@@ -1,0 +1,143 @@
+.progress-widget {
+  .progress-container {
+    &.radial {
+      .chart-section {
+        margin-bottom: 20px;
+      }
+    }
+
+    &.linear {
+      .linear-progress-section {
+        margin-bottom: 20px;
+      }
+    }
+  }
+
+  .linear-progress-section {
+    .progress-item {
+      margin-bottom: 16px;
+
+      &:last-child {
+        margin-bottom: 0;
+      }
+    }
+
+    .progress-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 8px;
+    }
+
+    .progress-label {
+      font-size: 14px;
+      font-weight: 500;
+      color: #495057;
+    }
+
+    .progress-value {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 12px;
+      font-weight: 600;
+
+      mat-icon {
+        font-size: 16px;
+        width: 16px;
+        height: 16px;
+      }
+
+      .target-text {
+        color: #6c757d;
+        font-weight: 400;
+      }
+    }
+
+    .mat-progress-bar {
+      height: 8px;
+      border-radius: 4px;
+    }
+  }
+
+  .summary-section {
+    border-top: 1px solid #e9ecef;
+    padding-top: 16px;
+    margin-top: 16px;
+  }
+
+  .summary-stats {
+    display: flex;
+    justify-content: space-around;
+    text-align: center;
+  }
+
+  .stat-item {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+
+    .stat-label {
+      font-size: 12px;
+      color: #6c757d;
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .stat-value {
+      font-size: 18px;
+      font-weight: 700;
+    }
+  }
+
+  // Status classes
+  .status-success {
+    color: #28a745;
+  }
+
+  .status-warning {
+    color: #ffc107;
+  }
+
+  .status-danger {
+    color: #dc3545;
+  }
+
+  // Chart styling
+  :host ::ng-deep {
+    .apexcharts-legend {
+      font-size: 11px !important;
+    }
+
+    .apexcharts-legend-series {
+      margin-bottom: 4px !important;
+    }
+  }
+}
+
+// Responsive design
+@media (max-width: 768px) {
+  .summary-stats {
+    flex-direction: column;
+    gap: 12px;
+    align-items: center;
+  }
+
+  .stat-item {
+    flex-direction: row;
+    justify-content: space-between;
+    width: 100%;
+    max-width: 200px;
+  }
+
+  .progress-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 4px;
+  }
+
+  .progress-value {
+    align-self: flex-end;
+  }
+}

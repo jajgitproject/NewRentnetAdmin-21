@@ -1,0 +1,46 @@
+<mat-card class="sales-statistics-card">
+  <mat-card-content>
+    <!-- Header Section -->
+    <div class="card-header">
+      <div class="header-left">
+        <mat-icon class="chart-icon">donut_small</mat-icon>
+        <span class="card-title">{{ title }}</span>
+      </div>
+
+    </div>
+
+    <!-- Main Content -->
+    <div class="card-content">
+      <!-- Statistics List -->
+      <div class="statistics-list">
+        @for (item of salesData; track item; let i = $index) {
+          <div class="stat-item">
+            <div class="stat-indicator">
+              <div class="color-dot" [style.background-color]="item.color"></div>
+              <mat-icon class="category-icon">{{ item.icon }}</mat-icon>
+            </div>
+            <div class="stat-content">
+              <div class="stat-category">{{ item.category }}</div>
+              <div class="stat-value">
+                <span class="value-number">{{ formatNumber(item.value) }}</span>
+                <span class="value-label">sales</span>
+              </div>
+            </div>
+          </div>
+        }
+      </div>
+
+      <!-- Chart Section -->
+      <div class="chart-section">
+        <div class="chart-container">
+          <apx-chart #chart [series]="chartOptions.series!" [chart]="chartOptions.chart!"
+            [labels]="chartOptions.labels!" [colors]="chartOptions.colors!"
+            [plotOptions]="chartOptions.plotOptions!" [dataLabels]="chartOptions.dataLabels!"
+            [stroke]="chartOptions.stroke!" [legend]="chartOptions.legend!"
+            [tooltip]="chartOptions.tooltip!" [responsive]="chartOptions.responsive!">
+          </apx-chart>
+        </div>
+      </div>
+    </div>
+  </mat-card-content>
+</mat-card>

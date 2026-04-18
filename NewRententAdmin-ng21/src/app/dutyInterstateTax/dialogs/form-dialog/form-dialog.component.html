@@ -1,0 +1,526 @@
+<div class="addContainer">
+    <div class="modalHeader">
+        <div class="editRowModal">
+            <div class="modalHeader clearfix">
+                <!-- <img [src]='advanceTable.img' alt="avatar"> -->
+                <div class="modal-about">
+                    <div class="font-weight-bold p-t-5 font-17">
+                        Add Interstate Tax to Duty No : {{DutySlipID}} & Regn.No. : {{RegistrationNumber}}
+                        for Date Between {{PickupDate | date}} - {{DropOffDate | date}}
+                    </div>
+                     <div *ngIf="isSaveAllowed">
+                        <span style="color:rgb(150, 4, 4);margin-bottom: 10px;font-style: italic;font-size: 12px;">({{verifyDutyStatusAndCacellationStatus}} !!!!!)</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <button mat-icon-button (click)="dialogRef.close()" aria-label="Close dialog">
+            <mat-icon>close</mat-icon>
+        </button>
+    </div>
+    <div mat-dialog-content>
+        <form class="register-form m-4" [formGroup]="advanceTableForm" (ngSubmit)="submit">
+            <mat-radio-group>
+                <mat-radio-button color="primary" style="margin-right: 70px;" (click)="toggleExisting()"
+                    value="existing">Existing Paid
+                    Tax</mat-radio-button>
+                <mat-radio-button (click)="togglePaid()" color="primary" value="paid">Paid For this
+                    Duty</mat-radio-button>
+            </mat-radio-group>
+            <br />
+            <br />
+            <!-- <div class="row">
+                <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                    <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                        <mat-label>State</mat-label>
+                        <input type="text" matInput [matAutocomplete]="auto3" formControlName="state">
+                        <mat-autocomplete #auto3="matAutocomplete">
+                            <mat-option *ngFor="let options of filteredStateOptions | async"
+                                [value]="options.geoPointName" (click)="getStateID(options.geoPointID)">
+                                {{options.geoPointName}}
+                            </mat-option>
+                        </mat-autocomplete>
+                    </mat-form-field>
+                </div>
+
+                <div class=" col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2" *ngIf="isExistingCardVisible">
+                    <mat-label>Image</mat-label>
+                    <br />
+                    <span>
+                        <a href="{{advanceTableForm.value.dutyInterstateTaxImage}}" target="_blank"
+                            style="cursor: pointer;color: #007bff;">
+                            View
+                        </a>
+                    </span>
+                </div>
+
+                <div class=" col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2" *ngIf="isPaidCardVisible">
+                    <mat-label style="margin-left: 18px;">Image</mat-label>
+                    <br />
+                    <a href="{{ ImagePath }}" target="_blank" *ngIf="ImagePath">
+                        <img [src]="ImagePath" class="table " style="height: 80px; width: auto;">
+                    </a>
+
+                    <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                        <app-myupload (onUploadFinished)="uploadFinished($event)"></app-myupload>
+                    </div>
+                </div>
+            </div> -->
+
+            <!-- <div class="row">
+                <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                    <mat-radio-group>
+                        <mat-radio-button (click)="toggleExisting()" color="primary" value="existing">Existing Paid
+                            Tax</mat-radio-button>
+                    </mat-radio-group>
+                </div>
+
+                <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                    <mat-radio-group>
+                        <mat-radio-button (click)="togglePaid()" color="primary" value="paid">Paid For this
+                            Duty</mat-radio-button>
+                    </mat-radio-group>
+                </div>
+            </div> -->
+
+            <!-- <mat-radio-group>
+                <mat-radio-button color="primary" style="margin-right: 70px;" (click)="toggleExisting()"
+                    value="existing">Existing Paid
+                    Tax</mat-radio-button>
+                <mat-radio-button (click)="togglePaid()" color="primary" value="paid">Paid For this
+                    Duty</mat-radio-button>
+            </mat-radio-group> -->
+
+            <div style="margin-top: 10px;" *ngIf="isExistingCardVisible">
+                <mat-card class="mat-elevation-z0 outline">
+                    <div>
+                        <a href="#" data-dismiss="modal" data-toggle="modal" data-backdrop="false"
+                            data-target="#exampleModal">
+                            Search
+                        </a>
+                    </div>
+
+                    <br>
+
+                    <div class="row" *ngIf="dataList">
+                        <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                            <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                                <mat-label>Paid From</mat-label>
+                                <input readonly matInput [matDatepicker]="endDate" formControlName="taxStartDate" >
+                                    <!-- (blur)="onBlurPaidFrom($event.target.value)"> -->
+                                <mat-datepicker-toggle matSuffix [for]="endDate"></mat-datepicker-toggle>
+                                <mat-datepicker [disabled]="true" #endDate></mat-datepicker>
+                                <mat-error *ngIf="advanceTableForm.get('taxStartDate').hasError('required')">
+                                    Paid From is required
+                                </mat-error>
+                                <!-- <mat-error *ngIf="advanceTableForm.get('taxStartDate')?.hasError('invalidDate')">
+                                    Invalid date format. Use DD/MM/YYYY.
+                                </mat-error> -->
+                            </mat-form-field>
+                        </div>
+
+                        <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                            <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                                <mat-label>Paid Until</mat-label>
+                                <input readonly matInput 
+                                placeholder="DD/MM/YYYY"
+                                (blur)="onBlurUpdateDate($event.target.value)" 
+                                [matDatepicker]="untilDate" formControlName="taxEndDate">
+                                <mat-datepicker-toggle matSuffix [for]="untilDate"></mat-datepicker-toggle>
+                                <mat-datepicker [disabled]="true" #untilDate></mat-datepicker>
+                                <mat-error *ngIf="advanceTableForm.get('taxEndDate').hasError('required')">
+                                    Paid Until is required
+                                </mat-error>
+                                <mat-error *ngIf="advanceTableForm.get('taxEndDate')?.hasError('invalidDate')">
+                                    Invalid date format. Use DD/MM/YYYY.
+                                </mat-error>
+                            </mat-form-field>
+                        </div>
+                    </div>
+
+                    <div class="row" *ngIf="dataList">
+                        <!-- <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                        <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                            <mat-label>Paid On</mat-label>
+                            <input required matInput [matDatepicker]="startDate" formControlName="taxStartDate">
+                            <mat-datepicker-toggle matSuffix [for]="startDate"></mat-datepicker-toggle>
+                            <mat-datepicker #startDate></mat-datepicker>
+                            <mat-error *ngIf="advanceTableForm.get('taxStartDate').hasError('required')">
+                                Paid To is required
+                            </mat-error>
+                        </mat-form-field>
+                    </div> -->
+
+                        <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                            <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                                <mat-label>Amount Paid</mat-label>
+                                <input readonly matInput formControlName="interStateTaxAmount">
+                                <!-- <mat-error *ngIf="advanceTableForm.get('interStateTaxAmount').hasError('required')">
+                                Approved Paid is required
+                            </mat-error> -->
+                            </mat-form-field>
+                        </div>
+
+                        <div class=" col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                            <mat-label>Image</mat-label>
+                            <br />
+                            <span>
+                                <a href="{{advanceTableForm.value.dutyInterstateTaxImage}}" target="_blank"
+                                    style="cursor: pointer;color: #007bff;">
+                                    <img [src]="advanceTableForm.value.dutyInterstateTaxImage" style="max-width: 100px; max-height: 100px;" alt="Image">
+                                </a>
+                            </span>
+                        </div>
+                    </div>
+
+                    <div class="row" *ngIf="dataList">
+                        <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                            <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                                <mat-label>State</mat-label>
+                                <input readonly type="text" matInput [matAutocomplete]="auto3" formControlName="state">
+                                <mat-autocomplete #auto3="matAutocomplete" (optionSelected)="OnStateSelect($event.option.value)">
+                                    <mat-option *ngFor="let options of filteredStateOptions | async"
+                                        [value]="options.geoPointName" (click)="getStateID(options.geoPointID)">
+                                        {{options.geoPointName}}
+                                    </mat-option>
+                                </mat-autocomplete>
+                            </mat-form-field>
+                        </div>
+                    </div>
+
+                    <div *ngIf="errorMessage">
+                        <span style="color: red;">{{errorMessage}}</span>
+                    </div>
+                </mat-card>
+            </div>
+
+            <div style="margin-top: 10px;" *ngIf="isPaidCardVisible">
+                <mat-card class="mat-elevation-z0 outline">
+                    <div class="row">
+                        <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                            <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                                <mat-label>Paid From</mat-label>
+                                <input required matInput [matDatepicker]="endDate" formControlName="taxStartDate">
+                                <mat-datepicker-toggle matSuffix [for]="endDate"></mat-datepicker-toggle>
+                                <mat-datepicker #endDate></mat-datepicker>
+                                <mat-error *ngIf="advanceTableForm.get('taxStartDate').hasError('required')">
+                                    Paid From is required
+                                </mat-error>
+                            </mat-form-field>
+                        </div>
+
+                        <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                            <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                                <mat-label>Paid Until</mat-label>
+                                <input matInput
+                                placeholder="DD/MM/YYYY"
+                                (blur)="onBlurUpdateDate($event.target.value)"
+                                [matDatepicker]="untilDate" formControlName="taxEndDate">
+                                <mat-datepicker-toggle matSuffix [for]="untilDate"></mat-datepicker-toggle>
+                                <mat-datepicker #untilDate></mat-datepicker>
+                                <mat-error *ngIf="advanceTableForm.get('taxEndDate')?.hasError('invalidDate')">
+                                    Invalid date format. Use DD/MM/YYYY.
+                                </mat-error>
+                                <!-- <mat-error *ngIf="advanceTableForm.get('taxEndDate').hasError('required')">
+                                Paid Until is required
+                            </mat-error> -->
+                            </mat-form-field>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <!-- <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                        <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                            <mat-label>Paid On</mat-label>
+                            <input required matInput [matDatepicker]="startDate" formControlName="taxStartDate">
+                            <mat-datepicker-toggle matSuffix [for]="startDate"></mat-datepicker-toggle>
+                            <mat-datepicker #startDate></mat-datepicker>
+                            <mat-error *ngIf="advanceTableForm.get('taxStartDate').hasError('required')">
+                                Paid To is required
+                            </mat-error>
+                        </mat-form-field>
+                    </div> -->
+
+                        <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                            <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                                <mat-label>Amount Paid</mat-label>
+                                <input required matInput formControlName="interStateTaxAmount">
+                                <mat-error *ngIf="advanceTableForm.get('interStateTaxAmount').hasError('required')">
+                                    Amount Paid is required
+                                </mat-error>
+                            </mat-form-field>
+                        </div>
+
+                        <div class=" col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2" *ngIf="isPaidCardVisible">
+                            <mat-label style="margin-left: 18px;">Image</mat-label>
+                            <br />
+                            <a href="{{ ImagePath }}" target="_blank" *ngIf="ImagePath">
+                                <img [src]="ImagePath" class="table " style="height: 80px; width: auto;">
+                            </a>
+        
+                            <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                                <app-myupload (onUploadFinished)="uploadFinished($event)"></app-myupload>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                            <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                                <mat-label>State</mat-label>
+                                <input required type="text" matInput [matAutocomplete]="auto3" formControlName="state">
+                                <mat-autocomplete #auto3="matAutocomplete" (optionSelected)="OnStateSelect($event.option.value)">
+                                    <mat-option *ngFor="let options of filteredStateOptions | async"
+                                        [value]="options.geoPointName" (click)="getStateID(options.geoPointID)">
+                                        {{options.geoPointName}}
+                                    </mat-option>
+                                </mat-autocomplete>
+                                 <mat-error *ngIf="advanceTableForm.get('state').hasError('required')">
+                            State is required
+                        </mat-error>
+
+                                
+                        <mat-error *ngIf="advanceTableForm.get('state').hasError('stateInvalid')
+                         && !advanceTableForm.get('state').hasError('required')">
+                            Please select a valid state
+                        </mat-error>
+                            </mat-form-field>
+                        </div>
+                    </div>
+                </mat-card>
+            </div>
+
+            <div class="row" style="margin-top: 10px;">
+                <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                    <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                        <mat-label>Tax Paid By</mat-label>
+                        <mat-select required #taxPaidByVal
+                            [class.is-invalid]="taxPaidByVal.invalid && taxPaidByVal.touched"
+                            formControlName="interStateTaxPaidBy">
+                            <mat-option value="Driver">Driver</mat-option>
+                            <mat-option value="Eco">Eco</mat-option>
+                        </mat-select>
+                        <mat-error *ngIf="advanceTableForm.get('interStateTaxPaidBy').hasError('required')">
+                            Tax Paid By is required
+                        </mat-error>
+                    </mat-form-field>
+                </div>
+                <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                    <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                        <mat-label>Amount To Be Charged</mat-label>
+                        <input required matInput formControlName="amountToBeChargedInCurrentDuty">
+                        <mat-error *ngIf="advanceTableForm.get('amountToBeChargedInCurrentDuty').hasError('required')">
+                            Amount To Be Charged is required
+                        </mat-error>
+                    </mat-form-field>
+                </div>
+            </div>
+
+            <!-- <div class="row" style="margin-top: 10px;">
+                <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                    <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                        <mat-label>Approved By</mat-label>
+                        <input readonly matInput formControlName="approvedBy">
+                        
+                    </mat-form-field>
+                </div>
+                <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                    <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                        <mat-label>Approval Date</mat-label>
+                        <input readonly matInput [matDatepicker]="startDate" formControlName="approvalDate">
+                        <mat-datepicker-toggle matSuffix [for]="startDate"></mat-datepicker-toggle>
+                        <mat-datepicker [disabled]="true" #startDate></mat-datepicker>
+                        
+                    </mat-form-field>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                    <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                        <mat-label>Approval Remark</mat-label>
+                        <input matInput formControlName="approvalRemark">
+                        <mat-error *ngIf="advanceTableForm.get('approvalRemark').hasError('required')">
+                            Approval Remark is required
+                        </mat-error>
+                    </mat-form-field>
+                </div>
+                <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                    <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                        <mat-label>Approval Status</mat-label>
+                        <input matInput formControlName="approvalStatus">
+                       
+                        <mat-error *ngIf="advanceTableForm.get('approvalStatus').hasError('required')">
+                            Approval Status is required
+                        </mat-error>
+                    </mat-form-field>
+                </div>
+            </div> -->
+
+            <div class="row">
+                <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                    <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                        <mat-label>Activation Status</mat-label>
+                        <mat-select formControlName="activationStatus">
+                            <mat-option [value]=true>Active</mat-option>
+                            <mat-option [value]=false>Deleted</mat-option>
+                        </mat-select>
+                        <mat-error *ngIf="advanceTableForm.get('activationStatus').hasError('required')">
+                            Activation Status is required
+                        </mat-error>
+                    </mat-form-field>
+                </div>
+            </div>
+
+            <div class="row">
+                <!-- <div *ngIf="isSaveAllowed">
+                    <span style="color:red;margin-bottom: 10px;">{{verifyDutyStatusAndCacellationStatus}}</span>
+                </div> -->
+                <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12 mb-2">
+                    <div class="example-button-row">
+                        <button mat-raised-button color="primary" *ngIf="saveDisabled" [type]="submit" [disabled]="!advanceTableForm.valid || isSaveAllowed"
+                            (click)="confirmAdd()">Save</button>
+                        <mat-spinner *ngIf="!saveDisabled" diameter="30"></mat-spinner>    
+                        <button *ngIf="action==='add'" mat-raised-button color="warn" (click)="onNoClick()"
+                            tabindex="-1">Reset</button>
+                        <button *ngIf="action==='edit'" mat-raised-button color="warn" (click)="onNoClick()"
+                            tabindex="-1">Cancel</button>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+
+    <div class="modal fade" id="exampleModal" tabindex="-1" role="dialog">
+        <div class="modal-dialog modal-dialog-centered" style="max-width: 50%; height: 60%;">
+            <div class="modal-content" style="height: 80%;">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLongTitle">Existing Paid Tax</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <!-- <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                        <mat-label>Reg. No.</mat-label> -->
+                        <!-- <input type="text" matInput [(ngModel)]="registrationNumber"> -->
+                        <!-- <input required type="text" matInput
+                        [(ngModel)]="registrationNumber" [formControl]="RegistrationNo" [matAutocomplete]="auto1">
+                        <mat-autocomplete #auto1="matAutocomplete">
+                            <mat-option *ngFor="let option of filteredRegistrationNumberOptions | async"
+                                [value]="option.registrationNumber">
+                                {{option.registrationNumber}}
+                            </mat-option>
+                        </mat-autocomplete> -->
+                        <!-- <mat-error *ngIf="advanceTableForm.get('registrationNumber').hasError('required')">
+                            Registration No is required
+                        </mat-error> -->
+                    <!-- </mat-form-field> -->
+                    <div class="row">
+                        <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12 mb-2">
+                            <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                                <mat-label>State</mat-label>
+                                <input type="text" matInput [matAutocomplete]="auto10" [formControl]="geoPointName">
+                                <mat-autocomplete #auto10="matAutocomplete" (optionSelected)="OnStateSelect($event.option.value)">
+                                    <mat-option *ngFor="let options of filteredUnpaidStateOptions | async"
+                                        [value]="options.geoPointName" (click)="getStateID(options.geoPointID)">
+                                        {{options.geoPointName}}
+                                    </mat-option>
+                                </mat-autocomplete>
+                            </mat-form-field>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                            <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                                <mat-label>Start Date</mat-label>
+                                <input matInput [matDatepicker]="date1" [(ngModel)]="interStateTaxStartDate">
+                                <mat-datepicker-toggle matSuffix [for]="date1"></mat-datepicker-toggle>
+                                <mat-datepicker #date1></mat-datepicker>
+                            </mat-form-field>
+                        </div>
+                        <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                            <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                                <mat-label>End Date</mat-label>
+                                <input matInput [matDatepicker]="date2" [(ngModel)]="interStateTaxEndDate">
+                                <mat-datepicker-toggle matSuffix [for]="date2"></mat-datepicker-toggle>
+                                <mat-datepicker #date2></mat-datepicker>
+                            </mat-form-field>
+                        </div>
+                    </div> 
+                    <div class="row">
+                        <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12 mb-2">
+                            <div class="modal-footer">
+                                <button (click)="GetDataForInterstate()" mat-raised-button color="primary">Search</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!---------------------------->
+                    <div class="row">
+                        <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                            <div class="card">
+                                <div class="body" style="overflow-y: hidden;">
+                                    <div class="responsive_table">
+                                        <p *ngIf="!dataList; then thenBlock2 else elseBlock2">
+                                            This is not rendered
+                                        </p>
+
+                                        <ng-template #thenBlock2>
+                                            <div class="alert alert-primary"
+                                                style="background-color:#E8E8E8; text-align: center;">
+                                                No Records Found
+                                            </div>
+                                        </ng-template>
+
+                                        <ng-template #elseBlock2>
+                                            <div style="margin-top: 50px;">
+                                                <div class="row" style="font-weight: bold;">
+                                                    <div class="col-xl-2 col-lg-6 col-md-12 col-sm-12 mb-2">
+                                                        State
+                                                    </div>
+                                                    <div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 mb-2">
+                                                        Paid From
+                                                    </div>
+                                                    <div class="col-xl-2 col-lg-6 col-md-12 col-sm-12 mb-2">
+                                                        Paid Until
+                                                    </div>
+                                                    <div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 mb-2">
+                                                        Amount
+                                                    </div>
+
+                                                    <div class="col-xl-2 col-lg-6 col-md-12 col-sm-12 mb-2">
+                                                        Select
+                                                    </div>
+                                                </div>
+                                                <hr>
+                                                <div class="row" *ngFor="let data of dataList;index as i">
+                                                    <div class="col-xl-2 col-lg-6 col-md-12 col-sm-12 mb-2">
+                                                        {{data.state}}
+                                                    </div>
+                                                    <div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 mb-2">
+                                                        {{ (data.interStateTaxStartDate | date : 'dd/MM/yyyy') || 'N/A'}}
+                                                    </div>
+                                                    <div class="col-xl-2 col-lg-6 col-md-12 col-sm-12 mb-2">
+                                                        {{ (data.interStateTaxEndDate | date : 'shortTime') || 'N/A'}}
+                                                    </div>
+                                                    <div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 mb-2">
+                                                        {{data.amount}}
+                                                    </div>
+
+                                                    <div class="col-xl-2 col-lg-6 col-md-12 col-sm-12 mb-2">
+                                                        <a style="cursor: pointer;color: #007bff;"
+                                                        (click)="TaxData(i)" data-dismiss="modal">Select</a>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </ng-template>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>    
+            </div>
+        </div>
+    </div>

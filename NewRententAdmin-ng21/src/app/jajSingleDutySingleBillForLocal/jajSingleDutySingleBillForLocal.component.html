@@ -1,0 +1,782 @@
+<div class="addContainer" #printSection style="background-color: white;">
+  <div class="invoice-container">
+    <div id="printElem">
+      <!-- HEADER -->
+      <div class="header">
+        <div class="header-left">
+          <!-- <h1>TAX INVOICE</h1>
+              
+              <div class="company-address">
+                {{dataSource?.invoiceEcoCompanyModel?.ecoCompanyName}}<br>
+                {{dataSource?.invoiceEcoCompanyModel?.ecoCompanyAddress}}<br>
+                {{dataSource?.invoiceEcoCompanyModel?.ecoCompanyCityName}} , 
+                {{dataSource?.invoiceEcoCompanyModel?.ecoCompanyStateName}} - 
+                {{dataSource?.invoiceEcoCompanyModel?.ecoCompanyPinCode}}<br />
+                <strong> GSTNo :</strong>{{dataSource?.invoiceEcoBranchModel?.branchGSTNumber}} <br />
+              </div> -->
+
+          <!-- <h4>
+                <span style="padding-left:35px">TAX INVOICE</span>
+                <br> 
+                <span>Original for Recipient</span>
+              </h4> -->
+         <div style="text-align: center;">
+            <strong>TAX INVOICE
+              <br />
+              Original for Recipient
+            </strong>
+          </div>
+          <div class="company-address">
+            <span class="text-heading">ECOS (India) Mobility & Hospitality Limited</span><br />
+            (Formerly known as Ecos (India) Mobility & Hospitality Private Limited)<br>
+            <strong> Branch. Office :</strong> {{dataSource?.invoiceEcoBranchModel?.branchAddress}}<br>
+            <strong>Reg. Office :</strong> 45, First Floor, Corner Market, Malviya Nagar, New Delhi-110017<br>
+            <strong>Correspondence :</strong>
+            {{dataSource?.invoiceEcoCompanyModel?.correspondenceAddress}}
+            ,{{dataSource?.invoiceEcoCompanyModel?.correspondenceCityName}} ,
+            {{dataSource?.invoiceEcoCompanyModel?.correspondenceStateName}}
+            ,{{dataSource?.invoiceEcoCompanyModel?.ecoCompanyCountryName}}<br />
+            <strong>Ph.</strong>{{dataSource?.invoiceEcoCompanyModel?.phoneNumber}},
+            <strong>Reservation</strong> : {{dataSource?.invoiceEcoCompanyModel?.emailReservation}}, 24/7 :
+            91-11-40794079<br />
+            <strong>E-mail :</strong> billing@ecosmobility.com, <strong>Reservation :</strong>cars@ecosmobility.com
+            <br />
+            <strong> GSTNo :</strong>{{dataSource?.invoiceEcoBranchModel?.branchGSTNumber}} <br />
+            LUT : {{dataSource?.invoiceEcoBranchModel?.branchLUTNumber}} Exp Date :
+            {{dataSource?.invoiceEcoBranchModel?.branchLUTExpiryDate | date: 'dd/MM/yyyy'}} <br />
+            IRN : {{dataSource?.invoiceModel?.irn || 'N/A'}}
+          </div>
+
+        </div>
+
+        <div class="qr-logo-area">
+          <img src="http://www.ecoserp.com/bill_printing/logo.jpg" alt="Logo">
+          <img [src]="'data:image/png;base64,' + dataSource?.invoiceModel?.signedQRCode" alt="QR" />
+        </div>
+      </div>
+
+      <!-- Billing DETAILS -->
+      <div class="info-section">
+        <div class="customer-box">
+          To,
+          <br />
+          <strong> {{
+            (dataSource?.invoiceCustomerModel?.customerType === 'Corporate Individual')
+            ? (dataSource?.invoiceCustomerModel?.customerName?.split('##')[0])
+            : dataSource?.invoiceCustomerModel?.customerName}}
+          </strong>
+          <br />
+          <strong>Billing Address:</strong>
+          {{dataSource?.invoiceCustomerModel?.billingAddress}}<br>
+          {{dataSource?.invoiceCustomerModel?.billingCityName}},
+          {{dataSource?.invoiceCustomerModel?.billingStateName}} - {{dataSource?.invoiceCustomerModel?.billingPin}}
+          <br>
+          <strong>Place of Supply & State :</strong>
+          {{dataSource?.invoiceCustomerModel?.customerGSTStateName}},
+          <strong>State Code :</strong> {{dataSource?.invoiceCustomerModel?.customerGSTStateCode}}<br />
+          <strong>GST : </strong>{{dataSource?.invoiceCustomerModel?.customerGSTNumber}} <br />
+          <strong>Reverse Charge(Y/N) : </strong> N
+
+        </div>
+
+        <div class="bill-box">
+          <b>Bill No : </b> {{dataSource?.invoiceModel?.invoiceNumberWithPrefix}}<br>
+          <b>Bill Date : </b> {{dataSource?.invoiceModel?.invoiceDate | date:'dd/MM/yyyy'}}<br>
+          <b>DS No : </b> {{dataSource?.dutySlipID}}<br>
+          <b>Booking No : </b> {{dataSource?.invoiceReservationModel.reservationID}}<br>
+          <b>VEH : </b>{{dataSource?.vehicle}}<br>
+          <b>Trip Date : </b>{{dataSource?.invoiceDutyModel?.dutyStartDateTime | date: 'dd/MM/yyyy'}}<br>
+          <b>to : </b>{{dataSource?.invoiceDutyModel?.dutyEndDateTime | date: 'dd/MM/yyyy'}}
+        </div>
+      </div>
+
+      <!-- EXTRA INFO -->
+      <div class="extra-info">
+        <b>Cost Center:</b> &nbsp;&nbsp;&nbsp;
+        <b>PO No:</b> &nbsp;&nbsp;&nbsp;
+        <b>Ref By:</b> &nbsp;&nbsp;&nbsp;
+        <b>PNR No:</b>
+      </div>
+
+      <!-- DUTY GRID -->
+      <div class="table-div">
+        <table class="table" style="z-index: 5;">
+          <tr class="table-first-tr">
+            <td class="table-firstrow-firstcolumn">
+              <b>Particulars</b>
+            </td>
+            <td class="table-firstrow-secondcolumn">
+              <b>Rate</b>
+            </td>
+            <td class="table-firstrow-thirdcolumn">
+              <b>Amount</b>
+            </td>
+          </tr>
+          <tr class="table-first-tr">
+            <td class="table-firstrow-firstcolumn">
+              Booked By: {{dataSource?.invoiceBookerModel?.bookerSalutation}}
+              {{(dataSource?.invoiceCustomerModel?.customerType === 'Corporate Individual')?
+              (dataSource?.invoiceBookerModel?.bookerName?.split('##')[0])
+              :dataSource?.invoiceBookerModel?.bookerName }}
+            </td>
+            <td class="table-firstrow-secondcolumn">
+
+            </td>
+            <td class="table-firstrow-thirdcolumn">
+
+            </td>
+          </tr>
+          <tr class="table-mid-tr">
+            <td class="table-midrow-firstcolumn">
+              Guest: {{dataSource?.invoicePassengerModel?.passengerSalutation}}
+              {{(dataSource?.invoiceCustomerModel?.customerType === 'Corporate Individual')?
+              (dataSource?.invoicePassengerModel?.passengerName?.split('##')[0])
+              :dataSource?.invoicePassengerModel?.passengerName}}
+              <!-- <br>
+               Dept : {{dataSource?.invoicePassengerModel?.passengerDepartmentName}} -->
+            </td>
+            <td class="table-midrow-secondcolumn">
+
+            </td>
+            <td class="table-midrow-thirdcolumn">
+
+            </td>
+          </tr>
+
+          <tr class="table-mid-tr">
+            <td class="table-midrow-firstcolumn"
+              *ngIf="dataSource?.invoicePackageModel?.packageType !== 'Outstation Round Trip'">
+              Total Kms : {{dataSource?.invoiceDutyModel?.totalRunningKM}},
+              Total Hrs :
+              {{dataSource?.invoiceDutyModel?.totalRunningHours}}:{{dataSource?.invoiceDutyModel?.totalRunningMinutes}},
+              {{dataSource?.pickupCity}}
+            </td>
+            <td class="table-midrow-secondcolumn"
+              *ngIf="dataSource?.invoicePackageModel?.packageType !== 'Outstation Round Trip'">
+            </td>
+            <td class="table-midrow-thirdcolumn"
+              *ngIf="dataSource?.invoicePackageModel?.packageType !== 'Outstation Round Trip'">
+            </td>
+          </tr>
+          <tr class="table-mid-tr">
+            <td class="table-midrow-firstcolumn">
+
+              <!-- Outstation One Way -->
+              <ng-container *ngIf="dataSource?.invoicePackageModel?.packageType === 'Outstation OneWay Trip'">
+                {{dataSource?.invoicePackageModel?.packageType}}({{dataSource?.invoicePackageModel?.package}})
+              </ng-container>
+
+              <!-- Local Transfer -->
+              <ng-container *ngIf="dataSource?.invoicePackageModel?.packageType === 'Local Transfer'">
+                {{dataSource?.invoicePackageModel?.packageType}}({{dataSource?.invoicePackageModel?.package}} -
+                {{dataSource?.invoicePackageModel?.minimumHours}} Hours &
+                {{dataSource?.invoicePackageModel?.minimumKM}} KMs)
+              </ng-container>
+
+              <!-- Default -->
+              <ng-container *ngIf="
+            dataSource?.invoicePackageModel?.packageType !== 'Outstation OneWay Trip' &&
+            dataSource?.invoicePackageModel?.packageType !== 'Local Transfer' &&
+            dataSource?.invoicePackageModel?.packageType !== 'Outstation Round Trip'">
+                {{dataSource?.invoicePackageModel?.packageType}} Upto
+                {{dataSource?.invoicePackageModel?.package}}
+              </ng-container>
+
+            </td>
+
+            <td class="table-midrow-secondcolumn"
+              *ngIf="dataSource?.invoicePackageModel?.packageType !== 'Outstation Round Trip'">
+              {{dataSource?.invoicePackageModel?.baseRate | number:'1.2-2'}}
+            </td>
+            <td class="table-midrow-thirdcolumn"
+              *ngIf="dataSource?.invoicePackageModel?.packageType !== 'Outstation Round Trip'">
+              {{dataSource?.dutyTotalPackageAmount | number:'1.2-2'}}
+            </td>
+          </tr>
+          <tr class="table-mid-tr" *ngIf="dataSource?.invoicePackageModel?.packageType === 'Outstation Round Trip'">
+            <td class="table-midrow-firstcolumn">
+              Total Kms : {{dataSource?.invoiceDutyModel?.totalRunningKM}},
+              &nbsp;Total Days : {{dataSource?.invoiceDutyModel?.totalRunningDays}}, {{dataSource?.pickupCity}}
+
+            </td>
+            <td class="table-midrow-secondcolumn">
+
+            </td>
+            <td class="table-midrow-thirdcolumn">
+
+            </td>
+          </tr>
+          <tr class="table-mid-tr" *ngIf="dataSource?.invoicePackageModel?.packageType === 'Outstation Round Trip'">
+            <td class="table-midrow-firstcolumn">
+              &nbsp; {{dataSource?.invoicePackageModel?.packageType}} (Trip To:{{dataSource?.tripTo}},
+              &nbsp; {{dataSource?.invoicePackageModel?.package}})
+            </td>
+            <td class="table-midrow-secondcolumn">
+              {{dataSource?.invoicePackageModel?.baseRate | number:'1.2-2'}}
+            </td>
+            <td class="table-midrow-thirdcolumn">
+              {{dataSource?.dutyTotalPackageAmount | number:'1.2-2'}}
+            </td>
+          </tr>
+          <tr class="table-mid-tr" *ngIf="dataSource?.invoicePackageModel?.packageType === 'Outstation Round Trip'">
+            <td class="table-midrow-firstcolumn">
+              &nbsp; {{dataSource?.invoicePackageModel?.minimumKM}} Kms @ min
+              &nbsp; {{dataSource?.invoicePackageModel?.minimumKM}} kms running per
+              {{dataSource?.invoicePackageModel?.billingOption}}
+            </td>
+            <td class="table-midrow-secondcolumn">
+
+            </td>
+            <td class="table-midrow-thirdcolumn">
+
+            </td>
+          </tr>
+          <!-- <tr class="table-mid-tr">
+            <td
+              class="table-midrow-firstcolumn">
+              Pickup City : {{dataSource?.pickupCity}}
+            </td>
+            <td
+              class="table-midrow-secondcolumn">
+
+            </td>
+            <td
+              class="table-midrow-thirdcolumn">
+            </td>
+          </tr> -->
+          <tr class="table-mid-tr"
+            *ngIf="dataSource?.invoicePackageValuesModel && dataSource?.invoicePackageValuesModel?.extraKMs!=0">
+            <td class="table-midrow-firstcolumn">
+              Extra KMs : {{dataSource?.invoicePackageValuesModel?.extraKMs}}
+            </td>
+            <td class="table-midrow-secondcolumn">
+              <span *ngIf="dataSource?.invoicePackageValuesModel?.extraKMRate!=0">
+                {{dataSource?.invoicePackageModel?.extraKMRate | number:'1.2-2'}}
+              </span>
+            </td>
+            <td class="table-midrow-thirdcolumn">
+              <span *ngIf="dataSource?.invoicePackageValuesModel?.extraKMAmount!=0">
+                {{dataSource?.invoicePackageValuesModel?.extraKMAmount | number:'1.2-2'}}
+              </span>
+            </td>
+          </tr>
+          <tr class="table-mid-tr"
+            *ngIf="dataSource?.invoicePackageValuesModel && dataSource?.invoicePackageValuesModel?.extraMinutes!=0">
+            <td class="table-midrow-firstcolumn">
+              Extra Hours :
+              <span *ngIf="dataSource?.invoicePackageValuesModel?.extraMinutes as extra">
+                {{ getHoursAndMinutes(extra).hours }}:{{getHoursAndMinutes(extra).minutes }}
+              </span>
+            </td>
+            <td class="table-midrow-secondcolumn">
+              <span *ngIf="dataSource?.invoicePackageModel?.extraHRRate!=0">
+                {{dataSource?.invoicePackageModel?.extraHRRate | number:'1.2-2'}}
+              </span>
+            </td>
+            <td class="table-midrow-thirdcolumn">
+              <span *ngIf="dataSource?.invoicePackageValuesModel?.extraMinutesAmount!=0">
+                {{dataSource?.invoicePackageValuesModel?.extraMinutesAmount}}
+              </span>
+            </td>
+          </tr>
+          <tr class="table-mid-tr" *ngIf="dataSource?.totalParkingTollFastagRFIDAmount!=0">
+            <td class="table-midrow-firstcolumn">
+              Parking/Toll/Fastag/RFID
+            </td>
+            <td class="table-midrow-secondcolumn">
+            </td>
+            <td class="table-midrow-thirdcolumn">
+              {{dataSource?.totalParkingTollFastagRFIDAmount | number:'1.2-2'}}
+
+            </td>
+          </tr>
+          <tr class="table-mid-tr"
+            *ngIf="dataSource?.invoicePackageFGRModel && dataSource?.invoicePackageFGRModel.fgrFixedAmount!=0">
+            <td class="table-midrow-firstcolumn">
+              FGR Charge {{dataSource?.invoicePackageFGRModel.fgrkm}} KMs -
+              @ {{dataSource?.invoicePackageFGRModel.fgrkmRate | number:'1.2-2'}} (Fixed Amount)
+            </td>
+            <td class="table-midrow-secondcolumn">
+              {{dataSource?.invoicePackageFGRModel.fgrkmRate | number:'1.2-2'}}
+            </td>
+            <td class="table-midrow-thirdcolumn">
+              {{dataSource?.invoicePackageFGRModel.fgrkmAmount | number:'1.2-2'}}
+            </td>
+          </tr>
+          <tr class="table-mid-tr" *ngIf="dataSource?.invoiceNightModel?.totalNights !=0">
+            <td class="table-midrow-firstcolumn">
+              Nights : {{dataSource?.invoiceNightModel?.totalNights}}
+
+            </td>
+            <td *ngIf="dataSource?.invoiceNightModel?.nightChargesPerNight != 0" class="table-midrow-secondcolumn">
+              {{dataSource?.invoiceNightModel?.nightChargesPerNight | number:'1.2-2'}}
+            </td>
+            <td class="table-midrow-thirdcolumn">
+              <span *ngIf="dataSource?.invoiceNightModel?.totalNightChargesAmount != 0">
+                {{dataSource?.invoiceNightModel?.totalNightChargesAmount | number:'1.2-2'}}
+              </span>
+            </td>
+          </tr>
+          <tr class="table-mid-tr" *ngIf="dataSource?.totalChargebleExpenceAmount!=0">
+            <td class="table-midrow-firstcolumn">
+              Total Expense
+            </td>
+            <td class="table-midrow-secondcolumn">
+
+            </td>
+            <td class="table-midrow-thirdcolumn">
+              {{dataSource?.totalChargebleExpenceAmount | number:'1.2-2'}}
+            </td>
+          </tr>
+          <tr class="table-mid-tr" *ngIf="dataSource?.invoicePackageModel.driverAllowance!=0">
+            <td class="table-midrow-firstcolumn">
+              Driver Allowance
+            </td>
+            <td class="table-midrow-secondcolumn">
+            </td>
+            <td class="table-midrow-thirdcolumn">
+              {{dataSource?.invoicePackageModel?.driverAllowance | number:'1.2-2'}}
+            </td>
+          </tr>
+          <tr class="table-mid-tr" *ngIf="dataSource?.totalInterStateAmount!=0">
+            <td class="table-midrow-firstcolumn">
+              Inter State Tax
+            </td>
+            <td class="table-midrow-secondcolumn">
+
+            </td>
+            <td class="table-midrow-thirdcolumn">
+              {{dataSource?.totalInterStateAmount | number:'1.2-2'}}
+            </td>
+          </tr>
+          <tr class="table-mid-tr" *ngIf="dataSource?.invoiceFuelSurchargeModel.totalFuelSurchargeOnPackageRate != 0
+                        || dataSource?.invoiceFuelSurchargeModel?.totalFuelSurchargeOnExtraKM!=0 ||
+                         dataSource?.invoiceFuelSurchargeModel?.totalFuelSurchargeOnExtraHours!=0 ">
+            <td class="table-midrow-firstcolumn">
+
+              Fuel Surcharge @ {{dataSource?.invoiceFuelSurchargeModel?.surchargePercentage}} %
+              on Rate ({{dataSource?.invoiceFuelSurchargeModel?.totalFuelSurchargeOnPackageRate}})
+              Extra KM ({{dataSource?.invoiceFuelSurchargeModel?.totalFuelSurchargeOnExtraKM}})
+              Extra Hr. ({{dataSource?.invoiceFuelSurchargeModel?.totalFuelSurchargeOnExtraHours}})
+
+            </td>
+            <td class="table-midrow-secondcolumn">
+
+            </td>
+            <td class="table-midrow-thirdcolumn">
+              <span *ngIf="dataSource?.invoiceFuelSurchargeModel.totalFuelSurchargeOnPackageRate != 0">
+                <span *ngIf="dataSource?.invoiceFuelSurchargeModel.totalFuelSurchargeOnPackageRate != 0">
+                  {{dataSource?.invoiceFuelSurchargeModel?.totalFuelSurchargeOnPackageRate | number:'1.2-2'}}
+                </span>
+              </span>
+            </td>
+          </tr>
+          <!-- <tr class="table-last-tr" *ngIf="dataSource?.invoiceGSTModel.gstsac!=0">
+            <td
+              style="width: 130mm;padding-left: 10px; border-right: 2px solid black; border-left: none;border-top: none; border-bottom: none;">
+              SAC : {{dataSource?.invoiceGSTModel.gstsac}}
+            </td>
+            <td
+              style="width: 30mm; text-align: right; padding-right: 10px;border-right: 2px solid black;border-top: none; border-bottom: none; ">
+
+            </td>
+            <td
+              style="width: 44mm; text-align: right;padding-right: 10px;border-right: none;border-top: none; border-bottom: none;">
+
+            </td>
+          </tr> -->
+
+          <tr class="table-mid-tr" *ngIf="dataSource?.invoiceGSTModel.gstsac!=0">
+            <td class="table-midrow-firstcolumn">
+              SAC : {{dataSource?.invoiceGSTModel.gstsac}}
+            </td>
+            <td class="table-midrow-secondcolumn">
+              &nbsp;
+            </td>
+            <td class="table-midrow-thirdcolumn">
+              &nbsp;
+            </td>
+          </tr>
+
+          <tr class="table-last-tr">
+            <td class="table-lastrow-firstcolumn">
+              &nbsp;
+            </td>
+            <td class="table-lastrow-secondcolumn">
+              &nbsp;
+            </td>
+            <td class="table-lastrow-thirdcolumn">
+              &nbsp;
+            </td>
+          </tr>
+
+
+        </table>
+
+
+      </div>
+      <!-- <div class="duty-grid">
+          <div class="duty-details">
+            <table>
+              <tr class="no-border" height="10">
+                <td valign="top" class="text6" style="padding-bottom: 5px;" class="no-border">
+                  Booked By: {{dataSource?.invoiceBookerModel?.bookerSalutation}}
+                            {{(dataSource?.invoiceCustomerModel?.customerType === 'Corporate Individual')?
+                                (dataSource?.invoiceBookerModel?.bookerName?.split('##')[0])
+                                  :dataSource?.invoiceBookerModel?.bookerName }}
+                </td><br>
+              </tr>
+                                
+              <tr class="no-border" height="10">
+                <td valign="top" class="text6" style="padding-bottom: 5px;" class="no-border">
+                  Guest: {{dataSource?.invoicePassengerModel?.passengerSalutation}}
+                      {{(dataSource?.invoiceCustomerModel?.customerType === 'Corporate Individual')?
+                                (dataSource?.invoicePassengerModel?.passengerName?.split('##')[0])
+                                  :dataSource?.invoicePassengerModel?.passengerName}}
+                </td><br>
+              </tr>
+
+              <tr class="no-border" height="10" *ngIf="dataSource?.invoicePackageModel?.packageType !== 'Outstation Round Trip'">
+                <td  valign="top" class="text6" style="padding-bottom: 10px;" class="no-border">
+                  Total Kms : {{dataSource?.invoiceDutyModel?.totalRunningKM}},
+                  Total Hrs : {{dataSource?.invoiceDutyModel?.totalRunningHours}}:{{dataSource?.invoiceDutyModel?.totalRunningMinutes}}
+                </td><br>
+              </tr>
+
+              <tr class="no-border" height="10" *ngIf="dataSource?.invoicePackageModel?.packageType !== 'Outstation Round Trip'">
+                <td  valign="top" class="text6" style="padding-bottom: 10px;" class="no-border">
+                  {{dataSource?.invoicePackageModel?.packageType}} Upto
+                  {{dataSource?.invoicePackageModel?.package}}
+                </td><br>
+              </tr>
+
+              <tr class="no-border" height="10" *ngIf="dataSource?.invoicePackageModel?.packageType === 'Outstation Round Trip'">
+                <td valign="top" class="text6" style="padding-bottom: 5px;">
+                    &nbsp; Total Kms : {{dataSource?.invoiceDutyModel?.totalRunningKM}},
+                    &nbsp;Total Days : {{dataSource?.invoiceDutyModel?.totalRunningDays}}
+                </td><br>
+              </tr>
+
+              <tr class="no-border" height="10" *ngIf="dataSource?.invoicePackageModel?.packageType === 'Outstation Round Trip'">
+                <td valign="top" class="text6" style="padding-bottom: 5px;">
+                    &nbsp; {{dataSource?.invoicePackageModel?.packageType}} (Trip To:{{dataSource?.tripTo}},
+                    &nbsp; {{dataSource?.invoicePackageModel?.package}})
+                </td>
+              </tr>
+
+              <tr class="no-border" height="10"  *ngIf="dataSource?.invoicePackageModel?.packageType === 'Outstation Round Trip'">
+                <td valign="top" class="text6" style="padding-bottom: 5px;"  *ngIf="dataSource?.invoicePackageModel?.minimumKM !=0">
+                    &nbsp; {{dataSource?.invoicePackageModel?.minimumKM}} Kms @ min
+                    &nbsp; {{dataSource?.invoicePackageModel?.minimumKM}} kms running per
+                    {{dataSource?.invoicePackageModel?.billingOption}}
+                </td><br>
+              </tr>
+
+              <tr class="no-border" height="10">
+                <span valign="top" class="text6" style="padding-bottom: 5px;" class="no-border">
+                  Pickup City : {{dataSource?.pickupCity}}
+                </span><br>
+
+                <span *ngIf="dataSource?.invoicePackageValuesModel && dataSource?.invoicePackageValuesModel?.extraKMs!=0" valign="top" class="text6" style="padding-bottom: 5px;" class="no-border">
+                  Extra KMs : {{dataSource?.invoicePackageValuesModel?.extraKMs}} &nbsp;
+                </span><br>
+
+                <span *ngIf="dataSource?.invoicePackageValuesModel && dataSource?.invoicePackageValuesModel?.extraMinutes!=0" valign="top" class="text6" style="padding-bottom: 5px;" class="no-border">
+                  Extra Hours :
+                                  <span *ngIf="dataSource?.invoicePackageValuesModel?.extraMinutes as extra">
+                                    {{ getHoursAndMinutes(extra).hours }}:{{getHoursAndMinutes(extra).minutes }} 
+                                  </span>
+                </span><br>
+
+                <span *ngIf="dataSource?.totalParkingTollFastagRFIDAmount!=0" valign="top" class="text6" style="padding-bottom: 5px;" class="no-border">
+                  Parking/Toll/Fastag/RFID &nbsp;
+                </span><br>
+
+                <span *ngIf="dataSource?.invoicePackageFGRModel && dataSource?.invoicePackageFGRModel.fgrFixedAmount!=0" valign="top" class="text6" style="padding-bottom: 5px;" class="no-border">
+                  FGR Charge &nbsp;{{dataSource?.invoicePackageFGRModel.fgrkm}} KMs -
+                    @ {{dataSource?.invoicePackageFGRModel.fgrkmRate}} (Fixed Amount)
+                </span><br>
+
+                <span *ngIf="dataSource?.invoiceNightModel?.totalNights !=0" valign="top" class="text6" style="padding-bottom: 5px;" class="no-border">
+                  Nights : {{dataSource?.invoiceNightModel?.totalNights}} &nbsp;
+                </span><br>
+
+                <span *ngIf="dataSource?.totalChargebleExpenceAmount!=0" valign="top" class="text6" style="padding-bottom: 5px;" class="no-border">
+                  Total Expense
+                </span><br>
+
+                <span *ngIf="dataSource?.invoicePackageModel.driverAllowance!=0" valign="top" class="text6" style="padding-bottom: 5px;" class="no-border">
+                  Driver Allowance
+                </span><br>
+
+                <span *ngIf="dataSource?.totalInterStateAmount!=0" valign="top" class="text6" style="padding-bottom: 5px;" class="no-border">
+                  Inter State Tax
+                </span><br>
+
+                <span valign="top" class="text6" style="padding-bottom: 5px;" class="no-border">
+                  <span *ngIf="dataSource?.invoiceFuelSurchargeModel.totalFuelSurchargeOnPackageRate != 0
+                        || dataSource?.invoiceFuelSurchargeModel?.totalFuelSurchargeOnExtraKM!=0 ||
+                         dataSource?.invoiceFuelSurchargeModel?.totalFuelSurchargeOnExtraHours!=0 ">
+                      Fuel Surcharge
+                        on Rate {{dataSource?.invoiceFuelSurchargeModel?.totalFuelSurchargeOnPackageRate}}
+                        Extra KM ({{dataSource?.invoiceFuelSurchargeModel?.totalFuelSurchargeOnExtraKM}})
+                        Extra Hr. ({{dataSource?.invoiceFuelSurchargeModel?.totalFuelSurchargeOnExtraHours}})
+                  </span>
+                         
+                  <br />
+                  
+                  <span *ngIf="dataSource?.invoiceGSTModel.gstsac!=0">
+                    SAC : {{dataSource?.invoiceGSTModel.gstsac}}
+                  </span>
+                </span><br>
+              </tr>
+            </table>
+          </div>
+
+          <div class="rate-box">
+            <table>
+            <tr class="no-border" height="29">
+              <td valign="top" class="text6" class="no-border">&nbsp;</td><br>
+            </tr>
+
+            <tr class="no-border" height="10">
+              <td valign="top" class="text6" class="no-border">&nbsp;</td><br><br> 
+            </tr>        
+
+            <tr class="no-border" height="10" *ngIf="dataSource?.invoicePackageModel?.packageType !== 'Outstation Round Trip'">
+              <td valign="top" class="text6" class="no-border">&nbsp;</td><br> 
+            </tr>
+
+            <tr class="no-border" height="10" *ngIf="dataSource?.invoicePackageModel?.packageType !== 'Outstation Round Trip'">
+              <td valign="top" class="text6" class="no-border">
+                &nbsp; {{dataSource?.invoicePackageModel?.baseRate}}
+              </td><br>
+            </tr>          
+
+            <tr class="no-border" *ngIf="dataSource?.invoicePackageModel?.packageType === 'Outstation Round Trip'">
+              <td valign="top" class="text6">&nbsp;</td><br>
+            </tr>
+
+            <tr class="no-border" *ngIf="dataSource?.invoicePackageModel?.packageType === 'Outstation Round Trip'">
+              <td valign="top" class="text6">
+                &nbsp; {{dataSource?.invoicePackageModel?.baseRate}}
+              </td><br>
+            </tr>
+
+            <tr class="no-border" *ngIf="dataSource?.invoicePackageModel?.packageType === 'Outstation Round Trip'">
+              <td valign="top" class="text6">&nbsp;</td><br>
+            </tr>
+
+            <tr class="no-border" height="10">
+              <span *ngIf="dataSource?.invoicePackageValuesModel && dataSource?.invoicePackageValuesModel?.extraKMs!=0" style="padding-bottom: 5px;" valign="top" class="text6" class="no-border">
+                <span *ngIf="dataSource?.invoicePackageValuesModel?.extraKMRate!=0">
+                  &nbsp; {{dataSource?.invoicePackageModel?.extraKMRate}}&nbsp;
+                </span>
+              </span><br>
+
+              <span *ngIf="dataSource?.invoicePackageValuesModel && dataSource?.invoicePackageValuesModel?.extraMinutes!=0" style="padding-bottom: 5px;" valign="top" class="text6" class="no-border">
+                <span *ngIf="dataSource?.invoicePackageModel?.extraHRRate!=0">
+                  &nbsp; {{dataSource?.invoicePackageModel?.extraHRRate}}&nbsp;
+                </span>
+              </span><br>
+
+              <span style="padding-bottom: 5px;" valign="top" class="text6" class="no-border"> &nbsp;</span><br>
+              
+              <span *ngIf="dataSource?.totalParkingTollFastagRFIDAmount!=0" style="padding-bottom: 5px;"  valign="top" class="text6" class="no-border"> &nbsp;</span><br>
+
+              <span *ngIf="dataSource?.invoicePackageFGRModel && dataSource?.invoicePackageFGRModel.fgrFixedAmount!=0" style="padding-bottom: 5px;" valign="top" class="text6" class="no-border">
+                &nbsp; {{dataSource?.invoicePackageFGRModel.fgrkmRate}} &nbsp;
+              </span><br>
+
+              <span *ngIf="dataSource?.invoiceNightModel?.nightChargesPerNight != 0" style="padding-bottom: 5px;" valign="top" class="text6" class="no-border">
+                  &nbsp; {{dataSource?.invoiceNightModel?.nightChargesPerNight}} &nbsp;
+              </span><br>
+
+              <span *ngIf="dataSource?.totalChargebleExpenceAmount!=0" style="padding-bottom: 5px;" valign="top" class="text6" class="no-border">&nbsp;</span><br>
+
+              <span *ngIf="dataSource?.invoicePackageModel.driverAllowance!=0" style="padding-bottom: 5px;" valign="top" class="text6" class="no-border"> &nbsp;</span><br>
+
+              <span *ngIf="dataSource?.totalInterStateAmount!=0" style="padding-bottom: 5px;" valign="top" class="text6" class="no-border"></span><br>
+
+              <span *ngIf="dataSource?.invoiceFuelSurchargeModel.totalFuelSurchargeOnPackageRate != 0" style="padding-bottom: 5px;" valign="top" class="text6" class="no-border">&nbsp;</span><br>
+            </tr><br>
+            </table>
+          </div>
+
+
+          <div class="amount-box">
+          <table>
+            <tr class="no-border" height="29">
+              <td valign="top" class="text6" class="no-border">&nbsp;</td><br>
+            </tr>
+
+            <tr class="no-border" height="10">
+              <td valign="top" class="text6" class="no-border">&nbsp;</td><br><br> 
+            </tr>        
+
+            <tr class="no-border" height="10" *ngIf="dataSource?.invoicePackageModel?.packageType !== 'Outstation Round Trip'">
+              <td valign="top" class="text6" class="no-border">&nbsp;</td><br> 
+            </tr>
+
+            
+            <tr class="no-border" height="10" *ngIf="dataSource?.invoicePackageModel?.packageType !== 'Outstation Round Trip'">
+              <td valign="top" class="text6" class="no-border">
+                &nbsp; {{dataSource?.dutyTotalPackageAmount}}&nbsp;
+              </td><br>
+            </tr>          
+
+            <tr class="no-border" *ngIf="dataSource?.invoicePackageModel?.packageType === 'Outstation Round Trip'">
+              <td valign="top" class="text6">&nbsp;</td><br>
+            </tr>
+
+            <tr class="no-border" *ngIf="dataSource?.invoicePackageModel?.packageType === 'Outstation Round Trip'">
+              <td valign="top" class="text6">
+                &nbsp; {{dataSource?.dutyTotalPackageAmount}}&nbsp;
+              </td><br>
+            </tr>
+
+            <tr class="no-border" *ngIf="dataSource?.invoicePackageModel?.packageType === 'Outstation Round Trip'">
+              <td valign="top" class="text6">&nbsp;</td><br>
+            </tr>
+
+            <tr class="no-border" height="10">
+              <span *ngIf="dataSource?.invoicePackageValuesModel && dataSource?.invoicePackageValuesModel?.extraKMs!=0" style="padding-bottom: 5px;" valign="top" class="text6" class="no-border">
+                <span *ngIf="dataSource?.invoicePackageValuesModel?.extraKMAmount!=0">
+                  &nbsp; {{dataSource?.invoicePackageValuesModel?.extraKMAmount}}&nbsp;
+                </span>
+              </span><br>
+
+              <span *ngIf="dataSource?.invoicePackageValuesModel && dataSource?.invoicePackageValuesModel?.extraMinutes!=0" style="padding-bottom: 5px;" valign="top" class="text6" class="no-border">
+                <span *ngIf="dataSource?.invoicePackageValuesModel?.extraMinutesAmount!=0">
+                  &nbsp; {{dataSource?.invoicePackageValuesModel?.extraMinutesAmount}} &nbsp;
+                </span>
+              </span><br>
+
+              <span style="padding-bottom: 5px;" valign="top" class="text6" class="no-border"> &nbsp;</span><br>
+
+              <span *ngIf="dataSource?.totalParkingTollFastagRFIDAmount !=0" style="padding-bottom: 5px;" valign="top" class="text6" class="no-border">
+                &nbsp;{{dataSource?.totalParkingTollFastagRFIDAmount}} &nbsp;
+              </span><br>
+
+              <span *ngIf="dataSource?.invoicePackageFGRModel && dataSource?.invoicePackageFGRModel.fgrFixedAmount!=0" style="padding-bottom: 5px;" valign="top" class="text6" class="no-border">
+                &nbsp;{{dataSource?.invoicePackageFGRModel.fgrkmAmount}} &nbsp;
+              </span><br>
+
+              <span *ngIf="dataSource?.invoiceNightModel?.totalNightChargesAmount != 0" style="padding-bottom: 5px;" valign="top" class="text6" class="no-border">
+                  &nbsp;{{dataSource?.invoiceNightModel?.totalNightChargesAmount}} &nbsp;
+              </span><br>
+
+              <span *ngIf="dataSource?.totalChargebleExpenceAmount!=0" style="padding-bottom: 5px;" valign="top" class="text6" class="no-border">
+                &nbsp;{{dataSource?.totalChargebleExpenceAmount}} &nbsp;
+              </span><br>
+
+              <span *ngIf="dataSource?.invoicePackageModel.driverAllowance!=0" style="padding-bottom: 5px;" valign="top" class="text6" class="no-border">
+                &nbsp;{{dataSource?.invoicePackageModel?.driverAllowance}} &nbsp;
+              </span><br>
+
+              <span *ngIf="dataSource?.totalInterStateAmount!=0" style="padding-bottom: 5px;" valign="top" class="text6" class="no-border">
+                &nbsp;{{dataSource?.totalInterStateAmount}}&nbsp;
+              </span><br>
+
+              <span *ngIf="dataSource?.invoiceFuelSurchargeModel.totalFuelSurchargeOnPackageRate != 0" style="padding-bottom: 5px;" valign="top" class="text6" class="no-border">
+                <span *ngIf="dataSource?.invoiceFuelSurchargeModel.totalFuelSurchargeOnPackageRate != 0">
+                  &nbsp;{{dataSource?.invoiceFuelSurchargeModel?.totalFuelSurchargeOnPackageRate}} &nbsp;
+                </span>
+              </span><br>
+            </tr><br>
+            </table>
+          </div>
+          
+      </div> -->
+
+      <!-- GST -->
+      <div class="gst-section" style="z-index: 10; background-color: white;">
+        <div class="gst-row"><strong>Sub Total : </strong><span>{{dataSource?.totalAmountAfterExpences |
+            number:'1.2-2'}}</span></div>
+        <div class="gst-row">
+          <strong>CGST @ {{dataSource?.invoiceGSTModel?.cgstPercentage}}% :</strong>
+          <span>{{dataSource?.invoiceGSTModel?.cgstAmount | number:'1.2-2'}}</span>
+        </div>
+
+        <div class="gst-row">
+          <strong>SGST @ {{dataSource?.invoiceGSTModel?.sgstPercentage}}% :</strong>
+          <span>{{dataSource?.invoiceGSTModel?.sgstAmount | number:'1.2-2'}}</span>
+        </div>
+
+        <div class="gst-row">
+          <strong>IGST @ {{dataSource?.invoiceGSTModel?.igstPercentage}}% :</strong>
+          <span>{{dataSource?.invoiceGSTModel?.igstAmount | number:'1.2-2'}}</span>
+        </div>
+
+        <div class="gst-row" *ngIf="dataSource?.invoiceCessModel?.cessPercentage">
+          <strong>Cess @ {{dataSource?.invoiceCessModel?.cessPercentage}}% :</strong>
+          <span></span>
+        </div>
+
+        <div class="gst-row" *ngIf="dataSource?.invoiceDiscountModel?.discountPercentage">
+          <strong>Total Discount @ {{dataSource?.invoiceDiscountModel?.discountPercentage}} %</strong>
+          <span *ngIf="dataSource?.invoiceDiscountModel?.discountAmountOnPackage!=0 
+                            || dataSource?.invoiceDiscountModel?.discountAmountOnExtraKM!=0 
+                            || dataSource?.invoiceDiscountModel?.discountAmountOnExtraHour!=0">
+            {{ (dataSource?.invoiceDiscountModel?.discountAmountOnPackage || 0) +
+            (dataSource?.invoiceDiscountModel?.discountAmountOnExtraKM || 0) +
+            (dataSource?.invoiceDiscountModel?.discountAmountOnExtraHour || 0) }}
+          </span>
+        </div>
+
+        <div class="gst-row" *ngIf="dataSource?.invoiceSEZModel">
+          <strong>
+            {{dataSource?.invoiceEcoBranchModel?.branchLUTNumber}} valid Date
+            {{dataSource?.invoiceEcoBranchModel?.branchLUTExpiryDate | date: 'dd/MM/yyyy'}}
+            *Supply meant for Export/supply to SEZ unit or SEZ developer for authorised operations under
+            bond or letter of undertaking without payment of integrated Taxgen (This Text comes when
+            TaxAmount is Zero. This text is Customer Based).
+          </strong>
+        </div>
+
+        <div class="gst-row" *ngIf="dataSource?.invoiceModel?.invoiceAdvance!=0">
+          <strong>Less Advance</strong>
+          <span>
+            {{dataSource?.invoiceModel?.invoiceAdvance}}
+          </span>
+        </div>
+
+        <div class="gst-row"
+          style="font-size:16px;font-weight:bold;border-top:1px solid #000;margin-top:6px;padding-top:6px;">
+          <strong>Grand Total : </strong><span>{{dataSource?.invoiceModel?.invoiceTotalAmountAfterGST | number:'1.2-2'
+            }}</span>
+        </div>
+      </div>
+
+      <!-- AMOUNT WORDS -->
+      <div class="amount-words">
+        <b>Amount in Words : </b> {{dataSource?.totalAmountAfterGSTInWords}} Only
+      </div>
+
+      <!-- FOOTER -->
+      <div class="footer">
+        <div class="terms">
+          <b>Terms & Conditions:</b><br>
+          Our Responsibility of the Signed duty slip rests till we handover the same to you with the bill.
+          Interest @ 24% will be charged if payment is not received as per payment terms settled.
+          No Objection pertaining to this invoice would be entertained thereafter.
+          Sent the RTGS/NEFT Payment to: KOTAK MAHINDRA BANK / A/C NO: 3911291161, IFSC CODE: KKBK0004620,
+          PAN NO: AABCE1357N, TINNO: 07860310884, CIN NO: U74999DL1996PTC076375
+          Electronic Mode of Payments as per Section 269SU of Income Tax Act, 1961:
+          <!-- <a href="https://www.ecosmobility.com/pay-online/"
+            target="_blank">https://www.ecosmobility.com/pay-online/</a> -->
+        </div>
+
+        <div class="signature">
+          Authorized Signatory<br><br>
+          <img src="assets/images/Picture1.png" width="80px" height="80px">
+        </div>
+      </div>
+    </div>
+  </div>
+  <!-- <div style="text-align: center">
+    <button type="button" (click)="print()" color="primary" mat-raised-button id="print">
+      Print
+    </button>
+  </div> -->
+</div>

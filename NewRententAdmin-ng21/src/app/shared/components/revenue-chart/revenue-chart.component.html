@@ -1,0 +1,11 @@
+<mat-card class="revenue-chart-card">
+  <mat-card-header class="header-style">
+    <mat-card-title>Monthly Revenue & Profit</mat-card-title>
+  </mat-card-header>
+  <mat-card-content>
+    <apx-chart [series]="chartOptions.series" [chart]="chartOptions.chart" [colors]="chartOptions.colors!"
+      [dataLabels]="chartOptions.dataLabels!" [stroke]="chartOptions.stroke!" [grid]="chartOptions.grid!"
+      [xaxis]="chartOptions.xaxis!" [yaxis]="chartOptions.yaxis!" [tooltip]="chartOptions.tooltip!">
+    </apx-chart>
+  </mat-card-content>
+</mat-card>

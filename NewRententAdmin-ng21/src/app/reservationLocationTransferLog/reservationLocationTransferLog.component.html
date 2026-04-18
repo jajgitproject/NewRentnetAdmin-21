@@ -1,0 +1,62 @@
+<div class="modalHeader">
+  <div class="editRowModal">
+    <div class="modalHeader clearfix">
+      <div class="modal-about">
+        <div class="font-weight-bold p-t-5 font-17">
+          {{ dialogTitle }} - {{ReservationID}}
+        </div>
+      </div>
+    </div>
+  </div>
+  <button mat-icon-button (click)="dialogRef.close()" aria-label="Close dialog">
+    <mat-icon class="small-close-icon">close</mat-icon>
+  </button>
+</div>
+<div *ngIf="!dataSource" class="alert alert-primary" style="background-color:#E8E8E8; text-align: center;width: 100%;margin-top: 10px;">
+  No Records Found
+</div>
+
+<ng-container *ngIf="dataSource !== undefined">
+  <mat-dialog-content class="mat-typography">
+  <ng-container  *ngFor="let dataSourceDetails of dataSource" >
+  <mat-card >
+    <mat-card-content>
+      
+      <div class="row">
+        <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+          <span class="TDValueBold">Previous Transfer Location</span> <br />
+          <span class="TDValue"> {{ dataSourceDetails?.transferedFromLocationName || 'N/A' }}</span> 
+        </div>
+        <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+          <span class="TDValueBold">New Transfer Location</span> <br />
+          <span class="TDValue"> {{ dataSourceDetails?.transferedToLocationName || 'N/A' }}</span> 
+        </div>
+      </div>
+     
+      <div class="row">
+        <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+          <span class="TDValueBold">Transfer Location Date</span> <br />
+          <span class="TDValue"> {{ (dataSourceDetails?.transferDate | date: 'dd-MM-yyyy') || 'N/A' }}</span> 
+        </div>
+        <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+          <span class="TDValueBold">Transfer Location Time</span> <br />
+          <span class="TDValue"> {{ (dataSourceDetails?.transferTime | date:'HH:mm:ss') || 'N/A' }}</span> 
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+          <span class="TDValueBold">Remark</span> <br />
+          <span class="TDValue"> {{ dataSourceDetails?.transferRemark || 'N/A' }}</span> 
+        </div>
+        <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+            <span class="TDValueBold">Transfer Location Change By</span> <br />
+            <span class="TDValue"> {{ dataSourceDetails?.transferedByEmployeeName  || 'N/A' }}</span> 
+          </div>
+      </div>
+    
+    </mat-card-content>
+  </mat-card>
+   
+  <br>
+  
+</ng-container>

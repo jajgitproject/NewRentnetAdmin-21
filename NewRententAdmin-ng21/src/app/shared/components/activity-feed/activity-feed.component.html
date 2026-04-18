@@ -1,0 +1,79 @@
+<mat-card class="activity-feed-card">
+  @if (showHeader) {
+    <mat-card-header class="activity-header">
+      <mat-card-title class="activity-title">
+        <mat-icon class="title-icon">timeline</mat-icon>
+        {{ title }}
+      </mat-card-title>
+      @if (showViewAll && activities.length > 0) {
+        <button mat-button color="primary" class="view-all-btn"
+          (click)="onViewAllClick()" matTooltip="View all activities">
+          View All
+        </button>
+      }
+    </mat-card-header>
+  }
+
+  <mat-card-content class="activity-content">
+    <ng-scrollbar style="height: 400px" visibility="hover">
+      @if (activities.length > 0) {
+        <div class="activity-list">
+          @for (activity of limitedActivities; track trackByActivityId($index, activity); let last = $last) {
+            <div
+              class="activity-item" [ngClass]="[getActivityClass(activity), getPriorityClass(activity.priority)]"
+              (click)="onActivityClick(activity)" matRipple>
+              <div class="activity-icon-container">
+                <div class="activity-icon" [ngClass]="getActivityClass(activity)">
+                  <mat-icon class="material-icons-outlined">{{ getActivityIcon(activity) }}</mat-icon>
+                </div>
+                @if (!last) {
+                  <div class="activity-line"></div>
+                }
+              </div>
+              <div class="activity-details">
+                <div class="activity-main">
+                  <div class="activity-title-row">
+                    <h4 class="activity-item-title">{{ activity.title }}</h4>
+                    <span class="activity-time">{{ getTimeAgo(activity.timestamp) }}</span>
+                  </div>
+                  <p class="activity-description">{{ activity.description }}</p>
+                  @if (activity.user || activity.metadata) {
+                    <div class="activity-metadata">
+                      @if (activity.user) {
+                        <div class="activity-user">
+                          <!-- <mat-icon class="user-icon">account_circle</mat-icon> -->
+                          @if (activity.user.avatar) {
+                            <img [src]="activity.user.avatar" class="user-icon" />
+                          }
+                          <span class="activity-user-name">{{ activity.user.name }}</span>
+                        </div>
+                      }
+                      @if (activity.metadata) {
+                        <div class="activity-tags">
+                          @for (key of getMetadataKeys(activity.metadata); track key) {
+                            <span class="metadata-tag"
+                              [matTooltip]="key + ': ' + activity.metadata![key]">
+                              {{ activity.metadata![key] }}
+                            </span>
+                          }
+                        </div>
+                      }
+                    </div>
+                  }
+                </div>
+                <div class="activity-priority" [ngClass]="getPriorityClass(activity.priority)"
+                  [matTooltip]="'Priority: ' + activity.priority">
+                </div>
+              </div>
+            </div>
+          }
+        </div>
+      } @else {
+        <div class="empty-state">
+          <mat-icon class="empty-icon">timeline</mat-icon>
+          <p class="empty-message">{{ emptyMessage }}</p>
+        </div>
+      }
+    </ng-scrollbar>
+  </mat-card-content>
+</mat-card>

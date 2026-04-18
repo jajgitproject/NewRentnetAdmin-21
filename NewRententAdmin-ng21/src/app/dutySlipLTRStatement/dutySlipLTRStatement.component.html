@@ -1,0 +1,579 @@
+<section class="content">
+    <div class="container-fluid">
+        <div class="block-header">
+            <div class="row">
+                <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+                    <ul>
+                        <li class="breadcrumb-item bcrumb-1">
+                            <a routerLink="/dashboard/main">
+                                <i class="fas fa-home"></i> Home</a>|
+                            <a href="#" onClick="return false;">Admin</a>|
+                            <a href="#" onClick="return false;">LTR Statement</a>
+                        </li>
+                    </ul>
+                    <div style="text-align: center;">
+                        <h2>Duty Slip : {{DutySlipID}}, Reservation No : {{ReservationID}}</h2>
+                        <h6>Guest Name : {{guestName}}</h6>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                <div class="card">
+                    <div class="body">
+                        <div class="responsive_table">
+                            <div class="table-responsive">
+                                <form *ngIf="advanceTableForm" [formGroup]="advanceTableForm">
+                                    <table style="width: 100%;overflow-y: hidden;">
+                                        <thead>
+                                            <tr>
+                                                <th class="sno-column"></th>
+                                                <th class="sno-column">S.No.</th>
+                                                <th style="width: 10px;text-align: center;">Holidays</th>
+                                                <th style="width: 40px;text-align: center;">Start City</th>
+                                                <th style="width: 40px;text-align: center;">Start Address</th>
+                                                <th style="width: 40px;text-align: center;">Start Date</th>
+                                                <th style="width: 40px;text-align: center;">Start Time</th>
+                                                <th style="width: 40px;text-align: center;">Start KM</th>
+                                                <th style="width: 40px;text-align: center;">End City</th>
+                                                <th style="width: 40px;text-align: center;">End Address</th>
+                                                <th style="width: 40px;text-align: center;">End Date</th>
+                                                <th style="width: 40px;text-align: center;">End Time</th>
+                                                <th style="width: 40px;text-align: center;">End KM</th>
+                                                <th style="width: 40px;text-align: center;">FKMP2P</th>
+                                                <th style="width: 40px;text-align: center;">Additional KM</th>
+                                                <th style="width: 40px;text-align: center;">Total KM</th>
+                                                <th style="width: 40px;text-align: center;">Additional Minutes</th>
+                                                <th style="width: 40px;text-align: center;">Total Minutes</th>
+                                                <th style="width: 40px;text-align: center;">Package KM</th>
+                                                <th style="width: 40px;text-align: center;">Package Hours</th>
+                                                <th style="width: 40px;text-align: center;">Daily Base Rate</th>
+                                                <th style="width: 40px;text-align: center;">Extra KM</th>
+                                                <th style="width: 40px;text-align: center;">Extra KM Rate</th>
+                                                <th style="width: 40px;text-align: center;">Extra KM Amount</th>
+                                                <th style="width: 40px;text-align: center;">Extra Hour</th>
+                                                <th style="width: 40px;text-align: center;">Extra Hour Rate</th>
+                                                <th style="width: 40px;text-align: center;">FKMP2P Amount</th>
+                                                <th style="width: 40px;text-align: center;">Extra Hour Amount</th>
+                                                <th style="width: 40px;text-align: center;">Total Toll</th>
+                                                <th style="width: 40px;text-align: center;">Toll Images</th>
+                                                <th style="width: 40px;text-align: center;">Total Parking</th>
+                                                <th style="width: 40px;text-align: center;">Parking Images</th>
+                                                <th style="width: 40px;text-align: center;">Total Inter State Tax</th>
+                                                <th style="width: 40px;text-align: center;">Inter State Tax Images</th>
+                                                <th style="width: 40px;text-align: center;">Number Of Days</th>
+                                                <th style="width: 40px;text-align: center;">Driver Allowance Rate</th>
+                                                <th style="width: 40px;text-align: center;">Driver Allowance Amount</th>
+                                                <th style="width: 40px;text-align: center;">Number Of Nights</th>
+                                                <th style="width: 40px;text-align: center;">Night Charge Rate</th>
+                                                <th style="width: 40px;text-align: center;">Night Charge Amount</th>
+                                                <th style="width: 40px;text-align: center;">Total Amount</th>
+                                                <th style="width: 40px;text-align: center;">Activation Status</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <ng-container *ngFor="let dayDifference of dayDifferences; let i = index">
+                                                <tr>
+                                                
+                                                    <td> 
+                                                        <a style="color: #007bff;cursor: pointer;padding-top: 10px; font-style: italic;" 
+                                                        *ngIf=" !advanceTableForm.get('holiday' + i)?.value"  (click)="openDialog(i,advanceTableForm)">Open LTR</a>
+                                                    <br/>
+                                                <br/>                                                       
+
+                                                        <!-- <a style="color: #007bff;cursor: pointer;padding-top: 10px; font-style: italic;" 
+                                                        *ngIf="changedControls[i] && !advanceTableForm.get('holiday' + i)?.value"  (click)="saveData(i)">Save</a> -->
+
+                                                        <a style="color: #007bff;cursor: pointer;padding-top: 10px; font-style: italic;" 
+                                                        *ngIf="editControls[i] && !advanceTableForm.get('holiday' + i)?.value" (click)="updateData(i)">Edit</a>
+                                                    </td>
+
+                                                    <td class="sno-column">
+                                                        {{i + 1}}.{{dataSourceLoadData[i]?.dutySlipLTRStatementID}}
+                                                    </td>
+
+                                                    <!-- <td class="sno-column" *ngIf="editControls[i] === true">
+                                                        {{i + 1}}.{{dataSourceLoadData[i]?.dutySlipLTRStatementID}}
+                                                    </td> -->
+
+                                                    <!-- <td class="sno-column" *ngIf="editControls[i] === false">
+                                                        {{i + 1}}
+                                                    </td> -->
+
+                                                <td>
+                                                    <span class="mat-cell">
+                                                        <mat-checkbox color="primary" [formControlName]="'holiday' + i"  (change)="onHolidayChange(i)"></mat-checkbox>
+                                                    </span>
+                                                </td>
+
+                                                <td>
+                                                    <mat-form-field class="example-full-width" appearance="outline" style="width: 130px;" floatLabel="always">
+                                                    <mat-label>Duty Start City</mat-label>
+                                                    <input matInput [matAutocomplete]="auto" [formControlName]="'dutyStartCity' + i" [disabled]="holidays[i]" required (input)="showSaveButton(i)">
+                                                    <mat-autocomplete #auto="matAutocomplete" (optionSelected)="OnStartCitySelect($event.option.value,i)">
+                                                        <mat-option *ngFor="let options of filteredStartCityOptions[i] | async"
+                                                            [value]="options.geoPointName" (click)="getStartCityID(options.geoPointID,i)">
+                                                            {{options.geoPointName}}
+                                                        </mat-option>
+                                                    </mat-autocomplete>
+                                                    <mat-error *ngIf="advanceTableForm.get('dutyStartCity' + i).hasError('required')">
+                                                            City is required
+                                                    </mat-error>
+                                                    </mat-form-field>
+                                                </td>
+
+                                                <td>
+                                                    <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                                                    <mat-label>Start Address</mat-label>
+                                                    <input matInput [formControlName]="'dutyStartAddress' + i" [disabled]="holidays[i]" required (input)="showSaveButton(i)">
+                                                    <mat-error *ngIf="advanceTableForm.get('dutyStartAddress' + i).hasError('required')">
+                                                        Start Address is required
+                                                    </mat-error>
+                                                    </mat-form-field>
+                                                </td>
+
+                                                <td>
+                                                    <mat-form-field class="example-full-width" appearance="outline" style="width: 130px;" floatLabel="always">
+                                                        <mat-label>Start Date</mat-label>
+                                                        <input matInput [matDatepicker]="dutyStartDate" [disabled]="holidays[i]" 
+                                                        [formControlName]="'dutyStartDate' + i" (dateChange)="onStartDateChange($event,i)">
+                                                        <!-- <input matInput [matDatepicker]="dutyStartDate" [disabled]="holidays[i]" 
+                                                        [formControlName]="'dutyStartDate' + i"> -->
+                                                        <mat-datepicker-toggle matSuffix [for]="dutyStartDate"></mat-datepicker-toggle>
+                                                        <mat-datepicker #dutyStartDate></mat-datepicker>
+                                                        <mat-error *ngIf="advanceTableForm.get('dutyStartDate' + i).hasError('required')">
+                                                            Start Date is required
+                                                        </mat-error>
+                                                    </mat-form-field>
+                                                </td>
+
+                                                <td style="width: 20px;">
+                                                    <mat-form-field class="example-full-width" appearance="outline" style="width: 130px;" floatLabel="always">
+                                                        <mat-label>Start Time</mat-label>
+                                                        <!-- <input matInput [owlDateTimeTrigger]="time1" [owlDateTime]="time1"
+                                                            [formControlName]="'dutyStartTime' + i" [disabled]="holidays[i]" (input)="onStartTimeInput($event,i)"> -->
+                                                            <input matInput [owlDateTimeTrigger]="time1" [owlDateTime]="time1"
+                                                            [formControlName]="'dutyStartTime' + i" [disabled]="holidays[i]">
+                                                        <mat-icon matSuffix [owlDateTimeTrigger]="time1"
+                                                            class="date-icon">schedule</mat-icon>
+                                                        <!-- <owl-date-time [pickerType]="'timer'" #time1 (afterPickerClosed)="onDateChange(i)"></owl-date-time> -->
+                                                        <owl-date-time [pickerType]="'timer'" #time1></owl-date-time>
+                                                        <mat-error *ngIf="advanceTableForm.get('dutyStartTime' + i).hasError('required')">
+                                                            Start Time is required
+                                                        </mat-error>
+                                                    </mat-form-field>
+                                                </td>
+
+                                                <td>
+                                                    <mat-form-field class="example-full-width" appearance="outline" style="width: 110px;" floatLabel="always">
+                                                    <mat-label>Start KM</mat-label>
+                                                    <input matInput [formControlName]="'dutyStartKM' + i" required [disabled]="holidays[i]" (input)="getTotalKMs(i)">
+                                                    <mat-error *ngIf="advanceTableForm.get('dutyStartKM' + i).hasError('required')">
+                                                        Start KM is required
+                                                    </mat-error>
+                                                    </mat-form-field>
+                                                </td>
+
+                                                <td>
+                                                    <mat-form-field class="example-full-width" appearance="outline" style="width: 130px;" floatLabel="always">
+                                                    <mat-label>End City</mat-label>
+                                                    <input matInput [matAutocomplete]="auto1" [formControlName]="'dutyEndCity' + i" [disabled]="holidays[i]" (input)="showSaveButton(i)">
+                                                    <mat-autocomplete #auto1="matAutocomplete" (optionSelected)="OnEndCitySelect($event.option.value,i)">
+                                                        <mat-option *ngFor="let options of filteredEndCityOptions[i] | async"
+                                                            [value]="options.geoPointName" (click)="getEndCityID(options.geoPointID,i)">
+                                                            {{options.geoPointName}}
+                                                        </mat-option>
+                                                    </mat-autocomplete>
+                                                    <!-- <mat-error *ngIf="advanceTableForm.get('dutyEndCity' + i).hasError('required')">
+                                                        End City is required
+                                                    </mat-error> -->
+                                                    </mat-form-field>
+                                                </td>
+
+                                                <td>
+                                                    <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                                                    <mat-label>End Address</mat-label>
+                                                    <input matInput [formControlName]="'dutyEndAddress' + i" required [disabled]="holidays[i]" (input)="showSaveButton(i)">
+                                                    <mat-error *ngIf="advanceTableForm.get('dutyEndAddress' + i).hasError('required')">
+                                                        End Address is required
+                                                    </mat-error>
+                                                    </mat-form-field>
+                                                </td>
+
+                                                <td>
+                                                    <mat-form-field class="example-full-width" appearance="outline" style="width: 130px;" floatLabel="always">
+                                                        <mat-label>End Date</mat-label>
+                                                        <input matInput [matDatepicker]="dutyEndDate" [disabled]="holidays[i]" 
+                                                        [formControlName]="'dutyEndDate' + i" (dateChange)="onEndDateChange($event,i)">
+                                                        <!-- <input matInput [matDatepicker]="dutyEndDate" [disabled]="holidays[i]" 
+                                                        [formControlName]="'dutyEndDate' + i" (dateChange)="getDateTime(i)"> -->
+                                                        <mat-datepicker-toggle matSuffix [for]="dutyEndDate"></mat-datepicker-toggle>
+                                                        <mat-datepicker #dutyEndDate></mat-datepicker>
+                                                        <mat-error *ngIf="advanceTableForm.get('dutyEndDate' + i).hasError('required')">
+                                                            End Date is required
+                                                        </mat-error>
+                                                    </mat-form-field>
+                                                </td>
+
+                                                <td>
+                                                    <mat-form-field class="example-full-width" appearance="outline" style="width: 130px;" floatLabel="always">
+                                                        <mat-label>End Time</mat-label>
+                                                        <input matInput [owlDateTimeTrigger]="time2" [owlDateTime]="time2"
+                                                            [formControlName]="'dutyEndTime' + i" [disabled]="holidays[i]" (input)="getDateTime(i)">
+                                                        <mat-icon matSuffix [owlDateTimeTrigger]="time2"
+                                                            class="date-icon">schedule</mat-icon>
+                                                        <!-- <owl-date-time [pickerType]="'timer'" #time2 (afterPickerClosed)="onDateChange(i)"></owl-date-time> -->
+                                                        <owl-date-time [pickerType]="'timer'" #time2 (afterPickerClosed)="getDateTime(i)"></owl-date-time>
+                                                        <!-- <owl-date-time [pickerType]="'timer'" #time2></owl-date-time> -->
+                                                        <mat-error *ngIf="advanceTableForm.get('dutyEndTime' + i).hasError('required')">
+                                                            End Time is required
+                                                        </mat-error>
+                                                    </mat-form-field>
+                                                </td>
+
+                                                <td>
+                                                    <mat-form-field class="example-full-width" appearance="outline" style="width: 110px;" floatLabel="always">
+                                                    <mat-label>End KM</mat-label>
+                                                    <input matInput [formControlName]="'dutyEndKM' + i" required [disabled]="holidays[i]" (input)="getTotalKMs(i)">
+                                                    <mat-error *ngIf="advanceTableForm.get('dutyEndKM' + i).hasError('required')">
+                                                        End KM is required
+                                                    </mat-error>
+                                                    </mat-form-field>
+                                                </td>
+
+                                                <td>
+                                                    <mat-form-field class="example-full-width" appearance="outline" style="width: 110px;" floatLabel="always">
+                                                    <mat-label>KKMP2P</mat-label>
+                                                    <input matInput [formControlName]="'fkmP2P' + i" required [disabled]="holidays[i]" (input)="showSaveButton(i)">
+                                                    <mat-error *ngIf="advanceTableForm.get('fkmP2P' + i).hasError('required')">
+                                                        FKMP2P is required
+                                                    </mat-error>
+                                                    </mat-form-field>
+                                                </td>
+
+                                                <td>
+                                                    <mat-form-field class="example-full-width" appearance="outline" style="width: 110px;" floatLabel="always">
+                                                    <mat-label>Additional KM</mat-label>
+                                                    <input matInput [formControlName]="'additionalKM' + i" required [disabled]="holidays[i]" (input)="showSaveButton(i)">
+                                                    <mat-error *ngIf="advanceTableForm.get('additionalKM' + i).hasError('required')">
+                                                        Additional KM is required
+                                                    </mat-error>
+                                                    </mat-form-field>
+                                                </td>
+
+                                                <td>
+                                                    <mat-form-field class="example-full-width" appearance="outline" style="width: 110px;" floatLabel="always">
+                                                    <mat-label>Total KM</mat-label>
+                                                    <input matInput [formControlName]="'totalKm' + i" required [disabled]="holidays[i]" (input)="showSaveButton(i)">
+                                                    <mat-error *ngIf="advanceTableForm.get('totalKm' + i).hasError('required')">
+                                                        Total KM is required
+                                                    </mat-error>
+                                                    </mat-form-field>
+                                                </td>
+
+                                                <td>
+                                                    <mat-form-field class="example-full-width" appearance="outline" style="width: 110px;" floatLabel="always">
+                                                    <mat-label>Additional Minutes</mat-label>
+                                                    <input matInput [formControlName]="'additionalMinutes' + i" required [disabled]="holidays[i]" (input)="showSaveButton(i)">
+                                                    <mat-error *ngIf="advanceTableForm.get('additionalMinutes' + i).hasError('required')">
+                                                        Additional Minutes is required
+                                                    </mat-error>
+                                                    </mat-form-field>
+                                                </td>
+
+                                                <td>
+                                                    <mat-form-field class="example-full-width" appearance="outline" style="width: 110px;" floatLabel="always">
+                                                    <mat-label>Total Minutes</mat-label>
+                                                    <input matInput [formControlName]="'totalHours' + i" required [disabled]="holidays[i]" (input)="showSaveButton(i)">
+                                                    <mat-error *ngIf="advanceTableForm.get('totalHours' + i).hasError('required')">
+                                                        Total Hours is required
+                                                    </mat-error>
+                                                    </mat-form-field>
+                                                </td>
+
+                                                <td>
+                                                    <mat-form-field class="example-full-width" appearance="outline" style="width: 110px;" floatLabel="always">
+                                                    <mat-label>Package KM</mat-label>
+                                                    <input matInput [formControlName]="'packageKM' + i" required [disabled]="holidays[i]" (input)="showSaveButton(i)">
+                                                    <mat-error *ngIf="advanceTableForm.get('packageKM' + i).hasError('required')">
+                                                        Package KM is required
+                                                    </mat-error>
+                                                    </mat-form-field>
+                                                </td>
+
+                                                <td>
+                                                    <mat-form-field class="example-full-width" appearance="outline" style="width: 110px;" floatLabel="always">
+                                                    <mat-label>Package Hours</mat-label>
+                                                    <input matInput [formControlName]="'packageHours' + i" required [disabled]="holidays[i]" (input)="showSaveButton(i)">
+                                                    <mat-error *ngIf="advanceTableForm.get('packageHours' + i).hasError('required')">
+                                                        Package Hours is required
+                                                    </mat-error>
+                                                    </mat-form-field>
+                                                </td>
+
+                                                <td>
+                                                    <mat-form-field class="example-full-width" appearance="outline" style="width: 110px;" floatLabel="always">
+                                                    <mat-label>Daily Base Rate</mat-label>
+                                                    <input matInput [formControlName]="'packageBaseRate' + i" required [disabled]="holidays[i]" (input)="showSaveButton(i)">
+                                                    <mat-error *ngIf="advanceTableForm.get('packageBaseRate' + i).hasError('required')">
+                                                        Daily Base Rate is required
+                                                    </mat-error>
+                                                    </mat-form-field>
+                                                </td>
+
+                                                <td>
+                                                    <mat-form-field class="example-full-width" appearance="outline" style="width: 110px;" floatLabel="always">
+                                                    <mat-label>Extra KM</mat-label>
+                                                    <input matInput [formControlName]="'extraKM' + i" required [disabled]="holidays[i]" (input)="showSaveButton(i)">
+                                                    <mat-error *ngIf="advanceTableForm.get('extraKM' + i).hasError('required')">
+                                                        Extra KM is required
+                                                    </mat-error>
+                                                    </mat-form-field>
+                                                </td>
+
+                                                <td>
+                                                    <mat-form-field class="example-full-width" appearance="outline" style="width: 110px;" floatLabel="always">
+                                                    <mat-label>Extra KM Rate</mat-label>
+                                                    <input matInput [formControlName]="'extraKMRate' + i" required [disabled]="holidays[i]" (input)="showSaveButton(i)">
+                                                    <mat-error *ngIf="advanceTableForm.get('extraKMRate' + i).hasError('required')">
+                                                        Extra KM Rate is required
+                                                    </mat-error>
+                                                    </mat-form-field>
+                                                </td>
+
+                                                <td>
+                                                    <mat-form-field class="example-full-width" appearance="outline" style="width: 110px;" floatLabel="always">
+                                                    <mat-label>Extra KM Amount</mat-label>
+                                                    <input matInput [formControlName]="'extraKMAmount' + i" required [disabled]="holidays[i]" (input)="showSaveButton(i)">
+                                                    <mat-error *ngIf="advanceTableForm.get('extraKMAmount' + i).hasError('required')">
+                                                        Extra KM Amount is required
+                                                    </mat-error>
+                                                    </mat-form-field>
+                                                </td>
+
+                                                <td>
+                                                    <mat-form-field class="example-full-width" appearance="outline" style="width: 110px;" floatLabel="always">
+                                                    <mat-label>Extra Hours</mat-label>
+                                                    <input matInput [formControlName]="'extraHour' + i" required [disabled]="holidays[i]" (input)="showSaveButton(i)">
+                                                    <mat-error *ngIf="advanceTableForm.get('extraHour' + i).hasError('required')">
+                                                        Extra Hours is required
+                                                    </mat-error>
+                                                    </mat-form-field>
+                                                </td>
+
+                                                <td>
+                                                    <mat-form-field class="example-full-width" appearance="outline" style="width: 110px;" floatLabel="always">
+                                                    <mat-label>Extra Hours Rate</mat-label>
+                                                    <input matInput [formControlName]="'extraHourRate' + i" required [disabled]="holidays[i]" (input)="showSaveButton(i)">
+                                                    <mat-error *ngIf="advanceTableForm.get('extraHourRate' + i).hasError('required')">
+                                                        Extra Hours Rate is required
+                                                    </mat-error>
+                                                    </mat-form-field>
+                                                </td>
+
+                                                <td>
+                                                    <mat-form-field class="example-full-width" appearance="outline" style="width: 110px;" floatLabel="always">
+                                                    <mat-label>FKMP2P Amount</mat-label>
+                                                    <input matInput [formControlName]="'fixedP2PAmount' + i" required [disabled]="holidays[i]" (input)="showSaveButton(i)">
+                                                    <mat-error *ngIf="advanceTableForm.get('fixedP2PAmount' + i).hasError('required')">
+                                                        FKMP2P Amount is required
+                                                    </mat-error>
+                                                    </mat-form-field>
+                                                </td>
+
+                                                <td>
+                                                    <mat-form-field class="example-full-width" appearance="outline" style="width: 110px;" floatLabel="always">
+                                                    <mat-label>Extra Hours Amount</mat-label>
+                                                    <input matInput [formControlName]="'extraHourAmount' + i" required [disabled]="holidays[i]" (input)="showSaveButton(i)">
+                                                    <mat-error *ngIf="advanceTableForm.get('extraHourAmount' + i)?.hasError('required')">
+                                                        Extra Hours Amount is required
+                                                    </mat-error>
+                                                    </mat-form-field>
+                                                </td>
+
+                                                <td>
+                                                    <mat-form-field class="example-full-width" appearance="outline" style="width: 110px;" floatLabel="always">
+                                                    <mat-label>Total Toll</mat-label>
+                                                    <input matInput [formControlName]="'totalToll' + i" (input)="onTotalTollParkingInterStateChange(i)" [disabled]="holidays[i]">
+                                                    <!-- <mat-error *ngIf="advanceTableForm.get('totalToll' + i).hasError('required')">
+                                                        Total Toll is required
+                                                    </mat-error> -->
+                                                    </mat-form-field>
+                                                </td>
+
+                                                
+                                                <td>
+                                                    <ng-container *ngIf="!advanceTableForm.get('holiday' + i)?.value">
+                                                        <a [href]="advanceTableForm.get('tollImages' + i)?.value" target="_blank" *ngIf="advanceTableForm.get('tollImages' + i)?.value">
+                                                        <img [src]="advanceTableForm.get('tollImages' + i)?.value" class="table " style="height: 80px; width: auto;">
+                                                        </a>    
+                                                        <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2" style="right: 15px;">
+                                                        <app-myupload (onUploadFinished)="uploadFinishedTollImage($event,i)"></app-myupload>
+                                                        </div>
+                                                        
+                                                        <!-- <a *ngIf="dataSaved" 
+                                                        style="cursor: pointer;color: #007bff; font-size: 10px !important; font-style: italic;"
+                                                        (click)="openTollImages()">
+                                                            View Image
+                                                        </a> -->
+                                                    </ng-container>
+                                                </td>                                             
+                                                
+
+                                                <td>
+                                                    <mat-form-field class="example-full-width" appearance="outline" style="width: 110px;" floatLabel="always">
+                                                    <mat-label>Total Parking</mat-label>
+                                                    <input matInput [formControlName]="'totalParking' + i" (input)="onTotalTollParkingInterStateChange(i)" [disabled]="holidays[i]">
+                                                    <!-- <mat-error *ngIf="advanceTableForm.get('totalParking' + i).hasError('required')">
+                                                        Total Parking is required
+                                                    </mat-error> -->
+                                                    </mat-form-field>
+                                                </td>
+
+                                                <td>
+                                                    <ng-container *ngIf="!advanceTableForm.get('holiday' + i)?.value">
+                                                        <a [href]="advanceTableForm.get('parkingImages' + i)?.value" target="_blank" *ngIf="advanceTableForm.get('parkingImages' + i)?.value">
+                                                        <img [src]="advanceTableForm.get('parkingImages' + i)?.value" class="table " style="height: 80px; width: auto;">
+                                                        </a>    
+                                                        <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2" style="right: 15px;">
+                                                        <app-myupload (onUploadFinished)="uploadFinishedParkingImage($event,i)" ></app-myupload>
+                                                        </div>
+
+                                                        <!-- <a *ngIf="dataSaved" 
+                                                        style="cursor: pointer;color: #007bff; font-size: 10px !important; font-style: italic;"
+                                                        (click)="openParkingImages()">
+                                                            View Image
+                                                        </a> -->
+                                                    </ng-container>
+                                                </td>
+
+                                                <td>
+                                                    <mat-form-field class="example-full-width" appearance="outline" style="width: 110px;" floatLabel="always">
+                                                    <mat-label>Total Inter State Tax</mat-label>
+                                                    <input matInput [formControlName]="'totalInterStateTax' + i" [disabled]="holidays[i]" (input)="onTotalTollParkingInterStateChange(i)">
+                                                    <!-- <mat-error *ngIf="advanceTableForm.get('totalInterStateTax' + i).hasError('required')">
+                                                        Total Inter State Tax is required
+                                                    </mat-error> -->
+                                                    </mat-form-field>
+                                                </td>
+
+                                                <td>
+                                                    <ng-container *ngIf="!advanceTableForm.get('holiday' + i)?.value">
+                                                        <a [href]="advanceTableForm.get('interStateTaxImages' + i)?.value" target="_blank" *ngIf="advanceTableForm.get('interStateTaxImages' + i)?.value">
+                                                        <img [src]="advanceTableForm.get('interStateTaxImages' + i)?.value" class="table " style="height: 80px; width: auto;">
+                                                        </a>    
+                                                        <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2" style="right: 15px;">
+                                                        <app-myupload  (onUploadFinished)="uploadFinishedInterStateTaxImages($event,i)"></app-myupload>
+                                                        </div>
+                                                        
+                                                        <!-- <a *ngIf="dataSaved" 
+                                                        style="cursor: pointer;color: #007bff; font-size: 10px !important; font-style: italic;"
+                                                        (click)="openISTImages()">
+                                                            View Image
+                                                        </a> -->
+                                                    </ng-container>
+                                                </td>
+
+                                                <td>
+                                                    <mat-form-field class="example-full-width" appearance="outline" style="width: 110px;" floatLabel="always">
+                                                    <mat-label>Number Of Days</mat-label>
+                                                    <input matInput [formControlName]="'numberOfDays' + i" required [disabled]="holidays[i]" (input)="showSaveButton(i)">
+                                                    <mat-error *ngIf="advanceTableForm.get('numberOfDays' + i)?.hasError('required')">
+                                                        Number Of Days is required
+                                                    </mat-error>
+                                                    </mat-form-field>
+                                                </td>
+
+                                                <td>
+                                                    <mat-form-field class="example-full-width" appearance="outline" style="width: 110px;" floatLabel="always">
+                                                    <mat-label>Driver Allowance Rate</mat-label>
+                                                    <input matInput [formControlName]="'driverAllowanceRate' + i" required [disabled]="holidays[i]" (input)="showSaveButton(i)">
+                                                    <mat-error *ngIf="advanceTableForm.get('driverAllowanceRate' + i).hasError('required')">
+                                                        Driver Allowance Rate is required
+                                                    </mat-error>
+                                                    </mat-form-field>
+                                                </td>
+
+                                                <td>
+                                                    <mat-form-field class="example-full-width" appearance="outline" style="width: 110px;" floatLabel="always">
+                                                    <mat-label>Driver Allowance Amount</mat-label>
+                                                    <input matInput [formControlName]="'driverAllowanceAmount' + i" required [disabled]="holidays[i]" (input)="showSaveButton(i)">
+                                                    <mat-error *ngIf="advanceTableForm.get('driverAllowanceAmount' + i).hasError('required')">
+                                                        Driver Allowance Amount is required
+                                                    </mat-error>
+                                                    </mat-form-field>
+                                                </td>
+
+                                                <td>
+                                                    <mat-form-field class="example-full-width" appearance="outline" style="width: 110px;" floatLabel="always">
+                                                    <mat-label>Number Of Nights</mat-label>
+                                                    <input matInput [formControlName]="'numberOfNights' + i" required [disabled]="holidays[i]" (input)="showSaveButton(i)">
+                                                    <mat-error *ngIf="advanceTableForm.get('numberOfNights' + i).hasError('required')">
+                                                        Number Of Nights is required
+                                                    </mat-error>
+                                                    </mat-form-field>
+                                                </td>
+
+                                                <td>
+                                                    <mat-form-field class="example-full-width" appearance="outline" style="width: 110px;" floatLabel="always">
+                                                    <mat-label>Night Charge Rate</mat-label>
+                                                    <input matInput [formControlName]="'nightChargeRate' + i" required [disabled]="holidays[i]" (input)="showSaveButton(i)">
+                                                    <mat-error *ngIf="advanceTableForm.get('nightChargeRate' + i).hasError('required')">
+                                                        Night Charge Rate is required
+                                                    </mat-error>
+                                                    </mat-form-field>
+                                                </td>
+
+                                                <td>
+                                                    <mat-form-field class="example-full-width" appearance="outline" style="width: 110px;" floatLabel="always">
+                                                    <mat-label>Night Charge Amount</mat-label>
+                                                    <input matInput [formControlName]="'nightChargeAmount' + i" required [disabled]="holidays[i]" (input)="showSaveButton(i)">
+                                                    <mat-error *ngIf="advanceTableForm.get('nightChargeAmount' + i).hasError('required')">
+                                                        Night Charge Amount is required
+                                                    </mat-error>
+                                                    </mat-form-field>
+                                                </td>
+
+                                                <td>
+                                                    <mat-form-field class="example-full-width" appearance="outline" style="width: 110px;" floatLabel="always">
+                                                    <mat-label>Total Amount</mat-label>
+                                                    <input matInput [formControlName]="'totalAmount' + i" required [disabled]="holidays[i]" (input)="showSaveButton(i)">
+                                                    <mat-error *ngIf="advanceTableForm.get('totalAmount' + i).hasError('required')">
+                                                        Total Amount is required
+                                                    </mat-error>
+                                                    </mat-form-field>
+                                                </td>
+
+                                                <td>
+                                                    <mat-form-field class="example-full-width" appearance="outline" style="width: 130px;" floatLabel="always">
+                                                        <mat-label>Activation Status</mat-label>
+                                                        <mat-select [formControlName]="'activationStatus' + i" [disabled]="holidays[i]">
+                                                            <mat-option [value]=true>Active</mat-option>
+                                                            <mat-option [value]=false>Deleted</mat-option>
+                                                        </mat-select>
+                                                        <mat-error *ngIf="advanceTableForm.get('activationStatus' + i).hasError('required')">
+                                                            Activation Status is required
+                                                        </mat-error>
+                                                    </mat-form-field>
+                                                </td>
+                                                </tr>
+                                            </ng-container>
+                                            <!-- <div class="row" style="padding-top: 10px;">
+                                                <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12 mb-2">
+                                                    <div class="example-button-row">
+                                                        <button mat-raised-button color="primary"  (click)="saveData()">Save</button>                                                       
+                                                    </div>
+                                                </div>
+                                            </div> -->
+                                        </tbody>
+                                    </table> 
+                                </form>
+                            </div>   
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>

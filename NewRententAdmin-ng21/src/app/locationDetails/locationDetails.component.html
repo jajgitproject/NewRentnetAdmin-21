@@ -1,0 +1,132 @@
+<div class="modalHeader">
+  <div class="editRowModal">
+    <div class="modalHeader clearfix">
+      <div class="modal-about">
+        <div class="font-weight-bold p-t-5 font-17">
+          {{ dialogTitle }}
+        </div>
+      </div>
+    </div>
+  </div>
+  <button mat-icon-button (click)="dialogRef.close()" aria-label="Close dialog">
+    <mat-icon class="small-close-icon">close</mat-icon>
+  </button>
+  <style></style>
+</div>
+<mat-card>
+  <mat-card-content *ngIf="dataSource">
+    <mat-dialog-content class="of-hidden">
+      <ng-container *ngFor="let dataSourceDetails of dataSource">
+        <div class="row">
+          <div class="col-xl-4 col-lg-6 col-md-12 col-sm-12 mb-2">
+            <span class="TDValueBold">Location</span> <br />
+            <span class="TDValue">
+              {{ dataSourceDetails.organizationalEntityName || 'N/A' }}</span
+            >
+          </div>
+          <div class="col-xl-4 col-lg-6 col-md-12 col-sm-12 mb-2">
+            <span class="TDValueBold">Address</span> <br />
+            <span class="TDValue">
+              {{ dataSourceDetails.organizationalEntityAddress || 'N/A' }}</span
+            >
+          </div>
+          <div class="col-xl-4 col-lg-6 col-md-12 col-sm-12 mb-2">
+            <span class="TDValueBold">Pincode</span> <br />
+            <span class="TDValue">
+              {{ dataSourceDetails.organizationalEntityPincode || 'N/A' }}</span
+            >
+          </div>
+        </div>
+        <div class="row">
+          <div class="col-xl-4 col-lg-6 col-md-12 col-sm-12 mb-2">
+            <span class="TDValueBold">City</span> <br />
+            <span class="TDValue">
+              {{ dataSourceDetails.city || 'N/A' }}</span
+            >
+          </div>
+          <div class="col-xl-4 col-lg-6 col-md-12 col-sm-12 mb-2">
+            <span class="TDValueBold">State</span> <br />
+            <span class="TDValue">
+              {{ dataSourceDetails.stateName || 'N/A' }}</span
+            >
+          </div>
+          <div class="col-xl-4 col-lg-6 col-md-12 col-sm-12 mb-2">
+            <span class="TDValueBold">Country</span> <br />
+            <span class="TDValue">
+              {{ dataSourceDetails.country || 'N/A' }}</span
+            >
+          </div>
+        </div>
+        <div class="row">
+          <div class="col-xl-4 col-lg-6 col-md-12 col-sm-12 mb-2">
+            <span class="TDValueBold">Email</span> <br />
+            <span class="TDValue">
+              {{ dataSourceDetails.organizationalEntityEmail2 || 'N/A' }}</span
+            >
+          </div>
+          <div class="col-xl-4 col-lg-6 col-md-12 col-sm-12 mb-2">
+            <span class="TDValueBold">Phone</span> <br />
+            <span class="TDValue">
+              {{ dataSourceDetails.organizationalEntityPhone1 || 'N/A' }}</span
+            >
+          </div>
+          <div class="col-xl-4 col-lg-6 col-md-12 col-sm-12 mb-2">
+            <span class="TDValueBold">Type</span> <br />
+            <span class="TDValue">
+              {{ dataSourceDetails.organizationalEntityType || 'N/A' }}</span
+            >
+          </div>
+        </div>
+
+        <div class="row">
+          <div class="col-xl-4 col-lg-6 col-md-12 col-sm-12 mb-2">
+            <span class="TDValueBold">StakeHolder Name</span> <br />
+            <span class="TDValue">
+              {{ dataSourceDetails.stakeHolder || 'N/A' }}</span
+            >
+          </div>
+          <div class="col-xl-4 col-lg-6 col-md-12 col-sm-12 mb-2">
+            <span class="TDValueBold">Phone</span> <br />
+            <span class="TDValue">
+              {{ dataSourceDetails.mobile || 'N/A' }}</span
+            >
+          </div>
+          <div class="col-xl-4 col-lg-6 col-md-12 col-sm-12 mb-2">
+            <span class="TDValueBold">Email</span> <br />
+            <span class="TDValue">
+              {{ dataSourceDetails.email || 'N/A' }}</span
+            >
+          </div>
+        </div>
+        <div class="row">
+          <div class="col-xl-4 col-lg-6 col-md-12 col-sm-12 mb-2">
+            <span class="TDValueBold">Gender</span> <br />
+            <span class="TDValue">
+              {{ dataSourceDetails.gender || 'N/A' }}</span
+            >
+          </div>
+          <div class="col-xl-4 col-lg-6 col-md-12 col-sm-12 mb-2">
+            <span class="TDValueBold">IsHod</span> <br />
+            <span class="TDValue">
+              {{ dataSourceDetails.isHOD || 'N/A' }}</span
+            >
+          </div>
+          <div class="col-xl-4 col-lg-6 col-md-12 col-sm-12 mb-2">
+            <span class="TDValueBold">Designation</span> <br />
+            <span class="TDValue">
+              {{ dataSourceDetails.designation || 'N/A' }}</span
+            >
+          </div>
+        </div>
+        <div class="row">
+          <div class="col-xl-4 col-lg-6 col-md-12 col-sm-12 mb-2">
+            <span class="TDValueBold">Department</span> <br />
+            <span class="TDValue">
+              {{ dataSourceDetails.department || 'N/A' }}</span
+            >
+          </div>
+        </div>
+      </ng-container>
+    </mat-dialog-content>
+  </mat-card-content>
+</mat-card>

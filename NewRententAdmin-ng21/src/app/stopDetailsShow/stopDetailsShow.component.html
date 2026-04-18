@@ -1,0 +1,89 @@
+<div class="modalHeader">
+  <div class="editRowModal">
+    <div class="modalHeader clearfix">
+      <div class="modal-about">
+        <div class="font-weight-bold p-t-5 font-17">
+          {{ dialogTitle }}
+        </div>
+      </div>
+    </div>
+  </div>
+  <button mat-icon-button (click)="dialogRef.close()" aria-label="Close dialog">
+    <mat-icon class="small-close-icon">close</mat-icon>
+  </button>
+</div>
+<mat-card>
+  <mat-card-content>
+    <mat-dialog-content class="of-hidden">
+
+      <ng-container *ngIf="dataSource">
+        <ng-container *ngFor="let item of dataSource;">
+          <span *ngIf="item.reservationStopType === 'Pickup'">
+            <b style="color: #007bff;">Pickup Details</b> <br/><br/>
+            <div class="row">
+              <div class="col-xl-4 col-lg-6 col-md-12 col-sm-12 mb-2">
+                <span class="TDValueBold">Pickup Date & Time</span> <br />
+                <span class="TDValue">{{item.reservationStopDate | date}} {{item.reservationStopTime | date:'shortTime'}}</span>
+              </div>
+              <div class="col-xl-4 col-lg-6 col-md-12 col-sm-12 mb-2">
+                <span class="TDValueBold">Pickup Spot</span> <br />
+                <span class="TDValue"> {{item.reservationStopSpot}}({{item.reservationStopSpotType}})</span>         
+              </div>
+
+              <div class="col-xl-4 col-lg-6 col-md-12 col-sm-12 mb-2">
+                <span class="TDValueBold">Address Details</span> <br />
+                <span class="TDValue"> {{item.reservationStopAddressDetails}} - {{item.reservationStopAddress}}</span> 
+              </div>
+            </div>
+        </span>
+        </ng-container>
+
+        <ng-container *ngFor="let item of dataSource;index as i">
+          <span *ngIf="item.reservationStopType === 'Enroute'">
+            <b style="color: #007bff;">Enroute Details - {{i-1}}</b><br/><br/>
+            <div class="row">
+              <div class="col-xl-4 col-lg-6 col-md-12 col-sm-12 mb-2">
+                <span class="TDValueBold">Enroute Date & Time</span> <br />
+                <span class="TDValue">{{item.reservationStopDate | date}} {{item.reservationStopTime | date:'shortTime'}}</span>
+              </div>
+              <div class="col-xl-4 col-lg-6 col-md-12 col-sm-12 mb-2">
+                <span class="TDValueBold">Enroute Spot</span> <br />
+                <span class="TDValue"> {{item.reservationStopSpot}}({{item.reservationStopSpotType}})</span>         
+              </div>
+
+              <div class="col-xl-4 col-lg-6 col-md-12 col-sm-12 mb-2">
+                <span class="TDValueBold">Address Details</span> <br />
+                <span class="TDValue"> {{item.reservationStopAddressDetails}} - {{item.reservationStopAddress}}</span> 
+              </div>
+            </div>
+          </span>
+        </ng-container>
+
+        <ng-container *ngFor="let item of dataSource;">
+          <span *ngIf="item.reservationStopType === 'Dropoff'">
+            <b style="color: #007bff;">Dropoff Details</b><br/><br/>
+            <div class="row">
+              <div class="col-xl-4 col-lg-6 col-md-12 col-sm-12 mb-2">
+                <span class="TDValueBold">DropOff Date & Time</span> <br />
+                <span class="TDValue">{{item.reservationStopDate | date}} {{item.reservationStopTime | date:'shortTime'}}</span>
+              </div>
+              <div class="col-xl-4 col-lg-6 col-md-12 col-sm-12 mb-2">
+                <span class="TDValueBold">DropOff Spot</span> <br />
+                <span class="TDValue"> {{item.reservationStopSpot}}({{item.reservationStopSpotType}})</span>         
+              </div>
+
+              <div class="col-xl-4 col-lg-6 col-md-12 col-sm-12 mb-2">
+                <span class="TDValueBold">Address Details</span> <br />
+                <span class="TDValue"> {{item.reservationStopAddressDetails}} - {{item.reservationStopAddress}}</span> 
+              </div>
+            </div>
+          </span>
+        </ng-container>
+      </ng-container>
+
+      <ng-container *ngIf="!dataSource">
+        <div class="alert alert-primary" style="background-color:#E8E8E8; text-align: center;">No Records Found</div>
+      </ng-container>
+    </mat-dialog-content>
+  </mat-card-content>
+</mat-card>

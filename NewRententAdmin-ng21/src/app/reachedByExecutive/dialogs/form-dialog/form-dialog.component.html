@@ -1,0 +1,321 @@
+<div class="addContainer">
+    <div class="modalHeader">
+        <div class="editRowModal">
+            <div class="modalHeader clearfix">
+                <!-- <img [src]='advanceTable.img' alt="avatar"> -->
+                <div class="modal-about">
+                    <div class="font-weight-bold p-t-6 font-17">
+                        Reached Pickup Point - {{ driverName }} with {{regno}} For Reservation No: {{reservationID}} ,
+                        AllotmentNo: {{allotmentID}},
+                        DutySlipNo : {{dutySlipID}},
+                        <br>
+                        Pickup Date : {{actualDate | date:'dd-MM-yyyy'}}, Pickup Time : {{actualTime | date:'hh:mm a'}}
+                    </div>
+                    <div *ngIf="!isSaveAllowed">
+                        <span style="color:rgb(150, 4, 4);margin-bottom:10px;">
+                            ({{ verifyDutyStatusAndCacellationStatus }}!!!!!)
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <button mat-icon-button (click)="dialogRef.close()" aria-label="Close dialog">
+            <mat-icon>close</mat-icon>
+        </button>
+    </div>
+    <div mat-dialog-content>
+        <form class="register-form m-4" [formGroup]="advanceTableForm" (ngSubmit)="submit">
+            <div class="row">
+                <!-- <div class="col-xl-12 col-lg-4 col-md-4 col-sm-12 mb-2">
+                            <mat-radio-group formControlName="reportingToGuestEntryMethod" (change)="selectRadioButton($event)"  class="d-flex justify-content-between" >
+                                <mat-radio-button value="Manual"  (click)="getDataManual()">Manual</mat-radio-button>
+                                <mat-radio-button value="App" (click)="getDataApp()">App</mat-radio-button>
+                                <mat-radio-button value="GPS" >GPS</mat-radio-button>
+                        </mat-radio-group>  
+                </div>  -->
+            </div>
+            <!-- <div class="row">
+                <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                    <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                        <mat-label>Entry Method</mat-label>
+                        <mat-select required #typeVal [class.is-invalid]="typeVal.invalid && typeVal.touched" formControlName="reportingToGuestEntryMethod">
+                            <mat-option value="App">App</mat-option>
+                            <mat-option value="Manual">Manual</mat-option>
+                        </mat-select>
+
+                        <mat-error>
+                            Please Select Entry Method
+                        </mat-error>
+                    </mat-form-field>
+                </div>
+
+                <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                    <mat-form-field class="example-full-width" appearance="outline"  floatLabel="always">
+                        <mat-label>Executive</mat-label>
+                        <input matInput readonly formControlName="executive">
+                    </mat-form-field>
+                </div>
+            </div> -->
+            <div class="row">
+                <ng-container *ngIf="tab === 'Manual'">
+                    <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                        <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                            <mat-label>Date</mat-label>
+                            <input required matInput [matDatepicker]="Date" placeholder="DD/MM/YYYY"
+                                (blur)="onBlurUpdateDate($event.target.value)" formControlName="reportingToGuestDate">
+                            <mat-datepicker-toggle matSuffix [for]="Date"></mat-datepicker-toggle>
+                            <mat-datepicker #Date></mat-datepicker>
+                            <mat-error *ngIf="advanceTableForm.get('reportingToGuestDate')?.hasError('required')">
+                                Date is required
+                            </mat-error>
+                            <mat-error *ngIf="advanceTableForm.get('reportingToGuestDate')?.hasError('invalidDate')">
+                                Invalid date format. Use DD/MM/YYYY.
+                            </mat-error>
+                        </mat-form-field>
+                    </div>
+
+                    <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                        <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                            <mat-label>Time</mat-label>
+                            <input matInput [owlDateTimeTrigger]="time1" [owlDateTime]="time1"
+                                (input)="onTimeInput($event)" formControlName="reportingToGuestTime">
+                            <mat-icon matSuffix [owlDateTimeTrigger]="time1" class="date-icon">schedule</mat-icon>
+                            <owl-date-time [pickerType]="'timer'" #time1></owl-date-time>
+                            <mat-error *ngIf="advanceTableForm.get('reportingToGuestTime').hasError('required')">
+                                Time is required
+                            </mat-error>
+                            <mat-error *ngIf="advanceTableForm.get('reportingToGuestTime')?.hasError('invalidTime')">
+                                Time must be after Garage Out Time.
+                            </mat-error>
+                        </mat-form-field>
+                    </div>
+
+
+                    <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                        <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                            <mat-label>KM(ODO)</mat-label>
+                            <input required matInput formControlName="reportingToGuestKM">
+
+                            <mat-error *ngIf="advanceTableForm.get('reportingToGuestKM').hasError('required')">
+                                KM(ODO) is required
+                            </mat-error>
+                        </mat-form-field>
+                    </div>
+
+                    <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2" *ngIf="ifBlock; else elseBlock">
+                        <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                            <mat-label>Address</mat-label>
+                            <input required type="text" matInput formControlName="reportingToGuestAddressString"
+                                [matAutocomplete]="auto20" (input)="onAddressTyping()"
+                                (blur)="advanceTableForm.get('reportingToGuestAddressString')?.markAsTouched()" />
+
+                            <!-- Material Autocomplete options -->
+                            <mat-autocomplete #auto20="matAutocomplete"
+                                (optionSelected)="onAddressSelected($event.option.value)">
+                                <mat-option *ngFor="let option of filteredGoogleAddressOptions | async"
+                                    [value]="option.geoSearchString" (click)="bindPickupSpotTypeandSpot(option)">
+                                    {{ option.geoSearchString }}
+                                </mat-option>
+                            </mat-autocomplete>
+
+                            <!-- Error message -->
+                            <!-- REQUIRED ERROR -->
+                            <mat-error *ngIf="
+                            advanceTableForm.get('reportingToGuestAddressString')?.hasError('required')
+                            && advanceTableForm.get('reportingToGuestAddressString')?.touched">
+                                Address is required
+                            </mat-error>
+
+                            <!-- INVALID ADDRESS ERROR -->
+                            <mat-error *ngIf="
+                            advanceTableForm.get('reportingToGuestAddressString')?.hasError('invalidAddress')
+                            && !advanceTableForm.get('reportingToGuestAddressString')?.hasError('required')">
+                                Please select a valid address from suggestions
+                            </mat-error>
+
+                        </mat-form-field>
+
+                        <!-- Google Addresses Checkbox (Always Visible) -->
+                        <div style="text-align: right; margin-top: -10px;">
+                            <mat-checkbox color="primary" formControlName="googleAddresses"
+                                [(indeterminate)]="indeterminate" [labelPosition]="labelPosition"
+                                (change)="valueSwitch()">
+                                Google Addresses
+                            </mat-checkbox>
+                        </div>
+                    </div>
+
+                    <!-- Else Block for Google Autocomplete -->
+                    <ng-template #elseBlock>
+                        <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                            <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                                <mat-label>Address</mat-label>
+                                <input matInput ngx-google-places-autocomplete [options]="options"
+                                    #placesRef="ngx-places" (onAddressChange)="AddressChange($event)"
+                                    (input)="onAddressTyping()" formControlName="reportingToGuestAddressString"
+                                    required />
+
+                                <!-- Error message -->
+                                <mat-error *ngIf="
+                                advanceTableForm.get('reportingToGuestAddressString')?.invalid &&
+                                advanceTableForm.get('reportingToGuestAddressString')?.touched
+                                ">
+
+                                    <span
+                                        *ngIf="advanceTableForm.get('reportingToGuestAddressString')?.hasError('required')">
+                                        Address is required
+                                    </span>
+
+                                    <span
+                                        *ngIf="advanceTableForm.get('reportingToGuestAddressString')?.hasError('invalidAddress')">
+                                        Please select address from suggestions
+                                    </span>
+
+                                </mat-error>
+
+                            </mat-form-field>
+
+                            <!-- Google Addresses Checkbox (Always Visible) -->
+                            <div style="text-align: right; margin-top: -10px;">
+                                <mat-checkbox color="primary" formControlName="googleAddresses"
+                                    [(indeterminate)]="indeterminate" [labelPosition]="labelPosition"
+                                    (change)="valueSwitch()">
+                                    Google Addresses
+                                </mat-checkbox>
+                            </div>
+                        </div>
+                    </ng-template>
+                    <!--           
+                <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                    <mat-form-field class="example-full-width" appearance="outline"  floatLabel="always">
+                        <mat-label>Latitude</mat-label>
+                        <input matInput formControlName="latitude" readonly required>
+                        <mat-error *ngIf="advanceTableForm.get('latitude').hasError('required')">
+                            Latitude is required
+                        </mat-error>
+                    </mat-form-field>
+                </div> 
+                <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2" >
+                    <mat-form-field class="example-full-width" appearance="outline"  floatLabel="always">
+                        <mat-label>Longitude</mat-label>
+                        <input matInput formControlName="longitude" readonly required>
+                        <mat-error *ngIf="advanceTableForm.get('longitude').hasError('required')">
+                            Longitude is required
+                        </mat-error>
+                    </mat-form-field>
+                </div>           -->
+
+                </ng-container>
+                <ng-container *ngIf="tab === 'APP'">
+                    <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                        <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                            <mat-label>Date</mat-label>
+                            <input required matInput [matDatepicker]="Date" formControlName="reportingToGuestDateByApp">
+                            <mat-datepicker-toggle matSuffix [for]="Date"></mat-datepicker-toggle>
+                            <mat-datepicker #Date></mat-datepicker>
+                            <mat-error *ngIf="advanceTableForm.get('reportingToGuestDateByApp').hasError('required')">
+                                Date is required
+                            </mat-error>
+                        </mat-form-field>
+                    </div>
+                    <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                        <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                            <mat-label>Time</mat-label>
+                            <input matInput [owlDateTimeTrigger]="time1" [owlDateTime]="time1"
+                                formControlName="reportingToGuestTimeByApp">
+                            <mat-icon matSuffix [owlDateTimeTrigger]="time1" class="date-icon">schedule</mat-icon>
+                            <owl-date-time [pickerType]="'timer'" #time1></owl-date-time>
+                            <mat-error *ngIf="advanceTableForm.get('reportingToGuestTimeByApp').hasError('required')">
+                                Time is required
+                            </mat-error>
+                        </mat-form-field>
+                    </div>
+
+                    <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                        <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                            <mat-label>KM(ODO)</mat-label>
+                            <input required matInput formControlName="reportingToGuestKMByApp">
+
+                            <mat-error *ngIf="advanceTableForm.get('reportingToGuestKMByApp').hasError('required')">
+                                KM(ODO) is required
+                            </mat-error>
+                        </mat-form-field>
+                    </div>
+                    <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                        <!-- <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                            <mat-label>Address</mat-label>
+                            <input placeholder="Address String" matInput formControlName="reportingToGuestAddressStringByApp" ngx-google-places-autocomplete
+                                [options]="options" (onAddressChange)="AddressChange($event)" required/>
+                            <mat-error *ngIf="advanceTableForm.get('reportingToGuestAddressStringByApp').hasError('required')">
+                                Please select a Address
+                            </mat-error>
+    
+                        </mat-form-field> -->
+
+                        <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                            <mat-label>Address</mat-label>
+                            <input matInput placeholder="Address String"
+                                formControlName="reportingToGuestAddressStringByApp" ngx-google-places-autocomplete
+                                [options]="options" (onAddressChange)="AddressChange($event)" required
+                                googlePlacesOverlay>
+                            <mat-error
+                                *ngIf="advanceTableForm.get('reportingToGuestAddressStringByApp').hasError('required')">
+                                Please select an Address
+                            </mat-error>
+                        </mat-form-field>
+
+                    </div>
+
+                    <!-- <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                        <mat-form-field class="example-full-width" appearance="outline"  floatLabel="always">
+                            <mat-label>Latitude</mat-label>
+                            <input matInput formControlName="latitudeByApp" readonly required>
+                            <mat-error *ngIf="advanceTableForm.get('latitudeByApp').hasError('required')">
+                                Latitude is required
+                            </mat-error>
+                        </mat-form-field>
+                    </div> 
+                    <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2" >
+                        <mat-form-field class="example-full-width" appearance="outline"  floatLabel="always">
+                            <mat-label>Longitude</mat-label>
+                            <input matInput formControlName="longitudeByApp" readonly required>
+                            <mat-error *ngIf="advanceTableForm.get('longitudeByApp').hasError('required')">
+                                Longitude is required
+                            </mat-error>
+                        </mat-form-field>
+                    </div>           -->
+
+                </ng-container>
+
+                <!-- <div class="col-xl-6 col-lg-12 col-md-12 col-sm-12 mb-2">
+                        <div class="example-button-row">
+                            <button mat-raised-button color="primary" [type]="submit" (click)="fetchDataGPS()" [disabled]="reportingToGuestEntry">Fetch Data From GPS</button>
+                        </div>
+                    </div> -->
+
+                <div class="col-xl-4 col-lg-12 col-md-12 col-sm-12 mb-2" *ngIf="tab === 'Manual'">
+                    <!-- <div *ngIf="isSaveAllowed">
+                        <span style="color:red;margin-bottom: 10px;">{{verifyDutyStatusAndCacellationStatus}}</span>
+                    </div> -->
+                    <div class="example-button-row">
+                        <button mat-raised-button color="primary" *ngIf="saveDisabled" [type]="submit"
+                            [disabled]="!advanceTableForm.valid || reportingToGuestEntry || !isSaveAllowed"
+                            (click)="Put()">Save</button>
+                        <mat-spinner *ngIf="!saveDisabled" diameter="30"></mat-spinner>
+                    </div>
+                </div>
+                <div class="col-xl-4 col-lg-12 col-md-12 col-sm-12 mb-2">
+                    <div class="example-button-row">
+                        <!-- <button  mat-raised-button color="warn" [disabled]=" reportingToGuestEntry"  (click)="onNoClick()"tabindex="-1">Reset</button> -->
+                    </div>
+                </div>
+                <!-- <div class="col-xl-4 col-lg-12 col-md-12 col-sm-12 mb-2">
+                        <div class="example-button-row">
+                            <button mat-raised-button color="primary" [type]="submit" (click)="fetchData()" [disabled]="reportingToGuestEntry">Fetch Data From App</button>   
+                         </div>
+                        </div> -->
+
+            </div>
+
+        </form>
+    </div>

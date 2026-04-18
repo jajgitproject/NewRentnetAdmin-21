@@ -1,0 +1,8 @@
+{
+  "BaseURL": "https://api.example.com/",
+  "ImageURL": "https://api.example.com/",
+  "FormURL": "https://app.example.com/#",
+  "UnlockEmployeeUrl": "https://connect.example.com/",
+  "googleMapsApiKey": "YOUR_BROWSER_KEY",
+  "clientErrorReportUrl": "https://api.example.com/client-errors"
+}

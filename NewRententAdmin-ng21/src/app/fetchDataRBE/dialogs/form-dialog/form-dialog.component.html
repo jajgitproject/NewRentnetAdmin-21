@@ -1,0 +1,143 @@
+<div class="addContainer">
+    <div class="modalHeader">
+        <div class="editRowModal">
+            <div class="modalHeader clearfix">
+                <!-- <img [src]='advanceTable.img' alt="avatar"> -->
+                <div class="modal-about">
+                    <div class="font-weight-bold p-t-5 font-17">
+                        Fetch Data From App</div>
+                </div>
+            </div>
+        </div>
+        <button mat-icon-button (click)="dialogRef.close()" aria-label="Close dialog">
+      <mat-icon>close</mat-icon>
+    </button>
+    </div>
+    <div mat-dialog-content>
+        <form class="register-form m-4" [formGroup]="advanceTableForm" (ngSubmit)="submit">
+            <div class="row">
+                <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                    <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                        <mat-label>Date</mat-label>
+                        <input required matInput [matDatepicker]="Date" formControlName="pickupDate">
+                        <mat-datepicker-toggle matSuffix [for]="Date"></mat-datepicker-toggle>
+                        <mat-datepicker #Date></mat-datepicker>
+                        <mat-error *ngIf="advanceTableForm.get('pickupDate').hasError('required')">
+                            Pickup Date is required
+                        </mat-error>
+                    </mat-form-field>
+                </div>
+                <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                    <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                        <mat-label>Time</mat-label>
+                        <input required matInput [owlDateTimeTrigger]="time1" [owlDateTime]="time1"
+                            formControlName="pickupTime">
+                        <mat-icon matSuffix [owlDateTimeTrigger]="time1" class="date-icon">schedule</mat-icon>
+                        <owl-date-time [pickerType]="'timer'" #time1></owl-date-time>
+                            <mat-error *ngIf="advanceTableForm.get('pickupTime').hasError('required')">
+                                Pickup Time is required
+                            </mat-error>
+                    </mat-form-field>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12 mb-2">
+                    <div class="example-button-row">
+                        <button mat-raised-button color="primary" [type]="submit" [disabled]="!advanceTableForm.valid"  (click)="GetDataFromApp()">Search</button>
+                        <button mat-raised-button color="warn" (click)="onNoClick()" tabindex="-1">Reset</button>
+                    <!-- <button *ngIf="action==='edit'" mat-raised-button color="warn" (click)="onNoClick()"
+                        tabindex="-1">Cancel</button> -->
+                    </div>
+                </div>
+            </div>
+
+            <p *ngIf="!fetchCurrentDataFromAppList && !fetchPreviousDataFromAppList && !fetchNextDataFromAppList; then thenBlock2 else elseBlock2">
+                This is not rendered
+            </p>
+
+            <ng-template #thenBlock2>
+                <div class="alert alert-primary" style="background-color:#E8E8E8; text-align: center;">
+                    No Records Found
+                </div>
+            </ng-template>
+
+            <ng-template #elseBlock2>
+                <div style="margin-top: 50px;">
+                    <div class="row" style="font-weight: bold;">
+                        <div class="col-xl-2 col-lg-6 col-md-12 col-sm-12 mb-2">
+                            PickUpKM
+                        </div>
+                        <div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 mb-2">
+                            PickUp Address
+                        </div>
+                        <div class="col-xl-2 col-lg-6 col-md-12 col-sm-12 mb-2">
+                            PickUp Latitude
+                        </div>
+                        <div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 mb-2">
+                            PickUp Longitude
+                        </div>
+                        <div class="col-xl-2 col-lg-6 col-md-12 col-sm-12 mb-2">
+                            Select
+                        </div>
+                    </div>
+                </div>
+                <hr>
+
+                <div class="row" *ngFor="let data of fetchPreviousDataFromAppList;index as i">
+                    <div class="col-xl-2 col-lg-6 col-md-12 col-sm-12 mb-2">
+                        {{data.pickupKM}}
+                    </div>
+                    <div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 mb-2">
+                        {{data.pickupAddressString}}
+                    </div>
+                    <div class="col-xl-2 col-lg-6 col-md-12 col-sm-12 mb-2">
+                        {{data.pickupLatitude}}
+                    </div>
+                    <div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 mb-2">
+                        {{data.pickupLongitude}}
+                    </div>
+                    <div class="col-xl-2 col-lg-6 col-md-12 col-sm-12 mb-2">
+                        <a style="cursor: pointer;color: #007bff;" (click)="onPreviousClick(i)">Select</a>
+                    </div>
+                </div>
+
+                <div class="row" *ngFor="let data of fetchCurrentDataFromAppList;index as i">
+                    <div class="col-xl-2 col-lg-6 col-md-12 col-sm-12 mb-2">
+                        {{data.pickupKM}}
+                    </div>
+                    <div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 mb-2">
+                        {{data.pickupAddressString}}
+                    </div>
+                    <div class="col-xl-2 col-lg-6 col-md-12 col-sm-12 mb-2">
+                        {{data.pickupLatitude}}
+                    </div>
+                    <div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 mb-2">
+                        {{data.pickupLongitude}}
+                    </div>
+                    <div class="col-xl-2 col-lg-6 col-md-12 col-sm-12 mb-2">
+                        <a style="cursor: pointer;color: #007bff;" (click)="onCurrentClick(i)">Select</a>
+                    </div>
+                </div>
+
+                <div class="row" *ngFor="let data of fetchNextDataFromAppList;index as i">
+                    <div class="col-xl-2 col-lg-6 col-md-12 col-sm-12 mb-2">
+                        {{data.pickupKM}}
+                    </div>
+                    <div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 mb-2">
+                        {{data.pickupAddressString}}
+                    </div>
+                    <div class="col-xl-2 col-lg-6 col-md-12 col-sm-12 mb-2">
+                        {{data.pickupLatitude}}
+                    </div>
+                    <div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 mb-2">
+                        {{data.pickupLongitude}}
+                    </div>
+                    <div class="col-xl-2 col-lg-6 col-md-12 col-sm-12 mb-2">
+                        <a style="cursor: pointer;color: #007bff;" (click)="onNextClick(i)">Select</a>
+                    </div>
+                </div>
+        </ng-template>
+            
+            
+        </form>
+    </div>

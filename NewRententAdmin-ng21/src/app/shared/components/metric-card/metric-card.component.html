@@ -1,0 +1,36 @@
+<mat-card class="metric-card" [style.background-color]="backgroundColor">
+  <mat-card-content>
+    <div class="metric-header">
+      @if (icon) {
+        <div class="metric-icon" [ngClass]="'text-' + iconColor">
+          <mat-icon>{{ icon }}</mat-icon>
+        </div>
+      }
+      @if (showTrend && trendValue !== 0) {
+        <div class="metric-trend">
+          <mat-icon [ngClass]="trendClass">{{ trendIcon }}</mat-icon>
+          <span [ngClass]="trendClass">{{ trendValue > 0 ? '+' : '' }}{{ trendValue }}%</span>
+        </div>
+      }
+    </div>
+
+    <div class="metric-content">
+      <h3 class="metric-title">{{ title }}</h3>
+      <div class="metric-value">
+        @if (prefix) {
+          <span class="prefix">{{ prefix }}</span>
+        }
+        <span class="value">{{ value }}</span>
+        @if (suffix) {
+          <span class="suffix">{{ suffix }}</span>
+        }
+      </div>
+      @if (subtitle) {
+        <p class="metric-subtitle">{{ subtitle }}</p>
+      }
+      @if (trendLabel) {
+        <p class="metric-trend-label">{{ trendLabel }}</p>
+      }
+    </div>
+  </mat-card-content>
+</mat-card>

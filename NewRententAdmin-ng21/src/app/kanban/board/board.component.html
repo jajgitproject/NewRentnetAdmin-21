@@ -1,0 +1,105 @@
+<div class="board">
+  @for (list of $any(lists) | keyvalue: unsorted; track list) {
+  <div class="list-container">
+    <div class="list-header" [ngClass]="$any(list.key)">
+      <div class="header-pill">
+        <span class="count">{{ $any(list).value.length }}</span>
+        <span class="title">
+          @switch (list.key) {
+          @case ('NEWTASK') { New Task }
+          @case ('RUNNING') { Running }
+          @case ('ONHOLD') { On Hold }
+          @case ('FINISHED') { Finished }
+          }
+        </span>
+        <button class="add-task-inline" (click)="newKanbanDialog()">
+          <mat-icon>add</mat-icon>
+        </button>
+      </div>
+    </div>
+
+    <ul class="kanbans-list" id="{{ list.key.toString() }}" cdkDropList [cdkDropListData]="list.value"
+      [cdkDropListConnectedTo]="['NEWTASK', 'RUNNING', 'ONHOLD', 'FINISHED']" (cdkDropListDropped)="drop($event)">
+      @for (kanban of $any(list).value; track kanban) {
+      <li class="kanban-card" cdkDrag [cdkDragData]="kanban" (dblclick)="editKanbanDialog(kanban)">
+
+        <div class="card-badge" [ngClass]="'priority-' + kanban.priority">
+          @if (kanban.priority === 1) { High }
+          @if (kanban.priority === 0) { Medium }
+          @if (kanban.priority === -1) { Low }
+        </div>
+
+        <h3 class="card-title" (click)="openTaskDetail(kanban)">{{ kanban.name }}</h3>
+
+        <p class="card-desc">
+          {{ kanban.description | truncate:[100, '&hellip;'] }}
+        </p>
+
+        <div class="card-progress">
+          <div class="progress-info">
+            <span class="progress-label">Progress</span>
+            <span class="progress-percent">{{ kanban.progress || 0 }}%</span>
+          </div>
+          <mat-progress-bar mode="determinate" [value]="kanban.progress || 0"></mat-progress-bar>
+        </div>
+
+        <div class="card-deadline">
+          <mat-icon>calendar_today</mat-icon>
+          <span>Deadline: {{ kanban.deadline | date:'mediumDate' }}</span>
+        </div>
+
+        <div class="card-footer">
+          <div class="member-stack">
+            <ul class="list-unstyled order-list">
+              @for (member of kanban.members?.slice(0, 3); track member) {
+              <li class="avatar avatar-xs">
+                <img [src]="member.avatar" [alt]="member.name" class="rounded-circle" [matTooltip]="member.name">
+              </li>
+              }
+              @if ((kanban.members?.length || 0) > 3) {
+              <li class="avatar avatar-xs">
+                <span class="badge">+{{ (kanban.members?.length || 0) - 3 }}</span>
+              </li>
+              }
+            </ul>
+          </div>
+          <div class="card-stats">
+            <span class="stat-item">
+              <mat-icon class="material-icons-outlined">favorite_border</mat-icon>
+              {{ kanban.likes || 0 }}
+            </span>
+            <span class="stat-item">
+              <mat-icon class="material-icons-outlined">chat_bubble_outline</mat-icon>
+              {{ kanban.comments || 0 }}
+            </span>
+            <span class="stat-item">
+              <mat-icon class="material-icons-outlined">bug_report</mat-icon>
+              {{ kanban.bugs || 0 }}
+            </span>
+          </div>
+        </div>
+
+        <!-- Hidden actions menu trigger -->
+        <button mat-icon-button class="card-more" [matMenuTriggerFor]="menu" (dblclick)="$event.stopPropagation()">
+          <mat-icon>more_vert</mat-icon>
+        </button>
+        <mat-menu #menu="matMenu">
+          <button mat-menu-item (click)="openTaskDetail(kanban)">
+            <mat-icon>info</mat-icon>
+            <span>View Details</span>
+          </button>
+          <button mat-menu-item (click)="editKanbanDialog(kanban)">
+            <mat-icon>edit</mat-icon>
+            <span>Edit</span>
+          </button>
+          <button mat-menu-item (click)="removeKanban(kanban)">
+            <mat-icon>delete</mat-icon>
+            <span>Delete</span>
+          </button>
+        </mat-menu>
+      </li>
+      }
+    </ul>
+  </div>
+  }
+</div>

@@ -1,0 +1,142 @@
+<section class="content">
+    <div class="content-block">
+        <div class="block-header">
+            <app-breadcrumb [title]="'Customer CRM'" [items]="['E-Commerce']" [active_item]="'CRM'"></app-breadcrumb>
+        </div>
+
+        <!-- CRM Metrics -->
+        <div class="row">
+            <div class="col-xl-3 col-lg-6 col-md-6 col-sm-12">
+                <div class="card crm-kpi-card">
+                    <div class="body">
+                        <div class="kpi-content">
+                            <div class="icon bg-light-purple"><mat-icon>groups</mat-icon></div>
+                            <div class="info">
+                                <h3 class="mb-0">1,280</h3>
+                                <p class="mb-0">Total Customers</p>
+                            </div>
+                        </div>
+                        <div class="progress mt-3" style="height: 5px;">
+                            <div class="progress-bar bg-purple" role="progressbar" style="width: 75%"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-xl-3 col-lg-6 col-md-6 col-sm-12">
+                <div class="card crm-kpi-card">
+                    <div class="body">
+                        <div class="kpi-content">
+                            <div class="icon bg-light-blue"><mat-icon>monetization_on</mat-icon></div>
+                            <div class="info">
+                                <h3 class="mb-0">{{125000 | currency}}</h3>
+                                <p class="mb-0">Avg. Lifetime Value</p>
+                            </div>
+                        </div>
+                        <div class="progress mt-3" style="height: 5px;">
+                            <div class="progress-bar bg-blue" role="progressbar" style="width: 60%"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-xl-3 col-lg-6 col-md-6 col-sm-12">
+                <div class="card crm-kpi-card">
+                    <div class="body">
+                        <div class="kpi-content">
+                            <div class="icon bg-light-green"><mat-icon>trending_up</mat-icon></div>
+                            <div class="info">
+                                <h3 class="mb-0">15%</h3>
+                                <p class="mb-0">Retention Rate</p>
+                            </div>
+                        </div>
+                        <div class="progress mt-3" style="height: 5px;">
+                            <div class="progress-bar bg-green" role="progressbar" style="width: 85%"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-xl-3 col-lg-6 col-md-6 col-sm-12">
+                <div class="card crm-kpi-card">
+                    <div class="body">
+                        <div class="kpi-content">
+                            <div class="icon bg-light-orange"><mat-icon>person_add</mat-icon></div>
+                            <div class="info">
+                                <h3 class="mb-0">45</h3>
+                                <p class="mb-0">New This Month</p>
+                            </div>
+                        </div>
+                        <div class="progress mt-3" style="height: 5px;">
+                            <div class="progress-bar bg-orange" role="progressbar" style="width: 45%"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="crm-main-container">
+            <header class="crm-header card">
+                <div class="header-actions">
+                    <div class="search-box">
+                        <mat-icon>search</mat-icon>
+                        <input type="text" placeholder="Search customers by name or email...">
+                    </div>
+                    <div class="filter-actions">
+                        <button mat-flat-button color="primary">
+                            <mat-icon>add</mat-icon>
+                            <span>Add Customer</span>
+                        </button>
+                    </div>
+                </div>
+            </header>
+
+            <div class="customer-grid">
+                @for (customer of customers; track customer.id) {
+                <div class="card customer-card">
+                    <div class="body">
+                        <div class="card-options">
+                            <button mat-icon-button [matMenuTriggerFor]="custMenu">
+                                <mat-icon>more_vert</mat-icon>
+                            </button>
+                        </div>
+                        <div class="profile-header">
+                            <div class="avatar-wrapper">
+                                <img [src]="customer.avatar" alt="">
+                                <span class="status-dot" [class.online]="customer.status === 'Active'"></span>
+                            </div>
+                            <h4>{{customer.name}}</h4>
+                            <p>{{customer.email}}</p>
+                        </div>
+
+                        <div class="stats-row">
+                            <div class="stat-item">
+                                <span class="label">Orders</span>
+                                <span class="value">{{customer.ordersCount}}</span>
+                            </div>
+                            <div class="stat-item">
+                                <span class="label">LTV</span>
+                                <span class="value">{{customer.ltv | currency}}</span>
+                            </div>
+                        </div>
+
+                        <hr>
+
+                        <div class="location-item">
+                            <mat-icon>location_on</mat-icon>
+                            <span>{{customer.location}}</span>
+                        </div>
+
+                        <div class="footer-actions">
+                            <button mat-button color="primary" class="w-100">View Profile</button>
+                        </div>
+                    </div>
+                </div>
+                }
+            </div>
+        </div>
+    </div>
+</section>
+
+<mat-menu #custMenu="matMenu">
+    <button mat-menu-item><mat-icon>edit</mat-icon> Edit Profile</button>
+    <button mat-menu-item><mat-icon>mail</mat-icon> Send Email</button>
+    <button mat-menu-item class="text-danger"><mat-icon color="warn">block</mat-icon> Suspend Account</button>
+</mat-menu>

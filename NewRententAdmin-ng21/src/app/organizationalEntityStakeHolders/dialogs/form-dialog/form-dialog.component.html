@@ -1,0 +1,183 @@
+<div class="addContainer">
+    <div class="modalHeader">
+        <div class="editRowModal">
+            <div class="modalHeader clearfix">
+                <!-- <img [src]='advanceTable.img' alt="avatar"> -->
+                <div class="modal-about">
+                    <div class="font-weight-bold p-t-5 font-17">
+                        {{dialogTitle}} For {{OrganizationalEntityName}}</div>
+                </div>
+            </div>
+        </div>
+        <button mat-icon-button (click)="dialogRef.close()" aria-label="Close dialog">
+      <mat-icon>close</mat-icon>
+    </button>
+    </div>
+    <div mat-dialog-content>
+        <form class="register-form m-4" [formGroup]="advanceTableForm" (ngSubmit)="submit">
+            <div class="row">
+                <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                 
+                    <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                        <mat-label>Employee</mat-label>
+                        <input type="text" matInput required formControlName="employee" [matAutocomplete]="auto">
+                        <mat-autocomplete #auto="matAutocomplete" (optionSelected)="onEmployeeSelected($event.option.value)">
+                          <mat-option *ngFor="let option of filteredEmployeeOptions | async" 
+                          [value]="option.firstName+' '+ option.lastName" (click)="getTitles(option.employeeID)">
+                            {{option.firstName +' ' + option.lastName}}
+                          </mat-option>
+                        </mat-autocomplete>
+                        <mat-error *ngIf="advanceTableForm.controls['employee']?.hasError('employeeInvalid')">
+                            Please select a Employee
+                        </mat-error>
+
+                      </mat-form-field>
+                </div>
+
+                <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                    <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                        <mat-label>Department</mat-label>
+                        <input type="text" matInput required formControlName="department" [matAutocomplete]="auto2">
+                        <mat-autocomplete #auto2="matAutocomplete" 
+                        (optionSelected)="onDepartment($event.option.value)"
+                        >
+                          <mat-option *ngFor="let option of filteredDepartmentOptions | async" [value]="option.department" (click)="getdepartmentID(option.departmentID)">
+                            {{option.department}}
+                          </mat-option>
+                        </mat-autocomplete>
+                        <mat-error *ngIf="advanceTableForm.controls['department']?.hasError('departmentInvalid')">
+                            Please select a Department
+                        </mat-error>
+                      </mat-form-field>
+                </div>
+                <!-- <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+
+                    <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                        <mat-label>Entity</mat-label>
+                        <input type="text" matInput required formControlName="organizationalEntityName" [matAutocomplete]="auto1">
+                        <mat-autocomplete #auto1="matAutocomplete" (optionSelected)="onEnitySelected($event.option.value)">
+                          <mat-option *ngFor="let option of filteredOrganizationalEntityOptions | async" [value]="option.organizationalEntityName" (click)="getorganizationalEntityID(option.organizationalEntityID)">
+                            {{option.organizationalEntityName}}
+                          </mat-option>
+                        </mat-autocomplete>
+                        <mat-error *ngIf="advanceTableForm.controls['organizationalEntityName']?.hasError('organizationalEntityNameInvalid')">
+                            Please select a Entity
+                        </mat-error>
+                      </mat-form-field>
+                </div> -->
+            </div>
+
+            <div class="row">              
+                <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                    <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                        <mat-label>Designation</mat-label>
+                        <input type="text" matInput required formControlName="designation" [matAutocomplete]="auto3">
+                        <mat-autocomplete #auto3="matAutocomplete" (optionSelected)="ondesignation($event.option.value)">
+                          <mat-option *ngFor="let option of filteredDesginationOptions | async" [value]="option.designation" (click)="getdesignationID(option.designationID)">
+                            {{option.designation}}
+                          </mat-option>
+                        </mat-autocomplete>
+                        <mat-error *ngIf="advanceTableForm.controls['designation']?.hasError('desginationInvalid')">
+                            Please select a Designation
+                        </mat-error>
+                      </mat-form-field>
+                </div>
+
+                <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                    <mat-form-field class="example-full-width" appearance="outline"  floatLabel="always">
+                        <mat-label>Position Type</mat-label>
+                        <mat-select required #sdVal [class.is-invalid]="sdVal.invalid && sdVal.touched" formControlName="positionType">
+                            <mat-option value="Employment">Employment</mat-option>
+                            <mat-option value="Unemployment">Unemployment</mat-option>
+                        </mat-select>
+
+                        <mat-error *ngIf="advanceTableForm.get('positionType').hasError('required')">
+                            Position Type is required
+                        </mat-error>
+                    </mat-form-field>
+                </div>
+            </div> 
+           <div class="row">
+            <div class="col-xl-6 col-l66 col-md-12 col-sm-12 mb-2">
+                <section>
+                    <mat-checkbox formControlName="isHOD">Is HOD</mat-checkbox>
+                  </section>
+            </div>
+
+			<div class="col-xl-6 col-l66 col-md-12 col-sm-12 mb-2">
+                <section>
+                    <mat-checkbox formControlName="isResponsibleForChildEntities">Is Responsible For</mat-checkbox>
+                  </section>
+            </div>
+			
+           </div>
+           <div class="row">
+            <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                <mat-form-field class="example-full-width" appearance="outline"  floatLabel="always">
+                    <mat-label>Start Date</mat-label>
+                    <input required matInput [matDatepicker]="startDate" formControlName="startDate" 
+                    placeholder="DD/MM/YYYY" (blur)="onBlurUpdateStartDate($event.target.value)">
+                    <mat-datepicker-toggle matSuffix [for]="startDate"></mat-datepicker-toggle>
+                    <mat-datepicker #startDate></mat-datepicker>
+                    <mat-error *ngIf="advanceTableForm.get('startDate').hasError('required')">
+                        Start Date is required
+                    </mat-error>
+                    <mat-error *ngIf="advanceTableForm.get('startDate')?.hasError('invalidDate')">
+                        Invalid date format. Use DD/MM/YYYY.
+                      </mat-error>
+                </mat-form-field>
+
+            </div>
+            <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                <mat-form-field class="example-full-width" appearance="outline"  floatLabel="always">
+                    <mat-label>End Date</mat-label>
+                    <input required matInput [matDatepicker]="endDate" formControlName="endDate"
+                    placeholder="DD/MM/YYYY" (blur)="onBlurUpdateEndDate($event.target.value)">
+                    <mat-datepicker-toggle matSuffix [for]="endDate"></mat-datepicker-toggle>
+                    <mat-datepicker #endDate></mat-datepicker>
+                    <mat-error *ngIf="advanceTableForm.get('endDate').hasError('required')">
+                        End Date is required
+                    </mat-error>
+                    <mat-error *ngIf="advanceTableForm.get('endDate')?.hasError('invalidDate')">
+                        Invalid date format. Use DD/MM/YYYY.
+                      </mat-error>
+                </mat-form-field>
+
+            </div>
+
+        </div>
+            <div class="row">
+                <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                    <mat-form-field class="example-full-width" appearance="outline"  floatLabel="always">
+                        <mat-label>Activation Status</mat-label>
+                        <mat-select formControlName="activationStatus">
+                            <mat-option [value]=true>Active</mat-option>
+                            <mat-option [value]=false>Deleted</mat-option>
+                        </mat-select>
+
+                        <mat-error *ngIf="advanceTableForm.get('activationStatus').hasError('required')">
+                            Activation Status is required
+                        </mat-error>
+                    </mat-form-field>
+                </div>
+            </div>
+           
+            <div class="row">
+                <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12 mb-2">
+                    <div class="example-button-row">
+                      <button mat-raised-button 
+                              color="primary" 
+                              [disabled]="!advanceTableForm.valid || isLoading"
+                              (click)="confirmAdd()">
+                        <mat-spinner *ngIf="isLoading" diameter="20" class="spinner"></mat-spinner>  <!-- Spinner for loading -->
+                        <span *ngIf="!isLoading">Save</span>  <!-- Text when not loading -->
+                      </button>
+                  
+                      <button *ngIf="action === 'add'" mat-raised-button color="warn" (click)="onNoClick()" tabindex="-1">Reset</button>
+                      <button *ngIf="action === 'edit'" mat-raised-button color="warn" (click)="onNoClick()" tabindex="-1">Cancel</button>
+                    </div>
+                  </div>
+                  
+            </div>
+        </form>
+    </div>

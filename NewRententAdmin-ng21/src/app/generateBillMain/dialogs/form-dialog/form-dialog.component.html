@@ -1,0 +1,313 @@
+<div class="addContainer">
+    <div class="modalHeader">
+        <div class="editRowModal">
+            <div class="modalHeader clearfix">
+                <!-- <img [src]='advanceTable.img' alt="avatar"> -->
+                <div class="modal-about">
+                    <div class="font-weight-bold p-t-5 font-17">
+                        {{dialogTitle}}</div>
+                </div>
+            </div>
+        </div>
+        <button mat-icon-button (click)="dialogRef.close()" aria-label="Close dialog">
+      <mat-icon>close</mat-icon>
+    </button>
+    </div>
+    <div mat-dialog-content>
+        <form class="register-form m-4" [formGroup]="advanceTableForm" (ngSubmit)="submit">
+            <div class="row">
+                <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                    <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                        <mat-label>Eco Billing Branch</mat-label>
+                        <input type="text" matInput required formControlName="organizationalEntityName" [matAutocomplete]="auto">
+                        <mat-autocomplete #auto="matAutocomplete">
+                          <mat-option *ngFor="let option of filteredOrganizationalEntityOptions | async" [value]="option.organizationalEntityName" (click)="getorganizationalEntityID(option.organizationalEntityID)">
+                            {{option.organizationalEntityName}}
+                          </mat-option>
+                        </mat-autocomplete>
+                        <mat-error *ngIf="advanceTableForm.controls['organizationalEntityName']?.hasError('organizationalEntityNameInvalid')">
+                            Branch is required
+                        </mat-error>
+                    </mat-form-field>
+                </div>
+
+                <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                    <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                        <mat-label>Bill Date</mat-label>
+                        <input required matInput [matDatepicker]="invoiceDate" formControlName="invoiceDate">
+                        <mat-datepicker-toggle matSuffix [for]="invoiceDate"></mat-datepicker-toggle>
+                        <mat-datepicker #invoiceDate></mat-datepicker>
+                        <mat-error *ngIf="advanceTableForm.get('invoiceDate').hasError('required')">
+                            Bill Date is required
+                        </mat-error>
+                    </mat-form-field>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                    <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                        <mat-label>Customer</mat-label>
+                        <input required matInput formControlName="customer" [matAutocomplete]="auto1">
+                        <mat-autocomplete #auto1="matAutocomplete">
+                            <mat-option *ngFor="let options of filteredCustomerOptions | async"
+                                [value]="options.customerName" 
+                                (click)="getCustomerID(options.customerID,options.customerGroupID,options.customerGroup)">
+                                {{options.customerName}}
+                            </mat-option>
+                        </mat-autocomplete>
+                        <mat-error *ngIf="advanceTableForm.controls['customer'].hasError('customerInvalid')">
+                            Customer is required
+                        </mat-error>
+                    </mat-form-field>
+                </div>
+
+                <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                    <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                        <mat-label>State</mat-label>
+                        <input required matInput formControlName="state"[matAutocomplete]="auto2">
+                        <mat-autocomplete #auto2="matAutocomplete">
+                            <mat-option *ngFor="let options of filteredStateOptions | async"
+                                [value]="options.geoPointName" (click)="getStateID(options.geoPointID)">
+                                {{options.geoPointName}}
+                            </mat-option>
+                        </mat-autocomplete>
+                        <mat-error *ngIf="advanceTableForm.controls['state'].hasError('stateInvalid')">
+                            State is required
+                        </mat-error>
+                    </mat-form-field>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                    <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                        <mat-label>City</mat-label>
+                        <input required matInput formControlName="city" [matAutocomplete]="auto3">
+                        <mat-autocomplete #auto3="matAutocomplete">
+                            <mat-option *ngFor="let option of filteredCityOptions | async"
+                                [value]="option.geoPointName" (click)="getTitle(option.geoPointID)">
+                                {{option.geoPointName}}
+                            </mat-option>
+                        </mat-autocomplete>
+                        <mat-error *ngIf="advanceTableForm.controls['city'].hasError('cityInvalid')">
+                            City is required
+                        </mat-error>
+                    </mat-form-field>
+                </div>
+
+                <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                    <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                        <mat-label>Pin</mat-label>
+                        <input required matInput formControlName="pinCode">
+                        <mat-error *ngIf="advanceTableForm.get('pinCode').hasError('required')">
+                            Pin is required
+                        </mat-error>
+                    </mat-form-field>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                    <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                        <mat-label>Billing Address</mat-label>
+                        <input required matInput formControlName="billingAddress">
+                        <mat-error *ngIf="advanceTableForm.get('billingAddress').hasError('required')">
+                            Billing Address is required
+                        </mat-error>
+                    </mat-form-field>
+                </div>
+
+                <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                    <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                        <mat-label>Guest</mat-label>
+                        <input required type="text" matInput formControlName="passengerName" [matAutocomplete]="auto4">
+                        <mat-autocomplete #auto4="matAutocomplete">
+                            <mat-option *ngFor="let option of filteredCustomerPersonOptions | async"
+                            [value]="option.customerPersonName" (click)="getCustomerPersonID(option.customerPersonID)"> 
+                            {{option.customerPersonName}}</mat-option>
+                        </mat-autocomplete>
+                        <mat-error *ngIf="advanceTableForm.controls['passengerName'].hasError('customerPersonNameInvalid')">
+                            Guest is required
+                        </mat-error>
+                        <mat-hint>
+                            <div style="padding-left: 150px;padding-top: 0px;">
+                                <a style="cursor: pointer; color: #007bff; font-size: 10px !important; font-style: italic;"
+                                    (click)="personShort()">
+                                    New Guest
+                                </a>
+                            </div>                            
+                        </mat-hint>
+                    </mat-form-field>
+                    <!-- <div class="hint-container">
+                        <mat-hint>
+                            <div style="padding-left: 170px;padding-top: 0px;">
+                                <a style="cursor: pointer; color: #007bff; font-size: 10px !important; font-style: italic;"
+                                    (click)="personShort()">
+                                    New Guest
+                                </a>
+                            </div>                            
+                        </mat-hint>
+                    </div> -->
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                    <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                        <mat-label>Start Date</mat-label>
+                        <input required matInput [matDatepicker]="billFromDate" formControlName="billFromDate">
+                        <mat-datepicker-toggle matSuffix [for]="billFromDate"></mat-datepicker-toggle>
+                        <mat-datepicker #billFromDate></mat-datepicker>
+                        <mat-error *ngIf="advanceTableForm.get('billFromDate').hasError('required')">
+                            Start Date is required
+                        </mat-error>
+                    </mat-form-field>
+                </div>
+
+                <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                    <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                        <mat-label>End Date</mat-label>
+                        <input required matInput [matDatepicker]="billToDate" formControlName="billToDate">
+                        <mat-datepicker-toggle matSuffix [for]="billToDate"></mat-datepicker-toggle>
+                        <mat-datepicker #billToDate></mat-datepicker>
+                        <mat-error *ngIf="advanceTableForm.get('billToDate').hasError('required')">
+                            End Date is required
+                        </mat-error>
+                    </mat-form-field>
+                </div>
+            </div>
+
+            <div class="row">              
+                <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                    <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                        <mat-label>Place Of Supply</mat-label>
+                        <input required matInput formControlName="placeOfSupply">
+                        <mat-error *ngIf="advanceTableForm.get('placeOfSupply').hasError('required')">
+                            Place Of Supply is required
+                        </mat-error>
+                    </mat-form-field>
+                </div>
+
+                <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                    <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                        <mat-label>GST</mat-label>
+                        <mat-select formControlName="gst">
+                            <mat-option [value]=true>Yes</mat-option>
+                            <mat-option [value]=false>No</mat-option>
+                        </mat-select>
+                        <mat-error *ngIf="advanceTableForm.get('gst').hasError('required')">
+                            GST is required
+                        </mat-error>
+                    </mat-form-field>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2" *ngIf="advanceTableForm.value.gst === true">
+                    <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                        <mat-label>GST Type</mat-label>
+                        <mat-select formControlName="gstType">
+                            <mat-option value="IGST">IGST</mat-option>
+                            <mat-option value="CGSTSGST">CGST/SGST</mat-option>
+                        </mat-select>
+                        <!-- <mat-error *ngIf="advanceTableForm.get('gstType').hasError('required')">
+                            GST Type is required
+                        </mat-error> -->
+                    </mat-form-field>
+                </div>
+
+                <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2" *ngIf="advanceTableForm.value.gstType === 'IGST'">
+                    <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                        <mat-label>GST %</mat-label>
+                        <input type="text" matInput formControlName="igstPercentage" [matAutocomplete]="auto5">
+                        <mat-autocomplete #auto5="matAutocomplete">
+                          <mat-option *ngFor="let option of filteredIGSTPercentageOptions | async" 
+                          [value]="option.igstPercentage" (click)="getIGSTPercentageID(option.igstPercentageID)">
+                            {{option.igstPercentage}}
+                          </mat-option>
+                        </mat-autocomplete>
+
+                        <mat-error *ngIf="advanceTableForm.get('igstPercentage').hasError('required')">
+                            GST Percentage is required
+                        </mat-error>
+                    </mat-form-field>
+                </div>
+
+                <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2" *ngIf="advanceTableForm.value.gstType === 'CGSTSGST'">
+                    <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                        <mat-label>GST %</mat-label>
+                        <input type="text" matInput formControlName="csgstPercentage" [matAutocomplete]="auto6">
+                        <mat-autocomplete #auto6="matAutocomplete">
+                          <mat-option *ngFor="let option of filteredCSGSTPercentageOptions | async" 
+                          [value]="option.csgstPercentage" (click)="getCSGSTPercentageID(option.csgstPercentageID)">
+                            {{option.csgstPercentage}}
+                          </mat-option>
+                        </mat-autocomplete>
+
+                        <!-- <mat-error *ngIf="advanceTableForm.get('csgstPercentage').hasError('required')">
+                            GST Percentage is required
+                        </mat-error> -->
+                    </mat-form-field>
+                </div>
+            </div>
+
+            <!-- <div class="row">
+                <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                    <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                        <mat-label>Invoice Narration</mat-label>
+                        <input required matInput formControlName="invoiceNarration">
+                        <mat-error *ngIf="advanceTableForm.get('invoiceNarration').hasError('required')">
+                            Invoice Narration is required
+                        </mat-error>
+                    </mat-form-field>
+                </div>
+            </div> -->
+
+            <!-- <div class="row">
+                <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                    <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                        <mat-label>Car</mat-label>
+                        <input required matInput formControlName="vehicle" [matAutocomplete]="auto3">
+                        <mat-autocomplete #auto3="matAutocomplete">
+                            <mat-option *ngFor="let options of filteredVehicleOptions | async"
+                                [value]="options.vehicle" (click)="getvehicleID(options.vehicleID)">
+                                {{options.vehicle}}
+                            </mat-option>
+                        </mat-autocomplete>
+                        <mat-error *ngIf="advanceTableForm.controls['vehicle'].hasError('vehicleInvalid')">
+                            Car is required
+                        </mat-error>
+                    </mat-form-field>
+                </div>
+
+                <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                    <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                        <mat-label>Duty Type</mat-label>
+                        <input required matInput formControlName="dutyType" [matAutocomplete]="auto4">
+                        <mat-autocomplete #auto4="matAutocomplete">
+                            <mat-option *ngFor="let option of filteredPackageTypeOptions | async"
+                                [value]="option.packageType"
+                                (click)="getPackageTypeID(option.packageTypeID,option.packageType)">
+                                {{option.packageType}}
+                            </mat-option>
+                        </mat-autocomplete>
+                        <mat-error *ngIf="advanceTableForm.controls['dutyType'].hasError('packageTypeInvalid')">
+                            Duty Type is required
+                        </mat-error>
+                    </mat-form-field>
+                </div>
+            </div> -->
+
+            <div class="row">
+                <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12 mb-2">
+                    <div class="example-button-row">
+                        <button mat-raised-button color="primary" [type]="submit" [disabled]="!advanceTableForm.valid"  (click)="confirmAdd()">Save</button>
+                        <button *ngIf="action==='add'" mat-raised-button color="warn" (click)="onNoClick()"
+                        tabindex="-1">Reset</button>
+                    <button *ngIf="action==='edit'" mat-raised-button color="warn" (click)="onNoClick()"
+                        tabindex="-1">Cancel</button>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>

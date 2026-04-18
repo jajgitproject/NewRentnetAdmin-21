@@ -1,0 +1,291 @@
+<div class="addContainer" >
+    <div class="modalHeader">
+        <div class="editRowModal">
+            <div class="modalHeader clearfix">
+                <!-- <img [src]='advanceTable.img' alt="avatar"> -->
+                <div class="modal-about">
+                    <div class="font-weight-bold p-t-5 font-17">
+                        {{dialogTitle}}</div>
+                </div>
+            </div>
+        </div>
+        <button mat-icon-button (click)="dialogRef.close()" aria-label="Close dialog">
+            <mat-icon>close</mat-icon>
+        </button>
+    </div>
+    <div mat-dialog-content>     
+        <form class="register-form m-4" [formGroup]="advanceTableForm" (ngSubmit)="submit">
+        <div class="row">
+            <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                    <mat-label>Booking Number</mat-label>
+                    <input matInput [formControl]="searchBookingNumber" [(ngModel)]="SearchBookingNumber">
+                </mat-form-field>
+            </div>
+            <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                    <mat-label>Vendor Trip No.</mat-label>
+                    <input matInput [formControl]="searchBookingNumber" [(ngModel)]="SearchBookingNumber">
+                </mat-form-field>
+            </div>
+            
+        </div>
+        <div class="row">
+            <div class="col-xl-6 col-lg-6 col-md-6 col-sm-6 mb-2">
+                <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                    <mat-label>Trip Date From</mat-label>
+                    <input matInput [formControl]="searchRegDate" [(ngModel)]="SearchDateOfReg">
+                    <mat-datepicker-toggle matSuffix [for]="regdate"></mat-datepicker-toggle>
+                    <mat-datepicker #regdate></mat-datepicker>
+                </mat-form-field>
+            </div>
+            <div class="col-xl-6 col-lg-6 col-md-6 col-sm-6 mb-2">
+                <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                    <mat-label>Trip Date To</mat-label>
+                    <input matInput [formControl]="searchRegDate" [(ngModel)]="SearchDateOfReg">
+                    <mat-datepicker-toggle matSuffix [for]="regdate"></mat-datepicker-toggle>
+                    <mat-datepicker #regdate></mat-datepicker>
+                </mat-form-field>
+            </div>
+ 
+
+           
+        </div>
+        <div class="row">
+            <div class="col-xl-6 col-lg-6 col-md-6 col-sm-6 mb-2">
+                <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                    <mat-label>Booker</mat-label>
+                    <input  matInput [formControl]="searchBooker" [(ngModel)]="SearchBooker">
+                </mat-form-field>
+            </div>
+
+            <div class="col-xl-6 col-lg-6 col-md-6 col-sm-6 mb-2">
+                <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                    <mat-label>Passenger</mat-label>
+                    <input  matInput [formControl]="searchPassenger" [(ngModel)]="SearchPassenger">
+                </mat-form-field>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-xl-6 col-lg-6 col-md-6 col-sm-6 mb-2">
+                <mat-form-field class="example-full-width mb-3"
+                appearance="outline" floatLabel="always">
+                <mat-label>Cars</mat-label>
+                    <mat-select multiple>
+                        <mat-option value="crysta">Innova Crysta</mat-option>
+                        <mat-option value="crysta">Honda City</mat-option>
+                        <mat-option value="crysta">Fortuner</mat-option>
+                        <mat-option value="crysta">Swift Dezire</mat-option>
+            </mat-select>
+            </mat-form-field>
+            </div>
+
+            <div class="col-xl-6 col-lg-6 col-md-6 col-sm-6 mb-2">
+                <mat-form-field class="example-full-width mb-3"
+                appearance="outline" floatLabel="always">
+                <mat-label>City</mat-label>
+                    <mat-select multiple>
+                        <mat-option value="Delhi">Delhi</mat-option>
+                        <mat-option value="Mumbai>">Mumbai</mat-option>
+                        <mat-option value="Kolkata">Kolkata</mat-option>
+                        <mat-option value="Chennai">Chennai</mat-option>
+                        <mat-option value="Lucknow">Lucknow</mat-option>
+                        <mat-option value="Noida">Noida</mat-option>
+                        <mat-option value="Gurgaon">Gurgaon</mat-option>
+                        <mat-option value="Amritsar">Amritsar</mat-option>
+            </mat-select>
+            </mat-form-field>
+            </div>
+        </div>
+
+        <div class="row">
+
+            <div class="col-xl-6 col-lg-6 col-md-6 col-sm-6 mb-2">              
+                <mat-form-field class="example-full-width mb-3"
+                appearance="outline" floatLabel="always">
+                <mat-label>Package Type</mat-label>
+                    <mat-select multiple>
+                        <mat-option value="airport">Pickup From Airport</mat-option>
+                        <mat-option value="airport">Drop to Airport</mat-option>
+                        <mat-option value="airport">Local</mat-option>
+                        <mat-option value="airport">Outstation One Way</mat-option>
+                        <mat-option value="airport">Outstation Round Trip</mat-option>
+            </mat-select>
+            </mat-form-field>
+            </div>
+            <div class="col-xl-6 col-lg-6 col-md-6 col-sm-6 mb-2">
+                <mat-form-field class="example-full-width mb-3"
+                appearance="outline" floatLabel="always">
+                <mat-label>Package</mat-label>
+                    <mat-select multiple>
+                        <mat-option value="airportdrop">Half Day</mat-option>
+                        <mat-option value="airportdrop">Full Day</mat-option>
+                        <mat-option value="airportdrop">8/80 Day</mat-option>
+
+            </mat-select>
+            </mat-form-field>
+            </div>
+
+        </div>
+
+        <div class="row">
+
+            <div class="col-xl-6 col-lg-6 col-md-6 col-sm-6 mb-2">
+                <mat-form-field class="example-full-width mb-3"
+                appearance="outline" floatLabel="always">
+                <mat-label>Assignments</mat-label>
+                <mat-select multiple>
+                    <mat-option value="Assigned">Vendor Assigned</mat-option>
+                    <mat-option value="airportdrop">Vendor Not Assigned</mat-option>
+                    <mat-option value="Assigned">Driver Assigned</mat-option>
+                    <mat-option value="airportdrop">Driver Not Assigned</mat-option>
+                    <mat-option value="Assigned">Vehicle Assigned</mat-option>
+                    <mat-option value="airportdrop">Vehicle Not Assigned</mat-option>
+                </mat-select>
+            </mat-form-field>
+            </div>
+            <div class="col-xl-6 col-lg-6 col-md-6 col-sm-6 mb-2">
+                <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                    <mat-label>Vendor</mat-label>
+                    <input  matInput [formControl]="searchPassenger" [(ngModel)]="SearchPassenger">
+                </mat-form-field>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-xl-6 col-lg-6 col-md-6 col-sm-6 mb-2">
+                <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                    <mat-label>Driver</mat-label>
+                    <input  matInput [formControl]="searchVendor" [(ngModel)]="SearchVendor">
+                </mat-form-field>
+            </div>
+
+            <div class="col-xl-6 col-lg-6 col-md-6 col-sm-6 mb-2">
+                <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                    <mat-label>Vehicle No.</mat-label>
+                    <input  matInput [formControl]="searchVendor" [(ngModel)]="SearchVendor">
+                </mat-form-field>
+            </div>
+        </div>
+        <div class="row">
+
+
+            <div class="col-xl-6 col-lg-6 col-md-6 col-sm-6 mb-2">           
+                <mat-form-field class="example-full-width mb-3"
+                appearance="outline" floatLabel="always">
+                <mat-label>Trip Status</mat-label>
+                    <mat-select multiple>
+                        <mat-option value="yettostart">Booked</mat-option>
+                        <mat-option value="yettostart">Approved</mat-option>
+                        <mat-option value="yettostart">Rejected</mat-option>
+                        <mat-option value="yettostart">Cancelled</mat-option>
+                        <mat-option value="yettostart">PreDispatch</mat-option>
+                        <mat-option value="yettostart">Dispatched</mat-option>
+                        <mat-option value="yettostart">Started</mat-option>
+                        <mat-option value="yettostart">Ended</mat-option>
+                        <mat-option value="yettostart">Duty Closed</mat-option>
+            </mat-select>
+            </mat-form-field>
+            </div>
+            
+            <div class="col-xl-6 col-lg-6 col-md-6 col-sm-6 mb-2">           
+                <mat-form-field class="example-full-width mb-3"
+                appearance="outline" floatLabel="always">
+                <mat-label>Billing Status</mat-label>
+                    <mat-select multiple>
+                        <mat-option value="yettostart">Not Invoiced</mat-option>
+                        <mat-option value="yettostart">Invoiced - Paid</mat-option>
+                        <mat-option value="yettostart">Invoiced - UnPaid</mat-option>
+                        <mat-option value="yettostart">Dispute in Invoice</mat-option>
+            </mat-select>
+            </mat-form-field>
+            </div>
+
+        </div>
+
+        <div class="row">
+
+
+            <div class="col-xl-6 col-lg-6 col-md-6 col-sm-6 mb-2">           
+                <mat-form-field class="example-full-width mb-3"
+                appearance="outline" floatLabel="always">
+                <mat-label>Delays</mat-label>
+                    <mat-select multiple>
+                        <mat-option value="yettostart">Delay in Vendor Assignment</mat-option>
+                        <mat-option value="yettostart">Delay in car Allotment</mat-option>
+                        <mat-option value="yettostart">Delay in Dispatch</mat-option>
+                        <mat-option value="yettostart">Delay in Reporting</mat-option>
+                        <mat-option value="yettostart">Delay in Pickup</mat-option>
+                        <mat-option value="yettostart">Delay in Dropoff</mat-option>
+                        <mat-option value="yettostart">Delay in Closing</mat-option>
+                        <mat-option value="yettostart">Delay in billing</mat-option>
+                        <mat-option value="yettostart">Delay in Payment</mat-option>
+            </mat-select>
+            </mat-form-field>
+            </div>
+            
+            <div class="col-xl-6 col-lg-6 col-md-6 col-sm-6 mb-2">           
+                <mat-form-field class="example-full-width mb-3"
+                appearance="outline" floatLabel="always">
+                <mat-label>Security</mat-label>
+                    <mat-select multiple>
+                        <mat-option value="yettostart">Car not moving</mat-option>
+                        <mat-option value="yettostart">GPS location Missing</mat-option>
+                        <mat-option value="yettostart">VIP Guest</mat-option>
+                        <mat-option value="yettostart">Female Guest</mat-option>
+            </mat-select>
+            </mat-form-field>
+            </div>
+
+        </div>
+        <div class="row" >
+            <div class="col-xl-6 col-lg-6 col-md-6 col-sm-6 mb-2">           
+                <mat-form-field class="example-full-width mb-3"
+                appearance="outline" floatLabel="always">
+                <mat-label>Disputes</mat-label>
+                    <mat-select multiple>
+                        <mat-option value="yettostart">Denied by Vendor</mat-option>
+                        <mat-option value="yettostart">Traveller Disputes</mat-option>
+                        <mat-option value="yettostart">Driver Disputes</mat-option>
+                        <mat-option value="yettostart">Billing Disputes</mat-option>
+                        <mat-option value="yettostart">General Breakdown</mat-option>
+                        
+            </mat-select>
+            </mat-form-field>
+            </div>
+
+            <div class="col-xl-6 col-lg-6 col-md-6 col-sm-6 mb-2">           
+                <mat-form-field class="example-full-width mb-3"
+                appearance="outline" floatLabel="always">
+                <mat-label>Sort By</mat-label>
+                    <mat-select multiple>
+                        <mat-option value="yettostart">Booking No.</mat-option>
+                        <mat-option value="yettostart">Trip Date/Time</mat-option>
+                        <mat-option value="yettostart">Passenger</mat-option>
+                        <mat-option value="yettostart">Vendor</mat-option>
+                        <mat-option value="yettostart">Booker</mat-option>
+                        <mat-option value="yettostart">City</mat-option>
+                        <mat-option value="yettostart">Car</mat-option>
+            </mat-select>
+            </mat-form-field>
+            </div>
+            
+          
+
+        </div>
+
+
+        <div class="row">
+            <div class="col-xl-6 col-lg-6 col-md-6 col-sm-6 mb-6">
+                <div class="example-button-row">
+                    <button mat-raised-button color="primary" (click)="SearchData()">
+                        Search
+                     </button>
+                    <button mat-raised-button color="warn" (click)="onNoClick()" tabindex="-1">Cancel</button>
+                </div>
+            </div>
+        </div>
+    </form>
+    </div>
+</div>

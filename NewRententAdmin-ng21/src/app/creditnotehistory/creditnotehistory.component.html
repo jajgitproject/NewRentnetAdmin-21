@@ -1,0 +1,110 @@
+<div class="modalHeader">
+  <div class="editRowModal">
+    <div class="modalHeader clearfix">
+      <div class="modal-about">
+        <div class="font-weight-bold p-t-5 font-17">
+          {{ dialogTitle }} - {{ invoiceNumberWithPrefix || 'N/A' }}
+        </div>
+      </div>
+    </div>
+  </div>
+  <button mat-icon-button (click)="onNoClick()" aria-label="Close dialog">
+    <mat-icon class="small-close-icon">close</mat-icon>
+  </button>
+</div>
+
+<mat-card>
+  <mat-card-content *ngIf="creditNoteHistoryDataSource && creditNoteHistoryDataSource.length > 0; else noDataTemplate">
+    <mat-dialog-content class="of-hidden">
+      
+      <!-- Display all credit note history records -->
+      <div *ngFor="let historyItem of creditNoteHistoryDataSource; let i = index" class="history-record">
+        <mat-card class="mb-3" *ngIf="i === 0 || i < creditNoteHistoryDataSource.length">
+          <mat-card-header *ngIf="creditNoteHistoryDataSource.length > 1">
+            <mat-card-title>Action {{ i + 1 }}</mat-card-title>
+          </mat-card-header>
+          <mat-card-content>
+            
+            <!-- Row 1: Basic Information -->
+            <div class="row">
+              <div class="col-md-4 mb-2">
+                <span class="TDValueBold">History No</span><br />
+                <span class="TDValue">
+                  {{ historyItem?.invoiceCreditNoteHistoryID || 'N/A' }}
+                </span>
+              </div>
+
+              <div class="col-md-4 mb-2">
+                <span class="TDValueBold">Credit Note No</span><br />
+                <span class="TDValue">
+                  {{ historyItem?.invoiceCreditNoteID || 'N/A' }}
+                </span>
+              </div>
+              
+              <div class="col-md-4 mb-2">
+                <span class="TDValueBold">Invoice No</span><br />
+                <span class="TDValue">
+                  {{ historyItem?.invoiceID || 'N/A' }}
+                </span>
+              </div>
+            </div>
+
+            <!-- Row 2: Amount and Action Information -->
+            <div class="row">
+              <div class="col-md-4 mb-2">
+                <span class="TDValueBold">Amount</span><br />
+                <span class="TDValue">
+                  {{ historyItem?.amount | currency:'INR':'symbol':'1.2-2' || 'N/A' }}
+                </span>
+              </div>
+
+              <div class="col-md-4 mb-2">
+                <span class="TDValueBold">Action</span><br />
+                <span class="TDValue">
+                  {{ historyItem?.action || 'N/A' }}
+                </span>
+              </div>
+
+              <div class="col-md-4 mb-2">
+                <span class="TDValueBold">Action Value</span><br />
+                <span class="TDValue">
+                  {{ historyItem?.actionValue || 'N/A' }}
+                </span>
+              </div>
+            </div>
+
+            <!-- Row 3: Action Details -->
+            <div class="row">
+              <div class="col-md-4 mb-2">
+                <span class="TDValueBold">Action By </span><br />
+                <span class="TDValue">
+                  {{ historyItem?.actionByName || 'N/A' }}
+                </span>
+              </div>
+
+              <div class="col-md-4 mb-2">
+                <span class="TDValueBold">Date</span><br />
+                <span class="TDValue">
+                  {{ (historyItem?.actionDate | date:'dd/MM/yyyy') || 'N/A' }}
+                </span>
+              </div>
+              <div class="col-md-4 mb-2">
+                <span class="TDValueBold">Time</span><br />
+                <span class="TDValue">
+                  {{ historyItem?.actionTime || 'N/A' }}
+                </span>
+              </div>
+            </div>
+          </mat-card-content>
+            </mat-card>
+      </div>
+      
+    </mat-dialog-content>
+  </mat-card-content>
+
+  <ng-template #noDataTemplate>
+    <mat-card-content>
+      <p>No credit note history found for the given invoice ID.</p>
+    </mat-card-content>
+  </ng-template>
+</mat-card>

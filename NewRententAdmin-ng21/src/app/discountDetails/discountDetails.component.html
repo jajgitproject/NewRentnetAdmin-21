@@ -1,0 +1,44 @@
+<ng-container *ngFor="let data of advanceTableDD;index as i">
+  <div class="row" style="margin-left: 20px;margin-top: 20px;">
+    <a style="cursor: pointer; color: #007bff;">
+      Discount Details -
+      <span style="cursor: pointer; color: #007bff;" (click)="deleteItem(i)">Delete</span>
+    </a>
+  </div>
+
+  <div class="row" style="margin-left: 20px;margin-top: 20px;">
+    <div class="col-xl-4 col-lg-6 col-md-12 col-sm-12 mb-2">
+      <span><b>Approved By</b></span>
+      <br/>
+      <span>{{ data.firstName && data.lastName ? (data.firstName + ' ' + data.lastName) : 'N/A' }}</span>
+    </div>
+
+    <div class="col-xl-4 col-lg-6 col-md-12 col-sm-12 mb-2">
+      <span><b>Discount Percentage</b></span>
+      <br/>
+      <span>{{ data.discountPercentage || 'N/A' }}</span>
+    </div>
+
+    <div class="col-xl-4 col-lg-6 col-md-12 col-sm-12 mb-2">
+      <span><b>Is Allowed On Package Rate</b></span>
+      <br/>
+      <span>{{ data.isAllowedOnPackageRate === true ? 'Yes' : 'No' }}</span>
+    </div>
+
+    <div class="col-xl-4 col-lg-6 col-md-12 col-sm-12 mb-2">
+      <span><b>Is Allowed On Extras</b></span>
+      <br/>
+      <span>{{ data.isAllowedOnExtras === true ? 'Yes' : 'No' }}</span>
+    </div>
+          
+    <div class="col-xl-4 col-lg-6 col-md-12 col-sm-12 mb-2">
+      <span><b>Attachment</b></span>
+      <br/>
+      <span>
+        <a href="{{data.attachment}}" target="_blank" style="cursor: pointer;color: #007bff;">
+          <img [src]="data.attachment" style="max-width: 70px; max-height: 70px;" />
+        </a>
+      </span>
+    </div>  
+  </div>
+</ng-container>

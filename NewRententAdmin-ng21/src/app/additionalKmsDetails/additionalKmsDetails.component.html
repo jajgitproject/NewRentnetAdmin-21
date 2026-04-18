@@ -1,0 +1,54 @@
+<div class="card">
+  <div class="header bg-cyan">
+    <h2>
+      Additional Kms Details
+
+      <i>
+        <!-- <span style="cursor: pointer; color: #fff; font-weight: 400;" (click)="openAdditional()">
+          Add More
+        </span> -->
+      </i>
+    </h2>
+    <ul class="header-dropdown m-r-10">
+            <li>
+              <a style="color:#fff;padding:15px;position: relative;"  href="javascript:void(0);" (click)="scrollToLinkButton()">Go To Menu</a>              
+            </li>
+          </ul> 
+  </div>
+
+  <div style="background-color: #ffffff;">
+    <div class="responsive_table">
+      <mat-accordion>
+        <mat-expansion-panel [expanded]="panelExpanded" class="p-0 m-0" (opened)="onPanelOpen()" (closed)="onPanelClose()">
+          <mat-expansion-panel-header>
+            <mat-panel-title></mat-panel-title>
+          </mat-expansion-panel-header>
+
+          <div *ngFor="let data of advanceTableAD; index as i">
+            <div class="row" style="margin-left: 10px; margin-top: 8px; margin-bottom: 0;">
+              <div class="col-xl-4 col-lg-6 col-md-12 col-sm-12 mb-1">
+                <div style="margin-bottom: 2px;">
+                  <a style="cursor: pointer; color: #007bff;" (click)="openAdditionalKms()" [class.disabled]="isEditingMinutes">
+                    Additional KMS - Edit
+                  </a>
+                </div>
+                <span><b>Additional KMS</b></span><br />
+                <span>{{ data.additionalKMs }}</span>
+              </div>
+
+              <div class="col-xl-4 col-lg-6 col-md-12 col-sm-12 mb-1">
+                <div style="margin-bottom: 2px;">
+                  <a style="cursor: pointer; color: #007bff;" (click)="openAdditionalMinutes()" [class.disabled]="isEditingKms">
+                    Additional Minutes - Edit
+                  </a>
+                </div>
+                <span><b>Additional Minutes</b></span><br />
+                <span>{{ data.additionalMinutes }}</span>
+              </div>
+            </div>
+          </div>
+        </mat-expansion-panel>
+      </mat-accordion>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,162 @@
+<div class="addContainer">
+    <div class="modalHeader">
+        <div class="editRowModal">
+            <div class="modalHeader clearfix">
+                <!-- <img [src]='advanceTable.img' alt="avatar"> -->
+                <div class="modal-about" style="text-align: center;">
+                    <div class="font-weight-bold p-t-5 font-17">
+                        {{dialogTitle}} {{CustomerName}}
+                    </div>
+                </div>
+                
+            </div>
+        </div>
+        <button mat-icon-button (click)="dialogRef.close()" aria-label="Close dialog">
+      <mat-icon>close</mat-icon>
+    </button>
+    </div>
+    <div mat-dialog-content>
+        <form class="register-form m-4" [formGroup]="advanceTableForm" (ngSubmit)="submit">
+
+            <div class="row">
+                <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2" *ngIf="action === 'add'">
+                    <mat-form-field class="example-full-width" appearance="outline"  floatLabel="always">
+                        <mat-label>Block Date</mat-label>
+                        <input required matInput [matDatepicker]="startDate" formControlName="blockDate">
+                        <mat-datepicker-toggle matSuffix [for]="startDate"></mat-datepicker-toggle>
+                        <mat-datepicker #startDate></mat-datepicker>
+                        <mat-error *ngIf="advanceTableForm.get('blockDate').hasError('required')">
+                            Block Date is required
+                        </mat-error>
+                    </mat-form-field>
+                </div>
+
+                <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2" *ngIf="action === 'edit'">
+                    <mat-form-field class="example-full-width" appearance="outline"  floatLabel="always">
+                        <mat-label>Block Date</mat-label>
+                        <input readonly required matInput [matDatepicker]="startDate" formControlName="blockDate">
+                        <mat-datepicker-toggle matSuffix [for]="startDate"></mat-datepicker-toggle>
+                        <mat-datepicker  disabled="true" #startDate></mat-datepicker>
+                        <mat-error *ngIf="advanceTableForm.get('blockDate').hasError('required')">
+                            Block Date is required
+                        </mat-error>
+                    </mat-form-field>
+                </div>
+
+                <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2" *ngIf="action === 'add' || action === 'edit'">
+                    <mat-form-field class="example-full-width" appearance="outline"  floatLabel="always">
+                        <mat-label>Blocked By</mat-label>
+                        <input readonly matInput formControlName="blockedBy" required>
+                        <mat-error *ngIf="advanceTableForm.get('blockedBy').hasError('required')">
+                            Blocked By is required
+                        </mat-error>
+                    </mat-form-field>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2" *ngIf="action === 'add'">
+                    <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                        <mat-label>Reason Of Blocking</mat-label>
+                        <input matInput formControlName="reasonofBlocking" required>
+                        <mat-error *ngIf="advanceTableForm.get('reasonofBlocking').hasError('required')">
+                            Reason Of Blocking is required
+                        </mat-error>
+                    </mat-form-field>
+                </div>
+
+                <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2" *ngIf="action === 'edit'">
+                    <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                        <mat-label>Reason Of Blocking</mat-label>
+                        <input readonly matInput formControlName="reasonofBlocking" required>
+                        <mat-error *ngIf="advanceTableForm.get('reasonofBlocking').hasError('required')">
+                            Reason Of Blocking is required
+                        </mat-error>
+                    </mat-form-field>
+                </div>
+
+                <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2" *ngIf="action==='add'">
+                    <mat-label>
+                        Blocking Attachment
+                    </mat-label>
+                    <br>
+                    <a href="{{ ImagePath }}" target="_blank" *ngIf="ImagePath">
+                        <img [src]="ImagePath" class="table " style="height: 80px; width: auto;">
+                    </a>
+
+                    <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                        <app-myupload (onUploadFinished)="uploadFinishedDoc($event)"></app-myupload>
+                    </div>
+                </div>
+
+                <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2" *ngIf="action==='edit'">
+                    <mat-label>
+                        Blocking Attachment
+                    </mat-label>
+                    <br>
+                     <a style="cursor: pointer;color: #007bff;" href="{{advanceTable.blockAttachment}}" target="_blank">
+                        View
+                    </a>
+                </div>
+            </div>      
+            
+            <div class="row">
+                <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2" *ngIf="action === 'edit'">
+                    <mat-form-field class="example-full-width" appearance="outline"  floatLabel="always">
+                        <mat-label>Unblock Date</mat-label>
+                        <input readonly required matInput [matDatepicker]="unblock" [min]="advanceTableForm.controls.blockDate.value"  formControlName="unblockDate">
+                        <mat-datepicker-toggle matSuffix [for]="unblock"></mat-datepicker-toggle>
+                        <mat-datepicker #unblock></mat-datepicker>
+                        <mat-error *ngIf="advanceTableForm.get('unblockDate').hasError('required')">
+                            Unblock Date is required
+                        </mat-error>
+                    </mat-form-field>
+                </div>
+
+                <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2" *ngIf="action === 'edit'">
+                    <mat-form-field class="example-full-width" appearance="outline"  floatLabel="always">
+                        <mat-label>Unblocked By</mat-label>
+                        <input readonly matInput formControlName="unblockedBy" required>
+                        <mat-error *ngIf="advanceTableForm.get('unblockedBy').hasError('required')">
+                            Unblocked By is required
+                        </mat-error>
+                    </mat-form-field>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2" *ngIf="action === 'edit'">
+                    <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                        <mat-label>Reason Of Unblocking</mat-label>
+                        <input matInput formControlName="reasonofUnblocking" required>
+                        <mat-error *ngIf="advanceTableForm.get('reasonofUnblocking').hasError('required')">
+                            Reason Of Blocking is required
+                        </mat-error>
+                    </mat-form-field>
+                </div>
+
+                <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2" *ngIf="action === 'edit'">
+                    <mat-label>
+                        Unblocking Attachment
+                    </mat-label>
+                    <br>
+                    <a href="{{ ImagePath1 }}" target="_blank" *ngIf="ImagePath1">
+                        <img [src]="ImagePath1" class="table " style="height: 80px; width: auto;">
+                    </a>
+
+                    <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                        <app-myupload (onUploadFinished)="uploadFinished($event)"></app-myupload>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="row" *ngIf="action === 'add' || action === 'edit'">
+                <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12 mb-2">
+                    <div class="example-button-row">
+                        <button mat-raised-button color="primary" [type]="submit" [disabled]="!advanceTableForm.valid"  (click)="confirmAdd()">Save</button>
+                        <button mat-raised-button color="warn" (click)="onNoClick(action)" tabindex="-1">{{ action === 'add' ? 'Reset' :  'Cancel'}}</button>
+                    </div>
+                </div>
+            </div>
+        </form>
+  </div>

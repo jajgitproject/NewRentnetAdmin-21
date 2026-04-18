@@ -1,0 +1,35 @@
+name: CI
+
+on:
+  push:
+    branches: [main, master, develop]
+  pull_request:
+    branches: [main, master, develop]
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: npm
+          cache-dependency-path: package-lock.json
+      - name: Install dependencies
+        run: npm ci
+      - name: TypeScript (strict slice — core + env + errors)
+        run: npm run typecheck:core
+      - name: TypeScript (strict — full app sources)
+        run: npm run typecheck:app
+      - name: ESLint (entire src)
+        run: npm run lint:app
+      - name: npm audit (production deps, informational)
+        continue-on-error: true
+        run: npm audit --omit=dev --audit-level=high
+      - uses: browser-actions/setup-chrome@v1
+      - name: Unit tests (entire app — lorax)
+        run: npx ng test lorax --no-watch --browsers=ChromeHeadless
+      - name: Production build
+        run: npx ng build --configuration=production

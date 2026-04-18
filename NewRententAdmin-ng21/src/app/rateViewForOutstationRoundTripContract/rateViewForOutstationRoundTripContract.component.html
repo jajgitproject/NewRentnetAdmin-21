@@ -1,0 +1,156 @@
+<section class="content">
+    <div class="container-fluid">
+        <div class="block-header">
+            <div class="row">
+                <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+                    <ul>
+                        <li class="breadcrumb-item bcrumb-1">
+                            <a routerLink="/dashboard/main">
+                                <i class="fas fa-home"></i> Home</a>|
+                            <a href="#" onClick="return false;">Admin</a>|
+                            <a href="#" onClick="return false;">Rate View</a>
+                        </li>
+                    </ul>
+                    <div style="text-align: center;">
+                        <h2>Rate View of <b>{{ContractName}}</b> On <b>{{CurrentDateTime}}</b></h2>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                <div class="card">
+                    <div class="body">
+                        <div class="responsive_table">
+                            <div class="materialTableHeader">
+                                <div class="row">
+                                <div class="modal fade" id="exampleModalCenter" tabindex="-1" role="dialog">
+                                    <div class="modal-dialog modal-dialog-centered">
+                                        <div class="modal-content">
+                                            <div class="modal-header">
+                                                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                                    <span aria-hidden="true">&times;</span>
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div style="width: 70%; float:left;padding-top: 6px;padding-left: 12px;">
+                                    <span style="color: black;">
+                                        <b>Outstation Round Trip Variable Details</b>
+                                    </span>
+                                </div>
+
+                                <div style="width: 30%; text-align:right;"></div>
+                                </div>
+                            </div>
+
+                            <p *ngIf="!dataSource; then thenBlock2 else elseBlock2">
+                                This is not rendered
+                            </p>
+
+                            <ng-template #thenBlock2>
+                                <div class="alert alert-primary" style="background-color:#E8E8E8; text-align: center;">
+                                    No Records Found</div>
+                                <div class="body">
+                                    <div class="example-button-row">
+
+                                        <button mat-raised-button color="primary"
+                                            (click)="PreviousCall()">Previous</button>
+                                        <button mat-raised-button color="primary" (click)="NextCall()">Next</button>
+                                    </div>
+                                </div>
+                            </ng-template>
+
+                            <ng-template #elseBlock2>
+                                <div class="scrollable-table-container">
+                                    <mat-table #table [dataSource]="dataSource" matSort class="mat-cell floating-header-table">
+                                        <ng-container matColumnDef="Package">
+                                            <mat-header-cell *matHeaderCellDef mat-sort-header>Package</mat-header-cell>
+                                            <mat-cell *matCellDef="let row" (contextmenu)="onContextMenu($event, row)">
+                                                {{row.package}}</mat-cell>
+                                        </ng-container>
+
+                                        <ng-container matColumnDef="CustomerContractCityTier">
+                                            <mat-header-cell *matHeaderCellDef mat-sort-header>City Tier</mat-header-cell>
+                                            <mat-cell *matCellDef="let row" (contextmenu)="onContextMenu($event, row)">
+                                                {{row.customerContractCityTier}}</mat-cell>
+                                        </ng-container>
+
+                                        <ng-container matColumnDef="City">
+                                            <mat-header-cell *matHeaderCellDef mat-sort-header>City</mat-header-cell>
+                                            <mat-cell *matCellDef="let row" (contextmenu)="onContextMenu($event, row)">
+                                                {{row.city}}</mat-cell>
+                                        </ng-container>
+
+                                        <ng-container matColumnDef="CustomerContractCarCategory">
+                                            <mat-header-cell *matHeaderCellDef mat-sort-header>Car Category</mat-header-cell>
+                                            <mat-cell *matCellDef="let row" (contextmenu)="onContextMenu($event, row)">
+                                                {{row.customerContractCarCategory}}</mat-cell>
+                                        </ng-container>
+
+                                        <ng-container matColumnDef="Car">
+                                            <mat-header-cell *matHeaderCellDef mat-sort-header>Car</mat-header-cell>
+                                            <mat-cell *matCellDef="let row" (contextmenu)="onContextMenu($event, row)">
+                                                {{row.car}}</mat-cell>
+                                        </ng-container>
+
+                                        <ng-container matColumnDef="MinimumKmsPerDay">
+                                            <mat-header-cell *matHeaderCellDef mat-sort-header>Minimum Kms Per Day</mat-header-cell>
+                                            <mat-cell *matCellDef="let row" (contextmenu)="onContextMenu($event, row)">
+                                                {{row.minimumKmsPerDay}}</mat-cell>
+                                        </ng-container>
+
+                                        <ng-container matColumnDef="RatePerDay">
+                                            <mat-header-cell *matHeaderCellDef mat-sort-header>Rate Per Day</mat-header-cell>
+                                            <mat-cell *matCellDef="let row" (contextmenu)="onContextMenu($event, row)">
+                                                {{row.ratePerDay}}</mat-cell>
+                                        </ng-container>
+
+                                        <ng-container matColumnDef="ExtraKMRate">
+                                            <mat-header-cell *matHeaderCellDef mat-sort-header>Extra KM Rate</mat-header-cell>
+                                            <mat-cell *matCellDef="let row" (contextmenu)="onContextMenu($event, row)">
+                                                {{row.extraKMRate}}</mat-cell>
+                                        </ng-container>
+
+                                        <ng-container matColumnDef="NightCharge">
+                                            <mat-header-cell *matHeaderCellDef mat-sort-header>Night Charge</mat-header-cell>
+                                            <mat-cell *matCellDef="let row" (contextmenu)="onContextMenu($event, row)">
+                                                {{row.nightCharge}}</mat-cell>
+                                        </ng-container>
+
+                                        <ng-container matColumnDef="DriverAllowance">
+                                            <mat-header-cell *matHeaderCellDef mat-sort-header>Driver Allowance</mat-header-cell>
+                                            <mat-cell *matCellDef="let row" (contextmenu)="onContextMenu($event, row)">
+                                                {{row.driverAllowance}}</mat-cell>
+                                        </ng-container>
+
+                                        <ng-container matColumnDef="BillFromTo">
+                                            <mat-header-cell *matHeaderCellDef mat-sort-header>Bill From To</mat-header-cell>
+                                            <mat-cell *matCellDef="let row" (contextmenu)="onContextMenu($event, row)">
+                                                {{row.billFromTo}}</mat-cell>
+                                        </ng-container>
+                                    
+                                        <mat-header-row *matHeaderRowDef="displayedColumns"></mat-header-row>
+                                        <mat-row *matRowDef="let row; columns: displayedColumns;" [style.cursor]="'pointer'"
+                                            matRipple>
+                                        </mat-row>
+                                    </mat-table>
+                                </div>
+
+                                <div class="body">
+                                    <div class="example-button-row">
+                                        <button mat-raised-button color="primary" (click)="PreviousCall()">Previous</button>
+                                        <button mat-raised-button color="primary" (click)="NextCall()">Next</button>
+                                    </div>
+                                </div>
+                            </ng-template>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>

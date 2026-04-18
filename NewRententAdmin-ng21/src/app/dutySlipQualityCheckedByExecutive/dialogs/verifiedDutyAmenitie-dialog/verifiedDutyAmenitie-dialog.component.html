@@ -1,0 +1,80 @@
+<div class="addContainer">
+  <div class="modalHeader">
+    <div class="editRowModal">
+      <div class="modalHeader clearfix">
+        <div class="modal-about">
+          <div class="font-weight-bold p-t-5 font-17">
+            {{dialogTitle}}
+          </div>
+        </div>
+      </div>
+    </div>
+    <button mat-icon-button (click)="dialogRef.close()" aria-label="Close dialog">
+      <mat-icon>close</mat-icon>
+    </button>
+  </div>
+  <div mat-dialog-content>
+    <form class="register-form m-4" [formGroup]="advanceTableForm" (ngSubmit)="submit">
+            <div class="row">
+              <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12 mb-2">
+                <div class="row g-3"> <!-- g-3 will add space between columns -->
+                  <div class="col-xl-6 col-lg-6 col-md-6 col-sm-12 mb-2">
+                    <div class="status-display">
+                      <strong style="font-size: 10px;">Amenitie</strong>
+                      <br />
+                      <span style="font-size: 10px;">{{advanceTable?.amenitie}}</span>
+                    </div>
+                  </div>
+
+                  <div class="col-xl-6 col-lg-6 col-md-6 col-sm-12 mb-2">
+                    <div class="status-display">
+                      <strong style="font-size: 10px;">Remark</strong>
+                      <br />
+                      <span style="font-size: 10px;">{{advanceTable?.amenitieRemark}}</span>
+                    </div>
+                  </div>
+
+                </div>
+
+              </div>
+            </div>
+      <br />
+
+      <div class="row">
+        <div class="col-xl-6 col-lg-6 col-md-6 col-sm-12 mb-2">
+          <mat-label>Amenitie Image</mat-label>
+          <br>
+          <span>
+            <a href="{{ advanceTable.amenitieImage }}" target="_blank">
+              <img [src]="advanceTable.amenitieImage" class="table " style="height: 80px; width: auto;"
+                *ngIf="advanceTable.amenitieImage">
+            </a></span>
+        </div>
+
+        <div class="col-xl-6 col-lg-6 col-md-6 col-sm-12 mb-2">
+          <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+            <mat-label>Verification Result</mat-label>
+            <mat-select formControlName="amenitieVerified">
+              <mat-option value=Passed>Passed</mat-option>
+              <mat-option value=Failed>Failed</mat-option>
+            </mat-select>
+
+            <mat-error *ngIf="advanceTableForm.get('amenitieVerified').hasError('required')">
+              Verification Result is required
+            </mat-error>
+          </mat-form-field>
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12 mb-2">
+          <div class="example-button-row">
+            <button mat-raised-button color="primary" *ngIf="saveDisabled" [type]="submit"
+              [disabled]="!advanceTableForm.valid" (click)="confirmAdd()">Save</button>
+            <mat-spinner *ngIf="!saveDisabled" diameter="30"></mat-spinner>
+            <button mat-raised-button color="warn" (click)="onNoClick()" tabindex="-1">Cancel</button>
+          </div>
+        </div>
+      </div>
+    </form>
+  </div>

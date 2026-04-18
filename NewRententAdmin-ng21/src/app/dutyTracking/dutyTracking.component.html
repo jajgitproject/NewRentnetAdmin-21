@@ -1,0 +1,53 @@
+<div class="modalHeader">
+  <div class="editRowModal">
+    <div class="modalHeader clearfix">
+      <div class="modal-about">
+        <div class="font-weight-bold p-t-5 font-17">
+          {{ dialogTitle }}, Duty Slip - {{dutySlipID}}
+        </div>
+      </div>
+    </div>
+  </div>
+  <button mat-icon-button (click)="dialogRef.close()" aria-label="Close dialog">
+    <mat-icon class="small-close-icon">close</mat-icon>
+  </button>
+</div>
+<div *ngIf="!dataSource" class="alert alert-primary" style="background-color:#E8E8E8; text-align: center;width: 100%;margin-top: 10px;">
+  No Records Found
+</div>
+
+<ng-container *ngIf="dataSource !== undefined">
+  <mat-dialog-content class="mat-typography">
+  <ng-container  *ngFor="let dataSourceDetails of dataSource" >
+  <mat-card >
+    <mat-card-content>
+      <div class="row">
+        <div class="col-12 col-sm-12 col-md-2 mb-2">
+          <span class="TDValueBold">Date</span> <br />
+          <span class="TDValue"> {{ (dataSourceDetails?.trackingDate | date: 'dd-MM-yyyy') || 'N/A' }}</span> 
+        </div>
+
+        <div class="col-12 col-sm-12 col-md-2 mb-2">
+          <span class="TDValueBold">Time</span> <br />
+          <span class="TDValue"> {{ (dataSourceDetails?.trackingTime | date:'HH:mm:ss') || 'N/A' }}</span> 
+        </div>
+
+        <div class="col-12 col-sm-12 col-md-2 mb-2">
+          <span class="TDValueBold">Mode</span> <br />
+          <span class="TDValue"> {{ dataSourceDetails?.modeOfTracking || 'N/A' }}</span> 
+        </div>
+
+        <div class="col-12 col-sm-12 col-md-2 mb-2">
+          <span class="TDValueBold">Details</span> <br />
+          <span class="TDValue"> {{ dataSourceDetails?.trackingDetails || 'N/A' }}</span> 
+        </div>
+
+        <div class="col-12 col-sm-12 col-md-3 mb-2">
+          <span class="TDValueBold">Tracked By</span> <br />
+          <span class="TDValue"> {{ dataSourceDetails?.trackedByEmployeeName || 'N/A' }}</span> 
+        </div>
+      </div>   
+    </mat-card-content>
+  </mat-card>   
+  <br>  
+</ng-container>

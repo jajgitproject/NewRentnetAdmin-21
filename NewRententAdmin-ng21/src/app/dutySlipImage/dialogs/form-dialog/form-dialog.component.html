@@ -1,0 +1,60 @@
+<div class="addContainer">
+    <div class="modalHeader">
+        <div class="editRowModal">
+            <div class="modalHeader clearfix">
+                <!-- <img [src]='advanceTable.img' alt="avatar"> -->
+                <!-- <div class="modal-about">
+                    <div class="font-weight-bold p-t-5 font-17">{{dialogTitle}} {{dutySlipID}}</div>
+                </div> -->
+                <div class="modal-about">
+                    <div class="font-weight-bold p-t-5 font-17">
+                        {{dialogTitle}} For Duty No. {{ dutySlipID }}
+                    </div>
+                     <div *ngIf="isSaveAllowed">
+                        <span style="color:rgb(150, 4, 4);margin-bottom: 10px;font-style: italic;font-size: 12px;">({{verifyDutyStatusAndCacellationStatus}} !!!!!)</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <button mat-icon-button (click)="dialogRef.close()" aria-label="Close dialog">
+      <mat-icon>close</mat-icon>
+    </button>
+    </div>
+    <div mat-dialog-content>
+        <form class="register-form m-4" [formGroup]="advanceTableForm" (ngSubmit)="submit">
+            
+
+
+            <!-- <mat-card  class="mat-elevation-z0 outline"> -->
+            <div class="row">
+                <div class=" col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                    <!-- <mat-label style="margin-left: 18px;">Selfie With Uniform</mat-label> -->
+                    <mat-label>DutySlip Image</mat-label>
+                    <br>
+                    <a href="{{ ImagePath }}" target="_blank" *ngIf="ImagePath" >
+                        <img [src]="ImagePath" class="table " style="cursor: pointer;height: 80px; width: auto;">
+                    </a>
+    
+                    <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2" style="cursor: pointer;right: 15px;">
+                        <app-myupload (onUploadFinished)="uploadFinishedSelfie($event)" ></app-myupload>
+                    </div>
+                </div>
+               
+            </div>
+
+
+            <!-- </mat-card>  -->
+            <div class="row">
+                <!-- <div *ngIf="isSaveAllowed">
+                    <span style="color:red;margin-bottom: 10px;">{{verifyDutyStatusAndCacellationStatus}}</span>
+                </div> -->
+                <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12 mb-2">
+                    <div class="example-button-row">
+                        <button mat-raised-button color="primary" *ngIf="saveDisabled" [type]="submit" [disabled]="!this.ImagePath || isSaveAllowed"  (click)="confirmAdd()">Save</button>
+                        <mat-spinner *ngIf="!saveDisabled" diameter="30"></mat-spinner>
+                        <button mat-raised-button color="warn" (click)="onNoClick()" tabindex="-1">Cancel</button>
+                    </div>
+                </div>
+            </div>
+        </form>
+  </div>

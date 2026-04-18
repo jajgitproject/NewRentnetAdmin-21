@@ -1,0 +1,122 @@
+<div class="addContainer">
+    <div class="modalHeader">
+        <div class="editRowModal">
+            <div class="modalHeader clearfix">
+                <!-- <img [src]='advanceTable.img' alt="avatar"> -->
+                <div class="modal-about">
+                    <div class="font-weight-bold p-t-5 font-17">
+                        Add Passengers</div>
+                </div>
+            </div>
+        </div>
+        <button mat-icon-button (click)="dialogRef.close()" aria-label="Close dialog">
+      <mat-icon>close</mat-icon>
+    </button>
+    </div>
+    <div mat-dialog-content>
+        <form class="register-form m-4" [formGroup]="advanceTableForm" (ngSubmit)="submit">
+            <div class="row">
+                <div class="col-xl-12 col-lg-6 col-md-12 col-sm-12 mb-2">
+                    <mat-form-field appearance="outline" floatLabel="always" class="example-full-width">
+                        <mat-label>Search Passenger By Name, Email, Phone</mat-label>
+                        <input type="text" matInput [formControl]="myControl" [matAutocomplete]="auto">
+                        <mat-autocomplete #auto="matAutocomplete" [displayWith]="displayFn">
+                          <mat-option *ngFor="let option of filteredOptions | async" [value]="option">
+                            {{option.name}}
+                          </mat-option>
+                        </mat-autocomplete>
+                      </mat-form-field>
+
+                </div>
+            </div>    
+
+            <div class="row">
+                <div class="col-xl-4 col-lg-6 col-md-12 col-sm-12 mb-2">
+                    <mat-form-field appearance="outline" floatLabel="always" class="example-full-width">
+                        <mat-label>Pickup Date</mat-label>
+                        <input  matInput [matDatepicker]="startDate" >
+                        <mat-datepicker-toggle matSuffix [for]="startDate"></mat-datepicker-toggle>
+                        <mat-datepicker #startDate></mat-datepicker>
+                        <!-- <mat-error *ngIf="advanceTableForm.get('organizationalEntityStartDate').hasError('required')">
+                            Start Date is required
+                        </mat-error> -->
+                    </mat-form-field>
+                </div>
+
+                <div class="col-xl-4 col-lg-6 col-md-12 col-sm-12 mb-2">
+                    <mat-form-field appearance="outline" floatLabel="always" class="example-full-width">
+                        <mat-label>Pickup Time</mat-label>
+                        <input  matInput [owlDateTimeTrigger]="time1" [owlDateTime]="time1" >
+                        <mat-icon matSuffix [owlDateTimeTrigger]="time1" class="date-icon">schedule</mat-icon>
+                        <owl-date-time [pickerType]="'timer'" #time1></owl-date-time>
+                    </mat-form-field>
+                </div>
+
+                <div class="col-xl-4 col-lg-6 col-md-12 col-sm-12 mb-2">
+                    <mat-form-field appearance="outline" floatLabel="always" class="example-full-width">
+                        <mat-label>Pickup Stop</mat-label>
+                        <mat-select>
+                            <mat-option value="T3 IGI Airport">T3 IGI Airport</mat-option>
+                            <mat-option value="Dayanand Colony,Lajpat Nagar,New Delhi">Dayanand Colony,Lajpat Nagar,New Delhi</mat-option>
+                        </mat-select>
+                    </mat-form-field>
+                </div>    
+            </div>
+
+            <div class="row">
+                <div class="col-xl-4 col-lg-6 col-md-12 col-sm-12 mb-2">
+                    <mat-form-field appearance="outline" floatLabel="always" class="example-full-width">
+                        <mat-label>Drop Off Date</mat-label>
+                        <input  matInput [matDatepicker]="startDate" >
+                        <mat-datepicker-toggle matSuffix [for]="startDate"></mat-datepicker-toggle>
+                        <mat-datepicker #startDate></mat-datepicker>
+                        <!-- <mat-error *ngIf="advanceTableForm.get('organizationalEntityStartDate').hasError('required')">
+                            Start Date is required
+                        </mat-error> -->
+                    </mat-form-field>
+                </div>
+
+                <div class="col-xl-4 col-lg-6 col-md-12 col-sm-12 mb-2">
+                    <mat-form-field appearance="outline" floatLabel="always" class="example-full-width">
+                        <mat-label>Drop Off Time</mat-label>
+                        <input  matInput [owlDateTimeTrigger]="time2" [owlDateTime]="time2" >
+                        <mat-icon matSuffix [owlDateTimeTrigger]="time2" class="date-icon">schedule</mat-icon>
+                        <owl-date-time [pickerType]="'timer'" #time2></owl-date-time>
+                    </mat-form-field>
+                </div>
+
+                <div class="col-xl-4 col-lg-6 col-md-12 col-sm-12 mb-2">
+                    <mat-form-field appearance="outline" floatLabel="always" class="example-full-width">
+                        <mat-label>Drop Off Stop</mat-label>
+                        <mat-select>
+                            <mat-option value="T3 IGI Airport">T3 IGI Airport</mat-option>
+                            <mat-option value="Dayanand Colony,Lajpat Nagar,New Delhi">Dayanand Colony,Lajpat Nagar,New Delhi</mat-option>
+                        </mat-select>                                                            
+                    </mat-form-field>
+                </div>  
+            </div> 
+
+            <div class="row">
+                <div class="col-xl-4 col-lg-6 col-md-12 col-sm-12 mb-2">
+                    <mat-form-field appearance="outline" floatLabel="always" class="example-full-width">
+                        <mat-label>Passenger Type</mat-label>
+                        <mat-select>
+                            <mat-option value="Passenger">Passenger</mat-option>
+                            <mat-option value="Guard">Guard</mat-option>
+                        </mat-select>                                                            
+                    </mat-form-field>
+                </div>  
+            </div>
+
+            <div class="row">
+                <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12 mb-2">
+                    <div class="example-button-row">
+                        <button mat-raised-button style="background-color: #bcb4db">Save</button>
+                        <button mat-raised-button style="background-color: #f29f99">Cancel</button>
+                    </div>
+                </div>
+            </div>
+
+        </form>
+    </div>
+</div> 

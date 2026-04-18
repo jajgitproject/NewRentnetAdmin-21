@@ -1,0 +1,50 @@
+<div class="modalHeader">
+  <div class="editRowModal">
+    <div class="modalHeader clearfix">
+      <div class="modal-about">
+        <div class="font-weight-bold p-t-5 font-17">
+          {{ dialogTitle }}
+        </div>
+      </div>
+    </div>
+  </div>
+  <button mat-icon-button (click)="dialogRef.close()" aria-label="Close dialog">
+    <mat-icon class="small-close-icon">close</mat-icon>
+  </button>
+</div>
+<mat-card>
+  <mat-card-content>
+    <mat-dialog-content class="of-hidden">
+      <div *ngFor="let item of passengerInfo;let i = index">
+        <p class="font-weight-bold>Passenger">Passenger {{ i + 1 }}</p>
+      <div class="row">
+        <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+          <span class="TDValueBold"> Passenger Name</span> <br />
+          <span class="TDValue"> {{ item.customerPersonName }}</span>
+        </div>
+        <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+          <span class="TDValueBold"> Designation</span> <br />
+          <span class="TDValue"> {{ item.customerDesignation }}</span>
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+          <span class="TDValueBold">Department</span> <br />
+          <span class="TDValue"> {{ item.customerDepartment }}</span>
+        </div>
+        <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+          <span class="TDValueBold"> Mobile No.</span> <br />
+          <span class="TDValue"> {{ item.primaryMobile }}</span>
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+          <span class="TDValueBold"> Email</span> <br />
+          <span class="TDValue"> {{ item.primaryEmail }}</span>
+        </div>
+      </div>
+    </div>
+    </mat-dialog-content>
+  </mat-card-content>
+</mat-card>
+

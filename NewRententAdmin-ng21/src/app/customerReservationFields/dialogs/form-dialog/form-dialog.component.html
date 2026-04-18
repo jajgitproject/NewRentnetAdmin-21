@@ -1,0 +1,121 @@
+<div class="addContainer">
+    <div class="modalHeader">
+        <div class="editRowModal">
+            <div class="modalHeader clearfix">
+                <!-- <img [src]='advanceTable.img' alt="avatar"> -->
+                <div class="modal-about" style="text-align: center;">
+                    <div class="font-weight-bold p-t-5 font-17">
+                        {{dialogTitle}} {{customerName}}
+                    </div>
+                   
+                </div>
+            </div>
+        </div>
+        <button mat-icon-button (click)="dialogRef.close()" aria-label="Close dialog">
+      <mat-icon>close</mat-icon>
+    </button>
+    </div>
+    <div mat-dialog-content>
+        <form class="register-form m-4" [formGroup]="advanceTableForm" (ngSubmit)="submit">
+            <div class="row">
+                
+                <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                    <mat-form-field class="example-full-width" appearance="outline"  floatLabel="always">
+                        <mat-label>Field Name</mat-label>
+                        <input matInput formControlName="fieldName" required>
+                        <mat-error *ngIf="advanceTableForm.get('fieldName').hasError('required')">
+                            Field Name is required
+                        </mat-error>
+                    </mat-form-field>
+                </div>
+
+                <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                    <mat-form-field class="example-full-width" appearance="outline"  floatLabel="always">
+                        <mat-label>Data Type</mat-label>
+                        <mat-select required #fieldDataType [class.is-invalid]="fieldDataType.invalid && fieldDataType.touched" formControlName="fieldDataType">
+                            <mat-option value="Int">Int</mat-option>
+                            <mat-option value="Decimal">Decimal</mat-option>
+                            <mat-option value="Text">Text</mat-option>
+                        </mat-select>
+
+                        <mat-error *ngIf="advanceTableForm.get('fieldDataType').hasError('required')">
+                           Field Data Type is required
+                        </mat-error>
+                    </mat-form-field>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                    <mat-form-field class="example-full-width" appearance="outline"  floatLabel="always">
+                        <mat-label>Control Type</mat-label>
+                        <mat-select required #fieldControlType [class.is-invalid]="fieldControlType.invalid && fieldControlType.touched" formControlName="fieldControlType">
+                            <mat-option value="DropDown">DropDown</mat-option>
+                            <mat-option value="TextBox">TextBox</mat-option>
+                            
+                        </mat-select>
+
+                        <mat-error *ngIf="advanceTableForm.get('fieldControlType').hasError('required')">
+                            Field Control Type is required
+                        </mat-error>
+                    </mat-form-field>
+                </div>
+
+                    <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                        <mat-form-field class="example-full-width" appearance="outline"  floatLabel="always">
+                            <mat-label>For Form</mat-label>
+                            <mat-select required #formForField [class.is-invalid]="formForField.invalid && formForField.touched" formControlName="formForField">
+                                <mat-option value="SBT">SBT</mat-option>
+                                <mat-option value="RentNet">RentNet</mat-option>
+                                
+                            </mat-select>
+    
+                            <mat-error *ngIf="advanceTableForm.get('formForField').hasError('required')">
+                                Form For Field is required
+                            </mat-error>
+                        </mat-form-field>
+                    </div>
+                
+            </div> 
+            
+            <div class="row">
+                <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                    <mat-form-field class="example-full-width" appearance="outline"  floatLabel="always">
+                        <mat-label>Is Mandatory</mat-label>
+                        <mat-select required #isMandatory [class.is-invalid]="isMandatory.invalid && isMandatory.touched" 
+                        formControlName="isMandatory">
+                            <mat-option [value]=true>Yes</mat-option>
+                            <mat-option [value]=false>No</mat-option>
+                        </mat-select>
+
+                        <mat-error>
+                            Is Mandatory is required
+                        </mat-error>
+                    </mat-form-field>
+                </div>
+                <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                    <mat-form-field class="example-full-width" appearance="outline"  floatLabel="always">
+                        <mat-label>Activation Status</mat-label>
+                        <mat-select formControlName="activationStatus">
+                            <mat-option [value]=true>Active</mat-option>
+                            <mat-option [value]=false>Deleted</mat-option>
+                        </mat-select>
+
+                        <mat-error *ngIf="advanceTableForm.get('activationStatus').hasError('required')">
+                            Activation Status is required
+                        </mat-error>
+                    </mat-form-field>
+                </div>
+            </div>
+           
+            <div class="row">
+                <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12 mb-2">
+                    <div class="example-button-row">
+                        <button mat-raised-button color="primary" *ngIf="saveDisabled" [type]="submit" [disabled]="!advanceTableForm.valid"  (click)="confirmAdd()">Save</button>
+                        <mat-spinner *ngIf="!saveDisabled" diameter="30"></mat-spinner>
+                        <button mat-raised-button color="warn" (click)="onNoClick(action)" tabindex="-1">{{ action === 'add' ? 'Reset' :  'Cancel'}}</button>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>

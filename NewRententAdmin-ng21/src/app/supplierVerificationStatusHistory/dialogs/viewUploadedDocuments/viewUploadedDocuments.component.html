@@ -1,0 +1,65 @@
+<div class="modalHeader">
+  <div class="editRowModal">
+      <div class="modalHeader clearfix">
+          <div class="modal-about">
+              <div class="font-weight-bold p-t-5 font-17">
+                 Supplier Uploaded Document</div>
+          </div>
+      </div>
+  </div>
+  <button mat-icon-button (click)="dialog.close()" aria-label="Close dialog">
+<mat-icon>close</mat-icon>
+</button>
+</div>
+<div class="example-container">
+  <ng-container *ngIf="dataSource && dataSource.length > 0; else thenBlock2">
+    <mat-table #table [dataSource]="dataSource">
+
+      <ng-container matColumnDef="documentName">
+        <mat-header-cell *matHeaderCellDef style="padding: 5px">Document Name</mat-header-cell>
+        <mat-cell *matCellDef="let element" style="padding: 5px">{{element.documentName}}</mat-cell>
+      </ng-container>
+
+      <ng-container matColumnDef="supplierRequiredDocumentsImage">
+        <mat-header-cell *matHeaderCellDef [ngClass]="'tbl-col-width-per-7'">Image</mat-header-cell>
+        <mat-cell *matCellDef="let element" class="table-img tbl-col-width-per-6">
+            <img src="{{element.supplierRequiredDocumentsImage}}" /> </mat-cell>
+    </ng-container>
+
+      <ng-container matColumnDef="supplierRequiredDocumentsNumber">
+        <mat-header-cell *matHeaderCellDef>
+          <span matTooltip="Supplier Required Documents Number" matTooltipPosition="above">Supplier Req...</span>
+        </mat-header-cell>
+        <mat-cell *matCellDef="let element" style="padding: 5px">{{element.supplierRequiredDocumentsNumber}}</mat-cell>
+      </ng-container>
+
+      <ng-container matColumnDef="supplierRequiredDocumentAdditionDate">
+        <mat-header-cell *matHeaderCellDef style="padding: 10px">
+          <span matTooltip="Supplier Required Document Addition Date" matTooltipPosition="above">Addition Dat...</span>
+        </mat-header-cell>
+        <mat-cell *matCellDef="let element" style="padding: 5px">{{element.supplierRequiredDocumentAdditionDate | date: 'dd-MM-yyyy' }}</mat-cell>
+      </ng-container>
+
+
+      <ng-container matColumnDef="supplierRequiredDocumentNonAvailabilityReason">
+        <mat-header-cell *matHeaderCellDef>  <span matTooltip="Supplier Required Document Non Availability Reason" matTooltipPosition="above">Non Availa...</span></mat-header-cell>
+        <mat-cell *matCellDef="let element">{{element.supplierRequiredDocumentNonAvailabilityReason}}</mat-cell>
+      </ng-container>
+
+      <ng-container matColumnDef="activationStatus">
+        <mat-header-cell *matHeaderCellDef>Activation Status</mat-header-cell>
+        <mat-cell *matCellDef="let element">{{element.activationStatus}}</mat-cell>
+      </ng-container>
+
+      <mat-header-row *matHeaderRowDef="displayedColumns"></mat-header-row>
+      <mat-row *matRowDef="let row; columns: displayedColumns;"></mat-row>
+    </mat-table>
+  </ng-container>
+
+  <ng-template #thenBlock2>
+    <div class="alert alert-primary" style="background-color:#E8E8E8; text-align: center;">No Records Found</div>
+    <div class="body">
+      <div class="example-button-row"></div>
+    </div>
+  </ng-template>
+</div>

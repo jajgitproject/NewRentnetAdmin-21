@@ -1,0 +1,191 @@
+.auto-style4 {
+    text-align: center;
+}
+
+.text-heading {
+font-family: arial;
+font-size: 15pt;
+font-weight: bold;
+color: #000000;
+text-decoration: none;
+line-height:16px;
+margin-top:20px;
+text-align: center;
+}
+
+.text-subheading {
+font-family: verdana,arial;
+font-size: 8pt;
+font-weight: bold;
+color: #000000;
+text-decoration: none;
+line-height:16px;
+text-align: center;
+}
+.text1 {
+font-family: arial;
+font-size: 10pt;
+font-weight: normal;
+color: #000000;
+text-decoration: none;
+line-height:15px;
+text-align: left;
+margin-left:5px;
+margin-right:5px;
+border:none
+}
+
+.text1009 {
+font-family: arial;
+font-size: 8pt;
+font-weight: normal;
+color: #000000;
+text-decoration: none;
+line-height:15px;
+text-align: center;
+margin-left:5px;
+margin-right:5px;
+border:none
+}
+
+.text2 {
+font-family: arial;
+font-size: 7pt;
+font-weight: normal;
+color: #000000;
+text-decoration: none;
+line-height:14px;
+text-align: center;
+padding-left:2px;
+}
+
+.text3 {
+font-family: arial;
+font-size: 6pt;
+font-weight: normal;
+color: #000000;
+text-decoration: none;
+line-height:12px;
+text-align: left;
+padding-left:2px;
+}
+
+.text4 {
+font-family: arial;
+font-size: 8pt;
+font-weight: normal;
+color: #000000;
+text-decoration: none;
+line-height:15px;
+text-align: left;
+border:none
+}
+
+.text5 {
+font-family: arial;
+font-size: 10pt;
+font-weight: normal;
+color: #000000;
+text-decoration: none;
+line-height:15px;
+text-align: right;
+border:none
+}
+.text6 {
+font-family: arial;
+font-size: 10pt;
+font-weight: normal;
+
+color:black;
+text-decoration: none;
+line-height:15px;
+text-align: left;
+border-left:1px;
+border-right:1px;
+border-top:0px;
+border-bottom:0px;
+border-style:solid ;
+}
+.text7 {
+font-family: arial;
+font-size: 10pt;
+font-weight: normal;
+
+color:black;
+text-decoration: none;
+line-height:15px;
+text-align:right;
+border-left:1px;
+border-right:1px;
+border-top:0px;
+border-bottom:0px;
+border-style:solid ;
+}
+tr,td {
+border: solid 1px #999;
+}
+
+.no-border {
+border:none;
+}
+
+.auto-style5 {
+    border-style: none;
+    border-color: inherit;
+    border-width: medium;
+    font-family: arial;
+    font-size: 8pt;
+    font-weight: normal;
+    color: #000000;
+    text-decoration: none;
+    line-height: 15px;
+    text-align: center;
+    margin-left: 5px;
+    margin-right: 5px;
+    width: 435px;
+}
+.auto-style6 {
+    border-style: none;
+    border-color: inherit;
+    border-width: medium;
+    font-family: arial;
+    font-size: 10pt;
+    font-weight: normal;
+    color: #000000;
+    text-decoration: none;
+    line-height: 15px;
+    text-align: left;
+    margin-left: 5px;
+    margin-right: 5px;
+    width: 435px;
+}
+
+.auto-style7 {
+    font-size: 7pt;
+}
+
+@media print {
+    @page {
+        size: A4;
+
+    }
+    body {
+        transform: scale(1.5); /* Increase the scale factor as needed */
+        transform-origin: top left;
+      }
+	/* Hide sidebar */
+	.sidebar {
+	  display: none;
+	}
+    
+  
+	/* Any other elements you want to hide */
+	.other-unwanted-elements {
+	  display: none;
+	}
+	
+	/* Ensure the print button is not visible in the printout */
+	#print {
+	  display: none;
+	}
+  }

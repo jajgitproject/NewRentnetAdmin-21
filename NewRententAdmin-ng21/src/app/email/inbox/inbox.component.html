@@ -1,0 +1,175 @@
+<section class="content">
+  <div class="content-block">
+    <div class="block-header">
+      <app-breadcrumb [title]="breadscrums[0].title" [items]="breadscrums[0].items"
+        [active_item]="breadscrums[0].active"></app-breadcrumb>
+    </div>
+
+    <div class="email-app-container">
+      <!-- 1. Folders Sidebar -->
+      <aside class="email-sidebar card">
+        <div class="compose-wrapper">
+          <button mat-flat-button color="primary" class="w-100 compose-btn" routerLink="/email/compose">
+            <mat-icon>add</mat-icon> Compose
+          </button>
+        </div>
+
+        <nav class="folder-nav">
+          @for (folder of folders; track folder.id) {
+          <div class="folder-item" [class.active]="activeFolder === folder.id" (click)="selectFolder(folder.id)">
+            <div class="folder-info">
+              <mat-icon>{{folder.icon}}</mat-icon>
+              <span>{{folder.name}}</span>
+            </div>
+            @if (folder.id === 'inbox' && (emails.length > 0)) {
+            <span class="badge bg-blue">{{emails.length}}</span>
+            }
+          </div>
+          }
+        </nav>
+
+        <div class="labels-section">
+          <h6 class="section-title">Labels</h6>
+          <div class="label-item"><mat-icon class="text-danger">local_offer</mat-icon> Work</div>
+          <div class="label-item"><mat-icon class="text-primary">local_offer</mat-icon> Personal</div>
+          <div class="label-item"><mat-icon class="text-warning">local_offer</mat-icon> Promotions</div>
+        </div>
+      </aside>
+
+      <!-- 2. Email List pane -->
+      <main class="email-list-pane card" [class.hidden-on-mobile]="selectedEmail">
+        <div class="list-header">
+          <div class="search-wrapper">
+            <mat-icon>search</mat-icon>
+            <input type="text" placeholder="Search emails..." [(ngModel)]="searchQuery" (input)="onSearch()">
+          </div>
+          <div class="list-actions">
+            <button mat-icon-button matTooltip="Refresh" (click)="loadEmails()"><mat-icon>refresh</mat-icon></button>
+            <button mat-icon-button [matMenuTriggerFor]="sortMenu"><mat-icon>sort</mat-icon></button>
+            <mat-menu #sortMenu="matMenu">
+              <button mat-menu-item>Date</button>
+              <button mat-menu-item>Sender</button>
+              <button mat-menu-item>Size</button>
+            </mat-menu>
+          </div>
+        </div>
+
+        <div class="email-items-container">
+          @if (emails.length === 0) {
+          <div class="empty-state">
+            <mat-icon>mail_outline</mat-icon>
+            <p>No emails found in this folder</p>
+          </div>
+          } @else {
+          @for (email of emails; track email.id) {
+          <div class="email-item" [class.unread]="!email.isRead" [class.active]="selectedEmail?.id === email.id"
+            (click)="selectEmail(email)">
+            <div class="item-header">
+              <div class="sender-info">
+                @if (email.from.avatar) {
+                <img [src]="email.from.avatar" class="avatar" alt="">
+                } @else {
+                <div class="avatar-placeholder">{{email.from.name.charAt(0)}}</div>
+                }
+                <span class="sender-name">{{email.from.name}}</span>
+              </div>
+              <span class="item-date">{{email.date | date:'MMM d'}}</span>
+            </div>
+            <div class="item-body">
+              <h4 class="subject">{{email.subject}}</h4>
+              <p class="snippet">{{email.body}}</p>
+            </div>
+            <div class="item-footer">
+              @if (email.label) {
+              <span class="label-pill" [class]="email.label.toLowerCase()">{{email.label}}</span>
+              }
+              <div class="item-icons">
+                @if (email.hasAttachment) { <mat-icon class="attach-icon">attach_file</mat-icon> }
+                <mat-icon class="star-icon" [class.starred]="email.isStarred" (click)="toggleStar($event, email)">
+                  {{email.isStarred ? 'star' : 'star_outline'}}
+                </mat-icon>
+              </div>
+            </div>
+          </div>
+          }
+          }
+        </div>
+      </main>
+
+      <!-- 3. Preview Pane -->
+      <section class="email-preview-pane card" [class.visible-on-mobile]="selectedEmail">
+        @if (!selectedEmail) {
+        <div class="no-selection-state">
+          <div class="icon-circle">
+            <mat-icon>mark_as_unread</mat-icon>
+          </div>
+          <h3>Select an email to read</h3>
+          <p>Nothing is selected. Pick an email from the left list to view its contents.</p>
+        </div>
+        } @else {
+        <div class="preview-header">
+          <div class="top-actions">
+            <button mat-icon-button class="back-btn mobile-only" (click)="selectedEmail = null">
+              <mat-icon>arrow_back</mat-icon>
+            </button>
+            <div class="main-actions">
+              <button mat-icon-button matTooltip="Archive"><mat-icon>archive</mat-icon></button>
+              <button mat-icon-button matTooltip="Mark as Spam"><mat-icon>report_outline</mat-icon></button>
+              <button mat-icon-button matTooltip="Delete"
+                (click)="deleteEmail($event, selectedEmail)"><mat-icon>delete_outline</mat-icon></button>
+              <div class="divider"></div>
+              <button mat-icon-button matTooltip="Reply"><mat-icon>reply</mat-icon></button>
+              <button mat-icon-button matTooltip="Forward"><mat-icon>forward</mat-icon></button>
+            </div>
+          </div>
+
+          <div class="email-info-section">
+            <h2 class="email-subject">{{selectedEmail.subject}}</h2>
+            <div class="sender-details">
+              @if (selectedEmail.from.avatar) {
+              <img [src]="selectedEmail.from.avatar" class="avatar-large" alt="">
+              }
+              <div class="meta">
+                <div class="sender-line">
+                  <strong>{{selectedEmail.from.name}}</strong>
+                  <span class="email-address">&lt;{{selectedEmail.from.email}}&gt;</span>
+                </div>
+                <div class="to-line">to me</div>
+              </div>
+              <div class="date-line">{{selectedEmail.date | date:'medium'}}</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="preview-body">
+          <div [innerHTML]="selectedEmail.body"></div>
+
+          @if (selectedEmail.hasAttachment && selectedEmail.attachments) {
+          <div class="attachments-section">
+            <h6>Attachments ({{selectedEmail.attachments.length}})</h6>
+            <div class="attachment-grid">
+              @for (file of selectedEmail.attachments; track file.name) {
+              <div class="attachment-file">
+                <mat-icon>insert_drive_file</mat-icon>
+                <div class="file-info">
+                  <span class="file-name">{{file.name}}</span>
+                  <span class="file-size">{{file.size}}</span>
+                </div>
+                <button mat-icon-button><mat-icon>download</mat-icon></button>
+              </div>
+              }
+            </div>
+          </div>
+          }
+        </div>
+
+        <div class="preview-footer">
+          <div class="reply-box">
+            <p>Click here to <span>Reply</span> or <span>Forward</span></p>
+          </div>
+        </div>
+        }
+      </section>
+    </div>
+  </div>
+</section>

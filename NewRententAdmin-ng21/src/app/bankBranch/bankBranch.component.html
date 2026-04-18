@@ -1,0 +1,326 @@
+<section class="content">
+    <div class="container-fluid">
+        <div class="block-header">
+            <div class="row">
+                <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+                    <ul>
+                        <li class="breadcrumb-item bcrumb-1">
+                            <a routerLink="/dashboard/main">
+                                <i class="fas fa-home"></i> Home</a>|
+                            <a href="#" onClick="return false;">Admin</a>|
+                            <a href="#" onClick="return false;">Bank Branch</a>
+                        </li>
+                    </ul>
+                    <ul class="breadcrumb breadcrumb-style ">
+                        <li class="breadcrumb-item">
+                            <h2>Bank Branch</h2>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                <div class="card">
+                    <div class="body">
+                        <div class="responsive_table">
+                            <div class="materialTableHeader">
+                                <div class="row">
+                                    <div style="width: 70%; float:left;padding-top: 6px;padding-left: 12px;">
+                                        <!-- <div style="float:left" *ngIf="SearchBankBranch"><b>Bank Branch</b> : {{SearchBankBranch}},</div>
+                                        <div style="float:left" *ngIf="search.value"><b>Bank</b> : {{search.value}},</div>
+                                        <div style="float:left" *ngIf="SearchBankBranchIFSCCode"><b>Ifsc</b> : {{SearchBankBranchIFSCCode}},</div>
+                                        <div style="float:left" *ngIf="SearchBankBranchSwiftCode"><b>Swift</b> : {{SearchBankBranchSwiftCode}},</div>
+                                        <div style="float:left" *ngIf="SearchBankBranchAddress"><b>Address</b> : {{SearchBankBranchAddress}},</div> -->
+                                        <div class="col-lg-6">
+                                            <div class="form-group">
+                                                <div class="input-group">
+                                                    <!-- Dropdown for selecting Type, Parent, City -->
+                                                    <div class="input-group-append input-group-addon">
+                                                        <select style="height: 40px; width: 140px;" class="form-control" [(ngModel)]="selectedFilter">
+                                                            <option value="search" hidden>Search By</option>
+                                                            <option value="Bank">Bank</option>
+                                                            <option value="Branch">Branch</option>
+                                                            <option value="City">City</option>
+                                                            <option value="Address">Address</option>
+                                                            <option value="Ifsc">Ifsc</option>
+                                                            <option value="Swift">Swift</option>
+                                                            <option value="IBAN">IBAN</option>
+                                                            <option value="RoutingCode">Routing Code</option>
+                                                        </select>
+                                                    </div>
+                                        
+                                                    <!-- Input field for filtering -->
+                                                     
+                                                    <input type="text" style="height: 40px; width: 300px;padding-left: 5px;" class="form-control" placeholder="Filter" id="inputGroup"
+                                                        (keyup)="onBackPress($event)" (input)="loadData()" [(ngModel)]="searchTerm" />
+                                        
+                                                    <!-- Search button -->
+                                                    <div class="input-group-append input-group-addon">
+                                                        <span class="input-group-text" style="cursor: pointer; height: 40px; width: 40px; text-align: center;" (click)="loadData()">
+                                                            <i class="fas fa-search"></i>
+                                                        </span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div style="width: 30%; text-align:right;">
+                                        <button mat-raised-button color="primary" 
+                                            data-dismiss="modal" data-toggle="modal" data-backdrop="false"
+                                            data-target="#exampleModalCenter">
+                                            Search
+                                        </button>     
+                                        &nbsp;
+                                <button mat-mini-fab color="primary" (click)="addNew()">
+                                            <mat-icon class="col-white">add</mat-icon>
+                                        </button>
+                                        &nbsp;
+                                        <button mat-mini-fab color="primary" (click)="refresh()">
+                                            <mat-icon class="col-white">refresh</mat-icon>
+                                        </button>
+                                        &nbsp;
+                                    </div>
+                                </div>
+                            </div>
+
+                            <p *ngIf="!dataSource; then thenBlock2 else elseBlock2">
+                                This is not rendered
+                            </p>
+
+                            <ng-template #thenBlock2>
+                                <div class="alert alert-primary" style="background-color:#E8E8E8; text-align: center;">No Records Found</div>
+                                <div class="body">
+                                    <div class="example-button-row">
+    
+                                        <button mat-raised-button color="primary" (click)="PreviousCall()">Previous</button>
+                                        <button mat-raised-button color="primary" (click)="NextCall()">Next</button>
+    
+                                    </div>
+                                </div>
+    
+                            </ng-template>
+
+                            <ng-template #elseBlock2>
+                                 <div class="scrollable-table-container">
+                            <mat-table #table [dataSource]="dataSource" matSort class="mat-cell floating-header-table" (matSortChange)="SortingData($event)">
+                                <ng-container matColumnDef="id">
+                                    <mat-header-cell *matHeaderCellDef mat-sort-header>Id</mat-header-cell>
+                                    <mat-cell *matCellDef="let row">{{row.bankBranchID}}</mat-cell>
+                                </ng-container>
+
+                                <ng-container matColumnDef="bank">
+                                    <mat-header-cell *matHeaderCellDef mat-sort-header>Bank Name</mat-header-cell>
+                                    <mat-cell *matCellDef="let row" (contextmenu)="onContextMenu($event, row)">
+                                        {{row.bank}}</mat-cell>
+                                </ng-container>
+
+                                <ng-container matColumnDef="bankBranch">
+                                    <mat-header-cell *matHeaderCellDef mat-sort-header>Branch</mat-header-cell>
+                                    <mat-cell *matCellDef="let row" (contextmenu)="onContextMenu($event, row)">
+                                        {{row.bankBranch}}</mat-cell>
+                                </ng-container>
+                                <ng-container matColumnDef="GeoPoint.GeoPointName">
+                                    <mat-header-cell *matHeaderCellDef mat-sort-header>City</mat-header-cell>
+                                    <mat-cell *matCellDef="let row" (contextmenu)="onContextMenu($event, row)">
+                                        {{row.city}}</mat-cell>
+                                </ng-container>
+
+                                <ng-container matColumnDef="bankBranchAddress">
+                                    <mat-header-cell *matHeaderCellDef mat-sort-header>Address</mat-header-cell>
+                                    <mat-cell *matCellDef="let row" (contextmenu)="onContextMenu($event, row)">
+                                        {{row.bankBranchAddress}}</mat-cell>
+                                </ng-container>
+
+                                <ng-container matColumnDef="bankBranchIFSCCode">
+                                    <mat-header-cell *matHeaderCellDef mat-sort-header>Ifsc</mat-header-cell>
+                                    <mat-cell *matCellDef="let row" (contextmenu)="onContextMenu($event, row)">
+                                        {{row.bankBranchIFSCCode}}</mat-cell>
+                                </ng-container>
+
+                                <ng-container matColumnDef="bankBranchSwiftCode">
+                                    <mat-header-cell *matHeaderCellDef mat-sort-header>Swift</mat-header-cell>
+                                    <mat-cell *matCellDef="let row" (contextmenu)="onContextMenu($event, row)">
+                                        {{row.bankBranchSwiftCode}}</mat-cell>
+                                </ng-container>
+
+                                <ng-container matColumnDef="BankBranch.bankBranchIBanNumber">
+                                    <mat-header-cell *matHeaderCellDef mat-sort-header>IBAN</mat-header-cell>
+                                    <mat-cell *matCellDef="let row" (contextmenu)="onContextMenu($event, row)">
+                                        {{row.bankBranchIBanNumber}}</mat-cell>
+                                </ng-container>
+
+                                <ng-container matColumnDef="bankBranchRoutingCode">
+                                    <mat-header-cell *matHeaderCellDef mat-sort-header><span matTooltip="Routing Code" matTooltipPosition="above">Routing...</span></mat-header-cell>
+                                    <!-- <mat-header-cell *matHeaderCellDef mat-sort-header>Routing Code</mat-header-cell> -->
+                                    <mat-cell *matCellDef="let row" (contextmenu)="onContextMenu($event, row)">
+                                  {{row.bankBranchRoutingCode}}</mat-cell>
+                                </ng-container>
+
+                                <ng-container matColumnDef="activationStatus">
+                                    <mat-header-cell *matHeaderCellDef mat-sort-header>Status</mat-header-cell>
+                                    <mat-cell *matCellDef="let row" (contextmenu)="onContextMenu($event, row)">
+                                        {{row.activationStatus===true ? 'Active' : 'Deleted'}}</mat-cell>
+                                </ng-container>
+
+                                <!-- actions -->
+                                <ng-container matColumnDef="actions">
+                                    <mat-header-cell *matHeaderCellDef class="pr-0" [ngClass]="'tbl-col-width-per-9'">Actions</mat-header-cell>
+                                    <mat-cell *matCellDef="let row; let i=index;" class="pr-0" [ngClass]="'tbl-col-width-per-9'">
+                                        <button mat-raised-button color="primary" (contextmenu)="onContextMenu($event, row)" (click)="onContextMenu($event, row)">
+                                            Actions
+                                    </button>
+                                    </mat-cell>
+                                </ng-container>
+                                <mat-header-row *matHeaderRowDef="displayedColumns"></mat-header-row>
+                                <mat-row *matRowDef="let row; columns: displayedColumns;" [style.cursor]="'pointer'" matRipple>
+                                </mat-row>
+                            </mat-table>
+                            </div>
+                            <!-- Loading spinner -->
+                            <!-- <div *ngIf="exampleDatabase.isTblLoading" class="tbl-spinner">
+                                <mat-progress-spinner color="primary" [diameter]="40" mode="indeterminate">
+                                </mat-progress-spinner>
+                            </div> -->
+
+                            <!-- context menu start -->
+                            <div style="visibility: hidden; position: fixed" [style.left]="contextMenuPosition.x" [style.top]="contextMenuPosition.y" [matMenuTriggerFor]="contextMenu">
+                            </div>
+                            <mat-menu #contextMenu="matMenu">
+                                <ng-template matMenuContent let-item="item">
+                                    <!-- <button mat-menu-item (click)="addNew()">
+                                    <mat-icon>add_box</mat-icon>
+                                    <span>Add</span>
+                                    </button> -->
+                                    <button mat-menu-item (click)="editCall(item)">
+                                    <mat-icon>create</mat-icon>
+                                    <span>Edit</span>
+                                    </button>
+                                    <button *ngIf="shouldShowDeleteButton(item)" mat-menu-item (click)="deleteItem(item)">
+                                    <mat-icon>delete</mat-icon>
+                                    <span>Delete</span>
+                                    </button>
+                                    <!-- <button mat-menu-item (click)="refresh()">
+                                <mat-icon>refresh</mat-icon>
+                            <span>Refresh</span>
+                        </button> -->
+
+                                </ng-template>
+                            </mat-menu>
+
+                            <!-- context menu end -->
+
+                            <!-- <div *ngIf="!exampleDatabase.isTblLoading" class="no-results" [style.display]="dataSource.renderedData.length == 0 ? '' : 'none'">
+                                No results
+                            </div> -->
+
+                            <div class="body">
+                                <div class="example-button-row">
+
+                                    <button mat-raised-button color="primary" (click)="PreviousCall()">Previous</button>
+                                    <button mat-raised-button color="primary" (click)="NextCall()">Next</button>
+
+                                </div>
+                            </div>
+
+                        </ng-template>
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- modelpopup -->
+<div class="modal fade" id="exampleModalCenter" tabindex="-1" role="dialog">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLongTitle">Bank Branch
+                </h5>
+                <button type="button" class="close" data-dismiss="modal"
+                    aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+
+                <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                    <mat-label>Bank Branch</mat-label>
+                    <input type="text" matInput 
+                        [(ngModel)]="SearchBankBranch">
+
+                </mat-form-field>
+            
+                <!-- <mat-form-field class="example-full-width" appearance="outline"  floatLabel="always">
+                    <mat-label>Bank</mat-label>
+                     <mat-select [(ngModel)]="SearchBank" [formControl]="search" >
+                        <mat-option [value]="Bank.bank" *ngFor="let Bank of BankList">{{Bank.bank}}</mat-option>
+                    </mat-select>
+                    <mat-error>
+                        Please select a Bank
+                    </mat-error>
+                </mat-form-field>    -->
+                <mat-form-field class="example-full-width" appearance="outline" floatLabel="always"> 
+                    <mat-label>Bank</mat-label>                       
+                    <input  type="text" matInput [matAutocomplete]="auto"
+                     [formControl]="search">
+                    <mat-autocomplete #auto="matAutocomplete">
+                        <mat-option *ngFor="let options of filteredOptions | async"
+                            [value]="options.bank">
+                            {{options.bank}}
+                        </mat-option>
+                    </mat-autocomplete>
+                    <!-- <mat-error *ngIf="advanceTableForm.get('bank').hasError('required')">
+                        Bank is required
+                    </mat-error> -->
+                </mat-form-field>
+
+                <!-- <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                    <mat-label>City</mat-label>
+                    <input type="text" matInput [formControl]="city"
+                        [(ngModel)]="SearchCity">
+
+                </mat-form-field> -->
+
+                <!-- <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                    <mat-label>Ifsc</mat-label>
+                    <input type="text" matInput [formControl]="ifsc"
+                        [(ngModel)]="SearchBankBranchIFSCCode">
+
+                </mat-form-field> -->
+
+                <!-- <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                    <mat-label>Address</mat-label>
+                    <input type="text" matInput [formControl]="address"
+                        [(ngModel)]="SearchBankBranchAddress">
+
+                </mat-form-field> -->
+
+                <!-- <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                    <mat-label>Swift</mat-label>
+                    <input type="text" matInput [formControl]="swift"
+                        [(ngModel)]="SearchBankBranchSwiftCode">
+
+                </mat-form-field> -->
+
+                <mat-form-field class="example-full-width mb-3"
+                    appearance="outline" floatLabel="always">
+                    <mat-label>Activation Status</mat-label>
+                    <mat-select [(value)]="SearchActivationStatus">
+                        <mat-option [value]=true>Active</mat-option>
+                        <mat-option [value]=false>Deleted</mat-option>
+                    </mat-select>
+                </mat-form-field>
+
+            </div>
+            <div class="modal-footer">
+                <button mat-raised-button color="primary" (click)="SearchData()"
+                    data-dismiss="modal">Search</button>
+
+            </div>
+        </div>
+    </div>
+</div>

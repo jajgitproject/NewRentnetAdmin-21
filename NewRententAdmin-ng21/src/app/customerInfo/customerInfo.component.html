@@ -1,0 +1,71 @@
+<div class="responsive_table">
+    <mat-accordion>
+        <mat-expansion-panel *ngFor="let data of advanceTableCI">
+            <mat-expansion-panel-header>
+                <mat-panel-title>
+                    <span style="font-size: 15px;text-align: center;vertical-align: top;">
+                        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>Customer Name</b> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+                            <b>Type</b> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                            <b>Category</b> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                            <b>Billing Instrunction</b> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                            <b>Other Instrunction</b>
+                    </span>
+                </mat-panel-title>
+            </mat-expansion-panel-header>
+            <div>
+                <div class="row" style="margin-left: 20px;">
+                    <div class="col-xl-2 col-lg-6 col-md-12 col-sm-12 mb-2">
+                        <!-- <span>
+                            <b>
+                                Customer Name
+                            </b>
+                        </span> -->
+                        <!-- <br /> -->
+                        <span>{{data.customerName}}</span>
+                    </div>
+
+                    <div class="col-xl-2 col-lg-6 col-md-12 col-sm-12 mb-2">
+                        <!-- <span>
+                            <b>
+                                Type
+                            </b>
+                        </span> -->
+                        <!-- <br /> -->
+                        <span>{{data.customerType}}</span>
+                    </div>
+
+                    <div class="col-xl-2 col-lg-6 col-md-12 col-sm-12 mb-2">
+                        <!-- <span>
+                            <b>
+                                Category
+                            </b>
+                        </span> -->
+                        <!-- <br /> -->
+                        <span>{{data.customerCategory}}</span>
+                    </div>
+
+                    <div class="col-xl-2 col-lg-6 col-md-12 col-sm-12 mb-2">
+                        <!-- <span>
+                            <b>
+                                Billing Instrunction
+                            </b>
+                        </span> -->
+                        <!-- <br /> -->
+                        <span>N/A</span>
+                    </div>
+
+                    <div class="col-xl-2 col-lg-6 col-md-12 col-sm-12 mb-2">
+                        <!-- <span>
+                            <b>
+                                Other Instrunction
+                            </b>
+                        </span> -->
+                        <!-- <br /> -->
+                        <span>N/A</span>
+                    </div>
+
+                </div>
+            </div>
+        </mat-expansion-panel>
+    </mat-accordion>
+</div>

@@ -1,0 +1,121 @@
+<div class="addContainer">
+    <div class="modalHeader">
+        <div class="editRowModal">
+            <div class="modalHeader clearfix">
+                <!-- <img [src]='advanceTable.img' alt="avatar"> -->
+                <div class="modal-about">
+                    <div class="font-weight-bold p-t-5 font-17">
+                        {{dialogTitle}} for {{CustomerName}} </div>
+                </div>
+            </div>
+        </div>
+        <button mat-icon-button (click)="dialogRef.close()" aria-label="Close dialog">
+      <mat-icon>close</mat-icon>
+    </button>
+    </div>
+    <div mat-dialog-content>
+        <form class="register-form m-4" [formGroup]="advanceTableForm" (ngSubmit)="submit">
+            <div class="row">
+           
+                <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                    <mat-form-field class="example-full-width" appearance="outline"  floatLabel="always">
+                        <mat-label>Salutation</mat-label>
+                         <mat-select required #salutationVal [class.is-invalid]="salutationVal.invalid && salutationVal.touched" formControlName="salutationID">
+                            <mat-option [value]="Salutation.salutationID" *ngFor="let Salutation of SalutationList">{{Salutation. salutation}}</mat-option>
+                        </mat-select>
+                        <mat-error>
+                            Please select a Salutation
+                        </mat-error>
+                    </mat-form-field>
+                </div>
+                <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                    <mat-form-field class="example-full-width" appearance="outline"  floatLabel="always">
+                        <mat-label>Name</mat-label>
+                        <input matInput formControlName="contactPersonName" required>
+                        <mat-error *ngIf="advanceTableForm.get('contactPersonName').hasError('required')">
+                            Name is required
+                        </mat-error>
+                    </mat-form-field>
+                </div>
+            </div>  
+            
+            <div class="row">
+           
+                <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                    <mat-form-field class="example-full-width" appearance="outline"  floatLabel="always">
+                        <mat-label>Department</mat-label>
+                         <mat-select required #departmentVal [class.is-invalid]="departmentVal.invalid && departmentVal.touched" formControlName="customerDepartmentID">
+                            <mat-option [value]="Department.customerDepartmentID" *ngFor="let Department of DepartmentList">{{Department. customerDepartment}}</mat-option>
+                        </mat-select>
+                        <mat-error>
+                            Please select a Department
+                        </mat-error>
+                    </mat-form-field>
+                </div>
+                <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                    <mat-form-field class="example-full-width" appearance="outline"  floatLabel="always">
+                        <mat-label>Desgination</mat-label>
+                         <mat-select required #designationVal [class.is-invalid]="designationVal.invalid && designationVal.touched" formControlName="customerDesignationID">
+                            <mat-option [value]="Designation.customerDesignationID" *ngFor="let Designation of DesginationList">{{Designation. customerDesignation}}</mat-option>
+                        </mat-select>
+                        <mat-error>
+                            Please select a Desgination
+                        </mat-error>
+                    </mat-form-field>
+                </div>
+            </div> 
+            <div class="row">
+                <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                    <mat-form-field class="example-full-width" appearance="outline"  floatLabel="always">
+                        <mat-label>Mobile</mat-label>
+                        <input matInput formControlName="mobile" required>
+                        <mat-error *ngIf="advanceTableForm.get('mobile').hasError('required')">
+                            Mobile is required
+                        </mat-error>
+                    </mat-form-field>
+                </div>
+    
+                <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                    <mat-form-field class="example-full-width" appearance="outline"  floatLabel="always">
+                        <mat-label>Email</mat-label>
+                        <input matInput formControlName="email" required>
+                        <mat-error *ngIf="advanceTableForm.get('email').hasError('required')">
+                            Email is required
+                        </mat-error>
+                    </mat-form-field>
+                </div>
+            </div>   
+            
+            <div class="row">
+
+                <div class="col-xl-6 col-l66 col-md-12 col-sm-12 mb-2">
+                    <section>
+                        <mat-checkbox formControlName="isMPOC">ISM POC</mat-checkbox>
+                      </section>
+                </div>
+
+                <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                    <mat-form-field class="example-full-width" appearance="outline"  floatLabel="always">
+                        <mat-label>Activation Status</mat-label>
+                        <mat-select formControlName="isActive">
+                            <mat-option [value]=true>Active</mat-option>
+                            <mat-option [value]=false>Deleted</mat-option>
+                        </mat-select>
+
+                        <mat-error *ngIf="advanceTableForm.get('isActive').hasError('required')">
+                            Activation Status is required
+                        </mat-error>
+                    </mat-form-field>
+                </div>
+            </div>
+            
+            <div class="row">
+                <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12 mb-2">
+                    <div class="example-button-row">
+                        <button mat-raised-button color="primary" [type]="submit" [disabled]="!advanceTableForm.valid"  (click)="confirmAdd()">Save</button>
+                        <button mat-raised-button color="warn" (click)="reset()" tabindex="-1">Reset</button>
+                    </div>
+                </div>
+            </div>
+        </form>
+  </div>

@@ -1,0 +1,478 @@
+@page {
+    size: A4 portrait;
+    margin: 5mm;
+}
+
+// html, body {
+//     margin: 0;
+//     padding: 0;
+//     font-family: Arial, sans-serif;
+//     background: #fff;
+// }
+
+/* ================= SCREEN VIEW ================= */
+.invoice-container {
+    width: 210mm;
+   margin: 10px auto;
+    border: 1px solid #000;
+    padding: 6mm;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+}
+
+/* ================= PRINT VIEW (SINGLE PAGE) ================= */
+@media print {
+
+  html, body {
+    margin: 0;
+    padding: 0;
+    background: #fff;
+  }
+
+  .addContainer {
+    margin: 0;
+    padding: 0;
+  }
+
+  .invoice-container {
+    width: 260mm;
+    height: 390mm;
+     margin: 10px auto;
+    border: 1px solid #000;
+    padding: 6mm;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+  }
+  
+  body {
+    transform: none !important;
+  }
+ 
+
+  .amount-box {
+    text-align: right !important;      /* PUSH TO END */
+    padding-left: 100%;
+    box-sizing: border-box;
+  }
+  .amount-box .text6 {
+    display: block;
+    text-align: right 0;
+    padding-left: 100%;
+    white-space: nowrap;
+  
+  }
+
+}
+
+
+/* ================= HEADER ================= */
+.header {
+    display: grid;
+    grid-template-columns: 120mm auto;
+    border-bottom: 1px solid #000;
+    padding-bottom: 10px;
+}
+.header-left h1 {
+    margin: 0;
+    font-size: 22px;
+    font-weight: bold;
+}
+.company-address {
+    margin-top: 6px;
+    font-size: 12px;
+    line-height: 16px;
+}
+
+/* ================= LOGO + QR ================= */
+.qr-logo-area {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    padding-top: 5px;
+}
+.qr-logo-area img {
+    width: 30mm;
+    height: 30mm;
+    object-fit: contain;
+}
+
+/* ================= INFO ================= */
+.info-section {
+    display: grid;
+    grid-template-columns: 120mm auto;
+    margin-top: 8px;
+    border-bottom: 1px solid #000;
+    padding-bottom: 8px;
+}
+.customer-box,
+.bill-box {
+    font-size: 13px;
+    line-height: 18px;
+}
+.bill-box {
+    text-align: right;
+}
+
+/* ================= EXTRA ================= */
+.extra-info {
+    margin-top: 4px;
+    font-size: 13px;
+    border-bottom: 1px solid #000;
+    padding-bottom: 6px;
+}
+
+/* ================= TABLE ================= */
+.table-header {
+    display: grid;
+    // grid-template-columns: 130mm 30mm 44mm;
+    background: #f5f5f5;
+    border-bottom: 1px solid #000;
+    padding: 6px 0;
+    margin-top: 10px;
+    font-weight: bold;
+}
+
+/* ================= DUTY ================= */
+// .duty-grid {
+//     display: grid;
+//     grid-template-columns: 130mm 30mm 44mm;
+//     border-bottom: 1px solid #000;
+// }
+// .duty-details {
+//     border-right: 1px solid #000;
+//     padding: 6px;
+//     padding-bottom: calc(17px * 5); /* 5 lines after Interstate Tax */
+//     font-size: 13px;
+// }
+
+.rate-box {
+  text-align: left; 
+    border-right: 1px solid #000;    
+  padding-left: 6mm;     
+  box-sizing: border-box;
+  justify-self: end;
+}
+
+.rate-box .text6 {
+  display: block;        /* each value on its own line */
+  white-space: nowrap;
+
+}
+
+
+
+.amount-box {
+   padding-left: 6mm;
+    text-align: left;    
+    justify-self: end;
+}
+
+/* ================= GST ================= */
+.gst-section {
+    margin-top: 10px;
+    border: 1px solid #000;
+    padding: 8px;
+    font-size: 14px;
+}
+.gst-row {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    padding: 4px 0;
+}
+
+/* ================= AMOUNT IN WORDS ================= */
+.amount-words {
+    margin-top: 6px;
+    padding: 6px;
+    border: 1px solid #000;
+    font-size: 13px;
+}
+
+/* ================= FOOTER / TERMS ================= */
+.footer {
+    margin-top: 6px;
+    border-top: 1px solid #000;
+    padding-top: 8px;
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    flex-grow: 1;   
+}
+.terms {
+    font-size: 12px;
+    line-height: 17px;          /* natural readable size */
+}
+.signature {
+    text-align: right;
+    font-size: 14px;
+    padding-right: 10px;
+    font-weight: bold;
+}
+
+.auto-style4 {
+	text-align: center;
+}
+
+
+.text-heading {
+font-family: arial;
+font-size: 15pt;
+font-weight: bold;
+color: #000000;
+text-decoration: none;
+line-height:16px;
+margin-top:20px;
+text-align: center;
+}
+
+.text-subheading {
+font-family: verdana,arial;
+font-size: 8pt;
+font-weight: bold;
+color: #000000;
+text-decoration: none;
+line-height:16px;
+text-align: center;
+}
+.text1 {
+font-family: arial;
+font-size: 10pt;
+font-weight: normal;
+color: #000000;
+text-decoration: none;
+line-height:15px;
+text-align: left;
+margin-left:5px;
+margin-right:5px;
+border:none
+}
+
+.text1009 {
+font-family: arial;
+font-size: 8pt;
+font-weight: normal;
+color: #000000;
+text-decoration: none;
+line-height:15px;
+text-align: center;
+margin-left:5px;
+margin-right:5px;
+border:none
+}
+
+.text2 {
+font-family: arial;
+font-size: 7pt;
+font-weight: normal;
+color: #000000;
+text-decoration: none;
+line-height:14px;
+text-align: center;
+padding-left:2px;
+}
+
+.text3 {
+font-family: arial;
+font-size: 6pt;
+font-weight: normal;
+color: #000000;
+text-decoration: none;
+line-height:12px;
+text-align: left;
+padding-left:2px;
+}
+
+.text4 {
+font-family: arial;
+font-size: 8pt;
+font-weight: normal;
+color: #000000;
+text-decoration: none;
+line-height:15px;
+text-align: left;
+border:none
+}
+
+.text5 {
+font-family: arial;
+font-size: 10pt;
+font-weight: normal;
+color: #000000;
+text-decoration: none;
+line-height:15px;
+text-align: right;
+border:none
+}
+.text6 {
+font-family: arial;
+font-size: 10pt;
+font-weight: normal;
+
+color:black;
+text-decoration: none;
+line-height:15px;
+text-align: left;
+border-left:1px;
+border-right:1px;
+border-top:0px;
+border-bottom:0px;
+border-style:solid ;
+}
+.text7 {
+font-family: arial;
+font-size: 10pt;
+font-weight: normal;
+
+color:black;
+text-decoration: none;
+line-height:15px;
+text-align:right;
+border-left:1px;
+border-right:1px;
+border-top:0px;
+border-bottom:0px;
+border-style:solid ;
+}
+tr,td {
+border: solid 1px #999;
+}
+
+.no-border {
+border:none;
+}
+
+
+
+.auto-style5 {
+	border-style: none;
+	border-color: inherit;
+	border-width: medium;
+	font-family: arial;
+	font-size: 10pt;
+	font-weight: normal;
+	color: #000000;
+	text-decoration: none;
+	line-height: 15px;
+	text-align: center;
+	margin-left: 5px;
+	margin-right: 5px;
+	width: 435px;
+}
+.auto-style6 {
+	border-style: none;
+	border-color: inherit;
+	border-width: medium;
+	font-family: arial;
+	font-size: 8pt;
+	font-weight: normal;
+	color: #000000;
+	text-decoration: none;
+	line-height: 15px;
+	text-align: left;
+	margin-left: 5px;
+	margin-right: 5px;
+	width: 435px;
+}
+
+
+
+.auto-style7 {
+	font-size: 7pt;
+}
+
+@media print {
+	/* Hide sidebar */
+	.sidebar {
+	  display: none;
+	}
+  
+	/* Any other elements you want to hide */
+	.other-unwanted-elements {
+	  display: none;
+	}
+	
+	/* Ensure the print button is not visible in the printout */
+	#print {
+	  display: none;
+	}
+  }
+  
+.table-div{
+    width: 100%;
+    height: 550px;
+}
+
+.table 
+{
+width: 100%; 
+border-collapse: collapse;
+
+}
+
+.table-first-tr
+{
+border-left: none;
+border-right: none; 
+border-bottom: none;
+line-height: 10px;
+}
+.table-mid-tr
+{
+    border-left: none;
+    border-right: none; 
+    border-top: none; 
+    border-bottom: none;
+    line-height: 10px;
+}
+.table-last-tr
+{
+    border-left: none;
+    border-right: none;
+    border-top: none;
+    border-top: none;
+    border-bottom: none;
+    line-height: 230px;
+
+}
+
+.table-firstrow-firstcolumn
+{
+  width: 130mm;  padding-left: 10px; border-right: 2px solid black; border-left: none;border-bottom: none;line-height: 10px;
+}
+.table-firstrow-secondcolumn
+{
+  width: 30mm; text-align: right; padding-right: 10px;border-right: 2px solid black;border-bottom: none;line-height: 10px;
+}
+.table-firstrow-thirdcolumn
+{
+  width: 44mm; text-align: right;padding-right: 10px;border-right: none;border-bottom: none;line-height: 10px;border-left: none;
+}
+
+
+.table-midrow-firstcolumn
+{
+  width: 130mm;padding-left: 10px; border-right: 2px solid black; border-left: none;border-top: none; border-bottom: none;line-height: 10px;
+}
+.table-midrow-secondcolumn
+{
+  width: 30mm; text-align: right; padding-right: 10px;border-right: 2px solid black;border-top: none; border-bottom: none;line-height: 10px;
+}
+.table-midrow-thirdcolumn
+{
+  width: 44mm; text-align: right;padding-right: 10px;border-right: none;border-top: none; border-bottom: none;line-height: 10px; border-left: none;
+}
+
+
+.table-lastrow-firstcolumn
+{
+  width: 130mm;  padding-left: 10px; border-right: 2px solid black; border-left: none;border-bottom: none;border-top: none; 
+}
+.table-lastrow-secondcolumn
+{
+  width: 30mm; text-align: right; padding-right: 10px;border-right: 2px solid black;border-bottom: none;border-top: none; 
+}
+.table-lastrow-thirdcolumn
+{
+  width: 44mm; text-align: right;padding-right: 10px;border-right: none;border-bottom: none;border-top: none; border-left: none;
+}

@@ -1,0 +1,416 @@
+<div class="modalHeader">
+  <div class="editRowModal">
+    <div class="modalHeader clearfix">
+      <div class="modal-about">
+        <div class="font-weight-bold p-t-5 font-17">
+          <!-- {{ dialogTitle }} -->
+        </div>
+      </div>
+    </div>
+  </div>
+  <!-- <button mat-icon-button (click)="dialogRef.close()" aria-label="Close dialog">
+    <mat-icon class="small-close-icon">close</mat-icon>
+  </button> -->
+</div>
+<div class="print-container">
+  <mat-card>
+    <mat-card-content>
+      <mat-dialog-content>
+        <div id="printElem">
+          <table width="595" border="0" align="center" cellpadding="0" cellspacing="0">
+            <tr>
+              <td height="840" valign="top">
+                <table width="556" border="0" align="center" cellpadding="0" cellspacing="0">
+                  <tr>
+                    <td height="824" align="center" valign="top" class="auto-style1">
+                      <p>
+                        <span class="text-heading">
+                          <strong>ECOS (India) Mobility & Hospitality Limited</strong><br />
+                          <h6>(Formerly known as Ecos (India) Mobility & Hospitality Private Limited)</h6>
+                        </span>
+                        <span class="text-subheading"></span>
+                      </p>
+
+                      <table width="556" border="0" cellpadding="0" cellspacing="0" class="text1" style="font-weight:bold; text-align:center;">
+                        <tr>
+                          <td width="65"></td>
+                          <td width="92"></td>
+                          <td width="85"><strong>MOP</strong></td>
+                          <td width="103">{{dataSource?.modeOfPayment}}</td>
+                          <td width="95"></td>
+                          <td width="92"></td>
+                        </tr>
+
+                        <tr>
+                          <td>Pickup Date</td>
+                          <td>{{dataSource?.pickUpDate | date : 'dd/MM/yyyy'}}</td>
+                          <td>Relesing Date</td>
+                          <td>{{dataSource?.dropOffDate | date : 'dd/MM/yyyy'}}</td>
+                          <td></td>
+                          <td>&nbsp;</td>
+                        </tr>
+
+                        <tr>
+                          <td>
+                            <strong>D.S No : </strong><br>
+                            {{dataSource?.dutySlipID}}
+                          </td>
+                          <td>
+                            <strong>City : </strong><br>
+                            {{dataSource?.pickupCity}}
+                          </td>
+                          <td>
+                            <strong>Bkg no : </strong><br>
+                            {{dataSource?.reservationID}}
+                          </td>
+                          <td>
+                            <strong>Car Booked : </strong><br>
+                            {{dataSource?.vehicleBooked}}
+                          </td>
+                          <td>
+                            <strong>Car Sent : </strong><br>
+                            {{dataSource?.vehicleSent}}
+                          </td>
+                          <td>
+                            <strong>Car No : </strong><br>
+                            {{dataSource?.registrationNumber}}
+                          </td>
+                        </tr>
+
+                        <tr>
+                          <td colspan="3">
+                            <strong>Driver Name : </strong>{{dataSource?.driverName}}
+                          </td>
+                          <td colspan="3">
+                            <strong>Duty Type : </strong>{{dataSource?.packageType}}
+                          </td>
+                        </tr>
+
+                        <tr>
+                          <td colspan="6">
+                            <strong>Booker Name/No : </strong>{{dataSource?.bookerName}} / {{dataSource?.mobile1}}
+                          </td>
+                        </tr>
+
+                        <tr>
+                          <td colspan="6">
+                            <strong>Guest Name/No : </strong> {{ dataSource?.passengerName }} /
+                            {{dataSource?.passengerMobile}}
+                          </td>
+                        </tr>
+
+                        <tr>
+                          <td colspan="6">
+                            <strong>Client Name : </strong>{{dataSource?.customerName}}
+                          </td>
+                        </tr>
+
+                        <tr>
+                          <td colspan="6">
+                            <strong>Reporting Address : </strong>{{dataSource?.pickUpAddressString}}
+                          </td>
+                        </tr>
+
+                        <tr>
+                          <td colspan="6">
+                            <p>
+                              <strong>Special Instruction/Trip To : </strong>
+                              {{dataSource?.specialInstruction}}
+                            </p>
+                          </td>
+                        </tr>
+
+                        <tr>
+                          <td colspan="2">
+                            <strong>Out Kms : {{dataSource?.locationOutKM}}</strong>
+                          </td>
+                          <td colspan="2">
+                            <strong>Out Time : {{dataSource?.locationOutTime | date : 'hh:mm a'}}</strong>
+                          </td>
+                          <td colspan="2">
+                            <strong>Out Date : {{dataSource?.locationOutDate | date : 'dd/MM/yyyy'}}</strong>
+                          </td>
+                        </tr>
+
+                        <tr>
+                          <td colspan="2">
+                            <strong>Reporting Kms : {{dataSource?.pickUpKM}}</strong>
+                          </td>
+                          <td colspan="2">
+                            <strong>Reporting Time : {{dataSource?.pickUpTime | date : 'hh:mm a'}}</strong>
+                          </td>
+                          <td colspan="2">
+                            <strong>Reporting Date : {{dataSource?.pickUpDate | date : 'dd/MM/yyyy'}}</strong>
+                          </td>
+                        </tr>
+
+                        <tr>
+                          <td colspan="2">
+                            <strong>Releasing Kms : {{dataSource?.dropOffKM}}</strong>
+                          </td>
+                          <td colspan="2">
+                            <strong>Releasing time : {{dataSource?.dropOffTime | date : 'hh:mm a'}}</strong>
+                          </td>
+                          <td colspan="2">
+                            <strong>Releasing Date : {{dataSource?.dropOffDate | date : 'dd/MM/yyyy'}}</strong>
+                          </td>
+                        </tr>
+
+                        <tr>
+                          <td colspan="2">
+                            <strong>In Kms : {{dataSource?.locationInKM}}</strong>
+                          </td>
+                          <td colspan="2">
+                            <strong>In Time : {{dataSource?.locationInTime | date : 'hh:mm a'}}</strong>
+                          </td>
+                          <td colspan="2">
+                            <strong>In Date : {{dataSource?.locationInDate | date : 'dd/MM/yyyy'}}</strong>
+                          </td>
+                        </tr>
+
+                        <tr>
+                          <td colspan="2">
+                            <strong>Total Kms : {{dataSource?.locationOutKM +
+                              dataSource?.pickUpKM +
+                              dataSource?.dropOffKM + dataSource?.locationInKM}} </strong>
+                          </td>
+                          <td colspan="2">
+                            <strong>Total Time : {{datetime}}</strong>
+                          </td>
+                          <td colspan="2"><strong>Total Days : {{totalDays}}</strong></td>
+                        </tr>
+                      </table>
+
+                      <!-- <br /> -->
+
+                      <span class="text-subheading">
+                        <strong class="text-subheading">
+                          <br />
+                          INVOICE CALCULATION<br />
+                        </strong>
+                      </span>
+
+                      <table width="556" border="0" cellpadding="0" cellspacing="0" class="text1">
+                        <tr>
+                          <td width="371" align="center">
+                            <strong>Particulars</strong>
+                          </td>
+                          <td width="69" align="center"><strong>Rate</strong></td>
+                          <td width="104" align="center"><strong>Amount</strong></td>
+                        </tr>
+                        <tr>
+                          <td align="left" style="padding-left: 5px;">
+                            <strong>Parking/Toll/Inter State Tax</strong>
+                          </td>
+                          <td></td>
+                          <td align="right" style="padding-right: 5px;">{{(dataSource?.totalTollParkingAmount + dataSource?.totalInterStateAmount) | number:'1.2-2'}}</td>
+                        </tr>
+
+                        <tr>
+                          <td align="left"  style="padding-left: 5px;">
+                            <strong>Other Charges(If Any)</strong>
+                          </td>
+                          <td></td>
+                          <td align="right" style="padding-right: 5px;">{{dataSource?.totalOtherChargeAmount | number:'1.2-2'}}</td>
+                        </tr>
+
+                        <tr>
+                          <td align="left"  style="padding-left: 5px;"><strong>Sub Total</strong></td>
+                          <td></td>
+                          <td align="right" style="padding-right: 5px;">{{(dataSource?.totalTollParkingAmount + dataSource?.totalInterStateAmount + dataSource?.totalOtherChargeAmount) | number:'1.2-2'}}</td>
+                        </tr>
+
+                        <tr>
+                          <td align="left"  style="padding-left: 5px;">
+                            <strong>SGST @ {{dataSource?.sgstPercentage}}%&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;    
+                                    CGST  @ {{dataSource?.cgstPercentage}}%&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;       
+                                    IGST  @ {{dataSource?.igstPercentage}}%
+                            </strong>
+                          </td>
+                          <td></td>
+                          <td align="right" style="padding-right: 5px;">{{dataSource?.totalGST | number:'1.2-2'}}</td>
+                        </tr>
+
+                        <tr>
+                          <td align="left" style="padding-left: 5px;"><strong>Total Amount</strong></td>
+                          <td>&nbsp;</td>
+                          <td align="right" style="padding-right: 5px;">{{dataSource?.totalAmount | number:'1.2-2'}}</td>
+                        </tr>
+                      </table>
+
+                      <span class="text-subheading"><strong class="text-subheading"></strong></span>
+                      <br />
+
+                      <table width="556" border="0" cellpadding="1" cellspacing="0" class="text1">
+                        <tr>
+                          <td width="180">
+                            <strong>Cash
+                              <input type="checkbox" id="chk1" value="CashPaid Rs" />
+                              ......................
+                            </strong>
+                          </td>
+                          <td width="272">
+                            <strong>
+                              In Words Rs.
+                            </strong>.....................................................................
+                          </td>
+                          <td width="98">
+                            Credit Card
+                            <strong>
+                              <input type="checkbox" name="checkbox2" id="checkbox2" />
+                            </strong>
+                          </td>
+                        </tr>
+
+                        <tr>
+                          <td>&nbsp;</td>
+                          <td>&nbsp;</td>
+                          <td>&nbsp;</td>
+                        </tr>
+
+                        <tr>
+                          <td colspan="2" align="center">Credit Card No</td>
+                          <td>Expiry Date</td>
+                        </tr>
+                        <tr>
+                          <td colspan="3" align="left">
+                            <p>
+                              I hearby Authorise ECOS (India) Mobility & Hospitality Limited To charge my card for an
+                              amount of Rs.
+                            </p>
+                          </td>
+                        </tr>
+
+                        <tr>
+                          <td colspan="3" align="center">
+                            <strong>INSTRUCTION FOR NEXT DAY REQUIREMENT</strong>
+                          </td>
+                        </tr>
+
+                        <tr>
+                          <td align="left"><strong>Date</strong></td>
+                        </tr>
+
+                        <tr>
+                          <td align="left"><strong>Time</strong></td>
+                        </tr>
+                      </table>
+
+                      <table width="556" border="0" cellpadding="1" cellspacing="0" class="text1">
+                        <tr>
+                          <td width="422">
+                            Special Instructions<br />
+                            <strong>Customer Feed Back<br />
+                              . Tips to Chauffeur at the discretion of the user
+                              <br />
+                              . Goods left in the car is user's responsibility
+                              <br />
+                              * Subject to Terms &amp; conditions mentioned
+                              behind.</strong>
+                          </td>
+                          <td valign="top" width="130">
+                            User Signature<br />
+                            <!-- <img src="dataSource?.customerSignatureImage" id="image1" width="150" height="150" /> -->
+                          </td>
+
+                          <td width="130" valign="top">
+                            OTP<br />
+                            Start Trip OTP
+                            <br />
+                            <span *ngIf="dataSource?.showOTPOnDutySlip === true">{{dataSource?.startTripOTP}}</span>
+                            <br/>
+                            End Trip OTP
+                            <br />
+                            <span *ngIf="dataSource?.showOTPOnDutySlip === true">{{dataSource?.endTripOTP}}</span>
+                          </td>
+                        </tr>
+                      </table>
+
+                      <table width="556" border="0" cellpadding="0" cellspacing="0" class="text2">
+                        <tr>
+                          <td align="center">
+                            <p class="text2">
+                              Your K.A.M is : {{dataSource?.keyAccountManagerName}}<br>
+                              Phone : {{dataSource?.keyAccountManagerMobile}}
+                              <br />
+                            </p>
+                          </td>
+                        </tr>
+                      </table>
+
+                <br />
+
+                <table width="556" border="0" cellpadding="0" cellspacing="0" class="text2" *ngIf="dataSource?.runningDetailsModels === null">
+                  <tr>
+                    <td colspan="6" style="text-align:center; font-weight:bold; font-size:11px;">
+                      Running Detail
+                    </td>
+                  </tr>
+                  <tr style="font-weight:bold; text-align:center;">
+                    <td>No record found.</td>
+                  </tr>
+                </table>
+
+                <table width="556" border="0" cellpadding="0" cellspacing="0" class="text2" *ngIf="dataSource?.runningDetailsModels !== null">
+                  <tr>
+                    <td colspan="6" style="text-align:center; font-weight:bold; font-size:11px;">
+                      Running Detail
+                    </td>
+                  </tr>
+                  <tr style="font-weight:bold; text-align:center;">
+                    <td>Rec ID</td>
+                    <td>Start Time</td>
+                    <td>Start Location</td>
+                    <td>End Time</td>
+                    <td>End Location</td>
+                    <td>Distance</td>
+                  </tr>
+
+                  <tr *ngFor="let runningDetails of dataSource?.runningDetailsModels;index as i">
+                    <td>{{i+1}}</td>
+                    <td>{{runningDetails?.startTime}}</td>
+                    <td>{{runningDetails?.start_GPS_location}}</td>
+                    <td>{{runningDetails?.endtime}}</td>
+                    <td>{{runningDetails?.end_GPS_location}}</td>
+                    <td>{{runningDetails?.distance}}</td>
+                  </tr>
+
+                  <tr style="font-weight:bold; text-align:center;">
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td>Total</td>
+                    <td>{{totalKms | number : '1.2-2'}}</td>
+                  </tr>
+                </table>
+
+                <br />
+              </td>
+            </tr>
+          </table>
+          </td>
+          </tr>
+          </table>
+        </div>
+        <br/>
+        <div >
+          <table width="556" border="0" align="center" cellpadding="0" cellspacing="0" class="text2">
+            <tr *ngFor="let img of dataSource?.tollParkingsImages">
+              <td align="center" *ngIf="img.tollParkingImage !== '' && img.tollParkingImage !== null">
+                <p class="auto-style3">Image</p>
+                  <img [src]="img.tollParkingImage" id="image1" width="150" height="150" /><br>
+              </td>
+            </tr>
+          </table>
+        </div>
+        <hr />
+        <div style="text-align: center">
+          <button type="button" onclick="window.print()" color="primary" mat-raised-button id="print">
+            Print
+          </button>
+        </div>
+      </mat-dialog-content>
+    </mat-card-content>
+  </mat-card>
+</div>

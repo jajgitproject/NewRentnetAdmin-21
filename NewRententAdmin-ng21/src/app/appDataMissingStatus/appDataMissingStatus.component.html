@@ -1,0 +1,40 @@
+<div class="modalHeader">
+  <div class="editRowModal">
+    <div class="modalHeader clearfix">
+      <div class="modal-about">
+        <div class="font-weight-bold p-t-5 font-17">
+          {{ dialogTitle }}
+        </div>
+      </div>
+    </div>
+  </div>
+  <button mat-icon-button (click)="dialogRef.close()" aria-label="Close dialog">
+    <mat-icon class="small-close-icon">close</mat-icon>
+  </button>
+</div>
+<mat-card>
+  <mat-card-content>
+    <mat-dialog-content class="of-hidden">
+      <div class="row">
+        <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+          <span class="TDValueBold">Status</span> <br />
+          <span class="TDValue">{{status || 'N/A' }}</span> 
+        </div>
+        <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+          <span class="TDValueBold">Date & Time</span> <br />
+          <span class="TDValue">{{ (dataSource?.currentDateTime | date: 'dd-MM-yyyy HH:mm:ss') || 'N/A' }}</span> 
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+          <span class="TDValueBold">Location</span> <br />
+          <span class="TDValue">{{currentAddress || 'N/A' }}</span> 
+        </div>
+        <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+          <span class="TDValueBold">Location Before Two Minute</span> <br />
+          <span class="TDValue">{{locationBeforeTwoMinutesAddress || 'N/A' }}</span> 
+        </div>
+      </div>
+    </mat-dialog-content>
+  </mat-card-content>
+</mat-card>

@@ -1,0 +1,26 @@
+<section class="content">
+  <div class="content-block">
+    <!-- Dashboard Header and Tabs -->
+    <div class="kanban-dashboard-container">
+      <div class="dashboard-header">
+        <div class="header-left">
+          <h1 class="page-title">Kanban Dashboard </h1>
+        </div>
+        <div class="header-right">
+          <button mat-flat-button class="share-btn">
+            <span>Share</span>
+            <mat-icon>share</mat-icon>
+          </button>
+          <button mat-mini-fab color="primary" class="add-btn-fab" (click)="boardComponent.newKanbanDialog()"
+            matTooltip="Create a kanban">
+            <mat-icon>add</mat-icon>
+          </button>
+        </div>
+      </div>
+
+      <div class="kanban-board-wrapper">
+        <app-board></app-board>
+      </div>
+    </div>
+  </div>
+</section>

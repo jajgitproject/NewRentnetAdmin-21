@@ -1,0 +1,197 @@
+<div class="row">
+    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+        <div class="card">
+            <div class="addContainer">
+                <form class="register-form m-4" [formGroup]="advanceTableForm" (ngSubmit)="submit">
+
+                    <div class="row">
+                        <div class="col-xl-10 col-lg-6 col-md-12 col-sm-12 mb-2">
+                            <mat-form-field appearance="outline" floatLabel="always" class="example-full-width">
+                                <mat-label>Passenger</mat-label>
+                                <input required matInput readonly>
+                            </mat-form-field>
+
+                        </div>
+                        <div class="col-xl-2 col-lg-6 col-md-12 col-sm-12 mb-2">
+                            <a style="cursor: pointer;color: #007bff;float: left;">New</a>
+                            <a style="cursor: pointer;color: #007bff;float: left;margin-left: 10px;"
+                                (click)="addPassengers()">Add More</a>
+                        </div>
+
+                    </div>
+
+                    <div class="row">
+                        <div class="col-xl-5 col-lg-6 col-md-12 col-sm-12 mb-2">
+                            <mat-form-field appearance="outline" floatLabel="always" class="example-full-width">
+                                <mat-label>Mode Of Payment</mat-label>
+                                <input matInput>
+                            </mat-form-field>
+                        </div>
+
+                        <div class="col-xl-5 col-lg-6 col-md-12 col-sm-12 mb-2">
+                            <mat-form-field appearance="outline" floatLabel="always" class="example-full-width">
+                                <mat-label>VIP Status</mat-label>
+                                <input matInput>
+                            </mat-form-field>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-xl-5 col-lg-6 col-md-12 col-sm-12 mb-2">
+                            <mat-form-field appearance="outline" floatLabel="always" class="example-full-width">
+                                <mat-label>Duty Type</mat-label>
+                                <input matInput>
+                            </mat-form-field>
+                        </div>
+
+                        <div class="col-xl-5 col-lg-6 col-md-12 col-sm-12 mb-2">
+                            <mat-form-field appearance="outline" floatLabel="always" class="example-full-width">
+                                <mat-label>Package</mat-label>
+                                <input matInput>
+                            </mat-form-field>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-xl-5 col-lg-6 col-md-12 col-sm-12 mb-2">
+                            <mat-form-field appearance="outline" floatLabel="always" class="example-full-width">
+                                <mat-label>Car </mat-label>
+                                <input matInput>
+                            </mat-form-field>
+                        </div>
+
+                        <div class="col-xl-5 col-lg-6 col-md-12 col-sm-12 mb-2">
+                            <mat-form-field appearance="outline" floatLabel="always" class="example-full-width">
+                                <mat-label>City</mat-label>
+                                <input matInput>
+                            </mat-form-field>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-xl-5 col-lg-6 col-md-12 col-sm-12 mb-2">
+                            <mat-form-field appearance="outline" floatLabel="always" class="example-full-width">
+                                <mat-label>Pickup Date </mat-label>
+                                <input matInput>
+                            </mat-form-field>
+                        </div>
+
+                        <div class="col-xl-5 col-lg-6 col-md-12 col-sm-12 mb-2">
+                            <mat-form-field appearance="outline" floatLabel="always" class="example-full-width">
+                                <mat-label>Pickup Time</mat-label>
+                                <input matInput>
+                            </mat-form-field>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-xl-5 col-lg-6 col-md-12 col-sm-12 mb-2">
+                            <mat-form-field appearance="outline" floatLabel="always" class="example-full-width">
+                                <mat-label>Pickup City </mat-label>
+                                <input matInput>
+                            </mat-form-field>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-xl-5 col-lg-6 col-md-12 col-sm-12 mb-2">
+                            <mat-form-field appearance="outline" floatLabel="always" class="example-full-width">
+                                <mat-label>Pickup Address </mat-label>
+                                <input matInput>
+                            </mat-form-field>
+                            <a style="cursor: pointer;color: #007bff;float: left;"
+                                (click)="pickupDetails()">Existing</a>
+
+                            <a style="cursor: pointer;color: #007bff;float: left;margin-left: 10px;"
+                                (click)="addStop()">Add
+                                New</a>
+                        </div>
+
+
+                        <div class="col-xl-5 col-lg-6 col-md-12 col-sm-12 mb-2">
+                            <mat-form-field appearance="outline" floatLabel="always" class="example-full-width">
+                                <mat-label>Geo Location </mat-label>
+                                <input matInput>
+                            </mat-form-field>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-xl-5 col-lg-6 col-md-12 col-sm-12 mb-2">
+                            <mat-form-field appearance="outline" floatLabel="always" class="example-full-width">
+                                <mat-label>Location Out Time</mat-label>
+                                <input matInput>
+                            </mat-form-field>
+                        </div>
+
+                        <div class="col-xl-5 col-lg-6 col-md-12 col-sm-12 mb-2">
+                            <mat-form-field appearance="outline" floatLabel="always" class="example-full-width">
+                                <mat-label>Service Location</mat-label>
+                                <input matInput>
+                            </mat-form-field>
+                        </div>
+
+                        <div class="col-xl-2 col-lg-6 col-md-12 col-sm-12 mb-2">
+                            <a style="cursor: pointer;color: #007bff;" (click)="addStops()">Add Stops</a>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-xl-5 col-lg-6 col-md-12 col-sm-12 mb-2">
+                            <mat-form-field appearance="outline" floatLabel="always" class="example-full-width">
+                                <mat-label>Droff of Date</mat-label>
+                                <input matInput>
+                            </mat-form-field>
+                        </div>
+
+                        <div class="col-xl-5 col-lg-6 col-md-12 col-sm-12 mb-2">
+                            <mat-form-field appearance="outline" floatLabel="always" class="example-full-width">
+                                <mat-label>Droff of Time</mat-label>
+                                <input matInput>
+                            </mat-form-field>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-xl-5 col-lg-6 col-md-12 col-sm-12 mb-2">
+                            <mat-form-field appearance="outline" floatLabel="always" class="example-full-width">
+                                <mat-label>DropOff of City</mat-label>
+                                <input matInput>
+                            </mat-form-field>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-xl-5 col-lg-6 col-md-12 col-sm-12 mb-2">
+                            <mat-form-field appearance="outline" floatLabel="always" class="example-full-width">
+                                <mat-label>DropOff of Address</mat-label>
+                                <input matInput>
+                            </mat-form-field>
+                            <a style="cursor: pointer;color: #007bff;float: left;"
+                                (click)="dropOffDetails()">Existing</a>
+                        </div>
+
+                        <div class="col-xl-5 col-lg-6 col-md-12 col-sm-12 mb-2">
+                            <mat-form-field appearance="outline" floatLabel="always" class="example-full-width">
+                                <mat-label>GeoLocation</mat-label>
+                                <input matInput>
+                            </mat-form-field>
+                        </div>
+                    </div>
+                    <br>
+                    <div class="row">
+                        <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12 mb-2">
+                            <div class="example-button-row">
+                                <button mat-raised-button style="background-color: #bcb4db">Save</button>
+                                <button mat-raised-button style="background-color: #f29f99"
+                                    tabindex="-1">Cancel</button>
+                            </div>
+                        </div>
+                    </div>
+
+                </form>
+
+            </div>
+        </div>
+    </div>
+</div>
