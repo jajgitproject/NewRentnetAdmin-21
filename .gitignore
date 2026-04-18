@@ -1,5 +1,5 @@
 /.cursor
 /lorax
 /NewRententAdmin
-NewRententAdmin-ng21/build-output.log
-NewRententAdmin-ng21/*.log
+# Angular app lives in its own repo: https://github.com/jajgitproject/NewRentnetAdmin-21
+/NewRententAdmin-ng21/
