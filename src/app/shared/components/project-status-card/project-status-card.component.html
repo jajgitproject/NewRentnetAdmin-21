@@ -1,0 +1,67 @@
+<div class="project-status-container">
+  <mat-card>
+    <div class="card-header">
+      <h2>{{ title }}</h2>
+      <div class="card-actions">
+        <button mat-icon-button [matMenuTriggerFor]="menu">
+          <mat-icon>more_vert</mat-icon>
+        </button>
+        <mat-menu #menu="matMenu">
+          <button mat-menu-item>
+            <mat-icon>refresh</mat-icon>
+            <span>Refresh</span>
+          </button>
+          <button mat-menu-item>
+            <mat-icon>file_download</mat-icon>
+            <span>Export</span>
+          </button>
+        </mat-menu>
+      </div>
+    </div>
+    <ng-scrollbar style="height: 400px" visibility="hover">
+      @if (displayedProjects && displayedProjects.length > 0) {
+        <div class="projects-list">
+          @for (project of displayedProjects; track project) {
+            <div class="project-item">
+              <div class="project-header">
+                <div class="project-info">
+                  <h3>{{ project.name }}</h3>
+                  <span class="project-id">{{ project.id }}</span>
+                </div>
+                <div class="project-status" [ngClass]="getStatusClass(project.status)">
+                  <mat-icon>{{ getStatusIcon(project.status) }}</mat-icon>
+                  <span>{{ project.status | titlecase }}</span>
+                </div>
+              </div>
+              <div class="project-progress">
+                <div class="progress-info">
+                  <span class="progress-percentage">{{ project.progress }}%</span>
+                  <span class="due-date">{{ getDaysRemainingText(project.dueDate) }}</span>
+                </div>
+                <mat-progress-bar [color]="getProgressColor(project.progress, project.status)"
+                [value]="project.progress"></mat-progress-bar>
+              </div>
+              <div class="project-footer">
+                <div class="assignee">
+                  <span>Assignee:</span>
+                  <strong>{{ project.assignee }}</strong>
+                </div>
+                <div class="due-date-full">
+                  <span>Due:</span>
+                  <strong>{{ formatDate(project.dueDate) }}</strong>
+                </div>
+              </div>
+            </div>
+          }
+        </div>
+      }
+    </ng-scrollbar>
+
+    @if (!displayedProjects || displayedProjects.length === 0) {
+      <div class="empty-state">
+        <mat-icon>assignment</mat-icon>
+        <p>No projects available</p>
+      </div>
+    }
+  </mat-card>
+</div>

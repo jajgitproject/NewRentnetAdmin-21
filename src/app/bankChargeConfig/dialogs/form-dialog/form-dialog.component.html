@@ -1,0 +1,239 @@
+<div class="addContainer">
+    <div class="modalHeader">
+        <div class="editRowModal">
+            <div class="modalHeader clearfix">
+                <!-- <img [src]='advanceTable.img' alt="avatar"> -->
+                <div class="modal-about">
+                    <div class="font-weight-bold p-t-5 font-17">
+                        {{dialogTitle}}</div>
+                </div>
+            </div>
+        </div>
+        <button mat-icon-button (click)="dialogRef.close()" aria-label="Close dialog">
+      <mat-icon>close</mat-icon>
+    </button>
+    </div>
+    <div mat-dialog-content>
+        <form class="register-form m-4" [formGroup]="advanceTableForm" (ngSubmit)="submit">
+
+            <div class="row">
+                <!-- <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                    <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                        <mat-label>Bank</mat-label>
+                        <mat-select formControlName="bankID" required>
+                            <mat-option [value]="Bank.bankID" *ngFor="let Bank of BankList" >{{Bank.bank}}</mat-option>
+                        </mat-select>
+                        <mat-error>
+                            Please select a Bank
+                        </mat-error>
+                    </mat-form-field>
+                </div> -->
+                <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                    <mat-form-field class="example-full-width" appearance="outline" floatLabel="always"> 
+                        <mat-label>Bank</mat-label>                       
+                        <input required type="text" matInput [matAutocomplete]="auto"
+                        formControlName="bank" >
+                        <mat-autocomplete #auto="matAutocomplete" (optionSelected)="onBankSelected($event.option.value)">
+                            <mat-option *ngFor="let options of filteredOptions | async"
+                                [value]="options.bank" (click)="getBankID(options.bankID)">
+                                {{options.bank}}
+                            </mat-option>
+                        </mat-autocomplete>
+                        <mat-error *ngIf="advanceTableForm.controls['bank'].hasError('bankInvalid')">
+                            Please select a Bank
+                        </mat-error>
+                    </mat-form-field>
+                </div>
+                <!-- <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                    <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                        <mat-label>Branch</mat-label>
+                        <mat-select formControlName="bankBranchID" required>
+                            <mat-option [value]="BankBranch.bankBranchID" *ngFor="let BankBranch of BankBranchList" >{{BankBranch.bankBranch}}</mat-option>
+                        </mat-select>
+                        <mat-error>
+                            Please select a Branch
+                        </mat-error>
+                    </mat-form-field>
+                </div> -->
+                <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                    <mat-form-field class="example-full-width" appearance="outline" floatLabel="always"> 
+                        <mat-label>Branch</mat-label>                       
+                        <input required type="text" matInput [matAutocomplete]="auto1"
+                        formControlName="bankBranch">
+                        <mat-autocomplete #auto1="matAutocomplete" (optionSelected)="onBranchSelected($event.option.value)">
+                            <mat-option *ngFor="let options of filteredBranchOptions | async"
+                                [value]="options.bankBranch" (click)="getBranchID(options.bankBranchID)">
+                                {{options.bankBranch}}
+                            </mat-option>
+                        </mat-autocomplete>
+                        <mat-error *ngIf="advanceTableForm.controls['bankBranch'].hasError('bankBranchInvalid')">
+                            Please select a Bank Branch
+                        </mat-error>
+                    </mat-form-field>
+                </div>
+            </div> 
+            
+            <div class="row">
+                <!-- <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                    <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                        <mat-label>Card</mat-label>
+                        <mat-select formControlName="cardID" required>
+                            <mat-option [value]="Card.cardID" *ngFor="let Card of CardList" >{{Card.card}}</mat-option>
+                        </mat-select>
+                        <mat-error>
+                            Please select a Card
+                        </mat-error>
+                    </mat-form-field>
+                </div> -->
+                <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                    <mat-form-field class="example-full-width" appearance="outline" floatLabel="always"> 
+                        <mat-label>Card</mat-label>                       
+                        <input required type="text" matInput [matAutocomplete]="auto2"
+                        formControlName="card">
+                        <mat-autocomplete #auto2="matAutocomplete" (optionSelected)="onCardSelected($event.option.value)">
+                            <mat-option *ngFor="let options of filteredCardOptions | async"
+                                [value]="options.card" (click)="getCardID(options.cardID)">
+                                {{options.card}}
+                            </mat-option>
+                        </mat-autocomplete>
+                        <mat-error *ngIf="advanceTableForm.controls['card'].hasError('cardInvalid')">
+                            Please select a  Card
+                        </mat-error>
+                    </mat-form-field>
+                </div>
+
+                <!-- <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                    <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                        <mat-label>Card Processing Charge</mat-label>
+                        <mat-select formControlName="cardProcessingChargeID" required>
+                            <mat-option [value]="CardProcessingCharge.cardProcessingChargeID" *ngFor="let CardProcessingCharge of CardProcessingChargeList" >{{CardProcessingCharge.cardProcessingCharge}}</mat-option>
+                        </mat-select>
+                        <mat-error>
+                            Please select a Card Processing Charge
+                        </mat-error>
+                    </mat-form-field>
+                </div> -->
+                <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                    <mat-form-field class="example-full-width" appearance="outline" floatLabel="always"> 
+                        <mat-label>Card Processing Charge</mat-label>                       
+                        <input required type="text" matInput [matAutocomplete]="auto3"
+                        formControlName="cardProcessingCharge">
+                        <mat-autocomplete #auto3="matAutocomplete" (optionSelected)="onChargeSelected($event.option.value)">
+                            <mat-option *ngFor="let options of filteredChargeOptions | async"
+                                [value]="options.cardProcessingCharge" (click)="getChargeID(options.cardProcessingChargeID)">
+                                {{options.cardProcessingCharge}}
+                            </mat-option>
+                        </mat-autocomplete>
+                        <mat-error *ngIf="advanceTableForm.controls['cardProcessingCharge'].hasError('cardProcessingChargeInvalid')">
+                            Please Select Card Processing Charge
+                        </mat-error>
+                    </mat-form-field>
+                </div>
+            </div>  
+
+            <div class="row">
+                <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                    <mat-form-field class="example-full-width" appearance="outline"  floatLabel="always">
+                        <mat-label>Charge Percentage</mat-label>
+                        <input matInput (keypress)="keyPress($event)" formControlName="bankChargePercentage" required>
+                        <mat-error *ngIf="advanceTableForm.get('bankChargePercentage').hasError('required')">
+                            Charge Percentage is required
+                        </mat-error>
+                    </mat-form-field>
+                </div>
+
+                <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                    <mat-form-field class="example-full-width" appearance="outline"  floatLabel="always">
+                        <mat-label>IGST</mat-label>
+                        <input matInput (keypress)="keyPress($event)" formControlName="bankChargeConfigIGSTRate" required>
+                        <mat-error *ngIf="advanceTableForm.get('bankChargeConfigIGSTRate').hasError('required')">
+                            IGST is required
+                        </mat-error>
+                    </mat-form-field>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                    <mat-form-field class="example-full-width" appearance="outline"  floatLabel="always">
+                        <mat-label>CGST</mat-label>
+                        <input matInput (keypress)="keyPress($event)" formControlName="bankChargeConfigCGSTRate" required>
+                        <mat-error *ngIf="advanceTableForm.get('bankChargeConfigCGSTRate').hasError('required')">
+                            CGST is required
+                        </mat-error>
+                    </mat-form-field>
+                </div>
+
+                <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                    <mat-form-field class="example-full-width" appearance="outline"  floatLabel="always">
+                        <mat-label>SGST</mat-label>
+                        <input matInput (keypress)="keyPress($event)" formControlName="bankChargeConfigSGSTRate" required>
+                        <mat-error *ngIf="advanceTableForm.get('bankChargeConfigSGSTRate').hasError('required')">
+                            SGST is required
+                        </mat-error>
+                    </mat-form-field>
+                </div>
+            </div>
+            
+            <div class="row">
+                <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                    <mat-form-field class="example-full-width" appearance="outline"  floatLabel="always">
+                        <mat-label>Charge Start Date</mat-label>
+                        <input required matInput [matDatepicker]="startDate" 
+                            formControlName="bankChargeConfigStartDate" (blur)="onBlurStartDate($event.target.value)">
+                        <mat-datepicker-toggle matSuffix [for]="startDate"></mat-datepicker-toggle>
+                        <mat-datepicker #startDate></mat-datepicker>
+                        <mat-error *ngIf="advanceTableForm.get('bankChargeConfigStartDate').hasError('required')">
+                            Charge Start Date is required
+                        </mat-error>
+                        <mat-error *ngIf="advanceTableForm.get('bankChargeConfigStartDate')?.hasError('invalidDate')">
+                            Invalid date format. Use DD/MM/YYYY.
+                        </mat-error>
+                    </mat-form-field>
+                </div>
+
+                <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                    <mat-form-field class="example-full-width" appearance="outline"  floatLabel="always">
+                        <mat-label>Charge End Date</mat-label>
+                        <input required matInput [matDatepicker]="endDate" 
+                            formControlName="bankChargeConfigEndDate" (blur)="onBlurEndDate($event.target.value)">
+                        <mat-datepicker-toggle matSuffix [for]="endDate"></mat-datepicker-toggle>
+                        <mat-datepicker #endDate></mat-datepicker>
+                        <mat-error *ngIf="advanceTableForm.get('bankChargeConfigEndDate').hasError('required')">
+                            Charge End Date is required
+                        </mat-error>
+                        <mat-error *ngIf="advanceTableForm.get('bankChargeConfigEndDate')?.hasError('invalidDate')">
+                            Invalid date format. Use DD/MM/YYYY.
+                        </mat-error>
+                    </mat-form-field>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                    <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                        <mat-label>Activation Status</mat-label>
+                        <mat-select formControlName="activationStatus">
+                            <mat-option [value]=true>Active</mat-option>
+                            <mat-option [value]=false>Deleted</mat-option>
+                        </mat-select>
+
+                        <mat-error *ngIf="advanceTableForm.get('activationStatus').hasError('required')">
+                            Activation Status is required
+                        </mat-error>
+                    </mat-form-field>
+                </div>
+            </div>
+            
+            <div class="row">
+                <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12 mb-2">
+                    <div class="example-button-row">
+                        <button mat-raised-button color="primary" *ngIf="saveDisabled" [type]="submit" [disabled]="!advanceTableForm.valid"  (click)="confirmAdd()">Save</button>
+                        <mat-spinner *ngIf="!saveDisabled" diameter="30"></mat-spinner>
+                        <button *ngIf="action==='add'" mat-raised-button color="warn" (click)="reset()" tabindex="-1">Reset</button>
+                        <button *ngIf="action==='edit'" mat-raised-button color="warn" (click)="onNoClick()" tabindex="-1">Cancel</button>
+                    </div>
+                </div>
+            </div>
+        </form>
+  </div>

@@ -1,0 +1,396 @@
+<div class="addContainer">
+    <div class="modalHeader">
+        <div class="editRowModal">
+            <div class="modalHeader clearfix">
+                <!-- <img [src]='advanceTable.img' alt="avatar"> -->
+                <div class="modal-about">
+                    <div class="font-weight-bold p-t-5 font-17">
+                        Garage In {{DriverName}} with {{RegistrationNumber}} for Reservation No: {{ReservationID}},
+                        Allotment No: {{AllotmentID}}, DutySlipNo : {{dutySlipID}},
+                        Pickup Date:{{ actualDate | date: 'dd/MM/yyyy' }},
+                        Pickup Time:{{ actualTime | date: 'hh:mm a' }} </div>
+                </div>
+                <div *ngIf="!isSaveAllowed" style="color:rgb(150, 4, 4); margin-top:5px; font-style: italic;">
+                ({{ verifyDutyStatusAndCacellationStatus }}!!!!!)
+            </div>
+            </div>
+        </div>
+        <button mat-icon-button (click)="dialogRef.close()" aria-label="Close dialog">
+            <mat-icon>close</mat-icon>
+        </button>
+    </div>
+    <div mat-dialog-content>
+        <form class="register-form m-4" [formGroup]="advanceTableForm" (ngSubmit)="submit">
+            <div class="row">
+                <!-- <div class="col-xl-12 col-lg-4 col-md-4 col-sm-12 mb-2">
+                            <mat-radio-group formControlName="locationInEntryMethod" (change)="selectRadioButton($event)"  class="d-flex justify-content-between" >
+                                <mat-radio-button value="Manual" (click)="getDataManual()">Manual</mat-radio-button>
+                                <mat-radio-button value="App" (click)="getDataApp()">App</mat-radio-button>
+                                <mat-radio-button value="GPS" >GPS</mat-radio-button>
+                        </mat-radio-group>  
+                </div>  -->
+            </div>
+            <!-- <div class="row">
+                <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                    <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                        <mat-label>Entry Method</mat-label>
+                        <mat-select required #typeVal [class.is-invalid]="typeVal.invalid && typeVal.touched"
+                         formControlName="locationInEntryMethod">
+                            <mat-option value="App">App</mat-option>
+                            <mat-option value="Manual">Manual</mat-option>
+                        </mat-select>
+
+                        <mat-error>
+                            Please Select Entry Method
+                        </mat-error>
+                    </mat-form-field>
+                </div>
+
+                <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                    <mat-form-field class="example-full-width" appearance="outline"  floatLabel="always">
+                        <mat-label>Executive</mat-label>
+                        <input matInput readonly formControlName="executive">
+                    </mat-form-field>
+                </div>
+            </div> -->
+            <div class="row">
+                <ng-container *ngIf="tab === 'Manual'">
+
+                    <!-- <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                    <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                        <mat-label>Manual Duty Slip No</mat-label>
+                        <input  matInput formControlName="manualDutySlipNumber">
+
+                        <mat-error *ngIf="advanceTableForm.get('manualDutySlipNumber').hasError('required')">
+                            Manual Duty Slip No is required
+                        </mat-error>
+                    </mat-form-field>
+                </div> -->
+
+                    <!-- <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                    <mat-form-field class="example-full-width" appearance="outline"  floatLabel="always">
+                        <mat-label>Car Moved From</mat-label>
+                        <mat-select required #typeVal [class.is-invalid]="typeVal.invalid && typeVal.touched" 
+                        formControlName="actualCarMovedFrom">
+                            <mat-option value="DriverHome">Driver Home</mat-option>
+                            <mat-option value="Field">Field</mat-option>
+                            <mat-option value="Hub">Hub</mat-option>
+                        </mat-select>
+
+                        <mat-error>
+                            Please Select a Car Moved From
+                        </mat-error>
+                    </mat-form-field>
+                </div> -->
+
+                    <!-- <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                    <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                        <mat-label>Location/Hub</mat-label>
+                        <input required type="text" matInput formControlName="locationInLocationOrHub" [matAutocomplete]="auto3">
+                        <mat-autocomplete #auto3="matAutocomplete">
+                          <mat-option *ngFor="let option of filteredOrganizationalEntityOptions | async" [value]="option.organizationalEntityName" (click)="getlocationHubID(option.organizationalEntityID)">
+                            {{option.organizationalEntityName}}
+                          </mat-option>
+                        </mat-autocomplete>
+                        <mat-error *ngIf="advanceTableForm.get('locationInLocationOrHub').hasError('required')">
+                            Location/Hub is required
+                        </mat-error>
+                      </mat-form-field>
+                </div> -->
+
+                    <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                        <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                            <mat-label>Date</mat-label>
+                            <input required matInput [matDatepicker]="Date" placeholder="DD/MM/YYYY"
+                                (blur)="onBlurUpdateDate($event.target.value)" formControlName="locationInDate">
+                            <mat-datepicker-toggle matSuffix [for]="Date"></mat-datepicker-toggle>
+                            <mat-datepicker #Date></mat-datepicker>
+                            <mat-error *ngIf="advanceTableForm.get('locationInDate').hasError('required')">
+                                Date is required
+                            </mat-error>
+                            <mat-error *ngIf="advanceTableForm.get('locationInDate')?.hasError('invalidDate')">
+                                Invalid date format. Use DD/MM/YYYY.
+                            </mat-error>
+                        </mat-form-field>
+                    </div>
+                    <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                        <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                            <mat-label>Time</mat-label>
+                            <input matInput [owlDateTimeTrigger]="time1" [owlDateTime]="time1"
+                                formControlName="locationInTime" (input)="onTimeInput($event)">
+                            <mat-icon matSuffix [owlDateTimeTrigger]="time1" class="date-icon">schedule</mat-icon>
+                            <owl-date-time [pickerType]="'timer'" #time1></owl-date-time>
+                            <mat-error *ngIf="advanceTableForm.get('locationInTime').hasError('required')">
+                                Time is required
+                            </mat-error>
+
+                        </mat-form-field>
+                    </div>
+
+                    <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                        <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                            <mat-label>KM(ODO)</mat-label>
+                            <input required matInput formControlName="locationInKM">
+
+                            <mat-error *ngIf="advanceTableForm.get('locationInKM').hasError('required')">
+                                KM(ODO) is required
+                            </mat-error>
+                        </mat-form-field>
+                    </div>
+
+                    <!-- <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                    <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                        <mat-label>Address</mat-label>
+                        <input placeholder="Address String" matInput formControlName="locationInAddressString" ngx-google-places-autocomplete
+                            [options]="options" (onAddressChange)="AddressChange($event)" required/>
+                        <mat-error *ngIf="advanceTableForm.get('locationInAddressString').hasError('required')">
+                            Please select a Address
+                        </mat-error>
+
+                    </mat-form-field>
+                </div> -->
+
+                    <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2" *ngIf="ifBlock; else elseBlock">
+                        <!-- Address Input with mat-autocomplete -->
+                        <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                            <mat-label>Address</mat-label>
+                            <input required type="text" matInput formControlName="locationInAddressString"
+                                [matAutocomplete]="auto20" (input)="onTypingLocation()"
+                                (blur)="advanceTableForm.get('locationInAddressString')?.markAsTouched()" />
+
+                            <mat-autocomplete #auto20="matAutocomplete"
+                                (optionSelected)="onAddressSelected($event.option.value)">
+                                <mat-option *ngFor="let option of filteredGoogleAddressOptions | async"
+                                    [value]="option.geoSearchString" (click)="bindPickupSpotTypeandSpot(option)">
+                                    {{ option.geoSearchString }}
+                                </mat-option>
+                            </mat-autocomplete>
+
+                            <!-- Error message for required field validation -->
+                            <mat-error *ngIf="advanceTableForm.get('locationInAddressString')?.hasError('required') 
+                                && (advanceTableForm.get('locationInAddressString')?.touched 
+                                || advanceTableForm.get('locationInAddressString')?.dirty)">
+                                Address is required
+                            </mat-error>
+
+                            <!-- INVALID GOOGLE SELECTION ERROR -->
+                            <mat-error *ngIf="advanceTableForm.get('locationInAddressString')?.hasError('invalidAddress') 
+                                            && !advanceTableForm.get('locationInAddressString')?.hasError('required')">
+                                Please select a valid address from suggestions
+                            </mat-error>
+                        </mat-form-field>
+
+                        <!-- Google Addresses Checkbox - Always Visible -->
+                        <div style="text-align: right; margin-top: -10px;">
+                            <mat-checkbox color="primary" formControlName="googleAddresses" (change)="valueSwitch()"
+                                [labelPosition]="labelPosition">
+                                Google Addresses
+                            </mat-checkbox>
+                        </div>
+                    </div>
+
+                    <!-- Google Places Autocomplete Else Block -->
+                    <ng-template #elseBlock>
+                        <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                            <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                                <mat-label>Address</mat-label>
+                                <input matInput ngx-google-places-autocomplete [options]="options"
+                                    #placesRef="ngx-places" (onAddressChange)="handleAddressChange($event)"
+                                    formControlName="locationInAddressString" (input)="onTypingLocation()" required />
+
+                                <!-- Error message for required field validation -->
+                                <mat-error *ngIf="
+advanceTableForm.get('locationInAddressString')?.invalid &&
+advanceTableForm.get('locationInAddressString')?.touched
+">
+
+                                    <span *ngIf="advanceTableForm.get('locationInAddressString')?.hasError('required')">
+                                        Please select an Address
+                                    </span>
+
+                                    <span
+                                        *ngIf="advanceTableForm.get('locationInAddressString')?.hasError('invalidAddress')">
+                                        Please select address from suggestions
+                                    </span>
+
+                                </mat-error>
+
+                            </mat-form-field>
+
+                            <!-- Google Addresses Checkbox - Always Visible -->
+                            <div style="text-align: right; margin-top: -10px;">
+                                <mat-checkbox color="primary" formControlName="googleAddresses" (change)="valueSwitch()"
+                                    [labelPosition]="labelPosition">
+                                    Google Addresses
+                                </mat-checkbox>
+                            </div>
+                        </div>
+                    </ng-template>
+
+                    <!-- <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                    <mat-form-field class="example-full-width" appearance="outline"  floatLabel="always">
+                        <mat-label>Latitude</mat-label>
+                        <input matInput formControlName="locationInLatitude" readonly required>
+                        <mat-error *ngIf="advanceTableForm.get('locationInLatitude').hasError('required')">
+                            Latitude is required
+                        </mat-error>
+                    </mat-form-field>
+                </div> 
+                <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2" >
+                    <mat-form-field class="example-full-width" appearance="outline"  floatLabel="always">
+                        <mat-label>Longitude</mat-label>
+                        <input matInput formControlName="locationInLongitude" readonly required>
+                        <mat-error *ngIf="advanceTableForm.get('locationInLongitude').hasError('required')">
+                            Longitude is required
+                        </mat-error>
+                    </mat-form-field>
+                     
+            </div> -->
+                </ng-container>
+
+                <ng-container *ngIf="tab === 'APP'">
+
+                    <!-- <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                        <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                            <mat-label>Manual Duty Slip No</mat-label>
+                            <input  matInput formControlName="manualDutySlipNumberByApp">
+    
+                        </mat-form-field>
+                    </div> -->
+
+                    <!-- <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                        <mat-form-field class="example-full-width" appearance="outline"  floatLabel="always">
+                            <mat-label>Car Moved From</mat-label>
+                            <mat-select required #typeVal [class.is-invalid]="typeVal.invalid && typeVal.touched" 
+                            formControlName="actualCarMovedFromByApp">
+                                <mat-option value="DriverHome">Driver Home</mat-option>
+                                <mat-option value="Field">Field</mat-option>
+                                <mat-option value="Hub">Hub</mat-option>
+                            </mat-select>
+    
+                            <mat-error>
+                                Please Select a Car Moved From
+                            </mat-error>
+                        </mat-form-field>
+                    </div>
+    
+                    <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                        <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                            <mat-label>Location/Hub</mat-label>
+                            <input required type="text" matInput formControlName="locationInLocationOrHubByApp" [matAutocomplete]="auto3">
+                            <mat-autocomplete #auto3="matAutocomplete">
+                              <mat-option *ngFor="let option of filteredOrganizationalEntityOptions | async" [value]="option.organizationalEntityName" (click)="getlocationHubID(option.organizationalEntityID)">
+                                {{option.organizationalEntityName}}
+                              </mat-option>
+                            </mat-autocomplete>
+                            <mat-error *ngIf="advanceTableForm.get('locationInLocationOrHubByApp').hasError('required')">
+                                Location/Hub is required
+                            </mat-error>
+                          </mat-form-field>
+                    </div>
+               -->
+
+                    <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                        <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                            <mat-label>Date</mat-label>
+                            <input required matInput [matDatepicker]="Date" formControlName="locationInDateByApp">
+                            <mat-datepicker-toggle matSuffix [for]="Date"></mat-datepicker-toggle>
+                            <mat-datepicker #Date></mat-datepicker>
+                            <mat-error *ngIf="advanceTableForm.get('locationInDateByApp').hasError('required')">
+                                Date is required
+                            </mat-error>
+                        </mat-form-field>
+                    </div>
+                    <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                        <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                            <mat-label>Time</mat-label>
+                            <input matInput [owlDateTimeTrigger]="time1" [owlDateTime]="time1"
+                                formControlName="locationInTimeByApp" (ngModelChange)="locationTimeSet($event)">
+                            <mat-icon matSuffix [owlDateTimeTrigger]="time1" class="date-icon">schedule</mat-icon>
+                            <owl-date-time [pickerType]="'timer'" #time1></owl-date-time>
+                            <mat-error *ngIf="advanceTableForm.get('locationInTimeByApp').hasError('required')">
+                                Time is required
+                            </mat-error>
+                        </mat-form-field>
+                    </div>
+
+                    <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                        <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                            <mat-label>KM(ODO)</mat-label>
+                            <input required matInput formControlName="locationInKMByApp">
+
+                            <mat-error *ngIf="advanceTableForm.get('locationInKMByApp').hasError('required')">
+                                KM(ODO) is required
+                            </mat-error>
+                        </mat-form-field>
+                    </div>
+
+                    <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                        <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                            <mat-label>Address</mat-label>
+                            <input placeholder="Address String" matInput formControlName="locationInAddressStringByApp"
+                                ngx-google-places-autocomplete [options]="options"
+                                (onAddressChange)="AddressChange($event)" required />
+                            <mat-error
+                                *ngIf="advanceTableForm.get('locationInAddressStringByApp').hasError('required')">
+                                Please select a Address
+                            </mat-error>
+
+                        </mat-form-field>
+                    </div>
+
+                    <!-- <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                        <mat-form-field class="example-full-width" appearance="outline"  floatLabel="always">
+                            <mat-label>Latitude</mat-label>
+                            <input matInput formControlName="locationInLatitudeByApp" readonly required>
+                            <mat-error *ngIf="advanceTableForm.get('locationInLatitudeByApp').hasError('required')">
+                                Latitude is required
+                            </mat-error>
+                        </mat-form-field>
+                    </div> 
+                    <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2" >
+                        <mat-form-field class="example-full-width" appearance="outline"  floatLabel="always">
+                            <mat-label>Longitude</mat-label>
+                            <input matInput formControlName="locationInLongitudeByApp" readonly required>
+                            <mat-error *ngIf="advanceTableForm.get('locationInLongitudeByApp').hasError('required')">
+                                Longitude is required
+                            </mat-error>
+                        </mat-form-field>
+                    </div>           -->
+
+                </ng-container>
+
+                <div class="col-xl-4 col-lg-12 col-md-12 col-sm-12 mb-2" *ngIf="tab === 'Manual'">
+                    <!-- <div *ngIf="isSaveAllowed">
+                        <span style="color:red;margin-bottom: 10px;">{{verifyDutyStatusAndCacellationStatus}}</span>
+                    </div> -->
+                    <div class="example-button-row">
+                        <button mat-raised-button color="primary" *ngIf="saveDisabled" [type]="submit"
+                            [disabled]="!advanceTableForm.valid || locationInEntry || !isSaveAllowed"
+                            (click)="Put()">Save</button>
+                        <mat-spinner *ngIf="!saveDisabled" diameter="30"></mat-spinner>
+                    </div>
+                </div>
+
+                <div class="col-xl-4 col-lg-12 col-md-12 col-sm-12 mb-2">
+                    <div class="example-button-row">
+                        <!-- <button  mat-raised-button color="warn" (click)="onNoClick()"
+                    [disabled]="locationInEntry"
+                    tabindex="-1">Reset</button> -->
+                    </div>
+                </div>
+
+                <!-- <div class="col-xl-4 col-lg-12 col-md-12 col-sm-12 mb-2">
+                    <div class="example-button-row">
+                        <button mat-raised-button color="primary" [type]="submit" [disabled]="locationInEntry"  (click)="FetchDataSearch()">Fetch Data From App</button>                    </div>
+                </div> -->
+                <!-- <div class="col-xl-6 col-lg-12 col-md-12 col-sm-12 mb-2">
+                    <div class="example-button-row">
+                        <button mat-raised-button color="primary" [type]="submit" [disabled]=" dataSource[0].locationInEntryMethod==='App'"  (click)="fetchDataGPS()">Fetch Data From GPS</button>
+                    </div>
+                </div> -->
+
+            </div>
+
+        </form>
+    </div>

@@ -1,0 +1,65 @@
+<div class="addContainer" >
+    <div class="modalHeader">
+        <div class="editRowModal">
+            <div class="modalHeader clearfix">
+                <!-- <img [src]='advanceTable.img' alt="avatar"> -->
+                <div class="modal-about">
+                    <div class="font-weight-bold p-t-5 font-17">
+                        {{dialogTitle}}</div>
+                </div>
+            </div>
+        </div>
+        <button mat-icon-button (click)="dialogRef.close()" aria-label="Close dialog">
+            <mat-icon>close</mat-icon>
+        </button>
+    </div>
+    <div mat-dialog-content>     
+        <form class="register-form m-4" [formGroup]="advanceTableForm" (ngSubmit)="submit">
+            <div class="row">
+                <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12 mb-2">
+                    DL9DE7474 Innova Crysta -2022 MUV is currently attached to Ram Lal#987887654543  
+                 </div>
+            </div>
+            <div class="row">
+                <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12 mb-2">
+                    <mat-form-field appearance="outline" floatLabel="always" class="example-full-width">
+                        <mat-label>Reason of Attachment/Detachment</mat-label>
+                        <input  matInput >
+                    </mat-form-field>
+                </div>
+            </div>
+            <div class="row">
+      
+                <div class="col-xl-6 col-lg-6 col-md-6 col-sm-6 mb-2">
+                    <mat-form-field appearance="outline" floatLabel="always" >
+                        <mat-label>Driver Name</mat-label>
+                        <input  matInput >
+                    </mat-form-field>
+    
+                </div>
+                <div class="col-xl-6 col-lg-6 col-md-6 col-sm-6 mb-2">
+                    <span>Vendor - None</span>
+                </div>
+        </div>
+
+        <div class="row">
+            <div class="col-xl-6 col-lg-6 col-md-6 col-sm-6 mb-2">
+                <span>License No - None</span>
+            </div>
+
+            <div class="col-xl-6 col-lg-6 col-md-6 col-sm-6 mb-2">
+                <span>RTO - None</span>               
+            </div>
+        </div>
+
+
+        <div class="row">
+            <div class="col-xl-6 col-lg-6 col-md-6 col-sm-6 mb-2">
+                <button type="button" class="btn btn-primary" >Attach Car And Driver</button>     
+            </div>
+           
+        </div>
+
+    </form>
+    </div>
+</div>

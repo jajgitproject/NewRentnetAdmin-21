@@ -1,0 +1,130 @@
+<div *ngFor="let data of advanceTableData;index as i">
+<div class="row" style="margin-left: 20px;margin-top: 20px;">
+    <!-- <b>  Passenger {{i+1}} &nbsp;</b>
+    <span *ngIf="i>0">
+        <b> - </b> <a style="cursor: pointer;color: #007bff;" (click)="editPassenger(i)">  Edit  </a> <b>-</b>
+        <a style="cursor: pointer;color: #007bff;">  Delete </a>
+    <a style="cursor: pointer;color: #007bff;" [disabled]="advanceTableData[0]" (click)="editPassenger(i)">
+          - Delete</a>
+    </span> -->
+    <a style="cursor: pointer; color: #007bff;">
+        Passenger {{i + 1}} -
+        <span style="cursor: pointer; color: #007bff;" (click)="editPassenger(i)">Edit</span> -
+        <span style="cursor: pointer; color: #007bff;" (click)="deleteItem(i)">Delete</span>
+    </a>
+</div>
+
+<div class="row" style="margin-left: 20px;margin-top: 20px;">
+    <div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 mb-2">
+        <span>
+            <b>
+                Passenger Name
+            </b>                   
+        </span>
+        <br/>
+        <span>{{data.customerPersonName}}</span>
+    </div>
+
+    <div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 mb-2">
+        <span>
+            <b>
+                Passenger Mobile
+            </b>                   
+        </span>
+        <br/>
+        <span>{{data.primaryMobile}}</span>
+    </div>
+
+    <div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 mb-2">
+        <span>
+            <b>
+                Passenger Email
+            </b>                   
+        </span>
+        <br/>
+        <span>{{data.primaryEmail}}</span>
+    </div>
+
+    <div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 mb-2">
+        <span>
+            <b>
+                Status(Gender, VIP Status)
+            </b>                   
+        </span>
+        <br/>
+        <!-- <span>Male - N/A - Guard</span> -->
+        <span>{{data.gender}}</span>
+    </div>
+    
+</div>
+
+<div class="row" style="margin-left: 20px;margin-top: 20px;margin-bottom: 20px;">
+    <div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 mb-2">
+        <span>
+            <b>
+                PickupDate & Time
+            </b>                   
+        </span>
+        <br/>
+        <span>{{data.pickupDate | date:'shortDate'}} {{data.pickupTime | date:'shortTime'}}</span>
+    </div>
+
+    <!-- <div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 mb-2">
+        <span>
+            <b>
+                Pickup Spot
+            </b>                   
+        </span>
+        <br/>
+        <span>{{data.pickupSpotType}}</span><br/>
+        <span>{{data.pickupSpot}}</span>
+    </div> -->
+
+    <div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 mb-2">
+        <span>
+            <b>
+                Pickup Address
+            </b>                   
+        </span>
+        <br/>
+        <span>{{data.pickupAddress}}</span>
+    </div>
+    
+</div>
+
+<div class="row" style="margin-left: 20px;margin-top: 20px;margin-bottom: 20px;">
+    <div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 mb-2">
+        <span>
+            <b>
+                Drop Off Date & Time
+            </b>                   
+        </span>
+        <br/>
+        <span>{{data.dropOffDate | date:'shortDate'}} {{data.dropOffTime | date:'shortTime'}}</span>
+    </div>
+
+    <!-- <div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 mb-2">
+        <span>
+            <b>
+                Drop Off Spot
+            </b>                   
+        </span>
+        <br/>
+        <span>{{data.dropOffSpotType}}</span><br/>
+        <span>{{data.dropOffSpot}}</span>
+    </div> -->
+
+    <div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 mb-2">
+        <span>
+            <b>
+                Drop Off Address
+            </b>                   
+        </span>
+        <br/>
+        <span>{{data.dropOffAddress}}</span>
+    </div>
+    
+</div>
+
+</div>
+

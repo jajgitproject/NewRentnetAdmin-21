@@ -1,0 +1,185 @@
+<div class="addContainer">
+    <div class="modalHeader">
+        <div class="editRowModal">
+            <div class="modalHeader clearfix">
+                <!-- <img [src]='advanceTable.img' alt="avatar"> -->
+                <div class="modal-about" style="text-align: center;">
+                    <div class="font-weight-bold p-t-5 font-17">
+                      <b>   {{customerPersonName}}'s</b>  {{dialogTitle}}
+                    </div>
+
+                </div>
+            </div>
+        </div>
+        <button mat-icon-button (click)="dialogRef.close()" aria-label="Close dialog">
+            <mat-icon>close</mat-icon>
+        </button>
+    </div>
+    <div mat-dialog-content>
+        <form class="register-form m-4" [formGroup]="advanceTableForm" (ngSubmit)="submit">
+            <div class="row">
+                <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                    <mat-form-field class="example-full-width" appearance="outline"  floatLabel="always">
+                        <mat-label>Document</mat-label>
+                        <input matInput formControlName="documentName" readonly>
+                      
+                    </mat-form-field>
+                </div>
+
+                <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                    <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                        <mat-label>Document Number</mat-label>
+                        <input matInput formControlName="documentNumber" readonly>
+                      
+                    </mat-form-field>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                    <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                        <mat-label>Issuing Authority</mat-label>
+                        <input matInput formControlName="documentIssuingAuthority" readonly>
+                        
+                    </mat-form-field>
+                </div>
+
+                <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2" *ngIf="!advanceTable.documentImage">
+                    <mat-form-field class="example-full-width" appearance="outline"  floatLabel="always">
+                        <mat-label>Document Image</mat-label>
+                        <input readonly matInput formControlName="documentImage">
+                    </mat-form-field>
+                </div>
+                <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2" *ngIf="advanceTable.documentImage">
+                    <mat-label>Document Image</mat-label><br>
+                    <a href="{{advanceTable.documentImage}}" target="_blank">
+                        View Image
+                    </a>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                    <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                        <mat-label>Reason(If Image Not Available)</mat-label>
+                        <input readonly matInput formControlName="documentImageNonAvailabilityReason">
+                    </mat-form-field>
+                </div>
+               
+                <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                    <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                        <mat-label>Document Expiry</mat-label>
+                        <input readonly matInput [matDatepicker]="documentExpiry" formControlName="documentExpiry">
+                        <mat-datepicker-toggle matSuffix [for]="documentExpiry"></mat-datepicker-toggle>
+                        <mat-datepicker #documentExpiry></mat-datepicker>
+                        <mat-error *ngIf="advanceTableForm.get('documentExpiry').hasError('required')">
+                            Document Expiry is required
+                        </mat-error>
+                    </mat-form-field>
+
+                </div>
+
+            </div>
+            <div class="row">
+                 <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                    <mat-form-field class="example-full-width" appearance="outline" floatLabel="always"> 
+                        <mat-label>Address City</mat-label>                       
+                        <input matInput formControlName="addressCity" readonly>
+                    </mat-form-field>
+                </div>  
+
+                 <!-- <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                    <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                        <mat-label>City</mat-label>
+                        <mat-select required #cityVal [class.is-invalid]="cityVal.invalid && cityVal.touched"
+                            formControlName="addressCityID">
+                            <mat-option [value]="City.geoPointID"
+                                *ngFor="let City of CityList">{{City.geoPointName}}</mat-option>
+                        </mat-select>
+                        <mat-error>
+                            Please select a City
+                        </mat-error>
+                    </mat-form-field>
+                </div>  -->
+
+                <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                    <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                        <mat-label>Address</mat-label>
+                        <input matInput formControlName="address" readonly>
+                       
+                    </mat-form-field>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                    <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                        <mat-label>Pin</mat-label>
+                        <input matInput formControlName="pin" readonly>
+                       
+                    </mat-form-field>
+                </div>
+                <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                    <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                        <mat-label>Activation Status</mat-label>
+                        <input matInput formControlName="status" readonly>
+                        
+                    </mat-form-field>
+                </div>
+             
+            </div>
+            <div class="row">
+                <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                    <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                        <mat-label>Verified</mat-label>
+                        <mat-select formControlName="documentVerified">
+                            <mat-option value="Verified">Verified</mat-option>
+                            <mat-option value="Rejected">Rejected</mat-option>
+                            <mat-option value="Unverified">Unverified</mat-option>
+                        </mat-select>
+                    </mat-form-field>
+                </div>
+             
+                <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                    <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                        <mat-label>Verfication Remark</mat-label>
+                        <input matInput formControlName="documentVerifiedRemark" >
+                        
+                    </mat-form-field>
+                </div>
+
+            </div>
+            
+            <div class="row">
+                <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                    <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                        <mat-label>Verfied By</mat-label>
+                        <input matInput formControlName="documentVerifiedBy" readonly>
+                        <mat-error *ngIf="advanceTableForm.get('documentVerifiedBy').hasError('required')">
+                            VerifiedBy is required
+                        </mat-error>
+                    </mat-form-field>
+                </div>
+                <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                    <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                        <mat-label>Verification Date</mat-label>
+                        <input readonly matInput [matDatepicker]="documentVerifiedDate" formControlName="documentVerifiedDate">
+                        <mat-datepicker-toggle matSuffix [for]="documentVerifiedDate"></mat-datepicker-toggle>
+                        <mat-datepicker #documentVerifiedDate disabled="true"></mat-datepicker>
+                        
+                    </mat-form-field>
+
+                </div>
+                
+            </div>
+
+            <div class="row">
+                <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12 mb-2">
+                    <div class="example-button-row">
+                        <button mat-raised-button color="primary"  *ngIf="saveDisabled" [type]="submit" [disabled]="!advanceTableForm.valid"
+                        (click)="Put()">Save</button>
+                        <mat-spinner *ngIf="!saveDisabled" diameter="30"></mat-spinner>
+                        <button mat-raised-button color="warn" (click)="onNoClick()" tabindex="-1">Cancel</button>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>

@@ -1,0 +1,103 @@
+<div class="addContainer">
+    <div class="modalHeader">
+        <div class="editRowModal">
+            <div class="modalHeader clearfix">
+                <!-- <img [src]='advanceTable.img' alt="avatar"> -->
+                <div class="modal-about">
+                    <div class="p-t-5 font-17">
+                        {{dialogTitle}} <b>{{CustomerName}}</b> Contract Applicable <b>{{StartDate | date:'dd-MM-yyyy'}}</b> - <b>{{EndDate | date:'dd-MM-yyyy'}}</b></div>
+                </div>
+            </div>
+        </div>
+        <button mat-icon-button (click)="dialogRef.close()" aria-label="Close dialog">
+      <mat-icon>close</mat-icon>
+    </button>
+    </div>
+    <div mat-dialog-content>
+        <form class="register-form m-4" [formGroup]="advanceTableForm" (ngSubmit)="submit">
+
+            <div class="row">
+                <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                    <mat-form-field class="example-full-width" appearance="outline"  floatLabel="always">
+                        <mat-label>Fuel Surcharge Start Date</mat-label>
+                        <input required matInput [matDatepicker]="startDate" formControlName="fuelSurchargePercentageStartDate">
+                        <mat-datepicker-toggle matSuffix [for]="startDate"></mat-datepicker-toggle>
+                        <mat-datepicker #startDate></mat-datepicker>
+                        <mat-error *ngIf="advanceTableForm.get('fuelSurchargePercentageStartDate').hasError('required')">
+                            Fuel Surcharge Start Date is required
+                        </mat-error>
+                    </mat-form-field>
+
+                </div>
+                <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                    <mat-form-field class="example-full-width" appearance="outline"  floatLabel="always">
+                        <mat-label>Fuel Surcharge End Date</mat-label>
+                        <input required matInput [matDatepicker]="endDate" formControlName="fuelSurchargePercentageEndDate">
+                        <mat-datepicker-toggle matSuffix [for]="endDate"></mat-datepicker-toggle>
+                        <mat-datepicker #endDate></mat-datepicker>
+                        <mat-error *ngIf="advanceTableForm.get('fuelSurchargePercentageEndDate').hasError('required')">
+                            Fuel Surcharge End Date is required
+                        </mat-error>
+                    </mat-form-field>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                    <mat-form-field class="example-full-width" appearance="outline"  floatLabel="always">
+                        <mat-label>Fuel Surcharge Percentage On Package</mat-label>
+                        <input matInput (keypress)="keyPressNumbersDecimal($event)" formControlName="fuelSurchargePercentageOnPackage" required>
+                        <mat-error *ngIf="advanceTableForm.get('fuelSurchargePercentageOnPackage').hasError('required')">
+                            Fuel Surcharge Percentage On Package is required
+                        </mat-error>
+                    </mat-form-field>
+                </div>
+
+                <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                    <mat-form-field class="example-full-width" appearance="outline"  floatLabel="always">
+                        <mat-label>Fuel Surcharge Percentage On Extra KM</mat-label>
+                        <input matInput (keypress)="keyPressNumbersDecimal($event)" formControlName="fuelSurchargePercentageOnExtraKM" required>
+                        <mat-error *ngIf="advanceTableForm.get('fuelSurchargePercentageOnExtraKM').hasError('required')">
+                            Fuel Surcharge Percentage On Extra KM is required
+                        </mat-error>
+                    </mat-form-field>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                    <mat-form-field class="example-full-width" appearance="outline"  floatLabel="always">
+                        <mat-label>Fuel Surcharge Percentage On Extra Hour</mat-label>
+                        <input matInput (keypress)="keyPressNumbersDecimal($event)" formControlName="fuelSurchargePercentageOnExtraHour" required>
+                        <mat-error *ngIf="advanceTableForm.get('fuelSurchargePercentageOnExtraHour').hasError('required')">
+                            Fuel Surcharge Percentage On Extra Hour is required
+                        </mat-error>
+                    </mat-form-field>
+                </div>
+
+                    <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                        <mat-form-field class="example-full-width" appearance="outline"  floatLabel="always">
+                            <mat-label>Activation Status</mat-label>
+                            <mat-select formControlName="activationStatus">
+                                <mat-option [value]=true>Active</mat-option>
+                                <mat-option [value]=false>Deleted</mat-option>
+                            </mat-select>
+    
+                            <mat-error *ngIf="advanceTableForm.get('activationStatus').hasError('required')">
+                                Activation Status is required
+                            </mat-error>
+                        </mat-form-field>
+                    </div> 
+            </div>                    
+            
+            <div class="row">
+                <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12 mb-2">
+                    <div class="example-button-row">
+                        <button mat-raised-button color="primary" [type]="submit" [disabled]="!advanceTableForm.valid"  (click)="confirmAdd()">Save</button>
+                        <button *ngIf="action==='add'" mat-raised-button color="warn" (click)="onNoClick()" tabindex="-1">Reset</button>
+                        <button *ngIf="action==='edit'" mat-raised-button color="warn" (click)="onNoClick()" tabindex="-1">Cancel</button>
+                    </div>
+                </div>
+            </div>
+        </form>
+  </div>

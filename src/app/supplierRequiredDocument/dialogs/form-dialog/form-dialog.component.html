@@ -1,0 +1,158 @@
+<div class="addContainer">
+    <div class="modalHeader">
+        <div class="editRowModal">
+            <div class="modalHeader clearfix">
+                <!-- <img [src]='advanceTable.img' alt="avatar"> -->
+                <div class="modal-about">
+                    <div class="font-weight-bold p-t-5 font-17">
+                        {{dialogTitle}}</div>
+                </div>
+            </div>
+        </div>
+        <button mat-icon-button (click)="dialogRef.close()" aria-label="Close dialog">
+      <mat-icon>close</mat-icon>
+    </button>
+    </div>
+    <div mat-dialog-content>
+        <form class="register-form m-4" [formGroup]="advanceTableForm" (ngSubmit)="submit">
+            <!-- <div class="row">
+                <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                     <mat-form-field class="example-full-width" appearance="outline"  floatLabel="always">
+                        <mat-label>Document</mat-label>
+                         <mat-select required #documentVal [class.is-invalid]="documentVal.invalid && documentVal.touched" formControlName="documentID">
+                            <mat-option [value]="Document.documentID" *ngFor="let Document of DocumentList">{{Document.documentName}}</mat-option>
+                        </mat-select>
+                        <mat-error>
+                            Please select a Document
+                        </mat-error>
+                    </mat-form-field> 
+                 </div>  
+            </div> -->
+           <div class="row">
+            <div class="col-xl-6 col-l66 col-md-12 col-sm-12 mb-2">
+                <section>
+                    <mat-checkbox formControlName="requiredForSoftAttachment">Soft Attachment</mat-checkbox>
+                  </section>
+            </div>
+
+			<div class="col-xl-6 col-l66 col-md-12 col-sm-12 mb-2">
+                <section>
+                    <mat-checkbox formControlName="requiredForFullAttachment">Full Attachment</mat-checkbox>
+                  </section>
+            </div>
+			
+           </div>
+           <div class="row">
+            <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                    <mat-label>Valid From</mat-label>
+                    <input 
+                        required 
+                        matInput 
+                        [matDatepicker]="validFrom" 
+                        placeholder="DD/MM/YYYY"
+                        formControlName="validFrom"
+                        (blur)="onBlurUpdateDate($event.target.value)"
+                    >
+                    <mat-datepicker-toggle matSuffix [for]="validFrom"></mat-datepicker-toggle>
+                    <mat-datepicker #validFrom></mat-datepicker>
+                    <mat-error *ngIf="advanceTableForm && advanceTableForm.get('validFrom').hasError('required')">
+                        Valid From is required
+                    </mat-error>
+                    <mat-error *ngIf="advanceTableForm.get('validFrom')?.hasError('invalidDate')">
+                        Invalid date format. Use DD/MM/YYYY.
+                      </mat-error>
+
+                </mat-form-field>
+                
+            </div>
+            <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">  
+                <mat-form-field class="example-full-width" appearance="outline"  floatLabel="always">
+                    <mat-label>Valid To</mat-label>
+                    <input required matInput [matDatepicker]="validTo"  placeholder="DD/MM/YYYY" formControlName="validTo" (blur)="onBlurUpdateEndDate($event.target.value)">
+                    <mat-datepicker-toggle matSuffix [for]="validTo"></mat-datepicker-toggle>
+                    <mat-datepicker #validTo></mat-datepicker>
+                    <mat-error *ngIf="advanceTableForm.get('validTo').hasError('required')">
+                        Valid To required
+                    </mat-error>
+                    <mat-error *ngIf="advanceTableForm.get('validTo')?.hasError('invalidDate')">
+                        Invalid date format. Use DD/MM/YYYY.
+                      </mat-error>
+
+                </mat-form-field>
+            </div>
+        </div>
+            <div class="row">
+                <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                    <!-- <mat-form-field class="example-full-width" appearance="outline"  floatLabel="always">
+                        <mat-label>Document</mat-label>
+                         <mat-select required #documentVal [class.is-invalid]="documentVal.invalid && documentVal.touched" formControlName="documentID">
+                            <mat-option [value]="Document.documentID" *ngFor="let Document of DocumentList">{{Document.documentName}}</mat-option>
+                        </mat-select>
+                        <mat-error>
+                            Please select a Document
+                        </mat-error>
+                    </mat-form-field>  -->
+
+                    <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                        <mat-label>Document</mat-label>
+                        <input
+                          type="text"
+                          required
+                          matInput
+                          formControlName="searchDocument"
+                          [matAutocomplete]="auto1"
+                        />
+                        <mat-autocomplete
+                          #auto1="matAutocomplete"
+                          (optionSelected)="onDocumentSelected($event.option.value)"
+                        >
+                          <mat-option
+                            *ngFor="let option of filteredDocumentOptions | async"
+                            [value]="option.documentName"
+                          >
+                            {{ option.documentName }}
+                          </mat-option>
+                        </mat-autocomplete>
+                        <mat-error
+                          *ngIf="advanceTableForm.controls['searchDocument'].hasError('documentInvalid')"
+                        >
+                          Please select a Document
+                        </mat-error>
+                      </mat-form-field>
+                      
+                </div>
+                <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                    <mat-form-field class="example-full-width" appearance="outline"  floatLabel="always">
+                        <mat-label>Activation Status</mat-label>
+                        <mat-select formControlName="activationStatus">
+                            <mat-option [value]=true>Active</mat-option>
+                            <mat-option [value]=false>Deleted</mat-option>
+                        </mat-select>
+
+                        <mat-error *ngIf="advanceTableForm.get('activationStatus').hasError('required')">
+                            Activation Status is required
+                        </mat-error>
+                    </mat-form-field>
+                </div>
+            </div>
+           
+            <div class="row">
+                <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12 mb-2">
+                    <div class="example-button-row">
+                      <button mat-raised-button 
+                              color="primary" 
+                              [disabled]="!advanceTableForm.valid || isLoading"
+                              (click)="confirmAdd()">
+                        <mat-spinner *ngIf="isLoading" diameter="20" class="spinner"></mat-spinner>  <!-- Spinner for loading -->
+                        <span *ngIf="!isLoading">Save</span>  <!-- Text when not loading -->
+                      </button>
+                  
+                      <button *ngIf="action === 'add'" mat-raised-button color="warn" (click)="onNoClick()" tabindex="-1">Reset</button>
+                      <button *ngIf="action === 'edit'" mat-raised-button color="warn" (click)="onNoClick()" tabindex="-1">Cancel</button>
+                    </div>
+                  </div>
+                  
+            </div>
+        </form>
+    </div>

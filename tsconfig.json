@@ -1,0 +1,79 @@
+/* To learn more about this file see: https://angular.io/config/tsconfig. */
+{
+  "compileOnSave": false,
+  "compilerOptions": {
+    "baseUrl": "./",
+    "outDir": "./dist/out-tsc",
+    "forceConsistentCasingInFileNames": true,
+    "esModuleInterop": true,
+    "strict": false,
+    "noImplicitOverride": false,
+    "noPropertyAccessFromIndexSignature": false,
+    "noImplicitReturns": false,
+    "noFallthroughCasesInSwitch": true,
+    "sourceMap": true,
+    "declaration": false,
+    "skipLibCheck": true,
+    "experimentalDecorators": true,
+    "moduleResolution": "bundler",
+    "importHelpers": true,
+    "target": "ES2022",
+    "module": "ES2022",
+    "useDefineForClassFields": false,
+    "paths": {
+      "@core": [
+        "src/app/core"
+      ],
+      "@core/*": [
+        "src/app/core/*"
+      ],
+      "@shared": [
+        "src/app/shared"
+      ],
+      "@shared/*": [
+        "src/app/shared/*"
+      ],
+      "@config": [
+        "src/app/config"
+      ],
+      "@config/*": [
+        "src/app/config/*"
+      ],
+      "@compat/*": [
+        "src/app/compat/*"
+      ],
+      "ngx-google-places-autocomplete": [
+        "src/app/compat/google-places-shim"
+      ],
+      "ngx-google-places-autocomplete/*": [
+        "src/app/compat/google-places-shim-objects/*"
+      ],
+      "ngx-perfect-scrollbar": [
+        "src/app/compat/perfect-scrollbar-shim"
+      ],
+      "@danielmoncada/angular-datetime-picker": [
+        "src/app/compat/owl-datetime-shim"
+      ],
+      "ng2-charts": [
+        "src/app/compat/ng2-charts-shim"
+      ],
+      "ngx-material-file-input": [
+        "src/app/compat/material-file-input-shim"
+      ],
+      "@testing": [
+        "src/testing"
+      ],
+      "@testing/*": [
+        "src/testing/*"
+      ]
+    },
+    "types": ["node"]
+  },
+  "angularCompilerOptions": {
+    "enableI18nLegacyMessageIdFormat": false,
+    "strictInjectionParameters": true,
+    "strictInputAccessModifiers": false,
+    "strictTemplates": false,
+    "strictStandalone": false
+  }
+}

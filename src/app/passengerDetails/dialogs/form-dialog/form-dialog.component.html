@@ -1,0 +1,194 @@
+<div class="addContainer">
+  <div class="modalHeader">
+      <div class="editRowModal">
+          <div class="modalHeader clearfix">
+              <div class="modal-about">
+                  <div class="font-weight-bold p-t-5 font-17">
+                      {{ dialogTitle }}
+                  </div>
+                   <div *ngIf="status && status !== 'Changes allow'"
+                        style="color:rgb(150, 4, 4); margin-top:5px; font-style: italic;">
+                        ({{status}}!!!!!)
+                    </div>
+              </div>
+          </div>
+      </div>
+      <button mat-icon-button (click)="dialogRef.close()" aria-label="Close dialog">
+          <mat-icon>close</mat-icon>
+      </button>
+  </div>
+    <div mat-dialog-content>
+        <ng-container *ngIf="!viewDetails">
+        <form class="register-form m-4" [formGroup]="advanceTableForm" (ngSubmit)="submit">
+            <div class="row">
+                <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12 mb-2">
+                    <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                        <mat-label>Search Passenger by Name, Mobile, Email</mat-label>
+                        <input required type="text" matInput formControlName="passengerEmployee" [matAutocomplete]="auto5">
+                        <mat-autocomplete #auto5="matAutocomplete" (optionSelected)="onPassengerSelected($event.option.value)">
+                          <mat-option *ngFor="let option of filteredPassengerOptions | async" 
+                          [value]="option.customerPersonName + '-' + option.gender + '-' + option.importance+ '-' + option.phone+ '-'+ option.customerDepartment+ '-'+ option.customerDesignation+'-'+ option.customerName" 
+                          (click)="getPassengerID(option.customerPersonID)">
+                          {{option.customerPersonName}} - {{option.gender}} - {{option.importance}} - {{option.phone}} - {{option.customerDepartment}} - {{option.customerDesignation}} - {{option.customerName}}
+                          </mat-option>
+                        </mat-autocomplete>
+                        <mat-error *ngIf="advanceTableForm.controls['passengerEmployee'].hasError('passengerEmployeeInvalid')">
+                          Please Select Valid Passenger
+                        </mat-error>
+                      </mat-form-field>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12 mb-2">
+                    <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                        <mat-label>Pickup Stop</mat-label>
+                        <input required type="text" matInput formControlName="reservationPickupStop" [matAutocomplete]="auto">
+                        <mat-autocomplete #auto="matAutocomplete" (optionSelected)="onPickupStopSelected($event.option.value)">
+                          <mat-option *ngFor="let option of filteredOptions | async" 
+                          [value]="option.reservationStopAddress" (click)="getPickupStopID(option.reservationStopID)">
+                            {{option.reservationStopAddress}}
+                          </mat-option>
+                        </mat-autocomplete>
+                        <mat-error *ngIf="advanceTableForm.controls['reservationPickupStop'].hasError('reservationPickupStopInvalid')">
+                          Please Select Valid Pickup Stop
+                        </mat-error>
+                      </mat-form-field>
+                </div>
+            </div>
+
+            <div class="row">
+              <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12 mb-2">
+                <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                    <mat-label>DropOff Stop</mat-label>
+                    <input  type="text" matInput formControlName="reservationDropoffStop" [matAutocomplete]="auto1">
+                    <mat-autocomplete #auto1="matAutocomplete" (optionSelected)="onDropOffStopSelected($event.option.value)">
+                      <mat-option *ngFor="let option of filteredDropOffOptions | async" 
+                      [value]="option.reservationStopAddress" (click)="getDropOffStopID(option.reservationStopID)">
+                        {{option.reservationStopAddress}}
+                      </mat-option>
+                    </mat-autocomplete>
+                    <mat-error *ngIf="advanceTableForm.controls['reservationDropoffStop'].hasError('reservationDropoffStopInvalid')">
+                      Please Select Valid DropOff Stop
+                    </mat-error>
+                    <!-- <mat-error *ngIf="advanceTableForm.get('reservationDropoffStop').hasError('required')">
+                        Please Select Pickup Spot
+                    </mat-error> -->
+                  </mat-form-field>
+              </div>
+            </div>
+          
+            <div class="row">
+                <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2" hidden>
+                    <mat-form-field class="example-full-width" appearance="outline"  floatLabel="always">
+                        <mat-label>Passenger Type</mat-label>
+                        <mat-select>
+                            <mat-option value="Passenger">Passenger</mat-option>
+                            <mat-option value="Guard">Guard</mat-option>
+                        </mat-select>                                                            
+                    </mat-form-field>
+                </div>  
+
+                <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                    <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                        <mat-label>Activation Status</mat-label>
+                        <mat-select formControlName="activationStatus">
+                            <mat-option [value]=true>Active</mat-option>
+                            <mat-option [value]=false>Deleted</mat-option>
+                        </mat-select>
+
+                        <mat-error *ngIf="advanceTableForm.get('activationStatus').hasError('required')">
+                            Activation Status is required
+                        </mat-error>
+                    </mat-form-field>
+                </div>
+            </div>
+            <div class="row">
+                  <!-- <div class="row" *ngIf="status">
+                        <div class="col-12 mb-1">
+                          <span style="color:red">{{status}}</span>
+                        </div>
+                    </div> -->
+                <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12 mb-2">
+                    <div class="example-button-row">
+                        <button mat-raised-button color="primary" *ngIf="saveDisabled" [type]="submit" [disabled]="!advanceTableForm.valid || buttonDisabled"  (click)="confirmAdd()">Save</button>
+                        <mat-spinner *ngIf="!saveDisabled" diameter="30"></mat-spinner>
+                        <button mat-raised-button color="warn" (click)="onNoClick()" tabindex="-1">Cancel</button>
+                    </div>
+                </div>
+            </div>
+        </form>
+        </ng-container>
+          <!-- <mat-card> -->
+            <!-- <mat-card-content> -->
+              <mat-dialog-content class="of-hidden">
+                
+                <ng-container *ngIf="viewDetails">
+                  <ng-container *ngFor="let item of passengerDetailsData; index as i">
+                    <b style="color: #007bff;">
+                        Passenger Details - {{i+1}}
+                    </b>
+                    <br>
+                   <br/>
+                      <div class="row">
+                        <div class="col-xl-4 col-lg-6 col-md-12 col-sm-12 mb-2">
+                          <span class="TDValueBold">Passenger Name</span> <br />
+                          <span class="TDValue">{{item.customerPersonName}}</span>
+                        </div>
+                        <div class="col-xl-4 col-lg-6 col-md-12 col-sm-12 mb-2">
+                          <span class="TDValueBold">Passenger Mobile</span> <br />
+                          <span class="TDValue"> {{item.primaryMobile}}</span>         
+                        </div>
+          
+                        <div class="col-xl-4 col-lg-6 col-md-12 col-sm-12 mb-2">
+                          <span class="TDValueBold"> Passenger Email</span> <br />
+                          <span class="TDValue"> {{item.primaryEmail}}</span> 
+                        </div>
+                      </div>
+
+                      <div class="row">
+                        <div class="col-xl-4 col-lg-6 col-md-12 col-sm-12 mb-2">
+                          <span class="TDValueBold">Status(Gender, VIP Status)</span> <br />
+                          <span class="TDValue">{{item.gender}}</span>
+                        </div>
+                        <div class="col-xl-4 col-lg-6 col-md-12 col-sm-12 mb-2">
+                          <span class="TDValueBold">PickupDate & Time </span> <br />
+                          <span class="TDValue"> {{item.pickupDate | date:'shortDate'}} {{item.pickupTime | date:'shortTime'}}</span>         
+                        </div>
+          
+                        <div class="col-xl-4 col-lg-6 col-md-12 col-sm-12 mb-2">
+                          <span class="TDValueBold">Pickup Spot</span> <br />
+                          <span class="TDValue">{{item.pickupSpotType}}</span><br/>
+                          <span class="TDValue">{{item.pickupSpot}}</span>
+                        </div>
+                      </div>
+
+                      <div class="row">
+                        <div class="col-xl-4 col-lg-6 col-md-12 col-sm-12 mb-2">
+                          <span class="TDValueBold">Drop Off Date & Time</span> <br />
+                          <span class="TDValue">{{item.dropOffDate | date:'shortDate'}} {{item.dropOffTime | date:'shortTime'}}</span>
+                        </div>
+                        <div class="col-xl-4 col-lg-6 col-md-12 col-sm-12 mb-2">
+                          <span class="TDValueBold">Drop Off Spot</span> <br />
+                          <span class="TDValue">{{item.dropOffSpotType}}</span><br/>
+                          <span class="TDValue">{{item.dropOffSpot}}</span>
+       
+                        </div>
+          
+                        <div class="col-xl-4 col-lg-6 col-md-12 col-sm-12 mb-2">
+                          <span class="TDValueBold">Drop Off Address</span> <br />
+                          <span class="TDValue"> {{item.dropOffAddress}}</span> 
+                        </div>
+                      </div>
+                 
+                  </ng-container>
+          
+                </ng-container>
+          
+                <!-- <ng-container *ngIf="!viewDetails">
+                  <div class="alert alert-primary" style="background-color:#E8E8E8; text-align: center;">No Records Found</div>
+                </ng-container> -->
+              </mat-dialog-content>
+            <!-- </mat-card-content> -->
+          <!-- </mat-card> -->
+    </div>

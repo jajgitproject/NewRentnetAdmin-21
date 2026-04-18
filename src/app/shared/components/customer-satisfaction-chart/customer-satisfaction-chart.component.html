@@ -1,0 +1,52 @@
+<mat-card class="customer-satisfaction-chart">
+  <div class="chart-header">
+    <h3 class="chart-title">{{ title }}</h3>
+    @if (data.length > 0) {
+      <div class="satisfaction-summary">
+        <div class="overall-rating">
+          <span class="rating-label">Overall Satisfaction:</span>
+          <span class="rating-value" [style.color]="getSatisfactionColor()">
+            {{ getOverallSatisfaction() }}%
+          </span>
+          <span class="rating-level" [style.color]="getSatisfactionColor()">
+            ({{ getSatisfactionLevel() }})
+          </span>
+        </div>
+      </div>
+    }
+  </div>
+
+  <div class="chart-container">
+    <apx-chart [series]="chartOptions!.series" [chart]="chartOptions!.chart" [colors]="chartOptions!.colors"
+      [labels]="chartOptions!.labels" [plotOptions]="chartOptions!.plotOptions" [legend]="chartOptions!.legend"
+      [dataLabels]="chartOptions!.dataLabels" [tooltip]="chartOptions!.tooltip">
+    </apx-chart>
+  </div>
+
+  @if (showCategories && data.length > 0) {
+    <div class="chart-footer">
+      <div class="category-breakdown">
+        <h4>Category Breakdown</h4>
+        <div class="category-list">
+          @for (item of data; track item) {
+            <div class="category-item">
+              <span class="category-name">{{ item.category }}</span>
+              <div class="category-stats">
+                <span class="stat satisfied">{{ item.satisfied }}% Satisfied</span>
+                <span class="stat neutral">{{ item.neutral }}% Neutral</span>
+                <span class="stat dissatisfied">{{ item.dissatisfied }}% Dissatisfied</span>
+              </div>
+            </div>
+          }
+        </div>
+      </div>
+    </div>
+  }
+
+  @if (!data || data.length === 0) {
+    <div class="empty-state">
+      <mat-icon>sentiment_very_satisfied</mat-icon>
+      <p>No customer satisfaction data available</p>
+    </div>
+  }
+</mat-card>

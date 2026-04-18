@@ -1,0 +1,316 @@
+<section class="content">
+    <div class="container-fluid">
+        <div class="block-header">
+            <div class="row">
+                <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+                    <ul>
+                        <li class="breadcrumb-item bcrumb-1">
+                            <a routerLink="/dashboard/main">
+                                <i class="fas fa-home"></i> Home</a>|
+                            <a href="#" onClick="return false;">Admin</a>|
+                            <a href="#" onClick="return false;">Credit Note Home</a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+    <mat-accordion>
+      <mat-expansion-panel expanded="true">
+        <mat-expansion-panel-header>
+          <mat-panel-title>
+            Quick Search
+          </mat-panel-title>
+        </mat-expansion-panel-header>
+
+        <div id="exampleModalLongTitle">
+            <div class="row">
+                <div class="col-xl-2 col-lg-2 col-md-2 col-sm-12 mb-2">
+                    <mat-form-field appearance="outline" floatLabel="always" class="example-full-width">
+                        <mat-label>Customer Group</mat-label>
+                        <input type="text" matInput [matAutocomplete]="auto" [formControl]="customerGroup">
+                        <mat-autocomplete #auto (optionSelected)="onCustomerGroupSelected($event.option.value)">
+                            <mat-option *ngFor="let options of filteredOptions | async" [value]="options.customerGroup" (click)="getGroupID(options.customerGroupID)">
+                                {{options.customerGroup}}
+                            </mat-option>
+                        </mat-autocomplete>
+                    </mat-form-field>
+                </div>
+
+                <div class="col-xl-2 col-lg-2 col-md-2 col-sm-12 mb-2">
+                    <mat-form-field appearance="outline" floatLabel="always" class="example-full-width">
+                        <mat-label>Customer</mat-label>
+                        <input type="text" matInput [matAutocomplete]="auto1" [formControl]="customer">
+                        <mat-autocomplete #auto1="matAutocomplete" (optionSelected)="onCustomerSelected($event.option.value)">
+                            <mat-option  *ngFor="let option of filteredCustomerOptions | async" [value]="option.customerName">
+                                {{option.customerName}}
+                            </mat-option>
+                        </mat-autocomplete>
+                    </mat-form-field>
+                </div>
+
+                <div class="col-xl-2 col-lg-2 col-md-2 col-sm-12 mb-2">
+                    <mat-form-field appearance="outline" floatLabel="always" class="example-full-width">
+                        <mat-label>Credit Note No.</mat-label>
+                        <input type="text" matInput [(ngModel)]="SearchCreditNoteNumber">
+                    </mat-form-field>
+                </div>
+
+                <div class="col-xl-2 col-lg-2 col-md-2 col-sm-12 mb-2">
+                    <mat-form-field appearance="outline" floatLabel="always" class="example-full-width">
+                        <mat-label>Branch</mat-label>
+                        <input type="text" matInput [matAutocomplete]="auto2" [formControl]="SearchBranch">
+                        <mat-autocomplete #auto2="matAutocomplete" (optionSelected)="OnBranchSelect($event.option.value)">
+                            <mat-option *ngFor="let options of filteredBranchOptions | async" [value]="options.organizationalEntityName">
+                                {{options.organizationalEntityName}}
+                            </mat-option>
+                        </mat-autocomplete>
+                    </mat-form-field>
+                </div>
+
+                <div class="col-xl-2 col-lg-2 col-md-2 col-sm-12 mb-2">
+                    <mat-form-field appearance="outline" floatLabel="always" class="example-full-width">
+                        <mat-label>Date From</mat-label>
+                        <input matInput [matDatepicker]="startingDate" [(ngModel)]="SearchFromDate">
+                        <mat-datepicker-toggle matSuffix [for]="startingDate"></mat-datepicker-toggle>
+                        <mat-datepicker #startingDate></mat-datepicker>
+                    </mat-form-field>
+                </div>
+
+                <div class="col-xl-2 col-lg-2 col-md-2 col-sm-12 mb-2">
+                    <mat-form-field appearance="outline" floatLabel="always" class="example-full-width">
+                        <mat-label>Date To</mat-label>
+                        <input matInput [matDatepicker]="endingDate" [(ngModel)]="SearchToDate">
+                        <mat-datepicker-toggle matSuffix [for]="endingDate"></mat-datepicker-toggle>
+                        <mat-datepicker #endingDate></mat-datepicker>
+                    </mat-form-field>
+                </div>                
+            </div>
+
+            <div class="row">
+                <div class="col-xl-2 col-lg-2 col-md-2 col-sm-12 mb-2">
+                    <mat-form-field appearance="outline" floatLabel="always" class="example-full-width mb-3">
+                        <mat-label>Type</mat-label>
+                        <mat-select [(ngModel)]="SearchType">
+                            <mat-option value="Full">Full</mat-option>
+                            <mat-option value="Partial">Partial</mat-option>
+                        </mat-select>
+                    </mat-form-field>
+                </div>
+
+                <div class="col-xl-2 col-lg-2 col-md-2 col-sm-12 mb-2">
+                    <mat-form-field appearance="outline" floatLabel="always" class="example-full-width mb-3">
+                        <mat-label>Approval Status</mat-label>
+                        <mat-select [(ngModel)]="searchApprovalStatus">
+                            <mat-option value="Approved">Approved</mat-option>
+                            <mat-option value="Pending">Pending</mat-option>
+                            <mat-option value="Rejected">Rejected</mat-option>
+                            <mat-option value="Cancel">Cancel</mat-option>
+                        </mat-select>
+                    </mat-form-field>
+                </div>
+            </div>
+
+          <div class="row">
+            <div class="col-xl-2 col-lg-2 col-md-2 col-sm-12 mb-2">
+                <button mat-raised-button color="primary" (click)="SearchData()" data-target="#exampleModalCenter">
+                    Search
+                </button>
+            </div>
+            <div class="col-xl-2 col-lg-2 col-md-2 col-sm-12 mb-2">
+                <button mat-raised-button color="primary" (click)="refresh()">
+                    Refresh
+                </button>
+            </div>
+
+            <div class="col-xl-2 col-lg-2 col-md-2 col-sm-12 mb-2"></div>
+            <div class="col-xl-2 col-lg-2 col-md-2 col-sm-12 mb-2"></div>
+            <div class="col-xl-2 col-lg-2 col-md-2 col-sm-12 mb-2"></div>
+
+            <div class="col-xl-2 col-lg-2 col-md-2 col-sm-12 mb-2">
+                <button mat-raised-button color="primary" (click)="addCreditNote()">
+                    Add Credit Note
+                </button>
+            </div>
+          </div>
+        </div>
+      </mat-expansion-panel>
+    </mat-accordion>
+
+    <br>
+        <div class="row">
+            <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                <div class="card">
+                    <div class="body">
+                        <div class="responsive_table">
+                            <div class="table-responsive">                               
+                                <p *ngIf="!dataSource; then thenBlock2 else elseBlock2">
+                                    This is not rendered
+                                </p>
+
+                                <ng-template #thenBlock2>
+                                    <div class="alert alert-primary" style="background-color:#E8E8E8; text-align: center;">No Records Found</div>
+                                    <div class="body">
+                                        <div class="example-button-row">
+                                            <button mat-raised-button color="primary" (click)="PreviousCall()">Previous</button>
+                                            <button mat-raised-button color="primary" (click)="NextCall()">Next</button>
+                                        </div>
+                                    </div>
+                                </ng-template>
+
+                                <ng-template #elseBlock2>
+                                    <div class="scrollable-table-container">
+                                        <mat-table #table [dataSource]="dataSource" matSort class="mat-cell floating-header-table"
+                                            (matSortChange)="SortingData($event)">
+                                            <ng-container matColumnDef="check">
+                                                <mat-header-cell *matHeaderCellDef>
+                                                    <mat-checkbox></mat-checkbox></mat-header-cell>
+                                                <mat-cell *matCellDef="let row">
+                                                    <mat-checkbox></mat-checkbox>
+                                                </mat-cell>
+                                            </ng-container>
+
+                                            <ng-container matColumnDef="id">
+                                                <mat-header-cell *matHeaderCellDef mat-sort-header>Id</mat-header-cell>
+                                                <mat-cell *matCellDef="let row">{{row.customerID}}</mat-cell>
+                                            </ng-container>
+
+                                            <ng-container matColumnDef="CreditNoteNumberWithPrefix">
+                                                <mat-header-cell *matHeaderCellDef mat-sort-header>Credit Note Number</mat-header-cell>
+                                                <mat-cell *matCellDef="let row" (contextmenu)="onContextMenu($event, row)">
+                                                    {{row.creditNoteNumberWithPrefix ? row.creditNoteNumberWithPrefix : 'N/A'}}</mat-cell>
+                                            </ng-container>
+
+                                            <ng-container matColumnDef="CustomerName">
+                                                <mat-header-cell *matHeaderCellDef mat-sort-header>Customer Name</mat-header-cell>
+                                                <mat-cell *matCellDef="let row" (contextmenu)="onContextMenu($event, row)">
+                                                    {{row.customerName ? row.customerName : 'N/A'}}</mat-cell>
+                                            </ng-container>
+
+                                            <ng-container matColumnDef="CreditNoteAmount">
+                                                <mat-header-cell *matHeaderCellDef mat-sort-header>Credit Note Amount</mat-header-cell>
+                                                <mat-cell *matCellDef="let row" (contextmenu)="onContextMenu($event, row)">
+                                                    {{row.creditNoteAmount ? row.creditNoteAmount : 'N/A'}}</mat-cell>
+                                            </ng-container>
+
+                                            <ng-container matColumnDef="DateTimeOfGeneration">
+                                                <mat-header-cell *matHeaderCellDef mat-sort-header>Date</mat-header-cell>
+                                                <mat-cell *matCellDef="let row" (contextmenu)="onContextMenu($event, row)">
+                                                    {{row.dateTimeOfGeneration | date: 'dd-MM-yyyy'}}</mat-cell>
+                                            </ng-container>
+
+                                            <ng-container matColumnDef="InvoiceNumberWithPrefix">
+                                                <mat-header-cell *matHeaderCellDef mat-sort-header>Invoice Number</mat-header-cell>
+                                                <mat-cell *matCellDef="let row" (contextmenu)="onContextMenu($event, row)">
+                                                    {{row.invoiceNumberWithPrefix ? row.invoiceNumberWithPrefix : 'N/A'}}</mat-cell>
+                                            </ng-container>
+
+                                            <ng-container matColumnDef="CreditNoteType">
+                                                <mat-header-cell *matHeaderCellDef mat-sort-header>Credit Note Type</mat-header-cell>
+                                                <mat-cell *matCellDef="let row" (contextmenu)="onContextMenu($event, row)">
+                                                    {{row.creditNoteType ? row.creditNoteType : 'N/A'}}</mat-cell>
+                                            </ng-container>
+
+                                            <ng-container matColumnDef="ApprovalStatus">
+                                                <mat-header-cell *matHeaderCellDef mat-sort-header>Approval Status</mat-header-cell>
+                                                <mat-cell *matCellDef="let row" (contextmenu)="onContextMenu($event, row)">
+                                                    {{row.approvalStatus ? row.approvalStatus : 'N/A'}}</mat-cell>
+                                            </ng-container>
+
+                                            <ng-container matColumnDef="CreditNoteIRN">
+                                                <mat-header-cell *matHeaderCellDef mat-sort-header>Credit Note IRN</mat-header-cell>
+                                                <mat-cell *matCellDef="let row" (contextmenu)="onContextMenu($event, row)">
+                                                    {{row.creditNoteIRN ? row.creditNoteIRN : 'N/A'}}</mat-cell>
+                                            </ng-container>
+
+                                            <ng-container matColumnDef="IsEinvoiceGenerated">
+                                                <mat-header-cell *matHeaderCellDef mat-sort-header>E-Credit Note Status</mat-header-cell>
+                                                <mat-cell *matCellDef="let row" (contextmenu)="onContextMenu($event, row)">
+                                                    {{row.isEinvoiceGenerated === true ? 'Created' : 'Not Created'}}</mat-cell>
+                                            </ng-container> 
+                                            
+                                            <ng-container matColumnDef="CancellationDate">
+                                                <mat-header-cell *matHeaderCellDef mat-sort-header>Cancellation Date</mat-header-cell>
+                                                <mat-cell *matCellDef="let row" (contextmenu)="onContextMenu($event, row)">
+                                                    {{row.cancellationDate ? (row.cancellationDate | date: 'dd-MM-yyyy') : 'N/A'}}</mat-cell>
+                                            </ng-container>
+                                             
+                                            <ng-container matColumnDef="CancellationStatus">
+                                                <mat-header-cell *matHeaderCellDef mat-sort-header>Cancellation Status</mat-header-cell>
+                                                <mat-cell *matCellDef="let row" (contextmenu)="onContextMenu($event, row)">
+                                                    {{ row.cancellationDate ? 'Cancelled' : 'N/A' }}</mat-cell>
+                                            </ng-container>
+
+                                             <!-- actions -->
+                                             <ng-container matColumnDef="actions">
+                                                <mat-header-cell *matHeaderCellDef class="pr-0"
+                                                    [ngClass]="'tbl-col-width-per-9'">Actions</mat-header-cell>
+                                                <mat-cell *matCellDef="let row; let i=index;" class="pr-0"
+                                                    [ngClass]="'tbl-col-width-per-9'">
+                                                <button mat-raised-button color="primary" [disabled]="row.customerName==='Individual'"
+                                                (contextmenu)="onContextMenu($event, row)"
+                                                (click)="onContextMenu($event, row)">
+                                                Actions
+                                            </button>
+
+                                                </mat-cell>
+                                            </ng-container>
+
+
+                                            <mat-header-row *matHeaderRowDef="displayedColumns"></mat-header-row>
+                                            <mat-row *matRowDef="let row; columns: displayedColumns;"
+                                                [style.cursor]="'pointer'" matRipple>
+                                            </mat-row>
+                                        </mat-table>
+                                    </div>
+
+                                    <!-- context menu start -->
+                                    <div style="visibility: hidden; position: fixed"
+                                        [style.left]="contextMenuPosition.x" [style.top]="contextMenuPosition.y"
+                                        [matMenuTriggerFor]="contextMenu">
+                                    </div>
+                                    <mat-menu #contextMenu="matMenu">
+                                        <ng-template matMenuContent let-item="item">
+                                            <button mat-menu-item (click)="editCall(item)">
+                                                <mat-icon>create</mat-icon>
+                                                <span>Edit</span>
+                                            </button>
+
+                                            <button mat-menu-item (click)="DutyAdjust(item)">
+                                                <mat-icon>create</mat-icon>
+                                                <span>Duty Adjustment</span>
+                                            </button>
+
+                                            <button mat-menu-item  (click)="GenerateECreditNote(item)">
+                                                <mat-icon>create</mat-icon>
+                                                <span>Generate E - Credit Note</span>
+                                            </button>
+
+                                            <button mat-menu-item  (click)="CancelECreditNote(item)">
+                                                <mat-icon>create</mat-icon>
+                                                <span>Cancel E - Credit Note</span>
+                                            </button>
+                                        </ng-template>
+                                    </mat-menu>
+
+
+
+                                    <div class="body">
+                                        <div class="example-button-row">
+
+                                            <button mat-raised-button color="primary"
+                                                (click)="PreviousCall()">Previous</button>
+                                            <button mat-raised-button color="primary" (click)="NextCall()">Next</button>
+
+                                        </div>
+                                    </div>
+
+                                </ng-template>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>

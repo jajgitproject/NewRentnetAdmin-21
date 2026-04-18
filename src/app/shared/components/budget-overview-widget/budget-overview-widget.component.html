@@ -1,0 +1,66 @@
+<div class="budget-overview-container">
+  <mat-card>
+    <div class="card-header">
+      <h2>{{ title }}</h2>
+      <div class="card-actions">
+        <span class="period-badge">{{ period }}</span>
+        <button mat-icon-button [matMenuTriggerFor]="menu">
+          <mat-icon>more_vert</mat-icon>
+        </button>
+        <mat-menu #menu="matMenu">
+          <button mat-menu-item>
+            <mat-icon>refresh</mat-icon>
+            <span>Refresh</span>
+          </button>
+          <button mat-menu-item>
+            <mat-icon>file_download</mat-icon>
+            <span>Export</span>
+          </button>
+        </mat-menu>
+      </div>
+    </div>
+
+    <div class="budget-summary">
+      <div class="total-budget">
+        <div class="label">Total Budget</div>
+        <div class="value">{{ formatCurrency(totalBudget) }}</div>
+      </div>
+      <div class="budget-progress">
+        <div class="progress-info">
+          <div class="spent">
+            <span class="label">Spent</span>
+            <span class="value">{{ formatCurrency(totalSpent) }}</span>
+          </div>
+          <div class="remaining">
+            <span class="label">Remaining</span>
+            <span class="value">{{ formatCurrency(remainingBudget) }}</span>
+          </div>
+        </div>
+        <mat-progress-bar mode="determinate" [value]="spentPercentage"></mat-progress-bar>
+        <div class="percentage">{{ spentPercentage | number:'1.0-0' }}%</div>
+      </div>
+    </div>
+
+    <div class="categories-list">
+      <h3>Budget Categories</h3>
+      @for (category of categories; track category) {
+        <div class="category-item">
+          <div class="category-header">
+            <div class="category-name">
+              <span class="color-indicator" [style.background-color]="category.color"></span>
+              {{ category.name }}
+            </div>
+            <div class="category-values">
+              <span class="spent" [ngClass]="getStatusClass(category.allocated, category.spent)">
+                {{ formatCurrency(category.spent) }}
+              </span>
+              <span class="allocated">/ {{ formatCurrency(category.allocated) }}</span>
+            </div>
+          </div>
+          <mat-progress-bar mode="determinate" [value]="getCategoryPercentage(category.allocated, category.spent)">
+          </mat-progress-bar>
+        </div>
+      }
+    </div>
+  </mat-card>
+</div>

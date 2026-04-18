@@ -1,0 +1,55 @@
+<mat-card class="trend-card" [ngClass]="{ 'compact': compact }">
+  <mat-card-content>
+    <div class="trend-header">
+      <div class="trend-info">
+        @if (icon) {
+          <div class="trend-icon" [ngClass]="iconColorClass">
+            <mat-icon>{{ icon }}</mat-icon>
+          </div>
+        }
+        <div class="trend-text">
+          <h4 class="trend-title">{{ title }}</h4>
+          <div class="trend-value">
+            @if (prefix) {
+              <span class="prefix">{{ prefix }}</span>
+            }
+            <span class="value">{{ currentValue }}</span>
+            @if (suffix) {
+              <span class="suffix">{{ suffix }}</span>
+            }
+          </div>
+        </div>
+      </div>
+
+      <div class="trend-change" [ngClass]="changeClass">
+        <mat-icon>{{ changeIcon }}</mat-icon>
+        <span>{{ percentageChange > 0 ? '+' : '' }}{{ percentageChange.toFixed(1) }}%</span>
+      </div>
+    </div>
+
+    @if (chartData.length > 0) {
+      <div class="chart-container">
+        <apx-chart
+          [series]="chartOptions.series!"
+          [chart]="chartOptions.chart!"
+          [stroke]="chartOptions.stroke!"
+          [fill]="chartOptions.fill!"
+          [colors]="chartOptions.colors!"
+          [dataLabels]="chartOptions.dataLabels!"
+          [grid]="chartOptions.grid!"
+          [xaxis]="chartOptions.xaxis!"
+          [tooltip]="chartOptions.tooltip!">
+        </apx-chart>
+      </div>
+    }
+
+    <div class="trend-footer">
+      <span class="period-label">{{ period }}</span>
+      @if (previousValue) {
+        <span class="previous-value">
+          Previous: {{ prefix }}{{ previousValue }}{{ suffix }}
+        </span>
+      }
+    </div>
+  </mat-card-content>
+</mat-card>

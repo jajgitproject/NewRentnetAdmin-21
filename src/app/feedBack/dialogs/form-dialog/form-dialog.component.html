@@ -1,0 +1,367 @@
+<div class="addContainer">
+    <div class="modalHeader">
+        <div class="editRowModal">
+            <div class="modalHeader clearfix">
+                <!-- <img [src]='advanceTable.img' alt="avatar"> -->
+                <div class="centered-text font-weight-bold p-t-5 font-17">
+                    Trip feedback for DutySlip No.- {{DutySlipID}}, 
+                    Allotment No.- {{AllotmentID}}, 
+                    Car No.- {{RegistrationNumber}}, 
+                    Driver Name- {{DriverName}}
+                  </div>
+            </div>
+        </div>
+        <button mat-icon-button (click)="dialogRef.close({isClose: true})" aria-label="Close dialog">
+      <mat-icon>close</mat-icon>
+    </button>
+    </div>
+    
+    <div mat-dialog-content>
+        <form class="register-form m-4" [formGroup]="advanceTableForm" (ngSubmit)="submit">
+            <!-- <div class="row">
+                <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                    <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                        <mat-label>Duty Slip Number</mat-label>
+                        <input matInput formControlName="dutySlipID" readonly>
+                       
+                    </mat-form-field>
+                </div>  
+                
+                <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                    <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                        <mat-label>Allotment Number</mat-label>
+                        <input matInput formControlName="allotmentID" readonly>
+                    </mat-form-field>
+                </div>  
+                
+            </div>
+            <div class="row">
+                <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                    <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                        <mat-label>Reservation Number</mat-label>
+                        <input matInput formControlName="reservationID" readonly>
+                       
+                    </mat-form-field>
+                </div>  
+                
+                <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                    <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                        <mat-label>Driver</mat-label>
+                        <input matInput formControlName="driverName" readonly>
+                    </mat-form-field>
+                </div>  
+                
+            </div>
+            <div class="row">
+                <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                    <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                        <mat-label> Car Registration Number</mat-label>
+                        <input matInput formControlName="registrationNumber" >
+                       
+                    </mat-form-field>
+                </div>  
+                
+                <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                    <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                        <mat-label>Passenger Name</mat-label>
+                        <input matInput formControlName="passengerID" >
+                    </mat-form-field>
+                </div>   -->
+                <!-- <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                 
+                    <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                        <mat-label>Passenger Name</mat-label>
+                        <input type="text" matInput [formControl]="searchEmployee" [matAutocomplete]="auto">
+                        <mat-autocomplete #auto="matAutocomplete">
+                          <mat-option *ngFor="let option of filteredEmployeeOptions | async" 
+                          [value]="option.firstName+' '+ option.lastName" (click)="getTitles(option.employeeID)">
+                            {{option.firstName +' ' + option.lastName}}
+                          </mat-option>
+                        </mat-autocomplete>
+                      </mat-form-field>
+                </div> -->
+                
+            <!-- </div>  -->
+            <!-- <div class="row">
+                <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                    <mat-form-field class="example-full-width" appearance="outline"  floatLabel="always">
+                        <mat-label>Date Of FeedBack Received</mat-label>
+                        <input  matInput [matDatepicker]="dateOfFeedback" formControlName="dateOfFeedback">
+                        <mat-datepicker-toggle matSuffix [for]="dateOfFeedback"></mat-datepicker-toggle>
+                        <mat-datepicker #dateOfFeedback></mat-datepicker>
+                       
+                    </mat-form-field>
+
+                </div>
+                <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                    <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                        <mat-label>Time Of FeedBack Received</mat-label>
+                        <input required matInput [owlDateTimeTrigger]="time1" [owlDateTime]="time1" formControlName="timeOfFeedback">
+                        <mat-icon matSuffix [owlDateTimeTrigger]="time1" class="date-icon">schedule</mat-icon>
+                        <owl-date-time [pickerType]="'timer'" #time1></owl-date-time>
+
+                    </mat-form-field>
+                </div>
+            </div> -->
+
+            <div class="row">
+                <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                    <mat-form-field class="example-full-width" appearance="outline"  floatLabel="always">
+                        <mat-label>Feedback Points</mat-label>
+                        <mat-select formControlName="feedbackPointsOutOfFive">
+                            <mat-option value="1">1</mat-option> 
+                            <mat-option value="2">2</mat-option>
+                            <mat-option value="3">3</mat-option>
+                            <mat-option value="4">4</mat-option>
+                            <mat-option value="5">5</mat-option>
+                        </mat-select>
+
+                    </mat-form-field>
+                </div>
+                <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                    <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                        <mat-label>Feedback Remark</mat-label>
+                        <input matInput formControlName="feedbackRemark" >
+                    </mat-form-field>
+                </div>  
+            </div>
+
+              <div class="row">
+                <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                    <!-- <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                        <mat-label>Passenger Name</mat-label>
+                        <input type="text" matInput [formControl]="searchEmployee" [matAutocomplete]="auto">
+                        <mat-autocomplete #auto="matAutocomplete">
+                          <mat-option *ngFor="let option of filteredEmployeeOptions | async" 
+                          [value]="option.firstName+' '+ option.lastName" (click)="getTitles(option.employeeID)">
+                            {{option.firstName +' ' + option.lastName}}
+                          </mat-option>
+                        </mat-autocomplete>
+                      </mat-form-field> -->
+
+                      <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                        <mat-label>Passenger Name</mat-label>
+                        <input readonly type="text" matInput formControlName="customerPersonName">
+                        <!-- <input required type="text" matInput formControlName="customerPersonName" [matAutocomplete]="auto">
+                        <mat-autocomplete #auto="matAutocomplete">
+                          <mat-option *ngFor="let option of filteredEmployeeOptions1 | async" 
+                                      [value]="option.customerPersonName" 
+                                      (click)="getTitles(option)">
+                            {{option.customerPersonName}}
+                          </mat-option>
+                        </mat-autocomplete>
+                        <mat-error *ngIf="advanceTableForm.controls['customerPersonName'].hasError('employeeFeedbackInvalid')">
+                          Please select a Passenger Name
+                        </mat-error> -->
+                      </mat-form-field>
+    
+                </div>
+                <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                     <mat-form-field class="example-full-width" appearance="outline"  floatLabel="always">
+                        <mat-label>Activation Status</mat-label>
+                        <mat-select formControlName="activationStatus">
+                            <mat-option [value]=true>Active</mat-option>
+                            <mat-option [value]=false>Deleted</mat-option>
+                        </mat-select>
+
+                        <mat-error *ngIf="advanceTableForm.get('activationStatus').hasError('required')">
+                            Activation Status is required
+                        </mat-error>
+                    </mat-form-field>
+                </div>
+            </div> 
+            <!-- <div class="row">
+                
+                <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                    <mat-form-field class="example-full-width" appearance="outline"  floatLabel="always">
+                        <mat-label>Activation Status</mat-label>
+                        <mat-select formControlName="activationStatus">
+                            <mat-option [value]=true>Active</mat-option>
+                            <mat-option [value]=false>Deleted</mat-option>
+                        </mat-select>
+
+                        <mat-error *ngIf="advanceTableForm.get('activationStatus').hasError('required')">
+                            Activation Status is required
+                        </mat-error>
+                    </mat-form-field>
+                </div>
+            </div> -->
+
+            <div class="row">
+                <div *ngIf="isSaveAllowed">
+                    <span style="color:red;margin-bottom: 10px;">{{verifyDutyStatusAndCacellationStatus}}</span>
+                </div>
+                <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12 mb-2">
+                    <div class="example-button-row">
+                        <button mat-raised-button color="primary" *ngIf="saveDisabled" [type]="submit" [disabled]="!advanceTableForm.valid || isSaveAllowed" (click)="confirmAdd()">Save</button>
+                        <mat-spinner *ngIf="!saveDisabled" diameter="30"></mat-spinner>
+                        <button mat-raised-button color="warn" (click)="onNoClick()" tabindex="-1">Reset</button>
+                        <!-- <button mat-raised-button color="primary" (click)="tripFeedBackAttachment()">TripFeedBackAttachment</button> -->
+                    </div>
+                </div>
+            </div>
+            <div class="row"  > 
+                <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                    <div class="card" >
+                        <div class="body" style="overflow-y: hidden;">
+                            <div class="responsive_table">
+                                <div class="materialTableHeader">
+                                    <div class="row" style="display: flex; align-items: center; padding-top: 15px; padding-left: 22px;">
+                                        <div style="width: 45%;">
+                                            <!-- Optional Search Fields -->
+                                        </div>
+                                        <div style="width: 30%; display: flex; align-items: center;">
+                                            <!-- Feedback Attachment Text on the Left and Add Icon on the Right -->
+                                            <h5 style="margin: 0; font-size: 15px; font-weight: bold; display: inline-flex; align-items: center; margin-right: 10px;">
+                                                Feedback Attachment
+                                            </h5>
+                                            <button mat-mini-fab color="primary" (click)="tripFeedBackAttachment()" style="margin-left: 15px;">
+                                                <mat-icon class="col-white">add</mat-icon>
+                                            </button>
+                                            
+                                        </div>
+                                    </div>
+                                    
+                                </div>
+                                <p *ngIf="!dataSource; then thenBlock2 else elseBlock2">
+                                    This is not rendered
+                                </p>
+    
+                                <ng-template #thenBlock2>
+                                    <div class="alert alert-primary" style="background-color:#E8E8E8; text-align: center;">
+                                        No Records Found</div>
+                                    <div class="body">
+                                        <div class="example-button-row">
+    
+                                            <button mat-raised-button color="primary"
+                                                (click)="PreviousCall()">Previous</button>
+                                            <button mat-raised-button color="primary" (click)="NextCall()">Next</button>
+    
+                                        </div>
+                                    </div>
+    
+                                </ng-template>
+    
+                                <ng-template #elseBlock2  >
+                                    
+                                    <mat-table #table [dataSource]="dataSource" matSort class="mat-cell" (matSortChange)="SortingData($event)">
+                                        <!-- <ng-container matColumnDef="check">
+                                            <mat-header-cell *matHeaderCellDef > <mat-checkbox></mat-checkbox></mat-header-cell>
+                                            <mat-cell *matCellDef="let row">
+                                                <mat-checkbox></mat-checkbox>
+                                            </mat-cell>
+                                        </ng-container> -->
+    
+                                        <ng-container matColumnDef="tripFeedBackAttachmentID">
+                                            <mat-header-cell *matHeaderCellDef mat-sort-header>feedBackAttachmentID</mat-header-cell>
+                                            <mat-cell *matCellDef="let row">{{row.tripFeedBackAttachmentID}}</mat-cell>
+                                        </ng-container>
+    
+                                        <!-- <ng-container matColumnDef="additionalService">
+                                            <mat-header-cell *matHeaderCellDef mat-sort-header>ServiceName</mat-header-cell>
+                                            <mat-cell *matCellDef="let row" (contextmenu)="onContextMenu($event, row)">
+                                                {{row.additionalService}}</mat-cell>
+                                        </ng-container> -->
+                                        <ng-container matColumnDef="reservationID">
+                                            <mat-header-cell *matHeaderCellDef mat-sort-header>Rervation No.</mat-header-cell>
+                                            <mat-cell *matCellDef="let row" (contextmenu)="onContextMenu($event, row)">
+                                                {{row.reservationID}}</mat-cell>
+                                        </ng-container>
+                                        
+                                        <ng-container matColumnDef="dutySlipID">
+                                            <mat-header-cell *matHeaderCellDef mat-sort-header>Duty Slip</mat-header-cell>
+                                            <mat-cell *matCellDef="let row" (contextmenu)="onContextMenu($event, row)">
+                                                {{row.dutySlipID}}</mat-cell>
+                                        </ng-container>
+
+                                        <ng-container matColumnDef="tripFeedBackAttachment">
+                                            <mat-header-cell *matHeaderCellDef mat-sort-header  [ngClass]="'tbl-col-width-per-8'">Image
+                                            </mat-header-cell>
+                                            <!-- <mat-header-cell *matHeaderCellDef mat-sort-header><span matTooltip="Attachment" matTooltipPosition="above">Image...</span></mat-header-cell> -->
+                                            <mat-cell *matCellDef="let row" class="table-img tbl-col-width-per-8" (contextmenu)="onContextMenu($event, row)">
+                                                <img src="{{row.tripFeedBackAttachment}}"/> </mat-cell>
+                                          
+                                          </ng-container>
+                                        
+                                        <ng-container matColumnDef="status">
+                                            <mat-header-cell *matHeaderCellDef mat-sort-header>Status</mat-header-cell>
+                                            <mat-cell *matCellDef="let row">
+                                                {{activation}}</mat-cell>
+                                        </ng-container>
+    
+                                        <!-- actions -->
+                                        <ng-container matColumnDef="actions">
+                                            <mat-header-cell *matHeaderCellDef class="pr-0"
+                                                [ngClass]="'tbl-col-width-per-9'">Actions</mat-header-cell>
+                                            <mat-cell *matCellDef="let row; let i=index;" class="pr-0"
+                                                [ngClass]="'tbl-col-width-per-9'">
+                                                
+                                                <button mat-raised-button color="primary"
+                                                    (contextmenu)="onContextMenu($event, row)"
+                                                    (click)="onContextMenu($event, row)">
+                                                    Actions
+                                                </button>
+                                            </mat-cell>
+                                        </ng-container>
+                                       
+                                        <mat-header-row *matHeaderRowDef="displayedColumns"></mat-header-row>
+                                        <mat-row *matRowDef="let row; columns: displayedColumns;" [style.cursor]="'pointer'"
+                                            matRipple>
+                                        </mat-row>
+                                    </mat-table>
+    
+                                    <!-- context menu start -->
+                                    <div style="visibility: hidden; position: fixed" [style.left]="contextMenuPosition.x"
+                                        [style.top]="contextMenuPosition.y" [matMenuTriggerFor]="contextMenu">
+                                    </div>
+                                    <mat-menu #contextMenu="matMenu">
+                                        <ng-template matMenuContent let-item="item">
+                                            <!-- <button mat-menu-item (click)="addNew()">
+                        <mat-icon>add_box</mat-icon>
+                        <span>Add</span>
+                      </button> -->
+                                            <!-- <button mat-menu-item (click)="editCall(item)">
+                                                <mat-icon>create</mat-icon>
+                                                <span>Edit</span>
+                                            </button> -->
+                                            <button mat-menu-item (click)="editCall(item)">
+                                                <mat-icon>create</mat-icon>
+                                                <span>Edit</span>
+                                            </button>
+                                            <button mat-menu-item (click)="deleteItemfeedBackAttachment(item)">
+                                                <mat-icon>delete</mat-icon>
+                                                <span>Delete</span>
+                                            </button>
+                                            <!-- <button mat-menu-item (click)="refresh()">
+                        <mat-icon>refresh</mat-icon>
+                        <span>Refresh</span>
+                      </button> -->
+    
+                                        </ng-template>
+                                    </mat-menu>
+    
+                                    <!-- context menu end -->
+    
+                                    <!-- <div *ngIf="!exampleDatabase.isTblLoading" class="no-results" [style.display]="dataSource.renderedData.length == 0 ? '' : 'none'">
+                                    No results
+                                </div> -->
+    
+                                    <div class="body">
+                                        <div class="example-button-row">
+    
+                                            <button mat-raised-button color="primary"
+                                                (click)="PreviousCall()">Previous</button>
+                                            <button mat-raised-button color="primary" (click)="NextCall()">Next</button>
+    
+                                        </div>
+                                    </div>
+    
+                                </ng-template>
+    
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>

@@ -1,0 +1,536 @@
+/* You can add global styles to this file, and also import other style files */
+
+/* Old app parity: tame Material 3 corner tokens (legacy admin was ~4px, not pill M3) */
+:root {
+  --mat-sys-corner-full: 4px;
+  --mat-sys-corner-medium: 4px;
+  --mat-sys-corner-extra-small: 4px;
+  --mat-sys-corner-small: 4px;
+  --mat-sys-corner-large: 4px;
+  --mat-sys-corner-extra-large: 4px;
+}
+
+/* RedStar + old app: Poppins-first (see assets/scss/common/_general.scss) */
+.mat-typography,
+.mat-mdc-dialog-container,
+.mat-mdc-menu-panel,
+.mat-mdc-select-panel,
+.mat-mdc-autocomplete-panel,
+.mat-datepicker-content,
+.mat-mdc-tab-group {
+  font-family: 'Poppins', 'Roboto', 'Helvetica Neue', sans-serif;
+}
+
+/* Styles for tab labels */
+.mat-tab-label {
+  min-width: 25px !important;
+  padding: 5px;
+  color: black;
+  font-weight: 700;
+}
+
+/* Styles for the active tab label */
+.mat-tab-label.mat-tab-label-active {
+  min-width: 25px !important;
+  background-color: rgb(251, 251, 254);
+  color: rgb(8, 5, 5);
+  font-weight: 900;
+}
+
+/* MDC tabs (Angular 15+): mirror legacy .mat-tab-label rules from NewRententAdmin */
+.mat-mdc-tab .mdc-tab {
+  min-width: 25px !important;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+.mat-mdc-tab .mdc-tab__text-label {
+  color: black;
+  font-weight: 700;
+}
+
+.mat-mdc-tab.mdc-tab--active .mdc-tab__text-label {
+  color: rgb(8, 5, 5);
+  font-weight: 900;
+}
+
+.mat-mdc-tab.mdc-tab--active {
+  background-color: rgb(251, 251, 254);
+}
+
+.mat-mdc-tab-group .mat-mdc-tab.mdc-tab--active .mdc-tab-indicator__content--underline,
+.mat-mdc-tab-group .mdc-tab-indicator__content--underline {
+  border-color: #3f51b5 !important;
+}
+
+.mat-mdc-tab-header-pagination-chevron {
+  border-color: #3f51b5;
+}
+
+.modal-backdrop {
+  z-index: -1;
+}
+
+/* Spinner overlay: prevent stale fade-out overlay from blocking interaction */
+.ngx-spinner-overlay.fade-out,
+.ngx-spinner-overlay[style*="opacity: 0"] {
+  pointer-events: none !important;
+}
+
+.cdk-overlay-container {
+  z-index: 9999 !important;
+}
+
+.pac-container {
+  z-index: 10000 !important;
+  position: absolute !important;
+  width: 400px !important;
+}
+
+.outline {
+  border-style: ridge;
+  border-width: medium;
+}
+
+a.hide {
+  pointer-events: none;
+  cursor: not-allowed;
+  color: black !important;
+  text-decoration: none;
+}
+
+.square {
+  height: 70px;
+  min-width: 800px;
+  border-color: #3b73bc;
+  background-color: #ebebee;
+}
+
+.mat-checkbox-label {
+  color: #007bff !important;
+  font-size: 10px !important;
+}
+
+.of-hidden {
+  overflow-x: hidden !important;
+}
+
+.BoldButton {
+  font-size: 10px !important;
+  line-height: 20px;
+  text-align: left;
+  padding: 0;
+  font-weight: bold;
+}
+
+.TDValue {
+  font-size: 10px;
+  text-align: left;
+  vertical-align: top;
+}
+
+.TDValueBold {
+  font-size: 10px;
+  text-align: left;
+  vertical-align: top;
+  font-weight: bold;
+}
+
+mat-option {
+  word-break: break-all;
+  white-space: normal;
+  height: unset;
+}
+
+.btn-tbl-delete {
+  background-color: #96a2b4;
+}
+
+.btn-tbl-delete:hover {
+  background-color: #96a2b4;
+}
+
+.tbl-col-width-per-9 {
+  min-width: 120px;
+}
+
+.mat-cell,
+.mat-header-cell {
+  padding: 0 8px;
+  white-space: normal !important;
+  word-break: break-word;
+}
+
+@media (max-width: 768px) {
+  .tbl-col-width-per-9 {
+    min-width: 100px;
+  }
+}
+
+.responsive_table {
+  overflow: hidden;
+}
+
+#inputGroup::placeholder {
+  font-size: 16px;
+  color: #555;
+}
+
+.custom-autocomplete-panel {
+  width: max-content !important;
+  max-width: 90vw;
+  overflow-x: auto;
+}
+
+.swal2-popup-high-zindex {
+  z-index: 15000 !important;
+}
+
+.swal2-container {
+  z-index: 30000 !important;
+}
+
+.google-autocomplete-panel {
+  width: 800px;
+}
+
+.scrollable-table-container {
+  height: 70vh;
+  overflow-y: auto;
+  position: relative;
+  background: #fff;
+  border-radius: 8px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+}
+
+.floating-header-table {
+  width: 100%;
+  min-width: 1200px;
+  border-collapse: collapse;
+}
+
+.mat-header-row {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  background-color: #f8f8f8;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.mat-mdc-header-row {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  background-color: #f8f8f8 !important;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.mat-header-cell {
+  font-weight: 600;
+  background: #f8f8f8;
+}
+
+.mat-mdc-header-cell,
+th.mat-mdc-header-cell {
+  font-size: 14px !important;
+  font-weight: 600 !important;
+  background: #f8f8f8 !important;
+  color: #222 !important;
+}
+
+.mat-cell {
+  background: #fff;
+}
+
+/* Old app parity: Material 3 defaults make buttons pill-shaped (9999px, 40px).
+   Force legacy-like raised button geometry used in NewRententAdmin. */
+.mat-mdc-raised-button,
+button.mat-mdc-raised-button,
+.mat-raised-button,
+button.mat-raised-button {
+  border-radius: 4px !important;
+  height: 36px !important;
+  min-height: 36px !important;
+  line-height: 36px !important;
+  padding: 0 16px !important;
+}
+
+/* Old app parity: normalize all non-icon button variants. */
+.mat-mdc-button-base:not(.mat-mdc-icon-button):not(.mat-mdc-fab):not(.mat-mdc-mini-fab),
+.mat-button,
+.mat-flat-button,
+.mat-stroked-button {
+  border-radius: 4px !important;
+  text-transform: none !important;
+  letter-spacing: normal !important;
+  font-weight: 500 !important;
+}
+
+/* Old app parity: keep mini-fab/fab geometry circular and compact. */
+.mat-mdc-mini-fab,
+.mat-mini-fab {
+  width: 40px !important;
+  height: 40px !important;
+  line-height: 40px !important;
+  border-radius: 50% !important;
+}
+
+.mat-mdc-mini-fab.mat-primary,
+.mat-mini-fab.mat-primary {
+  background-color: #3f51b5 !important;
+  color: #fff !important;
+}
+
+.mat-mdc-mini-fab.mat-primary:hover,
+.mat-mdc-mini-fab.mat-primary:focus,
+.mat-mini-fab.mat-primary:hover,
+.mat-mini-fab.mat-primary:focus {
+  background-color: #3f51b5 !important;
+  color: #fff !important;
+}
+
+.mat-mdc-fab,
+.mat-fab {
+  border-radius: 50% !important;
+}
+
+/* Old app parity: ensure primary/warn button colors are consistent. */
+.mat-mdc-raised-button.mat-primary,
+.mat-mdc-unelevated-button.mat-primary,
+.mat-raised-button.mat-primary,
+.mat-flat-button.mat-primary {
+  background-color: #3f51b5 !important;
+  color: #fff !important;
+}
+
+.mat-mdc-raised-button.mat-primary:hover,
+.mat-mdc-raised-button.mat-primary:focus,
+.mat-mdc-raised-button.mat-primary:active,
+.mat-mdc-unelevated-button.mat-primary:hover,
+.mat-mdc-unelevated-button.mat-primary:focus,
+.mat-mdc-unelevated-button.mat-primary:active,
+.mat-raised-button.mat-primary:hover,
+.mat-raised-button.mat-primary:focus,
+.mat-raised-button.mat-primary:active,
+.mat-flat-button.mat-primary:hover,
+.mat-flat-button.mat-primary:focus,
+.mat-flat-button.mat-primary:active {
+  background-color: #3f51b5 !important;
+  color: #fff !important;
+}
+
+.mat-mdc-raised-button.mat-warn,
+.mat-mdc-unelevated-button.mat-warn,
+.mat-raised-button.mat-warn,
+.mat-flat-button.mat-warn {
+  background-color: #f44336 !important;
+  color: #fff !important;
+}
+
+.mat-mdc-raised-button.mat-warn:hover,
+.mat-mdc-raised-button.mat-warn:focus,
+.mat-mdc-raised-button.mat-warn:active,
+.mat-mdc-unelevated-button.mat-warn:hover,
+.mat-mdc-unelevated-button.mat-warn:focus,
+.mat-mdc-unelevated-button.mat-warn:active,
+.mat-raised-button.mat-warn:hover,
+.mat-raised-button.mat-warn:focus,
+.mat-raised-button.mat-warn:active,
+.mat-flat-button.mat-warn:hover,
+.mat-flat-button.mat-warn:focus,
+.mat-flat-button.mat-warn:active {
+  background-color: #f44336 !important;
+  color: #fff !important;
+}
+
+/* Inline-style compatibility from old app templates. */
+button[style*="background-color: #bcb4db"],
+button[style*="background-color:#bcb4db"] {
+  color: #ffffff !important;
+  border-color: #bcb4db !important;
+}
+
+button[style*="background-color: #bcb4db"]:hover,
+button[style*="background-color:#bcb4db"]:hover,
+button[style*="background-color: #bcb4db"]:focus,
+button[style*="background-color:#bcb4db"]:focus,
+button[style*="background-color: #bcb4db"]:active,
+button[style*="background-color:#bcb4db"]:active {
+  background-color: #bcb4db !important;
+  color: #ffffff !important;
+  border-color: #bcb4db !important;
+}
+
+button[style*="background-color: #f29f99"],
+button[style*="background-color:#f29f99"] {
+  color: #ffffff !important;
+  border-color: #f29f99 !important;
+}
+
+button[style*="background-color: #f29f99"]:hover,
+button[style*="background-color:#f29f99"]:hover,
+button[style*="background-color: #f29f99"]:focus,
+button[style*="background-color:#f29f99"]:focus,
+button[style*="background-color: #f29f99"]:active,
+button[style*="background-color:#f29f99"]:active {
+  background-color: #f29f99 !important;
+  color: #ffffff !important;
+  border-color: #f29f99 !important;
+}
+
+button[style*="background-color: darkgray"],
+button[style*="background-color:darkgray"] {
+  color: #ffffff !important;
+}
+
+/* Old app parity: ensure table action icon buttons keep filled circular backgrounds. */
+.mat-mdc-icon-button.btn-tbl-delete,
+.mat-icon-button.btn-tbl-delete {
+  background-color: #ff944f !important;
+  color: #fff !important;
+  border-radius: 50% !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  padding: 0 !important;
+}
+
+.mat-mdc-icon-button.btn-tbl-delete:hover,
+.mat-icon-button.btn-tbl-delete:hover {
+  background-color: #ff9600 !important;
+}
+
+.mat-mdc-icon-button.btn-tbl-edit,
+.mat-icon-button.btn-tbl-edit {
+  background-color: #96a2b4 !important;
+  color: #fff !important;
+  border-radius: 50% !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  padding: 0 !important;
+}
+
+.mat-mdc-icon-button.btn-tbl-edit .mat-icon,
+.mat-mdc-icon-button.btn-tbl-delete .mat-icon,
+.mat-icon-button.btn-tbl-edit .mat-icon,
+.mat-icon-button.btn-tbl-delete .mat-icon {
+  margin: 0 !important;
+  line-height: 16px !important;
+}
+
+.mat-mdc-icon-button.btn-tbl-edit:hover,
+.mat-mdc-icon-button.btn-tbl-edit:focus,
+.mat-icon-button.btn-tbl-edit:hover,
+.mat-icon-button.btn-tbl-edit:focus {
+  background-color: #888 !important;
+  color: #fff !important;
+}
+
+/*
+ * Filled (non-outline) MDC fields: give the infix enough height so floating labels
+ * clear the value. Do NOT apply these to appearance="outline" — the notched outline
+ * computes label + infix geometry itself; forcing infix height/padding breaks the
+ * notch and makes the label sit on top of the value (Edit Reservation, etc.).
+ */
+.mat-mdc-form-field:not(.mat-form-field-appearance-outline) .mat-mdc-form-field-infix {
+  min-height: 56px !important;
+  padding-top: 8px !important;
+  padding-bottom: 8px !important;
+  font-size: 14px !important;
+}
+
+.mat-mdc-form-field:not(.mat-form-field-appearance-outline) .mat-mdc-floating-label {
+  font-size: 14px !important;
+}
+
+/* Old app parity: normalize textbox appearance across Bootstrap + Material fields. */
+input.form-control,
+select.form-control {
+  height: 40px !important;
+  border: 1px solid #ced4da !important;
+  border-radius: 4px !important;
+  background-color: #fff !important;
+  box-shadow: none !important;
+  color: #555 !important;
+  font-size: 13px !important;
+  line-height: 40px !important;
+  padding: 0 10px !important;
+}
+
+input.form-control::placeholder {
+  line-height: 40px !important;
+  font-size: 13px !important;
+  color: #a7a7a7 !important;
+}
+
+textarea.form-control {
+  border: 1px solid #ced4da !important;
+  border-radius: 4px !important;
+  background-color: #fff !important;
+  box-shadow: none !important;
+  color: #555 !important;
+  font-size: 13px !important;
+  line-height: 1.5 !important;
+}
+
+input.form-control:focus,
+select.form-control:focus,
+textarea.form-control:focus {
+  border-color: #80bdff !important;
+  box-shadow: none !important;
+}
+
+.mat-mdc-form-field {
+  font-size: 13px !important;
+}
+
+.mat-mdc-form-field:not(.mat-form-field-appearance-outline) .mat-mdc-text-field-wrapper {
+  border-radius: 4px !important;
+}
+
+.mdc-text-field--outlined:not(.mdc-text-field--disabled) .mdc-notched-outline__leading,
+.mdc-text-field--outlined:not(.mdc-text-field--disabled) .mdc-notched-outline__notch,
+.mdc-text-field--outlined:not(.mdc-text-field--disabled) .mdc-notched-outline__trailing {
+  border-color: #ced4da !important;
+  border-width: 1px !important;
+}
+
+.mdc-text-field--outlined:not(.mdc-text-field--disabled):not(.mdc-text-field--focused)
+  .mdc-notched-outline
+  .mdc-notched-outline__leading,
+.mdc-text-field--outlined:not(.mdc-text-field--disabled):not(.mdc-text-field--focused)
+  .mdc-notched-outline
+  .mdc-notched-outline__notch,
+.mdc-text-field--outlined:not(.mdc-text-field--disabled):not(.mdc-text-field--focused)
+  .mdc-notched-outline
+  .mdc-notched-outline__trailing {
+  border-color: #ced4da !important;
+}
+
+.mdc-text-field--outlined:not(.mdc-text-field--disabled).mdc-text-field--focused
+  .mdc-notched-outline
+  .mdc-notched-outline__leading,
+.mdc-text-field--outlined:not(.mdc-text-field--disabled).mdc-text-field--focused
+  .mdc-notched-outline
+  .mdc-notched-outline__notch,
+.mdc-text-field--outlined:not(.mdc-text-field--disabled).mdc-text-field--focused
+  .mdc-notched-outline
+  .mdc-notched-outline__trailing {
+  border-color: #80bdff !important;
+}
+
+.mat-mdc-form-field .mat-mdc-select-value,
+.mat-mdc-form-field .mat-mdc-select-value-text,
+.mat-mdc-form-field .mat-mdc-input-element {
+  font-size: 13px !important;
+  color: #555 !important;
+}
+
+/* Old app parity: legacy mat-form-field default was not filled.
+   Keep non-outline MDC fields transparent to avoid gray fill drift. */
+.mat-mdc-form-field:not(.mat-form-field-appearance-outline) .mat-mdc-text-field-wrapper,
+.mat-mdc-form-field:not(.mat-form-field-appearance-outline) .mdc-text-field--filled {
+  background-color: transparent !important;
+}
+

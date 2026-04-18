@@ -1,0 +1,50 @@
+<div class="modalHeader">
+    <div class="editRowModal">
+        <div class="modalHeader clearfix">
+            <div class="modal-about">
+                <div class="font-weight-bold p-t-5 font-17">
+                    Supplier Status</div>
+            </div>
+        </div>
+    </div>
+    <button mat-icon-button (click)="dialog.close()" aria-label="Close dialog">
+  <mat-icon>close</mat-icon>
+</button>
+</div>
+
+<mat-table #table [dataSource]="dataSource" matSort class="mat-cell">
+    <ng-container matColumnDef="supplierName">
+        <mat-header-cell *matHeaderCellDef>Supplier Name</mat-header-cell>
+        <mat-cell *matCellDef="let row">
+            {{row.supplierName}}</mat-cell>
+    </ng-container>
+    
+    <ng-container matColumnDef="supplierStatus">
+        <mat-header-cell *matHeaderCellDef>Status</mat-header-cell>
+        <mat-cell *matCellDef="let row">
+            {{row.supplierStatus}}</mat-cell>
+    </ng-container>
+
+    <ng-container matColumnDef="supplierStatusReason">
+        <mat-header-cell *matHeaderCellDef>Reason</mat-header-cell>
+        <mat-cell *matCellDef="let row">
+            {{row.supplierStatusReason}}</mat-cell>
+    </ng-container>
+    
+    <ng-container matColumnDef="statusBy">
+        <mat-header-cell *matHeaderCellDef>Status By</mat-header-cell>
+        <mat-cell *matCellDef="let row">
+            {{row.supplierStatusByEmployeeName}}</mat-cell>
+    </ng-container>
+
+    <ng-container matColumnDef="supplierStatusDate">
+        <mat-header-cell *matHeaderCellDef>Status Date</mat-header-cell>
+        <mat-cell *matCellDef="let row">
+            {{row.supplierStatusDate | date: 'dd-MM-yyyy'}}</mat-cell>
+    </ng-container>
+   
+    <mat-header-row *matHeaderRowDef="displayedColumns"></mat-header-row>
+    <mat-row *matRowDef="let row; columns: displayedColumns;" [style.cursor]="'pointer'"
+        matRipple>
+    </mat-row>
+</mat-table>

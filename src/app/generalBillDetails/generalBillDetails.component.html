@@ -1,0 +1,212 @@
+<div id="invoiceContainer"
+  style="width: 210mm; min-height: 297mm; margin: auto; background: #fff; padding: 20mm; font-family: Arial, sans-serif; font-size: 10pt; color: #000;">
+
+  <style>
+    #invoiceContainer table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    #invoiceContainer th,
+    #invoiceContainer td {
+      padding: 6px;
+      border: 1px solid #000;
+    }
+
+    #invoiceContainer th {
+      background: #f2f2f2;
+      text-align: center;
+    }
+
+    #invoiceContainer .no-border td {
+      border: none !important;
+    }
+
+    #invoiceContainer .text-right {
+      text-align: right;
+    }
+
+    #invoiceContainer .text-center {
+      text-align: center;
+    }
+
+    #invoiceContainer h3 {
+      margin: 0;
+      font-size: 16pt;
+    }
+
+    #invoiceContainer small {
+      font-size: 9pt;
+    }
+
+    #invoiceContainer hr {
+      border: none;
+      border-top: 1px solid #000;
+      margin: 10px 0;
+    }
+
+    @media print {
+      .no-print {
+        display: none !important;
+      }
+
+      body {
+        margin: 0;
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+      }
+
+      #invoiceContainer {
+        width: 100%;
+        padding: 15mm;
+      }
+    }
+  </style>
+
+  <!-- Header -->
+  <table class="no-border">
+    <tr>
+      <td class="text-center">
+        <h3><strong>TAX INVOICE</strong></h3>
+        <small>Original for Recipient</small>
+      </td>
+    </tr>
+  </table>
+
+  <!-- Company Details -->
+  <table class="no-border" style="margin-top: 10px; line-height: 1.5;">
+    <tr>
+      <td>
+        <strong>ECOS (I) MOBILITY & HOSPITALITY PVT. LTD</strong><br />
+        <strong>Branch Office:</strong> {{dataSource?.ecoBranchAddress}}<br />
+        <strong>Reg. Office:</strong> 45, First Floor, Corner Market, Malviya Nagar, New Delhi-110017<br />
+        <strong>Correspondence:</strong> 45, First Floor, Corner Market, Malviya Nagar, New Delhi-110017<br />
+        <strong>Telephone Reservation 24/7:</strong> 91-11-40794079,
+        <strong>Fax:</strong> 01141550515<br />
+        <strong>Email:</strong> billing@ecorentacar.com,
+        <strong>Reservation:</strong> cars@ecorentacar.com<br />
+        <strong>GST No:</strong> {{dataSource?.ecoBranchGSTNumber}}<br />
+        LUT: {{dataSource?.lutNOForInvoiceModel?.lutNo}},
+        Exp. Date: {{dataSource?.lutNOForInvoiceModel?.endDate | date:'dd/MM/yyyy'}}<br />
+        Reverse Charge (Y/N): N
+      </td>
+    </tr>
+  </table>
+
+  <!-- Customer + Invoice Info -->
+     <hr />
+  <table style="margin-top: 15px;" class="no-border">
+    <tr>
+      <td width="70%">
+        <strong>Bill To:</strong><br />
+        {{dataSource?.billingName}}<br />
+        {{dataSource?.billingAddress}},
+        {{dataSource?.billingCityName}},
+        {{dataSource?.billingStateName}},
+        {{dataSource?.customerCountryName}}<br />
+        <strong>State of Service:</strong> {{dataSource?.customerGSTStateName}},
+        <strong>State Code:</strong> {{dataSource?.customerGSTStateCode}}<br />
+        <strong>GST/UIN:</strong> {{dataSource?.customerGSTNumber}}<br />
+        <strong>Guest Name:</strong> {{dataSource?.passengerName}}
+      </td>
+      <td width="30%">
+        <strong>Invoice No:</strong> {{dataSource?.invoiceNumberWithPrefix}}<br />
+        <strong>Invoice Date:</strong> {{dataSource?.invoiceDate | date:'dd/MM/yyyy'}}<br />
+      </td>
+    </tr>
+  </table>
+
+  <!-- Charge Details -->
+   
+  <table style="margin-top: 15px;" class="no-border">
+    <thead>
+      <tr align="center">
+        <th>Car Type</th>
+        <th>Particulars</th>
+        <th>Amount</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let duty of dataSource?.lineItems">
+        <td> </td>
+        <td >{{duty.narration}}</td>
+        <td class="text-right">{{duty.baseAmount}}</td>
+      </tr>
+      <tr>
+        <td colspan="2" class="text-right"><strong>Total</strong></td>
+        <td class="text-right">{{dataSource?.totalAmountAfterDiscout}}</td>
+      </tr>
+    </tbody>
+
+  </table>
+    <hr />
+
+
+    
+
+  <!-- Taxes -->
+  <table style="margin-top: 10px;" class="no-border">
+    <tr>
+       <td>SAC : 996601</td>
+    </tr>
+    <tr>
+       <td class="text-right">CGST &nbsp;&nbsp;&nbsp; <span *ngIf="dataSource?.cgstPercentage!=0"> @ {{dataSource?.cgstPercentage}}%</span> &nbsp;&nbsp;&nbsp; <span *ngIf="dataSource?.cgstAmount!=0">{{dataSource?.cgstAmount}}</span></td>
+    </tr>
+    <tr>
+      <td class="text-right">SGST &nbsp;&nbsp;&nbsp; <span  *ngIf="dataSource?.sgstPercentage!=0">@ {{dataSource?.sgstPercentage}}% </span> &nbsp;&nbsp;&nbsp; <span *ngIf="dataSource?.sgstAmount!=0">{{dataSource?.sgstAmount}}</span></td>
+    </tr>
+    <tr>
+      <td class="text-right">IGST  &nbsp;&nbsp;&nbsp;<span  *ngIf="dataSource?.igstPercentage!=0">@ {{dataSource?.igstPercentage}}% </span> &nbsp;&nbsp;&nbsp;  <span *ngIf="dataSource?.igstAmount!=0">{{dataSource?.igstAmount}}</span></td>
+    </tr>
+  </table>
+
+  <!-- Total -->
+  <hr />
+  <table class="no-border">
+    <tr>
+      <td><strong>Amount in Words:</strong> {{dataSourceForCalculate.invoiceTotalAmountAfterGSTInWords}}</td>
+      <td class="text-right"><strong>Total Rs:</strong>{{dataSource?.invoiceTotalAmountAfterGST}}</td>
+    </tr>
+  </table>
+  <hr />
+
+  <!-- Terms and Signature -->
+  <table style="margin-top: 10px;" class="no-border">
+    <tr>
+      <td width="70%" valign="top">
+        <strong>E & O. E.</strong><br />
+        <strong>Terms & Conditions</strong><br />
+        Our Responsibility of the Signed duty slip rests till we handover the same to you with the bill.<br />
+        Interest @ 24% will be charged if payment is not received as per payment terms settled.<br />
+        No Objection pertaining to this invoice would be entertained thereafter.<br />
+        <br />
+        <strong>Sent the RTGS/NEFT Payment to:</strong><br />
+        KOTAK MAHINDRA BANK / A/C NO: 3911291161<br />
+        IFSC CODE: KKBK0004620
+      </td>
+      <td width="30%" class="text-center">
+        <strong>ECOS (I) MOBILITY & HOSPITALITY PVT. LTD</strong><br />
+        <img src="assets/images/Picture1.png" width="80px" height="80px" alt="Signature" /><br />
+        <strong>Authorized Signatory</strong>
+      </td>
+    </tr>
+  </table>
+
+  <!-- Footer -->
+  <div style="font-size: 9pt; margin-top: 15px;">
+    PAN NO: AABCE1357N,
+    TIN NO: 07860310884,
+    CIN NO: U74999DL1996PTC076375<br />
+    Electronic Mode of Payments as per Section 269SU of Income Tax Act, 1961:
+    <a href="https://www.ecorentacar.com/pay-online/" target="_blank">https://www.ecorentacar.com/pay-online/</a>
+  </div>
+
+  <div style="text-align: center; margin-top: 10px; font-weight: bold;">
+    “This is a computer generated bill and does not require any signature”
+  </div>
+
+</div>
+  <!-- Print Button -->
+  <div class="text-center mt-3 no-print" style="margin-top: 15px;">
+    <button class="btn btn-primary" onclick="window.print()">Print</button>
+  </div>

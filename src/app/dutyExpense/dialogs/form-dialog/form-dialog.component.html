@@ -1,0 +1,135 @@
+<div class="addContainer">
+    <div class="modalHeader">
+        <div class="editRowModal">
+            <div class="modalHeader clearfix">
+                <!-- <img [src]='advanceTable.img' alt="avatar"> -->
+                <div class="modal-about">
+                    <div class="font-weight-bold p-t-5 font-17">
+                        {{dialogTitle}}</div>
+                         <div *ngIf="isSaveAllowed">
+                        <span style="color:rgb(150, 4, 4);margin-bottom: 10px;font-style: italic;font-size: 12px;">({{verifyDutyStatusAndCacellationStatus}} !!!!!)</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <button mat-icon-button (click)="dialogRef.close()" aria-label="Close dialog">
+      <mat-icon>close</mat-icon>
+    </button>
+    </div>
+    <div mat-dialog-content>
+        <form class="register-form m-4" [formGroup]="advanceTableForm" (ngSubmit)="submit">
+            <div class="row">
+                <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                    <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                        <mat-label>Expense</mat-label>
+                        <input required type="text" matInput formControlName="expense" [matAutocomplete]="auto">
+                        <mat-autocomplete #auto="matAutocomplete" (optionSelected)="OnExpenseSelect($event.option.value)">
+                          <mat-option *ngFor="let option of filteredExpenseOptions | async" 
+                          [value]="option.expense" (click)="getExpenseID(option.expenseID)">
+                            {{option.expense}}
+                          </mat-option>
+                        </mat-autocomplete>
+                        <mat-error *ngIf="advanceTableForm.get('expense').hasError('required')">
+                            Expense is required
+                        </mat-error>
+
+                        <mat-error *ngIf="advanceTableForm.get('expense').hasError('expenseInvalid')
+                        && !advanceTableForm.get('expense')?.hasError('required')">
+                            Please select a valid Expense
+                        </mat-error>
+                    </mat-form-field>
+                </div>
+                <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                    <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                        <mat-label>Chargeable/NonChargeable</mat-label>
+                        <mat-select formControlName="chargeableOrNonChargeable">
+                            <mat-option value="Chargeable">Chargeable</mat-option>
+                            <mat-option value="Non Chargeable">Non Chargeable</mat-option>
+                        </mat-select>
+                        <mat-error *ngIf="advanceTableForm.get('chargeableOrNonChargeable').hasError('required')">
+                            Chargeable/Non Chargeable is required
+                        </mat-error>
+                    </mat-form-field>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                    <mat-form-field class="example-full-width" appearance="outline" floatLabel="always"> 
+                        <mat-label>UOM</mat-label>                       
+                        <input required type="text" matInput [matAutocomplete]="auto1"
+                        formControlName="uom">
+                        <mat-autocomplete #auto1="matAutocomplete"(optionSelected)="OnUOMSelect($event.option.value)">
+                            <mat-option *ngFor="let options of filteredUOMOptions | async"
+                                [value]="options.uom" (click)="getUomID(options.uomid)">
+                                {{options.uom}}
+                            </mat-option>
+                        </mat-autocomplete>
+                        <mat-error *ngIf="advanceTableForm.controls['uom'].hasError('UomInvalid')">
+                            Please select a Uom 
+                        </mat-error>
+                    </mat-form-field>
+                </div>
+                <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                    <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                        <mat-label>Units</mat-label>
+                        <input matInput formControlName="uomUnits" (input)="calculateAmount()">
+                        <mat-error *ngIf="advanceTableForm.get('uomUnits').hasError('required')">
+                            Units is required
+                    </mat-error>
+                    </mat-form-field>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                    <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                        <mat-label>Amount Per Unit</mat-label>
+                        <input matInput formControlName="amountPerUnit" (input)="calculateAmount()">
+                        <mat-error *ngIf="advanceTableForm.get('amountPerUnit').hasError('required')">
+                            Amount Per Units is required
+                        </mat-error>
+                    </mat-form-field>
+                </div>
+                <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                    <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                        <mat-label>Amount</mat-label>
+                        <input matInput formControlName="amount"  (input)="calculateAmountPerUnit()">
+                        <mat-error *ngIf="advanceTableForm.get('amount').hasError('required')">
+                            Amount is required
+                        </mat-error>
+                    </mat-form-field>
+                </div>
+            </div>
+          
+            <div class="row">
+                <div class="col-xl-12 col-lg-6 col-md-12 col-sm-12 mb-2">
+                    <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                        <mat-label>Activation Status</mat-label>
+                        <mat-select formControlName="activationStatus">
+                            <mat-option [value]=true>Active</mat-option>
+                            <mat-option [value]=false>Deleted</mat-option>
+                        </mat-select>
+                        <mat-error *ngIf="advanceTableForm.get('activationStatus').hasError('required')">
+                            Activation Status is required
+                        </mat-error>
+                    </mat-form-field>
+                </div>
+            </div>
+            <div class="row">
+                <!-- <div *ngIf="isSaveAllowed">
+                    <span style="color:red;margin-bottom: 10px;">{{verifyDutyStatusAndCacellationStatus}}</span>
+                </div> -->
+                <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12 mb-2">
+                    <div class="example-button-row">
+                        <button mat-raised-button color="primary" *ngIf="saveDisabled" [type]="submit" [disabled]="!advanceTableForm.valid || isSaveAllowed"  (click)="confirmAdd()">Save</button>
+                        <mat-spinner *ngIf="!saveDisabled" diameter="30"></mat-spinner>
+                        <button *ngIf="action==='add'" mat-raised-button color="warn" (click)="onNoClick()"
+                        tabindex="-1">Reset</button>
+                    <button *ngIf="action==='edit'" mat-raised-button color="warn" (click)="onNoClick()"
+                        tabindex="-1">Cancel</button>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>

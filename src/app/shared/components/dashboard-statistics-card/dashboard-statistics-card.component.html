@@ -1,0 +1,32 @@
+<mat-card class="dashboard-stat-card" [style.background]="backgroundColor">
+  <mat-card-content>
+    <div class="card-content">
+      <div class="icon-container" [ngClass]="iconColor">
+        <mat-icon>{{ icon }}</mat-icon>
+      </div>
+      <div class="stats-content">
+        <h4 class="card-title">{{ title }}</h4>
+        <h2 class="card-value">
+          @if (prefix) {
+            <span>{{ prefix }}</span>
+          }
+          {{ value }}
+          @if (suffix) {
+            <span>{{ suffix }}</span>
+          }
+        </h2>
+        @if (showTrend) {
+          <div class="trend-container">
+            <mat-icon [ngClass]="trendClass">{{ trendIcon }}</mat-icon>
+            <span class="trend-value" [ngClass]="trendClass">
+              {{ trendValue }}% {{ trendLabel }}
+            </span>
+          </div>
+        }
+        @if (subtitle) {
+          <p class="card-subtitle">{{ subtitle }}</p>
+        }
+      </div>
+    </div>
+  </mat-card-content>
+</mat-card>

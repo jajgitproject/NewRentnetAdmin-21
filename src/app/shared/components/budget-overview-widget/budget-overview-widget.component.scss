@@ -1,0 +1,149 @@
+.budget-overview-container {
+  width: 100%;
+
+  .card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 16px 24px;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+
+    h2 {
+      margin: 0;
+      font-size: 17px;
+      font-weight: 500;
+    }
+
+    .card-actions {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .period-badge {
+      background-color: rgba(0, 0, 0, 0.05);
+      padding: 4px 12px;
+      border-radius: 16px;
+      font-size: 12px;
+      font-weight: 500;
+    }
+  }
+
+  .budget-summary {
+    padding: 24px;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+
+    .total-budget {
+      margin-bottom: 16px;
+
+      .label {
+        font-size: 14px;
+        margin-bottom: 4px;
+      }
+
+      .value {
+        font-size: 24px;
+        font-weight: 500;
+      }
+    }
+
+    .budget-progress {
+      .progress-info {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 8px;
+
+        .label {
+          font-size: 12px;
+          margin-bottom: 2px;
+        }
+
+        .value {
+          font-size: 14px;
+          font-weight: 500;
+        }
+      }
+
+      mat-progress-bar {
+        height: 8px;
+        border-radius: 4px;
+      }
+
+      .percentage {
+        text-align: right;
+        font-size: 12px;
+        margin-top: 4px;
+      }
+    }
+  }
+
+  .categories-list {
+    padding: 24px;
+
+    h3 {
+      margin: 0 0 16px 0;
+      font-size: 16px;
+      font-weight: 500;
+    }
+
+    .category-item {
+      margin-bottom: 16px;
+
+      &:last-child {
+        margin-bottom: 0;
+      }
+
+      .category-header {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 8px;
+
+        .category-name {
+          display: flex;
+          align-items: center;
+          gap: 8px;
+          font-weight: 500;
+
+          .color-indicator {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+          }
+        }
+
+        .category-values {
+          .spent {
+            font-weight: 500;
+
+            &.danger {
+              color: #f44336;
+            }
+
+            &.warning {
+              color: #ff9800;
+            }
+
+            &.success {
+              color: #4caf50;
+            }
+          }
+        }
+      }
+    }
+  }
+
+  @media (max-width: 768px) {
+    .card-header {
+      padding: 12px 16px;
+
+      h2 {
+        font-size: 16px;
+      }
+    }
+
+    .budget-summary,
+    .categories-list {
+      padding: 16px;
+    }
+  }
+}

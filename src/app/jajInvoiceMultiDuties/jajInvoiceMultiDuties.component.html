@@ -1,0 +1,203 @@
+<div #printSection class="no-border">
+  <div class="invoice-container">
+
+    <div class="invoice-title">TAX INVOICE</div>
+    <div class="invoice-subtitle">Original for Recipient</div>
+
+    <div class="header-grid">
+      <div class="company-box">
+        <!-- <b>{{dataSource?.invoiceEcoCompanyModel?.ecoCompanyName}}</b><br>
+        {{dataSource?.invoiceEcoCompanyModel?.ecoCompanyCityName}} ,
+        {{dataSource?.invoiceEcoCompanyModel?.ecoCompanyStateName}} -
+        {{dataSource?.invoiceEcoCompanyModel?.ecoCompanyPinCode}}<br />
+        <strong> GSTNo : </strong>{{dataSource?.invoiceEcoBranchModel?.branchGSTNumber}} <br />
+        <strong> SAC : </strong>{{dataSource?.sacNumber || 'N/A'}} -->
+        <p>
+          <span class="text-heading">ECOS (India) Mobility & Hospitality Limited</span><br />
+          (Formerly known as Ecos (India) Mobility & Hospitality Pvt. Ltd.)<br />
+          <strong>Branch Office :</strong>
+          {{dataSource?.invoiceEcoBranchModel?.branchAddress}}<br />
+          <strong>Reg. Office :</strong>
+          45, First Floor, Corner Market, Malviya Nagar, New Delhi-110017<br />
+          <strong>Correspondence :</strong>
+          {{dataSource?.invoiceEcoCompanyModel?.correspondenceAddress}},
+          {{dataSource?.invoiceEcoCompanyModel?.correspondenceCityName}},
+          {{dataSource?.invoiceEcoCompanyModel?.correspondenceStateName}},
+          {{dataSource?.invoiceEcoCompanyModel?.ecoCompanyCountryName}}<br />
+
+          <strong>GST No :</strong>
+          {{dataSource?.invoiceEcoBranchModel?.branchGSTNumber}} /
+          <strong>SAC :</strong> {{dataSource?.invoiceGSTModel?.gstsac}}<br />
+          <strong>Ph :</strong> {{dataSource?.invoiceEcoCompanyModel?.phoneNumber}},
+          <!-- <strong>Fax :</strong> {{dataSource?.invoiceEcoCompanyModel?.fax}}<br /> -->
+          LUT : {{dataSource?.invoiceEcoBranchModel?.branchLUTNumber}}
+          Exp Date :{{dataSource?.invoiceEcoBranchModel?.branchLUTExpiryDate | date:'dd/MM/yyyy'}}
+        </p>
+      </div>
+
+      <div class="invoice-box">
+        <div class="invoice-info">
+          <b>Invoice No:</b> {{dataSource?.invoiceModel?.invoiceNumberWithPrefix}}<br>
+          <b>Bill Date:</b> {{dataSource?.invoiceModel?.invoiceDate | date:'dd/MM/yyyy'}}<br>
+          <b>Customer:</b> {{dataSource?.invoiceCustomerModel?.customerName}}<br>
+          <!-- <b>GST/UIN:</b> {{dataSource?.invoiceCustomerModel?.customerGSTNumber}} -->
+          <strong>Address : </strong> {{dataSource?.invoiceCustomerModel?.billingAddress}}<br />
+          <strong>Place of Supply & State :</strong>
+          {{dataSource?.invoiceCustomerModel?.customerGSTStateName}}<br />
+          <strong>State Code :</strong> {{dataSource?.invoiceCustomerModel?.customerGSTStateCode}}<br />
+          <strong>GST/UIN :</strong> {{dataSource?.invoiceCustomerModel?.customerGSTNumber}}<br />
+          <strong>Reverse Charge (Y/N):</strong> N
+        </div>
+
+        <div class="logo-qr">
+          <img class="logo" src="http://www.ecoserp.com/bill_printing/logo.jpg" alt="Logo">
+          <img class="qr" [src]="'data:image/png;base64,' + dataSource?.invoiceModel?.signedQRCode" alt="QR" />
+        </div>
+      </div>
+    </div>
+
+    <table class="slip-table">
+      <thead>
+        <tr>
+          <th>Slip No</th>
+          <th>Slip Date</th>
+          <th>Used By</th>
+          <th>Booked By</th>
+          <th>City</th>
+          <th>Vehicle</th>
+          <th>Package</th>
+          <th>Basic</th>
+          <th>Kms</th>
+          <th>Hrs</th>
+          <th>Extra Kms</th>
+          <td>Extra Kms Rate</td>
+          <th>Extra KM Amt</th>
+          <th>Extra Hrs</th>
+          <th>Extra Hrs Rate</th>
+          <th>Extra Hr Amt</th>
+          <th>Parking /toll Chagre</th>
+          <th>Night</th>
+          <th>FGR</th>
+          <th>Interstate</th>
+          <th>Other Charges</th>
+          <th>Driver Allowan ce </th>
+          <th>Fuel Surcharge on Rate </th>
+          <th>Fuel Surcharge on Ext.KM.</th>
+          <th>Total</th>
+          <th>After Discount Amount</th>
+        </tr>
+      </thead>
+
+      <tbody>
+        <!-- ===== MANY ROWS (FOR MULTIPLE PAGES) ===== -->
+        <!-- Copy-paste pattern to simulate large data -->
+
+        <!-- 30+ rows -->
+        <!-- PAGE 1 -->
+        <tr class="text2" *ngFor="let duty of dataSourceForInvoiceDuties">
+          <td>{{duty.dutySlipID}}</td>
+          <td>{{duty.pickupDate | date:'dd/MM/yyyy'}}</td>
+          <td>{{duty.passengerSalutation + " " + duty.passengerName}}</td>
+          <td>{{duty.bookerSalutation + " " + duty.bookerName}}</td>
+          <td>{{duty.city}}</td>
+          <td>{{duty.vehicle}}</td>
+          <td>{{duty.package}}</td>
+          <td>{{duty.baseRate}}</td>
+          <td>{{duty.totalKMWithAddtionalKM}}</td>
+          <td>{{duty.totalHoursWithAddtionalHours}}</td>
+          <td>{{duty.extraKMs}}</td>
+          <td>{{duty.extraKMRate}}</td>
+          <td>{{duty.extraKMAmount}}</td>
+          <td>{{duty.extraMinutes / 60}}</td>
+          <td>{{duty.extraHRRate}}</td>
+          <td>{{duty.extraMinutesAmount}}</td>
+          <td>{{duty.tollParkingAmount}}</td>
+          <td>{{duty.totalNightChargesAmount}}</td>
+          <td>{{duty.fgr}}</td>
+          <td>{{duty.interStateTax}}</td>
+          <td>{{duty.totalExpences}}</td>
+          <td>{{duty.driverAllowance}}</td>
+          <td>{{duty.totalFuelSurchargeOnPackageRate}}</td>
+          <td>{{duty.totalFuelSurchargeOnExtraKM }}</td>
+          <td>{{duty.totalAmountAfterExpences}}</td>
+          <td>{{duty.totalAmountAfterDiscount}}</td>
+        </tr>
+
+
+        <!-- Duplicate rows to force multiple pages -->
+        <!-- PAGE 2 & 3 -->
+        <!-- (Intentionally repeated) -->
+        <!-- Add as many rows as needed -->
+        <!-- Below block repeated many times -->
+        <!-- START -->
+        <!-- <tr><td>S004</td><td>04-Aug</td><td>User4</td><td>Admin</td><td>Delhi</td><td>Dzire</td><td>8H</td><td>2400</td><td>85</td><td>9</td><td>100</td><td>200</td><td>150</td><td>0</td><td>0</td><td>2850</td></tr>
+            <tr><td>S005</td><td>05-Aug</td><td>User5</td><td>Admin</td><td>Delhi</td><td>Ertiga</td><td>12H</td><td>3600</td><td>130</td><td>13</td><td>200</td><td>300</td><td>200</td><td>0</td><td>0</td><td>4300</td></tr>
+            <tr><td>S006</td><td>06-Aug</td><td>User6</td><td>Admin</td><td>Noida</td><td>Innova</td><td>OS</td><td>5200</td><td>260</td><td>-</td><td>-</td><td>-</td><td>350</td><td>300</td><td>500</td><td>6350</td></tr>
+            <tr><td>S007</td><td>07-Aug</td><td>User7</td><td>Admin</td><td>Delhi</td><td>Dzire</td><td>8H</td><td>2400</td><td>85</td><td>9</td><td>100</td><td>200</td><td>150</td><td>0</td><td>0</td><td>2850</td></tr>
+            <tr><td>S008</td><td>08-Aug</td><td>User8</td><td>Admin</td><td>Delhi</td><td>Ertiga</td><td>12H</td><td>3600</td><td>130</td><td>13</td><td>200</td><td>300</td><td>200</td><td>0</td><td>0</td><td>4300</td></tr>
+            <tr><td>S009</td><td>09-Aug</td><td>User9</td><td>Admin</td><td>Noida</td><td>Innova</td><td>OS</td><td>5200</td><td>260</td><td>-</td><td>-</td><td>-</td><td>350</td><td>300</td><td>500</td><td>6350</td></tr> -->
+        <!-- END -->
+      </tbody>
+    </table>
+
+    <div class="totals-wrapper">
+      <div class="amount-words">
+        <b>Amount in Words:</b><br>
+        Rupees {{dataSourceForCalculate?.totalAmountAfterGSTInWords}} Only
+      </div>
+
+      <div class="totals-box">
+        <div class="totals-row">
+          <span>Sub Total</span>
+          <span><strong>{{dataSourceForCalculate?.totalBasicAmount | number:'1.2-2'}}</strong></span>
+        </div>
+
+        <div class="totals-row" *ngIf="dataSource?.invoiceGSTModel?.cgstAmount > 0">
+          <span>CGST @{{dataSource?.invoiceGSTModel?.cgstPercentage}}%</span>
+          <span><strong>{{dataSource?.invoiceGSTModel?.cgstAmount | number:'1.2-2'}}</strong></span>
+        </div>
+
+        <div class="totals-row" *ngIf="dataSource?.invoiceGSTModel?.sgstAmount > 0">
+          <span>SGST @{{dataSource?.invoiceGSTModel?.sgstPercentage}}%</span>
+          <span><strong>{{dataSource?.invoiceGSTModel?.sgstAmount | number:'1.2-2'}}</strong></span>
+        </div>
+
+        <div class="totals-row" *ngIf="dataSource?.invoiceGSTModel?.igstAmount > 0">
+          <span>IGST @{{dataSource?.invoiceGSTModel?.igstPercentage}}%</span>
+          <span><strong>{{dataSource?.invoiceGSTModel?.igstAmount | number:'1.2-2'}}</strong></span>
+        </div>
+
+        <div class="totals-row bold">
+          <span>Grand Total</span>
+          <span><strong>{{dataSource?.invoiceModel?.invoiceTotalAmountAfterGST | number:'1.2-2'}}</strong></span>
+        </div>
+      </div>
+    </div>
+
+    <div class="terms-box">
+      <b>Terms & Conditions:</b><br>
+      Our Responsibility of the Signed duty slip rests till we handover the same to you with the bill.
+      Interest @ 24% will be charged if payment is not received as per payment terms settled.
+      No Objection pertaining to this invoice would be entertained thereafter. <br />
+      Sent the RTGS/NEFT Payment to: KOTAK MAHINDRA BANK / A/C NO: 3911291161,
+      IFSC CODE: KKBK0004620, PAN NO: AABCE1357N, CIN NO: U74999DL1996PLC076375<br />
+      Electronic Mode of Payments as per Section 269SU of Income Tax Act, 1961:
+      <!-- <a href="https://www.ecosmobility.com/pay-online/" target="_blank">https://www.ecosmobility.com/pay-online/</a> -->
+    </div>
+
+    <div class="footer">
+      <div></div>
+      <div class="signature">
+        <p><strong>ECOS (India) Mobility & Hospitality Limited</strong></p>
+        <br><br>
+        <img src="assets/images/Picture1.png" width="80px" height="80px" />
+        <p>Authorized Signatory</p>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<div style="text-align:center; margin-top:20px;">
+  <button type="button" (click)="print()" mat-raised-button color="primary">Print</button>
+</div>

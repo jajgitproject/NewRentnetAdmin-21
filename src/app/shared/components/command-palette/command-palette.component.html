@@ -1,0 +1,35 @@
+@if (isOpen()) {
+<div class="command-palette-backdrop" (click)="onBackdropClick($event)">
+    <div class="command-palette-container">
+        <div class="search-bar">
+            <mat-icon class="search-icon">search</mat-icon>
+            <input #searchInput type="text" placeholder="Type a command or search..." [ngModel]="query()"
+                (ngModelChange)="query.set($event)" class="search-input">
+            <div class="shortcut-hint">ESC</div>
+        </div>
+
+        <div class="results-list">
+            @if (filteredCommands().length === 0) {
+            <div class="no-results">No results found.</div>
+            }
+
+            @for (cmd of filteredCommands(); track cmd.id; let i = $index) {
+            <div class="command-item" [class.selected]="i === selectedIndex()" (click)="executeCommand(cmd)"
+                (mouseenter)="selectedIndex.set(i)">
+                <mat-icon>{{cmd.icon}}</mat-icon>
+                <span class="command-title">{{cmd.title}}</span>
+                <span class="command-group">{{cmd.group}}</span>
+                @if (i === selectedIndex()) {
+                <mat-icon class="enter-icon">keyboard_return</mat-icon>
+                }
+            </div>
+            }
+        </div>
+
+        <div class="footer">
+            <span><kbd>↑</kbd> <kbd>↓</kbd> to navigate</span>
+            <span><kbd>↵</kbd> to select</span>
+        </div>
+    </div>
+</div>
+}

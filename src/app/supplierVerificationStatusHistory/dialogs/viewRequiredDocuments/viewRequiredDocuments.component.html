@@ -1,0 +1,62 @@
+<div class="modalHeader">
+  <div class="editRowModal">
+      <div class="modalHeader clearfix">
+          <div class="modal-about">
+              <div class="font-weight-bold p-t-5 font-17">
+                 Supplier Required Document</div>
+          </div>
+      </div>
+  </div>
+  <button mat-icon-button (click)="dialog.close()" aria-label="Close dialog">
+<mat-icon>close</mat-icon>
+</button>
+</div>
+<div class="example-container">
+  <ng-container *ngIf="dataSource && dataSource.length > 0; else thenBlock2">
+    <mat-table #table [dataSource]="dataSource">
+      <ng-container matColumnDef="documentName">
+        <mat-header-cell *matHeaderCellDef style="padding: 5px">Document Name</mat-header-cell>
+        <mat-cell *matCellDef="let element" style="padding: 5px">{{element.documentName}}</mat-cell>
+      </ng-container>
+
+      <ng-container matColumnDef="RequiredForSoftAttachment">
+        <mat-header-cell *matHeaderCellDef>
+          <span matTooltip="Soft Attachment" matTooltipPosition="above">Soft Att...</span>
+        </mat-header-cell>
+        <mat-cell *matCellDef="let element" style="padding: 5px">{{element.requiredForSoftAttachment === true ? 'Yes' : 'No'}}</mat-cell>
+      </ng-container>
+
+      <ng-container matColumnDef="RequiredForFullAttachment">
+        <mat-header-cell *matHeaderCellDef style="padding: 10px">
+          <span matTooltip="Full Attachment" matTooltipPosition="above">Full Att...</span>
+        </mat-header-cell>
+        <mat-cell *matCellDef="let element" style="padding: 5px">{{element.requiredForFullAttachment === true ? 'Yes' : 'No'}}</mat-cell>
+      </ng-container>
+
+      <ng-container matColumnDef="validFrom">
+        <mat-header-cell *matHeaderCellDef>Valid From</mat-header-cell>
+        <mat-cell *matCellDef="let element" style="padding: 5px">{{element.validFrom | date: 'dd-MM-yyyy'}}</mat-cell>
+      </ng-container>
+
+      <ng-container matColumnDef="validTo">
+        <mat-header-cell *matHeaderCellDef>Valid To</mat-header-cell>
+        <mat-cell *matCellDef="let element">{{element.validTo | date: 'dd-MM-yyyy'}}</mat-cell>
+      </ng-container>
+
+      <ng-container matColumnDef="activationStatus">
+        <mat-header-cell *matHeaderCellDef>Activation Status</mat-header-cell>
+        <mat-cell *matCellDef="let element">{{element.activationStatus === true ? 'Active' : 'Deleted'}}</mat-cell>
+      </ng-container>
+
+      <mat-header-row *matHeaderRowDef="displayedColumns"></mat-header-row>
+      <mat-row *matRowDef="let row; columns: displayedColumns;"></mat-row>
+    </mat-table>
+  </ng-container>
+
+  <ng-template #thenBlock2>
+    <div class="alert alert-primary" style="background-color:#E8E8E8; text-align: center;">No Records Found</div>
+    <div class="body">
+      <div class="example-button-row"></div>
+    </div>
+  </ng-template>
+</div>

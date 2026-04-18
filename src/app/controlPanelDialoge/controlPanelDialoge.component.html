@@ -1,0 +1,949 @@
+<div class="modalHeader">
+  <div class="editRowModal">
+    <div class="modalHeader clearfix">
+      <div class="modal-about">
+        <div class="font-weight-bold p-t-5 font-17">
+          {{ dialogTitle }}  <span style="color: red;font-size: 15px;" *ngIf="ReservationStatus === 'Cancelled'"> - {{ReservationStatus}}</span>
+        </div>
+      </div>
+    </div>
+  </div>
+  <button mat-icon-button (click)="dialogRef.close()" aria-label="Close dialog">
+    <mat-icon class="small-close-icon">close</mat-icon>
+  </button>
+</div>
+<mat-card style="width: 100%;">
+  <mat-card-content style="width: 100%;">
+    <mat-dialog-content class="of-hidden">
+      
+       <div *ngIf="reservationInfo" style="width: 100%;">
+                        <div class="row" g-1 *ngFor="let item of reservationInfo; let j = index" style="margin-left: 10px;">
+                          <table class="col-lg-12 col-md-12 col-sm-12 col-xs-6" style="margin-top:15px">
+                            <tbody>
+                              <tr class="col-lg-12 col-md-12 col-sm-12 col-xs-12" >
+                                <td class="TDValue col-lg-1 col-md-1 col-sm-1 col-xs-1">
+                                  <span class="reservation-group-container cp-menu-label-row cp-menu-row-tight"><a class="BoldButton cp-menu-label-text">Reservation Group</a><mat-icon class="more-icon cp-menu-trigger" [matMenuTriggerFor]="menu9">more_vert</mat-icon></span>
+
+                                  <div class="reservation-group-value-row">
+                                  {{ item.reservationGroupID }} &nbsp; &nbsp;
+                                    <mat-menu #menu9="matMenu">
+
+                                    <span *ngIf="item.reservationGroupID">
+                                     
+                                      <button mat-menu-item type="button" (click)="navigateToBookingForEdit(item)">
+                                        Edit
+                                      </button>
+                                    </span>
+
+                                  </mat-menu>
+                                  <span *ngIf="!item.reservationGroupID">
+                                    N/A
+                                  </span>
+                                  </div>
+                                  <span class="cp-menu-label-row edit-booking-row cp-menu-row-tight"><a class="BoldButton edit-booking-label cp-menu-label-text">Edit Booking</a><mat-icon class="edit-booking-dots cp-menu-trigger" [matMenuTriggerFor]="menu">more_vert</mat-icon></span>
+
+                                  <span *ngIf="item.pickupCityID === 0">
+                                    <b><a class="BoldButton" mat-button [routerLink]="['/bookingScreen']" [queryParams]="{reservationID:item.reservationID,
+                                                  reservationGroupID:item.reservationGroupID}" target="_blank">
+                                      </a></b>
+                                  </span>
+
+                                  <mat-menu #menu="matMenu">
+                                   
+                                    <span *ngIf="item.pickupCityID !== 0">
+                                      <a (click)="OpenBookingScreen(item)" target="_blank">
+                                        <button mat-menu-item>Edit</button>
+                                      </a>
+                                    </span>
+
+                                    <button mat-menu-item
+                                      (click)="openSendEmsDialog(item.reservationID,item.vehicle.vehicle,item.pickup.pickupDate,item.pickup.pickupTime,item.registrationNumber,item?.passengerDetails[0].customerPersonName,item?.stopsDetails[0].city, item,item.customerPersonID)">
+                                      Send SMS
+                                    </button>
+
+                                     <button mat-menu-item
+                                     (click)="getInvoiceNumber(item,i)">
+                                      Reservation Cancel
+                                    </button>
+                                    <!-- </span> -->
+                                  </mat-menu>
+                                  <div class="edit-booking-value-row">
+                                    <span *ngIf="item.reservationGroupID">
+                                      {{item.reservationGroupID +'.'+ item.reservationID }}
+                                    </span>
+                                    <span *ngIf="!item.reservationGroupID">
+                                      {{ item.reservationID }}
+                                    </span>
+                                    &nbsp; &nbsp;
+                                  </div>
+                                
+                                  <span *ngIf="item.passengerDetails === null">
+                                    
+                                    <a class="BoldButton" mat-button (click)="OpenBookingScreenIncomplete(item)">
+                                      <mat-icon>edit</mat-icon></a>
+                                  </span>
+                                  <div class="booker-button-row">
+                                  <b><button class="BoldButton" mat-button (click)="BookerInfo(item)">
+                                      Booker
+                                    </button></b>
+                                  </div>
+                                  {{ item.customerPerson.customerPersonName }}<br />
+                                  <b><button class="BoldButton BoldButtonTopMargin" mat-button (click)="VehicleCategoryInfo(item)">
+                                      Vehicle Category
+                                    </button></b><br />
+                                  {{ item.vehicle.vehicleCategory }} <br />
+                                  <b><button class="BoldButton BoldButtonTopMargin" mat-button (click)="VehicleInfo(item)">
+                                      Vehicle Booked
+                                    </button></b><br />
+                                  {{ item.vehicle.vehicle }}<br />
+                                  <b><button class="BoldButton BoldButtonTopMargin" mat-button (click)="PackageInfo(item)">
+                                      Package Booked
+                                    </button></b><br />
+                                  {{ item.package.package }}<br />
+                                  <b>VIP Booking</b><br />
+                                  <label class="TDValue" *ngIf="
+                                              item.customerPerson.importance == 'VIP';
+                                              else general
+                                            ">Yes
+                                  </label>
+                                  <ng-template #general>No</ng-template><br />
+
+                                  <b>Female Traveller</b><br />
+                                  <label class="TDValue" *ngIf="
+                                              item.customerPerson.gender == 'Female';
+                                              else male
+                                            ">Yes
+                                  </label>
+                                  <ng-template #male> No </ng-template> <br />
+                                  <b><button class="BoldButton BoldButtonTopMargin" mat-button
+                                      (click)="ReservationMessaging(item.reservationID,item.allotmentID)">
+                                      Messaging History
+                                    </button></b><br />
+                                    <b><button class="BoldButton" mat-button (click)="emailInfo(item)">
+                                     Email format
+                                    </button></b><br />
+                            
+                                </td>
+                                <td class="TDValue col-lg-1 col-md-1 col-sm-1 col-xs-1">
+                                  <span *ngIf="
+                                              item.passengerDetails">
+                                    <div *ngFor="let p of item.passengerDetails; let c = index">
+                                      <!-- <b><button class="BoldButton" mat-button
+                                                (click)="PassengerInfo(item.reservationID,p.customerPersonID)"
+                                                *ngIf="p.customerPersonID != null;else unregUser">
+                                                Passenger {{ c + 1 }}
+                                              </button> -->
+                                      <b><button class="BoldButton BoldButtonTopMargin" mat-button (click)="PassengerInfo(item)"
+                                          [class.passenger-first-btn]="c === 0"
+                                          *ngIf="p.customerPersonID != null;else unregUser">
+                                          {{ c === 0 ? 'Passenger' : ('Passenger ' + (c + 1)) }}
+                                        </button>
+                                        <ng-template #unregUser>
+                                          <button class="BoldButton BoldButtonTopMargin" mat-button
+                                            [class.passenger-first-btn]="c === 0"
+                                            (click)="PassengerInfoUnReg(p.customerPersonName,p.primaryMobile,p.primaryEmail)">
+                                            {{ c === 0 ? 'Passenger' : ('Passenger ' + (c + 1)) }}
+                                          </button>
+                                        </ng-template> </b><br />
+                                      {{ p.customerPersonName }} <br />
+                                      {{ p.pickupDate | date : 'dd-MMM-yy' }}
+                                      {{ p.pickupTime | date : 'shortTime' }}<br />
+                                      <span *ngIf="
+                                                p.pickupStopType == 'Pickup' &&
+                                                  p.dropOffStopType == 'Dropoff';
+                                                else stopToStop
+                                              ">
+                                        Pickup to Drop off
+                                      </span>
+                                      <ng-template #stopToStop>
+                                        <ng-container *ngIf="
+                                                  p.pickupStopType == 'Enroute' &&
+                                                    p.dropOffStopType == 'Enroute';
+                                                  else stopToDropOff
+                                                ">
+                                          Stop to Stop
+                                        </ng-container>
+                                      </ng-template>
+                                      <ng-template #stopToDropOff>
+                                        Stop to Drop Off
+                                      </ng-template>
+                                    </div>
+                                  </span>
+
+                                  <span *ngIf="
+                                              item.specialInstruction">
+                                    <div *ngFor="let sp of item.specialInstruction; let s = index">
+                                      <b><button class="BoldButton BoldButtonTopMargin" mat-button>
+                                          Special Instructions
+                                        </button></b>
+                                      <br />
+                                      {{ sp.specialInstruction}}
+                                      <br />
+                                      <button class="BoldButton BoldButtonTopMargin" mat-button style="font-weight: 100" (click)="
+                                                SpecialInstructionInfo(item)">
+                                        View</button><br />
+
+                                    </div>
+                                  </span>
+                                  <span *ngIf="!item.specialInstruction">
+                                    <div>
+                                      <b><button class="BoldButton BoldButtonTopMargin" mat-button>
+                                          Special Instructions
+                                        </button></b>
+                                      <br />
+                                      N/A
+                                      <br />
+                                      <!-- <button class="BoldButton" mat-button style="font-weight: 100">
+                                              View</button><br /> -->
+                                    </div>
+                                  </span>
+
+                                  <span *ngIf="item.internalNoteModel">
+                                    <div *ngFor="let internalNote of item.internalNoteModel; let s = index">
+                                      <b><button class="BoldButton BoldButtonTopMargin" mat-button>Internal Note {{s + 1}}</button></b>
+                                      <br />
+                                      {{ internalNote.reservationInternalNote}}
+                                      <br />
+                                      <!-- <button class="BoldButton BoldButtonTopMargin" mat-button style="font-weight: 100">View</button><br /> -->
+                                    </div>
+                                  </span>
+                                  <span *ngIf="!item.internalNoteModel">
+                                    <div>
+                                      <b><button class="BoldButton BoldButtonTopMargin" mat-button>Internal Note</button></b>
+                                      <br />
+                                      N/A
+                                      <br />
+                                    </div>
+                                  </span>
+
+                                  <!-- <b>Ring Door Bell</b><br />
+                                          N/A -->
+
+                                    <b class="pickup-time-label-row"><button class="BoldButton BoldButtonTopMargin pickup-time-align-btn" mat-button (click)=" TimeAndAddressInfo(item)">
+                                      Pick up Time
+                                    </button> 
+                                    <mat-icon class="pickup-time-dots" [matMenuTriggerFor]="menu31"
+                                      style="cursor: pointer; color: blue; font-size: 14px !important;">
+                                      more_vert
+                                    </mat-icon>
+                                  </b><br/>
+                                   <mat-menu #menu31="matMenu">
+                                    <a mat-menu-item (click)="pickupTimeUpdate(item)" target="_blank"
+                                      rel="noreferrer noopener" [disabled]="ReservationStatus === 'Cancelled'">
+                                     PickUP Time
+                                    </a>
+                                  </mat-menu>
+                                  <!-- <span
+                                            *ngIf="item.stopsDetails[0].stopType == 'Pickup'"
+                                          > -->
+                                  <span>
+                                    {{ item.pickup.pickupDate | date : 'dd-MMM-yy' }}
+                                    {{ item.pickup.pickupTime ? (item.pickup.pickupTime | date : 'shortTime') : 'TNC' }} </span><br />
+                                  <b><button class="BoldButton BoldButtonTopMargin" mat-button (click)="
+                                                TimeAndAddressInfo(item)
+                                              ">
+                                      Pick up Address
+                                    </button></b><br />
+                                  <!-- <span
+                                            *ngIf="item.stopsDetails[0].stopType == 'Pickup'"
+                                            > -->
+                                  <span> {{ item.pickup.pickupAddress }}</span><br />
+                                  <b><button class="BoldButton BoldButtonTopMargin" mat-button (click)="
+                                                TimeAndAddressDrop(item)
+                                              ">
+                                      Drop Off Time
+                                    </button></b><br />
+                                  <!-- <span
+                                            *ngIf="
+                                              item.stopsDetails[1].stopType == 'Destination'
+                                            "
+                                            > -->
+                                  <span>
+                                    {{ item.drop.dropOffDate | date : 'dd-MMM-yy' }}
+                                    {{
+                                    item.drop.dropOffTime | date : 'shortTime'
+                                    }} </span><br />
+                                  <b><button class="BoldButton BoldButtonTopMargin" mat-button (click)="
+                                                TimeAndAddressDrop(item)
+                                              ">
+                                      Drop Off Address
+                                    </button></b><br />
+                                  <!-- <span
+                                            *ngIf="
+                                              item.stopsDetails[1].stopType == 'Destination'
+                                            "
+                                            > -->
+                                  <span> {{ item.drop.dropOffAddress }}</span>
+                                  <b><button class="BoldButton stop-details-btn" mat-button (click)="StopDetailsInfo(item)">
+                                      Stop Details
+                                    </button></b><br />
+                                  <b><button class="BoldButton BoldButtonTopMargin" mat-button (click)="StopsOnMapInfo(item)">
+                                      Stops on Map
+                                    </button></b><br />
+                                </td>
+
+                                <td class="TDValue col-lg-1 col-md-1 col-sm-1 col-xs-1">
+                                  <b class="pass-to-supplier-row">
+                                    <button class="BoldButton" mat-button (click)="locationDetailsInfo(item)">
+                                      Pass To Supplier
+                                    </button>
+                                    <mat-icon class="pass-to-supplier-dots" [matMenuTriggerFor]="menu73">
+                                      more_vert
+                                    </mat-icon>
+                                  </b>
+                                  <mat-menu #menu73="matMenu">
+                                    <a mat-menu-item (click)="PassToSupplier(item.reservationID)" target="_blank"
+                                      rel="noreferrer noopener" [disabled]="ReservationStatus === 'Cancelled'">
+                                     Pass To Supplier
+                                    </a>
+                                    <a mat-menu-item (click)="openMailToSupplier(item.reservationID)"
+                                      target="_blank" rel="noreferrer noopener" [disabled]="ReservationStatus === 'Cancelled'">
+                                       Mail To Supplier
+                                    </a>
+                                  </mat-menu>
+
+                                  <br>
+
+                                  <b class="location-details-row">
+                                    <button class="BoldButton" mat-button (click)="locationDetailsInfo(item)">
+                                      Location Details
+                                    </button>
+                                    <mat-icon class="location-details-dots" [matMenuTriggerFor]="menu30">
+                                      more_vert
+                                    </mat-icon>
+                                  </b>
+                                  <mat-menu #menu30="matMenu">
+                                    <a mat-menu-item (click)="TransferLocation(item.reservationID,i)" target="_blank"
+                                      rel="noreferrer noopener" [disabled]="ReservationStatus === 'Cancelled'">
+                                      Transfer Location
+                                    </a>
+                                    <!-- <button mat-menu-item>History</button> -->
+                                    <a mat-menu-item (click)="TransferLocationHistory(item.reservationID)"
+                                      target="_blank" rel="noreferrer noopener">
+                                      History
+                                    </a>
+                                  </mat-menu>
+                                  <div>{{item.transferedLocation ? item.transferedLocation : 'N/A'}}</div>
+
+                                  <b class="allotment-status-row">
+                                    <button class="BoldButton" mat-button (click)="allotmentStatus(item)">
+                                      Allotment Status
+                                    </button>
+                                    <mat-icon class="allotment-status-dots" [matMenuTriggerFor]="menu1">
+                                      more_vert
+                                    </mat-icon>
+                                  </b>
+                                  <mat-menu #menu1="matMenu">
+                                    <a mat-menu-item
+                                    (click)="DriverAllotment(
+                                      item.reservationID,
+                                      item.reservationGroupID,
+                                      item.pickup?.pickupDate,
+                                      item.pickup?.pickupAddress
+                                    )"
+                                    target="_blank" rel="noreferrer noopener" [disabled]="ReservationStatus === 'Cancelled'">
+                                    Driver Allotment
+                                  </a>
+                                    <button mat-menu-item
+                                      (click)="openSendSmsWhatsappMail(item.reservationID,item.vehicle.vehicle,item.pickup.pickupDate,item.pickup.pickupTime,item.registrationNumber,item?.passengerDetails[0].customerPersonName,item?.stopsDetails[0].city, item,item.customerPersonID)">
+                                      Send WA/SMS/Mail</button>
+
+                                    <button mat-menu-item *ngIf="item.allotmentType==='Soft'"
+                                      (click)="CovertSoftToHard(item,i)">
+                                      Convert To Hard Allotment</button>
+                                  </mat-menu>
+
+                                  <div
+                                    [ngStyle]="{color: AllotmentOnTime(data) === 'onTime' || AllotmentOnTime(data) === 'late' ? 'green' :
+                                                                  AllotmentOnTime(data) === 'notDone' ? 'black' : 'red'}">
+                                    {{ item.allotmentStatus ? item.allotmentStatus + (item.allotmentType ? ' (' +
+                                    item.allotmentType + ')' : '') : 'Pending' }}
+                                  </div>
+
+                                  <b class="interstate-tax-row">
+                                    <button class="BoldButton" mat-button>
+                                      Interstate Tax
+                                    </button>
+                                    <mat-icon class="interstate-tax-dots" [matMenuTriggerFor]="menu26">
+                                      more_vert
+                                    </mat-icon>
+                                  </b>
+                                  <mat-menu #menu26="matMenu">
+                                    <a mat-menu-item (click)="InterstateTax(item)" target="_blank"
+                                      rel="noreferrer noopener"  [disabled]="ReservationStatus === 'Cancelled'">
+                                      Interstate Tax
+                                    </a>
+                                    <a mat-menu-item (click)="navigateToInterstateTaxDetails(item)" target="_blank"
+                                      rel="noreferrer noopener">
+                                      Interstate Tax Details
+                                    </a>
+                                  </mat-menu>
+                                  <div>{{item.interstateTaxAmount ? "Done" : 'Pending'}}</div>
+
+                                  <b><button class="BoldButton" mat-button (click)="vendorStatus(item)">
+                                      Vendor
+                                    </button></b><br />
+                                  {{item.carVendor || 'Pending'}}<br />
+                                  <!-- <b><button class="BoldButton" mat-button>
+                                              Vendor Acceptance
+                                            </button></b><br />
+                                          N/A<br />
+                                          <b><button class="BoldButton" mat-button>
+                                              Vehicle Status
+                                            </button></b><br />
+                                          N/A <br /> -->
+                                  <!-- <b><button class="BoldButton" mat-button>
+                                              Vendor Booking No.
+                                            </button></b><br />
+                                          N/A<br /> -->
+                                  <b><button class="BoldButton" mat-button (click)="allotmentStatus(item)">
+                                      Veh. Supplied
+                                    </button></b><br />
+                                  {{item.vehicleName !== "" ? item.vehicleName : 'Pending'}}<br />
+                                  <b><button class="BoldButton" mat-button (click)="allotmentStatus(item)">
+                                      Veh. No
+                                    </button></b><br />
+                                  {{item.registrationNumber !== "" ? item.registrationNumber : 'Pending'}}<br />
+                                  <b><button class="BoldButton" mat-button (click)="allotmentStatus(item)">
+                                      Chauffeur
+                                    </button></b><br />
+                                  {{item.driverName !== "" ? item.driverName : 'Pending'}}<br />
+                                  <b class="qc-status-row"><button class="BoldButton" mat-button (click)="qCImageDetails(item)">
+                                      QC Status
+                                    </button>
+                                    <mat-icon class="qc-status-dots" [matMenuTriggerFor]="menu8">
+                                      more_vert
+                                    </mat-icon></b>
+                                  <!-- <b><button class="BoldButton" mat-button [matMenuTriggerFor]="menu8">
+                                            <mat-icon style="color: blue;font-size: 14px !important; padding-top: 4px">more_vert</mat-icon></button></b> -->
+                                  <mat-menu style="font-size: small;" #menu8="matMenu">
+                                    <button mat-menu-item (click)="qCImage(item)" [disabled]="ReservationStatus === 'Cancelled'">
+                                      QC Status
+                                    </button>
+                                  </mat-menu>
+                                  <br />
+                                  <!-- N/A -->
+                                  {{item.activationStatus ? "Uploaded": "N/A"}}
+                                  <br />
+                                  <span class="verify-qc-row">
+                                    <button class="BoldButton" mat-button (click)="verifyImageDetails(item)">
+                                      Verify QC
+                                    </button>
+                                    <mat-icon class="verify-qc-dots" [matMenuTriggerFor]="menu7">
+                                      more_vert
+                                    </mat-icon>
+                                  </span>
+                                  <!-- <b><button class="BoldButton" mat-button [matMenuTriggerFor]="menu7">
+                                          <mat-icon style="color: blue;font-size: 14px !important; padding-top: 4px">more_vert</mat-icon></button></b> -->
+                                  <mat-menu style="font-size: small;" #menu7="matMenu">
+                                    <button mat-menu-item (click)="viewQcImage(item,i)" [disabled]="ReservationStatus === 'Cancelled'">
+                                      Verify QC
+                                    </button>
+                                  </mat-menu><br>
+                                  {{item.qcCheckedByExecutivePassed? "Verified": "N/A"}}
+                                  <br />
+
+                                    <b>
+                                      <button class="BoldButton" mat-button (click)="PrintDSBlank(item)">
+                                        Print Blank DutySlip 
+                                      </button>
+                                    </b>
+                                  <br />
+                                </td>
+
+                                <td class="TDValue col-lg-1 col-md-1 col-sm-1 col-xs-1">
+                                  <b>
+                                    <button class="BoldButton" mat-button (click)="PrintDS(item)">
+                                      Print DutySlip
+                                    </button>
+                                  </b>
+
+                                <br />
+                                DutySlip<br />
+
+                                {{ item.currentStatus }}
+                                  <b class="garage-out-row"><button class="BoldButton" mat-button (click)="garageOutDetails(item)">
+                                      Garage out
+                                    </button>
+                                    <mat-icon class="garage-out-dots" [matMenuTriggerFor]="menu2">more_vert</mat-icon>
+
+                                  </b>
+
+                                  <!-- <b><button class="BoldButton" mat-button [matMenuTriggerFor]="menu2"></button>
+                                            </b> -->
+                                  <mat-menu style="font-size: small;" #menu2="matMenu">
+                                    <!-- <button mat-menu-item (click)="DispatchByExecutiveManual(item)"> -->
+                                    <button mat-menu-item (click)="handleDispatchByQC(item)" [disabled]="ReservationStatus === 'Cancelled'">
+                                      Manual
+                                    </button>
+                                    <button mat-menu-item (click)="DispatchByExecutiveApp(item)" [disabled]="ReservationStatus === 'Cancelled'">
+                                      App
+                                    </button>
+                                    <button mat-menu-item (click)="DispatchByExecutiveGPS(item)" [disabled]="ReservationStatus === 'Cancelled'">
+                                      GPS
+                                    </button>
+                                    <button mat-menu-item [disabled]="ReservationStatus === 'Cancelled'">Send
+                                      SMS</button>
+                                  </mat-menu>
+                                  <br />
+                                  <ng-container
+                                    *ngIf="item.locationOutDate || item.locationOutTime || item.locationOutEntryMethod; else noDataForlocationOut">
+                                    {{ (item.locationOutDate | date : 'dd/MM/yyyy') || 'N/A' }} ,
+                                    {{ (item.locationOutTime | date : 'shortTime') || 'N/A' }}
+                                    <!-- {{ item.locationOutEntryMethod ? 'Done' : 'N/A' }} -->
+                                  </ng-container>
+                                  <!-- <ng-template #noDataForlocationOut>N/A</ng-template> -->
+                                  <ng-template #noDataForlocationOut>
+                                    <span
+                                      [ngStyle]="{color: (TripOnTime(data) === 'NotDispatchedLessThanTwoHours') ? 'red' : 'black'}">N/A</span>
+                                  </ng-template>
+                                  <br />
+                                  <b class="reached-row"><button class="BoldButton" mat-button (click)="reachedDetails(item)">
+                                      Reached
+                                    </button>
+                                    <mat-icon class="reached-dots" [matMenuTriggerFor]="menu3">
+                                      more_vert
+                                    </mat-icon></b>
+                                  <!-- <b><button class="BoldButton" mat-button [matMenuTriggerFor]="menu3">
+                                              <mat-icon style="color: blue;font-size: 14px !important; padding-top: 4px">more_vert</mat-icon></button></b> -->
+                                  <mat-menu #menu3="matMenu">
+                                    <span>
+                                      <b> <button mat-menu-item (click)="reachedByExecutiveManual(item)" [disabled]="ReservationStatus === 'Cancelled'">
+                                          Manual
+                                        </button>
+                                        <button mat-menu-item (click)="reachedByExecutiveAPP(item)" [disabled]="ReservationStatus === 'Cancelled'">
+                                          APP
+                                        </button>
+                                        <button mat-menu-item (click)="reachedByExecutiveGPS(item)" [disabled]="ReservationStatus === 'Cancelled'">
+                                          GPS
+                                        </button>
+                                      </b>
+                                      <button mat-menu-item [disabled]="ReservationStatus === 'Cancelled'"
+                                        (click)="SendSMS(item.reservationID,item.vehicle.vehicle,item.pickup.pickupDate,item.pickup.pickupTime,item.
+                                                registrationNumber,item?.passengerDetails[0].customerPersonName,item?.stopsDetails[0].city,item,item.customerPerson.primaryMobile,item.customerPerson.primaryEmail)">Send
+                                        SMS</button>
+                                    </span>
+                                  </mat-menu>
+                                  <br />
+                                  <ng-container
+                                    *ngIf="item.reportingToGuestDate || item.reportingToGuestTime || item.reportingToGuestEntryMethod; else noDataForreportingToGuest">
+                                    {{ (item.reportingToGuestDate | date : 'dd/MM/yyyy') }} ,
+                                    {{ (item.reportingToGuestTime | date : 'shortTime') }}
+                                    <!-- {{ item.reportingToGuestEntryMethod ? 'Done' : 'N/A' }} -->
+                                  </ng-container>
+                                  <!-- <ng-template #noData>N/A</ng-template> -->
+                                  <ng-template #noDataForreportingToGuest>
+                                    <span
+                                      [ngStyle]="{color: (TripOnTime(data) === 'DispatchedButNotReached' || TripOnTime(data) === 'NotDispatchedLessThanTwoHours') ? 'red' : 'black'}">N/A</span>
+                                  </ng-template>
+
+                                  <br />
+                                  <b class="pickup-row">
+                                    <button class="BoldButton" mat-button (click)="PickupDetail(item.dutySlipID)">
+                                      Pick Up
+                                    </button>
+                                    <mat-icon class="pickup-dots" [matMenuTriggerFor]="menu4">
+                                      more_vert
+                                    </mat-icon>
+                                  </b>
+                                  <mat-menu #menu4="matMenu">
+                                    <b>
+                                      <button mat-menu-item (click)="pickupByExecutiveManual(item)" [disabled]="ReservationStatus === 'Cancelled'">
+                                        Manual
+                                      </button>
+                                      <button mat-menu-item (click)="pickupByExecutiveAPP(item)" [disabled]="ReservationStatus === 'Cancelled'">
+                                        APP
+                                      </button>
+                                      <button mat-menu-item (click)="pickupByExecutiveGPS(item)" [disabled]="ReservationStatus === 'Cancelled'">
+                                        GPS
+                                      </button>
+                                    </b>
+                                    <button mat-menu-item [disabled]="ReservationStatus === 'Cancelled'">Send SMS</button>
+                                  </mat-menu>
+                                  <br />
+                                  <ng-container
+                                    *ngIf="item.pickDate || item.pickTime || item.pickupEntryMethod; else noDataForpick">
+                                    {{ (item.pickDate | date : 'dd/MM/yyyy') || 'N/A' }} ,
+                                    {{ (item.pickTime | date : 'shortTime') || 'N/A' }}
+                                    <!-- {{ item.pickupEntryMethod ? 'Done' : 'N/A' }} -->
+                                  </ng-container>
+                                  <!-- <ng-template #noDataForpick>N/A</ng-template> -->
+                                  <ng-template #noDataForpick>
+                                    <span
+                                      [ngStyle]="{color: (TripOnTime(data) === 'NotPickup' || TripOnTime(data) === 'DispatchedButNotReached' || TripOnTime(data) === 'NotDispatchedLessThanTwoHours') ? 'red' : 'black'}">N/A</span>
+                                  </ng-template>
+                                  <br />
+                                  <b class="drop-off-row">
+                                    <button class="BoldButton" mat-button (click)="DropOffDetail(item.dutySlipID)">
+                                      Drop Off
+                                    </button>
+                                    <mat-icon class="drop-off-dots" [matMenuTriggerFor]="menu5">
+                                      more_vert
+                                    </mat-icon>
+                                  </b>
+
+                                  <!-- <b><button class="BoldButton" mat-button [matMenuTriggerFor]="menu5">
+                                              <mat-icon style="color: blue;font-size: 14px !important; padding-top: 4px">more_vert</mat-icon></button></b> -->
+                                  <mat-menu #menu5="matMenu">
+                                    <b>
+                                      <button mat-menu-item (click)="openDropOffByExectiveManual(item)" [disabled]="ReservationStatus === 'Cancelled'">
+                                        Manual
+                                      </button>
+                                      <button mat-menu-item (click)="openDropOffByExectiveAPP(item)" [disabled]="ReservationStatus === 'Cancelled'">
+                                        APP
+                                      </button>
+                                      <button mat-menu-item (click)="openDropOffByExectiveGPS(item)" [disabled]="ReservationStatus === 'Cancelled'">
+                                        GPS
+                                      </button></b>
+                                    <button mat-menu-item [disabled]="ReservationStatus === 'Cancelled'">Send
+                                      SMS</button>
+                                  </mat-menu>
+                                  <br />
+                                  <ng-container
+                                    *ngIf="item.garageOutDate || item.garageOutTime || item.dropOffEntryMethod; else noDataForgarageOut">
+                                    {{ (item.garageOutDate | date : 'dd/MM/yyyy') || 'N/A' }} ,
+                                    {{ (item.garageOutTime | date : 'shortTime') || 'N/A' }}
+                                    <!-- {{ item.dropOffEntryMethod ? 'Done' : 'N/A' }} -->
+                                  </ng-container>
+                                  <!-- <ng-template #noDataForgarageOut>N/A</ng-template> -->
+                                  <ng-template #noDataForgarageOut>
+                                    <span
+                                      [ngStyle]="{color: (TripOnTime(data) === 'NotDropOff' || TripOnTime(data) === 'DispatchedButNotReached' || TripOnTime(data) === 'NotDispatchedLessThanTwoHours') ? 'red' : 'black'}">N/A</span>
+                                  </ng-template>
+                                  <br />
+                                  <b class="garage-in-row">
+                                    <button class="BoldButton" mat-button (click)="LocationInDetail(item.dutySlipID)">
+                                      Garage in
+                                    </button>
+                                    <mat-icon class="garage-in-dots" [matMenuTriggerFor]="menu6">
+                                      more_vert
+                                    </mat-icon>
+                                  </b>
+                                  <!-- <b><button class="BoldButton" mat-button [matMenuTriggerFor]="menu6">
+                                              <mat-icon style="color: blue;font-size: 14px !important; padding-top: 4px">more_vert</mat-icon></button></b> -->
+                                  <mat-menu #menu6="matMenu">
+                                    <b><button mat-menu-item (click)="openGarageInManual(item)" [disabled]="ReservationStatus === 'Cancelled'">
+                                        Manual
+                                      </button>
+                                      <button mat-menu-item (click)="openGarageInApp(item)" [disabled]="ReservationStatus === 'Cancelled'">
+                                        APP
+                                      </button>
+                                      <button mat-menu-item (click)="openGarageInGPS(item)" [disabled]="ReservationStatus === 'Cancelled'">
+                                        GPS
+                                      </button></b>
+                                    <button mat-menu-item [disabled]="ReservationStatus === 'Cancelled'">Send
+                                      SMS</button>
+                                  </mat-menu>
+                                  <br />
+                                  <ng-container
+                                    *ngIf="item.locationInDate || item.locationInTime || item.locationInEntryMethod; else noDataForlocationIn">
+                                    {{ (item.locationInDate | date : 'dd/MM/yyyy') || 'N/A' }} ,
+                                    {{ (item.locationInTime | date : 'shortTime') || 'N/A' }}
+                                    <!-- {{ item.locationInEntryMethod ? 'Done' : 'N/A' }} -->
+                                  </ng-container>
+                                  <!-- <ng-template #noDataForlocationIn>N/A</ng-template> -->
+                                  <ng-template #noDataForlocationIn>
+                                    <span
+                                      [ngStyle]="{color: (TripOnTime(data) === 'NotGarageIn' || TripOnTime(data) === 'DispatchedButNotReached' || TripOnTime(data) === 'NotDispatchedLessThanTwoHours') ? 'red' : 'black'}">N/A</span>
+                                  </ng-template>
+                                  <br />
+                                  <b class="closing-row"><button class="BoldButton" mat-button>
+                                      Closing
+                                    </button>
+                                    <mat-icon class="closing-dots" [matMenuTriggerFor]="menu10">
+                                      more_vert
+                                    </mat-icon></b>
+
+                                 <mat-menu #menu10="matMenu">
+                                    <a  class="BoldButton" style="color: black;"
+                                      [ngClass]="{'disabled-link': role === 'Reservation'}"
+                                      (click)="openClosingScreen(item)">
+                                      <button mat-menu-item [disabled]="ReservationStatus === 'Cancelled'">
+                                        Closing
+                                      </button>
+                                    </a>
+
+                                  </mat-menu><br />
+                                  N/A<br />
+
+                                  <b class="remark-row">
+                                    <button class="BoldButton" mat-button (click)="driverRemarkDetails(item)">
+                                      Remark
+                                    </button>
+                                    <mat-icon class="remark-dots" [matMenuTriggerFor]="menu14">
+                                      more_vert
+                                    </mat-icon>
+                                  </b>
+                                     <mat-menu #menu14="matMenu">
+                                    <b>
+                                      <button mat-menu-item (click)="driverRemark(item)" [disabled]="ReservationStatus === 'Cancelled'">
+                                        Driver Remark
+                                      </button></b>
+
+                                  </mat-menu>
+                                  <br />
+                                  {{item.driverRemark? item.driverRemark: "N/A"}}
+                                  <br />
+
+                                  <b class="duty-slip-image-row">
+                                    <button class="BoldButton" mat-button (click)="dutySlipImage(item.dutySlipID)">
+                                      DutySlip Image
+                                    </button>
+                                    <mat-icon class="duty-slip-image-dots" [matMenuTriggerFor]="menu16">
+                                      more_vert
+                                    </mat-icon>
+                                  </b>
+
+                                  <mat-menu #menu16="matMenu">
+                                    <b><button mat-menu-item (click)="openDutySlipImage(item)" [disabled]="ReservationStatus === 'Cancelled'">
+                                        Dutyslip Image
+                                      </button></b>
+                                    <!-- <button mat-menu-item >Send
+                                            SMS</button> -->
+                                  </mat-menu>
+                                  <br />
+                                  {{item.dutySlipImage? "Uploaded": "N/A"}}
+                                  <br />
+
+                                  <b class="next-day-instruction-row">
+                                    <button class="BoldButton" mat-button (click)="nextDayInstructionDetails(item)">
+                                      Next Day Instruction
+                                    </button>
+                                    <mat-icon class="next-day-instruction-dots" [matMenuTriggerFor]="menu15">
+                                      more_vert
+                                    </mat-icon>
+                                  </b>
+                               <mat-menu #menu15="matMenu">
+                                    <b>
+                                      <button mat-menu-item (click)="nextDayInstruction(item)" [disabled]="ReservationStatus === 'Cancelled'">
+                                        Next Day Instruction
+                                      </button></b>
+
+                                  </mat-menu>
+                                  <br />
+                                  {{item.nextDayInstruction? item.nextDayInstruction: "N/A"}}
+                                  <br />
+
+                                </td>
+
+                                <td class="TDValue col-lg-2 col-md-2 col-sm-2 col-xs-2">
+                                  <b class="duty-tracking-row">
+                                    <button class="BoldButton" mat-button>
+                                      Duty Tracking
+                                    </button>
+                                    <mat-icon class="duty-tracking-dots" [matMenuTriggerFor]="menu32">
+                                      more_vert
+                                    </mat-icon>
+                                  </b>
+                                    <mat-menu #menu32="matMenu">
+                                      <a mat-menu-item (click)="DutyTracking(item,i)" target="_blank" rel="noreferrer noopener" [disabled]="ReservationStatus === 'Cancelled'">
+                                        Add Tracking
+                                      </a>
+                                      <a mat-menu-item (click)="DutyTrackingHistory(item.dutySlipID)" target="_blank" rel="noreferrer noopener">
+                                        History
+                                      </a>
+                                    </mat-menu>
+                                    <br/>
+                                    <b class="life-cycle-status-row">
+                                      <button class="BoldButton" mat-button (click)="lifeCycleStatus(item)">
+                                        Life Cycle Status
+                                      </button>
+                                    </b>
+                                <br/>
+                                  <b class="post-pickup-call-row">
+                                    <button class="BoldButton" mat-button (click)="postPickUPCallLoadDataDetails(item)">
+                                      Post PickUP Call
+                                    </button>
+                                    <mat-icon class="post-pickup-call-dots" [matMenuTriggerFor]="menu45">
+                                      more_vert
+                                    </mat-icon>
+                                  </b>
+                                 <mat-menu #menu45="matMenu">
+                                    <a mat-menu-item (click)="postPickUPCall(item)" target="_blank"
+                                      rel="noreferrer noopener" [disabled]="ReservationStatus === 'Cancelled'">
+                                      Post PickUP Call
+                                    </a>
+                                    <!-- <button mat-menu-item>History</button> -->
+                                    <a mat-menu-item (click)="postPickUPCallLoadDataDetails(item)"
+                                      target="_blank" rel="noreferrer noopener">
+                                      History
+                                    </a>
+                                  </mat-menu>
+
+                                  <!-- <b>Track on map</b><br />
+                                          <b>Dispute</b> <br />
+                                          None <br /> -->
+                                  <br />
+
+                                  <b class="incidence-row">
+                                    <button class="BoldButton" mat-button>
+                                      Incidence
+                                    </button>
+                                    <mat-icon class="incidence-dots" [matMenuTriggerFor]="menu60">
+                                      more_vert
+                                    </mat-icon>
+                                  </b>
+                                  <mat-menu #menu60="matMenu" >
+                                    <b><button mat-menu-item (click)="incidence(item)"  [ngClass]="{'disabled-link': !item.allotmentStatus}" [disabled]="ReservationStatus === 'Cancelled'">
+                                        Create/Edit/View - Incidence
+                                      </button></b>
+
+                                       <b><button mat-menu-item (click)="resolution(item)" [disabled]="ReservationStatus === 'Cancelled'">
+                                        Create/Edit/View - Resolution
+                                      </button></b>
+                                  </mat-menu>
+
+                                  <br>
+
+                                  <b class="feedback-row">
+                                    <button class="BoldButton" mat-button>
+                                      Feedback
+                                    </button>
+                                    <mat-icon class="feedback-dots" [matMenuTriggerFor]="menu25">
+                                      more_vert
+                                    </mat-icon>
+                                  </b>
+
+                                  <!-- Dropdown Menu -->
+                                  <mat-menu style="font-size: small;" #menu25="matMenu">
+                                    <!-- Conditional feedback option -->
+                                    <span *ngIf="item.passengerDetails">
+                                      <button mat-menu-item (click)="FeedBack(
+                                            item.reservationID,
+                                            item.customerPerson.customerPersonID,
+                                            item.allotmentID,
+                                            item.primaryPassengerID,
+                                            item.dutySlipID,
+                                            item.inventoryID,
+                                            item.driverID,
+                                            item.registrationNumber,
+                                            item.driverName,
+                                            item.passengerDetails[0].reservationPassengerID,
+                                            item.feedbackRemark,
+                                            item
+                                          )" [disabled]="ReservationStatus === 'Cancelled'">
+                                        <b>Feedback</b>
+                                      </button>
+                                      <br />
+                                    </span>
+                                  </mat-menu>
+
+                                  <!-- Feedback Remark Display -->
+                                  <br />
+                                  {{ item.feedbackRemark !== null ? item.feedbackRemark : 'N/A' }}
+
+                                  <br>
+
+                                <b class="track-on-map-row">
+                                    <button class="BoldButton" mat-button (click)="TrackOnMapInfo(item.reservationID, item)">
+                                      Track on Map
+                                    </button>
+                                    <mat-icon class="track-on-map-dots" [matMenuTriggerFor]="menu71">
+                                      more_vert
+                                    </mat-icon>
+                                  </b>
+                                  <mat-menu #menu71="matMenu" >
+                                    <b><button mat-menu-item (click)="TrackOnMapInfo(item.reservationID, item)"  [ngClass]="{'disabled-link': !item.allotmentStatus}">
+                                        By App
+                                      </button></b>
+
+                                       <b><button mat-menu-item>
+                                        By GPS
+                                      </button></b>
+                                  </mat-menu>
+                                  <br>
+
+                                  <b><button class="BoldButton" mat-button (click)="CarMovingStatusByApp(item)">Car not
+                                      moving by App</button></b><br />
+                                  <span
+                                    [ngStyle]="{ color: data.carStatus === 'Moving' || data.carStatus === 'Car Moving' ? 'green' :
+                                                                    data.carStatus === 'Not Moving' ? 'red' : 'black' }">
+                                    {{ data.carStatus || 'N/A' }}
+                                  </span>
+                                  <br />
+
+                                  <b><button class="BoldButton" mat-button>Car not moving by GPS</button></b><br />
+                                  Value<br />
+
+                                  <b><button class="BoldButton" mat-button (click)="AppDataMissingStatus(item)">App data
+                                      missing</button></b><br />
+                                  <span
+                                    [ngStyle]="{ color: data.appCarStatus === 'Moving' ? 'green' :
+                                                                    data.appCarStatus === 'Not Moving' ? 'red' : 'black' }">
+                                    {{ data.appCarStatus || 'N/A' }}
+                                  </span>
+                                  <br />
+
+                                  <b><button class="BoldButton" mat-button>GPS data missing</button></b><br />
+                                  Value<br />
+
+                                  <b><button class="BoldButton" mat-button (click)="openIntegrationLog(item.reservationID)">
+                                      Integration Log
+                                  </button></b>
+
+
+
+                                  <!-- <b>
+                                    <br>
+                                    <button class="BoldButton" mat-button>
+                                      Incidence Resolution
+                                    </button>
+                                    <mat-icon [matMenuTriggerFor]="menu61"
+                                      style="cursor: pointer;color: blue;font-size: 14px !important;">
+                                      more_vert
+                                    </mat-icon>
+                                  </b>
+                                  <mat-menu #menu61="matMenu">
+                                    <b><button mat-menu-item (click)="resolution(item)">
+                                        Resolution
+                                      </button></b>
+                                  </mat-menu> -->
+                                  <br>
+                                  <!-- Main Feedback Button -->
+                                  
+                                  <!-- {{ item | json }} -->
+
+                                  <!-- <b>Billing Status</b><br />
+                                  Invoiced<br />
+                                  <b>Amount</b><br />
+                                  12000<br />
+                                  <b>Documents</b><br />
+                                  View <br />
+                                  <b>Payment Mode</b><br />
+                                  Credit Card <br />
+                                  <b>Invoice Clearance</b><br />
+                                  Approved<br />
+                                  <b>Amount Paid</b> <br />
+                                  12000 <br /> -->
+
+                                  <!-- <b><a class="BoldButton" mat-button [routerLink]="['/SingleDutySingleBillForLocal']"
+                                      target="_blank"
+                                      [queryParams]="{reservationID:item.reservationID,dutySlipID:item.dutySlipID,vehicleName:item.vehicle.vehicle}">
+                                      SingleBillForLocal
+                                    </a></b><br />
+
+                                  <b><a class="BoldButton" mat-button
+                                      [routerLink]="['/SingleDutySingleBillForOutstation']" target="_blank"
+                                      [queryParams]="{reservationID:item.reservationID,dutySlipID:item.dutySlipID,vehicleName:item.vehicle.vehicle}">
+                                      SingleBillForOutstation
+                                    </a></b> <br />
+                                  <br />
+                                  <b><a class="BoldButton" [routerLink]="['/singleDutySingleBill']" target="_blank"
+                                      mat-button
+                                      [queryParams]="{reservationID:item.reservationID,dutySlipID:item.dutySlipID,vehicleName:item.vehicle.vehicle}">
+                                      Print Bill
+                                    </a></b> -->
+                                  <br />
+
+                                </td>
+
+                              </tr>
+                            </tbody>
+                          </table>
+                        </div>
+
+                      </div>
+                   
+    </mat-dialog-content>
+  </mat-card-content>
+</mat-card>

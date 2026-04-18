@@ -1,0 +1,154 @@
+<section class="content">
+    <div class="content-block">
+        <div class="block-header">
+            <app-breadcrumb [title]="'Order Details'" [items]="['E-Commerce']"
+                [active_item]="'Details'"></app-breadcrumb>
+        </div>
+
+        @if (order) {
+        <div class="order-details-layout">
+            <div class="main-content">
+                <!-- Order Summary Cards -->
+                <div class="summary-cards">
+                    <div class="card summary-card status-card">
+                        <div class="body">
+                            <div class="icon-circle bg-orange-light">
+                                <mat-icon color="warn">sync</mat-icon>
+                            </div>
+                            <div class="info">
+                                <span class="label">Order Status</span>
+                                <h4 class="value">{{order.status}}</h4>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card summary-card">
+                        <div class="body">
+                            <div class="icon-circle bg-blue-light">
+                                <mat-icon color="primary">event</mat-icon>
+                            </div>
+                            <div class="info">
+                                <span class="label">Placement Date</span>
+                                <h4 class="value">{{order.date | date:'mediumDate'}}</h4>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card summary-card">
+                        <div class="body">
+                            <div class="icon-circle bg-green-light">
+                                <mat-icon color="accent">payments</mat-icon>
+                            </div>
+                            <div class="info">
+                                <span class="label">Total Amount</span>
+                                <h4 class="value">{{order.total | currency}}</h4>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Order Items Table -->
+                <div class="card order-items-card">
+                    <div class="header">
+                        <h2>Order Items</h2>
+                    </div>
+                    <div class="body p-0">
+                        <div class="responsive_table">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>Product</th>
+                                        <th>Price</th>
+                                        <th>Quantity</th>
+                                        <th class="text-end">Total</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @for (item of order.items; track item.productId) {
+                                    <tr>
+                                        <td class="product-col">
+                                            <div class="product-info">
+                                                <div class="img-placeholder"><mat-icon>image</mat-icon></div>
+                                                <span>{{item.name}}</span>
+                                            </div>
+                                        </td>
+                                        <td>{{item.price | currency}}</td>
+                                        <td>{{item.quantity}}</td>
+                                        <td class="text-end font-bold">{{item.price * item.quantity | currency}}</td>
+                                    </tr>
+                                    }
+                                </tbody>
+                                <tfoot>
+                                    <tr>
+                                        <td colspan="3" class="text-end">Subtotal</td>
+                                        <td class="text-end">{{order.total - 10 | currency}}</td>
+                                    </tr>
+                                    <tr>
+                                        <td colspan="3" class="text-end">Shipping</td>
+                                        <td class="text-end">$10.00</td>
+                                    </tr>
+                                    <tr class="total-row">
+                                        <td colspan="3" class="text-end font-bold">Grand Total</td>
+                                        <td class="text-end font-bold text-primary fs-5">{{order.total | currency}}</td>
+                                    </tr>
+                                </tfoot>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="side-content">
+                <!-- Customer Information -->
+                <div class="card customer-card">
+                    <div class="header">
+                        <h2>Customer Info</h2>
+                    </div>
+                    <div class="body">
+                        <div class="customer-profile">
+                            <img src="assets/images/user/user1.jpg" alt="">
+                            <div class="details">
+                                <h4>{{order.customerName}}</h4>
+                                <span>{{order.email}}</span>
+                            </div>
+                        </div>
+                        <hr>
+                        <div class="contact-details">
+                            <div class="item">
+                                <mat-icon>phone</mat-icon>
+                                <span>+1 254 874 556</span>
+                            </div>
+                            <div class="item">
+                                <mat-icon>location_on</mat-icon>
+                                <span>California, USA</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Order Timeline -->
+                <div class="card timeline-card">
+                    <div class="header">
+                        <h2>Status Tracker</h2>
+                    </div>
+                    <div class="body">
+                        <div class="vertical-timeline">
+                            @for (step of order.timeline; track step.status; let last = $last) {
+                            <div class="timeline-step" [class.completed]="step.completed">
+                                <div class="icon-wrapper">
+                                    <mat-icon>{{step.icon}}</mat-icon>
+                                    @if (!last) { <div class="line"></div> }
+                                </div>
+                                <div class="text-wrapper">
+                                    <h5>{{step.status}}</h5>
+                                    <p>{{step.description}}</p>
+                                    <small>{{step.date | date:'shortTime'}}</small>
+                                </div>
+                            </div>
+                            }
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        }
+    </div>
+</section>

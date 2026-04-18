@@ -1,0 +1,50 @@
+<mat-card class="mini-chart-card">
+  <mat-card-content>
+    <div class="card-header">
+      <div class="card-info">
+        @if (icon) {
+          <div class="icon-container" [ngClass]="iconColorClass">
+            <mat-icon>{{ icon }}</mat-icon>
+          </div>
+        }
+        <div class="text-info">
+          <h4 class="card-title">{{ title }}</h4>
+          <div class="card-value">{{ value }}</div>
+          @if (subtitle) {
+            <p class="card-subtitle">{{ subtitle }}</p>
+          }
+        </div>
+      </div>
+
+      @if (showChange && changeValue !== 0) {
+        <div class="change-indicator" [ngClass]="changeClass">
+          <mat-icon>{{ changeIcon }}</mat-icon>
+          <span>{{ changeValue > 0 ? '+' : '' }}{{ changeValue }}%</span>
+        </div>
+      }
+    </div>
+
+    @if (chartData.length > 0) {
+      <div class="chart-container">
+        <apx-chart
+          [series]="chartOptions.series!"
+          [chart]="chartOptions.chart!"
+          [stroke]="chartOptions.stroke!"
+          [fill]="chartOptions.fill!"
+          [colors]="chartOptions.colors!"
+          [dataLabels]="chartOptions.dataLabels!"
+          [grid]="chartOptions.grid!"
+          [xaxis]="chartOptions.xaxis!"
+          [yaxis]="chartOptions.yaxis!"
+          [tooltip]="chartOptions.tooltip!">
+        </apx-chart>
+      </div>
+    }
+
+    @if (changeLabel) {
+      <div class="change-label">
+        <span>{{ changeLabel }}</span>
+      </div>
+    }
+  </mat-card-content>
+</mat-card>

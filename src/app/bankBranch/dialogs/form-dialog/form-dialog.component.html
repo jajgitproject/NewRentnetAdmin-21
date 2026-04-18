@@ -1,0 +1,232 @@
+<div class="addContainer">
+    <div class="modalHeader">
+        <div class="editRowModal">
+            <div class="modalHeader clearfix">
+                <!-- <img [src]='advanceTable.img' alt="avatar"> -->
+                <div class="modal-about">
+                    <div class="font-weight-bold p-t-5 font-17">
+                        {{dialogTitle}}</div>
+                </div>
+            </div>
+        </div>
+        <button mat-icon-button (click)="dialogRef.close()" aria-label="Close dialog">
+      <mat-icon>close</mat-icon>
+    </button>
+    </div>
+    <div mat-dialog-content>
+        <form class="register-form m-4" [formGroup]="advanceTableForm" (ngSubmit)="submit">
+            <div class="row">
+                <!-- <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                    <mat-form-field class="example-full-width" appearance="outline"  floatLabel="always">
+                        <mat-label>Bank</mat-label>
+                         <mat-select required #bankVal [class.is-invalid]="bankVal.invalid && bankVal.touched" formControlName="bankID">
+                            <mat-option [value]="Bank.bankID" *ngFor="let Bank of BankList">{{Bank.bank}}</mat-option>
+                        </mat-select>
+                        <mat-error>
+                            Please select a Bank
+                        </mat-error>
+                    </mat-form-field>      
+                </div> -->
+                <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                    <mat-form-field class="example-full-width" appearance="outline" floatLabel="always"> 
+                        <mat-label>Bank</mat-label>                       
+                        <input required type="text" matInput [matAutocomplete]="auto"
+                        formControlName="bank">
+                        <mat-autocomplete #auto="matAutocomplete" (optionSelected)="onBankSelected($event.option.value)">
+                            <mat-option *ngFor="let options of filteredOptions | async"
+                                [value]="options.bank" (click)="getBankID(options.bankID)">
+                                {{options.bank}}
+                            </mat-option>
+                        </mat-autocomplete>
+                        <mat-error *ngIf="advanceTableForm.controls['bank'].hasError('bankInvalid')">
+                            Please select a Bank
+                        </mat-error>
+
+                    </mat-form-field>
+                </div>
+
+                <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                    <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                        <mat-label>Branch Name</mat-label>
+                        <input required matInput formControlName="bankBranch">
+                        <mat-error *ngIf="advanceTableForm.get('bankBranch').hasError('required')">
+                            Bank Branch is required
+                        </mat-error>
+                    </mat-form-field>    
+                </div>
+            </div> 
+
+            <div class="row">
+                <!-- <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                    <mat-form-field class="example-full-width" appearance="outline"  floatLabel="always">
+                        <mat-label>Country</mat-label>
+                        <mat-select  required  (selectionChange)="OnCountryChangeGetStates()" formControlName="countryID">
+                            <mat-option [value]="Country.geoPointID" *ngFor="let Country of CountriesList">{{Country.geoPointName}}</mat-option>
+                        </mat-select>
+                        <mat-error>
+                            Please select a Country
+                        </mat-error>
+                    </mat-form-field>        
+                </div> -->
+                <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                    <mat-form-field class="example-full-width" appearance="outline" floatLabel="always"> 
+                        <mat-label>Country</mat-label>                       
+                        <input required type="text" matInput [matAutocomplete]="auto1"
+                        formControlName="country" (keyup)="onCountryInputChanges($event)">
+                        <mat-autocomplete #auto1="matAutocomplete" (optionSelected)="onCountrySelected($event.option.value)">
+                            <mat-option *ngFor="let options of filteredCountryOptions | async"
+                                [value]="options.geoPointName" (click)="getCountryID(options.geoPointID)">
+                                {{options.geoPointName}}
+                            </mat-option>
+                        </mat-autocomplete>
+                        <mat-error *ngIf="advanceTableForm.controls['country'].hasError('countryNameInvalid')">
+                            Please select a Country
+                        </mat-error>
+                    </mat-form-field>
+                </div>
+
+                <!-- <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                    <mat-form-field class="example-full-width" appearance="outline"  floatLabel="always">
+                        <mat-label>State</mat-label>
+                        <mat-select (selectionChange)="OnStateChangeGetCity()" formControlName="stateID" required>
+                            <mat-option [value]="State.geoPointID" *ngFor="let State of StateList">{{State.geoPointName}}</mat-option>
+                        </mat-select>
+                        <mat-error>
+                            please select a State
+                        </mat-error>
+                    </mat-form-field>       
+                </div> -->
+                <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                    <mat-form-field class="example-full-width" appearance="outline" floatLabel="always"> 
+                        <mat-label>State</mat-label>                       
+                        <input required type="text" matInput [matAutocomplete]="auto2"
+                        formControlName="stateName" (keyup)="onStateInputChanges($event)">
+                        <mat-autocomplete #auto2="matAutocomplete"  (optionSelected)="onStateSelected($event.option.value)">
+                            <mat-option *ngFor="let options of filteredStateOptions | async"
+                                [value]="options.geoPointName" (click)="getStateID(options.geoPointID)">
+                                {{options.geoPointName}}
+                            </mat-option>
+                        </mat-autocomplete>
+                        <mat-error *ngIf="advanceTableForm.controls['stateName'].hasError('stateNameInvalid')">
+                            Please select a State
+                        </mat-error>
+                    </mat-form-field>
+                </div>
+            </div> 
+
+            <div class="row">
+                <!-- <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                    <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                        <mat-label>City</mat-label>
+                        <mat-select required #cityVal [class.is-invalid]="cityVal.invalid && cityVal.touched"
+                            formControlName="bankBranchCityID">
+                            <mat-option [value]="City.geoPointID" *ngFor="let City of CityLists">{{City.geoPointName}}</mat-option>
+                        </mat-select>
+                        <mat-error>
+                            Please select a City
+                        </mat-error>
+                    </mat-form-field>
+                </div> -->
+                <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                    <mat-form-field class="example-full-width" appearance="outline" floatLabel="always"> 
+                        <mat-label>City</mat-label>                       
+                        <input required type="text" matInput [matAutocomplete]="auto3"
+                        formControlName="city">
+                        <mat-autocomplete #auto3="matAutocomplete" (optionSelected)="onCitySelected($event.option.value)">
+                            <mat-option *ngFor="let options of filteredCityOptions | async"
+                                [value]="options.geoPointName" (click)="getCityID(options.geoPointID)">
+                                {{options.geoPointName}}
+                            </mat-option>
+                        </mat-autocomplete>
+                        <mat-error *ngIf="advanceTableForm.controls['city'].hasError('cityNameInvalid')">
+                       Please select a  City 
+                        </mat-error>
+                    </mat-form-field>
+                </div>
+
+                    <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                        <mat-form-field class="example-full-width" appearance="outline"  floatLabel="always">
+                            <mat-label>Address</mat-label>
+                            <input matInput formControlName="bankBranchAddress" required>
+                            <mat-error *ngIf="advanceTableForm.get('bankBranchAddress').hasError('required')">
+                                Address is required
+                            </mat-error>
+                        </mat-form-field>
+                    </div>
+                
+            </div> 
+
+            <div class="row">
+                <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                    <mat-form-field class="example-full-width" appearance="outline"  floatLabel="always">
+                        <mat-label>IFSC</mat-label>
+                        <input matInput formControlName="bankBranchIFSCCode" required>
+                        <mat-error *ngIf="advanceTableForm.get('bankBranchIFSCCode').hasError('required')">
+                            IFSC is required
+                        </mat-error>
+                    </mat-form-field>
+                </div>
+
+                    <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                        <mat-form-field class="example-full-width" appearance="outline"  floatLabel="always">
+                            <mat-label>Swift</mat-label>
+                            <input matInput formControlName="bankBranchSwiftCode" required>
+                            <mat-error *ngIf="advanceTableForm.get('bankBranchSwiftCode').hasError('required')">
+                                Swift is required
+                            </mat-error>
+                        </mat-form-field>
+                    </div>
+                
+            </div> 
+
+            <div class="row">
+                <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                    <mat-form-field class="example-full-width" appearance="outline"  floatLabel="always">
+                        <mat-label>IBAN</mat-label>
+                        <input matInput formControlName="bankBranchIBanNumber" required>
+                        <mat-error *ngIf="advanceTableForm.get('bankBranchIBanNumber').hasError('required')">
+                            IFSC is required
+                        </mat-error>
+                    </mat-form-field>
+                </div>
+
+                    <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                        <mat-form-field class="example-full-width" appearance="outline"  floatLabel="always">
+                            <mat-label>Routing Code</mat-label>
+                            <input matInput formControlName="bankBranchRoutingCode" required>
+                            <mat-error *ngIf="advanceTableForm.get('bankBranchRoutingCode').hasError('required')">
+                                Routing Code is required
+                            </mat-error>
+                        </mat-form-field>
+                    </div>
+                
+            </div>
+            <div class="row">
+                <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                    <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                        <mat-label>Activation Status</mat-label>
+                        <mat-select formControlName="activationStatus">
+                            <mat-option [value]=true>Active</mat-option>
+                            <mat-option [value]=false>Deleted</mat-option>
+                        </mat-select>
+
+                        <mat-error *ngIf="advanceTableForm.get('activationStatus').hasError('required')">
+                            Activation Status is required
+                        </mat-error>
+                    </mat-form-field>
+                </div>
+            </div> 
+            <div class="row">
+                <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12 mb-2">
+                    <div class="example-button-row">
+                        <button mat-raised-button color="primary" *ngIf="saveDisabled" [type]="submit" [disabled]="!advanceTableForm.valid"  (click)="confirmAdd()">Save</button>
+                        <mat-spinner *ngIf="!saveDisabled" diameter="30"></mat-spinner>
+                        <button *ngIf="action==='add'" mat-raised-button color="warn" (click)="onNoClick()"
+                        tabindex="-1">Reset</button>
+                    <button *ngIf="action==='edit'" mat-raised-button color="warn" (click)="onNoClick()"
+                        tabindex="-1">Cancel</button>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>

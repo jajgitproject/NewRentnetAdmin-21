@@ -1,0 +1,227 @@
+<div class="addContainer">
+    <div class="modalHeader">
+        <div class="editRowModal">
+            <div class="modalHeader clearfix">
+                <!-- <img [src]='advanceTable.img' alt="avatar"> -->
+                <div class="modal-about">
+                    <div class="font-weight-bold p-t-5 font-17">
+                        {{dialogTitle}} {{customerGroup}}</div>
+                </div>
+            </div>
+        </div>
+        <button mat-icon-button (click)="dialogRef.close()" aria-label="Close dialog">
+      <mat-icon>close</mat-icon>
+    </button>
+    </div>
+    <div mat-dialog-content>
+        <form class="register-form m-4" [formGroup]="advanceTableForm" (ngSubmit)="submit">
+           
+            <div class="row">
+
+                <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">       
+                    <!-- <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                        <mat-label>Customer Group </mat-label>
+                        <mat-select formControlName="customerGroupID" required>
+                            <mat-option [value]="customerGroup.customerGroupID" *ngFor="let customerGroup of customerGroupList">{{customerGroup.customerGroup}}</mat-option>
+                        </mat-select>
+                        <mat-error>
+                            Please select a Customer Group
+                        </mat-error>
+                    </mat-form-field> -->
+
+                    <mat-form-field class="example-full-width" appearance="outline" floatLabel="always"> 
+                        <mat-label>Customer Group</mat-label>                       
+                        <input required type="text" matInput [matAutocomplete]="auto"
+                        formControlName="customerGroup">
+                        <mat-autocomplete #auto="matAutocomplete">
+                            <mat-option *ngFor="let options of filteredOptions | async"
+                                [value]="options.customerGroup" (click)="getTierID(options.customerGroupID)">
+                                {{options.customerGroup}}
+                            </mat-option>
+                        </mat-autocomplete>
+                        <mat-error *ngIf="advanceTableForm.get('customerGroup').hasError('required')">
+                            customer Group is required
+                        </mat-error>
+                    </mat-form-field>
+
+                </div>
+
+                <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                    <!-- <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                        <mat-label>Customer</mat-label>
+                        <mat-select formControlName="customerID" required>
+                            <mat-option [value]="customers.customerID" *ngFor="let customers of customerList">{{customers.customerName}}</mat-option>
+                        </mat-select>
+                        <mat-error>
+                            Please select a Customer 
+                        </mat-error>
+                    </mat-form-field> -->
+
+                    <mat-form-field class="example-full-width" appearance="outline" floatLabel="always"> 
+                        <mat-label>Customer</mat-label>                       
+                        <input required type="text" matInput [matAutocomplete]="auto1"
+                        formControlName="customerName">
+                        <mat-autocomplete #auto1="matAutocomplete">
+                            <mat-option *ngFor="let options of filteredCustomerOptions | async"
+                                [value]="options.customerName" (click)="getCustomerTierID(options.customerID)">
+                                {{options.customerName}}
+                            </mat-option>
+                        </mat-autocomplete>
+                        <mat-error *ngIf="advanceTableForm.get('customerName').hasError('required')">
+                            customer is required
+                        </mat-error>
+                    </mat-form-field>
+                </div>
+            </div>
+            <div class="row">
+                <!-- <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                    <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                        <mat-label>Salutation ID</mat-label>
+                        <mat-select required #salutationVal [class.is-invalid]="salutationVal.invalid && salutationVal.touched" 
+                        formControlName="salutationID">
+                            <mat-option [value]="Salutations.salutationID" 
+                            *ngFor="let Salutations of SalutationList">{{Salutations.salutation}}</mat-option>
+                        </mat-select>
+                        <mat-error>
+                            Please select a Salutation ID
+                        </mat-error>
+                    </mat-form-field>
+                </div> -->
+
+ <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                  
+    <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+        <mat-label>Salutation ID</mat-label>
+        <input  required type="text" matInput formControlName="salutation" [matAutocomplete]="auto2">
+        <mat-autocomplete #auto2="matAutocomplete">
+          <mat-option *ngFor="let option of filteredSalutationOptions | async" 
+          [value]="option.salutation" (click)="getTitles(option.salutationID)">
+            {{option.salutation}}
+          </mat-option>
+        </mat-autocomplete>
+        <mat-error *ngIf="advanceTableForm.get('salutation').hasError('required')">
+            Salutation ID is required
+        </mat-error>
+      </mat-form-field>
+
+      <!-- <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+        <mat-label>Salutation ID</mat-label>
+        <mat-select required #salutationVal [class.is-invalid]="salutationVal.invalid && salutationVal.touched" 
+        formControlName="salutationID">
+            <mat-option [value]="Salutations.salutationID" 
+            *ngFor="let Salutations of SalutationList">{{Salutations.salutation}}</mat-option>
+        </mat-select>
+        <mat-error>
+            Please select a Salutation ID
+        </mat-error>
+    </mat-form-field> -->
+
+</div>
+
+                <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                    <mat-form-field class="example-full-width" appearance="outline"  floatLabel="always">
+                        <mat-label>Customer Person Name</mat-label>
+                        <input matInput formControlName="customerPersonName" required>
+                        <mat-error *ngIf="advanceTableForm.get('customerPersonName').hasError('required')">
+                            Customer Person Name is required
+                        </mat-error>
+                    </mat-form-field>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                    <mat-form-field class="example-full-width" appearance="outline"  floatLabel="always">
+                        <mat-label>Gender</mat-label>
+                        <mat-select required #genderVal [class.is-invalid]="genderVal.invalid && genderVal.touched" 
+                        formControlName="gender">
+                            <mat-option value="Male">Male</mat-option>
+                            <mat-option value="Female">Female</mat-option>
+                            <mat-option value="Other">Other</mat-option>
+                        </mat-select>
+
+                        <mat-error>
+                            Gender is required
+                        </mat-error>
+                    </mat-form-field>
+                </div>
+
+                <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                    <mat-form-field class="example-full-width" appearance="outline"  floatLabel="always">
+                        <mat-label>Importance</mat-label>
+                        <mat-select required #importanceVal [class.is-invalid]="importanceVal.invalid && importanceVal.touched" 
+                        formControlName="importance">
+                            <mat-option value="General">General</mat-option>
+                            <mat-option value="VIP">VIP</mat-option>
+                        </mat-select>
+
+                        <mat-error>
+                            Importance is required
+                        </mat-error>
+                    </mat-form-field>
+                </div>
+            </div>    
+
+            <div class="row">
+                <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                    <mat-form-field class="example-full-width" appearance="outline"  floatLabel="always">
+                        <mat-label>Primary Email</mat-label>
+                        <input matInput formControlName="primaryEmail" required>
+                        <mat-error *ngIf="advanceTableForm.get('primaryEmail').hasError('required')">
+                            Primary Email is required
+                        </mat-error>
+                    </mat-form-field>
+                </div>
+
+                <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                    <mat-form-field class="example-full-width" appearance="outline"  floatLabel="always">
+                        <mat-label>Primary Mobile</mat-label>
+                        <input matInput formControlName="primaryMobile" required>
+                        <mat-error *ngIf="advanceTableForm.get('primaryMobile').hasError('required')">
+                            Primary Mobile is required
+                        </mat-error>
+                    </mat-form-field>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                    <mat-form-field class="example-full-width" appearance="outline"  floatLabel="always">
+                        <mat-label>Send Email</mat-label>
+                        <mat-select required #sendEmailVal [class.is-invalid]="sendEmailVal.invalid && sendEmailVal.touched" 
+                        formControlName="sendEmail">
+                         <mat-option [value]=true>Yes</mat-option>
+                            <mat-option [value]=false>No</mat-option>
+                        </mat-select>
+
+                        <mat-error>
+                            Send Email is required
+                        </mat-error>
+                    </mat-form-field>
+                </div>
+
+                <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                    <mat-form-field class="example-full-width" appearance="outline"  floatLabel="always">
+                        <mat-label>Activation Status</mat-label>
+                        <mat-select formControlName="activationStatus">
+                            <mat-option [value]=true>Active</mat-option>
+                            <mat-option [value]=false>Deleted</mat-option>
+                        </mat-select>
+
+                        <mat-error *ngIf="advanceTableForm.get('activationStatus').hasError('required')">
+                            Activation Status is required
+                        </mat-error>
+                    </mat-form-field>
+                </div>
+            </div>
+
+`            <div class="row">
+                <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12 mb-2">
+                    <div class="example-button-row">
+                        <button mat-raised-button color="primary" [type]="submit" [disabled]="!advanceTableForm.valid"  (click)="confirmAdd()">Save</button>
+                        <button mat-raised-button color="warn" (click)="reset()" tabindex="-1">Reset</button>
+                    </div>
+                </div>
+            </div>
+        </form>
+  </div>

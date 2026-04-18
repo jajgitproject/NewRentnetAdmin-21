@@ -1,0 +1,397 @@
+<div class="addContainer">
+    <div class="modalHeader">
+        <div class="editRowModal">
+            <div class="modalHeader clearfix">
+                <!-- <img [src]='advanceTable.img' alt="avatar"> -->
+                <div class="modal-about">
+                    <div class="font-weight-bold p-t-5 font-17">
+                        {{dialogTitle}} {{customerName}}</div>
+                </div>
+            </div>
+        </div>
+        <button mat-icon-button (click)="dialogRef.close()" aria-label="Close dialog">
+            <mat-icon>close</mat-icon>
+        </button>
+    </div>
+    <div mat-dialog-content>
+        <form class="register-form m-4" [formGroup]="advanceTableForm" (ngSubmit)="submit">
+
+            <div class="row">
+                <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                    <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                        <mat-label>Reservation SMS To Booker</mat-label>
+                        <mat-select required #ressmstbVal [class.is-invalid]="ressmstbVal.invalid && ressmstbVal.touched" formControlName="reservationSMSToBooker">
+                            <mat-option [value]=true>Yes</mat-option>
+                            <mat-option [value]=false>No</mat-option>
+                        </mat-select>
+                        <mat-error>
+                            Reservation SMS To Booker is required
+                        </mat-error>
+                    </mat-form-field>
+                </div>
+                <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                    <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                        <mat-label>Reservation SMS To Passenger</mat-label>
+                        <mat-select required #rsmspVal [class.is-invalid]="rsmspVal.invalid && rsmspVal.touched" formControlName="reservationSMSToPassenger">
+                            <mat-option [value]=true>Yes</mat-option>
+                            <mat-option [value]=false>No</mat-option>
+                        </mat-select>
+                        <mat-error>
+                            Reservation SMS To Passenger is required
+                        </mat-error>
+                    </mat-form-field>
+
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                    <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                        <mat-label>Allotment SMS To Booker</mat-label>
+                        <mat-select required #asmstbVal [class.is-invalid]="asmstbVal.invalid && asmstbVal.touched" formControlName="allotmentSMSToBooker">
+                            <mat-option [value]=true>Yes</mat-option>
+                            <mat-option [value]=false>No</mat-option>
+                        </mat-select>
+                        <mat-error>
+                            Allotment SMS To Booker is required
+                        </mat-error>
+                    </mat-form-field>
+                </div>
+                <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                    <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                        <mat-label>Allotment SMS To Passenger</mat-label>
+                        <mat-select required #asmspVal [class.is-invalid]="asmspVal.invalid && asmspVal.touched" formControlName="allotmentSMSToPassenger">
+                            <mat-option [value]=true>Yes</mat-option>
+                            <mat-option [value]=false>No</mat-option>
+                        </mat-select>
+                        <mat-error>
+                            Allotment SMS To Passenger is required
+                        </mat-error>
+                    </mat-form-field>
+                </div>
+
+            </div>
+            <div class="row">
+                <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                    <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                        <mat-label>Dispatch SMS To Booker</mat-label>
+                        <mat-select required #dsmstbVal [class.is-invalid]="dsmstbVal.invalid && dsmstbVal.touched" formControlName="dispatchSMSToBooker">
+                            <mat-option [value]=true>Yes</mat-option>
+                            <mat-option [value]=false>No</mat-option>
+                        </mat-select>
+                        <mat-error>
+                            Dispatch SMS To Booker is required
+                        </mat-error>
+                    </mat-form-field>
+
+                </div>
+                <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                    <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                        <mat-label>Dispatch SMS To Passenger</mat-label>
+                        <mat-select required #dsmspVal [class.is-invalid]="dsmspVal.invalid && dsmspVal.touched" formControlName="dispatchSMSToPassenger">
+                            <mat-option [value]=true>Yes</mat-option>
+                            <mat-option [value]=false>No</mat-option>
+                        </mat-select>
+                        <mat-error>
+                            Dispatch SMS To Passenger is required
+                        </mat-error>
+                    </mat-form-field>
+
+                </div>
+
+            </div>
+            <div class="row">
+                <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                    <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                        <mat-label>Reached SMS To Booker</mat-label>
+                        <mat-select required #rsmsmtbVal [class.is-invalid]="rsmsmtbVal.invalid && rsmsmtbVal.touched" formControlName="reachedSMSToBooker">
+                            <mat-option [value]=true>Yes</mat-option>
+                            <mat-option [value]=false>No</mat-option>
+                        </mat-select>
+                        <mat-error>
+                            Reached SMS To Booker is required
+                        </mat-error>
+                    </mat-form-field>
+                </div>
+                <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                    <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                        <mat-label>Reached SMS To Passenger</mat-label>
+                        <mat-select required #rsmstpVal [class.is-invalid]="rsmstpVal.invalid && rsmstpVal.touched" formControlName="reachedSMSToPassenger">
+                            <mat-option [value]=true>Yes</mat-option>
+                            <mat-option [value]=false>No</mat-option>
+                        </mat-select>
+                        <mat-error>
+                            Reached SMS To Passenger is required
+                        </mat-error>
+                    </mat-form-field>
+
+                </div>
+
+            </div>
+            <div class="row">
+                <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                    <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                        <mat-label>Trip Start SMS To Booker</mat-label>
+                        <mat-select required #tssmsbVal [class.is-invalid]="tssmsbVal.invalid && tssmsbVal.touched" formControlName="tripStartSMSToBooker">
+                            <mat-option [value]=true>Yes</mat-option>
+                            <mat-option [value]=false>No</mat-option>
+                        </mat-select>
+                        <mat-error>
+                            Trip Start SMS To Booker is required
+                        </mat-error>
+                    </mat-form-field>
+
+                </div>
+                <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                    <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                        <mat-label>Trip Start SMS To Passenger</mat-label>
+                        <mat-select required #tsspVal [class.is-invalid]="tsspVal.invalid && tsspVal.touched" formControlName="tripStartSMSToPassenger">
+                            <mat-option [value]=true>Yes</mat-option>
+                            <mat-option [value]=false>No</mat-option>
+                        </mat-select>
+                        <mat-error>
+                            Trip Start SMS To Passenger is required
+                        </mat-error>
+                    </mat-form-field>
+
+                </div>
+
+            </div>
+            <div class="row">
+                <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                    <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                        <mat-label>Trip End SMS To Booker</mat-label>
+                        <mat-select required #tesmsbVal [class.is-invalid]="tesmsbVal.invalid && tesmsbVal.touched" formControlName="tripEndSMSToBooker">
+                            <mat-option [value]=true>Yes</mat-option>
+                            <mat-option [value]=false>No</mat-option>
+                        </mat-select>
+                        <mat-error>
+                            Trip End SMS To Booker is required
+                        </mat-error>
+                    </mat-form-field>
+                </div>
+                <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                    <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                        <mat-label>Trip End SMS To Passenger</mat-label>
+                        <mat-select required #tespVal [class.is-invalid]="tespVal.invalid && tespVal.touched" formControlName="tripEndSMSToPassenger">
+                            <mat-option [value]=true>Yes</mat-option>
+                            <mat-option [value]=false>No</mat-option>
+                        </mat-select>
+                        <mat-error>
+                            Trip End SMS To Passenger is required
+                        </mat-error>
+                    </mat-form-field>
+
+                </div>
+               
+            </div>
+            <div class="row">
+                <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                    <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                        <mat-label>Reservation Email To Booker</mat-label>
+                        <mat-select required #retbVal [class.is-invalid]="retbVal.invalid && retbVal.touched" formControlName="reservationEmailToBooker">
+                            <mat-option [value]=true>Yes</mat-option>
+                            <mat-option [value]=false>No</mat-option>
+                        </mat-select>
+                        <mat-error>
+                            Reservation Email To Booker is required
+                        </mat-error>
+                    </mat-form-field>
+
+                </div>
+                <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                    <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                        <mat-label>Reservation Email To Passenger</mat-label>
+                        <mat-select required #retpVal [class.is-invalid]="retpVal.invalid && retpVal.touched" formControlName="reservationEmailToPassenger">
+                            <mat-option [value]=true>Yes</mat-option>
+                            <mat-option [value]=false>No</mat-option>
+                        </mat-select>
+                        <mat-error>
+                            Reservation Email To Passenger is required
+                        </mat-error>
+                    </mat-form-field>
+
+                </div>
+              
+            </div>
+            <div class="row">
+                <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                    <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                        <mat-label>Allotment Email To Booker</mat-label>
+                        <mat-select required #aetbVal [class.is-invalid]="aetbVal.invalid && aetbVal.touched" formControlName="allotmentEmailToBooker">
+                            <mat-option [value]=true>Yes</mat-option>
+                            <mat-option [value]=false>No</mat-option>
+                        </mat-select>
+                        <mat-error>
+                            Allotment Email To Booker is required
+                        </mat-error>
+                    </mat-form-field>
+
+                </div>
+                <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                    <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                        <mat-label>Allotment Email To Passenger</mat-label>
+                        <mat-select required #aepVal [class.is-invalid]="aepVal.invalid && aepVal.touched" formControlName="allotmentEmailToPassenger">
+                            <mat-option [value]=true>Yes</mat-option>
+                            <mat-option [value]=false>No</mat-option>
+                        </mat-select>
+                        <mat-error>
+                            Allotment Email To Passenger is required
+                        </mat-error>
+                    </mat-form-field>
+
+                </div>
+             
+            </div>
+            <div class="row">
+                <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                    <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                        <mat-label>Dispatch Email To Booker</mat-label>
+                        <mat-select required #detbVal [class.is-invalid]="detbVal.invalid && detbVal.touched" formControlName="dispatchEmailToBooker">
+                            <mat-option [value]=true>Yes</mat-option>
+                            <mat-option [value]=false>No</mat-option>
+                        </mat-select>
+                        <mat-error>
+                            Dispatch Email To Booker is required
+                        </mat-error>
+                    </mat-form-field>
+
+                </div>
+                <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                    <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                        <mat-label>Dispatch Email To Passenger</mat-label>
+                        <mat-select required #depVal [class.is-invalid]="depVal.invalid && depVal.touched" formControlName="dispatchEmailToPassenger">
+                            <mat-option [value]=true>Yes</mat-option>
+                            <mat-option [value]=false>No</mat-option>
+                        </mat-select>
+                        <mat-error>
+                            Dispatch Email To Passenger is required
+                        </mat-error>
+                    </mat-form-field>
+
+                </div>
+              
+            </div>
+            <div class="row">
+                <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                    <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                        <mat-label>Reached Email To Booker</mat-label>
+                        <mat-select required #rebVal [class.is-invalid]="rebVal.invalid && rebVal.touched" formControlName="reachedEmailToBooker">
+                            <mat-option [value]=true>Yes</mat-option>
+                            <mat-option [value]=false>No</mat-option>
+                        </mat-select>
+                        <mat-error>
+                            Reached Email To Booker is required
+                        </mat-error>
+                    </mat-form-field>
+                </div>
+                <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                    <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                        <mat-label>Reached Email To Passenger</mat-label>
+                        <mat-select required #repVal [class.is-invalid]="repVal.invalid && repVal.touched" formControlName="reachedEmailToPassenger">
+                            <mat-option [value]=true>Yes</mat-option>
+                            <mat-option [value]=false>No</mat-option>
+                        </mat-select>
+                        <mat-error>
+                            Reached Email To Passenger is required
+                        </mat-error>
+                    </mat-form-field>
+
+                </div>
+       
+            </div>
+            <div class="row">
+                <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                    <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                        <mat-label>Trip Start Email To Booker</mat-label>
+                        <mat-select required #tsebVal [class.is-invalid]="tsebVal.invalid && tsebVal.touched" formControlName="tripStartEmailToBooker">
+                            <mat-option [value]=true>Yes</mat-option>
+                            <mat-option [value]=false>No</mat-option>
+                        </mat-select>
+                        <mat-error>
+                            Trip Start Email To Booker is required
+                        </mat-error>
+                    </mat-form-field>
+
+                </div>
+                <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                    <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                        <mat-label>Trip Start Email To Passenger</mat-label>
+                        <mat-select required #tspVal [class.is-invalid]="tspVal.invalid && tspVal.touched" formControlName="tripStartEmailToPassenger">
+                            <mat-option [value]=true>Yes</mat-option>
+                            <mat-option [value]=false>No</mat-option>
+                        </mat-select>
+                        <mat-error>
+                            Trip Start Email To Passenger is required
+                        </mat-error>
+                    </mat-form-field>
+
+                </div>
+             
+            </div>
+            <div class="row">
+                <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                    <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                        <mat-label>Trip End Email To Booker</mat-label>
+                        <mat-select required #teebVal [class.is-invalid]="teebVal.invalid && teebVal.touched" formControlName="tripEndEmailToBooker">
+                            <mat-option [value]=true>Yes</mat-option>
+                            <mat-option [value]=false>No</mat-option>
+                        </mat-select>
+                        <mat-error>
+                            Trip End Email To Booker is required
+                        </mat-error>
+                    </mat-form-field>
+
+                </div>
+                <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                    <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                        <mat-label>Trip End Email To Passenger</mat-label>
+                        <mat-select required #tepVal [class.is-invalid]="tepVal.invalid && tepVal.touched" formControlName="tripEndEmailToPassenger">
+                            <mat-option [value]=true>Yes</mat-option>
+                            <mat-option [value]=false>No</mat-option>
+                        </mat-select>
+                        <mat-error>
+                            Trip End Email To Passenger is required
+                        </mat-error>
+                    </mat-form-field>
+                </div>           
+            </div>
+            <div class="row">
+                <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                    <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                        <mat-label>Passenger SMS Alert</mat-label>
+                        <mat-select required #psaVal [class.is-invalid]="psaVal.invalid && psaVal.touched" formControlName="passengerSMSAlert">
+                            <mat-option [value]=true>Yes</mat-option>
+                            <mat-option [value]=false>No</mat-option>
+                        </mat-select>
+                        <mat-error>
+                            Passenger SMS Alert is required
+                        </mat-error>
+                    </mat-form-field>
+
+                </div>
+                <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                    <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                        <mat-label>Activation Status</mat-label>
+                        <mat-select formControlName="activationStatus">
+                            <mat-option [value]=true>Active</mat-option>
+                           
+                        </mat-select>
+
+                        <mat-error *ngIf="advanceTableForm.get('activationStatus').hasError('required')">
+                            Activation Status is required
+                        </mat-error>
+                    </mat-form-field>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12 mb-2">
+                    <div class="example-button-row">
+                        <button mat-raised-button color="primary" *ngIf="saveDisabled" [disabled]="!advanceTableForm.valid"
+                        (click)="openSaveDialog()">Save</button>
+                        <mat-spinner *ngIf="!saveDisabled" diameter="30"></mat-spinner>
+                        <button mat-raised-button color="warn" (click)="onNoClick(action)" tabindex="-1">{{ action === 'add' ? 'Reset' :  'Cancel'}}</button>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>

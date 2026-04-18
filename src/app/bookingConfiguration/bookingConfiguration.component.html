@@ -1,0 +1,425 @@
+<section class="content">
+    
+        <!-- <div class="block-header">
+            <div class="row">
+                <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12" >
+                    <ul> 
+                      <li class="breadcrumb-item bcrumb-1">     
+                        <a routerLink="/dashboard/main"><i class="fas fa-home"></i> Home</a>|     
+                        <a href="#" onClick="return false;">Admin</a>     
+                        <a href="#" onClick="return false;"></a> 
+                      </li>
+                    </ul>
+                    
+                </div>
+            </div>
+        </div> -->
+     <!-- Customer Details --> 
+    <div style="background-color:#ebeef1;font-size:10px;">
+
+        <div class="row" style="margin-left:20px;padding-top:20px;">
+            <div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 mb-2">
+                <b>Request Number</b><br>
+                {{customerDetails?.customerTravelRequestNumber}}
+            </div>
+
+            <div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 mb-2">
+                <b>Customer</b><br>
+                {{customerDetails?.customerName}}
+            </div>
+
+            <div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 mb-2">
+                <b>Aggregator</b><br>
+                {{customerDetails?.aggregatorName}}
+            </div>
+        </div>
+
+        <div *ngFor="let data of passengerDetailsList; index as i">
+
+            <div class="row" style="margin-left:20px;margin-top:10px;">
+                <div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 mb-2">
+                    <b>Passenger({{ i + 1 }}) Name</b><br>
+                    {{data.integrationRequestPassenger}}
+                </div>
+
+                <div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 mb-2">
+                    <b>Passenger({{ i + 1 }}) Mobile</b><br>
+                    {{data.integrationRequestPassengerMobile}}
+                </div>
+
+                <div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 mb-2">
+                    <b>Passenger({{ i + 1 }}) Email</b><br>
+                    {{data.integrationRequestPassengerEmail}}
+                </div>
+
+                <div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 mb-2">
+                    <b>Gender</b><br>
+                    {{data.integrationRequestPassengerGender}}
+                </div>
+            </div>
+
+            <!-- <div class="row" style="margin-left:20px;margin-top:20px;">
+                <div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 mb-2">
+                    <b>Pickup Address</b><br>
+                    {{data.pickupAddress}}
+                </div>
+
+                <div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 mb-2">
+                    <b>Dropoff Address</b><br>
+                    {{data.dropoffAddress}}
+                </div>
+            </div> -->
+
+        </div>
+
+        <div *ngFor="let data of stopDetailsList">
+
+            <div class="row" style="margin-left:20px;margin-top:20px;">
+
+                <div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 mb-2">
+                    <b>{{ getStopLabel(data.integrationRequestStopType) }} Date & Time</b><br>
+                    {{data.integrationRequestStopDate | date}}
+                    {{data.integrationRequestStopTime | date:'shortTime'}}
+                </div>
+
+                <div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 mb-2">
+                    <b>{{ getStopLabel(data.integrationRequestStopType) }} Type</b><br>
+                    {{data.integrationRequestStopType || 'N/A'}}
+                </div>
+
+                <div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 mb-2">
+                    <b>{{ getStopLabel(data.integrationRequestStopType) }} Address Details</b><br>
+                    {{data.integrationRequestStopAddress || 'N/A'}}
+                </div>
+
+                <div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 mb-2">
+                    <b>{{ getStopLabel(data.integrationRequestStopType) }} City</b><br>
+                    {{data.integrationRequestStopCity || 'N/A'}}
+                </div>
+
+            </div>
+        </div>
+
+        <form class="register-form" [formGroup]="advanceTableForm" (ngSubmit)="submit">
+            <div class="row" style="margin-left: 20px;margin-top: 5px;">
+              <div class="col-xl-3 col-lg-3 col-md-6 col-sm-6 mb-2" >
+                <mat-form-field appearance="outline" floatLabel="always" class="example-full-width">
+                    <mat-label>Package Type</mat-label>
+                    <input required type="text" matInput formControlName="packageType"
+                        [matAutocomplete]="auto6" (keyup)="onPackageTypeChanges($event)">
+                    <mat-autocomplete #auto6="matAutocomplete" (optionSelected)="onDTSelected($event.option.value)">
+                        <mat-option *ngFor="let option of filteredPackageTypeOptions | async"
+                            [value]="option.packageType"
+                            (click)="getPackageTypeID(option.packageTypeID,option.packageType)">
+                            {{option.packageType}}
+                        </mat-option>
+                    </mat-autocomplete>
+                </mat-form-field>
+              </div>
+  
+              <div class="col-xl-3 col-lg-3 col-md-6 col-sm-6 mb-2">
+                <mat-form-field appearance="outline" floatLabel="always" class="example-full-width">
+                    <mat-label>Package</mat-label>
+                    <input required type="text" matInput formControlName="package"
+                        [matAutocomplete]="auto7" (keyup)="onPackageChanges($event)">
+                    <mat-autocomplete #auto7="matAutocomplete" (optionSelected)="onPackageSelected($event.option.value)">
+                        <mat-option *ngFor="let option of filteredPackageOptions | async"
+                            [value]="option.package" (click)="getPackageID(option.packageID)">
+                            {{option.package}}
+                        </mat-option>
+                    </mat-autocomplete>
+                </mat-form-field>
+              </div>
+  
+              <div class="col-xl-3 col-lg-3 col-md-6 col-sm-6 mb-2">
+                <mat-form-field appearance="outline" floatLabel="always" class="example-full-width">
+                    <mat-label>Pickup City</mat-label>
+                    <input required type="text" matInput formControlName="pickupCity"
+                        [matAutocomplete]="auto4" (keyup)="onPickupCityKeyUp($event)">
+                    <mat-autocomplete #auto4="matAutocomplete" (optionSelected)="onCitySelected($event.option.value)">
+                        <mat-option *ngFor="let option of filteredCityOptions | async"
+                            [value]="option.geoPointName" (click)="getCityID(option.geoPointID)">
+                            {{option.geoPointName}}
+                        </mat-option>
+                    </mat-autocomplete>
+                </mat-form-field>
+              </div>
+  
+              <div class="col-xl-3 col-lg-3 col-md-6 col-sm-6 mb-2">
+                <mat-form-field appearance="outline" floatLabel="always" class="example-full-width">
+                    <mat-label>Vehicle</mat-label>
+                    <input required type="text" matInput formControlName="vehicle"
+                        [matAutocomplete]="auto5">
+                    <mat-autocomplete #auto5="matAutocomplete" (optionSelected)="onCarSelected($event.option.value)">
+                        <mat-option *ngFor="let option of filteredVehicleOptions | async"
+                            [value]="option.vehicle"
+                            (click)="getVehicleID(option.vehicleID,option.vehicleCategoryID)">
+                            {{option.vehicle}}
+                        </mat-option>
+                    </mat-autocomplete>
+                </mat-form-field>
+              </div>
+            </div>
+              
+            <div class="row" style="margin-left: 20px;margin-top: 5px;">
+                <div class="col-xl-3 col-lg-3 col-md-6 col-sm-6 mb-2">
+                    <mat-form-field appearance="outline" floatLabel="always" class="example-full-width">
+                        <mat-label>Request Type</mat-label>
+                        <mat-select formControlName="requestType">
+                            <mat-option value="Airport Pickup">Airport Pickup</mat-option>
+                            <mat-option value="Airport Drop">Airport Drop</mat-option>
+                            <mat-option value="Other">Other</mat-option>
+                        </mat-select>
+                    </mat-form-field>
+                </div>
+  
+                <div class="col-xl-3 col-lg-3 col-md-6 col-sm-6 mb-2">
+                  <!-- <b>Date/Time :</b>&nbsp; <span>{{customerDetails?.pickupDate | date :'dd-MM-yyyy'}} {{customerDetails?.pickupTime | date :'shortTime'}}</span> -->
+                   <mat-form-field appearance="outline" floatLabel="always" class="example-full-width mb-3">
+                      <mat-label>Pickup DateTime</mat-label>
+                      <input
+                          matInput
+                          [owlDateTimeTrigger]="date2"
+                          [owlDateTime]="date2"
+                          formControlName="pickupDateTime"
+                      />
+                  <mat-icon
+                      matSuffix
+                      [owlDateTimeTrigger]="date2"
+                      class="date-icon disabled-icon"
+                  >today</mat-icon>
+                  <owl-date-time #date2></owl-date-time>
+                  </mat-form-field>
+                </div>
+  
+                <div class="col-xl-3 col-lg-3 col-md-6 col-sm-6 mb-2" *ngIf="ifBlock;else elseBlock">
+                  <mat-form-field appearance="outline" floatLabel="always" class="example-full-width">
+                      <mat-label>Pickup Geo Location</mat-label>
+                      <input required type="text" matInput formControlName="pickupAddress"
+                          [matAutocomplete]="auto20">
+                      <mat-autocomplete #auto20="matAutocomplete" (optionSelected)="onPGLSelected($event.option.value)">
+                          <mat-option *ngFor="let option of filteredGoogleAddressOptions | async"
+                              [value]="option.geoSearchString"
+                              (click)="OnPickupGeoLocationClick(option)"
+                              >
+                              {{option.geoSearchString}}
+                          </mat-option>
+                      </mat-autocomplete>
+                      <mat-hint align="end">
+                          <div style="float: right;">
+                              <mat-checkbox color="danger" formControlName="googleAddresses"
+                                  (change)="valueSwitch()" [(indeterminate)]="indeterminate"
+                                  [labelPosition]="labelPosition">Google Addresses</mat-checkbox>
+                          </div>
+                      </mat-hint>
+                  </mat-form-field>
+  
+              </div>
+  
+              <ng-template #elseBlock>
+                  <div class="col-xl-3 col-lg-3 col-md-6 col-sm-6 mb-2">
+                      <mat-form-field appearance="outline" floatLabel="always" class="example-full-width">
+                          <mat-label>Geo Location</mat-label>
+                          <input matInput ngx-google-places-autocomplete [options]='options'
+                              #placesRef="ngx-places" (onAddressChange)="handleAddressChange($event)"
+                              formControlName="pickupAddress" required>
+                          <mat-hint align="end">
+                              <div style="float: right;">
+                                  <mat-checkbox color="primary" formControlName="googleAddresses"
+                                      [(indeterminate)]="indeterminate" [labelPosition]="labelPosition"
+                                      (change)="valueSwitch()">Google Addresses</mat-checkbox>
+                              </div>
+                          </mat-hint>
+                      </mat-form-field>
+                  </div>
+              </ng-template>
+  
+              <div class="col-xl-3 col-lg-3 col-md-6 col-sm-6 mb-2">
+                  <mat-form-field appearance="outline" floatLabel="always" class="example-full-width">
+                      <mat-label>Pickup Address Details </mat-label>
+                      <input required matInput formControlName="pickupAddressDetails">
+                  </mat-form-field>
+              </div>
+            </div>
+  
+            <div class="row" style="margin-left: 20px;margin-top: 5px;">
+              <div class="col-xl-3 col-lg-3 col-md-6 col-sm-6 mb-2">
+                  <mat-form-field appearance="outline" floatLabel="always" class="example-full-width">
+                      <mat-label>Service Location</mat-label>
+                      <input required type="text" matInput formControlName="serviceLocation"
+                          [matAutocomplete]="auto10">
+                      <mat-autocomplete #auto10="matAutocomplete" (optionSelected)="onSLSelected($event.option.value)">
+                          <mat-option *ngFor="let option of filteredServiceLocationOptions | async"
+                              [value]="option.organizationalEntityName"
+                              (click)="getServiceLocationID(option.organizationalEntityID)">
+                              {{option.organizationalEntityName}}
+                          </mat-option>
+                      </mat-autocomplete>
+                  </mat-form-field>
+              </div>
+
+              <div class="col-xl-3 col-lg-3 col-md-6 col-sm-6 mb-2">
+                <mat-form-field appearance="outline" floatLabel="always" class="example-full-width">
+                    <mat-label>Reservation Status</mat-label>
+                    <mat-select formControlName="reservationStatus">
+                        <mat-option value="Approved">Approved</mat-option>
+                        <mat-option value="Rejected">Rejected</mat-option>
+                    </mat-select>
+                    <mat-error>
+                        Reservation Status is required
+                    </mat-error>
+                </mat-form-field>
+              </div>
+              
+            </div>
+
+            <div class="row" style="margin-left: 20px;margin-top: 5px;">
+                <div class="col-xl-3 col-lg-3 col-md-6 col-sm-6 mb-2" >
+                <mat-form-field appearance="outline" floatLabel="always" class="example-full-width">
+                    <mat-label>Drop Off City</mat-label>
+                    <input type="text" matInput formControlName="dropOffCity"
+                        [matAutocomplete]="auto14">
+                    <mat-autocomplete #auto14="matAutocomplete" (optionSelected)="onDropCitySelected($event.option.value)">
+                        <mat-option *ngFor="let option of filteredDropOffCityOptions | async"
+                            [value]="option.geoPointName" (click)="getDropOffCityID(option.geoPointID)">
+                            {{option.geoPointName}}
+                        </mat-option>
+                    </mat-autocomplete>
+                </mat-form-field>
+                </div>
+
+                <div class="col-xl-3 col-lg-3 col-md-6 col-sm-6 mb-2">
+                <mat-form-field appearance="outline" floatLabel="always" class="example-full-width">
+                    <mat-label>Drop Off Address Details </mat-label>
+                    <input matInput formControlName="dropOffAddressDetails">
+                </mat-form-field>
+                </div>
+
+                <div class="col-xl-3 col-lg-3 col-md-6 col-sm-6 mb-2" *ngIf="dropOffifBlock;else elseBlock2">
+                    <mat-form-field appearance="outline" floatLabel="always" class="example-full-width">
+                        <mat-label>Drop Off Geo Location</mat-label>
+                        <input type="text" matInput formControlName="dropOffAddress"
+                            [matAutocomplete]="auto21">
+                        <mat-autocomplete #auto21="matAutocomplete" (optionSelected)="onDropGLSelected($event.option.value)">
+                            <mat-option *ngFor="let option of filteredDropOffGoogleAddressOptions | async"
+                                [value]="option.geoSearchString"
+                                (click)="OnDropOffGeoLocationClick(option)">
+                                {{option.geoSearchString}}
+                            </mat-option>
+                        </mat-autocomplete>
+                        
+                        <mat-hint align="end">
+                            <div style="float: right;">
+                                <mat-checkbox color="primary" formControlName="googleAdressesDropOff"
+                                    (change)="dropOffControlSwitch()" [(indeterminate)]="indeterminate"
+                                    [labelPosition]="labelPosition">Google Addresses</mat-checkbox>
+                            </div>
+                        </mat-hint>
+                    </mat-form-field>
+                </div>
+
+                <ng-template #elseBlock2>
+                    <div class="col-xl-3 col-lg-3 col-md-6 col-sm-6 mb-2">
+                        <mat-form-field appearance="outline" floatLabel="always" class="example-full-width">
+                            <mat-label>Geo Location</mat-label>
+                            <input matInput ngx-google-places-autocomplete [options]='options'
+                                #placesRef="ngx-places"
+                                (onAddressChange)="handleAddressChangeDropOff($event)"
+                                formControlName="dropOffAddress">
+                            <mat-hint align="end">
+                                <div style="float: right;">
+                                    <mat-checkbox color="primary"
+                                        formControlName="googleAdressesDropOff"
+                                        [(indeterminate)]="indeterminate" [labelPosition]="labelPosition"
+                                        (change)="dropOffControlSwitch()">Google Addresses</mat-checkbox>
+                                </div>
+                            </mat-hint>
+                        </mat-form-field>
+                    </div>
+                </ng-template>
+
+                <div class="col-xl-3 col-lg-3 col-md-6 col-sm-6 mb-2">
+                <!-- <b>Date/Time :</b>&nbsp; <span>{{customerDetails?.dropOffDate | date :'dd-MM-yyyy'}} {{customerDetails?.dropOffTime | date :'shortTime'}}</span> -->
+                <mat-form-field appearance="outline" floatLabel="always" class="example-full-width mb-3">
+                        <mat-label>DropOff DateTime</mat-label>
+                        <input
+                            matInput
+                            [owlDateTimeTrigger]="date3"
+                            [owlDateTime]="date3"
+                            formControlName="dropOffDateTime"
+                        />
+                    <mat-icon
+                        matSuffix
+                        [owlDateTimeTrigger]="date3"
+                        class="date-icon disabled-icon"
+                    >today</mat-icon>
+                    <owl-date-time #date3></owl-date-time>
+                    </mat-form-field>
+                </div>
+            </div>
+
+            <div class="row" style="margin-left: 20px;margin-top: 5px;">
+                <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12 mb-2">
+                    <div class="example-button-row">
+                        <button mat-raised-button style="background-color: #bcb4db" *ngIf="saveDisabled" [disabled]="PackageType" (click)="confirmAdd()">Save</button>
+                        <mat-spinner *ngIf="!saveDisabled" diameter="30"></mat-spinner>
+                        <!-- <button mat-raised-button style="background-color: #f29f99"
+                            (click)="navigateToNewForms()">Next</button> -->
+                        <!-- <button mat-raised-button style="background-color: #f29f99">Cancel</button> -->
+                          <button mat-flat-button color="warn" [mat-dialog-close]="1" [disabled]="PackageType" (click)="confirmRejected()">Rejected</button>
+                    </div>
+                </div>
+              </div>
+            <!-- <div class="row" style="margin-left: 20px;margin-top: 20px;">
+    
+                <div class="col-xl-3 col-lg-3 col-md-6 col-sm-6 mb-2">
+                  <mat-form-field appearance="outline" floatLabel="always" class="example-full-width">
+                      <mat-label>Reservation Source</mat-label>
+                      <input readonly type="text" matInput formControlName="reservationSource"
+                          [matAutocomplete]="auto13">
+                      <mat-autocomplete #auto13="matAutocomplete"  (optionSelected)="onRSSelected($event.option.value)">
+                          <mat-option *ngFor="let option of filteredReservationSourceOptions | async"
+                              [value]="option.reservationSource"
+                              (click)="getReservationSourceID(option.reservationSourceID)">
+                              {{option.reservationSource}}
+                          </mat-option>
+                      </mat-autocomplete>
+                  </mat-form-field>
+                </div>
+    
+                <div class="col-xl-3 col-lg-3 col-md-6 col-sm-6 mb-2">
+                  <mat-form-field appearance="outline" floatLabel="always" class="example-full-width">
+                      <mat-label>Reservation Status</mat-label>
+                      <mat-select formControlName="reservationStatus">
+                          <mat-option value="Approved">Approved</mat-option>
+                          <mat-option value="Rejected">Rejected</mat-option>
+                      </mat-select>
+                      <mat-error>
+                          Reservation Status is required
+                      </mat-error>
+                  </mat-form-field>
+                </div>
+    
+                <div class="col-xl-3 col-lg-3 col-md-6 col-sm-6 mb-2">
+                  <mat-form-field appearance="outline" floatLabel="always" class="example-full-width">
+                      <mat-label>Payment Mode</mat-label>
+                      <input required type="text" matInput formControlName="modeOfPayment"
+                          [matAutocomplete]="auto15">
+                      <mat-autocomplete #auto15="matAutocomplete" (optionSelected)="onPMSelected($event.option.value)">
+                          <mat-option *ngFor="let option of filteredPaymentModeOptions | async"
+                              [value]="option.modeOfPayment" (click)="getPaymentModeID(option.modeOfPaymentID)">
+                              {{option.modeOfPayment}}
+                          </mat-option>
+                      </mat-autocomplete>
+                      <mat-error *ngIf="advanceTableForm.get('modeOfPayment').hasError('required')">
+                          Please Select Payment Mode
+                      </mat-error>
+                  </mat-form-field>
+                </div>
+              </div> -->
+        </form> 
+    </div>
+
+  
+</section>
+

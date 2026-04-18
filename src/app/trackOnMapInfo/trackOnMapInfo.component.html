@@ -1,0 +1,128 @@
+<div class="modalHeader">
+  <div class="modal-about">
+    <div class="font-weight-bold p-t-5 font-17">{{ dialogTitle }}</div>
+  </div>
+  <button mat-icon-button (click)="dialogRef.close()" aria-label="Close dialog">
+    <mat-icon class="small-close-icon">close</mat-icon>
+  </button>
+</div>
+
+<!-- <mat-card>
+  <mat-card-content>
+    <div class="row">
+      <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12 mb-2">
+        <div class="mapouter">
+          <div class="gmap_canvas">
+            
+            <iframe
+              class="gmap_iframe"
+              frameborder="0"
+              scrolling="no"
+              marginheight="0"
+              marginwidth="0"
+              [src]="trustedUrl"
+              loading="lazy"
+              referrerpolicy="no-referrer-when-downgrade"
+            ></iframe>
+          </div>
+          <style>
+            .mapouter {
+              position: relative;
+              text-align: right;
+              width: 100%;
+              height: 400px;
+            }
+            .gmap_canvas {
+              overflow: hidden;
+              background: none !important;
+              width: 100%;
+              height: 400px;
+            }
+            .gmap_iframe {
+              width: 100% !important;
+              height: 400px !important;
+            }
+          </style>
+        </div>
+      </div>
+    </div>
+  </mat-card-content>
+</mat-card> -->
+
+<!-- <mat-card>
+  <mat-card-content>
+    <div class="row">
+      <div class="col-12">
+        <div class="map-container">
+          <img
+            [src]="trustedUrl"
+            alt="Map showing stops"
+            class="map-image"
+            loading="lazy"
+          />
+        </div>
+        <style>
+          .map-container {
+            position: relative;
+            width: 100%;
+            height: auto;
+          }
+          .map-image {
+            width: 100%;
+            height: auto;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+          }
+        </style>
+      </div>
+    </div>
+  </mat-card-content>
+</mat-card> -->
+
+<mat-card>
+  <mat-card-content>
+    <div class="row">
+      <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12 mb-2">
+        <div class="mapouter">
+          <div class="gmap_canvas">
+            <iframe
+              class="gmap_iframe"
+              frameborder="0"
+              scrolling="no"
+              marginheight="0"
+              marginwidth="0"
+              [src]="trustedUrl"
+              loading="lazy"
+              referrerpolicy="no-referrer-when-downgrade"
+            ></iframe>
+          </div>
+          <style>
+            .mapouter {
+              position: relative;
+              text-align: right;
+              width: 100%;
+              height: 400px;
+            }
+            .gmap_canvas {
+              overflow: hidden;
+              background: none !important;
+              width: 100%;
+              height: 400px;
+            }
+            .gmap_iframe {
+              width: 100% !important;
+              height: 400px !important;
+            }
+          </style>
+        </div>
+      </div>
+    </div>
+  </mat-card-content>
+</mat-card>
+<br>
+<div class="message" style="display: flex;align-items: center;margin-bottom: 10px;font-size: 14px;color: #110f0f;">
+  <mat-icon class="circle-icon" style=" color:white; margin-right: 8px;font-size: 10px; border: 4px solid black;border-radius: 50%;background-color: white;display: inline-flex;align-items: center;justify-content: center;width: 20px;  
+  height: 20px;">fiber_manual_record</mat-icon>
+  <span>The circles on the map indicate the stops.</span>
+</div>
+

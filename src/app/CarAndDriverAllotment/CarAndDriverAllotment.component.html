@@ -1,0 +1,2621 @@
+<section class="content">
+  <div class="container-fluid">
+    <div class="block-header">
+      <div class="row">
+        <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+          <ul>
+            <li class="breadcrumb-item bcrumb-1">
+              <a routerLink="/dashboard/main"><i class="fas fa-home"></i> Home</a>| <a href="#"
+                onClick="return false;">Admin</a>|
+              <a href="#" onClick="return false;">Car and Driver Allotment </a>
+            </li>
+          </ul>
+          <!-- <ul class="breadcrumb breadcrumb-style">
+             <li class="breadcrumb-item">
+               <h2>Car and Driver Allotment</h2>
+             </li>
+           </ul> -->
+        </div>
+      </div>
+    </div>
+
+  </div>
+  <br>
+  <div style="display: flex; justify-content: space-between; align-items: center; padding: 10px 20px;">
+  <h5 style="margin: 0;"><b>Reservation/Allotment Details</b></h5>
+  <div>
+    <button mat-raised-button color="primary" (click)="CancellAllotment(reservationInfo[0].allotmentID)">Cancel Allotment</button>&nbsp; 
+    <button mat-raised-button color="primary" [matMenuTriggerFor]="menu">Actions</button>&nbsp; 
+    <ng-template ></ng-template>
+    <span *ngIf="allotmentType==='Soft'">
+      <button mat-raised-button color="primary" (click)="CovertSoftToHard(reservationInfo[0].allotmentID,reservationInfo[0])">Convert To Hard Allotment</button>
+    </span>
+    
+    <mat-menu #menu="matMenu">
+                      <button mat-menu-item data-dismiss="modal" data-toggle="modal" data-backdrop="false"
+                        data-target="#searchCarsModal">
+                        Advance Search
+                      </button>
+                      <button mat-menu-item (click)="PassengerHistory()">
+                        Passenger History
+                      </button>
+                      <button mat-menu-item (click)="AddNewBid()">
+                        New Bid
+                      </button>
+                      <button mat-menu-item (click)="ExistingBids()">
+                        Existing Bids
+                      </button>
+                      <button mat-menu-item (click)="AdhocCarAndDriver(reservationInfo)">
+                        Adhoc Car/Driver
+                      </button>
+                      <!-- <button
+                         mat-menu-item
+                         (click)="
+                           CancellAllotment(reservationInfo[0].allotmentID)
+                         "
+                       >
+                         Cancel Allotment
+                       </button> -->
+                      <button mat-menu-item (click)="navigateToBooking()">
+                        Fleet
+                      </button>
+                      <button mat-menu-item (click)="openAllotmentNotification()">
+                        Send Notification
+                      </button>
+                      <button mat-menu-item (click)="openAllotmentNotificationReply()">
+                        Reply Notification
+                      </button>
+                      <button mat-menu-item data-dismiss="modal" data-toggle="modal" data-backdrop="false"
+                        data-target="#exampleModalCenter">
+                        Search Driver By Location
+                      </button>
+                    </mat-menu>
+  </div>
+</div>
+  <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+    <div class="card" style="width: 100%">
+      <div class="body">
+        <div class="responsive_table">
+          <mat-accordion>
+            <div style="margin-left: 23px">
+              <span style="
+                    font-size: 12px;
+                    text-align: left;
+                    width: 80px;
+                    float: left;
+                  ">
+                <b>VIP/Female </b>
+              </span>
+
+              <span style="
+                    font-size: 12px;
+                    text-align: left;
+                    width: 80px;
+                    float: left;
+                  ">
+                <b>Res. No.</b>
+              </span>
+
+              <span style="
+                    font-size: 12px;
+                    text-align: left;
+                    width: 80px;
+                    float: left;
+                  ">
+                <b>Vehicle</b>
+              </span>
+
+              <span style="
+                    font-size: 12px;
+                    text-align: left;
+                    width: 80px;
+                    float: left;
+                  ">
+                <b>City</b>
+              </span>
+
+              <span style="
+                    font-size: 12px;
+                    text-align: left;
+                    width: 80px;
+                    float: left;
+                  ">
+                <b>Pickup</b>
+              </span>
+
+              <span style="
+                    font-size: 12px;
+                    text-align: left;
+                    width: 80px;
+                    float: left;
+                  ">
+                <b>Pickup</b>
+              </span>
+
+              <span style="
+                    font-size: 12px;
+                    text-align: left;
+                    width: 80px;
+                    float: left;
+                  ">
+                <b>Passenger </b>
+              </span>
+
+              <span style="
+                    font-size: 12px;
+                    text-align: left;
+                    width: 80px;
+                    float: left;
+                  ">
+                <b>Vendor</b>
+              </span>
+
+              <span style="
+                    font-size: 12px;
+                    text-align: left;
+                    width: 80px;
+                    float: left;
+                  ">
+                <b>Veh. No.</b>
+              </span>
+
+              <span style="
+                    font-size: 12px;
+                    text-align: left;
+                    width: 80px;
+                    float: left;
+                  ">
+                <b>Driver</b>
+              </span>
+
+              <!-- <span style="font-size: 12px;text-align: left;width: 80px;float: left;">
+                  <b>Reservation </b>
+                </span> -->
+
+              <span style="
+                    font-size: 12px;
+                    text-align: left;
+                    width: 80px;
+                    float: left;
+                  ">
+                <b>Allotment </b>
+              </span>
+
+              <!-- <span style="font-size: 12px;text-align: left;width: 80px;float: left;">
+                  <b>Trip </b>
+                </span>
+
+                <span style="font-size: 12px;text-align: left;width: 80px;vertical-align: top;">
+                  <b>Movement </b>
+                </span> -->
+            </div>
+
+            <br />
+
+            <mat-expansion-panel *ngFor="let item of reservationInfo; let i = index">
+              <mat-expansion-panel-header>
+                <mat-panel-title>
+                  <span style="
+                        font-size: 12px;
+                        text-align: left;
+                        width: 80px;
+                        float: left;
+                      ">
+                    <i class="fas fa-crown" style="color: #edc877; font-size: medium"
+                      *ngIf="item.importance == 'VIP'"></i>
+                    &nbsp;
+                    <i class="fas fa-female" style="color: #d69fa6; font-size: large"
+                      *ngIf="item.gender == 'Female'"></i>
+                  </span>
+
+                  <span style="
+                        font-size: 12px;
+                        width: 80px;
+                        text-align: left;
+                        vertical-align: top;
+                      ">
+                    {{ item.reservationID }}
+                  </span>
+
+                  <span style="
+                        font-size: 12px;
+                        width: 80px;
+                        text-align: left;
+                        vertical-align: top;
+                      ">
+                    {{ item.vehicle.vehicle }}
+                  </span>
+
+                  <span style="
+                        font-size: 12px;
+                        width: 80px;
+                        text-align: left;
+                        vertical-align: top;
+                      ">
+                    {{ item.pickup.pickupAddress.split(',')[0] }}
+                  </span>
+
+                  <span style="
+                        font-size: 12px;
+                        width: 80px;
+                        text-align: left;
+                        vertical-align: top;
+                      ">
+                    {{ item.pickup.pickupTime | date : 'shortTime' }}
+                  </span>
+
+                  <span style="
+                        font-size: 12px;
+                        width: 80px;
+                        text-align: left;
+                        vertical-align: top;
+                      ">
+                    {{ item.pickup.pickupDate | date : 'dd-MMM-yy' }}
+                  </span>
+
+                  <span style="
+                        font-size: 12px;
+                        width: 80px;
+                        text-align: left;
+                        vertical-align: top;
+                      ">
+                    {{ item.customerPerson.customerPersonName }}
+                  </span>
+
+                  <span style="
+                        font-size: 12px;
+                        width: 80px;
+                        text-align: left;
+                        vertical-align: top;
+                      ">
+                    {{ item.carVendor }}
+                  </span>
+
+                  <span style="
+                        font-size: 12px;
+                        width: 80px;
+                        text-align: left;
+                        vertical-align: top;
+                      ">
+                    {{ item.registrationNumber }}
+                  </span>
+
+                  <span style="
+                        font-size: 12px;
+                        width: 80px;
+                        text-align: left;
+                        vertical-align: top;
+                      ">
+                    {{ item.driverName }}
+                  </span>
+
+                  <span style="
+                        font-size: 12px;
+                        width: 80px;
+                        text-align: left;
+                        vertical-align: top;
+                      ">
+                    {{ item.allotmentStatus ? item.allotmentStatus + (item.allotmentType ? ' (' + item.allotmentType +
+                    ')' : '') : 'Pending' }}
+                  </span>
+
+                  <!-- <span style="font-size: 12px;text-align: left;vertical-align: top;">
+                      {{ item.reservationID }}, {{ item.vehicle.vehicle }},
+                      Delhi,
+                      {{ item.pickup.pickupTime | date : 'shortTime' }}
+                      {{ item.pickup.pickupDate | date : 'dd-MMM-yy' }},
+                      {{ item.customerPerson.customerPersonName }}, Vendor:
+                      --, {{item.vehicleName}}, {{item.driverName}}
+                    </span> -->
+                </mat-panel-title>
+                <!-- <mat-panel-description>
+                    <span style="font-size: 12px;text-align: left;vertical-align: top;color: crimson;">
+                      Status : {{item.allotmentStatus}}
+                    </span>
+                  </mat-panel-description> -->
+              </mat-expansion-panel-header>
+              <div class="row">
+                <table class="col-lg-12 col-md-12 col-sm-12 col-xs-6">
+                  <tbody>
+                    <tr class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                      <td class="TDValue col-lg-2 col-md-2 col-sm-2 col-xs-2">
+                        <b><a class="BoldButton" mat-button (click)="BookingInfo(item.reservationID)" target="_blank">
+                            Booking No
+                          </a></b><br />
+                        {{ item.reservationID }}<br />
+                        <b><button class="BoldButton" mat-button (click)="BookerInfo(item.reservationID)">
+                            Booker
+                          </button></b><br />
+                        {{ item.customerPerson.customerPersonName }}<br />
+                        <b><button class="BoldButton" mat-button (click)="
+                                VehicleCategoryInfo(item.reservationID)
+                              ">
+                            Vehicle Category
+                          </button></b><br />
+                        {{ item.vehicle.vehicleCategory }} <br />
+                        <b><button class="BoldButton" mat-button (click)="VehicleInfo(item.reservationID)">
+                            Vehicle Booked
+                          </button></b><br />
+                        {{ item.vehicle.vehicle }}<br />
+                        <b><button class="BoldButton" mat-button (click)="PackageInfo(item.reservationID)">
+                            Package Booked
+                          </button></b><br />
+                        {{ item.package.package }}<br />
+                        <b>VIP Booking</b><br />
+                        <label class="TDValue" *ngIf="
+                              item.customerPerson.importance == 'VIP';
+                              else general
+                            ">Yes
+                        </label>
+                        <ng-template #general>No</ng-template><br />
+
+                        <b>Female Traveller</b><br />
+                        <label class="TDValue" *ngIf="
+                              item.customerPerson.gender == 'Female';
+                              else male
+                            ">Yes
+                        </label>
+                        <ng-template #male> No </ng-template>
+                      </td>
+                      <td class="TDValue col-lg-2 col-md-2 col-sm-2 col-xs-2">
+                        <div *ngFor="
+                              let p of item.passengerDetails;
+                              let c = index
+                            ">
+                          <!-- <b><button class="BoldButton" mat-button (click)="
+                                  PassengerInfo(
+                                    item.reservationID,
+                                    p.customerPersonID
+                                  )
+                                " *ngIf="
+                                  p.customerPersonID != null;
+                                  else unregUser
+                                ">
+                                Passenger {{ c + 1 }}
+                              </button> -->
+                          <b><button class="BoldButton" mat-button (click)="PassengerInfo(item)" *ngIf="
+                                  p.customerPersonID != null;
+                                  else unregUser
+                                ">
+                              Passenger {{ c + 1 }}
+                            </button>
+                            <ng-template #unregUser>
+                              <button class="BoldButton" mat-button (click)="
+                                    PassengerInfoUnReg(
+                                      p.customerPersonName,
+                                      p.primaryMobile,
+                                      p.primaryEmail
+                                    )
+                                  ">
+                                Passenger {{ c + 1 }}
+                              </button>
+                            </ng-template> </b><br />
+                          {{ p.customerPersonName }} <br />
+                          {{ p.pickupDate | date : 'dd-MMM-yy' }}
+                          {{ p.pickupTime | date : 'shortTime' }}<br />
+                          <span *ngIf="
+                                p.pickupStopType == 'Pickup' &&
+                                  p.dropOffStopType == 'Dropoff';
+                                else stopToStop
+                              ">
+                            Pickup to Drop off
+                          </span>
+                          <ng-template #stopToStop>
+                            <ng-container *ngIf="
+                                  p.pickupStopType == 'Enroute' &&
+                                    p.dropOffStopType == 'Enroute';
+                                  else stopToDropOff
+                                ">
+                              Stop to Stop
+                            </ng-container>
+                          </ng-template>
+                          <ng-template #stopToDropOff>
+                            Stop to Drop Off
+                          </ng-template>
+                        </div>
+                        <span *ngIf="item.specialInstruction">
+                          <div *ngFor="
+                                let sp of item.specialInstruction;
+                                let s = index
+                              ">
+                            <b><button class="BoldButton" mat-button>
+                                Special Instructions {{ s + 1 }}
+                              </button></b>
+                            <br />
+                            {{ sp.specialInstruction }}
+                            <br />
+                            <button class="BoldButton" mat-button style="font-weight: 100"
+                              (click)="SpecialInstructionInfo(item)">
+                              View</button><br />
+                          </div>
+                        </span>
+                        <span *ngIf="!item.specialInstruction">
+                          <div>
+                            <b><button class="BoldButton" mat-button>
+                                Special Instructions
+                              </button></b>
+                            <br />
+                            N/A
+                            <br />
+                            <!-- <button class="BoldButton" mat-button style="font-weight: 100">
+                            View</button><br /> -->
+                          </div>
+                        </span>
+                        <!-- <b>Ring Door Bell</b><br />
+                          N/A -->
+                      </td>
+                      <td class="TDValue col-lg-2 col-md-2 col-sm-2 col-xs-2">
+                        <b><button class="BoldButton" mat-button (click)="TimeAndAddressInfo(item)">
+                            Pick up Time
+                          </button></b><br />
+                        <!-- <span
+                            *ngIf="item.stopsDetails[0].stopType == 'Pickup'"
+                          > -->
+                        <span>
+                          {{ item.pickup.pickupDate | date : 'dd-MMM-yy' }}
+                          {{
+                          item.pickup.pickupTime | date : 'shortTime'
+                          }} </span><br />
+                        <b><button class="BoldButton" mat-button (click)="TimeAndAddressInfo(item)">
+                            Pick up Address
+                          </button></b><br />
+                        <!-- <span
+                            *ngIf="item.stopsDetails[0].stopType == 'Pickup'"
+                            > -->
+                        <span> {{ item.pickup.pickupAddress }}</span><br />
+                        <b><button class="BoldButton" mat-button (click)="TimeAndAddressDrop(item)">
+                            Drop Off Time
+                          </button></b><br />
+                        <!-- <span
+                            *ngIf="
+                              item.stopsDetails[1].stopType == 'Destination'
+                            "
+                            > -->
+                        <span>
+                          {{ item.drop.dropOffDate | date : 'dd-MMM-yy' }}
+                          {{
+                          item.drop.dropOffTime | date : 'shortTime'
+                          }} </span><br />
+                        <b><button class="BoldButton" mat-button (click)="TimeAndAddressDrop(item)">
+                            Drop Off Address
+                          </button></b><br />
+                        <!-- <span
+                            *ngIf="
+                              item.stopsDetails[1].stopType == 'Destination'
+                            "
+                            > -->
+                        <span> {{ item.drop.dropOffAddress }}</span><br />
+                        <b><button class="BoldButton" mat-button (click)="StopDetailsInfo(item)">
+                            Stop Details
+                          </button></b><br />
+                        <b><button class="BoldButton" mat-button (click)="StopsOnMapInfo(item)">
+                            Stops on Map
+                          </button></b><br />
+                      </td>
+                      <td class="TDValue col-lg-2 col-md-2 col-sm-2 col-xs-2">
+                        <b>
+                          <button class="BoldButton" mat-button (click)="locationDetailsInfo(item)">
+                            Location Details
+                          </button>
+                          <mat-icon [matMenuTriggerFor]="menu30" style="
+                                cursor: pointer;
+                                color: blue;
+                                font-size: 14px !important;
+                              ">
+                            more_vert
+                          </mat-icon>
+                        </b>
+                        <mat-menu #menu30="matMenu">
+                          <a mat-menu-item (click)="TransferLocation(item.reservationID)" target="_blank"
+                            rel="noreferrer noopener">
+                            Transfer Location
+                          </a>
+                          <!-- <button mat-menu-item>History</button> -->
+                          <a mat-menu-item (click)="
+                                TransferLocationHistory(item.reservationID)
+                              " target="_blank" rel="noreferrer noopener">
+                            History
+                          </a>
+                        </mat-menu>
+                        <div>
+                          {{
+                          item.transferedLocation
+                          ? item.transferedLocation
+                          : 'N/A'
+                          }}
+                        </div>
+
+                        <b><button class="BoldButton" mat-button (click)="allotmentStatusDetails(item)">
+                            Allotment Status
+                          </button></b>
+                        <!-- <button
+                            mat-button
+                            [matMenuTriggerFor]="menu"
+                            class="header-dropdown"
+                            style="line-height: 0px; min-width: 50px"
+                          >
+                            <mat-icon>more_vert</mat-icon>
+                          </button> -->
+                        <br />
+
+                        {{ item.allotmentStatus || 'N/A' }}<br />
+                        <b><button class="BoldButton" mat-button (click)="vendorStatusInfo(item)">
+                            Vendor
+                          </button></b><br />
+                        {{ item.carVendor || 'N/A' }}
+                        <br />
+                        <!-- <b><button class="BoldButton" mat-button>
+                              Vendor Acceptance
+                            </button></b><br />
+                          N/A<br />
+                          <b><button class="BoldButton" mat-button>
+                              Vehicle Status
+                            </button></b><br />
+                          N/A <br />
+                          <b><button class="BoldButton" mat-button>
+                              Vendor Booking No.
+                            </button></b><br />
+                          N/A<br /> -->
+                        <b><button class="BoldButton" mat-button (click)="allotmentStatusDetails(item)">
+                            Veh. Supplied
+                          </button></b><br />
+                        {{ item.vehicleName || 'N/A' }}<br />
+                        <b><button class="BoldButton" mat-button (click)="allotmentStatusDetails(item)">
+                            Veh. No
+                          </button></b><br />
+                        {{ item.registrationNumber || 'N/A' }}<br />
+                        <b><button class="BoldButton" mat-button (click)="allotmentStatusDetails(item)">
+                            Chauffeur
+                          </button></b><br />
+                        {{ item.driverName || 'N/A' }}<br />
+                      </td>
+                      <td class="TDValue col-lg-2 col-md-2 col-sm-2 col-xs-2">
+                        <b><button class="BoldButton" mat-button>
+                            Print DutySlip
+                          </button></b>
+                        <br />
+                        DutySlip<br />
+                        <b>Trip Status</b><br />
+                        {{ item.currentStatus }}<br />
+                        <ng-container *ngIf="item.locationOutEntryMethod">
+                          <b><button class="BoldButton" mat-button (click)="garageOutDetails(item)">
+                              Garage out
+                            </button></b></ng-container>
+                        <ng-container *ngIf="!item.locationOutEntryMethod">
+                          <b><button class="BoldButton" mat-button>
+                              Garage out
+                            </button></b></ng-container>
+                        <br />
+                        <ng-container *ngIf="
+                              item.locationOutDate ||
+                                item.locationOutTime ||
+                                item.locationOutEntryMethod;
+                              else noData
+                            ">
+                          {{
+                          (item.locationOutDate | date : 'dd/MM/yyyy') ||
+                          'N/A'
+                          }}
+                          ,
+                          {{
+                          (item.locationOutTime | date : 'shortTime') ||
+                          'N/A'
+                          }}
+                        </ng-container>
+                        <ng-template #noData>N/A</ng-template>
+                        <br />
+                        <ng-container *ngIf="item.reportingToGuestEntryMethod">
+                          <b><button class="BoldButton" mat-button (click)="reachedDetails(item)">
+                              Reached
+                            </button></b>
+                        </ng-container>
+                        <ng-container *ngIf="!item.reportingToGuestEntryMethod">
+                          <b><button class="BoldButton" mat-button>
+                              Reached
+                            </button></b>
+                        </ng-container>
+                        <br />
+                        <ng-container *ngIf="
+                              item.reportingToGuestDate ||
+                                item.reportingToGuestTime ||
+                                item.reportingToGuestEntryMethod;
+                              else noData
+                            ">
+                          {{
+                          (item.reportingToGuestDate
+                          | date : 'dd/MM/yyyy') || 'N/A'
+                          }}
+                          ,
+                          {{
+                          (item.reportingToGuestTime
+                          | date : 'shortTime') || 'N/A'
+                          }}
+                        </ng-container>
+                        <ng-template #noData>N/A</ng-template><br />
+
+                        <ng-container *ngIf="item.pickupEntryMethod">
+                          <b><button class="BoldButton" mat-button (click)="PickupDetail(item.dutySlipID)">
+                              Pick Up
+                            </button></b>
+                        </ng-container>
+                        <ng-container *ngIf="!item.pickupEntryMethod">
+                          <b>
+                            <button class="BoldButton" mat-button>
+                              Pick Up
+                            </button></b>
+                        </ng-container>
+                        <br />
+                        <ng-container *ngIf="
+                              item.pickDate ||
+                                item.pickTime ||
+                                item.pickupEntryMethod;
+                              else noData
+                            ">
+                          {{
+                          (item.pickDate | date : 'dd/MM/yyyy') || 'N/A'
+                          }}
+                          ,
+                          {{
+                          (item.pickTime | date : 'shortTime') || 'N/A'
+                          }}
+                        </ng-container>
+                        <ng-template #noData>N/A</ng-template><br />
+                        <ng-container *ngIf="item.dropOffEntryMethod">
+                          <b>
+                            <button class="BoldButton" mat-button (click)="DropOffDetail(item.dutySlipID)">
+                              Drop Off
+                            </button></b>
+                        </ng-container>
+                        <ng-container *ngIf="!item.dropOffEntryMethod">
+                          <b>
+                            <button class="BoldButton" mat-button>
+                              Drop Off
+                            </button></b>
+                        </ng-container>
+                        <br />
+                        <ng-container *ngIf="
+                              item.dropOffDate ||
+                                item.dropOffTime ||
+                                item.dropOffEntryMethod;
+                              else noData
+                            ">
+                          {{
+                          (item.dropOffDate | date : 'dd/MM/yyyy') ||
+                          'N/A'
+                          }}
+                          ,
+                          {{
+                          (item.dropOffTime | date : 'shortTime') || 'N/A'
+                          }}
+                          <!-- {{ item.dropOffEntryMethod ? 'Done' : 'N/A' }} -->
+                        </ng-container>
+                        <ng-template #noData>N/A</ng-template><br />
+                        <ng-container *ngIf="item.locationInEntryMethod">
+                          <b><button class="BoldButton" mat-button (click)="LocationInDetail(item.dutySlipID)">
+                              Garage in
+                            </button></b></ng-container>
+                        <ng-container *ngIf="!item.locationInEntryMethod">
+                          <b><button class="BoldButton" mat-button>
+                              Garage in
+                            </button></b></ng-container>
+                        <br />
+                        <ng-container *ngIf="
+                              item.locationInDate ||
+                                item.locationInTime ||
+                                item.locationInEntryMethod;
+                              else noData
+                            ">
+                          {{
+                          (item.locationInDate | date : 'dd/MM/yyyy') ||
+                          'N/A'
+                          }}
+                          ,
+                          {{
+                          (item.locationInTime | date : 'shortTime') ||
+                          'N/A'
+                          }}
+                        </ng-container>
+                        <ng-template #noData>N/A</ng-template><br />
+                        <b>Track on map</b><br />
+                        <!-- <b>View Feedback</b> <br /> -->
+                        <button class="BoldButton" mat-button (click)="feedBackDetails(item.reservationID)">
+                          View Feedback
+                        </button>
+                        <br />
+                      </td>
+
+                      <td class="TDValue col-lg-2 col-md-2 col-sm-2 col-xs-2">
+                        <b>Billing Status</b><br />
+                        Invoiced<br />
+                        <b>Amount</b><br />
+                        12000<br />
+                        <b>Documents</b><br />
+                        View <br />
+                        <b>Payment Mode</b><br />
+                        Credit Card <br />
+                        <b>Invoice Clearance</b><br />
+                        Approved<br />
+                        <b>Amount Paid</b> <br />
+                        12000 <br />
+                        <b>Dispute</b> <br />
+                        None <br />
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </mat-expansion-panel>
+          </mat-accordion>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+    <div class="card" style="width: 100%">
+      <div class="body">
+        <div class="responsive_table">
+          <div class="row">
+            <ng-container *ngFor="let item of reservationInfo; let i = index">
+              <tbody>
+                <tr>
+                  <td class="TDValue col-lg-2 col-md-2 col-sm-2 col-xs-2">
+                    <b>Customer</b><br /><b>Alter Message</b><br />
+                    <ng-container *ngIf="item.customerAlterMessage">
+                      <ng-container *ngFor="let alterMessage of item.customerAlterMessage">
+                        {{ alterMessage.customerAlertMessage }}<br />
+                      </ng-container>
+                    </ng-container>
+                  </td>
+                </tr>
+              </tbody>
+
+              <tbody>
+                <tr>
+                  <td class="TDValue col-lg-2 col-md-2 col-sm-2 col-xs-2">
+                    <b>Customer Person</b><br /><b>Alert Message</b><br />
+                    <ng-container *ngIf="item.customerPersonAlertMessages">
+                      <ng-container *ngFor="
+                           let customerPersonAlertMessages of item.customerPersonAlertMessages
+                         ">
+                        {{ customerPersonAlertMessages.bookingAlert }}<br />
+                      </ng-container>
+                    </ng-container>
+                  </td>
+                </tr>
+              </tbody>
+              <tbody>
+                <tr>
+                  <td class="TDValue col-lg-2 col-md-2 col-sm-2 col-xs-2">
+                    <b>Customer Person</b><br /><b> Prefered Driver </b><br />
+                    <ng-container *ngIf="item.customerPersonPreferedDriver">
+                      <ng-container *ngFor="
+                           let customerPersonPreferedDriver of item.customerPersonPreferedDriver
+                         ">
+                        {{ customerPersonPreferedDriver.driverName }}<br />
+                      </ng-container>
+                    </ng-container>
+                  </td>
+                </tr>
+              </tbody>
+              <tbody>
+                <tr>
+                  <td class="TDValue col-lg-2 col-md-2 col-sm-2 col-xs-2">
+                    <b>Customer Person</b><br /><b>Restricted Driver </b><br />
+                    <ng-container *ngIf="item.customerPersonDriverRestriction">
+                      <ng-container *ngFor="
+                           let customerPersonDriverRestriction of item.customerPersonDriverRestriction
+                         ">
+                        {{ customerPersonDriverRestriction.driverName }}<br />
+                      </ng-container>
+                    </ng-container>
+                  </td>
+                </tr>
+              </tbody>
+
+              <tbody>
+                <tr>
+                  <td class="TDValue col-lg-2 col-md-2 col-sm-2 col-xs-2">
+                    <b>Customer Person</b><br /><b>Prefer App Based Driver</b><br />
+                    <ng-container *ngIf="item?.customerPerson">
+                      {{ item.customerPerson.preferAppBasedDriver }}
+                      <br />
+                    </ng-container>
+                  </td>
+                </tr>
+              </tbody>
+              <tbody>
+                <tr>
+                  <td class="TDValue col-lg-2 col-md-2 col-sm-2 col-xs-2">
+                    <b>Customer Person</b><br /><b>Importance</b><br />
+                    <ng-container *ngIf="item?.customerPerson">
+                      {{ item.customerPerson.gender }}
+                      <br />
+                    </ng-container>
+                  </td>
+                </tr>
+              </tbody>
+              <tbody></tbody>
+
+              <tbody>
+                <tr>
+                  <td class="TDValue col-lg-2 col-md-2 col-sm-2 col-xs-2">
+                    <b>Gender</b><br />
+                    <ng-container *ngIf="item?.gender">
+                      {{ item.customerPerson.gender }}
+                      <br />
+                    </ng-container>
+                  </td>
+                </tr>
+              </tbody>
+              <tbody>
+                <tr>
+                  <td class="TDValue col-lg-2 col-md-2 col-sm-2 col-xs-2">
+                    <b>Customer</b><br /><b>Instruction</b><br />
+                    <ng-container *ngIf="item.instruction">
+                      <ng-container *ngFor="let instruction of item.instruction">
+                        {{ instruction.instruction }}<br />
+                      </ng-container>
+                    </ng-container>
+                  </td>
+                </tr>
+              </tbody>
+              <tbody>
+                <tr>
+                  <td class="TDValue col-lg-2 col-md-2 col-sm-2 col-xs-2">
+                    <b>Special</b><br /><b>Instruction</b><br />
+                    <ng-container *ngIf="item.specialInstruction">
+                      <ng-container *ngFor="
+                           let specialInstruction of item.specialInstruction
+                         ">
+                        {{ specialInstruction.specialInstruction }}<br />
+                      </ng-container>
+                    </ng-container>
+                  </td>
+                </tr>
+              </tbody>
+
+              <tbody>
+                <tr>
+                  <td class="TDValue col-lg-2 col-md-2 col-sm-2 col-xs-2">
+                    <b>Internal </b><br /><b>Note</b><br />
+                    <ng-container *ngIf="item.internalNote">
+                      <ng-container *ngFor="let internalNote of item.internalNote">
+                        {{ internalNote.reservationInternalNote }}<br />
+                      </ng-container>
+                    </ng-container>
+                  </td>
+                </tr>
+              </tbody>
+            </ng-container>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div> -->
+
+  <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+    <div class="card" style="width: 100%">
+      <div class="body">
+        <!-- <span><b>Alert Message</b></span> -->
+        <div class="responsive_table" *ngFor="let item of reservationInfo; let i = index">
+          <div class="row" style="margin-left: 10px;">
+            <div style="font-size: 10px;" *ngIf="item.customerAlterMessage">
+              <b> Customer Alert Message</b> :
+              <span *ngFor="let alterMessage of item.customerAlterMessage">
+                {{ alterMessage.customerAlertMessage }},
+              </span>
+            </div>
+            <div style="font-size: 10px;margin-left: 5px;" *ngIf="item.customerPersonAlertMessages">
+              <b>Customer Person Alert Message</b> :
+              <span *ngFor="let customerPersonAlertMessages of item.customerPersonAlertMessages">
+                {{ customerPersonAlertMessages.bookingAlert }},
+              </span>
+            </div>
+            <div style="font-size: 10px;margin-left: 5px;" *ngIf="item.customerPersonPreferedDriver">
+              <b>Customer Person Prefered Driver</b> :
+              <span *ngFor="let customerPersonPreferedDriver of item.customerPersonPreferedDriver">
+                {{ customerPersonPreferedDriver.driverName }},
+              </span>
+            </div>
+            <div style="font-size: 10px;margin-left: 5px;" *ngIf="item?.customerPerson">
+              <b>Customer Person Importance </b>:
+              <span>
+                {{item.customerPerson.gender}},
+              </span>
+            </div>
+            <div style="font-size: 10px;margin-left: 5px;" *ngIf="item.customerPersonDriverRestriction">
+              <b>Customer Restricted Driver</b> :
+              <span *ngFor="let customerPersonDriverRestriction of item.customerPersonDriverRestriction">
+                {{ customerPersonDriverRestriction.driverName }},
+              </span>
+            </div>
+            <div style="font-size: 10px;margin-left: 5px;" *ngIf="item?.customerPerson">
+              <b>Customer Person Prefer App Based Driver </b>:
+              <span>
+                {{ item.customerPerson.preferAppBasedDriver === true ? 'Yes' : 'No'}},
+              </span>
+            </div>
+            <div style="font-size: 10px;margin-left: 5px;" *ngIf="item?.gender">
+              <b>Gender</b> :
+              <span>
+                {{ item.customerPerson.gender }},
+              </span>
+            </div>
+            <div style="font-size: 10px;margin-left: 5px;" *ngIf="item?.instruction">
+              <b>Customer Instruction </b>:
+              <span *ngFor="let instruction of item.instruction">
+                {{ instruction.instruction}},
+              </span>
+            </div>
+
+            <div style="font-size: 10px;margin-left: 5px;" *ngIf="item?.internalNote">
+              <b>Internal Note</b> :
+              <span *ngFor="let internalNote of item.internalNote">
+                {{ internalNote.reservationInternalNote}},
+              </span>
+            </div>
+            <div style="font-size: 10px;margin-left: 5px;" *ngIf="item?.specialInstruction">
+              <b>Special Instruction</b> :
+              <span *ngFor="let specialInstruction of item.specialInstruction">
+                {{ specialInstruction.specialInstruction}}
+              </span>
+            </div>
+
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+    <div class="card" style="width: 100%">
+      <div class="body">
+        <div class="responsive_table">
+          <mat-accordion>
+
+            <mat-expansion-panel
+            >
+              <mat-expansion-panel-header>
+                <mat-panel-title>
+               <h5><b>Advance Search</b></h5>
+                </mat-panel-title>
+              </mat-expansion-panel-header>
+                    <div class="row">
+                      <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                        <mat-form-field appearance="outline" floatLabel="always" class="example-full-width">
+                          <mat-label>Vendor Type</mat-label>
+                          <input
+                            type="text"
+                            matInput
+                            [matAutocomplete]="auto25"
+                            [formControl]="vendorType"
+                          />
+                          <mat-autocomplete #auto25="matAutocomplete">
+                            <mat-option
+                              *ngFor="let option of filteredVendorTypeOptions | async"
+                              [value]="
+                                option.supplierType
+                              "
+                            >
+                              {{ option.supplierType }}
+                            </mat-option>
+                          </mat-autocomplete>
+                        </mat-form-field>
+                      </div>
+                      <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                       
+                        <mat-form-field appearance="outline" floatLabel="always" class="example-full-width">
+                          <mat-label>Car Category</mat-label>
+                          <input
+                            type="text"
+                            matInput
+                            [formControl]="category"
+                            [matAutocomplete]="auto9"
+                            (keyup)="onVehicleAutoCompleteChange($event)"
+                          />
+                          <mat-autocomplete #auto9="matAutocomplete">
+                            <mat-option
+                              *ngFor="let option of filteredVehicleCategoryOptions | async"
+                              [value]="option.vehicleCategory"
+                              (click)="getVehicleCategoryID(option.vehicleCategoryID)"
+                            >
+                              {{ option.vehicleCategory }}
+                            </mat-option>
+                          </mat-autocomplete>
+                        </mat-form-field>
+                      </div>
+                    </div>
+            
+                    <div class="row">
+                      <div class="col-xl-6 col-lg-6 col-md-6 col-sm-6 mb-2">
+                        
+                        <mat-form-field appearance="outline" floatLabel="always" class="example-full-width">
+                          <mat-label>Car</mat-label>
+                          <input
+                            type="text"
+                            matInput
+                            [matAutocomplete]="auto1"
+                            [formControl]="vehicle"
+                          />
+                          <mat-autocomplete #auto1="matAutocomplete">
+                            <mat-option
+                              *ngFor="let option of filteredVehicleOptions | async"
+                              [value]="option.vehicle"
+                            >
+                              {{ option.vehicle }}
+                            </mat-option>
+                          </mat-autocomplete>
+                        </mat-form-field>
+                      </div>
+                      <div class="col-xl-6 col-lg-6 col-md-6 col-sm-6 mb-2">
+                        <mat-form-field appearance="outline" floatLabel="always" class="example-full-width">
+                          <mat-label>Bookings</mat-label>
+                          <mat-select [formControl]="bookingCount">
+                            <mat-option value="0">0 Bookings</mat-option>
+                            <mat-option value="1">1 Booking</mat-option>
+                            <mat-option value="2">2 Bookings</mat-option>
+                            <mat-option value="3">3 Booking</mat-option>
+                            <mat-option value="Freein4Hours">Free in 4 Hours</mat-option>
+                            <mat-option value="Freein8Hours">Free in 8 Hours</mat-option>
+                          </mat-select>
+                        </mat-form-field>
+                      </div>
+                    </div>
+            
+                    <div class="row">
+                      <div class="col-xl-6 col-lg-6 col-md-6 col-sm-6 mb-2">
+                        <mat-form-field appearance="outline" floatLabel="always" class="example-full-width">
+                          <mat-label>Business Volume</mat-label>
+                          <mat-select [formControl]="monthlyTarget">
+                            <mat-option value="between 0 - 10"
+                              >Monthly business between 0 - 10%</mat-option
+                            >
+                            <mat-option value="between 11 - 20"
+                              >Monthly business between 11% - 20%</mat-option
+                            >
+                            <mat-option value="between 21 - 30"
+                              >Monthly business between 21% - 30%</mat-option
+                            >
+                            <mat-option value="between 31 - 40"
+                              >Monthly business between 31% - 40%</mat-option
+                            >
+                            <mat-option value="between 41 - 50"
+                              >Monthly business between 41% - 50%</mat-option
+                            >
+                            <mat-option value="between 51 - 60"
+                              >Monthly business between 51% - 60%</mat-option
+                            >
+                            <mat-option value="between 61 - 70"
+                              >Monthly business between 61% - 70%</mat-option
+                            >
+                            <mat-option value="between 71 - 80"
+                              >Monthly business between 71% - 80%</mat-option
+                            >
+                            <mat-option value="between 81 - 90"
+                              >Monthly business between 81% - 90%</mat-option
+                            >
+                            <mat-option value="between 91 - 100"
+                              >Monthly business between 91% - 100%</mat-option
+                            >
+                            <mat-option value="less than 10"
+                              >Monthly business less than 10%</mat-option
+                            >
+                            <mat-option value="less than 20"
+                              >Monthly business less than 20%</mat-option
+                            >
+                            <mat-option value="less than 30"
+                              >Monthly business less than 30%</mat-option
+                            >
+                            <mat-option value="less than 40"
+                              >Monthly business less than 40%</mat-option
+                            >
+                            <mat-option value="less than 50"
+                              >Monthly business less than 50%</mat-option
+                            >
+                            <mat-option value="less than 60"
+                              >Monthly business less than 60%</mat-option
+                            >
+                            <mat-option value="less than 70"
+                              >Monthly business less than 70%</mat-option
+                            >
+                            <mat-option value="less than 80"
+                              >Monthly business less than 80%</mat-option
+                            >
+                            <mat-option value="less than 90"
+                              >Monthly business less than 90%</mat-option
+                            >
+                            <mat-option value="less than 100"
+                              >Monthly business less than 100%</mat-option
+                            >
+                            <mat-option value="more than 10"
+                              >Monthly business more than 10%</mat-option
+                            >
+                            <mat-option value="more than 20"
+                              >Monthly business more than 20%</mat-option
+                            >
+                            <mat-option value="more than 30"
+                              >Monthly business more than 30%</mat-option
+                            >
+                            <mat-option value="more than 40"
+                              >Monthly business more than 40%</mat-option
+                            >
+                            <mat-option value="more than 50"
+                              >Monthly business more than 50%</mat-option
+                            >
+                            <mat-option value="more than 60"
+                              >Monthly business more than 60%</mat-option
+                            >
+                            <mat-option value="more than 70"
+                              >Monthly business more than 70%</mat-option
+                            >
+                            <mat-option value="more than 80"
+                              >Monthly business more than 80%</mat-option
+                            >
+                            <mat-option value="more than 90"
+                              >Monthly business more than 90%</mat-option
+                            >
+                            <mat-option value="more than 100"
+                              >Monthly business more than 100%</mat-option
+                            >
+                          </mat-select>
+                        </mat-form-field>
+                      </div>
+            
+                      <div class="col-xl-6 col-lg-6 col-md-6 col-sm-6 mb-2">
+                        <mat-form-field appearance="outline" floatLabel="always" class="example-full-width">
+                          <mat-label>Other Criteria</mat-label>
+                          <mat-select [formControl]="otherCriteria">
+                            <mat-option value="PickupLocation"
+                              >Currently Near Pickup Location</mat-option
+                            >
+                            <mat-option value="Online">Online on App</mat-option>
+                            <mat-option value="Offline">Offline on App</mat-option>
+                            <mat-option value="Present">Present Drivers </mat-option>
+                            <mat-option value="Absent">Absent Drivers</mat-option>
+                          </mat-select>
+                        </mat-form-field>
+                      </div>
+                    </div>
+
+                    <div class="row">
+                      <div class="col-xl-6 col-lg-5 col-md-6 col-sm-12 mb-2">
+                        <mat-form-field appearance="outline" floatLabel="always" class="example-full-width">
+                          <mat-label>Supplier</mat-label>
+                          <input
+                            type="text"
+                            matInput
+                            [formControl]="supplier"
+                            [matAutocomplete]="auto4"
+                            (keyup)="onAutoCompleteChange($event)"
+                          />
+                          <mat-autocomplete #auto4="matAutocomplete">
+                            <mat-option
+                              *ngFor="let option of filteredSupplierOptions | async"
+                              [value]="option.supplierName"
+                              (click)="getSupplierID(option.supplierID)"
+                            >
+                              {{ option.supplierName }}
+                            </mat-option>
+                          </mat-autocomplete>
+                        </mat-form-field>
+                      </div>
+                      <div class="col-xl-6 col-lg-5 col-md-6 col-sm-12 mb-2">
+                        <mat-form-field appearance="outline" floatLabel="always" class="example-full-width">
+                          <mat-label>Driver</mat-label>
+                          <input
+                            type="text"
+                            matInput
+                            [matAutocomplete]="auto"
+                            [formControl]="driver"
+                          />
+                          <mat-autocomplete #auto="matAutocomplete">
+                            <mat-option
+                              *ngFor="let option of filteredOptions | async"
+                              [value]="
+                                option.driverName +
+                                '-' +
+                                option.driverPhone +
+                                '-' +
+                                option.registrationNumber +
+                                '-' +
+                                option.vehicle +
+                                '-' +
+                                option.supplierName
+                              "
+                              (click)="getDriverID(option.driverID)"
+                            >
+                              {{ option.driverName }} - {{ option.driverPhone }} -
+                              {{ option.registrationNumber }} - {{ option.vehicle }} -
+                              {{ option.supplierName }}
+                            </mat-option>
+                          </mat-autocomplete>
+                        </mat-form-field>
+                      </div>
+                    </div>
+            
+                    <div class="row">
+                     <div class="col-xl-6 col-lg-6 col-md-6 col-sm-6 mb-2">
+                       <mat-form-field appearance="outline" floatLabel="always" class="example-full-width">
+                           <mat-label>Driver Official Identity No</mat-label>
+                           <input type="text" matInput [formControl]="driverOfficialIdentityNumber"
+                               [matAutocomplete]="auto25">
+                           <mat-autocomplete #auto25="matAutocomplete">
+                               <mat-option *ngFor="let option of filteredDriverOfficialIdentityNumberOptions | async"
+                                   [value]="option.driverOfficialIdentityNumber"
+                                   >
+                                   {{option.driverOfficialIdentityNumber}}
+                               </mat-option>
+                           </mat-autocomplete>
+                       </mat-form-field>
+                   </div>
+           
+                      <div class="col-xl-6 col-lg-6 col-md-6 col-sm-6 mb-2">
+                        <mat-form-field appearance="outline" floatLabel="always" class="example-full-width">
+                          <mat-label>Regn. No.</mat-label>
+                          <input
+                            type="text"
+                            matInput
+                            [matAutocomplete]="auto2"
+                            [formControl]="inventory"
+                          />
+                          <mat-autocomplete #auto2="matAutocomplete">
+                            <mat-option
+                              *ngFor="let option of filteredInventoryOptions | async"
+                              [value]="
+                                option.registrationNumber +
+                                '-' +
+                                option.vehicleCategory +
+                                '-' +
+                                option.driverName +
+                                '-' +
+                                option.driverPhone +
+                                '-' +
+                                option.supplierName
+                              "
+                            >
+                              {{ option.registrationNumber }} -
+                              {{ option.vehicleCategory }} - {{ option.driverName }} -
+                              {{ option.driverPhone }} - {{ option.supplierName }}
+                            </mat-option>
+                          </mat-autocomplete>
+                        </mat-form-field>
+                      </div>
+                    </div>
+                  
+                  <div class="row">
+                      <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12 mb-2" >
+                          <div class="example-button-row" style="float: right;">
+                              <button mat-raised-button color="primary" (click)="SearchCarAndDriver()" >Search</button>
+                              
+                          </div>
+                      </div>
+                  </div>
+             
+            </mat-expansion-panel>
+          </mat-accordion>
+        </div>
+      </div>
+    </div>
+  </div> -->
+
+  <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+    <div class="card" style="width: 100%">
+      <div class="body">
+      <div class="materialTableHeader  full-height-container">
+                    <form class="register-form">
+                      <div class="row">
+                        <!-- <div class="col-xl-1 col-lg-1 col-md-1 col-sm-12 mb-2">
+                          <span><b>Quick Search</b></span>
+                        </div> -->
+                        <div class="col-xl-2 col-lg-2 col-md-2 col-sm-12 mb-2">
+                          <mat-form-field appearance="outline" floatLabel="always" class="example-full-width">
+                            <mat-label>Regn. No.</mat-label>
+                            <input type="text" matInput [matAutocomplete]="auto81" [formControl]="inventory" />
+                            <mat-autocomplete #auto81="matAutocomplete" panelWidth="custom-autocomplete-panel">
+                              <mat-option *ngFor="let option of filteredRegNumberOptions | async" [value]="
+                                            option.registrationNumber
+                                          ">
+                                {{ option.registrationNumber }}
+                              </mat-option>
+                            </mat-autocomplete>
+                          </mat-form-field>
+                        </div>
+
+                        <div class="col-xl-2 col-lg-2 col-md-2 col-sm-12 mb-2">
+                          <mat-form-field appearance="outline" floatLabel="always" class="example-full-width">
+                            <mat-label>Driver</mat-label>
+                            <input type="text" matInput [matAutocomplete]="auto80" [formControl]="driver" />
+                            <mat-autocomplete #auto80="matAutocomplete" panelWidth="custom-autocomplete-panel">
+                              <mat-option *ngFor="let option of filteredOptions | async" [value]="
+                                            option.driverName +
+                                            '-' +
+                                            option.driverPhone +
+                                            '-' +
+                                            option.registrationNumber +
+                                            '-' +
+                                            option.vehicle +
+                                            '-' +
+                                            option.supplierName
+                                          " (click)="getDriverID(option.driverID)">
+                                {{ option.driverName }} - {{ option.driverPhone }} -
+                                {{ option.registrationNumber }} - {{ option.vehicle }} -
+                                {{ option.supplierName }}
+                              </mat-option>
+                            </mat-autocomplete>
+                          </mat-form-field>
+                        </div>
+
+                        <div class="col-xl-2 col-lg-2 col-md-2 col-sm-12 mb-2">
+                          <!-- <mat-form-field appearance="outline" floatLabel="always" class="example-full-width">
+                                      <mat-label>Vendor Type</mat-label>
+                                      <mat-select [formControl]="vendorType">
+                                        <mat-option value="All">All</mat-option>
+                                        <mat-option value="Owned">Owned</mat-option>
+                                        <mat-option value="Supplier">Supplier</mat-option>
+                                      </mat-select>
+                                    </mat-form-field> -->
+                          <mat-form-field appearance="outline" floatLabel="always" class="example-full-width">
+                            <mat-label>Vendor Type</mat-label>
+                            <input type="text" matInput [matAutocomplete]="auto85" [formControl]="vendorType" />
+                            <mat-autocomplete #auto85="matAutocomplete" panelWidth="custom-autocomplete-panel">
+                              <mat-option *ngFor="let option of filteredVendorTypeOptions | async" [value]="
+                                            option.supplierType
+                                          ">
+                                {{ option.supplierType }}
+                              </mat-option>
+                            </mat-autocomplete>
+                          </mat-form-field>
+                        </div>
+
+                        <div class="col-xl-2 col-lg-2 col-md-2 col-sm-12 mb-2">
+                          <mat-form-field appearance="outline" floatLabel="always" class="example-full-width">
+                            <mat-label>Owned/Supplier</mat-label>
+                            <mat-select [formControl]="ownedSupplier">
+                              <mat-option value="All">All</mat-option>
+                              <mat-option value="Owned">Owned</mat-option>
+                              <mat-option value="Supplier">Supplier</mat-option>
+                            </mat-select>
+                          </mat-form-field>
+                        </div>
+
+                        <div class="col-xl-2 col-lg-2 col-md-2 col-sm-12 mb-2">
+                          <mat-form-field appearance="outline" floatLabel="always" class="example-full-width">
+                            <mat-label>Car</mat-label>
+                            <input type="text" matInput [matAutocomplete]="auto82" [formControl]="vehicle" />
+                            <mat-autocomplete #auto82="matAutocomplete" panelWidth="custom-autocomplete-panel">
+                              <mat-option *ngFor="let option of filteredVehicleOptions | async" [value]="option.vehicle">
+                                {{ option.vehicle }}
+                              </mat-option>
+                            </mat-autocomplete>
+                          </mat-form-field>
+                        </div>
+
+                        <div class="col-xl-2 col-lg-2 col-md-2 col-sm-12 mb-2">
+                          <mat-form-field appearance="outline" floatLabel="always" class="example-full-width">
+                            <mat-label>Associated/Unassociated</mat-label>
+                            <mat-select [formControl]="associatedUnassociated">
+                              <mat-option value="Associated">Associated</mat-option>
+                              <mat-option value="Unassociated">Unassociated</mat-option>
+                            </mat-select>
+                          </mat-form-field>
+                        </div>
+                        
+                      </div>
+
+                      <div class="row">
+                        <div class="col-xl-2 col-lg-2 col-md-2 col-sm-12 mb-2">
+                          <div class="col-xl-2 col-lg-2 col-md-2 col-sm-12 mb-2">
+                          <mat-progress-spinner *ngIf="isLoadingdata" mode="indeterminate" diameter="30" strokeWidth="4"></mat-progress-spinner>
+                        </div>
+                        </div>
+                        <div class="col-xl-2 col-lg-2 col-md-2 col-sm-12 mb-2"></div>
+                        <div class="col-xl-2 col-lg-2 col-md-2 col-sm-12 mb-2"></div>
+                        <div class="col-xl-2 col-lg-2 col-md-2 col-sm-12 mb-2"></div>
+                        <div class="col-xl-2 col-lg-2 col-md-2 col-sm-12 mb-2"></div>
+
+                        <div class="col-xl-2 col-lg-2 col-md-2 col-sm-12 mb-2">
+                          <div class="example-button-row" style="float: right;">
+                            <button mat-raised-button color="primary" (click)="SearchCarAndDriver()">Search</button>
+                          </div>
+                        </div>
+                      </div>
+                    </form>
+                  </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="container-fluid" *ngIf="driverInventoryAssociationDataSource && searchedType === 'Associated'">
+    <div class="row">
+      <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+        <div class="card" style="width: 100%">
+          <div class="body">
+            <div class="responsive_table">
+              <!-- Search Criteria Starts -->
+
+              <!-- <div class="row" style="padding: 10px">
+                 <div 
+                   class="badge col-cyan" 
+                   [ngClass]="{'selected-badge': selectedBadge.includes('Same Category')}"
+                   (click)="fetchSameCategoryVehicles(vendorType?.value, 0, monthlyTarget?.value, 'Same Category')"
+                   style="margin-left: 10px;"
+                 >
+                   Same Category
+                 </div>
+               
+                 <div 
+                   class="badge col-cyan" 
+                   [ngClass]="{'selected-badge': selectedBadge.includes('Owned Cars')}"
+                   (click)="fetchSameCategoryVehicles(vendorType?.value, 0, monthlyTarget?.value, 'Owned Cars')"
+                   style="margin-left: 10px;"
+                 >
+                   Owned Cars
+                 </div>
+               
+                 <div 
+                   class="badge col-cyan" 
+                   [ngClass]="{'selected-badge': selectedBadge.includes('Supplier Cars')}"
+                   (click)="fetchSameCategoryVehicles(vendorType?.value, 0, monthlyTarget?.value, 'Supplier Cars')"
+                   style="margin-left: 10px;"
+                 >
+                   Supplier Cars
+                 </div>
+               
+                 <div 
+                   class="badge col-cyan" 
+                   [ngClass]="{'selected-badge': selectedBadge.includes('0 Bookings')}"
+                   (click)="fetchSameCategoryVehicles(vendorType?.value, 0, monthlyTarget?.value, '0 Bookings')"
+                   style="margin-left: 10px;"
+                 >
+                   0 Bookings
+                 </div>
+               
+                 <div 
+                   class="badge col-cyan" 
+                   [ngClass]="{'selected-badge': selectedBadge.includes('Between 0 - 10')}"
+                   (click)="fetchSameCategoryVehicles(vendorType?.value, bookingCount?.value, 'between 0 - 10', 'Between 0 - 10')"
+                   style="margin-left: 10px;"
+                 >
+                   Between 0 - 10
+                 </div>
+               </div> -->
+
+              <!-- <div class="row">
+                 <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                   <div
+                     class="card"
+                     style="margin-bottom: 5px; margin-top: 20px"
+                   >
+                     <div>
+                       <div class="responsive_table">
+                         <div class="materialTableHeader">
+                           <div  class="row" style="display: flex; flex-wrap: wrap; gap: 10px; padding: 10px;">
+                            
+                               <div *ngIf="vendorType.value" style="float: left">
+                                 <b>Vendor Type</b>: {{ vendorType.value }},
+                               </div>
+                               <div *ngIf="category.value" style="float: left">
+                                 <b>Category</b>: {{ category.value }},
+                               </div>
+                               <div *ngIf="vehicle.value" style="float: left">
+                                 <b>Car</b>: {{ vehicle.value }},
+                               </div>
+                               <div
+                                 *ngIf="bookingCount.value"
+                                 style="float: left"
+                               >
+                                 <b>Booking</b>: {{ bookingCount.value }},
+                               </div>
+                               <div
+                                 *ngIf="monthlyTarget.value"
+                                 style="float: left"
+                               >
+                                 <b>Business Volume</b>:
+                                 {{ monthlyTarget.value }},
+                               </div>
+                               <div
+                                 *ngIf="otherCriteria.value"
+                                 style="float: left"
+                               >
+                                 <b>Other Criteria</b>:
+                                 {{ otherCriteria.value }},
+                               </div>
+                               <div *ngIf="supplier.value" style="float: left">
+                                 <b>Supplier</b>: {{ supplier.value }},
+                               </div>
+                               <div *ngIf="driver.value" style="float: left">
+                                 <b>Driver</b>: {{ driver.value }},
+                               </div>
+                               <div *ngIf="inventory.value" style="float: left">
+                                 <b>Reg.No.</b>: {{ inventory.value }}
+                               </div>
+                           </div>
+                         </div>
+                       </div>
+                     </div>
+                   </div>
+                 </div>
+               </div> -->
+
+              <!-- Search Criteria Ends    -->
+              <mat-accordion displayMode="flat" multi class="mat-table">
+                <section matSort class="mat-elevation-z2 mat-header-row custom-header">
+                  <!-- <span style="width:2px"></span> -->
+                  <span class="mat-header-cell" style="width:60px">
+                    <mat-checkbox color="primary" (change)="checkAll($event.checked)" [checked]="selectAll"
+                      matTooltip="Select All Driver" matTooltipPosition="above">
+                     All Associated
+                    </mat-checkbox>
+                  </span>
+                  <span class="mat-header-cell">
+                    <div class="col-xl-2 col-lg-2 col-md-2 col-sm-12 mb-2">
+                      <mat-progress-spinner *ngIf="isLoadingdata" mode="indeterminate" diameter="30" strokeWidth="4"></mat-progress-spinner>
+                    </div>
+                  </span>
+                  <span class="mat-header-cell">Location</span>
+                  <span class="mat-header-cell">Reg No</span>
+                  <span class="mat-header-cell">Vehicle</span>
+                  <span class="mat-header-cell">Driver</span>
+                  <span class="mat-header-cell">Ownership</span>
+                  <span class="mat-header-cel" style="margin-right: 20px;"><b>Previous Duty</b></span>
+                  <span class="mat-header-cell">On Going Duty</span>
+                  <span class="mat-header-cell">Future Duty</span>
+                  <!-- <span class="mat-header-cell">Rating</span>
+                  <span class="mat-header-cell">Monthly Business</span> -->
+                </section>
+
+                <mat-expansion-panel
+                  *ngFor="let data of driverInventoryAssociationDataSource;index as i"
+                  (opened)="GetDriverDutyData(driverInventoryAssociationDataSource[i].driverID,i)"
+                  [ngClass]="{ 'striped-header-odd': i % 2 !== 0, 'striped-header-even': i % 2 === 0 }">
+                  <mat-expansion-panel-header style="height: 60px;" class="mat-row" #panelH>
+                      <span class="mat-cell checkbox-container">
+                        <mat-checkbox color="primary" (click)="panelH._toggle()"
+                          (change)="onCheckBox($event.checked, data)" [checked]="data.checked"
+                          style="margin: 0;width:5px"></mat-checkbox>
+
+                      </span>
+                      <span class="mat-cell" style="
+                    font-size: 12px;
+                    color: rgb(140, 166, 231);
+                    font-style: italic;
+                  ">
+                        <b><button class="BoldButton" mat-button [matMenuTriggerFor]="menu1">
+                            Actions
+                          </button></b>
+                      </span>
+                      <!-- Menu for Actions -->
+                      <mat-menu #menu1="matMenu">
+                        <button mat-menu-item (click)="openAllotCarAndDriver(i,'Soft',reservationInfo[0].allotmentID)">
+                          Soft
+                        </button>
+                        <button mat-menu-item (click)="openAllotCarAndDriver(i,'Hard',reservationInfo[0].allotmentID)">
+                          Hard
+                        </button>
+                      </mat-menu>
+
+                      <span class="mat-cell" style="font-size: 12px;margin-left: -20px;">
+                        {{data.organizationalEntityName }}
+                        <!-- <strong>Location:</strong> {{ data.organizationalEntityName }} <br /> -->
+                        <!-- <strong>Reg No.:</strong> {{ data.inventoryName }} <br />
+                      <strong>Vehicle:</strong> {{ data.vehicle }} <br />
+                      <strong>Driver:</strong> {{ data.driverName }} <br />
+                      <strong>Driver Mobile:</strong> {{ data.phone }} <br />
+                      <strong>Veh. Ownership:</strong> {{ data.inventorySupplierType }} <br />
+                      <strong>Supplier Name:</strong> {{ data.supplierName }} -->
+                      </span>
+
+                      <span class="mat-cell" style="font-size: 12px;">
+                        {{ data.inventoryName }}
+                      </span>
+                      <span class="mat-cell" style="font-size: 12px;">
+
+                        {{ data.vehicle }}
+
+                      </span>
+                      <span class="mat-cell" style="font-size: 12px;">
+                        {{ data.driverName }}
+                      </span>
+                      <span class="mat-cell" style="font-size: 12px;">
+
+                        {{ data.inventorySupplierType }}
+
+                      </span>
+                      <span class="mat-cell" style="font-size: 12px;">
+                        <ng-container *ngIf="data?.previousDuty; else noData">
+                          <ng-container *ngIf="data.previousDuty.split('\n')[1] as pickupDate">
+                            <ng-container *ngIf="data.previousDuty.split('\n')[2] as pickupTime">
+                              {{ pickupDate | date : 'dd MMM yyyy' }}<br>{{ pickupTime }}
+                            </ng-container>
+                          </ng-container>
+                        </ng-container>
+
+                        <ng-template #noData>N/A</ng-template>
+                      </span>
+                      <span class="mat-cell" style="font-size: 12px;">
+                        <ng-container *ngIf="data?.currentDuty; else noData">
+                          <ng-container *ngIf="data.currentDuty.split('\n')[1] as pickupDate">
+                            <ng-container *ngIf="data.currentDuty.split('\n')[2] as pickupTime">
+                              {{ pickupDate | date : 'dd MMM yyyy' }}<br>{{ pickupTime}}
+                            </ng-container>
+                          </ng-container> </ng-container>
+                        <!-- <span *ngIf="data?.currentDuty; else noDataCurrent">{{ data.currentDuty }}</span> -->
+                        <ng-template #noDataCurrent>N/A</ng-template>
+                      </span>
+
+                      <span class="mat-cell" style="font-size: 12px;">
+                        <ng-container *ngIf="data?.futureDuty; else noData">
+                          <ng-container *ngIf="data.futureDuty.split('\n')[1] as pickupDate">
+                            <ng-container *ngIf="data.futureDuty.split('\n')[2] as pickupTime">
+                              {{ pickupDate | date : 'dd MMM yyyy' }}<br>{{ pickupTime}}
+                            </ng-container>
+                          </ng-container> </ng-container>
+                        <!-- <span *ngIf="data?.futureDuty; else noDataFuture">{{ data.futureDuty }}</span> -->
+                        <ng-template #noDataFuture>N/A</ng-template>
+                      </span>
+                      <!-- <span class="mat-cell" style="font-size: 12px;"> -->
+
+                        <!-- {{ data.driverAverage }} -->
+                        <!-- Phase 2
+
+
+                      </span> -->
+                      <!-- <span class="mat-cell" style="font-size: 12px;"> -->
+
+                        <!-- {{ data.achievementPercentage }} % -->
+                       <!--   Phase 2
+
+                       </span> -->
+
+                      <!-- <span class="mat-cell status-color">
+                      <b>Bookings</b><br />
+                      <span *ngIf="data?.bookingCount; else nobookingCount">
+                        {{ data.bookingCount }} %
+                      </span>
+                      <ng-template #nobookingCount>Data Not Found</ng-template>
+                      <br />
+                      <b>Business</b><br />
+                      <span *ngIf="data?.achievementPercentage; else noAchievement">
+                        {{ data.achievementPercentage }} %
+                      </span>
+                      <ng-template #noAchievement>Data Not Found</ng-template>
+
+                      <br /><br />
+                      <b>Feedback</b><br />
+                      <span *ngIf="data?.driverAverage; else noFeedback">
+                        {{ data.driverAverage }}
+                      </span>
+                      <ng-template #noFeedback>Data Not Found</ng-template>
+                      <br>
+                      <span style="color: red;">
+                        <b>{{ data.restrictedMessage }}</b>
+                      </span>
+                      <br>
+                      <span style="color: red;">
+                        <b>{{ data.carRestrictedMessage }}</b>
+                      </span>
+                    </span> -->
+                  
+                  </mat-expansion-panel-header>
+                  <div style="width: 100%; padding: 10px;">
+                    <mat-card class="full-width-card">
+                      <mat-card-content  class="full-card-content">
+                          <div class="row">
+                       <table class="driver-table">
+                                    <tbody>
+                                      <tr>
+                                        <!-- Driver Name -->
+                                        <td class="TDValueActions">
+                                          <b>Driver Name</b><br />
+                                          {{ data.driverName }}#{{ data.phone }}<br />
+                                          <span class="action-button">
+                                            <b>
+                                              <!-- <button class="BoldButton" mat-button (click)="AttachAnotherCar(i)">Attach another car</button> -->
+                                            </b><br />
+                                          </span>
+                                        </td>
+
+                                        <!-- Current Car -->
+                                        <td class="TDValueActions">
+                                          <b>Current Car</b><br />
+                                          {{ data.inventoryName }} ({{ data.vehicle }})<br />
+                                          <span class="action-button">
+                                            <b>
+                                              <button class="BoldButton" mat-button (click)="AttachAnotherDriver(i)">Attach another Driver</button>
+                                            </b><br />
+                                          </span>
+                                        </td>
+
+                                        <!-- Current Location -->
+                                        <td class="TDValueActions">
+                                          <b>Current Location</b><br />
+                                          {{ city }}, {{ province }}<br />
+                                          {{ country }}<br />
+                                        </td>
+
+                                        <!-- Feedback & Comments -->
+                                        <td class="TDValueActions">
+                                          <b>Feedback & Comments</b><br />
+                                          <span>Avg Rating : {{ driverAvg[i] || 'N/A' }}</span><br />
+                                          <span class="action-button">
+                                            <b>
+                                              <button class="BoldButton" mat-button (click)="DriverFeedbackInfo(i)">View Details</button>
+                                            </b><br />
+                                          </span>
+                                        </td>
+
+                                        <!-- Monthly Business -->
+                                        <!-- <td class="TDValueActions">
+                                          <b>Monthly Business</b><br />
+                                          <span>{{ data.achievementPercentage }} %</span><br /><br />
+                                        </td> -->
+                                      </tr>
+                                    </tbody>
+                                  </table>
+
+            <table class="driver-table">
+              <tbody>
+                <tr>
+                  <!-- Last Duty Before -->
+                  <td class="TDValueActions">
+                    <b>Last Duty Before {{ pickupDate | date: 'dd MMM yyyy' }}</b><br />
+                    <ng-container *ngIf="driverPreviousDutyData?.length > 0; else noDataBefore">
+                      <div *ngFor="let item of driverPreviousDutyData">
+                        Trip Not Started ({{ item.reservationID }} / {{ item.reservationGroupID }})<br />
+                        Pick up: {{ item.pickupTime | date:'shortTime' }} {{ item.pickupDate | date:'dd MMM yyyy' }}<br />
+                        {{ item.pickupAddressDetails }}, {{ item.pickupAddress }}<br />
+                        Drop Off: {{ item.dropOffTime | date:'shortTime' }} {{ item.dropOffDate | date:'dd MMM yyyy' }}<br />
+                        {{ item.dropOffAddress }}
+                      </div>
+                    </ng-container>
+                    <ng-template #noDataBefore>No Duty</ng-template>
+                     <div class="button-wrapper">
+                    <button mat-button class="smallDetachButton"
+                      (click)="DetachFromDuty(driverPreviousDutyData[0]?.allotmentID, driverPreviousDutyData[0]?.allotmentStatus)">
+                      Detach from Duty
+                    </button>
+                  </div>
+                  </td>
+
+                  <!-- Duty on -->
+                  <td class="TDValueActions">
+                    <b>Duty on {{ pickupDate | date: 'dd MMM yyyy' }}</b><br />
+                    <ng-container *ngIf="driverDutyData?.length > 0; else noDataCurrent">
+                      <div *ngFor="let item1 of driverDutyData">
+                        Status: {{ item1.allotmentStatus }}<br />
+                        Pick up: {{ item1.pickupTime | date:'shortTime' }} {{ item1.pickupDate | date:'dd MMM yyyy' }}<br />
+                        {{ item1.pickupAddressDetails }}, {{ item1.pickupAddress }}<br />
+                        Drop Off: {{ item1.dropOffTime | date:'shortTime' }} {{ item1.dropOffDate | date:'dd MMM yyyy' }}<br />
+                        {{ item1.dropOffAddress }}
+                      </div>
+                    </ng-container>
+                    <ng-template #noDataCurrent>No Duty</ng-template>
+                        <div class="button-wrapper no-margin">
+          <button mat-button class="smallDetachButton"
+            (click)="DetachFromDuty(driverDutyData[0]?.allotmentID, driverDutyData[0]?.allotmentStatus)">
+            Detach from Duty
+          </button>
+        </div>
+                  </td>
+
+                  <!-- First Duty After -->
+                      <td class="TDValueActions">
+                        <b>First Duty After {{ pickupDate | date: 'dd MMM yyyy' }}</b><br />
+                        <ng-container *ngIf="driverNextDutyData?.length > 0; else noDataAfter">
+                          <div *ngFor="let item2 of driverNextDutyData">
+                            Trip Not Started ({{ item2.reservationID }} / {{ item2.reservationGroupID }})<br />
+                            Pick up: {{ item2.pickupTime | date:'shortTime' }} {{ item2.pickupDate | date:'dd MMM yyyy' }}<br />
+                            {{ item2.pickupAddressDetails }}, {{ item2.pickupAddress }}<br />
+                            Drop Off: {{ item2.dropOffTime | date:'shortTime' }} {{ item2.dropOffDate | date:'dd MMM yyyy' }}<br />
+                            {{ item2.dropOffAddress }}
+                          </div>
+                        </ng-container>
+                        <ng-template #noDataAfter>No Duty</ng-template>
+
+                        <div class="button-wrapper">
+                  <button mat-button class="smallDetachButton"
+                    (click)="DetachFromDuty(driverNextDutyData[0]?.allotmentID, driverNextDutyData[0]?.allotmentStatus)">
+                    Detach from Duty
+                  </button>
+                </div>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+
+                            <table class="col-lg-12 col-md-12 col-sm-12 col-xs-6">
+                              <tbody>
+                                <tr class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                                  <td class="TDValueActions col-lg-2 col-md-2 col-sm-2 col-xs-2">
+                                    <button type="button" class="btn btn-primary"
+                                      (click)="openAllotCarAndDriver(i,'Soft',reservationInfo[0].allotmentID)">
+                                      Allot Car & Driver(Soft)
+                                    </button>
+                                  </td>
+
+                                  <td class="TDValueActions col-lg-2 col-md-2 col-sm-2 col-xs-2">
+                                    <button type="button" class="btn btn-primary"
+                                      (click)="openAllotCarAndDriver(i,'Hard',reservationInfo[0].allotmentID)">
+                                      Allot Car & Driver(Hard)
+                                    </button>
+                                  </td>
+                                  <!-- <td
+                                    class="TDValueActions col-lg-2 col-md-2 col-sm-2 col-xs-2"
+                                  >
+                                    <button
+                                      type="button"
+                                      class="btn btn-primary"
+                                      (click)="opencarWithDriver(i)"
+                                      [disabled]="isDisabled"
+                                    >
+                                      Allot Car with other Driver
+                                    </button>
+                                  </td> -->
+                                  <!-- <td
+                                    class="TDValueActions col-lg-2 col-md-2 col-sm-2 col-xs-2"
+                                  >
+                                    <button
+                                      type="button"
+                                      class="btn btn-primary"
+                                      (click)="openDriverWithCar(i)"
+                                      [disabled]="isDisabled"
+                                    >
+                                      Allot Driver with other Car
+                                    </button>
+                                  </td> -->
+                                </tr>
+                              </tbody>
+                            </table>
+                          </div>
+                      </mat-card-content>
+                    </mat-card>
+                  </div>
+                </mat-expansion-panel>
+              </mat-accordion>
+
+              <mat-progress-bar mode="indeterminate" *ngIf="isLoading"></mat-progress-bar>
+              <mat-paginator #paginator [length]="totalData" [pageSize]="recordsPerPage" (page)="onChangedPage($event)"
+                showFirstLastButtons></mat-paginator>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <br>
+
+  <div class="container-fluid" *ngIf="inventoryUnassociatedDataSource && searchedType === 'Unassociated'">
+    <div class="row">
+      <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+        <div class="card" style="width: 100%">
+          <div class="body">
+            <div class="responsive_table">
+              <!-- Search Criteria Starts -->
+
+              <!-- <div class="row" style="padding: 10px">
+                 <div 
+                   class="badge col-cyan" 
+                   [ngClass]="{'selected-badge': selectedBadge.includes('Same Category')}"
+                   (click)="fetchSameCategoryVehicles(vendorType?.value, 0, monthlyTarget?.value, 'Same Category')"
+                   style="margin-left: 10px;"
+                 >
+                   Same Category
+                 </div>
+               
+                 <div 
+                   class="badge col-cyan" 
+                   [ngClass]="{'selected-badge': selectedBadge.includes('Owned Cars')}"
+                   (click)="fetchSameCategoryVehicles(vendorType?.value, 0, monthlyTarget?.value, 'Owned Cars')"
+                   style="margin-left: 10px;"
+                 >
+                   Owned Cars
+                 </div>
+               
+                 <div 
+                   class="badge col-cyan" 
+                   [ngClass]="{'selected-badge': selectedBadge.includes('Supplier Cars')}"
+                   (click)="fetchSameCategoryVehicles(vendorType?.value, 0, monthlyTarget?.value, 'Supplier Cars')"
+                   style="margin-left: 10px;"
+                 >
+                   Supplier Cars
+                 </div>
+               
+                 <div 
+                   class="badge col-cyan" 
+                   [ngClass]="{'selected-badge': selectedBadge.includes('0 Bookings')}"
+                   (click)="fetchSameCategoryVehicles(vendorType?.value, 0, monthlyTarget?.value, '0 Bookings')"
+                   style="margin-left: 10px;"
+                 >
+                   0 Bookings
+                 </div>
+               
+                 <div 
+                   class="badge col-cyan" 
+                   [ngClass]="{'selected-badge': selectedBadge.includes('Between 0 - 10')}"
+                   (click)="fetchSameCategoryVehicles(vendorType?.value, bookingCount?.value, 'between 0 - 10', 'Between 0 - 10')"
+                   style="margin-left: 10px;"
+                 >
+                   Between 0 - 10
+                 </div>
+               </div> -->
+
+              <!-- <div class="row">
+                 <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                   <div
+                     class="card"
+                     style="margin-bottom: 5px; margin-top: 20px"
+                   >
+                     <div>
+                       <div class="responsive_table">
+                         <div class="materialTableHeader">
+                           <div  class="row" style="display: flex; flex-wrap: wrap; gap: 10px; padding: 10px;">
+                            
+                               <div *ngIf="vendorType.value" style="float: left">
+                                 <b>Vendor Type</b>: {{ vendorType.value }},
+                               </div>
+                               <div *ngIf="category.value" style="float: left">
+                                 <b>Category</b>: {{ category.value }},
+                               </div>
+                               <div *ngIf="vehicle.value" style="float: left">
+                                 <b>Car</b>: {{ vehicle.value }},
+                               </div>
+                               <div
+                                 *ngIf="bookingCount.value"
+                                 style="float: left"
+                               >
+                                 <b>Booking</b>: {{ bookingCount.value }},
+                               </div>
+                               <div
+                                 *ngIf="monthlyTarget.value"
+                                 style="float: left"
+                               >
+                                 <b>Business Volume</b>:
+                                 {{ monthlyTarget.value }},
+                               </div>
+                               <div
+                                 *ngIf="otherCriteria.value"
+                                 style="float: left"
+                               >
+                                 <b>Other Criteria</b>:
+                                 {{ otherCriteria.value }},
+                               </div>
+                               <div *ngIf="supplier.value" style="float: left">
+                                 <b>Supplier</b>: {{ supplier.value }},
+                               </div>
+                               <div *ngIf="driver.value" style="float: left">
+                                 <b>Driver</b>: {{ driver.value }},
+                               </div>
+                               <div *ngIf="inventory.value" style="float: left">
+                                 <b>Reg.No.</b>: {{ inventory.value }}
+                               </div>
+                           </div>
+                         </div>
+                       </div>
+                     </div>
+                   </div>
+                 </div>
+               </div> -->
+
+
+              <mat-accordion displayMode="flat" multi class="mat-table">
+                <section matSort class="mat-elevation-z2 mat-header-row custom-header">
+                  <!-- <span style="width:2px"></span> -->
+                  <span class="mat-header-cell" style="width:60px">
+                    <mat-checkbox color="primary" (change)="checkAll($event.checked)" [checked]="selectAll"
+                      matTooltip="Select All Driver" matTooltipPosition="above">
+                     All Unassociated
+                    </mat-checkbox>
+                  </span>
+                  <span class="mat-header-cell">
+                    <div class="col-xl-2 col-lg-2 col-md-2 col-sm-12 mb-2">
+                      <mat-progress-spinner *ngIf="isLoadingdata" mode="indeterminate" diameter="30" strokeWidth="4"></mat-progress-spinner>
+                    </div>
+                  </span>
+                  <span class="mat-header-cell">Location</span>
+                  <span class="mat-header-cell">Reg No</span>
+                  <span class="mat-header-cell">Vehicle</span>
+                  <span class="mat-header-cell">Driver</span>
+                  <span class="mat-header-cell">Ownership</span>
+                  <span class="mat-header-cel" style="margin-right: 20px;"><b>Previous Duty</b></span>
+                  <span class="mat-header-cell">On Going Duty</span>
+                  <span class="mat-header-cell">Future Duty</span>
+                  <!-- <span class="mat-header-cell">Rating</span>
+                  <span class="mat-header-cell">Monthly Business</span> -->
+                </section>
+
+                <mat-expansion-panel
+                  *ngFor="let data of inventoryUnassociatedDataSource;index as i"
+                  (opened)="GetDriverDutyData(inventoryUnassociatedDataSource[i].driverID,i)"
+                  [ngClass]="{ 'striped-header-odd': i % 2 !== 0, 'striped-header-even': i % 2 === 0 }">
+                  <mat-expansion-panel-header style="height: 60px;" class="mat-row" #panelH>
+                      <span class="mat-cell checkbox-container">
+                        <mat-checkbox color="primary" (click)="panelH._toggle()"
+                          (change)="onCheckBox($event.checked, data)" [checked]="data.checked"
+                          style="margin: 0;width:5px"></mat-checkbox>
+
+                      </span>
+                      <span class="mat-cell" style="
+                    font-size: 12px;
+                    color: rgb(140, 166, 231);
+                    font-style: italic;
+                  ">
+                        
+                      </span>
+
+                      <span class="mat-cell" style="font-size: 12px;margin-left: -20px;">
+                        {{data.organizationalEntityName }}
+                        <!-- <strong>Location:</strong> {{ data.organizationalEntityName }} <br /> -->
+                        <!-- <strong>Reg No.:</strong> {{ data.inventoryName }} <br />
+                      <strong>Vehicle:</strong> {{ data.vehicle }} <br />
+                      <strong>Driver:</strong> {{ data.driverName }} <br />
+                      <strong>Driver Mobile:</strong> {{ data.phone }} <br />
+                      <strong>Veh. Ownership:</strong> {{ data.inventorySupplierType }} <br />
+                      <strong>Supplier Name:</strong> {{ data.supplierName }} -->
+                      </span>
+
+                      <span class="mat-cell" style="font-size: 12px;">
+                        {{ data.inventoryName }}
+                      </span>
+                      <span class="mat-cell" style="font-size: 12px;">
+
+                        {{ data.vehicle }}
+
+                      </span>
+                      <span class="mat-cell" style="font-size: 12px;">
+                        {{ data.driverName }}
+                      </span>
+                      <span class="mat-cell" style="font-size: 12px;">
+
+                        {{ data.inventorySupplierType }}
+
+                      </span>
+                      <span class="mat-cell" style="font-size: 12px;">
+                        <ng-container *ngIf="data?.previousDuty; else noData">
+                          <ng-container *ngIf="data.previousDuty.split('\n')[1] as pickupDate">
+                            <ng-container *ngIf="data.previousDuty.split('\n')[2] as pickupTime">
+                              {{ pickupDate | date : 'dd MMM yyyy' }}<br>{{ pickupTime }}
+                            </ng-container>
+                          </ng-container>
+                        </ng-container>
+
+                        <ng-template #noData>N/A</ng-template>
+                      </span>
+                      <span class="mat-cell" style="font-size: 12px;">
+                        <ng-container *ngIf="data?.currentDuty; else noData">
+                          <ng-container *ngIf="data.currentDuty.split('\n')[1] as pickupDate">
+                            <ng-container *ngIf="data.currentDuty.split('\n')[2] as pickupTime">
+                              {{ pickupDate | date : 'dd MMM yyyy' }}<br>{{ pickupTime}}
+                            </ng-container>
+                          </ng-container> </ng-container>
+                        <!-- <span *ngIf="data?.currentDuty; else noDataCurrent">{{ data.currentDuty }}</span> -->
+                        <ng-template #noDataCurrent>N/A</ng-template>
+                      </span>
+
+                      <span class="mat-cell" style="font-size: 12px;">
+                        <ng-container *ngIf="data?.futureDuty; else noData">
+                          <ng-container *ngIf="data.futureDuty.split('\n')[1] as pickupDate">
+                            <ng-container *ngIf="data.futureDuty.split('\n')[2] as pickupTime">
+                              {{ pickupDate | date : 'dd MMM yyyy' }}<br>{{ pickupTime}}
+                            </ng-container>
+                          </ng-container> </ng-container>
+                        <!-- <span *ngIf="data?.futureDuty; else noDataFuture">{{ data.futureDuty }}</span> -->
+                        <ng-template #noDataFuture>N/A</ng-template>
+                      </span>
+
+                      <!-- <span class="mat-cell status-color">
+                      <b>Bookings</b><br />
+                      <span *ngIf="data?.bookingCount; else nobookingCount">
+                        {{ data.bookingCount }} %
+                      </span>
+                      <ng-template #nobookingCount>Data Not Found</ng-template>
+                      <br />
+                      <b>Business</b><br />
+                      <span *ngIf="data?.achievementPercentage; else noAchievement">
+                        {{ data.achievementPercentage }} %
+                      </span>
+                      <ng-template #noAchievement>Data Not Found</ng-template>
+
+                      <br /><br />
+                      <b>Feedback</b><br />
+                      <span *ngIf="data?.driverAverage; else noFeedback">
+                        {{ data.driverAverage }}
+                      </span>
+                      <ng-template #noFeedback>Data Not Found</ng-template>
+                      <br>
+                      <span style="color: red;">
+                        <b>{{ data.restrictedMessage }}</b>
+                      </span>
+                      <br>
+                      <span style="color: red;">
+                        <b>{{ data.carRestrictedMessage }}</b>
+                      </span>
+                    </span> -->
+                  
+                  </mat-expansion-panel-header>
+                  <div style="width: 100%; padding: 10px;">
+                    <mat-card class="full-width-card">
+                      <mat-card-content  class="full-card-content">
+                          <div class="row">
+                       <table class="driver-table">
+                                    <tbody>
+                                      <tr>
+                                        <!-- Driver Name -->
+                                        <td class="TDValueActions">
+                                          <b>Driver Name</b><br />
+                                          {{ data.driverName }}#{{ data.phone }}<br />
+                                          <span class="action-button">
+                                            <b>
+                                              <!-- <button class="BoldButton" mat-button (click)="AttachAnotherCar(i)">Attach another car</button> -->
+                                            </b><br />
+                                          </span>
+                                        </td>
+
+                                        <!-- Current Car -->
+                                        <td class="TDValueActions">
+                                          <b>Current Car</b><br />
+                                          {{ data.inventoryName }} ({{ data.vehicle }})<br />
+                                          <span class="action-button">
+                                            <b>
+                                              <button class="BoldButton" mat-button (click)="AttachAnotherDriverForUnassoicated(i)">Attach another Driver</button>
+                                            </b><br />
+                                          </span>
+                                        </td>
+
+                                        <!-- Current Location -->
+                                        <td class="TDValueActions">
+                                          <b>Current Location</b><br />
+                                          {{ city }}, {{ province }}<br />
+                                          {{ country }}<br />
+                                        </td>
+
+                                        <!-- Feedback & Comments -->
+                                        <td class="TDValueActions">
+                                          <b>Feedback & Comments</b><br />
+                                          <span>Avg Rating : {{ driverAvg[i] || 'N/A' }}</span><br />
+                                          <span class="action-button">
+                                            <b>
+                                              <button class="BoldButton" mat-button (click)="DriverFeedbackInfo(i)">View Details</button>
+                                            </b><br />
+                                          </span>
+                                        </td>
+
+                                        <!-- Monthly Business -->
+                                        <!-- <td class="TDValueActions">
+                                          <b>Monthly Business</b><br />
+                                          <span>{{ data.achievementPercentage }} %</span><br /><br />
+                                        </td> -->
+                                      </tr>
+                                    </tbody>
+                                  </table>
+
+            <table class="driver-table">
+              <tbody>
+                <tr>
+                  <!-- Last Duty Before -->
+                  <td class="TDValueActions">
+                    <b>Last Duty Before {{ pickupDate | date: 'dd MMM yyyy' }}</b><br />
+                    <ng-container *ngIf="driverPreviousDutyData?.length > 0; else noDataBefore">
+                      <div *ngFor="let item of driverPreviousDutyData">
+                        Trip Not Started ({{ item.reservationID }} / {{ item.reservationGroupID }})<br />
+                        Pick up: {{ item.pickupTime | date:'shortTime' }} {{ item.pickupDate | date:'dd MMM yyyy' }}<br />
+                        {{ item.pickupAddressDetails }}, {{ item.pickupAddress }}<br />
+                        Drop Off: {{ item.dropOffTime | date:'shortTime' }} {{ item.dropOffDate | date:'dd MMM yyyy' }}<br />
+                        {{ item.dropOffAddress }}
+                      </div>
+                    </ng-container>
+                    <ng-template #noDataBefore>No Duty</ng-template>
+                     <div class="button-wrapper">
+                    <button mat-button class="smallDetachButton"
+                      (click)="DetachFromDuty(driverPreviousDutyData[0]?.allotmentID, driverPreviousDutyData[0]?.allotmentStatus)">
+                      Detach from Duty
+                    </button>
+                  </div>
+                  </td>
+
+                  <!-- Duty on -->
+                  <td class="TDValueActions">
+                    <b>Duty on {{ pickupDate | date: 'dd MMM yyyy' }}</b><br />
+                    <ng-container *ngIf="driverDutyData?.length > 0; else noDataCurrent">
+                      <div *ngFor="let item1 of driverDutyData">
+                        Status: {{ item1.allotmentStatus }}<br />
+                        Pick up: {{ item1.pickupTime | date:'shortTime' }} {{ item1.pickupDate | date:'dd MMM yyyy' }}<br />
+                        {{ item1.pickupAddressDetails }}, {{ item1.pickupAddress }}<br />
+                        Drop Off: {{ item1.dropOffTime | date:'shortTime' }} {{ item1.dropOffDate | date:'dd MMM yyyy' }}<br />
+                        {{ item1.dropOffAddress }}
+                      </div>
+                    </ng-container>
+                    <ng-template #noDataCurrent>No Duty</ng-template>
+                        <div class="button-wrapper no-margin">
+          <button mat-button class="smallDetachButton"
+            (click)="DetachFromDuty(driverDutyData[0]?.allotmentID, driverDutyData[0]?.allotmentStatus)">
+            Detach from Duty
+          </button>
+        </div>
+                  </td>
+
+                  <!-- First Duty After -->
+                      <td class="TDValueActions">
+                        <b>First Duty After {{ pickupDate | date: 'dd MMM yyyy' }}</b><br />
+                        <ng-container *ngIf="driverNextDutyData?.length > 0; else noDataAfter">
+                          <div *ngFor="let item2 of driverNextDutyData">
+                            Trip Not Started ({{ item2.reservationID }} / {{ item2.reservationGroupID }})<br />
+                            Pick up: {{ item2.pickupTime | date:'shortTime' }} {{ item2.pickupDate | date:'dd MMM yyyy' }}<br />
+                            {{ item2.pickupAddressDetails }}, {{ item2.pickupAddress }}<br />
+                            Drop Off: {{ item2.dropOffTime | date:'shortTime' }} {{ item2.dropOffDate | date:'dd MMM yyyy' }}<br />
+                            {{ item2.dropOffAddress }}
+                          </div>
+                        </ng-container>
+                        <ng-template #noDataAfter>No Duty</ng-template>
+
+                        <div class="button-wrapper">
+                  <button mat-button class="smallDetachButton"
+                    (click)="DetachFromDuty(driverNextDutyData[0]?.allotmentID, driverNextDutyData[0]?.allotmentStatus)">
+                    Detach from Duty
+                  </button>
+                </div>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+
+                            
+                          </div>
+                      </mat-card-content>
+                    </mat-card>
+                  </div>
+                </mat-expansion-panel>
+              </mat-accordion>
+
+              <mat-progress-bar mode="indeterminate" *ngIf="isLoading"></mat-progress-bar>
+              <mat-paginator #paginator [length]="totalData" [pageSize]="recordsPerPage" (page)="onChangedPage($event)"
+                showFirstLastButtons></mat-paginator>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <br>
+
+</section>
+
+<!--------------------------------Search Driver By Location---------------------->
+<div class="modal fade" id="exampleModalCenter" tabindex="-1" role="dialog">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header" style="height: 40px">
+        <h5 class="modal-title" id="exampleModalLongTitle">
+          Search Driver By Location
+        </h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <div class="row">
+          <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+            <mat-radio-button color="primary" [checked]="true" [(ngModel)]="selected" (click)="updateSelected()"
+              value="pickup">Pickup Address</mat-radio-button>
+            <!-- <input type="radio" [checked]="true" name="heading" value="pickup"> -->
+          </div>
+          <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+            <mat-radio-button color="primary" (click)="updateSelectedOption()" value="other">Other</mat-radio-button>
+            <!-- <input type="radio" name="heading" value="other"> -->
+          </div>
+          <!-- <div class="col-xl-5 col-lg-5 col-md-6 col-sm-12 mb-2">
+               <mat-form-field class="example-full-width" appearance="outline" floatLabel="always"> 
+                   <mat-label>Driver</mat-label>                       
+                   <input  type="text" matInput [matAutocomplete]="auto" [formControl]="driver">
+                   <mat-autocomplete #auto="matAutocomplete">
+                       <mat-option *ngFor="let option of filteredOptions | async"  [value]="option.driverName"
+                       (click)="getDriverID(option.driverID)">
+                           {{option.driverName}}
+                       </mat-option>
+                   </mat-autocomplete>
+               </mat-form-field>
+         </div> -->
+        </div>
+        <div class="row" style="margin-top: 5px">
+          <div class="col-xl-12 col-lg-6 col-md-12 col-sm-12 mb-2" *ngIf="selectedOption">
+            <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+              <mat-label>Address</mat-label>
+              <input placeholder="Address String" matInput [(ngModel)]="locationString" ngx-google-places-autocomplete
+                [options]="options" [disabled]="selected === 'pickup'" (onAddressChange)="AddressChange($event)" />
+            </mat-form-field>
+          </div>
+          <div class="col-xl-12 col-lg-6 col-md-12 col-sm-12 mb-2" *ngIf="selectedOptions">
+            <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+              <mat-label>Address</mat-label>
+              <input placeholder="Address String" matInput [(ngModel)]="locationString" ngx-google-places-autocomplete
+                [options]="options" (onAddressChange)="AddressChange($event)" />
+            </mat-form-field>
+          </div>
+        </div>
+
+        <div class="row" *ngIf="hideLatLong">
+          <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+            <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+              <mat-label>Latitude</mat-label>
+              <input matInput [(ngModel)]="latitude" readonly />
+            </mat-form-field>
+          </div>
+          <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+            <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+              <mat-label>Longitude</mat-label>
+              <input matInput [(ngModel)]="longitude" readonly />
+            </mat-form-field>
+          </div>
+        </div>
+
+        <div class="row">
+          <div class="col-xl-6 col-lg-6 col-md-6 col-sm-6 mb-2">
+            <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+              <mat-label>Date</mat-label>
+              <input matInput [matDatepicker]="fromDate" [(ngModel)]="eTRAvailabilityDate" />
+              <mat-datepicker-toggle matSuffix [for]="fromDate"></mat-datepicker-toggle>
+              <mat-datepicker #fromDate></mat-datepicker>
+            </mat-form-field>
+          </div>
+          <div class="col-xl-6 col-lg-6 col-md-6 col-sm-6 mb-2">
+            <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+              <mat-label>Time</mat-label>
+              <input matInput [owlDateTimeTrigger]="time1" [owlDateTime]="time1" [(ngModel)]="eTRAvailabilityTime"
+                (ngModelChange)="locationTimeSet($event)" />
+              <mat-icon matSuffix [owlDateTimeTrigger]="time1" class="date-icon">schedule</mat-icon>
+              <owl-date-time [pickerType]="'timer'" #time1></owl-date-time>
+            </mat-form-field>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button mat-raised-button color="primary" (click)="SearchData()" data-dismiss="modal">
+          Search
+        </button>
+        <!-- <button mat-raised-button color="primary" *ngIf="selectedOption" (click)="SearchData()"
+           data-dismiss="modal">Searchh</button> -->
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal fade" id="searchCarsModal" tabindex="-1" role="dialog">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header" style="height: 40px">
+        <h5 class="modal-title" id="exampleModalLongTitle" style="margin-left: 25px">
+          Search Car And Driver
+        </h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <div class="row">
+          <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+            <mat-form-field appearance="outline" floatLabel="always" class="example-full-width">
+              <mat-label>Vendor Type</mat-label>
+              <input type="text" matInput [matAutocomplete]="auto35" [formControl]="vendorType" />
+                        <mat-autocomplete #auto35="matAutocomplete" panelWidth="custom-autocomplete-panel">
+                <mat-option *ngFor="let option of filteredVendorTypeOptions | async" [value]="
+                      option.supplierType
+                    ">
+                  {{ option.supplierType }}
+                </mat-option>
+              </mat-autocomplete>
+            </mat-form-field>
+          </div>
+          <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+            <!-- <mat-form-field appearance="outline" floatLabel="always">
+                       <mat-label>Car Category</mat-label>
+                             <mat-select multiple>
+                                 <mat-option value="yettostart">Same Category</mat-option>
+                                 <mat-option value="yettostart">Next Category</mat-option>
+                                 <mat-option value="yettostart">Hatch Back</mat-option>
+                                 <mat-option value="yettostart">Economy 1</mat-option>
+                                 <mat-option value="yettostart">Economy 2</mat-option>
+                                 <mat-option value="yettostart">Sedan</mat-option>
+                                 <mat-option value="yettostart">Crossover</mat-option>
+                                 <mat-option value="yettostart">MUV</mat-option>
+                                 <mat-option value="yettostart">SUV</mat-option>
+                                 <mat-option value="yettostart">Luxury</mat-option>
+                             </mat-select>
+                     </mat-form-field> -->
+            <mat-form-field appearance="outline" floatLabel="always" class="example-full-width">
+              <mat-label>Car Category</mat-label>
+              <input type="text" matInput [formControl]="category" [matAutocomplete]="auto9"
+                (keyup)="onVehicleAutoCompleteChange($event)" />
+              <mat-autocomplete #auto9="matAutocomplete">
+                <mat-option *ngFor="let option of filteredVehicleCategoryOptions | async"
+                  [value]="option.vehicleCategory" (click)="getVehicleCategoryID(option.vehicleCategoryID)">
+                  {{ option.vehicleCategory }}
+                </mat-option>
+              </mat-autocomplete>
+            </mat-form-field>
+          </div>
+        </div>
+
+        <div class="row">
+          <div class="col-xl-6 col-lg-6 col-md-6 col-sm-6 mb-2">
+            <!-- <mat-form-field appearance="outline" floatLabel="always">
+                       <mat-label>Car</mat-label>
+                             <mat-select multiple>
+                                 <mat-option value="yettostart">Suzuki Alto</mat-option>
+                                 <mat-option value="yettostart">Suzuki Wagon R</mat-option>
+                                 <mat-option value="yettostart">Suzuki Swift</mat-option>
+                                 <mat-option value="yettostart">Honda City</mat-option>
+                                 <mat-option value="yettostart">Innova Crysta</mat-option>
+                                 <mat-option value="yettostart">Fortuner</mat-option>
+                                 <mat-option value="yettostart">Endeavour</mat-option>
+                                 <mat-option value="yettostart">Mahindra TUV</mat-option>
+                                 <mat-option value="yettostart">Toyota Corrola</mat-option>
+                                 <mat-option value="yettostart">Kia Carnival</mat-option>
+                             </mat-select>
+                     </mat-form-field> -->
+            <mat-form-field appearance="outline" floatLabel="always" class="example-full-width">
+              <mat-label>Car</mat-label>
+              <input type="text" matInput [matAutocomplete]="auto1" [formControl]="vehicle" />
+              <mat-autocomplete #auto1="matAutocomplete">
+                <mat-option *ngFor="let option of filteredVehicleOptions | async" [value]="option.vehicle">
+                  {{ option.vehicle }}
+                </mat-option>
+              </mat-autocomplete>
+            </mat-form-field>
+          </div>
+          <div class="col-xl-6 col-lg-6 col-md-6 col-sm-6 mb-2">
+            <mat-form-field appearance="outline" floatLabel="always">
+              <mat-label>Bookings</mat-label>
+              <mat-select [formControl]="bookingCount">
+                <mat-option value="0">0 Bookings</mat-option>
+                <mat-option value="1">1 Booking</mat-option>
+                <mat-option value="2">2 Bookings</mat-option>
+                <mat-option value="3">3 Booking</mat-option>
+                <mat-option value="Freein4Hours">Free in 4 Hours</mat-option>
+                <mat-option value="Freein8Hours">Free in 8 Hours</mat-option>
+              </mat-select>
+            </mat-form-field>
+          </div>
+        </div>
+
+        <div class="row">
+          <div class="col-xl-6 col-lg-6 col-md-6 col-sm-6 mb-2">
+            <mat-form-field appearance="outline" floatLabel="always">
+              <mat-label>Business Volume</mat-label>
+              <!-- <mat-select multiple> -->
+              <mat-select [formControl]="monthlyTarget">
+                <mat-option value="between 0 - 10">Monthly business between 0 - 10%</mat-option>
+                <mat-option value="between 11 - 20">Monthly business between 11% - 20%</mat-option>
+                <mat-option value="between 21 - 30">Monthly business between 21% - 30%</mat-option>
+                <mat-option value="between 31 - 40">Monthly business between 31% - 40%</mat-option>
+                <mat-option value="between 41 - 50">Monthly business between 41% - 50%</mat-option>
+                <mat-option value="between 51 - 60">Monthly business between 51% - 60%</mat-option>
+                <mat-option value="between 61 - 70">Monthly business between 61% - 70%</mat-option>
+                <mat-option value="between 71 - 80">Monthly business between 71% - 80%</mat-option>
+                <mat-option value="between 81 - 90">Monthly business between 81% - 90%</mat-option>
+                <mat-option value="between 91 - 100">Monthly business between 91% - 100%</mat-option>
+                <mat-option value="less than 10">Monthly business less than 10%</mat-option>
+                <mat-option value="less than 20">Monthly business less than 20%</mat-option>
+                <mat-option value="less than 30">Monthly business less than 30%</mat-option>
+                <mat-option value="less than 40">Monthly business less than 40%</mat-option>
+                <mat-option value="less than 50">Monthly business less than 50%</mat-option>
+                <mat-option value="less than 60">Monthly business less than 60%</mat-option>
+                <mat-option value="less than 70">Monthly business less than 70%</mat-option>
+                <mat-option value="less than 80">Monthly business less than 80%</mat-option>
+                <mat-option value="less than 90">Monthly business less than 90%</mat-option>
+                <mat-option value="less than 100">Monthly business less than 100%</mat-option>
+                <mat-option value="more than 10">Monthly business more than 10%</mat-option>
+                <mat-option value="more than 20">Monthly business more than 20%</mat-option>
+                <mat-option value="more than 30">Monthly business more than 30%</mat-option>
+                <mat-option value="more than 40">Monthly business more than 40%</mat-option>
+                <mat-option value="more than 50">Monthly business more than 50%</mat-option>
+                <mat-option value="more than 60">Monthly business more than 60%</mat-option>
+                <mat-option value="more than 70">Monthly business more than 70%</mat-option>
+                <mat-option value="more than 80">Monthly business more than 80%</mat-option>
+                <mat-option value="more than 90">Monthly business more than 90%</mat-option>
+                <mat-option value="more than 100">Monthly business more than 100%</mat-option>
+              </mat-select>
+            </mat-form-field>
+          </div>
+
+          <div class="col-xl-6 col-lg-6 col-md-6 col-sm-6 mb-2">
+            <mat-form-field appearance="outline" floatLabel="always">
+              <mat-label>Other Criteria</mat-label>
+              <mat-select [formControl]="otherCriteria">
+                <mat-option value="PickupLocation">Currently Near Pickup Location</mat-option>
+                <mat-option value="Online">Online on App</mat-option>
+                <mat-option value="Offline">Offline on App</mat-option>
+                <mat-option value="Present">Present Drivers </mat-option>
+                <mat-option value="Absent">Absent Drivers</mat-option>
+              </mat-select>
+            </mat-form-field>
+          </div>
+        </div>
+
+        <div class="row">
+          <div class="col-xl-6 col-lg-5 col-md-6 col-sm-12 mb-2">
+            <mat-form-field appearance="outline" floatLabel="always" class="example-full-width">
+              <mat-label>Supplier</mat-label>
+              <input type="text" matInput [formControl]="supplier" [matAutocomplete]="auto4"
+                (keyup)="onAutoCompleteChange($event)" />
+              <mat-autocomplete #auto4="matAutocomplete">
+                <mat-option *ngFor="let option of filteredSupplierOptions | async" [value]="option.supplierName"
+                  (click)="getSupplierID(option.supplierID)">
+                  {{ option.supplierName }}
+                </mat-option>
+              </mat-autocomplete>
+            </mat-form-field>
+          </div>
+          <div class="col-xl-6 col-lg-5 col-md-6 col-sm-12 mb-2">
+            <mat-form-field appearance="outline" floatLabel="always" class="example-full-width">
+              <mat-label>Driver</mat-label>
+              <input type="text" matInput [matAutocomplete]="auto" [formControl]="driver" />
+              <mat-autocomplete #auto="matAutocomplete">
+                <mat-option *ngFor="let option of filteredOptions | async" [value]="
+                     option.driverName +
+                     '-' +
+                     option.driverPhone +
+                     '-' +
+                     option.registrationNumber +
+                     '-' +
+                     option.vehicle +
+                     '-' +
+                     option.supplierName
+                   " (click)="getDriverID(option.driverID)">
+                  {{ option.driverName }} - {{ option.driverPhone }} -
+                  {{ option.registrationNumber }} - {{ option.vehicle }} -
+                  {{ option.supplierName }}
+                </mat-option>
+              </mat-autocomplete>
+            </mat-form-field>
+          </div>
+        </div>
+
+        <div class="row">
+          <div class="col-xl-6 col-lg-6 col-md-6 col-sm-6 mb-2">
+            <mat-form-field appearance="outline" floatLabel="always" class="example-full-width">
+              <mat-label>Driver Official Identity No</mat-label>
+              <input type="text" matInput [formControl]="driverOfficialIdentityNumber" [matAutocomplete]="auto25">
+              <mat-autocomplete #auto25="matAutocomplete">
+                <mat-option *ngFor="let option of filteredDriverOfficialIdentityNumberOptions | async"
+                  [value]="option.driverOfficialIdentityNumber">
+                  {{option.driverOfficialIdentityNumber}}
+                </mat-option>
+              </mat-autocomplete>
+            </mat-form-field>
+          </div>
+
+          <div class="col-xl-6 col-lg-6 col-md-6 col-sm-6 mb-2">
+            <mat-form-field appearance="outline" floatLabel="always" class="example-full-width">
+              <mat-label>Regn. No.</mat-label>
+              <input type="text" matInput [matAutocomplete]="auto2" [formControl]="inventory" />
+              <mat-autocomplete #auto2="matAutocomplete">
+                <mat-option *ngFor="let option of filteredInventoryOptions | async" [value]="
+                     option.registrationNumber +
+                     '-' +
+                     option.vehicleCategory +
+                     '-' +
+                     option.driverName +
+                     '-' +
+                     option.driverPhone +
+                     '-' +
+                     option.supplierName
+                   ">
+                  {{ option.registrationNumber }} -
+                  {{ option.vehicleCategory }} - {{ option.driverName }} -
+                  {{ option.driverPhone }} - {{ option.supplierName }}
+                </mat-option>
+              </mat-autocomplete>
+            </mat-form-field>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button mat-raised-button color="primary" (click)="SearchCarAndDriver()" data-dismiss="modal">
+          Search
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

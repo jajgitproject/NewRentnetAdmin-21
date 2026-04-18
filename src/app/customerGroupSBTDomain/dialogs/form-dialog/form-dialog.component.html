@@ -1,0 +1,249 @@
+<div class="addContainer">
+    <div class="modalHeader">
+        <div class="editRowModal">
+            <div class="modalHeader clearfix">
+                <div class="modal-about">
+                    <div class="font-weight-bold p-t-5 font-17">
+                        {{dialogTitle}} for {{CustomerGroup}}
+                    </div>
+                </div>
+            </div>
+        </div>
+        <button mat-icon-button (click)="dialogRef.close()" aria-label="Close dialog">
+            <mat-icon>close</mat-icon>
+        </button>
+    </div>
+
+    <div mat-dialog-content>
+        <form class="register-form m-4" [formGroup]="advanceTableForm" (ngSubmit)="submit()">
+
+            <!-- Row 1: SBT Domain + Allow CDP Login -->
+            <div class="row">
+                <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                    <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                        <mat-label>SBT Domain</mat-label>
+
+                        <input matInput formControlName="sbtDomain" autocomplete="off" />
+
+                        <!-- Required -->
+                        <mat-error *ngIf="
+                            advanceTableForm.get('sbtDomain')?.hasError('required') &&
+                            advanceTableForm.get('sbtDomain')?.touched
+                            ">
+                            SBT Domain is required
+                        </mat-error>
+
+                        <!-- Whitespace -->
+                        <mat-error *ngIf="
+                            advanceTableForm.get('sbtDomain')?.hasError('whitespace') &&
+                            advanceTableForm.get('sbtDomain')?.touched
+                            ">
+                            Domain cannot be empty or spaces only
+                        </mat-error>
+                        <!-- Pattern -->
+                        <mat-error *ngIf="
+                                advanceTableForm.get('sbtDomain')?.hasError('pattern') &&
+                                advanceTableForm.get('sbtDomain')?.touched
+                                ">
+                            Enter a valid domain (e.g. example.com)
+                        </mat-error>
+                    </mat-form-field>
+                </div>
+
+                <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                    <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                        <mat-label>Allow CDP Login</mat-label>
+                        <mat-select formControlName="allowCDPLogin" required>
+                            <mat-option [value]="true">Yes</mat-option>
+                            <mat-option [value]="false">No</mat-option>
+                        </mat-select>
+                        <mat-error *ngIf="advanceTableForm.get('allowCDPLogin')?.hasError('required')">
+                            CDP Login selection is required
+                        </mat-error>
+                    </mat-form-field>
+                </div>
+            </div>
+
+            <!-- Row 2: Allow Passenger To Make Reservation -->
+            <div class="row">
+                <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                    <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                        <mat-label>Allow Passenger To Make Reservation</mat-label>
+                        <mat-select formControlName="allowPassengerToMakeReservation" required>
+                            <mat-option value="All">All</mat-option>
+                            <mat-option value="Limited">Limited</mat-option>
+                            <mat-option value="None">None</mat-option>
+                            <!-- <mat-option value="Deactive">Deactive</mat-option> -->
+                        </mat-select>
+
+                        <mat-error *ngIf="advanceTableForm.get('allowPassengerToMakeReservation').hasError('required')">
+                            Allow Passenger To Make Reservation is required
+                        </mat-error>
+                    </mat-form-field>
+
+                </div>
+                <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                    <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                        <mat-label>Require Approval On Reservation</mat-label>
+                        <mat-select formControlName="requireApprovalOnReservation" required>
+                            <mat-option [value]="true">Yes</mat-option>
+                            <mat-option [value]="false">No</mat-option>
+                        </mat-select>
+                        <mat-error *ngIf="advanceTableForm.get('requireApprovalOnReservation')?.hasError('required')">
+                            Approval selection is required
+                        </mat-error>
+                    </mat-form-field>
+                </div>
+            </div>
+
+            <!-- Row 4: Car & Duty Type Controls -->
+            <div class="row">
+                <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                    <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                        <mat-label>Allow All Cars in CDP</mat-label>
+                        <mat-select formControlName="allowAllCars" required>
+                            <mat-option [value]="true">Yes</mat-option>
+                            <mat-option [value]="false">No</mat-option>
+                        </mat-select>
+                        <mat-error *ngIf="advanceTableForm.get('allowAllCars')?.hasError('required')">
+                            Selection required
+                        </mat-error>
+                    </mat-form-field>
+                </div>
+
+                <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                    <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                        <mat-label>Allow All Duty Types in CDP</mat-label>
+                        <mat-select formControlName="allowAllDutyTypes" required>
+                            <mat-option [value]="true">Yes</mat-option>
+                            <mat-option [value]="false">No</mat-option>
+                        </mat-select>
+                        <mat-error *ngIf="advanceTableForm.get('allowAllDutyTypes')?.hasError('required')">
+                            Selection required
+                        </mat-error>
+                    </mat-form-field>
+                </div>
+            </div>
+
+            <!-- Row 5: Designation Specific -->
+            <div class="row">
+                <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                    <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                        <mat-label>Designation Specific Cars</mat-label>
+                        <mat-select formControlName="designationSpecificCars" required>
+                            <mat-option [value]="true">Yes</mat-option>
+                            <mat-option [value]="false">No</mat-option>
+                        </mat-select>
+                        <mat-error *ngIf="advanceTableForm.get('designationSpecificCars')?.hasError('required')">
+                            Selection required
+                        </mat-error>
+                    </mat-form-field>
+                </div>
+
+                <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                    <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                        <mat-label>Designation Specific Duty Types</mat-label>
+                        <mat-select formControlName="designationSpecificDutyTypes" required>
+                            <mat-option [value]="true">Yes</mat-option>
+                            <mat-option [value]="false">No</mat-option>
+                        </mat-select>
+                        <mat-error *ngIf="advanceTableForm.get('designationSpecificDutyTypes')?.hasError('required')">
+                            Selection required
+                        </mat-error>
+                    </mat-form-field>
+                </div>
+            </div>
+
+            <!-- Row 6: Activation Status (LAST) -->
+            <div class="row">
+                <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                    <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                        <mat-label>Single Approver Or Person Specific Approver</mat-label>
+                        <mat-select formControlName="singleApproverOrPersonSpecificApprover" required>
+                            <mat-option value="Single Approver">Single Approver</mat-option>
+                            <mat-option value="Person Specific Approver">Person Specific Approver</mat-option>
+                        </mat-select>
+                        <mat-error
+                            *ngIf="advanceTableForm.get('singleApproverOrPersonSpecificApprover')?.hasError('required')">
+                            singleApproverOrPersonSpecificApprover is required
+                        </mat-error>
+                    </mat-form-field>
+                </div>
+
+                <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                    <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                        <mat-label>Approver Customer Person</mat-label>
+
+                        <input required type="text" matInput formControlName="approverCustomerPersonName"
+                            [matAutocomplete]="auto1" />
+
+                        <mat-autocomplete #auto1="matAutocomplete"
+                            (optionSelected)="OnCustomerPerson($event.option.value)">
+                            <mat-option *ngFor="let option of filteredCustomerPersonNameOptions | async"
+                                [value]="option.approverCustomerPersonName">
+                                {{ option.approverCustomerPersonName }}
+                            </mat-option>
+                        </mat-autocomplete>
+
+                        <mat-error *ngIf="
+      advanceTableForm.get('approverCustomerPersonName')?.hasError('CustomerPersonInvalid')
+    ">
+                            Please Select Approver Customer Person
+                        </mat-error>
+                    </mat-form-field>
+
+
+                </div>
+
+            </div>
+
+            <div class="row">
+                <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                    <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                        <mat-label>Allow Passenger To Login CDP</mat-label>
+                        <mat-select formControlName="allowPassengerToLoginCDP" required>
+                            <mat-option value="All">All</mat-option>
+                            <mat-option value="Limited">Limited</mat-option>
+                            <mat-option value="None">None</mat-option>
+                            
+                        </mat-select>
+
+                        <mat-error *ngIf="advanceTableForm.get('allowPassengerToLoginCDP').hasError('required')">
+                            Allow Passenger To Login CDP is required
+                        </mat-error>
+                    </mat-form-field>
+
+                </div>
+                <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                    <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                        <mat-label>Activation Status</mat-label>
+                        <mat-select formControlName="status" required>
+                            <mat-option [value]="true">Active</mat-option>
+                            <mat-option [value]="false">Deleted</mat-option>
+                        </mat-select>
+                        <mat-error *ngIf="advanceTableForm.get('status')?.hasError('required')">
+                            Activation Status is required
+                        </mat-error>
+                    </mat-form-field>
+                </div>
+            </div>
+
+
+            <!-- Buttons -->
+            <div class="row">
+                <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12 mb-2">
+                    <div class="example-button-row">
+                        <button mat-raised-button color="primary" *ngIf="saveDisabled" [type]="'submit'"
+                            [disabled]="!advanceTableForm.valid" (click)="confirmAdd()">Save</button>
+                        <mat-spinner *ngIf="!saveDisabled" diameter="30"></mat-spinner>
+                        <button *ngIf="action==='add'" mat-raised-button color="warn" (click)="reset()"
+                            tabindex="-1">Reset</button>
+                        <button *ngIf="action==='edit'" mat-raised-button color="warn" (click)="onNoClick()"
+                            tabindex="-1">Cancel</button>
+                    </div>
+                </div>
+            </div>
+
+        </form>
+    </div>
+</div>

@@ -1,0 +1,99 @@
+<div class="addContainer">
+    <div class="modalHeader">
+        <div class="editRowModal">
+            <div class="modalHeader clearfix">
+                <!-- <img [src]='advanceTable.img' alt="avatar"> -->
+                 <div class="modal-about">
+                    <div class="font-weight-bold p-t-5 font-17">
+                        {{dialogTitle}}  - {{DutySlipID}}</div>
+                          <div *ngIf="!isSaveAllowed">
+                        <span style="color:rgb(150, 4, 4);margin-bottom: 10px;font-style: italic;font-size: 12px;">({{verifyDutyStatusAndCacellationStatus}} !!!!!)</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <button mat-icon-button (click)="dialogRef.close()" aria-label="Close dialog">
+      <mat-icon>close</mat-icon>
+    </button>
+    </div>
+    <div mat-dialog-content>
+        <form class="register-form m-4" [formGroup]="advanceTableForm" (ngSubmit)="submit">
+            <div class="row">
+                
+                <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                    <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                        <mat-label>Mode Of Call</mat-label>
+                         <mat-select required formControlName="postPickUpCallMode">
+                            <mat-option value="Phone Call">Phone Call</mat-option>
+                            <mat-option value="WhatsApp">WhatsApp</mat-option>
+                            <mat-option value="SMS">SMS</mat-option>
+                        </mat-select>
+                        <mat-error *ngIf="advanceTableForm.get('postPickUpCallMode').hasError('required')">
+                          Call Mode is required
+                        </mat-error>
+                    </mat-form-field>
+                </div>
+
+                <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                    <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                        <mat-label>Call Details</mat-label>
+                        <input  required matInput formControlName="postPickUpCallDetails">
+                        <mat-error *ngIf="advanceTableForm.get('postPickUpCallDetails').hasError('required')">
+                           Call Details is required
+                        </mat-error>
+                    </mat-form-field>
+                </div>
+            </div>
+
+            <!-- <div class="row">
+                <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                    <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                        <mat-label>Transfer Date</mat-label>
+                        <input required readonly matInput [matDatepicker]="Date" formControlName="transferDate">
+                        <mat-datepicker-toggle matSuffix [for]="Date" [disabled]="true"></mat-datepicker-toggle>
+                        <mat-datepicker #Date [disabled]="true"></mat-datepicker>
+                        <mat-error *ngIf="advanceTableForm.get('transferDate').hasError('required')">
+                            Date is required
+                        </mat-error>
+                    </mat-form-field>
+                </div>
+
+                <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                    <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                        <mat-label>Transfer Time</mat-label>
+                        <input matInput readonly [owlDateTimeTrigger]="time1" [owlDateTime]="time1" formControlName="transferTime">
+                        <mat-icon matSuffix [owlDateTimeTrigger]="time1" class="date-icon">schedule</mat-icon>
+                        <owl-date-time [pickerType]="'timer'" #time1 [disabled]="true"></owl-date-time>
+                        <mat-error *ngIf="advanceTableForm.get('transferTime').hasError('required')">
+                            Transfer Time is required
+                        </mat-error>
+                    </mat-form-field>
+                </div>
+            </div> -->
+
+            <!-- <div class="row">
+                <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                        <mat-form-field appearance="outline" floatLabel="always" class="example-full-width" 
+                        <mat-label>Transfered By Employee</mat-label>
+                        <input matInput readonly formControlName="transferedByEmployeeName">
+                        <mat-error *ngIf="advanceTableForm.get('transferedByEmployeeName').hasError('required')">
+                            Transfered By Employee is required
+                        </mat-error>
+                    </mat-form-field>
+                </div>
+            </div> -->
+          
+            <div class="row">
+                <!-- <div *ngIf="isSaveAllowed">
+                    <span style="color:red;margin-bottom: 10px;">{{verifyDutyStatusAndCacellationStatus}}</span>
+                </div> -->
+                <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12 mb-2">
+                    <div class="example-button-row">
+                        <button mat-raised-button color="primary" [type]="submit" [disabled]="!advanceTableForm.valid || !isSaveAllowed"  (click)="confirmAdd()">Save</button>
+                        <!-- <mat-spinner *ngIf="!saveDisabled" diameter="30"></mat-spinner> -->
+                        <button *ngIf="action==='edit'" mat-raised-button color="warn" (click)="onNoClick()" tabindex="-1">Cancel</button>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>

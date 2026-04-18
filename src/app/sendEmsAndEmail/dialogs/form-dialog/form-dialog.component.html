@@ -1,0 +1,209 @@
+<div class="modalHeader">
+  <div class="editRowModal">
+    <div class="modalHeader clearfix">
+      <div class="modal-about">
+        <div class="font-weight-bold p-t-5 font-17">
+          {{ dialogTitle }}
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class=" p-t-5 font-12">
+  <b><h5 style="text-align: center;">Send SMS To </h5></b>
+  <div style="text-align: center;"> 
+  <h5 style="text-align: center;"></h5>
+  </div>
+  <h5 style="text-align: center;">Dear {{customerPersonName}} Sir,</h5>
+  <h5 style="text-align: center;">   Your Car And Service Staff Details Are Below</h5>
+  </div>
+<br/>
+  <button mat-icon-button (click)="dialogRef.close()" aria-label="Close dialog">
+    <mat-icon class="small-close-icon">close</mat-icon>
+  </button>
+  <style></style>
+</div>
+<mat-card>
+  <mat-card-content>
+    <mat-dialog-content class="of-hidden">
+        <div class="row">
+          <div class="col-xl-4 col-lg-6 col-md-12 col-sm-12 mb-2">
+            <span class="TDValueBold">Booking No</span> <br />
+            <span class="TDValue">
+             {{ReservationID}}</span
+            >
+          </div>
+          <div class="col-xl-4 col-lg-6 col-md-12 col-sm-12 mb-2">
+            <span class="TDValueBold">City</span> <br />
+            <span class="TDValue">
+              {{city}}
+              </span
+            >
+          </div>
+          <div class="col-xl-4 col-lg-6 col-md-12 col-sm-12 mb-2">
+            <span class="TDValueBold">Date</span> <br />
+            <span class="TDValue">
+              {{pickupDate | date : 'dd-MMM-yy' }}</span
+            >
+          </div>
+        </div>
+
+        <div class="row">
+          
+          <div class="col-xl-4 col-lg-6 col-md-12 col-sm-12 mb-2">
+            <span class="TDValueBold">Car No</span> <br />
+            <span class="TDValue">
+              {{registrationNumber}}</span
+            >
+          </div>
+          <div class="col-xl-4 col-lg-6 col-md-12 col-sm-12 mb-2">
+            <span class="TDValueBold">Time</span> <br />
+            <span class="TDValue">
+             {{pickupTime |  date : 'H:mm' }}</span
+            >
+          </div>
+
+          <div class="col-xl-4 col-lg-6 col-md-12 col-sm-12 mb-2">
+              <span class="TDValueBold">Car Send</span> <br />
+              <span class="TDValue">
+               {{vehicle}}</span
+              >
+            </div>
+        </div>
+        <div class="row">
+          <div class="col-xl-4 col-lg-6 col-md-12 col-sm-12 mb-2">
+            <span class="TDValueBold">Service Staff Name</span> <br />
+            <span class="TDValue">
+              N/A</span
+            >
+          </div>
+          <div class="col-xl-4 col-lg-6 col-md-12 col-sm-12 mb-2">
+            <span class="TDValueBold">Service Staff Mobile No</span> <br />
+            <span class="TDValue">
+              N/A</span
+            >
+          </div>
+          <br>
+
+          <!-- <div class="col-xl-4 col-lg-6 col-md-12 col-sm-12 mb-2">
+            <span class="TDValueBold">Mobile</span> <br />
+            <span class="TDValue">
+             {{primaryMobile}}</span
+            >
+          </div> -->
+        </div>
+
+        <div>
+          <span style="cursor: pointer;color: #007bff;margin-left: 300px;
+            padding: 300px; font-size: 10px !important; font-style: italic;" (click)="saveData()">
+          Add People
+        </span>
+
+        </div>
+
+        <div class="example-container mat-elevation-z8">
+          <p *ngIf="showNoRecordsFoundMessage || !permissionData; then thenBlock2 else elseBlock2">
+            Data Not Found
+          </p>
+
+          <ng-template #thenBlock2>
+            <div class="alert alert-primary" style="background-color:#E8E8E8; text-align: center;">No Records Found</div>
+            <div class="body">
+              <div class="example-button-row">
+              </div>
+            </div>
+  
+          </ng-template >
+          <ng-template #elseBlock2>
+            <mat-table  style = "width: 110%;" #table [dataSource]="permissionData">
+        
+              <ng-container matColumnDef="name">
+                <mat-header-cell *matHeaderCellDef >Name 
+                </mat-header-cell>
+                  <mat-cell *matCellDef="let row"> {{row.customerPersonName}}
+                   </mat-cell>
+                   
+              </ng-container>
+              <ng-container style="margin-right: 10px;" matColumnDef="mobileNo">
+                <mat-header-cell *matHeaderCellDef>Mobile No</mat-header-cell>
+                <mat-cell *matCellDef="let row"> {{row.primaryMobile}} </mat-cell>
+                
+              </ng-container>
+  
+              <ng-container style="margin-left: 15px;"  matColumnDef="primaryEmail">
+                <mat-header-cell *matHeaderCellDef> Email 
+                </mat-header-cell>
+                
+                <mat-cell *matCellDef="let row"> {{row.primaryEmail}}  </mat-cell>
+              </ng-container>
+  
+              <ng-container matColumnDef="reservationSMSToBooker">
+                <mat-header-cell *matHeaderCellDef> <span matTooltip="Is Customer Notifications Allowed"
+                    matTooltipPosition="above">
+                    Customer Notifi...</span>
+                </mat-header-cell>
+                <mat-cell *matCellDef="let row" style="padding: 5px"> {{ (row.reachedSMSToBooker === true || row.reachedSMSToPassenger === true) ? 'Yes' : 'No' }}
+  
+                </mat-cell>
+  
+              </ng-container>
+
+              <ng-container matColumnDef="reservationSMSToPassenger">
+                <mat-header-cell *matHeaderCellDef style="padding: 10px"> <span matTooltip="Is Customer Person Notifications Allowed "
+                    matTooltipPosition="above">
+                    Customer Per...</span>
+                </mat-header-cell>
+                <mat-cell *matCellDef="let row" style="padding: 5px"> {{row.sendSMSWhatsApp===true ? 'Yes' : 'No'}}
+  
+                </mat-cell>
+  
+              </ng-container>
+              
+            <ng-container matColumnDef="type">
+              <mat-header-cell *matHeaderCellDef>Type</mat-header-cell>
+              <mat-cell *matCellDef="let row" style="padding: 5px">
+                {{ (row.isPassenger && row.isBooker === true || row?.type?.toLowerCase() === 'customerPerson') ? 'Customer Person' : (row?.type?.toLowerCase() === 'employee' ? 'Employee' : 'Not Registered') }}
+              </mat-cell>
+            </ng-container>
+
+              <ng-container matColumnDef="sendSMSWhatsApp">
+                <mat-header-cell *matHeaderCellDef style="padding: 10px"> <span matTooltip="Send SMS Whats App" 
+                    matTooltipPosition="above">
+                   Send Sms...</span>
+                </mat-header-cell>
+                <mat-cell *matCellDef="let row" style="padding: 5px"> {{row.sendSMSWhatsApp===true ? 'Yes' : 'No'}}
+  
+                </mat-cell>
+  
+              </ng-container>
+              
+              <ng-container matColumnDef="action">
+                <mat-header-cell *matHeaderCellDef >
+                </mat-header-cell>
+                  <mat-cell *matCellDef="let row">
+                    <button mat-icon-button color="warn" (click)="deleteRecord(row)" aria-label="Close dialog">
+                      <mat-icon class="small-close-icon">close</mat-icon>
+                    </button>
+                   </mat-cell>
+                   
+              </ng-container>
+              <mat-header-row *matHeaderRowDef="displayedColumns"></mat-header-row>
+              <mat-row *matRowDef="let row; columns: displayedColumns;"></mat-row>
+            </mat-table>
+  
+          </ng-template>
+        
+        </div>
+        <br/>
+<br/>
+<div class="row">
+  <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12 mb-2">
+      <div class="example-button-row">
+          <button mat-raised-button color="primary"
+        (click)="sendNotification()" >Send</button>
+          
+      </div>
+  </div>
+</div>
+    </mat-dialog-content>
+  </mat-card-content>
+</mat-card>

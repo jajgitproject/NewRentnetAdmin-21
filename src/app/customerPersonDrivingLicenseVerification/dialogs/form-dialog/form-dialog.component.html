@@ -1,0 +1,182 @@
+<div class="addContainer">
+    <div class="modalHeader">
+        <div class="editRowModal">
+            <div class="modalHeader clearfix">
+                <!-- <img [src]='advanceTable.img' alt="avatar"> -->
+                <div class="modal-about" style="text-align: center;">
+                    <div class="font-weight-bold p-t-5 font-17">
+                      <b>   {{customerPersonName}}'s</b>  {{dialogTitle}}
+                    </div>
+
+                </div>
+            </div>
+        </div>
+        <button mat-icon-button (click)="dialogRef.close()" aria-label="Close dialog">
+            <mat-icon>close</mat-icon>
+        </button>
+    </div>
+    <div mat-dialog-content>
+        <form class="register-form m-4" [formGroup]="advanceTableForm" (ngSubmit)="submit">
+
+            <div class="row">
+                <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                    <mat-form-field class="example-full-width" appearance="outline"  floatLabel="always">
+                        <mat-label>Permanent Address</mat-label>
+                        <input matInput formControlName="permanentAddress" readonly>
+                        
+                    </mat-form-field>
+                </div>
+                <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                    <mat-form-field class="example-full-width" appearance="outline"  floatLabel="always">
+                        <mat-label>Address City</mat-label>
+                        <input matInput formControlName="addressCity" readonly>
+                      
+                    </mat-form-field>
+                </div>
+             
+            </div>
+
+            <div class="row">
+                <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                    <mat-form-field class="example-full-width" appearance="outline"  floatLabel="always">
+                        <mat-label>License No</mat-label>
+                        <input matInput formControlName="drivingLicenseNo" readonly>
+                       
+                    </mat-form-field>
+                </div>
+
+                <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2" *ngIf="!advanceTable.licenseImage">
+                    <mat-form-field class="example-full-width" appearance="outline"  floatLabel="always">
+                        <mat-label>License Image</mat-label>
+                        <input readonly matInput formControlName="licenseImage">
+                    </mat-form-field>
+                </div>
+                <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2" *ngIf="advanceTable.licenseImage">
+                    <mat-label>Document Image</mat-label><br>
+                    <a href="{{advanceTable.licenseImage}}" target="_blank">
+                        View Image
+                    </a>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                    <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                        <mat-label>Reason(If Image Not Available)</mat-label>
+                        <input matInput formControlName="reasonOfLicenseImageNonAvailblity" readonly>
+                     
+                    </mat-form-field>
+                </div>
+
+                <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                    <mat-form-field class="example-full-width" appearance="outline"  floatLabel="always">
+                        <mat-label>Issuing Authority</mat-label>
+                        <input matInput formControlName="licenseAuthorityName" readonly>
+                        
+                    </mat-form-field>
+                </div>
+            </div>
+            
+            <div class="row">
+                <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                    <mat-form-field class="example-full-width" appearance="outline"  floatLabel="always">
+                        <mat-label>Issuing City</mat-label>
+                        <input matInput formControlName="issuingCity" readonly>
+                        
+                    </mat-form-field>
+                </div>
+              
+                <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                    <mat-form-field class="example-full-width" appearance="outline"  floatLabel="always">
+                        <mat-label>Uploaded By</mat-label>
+                        <input readonly matInput formControlName="uploadedBy" readOnly>
+                    </mat-form-field>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                    <mat-form-field class="example-full-width" appearance="outline"  floatLabel="always">
+                        <mat-label>Upload Date</mat-label>
+                        <input  matInput [matDatepicker]="startDate" formControlName="uploadEditedDate" readonly>
+                        <mat-datepicker-toggle matSuffix [for]="startDate"></mat-datepicker-toggle>
+                        <mat-datepicker #startDate></mat-datepicker>
+                      
+                    </mat-form-field>
+                </div>
+
+                <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                    <mat-form-field class="example-full-width" appearance="outline"  floatLabel="always">
+                        <mat-label>Upload Remark</mat-label>
+                        <input matInput formControlName="uploadRemark" readonly>
+                      
+                    </mat-form-field>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                    <mat-form-field class="example-full-width" appearance="outline"  floatLabel="always">
+                        <mat-label>Activation Status</mat-label>
+                        <input readonly matInput formControlName="status">
+                    </mat-form-field>
+                </div> 
+            </div> 
+            <div class="row">
+                <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                    <mat-form-field class="example-full-width" appearance="outline"  floatLabel="always">
+                        <mat-label>Verified</mat-label>                     
+                        <mat-select formControlName="licenseVerified" readonly>
+                            <mat-option value="Verified">Verified</mat-option>
+                            <mat-option value="Rejected">Rejected</mat-option>
+                            <mat-option value="Unverified">Unverified</mat-option>
+                        </mat-select>
+                    </mat-form-field>
+                </div>
+
+                <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                    <mat-form-field class="example-full-width" appearance="outline"  floatLabel="always">
+                        <mat-label>Verification Remark</mat-label>
+                        <input  matInput formControlName="verificationRemark">
+                    </mat-form-field>
+                </div>
+              
+            </div>
+            <div class="row">
+                <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                    <mat-form-field class="example-full-width" appearance="outline"  floatLabel="always">
+                        <mat-label>Verified By</mat-label>
+                        <input readonly matInput formControlName="verifiedBy">
+                    </mat-form-field>
+                </div>
+
+                <!-- <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                    <mat-form-field class="example-full-width" appearance="outline"  floatLabel="always">
+                        <mat-label>Verification Date</mat-label>
+                        <input readonly matInput formControlName="verificationDate">
+                    </mat-form-field>
+                </div> -->
+
+                <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                    <mat-form-field class="example-full-width" appearance="outline"  floatLabel="always">
+                        <mat-label>Verification Date</mat-label>
+                        <input readonly  matInput [matDatepicker]="vfs" formControlName="verificationDate">
+                        <mat-datepicker-toggle matSuffix [for]="vfs"></mat-datepicker-toggle>
+                        <mat-datepicker disabled="true" #vfs></mat-datepicker>
+                        
+                    </mat-form-field>
+                </div>
+                
+            </div>
+
+            <div class="row">
+                <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12 mb-2">
+                    <div class="example-button-row">
+                        <button mat-raised-button color="primary" *ngIf="saveDisabled" [type]="submit" [disabled]="!advanceTableForm.valid"  (click)="Put()">Save</button>
+                        <mat-spinner *ngIf="!saveDisabled" diameter="30"></mat-spinner>
+                        <button mat-raised-button color="warn" (click)="reset()" tabindex="-1">Reset</button>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>

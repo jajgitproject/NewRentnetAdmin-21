@@ -1,0 +1,55 @@
+<div class="traffic-sources-container">
+  <mat-card>
+    <div class="chart-header">
+      <h2>{{ title }}</h2>
+      <div class="chart-actions">
+        <button mat-icon-button [matMenuTriggerFor]="menu">
+          <mat-icon>more_vert</mat-icon>
+        </button>
+        <mat-menu #menu="matMenu">
+          <button mat-menu-item>
+            <mat-icon>file_download</mat-icon>
+            <span>Export</span>
+          </button>
+          <button mat-menu-item>
+            <mat-icon>refresh</mat-icon>
+            <span>Refresh</span>
+          </button>
+        </mat-menu>
+      </div>
+    </div>
+
+    @if (data && data.length > 0) {
+      <div class="chart-content">
+        <apx-chart [series]="chartOptions.series!" [chart]="chartOptions.chart!" [labels]="chartOptions.labels!"
+          [responsive]="chartOptions.responsive!" [dataLabels]="chartOptions.dataLabels!"
+          [plotOptions]="chartOptions.plotOptions!" [legend]="chartOptions.legend!" [colors]="chartOptions.colors!"
+        [tooltip]="chartOptions.tooltip!"></apx-chart>
+      </div>
+    }
+
+    @if (!data || data.length === 0) {
+      <div class="chart-empty">
+        <mat-icon>pie_chart</mat-icon>
+        <p>No traffic data available</p>
+      </div>
+    }
+
+    @if (data && data.length > 0) {
+      <div class="sources-breakdown">
+        @for (source of data; track source) {
+          <div class="source-item">
+            <div class="source-info">
+              <div class="source-color" [style.background-color]="source.color"></div>
+              <span class="source-name">{{ source.name }}</span>
+            </div>
+            <div class="source-stats">
+              <span class="source-value">{{ source.value.toLocaleString() }}</span>
+              <span class="source-percentage">{{ getPercentage(source.value) }}</span>
+            </div>
+          </div>
+        }
+      </div>
+    }
+  </mat-card>
+</div>
