@@ -190,6 +190,48 @@ mat-option {
   z-index: 30000 !important;
 }
 
+/* Legacy Bootstrap modal parity:
+   keep the "x" close button pinned to top-right corner, not title baseline. */
+.modal .modal-header {
+  position: relative;
+  padding-right: 2.25rem;
+}
+
+.modal .modal-header .close {
+  position: absolute;
+  top: 0.5rem;
+  right: 0.75rem;
+  margin: 0 !important;
+  padding: 0 !important;
+  line-height: 1;
+  float: none !important;
+}
+
+/* App-wide legacy popup sizing + centering rules */
+.modal .modal-dialog {
+  margin: 1.75rem auto !important;
+  max-width: calc(100vw - 48px);
+}
+
+/* Standard popup size consistency across pages */
+.modal .modal-dialog:not(.modal-lg):not(.modal-xl) {
+  width: 500px;
+}
+
+/* Keep larger dialogs wider when explicitly requested by template */
+.modal .modal-dialog.modal-lg {
+  width: 800px;
+}
+
+.modal .modal-dialog.modal-xl {
+  width: 1140px;
+}
+
+/* Ensure popups always appear centered */
+.modal .modal-dialog.modal-dialog-centered {
+  min-height: calc(100% - 3.5rem);
+}
+
 .google-autocomplete-panel {
   width: 800px;
 }
