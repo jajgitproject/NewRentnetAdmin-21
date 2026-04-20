@@ -1,5 +1,5 @@
 // @ts-nocheck
-import { Component, ElementRef, OnInit, TemplateRef, ViewChild } from '@angular/core';
+import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
 import { AdditionalServiceRateService } from './additionalServiceRate.service';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { MatDialog } from '@angular/material/dialog';
@@ -78,7 +78,6 @@ export class AdditionalServiceRateComponent implements OnInit {
   @ViewChild(MatPaginator, { static: true }) paginator: MatPaginator;
   @ViewChild(MatSort, { static: true }) sort: MatSort;
   @ViewChild('filter', { static: true }) filter: ElementRef;
-  @ViewChild('searchDialog') searchDialog: TemplateRef<any>;
   @ViewChild(MatMenuTrigger)
   contextMenu: MatMenuTrigger;
   contextMenuPosition = { x: '0px', y: '0px' };
@@ -127,19 +126,6 @@ console.log(this.uom_ID, this.service_ID); // Log the decrypted values
     this.loadData();
     //this.SearchRate='';
     
-  }
-
-  openSearchDialog()
-  {
-    this.dialog.open(this.searchDialog, {
-      width: '500px'
-    });
-  }
-
-  SearchFromDialog(dialogRef: any)
-  {
-    this.SearchData();
-    dialogRef.close();
   }
   addNew()
   {

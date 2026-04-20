@@ -1,5 +1,5 @@
 // @ts-nocheck
-import { Component, ElementRef, OnInit, ViewChild, TemplateRef } from '@angular/core';
+import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { MatDialog, MatDialogRef } from '@angular/material/dialog';
 import { DateAdapter, MAT_DATE_LOCALE } from '@angular/material/core';
@@ -134,17 +134,6 @@ export class ReservationDutyslipSearchComponent implements OnInit {
   }
 
 
-
-
-
-  openSearchDialog() {
-    this.dialog.open(this.searchDialog, { width: '500px' });
-  }
-
-  SearchFromDialog(dialogRef: any) {
-    SearchData();
-    dialogRef.close();
-  }
 
 }
 

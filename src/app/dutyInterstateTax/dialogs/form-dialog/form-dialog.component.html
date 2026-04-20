@@ -94,7 +94,8 @@
             <div style="margin-top: 10px;" *ngIf="isExistingCardVisible">
                 <mat-card class="mat-elevation-z0 outline">
                     <div>
-                        <a href="#" (click)="$event.preventDefault()">
+                        <a href="#" data-dismiss="modal" data-toggle="modal" data-backdrop="false"
+                            data-target="#exampleModal">
                             Search
                         </a>
                     </div>
@@ -388,10 +389,17 @@
         </form>
     </div>
 
-    <ng-template #searchDialog let-dialogRef="dialogRef">
-    <h2 mat-dialog-title>Existing Paid Tax</h2>
-    <div mat-dialog-content>
-<!-- <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+    <div class="modal fade" id="exampleModal" tabindex="-1" role="dialog">
+        <div class="modal-dialog modal-dialog-centered" style="max-width: 50%; height: 60%;">
+            <div class="modal-content" style="height: 80%;">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLongTitle">Existing Paid Tax</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <!-- <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
                         <mat-label>Reg. No.</mat-label> -->
                         <!-- <input type="text" matInput [(ngModel)]="registrationNumber"> -->
                         <!-- <input required type="text" matInput
@@ -501,7 +509,7 @@
 
                                                     <div class="col-xl-2 col-lg-6 col-md-12 col-sm-12 mb-2">
                                                         <a style="cursor: pointer;color: #007bff;"
-                                                        (click)="TaxData(i)">Select</a>
+                                                        (click)="TaxData(i)" data-dismiss="modal">Select</a>
                                                     </div>
                                                 </div>
                                             </div>
@@ -511,9 +519,8 @@
                             </div>
                         </div>
                     </div>
+
+                </div>    
+            </div>
+        </div>
     </div>
-    <div mat-dialog-actions align="end">
-        <button mat-button (click)="dialogRef.close()">Cancel</button>
-        <button mat-raised-button color="primary" (click)="SearchFromDialog(dialogRef)">Search</button>
-    </div>
-</ng-template>

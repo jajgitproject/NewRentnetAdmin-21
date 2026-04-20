@@ -1,5 +1,5 @@
 // @ts-nocheck
-import { Component, ElementRef, EventEmitter, Input, OnInit, Output, ViewChild, ViewEncapsulation, TemplateRef } from '@angular/core';
+import { Component, ElementRef, EventEmitter, Input, OnInit, Output, ViewChild, ViewEncapsulation } from '@angular/core';
 import { ControlPanelDesignService } from './controlPanelDesign.service';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { MatDialog } from '@angular/material/dialog';
@@ -301,9 +301,7 @@ export class ControlPanelDesignComponent implements OnInit {
   @ViewChild(MatPaginator, { static: true }) paginator: MatPaginator;
   @ViewChild(MatSort, { static: true }) sort: MatSort;
   @ViewChild('filter', { static: true }) filter: ElementRef;
-  
-  @ViewChild('searchDialog') searchDialog: TemplateRef<any>;
-// @ViewChild(MatMenuTrigger)
+  // @ViewChild(MatMenuTrigger)
   @ViewChild('topScroll') topScroll!: ElementRef;
   @ViewChild('bottomScroll') bottomScroll!: ElementRef;
 
@@ -3859,17 +3857,6 @@ this.InitPackageType();
 }
 
 
-
-
-
-  openSearchDialog() {
-    this.dialog.open(this.searchDialog, { width: '500px' });
-  }
-
-  SearchFromDialog(dialogRef: any) {
-    SearchData();
-    dialogRef.close();
-  }
 
 } 
 

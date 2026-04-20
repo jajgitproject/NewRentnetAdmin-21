@@ -66,7 +66,9 @@
                                         </div>
                                     </div>
                                     <div style="width: 30%; text-align:right;">
-                                        <button mat-raised-button color="primary" (click)="openSearchDialog()">
+                                        <button mat-raised-button color="primary" 
+                                            data-dismiss="modal" data-toggle="modal" data-backdrop="false"
+                                            data-target="#exampleModalCenter">
                                             Search
                                         </button>     
                                         &nbsp;
@@ -231,34 +233,94 @@
     </div>
 </section>
 
-<ng-template #searchDialog let-dialogRef="dialogRef">
-    <h2 mat-dialog-title>Bank Branch</h2>
-    <div mat-dialog-content>
-        <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
-            <mat-label>Bank Branch</mat-label>
-            <input type="text" matInput [(ngModel)]="SearchBankBranch">
-        </mat-form-field>
+<!-- modelpopup -->
+<div class="modal fade" id="exampleModalCenter" tabindex="-1" role="dialog">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLongTitle">Bank Branch
+                </h5>
+                <button type="button" class="close" data-dismiss="modal"
+                    aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
 
-        <mat-form-field class="example-full-width" appearance="outline" floatLabel="always"> 
-            <mat-label>Bank</mat-label>                       
-            <input type="text" matInput [matAutocomplete]="auto" [formControl]="search">
-            <mat-autocomplete #auto="matAutocomplete">
-                <mat-option *ngFor="let options of filteredOptions | async" [value]="options.bank">
-                    {{options.bank}}
-                </mat-option>
-            </mat-autocomplete>
-        </mat-form-field>
+                <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                    <mat-label>Bank Branch</mat-label>
+                    <input type="text" matInput 
+                        [(ngModel)]="SearchBankBranch">
 
-        <mat-form-field class="example-full-width mb-3" appearance="outline" floatLabel="always">
-            <mat-label>Activation Status</mat-label>
-            <mat-select [(value)]="SearchActivationStatus">
-                <mat-option [value]=true>Active</mat-option>
-                <mat-option [value]=false>Deleted</mat-option>
-            </mat-select>
-        </mat-form-field>
+                </mat-form-field>
+            
+                <!-- <mat-form-field class="example-full-width" appearance="outline"  floatLabel="always">
+                    <mat-label>Bank</mat-label>
+                     <mat-select [(ngModel)]="SearchBank" [formControl]="search" >
+                        <mat-option [value]="Bank.bank" *ngFor="let Bank of BankList">{{Bank.bank}}</mat-option>
+                    </mat-select>
+                    <mat-error>
+                        Please select a Bank
+                    </mat-error>
+                </mat-form-field>    -->
+                <mat-form-field class="example-full-width" appearance="outline" floatLabel="always"> 
+                    <mat-label>Bank</mat-label>                       
+                    <input  type="text" matInput [matAutocomplete]="auto"
+                     [formControl]="search">
+                    <mat-autocomplete #auto="matAutocomplete">
+                        <mat-option *ngFor="let options of filteredOptions | async"
+                            [value]="options.bank">
+                            {{options.bank}}
+                        </mat-option>
+                    </mat-autocomplete>
+                    <!-- <mat-error *ngIf="advanceTableForm.get('bank').hasError('required')">
+                        Bank is required
+                    </mat-error> -->
+                </mat-form-field>
+
+                <!-- <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                    <mat-label>City</mat-label>
+                    <input type="text" matInput [formControl]="city"
+                        [(ngModel)]="SearchCity">
+
+                </mat-form-field> -->
+
+                <!-- <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                    <mat-label>Ifsc</mat-label>
+                    <input type="text" matInput [formControl]="ifsc"
+                        [(ngModel)]="SearchBankBranchIFSCCode">
+
+                </mat-form-field> -->
+
+                <!-- <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                    <mat-label>Address</mat-label>
+                    <input type="text" matInput [formControl]="address"
+                        [(ngModel)]="SearchBankBranchAddress">
+
+                </mat-form-field> -->
+
+                <!-- <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                    <mat-label>Swift</mat-label>
+                    <input type="text" matInput [formControl]="swift"
+                        [(ngModel)]="SearchBankBranchSwiftCode">
+
+                </mat-form-field> -->
+
+                <mat-form-field class="example-full-width mb-3"
+                    appearance="outline" floatLabel="always">
+                    <mat-label>Activation Status</mat-label>
+                    <mat-select [(value)]="SearchActivationStatus">
+                        <mat-option [value]=true>Active</mat-option>
+                        <mat-option [value]=false>Deleted</mat-option>
+                    </mat-select>
+                </mat-form-field>
+
+            </div>
+            <div class="modal-footer">
+                <button mat-raised-button color="primary" (click)="SearchData()"
+                    data-dismiss="modal">Search</button>
+
+            </div>
+        </div>
     </div>
-    <div mat-dialog-actions align="end">
-        <button mat-button (click)="dialogRef.close()">Cancel</button>
-        <button mat-raised-button color="primary" (click)="SearchFromDialog(dialogRef)">Search</button>
-    </div>
-</ng-template>
+</div>

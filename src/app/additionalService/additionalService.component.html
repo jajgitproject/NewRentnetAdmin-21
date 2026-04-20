@@ -60,7 +60,9 @@
                                         </div>
                                     </div>
                                     <div style="width: 30%; text-align:right;">
-                                        <button mat-raised-button color="primary" (click)="openSearchDialog()">
+                                        <button mat-raised-button color="primary"
+                                            data-dismiss="modal" data-toggle="modal" data-backdrop="false"
+                                            data-target="#exampleModalCenter">
                                             Search
                                         </button>
                                         &nbsp;
@@ -198,44 +200,80 @@
     </div>
 </section>
 
-<ng-template #searchDialog let-dialogRef="dialogRef">
-    <h2 mat-dialog-title>Additional Service</h2>
-    <div mat-dialog-content>
-        <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
-            <mat-label>Additional Service</mat-label>
-            <input type="text" matInput [(ngModel)]="SearchAdditionalService">
-        </mat-form-field>
+<!-- ---model popup-- -->
+<div class="modal fade" id="exampleModalCenter" tabindex="-1" role="dialog">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLongTitle">Additional Service
+                </h5>
+                <button type="button" class="close" data-dismiss="modal"
+                    aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
 
-        <mat-form-field class="example-full-width" appearance="outline" floatLabel="always"> 
-            <mat-label>Service Type</mat-label>                       
-            <input type="text" matInput [matAutocomplete]="auto" [formControl]="serviceType">
-            <mat-autocomplete #auto="matAutocomplete">
-                <mat-option *ngFor="let options of filteredOptions | async" [value]="options.serviceType">
-                    {{options.serviceType}}
-                </mat-option>
-            </mat-autocomplete>
-        </mat-form-field>
+                <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                    <mat-label>Additional Service</mat-label>
+                    <input type="text" matInput 
+                        [(ngModel)]="SearchAdditionalService">
+                </mat-form-field>
 
-        <mat-form-field class="example-full-width" appearance="outline" floatLabel="always"> 
-            <mat-label>UOM</mat-label>                       
-            <input type="text" matInput [matAutocomplete]="auto1" [formControl]="uom">
-            <mat-autocomplete #auto1="matAutocomplete">
-                <mat-option *ngFor="let options of filteredUomOptions | async" [value]="options.uom">
-                    {{options.uom}}
-                </mat-option>
-            </mat-autocomplete>
-        </mat-form-field>
+                <!-- <mat-form-field class="example-full-width" appearance="outline"  floatLabel="always">
+                    <mat-label>Service Type</mat-label>
+                    <mat-select [(ngModel)]="SearchServiceType" [formControl]="serviceType">
+                  <mat-option [value]="ServiceType.serviceType" *ngFor="let ServiceType of ServiceTypeList">{{ServiceType.serviceType}}</mat-option>
+                    </mat-select>
+                </mat-form-field> -->
 
-        <mat-form-field class="example-full-width mb-3" appearance="outline" floatLabel="always">
-            <mat-label>Activation Status</mat-label>
-            <mat-select [(value)]="SearchActivationStatus">
-                <mat-option [value]=true>Active</mat-option>
-                <mat-option [value]=false>Deleted</mat-option>
-            </mat-select>
-        </mat-form-field>
+                <mat-form-field class="example-full-width" appearance="outline" floatLabel="always"> 
+                    <mat-label>Service Type</mat-label>                       
+                    <input  type="text" matInput [matAutocomplete]="auto"
+                    [formControl]="serviceType">
+                    <mat-autocomplete #auto="matAutocomplete">
+                        <mat-option *ngFor="let options of filteredOptions | async"
+                            [value]="options.serviceType">
+                            {{options.serviceType}}
+                        </mat-option>
+                    </mat-autocomplete>
+                </mat-form-field>
+
+                <!-- <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                    <mat-label>UOM</mat-label>
+                    <mat-select [(ngModel)]="SearchUom" [formControl]="uom">
+                        <mat-option [value]="UOM.uom" *ngFor="let UOM of UOMList">{{UOM.uom}}</mat-option>
+                    </mat-select>
+                    <mat-error>
+                        Please select a UOM
+                    </mat-error>
+                </mat-form-field> -->
+
+                <mat-form-field class="example-full-width" appearance="outline" floatLabel="always"> 
+                    <mat-label>UOM</mat-label>                       
+                    <input  type="text" matInput [matAutocomplete]="auto1"
+                     [formControl]="uom">
+                    <mat-autocomplete #auto1="matAutocomplete">
+                        <mat-option *ngFor="let options of filteredUomOptions | async"
+                            [value]="options.uom">
+                            {{options.uom}}
+                        </mat-option>
+                    </mat-autocomplete>
+                </mat-form-field>
+
+                <mat-form-field class="example-full-width mb-3"
+                    appearance="outline" floatLabel="always">
+                    <mat-label>Activation Status</mat-label>
+                    <mat-select [(value)]="SearchActivationStatus">
+                        <mat-option [value]=true>Active</mat-option>
+                        <mat-option [value]=false>Deleted</mat-option>
+                    </mat-select>
+                </mat-form-field>
+            </div>
+            <div class="modal-footer">
+                <button mat-raised-button color="primary" (click)="SearchData()"
+                    data-dismiss="modal">Search</button>
+            </div>
+        </div>
     </div>
-    <div mat-dialog-actions align="end">
-        <button mat-button (click)="dialogRef.close()">Cancel</button>
-        <button mat-raised-button color="primary" (click)="SearchFromDialog(dialogRef)">Search</button>
-    </div>
-</ng-template>
+</div>

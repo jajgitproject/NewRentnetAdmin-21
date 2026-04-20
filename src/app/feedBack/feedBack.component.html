@@ -27,10 +27,20 @@
                         <div class="responsive_table">
                             <div class="materialTableHeader">
                                 <div class="row">
-                                    <ng-template #searchDialog let-dialogRef="dialogRef">
-    <h2 mat-dialog-title>Additional Service Rate</h2>
-    <div mat-dialog-content>
-<mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                                    <div class="modal fade" id="exampleModalCenter" tabindex="-1" role="dialog"> 
+                                        <div class="modal-dialog modal-dialog-centered">
+                                            <div class="modal-content">
+                                                <div class="modal-header">
+                                                    <h5 class="modal-title" id="exampleModalLongTitle">Additional Service Rate
+                                                    </h5>
+                                                    <button type="button" class="close" data-dismiss="modal"
+                                                        aria-label="Close">
+                                                        <span aria-hidden="true">&times;</span>
+                                                    </button>
+                                                </div>
+                                                <div class="modal-body">
+                                    
+                                                    <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
                                                         <mat-label>Rate</mat-label>
                                                         <input type="text" matInput [formControl]="search"
                                                             [(ngModel)]="SearchRate">
@@ -45,12 +55,16 @@
                                                             <mat-option [value]=false>Deleted</mat-option>
                                                         </mat-select>
                                                     </mat-form-field>
-    </div>
-    <div mat-dialog-actions align="end">
-        <button mat-button (click)="dialogRef.close()">Cancel</button>
-        <button mat-raised-button color="primary" (click)="SearchFromDialog(dialogRef)">Search</button>
-    </div>
-</ng-template> 
+                                    
+                                                </div>
+                                                <div class="modal-footer">
+                                                    <button mat-raised-button color="primary" (click)="SearchData()"
+                                                        data-dismiss="modal">Search</button>
+                                    
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div> 
                                     <div class="col-12">
                                         <ul class="header-buttons-left ms-0 mb-0">
                                             <li *ngIf="SearchRate">
@@ -62,7 +76,9 @@
                                         <ul class="header-buttons">
                                             <li>
                                                 <div class="icon-button-demo">
-                                                    <button mat-raised-button color="primary" (click)="openSearchDialog()">
+                                                    <button mat-raised-button color="primary" data-backdrop="false"
+                                                        data-dismiss="modal" data-toggle="modal"
+                                                        data-target="#exampleModalCenter">
                                                         Search
                                                     </button>
                                                 </div>
@@ -248,13 +264,13 @@
 </section>
 
 <!-- modelpopup -->
- <!-- <div id="exampleModalCenter"> 
+ <!-- <div class="modal fade" id="exampleModalCenter" tabindex="-1" role="dialog"> 
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title" id="exampleModalLongTitle">FeedBack
                 </h5>
-                <button type="button" class="close"
+                <button type="button" class="close" data-dismiss="modal"
                     aria-label="Close">
                     <span aria-hidden="true">&times;</span>
                 </button>
@@ -280,7 +296,7 @@
             </div>
             <div class="modal-footer">
                 <button mat-raised-button color="primary" (click)="SearchData()"
-                    >Search</button>
+                    data-dismiss="modal">Search</button>
 
             </div>
         </div>

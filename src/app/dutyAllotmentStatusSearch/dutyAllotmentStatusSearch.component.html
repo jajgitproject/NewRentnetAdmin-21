@@ -30,7 +30,14 @@
                   <div class="row">
                     <div style="width: 70%; float: left; padding-top: 6px; padding-left: 12px;"></div>
                     <div style="width: 30%; text-align: right;">
-                      <button mat-raised-button color="primary" (click)="openSearchDialog()">
+                      <button
+                        mat-raised-button
+                        color="primary"
+                        data-dismiss="modal"
+                        data-toggle="modal"
+                        data-backdrop="false"
+                        data-target="#exampleModalCenter"
+                      >
                         Search
                       </button>
                       &nbsp; &nbsp;
@@ -95,10 +102,17 @@
   </div>
 </section>
 
-<ng-template #searchDialog let-dialogRef="dialogRef">
-    <h2 mat-dialog-title>Duty Allotment Status Search</h2>
-    <div mat-dialog-content>
-<form [formGroup]="searchForm">
+<div class="modal fade" id="exampleModalCenter" tabindex="-1" role="dialog">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="exampleModalLongTitle">Duty Allotment Status Search</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close" (click)="resetSearchState()">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <form [formGroup]="searchForm">
           <div class="form-row">
             <div class="form-group col-md-6 col-sm-12 mb-3">
               <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
@@ -138,10 +152,19 @@
             </div>
           </div> -->
         </form>
+      </div>
+      <div class="modal-footer">
+        <button
+          mat-raised-button
+          color="primary"
+          (click)="SearchData()"
+          [disabled]="searchForm.invalid"
+          data-dismiss="modal"
+        >
+          Search
+        </button>
+      </div>
     </div>
-    <div mat-dialog-actions align="end">
-        <button mat-button (click)="dialogRef.close()">Cancel</button>
-        <button mat-raised-button color="primary" (click)="SearchFromDialog(dialogRef)">Search</button>
-    </div>
-</ng-template>
+  </div>
+</div>
 

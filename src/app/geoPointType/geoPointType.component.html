@@ -26,9 +26,19 @@
                         <div class="responsive_table">
                             <div class="materialTableHeader">
                                 <div class="row">
-                                <ng-template #searchDialog let-dialogRef="dialogRef">
-    <h2 mat-dialog-title>Geo Point Type</h2>
-    <div mat-dialog-content>
+                                <div class="modal fade" id="exampleModalCenter" tabindex="-1" role="dialog">
+                                    <div class="modal-dialog modal-dialog-centered">
+                                        <div class="modal-content">
+                                            <div class="modal-header">
+                                                <h5 class="modal-title" id="exampleModalLongTitle">Geo Point Type
+                                                </h5>
+                                                <button type="button" class="close" data-dismiss="modal"
+                                                    aria-label="Close">
+                                                    <span aria-hidden="true">&times;</span>
+                                                </button>
+                                            </div>
+                                            <div class="modal-body">
+
                                                 <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
                                                     <mat-label>Geo Point Type</mat-label>
                                                     <input type="text" matInput [(ngModel)]="SearchName">
@@ -63,13 +73,15 @@
                                                 </mat-form-field>
 
 
-                                            
-    </div>
-    <div mat-dialog-actions align="end">
-        <button mat-button (click)="dialogRef.close()">Cancel</button>
-        <button mat-raised-button color="primary" (click)="SearchFromDialog(dialogRef)">Search</button>
-    </div>
-</ng-template>
+                                            </div>
+                                            <div class="modal-footer">
+                                                <button mat-raised-button color="primary" (click)="SearchData()"
+                                                    data-dismiss="modal">Search</button>
+
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
                                 <!-- <div style="width: 70%; float:left;padding-top: 15px;padding-left: 22px;">
                                     <div *ngIf="SearchName" style="float: left;"><b>Geo Point Type</b> : {{SearchName}},</div>
                                     <div *ngIf="parent.value" style="float: left;"><b>Parent</b> : {{parent.value}}</div>
@@ -105,7 +117,8 @@
                                 
                                 <div style="width: 30%; text-align:right;">
                                     <button mat-raised-button color="primary"
-                                        (click)="openSearchDialog()">
+                                        data-dismiss="modal" data-toggle="modal" data-backdrop="false"
+                                        data-target="#exampleModalCenter">
                                         Search
                                     </button>
                                     &nbsp;

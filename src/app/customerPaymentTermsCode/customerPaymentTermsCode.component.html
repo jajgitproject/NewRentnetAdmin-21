@@ -26,10 +26,19 @@
                         <div class="responsive_table">
                             <div class="materialTableHeader">
                                 <div class="row">
-                                <ng-template #searchDialog let-dialogRef="dialogRef">
-    <h2 mat-dialog-title>Customer Payment Terms Code</h2>
-    <div mat-dialog-content>
-<!-- <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                                <div class="modal fade" id="exampleModalCenter" tabindex="-1" role="dialog">
+                                    <div class="modal-dialog modal-dialog-centered">
+                                        <div class="modal-content">
+                                            <div class="modal-header">
+                                                <h5 class="modal-title" id="exampleModalLongTitle">Customer Payment Terms Code
+                                                </h5>
+                                                <button type="button" class="close" data-dismiss="modal"
+                                                    aria-label="Close">
+                                                    <span aria-hidden="true">&times;</span>
+                                                </button>
+                                            </div>
+                                            <div class="modal-body">
+                                                <!-- <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
                                                     <mat-label>Customer Category</mat-label>
                                                     <mat-select [formControl]="search"
                                                     [(ngModel)]="searchCustomerCategory">
@@ -51,12 +60,16 @@
                                                         <mat-option [value]=false>Deleted</mat-option>
                                                     </mat-select>
                                                 </mat-form-field>
-    </div>
-    <div mat-dialog-actions align="end">
-        <button mat-button (click)="dialogRef.close()">Cancel</button>
-        <button mat-raised-button color="primary" (click)="SearchFromDialog(dialogRef)">Search</button>
-    </div>
-</ng-template>
+
+                                            </div>
+                                            <div class="modal-footer">
+                                                <button mat-raised-button color="primary" (click)="SearchData()"
+                                                    data-dismiss="modal">Search</button>
+
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
                                 <!-- <div style="width: 70%; float:left;padding-top: 15px;padding-left: 22px;">
                                     <div *ngIf="search.value"><b>Customer Category</b> : {{search.value}}</div>
                                 </div> -->
@@ -90,7 +103,9 @@
                                 </div>
                                 
                                 <div style="width: 30%; text-align:right;">
-                                    <button mat-raised-button color="primary" (click)="openSearchDialog()">
+                                    <button mat-raised-button color="primary"
+                                        data-dismiss="modal" data-toggle="modal" data-backdrop="false"
+                                        data-target="#exampleModalCenter">
                                         Search
                                     </button>
                                     &nbsp;
