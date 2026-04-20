@@ -193,18 +193,51 @@ mat-option {
 /* Legacy Bootstrap modal parity:
    keep the "x" close button pinned to top-right corner, not title baseline. */
 .modal .modal-header {
-  position: relative;
-  padding-right: 2.25rem;
+  position: relative !important;
+  align-items: flex-start !important;
+  padding: 22px 24px 8px 24px !important;
+  padding-right: 4.25rem !important;
+  border-bottom: 0 !important;
 }
 
-.modal .modal-header .close {
-  position: absolute;
-  top: 0.5rem;
-  right: 0.75rem;
+.modal .modal-header .close,
+.modal .modal-header button.close {
+  position: absolute !important;
+  top: 14px !important;
+  right: 16px !important;
+  width: 56px !important;
+  height: 56px !important;
+  border-radius: 50% !important;
+  border: 0 !important;
+  background: #efefef !important;
+  opacity: 1 !important;
   margin: 0 !important;
   padding: 0 !important;
-  line-height: 1;
+  line-height: 1 !important;
   float: none !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  box-shadow: none !important;
+  color: #1f2430 !important;
+  z-index: 2;
+}
+
+.modal .modal-header .close span,
+.modal .modal-header button.close span {
+  font-size: 48px !important;
+  font-weight: 300 !important;
+  line-height: 1 !important;
+  color: #1f2430 !important;
+  margin-top: -6px;
+}
+
+.modal .modal-header .modal-title {
+  margin: 0 !important;
+  font-size: 42px !important;
+  font-weight: 600 !important;
+  line-height: 1.1 !important;
+  color: #1d2433 !important;
 }
 
 /* App-wide legacy popup sizing + centering rules */
