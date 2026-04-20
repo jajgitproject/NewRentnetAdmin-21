@@ -1,5 +1,5 @@
 // @ts-nocheck
-import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
+import { Component, ElementRef, OnInit, TemplateRef, ViewChild } from '@angular/core';
 import { RolePageMappingService } from './rolePageMapping.service';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { MatDialog } from '@angular/material/dialog';
@@ -65,6 +65,7 @@ export class RolePageMappingComponent implements OnInit {
   @ViewChild(MatPaginator, { static: true }) paginator: MatPaginator;
   @ViewChild(MatSort, { static: true }) sort: MatSort;
   @ViewChild('filter', { static: true }) filter: ElementRef;
+  @ViewChild('searchDialog') searchDialog: TemplateRef<any>;
   @ViewChild(MatMenuTrigger)
 
   contextMenu: MatMenuTrigger;
@@ -213,6 +214,15 @@ export class RolePageMappingComponent implements OnInit {
     this.loadData();
     //this.SearchName='';
     
+  }
+
+  openSearchDialog() {
+    this.dialog.open(this.searchDialog, { width: '550px' });
+  }
+
+  SearchFromDialog(dialogRef: any) {
+    this.SearchData();
+    dialogRef.close();
   }
 
   InitPages(){

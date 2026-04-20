@@ -1,5 +1,5 @@
 // @ts-nocheck
-import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
+import { Component, ElementRef, OnInit, TemplateRef, ViewChild } from '@angular/core';
 import { BankBranchService } from './bankBranch.service';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { MatDialog } from '@angular/material/dialog';
@@ -73,6 +73,7 @@ export class BankBranchComponent implements OnInit {
   @ViewChild(MatPaginator, { static: true }) paginator: MatPaginator;
   @ViewChild(MatSort, { static: true }) sort: MatSort;
   @ViewChild('filter', { static: true }) filter: ElementRef;
+  @ViewChild('searchDialog') searchDialog: TemplateRef<any>;
   @ViewChild(MatMenuTrigger)
   contextMenu: MatMenuTrigger;
   contextMenuPosition = { x: '0px', y: '0px' };
@@ -228,6 +229,19 @@ shouldShowDeleteButton(item: any): boolean {
     this.loadData();
     //this.SearchBankBranch='';
     
+  }
+
+  openSearchDialog()
+  {
+    this.dialog.open(this.searchDialog, {
+      width: '540px'
+    });
+  }
+
+  SearchFromDialog(dialogRef: any)
+  {
+    this.SearchData();
+    dialogRef.close();
   }
 
 /////////////////for Image Upload////////////////////////////

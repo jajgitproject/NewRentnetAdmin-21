@@ -1,5 +1,5 @@
 // @ts-nocheck
-import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
+import { Component, ElementRef, OnInit, ViewChild, TemplateRef } from '@angular/core';
 import { CustomerPersonDriverRestrictionService } from './customerPersonDriverRestriction.service';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { MatDialog } from '@angular/material/dialog';
@@ -65,7 +65,9 @@ export class CustomerPersonDriverRestrictionComponent implements OnInit {
   @ViewChild(MatPaginator, { static: true }) paginator: MatPaginator;
   @ViewChild(MatSort, { static: true }) sort: MatSort;
   @ViewChild('filter', { static: true }) filter: ElementRef;
-  @ViewChild(MatMenuTrigger)
+  
+  @ViewChild('searchDialog') searchDialog: TemplateRef<any>;
+@ViewChild(MatMenuTrigger)
   contextMenu: MatMenuTrigger;
   contextMenuPosition = { x: '0px', y: '0px' };
   ngOnInit() {
@@ -371,6 +373,17 @@ export class CustomerPersonDriverRestrictionComponent implements OnInit {
       (error: HttpErrorResponse) => { this.dataSource = null;}
     );
   }
+
+
+  openSearchDialog() {
+    this.dialog.open(this.searchDialog, { width: '500px' });
+  }
+
+  SearchFromDialog(dialogRef: any) {
+    SearchData();
+    dialogRef.close();
+  }
+
 }
 
 

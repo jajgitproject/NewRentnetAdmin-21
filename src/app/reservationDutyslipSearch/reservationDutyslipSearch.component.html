@@ -1,15 +1,8 @@
 <!-- modelpopup
-<div class="modal fade" id="exampleModalCenter" tabindex="-1" role="dialog">
-      <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="exampleModalLongTitle">Reservation / Dutyslip Search</h5>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                  <span aria-hidden="true">&times;</span>
-                </button>
-            </div>
-            <div class="modal-body">
-                <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+<ng-template #searchDialog let-dialogRef="dialogRef">
+    <h2 mat-dialog-title>Reservation / Dutyslip Search</h2>
+    <div mat-dialog-content>
+<mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
                     <mat-label>Booking Number</mat-label>
                     <input type="text" matInput [(ngModel)]="reservationID" (ngModelChange)="onInputChange()" [disabled]="isReservationDisabled">
                 </mat-form-field>
@@ -18,13 +11,12 @@
                     <mat-label>Dutyslip Number</mat-label>
                     <input type="text" matInput [(ngModel)]="dutyslipID" (ngModelChange)="onInputChange()" [disabled]="isDutySlipDisabled">
                 </mat-form-field>
-            </div>
-            <div class="modal-footer">
-                <button mat-raised-button color="primary" data-dismiss="modal" (click)="SearchData()">Search</button>
-            </div>
-        </div>
     </div>
-</div> -->
+    <div mat-dialog-actions align="end">
+        <button mat-button (click)="dialogRef.close()">Cancel</button>
+        <button mat-raised-button color="primary" (click)="SearchFromDialog(dialogRef)">Search</button>
+    </div>
+</ng-template> -->
 
 <div class="card search-card">
 

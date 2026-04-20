@@ -13,6 +13,7 @@
     "fix:spec-imports": "node scripts/fix-spec-imports.cjs",
     "fix:spec-testbed": "node scripts/fix-spec-testbed.cjs",
     "fix:delete-spec-providers": "node scripts/fix-delete-dialog-spec-providers.cjs",
+    "modal:report": "node scripts/modal-migration-report.cjs",
     "test": "ng test",
     "lint": "ng lint"
   },

@@ -1,5 +1,5 @@
 // @ts-nocheck
-import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
+import { Component, ElementRef, OnInit, ViewChild, TemplateRef } from '@angular/core';
 import { CustomerContractCarCategoryService } from './customerContractCarCategory.service';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { MatDialog } from '@angular/material/dialog';
@@ -91,7 +91,9 @@ export class CustomerContractCarCategoryComponent implements OnInit {
   @ViewChild(MatPaginator, { static: true }) paginator: MatPaginator;
   @ViewChild(MatSort, { static: true }) sort: MatSort;
   @ViewChild('filter', { static: true }) filter: ElementRef;
-  @ViewChild(MatMenuTrigger)
+  
+  @ViewChild('searchDialog') searchDialog: TemplateRef<any>;
+@ViewChild(MatMenuTrigger)
   contextMenu: MatMenuTrigger;
   contextMenuPosition = { x: '0px', y: '0px' };
   ngOnInit() {
@@ -565,6 +567,17 @@ saveCustomerContractCarCategory() {
         }
     );
 }
+
+
+  openSearchDialog() {
+    this.dialog.open(this.searchDialog, { width: '500px' });
+  }
+
+  SearchFromDialog(dialogRef: any) {
+    SearchData();
+    dialogRef.close();
+  }
+
 }
 
 

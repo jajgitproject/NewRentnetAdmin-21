@@ -30,18 +30,10 @@
                             <div class="table-responsive">
                                 <div class="materialTableHeader" >
                                     <div class="row">
-                                        <div class="modal fade" id="exampleModalCenter" tabindex="-1" role="dialog">
-                                            <div class="modal-dialog modal-dialog-centered" style="max-width: 65%;">
-                                                <div class="modal-content">
-                                                    <div class="modal-header">
-                                                        <h5 class="modal-title" id="exampleModalLongTitle">Attach/Detach Duties</h5>
-                                                        <button type="button" class="close" data-dismiss="modal"
-                                                            aria-label="Close">
-                                                            <span aria-hidden="true">&times;</span>
-                                                        </button>
-                                                    </div>
-                                                    <div class="modal-body">                                  
-                                                        <div class="row">
+                                        <ng-template #searchDialog let-dialogRef="dialogRef">
+    <h2 mat-dialog-title>Attach/Detach Duties</h2>
+    <div mat-dialog-content>
+<div class="row">
                                                             <div class="col-xl-3 col-lg-3 col-md-6 col-sm-12 mb-2">
                                                                 <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
                                                                     <mat-label>Customer</mat-label>
@@ -176,39 +168,31 @@
                                                                 </mat-form-field>
                                                             </div>
                                                         </div>
-                                                                                                            
-                                                    </div>
-
-                                                    <div class="modal-footer">
-                                                        <button mat-raised-button color="primary" (click)="SearchData()"  data-dismiss="modal">Search</button>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
+    </div>
+    <div mat-dialog-actions align="end">
+        <button mat-button (click)="dialogRef.close()">Cancel</button>
+        <button mat-raised-button color="primary" (click)="SearchFromDialog(dialogRef)">Search</button>
+    </div>
+</ng-template>
 
                                         <div style="width: 100%; text-align: right;">
-                                            <button mat-raised-button color="primary" data-dismiss="modal"
-                                                data-toggle="modal" data-backDrop="false" *ngIf="InvoiceNumberWithPrefix"
+                                            <button mat-raised-button color="primary" *ngIf="InvoiceNumberWithPrefix"
                                                 (click)="AttachDuty()">
                                                 Attach Duty
                                             </button>
                                             &nbsp; 
-                                            <button mat-raised-button color="primary" data-dismiss="modal"
-                                                data-toggle="modal" data-backDrop="false"
+                                            <button mat-raised-button color="primary"
                                                *ngIf="!InvoiceNumberWithPrefix"
                                                 (click)="GenerateSingleInvoiceforSingleDuty()">
                                                 Generate Single Invoice for Single Duty
                                             </button>
                                             &nbsp; 
-                                            <button mat-raised-button color="primary" data-dismiss="modal"
-                                                data-toggle="modal" data-backDrop="false" *ngIf="!InvoiceNumberWithPrefix"
+                                            <button mat-raised-button color="primary" *ngIf="!InvoiceNumberWithPrefix"
                                                 (click)="GenerateSingleInvoiceforMultipleDuties()">
                                                 Generate Single Invoice for Multiple Duties
                                             </button>
                                             &nbsp; 
-                                            <button mat-raised-button color="primary" data-dismiss="modal"
-                                                data-toggle="modal" data-backDrop="false"
-                                                data-target="#exampleModalCenter">
+                                            <button mat-raised-button color="primary" (click)="openSearchDialog()">
                                                 Search
                                             </button>
                                             &nbsp;                                           

@@ -2971,17 +2971,10 @@
 </section>
 
 <!-- Filters -->
-<div class="modal fade" id="exampleModalCenter" tabindex="-1" role="dialog">
-  <div class="modal-dialog modal-dialog-centered">
-    <div class="modal-content">
-      <div class="modal-header" style="height: 40px">
-        <h5 class="modal-title" id="exampleModalLongTitle">Trip Filter</h5>
-        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-          <span aria-hidden="true">&times;</span>
-        </button>
-      </div>
-      <div class="modal-body">
-        <form class="register-form" [formGroup]="filterForm">
+<ng-template #searchDialog let-dialogRef="dialogRef">
+    <h2 mat-dialog-title>Trip Filter</h2>
+    <div mat-dialog-content>
+<form class="register-form" [formGroup]="filterForm">
           <div class="row">
             <div class="col-xl-6 col-lg-6 col-md-6 col-sm-6 mb-2">
               <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
@@ -3508,12 +3501,9 @@
           </div>
 
         </form>
-      </div>
-      <div class="modal-footer">
-        <button mat-raised-button color="primary" (click)="SearchData()" data-dismiss="modal">
-          Search
-        </button>
-      </div>
     </div>
-  </div>
-</div>
+    <div mat-dialog-actions align="end">
+        <button mat-button (click)="dialogRef.close()">Cancel</button>
+        <button mat-raised-button color="primary" (click)="SearchFromDialog(dialogRef)">Search</button>
+    </div>
+</ng-template>

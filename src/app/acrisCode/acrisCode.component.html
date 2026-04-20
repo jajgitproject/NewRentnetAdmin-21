@@ -59,9 +59,7 @@
                                         </div>
                                     </div>
                                     <div style="width: 30%; text-align:right;">
-                                        <button mat-raised-button color="primary"
-                                            data-dismiss="modal" data-toggle="modal" data-backdrop="false"
-                                            data-target="#exampleModalCenter">
+                                        <button mat-raised-button color="primary" (click)="openSearchDialog()">
                                             Search
                                         </button>
                                         &nbsp;
@@ -194,62 +192,39 @@
         </div>
     </div>
 </section>
-<!-- Modal PopUp Code -->
-<div class="modal fade" id="exampleModalCenter" tabindex="-1" role="dialog">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="exampleModalLongTitle">ACRISS Code
-                </h5>
-                <button type="button" class="close" data-dismiss="modal"
-                    aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button>
-            </div>
-            <div class="modal-body">
 
-                 <!-- <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
-                    <mat-label>Acris Code Type</mat-label>
-                    <input type="text" matInput [formControl]="search"
-                        [(ngModel)]="SearchAcrisCodeType">
-                </mat-form-field>  -->
+<ng-template #searchDialog let-dialogRef="dialogRef">
+    <h2 mat-dialog-title>ACRISS Code</h2>
+    <div mat-dialog-content>
+        <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+            <mat-label>ACRISS Code </mat-label>
+            <input type="text" matInput [(ngModel)]="SearchAcrisCode">
+        </mat-form-field>
 
-                <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
-                    <mat-label>ACRISS Code </mat-label>
-                    <input type="text" matInput
-                        [(ngModel)]="SearchAcrisCode">
-                </mat-form-field>
+        <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+            <mat-label>ACRISS Code Type</mat-label>
+            <mat-select [(ngModel)]="SearchAcrisCodeType">
+                <mat-option value="1">1</mat-option>
+                <mat-option value="2">2</mat-option>
+                <mat-option value="3">3</mat-option>
+                <mat-option value="4">4</mat-option>
+            </mat-select>
+        </mat-form-field>
+        <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+            <mat-label>ACRISS Code Value</mat-label>
+            <input type="text" matInput [(ngModel)]="SearchAcrisCodeValue">
+        </mat-form-field>
 
-                <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
-                    <mat-label>ACRISS Code Type</mat-label>
-                    <mat-select [(ngModel)]="SearchAcrisCodeType">
-                        <mat-option value="1">1</mat-option>
-                        <mat-option value="2">2</mat-option>
-                        <mat-option value="3">3</mat-option>
-                        <mat-option value="4">4</mat-option>
-                    </mat-select>
-                </mat-form-field>
-                <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
-                    <mat-label>ACRISS Code Value</mat-label>
-                    <input type="text" matInput 
-                        [(ngModel)]="SearchAcrisCodeValue">
-                </mat-form-field>
-            
-                <mat-form-field class="example-full-width mb-3"
-                    appearance="outline" floatLabel="always">
-                    <mat-label>Activation Status</mat-label>
-                    <mat-select [(value)]="SearchActivationStatus">
-                        <mat-option [value]=true>Active</mat-option>
-                        <mat-option [value]=false>Deleted</mat-option>
-                    </mat-select>
-                </mat-form-field>
-
-            </div>
-            <div class="modal-footer">
-                <button mat-raised-button color="primary" (click)="SearchData()" 
-                    data-dismiss="modal">Search</button>
-
-            </div>
-        </div>
+        <mat-form-field class="example-full-width mb-3" appearance="outline" floatLabel="always">
+            <mat-label>Activation Status</mat-label>
+            <mat-select [(value)]="SearchActivationStatus">
+                <mat-option [value]=true>Active</mat-option>
+                <mat-option [value]=false>Deleted</mat-option>
+            </mat-select>
+        </mat-form-field>
     </div>
-</div>
+    <div mat-dialog-actions align="end">
+        <button mat-button (click)="dialogRef.close()">Cancel</button>
+        <button mat-raised-button color="primary" (click)="SearchFromDialog(dialogRef)">Search</button>
+    </div>
+</ng-template>

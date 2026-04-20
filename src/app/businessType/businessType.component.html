@@ -55,9 +55,7 @@
                                         </div>
                                     </div>
                                     <div style="width: 30%; text-align:right;">
-                                        <button mat-raised-button color="primary"
-                                            data-dismiss="modal" data-toggle="modal" data-backdrop="false"
-                                            data-target="#exampleModalCenter">
+                                        <button mat-raised-button color="primary" (click)="openSearchDialog()">
                                             Search
                                         </button>
                                         &nbsp;
@@ -153,38 +151,24 @@
     </div>
 </section>
 
-<!-- modelpopup -->
-<div class="modal fade" id="exampleModalCenter" tabindex="-1" role="dialog">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="exampleModalLongTitle">Business Type</h5>
-                <button type="button" class="close" data-dismiss="modal"
-                    aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button>
-            </div>
-            <div class="modal-body">
+<ng-template #searchDialog let-dialogRef="dialogRef">
+    <h2 mat-dialog-title>Business Type</h2>
+    <div mat-dialog-content>
+        <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+            <mat-label>BusinessType</mat-label>
+            <input type="text" matInput [(ngModel)]="SearchBusinessTypeName">
+        </mat-form-field>
 
-                <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
-                    <mat-label>BusinessType</mat-label>
-                    <input type="text" matInput [(ngModel)]="SearchBusinessTypeName">
-                </mat-form-field>
-
-                <mat-form-field class="example-full-width mb-3"
-                    appearance="outline" floatLabel="always">
-                    <mat-label>Activation Status</mat-label>
-                    <mat-select [(value)]="SearchActivationStatus">
-                        <mat-option [value]=true>Active</mat-option>
-                        <mat-option [value]=false>Deleted</mat-option>
-                    </mat-select>
-                </mat-form-field>
-
-            </div>
-            <div class="modal-footer">
-                <button mat-raised-button color="primary" (click)="SearchData()"
-                    data-dismiss="modal">Search</button>
-            </div>
-        </div>
+        <mat-form-field class="example-full-width mb-3" appearance="outline" floatLabel="always">
+            <mat-label>Activation Status</mat-label>
+            <mat-select [(value)]="SearchActivationStatus">
+                <mat-option [value]=true>Active</mat-option>
+                <mat-option [value]=false>Deleted</mat-option>
+            </mat-select>
+        </mat-form-field>
     </div>
-</div>
+    <div mat-dialog-actions align="end">
+        <button mat-button (click)="dialogRef.close()">Cancel</button>
+        <button mat-raised-button color="primary" (click)="SearchFromDialog(dialogRef)">Search</button>
+    </div>
+</ng-template>

@@ -1,5 +1,5 @@
 // @ts-nocheck
-import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
+import { Component, ElementRef, OnInit, TemplateRef, ViewChild } from '@angular/core';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { MatDialog } from '@angular/material/dialog';
 import { MatPaginator } from '@angular/material/paginator';
@@ -140,6 +140,7 @@ export class CarUtilizationMISComponent implements OnInit {
   @ViewChild(MatPaginator, { static: true }) paginator: MatPaginator;
   @ViewChild(MatSort, { static: true }) sort: MatSort;
   @ViewChild('filter', { static: true }) filter: ElementRef;
+  @ViewChild('searchDialog') searchDialog: TemplateRef<any>;
   @ViewChild(MatMenuTrigger)
   contextMenu: MatMenuTrigger;
   contextMenuPosition = { x: '0px', y: '0px' };
@@ -442,6 +443,15 @@ shouldShowDeleteButton(item: any): boolean {
   public SearchData()
   {
     this.loadData();
+  }
+
+  openSearchDialog() {
+    this.dialog.open(this.searchDialog, { width: '700px' });
+  }
+
+  SearchFromDialog(dialogRef: any) {
+    this.SearchData();
+    dialogRef.close();
   }
 
 /////////////////for Image Upload////////////////////////////
