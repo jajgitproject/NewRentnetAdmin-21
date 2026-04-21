@@ -14,7 +14,10 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 
 @Component({
   standalone: false,
-  selector: 'app-lumpsumRateDetails',
+  // Rename to avoid NG0300 collision with the embedded LumpsumRateDetailsComponent
+  // (same selector registered in two different components inside the newForm
+  // module scope -> "Multiple components match node with tagname").
+  selector: 'app-lumpsumRateDetails-dialog',
   templateUrl: './lumpsumRateDetails.component.html',
   styleUrls: ['./lumpsumRateDetails.component.sass'],
   providers: [{ provide: MAT_DATE_LOCALE, useValue: 'en-GB' }]

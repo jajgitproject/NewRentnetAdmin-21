@@ -15,7 +15,12 @@ import { ReservationSourceDropDown } from 'src/app/reservationSource/reservation
 
 @Component({
   standalone: false,
-  selector: 'app-otherDetails',
+  // The embedded OtherDetailsComponent already owns the `app-otherDetails`
+  // selector. Keeping the same selector here triggered Angular's NG0300
+  // (multiple components match node with tagname app-otherDetails), which
+  // crashed NewFormComponent's template at `<app-otherDetails>` and left the
+  // whole /newForm page blank.
+  selector: 'app-otherDetails-dialog',
   templateUrl: './otherDetails.component.html',
   styleUrls: ['./otherDetails.component.sass'],
   providers: [{ provide: MAT_DATE_LOCALE, useValue: 'en-GB' }]

@@ -17,7 +17,10 @@ import Swal from 'sweetalert2';
 
 @Component({
   standalone: false,
-  selector: 'app-discountDetails',
+  // Rename to avoid NG0300 collision with the embedded DiscountDetailsComponent
+  // (same selector registered in two different components inside the newForm
+  // module scope -> "Multiple components match node with tagname").
+  selector: 'app-discountDetails-dialog',
   templateUrl: './discountDetails.component.html',
   styleUrls: ['./discountDetails.component.sass'],
   providers: [{ provide: MAT_DATE_LOCALE, useValue: 'en-GB' }]
