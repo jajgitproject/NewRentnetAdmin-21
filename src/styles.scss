@@ -124,6 +124,62 @@
   overflow-y: auto !important;
 }
 
+/* Global dialog scrolling fix for Angular Material 21 (MDC).
+   Many dialogs in this app (Customer, Supplier, Employee, etc.) don't pass a
+   panelClass, so the `.dbe-dialog-centered`-scoped rules above don't reach them
+   and long forms get clipped at the viewport with no scrollbar. Without a
+   dialog-wide cap here, the MDC surface grows to fit its content and pushes
+   past the viewport. Applying `max-height` + `overflow-y: auto` unconditionally
+   is safe: short dialogs stay short (max-height only kicks in when content
+   overflows), long ones become scrollable.
+
+   Two paths are covered:
+   1. Preferred: popup uses `<div mat-dialog-content>` — the content div scrolls.
+   2. Fallback: popup doesn't use `mat-dialog-content` — the dialog surface
+      itself scrolls (targeted via `:has()` so we don't get double scrollbars
+      on popups that DO use mat-dialog-content). */
+
+.cdk-overlay-pane .mat-mdc-dialog-container,
+.cdk-overlay-pane .mdc-dialog__surface {
+  max-height: 90vh;
+}
+.cdk-overlay-pane .mat-mdc-dialog-content,
+.cdk-overlay-pane .mdc-dialog__content {
+  max-height: calc(90vh - 120px);
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+/* Fallback: if the popup surface has no mat-dialog-content child, let the
+   surface itself scroll so long forms aren't clipped. */
+.cdk-overlay-pane .mdc-dialog__surface:not(:has(.mat-mdc-dialog-content)):not(:has(.mdc-dialog__content)),
+.cdk-overlay-pane .mat-mdc-dialog-container:not(:has(.mat-mdc-dialog-content)):not(:has(.mdc-dialog__content)) {
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+.cdk-overlay-pane .mat-mdc-dialog-content::-webkit-scrollbar,
+.cdk-overlay-pane .mdc-dialog__content::-webkit-scrollbar,
+.cdk-overlay-pane .mdc-dialog__surface::-webkit-scrollbar {
+  width: 8px;
+}
+.cdk-overlay-pane .mat-mdc-dialog-content::-webkit-scrollbar-track,
+.cdk-overlay-pane .mdc-dialog__content::-webkit-scrollbar-track,
+.cdk-overlay-pane .mdc-dialog__surface::-webkit-scrollbar-track {
+  background: #f1f1f1;
+}
+.cdk-overlay-pane .mat-mdc-dialog-content::-webkit-scrollbar-thumb,
+.cdk-overlay-pane .mdc-dialog__content::-webkit-scrollbar-thumb,
+.cdk-overlay-pane .mdc-dialog__surface::-webkit-scrollbar-thumb {
+  background: #888;
+  border-radius: 4px;
+}
+.cdk-overlay-pane .mat-mdc-dialog-content::-webkit-scrollbar-thumb:hover,
+.cdk-overlay-pane .mdc-dialog__content::-webkit-scrollbar-thumb:hover,
+.cdk-overlay-pane .mdc-dialog__surface::-webkit-scrollbar-thumb:hover {
+  background: #555;
+}
+
 /* Material timepicker visual parity (light popup with blue actions) */
 .cdk-overlay-pane .mat-timepicker-panel {
   border-radius: 10px !important;
@@ -456,9 +512,9 @@ body > .swal2-container.swal2-backdrop-show {
 
 .modal .modal-header .modal-title {
   margin: 0 !important;
-  font-size: 42px !important;
+  font-size: 20px !important;
   font-weight: 600 !important;
-  line-height: 1.1 !important;
+  line-height: 1.3 !important;
   color: #1d2433 !important;
 }
 

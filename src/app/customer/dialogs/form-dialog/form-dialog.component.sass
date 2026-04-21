@@ -1,29 +1,6 @@
-::ng-deep
-  .mat-dialog-container
-    padding: 0 !important
-
-  mat-dialog-content
-    max-height: calc(100vh - 200px)
-    overflow-y: auto
-    padding: 20px
-    display: block
-
-    &::-webkit-scrollbar
-      width: 8px
-
-    &::-webkit-scrollbar-track
-      background: #f1f1f1
-
-    &::-webkit-scrollbar-thumb
-      background: #888
-      border-radius: 4px
-
-      &:hover
-        background: #555
-
-  .mat-dialog-actions
-    padding: 16px
-    border-top: 1px solid #e0e0e0
+// Dialog scroll + surface rules now live globally in src/styles.scss under
+// the "Global dialog scrolling fix for Angular Material 21 (MDC)" block so
+// every popup in the app benefits without needing ::ng-deep per component.
 
 .addContainer
   display: flex
