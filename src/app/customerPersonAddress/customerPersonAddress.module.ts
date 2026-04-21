@@ -34,10 +34,10 @@ import { MatAutocompleteModule } from '@angular/material/autocomplete';
 @NgModule({
   declarations: [
     CustomerPersonAddressComponent,
-    advanceTableForm,
     DeleteDialogComponent
   ],
   imports: [
+    advanceTableForm,
     MatAutocompleteModule,
     GooglePlaceModule,
     CommonModule,

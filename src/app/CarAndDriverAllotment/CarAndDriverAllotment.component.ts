@@ -1609,7 +1609,8 @@ getAllDriver()
     this.dialog.open(TimeAndAddressInfoComponent, {
       width: '750px',
       data: {
-        advanceTable: item.stopsDetails[0]
+        advanceTable: item.stopsDetails[0],
+        parentRow: item
       }
     });
   }
@@ -1623,7 +1624,9 @@ getAllDriver()
     this.dialog.open(TimeAndAddressInfoComponent, {
       width: '750px',
       data: {
-        advanceTable: item.stopsDetails[1]
+        advanceTable: item.stopsDetails[1],
+        parentRow: item,
+        locationKind: 'drop'
       }
     });
   }

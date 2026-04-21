@@ -1,6 +1,6 @@
 // @ts-nocheck
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
-import { Component, Inject } from '@angular/core';
+import { ChangeDetectorRef, Component, Inject, NgZone } from '@angular/core';
 import { EmailInfoModel } from './EmailInfo.model';
 import { MAT_DATE_LOCALE } from '@angular/material/core';
 import { GeneralService } from '../general/general.service';
@@ -27,10 +27,20 @@ export class EmailInfoComponent {
     @Inject(MAT_DIALOG_DATA) public data: any,
     public _generalService: GeneralService,
     public emailInfoService: EmailInfoService,
+    private cdr: ChangeDetectorRef,
+    private ngZone: NgZone,
   ) {
     // Set the defaults
     this.dialogTitle = 'Email Info';
-    this.reservationID = data.reservationID;
+    // Accept whichever identifier the caller provides. Some screens pass
+    // reservationID, others pass reservationGroupID (or hand over the whole
+    // row via advanceTable); fall back through all of them.
+    this.reservationID =
+      data?.reservationID ??
+      data?.reservationGroupID ??
+      data?.advanceTable?.reservationID ??
+      data?.advanceTable?.reservationGroupID ??
+      null;
   }
 
   onNoClick(): void {
@@ -39,6 +49,11 @@ export class EmailInfoComponent {
 
   ngOnInit() 
   {
+    if (this.reservationID === null || this.reservationID === undefined || this.reservationID === '') {
+      console.warn('[EmailInfo] No reservation identifier supplied; skipping load.');
+      this.emailList = [];
+      return;
+    }
     this.loadData();      
   }
 
@@ -68,13 +83,36 @@ export class EmailInfoComponent {
     this.emailInfoService.getData(this.reservationID).subscribe(
     data =>   
     {
-      this.emailList = data;
-      if(this.emailList && this.emailList.length>0)
-      {
-        this.prepareInstructions();
+      // Be resilient to different response shapes: an array directly,
+      // an object wrapping the array (e.g. { data: [...] } or
+      // { reservationDetails: [...] }), or a single reservation object.
+      let list: any = data;
+      if (list && !Array.isArray(list)) {
+        if (Array.isArray(list.data)) list = list.data;
+        else if (Array.isArray(list.reservationDetails)) list = list.reservationDetails;
+        else if (Array.isArray(list.emailList)) list = list.emailList;
+        else if (list.reservationID !== undefined) list = [list];
+        else list = [];
       }
+      // Defer the state mutation to the next microtask so bindings that
+      // already read 'N/A' during the in-flight change-detection pass do
+      // not collide with the new value (NG0100).
+      this.ngZone.run(() => {
+        setTimeout(() => {
+          this.emailList = list || [];
+          if (this.emailList && this.emailList.length > 0) {
+            this.prepareInstructions();
+          }
+          this.cdr.detectChanges();
+        }, 0);
+      });
     },
-    (error: HttpErrorResponse) => { this.emailList = null;});
+    (error: HttpErrorResponse) => 
+    { 
+      console.error('[EmailInfo] Failed to load email details:', error);
+      this.emailList = [];
+      this.cdr.detectChanges();
+    });
   }
     
   copyEmail() {

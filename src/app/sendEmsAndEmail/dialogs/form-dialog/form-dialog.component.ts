@@ -58,7 +58,7 @@ export class FormDialogSendEmsComponent {
     'action'
   ];
   dataSource: any;
-  permissionData: ConfigurationMessaging[] | any;
+  permissionData: ConfigurationMessaging[] | any = [];
   @ViewChild(MatTable) table: MatTable<any>;
   showError: string;
   action: string;

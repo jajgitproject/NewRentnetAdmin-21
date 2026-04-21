@@ -5,7 +5,7 @@ import { MAT_DIALOG_DATA, MatDialog, MatDialogRef } from '@angular/material/dial
 // import { SendSMSService } from '../../sendSMS.service';
 import { GeneralService } from 'src/app/general/general.service';
 import { CustomerPersonDropDown } from 'src/app/customerPerson/customerPersonDropDown.model';
-import { Observable } from 'rxjs';
+import { Observable, of } from 'rxjs';
 import { map, startWith } from 'rxjs/operators';
 import { EmployeeDropDown } from 'src/app/employee/employeeDropDown.model';
 import { AddPeople } from './add-people.model';
@@ -18,7 +18,7 @@ import { ConfigurationMessaging } from '../sendEmsAndEmail.model';
 
 @Component({
   standalone: false,
-  selector: 'app-add-people',
+  selector: 'app-ems-email-add-people',
   templateUrl: './add-people.component.html',
   styleUrls: ['./add-people.component.sass']
 })
@@ -29,17 +29,19 @@ export class AddPeopleComponent implements OnInit {
   advanceTableForm: FormGroup;
   advanceTable: AddPeople;
   formDataArray = [];
-  filteredCustomerMobileOptions: Observable<CustomerPersonDropDown[]>;
-  filteredCustomerEmailListOptions: Observable<CustomerPersonDropDown[]>;
+  // Seed every autocomplete stream with an empty observable so the template's
+  // "| async" never resolves from null -> array within the same CD cycle.
+  filteredCustomerMobileOptions: Observable<CustomerPersonDropDown[]> = of([]);
+  filteredCustomerEmailListOptions: Observable<CustomerPersonDropDown[]> = of([]);
   public CustomerMobileList?: CustomerPersonDropDown[] = [];
   public CustomerEmailList?: CustomerPersonDropDown[] = [];
   public EmployeeMailList?: CustomerPersonDropDown[] = [];
-  filteredEmployeeMobileOptions: Observable<EmployeeDropDown[]>;
-  filteredEmployeeMailOptions: Observable<EmployeeDropDown[]>;
+  filteredEmployeeMobileOptions: Observable<EmployeeDropDown[]> = of([]);
+  filteredEmployeeMailOptions: Observable<EmployeeDropDown[]> = of([]);
   public EmployeeMobileList?: EmployeeDropDown[] = [];
   public EmployeeEmailList?: EmployeeDropDown[] = [];
   public CountryCodeList?: CountryCodeDropDown[] = [];
-  filteredCountryCodeOptions: Observable<CountryCodeDropDown[]>;
+  filteredCountryCodeOptions: Observable<CountryCodeDropDown[]> = of([]);
   permissionData:ConfigurationMessaging[] | any;
   employeeID: any;
   primaryEmail: any;

@@ -37,10 +37,10 @@ import { AbstractControl, } from '@angular/forms';
 @NgModule({
   declarations: [
     CustomerPersonComponent,
-    advanceTableForm,
     DeleteDialogComponent
   ],
   imports: [
+    advanceTableForm,
     MatTooltipModule,
     CommonModule,
     FormsModule,

@@ -20,7 +20,7 @@
   <mat-card-content>
     <mat-dialog-content class="of-hidden">
       <div *ngFor="let sp of specialInstructionInfo.specialInstruction; let i = index">
-        <diiv class="row">
+        <div class="row">
           <div class="col-xl-6 col-lg-6 col-md-6 col-sm-6 mb-2">
             <span class="TDValueBold">Special Instruction</span> <br />
             {{ sp.specialInstruction}}
@@ -28,9 +28,9 @@
           <!-- <hr /> -->
           <div class="col-xl-6 col-lg-6 col-md-6 col-sm-6 mb-2">
             <span class="TDValueBold">Photo</span> <br />
-            <span class="table-img tbl-col-width-per-12"><img style="cursor: pointer;" src="{{sp.specialInstructionAttachment}}" (click)="openImageInNewTab(sp.specialInstructionAttachment)"/></span>
+            <span class="table-img tbl-col-width-per-12"><img *ngIf="sp.specialInstructionAttachment && (sp.specialInstructionAttachment.startsWith('http://') || sp.specialInstructionAttachment.startsWith('https://') || sp.specialInstructionAttachment.startsWith('data:') || sp.specialInstructionAttachment.startsWith('/assets/'))" style="cursor: pointer;" [src]="sp.specialInstructionAttachment" (click)="openImageInNewTab(sp.specialInstructionAttachment)" (error)="$any($event.target).style.display='none'"/></span>
           </div>
-        </diiv>
+        </div>
       </div>
     </mat-dialog-content>
   </mat-card-content>

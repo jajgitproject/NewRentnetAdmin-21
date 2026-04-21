@@ -14,9 +14,9 @@
     <div mat-dialog-content class="si-dialog__body">
         <form class="register-form" [formGroup]="advanceTableForm" (ngSubmit)="submit()">
             <div class="si-dialog__row">
-                <mat-form-field class="si-dialog__field" appearance="outline">
+                <mat-form-field class="si-dialog__field" appearance="outline" floatLabel="always">
                     <mat-label>Special Instruction</mat-label>
-                    <input required matInput formControlName="specialInstruction">
+                    <input required matInput formControlName="specialInstruction" placeholder="Enter special instruction">
                     <mat-error *ngIf="advanceTableForm.get('specialInstruction').hasError('required')">
                         Special Instruction is required
                     </mat-error>
@@ -24,9 +24,9 @@
             </div>
 
             <div class="si-dialog__row">
-                <mat-form-field class="si-dialog__field" appearance="outline">
+                <mat-form-field class="si-dialog__field" appearance="outline" floatLabel="always">
                     <mat-label>Special Instruction By</mat-label>
-                    <input required matInput formControlName="specialInstructionBy">
+                    <input required matInput formControlName="specialInstructionBy" placeholder="Enter instruction by">
                     <mat-error *ngIf="advanceTableForm.get('specialInstructionBy').hasError('required')">
                         Special Instruction By is required
                     </mat-error>

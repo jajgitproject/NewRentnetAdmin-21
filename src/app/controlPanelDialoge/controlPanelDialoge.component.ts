@@ -266,7 +266,8 @@ export class ControlPanelDialogeComponent {
         width: '750px',
         data: {
           advanceTable: item.stopsDetails[0],
-          status: this.status
+          status: this.status,
+          parentRow: item
         }
       });
     }, item.reservationID);
@@ -277,7 +278,9 @@ export class ControlPanelDialogeComponent {
         width: '750px',
         data: {
           advanceTable: item.stopsDetails[1],
-          status: this.status
+          status: this.status,
+          parentRow: item,
+          locationKind: 'drop'
         }
       });
     }, item.reservationID);
@@ -629,7 +632,9 @@ export class ControlPanelDialogeComponent {
     this.dialog.open(EmailInfoComponent, {
       // width: '500px',
       data: {
-        reservationGroupID: item.reservationGroupID
+        reservationID: item?.reservationID,
+        reservationGroupID: item?.reservationGroupID,
+        advanceTable: item
       }
     });
   }
@@ -2189,6 +2194,8 @@ TrackOnMapInfo(dutySlipID:number) {
       this.dialog.open(EmailInfoComponent, {
         width: '500px',
         data: {
+          reservationID: reservationID ?? filtered?.reservationID,
+          reservationGroupID: filtered?.reservationGroupID,
           advanceTable: filtered
         }
       });

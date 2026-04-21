@@ -158,6 +158,12 @@
   overflow-x: hidden;
 }
 
+/* Time & Address Info: one scrollbar — stop the dialog surface from scrolling in addition to mat-dialog-content. */
+.cdk-overlay-pane:has(app-TimeAndAddressInfo) .mdc-dialog__surface,
+.cdk-overlay-pane:has(app-TimeAndAddressInfo) .mat-mdc-dialog-container {
+  overflow: hidden !important;
+}
+
 .cdk-overlay-pane .mat-mdc-dialog-content::-webkit-scrollbar,
 .cdk-overlay-pane .mdc-dialog__content::-webkit-scrollbar,
 .cdk-overlay-pane .mdc-dialog__surface::-webkit-scrollbar {
@@ -411,27 +417,40 @@ body > .swal2-container.swal2-backdrop-show {
   color: #5bc0de !important;
 }
 
-/* Action bar: legacy footer look, right-aligned */
+/* Action bar: legacy footer look, right-aligned.
+   flex-wrap: nowrap prevents SweetAlert's default wrap behaviour from pushing
+   the last button (e.g. "Reservation List") onto a second row when all three
+   actions are shown together. */
 .swal2-popup .swal2-actions {
   display: flex !important;
+  flex-wrap: nowrap !important;
   justify-content: flex-end !important;
-  gap: 10px !important;
+  align-items: center !important;
+  gap: 8px !important;
   margin: 0 !important;
-  padding: 12px 20px !important;
+  padding: 12px 16px !important;
   border-top: 1px solid rgba(82, 63, 105, 0.08);
   background: #fafbfc;
+  width: 100% !important;
+  box-sizing: border-box !important;
 }
 
-/* Buttons: 4px radius, Poppins, matching sizing to MatDialog action buttons */
+/* Buttons: 4px radius, Poppins, matching sizing to MatDialog action buttons.
+   Relaxed min-width + flex-shrink:1 + white-space:nowrap so multi-button
+   layouts like [Add Details] [Control Panel] [Reservation List] stay on one
+   line without wrapping. */
 .swal2-popup .swal2-styled {
   font-family: 'Poppins', 'Roboto', 'Helvetica Neue', sans-serif !important;
   font-weight: 600 !important;
   font-size: 13px !important;
   border-radius: 4px !important;
-  min-width: 92px !important;
-  padding: 8px 16px !important;
+  min-width: 0 !important;
+  padding: 8px 14px !important;
+  margin: 0 !important;
   text-transform: none !important;
   letter-spacing: 0 !important;
+  white-space: nowrap !important;
+  flex: 0 0 auto !important;
   box-shadow: none !important;
 }
 .swal2-popup .swal2-styled.swal2-confirm {

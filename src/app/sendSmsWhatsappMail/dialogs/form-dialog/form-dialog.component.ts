@@ -55,7 +55,9 @@ export class FormDialogSendSmsWhatsappMailComponent {
     'action'
   ];
   dataSource: any;
-  permissionData: ConfigurationMessaging[] | any;
+  // Start as an empty array so the template's *ngIf="!permissionData" does
+  // not transition from true -> false once data arrives (NG0100).
+  permissionData: ConfigurationMessaging[] | any = [];
   @ViewChild(MatTable) table: MatTable<any>;
   showError: string;
   action: string;

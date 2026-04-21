@@ -20,7 +20,7 @@ import { SendEmsAndEmail } from '../sendEmsAndEmail.model';
 
 @Component({
   standalone: false,
-    selector: 'app-passenger-dialog',
+    selector: 'app-ems-email-passenger-dialog',
     templateUrl: './passenger-dialog.component.html',
     styleUrls: ['./passenger-dialog.component.sass'],
     providers: [{ provide: MAT_DATE_LOCALE, useValue: 'en-GB' }]

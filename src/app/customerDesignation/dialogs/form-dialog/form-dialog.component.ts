@@ -1,23 +1,46 @@
 // @ts-nocheck
-import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
+import { MAT_DIALOG_DATA, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
 import { Component, ElementRef, HostListener, Inject } from '@angular/core';
 import { CustomerDesignationService } from '../../customerDesignation.service';
-import { FormControl, Validators, FormGroup, FormBuilder} from '@angular/forms';
+import { FormControl, Validators, FormGroup, FormBuilder, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { CustomerDesignation } from '../../customerDesignation.model';
 import { MAT_DATE_LOCALE } from '@angular/material/core';
-import { formatDate } from '@angular/common';
+import { CommonModule, formatDate } from '@angular/common';
 import { GeneralService } from '../../../general/general.service';
 import { CurrencyDropDown } from 'src/app/general/currencyDropDown.model';
 import { QualificationDropDown } from 'src/app/general/qualificationDropDown.model';
 import { CitiesDropDown } from 'src/app/organizationalEntity/citiesDropDown.model';
 import { SupplierRateCardDropDown } from 'src/app/supplierRateCard/supplierRateCardDropDown.model';
 import { CustomerCategoryDropDown } from 'src/app/customerCategory/customerCategoryDropDown.model';
-import { MatSnackBar } from '@angular/material/snack-bar';
+import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatInputModule } from '@angular/material/input';
+import { MatSelectModule } from '@angular/material/select';
+import { MatButtonModule } from '@angular/material/button';
+import { MatIconModule } from '@angular/material/icon';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatCheckboxModule } from '@angular/material/checkbox';
+import { MatRadioModule } from '@angular/material/radio';
 @Component({
-  standalone: false,
-  selector: 'app-form-dialog',
+  standalone: true,
+  selector: 'app-customerdesignation-form-dialog',
   templateUrl: './form-dialog.component.html',
   styleUrls: ['./form-dialog.component.sass'],
+  imports: [
+    CommonModule,
+    FormsModule,
+    ReactiveFormsModule,
+    MatDialogModule,
+    MatFormFieldModule,
+    MatInputModule,
+    MatSelectModule,
+    MatButtonModule,
+    MatIconModule,
+    MatProgressSpinnerModule,
+    MatSnackBarModule,
+    MatCheckboxModule,
+    MatRadioModule,
+  ],
   providers: [{ provide: MAT_DATE_LOCALE, useValue: 'en-GB' }]
 })
 

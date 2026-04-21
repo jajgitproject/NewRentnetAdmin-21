@@ -407,7 +407,6 @@ export class ReservationService
     }
    updatePickupEdit(advanceTable: any)
     {
-      debugger;
     if(advanceTable.pickupTime==="")
     {
       advanceTable.pickupTime=null;

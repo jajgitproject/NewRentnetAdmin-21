@@ -144,48 +144,51 @@ export class ControlPanelDesignComponent implements OnInit {
   public reservationInfo: any[]=[];
   public reservationHeaderInfo: ControlPanelHeaderDetails[];
   public VehicleList?: VehicleDropDown[] = [];
-  filteredVehicleOptions: Observable<VehicleDropDown[]>;
+  // Seed every autocomplete stream with an empty observable so the template's
+  // "| async" never transitions from null -> array in the same CD cycle
+  // (NG0100 source).
+  filteredVehicleOptions: Observable<VehicleDropDown[]> = of([]);
 
   public CustomerGroupList?: CustomerGroupDropDown[] = [];
-  filteredCustomerGroupOptions: Observable<CustomerGroupDropDown[]>;
+  filteredCustomerGroupOptions: Observable<CustomerGroupDropDown[]> = of([]);
 
   public CustomersList?: CustomerCustomerGroupDropDown[] = [];
-  filteredCustomersOptions: Observable<CustomerCustomerGroupDropDown[]>;
+  filteredCustomersOptions: Observable<CustomerCustomerGroupDropDown[]> = of([]);
 
   public CustomerList?: CustomerCustomerGroupDropDown[] = [];
-  filteredCustomerOptions: Observable<CustomerCustomerGroupDropDown[]>;
+  filteredCustomerOptions: Observable<CustomerCustomerGroupDropDown[]> = of([]);
 
-  filteredBookerOptions: Observable<CustomerPersonDropDown[]>;
+  filteredBookerOptions: Observable<CustomerPersonDropDown[]> = of([]);
   public BookerList?: CustomerPersonDropDown[] = [];
 
   public PassengerList?: CustomerPersonDropDown[] = [];
-  filteredPassengerOptions: Observable<CustomerPersonDropDown[]>;
+  filteredPassengerOptions: Observable<CustomerPersonDropDown[]> = of([]);
 
   public VehicleCategoryList?: VehicleCategoryDropDown[] = [];
-  filteredVehicleCategoryOptions: Observable<VehicleCategoryDropDown[]>;
+  filteredVehicleCategoryOptions: Observable<VehicleCategoryDropDown[]> = of([]);
   
   public CityList?: CitiesDropDown[] = [];
-  filteredCityOptions: Observable<CitiesDropDown[]>;
+  filteredCityOptions: Observable<CitiesDropDown[]> = of([]);
 
   public PackageTypeList?:PackageTypeDropDown[]=[]; 
-  filteredPackageTypeOptions: Observable<PackageTypeDropDown[]>;
+  filteredPackageTypeOptions: Observable<PackageTypeDropDown[]> = of([]);
 
   public PackageList?:PackageDropDown[]=[];
-  filteredPackageOptions: Observable<PackageDropDown[]>;
+  filteredPackageOptions: Observable<PackageDropDown[]> = of([]);
 
   public SupplierList?:SupplierDropDown[]=[];
-  filteredSupplierOptions: Observable<SupplierDropDown[]>;
+  filteredSupplierOptions: Observable<SupplierDropDown[]> = of([]);
 
-  filteredVehicleInventoryOptions: Observable<DriverInventoryAssociationDropDown[]>;
+  filteredVehicleInventoryOptions: Observable<DriverInventoryAssociationDropDown[]> = of([]);
   public VehicleInventoryList?: DriverInventoryAssociationDropDown[] = [];
 
-  filteredDriverOptions: Observable<DriverInventoryAssociationDropDown[]>;
+  filteredDriverOptions: Observable<DriverInventoryAssociationDropDown[]> = of([]);
   public DriverList?: DriverInventoryAssociationDropDown[] = [];
 
-  filteredDriverOfficialIdentityNumberOptions: Observable<DriverOfficialIdentityNumberDD[]>;
+  filteredDriverOfficialIdentityNumberOptions: Observable<DriverOfficialIdentityNumberDD[]> = of([]);
   public DriverOfficialIdentityNumberList?: DriverOfficialIdentityNumberDD[] = [];
 
-  filteredDisputesOptions: Observable<DisputeTypeDropDown[]>;
+  filteredDisputesOptions: Observable<DisputeTypeDropDown[]> = of([]);
   public DisputesList?: DisputeTypeDropDown[] = [];
 
   totalData = 0;
@@ -257,10 +260,10 @@ export class ControlPanelDesignComponent implements OnInit {
   public DutyPostPickUPCall:DutyPostPickUPCallModel | null;
 
   public OrganizationalEntityList?: OrganizationalEntityDropDown[] = [];
-  filteredOrganizationalEntityOptions: Observable<OrganizationalEntityDropDown[]>;
+  filteredOrganizationalEntityOptions: Observable<OrganizationalEntityDropDown[]> = of([]);
 
   public TransferLocationList?: OrganizationalEntityDropDown[] = [];
-  filteredTransferLocationOptions: Observable<OrganizationalEntityDropDown[]>;
+  filteredTransferLocationOptions: Observable<OrganizationalEntityDropDown[]> = of([]);
   verifyDutyStatusAndCacellationStatus: any;
     
   constructor(
@@ -2272,12 +2275,12 @@ reachedByExecutiveGPS(item:any){
     this.dialog.open(TimeAndAddressInfoComponent, {
       width: '750px',
       data: {
-        advanceTable: item.stopsDetails[0]
+        advanceTable: item.stopsDetails[0],
+        parentRow: item
       }
     });
   }
   TimeAndAddressDrop(item) {
-    debugger
     // const filtered = this.reservationInfo
     //   .filter((value) => value.reservationID === reservationID)[0]
     //   .stopsDetails.filter(
@@ -2286,7 +2289,9 @@ reachedByExecutiveGPS(item:any){
     this.dialog.open(TimeAndAddressInfoComponent, {
       width: '750px',
       data: {
-        advanceTable: item.stopsDetails[1]
+        advanceTable: item.stopsDetails[1],
+        parentRow: item,
+        locationKind: 'drop'
       }
     });
   }
@@ -3608,8 +3613,8 @@ navigateToInterstateTaxDetails(item)
       data: 
       {
         advanceTable:item,
-        customerID:item.customerID,     
-        
+        customerID:item.customerID,
+        status: this.status
       }
     });
     dialogRef.afterClosed().subscribe((res: any) => {

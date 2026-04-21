@@ -335,19 +335,35 @@ export class StopsModel {
   country: string;
   constructor(stops) {
     this.reservationStopID = stops.reservationStopID || '';
-    this.reservationStopAddress = stops.reservationStopID || '';
+    this.reservationStopAddress = stops.reservationStopAddress || '';
     this.encodedStopAddressGeoLocation =
       stops.encodedStopAddressGeoLocation || '';
-    this.reservationStopCityID = stops.reservationStopID || '';
-    this.reservationStopAddressDetails = stops.reservationStopID || '';
-    this.reservationStopDate = stops.reservationStopID || '';
-    this.reservationStopTime = stops.reservationStopID || '';
-    this.reservationStopType = stops.reservationStopID || '';
-    this.cityGroup = stops.reservationStopID || '';
-    this.cityTierName = stops.reservationStopID || '';
-    this.city = stops.reservationStopID || '';
-    this.state = stops.reservationStopID || '';
-    this.country = stops.reservationStopID || '';
+    this.reservationStopCityID = stops.reservationStopCityID || '';
+    this.reservationStopAddressDetails = stops.reservationStopAddressDetails || '';
+    this.reservationStopDate = stops.reservationStopDate || '';
+    this.reservationStopTime = stops.reservationStopTime || '';
+    this.reservationStopType = stops.reservationStopType || stops.stopType || '';
+    this.cityGroup =
+      stops.cityGroup ||
+      stops.CityGroup ||
+      stops.cityGroupName ||
+      '';
+    this.cityTierName = stops.cityTierName || stops.CityTierName || '';
+    this.city =
+      stops.city ||
+      stops.City ||
+      stops.reservationStopCity ||
+      '';
+    this.state =
+      stops.state ||
+      stops.State ||
+      stops.reservationStopState ||
+      '';
+    this.country =
+      stops.country ||
+      stops.Country ||
+      stops.reservationStopCountry ||
+      '';
   }
 }
 

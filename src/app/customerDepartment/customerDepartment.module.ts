@@ -32,10 +32,10 @@ import { MyUploadModule } from '../myupload/myupload.module';
 @NgModule({
   declarations: [
     CustomerDepartmentComponent,
-    advanceTableForm,
     DeleteDialogComponent
   ],
   imports: [
+    advanceTableForm,
     CommonModule,
     FormsModule,
     ReactiveFormsModule,

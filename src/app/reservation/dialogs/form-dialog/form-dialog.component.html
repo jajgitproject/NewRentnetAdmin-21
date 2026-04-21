@@ -18,14 +18,13 @@
     </button>
     </div>
     <div mat-dialog-content>
-        <form class="register-form m-4" [formGroup]="advanceTableForm" (ngSubmit)="submit">
+        <form class="register-form m-4" [formGroup]="advanceTableForm" (ngSubmit)="submit()">
            
             <div class="row">
                 <div class="col-xl-12 col-lg-6 col-md-12 col-sm-12 mb-2">
                     <mat-form-field class="example-full-width"  appearance="outline" floatLabel="always">
                         <mat-label>Pickup Time</mat-label>
-                        <input matInput [owlDateTimeTrigger]="time1" [owlDateTime]="time1" formControlName="pickupTime"
-                            (ngModelChange)="locationTimeSet($event)" >
+                        <input matInput [owlDateTimeTrigger]="time1" [owlDateTime]="time1" formControlName="pickupTime">
                         <button mat-icon-button matSuffix type="button" [owlDateTimeTrigger]="time1" class="date-icon" aria-label="Open time picker"><mat-icon>schedule</mat-icon></button>
                         <owl-date-time [pickerType]="'timer'" #time1></owl-date-time>
                     </mat-form-field>
@@ -41,9 +40,14 @@
             </div> -->
                 <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12 mb-2">
                     <div class="example-button-row">
-                        <button mat-raised-button color="primary" *ngIf="saveDisabled" [type]="submit" [disabled]="!advanceTableForm.valid || buttonDisabled"  (click)="confirmAdd()">Save</button>
-                        <mat-spinner *ngIf="!saveDisabled" diameter="30"></mat-spinner>
-                    <button  mat-raised-button color="warn" (click)="onNoClick()"
+                        <button mat-raised-button color="primary" type="button"
+                          [disabled]="!advanceTableForm.valid || buttonDisabled || isSubmitting"
+                          (click)="confirmAdd()">
+                          <span *ngIf="!isSubmitting">Save</span>
+                          <span *ngIf="isSubmitting">Saving…</span>
+                        </button>
+                        <mat-spinner *ngIf="isSubmitting" diameter="28" class="pickup-time-spinner"></mat-spinner>
+                    <button mat-raised-button color="warn" type="button" (click)="onNoClick()"
                         tabindex="-1">Cancel</button>
                     </div>
                 </div>

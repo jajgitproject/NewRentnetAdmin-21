@@ -8,7 +8,7 @@ import { MatSort } from '@angular/material/sort';
 import { ModelForReservation, Reservation, ReservationStatusLog } from './reservation.model';
 import { DataSource } from '@angular/cdk/collections';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import { BehaviorSubject, fromEvent, merge, Observable, Subject, Subscription } from 'rxjs';
+import { BehaviorSubject, fromEvent, merge, Observable, of, Subject, Subscription } from 'rxjs';
 import { map, startWith } from 'rxjs/operators';
 import { DateAdapter, MAT_DATE_LOCALE } from '@angular/material/core';
 import { MatMenu, MatMenuTrigger } from '@angular/material/menu';
@@ -115,7 +115,10 @@ export class ReservationComponent implements OnInit {
   filteredBookerOptions: Observable<CustomerPersonDropDown[]>;
   searchBooker: FormControl = new FormControl();
 
-  filteredPassengerOptions: Observable<CustomerPersonDropDown[]>;
+  // Seed with an already-emitting observable so the async pipe never
+  // transitions from null -> [] inside the first change-detection pass
+  // (that transition triggers NG0100 on the passenger *ngFor).
+  filteredPassengerOptions: Observable<CustomerPersonDropDown[]> = of([]);
   searchPassenger: FormControl = new FormControl();
 showHideSpecialInst:boolean = false;
   showHideInternalNote:boolean = false;
@@ -703,30 +706,49 @@ onTNCChange(checked: any)
     }
 
   InitProjectCode() {
-    this._generalService
-      .GetCustomerRentNetFieldsBasedOnCustomerID(this.advanceTableForm.value.customerID || this.advanceTable.customerID)
-      .subscribe((data) => {
-        this.CustomerExtraFieldList = data;
-        this.arr1 = [];
-        this.arr2 = [];
-  
-        this.CustomerExtraFieldList.forEach((ele) => {
-          this.arr1.push(ele.customerReservationFieldID);
-          this.arr2.push(ele.fieldName);
-  
-          const isMandatory = ele.isMandatory ? [Validators.required] : [];
-          this.advanceTableForm.addControl(ele.fieldName, new FormControl('', isMandatory));
-        });
+    // `this.advanceTable` is undefined in new-reservation mode. Guard every
+    // access so ngOnInit doesn't throw and abort the rest of the init chain
+    // (which previously left contractID / customerID / customerGroupID unset
+    // and produced a cascade of 400s to `.../undefined` URLs).
+    const customerID = this.advanceTableForm.value.customerID
+      || (this.advanceTable && this.advanceTable.customerID);
 
-        if(this.action === 'edit')
-        {
-          this.CustomerSpecificFieldsloadData();
-        }
-  
-        this.advanceTableForm.patchValue({
-          customerReservationFieldID: this.arr1,
-          fieldName: this.arr2,
-        });
+    if (!customerID) {
+      // No customer selected yet; skip the lookup. It will be triggered later
+      // when the user picks a customer (see getCustomerID / customer handlers).
+      return;
+    }
+
+    this._generalService
+      .GetCustomerRentNetFieldsBasedOnCustomerID(customerID)
+      .subscribe((data) => {
+        // Defer mutation to the next macrotask so the *ngIf/*ngFor over
+        // CustomerExtraFieldList (line ~1207 in the template) is not
+        // updated inside the same check / verify-check pass that first
+        // read it, which is what produces NG0100 in dev mode.
+        setTimeout(() => {
+          this.CustomerExtraFieldList = data || [];
+          this.arr1 = [];
+          this.arr2 = [];
+
+          this.CustomerExtraFieldList.forEach((ele) => {
+            this.arr1.push(ele.customerReservationFieldID);
+            this.arr2.push(ele.fieldName);
+
+            const isMandatory = ele.isMandatory ? [Validators.required] : [];
+            this.advanceTableForm.addControl(ele.fieldName, new FormControl('', isMandatory));
+          });
+
+          if(this.action === 'edit')
+          {
+            this.CustomerSpecificFieldsloadData();
+          }
+
+          this.advanceTableForm.patchValue({
+            customerReservationFieldID: this.arr1,
+            fieldName: this.arr2,
+          });
+        }, 0);
       });
   }
   
@@ -1285,7 +1307,11 @@ getFieldValues() {
   // }
    //------------ CustomerCustomerGroup -----------------
   InitCustomerCustomerGroup(){
-      this._generalService.getCustomerCustomerGroup(this.customerTypeID || this.advanceTableForm.value.customerTypeID).subscribe(
+      const customerTypeID = this.customerTypeID || this.advanceTableForm.value.customerTypeID;
+      // Skip while no customer type is picked yet; otherwise the backend URL
+      // path trails nothing and the request returns 400 on page load.
+      if (!customerTypeID) { return; }
+      this._generalService.getCustomerCustomerGroup(customerTypeID).subscribe(
         data=>
         {
           this.CustomerCustomerGroupList=data;
@@ -1416,19 +1442,23 @@ getFieldValues() {
 
   ViewKAM()
   {
-    if(this.advanceTableForm.value.customerID)
-    {
-    const dialogRef = this.dialog.open(FormDialogComponent, 
+    // customerID may live on the component property (set during edit init)
+    // or on the form control. Fall back to both so the dialog opens even
+    // when the form's customerID patch hasn't happened yet.
+    const customerID = this.advanceTableForm.value.customerID || this.customerID;
+    if (!customerID) {
+      console.warn('[ViewKAM] No customerID available yet; aborting dialog open.');
+      return;
+    }
+    const payload = { ...this.advanceTableForm.value, customerID };
+    this.dialog.open(FormDialogComponent,
       {
-        width:'60%',
-        data: 
+        width: '60%',
+        data:
           {
-            advanceTable: this.advanceTableForm.value,
-            // action: 'add'
-            
+            advanceTable: payload,
           }
       });
-    }
   }
   
   //------------ Booker -----------------
@@ -1776,6 +1806,10 @@ getFieldValues() {
     //this.InitReservationInvoiceGSTDetails( this.customerID);
     //this.InitResrvationGSTForCityID(this.customerID,this.cityID);
     this.GetReservationCapping(this.customerGroupID,this.customerID,this.pickupDate,this.cityID,this.packageTypeID,this.vehicleCategoryID);
+    // Recalculate drop-off time in case the user picked the city last; the
+    // guard inside getETRDropOffTime skips the API call until every required
+    // input is populated, so this is safe to call unconditionally.
+    this.getETRDropOffTime();
   }
 
    //------------DropOff City -----------------
@@ -2094,6 +2128,9 @@ getFieldValues() {
 
   //------------ Type -----------------
   InitPackageType(){
+    // Skip until a contract is known; otherwise the URL ends in "undefined"
+    // and the backend returns 400 on page load.
+    if (!this.contractID) { return; }
     this._generalService.getPackageTypeByContractID(this.contractID).subscribe(
       data=>
       {
@@ -2224,10 +2261,17 @@ DTValidator(PackageTypeList: any[]): ValidatorFn {
   getPackageID(packageID: any) {
     this.packageID=packageID;
     this.advanceTableForm.patchValue({packageID:this.packageID});
-    this.InitCity(this.packageType || this.advanceTable.packageType);
-    this.InitDropOffCity(this.packageType || this.advanceTable.packageType);
+    // `this.advanceTable` is undefined in new-reservation mode; guard every
+    // access so a missing record doesn't throw and abort the rest of this
+    // function (which would leave downstream form state half-initialised).
+    const fallbackPackageType = this.packageType || (this.advanceTable && this.advanceTable.packageType) || '';
+    this.InitCity(fallbackPackageType);
+    this.InitDropOffCity(fallbackPackageType);
     this.InitVehicle(this.packageType);
-    //this.getETRDropOffTime();
+    // Re-enabled so Drop-off Time / ETR binds as soon as a Package is picked.
+    // Previously only getVehicleID() triggered this, which meant the field
+    // stayed blank until a vehicle was also selected.
+    this.getETRDropOffTime();
   }
 
   //------------ PickupSpotType -----------------
@@ -2272,6 +2316,9 @@ DTValidator(PackageTypeList: any[]): ValidatorFn {
 
    //------------ PickupSpot -----------------
   InitPickupSpot(){
+    // Skip until a pickup-spot type is selected; otherwise the URL ends in
+    // "undefined" and the backend returns 400 on page load.
+    if (!this.pickupSpotTypeID) { return; }
     this._generalService.GetPickupSpotForReservation(this.pickupSpotTypeID).subscribe(
       data=>
       {
@@ -2313,6 +2360,9 @@ DTValidator(PackageTypeList: any[]): ValidatorFn {
   //------------ Service Location -----------------
   InitServiceLocationBasedOnCity()
   { 
+    // Skip until a pickup city is selected; otherwise the URL ends in
+    // "undefined" and the backend returns 400 on page load.
+    if (!this.cityID) { return; }
     this._generalService.GetLocationBasedOnCity(this.cityID).subscribe(
       data=>
       {
@@ -2474,6 +2524,9 @@ DTValidator(PackageTypeList: any[]): ValidatorFn {
 
    //------------ DropOffSpot -----------------
   InitDropOffSpot(){
+    // Skip until a drop-off-spot type is selected; otherwise the URL ends
+    // in "undefined" and the backend returns 400 on page load.
+    if (!this.dropOffSpotTypeID) { return; }
     this._generalService.GetPickupSpotForReservation(this.dropOffSpotTypeID).subscribe(
       data=>
       {
@@ -3904,13 +3957,22 @@ private patchPickupAddress(res: any) {
             this.noReservationMessage = false;
             this.InitPackageType();
             this.InitPackage();
-            if(this.action ==='edit')
+            if(this.action ==='edit' && this.advanceTable && this.advanceTable.packageType)
             {
-              this.advanceTable.packageType =this.advanceTable.packageType +" "+ "Rate";
+              this.advanceTable.packageType = this.advanceTable.packageType + " " + "Rate";
             }
-            this.InitCity(this.packageType || this.advanceTable.packageType);
-            this.InitDropOffCity(this.packageType || this.advanceTable.packageType);
-            this.InitVehicle(this.packageType || this.advanceTable.packageType);
+            // In new-reservation mode `this.advanceTable` may still be null
+            // before any contract/package selections exist; guard every access.
+            const fallbackPackageType = this.packageType || (this.advanceTable && this.advanceTable.packageType) || '';
+            this.InitCity(fallbackPackageType);
+            this.InitDropOffCity(fallbackPackageType);
+            this.InitVehicle(fallbackPackageType);
+            // Retry Drop-off Time calculation now that contractID is known.
+            // In edit mode getETRDropOffTime() runs synchronously during
+            // loadData() before this async contract lookup completes, so
+            // the original call is aborted by the guard; trigger it again
+            // here once all the inputs are finally available.
+            this.getETRDropOffTime();
           } 
           else
           {
@@ -4109,26 +4171,156 @@ private patchPickupAddress(res: any) {
     );
   }
 
+  // Parses a date value coming from the form in one of the many shapes
+  // the page hands us (Date, ISO string, "DD/MM/YYYY", "DD-MM-YYYY",
+  // "YYYY-MM-DD", etc.). Returns a moment or null if none match.
+  private parseFlexibleDate(value: any): moment.Moment | null {
+    if (value === null || value === undefined || value === '') { return null; }
+    if (value instanceof Date) {
+      const m = moment(value);
+      return m.isValid() ? m : null;
+    }
+    const candidates = [
+      moment.ISO_8601,
+      'YYYY-MM-DDTHH:mm:ss',
+      'YYYY-MM-DDTHH:mm:ss.SSSZ',
+      'YYYY-MM-DD',
+      'DD/MM/YYYY',
+      'DD-MM-YYYY',
+      'MM/DD/YYYY',
+    ];
+    const m = moment(value, candidates as any, true);
+    if (m.isValid()) { return m; }
+    const loose = moment(value);
+    return loose.isValid() ? loose : null;
+  }
+
+  // Parses a time value in any shape we've seen on the page (Date, ISO
+  // datetime, "HH:mm", "HH:mm:ss", "h:mm A"). Returns a moment or null.
+  private parseFlexibleTime(value: any): moment.Moment | null {
+    if (value === null || value === undefined || value === '') { return null; }
+    if (value instanceof Date) {
+      const m = moment(value);
+      return m.isValid() ? m : null;
+    }
+    const candidates = [
+      moment.ISO_8601,
+      'YYYY-MM-DDTHH:mm:ss',
+      'YYYY-MM-DDTHH:mm:ss.SSSZ',
+      'HH:mm',
+      'HH:mm:ss',
+      'h:mm A',
+      'hh:mm A',
+    ];
+    const m = moment(value, candidates as any, true);
+    if (m.isValid()) { return m; }
+    const loose = moment(value);
+    return loose.isValid() ? loose : null;
+  }
+
+  // Best-effort client-side drop-off computation. Reads the selected
+  // package label (e.g. "4 Hrs /40 Kms", "8 Hrs 80 Kms", "12 hr") and,
+  // if it contains a usable hour count, sets Drop-off Date / Drop-off
+  // Time / ETR Time = Pickup + hours. No-op when any required piece is
+  // missing so we never stamp garbage into the form.
+  private applyLocalPackageDropOff(pickupDateMoment: moment.Moment | null, pickupTimeMoment: moment.Moment | null): void {
+    if (!pickupDateMoment || !pickupDateMoment.isValid()) { return; }
+    if (!pickupTimeMoment || !pickupTimeMoment.isValid()) { return; }
+
+    const packageLabel: string = this.advanceTableForm.value.package
+      || (this.advanceTable && (this.advanceTable as any).package)
+      || '';
+    const hours = this.extractPackageHours(packageLabel);
+    if (!hours) { return; }
+
+    // Some package types (on-demand / long-term / outstation variants)
+    // deliberately leave drop-off blank on the server side. Respect that
+    // if we can detect it locally from the packageType label.
+    const packageType: string = this.advanceTableForm.value.packageType
+      || (this.advanceTable && (this.advanceTable as any).packageType)
+      || '';
+    const blankTypes = ['Local On Demand', 'Long Term Rental', 'Outstation Lumpsum', 'Outstation OneWay Trip', 'Outstation Round Trip'];
+    if (blankTypes.some(t => packageType.toLowerCase().includes(t.toLowerCase()))) {
+      return;
+    }
+
+    const combined = moment({
+      year: pickupDateMoment.year(),
+      month: pickupDateMoment.month(),
+      day: pickupDateMoment.date(),
+      hour: pickupTimeMoment.hour(),
+      minute: pickupTimeMoment.minute(),
+    });
+    if (!combined.isValid()) { return; }
+
+    const dropOff = combined.clone().add(hours, 'hours');
+    const dropOffDateStr = dropOff.format('YYYY-MM-DD');
+
+    this.advanceTableForm.patchValue({ dropOffDate: dropOffDateStr });
+    this.advanceTableForm.patchValue({ dropOffTime: dropOff.toDate() });
+    this.advanceTableForm.patchValue({ etrTime: dropOff.toDate() });
+  }
+
+  // Extracts the hour count from a package label. Handles shapes like
+  // "4 Hrs /40 Kms", "8 Hrs", "12hr", "24 Hours" - returns null if none.
+  private extractPackageHours(label: string): number | null {
+    if (!label) { return null; }
+    const match = label.match(/(\d+(?:\.\d+)?)\s*(?:hrs?|hours?|h)\b/i);
+    if (!match) { return null; }
+    const hours = parseFloat(match[1]);
+    return isNaN(hours) || hours <= 0 ? null : hours;
+  }
+
   getETRDropOffTime()
   {
-    var pickupTime;
-    var pickupDate;
-    var packageID = this.advanceTableForm.value.packageID || this.packageID;
-    var contractID = this.advanceTableForm.value.contractID || this.contractID;
-    var vehicleID = this.advanceTableForm.value.vehicleID || this.vehicleID;
-    var cityID = this.advanceTableForm.value.pickupCityID || this.cityID;
-    if(this.advanceTableForm.value.pickupTime === "" || this.advanceTableForm.value.pickupTime === undefined)
-    {
-      pickupTime = null; 
+    // Prefer live form values, then local state, then the loaded reservation
+    // record (edit mode). This lets the call succeed whether the user is
+    // editing an existing reservation or filling a fresh one, in any order.
+    const av: any = this.advanceTable || {};
+    var packageID = this.advanceTableForm.value.packageID || this.packageID || av.packageID;
+    var contractID = this.advanceTableForm.value.contractID || this.contractID || av.contractID;
+    var vehicleID = this.advanceTableForm.value.vehicleID || this.vehicleID || av.vehicleID;
+    var cityID = this.advanceTableForm.value.pickupCityID || this.cityID || av.pickupCityID;
+
+    // `pickupDate` / `pickupTime` can arrive as Date objects (from the Owl
+    // date-time picker), ISO strings, "DD/MM/YYYY" strings, or "HH:mm"
+    // strings depending on edit vs. new flow. moment(...) with no format
+    // silently returns "Invalid date" for anything non-ISO, which would
+    // still satisfy a truthy check -> the URL gets "Invalid%20date" in a
+    // path segment and the backend returns 400. Parse safely instead.
+    const rawPickupDate = this.advanceTableForm.value.pickupDate ?? av.pickupDate;
+    const rawPickupTime = this.advanceTableForm.value.pickupTime ?? av.pickupTime;
+
+    const pickupDateMoment = this.parseFlexibleDate(rawPickupDate);
+    const pickupTimeMoment = this.parseFlexibleTime(rawPickupTime);
+
+    const pickupDate = pickupDateMoment && pickupDateMoment.isValid()
+      ? pickupDateMoment.format('DD-MM-YYYY')
+      : null;
+    const pickupTime = pickupTimeMoment && pickupTimeMoment.isValid()
+      ? pickupTimeMoment.format('HH:mm')
+      : null;
+
+    // Guard: the backend URL is a path-parameter style, so any undefined /
+    // empty value would be serialised as the literal string "undefined" and
+    // cause the request to fail silently, leaving the Drop-off Time field
+    // blank. If the server call isn't possible yet, fall back to a purely
+    // client-side "pickup + package duration" computation so the field
+    // isn't left empty while the user is still filling the form.
+    if (!packageID || !contractID || !vehicleID || !cityID || !pickupTime || !pickupDate) {
+      this.applyLocalPackageDropOff(pickupDateMoment, pickupTimeMoment);
+      return;
     }
-    else
-    {
-      pickupTime=moment(this.advanceTableForm.value.pickupTime).format('HH:mm');
-      pickupDate=moment(this.advanceTableForm.value.pickupDate).format('DD-MM-YYYY');
-    }
+
+    // Pre-fill drop-off locally from the package hours so the field is never
+    // empty while waiting for the API, and to cover the case where the API
+    // itself returns nothing meaningful for this combo.
+    this.applyLocalPackageDropOff(pickupDateMoment, pickupTimeMoment);
+
     this.reservationService.getTimeForDropoffTime(packageID,pickupTime,pickupDate,contractID,vehicleID,cityID).subscribe(
     (data:any)=>
     {
+      if (!data) { return; }
       if(data.packageType === 'Local On Demand' || data.packageType === 'Long Term Rental' || data.packageType === 'Outstation Lumpsum' || data.packageType === 'Outstation OneWay Trip' || data.packageType === 'Outstation Round Trip')
       {
         this.advanceTableForm.controls['dropOffTime'].setValue('');
@@ -4138,15 +4330,28 @@ private patchPickupAddress(res: any) {
       {
         var timeBasedOnPackage = data.dropOffTime;
         var DropOffDate = data.dropOffDate;
-        this.advanceTableForm.patchValue({dropOffDate:DropOffDate});
+        if (DropOffDate) {
+          this.advanceTableForm.patchValue({dropOffDate:DropOffDate});
+        }
 
-        timeBasedOnPackage = moment(timeBasedOnPackage, 'HH:mm').toDate();
-        this.advanceTableForm.patchValue({dropOffTime:timeBasedOnPackage});
+        if (timeBasedOnPackage) {
+          const parsed = moment(timeBasedOnPackage, 'HH:mm');
+          if (parsed.isValid()) {
+            this.advanceTableForm.patchValue({dropOffTime: parsed.toDate()});
+          }
+        }
 
         var etrTime = data.etrTime;
-        etrTime = moment(etrTime, 'HH:mm').toDate();
-        this.advanceTableForm.patchValue({etrTime:etrTime});
+        if (etrTime) {
+          const parsedEtr = moment(etrTime, 'HH:mm');
+          if (parsedEtr.isValid()) {
+            this.advanceTableForm.patchValue({etrTime: parsedEtr.toDate()});
+          }
+        }
       }
+    },
+    (err: any) => {
+      console.warn('[reservation] getETRDropOffTime failed', err);
     });
   }
 
@@ -4302,10 +4507,14 @@ onTimeInput(event: any): void {
   //---------- Reservation Capping ----------
   public GetReservationCapping(customerGroupID,customerID,pickupDate,cityID,packageTypeID,vehicleCategoryID)
   {
-    if(pickupDate !== "") 
-    {
-      pickupDate = moment(pickupDate, "DD/MM/YYYY").format("YYYY-MM-DD");
+    // All 6 params are path segments; any missing value produces URLs like
+    // /CheckReservationCapping/4616/9/Invalid%20date/undefined/... and 400s.
+    if (!customerGroupID || !customerID || !pickupDate || !cityID || !packageTypeID || !vehicleCategoryID) {
+      return;
     }
+    const formattedDate = moment(pickupDate, "DD/MM/YYYY");
+    if (!formattedDate.isValid()) { return; }
+    pickupDate = formattedDate.format("YYYY-MM-DD");
     this.reservationService.getReservationCapping(customerGroupID,customerID,pickupDate,cityID,packageTypeID,vehicleCategoryID).subscribe(
       (data: any) =>   
       {
@@ -4344,6 +4553,9 @@ onTimeInput(event: any): void {
   //--------------------GST For Billing------------------
 
   InitReservationInvoiceGSTDetails(customerID){
+    // Skip when no customer is known yet; otherwise the backend receives the
+    // literal string "undefined" in the URL path and returns 400.
+    if (!customerID) { return; }
     this.reservationService.GetResrvationGSTDetails(customerID).subscribe(
       data=>
       {
@@ -4365,10 +4577,14 @@ onTimeInput(event: any): void {
   }
   InitResrvationGSTForCityID(customerID,pickuCityID)
   {
+    // Skip until both IDs are known; otherwise the URL gets "undefined"
+    // segments (e.g. /GetResrvationGSTForCityID/9/undefined) and backend 400s.
+    if (!customerID || !pickuCityID) { return; }
     this.reservationService.GetResrvationGSTForCityID(customerID,pickuCityID).subscribe(
       data=>
-      {       
-        this.advanceTableForm.patchValue({gSTForBilling:(data[0].gstNumber +'-'+ data[0].gstRate  +'-'+data[0].billingStateName) || "--Select--"}); 
+      {
+        if (!data || !data.length) { return; }
+        this.advanceTableForm.patchValue({gSTForBilling:(data[0].gstNumber +'-'+ data[0].gstRate  +'-'+data[0].billingStateName) || "--Select--"});
         this.advanceTableForm.patchValue({customerConfigurationInvoicingID:data[0].customerConfigurationInvoicingID});
       });
   }
@@ -4420,26 +4636,33 @@ onTimeInput(event: any): void {
  //---------------IS GST Mandatory With Reservation------------
  GetIsGSTMandatoryWithResrvation(customerGroupID:any)
  {
+  // Skip when no customer group is known yet (new reservation on load);
+  // otherwise the URL ends in "undefined" and the backend returns 400.
+  if (!customerGroupID) { return; }
   this.reservationService.GetIsGSTMandatoryWithResrvation(customerGroupID).subscribe(
     data=>
     {
-      this.isGSTMandatoryWithReservation=data.isGSTMandatoryWithReservation;
+      this.isGSTMandatoryWithReservation = data ? data.isGSTMandatoryWithReservation : false;
     });
 }
 
  //---------------Reservation GST Details------------
  getReservationGSTData(){
+  // Skip when no reservation is selected (new reservation flow) to avoid
+  // /getReservationGSTData/undefined 400s on page load.
+  if (!this.ReservationID) { return; }
   this.reservationService.getReservationGSTData(this.ReservationID).subscribe(
     data=>
     {
-      this.reservationDataSource=data;
-      this.advanceTable=this.reservationDataSource[0];
+      this.reservationDataSource = data || [];
+      this.advanceTable = this.reservationDataSource[0];
+      if (!this.advanceTable) { return; }
       let gstValue = "--Select--";
-      if (this.advanceTable?.gstNumber &&this.advanceTable?.gstRate &&this.advanceTable?.billingStateName) 
+      if (this.advanceTable?.gstNumber && this.advanceTable?.gstRate && this.advanceTable?.billingStateName)
       {
         gstValue = `${this.advanceTable.gstNumber}-${this.advanceTable.gstRate}-${this.advanceTable.billingStateName}`;
       }
-      this.advanceTableForm.patchValue({gSTForBilling:gstValue}); 
+      this.advanceTableForm.patchValue({gSTForBilling:gstValue});
       this.advanceTableForm.patchValue({customerConfigurationInvoicingID:this.advanceTable.customerConfigurationInvoicingID});
     });
 }
@@ -4474,6 +4697,9 @@ openSpecialInstrucation()
 
   public getInstrucationDetails() 
   {
+     // Skip when no reservation is selected yet; otherwise
+     // /ForSpecialInstructionLoadData/undefined hits the backend and 400s.
+     if (!this.ReservationID) { return; }
      this.specialInstructionDetailsService.getspecialInstructionDetails(this.ReservationID).subscribe
      (
        (data: SpecialInstructionDetails)=>   

@@ -65,7 +65,11 @@
                             </div>
 
                             <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
-                                <!-- <div class="col-xl-3 col-lg-3 col-md-3 col-sm-6 mb-2"> -->
+                                <div style="text-align: right; margin-bottom: 2px; line-height: 1;">
+                                    <a style="cursor: pointer; color: #007bff; font-size: 10px !important; font-style: italic;"
+                                       (click)="ViewKAM()"
+                                    >View KAM</a>
+                                </div>
                                 <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
                                     <mat-label>Customer (Customer Group)</mat-label>
                                     <input required type="text" matInput formControlName="customerCustomerGroup"
@@ -77,38 +81,6 @@
                                             {{option.customerName}} - {{option.customerGroup}}
                                         </mat-option>
                                     </mat-autocomplete>
-                                    <!-- <mat-error *ngIf="advanceTableForm.get('customerCustomerGroup').hasError('required')">
-                                            <div style="width: 70%;">
-                                                Please Select Customer
-                                            </div>
-                                            
-                                            <div style="float: right;margin-top: -10px;">
-                                                <div style="font-family: italic;">
-                                                    <a style="cursor: pointer;color: #007bff; padding: 10px; font-size: 10px !important; font-style: italic;"
-                                                    (click)="customerShort()">
-                                                    New Customer
-                                                    </a>
-                                                    <a style="cursor: pointer;color: #007bff; padding: 10px; font-size: 10px !important; font-style: italic;"
-                                                    (click)="ViewKAM()">
-                                                    View KAM 
-                                                    </a> 
-                                                </div>
-                                            </div> 
-                                        </mat-error> -->
-                                    <mat-hint align="end">
-                                        <div>
-                                            <!-- <a style="cursor: pointer;color: #007bff;
-                                                padding: 10px; font-size: 10px !important; font-style: italic;"
-                                                    (click)="customerShort()">
-                                                    New Customer
-                                                </a> -->
-                                            <a style="cursor: pointer;color: #007bff; font-size: 10px !important; font-style: italic;"
-                                                (click)="ViewKAM()">
-                                                View KAM
-                                            </a>
-                                        </div>
-                                    </mat-hint>
-
                                 </mat-form-field>
 
                             </div>
@@ -183,7 +155,13 @@
                                                 New Booker</a> -->
                             </div>
                             <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
-                                <!-- <div class="col-xl-3 col-lg-3 col-md-3 col-sm-6 mb-2"> -->
+                                <div style="text-align: right; margin-bottom: 2px; line-height: 1;">
+                                    <a style="cursor: pointer; color: #007bff; font-size: 10px !important; font-style: italic;"
+                                       (click)="personShort()"
+                                    >New Passenger</a><span style="color: #007bff; font-size: 10px;">/</span><a style="cursor: pointer; color: #007bff; font-size: 10px !important; font-style: italic;"
+                                       (click)="editPassenger()"
+                                    >Edit Passenger</a>
+                                </div>
                                 <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
                                     <mat-label>Passenger (Gender, VIP Status)</mat-label>
                                     <input required type="text" matInput formControlName="passenger"
@@ -191,15 +169,6 @@
                                     <mat-autocomplete #auto3="matAutocomplete"
                                         (optionSelected)="onPassengerSelected($event.option.value)"
                                         panelWidth="custom-autocomplete-panel">
-                                        <!-- <mat-option *ngFor="let option of filteredPassengerOptions | async"
-                                                [value]="option.customerPersonName + '-' + option.gender + '-' + option.importance+ '-' + option.phone+ '-'+ option.customerDepartment+ '-'+ option.customerDesignation+'-'+ option.customerName"
-                                                (click)="getPassengerID(option.customerPersonID,option.customerPersonName)">
-                                                {{option.customerPersonName}} - {{option.gender}} - {{option.importance}} -
-                                                {{option.phone}} - {{option.customerDepartment}} -
-                                                {{option.customerDesignation
-                                                }} - {{option.customerName}}
-                                            </mat-option> -->
-
                                         <mat-option *ngFor="let option of filteredPassengerOptions | async"
                                             [value]="option.customerPersonName + '-' + option.gender + '-' + option.importance + '-' + option.phone + '-' + option.customerDepartment + '-' + option.customerDesignation + '-' + option.customerName"
                                             (click)="getPassengerID(option.customerPersonID, option.customerPersonName)">
@@ -208,49 +177,6 @@
                                             {{option.customerDesignation}} - {{option.customerName}}
                                         </mat-option>
                                     </mat-autocomplete>
-                                    <!-- <mat-error *ngIf="advanceTableForm.get('passenger').hasError('required')">
-                                            <div style="width: 70%;">
-                                                Please Select Passenger
-                                            </div>
-                                            
-                                            <div style="float: right;margin-top: -10px;">
-                                                    <a style="cursor: pointer;color: #007bff;
-                                                    padding: 10px; font-size: 10px !important; font-style: italic;"
-                                                    (click)="personShort()" >
-                                                    New Passenger
-                                                    </a>
-                                            </div>
-                                            </mat-error> -->
-                                    <mat-hint align="end">
-                                        <div>
-                                            <a style="cursor: pointer; color: #007bff; padding: 3px; font-size: 10px !important; font-style: italic;"
-                                                (click)="personShort()">
-                                                New Passenger
-                                            </a>
-
-                                            <span style="padding: 0 2px; color: #007bff;">/</span>
-
-                                            <!-- Edit Passenger: triggers showing form -->
-                                            <a style="cursor: pointer; color: #007bff; padding: 3px; font-size: 10px !important; font-style: italic;"
-                                                (click)="editPassenger()">
-                                                Edit Passenger
-                                            </a>
-
-                                            <!-- <span style="padding: 0 0px; color: #007bff;">/</span> <!-- Reduced padding for closer spacing -->
-
-                                            <!-- <a style="cursor: pointer; color: #007bff; padding: 3px; font-size: 10px !important; font-style: italic;"
-                                                    (click)="openAddPassenger(false)">
-                                                    Add Passenger 
-                                                    </a>
-                                                
-                                                    <span style="padding: 0 0px; color: #007bff;">/</span>
-                                                
-                                                    <a style="cursor: pointer; color: #007bff; padding: 3px; font-size: 10px !important; font-style: italic;"
-                                                    (click)="openAddPassenger(true)">
-                                                    View 
-                                                    </a> -->
-                                        </div>
-                                    </mat-hint>
                                 </mat-form-field>
                                 <mat-error *ngIf="advanceTableForm.controls['passenger'].hasError('passengerInvalid')">
                                     Please Select Valid Passenger
@@ -337,8 +263,7 @@
                                 <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
                                     <mat-label>Duty Type</mat-label>
                                     <input required type="text" matInput formControlName="packageType"
-                                        [matAutocomplete]="auto6" (keyup)="onPackageTypeChanges($event)"
-                                        (ngModelChange)="ETRDropoffDate(option.packageType)">
+                                        [matAutocomplete]="auto6" (keyup)="onPackageTypeChanges($event)">
                                     <mat-autocomplete #auto6="matAutocomplete"
                                         (optionSelected)="onDTSelected($event.option.value)"
                                         panelWidth="custom-autocomplete-panel">

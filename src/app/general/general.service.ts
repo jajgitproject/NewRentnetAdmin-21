@@ -280,7 +280,17 @@ encrypt(value: string): string{
 }
 
 decrypt(textToDecrypt: string): string{
-  return AES.decrypt(textToDecrypt, this.runtimeConfig.getCryptoSecretKey()).toString(Utf8);
+  // Guard against missing/invalid ciphertext. decoding garbage (or the
+  // literal string "undefined" from decodeURIComponent(undefined)) throws
+  // "Malformed UTF-8 data" and aborts whichever callback invoked decrypt.
+  if (textToDecrypt === null || textToDecrypt === undefined || textToDecrypt === '' || textToDecrypt === 'undefined') {
+    return '';
+  }
+  try {
+    return AES.decrypt(textToDecrypt, this.runtimeConfig.getCryptoSecretKey()).toString(Utf8);
+  } catch {
+    return '';
+  }
 }
 
   getCurrentTime() {

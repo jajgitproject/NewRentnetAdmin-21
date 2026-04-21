@@ -20,7 +20,7 @@ import { SendFeedbackMail } from '../sendFeedbackMail.model';
 
 @Component({
   standalone: false,
-    selector: 'app-passenger-dialog',
+    selector: 'app-feedback-mail-passenger-dialog',
     templateUrl: './passenger-dialog.component.html',
     styleUrls: ['./passenger-dialog.component.sass'],
     providers: [{ provide: MAT_DATE_LOCALE, useValue: 'en-GB' }]

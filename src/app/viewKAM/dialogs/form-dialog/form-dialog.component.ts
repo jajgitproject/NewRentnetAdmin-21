@@ -1,11 +1,11 @@
 // @ts-nocheck
-import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
+import { MAT_DIALOG_DATA, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
 import { Component, ElementRef, HostListener, Inject } from '@angular/core';
 import { ViewKAMService } from '../../viewKAM.service';
-import { FormControl, Validators, FormGroup, FormBuilder} from '@angular/forms';
+import { FormControl, Validators, FormGroup, FormBuilder, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { ViewKAM } from '../../viewKAM.model';
 import { MAT_DATE_LOCALE } from '@angular/material/core';
-import { formatDate } from '@angular/common';
+import { CommonModule, formatDate } from '@angular/common';
 import { GeneralService } from '../../../general/general.service';
 import { ViewKAMDropDown } from '../../viewKAMDropDown.model';
 import { CurrencyDropDown } from 'src/app/general/currencyDropDown.model';
@@ -13,11 +13,23 @@ import { QualificationDropDown } from 'src/app/general/qualificationDropDown.mod
 import { HttpErrorResponse } from '@angular/common/http';
 import { ActivatedRoute } from '@angular/router';
 import { CustomerNameModel } from 'src/app/customer/customer.model';
+import { MatButtonModule } from '@angular/material/button';
+import { MatIconModule } from '@angular/material/icon';
+import { MatCardModule } from '@angular/material/card';
 @Component({
-  standalone: false,
-  selector: 'app-form-dialog',
+  standalone: true,
+  selector: 'app-viewkam-form-dialog',
   templateUrl: './form-dialog.component.html',
   styleUrls: ['./form-dialog.component.sass'],
+  imports: [
+    CommonModule,
+    FormsModule,
+    ReactiveFormsModule,
+    MatDialogModule,
+    MatButtonModule,
+    MatIconModule,
+    MatCardModule,
+  ],
   providers: [{ provide: MAT_DATE_LOCALE, useValue: 'en-GB' }]
 })
 

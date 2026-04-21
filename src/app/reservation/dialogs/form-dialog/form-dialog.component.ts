@@ -1,6 +1,8 @@
 // @ts-nocheck
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
-import { Component, Inject } from '@angular/core';
+import { Component, Inject, OnDestroy, OnInit } from '@angular/core';
+import { Subject } from 'rxjs';
+import { skip, takeUntil } from 'rxjs/operators';
 import { FormControl, Validators, FormGroup, FormBuilder } from '@angular/forms';
 import { MAT_DATE_LOCALE } from '@angular/material/core';
 import { formatDate } from '@angular/common';
@@ -19,14 +21,16 @@ import { ControlPanelDetails } from 'src/app/controlPanelDesign/controlPanelDesi
     providers: [{ provide: MAT_DATE_LOCALE, useValue: 'en-GB' }]
   })
 
-export class FormDialogComponent {
+export class FormDialogComponent implements OnInit, OnDestroy {
+  private readonly destroy$ = new Subject<void>();
   showError: string;
   action: string;
   dialogTitle: string;
   advanceTableForm: FormGroup;
   advanceTableCP: ControlPanelDetails;
   advanceTable: UpdatePickupModel;
-  saveDisabled: boolean = true;
+  /** True while API save is in progress */
+  isSubmitting = false;
   indeterminate = false;
   labelPosition: 'before' | 'before' = 'before';
   contractID: any;
@@ -54,8 +58,8 @@ export class FormDialogComponent {
 // normalize (safe compare)
 const normalized = (this.status || '').trim().toLowerCase();
 
-// button logic
-this.buttonDisabled = normalized !== 'changes allow';
+// Only block when status was supplied and is not "changes allow" (e.g. Control Panel Design omits status)
+    this.buttonDisabled = normalized.length > 0 && normalized !== 'changes allow';
 
 // debug
     this.customerID = data.customerID;
@@ -94,6 +98,19 @@ this.buttonDisabled = normalized !== 'changes allow';
       timeDateObject = new Date();
     }
     this.advanceTableForm.patchValue({ pickupTime: timeDateObject });
+    this.advanceTableForm
+      .get('pickupTime')
+      ?.valueChanges.pipe(skip(1), takeUntil(this.destroy$))
+      .subscribe((val: unknown) => {
+        if (val) {
+          this.locationTimeSet(val as Date | string);
+        }
+      });
+  }
+
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
   }
 
   public noWhitespaceValidator(control: FormControl) {
@@ -102,8 +119,8 @@ this.buttonDisabled = normalized !== 'changes allow';
     return isValid ? null : { 'whitespace': true };
   }
 
-  submit() {
-
+  submit(): void {
+    this.confirmAdd();
   }
   onNoClick(): void {
     this.dialogRef.close();
@@ -123,7 +140,7 @@ this.buttonDisabled = normalized !== 'changes allow';
             'bottom',
             'center'
           );
-          this.saveDisabled = true;
+          this.isSubmitting = false;
         },
         error => {
 
@@ -133,7 +150,7 @@ this.buttonDisabled = normalized !== 'changes allow';
             'bottom',
             'center'
           );
-          this.saveDisabled = true;
+          this.isSubmitting = false;
 
         }
       )
@@ -147,22 +164,24 @@ this.buttonDisabled = normalized !== 'changes allow';
     });
   }
   public confirmAdd(): void {
-    if (this.buttonDisabled) {
+    if (this.buttonDisabled || this.isSubmitting) {
       return; // blocked by status
     }
-    this.saveDisabled = false;
+    this.isSubmitting = true;
     this.Put();
   }
-  locationTimeSet(event) {
+  locationTimeSet(event: Date | string | { pickupTime?: unknown }) {
     const pickupDate = new Date(this.pickupDate);
-    const eventTime = new Date(event.pickupTime);
+    const eventTime =
+      event && typeof event === 'object' && 'pickupTime' in event && event.pickupTime != null
+        ? new Date(event.pickupTime as string | number | Date)
+        : new Date(event as string | number | Date);
     const combinedDateTime = new Date(pickupDate.getFullYear(), pickupDate.getMonth(), pickupDate.getDate(), eventTime.getHours(), eventTime.getMinutes());
     combinedDateTime.setMinutes(combinedDateTime.getMinutes() - 90);
     const locOutDateTime = new Date(combinedDateTime);
     this.getETRDropOffTime();
   }
   getETRDropOffTime() {
-    debugger
     var pickupTime;
     var pickupDate;
     if (this.advanceTableForm.value.pickupTime === "" || this.advanceTableForm.value.pickupTime === undefined) {
@@ -173,7 +192,7 @@ this.buttonDisabled = normalized !== 'changes allow';
       pickupDate = moment(this.pickupDate).format('DD-MM-YYYY');
     }
 
-    this.advanceTableService.getTimeForDropoffTime(this.advanceTableCP.package.packageID, pickupTime, pickupDate, this.contractID, this.advanceTableCP.vehicle.vehicleID, this.advanceTableCP.pickupCityID).subscribe(
+    this.advanceTableService.getTimeForDropoffTime(this.advanceTableCP.package.packageID, pickupTime, pickupDate, this.contractID, this.advanceTableCP.vehicle.vehicleID, this.advanceTableCP.pickupCityID).pipe(takeUntil(this.destroy$)).subscribe(
       (data: any) => {
         if (data.packageType === 'Local On Demand' || data.packageType === 'Long Term Rental' || data.packageType === 'Outstation Lumpsum' || data.packageType === 'Outstation OneWay Trip' || data.packageType === 'Outstation Round Trip') {
           this.advanceTable.dropOffTime = null;

@@ -76,7 +76,7 @@
                               <mat-option *ngFor="let option of filteredCountryCodeOptions | async"
                                   [value]="option.countryISDCode">
                                   <div style="display: flex; align-items: center;">
-                                    <img [src]="option.icon" alt="{{option.countryISOCode}}" width="20" height="20" style="margin-right: 8px;">
+                                    <img *ngIf="option.icon && (option.icon.startsWith('http://') || option.icon.startsWith('https://') || option.icon.startsWith('data:') || option.icon.startsWith('/assets/'))" [src]="option.icon" alt="{{option.countryISOCode}}" width="20" height="20" style="margin-right: 8px;" (error)="$any($event.target).style.display='none'">
                                     <span >{{option.countryISOCode}} {{option.countryISDCode}}</span>
                                   
                                   </div>
@@ -127,7 +127,7 @@
                               <mat-option *ngFor="let option of filteredCountryCodeOptions | async"
                                   [value]="option.countryISDCode">
                                   <div style="display: flex; align-items: center;">
-                                    <img [src]="option.icon" alt="{{option.countryISOCode}}" width="20" height="20" style="margin-right: 8px;">
+                                    <img *ngIf="option.icon && (option.icon.startsWith('http://') || option.icon.startsWith('https://') || option.icon.startsWith('data:') || option.icon.startsWith('/assets/'))" [src]="option.icon" alt="{{option.countryISOCode}}" width="20" height="20" style="margin-right: 8px;" (error)="$any($event.target).style.display='none'">
                                     <span >{{option.countryISOCode}} {{option.countryISDCode}}</span>
                                   
                                   </div>
@@ -161,7 +161,7 @@
                               <mat-option *ngFor="let option of filteredCountryCodeOptions | async"
                                   [value]="option.countryISDCode">
                                   <div style="display: flex; align-items: center;">
-                                    <img [src]="option.icon" alt="{{option.countryISOCode}}" width="20" height="20" style="margin-right: 8px;">
+                                    <img *ngIf="option.icon && (option.icon.startsWith('http://') || option.icon.startsWith('https://') || option.icon.startsWith('data:') || option.icon.startsWith('/assets/'))" [src]="option.icon" alt="{{option.countryISOCode}}" width="20" height="20" style="margin-right: 8px;" (error)="$any($event.target).style.display='none'">
                                     <span >{{option.countryISOCode}} {{option.countryISDCode}}</span>
                                   
                                   </div>
