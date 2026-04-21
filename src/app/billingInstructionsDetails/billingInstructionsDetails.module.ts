@@ -27,6 +27,7 @@ import { MyUploadModule } from '../myupload/myupload.module';
 import { BillingInstructionsDetailsDialogComponent } from './dialogs/billing-instruction-dialog/billing-instruction-dialog.component';
 import { MatAutocompleteModule } from '@angular/material/autocomplete';
 import { DeleteDialogComponent } from './dialogs/delete/delete.component';
+import { AdvanceService } from '../advance/advance.service';
 
 @NgModule({
   declarations: [

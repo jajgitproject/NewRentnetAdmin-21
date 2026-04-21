@@ -49,34 +49,40 @@ export class RuntimeConfigService {
     return (async () => {
       try {
         const res = await fetch('assets/runtime-config.json', { cache: 'no-store' });
-        if (!res.ok) {
-          return;
-        }
-        const patch = (await res.json()) as AppRuntimeConfigPatch;
-        if (typeof patch.BaseURL === 'string' && patch.BaseURL.trim()) {
-          this.baseUrl = withTrailingSlash(patch.BaseURL.trim());
-        }
-        if (typeof patch.ImageURL === 'string' && patch.ImageURL.trim()) {
-          this.imageUrl = withTrailingSlash(patch.ImageURL.trim());
-        }
-        if (typeof patch.FormURL === 'string' && patch.FormURL.trim()) {
-          this.formUrl = patch.FormURL.trim();
-        }
-        if (typeof patch.UnlockEmployeeUrl === 'string' && patch.UnlockEmployeeUrl.trim()) {
-          this.unlockEmployeeUrl = withTrailingSlash(patch.UnlockEmployeeUrl.trim());
-        }
-        if (typeof patch.googleMapsApiKey === 'string' && patch.googleMapsApiKey.trim()) {
-          this.googleMapsApiKey = patch.googleMapsApiKey.trim();
-          this.loadGoogleMapsScript(this.googleMapsApiKey);
-        }
-        if (typeof patch.clientErrorReportUrl === 'string' && patch.clientErrorReportUrl.trim()) {
-          this.clientErrorReportUrl = patch.clientErrorReportUrl.trim();
-        }
-        if (typeof patch.cryptoSecretKey === 'string' && patch.cryptoSecretKey.trim()) {
-          this.cryptoSecretKey = patch.cryptoSecretKey.trim();
+        if (res.ok) {
+          const patch = (await res.json()) as AppRuntimeConfigPatch;
+          if (typeof patch.BaseURL === 'string' && patch.BaseURL.trim()) {
+            this.baseUrl = withTrailingSlash(patch.BaseURL.trim());
+          }
+          if (typeof patch.ImageURL === 'string' && patch.ImageURL.trim()) {
+            this.imageUrl = withTrailingSlash(patch.ImageURL.trim());
+          }
+          if (typeof patch.FormURL === 'string' && patch.FormURL.trim()) {
+            this.formUrl = patch.FormURL.trim();
+          }
+          if (typeof patch.UnlockEmployeeUrl === 'string' && patch.UnlockEmployeeUrl.trim()) {
+            this.unlockEmployeeUrl = withTrailingSlash(patch.UnlockEmployeeUrl.trim());
+          }
+          if (typeof patch.googleMapsApiKey === 'string' && patch.googleMapsApiKey.trim()) {
+            this.googleMapsApiKey = patch.googleMapsApiKey.trim();
+          }
+          if (typeof patch.clientErrorReportUrl === 'string' && patch.clientErrorReportUrl.trim()) {
+            this.clientErrorReportUrl = patch.clientErrorReportUrl.trim();
+          }
+          if (typeof patch.cryptoSecretKey === 'string' && patch.cryptoSecretKey.trim()) {
+            this.cryptoSecretKey = patch.cryptoSecretKey.trim();
+          }
         }
       } catch {
         /* keep build-time defaults */
+      }
+
+      // Always inject the Maps JS API (with places library) using the
+      // effective key - default from source, or override from runtime-config.
+      // Without this, `window.google` never exists and every
+      // `ngx-google-places-autocomplete` input on the site is a dead field.
+      if (this.googleMapsApiKey) {
+        this.loadGoogleMapsScript(this.googleMapsApiKey);
       }
     })();
   }
@@ -110,13 +116,28 @@ export class RuntimeConfigService {
   }
 
   private loadGoogleMapsScript(apiKey: string): void {
-    const marker = 'script[data-app="google-maps"]';
-    document.querySelectorAll(marker).forEach((el) => el.remove());
+    // If a maps script is already on the page (e.g. from a previous call with
+    // the same key), don't re-inject - doing so would reload the library and
+    // invalidate any Autocomplete instances already wired up.
+    const existing = document.querySelector<HTMLScriptElement>('script[data-app="google-maps"]');
+    if (existing && existing.dataset.key === apiKey) {
+      return;
+    }
+    if (existing) {
+      existing.remove();
+    }
     const script = document.createElement('script');
     script.type = 'text/javascript';
     script.async = true;
     script.dataset.app = 'google-maps';
-    script.src = `https://maps.googleapis.com/maps/api/js?key=${encodeURIComponent(apiKey)}&loading=async`;
+    script.dataset.key = apiKey;
+    // `libraries=places` is required for google.maps.places.Autocomplete,
+    // which powers the `[ngx-google-places-autocomplete]` directive used on
+    // every address input in the app. `loading=async` silences the console
+    // warning and matches Google's current best practice.
+    script.src =
+      `https://maps.googleapis.com/maps/api/js?key=${encodeURIComponent(apiKey)}` +
+      `&libraries=places&loading=async`;
     document.head.appendChild(script);
   }
 }

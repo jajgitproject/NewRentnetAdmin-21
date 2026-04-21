@@ -2990,19 +2990,57 @@ public validateONReservationGST(): boolean {
   }
 
   navigateToNewForms() {
-    // const encryptedCustomerID = encodeURIComponent(this._generalService.encrypt(item.customerID.toString()));
-    // const encryptedCustomerName = encodeURIComponent(this._generalService.encrypt(item.customerName));
-    const encryptedReservationGroupID = encodeURIComponent(this._generalService.encrypt(this.reservationGroupID.toString()));
-    const encryptedReservationID = encodeURIComponent(this._generalService.encrypt(this.ReservationID.toString()));
-    const encryptedCustomerGroupID = encodeURIComponent(this._generalService.encrypt(this.customerGroupID.toString()));
-    const url= this.router.serializeUrl(this.router.createUrlTree(['/newForm'], { queryParams: {
-      
-      reservationID:encryptedReservationID,     
-      reservationGroupID: encryptedReservationGroupID ,
-      customerGroupID:encryptedCustomerGroupID ,
-      type:'edit'  ,              
-    } }));
-    window.open(this._generalService.FormURL+ url, '_blank');
+    // Guard against the silent-failure case: if the reservation hasn't been
+    // saved yet (or route params didn't populate), these three ids are
+    // undefined and calling `.toString()` on undefined throws a TypeError
+    // that Angular swallows -> button click appears to do nothing.
+    const reservationId = this.ReservationID;
+    const reservationGroupId = this.reservationGroupID;
+    const customerGroupId = this.customerGroupID;
+
+    if (
+      reservationId === null || reservationId === undefined || reservationId === '' ||
+      reservationGroupId === null || reservationGroupId === undefined || reservationGroupId === '' ||
+      customerGroupId === null || customerGroupId === undefined || customerGroupId === ''
+    ) {
+      this.showNotification(
+        'snackbar-warning',
+        'Please save the reservation first before adding details.',
+        'bottom',
+        'center'
+      );
+      return;
+    }
+
+    const encryptedReservationGroupID = encodeURIComponent(this._generalService.encrypt(String(reservationGroupId)));
+    const encryptedReservationID = encodeURIComponent(this._generalService.encrypt(String(reservationId)));
+    const encryptedCustomerGroupID = encodeURIComponent(this._generalService.encrypt(String(customerGroupId)));
+    const url = this.router.serializeUrl(this.router.createUrlTree(['/newForm'], {
+      queryParams: {
+        reservationID: encryptedReservationID,
+        reservationGroupID: encryptedReservationGroupID,
+        customerGroupID: encryptedCustomerGroupID,
+        type: 'edit',
+      }
+    }));
+
+    const formUrl = this._generalService.FormURL || '';
+    const fullUrl = formUrl + url;
+    const opened = window.open(fullUrl, '_blank');
+
+    // Modern browsers block window.open when a popup blocker is active or the
+    // call is not treated as user-activated. If that happens, fall back to
+    // same-tab navigation so the user isn't stuck.
+    if (!opened) {
+      this.router.navigate(['/newForm'], {
+        queryParams: {
+          reservationID: encryptedReservationID,
+          reservationGroupID: encryptedReservationGroupID,
+          customerGroupID: encryptedCustomerGroupID,
+          type: 'edit',
+        }
+      });
+    }
   }
   // navigateToNewForms()
   // {
@@ -4415,7 +4453,7 @@ openSpecialInstrucation()
 {
   const dialogRef = this.dialog.open(SpecialInstructionDialogComponent, 
   {
-    width:'350px',
+    width:'520px',
     data: 
     {
       advanceTable: this.advanceTable,

@@ -29,7 +29,6 @@ import { SpecialInstructionDialogComponent } from './dialogs/special-instruction
 @NgModule({
   declarations: [
     SpecialInstructionComponent,
-    SpecialInstructionDialogComponent,
     DeleteDialogComponent
   ],
   imports: [
@@ -54,7 +53,8 @@ import { SpecialInstructionDialogComponent } from './dialogs/special-instruction
     MatToolbarModule,
     MatMenuModule,
     MatProgressSpinnerModule,
-    MyUploadModule
+    MyUploadModule,
+    SpecialInstructionDialogComponent,
   ],
   exports: [SpecialInstructionDialogComponent],
   providers: [SpecialInstructionService]

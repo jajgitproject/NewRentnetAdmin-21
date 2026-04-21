@@ -1,19 +1,47 @@
 // @ts-nocheck
-import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
+import { MAT_DIALOG_DATA, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
 import { Component, Inject } from '@angular/core';
+import { CommonModule } from '@angular/common';
 import { SpecialInstructionService } from '../../specialInstruction.service';
-import { FormControl, Validators, FormGroup, FormBuilder} from '@angular/forms';
+import { FormControl, Validators, FormGroup, FormBuilder, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { SpecialInstruction } from '../../specialInstruction.model';
 import { MAT_DATE_LOCALE } from '@angular/material/core';
 import { formatDate } from '@angular/common';
 import { GeneralService } from '../../../general/general.service';
-import { MatSnackBar } from '@angular/material/snack-bar';
+import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatInputModule } from '@angular/material/input';
+import { MatSelectModule } from '@angular/material/select';
+import { MatButtonModule } from '@angular/material/button';
+import { MatIconModule } from '@angular/material/icon';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MyUploadModule } from '../../../myupload/myupload.module';
 
 @Component({
-  standalone: false,
+  // Standalone so the dialog brings its own Material imports. This dialog is
+  // opened from multiple modules (reservation, newForm, bookingScreen, etc.);
+  // when it was non-standalone it occasionally rendered with Material
+  // directives unresolved (plain HTML inputs, mat-icon showing as literal
+  // text "close", no outline on form fields). Standalone + explicit imports
+  // guarantees the same look everywhere.
+  standalone: true,
   selector: 'app-special-instruction-dialog',
   templateUrl: './special-instruction-dialog.component.html',
   styleUrls: ['./special-instruction-dialog.component.sass'],
+  imports: [
+    CommonModule,
+    FormsModule,
+    ReactiveFormsModule,
+    MatDialogModule,
+    MatFormFieldModule,
+    MatInputModule,
+    MatSelectModule,
+    MatButtonModule,
+    MatIconModule,
+    MatProgressSpinnerModule,
+    MatSnackBarModule,
+    MyUploadModule,
+  ],
   providers: [{ provide: MAT_DATE_LOCALE, useValue: 'en-GB' }]
 })
 

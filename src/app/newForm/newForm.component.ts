@@ -833,7 +833,7 @@ if(data !== null){
   {
     const dialogRef = this.dialog.open(SpecialInstructionDialogComponent, 
      {
-      width:'350px',
+      width:'520px',
        data: 
          {
            advanceTable: this.advanceTable,

@@ -153,7 +153,11 @@ export class SidebarComponent implements OnInit, OnDestroy {
     this.innerHeight = window.innerHeight;
     const height = this.innerHeight - this.headerHeight;
     this.listMaxHeight = height + '';
-    this.listMaxWidth = '500px';
+    // Sidebar is 260px wide; the previous value (500px) made the inner <ul>
+    // wider than its parent, which showed a horizontal scrollbar under the
+    // "Menu" label. '100%' keeps the list within the sidebar and avoids the
+    // ugly overlapping scrollbar.
+    this.listMaxWidth = '100%';
   }
   isOpen() {
     return this.bodyTag.classList.contains('overlay-open');
