@@ -473,18 +473,18 @@ body > .swal2-container.swal2-backdrop-show {
 .modal .modal-header {
   position: relative !important;
   align-items: flex-start !important;
-  padding: 22px 24px 8px 24px !important;
-  padding-right: 4.25rem !important;
+  padding: 18px 24px 8px 24px !important;
+  padding-right: 56px !important;
   border-bottom: 0 !important;
 }
 
 .modal .modal-header .close,
 .modal .modal-header button.close {
   position: absolute !important;
-  top: 14px !important;
-  right: 16px !important;
-  width: 56px !important;
-  height: 56px !important;
+  top: 12px !important;
+  right: 14px !important;
+  width: 32px !important;
+  height: 32px !important;
   border-radius: 50% !important;
   border: 0 !important;
   background: #efefef !important;
@@ -503,11 +503,11 @@ body > .swal2-container.swal2-backdrop-show {
 
 .modal .modal-header .close span,
 .modal .modal-header button.close span {
-  font-size: 48px !important;
+  font-size: 22px !important;
   font-weight: 300 !important;
   line-height: 1 !important;
   color: #1f2430 !important;
-  margin-top: -6px;
+  margin-top: -2px;
 }
 
 .modal .modal-header .modal-title {
