@@ -640,10 +640,7 @@ onAddressTyping() {
               <b>Location Out Date:</b> ${formatDateDDMMYYYY(this.locationOutDate)}<br>
               <b>Location Out Time:</b> ${this.locationOutTime.toLocaleTimeString()}<br>
               <b>Location Out KM:</b> ${this.locationOutKm}
-              `,
-            customClass: {
-              container: 'swal2-popup-high-zindex'
-            }
+              `
             }).then((result) => {
               if (result.isConfirmed) {
                 this.saveDisabled = true;

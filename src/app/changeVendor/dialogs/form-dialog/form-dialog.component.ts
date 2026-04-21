@@ -103,10 +103,7 @@ export class ChangeVendorFormDialogComponent
             icon: 'error',
             title: 'Data Not Found',
             text: 'The requested inventory data was not found!',
-            confirmButtonText: 'OK',
-            customClass: {
-                    container: 'swal2-popup-high-zindex'
-                  }
+            confirmButtonText: 'OK'
           });
           this.saveDisabled = true;
           return;

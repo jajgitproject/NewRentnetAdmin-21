@@ -196,8 +196,7 @@ export class DiscountDetailsDialogComponent
         Swal.fire({
                     title: '',
                     icon: 'warning',
-                    html: `<b>Please delete previous record to add new.</b>`,
-                    customClass: {container: 'swal2-popup-high-zindex'}
+                    html: `<b>Please delete previous record to add new.</b>`
                   })
         this.saveDisabled = true;
       }

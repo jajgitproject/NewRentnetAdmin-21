@@ -1059,10 +1059,7 @@ export class ControlPanelDialogeComponent {
       Swal.fire({
                   title: '',
                   icon: 'warning',
-                  html: `<b>Hard Allotment Required Before Quality Check..</b>`,
-                  customClass: {
-                    container: 'swal2-popup-high-zindex'
-                  }
+                  html: `<b>Hard Allotment Required Before Quality Check..</b>`
                   })
                  return;
     }
@@ -1124,10 +1121,7 @@ export class ControlPanelDialogeComponent {
           Swal.fire({
                   title: '',
                   icon: 'warning',
-                  html: `<b>Please Do Quality Check Before Verification.</b>`,
-                  customClass: {
-                    container: 'swal2-popup-high-zindex'
-                  }
+                  html: `<b>Please Do Quality Check Before Verification.</b>`
                   })
                  return;
         }
@@ -1198,10 +1192,7 @@ export class ControlPanelDialogeComponent {
       Swal.fire({
                 title: '',
                 icon: 'warning',
-                html: `<b>Allotment Required.</b>`,
-                customClass: {
-                  container: 'swal2-popup-high-zindex'
-                 }
+                html: `<b>Allotment Required.</b>`
                 })
               return;
     }
@@ -1230,10 +1221,7 @@ export class ControlPanelDialogeComponent {
         Swal.fire({
           title: '',
           icon: 'warning',
-          html: `<b>Allotment Required.</b>`,
-          customClass: {
-            container: 'swal2-popup-high-zindex'
-          }
+          html: `<b>Allotment Required.</b>`
         });
         return;
       }
@@ -1445,10 +1433,7 @@ export class ControlPanelDialogeComponent {
       Swal.fire({
                   title: '',
                   icon: 'warning',
-                  html: `<b>Only Hard  Alloted Duty Can Be Disptached.</b>`,
-                  customClass: {
-                    container: 'swal2-popup-high-zindex'
-                  }
+                  html: `<b>Only Hard  Alloted Duty Can Be Disptached.</b>`
                   })
                  return;
     }
@@ -1489,10 +1474,7 @@ export class ControlPanelDialogeComponent {
       Swal.fire({
                   title: '',
                   icon: 'warning',
-                  html: `<b>Only Hard  Alloted Duty Can Be Disptached.</b>`,
-                  customClass: {
-                    container: 'swal2-popup-high-zindex'
-                  }
+                  html: `<b>Only Hard  Alloted Duty Can Be Disptached.</b>`
                   })
                  return;
     }
@@ -1531,10 +1513,7 @@ export class ControlPanelDialogeComponent {
       Swal.fire({
                   title: '',
                   icon: 'warning',
-                  html: `<b>Only Hard  Alloted Duty Can Be Disptached.</b>`,
-                  customClass: {
-                    container: 'swal2-popup-high-zindex'
-                  }
+                  html: `<b>Only Hard  Alloted Duty Can Be Disptached.</b>`
                   })
                  return;
     }
@@ -1757,14 +1736,11 @@ export class ControlPanelDialogeComponent {
   openClosingScreen(item: any) {
     if (!item.locationOutDate || !item.locationOutTime) {
       Swal.fire({
-                  title: '',
-                  icon: 'warning',
-                  html: `<b>Closing can not be done without dispatch.</b>`,
-                  customClass: {
-                    container: 'swal2-popup-high-zindex'
-                  }
-                  })
-                 return;
+        title: '',
+        icon: 'warning',
+        html: `<b>Closing can not be done without dispatch.</b>`
+      });
+      return;
     }
 
     const encryptedReservationID = encodeURIComponent(this._generalService.encrypt(item.reservationID.toString()));
@@ -2230,10 +2206,7 @@ TrackOnMapInfo(dutySlipID:number) {
                             ${item.registrationNumber} - ${item.driverName}#${item.driverMobile}.<br><br>
                             Please cancel the Allotment before cancelling the Reservation.
                          </b>
-                        `,
-                  customClass: {
-                                container: 'swal2-popup-high-zindex'
-                               }
+                        `
                 })
             return;
     }
@@ -2365,10 +2338,7 @@ public getInvoiceNumber(item:any ,i: any)
              Swal.fire({
                   title: '',
                   icon: 'warning',
-                  html: `<b>Invoice is generate so reservation is not cancelled...</b>`,
-                  customClass: {
-                    container: 'swal2-popup-high-zindex'
-                  }
+                  html: `<b>Invoice is generate so reservation is not cancelled...</b>`
                   })
                  return;
           }

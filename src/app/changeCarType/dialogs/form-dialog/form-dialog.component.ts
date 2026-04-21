@@ -126,10 +126,7 @@ export class ChangeCarTypeFormDialogComponent {
           icon: 'error',
           html: `<div style="text-align:left;">${errorMessage}</div>`,
           confirmButtonText: 'OK',
-          width: '800px',
-          customClass: {
-            container: 'swal2-popup-high-zindex'
-          }
+          width: '800px'
         })
 
 

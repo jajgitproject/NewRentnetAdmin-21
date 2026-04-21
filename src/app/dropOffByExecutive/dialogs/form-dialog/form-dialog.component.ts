@@ -923,10 +923,7 @@ getFormValidationErrors(formGroup: FormGroup): string[] {
               <b>Pickup Date:</b> ${formatDateDDMMYYYY(this.pickUpDate)}<br>
               <b>Pickup Time:</b> ${this.pickUpTime.toLocaleTimeString()}<br>
               <b>Pickup KM:</b> ${this.pickUpKM}
-              `,
-            customClass: {
-              container: 'swal2-popup-high-zindex'
-            }
+              `
             }).then((result) => {
               if (result.isConfirmed) {
                 this.saveDisabled = true;

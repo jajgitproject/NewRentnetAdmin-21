@@ -170,10 +170,7 @@ export class CreateCreditNoteComponent implements OnInit {
       Swal.fire({
                             title: '',
                             icon: 'warning',
-                            html: `<b>Branch not found in this invoice Invalid Record..</b>`,
-                            customClass: {
-                              container: 'swal2-popup-high-zindex'
-                            }
+                            html: `<b>Branch not found in this invoice Invalid Record..</b>`
                             })
                            return;
     }

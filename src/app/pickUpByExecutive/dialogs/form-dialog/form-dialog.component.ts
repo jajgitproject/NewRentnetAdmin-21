@@ -782,10 +782,7 @@ public PostGoogleAddress(): void
                 <b>Reporting Date:</b> ${formatDateDDMMYYYY(this.reportingToGuestDate)}<br>
                 <b>Reporting Time:</b> ${this.reportingToGuestTime.toLocaleTimeString()}<br>
                 <b>Reporting KM:</b> ${this.reportingToGuestKM}
-              `,
-              customClass: {
-                container: 'swal2-popup-high-zindex'
-              }
+              `
               }).then((result) => {
                 if (result.isConfirmed) {
                   this.saveDisabled = true;

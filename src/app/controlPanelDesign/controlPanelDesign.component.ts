@@ -3538,9 +3538,7 @@ TrackOnMapInfo(reservationID: number, item?: any) {
   if (!hasGarageOut && !hasLocationOut) {
     Swal.fire({
       icon: 'info',
-      text: 'You can track trips after Location Out..',
-      customClass: { popup: 'swal2-popup-high-zindex' },
-      target: document.body
+      text: 'You can track trips after Location Out..'
     });
     return;
   }

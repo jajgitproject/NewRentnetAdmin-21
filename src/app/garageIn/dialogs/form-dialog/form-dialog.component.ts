@@ -827,10 +827,7 @@ onTimeInput(event: any): void {
               <b>Drop off Date:</b> ${formatDateDDMMYYYY(this.dropoffDate)}<br>
               <b>Drop off Time:</b> ${this.dropoffTime.toLocaleTimeString()}<br>
               <b>Drop off KM:</b> ${this.dropoffKM}
-              `,
-            customClass: {
-              container: 'swal2-popup-high-zindex'
-            }
+              `
             }).then((result) => {
               if (result.isConfirmed) {
                 this.saveDisabled = true;

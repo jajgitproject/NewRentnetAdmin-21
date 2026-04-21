@@ -157,10 +157,7 @@ export class FormDialogComponent
         {
           Swal.fire({
                       title: response.result,
-                      icon: 'warning',
-                      customClass: {
-                              container: 'swal2-popup-high-zindex'
-                      }
+                      icon: 'warning'
                     })
                     //return;
                     this.dialogRef.close(true);

@@ -213,20 +213,51 @@ export class AppComponent {
     if (AppComponent.swalForegroundInstalled) return;
     AppComponent.swalForegroundInstalled = true;
 
+    // Runtime evidence (debug session 445479) proved Angular CDK 17+ mounts
+    // MatDialog's overlay wrapper with `popover="manual"` and calls
+    // showPopover(), which places the dialog into the browser's TOP LAYER.
+    // Nothing with a z-index — not even 2147483647 — can paint above the top
+    // layer. The only reliable way to put Swal2 on top of a MatDialog is to
+    // promote the `.swal2-container` into the top layer too, via the same
+    // Popover API. The empirical test (swal container + setAttribute popover
+    // manual + showPopover()) moved Swal from popupIdx:14 to popupIdx:2 —
+    // above every dialog descendant.
     const promote = () => {
       const container = Swal.getContainer();
       if (!container) return;
-      // Re-parent to end of <body> (breaks CDK-overlay stacking-context trap).
+      // Re-parent to end of <body>. Required by the Popover API (a popover
+      // must live in the DOM while open) and also breaks any CDK-overlay
+      // stacking-context trap for the legacy z-index path below.
       if (container.parentElement !== document.body) {
         document.body.appendChild(container);
       } else if (document.body.lastElementChild !== container) {
         document.body.appendChild(container);
       }
-      // Use setProperty with priority 'important' so the inline style beats
-      // any stylesheet rule, including `!important` ones and Swal2's own
-      // runtime-injected <style>.
+      // Keep the z-index path as a fallback for browsers without Popover API
+      // support (Chrome <114, Safari <17, Firefox <125). setProperty with
+      // priority 'important' so it beats Swal2's own runtime stylesheet and
+      // theme rules.
       container.style.setProperty('z-index', '2147483647', 'important');
       container.style.setProperty('position', 'fixed', 'important');
+      // Top-layer promotion via Popover API — THE actual fix.
+      const anyContainer = container as any;
+      if (typeof anyContainer.showPopover === 'function') {
+        try {
+          if (container.getAttribute('popover') !== 'manual') {
+            container.setAttribute('popover', 'manual');
+          }
+          // :popover-open matches only when the element is currently in the
+          // top layer. If it's already open, calling showPopover() throws, so
+          // we check first.
+          let alreadyOpen = false;
+          try { alreadyOpen = container.matches(':popover-open'); } catch {}
+          if (!alreadyOpen) {
+            anyContainer.showPopover();
+          }
+        } catch {
+          // Swallow — we still have the z-index fallback above.
+        }
+      }
     };
 
     // Also monkey-patch Swal.fire so every call app-wide is foregrounded

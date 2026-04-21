@@ -277,9 +277,7 @@ mat-option {
    Call sites never need `target:` / `backdrop:` / `heightAuto:` overrides — a
    plain `Swal.fire({ ... })` is guaranteed to render in the foreground. */
 .swal2-container,
-body > .swal2-container,
-.swal2-container.swal2-popup-high-zindex,
-.swal2-popup-high-zindex {
+body > .swal2-container {
   z-index: 2147483647 !important;
 }
 

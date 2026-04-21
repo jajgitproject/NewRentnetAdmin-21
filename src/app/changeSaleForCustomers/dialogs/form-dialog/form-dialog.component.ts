@@ -461,10 +461,7 @@ public confirmAdd(): void
     cancelButtonText: 'Cancel',
     allowOutsideClick: false,
     allowEscapeKey: false,
-    heightAuto: false,
-    customClass: {
-      container: 'swal2-popup-high-zindex'
-    }
+    heightAuto: false
   }).then((result) => {
 
     if (result.isConfirmed) {

@@ -388,10 +388,7 @@ export class FormDialogSendSmsWhatsappMailComponent {
             Swal.fire({
                       title: '',
                       icon: 'warning',
-                      html: `<b>You cannot send a notification for a booking date earlier than today.</b>`,
-                      customClass: {
-                        container: 'swal2-popup-high-zindex'
-                      }
+                      html: `<b>You cannot send a notification for a booking date earlier than today.</b>`
                     })
                     return false;
           }  

@@ -372,10 +372,7 @@ export class CreditNoteHomeComponent implements OnInit {
      Swal.fire({
                       title: '',
                       icon: 'warning',
-                      html: `<b>Edit is not available Credit Note Status Already Approved..</b>`,
-                      customClass: {
-                        container: 'swal2-popup-high-zindex'
-                      }
+                      html: `<b>Edit is not available Credit Note Status Already Approved..</b>`
                       })
                      return;
         }

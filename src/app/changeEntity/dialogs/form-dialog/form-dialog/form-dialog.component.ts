@@ -88,10 +88,7 @@ export class MessageBoxFormDialogComponent {
               ${errors.map((e: string) => `• ${e}`).join('<br>')}
              </div></b>`,
               confirmButtonText: 'OK',
-              width: '800px',
-              customClass: {
-                container: 'swal2-popup-high-zindex'
-              }
+              width: '800px'
             })
 
 
