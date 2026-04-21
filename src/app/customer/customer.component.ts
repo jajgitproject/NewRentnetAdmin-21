@@ -82,13 +82,13 @@ export class CustomerComponent implements OnInit {
   searchCustomerCodeForAPIIntegration:string='';
   //vehicleCategory:FormControl=new FormControl();
 
-  customerName:FormControl=new FormControl();
-  customerGroup:FormControl=new FormControl();
-  customerType:FormControl=new FormControl();
-  customerCategory:FormControl=new FormControl();
-  customerCodeForAPIIntegration:FormControl=new FormControl();
+  customerName:FormControl=new FormControl('');
+  customerGroup:FormControl=new FormControl('');
+  customerType:FormControl=new FormControl('');
+  customerCategory:FormControl=new FormControl('');
+  customerCodeForAPIIntegration:FormControl=new FormControl('');
 
-  supplier:FormControl=new FormControl();
+  supplier:FormControl=new FormControl('');
   
   // regNumber:FormControl=new FormControl();
   public customerGroupList?: CustomerGroupDropDown[] = [];
@@ -162,6 +162,15 @@ export class CustomerComponent implements OnInit {
   contextMenuPosition = { x: '0px', y: '0px' };
   
   ngOnInit() {
+    this.PageNumber = 0;
+    this.searchTerm = '';
+    this.searchCustomerName = '';
+    this.selectedFilter = 'search';
+    this.SearchActivationStatus = true;
+    this.customerType.setValue('', { emitEvent: false });
+    this.customerGroup.setValue('', { emitEvent: false });
+    this.customerCategory.setValue('', { emitEvent: false });
+
     this.loadData();
     this.SubscribeUpdateService();
     //this.InitSupplier();
@@ -472,9 +481,9 @@ export class CustomerComponent implements OnInit {
 }
 
     this.customerService.getTableData(
-      this.searchCustomerName,
-      this.customerType.value,
-      this.customerGroup.value,
+      this.searchCustomerName || '',
+      this.customerType.value || '',
+      this.customerGroup.value || '',
       this.SearchActivationStatus,
       this.PageNumber).subscribe(
       data =>

@@ -48,7 +48,7 @@ import { FormDialogKCComponent } from '../kamCard/dialogs/form-dialog/form-dialo
 import { KamCardService } from '../kamCard/kamCard.service';
 import { KamCard } from '../kamCard/kamCard.model';
 import { SpecialInstructionDialogComponent } from '../specialInstruction/dialogs/special-instruction-dialog/special-instruction-dialog.component';
-import { BillingInstructionDialogComponent } from '../billingInstructionsDetails/dialogs/billing-instruction-dialog/billing-instruction-dialog.component';
+import { BillingInstructionsDetailsDialogComponent } from '../billingInstructionsDetails/dialogs/billing-instruction-dialog/billing-instruction-dialog.component';
 import { BillingInstructionsDetailsService } from '../billingInstructionsDetails/billingInstructionsDetails.service';
 import { BillingInstructionsDetails } from '../billingInstructionsDetails/billingInstructionsDetails.model';
 import { DiscountDetails } from '../discountDetails/discountDetails.model';
@@ -385,7 +385,7 @@ public MOPLoadData()
 BillingInstruction()
 {
   
-  const dialogRef = this.dialog.open(BillingInstructionDialogComponent, 
+  const dialogRef = this.dialog.open(BillingInstructionsDetailsDialogComponent, 
     {
       width:'350px',
       data: 

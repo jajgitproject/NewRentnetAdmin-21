@@ -24,17 +24,14 @@ import { BillingInstructionsDetailsService } from './billingInstructionsDetails.
 import { BillingInstructionsDetailsRoutingModule } from './billingInstructionsDetails-routing.module';
 import { MyUploadComponent } from '../myupload/myupload.component';
 import { MyUploadModule } from '../myupload/myupload.module';
-import { AdvanceService } from '../advance/advance.service';
-//import { MatAutocompleteModule } from '@angular/material/autocomplete';
-import { BillingInstructionDialogComponent } from './dialogs/billing-instruction-dialog/billing-instruction-dialog.component';
+import { BillingInstructionsDetailsDialogComponent } from './dialogs/billing-instruction-dialog/billing-instruction-dialog.component';
 import { MatAutocompleteModule } from '@angular/material/autocomplete';
 import { DeleteDialogComponent } from './dialogs/delete/delete.component';
-//import { BillingInstructionDialogComponent } from '../billingInstruction/dialogs/billing-instruction-dialog/billing-instruction-dialog.component';
 
 @NgModule({
   declarations: [
     BillingInstructionsDetailsComponent,
-    BillingInstructionDialogComponent,
+    BillingInstructionsDetailsDialogComponent,
     DeleteDialogComponent
   ],
   imports: [
@@ -63,7 +60,7 @@ import { DeleteDialogComponent } from './dialogs/delete/delete.component';
     MyUploadModule,
     MatAutocompleteModule
   ],
-  exports: [BillingInstructionsDetailsComponent, BillingInstructionDialogComponent],
+  exports: [BillingInstructionsDetailsComponent, BillingInstructionsDetailsDialogComponent],
   providers: [BillingInstructionsDetailsService,AdvanceService]
 })
 export class BillingInstructionsDetailsModule {}

@@ -14,13 +14,13 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 
 @Component({
   standalone: false,
-  selector: 'app-billing-instruction-dialog',
+  selector: 'app-billing-instructions-details-dialog',
   templateUrl: './billing-instruction-dialog.component.html',
   styleUrls: ['./billing-instruction-dialog.component.sass'],
   providers: [{ provide: MAT_DATE_LOCALE, useValue: 'en-GB' }]
 })
 
-export class BillingInstructionDialogComponent 
+export class BillingInstructionsDetailsDialogComponent 
 {
   saveDisabled:boolean=true;
   buttonDisabled:boolean=false;
@@ -34,7 +34,7 @@ export class BillingInstructionDialogComponent
   ReservationID: any;
 
   constructor(
-  public dialogRef: MatDialogRef<BillingInstructionDialogComponent>, 
+  public dialogRef: MatDialogRef<BillingInstructionsDetailsDialogComponent>, 
   @Inject(MAT_DIALOG_DATA) public data: any,
   public advanceTableService: BillingInstructionsDetailsService,
   private snackBar: MatSnackBar,

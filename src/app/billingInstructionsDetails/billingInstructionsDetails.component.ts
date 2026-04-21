@@ -18,7 +18,7 @@ import { MyUploadComponent } from '../myupload/myupload.component';
 import { DeleteDialogCityComponent } from '../dashboard/city-master/dialogscity/delete-city/delete-city.component';
 import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
 import { AdvanceDialogComponent } from '../advance/dialogs/advance-dialog/advance-dialog.component';
-import { BillingInstructionDialogComponent } from './dialogs/billing-instruction-dialog/billing-instruction-dialog.component';
+import { BillingInstructionsDetailsDialogComponent } from './dialogs/billing-instruction-dialog/billing-instruction-dialog.component';
 import { DeleteDialogComponent } from './dialogs/delete/delete.component';
 @Component({
   standalone: false,
@@ -82,7 +82,7 @@ export class BillingInstructionsDetailsComponent implements OnInit {
   }
   BillingInstructionEdit(i:any)
   {
-    const dialogRef = this.dialog.open(BillingInstructionDialogComponent, 
+    const dialogRef = this.dialog.open(BillingInstructionsDetailsDialogComponent, 
       {
         data: 
           {

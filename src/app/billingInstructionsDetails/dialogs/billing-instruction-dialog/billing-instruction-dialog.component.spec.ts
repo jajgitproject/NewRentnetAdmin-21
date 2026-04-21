@@ -2,21 +2,21 @@
 import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 import { matDialogTestProviders } from '@testing/mat-dialog-test-providers';
 
-import { BillingInstructionDialogComponent } from './billing-instruction-dialog.component';
+import { BillingInstructionsDetailsDialogComponent } from './billing-instruction-dialog.component';
 
-describe('BillingInstructionDialogComponent', () => {
-  let component: BillingInstructionDialogComponent;
-  let fixture: ComponentFixture<BillingInstructionDialogComponent>;
+describe('BillingInstructionsDetailsDialogComponent', () => {
+  let component: BillingInstructionsDetailsDialogComponent;
+  let fixture: ComponentFixture<BillingInstructionsDetailsDialogComponent>;
 
   beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
       
-      providers: matDialogTestProviders(),declarations: [BillingInstructionDialogComponent]
+      providers: matDialogTestProviders(),declarations: [BillingInstructionsDetailsDialogComponent]
     }).compileComponents();
   }));
 
   beforeEach(() => {
-    fixture = TestBed.createComponent(BillingInstructionDialogComponent);
+    fixture = TestBed.createComponent(BillingInstructionsDetailsDialogComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });

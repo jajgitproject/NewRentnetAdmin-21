@@ -30,6 +30,7 @@ import {MatTooltipModule} from '@angular/material/tooltip';
 import { MatAutocompleteModule } from '@angular/material/autocomplete';
 import { CustomerCorporateIndividualService } from '../customerCorporateIndividual/customerCorporateIndividual.service';
 // import { TwoDigitDecimaNumberDirective } from './twodigitdecimalnumber.directive';
+import { CustomerCorporateIndividualModule } from '../customerCorporateIndividual/customerCorporateIndividual.module';
 
 
 @NgModule({
@@ -63,6 +64,7 @@ import { CustomerCorporateIndividualService } from '../customerCorporateIndividu
     MatMenuModule,
     MatProgressSpinnerModule,
     MyUploadModule,
+    CustomerCorporateIndividualModule,
     //TwoDigitDecimaNumberDirective
   ],
   providers: [CustomerService,CustomerCorporateIndividualService]

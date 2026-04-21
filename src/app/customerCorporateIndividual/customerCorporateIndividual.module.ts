@@ -62,7 +62,7 @@ import { CustomerCorporateIndividualRoutingModule } from './customer-routing.mod
     MatProgressSpinnerModule,
     MyUploadModule
   ],
-  providers: [CustomerCorporateIndividualService]
+  exports: [CustomerCorporateIndividualComponent, advanceTableForm, DeleteDialogComponent]
 })
 export class CustomerCorporateIndividualModule {}
 
