@@ -8,8 +8,8 @@ import { MatSort } from '@angular/material/sort';
 import { Customer } from './customer.model';
 import { DataSource } from '@angular/cdk/collections';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import { BehaviorSubject, fromEvent, merge, Observable, Subscription } from 'rxjs';
-import { map, startWith } from 'rxjs/operators';
+import { BehaviorSubject, fromEvent, merge, Observable, Subject, Subscription } from 'rxjs';
+import { debounceTime, distinctUntilChanged, map, startWith } from 'rxjs/operators';
 import { FormDialogComponent } from './dialogs/form-dialog/form-dialog.component';
 import { DeleteDialogComponent } from './dialogs/delete/delete.component';
 import { DateAdapter, MAT_DATE_LOCALE } from '@angular/material/core';
@@ -106,6 +106,8 @@ export class CustomerComponent implements OnInit {
   searchTerm: any = '';
   selectedFilter: string = 'search';
   filterSelected:boolean = true;
+  isLoading: boolean = false;
+  private searchTerm$ = new Subject<string>();
 
   menuItems: any[] = [
     { label: 'Address', tooltip: 'Address', pageName: 'Address' },
@@ -170,6 +172,12 @@ export class CustomerComponent implements OnInit {
     this.customerType.setValue('', { emitEvent: false });
     this.customerGroup.setValue('', { emitEvent: false });
     this.customerCategory.setValue('', { emitEvent: false });
+
+    // Debounce filter typing so we don't hammer the backend with one call per
+    // keystroke. 300ms is the sweet spot between responsiveness and backend load.
+    this.searchTerm$
+      .pipe(debounceTime(300), distinctUntilChanged())
+      .subscribe(() => this.loadData(false));
 
     this.loadData();
     this.SubscribeUpdateService();
@@ -313,6 +321,11 @@ export class CustomerComponent implements OnInit {
 
   this.loadData(true); // exact match
 }
+
+  onSearchTermChange(value: string) {
+    this.searchTerm = value ?? '';
+    this.searchTerm$.next(this.searchTerm);
+  }
   // initCustomerType(){
   //   this._generalService.getCustomerType().subscribe(
   //     data=>{
@@ -480,6 +493,7 @@ export class CustomerComponent implements OnInit {
     break;
 }
 
+    this.isLoading = true;
     this.customerService.getTableData(
       this.searchCustomerName || '',
       this.customerType.value || '',
@@ -554,8 +568,9 @@ if (exactMatch) {
 }
 
         this.dataSource = filteredData;
+        this.isLoading = false;
       },
-      (error: HttpErrorResponse) => { this.dataSource = null; }
+      (error: HttpErrorResponse) => { this.dataSource = null; this.isLoading = false; }
     );
   }
 

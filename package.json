@@ -43,6 +43,7 @@
     "@fullcalendar/timegrid": "^6.1.20",
     "@ng-bootstrap/ng-bootstrap": "^20.0.0",
     "@ngx-loading-bar/core": "^7.0.1",
+    "@ngx-loading-bar/http-client": "^7.0.1",
     "@ngx-loading-bar/router": "^7.0.1",
     "@ngx-translate/core": "^17.0.0",
     "@ngx-translate/http-loader": "^17.0.0",

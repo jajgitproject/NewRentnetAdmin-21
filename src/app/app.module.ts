@@ -42,6 +42,9 @@ import { MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { NoDataDialogModule } from './no-data-dialog/no-data-dialog.module';
 import { ChangePasswordDialogModule } from './changePassword/change-password-dialog.module';
+import { LoadingBarHttpClientModule } from '@ngx-loading-bar/http-client';
+import { LoadingBarRouterModule } from '@ngx-loading-bar/router';
+import { LoadingBarModule } from '@ngx-loading-bar/core';
 import { MatDialogModule, MAT_DIALOG_DEFAULT_OPTIONS } from '@angular/material/dialog';
 import { MAT_FORM_FIELD_DEFAULT_OPTIONS } from '@angular/material/form-field';
 import { RuntimeConfigService } from './core/service/runtime-config.service';
@@ -82,6 +85,9 @@ export function createTranslateLoader(http: HttpClient): any {
     MatDialogModule,
     NoDataDialogModule,
     ChangePasswordDialogModule,
+    LoadingBarHttpClientModule,
+    LoadingBarRouterModule,
+    LoadingBarModule,
     TranslateModule.forRoot({
       loader: {
         provide: TranslateLoader,

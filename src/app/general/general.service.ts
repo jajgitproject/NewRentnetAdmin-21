@@ -12,7 +12,7 @@ import { AdditionalServiceDropDown } from './additionalServiceDropDown.model';
 import { CityGroupDropDown } from './cityGroupDropDown.model';
 import { CurrencyDropDown } from './currencyDropDown.model';
 
-import { debounceTime, map } from 'rxjs/operators';
+import { debounceTime, map, shareReplay } from 'rxjs/operators';
 import { QualificationDropDown } from './qualificationDropDown.model';
 import { GeoCountryDropDown } from './geoCountryDropDown.model';
 import { SpotTypeDropDown } from '../spotInCity/spotTypeDropDown.model';
@@ -130,6 +130,30 @@ export class GeneralService {
   ImageURL: string;
   FormURL: string;
   UnlockEmployeeUrl: string;
+
+  // In-memory cache for read-only dropdown/lookup endpoints. Populated lazily
+  // on first call per key and reused across the whole app session to avoid
+  // re-hitting the server on every page visit. Call `invalidateCache(key)` (or
+  // `invalidateCache()` for all) after a create/update/delete that could make
+  // the cached list stale.
+  private _dropdownCache = new Map<string, Observable<any>>();
+
+  private cachedGet<T>(key: string, factory: () => Observable<T>): Observable<T> {
+    let cached = this._dropdownCache.get(key) as Observable<T> | undefined;
+    if (!cached) {
+      cached = factory().pipe(shareReplay({ bufferSize: 1, refCount: false }));
+      this._dropdownCache.set(key, cached);
+    }
+    return cached;
+  }
+
+  public invalidateCache(key?: string): void {
+    if (key) {
+      this._dropdownCache.delete(key);
+    } else {
+      this._dropdownCache.clear();
+    }
+  }
 
   private subjectName = new Subject<any>(); //need to create a subject
   // User_API_URL: string;
@@ -354,7 +378,8 @@ GetCitiessAl(): Observable<CityDropDown[]> {
   }
 
   GetCountryCodes(): Observable<CountryCodeDropDown[]> {
-    return this.http.get<CountryCodeDropDown[]>(this.BaseURL + "country/getCountryISOForDropDown");
+    return this.cachedGet('getCountryCodes', () =>
+      this.http.get<CountryCodeDropDown[]>(this.BaseURL + "country/getCountryISOForDropDown"));
   }
   GetDisputeType(): Observable<DisputeTypeDropDown[]> {
     return this.http.get<DisputeTypeDropDown[]>(this.BaseURL + "dutySlipForBilling/DisputeTypeDropDown");
@@ -1212,11 +1237,13 @@ GetVehicleBasedOnContractIDForOutStationRoundTrip(contractID: any,PackageID:numb
   }
 
   getCountries(): Observable<CountryDropDown[]> {
-    return this.http.get<CountryDropDown[]>(this.BaseURL + "city/ForDropDownCountry");
+    return this.cachedGet('getCountries', () =>
+      this.http.get<CountryDropDown[]>(this.BaseURL + "city/ForDropDownCountry"));
   }
 
   getBusniessType(): Observable<BusinessTypeDropDown[]> {
-    return this.http.get<BusinessTypeDropDown[]>(this.BaseURL + "customer/ForDropDownBusinessType");
+    return this.cachedGet('getBusniessType', () =>
+      this.http.get<BusinessTypeDropDown[]>(this.BaseURL + "customer/ForDropDownBusinessType"));
   }
   GetCustomerID(): Observable<any[]> {
     return this.http.get<any[]>(this.BaseURL + "customer/getCustomerID");
@@ -1227,7 +1254,8 @@ GetVehicleBasedOnContractIDForOutStationRoundTrip(contractID: any,PackageID:numb
   }
 
   getSupplier(): Observable<SupplierDropDown[]> {
-    return this.http.get<SupplierDropDown[]>(this.BaseURL + "organizationalEntity/ForDropDownSupplier");
+    return this.cachedGet('getSupplier', () =>
+      this.http.get<SupplierDropDown[]>(this.BaseURL + "organizationalEntity/ForDropDownSupplier"));
   }
 
   getSupplierOfOE(): Observable<SupplierDropDown[]> {
@@ -1292,7 +1320,8 @@ GetVehicleBasedOnContractIDForOutStationRoundTrip(contractID: any,PackageID:numb
   }
 
   getCustomerGroup(): Observable<CustomerGroupDropDown[]> {
-    return this.http.get<CustomerGroupDropDown[]>(this.BaseURL + "CustomerGroup/ForDropDown");
+    return this.cachedGet('getCustomerGroup', () =>
+      this.http.get<CustomerGroupDropDown[]>(this.BaseURL + "CustomerGroup/ForDropDown"));
   }
   GetCustomerForIndividual(): Observable<CustomerGroupDropDown[]> {
     return this.http.get<CustomerGroupDropDown[]>(this.BaseURL + "CustomerGroup/GetCustomerForIndividual");
@@ -1330,7 +1359,8 @@ getCountry(): Observable<CountryDropDown[]> {
 }
 
 getCustomerType(): Observable<CustomerTypeDropDown[]> {
-  return this.http.get<CustomerTypeDropDown[]>(this.BaseURL + "CustomerType/ForDropDown");
+  return this.cachedGet('getCustomerType', () =>
+    this.http.get<CustomerTypeDropDown[]>(this.BaseURL + "CustomerType/ForDropDown"));
 }
 
 getCustomerPerson(): Observable<CustomerPersonDropDown[]> {
@@ -1396,7 +1426,8 @@ GetIGSTPercentage(): Observable<IGSTPercentageDropDown[]> {
 }
 
 getCustomer(): Observable<CustomerCustomerGroupDropDown[]> {
-  return this.http.get<CustomerCustomerGroupDropDown[]>(this.BaseURL + "Customer/ForDropDown");
+  return this.cachedGet('getCustomer', () =>
+    this.http.get<CustomerCustomerGroupDropDown[]>(this.BaseURL + "Customer/ForDropDown"));
 }
 
 GetCSGSTPercentage(): Observable<CSGSTPercentageDropDown[]> {
@@ -1433,11 +1464,13 @@ GetCustomerDesignationBasedOnCG(CustomerGroupID:number): Observable<CustomerDesi
 }
 
 getCustomerCategory(): Observable<CustomerCategoryDropDown[]>{
-  return this.http.get<CustomerCategoryDropDown[]>(this.BaseURL + "CustomerCategory/ForDropDown");
+  return this.cachedGet('getCustomerCategory', () =>
+    this.http.get<CustomerCategoryDropDown[]>(this.BaseURL + "CustomerCategory/ForDropDown"));
 }
  
   GetVehicleCategories(): Observable<VehicleCategoryDropDown[]> {
-    return this.http.get<VehicleCategoryDropDown[]>(this.BaseURL + "VehicleCategory/ForDropDown");
+    return this.cachedGet('GetVehicleCategories', () =>
+      this.http.get<VehicleCategoryDropDown[]>(this.BaseURL + "VehicleCategory/ForDropDown"));
   }
    GetVehicleCategoryByVehicleID(vehicleID:number): Observable<VehicleCategoryDropDown[]> {
     return this.http.get<VehicleCategoryDropDown[]>(this.BaseURL + "vehicle/GetVehicleCategoryByVehicleID/" + vehicleID);
@@ -1472,15 +1505,18 @@ getCustomerCategory(): Observable<CustomerCategoryDropDown[]>{
   }
 
   GetCompany(): Observable<OrganizationalEntityDropDown[]>{
-    return this.http.get<OrganizationalEntityDropDown[]>(this.BaseURL + "organizationalEntity/ForCompanyDropDown");
+    return this.cachedGet('GetCompany', () =>
+      this.http.get<OrganizationalEntityDropDown[]>(this.BaseURL + "organizationalEntity/ForCompanyDropDown"));
   }
 
   GetHub(): Observable<OrganizationalEntityDropDown[]>{
-    return this.http.get<OrganizationalEntityDropDown[]>(this.BaseURL + "organizationalEntity/ForHubDropDown");
+    return this.cachedGet('GetHub', () =>
+      this.http.get<OrganizationalEntityDropDown[]>(this.BaseURL + "organizationalEntity/ForHubDropDown"));
   }
 
   GetLocation(): Observable<OrganizationalEntityDropDown[]>{
-    return this.http.get<OrganizationalEntityDropDown[]>(this.BaseURL + "organizationalEntity/ForLocationDropDown");
+    return this.cachedGet('GetLocation', () =>
+      this.http.get<OrganizationalEntityDropDown[]>(this.BaseURL + "organizationalEntity/ForLocationDropDown"));
   }
 
   GetLocationBasedOnCity(CityID:number): Observable<OrganizationalEntityDropDown[]>{
@@ -1488,11 +1524,13 @@ getCustomerCategory(): Observable<CustomerCategoryDropDown[]>{
   }
   
   GetLocationHub(): Observable<OrganizationalEntityDropDown[]>{
-    return this.http.get<OrganizationalEntityDropDown[]>(this.BaseURL + "organizationalEntity/ForLocationHubDropDown");
+    return this.cachedGet('GetLocationHub', () =>
+      this.http.get<OrganizationalEntityDropDown[]>(this.BaseURL + "organizationalEntity/ForLocationHubDropDown"));
   }
   
    GetLocationGroup(): Observable<LocationGroupDropDown[]>{
-    return this.http.get<LocationGroupDropDown[]>(this.BaseURL + "locationGroup/ForDropDown");
+    return this.cachedGet('GetLocationGroup', () =>
+      this.http.get<LocationGroupDropDown[]>(this.BaseURL + "locationGroup/ForDropDown"));
   }
   getSuppliersForInventory(): Observable<SupplierDropDown[]> {
     return this.http.get<SupplierDropDown[]>(this.BaseURL + "supplier/ForDropDown");
