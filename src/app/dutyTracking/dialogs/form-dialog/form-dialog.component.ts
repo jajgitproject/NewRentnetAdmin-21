@@ -49,7 +49,6 @@ export class FormDialogComponent
     this.action = data.action;
     this.dutySlipID=data.dutySlipID;
     this.verifyDutyStatusAndCacellationStatus = data.verifyDutyStatusAndCacellationStatus;
-    console.log(data)
     if (this.action === 'edit') 
     {
       this.dialogTitle ='Duty Tracking';       

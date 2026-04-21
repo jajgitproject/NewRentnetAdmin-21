@@ -53,7 +53,6 @@ export class VehicleCategoryTargetService
     {
       SearchActivationStatus=null;
     }
-    //console.log(this.API_URL + "/"+vehicleCategoryID+ '/'+SearchmonthlyTarget+ '/' +SearchdailyTarget+ '/' +SearchStartDate+ "/" +SearchEndDate + '/'+ SearchActivationStatus +'/' + PageNumber + '/VehicleCategoryTargetID/Ascending')
     return this.httpClient.get(this.API_URL + "/"+vehicleCategoryID+ '/'+SearchvehicleCategory+'/'+SearchmonthlyTarget+ '/' +SearchdailyTarget+ '/' +SearchStartDate+ "/" +SearchEndDate + '/'+ SearchActivationStatus +'/' + PageNumber + '/VehicleCategoryTargetID/Ascending');
   }
 
@@ -96,7 +95,6 @@ export class VehicleCategoryTargetService
     {
       SearchActivationStatus=null;
     }
-    //console.log(this.API_URL + "/" +SearchVehicleCategoryTarget+ "/" +SearchLevel+ "/" +SearchPreviousCategory+ "/" +SearchNextCategory + '/' + '/' + SearchActivationStatus +'/' + PageNumber + '/'+coloumName+'/'+sortType);
     return this.httpClient.get(this.API_URL + "/" +vehicleCategoryID+'/'+SearchvehicleCategory+'/'+SearchmonthlyTarget+ "/" +SearchdailyTarget+ '/'+SearchStartDate+ "/" +SearchEndDate + '/' + SearchActivationStatus +'/' + PageNumber + '/'+coloumName+'/'+sortType);
   }
 

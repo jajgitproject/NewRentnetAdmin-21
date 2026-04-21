@@ -225,7 +225,6 @@ shouldShowDeleteButton(item: any): boolean {
   //     {
   //        ;
   //       this.StateList = data;
-  //       console.log(this.StateList);
   //     },
   //     error =>
   //     {
@@ -243,7 +242,6 @@ shouldShowDeleteButton(item: any): boolean {
           startWith(""),
           map(value => this._filterState(value || ''))
         );
-        //console.log(this.StateList);
       },
       error => {
 

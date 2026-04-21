@@ -109,9 +109,7 @@ export class MonthlyBusinessReportComponent implements OnInit {
         this.regNo = this._generalService.decrypt(decodeURIComponent(encryptedRegNo));
       }
       
-      console.log(this.inventoryID, this.regNo);
       
-    console.log(this.regNo)
     });
     this.initMonthYear();
     this.loadData();
@@ -154,7 +152,6 @@ export class MonthlyBusinessReportComponent implements OnInit {
         this.PageNumber
       ).subscribe(
         data => {
-          console.log(this.dataSource);
           this.dataSource = data;
         },
         (error: HttpErrorResponse) => {
@@ -183,7 +180,6 @@ export class MonthlyBusinessReportComponent implements OnInit {
       November: 11,
       December: 12
     };
-    console.log(monthID);
     const monthNumber = monthMap[monthName] || 0; // Default to 0 if monthName is invalid
     const numericYear = +year || 0; // Default to 0 if year is invalid
   
@@ -416,7 +412,6 @@ export class MonthlyBusinessReportComponent implements OnInit {
       this.sortType).subscribe
       (
         data => {
-          console.log(this.dataSource)
           this.dataSource = data;
         },
        

@@ -65,13 +65,7 @@ export class FormDialogComponent
   // ✅ Button disable logic
   this.buttonDisabled = normalizedStatus !== 'changes allow';
 
-  console.log('STATUS:', this.status);
-  console.log('NORMALIZED:', normalizedStatus);
-  console.log('BUTTON DISABLED:', this.buttonDisabled);
 
-    console.log('PassToSupplier dialog - raw status:', data?.status);
-    console.log('PassToSupplier dialog - final status:', this.status);
-    console.log('PassToSupplier dialog - buttonDisabled:', this.buttonDisabled);
     
     if (this.action === 'edit') 
     {

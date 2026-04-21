@@ -18,7 +18,6 @@ export class DutySlipQualityCheckedByExecutiveService
   constructor(private httpClient: HttpClient, public generalService: GeneralService) 
   {
     this.API_URL=generalService.BaseURL+"dutySlipQualityCheckByExecutive";
-   // console.log(generalService.BaseURL+"dutySlipQualityCheckByExecutive")
   }
   /** CRUD METHODS */
   getdutyQualityCheckDataDetails(allotmentID: number):  Observable<any> 
@@ -40,7 +39,6 @@ export class DutySlipQualityCheckedByExecutiveService
   //   {
   //     SearchActivationStatus=null;
   //   }
-  //   console.log(this.API_URL + "/" +SearchVerificationResult + '/'+ dutyQualityCheckID + '/' + SearchActivationStatus +'/' + PageNumber + '/'+coloumName+'/'+sortType)
   //   return this.httpClient.get(this.API_URL + "/" +SearchVerificationResult + '/'+ dutyQualityCheckID + '/' + SearchActivationStatus +'/' + PageNumber +  '/'+coloumName+'/'+sortType);
   // }
 

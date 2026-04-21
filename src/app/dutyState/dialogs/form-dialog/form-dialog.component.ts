@@ -54,7 +54,6 @@ export class FormDialogComponent
         {
           this.dialogTitle =' Duty State'; 
           // this.tableRecord = data?.record[0];
-          // console.log(data.record[0]);      
           this.advanceTable = data.advanceTable;
         } else 
         {
@@ -125,7 +124,6 @@ InitStates() {
         startWith(""),
         map(value => this._filterState(value || ''))
       );
-      //console.log(this.StateList);
     },
     error => {
 
@@ -163,7 +161,6 @@ getEmployee()
     data=>
     {
       this.employeeDataSource=data;
-      console.log(this.employeeDataSource)
       this.advanceTableForm.controls["executive"].disable();
       this.advanceTableForm.patchValue({executive:this.employeeDataSource[0].firstName+" "+this.employeeDataSource[0].lastName});
       this.advanceTableForm.patchValue({changedByID:this.employeeDataSource[0].employeeID});
@@ -172,7 +169,6 @@ getEmployee()
 }
   submit() 
   {
-    //console.log(this.advanceTableForm.value);
   }
   onNoClick(): void 
   {

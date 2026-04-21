@@ -70,7 +70,6 @@ export class CustomerGroupSBTDomainService
     return this.httpClient.delete(this.API_URL + '/'+ customerGroupSBTDomainID  + '/'+ userID);
   }
   getCustomerForApproval(customerGroupID:number): Observable<CustomerPersonModels[]> {
-    console.log("customerGroupID in service: ", customerGroupID);
     return this.httpClient.get<CustomerPersonModels[]>(this.API_URL + "/getCustomerForApproval/"+customerGroupID);
 
   }

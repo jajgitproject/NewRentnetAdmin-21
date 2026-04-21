@@ -54,7 +54,6 @@ constructor(
       {
         // this.changeDetectorRef.detectChanges();
         // this.dataSource = new MatTableDataSource(data.driverList);
-        // console.log(this.dataSource);
         // this.dataSource.paginator = this.paginator;
         // this.obs = this.dataSource.connect();
         this.dataSource = data.bidDetailsList;

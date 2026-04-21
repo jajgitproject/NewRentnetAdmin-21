@@ -134,7 +134,6 @@ export class FormDialogInventoryVerificationsComponent
   
   createContactForm(): FormGroup 
   {
-    console.log(this.advanceTable)
     return this.fb.group(
     {
       inventoryDocumentID: [this.advanceTable.inventoryDocumentID],

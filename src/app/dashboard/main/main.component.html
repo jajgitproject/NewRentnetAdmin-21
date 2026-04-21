@@ -90,7 +90,7 @@
             <div class="card">
               <!-- Canvas for Chart.js -->
               <div class="recent-report__chart">
-                <canvas baseChart [chartType]="'line'" [datasets]="areaChartData" [labels]="areaChartLabels"
+                <canvas baseChart [type]="'line'" [datasets]="areaChartData" [labels]="areaChartLabels"
                   [options]="areaChartOptions" [plugins]="areaChartPlugins" [legend]="true">
                 </canvas>
               </div>
@@ -140,8 +140,7 @@
             <div class="card">
               <!-- Canvas for Chart.js -->
               <canvas baseChart class="chart" [datasets]="radarChartData" [labels]="radarChartLabels"
-                [options]="radarChartOptions" [chartType]="radarChartType" [plugins]="radarChartPlugins"
-                [colors]="radarChartColors"></canvas>
+                [options]="radarChartOptions" [type]="radarChartType" [plugins]="radarChartPlugins"></canvas>
             </div>
           </div>
         </div>

@@ -83,7 +83,6 @@ export class FormDialogComponent
         this.action = data.action;
         this.CreditNoteAmt = data.advanceTable?.creditNoteAmount;
         this.DutySlipID = data.advanceTable?.dutySlipID;
-        console.log(this.DutySlipID)
         if (this.action === 'edit') 
         {
           this.loadData();

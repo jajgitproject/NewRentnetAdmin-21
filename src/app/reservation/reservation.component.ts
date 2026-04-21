@@ -386,17 +386,12 @@ advanceTableIN: InternalNoteDetails | null;
   contextMenu: MatMenuTrigger;
   contextMenuPosition = { x: '0px', y: '0px' };
   ngOnInit() { 
-    console.log('Reservation ngOnInit - Status:', this.status);
-    console.log('Reservation ngOnInit - Status type:', typeof this.status);
-    console.log('Reservation ngOnInit - Comparison result:', this.status != 'Changes allow');
     
     // Enhanced status checking - allow changes for new duplicated bookings
     if(this.status && this.status !== 'Changes allow' && !this.isEditingAllowed()) {
       this.buttonDisabled = true;
-      console.log('Button disabled set to TRUE');
     } else {
       this.buttonDisabled = false;
-      console.log('Button disabled set to FALSE');
     }
   
     if(this.fromForm !=='newForm')
@@ -450,7 +445,6 @@ advanceTableIN: InternalNoteDetails | null;
 
       if (encryptedAction) {
         this.action = this._generalService.decrypt(decodeURIComponent(encryptedAction));
-        console.log(this.action)
       }
             });
           }   
@@ -464,7 +458,6 @@ advanceTableIN: InternalNoteDetails | null;
         this.InitResrvationGSTForCityID(this.customerID,this.cityID);
         this.GetIsGSTMandatoryWithResrvation(this.customerGroupID);
         const passengerID = this.advanceTable?.primaryPassengerID;
-        console.log("Received passengerID:", passengerID);
         this.GetIntervalMin();
         //this.GetReservationCapping(this.customerGroupID,this.customerID,this.pickupDate,this.cityID,this.packageTypeID,this.vehicleCategoryID);
 
@@ -699,7 +692,6 @@ onTNCChange(checked: any)
         (data:CustomerSpecificDetailsData)=>
         {
           this.dataSourceCSF = data.reservationDetailsList;
-          console.log(this.dataSourceCSF);
           const fieldValues = this.dataSourceCSF[0]?.customerSpecificFieldList || [];
           fieldValues.forEach((item) => {
             if (this.advanceTableForm.contains(item.fieldName)) {
@@ -813,7 +805,6 @@ getFieldValues() {
         this.reservationDataSource=data;
         this.advanceTable=this.reservationDataSource[0];
         this.ReservationStatus = this.advanceTable.reservationStatus;
-        console.log(this.reservationDataSource)
         let pickupDate=moment(this.advanceTable.pickupDate).format('DD/MM/yyyy');
           this.onBlurUpdateDateEdit(pickupDate);
         var value = this.advanceTable.pickupAddressLatLong.replace(
@@ -1142,7 +1133,6 @@ getFieldValues() {
     //this.formattedAddress = address.formatted_address;
     this.dropOffAddress = address.formatted_address;
     //this.dropOffAddress = address.name;
-    console.log(address)
     this.advanceTableForm.patchValue({ dropOffAddress: this.dropOffAddress });
     this.advanceTableForm.patchValue({dropOffAddressLatLong:address.geometry.location.lat()
       +
@@ -2528,7 +2518,6 @@ DTValidator(PackageTypeList: any[]): ValidatorFn {
       data=>
       {
         this.ReservationSourceList=data;
-        console.log(this.ReservationSourceList)
         this.filteredReservationSourceOptions = this.advanceTableForm.controls['reservationSource'].valueChanges.pipe(
           startWith(""),
           map(value => this._filterReservationSource(value || ''))
@@ -3231,8 +3220,6 @@ public validateONReservationGST(): boolean {
   }
 
   editPassenger() {
-    console.log(this.customerDetailData, this.action);
-    console.log(this.selectedPassengerData);
     if(this.action===undefined)
    {
      this.action = 'edit';
@@ -3506,7 +3493,6 @@ public validateONReservationGST(): boolean {
               }
             });
           } else {
-            console.log("cancel");
             this.patchPickupAddress(res)
           }
            
@@ -3557,7 +3543,6 @@ public validateONReservationGST(): boolean {
               }
             });
           } else {
-            console.log("cancel");
             this.patchPickupAddress(res)
           }
            
@@ -3599,7 +3584,6 @@ private patchPickupAddress(res: any) {
   {
     this.reservationService.getIntervalMin(this.customerID).subscribe(
       (data) => {
-        console.log(data, typeof data);
         this.locationOutIntervalInMinutes = data;        
       },
       (error: HttpErrorResponse) => {
@@ -4313,7 +4297,6 @@ onTimeInput(event: any): void {
         }
         else 
         {
-          console.log('No data received from API.');
         }
       },
       (error: HttpErrorResponse) => { this.dataSource = null;}
@@ -4347,7 +4330,6 @@ onTimeInput(event: any): void {
     this.reservationService.GetResrvationGSTForCityID(customerID,pickuCityID).subscribe(
       data=>
       {       
-        console.log(data)
         this.advanceTableForm.patchValue({gSTForBilling:(data[0].gstNumber +'-'+ data[0].gstRate  +'-'+data[0].billingStateName) || "--Select--"}); 
         this.advanceTableForm.patchValue({customerConfigurationInvoicingID:data[0].customerConfigurationInvoicingID});
       });
@@ -4396,7 +4378,6 @@ onTimeInput(event: any): void {
   getReservationInvoiceGSTDetailsID(customerConfigurationInvoicingID: any) {
     this.customerConfigurationInvoicingID=customerConfigurationInvoicingID;
     this.advanceTableForm.patchValue({customerConfigurationInvoicingID:this.customerConfigurationInvoicingID});
-    console.log("customerConfigurationInvoicingID:",this.customerConfigurationInvoicingID)
   }
  //---------------IS GST Mandatory With Reservation------------
  GetIsGSTMandatoryWithResrvation(customerGroupID:any)
@@ -4415,7 +4396,6 @@ onTimeInput(event: any): void {
     {
       this.reservationDataSource=data;
       this.advanceTable=this.reservationDataSource[0];
-      console.log(this.advanceTable)
       let gstValue = "--Select--";
       if (this.advanceTable?.gstNumber &&this.advanceTable?.gstRate &&this.advanceTable?.billingStateName) 
       {
@@ -4433,7 +4413,6 @@ onTimeInput(event: any): void {
 //---------- Special Instruction ----------
 openSpecialInstrucation()
 {
-  console.log('Opening special instruction dialog with ReservationID:', this.ReservationID);
   const dialogRef = this.dialog.open(SpecialInstructionDialogComponent, 
   {
     width:'350px',
@@ -4496,7 +4475,6 @@ InternalNote()
   {
     // Only load data if we have a valid ReservationID
     if (!this.ReservationID) {
-      console.log('No ReservationID available for loading internal notes');
       return;
     }
 
@@ -4505,7 +4483,6 @@ InternalNote()
     
      (data :InternalNoteDetails)=>   
      {
-      console.log('Internal note data:', data)
       if(data !== null && Array.isArray(data) && data.length > 0)
       {
         this.showHideInternalNote = true;

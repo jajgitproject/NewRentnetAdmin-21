@@ -99,7 +99,6 @@ if (encryptedInventoryID && encryptedRegNo) {
   this.regNo = this._generalService.decrypt(decodeURIComponent(encryptedRegNo));
 }
 
-console.log(this.inventoryID, this.regNo);
 
     });
     this.loadData();

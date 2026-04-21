@@ -128,14 +128,11 @@ menuItems: any[] = [
   VendorLocalRateID: number;
 
 openInNewTab(menuItem: any, rowItem: any) {
-  console.log(menuItem);
-  console.log(rowItem);
   let baseUrl = this._generalService.FormURL;
   if(menuItem.label.toLowerCase() === 'cdc local fixed rate') {
     const url = this.router.serializeUrl(this.router.createUrlTree(['/cdcLocalFixedDetails', ], { queryParams: {
       CustomerContractID: rowItem.customerContractID,
     } }));
-    console.log(baseUrl + url);
     window.open(baseUrl + url, '_blank'); 
    
   } 

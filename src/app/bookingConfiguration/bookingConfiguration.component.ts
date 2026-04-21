@@ -444,7 +444,6 @@ private extractTime(dateTime: Date): Date {
       this.salesManagerList=data;
       this.advanceTableForm.patchValue({salesExecutive:this.salesManagerList[0].firstName + ' ' + this.salesManagerList[0].lastName + '-' + this.salesManagerList[0].mobile + '-' + this.salesManagerList[0].email});
       this.advanceTableForm.patchValue({salesExecutiveID:this.salesManagerList[0]?.salesExecutiveID});
-      console.log(this.salesManagerList[0]?.salesExecutiveID)
       this.advanceTableForm.controls['salesExecutive'].setValidators([this.salesExecutiveValidator(this.salesManagerList)]);
       this.advanceTableForm.controls['salesExecutive'].updateValueAndValidity();
       this.filteredEmployeeOptions = this.advanceTableForm.controls['salesExecutive'].valueChanges.pipe(
@@ -482,7 +481,6 @@ private extractTime(dateTime: Date): Date {
       this.customerKamList=data;  
       this.advanceTableForm.patchValue({kam:this.customerKamList[0].firstName + ' ' + this.customerKamList[0].lastName + '-' + this.customerKamList[0].mobile + '-' + this.customerKamList[0].email});
       this.advanceTableForm.patchValue({kamID:this.customerKamList[0]?.kamID});
-      console.log(this.customerKamList[0].kamID)
       this.advanceTableForm.controls['kam'].setValidators([this.customerKAMValidator(this.customerKamList)]);
       this.advanceTableForm.controls['kam'].updateValueAndValidity();
       this.filteredEmployeesOptions = this.advanceTableForm.controls['kam'].valueChanges.pipe(
@@ -516,7 +514,6 @@ private extractTime(dateTime: Date): Date {
     this.bookingConfigurationService.getStopDetails(this.BookingID).subscribe(
         data => {
           this.stopDetailsList = data;
-          console.log(this.stopDetailsList);
           // this.advanceTableForm.patchValue({pickupCityID:this.stopDetailsList[0].integrationRequestStopID});
           // this.advanceTableForm.patchValue({pickupCity:this.stopDetailsList[0].integrationRequestStopCity.split("#")[1]});
            this.advanceTableForm.patchValue({pickupAddress:this.stopDetailsList[0].integrationRequestStopAddress});
@@ -546,7 +543,6 @@ private extractTime(dateTime: Date): Date {
         data => {
           this.passengerDetailsList = data;
           this.advanceTableForm.patchValue({primaryPassengerID:this.passengerDetailsList[0].passengerID});
-          console.log(this.passengerDetailsList)
         },
         (error: HttpErrorResponse) => { this.passengerDetailsList = null; }
       );
@@ -557,9 +553,7 @@ private extractTime(dateTime: Date): Date {
     this.bookingConfigurationService.getPackageVehcileDetails(this.BookingID).subscribe(
     data => {
       this.packageVehcileDetailsList = data;
-      console.log(this.packageVehcileDetailsList)
       this.customerTravelRequestNumber=this.packageVehcileDetailsList.customerTravelRequestNumber;
-       console.log(this.customerTravelRequestNumber)
       // this.advanceTableForm.patchValue({packageTypeID:this.packageVehcileDetailsList.packageTypeID});
       // this.advanceTableForm.patchValue({packageType:this.packageVehcileDetailsList.packageType.split("#")[1]});
       // this.advanceTableForm.patchValue({packageID:this.packageVehcileDetailsList.packageID});
@@ -1185,7 +1179,6 @@ private extractTime(dateTime: Date): Date {
       data=>
       {
         this.GoogleAddressList=data;
-        console.log(this.GoogleAddressList)
         this.filteredGoogleAddressOptions = this.advanceTableForm.controls['pickupAddress'].valueChanges.pipe(
           startWith(""),
           map(value => this._filterGA(value || ''))

@@ -18,7 +18,6 @@ import { MatCardModule } from '@angular/material/card';
 import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatSortModule } from '@angular/material/sort';
 import { MatToolbarModule } from '@angular/material/toolbar';
-import { MaterialFileInputModule } from '@compat/material-file-input-shim';
 import { MatMenuModule } from '@angular/material/menu';
 import { BookingScreenService } from './bookingScreen.service';
 import { BookingScreenRoutingModule } from './bookingScreen-routing.module';
@@ -57,7 +56,6 @@ import { MatDialogModule, MatDialogRef } from '@angular/material/dialog';
     MatDialogModule,
     MatSortModule,
     MatToolbarModule,
-    MaterialFileInputModule,
     MatMenuModule,
     MatProgressSpinnerModule,
     ReservationModule,

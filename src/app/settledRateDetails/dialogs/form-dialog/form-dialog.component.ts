@@ -81,8 +81,6 @@ export class FormDialogSRDComponent implements OnInit
         this.reservationID=data.reservationID;
         
         // Extract status safely
-        console.log('Received data:', data);
-        console.log('Received data.status:', data.status);
         
         // Constructor या ngOnInit में
 if (typeof data.status === 'string') {
@@ -93,7 +91,6 @@ if (typeof data.status === 'string') {
     this.status = '';
 }
 
-console.log('Final status:', this.status);
 
 // Save button control
 this.buttonDisabled = this.status !== 'Changes allow'; // true अगर status "Changes allow" नहीं
@@ -168,7 +165,6 @@ this.buttonDisabled = this.status !== 'Changes allow'; // true अगर status 
     this.advanceTableService.getCDCData(contractID,packageType,cityID,packageID).subscribe(
       data => {
         this.advanceTableCDC = data;
-        console.log(data)
         this.advanceTableForm.patchValue({baseFare: this.advanceTableCDC.baseFare});
         this.advanceTableForm.patchValue({packageKM: this.advanceTableCDC.packageKM});
         this.advanceTableForm.patchValue({packageHour: this.advanceTableCDC.packageHour});
@@ -394,7 +390,6 @@ this.buttonDisabled = this.status !== 'Changes allow'; // true अगर status 
 
   submit() 
   {
-    console.log(this.advanceTableForm.value);
   }
   onNoClick(): void 
   {

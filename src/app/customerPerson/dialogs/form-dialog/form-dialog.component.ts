@@ -107,10 +107,8 @@ export class FormDialogComponentCustomerPerson
           this.CustomerGroupID=data.CustomerGroupID;
           this.CustomerGroupName=data.CustomerGroupName;
           this.PrimaryMobile=data.PrimaryMobile;
-          console.log(this.PrimaryMobile);
           this.dialogTitle ='Customer Person for';       
           this.advanceTable = data.advanceTable;
-          console.log(data);
 
           // Fallback for list APIs that send phone instead of primaryMobile
           if (!this.advanceTable.primaryMobile && data?.advanceTable?.phone) {
@@ -605,7 +603,6 @@ export class FormDialogComponentCustomerPerson
   //   .subscribe(
   //   response => 
   //   {
-  //       console.log(response);
   //       if(response.status === "Failure") {
   //         this.showNotification(
   //           'snackbar-danger',
@@ -723,7 +720,6 @@ public Post(): void {
 };
   this.advanceTableService.add(payload).subscribe({
     next: (response) => {
-      console.log(response);
 
       if (response.status === 'Failure') {
         this.showNotification('snackbar-danger', response.message, 'bottom', 'center');
@@ -796,7 +792,6 @@ public Post(): void {
     response => 
     {
       debugger;
-        console.log(response);
          if (response.status === 'Failure') {
         this.showNotification('snackbar-danger', response.message, 'bottom', 'center');
         this.saveDisabled = true;

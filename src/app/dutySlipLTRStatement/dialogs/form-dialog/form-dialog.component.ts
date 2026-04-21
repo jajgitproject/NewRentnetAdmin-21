@@ -66,10 +66,6 @@ export class FormDialogComponent
   {
         // Set the defaults
         this.action = data.action;
-        // console.log(this.editControls)
-        // console.log(this.dataUpdated)
-        // console.log(this.changedControls)
-        // console.log(this.dataSaved)
         this.index=data.index
         if(this.dataSaved===true)
           {
@@ -757,7 +753,6 @@ getDateTime()
   // Get the time part (HH:mm:ss)
   const EndTime = timeObject.toTimeString().split(' ')[0];
 
-  // console.log(this.nightChargeable)
   const endDate: Date = new Date(EndDate);
   const startDate: Date = new Date(dutyStartDate);
   const timeDifference: number = endDate.getTime() - startDate.getTime(); 

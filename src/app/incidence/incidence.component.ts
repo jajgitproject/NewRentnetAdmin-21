@@ -67,7 +67,6 @@ export class IncidenceComponent implements OnInit {
     this.route.queryParams.subscribe(paramsData => {
       this.dutySlipID = paramsData.dutySlipID;
       this.reservationID = paramsData.reservationID;
-      console.log(this.reservationID);
     });
     this.loadData();
     this.SubscribeUpdateService();

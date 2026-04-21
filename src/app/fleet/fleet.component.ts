@@ -263,7 +263,6 @@ shouldShowDeleteButton(item: any): boolean {
         data =>   
         {
           this.dataSource = data; 
-          console.log(this.dataSource);        
         },
         (error: HttpErrorResponse) => { this.dataSource = null;}
       );
@@ -483,7 +482,6 @@ shouldShowDeleteButton(item: any): boolean {
       data=>
       {
         this.RegistrationNumberList=data;
-        console.log(this.RegistrationNumberList);
         this.filteredRegistrationNumberOptions = this.registrationNumber.valueChanges.pipe(
           startWith(""),
           map(value => this._filterRN(value || ''))

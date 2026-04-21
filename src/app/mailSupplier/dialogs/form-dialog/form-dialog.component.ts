@@ -76,7 +76,6 @@ export class MTSFormDialogComponent implements OnInit
 
   submit() 
   {
-    //console.log(this.advanceTableForm.value);
   }
   onNoClick(): void 
   {

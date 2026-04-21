@@ -48,7 +48,7 @@
               <td>
                 <mat-form-field appearance="outline" style="width: 110px;" floatLabel="always">
                   <input matInput [owlDateTimeTrigger]="time1" [owlDateTime]="time1" formControlName="locationOutTime">
-                  <mat-icon matSuffix [owlDateTimeTrigger]="time1" class="date-icon">schedule</mat-icon>
+                  <button mat-icon-button matSuffix type="button" [owlDateTimeTrigger]="time1" class="date-icon" aria-label="Open time picker"><mat-icon>schedule</mat-icon></button>
                   <owl-date-time [pickerType]="'timer'" #time1></owl-date-time>
                 </mat-form-field>
               </td>
@@ -95,7 +95,7 @@
               <td>
                 <mat-form-field appearance="outline" style="width: 110px;" floatLabel="always">
                   <input matInput [owlDateTimeTrigger]="time2" [owlDateTime]="time2" formControlName="pickUpTime">
-                  <mat-icon matSuffix [owlDateTimeTrigger]="time2" class="date-icon">schedule</mat-icon>
+                  <button mat-icon-button matSuffix type="button" [owlDateTimeTrigger]="time2" class="date-icon" aria-label="Open time picker"><mat-icon>schedule</mat-icon></button>
                   <owl-date-time [pickerType]="'timer'" #time2></owl-date-time>
                 </mat-form-field>
               </td>
@@ -143,7 +143,7 @@
               <td>
                 <mat-form-field appearance="outline" style="width: 110px;" floatLabel="always">
                   <input matInput [owlDateTimeTrigger]="time3" [owlDateTime]="time3" formControlName="dropOffTime">
-                  <mat-icon matSuffix [owlDateTimeTrigger]="time3" class="date-icon">schedule</mat-icon>
+                  <button mat-icon-button matSuffix type="button" [owlDateTimeTrigger]="time3" class="date-icon" aria-label="Open time picker"><mat-icon>schedule</mat-icon></button>
                   <owl-date-time [pickerType]="'timer'" #time3></owl-date-time>
                 </mat-form-field>
               </td>
@@ -191,7 +191,7 @@
               <td>
                 <mat-form-field appearance="outline" style="width: 110px;" floatLabel="always">
                   <input matInput [owlDateTimeTrigger]="time4" [owlDateTime]="time4" formControlName="locationInTime">
-                  <mat-icon matSuffix [owlDateTimeTrigger]="time4" class="date-icon">schedule</mat-icon>
+                  <button mat-icon-button matSuffix type="button" [owlDateTimeTrigger]="time4" class="date-icon" aria-label="Open time picker"><mat-icon>schedule</mat-icon></button>
                   <owl-date-time [pickerType]="'timer'" #time4></owl-date-time>
                 </mat-form-field>
               </td>

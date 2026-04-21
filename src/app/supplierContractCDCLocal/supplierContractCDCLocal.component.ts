@@ -117,7 +117,6 @@ export class SupplierContractCDCLocalComponent implements OnInit {
         this.Applicable_From= decodeURIComponent( this.Applicable_From);
       }
       });
-    console.log(this.supplierContract_ID)
     this.InitVehicleCategory();
     this.InitCityTier();
     this.InitPackage();
@@ -266,7 +265,6 @@ export class SupplierContractCDCLocalComponent implements OnInit {
           SupplierRateCardName:this.supplierRateCard_Name
       }
     });
-console.log(row);
   }
   deleteItem(row)
   {
@@ -345,7 +343,6 @@ console.log(row);
   
   NextCall()
   {
-    //console.log(this.dataSource.length>0)
     if (this.dataSource.length>0) 
     {
      

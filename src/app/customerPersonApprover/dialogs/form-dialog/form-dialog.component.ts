@@ -62,7 +62,6 @@ export class FormDialogComponent {
     if (this.action === 'edit') {
       this.dialogTitle = 'Customer person Approver for';
       this.advanceTable = data.advanceTable;
-      console.log(data);
       this.customerGroupID = data.CustomerGroupID || this.advanceTable.customerGroupID;
 
       if (!this.customerGroupID) {
@@ -470,7 +469,6 @@ export class FormDialogComponent {
     const CustomerPerson = this.CustomerPersonList.find(
       data => data.approverName === selectedCustomerPerson
     );
-    console.log(CustomerPerson);
     if (CustomerPerson) {
       this.getCustomerPersonID(CustomerPerson.approverID);
     }

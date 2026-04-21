@@ -44,7 +44,6 @@ export class DriverMISService
     {
       SearchActivationStatus=null;
     }
-    console.log(this.API_URL + "/" +SearchdriverName + '/'+searchlocation + '/' +searchdateofjoiningfrom + '/' +searchSupplierType + '/' + SearchActivationStatus +'/' + PageNumber + '/driverID/Dscending')
     return this.httpClient.get(this.API_URL + "/" +SearchdriverName + '/'+searchlocation + '/' +searchdateofjoiningfrom + '/'+searchdateofjoiningto + '/' +searchSupplierType + '/' + SearchActivationStatus +'/' + PageNumber + '/driverID/Dscending');
   }
   getTableDataSort(SearchdriverName:string,searchlocation:string,searchdateofjoiningfrom:string, searchdateofjoiningto:string,searchSupplierType:string, SearchActivationStatus:boolean, PageNumber: number,coloumName:string,sortType:string):  Observable<any> 

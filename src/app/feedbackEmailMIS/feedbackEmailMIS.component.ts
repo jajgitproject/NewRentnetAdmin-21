@@ -172,7 +172,6 @@ export class FeedbackEmailMISComponent implements OnInit {
         data => {
           this.dataSource = data;
        
-          console.log(this.dataSource)
           
        
         },
@@ -216,7 +215,6 @@ export class FeedbackEmailMISComponent implements OnInit {
   // feedbackCall() {
   //   debugger;
   //   const selectedRows = this.selection.selected; // Get all selected rows
-  //   console.log(selectedRows);
   //   if (selectedRows.length === 0) {
   //     // Show warning if no rows are selected
   //     Swal.fire({
@@ -252,7 +250,6 @@ export class FeedbackEmailMISComponent implements OnInit {
   feedbackCall() {
     debugger;
     const selectedRows = this.selection.selected; // Get all selected rows
-    console.log(selectedRows);
 
     if (selectedRows.length === 0) {
         Swal.fire({

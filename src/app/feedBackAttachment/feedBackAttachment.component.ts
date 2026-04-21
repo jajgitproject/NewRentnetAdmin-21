@@ -84,8 +84,6 @@ export class FeedBackAttachmentComponent implements OnInit {
       this.tripFeedBackID   = paramsData.tripFeedBackID;
       this.dutySlipID  = paramsData. dutySlipID
       ;
-      console.log(this.tripFeedBackID);
-      console.log(this.dutySlipID);
     });
     this.tripBackAttachmentloadData();
     this.SubscribeUpdateService();
@@ -108,7 +106,6 @@ export class FeedBackAttachmentComponent implements OnInit {
   }
   addNew()
   {
-    console.log(this.dutySlipID)
     const dialogRef = this.dialog.open(tripFeedBackAttachmentFormDialogComponent, 
     {
       
@@ -122,11 +119,9 @@ export class FeedBackAttachmentComponent implements OnInit {
         }
       
     });
-    console.log(this.dutySlipID )
   
   }
   editCall(row) {
-    // console.log(row);
     //    alert(row.id);
     this.feedBackAttachmentID = row.feedBackAttachmentID;
     const dialogRef = this.dialog.open(tripFeedBackAttachmentFormDialogComponent, {
@@ -164,7 +159,6 @@ export class FeedBackAttachmentComponent implements OnInit {
        data =>   
        {
          this.dataSource = data;
-         console.log(this.dataSource)
         //  this.dataSource.forEach((ele)=>{
         //    if(ele.activationStatus===true){
         //     this.activation="Active";
@@ -199,7 +193,6 @@ export class FeedBackAttachmentComponent implements OnInit {
   
   NextCall()
   {
-    //console.log(this.dataSource.length>0)
     if (this.dataSource.length>0) 
     {
      
@@ -227,12 +220,10 @@ export class FeedBackAttachmentComponent implements OnInit {
   }
 
   getseviceName(){
-    console.log('getseviceName')
     this._generalService.getSeviceName(this.service_ID).subscribe(
       data=>{
        this.additionalList=data;
        this.service = this.additionalList[0].additionalService;
-       console.log(this.service)
       }
     )
   }
@@ -356,7 +347,6 @@ export class FeedBackAttachmentComponent implements OnInit {
       data =>   
       {
         this.dataSource = data;
-       console.log(this.dataSource);
       },
       (error: HttpErrorResponse) => { this.dataSource = null;}
     );

@@ -29,7 +29,6 @@ export class PackageRateDetailsForClosingComponent implements OnInit {
              
     });       
     //this.loadDataForCard();
-     console.log(this.dataSourceforCard);   
     // this.SubscribeUpdateService();
   }
     
@@ -39,7 +38,6 @@ export class PackageRateDetailsForClosingComponent implements OnInit {
   //     (data) => {
   //       if (data && data.length > 0) {
   //         this.dataSourceforCard = data;
-  //         console.log(data) // Assuming the response is an array and we want the first item
   //       } else {
   //         this.dataSourceforCard = null; // Handle case where no data is returned
   //       }

@@ -50,8 +50,6 @@ export class TollParkingISTImagesComponent {
   ) {
     this.ltrStatementID=data.ltrStatementID;
     this.action=data.action;
-    console.log(this.ltrStatementID);
-    console.log(this.action);
   }
 
   formControl = new FormControl('', [Validators.required, Validators.email]);

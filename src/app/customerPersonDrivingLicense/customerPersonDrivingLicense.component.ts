@@ -96,7 +96,6 @@ export class CustomerPersonDrivingLicenseComponent implements OnInit {
   }
 
   // Log the decrypted values to the console
-  console.log(this.customerPerson_ID, this.customerPerson_Name);
 });
     this.loadData();
     this.SubscribeUpdateService();
@@ -265,7 +264,6 @@ export class CustomerPersonDrivingLicenseComponent implements OnInit {
   
   NextCall()
   {
-    //console.log(this.dataSource.length>0)
     if (this.dataSource.length>0) 
     {
      

@@ -106,7 +106,6 @@ export class KamCardComponent implements OnInit {
        (data: KamCard)=>   
        {
          this.advanceTableKC = data;
-         console.log(this.advanceTableKC)
         
        },
        (error: HttpErrorResponse) => { this.advanceTableKC = null;}

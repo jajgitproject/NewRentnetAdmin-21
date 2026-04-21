@@ -72,7 +72,6 @@ export class FormDialogComponentHolder {
       let toDate = moment(this.advanceTable.toDate).format('DD/MM/yyyy');
       this.onBlurUpdateDateFromEdit(fromDate);
       this.onBlurUpdateDateToEdit(toDate);
-      //console.log(data.advanceTable);
     } else {
       this.dialogTitle = 'Customer Wise Package Type Percentage For';
       this.advanceTable = new SupplierContractCustomerPackageTypePercentage({});
@@ -122,7 +121,6 @@ export class FormDialogComponentHolder {
           startWith(""),
           map(value => this._filterPackage(value || ''))
         );
-        //console.log(this.StateList);
       },
       error => {
 
@@ -173,7 +171,6 @@ export class FormDialogComponentHolder {
           startWith(""),
           map(value => this._filterCustomer(value || ''))
         );
-        //console.log(this.StateList);
       },
       error => {
 

@@ -79,22 +79,17 @@ private snackBar: MatSnackBar,
         this.advanceTableForm = this.createContactForm();
 
         this.ReservationID = data.reservationID;
-        console.log(this.ReservationID)
         this.vehicle = data.vehicle;
         this.pickupDate =data.pickupDate;
         this.pickupTime =data.pickupTime
-        console.log(this.vehicle)
         this.registrationNumber = data.registrationNumber;
         this.customerPersonName =data.customerPersonName;
         this.city=data.city;
-        console.log(this.registrationNumber)
         this.customerDetails = data?.item?.customerPerson;
         this.primaryMobile =data.primaryMobile;
        
         this.primaryEmail=data.primaryEmail;
-        console.log(this.primaryEmail)
         this.dataSource = data?.item?.passengerDetails;
-        console.log(this.permissionData)
       this.customerPersonDetails.push(data?.item?.customerPerson);
 
   }
@@ -111,7 +106,6 @@ private snackBar: MatSnackBar,
         data =>   
         {
           this.permissionData = data;
-          console.log(this.permissionData)
 
         },
         (error: HttpErrorResponse) => { this.permissionData = null;}
@@ -154,9 +148,7 @@ saveData() {
     }
   });
   dialogRef.afterClosed().subscribe((result: any) => {
-    console.log(result);
     result?.forEach(element => {
-      console.log(element);
       if (element.customerPersonName.customer) {
         const mobileParts = element.primaryMobile.split('-');
         const nameParts = element.customerPersonName.customer.split('-');
@@ -178,7 +170,6 @@ saveData() {
         const nameParts = element.customerPersonName.employee.split('-');
         const number = mobileParts[0];
         const name = nameParts[1];
-        console.log(name);
         this.permissionData.push({
           primaryMobile:'91-' + number, customerPersonName: name,
           reachedSMSToBooker: false,
@@ -254,7 +245,6 @@ saveData() {
 
   submit() 
   {
-    //console.log(this.advanceTableForm.value);
   }
   onNoClick(): void 
   {

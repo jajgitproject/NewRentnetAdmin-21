@@ -180,7 +180,6 @@ searchDocumentName: string = '';
         } else {
           this.dataSource = data;
         }
-        console.log(this.dataSource)
       },
       (error: HttpErrorResponse) => { this.dataSource = null; }
     );
@@ -435,7 +434,6 @@ downloadExcel() {
     );
   }
   openInNewTab(rowItem: any) {
-    console.log(rowItem);
     let baseUrl = this._generalService.FormURL;   
     const url = this.router.serializeUrl(this.router.createUrlTree(['/bookingConfiguration'], { queryParams: {
       BookingID:rowItem.integrationRequestID,
@@ -450,7 +448,6 @@ downloadExcel() {
         data=>
           {
             this.OrganizationalEntityList=data;
-            console.log(this.OrganizationalEntityList);
             this.filteredOrganizationalEntityOptions = this.location.valueChanges.pipe(
               startWith(""),
               map(value => this._filterOrganizationalEntity(value || ''))
@@ -473,7 +470,6 @@ downloadExcel() {
     
    
  viewCreditNote(row) {
-    console.log(row?.invoiceID);
     this.dialog.open(CreditNoteHistoryComponent, {
       width: '500px',
       data: {
@@ -502,7 +498,6 @@ downloadExcel() {
   }
   
 viewInvoiceBilling(row) {
-    console.log(row?.invoiceID);
     this.dialog.open(InvoiceBillingHistoryComponent, {
       width: '500px',
       data: {

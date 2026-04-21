@@ -53,7 +53,6 @@ export class VendorContractLocalRateService
     {
       SearchActivationStatus=null;
     }
-    console.log(this.API_URL + "/" + VendorContract_ID+ '/'+SearchVehicleCategory+ '/'+SearchCityTier+ '/'+SearchPackage+ '/'+SearchBaseRate + '/' + SearchActivationStatus +'/' + PageNumber + '/VendorLocalRateID/Ascending');
     return this.httpClient.get(this.API_URL + "/" + VendorContract_ID+ '/'+SearchVehicleCategory+ '/'+SearchCityTier+ '/'+SearchPackage+ '/'+SearchBaseRate + '/' + SearchActivationStatus +'/' + PageNumber + '/VendorLocalRateID/Ascending');
   }
   getTableDataSort(

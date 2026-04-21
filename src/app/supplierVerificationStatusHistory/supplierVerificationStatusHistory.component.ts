@@ -79,8 +79,6 @@ export class SupplierVerificationStatusHistoryComponent implements OnInit {
         }
       }
       
-      console.log("Decrypted Supplier ID:", this.supplier_ID);
-      console.log("Decrypted Supplier Name:", this.supplier_Name);
       
     });
     this.loadData();
@@ -329,7 +327,6 @@ deleteItem(row)
       data =>   
       {
         this.dataSource = data;
-       console.log(this.dataSource);
       },
       (error: HttpErrorResponse) => { this.dataSource = null;}
     );

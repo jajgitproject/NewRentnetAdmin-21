@@ -49,7 +49,6 @@ export class LumpsumRateDetailsDialogComponent
           //this.dialogTitle ='Edit lumpsum Rate';       
           this.dialogTitle ='Lumpsum Rate';
           this.advanceTable = data.advanceTable;
-          console.log(this.advanceTable);
           this.advanceTable.lumpsumRateApprovedByEmployee = data.advanceTable.firstName +" "+ data.advanceTable.lastName;
           this.ImagePath = this.advanceTable.attachment;
       
@@ -60,7 +59,6 @@ export class LumpsumRateDetailsDialogComponent
           this.advanceTable = new LumpsumRateDetails({});
           this.advanceTable.activationStatus=true;
           this.ReservationID = data.reservationID;
-          console.log(this.ReservationID);
         }
         this.status=data?.status?.status || data?.status || data;
         // if(this.status!='Changes allow'){
@@ -98,7 +96,6 @@ export class LumpsumRateDetailsDialogComponent
     (
       data =>   
       {
-        console.log(this.EmployeeList);
         this.EmployeeList = data; 
         this.advanceTableForm.controls['lumpsumRateApprovedByEmployee'].setValidators([Validators.required,this.ApprovedByEmployeeValidator(this.EmployeeList)]);
         this.advanceTableForm.controls['lumpsumRateApprovedByEmployee'].updateValueAndValidity();
@@ -106,7 +103,6 @@ export class LumpsumRateDetailsDialogComponent
           startWith(""),
           map(value => this._filtersearchinstructed(value || ''))
         );
-       // console.log(this.EmployeeList)
       }
     );
   }

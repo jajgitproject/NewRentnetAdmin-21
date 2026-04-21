@@ -73,7 +73,6 @@ export class SearchDialogComponent
       }
      
     );
-    //console.log(this.CustomerList);
   }
  
 
@@ -85,7 +84,6 @@ export class SearchDialogComponent
 
   }
   submit(){
-    //console.log(this.customerConID);
     this.dialog.close(this.customerConID);
   }
 }

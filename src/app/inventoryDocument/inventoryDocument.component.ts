@@ -97,7 +97,6 @@ export class InventoryDocumentComponent implements OnInit {
       this.InventoryID = this._generalService.decrypt(decodeURIComponent(encryptedInventoryID));
       this.InventoryName = this._generalService.decrypt(decodeURIComponent(encryptedInventoryName));
     });
-    console.log(this.InventoryID)
     this.loadData();
     this.SubscribeUpdateService();
     this.InitCities();

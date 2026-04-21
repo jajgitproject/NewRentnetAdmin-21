@@ -7,7 +7,7 @@ import { formatDate } from '@angular/common';
 import { GeneralService } from '../../../general/general.service';
 import { DropOffByExecutive } from '../../dropOffByExecutive.model';
 import { DropOffByExecutiveService } from '../../dropOffByExecutive.service';
-import { Address } from 'ngx-google-places-autocomplete/objects/address';
+import { Address } from '@compat/google-places-shim-objects/address';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { EmployeeDropDown } from 'src/app/employee/employeeDropDown.model';
@@ -107,9 +107,7 @@ export class FormDialogDropOffByExecutiveComponent {
     public _generalService: GeneralService) {
     // Set the defaults
     this.allotmentID = data.allotmentID;
-    console.log(data);
     this.actualDate = new Date(data.rowRecord.pickup.pickupDate);
-    console.log('Package Object:', data.rowRecord.package);
 
     if (data.rowRecord.pickup?.pickupTime) {
       // Step 1: Get actual pickup time
@@ -117,7 +115,6 @@ export class FormDialogDropOffByExecutiveComponent {
 
       // Step 2: Get package string (e.g., "8 hours 80 min")
       const packageString: string = data.rowRecord.package?.package || '';
-      console.log('Raw Package String:', packageString);
 
       // Step 3: Extract hours and minutes using regex
       const hourMatch = packageString.match(/(\d+)\s*(hour|hr|hrs)/i);
@@ -141,9 +138,6 @@ export class FormDialogDropOffByExecutiveComponent {
       this.advanceTableForm?.get('dropOffTime')?.setValue(calculatedTime);
 
       // Step 7: Debug log
-      console.log('Pickup Time:', this.actualTime.toLocaleTimeString());
-      console.log('Package Duration:', hours, 'hours', remainingMinutes, 'minutes');
-      console.log('Calculated Drop-Off Time:', this.calculatedDropOffTime.toLocaleTimeString());
     }
     this.verifyDutyStatusAndCacellationStatus = data.verifyDutyStatusAndCacellationStatus;
     this.driverName = data.driverName;
@@ -169,7 +163,6 @@ export class FormDialogDropOffByExecutiveComponent {
 this.isSaveAllowed = status === 'changes allow';
 
     
-    console.log(this.data.rowRecord)
     this.advanceTableForm.controls['dropOffEntryMethod'].setValue(data?.rowRecord?.dropOffEntryMethod);
     if (data?.rowRecord?.dropOffEntryMethod === 'Manual') {
       this.appRadioDisabled = true;
@@ -339,7 +332,6 @@ AddressChange(address: Address) {
     this._generalService.getEmployeeID(this._generalService.getUserID()).subscribe(
       data => {
         this.employeeDataSource = data;
-        console.log(this.employeeDataSource)
         this.advanceTableForm.controls["executive"].disable();
         this.advanceTableForm.patchValue({ executive: this.employeeDataSource[0].firstName + " " + this.employeeDataSource[0].lastName });
         this.advanceTableForm.patchValue({ dropOffEntryExecutiveID: this.employeeDataSource[0].employeeID });
@@ -399,7 +391,6 @@ AddressChange(address: Address) {
   }
 
   submit() {
-    console.log(this.advanceTableForm.value);
   }
   onNoClick(): void {
 
@@ -676,7 +667,6 @@ getFormValidationErrors(formGroup: FormGroup): string[] {
       (
         data => {
           this.dataSource = data;
-          console.log(this.dataSource)
           this.dropOffEntryMethod = 'Manual';
           this.dropOffEntry = false;
           this.ifBlock = true;
@@ -709,7 +699,6 @@ getFormValidationErrors(formGroup: FormGroup): string[] {
         data => {
 
           this.dataSource = data;
-          console.log(this.dataSource);
           this.dropOffEntryMethod = 'App';
           this.dropOffEntry = true;
           this.advanceTableForm.patchValue({ dutySlipID: this.dataSource[0]?.dutySlipID });
@@ -780,9 +769,7 @@ getFormValidationErrors(formGroup: FormGroup): string[] {
         }
       });
     dialogRef.afterClosed().subscribe((item: any) => {
-      console.log(item);
       if (item !== undefined) {
-        console.log(item)
         this.advanceTableForm.patchValue({ dropOffKM: item.data.pickupKM });
         this.advanceTableForm.patchValue({ dropOffAddressString: item.data.pickupAddressString });
         this.advanceTableForm.patchValue({ dropOffLatitude: item.data.pickupLatitude });
@@ -883,7 +870,6 @@ getFormValidationErrors(formGroup: FormGroup): string[] {
 
   onTimeInput(event: any): void {
     const inputValue = event.target.value;
-    console.log(inputValue);
     const parsedTime = new Date(`1970-01-01T${inputValue}`);
     if (!isNaN(parsedTime.getTime())) {
       this.advanceTableForm.get('dropOffTime').setValue(parsedTime);
@@ -896,7 +882,6 @@ getFormValidationErrors(formGroup: FormGroup): string[] {
       (
         data => {
           this.dataSourceForValidation = data;
-          console.log(this.dataSourceForValidation)
           this.pickUpDate = new Date(data.pickupDate);  // e.g. "2025-06-02T00:00:00"
           this.pickUpTime = new Date(data.pickupTime);  // e.g. "2025-06-02T15:00:00"
           this.pickUpKM = data.pickupKM;

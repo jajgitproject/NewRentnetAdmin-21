@@ -92,8 +92,6 @@ export class DisputeComponent implements OnInit {
     this.loadData();
     //this.DisputeLoadData();
     this.SubscribeUpdateService();
-    // console.log(this.reservationID);
-    // console.log(this.dutySlipID);
   }
   refresh() {
     this.SearchBank = '';
@@ -320,7 +318,6 @@ export class DisputeComponent implements OnInit {
   }
 
   openInNewTab(menuItem: any, rowItem: any) {
-    console.log(this.verifyDutyStatusAndCacellationStatus)
     let baseUrl = this._generalService.FormURL;
     if (menuItem.label.toLowerCase() === 'dispute resolution') {
       // Encrypt the required values
@@ -396,7 +393,6 @@ export class DisputeComponent implements OnInit {
         );
     } else {
       // Optional: You can handle cancellation here if needed
-      //console.log('User cancelled the approval');
     }
   });
 }

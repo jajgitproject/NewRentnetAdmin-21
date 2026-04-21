@@ -89,7 +89,6 @@ export class FormDialogComponent
           this.IGSTPercentage = data.advanceTable.igstPercentage || 0;
           this.CGSTPercentage = data.advanceTable.cgstPercentage || 0;
           this.SGSTPercentage = data.advanceTable.sgstPercentage || 0;
-          console.log(this.advanceTable)
         } else 
         {
           this.dialogTitle = 'Create/Edit Credit Note';
@@ -97,7 +96,6 @@ export class FormDialogComponent
           this.IGSTPercentage = data.advanceTable.igstPercentage || 0;
           this.CGSTPercentage = data.advanceTable.cgstPercentage || 0;
           this.SGSTPercentage = data.advanceTable.sgstPercentage || 0;
-          console.log(this.advanceTable)  
           //this.advanceTable = new CreateCreditNote({});
           this.advanceTable.requiresReBilling=true;
         }

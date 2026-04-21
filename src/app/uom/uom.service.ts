@@ -32,7 +32,6 @@ export class UomService
     {
       SearchActivationStatus=null;
     }
-   // console.log(this.API_URL + "/" +SearchUom + '/' + SearchActivationStatus +'/' + PageNumber + '/uom/Ascending')
     return this.httpClient.get(this.API_URL + "/" +SearchUom + '/'+SearchUomCode + '/' + SearchActivationStatus +'/' + PageNumber + '/uom/Ascending');
   }
 
@@ -51,7 +50,6 @@ export class UomService
     {
       SearchActivationStatus=null;
     }
-    //console.log(this.API_URL + "/kkk" +SearchUom + '/' + SearchActivationStatus +'/' + PageNumber + '/'+coloumName+'/'+sortType)
     return this.httpClient.get(this.API_URL + "/" +SearchUom + '/'+SearchUomCode + '/' + SearchActivationStatus +'/' + PageNumber + '/'+coloumName+'/'+sortType);
   }
 

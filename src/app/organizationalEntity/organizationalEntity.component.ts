@@ -279,7 +279,6 @@ export class OrganizationalEntityComponent implements OnInit {
   }
   editCall(row) {
       //  alert(row.id);
-      console.log(row)
     this.organizationalEntityID = row.organizationalEntityID;
     const dialogRef = this.dialog.open(FormDialogComponent, {
       data: {
@@ -393,7 +392,6 @@ export class OrganizationalEntityComponent implements OnInit {
        
   //       // CustomerName: rowItem.customerName
   //     } }));
-  //     console.log(rowItem)
   //     window.open(baseUrl + url, '_blank'); 
   //     // this.router.navigate(['/customerAddress'], {
   //     //   queryParams: {
@@ -420,7 +418,6 @@ export class OrganizationalEntityComponent implements OnInit {
         }
       }));
   
-      console.log(rowItem); // Log rowItem for debugging
   
       // Open the new tab with the encrypted URL
       window.open(baseUrl + url, '_blank');
@@ -600,16 +597,12 @@ export class OrganizationalEntityComponent implements OnInit {
 
   OpenStakeHolder(item: any) {
     // Log the original values before encryption
-    console.log('Original OrganizationalEntityID:', item.organizationalEntityID);
-    console.log('Original OrganizationalEntityName:', item.organizationalEntityName);
     
     // Encrypt the required values
     const encryptedOrganizationalEntityID = this._generalService.encrypt(encodeURIComponent(item.organizationalEntityID));
     const encryptedOrganizationalEntityName = this._generalService.encrypt(encodeURIComponent(item.organizationalEntityName));
     
     // Log the encrypted values
-    console.log('Encrypted OrganizationalEntityID:', encryptedOrganizationalEntityID);
-    console.log('Encrypted OrganizationalEntityName:', encryptedOrganizationalEntityName);
     
     let baseUrl = this._generalService.FormURL;
     const url = this.router.serializeUrl(this.router.createUrlTree(['/organizationalEntityStakeHolders'], { queryParams: {

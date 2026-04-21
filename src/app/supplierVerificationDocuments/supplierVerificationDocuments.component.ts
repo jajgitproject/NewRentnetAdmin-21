@@ -95,9 +95,6 @@ export class SupplierVerificationDocumentsComponent implements OnInit {
         }
       }
       
-      console.log("Decrypted Supplier ID:", this.supplier_ID);
-      console.log("Decrypted Supplier Name:", this.supplier_Name);
-      console.log("Decrypted Employee ID:", this.Employee_ID);
       
     });
     this.loadData();

@@ -91,8 +91,6 @@ export class FeedBackComponent implements OnInit {
     this.route.queryParams.subscribe(paramsData =>{
       this.customerPersonName  = paramsData.customerPersonName;
       this.CustomerPersonID   = paramsData.CustomerPersonID;
-      console.log(this.customerPersonName);
-      console.log(this.CustomerPersonID );
     });
     //this.loadData();
     this.SubscribeUpdateService();
@@ -115,7 +113,6 @@ export class FeedBackComponent implements OnInit {
   }
   addNew()
   {
-    console.log(this.customerPersonName)
     const dialogRef = this.dialog.open(tripFeedBackAttachmentFormDialogComponent, 
     {
       
@@ -129,7 +126,6 @@ export class FeedBackComponent implements OnInit {
     });
   }
   editCall(row) {
-    console.log(row);
       //  alert(row.id);
     this.feedBackID = row.feedBackID;
     const dialogRef = this.dialog.open(tripFeedBackAttachmentFormDialogComponent, {
@@ -174,7 +170,6 @@ export class FeedBackComponent implements OnInit {
 //        data =>   
 //        {
 //          this.dataSource = data;
-//          console.log(this.dataSource)
 //          this.dataSource.forEach((ele)=>{
 //            if(ele.activationStatus===true){
 //             this.activation="Active";
@@ -209,7 +204,6 @@ export class FeedBackComponent implements OnInit {
   
   NextCall()
   {
-    //console.log(this.dataSource.length>0)
     if (this.dataSource.length>0) 
     {
      
@@ -238,12 +232,10 @@ export class FeedBackComponent implements OnInit {
   }
 
   getseviceName(){
-    console.log('getseviceName')
     this._generalService.getSeviceName(this.service_ID).subscribe(
       data=>{
        this.additionalList=data;
        this.service = this.additionalList[0].additionalService;
-       console.log(this.service)
       }
     )
   }
@@ -367,7 +359,6 @@ export class FeedBackComponent implements OnInit {
       data =>   
       {
         this.dataSource = data;
-       console.log(this.dataSource);
       },
       (error: HttpErrorResponse) => { this.dataSource = null;}
     );

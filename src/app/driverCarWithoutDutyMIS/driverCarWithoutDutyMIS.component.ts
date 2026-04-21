@@ -189,7 +189,6 @@ export class DriverCarWithoutDutyMISComponent implements OnInit {
       this.driverCarWithoutDutyMISService.getTableData1(this.searchPickupFromDate, this.locationHub.value, true, 0).subscribe(
         (res: any) => {
           this.dataSource = res;
-          console.log('Driver Data Source:', this.dataSource);
         },
         (error: HttpErrorResponse) => {
           console.error(error);
@@ -215,7 +214,6 @@ export class DriverCarWithoutDutyMISComponent implements OnInit {
       this.driverCarWithoutDutyMISService.getTableData(this.searchPickupFromDate, this.locationHub.value, true, 0).subscribe(
         (res: any) => {
           this.dataSource = res;
-          console.log('Car Data Source:', this.dataSource);
         },
         (error: HttpErrorResponse) => {
           console.error(error);

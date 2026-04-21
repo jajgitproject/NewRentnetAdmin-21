@@ -69,7 +69,6 @@ export class FormDialogComponentHolder {
    
       this.dialogTitle = ' Document Details';
       this.advanceTable = data.advanceTable;
-      console.log(this.advanceTable)
       this.ImagePath = this.advanceTable.documentImage;
       this.searchTerm.setValue(this.advanceTable.addressCity);
       this.searchCategoryBy.setValue(this.advanceTable.documentName);

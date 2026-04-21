@@ -27,7 +27,6 @@ export class PackageService
     {
       SearchActivationStatus=null;
     }
-    //console.log(this.API_URL + "/" +SearchName + '/' + SearchActivationStatus +'/' + PageNumber + '/package/Ascending')
     return this.httpClient.get(this.API_URL + "/" +SearchName + '/' + SearchActivationStatus +'/' + PageNumber + '/package/Ascending');
   }
   getTableDataSort(SearchName:string, SearchActivationStatus:boolean, PageNumber: number,coloumName:string,sortType:string):  Observable<any> 
@@ -40,7 +39,6 @@ export class PackageService
     {
       SearchActivationStatus=null;
     }
-    //console.log(this.API_URL + "/" +SearchName + '/' + SearchActivationStatus +'/' + PageNumber + '/'+coloumName+'/'+sortType)
     return this.httpClient.get(this.API_URL + "/" +SearchName + '/' + SearchActivationStatus +'/' + PageNumber +  '/'+coloumName+'/'+sortType);
   }
   add(advanceTable: Package) 

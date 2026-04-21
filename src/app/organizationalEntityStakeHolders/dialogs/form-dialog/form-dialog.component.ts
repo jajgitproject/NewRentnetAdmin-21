@@ -67,7 +67,6 @@ export class FormDialogComponentHolder {
     this.action = data.action;
     this.OrganizationalEntityID = data.organizationalEntityID || null;
     this.OrganizationalEntityName = data.organizationalEntityName || '';
-    console.log('Constructor - OrganizationalEntityID:', this.OrganizationalEntityID);
     if (this.action === 'edit') {
       //this.dialogTitle = 'Edit Organizational Entity Stake Holders';
       this.dialogTitle = 'Stake Holders';
@@ -422,7 +421,6 @@ this.advanceTableForm.get('endDate')?.setErrors({ invalidDate: true });
     formData.departmentID = this.departmentID;
     formData.designationID = this.designationID;
 
-    console.log('Post - Form Data:', formData);
 
     this.advanceTableService.add(formData)
       .subscribe(

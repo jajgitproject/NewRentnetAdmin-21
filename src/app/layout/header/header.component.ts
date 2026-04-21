@@ -128,7 +128,6 @@ export class HeaderComponent implements OnInit, AfterViewInit {
     }
     //this.expirationDate = this.expirationDateService.getExpirationDate();
     this.expirationDate = localStorage.getItem('expirationDate');
-    console.log(this.expirationDate);
     if(this.expirationDate)
     {
       this.calculateDaysLeft();

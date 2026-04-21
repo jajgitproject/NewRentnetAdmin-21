@@ -140,10 +140,6 @@ export class VendorLocalLumpsumRateComponent implements OnInit {
          this.vendorContract_Name = this._generalService.decrypt(decodeURIComponent(encryptedVendorContractName));
      
          // Log the decrypted values to the console for verification
-         console.log("Decrypted VendorContractID:", this.vendorContract_ID);
-         console.log("Decrypted StartDate:", this.Applicable_From);
-         console.log("Decrypted EndDate:", this.Applicable_To);
-         console.log("Decrypted VendorContractName:", this.vendorContract_Name);
          
          // Initialize dropdowns and load data after vendorContract_ID is set
          this.InitVehicleCategory();

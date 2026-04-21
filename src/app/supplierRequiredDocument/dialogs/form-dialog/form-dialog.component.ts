@@ -73,7 +73,6 @@ export class FormDialogComponentHolder
          
         }
         this.advanceTableForm = this.createContactForm();
-        //console.log(data.lastid);
   }
   public ngOnInit(): void
   {
@@ -117,7 +116,6 @@ onDocumentSelected(selectedDocumentName: string) {
 
   if (selectedDocument) {
     this.documentID = selectedDocument.documentID; // Set the documentID
-    console.log('Document ID:', this.documentID); // Debug log to ensure correct documentID
     this.getTitles(this.documentID); // Call getTitles with the correct documentID
   } else {
     console.error('Selected document not found in the list');
@@ -125,7 +123,6 @@ onDocumentSelected(selectedDocumentName: string) {
 }
 
 getTitles(documentID: any) {
-  console.log('Fetching titles for Document ID:', documentID); // Debug log
   this.documentID = documentID;
 
   // Add your logic to handle the retrieved documentID here
@@ -146,7 +143,6 @@ documentValidator(DocumentList: any[]): ValidatorFn {
   //     {
   //        ;
   //       this.DocumentList = data;
-  //       console.log(this.DocumentList);
   //     },
   //     error =>
   //     {

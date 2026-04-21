@@ -156,7 +156,6 @@ export class DutyAllotmentStatusSearchComponent implements OnInit {
         data =>
         {
           this.DispatchLocationList = data;  
-          console.log(this.DispatchLocationList)
           this.filteredDispatchLocationOptions = this.dispatch_Location.valueChanges.pipe(
             startWith(""),
             map(value => this._filterRN(value || ''))
@@ -205,7 +204,6 @@ export class DutyAllotmentStatusSearchComponent implements OnInit {
             data=>
             {
               this.OrganizationalEntitiesList=data;
-              console.log(this.OrganizationalEntitiesList);
               this.filteredOrganizationalEntityOptions = this.searchForm.controls['locationHub'].valueChanges.pipe(
                 startWith(""),
                 map(value => this._filterOrganizationalsEntity(value || ''))
@@ -214,7 +212,6 @@ export class DutyAllotmentStatusSearchComponent implements OnInit {
         }
         
         private _filterOrganizationalsEntity(value: string): any {
-          console.log(value);
           const filterValue = value?.toLowerCase() || '';
     //       if (!value || value.length < 3)
     //  {
@@ -306,7 +303,6 @@ shouldShowDeleteButton(item: any): boolean {
         data =>   
         {
           this.dataSource = data?.slots; 
-          console.log(this.dataSource);        
         },
         (error: HttpErrorResponse) => { this.dataSource = null;}
       );

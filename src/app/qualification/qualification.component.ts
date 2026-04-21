@@ -91,7 +91,6 @@ export class QualificationComponent implements OnInit {
         action: 'edit'
       }
     });
-    //console.log(row.id);
 
   }
   deleteItem(row)
@@ -141,7 +140,6 @@ export class QualificationComponent implements OnInit {
   
   NextCall()
   {
-    //console.log(this.dataSource.length>0)
     if (this.dataSource.length>0) 
     {
      
@@ -289,7 +287,6 @@ export class QualificationComponent implements OnInit {
       data =>   
       {
         this.dataSource = data;
-       //console.log(this.dataSource);
       },
       (error: HttpErrorResponse) => { this.dataSource = null;}
     );

@@ -1,5 +1,5 @@
 .BoldButtonTopMargin
-  margin-top: 7px
+  margin-top: 0
 
 :host ::ng-deep .mat-mdc-dialog-content,
 :host ::ng-deep [mat-dialog-content],
@@ -23,7 +23,7 @@
   color: #000 !important
   font-weight: 700 !important
   text-decoration: none !important
-  line-height: 20px !important
+  line-height: 14px !important
   display: inline !important
   padding: 0 !important
   margin: 0 !important
@@ -31,31 +31,34 @@
   vertical-align: middle !important
   min-width: max-content !important
 
-/* Kebab: 4px below label baseline (Reservation Group + Edit Booking) */
+/* Kebab ⋮ sits on the same 14px row as its label — no vertical offset,
+   blue to match the user-supplied reference screenshot. */
 :host ::ng-deep .cp-menu-row-tight mat-icon.more-icon,
 :host ::ng-deep .cp-menu-row-tight mat-icon.edit-booking-dots,
 :host ::ng-deep .cp-menu-row-tight mat-icon.cp-menu-trigger
-  color: #000 !important
+  color: blue !important
   cursor: pointer !important
   margin: 0 !important
-  margin-left: -22px !important
+  margin-left: 2px !important
   padding: 0 !important
-  transform: translateY(4px) !important
-  width: 16px !important
-  height: 16px !important
-  min-width: 16px !important
-  font-size: 16px !important
-  line-height: 16px !important
+  transform: none !important
+  width: 14px !important
+  height: 14px !important
+  min-width: 14px !important
+  font-size: 14px !important
+  line-height: 14px !important
   overflow: visible !important
-  display: inline-block !important
+  display: inline-flex !important
+  align-items: center !important
+  justify-content: center !important
   vertical-align: middle !important
 
 :host ::ng-deep .cp-menu-row-tight mat-icon svg
   display: block !important
-  width: 16px !important
-  height: 16px !important
+  width: 14px !important
+  height: 14px !important
   margin: 0 !important
-  transform: translateX(-2px) !important
+  transform: none !important
 
 /* First column: avoid min-width: max-content (expands column 1 when combined with table layout). Inner grid span handles label+⋮. */
 :host ::ng-deep table tbody tr > td.TDValue.col-lg-1:first-child
@@ -66,8 +69,8 @@
 /* Reservation Group: CSS grid = label col + icon col (cannot stack like flex-wrap inside narrow td) */
 :host ::ng-deep .reservation-group-container.cp-menu-label-row.cp-menu-row-tight
   display: grid !important
-  grid-template-columns: max-content 20px !important
-  grid-template-rows: 20px !important
+  grid-template-columns: max-content 18px !important
+  grid-template-rows: 14px !important
   align-items: center !important
   justify-items: start !important
   column-gap: 0 !important
@@ -75,50 +78,51 @@
   min-width: min-content !important
   max-width: none !important
   white-space: nowrap !important
-  height: 20px !important
-  line-height: 20px !important
+  height: 14px !important
+  line-height: 14px !important
   vertical-align: top !important
 
 :host ::ng-deep .reservation-group-container.cp-menu-row-tight > mat-icon.more-icon.cp-menu-trigger
   grid-column: 2 !important
   grid-row: 1 !important
-  justify-self: center !important
+  justify-self: start !important
   align-self: center !important
   transform: none !important
   margin: 0 !important
-  margin-left: -6px !important
+  margin-left: 2px !important
   padding: 0 !important
   box-sizing: border-box !important
-  width: 18px !important
-  height: 18px !important
-  min-width: 18px !important
-  max-height: 20px !important
-  font-size: 18px !important
-  line-height: 18px !important
+  width: 14px !important
+  height: 14px !important
+  min-width: 14px !important
+  max-height: 14px !important
+  font-size: 14px !important
+  line-height: 14px !important
   display: inline-flex !important
   align-items: center !important
   justify-content: center !important
   overflow: visible !important
+  color: blue !important
 
 :host ::ng-deep .reservation-group-container.cp-menu-row-tight > mat-icon.more-icon.cp-menu-trigger svg
   display: block !important
-  width: 18px !important
-  height: 18px !important
-  margin: 0 auto !important
-  transform: translateX(-1px) !important
+  width: 14px !important
+  height: 14px !important
+  margin: 0 !important
+  transform: none !important
 
 /* Keep label row anchors from picking up column-wide min-height / flex quirks */
 :host ::ng-deep tr > td:nth-child(-n+5) .cp-menu-label-row.cp-menu-row-tight a.BoldButton.cp-menu-label-text
   min-height: 0 !important
   display: inline !important
-  line-height: 20px !important
+  line-height: 14px !important
   min-width: max-content !important
 
 :host ::ng-deep tr > td:nth-child(-n+5) .cp-menu-label-row.cp-menu-row-tight a.BoldButton.edit-booking-label
   min-height: 0 !important
   display: inline !important
   transform: none !important
-  line-height: 20px !important
+  line-height: 14px !important
   min-width: max-content !important
 
 /* Apply same left-align + typography to all action labels in columns 1-5 */
@@ -132,7 +136,7 @@
   text-align: left !important
   font-size: 10px !important
   font-weight: 700 !important
-  line-height: 18px !important
+  line-height: 14px !important
   color: #000 !important
   text-transform: none !important
 
@@ -145,18 +149,19 @@
   min-width: max-content !important
   display: inline-flex !important
   align-items: center !important
-  height: 20px !important
-  line-height: 20px !important
+  height: 14px !important
+  line-height: 14px !important
   font-size: 10px !important
   padding: 0 !important
   margin: 0 !important
   box-sizing: border-box !important
 
 :host ::ng-deep tr > td:nth-child(-n+5) .BoldButtonTopMargin
-  margin-top: 3px !important
+  margin-top: 0 !important
 
 :host ::ng-deep tr > td:nth-child(-n+5) br
-  line-height: 14px !important
+  line-height: 0 !important
+  height: 0 !important
 
 /* Keep columns 2-5 vertically aligned with column 1 */
 :host ::ng-deep tr > td:nth-child(n+2):nth-child(-n+5)
@@ -168,15 +173,15 @@
   margin-top: 0 !important
   padding-top: 0 !important
   padding-bottom: 0 !important
-  min-height: 16px !important
-  line-height: 16px !important
+  min-height: 0 !important
+  line-height: 14px !important
 
 :host ::ng-deep tr > td:nth-child(2) .passenger-first-btn
   margin-top: 0 !important
   padding-top: 0 !important
   padding-bottom: 0 !important
-  min-height: 16px !important
-  line-height: 16px !important
+  min-height: 0 !important
+  line-height: 14px !important
   transform: translateY(-2px) !important
 
 /* Match first 3 controls' vertical baseline in columns 3-5 with column 2 */
@@ -184,16 +189,16 @@
   margin-top: 0 !important
   padding-top: 0 !important
   padding-bottom: 0 !important
-  min-height: 16px !important
-  line-height: 16px !important
+  min-height: 0 !important
+  line-height: 14px !important
   transform: translateY(-2px) !important
 
 :host ::ng-deep .pickup-time-align-btn
   margin-top: 0 !important
   padding-top: 0 !important
   padding-bottom: 0 !important
-  min-height: 16px !important
-  line-height: 16px !important
+  min-height: 0 !important
+  line-height: 14px !important
 
 /* Three-dot icon alignment is now handled in popup-scoped CSS */
 :host ::ng-deep .pickup-time-dots

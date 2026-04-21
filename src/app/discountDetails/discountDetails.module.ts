@@ -19,7 +19,6 @@ import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatDialogModule } from '@angular/material/dialog';
 import { MatSortModule } from '@angular/material/sort';
 import { MatToolbarModule } from '@angular/material/toolbar';
-import { MaterialFileInputModule } from '@compat/material-file-input-shim';
 import { MatMenuModule } from '@angular/material/menu';
 import { DiscountDetailsService } from './discountDetails.service';
 import { DiscountDetailsRoutingModule } from './discountDetails-routing.module';
@@ -56,7 +55,6 @@ import { MatExpansionModule } from '@angular/material/expansion';
     MatDialogModule,
     MatSortModule,
     MatToolbarModule,
-    MaterialFileInputModule,
     MatMenuModule,
     MatProgressSpinnerModule,
     MyUploadModule,

@@ -44,7 +44,6 @@ export class ChangeVendorDetailsComponent
     data => 
     {
       this.dataSourceForVendor = data;
-      console.log(this.dataSourceForVendor)
     },
     (error: HttpErrorResponse) => { this.dataSourceForVendor = null; }
     );

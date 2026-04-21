@@ -41,7 +41,6 @@ export class SupplierContractPackageTypePercentageService
       {
         SearchToDate="null";
       }
-    //console.log(this.API_URL +  '/'+SupplierContractID +'/'+SearchSupplierContractPackageTypePercentage +'/'+SearchPercentage + '/' + SearchActivationStatus +'/' + PageNumber + '/supplierContractPackageTypePercentageID/Ascending')
     return this.httpClient.get(this.API_URL  + '/'+SupplierContractID + '/'+SearchSupplierContractPackageTypePercentage + '/'+SearchPercentage +'/'+SearchFromDate +'/'+SearchToDate+ '/'+ SearchActivationStatus +'/' + PageNumber + '/supplierContractPackageTypePercentageID/Ascending');
   }
 
@@ -65,7 +64,6 @@ export class SupplierContractPackageTypePercentageService
       {
         SearchToDate="null";
       }
-    //console.log(this.API_URL + "/kkk" +SearchSupplierContractPackageTypePercentage + '/' + SearchActivationStatus +'/' + PageNumber + '/'+coloumName+'/'+sortType)
     return this.httpClient.get(this.API_URL  + '/'+SupplierContractID + '/'+SearchSupplierContractPackageTypePercentage +'/'+SearchPercentage +'/'+SearchFromDate +'/'+SearchToDate + '/'+ SearchActivationStatus +'/' + PageNumber + '/'+coloumName+'/'+sortType);
   }
 

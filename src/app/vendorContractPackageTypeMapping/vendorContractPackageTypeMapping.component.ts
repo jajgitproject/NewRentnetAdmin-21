@@ -92,10 +92,6 @@ export class VendorContractPackageTypeMappingComponent implements OnInit {
         this.vendorContractName = this._generalService.decrypt(decodeURIComponent(encryptedVendorContractName));
     
         // Log the decrypted values to the console for verification
-        console.log("Decrypted VendorContractID:", this.vendorContract_ID);
-        console.log("Decrypted StartDate:", this.Applicable_From);
-        console.log("Decrypted EndDate:", this.Applicable_To);
-        console.log("Decrypted VendorContractName:", this.vendorContractName);
       }
     });
     this.loadData();
@@ -110,8 +106,6 @@ export class VendorContractPackageTypeMappingComponent implements OnInit {
       data=>
       {
         this.PackageTypeList=data;
-        console.log(this.packageType)
-        console.log(this.PackageTypeList);
           this.filteredPackageTypeOptions = this.package.valueChanges.pipe(
           startWith(""),
           map(value => this._filterPackageType(value || ''))
@@ -140,7 +134,6 @@ export class VendorContractPackageTypeMappingComponent implements OnInit {
 //      {
 
 //        this.packageType = data;
-//        console.log(this.packageType)
      
 //      },
 //      (error: HttpErrorResponse) => { this.dataSource = null;}

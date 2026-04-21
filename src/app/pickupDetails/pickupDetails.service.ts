@@ -35,7 +35,6 @@ export class PickupDetailsService
     {
       SearchActivationStatus="null";
     }
-     console.log(this.API_URL + "/" +ReservationID + '/'+PickupDetailsID + '/' + StopType +'/' + SearchActivationStatus +'/' + PageNumber + '/PickupDetailsID/Ascending');
     return this.httpClient.get(this.API_URL + "/" +ReservationID + '/'+PickupDetailsID + '/' + StopType +'/' + SearchActivationStatus +'/' + PageNumber + '/PickupDetailsID/Ascending');
   }
 
@@ -47,14 +46,12 @@ export class PickupDetailsService
     advanceTable.pickupDetailsID=-1;
     advanceTable.updatedBy=this.generalService.getUserID();
     advanceTable.updateDateTime= this.generalService.getTodaysDate();
-    console.log(this.API_URL , advanceTable);
     return this.httpClient.post<any>(this.API_URL , advanceTable);
   }
   update(advanceTable: PickupDetails)
   {
     advanceTable.updatedBy=this.generalService.getUserID();
     advanceTable.updateDateTime= this.generalService.getTodaysDate();
-    console.log(this.API_URL , advanceTable);
     return this.httpClient.put<any>(this.API_URL , advanceTable);
   }
   delete(pickupDetailsID: number):  Observable<any> 

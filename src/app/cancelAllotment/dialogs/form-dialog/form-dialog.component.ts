@@ -42,7 +42,6 @@ export class FormDialogCAComponent
          // status gating
     // this.status = data?.status;
     // this.buttonDisabled = this.status ? this.status.toLowerCase() !== 'changes allow' : false;
-    // console.log(data);
       this.status = data?.status || '';
 
     // ✅ normalize (important)
@@ -51,9 +50,6 @@ export class FormDialogCAComponent
     // ✅ button logic
     this.buttonDisabled = this.normalizedStatus !== 'changes allow';
 
-    console.log('STATUS:', this.status);
-    console.log('NORMALIZED:', this.normalizedStatus);
-    console.log('BUTTON DISABLED:', this.buttonDisabled);
 
         if (this.action === 'edit') 
         {
@@ -70,7 +66,6 @@ export class FormDialogCAComponent
         this.advanceTableForm = this.createContactForm();
         this.AllotmentID=data.allotmentID;
         this.AllotmentStatus=data.allotmentStatus
-        console.log(this.AllotmentID);
   }
   formControl = new FormControl('', 
   [

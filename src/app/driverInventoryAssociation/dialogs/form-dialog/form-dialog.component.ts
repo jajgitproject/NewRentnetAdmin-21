@@ -80,8 +80,6 @@ driverInventoryAssociationDataSource:any;
     this.driverInventoryAssociationDataSource= data.driverInventoryAssociationDataSource;
     this.ownedSupplier= data.driverInventoryAssociationDataSource?.driverOwnedSupplier;
     this.supplierID =  data.driverInventoryAssociationDataSource?.inventorySupplierID
-    console.log(this.driverInventoryAssociationDataSource)
-    console.log(this.SupplierName)
     
         // Set the defaults
         this.action = data.action;
@@ -89,7 +87,6 @@ driverInventoryAssociationDataSource:any;
         {
           this.dialogTitle ='Driver Inventory Association';       
           this.advanceTable = data.advanceTable;
-          console.log(this.advanceTable)
           //this.advanceTable.inventoryName=this.advanceTable.inventoryName + '-' + this.advanceTable.vehicle + '-'+ this.advanceTable.vehicleCategory;
           this.advanceTable.inventoryName=this.advanceTable.inventory + '-' + this.advanceTable.vehicle + '-'+ this.advanceTable.supplierName;
            let driverInventoryAssociationStartDate=moment(this.advanceTable.driverInventoryAssociationStartDate).format('DD/MM/yyyy');
@@ -181,7 +178,6 @@ ngOnInit(): void {
  }
  if(this.data.text === 'AttachAnotherCar')
  {
-  console.log(this.data)
   this.advanceTableForm.controls["driverName"].disable();
   this.advanceTableForm.controls["driverName"].setValue(this.data.driverName);
   //this.advanceTableForm.controls['driverID'].patchValue(this.data.driverID);
@@ -222,7 +218,6 @@ InitAttachAnotherDriver(supplierID,ownedSupplier)
     data=>
     {
       this.AnotherDriverList=data;
-      console.log(this.AnotherDriverList)
       this.advanceTableForm.controls['driverName'].setValidators([Validators.required,
         this.driverListTypeValidator(this.AnotherDriverList)
       ]);
@@ -290,7 +285,6 @@ InitDriver()
     data=>
     {
       this.DriverList=data;
-      console.log(this.DriverList)
       this.advanceTableForm.controls['driverName'].setValidators([Validators.required,
         this.driverTypeValidator(this.DriverList)
       ]);
@@ -346,7 +340,6 @@ InitVehicle(){
     data=>
     {
       this.VehicleList=data;
-      console.log(this.VehicleList);
       this.advanceTableForm.controls['inventoryName'].setValidators([Validators.required,
         this.inventoryTypeValidator(this.VehicleList)
       ]);

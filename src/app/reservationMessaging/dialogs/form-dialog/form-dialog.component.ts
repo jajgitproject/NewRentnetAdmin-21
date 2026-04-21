@@ -123,7 +123,6 @@ export class FormDialogComponent
     this._generalService.getMessageSource().subscribe(
       data=>{
         this.MessageSouceList=data;
-        //console.log(this.MessageSouceList);
         this.filteredMessageSourceOptions = this.messageSource.valueChanges.pipe(
           startWith(""),
           map(value => this._filterPackage(value || ''))
@@ -167,12 +166,10 @@ export class FormDialogComponent
        data =>   
        {
          this.dataSource = data;
-        //console.log(this.dataSource);
         this.filteredPersonsList = [];
         this.dataSource?.forEach((item: any)=>{
           if(item.customerPersonName !== null && item.customerPersonName !== '' || item.employee !== null && item.employee !== '')
             this.filteredPersonsList.push({reservationMessagingID: item.reservationMessagingID, personName: item.customerPersonName || item.employee});
-          //console.log(this.filteredPersonsList);
         });
         
        },
@@ -222,10 +219,8 @@ export class FormDialogComponent
   //   (
   //     data =>   
   //     {
-  //       console.log(data)
   //       this.dataSource = data.reservationMessagingDetails;
   //       this.totalRecord=data.totalRecords;
-  //       console.log(this.totalRecord)
   //       this.isLoading=false;
   //     },
   //     (error: HttpErrorResponse) => { this.dataSource = null;}

@@ -49,7 +49,6 @@ export class SupplierContractCDCLocalLumpsumService
     {
       SearchActivationStatus=null;
     }
-    console.log(this.API_URL + "/" +supplierContractID + '/'+searchVehicleCategory + '/'+searchPackage + '/'+searchCityTier + '/' +SearchBaseRate + '/' + SearchActivationStatus +'/' + PageNumber + '/SupplierContractCDCLocalLumpsumID/Ascending')
     return this.httpClient.get(this.API_URL + "/" +supplierContractID + '/'+searchVehicleCategory + '/'+searchPackage + '/'+searchCityTier + '/'+SearchBaseRate + '/'  + SearchActivationStatus +'/' + PageNumber + '/SupplierContractCDCLocalLumpsumID/Ascending');
     
   }

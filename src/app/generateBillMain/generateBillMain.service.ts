@@ -56,7 +56,6 @@ export class GenerateBillMainService
     {
       SearchActivationStatus=null;
     }
-    console.log(this.API_URL_GetData +"/GetAllGeneralBillMain" + "/" + SearchCustomer + '/'+ SearchInvoiceNumberWithPrefix + "/" + SearchGuset + "/" + SearchBillDate + '/' + SearchStartDate + '/' + SearchEndDate + '/' + SearchActivationStatus +'/' + PageNumber + '/InvoiceID/Ascending');
     
     return this.httpClient.get(this.API_URL_GetData +"/GetAllGeneralBillMain" + "/" + SearchCustomer + '/'+ SearchInvoiceNumberWithPrefix + "/" + SearchGuset + "/" + SearchBillDate + '/' + SearchStartDate + '/' + SearchEndDate + '/' + SearchActivationStatus +'/' + PageNumber + '/InvoiceID/Ascending');
   }

@@ -5,6 +5,7 @@ import { MAT_DATE_LOCALE } from '@angular/material/core';
 import { GeneralService } from '../general/general.service';
 import { ControlPanelDetails, StopsModel } from '../controlPanelDesign/controlPanelDesign.model';
 import { DomSanitizer, SafeUrl } from '@angular/platform-browser';
+import { RuntimeConfigService } from '../core/service/runtime-config.service';
 @Component({
   standalone: false,
   selector: 'app-StopOnMapInfo',
@@ -23,60 +24,39 @@ export class StopOnMapInfoComponent {
     @Inject(MAT_DIALOG_DATA)
     public data: { advanceTable: ControlPanelDetails },
     public _generalService: GeneralService,
-    private sanitizer: DomSanitizer
+    private sanitizer: DomSanitizer,
+    private runtimeConfig: RuntimeConfigService
   ) {
     // Set the defaults
     this.dialogTitle = 'Stops on Map';
     this.stopDetailsInfo = this.data.advanceTable;
-    console.log(this.stopDetailsInfo?.stopsDetails)
     if (this.stopDetailsInfo != null) {
-      if(this.stopDetailsInfo.stopsDetails.length > 2)
-        {
-           //For three or more stops, include waypoints
-          const origin = this.stopDetailsInfo.stopsDetails[0].reservationStopAddress;
-          const destination = this.stopDetailsInfo.stopsDetails[1].reservationStopAddress;
-          const waypoints = this.stopDetailsInfo.stopsDetails
-          .slice(2) // Skip first two records
+      const apiKey = encodeURIComponent(this.runtimeConfig.getGoogleMapsApiKey());
+      const base = `https://www.google.com/maps/embed/v1/directions?key=${apiKey}`;
+
+      if (this.stopDetailsInfo.stopsDetails.length > 2) {
+        // For three or more stops, include waypoints
+        const origin = this.stopDetailsInfo.stopsDetails[0].reservationStopAddress;
+        const destination = this.stopDetailsInfo.stopsDetails[1].reservationStopAddress;
+        const waypoints = this.stopDetailsInfo.stopsDetails
+          .slice(2)
           .map((stop) => stop.reservationStopAddress)
           .join('|');
-          console.log(waypoints)
 
-    this.dangerousMapUrl =
-    'https://www.google.com/maps/embed/v1/directions?key=AIzaSyAFoLcbOuZfbGJGCdlazGXZbOCYr8dW76c&origin=' +
-    encodeURIComponent(origin) +
-    '&destination=' +
-    encodeURIComponent(destination) +
-    '&waypoints=' +
-    encodeURIComponent(waypoints);
-  
-        this.trustedUrl = this.sanitizer.bypassSecurityTrustResourceUrl(
-          this.dangerousMapUrl
-        );
-    //       this.dangerousMapUrl =
-    // 'https://www.google.com/maps/embed/v1/directions?key=AIzaSyAFoLcbOuZfbGJGCdlazGXZbOCYr8dW76c&origin=' +
-    // encodeURIComponent(this.stopDetailsInfo?.stopsDetails[0].reservationStopAddress) +
-    // '&destination=' +
-    // encodeURIComponent(this.stopDetailsInfo?.stopsDetails[1].reservationStopAddress) +
-    // '&waypoints=' +
-    // encodeURIComponent(this.stopDetailsInfo?.stopsDetails[2].reservationStopAddress);
-
-  this.trustedUrl = this.sanitizer.bypassSecurityTrustResourceUrl(this.dangerousMapUrl);
-
-      }
-      else
-      {
         this.dangerousMapUrl =
-        'https://www.google.com/maps/embed/v1/directions?key=AIzaSyAFoLcbOuZfbGJGCdlazGXZbOCYr8dW76c&origin=' +
-        this.stopDetailsInfo?.stopsDetails[0].reservationStopAddress +
-        '&destination=' +
-        this.stopDetailsInfo?.stopsDetails[1].reservationStopAddress;
-
-      this.trustedUrl = this.sanitizer.bypassSecurityTrustResourceUrl(
-        this.dangerousMapUrl
-      );
+          `${base}&origin=${encodeURIComponent(origin)}` +
+          `&destination=${encodeURIComponent(destination)}` +
+          `&waypoints=${encodeURIComponent(waypoints)}`;
+      } else {
+        const origin = this.stopDetailsInfo?.stopsDetails[0].reservationStopAddress;
+        const destination = this.stopDetailsInfo?.stopsDetails[1].reservationStopAddress;
+        this.dangerousMapUrl =
+          `${base}&origin=${encodeURIComponent(origin)}` +
+          `&destination=${encodeURIComponent(destination)}`;
       }
-   
-    } 
+
+      this.trustedUrl = this.sanitizer.bypassSecurityTrustResourceUrl(this.dangerousMapUrl);
+    }
     
     
   }

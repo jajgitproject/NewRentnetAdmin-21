@@ -49,11 +49,9 @@ export class DutyAmenitieDialogComponent
     private el: ElementRef,
   public _generalService:GeneralService)
   {
-    console.log(data);
         // Set the defaults
         this.action = data.action;
         // this.status = this.extractStatus(data?.status);
-        // console.log('Duty Amenitie Dialog received status:', this.status);
         // this.buttonDisabled = this.status?.toLowerCase?.() !== 'changes allow';
         this.status = this.extractStatus(data?.status);
 
@@ -263,7 +261,6 @@ this.buttonDisabled = normalized !== 'changes allow';
   public confirmAdd(): void 
   {
     if (this.buttonDisabled) {
-      console.log('Save blocked due to status not allowing changes:', this.status);
       return;
     }
     this.saveDisabled = false;
@@ -298,7 +295,6 @@ this.buttonDisabled = normalized !== 'changes allow';
       }
       return input?.toString?.() || null;
     } catch (e) {
-      console.log('Status extraction error (AmenitieDialog):', e);
       return null;
     }
   }

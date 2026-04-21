@@ -124,7 +124,6 @@ deleteItem(row)
       (data :BillToOther)=> 
       {
         this.advanceTableBillingData = data;
-       console.log(this.advanceTableBillingData);
       },
       (error: HttpErrorResponse) => { this.advanceTable = null;}
     );
@@ -289,7 +288,6 @@ deleteItem(row)
   //     data =>   
   //     {
   //       this.dataSource = data;
-  //      console.log(this.dataSource);
   //     },
   //     (error: HttpErrorResponse) => { this.dataSource = null;}
   //   );

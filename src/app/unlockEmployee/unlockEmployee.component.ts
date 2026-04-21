@@ -105,7 +105,6 @@ export class UnlockEmployeeComponent implements OnInit {
   //     (
   //       data => {
   //         this.dataSource = data;
-  //         console.log(this.dataSource)
   //         this.loadData();
   //         this.showNotification(
   //           'snackbar-success',
@@ -153,7 +152,6 @@ export class UnlockEmployeeComponent implements OnInit {
         data => {
           this.dataSource = data;
        
-          console.log(this.dataSource)
           
        
         },

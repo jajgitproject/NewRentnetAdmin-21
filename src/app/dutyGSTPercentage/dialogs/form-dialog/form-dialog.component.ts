@@ -120,7 +120,6 @@ InitGSTPercentage(){
       this.GSTPercentageList=data;
       this.advanceTableForm.controls['gstPercentage'].setValidators([Validators.required,
           this.GSTPercentageValidator(this.GSTPercentageList)]);
-      console.log(this.GSTPercentageList)
       this.filteredGSTPercentageOptions = this.advanceTableForm.controls['gstPercentage'].valueChanges.pipe(
         startWith(""),
         map(value => this._filterGST(value || ''))
@@ -160,7 +159,6 @@ InitEmployee()
     data=>
     {
       this.employeeDataSource=data;
-      console.log(this.employeeDataSource)
       this.advanceTableForm.controls["changedByName"].disable();
       this.advanceTableForm.patchValue({changedByName:this.employeeDataSource[0].firstName+" "+this.employeeDataSource[0].lastName});
       this.advanceTableForm.patchValue({changedByID:this.employeeDataSource[0].employeeID});

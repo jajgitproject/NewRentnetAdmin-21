@@ -115,7 +115,6 @@ export class FormDialogComponent implements OnInit {
       // this.advanceTable.activationStatus=true;
     }
     this.requestType = data.requestType;
-    console.log(data);
     this.advanceTableForm = this.createContactForm();
     this.reservationID = data.reservationID;
     this.customer = data.customer;
@@ -589,7 +588,6 @@ private _filterCCG(value: string): any[] {
           startWith(""),
           map(value => this._filterRD(value || ''))
         );
-        console.log(this.filteredCustomerCustomerGroupOptions)
       });
   }
   
@@ -628,7 +626,6 @@ private _filterRD(value: string): any[] {
     this.customerTypeID = customerTypeID;
     this.customerType = customerType;
     this.customerGroup = customerGroup;
-    console.log(this.customerGroup,customerGroup)
     this.advanceTableForm.patchValue({ customerID: this.customerID });
     this.advanceTableForm.patchValue({ customerGroupID: this.customerGroupID });
     this.advanceTableForm.patchValue({ customerGroup: this.customerGroup });
@@ -938,8 +935,6 @@ private _filterRD(value: string): any[] {
   }
   public Post(): void {
     this.saveDisabled = false;
-    console.log(this.advanceTableForm.controls['salesExecutive'].value);
-    console.log(this.advanceTableForm.controls['kam'].value);
   const salesExecutive = this.advanceTableForm.controls['salesExecutive'].value;
   const kam = this.advanceTableForm.controls['kam'].value;
 
@@ -980,7 +975,6 @@ private _filterRD(value: string): any[] {
       .subscribe(
         response => {
           this.reservationGroupID = response.reservationGroupID;
-          console.log(response)
           this.saveDisabled = true;
           this.dialogRef.close(response);
           this._generalService.sendUpdate('ReservationGroupDetailsCreate:ReservationGroupDetailsView:Success');//To Send Updates  

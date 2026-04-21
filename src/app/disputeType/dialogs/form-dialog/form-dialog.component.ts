@@ -38,7 +38,6 @@ export class FormDialogComponent
         {
           this.dialogTitle ='Dispute Type';       
           this.advanceTable = data.advanceTable;
-          console.log(this.advanceTable);
         } else 
         {
           this.dialogTitle = 'Dispute Type';
@@ -66,7 +65,6 @@ export class FormDialogComponent
 
   submit() 
   {
-    //console.log(this.advanceTableForm.value);
   }
   onNoClick(): void 
   {

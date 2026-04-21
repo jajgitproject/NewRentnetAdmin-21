@@ -76,7 +76,6 @@ export class ForgotPasswordComponent implements OnInit {
         .forgotPasswordOTP(this.loginForm.getRawValue())
         .subscribe(
           (response) => {
-            console.log(response)
             if (response.message.includes('Success')) {
               this._generalService.sendUpdate('SendOTP:SendOTPView:Success');
               this.isOTPSent = true;
@@ -145,7 +144,6 @@ export class ForgotPasswordComponent implements OnInit {
             ); //To Send Updates
           }
         );
-      console.log();
     }
   }
 

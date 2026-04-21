@@ -11,7 +11,6 @@ import { SidebarComponent } from './layout/sidebar/sidebar.component';
 import { RightSidebarComponent } from './layout/right-sidebar/right-sidebar.component';
 import { AuthLayoutComponent } from './layout/app-layout/auth-layout/auth-layout.component';
 import { MainLayoutComponent } from './layout/app-layout/main-layout/main-layout.component';
-//import { fakeBackendProvider } from './core/interceptor/fake-backend';
 import { ErrorInterceptor } from './core/interceptor/error.interceptor';
 import { ReactiveFormsModule } from '@angular/forms';
 import { JwtInterceptor } from './core/interceptor/jwt.interceptor';
@@ -20,11 +19,6 @@ import { NgxSpinnerModule } from 'ngx-spinner';
 import{FormsModule} from '@angular/forms';
 import { FilterPipe } from './layout/sidebar/filter.pipe';
 
-import {
-  PerfectScrollbarModule,
-  PERFECT_SCROLLBAR_CONFIG,
-  PerfectScrollbarConfigInterface
-} from 'ngx-perfect-scrollbar';
 import { TranslateModule, TranslateLoader } from '@ngx-translate/core';
 import { TranslateHttpLoader, TRANSLATE_HTTP_LOADER_CONFIG } from '@ngx-translate/http-loader';
 import { ClickOutsideModule } from 'ng-click-outside';
@@ -38,6 +32,7 @@ import { GeneralService } from './general/general.service';
 import { MAT_DATE_LOCALE } from '@angular/material/core';
 import { DatePipe } from '@angular/common';
 import { OwlDateTimeModule, OwlNativeDateTimeModule } from '@danielmoncada/angular-datetime-picker';
+import { provideCharts, withDefaultRegisterables } from 'ng2-charts';
 import { RolePageMappingService } from './rolePageMapping/rolePageMapping.service';
 import { DurationPipe } from './clossingScreen/duration.pipe';
 import { NoSidebarLayoutComponent } from './layout/app-layout/no-sidebar-layout/no-sidebar-layout.component';
@@ -55,11 +50,6 @@ import { GlobalErrorHandler } from './core/error/global-error.handler';
 export function initRuntimeConfig(runtime: RuntimeConfigService): () => Promise<void> {
   return () => runtime.load();
 }
-
-const DEFAULT_PERFECT_SCROLLBAR_CONFIG: PerfectScrollbarConfigInterface = {
-  suppressScrollX: true,
-  wheelPropagation: false
-};
 
 export function createTranslateLoader(http: HttpClient): any {
   return new TranslateHttpLoader(http);
@@ -85,7 +75,6 @@ export function createTranslateLoader(http: HttpClient): any {
     BrowserAnimationsModule,
     AppRoutingModule,
     HttpClientModule,
-    PerfectScrollbarModule,
     NgxSpinnerModule,
     ReactiveFormsModule,
     ClickOutsideModule,
@@ -128,11 +117,8 @@ export function createTranslateLoader(http: HttpClient): any {
       },
     },
     GeneralService,
+    provideCharts(withDefaultRegisterables()),
     { provide: LocationStrategy, useClass: HashLocationStrategy },
-    {
-      provide: PERFECT_SCROLLBAR_CONFIG,
-      useValue: DEFAULT_PERFECT_SCROLLBAR_CONFIG
-    },
     {
       provide: TRANSLATE_HTTP_LOADER_CONFIG,
       useValue: {
@@ -142,7 +128,6 @@ export function createTranslateLoader(http: HttpClient): any {
     },
     { provide: HTTP_INTERCEPTORS, useClass: JwtInterceptor, multi: true },
     { provide: HTTP_INTERCEPTORS, useClass: ErrorInterceptor, multi: true },
-    //fakeBackendProvider,
     WINDOW_PROVIDERS,ChangePasswordService
   ],
   entryComponents: [],

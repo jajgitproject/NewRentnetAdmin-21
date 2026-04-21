@@ -54,7 +54,6 @@ export class StopDetailsService
   // }
   update(advanceTable: StopDetails)
   {
-    console.log(advanceTable);
     advanceTable.reservationStopDateString=this.generalService.getTimeApplicable(advanceTable.reservationStopDate);
     advanceTable.reservationStopTimeString=this.generalService.getTimeTo(advanceTable.reservationStopTime);
     return this.httpClient.put<any>(this.API_URL , advanceTable);

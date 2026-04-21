@@ -83,7 +83,6 @@ export class NextDayInstructionComponent implements OnInit {
   editCall(row) {
     //  alert(row.id);
     this.dutySlipID = row.id;
-    console.log(this.dutySlipID)
   const dialogRef = this.dialog.open(NextDayInstructionFormDialogComponent, {
     data: {
       advanceTable: row,

@@ -28,7 +28,6 @@ export class CurrentdataInformationComponent implements OnInit {
     this.currentdataService.getCurrentdataInformationClosingData(allotmentID).subscribe(
       (data) => {
         if (data && data.length > 0) {
-         console.log(data); // Assuming the response is an array and we want the first item
           this.currentdataInformation = data[0];
         } else {
           this.currentdataInformation = null;

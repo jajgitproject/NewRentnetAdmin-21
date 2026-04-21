@@ -116,7 +116,6 @@ export class DriverRewardComponent implements OnInit {
   //     data =>
   //     {
   //       this.DriverGradeList = data;
-  //       console.log(this.DriverGradeList);
   //     },
   //     error =>
   //     {

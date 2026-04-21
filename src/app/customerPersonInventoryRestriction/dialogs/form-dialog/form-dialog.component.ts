@@ -58,9 +58,7 @@ export class FormDialogComponent
           this.dialogTitle ='Inventory Restriction for';       
           this.advanceTable = data.advanceTable;
           this.advanceTableForm = this.createContactForm();
-          console.log(data)
           this.advanceTableForm?.controls['registrationNumber'].setValue(this.advanceTable?.registrationNumber);
-          console.log(this.advanceTable?.registrationNumber);
           this.advanceTableForm?.controls['inventoryID'].setValue(this.advanceTable?.inventoryID);
         } else 
         {
@@ -260,7 +258,6 @@ InitVehicle(){
     data=>
     {
       this.VehicleList=data;
-      console.log(this.VehicleList);
       this.advanceTableForm.controls['inventoryName'].setValidators([Validators.required,
         this.inventoryTypeValidator(this.VehicleList)
       ]);
@@ -312,7 +309,6 @@ InitRegistrationNumber(){
     data=>
     {
       this.RegistrationNumberList=data;
-      console.log(this.RegistrationNumberList);
       this.filteredRegistrationNumberOptions = this.advanceTableForm.controls['registrationNumber'].valueChanges.pipe(
         startWith(""),
         map(value => this._filterRN(value || ''))

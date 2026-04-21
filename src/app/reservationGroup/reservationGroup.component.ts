@@ -82,7 +82,6 @@ export class ReservationGroupComponent implements OnInit {
     }
   });
  
-    console.log(this.reservationGroupID);
     this.loadData();
     this.SubscribeUpdateService();
   }
@@ -97,7 +96,6 @@ export class ReservationGroupComponent implements OnInit {
   }
 
   addNew() {
-    console.log( this.reservationGroupID);
     // this.reservationGroupID = 0; // Initialize reservationGroupID for new entry
     const dialogRef = this.dialog.open(FormDialogComponent, {
       width:'1000px',
@@ -168,7 +166,6 @@ onBackPress(event) {
       (
         data =>   
         {
-          console.log(data);
           this.dataSource = data;
         },
         (error: HttpErrorResponse) => { this.dataSource = null;}

@@ -135,14 +135,11 @@ export class CustomerPersonComponent implements OnInit {
     }
   
     // Log decrypted values
-    console.log("Decrypted CustomerGroupID: ", this.customerGroup_ID);
-    console.log("Decrypted CustomerGroupName: ", this.customerGroup_Name);
   });
     
     this.loadData();
     this.InitCustomer();
     this.menuItems.sort((a, b) => a.label.localeCompare(b.label));
-    console.log(this.menuItems);
     this.SubscribeUpdateService();
   }
 
@@ -215,8 +212,6 @@ export class CustomerPersonComponent implements OnInit {
   }
 
  editCall(row) {
-  console.log('Row:', row);
- console.log(this.advanceTable)
   this.customerPersonID = row.customerPersonID;
 
   // // ✅ Extract mobile number only (ignore country code like "91-")
@@ -227,7 +222,6 @@ export class CustomerPersonComponent implements OnInit {
   //   mobileNumber = row.primaryMobile || ''; // fallback if no dash
   // }
 
-  //console.log("Mobile Number:", mobileNumber);
 
   
   const dialogRef = this.dialog.open(FormDialogComponentCustomerPerson, {
@@ -291,7 +285,6 @@ export class CustomerPersonComponent implements OnInit {
       {
 
         this.dataSource = data;
-        console.log(this.dataSource);
         
       },
       (error: HttpErrorResponse) => { this.dataSource = null;}
@@ -316,7 +309,6 @@ export class CustomerPersonComponent implements OnInit {
   
   NextCall()
   {
-    //console.log(this.dataSource.length>0)
     if (this.dataSource.length>0) 
     {
      
@@ -337,8 +329,6 @@ export class CustomerPersonComponent implements OnInit {
 
 //   openInNewTab(menuItem: any, rowItem: any) {
 
-//     console.log(menuItem);
-//     console.log(rowItem);
 //     let baseUrl = this._generalService.FormURL;
 //     if(menuItem.label.toLowerCase() === 'address') {
 //       const url = this.router.serializeUrl(this.router.createUrlTree(['/customerPersonAddress'], { queryParams: {
@@ -346,7 +336,6 @@ export class CustomerPersonComponent implements OnInit {
 //         CustomerPersonName: rowItem.customerPersonName, 
 
 //       } }));
-//       console.log(baseUrl + url);
 //       window.open(baseUrl + url, '_blank'); 
 //       // this.router.navigate(['/customerAddress'], {
 //       //   queryParams: {
@@ -532,8 +521,6 @@ export class CustomerPersonComponent implements OnInit {
 /////////////////for Image Upload////////////////////////////
 
 openInNewTab(menuItem: any, rowItem: any) {
-  console.log(menuItem);
-  console.log(rowItem);
   let baseUrl = this._generalService.FormURL;
 
   // Encrypt the parameters
@@ -547,7 +534,6 @@ openInNewTab(menuItem: any, rowItem: any) {
       CustomerPersonID: encryptedCustomerPersonID,
       CustomerPersonName: encryptedCustomerPersonName, 
     } }));
-    console.log(baseUrl + url);
     window.open(baseUrl + url, '_blank');
   } else if (menuItem.label.toLowerCase() === 'document') {
     const url = this.router.serializeUrl(this.router.createUrlTree(['/customerPersonDocument'], { queryParams: {

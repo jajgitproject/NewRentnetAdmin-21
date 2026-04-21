@@ -148,7 +148,6 @@ export class DailyReportComponent implements OnInit {
       } 
       if(this.SearchregistrationNo!==""){
         this.SearchregistrationNo = this.SearchregistrationNo.split('-')[0]
-        console.log(this.SearchregistrationNo)
   
       }
       
@@ -157,7 +156,6 @@ export class DailyReportComponent implements OnInit {
       data =>   
       {
         this.dataSource = data;
-        console.log(this.dataSource)
         this.dataSource.forEach((ele)=>{
           if(ele.activationStatus===true){
            this.activation="Active"

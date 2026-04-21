@@ -56,7 +56,6 @@ export class SingleDutySingleBillForLocalComponent implements OnInit {
       this.invoiceID   = paramsData.invoiceID;
        this.reservationID=paramsData.reservationID;
        this.vehicleName = paramsData.vehicleName;
-       console.log(this.vehicleName)
     });
     this.loadData();
     
@@ -69,7 +68,6 @@ export class SingleDutySingleBillForLocalComponent implements OnInit {
      data =>   
      {
        this.dataSource = data;
-      console.log(this.dataSource);
      },
      (error: HttpErrorResponse) => { this.dataSource = null;}
    );

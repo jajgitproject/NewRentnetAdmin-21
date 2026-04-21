@@ -28,7 +28,7 @@ import { VehicleVehicleCategoryDropDown } from '../vehicle/vehicleVehicleCategor
 import { DriverInventoryAssociationService } from '../driverInventoryAssociation/driverInventoryAssociation.service';
 import { DriverInventoryAssociation } from '../driverInventoryAssociation/driverInventoryAssociation.model';
 import { CarAndDriverAllotmentData } from '../CarAndDriverAllotment/CarAndDriverAllotment.model';
-import { Address } from 'ngx-google-places-autocomplete/objects/address';
+import { Address } from '@compat/google-places-shim-objects/address';
 
 @Component({
   standalone: false,
@@ -168,7 +168,6 @@ export class SearchDriverByLocationComponent implements OnInit {
 //     this.locationString = this.addressString;
 //     this.eTRAvailabilityGeoLocation = `POINT (${this.longitude} ${this.latitude})`;
 //     //this.eTRAvailabilityGeoLocation=`POINT (77.1024909999999 28.7040592)`;
-//     console.log(this.eTRAvailabilityGeoLocation);
 // }
 AddressChange(address: any) {
 
@@ -220,7 +219,6 @@ public loadData()
       {
         if (data != null) {
         this.driverInventoryAssociationDataSource = data.driverInventoryAssociationModel;
-        console.log(this.driverInventoryAssociationDataSource)
         this.driverInventoryAssociationDataSource?.forEach(element => {
           Object.assign(element, { checked: false });
         });
@@ -362,7 +360,6 @@ SearchData() {
 
   NextCall()
   {
-    //console.log(this.dataSource.length>0)
     if (this.driverInventoryAssociationDataSource.length>0) 
     {
      

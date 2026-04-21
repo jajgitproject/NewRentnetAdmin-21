@@ -10,7 +10,7 @@ import { GeneralService } from '../../../general/general.service';
 import { CustomerPersonAddressDropDown } from '../../customerPersonAddressDropDown.model';
 import { CurrencyDropDown } from 'src/app/general/currencyDropDown.model';
 import { QualificationDropDown } from 'src/app/general/qualificationDropDown.model';
-import { Address } from 'ngx-google-places-autocomplete/objects/address';
+import { Address } from '@compat/google-places-shim-objects/address';
 import { CitiesDropDown } from 'src/app/organizationalEntity/citiesDropDown.model';
 import { StatesDropDown } from 'src/app/organizationalEntity/stateDropDown.model';
 import { Observable } from 'rxjs';

@@ -331,7 +331,7 @@
                 <mat-label>Closure Time</mat-label>
                 <input matInput [owlDateTimeTrigger]="closureTime" [owlDateTime]="closureTime"
                   formControlName="closureTime" (input)="onEndTimeInput($event)" />
-                <mat-icon matSuffix [owlDateTimeTrigger]="closureTime" class="date-icon">schedule</mat-icon>
+                <button mat-icon-button matSuffix type="button" [owlDateTimeTrigger]="closureTime" class="date-icon" aria-label="Open time picker"><mat-icon>schedule</mat-icon></button>
                 <owl-date-time [pickerType]="'timer'" #closureTime></owl-date-time>
                 <mat-error *ngIf="advanceTableForm.get('closureTime')?.hasError('required')">Closure Time is
                   required</mat-error>

@@ -29,9 +29,7 @@ export class ReachedByExecutiveDetailsComponent {
     // Set the defaults
     this.dialogTitle = 'Reached By Executive Details';
     this.ReachedByExecutiveDetails = this.data;
-    console.log(this.data);
     this.reachedDetails = this.data?.dataSource
-    console.log(this.reachedDetails)
   }
 
   onNoClick(): void {

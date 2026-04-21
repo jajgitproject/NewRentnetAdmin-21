@@ -47,7 +47,6 @@ export class AdditionalServiceRateService
     {
       SearchActivationStatus=null;
     }
-    //console.log(this.API_URL + "/" +SearchRate + '/' + SearchActivationStatus +'/' + PageNumber + '/'+coloumName+'/'+sortType)
     return this.httpClient.get(this.API_URL + "/" +SearchRate + '/'+Service_ID + '/' + SearchActivationStatus +'/' + PageNumber +  '/'+coloumName+'/'+sortType);
   }
   add(advanceTable: AdditionalServiceRate) 
@@ -57,7 +56,6 @@ export class AdditionalServiceRateService
     advanceTable.userID=this.generalService.getUserID();
     advanceTable.startDateString=this.generalService.getTimeFromS(advanceTable.startDate);
     advanceTable.endDateString=this.generalService.getTimeFromS(advanceTable.endDate);
-    //console.log(this.API_URL , advanceTable)
     return this.httpClient.post<any>(this.API_URL , advanceTable);
   }
   update(advanceTable: AdditionalServiceRate)

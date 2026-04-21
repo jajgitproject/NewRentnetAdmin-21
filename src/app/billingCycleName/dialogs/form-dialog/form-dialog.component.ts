@@ -59,7 +59,6 @@ export class FormDialogComponent {
   }
 
   submit() {
-    //console.log(this.advanceTableForm.value);
   }
   onNoClick(): void {
     if (this.action === 'add') {

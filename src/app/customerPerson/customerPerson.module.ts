@@ -21,7 +21,6 @@ import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatDialogModule } from '@angular/material/dialog';
 import { MatSortModule } from '@angular/material/sort';
 import { MatToolbarModule } from '@angular/material/toolbar';
-import { MaterialFileInputModule } from '@compat/material-file-input-shim';
 import { MatMenuModule } from '@angular/material/menu';
 import { CustomerPersonService } from './customerPerson.service';
 import { CustomerPersonRoutingModule } from './customerPerson-routing.module';
@@ -62,7 +61,6 @@ import { AbstractControl, } from '@angular/forms';
     MatDialogModule,
     MatSortModule,
     MatToolbarModule,
-    MaterialFileInputModule,
     MatMenuModule,
     MatProgressSpinnerModule,
     MyUploadModule,

@@ -35,7 +35,6 @@ export class AcrisCodeService
     {
       SearchActivationStatus=null;
     }
-    //console.log(this.API_URL + "/" +SearchAcrisCodeType + '/' + SearchActivationStatus +'/' + PageNumber + '/AcrisCodeType/Ascending')
     return this.httpClient.get(this.API_URL + "/" +SearchAcrisCodeType + '/'+SearchAcrisCode + '/'+SearchAcrisCodeValue + '/' + SearchActivationStatus +'/' + PageNumber + '/AcrisCodeType/Ascending');
   }
 

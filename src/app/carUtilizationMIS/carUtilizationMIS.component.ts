@@ -158,7 +158,6 @@ export class CarUtilizationMISComponent implements OnInit {
     //     data=>
     //     {
     //       this.DispatchLocationList=data;
-    //       console.log(this.DispatchLocationList);
     //       this.filteredDispatchLocationOptions = this.dispatchLocation.valueChanges.pipe(
     //         startWith(""),
     //         map(value => this._filterRN(value || ''))
@@ -181,7 +180,6 @@ export class CarUtilizationMISComponent implements OnInit {
         data =>
         {
           this.DispatchLocationList = data;  
-          console.log(this.DispatchLocationList)
           this.filteredDispatchLocationOptions = this.dispatch_Location.valueChanges.pipe(
             startWith(""),
             map(value => this._filterRN(value || ''))
@@ -212,7 +210,6 @@ export class CarUtilizationMISComponent implements OnInit {
           data=>
           {
             this.RegistrationNumberList=data;
-            console.log(this.RegistrationNumberList);
             this.filteredRegistrationNumberOptions = this.registrationNumber.valueChanges.pipe(
               startWith(""),
               map(value => this._filterRNs(value || ''))
@@ -401,7 +398,6 @@ shouldShowDeleteButton(item: any): boolean {
         data =>   
         {
           this.dataSource = data; 
-          console.log(this.dataSource);        
         },
         (error: HttpErrorResponse) => { this.dataSource = null;}
       );

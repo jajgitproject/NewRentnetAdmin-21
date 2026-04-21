@@ -92,7 +92,6 @@ export class ReservationListComponent implements OnInit {
       {
 
         this.dataSource = data;
-        console.log(this.dataSource)
        
       },
       (error: HttpErrorResponse) => { this.dataSource = null;}
@@ -117,7 +116,6 @@ export class ReservationListComponent implements OnInit {
   
   NextCall()
   {
-    //console.log(this.dataSource.length>0)
     if (this.dataSource.length>0) 
     {
      
@@ -265,7 +263,6 @@ export class ReservationListComponent implements OnInit {
       data =>   
       {
         this.dataSource = data;
-       //console.log(this.dataSource);
       },
       (error: HttpErrorResponse) => { this.dataSource = null;}
     );
@@ -273,7 +270,6 @@ export class ReservationListComponent implements OnInit {
 
   navigateToNewForms(row)
   {
-    console.log(row);
     this.router.navigate([
       '/newForm',       
      
@@ -283,7 +279,6 @@ export class ReservationListComponent implements OnInit {
         customerGroupID:row.customerGroupID
       }
     });
-    console.log(row.customerGroupID);
   }
 }
 

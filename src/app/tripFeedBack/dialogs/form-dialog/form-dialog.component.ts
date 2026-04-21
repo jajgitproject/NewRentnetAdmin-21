@@ -97,7 +97,6 @@ export class FormDialogComponent
         this.DriverID=data.driverID;
         this.RegistrationNumber=data.registrationNumber;
         this.DriverName=data.driverName;
-       console.log(this.CustomerPersonID,this.ReservationID,this.AllotmentID,this.DriverID,this.InventoryID,this.RegistrationNumber,this.DriverName);
   }
   public ngOnInit(): void
   {
@@ -157,7 +156,6 @@ export class FormDialogComponent
     this._generalService.GetEmployee().subscribe(
       data => {
         this.EmployeeList = data;
-        console.log(this.EmployeeList);
         this.filteredEmployeeOptions = this.searchEmployee.valueChanges.pipe(
           startWith(""),
           map(value => this._filter(value || ''))
@@ -167,7 +165,6 @@ export class FormDialogComponent
 
   private _filter(value: string): any {
     const filterValue = value.toLowerCase();
-    console.log(this.EmployeeList);
     return this.EmployeeList.filter(
       customer => {
         return customer.firstName.toLowerCase().indexOf(filterValue) === 0;
@@ -201,7 +198,6 @@ export class FormDialogComponent
     this.advanceTableForm.patchValue({inventoryID: this.InventoryID});
     this.advanceTableForm.patchValue({driverID: this.DriverID});
     this.advanceTableForm.patchValue({employeeID: this.employeeID })
-    console.log(this.CustomerPersonID);
     this.advanceTableService.add(this.advanceTableForm.getRawValue())  
     .subscribe(
     response => 
@@ -271,7 +267,6 @@ export class FormDialogComponent
       data=>{
        this.additionalList=data;
        this.service= this.additionalList[0].additionalService;
-       console.log(this.service)
       }
     )
   }
@@ -289,13 +284,11 @@ export class FormDialogComponent
 
   // public fileChanged(event?: UIEvent): void {
   //   const files: FileList = this.fileUploadEl.nativeElement.files;
-  //   console.log(`files: `, files);
 
   //   const file = files[0];
   //   const reader = new FileReader();
   //   const loaded = (el) => {
   //     const contents = el.target.result;
-  //     console.log('onloaded', contents);
   //     this.contents = contents;
   //   }
   //   reader.onload = loaded;

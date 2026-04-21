@@ -69,7 +69,6 @@ export class FormDialogStopsPopupComponent
 
   submit() 
   {
-    console.log(this.advanceTableForm.value);
   }
   onNoClick(): void 
   {

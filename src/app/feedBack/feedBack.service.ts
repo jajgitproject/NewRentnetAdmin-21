@@ -48,7 +48,6 @@ export class FeedBackService
     {
       SearchActivationStatus=null;
     }
-    console.log(this.API_URL + "/"+ReservationID + '/'  + SearchActivationStatus +'/' + PageNumber + '/'+coloumName+'/'+sortType)
     return this.httpClient.get(this.API_URL + "/"+ReservationID + '/'  + SearchActivationStatus +'/' + PageNumber +  '/'+coloumName+'/'+sortType);
   }
   add(advanceTable: FeedBack) 

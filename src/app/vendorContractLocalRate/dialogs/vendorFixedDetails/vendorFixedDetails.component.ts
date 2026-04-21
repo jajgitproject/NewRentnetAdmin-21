@@ -48,7 +48,6 @@ export class VendorLocalFixedDetails
         {
           this.dialogTitle ='Vendor Local Fixed Details';       
           this.advanceTable = data.advanceTable;
-          console.log("Advance Table Data:", this.advanceTable);
           
         } else 
         {

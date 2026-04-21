@@ -44,14 +44,12 @@ export class FormDialogComponent
   {
         // Set the defaults
         this.action = data.action;
-        console.log(this.data);
       
         if (this.action === 'edit') 
         {
           this.dialogTitle ='Incidence Type';       
           this.advanceTable = data.advanceTable;
           this.advanceTableForm?.controls['department'].setValue(this.advanceTable.department);
-          console.log(this.advanceTable);
         } else 
         {
           this.dialogTitle = 'Incidence Type';
@@ -59,7 +57,6 @@ export class FormDialogComponent
           this.advanceTable.activationStatus=true;
           this.departmentID = data.departmentID;
           this.department = data.department;
-          console.log(this.departmentID);
         }
         this.advanceTableForm = this.createContactForm();
   }
@@ -72,7 +69,6 @@ export class FormDialogComponent
     // this.advanceTableForm.controls['department'].setValue(this.advanceTable.department);
     // this.advanceTableForm.controls['incidenceTypeID'].setValue(this.advanceTable.incidenceTypeID);
     // this.advanceTableForm.controls['departmentID'].setValue(this.departmentID);
-    console.log(this.advanceTableForm.value);
    this.Initdepartment();
   
  }
@@ -97,7 +93,6 @@ export class FormDialogComponent
 
   submit() 
   {
-    //console.log(this.advanceTableForm.value);
   }
   onNoClick(): void 
   {
@@ -149,7 +144,6 @@ export class FormDialogComponent
     }
   
     getdepartmentID(departmentID: any) {
-      console.log(departmentID);
       this.departmentID = departmentID;
       this.advanceTableForm.patchValue({ departmentID: departmentID });
     }

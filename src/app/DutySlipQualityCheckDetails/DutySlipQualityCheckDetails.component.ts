@@ -34,9 +34,7 @@ export class DutySlipQualityCheckDetailsComponent {
     // Set the defaults
     this.dialogTitle = 'Quality Check Details';
     this.DutySlipQualityCheckDetails = this.data;
-    console.log(this.data);
     this.qcDetails = this.data?.dataSource?.[0]
-    console.log(this.qcDetails)
   }
   @ViewChild(MatMenuTrigger)
   contextMenu: MatMenuTrigger;

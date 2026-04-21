@@ -50,7 +50,6 @@ export class DutyAllotmentStatusSearchService {
       searchlocation = "null";
     }
 
-    //console.log(this.API_URL + "/" +RegistrationNumber + '/' + SearchActivationStatus +'/' + PageNumber + '/'+coloumName+'/'+sortType)
     return this.httpClient.get(this.API_URL + "/" + searchpickupadate + "/" + searchlocation + "/"  + coloumName + '/' + sortType);
   }
 

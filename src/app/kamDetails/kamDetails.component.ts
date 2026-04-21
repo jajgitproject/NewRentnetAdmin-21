@@ -108,7 +108,6 @@ deleteItem(row)
       data =>   
       {
         this.dataSource = data;
-       console.log(this.dataSource);
       },
       (error: HttpErrorResponse) => { this.dataSource = null;}
     );
@@ -273,7 +272,6 @@ deleteItem(row)
       data =>   
       {
         this.dataSource = data;
-       console.log(this.dataSource);
       },
       (error: HttpErrorResponse) => { this.dataSource = null;}
     );

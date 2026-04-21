@@ -124,15 +124,11 @@ export class CDCLocalTransferRateComponent implements OnInit {
   if (encryptedCustomerContractID && encryptedCustomerContractName) {
     this.customerContractID = this._generalService.decrypt(decodeURIComponent(encryptedCustomerContractID));
     this.customerContractName = this._generalService.decrypt(decodeURIComponent(encryptedCustomerContractName));
-    console.log("Decrypted CustomerContractID:", this.customerContractID);
-    console.log("Decrypted CustomerContractName:", this.customerContractName);
   }
 
   if (encryptedStartDate && encryptedEndDate) {
     this.customerContractValidTo = this._generalService.decrypt(decodeURIComponent(encryptedStartDate));
     this.customerContractValidFrom = this._generalService.decrypt(decodeURIComponent(encryptedEndDate));
-    console.log("Decrypted StartDate:", this.customerContractValidTo);
-    console.log("Decrypted EndDate:", this.customerContractValidFrom);
   }
 
     });

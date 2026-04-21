@@ -106,7 +106,6 @@ export class VendorContractComponent implements OnInit {
     this.loadData();
     this.SubscribeUpdateService();
     this.menuItems.sort((a, b) => a.label.localeCompare(b.label));
-    console.log(this.menuItems);
   }
   
 
@@ -219,7 +218,6 @@ export class VendorContractComponent implements OnInit {
     return new Promise((resolve) => {
         this._generalService.getPackageTypeByVendorID(item.vendorContractID).subscribe(
             data => {
-              console.log("Package Type Data:", data);
                 this.packageType = data;
                 this.updateMenuItems();
                 resolve();
@@ -235,8 +233,6 @@ export class VendorContractComponent implements OnInit {
   {
     this.visibleMenuItems = [];
     const alwaysVisibleItems = this.getAlwaysVisibleItems();
-    console.log("Always Visible Items:", alwaysVisibleItems);
-    console.log("Package Types:", this.packageType);  
     if(this.packageType && this.packageType.length>0)
     {
       const conditionalItems = this.packageType

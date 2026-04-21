@@ -37,9 +37,6 @@ export class TimeAndAddressInfoComponent {
     const normalizedStatus = (this.status || '').toLowerCase().trim();
     this.buttonDisabled = normalizedStatus !== 'changes allow';
 
-    console.log('STATUS:', this.status);
-    console.log('NORMALIZED:', normalizedStatus);
-    console.log('BUTTON DISABLED:', this.buttonDisabled);
   }
 
   onNoClick(): void {

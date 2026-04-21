@@ -262,3 +262,255 @@
   padding-top: 12px;
 }
 
+// ---------------------------------------------------------------------------
+// Phase 1 + 2: Skin pure-Material confirmation / small-action dialogs so they
+// read as legacy NewRententAdmin modals without any HTML rewrite.
+//   Phase 1 target: 297 */dialogs/delete/delete.component.html (selector app-delete)
+//   Phase 2 targets: softToHard, askForDelete, save, confirmation,
+//                    confirmGenerateEInvoice, unlock, no-data, deleteDA,
+//                    dutySlipQualityCheckedByExecutive delete
+// Common structure:
+//   <div class="container"> (or no wrapper)
+//     <h2 mat-dialog-title>Title</h2>
+//     [<h3 mat-dialog-title>Subtitle/Are you sure?</h3>]
+//     [<div mat-dialog-content>...</div>]
+//     <div mat-dialog-actions>
+//       <button primary/warn>Action</button>
+//       <button>Cancel</button>
+//     </div>
+//   </div>
+// ---------------------------------------------------------------------------
+app-delete,
+app-softToHard-dialog,
+app-askForDelete-dialog,
+app-save-dialog,
+app-confirmation-dialog,
+app-confirmGenerateEInvoice,
+app-unlock,
+app-no-data-dialog,
+app-deleteDA,
+app-dutySlipQualityCheckedByExecutive {
+  display: block;
+  font-family: 'Poppins', 'Roboto', 'Helvetica Neue', sans-serif;
+}
+
+app-delete > .container,
+app-softToHard-dialog > .container,
+app-askForDelete-dialog > .container,
+app-save-dialog > .container,
+app-confirmGenerateEInvoice > .container,
+app-unlock > .container,
+app-deleteDA > .container,
+app-dutySlipQualityCheckedByExecutive > .container {
+  padding: 0 !important;
+  margin: 0 !important;
+  max-width: none !important;
+  min-width: 320px;
+}
+
+// Title block -> legacy .modalHeader / .editRowModal look
+app-delete h2[mat-dialog-title],
+app-softToHard-dialog h2[mat-dialog-title],
+app-askForDelete-dialog h2[mat-dialog-title],
+app-save-dialog h2[mat-dialog-title],
+app-confirmation-dialog h2[mat-dialog-title],
+app-confirmGenerateEInvoice h2[mat-dialog-title],
+app-unlock h2[mat-dialog-title],
+app-no-data-dialog h2[mat-dialog-title],
+app-no-data-dialog h1,
+app-deleteDA h2[mat-dialog-title],
+app-dutySlipQualityCheckedByExecutive h2[mat-dialog-title] {
+  display: block;
+  margin: 0 !important;
+  padding: 12px 20px 8px !important;
+  font-size: 17px !important;
+  font-weight: 700 !important;
+  color: #212529 !important;
+  letter-spacing: 0 !important;
+  line-height: 1.35 !important;
+  border-bottom: 1px solid rgba(82, 63, 105, 0.08);
+  background: #fff;
+}
+
+// Subtitle block ("Are you sure?" etc.)
+app-delete h3[mat-dialog-title],
+app-softToHard-dialog h3[mat-dialog-title],
+app-unlock h3[mat-dialog-title],
+app-confirmGenerateEInvoice h3[mat-dialog-title],
+app-deleteDA h3[mat-dialog-title],
+app-dutySlipQualityCheckedByExecutive h3[mat-dialog-title] {
+  display: block;
+  margin: 0 !important;
+  padding: 14px 20px 6px !important;
+  font-size: 14px !important;
+  font-weight: 500 !important;
+  color: #d9534f !important;
+  letter-spacing: 0 !important;
+}
+
+// Body / mat-dialog-content
+app-delete [mat-dialog-content],
+app-softToHard-dialog [mat-dialog-content],
+app-askForDelete-dialog [mat-dialog-content],
+app-save-dialog [mat-dialog-content],
+app-confirmation-dialog [mat-dialog-content],
+app-confirmGenerateEInvoice [mat-dialog-content],
+app-unlock [mat-dialog-content],
+app-no-data-dialog mat-dialog-content,
+app-deleteDA [mat-dialog-content],
+app-dutySlipQualityCheckedByExecutive [mat-dialog-content] {
+  display: block;
+  padding: 12px 20px 12px !important;
+  margin: 0 !important;
+  color: #555;
+  font-size: 13px;
+  max-height: none !important;
+  overflow-y: visible !important;
+}
+
+app-delete [mat-dialog-content] ul.clearfix,
+app-deleteDA [mat-dialog-content] ul.clearfix,
+app-dutySlipQualityCheckedByExecutive [mat-dialog-content] ul.clearfix {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+app-delete [mat-dialog-content] ul.clearfix li,
+app-deleteDA [mat-dialog-content] ul.clearfix li,
+app-dutySlipQualityCheckedByExecutive [mat-dialog-content] ul.clearfix li {
+  padding: 2px 0;
+}
+
+// Confirmation-dialog icon + text alignment
+app-confirmation-dialog [mat-dialog-content] {
+  display: flex !important;
+  align-items: center !important;
+  gap: 12px !important;
+}
+app-confirmation-dialog .confirm-icon {
+  color: #f0ad4e;
+  font-size: 28px;
+  height: 28px;
+  width: 28px;
+}
+
+// Footer action bar
+app-delete [mat-dialog-actions],
+app-softToHard-dialog [mat-dialog-actions],
+app-askForDelete-dialog [mat-dialog-actions],
+app-save-dialog [mat-dialog-actions],
+app-confirmation-dialog [mat-dialog-actions],
+app-confirmGenerateEInvoice [mat-dialog-actions],
+app-unlock [mat-dialog-actions],
+app-no-data-dialog mat-dialog-actions,
+app-deleteDA [mat-dialog-actions],
+app-dutySlipQualityCheckedByExecutive [mat-dialog-actions] {
+  display: flex !important;
+  justify-content: flex-end !important;
+  gap: 10px !important;
+  margin: 0 !important;
+  padding: 12px 20px !important;
+  border-top: 1px solid rgba(82, 63, 105, 0.08);
+  background: #fafbfc;
+}
+
+// Center no-data-dialog actions (single button)
+app-no-data-dialog mat-dialog-actions {
+  justify-content: center !important;
+}
+
+// Button polish
+app-delete [mat-dialog-actions] button,
+app-softToHard-dialog [mat-dialog-actions] button,
+app-askForDelete-dialog [mat-dialog-actions] button,
+app-save-dialog [mat-dialog-actions] button,
+app-confirmation-dialog [mat-dialog-actions] button,
+app-confirmGenerateEInvoice [mat-dialog-actions] button,
+app-unlock [mat-dialog-actions] button,
+app-no-data-dialog mat-dialog-actions button,
+app-deleteDA [mat-dialog-actions] button,
+app-dutySlipQualityCheckedByExecutive [mat-dialog-actions] button {
+  min-width: 92px !important;
+  border-radius: 4px !important;
+  font-family: 'Poppins', 'Roboto', 'Helvetica Neue', sans-serif !important;
+  font-weight: 600 !important;
+  letter-spacing: 0 !important;
+  text-transform: none !important;
+}
+
+// Pane should hug the content (no extra 24px legacy padding)
+.cdk-overlay-container
+  .cdk-overlay-pane:not(.control-panel-main-dialog)
+  .mat-mdc-dialog-container:has(app-delete)
+  .mdc-dialog__surface,
+.cdk-overlay-container
+  .cdk-overlay-pane:not(.control-panel-main-dialog)
+  .mat-mdc-dialog-container:has(app-softToHard-dialog)
+  .mdc-dialog__surface,
+.cdk-overlay-container
+  .cdk-overlay-pane:not(.control-panel-main-dialog)
+  .mat-mdc-dialog-container:has(app-askForDelete-dialog)
+  .mdc-dialog__surface,
+.cdk-overlay-container
+  .cdk-overlay-pane:not(.control-panel-main-dialog)
+  .mat-mdc-dialog-container:has(app-save-dialog)
+  .mdc-dialog__surface,
+.cdk-overlay-container
+  .cdk-overlay-pane:not(.control-panel-main-dialog)
+  .mat-mdc-dialog-container:has(app-confirmation-dialog)
+  .mdc-dialog__surface,
+.cdk-overlay-container
+  .cdk-overlay-pane:not(.control-panel-main-dialog)
+  .mat-mdc-dialog-container:has(app-confirmGenerateEInvoice)
+  .mdc-dialog__surface,
+.cdk-overlay-container
+  .cdk-overlay-pane:not(.control-panel-main-dialog)
+  .mat-mdc-dialog-container:has(app-unlock)
+  .mdc-dialog__surface,
+.cdk-overlay-container
+  .cdk-overlay-pane:not(.control-panel-main-dialog)
+  .mat-mdc-dialog-container:has(app-no-data-dialog)
+  .mdc-dialog__surface,
+.cdk-overlay-container
+  .cdk-overlay-pane:not(.control-panel-main-dialog)
+  .mat-mdc-dialog-container:has(app-deleteDA)
+  .mdc-dialog__surface,
+.cdk-overlay-container
+  .cdk-overlay-pane:not(.control-panel-main-dialog)
+  .mat-mdc-dialog-container:has(app-dutySlipQualityCheckedByExecutive)
+  .mdc-dialog__surface {
+  padding: 0 !important;
+  min-width: 360px !important;
+  overflow: hidden !important;
+}
+
+// Upload-dialog (file manager) uses its own dialog-header pattern; just
+// align button family and border radius with the rest of the theme.
+app-upload-dialog {
+  display: block;
+  font-family: 'Poppins', 'Roboto', 'Helvetica Neue', sans-serif;
+}
+app-upload-dialog .dialog-header {
+  padding: 12px 20px 8px !important;
+  border-bottom: 1px solid rgba(82, 63, 105, 0.08);
+}
+app-upload-dialog .dialog-header h2[mat-dialog-title] {
+  margin: 0 !important;
+  padding: 0 !important;
+  font-size: 17px !important;
+  font-weight: 700 !important;
+  color: #212529 !important;
+  border-bottom: none !important;
+}
+app-upload-dialog mat-dialog-actions {
+  padding: 12px 20px !important;
+  border-top: 1px solid rgba(82, 63, 105, 0.08);
+  background: #fafbfc;
+}
+app-upload-dialog mat-dialog-actions button {
+  border-radius: 4px !important;
+  font-family: 'Poppins', 'Roboto', 'Helvetica Neue', sans-serif !important;
+  font-weight: 600 !important;
+  text-transform: none !important;
+}
+

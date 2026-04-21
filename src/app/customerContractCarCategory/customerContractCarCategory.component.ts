@@ -107,7 +107,6 @@ export class CustomerContractCarCategoryComponent implements OnInit {
           this.customerContractName = this._generalService.decrypt(decodeURIComponent(encryptedCustomerContractName));
         }
         
-      console.log(this.customerContractID,this.customerContractName)
       
   });
     this.initCustomerCategory();
@@ -125,8 +124,6 @@ export class CustomerContractCarCategoryComponent implements OnInit {
   }
 
   // openInNewTab(menuItem: any, rowItem: any) {
-  //   console.log(menuItem);
-  //   console.log(rowItem);
   //   let baseUrl = this._generalService.FormURL;
   //   if(menuItem.label.toLowerCase() === 'car categories car mapping') {
   //     const url = this.router.serializeUrl(this.router.createUrlTree(['/customerContractCarCategoriesCarMapping',  ], { queryParams: {
@@ -136,17 +133,12 @@ export class CustomerContractCarCategoryComponent implements OnInit {
   //      // CustomerContractName: rowItem.customerContractName,
       
   //     } }));
-  //     console.log(baseUrl + url);
-  //     console.log(rowItem.customerContractName)
   //     window.open(baseUrl + url, '_blank'); 
      
   //   } 
   // }
   openInNewTab(menuItem: any, rowItem: any) {
-    console.log(menuItem);
-    console.log(rowItem);
     let baseUrl = this._generalService.FormURL;
-  console.log(this.customerContractID);
     if(menuItem.label.toLowerCase() === 'car categories car mapping') {
       // Encrypt the required parameters
        const encryptedCustomerContractID = encodeURIComponent(this._generalService.encrypt(this.customerContractID));
@@ -162,9 +154,6 @@ export class CustomerContractCarCategoryComponent implements OnInit {
         CustomerContractName: encryptedCustomerContractName
       }}));
   
-      console.log(baseUrl + url);
-      console.log(rowItem.customerContractName); // For debug
-   console.log(rowItem);
       // Open the new tab with the encrypted parameters
       window.open(baseUrl + url, '_blank'); 
     }
@@ -482,7 +471,6 @@ export class CustomerContractCarCategoryComponent implements OnInit {
   //           vehicleCategoryID:vehicleCategory.vehicleCategoryID
   //         })
   //       );
-  //       console.log(this.advanceTableForm);
   //       this.saveCustomerContractCarCategory()
   //     }
   //   );
@@ -513,7 +501,6 @@ export class CustomerContractCarCategoryComponent implements OnInit {
         this.getVehicleCategory();  // Fetch the vehicle categories
       } else {
         // User clicked No - Do nothing
-        console.log('Import canceled');
       }
     });
   }
@@ -533,7 +520,6 @@ getVehicleCategory() {
                     vehicleCategoryID: vehicleCategory.vehicleCategoryID
                 })
             );
-            console.log(this.advanceTableForm);
             
             // Save the customer contract car category once the categories are fetched
             this.saveCustomerContractCarCategory();

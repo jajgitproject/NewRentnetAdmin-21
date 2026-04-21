@@ -60,7 +60,6 @@ export class FormDialogComponentHolder {
 
     this.dialogTitle = 'Driving License Verification';
     this.advanceTable = data.advanceTable;
-    console.log(this.advanceTable )
     this.advanceTable.verificationDate=new Date();
     if (this.advanceTable.activationStatus === true) {
       this.advanceTable.status = "Active"

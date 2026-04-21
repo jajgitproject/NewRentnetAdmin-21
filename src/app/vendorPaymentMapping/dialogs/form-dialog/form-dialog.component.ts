@@ -68,7 +68,6 @@ export class FormDialogComponent
         }
         this.advanceTableForm = this.createContactForm();
         this.vendorContractID = data.vendorContract_ID;
-        console.log(this.vendorContractID);
         // Set vendorcontractID in the form
         this.advanceTableForm.patchValue({ vendorcontractID: this.vendorContractID });
   }

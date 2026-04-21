@@ -45,7 +45,6 @@ noRecords: any;
     this.dialogTitle = 'Dispute History';
     this.reservationID = data.reservationID;
     this.DutySlipForBillingID = data.dutySlipForBillingID;
-    console.log(this.reservationID, this.DutySlipForBillingID)
   }
 
   ngOnInit() 
@@ -67,14 +66,12 @@ noRecords: any;
       data=>{
         this.EmployeeList=data;
         this.disputeHistoryBy=this.EmployeeList[0].firstName+' '+this.EmployeeList[0].lastName;
-        console.log(this.disputeHistoryBy)
       }
     );
   }
   public disputeLoadData() 
   {
     
-    console.log(this.DutySlipForBillingID);
     this.disputeService.getTableData(this.DutySlipForBillingID, this.PageNumber, 'Descending').subscribe
     (
       data => 

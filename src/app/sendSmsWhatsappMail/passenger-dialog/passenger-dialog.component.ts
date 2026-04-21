@@ -4,7 +4,7 @@ import { Component, Inject } from '@angular/core';
 import { FormControl, Validators, FormGroup, FormBuilder } from '@angular/forms';
 import { MAT_DATE_LOCALE } from '@angular/material/core';
 import { formatDate } from '@angular/common';
-import { Address } from 'ngx-google-places-autocomplete/objects/address';
+import { Address } from '@compat/google-places-shim-objects/address';
 import { EmployeeDropDown } from 'src/app/employee/employeeDropDown.model';
 import { HttpErrorResponse } from '@angular/common/http';
 import { OrganizationalEntityDropDown } from 'src/app/organizationalEntityMessage/organizationalEntityDropDown.model';
@@ -88,7 +88,6 @@ export class FormDialogPassengerEmsComponent   {
     this.advanceTable = new SendSmsWhatsappMail({});
     //this.advanceTable.activationStatus=true;
       
-    console.log(data);
     this.formsData = data;
     
     this.ReservationID = data.reservationID;
@@ -99,7 +98,6 @@ export class FormDialogPassengerEmsComponent   {
     this.customerPersonName =data.customerPersonName;
     this.city=data.city;
     this.advanceTableForm = this.createContactForm();
-    console.log(this.formsData);
       
   }
   saveData() {
@@ -137,7 +135,6 @@ export class FormDialogPassengerEmsComponent   {
   }
 
   submit() {
-    console.log(this.advanceTableForm.value);
   }
   onNoClick(): void {
     if (this.action === 'add') {

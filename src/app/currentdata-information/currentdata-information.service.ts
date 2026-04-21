@@ -18,12 +18,10 @@ export class CurrentdataInformationService {
     private generalService: GeneralService
   ) {
     this.apiUrl = this.generalService.BaseURL + 'currentDutyClosing';
-    console.log('Constructed API URL:', this.apiUrl); // ✅ Debug log
   }
 
   getCurrentdataInformationClosingData(allotmentID: number): Observable<any> {
     const fullUrl = `${this.apiUrl}/GetCurrentDutyClosingByAllotmentID/${allotmentID}`;
-    console.log("Hitting API:", fullUrl); // ✅ Debug log
     return this.http.get(fullUrl);
   }
 }

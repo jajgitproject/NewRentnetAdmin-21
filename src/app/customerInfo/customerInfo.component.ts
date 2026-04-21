@@ -75,7 +75,6 @@ export class CustomerInfoComponent implements OnInit {
        (data: CustomerInfo)=>   
        {
          this.advanceTableCI = data;
-        // console.log(this.advanceTableCI)
         
        },
        (error: HttpErrorResponse) => { this.advanceTableCI = null;}

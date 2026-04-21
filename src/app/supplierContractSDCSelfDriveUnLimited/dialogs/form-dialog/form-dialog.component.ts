@@ -112,7 +112,6 @@ export class FormDialogComponent
   //       this.PackageList=data;
   //     }
   //   )
-  //   console.log(this.PackageList);
   // }
 
   //----------- Vehicle Category Validation --------------
@@ -164,7 +163,6 @@ onVehicleCategorySelected(selectedVehicleCategory: string) {
 getTitles(vehicleCategoryID: any) {
   //debugger;
   this.vehicleCategoryID=vehicleCategoryID;
-  //console.log(vehicleCategoryID)
 }
 
 //----------- City Tier Validation --------------
@@ -216,7 +214,6 @@ onCityTierSelected(selectedCityTier: string) {
 getcityTierID(cityTierID: any) {
   //debugger;
   this.cityTierID=cityTierID;
-  //console.log(cityTierID)
 }
 
 //----------- Package Validation --------------
@@ -272,7 +269,6 @@ onPackageSelected(selectedPackage: string) {
 getpackageID(packageID: any) {
   //debugger;
   this.packageID=packageID;
-  //console.log(packageID)
 }
 
   formControl = new FormControl('', 
@@ -291,7 +287,6 @@ getpackageID(packageID: any) {
   
   createContactForm(): FormGroup 
   {
-    //console.log(this.advanceTable)
     return this.fb.group(
     {
       supplierContractSDCSelfDriveUnLimitedID: [this.advanceTable.supplierContractSDCSelfDriveUnLimitedID],
@@ -454,13 +449,11 @@ getpackageID(packageID: any) {
 
   // public fileChanged(event?: UIEvent): void {
   //   const files: FileList = this.fileUploadEl.nativeElement.files;
-  //   console.log(`files: `, files);
 
   //   const file = files[0];
   //   const reader = new FileReader();
   //   const loaded = (el) => {
   //     const contents = el.target.result;
-  //     console.log('onloaded', contents);
   //     this.contents = contents;
   //   }
   //   reader.onload = loaded;

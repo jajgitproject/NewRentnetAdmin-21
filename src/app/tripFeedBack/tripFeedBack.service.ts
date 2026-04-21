@@ -47,13 +47,11 @@ export class TripFeedBackService
     {
       SearchActivationStatus=null;
     }
-    console.log(this.API_URL + "/" +SearchRate + '/' + SearchActivationStatus +'/' + PageNumber + '/'+coloumName+'/'+sortType)
     return this.httpClient.get(this.API_URL + "/" +SearchRate + '/'+Service_ID + '/' + SearchActivationStatus +'/' + PageNumber +  '/'+coloumName+'/'+sortType);
   }
   add(advanceTable: TripFeedBack) 
   {
     advanceTable.tripTripFeedBackID=-1;
-    console.log(this.API_URL , advanceTable)
     advanceTable.dateOfFeedbackString=this.generalService.getTimeFrom(advanceTable.dateOfFeedback);
     advanceTable.timeOfFeedbackString=this.generalService.getTimeTo(advanceTable.timeOfFeedback);
     return this.httpClient.post<any>(this.API_URL , advanceTable);

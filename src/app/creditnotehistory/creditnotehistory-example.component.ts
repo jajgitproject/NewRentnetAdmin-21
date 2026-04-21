@@ -64,7 +64,6 @@ export class CreditNoteHistoryExampleComponent {
     });
 
     dialogRef.afterClosed().subscribe(result => {
-      console.log('Credit note history dialog was closed');
     });
   }
 
@@ -79,7 +78,6 @@ export class CreditNoteHistoryExampleComponent {
     });
 
     dialogRef.afterClosed().subscribe(result => {
-      console.log(`Credit note history dialog was closed for status: ${lifeCycleStatus}`);
     });
   }
 }

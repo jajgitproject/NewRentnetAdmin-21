@@ -61,28 +61,21 @@ selectedTime: string = '';
     
   public _generalService:GeneralService)
   { 
-    console.log(data)
     this.DriverID= data.driverID;
     this.invoiceCreditNoteID= data.invoiceCreditNoteID;
     // Set creditNoteNumber from multiple possible sources
     this.creditNoteNumber = data.creditNoteNumber || data.advanceTable?.creditNoteNumber || '';
     this.invoiceNumberWithPrefix = data.invoiceNumberWithPrefix || data.advanceTable?.invoiceNumberWithPrefix || '';
-    console.log('Credit Note Number:', this.invoiceNumberWithPrefix);
     this.DriverName = data.DriverName;
         // Set the defaults
           this.dialogTitle = 'Credit Note Approval';
           this.advanceTable = data.advanceTable;
           
           // Debug: Log the incoming data to check if reason is present
-          console.log('Incoming data to dialog:', this.advanceTable);
-          console.log('Approval rejection reason from data:', this.advanceTable.approvalRejectionReason);
-          console.log('All properties of advanceTable:', Object.keys(this.advanceTable || {}));
           
           //this.verifiedByName();
           
         this.advanceTableForm = this.createContactForm();
-        console.log('Form created with values:', this.advanceTableForm.value);
-        console.log(this.action);   
   }
   
   public ngOnInit(): void
@@ -93,7 +86,6 @@ selectedTime: string = '';
     // Ensure creditNoteNumber is properly set
     if (!this.creditNoteNumber && this.advanceTable?.creditNoteNumber) {
       this.creditNoteNumber = this.advanceTable.creditNoteNumber;
-      console.log('Credit Note Number set from advanceTable:', this.creditNoteNumber);
     }
     
     // Call verifiedByName after a short delay to ensure form is fully initialized
@@ -104,8 +96,6 @@ selectedTime: string = '';
     
     // Monitor form validity to control Save button
     this.advanceTableForm.valueChanges.subscribe(value => {
-      console.log('Form value changed:', value);
-      console.log('Form valid status:', this.advanceTableForm.valid);
       
       // Enable/disable Save button based on form validity and required fields
       this.saveDisabled = !this.advanceTableForm.valid || 
@@ -122,8 +112,6 @@ selectedTime: string = '';
     // Force refresh form values to ensure they match the model
     if (this.advanceTable && this.advanceTableForm) {
       const currentValues = this.advanceTableForm.value;
-      console.log('Current form values before refresh:', currentValues);
-      console.log('AdvanceTable approvalRejectionReason:', this.advanceTable.approvalRejectionReason);
       
       // Patch the form with the model data again to ensure sync
       const patchData = {
@@ -137,17 +125,14 @@ selectedTime: string = '';
         patchData['approvedBy'] = this.advanceTable.approvedBy || '';
       }
       
-      console.log('Patching form with data:', patchData);
       this.advanceTableForm.patchValue(patchData);
       
       // If approvedBy is still empty, try to call verifiedByName again
       const updatedApprovedBy = this.advanceTableForm.get('approvedBy')?.value;
       if (!updatedApprovedBy || updatedApprovedBy.trim() === '') {
-        console.log('Approved By field is empty, attempting to reload...');
         this.verifiedByName();
       }
       
-      console.log('Form values after refresh:', this.advanceTableForm.value);
       
       // Force change detection for the specific field
       this.advanceTableForm.get('approvalRejectionReason')?.updateValueAndValidity();
@@ -160,7 +145,6 @@ selectedTime: string = '';
       data =>   
       {
         this.DocumentList = data;
-        console.log( this.DocumentList)
       }
     );
   }
@@ -229,9 +213,6 @@ selectedTime: string = '';
     //approvalDateTimeString: this.advanceTable?.approvalDateTimeString || ''
   };
   
-  console.log('Form data being set:', formData);
-  console.log('Approval rejection reason value:', formData.approvalRejectionReason);
-  console.log('Raw advanceTable data:', this.advanceTable);
   
   return this.fb.group(formData);
 }
@@ -267,14 +248,11 @@ selectedTime: string = '';
   public Put(): void
   {
     const formData = this.advanceTableForm.getRawValue();
-    // console.log('Data being sent to update API:', formData);
-    // console.log('Approval rejection reason in update data:', formData.approvalRejectionReason);
     
     this.advanceTableService.update(formData)  
     .subscribe(
     response => 
     {
-        console.log('Update API response:', response);
         this.dialogRef.close('success'); // Pass success result
         this.showNotification(
           'snackbar-success',
@@ -303,15 +281,12 @@ selectedTime: string = '';
   )
   }
   verifiedByName(){
-    console.log('Loading approved by information...');
     this._generalService.getEmployeeID(this._generalService.getUserID()).subscribe(
       data=>{
-        console.log('Employee data received:', data);
         this.EmployeeList=data;
         if (this.EmployeeList && this.EmployeeList.length > 0) {
           const employee = this.EmployeeList[0];
           const approvedByName = (employee.firstName || '') + ' ' + (employee.lastName || '');
-          console.log('Setting Approved By:', approvedByName);
           
           // Update the form control value
           this.advanceTableForm.patchValue({
@@ -322,7 +297,6 @@ selectedTime: string = '';
           // Trigger change detection
           this.advanceTableForm.get('approvedBy')?.updateValueAndValidity();
           
-          console.log('Form patched with approvedBy:', this.advanceTableForm.get('approvedBy')?.value);
         } else {
           console.warn('No employee data found for approved by field');
           this.showNotification(
@@ -346,15 +320,11 @@ selectedTime: string = '';
   }
   public confirmAdd(): void 
   {
-    console.log("Confirming add/update for credit note verification...");
-    console.log("Form data:", this.advanceTableForm.getRawValue());
-    console.log("Form valid:", this.advanceTableForm.valid);
     
     if (this.advanceTableForm.valid) {
       this.saveDisabled = true; // Disable while processing
       this.Put();
     } else {
-      console.log("Form is invalid, cannot proceed");
       this.showNotification(
         'snackbar-warning',
         'Please fill all required fields',

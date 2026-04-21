@@ -318,13 +318,11 @@ export class FormDialogComponent
     this.advanceTableForm.patchValue({image:this.ImagePath})
   }
 
-  //   console.log(`files: `, files);
 
   //   const file = files[0];
   //   const reader = new FileReader();
   //   const loaded = (el) => {
   //     const contents = el.target.result;
-  //     console.log('onloaded', contents);
   //     this.contents = contents;
   //   }
   //   reader.onload = loaded;

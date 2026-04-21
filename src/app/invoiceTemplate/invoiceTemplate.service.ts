@@ -39,7 +39,6 @@ export class InvoiceTemplateService
     {
       SearchActivationStatus=null;
     }
-    //console.log(this.API_URL + "/" +SearchInvoiceTemplateName + '/' + SearchActivationStatus +'/' + PageNumber + '/'+coloumName+'/'+sortType)
     return this.httpClient.get(this.API_URL + "/" +SearchInvoiceTemplateName + '/' + SearchActivationStatus +'/' + PageNumber +  '/'+coloumName+'/'+sortType);
   }
 

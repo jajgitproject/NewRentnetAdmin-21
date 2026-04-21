@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { Injectable, inject } from '@angular/core';
 import { ConfigService } from '@config';
 import { InConfiguration } from '@core';

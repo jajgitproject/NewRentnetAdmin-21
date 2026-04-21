@@ -94,7 +94,6 @@ export class InternalNoteDetailsComponent implements OnInit {
   }
   InternalNoteEdit(i:any)
   {
-    //console.log(this.advanceTableINData[i]);
     const dialogRef = this.dialog.open(InternalNoteDialogComponent, 
       {
         data: 

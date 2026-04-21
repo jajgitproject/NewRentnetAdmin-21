@@ -18,7 +18,6 @@ export class DeleteDialogComponent
     public _generalService: GeneralService
   )
   {
-    console.log(data)
   }
   onNoClick(): void
   {

@@ -550,7 +550,6 @@ export class InvoiceDetachComponent implements OnInit {
 
   DetachDuty()
   {
-    console.log(this.selectedInvoices)
     const duties: number[] = this.selectedInvoices.map(x => x.dutySlipID);
     this.advanceTableForm.patchValue({invoiceType:"InvoiceMultyDuty"});
     this.advanceTableForm.patchValue({invoiceID:this.InvoiceID});

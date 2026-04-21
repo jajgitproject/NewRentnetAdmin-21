@@ -88,7 +88,6 @@ export class FormDialogComponent
       {
 
         this.dataSource = data;
-        console.log(this.dataSource)
        
       },
       (error: HttpErrorResponse) => { this.dataSource = null;}
@@ -185,13 +184,11 @@ export class FormDialogComponent
 
   // public fileChanged(event?: UIEvent): void {
   //   const files: FileList = this.fileUploadEl.nativeElement.files;
-  //   console.log(`files: `, files);
 
   //   const file = files[0];
   //   const reader = new FileReader();
   //   const loaded = (el) => {
   //     const contents = el.target.result;
-  //     console.log('onloaded', contents);
   //     this.contents = contents;
   //   }
   //   reader.onload = loaded;

@@ -148,7 +148,6 @@ export class PersonShortComponent implements OnInit {
       {
 
         this.dataSource = data;
-        //console.log(this.dataSource)
         this.dataSource.forEach((ele)=>{
           if(ele.activationStatus===true){
             this.activeData="Active";
@@ -181,7 +180,6 @@ export class PersonShortComponent implements OnInit {
   
   NextCall()
   {
-    //console.log(this.dataSource.length>0)
     if (this.dataSource.length>0) 
     {
      

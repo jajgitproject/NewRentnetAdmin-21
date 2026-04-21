@@ -42,12 +42,10 @@ public PageGroupList?: PageGroupDropDown[] = [];
   {
         // Set the defaults
         this.action = data.action;
-        console.log(data)
         if (this.action === 'edit') 
         {
           this.dialogTitle ='Page';       
           this.advanceTable = data.advanceTable;
-          console.log(this.advanceTable)
         } 
         else 
         {

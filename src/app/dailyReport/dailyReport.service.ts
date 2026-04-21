@@ -19,7 +19,6 @@ export class DailyReportService
   /** CRUD METHODS */
   getTableData(SearchDateInDutySlip:string, SearchEndDateInDutySlip:string,SearchregistrationNo:string, SearchActivationStatus:boolean, PageNumber: number):  Observable<any> 
   {
-    console.log(SearchregistrationNo);
     if(SearchDateInDutySlip==="")
     {
       SearchDateInDutySlip="null";

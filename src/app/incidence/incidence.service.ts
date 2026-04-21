@@ -39,7 +39,6 @@ export class IncidenceService
     {
       SearchActivationStatus=null;
     }
-    //console.log(this.API_URL + "/" +SearchIncidence + '/' + SearchActivationStatus +'/' + PageNumber + '/'+coloumName+'/'+sortType)
     return this.httpClient.get(this.API_URL + "/" +SearchIncidence + '/' + SearchActivationStatus +'/' + PageNumber +  '/'+coloumName+'/'+sortType);
   }
 

@@ -195,7 +195,6 @@ private _filterPervious(value: string): any {
 };
 
 // driverGradeSBTDomain(row) {
-//   console.log(row.vehicle);
 //   this.router.navigate([
 //     '/driverGradeSBTDomain',  
 //   ],
@@ -208,7 +207,6 @@ private _filterPervious(value: string): any {
 // }
 
 // customerDepartment(row) {
-//   console.log(row.vehicle);
 //   this.router.navigate([
 //     '/customerDepartment',  
 //   ],
@@ -256,7 +254,6 @@ private _filterPervious(value: string): any {
         data =>   
         {
           this.dataSource = data;
-          console.log(this.dataSource)
           // this.dataSource.forEach((ele)=>{
           //   if(ele.activationStatus===true){
           //    this.activation="Active"

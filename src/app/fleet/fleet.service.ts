@@ -56,7 +56,6 @@ export class FleetService {
     if (searchpickupTime === "") {
       searchpickupTime = "null";
     }
-console.log(this.API_URL + "/" +SearchdriverName + '/'+RegistrationNumber + '/' +Vehicle + '/'+VehicleCategory + '/' +city + '/' +searchpickupadate + '/' +searchlocation + '/' +searchpickupTime + '/' + SearchActivationStatus +'/' + PageNumber + '/InventoryID/Dscending')
     return this.httpClient.get(this.API_URL + "/" +SearchdriverName + '/'+RegistrationNumber + '/' +Vehicle + '/'+VehicleCategory + '/' +city + '/' +searchpickupadate + '/' +searchlocation + '/' +searchpickupTime + '/' + SearchActivationStatus +'/' + PageNumber + '/InventoryID/Dscending');
   }
   getTableDataSort(
@@ -98,7 +97,6 @@ console.log(this.API_URL + "/" +SearchdriverName + '/'+RegistrationNumber + '/' 
         searchpickupTime = "null";
       }
 
-    //console.log(this.API_URL + "/" +RegistrationNumber + '/' + SearchActivationStatus +'/' + PageNumber + '/'+coloumName+'/'+sortType)
     return this.httpClient.get(this.API_URL + "/" +SearchdriverName + '/'+RegistrationNumber + '/' +Vehicle + '/'+VehicleCategory + '/' +city + '/' +searchpickupadate + '/' +searchlocation + '/' +searchpickupTime + '/' + SearchActivationStatus +'/' + PageNumber +  '/'+coloumName+'/'+sortType);
   }
 

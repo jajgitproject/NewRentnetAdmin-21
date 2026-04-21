@@ -19,7 +19,6 @@ export class OtherDetailsService
   /** CRUD METHODS */
   getTableData(ReservationID:string, SearchActivationStatus:boolean, PageNumber: number):  Observable<any> 
   {
-   console.log(this.API_URL + "/" +ReservationID + '/' + SearchActivationStatus +'/' + PageNumber + '/TicketNumber/Ascending');
     return this.httpClient.get(this.API_URL + "/" +ReservationID + '/' + SearchActivationStatus +'/' + PageNumber + '/TicketNumber/Ascending');
   }
 

@@ -58,12 +58,6 @@ const normalized = (this.status || '').trim().toLowerCase();
 this.buttonDisabled = normalized !== 'changes allow';
 
 // debug
-console.log('STATUS:', this.status);
-console.log('NORMALIZED:', normalized);
-console.log('BUTTON DISABLED:', this.buttonDisabled);
-  console.log('PickupTime dialog - raw status:', data?.status);
-  console.log('PickupTime dialog - final status:', this.status);
-  console.log('PickupTime dialog - buttonDisabled:', this.buttonDisabled);
     this.customerID = data.customerID;
     this.date = this.advanceTableCP.pickup.pickupDate;
     var date = this.date.split('T');
@@ -100,7 +94,6 @@ console.log('BUTTON DISABLED:', this.buttonDisabled);
       timeDateObject = new Date();
     }
     this.advanceTableForm.patchValue({ pickupTime: timeDateObject });
-    console.log(this.advanceTableCP.pickup.pickupTime, timeDateObject);
   }
 
   public noWhitespaceValidator(control: FormControl) {

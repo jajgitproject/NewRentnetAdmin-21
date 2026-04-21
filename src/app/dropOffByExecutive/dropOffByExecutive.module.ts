@@ -20,14 +20,13 @@ import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatDialogModule } from '@angular/material/dialog';
 import { MatSortModule } from '@angular/material/sort';
 import { MatToolbarModule } from '@angular/material/toolbar';
-import { MaterialFileInputModule } from '@compat/material-file-input-shim';
 import { MatMenuModule } from '@angular/material/menu';
 import { MyUploadComponent } from '../myupload/myupload.component';
 import { MyUploadModule } from '../myupload/myupload.module';
 import { DropOffByExecutiveService } from './dropOffByExecutive.service';
 import { DropOffByExecutiveComponent } from './dropOffByExecutive.component';
 import { DropOffByExecutiveRoutingModule } from './dropOffByExecutive-routing.module';
-import { GooglePlaceModule } from 'ngx-google-places-autocomplete';
+import { GooglePlaceModule } from '@compat/google-places-shim';
 import { OwlDateTimeModule } from '@danielmoncada/angular-datetime-picker';
 import { FetchDataFromAppService } from '../fetchDataFromApp/fetchDataFromApp.service';
 //import { FetchGpsAppDataDialogComponent } from './dialogs/fetch-gps-app-data/fetch-pickup-app-data.component';
@@ -63,7 +62,6 @@ import { MatAutocompleteModule } from '@angular/material/autocomplete';
     MatDialogModule,
     MatSortModule,
     MatToolbarModule,
-    MaterialFileInputModule,
     MatMenuModule,
     MatProgressSpinnerModule,
     MyUploadModule

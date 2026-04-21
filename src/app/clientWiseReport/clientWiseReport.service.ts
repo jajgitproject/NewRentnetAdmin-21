@@ -51,7 +51,6 @@ export class ClientWiseReportService
     {
       SearchToDate="null";
     }
-    console.log(this.API_URL + "/" + SearchYear + '/' + SearchMonth + '/' + SearchCustomerName  + '/' + SearchCity + '/' + SearchLocation + '/' + SearchCarCategory + '/' + SearchFromDate + '/' + SearchToDate + '/'  + PageNumber + '/CustomerID/Descending');
     return this.httpClient.get(this.API_URL + "/" + SearchYear + '/' + SearchMonth + '/' + SearchCustomerName  + '/' + SearchCity + '/' + SearchLocation + '/' + SearchCarCategory + '/' + SearchFromDate + '/' + SearchToDate + '/'  + PageNumber + '/CustomerID/Descending');
   }
 

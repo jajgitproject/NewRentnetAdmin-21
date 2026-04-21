@@ -41,7 +41,6 @@ export class CreditNoteHistoryComponent implements OnInit {
     private dialog: MatDialog
   ) {
     this.dialogTitle = 'Credit Note History';
-    console.log(this.invoiceID);
     this.invoiceID = data?.invoiceID || data?.invoiceID || 0;
     this.invoiceNumberWithPrefix = data?.invoiceNumberWithPrefix || '';
     this.creditNoteID = data?.creditNoteID || data?.invoiceID || 0;
@@ -86,7 +85,6 @@ export class CreditNoteHistoryComponent implements OnInit {
         this.creditNoteHistoryDataSource = data || [];
         this.dataSource.data = this.creditNoteHistoryDataSource;
         this.noDataFound = this.creditNoteHistoryDataSource.length === 0;
-        console.log('Credit Note History Data:', this.creditNoteHistoryDataSource);
       },
       (error: HttpErrorResponse) => {
         console.error('Error fetching credit note history:', error);

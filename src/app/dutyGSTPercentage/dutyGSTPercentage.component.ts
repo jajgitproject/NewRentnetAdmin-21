@@ -121,7 +121,6 @@ public loadData()
      data =>   
      {
        this.advanceTableDGP = data;
-       console.log(this.advanceTableDGP)
      },
      (error: HttpErrorResponse) => { this.advanceTableDGP = null;}
    );
@@ -133,7 +132,6 @@ public loadDataClosing()
      data =>   
      {
        this.advanceTableDGP = data;
-       console.log(this.advanceTableDGP)
      },
      (error: HttpErrorResponse) => { this.advanceTableDGP = null;}
    );

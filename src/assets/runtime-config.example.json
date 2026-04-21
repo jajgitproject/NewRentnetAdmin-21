@@ -4,5 +4,6 @@
   "FormURL": "https://app.example.com/#",
   "UnlockEmployeeUrl": "https://connect.example.com/",
   "googleMapsApiKey": "YOUR_BROWSER_KEY",
-  "clientErrorReportUrl": "https://api.example.com/client-errors"
+  "clientErrorReportUrl": "https://api.example.com/client-errors",
+  "cryptoSecretKey": "ROTATE_PER_ENVIRONMENT"
 }

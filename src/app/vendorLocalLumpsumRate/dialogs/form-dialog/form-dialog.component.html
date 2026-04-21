@@ -376,7 +376,7 @@
                         <mat-label>Night Charge Start Time</mat-label>
                         <input required matInput [owlDateTimeTrigger]="time1" [owlDateTime]="time1"
                             formControlName="nightChargeStartTime" (input)="onTimeInput($event)">
-                        <mat-icon matSuffix [owlDateTimeTrigger]="time1" class="date-icon">schedule</mat-icon>
+                        <button mat-icon-button matSuffix type="button" [owlDateTimeTrigger]="time1" class="date-icon" aria-label="Open time picker"><mat-icon>schedule</mat-icon></button>
                         <owl-date-time [pickerType]="'timer'" #time1></owl-date-time>
 
                         <mat-error *ngIf="advanceTableForm.get('nightChargeStartTime').hasError('required')">
@@ -390,7 +390,7 @@
                         <mat-label>Night Charge End Time</mat-label>
                         <input required matInput [owlDateTimeTrigger]="time2" [owlDateTime]="time2"
                             formControlName="nightChargeEndTime" (input)="onEndTimeInput($event)">
-                        <mat-icon matSuffix [owlDateTimeTrigger]="time2" class="date-icon">schedule</mat-icon>
+                        <button mat-icon-button matSuffix type="button" [owlDateTimeTrigger]="time2" class="date-icon" aria-label="Open time picker"><mat-icon>schedule</mat-icon></button>
                         <owl-date-time [pickerType]="'timer'" #time2></owl-date-time>
 
                         <mat-error *ngIf="advanceTableForm.get('nightChargeEndTime').hasError('required')">

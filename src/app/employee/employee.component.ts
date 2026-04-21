@@ -209,7 +209,6 @@ export class EmployeeComponent implements OnInit {
       (
         data => {
           this.dataSource = data;
-          console.log(this.dataSource);
         //   this.dataSource.forEach((element) => {
         //     if (element.activationStatus === true) {
         //       this.ActiveStatus = "Active"

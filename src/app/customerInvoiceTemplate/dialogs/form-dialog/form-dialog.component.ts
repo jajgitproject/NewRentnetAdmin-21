@@ -62,8 +62,7 @@ export class FormDialogComponent
           this.advanceTable.activationStatus=true;
         }
         this.advanceTableForm = this.createContactForm();
-        this.CustomerID= data.CustomerID,
-        console.log(this.CustomerID)
+        this.CustomerID= data.CustomerID;
 
   }
   
@@ -213,7 +212,6 @@ getInvoiceTemplateID(invoiceTemplateID:any)
 }
   submit() 
   {
-    //console.log(this.advanceTableForm.value);
   }
   onNoClick(): void 
   {

@@ -215,7 +215,6 @@ export class InventoryComponent implements OnInit {
       data=>
       {
         this.RegistrationNumberList=data;
-        console.log(this.RegistrationNumberList);
         this.filteredRegistrationNumberOptions = this.registrationNumber.valueChanges.pipe(
           startWith(""),
           map(value => this._filterRN(value || ''))
@@ -445,7 +444,6 @@ onBackPress(event)
   //   };
    
   //   const url = this.router.serializeUrl(this.router.createUrlTree([menuItem.route], { queryParams }));
-  //   console.log(formURL + url);
   
   //   window.open(formURL + url, '_blank');
   // }
@@ -464,7 +462,6 @@ onBackPress(event)
   
     const url = this.router.serializeUrl(this.router.createUrlTree([menuItem.route], { queryParams }));
   
-    console.log(formURL + url);
     window.open(formURL + url, '_blank');
   }
   

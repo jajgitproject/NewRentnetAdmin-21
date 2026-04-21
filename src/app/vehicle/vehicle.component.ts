@@ -428,7 +428,6 @@ export class VehicleComponent implements OnInit {
       data =>   
       {
         this.dataSource = data;
-        // console.log(this.dataSource);
       },
       (error: HttpErrorResponse) => { this.dataSource = null;}
     );

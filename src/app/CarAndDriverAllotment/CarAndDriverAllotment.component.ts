@@ -57,7 +57,7 @@ import { AllotmentNotificationDialogComponent } from './allotmentNotification/al
 import { AllotmentNotificationReplyDialogComponent } from './allotmentNotificationReply/allotmentNotificationReply.component';
 import { FormDialogNotificationComponent } from './form-dialog/form-dialog.component';
 import { FormBuilder, FormControl, FormGroup } from '@angular/forms';
-import { Address } from 'ngx-google-places-autocomplete/objects/address';
+import { Address } from '@compat/google-places-shim-objects/address';
 import { DriverDropDown } from '../customerPersonDriverRestriction/driverDropDown.model';
 import { forkJoin, Observable } from 'rxjs';
 import { map, startWith } from 'rxjs/operators';
@@ -324,8 +324,6 @@ export class CarAndDriverAllotmentComponent implements OnInit {
 
   ngOnInit() {
     this.router.queryParams.subscribe((paramsData) => {
-      // console.log(paramsData.reservationGroupID);
-      //  console.log(paramsData); 
       const encryptedReservationGroupID = paramsData.reservationGroupID;
       const encryptedReservationID = paramsData.reservationID;
       const encryptedPickupDate = paramsData.pickupDate;
@@ -397,7 +395,6 @@ export class CarAndDriverAllotmentComponent implements OnInit {
       data => 
       {
         this.ShowAllLocation=data.showAllLocation;
-        // console.log(this.ShowAllLocation)
         this._filters.showAllLocation=this.ShowAllLocation
         this.loadData(this._filters, this.currentPage, this.recordsPerPage);
       }
@@ -474,7 +471,6 @@ InitVendorType(){
     data =>   
     {
       this.VendorTypeList = data; 
-      // console.log(this.VendorTypeList);
       this.filteredVendorTypeOptions = this.vendorType.valueChanges.pipe(
         startWith(""),
         map(value => this._filterVT(value || ''))
@@ -502,7 +498,6 @@ private _filterVT(value: string): any {
       data =>   
       {
         this.DriverList = data; 
-        // console.log(this.DriverList);
         this.filteredOptions = this.driver.valueChanges.pipe(
           startWith(""),
           map(value => this._filter(value || ''))
@@ -670,7 +665,6 @@ InitDriverForSupplier(supplierID:any){
     data =>   
     {
       this.DriverList = data; 
-     // console.log(this.DriverList);
       this.filteredOptions = this.driver.valueChanges.pipe(
         startWith(""),
         map(value => this._filterSupplier(value || ''))
@@ -698,7 +692,6 @@ InitRegNumber(){
     data=>
     {
       this.RegNumberList=data;
-     // console.log(this.RegNumberList);
       this.filteredRegNumberOptions = this.inventory.valueChanges.pipe(
         startWith(""),
         map(value => this._filterRegNo(value || ''))
@@ -752,9 +745,7 @@ private _filterInventorySupplier(value: string): any {
     this.latitude = address.geometry.location.lat().toString();
     this.longitude = address.geometry.location.lng().toString();
     this.locationString = this.addressString;
-   // console.log(this.locationString);
     this.eTRAvailabilityGeoLocation = `POINT (${this.longitude} ${this.latitude})`;
-    //console.log(this.eTRAvailabilityGeoLocation);
   }
   
   // CheckData(i: any){
@@ -818,7 +809,6 @@ private _filterInventorySupplier(value: string): any {
           if (data != null) {
             this.reservationInfo = data.reservationDetails;
             this.allotmentType = this.reservationInfo[0]?.allotmentType;
-            //console.log(this.reservationInfo)
             this.filterByVehicleCategoryID = this.reservationInfo[0]?.vehicle?.vehicleCategoryID;
             this.filterByVehicleCategory = this.reservationInfo[0]?.vehicle?.vehicleCategory;
             this.carAndDriverAllotmentData();
@@ -910,7 +900,6 @@ private _filterInventorySupplier(value: string): any {
 //     this.driverID=0;
 //   }
  
-//   console.log(this.inventory.value);
 //   this.driverInventoryAssociationService.getTableData(this.driverID,this.driver.value,this.supplier.value,this.category.value,this.vehicle.value,this.inventory.value,
 //   this.searchInventoryName,this.vendorType.value,this.bookingCount.value,this.monthlyTarget.value,this.otherCriteria.value,PickupDate,this.searchActivationStatus, this.PageNumber).subscribe
 //   (
@@ -918,7 +907,6 @@ private _filterInventorySupplier(value: string): any {
 //     {
 //       if (data != null) {
 //       this.driverInventoryAssociationDataSource = data.driverInventoryAssociationModel;
-//       console.log(this.driverInventoryAssociationDataSource)
 //       this.driverInventoryAssociationDataSource?.forEach(element => {
 //         Object.assign(element, { checked: false });
 //       });
@@ -956,7 +944,6 @@ carAndDriverAllotmentData()
       if (data != null) 
       {
         this.driverInventoryAssociationDataSource = data.driverInventoryAssociationModel;
-        //console.log(this.driverInventoryAssociationDataSource);
         this.driverInventoryAssociationDataSource?.forEach(element => {
           Object.assign(element, { checked: false });
         });
@@ -1007,7 +994,6 @@ carAndDriverAllotmentDataForUnassociated()
       if (data != null) 
       {
         this.inventoryUnassociatedDataSource  = data.driverInventoryAssociationModel;
-        console.log(this.inventoryUnassociatedDataSource);
         this.inventoryUnassociatedDataSource ?.forEach(element => {
           Object.assign(element, { checked: false });
         });
@@ -1059,7 +1045,6 @@ carAndDriverAllotment()
     {
       if (data != null) {
       this.driverInventoryAssociationDataSource = data.driverInventoryAssociationModel;
-      //console.log(this.driverInventoryAssociationDataSource)
       this.driverInventoryAssociationDataSource?.forEach(element => {
         Object.assign(element, { checked: false });
       });
@@ -1121,7 +1106,6 @@ getAllDriver()
       (data : DriversRestrictedForPassengerModel[]) => 
       {
         this.DriversRestrictedForPassengerList=data;
-        //console.log(this.DriversRestrictedForPassengerList);
         this.updateDriverRestrictions();
       }
     );
@@ -1133,7 +1117,6 @@ getAllDriver()
       (data : CarsRestrictedForPassengerModel[]) => 
       {
         this.CarsRestrictedForPassengerList=data;
-        //console.log(this.CarsRestrictedForPassengerList);
         this.updateCarRestrictions();
       }
     );
@@ -1166,7 +1149,6 @@ getAllDriver()
   // openAllotCarAndDriver(i:any,allotmentType:string,allotmentID:any)
   // {
 
-  //   console.log(this.driverInventoryAssociationDataSource)
   //   let allottedDriverIndex = this.reservationInfo.findIndex(r => r.allotmentStatus === 'Alloted');
   //       if(this.reservationInfo[0].allotmentStatus==='Cancelled' || this.reservationInfo[0].allotmentStatus=== null)
   //       {
@@ -1318,7 +1300,6 @@ getAllDriver()
         (data:DriverDutyData[]) =>   
         {
           this.driverPreviousDutyData = data;
-          //console.log(this.driverPreviousDutyData);
         },
         (error: HttpErrorResponse) => { this.driverDutyData = null;}
       );
@@ -1328,7 +1309,6 @@ getAllDriver()
         (data:DriverDutyData[]) =>   
         {
           this.driverNextDutyData = data;
-          //console.log(this.driverNextDutyData);
         },
         (error: HttpErrorResponse) => { this.driverDutyData = null;}
       );
@@ -1549,7 +1529,6 @@ getAllDriver()
     const filtered = this.reservationInfo.filter(
       (value) => value.reservationID === reservationID
     )[0];
-    //console.log(filtered)
     this.dialog.open(BookerInfoComponent, {
       width: '500px',
       data: {
@@ -1665,7 +1644,6 @@ getAllDriver()
     // const filtered = this.reservationInfo.filter(
     //   (value) => value.reservationID === item.reservationID
     // )[0].stopsDetails;
-    // console.log(filtered)
     this.dialog.open(StopOnMapInfoComponent, {
       width: '750px',
       data: {
@@ -1725,7 +1703,6 @@ getAllDriver()
   }
 
   AdhocCarAndDriver(reservationInfo:any) {
-    //console.log(reservationInfo[0].allotmentStatus)
     if(reservationInfo[0].allotmentStatus !=='Alloted')
       {
         const dialogRef = this.dialog.open(AdhocCarAndDriverFormDialogComponent, {
@@ -1736,7 +1713,6 @@ getAllDriver()
         });
      dialogRef.afterClosed().subscribe(res => {
       if (res) {
-        //console.log(res)
         this.loadData(this._filters, this.currentPage, this.recordsPerPage);
         this.driver.setValue(res.response.driverName);
         this.carAndDriverAllotmentData();
@@ -2006,7 +1982,6 @@ getAllDriver()
     
   }
   // PassengerHistory() {
-  //   console.log(this.reservationInfo)
   //   this.dialog.open(PassengerHistoryComponent, {
   //     width:'600px',
   //     data: {
@@ -2019,7 +1994,6 @@ getAllDriver()
   // }
 
   PassengerHistory() {
-    //console.log('Reservation Info:', this.reservationInfo);
   
     if (!this.reservationInfo || !this.reservationInfo[0]?.pickupCityID) {
       console.error('pickupCityID is missing');
@@ -2126,7 +2100,6 @@ getAllDriver()
       (
         data => {
           this.dataSource = data;
-          //console.log(this.dataSource)
           this.dialog.open(GarageOutDetailsComponent, {
             width: '500px',
             data: {
@@ -2147,7 +2120,6 @@ getAllDriver()
         (
           data => {
             this.dataSource = data;
-           // console.log(this.dataSource)
             this.dialog.open(ReachedByExecutiveDetailsComponent, {
               width: '500px',
               data: {
@@ -2233,7 +2205,6 @@ getAllDriver()
     }
 
     // fetchSameCategoryVehicles(vendorType='All', bookingCount?: 0, businessVolume?: string) {
-    //   console.log(this.filterByVehicleCategoryID, this.filterByVehicleCategory, bookingCount);
     //   if(vendorType === 'All' || vendorType === undefined || vendorType === null) {
     //     this.vendorType.setValue('All');
     //   } else {
@@ -2283,7 +2254,6 @@ getAllDriver()
     //     (data: CarAndDriverAllotmentData) => {
     //       if (data && data.driverInventoryAssociationModel) {
     //         this.driverInventoryAssociationDataSource = data.driverInventoryAssociationModel;
-    //         console.log("API Response:", this.driverInventoryAssociationDataSource);
     //         this.driverInventoryAssociationDataSource.forEach(element => {
     //           Object.assign(element, { checked: false });
     //         });
@@ -2303,7 +2273,6 @@ getAllDriver()
 
     // fetchSameCategoryVehicles(vendorType = 'All', bookingCount?: number, businessVolume?: string, selectedBadge?: string) {
     //   this.selectedBadge = selectedBadge || ''; // Set the clicked badge as selected
-    //   console.log(this.filterByVehicleCategoryID, this.filterByVehicleCategory, bookingCount);
       
     //   if (!vendorType) {
     //     this.vendorType.setValue('All');
@@ -2353,7 +2322,6 @@ getAllDriver()
     //     (data: CarAndDriverAllotmentData) => {
     //       if (data?.driverInventoryAssociationModel) {
     //         this.driverInventoryAssociationDataSource = data.driverInventoryAssociationModel;
-    //         console.log("API Response:", this.driverInventoryAssociationDataSource);
     //         this.driverInventoryAssociationDataSource.forEach(element => {
     //           Object.assign(element, { checked: false });
     //         });
@@ -2382,7 +2350,6 @@ getAllDriver()
         this.selectedBadge += `, ${selectedBadge}`;
       }
     
-      //console.log(`Fetching Data for: ${this.selectedBadge}`);
     
       if (!vendorType) {
         this.vendorType.setValue('All');
@@ -2448,7 +2415,6 @@ getAllDriver()
             }
           });
     
-         // console.log("Merged Data:", this.driverInventoryAssociationDataSource);
           this.totalData = this.driverInventoryAssociationDataSource.length;
         },
         (error: HttpErrorResponse) => {
@@ -2490,7 +2456,6 @@ getAllDriver()
         (data: CarAndDriverAllotmentData) => {
           if (data && data.driverInventoryAssociationModel) {
             this.driverInventoryAssociationDataSource = data.driverInventoryAssociationModel;
-           // console.log("API Response:", this.driverInventoryAssociationDataSource);
             this.driverInventoryAssociationDataSource.forEach(element => {
               Object.assign(element, { checked: false });
             });

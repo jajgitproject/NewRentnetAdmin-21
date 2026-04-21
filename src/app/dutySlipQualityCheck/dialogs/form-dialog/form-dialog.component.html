@@ -44,7 +44,7 @@
                         <mat-label>Time</mat-label>
                         <input matInput [owlDateTimeTrigger]="time1" [owlDateTime]="time1"
                             formControlName="qCTime" (ngModelChange)="locationTimeSet($event)" (input)="onTimeInput($event)">
-                        <mat-icon matSuffix [owlDateTimeTrigger]="time1" class="date-icon">schedule</mat-icon>
+                        <button mat-icon-button matSuffix type="button" [owlDateTimeTrigger]="time1" class="date-icon" aria-label="Open time picker"><mat-icon>schedule</mat-icon></button>
                         <owl-date-time [pickerType]="'timer'" #time1></owl-date-time>
                             <mat-error *ngIf="advanceTableForm.get('qCTime').hasError('required')">
                                         Time is required

@@ -96,7 +96,6 @@ export class TestComponent implements OnInit {
         action: 'edit'
       }
     });
-    console.log(row.id);
 
   }
   deleteItem(row)
@@ -121,7 +120,6 @@ export class TestComponent implements OnInit {
       {
 
         this.dataSource = data;
-        //console.log(this.dataSource)
        
       },
       (error: HttpErrorResponse) => { this.dataSource = null;}
@@ -146,7 +144,6 @@ export class TestComponent implements OnInit {
   
   NextCall()
   {
-    //console.log(this.dataSource.length>0)
     if (this.dataSource.length>0) 
     {
      
@@ -295,7 +292,6 @@ export class TestComponent implements OnInit {
       data =>   
       {
         this.dataSource = data;
-       console.log(this.dataSource);
       },
       (error: HttpErrorResponse) => { this.dataSource = null;}
     );

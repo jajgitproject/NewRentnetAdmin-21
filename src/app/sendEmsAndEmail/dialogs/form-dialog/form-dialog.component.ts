@@ -19,7 +19,7 @@ import {
 import { MAT_DATE_LOCALE } from '@angular/material/core';
 import { formatDate } from '@angular/common';
 import { GeneralService } from '../../../general/general.service';
-import { Address } from 'ngx-google-places-autocomplete/objects/address';
+import { Address } from '@compat/google-places-shim-objects/address';
 import { EmployeeDropDown } from 'src/app/employee/employeeDropDown.model';
 import { HttpErrorResponse } from '@angular/common/http';
 import { OrganizationalEntityDropDown } from 'src/app/organizationalEntityMessage/organizationalEntityDropDown.model';
@@ -130,20 +130,16 @@ export class FormDialogSendEmsComponent {
     this.isBooker = data.isbooker;
     this.isPassenger = data.isPassenger;
     this.customerPersonID = data.customerPersonID;
-    // console.log(this.customerPersonID);
     this.vehicle = data.vehicle;
     this.pickupDate = data.pickupDate;
     this.pickupTime = data.pickupTime;
-    // console.log(this.vehicle)
     this.registrationNumber = data.registrationNumber;
     this.customerPersonName = data.customerPersonName;
     this.city = data.city;
     this.primaryMobile = data.primaryMobile;
 
     this.primaryEmail = data.primaryEmail;
-    // console.log(this.registrationNumber)
     this.customerDetails = data?.item?.customerPerson;
-    // console.log(data?.item?.passengerDetails);
     this.dataSource = data?.item?.passengerDetails;
     this.customerPersonDetails.push(data?.item?.customerPerson);
   }
@@ -162,7 +158,6 @@ export class FormDialogSendEmsComponent {
     this._generalService.GetPermission(this.ReservationID).subscribe(
       (data) => {
         this.permissionData = data;
-        // console.log(this.permissionData);
       },
       (error: HttpErrorResponse) => {
         this.permissionData = null;
@@ -271,7 +266,6 @@ export class FormDialogSendEmsComponent {
   }
 
   submit() {
-    // console.log(this.advanceTableForm.value);
   }
   onNoClick(): void {
     if (this.action === 'add') {
@@ -347,7 +341,6 @@ export class FormDialogSendEmsComponent {
   sendNotification() {
     const apiRequestData = [];
     this.permissionData?.forEach((element) => {
-      // console.log(element);
       apiRequestData.push({
         //ID: parseInt(element.customerPersonID),
         // "EmployeeID": element?.employeeID || null,
@@ -383,7 +376,6 @@ export class FormDialogSendEmsComponent {
       .getTableNotificationData(ReservationID, additionalData,pickupDate)
       .subscribe(
         (data: any) => {
-          console.log(data);
           this.dialogRef.close();
           if (data === '"OK"') 
           {
@@ -420,7 +412,6 @@ export class FormDialogSendEmsComponent {
   }
 
   // deleteRecord(row: any) {
-  //   console.log(row);
   //   const recordIndex = this.dataSource.findIndex((object) => object.primaryMobile === row.primaryMobile);
   //   // this.dataSource.pop(recordIndex);
   //   this.dataSource.splice(recordIndex,1);

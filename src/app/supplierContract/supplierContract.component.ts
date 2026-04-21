@@ -97,7 +97,6 @@ export class SupplierContractComponent implements OnInit {
       //this.supplierRateCard_ID = paramsData.SupplierRateCardID;
       //this.supplierRateCard_Name=paramsData.SupplierRateCardName;
       this.supplierName=paramsData.SupplierName;
-      //console.log(this.supplierRateCard_ID)
     });
     this.InitEmployee();
     this.loadData();
@@ -249,7 +248,6 @@ export class SupplierContractComponent implements OnInit {
       {
         // if(data !== null){
         this.dataSource = data;
-        console.log(this.dataSource)
         
       // }
       },
@@ -275,7 +273,6 @@ export class SupplierContractComponent implements OnInit {
   
   NextCall()
   {
-    //console.log(this.dataSource.length>0)
     if (this.dataSource.length>0) 
     {
      
@@ -340,8 +337,6 @@ export class SupplierContractComponent implements OnInit {
   //     //   }
   //     // });
   openInNewTab(menuItem: any, rowItem: any) {
-    console.log(menuItem);
-    console.log(rowItem);
     
     let baseUrl = this._generalService.FormURL;
     const encryptedSupplierContractID = this._generalService.encrypt(encodeURIComponent(rowItem.supplierContractID));

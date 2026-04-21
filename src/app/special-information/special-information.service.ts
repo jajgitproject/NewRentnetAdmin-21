@@ -18,12 +18,10 @@ export class SpecialinformationService {
     private generalService: GeneralService
   ) {
     this.apiUrl = this.generalService.BaseURL + 'specialInstructionForClosing';
-    //console.log('Constructed API URL:', this.apiUrl); // ✅ Debug log
   }
 
   getSpecialinformationClosingData(allotmentID: number): Observable<any> {
     const fullUrl = `${this.apiUrl}/ForSpecialInstructionForClosing/${allotmentID}`;
-   // console.log("Hitting API:", fullUrl); // ✅ Debug log
     return this.http.get(fullUrl);
   }
 }

@@ -42,24 +42,6 @@
       "@compat/*": [
         "src/app/compat/*"
       ],
-      "ngx-google-places-autocomplete": [
-        "src/app/compat/google-places-shim"
-      ],
-      "ngx-google-places-autocomplete/*": [
-        "src/app/compat/google-places-shim-objects/*"
-      ],
-      "ngx-perfect-scrollbar": [
-        "src/app/compat/perfect-scrollbar-shim"
-      ],
-      "@danielmoncada/angular-datetime-picker": [
-        "src/app/compat/owl-datetime-shim"
-      ],
-      "ng2-charts": [
-        "src/app/compat/ng2-charts-shim"
-      ],
-      "ngx-material-file-input": [
-        "src/app/compat/material-file-input-shim"
-      ],
       "@testing": [
         "src/testing"
       ],

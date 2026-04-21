@@ -27,7 +27,6 @@ export class SalutationService
     {
       SearchActivationStatus=null;
     }
-    // console.log(this.API_URL + "/" +SearchSalutation + '/' + SearchActivationStatus +'/' + PageNumber + '/Salutation/Ascending')
     return this.httpClient.get(this.API_URL + "/" +SearchSalutation + '/' + SearchActivationStatus +'/' + PageNumber + '/Salutation/Ascending');
   }
 

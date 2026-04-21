@@ -63,7 +63,6 @@ export class ReservationLocationTransferLogComponent implements OnInit {
     this.dialogTitle = 'Transfer Location History';
     this.ReservationID = data.reservationID;
   
-    console.log(this.ReservationID)
   }
   @ViewChild(MatPaginator, { static: true }) paginator: MatPaginator;
   @ViewChild(MatSort, { static: true }) sort: MatSort;
@@ -148,7 +147,6 @@ shouldShowDeleteButton(item: any): boolean {
         data =>   
         {
           this.dataSource = data;
-          console.log(this.dataSource)
         },
         (error: HttpErrorResponse) => { this.dataSource = null;}
       );

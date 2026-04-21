@@ -74,10 +74,7 @@ export class SpecialInstructionDialogComponent
     this.buttonDisabled = true;   // Save button disable
 }
        
-        console.log('Status set to:', this.status);
         
-        console.log('ReservationID set to:', this.reservationID);
-        console.log('Full dialog data:', data);
   }
 
   createContactForm(): FormGroup 
@@ -123,13 +120,11 @@ export class SpecialInstructionDialogComponent
     this.advanceTableForm.patchValue({reservationID:this.reservationID});
     
     // Log the form data for debugging
-    console.log('Form data being sent:', this.advanceTableForm.getRawValue());
     
     this.advanceTableService.add(this.advanceTableForm.getRawValue())  
     .subscribe(
       response => 
       {
-        console.log('Special instruction created successfully:', response);
           this.showNotification(
             'snackbar-success',
             'Special Instrucation Create...!!!',

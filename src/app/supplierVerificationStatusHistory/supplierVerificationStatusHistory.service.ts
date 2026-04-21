@@ -39,7 +39,6 @@ export class SupplierVerificationStatusHistoryService
     {
       SearchActivationStatus=null;
     }
-    //console.log(this.API_URL + "/" +SearchStatus + '/' +SupplierID + '/' + SearchActivationStatus +'/' + PageNumber + '/SupplierVerificationStatusHistoryID/Ascending')
     return this.httpClient.get(this.API_URL + "/" +SearchStatus + '/'+SupplierID + '/' + SearchActivationStatus +'/' + PageNumber + '/SupplierVerificationStatusHistoryID/Descending');
   }
   getTableDataSort(SearchStatus:string,SupplierID:number, SearchActivationStatus:Boolean, PageNumber: number,coloumName:string,sortType:string):  Observable<any> 
@@ -56,7 +55,6 @@ export class SupplierVerificationStatusHistoryService
     {
       SearchActivationStatus=null;
     }
-    //console.log(this.API_URL + "/" +SearchStatus + '/' + SearchActivationStatus +'/' + PageNumber + '/'+coloumName+'/'+sortType)
     return this.httpClient.get(this.API_URL + "/" +SearchStatus + '/'+SupplierID + '/' + SearchActivationStatus +'/' + PageNumber +  '/'+coloumName+'/'+sortType);
   }
 

@@ -79,7 +79,6 @@ export class CustomerConfigurationBillingComponent implements OnInit {
         this.Customer_ID = this._generalService.decrypt(decodeURIComponent(encryptedCustomerID));
         this.Customer_Name = this._generalService.decrypt(decodeURIComponent(encryptedCustomerName));
       }
-      //console.log(this.Customer_ID,this.Customer_Name)
       
     });
     this.loadData();

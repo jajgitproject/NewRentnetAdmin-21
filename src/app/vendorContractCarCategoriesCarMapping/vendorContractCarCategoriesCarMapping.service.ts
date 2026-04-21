@@ -65,7 +65,6 @@ export class VendorContractCarCategoriesCarMappingService
   }
   update(advanceTable: VendorContractCarCategoriesCarMappingModel)
   {
-    console.log(this.API_URL , advanceTable)
     advanceTable.userID=this.generalService.getUserID();
     return this.httpClient.put<any>(this.API_URL , advanceTable);
   

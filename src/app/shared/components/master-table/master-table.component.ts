@@ -351,7 +351,6 @@ export class MasterTableComponent<T> implements OnInit, AfterViewInit {
     // window.open(fileUrl, '_blank');
     // Or use a more sophisticated download approach
 
-    console.log(`Downloading file from: ${fileUrl}`);
   }
 
   getProgressBarColor(value: number): string {

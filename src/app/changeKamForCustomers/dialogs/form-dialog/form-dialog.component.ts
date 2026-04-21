@@ -140,7 +140,6 @@ export class FormDialogComponentHolder
       data =>   
       {
         this.kamList = data;
-        console.log(this.kamList);
         this.advanceTableForm.controls['oldCustomerkamEmployee'].setValidators([Validators.required,
           this.customerKamEmployeeNameValidator(this.kamList)]);
         this.advanceTableForm.controls['oldCustomerkamEmployee'].updateValueAndValidity(); 
@@ -196,7 +195,6 @@ export class FormDialogComponentHolder
       data =>   
       {
         this.EmployeeList = data;
-        console.log(this.EmployeeList);
         this.advanceTableForm.controls['newCustomerkamEmployee'].setValidators([Validators.required,
           this.employeeNameValidator(this.EmployeeList)]);
         this.advanceTableForm.controls['newCustomerkamEmployee'].updateValueAndValidity(); 
@@ -350,7 +348,6 @@ export class FormDialogComponentHolder
 
   submit() 
   {
-    console.log(this.advanceTableForm.value);
     // emppty stuff
   }
   

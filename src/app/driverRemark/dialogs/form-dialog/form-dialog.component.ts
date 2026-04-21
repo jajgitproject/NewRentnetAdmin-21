@@ -61,7 +61,6 @@ export class FormDialogdriverRemarkComponent
           this.dutySlipID=data.dutySlipID;
           // this.populateForm();
          
-          console.log(this.DriverRemark)
        
         } else 
         {
@@ -99,7 +98,6 @@ this.isSaveAllowed = status === 'changes allow';
        data =>   
        {
          this.dataSource = data;
-         console.log(this.dataSource)
          this.dataSource.forEach((ele)=>{
            // if(ele.activationStatus===true){
            //  this.activation="Active"
@@ -141,7 +139,6 @@ this.isSaveAllowed = status === 'changes allow';
 
   submit() 
   {
-    //console.log(this.advanceTableForm.value);
   }
   onNoClick(): void 
   {

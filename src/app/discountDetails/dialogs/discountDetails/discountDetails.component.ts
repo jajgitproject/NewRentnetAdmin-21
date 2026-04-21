@@ -83,8 +83,6 @@ export class DiscountDetailsDialogComponent
       const encryptedReservationID = paramsData.reservationID;
       this.AllotmentID = this._generalService.decrypt(decodeURIComponent(encryptedAllotmentID));
       this.ReservationID = this._generalService.decrypt(decodeURIComponent(encryptedReservationID));
-      console.log("AllotmentID",this.AllotmentID);
-      console.log("ReservationID",this.ReservationID);
       
     });
   

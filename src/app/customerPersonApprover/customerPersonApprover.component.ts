@@ -98,7 +98,6 @@ ngOnInit() {
       ? this._generalService.decrypt(decodeURIComponent(encryptedCustomerGroupID))
       : null;
 
-    console.log(this.customerPerson_ID, this.customerPerson_Name, this.customerGroupID);
   });
 
   this.loadData();
@@ -152,7 +151,6 @@ ngOnInit() {
   }
   addNew()
   {
-      console.log('CustomerGroupID to send:', this.customerGroupID);
     const dialogRef = this.dialog.open(FormDialogComponent, 
     {
       data: 
@@ -168,7 +166,6 @@ ngOnInit() {
   }
   editCall(row) {
       //  alert(row.id);
-      console.log(row);
     this.customerPersonApproverID = row.customerPersonApproverID;
     const dialogRef = this.dialog.open(FormDialogComponent, {
       data: {
@@ -414,7 +411,6 @@ ngOnInit() {
           startWith(""),
           map(value => this._filterCustomer(value || ''))
         );
-        //console.log(this.StateList);
       },
       error => {
 

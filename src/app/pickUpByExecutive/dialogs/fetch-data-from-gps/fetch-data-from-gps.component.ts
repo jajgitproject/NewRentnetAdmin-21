@@ -35,7 +35,6 @@ export class FetchDataFromGPSComponent implements OnInit {
   {
     
     this.reservationID=data.reservationID;
-    console.log(this.reservationID);
     this.advanceTableForm = this.createContactForm();
   }
   createContactForm(): FormGroup {
@@ -58,13 +57,11 @@ export class FetchDataFromGPSComponent implements OnInit {
       {
         this.fetchDataFromGPSList.push(data);
         this.dialogRef.close({data:this.fetchDataFromGPSList});
-        console.log(this.fetchDataFromGPSList)
       }
     );
   }
   submit() 
   {
-    console.log(this.advanceTableForm.value);
   }
 
   onNoClick(): void

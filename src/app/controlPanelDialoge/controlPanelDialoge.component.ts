@@ -262,7 +262,6 @@ export class ControlPanelDialogeComponent {
   TimeAndAddressInfo(item) {
     // Always fetch latest status before opening
     this.fetchStatusAndOpen(() => {
-      console.log('Opening TimeAndAddressInfo with status:', this.status);
       this.dialog.open(TimeAndAddressInfoComponent, {
         width: '750px',
         data: {
@@ -274,7 +273,6 @@ export class ControlPanelDialogeComponent {
   }
   TimeAndAddressDrop(item) {
     this.fetchStatusAndOpen(() => {
-      console.log('Opening TimeAndAddressDrop with status:', this.status);
       this.dialog.open(TimeAndAddressInfoComponent, {
         width: '750px',
         data: {
@@ -301,7 +299,6 @@ export class ControlPanelDialogeComponent {
     // const filtered = this.reservationInfo.filter(
     //   (value) => value.reservationID === item.reservationID
     // )[0].stopsDetails;
-    // console.log(filtered)
     this.dialog.open(StopOnMapInfoComponent, {
       width: '750px',
       data: {
@@ -333,10 +330,6 @@ export class ControlPanelDialogeComponent {
 
  DriverAllotment(reservationID: number, reservationGroupID: number, pickupDate: any, pickupAddress: any) {
   // debugger;
-  // console.log('reservationID:', reservationID);
-  // console.log('reservationGroupID:', reservationGroupID); // <- Confirm this logs correctly
-  // console.log('pickupDate:', pickupDate);
-  // console.log('pickupAddress:', pickupAddress);
 
   if (!reservationGroupID) {
     console.warn('⚠️ reservationGroupID is missing!');
@@ -347,7 +340,6 @@ export class ControlPanelDialogeComponent {
   const encryptedPickupDate = encodeURIComponent(this._generalService.encrypt(pickupDate));
   const encryptedPickupAddress = encodeURIComponent(this._generalService.encrypt(pickupAddress));
 
-//  console.log('Encrypted reservationGroupID:', encryptedReservationGroupID);
 
   const url = this.route.serializeUrl(this.route.createUrlTree(
     ['/CarAndDriverAllotment'],
@@ -362,7 +354,6 @@ export class ControlPanelDialogeComponent {
     }
   ));
 
-  //console.log('Final URL:', this._generalService.FormURL + url);
 
   window.open(this._generalService.FormURL + url, '_blank');
 }
@@ -482,7 +473,6 @@ export class ControlPanelDialogeComponent {
   //--------- PickupTime Popup ----------
   pickupTimeUpdate(item) {
     this.fetchStatusAndOpen(() => {
-      console.log('Opening PickupTime dialog with status:', this.status);
       const dialogRef = this.dialog.open(PickupTimeFormDialogComponent,
         {
           data:
@@ -509,7 +499,6 @@ export class ControlPanelDialogeComponent {
           status = statusData.status.status;
         }
         this.status = status; // persist
-        console.log('Fetched status (fetchStatusAndOpen):', status);
         callback();
       },
       error => {
@@ -533,7 +522,6 @@ export class ControlPanelDialogeComponent {
       if (this.status) {
         const encryptedStatus = encodeURIComponent(this._generalService.encrypt(this.status));
         queryParams.status = encryptedStatus;
-        console.log('navigateToBookingForEdit adding status:', this.status);
       } else {
         console.warn('navigateToBookingForEdit no status available');
       }
@@ -542,9 +530,6 @@ export class ControlPanelDialogeComponent {
     }, item.reservationID);
   }
   OpenBookingScreen(item) {
-    console.log('=== OpenBookingScreen ===');
-    console.log('Item:', item);
-    console.log('ReservationID:', item.reservationID);
     
     // Fetch status first, then open booking screen
     this.clossingOneService.getVerifyDutydata(item.reservationID).subscribe(
@@ -558,7 +543,6 @@ export class ControlPanelDialogeComponent {
           status = statusData.status.status;
         }
         
-        console.log('Fetched status:', status);
         this.openBookingScreenWithStatus(item, status);
       },
       error => {
@@ -589,7 +573,6 @@ export class ControlPanelDialogeComponent {
     if(status) {
       const encryptedStatus = encodeURIComponent(this._generalService.encrypt(status));
       queryParams.status = encryptedStatus;
-      console.log('Adding encrypted status to query params:', status);
     } else {
       console.warn('No status to add to query params');
     }
@@ -598,7 +581,6 @@ export class ControlPanelDialogeComponent {
       queryParams: queryParams
     }));
     
-    console.log('Opening booking screen with status:', status);
     window.open(this._generalService.FormURL + url, '_blank');
   }
   openSendEmsDialog(reservationID, vehicle, pickupDate, pickupTime,
@@ -644,7 +626,6 @@ export class ControlPanelDialogeComponent {
     });
   }
   emailInfo(item) {
-    //console.log(item)
     this.dialog.open(EmailInfoComponent, {
       // width: '500px',
       data: {
@@ -690,7 +671,6 @@ export class ControlPanelDialogeComponent {
   PassToSupplier(reservationID: number) {
     // Fetch status first, then open Pass To Supplier dialog with status included
     this.fetchStatusAndOpen(() => {
-      console.log('Opening PassToSupplier with status:', this.status);
       this.passToSupplierService.getData(reservationID).subscribe(
         data => {
           this.dataSourceForPassToSupplier = data;
@@ -743,7 +723,6 @@ export class ControlPanelDialogeComponent {
   }
 
   reachedDetails(item: any) {
-    console.log(item)
     this.reachedDetailsloadData(item)
   }
 
@@ -753,7 +732,6 @@ export class ControlPanelDialogeComponent {
       (
         data => {
           this.dataSource = data;
-          console.log(this.dataSource)
           this.dialog.open(ReachedByExecutiveDetailsComponent, {
             width: '500px',
             data: {
@@ -785,7 +763,6 @@ export class ControlPanelDialogeComponent {
       });
       dialogRef.afterClosed().subscribe(res => {
         if (res) {
-          console.log(res);
           item.reportingToGuestDate = res?.reportingToGuestDate; // Update with the received data
           item.reportingToGuestTime = res?.reportingToGuestTime; // Update with the received data
 
@@ -814,7 +791,6 @@ export class ControlPanelDialogeComponent {
       });
       dialogRef.afterClosed().subscribe(res => {
         if (res) {
-          console.log(res);
           item.reportingToGuestDate = res?.reportingToGuestDate; // Update with the received data
           item.reportingToGuestTime = res?.reportingToGuestTime; // Update with the received data
           // item.reportingToGuestEntryMethod ="Manual";
@@ -841,7 +817,6 @@ export class ControlPanelDialogeComponent {
       });
       dialogRef.afterClosed().subscribe(res => {
         if (res) {
-          console.log(res);
           item.reportingToGuestDate = res?.reportingToGuestDate; // Update with the received data
           item.reportingToGuestTime = res?.reportingToGuestTime; // Update with the received data
           // item.reportingToGuestEntryMethod ="Manual";
@@ -992,7 +967,6 @@ export class ControlPanelDialogeComponent {
       if (this.status) {
         const encryptedStatus = encodeURIComponent(this._generalService.encrypt(this.status));
         queryParams.status = encryptedStatus;
-        console.log('navigateToInterstateTaxDetails adding status:', this.status);
       } else {
         console.warn('navigateToInterstateTaxDetails no status available');
       }
@@ -1025,7 +999,6 @@ export class ControlPanelDialogeComponent {
       (
         data => {
           this.dataSource = data;
-          console.log(this.dataSource)
           this.dialog.open(DutySlipQualityCheckDetailsComponent, {
             width: '500px',
             data: {
@@ -1068,13 +1041,11 @@ export class ControlPanelDialogeComponent {
                 status: this.status
               };
             }
-            console.log('Opening DutySlipQualityCheck with status:', this.status);
             let dialogRef = this.dialog.open(DutySlipQualityCheckFormDialogComponent, {
               width: '75%',
               data: this.dialogRequestObject
             });
             dialogRef.afterClosed().subscribe((result: any) => {
-              console.log(result);
               if (result) {
                 item.activationStatus = 'Active';
                 this.loadData(item.reservationID, i);
@@ -1104,7 +1075,6 @@ export class ControlPanelDialogeComponent {
     //   }
 
     // });
-    // console.log(item)
     this.verifyImageloadData(item)
   }
 
@@ -1114,7 +1084,6 @@ export class ControlPanelDialogeComponent {
       (
         data => {
           this.dataSource = data;
-          console.log(this.dataSource)
           this.dialog.open(DutySlipQualityCheckedByExecutiveDetailsComponent, {
             width: '500px',
             data: {
@@ -1289,7 +1258,6 @@ export class ControlPanelDialogeComponent {
       });
       dialogRef.afterClosed().subscribe(res => {
         if (res) {
-          console.log(res)
           item.locationInDate = res?.locationInDate;
           item.locationInTime = res?.locationInTime;
           // item.locationInEntryMethod ="Manual";
@@ -1316,7 +1284,6 @@ export class ControlPanelDialogeComponent {
       });
       dialogRef.afterClosed().subscribe(res => {
         if (res) {
-          console.log(res)
           item.locationInDate = res?.locationInDate;
           item.locationInTime = res?.locationInTime;
           // item.locationInEntryMethod ="Manual";
@@ -1342,7 +1309,6 @@ export class ControlPanelDialogeComponent {
       });
       dialogRef.afterClosed().subscribe(res => {
         if (res) {
-          console.log(res)
           item.locationInDate = res?.locationInDate;
           item.locationInTime = res?.locationInTime;
           // item.locationInEntryMethod ="Manual";
@@ -1353,7 +1319,6 @@ export class ControlPanelDialogeComponent {
 
   lifeCycleStatus(item: any) {
     debugger;
-    console.log(item); // Check item structure
 
     // Call the method to load life cycle status data
     this.lifeCycleStatusLoadData(item);
@@ -1421,7 +1386,6 @@ export class ControlPanelDialogeComponent {
       });
   }
   garageOutDetails(item: any) {
-    console.log(item)
     this.garageOutDetailsloadData(item)
   }
 
@@ -1431,7 +1395,6 @@ export class ControlPanelDialogeComponent {
       (
         data => {
           this.dataSource = data;
-          console.log(this.dataSource)
           this.dialog.open(GarageOutDetailsComponent, {
             width: '500px',
             data: {
@@ -1453,6 +1416,11 @@ export class ControlPanelDialogeComponent {
     if (item.allotmentType === 'Hard') {
       const dialogRef = this.dialog.open(FormDialogDBEComponent, {
         width: '800px',
+        maxWidth: '95vw',
+        maxHeight: '90vh',
+        autoFocus: false,
+        restoreFocus: false,
+        panelClass: 'dbe-dialog-centered',
         data: {
           reservationID: item.reservationID,
           allotmentID: item.allotmentID,
@@ -1491,6 +1459,11 @@ export class ControlPanelDialogeComponent {
     if (item.allotmentType === 'Hard') {
       const dialogRef = this.dialog.open(FormDialogDBEComponent, {
         width: '800px',
+        maxWidth: '95vw',
+        maxHeight: '90vh',
+        autoFocus: false,
+        restoreFocus: false,
+        panelClass: 'dbe-dialog-centered',
         data: {
           reservationID: item.reservationID,
           allotmentID: item.allotmentID,
@@ -1529,6 +1502,11 @@ export class ControlPanelDialogeComponent {
     if (item.allotmentType === 'Hard') {
       const dialogRef = this.dialog.open(FormDialogDBEComponent, {
         width: '800px',
+        maxWidth: '95vw',
+        maxHeight: '90vh',
+        autoFocus: false,
+        restoreFocus: false,
+        panelClass: 'dbe-dialog-centered',
         data: {
           reservationID: item.reservationID,
           allotmentID: item.allotmentID,
@@ -1609,7 +1587,6 @@ export class ControlPanelDialogeComponent {
 
       dialogRef.afterClosed().subscribe(res => {
         if (res) {
-          console.log(res)
           item.pickDate = res?.pickUpDate;
           item.pickTime = res?.pickUpTime;
           // item.pickupEntryMethod ="Manual";
@@ -1640,7 +1617,6 @@ export class ControlPanelDialogeComponent {
 
       dialogRef.afterClosed().subscribe(res => {
         if (res) {
-          console.log(res)
           item.pickDate = res?.pickUpDate;
           item.pickTime = res?.pickUpTime;
           // item.pickupEntryMethod ="Manual";
@@ -1670,7 +1646,6 @@ export class ControlPanelDialogeComponent {
 
       dialogRef.afterClosed().subscribe(res => {
         if (res) {
-          console.log(res)
           item.pickDate = res?.pickUpDate;
           item.pickTime = res?.pickUpTime;
           // item.pickupEntryMethod ="Manual";
@@ -1716,7 +1691,6 @@ export class ControlPanelDialogeComponent {
         });
       dialogRef.afterClosed().subscribe(res => {
         if (res) {
-          console.log(res);
           item.garageOutDate = res?.dropOffDate;
           item.garageOutTime = res?.dropOffTime;
           // item.dropOffEntryMethod ="Manual";
@@ -1745,7 +1719,6 @@ export class ControlPanelDialogeComponent {
         });
       dialogRef.afterClosed().subscribe(res => {
         if (res) {
-          console.log(res);
           item.garageOutDate = res?.dropOffDate;
           item.garageOutTime = res?.dropOffTime;
           // item.dropOffEntryMethod ="Manual";
@@ -1774,7 +1747,6 @@ export class ControlPanelDialogeComponent {
         });
       dialogRef.afterClosed().subscribe(res => {
         if (res) {
-          console.log(res);
           item.garageOutDate = res?.dropOffDate;
           item.garageOutTime = res?.dropOffTime;
           // item.dropOffEntryMethod ="Manual";
@@ -1840,7 +1812,8 @@ export class ControlPanelDialogeComponent {
           locationOutAddress: encryptedLocationOutAddress
         }
       }));
-    window.open(this._generalService.FormURL + url, '_blank');
+    const closingWin = window.open(this._generalService.FormURL + url, '_blank');
+    closingWin?.focus();
   }
   driverRemarkDetails(item: any) {
     this.driverRemarkDetailsloadData(item)
@@ -1861,7 +1834,6 @@ export class ControlPanelDialogeComponent {
 
         dialogRef.afterClosed().subscribe(
           (result: any) => {
-            console.log(result);
             if (result !== undefined && result !== null) {
               item.activationStatus = "Active";
             }
@@ -1877,7 +1849,6 @@ export class ControlPanelDialogeComponent {
   }
 
   driverRemark(item: any) {
-    console.log(item);
     let dialogRef = this.dialog.open(FormDialogdriverRemarkComponent, {
       data: {
         action: 'edit',
@@ -1889,7 +1860,6 @@ export class ControlPanelDialogeComponent {
     });
 
     dialogRef.afterClosed().subscribe((result: any) => {
-      console.log(result);
       if (result !== undefined && result !== null) {
         item.driverRemark = result.driverRemark;
         item.activationStatus = "Active";
@@ -1938,7 +1908,6 @@ export class ControlPanelDialogeComponent {
             data: this.dialogRequestObject
           });
           dialogRef.afterClosed().subscribe((result: any) => {
-            console.log(result);
             if (result !== undefined || result !== null) {
               item.dutySlipImage = result.dutySlipImage;
               //item.activationStatus ="Active";
@@ -1949,7 +1918,6 @@ export class ControlPanelDialogeComponent {
     }
   }
    nextDayInstructionDetails(item: any) {
-      console.log(item)
     this.nextDayInstructionDetailsloadData(item)
   }
   
@@ -1998,7 +1966,6 @@ export class ControlPanelDialogeComponent {
         });
       
         dialogRef.afterClosed().subscribe((result: any) => {
-          console.log(result);
           if (result !== undefined && result !== null) {
             item.nextDayInstruction = result.nextDayInstruction;
             item.activationStatus = "Active";
@@ -2010,7 +1977,6 @@ export class ControlPanelDialogeComponent {
         postPickUPCall(item:any)
         {
           if(item && item.dutySlipID === null || item.dutySlipID === undefined || item.dutySlipID === 0 || item.dutySlipID === '')  {
-            // console.log(item.dutySlipID);
             return;
           }
           const dialogRef = this.dialog.open(DutyPostFormDialogComponent, 
@@ -2029,7 +1995,6 @@ export class ControlPanelDialogeComponent {
           });
           dialogRef.afterClosed().subscribe((res: any) => {
            if (res) {
-            console.log(res);
             item.dutyPostPickUPCall = {
               ...(item.dutyPostPickUPCall || {}), // fallback to empty object if null
               ...res
@@ -2040,7 +2005,6 @@ export class ControlPanelDialogeComponent {
           })
         }
        postPickUPCallLoadDataDetails(item: any) {
-          console.log(item)
         this.postPickUPCallLoadData(item,true)
       }
       
@@ -2067,7 +2031,6 @@ export class ControlPanelDialogeComponent {
               });
       
               dialogRef.afterClosed().subscribe((result: any) => {
-                console.log(result);
                 if (result !== undefined && result !== null) {
                   item.activationStatus = "Active";
                 }
@@ -2086,8 +2049,6 @@ export class ControlPanelDialogeComponent {
           } else {
             this.incidenceID = item.incidenceID;
           }
-          console.log(item);
-          console.log(this.incidenceID);
           let dialogRef = this.dialog.open(incidenceFormDialogComponent, {
             width: '60%',
             data: {
@@ -2108,9 +2069,7 @@ export class ControlPanelDialogeComponent {
           });
       
           dialogRef.afterClosed().subscribe(result => {
-            console.log(result);
             if(result) {
-              console.log('Dialog result:', result);
               this.incidenceID = result.incidenceID;
               this.emitEventToChild();
               // this.ngOnInit();
@@ -2151,7 +2110,6 @@ export class ControlPanelDialogeComponent {
         
           dialogRef.afterClosed().subscribe(result => {
             if (result) {
-              console.log('Dialog result:', result);
               // this.incidenceID = result.incidenceID;
             }
           });
@@ -2183,12 +2141,10 @@ export class ControlPanelDialogeComponent {
           }
           
       });
-      console.log(item.customerPersonName);
       const dialogInstance = dialogRef.componentInstance;
      
       // Subscribe to the messageSubject to receive messages from the dialog
       dialogInstance.messageSubject.subscribe((data: any) => {
-        console.log( data);
         item.feedbackRemark = data.feedbackRemark;
         item.activationStatus = "Active";
         // Handle the received message from the dialog
@@ -2254,7 +2210,6 @@ TrackOnMapInfo(dutySlipID:number) {
       const filtered = this.reservationInfo.filter(
         (value) => value.reservationID === reservationID
       )[0];
-      console.log(filtered)
       this.dialog.open(EmailInfoComponent, {
         width: '500px',
         data: {
@@ -2293,7 +2248,6 @@ TrackOnMapInfo(dutySlipID:number) {
     }
     else
     {           
-      console.log('CancellReservation - item:', item);
         
         // Fetch status first
         const reservationID = this.reservationInfo[0].reservationID;
@@ -2402,7 +2356,6 @@ public getInvoiceNumber(item:any ,i: any)
         data =>   
         {
           this.checkInvoiceNumber = data.invoiceNumber;
-          //console.log(this.checkInvoiceNumber)
           if(this.checkInvoiceNumber === false)
           {
            this.CancellReservation(item,i)
@@ -2434,7 +2387,6 @@ public getInvoiceNumber(item:any ,i: any)
           {
             this.reservationHeaderInfo = data.reservationHeaderDetails;
             this.totalData = data.totalRecords;
-            //console.log(this.reservationHeaderInfo)
 
             if (rowIndex !== undefined)
             {

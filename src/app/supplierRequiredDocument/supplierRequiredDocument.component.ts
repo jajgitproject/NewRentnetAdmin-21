@@ -80,7 +80,6 @@ export class SupplierRequiredDocumentComponent implements OnInit {
     this.SubscribeUpdateService();
     this.route.queryParams.subscribe(paramsData =>{
       this.employee_ID   = paramsData.employeeID;
-      //console.log(this.employee_ID);
       this.initDocument(); 
     });
     //onsole.log(this)
@@ -117,7 +116,6 @@ export class SupplierRequiredDocumentComponent implements OnInit {
         action: 'edit'
       }
     });
-    //console.log(row);
 
   }
   public SearchData()
@@ -130,7 +128,6 @@ export class SupplierRequiredDocumentComponent implements OnInit {
   {
 
     this.supplierRequiredDocumentID = row.id;
-  //console.log(row)
     const dialogRef = this.dialog.open(DeleteDialogComponent, 
     {
       data: row
@@ -182,7 +179,6 @@ export class SupplierRequiredDocumentComponent implements OnInit {
       data =>   
       {
         this.dataSource = data;
-        //console.log(this.dataSource);
       //   this.dataSource.forEach((element)=>{
       //     if(element.activationStatus===true){
       //       this.ActiveStatus="Active"
@@ -254,7 +250,6 @@ export class SupplierRequiredDocumentComponent implements OnInit {
         //message contains the data sent from service
         this.messageReceived = message.text;
         this.MessageArray=this.messageReceived.split(":");
-        //console.log(this.MessageArray);
         if(this.MessageArray.length==3)
         {
           if(this.MessageArray[0]=="SupplierRequiredDocumentCreate")

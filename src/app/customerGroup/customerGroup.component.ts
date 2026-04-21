@@ -90,7 +90,6 @@ export class CustomerGroupComponent implements OnInit {
   ngOnInit() {
     this.loadData();
     this.menuItems.sort((a, b) => a.label.localeCompare(b.label));
-    console.log(this.menuItems);
     this.SubscribeUpdateService();
   }
   refresh() {
@@ -148,8 +147,6 @@ shouldShowDeleteButton(item: any): boolean {
 }
 
 // openInNewTab(menuItem: any, rowItem: any) {
-//   console.log(menuItem);
-//   console.log(rowItem);
 //   let baseUrl = this._generalService.FormURL;
 //   if(menuItem.label.toLowerCase() === 'sbt domain') {
 //     const url = this.router.serializeUrl(this.router.createUrlTree(['/customerGroupSBTDomain'], { queryParams: {
@@ -170,7 +167,6 @@ shouldShowDeleteButton(item: any): boolean {
 //       CustomerGroup: rowItem.customerGroup
 //     } }));
 //     window.open(baseUrl + url, '_blank'); 
-//        console.log(CustomerGroup);
 //   }
 //     else if(menuItem.label.toLowerCase() === 'designation') {
 //       const url = this.router.serializeUrl(this.router.createUrlTree(['/customerDesignation'], { queryParams: {
@@ -178,7 +174,6 @@ shouldShowDeleteButton(item: any): boolean {
 //         CustomerGroupName: rowItem.customerGroup, 
 //       } }));
 //       window.open(baseUrl + url, '_blank'); 
-//       console.log(CustomerGroup);
     
 //   }
 
@@ -218,8 +213,6 @@ shouldShowDeleteButton(item: any): boolean {
 // }
 
 openInNewTab(menuItem: any, rowItem: any) {
-  console.log(menuItem);
-  console.log(rowItem);
   
   let baseUrl = this._generalService.FormURL;
   

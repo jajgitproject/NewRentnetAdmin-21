@@ -389,7 +389,6 @@ export class SetAsCustomerKAMComponent implements OnInit {
       {
 
         this.dataSourceForPage = data; 
-        console.log(this.dataSourceForPage)      
       },
       (error: HttpErrorResponse) => { this.dataSourceForPage = null;}
     );
@@ -542,7 +541,6 @@ export class SetAsCustomerKAMComponent implements OnInit {
   }
 }
 onCheckBox(checkBoxValue: boolean, data: any) {
-  console.log(data);
   data.employeeID = this.EmployeeID;
   if (checkBoxValue) {
     data.checked = true;

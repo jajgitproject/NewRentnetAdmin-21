@@ -118,7 +118,6 @@ export class CustomerContractComponent implements OnInit {
     this.InitCurrencies();
     this.InitCustomerContract();
     this.menuItems.sort((a, b) => a.label.localeCompare(b.label));
-    console.log(this.menuItems);
   }
   
   private _filter(value: string): any {
@@ -319,7 +318,6 @@ export class CustomerContractComponent implements OnInit {
       {
 
         this.dataSource = data;
-        console.log(this.dataSource)
         this.InitCustomerContract();
       },
       (error: HttpErrorResponse) => { this.dataSource = null;}
@@ -333,7 +331,6 @@ export class CustomerContractComponent implements OnInit {
   //     data =>   
   //     {
   //       this.packageType = data;
-  //       console.log(this.packageType);       
   //       this.updateMenuItems();
   //     },
   //     (error: HttpErrorResponse) => { this.dataSource = null;}
@@ -618,7 +615,6 @@ export class CustomerContractComponent implements OnInit {
         CustomerContractName: encryptedCustomerContractName
 
       } }));
-      console.log(baseUrl + url);
       window.open(baseUrl + url, '_blank'); 
       // this.router.navigate(['/customerAddress'], {
       //   queryParams: {

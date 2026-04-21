@@ -118,7 +118,6 @@ deleteItem(row)
         data =>   
         {
           this.advanceTableDutyState = data;
-          console.log(this.advanceTableDutyState)
          
         },
         (error: HttpErrorResponse) => { this.advanceTableDutyState = null;}
@@ -131,7 +130,6 @@ deleteItem(row)
         data =>   
         {
           this.advanceTableDutyState = data;
-          console.log(this.advanceTableDutyState)
          
         },
         (error: HttpErrorResponse) => { this.advanceTableDutyState = null;}

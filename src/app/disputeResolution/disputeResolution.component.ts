@@ -98,7 +98,6 @@ export class DisputeResolutionComponent implements OnInit {
       const encryptedreservationID = this.route.snapshot.queryParamMap.get('reservationID');
        const encrypteddutySlipID = this.route.snapshot.queryParamMap.get('dutySlipID');
        this.verifyDutyStatusAndCacellationStatus = this.route.snapshot.queryParamMap.get('verifyDutyStatusAndCacellationStatus');
-      console.log(this.verifyDutyStatusAndCacellationStatus)
       // Check if the parameters exist
       if (encrypteddisputeID) {
         // Decrypt and decode the parameters
@@ -107,9 +106,6 @@ export class DisputeResolutionComponent implements OnInit {
         this.dutySlipID = Number(this._generalService.decrypt(decodeURIComponent(encrypteddutySlipID)));
 
         // Log the decrypted values
-        // console.log("Decrypted disputeID : ", this.disputeID);
-        // console.log("Decrypted reservationID: ", this.reservationID);
-        // console.log("Decrypted dutySlipID: ", this.dutySlipID);
       }
 
     })
@@ -450,7 +446,6 @@ export class DisputeResolutionComponent implements OnInit {
           );
       } else {
         // Optional: You can handle cancellation here if needed
-        //console.log('User cancelled the approval');
       }
     });
   }

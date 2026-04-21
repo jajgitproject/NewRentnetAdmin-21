@@ -267,7 +267,6 @@ export class CreditNoteManagementComponent implements OnInit {
       (
         data => {
           this.dataSource = data;  
-          console.log(this.dataSource);
           
           // Force apply table styling after data load
           this.forceTableStyling();
@@ -369,7 +368,6 @@ export class CreditNoteManagementComponent implements OnInit {
   });
 
   dialogRef.afterClosed().subscribe((result) => {
-    console.log('Dialog result:', result);
     if (result === 'success') {
       this.loadData(); // reload after closing form - this will call forceTableStyling()
     } else {

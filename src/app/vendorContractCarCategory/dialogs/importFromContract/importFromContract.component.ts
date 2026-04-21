@@ -108,7 +108,6 @@ export class ImportFromContractComponent
     this.vendorContractCarCategoryService.getVendorCategory().subscribe(
       data=>{
         this.vendorCategoryList=data;
-        console.log(this.vendorCategoryList)
       }
     );
   }
@@ -132,7 +131,6 @@ export class ImportFromContractComponent
         data =>   
         {
           this.VendorList = data; 
-          console.log(this.VendorList)
           this.filteredOptions = this.advanceTableForm.controls['vendorContractName'].valueChanges.pipe(
             startWith(""),
             map(value => this._filter(value || ''))
@@ -185,7 +183,6 @@ export class ImportFromContractComponent
         else 
         {
           // User clicked No - Do nothing
-          console.log('Import canceled');
         }
       });
     }
@@ -196,7 +193,6 @@ export class ImportFromContractComponent
       this.vendorContractCarCategoryService.GetVehicleCategoryToImportFormContractCarCategory(this.vendorContractID).subscribe(
         data => {
             this.vehicleCategoryList = data;
-            console.log((this.vehicleCategoryList))
             this.advanceTableFormData = this.vehicleCategoryList.map(vehicleCategory => 
               new VendorContractCarCategoryModel({
                       vendorContractCarCategoryID: -1, 

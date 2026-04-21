@@ -98,7 +98,6 @@ export class FormDialogComponent
       data =>   
       {
         this.DepartmentList = data;
-        console.log(this.DepartmentList)
        
       }
     );
@@ -110,7 +109,6 @@ export class FormDialogComponent
       data =>   
       {
         this.DesginationList = data;
-        console.log(this.DesginationList)
        
       }
     );
@@ -122,7 +120,6 @@ export class FormDialogComponent
       data =>   
       {
         this.SalutationList = data;
-        console.log(this.SalutationList)
        
       }
     );
@@ -218,13 +215,11 @@ export class FormDialogComponent
 
   // public fileChanged(event?: UIEvent): void {
   //   const files: FileList = this.fileUploadEl.nativeElement.files;
-  //   console.log(`files: `, files);
 
   //   const file = files[0];
   //   const reader = new FileReader();
   //   const loaded = (el) => {
   //     const contents = el.target.result;
-  //     console.log('onloaded', contents);
   //     this.contents = contents;
   //   }
   //   reader.onload = loaded;

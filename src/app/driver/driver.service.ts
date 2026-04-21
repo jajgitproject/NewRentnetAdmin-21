@@ -19,7 +19,6 @@ export class DriverService
 
   getPassword(referenceID:number,type:any):  Observable<any> 
   {
-    console.log(this.API_URL + '/GetDriverPassword' + "/" + referenceID + "/" + type);
     return this.httpClient.get(this.API_URL + '/GetDriverPassword' + "/" + referenceID + "/" + type);
   }
   /** CRUD METHODS */

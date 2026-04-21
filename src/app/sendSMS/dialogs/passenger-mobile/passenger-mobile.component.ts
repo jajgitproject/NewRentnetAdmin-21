@@ -53,7 +53,6 @@ export class PassengerMobileComponent implements OnInit {
     }
     submit() 
     {
-      //console.log(this.advanceTableForm.value);
     }
   ngOnInit(): void {
   }

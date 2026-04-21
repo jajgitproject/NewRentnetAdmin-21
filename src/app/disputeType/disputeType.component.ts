@@ -136,7 +136,6 @@ shouldShowDeleteButton(item: any): boolean {
         data =>   
         {
           this.dataSource = data;
-          console.log(this.dataSource);
          
           // this.dataSource.forEach((ele)=>{
           //   if(ele.activationStatus===true){

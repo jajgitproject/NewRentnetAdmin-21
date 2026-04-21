@@ -90,7 +90,6 @@ export class CustomerPersonDrivingLicenseVerificationComponent implements OnInit
   }
 
   // Log the decrypted values to the console
-  console.log(this.customerPerson_ID, this.customerPerson_Name);
 });
       this.loadData();
       this.SubscribeUpdateService();
@@ -151,7 +150,6 @@ export class CustomerPersonDrivingLicenseVerificationComponent implements OnInit
       data =>   
       {
         this.dataSource = data;
-        //console.log(this.dataSource);
       
       },
      
@@ -215,7 +213,6 @@ export class CustomerPersonDrivingLicenseVerificationComponent implements OnInit
         //message contains the data sent from service
         this.messageReceived = message.text;
         this.MessageArray=this.messageReceived.split(":");
-        console.log(this.MessageArray);
         if(this.MessageArray.length==3)
         {
           if(this.MessageArray[0]=="CustomerPersonDrivingLicenseVerificationCreate")

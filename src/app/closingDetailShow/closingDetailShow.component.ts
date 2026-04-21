@@ -92,7 +92,6 @@ export class ClosingDetailShowComponent implements OnInit {
          this.advanceTableForm.patchValue({dropOffEntryMethod:this.advanceTable[0].dropOffEntryMethod});
          this.advanceTableForm.patchValue({locationInEntryMethod:this.advanceTable[0].locationInEntryMethod});
 
-        //  console.log(this.advanceTable)      
        },
        (error: HttpErrorResponse) => { this.advanceTable = null;}
      );
@@ -132,7 +131,6 @@ export class ClosingDetailShowComponent implements OnInit {
   //      (data: ClosingDetailShowModel)=>   
   //      {
   //        this.advanceTable = data;
-  //        console.log(this.advanceTable)      
   //      },
   //      (error: HttpErrorResponse) => { this.advanceTable = null;}
   //    );
@@ -145,7 +143,6 @@ export class ClosingDetailShowComponent implements OnInit {
   //      (data: ClosingDetailShowModel)=>   
   //      {
   //        this.advanceTable = data;
-  //        console.log(this.advanceTable)      
   //      },
   //      (error: HttpErrorResponse) => { this.advanceTable = null;}
   //    );
@@ -158,7 +155,6 @@ export class ClosingDetailShowComponent implements OnInit {
   //      (data: ClosingDetailShowModel)=>   
   //      {
   //        this.advanceTable = data;
-  //        console.log(this.advanceTable)      
   //      },
   //      (error: HttpErrorResponse) => { this.advanceTable = null;}
   //    );

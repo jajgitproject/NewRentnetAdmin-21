@@ -79,7 +79,6 @@ export class InternalNoteDialogComponent
     response => 
     { 
      
-      console.log(response);
        if(response.activationStatus.indexOf("Duplicate") !== -1)
        {
         this._generalService.sendUpdate('DataNotFound:DuplicacyError:Failure');
@@ -103,7 +102,6 @@ export class InternalNoteDialogComponent
     response => 
     {
      
-      console.log(response);
        if(response.activationStatus.indexOf("Duplicate") !== -1)
        {
         this._generalService.sendUpdate('DataNotFound:DuplicacyError:Failure');

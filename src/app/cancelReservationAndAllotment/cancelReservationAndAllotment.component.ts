@@ -61,7 +61,6 @@ export class CancelReservationAndAllotmentComponent {
     // Set the defaults
     this.dialogTitle = 'Cancel Reservation Info';
     this.CancelReservationData = this.data.advanceTable;
-    console.log(this.CancelReservationData)
   }
   @ViewChild(MatPaginator, { static: true }) paginator: MatPaginator;
   @ViewChild(MatSort, { static: true }) sort: MatSort;

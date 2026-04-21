@@ -65,7 +65,6 @@ export class InterstateTaxEntryService
     {
       SearchActivationStatus=null;
     }
-    //console.log(this.API_URL + "/" +RegistrationNumber + '/' + SearchActivationStatus +'/' + PageNumber + '/'+coloumName+'/'+sortType)
     return this.httpClient.get(this.API_URL + "/" +RegistrationNumber+ "/" +State+ "/" +StartDate+ "/" +EndDate + '/' + SearchActivationStatus +'/' + PageNumber +  '/'+coloumName+'/'+sortType);
   }
 

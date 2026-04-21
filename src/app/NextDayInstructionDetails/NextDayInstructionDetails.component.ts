@@ -28,10 +28,7 @@ export class NextDayInstructionDetailsComponent {
     // Set the defaults
     this.dialogTitle = 'Next Day Instruction Details';
     this.NextDayInstructionDetails = this.data;
-    console.log(this.NextDayInstructionDetails);
   this.NextDayInstructionDetails = this.data?.dataSource;
-  console.log(this.data);
-  console.log(this.NextDayInstructionDetails)
   
   }
 

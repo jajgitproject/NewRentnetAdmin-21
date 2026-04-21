@@ -221,7 +221,6 @@ export class DriverComponent implements OnInit {
       {
 
         this.dataSource = data;
-       console.log(this.dataSource);
         // this.dataSource.forEach((ele)=>{
         //   if(ele.activationStatus===true){
         //     this.activeData="Active";
@@ -316,8 +315,6 @@ export class DriverComponent implements OnInit {
   }
 
   // openInNewTab(menuItem: any, rowItem: any) {
-  //   console.log(menuItem);
-  //   console.log(rowItem);
   //   let baseUrl = this._generalService.FormURL;
   //   if(menuItem.label.toLowerCase() === 'driving license') {
   //     const url = this.router.serializeUrl(this.router.createUrlTree(['/driverDrivingLicense'], { queryParams: {
@@ -391,8 +388,6 @@ export class DriverComponent implements OnInit {
 
 /////////////////for Image Upload////////////////////////////
 openInNewTab(menuItem: any, rowItem: any) {
-  console.log(menuItem);
-  console.log(rowItem);
 
   let baseUrl = this._generalService.FormURL;
   const encryptedDriverID = encodeURIComponent(this._generalService.encrypt(rowItem.driverID.toString()));

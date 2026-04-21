@@ -171,17 +171,7 @@ if (encryptedVehicleID && encryptedRegNo && encryptedRedirectingFrom && encrypte
 }
 
     });
-    console.log("Decrypted DriverID: ", this.driverID);
-    console.log("Decrypted DriverPhone: ", this.DriverPhone);
-    console.log("Decrypted DriverName: ", this.driverName);
-    console.log("Decrypted Supplier: ", this.Supplier);
-    console.log("Decrypted RedirectingFrom: ", this.RedirectingFrom);
 
-    console.log("Decrypted VehicleID: ", this.vehicleID);
-    console.log("Decrypted RegNo: ", this.RegNo);
-    console.log("Decrypted Vehicle: ", this.Vehicle);
-    console.log("Decrypted VehicleCategory: ", this.VehicleCategory);
-    console.log("Decrypted SupplierName: ", this.SupplierName);
    
     this.loadData();
     this.initDriver();
@@ -587,7 +577,6 @@ public loadData()
     (
       data =>   
       {
-        console.log(data)
         this.dataSource = data;
       
       },

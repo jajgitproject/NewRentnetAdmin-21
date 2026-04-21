@@ -62,7 +62,6 @@ export class FormValidationsComponent {
     });
   }
   onRegister() {
-    console.log('Form Value', this.register.value);
   }
 }
 

@@ -89,11 +89,9 @@ export class FormDialogComponent
           this.searchCategoryBy.setValue(this.advanceTable.vendorContractCarCategory)
           this.searchTierBy.setValue(this.advanceTable.vendorContractCityTier)
           this.searchPackageBy.setValue(this.advanceTable.package);
-          //console.log('Edit value:', this.advanceTable.nightChargesBasedOn);
           this.advanceTableForm?.patchValue({
            nightChargesBasedOn: this.advanceTable.nightChargesBasedOn || 'Garage'
             });
-            //console.log('Edit value:', this.advanceTable.nightChargesBasedOn);
         } 
         else if (this.action === 'add')  
         {
@@ -163,7 +161,6 @@ export class FormDialogComponent
     this.vendorContractLocalRateService.GetCarCategory(this.VendorContractID).subscribe(
       data=>{
         this.VehicleCategoryList=data;
-        console.log(this.VehicleCategoryList)
         this.advanceTableForm.controls['vendorContractCarCategory'].setValidators([Validators.required,this.vehicleCategoryValidator(this.VehicleCategoryList)]);
         this.advanceTableForm.controls['vendorContractCarCategory'].updateValueAndValidity();
         this.filteredCategoryOptions = this.advanceTableForm.controls['vendorContractCarCategory'].valueChanges.pipe(
@@ -265,7 +262,6 @@ export class FormDialogComponent
     this.vendorContractLocalRateService.GetCityTiersForCV(this.VendorContractID).subscribe(
       data=>{
         this.CityTierList=data;
-        console.log(this.CityTierList)
         this.advanceTableForm.controls['vendorContractCityTier'].setValidators([Validators.required,this.cityTierValidator(this.CityTierList)]);
         this.advanceTableForm.controls['vendorContractCityTier'].updateValueAndValidity();
         this.filteredTierOptions = this.advanceTableForm.controls['vendorContractCityTier'].valueChanges.pipe(
@@ -299,7 +295,6 @@ export class FormDialogComponent
   getTierTitles(vendorContractCityTiersID: any)
   {
     this.vendorContractCityTiersID=vendorContractCityTiersID;
-    console.log(this.vendorContractCityTiersID)
   }
 
   formControl = new FormControl('', 
@@ -398,7 +393,6 @@ numberOnly(event): boolean {
   public Post(): void
   {
     debugger
-    console.log(this.vendorContractCityTiersID)
     this.advanceTableForm.patchValue({vendorContractID:this.data.VendorContractID});
     this.advanceTableForm.patchValue({vendorContractCarCategoryID:this.vendorContractCarCategoryID});
     this.advanceTableForm.patchValue({vendorContractCityTiersID:this.vendorContractCityTiersID});
@@ -506,7 +500,6 @@ numberOnly(event): boolean {
     .subscribe(
     response => 
     {
-      console.log(response.activationStatus);
       if(response.activationStatus===false)
       {
         this._generalService.sendUpdate('DataNotFound:DuplicacyError:Failure');

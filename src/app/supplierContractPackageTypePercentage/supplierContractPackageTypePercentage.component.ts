@@ -143,7 +143,6 @@ export class SupplierContractPackageTypePercentageComponent implements OnInit {
           startWith(""),
           map(value => this._filterPackage(value || ''))
         );
-        //console.log(this.StateList);
       },
       error => {
 
@@ -192,7 +191,6 @@ export class SupplierContractPackageTypePercentageComponent implements OnInit {
           SupplierName:this.supplier_Name
       }
     });
-    //console.log(row);
 
   }
   public SearchData()
@@ -205,7 +203,6 @@ export class SupplierContractPackageTypePercentageComponent implements OnInit {
   {
 
     this.supplierContractPackageTypePercentageID = row.id;
-  //console.log(row)
     const dialogRef = this.dialog.open(DeleteDialogComponent, 
     {
       data: row
@@ -321,7 +318,6 @@ export class SupplierContractPackageTypePercentageComponent implements OnInit {
         //message contains the data sent from service
         this.messageReceived = message.text;
         this.MessageArray=this.messageReceived.split(":");
-        //console.log(this.MessageArray);
         if(this.MessageArray.length==3)
         {
           if(this.MessageArray[0]=="SupplierContractPackageTypePercentageCreate")

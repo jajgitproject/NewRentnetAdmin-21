@@ -33,7 +33,6 @@ export class VerificationstatusComponent
   @Inject(MAT_DIALOG_DATA) public data: any)
   {
     this.Supplier_ID=data.supplier_ID
-    console.log(this.Supplier_ID)   
   }
 
   public ngOnInit(): void

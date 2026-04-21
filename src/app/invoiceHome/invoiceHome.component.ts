@@ -185,7 +185,6 @@ bookerName: FormControl = new FormControl();
     this.invoiceHomeService.getTableData(this.customerName.value,this.customerGroup.value,  this.searchInvoiceNo.replace("/","-"), this.branch.value,this.SearchFromDate,this.SearchToDate,this.SearchInvoiceStatus,this.SearchEInvoiceStatus,this.searchDutySlip,this.searchReservationID,this.searchActivationStatus,this.PageNumber).subscribe(
         data => {
           this.dataSource = data;
-          console.log(this.dataSource)
         },
         (error: HttpErrorResponse) => { this.dataSource = null; }
       );
@@ -328,7 +327,6 @@ bookerName: FormControl = new FormControl();
     );
   }
   openInNewTab(rowItem: any) {
-    console.log(rowItem);
     let baseUrl = this._generalService.FormURL;   
     const url = this.router.serializeUrl(this.router.createUrlTree(['/bookingConfiguration'], { queryParams: {
       BookingID:rowItem.integrationRequestID,
@@ -436,7 +434,6 @@ bookerName: FormControl = new FormControl();
         data=>
         {
           this.RegistrationNumberList=data;
-          console.log(this.RegistrationNumberList);
           this.filteredRegistrationNumberOptions = this.invoiceNumberWithPrefix.valueChanges.pipe(
             startWith(""),
             map(value => this._filterRN(value || ''))
@@ -459,7 +456,6 @@ bookerName: FormControl = new FormControl();
     }
 
  viewCreditNote(row) {
-    console.log(row?.invoiceID);
     this.dialog.open(CreditNoteHistoryComponent, {
       width: '500px',
       data: {
@@ -488,7 +484,6 @@ bookerName: FormControl = new FormControl();
   }
   
 viewInvoiceBilling(row) {
-    console.log(row?.invoiceID);
     this.dialog.open(InvoiceBillingHistoryComponent, {
       width: '500px',
       data: {
@@ -548,7 +543,6 @@ viewInvoiceBilling(row) {
 
   //----------------Cancel Invoice ---------------------
   //  cancelInvoice(row) {
-  //   console.log(row?.invoiceID);
   //   this.dialog.open(FormDialogCIComponent, {
   //     width: '400px',
   //     data: {

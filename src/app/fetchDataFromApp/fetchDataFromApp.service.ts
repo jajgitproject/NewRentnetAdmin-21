@@ -27,7 +27,6 @@ export class FetchDataFromAppService
     {
       searchpickupTime="null";
     }
-    console.log(this.API_URL + "/" +searchpickupDate + '/' + searchpickupTime  )
     return this.httpClient.get(this.API_URL + "/" +searchpickupDate + '/'+searchpickupTime );
   }
   fetchAppCurrentData(pickupDate:string,pickupTime:string)

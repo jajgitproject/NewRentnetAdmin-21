@@ -232,7 +232,6 @@ export class CreateCreditNoteComponent implements OnInit {
       data =>   
       {
         this.dataSource = data;    
-        console.log(this.dataSource)  
       },
       (error: HttpErrorResponse) => { this.dataSource = null;}
     );
@@ -265,7 +264,6 @@ export class CreateCreditNoteComponent implements OnInit {
       {
 
         this.dataSourceForPage = data; 
-        console.log(this.dataSourceForPage)      
       },
       (error: HttpErrorResponse) => { this.dataSourceForPage = null;}
     );

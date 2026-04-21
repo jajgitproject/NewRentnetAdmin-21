@@ -113,7 +113,6 @@ export class SupplierContractCDCLocalOnDemandComponent implements OnInit {
       this.Applicable_From= decodeURIComponent( this.Applicable_From);
     }
     });
-    console.log(this.supplierContract_ID)
     this.InitVehicleCategory();
     this.InitCityTier();
     this.loadData();
@@ -312,7 +311,6 @@ export class SupplierContractCDCLocalOnDemandComponent implements OnInit {
   
   NextCall()
   {
-    //console.log(this.dataSource.length>0)
     if (this.dataSource.length>0) 
     {
      

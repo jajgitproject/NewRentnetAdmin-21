@@ -65,7 +65,6 @@ export class DateWiseCarwiseBookingReportService {
     if (SearchActivationStatus === null) {
       SearchActivationStatus = null;
     }
-    //console.log(this.API_URL + "/" +RegistrationNumber + '/' + SearchActivationStatus +'/' + PageNumber + '/'+coloumName+'/'+sortType)
     return this.httpClient.get(this.API_URL + "/" + searchpickupadate + "/" + searchcity + "/" + searchlocation + "/" + searchvehicleCategory + "/" + SearchActivationStatus + '/' + PageNumber + '/' + coloumName + '/' + sortType);
   }
 

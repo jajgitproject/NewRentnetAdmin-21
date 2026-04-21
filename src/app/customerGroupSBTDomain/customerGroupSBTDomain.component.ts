@@ -94,8 +94,6 @@ export class CustomerGroupSBTDomainComponent implements OnInit {
   }
   
   // Log decrypted values
-  console.log("Decrypted CustomerGroupID: ", this.customerGroupID);
-  console.log("Decrypted CustomerGroup: ", this.customerGroup);
 });
     this.initCustomerCategory();
     this.initRate();
@@ -192,7 +190,6 @@ export class CustomerGroupSBTDomainComponent implements OnInit {
       {
 
         this.dataSource = data;
-        console.log(this.dataSource);
         this.dataSource?.forEach((ele)=>{
           if(ele.status===true){
             this.activeData="Active";

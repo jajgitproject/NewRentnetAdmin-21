@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { Injectable } from '@angular/core';
 interface Scripts {
   name: string;
@@ -23,7 +22,7 @@ export class DynamicScriptLoaderService {
     return Promise.all(promises);
   }
   loadScript(name: string) {
-    return new Promise((resolve, reject) => {
+    return new Promise((resolve) => {
       if (!this.scripts[name].loaded) {
         // load script
         let script = document.createElement('script');
@@ -48,7 +47,7 @@ export class DynamicScriptLoaderService {
             resolve({ script: name, loaded: true, status: 'Loaded' });
           };
         }
-        script.onerror = (error: any) =>
+        script.onerror = () =>
           resolve({ script: name, loaded: false, status: 'Loaded' });
         document.getElementsByTagName('head')[0].appendChild(script);
       } else {

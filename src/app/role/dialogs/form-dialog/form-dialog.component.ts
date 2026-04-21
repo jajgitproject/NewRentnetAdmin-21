@@ -36,7 +36,6 @@ export class FormDialogComponent
         {
           this.dialogTitle ='Role';       
           this.advanceTable = data.advanceTable;
-          console.log(this.advanceTable);
           this.advanceTableForm?.controls['canCreateReservation'].setValue(this.advanceTable.canCreateReservation);
         } else 
         {

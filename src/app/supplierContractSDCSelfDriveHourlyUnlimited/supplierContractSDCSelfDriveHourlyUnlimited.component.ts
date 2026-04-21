@@ -375,7 +375,6 @@ SearchMinimumHRs: string ='';
   
   NextCall()
   {
-    //console.log(this.dataSource.length>0)
     if (this.dataSource.length>0) 
     {
      

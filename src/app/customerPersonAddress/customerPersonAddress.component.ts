@@ -89,7 +89,6 @@ export class CustomerPersonAddressComponent implements OnInit {
           this.customerPerson_Name = this._generalService.decrypt(decodeURIComponent(encryptedCustomerPersonName));
         }
       
-        console.log(this.customerPerson_ID, this.customerPerson_Name); // Log the decrypted values
       });
       
     this.loadData();

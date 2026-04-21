@@ -86,7 +86,6 @@ export class CustomerPaymentTermsCodeComponent implements OnInit {
         this.customerID = this._generalService.decrypt(decodeURIComponent(encryptedCustomerID));
         this.customerName = this._generalService.decrypt(decodeURIComponent(encryptedCustomerName));
       }
-      //console.log(this.Customer_ID,this.Customer_Name)
       
     });
     
@@ -204,7 +203,6 @@ export class CustomerPaymentTermsCodeComponent implements OnInit {
   
   NextCall()
   {
-    //console.log(this.dataSource.length>0)
     if (this.dataSource.length>0) 
     {
      

@@ -108,7 +108,6 @@ export class SidebarComponent implements OnInit, OnDestroy {
     return new Promise((resolve, reject) => {
       this.roleMapService.getTableData(null, roleID, true, 0).subscribe(
         (data) => {
-          console.log(data);
           let accessPagesArray = [];
           data?.forEach(element => {
             if (element.activationStatus) {

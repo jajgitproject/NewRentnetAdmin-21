@@ -52,7 +52,6 @@ export class FormDialogComponent
           //this.dialogTitle ='Edit Mode Of Payment';       
           this.dialogTitle ='Mode Of Payment';
           this.advanceTable = data.advanceTable;
-          console.log(this.advanceTable)
           this.previousModeOfPaymentID=this.advanceTable?.modeOfPaymentID || null;
           this.previousModeOfPayment = this.advanceTable?.modeOfPayment || '';
         } else 
@@ -65,7 +64,6 @@ export class FormDialogComponent
         this.advanceTableForm = this.createContactForm();
         this.reservationID=data.reservationID;
         this.status= data.verifyDutyStatusAndCacellationStatus || data?.status?.status || data?.status;
-        console.log(this.status)
         // if(this.status !== 'Changes allow'){
         //   this.buttonDisabled=true;
         // }

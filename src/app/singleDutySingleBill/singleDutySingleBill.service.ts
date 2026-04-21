@@ -19,7 +19,6 @@ export class SingleDutySingleBillService {
 
   BillInfo(dutySlipID: number): Observable<any> 
   {
-    console.log(this.API_URL + 'getinvoice/' + dutySlipID);
     return this.httpClient.get(this.API_URL + 'getinvoice/' + dutySlipID);
   }
   

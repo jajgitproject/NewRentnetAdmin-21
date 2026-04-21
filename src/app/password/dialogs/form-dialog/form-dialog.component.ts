@@ -130,11 +130,9 @@ export class FormDialogComponent
       requestPayload.EmployeeEntityPasswordID = currentUser.employee.EmployeeEntityPasswordID;
       requestPayload.EmployeeEntityID = currentUser.employee.EmployeeEntityID;
       requestPayload.UserType = "Employee";
-      console.log(requestPayload);
       this.advanceTableService.password(requestPayload).subscribe(
         response => {
           // Handle success response
-          console.log('Password updated successfully', response);
           this.dialogRef.close(true);
           this.router.navigate(['/authentication/signin']);
         },

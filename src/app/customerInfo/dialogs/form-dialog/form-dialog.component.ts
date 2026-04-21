@@ -99,7 +99,6 @@ export class FormDialogCIComponent
           //this.dialogTitle ='Edit Reservation Details';
           // this.dialogTitle ='Reservation Details';  
           // this.advanceTable = data.advanceTable[0];
-          // console.log(this.advanceTable) 
           // this.advanceTable.primaryPassenger=data.advanceTable[0].primaryPassenger+"-"+data.advanceTable[0].gender+"-"+data.advanceTable[0].importance+"-"+data.advanceTable[0].customerDepartment+"-"+data.advanceTable[0].customerDesignation+"-"+data.advanceTable[0].customer;
           // this.advanceTable.primaryBooker=data.advanceTable[0].primaryBooker+"-"+data.advanceTable[0].gender+"-"+data.advanceTable[0].importance+"-"+data.advanceTable[0].customerDepartment+"-"+data.advanceTable[0].customerDesignation+"-"+data.advanceTable[0].customer;  
           //this.advanceTable.customer=data.advanceTable[0].customer+"-"+data.advanceTable[0].customerGroup;
@@ -111,7 +110,6 @@ export class FormDialogCIComponent
         //   this.advanceTable = new CustomerInfo({});
         // }
          
-        //console.log(data.test);
   }
   public ngOnInit(): void
   {
@@ -460,7 +458,6 @@ export class FormDialogCIComponent
 
   // ViewKAM()
   // {
-  //   console.log(this.advanceTableForm.value);
   //   const dialogRef = this.dialog.open(FormDialogComponent, 
   //     {
   //       width:'60%',
@@ -580,7 +577,6 @@ export class FormDialogCIComponent
   //     data=>
   //     {
   //       this.contractID=data;
-  //       console.log(this.contractID)
   //       this.InitPackage();
   //       this.InitVehicle();
   //     }
@@ -589,13 +585,11 @@ export class FormDialogCIComponent
 
   // public fileChanged(event?: UIEvent): void {
   //   const files: FileList = this.fileUploadEl.nativeElement.files;
-  //   console.log(`files: `, files);
 
   //   const file = files[0];
   //   const reader = new FileReader();
   //   const loaded = (el) => {
   //     const contents = el.target.result;
-  //     console.log('onloaded', contents);
   //     this.contents = contents;
   //   }
   //   reader.onload = loaded;

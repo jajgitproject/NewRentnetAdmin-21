@@ -47,12 +47,10 @@ export class FormDialogComponent
         this.action = data.action;
         this.dutySlipID=data.dutySlipID;
         this.verifyDutyStatusAndCacellationStatus = data.verifyDutyStatusAndCacellationStatus;
-        console.log(data)
         if(this.action==='approval')
         {
           this.dialogTitle ='Toll Parking For Duty Slip No.';       
           this.advanceTable = data.advanceTable;
-          console.log(this.advanceTable)
         }
         
         if(this.action==='add') 
@@ -157,7 +155,6 @@ InitTollParkingType() {
 
   submit() 
   {
-    //console.log(this.advanceTableForm.value);
   }
   onNoClick(): void 
   {

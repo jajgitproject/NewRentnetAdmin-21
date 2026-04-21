@@ -386,7 +386,6 @@ export class FormDialogComponent
   }
 
   // onCompanyInputChange(event: any) {
-  //   console.log(event)
   //   if(event.target.value.length === 0) {
   //     this.advanceTableForm.controls['supplier'].setValue('');
   //   } else {
@@ -606,7 +605,6 @@ export class FormDialogComponent
   //     this.advanceTableForm.patchValue({supplierID:this.supllierDetails?.organizationalEntityID || this.advanceTable.organizationalEntityID});
   //     this.owned=true;
   //     this.supplier=false;
-  //     console.log(event.value)
   //     //this.InitSupplierForOwnership();
      
   //   }
@@ -816,7 +814,6 @@ export class FormDialogComponent
       data=>
       {
         this.TransmissionTypeList=data;
-        console.log(this.TransmissionTypeList)
         this.advanceTableForm.controls['transmissionType'].setValidators([Validators.required,
           this.transmissionTypeValidator(this.TransmissionTypeList)]);
         this.advanceTableForm.controls['transmissionType'].updateValueAndValidity();

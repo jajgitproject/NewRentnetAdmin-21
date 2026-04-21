@@ -200,7 +200,6 @@ export class tripFeedBackAttachmentFormDialogComponent {
       data => {
         this.additionalList = data;
         this.service = this.additionalList[0].additionalService;
-        console.log(this.service)
       }
     )
   }

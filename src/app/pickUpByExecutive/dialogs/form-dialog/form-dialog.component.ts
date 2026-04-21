@@ -7,7 +7,7 @@ import { formatDate } from '@angular/common';
 import { GeneralService } from '../../../general/general.service';
 import { PickUpByExecutiveService } from '../../pickUpByExecutive.service';
 import { PickUpByExecutive } from '../../pickUpByExecutive.model';
-import { Address } from 'ngx-google-places-autocomplete/objects/address';
+import { Address } from '@compat/google-places-shim-objects/address';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { EmployeeDropDown } from 'src/app/employee/employeeDropDown.model';
 import { FetchPickupAppDataDialogComponent } from '../fetch-pickup-app-data/fetch-pickup-app-data.component';
@@ -167,7 +167,6 @@ this.isSaveAllowed = status === 'changes allow';
     this.getDutySlipData();
     this.InitGoogleAddress();
     // this.advanceTableForm.markAllAsTouched();
-    console.log(this.advanceTableForm.valid);
     // if (!this.advanceTableForm.get('pickupEntryMethod').value) {
     //   this.advanceTableForm.patchValue({ pickupEntryMethod: "Manual" });
     //}
@@ -249,7 +248,6 @@ this.isSaveAllowed = status === 'changes allow';
       data=>
       {
         this.employeeDataSource=data;
-        console.log(this.employeeDataSource)
         //this.advanceTableForm.controls["executive"].disable();
         this.advanceTableForm.patchValue({executive:this.employeeDataSource[0].firstName+" "+this.employeeDataSource[0].lastName});
         this.advanceTableForm.patchValue({pickupEntryExecutiveID:this.employeeDataSource[0].employeeID});
@@ -371,7 +369,6 @@ googlePickupValidator(): ValidatorFn {
             //this.advanceTableForm.controls["pickUpLatitude"].disable();
             this.advanceTableForm.patchValue({pickUpLongitude:long});
             //this.advanceTableForm.controls["pickUpLongitude"].disable();
-            console.log(this.advanceTableForm.valid);
           },
 
           (error: HttpErrorResponse) => { this.dataSource = null; }
@@ -528,7 +525,6 @@ public PostGoogleAddress(): void
 
   submit() 
   {
-    console.log(this.advanceTableForm.value);
   }
   onNoClick(): void 
   {
@@ -573,7 +569,6 @@ public PostGoogleAddress(): void
     {
     
         this.dialogRef.close(response);
-        console.log(response)
         this.showNotification(
           'snackbar-success',
           'Pickup By Executive Updated...!!!',
@@ -620,7 +615,6 @@ public PostGoogleAddress(): void
        
       if(res!==undefined)
       {
-        console.log(res)
        this.advanceTableForm.patchValue({pickUpKM:res.data.pickupKM});
        this.advanceTableForm.patchValue({pickUpAddressString:res.data.pickupAddressString});
        this.advanceTableForm.patchValue({pickUpLatitude:res.data.pickupLatitude});
@@ -646,7 +640,6 @@ public PostGoogleAddress(): void
        
       if(res!==undefined)
       {
-        console.log(res)
        this.advanceTableForm.patchValue({pickUpKM:res.data[0].pickupKM});
        this.advanceTableForm.patchValue({pickUpAddressString:res.data[0].pickupAddressString});
        this.advanceTableForm.patchValue({pickUpLatitude:res.data[0].pickupLatitude});
@@ -694,7 +687,6 @@ public PostGoogleAddress(): void
 
   bindPickupSpotTypeandSpot(option:any)
   {
-    console.log(option)
      this.advanceTableForm.patchValue({pickUpAddressString:option.geoSearchString});
      var value = option?.geoLocation?.replace(
       '(',

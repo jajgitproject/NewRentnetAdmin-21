@@ -312,7 +312,6 @@ export class DutySlipLTRStatementComponent implements OnInit {
 //     const formData = []; 
 //     for (let i = 0; i < this.dayDifferences.length; i++) {
 //         if (!this.advanceTableForm.get('holiday' + i)?.value) {
-//           console.log(this.advanceTableForm.get(`dutyStartCityID${i}`)?.value,)
 //             const rowData = {
 //               dutySlipID: this.DutySlipID,
 //               reservationID: this.ReservationID,
@@ -905,7 +904,6 @@ getDateTime(i:any)
   //   if (!isNaN(parsedTime.getTime())) 
   //   {
   //     const controlName = `dutyStartTime${i}`;
-  //     console.log(controlName)
   //     this.advanceTableForm.get(controlName)?.setValue(parsedTime);
   //   }
 
@@ -1682,7 +1680,6 @@ OnStartCitySelect(selectedStartCity: string,i:number)
 getStartCityID(geoPointID: any, i: number)
 {
   this.cityID = geoPointID;
-  console.log(this.cityID)
   this.advanceTableForm.patchValue({[`dutyStartCityID${i}`]: this.cityID || this.dataSourceLoadData[i].dutyStartCityID});
 }
 
@@ -1726,7 +1723,6 @@ OnEndCitySelect(selectedEndCity: string,i:number)
 getEndCityID(geoPointID: any, i:number) 
 {
   this.cityID=geoPointID;
-  console.log(this.cityID)
   this.advanceTableForm.patchValue({[`dutyEndCityID${i}`]: this.cityID || this.dataSourceLoadData[i].dutyEndCityID});
 }
 

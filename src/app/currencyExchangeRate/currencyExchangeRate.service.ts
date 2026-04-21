@@ -47,7 +47,6 @@ export class CurrencyExchangeRateService
     {
       SearchActivationStatus=null;
     }
-   // console.log(this.API_URL + "/" +CurrencyName +  "/" +SearchMessage + '/' + SearchApplicableFrom +'/'+SearchApplicableTo +  "/" +SearchName + '/' + SearchActivationStatus +'/' + PageNumber + '/currencyExchangeRateID/Ascending')
     return this.httpClient.get(this.API_URL + "/" + SearchSource + '/' +CurrencyName +  "/" +SearchMessage + '/' + SearchApplicableFrom +'/'+SearchApplicableTo +  "/" +SearchName + '/' + SearchActivationStatus +'/' + PageNumber + '/currencyExchangeRateID/Ascending');
   }
   getTableDataSort(SearchSource:string,CurrencyName:string ,SearchMessage:string,SearchApplicableFrom:string,SearchApplicableTo:string,SearchName:string, SearchActivationStatus:boolean, PageNumber: number,coloumName:string,sortType:string):  Observable<any> 
@@ -80,7 +79,6 @@ export class CurrencyExchangeRateService
     {
       SearchActivationStatus=null;
     }
-    //console.log(this.API_URL + "/" +CurrencyName +  "/" +SearchName + '/' + SearchActivationStatus +'/' + PageNumber + '/'+coloumName+'/'+sortType)
     return this.httpClient.get(this.API_URL + "/"+ SearchSource + '/' +CurrencyName +  "/"+SearchMessage + '/' + SearchApplicableFrom +'/'+SearchApplicableTo +  "/" +SearchName + '/' + SearchActivationStatus +'/' + PageNumber + '/'+coloumName+'/'+sortType);
   }
 

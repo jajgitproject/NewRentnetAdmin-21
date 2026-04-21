@@ -161,7 +161,6 @@ onVehicleCategorySelected(selectedVehicleCategory: string) {
 getTitles(vehicleCategoryID: any) {
   //debugger;
   this.vehicleCategoryID=vehicleCategoryID;
-  console.log(vehicleCategoryID)
 }
 
 //----------- City Tier Validation --------------
@@ -211,7 +210,6 @@ onCityTierSelected(selectedCityTier: string) {
 getcityTierID(cityTierID: any) {
   //debugger;
   this.cityTierID=cityTierID;
-  //console.log(cityTierID)
 }
 
 //----------- Package Validation --------------
@@ -265,7 +263,6 @@ onPackageSelected(selectedPackage: string) {
 getpackageID(packageID: any) {
   //debugger;
   this.packageID=packageID;
-  //console.log(packageID)
 }
 
   formControl = new FormControl('', 
@@ -284,7 +281,6 @@ getpackageID(packageID: any) {
   
   createContactForm(): FormGroup 
   {
-    //console.log(this.advanceTable)
     return this.fb.group(
     {
       supplierContractSDCSelfDriveHourlyLimitedID: [this.advanceTable.supplierContractSDCSelfDriveHourlyLimitedID],

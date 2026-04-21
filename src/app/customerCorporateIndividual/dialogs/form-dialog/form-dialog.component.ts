@@ -353,7 +353,6 @@ export class FormDialogComponent
         data =>   
         {
           this.dataSource = data;
-          console.log(this.dataSource)
           this.advanceTableForm.patchValue({salutationID:this.dataSource.salutationID});
           this.advanceTableForm.patchValue({salutation:this.dataSource.salutation});
           this.advanceTableForm.patchValue({gender:this.dataSource.gender});
@@ -627,7 +626,6 @@ export class FormDialogComponent
       data =>
       {
         this.KAMCityList = data;
-        console.log(this.KAMCityList)
         this.advanceTableForm.controls['customerKAMCity'].setValidators([Validators.required,this.kamCityNameValidator(this.KAMCityList)]);
         this.advanceTableForm.controls['customerKAMCity'].updateValueAndValidity();
         this.filteredKAMCityOptions = this.advanceTableForm.controls['customerKAMCity'].valueChanges.pipe(

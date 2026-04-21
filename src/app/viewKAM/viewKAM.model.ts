@@ -1,6 +1,5 @@
 // @ts-nocheck
 import { formatDate } from '@angular/common';
-import { LatLng } from 'ngx-google-places-autocomplete/objects/latLng';
 export class ViewKAM {
    customerID: number;
    employeeID: string;

@@ -43,13 +43,11 @@ export class InternalNoteDialogComponent {
     public _generalService: GeneralService) {
     // Set the defaults
     this.action = data.action;
-    //console.log(this.action);
     if (this.action === 'edit')
     {
       //this.dialogTitle = 'Edit Internal Note';
       this.dialogTitle = 'Internal Note';
       this.advanceTable = data.advanceTable;
-      //console.log(this.advanceTable);
       this.ImagePath = this.advanceTable.reservationInternalNoteAttachment;
       this.advanceTable.reservationInternalNoteByEmployee=this.advanceTable.firstName+" "+this.advanceTable.lastName;
       //this.advanceTableForm.patchValue({reservationInternalNote:data.reservationInternalNote});
@@ -60,7 +58,6 @@ export class InternalNoteDialogComponent {
       this.advanceTable = new InternalNote({});
       this.advanceTable.activationStatus=true;
       this.ReservationID = data.reservationID;
-      //console.log(this.ReservationID);
    
     }
     

@@ -32,7 +32,6 @@ export class DriverFeedbackInfoService
     {
       DriverID=0;
     }
-    console.log(this.Allotment_URL+'/GetCompleteDriverFeedbackData' +"/"+DriverID+'/' + PageNumber + '/DateOfFeedback/Descending');
     return this.httpClient.get(this.Allotment_URL+'/GetCompleteDriverFeedbackData' +"/"+DriverID +'/' + PageNumber + '/DateOfFeedback/Descending');
   }
 

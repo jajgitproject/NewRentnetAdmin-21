@@ -454,6 +454,14 @@ export class AuditTrailComponent implements OnInit {
     });
   }
 
+  /**
+   * Renders a JSON payload as a small HTML diff tree. Caller is responsible for
+   * trusting the returned string via `bypassSecurityTrustHtml`; every piece of
+   * user/server-provided content that is interpolated below MUST go through
+   * `escapeHtml()` first. CSS class names and literal HTML are the only
+   * unescaped strings in this method. If you add a new branch, preserve this
+   * contract or the whole diff viewer becomes an XSS sink.
+   */
   private renderJson(obj: any, changedPaths: Set<string>, basePath: string): string {
     if (obj === null || obj === undefined) {
       const v = 'null';

@@ -25,32 +25,27 @@ export class CustomerPersonService
 //   primaryEmail: string;
 //   customerGroupID: number;
 // }): Observable<MobileEmailModel> {
-//   console.log(this.API_URL + '/check-duplicate-customer-person');
 //   return this.httpClient.get<MobileEmailModel>(this.API_URL + '/check-duplicate-customer-person', { params: customerPerson });
 //   }
 
   DuplicateCustomerPersonName(customerPersonName: string,primaryMobile:string,customerGroupID:number):  Observable<any> 
   {
     debugger
-    console.log(this.API_URL + '/checkDuplicateCustomerPerson' + "/" + customerPersonName + "/" + primaryMobile + "/"  + customerGroupID);
     return this.httpClient.get(this.API_URL + '/checkDuplicateCustomerPerson' + "/" + customerPersonName + "/" + primaryMobile + "/" + customerGroupID);
   }
 
    duplicateCustomerPersonNameEmail(customerPersonName: string,primaryEmail:string,customerGroupID:number):  Observable<any> 
   {
 
-    console.log(this.API_URL + '/getDuplicateByNameEmailGroup' + "/" + customerPersonName + "/" + primaryEmail + "/"  + customerGroupID);
     return this.httpClient.get(this.API_URL + '/getDuplicateByNameEmailGroup' + "/" + customerPersonName + "/" + primaryEmail + "/" + customerGroupID);
   }
 
    duplicateCustomerPersonNameMobileEmail(customerPersonName: string, primaryMobile:string,primaryEmail:string,customerGroupID:number):  Observable<any> 
   {
-    console.log(this.API_URL + '/getDuplicateByNameEmailGroup' + "/" + customerPersonName + "/" + primaryMobile + "/" + primaryEmail + "/"  + customerGroupID);
     return this.httpClient.get(this.API_URL + '/getDuplicateByNameEmailGroup' + "/" + customerPersonName + "/" + primaryMobile + "/" + primaryEmail + "/" + customerGroupID);
   }
   getPassword(referenceID:number,type:any):  Observable<any> 
   {
-    console.log(this.API_URL_Driver + '/GetDriverPassword' + "/" + referenceID + "/" + type);
     return this.httpClient.get(this.API_URL_Driver + '/GetDriverPassword' + "/" + referenceID + "/" + type);
   }
   /** CRUD METHODS */

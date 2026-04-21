@@ -89,7 +89,6 @@ export class FormDialogPickupExecutiveComponent
   //   //console.log(this.advanceTableForm.controls['pickupDate'].value, this.advanceTableForm.controls['pickupTime'].value);
   //   var pickupDate = moment(this.advanceTableForm.value.pickupDate).format('yyyy-MM-DD');
   //   var pickupTime = moment(this.advanceTableForm.value.pickupTime).format('HH:mm:ss');
-  //   console.log(pickupDate ,pickupTime)
   //   this.fetchDataService.getTableData(pickupDate, pickupTime).subscribe((result: any) => {
   //     let dataTableRecords = [];
   //     result?.forEach(element => {
@@ -100,10 +99,8 @@ export class FormDialogPickupExecutiveComponent
   //         pickupLongitude: element.pickupLongitude
   //       });
   //     });
-  //     console.log(dataTableRecords);
   //     this.dataSource = dataTableRecords;
   //   }, (error: HttpErrorResponse) => {
-  //     console.log(error);
   //  });
   // }
 
@@ -116,7 +113,6 @@ export class FormDialogPickupExecutiveComponent
       (data:FetchDataFromApp[])=>
       {
         this.fetchCurrentDataFromAppList=data;
-        console.log(this.fetchCurrentDataFromAppList)
       }
     );
 
@@ -124,7 +120,6 @@ export class FormDialogPickupExecutiveComponent
       (data:FetchDataFromApp[])=>
       {
         this.fetchPreviousDataFromAppList=data;
-        console.log(this.fetchPreviousDataFromAppList)
       }
     );
 
@@ -132,7 +127,6 @@ export class FormDialogPickupExecutiveComponent
       (data:FetchDataFromApp[])=>
       {
         this.fetchNextDataFromAppList=data;
-        console.log(this.fetchNextDataFromAppList)
       }
     );
   }

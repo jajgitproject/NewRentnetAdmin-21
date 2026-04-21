@@ -185,7 +185,6 @@ public Put(): void {
     data=>
     {
       this.FuelTypeList=data;
-      console.log(this.FuelTypeList)
       this.advanceTableForm.controls['fuelType'].setValidators([Validators.required,
         this.fuelTypeValidator(this.FuelTypeList)
         ]);

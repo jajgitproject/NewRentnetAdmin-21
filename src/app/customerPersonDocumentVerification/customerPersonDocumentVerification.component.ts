@@ -92,7 +92,6 @@ export class CustomerPersonDocumentVerificationComponent implements OnInit {
   }
 
   // Log the decrypted values to the console
-  console.log(this.customerPerson_ID, this.customerPerson_Name);
 
     });
       this.loadData();
@@ -155,7 +154,6 @@ export class CustomerPersonDocumentVerificationComponent implements OnInit {
       data =>   
       {
         this.dataSource = data;
-        //console.log(this.dataSource);
         this.dataSource.forEach((element)=>{
           if(element.activationStatus===true){
             this.ActiveStatus="Active"
@@ -163,7 +161,6 @@ export class CustomerPersonDocumentVerificationComponent implements OnInit {
           else{
             this.ActiveStatus="Deleted"
           }
-         // console.log(element);
         })
       
       },
@@ -228,7 +225,6 @@ export class CustomerPersonDocumentVerificationComponent implements OnInit {
         //message contains the data sent from service
         this.messageReceived = message.text;
         this.MessageArray=this.messageReceived.split(":");
-        console.log(this.MessageArray);
         if(this.MessageArray.length==3)
         {
           if(this.MessageArray[0]=="CustomerPersonDocumentVerificationCreate")

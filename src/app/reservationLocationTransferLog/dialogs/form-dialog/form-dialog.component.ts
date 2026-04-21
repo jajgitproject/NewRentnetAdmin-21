@@ -244,7 +244,6 @@ InitTransferToLocation() {
 
   submit() 
   {
-    //console.log(this.advanceTableForm.value);
   }
   onNoClick(): void 
   {

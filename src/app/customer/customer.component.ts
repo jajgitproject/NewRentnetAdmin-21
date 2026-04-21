@@ -174,7 +174,6 @@ export class CustomerComponent implements OnInit {
     // // Fetch accessPages from localStorage
     const accessPagesString = localStorage.getItem('accessPages');
     const accessPages = accessPagesString ? JSON.parse(accessPagesString) : [];
-    console.log('Access Pages:', accessPages);
     // Filter and sort menuItems based on accessPages
     const filteredMenuItems = this.menuItems
       .filter(menuItem =>
@@ -184,9 +183,6 @@ export class CustomerComponent implements OnInit {
       )
       .sort((a, b) => a.label.localeCompare(b.label));
 
-    console.log(filteredMenuItems);
-    console.log('Access Pages:', accessPages);
-  console.log('Filtered Menu Items:', filteredMenuItems);
     this.menuItems = filteredMenuItems;
   //   this.roleID = localStorage.getItem('roleID');
   //   this.role = localStorage.getItem('role');
@@ -204,7 +200,6 @@ export class CustomerComponent implements OnInit {
   //   return new Promise((resolve, reject) => {
   //     this.roleMapService.getTableData(null, roleID, true, 0).subscribe(
   //       (data) => {
-  //         console.log(data);
   //         this.accessPages = [];
   //         data?.forEach(element => {
   //           if (element.activationStatus) {
@@ -255,8 +250,6 @@ export class CustomerComponent implements OnInit {
     // Fetch accessPages from localStorage
     const accessPagesString = localStorage.getItem('accessPages');
     const accessPages = accessPagesString ? JSON.parse(accessPagesString) : [];
-    console.log('Access Pages:', accessPages);
-    console.log('Original Menu Items:', this.menuItems);
   
     // Check if the user is an admin
     const isAdmin = this.role.toLowerCase() === 'admin';
@@ -271,7 +264,6 @@ export class CustomerComponent implements OnInit {
       .sort((a, b) => a.label.localeCompare(b.label));
   
     // Log the filtered menu items to verify the filtering logic
-    console.log('Filtered Menu Items:', filteredMenuItems);
   
     this.menuItems = filteredMenuItems;
   }
@@ -460,9 +452,6 @@ export class CustomerComponent implements OnInit {
 
   public loadData(exactMatch: boolean = false)
   {
-    console.log("searchTerm:", this.searchTerm);
-console.log("searchCustomerName:", this.searchCustomerName);
-console.log("selectedFilter:", this.selectedFilter);
     switch (this.selectedFilter)
 {
   case 'name':
@@ -556,7 +545,6 @@ if (exactMatch) {
 }
 
         this.dataSource = filteredData;
-        console.log(this.dataSource);
       },
       (error: HttpErrorResponse) => { this.dataSource = null; }
     );
@@ -596,7 +584,6 @@ if (exactMatch) {
       {
 
         this.dataSourceForPage = data; 
-        console.log(this.dataSourceForPage)      
       },
       (error: HttpErrorResponse) => { this.dataSourceForPage = null;}
     );

@@ -132,7 +132,6 @@ export class ReservationGroupDetailsComponent implements OnInit {
       //this.redirectedFrom=paramsData.formName;
       //   this.customerID=paramsData.customerID;
       // this.customer=paramsData.customerName;
-      // console.log(this.customer)
       // this.customerGroupID=paramsData.customerGroupID;
       // this.customerGroup=paramsData.customerGroup;
       // this.customerTypeID=paramsData.customerTypeID;
@@ -239,7 +238,6 @@ export class ReservationGroupDetailsComponent implements OnInit {
         }
       });
     dialogRef.afterClosed().subscribe(res => {
-      console.log(res);
       if (res !== undefined || res !== null) {
         this.reservationGroupID = res?.reservationGroupID;
         this.loadData();
@@ -247,8 +245,6 @@ export class ReservationGroupDetailsComponent implements OnInit {
         this.GetNumberOfBookings();
         this.noOfBooking = res?.numberOfBookings;
         if (this.noOfBooking === 1) {
-          console.log(this.reservationGroupID);
-          console.log(this.reservationID);
           this.showNotification(
             'snackbar-success',
             'Reservation Group Created...!!!',
@@ -350,7 +346,6 @@ export class ReservationGroupDetailsComponent implements OnInit {
           this.advanceTable = data;
           if (data && data.length > 0) {
             this.reservationID = data[0]?.reservationID;
-            console.log(this.reservationID);
           }
         },
         (error: HttpErrorResponse) => { this.dataSource = null; }

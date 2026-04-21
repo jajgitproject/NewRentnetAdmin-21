@@ -49,7 +49,6 @@ export class SupplierContractCDCOutStationRoundTripService
     {
       SearchActivationStatus=null;
     }
-    //console.log(this.API_URL + "/" +supplierContractID + '/'+searchVehicleCategory + '/'+searchPackage + '/'+searchCityTier + '/' + SearchActivationStatus +'/' + PageNumber + '/SupplierContractCDCOutStationRoundTripID/Ascending')
     return this.httpClient.get(this.API_URL + "/" +supplierContractID + '/'+searchVehicleCategory + '/'+searchPackage + '/'+searchCityTier + '/' +searchratePerDay + '/' + SearchActivationStatus +'/' + PageNumber + '/SupplierContractCDCOutStationRoundTripID/Ascending');
     
   }

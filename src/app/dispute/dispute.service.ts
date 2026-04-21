@@ -38,7 +38,6 @@ export class DisputeService
         dutySlipForBillingID=0;
       }
       
-    //console.log(this.API_URL + "/" +SearchBank + '/' + SearchActivationStatus +'/' + PageNumber + '/'+coloumName+'/'+sortType)
     return this.httpClient.get(this.API_URL +"/"+'GetAllDispute'+  "/" + dutySlipForBillingID + '/' + PageNumber + '/'+coloumName+'/'+sortType);
   }
 

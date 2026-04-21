@@ -107,7 +107,6 @@ export class FormDialogComponent {
   //       this.PackageList=data;
   //     }
   //   )
-  //   console.log(this.PackageList);
   // }
 
 
@@ -160,7 +159,6 @@ export class FormDialogComponent {
   getTitles(vehicleCategoryID: any) {
     //debugger;
     this.vehicleCategoryID = vehicleCategoryID;
-    //console.log(vehicleCategoryID)
   }
 
   //----------- City Tier Validation --------------
@@ -212,7 +210,6 @@ export class FormDialogComponent {
   getcityTierID(cityTierID: any) {
     //debugger;
     this.cityTierID = cityTierID;
-    //console.log(cityTierID)
   }
 
   //----------- Package Validation --------------
@@ -264,7 +261,6 @@ export class FormDialogComponent {
   getpackageID(packageID: any) {
     //debugger;
     this.packageID = packageID;
-    //console.log(packageID)
   }
 
   formControl = new FormControl('',
@@ -432,13 +428,11 @@ export class FormDialogComponent {
 
   // public fileChanged(event?: UIEvent): void {
   //   const files: FileList = this.fileUploadEl.nativeElement.files;
-  //   console.log(`files: `, files);
 
   //   const file = files[0];
   //   const reader = new FileReader();
   //   const loaded = (el) => {
   //     const contents = el.target.result;
-  //     console.log('onloaded', contents);
   //     this.contents = contents;
   //   }
   //   reader.onload = loaded;

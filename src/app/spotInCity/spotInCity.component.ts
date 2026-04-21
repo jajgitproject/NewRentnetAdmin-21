@@ -19,7 +19,7 @@ import { GeneralService } from '../general/general.service';
 // import { MyUploadComponent } from '../myupload/myupload.component';
 import { MyUploadComponent } from '../myupload/myupload.component';
 import { FormControl } from '@angular/forms';
-import { Address } from 'ngx-google-places-autocomplete/objects/address';
+import { Address } from '@compat/google-places-shim-objects/address';
 import { SpotInCityDropDown } from './spotInCityDropDown.model';
 import { SpotTypeDropDown } from './spotTypeDropDown.model';
 @Component({
@@ -202,7 +202,6 @@ export class SpotInCityComponent implements OnInit {
   }
   editCall(row) {
      
-    //console.log(row)
       //  alert(row.id);
     this.geoPointID = row.geoPointID;
     const dialogRef = this.dialog.open(FormDialogComponent, {
@@ -268,7 +267,6 @@ export class SpotInCityComponent implements OnInit {
       {
          
         this.dataSource = data;
-        //console.log(this.dataSource)
     
       },
       (error: HttpErrorResponse) => { this.dataSource = null;}
@@ -293,7 +291,6 @@ export class SpotInCityComponent implements OnInit {
   
   NextCall()
   {
-    //console.log(this.dataSource.length>0)
     if (this.dataSource.length>0) 
     {
      
@@ -447,7 +444,6 @@ export class SpotInCityComponent implements OnInit {
       data =>   
       {
         this.dataSource = data;
-       //console.log(this.dataSource);
       },
       (error: HttpErrorResponse) => { this.dataSource = null;}
     );

@@ -97,7 +97,6 @@ this.route.queryParams.subscribe(paramsData => {
     this.customerGroup = '';
   }
 
-  console.log('CustomerGroup:', this.customerGroup);
 
   this.loadData();
   this.InitPackageType();

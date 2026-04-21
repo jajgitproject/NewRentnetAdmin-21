@@ -28,9 +28,7 @@ export class DutySlipQualityCheckedByExecutiveDetailsComponent {
     // Set the defaults
     this.dialogTitle = 'Verify Quality Check Details';
     this.DutySlipQualityCheckDetails = this.data;
-    console.log(this.data);
     this.qcDetails = this.data?.dataSource?.[0]
-    console.log(this.qcDetails)
   }
   //----For Image
  openImageInNewTab(imageUrl: string) {

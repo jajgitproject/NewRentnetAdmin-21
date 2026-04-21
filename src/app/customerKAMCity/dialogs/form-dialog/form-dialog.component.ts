@@ -129,7 +129,6 @@ cityNameValidator(CityLists: any[]): ValidatorFn {
 
   submit() 
   {
-    //console.log(this.advanceTableForm.value);
   }
   onNoClick(): void 
   {

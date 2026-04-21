@@ -27,7 +27,6 @@ export class PassengerInfoComponent {
     this.dialogTitle = 'Passenger Info';
     this.passengerInfo = new ControlPanelDetails({});
     this.passengerInfo = this.data.advanceTable;
-    console.log(this.passengerInfo)
   }
 
   onNoClick(): void {

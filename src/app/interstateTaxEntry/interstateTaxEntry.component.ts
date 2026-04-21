@@ -151,12 +151,6 @@ export class InterstateTaxEntryComponent implements OnInit {
       }
     
       // Debugging - Check decrypted values
-      console.log("Decrypted Inventory ID:", this.inventoryID);
-      console.log("Decrypted Registration Number:", this.RegistrationNumber);
-      console.log("Decrypted State ID:", this.StateID);
-      console.log("Decrypted State Name:", this.State);
-      console.log("Decrypted Redirecting From:", this.redirectingFrom);
-      console.log("Decrypted Status:", this.status);
     });
     
     this.loadData();
@@ -210,7 +204,6 @@ export class InterstateTaxEntryComponent implements OnInit {
         data=>
         {
           this.RegistrationNumberList=data;
-          console.log(this.RegistrationNumberList);
           this.filteredRegistrationNumberOptions = this.registrationNumber.valueChanges.pipe(
             startWith(""),
             map(value => this._filterRN(value || ''))
@@ -341,7 +334,6 @@ shouldShowDeleteButton(item: any): boolean {
         data =>   
         {
           this.dataSource = data; 
-          console.log(this.dataSource);        
         },
         (error: HttpErrorResponse) => { this.dataSource = null;}
       );

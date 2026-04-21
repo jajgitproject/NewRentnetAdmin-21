@@ -110,7 +110,6 @@ export class FormDialogComponentHolder {
           startWith(""),
           map(value => this._filterPackage(value || ''))
         );
-        //console.log(this.StateList);
       },
       error => {
 

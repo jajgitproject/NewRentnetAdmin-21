@@ -312,7 +312,6 @@ export class BookingRequestComponent implements OnInit {
 
 
   openInNewTab(rowItem: any) {
-    console.log(rowItem);
     let baseUrl = this._generalService.FormURL;   
     const url = this.router.serializeUrl(this.router.createUrlTree(['/bookingConfiguration'], { queryParams: {
       BookingID:rowItem.integrationRequestID,

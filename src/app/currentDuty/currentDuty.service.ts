@@ -19,25 +19,21 @@ export class CurrentDutyService
   /** CRUD METHODS */
   getTableData(dutySlipID:any):  Observable<any> 
   {
-    console.log(this.API_URL+'/'+dutySlipID);
     return this.httpClient.get(this.API_URL+ '/' +dutySlipID);
   }
 
   getTableDataForApp(dutySlipID:any):  Observable<any> 
   {
-    console.log(this.API_URL+'/'+dutySlipID);
     return this.httpClient.get(this.API_URL+ '/'+ 'GetDataforApp' + '/' +dutySlipID);
   }
 
   getTableDataForDriver(dutySlipID:any):  Observable<any> 
   {
-    console.log(this.API_URL+'/'+dutySlipID);
     return this.httpClient.get(this.API_URL+ '/'+ 'GetDataforDriver' + '/' +dutySlipID);
   }
 
   getTableDataForGPS(dutySlipID:any):  Observable<any> 
   {
-    console.log(this.API_URL+'/'+dutySlipID);
     return this.httpClient.get(this.API_URL+ '/'+ 'GetDataforGPS' + '/' +dutySlipID);
   }
 

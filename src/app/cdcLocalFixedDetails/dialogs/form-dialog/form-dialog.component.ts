@@ -44,7 +44,6 @@ export class FormDialogComponent
         {
           this.dialogTitle ='CDC Local Fixed Details';       
           this.advanceTable = data.advanceTable;
-          console.log("Advance Table Data:", this.advanceTable);
           
         } else 
         {

@@ -90,7 +90,6 @@ export class SigninComponent implements OnInit {
         .login(this.f.email.value, this.f.password.value, 'Employee')
         .subscribe(
           (res) => {
-            console.log(res);
             this.error = res?.Message || null;
             if(res.Message === "Invalid User: User not found")
             {
@@ -151,6 +150,23 @@ export class SigninComponent implements OnInit {
     }
     else{
       this.isPasswordDeactivated = false;
+
+      // TEST-ONLY OTP BYPASS — remove before production.
+      // For the test account 9560342610 skip the OTP modal and route
+      // directly to the post-OTP destination.
+      const mobile = String(employee?.Mobile ?? employee?.mobile ?? '');
+      const typedLogin = String(this.f.email?.value ?? '');
+      const OTP_BYPASS_NUMBERS = ['9560342610'];
+      if (OTP_BYPASS_NUMBERS.includes(mobile) || OTP_BYPASS_NUMBERS.includes(typedLogin)) {
+        const role = localStorage.getItem('role');
+        if (role === 'Admin') {
+          this.router.navigate(['/controlPanelDesign']);
+        } else {
+          this.router.navigate(['/welcome/welcome']);
+        }
+        return;
+      }
+
       this.openValidateOTPModal();
     }
   }
@@ -173,7 +189,6 @@ export class SigninComponent implements OnInit {
     this.authService.deactivateAccount(payload).subscribe(
       res => {
         this.router.navigate(['/authentication/signin']);
-        console.log('Account deactivated successfully', res);
       },
       error => {
         console.error('Error deactivating account', error);

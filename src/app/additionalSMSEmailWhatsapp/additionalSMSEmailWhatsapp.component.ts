@@ -94,7 +94,6 @@ export class AdditionalSMSEmailWhatsappComponent implements OnInit {
         this.outputFromStopDetails.emit(true);
       }
     }, (error: HttpErrorResponse) => {
-      console.log(error);
     });
   }
 
@@ -112,7 +111,6 @@ export class AdditionalSMSEmailWhatsappComponent implements OnInit {
 
   additionaSMS(formValue: any)
   {
-    console.log(formValue);
     const dialogRef = this.dialog.open(AdditionalSMSEmailDialogComponent, 
       {
         data: 
@@ -151,7 +149,6 @@ deleteItem(row)
   //     data =>   
   //     {
   //       this.dataSource = data;
-  //      console.log(this.dataSource);
   //     },
   //     (error: HttpErrorResponse) => { this.dataSource = null;}
   //   );
@@ -316,7 +313,6 @@ deleteItem(row)
       data =>   
       {
         this.dataSource = data;
-       console.log(this.dataSource);
       },
       (error: HttpErrorResponse) => { this.dataSource = null;}
     );

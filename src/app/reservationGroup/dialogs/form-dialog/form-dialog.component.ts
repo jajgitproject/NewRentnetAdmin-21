@@ -92,13 +92,11 @@ export class FormDialogComponent {
     private snackBar: MatSnackBar,
     public _generalService: GeneralService,
     public rgdService: ReservationGroupDetailsService) {
-    console.log(this.ReservationGroupID)
     // Set the defaults
     this.action = data.action;
     if (this.action === 'edit') {
       this.dialogTitle = 'Reservation Group';
       this.advanceTable = data.advanceTable;
-      console.log(this.advanceTable)
       // let reservationStartDate=moment(this.advanceTable.reservationStartDate).format('DD/MM/yyyy');
       //       let reservationEndDate=moment(this.advanceTable.reservationEndDate).format('DD/MM/yyyy');
       //       this.onBlurUpdateStartDateEdit(reservationStartDate);
@@ -138,7 +136,6 @@ export class FormDialogComponent {
 
   // customerAlert(customerID:number,customerDetailData:any)
   // {
-  //   console.log(customerID,customerDetailData)
   //   let data;
   //   if (this.action === 'add') {
   //     data = {
@@ -154,7 +151,6 @@ export class FormDialogComponent {
   //     };
   //   }
 
-  //   console.log(data);
 
   //   const dialogRef = this.dialog.open(CustomerAlertMessageDetailsComponent,  { data });
 
@@ -880,14 +876,11 @@ export class FormDialogComponent {
     };
   }
   submit() {
-    //console.log(this.advanceTableForm.value);
   }
   onNoClick(): void {
     this.dialogRef.close();
   }
   public Post(): void {
-      console.log(this.advanceTableForm.controls['salesExecutive'].value);
-    console.log(this.advanceTableForm.controls['kam'].value);
   const salesExecutive = this.advanceTableForm.controls['salesExecutive'].value;
   const kam = this.advanceTableForm.controls['kam'].value;
 
@@ -928,7 +921,6 @@ export class FormDialogComponent {
       next: (response: any) => {
         this.saveDisabled = true; // Show Save button, hide spinner
         this.dialogRef.close(this.advanceTableForm.getRawValue());
-        console.log(response);
         this._generalService.sendUpdate('ReservationGroupCreate:ReservationGroupView:Success');
         if (response.numberOfBookings === 1) {
           const encryptedCustomerID = encodeURIComponent(this._generalService.encrypt(this.customerID.toString()));
@@ -994,7 +986,6 @@ export class FormDialogComponent {
   //     next: (response: any) => {
   //       this.saveDisabled = true; // Show Save button, hide spinner
   //       this.dialogRef.close(this.advanceTableForm.getRawValue());
-  //       console.log(response);
   //       this._generalService.sendUpdate('ReservationGroupCreate:ReservationGroupView:Success');
 
   //       if (response.numberOfBookings === 1) {
@@ -1059,7 +1050,6 @@ export class FormDialogComponent {
   }
 
   public confirmAdd(): void {
-    console.log(this.action)
     if (this.action == "edit") {
       this.Put();
     }

@@ -52,7 +52,6 @@ export class FormDialogDisputeComponent
         this.DutySlipID=data.dutySlipID;
         this.dutySlipForBillingID=data.dutySlipForBillingID;
         this.dutyTypeID=data.dutyTypeID;
-        // console.log(data.reservationID)
         this.reservationID=data.reservationID;
 
         // this.tableRecord = data?.record[0];

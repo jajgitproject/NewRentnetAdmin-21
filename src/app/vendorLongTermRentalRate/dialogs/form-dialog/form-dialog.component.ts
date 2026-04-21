@@ -238,7 +238,6 @@ export class FormDialogComponent {
     this.vendorContractLocalRateService.GetCityTiersForCV(this.VendorContractID).subscribe(
       data=>{
         this.CityTierList=data;
-        console.log(this.CityTierList)
         this.advanceTableForm.controls['vendorContractCityTier'].setValidators([Validators.required,this.cityTierValidator(this.CityTierList)]);
         this.advanceTableForm.controls['vendorContractCityTier'].updateValueAndValidity();
         this.filteredTierOptions = this.advanceTableForm.controls['vendorContractCityTier'].valueChanges.pipe(
@@ -272,7 +271,6 @@ export class FormDialogComponent {
   getTierTitles(vendorContractCityTiersID: any)
   {
     this.vendorContractCityTiersID=vendorContractCityTiersID;
-    console.log(this.vendorContractCityTiersID)
   }
 
 

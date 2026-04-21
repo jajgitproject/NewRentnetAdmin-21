@@ -40,7 +40,6 @@ export class CustomerBillingExecutiveService
       SearchEndDate="null";
     }
    
-    //console.log(this.API_URL + '/'+CustomerID +'/'+SearchCustomerBillingExecutive  + '/' + SearchStartDate+'/' + SearchEndDate +'/' + SearchActivationStatus +'/' + PageNumber + '/customerBillingExecutiveID/Ascending')
     return this.httpClient.get(this.API_URL + '/'+CustomerID +'/'+SearchCustomerBillingExecutive + '/' + SearchEmployeeName + '/' + SearchStartDate+'/' + SearchEndDate +'/' + SearchActivationStatus +'/' + PageNumber + '/customerBillingExecutiveID/Ascending');
   }
 
@@ -63,7 +62,6 @@ export class CustomerBillingExecutiveService
     {
       SearchEndDate="null";
     }
-    //console.log(this.API_URL + "/kkk" +SearchCustomerBillingExecutive + '/' + SearchActivationStatus +'/' + PageNumber + '/'+coloumName+'/'+sortType)
     return this.httpClient.get(this.API_URL + '/'+CustomerID +'/'+SearchCustomerBillingExecutive  + '/' + SearchEmployeeName + '/' + SearchStartDate+'/' + SearchEndDate +'/' + SearchActivationStatus +'/' + PageNumber + '/'+coloumName+'/'+sortType);
   }
 

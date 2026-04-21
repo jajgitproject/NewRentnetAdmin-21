@@ -63,7 +63,6 @@ export class FormDialogVerificationComponent
   {
           this.dialogTitle = 'Driving License Details';
           this.advanceTable = data.advanceTable;
-          console.log(this.advanceTable);
           this.uploadedByName();
           //this.advanceTable.licenseImage="";
           this.driverName=this.advanceTable.driver;

@@ -49,7 +49,6 @@ export class FormDialogCAComponent
         this.advanceTableForm = this.createContactForm();
         this.AllotmentID=data.allotmentID;
         this.AllotmentStatus=data.allotmentStatus
-        console.log(this.AllotmentID);
   }
   formControl = new FormControl('', 
   [

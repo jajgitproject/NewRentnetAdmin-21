@@ -7,7 +7,7 @@ import { DispatchFetchData } from '../../dispatchFetchData.model';
 import { MAT_DATE_LOCALE } from '@angular/material/core';
 import { formatDate } from '@angular/common';
 import { GeneralService } from '../../../general/general.service';
-import { Address } from 'ngx-google-places-autocomplete/objects/address';
+import { Address } from '@compat/google-places-shim-objects/address';
 import { EmployeeDropDown } from 'src/app/employee/employeeDropDown.model';
 import { DispatchFetchDataDropDown } from '../../dispatchFetchDataDropDown.model';
 import { HttpErrorResponse } from '@angular/common/http';
@@ -138,7 +138,6 @@ export class FormDialogFetchComponent {
       (
         (data: DispatchFetchData[]) => {
           this.dispatchCurrentData = data;
-          console.log(this.dispatchCurrentData);
         },
         (error: HttpErrorResponse) => { this.dispatchCurrentData = null; }
       );
@@ -147,7 +146,6 @@ export class FormDialogFetchComponent {
       (
         (data: DispatchFetchData[]) => {
           this.previousData = data;
-          console.log(this.previousData);
         },
         (error: HttpErrorResponse) => { this.previousData = null; }
       );
@@ -156,7 +154,6 @@ export class FormDialogFetchComponent {
       (
         (data: DispatchFetchData[]) => {
           this.dispatchNextData = data;
-          console.log(this.dispatchNextData);
         },
         (error: HttpErrorResponse) => { this.dispatchNextData = null; }
       );
@@ -167,17 +164,14 @@ export class FormDialogFetchComponent {
 
 
   onCurrent(item: any) {
-    console.log(this.dispatchCurrentData[item])
     this.dialogRef.close({ data: this.dispatchCurrentData[item] });
   }
 
   onPrevious(item: any) {
-    console.log(this.previousData[item])
     this.dialogRef.close({ data: this.previousData[item] });
   }
 
   onNext(item: any) {
-    console.log(this.dispatchNextData[item])
     this.dialogRef.close({ data: this.dispatchNextData[item] });
   }
 
@@ -192,9 +186,7 @@ export class FormDialogFetchComponent {
   //      (
   //        data =>   
   //        {
-  //         console.log(data);
   //          this.dataSource = data;
-  //          console.log(this.dataSource)
 
 
   //        },
@@ -202,7 +194,6 @@ export class FormDialogFetchComponent {
   //      );
   //  }
   submit() {
-    console.log(this.advanceTableForm.value);
   }
   onNoClick(): void {
     if (this.action === 'add') {

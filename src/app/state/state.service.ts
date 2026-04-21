@@ -31,7 +31,6 @@ export class StateService
     {
       SearchActivationStatus=null;
     }
-    //console.log(this.API_URL + '/'+SearchGeoPointName + '/'+SearchGstCode + '/' + SearchActivationStatus +'/' + PageNumber + '/GeoPoint.GeoPointName/Ascending')
     return this.httpClient.get(this.API_URL + '/'+SearchGeoPointName + '/'+SearchGstCode + '/' + SearchActivationStatus +'/' + PageNumber + '/GeoPoint.GeoPointName/Ascending');
   }
   getTableDataSort(SearchGeoPointName:string, SearchGstCode:string,  SearchActivationStatus:boolean, PageNumber: number,coloumName:string,sortType:string):  Observable<any> 
@@ -48,7 +47,6 @@ export class StateService
     {
       SearchActivationStatus=null;
     }
-    //console.log(this.API_URL + '/'+SearchGeoPointName +  '/' +SearchGstCode +  '/'+ SearchActivationStatus +'/' + PageNumber + '/'+coloumName+'/'+sortType)
     return this.httpClient.get(this.API_URL + '/'+SearchGeoPointName +  '/' +SearchGstCode +  '/'+ SearchActivationStatus +'/' + PageNumber + '/'+coloumName+'/'+sortType);
   }
   add(advanceTable: State) 

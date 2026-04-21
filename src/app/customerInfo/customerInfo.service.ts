@@ -19,7 +19,6 @@ export class CustomerInfoService
   /** CRUD METHODS */
   getTableData(customerID:any):  Observable<any> 
   {
-    console.log(this.API_URL+'/'+customerID);
     return this.httpClient.get(this.API_URL+'/'+customerID);
   }
 

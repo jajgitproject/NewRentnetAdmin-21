@@ -207,7 +207,6 @@ searchDocumentName: string = '';
     this.driverComplianceDashboardService.getTableData(this.documentName.value,this.documentType.value,this.searchOwnedSupplier,  this.location.value, this.searchDaysRemaning,this.searchActivationStatus,this.PageNumber).subscribe(
         data => {
           this.dataSource = data;
-          console.log(this.dataSource)
         },
         (error: HttpErrorResponse) => { this.dataSource = null; }
       );
@@ -351,7 +350,6 @@ searchDocumentName: string = '';
     );
   }
   openInNewTab(rowItem: any) {
-    console.log(rowItem);
     let baseUrl = this._generalService.FormURL;   
     const url = this.router.serializeUrl(this.router.createUrlTree(['/bookingConfiguration'], { queryParams: {
       BookingID:rowItem.integrationRequestID,
@@ -388,7 +386,6 @@ searchDocumentName: string = '';
     
    
  viewCreditNote(row) {
-    console.log(row?.invoiceID);
     this.dialog.open(CreditNoteHistoryComponent, {
       width: '500px',
       data: {
@@ -417,7 +414,6 @@ searchDocumentName: string = '';
   }
   
 viewInvoiceBilling(row) {
-    console.log(row?.invoiceID);
     this.dialog.open(InvoiceBillingHistoryComponent, {
       width: '500px',
       data: {

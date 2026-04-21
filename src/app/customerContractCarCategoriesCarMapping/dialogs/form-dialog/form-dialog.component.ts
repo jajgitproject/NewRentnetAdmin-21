@@ -54,8 +54,6 @@ export class FormDialogComponent
   public _generalService:GeneralService)
   {
 this.CustomerContractID= data.customerContractID;
-    console.log('Dialog data:', data);
-    console.log('CustomerContractID from data:', this.CustomerContractID);
     this.CustomerContractCarCategoryID= data.customerContractCarCategoryID;
         this.CustomerContractCarCategory =data.customerContractCarCategory;
         this.customerContractName =data.customerContractName;
@@ -83,14 +81,10 @@ this.CustomerContractID= data.customerContractID;
     
     // Debug form validity
     this.advanceTableForm.statusChanges.subscribe(status => {
-      console.log('Form status:', status);
-      console.log('Form errors:', this.advanceTableForm.errors);
-      console.log('Form values:', this.advanceTableForm.value);
       if (status === 'INVALID') {
         Object.keys(this.advanceTableForm.controls).forEach(key => {
           const control = this.advanceTableForm.get(key);
           if (control && control.invalid) {
-            console.log(`${key} is invalid:`, control.errors);
           }
         });
       }
@@ -221,7 +215,6 @@ this.CustomerContractID= data.customerContractID;
     this.advanceTableForm.patchValue({ customerContractID:this.CustomerContractID || this.data.customerContractID });
     this.advanceTableForm.patchValue({vehicleID:this.vehicleID});
     
-    console.log('Form data before submission:', this.advanceTableForm.getRawValue());
     
     this.advanceTableService.add(this.advanceTableForm.getRawValue())  
     .subscribe(
@@ -252,7 +245,6 @@ this.CustomerContractID= data.customerContractID;
     this.advanceTableForm.patchValue({customerContractID: this.CustomerContractID || this.data.customerContractID || this.advanceTable.customerContractID});
     this.advanceTableForm.patchValue({vehicleID:this.vehicleID || this.advanceTable.vehicleID});
     
-    console.log('Edit form data before submission:', this.advanceTableForm.getRawValue());
     
     this.advanceTableService.update(this.advanceTableForm.getRawValue())  
     .subscribe(
@@ -278,10 +270,6 @@ this.CustomerContractID= data.customerContractID;
     );
   }
   public confirmAdd(): void {
-    console.log('Attempting to save...');
-    console.log('Form valid:', this.advanceTableForm.valid);
-    console.log('Form value:', this.advanceTableForm.value);
-    console.log('CustomerContractID:', this.CustomerContractID);
 
     // Ensure customerContractID is set before saving
     if (!this.CustomerContractID && !this.data.customerContractID) {
@@ -394,12 +382,6 @@ this.CustomerContractID= data.customerContractID;
     const vehicle = this.advanceTableForm.get('vehicle')?.value;
     const customerVehicleName = this.advanceTableForm.get('customerVehicleName')?.value;
     
-    console.log('CanSave check:', {
-      vehicle: !!vehicle,
-      customerVehicleName: !!customerVehicleName,
-      vehicleValue: vehicle,
-      customerVehicleNameValue: customerVehicleName
-    });
 
     return !!(vehicle && customerVehicleName);
   }

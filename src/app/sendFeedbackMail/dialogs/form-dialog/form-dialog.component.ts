@@ -14,7 +14,7 @@ import {
 import { MAT_DATE_LOCALE } from '@angular/material/core';
 import { formatDate } from '@angular/common';
 import { GeneralService } from '../../../general/general.service';
-import { Address } from 'ngx-google-places-autocomplete/objects/address';
+import { Address } from '@compat/google-places-shim-objects/address';
 import { EmployeeDropDown } from 'src/app/employee/employeeDropDown.model';
 import { HttpErrorResponse } from '@angular/common/http';
 import { OrganizationalEntityDropDown } from 'src/app/organizationalEntityMessage/organizationalEntityDropDown.model';
@@ -123,7 +123,6 @@ export class FormDialogSendFeedbackMailComponent {
     this.isBooker = data.isbooker;
     this.isPassenger = data.isPassenger;
     this.customerPersonID = data.customerPersonID;
-    // console.log(data);
     this.vehicle = data.vehicle;
     this.pickupDate = data.pickupDate;
     this.pickupTime = data.pickupTime;
@@ -152,7 +151,6 @@ export class FormDialogSendFeedbackMailComponent {
   //   this._generalService.GetPermission(this.ReservationID).subscribe(
   //     (data) => {
   //       this.permissionData = data;
-  //       console.log(this.permissionData);
   //     },
   //     (error: HttpErrorResponse) => {
   //       this.permissionData = null;
@@ -261,7 +259,6 @@ export class FormDialogSendFeedbackMailComponent {
   }
 
   submit() {
-    // console.log(this.advanceTableForm.value);
   }
   onNoClick(): void {
     if (this.action === 'add') {
@@ -338,7 +335,6 @@ export class FormDialogSendFeedbackMailComponent {
     const apiRequestData = [];
     this.permissionData?.forEach((element) => {
         
-    //  console.log(element);
       apiRequestData.push({
         "ReservationID": element.reservationID,
         "EmployeeID": element?.employeeID || null,
@@ -373,7 +369,6 @@ export class FormDialogSendFeedbackMailComponent {
       .getTableNotificationData(additionalData)
       .subscribe(
         (data: any) => {
-          // console.log(data);
           this.dialogRef.close();
           if (data === '"OK"') {
             this.showNotification(
@@ -396,7 +391,6 @@ export class FormDialogSendFeedbackMailComponent {
   }
 
   // deleteRecord(row: any) {
-  //   console.log(row);
   //   const recordIndex = this.dataSource.findIndex((object) => object.primaryMobile === row.primaryMobile);
   //   // this.dataSource.pop(recordIndex);
   //   this.dataSource.splice(recordIndex,1);

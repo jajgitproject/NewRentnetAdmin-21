@@ -40,7 +40,6 @@ export class SupplierStatusComponent
   @Inject(MAT_DIALOG_DATA) public data: any)
   {
        this.Supplier_ID=data.supplier_ID
-       console.log(this.Supplier_ID)
   }
   public ngOnInit(): void
   {
@@ -55,7 +54,6 @@ export class SupplierStatusComponent
       {
 
         this.dataSource = data;
-        //console.log(this.dataSource)
       },
       (error: HttpErrorResponse) => { this.dataSource = null;}
     );

@@ -95,7 +95,7 @@ import { CustomerAlertMessageTypeForDropDown } from '../customerAlertMessage/cus
 //import { AllotmentDetails } from '../dutySlipQualityChecked/dutySlipQualityCheckedBy.model';
 import { TransmissionTypeDropDown } from '../transmissionType/transmissionTypeDropDown.model';
 import { PaymentModel } from '../contractPaymentMapping/contractPaymentMappingDropDown.model';
-import * as CryptoJS from 'crypto-js';
+import { AES, Utf8 } from 'crypto-es';
 import { EmployeesDropDown } from '../feedBack/employeeDropDown.model';
 import { DisputeTypeDropDown } from '../dispute/disputeTypeDropDown.model';
 import { DriverInventoryAssociation } from '../driverInventoryAssociation/driverInventoryAssociation.model';
@@ -133,7 +133,6 @@ export class GeneralService {
 
   private subjectName = new Subject<any>(); //need to create a subject
   // User_API_URL: string;
-  private secretKey = 'your-secret-key';
   constructor(
     private http: HttpClient,
     private authService: AuthService,
@@ -253,11 +252,11 @@ public isValidCustomDate(value: string): boolean {
 }
   
 encrypt(value: string): string{
-  return CryptoJS.AES.encrypt(value, this.secretKey).toString();
+  return AES.encrypt(value, this.runtimeConfig.getCryptoSecretKey()).toString();
 }
 
 decrypt(textToDecrypt: string): string{
-  return CryptoJS.AES.decrypt(textToDecrypt, this.secretKey).toString(CryptoJS.enc.Utf8);
+  return AES.decrypt(textToDecrypt, this.runtimeConfig.getCryptoSecretKey()).toString(Utf8);
 }
 
   getCurrentTime() {
@@ -930,13 +929,11 @@ nameEmailDuplicateMobile(payload: {
   }
 
   GetDutySlip(reservationID:number): Observable<any[]> {
-    console.log(this.BaseURL + "incidence/ForDropsDowns/" +reservationID);
     return this.http.get<any[]>(this.BaseURL + "incidence/ForDropsDowns/" +reservationID);
   }
 
    getPassenger(reservationID:number): Observable<any[]> {
 
-    console.log(this.BaseURL + "incidence/ForDropsDown/" +reservationID);
     return this.http.get<any[]>(this.BaseURL + "incidence/ForDropsDown/" +reservationID);
   }
 
@@ -945,7 +942,6 @@ nameEmailDuplicateMobile(payload: {
   }
 
   getIncidenceType(): Observable<any[]> {
-    console.log(this.BaseURL + "incidenceType/ForDropDown");
     return this.http.get<any[]>(this.BaseURL + "incidenceType/ForDropDown");
   }
 

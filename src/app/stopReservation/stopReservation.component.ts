@@ -168,7 +168,6 @@ export class StopReservationComponent implements OnInit {
   {
 
     this.stopReservationID = row.id;
-  //console.log(row)
     const dialogRef = this.dialog.open(DeleteDialogComponent, 
     {
       data: row

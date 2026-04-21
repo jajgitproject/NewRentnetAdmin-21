@@ -31,7 +31,6 @@ export class VendorDetailsComponent {
     
     this.vendorDetails = new VendorDetails({});
     this.vendorDetails = this.data.advanceTable;
-    console.log( this.vendorDetails)
     this.allotmentID =  this.vendorDetails.allotmentID;
     if(!this.vendorDetails.allotmentID)
       {
@@ -54,7 +53,6 @@ export class VendorDetailsComponent {
         {
   
           this.dataSource = data;
-          console.log(this.dataSource)
          
         },
         (error: HttpErrorResponse) => { this.dataSource = null;}

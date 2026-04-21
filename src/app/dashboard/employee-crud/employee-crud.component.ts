@@ -1,13 +1,13 @@
 // @ts-nocheck
 import { DataSource, SelectionModel } from '@angular/cdk/collections';
 import { HttpClient } from '@angular/common/http';
-import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
+import { Component, ElementRef, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { MatMenuTrigger } from '@angular/material/menu';
 import { MatPaginator } from '@angular/material/paginator';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatSort } from '@angular/material/sort';
-import { BehaviorSubject, fromEvent, merge, Observable } from 'rxjs';
+import { BehaviorSubject, fromEvent, merge, Observable, Subscription } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { DeleteDialogCrudComponent } from './dialogscrud/delete-crud/delete-crud.component';
 import { FormDialogCrudComponent } from './dialogscrud/form-dialog-crud/form-dialog-crud.component';
@@ -21,7 +21,8 @@ import { EmployeeCrudTestService } from './employee-crud.service';
   templateUrl: './employee-crud.component.html',
   styleUrls: ['./employee-crud.component.sass']
 })
-export class EmployeeCrudComponent implements OnInit {
+export class EmployeeCrudComponent implements OnInit, OnDestroy {
+  private keyupSub?: Subscription;
   displayedColumns = [
     'select',
     'img',
@@ -159,7 +160,6 @@ export class EmployeeCrudComponent implements OnInit {
       const index: number = this.dataSource.renderedData.findIndex(
         (d) => d === item
       );
-      // console.log(this.dataSource.renderedData.findIndex((d) => d === item));
       this.exampleDatabase.dataChange.value.splice(index, 1);
       this.refreshTable();
       this.selection = new SelectionModel<EmployeeCrud>(true, []);
@@ -178,12 +178,16 @@ export class EmployeeCrudComponent implements OnInit {
       this.paginator,
       this.sort
     );
-    fromEvent(this.filter.nativeElement, 'keyup').subscribe(() => {
+    this.keyupSub?.unsubscribe();
+    this.keyupSub = fromEvent(this.filter.nativeElement, 'keyup').subscribe(() => {
       if (!this.dataSource) {
         return;
       }
       this.dataSource.filter = this.filter.nativeElement.value;
     });
+  }
+  ngOnDestroy() {
+    this.keyupSub?.unsubscribe();
   }
   showNotification(colorName, text, placementFrom, placementAlign) {
     this.snackBar.open(text, '', {

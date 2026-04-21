@@ -38,8 +38,6 @@ export class LocationDetailsDialogComponent
         this.action = data.action;
         this.advanceTable = data.advanceTable;
         this.dialogTitle='Location Details';
-       console.log(this.advanceTable)
-          console.log(this.action)
 
   }
   public ngOnInit(): void
@@ -74,7 +72,6 @@ export class LocationDetailsDialogComponent
 
 
   // {
-  //   console.log(this.advanceTableForm.value);
   //   const dialogRef = this.dialog.open(FormDialogComponent, 
   //     {
   //       width:'60%',

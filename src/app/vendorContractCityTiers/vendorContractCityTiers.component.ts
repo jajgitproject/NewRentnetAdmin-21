@@ -96,7 +96,6 @@ export class VendorContractCityTiersComponent implements OnInit {
       const encryptedVendorContractName = paramsData.VendorContractName;
       this.vendorContractID = this._generalService.decrypt(decodeURIComponent(encryptedVendorContractID));
       this.vendorContractName = this._generalService.decrypt(decodeURIComponent(encryptedVendorContractName));        
-      console.log(this.vendorContractID,this.vendorContractName);
   });
  
     this.InitVendorCategory();
@@ -146,7 +145,6 @@ export class VendorContractCityTiersComponent implements OnInit {
         else 
         {
           // User clicked No - Do nothing
-          console.log('Import canceled');
         }
     });
   }
@@ -168,7 +166,6 @@ export class VendorContractCityTiersComponent implements OnInit {
             cityTierID:cityTiers.cityTierID
           })
         );
-        console.log(this.advanceTableForm);
         this.saveVendorContractCityTiers()
       }
     );

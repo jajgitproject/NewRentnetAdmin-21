@@ -49,7 +49,6 @@ export class AdditionalSMSDetailsComponent implements OnInit {
     public _generalService: GeneralService  ) {
     
     this.advanceTableASE = new AdditionalSMSDetails({});
-    console.log(this.reservationID);
     // this.advanceTable.field1='Value 1';
     // this.advanceTable.field2='Value 2';
     // this.advanceTable.field3='Value 3';
@@ -133,13 +132,11 @@ export class AdditionalSMSDetailsComponent implements OnInit {
   // getAdditionalSmsEmailDetails() {
   //   debugger
   //   this.additionalSMSDetailsService.getAdditionalSmsDetails(this.reservationID).subscribe((res:any) => {
-  //     console.log(res)
   //     this.additionalSmsDetailsList = res;
   //     if(this.additionalSmsDetailsList.length > 0) {
   //       this.outputFromStopDetails.emit(true);
   //     }
   //   }, (error: HttpErrorResponse) => {
-  //     console.log(error);
   //   });
   // }
 

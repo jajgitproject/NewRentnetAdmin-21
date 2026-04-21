@@ -112,11 +112,8 @@ export class SupplierContractCityPercentageComponent implements OnInit {
         this.Applicable_From= decodeURIComponent( this.Applicable_From);
 
         // Log the decrypted values
-        console.log("Decrypted Vehicle Category ID: ", this.supplierContract_ID);
-        console.log("Decrypted Vehicle Category: ", this.Applicable_From);
       }
     });
-    console.log(this.supplierContract_ID)
     this.loadData();
     this.SubscribeUpdateService();
    this.InitCities();
@@ -199,7 +196,6 @@ export class SupplierContractCityPercentageComponent implements OnInit {
           SupplierName:this.supplier_Name
       }
     });
-    //console.log(row);
 
   }
   public SearchData()
@@ -212,7 +208,6 @@ export class SupplierContractCityPercentageComponent implements OnInit {
   {
 
     this.supplierContractCityPercentageID = row.id;
-  //console.log(row)
     const dialogRef = this.dialog.open(DeleteDialogComponent, 
     {
       data: row
@@ -320,7 +315,6 @@ export class SupplierContractCityPercentageComponent implements OnInit {
         //message contains the data sent from service
         this.messageReceived = message.text;
         this.MessageArray=this.messageReceived.split(":");
-        //console.log(this.MessageArray);
         if(this.MessageArray.length==3)
         {
           if(this.MessageArray[0]=="SupplierContractCityPercentageCreate")

@@ -102,7 +102,6 @@ export class FormDialogComponent {
                   // if (this.existingCountryID === ele.geoPointID) {
                     
                   //   //this.advanceTableForm.controls["countryID"].setValue(ele.geoPointID);
-                  //   console.log(this.advanceTable.countryID)
                   // }
                 }
                 
@@ -296,7 +295,6 @@ export class FormDialogComponent {
           startWith(""),
           map(value => this._filterState(value || ''))
         );
-        //console.log(this.StateList);
       },
       error => {
 
@@ -345,7 +343,6 @@ export class FormDialogComponent {
           this.countryNameValidator(this.CountryList)
         ]);
         this.advanceTableForm.controls['country'].updateValueAndValidity();
-        //console.log(this.CountryList);
         for (var i = 0; i < this.CountryList.length; i++) {
           this.existingCountryID = this.CountryList[i].geoPointID;
         }

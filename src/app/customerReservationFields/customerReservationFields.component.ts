@@ -161,7 +161,6 @@ export class CustomerReservationFieldsComponent implements OnInit {
   }
   
   customerReservationFieldValue(row) {
-    console.log(row);
     this.router.navigate([
       '/customerReservationFieldValues',  
     ],
@@ -271,7 +270,6 @@ export class CustomerReservationFieldsComponent implements OnInit {
         //message contains the data sent from service
         this.messageReceived = message.text;
         this.MessageArray=this.messageReceived.split(":");
-        console.log(this.MessageArray);
         if(this.MessageArray.length==3)
         {
           if(this.MessageArray[0]=="CustomerReservationFieldsCreate")

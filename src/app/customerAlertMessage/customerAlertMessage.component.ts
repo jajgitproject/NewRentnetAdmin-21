@@ -87,7 +87,6 @@ export class CustomerAlertMessageComponent implements OnInit {
         this.customer_Name = this._generalService.decrypt(decodeURIComponent(encryptedCustomerName));
       }
       this.CustomerName = this.customer_Name.split("##")[0];
-      console.log(this.CustomerName)      
     });
     this.loadData();
     this.SubscribeUpdateService();

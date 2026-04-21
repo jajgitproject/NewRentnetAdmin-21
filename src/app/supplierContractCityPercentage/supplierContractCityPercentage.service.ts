@@ -41,7 +41,6 @@ export class SupplierContractCityPercentageService
         SearchToDate="null";
       }
         
-    console.log(this.API_URL  +  '/'+SupplierContractID + '/'+SearchSupplierContractCityPercentage + '/'+SearchPercentage + '/'+SearchFromDate + '/'+SearchToDate + '/' + SearchActivationStatus +'/' + PageNumber + '/supplierContractCityPercentageID/Ascending')
     return this.httpClient.get(this.API_URL  +  '/'+SupplierContractID + '/'+SearchSupplierContractCityPercentage + '/'+SearchPercentage + '/'+SearchFromDate + '/'+SearchToDate + '/' + SearchActivationStatus +'/' + PageNumber + '/supplierContractCityPercentageID/Ascending');
   }
 
@@ -67,7 +66,6 @@ export class SupplierContractCityPercentageService
         SearchToDate="null";
       }
       
-    //console.log(this.API_URL + "/kkk" +SearchSupplierContractCityPercentage + '/' + SearchActivationStatus +'/' + PageNumber + '/'+coloumName+'/'+sortType)
     return this.httpClient.get(this.API_URL  + '/'+ SupplierContractID + '/'+SearchSupplierContractCityPercentage + '/'+SearchPercentage + '/' +SearchFromDate + '/'+SearchToDate + '/'+ SearchActivationStatus +'/' + PageNumber + '/'+coloumName+'/'+sortType);
   }
 

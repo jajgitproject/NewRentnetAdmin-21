@@ -62,8 +62,6 @@ export class FormDialogComponentHolder
         {
           this.dialogTitle =' Key Account Manager For ';       
           this.advanceTable = data.advanceTable;
-            console.log("IsDefault Value:", this.advanceTable.isDefaultKeyAccountManager);
-  console.log("Type:", typeof this.advanceTable.isDefaultKeyAccountManager);
 
           this.searchinstructedBy.setValue(this.advanceTable.employeeName);
           let startDate=moment(this.advanceTable.fromDate).format('DD/MM/yyyy');

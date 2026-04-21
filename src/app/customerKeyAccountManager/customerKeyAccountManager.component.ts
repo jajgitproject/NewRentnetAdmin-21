@@ -172,8 +172,6 @@ export class CustomerKeyAccountManagerComponent implements OnInit {
   }
 
   openInNewTab(menuItem: any, rowItem: any) {
-    console.log(menuItem);
-    console.log(rowItem);
     let baseUrl = this._generalService.FormURL;
     if(menuItem.label.toLowerCase() === 'customer kam city') {
       const url = this.router.serializeUrl(this.router.createUrlTree(['/customerKAMCity'], { queryParams: {

@@ -55,7 +55,6 @@ export class FormDialogComponent
         }
         this.advanceTableForm = this.createContactForm();
         this.vendorContractID= data.vendorContract_ID
-        console.log(this.vendorContractID)
   }
   
   createContactForm(): FormGroup 
@@ -135,7 +134,6 @@ export class FormDialogComponent
 
   submit() 
   {
-    //console.log(this.advanceTableForm.value);
   }
   onNoClick(): void 
   {

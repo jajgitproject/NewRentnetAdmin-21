@@ -129,7 +129,6 @@ export class DiscountDetailsComponent implements OnInit {
        (data :DiscountDetails)=>   
        {
          this.advanceTableDD = data;
-         console.log(this.advanceTableDD)
        },
        (error: HttpErrorResponse) => { this.advanceTableDD = null;}
      );
@@ -144,7 +143,6 @@ export class DiscountDetailsComponent implements OnInit {
        (data :DiscountDetails)=>   
        {
          this.advanceTableDD = data;
-         console.log( this.advanceTableDD)
        },
        (error: HttpErrorResponse) => { this.advanceTableDD = null;}
      );

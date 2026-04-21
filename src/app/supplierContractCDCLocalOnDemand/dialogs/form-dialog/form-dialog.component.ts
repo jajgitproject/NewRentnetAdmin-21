@@ -212,7 +212,6 @@ export class FormDialogComponent
   getcityTierID(cityTierID: any) {
     //debugger;
     this.cityTierID=cityTierID;
-    //console.log(cityTierID)
   }
 
   formControl = new FormControl('', 
@@ -231,7 +230,6 @@ export class FormDialogComponent
   
   createContactForm(): FormGroup 
   {
-    //console.log(this.advanceTable)
     return this.fb.group(
     {
       supplierContractCDCLocalOnDemandID: [this.advanceTable.supplierContractCDCLocalOnDemandID],

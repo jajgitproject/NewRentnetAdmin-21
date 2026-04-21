@@ -90,7 +90,6 @@ export class FormDialogComponent
         {
           this.dialogTitle ='Vendor Contract Car Local Lumpsum Package';       
           this.advanceTable = data.advanceTable;
-          console.log(this.data.advanceTable);
           this.advanceTableForm = this.createContactForm();
           this.searchCategoryBy.setValue(this.advanceTable.vendorContractCarCategory)
   this.searchTierBy.setValue(this.advanceTable.vendorContractCityTier)
@@ -102,7 +101,6 @@ export class FormDialogComponent
         {
           this.dialogTitle ='Vendor Contract Local Lumpsum Package';       
           this.advanceTable = data.advanceTable;
-          console.log(this.data.advanceTable);
            this.advanceTableForm = this.createContactForm();
           this.searchCategoryBy.setValue(this.advanceTable.cityTier)
        this.searchTierBy.setValue(this.advanceTable.vendorContractCityTier)
@@ -157,12 +155,10 @@ export class FormDialogComponent
       this.VehicleCategoryList = [];
       return;
     }
-    console.log('Fetching vehicle categories for vendorContractID:', this.data.vendorContractID);
     this._generalService.getVendorCarCategory(this.data.vendorContractID).subscribe(
       data=>{
         // this.VehicleCategoryList=data;
         this.VehicleCategoryList=data || [];
-        console.log('Vehicle Category List:', this.VehicleCategoryList);
         this.advanceTableForm.controls['vendorContractCarCategory'].setValidators([Validators.required,
           this.vehicleCategoryValidator(this.VehicleCategoryList)
         ]);
@@ -263,11 +259,9 @@ export class FormDialogComponent
   //     this.CityTierList = [];
   //     return;
   //   }
-  //   console.log('Fetching city tiers for vendorContractID:', this.data.vendorContractID);
   //   this._generalService.GetVendorCityTiersForCD(this.data.vendorContractID).subscribe(
   //     data=>{
   //       this.CityTierList=data || [];
-  //       console.log('City Tier List:', this.CityTierList);
   //       this.advanceTableForm.controls['vendorContractCityTier'].setValidators([Validators.required,
   //         this.cityTierValidator(this.CityTierList)
   //       ]);
@@ -312,11 +306,9 @@ export class FormDialogComponent
       this.CityTierList = [];
       return;
     }
-    console.log('Fetching city tiers for vendorContractID:', this.data.vendorContractID);
     this._generalService.GetVendorCityTiersForCD(this.data.vendorContractID).subscribe(
       data=>{
         this.CityTierList=data || [];
-        console.log('City Tier List:', this.CityTierList);
         this.advanceTableForm.controls['cityTier'].setValidators([Validators.required,
           this.cityTierValidator(this.CityTierList)
         ]);

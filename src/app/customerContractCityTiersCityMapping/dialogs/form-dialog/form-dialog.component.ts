@@ -150,7 +150,6 @@ export class FormDialogComponent
   }
   
   getCityID(geoPointID: any) {
-    console.log( this.geoPointCityID);
     this.geoPointCityID = geoPointID;
     this.CityList = this.CityList.filter(city => city.geoPointID !== this.geoPointCityID);
   }
@@ -199,7 +198,6 @@ export class FormDialogComponent
     // this.advanceTableForm.patchValue({cityID:this.geoPointCityID});
     this.advanceTableForm.patchValue({geoPointID: this.geoPointCityID})
     this.advanceTableForm.patchValue({customerContractCityTiersID:this.data.customerContractCityTiersID});
-    console.log(this.advanceTableForm.getRawValue())
     this.advanceTableService.add(this.advanceTableForm.getRawValue())  
     .subscribe(
     response => 

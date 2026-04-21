@@ -95,7 +95,6 @@ export class VendorContractCarCategoriesCarMappingComponent implements OnInit {
     
     
     // Log the decrypted values to the console for verification
-    console.log(this.vendorContractCarCategoryID,this.vendorContractCarCategory,this.vendorContractID,this.vendorContractName);
     });
 
     this.InitCities();
@@ -228,7 +227,6 @@ export class VendorContractCarCategoriesCarMappingComponent implements OnInit {
       data =>   
       {
         this.dataSource = data;
-        console.log(this.dataSource);        
       },
       (error: HttpErrorResponse) => { this.dataSource = null;}
     );

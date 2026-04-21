@@ -217,7 +217,6 @@ export class ClossingScreenService
   generateBill(dutySlipID:any):  Observable<any> 
   { 
     let userID=this.generalService.getUserID();
-    console.log(this.API_GenerateBill+'/'+dutySlipID + '/'+userID);
     return this.httpClient.get(this.API_GenerateBill+'/'+dutySlipID + '/'+userID);
   }
   getTableDataForReservation(reservationID:any):  Observable<any> 

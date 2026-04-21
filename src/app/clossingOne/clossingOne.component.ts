@@ -252,7 +252,6 @@ export class ClossingOneComponent implements OnInit {
     this.GetClosingData();
      this.disputeService.disputeData$.subscribe(data => {
     this.disputeAdvanceTable = data;
-    console.log(data)
   });
 
   this.controlPanelDialogeService.getVerifyDutyStatus(this.ReservationID).subscribe(
@@ -830,7 +829,6 @@ public loadDataforAdditionalKMHR() {
   .subscribe(
     response =>
     {
-      //console.log(response.invoiceID)
       this.invoiceID = response.invoiceID;
       //this.refresh();
       // this.loadDataForDriver();
@@ -871,7 +869,6 @@ public loadDataforAdditionalKMHR() {
      data =>   
      {
        this.templateAddress = data.templateAddress;
-      console.log(this.templateAddress);
       if(this.templateAddress !== null)
       {
         this.ViewBill(this.templateAddress);
@@ -888,7 +885,6 @@ public loadDataforAdditionalKMHR() {
      data =>   
      {
        this.dataSourceforCard = data;
-      console.log(this.dataSourceforCard);
      },
      (error: HttpErrorResponse) => { this.dataSourceforCard = null;}
    );
@@ -1294,7 +1290,6 @@ public MOPLoadData()
     this.verifyDuty = event.verifyDuty;
     this.goodForBilling = event.goodForBilling;
     this.Message = event.message;
-    //console.log(this.Message)
   }
 
   openSearchModal() 
@@ -1306,7 +1301,6 @@ public MOPLoadData()
         this._dutySlipImageService.getAllotmentIDForDutySlipImage(this.allotmentID).subscribe(
           data => {
             this.dutySlipImageAllotmentID = data;
-            console.log(this.dutySlipImageAllotmentID);
             if (this.dutySlipImageAllotmentID.dutySlipImage === null) {
               this.dialogRequestObject = {
                 action: 'add',
@@ -1329,7 +1323,6 @@ public MOPLoadData()
               data: this.dialogRequestObject
             });
             dialogRef.afterClosed().subscribe((result: any) => {
-              console.log(result);
               if (result !== undefined || result !== null) {
                 this.dutySlipImage = result.dutySlipImage;
                 this.loadDataForImage();

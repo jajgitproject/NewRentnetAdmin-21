@@ -27,7 +27,6 @@ export class CityGroupService
     {
       SearchActivationStatus="null";
     }
-    //console.log(this.API_URL + "/" +SearchName + '/' + SearchActivationStatus +'/' + PageNumber + '/cityGroup/Ascending')
     return this.httpClient.get(this.API_URL + "/" +SearchName + '/' + SearchActivationStatus +'/' + PageNumber + '/cityGroup/Ascending');
   }
   getTableDataSort(SearchName:string, SearchActivationStatus:string, PageNumber: number,coloumName:string,sortType:string):  Observable<any> 
@@ -40,7 +39,6 @@ export class CityGroupService
     {
       SearchActivationStatus="null";
     }
-    //console.log(this.API_URL + "/" +SearchName + '/' + SearchActivationStatus +'/' + PageNumber + '/'+coloumName+'/'+sortType)
     return this.httpClient.get(this.API_URL + "/" +SearchName + '/' + SearchActivationStatus +'/' + PageNumber +  '/'+coloumName+'/'+sortType);
   }
   add(advanceTable: CityGroup) 

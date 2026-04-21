@@ -1,13 +1,12 @@
 // @ts-nocheck
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ChartsModule as chartjsModule } from 'ng2-charts';
+import { BaseChartDirective } from 'ng2-charts';
 import { NgxEchartsModule } from 'ngx-echarts';
 import { GaugeModule } from 'angular-gauge';
 import { MatIconModule } from '@angular/material/icon';
 import { MatMenuModule } from '@angular/material/menu';
 import { MatButtonModule } from '@angular/material/button';
-import { PerfectScrollbarModule } from 'ngx-perfect-scrollbar';
 import { NgApexchartsModule } from 'ng-apexcharts';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { MatAutocompleteModule } from '@angular/material/autocomplete';
@@ -31,7 +30,6 @@ import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { CKEditorModule } from '@ckeditor/ckeditor5-angular';
 import { OwlDateTimeModule, OwlNativeDateTimeModule } from '@danielmoncada/angular-datetime-picker';
-import { MaterialFileInputModule } from '@compat/material-file-input-shim';
 import { MatPaginatorModule } from '@angular/material/paginator';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSnackBarModule } from '@angular/material/snack-bar';
@@ -68,14 +66,12 @@ import { PasswordModule } from '../password/password.module';
     MatTooltipModule,
     OwlDateTimeModule,
     OwlNativeDateTimeModule,
-    MaterialFileInputModule,
     CommonModule,
     WelcomeRoutingModule,
-    chartjsModule,
+    BaseChartDirective,
     MatMenuModule,
     MatIconModule,
     MatButtonModule,
-    PerfectScrollbarModule,
     NgApexchartsModule,
     MatTableModule,
     MatPaginatorModule,

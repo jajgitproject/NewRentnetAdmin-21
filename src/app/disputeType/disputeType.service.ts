@@ -39,7 +39,6 @@ export class DisputeTypeService
     {
       SearchActivationStatus=null;
     }
-    //console.log(this.API_URL + "/" +SearchDisputeType + '/' + SearchActivationStatus +'/' + PageNumber + '/'+coloumName+'/'+sortType)
     return this.httpClient.get(this.API_URL + "/" +SearchDisputeType + '/' + SearchActivationStatus +'/' + PageNumber +  '/'+coloumName+'/'+sortType);
   }
 

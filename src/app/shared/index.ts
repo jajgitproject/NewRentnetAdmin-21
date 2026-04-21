@@ -1,4 +1,3 @@
-// @ts-nocheck
 export { SubSink } from './sub-sink';
 export { TableElement } from './TableElement';
 export { TableExportUtil } from './tableExportUtil';

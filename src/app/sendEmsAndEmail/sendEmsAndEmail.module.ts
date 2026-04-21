@@ -21,14 +21,13 @@ import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatDialogModule } from '@angular/material/dialog';
 import { MatSortModule } from '@angular/material/sort';
 import { MatToolbarModule } from '@angular/material/toolbar';
-import { MaterialFileInputModule } from '@compat/material-file-input-shim';
 import { MatMenuModule } from '@angular/material/menu';
 import { SendEmsAndEmailService } from './sendEmsAndEmail.service';
 import { SendEmsAndEmailRoutingModule } from './sendEmsAndEmail-routing.module';
 import { MyUploadComponent } from '../myupload/myupload.component';
 import { MyUploadModule } from '../myupload/myupload.module';
 import { OwlDateTimeModule, OwlNativeDateTimeModule } from '@danielmoncada/angular-datetime-picker';
-import { GooglePlaceModule } from 'ngx-google-places-autocomplete';
+import { GooglePlaceModule } from '@compat/google-places-shim';
 import { MatAutocompleteModule } from '@angular/material/autocomplete';
 import { FormDialogPassengerEmsComponent} from './passenger-dialog/passenger-dialog.component';
 import { AddPeopleComponent } from './add-people/add-people.component';
@@ -66,7 +65,6 @@ import { MatTooltip, MatTooltipModule } from '@angular/material/tooltip';
     MatDialogModule,
     MatSortModule,
     MatToolbarModule,
-    MaterialFileInputModule,
     MatMenuModule,
     MatProgressSpinnerModule,
     MyUploadModule,

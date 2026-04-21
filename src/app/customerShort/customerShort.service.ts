@@ -96,7 +96,6 @@ export class CustomerShortService
     advanceTable.customerCreatedByID=this.generalService.getUserID();
     advanceTable.treatAsNewCustomerTillDateString=this.generalService.getTimeApplicable(advanceTable.treatAsNewCustomerTillDate);
     advanceTable.customerCreationDateString=this.generalService.getTimeApplicableTO(advanceTable.customerCreationDate);
-    console.log(advanceTable);
     return this.httpClient.post<any>(this.API_URL , advanceTable);
   }
   update(advanceTable: CustomerShort)

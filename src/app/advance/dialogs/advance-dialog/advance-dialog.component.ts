@@ -77,7 +77,6 @@ export class AdvanceDialogComponent
     response => 
     { 
      
-      console.log(response);
        if(response.activationStatus.indexOf("Duplicate") !== -1)
        {
         this._generalService.sendUpdate('DataNotFound:DuplicacyError:Failure');
@@ -101,7 +100,6 @@ export class AdvanceDialogComponent
     response => 
     {
      
-      console.log(response);
        if(response.activationStatus.indexOf("Duplicate") !== -1)
        {
         this._generalService.sendUpdate('DataNotFound:DuplicacyError:Failure');

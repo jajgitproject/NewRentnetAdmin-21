@@ -81,7 +81,6 @@ export class CarPaidTaxMISService
     {
       SearchActivationStatus=null;
     }
-    //console.log(this.API_URL + "/" +RegistrationNumber + '/' + SearchActivationStatus +'/' + PageNumber + '/'+coloumName+'/'+sortType)
     return this.httpClient.get(this.API_URL + "/" +RegistrationNumber+ "/" +VehicleCategory+ "/" +Vehicle+ "/" +State+ "/" +StartDate+ "/" +EndDate + '/' + SearchActivationStatus +'/' + PageNumber +  '/'+coloumName+'/'+sortType);
   }
 

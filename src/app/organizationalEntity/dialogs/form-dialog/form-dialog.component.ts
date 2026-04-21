@@ -10,7 +10,7 @@ import { GeneralService } from '../../../general/general.service';
 import { OrganizationalEntityDropDown } from '../../organizationalEntityDropDown.model';
 import { CurrencyDropDown } from 'src/app/general/currencyDropDown.model';
 import { QualificationDropDown } from 'src/app/general/qualificationDropDown.model';
-import { Address } from 'ngx-google-places-autocomplete/objects/address';
+import { Address } from '@compat/google-places-shim-objects/address';
 import { CitiesDropDown } from '../../citiesDropDown.model';
 import { StatesDropDown } from '../../stateDropDown.model';
 import { SupplierDropDown } from '../../supplierDropDown.model';
@@ -125,7 +125,6 @@ export class FormDialogComponent {
         this.owned = false;
         this.supplier = true;
       }
-      console.log(this.advanceTable);
       this.advanceTableForm.controls['organizationalEntityEndDate'].setValue(this.advanceTable.organizationalEntityEndDate);
       this.advanceTableForm.controls['activationStatus'].setValue(this.advanceTable.activationStatus);
 
@@ -531,7 +530,6 @@ export class FormDialogComponent {
     this._generalService.SupplierForOwnershipOfOE().subscribe(
     data => {
       this.SupplierForOwnershipList = data;
-      console.log(this.SupplierForOwnershipList)
       this.filteredSupplierForOwnerOptions = this.advanceTableForm.controls["organizationalEntitySupplier"].valueChanges.pipe(
         startWith(""),
         map(value => this._filterForOwnerSupplier(value || ''))

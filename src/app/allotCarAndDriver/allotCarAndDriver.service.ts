@@ -26,7 +26,6 @@ export class AllotCarAndDriverService
     advanceTable.dateOfAllotment=null;
     advanceTable.timeofAllotment=null;
     advanceTable.allotmentStatus='Alloted';
-    console.log(this.API_URL , advanceTable);
     return this.httpClient.post<any>(this.API_URL , advanceTable);
   }
 

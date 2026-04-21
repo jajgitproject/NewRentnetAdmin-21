@@ -39,7 +39,6 @@ export class SupplierActivationStatusHistoryService
           {
             supplierStatusDate="null";
           }
-          console.log(this.API_URL + "/" +supplierStatus+ "/" +SupplierID+'/'+supplierStatusReason+'/'+supplierStatusByEmployeeName+'/'+supplierStatusDate+'/' + PageNumber + '/supplierStatus/Ascending')
     return this.httpClient.get(this.API_URL + "/" +supplierStatus+ "/" +SupplierID+'/'+supplierStatusReason+'/'+supplierStatusByEmployeeName+'/'+supplierStatusDate+'/' + PageNumber + '/supplierStatus/Ascending');
   }
   getTableDataSort(supplierStatus:string,SupplierID:number,supplierStatusReason:string,supplierStatusByEmployeeName:string,supplierStatusDate:string, PageNumber: number,coloumName:string,sortType:string):  Observable<any> 
@@ -73,7 +72,6 @@ export class SupplierActivationStatusHistoryService
     advanceTable.userID=this.generalService.getUserID();
     advanceTable.supplierStatusByEmployeeID=this.generalService.getUserID();
     advanceTable.supplierStatusDate=this.generalService.getTodaysDate();
-    console.log(this.API_URL , advanceTable)
     return this.httpClient.post<any>(this.API_URL , advanceTable);
   }
   update(advanceTable: SupplierActivationStatusHistory)

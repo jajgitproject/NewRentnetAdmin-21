@@ -109,7 +109,6 @@ export class FormDialogComponent
         this.action = data.action;
         if (this.action === 'edit') 
         {
-          console.log(data);
           this.dialogTitle ='Customer';       
           this.advanceTable = data.advanceTable;
           this.advanceTableForm = this.createContactForm();
@@ -566,7 +565,6 @@ InitBusinesstype(){
     data=>
     {
       this.BusinessTypeList=data;
-      console.log(this.BusinessTypeList);
       this.advanceTableForm.controls['businessType'].setValidators([
         this.businessTypeValidator(this.BusinessTypeList)
       ]);

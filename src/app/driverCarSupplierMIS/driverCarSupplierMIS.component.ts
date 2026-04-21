@@ -204,7 +204,6 @@ supplierColumnTitleMap: { [key: string]: string } = {
       this.driverCarSupplierMiService.getTableData1('','','','','','','',true,0).subscribe(
         (res: any) => {
           this.dataSource = res;
-          console.log(this.dataSource)
         },
       
         (error: HttpErrorResponse) => {

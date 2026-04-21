@@ -95,8 +95,6 @@ export class SupplierComponent implements OnInit {
   // ];
   
   // openSupplierTab(menuItem: any, rowItem: any) {
-  //   console.log(menuItem);
-  //   console.log(rowItem);
   //   const baseUrl = this._generalService.FormURL;
   //   const queryParams: any = {
   //     SupplierID: rowItem.supplierID,
@@ -109,7 +107,6 @@ export class SupplierComponent implements OnInit {
   //   }
   
   //   const url = this.router.serializeUrl(this.router.createUrlTree([menuItem.route], { queryParams }));
-  //   console.log(baseUrl + url);
   
   //   window.open(baseUrl + url, '_blank');
   // }
@@ -123,8 +120,6 @@ export class SupplierComponent implements OnInit {
   ];
   
   openSupplierTab(menuItem: any, rowItem: any) {
-    console.log("Menu Item:", menuItem);
-    console.log("Row Item:", rowItem);
   
     const baseUrl = this._generalService.FormURL;
   
@@ -143,7 +138,6 @@ export class SupplierComponent implements OnInit {
     }
   
     const url = this.router.serializeUrl(this.router.createUrlTree([menuItem.route], { queryParams }));
-    console.log("Encrypted URL:", baseUrl + url);
   
     window.open(baseUrl + url, '_blank');
   }
@@ -301,7 +295,6 @@ export class SupplierComponent implements OnInit {
       {
 
         this.dataSource = data;
-      console.log(this.dataSource)
        
       },
       (error: HttpErrorResponse) => { this.dataSource = null;}
@@ -326,7 +319,6 @@ export class SupplierComponent implements OnInit {
   
   NextCall()
   {
-    //console.log(this.dataSource.length>0)
     if (this.dataSource.length>0) 
     {
      

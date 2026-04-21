@@ -71,7 +71,6 @@ public dutyPostPickUPCalldataSource: any[] = [];
     this.dialogTitle = 'Post PickUP Call History';
     this.reservationID = data.reservationID;
   
-    console.log(this.reservationID)
   }
   @ViewChild(MatPaginator, { static: true }) paginator: MatPaginator;
   @ViewChild(MatSort, { static: true }) sort: MatSort;
@@ -162,7 +161,6 @@ shouldShowDeleteButton(item: any): boolean {
   //       data =>   
   //       {
   //         this.dataSource = data;
-  //         console.log(this.dataSource)
   //       },
   //       (error: HttpErrorResponse) => { this.dataSource = null;}
   //     );
@@ -173,11 +171,9 @@ public postPickUPCallLoadData() {
     data => {
       if (data) {
         this.dutyPostPickUPCalldataSource = data;
-        console.log(data);
 
         // Fix: get ID from first item
         this.DutySlipID = data?.dutySlipID;
-        console.log('DutySlipID:', this.DutySlipID);
       } else {
         this.dutyPostPickUPCalldataSource = [];
       }

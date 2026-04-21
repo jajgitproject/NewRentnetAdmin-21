@@ -100,7 +100,7 @@
                     <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
                         <mat-label>Time Of FeedBack Received</mat-label>
                         <input required matInput [owlDateTimeTrigger]="time1" [owlDateTime]="time1" formControlName="timeOfFeedback">
-                        <mat-icon matSuffix [owlDateTimeTrigger]="time1" class="date-icon">schedule</mat-icon>
+                        <button mat-icon-button matSuffix type="button" [owlDateTimeTrigger]="time1" class="date-icon" aria-label="Open time picker"><mat-icon>schedule</mat-icon></button>
                         <owl-date-time [pickerType]="'timer'" #time1></owl-date-time>
 
                         

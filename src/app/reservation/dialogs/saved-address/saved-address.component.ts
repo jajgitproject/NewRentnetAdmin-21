@@ -81,7 +81,6 @@ export class SavedAddressComponent
       });
       dialogRef.afterClosed().subscribe(res => {
         // received data from dialog-component
-        //console.log(res.data);
         this.loadData();
       })
   }
@@ -105,7 +104,6 @@ export class SavedAddressComponent
 
   select(index:any)
   {
-    //console.log(index);
     
     this.dialogRef.close({data:this.dataSource[index]});
   }

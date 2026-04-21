@@ -96,10 +96,6 @@ export class FormDialogRDComponent
   public _generalService:GeneralService)
   {
         // Set the default
-        console.log('=== ReservationDetails Dialog Constructor ===');
-        console.log('Full data object:', data);
-        console.log('data.status:', data.status);
-        console.log('data.status type:', typeof data.status);
         
         this.action = data.action;
         this.reservationID=data.reservationID;
@@ -108,17 +104,12 @@ export class FormDialogRDComponent
         // Extract status properly
         if(typeof data.status === 'string') {
           this.status = data.status;
-          console.log('Status extracted as string:', this.status);
         } else if(data.status?.status && typeof data.status.status === 'string') {
           this.status = data.status.status;
-          console.log('Status extracted from nested object:', this.status);
         } else {
           this.status = '';
-          console.log('Status not found, set to empty string');
         }
         
-        console.log('Final status value:', this.status);
-        console.log('Will button be disabled?', this.status != 'Changes allow');
         
         if(this.status != 'Changes allow') {
           this.buttonDisabled = true;
@@ -127,7 +118,6 @@ export class FormDialogRDComponent
           //this.dialogTitle ='Edit Reservation Details';
           // this.dialogTitle ='Reservation Details';  
           // this.advanceTable = data.advanceTable[0];
-          // console.log(this.advanceTable) 
           // this.advanceTable.primaryPassenger=data.advanceTable[0].primaryPassenger+"-"+data.advanceTable[0].gender+"-"+data.advanceTable[0].importance+"-"+data.advanceTable[0].customerDepartment+"-"+data.advanceTable[0].customerDesignation+"-"+data.advanceTable[0].customer;
           // this.advanceTable.primaryBooker=data.advanceTable[0].primaryBooker+"-"+data.advanceTable[0].gender+"-"+data.advanceTable[0].importance+"-"+data.advanceTable[0].customerDepartment+"-"+data.advanceTable[0].customerDesignation+"-"+data.advanceTable[0].customer;  
           //this.advanceTable.customer=data.advanceTable[0].customer+"-"+data.advanceTable[0].customerGroup;
@@ -139,7 +129,6 @@ export class FormDialogRDComponent
         //   this.advanceTable = new ReservationDetails({});
         // }
          
-        //console.log(data.test);
   }
   public ngOnInit(): void
   {
@@ -488,7 +477,6 @@ export class FormDialogRDComponent
 
   // ViewKAM()
   // {
-  //   console.log(this.advanceTableForm.value);
   //   const dialogRef = this.dialog.open(FormDialogComponent, 
   //     {
   //       width:'60%',
@@ -608,7 +596,6 @@ export class FormDialogRDComponent
   //     data=>
   //     {
   //       this.contractID=data;
-  //       console.log(this.contractID)
   //       this.InitPackage();
   //       this.InitVehicle();
   //     }
@@ -617,13 +604,11 @@ export class FormDialogRDComponent
 
   // public fileChanged(event?: UIEvent): void {
   //   const files: FileList = this.fileUploadEl.nativeElement.files;
-  //   console.log(`files: `, files);
 
   //   const file = files[0];
   //   const reader = new FileReader();
   //   const loaded = (el) => {
   //     const contents = el.target.result;
-  //     console.log('onloaded', contents);
   //     this.contents = contents;
   //   }
   //   reader.onload = loaded;

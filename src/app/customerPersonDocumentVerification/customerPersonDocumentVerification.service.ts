@@ -35,7 +35,6 @@ export class CustomerPersonDocumentVerificationService
     {
       SearchActivationStatus="null";
     }
-    console.log(this.API_URL + '/'+customerPerson_ID +'/'+SearchCustomerPersonDocumentVerification  + '/' + SearchDocumentNumber+'/' +  SearchActivationStatus +'/' + PageNumber + '/customerPersonDocumentVerificationVerificationID/Ascending')
     return this.httpClient.get(this.API_URL + '/'+customerPerson_ID +'/'+SearchCustomerPersonDocumentVerification  + '/' + SearchDocumentNumber+'/' +  SearchActivationStatus +'/' + PageNumber + '/customerPersonDocumentVerificationVerificationID/Ascending');
   }
 
@@ -54,7 +53,6 @@ export class CustomerPersonDocumentVerificationService
     {
       SearchActivationStatus="null";
     }
-    //console.log(this.API_URL + "/kkk" +SearchCustomerPersonDocumentVerification + '/' + SearchActivationStatus +'/' + PageNumber + '/'+coloumName+'/'+sortType)
     return this.httpClient.get(this.API_URL + '/'+customerPerson_ID +'/'+SearchCustomerPersonDocumentVerification  + '/' + SearchDocumentNumber+'/' + SearchActivationStatus +'/' + PageNumber + '/'+coloumName+'/'+sortType);
   }
 

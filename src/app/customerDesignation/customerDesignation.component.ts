@@ -86,8 +86,6 @@ export class CustomerDesignationComponent implements OnInit {
     }
   
     // Log decrypted values
-    console.log("Decrypted CustomerGroupID: ", this.customerGroup_ID);
-    console.log("Decrypted CustomerGroupName: ", this.customerGroup_Name);
   });
     this.initCustomerCategory();
     this.loadData();
@@ -108,7 +106,6 @@ export class CustomerDesignationComponent implements OnInit {
         this.customerCategoryList=data;
       }
     )
-    //console.log(this.customerCategoryList)
   }
 
   public SearchData()
@@ -185,7 +182,6 @@ export class CustomerDesignationComponent implements OnInit {
       {
 
         this.dataSource = data;
-        //console.log(this.dataSource)
        
       },
       (error: HttpErrorResponse) => { this.dataSource = null;}
@@ -210,7 +206,6 @@ export class CustomerDesignationComponent implements OnInit {
   
   NextCall()
   {
-    //console.log(this.dataSource.length>0)
     if (this.dataSource.length>0) 
     {
      

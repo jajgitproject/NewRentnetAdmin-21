@@ -88,7 +88,6 @@ export class CustomerContractCarCategoriesCarMappingComponent implements OnInit 
   // Decrypt the parameters if they exist
     if (encryptedCustomerContractID) {
     this.customerContractID = this._generalService.decrypt(decodeURIComponent(encryptedCustomerContractID));
-    console.log("Decrypted CustomerContractID:", this.customerContractID);
   }
   if (encryptedCustomerContractCarCategoryID && encryptedCustomerContractCarCategory &&
       encryptedCustomerContractName) {
@@ -98,9 +97,6 @@ export class CustomerContractCarCategoriesCarMappingComponent implements OnInit 
     this.customerContractName = this._generalService.decrypt(decodeURIComponent(encryptedCustomerContractName));
     
     // Log the decrypted values to the console for verification
-    console.log("Decrypted CustomerContractCarCategoryID:", this.customerContractCarCategoryID);
-    console.log("Decrypted CustomerContractCarCategory:", this.customerContractCarCategory);
-    console.log("Decrypted CustomerContractName:", this.customerContractName);
   }
 
 });

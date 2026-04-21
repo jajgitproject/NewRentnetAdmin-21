@@ -53,7 +53,6 @@ export class FormDialogLutComponent {
     public _generalService: GeneralService) {
     this.organizationalEntityID = data.organizationalEntityID;
     this.organizationalEntityName = data.organizationalEntityName;
-    console.log(this.organizationalEntityName)
     // Set the defaults
     this.action = data?.action;
     if (this.action === 'edit')
@@ -131,8 +130,6 @@ export class FormDialogLutComponent {
     // this.advanceTableForm.patchValue({bankID:this.bankID});
     //this.advanceTableForm.controls['organizationalEntityID'].setValue(this.organizationalEntityID);
     this.advanceTableForm.controls['organizationalEntityID'].setValue(this.organizationalEntityID);
-    console.log(this.organizationalEntityID)
-    console.log(this.advanceTableForm.getRawValue());
     this.advanceTableService.add(this.advanceTableForm.getRawValue())
       .subscribe(
         response => {
@@ -147,7 +144,6 @@ export class FormDialogLutComponent {
   }
   public Put(): void {
     this.advanceTableForm.controls['organizationalEntityID'].setValue(this.organizationalEntityID || this.advanceTable.organizationalEntityID);
-    console.log(this.advanceTableForm.getRawValue());
     this.advanceTableService.update(this.advanceTableForm.getRawValue())
       .subscribe(
         response => {
@@ -242,7 +238,6 @@ export class FormDialogLutComponent {
   }
 
   getcompanyBranchID(item:any) {
-    // console.log(item)
     // if(this.organizationalEntityID === undefined || this.organizationalEntityID===null)
     //   {
     //   this.organizationalEntityID = item.organizationalEntityID;
@@ -251,7 +246,6 @@ export class FormDialogLutComponent {
     // }
     this.organizationalEntityID = item.organizationalEntityID;
     this.advanceTableForm.patchValue({organizationalEntityID:this.organizationalEntityID || this.advanceTable.organizationalEntityID})
-    // console.log('Form after setting value:', this.advanceTableForm.value);
    
   }
 

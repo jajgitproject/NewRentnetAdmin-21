@@ -178,7 +178,6 @@ export class ImportFromContractComponent
             this.getVehicleCategory();  // Fetch the vehicle categories
           } else {
             // User clicked No - Do nothing
-            console.log('Import canceled');
           }
         });
       }
@@ -189,7 +188,6 @@ getVehicleCategory() {
     this.advanceTableService.GetVehicleCategoryToImportFormContractCarCategory(this.customerContractID).subscribe(
         data => {
             this.vehicleCategoryList = data;
-            console.log('Fetched vehicle categories:', this.vehicleCategoryList);
             this.advanceTableFormData = this.vehicleCategoryList.map(vehicleCategory => 
                 new CustomerContractCarCategory({
                     customerContractCarCategoryID: -1, 
@@ -200,7 +198,6 @@ getVehicleCategory() {
                     vehicleCategoryID: vehicleCategory.customerContractCarCategoryID
                 })
             );
-            console.log(this.advanceTableForm);
             
             // Save the customer contract car category once the categories are fetched
             this.saveCustomerContractCarCategory();

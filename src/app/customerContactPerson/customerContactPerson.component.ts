@@ -117,7 +117,6 @@ export class CustomerContactPersonComponent implements OnInit {
         this.customerCategoryList=data;
       }
     )
-    //console.log(this.customerCategoryList)
   }
 
   initCustomerDepartment(){
@@ -126,7 +125,6 @@ export class CustomerContactPersonComponent implements OnInit {
       data =>   
       {
         this.DepartmentList = data;
-        console.log(this.DepartmentList)
        
       }
     );
@@ -138,7 +136,6 @@ export class CustomerContactPersonComponent implements OnInit {
       data =>   
       {
         this.DesginationList = data;
-        console.log(this.DesginationList)
        
       }
     );
@@ -150,7 +147,6 @@ export class CustomerContactPersonComponent implements OnInit {
       data =>   
       {
         this.SalutationList = data;
-        console.log(this.SalutationList)
        
       }
     );
@@ -208,7 +204,6 @@ export class CustomerContactPersonComponent implements OnInit {
       {
 
         this.dataSource = data;
-        //console.log(this.dataSource)
         this.dataSource.forEach((ele)=>{
           if(ele.isActive===true){
             this.activeData="Active";
@@ -241,7 +236,6 @@ export class CustomerContactPersonComponent implements OnInit {
   
   NextCall()
   {
-    //console.log(this.dataSource.length>0)
     if (this.dataSource.length>0) 
     {
      
@@ -273,7 +267,6 @@ export class CustomerContactPersonComponent implements OnInit {
       data=>
       {
         this.RateList=data;
-        console.log(this.RateList)
       });
   }
 

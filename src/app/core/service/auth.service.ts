@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { Injectable } from '@angular/core';
 // import { HttpClient } from '@angular/common/http';
 import { BehaviorSubject, Observable, of } from 'rxjs';
@@ -11,8 +10,8 @@ import { RuntimeConfigService } from './runtime-config.service';
   providedIn: 'root'
 })
 export class AuthService {
-  private currentUserSubject: BehaviorSubject<User>;
-  public currentUser: Observable<User>;
+  private currentUserSubject: BehaviorSubject<User | null>;
+  public currentUser: Observable<User | null>;
   private API_URL:string = '';
 
   constructor(
@@ -20,13 +19,14 @@ export class AuthService {
     private runtimeConfig: RuntimeConfigService
   ) {
     this.API_URL = this.runtimeConfig.getBaseUrl() + 'Auth';
-    this.currentUserSubject = new BehaviorSubject<User>(
-      JSON.parse(localStorage.getItem('currentUser'))
+    const stored = localStorage.getItem('currentUser');
+    this.currentUserSubject = new BehaviorSubject<User | null>(
+      stored ? (JSON.parse(stored) as User) : null
     );
     this.currentUser = this.currentUserSubject.asObservable();
   }
 
-  public get currentUserValue(): User {
+  public get currentUserValue(): User | null {
     return this.currentUserSubject.value;
   }
 
@@ -35,7 +35,6 @@ export class AuthService {
   }
 
   login(email: string, password: string,userType: string) {
-    // console.log(this.API_URL + "/authenticate", {email,password,userType});
     return this.http
       .post<any>(this.API_URL + "/authenticate", {email,password,userType})
       .pipe(

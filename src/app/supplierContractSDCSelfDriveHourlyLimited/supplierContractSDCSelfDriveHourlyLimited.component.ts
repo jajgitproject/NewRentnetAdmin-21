@@ -119,8 +119,6 @@ export class SupplierContractSDCSelfDriveHourlyLimitedComponent implements OnIni
       this.Applicable_To = decodeURIComponent( this.Applicable_To);
       this.Applicable_From= decodeURIComponent( this.Applicable_From);
     }
-    console.log("Decrypted Supplier Name: ", this.supplierRateCard_Name);
-    console.log("ecrypted Supplier Name: ", this.supplierRateCard_Name);
     });
     
     this.InitVehicleCategory();
@@ -371,7 +369,6 @@ export class SupplierContractSDCSelfDriveHourlyLimitedComponent implements OnIni
   
   NextCall()
   {
-    //console.log(this.dataSource.length>0)
     if (this.dataSource.length>0) 
     {
      

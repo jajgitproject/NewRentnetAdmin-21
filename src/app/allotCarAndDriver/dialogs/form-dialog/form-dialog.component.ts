@@ -61,7 +61,6 @@ allotmentType: any;
     // status gating
     // this.status = data?.status;
     // this.buttonDisabled = this.status ? this.status.toLowerCase() !== 'changes allow' : false;
-    // console.log(data);
     this.status = data?.status || '';
 
     // ✅ normalize (important)
@@ -70,16 +69,12 @@ allotmentType: any;
     // ✅ button logic
     this.buttonDisabled = this.normalizedStatus !== 'changes allow';
 
-    console.log('STATUS:', this.status);
-    console.log('NORMALIZED:', this.normalizedStatus);
-    console.log('BUTTON DISABLED:', this.buttonDisabled);
 
 
     // Set the defaults
     if (this.action === 'add' || this.action === 'update') {
       debugger
       this.advanceTableDIA = data.advanceTable;
-      console.log(this.advanceTableDIA);
       this.dialogTitle = 'Allot Car And Driver';
       this.allotmentType =data.allotmentType
       this.advanceTable = new AllotCarAndDriver({});
@@ -238,10 +233,8 @@ allotmentType: any;
 
 
   submit() {
-    console.log(this.advanceTableForm.value);
   }
   CheckData() {
-    console.log(this.advanceTableForm.value.isDriverAcceptanceRequired);
     if (this.advanceTableForm.value.isDriverAcceptanceRequired === true) {
       this.advanceTableForm.patchValue({isDriverAcceptanceRequired : true});
       this.advanceTableForm.patchValue({driverAcceptanceStatus : "Pending"});
@@ -286,7 +279,6 @@ allotmentType: any;
         },
         error => {
           debugger;
-          console.log(error)
           if(error.error.status === "error")
           {
            this.openShowError(error.error.message);

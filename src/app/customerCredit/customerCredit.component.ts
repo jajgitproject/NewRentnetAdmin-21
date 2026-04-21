@@ -134,7 +134,6 @@ export class CustomerCreditComponent implements OnInit {
           ApplicableTo:this.Applicable_To,
         }
     });
-    //console.log(this.CustomerContractMapping_ID);
   }
   editCall(row) {
       //  alert(row.id);
@@ -162,7 +161,6 @@ export class CustomerCreditComponent implements OnInit {
   {
 
     this.customerCreditID = row.id;
-  //console.log(row)
     const dialogRef = this.dialog.open(DeleteDialogComponent, 
     {
       data: row
@@ -272,7 +270,6 @@ export class CustomerCreditComponent implements OnInit {
         //message contains the data sent from service
         this.messageReceived = message.text;
         this.MessageArray=this.messageReceived.split(":");
-       // console.log(this.MessageArray);
         if(this.MessageArray.length==3)
         {
           if(this.MessageArray[0]=="CustomerCreditCreate")

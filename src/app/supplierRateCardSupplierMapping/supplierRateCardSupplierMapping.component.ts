@@ -89,11 +89,7 @@ export class SupplierRateCardSupplierMappingComponent implements OnInit {
         }
       }
       
-      console.log("Decrypted Supplier ID:", this.supplier_ID);
-      console.log("Decrypted Supplier Name:", this.supplier_Name);
       
-      // console.log(this.supplier_ID)
-      // console.log(this.supplier_Name)
     });
     this.InitCities()
     this.initRate();
@@ -213,7 +209,6 @@ export class SupplierRateCardSupplierMappingComponent implements OnInit {
   
   NextCall()
   {
-    //console.log(this.dataSource.length>0)
     if (this.dataSource.length>0) 
     {
      
@@ -249,7 +244,6 @@ export class SupplierRateCardSupplierMappingComponent implements OnInit {
           startWith(""),
           map(value => this._filterRate(value || ''))
         );
-        //console.log(this.StateList);
       },
       error => {
 

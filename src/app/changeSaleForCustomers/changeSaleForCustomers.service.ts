@@ -41,7 +41,6 @@ export class ChangeSaleForCustomersService
  
     
    
-    //console.log(this.API_URL + '/'+CustomerID +'/'+SearchnewSalesManagerActivationFromDate  + '/' + SearchStartDate+'/' + SearchEndDate +'/' + SearchActivationStatus +'/' + PageNumber + '/changeSaleForCustomersID/Ascending')
     return this.httpClient.get(this.API_URL + '/'+SearchCustomerSalesManager +'/'+SearchEmployeeName +'/' + SearchFromDate +'/' + SearchActivationStatus +'/' + PageNumber + '/salesManagerUpdateID/Ascending');
   }
 
@@ -60,7 +59,6 @@ export class ChangeSaleForCustomersService
       SearchnewSalesManagerActivationStatus=null;
     }
  
-    //console.log(this.API_URL + "/kkk" +SearchChangeSaleForCustomers  + '/' + SearchActivationStatus +'/' + PageNumber + '/'+coloumName+'/'+sortType)
     return this.httpClient.get(this.API_URL + '/'+SearchCustomerSalesManager +'/'+SearchEmployeeName +'/' + SearchFromDate +'/' + SearchnewSalesManagerActivationStatus +'/' + PageNumber + '/'+coloumName+'/'+sortType);
   }
 

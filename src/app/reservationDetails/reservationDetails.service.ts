@@ -19,7 +19,6 @@ export class ReservationDetailsService
   /** CRUD METHODS */
   getTableData(reservationID:any):  Observable<any> 
   {
-    console.log(this.API_URL+'/'+'ForReservationDetails/'+reservationID);
     return this.httpClient.get(this.API_URL+'/'+'ForReservationDetails/'+reservationID);
   }
 

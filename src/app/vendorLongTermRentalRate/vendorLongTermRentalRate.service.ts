@@ -46,7 +46,6 @@ export class VendorLongTermRentalRateService
     {
       SearchActivationStatus=null;
     }
-    console.log(this.API_URL + "/" + VendorContract_ID+ '/'+SearchVehicleCategory+ '/'+SearchCityTier+ '/'+SearchPackage+ '/'+SearchBaseRate + '/' + SearchActivationStatus +'/' + PageNumber + '/VendorLongTermRentalRateID/Ascending');
 
     return this.httpClient.get(this.API_URL + "/" + VendorContract_ID+ '/'+SearchVehicleCategory+ '/'+SearchCityTier+ '/'+SearchPackage+ '/'+SearchBaseRate + '/' + SearchActivationStatus +'/' + PageNumber + '/VendorLongTermRentalRateID/Ascending');
   }

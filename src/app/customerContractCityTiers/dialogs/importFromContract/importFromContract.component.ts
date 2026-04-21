@@ -182,7 +182,6 @@ export class ImportFromContractComponent
           this.getCityTier();  // Fetch the vehicle categories
         } else {
           // User clicked No - Do nothing
-          console.log('Import canceled');
         }
       });
     }
@@ -203,7 +202,6 @@ export class ImportFromContractComponent
             cityTierID:cityTiers.customerContractCityTiersID
           })
         );
-        console.log(this.advanceTableFormData);
         this.saveCustomerContractCityTiers()
       }
     );

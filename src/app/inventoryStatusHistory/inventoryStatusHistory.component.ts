@@ -107,7 +107,6 @@ if (encryptedVehicleCategoryID && encryptedVehicleName && encryptedVehicleID) {
   this.vehicleID = this._generalService.decrypt(decodeURIComponent(encryptedVehicleID));
 }
 
-console.log(this.inventoryID, this.registrationNumber, this.vehicleCategoryID, this.vehicle, this.vehicleID);
 
     })
     this.InitCities()

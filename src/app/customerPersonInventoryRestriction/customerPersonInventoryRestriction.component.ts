@@ -91,7 +91,6 @@ export class CustomerPersonInventoryRestrictionComponent implements OnInit {
   }
 
   // Log the decrypted values to the console
-  console.log(this.customerPerson_ID, this.customerPerson_Name);
 });
 this.InitRegistrationNumber();
     this.loadData();
@@ -357,7 +356,6 @@ this.InitRegistrationNumber();
       data=>
       {
         this.RegistrationNumberList=data;
-        console.log(this.RegistrationNumberList);
         this.filteredRegistrationNumberOptions = this.registrationNumber.valueChanges.pipe(
           startWith(""),
           map(value => this._filterRN(value || ''))

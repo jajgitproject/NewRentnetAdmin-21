@@ -7,7 +7,7 @@ import { DispatchByExecutive } from '../../dispatchByExecutive.model';
 import { MAT_DATE_LOCALE } from '@angular/material/core';
 import { formatDate } from '@angular/common';
 import { GeneralService } from '../../../general/general.service';
-import { Address } from 'ngx-google-places-autocomplete/objects/address';
+import { Address } from '@compat/google-places-shim-objects/address';
 import { EmployeeDropDown } from 'src/app/employee/employeeDropDown.model';
 import { DispatchByExecutiveDropDown } from '../../dispatchByExecutiveDropDown.model';
 import { HttpErrorResponse } from '@angular/common/http';
@@ -124,7 +124,6 @@ this.isSaveAllowed = status === 'changes allow';
     // this.location=data.rowRecord.transferedLocation;
     // this.locationID=data.rowIndex.transferedLocationID;
     this.tab=data.tab;
-    console.log(data.rowRecord)
     this.getCustomerAlertForDispatch(data.rowRecord.customerID)
 
     this.actualDate = new Date(data.rowRecord.pickup.pickupDate);
@@ -270,9 +269,7 @@ this.isSaveAllowed = status === 'changes allow';
     this.advanceTableService.GetLocationOutIntervalInMinutes(this.data.rowRecord.customerID).subscribe(
       data=>
       {
-        console.log(data);
         this.IntervalInTime = data.locationOutIntervalInMinutes;
-        console.log(this.IntervalInTime);
         if (this.data.rowRecord?.pickup?.pickupTime && this.data.rowRecord?.pickup?.pickupDate) {
           const pickupDate = new Date(this.data.rowRecord?.pickup?.pickupDate);
           const eventTime = new Date(this.data.rowRecord?.pickup?.pickupTime);
@@ -393,7 +390,6 @@ this.isSaveAllowed = status === 'changes allow';
     this.dispatchByExecutiveService.getDispatchDetailsForApp(this.AllotmentID).subscribe
     (
       data => {
-       console.log(data);
         this.dataSource = data;
         this.locationOutEntryMethod = 'App';
           this.locationOutEntry = true;
@@ -431,7 +427,6 @@ this.isSaveAllowed = status === 'changes allow';
             if (appLat !== null && appLong !== null) {
               this.advanceTableForm.patchValue({ locationOutLatitudeByApp: appLat });
               this.advanceTableForm.patchValue({ locationOutLongitudeByApp: appLong });
-              console.log('Loaded App coordinates from locationOutLatLong:', { lat: appLat, long: appLong });
             } else {
               console.warn('Failed to parse App locationOutLatLong:', value);
             }
@@ -503,7 +498,6 @@ this.isSaveAllowed = status === 'changes allow';
       locationOutLongitude: lng
     });
     
-    console.log('AddressChange: Updated with coordinates:', { lat, lng });
 
     // Validator ko fir se chalaye
     this.advanceTableForm.get('locationOutAddressString')?.markAsTouched();
@@ -548,7 +542,6 @@ this.isSaveAllowed = status === 'changes allow';
 
   fetchDataGPS()
   {
-    console.log(this.ReservationID)
     const dialogRef = this.dialog.open(FetchDataFromGPSComponent, 
     {
       //width:'70%',
@@ -575,7 +568,6 @@ this.isSaveAllowed = status === 'changes allow';
   //   this.dispatchByExecutiveService.getDispatchDetailsForDriver(this.AllotmentID).subscribe
   //     (
   //       data => {
-  //        console.log(data);
   //         this.dataSource = data;
           
   //         this.locationOutEntryMethod = this.dataSource[0]?.locationOutEntryMethod ?? 'Manual';
@@ -662,7 +654,6 @@ this.isSaveAllowed = status === 'changes allow';
   // }
 
   submit() {
-    console.log(this.advanceTableForm.value);
   }
   onNoClick(): void {
     if (this.action === 'add') {
@@ -694,7 +685,6 @@ this.isSaveAllowed = status === 'changes allow';
       }
 
     })
-    //console.log(reservationId,allotmentID,registrationNumber,driverName)
   }
   
   public Post(): void {
@@ -718,7 +708,6 @@ this.isSaveAllowed = status === 'changes allow';
       if (backfilled) {
         latitude = this.advanceTableForm.value.locationOutLatitude;
         longitude = this.advanceTableForm.value.locationOutLongitude;
-        console.log('Coordinates backfilled from address list:', { latitude, longitude });
       }
     }
     
@@ -733,7 +722,6 @@ this.isSaveAllowed = status === 'changes allow';
       return;
     }
     
-    console.log('Saving with coordinates:', `${latitude},${longitude}`);
     
     this.advanceTableService.add(this.advanceTableForm.getRawValue())
      .subscribe(
@@ -779,7 +767,6 @@ this.isSaveAllowed = status === 'changes allow';
          this.advanceTableForm.controls['locationOutLocationOrHub'].setValidators([Validators.required,
           this.locationGroupValidator(this.OrganizationalEntitiesList)
         ]);
-        console.log(this.OrganizationalEntitiesList)
         this.filteredOrganizationalEntityOptions = this.advanceTableForm.controls['locationOutLocationOrHub'].valueChanges.pipe(
           startWith(""),
           map(value => this._filterOrganizationalsEntity(value || ''))
@@ -838,12 +825,6 @@ this.isSaveAllowed = status === 'changes allow';
   }
   public Put(): void {
     // Debug: Show form state before validation
-    console.log('Put() called - Form Value:', this.advanceTableForm.value);
-    console.log('Form Controls State:', {
-      address: this.advanceTableForm.get('locationOutAddressString')?.value,
-      lat: this.advanceTableForm.get('locationOutLatitude')?.value,
-      lng: this.advanceTableForm.get('locationOutLongitude')?.value
-    });
     
     if (!this.advanceTableForm.valid) {
       console.error('Form Validation Errors:', this.advanceTableForm.errors);
@@ -893,7 +874,6 @@ this.isSaveAllowed = status === 'changes allow';
       }
     }
     
-    console.log('Checking coordinates:', { latitude, longitude });
 
     if (!latitude || !longitude) {
       console.warn('Latitude/Longitude not found, saving without coordinates');
@@ -916,7 +896,6 @@ this.isSaveAllowed = status === 'changes allow';
     }
     this.advanceTableForm.patchValue({locationOutLatLong: (latitude && longitude) ? (latitude + ',' + longitude) : ''});
     
-    console.log('Saving with coordinates:', `${latitude},${longitude}`);
     
     this.advanceTableService.update(this.advanceTableForm.getRawValue())
     .subscribe(
@@ -1001,7 +980,6 @@ this.isSaveAllowed = status === 'changes allow';
     );
   }
   onAddressSelected(selectedBookerName: string) {
-    console.log('onAddressSelected called with:', selectedBookerName);
     const selectedValue = (selectedBookerName || '').trim().toLowerCase();
     const selectedBooker = this.GoogleAddressList.find(
       data => (data.geoSearchString || '').trim().toLowerCase() === selectedValue
@@ -1011,7 +989,6 @@ this.isSaveAllowed = status === 'changes allow';
     );
   
     if (selectedBooker) {
-      console.log('Found address in GoogleAddressList:', selectedBooker);
       this.bindPickupSpotTypeandSpot(selectedBooker);
     } else {
       console.warn('Address not found in GoogleAddressList for:', selectedBookerName);
@@ -1035,7 +1012,6 @@ this.isSaveAllowed = status === 'changes allow';
         locationOutLatitude: lat,
         locationOutLongitude: long
       });
-      console.log('Form updated with coordinates:', { lat, long });
     } else {
       console.error('Cannot set coordinates - invalid values:', { lat, long });
       this.showNotification(
@@ -1051,7 +1027,6 @@ this.isSaveAllowed = status === 'changes allow';
 
   // bindPickupSpotTypeandSpot(option:any)
   // {
-  //   console.log(option)
   //    this.advanceTableForm.patchValue({locationOutAddressString:option.geoSearchString});
   //    var value = option?.geoLocation?.replace(
   //     '(',
@@ -1062,7 +1037,6 @@ this.isSaveAllowed = status === 'changes allow';
   //   var long = value?.split(' ')[1];
   //   this.advanceTableForm.patchValue({ locationOutLatitude: lat });
   //   this.advanceTableForm.patchValue({ locationOutLongitude: long });
-  //   console.log(lat,long)
   // }
   valueSwitch()
   {
@@ -1240,10 +1214,6 @@ onLocationHubTyping() {
   control?.markAsTouched();
   control?.updateValueAndValidity();
   
-  console.log('onLocationHubTyping called. Current coordinates:', {
-    lat: this.advanceTableForm.get('locationOutLatitude')?.value,
-    lng: this.advanceTableForm.get('locationOutLongitude')?.value
-  });
 }
 
 // googleAddressValidator(): ValidatorFn {

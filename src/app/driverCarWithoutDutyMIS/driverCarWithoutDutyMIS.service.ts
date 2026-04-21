@@ -32,7 +32,6 @@ export class DriverCarWithoutDutyMISService {
     if (SearchActivationStatus === null) {
       SearchActivationStatus = null;
     }
-    console.log(this.API_URL + "/" + searchPickupToDate + '/' + searchlocation + '/' + SearchActivationStatus + '/' + PageNumber + '/inventoryID/Dscending')
     return this.httpClient.get(this.API_URL +'/' + 'GetCarMIS'+  "/" + searchPickupToDate + '/' + searchlocation + '/'+ SearchActivationStatus + '/' + PageNumber + '/inventoryID/Dscending');
   }
   getTableDataSort(searchPickupToDate: string, searchlocation:string,  SearchActivationStatus: boolean, PageNumber: number, coloumName: string, sortType: string): Observable<any> {
@@ -61,7 +60,6 @@ export class DriverCarWithoutDutyMISService {
     if (SearchActivationStatus === null) {
       SearchActivationStatus = null;
     }
-   // console.log(this.API_URL1 + "/" + searchPickupToDate + '/' + searchlocation + '/' + SearchActivationStatus + '/' + PageNumber + '/driverID/Dscending')
     return this.httpClient.get(this.API_URL + "/" + searchPickupToDate + '/' + searchlocation + '/'+ SearchActivationStatus + '/' + PageNumber + '/driverID/Dscending');
   }
   getTableDataSort1(searchPickupToDate: string, searchlocation:string,  SearchActivationStatus: boolean, PageNumber: number, coloumName: string, sortType: string): Observable<any> {

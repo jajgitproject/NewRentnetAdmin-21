@@ -35,7 +35,6 @@ export class CDCLocalFixedDetailsService
     {
       SearchActivationStatus=null;
     }
-    console.log(this.API_URL + "/" +customerContract_ID + '/' + SearchBillFromTo + '/' + SearchPackageJumpCriteria + '/' + SearchNextPackageCriteria + '/' + SearchActivationStatus +'/' + PageNumber + '/billFromTo/Ascending')
     return this.httpClient.get(this.API_URL + "/" +customerContract_ID + '/' + SearchBillFromTo + '/' + SearchPackageJumpCriteria + '/' + SearchNextPackageCriteria + '/' + SearchActivationStatus +'/' + PageNumber + '/billFromTo/Ascending');
   }
 

@@ -43,7 +43,6 @@ export class SupplierVerificationDocumentsService
     {
       SearchActivationStatus=null;
     }
-    //console.log(this.API_URL + "/" +SupplierID +"/" +SearchSupplierVerificationDocuments + '/' + SearchNumbers +'/'+ SearchReasonNon +'/' + SearchActivationStatus +'/' + PageNumber + '/SupplierVerificationDocumentsID/Ascending')
     return this.httpClient.get(this.API_URL + "/" +SupplierID +"/" +SearchSupplierVerificationDocuments + '/' + SearchNumbers +'/'+ SearchReasonNon +'/'+ SearchsupplierRequiredDocumentAdditionDate +'/' + SearchActivationStatus +'/' + PageNumber + '/SupplierVerificationDocumentsID/Ascending');
   }
   getTableDataSort(SupplierID:number,SearchSupplierVerificationDocuments:string,SearchNumbers:string,SearchReasonNon:string,SearchsupplierRequiredDocumentAdditionDate:string, SearchActivationStatus:Boolean, PageNumber: number,coloumName:string,sortType:string):  Observable<any> 
@@ -72,7 +71,6 @@ export class SupplierVerificationDocumentsService
     {
       SearchActivationStatus=null;
     }
-    //console.log(this.API_URL + "/" +supplierVerificationDocuments + '/' + SearchActivationStatus +'/' + PageNumber + '/'+coloumName+'/'+sortType)
     return this.httpClient.get(this.API_URL + "/" +SupplierID +"/" +SearchSupplierVerificationDocuments + '/' + SearchNumbers +'/'+ SearchReasonNon +'/'+SearchsupplierRequiredDocumentAdditionDate +'/'+ SearchActivationStatus +'/' + PageNumber +  '/'+coloumName+'/'+sortType);
   }
 

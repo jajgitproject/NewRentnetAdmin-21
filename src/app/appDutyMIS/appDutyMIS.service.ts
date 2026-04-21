@@ -57,7 +57,6 @@ export class AppDutyMISService
     {
       SearchActivationStatus=null;
     }
-    //console.log(this.API_URL + "/" +RegistrationNumber + '/' + SearchActivationStatus +'/' + PageNumber + '/'+coloumName+'/'+sortType)
     return this.httpClient.get(this.API_URL + "/" +searchFromDate+ "/" +searchToDate+ "/" +DispatchLocation+ "/" + SearchActivationStatus +'/' + PageNumber +  '/'+coloumName+'/'+sortType);
   }
 

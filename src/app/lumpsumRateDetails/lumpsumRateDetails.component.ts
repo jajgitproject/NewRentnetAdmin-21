@@ -225,7 +225,6 @@ export class LumpsumRateDetailsComponent implements OnInit {
   LumpsumRate(i:any)
   {
     debugger;
-    //console.log(this.advanceTableDD[i]);
     const dialogRef = this.dialog.open(LumpsumRateDetailsDialogComponent, 
       {
         data: 

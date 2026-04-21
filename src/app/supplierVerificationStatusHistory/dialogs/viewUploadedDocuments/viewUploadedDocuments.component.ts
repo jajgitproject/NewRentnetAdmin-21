@@ -51,7 +51,6 @@ export class ViewUploadedDocumentsComponent
   @Inject(MAT_DIALOG_DATA) public data: any)
   {
     this.supplier_ID=data.supplier_ID;
-    console.log(this.supplier_ID)   
   }
 
   public ngOnInit(): void

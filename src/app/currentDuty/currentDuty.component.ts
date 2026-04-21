@@ -60,7 +60,6 @@ export class CurrentDutyComponent implements OnInit {
   contextMenu: MatMenuTrigger;
   contextMenuPosition = { x: '0px', y: '0px' };
   ngOnInit() {
-    console.log(this.DutySlipID);
     this.loadData();
     //this.loadDataForApp();
     // this.loadDataForDriver();
@@ -122,13 +121,11 @@ export class CurrentDutyComponent implements OnInit {
 
   public loadData() 
   {
-    console.log(this.DutySlipID);
      this.currentDutyService.getTableData(this.DutySlipID).subscribe
      (
        (data: CurrentDuty)=>   
        {
          this.advanceTable = data;
-         console.log(this.advanceTable)
        },
        (error: HttpErrorResponse) => { this.advanceTable = null;}
      );
@@ -136,13 +133,11 @@ export class CurrentDutyComponent implements OnInit {
 
   public loadDataForApp() 
   {
-    console.log(this.DutySlipID);
      this.currentDutyService.getTableDataForApp(this.DutySlipID).subscribe
      (
        (data: CurrentDuty)=>   
        {
          this.advanceTable = data;
-         console.log(this.advanceTable)
        },
        (error: HttpErrorResponse) => { this.advanceTable = null;}
      );
@@ -150,13 +145,11 @@ export class CurrentDutyComponent implements OnInit {
 
  public loadDataForDriver() 
   {
-    console.log(this.DutySlipID);
      this.currentDutyService.getTableDataForDriver(this.DutySlipID).subscribe
      (
        (data: CurrentDuty)=>   
        {
          this.advanceTable = data;
-         console.log(this.advanceTable)
        },
        (error: HttpErrorResponse) => { this.advanceTable = null;}
      );
@@ -164,13 +157,11 @@ export class CurrentDutyComponent implements OnInit {
 
  public loadDataForGPS() 
   {
-    console.log(this.DutySlipID);
      this.currentDutyService.getTableDataForGPS(this.DutySlipID).subscribe
      (
        (data: CurrentDuty)=>   
        {
          this.advanceTable = data;
-         console.log(this.advanceTable)
        },
        (error: HttpErrorResponse) => { this.advanceTable = null;}
      );

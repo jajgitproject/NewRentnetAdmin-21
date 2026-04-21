@@ -135,7 +135,6 @@ export class DITFormDialogComponent
       this.PickupDate = this._generalService.decrypt(decodeURIComponent(encryptedPickupDate));
       
     });
-    console.log(this.ReservationID)
     this.InitState();
     this.InitStateOnSearch();
     //this.advanceTableForm.patchValue({approvalRemark:'N/A'});
@@ -188,7 +187,6 @@ export class DITFormDialogComponent
 //     var interStateTaxStartDate=moment(this.interStateTaxStartDate).format('yyyy-MM-DD');
 //     var interStateTaxEndDate=moment(this.interStateTaxEndDate).format('yyyy-MM-DD');
 //     var registrationNumber=this.registrationNumber;
-//     console.log(interStateTaxStartDate,interStateTaxEndDate,registrationNumber);
 
 //     this.advanceTableService.LoadInterstateTaxData(interStateTaxStartDate,interStateTaxEndDate,registrationNumber).subscribe(
 //       (data)=>
@@ -230,7 +228,6 @@ export class DITFormDialogComponent
       {
         
           this.dataList=data;   
-          console.log(this.dataList)  
           if(this.dataList===null)  
           {
             this.errorMessage='No Interstate Tax Available';
@@ -255,7 +252,6 @@ export class DITFormDialogComponent
     this.advanceTableForm.patchValue({interStateTaxID: this.dataList[item].interstateTaxID});
     this.advanceTableForm.patchValue({stateID: this.dataList[item].geoPointID});
     this.advanceTableForm.patchValue({state: this.dataList[item].state}); 
-    console.log(this.dataList[item])
     document.getElementById("exampleModalCenter").click();
   }
 
@@ -290,7 +286,6 @@ export class DITFormDialogComponent
   //   this.advanceTableService.LoadInterstateTaxImage(this.InterStateTaxID).subscribe(
   //     data =>{
   //       this.taxImage=data;
-  //       console.log(this.taxImage);
 
   //     }
   //   )
@@ -411,7 +406,6 @@ private _filterStateOnSearch(value: string): any {
 
   submit() 
   {
-    //console.log(this.advanceTableForm.value);
   }
   onNoClick(): void 
   {

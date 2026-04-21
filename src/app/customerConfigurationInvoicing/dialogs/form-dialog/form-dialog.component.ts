@@ -68,7 +68,6 @@ saveDisabled:boolean = true;
           this.advanceTable = data.advanceTable;
           this.advanceTableForm = this.createContactForm(); 
           this.dialogTitle ='Customer Configuration Invoicing For';       
-          // console.log("advanceTable", this.advanceTable);
           this.searchStateTerm.setValue(this.advanceTable.billingStateName);
           this.searchCityTerm.setValue(this.advanceTable.billingCityName);
           let startDate=moment(this.advanceTable.startDate).format('DD/MM/yyyy');

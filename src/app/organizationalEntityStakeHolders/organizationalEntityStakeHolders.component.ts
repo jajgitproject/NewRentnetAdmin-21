@@ -89,8 +89,6 @@ export class OrganizationalEntityStakeHoldersComponent implements OnInit {
     // Decode the URL-encoded string after decryption
     this.OrganizationalEntityName = decodeURIComponent(this.OrganizationalEntityName);
     
-    console.log("Decrypted Organizational Entity ID: ", this.OrganizationalEntityID);
-    console.log("Decrypted Organizational Entity Name: ", this.OrganizationalEntityName);
   }
 });
     this.loadData();

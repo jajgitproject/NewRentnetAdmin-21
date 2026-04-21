@@ -205,7 +205,6 @@ export class DynamicEInvoiceComponent implements OnInit {
         data => {
           
           this.dataSource = data;
-          console.log(this.dataSource);
           
         },
         (error: HttpErrorResponse) => { this.dataSource = null; }
@@ -411,7 +410,6 @@ ConfirmDynamicEInvoice(row)
   // }
 
   viewPayload(item: any) {
-  console.log(item);
 
   this.dialog.open(DynamicEInvoiceDetailsComponent, {
     width: '900px',
@@ -420,7 +418,6 @@ ConfirmDynamicEInvoice(row)
 }
 
   viewResponse(item: any) {
-  console.log(item);
 
   this.dialog.open(DynamicEInvoiceResponseDetailsComponent, {
     width: '500px',

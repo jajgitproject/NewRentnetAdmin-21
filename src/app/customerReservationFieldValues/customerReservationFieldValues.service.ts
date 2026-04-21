@@ -33,7 +33,6 @@ export class CustomerReservationFieldValuesService
     {
       SearchActivationStatus=null;
     }
-    console.log(this.API_URL + "/" +customerReservationFieldID + '/'+searchFieldValue +  '/'+ SearchActivationStatus +'/' + PageNumber + '/customerReservationFieldValuesID/Ascending')
     return this.httpClient.get(this.API_URL + "/" +customerReservationFieldID + '/'+searchFieldValue +  '/'+ SearchActivationStatus +'/' + PageNumber + '/customerReservationFieldValuesID/Ascending');
   }
   getTableDataSort(customerReservationFieldID:number,searchFieldValue:string, SearchActivationStatus:boolean, PageNumber: number,coloumName:string,sortType:string):  Observable<any> 

@@ -27,7 +27,6 @@ export class HandoffNotesComponent {
   onAddNote(event: Event) {
     event.preventDefault();
     // emit or handle "add note" event if needed
-    console.log('Add Note clicked');
   }
 }
 

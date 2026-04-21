@@ -22,13 +22,12 @@ import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatDialogModule } from '@angular/material/dialog';
 import { MatSortModule } from '@angular/material/sort';
 import { MatToolbarModule } from '@angular/material/toolbar';
-import { MaterialFileInputModule } from '@compat/material-file-input-shim';
 import { MatMenuModule } from '@angular/material/menu';
 import { SpotInCityService } from './spotInCity.service';
 import { SpotInCityRoutingModule } from './spotInCity-routing.module';
 import { MyUploadComponent } from '../myupload/myupload.component';
 import { MyUploadModule } from '../myupload/myupload.module';
-import { GooglePlaceModule } from 'ngx-google-places-autocomplete';
+import { GooglePlaceModule } from '@compat/google-places-shim';
 
 @NgModule({
   declarations: [
@@ -58,7 +57,6 @@ import { GooglePlaceModule } from 'ngx-google-places-autocomplete';
     MatDialogModule,
     MatSortModule,
     MatToolbarModule,
-    MaterialFileInputModule,
     MatMenuModule,
     MatProgressSpinnerModule,
     MyUploadModule,

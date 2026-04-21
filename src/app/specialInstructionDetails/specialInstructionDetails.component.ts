@@ -70,7 +70,6 @@ export class SpecialInstructionDetailsComponent implements OnInit {
     this.getInstrucationDetails();
     this.eventsSubscription = this.events.subscribe((res: boolean) => {
       if(res) {
-        console.log(res, 'specialInstruction');
         this.getInstrucationDetails();
       }
     });
@@ -100,11 +99,9 @@ export class SpecialInstructionDetailsComponent implements OnInit {
   //   this.specialInstructionDetailsService.getspecialInstructionDetails(this.reservationID).subscribe((res:any) => {
   //     this.specialInstrucationDetailsList = res;
   //     if(this.specialInstrucationDetailsList.length > 0) {
-  //       console.log('specialInstrucationDetailsList');
   //       this.outputFromStopDetails.emit(true);
   //     }
   //   }, (error: HttpErrorResponse) => {
-  //     console.log(error);
   //   });
   // }
 
@@ -115,7 +112,6 @@ export class SpecialInstructionDetailsComponent implements OnInit {
        (data: SpecialInstructionDetails)=>   
         {
           this.advanceTableSI = data;    
-          console.log(this.advanceTableSI)
         },
         (error: HttpErrorResponse) => { this.advanceTableSI = null;}
       );

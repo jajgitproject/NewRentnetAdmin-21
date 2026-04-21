@@ -162,7 +162,6 @@ export class CustomerSalesManagerComponent implements OnInit {
   {
 
     this.customerSalesManagerID = row.id;
-  //console.log(row)
     const dialogRef = this.dialog.open(DeleteDialogComponent, 
     {
       data: row

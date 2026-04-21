@@ -31,7 +31,6 @@ export class AdvanceTableTestService {
       },
       (error: HttpErrorResponse) => {
         this.isTblLoading = false;
-        console.log(error.name + ' ' + error.message);
       }
     );
   }
@@ -57,10 +56,8 @@ export class AdvanceTableTestService {
   );*/
   }
   deleteAdvanceTableTest(id: number): void {
-    console.log(id);
 
     /*  this.httpClient.delete(this.API_URL + id).subscribe(data => {
-      console.log(id);
       },
       (err: HttpErrorResponse) => {
          // error code here

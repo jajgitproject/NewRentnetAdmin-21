@@ -26,7 +26,6 @@ export class CustomerReservationFieldsService
     {
       SearchCustomerReservationFields="null";
     }
-    //console.log(this.API_URL + '/'+CustomerID +'/'+SearchCustomerReservationFields  + '/' + SearchStartDate+'/' + SearchEndDate +'/' + SearchActivationStatus +'/' + PageNumber + '/customerReservationFieldsID/Ascending')
     return this.httpClient.get(this.API_URL + '/'+CustomerID +'/'+SearchCustomerReservationFields +'/' + SearchActivationStatus +'/' + PageNumber + '/customerReservationFieldID/Ascending');
   }
 
@@ -39,7 +38,6 @@ export class CustomerReservationFieldsService
     }
     
     
-    //console.log(this.API_URL + "/kkk" +SearchCustomerReservationFields + '/' + SearchActivationStatus +'/' + PageNumber + '/'+coloumName+'/'+sortType)
     return this.httpClient.get(this.API_URL + '/'+CustomerID +'/'+SearchCustomerReservationFields  +'/' + SearchActivationStatus +'/' + PageNumber + '/'+coloumName+'/'+sortType);
   }
 

@@ -86,14 +86,10 @@ export class FormDialogComponent
   // this.status = this.extractStatus(data?.status);
   // const normalized = (this.status || '').trim().toLowerCase();
   // this.buttonDisabled = normalized !== 'changes allow';
-  // console.log('InterstateTax dialog - raw status:', data?.status);
-  // console.log('InterstateTax dialog - final status:', this.status);
-  // console.log('InterstateTax dialog - buttonDisabled:', this.buttonDisabled);
         if (this.action === 'edit') 
         {
           this.dialogTitle ='Interstate Tax';       
           this.advanceTable = data.advanceTable;
-          console.log(this.advanceTable)
           this.advanceTable.paidBy=this.advanceTable.firstName+' '+this.advanceTable.lastName;
           this.ImagePath=this.advanceTable.interStateTaxImage;
           let interStateTaxStartDate=moment(this.advanceTable.interStateTaxStartDate).format('DD/MM/yyyy');
@@ -156,7 +152,6 @@ export class FormDialogComponent
       data=>
         {
           this.VehicleList=data;
-          console.log(this.VehicleList);
           this.advanceTableForm.patchValue({vehicle:this.VehicleList[0].vehicle});
         }
     );
@@ -171,7 +166,6 @@ export class FormDialogComponent
   //     data=>
   //       {
   //         this.dataSource=data;
-  //         console.log(this.dataSource)
   //       }
   //   );
   // }
@@ -381,7 +375,6 @@ GetStates(){
         data=>
         {
           this.RegistrationNumberList=data;
-          console.log(this.RegistrationNumberList);
           this.filteredRegistrationNumberOptions = this.advanceTableForm.controls['registrationNumber'].valueChanges.pipe(
             startWith(""),
             map(value => this._filterRN(value || ''))
@@ -426,7 +419,6 @@ GetStates(){
     //   this._generalService.GetVehicleByRegistrationNumber(this.vehicle).subscribe(
     //     data => {
     //       this.CarList = data;
-    //       console.log(this.CarList)
     //       this.advanceTableForm.patchValue({ vehicle: this.advanceTable.vehicle });
           
     //     }
@@ -465,7 +457,6 @@ GetStates(){
 
   submit() 
   {
-    //console.log(this.advanceTableForm.value);
   }
   onNoClick(): void 
   {

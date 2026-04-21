@@ -193,12 +193,8 @@ export class FormDialogComponent {
       this.advanceTableForm.patchValue({ customerPersonName: this.customerPersonName });
       this.advanceTableForm.patchValue({ CustomerPersonID: this.CustomerPersonID });
       // this.CustomerPersonID=paramsData.customerPersonID;
-      // console.log(this.customerPersonName);
 
-      console.log(this.customerPersonName);
 
-      console.log(this.CustomerPersonID);
-      console.log(this.dutySlipID);
     });
     this.InitEmployee();
     this.loadData();
@@ -213,7 +209,6 @@ export class FormDialogComponent {
     this.contextMenu.openMenu();
   }
   // editCall(row) {
-  //  console.log(row) 
   //   this.dialogTitle =' Edit Trip FeedBack.';  
   //   this.advanceTableForm.patchValue({tripFeedBackID:row.tripFeedBackID});  
   //   //this.advanceTableForm.patchValue({dutySlipID:row.dutySlipID});
@@ -233,7 +228,6 @@ export class FormDialogComponent {
   // }
 
   editCall(row) {
-    // console.log(row);
     //    alert(row.id);
     this.feedBackAttachmentID = row.feedBackAttachmentID;
     const dialogRef = this.dialog.open(tripFeedBackAttachmentFormDialogComponent, {
@@ -359,7 +353,6 @@ export class FormDialogComponent {
   }
 
   getTitles(item: any) {
-    console.log(item)
     this.primaryPassengerID = item.primaryPassengerID;
     this.CustomerPersonID = item.primaryPassengerID;
     this.advanceTableForm.patchValue({ primaryPassengerID: this.primaryPassengerID })
@@ -379,7 +372,6 @@ export class FormDialogComponent {
           this.dataSource = data;
           this.dataSource.forEach((row: any) => {
             const feedbackPointsOutOfFive = parseFloat(row?.feedbackPointsOutOfFive)?.toString();
-            console.log(row, feedbackPointsOutOfFive);
             this.action = 'edit';
             this.tripFeedBackID = row.tripFeedBackID;
             this.advanceTableForm.patchValue({ tripFeedBackID: row.tripFeedBackID });
@@ -504,7 +496,6 @@ export class FormDialogComponent {
   deleteItemfeedBackAttachment(row) {
 
     this.tripFeedBackID = row.tripFeedBackAttachmentID;
-    //console.log(row.tripFeedBackID);
     const dialogRef = this.dialog.open(DeleteDialogComponentForfeedBackAttachment,
       {
 
@@ -522,7 +513,6 @@ export class FormDialogComponent {
   }
 
   // TripFeedBackAttachment(row) {
-  //   console.log(row)
   //   this.router.navigate([
   //     '/feedBackAttachment',  
   //   ],
@@ -558,7 +548,6 @@ export class FormDialogComponent {
     dialogRef.afterClosed().subscribe((res: any) => {
       this.tripBackAttachmentloadData();
     });
-    // console.log(this.DutySlipID)
   }
 
   getUom() {
@@ -575,7 +564,6 @@ export class FormDialogComponent {
       (
         data => {
           this.dataSource = data;
-          console.log(this.dataSource)
           this.dataSource.forEach((ele) => {
             if (ele.activationStatus === true) {
               this.activation = "Active";
@@ -603,13 +591,11 @@ export class FormDialogComponent {
 
   // public fileChanged(event?: UIEvent): void {
   //   const files: FileList = this.fileUploadEl.nativeElement.files;
-  //   console.log(`files: `, files);
 
   //   const file = files[0];
   //   const reader = new FileReader();
   //   const loaded = (el) => {
   //     const contents = el.target.result;
-  //     console.log('onloaded', contents);
   //     this.contents = contents;
   //   }
   //   reader.onload = loaded;
@@ -684,7 +670,6 @@ export class FormDialogComponent {
       (
         data => {
           this.dataSource = data;
-          console.log(this.dataSource);
         },
         (error: HttpErrorResponse) => { this.dataSource = null; }
       );

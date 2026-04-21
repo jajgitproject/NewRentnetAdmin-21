@@ -17,6 +17,21 @@ export class RuntimeConfigService {
   private formUrl = '';
   private unlockEmployeeUrl = '';
   private clientErrorReportUrl: string | null = null;
+  /**
+   * Default preserves the legacy literal so existing payloads encrypted with
+   * it remain decryptable. Override via `runtime-config.json#cryptoSecretKey`
+   * once backend coordination is in place.
+   */
+  private cryptoSecretKey = 'your-secret-key';
+  /**
+   * Browser-exposed Google Maps JavaScript / Embed / Geocoding key.
+   * TODO(security): this is a *public* key — it's always visible in the
+   * bundle or in network requests. Protection is via Google Cloud Console
+   * restrictions (HTTP referrers, API whitelist), NOT via secrecy. The
+   * literal below is the legacy key committed to this repo; rotate it
+   * (and lock it down) and override via `runtime-config.json#googleMapsApiKey`.
+   */
+  private googleMapsApiKey = 'AIzaSyAFoLcbOuZfbGJGCdlazGXZbOCYr8dW76c';
 
   constructor() {
     this.applyEnvironmentDefaults();
@@ -51,10 +66,14 @@ export class RuntimeConfigService {
           this.unlockEmployeeUrl = withTrailingSlash(patch.UnlockEmployeeUrl.trim());
         }
         if (typeof patch.googleMapsApiKey === 'string' && patch.googleMapsApiKey.trim()) {
-          this.loadGoogleMapsScript(patch.googleMapsApiKey.trim());
+          this.googleMapsApiKey = patch.googleMapsApiKey.trim();
+          this.loadGoogleMapsScript(this.googleMapsApiKey);
         }
         if (typeof patch.clientErrorReportUrl === 'string' && patch.clientErrorReportUrl.trim()) {
           this.clientErrorReportUrl = patch.clientErrorReportUrl.trim();
+        }
+        if (typeof patch.cryptoSecretKey === 'string' && patch.cryptoSecretKey.trim()) {
+          this.cryptoSecretKey = patch.cryptoSecretKey.trim();
         }
       } catch {
         /* keep build-time defaults */
@@ -80,6 +99,14 @@ export class RuntimeConfigService {
 
   getClientErrorReportUrl(): string | null {
     return this.clientErrorReportUrl;
+  }
+
+  getCryptoSecretKey(): string {
+    return this.cryptoSecretKey;
+  }
+
+  getGoogleMapsApiKey(): string {
+    return this.googleMapsApiKey;
   }
 
   private loadGoogleMapsScript(apiKey: string): void {

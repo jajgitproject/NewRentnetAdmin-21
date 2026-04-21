@@ -129,7 +129,6 @@ export class CustomerForSalesManagerComponent implements OnInit {
       this.EmployeeID = this._generalService.decrypt(decodeURIComponent(encryptedEmployeeID));
       this.EmployeeName = this._generalService.decrypt(decodeURIComponent(encryptedEmployeeName));
     });
-    console.log(this.EmployeeID,this.EmployeeName)
     this.loadData();
     this.SubscribeUpdateService();
     this.InitCustomerCategory();
@@ -527,7 +526,6 @@ export class CustomerForSalesManagerComponent implements OnInit {
             this.saveDisabled = false;
             this.advanceTableForm.patchValue({employeeID: this.EmployeeID});
             this.advanceTableForm.patchValue({listOfCustomerID: duties});
-            console.log(this.advanceTableForm)
             this.customerForSalesManagerService.add(this.advanceTableForm.getRawValue())
             .subscribe(
               response => 

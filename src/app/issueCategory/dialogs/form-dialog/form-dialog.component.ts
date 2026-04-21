@@ -60,7 +60,6 @@ filteredIncidenceTypeOptions: Observable<IncidenceTypeDropDown[]>;
   public ngOnInit(): void
   {
  
-    console.log(this.advanceTableForm.value);
    this.InitIncidenceType();
   
  }
@@ -84,7 +83,6 @@ filteredIncidenceTypeOptions: Observable<IncidenceTypeDropDown[]>;
 
   submit() 
   {
-    //console.log(this.advanceTableForm.value);
   }
   onNoClick(): void 
   {
@@ -115,7 +113,6 @@ filteredIncidenceTypeOptions: Observable<IncidenceTypeDropDown[]>;
 
 public Put(): void {
   this.advanceTableForm.patchValue({ incidenceTypeID: this.incidenceTypeID  || this.advanceTable.incidenceTypeID });
-  console.log(this.advanceTableForm.value);
     this.saveDisabled = false; // Show spinner before making API call
 
     this.advanceTableService.update(this.advanceTableForm.getRawValue())  
@@ -147,7 +144,6 @@ public Put(): void {
   InitIncidenceType() {
     this._generalService.GetIncidenceTypes().subscribe(data => {
       this.incidenceTypeList = data;
-      console.log(this.incidenceTypeList);
       this.advanceTableForm.controls['incidenceType'].setValidators([
         Validators.required,
         this.incidenceTypeValidator(this.incidenceTypeList)
@@ -180,7 +176,6 @@ public Put(): void {
   }
   
   getIncidenceTypeID(incidenceTypeID: any) {
-    console.log("Incidence Type ID:", incidenceTypeID);
     this.incidenceTypeID = incidenceTypeID;
     this.advanceTableForm.patchValue({ incidenceTypeID:incidenceTypeID });
   }

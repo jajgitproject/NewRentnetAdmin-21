@@ -20,7 +20,6 @@ export class AdhocCarAndDriverService
   /** CRUD METHODS */
   add(advanceTable: AdhocCarAndDriver) 
   {
-   console.log(advanceTable.driverID)
     if(advanceTable.driverID === null)
       {
       advanceTable.driverID=-1;

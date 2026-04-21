@@ -202,7 +202,6 @@ export class FileManagerComponent implements OnInit {
 
     dialogRef.afterClosed().subscribe((result) => {
       if (result) {
-        console.log('Files to upload:', result);
         // Refresh or show success
       }
     });

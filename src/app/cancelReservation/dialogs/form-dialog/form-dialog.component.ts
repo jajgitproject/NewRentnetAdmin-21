@@ -64,11 +64,6 @@ export class FormDialogCRComponent
         // Set button disabled state
         const normalizedStatus = (this.status || '').toString().trim().toLowerCase();
         this.buttonDisabled = normalizedStatus !== 'changes allow';
-        // console.log('CancelReservation dialog - normalizedStatus:', normalizedStatus);
-        // console.log('CancelReservation dialog - reservationID:', this.reservationID);
-        // console.log('CancelReservation dialog - raw data.status:', data?.status);
-        // console.log('CancelReservation dialog - final status:', this.status);
-        // console.log('CancelReservation dialog - buttonDisabled:', this.buttonDisabled);
      
   }
   formControl = new FormControl('', 
@@ -88,7 +83,6 @@ export class FormDialogCRComponent
      data =>   
      {
        this.dataSource = data;
-       console.log(this.dataSource)
        this.advanceTableForm.patchValue({cancellationReason:this.dataSource.cancellationReason});
       
      },

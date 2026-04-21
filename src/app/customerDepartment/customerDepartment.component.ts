@@ -79,8 +79,6 @@ export class CustomerDepartmentComponent implements OnInit {
   }
   
   // Log decrypted values
-  console.log("Decrypted CustomerGroupID: ", this.customerGroupID);
-  console.log("Decrypted CustomerGroup: ", this.customerGroup);
 });
     this.loadData();
     this.SubscribeUpdateService();

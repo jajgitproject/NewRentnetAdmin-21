@@ -3677,8 +3677,6 @@ showAndScrollSalesPerson() {
   }
 
   openDisputes() {
-    // console.log(this.disputeAdvanceTable);
-    // console.log(this.DutySlipForBillingID, this.disputeTypeID);
     const dialogRef = this.dialog.open(FormDialogDisputeComponent,
       {
         data:
@@ -3777,16 +3775,6 @@ checkChronologyAndValues(): boolean {
 
 
 debugger;
-console.log("Form values for DateTime check:", {
-  locationOutDate: form.locationOutDateForBilling,
-  locationOutTime: form.locationOutTimeForBilling,
-  pickupDate: form.pickUpDateForBilling,
-  pickupTime: form.pickUpTimeForBilling,
-  dropOffDate: form.dropOffDateForBilling,
-  dropOffTime: form.dropOffTimeForBilling,
-  locationInDate: form.locationInDateForBilling,
-  locationInTime: form.locationInTimeForBilling
-});
 
   const locationOutDT = getDateTime(form.locationOutDateForBilling, form.locationOutTimeForBilling);
 const pickupDT = getDateTime(form.pickUpDateForBilling, form.pickUpTimeForBilling);

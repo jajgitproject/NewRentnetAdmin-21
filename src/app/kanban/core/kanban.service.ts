@@ -33,7 +33,6 @@ export class KanbanService extends UnsubscribeOnDestroyAdapter {
         this._kanbans.next(data); // mock up backend with fake data (not Kanban objects yet!)
       },
       error: (error: HttpErrorResponse) => {
-        console.log(error.name + ' ' + error.message);
       },
     });
   }

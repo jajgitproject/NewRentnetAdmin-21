@@ -54,8 +54,6 @@ export class FormDialogComponent
   public _generalService:GeneralService)
   {
 this.VendorContractID= data.vendorContractID;
-    console.log('Dialog data:', data);
-    console.log('VendorContractID from data:', this.VendorContractID);
     this.VendorContractCarCategoryID= data.vendorContractCarCategoryID;
         this.VendorContractCarCategory =data.vendorContractCarCategory;
         this.vendorContractName =data.vendorContractName;
@@ -83,14 +81,10 @@ this.VendorContractID= data.vendorContractID;
     
     // Debug form validity
     this.advanceTableForm.statusChanges.subscribe(status => {
-      console.log('Form status:', status);
-      console.log('Form errors:', this.advanceTableForm.errors);
-      console.log('Form values:', this.advanceTableForm.value);
       if (status === 'INVALID') {
         Object.keys(this.advanceTableForm.controls).forEach(key => {
           const control = this.advanceTableForm.get(key);
           if (control && control.invalid) {
-            console.log(`${key} is invalid:`, control.errors);
           }
         });
       }
@@ -218,7 +212,6 @@ this.VendorContractID= data.vendorContractID;
     this.advanceTableForm.patchValue({ vendorContractID:this.VendorContractID || this.data.vendorContractID });
     this.advanceTableForm.patchValue({vehicleID:this.vehicleID});
     
-    console.log('Form data before submission:', this.advanceTableForm.getRawValue());
     
     this.advanceTableService.add(this.advanceTableForm.getRawValue())  
     .subscribe(
@@ -249,7 +242,6 @@ this.VendorContractID= data.vendorContractID;
     this.advanceTableForm.patchValue({vendorContractID: this.VendorContractID || this.data.vendorContractID || this.advanceTable.vendorContractID});
     this.advanceTableForm.patchValue({vehicleID:this.vehicleID || this.advanceTable.vehicleID});
     
-    console.log('Edit form data before submission:', this.advanceTableForm.getRawValue());
     
     this.advanceTableService.update(this.advanceTableForm.getRawValue())  
     .subscribe(
@@ -275,10 +267,6 @@ this.VendorContractID= data.vendorContractID;
     );
   }
   public confirmAdd(): void {
-    console.log('Attempting to save...');
-    console.log('Form valid:', this.advanceTableForm.valid);
-    console.log('Form value:', this.advanceTableForm.value);
-    console.log('VendorContractID:', this.VendorContractID);
 
     // Ensure vendorContractID is set before saving
     if (!this.VendorContractID && !this.data.vendorContractID) {
@@ -391,12 +379,6 @@ this.VendorContractID= data.vendorContractID;
     const vehicle = this.advanceTableForm.get('vehicle')?.value;
     const vendorVehicleName = this.advanceTableForm.get('vendorVehicleName')?.value;
     
-    console.log('CanSave check:', {
-      vehicle: !!vehicle,
-      vendorVehicleName: !!vendorVehicleName,
-      vehicleValue: vehicle,
-      vendorVehicleNameValue: vendorVehicleName
-    });
 
     return !!(vehicle && vendorVehicleName);
   }

@@ -291,7 +291,6 @@ filteredPackageOptions: Observable<PackageDropDown[]>;
           SupplierRateCardName:this.supplierRateCard_Name
       }
     });
-    //console.log(row)
 
   }
   deleteItem(row)
@@ -389,7 +388,6 @@ filteredPackageOptions: Observable<PackageDropDown[]>;
   
   NextCall()
   {
-    //console.log(this.dataSource.length>0)
     if (this.dataSource.length>0) 
     {
      

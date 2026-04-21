@@ -83,11 +83,9 @@ export class FormDialogComponent
           this.searchCategoryBy.setValue(this.advanceTable.customerContractCarCategory)
           this.searchTierBy.setValue(this.advanceTable.customerContractCityTier)
           this.searchPackageBy.setValue(this.advanceTable.package);
-          //console.log('Edit value:', this.advanceTable.nightChargesBasedOn);
           this.advanceTableForm?.patchValue({
            nightChargesBasedOn: this.advanceTable.nightChargesBasedOn || 'Garage'
             });
-            //console.log('Edit value:', this.advanceTable.nightChargesBasedOn);
         } 
         else if (this.action === 'add')  
         {
@@ -467,7 +465,6 @@ numberOnly(event): boolean {
     .subscribe(
     response => 
     {
-      console.log(response.activationStatus);
       if(response.activationStatus===false)
       {
         this._generalService.sendUpdate('DataNotFound:DuplicacyError:Failure');

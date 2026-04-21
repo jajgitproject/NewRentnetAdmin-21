@@ -70,7 +70,6 @@ export class FormDialogComponent
         // Set the defaults
         this.data = data;
         this.action = data.action;
-        console.log(this.data)
         if (this.action === 'edit') 
         {
           this.dialogTitle ='Cancel E - Credit Note';       

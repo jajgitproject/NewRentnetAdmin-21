@@ -59,7 +59,6 @@ export class SupplierContractCustomerPackageTypePercentageService
       //   {
       //     searchsupplierPercentage="null";
       //   }
-    console.log(this.API_URL + '/'+SupplierContractID +'/'+ SearchSupplierContractCustomers+'/'+SearchSupplierContractCustomerPackageTypePercentage +'/'+SearchPercentage + '/'+SearchFromDate + '/'+SearchToDate + '/' + SearchActivationStatus +'/' + PageNumber + '/supplierContractCustomerPackageTypePercentageID/Ascending')
     return this.httpClient.get(this.API_URL + '/'+SupplierContractID +'/'+ SearchSupplierContractCustomers+'/'+SearchSupplierContractCustomerPackageTypePercentage +'/'+SearchPercentage +'/'+SearchFromDate + '/'+SearchToDate + '/' + SearchActivationStatus +'/' + PageNumber + '/supplierContractCustomerPackageTypePercentageID/Ascending');
   }
 
@@ -105,7 +104,6 @@ export class SupplierContractCustomerPackageTypePercentageService
       //   {
       //     searchsupplierPercentage="null";
       //   }
-    //console.log(this.API_URL + "/kkk" +SearchSupplierContractCustomerPackageTypePercentage + '/' + SearchActivationStatus +'/' + PageNumber + '/'+coloumName+'/'+sortType)
     return this.httpClient.get(this.API_URL + '/'+SupplierContractID +'/'+ SearchSupplierContractCustomers+'/'+SearchSupplierContractCustomerPackageTypePercentage +'/'+SearchPercentage + '/'+SearchFromDate + '/'+SearchToDate + '/'  + SearchActivationStatus +'/' + PageNumber + '/'+coloumName+'/'+sortType);
   }
 

@@ -55,7 +55,6 @@ export class FormDialogComponentCSD
   public ngOnInit(): void
   {
     debugger;
-    console.log(this.data?.dataSource[0]);
     this.InitProjectCode();
     if(this.data.action==='edit')
     {
@@ -99,7 +98,6 @@ export class FormDialogComponentCSD
   }
   
   onSubmit() {
-    console.log(this.dynamicForm.value)
   }
 
   bindValues()

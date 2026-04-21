@@ -75,7 +75,6 @@ export class SupplierRateCardComponent implements OnInit {
     this.route.queryParams.subscribe(paramsData =>{
       this.supplier_ID   = paramsData.SupplierID;
       this.supplier_Name   = paramsData.SupplierName;
-      console.log(this.supplier_Name)
     });
     this.loadData();
     
@@ -167,8 +166,6 @@ export class SupplierRateCardComponent implements OnInit {
   ];
   
   openInNewTab(menuItem: any, rowItem: any) {
-    console.log(menuItem);
-    console.log(rowItem);
     let baseUrl = this._generalService.FormURL;
     if(menuItem.label.toLowerCase() === 'supplier contract') {
       const url = this.router.serializeUrl(this.router.createUrlTree(['/supplierContract'], { queryParams: {
@@ -176,7 +173,6 @@ export class SupplierRateCardComponent implements OnInit {
               SupplierRateCardName:rowItem.supplierRateCardName,
               SupplierName:this.supplier_Name
       } }));
-      console.log(this.supplier_Name);
       window.open(baseUrl + url, '_blank'); 
     } else if(menuItem.label.toLowerCase() === 'supplier rate card supplier mapping') {
       const url = this.router.serializeUrl(this.router.createUrlTree(['/supplierRateCardSupplierMapping'], { queryParams: {
@@ -220,7 +216,6 @@ export class SupplierRateCardComponent implements OnInit {
   
   NextCall()
   {
-    //console.log(this.dataSource.length>0)
     if (this.dataSource.length>0) 
     {
      

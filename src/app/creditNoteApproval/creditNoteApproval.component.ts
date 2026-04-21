@@ -363,7 +363,6 @@ export class CreditNoteApprovalComponent implements OnInit {
 
   // Method to open credit note approval dialog
   editCall(row: CreditNoteHomeModel): void {
-    console.log('Opening credit note approval dialog for:', row);
     
     const dialogRef = this.dialog.open(FormDialogCreditVerificationsComponent, {
       width: '800px',
@@ -377,7 +376,6 @@ export class CreditNoteApprovalComponent implements OnInit {
     });
 
     dialogRef.afterClosed().subscribe(result => {
-      console.log('Dialog result:', result);
       if (result === 'success') {
         this.loadData(); // Refresh the data after successful update - this will call forceTableStyling()
         
@@ -395,7 +393,6 @@ export class CreditNoteApprovalComponent implements OnInit {
   }
   // // Method to open credit note approval dialog
   // editCall(row: CreditNoteHomeModel): void {
-  //   console.log('Opening credit note approval dialog for:', row);
     
   //   const dialogRef = this.dialog.open(FormDialogCreditVerificationsComponent, {
   //     width: '800px',
@@ -407,7 +404,6 @@ export class CreditNoteApprovalComponent implements OnInit {
   //   });
 
   //   dialogRef.afterClosed().subscribe(result => {
-  //     console.log('Dialog result:', result);
   //     if (result === 'success') {
   //       this.loadData(); // Refresh the data after successful update
   //       this.showNotification(
@@ -422,7 +418,6 @@ export class CreditNoteApprovalComponent implements OnInit {
 
   // Method to handle delete operations (if needed)
   deleteItem(row: CreditNoteHomeModel): void {
-    console.log('Delete functionality not implemented for credit note approval');
     this.showNotification(
       'snackbar-warning',
       'Delete functionality is not available for credit note approvals',

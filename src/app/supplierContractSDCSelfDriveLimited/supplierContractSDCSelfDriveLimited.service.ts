@@ -54,7 +54,6 @@ export class SupplierContractSDCSelfDriveLimitedService
     {
       SearchActivationStatus=null;
     }
-    //console.log(this.API_URL + "/" +supplierContractID + '/'+searchVehicleCategory + '/'+searchPackage + '/'+searchCityTier + '/'+SearchBaseRate + '/' + SearchActivationStatus +'/' + PageNumber + '/supplierContractSDCSelfDriveLimitedID/Ascending')
     return this.httpClient.get(this.API_URL + "/" +supplierContractID + '/'+searchVehicleCategory + '/'+searchPackage + '/'+searchCityTier + '/'+SearchBaseRate +'/'+SearchminimumDays +'/' +SearchActivationStatus +'/' + PageNumber + '/supplierContractSDCSelfDriveLimitedID/Ascending');
     
   }

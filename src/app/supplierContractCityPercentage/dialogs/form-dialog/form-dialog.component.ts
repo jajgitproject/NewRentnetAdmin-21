@@ -83,7 +83,6 @@ export class FormDialogComponentHolder {
     //     data =>   
     //     {
     //       this.CityList = data;
-    //       console.log(this.CityList)
 
     //     }
     //   );

@@ -98,8 +98,6 @@ export class LutComponent implements OnInit {
     this.organizationalEntityName = decodeURIComponent(this.organizationalEntityName);
 
     // Log the decrypted values
-    console.log("Decrypted Organizational Entity ID: ", this.organizationalEntityID);
-    console.log("Decrypted Organizational Entity Name: ", this.organizationalEntityName);
   }
 }
   );
@@ -108,7 +106,6 @@ export class LutComponent implements OnInit {
       this.loadData();
     } else {
       this.LutloadData();
-      console.log( this.organizationalEntityName)
     }
     this.InitBranch();
     this.InitBank();
@@ -129,7 +126,6 @@ export class LutComponent implements OnInit {
   }
 
   addNew() {
-    console.log(this.organizationalEntityID)
     const dialogRef = this.dialog.open(FormDialogLutComponent,
       {
         data:
@@ -144,7 +140,6 @@ export class LutComponent implements OnInit {
 
   editCall(row) {
     this.lutID = row.id;
-    console.log(row);
   
     const dialogRef = this.dialog.open(FormDialogLutComponent, {
       data: {
@@ -188,7 +183,6 @@ export class LutComponent implements OnInit {
         
         data => {
           this.dataSource = data;
-          console.log(this.dataSource)
           //   this.dataSource.forEach((ele)=>{
           //     if(ele.activationStatus===true){
           //      this.activation="Active"
@@ -245,7 +239,6 @@ export class LutComponent implements OnInit {
         data => {
           this.advanceTable = data;
           this.dataSource = data;
-          console.log(this.advanceTable)
         },
         (error: HttpErrorResponse) => { this.advanceTable = null; }
       );

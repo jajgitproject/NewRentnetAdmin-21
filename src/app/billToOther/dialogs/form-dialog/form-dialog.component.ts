@@ -65,7 +65,6 @@ export class FormDialogBillToOtherComponent
         {
           this.dialogTitle ='Bill To Other';       
           this.advanceTable = data.advanceTable;
-          console.log(data.advanceTable);
           this.advanceTableForm = this.createContactForm();
         } else 
         {
@@ -160,7 +159,6 @@ OnCountryChangeGetStates(){
         startWith(""),
         map(value => this._filterState(value || ''))
       ); 
-      //console.log(this.StateList);                 
     },
     error=>
     {
@@ -276,7 +274,6 @@ getCountryBasedOnState(){
           {
             debugger;
             this.StateList = data; 
-            //console.log(this.StateList);                   
           },
           error=>
           {
@@ -325,7 +322,6 @@ getStatesBasedOnCity(){
 
   submit() 
   {
-    console.log(this.advanceTableForm.value);
   }
   onNoClick(): void 
   {

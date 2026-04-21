@@ -86,8 +86,6 @@ export class DutySlipForBillingComponent implements OnInit {
 
   ngOnInit() 
   {
-    // console.log(this.advanceTableClosingOne.closingReservationForPickupDataModel);
-    //console.log(this.RegistrationNumber);
     this.advanceTableForm.valueChanges.subscribe(value => {
     this.dutyStatusChanged.emit({
       verifyDuty: value.verifyDuty,
@@ -952,7 +950,6 @@ export class DutySlipForBillingComponent implements OnInit {
     let dropOffLongForBilling : string;
     let locationInLatForBilling:string;
     let locationInLongForBilling : string;
-    console.log(this.advanceTableClosingOne)
 
     if(this.advanceTableClosingOne.closingDutySlipForBillingModel.locationOutLatLongForBilling)
     {
@@ -1776,7 +1773,6 @@ setVerifyDuty(value: boolean, details: string) {
         response => 
         {
           this.showSpinner = false;
-          console.log(response)
           this.DSClosing = response.dsClosing;
           // this.saveDisabled = false;
           // this.CalculateBill();
@@ -1850,7 +1846,6 @@ setVerifyDuty(value: boolean, details: string) {
 
   ngOnChanges(changes: SimpleChanges) {
   if (changes['disputeAdvanceTable']) {
-    //console.log('Disputes received in DutySlipForBilling:', this.disputeAdvanceTable);
 
     // ✅ Check if any dispute has approvalStatus === false
     const hasUnapprovedDispute = this.disputeAdvanceTable?.some(d => d.approvalStatus === false);

@@ -282,7 +282,6 @@ private _filter(value: string): any {
     });
   }
   editCall(row) {
-     //console.log(row);
     this.supplierContractSDCSelfDriveLimitedID = row.supplierContractSDCSelfDriveLimitedID;
     const dialogRef = this.dialog.open(FormDialogComponent, {
       data: {
@@ -295,7 +294,6 @@ private _filter(value: string): any {
           SupplierRateCardName:this.supplierRateCard_Name
       }
     });
-    //console.log(row)
 
   }
   deleteItem(row)
@@ -376,7 +374,6 @@ private _filter(value: string): any {
   
   NextCall()
   {
-    //console.log(this.dataSource.length>0)
     if (this.dataSource.length>0) 
     {
      

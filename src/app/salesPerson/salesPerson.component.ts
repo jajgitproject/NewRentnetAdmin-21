@@ -85,7 +85,6 @@ export class SalesPersonComponent implements OnInit {
     this.salesPersonLoadData();
     //this.GetInterstateTaxImage();
     this.updateSub = this.updateData.subscribe(() => {
-      //console.log('Update received in SalesPersonComponent');
       this.salesPersonLoadData();
     });
   }

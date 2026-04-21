@@ -110,7 +110,6 @@ export class CustomerCarAndDriverDetailsSMSEMailComponent implements OnInit {
         this.customerCategoryList=data;
       }
     )
-    //console.log(this.customerCategoryList)
   }
   onBackPress(event) {
     if (event.keyCode === 8) 
@@ -209,7 +208,6 @@ export class CustomerCarAndDriverDetailsSMSEMailComponent implements OnInit {
   
   NextCall()
   {
-    //console.log(this.dataSource.length>0)
     if (this.dataSource.length>0) 
     {
      

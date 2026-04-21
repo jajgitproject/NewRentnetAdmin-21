@@ -140,7 +140,6 @@ export class SupplierContractCustomerPackageTypePercentageComponent implements O
           startWith(""),
           map(value => this._filterPackage(value || ''))
         );
-        //console.log(this.StateList);
       },
       error => {
 
@@ -169,7 +168,6 @@ export class SupplierContractCustomerPackageTypePercentageComponent implements O
           startWith(""),
           map(value => this._filterCustomer(value || ''))
         );
-        //console.log(this.StateList);
       },
       error => {
 
@@ -231,7 +229,6 @@ export class SupplierContractCustomerPackageTypePercentageComponent implements O
           SupplierName:this.supplier_Name
       }
     });
-    //console.log(row);
 
   }
   public SearchData()
@@ -244,7 +241,6 @@ export class SupplierContractCustomerPackageTypePercentageComponent implements O
   {
 
     this.supplierContractCustomerPackageTypePercentageID = row.id;
-  //console.log(row)
     const dialogRef = this.dialog.open(DeleteDialogComponent, 
     {
       data: row
@@ -359,7 +355,6 @@ export class SupplierContractCustomerPackageTypePercentageComponent implements O
         //message contains the data sent from service
         this.messageReceived = message.text;
         this.MessageArray=this.messageReceived.split(":");
-        //console.log(this.MessageArray);
         if(this.MessageArray.length==3)
         {
           if(this.MessageArray[0]=="SupplierContractCustomerPackageTypePercentageCreate")

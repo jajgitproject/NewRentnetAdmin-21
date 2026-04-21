@@ -19,7 +19,6 @@ export class PassengerDetailsService
   /** CRUD METHODS */
   getTableData(ReservationID:number, SearchActivationStatus:boolean, PageNumber: number):  Observable<any> 
   {
-    //console.log(this.API_URL + "/" +ReservationID + '/' + SearchActivationStatus +'/' + PageNumber + '/ReservationPassengerID/Ascending')
     return this.httpClient.get(this.API_URL + "/" +ReservationID + '/' + SearchActivationStatus +'/' + PageNumber + '/ReservationPassengerID/Ascending');
   }
 
@@ -39,7 +38,6 @@ export class PassengerDetailsService
   add(advanceTable: ReservationPassenger) 
   {
     advanceTable.reservationPassengerID=-1;
-    console.log( advanceTable.userID);
     advanceTable.userID=this.generalService.getUserID();
     advanceTable.procCalledFrom="ReservationDetails";
     advanceTable.isPrimaryPassenger=false;
@@ -48,7 +46,6 @@ export class PassengerDetailsService
   update(advanceTable: ReservationPassenger)
   {
     advanceTable.userID=this.generalService.getUserID();
-    console.log( advanceTable.userID);
     return this.httpClient.put<any>(this.API_URL , advanceTable);
   }
   delete(reservationPassengerID: number):  Observable<any> 

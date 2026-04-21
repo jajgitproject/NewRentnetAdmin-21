@@ -121,7 +121,6 @@ deleteItem(row)
         data =>   
         {
           this.advanceTableDutyStateCustomer = data;
-          console.log(this.advanceTableDutyStateCustomer)
          
         },
         (error: HttpErrorResponse) => { this.advanceTableDutyStateCustomer = null;}
@@ -134,7 +133,6 @@ deleteItem(row)
         data =>   
         {
           this.advanceTableDutyStateCustomer = data;
-          console.log(this.advanceTableDutyStateCustomer)
          
         },
         (error: HttpErrorResponse) => { this.advanceTableDutyStateCustomer = null;}

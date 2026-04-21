@@ -272,7 +272,6 @@ export class FormDialogComponent {
   }
 
   createContactForm(): FormGroup {
-    console.log(this.advanceTable)
     return this.fb.group(
       {
         supplierContractCDCLongTermRentalID: [this.advanceTable.supplierContractCDCLongTermRentalID],

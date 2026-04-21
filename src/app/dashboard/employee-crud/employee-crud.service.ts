@@ -30,7 +30,6 @@ export class EmployeeCrudTestService {
       },
       (error: HttpErrorResponse) => {
         this.isTblLoading = false;
-        console.log(error.name + ' ' + error.message);
       }
     );
   }
@@ -43,7 +42,6 @@ export class EmployeeCrudTestService {
 
   }
   deleteAdvanceTableTest(id: number): void {
-    console.log(id);    
   }
 }
 

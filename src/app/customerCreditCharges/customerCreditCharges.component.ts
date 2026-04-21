@@ -87,7 +87,6 @@ export class CustomerCreditChargesComponent implements OnInit {
         this.customer_ID = this._generalService.decrypt(decodeURIComponent(encryptedCustomerID));
         this.customer_Name = this._generalService.decrypt(decodeURIComponent(encryptedCustomerName));
       }
-      console.log(this.customer_ID,this.customer_Name)      
     });
     this.loadData();
     this.SubscribeUpdateService();

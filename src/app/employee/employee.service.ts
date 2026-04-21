@@ -21,7 +21,6 @@ export class EmployeeService
 
   getPassword(referenceID:number,type:any):  Observable<any> 
   {
-    console.log(this.API_URL_Driver + '/GetDriverPassword' + "/" + referenceID + "/" + type);
     return this.httpClient.get(this.API_URL_Driver + '/GetDriverPassword' + "/" + referenceID + "/" + type);
   }
   /** CRUD METHODS */

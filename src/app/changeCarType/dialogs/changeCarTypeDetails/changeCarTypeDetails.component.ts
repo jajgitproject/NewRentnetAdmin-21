@@ -44,7 +44,6 @@ export class ChangeCarTypeDetailsComponent
     data => 
     {
       this.dataSourceForCarType = data;
-      console.log(this.dataSourceForCarType)
     },
     (error: HttpErrorResponse) => { this.dataSourceForCarType = null; }
     );

@@ -5,7 +5,7 @@ import { FormControl, Validators, FormGroup, FormBuilder, AbstractControl, Valid
 import { MAT_DATE_LOCALE } from '@angular/material/core';
 import { formatDate } from '@angular/common';
 import { GeneralService } from '../../../general/general.service';
-import { Address } from 'ngx-google-places-autocomplete/objects/address';
+import { Address } from '@compat/google-places-shim-objects/address';
 import { EmployeeDropDown } from 'src/app/employee/employeeDropDown.model';
 import { HttpErrorResponse } from '@angular/common/http';
 import { OrganizationalEntityDropDown } from 'src/app/organizationalEntityMessage/organizationalEntityDropDown.model';
@@ -392,7 +392,6 @@ this.isSaveAllowed = status === 'changes allow';
   //   this.dispatchByExecutiveService.getDispatchDetailsForDriver(this.AllotmentID).subscribe
   //     (
   //       data => {
-  //        console.log(data);
   //         this.dataSource = data;
           
   //         this.locationInEntryMethod = this.dataSource[0]?.locationInEntryMethod ?? 'Manual';
@@ -695,7 +694,6 @@ this.isSaveAllowed = status === 'changes allow';
 
   bindPickupSpotTypeandSpot(option:any)
   {
-    console.log(option)
      this.advanceTableForm.patchValue({locationInAddressString:option.geoSearchString});
      var value = option?.geoLocation?.replace(
       '(',
@@ -788,7 +786,6 @@ onTimeInput(event: any): void {
       (
         data => {
           this.dataSourceForValidation = data;
-          console.log(this.dataSourceForValidation);
           this.dropoffDate = new Date(data.dropOffDate);  // e.g. "2025-06-02T00:00:00"
           this.dropoffTime = new Date(data.dropOffTime);  // e.g. "2025-06-02T15:00:00"
           this.dropoffKM = data.dropOffKM;

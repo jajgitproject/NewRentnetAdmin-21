@@ -84,9 +84,6 @@ if (encryptedCustomerContractCityTiersID && encryptedCustomerContractCityTier &&
   this.customerContractName = this._generalService.decrypt(decodeURIComponent(encryptedCustomerContractName));
 
   // Log the decrypted values for verification
-  console.log("Decrypted CustomerContractCityTiersID:", this.customerContractCityTiersID);
-  console.log("Decrypted CustomerContractCityTier:", this.customerContractCityTier);
-  console.log("Decrypted CustomerContractName:", this.customerContractName);
 }
 
     });

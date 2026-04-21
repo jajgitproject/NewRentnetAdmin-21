@@ -5,10 +5,13 @@ import {
   Inject,
   ElementRef,
   OnInit,
+  OnDestroy,
   AfterViewInit,
   Renderer2,
   ChangeDetectionStrategy
 } from '@angular/core';
+import { Subject } from 'rxjs';
+import { takeUntil } from 'rxjs/operators';
 import { RightSidebarService } from 'src/app/core/service/rightsidebar.service';
 import { ConfigService } from 'src/app/config/config.service';
 @Component({
@@ -18,7 +21,7 @@ import { ConfigService } from 'src/app/config/config.service';
   styleUrls: ['./right-sidebar.component.sass'],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class RightSidebarComponent implements OnInit, AfterViewInit {
+export class RightSidebarComponent implements OnInit, OnDestroy, AfterViewInit {
   selectedBgColor = 'white';
   maxHeight: string;
   maxWidth: string;
@@ -27,6 +30,7 @@ export class RightSidebarComponent implements OnInit, AfterViewInit {
   isDarkSidebar = false;
   isDarTheme = false;
   public config: any = {};
+  private readonly destroy$ = new Subject<void>();
 
   constructor(
     @Inject(DOCUMENT) private document: Document,
@@ -38,10 +42,17 @@ export class RightSidebarComponent implements OnInit, AfterViewInit {
 
   ngOnInit() {
     this.config = this.configService.configData;
-    this.dataService.currentStatus.subscribe((data: boolean) => {
-      this.isOpenSidebar = data;
-    });
+    this.dataService.currentStatus
+      .pipe(takeUntil(this.destroy$))
+      .subscribe((data: boolean) => {
+        this.isOpenSidebar = data;
+      });
     this.setRightSidebarWindowHeight();
+  }
+
+  ngOnDestroy() {
+    this.destroy$.next();
+    this.destroy$.complete();
   }
   ngAfterViewInit() {
     // set header color on startup

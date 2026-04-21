@@ -39,7 +39,6 @@ export class EmployeeLocationService
     {
       SearchActivationStatus=null;
     }
-    //console.log(this.API_URL + "/" +SearchEmployeeLocation + '/' + SearchActivationStatus +'/' + PageNumber + '/'+coloumName+'/'+sortType)
     return this.httpClient.get(this.API_URL + "/" +EmployeeID + '/' +Location + '/' + SearchActivationStatus +'/' + PageNumber +  '/'+coloumName+'/'+sortType);
   }
 

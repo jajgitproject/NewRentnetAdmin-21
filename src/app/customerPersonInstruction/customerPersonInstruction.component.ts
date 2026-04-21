@@ -83,7 +83,6 @@ export class CustomerPersonInstructionComponent implements OnInit {
   }
 
   // Log the decrypted values to the console
-  console.log(this.customerPerson_ID, this.customerPerson_Name);
 });
    this.loadData();
     this.SubscribeUpdateService();

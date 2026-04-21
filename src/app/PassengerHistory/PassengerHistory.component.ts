@@ -91,13 +91,10 @@ constructor(
   {
     this.PassengerID = this.data.PassengerID;
     this.pickupCityID =this.data.pickupCityID;
-    console.log(this.pickupCityID);
-    console.log(this.PassengerID);
       // Set the defaults
       this.action = data.action;
       if (this.action === 'edit') 
       {
-        console.log(this.advanceTable)
         //this.dialogTitle ='Edit PassengerHistory';       
         this.dialogTitle ='PassengerHistory';
         this.advanceTable = data.advanceTable;
@@ -119,8 +116,6 @@ constructor(
      {
         this.passengerHistoryRecords = data.passengerHistoryModel;
         this.totalData =data.totalRecords
-        console.log( this.totalData);
-        console.log(this.passengerHistoryRecords);
      },
      (error: HttpErrorResponse) => { this.passengerHistoryRecords = null;}
    );

@@ -62,7 +62,6 @@ export class AddPeopleComponent implements OnInit {
 
             this.advanceTableForm = this.createContactForm();
             this.ReservationID = data.ReservationID;
-            // console.log(this.ReservationID)
   
       }
 
@@ -78,7 +77,6 @@ export class AddPeopleComponent implements OnInit {
   postAdd() {
     if (this.advanceTableForm.valid) {
       if(this.selectedValue === 'customerPerson') {
-       // console.log( this.customerOptionDetail);
         this.formDataArray.push({
           primaryMobile: this.advanceTableForm.get('primaryMobile')?.value,
           primaryEmail: this.advanceTableForm.get('primaryEmail')?.value,
@@ -109,7 +107,6 @@ export class AddPeopleComponent implements OnInit {
         });
       }
       this.dialogRef.close(this.formDataArray);
-      //console.log(this.formDataArray)
     }
   }
 
@@ -169,7 +166,6 @@ customerPersonID:[''],
       data =>
       {
         this.CustomerMobileList = data; 
-       // console.log(this.CustomerMobileList);
         this.filteredCustomerMobileOptions = this.advanceTableForm.controls['customer'].valueChanges.pipe(
           startWith(""),
           map(value => this._filterState(value || ''))
@@ -196,7 +192,6 @@ customerPersonID:[''],
     );
     }
     getCustomerID(customerPersonID: any, option: any) {
-      //console.log(option);
       //debugger;
       this.customerOptionDetail = option;
       this.customerPersonID= customerPersonID.customerPersonID;
@@ -240,8 +235,6 @@ customerPersonID:[''],
           const parts = selectedOption.split('-');
            const phoneNumber = parts[0];
            const email = parts[2];
-          // console.log(phoneNumber)
-          // console.log(email)
             this.advanceTableForm.get('primaryMobile').setValue(phoneNumber);
             this.advanceTableForm.get('primaryEmail').setValue(email);
            
@@ -253,7 +246,6 @@ customerPersonID:[''],
         const parts = selectedOption.split('-');
          const phoneNumber = parts[0];
          const email = parts[2];
-        // console.log(phoneNumber)
           this.advanceTableForm.get('employeeMobile').setValue(phoneNumber);
           this.advanceTableForm.get('employeeEmail').setValue(email);
          
@@ -267,7 +259,6 @@ customerPersonID:[''],
        data =>   
        {
          this.permissionData = data;
-        //  console.log(this.permissionData);
 
        },
        (error: HttpErrorResponse) => { this.permissionData = null;}
@@ -306,7 +297,6 @@ customerPersonID:[''],
     );
     }
     getEmployeeID(employeeID: any,option:any) {
-      // console.log(option)
       this.employeeOptionDetail = option;
       this.employeeID= employeeID.employeeID;
       this.advanceTableForm.patchValue({employeeID:this.employeeID})

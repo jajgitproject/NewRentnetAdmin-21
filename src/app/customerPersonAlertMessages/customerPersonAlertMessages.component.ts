@@ -101,7 +101,6 @@ export class CustomerPersonAlertMessagesComponent implements OnInit {
     this.customerPersonName = this._generalService.decrypt(decodeURIComponent(encryptedCustomerPersonName));
   }
 
-  console.log(this.customerPersonID, this.customerPersonName); // Log the decrypted values
     });
     this.initCustomerType();
     this.initCustomerfor();

@@ -163,7 +163,6 @@ export class DutySlipImageComponent implements OnInit {
         data => {
 
           this.dataSource = data;
-          //console.log(this.dataSource)
           
 
         },
@@ -188,7 +187,6 @@ export class DutySlipImageComponent implements OnInit {
   }
 
   NextCall() {
-    //console.log(this.dataSource.length>0)
     if (this.dataSource.length > 0) {
 
       this.PageNumber++;

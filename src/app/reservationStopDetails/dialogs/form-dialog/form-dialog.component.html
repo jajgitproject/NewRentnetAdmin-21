@@ -45,7 +45,7 @@
                         [owlDateTime]="time1"
                         formControlName="reservationStopTime"
                         (input)="onTimeInput($event)" [disabled]="isTNCSelected">
-                        <mat-icon matSuffix [owlDateTimeTrigger]="time1" class="date-icon">schedule</mat-icon>
+                        <button mat-icon-button matSuffix type="button" [owlDateTimeTrigger]="time1" class="date-icon" aria-label="Open time picker"><mat-icon>schedule</mat-icon></button>
                         <owl-date-time [pickerType]="'timer'" #time1></owl-date-time>
                         <mat-hint align="end">
                             <div style="float: right; font-size: 10px !important; font-style: italic">

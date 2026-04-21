@@ -7,7 +7,7 @@ import { ReachedByExecutive, DateTimeKMModel } from '../../reachedByExecutive.mo
 import { MAT_DATE_LOCALE } from '@angular/material/core';
 import { formatDate } from '@angular/common';
 import { GeneralService } from '../../../general/general.service';
-import { Address } from 'ngx-google-places-autocomplete/objects/address';
+import { Address } from '@compat/google-places-shim-objects/address';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { HttpErrorResponse } from '@angular/common/http';
 import { EmployeeDropDown } from 'src/app/employee/employeeDropDown.model';
@@ -124,7 +124,6 @@ this.isSaveAllowed = status === 'changes allow';
     this._generalService.getEmployeeID(this._generalService.getUserID()).subscribe(
       data => {
         this.employeeDataSource = data;
-        console.log(this.employeeDataSource)
         this.advanceTableForm.controls["executive"].disable();
         this.advanceTableForm.patchValue({ executive: this.employeeDataSource[0].firstName + " " + this.employeeDataSource[0].lastName });
         this.advanceTableForm.patchValue({ reportingToGuestEntryExecutiveID: this.employeeDataSource[0].employeeID });
@@ -144,7 +143,6 @@ this.isSaveAllowed = status === 'changes allow';
     dialogRef.afterClosed().subscribe(res => {
       if (res !== undefined) {
 
-        console.log(res)
         this.advanceTableForm.patchValue({ reportingToGuestAddressString: res.data.pickupAddressString });
         this.advanceTableForm.patchValue({ reportingToGuestKM: res.data.pickupKM });
         this.advanceTableForm.patchValue({ latitude: res.data.pickupLatitude });
@@ -154,7 +152,6 @@ this.isSaveAllowed = status === 'changes allow';
   }
 
   fetchDataGPS() {
-    console.log(this.reservationID);
     const dialogRef = this.dialog.open(FetchDataFromGPSComponent, {
       data: {
         action: 'add',
@@ -164,7 +161,6 @@ this.isSaveAllowed = status === 'changes allow';
     dialogRef.afterClosed().subscribe(res => {
       if (res !== undefined) {
         
-        console.log(res)
         this.advanceTableForm.patchValue({ reportingToGuestAddressString: res.data[0].pickupAddressString });
         this.advanceTableForm.patchValue({ reportingToGuestKM: res.data[0].pickupKM });
         this.advanceTableForm.patchValue({ latitude: res.data[0].pickupLatitude });
@@ -275,7 +271,6 @@ onAddressTyping() {
   getDataManual() {
     this.advanceTableService.getReachedByDriverExecutive(this.allotmentID).subscribe(
       data => {
-        console.log(data);
         this.dataSource = data;
 
         this.reportingToGuestEntryMethod = 'Manual';
@@ -292,7 +287,6 @@ onAddressTyping() {
         else {
           this.advanceTableForm.patchValue({ reportingToGuestDate: this.dataSource[0]?.reportingToGuestDate });
         } 
-        console.log(this.data?.rowRecord);
         if (this.data?.rowRecord?.reportingToGuestTime) {
           this.advanceTableForm.patchValue({ reportingToGuestTime: this.data?.rowRecord?.reportingToGuestTime });
         } else if (this.data?.rowRecord?.pickup?.pickupTime) {
@@ -302,7 +296,6 @@ onAddressTyping() {
           this.advanceTableForm.patchValue({ reportingToGuestDate: exactDate });
           this.advanceTableForm.patchValue({ reportingToGuestTime: pickupTime });
         }
-        console.log(this.data?.rowRecord?.reportingToGuestKM);
         this.advanceTableForm.patchValue({ reportingToGuestKM: this.dataSource[0]?.reportingToGuestKM });
         this.advanceTableForm.patchValue({ reportingToGuestAddressString: this.dataSource[0]?.reportingToGuestAddressString });
         var value = this.dataSource[0]?.reportingToGuestLatLong?.replace(
@@ -325,7 +318,6 @@ onAddressTyping() {
   getDataApp() {
     this.advanceTableService.getReachedByAppExecutive(this.allotmentID).subscribe(
       data => {
-        console.log(data);
         this.dataSource = data;
 
         this.reportingToGuestEntryMethod = 'App';
@@ -412,7 +404,6 @@ onAddressTyping() {
   }
 
   submit() {
-    console.log(this.advanceTableForm.value);
   }
 
   onNoClick(): void {
@@ -509,7 +500,6 @@ onAddressTyping() {
   }
 
   bindPickupSpotTypeandSpot(option: any) {
-    console.log(option)
     this.advanceTableForm.patchValue({ reportingToGuestAddressString: option.geoSearchString });
     var value = option?.geoLocation?.replace(
       '(',
@@ -536,9 +526,7 @@ onAddressTyping() {
   }
 
   public handleAddressChange(address: any) {
-    console.log(address);
     this.reportingToGuestAddressString = address.formatted_address;
-    console.log(this.reportingToGuestAddressString);
     this.advanceTableForm.patchValue({ reportingToGuestAddressString: this.reportingToGuestAddressString });
 
     if (address.address_components.length > 1) {

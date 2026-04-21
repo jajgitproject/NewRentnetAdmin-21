@@ -95,7 +95,6 @@ export class FormDialogComponent
         this.action = data.action;
         // Extract and normalize status for gating
         // this.status = this.extractStatus(data?.status);
-        // console.log('Quality Check Dialog received status:', this.status);
         // this.buttonDisabled = this.status?.toLowerCase?.() !== 'changes allow';
         this.status = this.extractStatus(data?.status);
 
@@ -137,7 +136,6 @@ this.buttonDisabled = normalized !== 'changes allow';
         this.DriverName=data.driverName;
         this.InventoryID=data.inventoryID;
         this.RegistrationNumber=data.registrationNumber;
-        //console.log(this.dutySlipID,this.reservationID);
   }
    @ViewChild(MatMenuTrigger)
     contextMenu: MatMenuTrigger;
@@ -159,11 +157,9 @@ this.buttonDisabled = normalized !== 'changes allow';
     this._generalService.GetDutyQualityCheckID(this.data.allotmentID).subscribe(
       data=>{
         this.dutyQualityCheckList=data;
-        console.log(this.dutyQualityCheckList)
         this.InitDriverAndRegistration();
         let Date=moment(this.advanceTable.qCDate).format('DD/MM/yyyy');
           this.onBlurQCDateEdit(Date);
-        //console.log(this.dutyQualityCheckList);
        
       }
     );
@@ -277,7 +273,6 @@ this.buttonDisabled = normalized !== 'changes allow';
   //   this._generalService.GetDutySlipInfo().subscribe(
   //     data=>{
   //       this.dutySlipData=data;
-  //       console.log(this.dutySlipData);
   //       this.advanceTableForm.patchValue({dutySlipID:this.dutySlipData[0].dutySlipID});
   //       this.advanceTableForm.patchValue({reservationID:this.dutySlipData[0].reservationID});
   //     }
@@ -402,7 +397,6 @@ this.buttonDisabled = normalized !== 'changes allow';
   public confirmAdd(): void 
   {
    if (this.buttonDisabled) {
-    console.log('Save blocked due to status not allowing changes:', this.status);
     return;
    }
     this.saveDisabled = false;
@@ -547,7 +541,6 @@ this.buttonDisabled = normalized !== 'changes allow';
         data =>   
         {
             this.dataSource = data;
-            console.log(this.dataSource)
         },
         (error: HttpErrorResponse) => { this.dataSource = null;}
       );
@@ -610,7 +603,6 @@ this.buttonDisabled = normalized !== 'changes allow';
         }
         return input?.toString?.() || null;
       } catch (e) {
-        console.log('Status extraction error (QualityCheck):', e);
         return null;
       }
     }

@@ -116,7 +116,6 @@ export class FormDialogCustomerShortComponent
           this.searchLocationTerm.setValue(this.advanceTable.organizationalEntityName);
           this.searchCategoryTerm.setValue(this.advanceTable.customerCategory);
           this.searchCustomerTerm.setValue(this.advanceTable.customerName);
-          //console.log(this.advanceTable);
         } else 
         {
           this.dialogTitle = 'Customer';
@@ -158,7 +157,6 @@ export class FormDialogCustomerShortComponent
           startWith(""),
           map(value => this._filter(value || ''))
         );
-        //console.log(this.customerGroupList)
       }
     )
   }
@@ -307,7 +305,6 @@ export class FormDialogCustomerShortComponent
         );
       }
     )
-    //console.log(this.OrganizationalEntityList)
   }
 
   private _filterLocation(value: string): any {
@@ -477,7 +474,6 @@ export class FormDialogCustomerShortComponent
   //   this._generalService.GetStateAgainstCity(this.advanceTableForm.value.registrationCityID).subscribe(
   //     data=>{
   //       this.StatesLists=data;
-  //       console.log(this.StateList);
   //       this.advanceTableForm.patchValue({registrationStateID:this.StateList[0].geoPointID})
   //     }
   //   );
@@ -500,7 +496,6 @@ export class FormDialogCustomerShortComponent
     this.advanceTableForm.patchValue({serviceLocationID:this.organizationalEntityID});
     this.advanceTableForm.patchValue({customerCategoryID:this.customerCategoryID});
     this.advanceTableForm.patchValue({corporateCompanyID:this.customerID});
-    console.log(this.advanceTableForm.getRawValue());
     this.advanceTableService.add(this.advanceTableForm.getRawValue())  
     .subscribe(
       response => 
@@ -535,7 +530,6 @@ export class FormDialogCustomerShortComponent
     this.advanceTableForm.patchValue({serviceLocationID:this.organizationalEntityID || this.advanceTable.serviceLocationID});
     this.advanceTableForm.patchValue({customerCategoryID:this.customerCategoryID || this.advanceTable.customerCategoryID});
     this.advanceTableForm.patchValue({corporateCompanyID:this.customerID || this.advanceTable.corporateCompanyID});
-    console.log(this.advanceTableForm.getRawValue());
     this.advanceTableService.update(this.advanceTableForm.getRawValue())  
     .subscribe(
     response => 
@@ -552,7 +546,6 @@ export class FormDialogCustomerShortComponent
   }
   public confirmAdd(): void 
   {
-    console.log(this.action);
        if(this.action=="edit")
        {
           this.Put();

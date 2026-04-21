@@ -155,8 +155,7 @@
                                                             [formControlName]="'dutyStartTime' + i" [disabled]="holidays[i]" (input)="onStartTimeInput($event,i)"> -->
                                                             <input matInput [owlDateTimeTrigger]="time1" [owlDateTime]="time1"
                                                             [formControlName]="'dutyStartTime' + i" [disabled]="holidays[i]">
-                                                        <mat-icon matSuffix [owlDateTimeTrigger]="time1"
-                                                            class="date-icon">schedule</mat-icon>
+                                                        <button mat-icon-button matSuffix type="button" [owlDateTimeTrigger]="time1" class="date-icon" aria-label="Open time picker"><mat-icon>schedule</mat-icon></button>
                                                         <!-- <owl-date-time [pickerType]="'timer'" #time1 (afterPickerClosed)="onDateChange(i)"></owl-date-time> -->
                                                         <owl-date-time [pickerType]="'timer'" #time1></owl-date-time>
                                                         <mat-error *ngIf="advanceTableForm.get('dutyStartTime' + i).hasError('required')">
@@ -221,8 +220,7 @@
                                                         <mat-label>End Time</mat-label>
                                                         <input matInput [owlDateTimeTrigger]="time2" [owlDateTime]="time2"
                                                             [formControlName]="'dutyEndTime' + i" [disabled]="holidays[i]" (input)="getDateTime(i)">
-                                                        <mat-icon matSuffix [owlDateTimeTrigger]="time2"
-                                                            class="date-icon">schedule</mat-icon>
+                                                        <button mat-icon-button matSuffix type="button" [owlDateTimeTrigger]="time2" class="date-icon" aria-label="Open time picker"><mat-icon>schedule</mat-icon></button>
                                                         <!-- <owl-date-time [pickerType]="'timer'" #time2 (afterPickerClosed)="onDateChange(i)"></owl-date-time> -->
                                                         <owl-date-time [pickerType]="'timer'" #time2 (afterPickerClosed)="getDateTime(i)"></owl-date-time>
                                                         <!-- <owl-date-time [pickerType]="'timer'" #time2></owl-date-time> -->

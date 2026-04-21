@@ -18,12 +18,10 @@ export class LumpsuminformationService {
     private generalService: GeneralService
   ) {
     this.apiUrl = this.generalService.BaseURL + 'reservationLumpsumRateForClosing';
-   // console.log('Constructed API URL:', this.apiUrl); // ✅ Debug log
   }
 
   getLumpsuminformationClosingData(reservationID: number): Observable<any> {
     const fullUrl = `${this.apiUrl}/forReservationLumpsumRateForClosing/${reservationID}`;
-    //console.log("Hitting API:", fullUrl); // ✅ Debug log
     return this.http.get(fullUrl);
   }
 }

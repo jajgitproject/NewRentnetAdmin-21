@@ -34,7 +34,6 @@ export class CustomerCreditService
     {
       SearchEndDate="null";
     }
-    //console.log(this.API_URL + '/'+CustomerContractMappingID + '/' + SearchEmployeeName +'/' + SearchActivationStatus +'/' + PageNumber + '/customerCreditID/Ascending')
     return this.httpClient.get(this.API_URL + '/'+CustomerContractMappingID + '/' + SearchEmployeeName +'/' + SearchStartDate +'/' + SearchEndDate +'/' + SearchActivationStatus +'/' + PageNumber + '/customerCreditID/Ascending');
   }
 
@@ -53,7 +52,6 @@ export class CustomerCreditService
     {
       SearchEndDate="null";
     }
-    //console.log(this.API_URL + "/kkk" +SearchCustomerCredit + '/' + SearchActivationStatus +'/' + PageNumber + '/'+coloumName+'/'+sortType)
     return this.httpClient.get(this.API_URL + '/'+CustomerContractMappingID + '/' + SearchEmployeeName +'/' + SearchStartDate +'/' + SearchEndDate +'/' + SearchActivationStatus +'/' + PageNumber + '/'+coloumName+'/'+sortType);
   }
 

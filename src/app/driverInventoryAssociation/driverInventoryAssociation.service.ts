@@ -86,7 +86,6 @@ export class DriverInventoryAssociationService
     {
       searchActivationStatus=null;
     }
-    console.log(this.API_URL + '/GetAllSearchDriver' +"/"+driverID+ "/" +searchDriverName + "/" +eTRAvailabilityDate+ '/'+ eTRAvailabilityTime + '/' + eTRAvailabilityGeoLocation + '/' + searchInventoryName + "/" + pickupDate+ '/' + searchActivationStatus +'/' + PageNumber + '/driverInventoryAssociationID/Ascending');
     return this.httpClient.get(this.API_URL + '/GetAllSearchDriver' +"/"+driverID+ "/" +searchDriverName + "/" +eTRAvailabilityDate+ '/'+ eTRAvailabilityTime + '/' + eTRAvailabilityGeoLocation + '/' + searchInventoryName + "/" + pickupDate+ '/' + searchActivationStatus +'/' + PageNumber + '/driverInventoryAssociationID/Ascending');
   }
 

@@ -101,7 +101,6 @@ export class DutySlipQualityCheckService
 
   getAllotmentIDForDutyQualityCheck(AllotmentID:number)
   {
-    console.log(this.API_URL+"/"+'getAllotmentIDForDutyQualityCheck'+"/"+AllotmentID)
     return this.httpClient.get(this.API_URL+"/"+'getAllotmentIDForDutyQualityCheck'+"/"+AllotmentID);
   }
 

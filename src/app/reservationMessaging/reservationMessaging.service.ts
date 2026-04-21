@@ -74,7 +74,6 @@ export class ReservationMessagingService {
     if (SearchActivationStatus === null) {
       SearchActivationStatus = null;
     }
-    //console.log(this.API_URL + "/" + reservationID + '/' + searchMessageType + '/' + searchMessageSource + '/' + searchRecipientName + '/' + searchmessagingStatus + '/' + SearchActivationStatus + '/' + PageNumber + '/' + coloumName + '/' + sortType)
     return this.httpClient.get(this.API_URL + "/" + reservationID + '/'+ allotmentID + '/' + searchMessageType + '/' + searchMessageSource + '/' + searchRecipientName + '/' + searchmessagingStatus + '/' + SearchActivationStatus + '/' + PageNumber + '/' + coloumName + '/' + sortType);
   }
 

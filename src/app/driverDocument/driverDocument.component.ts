@@ -93,8 +93,6 @@ export class DriverDocumentComponent implements OnInit {
       const encryptedDriverID = paramsData.DriverID;
       const encryptedDriverName = paramsData.DriverName;
     
-      console.log("Encrypted DriverID:", encryptedDriverID);
-      console.log("Encrypted DriverName:", encryptedDriverName);
     
       if (encryptedDriverID && encryptedDriverName) {
         try {
@@ -112,8 +110,6 @@ export class DriverDocumentComponent implements OnInit {
         }
       }
     
-      console.log("Decrypted DriverID:", this.driverID);
-      console.log("Decrypted DriverName:", this.driverName);
     });
     this.loadData();
     this.SubscribeUpdateService();
@@ -267,7 +263,6 @@ export class DriverDocumentComponent implements OnInit {
       {
 
         this.dataSource = data;
-         console.log(this.dataSource)
         // this.dataSource.forEach((ele)=>{
         //   if(ele.activationStatus===true){
         //     this.activeData="Active";

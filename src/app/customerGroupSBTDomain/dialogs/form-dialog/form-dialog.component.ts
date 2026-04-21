@@ -313,7 +313,6 @@ InitCustomerPerson(customerGroupID: number) {
     .getCustomerForApproval(customerGroupID)
     .subscribe(data => {
 
-      console.log('CustomerPersonList:', data);
 
       this.CustomerPersonList = data || [];
 

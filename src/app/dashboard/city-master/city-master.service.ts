@@ -30,7 +30,6 @@ export class CityMasterTestService {
       },
       (error: HttpErrorResponse) => {
         this.isTblLoading = false;
-        console.log(error.name + ' ' + error.message);
       }
     );
   }
@@ -43,7 +42,6 @@ export class CityMasterTestService {
 
   }
   deleteAdvanceTableTest(id: number): void {
-    console.log(id);    
   }
 }
 

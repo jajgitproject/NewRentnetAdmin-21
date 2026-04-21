@@ -70,7 +70,6 @@ export class FormDialogComponent
           
         }
         this.advanceTableForm = this.createContactForm();
-        console.log(data.advanceTable);
         this.customerID = data.advanceTable.customerID;
         //this.customerName=data.advanceTable.customerCustomerGroup.split('-')[0];
   }
@@ -166,7 +165,6 @@ export class FormDialogComponent
   public Post(): void
   {
     this.advanceTableForm.patchValue({ customerID:this.data.customerID });
-    console.log(this.advanceTableForm.getRawValue())
     this.advanceTableService.add(this.advanceTableForm.getRawValue())  
     .subscribe(
     response => 
@@ -222,13 +220,11 @@ export class FormDialogComponent
 
   // public fileChanged(event?: UIEvent): void {
   //   const files: FileList = this.fileUploadEl.nativeElement.files;
-  //   console.log(`files: `, files);
 
   //   const file = files[0];
   //   const reader = new FileReader();
   //   const loaded = (el) => {
   //     const contents = el.target.result;
-  //     console.log('onloaded', contents);
   //     this.contents = contents;
   //   }
   //   reader.onload = loaded;

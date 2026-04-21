@@ -118,16 +118,9 @@ export class SupplierContractCustomerCityPercentageComponent implements OnInit {
         this.supplierContractName = this._generalService.decrypt(decodeURIComponent(encryptedSupplierContractName));
   
         // Log the decrypted values
-        console.log("Decrypted Supplier Contract ID: ", this.supplierContract_ID);
-        console.log("Decrypted Applicable From: ", this.Applicable_From);
-        console.log("Decoded Applicable To: ", this.Applicable_To);
-        console.log("Decrypted Supplier Name: ", this.supplier_Name);
-        console.log("ecrypted Supplier Name: ", encryptedSupplierName);
-        console.log("Decrypted Supplier Contract Name: ", this.supplierContractName);
       }
     }
     );
-    console.log(this.supplierContract_ID)
     this.InitCustomer();
     this.InitCities();
     this.loadData();
@@ -169,7 +162,6 @@ export class SupplierContractCustomerCityPercentageComponent implements OnInit {
           startWith(""),
           map(value => this._filterCustomer(value || ''))
         );
-        //console.log(this.StateList);
       },
       error => {
 
@@ -199,7 +191,6 @@ export class SupplierContractCustomerCityPercentageComponent implements OnInit {
           startWith(""),
           map(value => this._filterCity(value || ''))
         );
-        //console.log(this.StateList);
       },
       error => {
 
@@ -341,7 +332,6 @@ export class SupplierContractCustomerCityPercentageComponent implements OnInit {
   
   NextCall()
   {
-    //console.log(this.dataSource.length>0)
     if (this.dataSource.length>0) 
     {
      

@@ -121,10 +121,6 @@ export class CDCOutStationOneWayTripRateComponent implements OnInit {
          this.customerContract_Name = this._generalService.decrypt(decodeURIComponent(encryptedCustomerContractName));
      
          // Log the decrypted values to the console for verification
-         console.log("Decrypted CustomerContractID:", this.customerContract_ID);
-         console.log("Decrypted StartDate:", this.Applicable_From);
-         console.log("Decrypted EndDate:", this.Applicable_To);
-         console.log("Decrypted CustomerContractName:", this.customerContract_Name);
        }
     });
     this.InitVehicleCategory();
@@ -389,7 +385,6 @@ InitVehicleCategory(){
   
   NextCall()
   {
-    //console.log(this.dataSource.length>0)
     if (this.dataSource.length>0) 
     {
      

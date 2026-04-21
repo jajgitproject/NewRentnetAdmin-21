@@ -150,7 +150,6 @@ this.isSaveAllowed = status === 'changes allow';
 
   submit() 
   {
-    //console.log(this.advanceTableForm.value);
   }
   onNoClick(): void 
   {

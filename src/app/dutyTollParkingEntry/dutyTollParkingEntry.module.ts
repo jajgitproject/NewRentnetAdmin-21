@@ -21,7 +21,6 @@ import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatDialogModule } from '@angular/material/dialog';
 import { MatSortModule } from '@angular/material/sort';
 import { MatToolbarModule } from '@angular/material/toolbar';
-import { MaterialFileInputModule } from '@compat/material-file-input-shim';
 import { MatMenuModule } from '@angular/material/menu';
 import { DutyTollParkingEntryService } from './dutyTollParkingEntry.service';
 import { DutyTollParkingEntryRoutingModule } from './dutyTollParkingEntry-routing.module';
@@ -54,7 +53,6 @@ import { MatExpansionModule } from '@angular/material/expansion';
     MatDialogModule,
     MatSortModule,
     MatToolbarModule,
-    MaterialFileInputModule,
     MatMenuModule,
     MatProgressSpinnerModule,
     MyUploadModule,

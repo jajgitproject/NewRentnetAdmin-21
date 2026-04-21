@@ -36,7 +36,6 @@ export class CustomerContractMappingService
     {
       SearchEndDate="null";
     }
-    //console.log(this.API_URL + '/'+CustomerID +'/'+SearchCustomerContractMapping  + '/' + SearchStartDate+'/' + SearchEndDate +'/' + SearchActivationStatus +'/' + PageNumber + '/customerContractMappingID/Ascending')
     return this.httpClient.get(this.API_URL + '/'+CustomerID +'/'+SearchCustomerContractMapping + '/' + SearchEmployeeName + '/' + customerContractID+'/' + SearchEndDate +'/' + SearchActivationStatus +'/' + PageNumber + '/customerContractMappingID/Ascending');
   }
 
@@ -59,7 +58,6 @@ export class CustomerContractMappingService
     {
       SearchEndDate="null";
     }
-    //console.log(this.API_URL + "/kkk" +SearchCustomerContractMapping + '/' + SearchActivationStatus +'/' + PageNumber + '/'+coloumName+'/'+sortType)
     return this.httpClient.get(this.API_URL + '/'+CustomerID +'/'+SearchCustomerContractMapping  + '/' + SearchEmployeeName + '/' + SearchStartDate+'/' + SearchEndDate +'/' + SearchActivationStatus +'/' + PageNumber + '/'+coloumName+'/'+sortType);
   }
 

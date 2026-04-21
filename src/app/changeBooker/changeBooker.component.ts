@@ -204,7 +204,6 @@ export class ChangeBookerComponent implements OnInit {
       data => 
       {
         this.dataSource = data;
-        console.log(this.dataSource)
       },
       (error: HttpErrorResponse) => { this.dataSource = null; }
       );

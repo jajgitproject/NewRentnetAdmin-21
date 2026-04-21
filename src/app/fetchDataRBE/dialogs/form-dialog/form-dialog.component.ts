@@ -72,13 +72,11 @@ export class FormDialogComponent
   {
     var pickupDate=moment(this.advanceTableForm.value.pickupDate).format('yyyy-MM-DD');
     var pickupTime=moment(this.advanceTableForm.value.pickupTime).format('HH:mm');
-    console.log(pickupDate,pickupTime);
 
     this.advanceTableService.fetchAppCurrentData(pickupDate,pickupTime).subscribe(
       (data:FetchDataRBE[])=>
       {
         this.fetchCurrentDataFromAppList=data;
-        console.log(this.fetchCurrentDataFromAppList);
       }
     );
 
@@ -86,7 +84,6 @@ export class FormDialogComponent
       (data:FetchDataRBE[])=>
       {
         this.fetchPreviousDataFromAppList=data;
-        console.log(this.fetchPreviousDataFromAppList);
       }
     );
 
@@ -94,7 +91,6 @@ export class FormDialogComponent
       (data:FetchDataRBE[])=>
       {
         this.fetchNextDataFromAppList=data;
-        console.log(this.fetchNextDataFromAppList);
       }
     );
 
@@ -109,7 +105,6 @@ export class FormDialogComponent
 
   submit() 
   {
-    console.log(this.advanceTableForm.value);
   }
   onNoClick(): void 
   {

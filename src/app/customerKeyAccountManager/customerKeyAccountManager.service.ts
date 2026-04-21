@@ -44,7 +44,6 @@ export class CustomerKeyAccountManagerService
       {
         SearchActivationStatus=null;
       }
-    //console.log(this.API_URL + '/'+CustomerID +'/'+SearchCustomerKeyAccountManager  + '/' + SearchStartDate+'/' + SearchEndDate +'/' + SearchActivationStatus +'/' + PageNumber + '/customerKeyAccountManagerID/Ascending')
     return this.httpClient.get(this.API_URL + '/'+CustomerID +'/'+SearchCustomerKeyAccountManager + '/' + SearchEmployeeName + '/' + SearchStartDate+'/' + SearchEndDate +'/' + SearchActivationStatus +'/' + PageNumber + '/customerKeyAccountManagerID/Ascending');
   }
 
@@ -71,7 +70,6 @@ export class CustomerKeyAccountManagerService
       {
         SearchActivationStatus=null;
       }
-    //console.log(this.API_URL + "/kkk" +SearchCustomerKeyAccountManager + '/' + SearchActivationStatus +'/' + PageNumber + '/'+coloumName+'/'+sortType)
     return this.httpClient.get(this.API_URL + '/'+CustomerID +'/'+SearchCustomerKeyAccountManager  + '/' + SearchEmployeeName + '/' + SearchStartDate+'/' + SearchEndDate +'/' + SearchActivationStatus +'/' + PageNumber + '/'+coloumName+'/'+sortType);
   }
 

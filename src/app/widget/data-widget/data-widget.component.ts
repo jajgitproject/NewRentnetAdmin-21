@@ -630,7 +630,6 @@ export class DataWidgetComponent {
   ];
 
   onMessageSent(messageText: string) {
-    console.log('Message Sent:', messageText);
   }
 
   // latest post
@@ -800,11 +799,9 @@ export class DataWidgetComponent {
   ];
 
   onTodoToggled(todo: Todo) {
-    console.log('Todo toggled:', todo);
   }
 
   onTodosUpdated(updatedTodos: Todo[]) {
-    console.log('Todos updated:', updatedTodos);
   }
   // TODO end
 

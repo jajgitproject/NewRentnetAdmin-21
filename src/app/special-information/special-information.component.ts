@@ -23,7 +23,6 @@ export class SpecialinformationComponent implements OnInit {
 
   // ngOnInit(): void {
   //   if (this.AllotmentID) {
-  //     console.log("AllotmentID passed to component:", this.AllotmentID);
   //     // Initialization logic can go here
   //     this.loadSpecialinformation();
   //   }
@@ -33,8 +32,6 @@ export class SpecialinformationComponent implements OnInit {
      this.route.queryParams.subscribe(paramsData =>{
       const encryptedAllotmentID = paramsData.allotmentID;
       this.allotmentID = this._generalService.decrypt(decodeURIComponent(encryptedAllotmentID)); 
-        console.log(this.AllotmentID);
-        console.log(this.allotmentID);           
     });       
     this.loadSpecialinformation();
     // this.SubscribeUpdateService();
@@ -44,10 +41,8 @@ export class SpecialinformationComponent implements OnInit {
   const allotmentID = this.AllotmentID;
   this.specialinformationService.getSpecialinformationClosingData(allotmentID).subscribe(
     (data) => {
-      console.log('Data from API:', data); // ✅ DEBUG
       if (data && data.length > 0) {
         this.specialinformation = data[0];
-        console.log('Setting specialinformation:', this.specialinformation); // ✅ DEBUG
       } else {
         console.warn('No data received from API');
         this.specialinformation = null;

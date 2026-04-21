@@ -98,7 +98,6 @@ export class FormDialogRPComponent implements OnInit
           (data: any)=>   
           {
             this.passengerDetailsData = data;
-            console.log(this.passengerDetailsData)
            
           },
           (error: HttpErrorResponse) => { this.advanceTable = null;}
@@ -148,7 +147,6 @@ showNotification(colorName, text, placementFrom, placementAlign) {
 
   submit() 
   {
-    //console.log(this.advanceTableForm.value);
   }
   onNoClick(): void 
   {
@@ -346,7 +344,6 @@ showNotification(colorName, text, placementFrom, placementAlign) {
       data=>
       {
         this.PassengerList=data;
-        console.log(this.PassengerList);
         this.advanceTableForm.controls['passengerEmployee'].setValidators([Validators.required,this.PassengerEmployeeValidator(this.PassengerList)]);
         this.advanceTableForm.controls['passengerEmployee'].updateValueAndValidity();
         this.filteredPassengerOptions = this.advanceTableForm.controls['passengerEmployee'].valueChanges.pipe(

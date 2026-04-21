@@ -102,7 +102,6 @@ export class FormDialogComponent
           //this.dialogTitle ='Edit Employee';
           this.dialogTitle ='Employee';    
           this.advanceTable = data.advanceTable;
-          console.log(this.advanceTable);
   //          const rm = this.EmployeesList.find(e => e.employeeID === this.advanceTable.reportingManagerID);
   // if (rm) {
   //   const fullValue = `${rm.firstName} ${rm.lastName} ${rm.employeeOfficeID}`;

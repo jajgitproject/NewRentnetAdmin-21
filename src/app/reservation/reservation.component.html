@@ -306,8 +306,7 @@
                                     <input matInput [owlDateTimeTrigger]="time1" [owlDateTime]="time1"
                                         formControlName="pickupTime" (ngModelChange)="locationTimeSet($event)"
                                         [disabled]="isTNCSelected">
-                                    <mat-icon matSuffix [owlDateTimeTrigger]="time1"
-                                        class="date-icon">schedule</mat-icon>
+                                    <button mat-icon-button matSuffix type="button" [owlDateTimeTrigger]="time1" class="date-icon" aria-label="Open time picker"><mat-icon>schedule</mat-icon></button>
                                     <owl-date-time [pickerType]="'timer'" #time1></owl-date-time>
                                     <mat-hint align="end">
                                         <div style="float: right; font-size: 10px !important; font-style: italic">
@@ -639,8 +638,7 @@
                                     <mat-label>Location Out Time</mat-label>
                                     <input matInput [owlDateTimeTrigger]="time2" [owlDateTime]="time2"
                                         formControlName="locationOutTime">
-                                    <mat-icon matSuffix [owlDateTimeTrigger]="time2"
-                                        class="date-icon">schedule</mat-icon>
+                                    <button mat-icon-button matSuffix type="button" [owlDateTimeTrigger]="time2" class="date-icon" aria-label="Open time picker"><mat-icon>schedule</mat-icon></button>
                                     <owl-date-time [pickerType]="'timer'" #time2></owl-date-time>
                                     <!-- <mat-error *ngIf="advanceTableForm.get('locationOutTime').hasError('required')">
                                             Location Out Time is required
@@ -792,8 +790,7 @@
                                     <mat-label>Drop Off Time</mat-label>
                                     <input matInput [owlDateTimeTrigger]="time3" [owlDateTime]="time3"
                                         formControlName="dropOffTime">
-                                    <mat-icon matSuffix [owlDateTimeTrigger]="time3"
-                                        class="date-icon">schedule</mat-icon>
+                                    <button mat-icon-button matSuffix type="button" [owlDateTimeTrigger]="time3" class="date-icon" aria-label="Open time picker"><mat-icon>schedule</mat-icon></button>
                                     <owl-date-time [pickerType]="'timer'" #time3></owl-date-time>
                                     <!-- <mat-error *ngIf="advanceTableForm.get('dropOffTime').hasError('required')">
                                             Drop Off Time is required
@@ -820,8 +817,7 @@
                                         <mat-label>ETR Time</mat-label>
                                         <input matInput [owlDateTimeTrigger]="etrtime1" [owlDateTime]="etrtime1"
                                             formControlName="etrTime">
-                                        <mat-icon matSuffix [owlDateTimeTrigger]="etrtime1"
-                                            class="date-icon">schedule</mat-icon>
+                                        <button mat-icon-button matSuffix type="button" [owlDateTimeTrigger]="etrtime1" class="date-icon" aria-label="Open time picker"><mat-icon>schedule</mat-icon></button>
                                         <owl-date-time [pickerType]="'timer'" #etrtime1></owl-date-time>
                                         <!-- <mat-error *ngIf="advanceTableForm.get('etrTime').hasError('required')">
                                             ETR Time is required

@@ -34,7 +34,6 @@ export class FetchDataFromGPSComponent implements OnInit {
     { 
       this.dialogTitle = "Fetch GPS Data";
       this.ReservationID = data.reservationID;
-      console.log(this.ReservationID)
       this.advanceTableForm = this.createContactForm();
     }
     createContactForm(): FormGroup
@@ -51,21 +50,18 @@ export class FetchDataFromGPSComponent implements OnInit {
     var pickupDate=moment(this.advanceTableForm.value.pickupDate).format('yyyy-MM-DD');
     var pickupTime=moment(this.advanceTableForm.value.pickupTime).format('HH:mm');
    
-    console.log(pickupDate,pickupTime,this.ReservationID);
 
     this.advanceTableService.getDataFromGPS(pickupDate,pickupTime,this.ReservationID).subscribe(
       (data:FetchDataFromApp[])=>
       {
         this.fetchDataFromGPSList.push(data);
         this.dialogRef.close({data:this.fetchDataFromGPSList});
-        console.log(this.fetchDataFromGPSList);
       }
     );
   }
 
   submit() 
   {
-    console.log(this.advanceTableForm.value);
   }
   onNoClick(): void 
   {

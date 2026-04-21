@@ -58,7 +58,6 @@ export class GeneralBillDetailsComponent implements OnInit {
   ngOnInit() {
     this.route.queryParams.subscribe(paramsData =>{
       this.invoiceID   = paramsData.invoiceID;
-       console.log(this.invoiceID)
     });
     this.loadData();
     
@@ -72,7 +71,6 @@ export class GeneralBillDetailsComponent implements OnInit {
      {
        this.dataSource = data;       
        this.dataSourceForCalculate.invoiceTotalAmountAfterGSTInWords = this.convertNumberToWords(this.dataSource.invoiceTotalAmountAfterGST);
-      console.log(this.dataSource);
      },
      (error: HttpErrorResponse) => { this.dataSource = null;}
    );

@@ -149,12 +149,10 @@ export class FormDialogComponent
       this.VehicleCategoryList = [];
       return;
     }
-    console.log('Fetching vehicle categories for vendorContractID:', this.data.vendorContractID);
     this._generalService.getVendorCarCategory(this.data.vendorContractID).subscribe(
       data=>{
         // this.VehicleCategoryList=data;
         this.VehicleCategoryList=data || [];
-        console.log('Vehicle Category List:', this.VehicleCategoryList);
         this.advanceTableForm.controls['vendorContractCarCategory'].setValidators([Validators.required,
           this.vehicleCategoryValidator(this.VehicleCategoryList)
         ]);

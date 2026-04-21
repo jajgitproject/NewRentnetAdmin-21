@@ -64,7 +64,6 @@ export class AddPeopleComponent implements OnInit {
            
             this.advanceTableForm = this.createContactForm();
             this.ReservationID = data.ReservationID;
-            console.log(this.ReservationID)
   
       }
 
@@ -75,7 +74,6 @@ export class AddPeopleComponent implements OnInit {
         data =>   
         {
           this.permissionData = data;
-          console.log(this.permissionData)
 
         },
         (error: HttpErrorResponse) => { this.permissionData = null;}
@@ -112,7 +110,6 @@ export class AddPeopleComponent implements OnInit {
       const parts = selectedOption.split('-');
        const phoneNumber = parts[0];
  
-      console.log(phoneNumber)
         this.advanceTableForm.get('number').setValue(phoneNumber);
         
     }
@@ -185,7 +182,6 @@ export class AddPeopleComponent implements OnInit {
       data =>
       {
         this.CustomerMobileList = data;  
-        console.log(this.CustomerMobileList)
         this.filteredCustomerMobileOptions = this.advanceTableForm.controls['customer'].valueChanges.pipe(
           startWith(""),
           map(value => this._filterState(value || ''))
@@ -225,7 +221,6 @@ export class AddPeopleComponent implements OnInit {
         data =>
         {
           this.EmployeeMobileList = data;  
-          console.log(this.EmployeeMobileList)
           this.filteredEmployeeMobileOptions = this.advanceTableForm.controls['employee'].valueChanges.pipe(
             startWith(""),
             map(value => this._filterEmployee(value || ''))

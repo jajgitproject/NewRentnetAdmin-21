@@ -97,10 +97,6 @@ vendorContract_ID:any;
         this.vendorContractName = this._generalService.decrypt(decodeURIComponent(encryptedVendorContractName));
     
         // Log the decrypted values to the console for verification
-        console.log("Decrypted VendorContractID:", this.vendorContract_ID);
-        console.log("Decrypted StartDate:", this.Applicable_From);
-        console.log("Decrypted EndDate:", this.Applicable_To);
-        console.log("Decrypted VendorContractName:", this.vendorContractName);
       }
     });
     this.loadData();
@@ -146,7 +142,6 @@ private _filterMode(value: string): any {
 
   addNew()
   {
-    console.log("Vendor Contract ID in Add New Call:", this.vendorContract_ID);
       const dialogRef = this.dialog.open(FormDialogComponent, 
         {
           data: 
@@ -159,7 +154,6 @@ private _filterMode(value: string): any {
   }
 
   editCall(row) {
-    console.log("Vendor Contract ID in Edit Call:", this.vendorContract_ID);
     //  alert(row.id);
   this.vendorPaymentMappingID = row.vendorPaymentMappingID;
 

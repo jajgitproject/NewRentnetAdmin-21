@@ -83,7 +83,6 @@ export class FormDialogComponent
           this.advanceTable = new DutyInterstateTaxApproval({});
            // this.advanceTable.activationStatus=true;
         }
-        console.log(this.advanceTable);
         this.advanceTableForm = this.createContactForm();
         if (this.verifyDutyStatusAndCacellationStatus !== 'Changes allow') 
         {
@@ -160,13 +159,11 @@ export class FormDialogComponent
 
 DutyLoadData()
   {
-    console.log(this.DutySlipID);
 
     this.advanceTableService.LoadDutyInterstateTax(this.DutySlipID).subscribe(
       (data:DutyInterstateTaxApproval[])=>
       {
         this.dataSource=data;
-        console.log(this.dataSource);
         this.advanceTableForm.patchValue({dutyInterstateTaxID:this.advanceTable?.dutyInterstateTaxID || this.dataSource[0].dutyInterstateTaxID});
         this.advanceTableForm.patchValue({dutySlipID:this.advanceTable?.dutySlipID || this.dataSource[0].dutySlipID});
         this.advanceTableForm.patchValue({taxStartDate:this.advanceTable?.taxStartDate || this.dataSource[0].taxStartDate});
@@ -205,7 +202,6 @@ InitState()
     data=>
     {
       this.StateList=data;
-      console.log(this.StateList);
       this.filteredStateOptions = this.advanceTableForm.controls["state"].valueChanges.pipe(
         startWith(""),
         map(value => this._filterState(value || ''))
@@ -231,7 +227,6 @@ getStateID(geoPointID: any) {
 
   submit() 
   {
-    //console.log(this.advanceTableForm.value);
   }
   onNoClick(): void 
   {

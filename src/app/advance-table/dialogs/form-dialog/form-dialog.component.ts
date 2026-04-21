@@ -131,7 +131,6 @@ export class FormDialogComponent {
 
         this.advanceTableService.updateAdvanceTable(formData).subscribe({
           next: (response) => {
-            // console.log('Update Response:', response);
             this.dialogRef.close(response); // Close with the response data
           },
           error: (error) => {
@@ -143,7 +142,6 @@ export class FormDialogComponent {
         // Add new leave request
         this.advanceTableService.addAdvanceTable(formData).subscribe({
           next: (response) => {
-            // console.log('Add Response:', response);
             this.dialogRef.close(response); // Close with the response data
           },
           error: (error) => {

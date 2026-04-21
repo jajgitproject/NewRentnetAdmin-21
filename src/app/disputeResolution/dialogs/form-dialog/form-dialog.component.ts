@@ -61,10 +61,8 @@ export class FormDialogComponent
         {
           this.dialogTitle ='Dispute Resolution'; 
           
-          // console.log(data.disputeID);
 
           this.disputeID = data.disputeID;
-          // console.log(data.reservationID);
           this.reservationID = data.reservationID;
           
           // this.VehicleCategory = data.vehicleCategory;      

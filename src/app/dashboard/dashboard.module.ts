@@ -5,13 +5,12 @@ import { DashboardRoutingModule } from './dashboard-routing.module';
 import { MainComponent } from './main/main.component';
 import { Dashboard2Component } from './dashboard2/dashboard2.component';
 import { Dashboard3Component } from './dashboard3/dashboard3.component';
-import { ChartsModule as chartjsModule } from 'ng2-charts';
+import { BaseChartDirective } from 'ng2-charts';
 import { NgxEchartsModule } from 'ngx-echarts';
 import { GaugeModule } from 'angular-gauge';
 import { MatIconModule } from '@angular/material/icon';
 import { MatMenuModule } from '@angular/material/menu';
 import { MatButtonModule } from '@angular/material/button';
-import { PerfectScrollbarModule } from 'ngx-perfect-scrollbar';
 import { NgApexchartsModule } from 'ng-apexcharts';
 import { TestComponent } from './test/test.component';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
@@ -36,7 +35,6 @@ import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { CKEditorModule } from '@ckeditor/ckeditor5-angular';
 import { OwlDateTimeModule, OwlNativeDateTimeModule } from '@danielmoncada/angular-datetime-picker';
-import { MaterialFileInputModule } from '@compat/material-file-input-shim';
 import { AdvanceTableTestComponent } from './advance-table-test/advance-table-test.component';
 import { DeleteDialogTestComponent } from './advance-table-test/dialogsTest/delete-test/delete-test.component';
 import { MatPaginatorModule } from '@angular/material/paginator';
@@ -98,14 +96,12 @@ import { DeleteDialogCrudComponent } from './employee-crud/dialogscrud/delete-cr
     MatTooltipModule,
     OwlDateTimeModule,
     OwlNativeDateTimeModule,
-    MaterialFileInputModule,
     CommonModule,
     DashboardRoutingModule,
-    chartjsModule,
+    BaseChartDirective,
     MatMenuModule,
     MatIconModule,
     MatButtonModule,
-    PerfectScrollbarModule,
     NgApexchartsModule,
     MatTableModule,
     MatPaginatorModule,

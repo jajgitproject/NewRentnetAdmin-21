@@ -213,7 +213,6 @@ export class WelcomeComponent implements OnInit {
   }
 
   password() {
-    // console.log(item);
     const dialogRef =  this.dialog.open(FormDialogComponent, {
       width: '500px',
       disableClose: true, // disable background click

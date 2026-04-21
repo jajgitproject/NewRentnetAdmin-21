@@ -118,7 +118,6 @@ export class StateComponent implements OnInit {
     });
   }
   editCall(row) {
-    //console.log(row);
       //  alert(row.id);
     this.stateID = row.stateID;
     const dialogRef = this.dialog.open(FormDialogComponent, {
@@ -193,7 +192,6 @@ export class StateComponent implements OnInit {
   
   NextCall()
   {
-    //console.log(this.dataSource.length>0)
     if (this.dataSource.length>0) 
     {
      
@@ -363,7 +361,6 @@ export class StateComponent implements OnInit {
       data =>   
       {
         this.dataSource = data;
-       //console.log(this.dataSource);
       },
       (error: HttpErrorResponse) => { this.dataSource = null;}
     );

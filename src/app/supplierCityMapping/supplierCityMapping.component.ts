@@ -82,8 +82,6 @@ export class SupplierCityMappingComponent implements OnInit {
         }
       }
       
-      console.log("Decrypted Supplier ID:", this.supplier_ID);
-      console.log("Decrypted Supplier Name:", this.supplier_Name);
       
     });
     this.InitCities()
@@ -114,7 +112,6 @@ export class SupplierCityMappingComponent implements OnInit {
           startWith(""),
           map(value => this._filterCity(value || ''))
         );
-        //console.log(this.StateList);
       },
       error => {
 
@@ -234,7 +231,6 @@ export class SupplierCityMappingComponent implements OnInit {
   
   NextCall()
   {
-    //console.log(this.dataSource.length>0)
     if (this.dataSource.length>0) 
     {
      

@@ -25,7 +25,6 @@ export class SoftToHardDialogComponent
   {
     this.allotmentTypeData = data.advanceTable,
     this.allotmentID = data.allotmentID;
-    console.log(this.allotmentTypeData)
   }
   onNoClick(): void
   {

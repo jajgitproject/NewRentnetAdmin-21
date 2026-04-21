@@ -96,7 +96,6 @@ if (encryptedDriverID && encryptedDriverName) {
   this.driver_Name = this._generalService.decrypt(decodeURIComponent(encryptedDriverName));
 }
 
-console.log(this.driver_ID, this.driver_Name); // Log the decrypted values
 
     });
     this.loadData();
@@ -262,7 +261,6 @@ console.log(this.driver_ID, this.driver_Name); // Log the decrypted values
       {
 
         this.dataSource = data;
-        //console.log(this.dataSource)
         // this.dataSource.forEach((ele)=>{
         //   if(ele.activationStatus===true){
         //     this.activeData="Active";
@@ -295,7 +293,6 @@ console.log(this.driver_ID, this.driver_Name); // Log the decrypted values
   
   NextCall()
   {
-    //console.log(this.dataSource.length>0)
     if (this.dataSource.length>0) 
     {
      
@@ -316,7 +313,6 @@ console.log(this.driver_ID, this.driver_Name); // Log the decrypted values
 
   driverDrivingLicenseVerification(row)
   {
-    console.log(row.verified);
     const dialogRef = this.dialog.open(FormDialogVerificationComponent, 
     {
       data: 

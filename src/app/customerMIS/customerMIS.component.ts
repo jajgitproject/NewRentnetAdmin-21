@@ -231,7 +231,6 @@ export class CustomerMISComponent implements OnInit {
         data => {
           this.dataSource = data;
        
-          console.log(this.dataSource)
           
        
         },

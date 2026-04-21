@@ -52,7 +52,6 @@ export class ClossingOneService
     return this.httpClient.get<any>(this.API_URL_CurrentDutyInfo +'/' +dutySlipID);
   }
      getVerifyDutydata(reservationID:any): Observable<any>{
-      console.log(this.API_URL+ "/"+'GetVerifyDutyStatus'+ "/"+ reservationID)
       return this.httpClient.get(this.API_URL+ "/" + 'GetVerifyDutyStatus' + "/" + reservationID);
   }
   

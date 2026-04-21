@@ -115,7 +115,6 @@ export class CustomerReservationFieldValuesComponent implements OnInit {
         this.customerCategoryList=data;
       }
     )
-    //console.log(this.customerCategoryList)
   }
 
   public SearchData()
@@ -124,7 +123,6 @@ export class CustomerReservationFieldValuesComponent implements OnInit {
   }
   addNew()
   {
-    console.log(this.advanceTable)
     const dialogRef = this.dialog.open(FormDialogComponent, 
     {
     
@@ -203,7 +201,6 @@ export class CustomerReservationFieldValuesComponent implements OnInit {
   
   NextCall()
   {
-    //console.log(this.dataSource.length>0)
     if (this.dataSource.length>0) 
     {
      

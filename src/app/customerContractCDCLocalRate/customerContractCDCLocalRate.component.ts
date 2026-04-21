@@ -123,14 +123,11 @@ menuItems: any[] = [
   cdcLocalFixedDetailsID: any;
 
 openInNewTab(menuItem: any, rowItem: any) {
-  console.log(menuItem);
-  console.log(rowItem);
   let baseUrl = this._generalService.FormURL;
   if(menuItem.label.toLowerCase() === 'cdc local fixed rate') {
     const url = this.router.serializeUrl(this.router.createUrlTree(['/cdcLocalFixedDetails', ], { queryParams: {
       CustomerContractID: rowItem.customerContractID,
     } }));
-    console.log(baseUrl + url);
     window.open(baseUrl + url, '_blank'); 
    
   } 
@@ -171,10 +168,6 @@ openInNewTab(menuItem: any, rowItem: any) {
     this.customerContract_Name = this._generalService.decrypt(decodeURIComponent(encryptedCustomerContractName));
 
     // Log the decrypted values to the console for verification
-    console.log("Decrypted CustomerContractID:", this.customerContract_ID);
-    console.log("Decrypted StartDate:", this.Applicable_From);
-    console.log("Decrypted EndDate:", this.Applicable_To);
-    console.log("Decrypted CustomerContractName:", this.customerContract_Name);
   }
 
     });
@@ -429,7 +422,6 @@ openInNewTab(menuItem: any, rowItem: any) {
   //       CustomerContractID: row.customerContractID,   
   //     }
   //   }); 
-  //   console.log(this.customerContract_ID)
   // }
 
   onBackPress(event) 

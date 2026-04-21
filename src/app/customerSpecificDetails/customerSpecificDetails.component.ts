@@ -53,8 +53,6 @@ export class CustomerSpecificDetailsComponent implements OnInit {
   contextMenu: MatMenuTrigger;
   contextMenuPosition = { x: '0px', y: '0px' };
   ngOnInit() {
-    console.log(this.reservationID);
-    console.log(this.dataSourceCSD);
     this.SubscribeUpdateService();
   }
   formControl = new FormControl('', 

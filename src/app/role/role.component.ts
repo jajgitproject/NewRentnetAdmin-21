@@ -191,7 +191,6 @@ export class RoleComponent implements OnInit {
 
   PageMapping(row)
   {
-    console.log(row)
     this.router.navigate(['/rolePageMapping', row.roleID, row.
     role
     ]);

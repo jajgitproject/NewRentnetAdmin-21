@@ -100,12 +100,10 @@ export class ActivityFeedComponent {
 
   onViewAllClick(): void {
     // Emit event or navigate to full activity log
-    console.log('View all activities clicked');
   }
 
   onActivityClick(activity: ActivityItem): void {
     // Handle activity item click - could open details modal
-    console.log('Activity clicked:', activity);
   }
 
   trackByActivityId(_index: number, activity: ActivityItem): string {

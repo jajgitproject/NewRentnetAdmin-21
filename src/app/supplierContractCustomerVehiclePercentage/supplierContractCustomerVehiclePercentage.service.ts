@@ -54,7 +54,6 @@ export class SupplierContractCustomerVehiclePercentageService
         {
           SearchVechile="null";
         }
-    //console.log(this.API_URL + '/'+SupplierContractID +'/'+SearchSupplierContractCustomer +'/'+SearchPercentage + '/' + SearchActivationStatus +'/' + PageNumber + '/supplierContractCustomerVehiclePercentageID/Ascending')
     return this.httpClient.get(this.API_URL  + '/'+SupplierContractID + '/'+SearchSupplierContractCustomer +'/'+SearchSupplierContractVehiclePercentage + '/'+SearchPercentage +'/'+SearchFromDate +'/'+SearchToDate + '/' +SearchVechile + '/'+ SearchActivationStatus +'/' + PageNumber + '/supplierContractCustomerVehiclePercentageID/Ascending');
   }
 
@@ -92,7 +91,6 @@ export class SupplierContractCustomerVehiclePercentageService
         {
           SearchVechile="null";
         }
-    //console.log(this.API_URL + "/kkk" +SearchSupplierContractCustomerVehiclePercentage + '/' + SearchActivationStatus +'/' + PageNumber + '/'+coloumName+'/'+sortType)
     return this.httpClient.get(this.API_URL  + '/'+SupplierContractID +'/'+SearchSupplierContractCustomer + '/'+SearchSupplierContractVehiclePercentage + '/'+SearchPercentage + '/'+SearchFromDate + '/'+SearchToDate + '/'+SearchVechile + '/'+ SearchActivationStatus +'/' + PageNumber + '/'+coloumName+'/'+sortType);
   }
 

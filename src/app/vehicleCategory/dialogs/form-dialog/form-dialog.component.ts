@@ -57,7 +57,6 @@ export class FormDialogComponent
           //this.dialogTitle ='Edit Vehicle Category';
           this.dialogTitle ='Vehicle Category';
           this.advanceTable = data.advanceTable;
-          console.log( this.advanceTable)
           this.ImagePath=this.advanceTable.vehicleCategoryImage;
           this.ImagePath1=this.advanceTable.supportingDoc;
           this.searchVehicleCategory.setValue(this.advanceTable.previousCategory);

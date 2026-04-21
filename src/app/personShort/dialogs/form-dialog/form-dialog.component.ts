@@ -119,7 +119,6 @@ export class FormDialogPersonShortComponent
           startWith(""),
           map(value => this._filter(value || ''))
         );
-        //console.log(this.customerGroupList)
       }
     )
   }
@@ -142,12 +141,10 @@ export class FormDialogPersonShortComponent
     this._generalService.getCustomers().subscribe(
       data=>{
         this.customerList=data;``
-        console.log(this.customerList)
         this.filteredCustomerOptions = this.advanceTableForm.controls['customerName'].valueChanges.pipe(
           startWith(""),
           map(value => this._filterCustomer(value || ''))
         );
-        //console.log(this.customerGroupList)
       }
     )
   }
@@ -392,13 +389,11 @@ export class FormDialogPersonShortComponent
 
   // public fileChanged(event?: UIEvent): void {
   //   const files: FileList = this.fileUploadEl.nativeElement.files;
-  //   console.log(`files: `, files);
 
   //   const file = files[0];
   //   const reader = new FileReader();
   //   const loaded = (el) => {
   //     const contents = el.target.result;
-  //     console.log('onloaded', contents);
   //     this.contents = contents;
   //   }
   //   reader.onload = loaded;

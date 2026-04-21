@@ -27,10 +27,7 @@ export class DriverRemarkDetailsComponent {
     // Set the defaults
     this.dialogTitle = 'Driver Remark Details';
     this.DriverRemarkDetails = this.data;
-    console.log(this.DriverRemarkDetails);
   this.DriverRemarkDetails = this.data?.dataSource;
-  console.log(this.data);
-  console.log(this.DriverRemarkDetails)
   
   }
 

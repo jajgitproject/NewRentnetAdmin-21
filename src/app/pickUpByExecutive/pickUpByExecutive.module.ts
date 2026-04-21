@@ -19,7 +19,6 @@ import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatDialogModule } from '@angular/material/dialog';
 import { MatSortModule } from '@angular/material/sort';
 import { MatToolbarModule } from '@angular/material/toolbar';
-import { MaterialFileInputModule } from '@compat/material-file-input-shim';
 import { MatMenuModule } from '@angular/material/menu';
 import { MyUploadComponent } from '../myupload/myupload.component';
 import { MyUploadModule } from '../myupload/myupload.module';
@@ -27,7 +26,7 @@ import { PickUpByExecutiveComponent } from './pickUpByExecutive.component';
 import { PickUpByExecutiveService } from './pickUpByExecutive.service';
 import { PickUpByExecutiveRoutingModule } from './pickUpByExecutive-routing.module';
 import { OwlDateTimeModule } from '@danielmoncada/angular-datetime-picker';
-import { GooglePlaceModule } from 'ngx-google-places-autocomplete';
+import { GooglePlaceModule } from '@compat/google-places-shim';
 import { FetchPickupAppDataDialogComponent } from './dialogs/fetch-pickup-app-data/fetch-pickup-app-data.component';
 import { FetchDataFromGPSComponent } from './dialogs/fetch-data-from-gps/fetch-data-from-gps.component';
 import { MatAutocompleteModule } from '@angular/material/autocomplete';
@@ -62,7 +61,6 @@ import { MatAutocompleteModule } from '@angular/material/autocomplete';
     MatDialogModule,
     MatSortModule,
     MatToolbarModule,
-    MaterialFileInputModule,
     MatMenuModule,
     MatProgressSpinnerModule,
     MyUploadModule

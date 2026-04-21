@@ -107,7 +107,6 @@ export class KanbanDialogComponent {
   }
 
   public submit(): void {
-    console.log('save');
     if (!this.kanbanForm.valid) {
       return;
     }

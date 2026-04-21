@@ -139,7 +139,6 @@ export class resolutionFormDialogComponent {
     this.verifyDutyStatusAndCacellationStatus = data.verifyDutyStatusAndCacellationStatus;
     // Set the defaults
     this.action = data.action;
-    console.log(this.action);
     if (this.action === 'edit') {
       this.dialogTitle = ' Incidence Resolution';
       this.advanceTable = data.advanceTable;
@@ -301,7 +300,6 @@ this.isSaveAllowed = status === 'changes allow';
   }
 
   submit() {
-    //console.log(this.advanceTableForm.value);
   }
   onNoClick(): void {
     if (this.action === 'add') {
@@ -314,8 +312,6 @@ this.isSaveAllowed = status === 'changes allow';
   }
   public Put(): void {
     
-    // console.log(this.
-    // action, this.advanceTableForm.getRawValue());
     this.advanceTableForm.patchValue({incidenceID: this.incidenceID});
     let requestObject = this.advanceTableForm.getRawValue();
     ['responsible1', 'responsible2', 'responsible3', 'responsible4'].forEach((responsible, index) => {
@@ -369,7 +365,6 @@ this.isSaveAllowed = status === 'changes allow';
       })
     ).subscribe(data => {
       this.DutySlipList = Array.isArray(data) ? data : [];
-      console.log('Duty Slip List:', this.DutySlipList);
       this.advanceTableForm.controls['dutySlipNumber'].setValidators([
         Validators.required,
         this.supplierTypeValidator(this.DutySlipList)
@@ -384,7 +379,6 @@ this.isSaveAllowed = status === 'changes allow';
     });
 
     //     this.DutySlipList = data;
-    //     console.log('Duty Slip List:', this.DutySlipList);
 
     //     // Set validators and update form control
     //     this.advanceTableForm.controls['dutySlipNumber'].setValidators([
@@ -415,7 +409,6 @@ this.isSaveAllowed = status === 'changes allow';
 
   // Filter function for autocomplete
   private _filtersearchSupplier(value: string): any[] {
-    console.log('Filtering:', value);
     const filterValue = value;
     return this.DutySlipList.filter(option =>
       option.dutySlipID.toString().toLowerCase().includes(filterValue)
@@ -424,12 +417,10 @@ this.isSaveAllowed = status === 'changes allow';
 
   // Handle selection from autocomplete
   OnSupplierSelect(selectedValue: any): void {
-    console.log('Selected Duty Slip ID:', selectedValue);
   }
 
   // Additional method for handling click
   getdutySlipID(dutySlipID: number): void {
-    console.log('Clicked Duty Slip ID:', dutySlipID);
   }
 
   //--------------- Employee Validator -----------
@@ -448,7 +439,6 @@ this.isSaveAllowed = status === 'changes allow';
         data => {
 
           this.EmployeeList = data;
-          // console.log( this.EmployeeList)
           this.advanceTableForm.controls['closeByEmployeeName']?.setValidators([Validators.required, this.employeeNameValidator(this.EmployeeList)
           ]);
           this.advanceTableForm.controls['closeByEmployeeName']?.updateValueAndValidity();
@@ -476,7 +466,6 @@ this.isSaveAllowed = status === 'changes allow';
     }
   }
   getemployeeIDTitles(employeeID: any) {
-    // console.log(employeeID)
     this.closedByEmployeeID = employeeID;
     this.advanceTableForm.patchValue({ closedByEmployeeID: this.closedByEmployeeID });
   }
@@ -489,7 +478,6 @@ this.isSaveAllowed = status === 'changes allow';
         (
           data => {
             this.passengerList = data;
-            // console.log(this.passengerList)
             this.advanceTableForm.controls['customerPersonName'].setValidators([Validators.required,
             this.passengerValidator(this.passengerList)
             ]);
@@ -504,7 +492,6 @@ this.isSaveAllowed = status === 'changes allow';
   }
 
   private _filterCategory(value: any): any {
-    // console.log(typeof value, this.passengerList);
     const filterValue = value;
     return this.passengerList.filter(
       data => {
@@ -518,11 +505,9 @@ this.isSaveAllowed = status === 'changes allow';
     this.passengerID = selectedPassenger.primaryPassengerID;
     this.advanceTableForm.patchValue({ customerPersonName: selectedPassenger.customerPersonName });
     this.advanceTableForm.patchValue({ passengerID: selectedPassenger.primaryPassengerID });
-    // console.log(selectedPassenger);
   }
 
   // getpassengerTitles(passengerID) {
-  //   console.log(passengerID)
   //   // this.passengerID = passengerID
   //   // this.advanceTableForm.patchValue({ passengerID: this.passengerID })
   // }
@@ -530,8 +515,6 @@ this.isSaveAllowed = status === 'changes allow';
   passengerValidator(passengerList: any[]): ValidatorFn {
     return (control: AbstractControl): ValidationErrors | null => {
       // Log control value and passenger list for debugging
-      // console.log('Control Value:', control.value);
-      // console.log('Passenger List:', passengerList);
 
       // Check if control.value is an object and handle accordingly
       let value: string | undefined = undefined;
@@ -560,7 +543,6 @@ this.isSaveAllowed = status === 'changes allow';
     this._generalService.getIncidenceType().subscribe(
       data => {
         this.IncidenceTypeList = data;
-        // console.log(this.IncidenceTypeList);
         this.advanceTableForm.controls['incidenceType'].setValidators([Validators.required,
         this.incidenceTypeValidator(this.IncidenceTypeList)
         ]);
@@ -580,7 +562,6 @@ this.isSaveAllowed = status === 'changes allow';
       });
   }
   onincidenceTypeSelected(selectedincidenceType: string) {
-    // console.log(selectedincidenceType);
     const selectedincidence = this.IncidenceTypeList.find(
       data => data.incidenceType === selectedincidenceType
     );
@@ -607,7 +588,6 @@ this.isSaveAllowed = status === 'changes allow';
     this._generalService.getIssueCategory().subscribe(
       data => {
         this.IssueCategoryList = data;
-        // console.log(this.IssueCategoryList);
         this.advanceTableForm.controls['issueCategory'].setValidators([Validators.required,
         this.IssueCategoryValidator(this.IssueCategoryList)
         ]);
@@ -804,7 +784,6 @@ this.isSaveAllowed = status === 'changes allow';
         data => {
           this.dataSource = data;
           if(this.dataSource && this.dataSource.length > 0) {
-            console.log(this.dataSource[0]);
             this.advanceTableForm.patchValue({ reservationID: this.dataSource[0]?.reservationID });
             this.advanceTableForm.patchValue({
               incidenceDate
@@ -937,7 +916,6 @@ this.isSaveAllowed = status === 'changes allow';
         this[`showAutoComplete${responsibleNumber}`] = true;
         this[`autoCompleteLabel${responsibleNumber}`] = `Select Vendor ${responsibleNumber}`;
         this[`filteredOptions${responsibleNumber}`] = this.supplierOptions;
-        console.log(this.supplierOptions)
         if(recordData && recordData[dataSourceVendorrKey] != 0) {
           const defaultVendor = this.supplierOptions.find(supplier => supplier.id === recordData[dataSourceVendorrKey]);
           if(defaultVendor) {
@@ -956,7 +934,6 @@ this.isSaveAllowed = status === 'changes allow';
         this[`showAutoComplete${responsibleNumber}`] = true;
         this[`autoCompleteLabel${responsibleNumber}`] = `Select Employee ${responsibleNumber}`;
         this[`filteredOptions${responsibleNumber}`] = this.employeeOptions;
-        console.log(this.employeeOptions)
         if(recordData && recordData[dataSourceEmployeeKey] != 0) {
           const defaultEmployee = this.employeeOptions.find(emp => emp.id === recordData[dataSourceEmployeeKey]);
           if(defaultEmployee) {
@@ -966,7 +943,6 @@ this.isSaveAllowed = status === 'changes allow';
         }
         break;
       case 'guest':
-        console.log(this.CustomerPersonID, this.customerPersonName);
         this[`showAutoComplete${responsibleNumber}`] = true;
         this[`autoCompleteLabel${responsibleNumber}`] = `Select Passenger ${responsibleNumber}`;
         this[`filteredOptions${responsibleNumber}`] = this.passengerOptions;

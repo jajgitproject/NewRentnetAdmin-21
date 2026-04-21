@@ -35,7 +35,6 @@ export class TallyMisService {
       SearchLocation = "null";
     }
     
-    console.log(this.API_URL + '/' + SearchRequestFromDate + '/' + SearchRequestToDate + '/' + SearchLocation + '/' + PageNumber + '/InvoiceID/Ascending');
     return this.httpClient.get(this.API_URL + '/' + SearchRequestFromDate + '/' + SearchRequestToDate + '/' + SearchLocation + '/' + PageNumber + '/InvoiceID/Ascending');
 
   }

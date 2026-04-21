@@ -25,8 +25,6 @@ export class CustomerInformationComponent implements OnInit {
      this.route.queryParams.subscribe(paramsData =>{
       const encryptedAllotmentID = paramsData.allotmentID;
       this.allotmentID = this._generalService.decrypt(decodeURIComponent(encryptedAllotmentID)); 
-        console.log(this.AllotmentID);
-        console.log(this.allotmentID);           
     });       
     this.loadCustomerInformation();
     // this.SubscribeUpdateService();
@@ -43,7 +41,6 @@ export class CustomerInformationComponent implements OnInit {
       (data) => {
         if (data && data.length > 0) {
           this.customerInformation = data[0];
-          console.log(data) // Assuming the response is an array and we want the first item
         } else {
           this.customerInformation = null; // Handle case where no data is returned
         }

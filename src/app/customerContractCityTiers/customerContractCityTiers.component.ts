@@ -98,7 +98,6 @@ export class CustomerContractCityTiersComponent implements OnInit {
           this.customerContractName = this._generalService.decrypt(decodeURIComponent(encryptedCustomerContractName));
         }
         
-      console.log(this.customerContractID,this.customerContractName)
       // this.customerContractID   = paramsData.CustomerContractID;
       // this.customerContractName   = paramsData.CustomerContractName;
   });
@@ -147,7 +146,6 @@ export class CustomerContractCityTiersComponent implements OnInit {
           this.getCityTier();  // Fetch the vehicle categories
         } else {
           // User clicked No - Do nothing
-          console.log('Import canceled');
         }
       });
     }
@@ -168,7 +166,6 @@ export class CustomerContractCityTiersComponent implements OnInit {
             cityTierID:cityTiers.cityTierID
           })
         );
-        console.log(this.advanceTableForm);
         this.saveCustomerContractCityTiers()
       }
     );
@@ -211,8 +208,6 @@ export class CustomerContractCityTiersComponent implements OnInit {
     
   ];
   // openInNewTab(menuItem: any, rowItem: any) {
-  //   console.log(menuItem);
-  //   console.log(rowItem);
   //   let baseUrl = this._generalService.FormURL;
   //   if(menuItem.label.toLowerCase() === 'city tiers city mapping') {
   //     const url = this.router.serializeUrl(this.router.createUrlTree(['/customerContractCityTiersCityMapping',  ], { queryParams: {
@@ -221,7 +216,6 @@ export class CustomerContractCityTiersComponent implements OnInit {
   //        CustomerContractName: this.customerContractName,
       
   //     } }));
-  //     console.log(baseUrl + url);
   //     window.open(baseUrl + url, '_blank'); 
      
   //   } 
@@ -242,8 +236,6 @@ export class CustomerContractCityTiersComponent implements OnInit {
   // }
 
   openInNewTab(menuItem: any, rowItem: any) {
-    console.log(menuItem);
-    console.log(rowItem);
     let baseUrl = this._generalService.FormURL;
   
     // Encrypt the required parameters
@@ -257,7 +249,6 @@ export class CustomerContractCityTiersComponent implements OnInit {
         CustomerContractCityTier: encryptedCustomerContractCityTier,
         CustomerContractName: encryptedCustomerContractName
       }}));
-      console.log(baseUrl + url);
       window.open(baseUrl + url, '_blank'); 
     }
   }

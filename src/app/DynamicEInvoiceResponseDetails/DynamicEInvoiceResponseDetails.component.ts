@@ -20,15 +20,11 @@ export class DynamicEInvoiceResponseDetailsComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    console.log('Dialog Data:', this.data);
 
     this.DynamicEInvoiceDetails = this.data;
-    console.log('DynamicEInvoiceDetails:', this.DynamicEInvoiceDetails);
     if (this.DynamicEInvoiceDetails?.dynamicsAPIRequestPayLoad) {
-      console.log('Raw dynamicsAPIRequestPayLoad:', this.DynamicEInvoiceDetails.dynamicsAPIRequestPayLoad);
       try {
         const parsed = JSON.parse(this.DynamicEInvoiceDetails.dynamicsAPIRequestPayLoad);
-        console.log('Parsed dynamicsAPIRequestPayLoad:', parsed);
         this.formattedPayload = JSON.stringify(parsed, null, 2); // pretty format
       } catch (e) {
         console.error('JSON parse error:', e);
@@ -38,7 +34,6 @@ export class DynamicEInvoiceResponseDetailsComponent implements OnInit {
       console.warn('dynamicsAPIRequestPayLoad is missing or undefined.');
     }
 
-    console.log('Formatted Payload:', this.formattedPayload);
   }
 
   onNoClick(): void {

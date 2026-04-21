@@ -35,7 +35,6 @@ noRecords: any;
     this.dialogTitle = 'Mode Of Payment History';
     this.reservationID = data.reservationID;
   
-    console.log(this.reservationID)
   }
 
   ngOnInit() {
@@ -52,7 +51,6 @@ noRecords: any;
       data=>{
         this.EmployeeList=data;
         this.modeOfPaymentChangeBy=this.EmployeeList[0].firstName+' '+this.EmployeeList[0].lastName;
-        console.log(this.modeOfPaymentChangeBy)
       }
     );
   }
@@ -63,7 +61,6 @@ noRecords: any;
       (data) =>   
         {
           this.dataSource = data;
-          console.log(this.dataSource)
         },
         (error: HttpErrorResponse) => { this.dataSource=null }
     );

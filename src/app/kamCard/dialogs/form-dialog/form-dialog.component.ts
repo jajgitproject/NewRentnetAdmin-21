@@ -149,7 +149,6 @@ export class FormDialogKCComponent implements OnInit
 
   submit() 
   {
-    console.log(this.advanceTableForm.value);
   }
   onNoClick(): void 
   {

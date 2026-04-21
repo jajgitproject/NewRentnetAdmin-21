@@ -124,7 +124,6 @@ export class FetchDataFromAppComponent implements OnInit {
       data =>   
       {
         this.dataSource = data;
-        console.log(this.dataSource)
         this.dataSource.forEach((ele)=>{
           // if(ele.activationStatus===true){
           //  this.activation="Active"

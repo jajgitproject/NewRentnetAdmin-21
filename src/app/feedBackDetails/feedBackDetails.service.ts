@@ -19,7 +19,6 @@ export class FeedBackDetailsService
 
   getFeedBackDetails(ReservationID: number):  Observable<any> 
   {
- console.log(this.API_URL + '/GetFeedBackDetails/' + ReservationID)
     return this.httpClient.get(`${this.API_URL + '/GetFeedBackDetails/' + ReservationID}`);
   }
   

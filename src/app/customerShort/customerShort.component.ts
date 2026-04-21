@@ -137,7 +137,6 @@ export class CustomerShortComponent implements OnInit {
   //   this._generalService.getCustomerShortGroup().subscribe(
   //     data=>{
   //       this.customerShortGroupList=data;``
-  //       console.log(this.customerShortGroupList)
   //     }
   //   )
   // }
@@ -167,7 +166,6 @@ export class CustomerShortComponent implements OnInit {
         
       }
     });
-    console.log(row)
 
   }
   deleteItem(row)
@@ -206,7 +204,6 @@ export class CustomerShortComponent implements OnInit {
           else{
             this.ActiveStatus="Deleted"
           }
-         // console.log(element);
         })
       
       },
@@ -232,7 +229,6 @@ export class CustomerShortComponent implements OnInit {
   
   NextCall()
   {
-    //console.log(this.dataSource.length>0)
     if (this.dataSource.length>0) 
     {
      
@@ -252,7 +248,6 @@ export class CustomerShortComponent implements OnInit {
   }
 
   customerShortStatus(row) {
-    console.log(row.vehicle);
     this.router.navigate([
       '/customerShortConfigurationSEZ',  
     ],
@@ -267,7 +262,6 @@ export class CustomerShortComponent implements OnInit {
   }
 
   customerShortCityMapping(row) {
-    console.log(row.vehicle);
     this.router.navigate([
       '/customerShortCategoryMapping',  
     ],
@@ -280,7 +274,6 @@ export class CustomerShortComponent implements OnInit {
   }
 
   driverDetailsSMsEMail(row) {
-    console.log(row.vehicle);
     this.router.navigate([
       '/customerShortCarAndDriverDetailsSMSEMail',  
     ],
@@ -293,7 +286,6 @@ export class CustomerShortComponent implements OnInit {
   }
 
   customerShortDesignation(row) {
-    console.log(row.vehicle);
     this.router.navigate([
       '/customerShortDesignation',  
     ],
@@ -306,7 +298,6 @@ export class CustomerShortComponent implements OnInit {
   }
 
   customerShortReservation(row) {
-    console.log(row.vehicle);
     this.router.navigate([
       '/customerShortReservationAlert',  
     ],

@@ -84,7 +84,6 @@ export class DisputeResolutionService
           {
             SearchActivationStatus=null;
           }
-    //console.log(this.API_URL + "/" +SearchBank + '/' + SearchActivationStatus +'/' + PageNumber + '/'+coloumName+'/'+sortType)
     return this.httpClient.get(this.API_URL +"/"+'GetAllDisputeResolution'+  "/" + disputeID + '/' +SearchactionTaken + '/' + SearchActivationStatus +'/'+ PageNumber + '/'+coloumName+'/'+sortType);
   }
   add(advanceTable: DisputeResolution) 

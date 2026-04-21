@@ -20,7 +20,6 @@ export class PassengerHistoryService
   getTableData(reservationID:number, pickupCityID:number,PageNumber: number,):  Observable<any> 
   {
     const url = `${this.API_URL}/GetCompletePassengerData/${reservationID}/${pickupCityID}/${PageNumber}/reservation.ReservationID/Descending`;
-    console.log(url);
     return this.httpClient.get(url);
   }
 

@@ -90,7 +90,6 @@ export class CurrencyExchangeRateComponent implements OnInit {
     //   data =>   
     //   {
     //     this.CurrencyList = data;
-    //     console.log(this.CurrencyList)
        
     //   }
     // );

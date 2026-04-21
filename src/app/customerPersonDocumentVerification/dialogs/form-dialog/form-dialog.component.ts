@@ -77,8 +77,6 @@ export class FormDialogVerificationComponentHolder
     this.customerPersonName = data.CustomerPersonName;
     this.customerPersonID = data.CustomerPersonID;
 
-    console.log(this.advanceTable);
-    console.log(this.action);
 
   }
 

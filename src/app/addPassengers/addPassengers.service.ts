@@ -46,7 +46,6 @@ export class AddPassengersService
   {
     advanceTable.addPassengersID=-1;
     advanceTable.userID=this.generalService.getUserID();
-    console.log(advanceTable.userID);
     advanceTable.updatedBy=this.generalService.getUserID();
     advanceTable.updateDateTime= this.generalService.getTodaysDate();
     return this.httpClient.post<any>(this.API_URL , advanceTable);
@@ -55,7 +54,6 @@ export class AddPassengersService
   {
     advanceTable.updatedBy=this.generalService.getUserID();
     advanceTable.userID=this.generalService.getUserID();
-    console.log(advanceTable.userID);
     advanceTable.updateDateTime= this.generalService.getTodaysDate();
     return this.httpClient.put<any>(this.API_URL , advanceTable);
   }

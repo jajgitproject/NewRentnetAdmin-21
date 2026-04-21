@@ -41,7 +41,6 @@ export class LocationDetailsComponent {
           {
     
             this.dataSource = data;
-            console.log(this.dataSource)
            
           },
           (error: HttpErrorResponse) => { this.dataSource = null;}

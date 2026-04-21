@@ -91,7 +91,6 @@ export class incidenceFormDialogComponent {
     private fb: FormBuilder,
     private snackBar: MatSnackBar,
     public _generalService: GeneralService) {
-    console.log(this.data);
     this.reservationID = this.data?.item.reservationID;
     this.dutySlipID = this.data?.dutySlipID;
     this.incidenceTypeID = this.data?.item.incidenceTypeID;
@@ -118,7 +117,6 @@ export class incidenceFormDialogComponent {
     if (this.action === 'edit') {
       this.dialogTitle = 'Incidence';
       this.advanceTable = data.advanceTable;
-      // console.log(data.advanceTable)
       // this.loadData();
       // this.ImagePath=this.advanceTable?.reportEvidenceDoc;
       // let startDate = moment(this.advanceTable?.incidenceDate).format('DD/MM/yyyy');
@@ -194,7 +192,6 @@ this.isSaveAllowed = status === 'changes allow';
   }
 
   createContactForm(): FormGroup {
-    console.log(this.data?.item)
     return this.fb.group({
       dutySlipID: [this.advanceTable?.dutySlipID],
       userID: [this.advanceTable?.userID || ''],
@@ -262,7 +259,6 @@ this.isSaveAllowed = status === 'changes allow';
   }
 
   submit() {
-    //console.log(this.advanceTableForm.value);
   }
   onNoClick(): void {
     if (this.action === 'add') {
@@ -281,7 +277,6 @@ this.isSaveAllowed = status === 'changes allow';
     this.advanceTableForm.patchValue({ inventoryID: this.inventoryID });
     this.advanceTableForm.patchValue({ dispatchLocationID: this.transferedLocationID });
     this.advanceTableForm.patchValue({ passengerID: this.passengerID });
-    console.log(this.action, this.advanceTableForm.getRawValue());
     this.advanceTableService.add(this.advanceTableForm.getRawValue())
       .subscribe(
         response => {
@@ -314,7 +309,6 @@ this.isSaveAllowed = status === 'changes allow';
     this.advanceTableForm.patchValue({ inventoryID: this.inventoryID || this.advanceTable?.inventoryID });
     this.advanceTableForm.patchValue({ dispatchLocationID: this.transferedLocationID || this.advanceTable?.dispatchLocationID });
    
-    console.log(this.action, this.advanceTableForm.getRawValue());
     this.advanceTableService.update(this.advanceTableForm.getRawValue())
       .subscribe(
         response => {
@@ -357,7 +351,6 @@ this.isSaveAllowed = status === 'changes allow';
       })
     ).subscribe(data => {
       this.DutySlipList = Array.isArray(data) ? data : [];
-      console.log('Duty Slip List:', this.DutySlipList);
       this.advanceTableForm.controls['dutySlipNumber'].setValidators([
         Validators.required,
         this.supplierTypeValidator(this.DutySlipList)
@@ -372,7 +365,6 @@ this.isSaveAllowed = status === 'changes allow';
     });
 
     //     this.DutySlipList = data;
-    //     console.log('Duty Slip List:', this.DutySlipList);
 
     //     // Set validators and update form control
     //     this.advanceTableForm.controls['dutySlipNumber'].setValidators([
@@ -403,7 +395,6 @@ this.isSaveAllowed = status === 'changes allow';
 
   // Filter function for autocomplete
   private _filtersearchSupplier(value: string): any[] {
-    console.log('Filtering:', value);
     const filterValue = value;
     return this.DutySlipList.filter(option =>
       option.dutySlipID.toString().toLowerCase().includes(filterValue)
@@ -412,12 +403,10 @@ this.isSaveAllowed = status === 'changes allow';
 
   // Handle selection from autocomplete
   OnSupplierSelect(selectedValue: any): void {
-    console.log('Selected Duty Slip ID:', selectedValue);
   }
 
   // Additional method for handling click
   getdutySlipID(dutySlipID: number): void {
-    console.log('Clicked Duty Slip ID:', dutySlipID);
   }
 
   //   const filterValue = value.toLowerCase();
@@ -492,7 +481,6 @@ this.isSaveAllowed = status === 'changes allow';
     }
   }
   getemployeeIDTitles(employeeID: any) {
-    console.log(employeeID)
     this.assignedToEmployeeID = employeeID;
     this.advanceTableForm.patchValue({ assignedToEmployeeID: this.assignedToEmployeeID });
   }
@@ -551,7 +539,6 @@ departmentNameValidator(DepartmentList: any[]): ValidatorFn {
         (
           data => {
             this.passengerList = data;
-            console.log(this.passengerList)
             this.advanceTableForm.controls['customerPersonName'].setValidators([Validators.required,
             this.passengerValidator(this.passengerList)
             ]);
@@ -566,7 +553,6 @@ departmentNameValidator(DepartmentList: any[]): ValidatorFn {
   }
 
   private _filterCategory(value: any): any {
-    console.log(typeof value, this.passengerList);
     const filterValue = value;
     return this.passengerList.filter(
       data => {
@@ -580,11 +566,9 @@ departmentNameValidator(DepartmentList: any[]): ValidatorFn {
     this.passengerID = selectedPassenger.primaryPassengerID;
     this.advanceTableForm.patchValue({ customerPersonName: selectedPassenger.customerPersonName });
     this.advanceTableForm.patchValue({ passengerID: selectedPassenger.primaryPassengerID });
-    console.log(selectedPassenger);
   }
 
   getpassengerTitles(passengerID) {
-    console.log(passengerID)
     this.passengerID = passengerID
     this.advanceTableForm.patchValue({ passengerID: this.passengerID  || this.advanceTable?.passengerID});
   }
@@ -592,8 +576,6 @@ departmentNameValidator(DepartmentList: any[]): ValidatorFn {
   passengerValidator(passengerList: any[]): ValidatorFn {
     return (control: AbstractControl): ValidationErrors | null => {
       // Log control value and passenger list for debugging
-      console.log('Control Value:', control.value);
-      console.log('Passenger List:', passengerList);
 
       // Check if control.value is an object and handle accordingly
       let value: string | undefined = undefined;
@@ -653,7 +635,6 @@ InitincidenceType() {
       });
   }
   onincidenceTypeSelected(selectedincidenceType: string) {
-    console.log(selectedincidenceType);
     const selectedincidence = this.IncidenceTypeList.find(
       data => data.incidenceType === selectedincidenceType
     );
@@ -732,14 +713,12 @@ incidenceTypeValidator(list: any[]): ValidatorFn {
     )
     if (selectedCategory) {
       this.issueCategoryID = selectedCategory.issueCategoryID;
-      console.log("Selected Issue Category ID: ", this.issueCategoryID);
       
       this.advanceTableForm.patchValue({ issueCategoryID: this.issueCategoryID });
     }
 }
 
   getIssueCategoryID(issueCategoryID) {
-    console.log(this.issueCategoryID)
     this.issueCategoryID = issueCategoryID;
     this.advanceTableForm.patchValue({ issueCategoryID: this.issueCategoryID  || this.advanceTable?.issueCategoryID});
   }
@@ -884,7 +863,6 @@ incidenceTypeValidator(list: any[]): ValidatorFn {
           data => {
             this.dataSource = data;
             if(this.dataSource && this.dataSource.length > 0) {
-              console.log(this.dataSource);            
               this.advanceTableForm.patchValue({ reservationID: this.dataSource[0].reservationID });
               this.advanceTableForm.patchValue({ incidenceDate
                 : this.dataSource[0].incidenceDate

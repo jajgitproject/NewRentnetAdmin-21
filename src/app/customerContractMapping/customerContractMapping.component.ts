@@ -157,7 +157,6 @@ export class CustomerContractMappingComponent implements OnInit {
      
     );
 
-    //console.log(this.CustomerList);
   }
   private _filter(value: any): any {
     const filterValue = value.toLowerCase();
@@ -216,7 +215,6 @@ export class CustomerContractMappingComponent implements OnInit {
   {
 
     this.customerContractMappingID = row.id;
-  //console.log(row)
     const dialogRef = this.dialog.open(DeleteDialogComponent, 
     {
       data: row
@@ -415,8 +413,6 @@ export class CustomerContractMappingComponent implements OnInit {
   ];
   
   openInNewTab(menuItem: any, rowItem: any) {
-    console.log(menuItem);
-    console.log(rowItem);
     let baseUrl = this._generalService.FormURL;
   
     if (menuItem.label.toLowerCase() === 'fuel surcharge') {
@@ -428,7 +424,6 @@ export class CustomerContractMappingComponent implements OnInit {
           EndDate: rowItem.endDate,
         }
       }));
-      console.log(baseUrl + url);
       window.open(baseUrl + url, '_blank');
     } else if (menuItem.label.toLowerCase() === 'discount') {
       const url = this.router.serializeUrl(this.router.createUrlTree(['/customerDiscount'], {

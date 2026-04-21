@@ -43,7 +43,6 @@ export class DialogformComponent implements OnInit {
     this.dialog.closeAll();
   }
   onSubmitClick() {
-    console.log('Form Value', this.addCusForm.value);
   }
 }
 

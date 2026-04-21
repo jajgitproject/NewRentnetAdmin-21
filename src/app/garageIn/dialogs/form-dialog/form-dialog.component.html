@@ -118,7 +118,7 @@
                             <mat-label>Time</mat-label>
                             <input matInput [owlDateTimeTrigger]="time1" [owlDateTime]="time1"
                                 formControlName="locationInTime" (input)="onTimeInput($event)">
-                            <mat-icon matSuffix [owlDateTimeTrigger]="time1" class="date-icon">schedule</mat-icon>
+                            <button mat-icon-button matSuffix type="button" [owlDateTimeTrigger]="time1" class="date-icon" aria-label="Open time picker"><mat-icon>schedule</mat-icon></button>
                             <owl-date-time [pickerType]="'timer'" #time1></owl-date-time>
                             <mat-error *ngIf="advanceTableForm.get('locationInTime').hasError('required')">
                                 Time is required
@@ -306,7 +306,7 @@ advanceTableForm.get('locationInAddressString')?.touched
                             <mat-label>Time</mat-label>
                             <input matInput [owlDateTimeTrigger]="time1" [owlDateTime]="time1"
                                 formControlName="locationInTimeByApp" (ngModelChange)="locationTimeSet($event)">
-                            <mat-icon matSuffix [owlDateTimeTrigger]="time1" class="date-icon">schedule</mat-icon>
+                            <button mat-icon-button matSuffix type="button" [owlDateTimeTrigger]="time1" class="date-icon" aria-label="Open time picker"><mat-icon>schedule</mat-icon></button>
                             <owl-date-time [pickerType]="'timer'" #time1></owl-date-time>
                             <mat-error *ngIf="advanceTableForm.get('locationInTimeByApp').hasError('required')">
                                 Time is required

@@ -3,8 +3,7 @@
   (clickOutside)="onClickedOutside($event)">
   <div class="rightSidebarClose" (click)="toggleRightSidebar()"><i class="far fa-times-circle"></i></div>
   <div class="demo-skin"
-    [ngStyle]="{'position' : 'relative', 'max-height' : maxHeight+'px', 'max-width' : maxWidth+'px'}"
-    [perfectScrollbar]>
+    [ngStyle]="{'position' : 'relative', 'max-height' : maxHeight+'px', 'max-width' : maxWidth+'px', 'overflow-y' : 'auto'}">
     <div class="rightSetting">
       <p>GENERAL SETTINGS</p>
       <ul class="setting-list list-unstyled m-t-20">

@@ -44,14 +44,12 @@ export class OtherDetailsDialogComponent
   {
         // Set the defaults
         this.action = data.action;
-        console.log(this.action);
         debugger;
         if (this.action === 'edit') 
         {
           //this.dialogTitle ='Edit Other Details';       
           this.dialogTitle ='Other Details';
           this.advanceTable = data.advanceTable[0];
-          console.log(this.advanceTable);
           // this.advanceTable.discountApprovedByEmployee = data.advanceTable.firstName +" "+ data.advanceTable.lastName;
            this.ImagePath = this.advanceTable.attachment;
            this.uploadedByName();
@@ -62,7 +60,6 @@ export class OtherDetailsDialogComponent
           this.advanceTable = new OtherDetails({});
           //this.advanceTable.activationStatus="Active";
           this.ReservationID = data.reservationID;
-          console.log(this.ReservationID);
         }
         this.status=data?.status?.status || data?.status || data;
         // if(this.status!='Changes allow'){

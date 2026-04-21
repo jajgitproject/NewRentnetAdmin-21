@@ -66,7 +66,6 @@ export class DutySlipImageService
 
   getAllotmentIDForDutySlipImage(AllotmentID:number)
   {
-    console.log(this.API_URL+"/"+'GetDutySlipImage'+"/"+AllotmentID)
     return this.httpClient.get(this.API_URL+"/"+'GetDutySlipImage'+"/"+AllotmentID);
   }
 }

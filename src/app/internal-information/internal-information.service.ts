@@ -18,12 +18,10 @@ export class IternallinformationService {
     private generalService: GeneralService
   ) {
     this.apiUrl = this.generalService.BaseURL + 'internalNoteForClosing';
-    //console.log('Constructed API URL:', this.apiUrl); // ✅ Debug log
   }
 
   getIternallinformationClosingData(reservationID: number): Observable<any> {
     const fullUrl = `${this.apiUrl}/internalNoteForClosing/${reservationID}`;
-    //console.log("Hitting API:", fullUrl); // ✅ Debug log
     return this.http.get(fullUrl);
   }
 }

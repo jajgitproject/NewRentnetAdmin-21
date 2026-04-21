@@ -36,7 +36,6 @@ export class ChangeKamForCustomersService
     }
  
    
-    //console.log(this.API_URL + '/'+CustomerID +'/'+SearchnewKAMActivationFromDate  + '/' + SearchStartDate+'/' + SearchEndDate +'/' + SearchActivationStatus +'/' + PageNumber + '/changeKamForCustomersID/Ascending')
     return this.httpClient.get(this.API_URL + '/'+SearchEmployeeName +'/'+SearchFromDate +'/' + SearchActivationStatus +'/' + PageNumber + '/keyAccountManagerUpdateID/Ascending');
   }
 
@@ -55,7 +54,6 @@ export class ChangeKamForCustomersService
       SearchnewKAMActivationStatus=null;
     }
  
-    //console.log(this.API_URL + "/kkk" +SearchChangeKamForCustomers + '/' + SearchActivationStatus +'/' + PageNumber + '/'+coloumName+'/'+sortType)
     return this.httpClient.get(this.API_URL + '/'+SearchEmployeeName +'/' + SearchnewKAMActivationFromDate +'/' + SearchnewKAMActivationStatus +'/' + PageNumber + '/'+coloumName+'/'+sortType);
   }
 

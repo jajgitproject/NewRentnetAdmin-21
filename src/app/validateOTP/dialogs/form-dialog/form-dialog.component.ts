@@ -156,7 +156,6 @@ export class FormDialogComponent implements OnInit, OnDestroy
       requestPayload.EmployeeEntityID =
         employee?.EmployeeEntityID ?? employee?.employeeEntityID;
       requestPayload.UserType = "Employee";
-      console.log(requestPayload);
   
       this.advanceTableService.resendPassword(requestPayload).subscribe(
         response => {
@@ -164,7 +163,6 @@ export class FormDialogComponent implements OnInit, OnDestroy
           // Split the string in the message property using a colon
           let messageParts = response.message.split(":");
           this.validateOtp = messageParts[2];
-          console.log(this.validateOtp);
           
           // Show success message
           this.showNotification(
@@ -198,7 +196,6 @@ export class FormDialogComponent implements OnInit, OnDestroy
   verifyOTP()
   {
     this.role = localStorage.getItem('role');
-    console.log(this.role)
     if (this.otpValidationTime == null) {
       this.otpValidationTime = Date.now();
     }

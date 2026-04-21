@@ -353,7 +353,6 @@ uploadedByName(){
 
   public confirmAdd(): void {
     this.saveDisabled = false;
-    // console.log(this.action == "edit")
     if (this.action == "edit") {
 
       if (this.advanceTable.verified === 'Verified') {

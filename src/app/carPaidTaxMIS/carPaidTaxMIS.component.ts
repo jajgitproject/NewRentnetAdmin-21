@@ -119,7 +119,6 @@ export class CarPaidTaxMISComponent implements OnInit {
       data =>
       {
         this.StatesList = data;  
-        console.log(this.StatesList)
         this.filteredStateOptions = this.state.valueChanges.pipe(
           startWith(""),
           map(value => this._filterState(value || ''))
@@ -150,7 +149,6 @@ export class CarPaidTaxMISComponent implements OnInit {
     //     data=>
     //     {
     //       this.RegistrationNumberList=data;
-    //       console.log(this.RegistrationNumberList);
     //       this.filteredRegistrationNumberOptions = this.registrationNumber.valueChanges.pipe(
     //         startWith(""),
     //         map(value => this._filterRN(value || ''))
@@ -173,7 +171,6 @@ export class CarPaidTaxMISComponent implements OnInit {
         data=>
         {
           this.RegistrationNumberList=data;
-          console.log(this.RegistrationNumberList);
           this.filteredRegistrationNumberOptions = this.registrationNumber.valueChanges.pipe(
             startWith(""),
             map(value => this._filterRN(value || ''))
@@ -366,7 +363,6 @@ shouldShowDeleteButton(item: any): boolean {
         data =>   
         {
           this.dataSource = data; 
-          console.log(this.dataSource);        
         },
         (error: HttpErrorResponse) => { this.dataSource = null;}
       );

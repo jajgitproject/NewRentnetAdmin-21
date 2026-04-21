@@ -44,7 +44,6 @@ export class MessageBoxFormDialogComponent {
     this.dialogTitle = 'Select Entity to be assigned';
     this.advanceTable = data?.advanceTable;
     // this.advanceTable.userID = data.userID;
-    // console.log(this.advanceTable.userID)
     this.advanceTableForm = this.createContactForm();
   }
 
@@ -77,7 +76,6 @@ export class MessageBoxFormDialogComponent {
     this.advanceTableService.update(this.advanceTable, this.customerID).subscribe(
       {
         next: (response) => {
-          console.log('Response:', response);
           debugger
           if (!response.isSuccess) {
             const errors = response.Errors || ['Operation Failed'];
@@ -179,7 +177,6 @@ export class MessageBoxFormDialogComponent {
 
   getCustomerID(customerID: any) {
     this.customerID = customerID;
-    console.log(this.customerID)
     this.advanceTableForm.patchValue({ customerID: this.customerID });
   }
 

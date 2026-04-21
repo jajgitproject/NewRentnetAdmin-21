@@ -73,7 +73,6 @@ export class FetchPickupAppDataDialogComponent
       (data:FetchDataFromApp[])=>
       {
         this.fetchCurrentDataFromAppList=data;
-        console.log(this.fetchCurrentDataFromAppList)
       }
     );
 
@@ -81,7 +80,6 @@ export class FetchPickupAppDataDialogComponent
       (data:FetchDataFromApp[])=>
       {
         this.fetchPreviousDataFromAppList=data;
-        console.log(this.fetchPreviousDataFromAppList)
       }
     );
 
@@ -89,14 +87,12 @@ export class FetchPickupAppDataDialogComponent
       (data:FetchDataFromApp[])=>
       {
         this.fetchNextDataFromAppList=data;
-        console.log(this.fetchNextDataFromAppList)
       }
     );
   }
 
   submit() 
   {
-    console.log(this.advanceTableForm.value);
   }
 
   onNoClick(): void

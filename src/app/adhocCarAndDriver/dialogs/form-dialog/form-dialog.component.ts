@@ -7,7 +7,7 @@ import { formatDate } from '@angular/common';
 import { GeneralService } from '../../../general/general.service';
 import { CurrencyDropDown } from 'src/app/general/currencyDropDown.model';
 import { QualificationDropDown } from 'src/app/general/qualificationDropDown.model';
-import { Address } from 'ngx-google-places-autocomplete/objects/address';
+import { Address } from '@compat/google-places-shim-objects/address';
 import { CitiesDropDown } from 'src/app/organizationalEntity/citiesDropDown.model';
 import { AllCitiesDropDown } from 'src/app/customerPersonDrivingLicense/allCitiesDropDown.model';
 import { Observable } from 'rxjs';
@@ -169,7 +169,6 @@ copydetails:boolean = false;
           this.reservationID = data.reservationInfo.reservationID;
           this.advanceTableForm = this.createContactForm();
           this.advanceTableForm.valueChanges.subscribe(values => {
-            console.log("Form Values Changed:", values);
           });
 
         }
@@ -190,7 +189,6 @@ copydetails:boolean = false;
     this.advanceTableForm = this.createContactForm();
 
     this.advanceTableForm.valueChanges.subscribe(values => {
-      console.log("Form Values Changed:", values);
     });
   }
  
@@ -421,7 +419,6 @@ copydetails:boolean = false;
   //     data=>
   //     {
   //       this.SupplierTypeList=data;
-  //       console.log(this.SupplierTypeList)
   //       this.filteredSupplierTypeOptions = this.advanceTableForm.controls['supplierType'].valueChanges.pipe(
   //         startWith(""),
   //         map(value => this._filterSupplierType(value || ''))
@@ -463,7 +460,6 @@ copydetails:boolean = false;
       data=>
       {
         this.VehicleCategoryList=data;
-        console.log(this.VehicleCategoryList);
         this.advanceTableForm.patchValue({vehicleCategoryID:this.VehicleCategoryList.vehicleCategoryID}); 
         this.advanceTableForm.patchValue({vehicleCategory:this.VehicleCategoryList.vehicleCategory}); 
 
@@ -560,7 +556,6 @@ copydetails:boolean = false;
 //   this._generalService.GetRegistrationNumber().subscribe(
 //     data => {
 //       this.RegistrationNumberList = data;
-//       console.log(this.RegistrationNumberList)
 //       // this.advanceTableForm.controls['registrationNumber'].setValidators([Validators.required,
 //       //   this.RegistrationNumberValidator(this.RegistrationNumberList)]);
 //       // this.advanceTableForm.controls['registrationNumber'].updateValueAndValidity();
@@ -862,7 +857,6 @@ copydetails:boolean = false;
     .subscribe(
     response => 
     {
-      //console.log(response)
       this.dialogRef.close({response});
       this.showNotification(
           'snackbar-success',

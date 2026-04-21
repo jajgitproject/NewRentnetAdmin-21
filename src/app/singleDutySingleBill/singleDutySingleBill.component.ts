@@ -67,7 +67,6 @@ export class SingleDutySingleBillComponent implements OnInit {
      data =>   
      {
        this.dataSource = data;
-      console.log(this.dataSource);
      },
      (error: HttpErrorResponse) => { this.dataSource = null;}
    );

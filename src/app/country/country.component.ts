@@ -244,7 +244,6 @@ export class CountryComponent implements OnInit {
       //   var lat = value.split(' ')[2];
       //   var long = value.split(' ')[1];
       //   this.splittedDataShow=lat+long;
-      //   console.log(this.splittedDataShow)
       // }
       },
       (error: HttpErrorResponse) => { this.dataSource = null;}
@@ -269,7 +268,6 @@ export class CountryComponent implements OnInit {
   
   NextCall()
   {
-    //console.log(this.dataSource.length>0)
     if (this.dataSource?.length>0) 
     {
      

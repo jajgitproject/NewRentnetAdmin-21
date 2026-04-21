@@ -72,8 +72,6 @@ export class DutySACComponent implements OnInit {
   //      this.route.queryParams.subscribe(paramsData =>{
   //     const encryptedAllotmentID = paramsData.allotmentID;
   //     this.allotmentID = this._generalService.decrypt(decodeURIComponent(encryptedAllotmentID)); 
-  //       console.log(this.AllotmentID);
-  //       console.log(this.allotmentID);           
   //   });       
   //   this.loadCustomerInformation();
   //   this.loadDataForclosing();
@@ -168,7 +166,6 @@ export class DutySACComponent implements OnInit {
       (
         data => {
           this.advanceTableSAC = data;
-          //console.log(data);
         },
         (error: HttpErrorResponse) => { this.advanceTableSAC = null; }
       );
@@ -322,7 +319,6 @@ export class DutySACComponent implements OnInit {
   }
 
   openDutySAC() {
-    // console.log('openDutySAC called');
     if (!this.advanceTableSAC) {
       const dialogRef = this.dialog.open(FormDialogComponent,
         {
@@ -333,7 +329,6 @@ export class DutySACComponent implements OnInit {
             record: this.advanceTableSAC,
           }
         });
-        // console.log('Dialog opened with data:', this.DutySlipID, this.advanceTableSAC);
 
       dialogRef.afterClosed().subscribe((res: any) => {
         this.loadData();

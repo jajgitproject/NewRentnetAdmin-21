@@ -66,17 +66,12 @@ export class FormDialogCRAComponent
         const normalizedStatus = (this.status || '').toString().trim().toLowerCase();
         this.buttonDisabled = normalizedStatus !== 'changes allow';
         
-        console.log('CancelReservationAndAllotment dialog - raw data.status:', data?.status);
-        console.log('CancelReservationAndAllotment dialog - final status:', this.status);
-        console.log('CancelReservationAndAllotment dialog - buttonDisabled:', this.buttonDisabled);
         
         this.advanceTableForm = this.createContactForm();
         this.AllotmentID=data.allotmentID;
         this.AllotmentStatus=data.allotmentStatus;
         this.ReservationID=data.reservationID;
          this.AllotmentType=data.allotmentType;
-        console.log('AllotmentID:', this.AllotmentID);
-        console.log('ReservationID:', data);
   }
   formControl = new FormControl('', 
   [

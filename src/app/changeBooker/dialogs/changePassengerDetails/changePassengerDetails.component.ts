@@ -44,7 +44,6 @@ export class ChangeBookerDetailsComponent
     data => 
     {
       this.dataSourceForPassenger = data;
-      console.log(this.dataSourceForPassenger)
     },
     (error: HttpErrorResponse) => { this.dataSourceForPassenger = null; }
     );

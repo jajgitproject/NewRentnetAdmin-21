@@ -11,7 +11,7 @@ import { StateDropDown } from '../../stateDropDown.model';
 import { CurrencyDropDown } from 'src/app/general/currencyDropDown.model';
 import moment from 'moment';
 import { GeoCountryDropDown } from 'src/app/general/geoCountryDropDown.model';
-import { Address } from 'ngx-google-places-autocomplete/objects/address';
+import { Address } from '@compat/google-places-shim-objects/address';
 import { Observable } from 'rxjs';
 import { map, startWith } from 'rxjs/operators';
 import { AbstractControl, ValidationErrors, ValidatorFn } from '@angular/forms';
@@ -59,7 +59,6 @@ export class FormDialogComponent
           //this.dialogTitle ='Edit State';       
           this.dialogTitle ='State';
           this.advanceTable = data.advanceTable;
-          //console.log(this.advanceTable);
           this.ImagePath=this.advanceTable.bannerImage;
           this.ImagePath1=this.advanceTable.icon;
           var value = this.advanceTable.geoLocation.replace(
@@ -92,12 +91,7 @@ export class FormDialogComponent
     // componentRestrictions: { country: 'IN' }
   }  
   handleAddressChange(address: Address) {
-    // console.log(address.formatted_address)
-    // console.log(address.geometry.location.lat())
-    // console.log(address.geometry.location.lng())
     this.geoStringAddress=address.formatted_address;
-    console.log(address)
-    console.log(address.place_id)
     this.advanceTableForm.patchValue({latitude:address.geometry.location.lat()});
     this.advanceTableForm.patchValue({longitude:address.geometry.location.lng()});
     this.advanceTableForm.patchValue({googlePlacesID:address.place_id});
@@ -176,14 +170,12 @@ export class FormDialogComponent
   } 
 
   onCountrySelected(selectedCountryName: string) {
-    console.log('Selected Country:', selectedCountryName); // Debugging line
     const selectedCountry = this.GeoPointList.find(
       country => country.geoPointName === selectedCountryName
     );
   
     if (selectedCountry) {
       this.geoPointParentID = selectedCountry.geoPointID; // Directly assigning the ID
-      console.log('Selected Country GeoPointID:', this.geoPointParentID); // Debugging line
     }
 }
   
@@ -255,7 +247,6 @@ export class FormDialogComponent
       
        this.advanceTableForm.value.longitude
    });
-   //console.log( this.advanceTableForm.getRawValue());
    this.advanceTableForm.patchValue({geoSearchString:this.geoStringAddress});
     this.advanceTableService.add(this.advanceTableForm.getRawValue())  
     .subscribe(
@@ -362,13 +353,11 @@ export class FormDialogComponent
 
   // public fileChanged(event?: UIEvent): void {
   //   const files: FileList = this.fileUploadEl.nativeElement.files;
-  //   console.log(`files: `, files);
 
   //   const file = files[0];
   //   const reader = new FileReader();
   //   const loaded = (el) => {
   //     const contents = el.target.result;
-  //     console.log('onloaded', contents);
   //     this.contents = contents;
   //   }
   //   reader.onload = loaded;

@@ -392,7 +392,7 @@
             <mat-label>Reporting Time</mat-label>
             <input required matInput [owlDateTimeTrigger]="time4" [owlDateTime]="time4" formControlName="reportingTime"
               (input)="onreportingTimeInput($event)" />
-            <mat-icon matSuffix [owlDateTimeTrigger]="time4" class="date-icon">schedule</mat-icon>
+            <button mat-icon-button matSuffix type="button" [owlDateTimeTrigger]="time4" class="date-icon" aria-label="Open time picker"><mat-icon>schedule</mat-icon></button>
             <owl-date-time [pickerType]="'timer'" #time4></owl-date-time>
 
             <mat-error *ngIf="
@@ -476,7 +476,7 @@
                 <mat-label>Incidence Time</mat-label>
                 <input required matInput [owlDateTimeTrigger]="time2" [owlDateTime]="time2"
                   formControlName="incidenceTime" (input)="onEndTimeInput($event)" />
-                <mat-icon matSuffix [owlDateTimeTrigger]="time2" class="date-icon">schedule</mat-icon>
+                <button mat-icon-button matSuffix type="button" [owlDateTimeTrigger]="time2" class="date-icon" aria-label="Open time picker"><mat-icon>schedule</mat-icon></button>
                 <owl-date-time [pickerType]="'timer'" #time2></owl-date-time>
 
                 <mat-error *ngIf="
@@ -625,7 +625,7 @@
           <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
             <mat-label>Opened Time</mat-label>
             <input matInput [owlDateTimeTrigger]="time1" [owlDateTime]="time1" formControlName="openTime" />
-            <mat-icon matSuffix [owlDateTimeTrigger]="time1" class="date-icon">schedule</mat-icon>
+            <button mat-icon-button matSuffix type="button" [owlDateTimeTrigger]="time1" class="date-icon" aria-label="Open time picker"><mat-icon>schedule</mat-icon></button>
             <owl-date-time [pickerType]="'timer'" #time1></owl-date-time>
           </mat-form-field>
         </div> -->

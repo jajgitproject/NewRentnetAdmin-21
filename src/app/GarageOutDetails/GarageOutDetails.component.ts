@@ -38,10 +38,8 @@ export class GarageOutDetailsComponent {
     // Set the defaults
     this.dialogTitle = 'Garage Out Details';
     // this.GarageOutDetails = this.data;
-    console.log(this.data);
     this.qcDetails = this.data?.dataSource;
     // this.qcDetails = this.GarageOutDetails?.dataSource
-    console.log(this.qcDetails)
   }
 
   onNoClick(): void {

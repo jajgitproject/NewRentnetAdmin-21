@@ -35,7 +35,6 @@ export class CardService
     {
       SearchActivationStatus=null;
     }
-    //console.log(this.API_URL + "/" +SearchCard + '/' + SearchActivationStatus +'/' + PageNumber + '/Card/Ascending')
     return this.httpClient.get(this.API_URL + "/" +SearchCard + '/' + SearchPaymentNetwork +'/'+ SearchCardType +'/' + SearchActivationStatus +'/' + PageNumber + '/Card/Ascending');
     
   }
@@ -58,7 +57,6 @@ export class CardService
     {
       SearchActivationStatus=null;
     }
-    //console.log(this.API_URL + "/" +SearchCard + '/'+ SearchPaymentNetwork +'/'+ SearchCardType +'/' + SearchActivationStatus +'/' + PageNumber +  '/'+coloumName+'/'+sortType)
     return this.httpClient.get(this.API_URL + "/" +SearchCard + '/'+ SearchPaymentNetwork +'/'+ SearchCardType +'/' + SearchActivationStatus +'/' + PageNumber +  '/'+coloumName+'/'+sortType);
     
   }
@@ -66,7 +64,6 @@ export class CardService
   {
     advanceTable.cardID=-1;
     advanceTable.userID=this.generalService.getUserID();
-    console.log( advanceTable.userID);
     advanceTable.updatedBy=this.generalService.getUserID();
     advanceTable.updateDateTime= this.generalService.getTodaysDate();
     return this.httpClient.post<any>(this.API_URL , advanceTable);

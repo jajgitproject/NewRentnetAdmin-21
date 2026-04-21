@@ -104,7 +104,6 @@ export class CustomerPersonTempVIPComponent implements OnInit {
     }
   
     // Log the decrypted values
-    console.log(this.customerPersonID, this.customerPersonName);
   });
     this.initCustomerType();
     this.initCustomerfor();

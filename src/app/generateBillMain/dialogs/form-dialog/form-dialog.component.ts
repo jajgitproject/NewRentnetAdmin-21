@@ -98,7 +98,6 @@ export class FormDialogComponent
         {
           this.dialogTitle ='General Bill';       
           this.advanceTable = data.advanceTable;
-          console.log(this.advanceTable);
         } else 
         {
           this.dialogTitle = 'General Bill';
@@ -316,11 +315,9 @@ export class FormDialogComponent
 
   // Method to fetch customer address details from API
   fetchCustomerAddressDetails(customerID: any) {
-    console.log('Fetching customer address details for ID:', customerID);
     
     this.advanceTableService.getCustomerAddressFromGeneral(customerID).subscribe({
       next: (data: any) => {
-        console.log('Customer address details received:', data);
         
         if (data && data.length > 0) {
           this.populateCustomerAddressData(data[0]);
@@ -328,13 +325,11 @@ export class FormDialogComponent
           // If data is not an array but an object
           this.populateCustomerAddressData(data);
         } else {
-          console.log('No customer address data found, trying alternative API');
           this.tryAlternativeCustomerAPI(customerID);
         }
       },
       error: (error) => {
         console.error('Customer address API error:', error);
-        console.log('Trying alternative customer API');
         this.tryAlternativeCustomerAPI(customerID);
       }
     });
@@ -342,7 +337,6 @@ export class FormDialogComponent
 
   // Method to populate form with customer address data
   populateCustomerAddressData(customerDetails: any) {
-    console.log('Populating form with customer address details:', customerDetails);
     
     // Auto-populate the form fields from API response
     this.advanceTableForm.patchValue({
@@ -379,29 +373,24 @@ export class FormDialogComponent
     }
     
     this.clearAddressValidationErrors();
-    console.log('Form successfully updated with customer address details');
   }
 
   // Try alternative customer API as fallback
   tryAlternativeCustomerAPI(customerID: any) {
-    console.log('Trying general customer API for ID:', customerID);
     
     this._generalService.GetCustomerFieldsBasedOnCustomerID(customerID).subscribe({
       next: (data: any) => {
-        console.log('General customer API response:', data);
         
         if (data && data.length > 0) {
           this.populateCustomerAddressData(data[0]);
         } else if (data && !Array.isArray(data)) {
           this.populateCustomerAddressData(data);
         } else {
-          console.log('No customer data found, setting default test data');
           this.setDefaultTestData(customerID);
         }
       },
       error: (error) => {
         console.error('General customer API error:', error);
-        console.log('Setting default test data');
         this.setDefaultTestData(customerID);
       }
     });
@@ -409,7 +398,6 @@ export class FormDialogComponent
 
   // Set default test data for demonstration
   setDefaultTestData(customerID: any) {
-    console.log('Setting default test data for customer ID:', customerID);
     
     this.advanceTableForm.patchValue({
       state: 'Delhi',
@@ -419,7 +407,6 @@ export class FormDialogComponent
     });
     
     this.clearAddressValidationErrors();
-    console.log('Default test data set successfully');
   }
 
   // Method to clear validation errors for address fields
@@ -445,7 +432,6 @@ export class FormDialogComponent
 
   // Method to clear all address fields when customer is removed
   clearAllAddressFields() {
-    console.log('Customer removed, clearing all address fields');
     
     // Clear the form fields
     this.advanceTableForm.patchValue({
@@ -469,7 +455,6 @@ export class FormDialogComponent
     // Clear validation errors
     this.clearAddressValidationErrors();
     
-    console.log('All address fields cleared successfully');
   }
 
   customerValidator(CustomerList: any[]): ValidatorFn {
@@ -780,7 +765,6 @@ getcsGSTPercentageID(csgstPercentageID:any)
 
   submit() 
   {
-    //console.log(this.advanceTableForm.value);
   }
   onNoClick(): void 
   {

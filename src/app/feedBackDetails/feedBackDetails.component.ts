@@ -37,7 +37,6 @@ export class FeedBackDetailsComponent {
   this.FeedBackDetailsInfo = new ControlPanelDetails({});
     this.FeedBackDetailsInfo = this.data.advanceTable;
     this.ReservationID = this.FeedBackDetailsInfo.reservationID;
-    console.log(this.FeedBackDetailsInfo  )
   }
 
   ngOnInit() {
@@ -57,7 +56,6 @@ export class FeedBackDetailsComponent {
           {
           
             this.FeedBackDetails = data;
-            console.log(this.FeedBackDetails)
           },
   
           (error: HttpErrorResponse) => { this.FeedBackDetails=null }

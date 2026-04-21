@@ -55,7 +55,6 @@ export class ChangeVendorFormDialogComponent
       // Set the defaults
       this.dialogTitle = 'Change Vendor';
       this.ReservationID = data?.advanceTable;
-      console.log(this.ReservationID);
       this.advanceTableForm = this.createContactForm();
     }
 

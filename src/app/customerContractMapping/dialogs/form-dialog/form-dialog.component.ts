@@ -99,7 +99,6 @@ export class FormDialogComponentHolder
           this.advanceTable.customerName= this.customerName;
          // this.dialogCustomerContractData.customerContractName =this.customerContractName
         }
-        //console.log(this.dialogCustomerContractData.customerContractName);
         this.advanceTableForm = this.createContactForm();          
   }
   public ngOnInit(): void
@@ -330,7 +329,6 @@ ApprovedByValidator(EmployeeList: any[]): ValidatorFn {
     });
     dialogRef.afterClosed().subscribe(
       data => {
-       // console.log(data);
         this.dialogCustomerContractData = data;
         this.advanceTableForm.patchValue({customerContractName: this.dialogCustomerContractData.customerContractName});
         this.advanceTableForm.patchValue({customerContractID: this.dialogCustomerContractData.customerContractID});

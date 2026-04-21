@@ -131,17 +131,13 @@ import { OrganizationalEntityDropDown } from '../organizationalEntityMessage/org
 import { SpecialInstructionDialogComponent } from '../specialInstruction/dialogs/special-instruction-dialog/special-instruction-dialog.component';
 import { ControlPanelDialogeService } from '../controlPanelDialoge/controlPanelDialoge.service';
 import { InternalNoteDialogComponent } from '../internalNoteDetails/dialogs/internal-note-dialog/internal-note-dialog.component';
-import { MAT_FORM_FIELD_DEFAULT_OPTIONS } from '@angular/material/form-field';
 
 @Component({
   standalone: false,
   selector: 'app-controlPanelDesign',
   templateUrl: './controlPanelDesign.component.html',
   styleUrls: ['./controlPanelDesign.component.scss'],
-  encapsulation:ViewEncapsulation.None,
-  providers: [
-    { provide: MAT_FORM_FIELD_DEFAULT_OPTIONS, useValue: { floatLabel: 'always' } }
-  ]
+  encapsulation:ViewEncapsulation.None
 })
 export class ControlPanelDesignComponent implements OnInit {
   public cpInfo: ControlPanelData;
@@ -318,7 +314,6 @@ export class ControlPanelDesignComponent implements OnInit {
 
   onChangedPage(pageData: PageEvent) {
     debugger;
-    console.log(this.showDataPage)
     if(this.showDataPage === true)
     {
     const toDate = this.filterForm.value.toDate;
@@ -473,7 +468,6 @@ export class ControlPanelDesignComponent implements OnInit {
   }
 
   password() {
-    // console.log(item);
     const dialogRef =  this.dialog.open(PasswrodFormDialogComponent, {
       width: '500px',
       disableClose: true, // disable background click
@@ -717,7 +711,6 @@ export class ControlPanelDesignComponent implements OnInit {
           {
             this.reservationHeaderInfo = data.reservationHeaderDetails;
             this.totalData = data.totalRecords;
-            console.log(this.reservationHeaderInfo)
 
             if (rowIndex !== undefined)
             {
@@ -759,7 +752,6 @@ export class ControlPanelDesignComponent implements OnInit {
         (data: ControlPanelData) => 
         {
             this.reservationInfo[index] = data.reservationDetails;
-            console.log(this.reservationInfo[index]);
         },
         (error: HttpErrorResponse) => {
           this.reservationInfo[index] = null;
@@ -871,7 +863,6 @@ export class ControlPanelDesignComponent implements OnInit {
     this._generalService.GetCustomersForCPSearch(this.customerGroupID).subscribe(
       (data : CustomerCustomerGroupDropDown[]) => {
         this.CustomerList = data;
-        console.log(this.CustomerList)
         this.filteredCustomerOptions =
           this.filterForm.controls.customer.valueChanges.pipe(
             startWith(''),
@@ -1732,8 +1723,6 @@ export class ControlPanelDesignComponent implements OnInit {
   }
 
   OpenBookingScreen(item) {
-    console.log(item)
-    console.log('Primary Passenger ID:', item.primaryPassengerID); // This logs the value
     const encryptedCustomerID = encodeURIComponent(this._generalService.encrypt(item.customerID.toString()));
     const encryptedCustomerName = encodeURIComponent(this._generalService.encrypt(item.customerName));
     const encryptedReservationGroupID = encodeURIComponent(this._generalService.encrypt(item.reservationGroupID.toString()));
@@ -1788,7 +1777,6 @@ export class ControlPanelDesignComponent implements OnInit {
     });
     dialogRef.afterClosed().subscribe(res => {
       if(res){
-        console.log(res);
         item.reportingToGuestDate = res?.reportingToGuestDate; // Update with the received data
         item.reportingToGuestTime = res?.reportingToGuestTime; // Update with the received data
         
@@ -1816,7 +1804,6 @@ reachedByExecutiveAPP(item:any){
   });
   dialogRef.afterClosed().subscribe(res => {
     if(res){
-      console.log(res);
       item.reportingToGuestDate = res?.reportingToGuestDate; // Update with the received data
       item.reportingToGuestTime = res?.reportingToGuestTime; // Update with the received data
       // item.reportingToGuestEntryMethod ="Manual";
@@ -1842,7 +1829,6 @@ reachedByExecutiveGPS(item:any){
   });
   dialogRef.afterClosed().subscribe(res => {
     if(res){
-      console.log(res);
       item.reportingToGuestDate = res?.reportingToGuestDate; // Update with the received data
       item.reportingToGuestTime = res?.reportingToGuestTime; // Update with the received data
       // item.reportingToGuestEntryMethod ="Manual";
@@ -1856,7 +1842,6 @@ reachedByExecutiveGPS(item:any){
     // const filtered = this.reservationInfo.filter(
     //   (value) => value.reservationID === reservationID
     // )[0];
-    console.log(item)
     this.dialog.open(BookerInfoComponent, {
       width: '500px',
       data: {
@@ -1941,7 +1926,6 @@ reachedByExecutiveGPS(item:any){
           data: this.dialogRequestObject
         });
         dialogRef.afterClosed().subscribe((result: any) => {
-          console.log(result);
           if(result){
             item.activationStatus ="Active";
             this.loadData(item.reservationID,i);  
@@ -2170,7 +2154,6 @@ reachedByExecutiveGPS(item:any){
   }
 
   garageOutDetails(item: any) {
-    console.log(item)
     this.garageOutDetailsloadData(item)
   }
 
@@ -2180,7 +2163,6 @@ reachedByExecutiveGPS(item:any){
       (
         data => {
           this.dataSource = data;
-          console.log(this.dataSource)
           this.dialog.open(GarageOutDetailsComponent, {
             width: '500px',
             data: {
@@ -2201,7 +2183,6 @@ reachedByExecutiveGPS(item:any){
       (
         data => {
           this.dataSource = data;
-          console.log(this.dataSource)
           this.dialog.open(DutySlipQualityCheckDetailsComponent, {
             width: '500px',
             data: {
@@ -2224,7 +2205,6 @@ reachedByExecutiveGPS(item:any){
     //   }
     
     // });
-    // console.log(item)
     this.verifyImageloadData(item)
   }
 
@@ -2234,7 +2214,6 @@ reachedByExecutiveGPS(item:any){
       (
         data => {
           this.dataSource = data;
-          console.log(this.dataSource)
           this.dialog.open(DutySlipQualityCheckedByExecutiveDetailsComponent, {
             width: '500px',
             data: {
@@ -2250,7 +2229,6 @@ reachedByExecutiveGPS(item:any){
   }
 
   reachedDetails(item: any) {
-    console.log(item)
     this.reachedDetailsloadData(item)
   }
 
@@ -2260,7 +2238,6 @@ reachedByExecutiveGPS(item:any){
       (
         data => {
           this.dataSource = data;
-          console.log(this.dataSource)
           this.dialog.open(ReachedByExecutiveDetailsComponent, {
             width: '500px',
             data: {
@@ -2330,7 +2307,6 @@ reachedByExecutiveGPS(item:any){
     // const filtered = this.reservationInfo.filter(
     //   (value) => value.reservationID === item.reservationID
     // )[0].stopsDetails;
-    // console.log(filtered)
     this.dialog.open(StopOnMapInfoComponent, {
       width: '750px',
       data: {
@@ -2364,12 +2340,10 @@ reachedByExecutiveGPS(item:any){
           }
           
       });
-      console.log(item.customerPersonName);
       const dialogInstance = dialogRef.componentInstance;
      
       // Subscribe to the messageSubject to receive messages from the dialog
       dialogInstance.messageSubject.subscribe((data: any) => {
-        console.log( data);
         item.feedbackRemark = data.feedbackRemark;
         item.activationStatus = "Active";
         // Handle the received message from the dialog
@@ -2389,10 +2363,6 @@ reachedByExecutiveGPS(item:any){
   // }
 
 DriverAllotment(reservationID: number, reservationGroupID: number, pickupDate: any, pickupAddress: any) {
-  console.log('reservationID:', reservationID);
-  console.log('reservationGroupID:', reservationGroupID); // <- Confirm this logs correctly
-  console.log('pickupDate:', pickupDate);
-  console.log('pickupAddress:', pickupAddress);
 
   if (!reservationGroupID) {
     console.warn('⚠️ reservationGroupID is missing!');
@@ -2404,7 +2374,6 @@ DriverAllotment(reservationID: number, reservationGroupID: number, pickupDate: a
   const encryptedPickupAddress = encodeURIComponent(this._generalService.encrypt(pickupAddress));
   const encryptedStatus = this.status ? encodeURIComponent(this._generalService.encrypt(this.status)) : undefined;
 
-  console.log('Encrypted reservationGroupID:', encryptedReservationGroupID);
 
   const url = this.route.serializeUrl(this.route.createUrlTree(
     ['/CarAndDriverAllotment'],
@@ -2419,7 +2388,6 @@ DriverAllotment(reservationID: number, reservationGroupID: number, pickupDate: a
     }
   ));
 
-  console.log('Final URL:', this._generalService.FormURL + url);
 
   window.open(this._generalService.FormURL + url, '_blank');
 }
@@ -2481,7 +2449,6 @@ DriverAllotment(reservationID: number, reservationGroupID: number, pickupDate: a
 
       dialogRef.afterClosed().subscribe(res => {
         if(res){
-          console.log(res)
           item.pickDate =res?.pickUpDate;
           item.pickTime =res?.pickUpTime;
           // item.pickupEntryMethod ="Manual";
@@ -2511,7 +2478,6 @@ DriverAllotment(reservationID: number, reservationGroupID: number, pickupDate: a
 
       dialogRef.afterClosed().subscribe(res => {
         if(res){
-          console.log(res)
           item.pickDate =res?.pickUpDate;
           item.pickTime =res?.pickUpTime;
           // item.pickupEntryMethod ="Manual";
@@ -2540,7 +2506,6 @@ DriverAllotment(reservationID: number, reservationGroupID: number, pickupDate: a
 
       dialogRef.afterClosed().subscribe(res => {
         if(res){
-          console.log(res)
           item.pickDate =res?.pickUpDate;
           item.pickTime =res?.pickUpTime;
           // item.pickupEntryMethod ="Manual";
@@ -2570,7 +2535,6 @@ DriverAllotment(reservationID: number, reservationGroupID: number, pickupDate: a
      });
      dialogRef.afterClosed().subscribe(res => {
         if(res){
-          console.log(res);
           item.garageOutDate=res?.dropOffDate;
           item.garageOutTime=res?.dropOffTime;
           // item.dropOffEntryMethod ="Manual";
@@ -2599,7 +2563,6 @@ openDropOffByExectiveAPP(item: any)
    });
    dialogRef.afterClosed().subscribe(res => {
       if(res){
-        console.log(res);
         item.garageOutDate=res?.dropOffDate;
         item.garageOutTime=res?.dropOffTime;
         // item.dropOffEntryMethod ="Manual";
@@ -2628,7 +2591,6 @@ openDropOffByExectiveGPS(item: any)
    });
    dialogRef.afterClosed().subscribe(res => {
       if(res){
-        console.log(res);
         item.garageOutDate=res?.dropOffDate;
         item.garageOutTime=res?.dropOffTime;
         // item.dropOffEntryMethod ="Manual";
@@ -2798,7 +2760,6 @@ openDropOffByExectiveGPS(item: any)
      });
      dialogRef.afterClosed().subscribe(res => {
       if(res){
-        console.log(res)
         item.locationInDate =res?.locationInDate;
         item.locationInTime =res?.locationInTime;
         // item.locationInEntryMethod ="Manual";
@@ -2824,7 +2785,6 @@ openDropOffByExectiveGPS(item: any)
      });
      dialogRef.afterClosed().subscribe(res => {
       if(res){
-        console.log(res)
         item.locationInDate =res?.locationInDate;
         item.locationInTime =res?.locationInTime;
         // item.locationInEntryMethod ="Manual";
@@ -2849,7 +2809,6 @@ openDropOffByExectiveGPS(item: any)
      });
      dialogRef.afterClosed().subscribe(res => {
       if(res){
-        console.log(res)
         item.locationInDate =res?.locationInDate;
         item.locationInTime =res?.locationInTime;
         // item.locationInEntryMethod ="Manual";
@@ -2914,7 +2873,6 @@ openDropOffByExectiveGPS(item: any)
   // }
 
   driverRemark(item: any) {
-    console.log(item);
     let dialogRef = this.dialog.open(FormDialogdriverRemarkComponent, {
       data: {
         action: 'edit',
@@ -2925,7 +2883,6 @@ openDropOffByExectiveGPS(item: any)
     });
   
     dialogRef.afterClosed().subscribe((result: any) => {
-      console.log(result);
       if (result !== undefined && result !== null) {
         item.driverRemark = result.driverRemark;
         item.activationStatus = "Active";
@@ -2971,7 +2928,6 @@ openDropOffByExectiveGPS(item: any)
   
         dialogRef.afterClosed().subscribe(
           (result: any) => {
-            console.log(result);
             if (result !== undefined && result !== null) {
               item.activationStatus ="Active";
             }
@@ -3000,7 +2956,6 @@ openDropOffByExectiveGPS(item: any)
     });
   
     dialogRef.afterClosed().subscribe((result: any) => {
-      console.log(result);
       if (result !== undefined && result !== null) {
         item.nextDayInstruction = result.nextDayInstruction;
         item.activationStatus = "Active";
@@ -3010,7 +2965,6 @@ openDropOffByExectiveGPS(item: any)
   }
 
   nextDayInstructionDetails(item: any) {
-    console.log(item)
   this.nextDayInstructionDetailsloadData(item)
 }
 
@@ -3126,7 +3080,6 @@ openDropOffByExectiveGPS(item: any)
             data: this.dialogRequestObject
           });
           dialogRef.afterClosed().subscribe((result: any) => {
-            console.log(result);
             if(result!==undefined || result!==null){
               item.dutySlipImage = result.dutySlipImage;
               //item.activationStatus ="Active";
@@ -3455,8 +3408,6 @@ getLifeCycleDisplay(status: any): { label: string; color: string } {
     } else {
       this.incidenceID = item.incidenceID;
     }
-    console.log(item);
-    console.log(this.incidenceID);
     let dialogRef = this.dialog.open(incidenceFormDialogComponent, {
       width: '60%',
       data: {
@@ -3477,9 +3428,7 @@ getLifeCycleDisplay(status: any): { label: string; color: string } {
     });
 
     dialogRef.afterClosed().subscribe(result => {
-      console.log(result);
       if(result) {
-        console.log('Dialog result:', result);
         this.incidenceID = result.incidenceID;
         this.emitEventToChild();
         // this.ngOnInit();
@@ -3517,7 +3466,6 @@ getLifeCycleDisplay(status: any): { label: string; color: string } {
   
     dialogRef.afterClosed().subscribe(result => {
       if (result) {
-        console.log('Dialog result:', result);
         // this.incidenceID = result.incidenceID;
       }
     });
@@ -3702,9 +3650,7 @@ navigateToInterstateTaxDetails(item)
   //--------- postPickUPCall Popup ----------
   postPickUPCall(item:any)
   {
-    console.log(item);
     if(item && item.dutySlipID === null || item.dutySlipID === undefined || item.dutySlipID === 0 || item.dutySlipID === '')  {
-      // console.log(item.dutySlipID);
       return;
     }
     const dialogRef = this.dialog.open(DutyPostFormDialogComponent, 
@@ -3722,7 +3668,6 @@ navigateToInterstateTaxDetails(item)
     });
     dialogRef.afterClosed().subscribe((res: any) => {
      if (res) {
-      console.log(res);
       item.dutyPostPickUPCall = {
         ...(item.dutyPostPickUPCall || {}), // fallback to empty object if null
         ...res
@@ -3733,7 +3678,6 @@ navigateToInterstateTaxDetails(item)
     })
   }
  postPickUPCallLoadDataDetails(item: any) {
-    console.log(item)
   this.postPickUPCallLoadData(item,true)
 }
 
@@ -3760,7 +3704,6 @@ public postPickUPCallLoadData(item: any, popUpOpen = true) {
         });
 
         dialogRef.afterClosed().subscribe((result: any) => {
-          console.log(result);
           if (result !== undefined && result !== null) {
             item.activationStatus = "Active";
           }

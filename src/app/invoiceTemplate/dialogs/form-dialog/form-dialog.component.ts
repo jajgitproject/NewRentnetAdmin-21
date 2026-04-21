@@ -40,12 +40,10 @@ export class FormDialogComponent
   {
         // Set the defaults
         this.action = data.action;
-        console.log(data);
         if (this.action === 'edit') 
         {
           this.dialogTitle ='Invoice Template';       
           this.advanceTable = data.advanceTable;
-          console.log(this.advanceTable);
           // this.ImagePath1=this.advanceTable.address;
          
           
@@ -78,7 +76,6 @@ export class FormDialogComponent
 
   submit() 
   {
-    //console.log(this.advanceTableForm.value);
   }
   onNoClick(): void 
   {

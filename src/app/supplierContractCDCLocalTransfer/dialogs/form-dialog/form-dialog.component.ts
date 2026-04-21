@@ -287,7 +287,6 @@ getpackageID(packageID: any)
   
   createContactForm(): FormGroup 
   {
-    console.log(this.advanceTable)
     return this.fb.group(
     {
       supplierContractCDCLocalTransferID: [this.advanceTable.supplierContractCDCLocalTransferID],

@@ -64,7 +64,6 @@ export class BillToOtherDetailsComponent implements OnInit {
   contextMenuPosition = { x: '0px', y: '0px' };
   billToOtherDetailsList = [];
   ngOnInit() {
-    console.log(this.reservationID);
     this.SubscribeUpdateService();
     this.getBillToOtherDetails();
     this.eventsSubscription = this.events.subscribe((res: boolean) => {
@@ -107,7 +106,6 @@ export class BillToOtherDetailsComponent implements OnInit {
         this.outputFromStopDetails.emit(true);
       }
     }, (error: HttpErrorResponse) => {
-      console.log(error);
     });
   }
   
@@ -118,13 +116,11 @@ export class BillToOtherDetailsComponent implements OnInit {
 
 //   public loadData() 
 //   {
-//     console.log(this.reservationID);
 //      this.billToOtherDetailsService.getBillingToOther(this.reservationID).subscribe
 //      (
 //        (data: BillToOtherDetails)=>   
 //        {
 //          this.advanceTable = data;
-//          console.log(this.advanceTable)
         
 //        },
 //        (error: HttpErrorResponse) => { this.advanceTable = null;}

@@ -85,8 +85,6 @@ DutySlipID: any;
 
   editAdditionalKms(i: any, item: any)
   {
-    // console.log(item);
-    // console.log(this.advanceTableAD[i]);
     const dialogRef = this.dialog.open(AdditionalDialogComponent, 
       {
         data: {
@@ -345,7 +343,6 @@ showAndScrollAdditionalKm() {
        {
         
          this.advanceTableAD = data; 
-         //console.log(data);       
        },
        (error: HttpErrorResponse) => { this.advanceTableAD = null;}
      );

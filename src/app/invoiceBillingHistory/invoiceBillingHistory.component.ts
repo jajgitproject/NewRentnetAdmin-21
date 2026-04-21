@@ -52,7 +52,6 @@ ngOnInit() {
          (data: InvoiceBillingHistory[])=>   
          {
            this.invoiceBillingHistory = data;
-          // console.log(this.invoiceBillingHistory)
           
          },
          (error: HttpErrorResponse) => { this.invoiceBillingHistory = null;}

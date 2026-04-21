@@ -40,7 +40,6 @@ export class DriverCarSupplierMISService {
     if (SearchActivationStatus === null) {
       SearchActivationStatus = null;
     }
-    console.log(this.API_URL1 + "/" + SearchdriverName + '/' + searchlocation + '/' + searchdateofjoiningfrom + '/' + searchSupplierType + '/' + SearchActivationStatus + '/' + PageNumber + '/driverID/Dscending')
     return this.httpClient.get(this.API_URL1 + "/" + SearchdriverName + '/' + searchlocation + '/' + searchdateofjoiningfrom + '/' + searchdateofjoiningto + '/' + searchSupplierType + '/' + SearchActivationStatus + '/' + PageNumber + '/driverID/Dscending');
   }
   getTableDataSort(SearchdriverName: string, searchlocation: string, searchdateofjoiningfrom: string, searchdateofjoiningto: string, searchSupplierType: string, SearchActivationStatus: boolean, PageNumber: number, coloumName: string, sortType: string): Observable<any> {
@@ -188,7 +187,6 @@ getTableDataSort1(
     if (SearchSupplierRegistrationDate === "") {
       SearchSupplierRegistrationDate = "null";
     }
-    console.log(this.API_URL + "/" + SearchName + "/" + SearchCity + "/" + SearchAddress + "/" + SearchPin + "/" + SearchPhone + "/" + SearchFax + '/' + SearchEmail + '/' + SearchSupplierStatus + '/' + SearchSupplierVerificationStatus + '/' + SearchSupplierRegistrationDate + '/' + PageNumber + '/supplierID/Dscending')
     return this.httpClient.get(this.API_URL + "/" + SearchName + "/" + SearchCity + "/" + SearchAddress + "/" + SearchPin + "/" + SearchPhone + "/" + SearchFax + '/' + SearchEmail + '/' + SearchSupplierStatus + '/' + SearchSupplierVerificationStatus + '/' + SearchSupplierRegistrationDate + '/' + PageNumber + '/supplierID/Ascending');
   }
   getTableDataSort3(SearchName: string,

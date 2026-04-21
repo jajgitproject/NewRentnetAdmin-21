@@ -72,13 +72,10 @@ export class TestComponent{
    });
  }
  onRegister() {
-   console.log('Form Value', this.register.value);
  }
  onsecondFormSubmit() {
-   console.log('Form Value', this.secondForm.value);
  }
  onThirdFormSubmit() {
-   console.log('Form Value', this.thirdForm.value);
  }
 }
 

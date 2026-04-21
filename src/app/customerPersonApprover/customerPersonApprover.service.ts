@@ -37,7 +37,6 @@ export class CustomerPersonApproverService
     {
       searchcustomerPersonApproverStatus=null;
     }
-    console.log(this.API_URL + "/" +searchCustomerName + '/'+CustomerPersonID + '/' + searchStartDate + '/' + searchEndDate + '/' + searchcustomerPersonApproverStatus +'/' + PageNumber + '/customerPersonApproverID/Ascending');
     return this.httpClient.get(this.API_URL + "/" +searchCustomerName + '/'+CustomerPersonID + '/' + searchStartDate + '/' + searchEndDate + '/' + searchcustomerPersonApproverStatus +'/' + PageNumber + '/customerPersonApproverID/Ascending');
   }
   getTableDataSort(searchCustomerName:string,CustomerPersonID:number, searchStartDate:string, searchEndDate:string, searchcustomerPersonApproverStatus:boolean, PageNumber: number,coloumName:string,sortType:string):  Observable<any> 
@@ -82,7 +81,6 @@ export class CustomerPersonApproverService
     return this.httpClient.delete(this.API_URL + '/'+ customerPersonApproverID + '/'+ userID);
   }
     getCustomerPersonForApproval(customerGroupID:number): Observable<CustomerPersonModels[]> {
-      console.log("customerGroupID in service: ", customerGroupID);
       return this.httpClient.get<CustomerPersonModels[]>(this.API_URL + "/getCustomerForApproval/"+customerGroupID);
   
     }

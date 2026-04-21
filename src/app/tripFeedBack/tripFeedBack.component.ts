@@ -78,7 +78,6 @@ export class TripFeedBackComponent implements OnInit {
     this.route.queryParams.subscribe(paramsData =>{
       this.uom_ID   = paramsData.uomid;
       this.service_ID   = paramsData.tripFeedBackID;
-      console.log(this.service_ID);
     });
     this.loadData();
     this.SubscribeUpdateService();
@@ -113,7 +112,6 @@ export class TripFeedBackComponent implements OnInit {
     });
   }
   editCall(row) {
-    console.log(row);
       //  alert(row.id);
     this.tripFeedBackID = row.tripFeedBackID;
     const dialogRef = this.dialog.open(FormDialogComponent, {
@@ -147,7 +145,6 @@ export class TripFeedBackComponent implements OnInit {
        data =>   
        {
          this.dataSource = data;
-         console.log(this.dataSource)
          this.dataSource.forEach((ele)=>{
            if(ele.activationStatus===true){
             this.activation="Active";
@@ -182,7 +179,6 @@ export class TripFeedBackComponent implements OnInit {
   
   NextCall()
   {
-    //console.log(this.dataSource.length>0)
     if (this.dataSource.length>0) 
     {
      
@@ -210,12 +206,10 @@ export class TripFeedBackComponent implements OnInit {
   }
 
   getseviceName(){
-    console.log('getseviceName')
     this._generalService.getSeviceName(this.service_ID).subscribe(
       data=>{
        this.additionalList=data;
        this.service = this.additionalList[0].additionalService;
-       console.log(this.service)
       }
     )
   }
@@ -339,7 +333,6 @@ export class TripFeedBackComponent implements OnInit {
       data =>   
       {
         this.dataSource = data;
-       console.log(this.dataSource);
       },
       (error: HttpErrorResponse) => { this.dataSource = null;}
     );

@@ -75,7 +75,6 @@ export class PrintBlankDutySlipComponent {
     {
       this.route.queryParams.subscribe(paramsData =>{
       this.DutySlipID = paramsData.dutySlipID;
-       console.log(paramsData)
     });
       this.loadData();
     }
@@ -94,7 +93,6 @@ export class PrintBlankDutySlipComponent {
       data =>   
       {
         this.dataSource = data;
-        console.log(this.dataSource);  
         this.getTime()
       },
       (error: HttpErrorResponse) => { this.dataSource = null});
@@ -139,7 +137,6 @@ export class PrintBlankDutySlipComponent {
        
          // Combine hours and minutes in desired format
          this.datetime = hours + "." + minutes;
-         console.log(this.totalDays)
      }
    
   

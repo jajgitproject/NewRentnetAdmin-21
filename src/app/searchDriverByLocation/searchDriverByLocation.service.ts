@@ -52,7 +52,6 @@ export class SearchDriverByLocationService
     {
       searchActivationStatus=null;
     }
-    console.log(this.API_URL + '/SearchDriverByLocation' + "/"+driverID+ "/" +searchDriverName + "/" +eTRAvailabilityDate+ '/'+ eTRAvailabilityTime + '/' + eTRAvailabilityGeoLocation  + '/' + searchActivationStatus +'/' + PageNumber + '/driverInventoryAssociationID/Ascending');
     return this.httpClient.get(this.API_URL + '/SearchDriverByLocation' + "/"+driverID+ "/" +searchDriverName + "/" +eTRAvailabilityDate+ '/'+ eTRAvailabilityTime + '/' + eTRAvailabilityGeoLocation  + '/' + searchActivationStatus +'/' + PageNumber + '/driverInventoryAssociationID/Ascending');
   }
 }

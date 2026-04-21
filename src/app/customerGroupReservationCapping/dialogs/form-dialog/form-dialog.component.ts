@@ -61,7 +61,6 @@ export class FormDialogComponent
     this.CustomerGroupID=data.CustomerGroupID;
     this.CustomerGroupName=data.CustomerGroupName;
     this.action = data.action;
-    console.log(data)
     if (this.action === 'edit') 
     {
       this.dialogTitle ='Customer Group Reservation Capping';       

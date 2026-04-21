@@ -65,8 +65,6 @@ export class ReservationClosingDetailsComponent implements OnInit {
  this.route.queryParams.subscribe(paramsData =>{
       const encryptedAllotmentID = paramsData.allotmentID;
       this.allotmentID = this._generalService.decrypt(decodeURIComponent(encryptedAllotmentID)); 
-        console.log(this.AllotmentID);
-        console.log(this.allotmentID);           
     });       
     this.loadData();
     this.SubscribeUpdateService();
@@ -96,9 +94,7 @@ export class ReservationClosingDetailsComponent implements OnInit {
   {
     this.reservationClosingDetailsService.getTableData(this.AllotmentID).subscribe((res: any) => {
         this.reservationCloseDetail = res[0];
-        console.log(this.reservationCloseDetail);
     }, (error: HttpErrorResponse) => {
-    console.log(error);
     });
  }
 

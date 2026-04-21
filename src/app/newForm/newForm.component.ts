@@ -536,7 +536,6 @@ openAdvanceDetails()
       this.loadData();
       this.emitEventToChild(); 
       // this.stopReservationloadData();
-      console.log(res);
     })
   }
 
@@ -555,7 +554,6 @@ openAdvanceDetails()
        this.cancelreservationDetailsloadData();
       // this.loadData();
       this.emitEventToChild(); 
-      console.log(res);
     })
   }
   
@@ -630,11 +628,9 @@ openAdvanceDetails()
   //       } else if(element.reservationStopType === 'Dropoff') {
   //         this.dropOffData.push(element);
           
-  //         console.log(this.dropOffData);
   //       }
   //     });
   //   }, (error: HttpErrorResponse) => {
-  //     console.log(error);
   //   });
   // }
 
@@ -645,7 +641,6 @@ openAdvanceDetails()
     
      (data :InternalNoteDetails)=>   
      {
-      console.log(data)
       if(data !== null)
       {
         this.showHideInternalNote = true;
@@ -1145,7 +1140,6 @@ showAndScrollAddDiscount() {
         
       this.status=data?.status?.status || data?.status || data;
       
-      console.log(this.status)
       
     }
     );

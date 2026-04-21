@@ -357,7 +357,6 @@ export class DutyRegisterComponent implements OnInit {
   //     data =>   
   //     {
   //       this.dataSource = data;
-  //       console.log(this.dataSource)         
   //     },
   //   (error: HttpErrorResponse) => { this.dataSource = null;}
   //   );
@@ -410,7 +409,6 @@ export class DutyRegisterComponent implements OnInit {
       data =>   
       {
         this.dataSource = data;
-        console.log(this.dataSource)         
       },
     (error: HttpErrorResponse) => { this.dataSource = null;}
     );
@@ -779,7 +777,6 @@ export class DutyRegisterComponent implements OnInit {
     data=>
     {
       this.DriverList=data;
-      console.log(this.DriverList)
       this.filteredDriverOptions = this.SearchDri.valueChanges.pipe(
       startWith(""),
       map(value => this._filterDriver(value || ''))

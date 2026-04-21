@@ -48,7 +48,6 @@ export class VerifiedDutyAmenitieDialogComponent
   public _generalService:GeneralService,
  public dutySlipQualityCheckService: DutySlipQualityCheckService)
   {
-    console.log(data);
         // Set the defaults
         this.action = data.action;
         if (this.action === 'edit') 
@@ -220,7 +219,6 @@ export class VerifiedDutyAmenitieDialogComponent
           data =>   
           {
               this.dataSource = data;
-              console.log(this.dataSource)
           },
           (error: HttpErrorResponse) => { this.dataSource = null;}
         );

@@ -51,8 +51,6 @@ export class FormDialogCIComponent
         this.invoiceID=data.invoiceID;
         this.invoiceNumberWithPrefix=data.invoiceNumberWithPrefix;
         this.ReservationID=data.reservationID;
-         console.log('data:', data);
-        // console.log('ReservationID:', this.ReservationID);
   }
   formControl = new FormControl('', 
   [

@@ -8,6 +8,7 @@ import { DomSanitizer, SafeUrl } from '@angular/platform-browser';
 import { TrackOnMapInfo } from './trackOnMapInfo.model';
 import { TrackOnMapInfoService } from './trackOnMapInfo.service';
 import { HttpErrorResponse } from '@angular/common/http';
+import { RuntimeConfigService } from '../core/service/runtime-config.service';
 
 @Component({
   standalone: false,
@@ -32,77 +33,17 @@ export class TrackOnMapInfoComponent {
     public data: any,
     public _generalService: GeneralService,
     public trackOnMapInfoService: TrackOnMapInfoService,
-    private sanitizer: DomSanitizer
+    private sanitizer: DomSanitizer,
+    private runtimeConfig: RuntimeConfigService
   ) {
     // Set the defaults
     this.dialogTitle = 'Track on Map';
-    console.log(this.data)
     this.dutySlipID = this.data.dutySlipID;
     this.getTrackOnMap();
     
     
   }
-//--------Show only Directions----------------
 
-//   generateMapUrl(): void {
-//   debugger;
-
-//   if (this.stops.length === null) {
-//     console.error('No stops available to generate map URL');
-//     return;
-//   }
-
-//   // If there's only one stop, show it as a point on the map
-//   if (this.stops.length === 1) {
-//     const singleStop = this.stops[0];
-//     const mapUrl = `https://www.google.com/maps/embed/v1/place?key=AIzaSyAFoLcbOuZfbGJGCdlazGXZbOCYr8dW76c&q=${singleStop.lat},${singleStop.lng}`;
-//     this.trustedUrl = this.sanitizer.bypassSecurityTrustResourceUrl(mapUrl);
-//     return;
-//   }
-
-//   // For two stops, create a route between the start and end points
-//   if (this.stops.length === 2) {
-//     const origin = this.stops[0];
-//     const destination = this.stops[1];
-//     const mapUrl = `https://www.google.com/maps/embed/v1/directions?key=AIzaSyAFoLcbOuZfbGJGCdlazGXZbOCYr8dW76c&origin=${origin.lat},${origin.lng}&destination=${destination.lat},${destination.lng}`;
-//     this.trustedUrl = this.sanitizer.bypassSecurityTrustResourceUrl(mapUrl);
-//     return;
-//   }
-
-//   // For three or more stops, include waypoints
-//   const origin = this.stops[0];
-//   const destination = this.stops[this.stops.length - 1];
-//   const waypoints = this.stops
-//     .slice(1, -1)
-//     .map((stop) => `${stop.lat},${stop.lng}`)
-//     .join('|');
-
-//   const mapUrl = `https://www.google.com/maps/embed/v1/directions?key=AIzaSyAFoLcbOuZfbGJGCdlazGXZbOCYr8dW76c&origin=${origin.lat},${origin.lng}&destination=${destination.lat},${destination.lng}&waypoints=${waypoints}`;
-//   this.trustedUrl = this.sanitizer.bypassSecurityTrustResourceUrl(mapUrl);
-// }
-
-//-----------------Show only Stops -----------------------
-
-// generateMapUrl(): void {
-//   debugger;
-//   if (!this.stops || this.stops.length === 0) {
-//     console.error('No stops available to generate map URL');
-//     return;
-//   }
-
-//   // Generate marker parameters for all stops
-//   const markers = this.stops
-//     .map((stop) => `markers=color:red%7C${stop.lat},${stop.lng}`)
-//     .join('&');
-
-//   // Create the Static Maps API URL
-//   const mapUrl = `https://maps.googleapis.com/maps/api/staticmap?key=AIzaSyAFoLcbOuZfbGJGCdlazGXZbOCYr8dW76c&size=800x400&${markers}`;
-
-//   this.trustedUrl = this.sanitizer.bypassSecurityTrustResourceUrl(mapUrl);
-// }
-
-
-//-----------Show stops with directions-------------
 generateMapUrl(): void {
   if (!this.stops || this.stops.length === null) {
     console.error('No stops available to generate map URL');
@@ -110,10 +51,12 @@ generateMapUrl(): void {
     return;
   }
 
+  const apiKey = encodeURIComponent(this.runtimeConfig.getGoogleMapsApiKey());
+
   // Handle single stop
   if (this.stops.length === 1) {
     const singleStop = this.stops[0];
-    const mapUrl = `https://www.google.com/maps/embed/v1/place?key=AIzaSyAFoLcbOuZfbGJGCdlazGXZbOCYr8dW76c&q=${singleStop.lat},${singleStop.lng}`;
+    const mapUrl = `https://www.google.com/maps/embed/v1/place?key=${apiKey}&q=${singleStop.lat},${singleStop.lng}`;
     this.trustedUrl = this.sanitizer.bypassSecurityTrustResourceUrl(mapUrl);
     return;
   }
@@ -126,8 +69,7 @@ generateMapUrl(): void {
     .map((stop) => `${stop.lat},${stop.lng}`)
     .join('|');
 
-  // Generate URL
-  const mapUrl = `https://www.google.com/maps/embed/v1/directions?key=AIzaSyAFoLcbOuZfbGJGCdlazGXZbOCYr8dW76c&origin=${origin.lat},${origin.lng}&destination=${destination.lat},${destination.lng}&waypoints=${waypoints}`;
+  const mapUrl = `https://www.google.com/maps/embed/v1/directions?key=${apiKey}&origin=${origin.lat},${origin.lng}&destination=${destination.lat},${destination.lng}&waypoints=${encodeURIComponent(waypoints)}`;
   this.trustedUrl = this.sanitizer.bypassSecurityTrustResourceUrl(mapUrl);
 }
 
@@ -140,7 +82,6 @@ generateMapUrl(): void {
     this.trackOnMapInfoService.getTrackOnMapInfo(this.dutySlipID).subscribe(
       data => {
         this.dataSource = data;
-        console.log(this.dataSource);
   
         if (this.dataSource && this.dataSource.length > 0) {
           // Clear existing stops array
@@ -162,7 +103,6 @@ generateMapUrl(): void {
             }
           });
   
-          console.log(this.stops);
           this.generateMapUrl();
         }
       },

@@ -64,7 +64,6 @@ export class InvoiceMultiDutiesComponent implements OnInit {
   ngOnInit() {
     this.route.queryParams.subscribe(paramsData =>{
       this.invoiceID   = paramsData.invoiceID;
-       console.log(this.invoiceID)
     });
     this.loadData();
    
@@ -78,7 +77,6 @@ export class InvoiceMultiDutiesComponent implements OnInit {
      data =>   
      {
        this.dataSource = data;
-      console.log(this.dataSource);
       this.getInvoiceloadData();
      },
      (error: HttpErrorResponse) => { this.dataSource = null;}
@@ -91,7 +89,6 @@ export class InvoiceMultiDutiesComponent implements OnInit {
      data =>   
      {
        this.dataSourceForInvoiceDuties = data;
-      console.log(this.dataSourceForInvoiceDuties);
         this.calculateTotals();
         
      },
@@ -110,7 +107,6 @@ calculateTotals() {
     //   (this.dataSource?.invoiceGSTModel?.igstAmount || 0) +
     //   (this.dataSource?.invoiceGSTModel?.sgstAmount || 0) +
     //   (this.dataSource?.invoiceGSTModel?.cgstAmount || 0);
-    //   console.log(this.dataSourceForCalculate.totalRecivableAfterAdvace)
 
     // 3 Convert to words
     this.dataSourceForCalculate.totalAmountAfterGSTInWords =

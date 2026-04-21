@@ -1,5 +1,5 @@
 // @ts-nocheck
-import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
+import { Component, ElementRef, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { AdvanceTableTest } from './advance-table-test.model';
 import { AdvanceTableTestService } from './advance-table-test.service';
 
@@ -10,7 +10,7 @@ import { MatSort } from '@angular/material/sort';
 
 import { DataSource } from '@angular/cdk/collections';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import { BehaviorSubject, fromEvent, merge, Observable } from 'rxjs';
+import { BehaviorSubject, fromEvent, merge, Observable, Subscription } from 'rxjs';
 import { map } from 'rxjs/operators';
 
 import { DateAdapter, MAT_DATE_LOCALE } from '@angular/material/core';
@@ -27,7 +27,8 @@ import { DeleteDialogTestComponent } from './dialogsTest/delete-test/delete-test
   styleUrls: ['./advance-table-test.component.sass'],
   providers: [{ provide: MAT_DATE_LOCALE, useValue: 'en-GB' }]
 })
-export class AdvanceTableTestComponent implements OnInit {
+export class AdvanceTableTestComponent implements OnInit, OnDestroy {
+  private keyupSub?: Subscription;
   displayedColumns = [
     'select',
     'country',
@@ -157,7 +158,6 @@ export class AdvanceTableTestComponent implements OnInit {
       const index: number = this.dataSource.renderedData.findIndex(
         (d) => d === item
       );
-      // console.log(this.dataSource.renderedData.findIndex((d) => d === item));
       this.exampleDatabase.dataChange.value.splice(index, 1);
       this.refreshTable();
       this.selection = new SelectionModel<AdvanceTableTest>(true, []);
@@ -176,12 +176,16 @@ export class AdvanceTableTestComponent implements OnInit {
       this.paginator,
       this.sort
     );
-    fromEvent(this.filter.nativeElement, 'keyup').subscribe(() => {
+    this.keyupSub?.unsubscribe();
+    this.keyupSub = fromEvent(this.filter.nativeElement, 'keyup').subscribe(() => {
       if (!this.dataSource) {
         return;
       }
       this.dataSource.filter = this.filter.nativeElement.value;
     });
+  }
+  ngOnDestroy() {
+    this.keyupSub?.unsubscribe();
   }
   showNotification(colorName, text, placementFrom, placementAlign) {
     this.snackBar.open(text, '', {

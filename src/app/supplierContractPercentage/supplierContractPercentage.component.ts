@@ -153,7 +153,6 @@ export class SupplierContractPercentageComponent implements OnInit {
           SupplierName:this.supplier_Name
       }
     });
-   // console.log(row);
 
   }
   public SearchData()
@@ -166,7 +165,6 @@ export class SupplierContractPercentageComponent implements OnInit {
   {
 
     this.supplierContractPercentageID = row.id;
-  //console.log(row)
     const dialogRef = this.dialog.open(DeleteDialogComponent, 
     {
       data: row
@@ -272,7 +270,6 @@ export class SupplierContractPercentageComponent implements OnInit {
         //message contains the data sent from service
         this.messageReceived = message.text;
         this.MessageArray=this.messageReceived.split(":");
-        //console.log(this.MessageArray);
         if(this.MessageArray.length==3)
         {
           if(this.MessageArray[0]=="SupplierContractPercentageCreate")

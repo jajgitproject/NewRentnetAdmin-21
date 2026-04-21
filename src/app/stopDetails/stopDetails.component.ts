@@ -72,7 +72,6 @@ export class StopDetailsComponent implements OnInit {
     this.loadData();
     this.SubscribeUpdateService();
     this.eventsSubscription = this.events.subscribe((res: boolean) => {
-      console.log(res);
       if(res) {
         this.loadData();
       }
@@ -147,7 +146,6 @@ export class StopDetailsComponent implements OnInit {
   {
     this.pickUpData = []; this.dropOffData = []; this.enRouteData = [];
     this.stopDetailsService.getReservationStopDetails(this.reservationID).subscribe((res: any) => {
-      console.log(res)
       res?.forEach(element => {
         if(element.reservationStopType === 'Pickup') {
           this.pickUpData.push(element);        
@@ -156,11 +154,9 @@ export class StopDetailsComponent implements OnInit {
         } else if(element.reservationStopType === 'Dropoff') {
           this.dropOffData.push(element);
           
-          console.log(this.dropOffData);
         }
       });
     }, (error: HttpErrorResponse) => {
-      console.log(error);
     });
   }
 

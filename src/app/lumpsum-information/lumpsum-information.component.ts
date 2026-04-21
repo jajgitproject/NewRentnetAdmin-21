@@ -25,7 +25,6 @@ export class LumpsuminformationComponent implements OnInit {
 
   // ngOnInit(): void {
   //   if (this.AllotmentID) {
-  //     console.log("AllotmentID passed to component:", this.AllotmentID);
   //     // Initialization logic can go here
   //     this.loadLumpsuminformation();
   //   }
@@ -35,8 +34,6 @@ export class LumpsuminformationComponent implements OnInit {
      this.route.queryParams.subscribe(paramsData =>{
       const encryptedReservationID = paramsData.reservationID;
       this.ReservationID = this._generalService.decrypt(decodeURIComponent(encryptedReservationID));
-        console.log(this.ReservationID);
-        console.log(this.allotmentID);           
     });       
     this.loadLumpsuminformation();
     // this.SubscribeUpdateService();
@@ -46,10 +43,8 @@ export class LumpsuminformationComponent implements OnInit {
   const reservationID = this.ReservationID;
   this.lumpsuminformationService.getLumpsuminformationClosingData(reservationID).subscribe(
     (data) => {
-      console.log('Data from API:', data); // ✅ DEBUG
       if (data && data.length > 0) {
         this.lumpsuminformation = data[0];
-        console.log('Setting lumpsuminformation:', this.lumpsuminformation); // ✅ DEBUG
       } else {
         console.warn('No data received from API');
         this.lumpsuminformation = null;

@@ -95,7 +95,6 @@ if (encryptedUOMID && encryptedServiceID) {
   this.service_ID = this._generalService.decrypt(decodeURIComponent(encryptedServiceID));
 }
 
-console.log(this.uom_ID, this.service_ID); // Log the decrypted values
 
     });
     this.loadData();

@@ -83,7 +83,6 @@ export class DutyTollParkingEntryComponent implements OnInit {
 
   openDutyTollParkingApproval(row)
   {
-    console.log(row);
     const dialogRef=this.dialog.open(FormDialogComponent,
       {
         data:

@@ -35,7 +35,6 @@ export class AddStopService
     {
       SearchActivationStatus="null";
     }
-     console.log(this.API_URL + "/" +ReservationID + '/'+AddStopID + '/' + StopType +'/' + SearchActivationStatus +'/' + PageNumber + '/AddStopID/Ascending');
     return this.httpClient.get(this.API_URL + "/" +ReservationID + '/'+AddStopID + '/' + StopType +'/' + SearchActivationStatus +'/' + PageNumber + '/AddStopID/Ascending');
   }
 
@@ -47,14 +46,12 @@ export class AddStopService
     advanceTable.addStopID=-1;
     advanceTable.updatedBy=this.generalService.getUserID();
     advanceTable.updateDateTime= this.generalService.getTodaysDate();
-    console.log(this.API_URL , advanceTable);
     return this.httpClient.post<any>(this.API_URL , advanceTable);
   }
   update(advanceTable: AddStop)
   {
     advanceTable.updatedBy=this.generalService.getUserID();
     advanceTable.updateDateTime= this.generalService.getTodaysDate();
-    console.log(this.API_URL , advanceTable);
     return this.httpClient.put<any>(this.API_URL , advanceTable);
   }
   delete(addStopID: number):  Observable<any> 

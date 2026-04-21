@@ -81,10 +81,8 @@ export class CDCLocalFixedDetailsComponent implements OnInit {
     this.customerContract_ID = this._generalService.decrypt(decodeURIComponent(encryptedCustomerContractID));
 
     // Log the decrypted value for verification
-    console.log("Decrypted CustomerContractID:", this.customerContract_ID);
   }
     });
-    console.log(this.customerContract_ID);
     this.loadData();
     this.SubscribeUpdateService();
   }
@@ -110,7 +108,6 @@ export class CDCLocalFixedDetailsComponent implements OnInit {
     });
   }
   editCall(row) {
-       console.log("Row data for edit:", row);
     this.cdcLocalFixedDetailsID= row.id;
     const dialogRef = this.dialog.open(FormDialogComponent, {
       data: {

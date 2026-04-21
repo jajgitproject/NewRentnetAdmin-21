@@ -228,14 +228,11 @@ export class FormDialogReservationStopDetailsComponent {
   fetchExistingPriorities() {
     this.stopDetailsService.getReservationStopDetails(this.reservationID).subscribe((res: any) => {
       this.existingPriorities = res.map((item: any) => item.reservationStopOrderPriority);
-      console.log(this.existingPriorities);
     });
   }
 
   onPriorityChange(event: any) { 
     const selectedPriority = event.value;
-    console.log(selectedPriority);
-    console.log(this.existingPriorities);
     if (this.existingPriorities.includes(selectedPriority)) {
       this.advanceTableForm.controls['reservationStopOrderPriority'].setErrors({ existingPriority: true });
     } else {
@@ -354,7 +351,6 @@ export class FormDialogReservationStopDetailsComponent {
           startWith(""),
           map(value => this._filterState(value || ''))
         );
-        //console.log(this.StateList);                 
       },
       error => {
 
@@ -449,7 +445,6 @@ export class FormDialogReservationStopDetailsComponent {
                 data => {
                   debugger;
                   this.StateList = data;
-                  //console.log(this.StateList);                   
                 },
                 error => {
 
@@ -567,7 +562,6 @@ export class FormDialogReservationStopDetailsComponent {
   }
   public Post(): void {
     debugger
-    console.log(this.advanceTableForm.getRawValue)
     this.advanceTableForm.patchValue({isTimeNotConfirmed:this.isTNCSelected});
     let requestPayload = this.advanceTableForm.getRawValue();
     //requestPayload.reservationStopSpotID=this.reservationStopSpotID;
@@ -748,7 +742,6 @@ export class FormDialogReservationStopDetailsComponent {
       // this.advanceTableForm.controls["city"].setValue(city);
 
     }
-    //console.log(country + ' ' + state + ' ' + city);
     this.advanceTable.country = country;
     this.searchTerm.setValue(this.advanceTable.country);
     this.searchTerm.disable();
@@ -805,18 +798,14 @@ export class FormDialogReservationStopDetailsComponent {
 
   getCityIDByName(name: string) {
     // this._generalService.GetCityID(name).subscribe((res: any) => {
-    //   console.log(res);
     // }, (error: HttpErrorResponse) => {
-    //   console.log(error);
     // });
     debugger;
     const data = this._generalService.GetsCityID(name);
 
     this.cityID = parseInt(data.geoPointID);
-    console.log(this.cityID);
     // this.advanceTableForm.patchValue({reservationStopCityID:this.cityID});
     this.advanceTableForm.controls["reservationStopCityID"].setValue(this.cityID)
-    console.log(data);
   }
 
   InitGoogleAddress() {

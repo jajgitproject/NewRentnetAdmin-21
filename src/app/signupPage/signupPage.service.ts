@@ -39,7 +39,6 @@ export class SignupPageService
     {
       SearchActivationStatus=null;
     }
-    console.log(this.API_URL + "/" +SearchColor + '/' + SearchActivationStatus +'/' + PageNumber + '/'+coloumName+'/'+sortType)
     return this.httpClient.get(this.API_URL + "/" +SearchColor + '/' + SearchActivationStatus +'/' + PageNumber +  '/'+coloumName+'/'+sortType);
   }
 

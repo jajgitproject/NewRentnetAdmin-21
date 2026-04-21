@@ -143,7 +143,6 @@ export class DateWiseCarwiseBookingReportComponent implements OnInit {
     //     data=>
     //     {
     //       this.DispatchLocationList=data;
-    //       console.log(this.DispatchLocationList);
     //       this.filteredDispatchLocationOptions = this.dispatchLocation.valueChanges.pipe(
     //         startWith(""),
     //         map(value => this._filterRN(value || ''))
@@ -166,7 +165,6 @@ export class DateWiseCarwiseBookingReportComponent implements OnInit {
         data =>
         {
           this.DispatchLocationList = data;  
-          console.log(this.DispatchLocationList)
           this.filteredDispatchLocationOptions = this.dispatch_Location.valueChanges.pipe(
             startWith(""),
             map(value => this._filterRN(value || ''))
@@ -319,7 +317,6 @@ shouldShowDeleteButton(item: any): boolean {
         data =>   
         {
           this.dataSource = data; 
-          console.log(this.dataSource);        
         },
         (error: HttpErrorResponse) => { this.dataSource = null;}
       );

@@ -24,7 +24,6 @@ export class UnlockEmployeeService
     debugger;
     // row.employeeEntityPasswordID; 
     // data.userType="Employee";
-    console.log(this.API_URL_auth + '/unlock-account',data);
     return this.httpClient.post<any>(this.API_URL_auth + '/unlock-account',data);
   }
 

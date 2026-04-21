@@ -130,7 +130,6 @@ export class PackageTypeComponent implements OnInit {
         action: 'edit'
       }
     });
-    //console.log(row);
 
   }
   deleteItem(row)
@@ -205,7 +204,6 @@ export class PackageTypeComponent implements OnInit {
   
   NextCall()
   {
-    //console.log(this.dataSource.length>0)
     if (this.dataSource.length>0) 
     {
      
@@ -354,7 +352,6 @@ export class PackageTypeComponent implements OnInit {
       data =>   
       {
         this.dataSource = data;
-       //console.log(this.dataSource);
       },
       (error: HttpErrorResponse) => { this.dataSource = null;}
     );

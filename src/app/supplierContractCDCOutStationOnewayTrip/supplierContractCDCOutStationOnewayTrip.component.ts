@@ -390,7 +390,6 @@ export class SupplierContractCDCOutStationOnewayTripComponent implements OnInit 
   
   NextCall()
   {
-    //console.log(this.dataSource.length>0)
     if (this.dataSource.length>0) 
     {
      

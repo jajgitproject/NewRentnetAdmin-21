@@ -95,8 +95,6 @@ export class VehicleCategoryTargetComponent implements OnInit {
     this.vehicleCategory = decodeURIComponent(this._generalService.decrypt(encryptedVehicleCategory));
 
     // Log the decrypted values
-    console.log("Decrypted Vehicle Category ID: ", this.vehicleCategoryID);
-    console.log("Decrypted Vehicle Category: ", this.vehicleCategory);
   }
 
     })
@@ -214,7 +212,6 @@ export class VehicleCategoryTargetComponent implements OnInit {
       data =>   
       {      
         this.dataSource = data;
-        //console.log(this.dataSource);
         // this.dataSource.forEach((ele)=>{
         //   if(ele.activationStatus===true){
         //     this.activeData="Active";
@@ -393,7 +390,6 @@ export class VehicleCategoryTargetComponent implements OnInit {
     (
       data =>   
       {
-        //console.log(this.dataSource);
         this.dataSource = data;
        
       },

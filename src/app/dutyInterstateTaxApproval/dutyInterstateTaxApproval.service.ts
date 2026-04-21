@@ -51,7 +51,6 @@ export class DutyInterstateTaxApprovalService
     {
       SearchActivationStatus=null;
     }
-    //console.log(this.API_URL + "/" +SearchDutyInterstateTax + '/' + SearchActivationStatus +'/' + PageNumber + '/'+coloumName+'/'+sortType)
     return this.httpClient.get(this.API_URL + "/" +SearchDutyInterstateTax + '/' + SearchActivationStatus +'/' + PageNumber +  '/'+coloumName+'/'+sortType);
   }
 

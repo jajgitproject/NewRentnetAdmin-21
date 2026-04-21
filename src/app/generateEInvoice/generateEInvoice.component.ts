@@ -381,7 +381,6 @@ export class GenerateEInvoiceComponent implements OnInit {
 
 
 dynamicEInvoice(item: any) {
-  console.log(item);
 
   let baseUrl = this._generalService.FormURL;
 

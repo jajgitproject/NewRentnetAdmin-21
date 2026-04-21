@@ -65,7 +65,6 @@ export class FormDialogComponent
   {
         // Set the defaults
         this.action = data.action;
-        //console.log(data)
         this.allotmentID=data.allotmentID;
         this.reservationID=data.reservationID;
         this.verifyDutyStatusAndCacellationStatus = data.verifyDutyStatusAndCacellationStatus;
@@ -124,7 +123,6 @@ this.isSaveAllowed = status === 'changes allow';
     this._generalService.GetDutyAllotmentInfo(this.dutyQualityCheckList).subscribe(
       data=>{
         this.driverRegistrationData=data;
-        //console.log(this.driverRegistrationData);
         this.advanceTableForm.patchValue({dutyQualityCheckID:this.driverRegistrationData[0].dutyQualityCheckID});
         this.advanceTableForm.patchValue({dutySlipID:this.driverRegistrationData[0].dutySlipID});
         this.advanceTableForm.patchValue({driverID:this.driverRegistrationData[0].driverID});
@@ -150,7 +148,6 @@ this.isSaveAllowed = status === 'changes allow';
     this.advanceTableService.getdutyQualityCheckDataDetails(this.allotmentID).subscribe(
       data=>{
         this.dutyQualityCheckData=data;
-      //console.log(this.dutyQualityCheckData);
         this.advanceTableForm.patchValue({dutyQualityCheckID:this.dutyQualityCheckData[0].dutyQualityCheckID});
         this.advanceTableForm.patchValue({dutySlipID:this.dutyQualityCheckData[0].dutySlipID});
         this.advanceTableForm.patchValue({driverID:this.dutyQualityCheckData[0].driverID});
@@ -178,7 +175,6 @@ this.isSaveAllowed = status === 'changes allow';
         this.dutyQualityCheckList=data;
         this.InitDriverAndRegistration();
         this.InitDutyQualityCheckDataDetails();
-        //console.log(this.dutyQualityCheckList);
        
       }
     );
@@ -217,7 +213,6 @@ this.isSaveAllowed = status === 'changes allow';
 
   submit() 
   {
-    //console.log(this.advanceTableForm.value);
   }
   onNoClick(): void 
   {
@@ -330,7 +325,6 @@ this.isSaveAllowed = status === 'changes allow';
         data =>   
         {
             this.dataSource = data;
-            console.log(this.dataSource)
         },
         (error: HttpErrorResponse) => { this.dataSource = null;}
       );

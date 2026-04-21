@@ -39,7 +39,6 @@ export class CityService
     {
       SearchActivationStatus=null;
     }
-    //console.log(this.API_URL + "/" +SearchCity + '/' + SearchActivationStatus +'/' + PageNumber + '/GeoPoint.GeoPointName/Ascending');
     return this.httpClient.get(this.API_URL + "/" +SearchCity + '/'+ SearchState +'/'+ SearchCitySTDCode +'/'+ SearchGeoSearchString +'/' + SearchActivationStatus +'/' + PageNumber + '/GeoPoint.GeoPointName/Ascending');
   }
   getTableDataSort(SearchCity:string,SearchState:string,SearchCitySTDCode:string,SearchGeoSearchString:string, SearchActivationStatus:boolean, PageNumber: number,coloumName:string,sortType:string ):  Observable<any> 

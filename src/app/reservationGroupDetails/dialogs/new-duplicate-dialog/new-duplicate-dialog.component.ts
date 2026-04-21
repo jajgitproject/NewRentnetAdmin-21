@@ -64,14 +64,12 @@ export class NewDuplicateDialogComponent
       data=>
         {
           this.ReservationNumbers=data;
-          console.log(this.ReservationNumbers);
         }
     );
   }
   
   ngAfterViewInit(): void {
     this.reservationRadios.forEach((radioButton) => {
-      console.log(radioButton.value); 
     });
   }
 

@@ -38,7 +38,6 @@ export class StopReservationService
     {
       SearchEndDate="null";
     }
-    //console.log(this.API_URL + '/'+CustomerID +'/'+SearchStopReservation  + '/' + SearchStartDate+'/' + SearchEndDate +'/' + SearchActivationStatus +'/' + PageNumber + '/stopReservationID/Ascending')
     return this.httpClient.get(this.API_URL + '/'+CustomerID +'/'+SearchStopReservation + '/' + SearchEmployeeName + '/' + SearchStartDate+'/' + SearchEndDate +'/' + SearchActivationStatus +'/' + PageNumber + '/stopReservationID/Ascending');
   }
 
@@ -61,7 +60,6 @@ export class StopReservationService
     {
       SearchEndDate="null";
     }
-    //console.log(this.API_URL + "/kkk" +SearchStopReservation + '/' + SearchActivationStatus +'/' + PageNumber + '/'+coloumName+'/'+sortType)
     return this.httpClient.get(this.API_URL + '/'+CustomerID +'/'+SearchStopReservation  + '/' + SearchEmployeeName + '/' + SearchStartDate+'/' + SearchEndDate +'/' + SearchActivationStatus +'/' + PageNumber + '/'+coloumName+'/'+sortType);
   }
 

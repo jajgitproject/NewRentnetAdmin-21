@@ -27,7 +27,6 @@ export class ServiceTypeService
     {
       SearchActivationStatus=null;
     }
-    //console.log(this.API_URL + "/" +SearchName + '/' + SearchActivationStatus +'/' + PageNumber + '/serviceType/Ascending')
     return this.httpClient.get(this.API_URL + "/" +SearchName + '/' + SearchActivationStatus +'/' + PageNumber + '/serviceType/Ascending');
   }
   getTableDataSort(SearchName:string, SearchActivationStatus:boolean, PageNumber: number,coloumName:string,sortType:string):  Observable<any> 
@@ -40,7 +39,6 @@ export class ServiceTypeService
     {
       SearchActivationStatus=null;
     }
-    //console.log(this.API_URL + "/" +SearchName + '/' + SearchActivationStatus +'/' + PageNumber + '/'+coloumName+'/'+sortType)
     return this.httpClient.get(this.API_URL + "/" +SearchName + '/' + SearchActivationStatus +'/' + PageNumber +  '/'+coloumName+'/'+sortType);
   }
   add(advanceTable: ServiceType) 

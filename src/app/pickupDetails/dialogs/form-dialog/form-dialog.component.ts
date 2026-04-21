@@ -92,11 +92,9 @@ export class FormDialogPickupDetailsComponent
       }
     });
     this.formattedAddress = tempCity;
-    console.log(address);
      //this.formattedAddress = address.formatted_address;
      this.advanceTableForm.controls.stopAddressGeoLocation.setValue(address.formatted_address);
    this.advanceTable.stopAddressGeoLocation = address.formatted_address;
-   console.log(this.advanceTable);
    this.formattedAddress='';
  //  this.advanceTable.stopAddressGeoLocation='';
    this.formattedAddress=address.formatted_address;
@@ -142,7 +140,6 @@ export class FormDialogPickupDetailsComponent
 
   submit() 
   {
-    console.log(this.advanceTableForm.value);
   }
   onNoClick(): void 
   {
@@ -152,7 +149,6 @@ export class FormDialogPickupDetailsComponent
   {
     //debugger;
 
-   // console.log(this.advanceTableForm.getRawValue());
   // this.advanceTableForm.patchValue({ cityGeoName: this.advanceTable.cityGeoName });
    this.advanceTableForm.patchValue({ stopAddressGeoLocation: this.advanceTable.stopAddressGeoLocation });
     this.advanceTableForm.patchValue({ reservationID: this.idForReservation });
@@ -186,7 +182,6 @@ export class FormDialogPickupDetailsComponent
   public Put(): void
   {
     debugger;
-    console.log(this.advanceTableForm.getRawValue());
     this.advanceTableService.update(this.advanceTableForm.getRawValue())  
     .subscribe(
     response => 
@@ -227,13 +222,11 @@ this.SubscribeUpdateService();
   {
     debugger;
     this.reservationID=this.idForReservation
-    console.log(this.reservationID)
      this.advanceTableService.getTableData( this.reservationID,this.pickupDetailsID,this.stopType,this.SearchActivationStatus, this.PageNumber).subscribe
    (
      data =>   
      {
        this.dataSource = data;
-      console.log(this.dataSource);
      },
      (error: HttpErrorResponse) => { this.dataSource = null;}
    );

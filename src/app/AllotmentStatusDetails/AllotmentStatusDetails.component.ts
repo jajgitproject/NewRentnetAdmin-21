@@ -25,7 +25,6 @@ export class AllotmentStatusDetailsComponent {
     },
     public _generalService: GeneralService
   ) {
-    console.log( this.AllotmentStatusDetails)
     // Set the defaults
     this.AllotmentStatusDetails = this.data;
     if(!this.AllotmentStatusDetails?.row?.allotmentID)

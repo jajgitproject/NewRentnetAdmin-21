@@ -22,7 +22,6 @@ import { MatDialogModule } from '@angular/material/dialog';
 import { MatDividerModule } from '@angular/material/divider';
 import { MatSortModule } from '@angular/material/sort';
 import { MatToolbarModule } from '@angular/material/toolbar';
-import { MaterialFileInputModule } from '@compat/material-file-input-shim';
 import { MatMenuModule } from '@angular/material/menu';
 import { MyUploadModule } from '../myupload/myupload.module';
 import { CurrentDesginationModule } from '../currentDesgination/currentDesgination.module';
@@ -63,7 +62,6 @@ import { OwlDateTimeModule, OwlNativeDateTimeModule } from '@danielmoncada/angul
     MatDividerModule,
     MatSortModule,
     MatToolbarModule,
-    MaterialFileInputModule,
     MatMenuModule,
     MatProgressSpinnerModule,
     MyUploadModule,

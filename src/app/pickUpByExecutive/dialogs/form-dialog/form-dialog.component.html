@@ -64,7 +64,7 @@
               <mat-label>Time</mat-label>
               <input matInput [owlDateTimeTrigger]="time1" [owlDateTime]="time1" (input)="onTimeInput($event)"
                 formControlName="pickUpTime" />
-              <mat-icon matSuffix [owlDateTimeTrigger]="time1" class="date-icon">schedule</mat-icon>
+              <button mat-icon-button matSuffix type="button" [owlDateTimeTrigger]="time1" class="date-icon" aria-label="Open time picker"><mat-icon>schedule</mat-icon></button>
               <owl-date-time [pickerType]="'timer'" #time1></owl-date-time>
               <mat-error *ngIf="advanceTableForm.get('pickUpTime').hasError('required')">
                 Time is required
@@ -298,7 +298,7 @@
             <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
               <mat-label>Time</mat-label>
               <input matInput [owlDateTimeTrigger]="time1" [owlDateTime]="time1" formControlName="pickUpTimeByApp" />
-              <mat-icon matSuffix [owlDateTimeTrigger]="time1" class="date-icon">schedule</mat-icon>
+              <button mat-icon-button matSuffix type="button" [owlDateTimeTrigger]="time1" class="date-icon" aria-label="Open time picker"><mat-icon>schedule</mat-icon></button>
               <owl-date-time [pickerType]="'timer'" #time1></owl-date-time>
               <mat-error *ngIf="
                   advanceTableForm.get('pickUpTimeByApp').hasError('required')

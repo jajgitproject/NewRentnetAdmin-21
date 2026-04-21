@@ -132,7 +132,6 @@ public vendorContractCarCategoryService: VendorContractCarCategoryService)
         data =>   
         {
           this.VendorList = data; 
-          console.log(this.VendorList)
           this.filteredOptions = this.advanceTableForm.controls['vendorContractName'].valueChanges.pipe(
             startWith(""),
             map(value => this._filter(value || ''))
@@ -187,7 +186,6 @@ public vendorContractCarCategoryService: VendorContractCarCategoryService)
           this.getCityTier();  // Fetch the vehicle categories
         } else {
           // User clicked No - Do nothing
-          console.log('Import canceled');
         }
       });
     }
@@ -208,7 +206,6 @@ public vendorContractCarCategoryService: VendorContractCarCategoryService)
             cityTierID:cityTiers.vendorContractCityTiersID
           })
         );
-        console.log(this.advanceTableFormData);
         this.saveVendorContractCityTiers()
       }
     );

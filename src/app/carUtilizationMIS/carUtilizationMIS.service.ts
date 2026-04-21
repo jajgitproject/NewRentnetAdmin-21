@@ -74,7 +74,6 @@ export class CarUtilizationMISService {
     if (SearchActivationStatus === null) {
       SearchActivationStatus = null;
     }
-    //console.log(this.API_URL + "/" +RegistrationNumber + '/' + SearchActivationStatus +'/' + PageNumber + '/'+coloumName+'/'+sortType)
     return this.httpClient.get(this.API_URL + "/" + searchcarLocation + "/" + Vehicle + "/" + searchcarNumber + "/" + searchownedSupplier + "/" + openDate + "/" + status + "/" + SearchActivationStatus + '/' + PageNumber + '/' + coloumName + '/' + sortType);
   }
 

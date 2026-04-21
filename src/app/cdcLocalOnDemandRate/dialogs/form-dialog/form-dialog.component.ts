@@ -76,7 +76,6 @@ export class FormDialogComponent
           this.advanceTableForm?.patchValue({
            nightChargesBasedOn: this.advanceTable.nightChargesBasedOn || 'Garage'
             });
-            //  console.log('Edit value:', this.advanceTable.nightChargesBasedOn);
 
         } else 
         {

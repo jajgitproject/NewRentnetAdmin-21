@@ -97,7 +97,6 @@ export class PrintDutySlipWithoutMapComponent {
       data =>   
       {
         this.dataSource = data;
-        console.log(this.dataSource);
         this.totalKms =  this.dataSource?.runningDetailsModels ?.reduce((sum: number, item: any) => sum + Number(item.distance || 0), 0);
         this.getTime();
       },

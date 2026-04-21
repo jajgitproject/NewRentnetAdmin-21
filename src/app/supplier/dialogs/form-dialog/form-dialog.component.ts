@@ -88,11 +88,9 @@ export class FormDialogComponent
           //this.dialogTitle ='Edit Supplier';       
           this.dialogTitle ='Supplier';
           this.advanceTable = data.advanceTable;
-          console.log(this.advanceTable)
           this.OnCountryChangeGetStates();
           this.OnStateChangeGetCity();
           this.getStatesBasedOnCity();
-          console.log(this.advanceTable)
           // this.searchCountryTerm.setValue(this.advanceTable.country)
           this.advanceTable.supplierCode='N/A';
           // this.searchStateTerm.setValue(this.advanceTable.stateName)
@@ -335,7 +333,6 @@ showDetails(){
       data=>
       {
         this.SupplierTypeList=data;
-        console.log(this.SupplierTypeList)
         this.advanceTableForm.controls['supplierType'].setValidators([Validators.required,
           this.supplierTypeValidator(this.SupplierTypeList)]);
         this.advanceTableForm.controls['supplierType'].updateValueAndValidity();

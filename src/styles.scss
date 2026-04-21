@@ -81,6 +81,82 @@
   z-index: 9999 !important;
 }
 
+/* Owl time picker/date-time overlay should always sit above page content/modals */
+.owl-dt-container,
+.owl-dt-overlay {
+  z-index: 10050 !important;
+}
+
+/* CDK overlay panes stack by DOM insertion order inside .cdk-overlay-container.
+   Force a high per-pane z-index when panes carry their most common "on top of
+   a dialog" classes (mat-menu dropdowns, mat-select dropdowns, autocomplete,
+   tooltips, snackbars) so they ALWAYS paint above an already-open MatDialog,
+   irrespective of order-of-insertion quirks. */
+.cdk-overlay-container .cdk-overlay-pane:has(.mat-mdc-menu-panel),
+.cdk-overlay-container .cdk-overlay-pane:has(.mat-mdc-select-panel),
+.cdk-overlay-container .cdk-overlay-pane:has(.mat-mdc-autocomplete-panel),
+.cdk-overlay-container .cdk-overlay-pane:has(.mat-mdc-tooltip),
+.cdk-overlay-container .cdk-overlay-pane:has(.mat-mdc-snack-bar-container) {
+  z-index: 20000 !important;
+}
+
+/* Dispatch-By-Executive (Garage Out → Manual / App / GPS) dialog:
+   guarantee true viewport centering regardless of leaked parent dialog rules.
+   The panel class is applied in controlPanelDialoge.component.ts. */
+.cdk-global-overlay-wrapper:has(> .cdk-overlay-pane.dbe-dialog-centered) {
+  justify-content: center !important;
+  align-items: center !important;
+}
+.cdk-overlay-pane.dbe-dialog-centered {
+  position: static !important;
+  margin: auto !important;
+  max-height: 90vh !important;
+  /* Nudge 25px left of true center per UX request */
+  transform: translateX(-25px) !important;
+}
+.cdk-overlay-pane.dbe-dialog-centered .mat-mdc-dialog-container,
+.cdk-overlay-pane.dbe-dialog-centered .mdc-dialog__surface {
+  max-height: 90vh !important;
+}
+.cdk-overlay-pane.dbe-dialog-centered .mat-mdc-dialog-content,
+.cdk-overlay-pane.dbe-dialog-centered .mdc-dialog__content {
+  max-height: calc(90vh - 120px) !important;
+  overflow-y: auto !important;
+}
+
+/* Material timepicker visual parity (light popup with blue actions) */
+.cdk-overlay-pane .mat-timepicker-panel {
+  border-radius: 10px !important;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.22) !important;
+  background: #ffffff !important;
+  color: #1d2433 !important;
+}
+
+.cdk-overlay-pane .mat-timepicker-panel .mat-timepicker-content,
+.cdk-overlay-pane .mat-timepicker-panel .mat-mdc-form-field {
+  background: #ffffff !important;
+  color: #1d2433 !important;
+}
+
+.cdk-overlay-pane .mat-timepicker-panel .mat-timepicker-actions {
+  border-top: 1px solid #e8e8e8 !important;
+  padding: 10px 14px !important;
+}
+
+.cdk-overlay-pane .mat-timepicker-panel .mat-timepicker-actions .mat-mdc-button,
+.cdk-overlay-pane .mat-timepicker-panel .mat-timepicker-actions .mat-button {
+  color: #3f51b5 !important;
+  font-weight: 600 !important;
+  letter-spacing: 0 !important;
+  text-transform: none !important;
+}
+
+/* MDC compatibility: keep suffix trigger icons clickable for owl time pickers */
+.mat-mdc-form-field-icon-suffix,
+.mat-mdc-form-field-icon-prefix {
+  pointer-events: auto !important;
+}
+
 .pac-container {
   z-index: 10000 !important;
   position: absolute !important;
@@ -182,12 +258,160 @@ mat-option {
   overflow-x: auto;
 }
 
+/* ---------------------------------------------------------------------------
+   SweetAlert2 stacking policy
+   ---------------------------------------------------------------------------
+   The CDK overlay container (Mat dialogs / menus / selects / tooltips) is
+   pinned to z-index 9999 further up in this file. Swal2 v11 appends its own
+   `.swal2-container` as a direct child of <body>, sibling to the CDK overlay
+   container, so whichever has the higher z-index wins at the root stacking
+   level (no stacking context traps because both are body children and
+   position: fixed).
+
+   We use the largest safe z-index (2147483647 = INT32_MAX) so that even if a
+   downstream theme or third-party lib bumps the CDK overlay higher, Swal
+   still wins. Specificity is raised via `body > .swal2-container` so later
+   third-party stylesheets that target `.swal2-container` alone cannot
+   override us.
+
+   Call sites never need `target:` / `backdrop:` / `heightAuto:` overrides — a
+   plain `Swal.fire({ ... })` is guaranteed to render in the foreground. */
+.swal2-container,
+body > .swal2-container,
+.swal2-container.swal2-popup-high-zindex,
 .swal2-popup-high-zindex {
-  z-index: 15000 !important;
+  z-index: 2147483647 !important;
 }
 
-.swal2-container {
-  z-index: 30000 !important;
+/* Backdrop sits just below the popup but still above every Mat overlay. */
+.swal2-container.swal2-backdrop-show,
+body > .swal2-container.swal2-backdrop-show {
+  z-index: 2147483646 !important;
+}
+
+/* ---------------------------------------------------------------------------
+   Phase 3: SweetAlert theme skin.
+   Match the legacy NewRententAdmin modal look (Poppins 17px bold title with
+   bottom rule, #d9534f accent on warn icons, action bar w/ 4px radius buttons,
+   subtle gray footer). Applied globally to every Swal.fire() call; no call-site
+   changes required.
+   --------------------------------------------------------------------------- */
+.swal2-popup {
+  font-family: 'Poppins', 'Roboto', 'Helvetica Neue', sans-serif !important;
+  border-radius: 6px !important;
+  padding: 0 !important;
+  box-shadow: 0 11px 15px -7px rgba(0, 0, 0, 0.2),
+    0 24px 38px 3px rgba(0, 0, 0, 0.14),
+    0 9px 46px 8px rgba(0, 0, 0, 0.12) !important;
+  border: 1px solid #e5e5e5 !important;
+  background: #fff !important;
+  color: #555 !important;
+  min-width: 360px;
+}
+
+.swal2-popup .swal2-title {
+  font-family: 'Poppins', 'Roboto', 'Helvetica Neue', sans-serif !important;
+  font-size: 17px !important;
+  font-weight: 700 !important;
+  color: #212529 !important;
+  letter-spacing: 0 !important;
+  padding: 14px 20px 10px !important;
+  margin: 0 !important;
+  border-bottom: 1px solid rgba(82, 63, 105, 0.08);
+  text-align: left;
+}
+
+/* If a Swal has only html/text and no title, keep that content readable */
+.swal2-popup .swal2-html-container {
+  font-family: 'Poppins', 'Roboto', 'Helvetica Neue', sans-serif !important;
+  font-size: 13.5px !important;
+  color: #444 !important;
+  padding: 14px 20px !important;
+  margin: 0 !important;
+  text-align: left;
+  line-height: 1.5;
+}
+
+/* Icon sizing + legacy color family */
+.swal2-popup .swal2-icon {
+  margin: 16px auto 4px !important;
+  width: 48px !important;
+  height: 48px !important;
+  border-width: 2px !important;
+}
+.swal2-popup .swal2-icon.swal2-warning {
+  border-color: #f0ad4e !important;
+  color: #f0ad4e !important;
+}
+.swal2-popup .swal2-icon.swal2-error {
+  border-color: #d9534f !important;
+  color: #d9534f !important;
+}
+.swal2-popup .swal2-icon.swal2-success {
+  border-color: #5cb85c !important;
+  color: #5cb85c !important;
+}
+.swal2-popup .swal2-icon.swal2-info,
+.swal2-popup .swal2-icon.swal2-question {
+  border-color: #5bc0de !important;
+  color: #5bc0de !important;
+}
+
+/* Action bar: legacy footer look, right-aligned */
+.swal2-popup .swal2-actions {
+  display: flex !important;
+  justify-content: flex-end !important;
+  gap: 10px !important;
+  margin: 0 !important;
+  padding: 12px 20px !important;
+  border-top: 1px solid rgba(82, 63, 105, 0.08);
+  background: #fafbfc;
+}
+
+/* Buttons: 4px radius, Poppins, matching sizing to MatDialog action buttons */
+.swal2-popup .swal2-styled {
+  font-family: 'Poppins', 'Roboto', 'Helvetica Neue', sans-serif !important;
+  font-weight: 600 !important;
+  font-size: 13px !important;
+  border-radius: 4px !important;
+  min-width: 92px !important;
+  padding: 8px 16px !important;
+  text-transform: none !important;
+  letter-spacing: 0 !important;
+  box-shadow: none !important;
+}
+.swal2-popup .swal2-styled.swal2-confirm {
+  background: #3f51b5 !important; /* legacy primary */
+  color: #fff !important;
+  border: 0 !important;
+}
+.swal2-popup .swal2-styled.swal2-deny {
+  background: #d9534f !important; /* legacy danger */
+  color: #fff !important;
+  border: 0 !important;
+}
+.swal2-popup .swal2-styled.swal2-cancel {
+  background: #f5f5f5 !important;
+  color: #333 !important;
+  border: 1px solid #ddd !important;
+}
+.swal2-popup .swal2-styled:focus {
+  box-shadow: 0 0 0 3px rgba(63, 81, 181, 0.2) !important;
+}
+
+/* Input variant parity */
+.swal2-popup .swal2-input,
+.swal2-popup .swal2-textarea,
+.swal2-popup .swal2-select {
+  font-family: 'Poppins', 'Roboto', 'Helvetica Neue', sans-serif !important;
+  border-radius: 4px !important;
+  border: 1px solid #ddd !important;
+  box-shadow: none !important;
+}
+
+/* Dim backdrop the same as MatDialog's cdk-overlay-dark-backdrop */
+.swal2-container .swal2-backdrop-show {
+  background: rgba(0, 0, 0, 0.32) !important;
 }
 
 /* Legacy Bootstrap modal parity:

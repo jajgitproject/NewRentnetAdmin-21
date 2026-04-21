@@ -66,7 +66,6 @@ export class FormDialogComponent
         {
           this.dialogTitle ='Chauffeur Driven Car Local Lumpsum Package';       
           this.advanceTable = data.advanceTable;
-          //console.log(this.advanceTable)
           this.searchVehicleCategory.setValue(this.advanceTable.vehicleCategory);
           this.searchCityTier.setValue(this.advanceTable.cityTierName);
            this.searchPackage.setValue(this.advanceTable.package);
@@ -112,7 +111,6 @@ export class FormDialogComponent
   //       this.PackageList=data;
   //     }
   //   )
-  //   console.log(this.PackageList);
   // }
 
   //----------- Vehicle Category Validation --------------
@@ -456,13 +454,11 @@ export class FormDialogComponent
 
   // public fileChanged(event?: UIEvent): void {
   //   const files: FileList = this.fileUploadEl.nativeElement.files;
-  //   console.log(`files: `, files);
 
   //   const file = files[0];
   //   const reader = new FileReader();
   //   const loaded = (el) => {
   //     const contents = el.target.result;
-  //     console.log('onloaded', contents);
   //     this.contents = contents;
   //   }
   //   reader.onload = loaded;

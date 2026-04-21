@@ -45,13 +45,11 @@ export class PassengerEmailComponent implements OnInit {
         
           // }
           this.formsData = data;
-          console.log(this.formsData)
           this.advanceTableForm = this.createContactForm();
           
     }
     submit() 
     {
-      //console.log(this.advanceTableForm.value);
     }
 
 

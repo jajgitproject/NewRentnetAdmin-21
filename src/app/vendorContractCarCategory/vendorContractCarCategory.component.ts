@@ -102,7 +102,6 @@ export class VendorContractCarCategoryComponent implements OnInit {
         
       this.vendorContractID = this._generalService.decrypt(decodeURIComponent(encryptedVendorContractID));
       this.vendorContractName = this._generalService.decrypt(decodeURIComponent(encryptedVendorContractName));        
-      console.log(this.vendorContractID,this.vendorContractName);     
   });
     this.InitVendorCategory();
     this.loadData();
@@ -427,7 +426,6 @@ export class VendorContractCarCategoryComponent implements OnInit {
       } 
       else 
       {
-        console.log('Import canceled');
       }
     });
   }

@@ -96,7 +96,6 @@ this.isSaveAllowed = status === 'changes allow';
        data =>   
        {
          this.dataSource = data;
-         console.log(this.dataSource)
          this.advanceTableForm.controls['nextDayInstruction'].setValue(data?.[0]?.nextDayInstruction)
          this.advanceTableForm.controls['nextDayInstructionDate'].setValue(data?.[0]?.nextDayInstructionDate)
          this.advanceTableForm.controls['nextDayInstructionTime'].setValue(data?.[0]?.nextDayInstructionTime)
@@ -143,7 +142,6 @@ this.isSaveAllowed = status === 'changes allow';
 
   submit() 
   {
-    //console.log(this.advanceTableForm.value);
   }
   onNoClick(): void 
   {

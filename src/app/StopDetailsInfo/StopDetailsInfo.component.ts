@@ -28,7 +28,6 @@ export class StopDetailsInfoComponent {
     this.dialogTitle = 'Stop Details';
     this.stopDetailsInfo = new ControlPanelDetails({});
     this.stopDetailsInfo = this.data.advanceTable;
-    console.log(this.stopDetailsInfo)
   }
 
   onNoClick(): void {

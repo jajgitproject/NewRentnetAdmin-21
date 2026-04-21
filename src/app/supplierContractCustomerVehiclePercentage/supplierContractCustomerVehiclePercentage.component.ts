@@ -177,7 +177,6 @@ export class SupplierContractCustomerVehiclePercentageComponent implements OnIni
           SupplierName:this.supplier_Name
       }
     });
-    //console.log(row);
 
   }
   public SearchData()
@@ -190,7 +189,6 @@ export class SupplierContractCustomerVehiclePercentageComponent implements OnIni
   {
 
     this.supplierContractCustomerVehiclePercentageID = row.id;
-  //console.log(row)
     const dialogRef = this.dialog.open(DeleteDialogComponent, 
     {
       data: row
@@ -305,7 +303,6 @@ export class SupplierContractCustomerVehiclePercentageComponent implements OnIni
         //message contains the data sent from service
         this.messageReceived = message.text;
         this.MessageArray=this.messageReceived.split(":");
-        //console.log(this.MessageArray);
         if(this.MessageArray.length==3)
         {
           if(this.MessageArray[0]=="SupplierContractCustomerVehiclePercentageCreate")
@@ -402,7 +399,6 @@ export class SupplierContractCustomerVehiclePercentageComponent implements OnIni
           startWith(""),
           map(value => this._filterCustomer(value || ''))
         );
-        //console.log(this.StateList);
       },
       error => {
 
@@ -431,7 +427,6 @@ export class SupplierContractCustomerVehiclePercentageComponent implements OnIni
           startWith(""),
           map(value => this._filterVehicle(value || ''))
         );
-        //console.log(this.StateList);
       },
       error => {
 

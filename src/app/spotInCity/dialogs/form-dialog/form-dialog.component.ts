@@ -7,7 +7,7 @@ import { SpotInCity } from '../../spotInCity.model';
 import { MAT_DATE_LOCALE } from '@angular/material/core';
 import { GeneralService } from '../../../general/general.service';
 import { HttpErrorResponse } from '@angular/common/http';
-import { Address } from 'ngx-google-places-autocomplete/objects/address';
+import { Address } from '@compat/google-places-shim-objects/address';
 import { SpotInCityDropDown } from '../../spotInCityDropDown.model';
 import { SpotTypeDropDown } from '../../spotTypeDropDown.model';
 import { Observable } from 'rxjs';
@@ -73,7 +73,6 @@ export class FormDialogComponent
           //this.dialogTitle ='Edit Spot In City';               
           this.dialogTitle ='Spot In City';
           this.advanceTable = data.advanceTable;
-          console.log(this.advanceTable);
           this.advanceTable.spotType = this.advanceTable.type;
           this.ImagePath=this.advanceTable.bannerImage;
           this.ImagePath1=this.advanceTable.icon;
@@ -201,7 +200,6 @@ export class FormDialogComponent
   }
   
   getgeoPointParentID(geoPointParentID: any) {
-//console.log(geoPointParentID);
     this.geoPointParentID=geoPointParentID;
     //this.advanceTableForm.patchValue({geoPointParentID : this.geoPointParentID});
   }
@@ -434,13 +432,11 @@ public Put(): void {
 
   // public fileChanged(event?: UIEvent): void {
   //   const files: FileList = this.fileUploadEl.nativeElement.files;
-  //   console.log(`files: `, files);
 
   //   const file = files[0];
   //   const reader = new FileReader();
   //   const loaded = (el) => {
   //     const contents = el.target.result;
-  //     console.log('onloaded', contents);
   //     this.contents = contents;
   //   }
   //   reader.onload = loaded;

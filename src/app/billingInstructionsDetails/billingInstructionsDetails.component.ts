@@ -118,7 +118,6 @@ export class BillingInstructionsDetailsComponent implements OnInit {
      (data :BillingInstructionsDetails)=>   
      {
        this.advanceTableBI = data;
-       console.log(this.advanceTableBI);
      },
      (error: HttpErrorResponse) => { this.advanceTable = null;}
    );

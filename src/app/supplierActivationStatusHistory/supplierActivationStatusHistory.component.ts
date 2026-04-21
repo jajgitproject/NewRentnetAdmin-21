@@ -83,8 +83,6 @@ export class SupplierActivationStatusHistoryComponent implements OnInit {
         }
       }
       
-      console.log("Decrypted Supplier ID:", this.supplier_ID);
-      console.log("Decrypted Supplier Name:", this.supplier_Name);
       
     });
     this.loadData();
@@ -178,7 +176,6 @@ export class SupplierActivationStatusHistoryComponent implements OnInit {
       {
 
         this.dataSource = data;
-        //console.log(this.dataSource)
       },
       (error: HttpErrorResponse) => { this.dataSource = null;}
     );
@@ -202,7 +199,6 @@ export class SupplierActivationStatusHistoryComponent implements OnInit {
   
   NextCall()
   {
-    //console.log(this.dataSource.length>0)
     if (this.dataSource.length>0) 
     {
      

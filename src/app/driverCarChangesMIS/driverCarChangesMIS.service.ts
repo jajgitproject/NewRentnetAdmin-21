@@ -38,7 +38,6 @@ export class DriverCarChangesMISService
     {
       SearchAllotmentStatus="null";
     }
-    console.log(this.API_URL + "/" + SearchPickupFromDate + '/' + SearchPickupToDate + '/' + SearchDispatchLocation + '/' + SearchAfterSMSCarChange + '/' + PageNumber + '/ReservationID/Descending');
     return this.httpClient.get(this.API_URL + "/" + SearchPickupFromDate + '/' + SearchPickupToDate + '/' + SearchDispatchLocation + '/' + SearchAfterSMSCarChange + '/' + SearchAllotmentStatus + '/' + PageNumber + '/ReservationID/Descending');
   }
 

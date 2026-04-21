@@ -484,7 +484,6 @@ const filterValue = value.toLowerCase();
 
   getPSTID(geoPointTypeID: any) {
     this.geoPointTypeID=geoPointTypeID;
-    console.log(this.geoPointTypeID);
     this.InitPickupSubDetails();
   }
 
@@ -599,7 +598,6 @@ const filterValue = value.toLowerCase();
         data => {
           this.dataSource = data;
        
-          console.log(this.dataSource)
           
        
         },

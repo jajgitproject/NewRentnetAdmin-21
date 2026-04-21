@@ -7,6 +7,7 @@ import { PassengerModel } from '../controlPanelDesign/controlPanelDesign.model';
 import { HttpErrorResponse } from '@angular/common/http';
 import { AppDataMissingStatusModel } from './appDataMissingStatus.model';
 import { AppDataMissingStatusService} from './appDataMissingStatus.service';
+import { RuntimeConfigService } from '../core/service/runtime-config.service';
 
 @Component({
   standalone: false,
@@ -32,13 +33,13 @@ export class AppDataMissingStatusComponent {
     public dialogRef: MatDialogRef<AppDataMissingStatusComponent>,
     @Inject(MAT_DIALOG_DATA)
     public data:any,
-    public appDataMissingStatusService: AppDataMissingStatusService
+    public appDataMissingStatusService: AppDataMissingStatusService,
+    private runtimeConfig: RuntimeConfigService
   ) 
   {
     // Set the defaults
     this.dialogTitle = 'App Data Missing Status Details';
     this.dutySlipID = data.dutySlipID;
-    console.log(this.dutySlipID)
   }
 
   ngOnInit() 
@@ -64,7 +65,7 @@ export class AppDataMissingStatusComponent {
           this.currentLocationLatitude = currentLocationLatLong.split(' ')[2];
           this.currentLocationLongitude = currentLocationLatLong.split(' ')[1];
 
-          const apiKey = 'AIzaSyAFoLcbOuZfbGJGCdlazGXZbOCYr8dW76c&origin';
+          const apiKey = encodeURIComponent(this.runtimeConfig.getGoogleMapsApiKey());
           const currentLocationURL = `https://maps.googleapis.com/maps/api/geocode/json?latlng=${this.currentLocationLatitude},${this.currentLocationLongitude}&key=${apiKey}`;
 
           fetch(currentLocationURL).then(response => response.json()).then(data => {

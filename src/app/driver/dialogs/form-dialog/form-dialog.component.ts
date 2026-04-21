@@ -9,7 +9,7 @@ import { formatDate } from '@angular/common';
 import { GeneralService } from '../../../general/general.service';
 import { CurrencyDropDown } from 'src/app/general/currencyDropDown.model';
 import { QualificationDropDown } from 'src/app/general/qualificationDropDown.model';
-import { Address } from 'ngx-google-places-autocomplete/objects/address';
+import { Address } from '@compat/google-places-shim-objects/address';
 import { CitiesDropDown } from 'src/app/organizationalEntity/citiesDropDown.model';
 import { AllCitiesDropDown } from 'src/app/customerPersonDrivingLicense/allCitiesDropDown.model';
 import { Observable } from 'rxjs';
@@ -121,7 +121,6 @@ saveDisabled:boolean = true;
         {
           this.dialogTitle ='Driver';       
           this.advanceTable = data.advanceTable;
-          console.log(this.advanceTable);
           this.referenceID=this.advanceTable.driverID;
           this.loadPassword();
           this.ImagePath=this.advanceTable.driverImage;
@@ -625,9 +624,7 @@ saveDisabled:boolean = true;
   }
 //   getHubID(hubId: any) {
 //     this.hubID = hubId;
-//     console.log('Selected Hub ID:', this.hubID);
 //     this.advanceTableForm.patchValue({ hubID: this.hubID });
-//     console.log('Patched Form Value:', this.advanceTableForm.value);
 // }
 
   hubTypeValidator(HubList: any[]): ValidatorFn {

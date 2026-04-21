@@ -73,7 +73,6 @@ export class FormDialogComponent
         this.advanceTableForm = this.createContactForm();
         this.customerName=data.CustomerName;
         this.customerID=data.CustomerID;
-        console.log(this.customerName,this.customerID)
   }
   
   createContactForm(): FormGroup 

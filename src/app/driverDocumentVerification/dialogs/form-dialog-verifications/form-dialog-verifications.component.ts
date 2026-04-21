@@ -59,7 +59,6 @@ export class FormDialogVerificationsComponent
           this.dialogTitle = 'Document Verification';
           this.advanceTable = data.advanceTable;
           this.verifiedByName();
-          console.log(this.advanceTable)
           this.advanceTable.verificationDate=new Date();
           if(this.advanceTable.activationStatus===true){
             this.advanceTable.status="Active";
@@ -71,8 +70,6 @@ export class FormDialogVerificationsComponent
           // this.advanceTable.verified=null;
           
         this.advanceTableForm = this.createContactForm();
-        console.log(this.advanceTable);
-        console.log(this.action);   
   }
   
   public ngOnInit(): void
@@ -87,7 +84,6 @@ export class FormDialogVerificationsComponent
       data =>   
       {
         this.DocumentList = data;
-        console.log( this.DocumentList)
       }
     );
   }
@@ -134,7 +130,6 @@ export class FormDialogVerificationsComponent
   
   createContactForm(): FormGroup 
   {
-    console.log(this.advanceTable)
     return this.fb.group(
     {
       driverDocumentID: [this.advanceTable.driverDocumentID],
