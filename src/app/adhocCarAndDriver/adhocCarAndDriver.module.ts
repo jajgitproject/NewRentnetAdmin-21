@@ -62,6 +62,9 @@ import { AdhocCarAndDriverComponent } from './adhocCarAndDriver.component';
     MyUploadModule,
     //TwoDigitDecimaNumberDirective
   ],
+  exports: [
+    advanceTableForm
+  ],
   providers: [AdhocCarAndDriverService]
 })
 export class AdhocCarAndDriverModule {}

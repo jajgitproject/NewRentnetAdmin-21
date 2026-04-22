@@ -13,6 +13,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatSelectModule } from '@angular/material/select';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { MatCardModule } from '@angular/material/card';
 import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatDialogModule } from '@angular/material/dialog';
@@ -56,6 +57,7 @@ import { ReservationLocationTransferLogService } from '../reservationLocationTra
 import { ReservationLocationTransferLogModule } from '../reservationLocationTransferLog/reservationLocationTransferLog.module';
 import { ReservationLocationTransferLogComponent } from '../reservationLocationTransferLog/reservationLocationTransferLog.component';
 import { AdhocCarAndDriverService } from '../adhocCarAndDriver/adhocCarAndDriver.service';
+import { AdhocCarAndDriverModule } from '../adhocCarAndDriver/adhocCarAndDriver.module';
 
 @NgModule({
   declarations: [
@@ -94,8 +96,10 @@ import { AdhocCarAndDriverService } from '../adhocCarAndDriver/adhocCarAndDriver
     MatToolbarModule,
     MatMenuModule,
     MatProgressSpinnerModule,
+    MatProgressBarModule,
     MyUploadModule,
-    ReservationLocationTransferLogModule
+    ReservationLocationTransferLogModule,
+    AdhocCarAndDriverModule
   ],
   providers: [CarAndDriverAllotmentService,
               OtherFilterService,

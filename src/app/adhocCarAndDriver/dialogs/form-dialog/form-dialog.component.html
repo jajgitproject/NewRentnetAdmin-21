@@ -86,8 +86,8 @@
                    
                     <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
                         <mat-label>Country Code</mat-label>
-                        <input  type="text" matInput formControlName="countryCode" [matAutocomplete]="auto10" required>
-                        <mat-autocomplete #auto10="matAutocomplete"  (optionSelected)="onCountryCode($event)">
+                        <input  type="text" matInput formControlName="countryCode" [matAutocomplete]="vendorExistingCountryAuto" required>
+                        <mat-autocomplete #vendorExistingCountryAuto="matAutocomplete"  (optionSelected)="onCountryCode($event)">
                             <mat-option *ngFor="let option of filteredCountryCodesOptions | async"
                                 [value]="option.countryISDCode">
                                 <div style="display: flex; align-items: center;">
@@ -115,8 +115,8 @@
                    
                     <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
                         <mat-label>Country Code</mat-label>
-                        <input  type="text" matInput formControlName="countryCode" [matAutocomplete]="auto10" required>
-                        <mat-autocomplete #auto10="matAutocomplete"  (optionSelected)="onCountryCode($event)">
+                        <input  type="text" matInput formControlName="countryCode" [matAutocomplete]="vendorNewCountryAuto" required>
+                        <mat-autocomplete #vendorNewCountryAuto="matAutocomplete"  (optionSelected)="onCountryCode($event)">
                             <mat-option *ngFor="let option of filteredCountryCodesOptions | async"
                                 [value]="option.countryISDCode">
                                 <div style="display: flex; align-items: center;">
@@ -205,8 +205,8 @@
                    
                     <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
                         <mat-label>Country Code</mat-label>
-                        <input  type="text" matInput formControlName="countryCodes" [matAutocomplete]="auto10" required>
-                        <mat-autocomplete #auto10="matAutocomplete"  (optionSelected)="onCountryCode($event)">
+                        <input  type="text" matInput formControlName="countryCodes" [matAutocomplete]="driverNewCountryAuto" required>
+                        <mat-autocomplete #driverNewCountryAuto="matAutocomplete"  (optionSelected)="onCountryCodes($event)">
                             <mat-option *ngFor="let option of filteredCountryCodesOptions | async"
                                 [value]="option.countryISDCode">
                                 <div style="display: flex; align-items: center;">
@@ -244,8 +244,8 @@
                    
                     <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
                         <mat-label>Country Code</mat-label>
-                        <input  type="text" matInput formControlName="countryCodes" [matAutocomplete]="auto10" required>
-                        <mat-autocomplete #auto10="matAutocomplete"  (optionSelected)="onCountryCode($event)">
+                        <input  type="text" matInput formControlName="countryCodes" [matAutocomplete]="driverExistingCountryAuto" required>
+                        <mat-autocomplete #driverExistingCountryAuto="matAutocomplete"  (optionSelected)="onCountryCodes($event)">
                             <mat-option *ngFor="let option of filteredCountryCodesOptions | async"
                                 [value]="option.countryISDCode">
                                 <div style="display: flex; align-items: center;">
