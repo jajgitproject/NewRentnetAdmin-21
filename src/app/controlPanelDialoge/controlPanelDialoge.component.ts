@@ -84,7 +84,6 @@ import { DriverRemarkDetailsComponent } from '../DriverRemarkDetails/DriverRemar
 import { FormDialogdriverRemarkComponent } from '../driverRemark/dialogs/form-dialog/form-dialog.component';
 import { CarMovingStatusByAppComponent } from '../carMovingStatusByApp/carMovingStatusByApp.component';
 import { AppDataMissingStatusComponent } from '../appDataMissingStatus/appDataMissingStatus.component';
-import { TrackOnMapInfoComponent } from '../trackOnMapInfo/trackOnMapInfo.component';
 import { FormDialogComponent } from '../feedBack/dialogs/form-dialog/form-dialog.component';
 import { NextDayInstructionFormDialogComponent } from '../nextDayInstruction/dialogs/form-dialog/form-dialog.component';
 import { DutyPostFormDialogComponent } from '../dutyPostPickUPCall/dialogs/form-dialog/form-dialog.component';
@@ -263,7 +262,8 @@ export class ControlPanelDialogeComponent {
     // Always fetch latest status before opening
     this.fetchStatusAndOpen(() => {
       this.dialog.open(TimeAndAddressInfoComponent, {
-        width: '750px',
+        width: '920px',
+        maxWidth: '96vw',
         data: {
           advanceTable: item.stopsDetails[0],
           status: this.status,
@@ -275,7 +275,8 @@ export class ControlPanelDialogeComponent {
   TimeAndAddressDrop(item) {
     this.fetchStatusAndOpen(() => {
       this.dialog.open(TimeAndAddressInfoComponent, {
-        width: '750px',
+        width: '920px',
+        maxWidth: '96vw',
         data: {
           advanceTable: item.stopsDetails[1],
           status: this.status,
@@ -291,7 +292,9 @@ export class ControlPanelDialogeComponent {
     //   (value) => value.reservationID === reservationID
     // )[0].stopsDetails;
     this.dialog.open(StopDetailsInfoComponent, {
-      width: '650px',
+      width: 'min(1200px, 98vw)',
+      maxWidth: '98vw',
+      panelClass: 'stop-details-wide-dialog',
       data: {
         advanceTable: item
       }
@@ -303,7 +306,9 @@ export class ControlPanelDialogeComponent {
     //   (value) => value.reservationID === item.reservationID
     // )[0].stopsDetails;
     this.dialog.open(StopOnMapInfoComponent, {
-      width: '750px',
+      width: 'min(1200px, 98vw)',
+      maxWidth: '98vw',
+      panelClass: 'stops-on-map-wide-dialog',
       data: {
         advanceTable: item
       }
@@ -478,6 +483,8 @@ export class ControlPanelDialogeComponent {
     this.fetchStatusAndOpen(() => {
       const dialogRef = this.dialog.open(PickupTimeFormDialogComponent,
         {
+          width: '520px',
+          maxWidth: '96vw',
           data:
           {
             advanceTable: item,
@@ -2132,14 +2139,30 @@ export class ControlPanelDialogeComponent {
       });
   }
 //----------TrackOnMap------------
+/** Opens eco partner trip tracker when garage out is recorded; otherwise SweetAlert. */
+TrackOnMapInfo(reservationID: number, item?: any) {
+  const hasGarageOut = !!(item?.garageOutDate && item?.garageOutTime);
 
-TrackOnMapInfo(dutySlipID:number) {
-  this.dialog.open(TrackOnMapInfoComponent, {
-    width: '750px',
-    data: {
-      dutySlipID:dutySlipID
-    },
-  });
+  if (!hasGarageOut) {
+    Swal.fire({
+      icon: 'info',
+      text: 'You can track trips after Location Out..'
+    });
+    return;
+  }
+
+  const rid = Number(
+    reservationID != null && reservationID !== ''
+      ? reservationID
+      : item?.reservationID
+  );
+  if (!Number.isFinite(rid) || rid <= 0) {
+    console.warn('TrackOnMapInfo skipped: invalid reservationID', reservationID, item);
+    return;
+  }
+
+  const trackUrl = `https://ecopartner.ecoserp.in/?id=${encodeURIComponent(String(Math.trunc(rid)))}`;
+  window.open(trackUrl, '_blank', 'noopener,noreferrer');
 }
  //---------- Car Moving Status By App Popup----------
   CarMovingStatusByApp(item: any) 

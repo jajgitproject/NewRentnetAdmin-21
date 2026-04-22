@@ -513,6 +513,29 @@
     display: block !important;
   }
 
+  /* Track on Map: slightly taller row so label + ⋮ stay easy to click (default --cp-row-lh is 14px). */
+  .track-on-map-row {
+    --cp-track-hit: 22px;
+    grid-template-rows: var(--cp-track-hit) !important;
+  }
+
+  .track-on-map-row .BoldButton,
+  .track-on-map-row .BoldButton .mdc-button__label,
+  .track-on-map-row .BoldButton .mat-mdc-button-touch-target,
+  .track-on-map-row .BoldButton .mat-mdc-focus-indicator,
+  .track-on-map-row .BoldButton .mat-mdc-button-persistent-ripple,
+  .track-on-map-row .BoldButton .mat-mdc-button-ripple {
+    min-height: var(--cp-track-hit) !important;
+    height: var(--cp-track-hit) !important;
+    line-height: var(--cp-track-hit) !important;
+  }
+
+  .track-on-map-dots {
+    height: var(--cp-track-hit) !important;
+    max-height: var(--cp-track-hit) !important;
+    line-height: var(--cp-track-hit) !important;
+  }
+
   /* After .BoldButton + column rules: Reservation Group label in grid col 1 */
   table tr > td:nth-child(-n+5) .reservation-group-container.cp-menu-row-tight a.BoldButton.cp-menu-label-text {
     grid-column: 1 !important;

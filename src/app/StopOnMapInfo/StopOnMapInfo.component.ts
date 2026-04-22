@@ -3,9 +3,16 @@ import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { Component, Inject } from '@angular/core';
 import { MAT_DATE_LOCALE } from '@angular/material/core';
 import { GeneralService } from '../general/general.service';
-import { ControlPanelDetails, StopsModel } from '../controlPanelDesign/controlPanelDesign.model';
-import { DomSanitizer, SafeUrl } from '@angular/platform-browser';
+import { ControlPanelDetails } from '../controlPanelDesign/controlPanelDesign.model';
+import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { RuntimeConfigService } from '../core/service/runtime-config.service';
+import {
+  orderReservationStops,
+  getReservationStopMapQuery,
+  buildGoogleMapsEmbedDirectionsUrl,
+  buildGoogleMapsDirUrlForStops
+} from '../shared/reservation-stops-map.util';
+
 @Component({
   standalone: false,
   selector: 'app-StopOnMapInfo',
@@ -16,8 +23,10 @@ import { RuntimeConfigService } from '../core/service/runtime-config.service';
 export class StopOnMapInfoComponent {
   public stopDetailsInfo: ControlPanelDetails;
   dialogTitle: string;
-  public dangerousMapUrl: string;
-  public trustedUrl: SafeUrl;
+  /** Embedded map (place or directions). */
+  trustedUrl: SafeResourceUrl | null = null;
+  /** Same as Stop Details: open full route in browser. */
+  routeDirectionsBrowserUrl = '';
 
   constructor(
     public dialogRef: MatDialogRef<StopOnMapInfoComponent>,
@@ -27,43 +36,47 @@ export class StopOnMapInfoComponent {
     private sanitizer: DomSanitizer,
     private runtimeConfig: RuntimeConfigService
   ) {
-    // Set the defaults
     this.dialogTitle = 'Stops on Map';
-    this.stopDetailsInfo = this.data.advanceTable;
-    if (this.stopDetailsInfo != null) {
-      const apiKey = encodeURIComponent(this.runtimeConfig.getGoogleMapsApiKey());
-      const base = `https://www.google.com/maps/embed/v1/directions?key=${apiKey}`;
+    this.stopDetailsInfo = this.data?.advanceTable ?? new ControlPanelDetails({});
+    this.buildMapUrls();
+  }
 
-      if (this.stopDetailsInfo.stopsDetails.length > 2) {
-        // For three or more stops, include waypoints
-        const origin = this.stopDetailsInfo.stopsDetails[0].reservationStopAddress;
-        const destination = this.stopDetailsInfo.stopsDetails[1].reservationStopAddress;
-        const waypoints = this.stopDetailsInfo.stopsDetails
-          .slice(2)
-          .map((stop) => stop.reservationStopAddress)
-          .join('|');
+  getOrderedStops(): any[] {
+    return orderReservationStops(this.stopDetailsInfo?.stopsDetails);
+  }
 
-        this.dangerousMapUrl =
-          `${base}&origin=${encodeURIComponent(origin)}` +
-          `&destination=${encodeURIComponent(destination)}` +
-          `&waypoints=${encodeURIComponent(waypoints)}`;
-      } else {
-        const origin = this.stopDetailsInfo?.stopsDetails[0].reservationStopAddress;
-        const destination = this.stopDetailsInfo?.stopsDetails[1].reservationStopAddress;
-        this.dangerousMapUrl =
-          `${base}&origin=${encodeURIComponent(origin)}` +
-          `&destination=${encodeURIComponent(destination)}`;
-      }
+  getStopQuery(stop: any): string {
+    return getReservationStopMapQuery(stop);
+  }
 
-      this.trustedUrl = this.sanitizer.bypassSecurityTrustResourceUrl(this.dangerousMapUrl);
+  stopSectionHeading(item: any): string {
+    const t = String(item?.reservationStopType || item?.stopType || '').toLowerCase();
+    if (t === 'pickup') return 'Pick Up';
+    if (t === 'enroute') return 'Stop';
+    if (t === 'dropoff' || t === 'destination') return 'Drop Off';
+    return 'Stop';
+  }
+
+  stopMapSearchUrl(stop: any): string {
+    const q = this.getStopQuery(stop);
+    if (!q) return 'https://www.google.com/maps';
+    return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(q)}`;
+  }
+
+  private buildMapUrls(): void {
+    this.trustedUrl = null;
+    this.routeDirectionsBrowserUrl = '';
+    const ordered = this.getOrderedStops();
+    const withQuery = ordered.filter((s) => getReservationStopMapQuery(s));
+    const key = encodeURIComponent(this.runtimeConfig.getGoogleMapsApiKey());
+    const embed = buildGoogleMapsEmbedDirectionsUrl(withQuery, key);
+    if (embed) {
+      this.trustedUrl = this.sanitizer.bypassSecurityTrustResourceUrl(embed);
     }
-    
-    
+    this.routeDirectionsBrowserUrl = buildGoogleMapsDirUrlForStops(withQuery);
   }
 
   onNoClick(): void {
     this.dialogRef.close();
   }
 }
-
-

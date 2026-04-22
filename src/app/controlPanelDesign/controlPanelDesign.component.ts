@@ -101,7 +101,6 @@ import { incidenceFormDialogComponent } from '../incidence/dialogs/form-dialog/f
 import { IncidenceService } from '../incidence/incidence.service';
 import { resolutionFormDialogComponent } from '../resolution/dialogs/form-dialog/form-dialog.component';
 import { ResolutionService } from '../resolution/resolution.service';
-import { TrackOnMapInfoComponent } from '../trackOnMapInfo/trackOnMapInfo.component';
 import { DriverOfficialIdentityNumberDD } from '../general/driverOfficialIdentityNumberDD.model';
 import Swal from 'sweetalert2';
 import { TotalBookingCountDetailsComponent } from '../totalBookingCountDetails/totalBookingCountDetails.component';
@@ -2273,7 +2272,8 @@ reachedByExecutiveGPS(item:any){
     //     (value) => value.reservationStopID === reservationStopID
     //   )[0];
     this.dialog.open(TimeAndAddressInfoComponent, {
-      width: '750px',
+      width: '920px',
+      maxWidth: '96vw',
       data: {
         advanceTable: item.stopsDetails[0],
         parentRow: item
@@ -2287,7 +2287,8 @@ reachedByExecutiveGPS(item:any){
     //     (value) => value.reservationStopID === reservationStopID
     //   )[0];
     this.dialog.open(TimeAndAddressInfoComponent, {
-      width: '750px',
+      width: '920px',
+      maxWidth: '96vw',
       data: {
         advanceTable: item.stopsDetails[1],
         parentRow: item,
@@ -2301,7 +2302,9 @@ reachedByExecutiveGPS(item:any){
     //   (value) => value.reservationID === reservationID
     // )[0].stopsDetails;
     this.dialog.open(StopDetailsInfoComponent, {
-      width: '650px',
+      width: 'min(1200px, 98vw)',
+      maxWidth: '98vw',
+      panelClass: 'stop-details-wide-dialog',
       data: {
         advanceTable: item
       }
@@ -2313,7 +2316,9 @@ reachedByExecutiveGPS(item:any){
     //   (value) => value.reservationID === item.reservationID
     // )[0].stopsDetails;
     this.dialog.open(StopOnMapInfoComponent, {
-      width: '750px',
+      width: 'min(1200px, 98vw)',
+      maxWidth: '98vw',
+      panelClass: 'stops-on-map-wide-dialog',
       data: {
         advanceTable: item
       }
@@ -3537,10 +3542,8 @@ getLifeCycleDisplay(status: any): { label: string; color: string } {
 
 TrackOnMapInfo(reservationID: number, item?: any) {
   const hasGarageOut = !!(item?.garageOutDate && item?.garageOutTime);
-  const hasLocationOut = !!(item?.locationOutDate && item?.locationOutTime);
 
-  // Allow tracking only after garage out is captured.
-  if (!hasGarageOut && !hasLocationOut) {
+  if (!hasGarageOut) {
     Swal.fire({
       icon: 'info',
       text: 'You can track trips after Location Out..'
@@ -3548,14 +3551,18 @@ TrackOnMapInfo(reservationID: number, item?: any) {
     return;
   }
 
-  const rid = Number(reservationID);
+  const rid = Number(
+    reservationID != null && reservationID !== ''
+      ? reservationID
+      : item?.reservationID
+  );
   if (!Number.isFinite(rid) || rid <= 0) {
-    console.warn('TrackOnMapInfo skipped: invalid reservationID', reservationID);
+    console.warn('TrackOnMapInfo skipped: invalid reservationID', reservationID, item);
     return;
   }
 
   const trackUrl = `https://ecopartner.ecoserp.in/?id=${encodeURIComponent(String(Math.trunc(rid)))}`;
-  window.open(trackUrl, '_blank');
+  window.open(trackUrl, '_blank', 'noopener,noreferrer');
 }
 
 //--------- Interstate Tax Popup ----------
@@ -3610,6 +3617,8 @@ navigateToInterstateTaxDetails(item)
   {
     const dialogRef = this.dialog.open(PickupTimeFormDialogComponent, 
     {
+      width: '520px',
+      maxWidth: '96vw',
       data: 
       {
         advanceTable:item,

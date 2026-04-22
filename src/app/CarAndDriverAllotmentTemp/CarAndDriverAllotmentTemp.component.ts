@@ -494,6 +494,8 @@ DriverFeedbackInfo()
   { 
     this.dialog.open(TimeAndAddressInfoComponent, 
     { 
+      width: '920px',
+      maxWidth: '96vw',
       data: 
       {
         advanceTable: this.advanceTable,
@@ -533,6 +535,9 @@ DriverFeedbackInfo()
   { 
     this.dialog.open(StopDetailsInfoComponent, 
     { 
+      width: 'min(1200px, 98vw)',
+      maxWidth: '98vw',
+      panelClass: 'stop-details-wide-dialog',
       data: 
       {
         advanceTable: this.advanceTable,
@@ -543,13 +548,14 @@ DriverFeedbackInfo()
 
   StopsOnMapInfo()
   { 
-    this.dialog.open(StopOnMapInfoComponent, 
-    { 
-      data: 
-      {
+    this.dialog.open(StopOnMapInfoComponent, {
+      width: 'min(1200px, 98vw)',
+      maxWidth: '98vw',
+      panelClass: 'stops-on-map-wide-dialog',
+      data: {
         advanceTable: this.advanceTable,
         action: 'add'
-      }, 
+      }
     });
   }
 

@@ -1,107 +1,54 @@
-<!-- <div class="addContainer"> -->
-<div class="modalHeader">
-  <div class="editRowModal">
-    <div class="modalHeader clearfix">
-      <div class="modal-about">
-        <div class="font-weight-bold p-t-5 font-17">
-          {{ dialogTitle }}
+<div class="stop-details-shell">
+  <div class="modalHeader">
+    <div class="editRowModal">
+      <div class="modalHeader clearfix">
+        <div class="modal-about">
+          <div class="font-weight-bold p-t-5 font-17 stop-details-shell__title">
+            {{ dialogTitle }}
+          </div>
         </div>
       </div>
     </div>
+    <button mat-icon-button (click)="dialogRef.close()" aria-label="Close dialog">
+      <mat-icon class="small-close-icon">close</mat-icon>
+    </button>
   </div>
-  <button mat-icon-button (click)="dialogRef.close()" aria-label="Close dialog">
-    <mat-icon class="small-close-icon">close</mat-icon>
-  </button>
+  <mat-card class="stop-details-card">
+    <mat-card-content>
+      <mat-dialog-content class="of-hidden stop-details-content">
+        <div class="row stop-details-stop" *ngFor="let item of getOrderedStops()">
+          <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12 mb-3">
+            <div class="stop-details-stop__heading">
+              <span class="TDValueBold">{{ stopSectionHeading(item) }} - </span>
+              <span class="TDValue">
+                {{ item.reservationStopTime | date : 'shortTime' }}
+                {{ item.reservationStopDate | date : 'dd/MM/yyyy' }}
+              </span>
+            </div>
+            <span class="TDValue d-block">{{ item.reservationStopAddress || 'Address Not Found' }}</span>
+            <span class="TDValue d-block">{{ item.reservationStopAddressDetails || 'Address Not Found' }}</span>
+            <a
+              *ngIf="getStopQuery(item)"
+              class="stop-details__maps-link"
+              target="_blank"
+              rel="noopener noreferrer"
+              [href]="stopMapSearchUrl(item)"
+              >View On map</a
+            >
+          </div>
+        </div>
+        <div class="row stop-details__route-link" *ngIf="routeDirectionsBrowserUrl">
+          <div class="col-12">
+            <a
+              class="stop-details__maps-link"
+              target="_blank"
+              rel="noopener noreferrer"
+              [href]="routeDirectionsBrowserUrl"
+              >View full route on Google Maps</a
+            >
+          </div>
+        </div>
+      </mat-dialog-content>
+    </mat-card-content>
+  </mat-card>
 </div>
-<mat-card>
-  <mat-card-content>
-    <mat-dialog-content class="of-hidden">
-      <div class="row" *ngFor="let item of stopDetailsInfo.stopsDetails">
-        <div
-          class="col-xl-12 col-lg-12 col-md-12 col-sm-12 mb-2"
-          *ngIf="item.reservationStopType == 'Pickup'"
-        >
-          <span class="TDValueBold"> Pick Up - </span>
-          <span class="TDValue"
-            >{{ item.reservationStopTime | date : 'shortTime' }}
-            {{ item.reservationStopDate | date : 'dd/MM/yyyy' }}</span
-          >
-          <br />
-          <!-- <span class="TDValue" *ngFor="let pItem of item.stopPassengerList"
-                  >Passenger - {{ pItem.passengerName }} <br
-                /></span> -->
-          <span class="TDValue">{{ item.reservationStopAddress || 'Address Not Found' }}</span>
-          <br />
-          <span class="TDValue">{{ item.reservationStopAddressDetails || 'Address Not Found' }}</span>
-          <br />
-          <a
-            target="_blank"
-            href="https://www.google.com/maps/search/?api=1&query={{
-              item.encodedStopAddressGeoLocation
-            }}"
-            ><span class="TDValue">View On map</span></a
-          >
-          <br />
-        </div>
-      </div>
-      <div class="row" *ngFor="let item of stopDetailsInfo.stopsDetails; let i = index">
-        <div
-          class="col-xl-12 col-lg-12 col-md-12 col-sm-12 mb-2"
-          *ngIf="item.reservationStopType == 'Enroute'"
-        >
-          <span class="TDValueBold"> Stop - </span>
-          <span class="TDValue"
-            >{{ item.reservationStopTime | date : 'shortTime' }}
-            {{ item.reservationStopDate | date : 'dd/MM/yyyy' }}</span
-          >
-          <br />
-          <!-- <span class="TDValue" *ngFor="let pItem of item.stopPassengerList"
-            >Passenger - {{ pItem.passengerName }} <br
-          /></span> -->
-          <span class="TDValue">{{ item.reservationStopAddress || 'Address Not Found'}}</span>
-          <br />
-          <span class="TDValue">{{ item.reservationStopAddressDetails || 'Address Not Found'}}</span>
-          <br />
-          <a
-            target="_blank"
-            href="https://www.google.com/maps/search/?api=1&query={{
-              item.encodedStopAddressGeoLocation
-            }}"
-            ><span class="TDValue">View On map</span></a
-          >
-          <br />
-        </div>
-      </div>
-      <div class="row" *ngFor="let item of stopDetailsInfo.stopsDetails">
-        <div
-          class="col-xl-12 col-lg-12 col-md-12 col-sm-12 mb-2"
-          *ngIf="item.reservationStopType == 'Dropoff'"
-        >
-          <span class="TDValueBold"> Drop Off - </span>
-          <span class="TDValue"
-            >{{ item.reservationStopTime | date : 'shortTime' }}
-            {{ item.reservationStopDate | date : 'dd/MM/yyyy' }}</span
-          >
-          <br />
-          <!-- <span class="TDValue" *ngFor="let pItem of item.stopPassengerList"
-            >Passenger - {{ pItem.passengerName }} <br
-          /></span> -->
-          <span class="TDValue">{{ item.reservationStopAddress || 'Address Not Found' }}</span>
-          <br />
-          <span class="TDValue">{{ item.reservationStopAddressDetails  || 'Address Not Found'}}</span>
-          <br />
-          <a
-            class="TDValue"
-            target="_blank"
-            href="https://www.google.com/maps/search/?api=1&query={{
-              item.encodedStopAddressGeoLocation
-            }}"
-            ><span class="TDValue">View On map</span></a
-          >
-          <br />
-        </div>
-      </div>
-    </mat-dialog-content>
-  </mat-card-content>
-</mat-card>
-<!-- </div> -->

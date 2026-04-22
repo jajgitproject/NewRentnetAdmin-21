@@ -164,6 +164,64 @@
   overflow: hidden !important;
 }
 
+/* Stop Details: wide modal + single scroll (nested from control panel otherwise stays narrow). */
+.cdk-overlay-pane.stop-details-wide-dialog {
+  width: min(1200px, 98vw) !important;
+  max-width: 98vw !important;
+}
+.cdk-overlay-pane.stop-details-wide-dialog .mdc-dialog__surface,
+.cdk-overlay-pane.stop-details-wide-dialog .mat-mdc-dialog-container {
+  width: 100% !important;
+  max-width: 100% !important;
+}
+.cdk-overlay-pane:has(app-StopDetailsInfo) .mdc-dialog__surface,
+.cdk-overlay-pane:has(app-StopDetailsInfo) .mat-mdc-dialog-container {
+  overflow: hidden !important;
+}
+
+/* Stops on Map: same wide modal pattern as Stop Details. */
+.cdk-overlay-pane.stops-on-map-wide-dialog {
+  width: min(1200px, 98vw) !important;
+  max-width: 98vw !important;
+}
+.cdk-overlay-pane.stops-on-map-wide-dialog .mdc-dialog__surface,
+.cdk-overlay-pane.stops-on-map-wide-dialog .mat-mdc-dialog-container {
+  width: 100% !important;
+  max-width: 100% !important;
+}
+.cdk-overlay-pane:has(app-StopOnMapInfo) .mdc-dialog__surface,
+.cdk-overlay-pane:has(app-StopOnMapInfo) .mat-mdc-dialog-container {
+  overflow: hidden !important;
+}
+
+/*
+ * _modals.scss (via style.scss, loaded before this file) sets
+ * .mat-mdc-dialog-content { max-height: none !important; overflow-y: visible !important; }
+ * for most dialogs. That prevents scrolling inside mat-dialog-content while the surface
+ * uses overflow:hidden — tall content (e.g. Stops on Map iframe) is clipped with no bar.
+ * Re-enable a single scroll area on the dialog body for these wide panels only.
+ */
+.cdk-overlay-container
+  .cdk-overlay-pane.stops-on-map-wide-dialog
+  .mat-mdc-dialog-container
+  .mat-mdc-dialog-content,
+.cdk-overlay-container
+  .cdk-overlay-pane.stops-on-map-wide-dialog
+  .mat-mdc-dialog-container
+  .mdc-dialog__content,
+.cdk-overlay-container
+  .cdk-overlay-pane.stop-details-wide-dialog
+  .mat-mdc-dialog-container
+  .mat-mdc-dialog-content,
+.cdk-overlay-container
+  .cdk-overlay-pane.stop-details-wide-dialog
+  .mat-mdc-dialog-container
+  .mdc-dialog__content {
+  max-height: calc(90vh - 200px) !important;
+  overflow-y: auto !important;
+  overflow-x: hidden !important;
+}
+
 .cdk-overlay-pane .mat-mdc-dialog-content::-webkit-scrollbar,
 .cdk-overlay-pane .mdc-dialog__content::-webkit-scrollbar,
 .cdk-overlay-pane .mdc-dialog__surface::-webkit-scrollbar {

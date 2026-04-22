@@ -1607,7 +1607,8 @@ getAllDriver()
     //     (value) => value.reservationStopID === reservationStopID
     //   )[0];
     this.dialog.open(TimeAndAddressInfoComponent, {
-      width: '750px',
+      width: '920px',
+      maxWidth: '96vw',
       data: {
         advanceTable: item.stopsDetails[0],
         parentRow: item
@@ -1622,7 +1623,8 @@ getAllDriver()
     //     (value) => value.reservationStopID === reservationStopID
     //   )[0];
     this.dialog.open(TimeAndAddressInfoComponent, {
-      width: '750px',
+      width: '920px',
+      maxWidth: '96vw',
       data: {
         advanceTable: item.stopsDetails[1],
         parentRow: item,
@@ -1636,7 +1638,9 @@ getAllDriver()
     //   (value) => value.reservationID === reservationID
     // )[0].stopsDetails;
     this.dialog.open(StopDetailsInfoComponent, {
-      width: '650px',
+      width: 'min(1200px, 98vw)',
+      maxWidth: '98vw',
+      panelClass: 'stop-details-wide-dialog',
       data: {
         advanceTable: item
       }
@@ -1648,7 +1652,9 @@ getAllDriver()
     //   (value) => value.reservationID === item.reservationID
     // )[0].stopsDetails;
     this.dialog.open(StopOnMapInfoComponent, {
-      width: '750px',
+      width: 'min(1200px, 98vw)',
+      maxWidth: '98vw',
+      panelClass: 'stops-on-map-wide-dialog',
       data: {
         advanceTable: item
       }

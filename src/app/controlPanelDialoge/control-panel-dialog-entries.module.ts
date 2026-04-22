@@ -61,7 +61,6 @@ import { StopDetailsInfoModule } from '../StopDetailsInfo/StopDetailsInfo.module
 import { StopOnMapInfoModule } from '../StopOnMapInfo/StopOnMapInfo.module';
 import { TimeAndAddressInfoModule } from '../TimeAndAddressInfo/TimeAndAddressInfo.module';
 import { TotalBookingCountDetailsModule } from '../totalBookingCountDetails/totalBookingCountDetails.module';
-import { TrackOnMapInfoModule } from '../trackOnMapInfo/trackOnMapInfo.module';
 import { VendorDetailsModule } from '../vendorDetails/vendorDetails.module';
 import { VehicleCategoryInfoModule } from '../VehicleCategoryInfo/VehicleCategoryInfo.module';
 import { VehicleInfoModule } from '../VehicleInfo/VehicleInfo.module';
@@ -120,7 +119,6 @@ const CONTROL_PANEL_DIALOG_ENTRY_IMPORTS = [
   StopOnMapInfoModule,
   TimeAndAddressInfoModule,
   TotalBookingCountDetailsModule,
-  TrackOnMapInfoModule,
   VendorDetailsModule,
   VehicleCategoryInfoModule,
   VehicleInfoModule,

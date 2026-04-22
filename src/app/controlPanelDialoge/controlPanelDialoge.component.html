@@ -273,8 +273,8 @@
                                               item.stopsDetails[1].stopType == 'Destination'
                                             "
                                             > -->
-                                  <span> {{ item.drop.dropOffAddress }}</span>
-                                  <b><button class="BoldButton stop-details-btn" mat-button (click)="StopDetailsInfo(item)">
+                                  <span> {{ item.drop.dropOffAddress }}</span><br />
+                                  <b><button class="BoldButton" mat-button (click)="StopDetailsInfo(item)">
                                       Stop Details
                                     </button></b><br />
                                   <b><button class="BoldButton BoldButtonTopMargin" mat-button (click)="StopsOnMapInfo(item)">
@@ -835,21 +835,27 @@
                                   <br>
 
                                 <b class="track-on-map-row">
-                                    <button class="BoldButton" mat-button (click)="TrackOnMapInfo(item.reservationID, item)">
+                                    <button
+                                      type="button"
+                                      class="BoldButton"
+                                      mat-button
+                                      (click)="TrackOnMapInfo(item.reservationID, item)"
+                                      [disabled]="ReservationStatus === 'Cancelled'">
                                       Track on Map
                                     </button>
                                     <mat-icon class="track-on-map-dots" [matMenuTriggerFor]="menu71">
                                       more_vert
                                     </mat-icon>
                                   </b>
-                                  <mat-menu #menu71="matMenu" >
-                                    <b><button mat-menu-item (click)="TrackOnMapInfo(item.reservationID, item)"  [ngClass]="{'disabled-link': !item.allotmentStatus}">
-                                        By App
-                                      </button></b>
-
-                                       <b><button mat-menu-item>
-                                        By GPS
-                                      </button></b>
+                                  <mat-menu #menu71="matMenu">
+                                    <button
+                                      type="button"
+                                      mat-menu-item
+                                      (click)="TrackOnMapInfo(item.reservationID, item)"
+                                      [disabled]="ReservationStatus === 'Cancelled'">
+                                      By App
+                                    </button>
+                                    <button type="button" mat-menu-item disabled>By GPS</button>
                                   </mat-menu>
                                   <br>
 

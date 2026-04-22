@@ -654,7 +654,8 @@ export class ControlPanelTempComponent implements OnInit {
 
   TimeAndAddressInfo(reservationStopID: string) {
     this.dialog.open(TimeAndAddressInfoComponent, {
-      width: '750px',
+      width: '920px',
+      maxWidth: '96vw',
       data: {
         advanceTable: this.advanceTable,
         status: 'Active',
@@ -986,7 +987,9 @@ export class ControlPanelTempComponent implements OnInit {
 
   StopDetailsInfo(reservationID: number) {
     this.dialog.open(StopDetailsInfoComponent, {
-      width: '650px',
+      width: 'min(1200px, 98vw)',
+      maxWidth: '98vw',
+      panelClass: 'stop-details-wide-dialog',
       data: {
         advanceTable: this.advanceTable,
         status: 'Active',
@@ -997,7 +1000,9 @@ export class ControlPanelTempComponent implements OnInit {
 
   StopsOnMapInfo(reservationID: number) {
     this.dialog.open(StopOnMapInfoComponent, {
-      width: '750px',
+      width: 'min(1200px, 98vw)',
+      maxWidth: '98vw',
+      panelClass: 'stops-on-map-wide-dialog',
       data: {
         advanceTable: this.advanceTable,
         status: 'Active',
