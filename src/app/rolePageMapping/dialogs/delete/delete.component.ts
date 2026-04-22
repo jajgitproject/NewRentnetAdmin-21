@@ -38,6 +38,43 @@ export class DeleteDialogComponent
     }
     )
   }
+
+  get rolePageMappingDisplay(): string {
+    const role = this.data?.role ? String(this.data.role).trim() : '';
+    const page = this.data?.page ? String(this.data.page).trim() : '';
+    const explicit = this.data?.rolePageMapping ? String(this.data.rolePageMapping).trim() : '';
+
+    if (explicit) {
+      return explicit;
+    }
+    if (role && page) {
+      return `${role} - ${page}`;
+    }
+    if (page) {
+      return page;
+    }
+    if (role) {
+      return role;
+    }
+    if (this.data?.rolePageMappingID != null) {
+      return `ID ${this.data.rolePageMappingID}`;
+    }
+    return 'N/A';
+  }
+
+  get roleDisplay(): string {
+    const role = this.data?.role ? String(this.data.role).trim() : '';
+    if (role) {
+      return role;
+    }
+
+    const mapping = this.rolePageMappingDisplay;
+    if (mapping.includes(' - ')) {
+      return mapping.split(' - ')[0].trim() || 'N/A';
+    }
+
+    return mapping;
+  }
 }
 
 

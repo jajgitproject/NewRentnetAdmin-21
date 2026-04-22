@@ -58,11 +58,17 @@ export class GooglePlaceDirective implements AfterViewInit, OnChanges, OnDestroy
   private placeChangedListener: any = null;
   private readyTimer: any = null;
   private readyAttempts = 0;
+  private visibleAttempts = 0;
   private destroyed = false;
+  private debugInputListener: ((event: Event) => void) | null = null;
+  private debugInputEvents = 0;
 
   constructor(private elementRef: ElementRef<HTMLInputElement>, private zone: NgZone) {}
 
   ngAfterViewInit(): void {
+    // #region agent log
+    fetch('http://127.0.0.1:7278/ingest/38c94268-8542-449e-a503-35f5e1042ec5',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'cd6e32'},body:JSON.stringify({sessionId:'cd6e32',runId:'pre-fix',hypothesisId:'H2',location:'google-places-shim.ts:66',message:'Directive ngAfterViewInit',data:{hasInput:!!this.elementRef?.nativeElement,hasOptions:!!this.options,googlePlacesReady:!!(window as any)?.google?.maps?.places?.Autocomplete},timestamp:Date.now()})}).catch(()=>{});
+    // #endregion
     this.waitForGoogleAndInit();
   }
 
@@ -92,6 +98,10 @@ export class GooglePlaceDirective implements AfterViewInit, OnChanges, OnDestroy
       }
     }
     this.placeChangedListener = null;
+    if (this.debugInputListener && this.elementRef?.nativeElement) {
+      this.elementRef.nativeElement.removeEventListener('input', this.debugInputListener);
+    }
+    this.debugInputListener = null;
     this.autocomplete = null;
   }
 
@@ -107,6 +117,9 @@ export class GooglePlaceDirective implements AfterViewInit, OnChanges, OnDestroy
       return;
     }
     if (this.readyAttempts >= READY_POLL_MAX_ATTEMPTS) {
+      // #region agent log
+      fetch('http://127.0.0.1:7278/ingest/38c94268-8542-449e-a503-35f5e1042ec5',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'cd6e32'},body:JSON.stringify({sessionId:'cd6e32',runId:'pre-fix',hypothesisId:'H1',location:'google-places-shim.ts:110',message:'Google Places not ready after max attempts',data:{readyAttempts:this.readyAttempts},timestamp:Date.now()})}).catch(()=>{});
+      // #endregion
       // Give up quietly - the input continues to work as plain text.
       // eslint-disable-next-line no-console
       console.warn(
@@ -124,21 +137,106 @@ export class GooglePlaceDirective implements AfterViewInit, OnChanges, OnDestroy
     if (!input) {
       return;
     }
+    const inputVisible = !!input.offsetParent && input.clientWidth > 0;
+    if (!inputVisible) {
+      if (this.visibleAttempts < 120) {
+        this.visibleAttempts += 1;
+        // #region agent log
+        fetch('http://127.0.0.1:7278/ingest/38c94268-8542-449e-a503-35f5e1042ec5',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'cd6e32'},body:JSON.stringify({sessionId:'cd6e32',runId:'post-fix',hypothesisId:'H2',location:'google-places-shim.ts:136',message:'Deferring init until input visible',data:{visibleAttempts:this.visibleAttempts,inputOffsetParentNull:input.offsetParent===null,inputClientWidth:input.clientWidth},timestamp:Date.now()})}).catch(()=>{});
+        // #endregion
+        requestAnimationFrame(() => this.initAutocomplete());
+      }
+      return;
+    }
     try {
+      // #region agent log
+      fetch('http://127.0.0.1:7278/ingest/38c94268-8542-449e-a503-35f5e1042ec5',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'cd6e32'},body:JSON.stringify({sessionId:'cd6e32',runId:'pre-fix',hypothesisId:'H2',location:'google-places-shim.ts:131',message:'Init autocomplete called',data:{inputConnected:!!input.isConnected,inputOffsetParentNull:input.offsetParent===null,inputClientWidth:input.clientWidth,hasOptions:!!this.options},timestamp:Date.now()})}).catch(()=>{});
+      // #endregion
       this.autocomplete = new google.maps.places.Autocomplete(
         input,
         this.normalizeOptions(this.options)
       );
+      this.debugInputListener = () => {
+        if (this.debugInputEvents >= 3) {
+          return;
+        }
+        this.debugInputEvents += 1;
+        const pacContainers = Array.from(document.querySelectorAll('.pac-container')) as HTMLElement[];
+        this.repositionPacContainers(input, pacContainers);
+        const pacContainer = (pacContainers[pacContainers.length - 1] || null) as HTMLElement | null;
+        const pacRect = pacContainer?.getBoundingClientRect();
+        const inputRect = input.getBoundingClientRect();
+        const probeX = pacRect ? Math.max(0, Math.floor(pacRect.left + 8)) : 0;
+        const probeY = pacRect ? Math.max(0, Math.floor(pacRect.top + 8)) : 0;
+        const probeCenterX = pacRect ? Math.max(0, Math.floor(pacRect.left + (pacRect.width / 2))) : 0;
+        const probeCenterY = pacRect ? Math.max(0, Math.floor(pacRect.top + (pacRect.height / 2))) : 0;
+        const topElement = pacContainer ? document.elementFromPoint(probeX, probeY) as HTMLElement | null : null;
+        const topElementCenter = pacContainer ? document.elementFromPoint(probeCenterX, probeCenterY) as HTMLElement | null : null;
+        const pacItem = pacContainer?.querySelector('.pac-item') as HTMLElement | null;
+        const pacItemRect = pacItem?.getBoundingClientRect();
+        const pacStyle = pacContainer ? window.getComputedStyle(pacContainer) : null;
+        // #region agent log
+        fetch('http://127.0.0.1:7278/ingest/38c94268-8542-449e-a503-35f5e1042ec5',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'cd6e32'},body:JSON.stringify({sessionId:'cd6e32',runId:'pre-fix-3',hypothesisId:'H7',location:'google-places-shim.ts:148',message:'Input typed - pac geometry state',data:{typedValue:(input.value||'').slice(0,20),pacCount:pacContainers.length,pacExists:!!pacContainer,pacDisplay:pacStyle?.display||null,pacVisibility:pacStyle?.visibility||null,pacZIndex:pacStyle?.zIndex||null,pacOpacity:pacStyle?.opacity||null,pacTransform:pacStyle?.transform||null,pacBackground:pacStyle?.backgroundColor||null,pacChildrenCount:pacContainer?.children?.length||0,pacTop:pacRect?.top??null,pacLeft:pacRect?.left??null,pacBottom:pacRect?.bottom??null,pacRight:pacRect?.right??null,pacWidth:pacRect?.width??null,pacHeight:pacRect?.height??null,pacItemExists:!!pacItem,pacItemTop:pacItemRect?.top??null,pacItemLeft:pacItemRect?.left??null,pacItemBottom:pacItemRect?.bottom??null,pacItemHeight:pacItemRect?.height??null,inputTop:inputRect.top,inputLeft:inputRect.left,inputBottom:inputRect.bottom,inputRight:inputRect.right,viewportW:window.innerWidth,viewportH:window.innerHeight,topElementTag:topElement?.tagName||null,topElementClass:topElement?.className||null,topElementCenterTag:topElementCenter?.tagName||null,topElementCenterClass:topElementCenter?.className||null},timestamp:Date.now()})}).catch(()=>{});
+        // #endregion
+        try {
+          const service = new google.maps.places.AutocompleteService();
+          service.getPlacePredictions(
+            { input: input.value || '', componentRestrictions: this.options?.componentRestrictions },
+            (predictions: any[], status: string) => {
+              // #region agent log
+              fetch('http://127.0.0.1:7278/ingest/38c94268-8542-449e-a503-35f5e1042ec5',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'cd6e32'},body:JSON.stringify({sessionId:'cd6e32',runId:'pre-fix-2',hypothesisId:'H6',location:'google-places-shim.ts:152',message:'AutocompleteService prediction status',data:{typedValue:(input.value||'').slice(0,20),status,predictionCount:predictions?.length||0},timestamp:Date.now()})}).catch(()=>{});
+              // #endregion
+            }
+          );
+        } catch (e) {
+          // #region agent log
+          fetch('http://127.0.0.1:7278/ingest/38c94268-8542-449e-a503-35f5e1042ec5',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'cd6e32'},body:JSON.stringify({sessionId:'cd6e32',runId:'pre-fix-2',hypothesisId:'H6',location:'google-places-shim.ts:159',message:'AutocompleteService call failed',data:{errorMessage:(e as any)?.message||'unknown'},timestamp:Date.now()})}).catch(()=>{});
+          // #endregion
+        }
+      };
+      input.addEventListener('input', this.debugInputListener);
       this.placeChangedListener = this.autocomplete.addListener('place_changed', () => {
         const place = this.autocomplete.getPlace();
+        // #region agent log
+        fetch('http://127.0.0.1:7278/ingest/38c94268-8542-449e-a503-35f5e1042ec5',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'cd6e32'},body:JSON.stringify({sessionId:'cd6e32',runId:'pre-fix',hypothesisId:'H3',location:'google-places-shim.ts:139',message:'place_changed emitted',data:{hasPlace:!!place,hasGeometry:!!place?.geometry,placeId:place?.place_id||null,name:place?.name||null},timestamp:Date.now()})}).catch(()=>{});
+        // #endregion
         // Bring the event back into Angular's zone so change detection runs
         // for downstream form updates (patchValue, etc.).
         this.zone.run(() => this.onAddressChange.emit(place));
       });
     } catch (err) {
+      // #region agent log
+      fetch('http://127.0.0.1:7278/ingest/38c94268-8542-449e-a503-35f5e1042ec5',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'cd6e32'},body:JSON.stringify({sessionId:'cd6e32',runId:'pre-fix',hypothesisId:'H2',location:'google-places-shim.ts:146',message:'Init autocomplete failed',data:{errorMessage:(err as any)?.message||'unknown'},timestamp:Date.now()})}).catch(()=>{});
+      // #endregion
       // eslint-disable-next-line no-console
       console.warn('[google-places-shim] failed to init Autocomplete:', err);
     }
+  }
+
+  private repositionPacContainers(input: HTMLInputElement, pacContainers: HTMLElement[]): void {
+    if (!pacContainers || pacContainers.length === 0) {
+      return;
+    }
+    const rect = input.getBoundingClientRect();
+    if (rect.width <= 0 || rect.height <= 0) {
+      return;
+    }
+    pacContainers.forEach((pacContainer) => {
+      if (pacContainer.parentElement !== document.body) {
+        document.body.appendChild(pacContainer);
+      }
+      pacContainer.style.setProperty('position', 'fixed', 'important');
+      pacContainer.style.setProperty('top', `${Math.round(rect.bottom)}px`, 'important');
+      pacContainer.style.setProperty('left', `${Math.round(rect.left)}px`, 'important');
+      pacContainer.style.setProperty('width', `${Math.max(Math.round(rect.width), 260)}px`, 'important');
+      pacContainer.style.setProperty('z-index', '2147483647', 'important');
+      pacContainer.style.setProperty('pointer-events', 'auto', 'important');
+      pacContainer.style.setProperty('opacity', '1', 'important');
+    });
+    const lastContainer = pacContainers[pacContainers.length - 1];
+    // #region agent log
+    fetch('http://127.0.0.1:7278/ingest/38c94268-8542-449e-a503-35f5e1042ec5',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'cd6e32'},body:JSON.stringify({sessionId:'cd6e32',runId:'post-fix-2',hypothesisId:'H9',location:'google-places-shim.ts:208',message:'Repositioned pac containers',data:{pacCount:pacContainers.length,lastParent:lastContainer?.parentElement?.tagName||null,top:lastContainer?.style.top||null,left:lastContainer?.style.left||null,width:lastContainer?.style.width||null,zIndex:lastContainer?.style.zIndex||null,pointerEvents:lastContainer?.style.pointerEvents||null,opacity:lastContainer?.style.opacity||null},timestamp:Date.now()})}).catch(()=>{});
+    // #endregion
   }
 
   /**

@@ -514,3 +514,49 @@ app-upload-dialog mat-dialog-actions button {
   text-transform: none !important;
 }
 
+/* Role delete dialog: match plain compact theme (no section dividers). */
+.cdk-overlay-container .cdk-overlay-pane.plain-delete-dialog app-delete > .container {
+  min-width: 260px !important;
+  padding: 0 !important;
+  text-align: center !important;
+}
+
+.cdk-overlay-container .cdk-overlay-pane.plain-delete-dialog app-delete h2[mat-dialog-title] {
+  border-bottom: none !important;
+  background: transparent !important;
+  padding: 18px 16px 6px !important;
+  font-size: 24px !important;
+  font-weight: 400 !important;
+  color: #2b2b2b !important;
+  text-align: center !important;
+}
+
+.cdk-overlay-container .cdk-overlay-pane.plain-delete-dialog app-delete h3[mat-dialog-title] {
+  padding: 8px 16px 0 !important;
+  color: #2b2b2b !important;
+  font-size: 16px !important;
+  font-weight: 400 !important;
+  text-align: center !important;
+}
+
+.cdk-overlay-container .cdk-overlay-pane.plain-delete-dialog app-delete [mat-dialog-content] {
+  padding: 8px 16px 0 !important;
+  font-size: 14px !important;
+  text-align: center !important;
+}
+
+.cdk-overlay-container .cdk-overlay-pane.plain-delete-dialog app-delete [mat-dialog-actions] {
+  border-top: none !important;
+  background: transparent !important;
+  justify-content: center !important;
+  gap: 12px !important;
+  padding: 18px 16px 14px !important;
+}
+
+.cdk-overlay-container .cdk-overlay-pane.plain-delete-dialog app-delete [mat-dialog-actions] button {
+  min-width: 90px !important;
+  border-radius: 6px !important;
+  font-size: 16px !important;
+  font-weight: 500 !important;
+}
+

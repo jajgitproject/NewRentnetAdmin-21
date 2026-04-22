@@ -831,6 +831,7 @@ export class ControlPanelDialogeComponent {
           verifyDutyStatusAndCacellationStatus:this.verifyDutyStatusAndCacellationStatus
         }
       });
+      this.logPopupCenterMetrics(dialogRef, 'ReachedManual', 'H6');
       dialogRef.afterClosed().subscribe(res => {
         if (res) {
           item.reportingToGuestDate = res?.reportingToGuestDate; // Update with the received data
@@ -1301,6 +1302,11 @@ export class ControlPanelDialogeComponent {
     if (item.allotmentStatus === 'Alloted') {
       const dialogRef = this.dialog.open(FormDialogGIComponent, {
         width: '800px',
+        maxWidth: '95vw',
+        maxHeight: '90vh',
+        autoFocus: false,
+        restoreFocus: false,
+        panelClass: 'dbe-dialog-centered',
         data: {
           reservationID: item.reservationID,
           allotmentID: item.allotmentID,
@@ -1314,6 +1320,7 @@ export class ControlPanelDialogeComponent {
           verifyDutyStatusAndCacellationStatus:this.verifyDutyStatusAndCacellationStatus
         }
       });
+      this.logPopupCenterMetrics(dialogRef, 'GarageInManual', 'H7');
       dialogRef.afterClosed().subscribe(res => {
         if (res) {
           item.locationInDate = res?.locationInDate;
@@ -1328,6 +1335,11 @@ export class ControlPanelDialogeComponent {
     if (item.allotmentStatus === 'Alloted') {
       const dialogRef = this.dialog.open(FormDialogGIComponent, {
         width: '800px',
+        maxWidth: '95vw',
+        maxHeight: '90vh',
+        autoFocus: false,
+        restoreFocus: false,
+        panelClass: 'dbe-dialog-centered',
         data: {
           reservationID: item.reservationID,
           allotmentID: item.allotmentID,
@@ -1353,6 +1365,11 @@ export class ControlPanelDialogeComponent {
     if (item.allotmentStatus === 'Alloted') {
       const dialogRef = this.dialog.open(FormDialogGIComponent, {
         width: '800px',
+        maxWidth: '95vw',
+        maxHeight: '90vh',
+        autoFocus: false,
+        restoreFocus: false,
+        panelClass: 'dbe-dialog-centered',
         data: {
           reservationID: item.reservationID,
           allotmentID: item.allotmentID,
@@ -1491,6 +1508,7 @@ export class ControlPanelDialogeComponent {
           verifyDutyStatusAndCacellationStatus:this.verifyDutyStatusAndCacellationStatus
         }
       });
+      this.logPopupCenterMetrics(dialogRef, 'GarageOutManual', 'H8');
       dialogRef.afterClosed().subscribe(res => {
         if (res) {
           item.locationOutDate = res?.locationOutDate;
@@ -1633,6 +1651,7 @@ export class ControlPanelDialogeComponent {
           verifyDutyStatusAndCacellationStatus:this.verifyDutyStatusAndCacellationStatus
         }
       });
+      this.logPopupCenterMetrics(dialogRef, 'PickupManual', 'H9');
 
       dialogRef.afterClosed().subscribe(res => {
         if (res) {
@@ -1738,6 +1757,7 @@ export class ControlPanelDialogeComponent {
             verifyDutyStatusAndCacellationStatus:this.verifyDutyStatusAndCacellationStatus
           }
         });
+      this.logPopupCenterMetrics(dialogRef, 'DropOffManual', 'H10');
       dialogRef.afterClosed().subscribe(res => {
         if (res) {
           item.garageOutDate = res?.dropOffDate;
@@ -1775,6 +1795,34 @@ export class ControlPanelDialogeComponent {
 
       })
     }
+  }
+
+  private logPopupCenterMetrics(dialogRef: MatDialogRef<any>, popupName: string, hypothesisId: string): void {
+    dialogRef.afterOpened().subscribe(() => {
+      const containerEl = (dialogRef as any)?._containerInstance?._elementRef?.nativeElement as HTMLElement | null;
+      const pane = containerEl?.closest('.cdk-overlay-pane') as HTMLElement | null;
+      const container = pane?.querySelector('.mat-mdc-dialog-container, .mat-dialog-container') as HTMLElement | null;
+      const surface = pane?.querySelector('.mat-mdc-dialog-surface, .mdc-dialog__surface') as HTMLElement | null;
+      const paneRect = pane?.getBoundingClientRect();
+      const vv = window.visualViewport;
+      const viewportCenterX = vv ? (vv.offsetLeft + vv.width / 2) : (window.innerWidth / 2);
+      const viewportCenterY = vv ? (vv.offsetTop + vv.height / 2) : (window.innerHeight / 2);
+      const paneCenterX = paneRect ? paneRect.left + paneRect.width / 2 : null;
+      const paneCenterY = paneRect ? paneRect.top + paneRect.height / 2 : null;
+      const wrapper = pane?.closest('.cdk-global-overlay-wrapper') as HTMLElement | null;
+      const wrapperRect = wrapper?.getBoundingClientRect();
+      const scrollbarCompensation = (window.innerWidth - document.documentElement.clientWidth) / 2;
+      const paneRectAfterComp = pane?.getBoundingClientRect();
+      const paneCenterXAfterComp = paneRectAfterComp ? paneRectAfterComp.left + paneRectAfterComp.width / 2 : null;
+      const paneRectFinal = pane?.getBoundingClientRect();
+      const paneCenterXFinal = paneRectFinal ? paneRectFinal.left + paneRectFinal.width / 2 : null;
+      const surfaceRect = surface?.getBoundingClientRect();
+      const surfaceLeftGap = (paneRect && surfaceRect) ? Math.round(surfaceRect.left - paneRect.left) : null;
+      const surfaceRightGap = (paneRect && surfaceRect) ? Math.round((paneRect.left + paneRect.width) - (surfaceRect.left + surfaceRect.width)) : null;
+      // #region agent log
+      fetch('http://127.0.0.1:7278/ingest/38c94268-8542-449e-a503-35f5e1042ec5',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'cd6e32'},body:JSON.stringify({sessionId:'cd6e32',runId:'post-fix',hypothesisId,location:'controlPanelDialoge.component.ts:logPopupCenterMetrics',message:'Popup alignment metrics captured',data:{popupName,dialogId:dialogRef.id,paneClassName:pane?.className || null,paneWidth:paneRect?.width || null,paneHeight:paneRect?.height || null,paneTop:paneRect?.top || null,paneLeft:paneRect?.left || null,paneCenterX,paneCenterY,paneLeftAfterComp:paneRectAfterComp?.left || null,paneCenterXAfterComp,paneLeftFinal:paneRectFinal?.left || null,paneCenterXFinal,viewportCenterX,viewportCenterY,deltaX:paneCenterX != null ? Math.round(paneCenterX - viewportCenterX) : null,deltaXAfterComp:paneCenterXAfterComp != null ? Math.round(paneCenterXAfterComp - viewportCenterX) : null,deltaXFinal:paneCenterXFinal != null ? Math.round(paneCenterXFinal - viewportCenterX) : null,deltaY:paneCenterY != null ? Math.round(paneCenterY - viewportCenterY) : null,surfaceTransform:surface ? getComputedStyle(surface).transform : null,surfaceTransformOrigin:surface ? getComputedStyle(surface).transformOrigin : null,surfaceWidth:surfaceRect?.width || null,surfaceLeft:surfaceRect?.left || null,surfaceLeftGap,surfaceRightGap,containerDisplay:container ? getComputedStyle(container).display : null,totalOverlayPanes:document.querySelectorAll('.cdk-overlay-pane').length,wrapperLeft:wrapperRect?.left || null,wrapperWidth:wrapperRect?.width || null,wrapperCenterX:wrapperRect ? wrapperRect.left + wrapperRect.width / 2 : null,windowInnerWidth:window.innerWidth,documentClientWidth:document.documentElement.clientWidth,visualViewportWidth:vv?.width || null,visualViewportOffsetLeft:vv?.offsetLeft || null,scrollbarCompensation},timestamp:Date.now()})}).catch(()=>{});
+      // #endregion
+    });
   }
 
   openDropOffByExectiveGPS(item: any) {

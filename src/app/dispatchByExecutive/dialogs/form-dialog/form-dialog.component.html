@@ -182,7 +182,7 @@
                             <!-- Material Autocomplete options -->
                             <mat-autocomplete #auto20="matAutocomplete"
                                 (optionSelected)="onAddressSelected($event.option.value)">
-                                <mat-option *ngFor="let option of filteredGoogleAddressOptions | async"
+                                <mat-option *ngFor="let option of ((filteredGoogleAddressOptions | async) || [])"
                                     [value]="option.geoSearchString" (click)="bindPickupSpotTypeandSpot(option)">
                                     {{ option.geoSearchString }}
                                 </mat-option>
@@ -215,9 +215,15 @@
                         <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
                             <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
                                 <mat-label>Address</mat-label>
-                                <input matInput ngx-google-places-autocomplete [options]="options"
-                                    #placesRef="ngx-places" (onAddressChange)="AddressChange($event)"
+                                <input matInput type="text" [matAutocomplete]="googleAuto"
                                     formControlName="locationOutAddressString" required (input)="onAddressTyping()" />
+                                <mat-autocomplete #googleAuto="matAutocomplete"
+                                    (optionSelected)="onGooglePredictionSelected($event.option.value)">
+                                    <mat-option *ngFor="let option of ((filteredGooglePlacesOptions | async) || [])"
+                                        [value]="option">
+                                        {{ option }}
+                                    </mat-option>
+                                </mat-autocomplete>
 
                                 <!-- Error message -->
                                 <mat-error

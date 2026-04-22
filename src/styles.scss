@@ -108,14 +108,19 @@
   align-items: center !important;
 }
 .cdk-overlay-pane.dbe-dialog-centered {
-  position: static !important;
-  margin: auto !important;
+  position: fixed !important;
+  left: 50% !important;
+  top: 50% !important;
+  margin: 0 !important;
+  width: min(800px, calc(100vw - 32px)) !important;
+  max-width: calc(100vw - 32px) !important;
   max-height: 90vh !important;
-  /* Nudge 25px left of true center per UX request */
-  transform: translateX(-25px) !important;
+  transform: translate(-50%, -50%) !important;
 }
 .cdk-overlay-pane.dbe-dialog-centered .mat-mdc-dialog-container,
 .cdk-overlay-pane.dbe-dialog-centered .mdc-dialog__surface {
+  width: 100% !important;
+  max-width: 100% !important;
   max-height: 90vh !important;
 }
 .cdk-overlay-pane.dbe-dialog-centered .mat-mdc-dialog-content,

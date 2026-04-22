@@ -683,8 +683,12 @@ this.isSaveAllowed = status === 'changes allow';
   }
 
   onAddressSelected(selectedBookerName: string) {
+    const selectedValue = (selectedBookerName || '').trim().toLowerCase();
     const selectedBooker = this.GoogleAddressList.find(
-      data => data.geoSearchString === selectedBookerName
+      data => (data.geoSearchString || '').trim().toLowerCase() === selectedValue
+    ) || this.GoogleAddressList.find(
+      data => (data.geoSearchString || '').trim().toLowerCase().startsWith(selectedValue)
+        || selectedValue.startsWith((data.geoSearchString || '').trim().toLowerCase())
     );
   
     if (selectedBooker) {
@@ -695,13 +699,9 @@ this.isSaveAllowed = status === 'changes allow';
   bindPickupSpotTypeandSpot(option:any)
   {
      this.advanceTableForm.patchValue({locationInAddressString:option.geoSearchString});
-     var value = option?.geoLocation?.replace(
-      '(',
-      ''
-    );
-    value = value?.replace(')', '');
-    var lat = value?.split(' ')[2];
-    var long = value?.split(' ')[1];
+    const parsed = this.parseCoordinates(option?.geoLocation || '');
+    const lat = parsed.lat;
+    const long = parsed.long;
     this.advanceTableForm.patchValue({ locationInLatitude: lat });
     this.advanceTableForm.patchValue({ locationInLongitude: long });
   }
@@ -867,6 +867,37 @@ googleAddressValidator(): ValidatorFn {
 
     return null;
   };
+}
+
+private parseCoordinates(coordinateString: string): { lat: number | null, long: number | null } {
+  if (!coordinateString || typeof coordinateString !== 'string') {
+    return { lat: null, long: null };
+  }
+
+  try {
+    const numberTokens = coordinateString.match(/-?\d+(?:\.\d+)?/g) || [];
+    if (numberTokens.length < 2) {
+      return { lat: null, long: null };
+    }
+
+    if (coordinateString.includes(',')) {
+      const lat = parseFloat(numberTokens[0]);
+      const long = parseFloat(numberTokens[1]);
+      if (!isNaN(lat) && !isNaN(long)) {
+        return { lat, long };
+      }
+    }
+
+    const long = parseFloat(numberTokens[0]);
+    const lat = parseFloat(numberTokens[1]);
+    if (!isNaN(lat) && !isNaN(long)) {
+      return { lat, long };
+    }
+  } catch {
+    // no-op: invalid coordinate input
+  }
+
+  return { lat: null, long: null };
 }
 
 }

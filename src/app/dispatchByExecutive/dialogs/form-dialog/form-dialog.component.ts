@@ -12,8 +12,8 @@ import { EmployeeDropDown } from 'src/app/employee/employeeDropDown.model';
 import { DispatchByExecutiveDropDown } from '../../dispatchByExecutiveDropDown.model';
 import { HttpErrorResponse } from '@angular/common/http';
 import { OrganizationalEntityDropDown } from 'src/app/organizationalEntityMessage/organizationalEntityDropDown.model';
-import { Observable } from 'rxjs';
-import { map, startWith } from 'rxjs/operators';
+import { Observable, of } from 'rxjs';
+import { map, startWith, debounceTime, distinctUntilChanged, switchMap } from 'rxjs/operators';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { FormDialogFetchComponent } from 'src/app/dispatchFetchData/dialogs/form-dialog/form-dialog.component';
 import { FetchDataFromGPSComponent } from '../fetch-data-from-gps/fetch-data-from-gps.component';
@@ -22,6 +22,7 @@ import { GoogleAddressDropDown } from 'src/app/reservation/googleAddressDropDown
 import { ReservationService } from 'src/app/reservation/reservation.service';
 import moment from 'moment';
 import { ThemeService } from 'ng2-charts';
+declare const google: any;
 
 @Component({
   standalone: false,
@@ -61,7 +62,8 @@ export class FormDialogDBEComponent {
   locationOutEntryMethod: string;
   selectedValue: string;
   locationOutEntry: boolean;
-  filteredGoogleAddressOptions: Observable<GoogleAddressDropDown[]>;
+  filteredGoogleAddressOptions: Observable<GoogleAddressDropDown[]> = of([]);
+  filteredGooglePlacesOptions: Observable<string[]> = of([]);
   public GoogleAddressList?: GoogleAddressDropDown[] = [];
   ifBlock=true;
   indeterminate = false;
@@ -147,6 +149,7 @@ this.isSaveAllowed = status === 'changes allow';
     }
     // this.loadData();
     this.InitGoogleAddress();
+    this.initLiveGooglePredictions();
   //   if (!this.advanceTableForm.get('locationOutEntryMethod').value) {
   //    this.advanceTableForm.patchValue({ locationOutEntryMethod: "Manual" });
   //  }
@@ -197,6 +200,73 @@ this.isSaveAllowed = status === 'changes allow';
         googleAddresses:[''],
       });
 
+  }
+  private initLiveGooglePredictions(): void {
+    this.filteredGooglePlacesOptions = this.advanceTableForm.controls['locationOutAddressString'].valueChanges.pipe(
+      startWith(''),
+      debounceTime(200),
+      distinctUntilChanged(),
+      switchMap((value) => {
+        const useGoogle = this.advanceTableForm.value.googleAddresses === true;
+        if (!useGoogle) {
+          return of([]);
+        }
+        return this.getGooglePredictions((value || '').toString());
+      })
+    );
+  }
+
+  private getGooglePredictions(query: string): Observable<string[]> {
+    const trimmed = (query || '').trim();
+    if (trimmed.length < 2 || !(window as any)?.google?.maps?.places?.AutocompleteService) {
+      return of([]);
+    }
+    return new Observable<string[]>((observer) => {
+      try {
+        const service = new google.maps.places.AutocompleteService();
+        service.getPlacePredictions(
+          { input: trimmed, componentRestrictions: { country: 'IN' } },
+          (predictions: any[], status: string) => {
+            const items = status === 'OK' && Array.isArray(predictions)
+              ? predictions.map((p) => p?.description).filter((x) => !!x)
+              : [];
+            observer.next(items);
+            observer.complete();
+          }
+        );
+      } catch {
+        observer.next([]);
+        observer.complete();
+      }
+    });
+  }
+
+  onGooglePredictionSelected(addressText: string): void {
+    if (!addressText) {
+      return;
+    }
+    this.advanceTableForm.patchValue({ locationOutAddressString: addressText });
+    if (!(window as any)?.google?.maps?.Geocoder) {
+      return;
+    }
+    const geocoder = new google.maps.Geocoder();
+    geocoder.geocode({ address: addressText }, (results: any[], status: string) => {
+      if (status === 'OK' && results?.length) {
+        const location = results[0].geometry?.location;
+        const lat = typeof location?.lat === 'function' ? location.lat() : null;
+        const lng = typeof location?.lng === 'function' ? location.lng() : null;
+        if (lat !== null && lng !== null) {
+          this.advanceTableForm.patchValue({
+            locationOutLatitude: lat,
+            locationOutLongitude: lng
+          });
+          this.advanceTableForm.get('locationOutAddressString')?.updateValueAndValidity();
+        }
+      }
+      // #region agent log
+      fetch('http://127.0.0.1:7278/ingest/38c94268-8542-449e-a503-35f5e1042ec5',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'cd6e32'},body:JSON.stringify({sessionId:'cd6e32',runId:'post-fix-3',hypothesisId:'H10',location:'dispatch-form-dialog.component.ts:onGooglePredictionSelected',message:'Google prediction selected and geocoded',data:{status,hasResults:!!results?.length,addressText},timestamp:Date.now()})}).catch(()=>{});
+      // #endregion
+    });
   }
 
   googlePlacesForm = this.fb.group({
@@ -1044,12 +1114,18 @@ this.isSaveAllowed = status === 'changes allow';
       {
         this.ifBlock=false;
         this.advanceTableForm.controls["locationOutAddressString"].setValue('');
+        // #region agent log
+        fetch('http://127.0.0.1:7278/ingest/38c94268-8542-449e-a503-35f5e1042ec5',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'cd6e32'},body:JSON.stringify({sessionId:'cd6e32',runId:'pre-fix',hypothesisId:'H4',location:'dispatch-form-dialog.component.ts:1048',message:'Google Addresses toggled ON',data:{googleAddresses:true,ifBlock:this.ifBlock},timestamp:Date.now()})}).catch(()=>{});
+        // #endregion
        
       }
       if(this.advanceTableForm.value.googleAddresses===false)
       {
         this.ifBlock=true;
         this.advanceTableForm.controls["locationOutAddressString"].setValue('');
+        // #region agent log
+        fetch('http://127.0.0.1:7278/ingest/38c94268-8542-449e-a503-35f5e1042ec5',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'cd6e32'},body:JSON.stringify({sessionId:'cd6e32',runId:'pre-fix',hypothesisId:'H4',location:'dispatch-form-dialog.component.ts:1055',message:'Google Addresses toggled OFF',data:{googleAddresses:false,ifBlock:this.ifBlock},timestamp:Date.now()})}).catch(()=>{});
+        // #endregion
       }
 
   }
@@ -1118,6 +1194,9 @@ this.isSaveAllowed = status === 'changes allow';
     this.locationOutAddressString = address.formatted_address;
     const lat = address.geometry.location.lat();
     const lng = address.geometry.location.lng();
+    // #region agent log
+    fetch('http://127.0.0.1:7278/ingest/38c94268-8542-449e-a503-35f5e1042ec5',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'cd6e32'},body:JSON.stringify({sessionId:'cd6e32',runId:'pre-fix',hypothesisId:'H3',location:'dispatch-form-dialog.component.ts:1123',message:'Dispatch handleAddressChange fired',data:{hasAddress:!!address,hasFormattedAddress:!!address?.formatted_address,hasGeometry:!!address?.geometry,hasPlaceId:!!address?.place_id},timestamp:Date.now()})}).catch(()=>{});
+    // #endregion
 
     this.advanceTableForm.patchValue({
       locationOutAddressString: this.locationOutAddressString,

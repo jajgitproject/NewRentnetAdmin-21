@@ -2,7 +2,7 @@
 import { Component, ElementRef, EventEmitter, Input, OnInit, Output, ViewChild, ViewEncapsulation } from '@angular/core';
 import { ControlPanelDesignService } from './controlPanelDesign.service';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
-import { MatDialog } from '@angular/material/dialog';
+import { MatDialog, MatDialogRef } from '@angular/material/dialog';
 import { MatPaginator, PageEvent } from '@angular/material/paginator';
 import { MatSort } from '@angular/material/sort';
 import { GeneralService } from '../general/general.service';
@@ -2645,6 +2645,7 @@ openDropOffByExectiveGPS(item: any)
           tab: 'Manual'
         }
       });
+      this.logDesignPopupCenterMetrics(dialogRef, 'Design_GarageOut_Manual', 'H11');
       dialogRef.afterClosed().subscribe(res => {
         if (res) {
           item.locationOutDate = res?.locationOutDate;
@@ -2757,6 +2758,11 @@ openDropOffByExectiveGPS(item: any)
     if(item.allotmentStatus === 'Alloted'){
       const dialogRef=  this.dialog.open(FormDialogGIComponent, {
        width: '800px',
+       maxWidth: '95vw',
+       maxHeight: '90vh',
+       autoFocus: false,
+       restoreFocus: false,
+       panelClass: 'dbe-dialog-centered',
        data: {
              reservationID:item.reservationID,
              allotmentID:item.allotmentID,  
@@ -2768,6 +2774,7 @@ openDropOffByExectiveGPS(item: any)
              tab:'Manual'
        }
      });
+     this.logDesignPopupCenterMetrics(dialogRef, 'Design_GarageIn_Manual', 'H12');
      dialogRef.afterClosed().subscribe(res => {
       if(res){
         item.locationInDate =res?.locationInDate;
@@ -2778,10 +2785,31 @@ openDropOffByExectiveGPS(item: any)
     }
    }
 
+  private logDesignPopupCenterMetrics(dialogRef: MatDialogRef<any>, popupName: string, hypothesisId: string): void {
+    dialogRef.afterOpened().subscribe(() => {
+      const containerEl = (dialogRef as any)?._containerInstance?._elementRef?.nativeElement as HTMLElement | null;
+      const pane = containerEl?.closest('.cdk-overlay-pane') as HTMLElement | null;
+      const paneRect = pane?.getBoundingClientRect();
+      const vv = window.visualViewport;
+      const viewportCenterX = vv ? (vv.offsetLeft + vv.width / 2) : (window.innerWidth / 2);
+      const viewportCenterY = vv ? (vv.offsetTop + vv.height / 2) : (window.innerHeight / 2);
+      const paneCenterX = paneRect ? paneRect.left + paneRect.width / 2 : null;
+      const paneCenterY = paneRect ? paneRect.top + paneRect.height / 2 : null;
+      // #region agent log
+      fetch('http://127.0.0.1:7278/ingest/38c94268-8542-449e-a503-35f5e1042ec5',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'cd6e32'},body:JSON.stringify({sessionId:'cd6e32',runId:'post-fix',hypothesisId,location:'controlPanelDesign.component.ts:logDesignPopupCenterMetrics',message:'Design popup alignment metrics captured',data:{popupName,dialogId:dialogRef.id,paneClassName:pane?.className || null,paneWidth:paneRect?.width || null,paneHeight:paneRect?.height || null,paneLeft:paneRect?.left || null,paneTop:paneRect?.top || null,paneCenterX,paneCenterY,viewportCenterX,viewportCenterY,deltaX:paneCenterX != null ? Math.round(paneCenterX - viewportCenterX) : null,deltaY:paneCenterY != null ? Math.round(paneCenterY - viewportCenterY) : null,windowInnerWidth:window.innerWidth,documentClientWidth:document.documentElement.clientWidth,visualViewportWidth:vv?.width || null,visualViewportOffsetLeft:vv?.offsetLeft || null,totalOverlayPanes:document.querySelectorAll('.cdk-overlay-pane').length},timestamp:Date.now()})}).catch(()=>{});
+      // #endregion
+    });
+  }
+
    openGarageInApp(item: any) {
     if(item.allotmentStatus === 'Alloted'){
       const dialogRef=  this.dialog.open(FormDialogGIComponent, {
        width: '800px',
+       maxWidth: '95vw',
+       maxHeight: '90vh',
+       autoFocus: false,
+       restoreFocus: false,
+       panelClass: 'dbe-dialog-centered',
        data: {
              reservationID:item.reservationID,
              allotmentID:item.allotmentID,  
@@ -2806,6 +2834,11 @@ openDropOffByExectiveGPS(item: any)
     if(item.allotmentStatus === 'Alloted'){
       const dialogRef=  this.dialog.open(FormDialogGIComponent, {
        width: '800px',
+       maxWidth: '95vw',
+       maxHeight: '90vh',
+       autoFocus: false,
+       restoreFocus: false,
+       panelClass: 'dbe-dialog-centered',
        data: {
              reservationID:item.reservationID,
              allotmentID:item.allotmentID,  

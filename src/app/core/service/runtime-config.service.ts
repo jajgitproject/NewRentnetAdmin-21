@@ -121,6 +121,9 @@ export class RuntimeConfigService {
     // invalidate any Autocomplete instances already wired up.
     const existing = document.querySelector<HTMLScriptElement>('script[data-app="google-maps"]');
     if (existing && existing.dataset.key === apiKey) {
+      // #region agent log
+      fetch('http://127.0.0.1:7278/ingest/38c94268-8542-449e-a503-35f5e1042ec5',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'cd6e32'},body:JSON.stringify({sessionId:'cd6e32',runId:'pre-fix',hypothesisId:'H1',location:'runtime-config.service.ts:124',message:'Google Maps script already present',data:{sameKey:true},timestamp:Date.now()})}).catch(()=>{});
+      // #endregion
       return;
     }
     if (existing) {
@@ -138,6 +141,9 @@ export class RuntimeConfigService {
     script.src =
       `https://maps.googleapis.com/maps/api/js?key=${encodeURIComponent(apiKey)}` +
       `&libraries=places&loading=async`;
+    // #region agent log
+    fetch('http://127.0.0.1:7278/ingest/38c94268-8542-449e-a503-35f5e1042ec5',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'cd6e32'},body:JSON.stringify({sessionId:'cd6e32',runId:'pre-fix',hypothesisId:'H1',location:'runtime-config.service.ts:141',message:'Appending Google Maps script',data:{hasApiKey:!!apiKey,srcHasPlacesLibrary:script.src.includes('libraries=places')},timestamp:Date.now()})}).catch(()=>{});
+    // #endregion
     document.head.appendChild(script);
   }
 }

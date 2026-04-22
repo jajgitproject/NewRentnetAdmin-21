@@ -118,6 +118,7 @@ class CustomerPersonModel {
   primaryMobile: string;
   importance: string;
   gender: string;
+  preferAppBasedDriver: boolean;
   customerDesignationID: string;
   customerDesignation: string;
   customerDepartmentID: string;
@@ -130,6 +131,11 @@ class CustomerPersonModel {
     this.primaryMobile = customerPerson.primaryMobile || '';
     this.importance = customerPerson.importance || '';
     this.gender = customerPerson.gender || '';
+    this.preferAppBasedDriver =
+      customerPerson.preferAppBasedDriver === true ||
+      customerPerson.preferAppBasedDriver === 'true' ||
+      customerPerson.preferAppBasedDriver === 1 ||
+      String(customerPerson.preferAppBasedDriver || '').toLowerCase() === 'yes';
     this.customerDesignationID = customerPerson.customerDesignationID || '';
     this.customerDesignation = customerPerson.customerDesignation || '';
     this.customerDepartmentID = customerPerson.customerDepartmentID || '';

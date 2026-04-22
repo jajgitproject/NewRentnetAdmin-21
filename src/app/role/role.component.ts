@@ -100,9 +100,19 @@ export class RoleComponent implements OnInit {
   deleteItem(row)
   {
     this.roleID = row.id;
+    // #region agent log
+    fetch('http://127.0.0.1:7278/ingest/38c94268-8542-449e-a503-35f5e1042ec5',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'cd6e32'},body:JSON.stringify({sessionId:'cd6e32',runId:'pre-fix',hypothesisId:'H1',location:'role.component.ts:deleteItem:beforeOpen',message:'Opening Role delete dialog',data:{roleID:row?.roleID,id:row?.id,role:row?.role,panelClass:'plain-delete-dialog'},timestamp:Date.now()})}).catch(()=>{});
+    // #endregion
     const dialogRef = this.dialog.open(DeleteDialogComponent, 
     {
-      data: row
+      data: row,
+      panelClass: 'plain-delete-dialog'
+    });
+    dialogRef.afterOpened().subscribe(() => {
+      const pane = document.querySelector('.cdk-overlay-pane:last-child') as HTMLElement | null;
+      // #region agent log
+      fetch('http://127.0.0.1:7278/ingest/38c94268-8542-449e-a503-35f5e1042ec5',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'cd6e32'},body:JSON.stringify({sessionId:'cd6e32',runId:'pre-fix',hypothesisId:'H2',location:'role.component.ts:deleteItem:afterOpened',message:'Role dialog opened with pane classes',data:{paneClassName:pane?.className || null,hasPlainClass:!!pane?.classList.contains('plain-delete-dialog')},timestamp:Date.now()})}).catch(()=>{});
+      // #endregion
     });
   }
 
