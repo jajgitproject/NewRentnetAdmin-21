@@ -1,15 +1,22 @@
 // @ts-nocheck
-import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
+import { MAT_DIALOG_DATA, MatDialogRef, MatDialogModule } from '@angular/material/dialog';
 import { Component, Inject } from '@angular/core';
+import { CommonModule } from '@angular/common';
 import { CancelAllotmentService } from '../../cancelAllotment.service';
 import { GeneralService } from '../../../general/general.service';
 import { MatSnackBar } from '@angular/material/snack-bar';
+import { MatButtonModule } from '@angular/material/button';
 
 @Component({
-  standalone: false,
+  standalone: true,
   selector: 'app-softToHard-dialog',
   templateUrl: './softToHard-Dialog.component.html',
-  styleUrls: ['./softToHard-Dialog.component.sass']
+  styleUrls: ['./softToHard-Dialog.component.sass'],
+  imports: [
+    CommonModule,
+    MatDialogModule,
+    MatButtonModule,
+  ]
 })
 export class SoftToHardDialogComponent
 {

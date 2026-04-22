@@ -1,11 +1,11 @@
 // @ts-nocheck
-import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
+import { MAT_DIALOG_DATA, MatDialogRef, MatDialogModule } from '@angular/material/dialog';
 import { Component, Inject, OnInit } from '@angular/core';
+import { CommonModule, formatDate } from '@angular/common';
 import { DriverInventoryAssociationService } from '../../driverInventoryAssociation.service';
-import { FormControl, Validators, FormGroup, FormBuilder} from '@angular/forms';
+import { FormControl, Validators, FormGroup, FormBuilder, ReactiveFormsModule } from '@angular/forms';
 import { DriverDropDownForAllotment, DriverInventoryAssociation } from '../../driverInventoryAssociation.model';
 import { MAT_DATE_LOCALE } from '@angular/material/core';
-import { formatDate } from '@angular/common';
 import { GeneralService } from '../../../general/general.service';
 import { Observable } from 'rxjs';
 import { DriverDropDown } from 'src/app/customerPersonInstruction/driverDropDown.model';
@@ -13,12 +13,35 @@ import { map, startWith } from 'rxjs/operators';
 import { VehicleDropDown } from 'src/app/vehicle/vehicleDropDown.model';
 import { AbstractControl, ValidationErrors, ValidatorFn } from '@angular/forms';
 import moment from 'moment';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatInputModule } from '@angular/material/input';
+import { MatAutocompleteModule } from '@angular/material/autocomplete';
+import { MatSelectModule } from '@angular/material/select';
+import { MatDatepickerModule } from '@angular/material/datepicker';
+import { MatCheckboxModule } from '@angular/material/checkbox';
+import { MatButtonModule } from '@angular/material/button';
+import { MatIconModule } from '@angular/material/icon';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 
 @Component({
-  standalone: false,
+  standalone: true,
   selector: 'app-form-dialog',
   templateUrl: './form-dialog.component.html',
   styleUrls: ['./form-dialog.component.sass'],
+  imports: [
+    CommonModule,
+    ReactiveFormsModule,
+    MatDialogModule,
+    MatFormFieldModule,
+    MatInputModule,
+    MatAutocompleteModule,
+    MatSelectModule,
+    MatDatepickerModule,
+    MatCheckboxModule,
+    MatButtonModule,
+    MatIconModule,
+    MatProgressSpinnerModule,
+  ],
   providers: [{ provide: MAT_DATE_LOCALE, useValue: 'en-GB' }]
 })
 

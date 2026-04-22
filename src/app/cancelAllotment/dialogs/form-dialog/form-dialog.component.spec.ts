@@ -11,7 +11,7 @@ describe('FormDialogCAComponent', () => {
   beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
       
-      providers: matDialogTestProviders(),declarations: [FormDialogCAComponent]
+      providers: matDialogTestProviders(),imports: [FormDialogCAComponent]
     }).compileComponents();
   }));
 

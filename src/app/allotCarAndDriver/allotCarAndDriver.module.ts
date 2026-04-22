@@ -3,7 +3,6 @@ import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { AllotCarAndDriverComponent } from './allotCarAndDriver.component';
-import { FormDialogComponent as advanceTableForm } from './dialogs/form-dialog/form-dialog.component';
 import { MatTableModule } from '@angular/material/table';
 import { MatPaginatorModule } from '@angular/material/paginator';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -31,7 +30,6 @@ import { ShowErrorComponent } from './showError/form-dialog/showError.component'
 @NgModule({
   declarations: [
     AllotCarAndDriverComponent,
-    advanceTableForm,
     ShowErrorComponent
   ],
   imports: [

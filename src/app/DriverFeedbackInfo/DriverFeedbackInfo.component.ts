@@ -1,22 +1,36 @@
 // @ts-nocheck
-import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
+import { MAT_DIALOG_DATA, MatDialogRef, MatDialogModule } from '@angular/material/dialog';
 import { Component, Inject } from '@angular/core';
+import { CommonModule, formatDate } from '@angular/common';
 
-import { FormControl, Validators, FormGroup, FormBuilder} from '@angular/forms';
+import { FormControl, Validators, FormGroup, FormBuilder, ReactiveFormsModule } from '@angular/forms';
 import { DriverFeedBackData, DriverFeedbackInfo } from './DriverFeedbackInfo.model';
 import { MAT_DATE_LOCALE } from '@angular/material/core';
-import { formatDate } from '@angular/common';
 import { GeneralService } from '../general/general.service';
-//import { CityDropDown } from 'src/app/general/CityDropDown.model';
 import { VehicleDropDown } from 'src/app/vehicle/vehicleDropDown.model';
 import { DriverFeedbackInfoService } from './DriverFeedbackInfo.service';
 import { HttpErrorResponse } from '@angular/common/http';
-import { PageEvent } from '@angular/material/paginator';
+import { MatPaginatorModule, PageEvent } from '@angular/material/paginator';
+import { MatCardModule } from '@angular/material/card';
+import { MatIconModule } from '@angular/material/icon';
+import { MatButtonModule } from '@angular/material/button';
+import { MatProgressBarModule } from '@angular/material/progress-bar';
+
 @Component({
-  standalone: false,
+  standalone: true,
   selector: 'app-DriverFeedbackInfo',
   templateUrl: './DriverFeedbackInfo.component.html',
   styleUrls: ['./DriverFeedbackInfo.component.sass'],
+  imports: [
+    CommonModule,
+    ReactiveFormsModule,
+    MatDialogModule,
+    MatCardModule,
+    MatIconModule,
+    MatButtonModule,
+    MatPaginatorModule,
+    MatProgressBarModule,
+  ],
   providers: [{ provide: MAT_DATE_LOCALE, useValue: 'en-GB' }]
 })
 export class DriverFeedbackInfoComponent

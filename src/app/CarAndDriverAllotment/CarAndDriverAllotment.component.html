@@ -77,130 +77,26 @@
       <div class="body">
         <div class="responsive_table">
           <mat-accordion>
-            <div style="margin-left: 23px">
-              <span style="
-                    font-size: 12px;
-                    text-align: left;
-                    width: 80px;
-                    float: left;
-                  ">
-                <b>VIP/Female </b>
-              </span>
-
-              <span style="
-                    font-size: 12px;
-                    text-align: left;
-                    width: 80px;
-                    float: left;
-                  ">
-                <b>Res. No.</b>
-              </span>
-
-              <span style="
-                    font-size: 12px;
-                    text-align: left;
-                    width: 80px;
-                    float: left;
-                  ">
-                <b>Vehicle</b>
-              </span>
-
-              <span style="
-                    font-size: 12px;
-                    text-align: left;
-                    width: 80px;
-                    float: left;
-                  ">
-                <b>City</b>
-              </span>
-
-              <span style="
-                    font-size: 12px;
-                    text-align: left;
-                    width: 80px;
-                    float: left;
-                  ">
-                <b>Pickup</b>
-              </span>
-
-              <span style="
-                    font-size: 12px;
-                    text-align: left;
-                    width: 80px;
-                    float: left;
-                  ">
-                <b>Pickup</b>
-              </span>
-
-              <span style="
-                    font-size: 12px;
-                    text-align: left;
-                    width: 80px;
-                    float: left;
-                  ">
-                <b>Passenger </b>
-              </span>
-
-              <span style="
-                    font-size: 12px;
-                    text-align: left;
-                    width: 80px;
-                    float: left;
-                  ">
-                <b>Vendor</b>
-              </span>
-
-              <span style="
-                    font-size: 12px;
-                    text-align: left;
-                    width: 80px;
-                    float: left;
-                  ">
-                <b>Veh. No.</b>
-              </span>
-
-              <span style="
-                    font-size: 12px;
-                    text-align: left;
-                    width: 80px;
-                    float: left;
-                  ">
-                <b>Driver</b>
-              </span>
-
-              <!-- <span style="font-size: 12px;text-align: left;width: 80px;float: left;">
-                  <b>Reservation </b>
-                </span> -->
-
-              <span style="
-                    font-size: 12px;
-                    text-align: left;
-                    width: 80px;
-                    float: left;
-                  ">
-                <b>Allotment </b>
-              </span>
-
-              <!-- <span style="font-size: 12px;text-align: left;width: 80px;float: left;">
-                  <b>Trip </b>
-                </span>
-
-                <span style="font-size: 12px;text-align: left;width: 80px;vertical-align: top;">
-                  <b>Movement </b>
-                </span> -->
+            <div class="cda-summary-row cda-summary-head">
+              <span><b>VIP/Female</b></span>
+              <span><b>Res. No.</b></span>
+              <span><b>Vehicle</b></span>
+              <span><b>City</b></span>
+              <span><b>Pickup</b></span>
+              <span><b>Pickup</b></span>
+              <span><b>Passenger</b></span>
+              <span><b>Vendor</b></span>
+              <span><b>Veh. No.</b></span>
+              <span><b>Driver</b></span>
+              <span><b>Allotment</b></span>
             </div>
 
             <br />
 
             <mat-expansion-panel *ngFor="let item of reservationInfo; let i = index">
               <mat-expansion-panel-header>
-                <mat-panel-title>
-                  <span style="
-                        font-size: 12px;
-                        text-align: left;
-                        width: 80px;
-                        float: left;
-                      ">
+                <mat-panel-title class="cda-summary-row cda-summary-body">
+                  <span>
                     <i class="fas fa-crown" style="color: #edc877; font-size: medium"
                       *ngIf="item.importance == 'VIP'"></i>
                     &nbsp;
@@ -208,96 +104,26 @@
                       *ngIf="item.gender == 'Female'"></i>
                   </span>
 
-                  <span style="
-                        font-size: 12px;
-                        width: 80px;
-                        text-align: left;
-                        vertical-align: top;
-                      ">
-                    {{ item.reservationID }}
-                  </span>
+                  <span>{{ item.reservationID }}</span>
 
-                  <span style="
-                        font-size: 12px;
-                        width: 80px;
-                        text-align: left;
-                        vertical-align: top;
-                      ">
-                    {{ item.vehicle.vehicle }}
-                  </span>
+                  <span>{{ item.vehicle.vehicle }}</span>
 
-                  <span style="
-                        font-size: 12px;
-                        width: 80px;
-                        text-align: left;
-                        vertical-align: top;
-                      ">
-                    {{ item.pickup.pickupAddress.split(',')[0] }}
-                  </span>
+                  <span>{{ item.pickup.pickupAddress.split(',')[0] }}</span>
 
-                  <span style="
-                        font-size: 12px;
-                        width: 80px;
-                        text-align: left;
-                        vertical-align: top;
-                      ">
-                    {{ item.pickup.pickupTime | date : 'shortTime' }}
-                  </span>
+                  <span>{{ item.pickup.pickupTime | date : 'shortTime' }}</span>
 
-                  <span style="
-                        font-size: 12px;
-                        width: 80px;
-                        text-align: left;
-                        vertical-align: top;
-                      ">
-                    {{ item.pickup.pickupDate | date : 'dd-MMM-yy' }}
-                  </span>
+                  <span>{{ item.pickup.pickupDate | date : 'dd-MMM-yy' }}</span>
 
-                  <span style="
-                        font-size: 12px;
-                        width: 80px;
-                        text-align: left;
-                        vertical-align: top;
-                      ">
-                    {{ item.customerPerson.customerPersonName }}
-                  </span>
+                  <span>{{ item.customerPerson.customerPersonName }}</span>
 
-                  <span style="
-                        font-size: 12px;
-                        width: 80px;
-                        text-align: left;
-                        vertical-align: top;
-                      ">
-                    {{ item.carVendor }}
-                  </span>
+                  <span>{{ item.carVendor }}</span>
 
-                  <span style="
-                        font-size: 12px;
-                        width: 80px;
-                        text-align: left;
-                        vertical-align: top;
-                      ">
-                    {{ item.registrationNumber }}
-                  </span>
+                  <span>{{ item.registrationNumber }}</span>
 
-                  <span style="
-                        font-size: 12px;
-                        width: 80px;
-                        text-align: left;
-                        vertical-align: top;
-                      ">
-                    {{ item.driverName }}
-                  </span>
+                  <span>{{ item.driverName }}</span>
 
-                  <span style="
-                        font-size: 12px;
-                        width: 80px;
-                        text-align: left;
-                        vertical-align: top;
-                      ">
-                    {{ item.allotmentStatus ? item.allotmentStatus + (item.allotmentType ? ' (' + item.allotmentType +
-                    ')' : '') : 'Pending' }}
-                  </span>
+                  <span>{{ item.allotmentStatus ? item.allotmentStatus + (item.allotmentType ? ' (' + item.allotmentType +
+                    ')' : '') : 'Pending' }}</span>
 
                   <!-- <span style="font-size: 12px;text-align: left;vertical-align: top;">
                       {{ item.reservationID }}, {{ item.vehicle.vehicle }},
@@ -983,7 +809,7 @@
               </mat-expansion-panel-header>
                     <div class="row">
                       <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
-                        <mat-form-field appearance="outline" floatLabel="always" class="example-full-width">
+                        <mat-form-field class="example-full-width">
                           <mat-label>Vendor Type</mat-label>
                           <input
                             type="text"
@@ -1005,7 +831,7 @@
                       </div>
                       <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
                        
-                        <mat-form-field appearance="outline" floatLabel="always" class="example-full-width">
+                        <mat-form-field class="example-full-width">
                           <mat-label>Car Category</mat-label>
                           <input
                             type="text"
@@ -1030,7 +856,7 @@
                     <div class="row">
                       <div class="col-xl-6 col-lg-6 col-md-6 col-sm-6 mb-2">
                         
-                        <mat-form-field appearance="outline" floatLabel="always" class="example-full-width">
+                        <mat-form-field class="example-full-width">
                           <mat-label>Car</mat-label>
                           <input
                             type="text"
@@ -1049,7 +875,7 @@
                         </mat-form-field>
                       </div>
                       <div class="col-xl-6 col-lg-6 col-md-6 col-sm-6 mb-2">
-                        <mat-form-field appearance="outline" floatLabel="always" class="example-full-width">
+                        <mat-form-field class="example-full-width">
                           <mat-label>Bookings</mat-label>
                           <mat-select [formControl]="bookingCount">
                             <mat-option value="0">0 Bookings</mat-option>
@@ -1065,7 +891,7 @@
             
                     <div class="row">
                       <div class="col-xl-6 col-lg-6 col-md-6 col-sm-6 mb-2">
-                        <mat-form-field appearance="outline" floatLabel="always" class="example-full-width">
+                        <mat-form-field class="example-full-width">
                           <mat-label>Business Volume</mat-label>
                           <mat-select [formControl]="monthlyTarget">
                             <mat-option value="between 0 - 10"
@@ -1163,7 +989,7 @@
                       </div>
             
                       <div class="col-xl-6 col-lg-6 col-md-6 col-sm-6 mb-2">
-                        <mat-form-field appearance="outline" floatLabel="always" class="example-full-width">
+                        <mat-form-field class="example-full-width">
                           <mat-label>Other Criteria</mat-label>
                           <mat-select [formControl]="otherCriteria">
                             <mat-option value="PickupLocation"
@@ -1180,7 +1006,7 @@
 
                     <div class="row">
                       <div class="col-xl-6 col-lg-5 col-md-6 col-sm-12 mb-2">
-                        <mat-form-field appearance="outline" floatLabel="always" class="example-full-width">
+                        <mat-form-field class="example-full-width">
                           <mat-label>Supplier</mat-label>
                           <input
                             type="text"
@@ -1201,7 +1027,7 @@
                         </mat-form-field>
                       </div>
                       <div class="col-xl-6 col-lg-5 col-md-6 col-sm-12 mb-2">
-                        <mat-form-field appearance="outline" floatLabel="always" class="example-full-width">
+                        <mat-form-field class="example-full-width">
                           <mat-label>Driver</mat-label>
                           <input
                             type="text"
@@ -1236,7 +1062,7 @@
             
                     <div class="row">
                      <div class="col-xl-6 col-lg-6 col-md-6 col-sm-6 mb-2">
-                       <mat-form-field appearance="outline" floatLabel="always" class="example-full-width">
+                       <mat-form-field class="example-full-width">
                            <mat-label>Driver Official Identity No</mat-label>
                            <input type="text" matInput [formControl]="driverOfficialIdentityNumber"
                                [matAutocomplete]="auto25">
@@ -1251,7 +1077,7 @@
                    </div>
            
                       <div class="col-xl-6 col-lg-6 col-md-6 col-sm-6 mb-2">
-                        <mat-form-field appearance="outline" floatLabel="always" class="example-full-width">
+                        <mat-form-field class="example-full-width">
                           <mat-label>Regn. No.</mat-label>
                           <input
                             type="text"
@@ -1309,7 +1135,7 @@
                           <span><b>Quick Search</b></span>
                         </div> -->
                         <div class="col-xl-2 col-lg-2 col-md-2 col-sm-12 mb-2">
-                          <mat-form-field appearance="outline" floatLabel="always" class="example-full-width">
+                          <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
                             <mat-label>Regn. No.</mat-label>
                             <input type="text" matInput [matAutocomplete]="auto81" [formControl]="inventory" />
                             <mat-autocomplete #auto81="matAutocomplete" panelWidth="custom-autocomplete-panel">
@@ -1323,7 +1149,7 @@
                         </div>
 
                         <div class="col-xl-2 col-lg-2 col-md-2 col-sm-12 mb-2">
-                          <mat-form-field appearance="outline" floatLabel="always" class="example-full-width">
+                          <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
                             <mat-label>Driver</mat-label>
                             <input type="text" matInput [matAutocomplete]="auto80" [formControl]="driver" />
                             <mat-autocomplete #auto80="matAutocomplete" panelWidth="custom-autocomplete-panel">
@@ -1347,15 +1173,7 @@
                         </div>
 
                         <div class="col-xl-2 col-lg-2 col-md-2 col-sm-12 mb-2">
-                          <!-- <mat-form-field appearance="outline" floatLabel="always" class="example-full-width">
-                                      <mat-label>Vendor Type</mat-label>
-                                      <mat-select [formControl]="vendorType">
-                                        <mat-option value="All">All</mat-option>
-                                        <mat-option value="Owned">Owned</mat-option>
-                                        <mat-option value="Supplier">Supplier</mat-option>
-                                      </mat-select>
-                                    </mat-form-field> -->
-                          <mat-form-field appearance="outline" floatLabel="always" class="example-full-width">
+                          <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
                             <mat-label>Vendor Type</mat-label>
                             <input type="text" matInput [matAutocomplete]="auto85" [formControl]="vendorType" />
                             <mat-autocomplete #auto85="matAutocomplete" panelWidth="custom-autocomplete-panel">
@@ -1369,7 +1187,7 @@
                         </div>
 
                         <div class="col-xl-2 col-lg-2 col-md-2 col-sm-12 mb-2">
-                          <mat-form-field appearance="outline" floatLabel="always" class="example-full-width">
+                          <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
                             <mat-label>Owned/Supplier</mat-label>
                             <mat-select [formControl]="ownedSupplier">
                               <mat-option value="All">All</mat-option>
@@ -1380,7 +1198,7 @@
                         </div>
 
                         <div class="col-xl-2 col-lg-2 col-md-2 col-sm-12 mb-2">
-                          <mat-form-field appearance="outline" floatLabel="always" class="example-full-width">
+                          <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
                             <mat-label>Car</mat-label>
                             <input type="text" matInput [matAutocomplete]="auto82" [formControl]="vehicle" />
                             <mat-autocomplete #auto82="matAutocomplete" panelWidth="custom-autocomplete-panel">
@@ -1392,7 +1210,7 @@
                         </div>
 
                         <div class="col-xl-2 col-lg-2 col-md-2 col-sm-12 mb-2">
-                          <mat-form-field appearance="outline" floatLabel="always" class="example-full-width">
+                          <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
                             <mat-label>Associated/Unassociated</mat-label>
                             <mat-select [formControl]="associatedUnassociated">
                               <mat-option value="Associated">Associated</mat-option>
@@ -1718,13 +1536,11 @@
 
                                         <!-- Current Car -->
                                         <td class="TDValueActions">
-                                          <b>Current Car</b><br />
-                                          {{ data.inventoryName }} ({{ data.vehicle }})<br />
-                                          <span class="action-button">
-                                            <b>
-                                              <button class="BoldButton" mat-button (click)="AttachAnotherDriver(i)">Attach another Driver</button>
-                                            </b><br />
-                                          </span>
+                                          <div class="sectionHeader">
+                                            <b>Current Car</b>
+                                            <button class="smallLinkButton" mat-button color="primary" (click)="AttachAnotherDriver(i)">Attach another Driver</button>
+                                          </div>
+                                          {{ data.inventoryName }} ({{ data.vehicle }})
                                         </td>
 
                                         <!-- Current Location -->
@@ -1736,13 +1552,11 @@
 
                                         <!-- Feedback & Comments -->
                                         <td class="TDValueActions">
-                                          <b>Feedback & Comments</b><br />
-                                          <span>Avg Rating : {{ driverAvg[i] || 'N/A' }}</span><br />
-                                          <span class="action-button">
-                                            <b>
-                                              <button class="BoldButton" mat-button (click)="DriverFeedbackInfo(i)">View Details</button>
-                                            </b><br />
-                                          </span>
+                                          <div class="sectionHeader">
+                                            <b>Feedback & Comments</b>
+                                            <button class="smallLinkButton" mat-button color="primary" (click)="DriverFeedbackInfo(i)">View Details</button>
+                                          </div>
+                                          <span>Avg Rating : {{ driverAvg[i] || 'N/A' }}</span>
                                         </td>
 
                                         <!-- Monthly Business -->
@@ -2154,13 +1968,11 @@
 
                                         <!-- Current Car -->
                                         <td class="TDValueActions">
-                                          <b>Current Car</b><br />
-                                          {{ data.inventoryName }} ({{ data.vehicle }})<br />
-                                          <span class="action-button">
-                                            <b>
-                                              <button class="BoldButton" mat-button (click)="AttachAnotherDriverForUnassoicated(i)">Attach another Driver</button>
-                                            </b><br />
-                                          </span>
+                                          <div class="sectionHeader">
+                                            <b>Current Car</b>
+                                            <button class="smallLinkButton" mat-button color="primary" (click)="AttachAnotherDriverForUnassoicated(i)">Attach another Driver</button>
+                                          </div>
+                                          {{ data.inventoryName }} ({{ data.vehicle }})
                                         </td>
 
                                         <!-- Current Location -->
@@ -2172,13 +1984,11 @@
 
                                         <!-- Feedback & Comments -->
                                         <td class="TDValueActions">
-                                          <b>Feedback & Comments</b><br />
-                                          <span>Avg Rating : {{ driverAvg[i] || 'N/A' }}</span><br />
-                                          <span class="action-button">
-                                            <b>
-                                              <button class="BoldButton" mat-button (click)="DriverFeedbackInfo(i)">View Details</button>
-                                            </b><br />
-                                          </span>
+                                          <div class="sectionHeader">
+                                            <b>Feedback & Comments</b>
+                                            <button class="smallLinkButton" mat-button color="primary" (click)="DriverFeedbackInfo(i)">View Details</button>
+                                          </div>
+                                          <span>Avg Rating : {{ driverAvg[i] || 'N/A' }}</span>
                                         </td>
 
                                         <!-- Monthly Business -->
@@ -2306,7 +2116,7 @@
             <!-- <input type="radio" name="heading" value="other"> -->
           </div>
           <!-- <div class="col-xl-5 col-lg-5 col-md-6 col-sm-12 mb-2">
-               <mat-form-field class="example-full-width" appearance="outline" floatLabel="always"> 
+               <mat-form-field class="example-full-width" appearance="outline"> 
                    <mat-label>Driver</mat-label>                       
                    <input  type="text" matInput [matAutocomplete]="auto" [formControl]="driver">
                    <mat-autocomplete #auto="matAutocomplete">
@@ -2320,14 +2130,14 @@
         </div>
         <div class="row" style="margin-top: 5px">
           <div class="col-xl-12 col-lg-6 col-md-12 col-sm-12 mb-2" *ngIf="selectedOption">
-            <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+            <mat-form-field class="example-full-width" appearance="outline">
               <mat-label>Address</mat-label>
               <input placeholder="Address String" matInput [(ngModel)]="locationString" ngx-google-places-autocomplete
                 [options]="options" [disabled]="selected === 'pickup'" (onAddressChange)="AddressChange($event)" />
             </mat-form-field>
           </div>
           <div class="col-xl-12 col-lg-6 col-md-12 col-sm-12 mb-2" *ngIf="selectedOptions">
-            <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+            <mat-form-field class="example-full-width" appearance="outline">
               <mat-label>Address</mat-label>
               <input placeholder="Address String" matInput [(ngModel)]="locationString" ngx-google-places-autocomplete
                 [options]="options" (onAddressChange)="AddressChange($event)" />
@@ -2337,13 +2147,13 @@
 
         <div class="row" *ngIf="hideLatLong">
           <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
-            <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+            <mat-form-field class="example-full-width" appearance="outline">
               <mat-label>Latitude</mat-label>
               <input matInput [(ngModel)]="latitude" readonly />
             </mat-form-field>
           </div>
           <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
-            <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+            <mat-form-field class="example-full-width" appearance="outline">
               <mat-label>Longitude</mat-label>
               <input matInput [(ngModel)]="longitude" readonly />
             </mat-form-field>
@@ -2352,7 +2162,7 @@
 
         <div class="row">
           <div class="col-xl-6 col-lg-6 col-md-6 col-sm-6 mb-2">
-            <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+            <mat-form-field class="example-full-width" appearance="outline">
               <mat-label>Date</mat-label>
               <input matInput [matDatepicker]="fromDate" [(ngModel)]="eTRAvailabilityDate" />
               <mat-datepicker-toggle matSuffix [for]="fromDate"></mat-datepicker-toggle>
@@ -2360,11 +2170,11 @@
             </mat-form-field>
           </div>
           <div class="col-xl-6 col-lg-6 col-md-6 col-sm-6 mb-2">
-            <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+            <mat-form-field class="example-full-width" appearance="outline">
               <mat-label>Time</mat-label>
               <input matInput [owlDateTimeTrigger]="time1" [owlDateTime]="time1" [(ngModel)]="eTRAvailabilityTime"
                 (ngModelChange)="locationTimeSet($event)" />
-              <button mat-icon-button matSuffix type="button" [owlDateTimeTrigger]="time1" class="date-icon" aria-label="Open time picker"><mat-icon>schedule</mat-icon></button>
+              <mat-icon matSuffix [owlDateTimeTrigger]="time1" class="date-icon">schedule</mat-icon>
               <owl-date-time [pickerType]="'timer'" #time1></owl-date-time>
             </mat-form-field>
           </div>
@@ -2395,7 +2205,7 @@
       <div class="modal-body">
         <div class="row">
           <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
-            <mat-form-field appearance="outline" floatLabel="always" class="example-full-width">
+            <mat-form-field class="example-full-width">
               <mat-label>Vendor Type</mat-label>
               <input type="text" matInput [matAutocomplete]="auto35" [formControl]="vendorType" />
                         <mat-autocomplete #auto35="matAutocomplete" panelWidth="custom-autocomplete-panel">
@@ -2408,7 +2218,7 @@
             </mat-form-field>
           </div>
           <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
-            <!-- <mat-form-field appearance="outline" floatLabel="always">
+            <!-- <mat-form-field>
                        <mat-label>Car Category</mat-label>
                              <mat-select multiple>
                                  <mat-option value="yettostart">Same Category</mat-option>
@@ -2423,7 +2233,7 @@
                                  <mat-option value="yettostart">Luxury</mat-option>
                              </mat-select>
                      </mat-form-field> -->
-            <mat-form-field appearance="outline" floatLabel="always" class="example-full-width">
+            <mat-form-field class="example-full-width">
               <mat-label>Car Category</mat-label>
               <input type="text" matInput [formControl]="category" [matAutocomplete]="auto9"
                 (keyup)="onVehicleAutoCompleteChange($event)" />
@@ -2439,7 +2249,7 @@
 
         <div class="row">
           <div class="col-xl-6 col-lg-6 col-md-6 col-sm-6 mb-2">
-            <!-- <mat-form-field appearance="outline" floatLabel="always">
+            <!-- <mat-form-field>
                        <mat-label>Car</mat-label>
                              <mat-select multiple>
                                  <mat-option value="yettostart">Suzuki Alto</mat-option>
@@ -2454,7 +2264,7 @@
                                  <mat-option value="yettostart">Kia Carnival</mat-option>
                              </mat-select>
                      </mat-form-field> -->
-            <mat-form-field appearance="outline" floatLabel="always" class="example-full-width">
+            <mat-form-field class="example-full-width">
               <mat-label>Car</mat-label>
               <input type="text" matInput [matAutocomplete]="auto1" [formControl]="vehicle" />
               <mat-autocomplete #auto1="matAutocomplete">
@@ -2465,7 +2275,7 @@
             </mat-form-field>
           </div>
           <div class="col-xl-6 col-lg-6 col-md-6 col-sm-6 mb-2">
-            <mat-form-field appearance="outline" floatLabel="always">
+            <mat-form-field>
               <mat-label>Bookings</mat-label>
               <mat-select [formControl]="bookingCount">
                 <mat-option value="0">0 Bookings</mat-option>
@@ -2481,7 +2291,7 @@
 
         <div class="row">
           <div class="col-xl-6 col-lg-6 col-md-6 col-sm-6 mb-2">
-            <mat-form-field appearance="outline" floatLabel="always">
+            <mat-form-field>
               <mat-label>Business Volume</mat-label>
               <!-- <mat-select multiple> -->
               <mat-select [formControl]="monthlyTarget">
@@ -2520,7 +2330,7 @@
           </div>
 
           <div class="col-xl-6 col-lg-6 col-md-6 col-sm-6 mb-2">
-            <mat-form-field appearance="outline" floatLabel="always">
+            <mat-form-field>
               <mat-label>Other Criteria</mat-label>
               <mat-select [formControl]="otherCriteria">
                 <mat-option value="PickupLocation">Currently Near Pickup Location</mat-option>
@@ -2535,7 +2345,7 @@
 
         <div class="row">
           <div class="col-xl-6 col-lg-5 col-md-6 col-sm-12 mb-2">
-            <mat-form-field appearance="outline" floatLabel="always" class="example-full-width">
+            <mat-form-field class="example-full-width">
               <mat-label>Supplier</mat-label>
               <input type="text" matInput [formControl]="supplier" [matAutocomplete]="auto4"
                 (keyup)="onAutoCompleteChange($event)" />
@@ -2548,7 +2358,7 @@
             </mat-form-field>
           </div>
           <div class="col-xl-6 col-lg-5 col-md-6 col-sm-12 mb-2">
-            <mat-form-field appearance="outline" floatLabel="always" class="example-full-width">
+            <mat-form-field class="example-full-width">
               <mat-label>Driver</mat-label>
               <input type="text" matInput [matAutocomplete]="auto" [formControl]="driver" />
               <mat-autocomplete #auto="matAutocomplete">
@@ -2574,7 +2384,7 @@
 
         <div class="row">
           <div class="col-xl-6 col-lg-6 col-md-6 col-sm-6 mb-2">
-            <mat-form-field appearance="outline" floatLabel="always" class="example-full-width">
+            <mat-form-field class="example-full-width">
               <mat-label>Driver Official Identity No</mat-label>
               <input type="text" matInput [formControl]="driverOfficialIdentityNumber" [matAutocomplete]="auto25">
               <mat-autocomplete #auto25="matAutocomplete">
@@ -2587,7 +2397,7 @@
           </div>
 
           <div class="col-xl-6 col-lg-6 col-md-6 col-sm-6 mb-2">
-            <mat-form-field appearance="outline" floatLabel="always" class="example-full-width">
+            <mat-form-field class="example-full-width">
               <mat-label>Regn. No.</mat-label>
               <input type="text" matInput [matAutocomplete]="auto2" [formControl]="inventory" />
               <mat-autocomplete #auto2="matAutocomplete">

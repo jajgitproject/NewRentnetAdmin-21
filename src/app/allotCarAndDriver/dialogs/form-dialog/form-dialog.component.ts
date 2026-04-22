@@ -1,11 +1,11 @@
 // @ts-nocheck
-import { MAT_DIALOG_DATA, MatDialog, MatDialogRef } from '@angular/material/dialog';
+import { MAT_DIALOG_DATA, MatDialog, MatDialogRef, MatDialogModule } from '@angular/material/dialog';
 import { Component, Inject, OnInit } from '@angular/core';
+import { CommonModule, formatDate } from '@angular/common';
 import { AllotCarAndDriverService } from '../../allotCarAndDriver.service';
-import { FormControl, Validators, FormGroup, FormBuilder } from '@angular/forms';
+import { FormControl, Validators, FormGroup, FormBuilder, ReactiveFormsModule } from '@angular/forms';
 import { AllotCarAndDriver } from '../../allotCarAndDriver.model';
 import { MAT_DATE_LOCALE } from '@angular/material/core';
-import { formatDate } from '@angular/common';
 import { GeneralService } from '../../../general/general.service';
 import { Observable } from 'rxjs';
 import { VehicleDropDown } from 'src/app/vehicle/vehicleDropDown.model';
@@ -15,13 +15,30 @@ import { DriverInventoryAssociation } from 'src/app/driverInventoryAssociation/d
 import { MatSnackBar } from '@angular/material/snack-bar';
 import Swal from 'sweetalert2';
 import { ShowErrorComponent } from '../../showError/form-dialog/showError.component';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatInputModule } from '@angular/material/input';
+import { MatAutocompleteModule } from '@angular/material/autocomplete';
+import { MatButtonModule } from '@angular/material/button';
+import { MatIconModule } from '@angular/material/icon';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 
 
 @Component({
-  standalone: false,
+  standalone: true,
     selector: 'app-form-dialog',
     templateUrl: './form-dialog.component.html',
     styleUrls: ['./form-dialog.component.sass'],
+    imports: [
+      CommonModule,
+      ReactiveFormsModule,
+      MatDialogModule,
+      MatFormFieldModule,
+      MatInputModule,
+      MatAutocompleteModule,
+      MatButtonModule,
+      MatIconModule,
+      MatProgressSpinnerModule,
+    ],
     providers: [{ provide: MAT_DATE_LOCALE, useValue: 'en-GB' }]
   })
 

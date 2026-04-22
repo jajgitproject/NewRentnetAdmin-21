@@ -4,7 +4,6 @@ import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { CancelAllotmentComponent } from './cancelAllotment.component';
 import { FormDialogCAComponent as advanceTableForm } from './dialogs/form-dialog/form-dialog.component';
-//import { DeleteDialogComponent } from './dialogs/delete/delete.component';
 import { MatTableModule } from '@angular/material/table';
 import { MatPaginatorModule } from '@angular/material/paginator';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -30,9 +29,7 @@ import { SoftToHardDialogComponent } from './dialogs/softToHard-Dialog/softToHar
 
 @NgModule({
   declarations: [
-    CancelAllotmentComponent,
-    advanceTableForm,
-    SoftToHardDialogComponent
+    CancelAllotmentComponent
   ],
   imports: [
     CommonModule,
@@ -57,9 +54,13 @@ import { SoftToHardDialogComponent } from './dialogs/softToHard-Dialog/softToHar
     MatMenuModule,
     MatProgressSpinnerModule,
     MyUploadModule,
-    //NgxMatFileInputModule
+    // The two dialog components below are now standalone and opened via MatDialog.open()
+    // from this module's host (CancelAllotmentComponent) and from other modules
+    // (e.g. CarAndDriverAllotment). They are imported here only if any template
+    // references them as element selectors.
+    advanceTableForm,
+    SoftToHardDialogComponent,
   ],
-  exports: [SoftToHardDialogComponent, advanceTableForm],
   providers: [CancelAllotmentService]
 })
 export class CancelAllotmentModule {}

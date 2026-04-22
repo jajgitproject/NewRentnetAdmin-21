@@ -2,7 +2,6 @@
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
-import { DriverFeedbackInfoComponent } from './DriverFeedbackInfo.component';
 import { MatTableModule } from '@angular/material/table';
 import { MatPaginatorModule } from '@angular/material/paginator';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -26,9 +25,7 @@ import { MyUploadModule } from '../myupload/myupload.module';
 import { MatSidenav, MatSidenavModule } from '@angular/material/sidenav';
 
 @NgModule({
-  declarations: [
-    DriverFeedbackInfoComponent
-  ],
+  declarations: [],
   imports: [
     CommonModule,
     FormsModule,

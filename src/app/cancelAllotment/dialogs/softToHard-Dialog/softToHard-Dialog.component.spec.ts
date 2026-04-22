@@ -11,7 +11,7 @@ describe('SoftToHardDialogComponent', () => {
   beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
       
-      providers: matDialogTestProviders(),declarations: [SoftToHardDialogComponent]
+      providers: matDialogTestProviders(),imports: [SoftToHardDialogComponent]
     }).compileComponents();
   }));
 
