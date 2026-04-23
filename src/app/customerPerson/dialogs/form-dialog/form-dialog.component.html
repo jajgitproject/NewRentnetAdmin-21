@@ -933,6 +933,18 @@
                         </mat-error>
                     </mat-form-field>
                 </div>
+                 <div class="col-xl-3 col-lg-3 col-md-6 col-sm-12 mb-2">
+                    <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                        <mat-label>Allow Login To Customer App</mat-label>
+                        <mat-select required formControlName="allowLoginToCustomerApp">
+                            <mat-option [value]=true>Yes</mat-option>
+                            <mat-option [value]=false>No</mat-option>
+                        </mat-select>
+                        <mat-error>
+                            Allow Login To Customer App is required
+                        </mat-error>
+                    </mat-form-field>
+                </div>
 
                 <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
                     <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
