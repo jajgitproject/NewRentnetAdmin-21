@@ -241,10 +241,11 @@ export class ControlPanelDialogeComponent {
       (data: ControlPanelData) => {
         const details = data?.reservationDetails;
         const list = Array.isArray(details) ? details : details != null ? [details] : [];
-        // Avoid unsafe [0] access (throws and aborts the handler → blank dialog).
         this.reservationInfo = list.length > 0 ? list : null;
         this.ReservationStatus = list[0]?.reservationStatus ?? null;
-        this.cdr.detectChanges();
+        this.ngZone.run(() => {
+          this.cdr.detectChanges();
+        });
       },
       (error: HttpErrorResponse) => {
         this.reservationInfo = null;
@@ -254,11 +255,6 @@ export class ControlPanelDialogeComponent {
     );
   }
 
-  /**
-   * Child MatDialogs often close outside the same CD cycle as this host.
-   * Run merges inside the Angular zone and force a refresh so lifecycle timestamps
-   * update immediately after save (without requiring an extra click).
-   */
   private onDutyLifecycleDialogClosed(dialogRef: MatDialogRef<any>, apply: (res: any) => void): void {
     dialogRef.afterClosed().subscribe((res) => {
       this.ngZone.run(() => {

@@ -294,6 +294,7 @@ export class CarAndDriverAllotmentComponent implements OnInit {
   searchedType: 'Associated' | 'Unassociated' = 'Associated';
   isLoadingdataUnassociated: boolean = false;
   isSearchClicked: boolean = false;
+
   constructor(
     private fb: FormBuilder,
     public route: Router,
