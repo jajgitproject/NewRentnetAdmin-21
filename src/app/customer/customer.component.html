@@ -138,44 +138,29 @@
                                             {{customerGroup.value}}</div>
                                     </div> -->
 
-                                    <div style="width: 65%; float:left;padding-top: 6px;padding-left: 12px;">
-                                        <div class="col-lg-6">
-                                            <div class="form-group">
-                                                <div class="input-group">
-                                                    <!-- Dropdown for selecting Type, Parent, City -->
-                                                    <div class="input-group-append input-group-addon">
-                                                        <select style="height: 40px; width: 170px;" class="form-control"
-                                                            [(ngModel)]="selectedFilter">
-                                                            <option value="search" hidden>Search By</option>
-                                                            <option value="name">Customer Name</option>
-                                                            <option value="customerType">Customer Type</option>
-                                                            <option value="customerGroup">Customer Group</option>
-                                                        </select>
-                                                    </div>
+                                    <div class="customer-toolbar-left">
+                                        <div class="customer-search-group">
+                                            <select class="form-control customer-search-type"
+                                                [(ngModel)]="selectedFilter">
+                                                <option value="search" hidden>Search By</option>
+                                                <option value="name">Customer Name</option>
+                                                <option value="customerType">Customer Type</option>
+                                                <option value="customerGroup">Customer Group</option>
+                                            </select>
 
-                                                    <!-- Input field for filtering -->
-                                                    <input type="text"
-                                                        style="height: 40px; width: 300px;padding-left: 5px;"
-                                                        class="form-control" placeholder="Filter" id="inputGroup"
-                                                        [(ngModel)]="searchTerm"
-                                                        (ngModelChange)="onSearchTermChange($event)"
-                                                        (keyup.enter)="onSearchClick()"/>
+                                            <input type="text" class="form-control customer-search-input"
+                                                placeholder="Filter" id="inputGroup" [(ngModel)]="searchTerm"
+                                                (ngModelChange)="onSearchTermChange($event)"
+                                                (keyup.enter)="onSearchClick()" />
 
-                                                    <!-- Search button -->
-                                                    <div class="input-group-append input-group-addon">
-                                                        <span class="input-group-text"
-                                                            style="cursor: pointer; height: 40px; width: 40px; text-align: center;"
-                                                            (click)="onSearchClick()">
-                                                            <i class="fas fa-search"></i>
-                                                        </span>
-                                                    </div>
-                                                </div>
-                                            </div>
+                                            <button type="button" class="btn btn-light customer-search-btn"
+                                                (click)="onSearchClick()">
+                                                <i class="fas fa-search"></i>
+                                            </button>
                                         </div>
-
                                     </div>
 
-                                    <div style="width: 35%; text-align:right;">
+                                    <div class="customer-toolbar-right">
                                         <button mat-raised-button color="primary" data-dismiss="modal"
                                             data-toggle="modal" data-backdrop="false" data-target="#exampleModalCenter">
                                             Search

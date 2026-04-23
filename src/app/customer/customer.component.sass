@@ -1,0 +1,47 @@
+.customer-toolbar-left
+  width: 65%
+  float: left
+  padding-top: 6px
+  padding-left: 12px
+
+.customer-search-group
+  display: flex
+  align-items: center
+  gap: 8px
+  width: min(100%, 560px)
+
+.customer-search-type
+  width: 170px
+  min-width: 170px
+  height: 40px
+
+.customer-search-input
+  flex: 1 1 auto
+  min-width: 180px
+  height: 40px
+  padding-left: 8px
+
+.customer-search-btn
+  width: 40px
+  min-width: 40px
+  height: 40px
+  padding: 0
+  display: inline-flex
+  align-items: center
+  justify-content: center
+  border: 1px solid #ced4da
+
+.customer-toolbar-right
+  width: 35%
+  text-align: left
+
+@media (max-width: 1200px)
+  .customer-toolbar-left
+    width: 100%
+    float: none
+    padding-left: 0
+    margin-bottom: 10px
+
+  .customer-toolbar-right
+    width: 100%
+    text-align: left

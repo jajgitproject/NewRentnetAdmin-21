@@ -1,6 +1,6 @@
 // @ts-nocheck
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
-import { Component, Inject, Input } from '@angular/core';
+import { ChangeDetectorRef, Component, Inject, Input } from '@angular/core';
 import { CustomerConfigurationInvoicingService } from '../../customerConfigurationInvoicing.service';
 import { FormControl, Validators, FormGroup, FormBuilder, ValidatorFn, AbstractControl, ValidationErrors} from '@angular/forms';
 import { CustomerConfigurationInvoicing } from '../../customerConfigurationInvoicing.model';
@@ -58,7 +58,8 @@ saveDisabled:boolean = true;
   private snackBar: MatSnackBar,
   public advanceTableService: CustomerConfigurationInvoicingService,
     private fb: FormBuilder,
-  public _generalService:GeneralService)
+  public _generalService:GeneralService,
+  private cdr: ChangeDetectorRef)
   {
         // Set the defaults
         this.action = data.action;
@@ -104,23 +105,41 @@ saveDisabled:boolean = true;
 
   public ngOnInit(): void
   {
-    this.advanceTableForm.patchValue({customerName:this.customerName});
+    this.deferFormUpdate(() => {
+      this.advanceTableForm.patchValue({customerName:this.customerName});
+      if (this.action === 'edit') {
+        this.geoPointStateID = this.advanceTable?.billingStateID || null;
+        this.geoPointCityID = this.advanceTable?.billingCityID || null;
+        if (this.geoPointStateID) {
+          this.OnStateChangeGetCity();
+        }
+      }
+    });
     {
       this._generalService.GetStatesAl().subscribe
       (
         data =>   
         {
-          this.StatesList = data;
-          this.advanceTableForm.controls['billingStateName'].setValidators([Validators.required,
-            this.billingStateNameValidator(this.StatesList)
-          ]);
-          this.advanceTableForm.controls['billingStateName'].updateValueAndValidity();  
-          this.filteredStateOptions = this.advanceTableForm.controls['billingStateName'].valueChanges.pipe(
-            startWith(""),
-            map(value => this._filterState(value || ''))
-          );    
+          this.deferFormUpdate(() => {
+            this.StatesList = data;
+            this.advanceTableForm.controls['billingStateName'].setValidators([Validators.required,
+              this.billingStateNameValidator(this.StatesList)
+            ]);
+            this.advanceTableForm.controls['billingStateName'].updateValueAndValidity();  
+            this.filteredStateOptions = this.advanceTableForm.controls['billingStateName'].valueChanges.pipe(
+              startWith(""),
+              map(value => this._filterState(value || ''))
+            );
+          });
         });
     }
+  }
+
+  private deferFormUpdate(apply: () => void): void {
+    setTimeout(() => {
+      apply();
+      this.cdr.detectChanges();
+    }, 0);
   }
 
   private _filterState(value: string): any {
@@ -164,6 +183,7 @@ saveDisabled:boolean = true;
   return (control: AbstractControl): ValidationErrors | null => {
 
     if (!control.value) return null;
+    if (!CityList || CityList.length === 0) return null;
 
     const value = control.value.toLowerCase();
 
@@ -182,18 +202,28 @@ triggerBillingCityValidation() {
 }
   
   OnStateChangeGetCity(){
+    if (!this.geoPointStateID) {
+      this.CityList = [];
+      this.advanceTableForm.controls['billingCityName'].updateValueAndValidity();
+      return;
+    }
     this._generalService.GetCities(this.geoPointStateID).subscribe(
       data =>
       {
-        this.CityList = data;
-        this.advanceTableForm.controls['billingCityName'].setValidators([Validators.required,
-          this.billingCityNameValidator(this.CityList)
-        ]);
-        this.advanceTableForm.controls['billingCityName'].updateValueAndValidity();
-        this.filteredCityOptions = this.advanceTableForm.controls['billingCityName'].valueChanges.pipe(
-          startWith(""),
-          map(value => this._filterCity(value || ''))
-        );                  
+        this.deferFormUpdate(() => {
+          this.CityList = data;
+          this.advanceTableForm.controls['billingCityName'].setValidators([Validators.required,
+            this.billingCityNameValidator(this.CityList)
+          ]);
+          if (this.action === 'edit' && this.advanceTable?.billingCityName) {
+            this.advanceTableForm.controls['billingCityName'].setValue(this.advanceTable.billingCityName, { emitEvent: false });
+          }
+          this.advanceTableForm.controls['billingCityName'].updateValueAndValidity();
+          this.filteredCityOptions = this.advanceTableForm.controls['billingCityName'].valueChanges.pipe(
+            startWith(""),
+            map(value => this._filterCity(value || ''))
+          );
+        });                  
       },
       error=>
       {

@@ -160,7 +160,13 @@ export class FormDialogDropOffByExecutiveComponent {
   .toLowerCase()
   .replace(/[^a-z\s]/g, ''); // 👈 ye line important hai
 
-this.isSaveAllowed = status === 'changes allow';
+this.isSaveAllowed = !status || (
+  status.includes('change') &&
+  status.includes('allow') &&
+  !status.includes('not') &&
+  !status.includes('disallow') &&
+  !status.includes('deny')
+);
 
     
     this.advanceTableForm.controls['dropOffEntryMethod'].setValue(data?.rowRecord?.dropOffEntryMethod);

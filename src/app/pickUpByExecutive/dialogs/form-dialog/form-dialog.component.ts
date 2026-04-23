@@ -133,7 +133,13 @@ public reachedByExecutiveService: ReachedByExecutiveService)
   .toLowerCase()
   .replace(/[^a-z\s]/g, '');
 
-this.isSaveAllowed = status === 'changes allow';
+this.isSaveAllowed = !status || (
+  status.includes('change') &&
+  status.includes('allow') &&
+  !status.includes('not') &&
+  !status.includes('disallow') &&
+  !status.includes('deny')
+);
   
         // this.advanceTableForm.controls['pickUpTime'].setValue(data?.rowRecord?.pickupEntryMethod);
         if (data?.rowRecord?.pickupEntryMethod === 'Manual') {

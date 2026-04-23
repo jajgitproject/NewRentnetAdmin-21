@@ -113,7 +113,13 @@ export class FormDialogGIComponent {
   .toLowerCase()
   .replace(/[^a-z\s]/g, ''); // 👈 ye line important hai
 
-this.isSaveAllowed = status === 'changes allow';
+this.isSaveAllowed = !status || (
+  status.includes('change') &&
+  status.includes('allow') &&
+  !status.includes('not') &&
+  !status.includes('disallow') &&
+  !status.includes('deny')
+);
     this.actualDate = new Date(data.rowRecord.pickup.pickupDate);
     this.actualTime = new Date(data.rowRecord.pickup.pickupTime);
     this.ReservationID = data.reservationID;
