@@ -18,21 +18,21 @@
       <div class="row">
         <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
           <span class="TDValueBold">Address</span> <br />
-          <span class="TDValue"> {{ dataSource?.dropOffAddressString || 'N/A' }}</span> 
+          <span class="TDValue"> {{ viewAddress }}</span> 
         </div>
         <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
           <span class="TDValueBold">KM</span> <br />
-          <span class="TDValue"> {{ dataSource?.dropOffKM || 'N/A' }}</span> 
+          <span class="TDValue"> {{ viewKM }}</span> 
         </div>
       </div>
       <div class="row">
         <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
           <span class="TDValueBold">Date</span> <br />
-          <span class="TDValue"> {{ (dataSource?.dropOffDate | date: 'yyyy-MM-dd') || 'N/A' }}</span> 
+          <span class="TDValue"> {{ (viewDate | date: 'dd/MM/yyyy') || 'N/A' }}</span> 
         </div>
         <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
           <span class="TDValueBold">Time</span> <br />
-          <span class="TDValue"> {{ (dataSource?.dropOffTime | date: 'shortTime') || 'N/A' }}</span> 
+          <span class="TDValue"> {{ (viewTime | date: 'shortTime') || 'N/A' }}</span> 
         </div>
       </div>
     </mat-dialog-content>

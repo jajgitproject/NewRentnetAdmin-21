@@ -539,7 +539,7 @@
 
                                   <br />
                                   <b class="pickup-row">
-                                    <button class="BoldButton" mat-button (click)="PickupDetail(item.dutySlipID)">
+                                    <button class="BoldButton" mat-button (click)="PickupDetail(item)">
                                       Pick Up
                                     </button>
                                     <mat-icon class="pickup-dots" [matMenuTriggerFor]="menu4">
@@ -574,7 +574,7 @@
                                   </ng-template>
                                   <br />
                                   <b class="drop-off-row">
-                                    <button class="BoldButton" mat-button (click)="DropOffDetail(item.dutySlipID)">
+                                    <button class="BoldButton" mat-button (click)="DropOffDetail(item)">
                                       Drop Off
                                     </button>
                                     <mat-icon class="drop-off-dots" [matMenuTriggerFor]="menu5">
@@ -612,7 +612,7 @@
                                   </ng-template>
                                   <br />
                                   <b class="garage-in-row">
-                                    <button class="BoldButton" mat-button (click)="LocationInDetail(item.dutySlipID)">
+                                    <button class="BoldButton" mat-button (click)="LocationInDetail(item)">
                                       Garage in
                                     </button>
                                     <mat-icon class="garage-in-dots" [matMenuTriggerFor]="menu6">

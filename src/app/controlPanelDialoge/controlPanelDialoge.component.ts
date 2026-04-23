@@ -1276,8 +1276,17 @@ export class ControlPanelDialogeComponent {
       });
       this.onDutyLifecycleDialogClosed(dialogRef, (res) => {
         if (res) {
+          const garageInPayload = Array.isArray(res?.data) ? res.data[0] : (res?.data ?? res);
+          const garageInKM = garageInPayload?.locationInKM ?? garageInPayload?.locationInKm ?? garageInPayload?.garageInKM ?? garageInPayload?.garageInKm ?? res?.locationInKM ?? res?.locationInKm ?? res?.garageInKM ?? res?.garageInKm ?? null;
+          const garageInAddress = garageInPayload?.locationInAddressString ?? garageInPayload?.garageInAddressString ?? res?.locationInAddressString ?? res?.garageInAddressString ?? null;
           item.locationInDate = res?.locationInDate;
           item.locationInTime = res?.locationInTime;
+          item.locationInKM = garageInKM ?? item.locationInKM ?? item.locationInKm ?? item.garageInKM ?? item.garageInKm ?? null;
+          item.locationInKm = garageInKM ?? item.locationInKm ?? item.locationInKM ?? item.garageInKm ?? item.garageInKM ?? null;
+          item.garageInKM = garageInKM ?? item.garageInKM ?? item.garageInKm ?? item.locationInKM ?? item.locationInKm ?? null;
+          item.garageInKm = garageInKM ?? item.garageInKm ?? item.garageInKM ?? item.locationInKm ?? item.locationInKM ?? null;
+          item.locationInAddressString = garageInAddress ?? item.locationInAddressString ?? item.garageInAddressString ?? null;
+          item.garageInAddressString = garageInAddress ?? item.garageInAddressString ?? item.locationInAddressString ?? null;
         }
       });
     }
@@ -1306,8 +1315,17 @@ export class ControlPanelDialogeComponent {
       });
       this.onDutyLifecycleDialogClosed(dialogRef, (res) => {
         if (res) {
+          const garageInPayload = Array.isArray(res?.data) ? res.data[0] : (res?.data ?? res);
+          const garageInKM = garageInPayload?.locationInKM ?? garageInPayload?.locationInKm ?? garageInPayload?.garageInKM ?? garageInPayload?.garageInKm ?? res?.locationInKM ?? res?.locationInKm ?? res?.garageInKM ?? res?.garageInKm ?? null;
+          const garageInAddress = garageInPayload?.locationInAddressString ?? garageInPayload?.garageInAddressString ?? res?.locationInAddressString ?? res?.garageInAddressString ?? null;
           item.locationInDate = res?.locationInDate;
           item.locationInTime = res?.locationInTime;
+          item.locationInKM = garageInKM ?? item.locationInKM ?? item.locationInKm ?? item.garageInKM ?? item.garageInKm ?? null;
+          item.locationInKm = garageInKM ?? item.locationInKm ?? item.locationInKM ?? item.garageInKm ?? item.garageInKM ?? null;
+          item.garageInKM = garageInKM ?? item.garageInKM ?? item.garageInKm ?? item.locationInKM ?? item.locationInKm ?? null;
+          item.garageInKm = garageInKM ?? item.garageInKm ?? item.garageInKM ?? item.locationInKm ?? item.locationInKM ?? null;
+          item.locationInAddressString = garageInAddress ?? item.locationInAddressString ?? item.garageInAddressString ?? null;
+          item.garageInAddressString = garageInAddress ?? item.garageInAddressString ?? item.locationInAddressString ?? null;
         }
       });
     }
@@ -1335,8 +1353,17 @@ export class ControlPanelDialogeComponent {
       });
       this.onDutyLifecycleDialogClosed(dialogRef, (res) => {
         if (res) {
+          const garageInPayload = Array.isArray(res?.data) ? res.data[0] : (res?.data ?? res);
+          const garageInKM = garageInPayload?.locationInKM ?? garageInPayload?.locationInKm ?? garageInPayload?.garageInKM ?? garageInPayload?.garageInKm ?? res?.locationInKM ?? res?.locationInKm ?? res?.garageInKM ?? res?.garageInKm ?? null;
+          const garageInAddress = garageInPayload?.locationInAddressString ?? garageInPayload?.garageInAddressString ?? res?.locationInAddressString ?? res?.garageInAddressString ?? null;
           item.locationInDate = res?.locationInDate;
           item.locationInTime = res?.locationInTime;
+          item.locationInKM = garageInKM ?? item.locationInKM ?? item.locationInKm ?? item.garageInKM ?? item.garageInKm ?? null;
+          item.locationInKm = garageInKM ?? item.locationInKm ?? item.locationInKM ?? item.garageInKm ?? item.garageInKM ?? null;
+          item.garageInKM = garageInKM ?? item.garageInKM ?? item.garageInKm ?? item.locationInKM ?? item.locationInKm ?? null;
+          item.garageInKm = garageInKM ?? item.garageInKm ?? item.garageInKM ?? item.locationInKm ?? item.locationInKM ?? null;
+          item.locationInAddressString = garageInAddress ?? item.locationInAddressString ?? item.garageInAddressString ?? null;
+          item.garageInAddressString = garageInAddress ?? item.garageInAddressString ?? item.locationInAddressString ?? null;
         }
       });
     }
@@ -1421,6 +1448,8 @@ export class ControlPanelDialogeComponent {
           this.dataSource = data;
           this.dialog.open(GarageOutDetailsComponent, {
             width: '500px',
+            maxWidth: '95vw',
+            panelClass: 'dbe-dialog-centered',
             data: {
               row: item,
               dataSource: this.dataSource
@@ -1571,11 +1600,12 @@ export class ControlPanelDialogeComponent {
       }
     });
   }
-  PickupDetail(dutySlipID: number) {
+  PickupDetail(item: any) {
     this.dialog.open(PickUpDetailShowComponent, {
       width: '500px',
       data: {
-        dutySlipID: dutySlipID
+        dutySlipID: item?.dutySlipID,
+        rowRecord: item
       }
     });
   }
@@ -1599,8 +1629,15 @@ export class ControlPanelDialogeComponent {
 
       this.onDutyLifecycleDialogClosed(dialogRef, (res) => {
         if (res) {
+          const pickupPayload = Array.isArray(res?.data) ? res.data[0] : (res?.data ?? res);
+          const pickupKM = pickupPayload?.pickUpKM ?? pickupPayload?.pickupKM ?? res?.pickUpKM ?? res?.pickupKM ?? null;
+          const pickupAddress = pickupPayload?.pickUpAddressString ?? pickupPayload?.pickupAddressString ?? res?.pickUpAddressString ?? res?.pickupAddressString ?? null;
           item.pickDate = res?.pickUpDate;
           item.pickTime = res?.pickUpTime;
+          item.pickUpKM = pickupKM ?? item.pickUpKM ?? item.pickupKM ?? null;
+          item.pickupKM = pickupKM ?? item.pickupKM ?? item.pickUpKM ?? null;
+          item.pickUpAddressString = pickupAddress ?? item.pickUpAddressString ?? item.pickupAddressString ?? null;
+          item.pickupAddressString = pickupAddress ?? item.pickupAddressString ?? item.pickUpAddressString ?? null;
         }
       });
     }
@@ -1627,8 +1664,15 @@ export class ControlPanelDialogeComponent {
 
       this.onDutyLifecycleDialogClosed(dialogRef, (res) => {
         if (res) {
+          const pickupPayload = Array.isArray(res?.data) ? res.data[0] : (res?.data ?? res);
+          const pickupKM = pickupPayload?.pickUpKM ?? pickupPayload?.pickupKM ?? res?.pickUpKM ?? res?.pickupKM ?? null;
+          const pickupAddress = pickupPayload?.pickUpAddressString ?? pickupPayload?.pickupAddressString ?? res?.pickUpAddressString ?? res?.pickupAddressString ?? null;
           item.pickDate = res?.pickUpDate;
           item.pickTime = res?.pickUpTime;
+          item.pickUpKM = pickupKM ?? item.pickUpKM ?? item.pickupKM ?? null;
+          item.pickupKM = pickupKM ?? item.pickupKM ?? item.pickUpKM ?? null;
+          item.pickUpAddressString = pickupAddress ?? item.pickUpAddressString ?? item.pickupAddressString ?? null;
+          item.pickupAddressString = pickupAddress ?? item.pickupAddressString ?? item.pickUpAddressString ?? null;
         }
       });
     }
@@ -1654,27 +1698,36 @@ export class ControlPanelDialogeComponent {
 
       this.onDutyLifecycleDialogClosed(dialogRef, (res) => {
         if (res) {
+          const pickupPayload = Array.isArray(res?.data) ? res.data[0] : (res?.data ?? res);
+          const pickupKM = pickupPayload?.pickUpKM ?? pickupPayload?.pickupKM ?? res?.pickUpKM ?? res?.pickupKM ?? null;
+          const pickupAddress = pickupPayload?.pickUpAddressString ?? pickupPayload?.pickupAddressString ?? res?.pickUpAddressString ?? res?.pickupAddressString ?? null;
           item.pickDate = res?.pickUpDate;
           item.pickTime = res?.pickUpTime;
+          item.pickUpKM = pickupKM ?? item.pickUpKM ?? item.pickupKM ?? null;
+          item.pickupKM = pickupKM ?? item.pickupKM ?? item.pickUpKM ?? null;
+          item.pickUpAddressString = pickupAddress ?? item.pickUpAddressString ?? item.pickupAddressString ?? null;
+          item.pickupAddressString = pickupAddress ?? item.pickupAddressString ?? item.pickUpAddressString ?? null;
         }
       });
     }
 
   }
-  DropOffDetail(dutySlipID: number) {
+  DropOffDetail(item: any) {
     this.dialog.open(DropOffDetailShowComponent, {
       width: '500px',
       data: {
-        dutySlipID: dutySlipID
+        dutySlipID: item?.dutySlipID,
+        rowRecord: item
       }
     });
   }
 
-  LocationInDetail(dutySlipID: number) {
+  LocationInDetail(item: any) {
     this.dialog.open(LocationInDetailShowComponent, {
       width: '500px',
       data: {
-        dutySlipID: dutySlipID
+        dutySlipID: item?.dutySlipID,
+        rowRecord: item
       }
     });
   }
@@ -1697,8 +1750,20 @@ export class ControlPanelDialogeComponent {
         });
       this.onDutyLifecycleDialogClosed(dialogRef, (res) => {
         if (res) {
-          item.garageOutDate = res?.dropOffDate;
-          item.garageOutTime = res?.dropOffTime;
+          const dropPayload = Array.isArray(res?.data) ? res.data[0] : (res?.data ?? res);
+          const dropOffKM = dropPayload?.dropOffKM ?? dropPayload?.dropoffKM ?? dropPayload?.dropOffKm ?? dropPayload?.dropoffKm ?? res?.dropOffKM ?? res?.dropoffKM ?? res?.dropOffKm ?? res?.dropoffKm ?? null;
+          const dropOffAddress = dropPayload?.dropOffAddressString ?? dropPayload?.dropoffAddressString ?? res?.dropOffAddressString ?? res?.dropoffAddressString ?? null;
+          item.dropOffDate = res?.dropOffDate ?? item.dropOffDate ?? item.garageOutDate ?? null;
+          item.dropOffTime = res?.dropOffTime ?? item.dropOffTime ?? item.garageOutTime ?? null;
+          // Keep legacy aliases in sync for older bindings.
+          item.garageOutDate = item.dropOffDate;
+          item.garageOutTime = item.dropOffTime;
+          item.dropOffKM = dropOffKM ?? item.dropOffKM ?? item.dropOffKm ?? item.dropoffKM ?? item.dropoffKm ?? null;
+          item.dropOffKm = dropOffKM ?? item.dropOffKm ?? item.dropOffKM ?? item.dropoffKm ?? item.dropoffKM ?? null;
+          item.dropoffKM = dropOffKM ?? item.dropoffKM ?? item.dropoffKm ?? item.dropOffKM ?? item.dropOffKm ?? null;
+          item.dropoffKm = dropOffKM ?? item.dropoffKm ?? item.dropoffKM ?? item.dropOffKm ?? item.dropOffKM ?? null;
+          item.dropOffAddressString = dropOffAddress ?? item.dropOffAddressString ?? item.dropoffAddressString ?? null;
+          item.dropoffAddressString = dropOffAddress ?? item.dropoffAddressString ?? item.dropOffAddressString ?? null;
         }
       });
     }
@@ -1723,8 +1788,20 @@ export class ControlPanelDialogeComponent {
         });
       this.onDutyLifecycleDialogClosed(dialogRef, (res) => {
         if (res) {
-          item.garageOutDate = res?.dropOffDate;
-          item.garageOutTime = res?.dropOffTime;
+          const dropPayload = Array.isArray(res?.data) ? res.data[0] : (res?.data ?? res);
+          const dropOffKM = dropPayload?.dropOffKM ?? dropPayload?.dropoffKM ?? dropPayload?.dropOffKm ?? dropPayload?.dropoffKm ?? res?.dropOffKM ?? res?.dropoffKM ?? res?.dropOffKm ?? res?.dropoffKm ?? null;
+          const dropOffAddress = dropPayload?.dropOffAddressString ?? dropPayload?.dropoffAddressString ?? res?.dropOffAddressString ?? res?.dropoffAddressString ?? null;
+          item.dropOffDate = res?.dropOffDate ?? item.dropOffDate ?? item.garageOutDate ?? null;
+          item.dropOffTime = res?.dropOffTime ?? item.dropOffTime ?? item.garageOutTime ?? null;
+          // Keep legacy aliases in sync for older bindings.
+          item.garageOutDate = item.dropOffDate;
+          item.garageOutTime = item.dropOffTime;
+          item.dropOffKM = dropOffKM ?? item.dropOffKM ?? item.dropOffKm ?? item.dropoffKM ?? item.dropoffKm ?? null;
+          item.dropOffKm = dropOffKM ?? item.dropOffKm ?? item.dropOffKM ?? item.dropoffKm ?? item.dropoffKM ?? null;
+          item.dropoffKM = dropOffKM ?? item.dropoffKM ?? item.dropoffKm ?? item.dropOffKM ?? item.dropOffKm ?? null;
+          item.dropoffKm = dropOffKM ?? item.dropoffKm ?? item.dropoffKM ?? item.dropOffKm ?? item.dropOffKM ?? null;
+          item.dropOffAddressString = dropOffAddress ?? item.dropOffAddressString ?? item.dropoffAddressString ?? null;
+          item.dropoffAddressString = dropOffAddress ?? item.dropoffAddressString ?? item.dropOffAddressString ?? null;
         }
       });
     }
@@ -1749,8 +1826,20 @@ export class ControlPanelDialogeComponent {
         });
       this.onDutyLifecycleDialogClosed(dialogRef, (res) => {
         if (res) {
-          item.garageOutDate = res?.dropOffDate;
-          item.garageOutTime = res?.dropOffTime;
+          const dropPayload = Array.isArray(res?.data) ? res.data[0] : (res?.data ?? res);
+          const dropOffKM = dropPayload?.dropOffKM ?? dropPayload?.dropoffKM ?? dropPayload?.dropOffKm ?? dropPayload?.dropoffKm ?? res?.dropOffKM ?? res?.dropoffKM ?? res?.dropOffKm ?? res?.dropoffKm ?? null;
+          const dropOffAddress = dropPayload?.dropOffAddressString ?? dropPayload?.dropoffAddressString ?? res?.dropOffAddressString ?? res?.dropoffAddressString ?? null;
+          item.dropOffDate = res?.dropOffDate ?? item.dropOffDate ?? item.garageOutDate ?? null;
+          item.dropOffTime = res?.dropOffTime ?? item.dropOffTime ?? item.garageOutTime ?? null;
+          // Keep legacy aliases in sync for older bindings.
+          item.garageOutDate = item.dropOffDate;
+          item.garageOutTime = item.dropOffTime;
+          item.dropOffKM = dropOffKM ?? item.dropOffKM ?? item.dropOffKm ?? item.dropoffKM ?? item.dropoffKm ?? null;
+          item.dropOffKm = dropOffKM ?? item.dropOffKm ?? item.dropOffKM ?? item.dropoffKm ?? item.dropoffKM ?? null;
+          item.dropoffKM = dropOffKM ?? item.dropoffKM ?? item.dropoffKm ?? item.dropOffKM ?? item.dropOffKm ?? null;
+          item.dropoffKm = dropOffKM ?? item.dropoffKm ?? item.dropoffKM ?? item.dropOffKm ?? item.dropOffKM ?? null;
+          item.dropOffAddressString = dropOffAddress ?? item.dropOffAddressString ?? item.dropoffAddressString ?? null;
+          item.dropoffAddressString = dropOffAddress ?? item.dropoffAddressString ?? item.dropOffAddressString ?? null;
         }
       });
     }
