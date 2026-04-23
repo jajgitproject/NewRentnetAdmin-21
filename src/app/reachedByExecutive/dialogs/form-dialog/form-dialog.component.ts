@@ -403,7 +403,12 @@ onAddressTyping() {
     return isValid ? null : { 'whitespace': true };
   }
 
-  submit() {
+  submit(): void {
+    this.advanceTableForm.markAllAsTouched();
+    if (!this.advanceTableForm.valid) {
+      return;
+    }
+    this.Put();
   }
 
   onNoClick(): void {
@@ -422,9 +427,19 @@ onAddressTyping() {
   public Put(): void {
 
     this.saveDisabled = false;
-    if (!this.isReportingValid()) 
-    {
-      return; // Don't proceed if invalid
+    if (!this.isReportingValid()) {
+      this.saveDisabled = true;
+      return;
+    }
+    if (!this.employeeDataSource?.length) {
+      this.showNotification(
+        'snackbar-warning',
+        'Executive details are still loading. Please wait a moment and try again.',
+        'bottom',
+        'center'
+      );
+      this.saveDisabled = true;
+      return;
     }
     this.advanceTableForm.patchValue({ dutySlipID: this.dutySlipID });
     this.advanceTableForm.patchValue({ executive: this.employeeDataSource[0].firstName + ' ' + this.employeeDataSource[0].lastName });
@@ -607,10 +622,28 @@ onAddressTyping() {
     );
   }
 
-      private isReportingValid(): boolean {    
+      private isReportingValid(): boolean {
+        if (!this.locationOutDate || !this.locationOutTime || this.locationOutKm == null || this.locationOutKm === '') {
+          Swal.fire({
+            title: 'Please wait',
+            text: 'Garage out (dispatch) details are still loading. Wait a moment and try Save again.',
+            icon: 'info',
+          });
+          return false;
+        }
+
         const date = new Date(this.advanceTableForm.value.reportingToGuestDate);
         const time = new Date(this.advanceTableForm.value.reportingToGuestTime);
         const km = +this.advanceTableForm.value.reportingToGuestKM;
+
+        if (Number.isNaN(date.getTime()) || Number.isNaN(time.getTime()) || Number.isNaN(km)) {
+          Swal.fire({
+            title: 'Invalid details',
+            text: 'Please enter a valid date, time, and KM before saving.',
+            icon: 'warning',
+          });
+          return false;
+        }
 
         const locationOutDateTime = new Date(this.locationOutDate);
         locationOutDateTime.setHours(this.locationOutTime.getHours());

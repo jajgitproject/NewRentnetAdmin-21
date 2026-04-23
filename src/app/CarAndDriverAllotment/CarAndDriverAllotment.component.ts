@@ -294,8 +294,6 @@ export class CarAndDriverAllotmentComponent implements OnInit {
   searchedType: 'Associated' | 'Unassociated' = 'Associated';
   isLoadingdataUnassociated: boolean = false;
   isSearchClicked: boolean = false;
-  private adhocDebugErrorHookRegistered = false;
-
   constructor(
     private fb: FormBuilder,
     public route: Router,
@@ -324,20 +322,6 @@ export class CarAndDriverAllotmentComponent implements OnInit {
   buttonDisabled: boolean = false; // disable actions in child dialogs only
 
   ngOnInit() {
-    if (!this.adhocDebugErrorHookRegistered) {
-      this.adhocDebugErrorHookRegistered = true;
-      window.addEventListener('error', (event) => {
-        // #region agent log
-        fetch('http://127.0.0.1:7532/ingest/f2c32722-bd0e-4386-883a-e749a4372080',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'d80453'},body:JSON.stringify({sessionId:'d80453',runId:'adhoc-popup-pre',hypothesisId:'H7',location:'CarAndDriverAllotment.component.ts:window.onerror',message:'Unhandled window error',data:{message:event?.message ?? null,filename:event?.filename ?? null,lineno:event?.lineno ?? null,colno:event?.colno ?? null},timestamp:Date.now()})}).catch(()=>{});
-        // #endregion
-      });
-      window.addEventListener('unhandledrejection', (event: PromiseRejectionEvent) => {
-        // #region agent log
-        fetch('http://127.0.0.1:7532/ingest/f2c32722-bd0e-4386-883a-e749a4372080',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'d80453'},body:JSON.stringify({sessionId:'d80453',runId:'adhoc-popup-pre',hypothesisId:'H8',location:'CarAndDriverAllotment.component.ts:window.unhandledrejection',message:'Unhandled promise rejection',data:{reason:(event as any)?.reason?.message ?? (event as any)?.reason ?? null},timestamp:Date.now()})}).catch(()=>{});
-        // #endregion
-      });
-    }
-
     this.router.queryParams.subscribe((paramsData) => {
       const encryptedReservationGroupID = paramsData.reservationGroupID;
       const encryptedReservationID = paramsData.reservationID;
@@ -1085,9 +1069,6 @@ GetDriverLatLong()
         this.driverModelLatLong = data;
         const geoLocation = this.driverModelLatLong?.geoLocation;
         if (!geoLocation) {
-          // #region agent log
-          fetch('http://127.0.0.1:7532/ingest/f2c32722-bd0e-4386-883a-e749a4372080',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'d80453'},body:JSON.stringify({sessionId:'d80453',runId:'adhoc-popup-pre',hypothesisId:'H11',location:'CarAndDriverAllotment.component.ts:GetDriverLatLong',message:'GeoLocation missing from lat/long response',data:{pickupAddress:this.pickupAddress ?? null,hasDriverModel:!!this.driverModelLatLong},timestamp:Date.now()})}).catch(()=>{});
-          // #endregion
           this.latitude = '';
           this.longitude = '';
           this.eTRAvailabilityGeoLocation = '';
@@ -1729,13 +1710,7 @@ getAllDriver()
 
   AdhocCarAndDriver(reservationInfo: any) {
     const reservationData = Array.isArray(reservationInfo) ? reservationInfo[0] : reservationInfo;
-    // #region agent log
-    fetch('http://127.0.0.1:7532/ingest/f2c32722-bd0e-4386-883a-e749a4372080',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'d80453'},body:JSON.stringify({sessionId:'d80453',runId:'adhoc-popup-pre',hypothesisId:'H1',location:'CarAndDriverAllotment.component.ts:AdhocCarAndDriver',message:'Adhoc action clicked',data:{rawIsArray:Array.isArray(reservationInfo),hasReservationInfo:!!reservationData,reservationId:reservationData?.reservationID ?? null,allotmentStatusRaw:reservationData?.allotmentStatus ?? null},timestamp:Date.now()})}).catch(()=>{});
-    // #endregion
     if (!reservationData) {
-      // #region agent log
-      fetch('http://127.0.0.1:7532/ingest/f2c32722-bd0e-4386-883a-e749a4372080',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'d80453'},body:JSON.stringify({sessionId:'d80453',runId:'adhoc-popup-pre',hypothesisId:'H2',location:'CarAndDriverAllotment.component.ts:AdhocCarAndDriver',message:'Blocked due to missing reservationInfo',data:{reason:'reservationInfo-falsy'},timestamp:Date.now()})}).catch(()=>{});
-      // #endregion
       this.snackBar.open('Reservation details are not loaded yet.', '', {
         duration: 6000,
         verticalPosition: 'bottom',
@@ -1747,9 +1722,6 @@ getAllDriver()
 
     const allotmentStatus = (reservationData.allotmentStatus || '').toString().trim().toLowerCase();
     if (allotmentStatus === 'alloted' || allotmentStatus === 'allotted') {
-      // #region agent log
-      fetch('http://127.0.0.1:7532/ingest/f2c32722-bd0e-4386-883a-e749a4372080',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'d80453'},body:JSON.stringify({sessionId:'d80453',runId:'adhoc-popup-pre',hypothesisId:'H3',location:'CarAndDriverAllotment.component.ts:AdhocCarAndDriver',message:'Blocked due to already allotted status',data:{normalizedAllotmentStatus:allotmentStatus},timestamp:Date.now()})}).catch(()=>{});
-      // #endregion
       Swal.fire({
         title: 'Already Alloted',
         icon: 'warning',
@@ -1757,9 +1729,6 @@ getAllDriver()
       return;
     }
 
-    // #region agent log
-    fetch('http://127.0.0.1:7532/ingest/f2c32722-bd0e-4386-883a-e749a4372080',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'d80453'},body:JSON.stringify({sessionId:'d80453',runId:'adhoc-popup-pre',hypothesisId:'H4',location:'CarAndDriverAllotment.component.ts:AdhocCarAndDriver',message:'Opening Adhoc dialog',data:{reservationId:reservationData?.reservationID ?? null,hasTransferedLocationId:reservationData?.transferedLocationID !== undefined},timestamp:Date.now()})}).catch(()=>{});
-    // #endregion
     let dialogRef: any;
     try {
       dialogRef = this.dialog.open(AdhocCarAndDriverFormDialogComponent, {
@@ -1769,9 +1738,6 @@ getAllDriver()
         }
       });
     } catch (error: any) {
-      // #region agent log
-      fetch('http://127.0.0.1:7532/ingest/f2c32722-bd0e-4386-883a-e749a4372080',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'d80453'},body:JSON.stringify({sessionId:'d80453',runId:'adhoc-popup-pre',hypothesisId:'H9',location:'CarAndDriverAllotment.component.ts:AdhocCarAndDriver',message:'Dialog open threw exception',data:{errorMessage:error?.message ?? null,errorName:error?.name ?? null},timestamp:Date.now()})}).catch(()=>{});
-      // #endregion
       this.snackBar.open(`Unable to open Adhoc popup: ${error?.message || 'unknown error'}`, '', {
         duration: 6000,
         verticalPosition: 'bottom',
@@ -1781,9 +1747,6 @@ getAllDriver()
       return;
     }
     dialogRef.afterClosed().subscribe(res => {
-      // #region agent log
-      fetch('http://127.0.0.1:7532/ingest/f2c32722-bd0e-4386-883a-e749a4372080',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'d80453'},body:JSON.stringify({sessionId:'d80453',runId:'adhoc-popup-pre',hypothesisId:'H4',location:'CarAndDriverAllotment.component.ts:AdhocCarAndDriver.afterClosed',message:'Adhoc dialog closed',data:{hasResponse:!!res,hasDriverName:!!res?.response?.driverName},timestamp:Date.now()})}).catch(()=>{});
-      // #endregion
       if (res) {
         this.loadData(this._filters, this.currentPage, this.recordsPerPage);
         this.driver.setValue(res.response.driverName);

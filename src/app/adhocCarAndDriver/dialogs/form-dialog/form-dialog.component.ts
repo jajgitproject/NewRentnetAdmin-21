@@ -129,9 +129,6 @@ copydetails:boolean = false;
 
     public _generalService:GeneralService)
   {
-        // #region agent log
-        fetch('http://127.0.0.1:7532/ingest/f2c32722-bd0e-4386-883a-e749a4372080',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'d80453'},body:JSON.stringify({sessionId:'d80453',runId:'adhoc-popup-pre',hypothesisId:'H5',location:'adhocCarAndDriver/form-dialog.component.ts:constructor',message:'Adhoc dialog constructor entered',data:{hasData:!!data,action:data?.action ?? null,hasReservationInfo:!!data?.reservationInfo,reservationId:data?.reservationInfo?.reservationID ?? null},timestamp:Date.now()})}).catch(()=>{});
-        // #endregion
         // Set the defaults
         this.action = data.action;
         this.advanceTable = data;
@@ -163,9 +160,6 @@ copydetails:boolean = false;
         } 
         else 
         {
-          // #region agent log
-          fetch('http://127.0.0.1:7532/ingest/f2c32722-bd0e-4386-883a-e749a4372080',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'d80453'},body:JSON.stringify({sessionId:'d80453',runId:'adhoc-popup-pre',hypothesisId:'H5',location:'adhocCarAndDriver/form-dialog.component.ts:constructor',message:'Adhoc dialog add branch selected',data:{hasTransferedLocationId:data?.reservationInfo?.transferedLocationID !== undefined,hasReservationId:data?.reservationInfo?.reservationID !== undefined},timestamp:Date.now()})}).catch(()=>{});
-          // #endregion
           this.dialogTitle = 'Adhoc Car And Driver';
           this.advanceTable = new AdhocCarAndDriver({});
           this.advanceTable.activationStatus=true;
@@ -181,9 +175,6 @@ copydetails:boolean = false;
   }
   public ngOnInit(): void
   {
-    // #region agent log
-    fetch('http://127.0.0.1:7532/ingest/f2c32722-bd0e-4386-883a-e749a4372080',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'d80453'},body:JSON.stringify({sessionId:'d80453',runId:'adhoc-popup-pre',hypothesisId:'H6',location:'adhocCarAndDriver/form-dialog.component.ts:ngOnInit',message:'Adhoc dialog ngOnInit entered',data:{hasForm:!!this.advanceTableForm,reservationId:this.reservationID ?? null,locationId:this.locationID ?? null},timestamp:Date.now()})}).catch(()=>{});
-    // #endregion
     this.InitLocation();
     this.InitState();
     this.InitSupplier();

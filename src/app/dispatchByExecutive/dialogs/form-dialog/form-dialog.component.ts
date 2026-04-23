@@ -263,9 +263,6 @@ this.isSaveAllowed = status === 'changes allow';
           this.advanceTableForm.get('locationOutAddressString')?.updateValueAndValidity();
         }
       }
-      // #region agent log
-      fetch('http://127.0.0.1:7278/ingest/38c94268-8542-449e-a503-35f5e1042ec5',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'cd6e32'},body:JSON.stringify({sessionId:'cd6e32',runId:'post-fix-3',hypothesisId:'H10',location:'dispatch-form-dialog.component.ts:onGooglePredictionSelected',message:'Google prediction selected and geocoded',data:{status,hasResults:!!results?.length,addressText},timestamp:Date.now()})}).catch(()=>{});
-      // #endregion
     });
   }
 
@@ -1114,18 +1111,12 @@ this.isSaveAllowed = status === 'changes allow';
       {
         this.ifBlock=false;
         this.advanceTableForm.controls["locationOutAddressString"].setValue('');
-        // #region agent log
-        fetch('http://127.0.0.1:7278/ingest/38c94268-8542-449e-a503-35f5e1042ec5',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'cd6e32'},body:JSON.stringify({sessionId:'cd6e32',runId:'pre-fix',hypothesisId:'H4',location:'dispatch-form-dialog.component.ts:1048',message:'Google Addresses toggled ON',data:{googleAddresses:true,ifBlock:this.ifBlock},timestamp:Date.now()})}).catch(()=>{});
-        // #endregion
        
       }
       if(this.advanceTableForm.value.googleAddresses===false)
       {
         this.ifBlock=true;
         this.advanceTableForm.controls["locationOutAddressString"].setValue('');
-        // #region agent log
-        fetch('http://127.0.0.1:7278/ingest/38c94268-8542-449e-a503-35f5e1042ec5',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'cd6e32'},body:JSON.stringify({sessionId:'cd6e32',runId:'pre-fix',hypothesisId:'H4',location:'dispatch-form-dialog.component.ts:1055',message:'Google Addresses toggled OFF',data:{googleAddresses:false,ifBlock:this.ifBlock},timestamp:Date.now()})}).catch(()=>{});
-        // #endregion
       }
 
   }
@@ -1194,9 +1185,6 @@ this.isSaveAllowed = status === 'changes allow';
     this.locationOutAddressString = address.formatted_address;
     const lat = address.geometry.location.lat();
     const lng = address.geometry.location.lng();
-    // #region agent log
-    fetch('http://127.0.0.1:7278/ingest/38c94268-8542-449e-a503-35f5e1042ec5',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'cd6e32'},body:JSON.stringify({sessionId:'cd6e32',runId:'pre-fix',hypothesisId:'H3',location:'dispatch-form-dialog.component.ts:1123',message:'Dispatch handleAddressChange fired',data:{hasAddress:!!address,hasFormattedAddress:!!address?.formatted_address,hasGeometry:!!address?.geometry,hasPlaceId:!!address?.place_id},timestamp:Date.now()})}).catch(()=>{});
-    // #endregion
 
     this.advanceTableForm.patchValue({
       locationOutAddressString: this.locationOutAddressString,

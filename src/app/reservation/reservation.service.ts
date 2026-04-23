@@ -407,9 +407,6 @@ export class ReservationService
     }
    updatePickupEdit(advanceTable: any)
     {
-    // #region agent log
-    fetch('http://127.0.0.1:7532/ingest/f2c32722-bd0e-4386-883a-e749a4372080',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'445479'},body:JSON.stringify({sessionId:'445479',hypothesisId:'H1,H3',location:'reservation.service.ts:updatePickupEdit.entry',message:'inbound advanceTable',data:{reservationID:advanceTable?.reservationID,pickupTimeType:typeof advanceTable?.pickupTime,pickupTimeStr:advanceTable?.pickupTime?String(advanceTable.pickupTime):null,pickupTimeIsDate:advanceTable?.pickupTime instanceof Date,dropOffTimeType:typeof advanceTable?.dropOffTime,dropOffTimeStr:advanceTable?.dropOffTime?String(advanceTable.dropOffTime):String(advanceTable?.dropOffTime),dropOffTimeIsDate:advanceTable?.dropOffTime instanceof Date,keys:Object.keys(advanceTable||{})},timestamp:Date.now()})}).catch(()=>{});
-    // #endregion
     if(advanceTable.pickupTime==="")
     {
       advanceTable.pickupTime=null;
@@ -419,9 +416,6 @@ export class ReservationService
       advanceTable.pickupTimeString=this.generalService.getTimeApplicable(advanceTable.pickupTime);
     }
     advanceTable.dropOffTimeString=this.generalService.getTimeApplicable(advanceTable.dropOffTime);  
-    // #region agent log
-    fetch('http://127.0.0.1:7532/ingest/f2c32722-bd0e-4386-883a-e749a4372080',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'445479'},body:JSON.stringify({sessionId:'445479',hypothesisId:'H1,H3,H4',location:'reservation.service.ts:updatePickupEdit.postMutate',message:'outbound payload to EditPickupTime',data:{url:this.API_URL+'/EditPickupTime',reservationID:advanceTable?.reservationID,pickupTime:advanceTable?.pickupTime?String(advanceTable.pickupTime):null,pickupTimeString:advanceTable?.pickupTimeString,dropOffTime:advanceTable?.dropOffTime?String(advanceTable.dropOffTime):String(advanceTable?.dropOffTime),dropOffTimeString:advanceTable?.dropOffTimeString,hasUserID:advanceTable?.userID!==undefined,keys:Object.keys(advanceTable||{})},timestamp:Date.now()})}).catch(()=>{});
-    // #endregion
     return this.httpClient.put<any>(this.API_URL+'/'+'EditPickupTime' , advanceTable);
   }
 }

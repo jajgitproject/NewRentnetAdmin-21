@@ -131,15 +131,9 @@ const normalized = (this.status || '').trim().toLowerCase();
     this.advanceTableForm.patchValue({ reservationID: this.advanceTableCP.reservationID });
     this.advanceTableForm.patchValue({ dropOffTime: this.advanceTable.dropOffTime });
     const payload = this.advanceTableForm.getRawValue();
-    // #region agent log
-    fetch('http://127.0.0.1:7532/ingest/f2c32722-bd0e-4386-883a-e749a4372080',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'445479'},body:JSON.stringify({sessionId:'445479',hypothesisId:'H1,H2,H3',location:'form-dialog.component.ts:Put.entry',message:'Put() invoked - form state before service call',data:{reservationID:payload?.reservationID,pickupTimeType:typeof payload?.pickupTime,pickupTimeStr:payload?.pickupTime?String(payload.pickupTime):null,pickupTimeIsDate:payload?.pickupTime instanceof Date,dropOffTimeType:typeof payload?.dropOffTime,dropOffTimeStr:payload?.dropOffTime?String(payload.dropOffTime):String(payload?.dropOffTime),dropOffTimeIsDate:payload?.dropOffTime instanceof Date,advanceTableDropOffTime:this.advanceTable?.dropOffTime?String(this.advanceTable.dropOffTime):String(this.advanceTable?.dropOffTime),contractID:this.contractID,customerID:this.customerID,status:this.status,buttonDisabled:this.buttonDisabled,payloadKeys:Object.keys(payload||{})},timestamp:Date.now()})}).catch(()=>{});
-    // #endregion
     this.advanceTableService.updatePickupEdit(payload)
       .subscribe(
         response => {
-          // #region agent log
-          fetch('http://127.0.0.1:7532/ingest/f2c32722-bd0e-4386-883a-e749a4372080',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'445479'},body:JSON.stringify({sessionId:'445479',hypothesisId:'H4,H5',location:'form-dialog.component.ts:Put.success',message:'PUT EditPickupTime succeeded',data:{response:response},timestamp:Date.now()})}).catch(()=>{});
-          // #endregion
           this.dialogRef.close(response);
           this.showNotification(
             'snackbar-success',
@@ -150,9 +144,6 @@ const normalized = (this.status || '').trim().toLowerCase();
           this.isSubmitting = false;
         },
         (error: any) => {
-          // #region agent log
-          fetch('http://127.0.0.1:7532/ingest/f2c32722-bd0e-4386-883a-e749a4372080',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'445479'},body:JSON.stringify({sessionId:'445479',hypothesisId:'H4,H5',location:'form-dialog.component.ts:Put.error',message:'PUT EditPickupTime failed',data:{status:error?.status,statusText:error?.statusText,url:error?.url,name:error?.name,message:error?.message,ok:error?.ok,errorBodyType:typeof error?.error,errorBody:(typeof error?.error==='string'?error.error.slice(0,2000):error?.error),headers:error?.headers?.keys?error.headers.keys():null},timestamp:Date.now()})}).catch(()=>{});
-          // #endregion
           this.showNotification(
             'snackbar-danger',
             'Operation Failed.....!!!',
@@ -200,14 +191,8 @@ const normalized = (this.status || '').trim().toLowerCase();
       pickupTime = moment(this.advanceTableForm.value.pickupTime).format('HH:mm');
       pickupDate = moment(this.pickupDate).format('DD-MM-YYYY');
     }
-    // #region agent log
-    fetch('http://127.0.0.1:7532/ingest/f2c32722-bd0e-4386-883a-e749a4372080',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'445479'},body:JSON.stringify({sessionId:'445479',hypothesisId:'H1,H2',location:'form-dialog.component.ts:getETRDropOffTime.request',message:'requesting dropoff time',data:{pickupTime,pickupDate,contractID:this.contractID,packageID:this.advanceTableCP?.package?.packageID,vehicleID:this.advanceTableCP?.vehicle?.vehicleID,pickupCityID:this.advanceTableCP?.pickupCityID},timestamp:Date.now()})}).catch(()=>{});
-    // #endregion
     this.advanceTableService.getTimeForDropoffTime(this.advanceTableCP.package.packageID, pickupTime, pickupDate, this.contractID, this.advanceTableCP.vehicle.vehicleID, this.advanceTableCP.pickupCityID).pipe(takeUntil(this.destroy$)).subscribe(
       (data: any) => {
-        // #region agent log
-        fetch('http://127.0.0.1:7532/ingest/f2c32722-bd0e-4386-883a-e749a4372080',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'445479'},body:JSON.stringify({sessionId:'445479',hypothesisId:'H1,H2',location:'form-dialog.component.ts:getETRDropOffTime.response',message:'dropoff time resolved',data:{packageType:data?.packageType,rawDropOffTime:data?.dropOffTime},timestamp:Date.now()})}).catch(()=>{});
-        // #endregion
         if (data.packageType === 'Local On Demand' || data.packageType === 'Long Term Rental' || data.packageType === 'Outstation Lumpsum' || data.packageType === 'Outstation OneWay Trip' || data.packageType === 'Outstation Round Trip') {
           this.advanceTable.dropOffTime = null;
         }
@@ -216,9 +201,6 @@ const normalized = (this.status || '').trim().toLowerCase();
           dropOffTime = moment(dropOffTime, 'HH:mm').toDate();
           this.advanceTable.dropOffTime = dropOffTime;
         }
-        // #region agent log
-        fetch('http://127.0.0.1:7532/ingest/f2c32722-bd0e-4386-883a-e749a4372080',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'445479'},body:JSON.stringify({sessionId:'445479',hypothesisId:'H1',location:'form-dialog.component.ts:getETRDropOffTime.afterSet',message:'advanceTable.dropOffTime after set',data:{dropOffTimeStr:this.advanceTable?.dropOffTime?String(this.advanceTable.dropOffTime):String(this.advanceTable?.dropOffTime),isDate:this.advanceTable?.dropOffTime instanceof Date},timestamp:Date.now()})}).catch(()=>{});
-        // #endregion
       });
   }
   onPickupDateChange(event: any) {
@@ -229,9 +211,6 @@ const normalized = (this.status || '').trim().toLowerCase();
         if (data) {
           this.contractID = data;
         }
-        // #region agent log
-        fetch('http://127.0.0.1:7532/ingest/f2c32722-bd0e-4386-883a-e749a4372080',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'445479'},body:JSON.stringify({sessionId:'445479',hypothesisId:'H2',location:'form-dialog.component.ts:onPickupDateChange.response',message:'contractID resolved',data:{customerID:this.customerID,endDate,contractID:this.contractID,rawData:data},timestamp:Date.now()})}).catch(()=>{});
-        // #endregion
       });
   }
 

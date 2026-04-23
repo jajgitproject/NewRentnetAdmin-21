@@ -24,7 +24,7 @@
         </button>
     </div>
     <div mat-dialog-content>
-        <form class="register-form m-4" [formGroup]="advanceTableForm" (ngSubmit)="submit">
+        <form class="register-form m-4" [formGroup]="advanceTableForm" (ngSubmit)="submit()">
             <div class="row">
                 <!-- <div class="col-xl-12 col-lg-4 col-md-4 col-sm-12 mb-2">
                             <mat-radio-group formControlName="reportingToGuestEntryMethod" (change)="selectRadioButton($event)"  class="d-flex justify-content-between" >
@@ -298,7 +298,7 @@
                         <span style="color:red;margin-bottom: 10px;">{{verifyDutyStatusAndCacellationStatus}}</span>
                     </div> -->
                     <div class="example-button-row">
-                        <button mat-raised-button color="primary" *ngIf="saveDisabled" [type]="submit"
+                        <button mat-raised-button color="primary" *ngIf="saveDisabled" type="button"
                             [disabled]="!advanceTableForm.valid || reportingToGuestEntry || !isSaveAllowed"
                             (click)="Put()">Save</button>
                         <mat-spinner *ngIf="!saveDisabled" diameter="30"></mat-spinner>

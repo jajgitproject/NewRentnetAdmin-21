@@ -1,6 +1,6 @@
 // @ts-nocheck
 import { MAT_DIALOG_DATA, MatDialog, MatDialogRef } from '@angular/material/dialog';
-import { Component, EventEmitter, Inject, Input, Output, ViewEncapsulation } from '@angular/core';
+import { ChangeDetectorRef, Component, EventEmitter, Inject, Input, NgZone, Output, ViewEncapsulation } from '@angular/core';
 import { MAT_DATE_LOCALE } from '@angular/material/core';
 import { GeneralService } from '../general/general.service';
 import { ControlPanelData, ControlPanelHeaderData, ControlPanelHeaderDetails, Filters, PassengerModel } from '../controlPanelDesign/controlPanelDesign.model';
@@ -215,7 +215,9 @@ export class ControlPanelDialogeComponent {
     public passToSupplierService: PassToSupplierService,
     public dutyPostPickUPCallService: DutyPostPickUPCallService,
     public clossingOneService: ClossingOneService,
-    public controlPanelDialogeService:ControlPanelDialogeService
+    public controlPanelDialogeService:ControlPanelDialogeService,
+    private cdr: ChangeDetectorRef,
+    private ngZone: NgZone
   ) {
     // Set the defaults
     this.dialogTitle = 'Reservation Details';
@@ -237,14 +239,35 @@ export class ControlPanelDialogeComponent {
   public loadData(reservationID: any, index: number) {
     this._controlPanelDesignService.getReservationDetails(reservationID).subscribe(
       (data: ControlPanelData) => {
-        this.reservationInfo = data?.reservationDetails;
-        this.ReservationStatus = this.reservationInfo[0].reservationStatus;
+        const details = data?.reservationDetails;
+        const list = Array.isArray(details) ? details : details != null ? [details] : [];
+        // Avoid unsafe [0] access (throws and aborts the handler → blank dialog).
+        this.reservationInfo = list.length > 0 ? list : null;
+        this.ReservationStatus = list[0]?.reservationStatus ?? null;
+        this.cdr.detectChanges();
       },
       (error: HttpErrorResponse) => {
         this.reservationInfo = null;
+        this.ReservationStatus = null;
+        this.cdr.detectChanges();
       }
     );
   }
+
+  /**
+   * Child MatDialogs often close outside the same CD cycle as this host.
+   * Run merges inside the Angular zone and force a refresh so lifecycle timestamps
+   * update immediately after save (without requiring an extra click).
+   */
+  private onDutyLifecycleDialogClosed(dialogRef: MatDialogRef<any>, apply: (res: any) => void): void {
+    dialogRef.afterClosed().subscribe((res) => {
+      this.ngZone.run(() => {
+        apply(res);
+        this.cdr.detectChanges();
+      });
+    });
+  }
+
   SpecialInstructionInfo(item) {
     this.dialog.open(SpecialInstructionInfoComponent, {
       width: '500px',
@@ -768,15 +791,12 @@ export class ControlPanelDialogeComponent {
           verifyDutyStatusAndCacellationStatus:this.verifyDutyStatusAndCacellationStatus
         }
       });
-      dialogRef.afterClosed().subscribe(res => {
+      this.onDutyLifecycleDialogClosed(dialogRef, (res) => {
         if (res) {
-          item.reportingToGuestDate = res?.reportingToGuestDate; // Update with the received data
-          item.reportingToGuestTime = res?.reportingToGuestTime; // Update with the received data
-
-          // item.reportingToGuestEntryMethod ="Manual";
+          item.reportingToGuestDate = res?.reportingToGuestDate;
+          item.reportingToGuestTime = res?.reportingToGuestTime;
         }
-
-      })
+      });
     }
   }
 
@@ -796,14 +816,12 @@ export class ControlPanelDialogeComponent {
           verifyDutyStatusAndCacellationStatus:this.verifyDutyStatusAndCacellationStatus
         }
       });
-      dialogRef.afterClosed().subscribe(res => {
+      this.onDutyLifecycleDialogClosed(dialogRef, (res) => {
         if (res) {
-          item.reportingToGuestDate = res?.reportingToGuestDate; // Update with the received data
-          item.reportingToGuestTime = res?.reportingToGuestTime; // Update with the received data
-          // item.reportingToGuestEntryMethod ="Manual";
+          item.reportingToGuestDate = res?.reportingToGuestDate;
+          item.reportingToGuestTime = res?.reportingToGuestTime;
         }
-
-      })
+      });
     }
   }
   reachedByExecutiveGPS(item: any) {
@@ -822,14 +840,12 @@ export class ControlPanelDialogeComponent {
           verifyDutyStatusAndCacellationStatus:this.verifyDutyStatusAndCacellationStatus
         }
       });
-      dialogRef.afterClosed().subscribe(res => {
+      this.onDutyLifecycleDialogClosed(dialogRef, (res) => {
         if (res) {
-          item.reportingToGuestDate = res?.reportingToGuestDate; // Update with the received data
-          item.reportingToGuestTime = res?.reportingToGuestTime; // Update with the received data
-          // item.reportingToGuestEntryMethod ="Manual";
+          item.reportingToGuestDate = res?.reportingToGuestDate;
+          item.reportingToGuestTime = res?.reportingToGuestTime;
         }
-
-      })
+      });
     }
   }
   //---------- GarageOut,Reached Pickup,Dropoff,GarageIn Time Comparison ----------
@@ -1262,13 +1278,12 @@ export class ControlPanelDialogeComponent {
           verifyDutyStatusAndCacellationStatus:this.verifyDutyStatusAndCacellationStatus
         }
       });
-      dialogRef.afterClosed().subscribe(res => {
+      this.onDutyLifecycleDialogClosed(dialogRef, (res) => {
         if (res) {
           item.locationInDate = res?.locationInDate;
           item.locationInTime = res?.locationInTime;
-          // item.locationInEntryMethod ="Manual";
         }
-      })
+      });
     }
   }
 
@@ -1293,13 +1308,12 @@ export class ControlPanelDialogeComponent {
           verifyDutyStatusAndCacellationStatus:this.verifyDutyStatusAndCacellationStatus
         }
       });
-      dialogRef.afterClosed().subscribe(res => {
+      this.onDutyLifecycleDialogClosed(dialogRef, (res) => {
         if (res) {
           item.locationInDate = res?.locationInDate;
           item.locationInTime = res?.locationInTime;
-          // item.locationInEntryMethod ="Manual";
         }
-      })
+      });
     }
   }
   openGarageInGPS(item: any) {
@@ -1323,18 +1337,16 @@ export class ControlPanelDialogeComponent {
           verifyDutyStatusAndCacellationStatus:this.verifyDutyStatusAndCacellationStatus
         }
       });
-      dialogRef.afterClosed().subscribe(res => {
+      this.onDutyLifecycleDialogClosed(dialogRef, (res) => {
         if (res) {
           item.locationInDate = res?.locationInDate;
           item.locationInTime = res?.locationInTime;
-          // item.locationInEntryMethod ="Manual";
         }
-      })
+      });
     }
   }
 
   lifeCycleStatus(item: any) {
-    debugger;
 
     // Call the method to load life cycle status data
     this.lifeCycleStatusLoadData(item);
@@ -1449,11 +1461,10 @@ export class ControlPanelDialogeComponent {
           verifyDutyStatusAndCacellationStatus:this.verifyDutyStatusAndCacellationStatus
         }
       });
-      dialogRef.afterClosed().subscribe(res => {
+      this.onDutyLifecycleDialogClosed(dialogRef, (res) => {
         if (res) {
           item.locationOutDate = res?.locationOutDate;
           item.locationOutTime = res?.locationOutTime;
-          // item.locationOutEntryMethod ="Manual";
         }
       });
     }
@@ -1489,13 +1500,12 @@ export class ControlPanelDialogeComponent {
           verifyDutyStatusAndCacellationStatus:this.verifyDutyStatusAndCacellationStatus
         }
       });
-      dialogRef.afterClosed().subscribe(res => {
+      this.onDutyLifecycleDialogClosed(dialogRef, (res) => {
         if (res) {
           item.locationOutDate = res?.locationOutDate;
           item.locationOutTime = res?.locationOutTime;
-          //item.locationOutEntryMethod ="Manual";
         }
-      })
+      });
     }
 
     else {
@@ -1529,13 +1539,12 @@ export class ControlPanelDialogeComponent {
           verifyDutyStatusAndCacellationStatus:this.verifyDutyStatusAndCacellationStatus
         }
       });
-      dialogRef.afterClosed().subscribe(res => {
+      this.onDutyLifecycleDialogClosed(dialogRef, (res) => {
         if (res) {
           item.locationOutDate = res?.locationOutDate;
           item.locationOutTime = res?.locationOutTime;
-          //item.locationOutEntryMethod ="Manual";
         }
-      })
+      });
     }
     else {
       Swal.fire({
@@ -1592,14 +1601,12 @@ export class ControlPanelDialogeComponent {
         }
       });
 
-      dialogRef.afterClosed().subscribe(res => {
+      this.onDutyLifecycleDialogClosed(dialogRef, (res) => {
         if (res) {
           item.pickDate = res?.pickUpDate;
           item.pickTime = res?.pickUpTime;
-          // item.pickupEntryMethod ="Manual";
         }
-
-      })
+      });
     }
 
   }
@@ -1622,14 +1629,12 @@ export class ControlPanelDialogeComponent {
         }
       });
 
-      dialogRef.afterClosed().subscribe(res => {
+      this.onDutyLifecycleDialogClosed(dialogRef, (res) => {
         if (res) {
           item.pickDate = res?.pickUpDate;
           item.pickTime = res?.pickUpTime;
-          // item.pickupEntryMethod ="Manual";
         }
-
-      })
+      });
     }
 
   }
@@ -1651,14 +1656,12 @@ export class ControlPanelDialogeComponent {
         }
       });
 
-      dialogRef.afterClosed().subscribe(res => {
+      this.onDutyLifecycleDialogClosed(dialogRef, (res) => {
         if (res) {
           item.pickDate = res?.pickUpDate;
           item.pickTime = res?.pickUpTime;
-          // item.pickupEntryMethod ="Manual";
         }
-
-      })
+      });
     }
 
   }
@@ -1696,14 +1699,12 @@ export class ControlPanelDialogeComponent {
             verifyDutyStatusAndCacellationStatus:this.verifyDutyStatusAndCacellationStatus
           }
         });
-      dialogRef.afterClosed().subscribe(res => {
+      this.onDutyLifecycleDialogClosed(dialogRef, (res) => {
         if (res) {
           item.garageOutDate = res?.dropOffDate;
           item.garageOutTime = res?.dropOffTime;
-          // item.dropOffEntryMethod ="Manual";
         }
-
-      })
+      });
     }
   }
 
@@ -1724,43 +1725,13 @@ export class ControlPanelDialogeComponent {
             verifyDutyStatusAndCacellationStatus:this.verifyDutyStatusAndCacellationStatus
           }
         });
-      dialogRef.afterClosed().subscribe(res => {
+      this.onDutyLifecycleDialogClosed(dialogRef, (res) => {
         if (res) {
           item.garageOutDate = res?.dropOffDate;
           item.garageOutTime = res?.dropOffTime;
-          // item.dropOffEntryMethod ="Manual";
         }
-
-      })
+      });
     }
-  }
-
-  private logPopupCenterMetrics(dialogRef: MatDialogRef<any>, popupName: string, hypothesisId: string): void {
-    dialogRef.afterOpened().subscribe(() => {
-      const containerEl = (dialogRef as any)?._containerInstance?._elementRef?.nativeElement as HTMLElement | null;
-      const pane = containerEl?.closest('.cdk-overlay-pane') as HTMLElement | null;
-      const container = pane?.querySelector('.mat-mdc-dialog-container, .mat-dialog-container') as HTMLElement | null;
-      const surface = pane?.querySelector('.mat-mdc-dialog-surface, .mdc-dialog__surface') as HTMLElement | null;
-      const paneRect = pane?.getBoundingClientRect();
-      const vv = window.visualViewport;
-      const viewportCenterX = vv ? (vv.offsetLeft + vv.width / 2) : (window.innerWidth / 2);
-      const viewportCenterY = vv ? (vv.offsetTop + vv.height / 2) : (window.innerHeight / 2);
-      const paneCenterX = paneRect ? paneRect.left + paneRect.width / 2 : null;
-      const paneCenterY = paneRect ? paneRect.top + paneRect.height / 2 : null;
-      const wrapper = pane?.closest('.cdk-global-overlay-wrapper') as HTMLElement | null;
-      const wrapperRect = wrapper?.getBoundingClientRect();
-      const scrollbarCompensation = (window.innerWidth - document.documentElement.clientWidth) / 2;
-      const paneRectAfterComp = pane?.getBoundingClientRect();
-      const paneCenterXAfterComp = paneRectAfterComp ? paneRectAfterComp.left + paneRectAfterComp.width / 2 : null;
-      const paneRectFinal = pane?.getBoundingClientRect();
-      const paneCenterXFinal = paneRectFinal ? paneRectFinal.left + paneRectFinal.width / 2 : null;
-      const surfaceRect = surface?.getBoundingClientRect();
-      const surfaceLeftGap = (paneRect && surfaceRect) ? Math.round(surfaceRect.left - paneRect.left) : null;
-      const surfaceRightGap = (paneRect && surfaceRect) ? Math.round((paneRect.left + paneRect.width) - (surfaceRect.left + surfaceRect.width)) : null;
-      // #region agent log
-      fetch('http://127.0.0.1:7278/ingest/38c94268-8542-449e-a503-35f5e1042ec5',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'cd6e32'},body:JSON.stringify({sessionId:'cd6e32',runId:'post-fix',hypothesisId,location:'controlPanelDialoge.component.ts:logPopupCenterMetrics',message:'Popup alignment metrics captured',data:{popupName,dialogId:dialogRef.id,paneClassName:pane?.className || null,paneWidth:paneRect?.width || null,paneHeight:paneRect?.height || null,paneTop:paneRect?.top || null,paneLeft:paneRect?.left || null,paneCenterX,paneCenterY,paneLeftAfterComp:paneRectAfterComp?.left || null,paneCenterXAfterComp,paneLeftFinal:paneRectFinal?.left || null,paneCenterXFinal,viewportCenterX,viewportCenterY,deltaX:paneCenterX != null ? Math.round(paneCenterX - viewportCenterX) : null,deltaXAfterComp:paneCenterXAfterComp != null ? Math.round(paneCenterXAfterComp - viewportCenterX) : null,deltaXFinal:paneCenterXFinal != null ? Math.round(paneCenterXFinal - viewportCenterX) : null,deltaY:paneCenterY != null ? Math.round(paneCenterY - viewportCenterY) : null,surfaceTransform:surface ? getComputedStyle(surface).transform : null,surfaceTransformOrigin:surface ? getComputedStyle(surface).transformOrigin : null,surfaceWidth:surfaceRect?.width || null,surfaceLeft:surfaceRect?.left || null,surfaceLeftGap,surfaceRightGap,containerDisplay:container ? getComputedStyle(container).display : null,totalOverlayPanes:document.querySelectorAll('.cdk-overlay-pane').length,wrapperLeft:wrapperRect?.left || null,wrapperWidth:wrapperRect?.width || null,wrapperCenterX:wrapperRect ? wrapperRect.left + wrapperRect.width / 2 : null,windowInnerWidth:window.innerWidth,documentClientWidth:document.documentElement.clientWidth,visualViewportWidth:vv?.width || null,visualViewportOffsetLeft:vv?.offsetLeft || null,scrollbarCompensation},timestamp:Date.now()})}).catch(()=>{});
-      // #endregion
-    });
   }
 
   openDropOffByExectiveGPS(item: any) {
@@ -1780,13 +1751,12 @@ export class ControlPanelDialogeComponent {
             verifyDutyStatusAndCacellationStatus:this.verifyDutyStatusAndCacellationStatus
           }
         });
-      dialogRef.afterClosed().subscribe(res => {
+      this.onDutyLifecycleDialogClosed(dialogRef, (res) => {
         if (res) {
           item.garageOutDate = res?.dropOffDate;
           item.garageOutTime = res?.dropOffTime;
-          // item.dropOffEntryMethod ="Manual";
         }
-      })
+      });
     }
   }
   openClosingScreen(item: any) {
@@ -1864,14 +1834,11 @@ export class ControlPanelDialogeComponent {
           }
         });
 
-        dialogRef.afterClosed().subscribe(
-          (result: any) => {
-            if (result !== undefined && result !== null) {
-              item.activationStatus = "Active";
-            }
-          },
-
-        );
+        this.onDutyLifecycleDialogClosed(dialogRef, (result) => {
+          if (result !== undefined && result !== null) {
+            item.activationStatus = "Active";
+          }
+        });
       },
       (error: HttpErrorResponse) => {
         console.error('Error while fetching driver remark details:', error);
@@ -1891,11 +1858,10 @@ export class ControlPanelDialogeComponent {
       }
     });
 
-    dialogRef.afterClosed().subscribe((result: any) => {
+    this.onDutyLifecycleDialogClosed(dialogRef, (result) => {
       if (result !== undefined && result !== null) {
         item.driverRemark = result.driverRemark;
         item.activationStatus = "Active";
-
       }
     });
   }
