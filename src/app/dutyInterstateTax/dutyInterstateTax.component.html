@@ -35,8 +35,8 @@
 
                                     <ng-container matColumnDef="image">
                                         <mat-header-cell *matHeaderCellDef [ngClass]="'tbl-col-width-per-12'">Image</mat-header-cell>
-                                        <mat-cell *matCellDef="let row" class="table-img tbl-col-width-per-12" (contextmenu)="onContextMenu($event, row)">
-                                        <img style="cursor: pointer;" src="{{row.dutyInterstateTaxImage}}" (click)="openImageInNewTab(row.dutyInterstateTaxImage)"/> </mat-cell>
+                                        <mat-cell *matCellDef="let row" class="table-img tbl-col-width-per-12 image-cell" (contextmenu)="onContextMenu($event, row)">
+                                        <img class="tax-image-thumb" style="cursor: pointer;" src="{{row.dutyInterstateTaxImage}}" (click)="openImageInNewTab(row.dutyInterstateTaxImage)"/> </mat-cell>
                                     </ng-container>
 
                                     <ng-container matColumnDef="approvalStatus">

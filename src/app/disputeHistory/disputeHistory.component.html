@@ -1,24 +1,26 @@
-<div class="modalHeader">
-  <div class="editRowModal">
-    <div class="modalHeader clearfix">
-      <div class="modal-about">
-        <div class="font-weight-bold p-t-5 font-17">
-          {{ dialogTitle }}
+<div class="addContainer">
+  <div class="modalHeader">
+    <div class="editRowModal">
+      <div class="modalHeader clearfix">
+        <div class="modal-about">
+          <div class="font-weight-bold p-t-5 font-17">
+            {{ dialogTitle }}
+          </div>
         </div>
       </div>
     </div>
+    <button mat-icon-button (click)="dialogRef.close()" aria-label="Close dialog">
+      <mat-icon class="small-close-icon">close</mat-icon>
+    </button>
   </div>
-  <button mat-icon-button (click)="dialogRef.close()" aria-label="Close dialog">
-    <mat-icon class="small-close-icon">close</mat-icon>
-  </button>
-</div>
-<div *ngIf="dataSource.length === 0" class="alert alert-primary" style="background-color:#E8E8E8; text-align: center;width: 100%;margin-top: 10px;">
-  {{ noRecords }}
-</div>
 
-<ng-container *ngIf="dataSource.length > 0">
-  <mat-dialog-content class="mat-typography">
-    <ng-container *ngFor="let item of dataSource">
+  <mat-dialog-content class="mat-typography dispute-history-content">
+    <div *ngIf="historyReady && dataSource.length === 0" class="alert alert-primary no-records-banner">
+      {{ noRecords }}
+    </div>
+
+    <ng-container *ngIf="historyReady && dataSource.length > 0">
+    <ng-container *ngFor="let item of dataSource; trackBy: trackByIndex">
       <mat-card>
         <mat-card-content>
           <div class="row">
@@ -58,5 +60,6 @@
       </mat-card>
       <br />
     </ng-container>
+    </ng-container>
   </mat-dialog-content>
-</ng-container>
+</div>

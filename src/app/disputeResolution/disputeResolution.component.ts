@@ -90,7 +90,6 @@ export class DisputeResolutionComponent implements OnInit {
   contextMenu: MatMenuTrigger;
   contextMenuPosition = { x: '0px', y: '0px' };
   ngOnInit() {
-
     this.route.queryParams.subscribe(paramsData => {
       // this.vehicleCategoryID = paramsData.VehicleCategoryID;
       // this.vehicleCategory = paramsData.VehicleCategory;
@@ -104,15 +103,12 @@ export class DisputeResolutionComponent implements OnInit {
         this.disputeID = Number(this._generalService.decrypt(decodeURIComponent(encrypteddisputeID)));
         this.reservationID = Number(this._generalService.decrypt(decodeURIComponent(encryptedreservationID)));
         this.dutySlipID = Number(this._generalService.decrypt(decodeURIComponent(encrypteddutySlipID)));
-
-        // Log the decrypted values
+        this.loadData();
+        this.disputeloadData();
       }
-
-    })
-    this.loadData();
+    });
     this.InitCustomer();
     this.SubscribeUpdateService();
-    this.disputeloadData();
   }
   refresh() {
     this.SearchactionTaken = '';
@@ -222,6 +218,10 @@ export class DisputeResolutionComponent implements OnInit {
   // }
 
   public loadData() {
+    if (!this.disputeID || Number.isNaN(this.disputeID)) {
+      this.dataSource = [];
+      return;
+    }
     switch (this.selectedFilter) {
       case 'actionTaken':
         this.SearchactionTaken = this.searchTerm;
@@ -241,6 +241,10 @@ export class DisputeResolutionComponent implements OnInit {
   }
 
   public disputeloadData() {
+    if (!this.disputeID || Number.isNaN(this.disputeID)) {
+      this.disputeDetails = [];
+      return;
+    }
 
     this.disputeResolutionService.getDisputeDetails(this.disputeID).subscribe
       (

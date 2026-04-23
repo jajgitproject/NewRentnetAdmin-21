@@ -1,6 +1,11 @@
 // @ts-nocheck
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
-import { Component, Inject } from '@angular/core';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, Inject } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { MatDialogModule } from '@angular/material/dialog';
+import { MatCardModule } from '@angular/material/card';
+import { MatIconModule } from '@angular/material/icon';
+import { MatButtonModule } from '@angular/material/button';
 import { MAT_DATE_LOCALE } from '@angular/material/core';
 import { HttpErrorResponse } from '@angular/common/http';
 import { DisputeHistoryService } from './disputeHistory.service';
@@ -12,14 +17,17 @@ import { ActivatedRoute } from '@angular/router';
 import { Dispute } from '../dispute/dispute.model';
 
 @Component({
-  standalone: false,
+  standalone: true,
   selector: 'app-disputeHistory',
   templateUrl: './disputeHistory.component.html',
   styleUrls: ['./disputeHistory.component.sass'],
-  providers: [{ provide: MAT_DATE_LOCALE, useValue: 'en-GB' }]
+  imports: [CommonModule, MatDialogModule, MatCardModule, MatIconModule, MatButtonModule],
+  providers: [{ provide: MAT_DATE_LOCALE, useValue: 'en-GB' }],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class DisputeHistoryComponent {
   dataSource: DisputeHistory[] = [];
+  historyReady: boolean = false;
 
   dialogTitle: string;
   reservationID: number;
@@ -38,7 +46,8 @@ noRecords: any;
     public disputeHistoryService: DisputeHistoryService,
     public _generalService:GeneralService,
     private disputeService: DisputeService,
-    private route:ActivatedRoute
+    private route:ActivatedRoute,
+    private cdr: ChangeDetectorRef
   ) 
   {
     // Set the defaults
@@ -49,11 +58,25 @@ noRecords: any;
 
   ngOnInit() 
   {
-    this.route.queryParams.subscribe(paramsData =>{
-      const encryptedDutySlipID = paramsData.dutySlipID;
-      this.DutySlipID = this._generalService.decrypt(decodeURIComponent(encryptedDutySlipID));         
-    });
-    this.DisputeLoadData();
+    this.historyReady = false;
+    this.noRecords = 'No Records Found';
+    const dutySlipIDFromDialog = this.data?.dutySlipID;
+    if (dutySlipIDFromDialog) {
+      this.DutySlipID = dutySlipIDFromDialog;
+      setTimeout(() => this.DisputeLoadData());
+    } else {
+      this.route.queryParams.subscribe(paramsData =>{
+        const encryptedDutySlipID = paramsData.dutySlipID;
+        if (encryptedDutySlipID) {
+          this.DutySlipID = this._generalService.decrypt(decodeURIComponent(encryptedDutySlipID));
+          setTimeout(() => this.DisputeLoadData());
+        } else {
+          this.dataSource = [];
+          this.noRecords = 'No dispute history available';
+          this.historyReady = true;
+        }
+      });
+    }
     this.uploadedByName();
   }
 
@@ -96,22 +119,37 @@ noRecords: any;
 
   public DisputeLoadData() 
   {
-    debugger
+    this.historyReady = false;
     this.disputeService.getDisputeInfo(this.DutySlipID).subscribe
     (
       data => 
         {
-        
-          if(data !== null && data.length > 0)
-            {
-              this.dataSource = data;
+          const normalizedData = Array.isArray(data) ? [...data] : [];
+          setTimeout(() => {
+            if(normalizedData.length > 0) {
+              this.dataSource = normalizedData;
             } else {
               this.dataSource = [];
               this.noRecords = 'No Records Found';
             }
+            this.historyReady = true;
+            this.cdr.markForCheck();
+          });
         },
-      (error: HttpErrorResponse) => { this.disputeAdvanceTable = null;}
+      (error: HttpErrorResponse) => {
+        setTimeout(() => {
+          this.disputeAdvanceTable = null;
+          this.dataSource = [];
+          this.noRecords = 'Error loading dispute history';
+          this.historyReady = true;
+          this.cdr.markForCheck();
+        });
+      }
     );
+  }
+
+  trackByIndex(index: number): number {
+    return index;
   }
 
 }

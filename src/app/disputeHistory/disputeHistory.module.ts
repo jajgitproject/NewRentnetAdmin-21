@@ -25,9 +25,6 @@ import { DisputeHistoryRoutingModule } from './disputeHistory-routing.module';
 import { DisputeHistoryComponent } from './disputeHistory.component';
 
 @NgModule({
-  declarations: [
-    DisputeHistoryComponent
-  ],
   imports: [
     CommonModule,
     FormsModule,
@@ -51,7 +48,8 @@ import { DisputeHistoryComponent } from './disputeHistory.component';
     MatToolbarModule,
     MatMenuModule,
     MatProgressSpinnerModule,
-    MyUploadModule
+    MyUploadModule,
+    DisputeHistoryComponent
   ],
   providers: []
 })

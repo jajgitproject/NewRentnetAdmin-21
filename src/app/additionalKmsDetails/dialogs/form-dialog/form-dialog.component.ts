@@ -51,17 +51,14 @@ export class AdditionalDialogComponent
     }
 
     this.DutySlipID = data?.dutySlipID;
+    this.action = data?.action || 'edit';
     this.type = data?.type;
     this.verifyDutyStatusAndCacellationStatus = data.verifyDutyStatusAndCacellationStatus;
       this.advanceTableForm = this.createContactForm();
-      if (this.verifyDutyStatusAndCacellationStatus !== 'Changes allow') 
-      {
-        this.isSaveAllowed = true;
-      } 
-      else
-      {
-        this.isSaveAllowed = false;
-      }
+      const statusText = (this.verifyDutyStatusAndCacellationStatus || '').toString().trim().toLowerCase();
+      const changesAllowed = statusText.includes('changes allow');
+      // Disable save only when backend explicitly returns a blocking status.
+      this.isSaveAllowed = statusText.length > 0 && !changesAllowed;
   }
   
   ngOnInit()
@@ -81,6 +78,7 @@ export class AdditionalDialogComponent
     return this.fb.group(
     {
       dutySlipID: [this.tableRecord?.dutySlipID || ''],
+      dutySlipForBillingID: [this.tableRecord?.dutySlipForBillingID || this.tableRecord?.DutySlipForBillingID || -1],
       additionalKMs: [this.tableRecord?.additionalKMs || ''],
       additionalMinutes: [this.tableRecord?.additionalMinutes || '']
     });
@@ -106,9 +104,22 @@ export class AdditionalDialogComponent
 
   public Put(): void
   {
+    if (this.advanceTableForm.invalid) {
+      return;
+    }
     this.saveDisabled = false;
-    this.advanceTableForm.patchValue({dutySlipID:this.DutySlipID})
-    this.additionalKmsDetailsService.updateAdditional(this.advanceTableForm.getRawValue())  
+    this.advanceTableForm.patchValue({
+      dutySlipID: this.DutySlipID,
+      dutySlipForBillingID: this.advanceTableForm.get('dutySlipForBillingID')?.value
+        || this.tableRecord?.dutySlipForBillingID
+        || this.tableRecord?.DutySlipForBillingID
+        || -1
+    });
+    const payload = this.advanceTableForm.getRawValue();
+    payload.additionalKMs = Number(payload.additionalKMs || 0);
+    payload.additionalMinutes = Number(payload.additionalMinutes || 0);
+
+    this.additionalKmsDetailsService.updateAdditional(payload)  
     .subscribe(
     response => 
     {

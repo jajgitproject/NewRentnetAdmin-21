@@ -58,6 +58,7 @@ import { DutyExpenseService } from '../dutyExpense/dutyExpense.service';
 import { DutyGSTPercentageService } from '../dutyGSTPercentage/dutyGSTPercentage.service';
 import { DutyStateService } from '../dutyState/dutyState.service';
 import { AdditionalKmsDetailsComponent } from '../additionalKmsDetails/additionalKmsDetails.component';
+import { AdditionalDialogComponent } from '../additionalKmsDetails/dialogs/form-dialog/form-dialog.component';
 import { DiscountDetailsComponent } from '../discountDetails/discountDetails.component';
 import { DutySACComponent } from '../dutySAC/dutySAC.component';
 import { AdditionalKmsDetailsService } from '../additionalKmsDetails/additionalKmsDetails.service';
@@ -113,6 +114,7 @@ import { OdoMeterAndManualDutySlipImageComponent } from '../odoMeterAndManualDut
     CurrentdataInformationComponent,
     DutySACComponent,
     AdditionalKmsDetailsComponent,
+    AdditionalDialogComponent,
 
     ],
   imports: [
