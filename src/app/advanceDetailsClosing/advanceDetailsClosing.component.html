@@ -1,0 +1,48 @@
+<div *ngFor="let data of advanceTableAdvanceDC;index as i">
+<div class="row" style="margin-left: 20px;margin-top: 20px;">
+        <a style="cursor: pointer; color: #007bff;">
+            Payment {{i + 1}} 
+        </a>
+</div>
+<div class="row" style="margin-left: 20px;margin-top: 20px;">
+    <div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 mb-2">
+        <span>
+            <b>
+                Amount
+            </b>                   
+        </span>
+        <br/>
+        <span>{{data.advanceAmount}}</span>
+    </div>
+
+    <div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 mb-2">
+        <span>
+            <b>
+                Date Of Receipt
+            </b>                   
+        </span>
+        <br/>
+        <span>{{data.dateOfAdvanceReceived | date:'shortDate'}}</span>
+    </div>
+
+    <div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 mb-2">
+        <span>
+            <b>
+                Mode Of Payment
+            </b>                   
+        </span>
+        <br/>
+        <span>{{data.modeOfPayment}}</span>
+    </div>
+     
+    <div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 mb-2">
+        <span>
+            <b>
+                Reference No.
+            </b>                   
+        </span>
+        <br/>
+        <span>{{data.referenceNumber}}</span>
+    </div>
+</div>
+</div>

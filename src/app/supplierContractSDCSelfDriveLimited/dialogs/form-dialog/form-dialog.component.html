@@ -1,0 +1,359 @@
+<div class="addContainer">
+    <div class="modalHeader">
+        <div class="editRowModal">
+            <div class="modalHeader clearfix">
+                <!-- <img [src]='advanceTable.img' alt="avatar"> -->
+                <div class="modal-about" style="text-align: center;">
+                    <div class="font-weight-bold p-t-5 font-17">
+                        {{dialogTitle}}</div>
+                        <div class=" p-t-5 font-12">
+                            Supplier Contract <b>{{supplierContractName}}</b> Applicable From <b>{{applicableFrom | date:'dd-MM-yyyy'}}</b> to <b>{{applicableTo | date:'dd-MM-yyyy'}}</b>
+                        </div>
+                        <!-- <div class=" p-t-5 font-12">
+                            Rate Card <b>{{supplierRateCardName}}</b>
+                        </div> -->
+                </div>
+            </div>
+        </div>
+        <button mat-icon-button (click)="dialogRef.close()" aria-label="Close dialog">
+      <mat-icon>close</mat-icon>
+    </button>
+    </div>
+    <div mat-dialog-content>
+        <form class="register-form m-4" [formGroup]="advanceTableForm" (ngSubmit)="submit">
+
+            <div class="row">
+                <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                    <!-- <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                        <mat-label>Vehicle Category</mat-label>
+                        <mat-select formControlName="vehicleCategoryID" required>
+                            <mat-option [value]="Vehicles.vehicleCategoryID" *ngFor="let Vehicles of VehicleList">{{Vehicles.vehicleCategory}}</mat-option>
+                        </mat-select>
+                        <mat-error>
+                            Please select a Vehicle Category
+                        </mat-error>
+                    </mat-form-field> -->
+                    <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                        <mat-label>Vehicle Category</mat-label>
+                        <input required  type="text" matInput formControlName="vehicleCategory" [matAutocomplete]="auto">
+                        <mat-autocomplete #auto="matAutocomplete" (optionSelected)="onVehicleCategorySelected($event.option.value)">
+                          <mat-option *ngFor="let option of filteredVehicleCategoryOptions | async" [value]="option.vehicleCategory" (click)="getTitles(option.vehicleCategoryID)">
+                            {{option.vehicleCategory}}
+                          </mat-option>
+                        </mat-autocomplete>
+                        <mat-error *ngIf="advanceTableForm.controls['vehicleCategory'].hasError('vehicleCategoryInvalid')">
+                            Please select a Vehicle Category
+                        </mat-error>
+                      </mat-form-field>
+                    </div>
+                    <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                        <!-- <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                            <mat-label>City Tier</mat-label>
+                            <mat-select formControlName="cityTierID">
+                                <mat-option [value]="CityTier.cityTierID" *ngFor="let CityTier of CityTierList">{{CityTier.cityTierName}}</mat-option>
+                            </mat-select>
+                            <mat-error>
+                                Please select a CityTier
+                            </mat-error>
+                        </mat-form-field> -->
+                        <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                            <mat-label>City Tier</mat-label>
+                            <input required type="text" matInput formControlName="cityTierName" [matAutocomplete]="auto3">
+                            <mat-autocomplete #auto3="matAutocomplete" (optionSelected)="onCityTierSelected($event.option.value)">
+                              <mat-option *ngFor="let option of filteredCityTierOptions | async" [value]="option.cityTierName" (click)="getcityTierID(option.cityTierID)">
+                                {{option.cityTierName}}
+                              </mat-option>
+                            </mat-autocomplete>
+                            <mat-error *ngIf="advanceTableForm.controls['cityTierName'].hasError('cityTierInvalid')">
+                                Please select a City Tier
+                            </mat-error>
+                          </mat-form-field>
+                    </div>  
+            </div> 
+            
+             <div class="row">
+                <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                    <!-- <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                        <mat-label>Package</mat-label>
+                        <mat-select formControlName="packageID"  required>
+                            <mat-option [value]="Package.packageID" *ngFor="let Package of PackageList">{{Package.package}}</mat-option>
+                        </mat-select>
+                        <mat-error>
+                            Please select a Package
+                        </mat-error>
+                    </mat-form-field> -->
+                    <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                        <mat-label>Package</mat-label>
+                        <input required type="text" matInput formControlName="package" [matAutocomplete]="auto4">
+                        <mat-autocomplete #auto4="matAutocomplete" (optionSelected)="onPackageSelected($event.option.value)">
+                          <mat-option *ngFor="let option of filteredPackageOptions | async" [value]="option.package" (click)="getpackageID(option.packageID)">
+                            {{option.package}}
+                          </mat-option>
+                        </mat-autocomplete>
+                        <mat-error *ngIf="advanceTableForm.controls['package'].hasError('packageInvalid')">
+                            Please select a Package
+                        </mat-error>
+                      </mat-form-field>
+                    </div>
+                    <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                        <mat-form-field class="example-full-width" appearance="outline"  floatLabel="always">
+                            <mat-label>Minimum Days</mat-label>
+                            <input matInput formControlName="minimumDays" (keypress)="numericOnly($event)" required>
+                            <mat-error *ngIf="advanceTableForm.get('minimumDays').hasError('required')">
+                                Minimum Days  is required
+                            </mat-error>
+                        </mat-form-field>
+                    </div>  
+            </div> 
+
+       <div class="row">
+                <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                    <mat-form-field class="example-full-width" appearance="outline"  floatLabel="always">
+                        <mat-label>Base Rate</mat-label>
+                        <input matInput formControlName="baseRate" (keypress)="keyPressNumbersDecimal($event)" required>
+                        <mat-error *ngIf="advanceTableForm.get('baseRate').hasError('required')">
+                            Base Rate is required
+                        </mat-error>
+                    </mat-form-field>
+                    </div>
+                    <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                        <mat-form-field class="example-full-width" appearance="outline"  floatLabel="always">
+                            <mat-label>Extra Per Day Rate</mat-label>
+                            <input matInput formControlName="extraPerdayRate" (keypress)="numericOnly($event)" required>
+                            <mat-error *ngIf="advanceTableForm.get('extraPerdayRate').hasError('required')">
+                                Extra Per Day Rate is required
+                            </mat-error>
+                        </mat-form-field>
+                    </div>  
+            </div> 
+
+            <div class="row">
+                <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                    <mat-form-field class="example-full-width" appearance="outline"  floatLabel="always">
+                        <mat-label>Free KM Per Day</mat-label>
+                        <input matInput formControlName="freeKMPerday" (keypress)="keyPressNumbersDecimal($event)" required>
+                        <mat-error *ngIf="advanceTableForm.get('freeKMPerday').hasError('required')">
+                            Free KM Per Day is required
+                        </mat-error>
+                    </mat-form-field>
+                    </div>
+                    <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                        <mat-form-field class="example-full-width" appearance="outline"  floatLabel="always">
+                            <mat-label>Extra KM Rate </mat-label>
+                            <input matInput formControlName="extraKMRate" (keypress)="numericOnly($event)" required>
+                            <mat-error *ngIf="advanceTableForm.get('extraKMRate').hasError('required')">
+                                Extra KM Rate
+                                is required
+                            </mat-error>
+                        </mat-form-field>
+                    </div>  
+            </div> 
+
+              <div class="row">
+                <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                    <mat-form-field class="example-full-width" appearance="outline"  floatLabel="always">
+                        <mat-label>Grace KMs</mat-label>
+                        <input matInput formControlName="graceKMs" (keypress)="keyPressNumbersDecimal($event)" required>
+                        <mat-error *ngIf="advanceTableForm.get('graceKMs').hasError('required')">
+                            Grace KMs is required
+                        </mat-error>
+                    </mat-form-field>
+                </div> 
+                <div class=" col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                    <mat-form-field class="example-full-width" appearance="outline"  floatLabel="always">
+                        <mat-label>Extra HR Rate</mat-label>
+                        <input matInput formControlName="extraHRRate" (keypress)="numericOnly($event)" required>
+                        <mat-error *ngIf="advanceTableForm.get('extraHRRate').hasError('required')">
+                            Extra HR Rate is required
+                        </mat-error>
+                    </mat-form-field>
+                </div> 
+            </div> 
+
+             <div class="row">
+                <div class=" col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                    <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                        <mat-label>Delivery Chargeable</mat-label>
+                        <mat-select  required formControlName="deliveryChargeable">
+                            <mat-option [value]=true>Yes</mat-option>
+                            <mat-option [value]=false>No</mat-option>
+                        </mat-select>
+                    </mat-form-field>
+                </div> 
+
+                <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                    <mat-form-field class="example-full-width" appearance="outline"  floatLabel="always">
+                        <mat-label>Delivery Charges</mat-label>
+                        <input matInput formControlName="deliveryCharges" (keypress)="numericOnly($event)" required>
+                        <mat-error *ngIf="advanceTableForm.get('deliveryCharges').hasError('required')">
+                            Delivery Charges is required
+                        </mat-error>
+                    </mat-form-field>
+                </div>  
+            </div> 
+
+             <div class="row">
+                <div class=" col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                    <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                        <mat-label>Pickup Chargeable </mat-label>
+                        <mat-select required #pickupVal [class.is-invalid]="pickupVal.invalid && pickupVal.touched" formControlName="pickupChargeable">
+                            <mat-option [value]=true>Yes</mat-option>
+                            <mat-option [value]=false>No</mat-option>
+                        </mat-select>
+                        <mat-error>
+                            Please Select Pickup Chargeable
+                        </mat-error>
+                    </mat-form-field>
+                </div>
+
+                <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                    <mat-form-field class="example-full-width" appearance="outline"  floatLabel="always">
+                        <mat-label>Pickup Charges</mat-label>
+                        <input matInput formControlName="pickupCharges" (keypress)="keyPressNumbersDecimal($event)" required>
+                        <mat-error *ngIf="advanceTableForm.get('pickupCharges').hasError('required')">
+                            Pickup Charges is required
+                        </mat-error>
+                    </mat-form-field>
+                </div>
+            </div>
+            
+           <div class="row">
+                <div class=" col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                    <mat-form-field class="example-full-width " appearance="outline" floatLabel="always">
+                        <mat-label>Next Day Criteria</mat-label>
+                        <input matInput [owlDateTimeTrigger]="date2" [owlDateTime]="date2" formControlName="nextDayCriteria"  required >
+                        <mat-icon matSuffix [owlDateTimeTrigger]="date2" class="date-icon">today</mat-icon>
+                        <owl-date-time #date2></owl-date-time>
+                      </mat-form-field>
+                </div>
+
+                <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                    <mat-form-field class="example-full-width" appearance="outline"  floatLabel="always">
+                        <mat-label>Security Deposit Amount</mat-label>
+                        <input matInput formControlName="securityDepositAmount" (keypress)="keyPressNumbersDecimal($event)" required>
+                        <mat-error *ngIf="advanceTableForm.get('securityDepositAmount').hasError('required')">
+                            Security Deposit Amount is required
+                        </mat-error>
+                    </mat-form-field>
+                </div>
+            </div>
+            
+              <div class="row">
+                <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                    <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                        <mat-label>Night Charge Start Time</mat-label>
+                        <input required matInput [owlDateTimeTrigger]="time1" [owlDateTime]="time1" formControlName="nightChargeStartTime" (input)="onStartTimeInput($event)">
+                        <button mat-icon-button matSuffix type="button" [owlDateTimeTrigger]="time1" class="date-icon" aria-label="Open time picker"><mat-icon>schedule</mat-icon></button>
+                        <owl-date-time [pickerType]="'timer'" #time1></owl-date-time>
+
+                        <mat-error *ngIf="advanceTableForm.get('nightChargeStartTime').hasError('required')">
+                            Night Charge Start Time is required
+                        </mat-error>
+                    </mat-form-field>
+                </div>
+
+                <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                    <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                        <mat-label>Night Charge End Time</mat-label>
+                        <input required matInput [owlDateTimeTrigger]="time2" [owlDateTime]="time2" formControlName="nightChargeEndTime" (input)="onEndTimeInput($event)">
+                        <button mat-icon-button matSuffix type="button" [owlDateTimeTrigger]="time2" class="date-icon" aria-label="Open time picker"><mat-icon>schedule</mat-icon></button>
+                        <owl-date-time [pickerType]="'timer'" #time2></owl-date-time>
+
+                        <mat-error *ngIf="advanceTableForm.get('nightChargeEndTime').hasError('required')">
+                            Night Charge End Time is required
+                        </mat-error>
+                    </mat-form-field>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                    <mat-form-field class="example-full-width" appearance="outline"  floatLabel="always">
+                        <mat-label>Grace Minutes For Night Charge</mat-label>
+                        <input matInput formControlName="graceMinutesForNightCharge" (keypress)="numericOnly($event)" required>
+                        <mat-error *ngIf="advanceTableForm.get('graceMinutesForNightCharge').hasError('required')">
+                            Grace Minutes For Night Charge is required
+                        </mat-error>
+                    </mat-form-field>
+                </div>
+
+                <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                    <mat-form-field class="example-full-width" appearance="outline"  floatLabel="always">
+                        <mat-label>Grace Minutes Night Charge </mat-label>
+                        <input matInput formControlName="graceMinutesNightCharge" (keypress)="numericOnly($event)" required>
+                        <mat-error *ngIf="advanceTableForm.get('graceMinutesNightCharge').hasError('required')">
+                            Grace Minutes Night Charge  is required
+                        </mat-error>
+                    </mat-form-field>
+                </div>
+            </div> 
+            
+            <div class="row">
+                <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                    <mat-form-field class="example-full-width" appearance="outline"  floatLabel="always">
+                        <mat-label>Delivery Charges At Night </mat-label>
+                        <input matInput formControlName="deliveryChargesAtNight" (keypress)="numericOnly($event)"  required>
+                        <mat-error *ngIf="advanceTableForm.get('deliveryChargesAtNight').hasError('required')">
+                            Fixed KM Point to Point is required
+                        </mat-error>
+                    </mat-form-field>
+                </div>
+
+                <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                    <mat-form-field class="example-full-width" appearance="outline"  floatLabel="always">
+                        <mat-label>Pickup Charges At Night </mat-label>
+                        <input matInput formControlName="pickupChargesAtNight" (keypress)="keyPressNumbersDecimal($event)" required>
+                        <mat-error *ngIf="advanceTableForm.get('pickupChargesAtNight').hasError('required')">
+                            Pickup Charges At Night is required
+                        </mat-error>
+                    </mat-form-field>
+                </div>
+            </div> 
+            
+            <div class="row">
+                <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                    <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                        <mat-label>Bill From/To</mat-label>
+                        <mat-select  required #billVal [class.is-invalid]="billVal.invalid && billVal.touched" formControlName="billFromTo">
+                            <mat-option value="Location">Location</mat-option>
+                            <mat-option value="Pickup">Pickup</mat-option>
+                        </mat-select>
+                        <mat-error>
+                            Please Select Bill From/To
+                        </mat-error>
+                    </mat-form-field>
+                </div>
+
+                <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                    <mat-form-field class="example-full-width" appearance="outline"  floatLabel="always">
+                        <mat-label>Activation Status</mat-label>
+                        <mat-select formControlName="activationStatus">
+                            <mat-option [value]=true>Active</mat-option>
+                            <mat-option [value]=false>Deleted</mat-option>
+                        </mat-select>
+
+                        <mat-error *ngIf="advanceTableForm.get('activationStatus').hasError('required')">
+                            Activation Status is required
+                        </mat-error>
+                    </mat-form-field>
+                </div>
+            </div>  
+            <div class="row">
+                <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12 mb-2">
+                    <div class="example-button-row">
+                        <!-- Save Button with Spinner -->
+                        <button mat-raised-button color="primary" [disabled]="!advanceTableForm.valid || isLoading" (click)="confirmAdd()">
+                            <ng-container *ngIf="!isLoading">Save</ng-container>
+                            <mat-spinner *ngIf="isLoading" diameter="20"></mat-spinner>
+                        </button>
+            
+                        <!-- Reset Button (only in 'add' mode) -->
+                        <button *ngIf="action === 'add'" mat-raised-button color="warn" (click)="reset()" tabindex="-1">Reset</button>
+            
+                        <!-- Cancel Button (only in 'edit' mode) -->
+                        <button *ngIf="action === 'edit'" mat-raised-button color="warn" (click)="onNoClick()" tabindex="-1">Cancel</button>
+                    </div>
+                </div>
+            </div>
+        </form>
+  </div>

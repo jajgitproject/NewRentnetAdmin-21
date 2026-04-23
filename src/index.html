@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <title>Lorax - Angular 21+ Admin Dashboard Template </title>
+  <base href="/">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="referrer" content="strict-origin-when-cross-origin">
+  <link rel="icon" href="assets/images/favicon.ico" type="image/x-icon">
+  <link
+    href="https://fonts.googleapis.com/css?family=Material+Icons|Material+Icons+Outlined|Material+Icons+Two+Tone|Material+Icons+Round|Material+Icons+Sharp"
+    rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css?family=Roboto:300,400,500&display=swap" rel="stylesheet">
+  <!-- Google Maps: optional key via `assets/runtime-config.json` → `googleMapsApiKey` (see runtime-config.example.json) -->
+  <!-- SweetAlert2 foreground guarantee.
+       Angular CDK 17+ promotes MatDialog's overlay wrapper into the browser's
+       TOP LAYER via the native Popover API (popover="manual" + showPopover()).
+       Nothing with a z-index - not even 2147483647 - can paint above the top
+       layer. AppComponent.installSwalForegroundGuard() therefore also promotes
+       the Swal container into the top layer via the same Popover API. The
+       rules below (1) keep z-index as a fallback for browsers without popover
+       support, and (2) neutralize the browser's default [popover] styles so
+       they don't dislodge Swal's grid-based layout when it's top-layer. -->
+  <style id="swal-foreground-guarantee">
+    .swal2-container,
+    body > .swal2-container {
+      z-index: 2147483647 !important;
+    }
+    .swal2-container.swal2-backdrop-show,
+    body > .swal2-container.swal2-backdrop-show {
+      z-index: 2147483646 !important;
+    }
+    /* Neutralize UA [popover] defaults (margin:auto, border, padding,
+       color/background Canvas, overflow:auto) so Swal's own layout wins. */
+    .swal2-container[popover] {
+      position: fixed !important;
+      inset: 0 !important;
+      width: 100% !important;
+      height: 100% !important;
+      max-width: none !important;
+      max-height: none !important;
+      margin: 0 !important;
+      padding: 0 !important;
+      border: 0 !important;
+      background: transparent !important;
+      color: inherit !important;
+      overflow: hidden !important;
+    }
+    /* We use Swal's built-in backdrop (a child of swal2-container), not the
+       browser's popover ::backdrop - hide the UA one to avoid a double layer. */
+    .swal2-container[popover]::backdrop {
+      display: none !important;
+    }
+  </style>
+</head>
+
+<body>
+  <app-root></app-root>
+</body>
+
+</html>

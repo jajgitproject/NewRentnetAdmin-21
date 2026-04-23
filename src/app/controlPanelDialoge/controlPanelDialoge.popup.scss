@@ -1,0 +1,606 @@
+/* Booking Grid (Reservation Details) popup: self-contained styles.
+   Scoped to MatDialog panelClass `control-panel-main-dialog`. */
+
+.control-panel-main-dialog {
+  --cp-v-gap: 0px;
+  --cp-row-lh: 14px;
+  /* Remove default dialog padding so template controls spacing */
+  .cdk-dialog-container,
+  .mat-mdc-dialog-container {
+    padding: 0 !important;
+  }
+
+  /* Dialog surface sizing + legacy look */
+  .mdc-dialog__surface {
+    width: 90vw !important;
+    max-width: 90vw !important;
+    min-height: 0 !important;
+    max-height: none !important;
+    border-radius: 4px !important;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.28) !important;
+    border: 1px solid #e5e5e5 !important;
+    background: #fff !important;
+    padding: 6px 10px !important;
+    position: relative !important;
+  }
+
+  /* Allow full height content (no inner scroll) */
+  .mat-mdc-dialog-content,
+  [mat-dialog-content],
+  .mdc-dialog__content {
+    max-height: none !important;
+    overflow-y: visible !important;
+    padding: 0 !important;
+    margin: 0 !important;
+  }
+
+  /* Modal header (used by template) */
+  .modalHeader {
+    width: 100%;
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    padding: 2px 15px 4px;
+    position: relative;
+    border-bottom: 1px solid rgba(82, 63, 105, 0.06);
+  }
+
+  .modalHeader.clearfix .font-17 {
+    font-weight: 700 !important;
+    font-size: 16px !important;
+    line-height: 22px !important;
+    color: #212529 !important;
+  }
+
+  /* Ensure close icon always at right edge inside this popup */
+  .modalHeader > button[mat-icon-button],
+  .modalHeader > button.mat-mdc-icon-button,
+  .modalHeader > button[aria-label="Close dialog"],
+  .modalHeader > button[aria-label="Close"] {
+    position: absolute !important;
+    right: 0 !important;
+    top: 6px !important;
+    transform: none !important;
+    margin: 0 !important;
+  }
+
+  /* Popup-local base typography (avoid relying on global styles.scss) */
+  /* Every label in the popup renders like "Reservation Group": bold black,
+     10px, tight, no built-in Material button chrome. */
+  .BoldButton,
+  a.BoldButton,
+  button.BoldButton,
+  .mat-mdc-button.BoldButton {
+    font-size: 10px !important;
+    line-height: var(--cp-row-lh) !important;
+    height: var(--cp-row-lh) !important;
+    min-height: 0 !important;
+    min-width: 0 !important;
+    text-align: left !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    font-weight: 700 !important;
+    color: #000 !important;
+    text-transform: none !important;
+    justify-content: flex-start !important;
+    background: transparent !important;
+    letter-spacing: normal !important;
+  }
+
+  /* MDC button internal wrappers also enforced short + no padding. */
+  .BoldButton .mdc-button__label,
+  .BoldButton .mat-mdc-button-touch-target,
+  .BoldButton .mat-mdc-focus-indicator,
+  .BoldButton .mat-mdc-button-persistent-ripple,
+  .BoldButton .mat-mdc-button-ripple {
+    height: var(--cp-row-lh) !important;
+    line-height: var(--cp-row-lh) !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    min-height: 0 !important;
+  }
+
+  /* Nuke the 7px top-margin spacer class — every element sits on the
+     --cp-v-gap rhythm, no ad-hoc spacing above individual buttons. */
+  .BoldButtonTopMargin {
+    margin-top: 0 !important;
+  }
+
+  button,
+  .mat-mdc-button,
+  .mat-button,
+  .mat-mdc-menu-item,
+  .mat-menu-item {
+    font-weight: 700 !important;
+  }
+
+  /* <b> wrapper used around many buttons/labels — remove inherent inline
+     line leading so spacing is driven purely by --cp-row-lh. */
+  table tbody tr > td.TDValue b {
+    display: inline-block !important;
+    line-height: var(--cp-row-lh) !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+
+  .TDValue {
+    font-size: 10px !important;
+    line-height: var(--cp-row-lh) !important;
+    text-align: left !important;
+    vertical-align: top !important;
+  }
+
+  .TDValueBold {
+    font-size: 10px !important;
+    line-height: var(--cp-row-lh) !important;
+    text-align: left !important;
+    vertical-align: top !important;
+    font-weight: 700 !important;
+  }
+
+  /* Pin line-height on every descendant that carries gray value text so
+     inherited body line-height (~1.5) never inflates the gap between
+     consecutive text nodes separated by <br />. */
+  table tbody tr > td.TDValue,
+  table tbody tr > td.TDValue div,
+  table tbody tr > td.TDValue span,
+  table tbody tr > td.TDValue b,
+  table tbody tr > td.TDValue p,
+  table tbody tr > td.TDValue a {
+    line-height: var(--cp-row-lh) !important;
+  }
+
+  /* Keep all columns vertically aligned (same baseline) */
+  table tr > td,
+  table tr > th {
+    vertical-align: top !important;
+    padding-top: 0 !important;
+  }
+
+  /* Keep column proportions stable so col1 does not consume most of the row width. */
+  table {
+    width: 100% !important;
+    table-layout: fixed !important;
+    border-collapse: collapse !important;
+  }
+
+  table tbody tr > td.TDValue.col-lg-1 {
+    width: 16.6667% !important;
+  }
+
+  table tbody tr > td.TDValue.col-lg-2 {
+    width: 33.3333% !important;
+  }
+
+  table tbody tr > td.TDValue {
+    overflow-wrap: anywhere !important;
+    word-break: break-word !important;
+  }
+
+  /* Shared vertical rhythm across all columns/elements. */
+  table tbody tr > td.TDValue > * {
+    margin-top: var(--cp-v-gap) !important;
+    margin-bottom: 0 !important;
+  }
+
+  table tbody tr > td.TDValue > *:first-child {
+    margin-top: 0 !important;
+  }
+
+  /* Column start alignment: remove first-item button offsets so all columns begin at Reservation Group baseline. */
+  table tbody tr > td.TDValue > *:first-child .BoldButtonTopMargin,
+  table tbody tr > td.TDValue > *:first-child .passenger-first-btn,
+  table tbody tr > td.TDValue > b:first-child .BoldButtonTopMargin,
+  table tbody tr > td.TDValue > div:first-child .BoldButtonTopMargin,
+  table tbody tr > td.TDValue > span:first-child .BoldButtonTopMargin {
+    margin-top: 0 !important;
+  }
+
+  /* Normalize <br> spacing so line-break based rows follow the same rhythm. */
+  table tbody tr > td.TDValue br {
+    display: block !important;
+    content: '' !important;
+    height: 0 !important;
+    line-height: 0 !important;
+    font-size: 0 !important;
+    margin-top: var(--cp-v-gap) !important;
+  }
+
+  /* Match Reservation Group label->value spacing to Edit Booking label->value spacing. */
+  .reservation-group-value-row {
+    margin-top: var(--cp-v-gap) !important;
+    line-height: var(--cp-row-lh) !important;
+  }
+
+  /* One consistent baseline for menu-trigger icons not styled by .cp-menu-row-tight (those use row rules below). */
+  mat-icon[matMenuTriggerFor]:not(.cp-menu-trigger) {
+    padding-top: 0 !important;
+    margin-left: 4px !important;
+    width: 14px !important;
+    height: 14px !important;
+    line-height: var(--cp-row-lh) !important;
+    vertical-align: middle !important;
+    display: inline-block !important;
+    transform: translateY(4px) !important;
+  }
+
+  /* Align Location Details like Reservation Group: keep icon anchor, lift label baseline. */
+  .location-details-row,
+  .allotment-status-row {
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 2px !important;
+  }
+
+  .location-details-dots[matMenuTriggerFor],
+  .allotment-status-dots[matMenuTriggerFor] {
+    margin: 0 !important;
+    margin-left: 2px !important;
+    width: 14px !important;
+    height: 14px !important;
+    min-width: 14px !important;
+    line-height: 14px !important;
+    font-size: 14px !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    vertical-align: middle !important;
+    transform: none !important;
+    color: blue !important;
+  }
+
+  .location-details-row .BoldButton {
+    margin: 0 !important;
+    padding-top: 0 !important;
+    padding-bottom: 0 !important;
+    min-height: 0 !important;
+    line-height: var(--cp-row-lh) !important;
+    transform: translateY(-2px) !important;
+  }
+
+  /* Label + ⋮: inline-block + nowrap (flex + min-width:0 on a.BoldButton was wrapping the label) */
+  .cp-menu-label-row.cp-menu-row-tight {
+    display: inline-block !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    white-space: nowrap !important;
+    max-width: none !important;
+    width: max-content !important;
+    vertical-align: top !important;
+  }
+
+  .cp-menu-row-tight .cp-menu-label-text,
+  .cp-menu-row-tight.edit-booking-row .edit-booking-label.cp-menu-label-text {
+    color: #000 !important;
+    font-weight: 700 !important;
+    text-decoration: none !important;
+    line-height: var(--cp-row-lh) !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    display: inline !important;
+    white-space: nowrap !important;
+    vertical-align: middle !important;
+    min-width: max-content !important;
+  }
+
+  /* Keep Edit Booking gap equal to Reservation Group label->value gap. */
+  .cp-menu-label-row.edit-booking-row.cp-menu-row-tight {
+    display: block !important;
+    margin-top: var(--cp-v-gap) !important;
+  }
+
+  /* Edit Booking -> value should be tighter than generic line-break rhythm. */
+  .edit-booking-value-row {
+    margin-top: 0 !important;
+    line-height: var(--cp-row-lh) !important;
+  }
+
+  .booker-button-row {
+    margin-top: var(--cp-v-gap) !important;
+    line-height: var(--cp-row-lh) !important;
+  }
+
+  /* Nesting is already under .control-panel-main-dialog — do not repeat the parent class (would compile to .control-panel-main-dialog .control-panel-main-dialog … and never match). */
+  table tr > td:nth-child(-n+5) .cp-menu-label-row.cp-menu-row-tight a.BoldButton.cp-menu-label-text {
+    min-width: max-content !important;
+  }
+
+  table tr > td:nth-child(-n+5) .cp-menu-label-row.cp-menu-row-tight a.BoldButton.edit-booking-label {
+    min-width: max-content !important;
+  }
+
+  /* Do not use min-width: max-content here — it matched after fixing nested .control-panel-main-dialog and forced column 1 to ~full table width. */
+  table tbody tr > td.TDValue.col-lg-1:first-child {
+    width: auto !important;
+    max-width: none !important;
+    min-width: 0 !important;
+  }
+
+  .reservation-group-container.cp-menu-label-row.cp-menu-row-tight {
+    display: grid !important;
+    grid-template-columns: max-content 18px !important;
+    grid-template-rows: var(--cp-row-lh) !important;
+    align-items: center !important;
+    justify-items: start !important;
+    column-gap: 0 !important;
+    width: max-content !important;
+    min-width: min-content !important;
+    max-width: none !important;
+    white-space: nowrap !important;
+    height: var(--cp-row-lh) !important;
+    line-height: var(--cp-row-lh) !important;
+    vertical-align: top !important;
+  }
+
+  /* Make Edit Booking dots placement match Reservation Group. */
+  .cp-menu-label-row.edit-booking-row.cp-menu-row-tight {
+    display: grid !important;
+    grid-template-columns: max-content 18px !important;
+    grid-template-rows: var(--cp-row-lh) !important;
+    align-items: center !important;
+    justify-items: start !important;
+    column-gap: 0 !important;
+    width: max-content !important;
+    min-width: min-content !important;
+    max-width: none !important;
+    white-space: nowrap !important;
+    height: var(--cp-row-lh) !important;
+    line-height: var(--cp-row-lh) !important;
+    vertical-align: top !important;
+  }
+
+  /* Every ⋮ menu-trigger sits in grid col 2 on the same baseline as the
+     label (grid handles centering). No vertical offset, blue like the
+     user-supplied reference so every row matches the Reservation Group look. */
+  .cp-menu-row-tight mat-icon.more-icon[matMenuTriggerFor],
+  .cp-menu-row-tight mat-icon.edit-booking-dots[matMenuTriggerFor],
+  .cp-menu-row-tight mat-icon.cp-menu-trigger[matMenuTriggerFor] {
+    transform: none !important;
+    margin: 0 !important;
+    margin-left: 2px !important;
+    padding: 0 !important;
+    width: 14px !important;
+    height: 14px !important;
+    min-width: 14px !important;
+    line-height: 14px !important;
+    font-size: 14px !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    vertical-align: middle !important;
+    color: blue !important;
+  }
+
+  .cp-menu-row-tight mat-icon[matMenuTriggerFor] svg {
+    display: block !important;
+    width: 14px !important;
+    height: 14px !important;
+    margin: 0 !important;
+    transform: none !important;
+  }
+
+  /* Direct child + no [matMenuTriggerFor] — attribute selector missed in some builds; beat global .mat-icon sizing. */
+  .reservation-group-container.cp-menu-row-tight > mat-icon.more-icon.cp-menu-trigger,
+  .cp-menu-label-row.edit-booking-row.cp-menu-row-tight > mat-icon.edit-booking-dots.cp-menu-trigger {
+    grid-column: 2 !important;
+    grid-row: 1 !important;
+    justify-self: start !important;
+    align-self: center !important;
+    transform: none !important;
+    margin: 0 !important;
+    margin-left: 2px !important;
+    padding: 0 !important;
+    box-sizing: border-box !important;
+    width: 14px !important;
+    height: var(--cp-row-lh) !important;
+    min-width: 14px !important;
+    max-height: var(--cp-row-lh) !important;
+    font-size: 14px !important;
+    line-height: var(--cp-row-lh) !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    overflow: visible !important;
+    color: blue !important;
+  }
+
+  .reservation-group-container.cp-menu-row-tight > mat-icon.more-icon.cp-menu-trigger svg,
+  .cp-menu-label-row.edit-booking-row.cp-menu-row-tight > mat-icon.edit-booking-dots.cp-menu-trigger svg {
+    width: 14px !important;
+    height: 14px !important;
+    margin: 0 !important;
+    transform: none !important;
+    display: block !important;
+  }
+
+  /* Keep Pick up Time / action labels and ⋮ on one aligned row. */
+  .pickup-time-label-row,
+  .pass-to-supplier-row,
+  .location-details-row,
+  .allotment-status-row,
+  .interstate-tax-row,
+  .qc-status-row,
+  .verify-qc-row,
+  .garage-out-row,
+  .reached-row,
+  .pickup-row,
+  .drop-off-row,
+  .garage-in-row,
+  .closing-row,
+  .remark-row,
+  .duty-slip-image-row,
+  .next-day-instruction-row,
+  .duty-tracking-row,
+  .post-pickup-call-row,
+  .incidence-row,
+  .feedback-row,
+  .track-on-map-row {
+    display: grid !important;
+    grid-template-columns: max-content 18px !important;
+    grid-template-rows: var(--cp-row-lh) !important;
+    align-items: center !important;
+    justify-items: start !important;
+    column-gap: 0 !important;
+    width: max-content !important;
+    min-width: min-content !important;
+    white-space: nowrap !important;
+    line-height: var(--cp-row-lh) !important;
+  }
+
+  .pickup-time-label-row .pickup-time-align-btn,
+  .pass-to-supplier-row .BoldButton,
+  .location-details-row .BoldButton,
+  .allotment-status-row .BoldButton,
+  .interstate-tax-row .BoldButton,
+  .qc-status-row .BoldButton,
+  .verify-qc-row .BoldButton,
+  .garage-out-row .BoldButton,
+  .reached-row .BoldButton,
+  .pickup-row .BoldButton,
+  .drop-off-row .BoldButton,
+  .garage-in-row .BoldButton,
+  .closing-row .BoldButton,
+  .remark-row .BoldButton,
+  .duty-slip-image-row .BoldButton,
+  .next-day-instruction-row .BoldButton,
+  .duty-tracking-row .BoldButton,
+  .post-pickup-call-row .BoldButton,
+  .incidence-row .BoldButton,
+  .feedback-row .BoldButton,
+  .track-on-map-row .BoldButton,
+  .life-cycle-status-row .BoldButton {
+    grid-column: 1 !important;
+    grid-row: 1 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    min-height: 0 !important;
+    line-height: var(--cp-row-lh) !important;
+  }
+
+  .pickup-time-label-row .pickup-time-dots,
+  .pass-to-supplier-dots,
+  .location-details-dots,
+  .allotment-status-dots,
+  .interstate-tax-dots,
+  .qc-status-dots,
+  .verify-qc-dots,
+  .garage-out-dots,
+  .reached-dots,
+  .pickup-dots,
+  .drop-off-dots,
+  .garage-in-dots,
+  .closing-dots,
+  .remark-dots,
+  .duty-slip-image-dots,
+  .next-day-instruction-dots,
+  .duty-tracking-dots,
+  .post-pickup-call-dots,
+  .incidence-dots,
+  .feedback-dots,
+  .track-on-map-dots {
+    grid-column: 2 !important;
+    grid-row: 1 !important;
+    justify-self: start !important;
+    align-self: center !important;
+    margin: 0 !important;
+    margin-left: 2px !important;
+    width: 14px !important;
+    height: var(--cp-row-lh) !important;
+    min-width: 14px !important;
+    max-height: var(--cp-row-lh) !important;
+    font-size: 14px !important;
+    line-height: var(--cp-row-lh) !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    color: blue !important;
+    transform: none !important;
+    cursor: pointer !important;
+  }
+
+  /* Force the inner SVG to hug the 14px row too so it never pokes above the text cap-line. */
+  .pickup-time-label-row .pickup-time-dots svg,
+  .pass-to-supplier-dots svg,
+  .location-details-dots svg,
+  .allotment-status-dots svg,
+  .interstate-tax-dots svg,
+  .qc-status-dots svg,
+  .verify-qc-dots svg,
+  .garage-out-dots svg,
+  .reached-dots svg,
+  .pickup-dots svg,
+  .drop-off-dots svg,
+  .garage-in-dots svg,
+  .closing-dots svg,
+  .remark-dots svg,
+  .duty-slip-image-dots svg,
+  .next-day-instruction-dots svg,
+  .duty-tracking-dots svg,
+  .post-pickup-call-dots svg,
+  .incidence-dots svg,
+  .feedback-dots svg,
+  .track-on-map-dots svg {
+    width: 14px !important;
+    height: 14px !important;
+    margin: 0 !important;
+    transform: none !important;
+    display: block !important;
+  }
+
+  /* Track on Map: slightly taller row so label + ⋮ stay easy to click (default --cp-row-lh is 14px). */
+  .track-on-map-row {
+    --cp-track-hit: 22px;
+    grid-template-rows: var(--cp-track-hit) !important;
+  }
+
+  .track-on-map-row .BoldButton,
+  .track-on-map-row .BoldButton .mdc-button__label,
+  .track-on-map-row .BoldButton .mat-mdc-button-touch-target,
+  .track-on-map-row .BoldButton .mat-mdc-focus-indicator,
+  .track-on-map-row .BoldButton .mat-mdc-button-persistent-ripple,
+  .track-on-map-row .BoldButton .mat-mdc-button-ripple {
+    min-height: var(--cp-track-hit) !important;
+    height: var(--cp-track-hit) !important;
+    line-height: var(--cp-track-hit) !important;
+  }
+
+  .track-on-map-dots {
+    height: var(--cp-track-hit) !important;
+    max-height: var(--cp-track-hit) !important;
+    line-height: var(--cp-track-hit) !important;
+  }
+
+  /* After .BoldButton + column rules: Reservation Group label in grid col 1 */
+  table tr > td:nth-child(-n+5) .reservation-group-container.cp-menu-row-tight a.BoldButton.cp-menu-label-text {
+    grid-column: 1 !important;
+    grid-row: 1 !important;
+    align-self: center !important;
+    justify-self: start !important;
+    min-width: max-content !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    height: var(--cp-row-lh) !important;
+    line-height: var(--cp-row-lh) !important;
+    font-size: 10px !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    box-sizing: border-box !important;
+  }
+
+  table tr > td:nth-child(-n+5) .cp-menu-label-row.edit-booking-row.cp-menu-row-tight a.BoldButton.edit-booking-label.cp-menu-label-text {
+    grid-column: 1 !important;
+    grid-row: 1 !important;
+    align-self: center !important;
+    justify-self: start !important;
+    min-width: max-content !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    height: var(--cp-row-lh) !important;
+    line-height: var(--cp-row-lh) !important;
+    font-size: 10px !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    box-sizing: border-box !important;
+  }
+}
+

@@ -1,0 +1,556 @@
+<div class="addContainer">
+    <div class="modalHeader">
+        <div class="editRowModal">
+            <div class="modalHeader clearfix">
+                <!-- <img [src]='advanceTable.img' alt="avatar"> -->
+                <div class="modal-about">
+                    <div class="font-weight-bold p-t-5 font-17">
+                        {{dialogTitle}}</div>
+                </div>
+            </div>
+        </div>
+        <button mat-icon-button (click)="dialogRef.close()" aria-label="Close dialog">
+            <mat-icon>close</mat-icon>
+        </button>
+    </div>
+    <div mat-dialog-content>
+        <form class="register-form m-4" [formGroup]="advanceTableForm" (ngSubmit)="submit">
+
+            <div class="row">
+                <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                    <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                        <mat-label>New Customer</mat-label>
+                        <mat-select formControlName="newCustomer">
+                            <mat-option [value]=true>Yes</mat-option>
+                            <mat-option [value]=false>No</mat-option>
+                        </mat-select>
+                        <mat-error *ngIf="advanceTableForm.get('newCustomer').hasError('required')">
+                            New Customer is required
+                        </mat-error>
+                    </mat-form-field>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                    <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                        <mat-label>Name</mat-label>
+                        <input matInput formControlName="customerName" required (input)="onCustomerChange()">
+                        <mat-error *ngIf="advanceTableForm.get('customerName').hasError('required')">
+                            Name is required
+                        </mat-error>
+                        <mat-error *ngIf="advanceTableForm.get('customerName').hasError('duplicate')">
+                            Name is already exist
+                        </mat-error>
+                    </mat-form-field>
+                </div>
+
+                <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                    <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                        <mat-label>Customer Group</mat-label>
+                        <input required type="text" matInput [matAutocomplete]="auto" formControlName="customerGroup">
+                        <mat-autocomplete #auto="matAutocomplete"
+                            (optionSelected)="OnCustomerGroupSelect($event.option.value)">
+                            <mat-option *ngFor="let options of filteredOptions | async" [value]="options.customerGroup"
+                                (click)="getGroupID(options.customerGroupID)">
+                                {{options.customerGroup}}
+                            </mat-option>
+                        </mat-autocomplete>
+                        <mat-error *ngIf="advanceTableForm.get('customerGroup').hasError('required')">
+                            Customer Group is required
+                        </mat-error>
+                        <mat-error *ngIf="advanceTableForm.get('customerGroup').hasError('customerGroupInvalid')">
+                            Please select a Customer Group
+                        </mat-error>
+                    </mat-form-field>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                    <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                        <mat-label>Customer Type</mat-label>
+                        <input required type="text" matInput [matAutocomplete]="auto1" formControlName="customerType">
+                        <mat-autocomplete #auto1="matAutocomplete"
+                            (optionSelected)="OnCustomerTypeSelect($event.option.value)">
+                            <mat-option *ngFor="let options of filteredTypeOptions | async"
+                                [value]="options.customerType" (click)="getTypeID(options.customerTypeID)">
+                                {{options.customerType}}
+                            </mat-option>
+                        </mat-autocomplete>
+                        <mat-error *ngIf="advanceTableForm.controls['customerType'].hasError('customerTypeInvalid')">
+                            Please select a Customer Type
+                        </mat-error>
+                    </mat-form-field>
+                </div>
+
+                <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2"
+                    *ngIf="advanceTableForm.value.customerType==='Corporate Individual'">
+                    <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                        <mat-label>Tariff Applicable</mat-label>
+                        <input type="text" matInput [matAutocomplete]="autos" formControlName="corporateCompanyName">
+                        <mat-autocomplete #autos="matAutocomplete"
+                            (optionSelected)="OnTariffSelect($event.option.value)">
+                            <mat-option *ngFor="let options of filteredCustomerOptions | async"
+                                [value]="options.customerName" (click)="getCustomerID(options.customerID)">
+                                {{options.customerName}}
+                            </mat-option>
+                        </mat-autocomplete>
+                    </mat-form-field>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                    <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                        <mat-label>Customer Category</mat-label>
+                        <input required type="text" matInput [matAutocomplete]="auto4"
+                            formControlName="customerCategory">
+                        <mat-autocomplete #auto4="matAutocomplete"
+                            (optionSelected)="OnCustomerCategorySelect($event.option.value)">
+                            <mat-option *ngFor="let options of filteredCategoryOptions | async"
+                                [value]="options.customerCategory" (click)="getCategoryID(options.customerCategoryID)">
+                                {{options.customerCategory}}
+                            </mat-option>
+                        </mat-autocomplete>
+                        <mat-error *ngIf="advanceTableForm.controls['customerCategory']?.hasError('categoryInvalid')">
+                            Please select Category
+                        </mat-error>
+                    </mat-form-field>
+                </div>
+
+                <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                    <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                        <mat-label>Priority Customer</mat-label>
+
+                        <mat-select formControlName="customerPriority" required>
+                            <mat-option [value]="true">Yes</mat-option>
+                            <mat-option [value]="false">No</mat-option>
+                        </mat-select>
+
+                        <mat-error *ngIf="advanceTableForm.get('customerPriority')?.hasError('required')">
+                            Priority Customer is required
+                        </mat-error>
+                    </mat-form-field>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                    <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                        <mat-label>Company</mat-label>
+                        <input required type="text" matInput formControlName="companyName" [matAutocomplete]="auto10">
+                        <mat-autocomplete #auto10="matAutocomplete"
+                            (optionSelected)="OnCompanySelect($event.option.value)">
+                            <mat-option *ngFor="let option of filteredCompanyOptions | async"
+                                [value]="option.organizationalEntityName"
+                                (click)="getCompanyID(option.organizationalEntityID)">
+                                {{option.organizationalEntityName}}
+                            </mat-option>
+                        </mat-autocomplete>
+                        <mat-error *ngIf="advanceTableForm.controls['companyName'].hasError('companyNameInvalid')">
+                            Please select a Company
+                        </mat-error>
+                    </mat-form-field>
+                </div>
+
+                <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                    <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                        <mat-label>Country</mat-label>
+                        <input required type="text" matInput [matAutocomplete]="auto2" formControlName="country">
+                        <mat-autocomplete #auto2="matAutocomplete"
+                            (optionSelected)="OnCountrySelect($event.option.value)">
+                            <mat-option *ngFor="let options of filteredCountryOptions | async"
+                                [value]="options.geoPointName" (click)="getCountryID(options.geoPointID)">
+                                {{options.geoPointName}}
+                            </mat-option>
+                        </mat-autocomplete>
+                        <mat-error *ngIf="advanceTableForm.controls['country'].hasError('countryNameInvalid')">
+                            Please select a Country
+                        </mat-error>
+                    </mat-form-field>
+                </div>
+            </div>
+
+            <!-- <div class="row">
+                
+                <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                    <mat-form-field class="example-full-width" appearance="outline"  floatLabel="always">
+                        <mat-label>Contact Number</mat-label>
+                        <input matInput formControlName="contactNo" required>
+                        <mat-error *ngIf="advanceTableForm.get('contactNo').hasError('required')">
+                            Contact Number is required
+                        </mat-error>
+                    </mat-form-field>
+                </div>
+
+                <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                    <mat-form-field class="example-full-width" appearance="outline"  floatLabel="always">
+                        <mat-label>Email</mat-label>
+                        <input matInput formControlName="email" required>
+                        <mat-error *ngIf="advanceTableForm.get('email').hasError('required')">
+                            Email is required
+                        </mat-error>
+                    </mat-form-field>
+                </div>
+        </div>  -->
+
+            <div class="row">
+
+                <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                    <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                        <mat-label>Contact Person</mat-label>
+                        <input matInput formControlName="contactPerson">
+                        <!-- <mat-error *ngIf="advanceTableForm.get('contactPerson').hasError('required')">
+                        Contact Person is required
+                    </mat-error> -->
+                    </mat-form-field>
+
+                </div>
+                <div class="col-xl-3 col-lg-2 col-md-1 col-sm-1 mb-1">
+                    <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                        <mat-label>Country Code</mat-label>
+                        <input required type="text" matInput formControlName="countryCode" [matAutocomplete]="auto9">
+                        <mat-autocomplete #auto9="matAutocomplete" (optionSelected)="onCountryCode($event)">
+                            <mat-option *ngFor="let option of filteredCountryCodeOptions | async"
+                                [value]="option.countryISDCode">
+                                <div style="display: flex; align-items: center;">
+                                    <img [src]="option.icon" alt="{{option.countryISOCode}}" width="20" height="20"
+                                        style="margin-right: 8px;">
+                                    <span>{{option.countryISOCode}} {{option.countryISDCode}}</span>
+
+                                </div>
+                            </mat-option>
+                        </mat-autocomplete>
+
+                        <mat-error *ngIf="advanceTableForm.controls['countryCode'].hasError('countryCodeInvalid')">
+                            Country Code is required
+                        </mat-error>
+                    </mat-form-field>
+                </div>
+                <div class="col-xl-3 col-lg-4 col-md-6 col-sm-6 mb-1">
+                    <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                        <mat-label>Contact Number</mat-label>
+                        <input matInput formControlName="contactNo">
+                        <!-- <mat-error *ngIf="advanceTableForm.get('contactNo').hasError('required')">
+                        Contact Number is required
+                    </mat-error> -->
+                    </mat-form-field>
+                </div>
+
+            </div>
+
+            <div class="row">
+                <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                    <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                        <mat-label>Email</mat-label>
+                        <input matInput formControlName="email">
+                        <!-- <mat-error *ngIf="advanceTableForm.get('email').hasError('required')">
+                        Email is required
+                    </mat-error> -->
+                    </mat-form-field>
+                </div>
+                <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                    <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                        <mat-label>Customer Location </mat-label>
+                        <input required type="text" matInput [matAutocomplete]="auto3"
+                            formControlName="serviceLocation">
+                        <mat-autocomplete #auto3="matAutocomplete"
+                            (optionSelected)="OnServiceLocationSelect($event.option.value)">
+                            <mat-option *ngFor="let options of filteredLocationOptions | async"
+                                [value]="options.organizationalEntityName"
+                                (click)="getLocationID(options.organizationalEntityID)">
+                                {{options.organizationalEntityName}}
+                            </mat-option>
+                        </mat-autocomplete>
+                        <mat-error
+                            *ngIf="advanceTableForm.controls['serviceLocation'].hasError('serviceLocationInvalid')">
+                            Please select a Service Location
+                        </mat-error>
+                    </mat-form-field>
+                </div>
+
+
+            </div>
+
+            <div class="row">
+
+                <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2"
+                    *ngIf="advanceTableForm.value.newCustomer === false || advanceTableForm.value.newCustomer === '' || advanceTableForm.value.newCustomer === null ">
+                    <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                        <mat-label>Treat As New Customer Till Date</mat-label>
+                        <input matInput [matDatepicker]="treatAsNewCustomerTillDate"
+                            formControlName="treatAsNewCustomerTillDate">
+                        <mat-datepicker-toggle matSuffix [for]="treatAsNewCustomerTillDate"></mat-datepicker-toggle>
+                        <mat-datepicker #treatAsNewCustomerTillDate></mat-datepicker>
+                    </mat-form-field>
+                </div>
+
+                <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2"
+                    *ngIf="advanceTableForm.value.newCustomer === true">
+                    <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                        <mat-label>Treat As New Customer Till Date</mat-label>
+                        <input required matInput [matDatepicker]="treatAsNewCustomerTillDate"
+                            formControlName="treatAsNewCustomerTillDate">
+                        <mat-datepicker-toggle matSuffix [for]="treatAsNewCustomerTillDate"></mat-datepicker-toggle>
+                        <mat-datepicker #treatAsNewCustomerTillDate></mat-datepicker>
+                        <mat-error *ngIf="advanceTableForm.get('treatAsNewCustomerTillDate').hasError('required')">
+                            Treat As New Customer Till Date is required
+                        </mat-error>
+                    </mat-form-field>
+                </div>
+
+                <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                    <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                        <mat-label>Max Age Of Car To Be Sent</mat-label>
+                        <input matInput (keypress)="keyPress($event)" formControlName="maximumAgeOfCarToBeSent">
+                        <!-- <mat-error *ngIf="advanceTableForm.get('maximumAgeOfCarToBeSent').hasError('required')">
+                        Max Age Of Car To Be Sent is required
+                    </mat-error> -->
+
+                    </mat-form-field>
+                </div>
+            </div>
+
+            <div class="row">
+
+                <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                    <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                        <mat-label>Max Age Of Car Remark</mat-label>
+                        <input matInput formControlName="maximumAgeOfCarToBeSentRemark">
+                    </mat-form-field>
+                </div>
+
+                <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                    <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                        <mat-label>LatLon Required</mat-label>
+                        <mat-select formControlName="latLonRequired" required>
+                            <mat-option [value]="true">Yes</mat-option>
+                            <mat-option [value]="false">No</mat-option>
+                        </mat-select>
+                        <mat-error *ngIf="advanceTableForm.get('latLonRequired').hasError('required')">
+                            LatLon Required is required
+                        </mat-error>
+                    </mat-form-field>
+
+                </div>
+            </div>
+
+            <div class="row">
+                <!-- <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                <mat-form-field class="example-full-width" appearance="outline" floatLabel="always"> 
+                    <mat-label>Category</mat-label>                       
+                    <input required type="text" matInput [matAutocomplete]="auto4"
+                    formControlName="customerCategory">
+                    <mat-autocomplete #auto4="matAutocomplete">
+                        <mat-option *ngFor="let options of filteredCategoryOptions | async"
+                            [value]="options.customerCategory" (click)="getCategoryID(options.customerCategoryID)">
+                            {{options.customerCategory}}
+                        </mat-option>
+                    </mat-autocomplete>
+                    <mat-error *ngIf="advanceTableForm.get('customerCategory').hasError('required')">
+                        Customer Category is required
+                    </mat-error>
+                </mat-form-field>
+            </div> -->
+
+                <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2"
+                    *ngIf="advanceTableForm.get('latLonRequired').value">
+                    <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                        <mat-label>Location Collection Interval</mat-label>
+                        <input matInput (keypress)="keyPress($event)" formControlName="locationCollectionInterval"
+                            required>
+                        <mat-error *ngIf="advanceTableForm.get('locationCollectionInterval').hasError('required')">
+                            Location Collection Interval is required
+                        </mat-error>
+                    </mat-form-field>
+                </div>
+
+                <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2"
+                    *ngIf="advanceTableForm.get('latLonRequired').value">
+                    <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                        <mat-label>Location Upload Interval</mat-label>
+                        <input matInput (keypress)="keyPress($event)" formControlName="locationUploadInterval" required>
+                        <mat-error *ngIf="advanceTableForm.get('locationUploadInterval').hasError('required')">
+                            Location Upload Interval is required
+                        </mat-error>
+                    </mat-form-field>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                    <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                        <mat-label>API Integration Code</mat-label>
+                        <input matInput formControlName="customerCodeForAPIIntegration">
+                    </mat-form-field>
+                </div>
+
+                <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                    <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                        <mat-label>Location Out Interval In Minutes</mat-label>
+                        <input matInput formControlName="locationOutIntervalInMinutes">
+                        <!-- <mat-error *ngIf="advanceTableForm.get('email').hasError('required')">
+                        Email is required
+                    </mat-error> -->
+                    </mat-form-field>
+                </div>
+
+            </div>
+
+            <div class="row">
+                <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                    <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                        <mat-label>Tally Customer ID </mat-label>
+                        <input matInput formControlName="tallyCustomerID" required>
+                        <mat-error *ngIf="advanceTableForm.get('tallyCustomerID').hasError('required')">
+                            Tally Customer ID is required
+                        </mat-error>
+                    </mat-form-field>
+                </div>
+
+                <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                    <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                        <mat-label>Customer Sector</mat-label>
+                        <mat-select formControlName="customerSector">
+                            <mat-option value="GOVT">GOVT</mat-option>
+                            <mat-option value="PSU">PSU</mat-option>
+                            <mat-option value="PVT">PVT</mat-option>
+                            <mat-option value="Others">Others</mat-option>
+                        </mat-select>
+                    </mat-form-field>
+                </div>
+
+            </div>
+
+            <div class="row">
+                <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                    <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                        <mat-label>Duty Slip Type</mat-label>
+                        <mat-select formControlName="dutySlipType">
+                            <mat-option value="GeneralDutySlipWithMap">
+                                General Duty Slip With Map
+                            </mat-option>
+
+                            <mat-option value="GeneralDutySlipWithoutMap">
+                                General Duty Slip Without Map
+                            </mat-option>
+                        </mat-select>
+                    </mat-form-field>
+                </div>
+
+                <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                    <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                        <mat-label>Print Running Detail On DutySlip</mat-label>
+                        <mat-select formControlName="printRunningDetailOnDutySlip">
+                            <mat-option [value]="true">Yes</mat-option>
+                            <mat-option [value]="false">No</mat-option>
+                        </mat-select>
+                    </mat-form-field>
+                </div>
+            </div>
+
+
+            <div class="row">
+                <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                    <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                        <mat-label>Show Rate On DutySlip</mat-label>
+                        <mat-select formControlName="showRateOnDutySlip">
+                            <mat-option [value]="true">Yes</mat-option>
+                            <mat-option [value]="false">No</mat-option>
+                        </mat-select>
+                    </mat-form-field>
+                </div>
+
+                <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                    <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                        <mat-label>Show OTP On DutySlip</mat-label>
+                        <mat-select formControlName="showOTPOnDutySlip">
+                            <mat-option [value]="true">Yes</mat-option>
+                            <mat-option [value]="false">No</mat-option>
+                        </mat-select>
+                    </mat-form-field>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                    <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                        <mat-label>PAN No</mat-label>
+                        <input matInput formControlName="panNo" maxlength="10">
+                    </mat-form-field>
+                </div>
+                <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                    <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                        <mat-label>GST Customer Type</mat-label>
+                        <mat-select formControlName="gstCustomerType">
+                            <mat-option value="Registered">Registered</mat-option>
+                            <mat-option value="Unregistered">Unregistered</mat-option>
+                            <mat-option value="SEZ">SEZ</mat-option>
+                            <mat-option value="Export">Export</mat-option>
+                        </mat-select>
+                    </mat-form-field>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                    <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                        <mat-label>Segment</mat-label>
+                        <mat-select formControlName="segment">
+                            <mat-option value="CCR">CCR</mat-option>
+                            <mat-option value="ETS">ETS</mat-option>
+                        </mat-select>
+                    </mat-form-field>
+                </div>
+                <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                    <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                        <mat-label>Business Type</mat-label>                      
+                        <input type="text" matInput [matAutocomplete]="auto15"
+                        formControlName="businessType">
+                        <mat-autocomplete #auto15="matAutocomplete" (optionSelected)="OnBusinessTypeSelect($event.option.value)">
+                            <mat-option *ngFor="let options of filteredBusinessTypeOptions | async"
+                                [value]="options.businessTypeName" (click)="getBusinessTypeID(options.businessTypeID)">
+                                {{options.businessTypeName}}
+                            </mat-option>
+                        </mat-autocomplete>
+                        <mat-error *ngIf="advanceTableForm.controls['businessType'].hasError('businessTypeNameInvalid')">
+                            Please select a Business Type or leave it blank
+                        </mat-error>
+                    </mat-form-field>
+                </div>
+            </div>
+
+             <div class="row">
+                <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                   <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                        <mat-label>Activation Status</mat-label>
+                        <mat-select formControlName="activationStatus">
+                            <mat-option [value]=true>Active</mat-option>
+                            <mat-option [value]=false>Deleted</mat-option>
+                        </mat-select>
+
+                        <mat-error *ngIf="advanceTableForm.get('activationStatus').hasError('required')">
+                            Activation Status is required
+                        </mat-error>
+                    </mat-form-field>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12 mb-2">
+                    <div class="example-button-row">
+                        <button mat-raised-button color="primary" *ngIf="saveDisabled" type="submit"
+                            [disabled]="!advanceTableForm.valid" (click)="confirmAdd()">
+                            Save
+                        </button>
+
+                        <mat-spinner *ngIf="!saveDisabled" diameter="30"></mat-spinner>
+
+                        <button mat-raised-button color="warn" (click)="onNoClick(action)" tabindex="-1">
+                            {{ action === 'add' ? 'Reset' : 'Cancel'}}
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>

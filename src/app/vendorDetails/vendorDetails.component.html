@@ -1,0 +1,66 @@
+<div class="modalHeader">
+  <div class="editRowModal">
+    <div class="modalHeader clearfix">
+      <div class="modal-about">
+        <div class="font-weight-bold p-t-5 font-17">
+          {{ dialogTitle }}
+          <span *ngIf="allotmentNotDone" style="color: red;"> Allotment Not Done</span>
+        </div>
+      </div>
+    </div>
+  </div>
+  <button mat-icon-button (click)="dialogRef.close()" aria-label="Close dialog">
+    <mat-icon class="small-close-icon">close</mat-icon>
+  </button>
+  <style></style>
+</div>
+<mat-card>
+  <mat-card-content *ngIf="dataSource">
+    <mat-dialog-content class="of-hidden">
+      <ng-container *ngFor="let dataSourceDetails of dataSource">
+        <div class="row">
+          <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+            <span class="TDValueBold">Driver Vendor</span> <br />
+            <span class="TDValue">
+              {{ dataSourceDetails.driverVendor || 'N/A' }}</span
+            >
+          </div>
+          <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+            <span class="TDValueBold">Car Vendor</span> <br />
+            <span class="TDValue">
+              {{ dataSourceDetails.carVendor || 'N/A' }}</span
+            >
+          </div>
+        </div>
+        <div class="row">
+          <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+            <span class="TDValueBold">Driver Vendor Email</span> <br />
+            <span class="TDValue">
+              {{ dataSourceDetails.driverSupplierEmail || 'N/A' }}</span
+            >
+          </div>
+          <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+            <span class="TDValueBold">Car Vendor Email</span> <br />
+            <span class="TDValue">
+              {{ dataSourceDetails.inventorySupplierEmail || 'N/A' }}</span
+            >
+          </div>
+        </div>
+        <div class="row">
+          <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+            <span class="TDValueBold">Driver Vendor Phone</span> <br />
+            <span class="TDValue">
+              {{ dataSourceDetails.driverSupplierPhone || 'N/A' }}</span
+            >
+          </div>
+          <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+            <span class="TDValueBold">Car Vendor Phone</span> <br />
+            <span class="TDValue">
+              {{ dataSourceDetails.inventorySupplierPhone || 'N/A' }}</span
+            >
+          </div>
+        </div>
+      </ng-container>
+    </mat-dialog-content>
+  </mat-card-content>
+</mat-card>

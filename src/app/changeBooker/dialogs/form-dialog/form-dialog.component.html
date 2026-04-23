@@ -1,0 +1,61 @@
+<div class="addContainer">
+    <div class="modalHeader">
+        <div class="editRowModal">
+            <div class="modalHeader clearfix">
+                <div class="modal-about">
+                    <div class="font-weight-bold p-t-5 font-17">{{dialogTitle}}</div>
+                </div>
+            </div>
+        </div>
+        <button mat-icon-button (click)="dialogRef.close()" aria-label="Close dialog">
+            <mat-icon>close</mat-icon>
+        </button>
+    </div>
+    <div mat-dialog-content>
+        <form class="register-form m-4" [formGroup]="advanceTableForm" (ngSubmit)="submit">
+            <div class="row">
+                <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                    <mat-form-field class="example-full-width" appearance="outline"  floatLabel="always">
+                        <mat-label>Pervious Booker</mat-label>
+                        <input readonly matInput formControlName="previousRecordName" required>
+                    </mat-form-field>
+                </div>
+
+                <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                    <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                        <mat-label>New Booker</mat-label>
+                        <input required type="text" matInput formControlName="newRecordName" [matAutocomplete]="auto1">
+                        <mat-autocomplete #auto1="matAutocomplete" (optionSelected)="onPassengerSelected($event.option.value)" panelWidth="custom-autocomplete-panel">
+                          <mat-option *ngFor="let option of filteredPassengerOptions | async" 
+                          [value]="option.customerPersonName + '-' + option.gender + '-' + option.importance+ '-' + option.phone+ '-'+ option.customerDepartment+ '-'+ option.customerDesignation+'-'+ option.customerName" 
+                          (click)="getPassengerID(option.customerPersonID)">
+                          {{option.customerPersonName}} - {{option.gender}} - {{option.importance}} - {{option.phone}} - {{option.customerDepartment}} - {{option.customerDesignation}} - {{option.customerName}}
+                          </mat-option>
+                        </mat-autocomplete>
+                        <mat-error *ngIf="advanceTableForm.get('newRecordName').hasError('newRecordNameInvalid')">
+                          Please Select Valid Passenger
+                        </mat-error>
+                    </mat-form-field>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12 mb-2">
+                    <mat-form-field class="example-full-width" appearance="outline"  floatLabel="always">
+                        <mat-label>Reason</mat-label>
+                        <input matInput formControlName="reason">
+                    </mat-form-field>
+                </div>
+            </div>
+
+
+            <div class="row">
+                <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12 mb-2">
+                    <div class="example-button-row">
+                        <button mat-raised-button *ngIf="saveDisabled" color="primary" (click)="Post()">Select</button>
+                        <mat-spinner *ngIf="!saveDisabled" diameter="30"></mat-spinner>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>

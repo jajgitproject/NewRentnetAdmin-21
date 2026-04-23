@@ -1,0 +1,165 @@
+<div class="modalHeader">
+  <div class="editRowModal">
+    <div class="modalHeader clearfix">
+      <div class="modal-about">
+        <div class="font-weight-bold p-t-5 font-17">
+          {{ dialogTitle }}
+        </div>
+      </div>
+    </div>
+  </div>
+  <button mat-icon-button (click)="dialogRef.close()" aria-label="Close dialog">
+    <mat-icon class="small-close-icon">close</mat-icon>
+  </button>
+</div>
+
+<mat-card>
+  <mat-card-content *ngIf="lifeCycleStatusdataSource && lifeCycleStatusdataSource.length > 0; else noDataTemplate">
+    <mat-dialog-content class="of-hidden">
+      <!-- Row 1 -->
+      <div class="row">
+        <div class="col-md-3 mb-2">
+          <span class="TDValueBold">Completion Status</span><br />
+          <span class="TDValue">
+            {{ lifeCycleStatusdataSource[0]?.dataCompletionStatus || 'N/A' }}
+          </span>
+        </div>
+
+        <div class="col-md-3 mb-2">
+          <span class="TDValueBold">Confirmation</span><br />
+          <span class="TDValue">
+            {{ lifeCycleStatusdataSource[0]?.confirmation === 'Yes' ? 'Yes' :
+              (lifeCycleStatusdataSource[0]?.confirmation === 'No' ? 'No' : 'N/A') }}
+          </span>
+        </div>
+        
+        <div class="col-md-3 mb-2">
+          <span class="TDValueBold">Car and Driver Allotted</span><br />
+          <span class="TDValue">
+            {{ lifeCycleStatusdataSource[0]?.carAndDriverAlloted === 'Yes' ? 'Yes' :
+              (lifeCycleStatusdataSource[0]?.carAndDriverAlloted === 'No' ? 'No' : 'N/A') }}
+          </span>
+        </div>
+
+        <div class="col-md-3 mb-2">
+          <span class="TDValueBold">Allotted Delay (Min)</span><br />
+          <span class="TDValue">
+            {{ lifeCycleStatusdataSource[0]?.carAndDriverAllotedDelayInMinutes != null ? 
+              lifeCycleStatusdataSource[0].carAndDriverAllotedDelayInMinutes + ' min' : 'N/A' }}
+          </span>
+        </div>
+       
+      </div>
+
+      <!-- Row 2 -->
+      <div class="row">
+        <div class="col-md-3 mb-2">
+          <span class="TDValueBold">Dispatched</span><br />
+          <span class="TDValue">
+            {{ lifeCycleStatusdataSource[0]?.dispatched === 'Yes' ? 'Yes' :
+              (lifeCycleStatusdataSource[0]?.dispatched === 'No' ? 'No' : 'N/A') }}
+          </span>
+        </div>
+
+        <div class="col-md-3 mb-2">
+          <span class="TDValueBold">Dispatched Delay In (Min)</span><br />
+          <span class="TDValue">
+            {{ lifeCycleStatusdataSource[0]?.dispatchedDelayInMinutes || 'N/A' }}
+          </span>
+        </div>
+        
+        <div class="col-md-3 mb-2">
+          <span class="TDValueBold">Reached</span><br />
+          <span class="TDValue">
+            {{ lifeCycleStatusdataSource[0]?.reached === 'Yes' ? 'Yes' :
+              (lifeCycleStatusdataSource[0]?.reached === 'No' ? 'No' : 'N/A') }}
+          </span>
+        </div>
+
+        <div class="col-md-3 mb-2">
+          <span class="TDValueBold">Reached Delay In( Min)</span><br />
+          <span class="TDValue">
+            {{ lifeCycleStatusdataSource[0]?.reachedDelayInMinutes || 'N/A' }}
+          </span>
+        </div>
+      </div>
+
+      <!-- Row 3 -->
+      <div class="row">
+       
+        <div class="col-md-3 mb-2">
+          <span class="TDValueBold">Picked Up</span><br />
+          <span class="TDValue">
+            {{ lifeCycleStatusdataSource[0]?.pickedUp === 'Yes' ? 'Yes' :
+              (lifeCycleStatusdataSource[0]?.pickedUp === 'No' ? 'No' : 'N/A') }}
+          </span>
+        </div>
+
+        <div class="col-md-3 mb-2">
+          <span class="TDValueBold">Picked Up Delay In (Min)</span><br />
+          <span class="TDValue">
+            {{ lifeCycleStatusdataSource[0]?.pickedUpDelayInMinutes || 'N/A' }}
+          </span>
+        </div>
+
+        <div class="col-md-3 mb-2">
+          <span class="TDValueBold">Dropped</span><br />
+          <span class="TDValue">
+            {{ lifeCycleStatusdataSource[0]?.dropped === 'Yes' ? 'Yes' :
+              (lifeCycleStatusdataSource[0]?.dropped === 'No' ? 'No' : 'N/A') }}
+          </span>
+        </div>
+
+        <div class="col-md-3 mb-2">
+          <span class="TDValueBold">Garage In</span><br />
+          <span class="TDValue">
+            {{ lifeCycleStatusdataSource[0]?.garageIn === 'Yes' ? 'Yes' :
+              (lifeCycleStatusdataSource[0]?.garageIn === 'No' ? 'No' : 'N/A') }}
+          </span>
+        </div>
+      </div>
+
+      <!-- Row 5 -->
+      <div class="row">
+        <div class="col-md-3 mb-2">
+          <span class="TDValueBold">Closed</span><br />
+          <span class="TDValue">
+            {{ lifeCycleStatusdataSource[0]?.closed === 'Yes' ? 'Yes' :
+              (lifeCycleStatusdataSource[0]?.closed === 'No' ? 'No' : 'N/A') }}
+          </span>
+        </div>
+
+        <div class="col-md-3 mb-2">
+          <span class="TDValueBold">Verified</span><br />
+          <span class="TDValue">
+            {{ lifeCycleStatusdataSource[0]?.verified === 'Yes' ? 'Yes' :
+              (lifeCycleStatusdataSource[0]?.verified === 'No' ? 'No' : 'N/A') }}
+          </span>
+        </div>
+
+        <div class="col-md-3 mb-2">
+          <span class="TDValueBold">Ready To Bill</span><br />
+          <span class="TDValue">
+            {{ lifeCycleStatusdataSource[0]?.readyToBill === 'Yes' ? 'Yes' :
+              (lifeCycleStatusdataSource[0]?.readyToBill === 'No' ? 'No' : 'N/A') }}
+          </span>
+        </div>
+
+        <div class="col-md-3 mb-2">
+          <span class="TDValueBold">Billed</span><br />
+          <span class="TDValue">
+            {{ lifeCycleStatusdataSource[0]?.billed === 'Yes' ? 'Yes' :
+              (lifeCycleStatusdataSource[0]?.billed === 'No' ? 'No' : 'N/A') }}
+          </span>
+        </div>
+      </div>
+    </mat-dialog-content>
+  </mat-card-content>
+
+  <ng-template #noDataTemplate>
+    <mat-card-content>
+      <p>No data found for the given reservation ID.</p>
+    </mat-card-content>
+  </ng-template>
+</mat-card>
+

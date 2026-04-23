@@ -1,0 +1,70 @@
+<ng-container *ngFor="let billDetail of billToOtherDetailsList;">
+    <div>
+        <div class="row" style="margin-left: 20px;margin-top: 20px;">
+            <a style="cursor: pointer;color: #007bff;" (click)="billingOtherEdit(billDetail)">
+                Billing - Edit - Delete</a>
+        </div>
+        <div class="row" style="margin-left: 20px;margin-top: 20px;">
+            <div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 mb-2">
+                <span>
+                    <b>
+                    Payer Name
+                    </b>                   
+                </span>
+                <br/>
+                <span>{{billDetail.payerName}}</span>
+            </div>
+    
+            <div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 mb-2">
+                <span>
+                    <b>
+                        Payer Address
+                    </b>                   
+                </span>
+                <br/>
+                <span>{{billDetail.payerAddress}}</span>
+            </div>
+    
+            <div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 mb-2">
+                <span>
+                    <b>
+                        Country
+                    </b>                   
+                </span>
+                <br/>
+                <span>{{billDetail.country}}</span>
+            </div>
+    
+            <div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 mb-2">
+                <span>
+                    <b>
+                        State
+                    </b>                   
+                </span>
+                <br/>
+                <span>{{billDetail.state}}</span>
+            </div>
+        </div>
+        <div class="row" style="margin-left: 20px;margin-top: 20px;">
+            <div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 mb-2">
+                <span>
+                    <b>
+                        City
+                    </b>                   
+                </span>
+                <br/>
+                <span>{{billDetail.city}}</span>
+            </div>
+    
+            <div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 mb-2">
+                <span>
+                    <b>
+                        Pin
+                    </b>                   
+                </span>
+                <br/>
+                <span>{{billDetail.pin}}</span>
+            </div>
+        </div>
+    </div>
+</ng-container>

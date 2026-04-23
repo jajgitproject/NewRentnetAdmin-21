@@ -1,0 +1,55 @@
+
+   <div class="card">
+  <div class="header bg-cyan">
+    <h2>
+      Duty SAC Details -
+      <i>
+        <span style="cursor: pointer; color: #fff; font-weight: 400;" (click)="openDutySAC()">
+          Add More
+        </span>
+        <ul class="header-dropdown m-r-10">
+          <li>
+            <a style="color:#fff;padding:15px;position: relative;"  href="javascript:void(0);" (click)="scrollToLinkButton()">Go To Menu</a>
+          </li>
+        </ul>      
+      </i>
+    </h2>
+   
+  </div>
+
+  <div style="background-color: #ffffff;">
+    <div class="responsive_table">
+      <mat-accordion>
+        <mat-expansion-panel [expanded]="panelExpanded" class="p-0 m-0" (opened)="onPanelOpen()" (closed)="onPanelClose()">
+          <mat-expansion-panel-header>
+            <mat-panel-title></mat-panel-title>
+          </mat-expansion-panel-header>
+
+          <ng-container *ngFor="let data of advanceTableSAC; index as i">
+            <!-- SAC Edit link -->
+            <div class="row mt-3" style="margin-left: 5px;">
+              <a style="cursor: pointer; color: #007bff;" (click)="SACEdit(i)">SAC - Edit</a>
+            </div>
+
+            <!-- Table Header -->
+            <div class="panel-row is-header">
+              <div class="panel-cell"><b>SAC Number</b></div>
+              <div class="panel-cell"><b>Reason</b></div>
+              <div class="panel-cell"><b>Date</b></div>
+              <div class="panel-cell"><b>Time</b></div>
+            </div>
+
+            <!-- Table Data -->
+            <div class="panel-row">
+              <div class="panel-cell">{{ data.sacNumber || 'N/A' }}</div>
+              <div class="panel-cell">{{ data.reasonOfChange || 'N/A' }}</div>
+              <div class="panel-cell">{{ (data.changeDateTime | date: 'yyyy-MM-dd') || 'N/A' }}</div>
+              <div class="panel-cell">{{ (data.changeDateTime | date: 'shortTime') || 'N/A' }}</div>
+            </div>
+          </ng-container>
+        </mat-expansion-panel>
+      </mat-accordion>
+    </div>
+  </div>
+</div>
+

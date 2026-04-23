@@ -1,0 +1,153 @@
+.credit-note-history-dialog
+  max-width: 90vw
+  width: 1200px
+  height: 80vh
+
+.dialog-header
+  display: flex
+  justify-content: space-between
+  align-items: center
+  padding: 16px 24px
+  border-bottom: 1px solid #e0e0e0
+
+.dialog-title
+  margin: 0
+  font-weight: 500
+  color: #333
+
+.close-button
+  margin-left: auto
+
+.dialog-content
+  padding: 16px 24px
+  max-height: calc(80vh - 120px)
+  overflow: auto
+
+.filter-section
+  margin-bottom: 16px
+
+.filter-card
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1)
+
+.full-width
+  width: 100%
+
+.table-section
+  margin-top: 16px
+
+.full-width-table
+  width: 100%
+
+.action-cell,
+.date-cell,
+.user-cell
+  display: flex
+  align-items: center
+  gap: 8px
+
+.action-icon,
+.date-icon,
+.user-icon
+  font-size: 16px
+  color: #666
+
+.comments-cell
+  max-width: 200px
+  overflow: hidden
+  text-overflow: ellipsis
+  white-space: nowrap
+
+.status-badge
+  padding: 4px 8px
+  border-radius: 12px
+  font-size: 11px
+  font-weight: 500
+  text-transform: uppercase
+  letter-spacing: 0.5px
+
+.badge-secondary
+  background-color: #6c757d
+  color: white
+
+.badge-warning
+  background-color: #ffc107
+  color: #212529
+
+.badge-success
+  background-color: #28a745
+  color: white
+
+.badge-danger
+  background-color: #dc3545
+  color: white
+
+.badge-info
+  background-color: #17a2b8
+  color: white
+
+.badge-primary
+  background-color: #007bff
+  color: white
+
+.badge-dark
+  background-color: #343a40
+  color: white
+
+.badge-light
+  background-color: #f8f9fa
+  color: #212529
+  border: 1px solid #dee2e6
+
+.table-row
+  transition: background-color 0.2s ease
+
+.table-row:hover
+  background-color: #f5f5f5
+
+.highlight-row
+  background-color: #e3f2fd !important
+
+.no-data-container
+  text-align: center
+  padding: 40px 20px
+  color: #666
+
+.no-data-icon
+  font-size: 48px
+  color: #ccc
+  margin-bottom: 16px
+
+.text-muted
+  color: #6c757d
+
+.dialog-actions
+  padding: 16px 24px
+  border-top: 1px solid #e0e0e0
+  display: flex
+  justify-content: flex-end
+  gap: 12px
+
+.dialog-actions button
+  min-width: 100px
+
+.row
+  display: flex
+  flex-wrap: wrap
+  margin: 0 -8px
+
+.col-md-6
+  flex: 0 0 50%
+  max-width: 50%
+  padding: 0 8px
+
+@media (max-width: 768px)
+  .col-md-6
+    flex: 0 0 100%
+    max-width: 100%
+
+  .credit-note-history-dialog
+    width: 95vw
+    height: 90vh
+
+  .dialog-content
+    max-height: calc(90vh - 120px)

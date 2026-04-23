@@ -1,0 +1,256 @@
+<div class="addContainer">
+    <div class="modalHeader">
+        <div class="editRowModal">
+            <div class="modalHeader clearfix">
+                <!-- <img [src]='advanceTable.img' alt="avatar"> -->
+                <div class="modal-about">
+                    <div class="font-weight-bold p-t-5 font-17">
+                        {{dialogTitle}}</div>
+                </div>
+            </div>
+        </div>
+        <button mat-icon-button (click)="dialogRef.close()" aria-label="Close dialog">
+      <mat-icon>close</mat-icon>
+    </button>
+    </div>
+    <div mat-dialog-content>
+        <form class="register-form m-4" [formGroup]="advanceTableForm" (ngSubmit)="submit">
+            <div class="row">
+                <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                    <mat-form-field class="example-full-width" appearance="outline"  floatLabel="always">
+                        <mat-label>City</mat-label>
+                        <input readonly matInput>
+                        <!-- <mat-error *ngIf="advanceTableForm.get('department').hasError('required')">
+                            Department is required
+                        </mat-error> -->
+                    </mat-form-field>
+                </div>
+
+                <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                    <mat-form-field class="example-full-width" appearance="outline"  floatLabel="always">
+                        <mat-label>Car</mat-label>
+                        <input readonly matInput>
+                        <!-- <mat-error *ngIf="advanceTableForm.get('department').hasError('required')">
+                            Department is required
+                        </mat-error> -->
+                    </mat-form-field>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                    <mat-form-field class="example-full-width" appearance="outline"  floatLabel="always">
+                        <mat-label>Duty Type</mat-label>
+                        <input readonly matInput>
+                        <!-- <mat-error *ngIf="advanceTableForm.get('department').hasError('required')">
+                            Department is required
+                        </mat-error> -->
+                    </mat-form-field>
+                </div>
+
+                <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                    <mat-form-field class="example-full-width" appearance="outline"  floatLabel="always">
+                        <mat-label>Package</mat-label>
+                        <input readonly matInput>
+                        <!-- <mat-error *ngIf="advanceTableForm.get('department').hasError('required')">
+                            Department is required
+                        </mat-error> -->
+                    </mat-form-field>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                    <mat-form-field class="example-full-width" appearance="outline"  floatLabel="always">
+                        <mat-label>Base Fare</mat-label>
+                        <input matInput>
+                        <!-- <mat-error *ngIf="advanceTableForm.get('department').hasError('required')">
+                            Department is required
+                        </mat-error> -->
+                    </mat-form-field>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                    <mat-form-field class="example-full-width" appearance="outline"  floatLabel="always">
+                        <mat-label>Package KM</mat-label>
+                        <input matInput>
+                        <!-- <mat-error *ngIf="advanceTableForm.get('department').hasError('required')">
+                            Department is required
+                        </mat-error> -->
+                    </mat-form-field>
+                </div>
+
+                <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                    <mat-form-field class="example-full-width" appearance="outline"  floatLabel="always">
+                        <mat-label>Extra KM Rate</mat-label>
+                        <input matInput>
+                        <!-- <mat-error *ngIf="advanceTableForm.get('department').hasError('required')">
+                            Department is required
+                        </mat-error> -->
+                    </mat-form-field>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                    <mat-form-field class="example-full-width" appearance="outline"  floatLabel="always">
+                        <mat-label>Package HR</mat-label>
+                        <input matInput>
+                        <!-- <mat-error *ngIf="advanceTableForm.get('department').hasError('required')">
+                            Department is required
+                        </mat-error> -->
+                    </mat-form-field>
+                </div>
+
+                <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                    <mat-form-field class="example-full-width" appearance="outline"  floatLabel="always">
+                        <mat-label>Extra Hour Rate</mat-label>
+                        <input matInput>
+                        <!-- <mat-error *ngIf="advanceTableForm.get('department').hasError('required')">
+                            Department is required
+                        </mat-error> -->
+                    </mat-form-field>
+                </div>
+            </div>
+
+
+            <div class="row">
+                <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                    <mat-form-field class="example-full-width" appearance="outline"  floatLabel="always">
+                        <mat-label>Night Charges</mat-label>
+                        <input matInput>
+                        <!-- <mat-error *ngIf="advanceTableForm.get('department').hasError('required')">
+                            Department is required
+                        </mat-error> -->
+                    </mat-form-field>
+                </div>
+            </div>  
+            
+            <div class="row">
+                <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                    <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                        <mat-label>Night Charge Start Time</mat-label>
+                        <input required matInput [owlDateTimeTrigger]="time1" [owlDateTime]="time1">
+                        <button mat-icon-button matSuffix type="button" [owlDateTimeTrigger]="time1" class="date-icon" aria-label="Open time picker"><mat-icon>schedule</mat-icon></button>
+                        <owl-date-time [pickerType]="'timer'" #time1></owl-date-time>
+
+                        <!-- <mat-error *ngIf="advanceTableForm.get('nightChargesStartTime').hasError('required')">
+                            Night Charge Start Time is required
+                        </mat-error> -->
+                    </mat-form-field>
+                </div>
+
+                <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                    <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                        <mat-label>Night Charge End Time</mat-label>
+                        <input required matInput [owlDateTimeTrigger]="time2" [owlDateTime]="time2">
+                        <button mat-icon-button matSuffix type="button" [owlDateTimeTrigger]="time2" class="date-icon" aria-label="Open time picker"><mat-icon>schedule</mat-icon></button>
+                        <owl-date-time [pickerType]="'timer'" #time2></owl-date-time>
+
+                        <!-- <mat-error *ngIf="advanceTableForm.get('nightChargesEndTime').hasError('required')">
+                            Night Charge End Time is required
+                        </mat-error> -->
+                    </mat-form-field>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                    <mat-form-field class="example-full-width" appearance="outline"  floatLabel="always">
+                        <mat-label>Driver Allowance</mat-label>
+                        <input matInput>
+                        <!-- <mat-error *ngIf="advanceTableForm.get('department').hasError('required')">
+                            Department is required
+                        </mat-error> -->
+                    </mat-form-field>
+                </div>
+
+                <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                    <mat-form-field class="example-full-width" appearance="outline"  floatLabel="always">
+                        <mat-label>Driver Allowance Based On</mat-label>
+                        <input matInput>
+                        <!-- <mat-error *ngIf="advanceTableForm.get('department').hasError('required')">
+                            Department is required
+                        </mat-error> -->
+                    </mat-form-field>
+                </div>
+            </div>
+            
+            <div class="row">
+                <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                    <mat-form-field class="example-full-width" appearance="outline"  floatLabel="always">
+                        <mat-label>Billing From</mat-label>
+                        <input matInput>
+                        <!-- <mat-error *ngIf="advanceTableForm.get('department').hasError('required')">
+                            Department is required
+                        </mat-error> -->
+                    </mat-form-field>
+                </div>
+
+                <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                    <mat-form-field class="example-full-width" appearance="outline"  floatLabel="always">
+                        <mat-label>Billing To</mat-label>
+                        <input matInput>
+                        <!-- <mat-error *ngIf="advanceTableForm.get('department').hasError('required')">
+                            Department is required
+                        </mat-error> -->
+                    </mat-form-field>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                    <mat-form-field class="example-full-width" appearance="outline"  floatLabel="always">
+                        <mat-label>Parking Charges</mat-label>
+                        <input matInput>
+                        <!-- <mat-error *ngIf="advanceTableForm.get('department').hasError('required')">
+                            Department is required
+                        </mat-error> -->
+                    </mat-form-field>
+                </div>
+
+                <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                    <mat-form-field class="example-full-width" appearance="outline"  floatLabel="always">
+                        <mat-label>Toll Charges</mat-label>
+                        <input matInput>
+                        <!-- <mat-error *ngIf="advanceTableForm.get('department').hasError('required')">
+                            Department is required
+                        </mat-error> -->
+                    </mat-form-field>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                    <mat-form-field class="example-full-width" appearance="outline"  floatLabel="always">
+                        <mat-label>Interstate Charges</mat-label>
+                        <input matInput>
+                        <!-- <mat-error *ngIf="advanceTableForm.get('department').hasError('required')">
+                            Department is required
+                        </mat-error> -->
+                    </mat-form-field>
+                </div>
+
+                <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                    <mat-form-field class="example-full-width" appearance="outline"  floatLabel="always">
+                        <mat-label>Airport Fee</mat-label>
+                        <input matInput>
+                        <!-- <mat-error *ngIf="advanceTableForm.get('department').hasError('required')">
+                            Department is required
+                        </mat-error> -->
+                    </mat-form-field>
+                </div>
+            </div>
+          
+            <div class="row">
+                <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12 mb-2">
+                    <div class="example-button-row">
+                        <button mat-raised-button color="primary" [type]="submit" (click)="confirmAdd()">Save</button>
+                        <button mat-raised-button color="warn" (click)="onNoClick()" tabindex="-1">Cancel</button>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>

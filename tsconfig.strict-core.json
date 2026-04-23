@@ -1,0 +1,23 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "strict": true,
+    "noImplicitReturns": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "strictPropertyInitialization": false,
+    "noEmit": true,
+    "types": []
+  },
+  "include": [
+    "src/environments/*.ts",
+    "src/app/core/config/**/*.ts",
+    "src/app/core/error/**/*.ts",
+    "src/app/core/service/runtime-config.service.ts",
+    "src/app/core/service/window.service.ts",
+    "src/app/core/guard/module-import.guard.ts",
+    "src/app/core/guard/auth.guard.ts",
+    "src/app/core/interceptor/error.interceptor.ts",
+    "src/app/core/models/user.ts"
+  ]
+}

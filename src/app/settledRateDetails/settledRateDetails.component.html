@@ -1,0 +1,210 @@
+<div *ngFor="let data of advanceTableSRD;index as i">
+<div class="row" style="margin-left: 20px;margin-top: 20px;">
+    <!-- <a style="cursor: pointer;color: #007bff;" (click)="editSettledRate(i)">
+        Settled Rate {{i+1}} - Edit - Delete</a> -->
+        <a style="cursor: pointer; color: #007bff;">
+            Settled Rate {{i + 1}} -
+            <span style="cursor: pointer; color: #007bff;" (click)="editSettledRate(i)">Edit</span> -
+            <span style="cursor: pointer; color: #007bff;" (click)="deleteItem(i)">Delete</span>
+        </a>
+</div>
+<div class="row" style="margin-left: 20px;margin-top: 20px;">
+    <div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 mb-2">
+        <span>
+            <b>
+                City
+            </b>                   
+        </span>
+        <br/>
+        <span>{{data.city}}</span>
+    </div>
+
+    <div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 mb-2">
+        <span>
+            <b>
+                Car
+            </b>                   
+        </span>
+        <br/>
+        <span>{{data.vehicleCategory}}</span>
+    </div>
+
+    <div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 mb-2">
+        <span>
+            <b>
+                Duty Type
+            </b>                   
+        </span>
+        <br/>
+        <span>{{data.packageType}}</span>
+    </div>
+
+    <div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 mb-2">
+        <span>
+            <b>
+                Package
+            </b>                   
+        </span>
+        <br/>
+        <span>{{data.package}}</span>
+    </div>
+</div>
+
+<div class="row" style="margin-left: 20px;margin-top: 20px;">
+    <div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 mb-2">
+        <span>
+            <b>
+                Base Fare
+            </b>                   
+        </span>
+        <br/>
+        <span>{{data.baseFare}}</span>
+    </div>
+
+    <div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 mb-2">
+        <span>
+            <b>
+                Package KM
+            </b>                   
+        </span>
+        <br/>
+        <span>{{data.packageKM}}</span>
+    </div>
+
+    <div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 mb-2">
+        <span>
+            <b>
+                Extra KM Rate
+            </b>                   
+        </span>
+        <br/>
+        <span>{{data.extraKMRate}}</span>
+    </div>
+
+    <div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 mb-2">
+        <span>
+            <b>
+                Package Minute
+            </b>                   
+        </span>
+        <br/>
+        <span>{{data.packageHour}}</span>
+    </div>
+</div>
+
+<div class="row" style="margin-left: 20px;margin-top: 20px;">
+    <div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 mb-2">
+        <span>
+            <b>
+                Night Charges
+            </b>                   
+        </span>
+        <br/>
+        <span>{{data.nightCharges}}</span>
+    </div>
+
+    <div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 mb-2">
+        <span>
+            <b>
+                Night Charge Start Time
+            </b>                   
+        </span>
+        <br/>
+        <span>{{data.nightChargeStartTime | date:'shortTime'}}</span>
+    </div>
+
+    <div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 mb-2">
+        <span>
+            <b>
+                Night Charge End Time
+            </b>                   
+        </span>
+        <br/>
+        <span>{{data.nightChargeEndTime | date:'shortTime'}}</span>
+    </div>
+
+    <div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 mb-2">
+        <span>
+            <b>
+                Driver Allowance
+            </b>                   
+        </span>
+        <br/>
+        <span>{{data.driverAllowance}}</span>
+    </div>
+</div>
+
+<div class="row" style="margin-left: 20px;margin-top: 20px;">
+    <div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 mb-2">
+        <span>
+            <b>
+                Billing From
+            </b>                   
+        </span>
+        <br/>
+        <span>{{data.billingFrom}}</span>
+    </div>
+
+    <div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 mb-2">
+        <span>
+            <b>
+                Billing To
+            </b>                   
+        </span>
+        <br/>
+        <span>{{data.billingTo}}</span>
+    </div>
+
+    <div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 mb-2">
+        <span>
+            <b>
+                Parking Charges
+            </b>                   
+        </span>
+        <br/>
+        <span>{{data.parkingCharges===true?'Yes':'No'}}</span>
+    </div>
+
+    <div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 mb-2">
+        <span>
+            <b>
+                Toll Charges
+            </b>                   
+        </span>
+        <br/>
+        <span>{{data.tollCharges===true?'Yes':'No'}}</span>
+    </div>
+</div>
+
+<div class="row" style="margin-left: 20px;margin-top: 20px;">
+    <div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 mb-2">
+        <span>
+            <b>
+                Interstate Charges
+            </b>                   
+        </span>
+        <br/>
+        <span>{{data.interstateCharges===true?'Yes':'No'}}</span>
+    </div>
+
+    <div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 mb-2">
+        <span>
+            <b>
+                Airport Fee
+            </b>                   
+        </span>
+        <br/>
+        <span>{{data.airportFee===true?'Yes':'No'}}</span>
+    </div>
+
+    <div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 mb-2" *ngIf="PackageType === 'Outstation Round Trip'">
+        <span>
+            <b>
+                Next Day Charging
+            </b>                   
+        </span>
+        <br/>
+        <span>{{data.nextDayCharging}}</span>
+    </div>
+</div>
+</div>

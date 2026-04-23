@@ -1,0 +1,127 @@
+<ng-container *ngFor="let instrucationDetail of advanceTableSI;index as i">
+
+<div class="row" style="margin-left: 20px;margin-top: 20px;">
+            <!-- <a style="cursor: pointer;color: #007bff;" (click)="specialInstrucationEdit(instrucationDetail)">
+                Special Instruction  - Edit - Delete</a> -->
+                <a style="cursor: pointer; color: #007bff;">
+                    Special Instruction {{i + 1}} -
+                    <span style="cursor: pointer; color: #007bff;" (click)="specialInstrucationEdit(i)">Edit</span> -
+                    <span style="cursor: pointer; color: #007bff;" (click)="deleteItem(i)">Delete</span>
+                </a>
+        </div>
+
+        <div class="row" style="margin-left: 20px;margin-top: 20px;">
+            <div class="col-xl-4 col-lg-6 col-md-12 col-sm-12 mb-2">
+                <span>
+                    <b>
+                        Special Instruction
+                    </b>                   
+                </span>
+                <br/>
+            <span>{{instrucationDetail.specialInstruction}}</span>
+            </div>
+
+            <div class="col-xl-4 col-lg-6 col-md-12 col-sm-12 mb-2">
+                <span>
+                    <b>
+                        Special Instruction By
+                    </b>                   
+                </span>
+                <br/>
+                <span>{{instrucationDetail.specialInstructionBy}}</span>
+            </div>
+            
+            <div class="col-xl-4 col-lg-6 col-md-12 col-sm-12 mb-2">
+                <span>
+                    <b>
+                        Attachment
+                    </b>                   
+                </span>
+                <br/>
+                <span>
+                    <a href="{{instrucationDetail.specialInstructionAttachment}}" target="_blank" style="cursor: pointer;color: #007bff;">
+                    <!-- View -->
+                    <img [src]="instrucationDetail.specialInstructionAttachment" style="max-width: 70px; max-height: 70px;" />
+                    </a>
+                </span>
+            </div>  
+        </div>
+
+        <!-- <div class="row" style="margin-left: 20px;margin-top: 20px;">
+            <a style="cursor: pointer;color: #007bff;"(click)="specialInstrucationEdit(instrucationDetail)">
+                Special Instruction 2 - Edit - Delete</a>
+        </div> -->
+
+        <!-- <div class="row" style="margin-left: 20px;margin-top: 20px;">
+            <div class="col-xl-4 col-lg-6 col-md-12 col-sm-12 mb-2">
+                <span>
+                    <b>
+                        Special Instruction
+                    </b>                   
+                </span>
+                <br/>
+                <span>{{instrucationDetail.specialInstruction}}</span>
+            </div>
+
+            <div class="col-xl-4 col-lg-6 col-md-12 col-sm-12 mb-2">
+                <span>
+                    <b>
+                        Special Instruction By
+                    </b>                   
+                </span>
+                <br/>
+                <span>{{instrucationDetail.specialInstructionBy}}</span>
+            </div>
+
+            <div class="col-xl-4 col-lg-6 col-md-12 col-sm-12 mb-2">
+                <span>
+                    <b>
+                        Attachment
+                    </b>                   
+                </span>
+                <br/>
+                <span><a href="{{instrucationDetail.specialInstructionAttachment}}" target="_blank" style="cursor: pointer;color: #007bff;">
+                    View</a></span>
+            </div>  
+            
+        </div> -->
+
+        <!-- <div class="row" style="margin-left: 20px;margin-top: 20px;">
+            <a style="cursor: pointer;color: #007bff;">
+                Special Instruction 3 - Edit - Delete</a>
+        </div> -->
+
+        <!-- <div class="row" style="margin-left: 20px;margin-top: 20px;">
+            <div class="col-xl-4 col-lg-6 col-md-12 col-sm-12 mb-2">
+                <span>
+                    <b>
+                        Special Instruction
+                    </b>                   
+                </span>
+                <br/>
+                <span>Bring Pen And Paper</span>
+            </div>
+
+            <div class="col-xl-4 col-lg-6 col-md-12 col-sm-12 mb-2">
+                <span>
+                    <b>
+                        Special Instruction By
+                    </b>                   
+                </span>
+                <br/>
+                <span>3001 - Arun Kumar</span>
+            </div>
+
+            <div class="col-xl-4 col-lg-6 col-md-12 col-sm-12 mb-2">
+                <span>
+                    <b>
+                        Attachment
+                    </b>                   
+                </span>
+                <br/>
+                <span>View</span>
+            </div>
+            
+        </div> -->
+
+    </ng-container>

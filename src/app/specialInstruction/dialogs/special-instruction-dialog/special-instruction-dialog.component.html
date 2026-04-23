@@ -1,0 +1,66 @@
+<div class="si-dialog">
+    <div class="si-dialog__header">
+        <div>
+            <h2 class="si-dialog__title">{{ dialogTitle }}</h2>
+            <span class="si-dialog__status" *ngIf="status && status !== 'Changes allow'">
+                ({{ status }}!!!!!)
+            </span>
+        </div>
+        <button mat-icon-button (click)="dialogRef.close()" aria-label="Close dialog">
+            <mat-icon>close</mat-icon>
+        </button>
+    </div>
+
+    <div mat-dialog-content class="si-dialog__body">
+        <form class="register-form" [formGroup]="advanceTableForm" (ngSubmit)="submit()">
+            <div class="si-dialog__row">
+                <mat-form-field class="si-dialog__field" appearance="outline" floatLabel="always">
+                    <mat-label>Special Instruction</mat-label>
+                    <input required matInput formControlName="specialInstruction" placeholder="Enter special instruction">
+                    <mat-error *ngIf="advanceTableForm.get('specialInstruction').hasError('required')">
+                        Special Instruction is required
+                    </mat-error>
+                </mat-form-field>
+            </div>
+
+            <div class="si-dialog__row">
+                <mat-form-field class="si-dialog__field" appearance="outline" floatLabel="always">
+                    <mat-label>Special Instruction By</mat-label>
+                    <input required matInput formControlName="specialInstructionBy" placeholder="Enter instruction by">
+                    <mat-error *ngIf="advanceTableForm.get('specialInstructionBy').hasError('required')">
+                        Special Instruction By is required
+                    </mat-error>
+                </mat-form-field>
+            </div>
+
+            <div class="si-dialog__row">
+                <label class="si-dialog__section-label">Attachment</label>
+                <a href="{{ ImagePath }}" target="_blank" *ngIf="ImagePath" class="si-dialog__attachment-preview">
+                    <img [src]="ImagePath" alt="attachment preview">
+                </a>
+                <app-myupload (onUploadFinished)="uploadFinished($event)"></app-myupload>
+            </div>
+
+            <div class="si-dialog__row">
+                <mat-form-field class="si-dialog__field" appearance="outline">
+                    <mat-label>Activation Status</mat-label>
+                    <mat-select formControlName="activationStatus">
+                        <mat-option [value]="true">Active</mat-option>
+                        <mat-option [value]="false">Deleted</mat-option>
+                    </mat-select>
+                </mat-form-field>
+            </div>
+        </form>
+    </div>
+
+    <div mat-dialog-actions class="si-dialog__actions">
+        <button mat-raised-button color="warn" (click)="onNoClick()" tabindex="-1">Cancel</button>
+        <mat-spinner *ngIf="!saveDisabled" diameter="28"></mat-spinner>
+        <button mat-raised-button color="primary" *ngIf="saveDisabled"
+                [disabled]="!advanceTableForm.valid || buttonDisabled"
+                type="button"
+                (click)="confirmAdd()">
+            {{ action === 'edit' ? 'Update' : 'Save' }}
+        </button>
+    </div>
+</div>

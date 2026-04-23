@@ -1,0 +1,159 @@
+<div class="addContainer">
+    <div class="modalHeader">
+        <div class="editRowModal">
+            <div class="modalHeader clearfix">
+                <!-- <img [src]='advanceTable.img' alt="avatar"> -->
+                <div class="modal-about">
+                    <div class="font-weight-bold p-t-5 font-17">
+                        {{dialogTitle}}</div>
+                      
+                </div>
+            </div>
+        </div>
+        <button mat-icon-button (click)="dialogRef.close()" aria-label="Close dialog">
+      <mat-icon>close</mat-icon>
+    </button>
+    </div>
+    
+    <div mat-dialog-content>
+        <form class="register-form m-4" [formGroup]="advanceTableForm" (ngSubmit)="submit">
+            <div class="row">
+                <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                    <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                        <mat-label>Duty Slip Number</mat-label>
+                        <input matInput formControlName="dutySlipID" readonly>
+                       
+
+                    </mat-form-field>
+                </div>  
+                
+                <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                    <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                        <mat-label>Allotment Number</mat-label>
+                        <input matInput formControlName="allotmentID" readonly>
+                    </mat-form-field>
+                </div>  
+                
+            </div>
+            <div class="row">
+                <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                    <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                        <mat-label>Reservation Number</mat-label>
+                        <input matInput formControlName="reservationID" readonly>
+                       
+
+                    </mat-form-field>
+                </div>  
+                
+                <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                    <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                        <mat-label>Driver</mat-label>
+                        <input matInput formControlName="driverName" readonly>
+                    </mat-form-field>
+                </div>  
+                
+            </div>
+            <div class="row">
+                <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                    <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                        <mat-label> Car Registration Number</mat-label>
+                        <input matInput formControlName="registrationNumber" >
+                       
+
+                    </mat-form-field>
+                </div>  
+<!--                 
+                <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                    <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                        <mat-label>Passenger Name</mat-label>
+                        <input matInput formControlName="passengerID" >
+                    </mat-form-field>
+                </div>   -->
+                <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                 
+
+                    <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                        <mat-label>Passenger Name</mat-label>
+                        <input type="text" matInput [formControl]="searchEmployee" [matAutocomplete]="auto">
+                        <mat-autocomplete #auto="matAutocomplete">
+                          <mat-option *ngFor="let option of filteredEmployeeOptions | async" 
+                          [value]="option.firstName+' '+ option.lastName" (click)="getTitles(option.employeeID)">
+                            {{option.firstName +' ' + option.lastName}}
+                          </mat-option>
+                        </mat-autocomplete>
+                      </mat-form-field>
+                </div>
+                
+            </div>
+            <div class="row">
+                <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                    <mat-form-field class="example-full-width" appearance="outline"  floatLabel="always">
+                        <mat-label>Date Of FeedBack Received</mat-label>
+                        <input  matInput [matDatepicker]="dateOfFeedback" formControlName="dateOfFeedback">
+                        <mat-datepicker-toggle matSuffix [for]="dateOfFeedback"></mat-datepicker-toggle>
+                        <mat-datepicker #dateOfFeedback></mat-datepicker>
+                       
+                    </mat-form-field>
+
+                </div>
+                <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                    <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                        <mat-label>Time Of FeedBack Received</mat-label>
+                        <input required matInput [owlDateTimeTrigger]="time1" [owlDateTime]="time1" formControlName="timeOfFeedback">
+                        <button mat-icon-button matSuffix type="button" [owlDateTimeTrigger]="time1" class="date-icon" aria-label="Open time picker"><mat-icon>schedule</mat-icon></button>
+                        <owl-date-time [pickerType]="'timer'" #time1></owl-date-time>
+
+                        
+                    </mat-form-field>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                    <mat-form-field class="example-full-width" appearance="outline"  floatLabel="always">
+                        <mat-label>FeedBack Points</mat-label>
+                        <mat-select formControlName="feedbackPointsOutOfFive">
+                            <mat-option value="1">1</mat-option> 
+                            <mat-option value="2">2</mat-option>
+                            <mat-option value="3">3</mat-option>
+                            <mat-option value="4">4</mat-option>
+                            <mat-option value="5">5</mat-option>
+                        </mat-select>
+
+                   
+                    </mat-form-field>
+                </div>
+                <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                    <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                        <mat-label>FeedBack Remark</mat-label>
+                        <input matInput formControlName="feedbackRemark" >
+                    </mat-form-field>
+                </div>  
+            </div>
+            <div class="row">
+                
+                <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                    <mat-form-field class="example-full-width" appearance="outline"  floatLabel="always">
+                        <mat-label>Activation Status</mat-label>
+                        <mat-select formControlName="activationStatus">
+                            <mat-option [value]=true>Active</mat-option>
+                            <mat-option [value]=false>Deleted</mat-option>
+                        </mat-select>
+
+                        <mat-error *ngIf="advanceTableForm.get('activationStatus').hasError('required')">
+                            Activation Status is required
+                        </mat-error>
+                    </mat-form-field>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12 mb-2">
+                    <div class="example-button-row">
+                        <button mat-raised-button color="primary" [type]="submit" [disabled]="!advanceTableForm.valid" (click)="confirmAdd()">Save</button>
+                        <button mat-raised-button color="warn" (click)="onNoClick()" tabindex="-1">Reset</button>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>

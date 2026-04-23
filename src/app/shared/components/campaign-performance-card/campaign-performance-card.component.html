@@ -1,0 +1,95 @@
+<div class="campaign-performance-container">
+  <mat-card>
+    <div class="card-header">
+      <h2>{{ title }}</h2>
+      <div class="card-actions">
+        <button mat-icon-button [matMenuTriggerFor]="menu">
+          <mat-icon>more_vert</mat-icon>
+        </button>
+        <mat-menu #menu="matMenu">
+          <button mat-menu-item>
+            <mat-icon>refresh</mat-icon>
+            <span>Refresh</span>
+          </button>
+          <button mat-menu-item>
+            <mat-icon>file_download</mat-icon>
+            <span>Export</span>
+          </button>
+        </mat-menu>
+      </div>
+    </div>
+    <ng-scrollbar style="height: 460px" visibility="hover">
+      @if (campaigns && campaigns.length > 0) {
+        <div class="campaigns-list">
+          @for (campaign of campaigns; track campaign) {
+            <div class="campaign-item">
+              <div class="campaign-header">
+                <div class="campaign-info">
+                  <div class="platform-icon">
+                    <mat-icon>{{ getPlatformIcon(campaign.platform) }}</mat-icon>
+                  </div>
+                  <div class="campaign-details">
+                    <h3>{{ campaign.name }}</h3>
+                    <span class="platform">{{ campaign.platform }}</span>
+                  </div>
+                </div>
+                <div class="campaign-status">
+                  <span class="status-badge" [ngClass]="getStatusClass(campaign.status)">
+                    {{ campaign.status | titlecase }}
+                  </span>
+                </div>
+              </div>
+              <div class="budget-progress">
+                <div class="progress-info">
+                  <span>Budget: {{ formatCurrency(campaign.spent) }} / {{ formatCurrency(campaign.budget) }}</span>
+                  <span>{{ getSpentPercentage(campaign.budget, campaign.spent) | number:'1.0-0' }}%</span>
+                </div>
+                <mat-progress-bar mode="determinate"
+                [value]="getSpentPercentage(campaign.budget, campaign.spent)"></mat-progress-bar>
+              </div>
+              <div class="campaign-metrics">
+                <div class="metric">
+                  <div class="label">Impressions</div>
+                  <div class="value">{{ formatNumber(campaign.impressions) }}</div>
+                </div>
+                <div class="metric">
+                  <div class="label">Clicks</div>
+                  <div class="value">{{ formatNumber(campaign.clicks) }}</div>
+                </div>
+                <div class="metric">
+                  <div class="label">Conversions</div>
+                  <div class="value">{{ formatNumber(campaign.conversions) }}</div>
+                </div>
+              </div>
+              <div class="campaign-rates">
+                <div class="rate">
+                  <div class="label">CTR</div>
+                  <div class="value">{{ formatPercentage(getClickThroughRate(campaign.impressions, campaign.clicks)) }}
+                  </div>
+                </div>
+                <div class="rate">
+                  <div class="label">Conv. Rate</div>
+                  <div class="value">{{ formatPercentage(getConversionRate(campaign.clicks, campaign.conversions)) }}</div>
+                </div>
+                <div class="rate">
+                  <div class="label">CPC</div>
+                  <div class="value">{{ formatCurrency(getCostPerClick(campaign.spent, campaign.clicks)) }}</div>
+                </div>
+                <div class="rate">
+                  <div class="label">CPA</div>
+                  <div class="value">{{ formatCurrency(getCostPerConversion(campaign.spent, campaign.conversions)) }}</div>
+                </div>
+              </div>
+            </div>
+          }
+        </div>
+      }
+    </ng-scrollbar>
+    @if (!campaigns || campaigns.length === 0) {
+      <div class="empty-state">
+        <mat-icon>campaign</mat-icon>
+        <p>No campaign data available</p>
+      </div>
+    }
+  </mat-card>
+</div>

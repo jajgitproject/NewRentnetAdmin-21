@@ -1,0 +1,169 @@
+<div class="addContainer" >
+    <div class="modalHeader">
+        <div class="editRowModal">
+            <div class="modalHeader clearfix">
+                <!-- <img [src]='advanceTable.img' alt="avatar"> -->
+                <div class="modal-about">
+                    <div class="font-weight-bold p-t-5 font-17">
+                        <!-- {{dialogTitle}} -->
+                        Vehicle Assignment
+                    </div>
+                </div>
+            </div>
+        </div>
+        <button mat-icon-button (click)="dialogRef.close()" aria-label="Close dialog">
+            <mat-icon>close</mat-icon>
+        </button>
+    </div>
+    <div mat-dialog-content>     
+        <form class="register-form m-4" [formGroup]="advanceTableForm" (ngSubmit)="submit">
+            <div class="row" >
+                <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                    <span class="TDValueBold"> Booking No. </span> <br>
+                    <span class="TDValue"> 123</span>
+                </div>
+                <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                    <span class="TDValueBold"> Package </span> <br>
+                    <span class="TDValue">4/40 - Local Package</span>
+                </div>
+            </div>
+            <div class="row" >
+                <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                    <span class="TDValueBold"> Car </span> <br>
+                    <span class="TDValue"> Innova Crysta</span>
+                </div>
+                <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                    <span class="TDValueBold"> City </span> <br>
+                    <span class="TDValue">Delhi-Delhi/NCR</span>
+                </div>
+            </div>
+            <div class="row" >
+                <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                    <span class="TDValueBold">Trip Date/Time </span> <br>
+                    <span class="TDValue"> 17:30 22 Dec 2022</span>
+                </div>
+                <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                    <span class="TDValueBold">Assigned Vehicle</span> <br>
+                    <span class="TDValue">Innova Crysta</span>
+                </div>
+            </div>
+            <div class="row" >
+                <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                    <span class="TDValueBold">Registration No. </span> <br>
+                    <span class="TDValue"> DL7CE 4567</span>
+                </div>
+                <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                    <span class="TDValueBold">Chauffeur</span> <br>
+                    <span class="TDValue">Ram Lal</span>
+                </div>
+            </div>
+            <div class="row" >
+                <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                    <span class="TDValueBold">Chauffeur Mobile </span> <br>
+                    <span class="TDValue"> 9847574747</span>
+                </div>
+                <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                    <span class="TDValueBold">Chauffeur Alternate Mobile</span> <br>
+                    <span class="TDValue">9484857575</span>
+                </div>
+            </div>
+        <div class="row">
+            <div class="col-xl-6 col-lg-6 col-md-6 col-sm-6 mb-2">
+                <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                    <mat-label>Vehicle No.</mat-label>
+                    <input  matInput [formControl]="searchBooker" [(ngModel)]="SearchBooker">
+                </mat-form-field>
+            </div>
+
+            <div class="col-xl-6 col-lg-6 col-md-6 col-sm-6 mb-2">
+                <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                    <mat-label>Vehicle</mat-label>
+                    <input  matInput [formControl]="searchPassenger" [(ngModel)]="SearchPassenger">
+                </mat-form-field>
+            </div>
+           
+        </div>
+        <div class="row">
+            <div class="col-xl-6 col-lg-6 col-md-6 col-sm-6 mb-2">
+                <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                    <mat-label>Chauffeur Name</mat-label>
+                    <input  matInput [formControl]="searchBooker" [(ngModel)]="SearchBooker">
+                </mat-form-field>
+            </div>
+
+            <div class="col-xl-6 col-lg-6 col-md-6 col-sm-6 mb-2">
+                <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                    <mat-label>Chauffeur Mobile</mat-label>
+                    <input  matInput [formControl]="searchPassenger" [(ngModel)]="SearchPassenger">
+                </mat-form-field>
+            </div>
+           
+        </div>
+
+        <div class="row">
+            <div class="col-xl-6 col-lg-6 col-md-6 col-sm-6 mb-2">
+                <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                    <mat-label>Chauffeur Alternate Mobile</mat-label>
+                    <input  matInput [formControl]="searchBooker" [(ngModel)]="SearchBooker">
+                </mat-form-field>
+            </div>
+
+            <div class="col-xl-6 col-lg-6 col-md-6 col-sm-6 mb-2">
+                <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                    <mat-label>Chauffeur Email</mat-label>
+                    <input  matInput [formControl]="searchPassenger" [(ngModel)]="SearchPassenger">
+                </mat-form-field>
+            </div>
+           
+        </div>
+
+        <div class="row">
+            <div class="col-xl-6 col-lg-6 col-md-6 col-sm-6 mb-2">
+                <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                    <mat-label>Chauffeur Alternate Mobile</mat-label>
+                    <input  matInput [formControl]="searchBooker" [(ngModel)]="SearchBooker">
+                </mat-form-field>
+            </div>
+
+            <div class="col-xl-6 col-lg-6 col-md-6 col-sm-6 mb-2">
+                <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                    <mat-label>Vendor Trip No.</mat-label>
+                    <input  matInput [formControl]="searchPassenger" [(ngModel)]="SearchPassenger">
+                </mat-form-field>
+            </div>
+           
+        </div>
+
+        <div class="row">
+  
+            <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12 mb-2">
+                <mat-checkbox class="example-margin" [(ngModel)]="indeterminate">Adhoc Vehicle</mat-checkbox>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-xl-6 col-lg-6 col-md-6 col-sm-6 mb-2">
+                <button type="button" class="btn btn-primary">Assign Vehicle & Chauffeur</button>
+            </div>
+
+            <div class="col-xl-3 col-lg-3 col-md-3 col-sm-3 mb-2">
+                <button type="button" class="btn btn-primary">Detach Vehicle</button>
+            </div>
+            <div class="col-xl-3 col-lg-3 col-md-3 col-sm-3 mb-2">
+                <button type="button" class="btn btn-primary">Detach Chauffeur</button>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-xl-6 col-lg-6 col-md-6 col-sm-6 mb-2">
+                <button type="button" class="btn btn-primary">New Chauffeur</button>
+            </div>
+            <div class="col-xl-6 col-lg-6 col-md-6 col-sm-6 mb-2">
+                <button type="button" class="btn btn-primary">New Vehicle</button>
+            </div>
+
+        </div>
+        
+        
+    </form>
+    </div>
+</div>

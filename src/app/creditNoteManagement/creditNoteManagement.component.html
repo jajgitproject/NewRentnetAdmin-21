@@ -1,0 +1,344 @@
+<section class="content">
+    <div class="container-fluid">
+        <div class="block-header">
+            <div class="row">
+                <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+                    <ul>
+                        <li class="breadcrumb-item bcrumb-1">
+                            <a routerLink="/dashboard/main">
+                                <i class="fas fa-home"></i> Home</a>|
+                            <a href="#" onClick="return false;">Admin</a>|
+                            <a href="#" onClick="return false;">List Of Invoice Credit Note Approval</a>
+                        </li>
+                    </ul>
+                    <ul class="breadcrumb breadcrumb-style ">
+                        <li class="breadcrumb-item">
+                            <h2>List Of Invoice Credit Note Approval</h2>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                <div class="card">
+                    <div class="body">
+                        <div class="responsive_table">
+                            <div class="table-responsive">
+                                <div class="materialTableHeader">
+                                    <div class="row">
+                                        <div class="modal fade" id="exampleModalCenter" tabindex="-1" role="dialog">
+                                            <div class="modal-dialog modal-dialog-centered">
+                                                <div class="modal-content">
+                                                    <div class="modal-header">
+                                                        <h5 class="modal-title" id="exampleModalLongTitle">Search Existing Credit Note for Approval</h5>
+                                                        <button type="button" class="close" data-dismiss="modal"
+                                                            aria-label="Close">
+                                                            <span aria-hidden="true">&times;</span>
+                                                        </button>
+                                                    </div>
+                                                    <div class="modal-body">
+                                                        <div class="row">
+                                                            <div class="col-xl-6 col-lg-6 col-md-6 col-sm-6 mb-2">
+                                                                <mat-form-field class="example-full-width"
+                                                                    appearance="outline" floatLabel="always">
+                                                                    <mat-label>Customer Group</mat-label>
+                                                                    <input type="text" matInput [matAutocomplete]="auto"
+                                                                        [formControl]="customerGroup">
+                                                                    <mat-autocomplete #auto
+                                                                        (optionSelected)="onCustomerGroupSelected($event.option.value)">
+                                                                        <mat-option
+                                                                            *ngFor="let options of filteredOptions | async"
+                                                                            [value]="options.customerGroup"
+                                                                            (click)="getGroupID(options.customerGroupID)">
+                                                                            {{options.customerGroup}}
+                                                                        </mat-option>
+                                                                    </mat-autocomplete>
+                                                                </mat-form-field>
+                                                            </div>
+
+                                                            <div class="col-xl-6 col-lg-6 col-md-6 col-sm-6 mb-2">
+                                                                <mat-form-field class="example-full-width"
+                                                                    appearance="outline" floatLabel="always">
+                                                                    <mat-label>Customer Name</mat-label>
+                                                                    <input type="text" matInput
+                                                                        [matAutocomplete]="auto1"
+                                                                        [formControl]="customerName">
+                                                                    <mat-autocomplete #auto1="matAutocomplete">
+                                                                        <mat-option
+                                                                            *ngFor="let option of filteredCustomerOptions | async"
+                                                                            [value]="option.customerName">
+                                                                            {{option.customerName}}
+                                                                        </mat-option>
+                                                                    </mat-autocomplete>
+                                                                </mat-form-field>
+                                                            </div>
+                                                        </div>
+
+                                                        <div class="row">
+                                                            <div class="col-xl-6 col-lg-6 col-md-6 col-sm-6 mb-2">
+                                                                <mat-form-field class="example-full-width"
+                                                                    appearance="outline" floatLabel="always">
+                                                                    <mat-label>Credit Note No.</mat-label>
+                                                                    <input type="text" matInput
+                                                                        [(ngModel)]="SearchCreditNoteNumber">
+                                                                </mat-form-field>
+                                                            </div>
+
+                                                            <div class="col-xl-6 col-lg-6 col-md-6 col-sm-6 mb-2">
+                                                                <mat-form-field class="example-full-width"
+                                                                    appearance="outline" floatLabel="always">
+                                                                    <mat-label>Branch</mat-label>
+                                                                    <input type="text" matInput
+                                                                        [matAutocomplete]="auto2"
+                                                                        [formControl]="SearchBranch">
+                                                                    <mat-autocomplete #auto2="matAutocomplete"
+                                                                        (optionSelected)="OnBranchSelect($event.option.value)">
+                                                                        <mat-option
+                                                                            *ngFor="let options of filteredBranchOptions | async"
+                                                                            [value]="options.organizationalEntityName">
+                                                                            {{options.organizationalEntityName}}
+                                                                        </mat-option>
+                                                                    </mat-autocomplete>
+                                                                </mat-form-field>
+                                                            </div>
+                                                        </div>
+
+                                                        <div class="row">
+                                                            <div class="col-xl-6 col-lg-6 col-md-6 col-sm-6 mb-2">
+                                                                <mat-form-field class="example-full-width"
+                                                                    appearance="outline" floatLabel="always">
+                                                                    <mat-label>Date From</mat-label>
+                                                                    <input matInput [matDatepicker]="startingDate"
+                                                                        [(ngModel)]="SearchFromDate">
+                                                                    <mat-datepicker-toggle matSuffix
+                                                                        [for]="startingDate"></mat-datepicker-toggle>
+                                                                    <mat-datepicker #startingDate></mat-datepicker>
+                                                                </mat-form-field>
+                                                            </div>
+
+                                                            <div class="col-xl-6 col-lg-6 col-md-6 col-sm-6 mb-2">
+                                                                <mat-form-field class="example-full-width"
+                                                                    appearance="outline" floatLabel="always">
+                                                                    <mat-label>Date To</mat-label>
+                                                                    <input matInput [matDatepicker]="endingDate"
+                                                                        [(ngModel)]="SearchToDate">
+                                                                    <mat-datepicker-toggle matSuffix
+                                                                        [for]="endingDate"></mat-datepicker-toggle>
+                                                                    <mat-datepicker #endingDate></mat-datepicker>
+                                                                </mat-form-field>
+                                                            </div>
+                                                        </div>
+
+                                                        <div class="row">
+                                                            <div class="col-xl-6 col-lg-6 col-md-6 col-sm-6 mb-2">
+                                                                <mat-form-field class="example-full-width mb-3"
+                                                                    appearance="outline" floatLabel="always">
+                                                                    <mat-label>Type</mat-label>
+                                                                    <mat-select [(ngModel)]="SearchType">
+                                                                        <mat-option value="Full">Full</mat-option>
+                                                                        <mat-option value="Partial">Partial</mat-option>
+                                                                    </mat-select>
+                                                                </mat-form-field>
+                                                            </div>
+
+                                                            <div class="col-xl-6 col-lg-6 col-md-6 col-sm-6 mb-2">
+                                                                <mat-form-field class="example-full-width"
+                                                                    appearance="outline" floatLabel="always">
+                                                                    <mat-label>Approval Status</mat-label>
+                                                                    <mat-select [(ngModel)]="searchApprovalStatus">
+                                                                        <mat-option
+                                                                            value="Approved">Approved</mat-option>
+                                                                        <mat-option value="Reject">Reject</mat-option>
+                                                                        <mat-option value="Pending">Pending</mat-option>
+                                                                    </mat-select>
+                                                                </mat-form-field>
+                                                            </div>
+                                                        </div>
+
+                                                    </div>
+
+                                                    <div class="modal-footer">
+                                                        <button mat-raised-button color="primary" (click)="SearchData()"
+                                                            data-dismiss="modal">Search</button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div style="width: 70%; float:left;padding-top: 6px;padding-left: 12px;">
+                                            <div class="col-lg-6">
+                                                <div class="form-group">
+                                                    <div class="input-group">
+
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div style="width: 30%; text-align: right;">
+
+                                            <button mat-raised-button color="primary" data-dismiss="modal"
+                                                data-toggle="modal" data-backDrop="false"
+                                                data-target="#exampleModalCenter">
+                                                Search
+                                            </button>
+                                            &nbsp;
+                                            <button mat-mini-fab color="primary" (click)="refresh()">
+                                                <mat-icon class="col-white">refresh</mat-icon>
+                                            </button>
+
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <p *ngIf="!dataSource; then thenBlock2 else elseBlock2">
+                                    This is not rendered
+                                </p>
+
+                                <ng-template #thenBlock2>
+                                    <div class="alert alert-primary"
+                                        style="background-color:#E8E8E8; text-align: center;">
+                                        No Records Found</div>
+                                    <div class="body">
+                                        <div class="example-button-row">
+
+                                            <button mat-raised-button color="primary"
+                                                (click)="PreviousCall()">Previous</button>
+                                            <button mat-raised-button color="primary" (click)="NextCall()">Next</button>
+
+                                        </div>
+                                    </div>
+
+                                </ng-template>
+
+                                <ng-template #elseBlock2>
+                                    <div class="scrollable-table-container">
+
+                                    <div style="width: 100%; overflow-y: hidden;">
+                                        <mat-table #table [dataSource]="dataSource" matSort class="mat-cell floating-header-table"
+                                            (matSortChange)="SortingData($event)">
+                                            <ng-container matColumnDef="check">
+                                                <mat-header-cell *matHeaderCellDef>
+                                                    <mat-checkbox></mat-checkbox></mat-header-cell>
+                                                <mat-cell *matCellDef="let row">
+                                                    <mat-checkbox></mat-checkbox>
+                                                </mat-cell>
+                                            </ng-container>
+                                            
+                                            <ng-container matColumnDef="id">
+                                                <mat-header-cell *matHeaderCellDef mat-sort-header>Id</mat-header-cell>
+                                                <mat-cell *matCellDef="let row">{{row.invoiceCreditNoteID}}</mat-cell>
+                                            </ng-container>
+
+                                             <ng-container matColumnDef="Approval">
+                                                <mat-header-cell *matHeaderCellDef
+                                                    style="width: 80px;">Approval</mat-header-cell>
+                                                <mat-cell *matCellDef="let row">
+                                                    <button mat-raised-button color="primary"
+                                                        (click)="openApprovalForm(row)">
+                                                        Select
+                                                    </button>
+                                                </mat-cell>
+                                            </ng-container>
+
+                                            <ng-container matColumnDef="CreditNoteNumberWithPrefix">
+                                                <mat-header-cell *matHeaderCellDef mat-sort-header>Credit Note Number</mat-header-cell>
+                                                <mat-cell *matCellDef="let row"
+                                                    (contextmenu)="onContextMenu($event, row)">
+                                                    {{row.creditNoteNumberWithPrefix ? row.creditNoteNumberWithPrefix : 'N/A'}}</mat-cell>
+                                            </ng-container>
+
+                                            <ng-container matColumnDef="CustomerName">
+                                                <mat-header-cell *matHeaderCellDef mat-sort-header>Name</mat-header-cell>
+                                                <mat-cell *matCellDef="let row"
+                                                    (contextmenu)="onContextMenu($event, row)">
+                                                    {{row.customerName ? row.customerName : 'N/A'}}</mat-cell>
+                                            </ng-container>
+
+                                            <ng-container matColumnDef="CreditNoteAmount">
+                                                <mat-header-cell *matHeaderCellDef mat-sort-header>Amount</mat-header-cell>
+                                                <mat-cell *matCellDef="let row"
+                                                    (contextmenu)="onContextMenu($event, row)">
+                                                    {{row.creditNoteAmount ? row.creditNoteAmount : 'N/A'}}</mat-cell>
+                                            </ng-container>
+
+                                            <ng-container matColumnDef="DateTimeOfGeneration">
+                                                <mat-header-cell *matHeaderCellDef
+                                                    mat-sort-header>Date</mat-header-cell>
+                                                <mat-cell *matCellDef="let row"
+                                                    (contextmenu)="onContextMenu($event, row)">
+                                                    {{row.dateTimeOfGeneration | date: 'dd-MM-yyyy'}}</mat-cell>
+                                            </ng-container>
+
+                                            <ng-container matColumnDef="InvoiceNumberWithPrefix">
+                                                <mat-header-cell *matHeaderCellDef mat-sort-header>Invoice
+                                                    Number</mat-header-cell>
+                                                <mat-cell *matCellDef="let row"
+                                                    (contextmenu)="onContextMenu($event, row)">
+                                                    {{row.invoiceNumberWithPrefix ? row.invoiceNumberWithPrefix : 'N/A'}}</mat-cell>
+                                            </ng-container>
+
+                                            <ng-container matColumnDef="CreditNoteType">
+                                                <mat-header-cell *matHeaderCellDef mat-sort-header>Note Type</mat-header-cell>
+                                                <mat-cell *matCellDef="let row"
+                                                    (contextmenu)="onContextMenu($event, row)">
+                                                    {{row.creditNoteType ? row.creditNoteType : 'N/A'}}</mat-cell>
+                                            </ng-container>
+                                            <ng-container matColumnDef="ApprovalStatus">
+                                                <mat-header-cell *matHeaderCellDef mat-sort-header>Approval
+                                                    Status</mat-header-cell>
+                                                <mat-cell *matCellDef="let row"
+                                                    (contextmenu)="onContextMenu($event, row)">
+                                                    {{row.approvalStatus ? row.approvalStatus : 'N/A'}}</mat-cell>
+                                            </ng-container>
+
+                                            <!-- actions -->
+                                            <ng-container matColumnDef="unlock">
+                                                <mat-header-cell *matHeaderCellDef class="pr-0"
+                                                    [ngClass]="'tbl-col-width-per-9'">Actions</mat-header-cell>
+                                                <mat-cell *matCellDef="let row; let i=index;" class="pr-0"
+                                                    [ngClass]="'tbl-col-width-per-9'">
+
+                                                </mat-cell>
+                                            </ng-container>
+
+                                            <mat-header-row *matHeaderRowDef="displayedColumns"></mat-header-row>
+                                            <mat-row *matRowDef="let row; columns: displayedColumns;"
+                                                [style.cursor]="'pointer'" matRipple>
+                                            </mat-row>
+                                        </mat-table>
+                                    </div>
+                                    </div>
+
+                                    <!-- context menu start -->
+                                    <div style="visibility: hidden; position: fixed"
+                                        [style.left]="contextMenuPosition.x" [style.top]="contextMenuPosition.y"
+                                        [matMenuTriggerFor]="contextMenu">
+                                    </div>
+                                    <mat-menu #contextMenu="matMenu">
+                                        <ng-template matMenuContent let-item="item">
+
+                                        </ng-template>
+                                    </mat-menu>
+
+                                    <div class="body">
+                                        <div class="example-button-row">
+
+                                            <button mat-raised-button color="primary"
+                                                (click)="PreviousCall()">Previous</button>
+                                            <button mat-raised-button color="primary" (click)="NextCall()">Next</button>
+
+                                        </div>
+                                    </div>
+
+                                </ng-template>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>

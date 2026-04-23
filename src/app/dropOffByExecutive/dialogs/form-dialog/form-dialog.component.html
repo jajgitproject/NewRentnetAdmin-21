@@ -1,0 +1,374 @@
+<div class="addContainer">
+  <div class="modalHeader">
+    <div class="editRowModal">
+      <div class="modalHeader clearfix">
+        <div class="modal-about">
+          <div class="font-weight-bold p-t-5 font-17">
+            {{ dialogTitle }} Dropoff - {{ driverName }} with {{ regno }} For
+            Reservation No: {{ reservationID }} , AllotmentNo:
+            {{ allotmentID }} ,DutySlipID : {{ dutySlipID }},
+            Pickup Date:{{ actualDate | date: 'dd/MM/yyyy' }},
+            Pickup Time:{{ actualTime | date: 'hh:mm a' }}
+          </div>
+          <div *ngIf="!isSaveAllowed" style="color:rgb(150, 4, 4); margin-top:5px; font-style: italic;">
+            ({{ verifyDutyStatusAndCacellationStatus }}!!!!!)
+          </div>
+        </div>
+      </div>
+    </div>
+    <button mat-icon-button (click)="dialogRef.close()" aria-label="Close dialog">
+      <mat-icon>close</mat-icon>
+    </button>
+  </div>
+  <div mat-dialog-content>
+    <form class="register-form m-4" [formGroup]="advanceTableForm" (ngSubmit)="(submit)">
+      <div class="row">
+        <!-- <div class="col-xl-12 col-lg-6 col-md-6 col-sm-12 mb-2">
+          <mat-radio-group formControlName="dropOffEntryMethod" (change)="selectRadioButton($event)"
+            class="d-flex justify-content-between">
+            <mat-radio-button value="Manual" (click)="saveManualData()">Manual</mat-radio-button>
+            <mat-radio-button value="App" (click)="saveAppData()">App</mat-radio-button>
+            <mat-radio-button value="GPS">GPS</mat-radio-button>
+          </mat-radio-group>
+        </div> -->
+      </div>
+      <br />
+      <div class="row">
+        <ng-container *ngIf="tab === 'Manual'">
+          <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+            <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+              <mat-label>Date</mat-label>
+              <input matInput [matDatepicker]="Date" formControlName="dropOffDate" placeholder="DD/MM/YYYY"
+                (blur)="onBlurUpdateDate($event.target.value)" />
+              <mat-datepicker-toggle matSuffix [for]="Date"></mat-datepicker-toggle>
+              <mat-datepicker #Date></mat-datepicker>
+              <mat-error *ngIf="advanceTableForm.get('dropOffDate').hasError('required')">
+                Date is required
+              </mat-error>
+              <!-- <mat-error *ngIf="advanceTableForm.get('dropOffDate')?.hasError('invalidDate')">
+                Invalid date format. Use DD/MM/YYYY.
+              </mat-error> -->
+              <!-- <mat-error *ngIf="advanceTableForm.get('dropOffDate')?.hasError('invalidDate')">
+                Date must be after Pickup Date.
+              </mat-error> -->
+            </mat-form-field>
+            <!-- <div style="text-align: right; margin-top: -10px;">
+                        {{actualDate | date:'dd/MM/yyyy'}}
+                    </div> -->
+
+          </div>
+          <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+            <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+              <mat-label>Time</mat-label>
+              <input required matInput [owlDateTimeTrigger]="time1" [owlDateTime]="time1" (input)="onTimeInput($event)"
+                formControlName="dropOffTime" />
+              <button mat-icon-button matSuffix type="button" [owlDateTimeTrigger]="time1" class="date-icon" aria-label="Open time picker"><mat-icon>schedule</mat-icon></button>
+              <owl-date-time [pickerType]="'timer'" #time1></owl-date-time>
+              <mat-error *ngIf="advanceTableForm.get('dropOffTime').hasError('required')">
+                Time is required
+              </mat-error>
+              <!-- <mat-error *ngIf="advanceTableForm.get('dropOffTime')?.hasError('invalidTime')">
+                Time must be after Pickup Time.
+              </mat-error> -->
+            </mat-form-field>
+            <!-- <div style="text-align: right; margin-top: -10px;">
+                        {{ calculatedDropOffTime | date: 'hh:mm a' }}
+                    </div> -->
+
+          </div>
+          <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+            <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+              <mat-label>Km (ODO)</mat-label>
+              <input required matInput formControlName="dropOffKM" />
+
+              <mat-error *ngIf="advanceTableForm.get('dropOffKM').hasError('required')">
+                Km is required
+              </mat-error>
+              <!-- <mat-error *ngIf="advanceTableForm.get('dropOffKM')?.hasError('invalidKM')">
+                            KM must be greater than Pickup KM.
+                        </mat-error> -->
+            </mat-form-field>
+
+          </div>
+
+          <!-- <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2" *ngIf="ifBlock;else elseBlock">
+            <mat-form-field class="example-full-width"  appearance="outline" floatLabel="always">
+
+                <mat-label>Address</mat-label>
+                <input required type="text" matInput formControlName="dropOffAddressString"
+                    [matAutocomplete]="auto20">
+                <mat-autocomplete #auto20="matAutocomplete">
+                    <mat-option *ngFor="let option of filteredGoogleAddressOptions | async"
+                        [value]="option.geoSearchString"
+                        (click)="bindDropSpotTypeandSpot(option)">
+                        {{option.geoSearchString}}
+                    </mat-option>
+                </mat-autocomplete>
+
+                <mat-hint align="end">
+                    <div style="float: right;">
+
+                        <a style="cursor: pointer;color: #007bff; padding: 10px; font-size: 10px !important; font-style: italic;"
+                            ></a>
+                        <mat-checkbox color="danger" formControlName="googleAddresses"
+                            (change)="valueSwitch()" [(indeterminate)]="indeterminate"
+                            [labelPosition]="labelPosition">Google Addresses</mat-checkbox>
+                    </div>
+                </mat-hint>
+                
+            </mat-form-field>
+
+        </div>
+
+        <ng-template #elseBlock>
+            <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                <mat-form-field class="example-full-width"  appearance="outline" floatLabel="always">
+
+                    <mat-label>Address</mat-label>
+                    <input matInput ngx-google-places-autocomplete [options]='options'
+                        #placesRef="ngx-places" (onAddressChange)="handleAddressChange($event)"
+                        formControlName="dropOffAddressString" required>
+                    
+                    <mat-hint align="end">
+                        <div style="float: right;">
+
+                            <a style="cursor: pointer;color: #007bff;font-size: 10px !important; font-style: italic"
+                                > </a>
+                            <mat-checkbox color="primary" formControlName="googleAddresses"
+                                [(indeterminate)]="indeterminate" [labelPosition]="labelPosition"
+                                (change)="valueSwitch()">Google Addresses</mat-checkbox>
+                        </div>
+                    </mat-hint>
+                    
+                </mat-form-field>
+               
+            </div>
+        </ng-template> -->
+          <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2" *ngIf="ifBlock; else elseBlock">
+            <!-- Address Input with mat-autocomplete -->
+            <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+              <mat-label>Address</mat-label>
+              <input required type="text" matInput formControlName="dropOffAddressString" [matAutocomplete]="auto20"
+                (input)="onDropOffTyping()" (blur)="advanceTableForm.get('dropOffAddressString')?.markAsTouched()" />
+
+              <mat-autocomplete #auto20="matAutocomplete" (optionSelected)="onAddressSelected($event.option.value)">
+                <mat-option *ngFor="let option of filteredGoogleAddressOptions | async" [value]="option.geoSearchString"
+                  (click)="bindDropSpotTypeandSpot(option)">
+                  {{ option.geoSearchString }}
+                </mat-option>
+              </mat-autocomplete>
+
+              <!-- Error message for required field validation -->
+              <!-- Required Error -->
+              <mat-error *ngIf="
+                    advanceTableForm.get('dropOffAddressString')?.hasError('required') &&
+                    advanceTableForm.get('dropOffAddressString')?.touched
+                  ">
+                Address is required
+              </mat-error>
+              <!-- Invalid Address Error -->
+              <mat-error *ngIf="
+                  advanceTableForm.get('dropOffAddressString')?.hasError('invalidAddress') &&
+                  !advanceTableForm.get('dropOffAddressString')?.hasError('required') &&
+                  advanceTableForm.get('dropOffAddressString')?.touched
+                ">
+                Please select address from suggestions
+              </mat-error>
+            </mat-form-field>
+
+            <!-- Google Addresses Checkbox - Always Visible -->
+            <div style="text-align: right; margin-top: -10px;">
+              <mat-checkbox color="primary" formControlName="googleAddresses" (change)="valueSwitch()"
+                [labelPosition]="labelPosition">
+                Google Addresses
+              </mat-checkbox>
+            </div>
+          </div>
+
+          <!-- Google Places Autocomplete Else Block -->
+          <ng-template #elseBlock>
+            <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+              <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                <mat-label>Address</mat-label>
+                <input matInput ngx-google-places-autocomplete [options]="options" #placesRef="ngx-places"
+                  (onAddressChange)="AddressChange($event)" (input)="onDropOffTyping()"
+                  formControlName="dropOffAddressString" required />
+
+                <mat-error *ngIf="
+                  advanceTableForm.get('dropOffAddressString')?.invalid &&
+                  advanceTableForm.get('dropOffAddressString')?.touched
+                  ">
+
+                  <span *ngIf="advanceTableForm.get('dropOffAddressString')?.hasError('required')">
+                    Please select an Address
+                  </span>
+
+                  <span *ngIf="advanceTableForm.get('dropOffAddressString')?.hasError('invalidAddress')">
+                    Please select address from suggestions
+                  </span>
+
+                </mat-error>
+
+              </mat-form-field>
+
+              <!-- Google Addresses Checkbox - Always Visible -->
+              <div style="text-align: right; margin-top: -10px;">
+                <mat-checkbox color="primary" formControlName="googleAddresses" (change)="valueSwitch()"
+                  [labelPosition]="labelPosition">
+                  Google Addresses
+                </mat-checkbox>
+              </div>
+            </div>
+          </ng-template>
+
+          <!-- <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2" style="margin-bottom: 300px">
+            <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+              <mat-label>Address</mat-label>
+              <input placeholder="Address" matInput formControlName="dropOffAddressString"
+                ngx-google-places-autocomplete [options]="options" (onAddressChange)="AddressChange($event)" required />
+              <mat-error *ngIf="
+                  advanceTableForm
+                    .get('dropOffAddressString')
+                    .hasError('required')
+                ">
+                Please select Address
+              </mat-error>
+            </mat-form-field>
+          </div> -->
+          <!-- <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+            <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+              <mat-label>Longitude</mat-label>
+              <input matInput formControlName="dropOffLongitude" readonly required />
+              <mat-error *ngIf="
+                  advanceTableForm.get('dropOffLongitude').hasError('required')
+                ">
+                Longitude is required
+              </mat-error>
+            </mat-form-field>
+          </div>
+          <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+            <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+              <mat-label>Latitude</mat-label>
+              <input matInput formControlName="dropOffLatitude" readonly required />
+              <mat-error *ngIf="
+                  advanceTableForm.get('dropOffLatitude').hasError('required')
+                ">
+                Latitude is required
+              </mat-error>
+            </mat-form-field>
+          </div> -->
+        </ng-container>
+        <ng-container *ngIf="tab === 'APP'">
+          <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+            <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+              <mat-label>Date</mat-label>
+              <input required matInput [matDatepicker]="Date" formControlName="dropOffDateByApp" />
+              <mat-datepicker-toggle matSuffix [for]="Date"></mat-datepicker-toggle>
+              <mat-datepicker #Date></mat-datepicker>
+              <mat-error *ngIf="
+                  advanceTableForm.get('dropOffDateByApp').hasError('required')
+                ">
+                Date is required
+              </mat-error>
+            </mat-form-field>
+          </div>
+          <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+            <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+              <mat-label>Time</mat-label>
+              <input matInput [owlDateTimeTrigger]="time1" [owlDateTime]="time1" formControlName="dropOffTimeByApp" />
+              <button mat-icon-button matSuffix type="button" [owlDateTimeTrigger]="time1" class="date-icon" aria-label="Open time picker"><mat-icon>schedule</mat-icon></button>
+              <owl-date-time [pickerType]="'timer'" #time1></owl-date-time>
+              <mat-error *ngIf="
+                  advanceTableForm.get('dropOffTimeByApp').hasError('required')
+                ">
+                Time is required
+              </mat-error>
+            </mat-form-field>
+          </div>
+          <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+            <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+              <mat-label>Km (ODO)</mat-label>
+              <input required matInput formControlName="dropOffKmByApp" />
+
+              <mat-error *ngIf="
+                  advanceTableForm.get('dropOffKmByApp').hasError('required')
+                ">
+                Km is required
+              </mat-error>
+            </mat-form-field>
+          </div>
+          <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2" style="margin-bottom: 300px">
+            <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+              <mat-label>Address</mat-label>
+              <input placeholder="Address" matInput formControlName="dropOffAddressStringByApp"
+                ngx-google-places-autocomplete [options]="options" (onAddressChange)="AddressChange($event)" required />
+              <mat-error *ngIf="
+                  advanceTableForm
+                    .get('dropOffAddressStringByApp')
+                    .hasError('required')
+                ">
+                Please select Address
+              </mat-error>
+            </mat-form-field>
+          </div>
+          <!-- <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+            <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+              <mat-label>Longitude</mat-label>
+              <input matInput formControlName="dropOffLongitudeByApp" readonly required />
+              <mat-error *ngIf="
+                  advanceTableForm
+                    .get('dropOffLongitudeByApp')
+                    .hasError('required')
+                ">
+                Longitude is required
+              </mat-error>
+            </mat-form-field>
+          </div>
+          <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+            <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+              <mat-label>Latitude</mat-label>
+              <input matInput formControlName="dropOffLatitudeByApp" readonly required />
+              <mat-error *ngIf="
+                  advanceTableForm
+                    .get('dropOffLatitudeByApp')
+                    .hasError('required')
+                ">
+                Latitude is required
+              </mat-error>
+            </mat-form-field>
+          </div> -->
+        </ng-container>
+
+        <div class="col-xl-4 col-lg-12 col-md-12 col-sm-12 mb-2" *ngIf="tab === 'Manual'">
+          <!-- <div *ngIf="isSaveAllowed">
+            <span style="color:red;margin-bottom: 10px;">{{verifyDutyStatusAndCacellationStatus}}</span>
+          </div> -->
+          <div class="example-button-row">
+            <button mat-raised-button color="primary" [disabled]="!advanceTableForm.valid || !isSaveAllowed"
+              *ngIf="saveDisabled" [type]="submit" (click)="Put()">
+              Save
+            </button>
+            <mat-spinner *ngIf="!saveDisabled" diameter="30"></mat-spinner>
+          </div>
+        </div>
+        <div class="col-xl-4 col-lg-12 col-md-12 col-sm-12 mb-2">
+          <div class="example-button-row">
+            <!-- <button mat-raised-button color="warn" [disabled]="dropOffEntry" (click)="onNoClick()" tabindex="-1">
+              Reset
+            </button> -->
+          </div>
+        </div>
+
+        <!-- <div class="col-xl-4 col-lg-6 col-md-12 col-sm-12 mb-2">
+          <div class="example-button-row">
+            <button mat-raised-button color="primary" [type]="submit" [disabled]="dropOffEntry"
+              (click)="openPickupTimeExective()">
+              Fetch Data From App
+            </button>
+          </div>
+        </div> -->
+
+      </div>
+    </form>
+  </div>
+</div>

@@ -1,0 +1,838 @@
+<section class="content">
+    <div class="container-fluid">
+        <div class="block-header">
+            <div class="row">
+                <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+                    <ul>
+                        <li class="breadcrumb-item bcrumb-1">
+                            <a routerLink="/dashboard/main">
+                                <i class="fas fa-home"></i> Home</a>|
+                            <a href="#" onClick="return false;">Admin</a>|
+                            <a href="#" onClick="return false;">Booking Backup MIS</a>
+                        </li>
+                    </ul>
+                    <ul class="breadcrumb breadcrumb-style ">
+                        <li class="breadcrumb-item">
+                            <h2>Booking Backup MIS</h2>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                <div class="card">
+                    <div class="body">
+                        <div class="responsive_table">
+                            <div class="table-responsive">
+                                <div class="materialTableHeader">
+                                    <div class="row">
+                                        <div class="modal fade" id="exampleModalCenter" tabindex="-1" role="dialog">
+                                            <div class="modal-dialog modal-dialog-centered" style="max-width: 80%;">
+                                                <div class="modal-content">
+                                                    <div class="modal-header">
+                                                        <h5 class="modal-title" id="exampleModalLongTitle">Booking
+                                                            Backup MIS</h5>
+                                                        <button type="button" class="close" data-dismiss="modal"
+                                                            aria-label="Close">
+                                                            <span aria-hidden="true">&times;</span>
+                                                        </button>
+                                                    </div>
+                                                    <div class="modal-body">
+                                                       
+                                                            <div class="row">
+                                                                <div class="col mb-2"
+                                                                    style="flex: 0 0 20%; max-width: 20%;">
+                                                                    <mat-form-field class="example-full-width"
+                                                                        appearance="outline" floatLabel="always">
+                                                                        <mat-label>Duty Slip No</mat-label>
+                                                                        <input type="text" matInput
+                                                                            [(ngModel)]="searchDutySlip">
+
+                                                                    </mat-form-field>
+                                                                </div>
+                                                                <div class="col mb-2"
+                                                                    style="flex: 0 0 20%; max-width: 20%;">
+                                                                    <mat-form-field class="example-full-width"
+                                                                        appearance="outline" floatLabel="always">
+                                                                        <mat-label>Manual DS No</mat-label>
+                                                                        <input type="text" matInput
+                                                                            [(ngModel)]="searchManualDS">
+
+                                                                    </mat-form-field>
+                                                                </div>
+                                                                <div class="col mb-2"
+                                                                    style="flex: 0 0 20%; max-width: 20%;">
+                                                                    <mat-form-field class="example-full-width"
+                                                                        appearance="outline" floatLabel="always">
+                                                                        <mat-label>Booking No</mat-label>
+                                                                        <input type="text" matInput
+                                                                            [(ngModel)]="searchBooking">
+
+                                                                    </mat-form-field>
+                                                                </div>
+
+                                                                <div class="col mb-2"
+                                                                    style="flex: 0 0 20%; max-width: 20%;">
+                                                                    <mat-form-field class="example-full-width mb-3"
+                                                                        appearance="outline" floatLabel="always">
+                                                                        <mat-label>Dispatch Status</mat-label>
+                                                                        <mat-select [(ngModel)]="searchDispatchStatus">
+                                                                            <mat-option value="Garage">Garage
+                                                                                In</mat-option>
+                                                                            <mat-option value="Dispatched">Not
+                                                                                Dispatched</mat-option>
+                                                                            <mat-option value="Dropped">Dropped
+                                                                                Off</mat-option>
+                                                                        </mat-select>
+                                                                    </mat-form-field>
+                                                                </div>
+
+                                                                <div class="col mb-2"
+                                                                    style="flex: 0 0 20%; max-width: 20%;">
+                                                                    <mat-form-field class="example-full-width"
+                                                                        appearance="outline" floatLabel="always">
+                                                                        <mat-label>Booking Status</mat-label>
+                                                                        <mat-select [(ngModel)]="searchBookingStatus">
+                                                                            <mat-option value="Confirmed">Booking
+                                                                                Confirmed</mat-option>
+                                                                            <mat-option
+                                                                                value="Approved">Approved</mat-option>
+                                                                            <mat-option
+                                                                                value="Cancelled">Cancelled</mat-option>
+                                                                            <mat-option
+                                                                                value="Pending">Pending</mat-option>
+                                                                        </mat-select>
+                                                                    </mat-form-field>
+                                                                </div>
+
+
+                                                            </div>
+
+                                                            <div class="row">
+                                                                <div class="col mb-2"
+                                                                    style="flex: 0 0 20%; max-width: 20%;">
+                                                                    <mat-form-field class="example-full-width"
+                                                                        appearance="outline" floatLabel="always">
+                                                                        <mat-label>City</mat-label>
+                                                                        <input type="text" matInput
+                                                                            [matAutocomplete]="auto3"
+                                                                            [formControl]="city">
+                                                                        <mat-autocomplete #auto3="matAutocomplete">
+                                                                            <mat-option
+                                                                                *ngFor="let option of filteredCityOptions | async"
+                                                                                [value]="option.geoPointName">
+                                                                                {{option.geoPointName}}
+                                                                            </mat-option>
+                                                                        </mat-autocomplete>
+                                                                    </mat-form-field>
+                                                                </div>
+                                                                <div class="col mb-2"
+                                                                    style="flex: 0 0 20%; max-width: 20%;">
+                                                                    <mat-form-field class="example-full-width"
+                                                                        appearance="outline" floatLabel="always">
+                                                                        <mat-label>Pickup Detail</mat-label>
+                                                                        <input type="text" matInput
+                                                                            [matAutocomplete]="auto4"
+                                                                            [formControl]="pickupDetail">
+                                                                        <mat-autocomplete #auto4="matAutocomplete">
+                                                                            <mat-option
+                                                                                *ngFor="let option of filteredGeoPointTypeOptions | async"
+                                                                                [value]="option.geoPointType"
+                                                                                (click)="getPSTID(option.geoPointTypeID)">
+                                                                                {{option.geoPointType}}
+                                                                            </mat-option>
+                                                                        </mat-autocomplete>
+                                                                    </mat-form-field>
+                                                                </div>
+                                                                <div class="col mb-2"
+                                                                    style="flex: 0 0 20%; max-width: 20%;">
+                                                                    <mat-form-field class="example-full-width"
+                                                                        appearance="outline" floatLabel="always">
+                                                                        <mat-label>Pickup Sub Detail</mat-label>
+                                                                        <input type="text" matInput
+                                                                            [matAutocomplete]="auto5"
+                                                                            [formControl]="pickupSubDetail">
+                                                                        <mat-autocomplete #auto5="matAutocomplete">
+                                                                            <mat-option
+                                                                                *ngFor="let option of filteredPickupSpotOptions | async"
+                                                                                [value]="option.geoPointName">
+                                                                                {{option.geoPointName}}
+                                                                            </mat-option>
+                                                                        </mat-autocomplete>
+                                                                    </mat-form-field>
+                                                                </div>
+                                                                <div class="col mb-2"
+                                                                    style="flex: 0 0 20%; max-width: 20%;">
+
+                                                                    <mat-form-field class="example-full-width"
+                                                                        appearance="outline" floatLabel="always">
+                                                                        <mat-label>Location</mat-label>
+                                                                        <input type="text" matInput
+                                                                            [matAutocomplete]="auto2"
+                                                                            [formControl]="serviceLocation">
+                                                                        <mat-autocomplete #auto2="matAutocomplete">
+                                                                            <mat-option
+                                                                                *ngFor="let option of filteredServiceOptions | async"
+                                                                                [value]="option.organizationalEntityName">
+                                                                                {{option.organizationalEntityName}}
+                                                                            </mat-option>
+                                                                        </mat-autocomplete>
+                                                                    </mat-form-field>
+                                                                </div>
+                                                                <div class="col mb-2"
+                                                                    style="flex: 0 0 20%; max-width: 20%;">
+
+                                                                    <mat-form-field class="example-full-width"
+                                                                        appearance="outline" floatLabel="always">
+                                                                        <mat-label>Customer Location</mat-label>
+                                                                        <input type="text" matInput
+                                                                            [matAutocomplete]="auto8"
+                                                                            [formControl]="customerLocation">
+                                                                        <mat-autocomplete #auto8="matAutocomplete">
+                                                                            <mat-option
+                                                                                *ngFor="let option of filteredCustomerLocationOptions | async"
+                                                                                [value]="option.organizationalEntityName">
+                                                                                {{option.organizationalEntityName}}
+                                                                            </mat-option>
+                                                                        </mat-autocomplete>
+                                                                    </mat-form-field>
+                                                                </div>
+
+                                                            </div>
+                                                            <div class="row">
+
+                                                                <div class="col mb-2"
+                                                                    style="flex: 0 0 20%; max-width: 20%;">
+                                                                    <mat-form-field class="example-full-width" appearance="outline" floatLabel="always"> 
+                                                                        <mat-label>Customer Group</mat-label>                       
+                                                                        <input type="text" matInput [matAutocomplete]="auto10"
+                                                                        [formControl]="customerGroup">
+                                                                        <mat-autocomplete #auto10="matAutocomplete" >
+                                                                            <mat-option *ngFor="let options of filteredOptions | async"
+                                                                                [value]="options.customerGroup" >
+                                                                                {{options.customerGroup}}
+                                                                            </mat-option>
+                                                                        </mat-autocomplete>
+                                                                       
+                                                                    </mat-form-field>
+                                                                </div>
+                                                                <div class="col mb-2"
+                                                                    style="flex: 0 0 20%; max-width: 20%;">
+                                                                    <mat-form-field class="example-full-width"
+                                                                        appearance="outline" floatLabel="always">
+                                                                        <mat-label>Customer Name</mat-label>
+                                                                        <input type="text" matInput
+                                                                            [matAutocomplete]="auto1"
+                                                                            [formControl]="customer">
+                                                                        <mat-autocomplete #auto1="matAutocomplete">
+                                                                            <mat-option
+                                                                                *ngFor="let option of filteredCustomerOptions | async"
+                                                                                [value]="option.customerName">
+                                                                                {{option.customerName}}
+                                                                            </mat-option>
+                                                                        </mat-autocomplete>
+                                                                    </mat-form-field>
+                                                                </div>
+
+                                                                <div class="col mb-2"
+                                                                    style="flex: 0 0 20%; max-width: 20%;">
+
+                                                                    <mat-form-field class="example-full-width"
+                                                                        appearance="outline" floatLabel="always">
+                                                                        <mat-label>Guest Name</mat-label>
+                                                                        <input type="text" matInput
+                                                                            [matAutocomplete]="auto9"
+                                                                            [formControl]="guestName">
+                                                                        <mat-autocomplete #auto9="matAutocomplete">
+                                                                            <mat-option
+                                                                                *ngFor="let option of filteredCustomerPersonOptions | async"
+                                                                                [value]="option.customerPersonName">
+                                                                                {{option.customerPersonName}}
+                                                                            </mat-option>
+                                                                        </mat-autocomplete>
+                                                                    </mat-form-field>
+                                                                </div>
+                                                                <div class="col mb-2"
+                                                                    style="flex: 0 0 20%; max-width: 20%;">
+
+                                                                    <mat-form-field class="example-full-width"
+                                                                        appearance="outline" floatLabel="always">
+                                                                        <mat-label>Booker Name</mat-label>
+                                                                        <input type="text" matInput
+                                                                            [matAutocomplete]="auto11"
+                                                                            [formControl]="bookerName">
+                                                                        <mat-autocomplete #auto11="matAutocomplete">
+                                                                            <mat-option
+                                                                                *ngFor="let option of filteredBookerOptions | async"
+                                                                                [value]="option.customerPersonName">
+                                                                                {{option.customerPersonName}}
+                                                                            </mat-option>
+                                                                        </mat-autocomplete>
+                                                                    </mat-form-field>
+                                                                </div>
+                                                                <div class="col mb-2"
+                                                                    style="flex: 0 0 20%; max-width: 20%;">
+                                                                    <mat-form-field class="example-full-width"
+                                                                        appearance="outline" floatLabel="always">
+                                                                        <mat-label>Sales Person</mat-label>
+                                                                        <input type="text" matInput
+                                                                            [formControl]="salesPerson"
+                                                                            [matAutocomplete]="auto7">
+                                                                        <mat-autocomplete #auto7="matAutocomplete">
+                                                                            <mat-option
+                                                                                *ngFor="let option of filteredSalesPersonOptions | async"
+                                                                                [value]="option.salesPerson">
+                                                                                {{option.salesPerson}}
+                                                                            </mat-option>
+                                                                        </mat-autocomplete>
+                                                                    </mat-form-field>
+                                                                </div>
+
+                                                            </div>
+
+
+
+                                                            <div class="row">
+                                                                <div class="col mb-2"
+                                                                    style="flex: 0 0 20%; max-width: 20%;">
+                                                                    <mat-form-field class="example-full-width"
+                                                                        appearance="outline" floatLabel="always">
+                                                                        <mat-label>Mode Of Payment</mat-label>
+                                                                        <input type="text" matInput
+                                                                            [matAutocomplete]="auto"
+                                                                            [formControl]="modeOfPayment">
+                                                                        <mat-autocomplete #auto="matAutocomplete">
+                                                                            <mat-option
+                                                                                *ngFor="let option of filteredPaymentModeOptions | async"
+                                                                                [value]="option.modeOfPayment">
+                                                                                {{option.modeOfPayment}}
+                                                                            </mat-option>
+                                                                        </mat-autocomplete>
+                                                                    </mat-form-field>
+                                                                </div>
+
+                                                                <div class="col mb-2"
+                                                                    style="flex: 0 0 20%; max-width: 20%;">
+                                                                    <mat-form-field class="example-full-width"
+                                                                        appearance="outline" floatLabel="always">
+                                                                        <mat-label>From Date</mat-label>
+                                                                        <input type="text" matInput
+                                                                            [matDatepicker]="fromDate"
+                                                                            [(ngModel)]="searchFromDate">
+                                                                        <mat-datepicker-toggle matSuffix
+                                                                            [for]="fromDate"></mat-datepicker-toggle>
+                                                                        <mat-datepicker #fromDate></mat-datepicker>
+                                                                    </mat-form-field>
+                                                                </div>
+                                                                <div class="col mb-2"
+                                                                    style="flex: 0 0 20%; max-width: 20%;">
+                                                                    <mat-form-field class="example-full-width"
+                                                                        appearance="outline" floatLabel="always">
+                                                                        <mat-label>To Date</mat-label>
+                                                                        <input type="text" matInput
+                                                                            [matDatepicker]="toDate"
+                                                                            [(ngModel)]="searchToDate">
+                                                                        <mat-datepicker-toggle matSuffix
+                                                                            [for]="toDate"></mat-datepicker-toggle>
+                                                                        <mat-datepicker #toDate></mat-datepicker>
+                                                                    </mat-form-field>
+
+                                                                </div>
+                                                                <div class="col mb-2"
+                                                                    style="flex: 0 0 20%; max-width: 20%;">
+                                                                    <mat-form-field class="example-full-width"
+                                                                        appearance="outline" floatLabel="always">
+                                                                        <mat-label>Cancellation Date From</mat-label>
+                                                                        <input type="text" matInput
+                                                                            [matDatepicker]="CancellationfromDate"
+                                                                            [(ngModel)]="searchCancellationFrom">
+                                                                        <mat-datepicker-toggle matSuffix
+                                                                            [for]="CancellationfromDate"></mat-datepicker-toggle>
+                                                                        <mat-datepicker
+                                                                            #CancellationfromDate></mat-datepicker>
+                                                                    </mat-form-field>
+                                                                </div>
+
+                                                                <div class="col mb-2"
+                                                                    style="flex: 0 0 20%; max-width: 20%;">
+                                                                    <mat-form-field class="example-full-width"
+                                                                        appearance="outline" floatLabel="always">
+                                                                        <mat-label>Cancellation Date To</mat-label>
+                                                                        <input type="text" matInput
+                                                                            [matDatepicker]="CancellationtoDate"
+                                                                            [(ngModel)]="searchCancellationTo">
+                                                                        <mat-datepicker-toggle matSuffix
+                                                                            [for]="CancellationtoDate"></mat-datepicker-toggle>
+                                                                        <mat-datepicker
+                                                                            #CancellationtoDate></mat-datepicker>
+                                                                    </mat-form-field>
+
+                                                                </div>
+                                                            </div>
+                                                       
+                                                    </div>
+
+                                                    <div class="modal-footer">
+                                                        <button mat-raised-button color="primary" (click)="SearchData()"
+                                                            data-dismiss="modal">Search</button>
+
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <!-- <div style="width: 70%; float:left;padding-top: 10px;padding-left: 22px;">
+                                        <div *ngIf="SearchName" style="float: left;"><b>Unlock Employee</b> : {{SearchName}},</div>
+                                    </div> -->
+
+                                        <div style="width: 70%; float:left;padding-top: 6px;padding-left: 12px;">
+                                            <div class="col-lg-6">
+                                                <div class="form-group">
+                                                    
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div style="width: 30%; text-align: right;">
+
+                                            <button mat-raised-button color="primary" data-dismiss="modal"
+                                                data-toggle="modal" data-backDrop="false"
+                                                data-target="#exampleModalCenter">
+                                                Search
+                                            </button>
+                                            &nbsp;
+                                            <!-- <button mat-mini-fab color="primary" (click)="addNew()">
+                                            <mat-icon class="col-white">add</mat-icon>
+                                        </button> -->
+                                            &nbsp;
+                                            <button mat-mini-fab color="primary" (click)="refresh()">
+                                                <mat-icon class="col-white">refresh</mat-icon>
+                                            </button>
+
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- <label>
+                                <input type="checkbox" [(ngModel)]="isChecked">
+                                Check me!
+                            </label> -->
+                                <!-- <p>Checkbox is {{ isChecked ? 'checked' : 'unchecked' }}</p> -->
+                                <p *ngIf="!dataSource; then thenBlock2 else elseBlock2">
+                                    This is not rendered
+                                </p>
+
+                                <ng-template #thenBlock2>
+                                    <div class="alert alert-primary"
+                                        style="background-color:#E8E8E8; text-align: center;">
+                                        No Records Found</div>
+                                    <div class="body">
+                                        <div class="example-button-row">
+
+                                            <button mat-raised-button color="primary"
+                                                (click)="PreviousCall()">Previous</button>
+                                            <button mat-raised-button color="primary" (click)="NextCall()">Next</button>
+
+                                        </div>
+                                    </div>
+
+                                </ng-template>
+
+                                <ng-template #elseBlock2>
+                                    <div class="scrollable-table-container">
+                                    <div style="width: 500%; overflow-y: hidden;">
+                                        <mat-table #table [dataSource]="dataSource" matSort class="mat-cell floating-header-table"
+                                            (matSortChange)="SortingData($event)">
+                                            <ng-container matColumnDef="check">
+                                                <mat-header-cell *matHeaderCellDef>
+                                                    <mat-checkbox></mat-checkbox></mat-header-cell>
+                                                <mat-cell *matCellDef="let row">
+                                                    <mat-checkbox></mat-checkbox>
+                                                </mat-cell>
+                                            </ng-container>
+
+                                            <ng-container matColumnDef="id">
+                                                <mat-header-cell *matHeaderCellDef mat-sort-header>Id</mat-header-cell>
+                                                <mat-cell *matCellDef="let row">{{row.ReservationID}}</mat-cell>
+                                            </ng-container>
+
+                                            <ng-container matColumnDef="ReservationID">
+                                                <mat-header-cell *matHeaderCellDef mat-sort-header>Reservation
+                                                    Number</mat-header-cell>
+                                                <mat-cell *matCellDef="let row"
+                                                    (contextmenu)="onContextMenu($event, row)">
+                                                    {{row.reservationID ? row.reservationID : 'N/A'}}</mat-cell>
+                                            </ng-container>
+
+                                            <ng-container matColumnDef="DutySlipID">
+                                                <mat-header-cell *matHeaderCellDef mat-sort-header>Duty Slip
+                                                    Number</mat-header-cell>
+                                                <mat-cell *matCellDef="let row"
+                                                    (contextmenu)="onContextMenu($event, row)">
+                                                    {{row.dutySlipID ? row.dutySlipID : 'N/A'}}</mat-cell>
+                                            </ng-container>
+
+                                            <ng-container matColumnDef="ManualDutySlipNumber">
+                                                <mat-header-cell *matHeaderCellDef mat-sort-header>Manual Duty Slip
+                                                    Number</mat-header-cell>
+                                                <mat-cell *matCellDef="let row"
+                                                    (contextmenu)="onContextMenu($event, row)">
+                                                    {{row.manualDutySlipNumber ? row.manualDutySlipNumber :
+                                                    'N/A'}}</mat-cell>
+                                            </ng-container>
+
+                                            <ng-container matColumnDef="ReservationStatus">
+                                                <mat-header-cell *matHeaderCellDef mat-sort-header>Reservation
+                                                    Status</mat-header-cell>
+                                                <mat-cell *matCellDef="let row"
+                                                    (contextmenu)="onContextMenu($event, row)">
+                                                    {{row.reservationStatus ? row.reservationStatus : 'N/A'}}</mat-cell>
+                                            </ng-container>
+
+                                            <ng-container matColumnDef="LoggedInUser">
+                                                <mat-header-cell *matHeaderCellDef mat-sort-header>Logged In
+                                                    User</mat-header-cell>
+                                                <mat-cell *matCellDef="let row"
+                                                    (contextmenu)="onContextMenu($event, row)">
+                                                    {{row.loggedInUser ? row.loggedInUser : 'N/A'}}</mat-cell>
+                                            </ng-container>
+
+                                            <ng-container matColumnDef="GeoPointType">
+                                                <mat-header-cell *matHeaderCellDef mat-sort-header>Pickup
+                                                    Details</mat-header-cell>
+                                                <mat-cell *matCellDef="let row"
+                                                    (contextmenu)="onContextMenu($event, row)">
+                                                    {{row.pickupDetail ? row.pickupDetail : 'N/A'}}</mat-cell>
+                                            </ng-container>
+
+                                            <ng-container matColumnDef="GeoPointName">
+                                                <mat-header-cell *matHeaderCellDef mat-sort-header>Pickup Sub
+                                                    Detail</mat-header-cell>
+                                                <mat-cell *matCellDef="let row"
+                                                    (contextmenu)="onContextMenu($event, row)">
+                                                    {{row.pickupSubDetail ? row.pickupSubDetail : 'N/A'}}</mat-cell>
+                                            </ng-container>
+
+                                            <ng-container matColumnDef="BookerName">
+                                                <mat-header-cell *matHeaderCellDef mat-sort-header>Booker
+                                                    Name</mat-header-cell>
+                                                <mat-cell *matCellDef="let row"
+                                                    (contextmenu)="onContextMenu($event, row)">
+                                                    {{row.bookerName ? row.bookerName :
+                                                    'N/A'}}</mat-cell>
+                                            </ng-container>
+                                            <ng-container matColumnDef="CustomerGroup">
+                                                <mat-header-cell *matHeaderCellDef mat-sort-header>Customer Group
+                                                    </mat-header-cell>
+                                                <mat-cell *matCellDef="let row"
+                                                    (contextmenu)="onContextMenu($event, row)">
+                                                    {{row.customerGroup ? row.customerGroup :
+                                                    'N/A'}}</mat-cell>
+                                            </ng-container>
+
+
+                                            <ng-container matColumnDef="PrimaryMobile">
+                                                <mat-header-cell *matHeaderCellDef mat-sort-header>Guest Mobile</mat-header-cell>
+                                                <mat-cell *matCellDef="let row"
+                                                    (contextmenu)="onContextMenu($event, row)">
+                                                    {{row.primaryMobile ? row.primaryMobile : 'N/A'}}</mat-cell>
+                                            </ng-container>
+
+                                            <ng-container matColumnDef="PrimaryEmail">
+                                                <mat-header-cell *matHeaderCellDef mat-sort-header>Guest Email</mat-header-cell>
+                                                <mat-cell *matCellDef="let row"
+                                                    (contextmenu)="onContextMenu($event, row)">
+                                                    {{row.primaryEmail ? row.primaryEmail : 'N/A'}}</mat-cell>
+                                            </ng-container>
+
+                                            <ng-container matColumnDef="CustomerDepartment">
+                                                <mat-header-cell *matHeaderCellDef mat-sort-header>Guest Department</mat-header-cell>
+                                                <mat-cell *matCellDef="let row"
+                                                    (contextmenu)="onContextMenu($event, row)">
+                                                    {{row.customerDepartment ? row.customerDepartment : 'N/A'}}</mat-cell>
+                                            </ng-container>
+
+                                            <ng-container matColumnDef="CustomerDesignation">
+                                                <mat-header-cell *matHeaderCellDef mat-sort-header>Guest Designation</mat-header-cell>
+                                                <mat-cell *matCellDef="let row"
+                                                    (contextmenu)="onContextMenu($event, row)">
+                                                    {{row.customerDesignation ? row.customerDesignation :
+                                                    'N/A'}}</mat-cell>
+                                            </ng-container>
+
+                                            <ng-container matColumnDef="CustomerName">
+                                                <mat-header-cell *matHeaderCellDef mat-sort-header>Customer
+                                                    Name</mat-header-cell>
+                                                <mat-cell *matCellDef="let row"
+                                                    (contextmenu)="onContextMenu($event, row)">
+                                                    {{row.customerName ? row.customerName : 'N/A'}}</mat-cell>
+                                            </ng-container>
+
+                                            <ng-container matColumnDef="Gender">
+                                                <mat-header-cell *matHeaderCellDef
+                                                    mat-sort-header>Gender</mat-header-cell>
+                                                <mat-cell *matCellDef="let row"
+                                                    (contextmenu)="onContextMenu($event, row)">
+                                                    {{row.gender ? row.gender : 'N/A'}}</mat-cell>
+                                            </ng-container>
+
+                                            <ng-container matColumnDef="GstNumber">
+                                                <mat-header-cell *matHeaderCellDef mat-sort-header>GST
+                                                    Number</mat-header-cell>
+                                                <mat-cell *matCellDef="let row"
+                                                    (contextmenu)="onContextMenu($event, row)">
+                                                    {{row.gstNumber ? row.gstNumber : 'N/A'}}</mat-cell>
+                                            </ng-container>
+
+                                            <ng-container matColumnDef="GuestName">
+                                                <mat-header-cell *matHeaderCellDef mat-sort-header>Guest
+                                                    Name</mat-header-cell>
+                                                <mat-cell *matCellDef="let row"
+                                                    (contextmenu)="onContextMenu($event, row)">
+                                                    {{row.guestName ? row.guestName : 'N/A'}}</mat-cell>
+                                            </ng-container>
+
+                                            <ng-container matColumnDef="Importance">
+                                                <mat-header-cell *matHeaderCellDef
+                                                    mat-sort-header>Importance</mat-header-cell>
+                                                <mat-cell *matCellDef="let row"
+                                                    (contextmenu)="onContextMenu($event, row)">
+                                                    {{row.importance ? row.importance : 'N/A'}}</mat-cell>
+                                            </ng-container>
+
+                                            <ng-container matColumnDef="ModeOfPayment">
+                                                <mat-header-cell *matHeaderCellDef mat-sort-header>Mode Of
+                                                    Payment</mat-header-cell>
+                                                <mat-cell *matCellDef="let row"
+                                                    (contextmenu)="onContextMenu($event, row)">
+                                                    {{row.modeOfPayment ? row.modeOfPayment : 'N/A'}}</mat-cell>
+                                            </ng-container>
+
+                                            <ng-container matColumnDef="Package">
+                                                <mat-header-cell *matHeaderCellDef
+                                                    mat-sort-header>Package</mat-header-cell>
+                                                <mat-cell *matCellDef="let row"
+                                                    (contextmenu)="onContextMenu($event, row)">
+                                                    {{row.package ? row.package : 'N/A'}}</mat-cell>
+                                            </ng-container>
+
+                                            <ng-container matColumnDef="PackageType">
+                                                <mat-header-cell *matHeaderCellDef mat-sort-header>Package
+                                                    Type</mat-header-cell>
+                                                <mat-cell *matCellDef="let row"
+                                                    (contextmenu)="onContextMenu($event, row)">
+                                                    {{row.packageType ? row.packageType : 'N/A'}}</mat-cell>
+                                            </ng-container>
+
+                                            <ng-container matColumnDef="PickupAddress">
+                                                <mat-header-cell *matHeaderCellDef mat-sort-header>Pickup
+                                                    Address</mat-header-cell>
+                                                <mat-cell *matCellDef="let row"
+                                                    (contextmenu)="onContextMenu($event, row)">
+                                                    {{row.pickupAddress ? row.pickupAddress : 'N/A'}}</mat-cell>
+                                            </ng-container>
+
+                                            <ng-container matColumnDef="BookerMobile">
+                                                <mat-header-cell *matHeaderCellDef mat-sort-header>Booker
+                                                    Mobile</mat-header-cell>
+                                                <mat-cell *matCellDef="let row"
+                                                    (contextmenu)="onContextMenu($event, row)">
+                                                    {{row.bookerMobile ? row.bookerMobile : 'N/A'}}</mat-cell>
+                                            </ng-container>
+
+                                            <ng-container matColumnDef="RegistrationNumber">
+                                                <mat-header-cell *matHeaderCellDef mat-sort-header>Vehicle Registration
+                                                    Number</mat-header-cell>
+                                                <mat-cell *matCellDef="let row"
+                                                    (contextmenu)="onContextMenu($event, row)">
+                                                    {{row.registrationNumber ? row.registrationNumber :
+                                                    'N/A'}}</mat-cell>
+                                            </ng-container>
+
+                                            <ng-container matColumnDef="ReservationInternalNote">
+                                                <mat-header-cell *matHeaderCellDef mat-sort-header>Reservation Internal
+                                                    Note</mat-header-cell>
+                                                <mat-cell *matCellDef="let row"
+                                                    (contextmenu)="onContextMenu($event, row)">
+                                                    {{row.reservationInternalNote ? row.reservationInternalNote :
+                                                    'N/A'}}</mat-cell>
+                                            </ng-container>
+
+                                            <ng-container matColumnDef="SalesPerson">
+                                                <mat-header-cell *matHeaderCellDef mat-sort-header>Sales
+                                                    Person</mat-header-cell>
+                                                <mat-cell *matCellDef="let row"
+                                                    (contextmenu)="onContextMenu($event, row)">
+                                                    {{row.salesPerson ? row.salesPerson : 'N/A'}}</mat-cell>
+                                            </ng-container>
+
+                                            <ng-container matColumnDef="ServiceLocation">
+                                                <mat-header-cell *matHeaderCellDef mat-sort-header>Service
+                                                    Location</mat-header-cell>
+                                                <mat-cell *matCellDef="let row"
+                                                    (contextmenu)="onContextMenu($event, row)">
+                                                    {{row.serviceLocation ? row.serviceLocation : 'N/A'}}</mat-cell>
+                                            </ng-container>
+
+                                            <ng-container matColumnDef="SpecialInstruction">
+                                                <mat-header-cell *matHeaderCellDef mat-sort-header>Special
+                                                    Instruction</mat-header-cell>
+                                                <mat-cell *matCellDef="let row"
+                                                    (contextmenu)="onContextMenu($event, row)">
+                                                    {{row.specialInstruction ? row.specialInstruction :
+                                                    'N/A'}}</mat-cell>
+                                            </ng-container>
+
+                                            <ng-container matColumnDef="SupplierName">
+                                                <mat-header-cell *matHeaderCellDef mat-sort-header>Supplier
+                                                    Name</mat-header-cell>
+                                                <mat-cell *matCellDef="let row"
+                                                    (contextmenu)="onContextMenu($event, row)">
+                                                    {{row.supplierName ? row.supplierName : 'N/A'}}</mat-cell>
+                                            </ng-container>
+
+                                            <ng-container matColumnDef="TransferLocation">
+                                                <mat-header-cell *matHeaderCellDef mat-sort-header>Transfer
+                                                    Location</mat-header-cell>
+                                                <mat-cell *matCellDef="let row"
+                                                    (contextmenu)="onContextMenu($event, row)">
+                                                    {{row.transferLocation ? row.transferLocation : 'N/A'}}</mat-cell>
+                                            </ng-container>
+
+                                            <ng-container matColumnDef="TripStatus">
+                                                <mat-header-cell *matHeaderCellDef mat-sort-header>Trip
+                                                    Status</mat-header-cell>
+                                                <mat-cell *matCellDef="let row"
+                                                    (contextmenu)="onContextMenu($event, row)">
+                                                    {{row.tripStatus ? row.tripStatus : 'N/A'}}</mat-cell>
+                                            </ng-container>
+
+                                            <ng-container matColumnDef="Vehicle">
+                                                <mat-header-cell *matHeaderCellDef
+                                                    mat-sort-header>Vehicle</mat-header-cell>
+                                                <mat-cell *matCellDef="let row"
+                                                    (contextmenu)="onContextMenu($event, row)">
+                                                    {{row.vehicle ? row.vehicle : 'N/A'}}</mat-cell>
+                                            </ng-container>
+
+                                            <ng-container matColumnDef="City">
+                                                <mat-header-cell *matHeaderCellDef
+                                                    mat-sort-header>City</mat-header-cell>
+                                                <mat-cell *matCellDef="let row"
+                                                    (contextmenu)="onContextMenu($event, row)">
+                                                    {{row.city ? row.city : 'N/A'}}</mat-cell>
+                                            </ng-container>
+
+                                            <ng-container matColumnDef="BookingType">
+                                                <mat-header-cell *matHeaderCellDef mat-sort-header>Booking
+                                                    Type</mat-header-cell>
+                                                <mat-cell *matCellDef="let row"
+                                                    (contextmenu)="onContextMenu($event, row)">
+                                                    {{row.bookingType ? row.bookingType : 'N/A'}}</mat-cell>
+                                            </ng-container>
+
+                                            <ng-container matColumnDef="CustomerSpecificFields">
+                                                <mat-header-cell *matHeaderCellDef mat-sort-header>Customer Specific
+                                                    Fields</mat-header-cell>
+                                                <mat-cell *matCellDef="let row"
+                                                    (contextmenu)="onContextMenu($event, row)">
+                                                    {{row.customerSpecificFields ? row.customerSpecificFields :
+                                                    'N/A'}}</mat-cell>
+                                            </ng-container>
+
+                                            <ng-container matColumnDef="DriverName">
+                                                <mat-header-cell *matHeaderCellDef mat-sort-header>Driver
+                                                    Name</mat-header-cell>
+                                                <mat-cell *matCellDef="let row"
+                                                    (contextmenu)="onContextMenu($event, row)">
+                                                    {{row.driverName ? row.driverName : 'N/A'}}</mat-cell>
+                                            </ng-container>
+
+                                            <ng-container matColumnDef="DriverMobile">
+                                                <mat-header-cell *matHeaderCellDef mat-sort-header>Driver
+                                                    Mobile</mat-header-cell>
+                                                <mat-cell *matCellDef="let row"
+                                                    (contextmenu)="onContextMenu($event, row)">
+                                                    {{row.driverMobile ? row.driverMobile : 'N/A'}}</mat-cell>
+                                            </ng-container>
+
+                                            <ng-container matColumnDef="PickupDate">
+                                                <mat-header-cell *matHeaderCellDef mat-sort-header>Pickup
+                                                    Date</mat-header-cell>
+                                                <mat-cell *matCellDef="let row"
+                                                    (contextmenu)="onContextMenu($event, row)">
+                                                    {{row.pickupDate ? (row.pickupDate| date: 'dd-MM-yyyy')   :
+                                                    'N/A'}}</mat-cell>
+                                            </ng-container>
+
+                                            <ng-container matColumnDef="BookingDate">
+                                                <mat-header-cell *matHeaderCellDef mat-sort-header>Booking
+                                                    Date</mat-header-cell>
+                                                <mat-cell *matCellDef="let row"
+                                                    (contextmenu)="onContextMenu($event, row)">
+                                                    {{row.bookingDate ? (row.bookingDate | date: 'dd-MM-yyyy') :
+                                                    'N/A'}}</mat-cell>
+                                            </ng-container>
+
+                                            <ng-container matColumnDef="CancellationDateTime">
+                                                <mat-header-cell *matHeaderCellDef mat-sort-header>Cancellation Date
+                                                    Time</mat-header-cell>
+                                                <mat-cell *matCellDef="let row"
+                                                    (contextmenu)="onContextMenu($event, row)">
+                                                    {{row.cancellationDateTime ? (row.cancellationDateTime | date: 'dd-MM-yyyy') 
+                                                    : 'N/A'}}</mat-cell>
+                                            </ng-container>
+
+
+                                            <!-- actions -->
+                                            <ng-container matColumnDef="unlock">
+                                                <mat-header-cell *matHeaderCellDef class="pr-0"
+                                                    [ngClass]="'tbl-col-width-per-9'">Actions</mat-header-cell>
+                                                <mat-cell *matCellDef="let row; let i=index;" class="pr-0"
+                                                    [ngClass]="'tbl-col-width-per-9'">
+
+
+                                                </mat-cell>
+                                            </ng-container>
+
+                                            <mat-header-row *matHeaderRowDef="displayedColumns"></mat-header-row>
+                                            <mat-row *matRowDef="let row; columns: displayedColumns;"
+                                                [style.cursor]="'pointer'" matRipple>
+                                            </mat-row>
+                                        </mat-table>
+                                    </div>
+                                      </div>
+
+                                    <!-- context menu start -->
+                                    <div style="visibility: hidden; position: fixed"
+                                        [style.left]="contextMenuPosition.x" [style.top]="contextMenuPosition.y"
+                                        [matMenuTriggerFor]="contextMenu">
+                                    </div>
+                                    <mat-menu #contextMenu="matMenu">
+                                        <ng-template matMenuContent let-item="item">
+
+                                        </ng-template>
+                                    </mat-menu>
+
+
+
+                                    <div class="body">
+                                        <div class="example-button-row">
+
+                                            <button mat-raised-button color="primary"
+                                                (click)="PreviousCall()">Previous</button>
+                                            <button mat-raised-button color="primary" (click)="NextCall()">Next</button>
+
+                                        </div>
+                                    </div>
+
+                                </ng-template>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>

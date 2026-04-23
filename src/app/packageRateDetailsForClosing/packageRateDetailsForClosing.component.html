@@ -1,0 +1,182 @@
+<div class="responsive_table">
+      <div class="panel-row is-header">
+        <div class="panel-cell" colspan="2"><b>	Bill From To :</b></div>
+        <div class="panel-cell" colspan="2"><b>Additional :</b></div>
+      </div>
+
+      <div class="panel-row is-header">
+        <div class="panel-cell"><b>Fixed</b></div>
+        <div class="panel-cell"><b>Package</b></div>
+        <div class="panel-cell"><b>KMs</b></div>
+        <div class="panel-cell"><b>Minutes</b></div>
+      </div>
+
+      <div class="panel-row">
+        <div class="panel-cell">
+          {{ dataSourceforCard?.billFromTo || 'N/A' }}
+        </div>
+
+        <div class="panel-cell">
+          {{dataSourceforCard?.package || 'N/A' }}
+        </div>
+
+        <div class="panel-cell">
+          {{ dataSourceforCard?.additionalKM || 0 }}
+        </div>
+
+        <div class="panel-cell">
+          {{ dataSourceforCard?.addtionalMinutes || 0 }}
+        </div>
+
+      </div>
+
+      <div class="panel-row is-header">
+        <div class="panel-cell" colspan="2"><b>Total :</b></div>
+        <div class="panel-cell" colspan="2"><b>Extra :</b></div>
+      </div>
+
+      <div class="panel-row is-header">
+        <div class="panel-cell"><b>KMs</b></div>
+        <div class="panel-cell"><b>Hrs</b></div>
+        <div class="panel-cell"><b>Extra KMs</b></div>
+        <div class="panel-cell"><b>Extra Hrs</b></div>
+      </div>
+
+      <div class="panel-row">
+        <div class="panel-cell">
+          {{ dataSourceforCard?.totalRunningKM || 'N/A' }}
+        </div>
+
+        <div class="panel-cell">
+          {{ dataSourceforCard?.totalRunningHours || 'N/A' }}:
+          {{ dataSourceforCard?.totalRunningMinutes }}
+        </div>
+
+        <div class="panel-cell">
+          {{ dataSourceforCard?.extraKMs || 0 }}
+        </div>
+
+        <div class="panel-cell">
+          {{ dataSourceforCard?.extraMinutes
+          ? (getHoursAndMinutes(dataSourceforCard?.extraMinutes).hours + ':' +
+          getHoursAndMinutes(dataSourceforCard?.extraMinutes).minutes)
+          : 'N/A' }}
+        </div>
+
+      </div>
+      <div class="panel-row is-header">
+        <div class="panel-cell" colspan="2"><b>Nights :</b></div>
+        <div class="panel-cell" colspan="2"><b>FGR :</b></div>
+      </div>
+
+      <div class="panel-row is-header">
+        <div class="panel-cell"><b>Count</b></div>
+        <div class="panel-cell"><b>Amount</b></div>
+        <div class="panel-cell"><b>Kms</b></div>
+        <div class="panel-cell"><b>Amount</b></div>
+      </div>
+
+      <div class="panel-row">
+        <div class="panel-cell">
+          {{ dataSourceforCard?.totalNights || 0 }}
+        </div>
+
+        <div class="panel-cell">
+          {{ dataSourceforCard?.totalNightChargesAmount || 0 }}
+        </div>
+
+        <div class="panel-cell">
+          {{ dataSourceforCard?.fgrkm || 0 }}
+        </div>
+
+        <div class="panel-cell">
+          {{ dataSourceforCard?.fgrkmRate || 0 }}
+        </div>
+
+      </div>
+      <div class="panel-row is-header">
+        <div class="panel-cell" colspan="2"><b>Expenses :</b></div>
+      </div>
+
+      <div class="panel-row is-header">
+        <div class="panel-cell"><b>Parking/Toll/Fastag/RFID</b></div>
+        <div class="panel-cell"><b>Total Expense</b></div>
+        <div class="panel-cell"><b>Inter State Tax</b></div>
+        <div class="panel-cell"><b>Driver Allowance</b></div>
+      </div>
+
+      <div class="panel-row">
+        <div class="panel-cell">
+          {{ dataSourceforCard?.totalParkingTollFastagRFIDAmount || 0 }}
+        </div>
+
+        <div class="panel-cell">
+          {{ dataSourceforCard?.totalChargebleExpenceAmount || 0 }}
+        </div>
+
+        <div class="panel-cell">
+          {{ dataSourceforCard?.totalInterStateAmount || 0 }}
+        </div>
+
+        <div class="panel-cell">
+          {{ dataSourceforCard?.driverAllowance || 0 }}
+        </div>
+
+      </div>
+      <div class="panel-row is-header">
+        <div class="panel-cell"><b>SubTotal</b></div>
+        <div class="panel-cell"><b>GST Percentage</b></div>
+        <div class="panel-cell"><b>GST Amount</b></div>
+        <div class="panel-cell"><b> Discount %</b></div>
+      </div>
+
+      <div class="panel-row">
+        <div class="panel-cell">
+          {{ dataSourceforCard?.totalAmountAfterExpences || 0 }}
+        </div>
+
+        <div class="panel-cell">
+          <span *ngIf="dataSourceforCard?.igstPercentage">IGST @{{dataSourceforCard?.igstPercentage || 0}}%,</span><br>
+          <span *ngIf="dataSourceforCard?.sgstPercentage">SGST @{{dataSourceforCard?.sgstPercentage ||0 }}%,</span><br>
+          <span *ngIf="dataSourceforCard?.cgstPercentage">CGST @{{dataSourceforCard?.cgstPercentage || 0}}%</span>
+        </div>
+
+        <div class="panel-cell">
+          <span *ngIf="dataSourceforCard?.igstAmount">IGST: {{dataSourceforCard?.igstAmount || 0}},</span><br>
+          <span *ngIf="dataSourceforCard?.sgstAmount">SGST: {{dataSourceforCard?.sgstAmount || 0}},</span><br>
+          <span *ngIf="dataSourceforCard?.cgstAmount">CGST: {{dataSourceforCard?.cgstAmount || 0}}</span>&nbsp;
+        </div>
+
+        <div class="panel-cell">
+          {{ dataSourceforCard?.discountPercentage || 0 }}
+        </div>
+
+      </div>
+
+       <div class="panel-row is-header">
+        <div class="panel-cell"><b>Discount Amount</b></div>
+        <div class="panel-cell"><b>Advance</b></div>
+        <div class="panel-cell"><b>Total</b></div>
+       <div class="panel-cell"><b></b></div>
+      </div>
+
+      <div class="panel-row">
+        <div class="panel-cell">
+              {{ (dataSourceforCard?.discountAmountOnPackage || 0) +
+                            (dataSourceforCard?.discountAmountOnExtraKM || 0) +
+                            (dataSourceforCard?.discountAmountOnExtraHour || 0)  }}
+        </div>
+
+        <div class="panel-cell">
+        {{dataSourceforCard?.invoiceAdvance || 0 }} 
+        </div>
+
+        <div class="panel-cell">
+          {{ dataSourceforCard?.totalRecivableAfterAdvace || 0 }}
+        </div>
+          <div class="panel-cell">
+        
+        </div>
+      </div>
+
+</div>

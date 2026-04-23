@@ -1,0 +1,4171 @@
+<section class="content">
+  <div class="container-fluid">
+    <div class="block-header">
+      <div class="row">
+        <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12" id="linkButtonSection">
+          <ul>
+            <li class="breadcrumb-item bcrumb-1">
+              <a routerLink="/dashboard/main"><i class="fas fa-home"></i> Home</a>|
+              <a href="#" onClick="return false;">Admin</a>
+              <a href="#" onClick="return false;"></a>
+            </li>
+          </ul>
+          <ul class="breadcrumb breadcrumb-style ">
+            <li class="breadcrumb-item">
+              <h2></h2>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+
+    <div class="card">
+      <div class="header bg-cyan">
+        <h2>
+          KM  Comparsion
+        </h2>
+        <ul class="header-dropdown m-r-10">
+          <li>
+            <a class="material-icons" href="javascript:void(0);" (click)="scrollToLinkButton()">keyboard_arrow_up</a>
+          </li>
+          <li></li>
+
+        </ul>
+      </div>
+      <div style="background-color: #ebeef1;">
+        <!-- <app-customerInfo [CustomerID]="CustomerID"></app-customerInfo> -->
+        <form [formGroup]="advanceTableForm">
+          <mat-accordion>
+            <mat-expansion-panel *ngFor="let data of advanceTableCI" [expanded]="panelExpanded">
+              <mat-expansion-panel-header>
+                <mat-panel-title>
+                 
+                </mat-panel-title>
+              </mat-expansion-panel-header>
+             
+                      <div class="row">
+                        <div class="col-xl-3  col-lg-3 col-md-6 col-sm-12 mb-2">
+
+                        </div>
+
+                        <div class="col-xl-3  col-lg-3 col-md-6 col-sm-12 mb-2">
+                          <mat-radio-button
+                            color="primary"
+                            #manualRadio
+                            [checked]="true"
+                            value="Manual"
+                            (change)="toggleBillingManualVisibility()"
+                            >Manual KM</mat-radio-button
+                          >
+                        </div>
+                        <div class="col-xl-3  col-lg-3 col-md-6 col-sm-12 mb-2">
+                          <mat-radio-button
+                            color="primary"
+                            #appRadio
+                            value="App"
+                            (change)="toggleBillingManualVisibility()"
+                            >App KM</mat-radio-button
+                          >
+                        </div>
+                        <div class="col-xl-3  col-lg-3 col-md-6 col-sm-12 mb-2">
+                          <mat-radio-button
+                            color="primary"
+                            #gTrackRadio
+                            value="GtrackKM"
+                            (change)="toggleBillingManualVisibility()"
+                            >GPS
+                            <a href="" style="width: 50px; text-align: center" [type]="submit"
+                              >(Get KM)</a
+                            ></mat-radio-button
+                          >
+                        </div>
+                      </div>
+                      <br/>
+                
+                          <div class ="row"
+                          >
+                          <div class="col-xl-3  col-lg-3 col-md-6 col-sm-12 mb-2">
+                          <span matTooltip="Garage To Pickup" matTooltipPosition="above"
+                          >G2P</span
+                        >
+                          </div>
+                          <div class="col-xl-3  col-lg-3 col-md-6 col-sm-12 mb-2">
+                          <mat-form-field appearance="outline" style="width: 100px" floatLabel="always">
+                            <input required matInput formControlName="hubToStartKM" readonly />
+                          </mat-form-field>
+                          </div>
+                          
+                          <div class="col-xl-3  col-lg-3 col-md-6 col-sm-12 mb-2">
+                          <mat-form-field appearance="outline" style="width: 100px" floatLabel="always">
+                            <input
+                              required
+                              matInput
+                              formControlName="locationToPickupTripKm"
+                              (input)="onlocationToPickupTripKmChange()"
+                              readonly
+                            />
+                          </mat-form-field>
+                    </div>
+
+                    <div class="col-xl-3  col-lg-3 col-md-6 col-sm-12 mb-2">
+                          <mat-form-field appearance="outline" style="width: 100px" floatLabel="always">
+                            <input required matInput readonly />
+                          </mat-form-field>
+                    </div>
+                          
+                        </div>
+                        <br/>
+                      
+                        <div class ="row">
+                          <div class="col-xl-3  col-lg-3 col-md-6 col-sm-12 mb-2">
+                          <span matTooltip="Point To Point" matTooltipPosition="above">P2P</span>
+                          </div>
+
+                          <div  class="col-xl-3  col-lg-3 col-md-6 col-sm-12 mb-2">
+                        <mat-form-field appearance="outline" style="width: 100px;" floatLabel="always">
+                          <input required matInput formControlName="startToEndKM" readonly>
+                        </mat-form-field>
+                        </div>
+
+                        <div  class="col-xl-3  col-lg-3 col-md-6 col-sm-12 mb-2">
+                        <mat-form-field appearance="outline" style="width: 100px;" floatLabel="always">
+                          <input required matInput formControlName="pickupToDropOffTripKm"
+                            (input)="onpickupToDropOffTripKmChange()" readonly>
+                        </mat-form-field>
+                        </div>
+
+                      <div  class="col-xl-3  col-lg-3 col-md-6 col-sm-12 mb-2">
+                        <mat-form-field appearance="outline" style="width: 100px;" floatLabel="always">
+                          <input required matInput readonly>
+                        </mat-form-field>
+                        </div>
+
+                        </div>
+                        <br/>
+
+                        <div class ="row"> 
+                          <div class="col-xl-3  col-lg-3 col-md-6 col-sm-12 mb-2">
+                          <span matTooltip="DropOff To Garage" matTooltipPosition="above">D2G</span>
+
+                        </div>
+                        <div class="col-xl-3  col-lg-3 col-md-6 col-sm-12 mb-2">
+                        <mat-form-field appearance="outline" style="width: 100px;" floatLabel="always">
+                          <input required matInput formControlName="endToHubKM" readonly>
+                        </mat-form-field>
+                        </div>
+
+                    <div class="col-xl-3  col-lg-3 col-md-6 col-sm-12 mb-2">
+                        <mat-form-field appearance="outline" style="width: 100px;" floatLabel="always">
+                          <input required matInput formControlName="dropOffToLocationInTripKm"
+                            (input)="ondropOffToLocationInTripKmChange()" readonly>
+                        </mat-form-field>
+                    </div>
+
+                    <div class="col-xl-3  col-lg-3 col-md-6 col-sm-12 mb-2">
+                      
+                        <mat-form-field appearance="outline" style="width: 100px;" floatLabel="always">
+                          <input required matInput readonly>
+                        </mat-form-field>
+                    </div>
+                  
+                          </div>
+                          <br/>
+            </mat-expansion-panel>
+          </mat-accordion>
+        </form>
+      </div>
+    </div>
+
+
+    <!--Table-->
+    <div class="card" style="background-color: #ebeef1;margin-bottom: 10px;">
+      <div>
+        
+        <!-- <h2>
+          Current Duty
+        </h2> -->
+      </div>
+      <div style="background-color: #ebeef1;">
+        <!-- <app-closingDetailShow [ReservationID]="ReservationID"></app-closingDetailShow> -->
+        <div class="container-fluid">
+          <form [formGroup]="advanceTableForm">
+            <!-- <div *ngFor="let data of advanceTable"> -->
+            <div class="row" style="margin-left: 0px;margin-top: 10px;">
+              <div class="col-lg-12">
+                <div class="table-responsive">
+                  <mat-card class="example-card">
+                    <mat-card-header></mat-card-header>
+                    <mat-card-content>
+                      <div class="row">
+                        <div class="col-xl-3 col-lg-3 col-md-3 col-sm-6 mb-2">
+                          <mat-form-field appearance="outline" floatLabel="always" class="example-full-width">
+                            <mat-label>DS Closing</mat-label>
+                            <mat-select formControlName="dsClosing">
+                              <mat-option value="Closed">Closed</mat-option>
+                              <mat-option value="VirtualClosing">Virtual Closing</mat-option>
+                              <mat-option value="Disputed">Disputed</mat-option>
+                            </mat-select>
+                          </mat-form-field>
+                        </div>
+
+                        <div class="col-xl-3 col-lg-3 col-md-3 col-sm-6 mb-2">
+                          <mat-form-field appearance="outline" floatLabel="always" class="example-full-width">
+                            <mat-label>Duty Slip Received</mat-label>
+                            <mat-select formControlName="physicalDutySlipReceived">
+                              <mat-option [value]=true>Yes</mat-option>
+                              <mat-option [value]=false>No</mat-option>
+                            </mat-select>
+                          </mat-form-field>
+                        </div>
+
+                        <div class="col-xl-3 col-lg-3 col-md-3 col-sm-6 mb-2">
+                          <mat-form-field appearance="outline" floatLabel="always" class="example-full-width"> 
+                            <mat-label>Running Details</mat-label>                         
+                            <textarea matInput  formControlName="runningDetails"></textarea>
+                          </mat-form-field>
+                        </div>
+
+                        <div class="col-xl-3 col-lg-3 col-md-3 col-sm-6 mb-2">
+                          <mat-form-field appearance="outline" floatLabel="always" class="example-full-width">  
+                            <mat-label>Vendor Remark</mat-label>                        
+                            <textarea matInput  formControlName="vendorRemark"></textarea>
+                          </mat-form-field>
+                        </div>
+                      </div>
+
+                      <div class="row">
+                        <div class="col-xl-3 col-lg-3 col-md-3 col-sm-6 mb-2">
+                          <mat-form-field appearance="outline" floatLabel="always" class="example-full-width">
+                            <mat-label>Location Out Date</mat-label>
+                            <input required matInput [matDatepicker]="locOutDate"  formControlName="locationOutDateForBilling" (dateChange)="onLocOutDatepickerChange($event)">
+                            <mat-datepicker-toggle matSuffix [for]="locOutDate"></mat-datepicker-toggle>
+                            <mat-datepicker #locOutDate></mat-datepicker>
+                          </mat-form-field>
+                        </div>
+
+                        <div class="col-xl-3 col-lg-3 col-md-3 col-sm-6 mb-2">
+                          <mat-form-field appearance="outline" floatLabel="always" class="example-full-width">
+                            <mat-label>Location Out Time</mat-label>
+                            <input required matInput [owlDateTimeTrigger]="time1" [owlDateTime]="time1"  formControlName="locationOutTimeForBilling" (ngModelChange)="onTimeSelection()">
+                            <button mat-icon-button matSuffix type="button" [owlDateTimeTrigger]="time1" class="date-icon" aria-label="Open time picker"><mat-icon>schedule</mat-icon></button>
+                            <owl-date-time [pickerType]="'timer'" #time1></owl-date-time>
+                          </mat-form-field>
+                        </div>
+
+                        <div class="col-xl-3 col-lg-3 col-md-3 col-sm-6 mb-2">
+                          <mat-form-field appearance="outline" floatLabel="always" class="example-full-width">
+                            <mat-label>Location Out KM</mat-label>
+                            <input required matInput formControlName="locationOutKMForBilling" (input)="onlocationOutKMForDriver()">
+                          </mat-form-field>
+                        </div>
+
+                        <div class="col-xl-3 col-lg-3 col-md-3 col-sm-6 mb-2">
+                          <mat-form-field appearance="outline" floatLabel="always" class="example-full-width">
+                            <mat-label>Location Out Address</mat-label>
+                            <textarea matInput [disabled]="true" formControlName="locationOutAddressStringForBilling" rows="3"></textarea>
+                          </mat-form-field>
+                        </div>
+
+                      </div>
+
+                      <div class="row">
+                        <div class="col-xl-3 col-lg-3 col-md-3 col-sm-6 mb-2">                         
+                          <mat-form-field appearance="outline" floatLabel="always" class="example-full-width">                           
+                            <mat-label>Pickup Date</mat-label>
+                            <input required matInput [matDatepicker]="pickDate" formControlName="pickUpDateForBilling" (dateChange)="onPickupDatepickerChange($event)">
+                            <mat-datepicker-toggle matSuffix [for]="pickDate"></mat-datepicker-toggle>
+                            <mat-datepicker #pickDate></mat-datepicker>
+                          </mat-form-field>
+                          <span style="color: green; font-size: 10px;" >
+                                <b>Pickup Date</b> :  {{PickupDate | date:'dd-MM-yyyy'}}
+                           </span> 
+                        </div>
+
+                        <div class="col-xl-3 col-lg-3 col-md-3 col-sm-6 mb-2">  
+                          <mat-form-field appearance="outline" floatLabel="always" class="example-full-width">
+                            <mat-label>Pickup Time</mat-label>                            
+                            <input required matInput [owlDateTimeTrigger]="time2"  [owlDateTime]="time2"  formControlName="pickUpTimeForBilling" (ngModelChange)="onTimeSelection()">
+                            <button mat-icon-button matSuffix type="button" [owlDateTimeTrigger]="time2" class="date-icon" aria-label="Open time picker"><mat-icon>schedule</mat-icon></button>
+                            <owl-date-time [pickerType]="'timer'" #time2></owl-date-time>
+                            
+                          </mat-form-field> 
+                          <span style="color: red; font-size: 10px;" *ngIf="isPickupTimeInvalid()">
+                                 Time Not Confirmed
+                           </span> 
+                           <span style="color: green; font-size: 10px;" *ngIf="!isPickupTimeInvalid()">
+                                <b>Pickup Time</b> :  {{PickupTime | date:'shortTime'}}
+                           </span>
+                                                  
+                        </div>
+
+                        <div class="col-xl-3 col-lg-3 col-md-3 col-sm-6 mb-2">
+                          <mat-form-field appearance="outline" floatLabel="always" class="example-full-width">
+                            <mat-label>Pickup KM</mat-label>
+                            <input required matInput formControlName="pickUpKMForBilling" (input)="onPickupDriverKMChange()">
+                          </mat-form-field>
+                        </div>
+
+                        <div class="col-xl-3 col-lg-3 col-md-3 col-sm-6 mb-2">
+                          <mat-form-field appearance="outline" floatLabel="always" class="example-full-width">
+                            <mat-label>Pickup Address</mat-label>
+                            <textarea matInput [disabled]="true" formControlName="pickUpAddressStringForBilling" rows="3"></textarea>
+                          </mat-form-field>
+                        </div>
+                      </div>
+
+                      <div class="row">
+                        <div class="col-xl-3 col-lg-3 col-md-3 col-sm-6 mb-2">
+                          <mat-form-field appearance="outline" floatLabel="always" class="example-full-width">
+                            <mat-label>DropOff Date</mat-label>
+                            <input required matInput [matDatepicker]="dropDate"  formControlName="dropOffDateForBilling" (dateChange)="onDropOffDatepickerChange($event)">
+                            <mat-datepicker-toggle matSuffix [for]="dropDate"></mat-datepicker-toggle>
+                            <mat-datepicker #dropDate></mat-datepicker>
+                          </mat-form-field>
+                        </div>
+
+                        <div class="col-xl-3 col-lg-3 col-md-3 col-sm-6 mb-2">
+                          <mat-form-field appearance="outline" floatLabel="always" class="example-full-width">
+                            <mat-label>DropOff Time</mat-label>
+                            <input required matInput [owlDateTimeTrigger]="time3"  [owlDateTime]="time3"  formControlName="dropOffTimeForBilling" (ngModelChange)="onTimeSelection()">
+                            <button mat-icon-button matSuffix type="button" [owlDateTimeTrigger]="time3" class="date-icon" aria-label="Open time picker"><mat-icon>schedule</mat-icon></button>
+                            <owl-date-time [pickerType]="'timer'" #time3></owl-date-time>
+                          </mat-form-field>
+                        </div>
+
+                        <div class="col-xl-3 col-lg-3 col-md-3 col-sm-6 mb-2">
+                          <mat-form-field appearance="outline" floatLabel="always" class="example-full-width">
+                            <mat-label>DropOff KM</mat-label>
+                            <input required matInput formControlName="dropOffKMForBilling" (input)="ondropOffKMForDriverChange()">                          
+                          </mat-form-field>
+                        </div>
+
+                        <div class="col-xl-3 col-lg-3 col-md-3 col-sm-6 mb-2">
+                          <mat-form-field appearance="outline" floatLabel="always" class="example-full-width">
+                            <mat-label>DropOff Address</mat-label>
+                            <textarea matInput [disabled]="true" formControlName="dropOffAddressStringForBilling" rows="3"></textarea>
+                          </mat-form-field>
+                        </div>
+                      </div>
+
+                      <div class="row">
+                        <div class="col-xl-3 col-lg-3 col-md-3 col-sm-6 mb-2">
+                          <mat-form-field appearance="outline" floatLabel="always" class="example-full-width">
+                            <mat-label>LocationIn Date</mat-label>
+                            <input required matInput [matDatepicker]="locInDate"  formControlName="locationInDateForBilling" (dateChange)="onLocInDatepickerChange($event)">
+                            <mat-datepicker-toggle matSuffix [for]="locInDate"></mat-datepicker-toggle>
+                            <mat-datepicker #locInDate></mat-datepicker>
+                          </mat-form-field>
+                        </div>
+
+                        <div class="col-xl-3 col-lg-3 col-md-3 col-sm-6 mb-2">
+                          <mat-form-field appearance="outline" floatLabel="always" class="example-full-width">
+                            <mat-label>LocationIn Time</mat-label>
+                            <input required matInput [owlDateTimeTrigger]="time4"  [owlDateTime]="time4" formControlName="locationInTimeForBilling" (ngModelChange)="onTimeSelection()">
+                            <button mat-icon-button matSuffix type="button" [owlDateTimeTrigger]="time4" class="date-icon" aria-label="Open time picker"><mat-icon>schedule</mat-icon></button>
+                            <owl-date-time [pickerType]="'timer'" #time4></owl-date-time>
+                          </mat-form-field>
+                        </div>
+
+                        <div class="col-xl-3 col-lg-3 col-md-3 col-sm-6 mb-2">
+                          <mat-form-field appearance="outline" floatLabel="always" class="example-full-width">
+                            <mat-label>LocationIn KM</mat-label>
+                            <input required matInput formControlName="locationInKMForBilling" (input)="onlocationInKMForDriverChange()">                         
+                          </mat-form-field>
+                        </div>
+
+                        <div class="col-xl-3 col-lg-3 col-md-3 col-sm-6 mb-2">
+                          <mat-form-field appearance="outline" floatLabel="always" class="example-full-width">
+                            <mat-label>LocationIn Address</mat-label>
+                            <textarea matInput [disabled]="true" formControlName="locationInAddressStringForBilling" rows="3"></textarea>
+                          </mat-form-field>
+                        </div>
+                      </div>
+                      
+                      <div class="row">
+                        <div class="col-xl-3 col-lg-3 col-md-3 col-sm-6 mb-2" style="font-size: 15px;padding-top: 12px;">
+                          <mat-label style="border-bottom: 1px solid rgba(0, 0, 0, 0.42); padding: 4px 0;width:215px;display: inline-block; "><strong>Total</strong></mat-label>
+                        </div>
+
+                        <div class="col-xl-3 col-lg-3 col-md-3 col-sm-6 mb-2">
+                          <mat-form-field appearance="outline" floatLabel="always" class="example-full-width">
+                            <mat-label>Date & Time  Diff</mat-label>
+                            <input matInput [value]="datetime" readonly>
+                          </mat-form-field>
+                        </div>
+
+                        <div class="col-xl-3 col-lg-3 col-md-3 col-sm-6 mb-2">
+                          <mat-form-field appearance="outline" floatLabel="always" class="example-full-width">
+                            <mat-label>KM Diff</mat-label>
+                            <input matInput [value]="diff" readonly>
+                          </mat-form-field>
+                        </div>
+
+                        <div class="col-xl-3 col-lg-3 col-md-3 col-sm-6 mb-2">
+                          <mat-label>Signature</mat-label>
+                          <div>
+                            <img [src]="CustomerSignatureByDriver" alt="Signature" style="max-width: 100%; height: auto;">
+                          </div>
+                        </div>
+                      </div>
+
+                      <div class="row">
+                        <div class="col-xl-3 col-lg-3 col-md-3 col-sm-6 mb-2">
+                          <input  type="checkbox" formControlName="goodForBilling" (change)="onGFBChange($event)"> Good For Billing
+                        </div>
+                        <div class="col-xl-3 col-lg-3 col-md-3 col-sm-6 mb-2">
+                          <input  type="checkbox" formControlName="verifyDuty" (change)="onVDChange($event)"> Verify Duty
+                        </div>
+                        <div class="col-xl-3 col-lg-3 col-md-3 col-sm-6 mb-2"></div>
+                        <div class="col-xl-3 col-lg-3 col-md-3 col-sm-6 mb-2">
+                          <button mat-flat-button style="width: 200px;" color="primary" [disabled]="!advanceTableForm.valid" (click)="Put()"
+                              [type]="submit">{{ advanceTableBilling[0].dsClosing === null ? 'Save' : 'Update' }}
+                          </button>
+                        </div>
+                      </div>
+                    </mat-card-content>
+                  </mat-card>
+
+                  
+                  
+                </div>
+              </div>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <br>
+    <!-- Some Links -->
+    <div class="card" style="background-color: #ffffff;" id="linkButtonSection">
+      <div class="row" style="padding-left: 30px;margin-top: 10px;">
+        <div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 mb-2">
+          <h5>
+            <a (click)="openDutyTollParkingEntry()" style="cursor: pointer;color: #007bff;">Toll Parking Entry</a>
+            <a class="material-icons" href="javascript:void(0);"
+              (click)="showAndScrollToElement()">keyboard_arrow_down</a>
+          </h5>
+
+        </div>
+
+        <!-- <div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 mb-2">
+          <h5>
+            <a (click)="openInterstateTax()" style="cursor: pointer;color: #007bff;">Interstate Tax</a>
+            
+          </h5>
+        </div> -->
+
+        <div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 mb-2">
+          <h5>
+            <a (click)="dutyInterstateTax()" style="cursor: pointer;color: #007bff;">Interstate Tax Entry</a>
+            <a class="material-icons" href="javascript:void(0);"
+              (click)="showAndScrollDutyInterstateTax()">keyboard_arrow_down</a>
+          </h5>
+        </div>
+
+        <div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 mb-2">
+          <h5>
+            <a (click)="openDisputes()" style="cursor: pointer;color: #007bff;">Dispute</a>
+            <a class="material-icons" href="javascript:void(0);"
+              (click)="showAndScrollOpenDisputes()">keyboard_arrow_down</a>
+          </h5>
+        </div>
+
+        <div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 mb-2">
+          <h5>
+            <a (click)="openDutyExpense()" style="cursor: pointer;color: #007bff;">Duty Expense</a>
+            <a class="material-icons" href="javascript:void(0);"
+              (click)="showAndScrollOpenDutyExpense()">keyboard_arrow_down</a>
+          </h5>
+        </div>
+
+        <div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 mb-2">
+          <h5>
+            <a (click)="openDutyGSTPercentage()" style="cursor: pointer;color: #007bff;">Duty GST Percentage</a>
+            <a class="material-icons" href="javascript:void(0);"
+              (click)="showAndScrollDutyGSTPercentage()">keyboard_arrow_down</a>
+          </h5>
+        </div>
+
+        <div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 mb-2">
+          <h5>
+            <a (click)="openDutyState()" style="cursor: pointer;color: #007bff;">Duty State</a>
+            <a class="material-icons" href="javascript:void(0);"
+              (click)="showAndScrollDutyState()">keyboard_arrow_down</a>
+          </h5>
+        </div>
+
+        <div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 mb-2">
+          <h5>
+            <a (click)="openDutySAC()" style="cursor: pointer;color: #007bff;">Duty SAC</a>
+            <a class="material-icons" href="javascript:void(0);"
+              (click)="showAndScrollDutySAC()">keyboard_arrow_down</a>
+          </h5>
+        </div>
+        <div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 mb-2">
+          <h5>
+            <a (click)="openAdditional()" style="cursor: pointer;color: #007bff;">Additional KMs And Minutes</a>
+            <a class="material-icons" href="javascript:void(0);"
+              (click)="showAndScrollAdditionalKm()">keyboard_arrow_down</a>
+          </h5>
+        </div>
+      </div>
+
+      <div class="row" style="padding-left: 30px;">
+
+        <div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 mb-2">
+          <h5>
+            <a (click)="addDiscount()" style="cursor: pointer;color: #007bff;">Add Discount Details</a>
+            <a class="material-icons" href="javascript:void(0);" (click)="showAndScrollAddDiscount()">keyboard_arrow_down</a>
+          </h5>
+        </div>
+
+        <div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 mb-2">
+          <h5>
+            <a (click)="showMap()" style="cursor: pointer;color: #007bff;">Duty Slip Map</a>
+          </h5>
+        </div>
+
+        <div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 mb-2">
+          <h5>
+            <a (click)="closePanels()" style="cursor: pointer;color: #007bff;">Close All Panels</a>
+          </h5>
+        </div>
+
+        <div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 mb-2">
+          <h5>
+            <a style="cursor: pointer;color: #007bff;">Duty Slip Type</a>
+          </h5>
+        </div>
+
+      </div>
+
+      <div class="row" style="padding-left: 30px;">
+
+        <div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 mb-2">
+          <h5>
+            <a style="cursor: pointer;color: #007bff;">Billing Type</a>
+          </h5>
+        </div>
+
+        <div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 mb-2">
+          <h5>
+            <a (click)="addSalesPerson()" style="cursor: pointer;color: #007bff;">Add Sales Person</a>
+            <a class="material-icons" href="javascript:void(0);" (click)="showAndScrollSalesPerson()">keyboard_arrow_down</a>
+          </h5>
+        </div>
+
+        <div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 mb-2">
+          <button mat-flat-button style="width: 150px;text-align: center;" color="primary" (click)="CalculateBill()"
+            [type]="submit">Calculate </button>
+        </div>
+        <div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 mb-2">
+          <button mat-flat-button style="width: 150px;text-align: center;" color="primary" (click)="GenerateBill()"
+            [type]="submit">Generate Bill </button>
+        </div>
+        
+      </div>
+
+      <div class="row" style="padding-left: 30px;">        
+        <div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 mb-2">
+          <button mat-flat-button style="width: 100px;text-align: center;" color="primary" (click)="ViewBill()"
+            [type]="submit">View Bill</button>
+        </div>
+        <div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 mb-2">
+          <button mat-flat-button style="width: 150px;text-align: center;" color="primary" (click)="LoadLTR()"
+            [type]="submit">Add LTR Details</button>
+        </div>
+        <div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 mb-2">
+          <button mat-flat-button style="width: 150px;text-align: center;" color="primary" (click)="openBillingHistory()"
+            [type]="submit">Billing History</button>
+        </div>
+      </div>
+    </div>
+
+    <br>
+    <!-- Customer Details -->
+    <div class="card">
+      <div class="header bg-cyan">
+        <h2>
+          Customer Info
+        </h2>
+        <ul class="header-dropdown m-r-10">
+          <li>
+            <a class="material-icons" href="javascript:void(0);" (click)="scrollToLinkButton()">keyboard_arrow_up</a>
+          </li>
+          <li></li>
+
+        </ul>
+      </div>
+      <div style="background-color: #ebeef1;">
+        <!-- <app-customerInfo [CustomerID]="CustomerID"></app-customerInfo> -->
+        <div class="responsive_table">
+          <mat-accordion>
+            <mat-expansion-panel *ngFor="let data of advanceTableCI" [expanded]="panelExpanded">
+              <mat-expansion-panel-header>
+                <mat-panel-title>
+                  <div class="row">
+                    <div class="col-xl-2 col-lg-6 col-md-12 col-sm-12 mb-2">
+                      <b>Customer Name</b>
+                    </div>
+                    <div class="col-xl-2 col-lg-6 col-md-12 col-sm-12 mb-2">
+                      <b>Type</b>
+                    </div>
+                    <div class="col-xl-2 col-lg-6 col-md-12 col-sm-12 mb-2">
+                      <b>Category</b>
+                    </div>
+                    <div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 mb-2">
+                      <b>Billing Instruction</b>
+                    </div>
+                    <div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 mb-2">
+                      <b>Other Instruction</b>
+                    </div>
+                  </div>
+
+                </mat-panel-title>
+              </mat-expansion-panel-header>
+
+              <div class="row" style="margin-right: 5px;">
+                <div class="col-xl-2 col-lg-2 col-md-2 col-sm-2 mb-2">
+                  <span>{{data.customerName}}</span>
+                </div>
+
+                <div class="col-xl-2 col-lg-2 col-md-2 col-sm-2 mb-2">
+                  <span>{{data.customerType}}</span>
+                </div>
+
+                <div class="col-xl-2 col-lg-2 col-md-2 col-sm-2 mb-2">
+                  <span>{{data.customerCategory}}</span>
+                </div>
+
+                <div class="col-xl-3 col-lg-3 col-md-3 col-sm-3 mb-2">
+                  <span>N/A</span>
+                </div>
+
+                <div class="col-xl-3 col-lg-3 col-md-3 col-sm-3 mb-2">
+                  <span>N/A</span>
+                </div>
+
+              </div>
+
+            </mat-expansion-panel>
+          </mat-accordion>
+        </div>
+      </div>
+    </div>
+
+    <!--Resevation Detail-->
+    <div class="card">
+      <div class="header bg-cyan">
+        <h2>
+          Reservation Details
+          <ul class="header-dropdown m-r-10">
+            <li>
+              <a class="material-icons" href="javascript:void(0);" (click)="scrollToLinkButton()">keyboard_arrow_up</a>
+            </li>
+            <li></li>
+
+          </ul>
+        </h2>
+      </div>
+      <div style="background-color: #ebeef1;">
+        <!-- <app-reservationClosingDetails [ReservationID]="ReservationID"></app-reservationClosingDetails> -->
+        <div class="responsive_table">
+          <mat-accordion>
+            <mat-expansion-panel *ngIf="reservationCloseDetail" [expanded]="panelExpanded">
+              <mat-expansion-panel-header>
+                <mat-panel-title>
+                  <div class="row">
+                    <div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 mb-2">
+                      <b>Reservation No</b>
+                    </div>
+                    <div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 mb-2">
+                      <b>Pickup Address</b>
+                    </div>
+                    <div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 mb-2">
+                      <b>Pickup Date/Time</b>
+                    </div>
+                    <div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 mb-2">
+                      <b>DropOff Address</b>
+                    </div>
+                  </div>
+                </mat-panel-title>
+              </mat-expansion-panel-header>
+              <div>
+                <div class="row">
+                  <div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 mb-2">
+                    <span>{{ReservationID}}</span>
+                  </div>
+
+                  <div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 mb-2">
+                    <span>{{reservationCloseDetail.pickupAddress}}</span>
+                    <div>
+                      <a style="cursor: pointer;color: #007bff;
+                             padding-right: 5px; font-size: 10px !important; font-style: italic;">
+                        Location Details
+                      </a>
+                    </div>
+                  </div>
+
+                  <div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 mb-2">
+                    <!-- <span>
+                            <b>
+                                PickupDate/Time
+                            </b>                   
+                        </span>
+                        <br/> -->
+                    <span>{{reservationCloseDetail.pickupDate | date}} - {{reservationCloseDetail.pickupTime |
+                      date:'shortTime'}}</span>
+                  </div>
+
+                  <div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 mb-2">
+                    <!-- <span>
+                            <b>
+                                Drop Off Address
+                            </b>                   
+                        </span>
+                        <br/> -->
+                    <span>{{reservationCloseDetail.dropOffAddress}}</span>
+                    <div>
+                      <a style="cursor: pointer;color: #007bff;
+                             padding-right: 5px; font-size: 10px !important; font-style: italic;">
+                        Location Details
+                      </a>
+                    </div>
+                  </div>
+
+                </div>
+
+                <div class="row">
+                  <div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 mb-2">
+                    <span>
+                      <b>
+                        DropOffDate/Time
+                      </b>
+                    </span>
+                    <br />
+                    <span>{{reservationCloseDetail.dropOffDate
+                      | date}} - {{reservationCloseDetail.dropOffTime
+                      | date:'shortTime'}}</span>
+                  </div>
+
+                  <div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 mb-2">
+                    <span>
+                      <b>
+                        Duty Type
+                      </b>
+                    </span>
+                    <br />
+                    <span>{{reservationCloseDetail.packageType}}</span>
+                  </div>
+
+                  <div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 mb-2">
+                    <span>
+                      <b>
+                        Package
+                      </b>
+                    </span>
+                    <br />
+                    <span>{{reservationCloseDetail.package}}</span>
+
+                  </div>
+
+                  <div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 mb-2">
+                    <span>
+                      <b>
+                        Car Type Booked
+                      </b>
+                    </span>
+                    <br />
+                    <span>{{reservationCloseDetail.vehicleCategory}}</span>
+                  </div>
+
+                </div>
+
+                <div class="row">
+                  <div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 mb-2">
+                    <span>
+                      <b>
+                        City
+                      </b>
+                    </span>
+                    <br />
+                    <span>{{reservationCloseDetail.pickupCity}}</span>
+
+                  </div>
+                  <div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 mb-2">
+                    <span>
+                      <b>
+                        Car Booked
+                      </b>
+                    </span>
+                    <br />
+                    <span>{{reservationCloseDetail.vehicle}}</span>
+                  </div>
+
+                  <div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 mb-2">
+                    <span>
+                      <b>
+                        No of duties
+                      </b>
+                    </span>
+                    <br />
+                    <span>{{
+                      reservationCloseDetail.dutySlipID
+                      }}</span>
+                  </div>
+
+                  <div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 mb-2">
+                    <span>
+                      <b>
+                        Duty Details (if Multiple)
+                      </b>
+                    </span>
+                    <br />
+                    <span>{{'N/A'}}</span>
+
+                  </div>
+
+                </div>
+
+                <div class="row">
+
+                  <div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 mb-2">
+                    <span>
+                      <b>
+                        Email Attachment
+                      </b>
+                    </span>
+                    <br />
+                    <a style="cursor: pointer;color: #007bff;
+                             padding-right: 5px; font-size: 10px !important; font-style: italic;">
+                      Click To Open
+                    </a>
+                    <br />
+
+                  </div>
+
+                  <div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 mb-2">
+                    <span>
+                      <b>
+                        Ticket Number
+                      </b>
+                    </span>
+                    <br />
+                    <span>{{reservationCloseDetail.
+                      ticketNumber
+                      }}</span>
+                  </div>
+
+                  <div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 mb-2">
+                    <span>
+                      <b>
+                        Document
+                      </b>
+                    </span>
+                    <br />
+                    <div>
+                      <a style="cursor: pointer;color: #007bff;
+                              padding-right: 5px; font-size: 10px !important; font-style: italic;">
+                        Click To Open
+                      </a>
+                    </div>
+                  </div>
+                  <div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 mb-2">
+                    <span>
+                      <b>
+                        Booking Billing Instrucation
+                      </b>
+                    </span>
+                    <br />
+                    <span>{{'N/A'}}</span>
+                  </div>
+
+                </div>
+
+                <div class="row">
+
+                  <div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 mb-2">
+                    <span>
+                      <b>
+                        Discount
+                      </b>
+                    </span>
+                    <br />
+                    <span>{{'N/A'}}</span>
+                  </div>
+
+                  <div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 mb-2">
+                    <span>
+                      <b>
+                        Settled Rates
+                      </b>
+                    </span>
+                    <br />
+                    <span>{{'N/A'}}</span>
+                  </div>
+
+                </div>
+              </div>
+            </mat-expansion-panel>
+          </mat-accordion>
+        </div>
+      </div>
+    </div>
+
+    <!--Current Duty-->
+    <div class="card">
+      <div class="header bg-cyan">
+        <h2>
+          Current Duty
+        </h2>
+        <ul class="header-dropdown m-r-10">
+          <li>
+            <a class="material-icons" href="javascript:void(0);" (click)="scrollToLinkButton()">keyboard_arrow_up</a>
+          </li>
+          <li></li>
+
+        </ul>
+      </div>
+      <div style="background-color: #ebeef1;">
+        <!-- <app-currentDuty [ReservationID]="ReservationID" [DutySlipID]="DutySlipID"></app-currentDuty> -->
+        <!-- Assignment Info -->
+        <!-- <div class="responsive_table"> -->
+        <mat-accordion>
+          <mat-expansion-panel *ngFor="let data of dataSourceCurrentDuty" [expanded]="panelExpanded">
+            <mat-expansion-panel-header>
+              <mat-panel-title>
+                <span style="font-size: 15px;text-align: center;vertical-align: top;">
+                  <b>Assignment Info</b>
+                </span>
+              </mat-panel-title>
+            </mat-expansion-panel-header>
+            <div>
+              <div class="row">
+                <div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 mb-2">
+                  <span><b>Vendor</b></span>
+                  <br />
+                  <span>N/A</span>
+                </div>
+
+                <div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 mb-2">
+                  <span><b>App</b></span>
+                  <br />
+                  <span>{{ (data.driverName !== undefined || data.driverPhone.split('-')[1] !== undefined) ?
+                    ((data.driverName || 'N/A') + '-' + (data.driverPhone.split('-')[1] || 'N/A')) : 'N/A' }}</span>
+                </div>
+
+                <div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 mb-2">
+                  <span><b>Car</b></span>
+                  <br />
+                  <span>{{ (data.vehicle !== undefined || data.registrationNumber !== undefined) ? ((data.vehicle ||
+                    'N/A') + '-' + (data.registrationNumber || 'N/A')) : 'N/A' }}</span>
+                </div>
+
+                <div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 mb-2">
+                  <span><b>Date of Assignment</b></span>
+                  <br />
+                  <span>{{data.dateOfAllotment | date:'dd-MM-yyyy'}}</span>
+                </div>
+              </div>
+
+              <div class="row">
+
+                <div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 mb-2">
+                  <span><b>Assign No.</b></span>
+                  <br />
+                  <span>{{data.allotmentID || 'N/A'}}</span>
+                </div>
+
+                <div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 mb-2">
+                  <span><b>Duty No.</b></span>
+                  <br />
+                  <span>{{data.dutySlipID || 'N/A'}}</span>
+                </div>
+              </div>
+            </div>
+          </mat-expansion-panel>
+        </mat-accordion>
+        <!-- </div> -->
+        <br>
+
+        <!-- Car Running Info -->
+        <!-- <mat-accordion>
+            <mat-expansion-panel *ngFor="let data of advanceTable" [expanded]="panelExpanded">
+              <mat-expansion-panel-header>
+                <mat-panel-title>
+                  <span style="font-size: 15px;text-align: center;vertical-align: top;">
+                    <b>Car Running Info</b>
+                  </span>
+                </mat-panel-title>
+              </mat-expansion-panel-header>
+              <div>
+                <div class="row" style="margin-left: 20px;margin-top: 10px;">
+                  <div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 mb-2">
+                    <mat-radio-group [(ngModel)]="selectedOption">
+                      <mat-radio-button (click)="toggleAppCardVisibility()" color="primary"
+                        value="app">App</mat-radio-button>
+                    </mat-radio-group>
+                  </div>
+
+                  <div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 mb-2">
+                    <mat-radio-group [(ngModel)]="selectedOption">
+                      <mat-radio-button (click)="toggleDriverCardVisibility()" color="primary"
+                        value="driver">Driver</mat-radio-button>
+                    </mat-radio-group>
+                  </div>
+
+                  <div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 mb-2">
+                    <mat-radio-group [(ngModel)]="selectedOption">
+                      <mat-radio-button (click)="toggleGPSCardVisibility()" color="primary"
+                        value="gps">GPS</mat-radio-button>
+                    </mat-radio-group>
+                  </div>
+                </div>
+              </div>
+            </mat-expansion-panel>
+          </mat-accordion> -->
+
+        <!-- Other Info-->
+        <div class="header bg-cyan">
+          <span style="font-size: 15px;text-align: center;vertical-align: top;">
+            <b>Other Info</b>
+          </span>
+          <ul class="header-dropdown m-r-10">
+            <li>
+              <a class="material-icons" href="javascript:void(0);" (click)="scrollToLinkButton()">keyboard_arrow_up</a>
+            </li>
+            <li></li>
+
+          </ul>
+        </div>
+        <mat-accordion>
+          <mat-expansion-panel *ngFor="let data of advanceTableDriverTab || advanceTableAppTab || advanceTableGPSTab"
+            [expanded]="panelExpanded">
+            <mat-expansion-panel-header>
+              <mat-panel-title>
+              </mat-panel-title>
+            </mat-expansion-panel-header>
+
+            <!-- Garage IN Info-->
+            <!-- <div>
+              <span style="font-size: 15px;text-align: center;vertical-align: top;margin: 10px;margin-bottom: 5px;">
+                <b>Garage In Info</b>
+              </span>
+            </div>
+            <div class="row" style="margin-left: 20px;margin-top: 10px;">
+              <div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 mb-2">
+                <span>
+                  <b>
+                    Date
+                  </b>
+                </span>
+                <br />
+                <span>N/A</span>
+              </div>
+
+              <div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 mb-2">
+                <span>
+                  <b>
+                    Time
+                  </b>
+                </span>
+                <br />
+                <span>N/A</span>
+              </div>
+
+              <div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 mb-2">
+                <span>
+                  <b>
+                    Address
+                  </b>
+                </span>
+                <br />
+                <span>N/A</span>
+              </div>
+
+              <div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 mb-2">
+                <span>
+                  <b>
+                    GPS Location
+                  </b>
+                </span>
+                <br />
+                <span>N/A</span>
+              </div>
+            </div> -->
+
+            <!-- Device Info-->
+            <div>
+              <span style="font-size: 15px;text-align: center;vertical-align: top;margin: 10px;margin-bottom: 5px;">
+                <b>Device Info</b>
+              </span>
+            </div>
+            <div>
+              <div class="row" style="margin-left: 20px;">
+                <div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 mb-2">
+                  <span>
+                    <b>
+                      Internet Off Count
+                    </b>
+                  </span>
+                  <br />
+                  <span>0</span>
+                </div>
+
+                <div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 mb-2">
+                  <span>
+                    <b>
+                      Internet Off Minutes
+                    </b>
+                  </span>
+                  <br />
+                  <span>0</span>
+                </div>
+                <div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 mb-2">
+                  <span>
+                    <b>
+                      GPS Off Count
+                    </b>
+                  </span>
+                  <br />
+                  <span>0</span>
+                </div>
+
+                <div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 mb-2">
+                  <span>
+                    <b>
+                      GPS Off Minutes
+                    </b>
+                  </span>
+                  <br />
+                  <span>0</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Dispute Info-->
+            <div>
+              <span style="font-size: 15px;text-align: center;vertical-align: top;margin: 10px;margin-bottom: 5px;">
+                <b>Dispute Info</b>
+              </span>
+            </div>
+            <div class="row" style="margin-left: 20px;margin-top: 10px;">
+              <div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 mb-2">
+                <span>
+                  <b>
+                    Dispute
+                  </b>
+                </span>
+                <br />
+                <span>N/A</span>
+              </div>
+            </div>
+
+            <!-- Duty Info-->
+            <div>
+              <span style="font-size: 15px;text-align: center;vertical-align: top;margin: 10px;margin-bottom: 5px;">
+                <b>Duty Info</b>
+              </span>
+            </div>
+            <div class="row" style="margin-left: 20px;margin-top: 10px;">
+              <div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 mb-2">
+                <span>
+                  <b>
+                    Duty Type
+                  </b>
+                </span>
+                <br />
+                <span>{{data.dutyType || 'N/A'}}</span>
+              </div>
+
+              <div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 mb-2">
+                <span>
+                  <b>
+                    Package
+                  </b>
+                </span>
+                <br />
+                <span>{{data.package || 'N/A'}}</span>
+              </div>
+
+              <div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 mb-2">
+                <span>
+                  <b>
+                    Reason of Change
+                  </b>
+                </span>
+                <br />
+                <span>N/A</span>
+              </div>
+              <div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 mb-2">
+                <span>
+                  <b>
+                    Time Off Change
+                  </b>
+                </span>
+                <br />
+                <span>N/A</span>
+              </div>
+              <!-- <div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 mb-2">
+                <span>
+                  <b>
+                    Dispute
+                  </b>
+                </span>
+                <br />
+                <span>N/A</span>
+              </div> -->
+            </div>
+
+            <!-- Tariff Info-->
+            <div>
+              <span style="font-size: 15px;text-align: center;vertical-align: top;margin: 10px;margin-bottom: 5px;">
+                <!-- <b>Tariff City</b> -->
+              </span>
+            </div>
+            <div class="row" style="margin-left: 20px;margin-top: 10px;">
+              <div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 mb-2">
+                <span>
+                  <b>
+                    Tariff City
+                  </b>
+                </span>
+                <br />
+                <span>N/A</span>
+              </div>
+            </div>
+            <!-- </div> -->
+          </mat-expansion-panel>
+        </mat-accordion>
+
+        <br>
+
+        <div class="header bg-cyan" style="background-color: white; font-size: 15px;">
+          <span style="margin: 15px;font-weight:900;"><b>Car Running Info</b></span>
+          <ul class="header-dropdown m-r-10">
+            <li>
+              <a class="material-icons" href="javascript:void(0);" (click)="scrollToLinkButton()">keyboard_arrow_up</a>
+            </li>
+            <li></li>
+
+          </ul>
+        </div>
+
+        <mat-accordion>
+          <mat-expansion-panel [expanded]="panelExpanded">
+            <mat-expansion-panel-header>
+              <mat-panel-title>
+              </mat-panel-title>
+            </mat-expansion-panel-header>
+           
+    <!-- Radio buttons to replace tabs -->
+    <mat-radio-group color="primary" [(ngModel)]="selectedTab" (change)="onTabChangeByRadio($event)" class="mb-3" aria-label="Select section">
+      <mat-radio-button value="App">App</mat-radio-button>
+      <mat-radio-button value="Driver">Driver</mat-radio-button>
+      <mat-radio-button value="GPS">GPS</mat-radio-button>
+    </mat-radio-group>
+            <!-- <mat-tab-group style="background-color: white" (selectedTabChange)="tabChanged($event)"> -->
+              <mat-tab-group style="background-color: white">
+              <!--Data For App-->
+              <mat-tab *ngIf="selectedTab === 'App'">
+                <br>
+                <p *ngIf="!advanceTableAppTab; then thenBlock3 else elseBlock3">
+                  This is not rendered
+                </p>
+
+                <ng-template #elseBlock3>
+                  <div class="card" style="padding-bottom: 20px;">
+
+                    <!-- Location Out Info -->
+                    <div>
+                      <span
+                        style="font-size: 15px;text-align: center;vertical-align: top;margin: 10px;margin-bottom: 5px;">
+                        <b>Location Out Info</b>
+                      </span>
+                    </div>
+                    <div *ngFor="let data of advanceTableAppTab">
+                      <div class="row" style="margin-left: 20px;margin-top: 10px;">
+                        <div class="col-xl-2 col-lg-6 col-md-12 col-sm-12 mb-2">
+                          <span>
+                            <b>
+                              Date
+                            </b>
+                          </span>
+                          <br />
+                          <span>{{(data.locationOutDateByApp | date) || 'N/A'}}</span>
+                        </div>
+
+                        <div class="col-xl-2 col-lg-6 col-md-12 col-sm-12 mb-2">
+                          <span>
+                            <b>
+                              Time
+                            </b>
+                          </span>
+                          <br />
+                          <span>{{(data.locationOutTimeByApp | date:'shortTime') || 'N/A'}}</span>
+                        </div>
+                        <div class="col-xl-2 col-lg-6 col-md-12 col-sm-12 mb-2">
+                          <span>
+                            <b>
+                              KM
+                            </b>
+                          </span>
+                          <br />
+                          <span>{{data.locationOutKMByApp || 'N/A'}}</span>
+                        </div>
+
+                        <div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 mb-2">
+                          <span>
+                            <b>
+                              Address
+                            </b>
+                          </span>
+                          <br />
+                          <span>{{data.locationOutAddressStringByApp || 'N/A'}}</span>
+                        </div>
+
+                        <div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 mb-2">
+                          <span>
+                            <b>
+                              GPS Location
+                            </b>
+                          </span>
+                          <br />
+                          <span>{{data.locationOutAddressStringByApp || 'N/A'}}</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    <!-- Reached Info -->
+                    <div>
+                      <span style="font-size: 15px;text-align: center;vertical-align: top;margin: 10px;">
+                        <b>Reached Info</b>
+                      </span>
+                    </div>
+                    <div *ngFor="let data of advanceTableAppTab">
+                      <div class="row" style="margin-left: 20px;margin-top: 10px;">
+                        <div class="col-xl-2 col-lg-6 col-md-12 col-sm-12 mb-2">
+                          <span>
+                            <b>
+                              Date
+                            </b>
+                          </span>
+                          <br />
+                          <span>{{(data.reportingToGuestDateByApp | date) || 'N/A'}}</span>
+                        </div>
+
+                        <div class="col-xl-2 col-lg-6 col-md-12 col-sm-12 mb-2">
+                          <span>
+                            <b>
+                              Time
+                            </b>
+                          </span>
+                          <br />
+                          <span>{{(data.reportingToGuestTimeByApp | date:'shortTime') || 'N/A'}}</span>
+                        </div>
+                        <div class="col-xl-2 col-lg-6 col-md-12 col-sm-12 mb-2">
+                          <span>
+                            <b>
+                              KM
+                            </b>
+                          </span>
+                          <br />
+                          <span>{{data.reportingToGuestKMByApp || 'N/A'}}</span>
+                        </div>
+
+                        <div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 mb-2">
+                          <span>
+                            <b>
+                              Address
+                            </b>
+                          </span>
+                          <br />
+                          <span>{{data.reportingToGuestAddressStringByApp || 'N/A'}}</span>
+                        </div>
+
+                        <div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 mb-2">
+                          <span>
+                            <b>
+                              GPS Location
+                            </b>
+                          </span>
+                          <br />
+                          <span>{{data.reportingToGuestAddressStringByApp || 'N/A'}}</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    <!-- Pick Up Info -->
+                    <div>
+                      <span style="font-size: 15px;text-align: center;vertical-align: top;margin: 10px;">
+                        <b>Pick Up Info</b>
+                      </span>
+                    </div>
+                    <div *ngFor="let data of advanceTableAppTab">
+                      <div class="row" style="margin-left: 20px;margin-top: 10px;">
+                        <div class="col-xl-2 col-lg-6 col-md-12 col-sm-12 mb-2">
+                          <span>
+                            <b>
+                              Date
+                            </b>
+                          </span>
+                          <br />
+                          <span>{{(data.pickUpDateByApp | date) || 'N/A'}}</span>
+                        </div>
+
+                        <div class="col-xl-2 col-lg-6 col-md-12 col-sm-12 mb-2">
+                          <span>
+                            <b>
+                              Time
+                            </b>
+                          </span>
+                          <br />
+                          <span>{{(data.pickUpTimeByApp | date:'shortTime') || 'N/A'}}</span>
+                        </div>
+                        <div class="col-xl-2 col-lg-6 col-md-12 col-sm-12 mb-2">
+                          <span>
+                            <b>
+                              KM
+                            </b>
+                          </span>
+                          <br />
+                          <span>{{data.pickUpKMByApp || 'N/A'}}</span>
+                        </div>
+
+                        <div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 mb-2">
+                          <span>
+                            <b>
+                              Address
+                            </b>
+                          </span>
+                          <br />
+                          <span>{{data.pickUpAddressStringByApp || 'N/A'}}</span>
+                        </div>
+
+                        <div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 mb-2">
+                          <span>
+                            <b>
+                              GPS Location
+                            </b>
+                          </span>
+                          <br />
+                          <span>{{data.pickUpAddressStringByApp || 'N/A'}}</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    <!-- Drop Off Info -->
+                    <div>
+                      <span style="font-size: 15px;text-align: center;vertical-align: top;margin: 10px;">
+                        <b>Drop Off Info</b>
+                      </span>
+                    </div>
+                    <div *ngFor="let data of advanceTableAppTab">
+                      <div class="row" style="margin-left: 20px;margin-top: 10px;">
+                        <div class="col-xl-2 col-lg-6 col-md-12 col-sm-12 mb-2">
+                          <span>
+                            <b>
+                              Date
+                            </b>
+                          </span>
+                          <br />
+                          <span>{{(data.dropOffDateByApp | date) || 'N/A'}}</span>
+                        </div>
+
+                        <div class="col-xl-2 col-lg-6 col-md-12 col-sm-12 mb-2">
+                          <span>
+                            <b>
+                              Time
+                            </b>
+                          </span>
+                          <br />
+                          <span>{{data.dropOffTimeByApp | date:'shortTime'}}</span>
+                        </div>
+                        <div class="col-xl-2 col-lg-6 col-md-12 col-sm-12 mb-2">
+                          <span>
+                            <b>
+                              KM
+                            </b>
+                          </span>
+                          <br />
+                          <span>{{data.dropOffKMByApp || 'N/A'}}</span>
+                        </div>
+
+                        <div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 mb-2">
+                          <span>
+                            <b>
+                              Address
+                            </b>
+                          </span>
+                          <br />
+                          <span>{{data.dropOffAddressStringByApp || 'N/A'}}</span>
+                        </div>
+
+                        <div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 mb-2">
+                          <span>
+                            <b>
+                              GPS Location
+                            </b>
+                          </span>
+                          <br />
+                          <span>{{data.dropOffAddressStringByApp || 'N/A'}}</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    <!-- LocationIn Info -->
+                    <div>
+                      <span style="font-size: 15px;text-align: center;vertical-align: top;margin: 10px;">
+                        <b>Location In Info</b>
+                      </span>
+                    </div>
+                    <div *ngFor="let data of advanceTableAppTab">
+                      <div class="row" style="margin-left: 20px;margin-top: 10px;">
+                        <div class="col-xl-2 col-lg-6 col-md-12 col-sm-12 mb-2">
+                          <span>
+                            <b>
+                              Date
+                            </b>
+                          </span>
+                          <br />
+                          <span>{{(data.locationInDateByApp | date) || 'N/A'}}</span>
+                        </div>
+
+                        <div class="col-xl-2 col-lg-6 col-md-12 col-sm-12 mb-2">
+                          <span>
+                            <b>
+                              Time
+                            </b>
+                          </span>
+                          <br />
+                          <span>{{data.locationInTimeByApp | date:'shortTime'}}</span>
+                        </div>
+                        <div class="col-xl-2 col-lg-6 col-md-12 col-sm-12 mb-2">
+                          <span>
+                            <b>
+                              KM
+                            </b>
+                          </span>
+                          <br />
+                          <span>{{data.locationInKMByApp || 'N/A'}}</span>
+                        </div>
+
+                        <div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 mb-2">
+                          <span>
+                            <b>
+                              Address
+                            </b>
+                          </span>
+                          <br />
+                          <span>{{data.locationInAddressStringByApp || 'N/A'}}</span>
+                        </div>
+
+                        <div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 mb-2">
+                          <span>
+                            <b>
+                              GPS Location
+                            </b>
+                          </span>
+                          <br />
+                          <span>{{data.locationInAddressStringByApp || 'N/A'}}</span>
+                        </div>
+                      </div>
+                    </div>
+                    
+                  </div>
+                </ng-template>
+
+                <ng-template #thenBlock3>
+                  <div class="card" style="padding-bottom: 20px;">
+
+                    <!-- Location Out Info -->
+                    <div>
+                      <span
+                        style="font-size: 15px;text-align: center;vertical-align: top;margin: 10px;margin-bottom: 5px;">
+                        <b>Location Out Info</b>
+                      </span>
+                    </div>
+
+                    <div class="row" style="margin-left: 20px;margin-top: 10px;">
+                      <div class="col-xl-2 col-lg-6 col-md-12 col-sm-12 mb-2">
+                        <span>
+                          <b>
+                            Date
+                          </b>
+                        </span>
+                        <br />
+                        <span>N/A</span>
+                      </div>
+
+                      <div class="col-xl-2 col-lg-6 col-md-12 col-sm-12 mb-2">
+                        <span>
+                          <b>
+                            Time
+                          </b>
+                        </span>
+                        <br />
+                        <span>N/A</span>
+                      </div>
+                      <div class="col-xl-2 col-lg-6 col-md-12 col-sm-12 mb-2">
+                        <span>
+                          <b>
+                            KM
+                          </b>
+                        </span>
+                        <br />
+                        <span>N/A</span>
+                      </div>
+
+                      <div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 mb-2">
+                        <span>
+                          <b>
+                            Address
+                          </b>
+                        </span>
+                        <br />
+                        <span>N/A</span>
+                      </div>
+
+                      <div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 mb-2">
+                        <span>
+                          <b>
+                            GPS Location
+                          </b>
+                        </span>
+                        <br />
+                        <span>N/A</span>
+                      </div>
+                    </div>
+
+                    <!-- Reached Info -->
+                    <div>
+                      <span style="font-size: 15px;text-align: center;vertical-align: top;margin: 10px;">
+                        <b>Reached Info</b>
+                      </span>
+                    </div>
+                    <div class="row" style="margin-left: 20px;margin-top: 10px;">
+                      <div class="col-xl-2 col-lg-6 col-md-12 col-sm-12 mb-2">
+                        <span>
+                          <b>
+                            Date
+                          </b>
+                        </span>
+                        <br />
+                        <span>N/A</span>
+                      </div>
+
+                      <div class="col-xl-2 col-lg-6 col-md-12 col-sm-12 mb-2">
+                        <span>
+                          <b>
+                            Time
+                          </b>
+                        </span>
+                        <br />
+                        <span>N/A</span>
+                      </div>
+                      <div class="col-xl-2 col-lg-6 col-md-12 col-sm-12 mb-2">
+                        <span>
+                          <b>
+                            KM
+                          </b>
+                        </span>
+                        <br />
+                        <span>N/A</span>
+                      </div>
+
+                      <div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 mb-2">
+                        <span>
+                          <b>
+                            Address
+                          </b>
+                        </span>
+                        <br />
+                        <span>N/A</span>
+                      </div>
+
+                      <div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 mb-2">
+                        <span>
+                          <b>
+                            GPS Location
+                          </b>
+                        </span>
+                        <br />
+                        <span>N/A</span>
+                      </div>
+                    </div>
+
+                    <!-- Pick Up Info -->
+                    <div>
+                      <span style="font-size: 15px;text-align: center;vertical-align: top;margin: 10px;">
+                        <b>Pick Up Info</b>
+                      </span>
+                    </div>
+                    <div class="row" style="margin-left: 20px;margin-top: 10px;">
+                      <div class="col-xl-2 col-lg-6 col-md-12 col-sm-12 mb-2">
+                        <span>
+                          <b>
+                            Date
+                          </b>
+                        </span>
+                        <br />
+                        <span>N/A</span>
+                      </div>
+
+                      <div class="col-xl-2 col-lg-6 col-md-12 col-sm-12 mb-2">
+                        <span>
+                          <b>
+                            Time
+                          </b>
+                        </span>
+                        <br />
+                        <span>N/A</span>
+                      </div>
+                      <div class="col-xl-2 col-lg-6 col-md-12 col-sm-12 mb-2">
+                        <span>
+                          <b>
+                            KM
+                          </b>
+                        </span>
+                        <br />
+                        <span>N/A</span>
+                      </div>
+
+                      <div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 mb-2">
+                        <span>
+                          <b>
+                            Address
+                          </b>
+                        </span>
+                        <br />
+                        <span>N/A</span>
+                      </div>
+
+                      <div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 mb-2">
+                        <span>
+                          <b>
+                            GPS Location
+                          </b>
+                        </span>
+                        <br />
+                        <span>N/A</span>
+                      </div>
+                    </div>
+
+                    <!-- Drop Off Info -->
+                    <div>
+                      <span style="font-size: 15px;text-align: center;vertical-align: top;margin: 10px;">
+                        <b>Drop Off Info</b>
+                      </span>
+                    </div>
+                    <div class="row" style="margin-left: 20px;margin-top: 10px;">
+                      <div class="col-xl-2 col-lg-6 col-md-12 col-sm-12 mb-2">
+                        <span>
+                          <b>
+                            Date
+                          </b>
+                        </span>
+                        <br />
+                        <span>N/A</span>
+                      </div>
+
+                      <div class="col-xl-2 col-lg-6 col-md-12 col-sm-12 mb-2">
+                        <span>
+                          <b>
+                            Time
+                          </b>
+                        </span>
+                        <br />
+                        <span>N/A</span>
+                      </div>
+                      <div class="col-xl-2 col-lg-6 col-md-12 col-sm-12 mb-2">
+                        <span>
+                          <b>
+                            KM
+                          </b>
+                        </span>
+                        <br />
+                        <span>N/A</span>
+                      </div>
+
+                      <div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 mb-2">
+                        <span>
+                          <b>
+                            Address
+                          </b>
+                        </span>
+                        <br />
+                        <span>N/A</span>
+                      </div>
+
+                      <div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 mb-2">
+                        <span>
+                          <b>
+                            GPS Location
+                          </b>
+                        </span>
+                        <br />
+                        <span>N/A</span>
+                      </div>
+                    </div>
+
+                    <!-- LocationIn Info -->
+                    <div>
+                      <span style="font-size: 15px;text-align: center;vertical-align: top;margin: 10px;">
+                        <b>Location In Info</b>
+                      </span>
+                    </div>
+                    <div class="row" style="margin-left: 20px;margin-top: 10px;">
+                      <div class="col-xl-2 col-lg-6 col-md-12 col-sm-12 mb-2">
+                        <span>
+                          <b>
+                            Date
+                          </b>
+                        </span>
+                        <br />
+                        <span>N/A</span>
+                      </div>
+
+                      <div class="col-xl-2 col-lg-6 col-md-12 col-sm-12 mb-2">
+                        <span>
+                          <b>
+                            Time
+                          </b>
+                        </span>
+                        <br />
+                        <span>N/A</span>
+                      </div>
+                      <div class="col-xl-2 col-lg-6 col-md-12 col-sm-12 mb-2">
+                        <span>
+                          <b>
+                            KM
+                          </b>
+                        </span>
+                        <br />
+                        <span>N/A</span>
+                      </div>
+
+                      <div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 mb-2">
+                        <span>
+                          <b>
+                            Address
+                          </b>
+                        </span>
+                        <br />
+                        <span>N/A</span>
+                      </div>
+
+                      <div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 mb-2">
+                        <span>
+                          <b>
+                            GPS Location
+                          </b>
+                        </span>
+                        <br />
+                        <span>N/A</span>
+                      </div>
+                    </div>
+
+                  </div>
+                </ng-template>
+
+              </mat-tab>
+
+              <!--Data For Driver-->
+
+              <mat-tab *ngIf="selectedTab === 'Driver'">
+                <br>
+                <p *ngIf="!advanceTableDriverTab; then thenBlock2 else elseBlock2">
+                  This is not rendered
+                </p>
+
+                <ng-template #elseBlock2>
+                  <div class="card" style="padding-bottom: 20px;">
+                    <!-- Location Out Info -->
+
+                    <div>
+                      <span
+                        style="font-size: 15px;text-align: center;vertical-align: top;margin: 10px;margin-bottom: 5px;">
+                        <b>Location Out Info</b>
+                      </span>
+                    </div>
+                    <div *ngFor="let data of advanceTableDriverTab">
+                      <div class="row" style="margin-left: 20px;margin-top: 10px;">
+                        <div class="col-xl-2 col-lg-6 col-md-12 col-sm-12 mb-2">
+                          <span>
+                            <b>
+                              Date
+                            </b>
+                          </span>
+                          <br />
+                          <span>{{(data.locationOutDateByDriver | date) || 'N/A'}}</span>
+                        </div>
+
+                        <div class="col-xl-2 col-lg-6 col-md-12 col-sm-12 mb-2">
+                          <span>
+                            <b>
+                              Time
+                            </b>
+                          </span>
+                          <br />
+                          <span>{{(data.locationOutTimeByDriver | date:'shortTime') || 'N/A'}}</span>
+                        </div>
+
+                        <div class="col-xl-2 col-lg-6 col-md-12 col-sm-12 mb-2">
+                          <span>
+                            <b>
+                              KM
+                            </b>
+                          </span>
+                          <br />
+                          <span>{{data.locationOutKMByDriver || 'N/A'}}</span>
+                        </div>
+
+
+                        <div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 mb-2">
+                          <span>
+                            <b>
+                              Address
+                            </b>
+                          </span>
+                          <br />
+                          <span>{{data.locationOutAddressStringByDriver || 'N/A'}}</span>
+                        </div>
+
+                        <div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 mb-2">
+                          <span>
+                            <b>
+                              GPS Location
+                            </b>
+                          </span>
+                          <br />
+                          <span>{{data.locationOutAddressStringByDriver || 'N/A'}}</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    <!-- Reached Info -->
+                    <div>
+                      <span style="font-size: 15px;text-align: center;vertical-align: top;margin: 10px;">
+                        <b>Reached Info</b>
+                      </span>
+                    </div>
+                    <div *ngFor="let data of advanceTableDriverTab">
+                      <div class="row" style="margin-left: 20px;margin-top: 10px;">
+                        <div class="col-xl-2 col-lg-6 col-md-12 col-sm-12 mb-2">
+                          <span>
+                            <b>
+                              Date
+                            </b>
+                          </span>
+                          <br />
+                          <span>{{(data.reportingToGuestDateByDriver | date) || 'N/A'}}</span>
+                        </div>
+
+                        <div class="col-xl-2 col-lg-6 col-md-12 col-sm-12 mb-2">
+                          <span>
+                            <b>
+                              Time
+                            </b>
+                          </span>
+                          <br />
+                          <span>{{(data.reportingToGuestTimeByDriver | date:'shortTime') || 'N/A'}}</span>
+                        </div>
+                        <div class="col-xl-2 col-lg-6 col-md-12 col-sm-12 mb-2">
+                          <span>
+                            <b>
+                              KM
+                            </b>
+                          </span>
+                          <br />
+                          <span>{{data.reportingToGuestKMByDriver || 'N/A'}}</span>
+                        </div>
+
+                        <div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 mb-2">
+                          <span>
+                            <b>
+                              Address
+                            </b>
+                          </span>
+                          <br />
+                          <span>{{data.reportingToGuestAddressStringByDriver || 'N/A'}}</span>
+                        </div>
+
+                        <div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 mb-2">
+                          <span>
+                            <b>
+                              GPS Location
+                            </b>
+                          </span>
+                          <br />
+                          <span>{{data.reportingToGuestAddressStringByDriver || 'N/A'}}</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    <!-- Pick Up Info -->
+                    <div>
+                      <span style="font-size: 15px;text-align: center;vertical-align: top;margin: 10px;">
+                        <b>Pick Up Info</b>
+                      </span>
+                    </div>
+                    <div *ngFor="let data of advanceTableDriverTab">
+                      <div class="row" style="margin-left: 20px;margin-top: 10px;">
+                        <div class="col-xl-2 col-lg-6 col-md-12 col-sm-12 mb-2">
+                          <span>
+                            <b>
+                              Date
+                            </b>
+                          </span>
+                          <br />
+                          <span>{{(data.pickUpDateByDriver | date) || 'N/A'}}</span>
+                        </div>
+
+                        <div class="col-xl-2 col-lg-6 col-md-12 col-sm-12 mb-2">
+                          <span>
+                            <b>
+                              Time
+                            </b>
+                          </span>
+                          <br />
+                          <span>{{(data.pickUpTimeByDriver | date:'shortTime') || 'N/A'}}</span>
+                        </div>
+                        <div class="col-xl-2 col-lg-6 col-md-12 col-sm-12 mb-2">
+                          <span>
+                            <b>
+                              KM
+                            </b>
+                          </span>
+                          <br />
+                          <span>{{data.pickUpKMByDriver || 'N/A' }}</span>
+                        </div>
+
+                        <div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 mb-2">
+                          <span>
+                            <b>
+                              Address
+                            </b>
+                          </span>
+                          <br />
+                          <span>{{data.pickUpAddressStringByDriver || 'N/A'}}</span>
+                        </div>
+
+                        <div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 mb-2">
+                          <span>
+                            <b>
+                              GPS Location
+                            </b>
+                          </span>
+                          <br />
+                          <span>{{data.pickUpAddressStringByDriver || 'N/A'}}</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    <!-- Drop Off Info -->
+                    <div>
+                      <span style="font-size: 15px;text-align: center;vertical-align: top;margin: 10px;">
+                        <b>Drop Off Info</b>
+                      </span>
+                    </div>
+                    <div *ngFor="let data of advanceTableDriverTab">
+                      <div class="row" style="margin-left: 20px;margin-top: 10px;">
+                        <div class="col-xl-2 col-lg-6 col-md-12 col-sm-12 mb-2">
+                          <span>
+                            <b>
+                              Date
+                            </b>
+                          </span>
+                          <br />
+                          <span>{{(data.dropOffDateByDriver | date) || 'N/A'}}</span>
+                        </div>
+
+                        <div class="col-xl-2 col-lg-6 col-md-12 col-sm-12 mb-2">
+                          <span>
+                            <b>
+                              Time
+                            </b>
+                          </span>
+                          <br />
+                          <span>{{(data.dropOffTimeByDriver | date:'shortTime') || 'N/A'}}</span>
+                        </div>
+                       
+                        <div class="col-xl-2 col-lg-6 col-md-12 col-sm-12 mb-2">
+                          <span>
+                            <b>
+                              KM
+                            </b>
+                          </span>
+                          <br />
+                          <span>{{data.dropOffKMByDriver  || 'N/A'}}</span>
+                        </div>
+
+                        <div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 mb-2">
+                          <span>
+                            <b>
+                              Address
+                            </b>
+                          </span>
+                          <br />
+                          <span>{{data.dropOffAddressStringByDriver || 'N/A'}}</span>
+                        </div>
+
+                        <div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 mb-2">
+                          <span>
+                            <b>
+                              GPS Location
+                            </b>
+                          </span>
+                          <br />
+                          <span>{{data.dropOffAddressStringByDriver || 'N/A'}}</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    <!-- LocationIn Info -->
+                    <div>
+                      <span style="font-size: 15px;text-align: center;vertical-align: top;margin: 10px;">
+                        <b>Location In Info</b>
+                      </span>
+                    </div>
+                    <div *ngFor="let data of advanceTableDriverTab">
+                      <div class="row" style="margin-left: 20px;margin-top: 10px;">
+                        <div class="col-xl-2 col-lg-6 col-md-12 col-sm-12 mb-2">
+                          <span>
+                            <b>
+                              Date
+                            </b>
+                          </span>
+                          <br />
+                          <span>{{(data.locationInDateByDriver | date) || 'N/A'}}</span>
+                        </div>
+
+                        <div class="col-xl-2 col-lg-6 col-md-12 col-sm-12 mb-2">
+                          <span>
+                            <b>
+                              Time
+                            </b>
+                          </span>
+                          <br />
+                          <span>{{(data.locationInTimeByDriver | date:'shortTime') || 'N/A'}}</span>
+                        </div>
+                        <div class="col-xl-2 col-lg-6 col-md-12 col-sm-12 mb-2">
+                          <span>
+                            <b>
+                              KM
+                            </b>
+                          </span>
+                          <br />
+                          <span>{{data.locationInKMByDriver || 'N/A' }}</span>
+                        </div>
+
+                        <div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 mb-2">
+                          <span>
+                            <b>
+                              Address
+                            </b>
+                          </span>
+                          <br />
+                          <span>{{data.locationInAddressStringByDriver || 'N/A'}}</span>
+                        </div>
+
+                        <div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 mb-2">
+                          <span>
+                            <b>
+                              GPS Location
+                            </b>
+                          </span>
+                          <br />
+                          <span>{{data.locationInAddressStringByDriver || 'N/A'}}</span>
+                        </div>
+                      </div>
+                    </div>
+
+                  </div>
+                </ng-template>
+
+                <ng-template #thenBlock2>
+                  <div class="card" style="padding-bottom: 20px;">
+                    <!-- Location Out Info -->
+
+                    <div>
+                      <span
+                        style="font-size: 15px;text-align: center;vertical-align: top;margin: 10px;margin-bottom: 5px;">
+                        <b>Location Out Info</b>
+                      </span>
+                    </div>
+
+                    <div class="row" style="margin-left: 20px;margin-top: 10px;">
+                      <div class="col-xl-2 col-lg-6 col-md-12 col-sm-12 mb-2">
+                        <span>
+                          <b>
+                            Date
+                          </b>
+                        </span>
+                        <br />
+                        <span>N/A</span>
+                      </div>
+
+                      <div class="col-xl-2 col-lg-6 col-md-12 col-sm-12 mb-2">
+                        <span>
+                          <b>
+                            Time
+                          </b>
+                        </span>
+                        <br />
+                        <span>N/A</span>
+                      </div>
+                      <div class="col-xl-2 col-lg-6 col-md-12 col-sm-12 mb-2">
+                        <span>
+                          <b>
+                            KM
+                          </b>
+                        </span>
+                        <br />
+                        <span>N/A</span>
+                      </div>
+
+                      <div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 mb-2">
+                        <span>
+                          <b>
+                            Address
+                          </b>
+                        </span>
+                        <br />
+                        <span>N/A</span>
+                      </div>
+
+                      <div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 mb-2">
+                        <span>
+                          <b>
+                            GPS Location
+                          </b>
+                        </span>
+                        <br />
+                        <span>N/A</span>
+                      </div>
+                    </div>
+
+                    <!-- Reached Info -->
+                    <div>
+                      <span style="font-size: 15px;text-align: center;vertical-align: top;margin: 10px;">
+                        <b>Reached Info</b>
+                      </span>
+                    </div>
+                    <div class="row" style="margin-left: 20px;margin-top: 10px;">
+                      <div class="col-xl-2 col-lg-6 col-md-12 col-sm-12 mb-2">
+                        <span>
+                          <b>
+                            Date
+                          </b>
+                        </span>
+                        <br />
+                        <span>N/A</span>
+                      </div>
+
+                      <div class="col-xl-2 col-lg-6 col-md-12 col-sm-12 mb-2">
+                        <span>
+                          <b>
+                            Time
+                          </b>
+                        </span>
+                        <br />
+                        <span>N/A</span>
+                      </div>
+                      <div class="col-xl-2 col-lg-6 col-md-12 col-sm-12 mb-2">
+                        <span>
+                          <b>
+                            KM
+                          </b>
+                        </span>
+                        <br />
+                        <span>N/A</span>
+                      </div>
+
+                      <div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 mb-2">
+                        <span>
+                          <b>
+                            Address
+                          </b>
+                        </span>
+                        <br />
+                        <span>N/A</span>
+                      </div>
+
+                      <div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 mb-2">
+                        <span>
+                          <b>
+                            GPS Location
+                          </b>
+                        </span>
+                        <br />
+                        <span>N/A</span>
+                      </div>
+                    </div>
+
+                    <!-- Pick Up Info -->
+                    <div>
+                      <span style="font-size: 15px;text-align: center;vertical-align: top;margin: 10px;">
+                        <b>Pick Up Info</b>
+                      </span>
+                    </div>
+                    <div class="row" style="margin-left: 20px;margin-top: 10px;">
+                      <div class="col-xl-2 col-lg-6 col-md-12 col-sm-12 mb-2">
+                        <span>
+                          <b>
+                            Date
+                          </b>
+                        </span>
+                        <br />
+                        <span>N/A</span>
+                      </div>
+
+                      <div class="col-xl-2 col-lg-6 col-md-12 col-sm-12 mb-2">
+                        <span>
+                          <b>
+                            Time
+                          </b>
+                        </span>
+                        <br />
+                        <span>N/A</span>
+                      </div>
+                      <div class="col-xl-2 col-lg-6 col-md-12 col-sm-12 mb-2">
+                        <span>
+                          <b>
+                            KM
+                          </b>
+                        </span>
+                        <br />
+                        <span>N/A</span>
+                      </div>
+
+                      <div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 mb-2">
+                        <span>
+                          <b>
+                            Address
+                          </b>
+                        </span>
+                        <br />
+                        <span>N/A</span>
+                      </div>
+
+                      <div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 mb-2">
+                        <span>
+                          <b>
+                            GPS Location
+                          </b>
+                        </span>
+                        <br />
+                        <span>N/A</span>
+                      </div>
+                    </div>
+
+                    <!-- Drop Off Info -->
+                    <div>
+                      <span style="font-size: 15px;text-align: center;vertical-align: top;margin: 10px;">
+                        <b>Drop Off Info</b>
+                      </span>
+                    </div>
+                    <div class="row" style="margin-left: 20px;margin-top: 10px;">
+                      <div class="col-xl-2 col-lg-6 col-md-12 col-sm-12 mb-2">
+                        <span>
+                          <b>
+                            Date
+                          </b>
+                        </span>
+                        <br />
+                        <span>N/A</span>
+                      </div>
+
+                      <div class="col-xl-2 col-lg-6 col-md-12 col-sm-12 mb-2">
+                        <span>
+                          <b>
+                            Time
+                          </b>
+                        </span>
+                        <br />
+                        <span>N/A</span>
+                      </div>
+                      <div class="col-xl-2 col-lg-6 col-md-12 col-sm-12 mb-2">
+                        <span>
+                          <b>
+                            KM
+                          </b>
+                        </span>
+                        <br />
+                        <span>N/A</span>
+                      </div>
+                      <div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 mb-2">
+                        <span>
+                          <b>
+                            Address
+                          </b>
+                        </span>
+                        <br />
+                        <span>N/A</span>
+                      </div>
+
+                      <div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 mb-2">
+                        <span>
+                          <b>
+                            GPS Location
+                          </b>
+                        </span>
+                        <br />
+                        <span>N/A</span>
+                      </div>
+                    </div>
+
+                    <!-- LocationIn Info -->
+                    <div>
+                      <span style="font-size: 15px;text-align: center;vertical-align: top;margin: 10px;">
+                        <b>Location In Info</b>
+                      </span>
+                    </div>
+
+                    <div class="row" style="margin-left: 20px;margin-top: 10px;">
+                      <div class="col-xl-2 col-lg-6 col-md-12 col-sm-12 mb-2">
+                        <span>
+                          <b>
+                            Date
+                          </b>
+                        </span>
+                        <br />
+                        <span>N/A</span>
+                      </div>
+
+                      <div class="col-xl-2 col-lg-6 col-md-12 col-sm-12 mb-2">
+                        <span>
+                          <b>
+                            Time
+                          </b>
+                        </span>
+                        <br />
+                        <span>N/A</span>
+                      </div>
+                      <div class="col-xl-2 col-lg-6 col-md-12 col-sm-12 mb-2">
+                        <span>
+                          <b>
+                            KM
+                          </b>
+                        </span>
+                        <br />
+                        <span>N/A</span>
+                      </div>
+
+                      <div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 mb-2">
+                        <span>
+                          <b>
+                            Address
+                          </b>
+                        </span>
+                        <br />
+                        <span>N/A</span>
+                      </div>
+
+                      <div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 mb-2">
+                        <span>
+                          <b>
+                            GPS Location
+                          </b>
+                        </span>
+                        <br />
+                        <span>N/A</span>
+                      </div>
+                    </div>
+
+                  </div>
+                </ng-template>
+
+              </mat-tab>
+
+              <!--Data For GPS-->
+              <mat-tab *ngIf="selectedTab === 'GPS'">
+                <br>
+                <p *ngIf="!advanceTableGPSTab; then thenBlock4 else elseBlock4">
+                  This is not rendered
+                </p>
+
+                <ng-template #elseBlock4>
+                  <div class="card" style="padding-bottom: 20px;">
+
+                    <!-- Location Out Info -->
+                    <div>
+                      <span
+                        style="font-size: 15px;text-align: center;vertical-align: top;margin: 10px;margin-bottom: 5px;">
+                        <b>Location Out Info</b>
+                      </span>
+                    </div>
+                    <div *ngFor="let data of advanceTableGPSTab">
+                      <div class="row" style="margin-left: 20px;margin-top: 10px;">
+                        <div class="col-xl-2 col-lg-6 col-md-12 col-sm-12 mb-2">
+                          <span>
+                            <b>
+                              Date
+                            </b>
+                          </span>
+                          <br />
+                          <span>{{(data.locationOutDateByGPS | date) || 'N/A'}}</span>
+                        </div>
+
+                        <div class="col-xl-2 col-lg-6 col-md-12 col-sm-12 mb-2">
+                          <span>
+                            <b>
+                              Time
+                            </b>
+                          </span>
+                          <br />
+                          <span>{{(data.locationOutTimeByGPS | date:'shortTime') || 'N/A'}}</span>
+                        </div>
+                        <div class="col-xl-2 col-lg-6 col-md-12 col-sm-12 mb-2">
+                          <span>
+                            <b>
+                              KM
+                            </b>
+                          </span>
+                          <br />
+                          <span>{{data.locationOutKMByGPS || 'N/A'}}</span>
+                        </div>
+
+                        <div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 mb-2">
+                          <span>
+                            <b>
+                              Address
+                            </b>
+                          </span>
+                          <br />
+                          <span>{{data.locationOutAddressStringByGPS || 'N/A'}}</span>
+                        </div>
+
+                        <div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 mb-2">
+                          <span>
+                            <b>
+                              GPS Location
+                            </b>
+                          </span>
+                          <br />
+                          <span>{{data.locationOutAddressStringByGPS || 'N/A'}}</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    <!-- Reached Info -->
+                    <div>
+                      <span style="font-size: 15px;text-align: center;vertical-align: top;margin: 10px;">
+                        <b>Reached Info</b>
+                      </span>
+                    </div>
+                    <div *ngFor="let data of advanceTableGPSTab">
+                      <div class="row" style="margin-left: 20px;margin-top: 10px;">
+                        <div class="col-xl-2 col-lg-6 col-md-12 col-sm-12 mb-2">
+                          <span>
+                            <b>
+                              Date
+                            </b>
+                          </span>
+                          <br />
+                          <span>{{(data.reportingToGuestDateByGPS | date) || 'N/A'}}</span>
+                        </div>
+
+                        <div class="col-xl-2 col-lg-6 col-md-12 col-sm-12 mb-2">
+                          <span>
+                            <b>
+                              Time
+                            </b>
+                          </span>
+                          <br />
+                          <span>{{(data.reportingToGuestTimeByGPS | date:'shortTime') || 'N/A'}}</span>
+                        </div>
+                        <div class="col-xl-2 col-lg-6 col-md-12 col-sm-12 mb-2">
+                          <span>
+                            <b>
+                              KM
+                            </b>
+                          </span>
+                          <br />
+                          <span>{{data.reportingToGuestKMByGPS || 'N/A'}}</span>
+                        </div>
+
+                        <div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 mb-2">
+                          <span>
+                            <b>
+                              Address
+                            </b>
+                          </span>
+                          <br />
+                          <span>{{data.reportingToGuestAddressStringByGPS || 'N/A'}}</span>
+                        </div>
+
+                        <div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 mb-2">
+                          <span>
+                            <b>
+                              GPS Location
+                            </b>
+                          </span>
+                          <br />
+                          <span>{{data.reportingToGuestAddressStringByGPS || 'N/A'}}</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    <!-- Pick Up Info -->
+                    <div>
+                      <span style="font-size: 15px;text-align: center;vertical-align: top;margin: 10px;">
+                        <b>Pick Up Info</b>
+                      </span>
+                    </div>
+                    <div *ngFor="let data of advanceTableGPSTab">
+                      <div class="row" style="margin-left: 20px;margin-top: 10px;">
+                        <div class="col-xl-2 col-lg-6 col-md-12 col-sm-12 mb-2">
+                          <span>
+                            <b>
+                              Date
+                            </b>
+                          </span>
+                          <br />
+                          <span>{{(data.pickUpDateByGPS | date) || 'N/A'}}</span>
+                        </div>
+
+                        <div class="col-xl-2 col-lg-6 col-md-12 col-sm-12 mb-2">
+                          <span>
+                            <b>
+                              Time
+                            </b>
+                          </span>
+                          <br />
+                          <span>{{(data.pickUpTimeByGPS | date:'shortTime') || 'N/A'}}</span>
+                        </div>
+                        <div class="col-xl-2 col-lg-6 col-md-12 col-sm-12 mb-2">
+                          <span>
+                            <b>
+                              KM
+                            </b>
+                          </span>
+                          <br />
+                          <span>{{data.pickUpKMByGPS || 'N/A'}}</span>
+                        </div>
+
+                        <div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 mb-2">
+                          <span>
+                            <b>
+                              Address
+                            </b>
+                          </span>
+                          <br />
+                          <span>{{data.pickUpAddressStringByGPS || 'N/A'}}</span>
+                        </div>
+
+                        <div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 mb-2">
+                          <span>
+                            <b>
+                              GPS Location
+                            </b>
+                          </span>
+                          <br />
+                          <span>{{data.pickUpAddressStringByGPS || 'N/A'}}</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    <!-- Drop Off Info -->
+                    <div>
+                      <span style="font-size: 15px;text-align: center;vertical-align: top;margin: 10px;">
+                        <b>Drop Off Info</b>
+                      </span>
+                    </div>
+                    <div *ngFor="let data of advanceTableGPSTab">
+                      <div class="row" style="margin-left: 20px;margin-top: 10px;">
+                        <div class="col-xl-2 col-lg-6 col-md-12 col-sm-12 mb-2">
+                          <span>
+                            <b>
+                              Date
+                            </b>
+                          </span>
+                          <br />
+                          <span>{{(data.dropOffDateByGPS | date) || 'N/A'}}</span>
+                        </div>
+
+                        <div class="col-xl-2 col-lg-6 col-md-12 col-sm-12 mb-2">
+                          <span>
+                            <b>
+                              Time
+                            </b>
+                          </span>
+                          <br />
+                          <span>{{(data.dropOffTimeByGPS | date:'shortTime') || 'N/A'}}</span>
+                        </div>
+                        <div class="col-xl-2 col-lg-6 col-md-12 col-sm-12 mb-2">
+                          <span>
+                            <b>
+                              KM
+                            </b>
+                          </span>
+                          <br />
+                          <span>{{data.dropOffKMByGPS || 'N/A'}}</span>
+                        </div>
+
+                        <div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 mb-2">
+                          <span>
+                            <b>
+                              Address
+                            </b>
+                          </span>
+                          <br />
+                          <span>{{data.dropOffAddressStringByGPS || 'N/A'}}</span>
+                        </div>
+
+                        <div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 mb-2">
+                          <span>
+                            <b>
+                              GPS Location
+                            </b>
+                          </span>
+                          <br />
+                          <span>{{data.dropOffAddressStringByGPS || 'N/A'}}</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    <!-- LocationIn Info -->
+                    <div>
+                      <span style="font-size: 15px;text-align: center;vertical-align: top;margin: 10px;">
+                        <b>Location In Info</b>
+                      </span>
+                    </div>
+                    <div *ngFor="let data of advanceTableGPSTab">
+                      <div class="row" style="margin-left: 20px;margin-top: 10px;">
+                        <div class="col-xl-2 col-lg-6 col-md-12 col-sm-12 mb-2">
+                          <span>
+                            <b>
+                              Date
+                            </b>
+                          </span>
+                          <br />
+                          <span>{{(data.locationInDateByGPS | date) || 'N/A'}}</span>
+                        </div>
+
+                        <div class="col-xl-2 col-lg-6 col-md-12 col-sm-12 mb-2">
+                          <span>
+                            <b>
+                              Time
+                            </b>
+                          </span>
+                          <br />
+                          <span>{{(data.locationInTimeByGPS | date:'shortTime') || 'N/A'}}</span>
+                        </div>
+                        <div class="col-xl-2 col-lg-6 col-md-12 col-sm-12 mb-2">
+                          <span>
+                            <b>
+                              KM
+                            </b>
+                          </span>
+                          <br />
+                          <span>{{data.locationInKMByGPS || 'N/A'}}</span>
+                        </div>
+
+                        <div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 mb-2">
+                          <span>
+                            <b>
+                              Address
+                            </b>
+                          </span>
+                          <br />
+                          <span>{{data.locationInAddressStringByGPS || 'N/A'}}</span>
+                        </div>
+
+                        <div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 mb-2">
+                          <span>
+                            <b>
+                              GPS Location
+                            </b>
+                          </span>
+                          <br />
+                          <span>{{data.locationInAddressStringByGPS || 'N/A'}}</span>
+                        </div>
+                      </div>
+                    </div>
+
+                  </div>
+                </ng-template>
+
+                <ng-template #thenBlock4>
+                  <div class="card" style="padding-bottom: 20px;">
+
+                    <!-- Location Out Info -->
+                    <div>
+                      <span
+                        style="font-size: 15px;text-align: center;vertical-align: top;margin: 10px;margin-bottom: 5px;">
+                        <b>Location Out Info</b>
+                      </span>
+                    </div>
+
+                    <div class="row" style="margin-left: 20px;margin-top: 10px;">
+                      <div class="col-xl-2 col-lg-6 col-md-12 col-sm-12 mb-2">
+                        <span>
+                          <b>
+                            Date
+                          </b>
+                        </span>
+                        <br />
+                        <span>N/A</span>
+                      </div>
+
+                      <div class="col-xl-2 col-lg-6 col-md-12 col-sm-12 mb-2">
+                        <span>
+                          <b>
+                            Time
+                          </b>
+                        </span>
+                        <br />
+                        <span>N/A</span>
+                      </div>
+                      <div class="col-xl-2 col-lg-6 col-md-12 col-sm-12 mb-2">
+                        <span>
+                          <b>
+                            KM
+                          </b>
+                        </span>
+                        <br />
+                        <span>N/A</span>
+                      </div>
+
+                      <div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 mb-2">
+                        <span>
+                          <b>
+                            Address
+                          </b>
+                        </span>
+                        <br />
+                        <span>N/A</span>
+                      </div>
+
+                      <div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 mb-2">
+                        <span>
+                          <b>
+                            GPS Location
+                          </b>
+                        </span>
+                        <br />
+                        <span>N/A</span>
+                      </div>
+                    </div>
+
+                    <!-- Reached Info -->
+                    <div>
+                      <span style="font-size: 15px;text-align: center;vertical-align: top;margin: 10px;">
+                        <b>Reached Info</b>
+                      </span>
+                    </div>
+                    <div class="row" style="margin-left: 20px;margin-top: 10px;">
+                      <div class="col-xl-2 col-lg-6 col-md-12 col-sm-12 mb-2">
+                        <span>
+                          <b>
+                            Date
+                          </b>
+                        </span>
+                        <br />
+                        <span>N/A</span>
+                      </div>
+
+                      <div class="col-xl-2 col-lg-6 col-md-12 col-sm-12 mb-2">
+                        <span>
+                          <b>
+                            Time
+                          </b>
+                        </span>
+                        <br />
+                        <span>N/A</span>
+                      </div>
+                      <div class="col-xl-2 col-lg-6 col-md-12 col-sm-12 mb-2">
+                        <span>
+                          <b>
+                            KM
+                          </b>
+                        </span>
+                        <br />
+                        <span>N/A</span>
+                      </div>
+
+                      <div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 mb-2">
+                        <span>
+                          <b>
+                            Address
+                          </b>
+                        </span>
+                        <br />
+                        <span>N/A</span>
+                      </div>
+
+                      <div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 mb-2">
+                        <span>
+                          <b>
+                            GPS Location
+                          </b>
+                        </span>
+                        <br />
+                        <span>N/A</span>
+                      </div>
+                    </div>
+
+                    <!-- Pick Up Info -->
+                    <div>
+                      <span style="font-size: 15px;text-align: center;vertical-align: top;margin: 10px;">
+                        <b>Pick Up Info</b>
+                      </span>
+                    </div>
+                    <div class="row" style="margin-left: 20px;margin-top: 10px;">
+                      <div class="col-xl-2 col-lg-6 col-md-12 col-sm-12 mb-2">
+                        <span>
+                          <b>
+                            Date
+                          </b>
+                        </span>
+                        <br />
+                        <span>N/A</span>
+                      </div>
+
+                      <div class="col-xl-2 col-lg-6 col-md-12 col-sm-12 mb-2">
+                        <span>
+                          <b>
+                            Time
+                          </b>
+                        </span>
+                        <br />
+                        <span>N/A</span>
+                      </div>
+                      <div class="col-xl-2 col-lg-6 col-md-12 col-sm-12 mb-2">
+                        <span>
+                          <b>
+                            KM
+                          </b>
+                        </span>
+                        <br />
+                        <span>N/A</span>
+                      </div>
+
+                      <div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 mb-2">
+                        <span>
+                          <b>
+                            Address
+                          </b>
+                        </span>
+                        <br />
+                        <span>N/A</span>
+                      </div>
+
+                      <div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 mb-2">
+                        <span>
+                          <b>
+                            GPS Location
+                          </b>
+                        </span>
+                        <br />
+                        <span>N/A</span>
+                      </div>
+                    </div>
+
+                    <!-- Drop Off Info -->
+                    <div>
+                      <span style="font-size: 15px;text-align: center;vertical-align: top;margin: 10px;">
+                        <b>Drop Off Info</b>
+                      </span>
+                    </div>
+
+                    <div class="row" style="margin-left: 20px;margin-top: 10px;">
+                      <div class="col-xl-2 col-lg-6 col-md-12 col-sm-12 mb-2">
+                        <span>
+                          <b>
+                            Date
+                          </b>
+                        </span>
+                        <br />
+                        <span>N/A</span>
+                      </div>
+
+                      <div class="col-xl-2 col-lg-6 col-md-12 col-sm-12 mb-2">
+                        <span>
+                          <b>
+                            Time
+                          </b>
+                        </span>
+                        <br />
+                        <span>N/A</span>
+                      </div>
+                      <div class="col-xl-2 col-lg-6 col-md-12 col-sm-12 mb-2">
+                        <span>
+                          <b>
+                            KM
+                          </b>
+                        </span>
+                        <br />
+                        <span>N/A</span>
+                      </div>
+
+                      <div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 mb-2">
+                        <span>
+                          <b>
+                            Address
+                          </b>
+                        </span>
+                        <br />
+                        <span>N/A</span>
+                      </div>
+
+                      <div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 mb-2">
+                        <span>
+                          <b>
+                            GPS Location
+                          </b>
+                        </span>
+                        <br />
+                        <span>N/A</span>
+                      </div>
+                    </div>
+
+                    <!-- LocationIn Info -->
+                    <div>
+                      <span style="font-size: 15px;text-align: center;vertical-align: top;margin: 10px;">
+                        <b>Location In Info</b>
+                      </span>
+                    </div>
+                    <div class="row" style="margin-left: 20px;margin-top: 10px;">
+                      <div class="col-xl-2 col-lg-6 col-md-12 col-sm-12 mb-2">
+                        <span>
+                          <b>
+                            Date
+                          </b>
+                        </span>
+                        <br />
+                        <span>N/A</span>
+                      </div>
+
+                      <div class="col-xl-2 col-lg-6 col-md-12 col-sm-12 mb-2">
+                        <span>
+                          <b>
+                            Time
+                          </b>
+                        </span>
+                        <br />
+                        <span>N/A</span>
+                      </div>
+                      <div class="col-xl-2 col-lg-6 col-md-12 col-sm-12 mb-2">
+                        <span>
+                          <b>
+                            KM
+                          </b>
+                        </span>
+                        <br />
+                        <span>N/A</span>
+                      </div>
+
+                      <div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 mb-2">
+                        <span>
+                          <b>
+                            Address
+                          </b>
+                        </span>
+                        <br />
+                        <span>N/A</span>
+                      </div>
+
+                      <div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 mb-2">
+                        <span>
+                          <b>
+                            GPS Location
+                          </b>
+                        </span>
+                        <br />
+                        <span>N/A</span>
+                      </div>
+                    </div>
+
+                  </div>
+                </ng-template>
+
+              </mat-tab>
+            </mat-tab-group>
+
+          </mat-expansion-panel>
+        </mat-accordion>
+
+      </div>
+    </div>
+
+    <div class="card" *ngIf="showHideTollParkingCard" id="tollParkingEntry">
+
+      <div class="header bg-cyan">
+        <h2>
+          Duty Toll Parking Entry -
+          <i><a style="cursor: pointer;" (click)="openDutyTollParkingEntry()">Add more</a></i>
+        </h2>
+        <ul class="header-dropdown m-r-10">
+          <li>
+            <a class="material-icons" href="javascript:void(0);" (click)="scrollToLinkButton()">keyboard_arrow_up</a>
+          </li>
+          <li></li>
+
+        </ul>
+
+      </div>
+      <mat-accordion>
+        <mat-expansion-panel [expanded]="panelExpanded">
+          <mat-expansion-panel-header>
+            <mat-panel-title>
+            </mat-panel-title>
+          </mat-expansion-panel-header>
+          <div id="tollParkingEntry">
+            <app-dutyTollParkingEntry [tollParkingAdvanceTable]="tollParkingAdvanceTable"
+              [dutySlipID]="DutySlipID"></app-dutyTollParkingEntry>
+          </div>
+        </mat-expansion-panel>
+      </mat-accordion>
+
+    </div>
+
+    <!--Duty Inter State Tax-->
+    <div class="card" *ngIf="showHideaddDIT" id="dutyInterstateTax">
+      <div class="header bg-cyan">
+        <h2>
+          Interstate Tax -
+          <i><a (click)="dutyInterstateTax()" style="cursor: pointer;">Add More</a></i>
+        </h2>
+        <ul class="header-dropdown m-r-10">
+          <li>
+            <a class="material-icons" href="javascript:void(0);" (click)="scrollToLinkButton()">keyboard_arrow_up</a>
+          </li>
+          <li></li>
+
+        </ul>
+      </div>
+      <mat-accordion>
+        <mat-expansion-panel [expanded]="panelExpanded">
+          <mat-expansion-panel-header>
+            <mat-panel-title>
+            </mat-panel-title>
+          </mat-expansion-panel-header>
+          <div>
+            <app-dutyInterstateTax [advanceTableDIT]="advanceTableDIT"
+              [dutySlipID]="DutySlipID"></app-dutyInterstateTax>
+          </div>
+        </mat-expansion-panel>
+      </mat-accordion>
+
+    </div>
+
+    <div class="card" *ngIf="showHideDispute" id="openDisputes">
+      <div class="header bg-cyan">
+        <h2>
+          Dispute -
+          <!-- <i><a (click)="openDisputes()" style="cursor: pointer;">Edit</a></i> -->
+          <i><a style="cursor: pointer;" (click)="openDisputes()">Add more</a></i>
+          <i><a (click)="disputeHistoryDetails(DutySlipForBillingID)" style="cursor: pointer;"> - History</a></i>
+        </h2>
+
+        <ul class="header-dropdown m-r-10">
+          <li>
+            <a class="material-icons" href="javascript:void(0);" (click)="scrollToLinkButton()">keyboard_arrow_up</a>
+          </li>
+          <li></li>
+
+        </ul>
+      </div>
+      <mat-accordion>
+        <mat-expansion-panel [expanded]="panelExpanded">
+          <mat-expansion-panel-header>
+            <mat-panel-title>
+            </mat-panel-title>
+          </mat-expansion-panel-header>
+          <div *ngIf="showHideDispute">
+            <app-dispute [disputeAdvanceTable]="disputeAdvanceTable" [dutySlipID]="DutySlipID" [reservationID]="ReservationID"></app-dispute>
+          </div>
+        </mat-expansion-panel>
+      </mat-accordion>
+
+    </div>
+
+    <!-- Additional Kms Details card -->
+    <div class="card" *ngIf="showAdditionalKms" id="AdditionalKms">
+      <div class="header bg-cyan">
+        <h2>
+          Additional Kms Details
+          <!-- <i><a style="cursor: pointer;" (click)="openAdditional()">Edit</a></i> -->
+
+        </h2>
+        <ul class="header-dropdown m-r-10">
+          <li>
+            <a class="material-icons" href="javascript:void(0);" (click)="scrollToLinkButton()">keyboard_arrow_up</a>
+          </li>
+          <li></li>
+
+        </ul>
+      </div>
+      <mat-accordion>
+        <mat-expansion-panel [expanded]="panelExpanded">
+          <mat-expansion-panel-header>
+            <mat-panel-title>
+            </mat-panel-title>
+          </mat-expansion-panel-header>
+          <div>
+            <!-- <app-additionalKmsDetails [advanceTableAD]="advanceTableAD" [dutySlipID]="DutySlipID"></app-additionalKmsDetails> -->
+            <div *ngFor="let data of advanceTableAD; index as i">
+              <div class="row" style="margin-left: 20px;margin-top: 20px;">
+                <div class="col-xl-4 col-lg-6 col-md-12 col-sm-12 mb-2">
+                  <div>
+                    <a style="cursor: pointer;color: #007bff;" (click)="openAdditionalKms()"
+                      [class.disabled]="isEditingMinutes">
+                      Additional KMS - Edit</a>
+                  </div>
+                  <span>
+                    <b>Additional KMS</b>
+                  </span>
+                  <br />
+                  <span>{{data.additionalKMs}}</span>
+                </div>
+                <div class="col-xl-4 col-lg-6 col-md-12 col-sm-12 mb-2">
+                  <div>
+                    <a style="cursor: pointer;color: #007bff;" (click)="openAdditionalMinutes()"
+                      [class.disabled]="isEditingKms">
+                      Additional Minutes - Edit</a>
+                  </div>
+                  <span>
+                    <b>Additional Minutes</b>
+                  </span>
+                  <br />
+                  <span>{{data.additionalMinutes}}</span>
+                </div>
+                <!-- <div class="col-xl-4 col-lg-6 col-md-12 col-sm-12 mb-2">
+                <app-dutySAC [advanceTableSAC]="advanceTableSAC" [dutySlipID]="DutySlipID"></app-dutySAC>
+              </div> -->
+              </div>
+            </div>
+          </div>
+          <!-- SAC -->
+
+        </mat-expansion-panel>
+      </mat-accordion>
+
+    </div>
+
+    <!-- Duty SAC -->
+    <div class="card" *ngIf="showSAC" id="dutySAC">
+      <div class="header bg-cyan">
+        <h2>
+          Duty SAC Details
+          <!-- <i><a style="cursor: pointer;" (click)="openDutySAC()">Add More</a></i> -->
+
+        </h2>
+        <ul class="header-dropdown m-r-10">
+          <li>
+            <a class="material-icons" href="javascript:void(0);" (click)="scrollToLinkButton()">keyboard_arrow_up</a>
+          </li>
+          <li></li>
+
+        </ul>
+      </div>
+      <mat-accordion>
+        <mat-expansion-panel [expanded]="panelExpanded">
+          <mat-expansion-panel-header>
+            <mat-panel-title>
+            </mat-panel-title>
+          </mat-expansion-panel-header>
+          <div>
+            <app-dutySAC [advanceTableSAC]="advanceTableSAC" [dutySlipID]="DutySlipID"></app-dutySAC>
+          </div>
+        </mat-expansion-panel>
+      </mat-accordion>
+    </div>
+
+    <!-- Duty Expense -->
+    <div class="card" *ngIf="showDutyExpense" id="dutyExpense">
+      <div class="header bg-cyan">
+        <h2>
+          Duty Expense -
+          <i><a style="cursor: pointer;" (click)="openDutyExpense()">Add More</a></i>
+        </h2>
+        <ul class="header-dropdown m-r-10">
+          <li>
+            <a class="material-icons" href="javascript:void(0);" (click)="scrollToLinkButton()">keyboard_arrow_up</a>
+          </li>
+          <li></li>
+
+        </ul>
+      </div>
+      <mat-accordion>
+        <mat-expansion-panel [expanded]="panelExpanded">
+          <mat-expansion-panel-header>
+            <mat-panel-title>
+            </mat-panel-title>
+          </mat-expansion-panel-header>
+          <div>
+            <app-dutyExpense [advanceTableDE]="advanceTableDE" [dutySlipID]="DutySlipID"></app-dutyExpense>
+          </div>
+        </mat-expansion-panel>
+      </mat-accordion>
+    </div>
+
+    <!-- Special Instructoins -->
+    <div class="card" *ngIf="showSpecialInstructoins">
+      <div class="header bg-cyan">
+        <h2>Special Instructoins
+        </h2>
+        <ul class="header-dropdown m-r-10">
+          <li>
+            <a class="material-icons" href="javascript:void(0);" (click)="scrollToLinkButton()">keyboard_arrow_up</a>
+          </li>
+          <li></li>
+
+        </ul>
+      </div>
+      <div>
+        <mat-accordion>
+          <mat-expansion-panel [expanded]="panelExpanded">
+            <mat-expansion-panel-header>
+              <mat-panel-title>
+              </mat-panel-title>
+            </mat-expansion-panel-header>
+            <div>
+              <div *ngFor="let data of specialInstrucationDetailsList;index as i">
+                <div class="row" style="margin-left: 20px;margin-top: 20px;">
+                  <b style="cursor: pointer;color: black;">Special Instruction - {{i+1}}</b>
+                </div>
+                <div class="row" style="margin-left: 20px;margin-top: 20px;">
+                  <div class="col-xl-4 col-lg-6 col-md-12 col-sm-12 mb-2">
+                    <span>
+                      <b>Special Instruction</b>
+                    </span>
+                    <br />
+                    <span>{{data.specialInstruction}}</span>
+                  </div>
+
+                  <div class="col-xl-4 col-lg-6 col-md-12 col-sm-12 mb-2">
+                    <span>
+                      <b>Special Instruction By</b>
+                    </span>
+                    <br />
+                    <span>{{data.specialInstructionBy}}</span>
+                  </div>
+
+                  <div class="col-xl-4 col-lg-6 col-md-12 col-sm-12 mb-2">
+                    <span>
+                      <b>Attachment</b>
+                    </span>
+                    <br />
+                    <span><a href="{{data.specialInstructionAttachment}}" target="_blank"
+                        style="cursor: pointer;color: #007bff;">
+                        View</a></span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </mat-expansion-panel>
+        </mat-accordion>
+      </div>
+    </div>
+
+    <!-- Internal Note Details -->
+    <div class="card" *ngIf="showInternalNote">
+      <div class="header bg-cyan">
+        <h2>Internal Note Details
+        </h2>
+        <ul class="header-dropdown m-r-10">
+          <li>
+            <a class="material-icons" href="javascript:void(0);" (click)="scrollToLinkButton()">keyboard_arrow_up</a>
+          </li>
+          <li></li>
+
+        </ul>
+      </div>
+      <div>
+        <mat-accordion>
+          <mat-expansion-panel [expanded]="panelExpanded">
+            <mat-expansion-panel-header>
+              <mat-panel-title>
+              </mat-panel-title>
+            </mat-expansion-panel-header>
+            <div>
+              <div *ngFor="let data of advanceTableIN;index as i">
+                <div class="row" style="margin-left: 20px;margin-top: 20px;">
+                  <b style="cursor: pointer;color: black;">Internal Note - {{i+1}}</b>
+                </div>
+                <div class="row" style="margin-left: 20px;margin-top: 20px;">
+                  <div class="col-xl-4 col-lg-6 col-md-12 col-sm-12 mb-2">
+                    <span>
+                      <b>Internal Note</b>
+                    </span>
+                    <br />
+                    <span>{{data.reservationInternalNote}}</span>
+                  </div>
+
+                  <div class="col-xl-4 col-lg-6 col-md-12 col-sm-12 mb-2">
+                    <span>
+                      <b>Internal Note By</b>
+                    </span>
+                    <br />
+                    <span>{{data.firstName}} {{data.lastName}}</span>
+                  </div>
+
+                  <div class="col-xl-4 col-lg-6 col-md-12 col-sm-12 mb-2">
+                    <span>
+                      <b>Attachment</b>
+                    </span>
+                    <br />
+                    <span><a href="{{data.reservationInternalNoteAttachment}}" target="_blank"
+                        style="cursor: pointer;color: #007bff;">
+                        View</a></span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </mat-expansion-panel>
+        </mat-accordion>
+      </div>
+    </div>
+
+    <!-- Advance Details -->
+    <div class="card" *ngIf="showAdvanceDetails">
+      <div class="header bg-cyan">
+        <h2>Advance Details
+        </h2>
+        <ul class="header-dropdown m-r-10">
+          <li>
+            <a class="material-icons" href="javascript:void(0);" (click)="scrollToLinkButton()">keyboard_arrow_up</a>
+          </li>
+          <li></li>
+
+        </ul>
+      </div>
+      <div>
+        <mat-accordion>
+          <mat-expansion-panel [expanded]="panelExpanded">
+            <mat-expansion-panel-header>
+              <mat-panel-title>
+              </mat-panel-title>
+            </mat-expansion-panel-header>
+            <div>
+              <div *ngFor="let data of advanceTableADs;index as i">
+                <div class="row" style="margin-left: 20px;margin-top: 20px;">
+                  <b style="cursor: pointer;color: black;">Payment- {{i+1}}</b>
+                </div>
+                <div class="row" style="margin-left: 20px;margin-top: 20px;">
+                  <div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 mb-2">
+                    <span>
+                      <b>Amount</b>
+                    </span>
+                    <br />
+                    <span>{{data.advanceAmount}}</span>
+                  </div>
+
+                  <div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 mb-2">
+                    <span>
+                      <b>Date Of Receipt</b>
+                    </span>
+                    <br />
+                    <span>{{data.dateOfAdvanceReceived | date:'shortDate'}}</span>
+                  </div>
+
+                  <div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 mb-2">
+                    <span>
+                      <b>Mode Of Payment</b>
+                    </span>
+                    <br />
+                    <span>{{data.modeOfPayment}}</span>
+                  </div>
+
+                  <div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 mb-2">
+                    <span>
+                      <b>Reference No.</b>
+                    </span>
+                    <br />
+                    <span>{{data.referenceNumber}}</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </mat-expansion-panel>
+        </mat-accordion>
+      </div>
+    </div>
+
+    <!-- Lumpsum Rate Details -->
+    <div class="card" *ngIf="showLumpsumRate">
+      <div class="header bg-cyan">
+        <h2>Lumpsum Rate Details
+
+        </h2>
+        <ul class="header-dropdown m-r-10">
+          <li>
+            <a class="material-icons" href="javascript:void(0);" (click)="scrollToLinkButton()">keyboard_arrow_up</a>
+          </li>
+          <li></li>
+
+        </ul>
+      </div>
+      <div>
+        <mat-accordion>
+          <mat-expansion-panel [expanded]="panelExpanded">
+            <mat-expansion-panel-header>
+              <mat-panel-title>
+              </mat-panel-title>
+            </mat-expansion-panel-header>
+            <div>
+              <div *ngFor="let data of advanceTableLR;index as i">
+                <div class="row" style="margin-left: 20px;margin-top: 20px;">
+                  <b style="cursor: pointer;color: black">
+                    Lumpsum Rate Detail - {{i+1}}</b>
+                </div>
+                <div class="row" style="margin-left: 20px;margin-top: 20px;">
+                  <div class="col-xl-4 col-lg-6 col-md-12 col-sm-12 mb-2">
+                    <span>
+                      <b>Amount</b>
+                    </span>
+                    <br />
+                    <span>{{data.lumpsumRatePercentage}}</span>
+                  </div>
+
+                  <div class="col-xl-4 col-lg-6 col-md-12 col-sm-12 mb-2">
+                    <span>
+                      <b>Approved By</b>
+                    </span>
+                    <br />
+                    <span>{{data.firstName}} {{data.lastName}}</span>
+                  </div>
+
+                  <div class="col-xl-4 col-lg-6 col-md-12 col-sm-12 mb-2">
+                    <span>
+                      <b>Attachment</b>
+                    </span>
+                    <br />
+                    <span><a href="{{data.attachment}}" target="_blank" style="cursor: pointer;color: #007bff;">
+                        View</a></span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </mat-expansion-panel>
+        </mat-accordion>
+      </div>
+    </div>
+
+    <!-- Settled Rate -->
+    <div class="card" *ngIf="showSettledRate">
+      <div class="header bg-cyan">
+        <h2>Settled Rate
+
+        </h2>
+        <ul class="header-dropdown m-r-10">
+          <li>
+            <a class="material-icons" href="javascript:void(0);" (click)="scrollToLinkButton()">keyboard_arrow_up</a>
+          </li>
+          <li></li>
+
+        </ul>
+      </div>
+      <div>
+        <mat-accordion>
+          <mat-expansion-panel [expanded]="panelExpanded">
+            <mat-expansion-panel-header>
+              <mat-panel-title>
+              </mat-panel-title>
+            </mat-expansion-panel-header>
+            <div>
+              <div *ngFor="let data of advanceTableSRD;index as i">
+                <div class="row" style="margin-left: 20px;margin-top: 20px;">
+                  <b style="cursor: pointer;color: black;">Settled Rate - {{i+1}}</b>
+                </div>
+                <div class="row" style="margin-left: 20px;margin-top: 20px;">
+                  <div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 mb-2">
+                    <span>
+                      <b>City</b>
+                    </span>
+                    <br />
+                    <span>{{data.city}}</span>
+                  </div>
+
+                  <div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 mb-2">
+                    <span>
+                      <b>Car</b>
+                    </span>
+                    <br />
+                    <span>{{data.vehicleCategory}}</span>
+                  </div>
+
+                  <div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 mb-2">
+                    <span>
+                      <b>Duty Type</b>
+                    </span>
+                    <br />
+                    <span>{{data.packageType}}</span>
+                  </div>
+
+                  <div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 mb-2">
+                    <span>
+                      <b>Package</b>
+                    </span>
+                    <br />
+                    <span>{{data.package}}</span>
+                  </div>
+                </div>
+
+                <div class="row" style="margin-left: 20px;margin-top: 20px;">
+                  <div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 mb-2">
+                    <span>
+                      <b>Base Fare</b>
+                    </span>
+                    <br />
+                    <span>{{data.baseFare}}</span>
+                  </div>
+
+                  <div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 mb-2">
+                    <span>
+                      <b>Package KM</b>
+                    </span>
+                    <br />
+                    <span>{{data.packageKM}}</span>
+                  </div>
+
+                  <div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 mb-2">
+                    <span>
+                      <b>Extra KM Rate</b>
+                    </span>
+                    <br />
+                    <span>{{data.extraKMRate}}</span>
+                  </div>
+
+                  <div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 mb-2">
+                    <span>
+                      <b>Package HR</b>
+                    </span>
+                    <br />
+                    <span>{{data.packageHour}}</span>
+                  </div>
+                </div>
+
+                <div class="row" style="margin-left: 20px;margin-top: 20px;">
+                  <div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 mb-2">
+                    <span>
+                      <b>Night Charges</b>
+                    </span>
+                    <br />
+                    <span>{{data.nightCharges}}</span>
+                  </div>
+
+                  <div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 mb-2">
+                    <span>
+                      <b>Night Charge Start Time</b>
+                    </span>
+                    <br />
+                    <span>{{data.nightChargeStartTime | date:'shortTime'}}</span>
+                  </div>
+
+                  <div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 mb-2">
+                    <span>
+                      <b>Night Charge End Time</b>
+                    </span>
+                    <br />
+                    <span>{{data.nightChargeEndTime | date:'shortTime'}}</span>
+                  </div>
+
+                  <div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 mb-2">
+                    <span>
+                      <b>Driver Allowance</b>
+                    </span>
+                    <br />
+                    <span>{{data.driverAllowance}}</span>
+                  </div>
+                </div>
+
+                <div class="row" style="margin-left: 20px;margin-top: 20px;">
+                  <div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 mb-2">
+                    <span>
+                      <b>Billing From</b>
+                    </span>
+                    <br />
+                    <span>{{data.billingFrom}}</span>
+                  </div>
+
+                  <div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 mb-2">
+                    <span>
+                      <b>Billing To</b>
+                    </span>
+                    <br />
+                    <span>{{data.billingTo}}</span>
+                  </div>
+
+                  <div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 mb-2">
+                    <span>
+                      <b>Parking Charges</b>
+                    </span>
+                    <br />
+                    <span>{{data.parkingCharges===true?'Yes':'No'}}</span>
+                  </div>
+
+                  <div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 mb-2">
+                    <span>
+                      <b>Toll Charges</b>
+                    </span>
+                    <br />
+                    <span>{{data.tollCharges===true?'Yes':'No'}}</span>
+                  </div>
+                </div>
+
+                <div class="row" style="margin-left: 20px;margin-top: 20px;">
+                  <div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 mb-2">
+                    <span>
+                      <b>Interstate Charges</b>
+                    </span>
+                    <br />
+                    <span>{{data.interstateCharges===true?'Yes':'No'}}</span>
+                  </div>
+
+                  <div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 mb-2">
+                    <span>
+                      <b>Airport Fee</b>
+                    </span>
+                    <br />
+                    <span>{{data.airportFee===true?'Yes':'No'}}</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </mat-expansion-panel>
+        </mat-accordion>
+      </div>
+    </div>
+
+    <!-- Additional SMS/Email/WhatsApp Details -->
+    <div class="card" *ngIf="showAdditionalSMS">
+      <div class="header bg-cyan">
+        <h2>Additional SMS/Email/WhatsApp Details
+
+        </h2>
+        <ul class="header-dropdown m-r-10">
+          <li>
+            <a class="material-icons" href="javascript:void(0);" (click)="scrollToLinkButton()">keyboard_arrow_up</a>
+          </li>
+          <li></li>
+
+        </ul>
+      </div>
+      <div>
+        <mat-accordion>
+          <mat-expansion-panel [expanded]="panelExpanded">
+            <mat-expansion-panel-header>
+              <mat-panel-title>
+              </mat-panel-title>
+            </mat-expansion-panel-header>
+            <div>
+              <div *ngFor="let data of advanceTableASEW;index as i">
+                <div class="row" style="margin-left: 20px;margin-top: 20px;">
+                  <b style="cursor: pointer;color: black">
+                    Additional SMS/Email/WhatsApp Details - {{i+1}}</b>
+                </div>
+                <div class="row" style="margin-left: 20px;margin-top: 20px;">
+                  <div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 mb-2">
+                    <span>
+                      <b>Name</b>
+                    </span>
+                    <br />
+                    <span>{{data.personToBeMessaged}}</span>
+                  </div>
+
+                  <div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 mb-2">
+                    <span>
+                      <b>Email</b>
+                    </span>
+                    <br />
+                    <span>{{data.emailID}}</span>
+                  </div>
+
+                  <div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 mb-2">
+                    <span>
+                      <b>Mobile</b>
+                    </span>
+                    <br />
+                    <span>{{data.mobileNumber}}</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </mat-expansion-panel>
+        </mat-accordion>
+      </div>
+    </div>
+
+    <!-- Bill To Other Details -->
+    <div class="card" *ngIf="showBillToOther">
+      <div class="header bg-cyan">
+        <h2>Bill To Other Details
+
+        </h2>
+        <ul class="header-dropdown m-r-10">
+          <li>
+            <a class="material-icons" href="javascript:void(0);" (click)="scrollToLinkButton()">keyboard_arrow_up</a>
+          </li>
+          <li></li>
+
+        </ul>
+      </div>
+      <div>
+        <mat-accordion>
+          <mat-expansion-panel [expanded]="panelExpanded">
+            <mat-expansion-panel-header>
+              <mat-panel-title>
+              </mat-panel-title>
+            </mat-expansion-panel-header>
+            <div>
+              <div *ngFor="let data of advanceTableBD;index as i">
+                <div class="row" style="margin-left: 20px;margin-top: 20px;">
+                  <b style="cursor: pointer;color: black">
+                    Billing To Other - {{i+1}}</b>
+                </div>
+                <div class="row" style="margin-left: 20px;margin-top: 20px;">
+                  <div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 mb-2">
+                    <span>
+                      <b>Payer Name</b>
+                    </span>
+                    <br />
+                    <span>{{data.payerName}}</span>
+                  </div>
+
+                  <div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 mb-2">
+                    <span>
+                      <b>Passenger Address</b>
+                    </span>
+                    <br />
+                    <span>{{data.payerAddress}}</span>
+                  </div>
+
+                  <div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 mb-2">
+                    <span>
+                      <b>Country</b>
+                    </span>
+                    <br />
+                    <span>{{data.country}}</span>
+                  </div>
+
+                  <div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 mb-2">
+                    <span>
+                      <b>State</b>
+                    </span>
+                    <br />
+                    <span>{{data.state}}</span>
+                  </div>
+                </div>
+
+                <div class="row" style="margin-left: 20px;margin-top: 20px;margin-bottom: 20px;">
+                  <div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 mb-2">
+                    <span>
+                      <b>City</b>
+                    </span>
+                    <br />
+                    <span>{{data.city}}</span>
+                  </div>
+                  <div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 mb-2">
+                    <span>
+                      <b>Pin</b>
+                    </span>
+                    <br />
+                    <span>{{data.pin}}</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </mat-expansion-panel>
+        </mat-accordion>
+      </div>
+    </div>
+
+    <!-- Kam Card -->
+    <div class="card" *ngIf="showKamCard">
+      <div class="header bg-cyan">
+        <h2>KAM Details
+
+        </h2>
+        <ul class="header-dropdown m-r-10">
+          <li>
+            <a class="material-icons" href="javascript:void(0);" (click)="scrollToLinkButton()">keyboard_arrow_up</a>
+          </li>
+          <li></li>
+
+        </ul>
+      </div>
+      <div>
+        <mat-accordion>
+          <mat-expansion-panel [expanded]="panelExpanded">
+            <mat-expansion-panel-header>
+              <mat-panel-title>
+              </mat-panel-title>
+            </mat-expansion-panel-header>
+            <div>
+              <div *ngFor="let data of advanceTableKC;index as i">
+                <div class="row" style="margin-left: 20px;margin-top: 20px;">
+                  <b style="cursor: pointer;color: black">
+                    KAM - {{i+1}}</b>
+                </div>
+                <div class="row" style="margin-left: 20px;margin-top: 20px;">
+                  <div class="col-xl-4 col-lg-6 col-md-12 col-sm-12 mb-2">
+                    <span>
+                      <b>Employee Name</b>
+                    </span>
+                    <br />
+                    <span>{{data.firstName}} {{data.lastName}}</span>
+                  </div>
+                  <div class="col-xl-4 col-lg-6 col-md-12 col-sm-12 mb-2">
+                    <span>
+                      <b>Employee Mobile</b>
+                    </span>
+                    <br />
+                    <span>{{data.mobile}}</span>
+                  </div>
+                  <div class="col-xl-4 col-lg-6 col-md-12 col-sm-12 mb-2">
+                    <span>
+                      <b>Employee Email</b>
+                    </span>
+                    <br />showDGP
+                    <span>{{data.email}}</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </mat-expansion-panel>
+        </mat-accordion>
+
+      </div>
+    </div>
+
+    <!-- Duty GST Percentage -->
+    <div class="card" *ngIf="showDGP" id="dutyGSTPercentage">
+      <div class="header bg-cyan">
+        <h2>
+          Duty GST Percentage
+          <!-- <i><a style="cursor: pointer;" (click)="openDutyGSTPercentage()">Add More</a></i> -->
+
+        </h2>
+        <ul class="header-dropdown m-r-10">
+          <li>
+            <a class="material-icons" href="javascript:void(0);" (click)="scrollToLinkButton()">keyboard_arrow_up</a>
+          </li>
+          <li></li>
+
+        </ul>
+      </div>
+      <mat-accordion>
+        <mat-expansion-panel [expanded]="panelExpanded">
+          <mat-expansion-panel-header>
+            <mat-panel-title>
+            </mat-panel-title>
+          </mat-expansion-panel-header>
+          <div>
+            <app-dutyGSTPercentage [advanceTableDGP]="advanceTableDGP"
+              [dutySlipID]="DutySlipID"></app-dutyGSTPercentage>
+          </div>
+        </mat-expansion-panel>
+      </mat-accordion>
+    </div>
+
+    <!--Discount Details-->
+    <div class="card" *ngIf="showHideaddDiscount" id="addDiscount">
+      <div class="header bg-cyan">
+          <h2>
+           Discount Details - 
+           <i><a (click)="addDiscount()" style="cursor: pointer;">Add More</a></i>
+           </h2>
+          <ul class="header-dropdown m-r-10">
+            <li>
+              <a class="material-icons" href="javascript:void(0);"  (click)="scrollToLinkButton()">keyboard_arrow_up</a>
+              
+            </li>
+           <li></li>
+          </ul>
+      </div>
+      <div>
+        <mat-accordion>
+          <mat-expansion-panel [expanded]="panelExpanded">
+            <mat-expansion-panel-header>
+              <mat-panel-title>
+              </mat-panel-title>
+            </mat-expansion-panel-header>
+            <div>
+              <div *ngFor="let data of advanceTableDD;index as i">
+                <div class="row" style="margin-left: 20px;margin-top: 20px;">
+                  <b style="cursor: pointer;color: black">
+                    Discount Details - {{i+1}}</b>
+                </div>
+                <div class="row" style="margin-left: 20px;margin-top: 20px;">
+                  <div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 mb-2">
+                    <span>
+                      <b>Name</b>
+                    </span>
+                    <br />
+                    <span>{{data.firstName}}</span>
+                  </div>
+                  <div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 mb-2">
+                    <span>
+                      <b>Discount</b>
+                    </span>
+                    <br />
+                    <span>{{data.discountPercentageOnPackage}}</span>
+                  </div>
+
+                  <div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 mb-2">
+                    <span>
+                      <b>Discount ON</b>
+                    </span>
+                    <br />
+                    <span>{{data.discountPercentageOnExtraKM}}</span>
+                  </div>
+
+                  <div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 mb-2">
+                    <span>
+                      <b>Attachment</b>
+                    </span>
+                    <br />
+                    <span><a href="{{data.attachment}}" target="_blank"
+                      style="cursor: pointer;color: #007bff;">
+                      View</a></span>                   
+                  </div>
+                </div>
+              </div>
+            </div>
+          </mat-expansion-panel>
+        </mat-accordion>
+      </div>
+    
+  </div>  
+
+    <!-- Duty State Card -->
+    <div class="card" *ngIf="showHideDutyState" id="dutyState">
+      <div class="header bg-cyan">
+        <h2>
+          Duty State
+          <!-- <i><a (click)="openDutyState()" style="cursor: pointer;">Add More</a></i> -->
+        </h2>
+        <ul class="header-dropdown m-r-10">
+          <li>
+            <a class="material-icons" href="javascript:void(0);" (click)="scrollToLinkButton()">keyboard_arrow_up</a>
+          </li>
+          <li></li>
+
+        </ul>
+      </div>
+      <mat-accordion>
+        <mat-expansion-panel [expanded]="panelExpanded">
+          <mat-expansion-panel-header>
+            <mat-panel-title>
+            </mat-panel-title>
+          </mat-expansion-panel-header>
+          <div>
+            <app-dutyState [advanceTableDutyState]="advanceTableDutyState" [dutySlipID]="DutySlipID"></app-dutyState>
+          </div>
+        </mat-expansion-panel>
+      </mat-accordion>
+    </div>
+
+    <!--ReservationSalesPerson-->
+    <div class="card" *ngIf="showHideSalesPerson" id="salesPerson">
+      <div class="header bg-cyan">
+          <h2>
+           Sales Person - 
+           <i><a (click)="addSalesPerson()" style="cursor: pointer;">Add More</a></i>
+           </h2>
+          <ul class="header-dropdown m-r-10">
+            <li>
+              <a class="material-icons" href="javascript:void(0);"  (click)="scrollToLinkButton()">keyboard_arrow_up</a>
+              
+            </li>
+           <li></li>
+          </ul>
+      </div>
+      <div>
+        <mat-accordion>
+          <mat-expansion-panel [expanded]="panelExpanded">
+            <mat-expansion-panel-header>
+              <mat-panel-title>
+              </mat-panel-title>
+            </mat-expansion-panel-header>
+            <div>
+              <!-- <div *ngFor="let data of advanceTableSP;index as i">
+                <div class="row" style="margin-left: 20px;margin-top: 20px;">
+                  <b style="cursor: pointer;color: black">
+                    Sales Person - {{i+1}} -</b>
+                  <b style="cursor: pointer;color: #007bff;" (click)="updateSalesPerson()">
+                    Edit -</b> 
+                  <b style="cursor: pointer;color: #007bff;" (click)="deleteSalesPerson(data.reservationSalesPersonID)">
+                    Delete</b> 
+                </div>
+                <div class="row" style="margin-left: 20px;margin-top: 20px;">
+                  <div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 mb-2">
+                    <span>
+                      <b>Name</b>
+                    </span>
+                    <br />
+                    <span>{{data.salesPerson}}</span>
+                  </div>
+                  <div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 mb-2">
+                    <span>
+                      <b>Activation Status</b>
+                    </span>
+                    <br />
+                    <span>{{data.activationStatus}}</span>
+                  </div>
+                </div>
+              </div> -->
+              <mat-table #table [dataSource]="advanceTableSP" matSort class="mat-cell">
+                <ng-container matColumnDef="salesPerson">
+                    <mat-header-cell *matHeaderCellDef mat-sort-header>Sales Person</mat-header-cell>
+                    <mat-cell *matCellDef="let row" (contextmenu)="onContextMenu($event, row)">
+                        {{row.salesPerson}}</mat-cell>
+                </ng-container>
+
+                <ng-container matColumnDef="status">
+                    <mat-header-cell *matHeaderCellDef>Activation Status</mat-header-cell>
+                    <mat-cell *matCellDef="let row" (contextmenu)="onContextMenu($event, row)">
+                        
+                        {{row.activationStatus===true ? 'Active' : 'Deleted'}}</mat-cell>
+                </ng-container>
+                <!-- actions -->
+                <ng-container matColumnDef="actions">
+                    <mat-header-cell *matHeaderCellDef class="pr-0" [ngClass]="'tbl-col-width-per-9'">Actions</mat-header-cell>
+                    <mat-cell *matCellDef="let row; let i=index;" class="pr-0" [ngClass]="'tbl-col-width-per-9'">
+                        <button mat-raised-button color="primary" (contextmenu)="onContextMenu($event, row)" (click)="onContextMenu($event, row)">
+                            Actions
+                    </button>
+                    </mat-cell>
+                </ng-container>
+                <mat-header-row *matHeaderRowDef="displayedColumns"></mat-header-row>
+                <mat-row *matRowDef="let row; columns: displayedColumns;" [style.cursor]="'pointer'" matRipple>
+                </mat-row>
+            </mat-table>
+            <div style="visibility: hidden; position: fixed" [style.left]="contextMenuPosition.x" [style.top]="contextMenuPosition.y" [matMenuTriggerFor]="contextMenu">
+            </div>
+            <mat-menu #contextMenu="matMenu">
+              <ng-template matMenuContent let-item="item">
+                  <!-- <button mat-menu-item (click)="addNew()">
+                  <mat-icon>add_box</mat-icon>
+                  <span>Add</span>
+                  </button> -->
+                  <button mat-menu-item (click)="updateSalesPerson(item)">
+                  <mat-icon>create</mat-icon>
+                  <span>Edit</span>
+                  </button>
+                  <button mat-menu-item (click)="deleteSalesPerson(item)">
+                  <mat-icon>delete</mat-icon>
+                  <span>Delete</span>
+                  </button>
+                  <!-- <button mat-menu-item (click)="refresh()">
+              <mat-icon>refresh</mat-icon>
+          <span>Refresh</span>
+      </button> -->
+
+              </ng-template>
+          </mat-menu>
+            </div>
+          </mat-expansion-panel>
+        </mat-accordion>
+      </div>
+    
+  </div>  
+
+  </div>
+</section>

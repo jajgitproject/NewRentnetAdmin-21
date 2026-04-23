@@ -1,0 +1,347 @@
+<div class="modalHeader">
+  <div class="editRowModal">
+    <div class="modalHeader clearfix">
+      <div class="modal-about">
+        <div class="font-weight-bold p-t-5 font-17">
+          <!-- {{ dialogTitle }} -->
+        </div>
+      </div>
+    </div>
+  </div>
+  <!-- <button mat-icon-button (click)="dialogRef.close()" aria-label="Close dialog">
+    <mat-icon class="small-close-icon">close</mat-icon>
+  </button> -->
+</div>
+<div class="print-container">
+  <mat-card>
+    <mat-card-content>
+      <mat-dialog-content>
+        <div id="printElem">
+          <table width="595" border="0" align="center" cellpadding="0" cellspacing="0">
+            <tr>
+              <td height="840" valign="top">
+                <table width="556" border="0" align="center" cellpadding="0" cellspacing="0">
+                  <tr>
+                    <td height="824" align="center" valign="top" class="auto-style1">
+                      <p>
+                        <span class="text-heading">
+                          <strong>ECOS(I) MOBILITY AND HOSPITALITY PVT. LTD<br /></strong>
+                        </span>
+                        <span class="text-subheading">
+                          Address_Branch / Customer_of_branch
+                        </span>
+                      </p>
+
+                      <table width="556" border="0" cellpadding="0" cellspacing="0" class="text1">
+                        <tr>
+                          <td width="65"></td>
+                          <td width="92"></td>
+                          <td width="85"><strong>MOP</strong></td>
+                          <td width="103">{{dataSource?.modeOfPayment}}</td>
+                          <td width="95"></td>
+                          <td width="92">id / Cust_Loc</td>
+                        </tr>
+
+                        <tr>
+                          <td>Pickup Date</td>
+                          <td>{{dataSource?.pickUpDate | date : 'dd/MM/yyyy'}}</td>
+                          <td>App. Relesing Date</td>
+                          <td>{{dataSource?.locationInDate | date : 'dd/MM/yyyy'}}</td>
+                          <td></td>
+                          <td>&nbsp;</td>
+                        </tr>
+
+                        <tr>
+                          <td>
+                            <strong>D.S No : </strong>{{dataSource?.dutySlipID}}
+                          </td>
+                          <td>
+                            <strong>City : </strong>{{dataSource?.pickupCity}}
+                          </td>
+                          <td>
+                            <strong>Bkg no : </strong>{{dataSource?.reservationID}}
+                          </td>
+                          <td>
+                            <strong>Car Booked : </strong>{{dataSource?.vehicleBooked}}                            
+                          </td>
+                          <td>
+                            <strong>Car Send : </strong>{{dataSource?.vehicleSent}}
+                          </td>
+                          <td>
+                            <strong>Car No : </strong>{{dataSource?.registrationNumber}}
+                          </td>
+                        </tr>
+
+                        <tr>
+                          <td colspan="3">
+                            <strong>Driver Name : </strong>{{dataSource?.driverName}}
+                          </td>
+                          <td colspan="3">
+                            <strong>Duty Type : </strong>{{dataSource?.packageType}}
+                          </td>
+                        </tr>
+
+                        <tr>
+                          <td colspan="6">
+                            <strong>Booker Name/No : </strong>{{dataSource?.bookerName}} / {{dataSource?.mobile1}}
+                          </td>
+                        </tr>
+
+                        <tr>
+                          <td colspan="6">
+                            <strong>Guest Name/No : </strong> {{ dataSource?.passengerName }} / {{dataSource?.passengerMobile}}
+                          </td>
+                        </tr>
+
+                        <tr>
+                          <td colspan="6">
+                            <strong>Client Name : </strong>{{dataSource?.customerName}}
+                          </td>
+                        </tr>
+
+                        <tr>
+                          <td colspan="6">
+                            <strong>Reporting Address : </strong>
+                            <!-- {{dataSource?.pickup.pickupAddress}} -->
+                          </td>
+                        </tr>
+
+                        <tr>
+                          <td colspan="6">
+                            <p>
+                              <strong>Special Instruction/Trip To</strong>
+                              <!-- {{dataSource?.specialInstruction}} -->
+                            </p>
+                          </td>
+                        </tr>
+
+                        <tr>
+                          <td colspan="2">
+                            <strong>Out Kms : {{dataSource?.locationOutKM}}</strong>
+                          </td>
+                          <td colspan="2">
+                            <strong>Out Time : {{dataSource?.locationOutTime | date : 'HH:mm'}}</strong>
+                          </td>
+                          <td colspan="2">
+                            <strong>Out Date : {{dataSource?.locationOutDate | date : 'dd/MM/yyyy'}}</strong>
+                          </td>
+                        </tr>
+
+                        <tr>
+                          <td colspan="2">
+                            <strong>Reporting Kms : {{dataSource?.pickUpKM}}</strong>
+                          </td>
+                          <td colspan="2">
+                            <strong>Reporting Time : {{dataSource?.pickUpTime | date : 'HH:mm'}}</strong>
+                          </td>
+                          <td colspan="2">
+                            <strong>Reporting Date : {{dataSource?.pickUpDate | date : 'dd/MM/yyyy'}}</strong>
+                          </td>
+                        </tr>
+
+                        <tr>
+                          <td colspan="2">
+                            <strong>Releasing Kms : {{dataSource?.dropOffKM}}</strong>
+                          </td>
+                          <td colspan="2">
+                            <strong>Releasing time : {{dataSource?.dropOffTime | date : 'HH:mm'}}</strong>
+                          </td>
+                          <td colspan="2">
+                            <strong>Releasing Date : {{dataSource?.dropOffDate | date : 'dd/MM/yyyy'}}</strong>
+                          </td>
+                        </tr>
+
+                        <tr>
+                          <td colspan="2">
+                            <strong>In Kms : {{dataSource?.locationInKM}}</strong>
+                          </td>
+                          <td colspan="2">
+                            <strong>In Time : {{dataSource?.locationInTime | date : 'HH:mm'}}</strong>
+                          </td>
+                          <td colspan="2">
+                            <strong>In Date : {{dataSource?.locationInDate | date : 'dd/MM/yyyy'}}</strong>
+                          </td>
+                        </tr>
+
+                        <tr>
+                          <td colspan="2">
+                            <strong>Total Kms : {{dataSource?.locationOutKM + dataSource?.reportingToGuestKM + dataSource?.pickUpKM + dataSource?.locationInKM}}</strong>
+                          </td>
+                          <td colspan="2">
+                            <strong>Total Time : {{datetime}}</strong>
+                          </td>
+                          <td colspan="2"><strong>Total Days : {{totalDays}}</strong></td>
+                        </tr>
+                      </table>
+
+                      <span class="text-subheading">
+                        <strong class="text-subheading">
+                          <br />
+                          INVOICE CALCULATION<br /> 
+                        </strong>
+                      </span>
+
+                      <table width="556" border="0" cellpadding="0" cellspacing="0" class="text1">
+                        <tr>
+                          <td width="371" align="center">
+                            <strong>Particulars</strong>
+                          </td>
+                          <td width="69"><strong>Rate</strong></td>
+                          <td width="104"><strong>Amount</strong></td>
+                        </tr>
+
+                        <tr  *ngFor="let duty of dataSource?.packageDetails">
+                          <td height="90" align="left" valign="top">
+                            Package Name : {{duty?.packageName}}
+                            <br />
+                            Extra Hr 
+                            <br />
+                            Extra KM
+                          </td>
+                          <td valign="top">
+                            {{duty?.packageRate}}
+                            <br />
+                            {{duty?.extraHourRate}}
+                            <br />
+                            {{duty?.extraKmRate}}
+                          </td>
+                          <td valign="top"></td>
+                        </tr>
+
+                        <tr>
+                          <td align="left">
+                            <strong>Parking/Toll/Inter State Tax</strong>
+                          </td>
+                          <td></td>
+                          <td>Expenses</td>
+                        </tr>
+
+                        <tr>
+                          <td align="left">
+                            <strong>Other Charges(If Any)</strong>
+                          </td>
+                          <td></td>
+                          <td></td>
+                        </tr>
+
+                        <tr>
+                          <td align="left"><strong>Sub Total</strong></td>
+                          <td></td>
+                          <td></td>
+                        </tr>
+
+                        <tr>
+                          <td align="left">
+                            <strong>Service Tax</strong>
+                          </td>
+                          <td></td>
+                          <td></td>
+                        </tr>
+
+                        <tr>
+                          <td align="left"><strong>Total Amount</strong></td>
+                          <td>&nbsp;</td>
+                          <td>&nbsp;</td>
+                        </tr>
+                      </table>
+
+                      <span class="text-subheading"><strong class="text-subheading"></strong></span>
+                      <br />
+
+                      <table width="556" border="0" cellpadding="1" cellspacing="0" class="text1">
+                        <tr>
+                          <td width="180">
+                            <strong>Cash
+                              <input type="checkbox" id="chk1" value="CashPaid Rs" />
+                              ......................
+                            </strong>
+                          </td>
+                          <td width="272">
+                            <strong>
+                              In Words Rs.
+                            </strong>.....................................................................
+                          </td>
+                          <td width="98">
+                            Credit Card
+                            <strong>
+                              <input type="checkbox" name="checkbox2" id="checkbox2" />
+                            </strong>
+                          </td>
+                        </tr>
+
+                        <tr>
+                          <td>&nbsp;</td>
+                          <td>&nbsp;</td>
+                          <td>&nbsp;</td>
+                        </tr>
+
+                        <tr>
+                          <td colspan="2" align="center">Credit Card No</td>
+                          <td>Expiry Date</td>
+                        </tr>
+
+                        <tr>
+                          <td colspan="2" align="center">Cc_no</td>
+                          <td>Card_exp</td>
+                        </tr>
+
+                        <tr>
+                          <td colspan="3" align="left">
+                            <p>
+                              I authorize ECOS(I) MOBILITY & HOSPITALITY (P) LTD.
+                              to charge as per rates contracted on account of the car hire / hotel / travel facility to my above mentioned card (s) which are valid &amp; sufficiently funded. This instruction is irrevocable and valid on an ongoing basis. I agree to advise
+                              ECOS(I) MOBILITY & HOSPITALITY (P) LTD. , if any nominated\credit card account is cancelled, substituted not renewed. In such case, I agree to provide alternative payment I understand that the Record of charges in respect of services received / availed, submitted by you to the credit card center/bank with neither bear my signatures nor the imprint of the card
+                            </p>
+                          </td>
+                        </tr>
+
+                        <tr>
+                          <td colspan="3" align="center">
+                            <strong>INSTRUCTION FOR NEXT DAY REQUIREMENT</strong>
+                          </td>
+                        </tr>
+
+                        <tr>
+                          <td align="left"><strong>Date</strong></td>
+                          <td colspan="2" class="auto-style2" rowspan="2">Reporting Address</td>
+                        </tr>
+
+                        <tr>
+                          <td align="left"><strong>Time</strong></td>
+                        </tr>
+                      </table>
+
+                      <table width="556" border="0" cellpadding="1" cellspacing="0" class="text1">
+                        <tr>
+                          <td width="422">
+                            <strong>Customer Feed Back<br /><br /><br />
+                              Your K.A.M is : {{dataSource?.keyAccountManagerName}}, Phone : {{dataSource?.keyAccountManagerMobile}}
+                            </strong>
+                          </td>
+                          <td width="130" valign="top">User Signature</td>
+                      </table>
+
+                      <table width="556" border="0" cellpadding="0" cellspacing="0" class="text2">
+                        <tr>
+                          <td align="center"><p class="auto-style3">Note- If you Need the Receipt Copy please give us your e-mail..............................................Contact No..............................</p></td>
+                        </tr>
+                      </table>
+
+                      <br />
+                    </td>
+                  </tr>
+                </table>
+              </td>
+            </tr>
+          </table>
+        </div>
+        <hr />
+        <div style="text-align: center">
+          <button type="button" onclick="window.print()" color="primary" mat-raised-button id="print">
+            Print
+          </button>
+        </div>
+      </mat-dialog-content>
+    </mat-card-content>
+  </mat-card>
+</div>

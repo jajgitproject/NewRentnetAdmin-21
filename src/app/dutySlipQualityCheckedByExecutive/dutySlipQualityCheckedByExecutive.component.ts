@@ -1,0 +1,301 @@
+// @ts-nocheck
+import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
+import { HttpClient, HttpErrorResponse } from '@angular/common/http';
+import { MatDialog } from '@angular/material/dialog';
+import { MatPaginator } from '@angular/material/paginator';
+import { MatSort } from '@angular/material/sort';
+import { DutySlipQualityCheckedByExecutive } from './dutySlipQualityCheckedByExecutive.model';
+import { DataSource } from '@angular/cdk/collections';
+import { MatSnackBar } from '@angular/material/snack-bar';
+import { BehaviorSubject, fromEvent, merge, Observable, Subscription } from 'rxjs';
+import { map } from 'rxjs/operators';
+import { DateAdapter, MAT_DATE_LOCALE } from '@angular/material/core';
+import { MatMenu, MatMenuTrigger } from '@angular/material/menu';
+import { SelectionModel } from '@angular/cdk/collections';
+import { GeneralService } from '../general/general.service';
+import { MyUploadComponent } from '../myupload/myupload.component';
+import { DeleteDialogCityComponent } from '../dashboard/city-master/dialogscity/delete-city/delete-city.component';
+import { FormControl } from '@angular/forms';
+import { DeleteDialogComponent } from './dialogs/delete/dutySlipQualityCheckedByExecutive.component';
+import { DutySlipQualityCheckedByExecutiveService } from './dutySlipQualityCheckedByExecutive.service';
+import { FormDialogComponent } from './dialogs/form-dialog/form-dialog.component';
+@Component({
+  standalone: false,
+  selector: 'app-dutySlipQualityCheckedByExecutive',
+  templateUrl: './dutySlipQualityCheckedByExecutive.component.html',
+  styleUrls: ['./dutySlipQualityCheckedByExecutive.component.sass'],
+  providers: [{ provide: MAT_DATE_LOCALE, useValue: 'en-GB' }]
+})
+export class DutySlipQualityCheckedByExecutiveComponent implements OnInit {
+  displayedColumns = [
+    'status',
+    'actions'
+  ];
+  dataSource: DutySlipQualityCheckedByExecutive[] | null;
+  dutyQualityCheckID: number;
+  advanceTable: DutySlipQualityCheckedByExecutive | null;
+  //SearchDutyQualityCheckID: string = '';
+  SearchVerificationResult : boolean=true;
+  SearchActivationStatus : boolean=true;
+  PageNumber: number = 0;
+  activation: string;
+  sortingData: number;
+  sortType: string;
+  search : FormControl = new FormControl();
+
+  constructor(
+    public httpClient: HttpClient,
+    public dialog: MatDialog,
+    public DutySlipQualityCheckedByExecutiveService: DutySlipQualityCheckedByExecutiveService,
+    private snackBar: MatSnackBar,
+    public _generalService: GeneralService
+  ) {}
+  @ViewChild(MatPaginator, { static: true }) paginator: MatPaginator;
+  @ViewChild(MatSort, { static: true }) sort: MatSort;
+  @ViewChild('filter', { static: true }) filter: ElementRef;
+  @ViewChild(MatMenuTrigger)
+  contextMenu: MatMenuTrigger;
+  contextMenuPosition = { x: '0px', y: '0px' };
+  ngOnInit() {
+    this.loadData();
+    this.SubscribeUpdateService();
+  }
+  refresh() {
+    this.SearchVerificationResult = true;
+    this.SearchActivationStatus = true;
+    this.PageNumber=0;
+    this.loadData();
+  }
+
+  addNew()
+  {
+    const dialogRef = this.dialog.open(FormDialogComponent, 
+    {
+      data: 
+        {
+          advanceTable: this.advanceTable,
+      
+        }
+    });
+  }
+
+  editCall(row) {
+    //  alert(row.id);
+  this.dutyQualityCheckID = row.id;
+  const dialogRef = this.dialog.open(FormDialogComponent, {
+    data: {
+      advanceTable: row,
+  
+    }
+  });
+
+}
+// deleteItem(row)
+// {
+//   this.dutyQualityCheckID = row.id;
+//   const dialogRef = this.dialog.open(DeleteDialogComponent, 
+//   {
+//     data: row
+//   });
+// }
+
+  public Filter()
+  {
+    this.PageNumber = 0;
+    this.loadData();
+  }
+   public loadData() 
+   {
+      // this.DutySlipQualityCheckedByExecutiveService.getTableData(this.dutyQualityCheckID,this.SearchVerificationResult,this.SearchActivationStatus, this.PageNumber).subscribe
+      // (
+      //   data =>   
+      //   {
+      //     this.dataSource = data;
+      //     this.dataSource.forEach((ele)=>{
+      //       if(ele.activationStatus===true){
+      //        this.activation="Active"
+      //       }
+      //       if(ele.activationStatus===false){
+      //         this.activation="Deleted"
+      //        }
+      //     })
+         
+      //   },
+      //   (error: HttpErrorResponse) => { this.dataSource = null;}
+      // );
+  }
+  showNotification(colorName, text, placementFrom, placementAlign) {
+    this.snackBar.open(text, '', {
+      duration: 2000,
+      verticalPosition: placementFrom,
+      horizontalPosition: placementAlign,
+      panelClass: colorName
+    });
+  }
+  onContextMenu(event: MouseEvent, item: DutySlipQualityCheckedByExecutive) {
+    event.preventDefault();
+    this.contextMenuPosition.x = event.clientX + 'px';
+    this.contextMenuPosition.y = event.clientY + 'px';
+    this.contextMenu.menuData = { item: item };
+    this.contextMenu.menu.focusFirstItem('mouse');
+    this.contextMenu.openMenu();
+  }
+  NextCall()
+  {
+    if (this.dataSource.length>0) 
+    {
+      this.PageNumber++;
+      this.loadData();
+    }
+  }
+  PreviousCall()
+  {
+    if(this.PageNumber>0)
+    {
+      this.PageNumber--;
+      this.loadData(); 
+    } 
+  }
+
+  public SearchData()
+  {
+    this.loadData();
+    //this.SearchDutySlipQualityCheckedByExecutivek='';
+    
+  }
+
+/////////////////for Image Upload////////////////////////////
+  public response: { dbPath: '' };
+  public ImagePath: string;
+  public uploadFinished = (event) => {
+  this.response = event;
+  this.ImagePath = this._generalService.getImageURL() + this.response.dbPath;
+  }
+/////////////////for Image Upload ends////////////////////////////
+
+
+  /////////////////To Recieve Updates Start////////////////////////////
+  messageReceived: string;
+  MessageArray:string[]=[];
+  private subscriptionName: Subscription; //important to create a subscription
+
+  SubscribeUpdateService()
+  {
+    this.subscriptionName=this._generalService.getUpdate().subscribe
+    (
+      message => 
+      { 
+        //message contains the data sent from service
+        this.messageReceived = message.text;
+        this.MessageArray=this.messageReceived.split(":");
+        if(this.MessageArray.length==3)
+        {
+          if(this.MessageArray[0]=="DutySlipQualityCheckedByExecutiveCreate")
+          {
+            if(this.MessageArray[1]=="DutySlipQualityCheckedByExecutiveView")
+            {
+              if(this.MessageArray[2]=="Success")
+              {
+                this.refresh();
+                this.showNotification(
+                'snackbar-success',
+                'DutySlipQualityCheckedByExecutive Created...!!!',
+                'bottom',
+                'center'
+              );
+              }
+            }
+          }
+          else if(this.MessageArray[0]=="DutySlipQualityCheckedByExecutiveUpdate")
+          {
+            if(this.MessageArray[1]=="DutySlipQualityCheckedByExecutiveView")
+            {
+              if(this.MessageArray[2]=="Success")
+              {
+               this.refresh();
+               this.showNotification(
+                'snackbar-success',
+                'Duty Slip Quality CheckedBy Executive Updated...!!!',
+                'bottom',
+                'center'
+              );
+              }
+            }
+          }
+          else if(this.MessageArray[0]=="DutySlipQualityCheckedByExecutiveDelete")
+          {
+            if(this.MessageArray[1]=="DutySlipQualityCheckedByExecutiveView")
+            {
+              if(this.MessageArray[2]=="Success")
+              {
+               this.refresh();
+               this.showNotification(
+                'snackbar-success',
+                'DutySlipQualityCheckedByExecutive Deleted...!!!',
+                'bottom',
+                'center'
+              );
+              }
+            }
+          }
+          else if(this.MessageArray[0]=="DutySlipQualityCheckedByExecutiveAll")
+          {
+            if(this.MessageArray[1]=="DutySlipQualityCheckedByExecutiveView")
+            {
+              if(this.MessageArray[2]=="Failure")
+              {
+               this.refresh();
+               this.showNotification(
+                'snackbar-danger',
+                'Operation Failed.....!!!',
+                'bottom',
+                'center'
+              );
+              }
+            }
+          }
+          else if(this.MessageArray[0]=="DataNotFound")
+          {
+            if(this.MessageArray[1]=="DuplicacyError")
+            {
+              if(this.MessageArray[2]=="Failure")
+              {
+               this.refresh();
+               this.showNotification(
+                'snackbar-danger',
+                'Duplicate Value Found.....!!!',
+                'bottom',
+                'center'
+              );
+              }
+            }
+          }
+        }
+      }
+    );
+  }
+
+  SortingData(coloumName:any) {
+    if (this.sortingData == 1) {
+
+      this.sortingData = 0;
+      this.sortType = "Ascending"
+    }
+    else {
+      this.sortingData = 1;
+      this.sortType = "Descending";
+    }
+    // this.DutySlipQualityCheckedByExecutiveService.getTableDataSort(this.dutyQualityCheckID,this.SearchVerificationResult,this.SearchActivationStatus, this.PageNumber,coloumName.active,this.sortType).subscribe
+    // (
+    //   data =>   
+    //   {
+    //     this.dataSource = data;
+    //   },
+    //   (error: HttpErrorResponse) => { this.dataSource = null;}
+    // );
+  }
+}
+
+        
+
+

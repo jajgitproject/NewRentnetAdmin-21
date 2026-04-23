@@ -1,0 +1,122 @@
+<div *ngFor="let data of dataSource;index as i">
+    <div class="row" style="margin-left: 20px;margin-top: 20px;">
+        <a style="cursor: pointer;color: #007bff;">
+            Billing To Other {{i+1}}</a>
+    </div>
+    
+    <div class="row" style="margin-left: 20px;margin-top: 20px;">
+        <div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 mb-2">
+            <span>
+                <b>
+                    Payer Name
+                </b>                   
+            </span>
+            <br/>
+            <span>{{data.payerName}}</span>
+        </div>
+    
+        <div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 mb-2">
+            <span>
+                <b>
+                    Passenger Address
+                </b>                   
+            </span>
+            <br/>
+            <span>{{data.payerAddress}}</span>
+        </div>
+    
+        <div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 mb-2">
+            <span>
+                <b>
+                    Country
+                </b>                   
+            </span>
+            <br/>
+            <span>{{data.country}}</span>
+        </div>
+    
+        <div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 mb-2">
+            <span>
+                <b>
+                    State
+                </b>                   
+            </span>
+            <br/>
+            <!-- <span>Male - N/A - Guard</span> -->
+            <span>{{data.state}}</span>
+        </div>
+        
+    </div>
+    
+    <div class="row" style="margin-left: 20px;margin-top: 20px;margin-bottom: 20px;">
+        <div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 mb-2">
+            <span>
+                <b>
+                    City
+                </b>                   
+            </span>
+            <br/>
+            <span>{{data.city}}</span>
+           
+        </div>
+    
+        <div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 mb-2">
+            <span>
+                <b>
+                    Pin
+                </b>                   
+            </span>
+            <br/>
+            <span>{{data.pin || 'N/A'}}</span>
+            
+        </div>
+    
+        <div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 mb-2">
+            <!-- <span>
+                <b>
+                    Pickup Address
+                </b>                   
+            </span>
+            <br/>
+            <span>{{data.pickupAddress}}</span> -->
+        </div>
+        
+    </div>
+    
+    <div class="row" style="margin-left: 20px;margin-top: 20px;margin-bottom: 20px;">
+        <div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 mb-2">
+            <!-- <span>
+                <b>
+                    Drop Off Date & Time
+                </b>                   
+            </span>
+            <br/>
+            <span>{{data.dropOffDate | date:'shortDate'}}</span><br/>
+            <span>{{data.dropOffTime | date:'shortTime'}}</span> -->
+        </div>
+    
+        <div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 mb-2">
+            <!-- <span>
+                <b>
+                    Drop Off Spot
+                </b>                   
+            </span>
+            <br/>
+            <span>{{data.dropOffSpotType}}</span><br/>
+            <span>{{data.DropOffSpot}}</span> -->
+        </div>
+    
+        <div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 mb-2">
+            <!-- <span>
+                <b>
+                    Drop Off Address
+                </b>                   
+            </span>
+            <br/>
+            <span>{{data.dropOffAddress}}</span> -->
+        </div>
+        
+    </div>
+    
+    </div>
+    

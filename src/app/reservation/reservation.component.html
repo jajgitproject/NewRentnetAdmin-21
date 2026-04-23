@@ -1,0 +1,1363 @@
+<div class="row">
+    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+        <div class="col-xl-2 col-lg-2 col-md-2 col-sm-12 mb-2">
+            <mat-progress-spinner *ngIf="isLoadingdata" mode="indeterminate" diameter="30" strokeWidth="4"></mat-progress-spinner>
+        </div>
+        <div *ngIf="ReasonMessageShow">
+            <span style="color: red;font-size: 15px;">
+                Reservation for {{customerName}} are not allowed due to the following reason : {{Reason}}
+            </span>
+        </div>
+        <div *ngIf="ReservationAlertShow">
+            <span style="color: red;font-size: 15px;">
+                Reservation Alert Message : {{ReservationAlert}}
+            </span>
+        </div>
+        <div *ngIf="CustomerAlertMessageShow">
+            <span style="color: red;font-size: 15px;">
+                Customer Alert Message : {{CustomerAlertMessage}}
+            </span>
+        </div>
+
+        <div *ngIf="ReservationStatus === 'Cancelled'">
+            <span style="color: red;font-size: 15px;">
+                Reservation Status : {{ReservationStatus}}
+            </span>
+        </div>
+
+        <div class="addContainer">
+            <form class="register-form m-4" [formGroup]="advanceTableForm" (ngSubmit)="submit">
+
+                <mat-card class="example-card">
+                    <mat-card-header>
+                        <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
+                            <h5 style="color: white;">Customer Details</h5>
+
+                            <!-- <div style="float: right;">
+                                <a style="color: white; cursor: pointer; padding: 10px; font-style: italic;" 
+                                   (click)="openAddPassenger(false)">Add Passenger</a>
+                                <i>/</i>
+                                <a style="color: white; cursor: pointer; padding: 10px; font-style: italic;" 
+                                   (click)="openAddPassenger(true)">View</a>
+                              </div> -->
+                        </div>
+                    </mat-card-header>
+                    <mat-card-content>
+                        <div class="row">
+                            <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                                <!-- <div class="col-xl-3 col-lg-3 col-md-3 col-sm-6 mb-2"> -->
+                                <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                                    <mat-label>Customer Type</mat-label>
+                                    <input required type="text" matInput formControlName="customerType"
+                                        (keyup)="onCustomerTypeKeyUp($event)" [matAutocomplete]="auto">
+                                    <mat-autocomplete #auto="matAutocomplete">
+                                        <mat-option *ngFor="let option of filteredCustomerTypeOptions | async"
+                                            [value]="option.customerType"
+                                            (click)="getTitles(option.customerTypeID, option)">
+                                            {{option.customerType}}
+                                        </mat-option>
+                                    </mat-autocomplete>
+
+                                    <!-- <mat-error *ngIf="advanceTableForm.get('customerType').hasError('required')">
+                                            Please Select Customer Type
+                                        </mat-error> -->
+                                </mat-form-field>
+                            </div>
+
+                            <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                                <div style="text-align: right; margin-bottom: 2px; line-height: 1;">
+                                    <a style="cursor: pointer; color: #007bff; font-size: 10px !important; font-style: italic;"
+                                       (click)="ViewKAM()"
+                                    >View KAM</a>
+                                </div>
+                                <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                                    <mat-label>Customer (Customer Group)</mat-label>
+                                    <input required type="text" matInput formControlName="customerCustomerGroup"
+                                        (keyup)="onKeyUp($event)" [matAutocomplete]="auto1">
+                                    <mat-autocomplete #auto1="matAutocomplete" (optionSelected)="onCustomerCustomerGroupSelected($event.option.value)">
+                                        <mat-option *ngFor="let option of filteredCustomerCustomerGroupOptions | async"
+                                            [value]="option.customerName +'-'+option.customerGroup"
+                                            (click)="getCustomerCustomerGroupID(option.customerID,option.customerGroupID, option)">
+                                            {{option.customerName}} - {{option.customerGroup}}
+                                        </mat-option>
+                                    </mat-autocomplete>
+                                </mat-form-field>
+
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                                <!-- <div class="col-xl-3 col-lg-3 col-md-3 col-sm-6 mb-2"> -->
+                                <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                                    <mat-label>Booker</mat-label>
+                                    <input required type="text" matInput formControlName="booker"
+                                        [matAutocomplete]="auto2">
+                                    <mat-autocomplete #auto2="matAutocomplete"
+                                        (optionSelected)="onBookerSelected($event.option.value)"
+                                        panelWidth="custom-autocomplete-panel">
+                                        <!-- <mat-option *ngFor="let option of filteredBookerOptions | async"
+                                                [value]="option.customerPersonName + '-' + option.gender + '-' + option.importance+ '-' + option.phone+ '-'+ option.customerDepartment+ '-'+ option.customerDesignation+'-'+ option.customerName"
+                                                (click)="getBookerID(option.customerPersonID)">
+                                                {{option.customerPersonName}} - {{option.gender}} - {{option.importance}} -
+                                                {{option.phone}} - {{option.customerDepartment}} -
+                                                {{option.customerDesignation
+                                                }} - {{option.customerName}}
+                                            </mat-option> -->
+
+                                        <mat-option *ngFor="let option of filteredBookerOptions | async"
+                                            [value]="option.customerPersonName + '-' + option.gender + '-' + option.importance + '-' + option.phone + '-' +  option.customerDepartment + '-' + option.customerDesignation + '-' + option.customerName"
+                                            (click)="getBookerID(option.customerPersonID)">
+                                            {{option.customerPersonName}} - {{option.gender}} -
+                                            {{option.importance}} - {{option.phone}}  - {{option.customerDepartment}} -
+                                            {{option.customerDesignation}} - {{option.customerName}}
+                                        </mat-option>                                        
+                                    </mat-autocomplete>
+                                    <mat-error *ngIf="advanceTableForm.controls['booker'].hasError('primaryBookerInvalid')">
+                                        Please Select Valid Booker
+                                    </mat-error>
+                                    
+                                    <!-- <mat-hint align="end">
+                                            <div>
+                                                <a style="cursor: pointer;color: #007bff;
+                                                    padding: 10px; font-size: 10px !important; font-style: italic;"
+                                                    (click)="personShort()">
+                                                    New Booker
+                                                </a>
+
+                                            </div>
+                                        </mat-hint> -->
+                                    <!-- <mat-hint align="end">
+                                            <div>
+                                                <a style="cursor: pointer; color: #007bff; padding: 3px; font-size: 10px !important; font-style: italic;"
+                                                (click)="personShortBooker()">
+                                                New Booker
+                                                </a> -->
+
+                                    <!-- <span style="padding: 0 0px; color: #007bff;">/</span> <!-- Reduced padding for closer spacing -->
+
+                                    <!-- <a style="cursor: pointer; color: #007bff; padding: 3px; font-size: 10px !important; font-style: italic;"
+                                                (click)="openAddPassenger(false)">
+                                                Add Passenger 
+                                                </a>
+                                            
+                                                <span style="padding: 0 0px; color: #007bff;">/</span>
+                                            
+                                                <a style="cursor: pointer; color: #007bff; padding: 3px; font-size: 10px !important; font-style: italic;"
+                                                (click)="openAddPassenger(true)">
+                                                View 
+                                                </a> -->
+                                    <!-- </div>                                            
+                                        </mat-hint> -->
+                                </mat-form-field>
+                                
+                                <!-- <a style="cursor: pointer;color: #007bff;float: left;margin-top:-15px;" (click)="addPassengers()">
+                                                New Booker</a> -->
+                            </div>
+                            <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                                <div style="text-align: right; margin-bottom: 2px; line-height: 1;">
+                                    <a style="cursor: pointer; color: #007bff; font-size: 10px !important; font-style: italic;"
+                                       (click)="personShort()"
+                                    >New Passenger</a><span style="color: #007bff; font-size: 10px;">/</span><a style="cursor: pointer; color: #007bff; font-size: 10px !important; font-style: italic;"
+                                       (click)="editPassenger()"
+                                    >Edit Passenger</a>
+                                </div>
+                                <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                                    <mat-label>Passenger (Gender, VIP Status)</mat-label>
+                                    <input required type="text" matInput formControlName="passenger"
+                                        [matAutocomplete]="auto3">
+                                    <mat-autocomplete #auto3="matAutocomplete"
+                                        (optionSelected)="onPassengerSelected($event.option.value)"
+                                        panelWidth="custom-autocomplete-panel">
+                                        <mat-option *ngFor="let option of filteredPassengerOptions | async"
+                                            [value]="option.customerPersonName + '-' + option.gender + '-' + option.importance + '-' + option.phone + '-' + option.customerDepartment + '-' + option.customerDesignation + '-' + option.customerName"
+                                            (click)="getPassengerID(option.customerPersonID, option.customerPersonName)">
+                                            {{option.customerPersonName}} - {{option.gender}} -
+                                            {{option.importance}}- {{option.phone}} - {{option.customerDepartment}} -
+                                            {{option.customerDesignation}} - {{option.customerName}}
+                                        </mat-option>
+                                    </mat-autocomplete>
+                                </mat-form-field>
+                                <mat-error *ngIf="advanceTableForm.controls['passenger'].hasError('passengerInvalid')">
+                                    Please Select Valid Passenger
+                                </mat-error>
+                                <!-- <a style="cursor: pointer;color: #007bff;float: left;margin-top:5px;" (click)="addPassengers()">
+                                                New Passenger</a> -->
+                                                
+
+                            </div>
+                        </div>
+                    </mat-card-content>
+                </mat-card>
+
+                <br>
+
+                <mat-card class="example-card">
+                    <mat-card-header>
+                        <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
+                            <h5 style="color: white;">Pickup Details</h5>
+
+                            <!-- <div style="float: right;">
+                                <a style="color: white; cursor: pointer; padding: 10px; font-style: italic;" 
+                                   (click)="openAddStops()">Add More Stops</a>
+                                <i>/</i>
+                                <a style="color: white; cursor: pointer; padding: 10px; font-style: italic;" 
+                                   (click)="ShowDataForStops()">View</a>
+                              </div> -->
+                        </div>
+                    </mat-card-header>
+                    <mat-card-content>
+                        <div class="row">
+                            <!-- <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2"> -->
+                            <div class="col-xl-3 col-lg-3 col-md-3 col-sm-6 mb-2">
+                                <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                                    <mat-label>Pickup Date</mat-label>
+                                    <input required matInput [matDatepicker]="startDate" formControlName="pickupDate"
+                                        (dateChange)="onDatepickerChange($event)">
+                                    <mat-datepicker-toggle matSuffix [for]="startDate"></mat-datepicker-toggle>
+                                    <mat-datepicker #startDate></mat-datepicker>
+                                    <mat-error *ngIf="advanceTableForm.get('pickupDate')?.hasError('invalidDate')">
+                                        Invalid date format. Use DD/MM/YYYY.
+                                    </mat-error>
+                                </mat-form-field>
+                                <div *ngIf="noReservationMessage">
+                                    <span style="color: red;">There is no contract on this date.</span>
+                                </div>
+                            </div>
+
+                            <!-- <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2"> -->
+                            <div class="col-xl-3 col-lg-3 col-md-3 col-sm-6 mb-2">
+                                <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                                    <mat-label>Pickup Time</mat-label>
+                                    <input matInput [owlDateTimeTrigger]="time1" [owlDateTime]="time1"
+                                        formControlName="pickupTime" (ngModelChange)="locationTimeSet($event)"
+                                        [disabled]="isTNCSelected">
+                                    <button mat-icon-button matSuffix type="button" [owlDateTimeTrigger]="time1" class="date-icon" aria-label="Open time picker"><mat-icon>schedule</mat-icon></button>
+                                    <owl-date-time [pickerType]="'timer'" #time1></owl-date-time>
+                                    <mat-hint align="end">
+                                        <div style="float: right; font-size: 10px !important; font-style: italic">
+                                            <mat-checkbox color="primary" [(indeterminate)]="indeterminate"
+                                                [labelPosition]="labelPosition" formControlName="isTimeNotConfirmed"
+                                                (change)="onTNCChange($event.checked)">TNC</mat-checkbox>
+                                        </div>
+                                    </mat-hint>
+                                </mat-form-field>
+                            </div>
+
+                            <!-- </div>
+
+                            <div class="row"> -->
+                            <!-- <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2" *ngIf="noReservationMessage"> -->
+                            <div class="col-xl-3 col-lg-3 col-md-3 col-sm-6 mb-2" *ngIf="noReservationMessage">
+                                <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                                    <mat-label>Duty Type</mat-label>
+                                    <input required type="text" matInput formControlName="packageType">
+                                </mat-form-field>
+                                <!-- <mat-error *ngIf="searchPackageType.value">
+                                                Duty Type is required
+                                            </mat-error> -->
+                            </div>
+
+                            <!-- <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2" *ngIf="!noReservationMessage"> -->
+                            <div class="col-xl-3 col-lg-3 col-md-3 col-sm-6 mb-2" *ngIf="!noReservationMessage">
+                                <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                                    <mat-label>Duty Type</mat-label>
+                                    <input required type="text" matInput formControlName="packageType"
+                                        [matAutocomplete]="auto6" (keyup)="onPackageTypeChanges($event)">
+                                    <mat-autocomplete #auto6="matAutocomplete"
+                                        (optionSelected)="onDTSelected($event.option.value)"
+                                        panelWidth="custom-autocomplete-panel">
+                                        <mat-option *ngFor="let option of filteredPackageTypeOptions | async"
+                                            [value]="option.packageType"
+                                            (click)="getPackageTypeID(option.packageTypeID,option.packageType)">
+                                            {{option.packageType}}
+                                        </mat-option>
+                                    </mat-autocomplete>
+                                    <mat-error *ngIf="advanceTableForm.controls['packageType'].hasError('packageTypeInvalid')">
+                                        Please select a valid Duty Type
+                                    </mat-error>
+                                </mat-form-field>
+                                <!-- <mat-error *ngIf="searchPackageType.value">
+                                                Duty Type is required
+                                            </mat-error> -->
+                            </div>
+
+                            <!-- <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2" *ngIf="!noReservationMessage"> -->
+                            <div class="col-xl-3 col-lg-3 col-md-3 col-sm-6 mb-2" *ngIf="!noReservationMessage">
+                                <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                                    <mat-label>Package</mat-label>
+                                    <input required type="text" matInput formControlName="package"
+                                        [matAutocomplete]="auto7" (keyup)="onPackageChanges($event)">
+                                    <mat-autocomplete #auto7="matAutocomplete"
+                                        (optionSelected)="onPackageSelected($event.option.value)"
+                                        panelWidth="custom-autocomplete-panel">
+                                        <mat-option *ngFor="let option of filteredPackageOptions | async"
+                                            [value]="option.package" (click)="getPackageID(option.packageID)">
+                                            {{option.package}}
+                                        </mat-option>
+                                    </mat-autocomplete>
+                                    <mat-error *ngIf="advanceTableForm.controls['package'].hasError('packageInvalid')">
+                                        Please select a valid Package
+                                    </mat-error>
+                                </mat-form-field>
+                            </div>
+
+                            <!-- <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2" *ngIf="noReservationMessage"> -->
+                            <div class="col-xl-3 col-lg-3 col-md-3 col-sm-6 mb-2" *ngIf="noReservationMessage">
+                                <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                                    <mat-label>Package</mat-label>
+                                    <input required type="text" matInput formControlName="package">
+                                </mat-form-field>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <!-- <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2" *ngIf="!noReservationMessage"> -->
+                            <div class="col-xl-3 col-lg-3 col-md-3 col-sm-6 mb-2" *ngIf="!noReservationMessage">
+                                <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                                    <mat-label>Pickup City</mat-label>
+                                    <input required type="text" matInput formControlName="pickupCity"
+                                        [matAutocomplete]="auto4" (keyup)="onPickupCityKeyUp($event)">
+                                    <mat-autocomplete #auto4="matAutocomplete"
+                                        (optionSelected)="onCitySelected($event.option.value)"
+                                        panelWidth="custom-autocomplete-panel">
+                                        <mat-option *ngFor="let option of filteredCityOptions | async"
+                                            [value]="option.geoPointName" (click)="getCityID(option.geoPointID)">
+                                            {{option.geoPointName}}
+                                        </mat-option>
+                                    </mat-autocomplete>
+                                    <mat-error *ngIf="advanceTableForm.controls['pickupCity'].hasError('pickupCityInvalid')">
+                                        Please select a valid Pickup City
+                                    </mat-error>
+                                </mat-form-field>
+
+                                <!-- <a style="cursor: pointer;color: #007bff;float: left;margin-top:-15px;" (click)="addPassengers()">
+                                                New Booker</a> -->
+                            </div>
+                            <!-- <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2" *ngIf="noReservationMessage"> -->
+                            <div class="col-xl-3 col-lg-3 col-md-3 col-sm-6 mb-2" *ngIf="noReservationMessage">
+                                <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                                    <mat-label>Pickup City</mat-label>
+                                    <input required type="text" matInput formControlName="pickupCity">
+                                </mat-form-field>
+                            </div>
+
+                            <!-- <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2" *ngIf="!noReservationMessage"> -->
+                            <div class="col-xl-3 col-lg-3 col-md-3 col-sm-6 mb-2" *ngIf="!noReservationMessage">
+                                <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                                    <mat-label>Car</mat-label>
+                                    <input required type="text" matInput formControlName="vehicle"
+                                        [matAutocomplete]="auto5">
+                                    <mat-autocomplete #auto5="matAutocomplete"
+                                        (optionSelected)="onCarSelected($event.option.value)"
+                                        panelWidth="custom-autocomplete-panel">
+                                        <mat-option *ngFor="let option of filteredVehicleOptions | async"
+                                            [value]="option.vehicle"
+                                            (click)="getVehicleID(option.vehicleID,option.vehicleCategoryID)">
+                                            {{option.vehicle}}
+                                        </mat-option>
+                                    </mat-autocomplete>
+                                    <mat-error *ngIf="advanceTableForm.controls['vehicle'].hasError('vehicleInvalid')">
+                                        Please select a valid Car
+                                    </mat-error>
+                                </mat-form-field>
+                            </div>
+                            <!-- <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2" *ngIf="noReservationMessage"> -->
+                            <div class="col-xl-3 col-lg-3 col-md-3 col-sm-6 mb-2" *ngIf="noReservationMessage">
+                                <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                                    <mat-label>Car</mat-label>
+                                    <input required type="text" matInput formControlName="vehicle">
+                                </mat-form-field>
+                            </div>
+                            <!-- </div>
+
+                            <div class="row"> -->
+                            <!-- <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2" *ngIf="ifBlock;else elseBlock"> -->
+                            <div class="col-xl-3 col-lg-3 col-md-3 col-sm-6 mb-2" *ngIf="ifBlock;else elseBlock">
+                                <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                                    <!-- <mat-label>Pickup Address (Society/Colony/Area/Nearby Location)</mat-label> -->
+                                    <mat-label>Pickup Geo Location</mat-label>
+                                    <input required type="text" matInput formControlName="pickupAddress"
+                                        [matAutocomplete]="auto20" >
+                                    <mat-autocomplete #auto20="matAutocomplete"
+                                        (optionSelected)="onPGLSelected($event.option.value)"
+                                       class="google-autocomplete-panel">
+                                        <mat-option *ngFor="let option of filteredGoogleAddressOptions | async"
+                                            [value]="option.geoSearchString" (click)="OnPickupGeoLocationClick(option)">
+                                            {{option.geoSearchString}}
+                                        </mat-option>
+                                    </mat-autocomplete>
+
+                                    <!-- <mat-error *ngIf="advanceTableForm.get('pickupAddress').hasError('required')">
+                                            <div style="width: 70%;">
+                                                Please Select Pickup Address
+                                            </div> 
+                                            
+                                            <div style="float: right;margin-top: -15px;">
+                                                <div style="float: right;">
+                                                    
+                                                    <a style="cursor: pointer;color: #007bff; padding: 10px; font-size: 10px !important; font-style: italic" (click)="savedAddress()">Saved Addresses </a>
+                                                    <mat-checkbox color="danger" formControlName="googleAddresses" (change)="valueSwitch()" [(indeterminate)]="indeterminate"
+                                                    [labelPosition]="labelPosition">Google Addresses</mat-checkbox>
+                                                </div>
+                                            </div>
+                                        </mat-error> -->
+                                    <mat-hint align="end">
+                                        <div style="float: right;">
+
+                                            <a style="cursor: pointer;color: #007bff; padding: 10px; font-size: 10px !important; font-style: italic;"
+                                                (click)="savedAddress()">Saved Addresses </a>
+                                            <mat-checkbox color="danger" formControlName="googleAddresses"
+                                                (change)="valueSwitch()" [(indeterminate)]="indeterminate"
+                                                [labelPosition]="labelPosition">Google Addresses</mat-checkbox>
+                                        </div>
+                                    </mat-hint>
+                                </mat-form-field>
+
+                            </div>
+
+                            <ng-template #elseBlock>
+                                <!-- <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2"> -->
+                                <div class="col-xl-3 col-lg-3 col-md-3 col-sm-6 mb-2">
+                                    <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                                        <!-- <mat-label>Pickup Address (Society/Colony/Area/Nearby Location)</mat-label> -->
+                                        <mat-label>Geo Location</mat-label>
+                                        <input matInput ngx-google-places-autocomplete [options]='options'
+                                            #placesRef="ngx-places" (onAddressChange)="handleAddressChange($event)"
+                                            formControlName="pickupAddress"
+                                            (input)="onPickupTyping()">
+                                        <!-- <mat-error *ngIf="advanceTableForm.get('pickupAddress').hasError('required')">
+                                                <div style="width: 70%;">
+                                                    Pickup Address is required
+                                                </div>
+                                                
+                                                <div style="float: right;margin-top: -15px;">
+                                                    <div style="float: right;">
+                                                        
+                                                        <a style="cursor: pointer;color: #007bff;font-size: 10px !important; font-style: italic" (click)="savedAddress()">Saved Addresses </a>
+                                                        <mat-checkbox color="primary" formControlName="googleAddresses" [(indeterminate)]="indeterminate"
+                                                        [labelPosition]="labelPosition" (change)="valueSwitch()">Google Addresses</mat-checkbox>
+                                                    </div>
+                                                </div>
+                                            </mat-error> -->
+                                        <mat-hint align="end">
+                                            <div style="float: right;">
+
+                                                <a style="cursor: pointer;color: #007bff;font-size: 10px !important; font-style: italic"
+                                                    (click)="savedAddress()">Saved Addresses </a>
+                                                <mat-checkbox color="primary" formControlName="googleAddresses"
+                                                    [(indeterminate)]="indeterminate" [labelPosition]="labelPosition"
+                                                    (change)="valueSwitch()">Google Addresses</mat-checkbox>
+                                            </div>
+                                        </mat-hint>
+                                    </mat-form-field>
+                                    <mat-error  *ngIf="advanceTableForm.get('pickupAddress')?.touched &&
+                                                       advanceTableForm.get('pickupAddress')?.hasError('invalidPickupAddress')">
+                                        Please select an address from suggestions
+                                    </mat-error>
+                                    <!-- <a style="cursor: pointer;color: #007bff;float: left;margin-left: 44%;margin-top: 2px;"
+                                            (click)="savedAddress()">
+                                            Saved Addresses
+                                        </a>
+                                        <a style="cursor: pointer;color: #007bff;float: right;">
+                                            <table>
+                                                <tr>
+                                                    <td>Google Addresses</td>
+                                                    <td><mat-checkbox color="primary" checked formControlName="googleAddresses"
+                                                            (change)="valueSwitch()"></mat-checkbox> </td>
+                                                </tr>
+                                            </table>
+                                        </a> -->
+                                </div>
+                            </ng-template>
+
+                            <!-- <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2"> -->
+                            <div class="col-xl-3 col-lg-3 col-md-3 col-sm-6 mb-2">
+                                <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                                    <mat-label>Pickup Address Details i.e Street/Flat No./Flight No./Train
+                                        No.</mat-label>
+                                    <input required matInput formControlName="pickupAddressDetails">
+                                    <!-- <mat-error *ngIf="advanceTableForm.get('pickupAddressDetails').hasError('required')">
+                                            Pickup Address Details is required
+                                        </mat-error> -->
+                                </mat-form-field>
+                            </div>
+                        </div>
+
+                        <!-- <div class="row" *ngIf="hideSpotTypeANDPickupSpot"> -->
+                        <!-- <div class="row">
+                                <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2" *ngIf="!noReservationMessage">
+                                    <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                                        <mat-label>Pickup Spot Type</mat-label>
+                                        <input type="text" matInput formControlName="pickupSpotType"
+                                            [matAutocomplete]="auto8" (keyup)="onSpotTypeKeyUp($event)">
+                                        <mat-autocomplete #auto8="matAutocomplete" (optionSelected)="onPSTSelected($event.option.value)">
+                                            <mat-option *ngFor="let option of filteredPSTOptions | async"
+                                                [value]="option.geoPointType" (click)="getPSTID(option.geoPointTypeID,option.geoPointType)">
+                                                {{option.geoPointType}}
+                                            </mat-option>
+                                        </mat-autocomplete>
+                                        
+                                    </mat-form-field>
+                                </div>
+                                <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2" *ngIf="noReservationMessage">
+                                    <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                                        <mat-label>Pickup Spot Type</mat-label>
+                                        <input type="text" matInput formControlName="pickupSpotType">
+                                    </mat-form-field>
+                                </div>
+
+                                <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2" *ngIf="!noReservationMessage">
+                                    <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                                        <mat-label>Pickup Spot</mat-label>
+                                        <input type="text" matInput formControlName="pickupSpot" [matAutocomplete]="auto9">
+                                        <mat-autocomplete #auto9="matAutocomplete" (optionSelected)="onPSSelected($event.option.value)">
+                                            <mat-option *ngFor="let option of filteredPSOptions | async"
+                                                [value]="option.geoPointName" (click)="getPSpotID(option.geoPointID)">
+                                                {{option.geoPointName}}
+                                            </mat-option>
+                                        </mat-autocomplete>
+                                        <mat-hint align="end">
+                                            <div>
+                                                <div *ngIf="selectedCity" style="float: left; display: flex; align-items: center;">
+                                                    <b>Selected City</b> : {{selectedCity}}
+                                                    <button (click)="clearCitySelection()" 
+                                                            style="background: transparent; border: none; color: black; font-size: 12px; cursor: pointer; padding: 0 5px; margin-left: 5px;">
+                                                    &#x2716;
+                                                    </button>
+                                                </div>
+                                                <a style="cursor: pointer; color: #007bff; padding: 3px; font-size: 10px !important; font-style: italic;"
+                                                (click)="CityBasedSpots()">
+                                                City Based Spots
+                                                </a>
+                                                <a style="cursor: pointer; color: #007bff; padding: 3px; font-size: 10px !important; font-style: italic;"
+                                                (click)="AddSpots()">
+                                                Add More Spots
+                                                </a>
+                                            </div>
+                                            
+                                        </mat-hint>
+                                    </mat-form-field>
+                                </div>
+                                <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2" *ngIf="noReservationMessage">
+                                    <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                                        <mat-label>Pickup Spot</mat-label>
+                                        <input type="text" matInput formControlName="pickupSpot">
+                                    </mat-form-field>
+                                </div>
+                            </div> -->
+
+                        <div class="row" *ngIf="hideLocationOutDateTime">
+                            <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                                <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                                    <mat-label>Location Out Date</mat-label>
+                                    <input required matInput [matDatepicker]="locOutDate"
+                                        formControlName="locationOutDate">
+                                    <mat-datepicker-toggle matSuffix [for]="locOutDate"></mat-datepicker-toggle>
+                                    <mat-datepicker #locOutDate></mat-datepicker>
+                                </mat-form-field>
+                            </div>
+
+                            <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                                <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                                    <mat-label>Location Out Time</mat-label>
+                                    <input matInput [owlDateTimeTrigger]="time2" [owlDateTime]="time2"
+                                        formControlName="locationOutTime">
+                                    <button mat-icon-button matSuffix type="button" [owlDateTimeTrigger]="time2" class="date-icon" aria-label="Open time picker"><mat-icon>schedule</mat-icon></button>
+                                    <owl-date-time [pickerType]="'timer'" #time2></owl-date-time>
+                                    <!-- <mat-error *ngIf="advanceTableForm.get('locationOutTime').hasError('required')">
+                                            Location Out Time is required
+                                        </mat-error> -->
+                                </mat-form-field>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <!-- <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2" *ngIf="!noReservationMessage"> -->
+                            <!-- <div class="col-xl-3 col-lg-3 col-md-3 col-sm-6 mb-2" *ngIf="!noReservationMessage"> -->
+                            <div class="col-xl-3 col-lg-3 col-md-3 col-sm-6 mb-2"
+                                *ngIf="ifBlockService;else elseBlockService">
+                                <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                                    <mat-label>Service Location</mat-label>
+                                    <input required type="text" matInput formControlName="serviceLocation"
+                                        [matAutocomplete]="auto10">
+                                    <mat-autocomplete #auto10="matAutocomplete"
+                                        (optionSelected)="onSLSelectedBasedOnCity($event.option.value)"
+                                        panelWidth="custom-autocomplete-panel">
+                                        <mat-option *ngFor="let option of filteredServiceLocationOptions | async"
+                                            [value]="option.organizationalEntityName"
+                                            (click)="getServiceLocationIDBasedOnCity(option.organizationalEntityID)">
+                                            {{option.organizationalEntityName}}
+                                        </mat-option>
+                                    </mat-autocomplete>
+                                    <mat-hint align="end">
+                                        <div style="float: right;">
+                                            <mat-checkbox color="primary" formControlName="serviceLocationBasedOnCity"
+                                                (change)="valueSwitchForLoaction()" [(indeterminate)]="indeterminate"
+                                                [labelPosition]="labelPosition">All Location</mat-checkbox>
+                                        </div>
+                                    </mat-hint>
+                                </mat-form-field>
+                                <mat-error *ngIf="advanceTableForm.controls['serviceLocation'].hasError('serviceLocationeInvalid')">
+                                    Please select a valid Service Location
+                                </mat-error>                               
+
+                            </div>
+
+                            <ng-template #elseBlockService>
+                                <div class="col-xl-3 col-lg-3 col-md-3 col-sm-6 mb-2">
+                                    <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                                        <mat-label>Service Location</mat-label>
+                                        <input required type="text" matInput formControlName="serviceLocation"
+                                            [matAutocomplete]="auto10">
+                                        <mat-autocomplete #auto10="matAutocomplete"
+                                            (optionSelected)="onSLSelected($event.option.value)"
+                                            panelWidth="custom-autocomplete-panel">
+                                            <mat-option *ngFor="let option of filteredServiceLocationOptions | async"
+                                                [value]="option.organizationalEntityName"
+                                                (click)="getServiceLocationID(option.organizationalEntityID)">
+                                                {{option.organizationalEntityName}}
+                                            </mat-option>
+                                        </mat-autocomplete>
+                                        <mat-hint align="end">
+                                            <div style="float: right;">
+                                                <mat-checkbox color="primary"
+                                                    formControlName="serviceLocationBasedOnCity"
+                                                    (change)="valueSwitchForLoaction()"
+                                                    [(indeterminate)]="indeterminate"
+                                                    [labelPosition]="labelPosition">All Location</mat-checkbox>
+                                            </div>
+                                        </mat-hint>
+                                    </mat-form-field>
+                                    <mat-error *ngIf="advanceTableForm.controls['serviceLocation'].hasError('serviceLocationeInvalid')">
+                                        Please select a valid Service Location
+                                    </mat-error>
+                                </div>
+                            </ng-template>
+
+                            <!-- <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2" *ngIf="noReservationMessage"> -->
+                            <div class="col-xl-3 col-lg-3 col-md-3 col-sm-6 mb-2" *ngIf="noReservationMessage">
+                                <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                                    <mat-label>Service Location</mat-label>
+                                    <input required type="text" matInput formControlName="serviceLocation"
+                                        [matAutocomplete]="auto10">
+                                </mat-form-field>
+                            </div>
+
+                            <!-- <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2"> -->
+                            <div class="col-xl-3 col-lg-3 col-md-3 col-sm-6 mb-2" hidden>
+                                <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                                    <mat-label>Pickup Priority Order</mat-label>
+                                    <mat-select formControlName="pickupPriorityOrder">
+                                        <mat-option *ngFor="let value of priorityValues" [value]="value">
+                                            {{ value }}
+                                        </mat-option>
+                                    </mat-select>
+                                </mat-form-field>
+                                <div *ngIf="!showError('pickupPriorityOrder')" class="default-message"
+                                    style="color: green;font-style: italic;">
+                                    Based on planned number of stops
+                                </div>
+                            </div>
+
+                            <div class="col-xl-3 col-lg-3 col-md-3 col-sm-6 mb-2"
+                                *ngIf="advanceTableForm.value.packageType === 'Outstation Round Trip Rate' || advanceTableForm.value.packageType === 'Outstation Lumpsum Rate' || advanceTableForm.value.packageType === 'Outstation OneWay Trip Rate' ">
+                                <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                                    <mat-label>Trip To</mat-label>
+                                    <input type="text" matInput formControlName="tripTo">
+                                </mat-form-field>
+                            </div>
+
+                            <div class="col-xl-3 col-lg-3 col-md-3 col-sm-6 mb-2">
+                                <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                                    <mat-label>Trip Type</mat-label>
+                                    <mat-select formControlName="tripType" required>
+                                        <mat-option value="Airport Pickup">Airport Pickup</mat-option>
+                                        <mat-option value="Airport Drop">Airport Drop</mat-option>
+                                        <mat-option value="Local">Local</mat-option>
+                                        <mat-option value="Outstation">Outstation</mat-option>
+                                        <mat-option value="Other">Other</mat-option>
+                                    </mat-select>
+                                    <mat-error>
+                                        Please select Trip Type
+                                    </mat-error>
+                                </mat-form-field>                                
+                            </div>
+
+                        </div>
+                    </mat-card-content>
+                </mat-card>
+
+                <br>
+
+                <mat-card class="example-card">
+                    <mat-card-header>
+                        <h5 style="color: white;">DropOff Details</h5>
+                    </mat-card-header>
+                    <mat-card-content>
+                        <div class="row">
+                            <!-- <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2"> -->
+                            <div class="col-xl-3 col-lg-3 col-md-3 col-sm-6 mb-2">
+                                <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                                    <mat-label>Drop Off Date</mat-label>
+                                    <input matInput [matDatepicker]="startingDate" formControlName="dropOffDate">
+                                    <mat-datepicker-toggle matSuffix [for]="startingDate"></mat-datepicker-toggle>
+                                    <mat-datepicker #startingDate></mat-datepicker>
+                                    <!-- <mat-error *ngIf="advanceTableForm.get('dropOffDate').hasError('required')">
+                                            Drop Off Date is required
+                                        </mat-error> -->
+                                </mat-form-field>
+                            </div>
+
+                            <!-- <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2"> -->
+                            <div class="col-xl-3 col-lg-3 col-md-3 col-sm-6 mb-2">
+                                <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                                    <mat-label>Drop Off Time</mat-label>
+                                    <input matInput [owlDateTimeTrigger]="time3" [owlDateTime]="time3"
+                                        formControlName="dropOffTime">
+                                    <button mat-icon-button matSuffix type="button" [owlDateTimeTrigger]="time3" class="date-icon" aria-label="Open time picker"><mat-icon>schedule</mat-icon></button>
+                                    <owl-date-time [pickerType]="'timer'" #time3></owl-date-time>
+                                    <!-- <mat-error *ngIf="advanceTableForm.get('dropOffTime').hasError('required')">
+                                            Drop Off Time is required
+                                        </mat-error> -->
+                                </mat-form-field>
+                            </div>
+                            <!-- </div> -->
+
+                            <div class="row" *ngIf="hideLocationOutDateTime">
+                                <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                                    <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                                        <mat-label>ETR Date</mat-label>
+                                        <input matInput [matDatepicker]="etrDate" formControlName="etrDate">
+                                        <mat-datepicker-toggle matSuffix [for]="etrDate"></mat-datepicker-toggle>
+                                        <mat-datepicker #etrDate></mat-datepicker>
+                                        <!-- <mat-error *ngIf="advanceTableForm.get('etrDate').hasError('required')">
+                                            ETR Date is required
+                                        </mat-error> -->
+                                    </mat-form-field>
+                                </div>
+
+                                <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                                    <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                                        <mat-label>ETR Time</mat-label>
+                                        <input matInput [owlDateTimeTrigger]="etrtime1" [owlDateTime]="etrtime1"
+                                            formControlName="etrTime">
+                                        <button mat-icon-button matSuffix type="button" [owlDateTimeTrigger]="etrtime1" class="date-icon" aria-label="Open time picker"><mat-icon>schedule</mat-icon></button>
+                                        <owl-date-time [pickerType]="'timer'" #etrtime1></owl-date-time>
+                                        <!-- <mat-error *ngIf="advanceTableForm.get('etrTime').hasError('required')">
+                                            ETR Time is required
+                                        </mat-error> -->
+                                    </mat-form-field>
+                                </div>
+                            </div>
+
+                            <!-- <div class="row"> -->
+                            <!-- <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2"> -->
+                            <div class="col-xl-3 col-lg-3 col-md-3 col-sm-6 mb-2">
+                                <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                                    <mat-label>Drop Off City</mat-label>
+                                    <input type="text" matInput formControlName="dropOffCity"
+                                        [matAutocomplete]="auto14">
+                                    <mat-autocomplete #auto14="matAutocomplete"
+                                        (optionSelected)="onDropCitySelected($event.option.value)"
+                                        panelWidth="custom-autocomplete-panel">
+                                        <mat-option *ngFor="let option of filteredDropOffCityOptions | async"
+                                            [value]="option.geoPointName" (click)="getDropOffCityID(option.geoPointID)">
+                                            {{option.geoPointName}}
+                                        </mat-option>
+                                    </mat-autocomplete>
+                                    <mat-error *ngIf="advanceTableForm.controls['dropOffCity'].hasError('dropOffCityInvalid')">
+                                        Please Select DropOff City
+                                    </mat-error>
+                                </mat-form-field>
+                                <!-- <a style="cursor: pointer;color: #007bff;float: left;margin-top:-15px;" (click)="addPassengers()">
+                                                    New Booker</a> -->
+                            </div>
+
+                            <!-- <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2"> -->
+                            <div class="col-xl-3 col-lg-3 col-md-3 col-sm-6 mb-2" hidden>
+                                <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                                    <mat-label>Drop Off Priority Order</mat-label>
+                                    <mat-select formControlName="dropOffPriorityOrder">
+                                        <mat-option *ngFor="let value of priorityValues" [value]="value">
+                                            {{ value }}
+                                        </mat-option>
+                                    </mat-select>
+                                </mat-form-field>
+                                <div *ngIf="!showError('dropOffPriorityOrder')" class="default-message"
+                                    style="color: green;font-style: italic;">
+                                    Based on planned number of stops
+                                </div>
+                            </div>
+
+                        </div>
+
+                        <div class="row">
+                            <!-- <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2"
+                                    *ngIf="dropOffifBlock;else elseBlock2"> -->
+                            <div class="col-xl-3 col-lg-3 col-md-3 col-sm-6 mb-2"
+                                *ngIf="dropOffifBlock;else elseBlock2">
+                                <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                                    <mat-label>Drop Off Geo Location</mat-label>
+                                    <input type="text" matInput formControlName="dropOffAddress"
+                                        [matAutocomplete]="auto21">
+                                    <mat-autocomplete #auto21="matAutocomplete"
+                                        (optionSelected)="onDropGLSelected($event.option.value)"
+                                        panelWidth="custom-autocomplete-panel">
+                                        <mat-option *ngFor="let option of filteredDropOffGoogleAddressOptions | async"
+                                            [value]="option.geoSearchString"
+                                            (click)="OnDropOffGeoLocationClick(option)">
+                                            {{option.geoSearchString}}
+                                        </mat-option>
+                                    </mat-autocomplete>
+
+                                    <!-- <mat-error *ngIf="advanceTableForm.get('dropOffAddress').hasError('required')">
+                                            Please Select DropOff Address
+                                            <mat-hint align="end">
+                                                <div style="float: right;">
+                                                    <a style="cursor: pointer;color: #007bff; padding: 10px; font-size: 10px !important; font-style: italic;" (click)="savedAddress()">Saved Addresses </a>
+                                                    <mat-checkbox color="primary" formControlName="googleAdressesDropOff" (change)="dropOffControlSwitch()" [(indeterminate)]="indeterminate"
+                                                        [labelPosition]="labelPosition">Google Addresses</mat-checkbox>
+                                                </div>
+                                            </mat-hint>
+                                        </mat-error> -->
+                                    <mat-hint align="end">
+                                        <div style="float: right;">
+
+                                            <a style="cursor: pointer;color: #007bff; padding: 10px; font-size: 10px !important; font-style: italic"
+                                                (click)="dropOffSavedAddress()">Saved Addresses </a>
+                                            <mat-checkbox color="primary" formControlName="googleAdressesDropOff"
+                                                (change)="dropOffControlSwitch()" [(indeterminate)]="indeterminate"
+                                                [labelPosition]="labelPosition">Google Addresses</mat-checkbox>
+                                        </div>
+                                    </mat-hint>
+                                </mat-form-field>
+
+                            </div>
+
+                            <ng-template #elseBlock2>
+                                <!-- <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2"> -->
+                                <div class="col-xl-3 col-lg-3 col-md-3 col-sm-6 mb-2">
+                                    <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                                        <mat-label>Geo Location</mat-label>
+                                        <input matInput ngx-google-places-autocomplete [options]='options'
+                                            #placesRef="ngx-places"
+                                            (onAddressChange)="handleAddressChangeDropOff($event)"
+                                            formControlName="dropOffAddress"  (input)="onDropOffTyping()"
+                                            (blur)="validateDropOffOnBlur()">
+                                            
+                                        <!-- <mat-error *ngIf="advanceTableForm.get('dropOffAddress').hasError('required')">
+                                                DropOff Address is required
+                                                <mat-hint align="end">
+                                                    <div style="float: right;">
+                                                        <a style="cursor: pointer;color: #007bff;font-size: 10px !important; font-style: italic;" (click)="savedAddress()">Saved Addresses </a>
+                                                        <mat-checkbox color="primary" checked
+                                                            formControlName="googleAdressesDropOff" [(indeterminate)]="indeterminate"
+                                                            [labelPosition]="labelPosition"
+                                                            (change)="dropOffControlSwitch()">Google Addresses</mat-checkbox>
+                                                    </div>
+                                                </mat-hint>
+                                            </mat-error> -->
+                                        <mat-hint align="end">
+                                            <div style="float: right;">
+                                                <a style="cursor: pointer;color: #007bff;font-size: 10px !important; font-style: italic;"
+                                                    (click)="dropOffSavedAddress()">Saved Addresses </a>
+                                                <!-- <a style="cursor: pointer;color: #007bff; font-size: 10px !important; font-style: italic;">
+                                                    
+                                                    </a> -->
+                                                <mat-checkbox color="primary" checked
+                                                    formControlName="googleAdressesDropOff"
+                                                    [(indeterminate)]="indeterminate" [labelPosition]="labelPosition"
+                                                    (change)="dropOffControlSwitch()">Google Addresses</mat-checkbox>
+                                            </div>
+                                        </mat-hint>
+                                        <mat-error  *ngIf="advanceTableForm.get('dropOffAddress')?.touched &&
+                                                       advanceTableForm.get('dropOffAddress')?.hasError('invalidDropOffAddress')">
+                                            Please select an address from suggestions
+                                        </mat-error>
+                                    </mat-form-field>
+                                    
+                                </div>
+                            </ng-template>
+
+                            <!-- <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2"> -->
+                            <div class="col-xl-3 col-lg-3 col-md-3 col-sm-6 mb-2">
+                                <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                                    <mat-label>Drop Off Address Details i.e Street/Flat No./Flight No./Train
+                                        No.</mat-label>
+                                    <input matInput formControlName="dropOffAddressDetails">
+                                    <!-- <mat-error *ngIf="advanceTableForm.get('dropOffAddressDetails').hasError('required')">
+                                            DropOff Address Details is required
+                                        </mat-error> -->
+                                </mat-form-field>
+                            </div>
+                        </div>
+
+                        <!-- <div class="row">
+                                <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                                    <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                                        <mat-label>Drop Off Spot Type</mat-label>
+                                        <input type="text" matInput formControlName="dropOffSpotType"
+                                            [matAutocomplete]="auto11">
+                                        <mat-autocomplete #auto11="matAutocomplete" (optionSelected)="onDropSTSelected($event.option.value)">
+                                            <mat-option *ngFor="let option of filteredDSTOptions | async"
+                                                [value]="option.geoPointType" (click)="getDSTID(option.geoPointTypeID,option.geoPointType)">
+                                                {{option.geoPointType}}
+                                            </mat-option>
+                                        </mat-autocomplete>
+
+                                    </mat-form-field>
+                                </div>
+
+                                <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                                    <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                                        <mat-label>Drop Off Spot</mat-label>
+                                        <input type="text" matInput formControlName="dropOffSpot"
+                                            [matAutocomplete]="auto12">
+                                        <mat-autocomplete #auto12="matAutocomplete" (optionSelected)="onDropSpotSelected($event.option.value)">
+                                            <mat-option *ngFor="let option of filteredDSOptions | async"
+                                                [value]="option.geoPointName" (click)="getDSpotID(option.geoPointID)">
+                                                {{option.geoPointName}}
+                                            </mat-option>
+                                        </mat-autocomplete>
+                                        <mat-hint align="end">
+                                            <div>
+                                                <div *ngIf="selectedCity" style="float: left; display: flex; align-items: center;">
+                                                    <b>Selected City</b> : {{selectedCity}}
+                                                    <button (click)="clearCitySelectionForDropOff()" 
+                                                            style="background: transparent; border: none; color: black; font-size: 12px; cursor: pointer; padding: 0 5px; margin-left: 5px;">
+                                                    &#x2716;
+                                                    </button>
+                                                </div>
+                                                <a style="cursor: pointer; color: #007bff; padding: 3px; font-size: 10px !important; font-style: italic;"
+                                                (click)="CityBasedSpotsForDropOff()">
+                                                City Based Spots
+                                                </a>
+                                                <a style="cursor: pointer; color: #007bff; padding: 3px; font-size: 10px !important; font-style: italic;"
+                                                (click)="AddDropOffSpots()">
+                                                Add More Spots
+                                                </a>
+                                            </div>
+                                            
+                                        </mat-hint>
+                                    </mat-form-field>
+                                </div>
+                            </div> -->
+                    </mat-card-content>
+                </mat-card>
+
+                <br>
+
+                <mat-card class="example-card">
+                    <mat-card-header>
+                        <h5 style="color: white;">Other Details</h5>
+                    </mat-card-header>
+                    <mat-card-content>
+                        <div class="row">
+
+                            <!-- <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                                    <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                                        <mat-label>Ticket Number</mat-label>
+                                        <input required matInput formControlName="ticketNumber">
+                                    </mat-form-field>
+                                </div> -->
+                            <!-- <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2"> -->
+                            <div class="col-xl-3 col-lg-3 col-md-3 col-sm-6 mb-2">
+                                <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                                    <mat-label>Ticket Number</mat-label>
+                                    <input matInput formControlName="ticketNumber" (input)="onNumberInput($event)"
+                                        required maxlength="12" minlength="12"
+                                        pattern="[0-9]{12}" inputmode="numeric">
+                                    <mat-error *ngIf="advanceTableForm.get('ticketNumber')?.hasError('pattern')">
+                                        Ticket number must be 12 digits
+                                    </mat-error>
+                                </mat-form-field>
+                            </div>
+
+                            <!-- <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2"> -->
+                            <div class="col-xl-3 col-lg-3 col-md-3 col-sm-6 mb-2">
+                                <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                                    <mat-label>Reservation Source</mat-label>
+                                    <input type="text" matInput formControlName="reservationSource"
+                                        [matAutocomplete]="auto13">
+                                    <mat-autocomplete #auto13="matAutocomplete"
+                                        (optionSelected)="onRSSelected($event.option.value)"
+                                        panelWidth="custom-autocomplete-panel">
+                                        <mat-option *ngFor="let option of filteredReservationSourceOptions | async"
+                                            [value]="option.reservationSource"
+                                            (click)="getReservationSourceID(option.reservationSourceID)">
+                                            {{option.reservationSource}}
+                                        </mat-option>
+                                    </mat-autocomplete>
+                                </mat-form-field>
+                            </div>
+                            <!-- </div>
+
+                            <div class="row"> -->
+                            <!-- <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                                    <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                                        <mat-label>Reservation Source</mat-label>
+                                        <input required type="text" matInput formControlName="reservationSource"
+                                            [matAutocomplete]="auto13">
+                                        <mat-autocomplete #auto13="matAutocomplete">
+                                            <mat-option *ngFor="let option of filteredReservationSourceOptions | async"
+                                                [value]="option.reservationSource"
+                                                (click)="getReservationSourceID(option.reservationSourceID)">
+                                                {{option.reservationSource}}
+                                            </mat-option>
+                                        </mat-autocomplete>
+
+                                    </mat-form-field>
+                                </div> -->
+
+                            <!-- <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                                    <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                                        <mat-label>Reservation Source Details</mat-label>
+                                        <input required matInput formControlName="reservationSourceDetail">
+                                    </mat-form-field>
+                                </div> -->
+                            <!-- </div>
+
+                            <div class="row"> -->
+                            <!-- <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                                    <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                                        <mat-label>Reference Number</mat-label>
+                                        <input required matInput formControlName="referenceNumber">
+                                    </mat-form-field>
+                                </div> -->
+
+                            <!-- <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2"> -->
+                            <div class="col-xl-3 col-lg-3 col-md-3 col-sm-6 mb-2">
+                                <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                                    <mat-label>Reservation Status</mat-label>
+                                    <mat-select formControlName="reservationStatus">
+                                        <mat-option value="Confirmed">Confirmed</mat-option>
+                                        <mat-option value="Approved">Approved</mat-option>
+                                        <mat-option value="Pending">Pending</mat-option>
+                                        <mat-option value="Cancelled">Cancelled</mat-option>
+                                    </mat-select>
+
+                                    <mat-error>
+                                        Reservation Status is required
+                                    </mat-error>
+                                </mat-form-field>
+                            </div>
+
+                            <!-- <div class=" col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2"> -->
+                            <div class="col-xl-3 col-lg-3 col-md-3 col-sm-6 mb-2">
+                                <table>
+                                    <tr>
+                                        <td>
+                                            <mat-label>
+                                                Attachment
+                                            </mat-label>
+                                        </td>
+                                        <td>
+                                            <a href="{{ ImagePath }}" target="_blank" *ngIf="ImagePath">
+                                                <img [src]="ImagePath" class="table "
+                                                    style="height: 80px; width: auto;">
+                                            </a>
+                                        </td>
+                                        <td>
+                                            <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                                                <!-- style="float: right;"> -->
+                                                <app-imageUploader
+                                                    (onUploadFinished)="uploadFinished($event)"></app-imageUploader>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                </table>
+
+                            </div>
+                        </div>
+
+                        <!-- <div class="row">
+                                <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                                    <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                                        <mat-label>Reservation Status Reason</mat-label>
+                                        <mat-select formControlName="reservationStatusText">
+                                            <mat-option value="Reason1">Reason1</mat-option>
+                                            <mat-option value="Reason2">Reason2</mat-option>
+                                            <mat-option value="Reason3">Reason3</mat-option>
+                                            <mat-option value="Reason4">Reason4</mat-option>
+                                        </mat-select>
+
+                                        <mat-error>
+                                            Reservation Status is required
+                                        </mat-error>
+                                    </mat-form-field>
+                                </div>
+                                <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                                    <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                                        <mat-label>Reservation Details</mat-label>
+                                        <input required matInput formControlName="reservationStatusDetails">
+
+                                    </mat-form-field>
+                                </div>
+                                
+                            </div> -->
+
+                        <!-- <div class="row">
+                                <div class=" col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                                    <table>
+                                        <tr>
+                                            <td>
+                                                <mat-label>
+                                                    Attachment
+                                                </mat-label>
+                                            </td>
+                                            <td>
+                                                <a href="{{ ImagePath }}" target="_blank" *ngIf="ImagePath">
+                                                    <img [src]="ImagePath" class="table "
+                                                        style="height: 80px; width: auto;">
+                                                </a>
+                                            </td>
+                                            <td>
+                                                <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2"
+                                                    style="float: right;">
+                                                    <app-imageUploader
+                                                        (onUploadFinished)="uploadFinished($event)"></app-imageUploader>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    </table>
+
+                                </div>
+                            </div> -->
+
+                    </mat-card-content>
+                </mat-card>
+
+                <br>
+
+                <div class="card" *ngIf="CustomerExtraFieldList">
+                    <!-- <div class="header bg-cyan">
+                            <h2>Customer Specific Field</h2>
+                        </div> -->
+                    <mat-card-header>
+                        <h5 style="color: white;">Customer Specific Field</h5>
+                    </mat-card-header>
+                    <div style="background-color: #ebeef1;">
+                        <div class="row" style="margin:10px">
+
+                            <div *ngFor="let data of CustomerExtraFieldList">
+                                <div *ngIf="data.fieldControlType === 'TextBox'"
+                                    class="col-xl-12 col-lg-12 col-md-12 col-sm-12 mb-2">
+                                    <!-- <div *ngIf="data.fieldControlType === 'TextBox'" class="col-xl-3 col-lg-3 col-md-3 col-sm-6 mb-2"> -->
+                                    <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                                        <mat-label>{{ data.fieldName }}</mat-label>
+                                        <input matInput [formControlName]="data.fieldName" (change)="getFieldValues()">
+                                    </mat-form-field>
+                                </div>
+
+                                <div *ngIf="data.fieldControlType === 'DropDown'"
+                                    class="col-xl-12 col-lg-12 col-md-12 col-sm-12 mb-2">
+                                    <!-- <div *ngIf="data.fieldControlType === 'DropDown'" class="col-xl-3 col-lg-3 col-md-3 col-sm-6 mb-2"> -->
+                                    <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                                        <mat-label>{{ data.fieldName }}</mat-label>
+                                        <mat-select [formControlName]="data.fieldName"
+                                            (selectionChange)="getFieldValues()">
+                                            <mat-option *ngFor="let item of data.fieldValue.fieldValue" [value]="item">
+                                                {{ item }}
+                                            </mat-option>
+                                        </mat-select>
+                                    </mat-form-field>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <!-- <div class="header bg-cyan">
+                            <h2>Mode Of Payment</h2>
+                        </div> -->
+                    <mat-card-header>
+                        <h5 style="color: white;">Mode Of Payment</h5>
+                    </mat-card-header>
+                    <div style="background-color: #ebeef1;">
+
+                        <div class="row" style="margin: 10px;">
+                            <!-- <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2"> -->
+                            <div class="col-xl-3 col-lg-3 col-md-3 col-sm-6 mb-2">
+                                <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                                    <mat-label>Payment Mode</mat-label>
+                                    <input required type="text" matInput formControlName="modeOfPayment"
+                                        [matAutocomplete]="auto15">
+                                    <mat-autocomplete #auto15="matAutocomplete"
+                                        (optionSelected)="onPMSelected($event.option.value)"
+                                        panelWidth="custom-autocomplete-panel">
+                                        <mat-option *ngFor="let option of filteredPaymentModeOptions | async"
+                                            [value]="option.modeOfPayment"
+                                            (click)="getPaymentModeID(option.modeOfPaymentID)">
+                                            {{option.modeOfPayment}}
+                                        </mat-option>
+                                    </mat-autocomplete>
+                                    <mat-error *ngIf="advanceTableForm.controls['modeOfPayment'].hasError('modeOfPaymentInvalid')">
+                                        Please select a valid Payment Mode
+                                    </mat-error>
+                                </mat-form-field>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+
+                <br>
+
+                <div class="card" *ngIf="isGSTMandatoryWithReservation === true">
+                    <mat-card-header>
+                        <h5 style="color: white;">GST Details</h5>
+                    </mat-card-header>
+                    <div style="background-color: #ebeef1;">
+                        <div class="row" style="margin: 10px;">
+                            <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                                <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                                    <mat-label>GST For Billing</mat-label>
+                                    <input required type="text" matInput formControlName="gSTForBilling"
+                                        [matAutocomplete]="auto12"
+                                        (keyup)="onCustomerConfigurationInvoicingKeyUp($event)">
+                                    <mat-autocomplete #auto12="matAutocomplete"
+                                        (optionSelected)="onReservationInvoiceGSTSelected($event.option.value)"
+                                        panelWidth="custom-autocomplete-panel">
+                                        <mat-option *ngFor="let option of filteredConfigurationInvoicingOptions | async"
+                                            [value]="option.gstNumber + '-' + option.gstRate + '-' + option.billingStateName"
+                                            (click)="getReservationInvoiceGSTDetailsID(option.customerConfigurationInvoicingID)">
+                                            {{option.gstNumber}} - {{option.gstRate}} - {{option.billingStateName}}
+                                        </mat-option>
+                                    </mat-autocomplete>
+                                    <mat-error *ngIf="advanceTableForm.controls['gSTForBilling'].hasError('gSTMandatoryForBillingInvaild')">
+                                        Please select a valid GST For Billing
+                                    </mat-error>
+                                </mat-form-field>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card" *ngIf="isGSTMandatoryWithReservation === false">
+                    <mat-card-header>
+                        <h5 style="color: white;">GST Details</h5>
+                    </mat-card-header>
+                    <div style="background-color: #ebeef1;">
+                        <div class="row" style="margin: 10px;">
+                            <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                                <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                                    <mat-label>GST For Billing</mat-label>
+                                    <input type="text" matInput formControlName="gSTForBilling"
+                                        [matAutocomplete]="auto12"
+                                        (keyup)="onCustomerConfigurationInvoicingKeyUp($event)">
+                                    <mat-autocomplete #auto12="matAutocomplete"
+                                        (optionSelected)="onReservationInvoiceGSTSelected($event.option.value)"
+                                        panelWidth="custom-autocomplete-panel">
+                                        <!-- <mat-option *ngFor="let option of filteredConfigurationInvoicingOptions | async"
+                                                [value]="option.gstNumber + '-' + option.gstRate + '-' + option.billingStateName"
+                                                (click)="getReservationInvoiceGSTDetailsID(option.customerConfigurationInvoicingID)">
+                                                {{option.gstNumber}} - {{option.gstRate}} - {{option.billingStateName}}
+                                            </mat-option> -->
+                                        <mat-option *ngFor="let option of filteredConfigurationInvoicingOptions | async"
+                                            [value]="option.gstNumber === '--Select--' ? '--Select--' : (option.gstNumber + '-' + option.gstRate + '-' + option.billingStateName)"
+                                            (click)="getReservationInvoiceGSTDetailsID(option.customerConfigurationInvoicingID)">
+                                            <ng-container *ngIf="option.gstNumber === '--Select--'; else normalOption">
+                                                {{ option.gstNumber }}
+                                            </ng-container>
+                                            <ng-template #normalOption>
+                                                {{ option.gstNumber }} - {{ option.gstRate }} - {{ option.billingStateName }}
+                                            </ng-template>
+                                        </mat-option>
+                                    </mat-autocomplete>
+                                    <mat-error *ngIf="advanceTableForm.controls['gSTForBilling'].hasError('gSTNonMandatoryForBillingInvaild')">
+                                        Please select a valid GST For Billing
+                                    </mat-error>
+                                </mat-form-field>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <br>
+
+            <!-- Special Instruction Card -->
+                 <div class="card" *ngIf="showHideSpecialInst">
+                <div class="header bg-cyan">
+                    <h2>
+                     Special Instructions - 
+                     <i><a (click)="openSpecialInstrucation()" style="cursor: pointer;">Add More</a></i>
+                     
+                    </h2>
+                   
+                </div>
+                <div style="background-color: #ebeef1;">
+                  <app-specialInstructionDetails [reservationID]="ReservationID" [status]="status" (outputFromStopDetails)="getOuput($event)" [events]="eventsSubject.asObservable()"></app-specialInstructionDetails>
+                </div>
+            </div>
+
+            <!-- Internal Note Card -->
+          <div class="card" *ngIf="showHideInternalNote">
+        <div class="header bg-cyan">
+            <h2>
+             Internal Note - 
+             <i><a (click)="InternalNote()" style="cursor: pointer;">Add More</a></i>
+             
+            </h2>
+           
+        </div>
+        <div *ngIf="advanceTableIN" style="background-color: #ebeef1;">
+          <app-internalNoteDetails [advanceTableINData]="advanceTableIN" [reservationID]="ReservationID" [status]="status"></app-internalNoteDetails>
+        </div>
+        
+        <!-- <div class="row" style="margin-left: 20px;margin-top: 20px;padding-bottom: 20px;">
+            <button mat-flat-button style="background-color: #bcb4db" (click)="openAddPassenger()">Edit</button>
+        </div> -->
+    </div>
+            <!-- Settled Rate Card -->
+            <div class="card" *ngIf="showHidesettledRates">
+              <div class="header bg-cyan">
+                  <h2>
+                   Settled Rate Details 
+                   
+                  </h2>
+              
+              </div>
+              <div style="background-color: #ebeef1;">
+                <app-settledRateDetails [advanceTableSRD]="advanceTableSRD" [reservationID]="ReservationID" [status]="status"></app-settledRateDetails>
+              </div>
+          </div>
+
+                <div class="row">
+                    <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12 mb-2">
+                        <div class="example-button-row">
+                            <span style="color:red;margin-bottom: 10px;" *ngIf="status && status !== 'Changes allow' && !status.includes('Changes allow') && buttonDisabled">{{status}}</span>
+                           
+                            <br>
+                            
+                            <button mat-raised-button style="background-color: #bcb4db"  *ngIf="this.action !== 'edit'"
+                                (click)="confirmAdd()">Save</button>
+
+                            <button mat-raised-button style="background-color: #bcb4db"  *ngIf="this.action === 'edit'"
+                                (click)="confirmAdd()" [disabled]="buttonDisabled">Update</button>
+
+                            <button mat-raised-button style="background-color: #f29f99"
+                                (click)="navigateToNewForms()">Add Details</button>
+
+                            <button mat-raised-button style="background-color: #f29f99"
+                                (click)="openSpecialInstrucation()">Special Instruction</button>
+
+                            <button mat-raised-button style="background-color: #f29f99"
+                                (click)="InternalNote()">Internal Note</button>
+
+                            <button mat-raised-button style="background-color: #f29f99"
+                                (click)="settledRates()">Settled Rate</button>
+
+                            <button mat-raised-button style="background-color: #f29f99"
+                                (click)="emailInfo()"> Email format</button>
+
+                        </div>
+                    </div>
+                </div>
+
+            </form>
+           
+        </div>
+    </div>
+</div>

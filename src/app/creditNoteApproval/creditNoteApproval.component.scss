@@ -1,0 +1,84 @@
+/* Credit Note Approval Component Styles */
+.creditNoteApproval-container {
+  padding: 20px;
+}
+
+/* Add spacing between table columns - more specific selectors to ensure they persist */
+::ng-deep .mat-table {
+  .mat-header-cell,
+  .mat-cell {
+    padding-right: 24px !important;
+    padding-left: 8px !important;
+  }
+
+  // Specific spacing for actions and approval columns with higher specificity
+  .mat-column-actions {
+    padding-right: 35px !important;
+    min-width: 130px !important;
+  }
+
+  .mat-column-ApprovalStatus {
+    padding-right: 30px !important;
+    min-width: 150px !important;
+  }
+
+  .mat-column-CreditNoteNumber {
+    padding-left: 20px !important;
+    padding-right: 30px !important;
+    min-width: 110px !important;
+  }
+
+  .mat-column-id {
+    padding-right: 30px !important;
+  }
+}
+
+/* Additional styles to ensure spacing persists after table refresh */
+::ng-deep .responsive_table .mat-table {
+  .mat-header-cell {
+    padding: 12px 24px 12px 8px !important;
+  }
+  
+  .mat-cell {
+    padding: 12px 24px 12px 8px !important;
+  }
+}
+
+/* Force consistent column widths */
+::ng-deep .mat-header-row,
+::ng-deep .mat-row {
+  .mat-header-cell:first-child,
+  .mat-cell:first-child {
+    padding-left: 16px !important;
+  }
+  
+  .mat-header-cell:last-child,
+  .mat-cell:last-child {
+    padding-right: 16px !important;
+  }
+}
+
+/* Additional backup styles with even higher specificity */
+::ng-deep .creditNoteApproval-container .mat-table {
+  .mat-column-actions {
+    padding-right: 40px !important;
+    min-width: 140px !important;
+  }
+  
+  .mat-column-CreditNoteNumber  {
+    padding-left: 25px !important;
+    min-width: 120px !important;
+  }
+}
+
+/* Force table layout to be fixed */
+::ng-deep .responsive_table .mat-table {
+  table-layout: fixed !important;
+  width: 100% !important;
+}
+
+/* Ensure consistent spacing after Angular updates */
+::ng-deep .mat-table .mat-header-cell,
+::ng-deep .mat-table .mat-cell {
+  box-sizing: border-box !important;
+}

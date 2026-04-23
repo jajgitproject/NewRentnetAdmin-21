@@ -1,0 +1,171 @@
+<div class="addContainer">
+    <div class="modalHeader">
+        <div class="editRowModal">
+            <div class="modalHeader clearfix">
+                <div class="modal-about">
+                    <div class="font-weight-bold p-t-5 font-17">
+                        {{dialogTitle}}</div>
+                </div>
+            </div>
+        </div>
+        <button mat-icon-button (click)="dialogRef.close()" aria-label="Close dialog">
+      <mat-icon>close</mat-icon>
+    </button>
+    </div>
+    <div mat-dialog-content>
+        <form class="register-form m-4" [formGroup]="advanceTableForm" (ngSubmit)="submit">
+            <div class="row">
+                <div class="col-xl-6 col-lg-6 col-md-6 col-sm-6 mb-2" style="margin-top: 17px;">
+                    <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                        <mat-label>Amount</mat-label>
+                        <input matInput formControlName="amount" required (input)="calculateTax()">
+                        <mat-error *ngIf="advanceTableForm.get('amount').hasError('required')">
+                            Please Enter Amount
+                        </mat-error>
+                    </mat-form-field>
+                    <div *ngIf="grtThanCNA">
+                        <span style="color: red;">The adjust amount is greater than credit note amount.</span>
+                    </div>
+                </div>
+
+                <div class="col-xl-6 col-lg-6 col-md-6 col-sm-6 mb-2">
+                    <span style="color: black;font-size: x-small;">@ {{IGSTPercentage}} %.</span>
+                    <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                        <mat-label>IGST</mat-label>
+                        <input matInput formControlName="igstAmount" readonly>
+                    </mat-form-field>
+                </div>                
+            </div>           
+
+        <div class="row">
+            <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                <span style="color: black;font-size: x-small;">@ {{CGSTPercentage}} %.</span>
+                <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                    <mat-label>CGST</mat-label>
+                    <input matInput formControlName="cgstAmount" readonly>
+                </mat-form-field>
+            </div>
+                
+            <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                <span style="color: black;font-size: x-small;">@ {{SGSTPercentage}} %.</span>
+                <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                    <mat-label>SGST</mat-label>
+                    <input matInput formControlName="sgstAmount" readonly>
+                </mat-form-field>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                    <mat-label>Debited To</mat-label>
+                    <mat-select formControlName="debitedTo" required (selectionChange)="changeFields()">
+                        <mat-option value="Driver">Driver</mat-option>
+                        <mat-option value="Eco">Eco</mat-option>
+                        <mat-option value="Supplier">Supplier</mat-option>
+                    </mat-select>
+                </mat-form-field>
+            </div>
+            
+            <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2" *ngIf="advanceTableForm.value.debitedTo === 'Driver'">
+                <mat-form-field class="example-full-width" appearance="outline" floatLabel="always"> 
+                    <mat-label>Driver</mat-label>                       
+                    <input  type="text" matInput [matAutocomplete]="auto" formControlName="debitedToDriverName">
+                    <mat-autocomplete #auto="matAutocomplete" (optionSelected)="OnDriverSelect($event.option.value)" panelWidth="custom-autocomplete-panel">
+                        <mat-option *ngFor="let option of filteredDriverOptions | async"
+                            [value]="option.driverName" (click)="getDriverID(option.driverID)">
+                            {{option.driverName}}
+                        </mat-option>
+                    </mat-autocomplete>
+                    <mat-error *ngIf="advanceTableForm.controls['debitedToDriverName'].hasError('driverTypeInvalid')">
+                        Please select  Driver 
+                    </mat-error>
+                </mat-form-field>
+            </div>
+
+            <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2" *ngIf="advanceTableForm.value.debitedTo === 'Eco'">
+                <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                    <mat-label>Eco</mat-label>
+                    <input matInput formControlName="debitedToEcoName" [matAutocomplete]="auto1">
+                    <mat-autocomplete #auto1="matAutocomplete" (optionSelected)="OnSupplierForOwnerSelect($event.option.value)" panelWidth="custom-autocomplete-panel">
+                        <mat-option *ngFor="let option of filteredSupplierForOwnerOptions | async" [value]="option.supplierName" 
+                            (click)="getsupplierIDForOwnerID(option.supplierID)">
+                            {{option.supplierName}}
+                        </mat-option>
+                    </mat-autocomplete>
+                    <mat-error *ngIf="advanceTableForm.get('debitedToEcoName').hasError('supplierForOwnerInvalid')">
+                        Eco is required
+                    </mat-error>
+                </mat-form-field>
+            </div>
+
+            <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2" *ngIf="advanceTableForm.value.debitedTo === 'Supplier'">
+                <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                <mat-label>Supplier</mat-label>
+                <input type="text" matInput formControlName="debitedToSupplierName" [matAutocomplete]="auto2">
+                <mat-autocomplete #auto2="matAutocomplete" (optionSelected)="OnSupplierSelect($event.option.value)" panelWidth="custom-autocomplete-panel">
+                    <mat-option *ngFor="let option of filteredSupplierOptions | async" [value]="option.supplierName" (click)="getsupplierID(option.supplierID)">
+                        {{option.supplierName}}
+                    </mat-option>
+                </mat-autocomplete>
+                <mat-error *ngIf="advanceTableForm.controls['debitedToSupplierName'].hasError('supplierInvalid')">
+                    Please select a Supplier
+                </mat-error>
+                </mat-form-field>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                    <mat-label>Reason</mat-label>
+                    <mat-select formControlName="reason" required>
+                        <mat-option value="Billing error">Billing error</mat-option>
+                        <mat-option value="Complimentary">Complimentary</mat-option>
+                        <mat-option value="Discount">Discount</mat-option>
+                        <mat-option value="Excess HRS/KMS Complaint">Excess HRS/KMS Complaint</mat-option>
+                        <mat-option value="Parking / Toll / Interstate">Parking / Toll / Interstate</mat-option>
+                        <mat-option value="Rate Difference">Rate Difference</mat-option>
+                        <mat-option value="Service Complaint">Service Complaint</mat-option>
+                        <mat-option value="Other">Other</mat-option>
+                    </mat-select>
+                </mat-form-field>
+            </div>
+            
+            <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                    <mat-label>Details</mat-label>
+                    <input matInput formControlName="details" required>
+                    <mat-error *ngIf="advanceTableForm.get('details').hasError('required')">
+                        Please Enter Details
+                    </mat-error>
+                </mat-form-field>
+            </div>   
+        </div>
+
+        <div class="row">
+            <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                    <mat-label>Activation Status</mat-label>
+                    <mat-select formControlName="activationStatus">
+                        <mat-option [value]=true>Active</mat-option>
+                        <mat-option [value]=false>Deleted</mat-option>
+                    </mat-select>
+                    <mat-error *ngIf="advanceTableForm.get('activationStatus').hasError('required')">
+                        Activation Status is required
+                    </mat-error>
+                </mat-form-field>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12 mb-2">
+                <div class="example-button-row">
+                    <button mat-raised-button color="primary" *ngIf="saveDisabled" [type]="submit" [disabled]="!advanceTableForm.valid"  (click)="confirmAdd()">Save</button>
+                    <mat-spinner *ngIf="!saveDisabled" diameter="30"></mat-spinner>
+                    <button mat-raised-button color="warn" (click)="onNoClick(action)" tabindex="-1">{{ action === 'add' ? 'Reset' :  'Cancel'}}</button>              
+                </div>
+            </div>
+        </div>
+    </form>
+  </div>

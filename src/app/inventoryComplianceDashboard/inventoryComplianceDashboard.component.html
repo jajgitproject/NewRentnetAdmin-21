@@ -1,0 +1,221 @@
+<section class="content">
+    <div class="container-fluid">
+        <div class="block-header">
+            <div class="row">
+                <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+                    <ul>
+                        <li class="breadcrumb-item bcrumb-1">
+                            <a routerLink="/dashboard/main">
+                                <i class="fas fa-home"></i> Home</a>|
+                            <a href="#" onClick="return false;">Admin</a>|
+                            <a href="#" onClick="return false;">Inventory Compliance Dashboard</a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <mat-accordion>
+            <mat-expansion-panel expanded="true">
+                <mat-expansion-panel-header>
+                    <mat-panel-title   mat-panel-title>Quick Search</mat-panel-title>
+                </mat-expansion-panel-header>
+                <div>
+                    <div class="row">
+                        <div class="col-xl-2 col-lg-2 col-md-2 col-sm-12 mb-2">
+                            <mat-form-field appearance="outline" floatLabel="always" class="example-full-width">
+                                <mat-label>Document Type</mat-label>
+                                <input type="text" matInput [matAutocomplete]="auto1" [formControl]="documentType">
+                                <mat-autocomplete #auto1="matAutocomplete">
+                                    <mat-option *ngFor="let option of filteredDocumentOption | async" [value]="option.documentType">
+                                        {{option.documentType}}
+                                    </mat-option>
+                                </mat-autocomplete>
+                            </mat-form-field>
+                        </div>
+
+                        <div class="col-xl-2 col-lg-2 col-md-2 col-sm-12 mb-2">
+                            <mat-form-field appearance="outline" floatLabel="always" class="example-full-width">
+                                <mat-label>Document Name</mat-label>
+                                <input type="text" matInput [matAutocomplete]="auto3" [formControl]="documentName">
+                                <mat-autocomplete #auto3="matAutocomplete">
+                                    <mat-option *ngFor="let option of filteredDocumentNameOption | async" [value]="option.documentName">
+                                        {{option.documentName}}
+                                    </mat-option>
+                                </mat-autocomplete>
+                            </mat-form-field>
+                        </div>
+
+                        <div class="col-xl-2 col-lg-2 col-md-2 col-sm-12 mb-2">
+                            <mat-form-field appearance="outline" floatLabel="always" class="example-full-width">
+                                <mat-label>Location</mat-label>
+                                <input type="text" matInput [matAutocomplete]="auto2" [formControl]="location">
+                                <mat-autocomplete #auto2="matAutocomplete">
+                                    <mat-option *ngFor="let options of filteredOrganizationalEntityOptions | async" [value]="options.organizationalEntityName">
+                                        {{options.organizationalEntityName}}
+                                    </mat-option>
+                                </mat-autocomplete>
+                            </mat-form-field>
+                        </div>
+
+                        <div class="col-xl-2 col-lg-2 col-md-2 col-sm-12 mb-2">
+                            <mat-form-field appearance="outline" floatLabel="always" class="example-full-width">
+                                <mat-label>Expiry range</mat-label>
+                                <mat-select [(ngModel)]="searchDaysRemaning">
+                                    <mat-option value="7">7 days</mat-option>
+                                    <mat-option value="15">15 days</mat-option>
+                                    <mat-option value="30">30 days</mat-option>
+                                    <mat-option value="60">60 days</mat-option>                                                                       
+                                </mat-select>
+                            </mat-form-field>
+                        </div>
+
+                        <div class="col-xl-2 col-lg-2 col-md-2 col-sm-12 mb-2">
+                            <mat-form-field appearance="outline" floatLabel="always" class="example-full-width">
+                                <mat-label>Owned/Supplier</mat-label>
+                                <mat-select [(ngModel)]="searchOwnedSupplier">
+                                    <mat-option value="owned">Owned</mat-option>
+                                    <mat-option value="supplier">Supplier</mat-option>
+                                </mat-select>
+                            </mat-form-field>
+                        </div>
+
+                        <div class="col-xl-2 col-lg-2 col-md-2 col-sm-12 mb-2">
+                            <mat-form-field appearance="outline" floatLabel="always" class="example-full-width">
+                                <mat-label>Status</mat-label>
+                                <mat-select [(ngModel)]="status">
+                                    <mat-option value="Active">Active</mat-option>
+                                    <mat-option value="Maintenance">Maintenance</mat-option>
+                                    <mat-option value="OnHold">On Hold</mat-option>
+                                    <mat-option value="Deactive">Deactive</mat-option>
+                                </mat-select>
+                            </mat-form-field>
+                        </div>
+                    </div>
+
+                <div class="row">
+                    <div class="col-xl-2 col-lg-2 col-md-2 col-sm-12 mb-2">
+                        <button mat-raised-button color="primary" (click)="SearchData()">
+                            Search
+                        </button>
+                    </div>
+                    <div class="col-xl-2 col-lg-2 col-md-2 col-sm-12 mb-2">
+                        <button mat-raised-button color="primary" (click)="refresh()">
+                            Refresh
+                        </button>
+                    </div>
+                </div>
+                </div>
+            </mat-expansion-panel>
+        </mat-accordion>
+
+    <br>
+
+
+        <div class="row">
+            <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                <div class="card">
+                    <div class="body">
+                        <div class="responsive_table">
+                            <div class="table-responsive">
+                                <p *ngIf="!dataSource; then thenBlock2 else elseBlock2">
+                                    This is not rendered
+                                </p>
+
+                                <ng-template #thenBlock2>
+                                    <div class="alert alert-primary" style="background-color:#E8E8E8; text-align: center;">No Records Found</div>
+                                    <div class="body">
+                                        <div class="example-button-row">
+                                            <button mat-raised-button color="primary" (click)="PreviousCall()">Previous</button>
+                                            <button mat-raised-button color="primary" (click)="NextCall()">Next</button>
+                                        </div>
+                                    </div>
+
+                                </ng-template>
+
+                                <ng-template #elseBlock2>
+                                    <div class="scrollable-table-container">
+                                    <mat-table #table [dataSource]="dataSource" matSort class="mat-cell floating-header-table"
+                                        (matSortChange)="SortingData($event)">
+                            
+                                        <ng-container matColumnDef="registrationNumber">
+                                            <mat-header-cell *matHeaderCellDef mat-sort-header>Inventory</mat-header-cell>
+                                            <mat-cell *matCellDef="let row">{{row.registrationNumber}}</mat-cell>
+                                        </ng-container>
+
+                                                                         
+                                        <ng-container matColumnDef="documentType">
+                                            <mat-header-cell *matHeaderCellDef mat-sort-header style="white-space: nowrap;">Document Type</mat-header-cell>
+                                            <mat-cell *matCellDef="let row" (contextmenu)="onContextMenu($event, row)">
+                                                {{ row.documentType  || 'N/A'}}</mat-cell>
+                                        </ng-container>
+
+
+                                          <ng-container matColumnDef="documentName">
+                                            <mat-header-cell *matHeaderCellDef mat-sort-header style="white-space: nowrap;">Document</mat-header-cell>
+                                            <mat-cell *matCellDef="let row" (contextmenu)="onContextMenu($event, row)">
+                                                {{ row.documentName  || 'N/A'}}</mat-cell>
+                                        </ng-container>
+
+                                        <ng-container matColumnDef="documentExpiry">
+                                            <mat-header-cell *matHeaderCellDef mat-sort-header>Expiry Date</mat-header-cell>
+                                            <mat-cell *matCellDef="let row" (contextmenu)="onContextMenu($event, row)">
+                                                {{row.documentExpiry ? (row.documentExpiry | date : 'dd-MM-yyyy') : 'N/A'}}</mat-cell>
+                                        </ng-container>
+
+                                        <ng-container matColumnDef="daysRemaining">
+                                            <mat-header-cell *matHeaderCellDef mat-sort-header>Days Left (Expiry – Today)</mat-header-cell>
+                                            <mat-cell *matCellDef="let row" (contextmenu)="onContextMenu($event, row)">
+                                                {{row.daysRemaining ? row.daysRemaining : 'N/A'}}</mat-cell>
+                                        </ng-container>
+
+                                        <ng-container matColumnDef="documentStatus">
+                                            <mat-header-cell *matHeaderCellDef mat-sort-header>Document Status</mat-header-cell>
+                                            <mat-cell *matCellDef="let row" (contextmenu)="onContextMenu($event, row)">
+                                                {{row.documentStatus ? row.documentStatus : 'N/A'}}</mat-cell>
+                                        </ng-container>
+
+                                        <ng-container matColumnDef="organizationalEntityName">
+                                            <mat-header-cell *matHeaderCellDef>Location</mat-header-cell>
+                                            <mat-cell *matCellDef="let row" (contextmenu)="onContextMenu($event, row)">
+                                                {{row.location || 'N/A'}}</mat-cell>
+                                        </ng-container>
+
+                                        <mat-header-row *matHeaderRowDef="displayedColumns"></mat-header-row>
+                                        <mat-row *matRowDef="let row; columns: displayedColumns;"
+                                            [style.cursor]="'pointer'" matRipple>
+                                        </mat-row>
+                                    </mat-table>
+                                    </div>
+
+                                    <!-- context menu start -->
+                                    <div style="visibility: hidden; position: fixed"
+                                        [style.left]="contextMenuPosition.x" [style.top]="contextMenuPosition.y"
+                                        [matMenuTriggerFor]="contextMenu">
+                                    </div>
+                                    <mat-menu #contextMenu="matMenu">
+                                        <ng-template matMenuContent let-item="item">
+                                            <button mat-menu-item>
+                                                <mat-icon>create</mat-icon>
+                                                <span>Edit</span>
+                                            </button>
+                                        </ng-template>
+                                    </mat-menu>
+
+                                    <div class="body">
+                                        <div class="example-button-row">
+                                            <button mat-raised-button color="primary" (click)="PreviousCall()">Previous</button>
+                                            <button mat-raised-button color="primary" (click)="NextCall()">Next</button>
+                                        </div>
+                                    </div>
+
+                                </ng-template>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>

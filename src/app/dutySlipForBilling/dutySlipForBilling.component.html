@@ -1,0 +1,509 @@
+<!-- <div class="card">
+      <div class="header bg-cyan">
+        <h2>
+          KM  Comparision
+        </h2>
+        <ul class="header-dropdown m-r-10">
+          <li>
+            <a class="material-icons" href="javascript:void(0);">keyboard_arrow_up</a>
+          </li>
+          <li></li>
+
+        </ul>
+      </div>
+      <div style="background-color: #ebeef1;">
+        <form [formGroup]="advanceTableForm">
+          <mat-accordion>
+            <mat-expansion-panel [expanded]="panelExpanded">
+              <mat-expansion-panel-header>
+                <mat-panel-title>
+                 
+                </mat-panel-title>
+              </mat-expansion-panel-header>
+             
+                      <div class="row">
+                        <div class="col-xl-3 col-lg-3 col-md-6 col-sm-12 mb-2">
+
+                        </div>
+
+                       
+                        <div class="col-xl-3 col-lg-3 col-md-6 col-sm-12 mb-2">
+                          
+                            <mat-radio-button color="primary" value="Manual"
+                            [(ngModel)]="selectedKMType" (change)="toggleBillingManualVisibility()">Manual KM</mat-radio-button>
+                          
+                        </div>
+
+                       
+                        <div class="col-xl-3 col-lg-3 col-md-6 col-sm-12 mb-2">
+                            <mat-radio-button color="primary" value="App"
+                            [(ngModel)]="selectedKMType" (change)="toggleBillingManualVisibility()">App KM</mat-radio-button>
+                          
+                        </div>
+
+                        
+                        <div class="col-xl-3 col-lg-3 col-md-6 col-sm-12 mb-2">
+                            <mat-radio-button color="primary" value="GtrackKM" [(ngModel)]="selectedKMType" (change)="toggleBillingManualVisibility()">
+                              GPS <a href="" style="width: 50px; text-align: center;" [type]="submit">(Get KM)</a>
+                            </mat-radio-button>
+                        </div>
+                      </div>
+
+                      <br/>
+                
+                        <div class ="row"
+                          >
+                          <div class="col-xl-3  col-lg-3 col-md-6 col-sm-12 mb-2">
+                          <span matTooltip="Garage To Pickup" matTooltipPosition="above"
+                          >G2P</span
+                        >
+                          </div>
+                          <div class="col-xl-3  col-lg-3 col-md-6 col-sm-12 mb-2">
+                          <mat-form-field appearance="outline" style="width: 100px" floatLabel="always">
+                            <input required matInput formControlName="hubToStartKM" readonly />
+                          </mat-form-field>
+                          </div>
+                          
+                          <div class="col-xl-3  col-lg-3 col-md-6 col-sm-12 mb-2">
+                          <mat-form-field appearance="outline" style="width: 100px" floatLabel="always">
+                            <input
+                              required
+                              matInput
+                              formControlName="locationToPickupTripKm"
+                              readonly
+                            />
+                          </mat-form-field>
+                    </div>
+
+                    <div class="col-xl-3  col-lg-3 col-md-6 col-sm-12 mb-2">
+                          <mat-form-field appearance="outline" style="width: 100px" floatLabel="always">
+                            <input required matInput readonly />
+                          </mat-form-field>
+                    </div>
+                          
+                        </div>
+                        <br/>
+                      
+                        <div class ="row">
+                          <div class="col-xl-3  col-lg-3 col-md-6 col-sm-12 mb-2">
+                          <span matTooltip="Point To Point" matTooltipPosition="above">P2P</span>
+                          </div>
+
+                          <div  class="col-xl-3  col-lg-3 col-md-6 col-sm-12 mb-2">
+                        <mat-form-field appearance="outline" style="width: 100px;" floatLabel="always">
+                          <input required matInput formControlName="startToEndKM" readonly>
+                        </mat-form-field>
+                        </div>
+
+                        <div  class="col-xl-3  col-lg-3 col-md-6 col-sm-12 mb-2">
+                        <mat-form-field appearance="outline" style="width: 100px;" floatLabel="always">
+                          <input required matInput formControlName="pickupToDropOffTripKm" readonly>
+                        </mat-form-field>
+                        </div>
+
+                      <div  class="col-xl-3  col-lg-3 col-md-6 col-sm-12 mb-2">
+                        <mat-form-field appearance="outline" style="width: 100px;" floatLabel="always">
+                          <input required matInput readonly>
+                        </mat-form-field>
+                        </div>
+
+                        </div>
+                        <br/>
+
+                        <div class ="row"> 
+                          <div class="col-xl-3  col-lg-3 col-md-6 col-sm-12 mb-2">
+                          <span matTooltip="DropOff To Garage" matTooltipPosition="above">D2G</span>
+
+                        </div>
+                        <div class="col-xl-3  col-lg-3 col-md-6 col-sm-12 mb-2">
+                        <mat-form-field appearance="outline" style="width: 100px;" floatLabel="always">
+                          <input required matInput formControlName="endToHubKM" readonly>
+                        </mat-form-field>
+                        </div>
+
+                    <div class="col-xl-3  col-lg-3 col-md-6 col-sm-12 mb-2">
+                        <mat-form-field appearance="outline" style="width: 100px;" floatLabel="always">
+                          <input required matInput formControlName="dropOffToLocationInTripKm" readonly>
+                        </mat-form-field>
+                    </div>
+
+                    <div class="col-xl-3  col-lg-3 col-md-6 col-sm-12 mb-2">
+                      
+                        <mat-form-field appearance="outline" style="width: 100px;" floatLabel="always">
+                          <input required matInput readonly>
+                        </mat-form-field>
+                    </div>
+                  
+                          </div>
+                          <br/>
+            </mat-expansion-panel>
+          </mat-accordion>
+        </form>
+      </div>
+</div> -->
+
+
+<!--Table-->
+<div class="card" style="background-color: #ebeef1;margin-bottom: 10px;">
+  <div style="background-color: #ebeef1;">
+    <div class="container-fluid">
+      <form [formGroup]="advanceTableForm">
+        <div class="row" style="margin-left: 0px;margin-top: 10px;">
+          <div class="col-lg-12">
+            <div class="table-responsive">
+              <mat-card class="example-card">
+                <mat-card-header></mat-card-header>
+                <mat-card-content>
+
+                  <div class="row align-items-center mb-3">
+                    <!-- Left 50% Table -->
+                    <div class="col-xl-12 col-lg-12 col-md-6 col-sm-12 mb-2">
+                      <div style="background-color: white; padding: 10px; border-radius: 4px; border: 1px solid #ccc;">
+                        <table style="width: 100%; background-color: white;" class="table-bordered">
+                          <tbody>
+                            <tr style="height: 13px;">
+                              <td></td>
+                              <td colspan="4">
+                                <mat-radio-group formControlName="closureType"
+                                  (change)="toggleBillingManualVisibility($event)">
+                                  <div class="radio-button-container" style="width: 90%;">
+                                    <mat-radio-button color="primary" value="Driver">Driver KM</mat-radio-button>
+                                    <mat-radio-button color="primary" value="App">App KM</mat-radio-button>
+                                    <mat-radio-button color="primary" value="GPS">
+                                      GPS KM &nbsp;
+                                      <a href="javascript:void(0)" (click)="PostDataGPS()"
+                                        style="text-align: center; cursor: pointer; color: #007bff;">
+                                        (Get KM)
+                                      </a>
+                                    </mat-radio-button>
+
+                                    <mat-radio-button color="primary" value="Manual">Manual KM</mat-radio-button>
+                                  </div>
+                                </mat-radio-group>
+                              </td>
+                            </tr>
+                            <tr style="height: 10px;">
+                              <td>G2P</td>
+                              <td>{{advanceTableClosingOne?.kmComparisionModel.g2PApp || 0}}</td>
+                              <td>{{advanceTableClosingOne?.kmComparisionModel.g2PAppActual || 0}}</td>
+                              <td>{{advanceTableClosingOne?.kmComparisionModel.g2PGPS || 0}}</td>
+                              <td>{{advanceTableClosingOne?.kmComparisionModel.g2PManual || 0}}</td>
+                            </tr>
+                            <tr style="height: 13px;">
+                              <td>P2D</td>
+                              <td>{{advanceTableClosingOne?.kmComparisionModel.p2DApp || 0}}</td>
+                              <td>{{advanceTableClosingOne?.kmComparisionModel.p2DAppActual || 0}}</td>
+                              <td>{{advanceTableClosingOne?.kmComparisionModel.p2DGPS || 0}}</td>
+                              <td>{{advanceTableClosingOne?.kmComparisionModel.p2DManual || 0}}</td>
+                            </tr>
+                            <tr style="height: 13px;">
+                              <td>D2G</td>
+                              <td>{{advanceTableClosingOne?.kmComparisionModel.d2GApp || 0}}</td>
+                              <td>{{advanceTableClosingOne?.kmComparisionModel.d2GAppActual || 0}}</td>
+                              <td>{{advanceTableClosingOne?.kmComparisionModel.d2GGPS || 0}}</td>
+                              <td>{{advanceTableClosingOne?.kmComparisionModel.d2GManual || 0}}</td>
+                            </tr>
+
+                          </tbody>
+                        </table>
+                      </div>
+                    </div>
+
+                    <!-- Right Side Cards (25% + 25%) -->
+                    <!-- <div class="col-xl-3 col-lg-3 col-md-6 col-sm-12 mb-2">
+                          
+                        </div>
+
+                        <div class="col-xl-3 col-lg-3 col-md-6 col-sm-12 mb-2">
+                         
+                        </div> -->
+                  </div>
+
+
+
+                  <div class="row">
+                    <div class="col-xl-3 col-lg-3 col-md-3 col-sm-6 mb-2">
+                      <mat-form-field appearance="outline" floatLabel="always" class="example-full-width">
+                        <mat-label>DS Closing</mat-label>
+                        <mat-select formControlName="dsClosing">
+                          <mat-option value="Closed">Closed</mat-option>
+                          <mat-option value="VirtualClosing">Virtual Closing</mat-option>
+                          <mat-option value="Disputed">Disputed</mat-option>
+                        </mat-select>
+                      </mat-form-field>
+                    </div>
+
+                    <div class="col-xl-3 col-lg-3 col-md-3 col-sm-6 mb-2">
+                      <mat-form-field appearance="outline" floatLabel="always" class="example-full-width">
+                        <mat-label>Duty Slip Received</mat-label>
+                        <mat-select formControlName="physicalDutySlipReceived">
+                          <mat-option [value]=true>Yes</mat-option>
+                          <mat-option [value]=false>No</mat-option>
+                        </mat-select>
+                      </mat-form-field>
+                    </div>
+
+                    <div class="col-xl-3 col-lg-3 col-md-3 col-sm-6 mb-2">
+                      <mat-form-field appearance="outline" floatLabel="always" class="example-full-width">
+                        <mat-label>Running Details</mat-label>
+                        <textarea matInput formControlName="runningDetails"></textarea>
+                      </mat-form-field>
+                    </div>
+
+                    <div class="col-xl-3 col-lg-3 col-md-3 col-sm-6 mb-2">
+                      <mat-form-field appearance="outline" floatLabel="always" class="example-full-width">
+                        <mat-label>Vendor Remark</mat-label>
+                        <textarea matInput formControlName="vendorRemark"></textarea>
+                      </mat-form-field>
+                    </div>
+                  </div>
+
+                  <div class="row">
+                    <div class="col-xl-3 col-lg-3 col-md-3 col-sm-6 mb-2">
+                      <mat-form-field appearance="outline" floatLabel="always" class="example-full-width">
+                        <mat-label>Location Out Date</mat-label>
+                        <input required matInput [matDatepicker]="locOutDate"
+                          formControlName="locationOutDateForBilling" (dateChange)="onLocOutDatepickerChange($event)">
+                        <mat-datepicker-toggle matSuffix [for]="locOutDate"></mat-datepicker-toggle>
+                        <mat-datepicker #locOutDate></mat-datepicker>
+                      </mat-form-field>
+                    </div>
+
+                    <div class="col-xl-3 col-lg-3 col-md-3 col-sm-6 mb-2">
+                      <mat-form-field appearance="outline" floatLabel="always" class="example-full-width">
+                        <mat-label>Location Out Time</mat-label>
+                        <input required matInput [owlDateTimeTrigger]="time1" [owlDateTime]="time1"
+                          formControlName="locationOutTimeForBilling" (ngModelChange)="onTimeSelection()">
+                        <button mat-icon-button matSuffix type="button" [owlDateTimeTrigger]="time1" class="date-icon" aria-label="Open time picker"><mat-icon>schedule</mat-icon></button>
+                        <owl-date-time [pickerType]="'timer'" #time1></owl-date-time>
+                      </mat-form-field>
+                    </div>
+
+                    <div class="col-xl-3 col-lg-3 col-md-3 col-sm-6 mb-2">
+                      <mat-form-field appearance="outline" floatLabel="always" class="example-full-width">
+                        <mat-label>Location Out KM</mat-label>
+                        <input required matInput formControlName="locationOutKMForBilling" (input)="onKeyUp()">
+                      </mat-form-field>
+                    </div>
+
+                    <div class="col-xl-3 col-lg-3 col-md-3 col-sm-6 mb-2">
+                      <mat-form-field appearance="outline" floatLabel="always" class="example-full-width">
+                        <mat-label>Location Out Address</mat-label>
+                        <textarea matInput formControlName="locationOutAddressStringForBilling" rows="3"></textarea>
+                      </mat-form-field>
+                    </div>
+
+                  </div>
+
+                  <div class="row">
+                    <div class="col-xl-3 col-lg-3 col-md-3 col-sm-6 mb-2">
+                      <mat-form-field appearance="outline" floatLabel="always" class="example-full-width">
+                        <mat-label>Pickup Date</mat-label>
+                        <input required matInput [matDatepicker]="pickDate" formControlName="pickUpDateForBilling"
+                          (dateChange)="onPickupDatepickerChange($event)">
+                        <mat-datepicker-toggle matSuffix [for]="pickDate"></mat-datepicker-toggle>
+                        <mat-datepicker #pickDate></mat-datepicker>
+                      </mat-form-field>
+                      <!-- <span style="color: green; font-size: 10px;" >
+                                <b>Pickup Date</b> :  {{PickupDate | date:'dd-MM-yyyy'}}
+                           </span>  -->
+                    </div>
+
+                    <div class="col-xl-3 col-lg-3 col-md-3 col-sm-6 mb-2">
+                      <mat-form-field appearance="outline" floatLabel="always" class="example-full-width">
+                        <mat-label>Pickup Time</mat-label>
+                        <input required matInput [owlDateTimeTrigger]="time2" [owlDateTime]="time2"
+                          formControlName="pickUpTimeForBilling" (ngModelChange)="onTimeSelection()">
+                        <button mat-icon-button matSuffix type="button" [owlDateTimeTrigger]="time2" class="date-icon" aria-label="Open time picker"><mat-icon>schedule</mat-icon></button>
+                        <owl-date-time [pickerType]="'timer'" #time2></owl-date-time>
+
+                      </mat-form-field>
+                      <!-- <span style="color: red; font-size: 10px;" *ngIf="isPickupTimeInvalid()">
+                                 Time Not Confirmed
+                           </span> 
+                           <span style="color: green; font-size: 10px;" *ngIf="!isPickupTimeInvalid()">
+                                <b>Pickup Time</b> :  {{PickupTime | date:'shortTime'}}
+                           </span> -->
+
+                    </div>
+
+                    <div class="col-xl-3 col-lg-3 col-md-3 col-sm-6 mb-2">
+                      <mat-form-field appearance="outline" floatLabel="always" class="example-full-width">
+                        <mat-label>Pickup KM</mat-label>
+                        <input required matInput formControlName="pickUpKMForBilling" (input)="onKeyUp()">
+                      </mat-form-field>
+                    </div>
+
+                    <div class="col-xl-3 col-lg-3 col-md-3 col-sm-6 mb-2">
+                      <mat-form-field appearance="outline" floatLabel="always" class="example-full-width">
+                        <mat-label>Pickup Address</mat-label>
+                        <textarea matInput formControlName="pickUpAddressStringForBilling" rows="3"></textarea>
+                      </mat-form-field>
+                    </div>
+                  </div>
+
+                  <div class="row">
+                    <div class="col-xl-3 col-lg-3 col-md-3 col-sm-6 mb-2">
+                      <mat-form-field appearance="outline" floatLabel="always" class="example-full-width">
+                        <mat-label>DropOff Date</mat-label>
+                        <input required matInput [matDatepicker]="dropDate" formControlName="dropOffDateForBilling"
+                          (dateChange)="onDropOffDatepickerChange($event)">
+                        <mat-datepicker-toggle matSuffix [for]="dropDate"></mat-datepicker-toggle>
+                        <mat-datepicker #dropDate></mat-datepicker>
+                      </mat-form-field>
+                    </div>
+
+                    <div class="col-xl-3 col-lg-3 col-md-3 col-sm-6 mb-2">
+                      <mat-form-field appearance="outline" floatLabel="always" class="example-full-width">
+                        <mat-label>DropOff Time</mat-label>
+                        <input required matInput [owlDateTimeTrigger]="time3" [owlDateTime]="time3"
+                          formControlName="dropOffTimeForBilling" (ngModelChange)="onTimeSelection()">
+                        <button mat-icon-button matSuffix type="button" [owlDateTimeTrigger]="time3" class="date-icon" aria-label="Open time picker"><mat-icon>schedule</mat-icon></button>
+                        <owl-date-time [pickerType]="'timer'" #time3></owl-date-time>
+                      </mat-form-field>
+                    </div>
+
+                    <div class="col-xl-3 col-lg-3 col-md-3 col-sm-6 mb-2">
+                      <mat-form-field appearance="outline" floatLabel="always" class="example-full-width">
+                        <mat-label>DropOff KM</mat-label>
+                        <input required matInput formControlName="dropOffKMForBilling" (input)="onKeyUp()">
+                      </mat-form-field>
+                    </div>
+
+                    <div class="col-xl-3 col-lg-3 col-md-3 col-sm-6 mb-2">
+                      <mat-form-field appearance="outline" floatLabel="always" class="example-full-width">
+                        <mat-label>DropOff Address</mat-label>
+                        <textarea matInput formControlName="dropOffAddressStringForBilling" rows="3"></textarea>
+                      </mat-form-field>
+                    </div>
+                  </div>
+
+                  <div class="row">
+                    <div class="col-xl-3 col-lg-3 col-md-3 col-sm-6 mb-2">
+                      <mat-form-field appearance="outline" floatLabel="always" class="example-full-width">
+                        <mat-label>LocationIn Date</mat-label>
+                        <input required matInput [matDatepicker]="locInDate" formControlName="locationInDateForBilling"
+                          (dateChange)="onLocInDatepickerChange($event)">
+                        <mat-datepicker-toggle matSuffix [for]="locInDate"></mat-datepicker-toggle>
+                        <mat-datepicker #locInDate></mat-datepicker>
+                      </mat-form-field>
+                    </div>
+
+                    <div class="col-xl-3 col-lg-3 col-md-3 col-sm-6 mb-2">
+                      <mat-form-field appearance="outline" floatLabel="always" class="example-full-width">
+                        <mat-label>LocationIn Time</mat-label>
+                        <input required matInput [owlDateTimeTrigger]="time4" [owlDateTime]="time4"
+                          formControlName="locationInTimeForBilling" (ngModelChange)="onTimeSelection()">
+                        <button mat-icon-button matSuffix type="button" [owlDateTimeTrigger]="time4" class="date-icon" aria-label="Open time picker"><mat-icon>schedule</mat-icon></button>
+                        <owl-date-time [pickerType]="'timer'" #time4></owl-date-time>
+                      </mat-form-field>
+                    </div>
+
+                    <div class="col-xl-3 col-lg-3 col-md-3 col-sm-6 mb-2">
+                      <mat-form-field appearance="outline" floatLabel="always" class="example-full-width">
+                        <mat-label>LocationIn KM</mat-label>
+                        <input required matInput formControlName="locationInKMForBilling" (input)="onKeyUp()">
+                      </mat-form-field>
+                    </div>
+
+                    <div class="col-xl-3 col-lg-3 col-md-3 col-sm-6 mb-2">
+                      <mat-form-field appearance="outline" floatLabel="always" class="example-full-width">
+                        <mat-label>LocationIn Address</mat-label>
+                        <textarea matInput formControlName="locationInAddressStringForBilling" rows="3"></textarea>
+                      </mat-form-field>
+                    </div>
+                  </div>
+
+                  <div class="row">
+                    <div class="col-xl-3 col-lg-3 col-md-3 col-sm-6 mb-2" style="font-size: 15px;padding-top: 12px;">
+                      <mat-label
+                        style="border-bottom: 1px solid rgba(0, 0, 0, 0.42); padding: 4px 0;width:215px;display: inline-block; "><strong>Total</strong></mat-label>
+                    </div>
+
+                    <div class="col-xl-3 col-lg-3 col-md-3 col-sm-6 mb-2">
+                      <mat-form-field appearance="outline" floatLabel="always" class="example-full-width">
+                        <mat-label>Date & Time Diff</mat-label>
+                        <input matInput [value]="datetime" readonly>
+                      </mat-form-field>
+                    </div>
+
+                    <div class="col-xl-3 col-lg-3 col-md-3 col-sm-6 mb-2">
+                      <mat-form-field appearance="outline" floatLabel="always" class="example-full-width">
+                        <mat-label>KM Diff</mat-label>
+                        <input matInput [value]="diff" readonly>
+                      </mat-form-field>
+                    </div>
+
+                    <div class="col-xl-3 col-lg-3 col-md-3 col-sm-6 mb-2"
+                      *ngIf="this.advanceTableClosingOne?.closingDutySlipModel.customerSignatureImage !== null">
+                      <mat-label>Signature</mat-label>
+                      <div>
+                        <img [src]="CustomerSignatureImage" alt="Signature" style="max-width: 25%; height: 25%;">
+                        <span><a href="{{advanceTableClosingOne.closingDutySlipModel.customerSignatureImage}}"
+                            target="_blank" style="cursor: pointer;color: #007bff;">View</a></span>
+                      </div>
+                    </div>
+
+                    <div class="col-xl-3 col-lg-3 col-md-3 col-sm-6 mb-2"
+                      *ngIf="this.advanceTableClosingOne?.closingDutySlipModel.customerSignatureImage === null">
+                      <mat-label>Signature</mat-label>
+                      <div style="color: red;">
+                        <span>Image Not Found!!</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="row">
+                    <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12 mb-2">
+                      <!-- <button mat-flat-button *ngIf="saveDisabled && (Action === 'Cancelled' || !InvoiceID)" style="width: 100%;"  color="primary" [disabled]="!advanceTableForm.valid" (click)="Put()" [type]="submit">{{ buttonText }} -->
+                      <button mat-flat-button style="width: 100%;"  color="primary" 
+                          *ngIf="(showSpinner === false) && (Action === 'Cancelled' || !InvoiceID)"  
+                          [disabled]="!advanceTableForm.valid" 
+                          (click)="Put()" [type]="submit">{{ buttonText }}
+                        <span style="margin-left: 5px;"
+                          *ngIf="advanceTableClosingOne.closingDutySlipForBillingModel.closureType">(Based on
+                          {{advanceTableClosingOne.closingDutySlipForBillingModel.closureType}} KM)</span>
+                      </button>
+                      <br/>
+                      <div *ngIf="Action !== 'Cancelled'">
+                        <button mat-flat-button style="width: 100%;"  color="primary" *ngIf="InvoiceID" disabled>Invoice already created</button>
+                      </div>
+                      <mat-spinner *ngIf="!saveDisabled" diameter="30"></mat-spinner>
+                      <img *ngIf="showSpinner === true" src="assets/images/loader4.gif" width="30">
+                    </div>
+                  </div>
+                </mat-card-content>
+              </mat-card>
+
+
+
+
+
+            </div>
+          </div>
+        </div>
+
+        <br>
+        <mat-card>
+          <mat-card-content>
+            <mat-checkbox formControlName="verifyDuty" (change)="onVDChange($event)">
+              Verify Duty
+            </mat-checkbox>
+            <!-- <img *ngIf="showSpinnerForVDGB === true" src="assets/images/loader4.gif" width="30"> -->
+            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+            <mat-checkbox formControlName="goodForBilling" (change)="onGFBChange($event)">
+              Good For Billing
+            </mat-checkbox>
+            <br>
+            <img *ngIf="showSpinnerForVDGB === true" src="assets/images/loader4.gif" width="30">
+          </mat-card-content>
+        </mat-card>
+
+        <br>
+      </form>
+    </div>
+  </div>
+</div>
+
+
+<br>

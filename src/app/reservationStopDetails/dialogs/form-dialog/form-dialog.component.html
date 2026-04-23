@@ -1,0 +1,260 @@
+<div class="addContainer">
+    <div class="modalHeader">
+        <div class="editRowModal">
+          <div class="modalHeader clearfix">
+              <div class="modal-about">
+                  <div class="font-weight-bold p-t-5 font-17">
+                      {{ dialogTitle }}
+                  </div>
+                   <div *ngIf="status && status !== 'Changes allow'"
+                        style="color:rgb(150, 4, 4); margin-top:5px; font-style: italic;">
+                        ({{status}}!!!!!)
+                    </div>
+              </div>
+          </div>
+      </div>
+        <button mat-icon-button (click)="dialogRef.close()" aria-label="Close dialog">
+            <mat-icon>close</mat-icon>
+        </button>
+    </div>
+    <div mat-dialog-content>
+        <form class="register-form m-4" [formGroup]="advanceTableForm" (ngSubmit)="submit">
+            <div class="row">
+                <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                    <mat-form-field appearance="outline" floatLabel="always" class="example-full-width">
+                        <mat-label>Stop Date</mat-label>
+                        <input matInput 
+                        formControlName="reservationStopDate" 
+                        [matDatepicker]="startDate"
+                        placeholder="DD/MM/YYYY"
+                        (blur)="onBlurUpdateDate($event.target.value)">
+                        <mat-datepicker-toggle matSuffix [for]="startDate"></mat-datepicker-toggle>
+                        <mat-datepicker #startDate></mat-datepicker>
+                        <mat-error *ngIf="advanceTableForm.get('reservationStopDate').hasError('required')">
+                            Stop Date is required
+                        </mat-error>
+                    </mat-form-field>
+                </div>
+
+                <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                    <mat-form-field appearance="outline" floatLabel="always" class="example-full-width">
+                        <mat-label>Stop Time</mat-label>
+                        <input 
+                        matInput 
+                        [owlDateTimeTrigger]="time1" 
+                        [owlDateTime]="time1"
+                        formControlName="reservationStopTime"
+                        (input)="onTimeInput($event)" [disabled]="isTNCSelected">
+                        <button mat-icon-button matSuffix type="button" [owlDateTimeTrigger]="time1" class="date-icon" aria-label="Open time picker"><mat-icon>schedule</mat-icon></button>
+                        <owl-date-time [pickerType]="'timer'" #time1></owl-date-time>
+                        <mat-hint align="end">
+                            <div style="float: right; font-size: 10px !important; font-style: italic">
+                                <mat-checkbox color="primary" formControlName="isTimeNotConfirmed"
+                                    (change)="onTNCChange($event.checked)">TNC</mat-checkbox>
+                            </div>
+                        </mat-hint>
+                        <!-- <mat-error *ngIf="advanceTableForm.get('reservationStopTime').hasError('required')">
+                            Stop Time is required
+                        </mat-error> -->
+                    </mat-form-field>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                    <mat-form-field appearance="outline" floatLabel="always" class="example-full-width">
+                        <mat-label>City</mat-label>
+                        <input required type="text" matInput [matAutocomplete]="auto3" formControlName="city"
+                            >
+                        <mat-autocomplete #auto3="matAutocomplete" (optionSelected)="onCitySelected($event.option.value)">
+                            <mat-option *ngFor="let options of filteredCityOptions | async"
+                                [value]="options.geoPointName" (click)="getCityID(options.geoPointID)">
+                                {{options.geoPointName}}
+                            </mat-option>
+                        </mat-autocomplete>
+                        <mat-error *ngIf="advanceTableForm.controls['city'].hasError('cityInvalid')">
+                            Please Select Valid City
+                        </mat-error>
+                        <!-- <mat-error *ngIf="advanceTableForm.get('city').hasError('required')">
+                            City is required
+                        </mat-error> -->
+                    </mat-form-field>
+                </div>
+
+                <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                    <mat-form-field appearance="outline" floatLabel="always" class="example-full-width">
+                        <mat-label>Priority Order</mat-label>
+                        <mat-select required #POVal [class.is-invalid]="POVal.invalid && POVal.touched" 
+                        formControlName="reservationStopOrderPriority" (selectionChange)="onPriorityChange($event)">
+                          <mat-option *ngFor="let value of priorityValues" [value]="value">
+                            {{ value }}
+                          </mat-option>
+                        </mat-select>
+                      </mat-form-field>
+                      <div *ngIf="!showError('reservationStopOrderPriority')" class="default-message" style="color: green;font-style: italic;">
+                            Based on planned number of stops
+                      </div>
+
+                    <mat-error  *ngIf="showError('reservationStopOrderPriority')">
+                        Priority Order is required
+                    </mat-error>
+
+                    <mat-error *ngIf="advanceTableForm.get('reservationStopOrderPriority')?.hasError('existingPriority')">
+                        This priority already exists. Please choose a different one.
+                      </mat-error>
+                </div>
+            </div>
+
+            <!-- <div class="row">
+                <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                    <mat-form-field appearance="outline" floatLabel="always" class="example-full-width" > 
+                        <mat-label>Country</mat-label>                       
+                        <input required type="text" matInput [matAutocomplete]="auto1"
+                        formControlName="country" (change)="onCountryInputChange($event)" [readonly]="isGoogleAutoComplete">
+                        <mat-autocomplete #auto1="matAutocomplete">
+                            <mat-option *ngFor="let options of filteredCountryOptions | async"
+                                [value]="options.geoPointName" (click)="getCountryID(options.geoPointID)">
+                                {{options.geoPointName}}
+                            </mat-option>
+                        </mat-autocomplete>
+                        <mat-error *ngIf="advanceTableForm.get('country').hasError('required')">
+                            Country is required
+                        </mat-error>
+                    </mat-form-field>
+                        
+                </div>
+                <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                    <mat-form-field appearance="outline" floatLabel="always" class="example-full-width"> 
+                        <mat-label>State</mat-label>                       
+                        <input required type="text" matInput [matAutocomplete]="auto2"
+                        formControlName="state" (change)="onStateInputChange($event)" [readonly]="isGoogleAutoComplete">
+                        <mat-autocomplete #auto2="matAutocomplete">
+                            <mat-option *ngFor="let options of filteredStateOptions | async"
+                                [value]="options.geoPointName" (click)="getStateID(options.geoPointID)">
+                                {{options.geoPointName}}
+                            </mat-option>
+                        </mat-autocomplete>
+                        <mat-error *ngIf="advanceTableForm.get('state').hasError('required')">
+                            State Name is required
+                        </mat-error>
+                    </mat-form-field>
+                </div>
+            </div> -->
+
+            <div class="row">
+
+                <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                    <ng-container *ngIf="isGoogleAutoComplete">
+                        <mat-form-field appearance="outline" floatLabel="always" class="example-full-width">
+                            <mat-label>Google Stop Address (Society/Colony/Area/Nearby Location)</mat-label>
+                            <input matInput ngx-google-places-autocomplete [options]="options" #placesRef="ngx-places"
+                                (onAddressChange)="handleAddressChange($event)" formControlName="reservationStopAddress"
+                                required (input)="onGoogleStopAddressTyping()"/>
+                            <!-- <mat-error *ngIf="advanceTableForm.get('reservationStopAddress').hasError('required')">
+                                Address String is required
+                            </mat-error> -->
+                            <mat-error  *ngIf="advanceTableForm.get('reservationStopAddress')?.touched &&
+                                                       advanceTableForm.get('reservationStopAddress')?.hasError('invalidreservationStopAddress')">
+                                            Please select an address from suggestions
+                                        </mat-error>
+                        </mat-form-field>
+                    </ng-container>
+                    <ng-container *ngIf="!isGoogleAutoComplete">
+                        <mat-form-field appearance="outline" floatLabel="always" class="example-full-width">
+                            <!-- <mat-label>Stop Address (Society/Colony/Area/Nearby Location)</mat-label> -->
+                            <mat-label>Stop Location</mat-label>
+                            <input required type="text" matInput formControlName="reservationStopAddress"
+                                [matAutocomplete]="auto20">
+                            <mat-autocomplete #auto20="matAutocomplete" (optionSelected)="onGASelected($event.option.value)">
+                                <mat-option *ngFor="let option of filteredGoogleAddressOptions | async"
+                                    [value]="option.geoSearchString" (click)="OnGeoLocationClick(option)">
+                                    {{option.geoSearchString}}
+                                </mat-option>
+                            </mat-autocomplete>
+                            <mat-error *ngIf="advanceTableForm.controls['reservationStopAddress'].hasError('reservationStopAddressInvalid')">
+                                Please Select Valid Stop Location
+                            </mat-error>
+                            <!-- <mat-error *ngIf="advanceTableForm.get('reservationStopAddress').hasError('required')">
+                                Please Select Stop Address
+                            </mat-error> -->
+                        </mat-form-field>
+                    </ng-container>
+
+                    <!-- <a style="cursor: pointer;color: #007bff;float: left;font-size: 10px !important; font-style: italic;">
+                        Saved Addresses</a> -->
+                    <div style="float: right;margin-top: -10px;">
+                        <a
+                            style="cursor: pointer;color: #007bff;float: right;font-size: 10px !important; font-style: italic;">
+                            <table>
+                                <tr>
+                                    <td>Google Addresses</td>
+                                    <td><mat-checkbox color="primary" (change)="googleCheckBox($event)"></mat-checkbox>
+                                    </td>
+                                </tr>
+                            </table>
+
+                        </a>
+                    </div>
+
+                </div>
+                <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                    <mat-form-field appearance="outline" floatLabel="always" class="example-full-width">
+                        <!-- <mat-label>Stop Address Details i.e Street/Flat No./Flight No./Train No.</mat-label> -->
+                        <mat-label>Address</mat-label>
+                        <input required matInput formControlName="reservationStopAddressDetails">
+                        <mat-error *ngIf="advanceTableForm.get('reservationStopAddressDetails').hasError('required')">
+                            Please Stop Address Details
+                        </mat-error>
+
+                    </mat-form-field>
+                </div>
+            </div>
+
+            <!-- <div class="row">
+                <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                    <mat-form-field appearance="outline" floatLabel="always" class="example-full-width">
+                        <mat-label>Stop Spot Type</mat-label>
+                        <input type="text" matInput formControlName="reservationStopSpotType"
+                            [matAutocomplete]="auto8" (keyup)="reservationStopSpotTypeKeyUp($event)">
+                        <mat-autocomplete #auto8="matAutocomplete" (optionSelected)="onStopSpotTypeSelected($event.option.value)">
+                            <mat-option *ngFor="let option of filteredPSTOptions | async" [value]="option.geoPointType"
+                                (click)="getPSTID(option.geoPointTypeID)">
+                                {{option.geoPointType}}
+                            </mat-option>
+                        </mat-autocomplete>
+                        <mat-error *ngIf="advanceTableForm.get('reservationStopSpotType').hasError('required')">
+                            Stop Spot Type is required
+                    </mat-form-field>
+                </div>
+
+                <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                    <mat-form-field appearance="outline" floatLabel="always" class="example-full-width">
+                        <mat-label>Stop Spot</mat-label>
+                        <input type="text" matInput formControlName="reservationStopSpot"
+                            [matAutocomplete]="auto9">
+                        <mat-autocomplete #auto9="matAutocomplete" (optionSelected)="onStopSpotSelected($event.option.value)">
+                            <mat-option *ngFor="let option of filteredPSOptions | async" [value]="option.geoPointName"
+                                (click)="getPSpotID(option.geoPointID)">
+                                {{option.geoPointName}}
+                            </mat-option>
+                        </mat-autocomplete>
+                        <mat-error *ngIf="advanceTableForm.get('reservationStopSpot').hasError('required')">
+                            Stop Spot is required
+                    </mat-form-field>
+                </div>
+            </div> -->
+
+            <div class="row">
+                <!-- <span style="color: red;">{{status}}</span> -->
+                <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12 mb-2">
+                    <div class="example-button-row">
+                        <button mat-raised-button style="background-color: #bcb4db" [type]="submit" *ngIf="saveDisabled"
+                            [disabled]="!advanceTableForm.valid || buttonDisabled" (click)="confirmAdd()">Save</button>
+                            <mat-spinner *ngIf="!saveDisabled" diameter="30"></mat-spinner>
+                        <button mat-raised-button style="background-color: #f29f99" (click)="onNoClick()" tabindex="-1">Cancel</button>
+                    </div>
+                </div>
+            </div>
+
+        </form>
+    </div>
+</div>

@@ -1,0 +1,14 @@
+tbody, thead {
+  border: 1px solid #000;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+td, th {
+  border: 1px solid #000; 
+  padding: 8px;
+}
+
+td:first-of-type {
+  border-right: none; 
+}

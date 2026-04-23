@@ -1,0 +1,274 @@
+<section class="content">
+    <div class="container-fluid">
+        <div class="block-header">
+            <div class="row">
+                <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+                    <ul>
+                        <li class="breadcrumb-item bcrumb-1">
+                            <a routerLink="/dashboard/main">
+                                <i class="fas fa-home"></i> Home</a>|
+                            <a href="#" onClick="return false;">Admin</a>|
+                            <a href="#" onClick="return false;">Customer Discount</a>
+                        </li>
+                    </ul>
+                    <div style="text-align: center;">
+                        <h2>Customer Discount For <b>{{customer_Name}}</b></h2>
+                        <h6>Contract Applicable <b>{{start_Date | date:'dd-MM-yyyy'}}</b> - <b>{{end_Date | date:'dd-MM-yyyy'}}</b></h6>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                <div class="card">
+                    <div class="body">
+                        <div class="responsive_table">
+                            <div class="materialTableHeader">
+                                <div class="row">
+                                <div class="modal fade" id="exampleModalCenter" tabindex="-1" role="dialog">
+                                    <div class="modal-dialog modal-dialog-centered">
+                                        <div class="modal-content">
+                                            <div class="modal-header">
+                                                <h5 class="modal-title" id="exampleModalLongTitle">Customer Discount
+                                                </h5>
+                                                <button type="button" class="close" data-dismiss="modal"
+                                                    aria-label="Close">
+                                                    <span aria-hidden="true">&times;</span>
+                                                </button>
+                                            </div>
+                                            <div class="modal-body">
+                                                <mat-form-field class="example-full-width" appearance="outline"  floatLabel="always">
+                                                    <mat-label>Discount Start Date</mat-label>
+                                                    <input matInput [matDatepicker]="fromDate"
+                                                    [(ngModel)]="SearchStartDate">
+                                                    <mat-datepicker-toggle matSuffix [for]="fromDate"></mat-datepicker-toggle>
+                                                    <mat-datepicker #fromDate></mat-datepicker>
+                                                </mat-form-field>
+
+                                                <mat-form-field class="example-full-width" appearance="outline"  floatLabel="always">
+                                                    <mat-label>Discount End Date</mat-label>
+                                                    <input matInput [matDatepicker]="toDate"
+                                                    [(ngModel)]="SearchEndDate">
+                                                    <mat-datepicker-toggle matSuffix [for]="toDate"></mat-datepicker-toggle>
+                                                    <mat-datepicker #toDate></mat-datepicker>
+                                                </mat-form-field>
+
+                                                <mat-form-field class="example-full-width mb-3"
+                                                    appearance="outline" floatLabel="always">
+                                                    <mat-label>Activation Status</mat-label>
+                                                    <mat-select [(value)]="SearchActivationStatus">
+                                                        <mat-option [value]=true>Active</mat-option>
+                                                        <mat-option [value]=false>Deleted</mat-option>
+                                                    </mat-select>
+                                                </mat-form-field>
+
+
+                                            </div>
+                                            <div class="modal-footer">
+                                                <button mat-raised-button color="primary" (click)="SearchData()"
+                                                    data-dismiss="modal">Search</button>
+
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <!-- <div style="width: 70%; float:left;padding-top: 15px;padding-left: 22px;">
+                                    <div *ngIf="SearchStartDate" style="float:left;"><b>Discount Start Date</b> : {{SearchStartDate}},</div>
+                                    <div *ngIf="SearchEndDate" style="float:left;"><b>Discount End Date</b> : {{SearchEndDate}}</div>
+                                </div> -->
+                                <div style="width: 70%; float:left;padding-top: 6px;padding-left: 12px;">
+                                    <div class="col-lg-6">
+                                        <div class="form-group">
+                                            <div class="input-group">
+                                                <!-- Dropdown for selecting Type, Parent, City -->
+                                                <div class="input-group-append input-group-addon">
+                                                    <select style="height: 40px; width: 170px;" class="form-control" [(ngModel)]="selectedFilter">
+                                                        <option value="search" hidden>Search By</option>                                                          
+                                                        <option value="startDate">Discount Start Date</option>                                                                                                            
+                                                        <option value="endDate">Discount End Date</option>                                                           
+                                                    </select>
+                                                </div>
+                                    
+                                                <!-- Input field for filtering -->
+                                                <input type="text" style="height: 40px; width: 300px;padding-left: 5px;" class="form-control" placeholder="Filter" id="inputGroup"
+                                                    (keyup)="onBackPress($event)" (input)="loadData()" [(ngModel)]="searchTerm" />
+                                    
+                                                <!-- Search button -->
+                                                <div class="input-group-append input-group-addon">
+                                                    <span class="input-group-text" style="cursor: pointer; height: 40px; width: 40px; text-align: center;" (click)="loadData()">
+                                                        <i class="fas fa-search"></i>
+                                                    </span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                </div>
+                                
+                                <div style="width: 30%; text-align:right;">
+                                    <button mat-raised-button color="primary"
+                                        data-dismiss="modal" data-toggle="modal" data-backdrop="false"
+                                        data-target="#exampleModalCenter">
+                                        Search
+                                    </button>
+                                    &nbsp;
+                                    <button mat-mini-fab color="primary" (click)="addNew()">
+                                        <mat-icon class="col-white">add</mat-icon>
+                                    </button>
+                                    &nbsp;
+                                    <button mat-mini-fab color="primary" (click)="refresh()">
+                                        <mat-icon class="col-white">refresh</mat-icon>
+                                    </button>
+                                    &nbsp;
+                                </div>
+                                </div>
+                            </div>
+
+                            <!-- <label>
+                                <input type="checkbox" [(ngModel)]="isChecked">
+                                Check me!
+                            </label> -->
+                            <!-- <p>Checkbox is {{ isChecked ? 'checked' : 'unchecked' }}</p> -->
+                            <p *ngIf="!dataSource; then thenBlock2 else elseBlock2">
+                                This is not rendered
+                            </p>
+
+                            <ng-template #thenBlock2>
+                                <div class="alert alert-primary" style="background-color:#E8E8E8; text-align: center;">
+                                    No Records Found</div>
+                                <div class="body">
+                                    <div class="example-button-row">
+
+                                        <button mat-raised-button color="primary"
+                                            (click)="PreviousCall()">Previous</button>
+                                        <button mat-raised-button color="primary" (click)="NextCall()">Next</button>
+
+                                    </div>
+                                </div>
+
+                            </ng-template>
+
+                            <ng-template #elseBlock2  >
+                                <div class="scrollable-table-container">
+
+                                <mat-table #table [dataSource]="dataSource" matSort class="mat-cell floating-header-table" (matSortChange)="SortingData($event)">
+
+                                    <ng-container matColumnDef="id">
+                                        <mat-header-cell *matHeaderCellDef mat-sort-header>Id</mat-header-cell>
+                                        <mat-cell *matCellDef="let row">{{row.customerDiscountID}}</mat-cell>
+                                    </ng-container>
+
+                                    <ng-container matColumnDef="discountPercentageStartDate">
+                                        <mat-header-cell *matHeaderCellDef mat-sort-header>Start Date</mat-header-cell>
+                                        <mat-cell *matCellDef="let row" (contextmenu)="onContextMenu($event, row)">
+                                            {{row.discountPercentageStartDate | date:'dd-MM-yyyy'}}</mat-cell>
+                                    </ng-container>
+
+                                    <ng-container matColumnDef="discountPercentageEndDate">
+                                        <mat-header-cell *matHeaderCellDef mat-sort-header>End Date</mat-header-cell>
+                                        <mat-cell *matCellDef="let row" (contextmenu)="onContextMenu($event, row)">
+                                            {{row.discountPercentageEndDate | date:'dd-MM-yyyy'}}</mat-cell>
+                                    </ng-container>
+
+                                    <ng-container matColumnDef="DiscountPercentage">
+                                        <mat-header-cell *matHeaderCellDef mat-sort-header><span matTooltip="Discount Percentage" matTooltipPosition="above">Percentage</span></mat-header-cell>
+                                        <mat-cell *matCellDef="let row" (contextmenu)="onContextMenu($event, row)">
+                                            {{row.discountPercentage}}</mat-cell>
+                                    </ng-container>
+
+                                    <ng-container matColumnDef="IsAllowedOnPackageRate">
+                                        <mat-header-cell *matHeaderCellDef mat-sort-header><span matTooltip="Is Allowed On Package Rate" matTooltipPosition="above">Package Rate</span></mat-header-cell>
+                                        <mat-cell *matCellDef="let row" (contextmenu)="onContextMenu($event, row)">
+                                            {{row.isAllowedOnPackageRate === true ? 'Yes' : 'No'}}</mat-cell>
+                                    </ng-container>
+
+                                    <ng-container matColumnDef="IsAllowedOnExtras">
+                                        <mat-header-cell *matHeaderCellDef mat-sort-header><span matTooltip="Is Allowed On Extras" matTooltipPosition="above">Extras</span></mat-header-cell>
+                                        <mat-cell *matCellDef="let row" (contextmenu)="onContextMenu($event, row)">
+                                            {{row.isAllowedOnExtras === true ? 'Yes' : 'No'}}</mat-cell>
+                                    </ng-container>
+                                    
+                                    <ng-container matColumnDef="status">
+                                        <mat-header-cell *matHeaderCellDef>Status</mat-header-cell>
+                                        <mat-cell *matCellDef="let row">
+                                            {{row.activationStatus===true ? 'Active' : 'Deleted'}}</mat-cell>
+                                    </ng-container>
+                                    <!-- actions -->
+                                    <ng-container matColumnDef="actions">
+                                        <mat-header-cell *matHeaderCellDef class="pr-0"
+                                            [ngClass]="'tbl-col-width-per-9'">Actions</mat-header-cell>
+                                        <mat-cell *matCellDef="let row; let i=index;" class="pr-0"
+                                            [ngClass]="'tbl-col-width-per-9'">
+                                            
+                                            <button mat-raised-button color="primary"
+                                                (contextmenu)="onContextMenu($event, row)"
+                                                (click)="onContextMenu($event, row)">
+                                                Actions
+                                            </button>
+                                        </mat-cell>
+                                    </ng-container>
+                                   
+                                    <mat-header-row *matHeaderRowDef="displayedColumns"></mat-header-row>
+                                    <mat-row *matRowDef="let row; columns: displayedColumns;" [style.cursor]="'pointer'"
+                                        matRipple>
+                                    </mat-row>
+                                </mat-table>
+                                </div>
+                                <!-- Loading spinner -->
+                                <!-- <div *ngIf="exampleDatabase.isTblLoading" class="tbl-spinner">
+                                <mat-progress-spinner color="primary" [diameter]="40" mode="indeterminate">
+                                </mat-progress-spinner>
+                            </div> -->
+
+                                <!-- context menu start -->
+                                <div style="visibility: hidden; position: fixed" [style.left]="contextMenuPosition.x"
+                                    [style.top]="contextMenuPosition.y" [matMenuTriggerFor]="contextMenu">
+                                </div>
+                                <mat-menu #contextMenu="matMenu">
+                                    <ng-template matMenuContent let-item="item">
+                                        <!-- <button mat-menu-item (click)="addNew()">
+                    <mat-icon>add_box</mat-icon>
+                    <span>Add</span>
+                  </button> -->
+                                        <button mat-menu-item (click)="editCall(item)">
+                                            <mat-icon>create</mat-icon>
+                                            <span>Edit</span>
+                                        </button>
+                                        <button  *ngIf="shouldShowDeleteButton(item)"mat-menu-item (click)="deleteItem(item)">
+                                            <mat-icon>delete</mat-icon>
+                                            <span>Delete</span>
+                                        </button>
+                                        <!-- <button mat-menu-item (click)="refresh()">
+                    <mat-icon>refresh</mat-icon>
+                    <span>Refresh</span>
+                  </button> -->
+
+
+                                    </ng-template>
+                                </mat-menu>
+
+                                <!-- context menu end -->
+
+                                <!-- <div *ngIf="!exampleDatabase.isTblLoading" class="no-results" [style.display]="dataSource.renderedData.length == 0 ? '' : 'none'">
+                                No results
+                            </div> -->
+
+                                <div class="body">
+                                    <div class="example-button-row">
+
+                                        <button mat-raised-button color="primary"
+                                            (click)="PreviousCall()">Previous</button>
+                                        <button mat-raised-button color="primary" (click)="NextCall()">Next</button>
+
+                                    </div>
+                                </div>
+
+                            </ng-template>
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>

@@ -1,0 +1,118 @@
+// This component uses shared styles from the main application
+// All table styles are inherited from the global styles
+
+// Progress bar styling
+.progress-container {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  min-width: 120px;
+
+  mat-progress-bar {
+    flex: 1;
+    height: 8px;
+    border-radius: 4px;
+  }
+
+  .progress-text {
+    font-size: 12px;
+    font-weight: 500;
+    min-width: 35px;
+    text-align: right;
+    color: var(--text-color);
+  }
+}
+
+// Sticky header styling
+.overflow-auto {
+  position: relative;
+}
+
+table.advance-table {
+  width: 100%;
+
+  thead {
+    tr {
+      height: 56px;
+    }
+
+    th {
+      background-color: var(--bs-card-bg);
+      z-index: 100;
+      position: sticky;
+      top: 0;
+      font-weight: 600;
+      color: var(--bs-body-color);
+      border-bottom: 2px solid rgba(0, 0, 0, 0.05);
+
+      &::after {
+        content: '';
+        position: absolute;
+        left: 0;
+        bottom: 0;
+        width: 100%;
+        border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+      }
+    }
+  }
+}
+
+// Skeleton Loading Animation
+.skeleton-loader {
+  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+  background-size: 200% 100%;
+  animation: loading 1.5s infinite;
+  height: 20px;
+  border-radius: 4px;
+  width: 80%;
+}
+
+@keyframes loading {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
+
+// Dark mode adjustments for skeleton
+[data-theme='dark'] {
+  .skeleton-loader {
+    background: linear-gradient(90deg, #2c2c2c 25%, #3a3a3a 50%, #2c2c2c 75%);
+    background-size: 200% 100%;
+  }
+}
+
+// Enhanced empty state
+.no-results-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 40px;
+  text-align: center;
+
+  .no-results-icon {
+    font-size: 64px;
+    height: 64px;
+    width: 64px;
+    color: #ccc;
+    margin-bottom: 16px;
+    opacity: 0.5;
+  }
+
+  .no-results-text {
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--bs-body-color);
+    margin-bottom: 8px;
+  }
+
+  .no-results-subtext {
+    font-size: 14px;
+    color: #999;
+    max-width: 400px;
+  }
+}

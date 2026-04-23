@@ -1,0 +1,25 @@
+// Dialog scroll + surface rules now live globally in src/styles.scss under
+// the "Global dialog scrolling fix for Angular Material 21 (MDC)" block so
+// every popup in the app benefits without needing ::ng-deep per component.
+//
+// Header layout (.modalHeader / .editRowModal / .modal-about) intentionally
+// inherits from the shared styles in assets/scss/ui/_modals.scss so the
+// customer form matches every other form-dialog in the app (Supplier,
+// Employee, Driver, etc.). The previous component-local rules here added a
+// gray background + extra padding + border, which also hit the NESTED
+// `.modalHeader` inside the template and pushed the close button out of line.
+
+.register-form
+  .row
+    margin-bottom: 8px
+
+  .col-xl-6,
+  .col-lg-6,
+  .col-md-12,
+  .col-sm-12
+    padding: 0 8px
+
+
+
+
+

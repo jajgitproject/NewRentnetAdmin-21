@@ -1,0 +1,29 @@
+// Scoped polish for the "Add People" dialog so its form content reads as
+// a balanced, centered card rather than hugging the left edge.
+.addContainer
+  display: flex
+  flex-direction: column
+
+  .modalHeader
+    display: flex
+    align-items: center
+    justify-content: space-between
+
+  .register-form
+    max-width: 560px
+    width: 100%
+    margin: 0 auto
+
+    mat-radio-group
+      display: flex
+      flex-wrap: wrap
+      gap: 12px
+      justify-content: center
+
+    .example-button-row
+      display: flex
+      justify-content: center
+      padding-top: 4px
+
+      button
+        min-width: 120px

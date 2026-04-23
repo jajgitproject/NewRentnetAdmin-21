@@ -1,0 +1,363 @@
+.activity-feed-card {
+  border-radius: 12px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  height: 100%;
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+  }
+}
+
+.activity-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 20px 0;
+
+  .activity-title {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 17px;
+    font-weight: 500;
+    margin: 0;
+
+    .title-icon {
+      color: #3f51b5;
+      font-size: 20px;
+      width: 20px;
+      height: 20px;
+    }
+  }
+
+  .view-all-btn {
+    font-size: 12px;
+    font-weight: 500;
+    height: 32px;
+    min-width: auto;
+    padding: 0 12px;
+  }
+}
+
+.activity-content {
+  padding: 16px 20px 20px;
+  overflow-y: auto;
+  overflow-x: hidden;
+
+  &::-webkit-scrollbar {
+    width: 6px;
+  }
+
+  &::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 3px;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background: #c1c1c1;
+    border-radius: 3px;
+  }
+
+  &::-webkit-scrollbar-thumb:hover {
+    background: #a8a8a8;
+  }
+}
+
+.activity-list {
+  position: relative;
+}
+
+.activity-item {
+  display: flex;
+  gap: 12px;
+  padding: 12px 5px;
+  cursor: pointer;
+  border-radius: 8px;
+  transition: background-color 0.2s ease;
+  position: relative;
+
+  &:hover {
+    background-color: rgba(63, 81, 181, 0.04);
+  }
+
+  &:last-child {
+    padding-bottom: 0;
+  }
+}
+
+.activity-icon-container {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  z-index: 1;
+
+  .activity-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    border: 2px solid #fff;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+
+    mat-icon {
+      font-size: 18px;
+      width: 18px;
+      height: 18px;
+      color: #fff;
+    }
+
+    &.activity-user {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    }
+
+    &.activity-system {
+      background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+    }
+
+    &.activity-security {
+      background: linear-gradient(135deg, #ffad3e 0%, #e77752 100%);
+    }
+
+    &.activity-project {
+      background: linear-gradient(135deg, #a8abed 0%, #138dfe 100%);
+    }
+
+    &.activity-notification {
+      background: linear-gradient(135deg, #96deda 0%, #50c9c3 100%);
+    }
+  }
+
+  .activity-line {
+    width: 2px;
+    height: 100%;
+    background: linear-gradient(to bottom, #e9ecef 0%, transparent 100%);
+    position: absolute;
+    top: 36px;
+    left: 50%;
+    transform: translateX(-50%);
+  }
+}
+
+.activity-details {
+  flex: 1;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.activity-main {
+  flex: 1;
+  min-width: 0;
+}
+
+.activity-title-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 8px;
+  margin-bottom: 4px;
+}
+
+.activity-item-title {
+  font-size: 14px;
+  font-weight: 600;
+  margin: 0;
+  line-height: 1.3;
+  flex: 1;
+  min-width: 0;
+  word-wrap: break-word;
+}
+
+.activity-time {
+  font-size: 11px;
+  color: #6c757d;
+  white-space: nowrap;
+  font-weight: 500;
+}
+
+.activity-description {
+  font-size: 13px;
+  color: #6c757d;
+  margin: 0 0 8px 0;
+  line-height: 1.4;
+  word-wrap: break-word;
+}
+
+.activity-metadata {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.activity-user {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 12px;
+
+  .user-icon {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+  }
+
+  .activity-user-name {
+    font-weight: 500;
+  }
+}
+
+.activity-tags {
+  display: flex;
+  gap: 4px;
+  flex-wrap: wrap;
+}
+
+.metadata-tag {
+  display: inline-block;
+  background: #e9ecef;
+  color: #495057;
+  font-size: 10px;
+  font-weight: 500;
+  padding: 2px 6px;
+  border-radius: 10px;
+  line-height: 1;
+}
+
+.activity-priority {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  margin-top: 6px;
+  flex-shrink: 0;
+
+  &.priority-low {
+    background-color: #28a745;
+  }
+
+  &.priority-medium {
+    background-color: #ffc107;
+  }
+
+  &.priority-high {
+    background-color: #dc3545;
+  }
+}
+
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 20px;
+  text-align: center;
+
+  .empty-icon {
+    font-size: 48px;
+    width: 48px;
+    height: 48px;
+    color: #dee2e6;
+    margin-bottom: 12px;
+  }
+
+  .empty-message {
+    font-size: 14px;
+    color: #6c757d;
+    margin: 0;
+  }
+}
+
+// Responsive design
+@media (max-width: 768px) {
+  .activity-header {
+    padding: 12px 16px 0;
+
+    .activity-title {
+      font-size: 16px;
+    }
+  }
+
+  .activity-content {
+    padding: 12px 16px 16px;
+  }
+
+  .activity-item {
+    gap: 10px;
+    padding: 10px 0;
+  }
+
+  .activity-icon-container .activity-icon {
+    width: 32px;
+    height: 32px;
+
+    mat-icon {
+      font-size: 16px;
+      width: 16px;
+      height: 16px;
+    }
+  }
+
+  .activity-item-title {
+    font-size: 13px;
+  }
+
+  .activity-description {
+    font-size: 12px;
+  }
+
+  .activity-time {
+    font-size: 10px;
+  }
+}
+
+// Dark mode support
+@media (prefers-color-scheme: dark) {
+  .activity-feed-card {
+    background-color: #2d3748;
+    color: #e2e8f0;
+
+    .activity-title {
+      color: #e2e8f0;
+    }
+
+    .activity-item:hover {
+      background-color: rgba(113, 128, 150, 0.1);
+    }
+
+    .activity-item-title {
+      color: #e2e8f0;
+    }
+
+    .activity-description {
+      color: #a0aec0;
+    }
+
+    .activity-time {
+      color: #718096;
+    }
+
+    .metadata-tag {
+      background: #4a5568;
+      color: #e2e8f0;
+    }
+
+    .empty-icon {
+      color: #4a5568;
+    }
+
+    .empty-message {
+      color: #a0aec0;
+    }
+  }
+}
+::ng-deep .dark {
+  .metadata-tag {
+    background-color: rgba(0, 0, 0, 0.5) !important;
+  }
+}

@@ -1,0 +1,167 @@
+<!--Pickup Details -->
+<ng-container *ngFor="let pickupItem of pickUpData">
+    <div class="row" style="margin-left: 20px;margin-top: 20px;">
+      <b>Pickup Details </b>
+      <!-- <a style="cursor: pointer;color: #007bff;" (click)="openPickupDropEnroute(pickupItem)">Edit</a> -->
+      <!-- <a style="cursor: pointer;color: #007bff;" (click)="deleteItem(i)">Delete</a> -->
+    </div>
+    <div class="row" style="margin-left: 20px;margin-top: 20px;">
+      <div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 mb-2">
+        <span>
+          <b> PickupDate & Time </b>
+        </span>
+        <br />
+        <span>{{pickupItem.reservationStopDate | date}} {{pickupItem.reservationStopTime | date:'shortTime'}}</span>
+      </div>
+
+      <!-- <div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 mb-2">
+        <span>
+          <b> Pickup Spot </b>
+        </span>
+        <br />
+        <span>{{pickupItem.geoPointName}} ({{pickupItem.reservationStopSpotType !== ''? pickupItem.reservationStopSpotType : 'N/A'}})</span>
+      </div> -->
+
+      <div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 mb-2">
+        <span>
+          <b> Address Details </b>
+        </span>
+        <br />
+        <span>{{pickupItem.reservationStopAddressDetails}} - {{pickupItem.reservationStopAddress}}</span>
+      </div>
+
+      <div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 mb-2">
+        <span>
+          <b> Stop Order Priority </b>
+        </span>
+        <br />
+        <span>{{pickupItem.reservationStopOrderPriority}}</span>
+      </div>
+    </div>
+    <!-- <div class="row" style="margin-left: 20px;margin-top: 20px;"> -->
+      <!-- <div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 mb-2"><span><b>
+      Pickup Address
+      </b></span><br/><span>Varanasi Cantt</span></div> -->
+      <!-- <div class="col-xl-12 col-lg-6 col-md-12 col-sm-12 mb-2">
+        <span>
+          <b> Address Details </b>
+        </span>
+        <br />
+        <span>{{pickupItem.reservationStopAddressDetails}} - {{pickupItem.reservationStopAddress}}</span>
+      </div> -->
+      <!-- <div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 mb-2"><span><b>
+      Location Out Time
+      </b></span><br/><span>3:45 pm</span></div><div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 mb-2"><span><b>
+      Service Location
+      </b></span><br/><span>Varanasi</span></div> -->
+    <!-- </div> -->
+  </ng-container>
+
+  <!--Enroute Details -->
+  <ng-container *ngFor="let enRouteItem of enRouteData;index as i">
+    <div class="row" style="margin-left: 20px;margin-top: 20px;">
+      <b>  Enroute Details  - </b>  
+      <a style="cursor: pointer;color: #007bff;" (click)="openPickupDropEnroute(enRouteItem)">Edit</a> <b>-</b>
+      <a style="cursor: pointer;color: #007bff;" (click)="deleteItem(i)">Delete</a>
+    </div>
+    <div class="row" style="margin-left: 20px;margin-top: 20px;">
+      <div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 mb-2">
+        <span>
+          <b> Drop Off Date </b>
+        </span>
+        <br />
+        <span>{{enRouteItem.reservationStopDate | date}} {{enRouteItem.reservationStopTime | date:'shortTime'}}</span>
+      </div>
+      <!-- <div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 mb-2">
+        <span>
+          <b> Drop Off Spot </b>
+        </span>
+        <br />
+        <span>{{enRouteItem.geoPointName}} ({{enRouteItem.reservationStopSpotType !== ''? enRouteItem.reservationStopSpotType : 'N/A'}})</span>
+      </div>       -->
+
+      <div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 mb-2">
+        <span>
+          <b> Address Details </b>
+        </span>
+        <br />
+        <span>{{enRouteItem.reservationStopAddressDetails}} - {{enRouteItem.reservationStopAddress}}</span>
+      </div>
+
+      <div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 mb-2">
+        <span>
+          <b> Stop Order Priority </b>
+        </span>
+        <br />
+        <span>{{enRouteItem.reservationStopOrderPriority}}</span>
+      </div>
+    </div>
+    <!-- <div class="row" style="margin-left: 20px;margin-top: 20px;margin-bottom: 20px;"> -->
+      <!-- <div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 mb-2"><span><b>
+      Drop Off Address
+      </b></span><br/><span>Bus Stop,Varanasi</span></div> -->
+      <!-- <div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 mb-2">
+        <span>
+          <b> Address Details </b>
+        </span>
+        <br />
+        <span>{{enRouteItem.reservationStopAddressDetails}} - {{enRouteItem.reservationStopAddress}}</span>
+      </div> -->
+    <!-- </div> -->
+  </ng-container>
+
+  <!--Drop Off Details -->
+  <ng-container *ngFor="let dropOffItem of dropOffData">
+     <div class="row" style="margin-left: 20px;margin-top: 20px;">
+      <b>
+        Drop Off Details - 
+      </b>
+      <a style="cursor: pointer;color: #007bff;" (click)="openPickupDropEnroute(dropOffItem)">Edit</a> 
+      <!-- <a style="cursor: pointer;color: #007bff;" (click)="deleteItem(i)">Delete</a> -->
+    </div> 
+    <div class="row" style="margin-left: 20px;margin-top: 20px;">
+      <div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 mb-2">
+        <span>
+          <b> Drop Off Date </b>
+        </span>
+        <br />
+        <span>{{dropOffItem.reservationStopDate | date }} {{dropOffItem.reservationStopTime | date:'shortTime'}}</span>
+      </div>
+
+      <!-- <div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 mb-2">
+        <span>
+          <b> Drop Off Spot </b>
+        </span>
+        <br />
+        <span>{{dropOffItem.geoPointName }} ({{dropOffItem.reservationStopSpotType !== ''? dropOffItem.reservationStopSpotType : 'N/A'}})</span>
+      </div> -->
+
+      <div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 mb-2">
+        <span>
+          <b>Address Details</b>
+        </span>
+        <br />
+        <span>{{dropOffItem.reservationStopAddressDetails }} - ({{dropOffItem.reservationStopAddress !== ''? dropOffItem.reservationStopAddress : 'NA'}})</span>
+      </div>
+
+      <div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 mb-2">
+        <span>
+          <b> Stop Order Priority </b>
+        </span>
+        <br />
+        <span>{{dropOffItem.reservationStopOrderPriority}}</span>
+      </div>
+    </div>
+    <!-- <div class="row" style="margin-left: 20px;margin-top: 20px;margin-bottom: 20px;"> -->
+      <!-- <div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 mb-2"><span><b>
+      Drop Off Address
+      </b></span><br/><span>Bus Stop,Varanasi</span></div> -->
+      <!-- <div class="col-xl-12 col-lg-6 col-md-12 col-sm-12 mb-2">
+        <span>
+          <b>Address Details</b>
+        </span>
+        <br />
+        <span>{{dropOffItem.reservationStopAddressDetails }} - ({{dropOffItem.reservationStopAddress !== ''? dropOffItem.reservationStopAddress : 'NA'}})</span>
+      </div> -->
+    <!-- </div> -->
+  </ng-container>

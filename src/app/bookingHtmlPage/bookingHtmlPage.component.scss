@@ -1,0 +1,298 @@
+/* ⭐ TOP HEADER — MATCH FIRST IMAGE LAYOUT */
+.dashboard-header {
+  background: #2f2f2f;
+  width: 100%;
+  padding: 18px 0;
+  display: flex;
+  justify-content: center;
+  border-bottom: 1px solid #222;
+}
+
+.dashboard-header .header-content {
+  position: relative;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  //min-height: 110px;
+}
+
+.dashboard-header .eco-logo {
+  position: absolute;
+  left: 24px;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+.dashboard-header .eco-logo .logo-img {
+  height: 76px;
+  width: auto;
+  display: block;
+}
+
+.dashboard-header .header-title {
+  color: #ffffff;
+  font-size: 34px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  text-align: center;
+  margin: 0 auto;
+}
+
+/* ⭐ Tabs Navigation */
+.tab-navigation {
+  margin: 0;
+  background: #e8e8e8;
+  padding: 15px 0;
+  text-align: center;
+}
+
+.tab-navigation .nav-tabs {
+  list-style: none;
+  max-width: 1150px;
+  margin: 0 auto;
+  padding: 0;
+  background: transparent;
+  text-align: center;
+  justify-content: center;
+  display: flex;
+}
+
+.tab-navigation .nav-tabs li {
+  display: inline-block;
+  margin: 0 30px;
+  position: relative;
+}
+
+.tab-navigation .nav-tabs li a {
+  color: #888;
+  text-decoration: none;
+  font-weight: 500;
+  font-size: 12px;
+  letter-spacing: 0.5px;
+  padding: 0;
+}
+
+.tab-navigation .nav-tabs li.active a {
+  color: #e53935;
+  font-weight: 600;
+}
+
+.tab-navigation .nav-tabs li.active a:after {
+  content: '';
+  display: block;
+  height: 2px;
+  width: 100%;
+  background: #e53935;
+  margin: 6px 0 0 0;
+}
+
+/* ⭐ Search Bar & Action Bar */
+.search-action-bar {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  max-width: 1150px;
+  margin: 20px auto;
+  padding: 0 20px;
+  gap: 20px;
+}
+
+.search-box {
+  display: flex;
+  align-items: center;
+  flex: 0 1 500px;
+  gap: 0;
+}
+
+.search-dropdown .btn-search-by {
+  border: 1px solid #ccc;
+  background: #fff;
+  padding: 8px 12px;
+  border-radius: 2px 0 0 2px;
+  font-size: 12px;
+  cursor: pointer;
+  font-weight: 500;
+  color: #555;
+}
+
+.search-input {
+  border: 1px solid #ccc;
+  border-left: none;
+  padding: 8px 12px;
+  flex: 1;
+  height: 36px;
+  font-size: 12px;
+  outline: none;
+}
+
+.search-input::placeholder {
+  color: #bbb;
+}
+
+.btn-search {
+  padding: 8px 10px;
+  border: 1px solid #ccc;
+  border-left: none;
+  background: #fff;
+  height: 36px;
+  cursor: pointer;
+  border-radius: 0 2px 2px 0;
+  color: #666;
+}
+
+.action-buttons {
+  margin-left: 0;
+  display: flex;
+  gap: 10px;
+}
+
+.btn-download {
+  padding: 8px 16px;
+  background: #2f2f2f;
+  color: #fff;
+  border: 0;
+  border-radius: 2px;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 11px;
+}
+
+.btn-filter {
+  padding: 8px 16px;
+  background: #e53935;
+  color: #fff;
+  border: 0;
+  border-radius: 2px;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 11px;
+}
+
+/* ⭐ Table Container & Styling */
+.table-container {
+  margin: 20px auto;
+  max-width: 100%;
+  padding: 0 20px;
+  overflow-x: auto;
+  background: #fff;
+}
+
+.booking-table {
+  width: 100%;
+  border-collapse: collapse;
+  background: #fff;
+}
+
+.booking-table thead {
+  background: #f8f8f8;
+  border-bottom: 1px solid #ddd;
+}
+
+.booking-table thead th {
+  padding: 14px 12px;
+  text-align: left;
+  color: #555;
+  font-weight: 600;
+  font-size: 13px;
+  letter-spacing: 0px;
+  border: none;
+  white-space: nowrap;
+}
+
+.booking-table tbody tr {
+  border-bottom: 1px solid #f0f0f0;
+  background: #fff;
+}
+
+.booking-table tbody tr:hover {
+  background: #fafafa;
+}
+
+.booking-table tbody td {
+  padding: 14px 12px;
+  color: #666;
+  font-size: 13px;
+  vertical-align: middle;
+  text-align: left;
+  border: none;
+}
+
+/* ⭐ Badges Styling */
+.badge {
+  display: inline-block;
+  padding: 4px 8px;
+  border-radius: 2px;
+  border: none;
+  font-weight: 500;
+  font-size: 11px;
+  background: transparent;
+}
+
+.badge-pending {
+  //color: #f57c00;
+  color: #2f2f2f;
+}
+
+.badge-complete {
+  color: #2f2f2f;
+  //color: #388e3c;
+}
+
+/* Responsive Design */
+@media (max-width: 1200px) {
+  .search-action-bar,
+  .tab-navigation .nav-tabs,
+  .table-container {
+    padding: 0 20px;
+  }
+
+  .dashboard-header .header-title {
+    font-size: 22px;
+  }
+}
+
+@media (max-width: 768px) {
+  .dashboard-header .header-content {
+    flex-direction: column;
+    gap: 15px;
+  }
+
+  .search-action-bar {
+    flex-direction: column;
+    align-items: stretch;
+    padding: 0 20px;
+  }
+
+  .action-buttons {
+    margin-left: 0;
+    margin-top: 12px;
+  }
+
+  .tab-navigation .nav-tabs li {
+    margin: 0 15px;
+  }
+
+  .dashboard-header .header-title {
+    font-size: 18px;
+  }
+}
+
+/* Additional Styles for Print */
+@media print {
+  * {
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  @page {
+    size: A4;
+    margin: 10mm;
+  }
+
+  .booking-table {
+    page-break-inside: avoid;
+  }
+}
+
