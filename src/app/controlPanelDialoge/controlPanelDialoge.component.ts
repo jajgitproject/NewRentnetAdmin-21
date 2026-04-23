@@ -1,6 +1,6 @@
 // @ts-nocheck
 import { MAT_DIALOG_DATA, MatDialog, MatDialogRef } from '@angular/material/dialog';
-import { ChangeDetectorRef, Component, EventEmitter, Inject, Input, NgZone, Output, ViewEncapsulation } from '@angular/core';
+import { Component, EventEmitter, Inject, Input, Output, ViewEncapsulation } from '@angular/core';
 import { MAT_DATE_LOCALE } from '@angular/material/core';
 import { GeneralService } from '../general/general.service';
 import { ControlPanelData, ControlPanelHeaderData, ControlPanelHeaderDetails, Filters, PassengerModel } from '../controlPanelDesign/controlPanelDesign.model';
@@ -185,8 +185,6 @@ export class ControlPanelDialogeComponent {
   verifyDutyStatusAndCacellationStatus: any;
 
   ReservationStatus:any;
-  private alignmentDebugLogged = false;
-  private alignmentDebugViewCheckedLogged = false;
 
   constructor(
     public dialogRef: MatDialogRef<ControlPanelDialogeComponent>,
@@ -217,9 +215,7 @@ export class ControlPanelDialogeComponent {
     public passToSupplierService: PassToSupplierService,
     public dutyPostPickUPCallService: DutyPostPickUPCallService,
     public clossingOneService: ClossingOneService,
-    public controlPanelDialogeService:ControlPanelDialogeService,
-    private ngZone: NgZone,
-    private cdr: ChangeDetectorRef
+    public controlPanelDialogeService:ControlPanelDialogeService
   ) {
     // Set the defaults
     this.dialogTitle = 'Reservation Details';
@@ -238,75 +234,16 @@ export class ControlPanelDialogeComponent {
 
   }
 
-  ngAfterViewChecked(): void {
-    if (this.alignmentDebugViewCheckedLogged) {
-      return;
-    }
-    const locationRow = document.querySelector('.location-details-row');
-    if (!locationRow) {
-      return;
-    }
-    this.alignmentDebugViewCheckedLogged = true;
-    this.logLocationDetailsAlignment('pre-fix-viewchecked');
-  }
-
   public loadData(reservationID: any, index: number) {
     this._controlPanelDesignService.getReservationDetails(reservationID).subscribe(
       (data: ControlPanelData) => {
         this.reservationInfo = data?.reservationDetails;
         this.ReservationStatus = this.reservationInfo[0].reservationStatus;
-        this.ngZone.run(() => {
-          this.cdr.detectChanges();
-          this.logLocationDetailsAlignment('pre-fix');
-        });
       },
       (error: HttpErrorResponse) => {
         this.reservationInfo = null;
       }
     );
-  }
-
-  private logLocationDetailsAlignment(runId: string): void {
-    if (this.alignmentDebugLogged && runId === 'pre-fix') {
-      return;
-    }
-    if (runId === 'pre-fix') {
-      this.alignmentDebugLogged = true;
-    }
-    const locationButton = document.querySelector('.location-details-row .BoldButton') as HTMLElement | null;
-    const locationButtonLabel = document.querySelector('.location-details-row .BoldButton .mdc-button__label') as HTMLElement | null;
-    const locationDots = document.querySelector('.location-details-dots[matMenuTriggerFor]') as HTMLElement | null;
-    const reservationLabel = document.querySelector('.reservation-group-container .cp-menu-label-text') as HTMLElement | null;
-    const reservationDots = document.querySelector('.reservation-group-container .cp-menu-trigger') as HTMLElement | null;
-    const locationButtonRect = locationButton?.getBoundingClientRect();
-    const locationButtonLabelRect = locationButtonLabel?.getBoundingClientRect();
-    const locationDotsRect = locationDots?.getBoundingClientRect();
-    const reservationLabelRect = reservationLabel?.getBoundingClientRect();
-    const reservationDotsRect = reservationDots?.getBoundingClientRect();
-
-    // #region agent log
-    fetch('http://127.0.0.1:7532/ingest/f2c32722-bd0e-4386-883a-e749a4372080',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'d80453'},body:JSON.stringify({sessionId:'d80453',runId,hypothesisId:'H5',location:'controlPanelDialoge.component.ts:logLocationDetailsAlignment',message:'Instrumentation invocation heartbeat',data:{dialogTitle:this.dialogTitle,reservationId:this.reservationID,rowVisible:!!locationButton,triggerVisible:!!locationDots},timestamp:Date.now()})}).catch(()=>{});
-    // #endregion
-
-    // #region agent log
-    fetch('http://127.0.0.1:7532/ingest/f2c32722-bd0e-4386-883a-e749a4372080',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'d80453'},body:JSON.stringify({sessionId:'d80453',runId,hypothesisId:'H1',location:'controlPanelDialoge.component.ts:loadData',message:'Location Details and dots DOM presence',data:{locationButtonFound:!!locationButton,locationDotsFound:!!locationDots,reservationLabelFound:!!reservationLabel,reservationDotsFound:!!reservationDots},timestamp:Date.now()})}).catch(()=>{});
-    // #endregion
-
-    // #region agent log
-    fetch('http://127.0.0.1:7532/ingest/f2c32722-bd0e-4386-883a-e749a4372080',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'d80453'},body:JSON.stringify({sessionId:'d80453',runId,hypothesisId:'H2',location:'controlPanelDialoge.component.ts:loadData',message:'Location Details button box and computed style',data:{top:locationButtonRect?.top ?? null,bottom:locationButtonRect?.bottom ?? null,height:locationButtonRect?.height ?? null,lineHeight:locationButton ? getComputedStyle(locationButton).lineHeight : null,transform:locationButton ? getComputedStyle(locationButton).transform : null,paddingTop:locationButton ? getComputedStyle(locationButton).paddingTop : null,paddingBottom:locationButton ? getComputedStyle(locationButton).paddingBottom : null,alignSelf:locationButton ? getComputedStyle(locationButton).alignSelf : null},timestamp:Date.now()})}).catch(()=>{});
-    // #endregion
-
-    // #region agent log
-    fetch('http://127.0.0.1:7532/ingest/f2c32722-bd0e-4386-883a-e749a4372080',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'d80453'},body:JSON.stringify({sessionId:'d80453',runId,hypothesisId:'H3',location:'controlPanelDialoge.component.ts:loadData',message:'Location dots box and computed style',data:{top:locationDotsRect?.top ?? null,bottom:locationDotsRect?.bottom ?? null,height:locationDotsRect?.height ?? null,lineHeight:locationDots ? getComputedStyle(locationDots).lineHeight : null,transform:locationDots ? getComputedStyle(locationDots).transform : null,marginLeft:locationDots ? getComputedStyle(locationDots).marginLeft : null,display:locationDots ? getComputedStyle(locationDots).display : null,color:locationDots ? getComputedStyle(locationDots).color : null},timestamp:Date.now()})}).catch(()=>{});
-    // #endregion
-
-    // #region agent log
-    fetch('http://127.0.0.1:7532/ingest/f2c32722-bd0e-4386-883a-e749a4372080',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'d80453'},body:JSON.stringify({sessionId:'d80453',runId,hypothesisId:'H4',location:'controlPanelDialoge.component.ts:loadData',message:'Baseline delta between Location Details row and Reservation Group row',data:{locationTextVsDotsDeltaTop:(locationButtonRect && locationDotsRect) ? Number((locationButtonRect.top - locationDotsRect.top).toFixed(2)) : null,reservationTextVsDotsDeltaTop:(reservationLabelRect && reservationDotsRect) ? Number((reservationLabelRect.top - reservationDotsRect.top).toFixed(2)) : null,locationTextVsReservationTextDeltaTop:(locationButtonRect && reservationLabelRect) ? Number((locationButtonRect.top - reservationLabelRect.top).toFixed(2)) : null},timestamp:Date.now()})}).catch(()=>{});
-    // #endregion
-
-    // #region agent log
-    fetch('http://127.0.0.1:7532/ingest/f2c32722-bd0e-4386-883a-e749a4372080',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'d80453'},body:JSON.stringify({sessionId:'d80453',runId,hypothesisId:'H6',location:'controlPanelDialoge.component.ts:loadData',message:'MDC button label metrics inside Location Details',data:{labelFound:!!locationButtonLabel,labelTop:locationButtonLabelRect?.top ?? null,labelBottom:locationButtonLabelRect?.bottom ?? null,labelHeight:locationButtonLabelRect?.height ?? null,labelLineHeight:locationButtonLabel ? getComputedStyle(locationButtonLabel).lineHeight : null,labelTransform:locationButtonLabel ? getComputedStyle(locationButtonLabel).transform : null,labelDisplay:locationButtonLabel ? getComputedStyle(locationButtonLabel).display : null},timestamp:Date.now()})}).catch(()=>{});
-    // #endregion
   }
   SpecialInstructionInfo(item) {
     this.dialog.open(SpecialInstructionInfoComponent, {
@@ -831,7 +768,6 @@ export class ControlPanelDialogeComponent {
           verifyDutyStatusAndCacellationStatus:this.verifyDutyStatusAndCacellationStatus
         }
       });
-      this.logPopupCenterMetrics(dialogRef, 'ReachedManual', 'H6');
       dialogRef.afterClosed().subscribe(res => {
         if (res) {
           item.reportingToGuestDate = res?.reportingToGuestDate; // Update with the received data
@@ -1274,14 +1210,20 @@ export class ControlPanelDialogeComponent {
       let baseUrl = this._generalService.FormURL;
       if (item.allotmentStatus === 'Alloted') 
       {
+        const dutySlipType = (item?.dutySlipType || '').toString().trim();
         let url = '';
-        if (item.dutySlipType === 'GeneralDutySlipWithMap') 
+        if (dutySlipType === 'GeneralDutySlipWithMap') 
         {
           url = this.route.serializeUrl(this.route.createUrlTree(['/printdutyslip'], 
             { queryParams: { dutySlipID: item.dutySlipID,reservationID: item.reservationID } }));
         }
-        else if (item.dutySlipType === 'GeneralDutySlipWithoutMap') 
+        else if (dutySlipType === 'GeneralDutySlipWithoutMap') 
         {
+          url = this.route.serializeUrl(this.route.createUrlTree(['/PrintDutySlipWithoutMap'], 
+            { queryParams: {  dutySlipID: item.dutySlipID,reservationID: item.reservationID } }));
+        }
+        else {
+          // Fallback: backend sometimes sends null dutySlipType; default to without-map format.
           url = this.route.serializeUrl(this.route.createUrlTree(['/PrintDutySlipWithoutMap'], 
             { queryParams: {  dutySlipID: item.dutySlipID,reservationID: item.reservationID } }));
         }
@@ -1320,7 +1262,6 @@ export class ControlPanelDialogeComponent {
           verifyDutyStatusAndCacellationStatus:this.verifyDutyStatusAndCacellationStatus
         }
       });
-      this.logPopupCenterMetrics(dialogRef, 'GarageInManual', 'H7');
       dialogRef.afterClosed().subscribe(res => {
         if (res) {
           item.locationInDate = res?.locationInDate;
@@ -1508,7 +1449,6 @@ export class ControlPanelDialogeComponent {
           verifyDutyStatusAndCacellationStatus:this.verifyDutyStatusAndCacellationStatus
         }
       });
-      this.logPopupCenterMetrics(dialogRef, 'GarageOutManual', 'H8');
       dialogRef.afterClosed().subscribe(res => {
         if (res) {
           item.locationOutDate = res?.locationOutDate;
@@ -1651,7 +1591,6 @@ export class ControlPanelDialogeComponent {
           verifyDutyStatusAndCacellationStatus:this.verifyDutyStatusAndCacellationStatus
         }
       });
-      this.logPopupCenterMetrics(dialogRef, 'PickupManual', 'H9');
 
       dialogRef.afterClosed().subscribe(res => {
         if (res) {
@@ -1757,7 +1696,6 @@ export class ControlPanelDialogeComponent {
             verifyDutyStatusAndCacellationStatus:this.verifyDutyStatusAndCacellationStatus
           }
         });
-      this.logPopupCenterMetrics(dialogRef, 'DropOffManual', 'H10');
       dialogRef.afterClosed().subscribe(res => {
         if (res) {
           item.garageOutDate = res?.dropOffDate;

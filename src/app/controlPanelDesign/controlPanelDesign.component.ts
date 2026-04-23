@@ -2737,6 +2737,9 @@ openDropOffByExectiveGPS(item: any)
    PrintDS(item: any) {
     if(item.allotmentStatus === 'Alloted')
     {
+      // #region agent log
+      fetch('http://127.0.0.1:7278/ingest/38c94268-8542-449e-a503-35f5e1042ec5',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'cd6e32'},body:JSON.stringify({sessionId:'cd6e32',runId:'pre-fix-dutyslip',hypothesisId:'DS3',location:'controlPanelDesign.component.ts:2740',message:'Design PrintDS dialog open attempt',data:{dutySlipType:item?.dutySlipType||null,allotmentStatus:item?.allotmentStatus||null,dutySlipID:item?.dutySlipID||null,reservationID:item?.reservationID||null},timestamp:Date.now()})}).catch(()=>{});
+      // #endregion
       this.dialog.open(PrintDutySlipComponent, {
       width: '800px',
       data: {
