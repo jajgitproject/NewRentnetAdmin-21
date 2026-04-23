@@ -663,34 +663,23 @@ public loadDataforAdditionalKMHR() {
 }
 
   //---------- Start Duty SAC ----------
-  openDutySAC() 
+  openDutySAC(source: 'anchor' | 'view' | 'unknown' = 'unknown') 
   {
-    if (!this.advanceTableSAC) 
+    // #region agent log
+    fetch('http://127.0.0.1:7532/ingest/f2c32722-bd0e-4386-883a-e749a4372080',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'b9234c'},body:JSON.stringify({sessionId:'b9234c',runId:'pre-fix',hypothesisId:'H8',location:'NewRententAdmin-ng21/clossingOne.component.ts:openDutySAC:start',message:'Duty SAC open invoked',data:{source,isArray:Array.isArray(this.advanceTableSAC),length:Array.isArray(this.advanceTableSAC)?this.advanceTableSAC.length:null},timestamp:Date.now()})}).catch(()=>{});
+    // #endregion
+    const dialogRef = this.dialog.open(DutySACFormDialogComponent,
       {
-      const dialogRef = this.dialog.open(DutySACFormDialogComponent,
+        data:
         {
-          data:
-          {
-            dutySlipID: this.DutySlipID,
-            record: this.advanceTableSAC,
-            verifyDutyStatusAndCacellationStatus:this.verifyDutyStatusAndCacellationStatus
-          }
-        });
-      dialogRef.afterClosed().subscribe((res: any) => {
-        this.DutySACLoadData();
-      });
-    }
-    else {
-      Swal.fire({
-        title:
-          'Already added.',
-        icon: 'warning',
-      }).then((result) => {
-        if (result.value) {
-
+          dutySlipID: this.DutySlipID,
+          record: this.advanceTableSAC,
+          verifyDutyStatusAndCacellationStatus:this.verifyDutyStatusAndCacellationStatus
         }
       });
-    }
+    dialogRef.afterClosed().subscribe((res: any) => {
+      this.DutySACLoadData();
+    });
   }
 
   //======= Duty SAC =======//

@@ -104,7 +104,7 @@
 
             <div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 mb-2">
               <h5>
-                <a (click)="openDutySAC()" style="cursor: pointer;color: #007bff;">Duty SAC</a>
+                <a href="javascript:void(0);" (click)="$event.preventDefault(); openDutySAC('anchor')" style="cursor: pointer;color: #007bff;">Duty SAC</a>
                 <a href="javascript:void(0);" (click)="showAndScrollDutySAC()">&nbsp;- <b>View</b></a>
               </h5>
             </div>
@@ -410,7 +410,7 @@
 
     <!-- Duty SAC -->
     <div *ngIf="showSAC" id="dutySAC">
-      <app-dutySAC [advanceTableSAC]="advanceTableSAC" [AllotmentID]="AllotmentID" [verifyDutyStatusAndCacellationStatus]="verifyDutyStatusAndCacellationStatus"></app-dutySAC>
+      <app-dutySAC [advanceTableSAC]="advanceTableSAC" [dutySlipID]="DutySlipID" [AllotmentID]="AllotmentID" [verifyDutyStatusAndCacellationStatus]="verifyDutyStatusAndCacellationStatus"></app-dutySAC>
     </div>
   
     <!-- Additional KM & HRs -->

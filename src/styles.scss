@@ -969,3 +969,72 @@ textarea.form-control:focus {
   background-color: transparent !important;
 }
 
+/* Invoice table fix: Bootstrap .table adds padding/borders to td globally.
+   The invoice components use class="table" on their <table> but rely on
+   their own td classes for borders. This neutralizes Bootstrap interference. */
+.invoice-container .table {
+  border-collapse: collapse !important;
+  height: 100% !important;
+}
+.invoice-container .table-div {
+  display: flex !important;
+  flex-direction: column !important;
+}
+.invoice-container .table td,
+.invoice-container .table th {
+  padding: 3px 0 !important;
+  vertical-align: middle !important;
+  border-top: none !important;
+  border-bottom: none !important;
+  border-left: none !important;
+}
+.invoice-container .table .table-firstrow-firstcolumn,
+.invoice-container .table .table-midrow-firstcolumn {
+  border-right: 2px solid black !important;
+  line-height: 22px !important;
+}
+.invoice-container .table .table-firstrow-secondcolumn,
+.invoice-container .table .table-midrow-secondcolumn {
+  border-right: 2px solid black !important;
+  line-height: 22px !important;
+}
+.invoice-container .table .table-firstrow-thirdcolumn,
+.invoice-container .table .table-midrow-thirdcolumn {
+  border-right: none !important;
+  line-height: 22px !important;
+}
+/* Last row: stretches to fill remaining space so vertical dividers reach Sub Total */
+.invoice-container .table .table-last-tr {
+  height: 100% !important;
+  vertical-align: top !important;
+}
+.invoice-container .table .table-lastrow-firstcolumn {
+  border-right: 2px solid black !important;
+  border-bottom: 2px solid black !important;
+}
+.invoice-container .table .table-lastrow-secondcolumn {
+  border-right: 2px solid black !important;
+  border-bottom: 2px solid black !important;
+}
+.invoice-container .table .table-lastrow-thirdcolumn {
+  border-right: none !important;
+  border-bottom: 2px solid black !important;
+}
+/* Header row horizontal lines */
+.invoice-container .table tr.table-first-tr:first-child td {
+  border-top: 2px solid black !important;
+  border-bottom: 2px solid black !important;
+}
+/* Close gap between table bottom and Sub Total box */
+.invoice-container .table-div {
+  margin-bottom: 0 !important;
+  padding-bottom: 0 !important;
+}
+.invoice-container .table {
+  margin-bottom: 0 !important;
+}
+.invoice-container .gst-section {
+  margin-top: -2px !important;
+  border-top: 2px solid black !important;
+}
+

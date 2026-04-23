@@ -32,8 +32,6 @@ import { MatExpansionModule } from '@angular/material/expansion';
 
 @NgModule({
   declarations: [
-
-    advanceTableForm,
     DeleteDialogComponent
   ],
   imports: [
@@ -61,6 +59,7 @@ import { MatExpansionModule } from '@angular/material/expansion';
     MatMenuModule,
     MatProgressSpinnerModule,
     MyUploadModule,
+    advanceTableForm,
     MatAutocompleteModule,
     MatExpansionModule
   ],

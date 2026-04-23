@@ -1,6 +1,7 @@
 // @ts-nocheck
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { Component, Inject } from '@angular/core';
+import { CommonModule } from '@angular/common';
 import { DutySACService } from '../../dutySAC.service';
 import { FormControl, Validators, FormGroup, FormBuilder,ValidationErrors,AbstractControl,ValidatorFn} from '@angular/forms';
 import { DutySACModel } from '../../dutySAC.model';
@@ -12,12 +13,37 @@ import { map, startWith } from 'rxjs/operators';
 import { DutySACCDropDown } from '../../dutySACDropDownModel';
 import { EmployeeDropDown } from 'src/app/employee/employeeDropDown.model';
 import { MatSnackBar } from '@angular/material/snack-bar';
+import { ReactiveFormsModule, FormsModule } from '@angular/forms';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatInputModule } from '@angular/material/input';
+import { MatSelectModule } from '@angular/material/select';
+import { MatButtonModule } from '@angular/material/button';
+import { MatIconModule } from '@angular/material/icon';
+import { MatDialogModule } from '@angular/material/dialog';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { OwlDateTimeModule, OwlNativeDateTimeModule } from '@danielmoncada/angular-datetime-picker';
+import { MatAutocompleteModule } from '@angular/material/autocomplete';
 
 @Component({
-  standalone: false,
+  standalone: true,
   selector: 'app-form-dialog',
   templateUrl: './form-dialog.component.html',
   styleUrls: ['./form-dialog.component.sass'],
+  imports: [
+    CommonModule,
+    FormsModule,
+    ReactiveFormsModule,
+    MatFormFieldModule,
+    MatInputModule,
+    MatSelectModule,
+    MatButtonModule,
+    MatIconModule,
+    MatDialogModule,
+    MatProgressSpinnerModule,
+    MatAutocompleteModule,
+    OwlDateTimeModule,
+    OwlNativeDateTimeModule
+  ],
   providers: [{ provide: MAT_DATE_LOCALE, useValue: 'en-GB' }]
 })
 
