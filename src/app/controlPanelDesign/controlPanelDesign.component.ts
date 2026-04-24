@@ -208,6 +208,8 @@ export class ControlPanelDesignComponent implements OnInit {
   data: any;
   role: string;
   canCreateReservation: boolean = false;
+  Math = Math;
+  calculatedLocationOutDateTime: Date;
 
   eventsSubject: Subject<boolean> = new Subject<boolean>();
   advanceTableRD: ReservationDetails | null;
@@ -713,6 +715,12 @@ export class ControlPanelDesignComponent implements OnInit {
           {
             this.reservationHeaderInfo = data.reservationHeaderDetails;
             this.totalData = data.totalRecords;
+             this.reservationHeaderInfo.forEach(row => {
+            
+            this.setCalculatedLocationOutTime(row);
+            this.getIntervalInTime(row);
+        
+          });
 
             if (rowIndex !== undefined)
             {
@@ -3239,13 +3247,15 @@ openDropOffByExectiveGPS(item: any)
   const delay = item.lifeCycleStatus?.carAndDriverAllotedDelayInMinutes || 0;
   const isAlloted = item.lifeCycleStatus?.carAndDriverAlloted === 'Yes';
   const type = item.allotmentType;
+  const displayType = type?.toLowerCase() === 'Soft' ? 'Soft' : type;
+  console.log(delay,displayType,isAlloted);
 
   if (isAlloted && delay > 0) {
-    return { label: `Alloted (${type})`, color: 'red' };
+    return { label: `Alloted (${displayType})`, color: 'red' };
   }
 
   if (isAlloted && delay === 0) {
-    return { label: `Alloted (${type})`, color: 'green' };
+    return { label: `Alloted (${displayType})`, color: 'green' };
   }
 
   if (allotmentStatus === 'lateNotDone') {
@@ -3253,10 +3263,18 @@ openDropOffByExectiveGPS(item: any)
   }
 
   if (allotmentStatus === 'notDone') {
-    return { label: 'Pending', color: 'black' };
+    if(displayType === null)
+    {
+     return { label: 'Pending', color: 'black' };
+    }
+    else
+  {
+     return { label:  `Alloted (${displayType})`, color: 'black' };
+
+    }
   }
 
- return { label: 'Pending', color: 'green' }; // if late but still within threshold
+ return { label: `Alloted (${displayType})`, color: 'green' };; // if late but still within threshold
 }
 
 
@@ -3825,9 +3843,54 @@ this.InitPackageType();
    
 
 }
+getIntervalInTime(data: any) {
+  const customerID = data?.customerID;
 
+  if (customerID) {
+    this.dispatchByExecutiveService
+      .GetLocationOutIntervalInMinutes(customerID)
+      .subscribe(res => {
+        const interval = res.locationOutIntervalInMinutes;
+        this.setCalculatedLocationOutTime(data, interval);
+      });
+  } else {
+    // 👇 fallback for Not Dispatch / missing data
+    this.setCalculatedLocationOutTime(data);
+  }
+}
 
+setCalculatedLocationOutTime(data: any, interval?: number) {
 
+  if (!data?.pickupDate || !data?.pickupTime) {
+    data.calculatedLocationOutDateTime = null;
+    return;
+  }
+
+  const pickupDate = new Date(data.pickupDate);
+  const eventTime = new Date(data.pickupTime);
+
+  // 👇 invalid date check
+  if (isNaN(eventTime.getTime())) {
+    data.calculatedLocationOutDateTime = null;
+    return;
+  }
+
+  const combinedDateTime = new Date(
+    pickupDate.getFullYear(),
+    pickupDate.getMonth(),
+    pickupDate.getDate(),
+    eventTime.getHours(),
+    eventTime.getMinutes()
+  );
+
+  const minutesToSubtract = interval && interval > 0 ? interval : 90;
+
+  combinedDateTime.setMinutes(combinedDateTime.getMinutes() - minutesToSubtract);
+
+  data.calculatedLocationOutDateTime = combinedDateTime;
+
+  //console.log('Calculated Location Out Time:', combinedDateTime);
+}
 } 
 
 

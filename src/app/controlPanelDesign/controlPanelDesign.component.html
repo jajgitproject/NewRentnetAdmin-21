@@ -31,7 +31,7 @@
             <div class="col-xl-2 col-lg-2 col-md-2 col-sm-12 mb-2">
               <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
                 <mat-label>Booking Number</mat-label>
-                <input matInput formControlName="reservationID"  (blur)="trimBookingNo()"/>
+                <input matInput formControlName="reservationID" (blur)="trimBookingNo()" />
               </mat-form-field>
             </div>
             <div class="col-xl-2 col-lg-2 col-md-2 col-sm-12 mb-2">
@@ -339,8 +339,8 @@
                 <mat-label>Location</mat-label>
                 <input type="text" matInput formControlName="locationName" [matAutocomplete]="auto1">
                 <mat-autocomplete #auto1="matAutocomplete">
-                  <mat-option *ngFor="let option of filteredOrganizationalEntityOptions | async" 
-                    [value]="option.organizationalEntityName" >
+                  <mat-option *ngFor="let option of filteredOrganizationalEntityOptions | async"
+                    [value]="option.organizationalEntityName">
                     {{option.organizationalEntityName}}
                   </mat-option>
                 </mat-autocomplete>
@@ -352,8 +352,8 @@
                 <mat-label>Transfer Location</mat-label>
                 <input type="text" matInput formControlName="transferLocationName" [matAutocomplete]="auto0">
                 <mat-autocomplete #auto0="matAutocomplete">
-                  <mat-option *ngFor="let option of filteredTransferLocationOptions | async" 
-                    [value]="option.organizationalEntityName" >
+                  <mat-option *ngFor="let option of filteredTransferLocationOptions | async"
+                    [value]="option.organizationalEntityName">
                     {{option.organizationalEntityName}}
                   </mat-option>
                 </mat-autocomplete>
@@ -376,7 +376,7 @@
             <div class="col-xl-2 col-lg-2 col-md-2 col-sm-12 mb-2">
               <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
                 <mat-label>Reservation Source Detail</mat-label>
-                <input matInput formControlName="reservationSourceDetail"  (blur)="trimBookingNo()"/>
+                <input matInput formControlName="reservationSourceDetail" (blur)="trimBookingNo()" />
               </mat-form-field>
             </div>
           </div>
@@ -909,14 +909,16 @@
             <div class="responsive_table">
               <div class="materialTableHeader control-panel-main-header">
                 <div class="row">
-                  <div class="col-12 d-flex align-items-center justify-content-between control-panel-toolbar control-panel-header-col" style="flex-wrap: nowrap;">
+                  <div
+                    class="col-12 d-flex align-items-center justify-content-between control-panel-toolbar control-panel-header-col"
+                    style="flex-wrap: nowrap;">
                     <!-- Left Section -->
                     <div class="d-flex align-items-center" style="flex: 1 1 auto; min-width: 0;">
                       <div class="d-flex align-items-center booking-category-wrap">
                         <span class="booking-category-static-label">Booking Category ({{totalData}})</span>
-                        <mat-form-field class="example-full-width mr-4 booking-category-field" appearance="outline" floatLabel="always" style="max-width: 240px;margin-left: 5px;">
-                          <mat-select [(ngModel)]="bookingCategory"
-                            (selectionChange)="onRadioChange()">
+                        <mat-form-field class="example-full-width mr-4 booking-category-field" appearance="outline"
+                          floatLabel="always" style="max-width: 240px;margin-left: 5px;">
+                          <mat-select [(ngModel)]="bookingCategory" (selectionChange)="onRadioChange()">
                             <mat-option value="complete">Complete</mat-option>
                             <mat-option value="incomplete">Incomplete</mat-option>
                             <mat-option value="all">Total Booking</mat-option>
@@ -932,12 +934,15 @@
                     </div>
 
                     <!-- Right Section -->
-                    <div class="d-flex align-items-center justify-content-end control-panel-actions" style="flex: 0 0 auto; white-space: nowrap;">
-                      <button type="button" class="btn btn-primary control-panel-action-btn" (click)="bookingCountDetailsInfo()">
+                    <div class="d-flex align-items-center justify-content-end control-panel-actions"
+                      style="flex: 0 0 auto; white-space: nowrap;">
+                      <button type="button" class="btn btn-primary control-panel-action-btn"
+                        (click)="bookingCountDetailsInfo()">
                         OverView
                       </button>
                       <ng-container *ngIf="canCreateReservation">
-                        <button mat-raised-button class="btn btn-primary control-panel-action-btn" (click)="navigateToBooking()">
+                        <button mat-raised-button class="btn btn-primary control-panel-action-btn"
+                          (click)="navigateToBooking()">
                           Add Booking
                         </button>
                       </ng-container>
@@ -948,18 +953,18 @@
                   </div>
                 </div>
               </div>
-             
+
 
               <div class="materialTableHeader" *ngIf="showEmptyTableHeader" style="display:contents;">
                 <div class="row">
                   <div
                     style="float:left;padding-top: 15px;padding-left: 22px;padding-bottom: 10px;font-size: 12px;background-color:#EBEBEE;width:100%">
                     <div style="float:left" *ngIf="filterForm.value.fromDate"><b>From Date</b> :
-                      {{filterForm.value.fromDate  | date:'dd/MM/yyyy'}}; &nbsp;</div>
+                      {{filterForm.value.fromDate | date:'dd/MM/yyyy'}}; &nbsp;</div>
                     <div style="float:left" *ngIf="filterForm.value.fromTime"><b>From Time</b> :
                       {{filterForm.value.fromTime | date:'shortTime'}}; &nbsp;</div>
                     <div style="float:left" *ngIf="filterForm.value.toDate"><b>To Date</b> :
-                      {{filterForm.value.toDate  | date:'dd/MM/yyyy'}}; &nbsp;</div>
+                      {{filterForm.value.toDate | date:'dd/MM/yyyy'}}; &nbsp;</div>
                     <div style="float:left" *ngIf="filterForm.value.toTime"><b>To Time</b> : {{filterForm.value.toTime |
                       date:'shortTime'}}; &nbsp;</div>
                     <div style="float:left" *ngIf="filterForm.value.reservationStatus"><b>Reservation Status</b> :
@@ -1211,8 +1216,7 @@
                   float: left;cursor: pointer;" (click)="sortByColumnName('tripTo')"
                     [ngClass]="{'active-sort': sortColumn === 'tripTo'}">
                     <b>Trip To</b>
-                    <i class="fas"
-                      [ngClass]="{'fa-arrow-up': sortColumn === 'tripTo' && sortDirection === 'asc',
+                    <i class="fas" [ngClass]="{'fa-arrow-up': sortColumn === 'tripTo' && sortDirection === 'asc',
                                             'fa-arrow-down': sortColumn === 'tripTo' && sortDirection === 'desc'}"></i>
                   </span>
 
@@ -1449,13 +1453,16 @@
                                   width:55px;
                                   float: left;
                                 ">
-                            <img *ngIf="data.newCustomer == true" src="assets/images/newCustomerImage.png" alt="" width="20" height="20"  matTooltip="New Customer"/>
+                            <img *ngIf="data.newCustomer == true" src="assets/images/newCustomerImage.png" alt=""
+                              width="20" height="20" matTooltip="New Customer" />
                             &nbsp;
-                            <i class="fas fa-crown" style="color: #edc877; font-size: medium" *ngIf="data.importance == 'VIP'"  matTooltip="VIP"></i>
+                            <i class="fas fa-crown" style="color: #edc877; font-size: medium"
+                              *ngIf="data.importance == 'VIP'" matTooltip="VIP"></i>
                             &nbsp;
-                            <i class="fas fa-female" style="color: #d69fa6; font-size: large" *ngIf="data.gender == 'Female'"  matTooltip="Female"></i>
+                            <i class="fas fa-female" style="color: #d69fa6; font-size: large"
+                              *ngIf="data.gender == 'Female'" matTooltip="Female"></i>
                             <br>
-                              <span *ngIf="data.internalNoteModel !== null" matTooltip="Internal Note"> IN </span>
+                            <span *ngIf="data.internalNoteModel !== null" matTooltip="Internal Note"> IN </span>
                           </span>
                           <br />
                           <span style="
@@ -1522,7 +1529,9 @@
                               {{ getAllotmentDisplay(data).label }}
 
                               <span *ngIf="data.lifeCycleStatus?.carAndDriverAllotedDelayInMinutes !== 0">
-                                Delay {{ data.lifeCycleStatus.carAndDriverAllotedDelayInMinutes }} Min
+                                Delay
+                                {{Math.floor(data.lifeCycleStatus.carAndDriverAllotedDelayInMinutes / 60)}} hr
+                                {{data.lifeCycleStatus.carAndDriverAllotedDelayInMinutes % 60}} Min
                               </span>
                             </span>
 
@@ -1581,6 +1590,15 @@
                           width: 100px;
                           float: left;
                         ">
+                            <ng-container *ngIf="data.calculatedLocationOutDateTime; else noData">
+                              {{ data.calculatedLocationOutDateTime | date : 'dd-MMM-yy' }}
+                              {{ data.calculatedLocationOutDateTime | date : 'H:mm' }}
+                            </ng-container>
+
+                            <ng-template #noData>
+                              N/A
+                            </ng-template>
+                            <br />
                             {{ data.locationOutDate | date : 'dd-MMM-yy' }}
                             {{ data.locationOutTime | date : 'H:mm' }}
                           </span>
@@ -2950,14 +2968,10 @@
                     <!-- 123 Ends -->
                   </mat-accordion>
                 </div>
-              </div>  
+              </div>
               <mat-progress-bar mode="indeterminate" *ngIf="isLoading"></mat-progress-bar>
-              <mat-paginator 
-                #paginator 
-                [length]="totalData || reservationHeaderInfo?.length" 
-                [pageSize]="recordsPerPage"
-                (page)="onChangedPage($event)" 
-                showFirstLastButtons>
+              <mat-paginator #paginator [length]="totalData || reservationHeaderInfo?.length"
+                [pageSize]="recordsPerPage" (page)="onChangedPage($event)" showFirstLastButtons>
               </mat-paginator>
 
             </div>
