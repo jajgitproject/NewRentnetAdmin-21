@@ -109,20 +109,27 @@ constructor(
 
   public loadData() 
   {
+  this.isLoading = true;
      this.passengerHistoryService.getTableData(this.PassengerID, this.pickupCityID,this.PageNumber
        ).subscribe
    (
      (data:PassengerData) =>   
      {
-        this.passengerHistoryRecords = data.passengerHistoryModel;
-        this.totalData =data.totalRecords
+        this.passengerHistoryRecords = Array.isArray(data?.passengerHistoryModel)
+          ? data.passengerHistoryModel
+          : [];
+        this.totalData = Number(data?.totalRecords || 0);
+        this.isLoading = false;
      },
-     (error: HttpErrorResponse) => { this.passengerHistoryRecords = null;}
+    (error: HttpErrorResponse) => {
+      this.passengerHistoryRecords = [];
+      this.totalData = 0;
+      this.isLoading = false;
+    }
    );
  }
  
  onChangedPage(pageData: PageEvent) {
-  this.isLoading = true;
   this.PageNumber = pageData.pageIndex + 1;
 this.loadData();
 }

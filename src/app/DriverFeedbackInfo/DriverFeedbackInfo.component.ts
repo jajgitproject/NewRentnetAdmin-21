@@ -153,6 +153,7 @@ getFeedBackData(driverID:any){
 
 public loadData() 
 {
+  this.isLoading = true;
   if(this.DriverID===undefined)
   {
     this.DriverID=0;
@@ -166,9 +167,13 @@ public loadData()
      this.dataSource = data.driverDutyData;
      this.totalData =data.totalRecords
     }
+    this.isLoading = false;
 
    },
-   (error: HttpErrorResponse) => { this.dataSource = null;}
+   (error: HttpErrorResponse) => {
+    this.dataSource = null;
+    this.isLoading = false;
+   }
  );
 }
 onChangedPage(pageData: PageEvent) {

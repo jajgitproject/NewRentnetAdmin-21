@@ -8,14 +8,14 @@
         </div>
       </div>
     </div>
-    <button mat-icon-button (click)="dialogRef.close()" aria-label="Close dialog">
-      <mat-icon class="small-close-icon">close</mat-icon>
+    <button mat-icon-button class="passenger-history-close-btn" (click)="dialogRef.close()" aria-label="Close dialog">
+      <span class="small-close-icon" aria-hidden="true">&times;</span>
     </button>
   </div>
-  <div *ngIf="!passengerHistoryRecords" class="alert alert-primary" style="background-color:#E8E8E8; text-align: center;width: 100%;margin-top: 10px;">
+  <div *ngIf="!isLoading && (!passengerHistoryRecords || passengerHistoryRecords.length === 0)" class="alert alert-primary" style="background-color:#E8E8E8; text-align: center;width: 100%;margin-top: 10px;">
     No Record To Display...
 </div>
-<ng-container *ngIf="passengerHistoryRecords !== undefined">
+<ng-container *ngIf="!isLoading && passengerHistoryRecords && passengerHistoryRecords.length > 0">
     <mat-dialog-content class="mat-typography">
         <ng-container *ngFor="let item of passengerHistoryRecords;">
             <mat-card>
@@ -96,6 +96,7 @@
   *ngIf="isLoading"
 ></mat-progress-bar>
 <mat-paginator
+  *ngIf="!isLoading && passengerHistoryRecords && passengerHistoryRecords.length > 0 && totalData > recordsPerPage"
   #paginator
   [length]="totalData"
   [pageSize]="recordsPerPage"

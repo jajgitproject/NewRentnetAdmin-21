@@ -44,7 +44,7 @@ export class FormDialogCAComponent
   AllotmentStatus: any;
    status: string = '';
   buttonDisabled: boolean = false;
-    normalizedStatus: string = '';
+  normalizedStatus: string = '';
   constructor(
     private snackBar: MatSnackBar,
   public dialogRef: MatDialogRef<FormDialogCAComponent>, 
@@ -58,13 +58,16 @@ export class FormDialogCAComponent
          // status gating
     // this.status = data?.status;
     // this.buttonDisabled = this.status ? this.status.toLowerCase() !== 'changes allow' : false;
-      this.status = data?.status || '';
-
-    // ✅ normalize (important)
-    this.normalizedStatus = this.status.toLowerCase().trim();
-
-    // ✅ button logic
-    this.buttonDisabled = this.normalizedStatus !== 'changes allow';
+      // `status` is not always passed by caller (e.g. detach flow).
+      // Only enforce the "changes allow" gate when a status is explicitly available.
+      this.status = data?.status ?? data?.allotmentStatus ?? '';
+      this.normalizedStatus = (this.status || '').toLowerCase().trim();
+      // Allow cancellation for active allotment states.
+      // Keep strict gating only for explicit non-editable statuses.
+      const allowedStatuses = ['changes allow', 'alloted', 'allotted'];
+      this.buttonDisabled = this.normalizedStatus
+        ? !allowedStatuses.includes(this.normalizedStatus)
+        : false;
 
 
         if (this.action === 'edit') 
@@ -105,7 +108,10 @@ export class FormDialogCAComponent
       dateOfCancellation: [this.advanceTable.dateOfCancellation],
       timeOfCancellation: [this.advanceTable.timeOfCancellation],
       cancellationByEmployeeID: [this.advanceTable.cancellationByEmployeeID],
-      cancellationRemark: [this.advanceTable.cancellationRemark],
+      cancellationRemark: [
+        this.advanceTable.cancellationRemark,
+        [Validators.required, this.noWhitespaceValidator]
+      ],
       allotmentStatus: [this.advanceTable.allotmentStatus],
 
     });
@@ -116,6 +122,14 @@ export class FormDialogCAComponent
     const isValid = !isWhitespace;
     return isValid ? null : { 'whitespace': true };
 }
+
+  isSaveButtonDisabled(): boolean {
+    if (this.buttonDisabled) {
+      return true;
+    }
+    const remark = (this.advanceTableForm?.get('cancellationRemark')?.value || '').toString().trim();
+    return remark.length === 0;
+  }
 
   submit() 
   {

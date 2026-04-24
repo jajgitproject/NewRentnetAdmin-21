@@ -49,6 +49,7 @@ constructor(
 
   loadData()
   {
+    this.isLoading = true;
     this._carAndDriverAllotmentService.GetExistingBids(this.reservationID, this.PageNumber).subscribe(
       (data:ExistingBidsData)=>
       {
@@ -56,8 +57,13 @@ constructor(
         // this.dataSource = new MatTableDataSource(data.driverList);
         // this.dataSource.paginator = this.paginator;
         // this.obs = this.dataSource.connect();
-        this.dataSource = data.bidDetailsList;
-        
+        this.dataSource = Array.isArray(data?.bidDetailsList) ? data.bidDetailsList : [];
+        this.isLoading = false;
+      }
+      ,
+      () => {
+        this.dataSource = [];
+        this.isLoading = false;
       }
     );
   }

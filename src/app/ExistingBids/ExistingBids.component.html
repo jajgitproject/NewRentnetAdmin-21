@@ -9,16 +9,16 @@
             </div>
           </div>
         </div>
-        <button mat-icon-button (click)="dialogRef.close()" aria-label="Close dialog">
-          <mat-icon class="small-close-icon">close</mat-icon>
+        <button mat-icon-button class="existing-bids-close-btn" (click)="dialogRef.close()" aria-label="Close dialog">
+          <span class="small-close-icon" aria-hidden="true">&times;</span>
         </button>
       </div>
   
-      <div *ngIf="!dataSource" class="alert alert-primary" style="background-color:#E8E8E8; text-align: center;width: 100%;margin-top: 10px;">
+      <div *ngIf="!isLoading && (!dataSource || dataSource.length === 0)" class="alert alert-primary existing-bids-empty">
         No Existing Bid To Display...
     </div>
 
-    <ng-container *ngIf="dataSource !== undefined">
+    <ng-container *ngIf="!isLoading && dataSource && dataSource.length > 0">
       <!-- <ng-container *ngFor="let data of obs | async" > -->
       <!-- <ng-container *ngFor="let data of dataSource" > -->
         <!-- <mat-card>
