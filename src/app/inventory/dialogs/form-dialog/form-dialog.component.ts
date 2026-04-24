@@ -1029,6 +1029,11 @@ export class FormDialogComponent
 
   setGPSIMEIValidator(isGPSAvailable: boolean) {
     const gpsimeiNoControl = this.advanceTableForm.get('gpsimeiNo');
+    // `gpsimeiNo` field is currently not part of the active form model.
+    // Guard to avoid runtime errors that break dialog rendering.
+    if (!gpsimeiNoControl) {
+      return;
+    }
     if (isGPSAvailable) {
       gpsimeiNoControl.setValidators([Validators.required]);
     } else {
