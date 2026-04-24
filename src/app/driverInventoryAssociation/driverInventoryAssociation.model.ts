@@ -42,7 +42,7 @@ export class DriverInventoryAssociation {
        this.inventoryName = driverInventoryAssociation.inventoryName || '';
        this.driverInventoryAssociationStartDateString = driverInventoryAssociation.driverInventoryAssociationStartDateString || '';
        this.driverInventoryAssociationEndDateString = driverInventoryAssociation.driverInventoryAssociationEndDateString || '';
-       this.activationStatus = driverInventoryAssociation.activationStatus || '';
+       this.activationStatus = driverInventoryAssociation.activationStatus || true;
        this.vehicleID = driverInventoryAssociation.vehicleID || 0;
        this.vehicleCategoryID = driverInventoryAssociation.vehicleCategoryID || 0;
        this.inventory = driverInventoryAssociation.inventory || '';

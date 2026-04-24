@@ -808,6 +808,7 @@ private _filterInventorySupplier(value: string): any {
         (data: ControlPanelData) => {
           if (data != null) {
             this.reservationInfo = data.reservationDetails;
+            console.log(this.reservationInfo)
             this.allotmentType = this.reservationInfo[0]?.allotmentType;
             this.filterByVehicleCategoryID = this.reservationInfo[0]?.vehicle?.vehicleCategoryID;
             this.filterByVehicleCategory = this.reservationInfo[0]?.vehicle?.vehicleCategory;
@@ -1802,11 +1803,12 @@ getAllDriver()
   }
 
   AttachAnotherDriver(i:any) {
+    console.log(i)
     const dialogRef=this.dialog.open(MyFormDialogComponent, {
       data: {
         advanceTable: this.advanceTable,
         driverInventoryAssociationDataSource:this.driverInventoryAssociationDataSource[i],
-        action: 'edit',
+        action: 'add',
         text:'AttachAnotherDriver',
         driverInventoryAssociationID:this.driverInventoryAssociationDataSource[i].driverInventoryAssociationID,
         inventoryID:this.driverInventoryAssociationDataSource[i].inventoryID,
@@ -1819,6 +1821,8 @@ getAllDriver()
         driverInventoryAssociationEndDate:this.driverInventoryAssociationDataSource[i].driverInventoryAssociationEndDate,
         driverInventoryAssociationStatus:this.driverInventoryAssociationDataSource[i].driverInventoryAssociationStatus,
         activationStatus:this.driverInventoryAssociationDataSource[i].activationStatus,
+        driverSupplierName:this.driverInventoryAssociationDataSource[i].driverSupplierName,
+        inventorySupplierName:this.driverInventoryAssociationDataSource[i].inventorySupplierName,
 
       },
     });
@@ -1848,7 +1852,8 @@ getAllDriver()
         driverInventoryAssociationEndDate:this.inventoryUnassociatedDataSource[i].driverInventoryAssociationEndDate,
         driverInventoryAssociationStatus:this.inventoryUnassociatedDataSource[i].driverInventoryAssociationStatus,
         activationStatus:this.inventoryUnassociatedDataSource[i].activationStatus,
-
+        driverSupplierName:this.driverInventoryAssociationDataSource[i].driverSupplierName,
+        inventorySupplierName:this.driverInventoryAssociationDataSource[i].inventorySupplierName,
       },
     });
     dialogRef.afterClosed().subscribe(res => {

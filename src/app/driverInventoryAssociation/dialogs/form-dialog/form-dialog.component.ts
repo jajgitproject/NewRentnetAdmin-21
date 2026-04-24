@@ -82,6 +82,8 @@ export class FormDialogComponent implements OnInit
   ownedSupplier: any;
 driverInventoryAssociationDataSource:any;
   ownedSupplierChecked: string;
+  InventorySupplierName:any;
+  DriverSupplierName:any;
 
   constructor(
   public dialogRef: MatDialogRef<FormDialogComponent>, 
@@ -106,16 +108,20 @@ driverInventoryAssociationDataSource:any;
     
         // Set the defaults
         this.action = data.action;
+        console.log(data)
+        this.InventorySupplierName = data.inventorySupplierName;
+        this.DriverSupplierName = data.driverSupplierName;
         if (this.action === 'edit') 
         {
           this.dialogTitle ='Driver Inventory Association';       
           this.advanceTable = data.advanceTable;
+          this.advanceTable.activationStatus=true;
           //this.advanceTable.inventoryName=this.advanceTable.inventoryName + '-' + this.advanceTable.vehicle + '-'+ this.advanceTable.vehicleCategory;
           this.advanceTable.inventoryName=this.advanceTable.inventory + '-' + this.advanceTable.vehicle + '-'+ this.advanceTable.supplierName;
-           let driverInventoryAssociationStartDate=moment(this.advanceTable.driverInventoryAssociationStartDate).format('DD/MM/yyyy');
-           let driverInventoryAssociationEndDate=moment(this.advanceTable.driverInventoryAssociationEndDate).format('DD/MM/yyyy');
-           this.onBlurUpdateDateEdit(driverInventoryAssociationStartDate);
-           this.onBlurUpdateEndDateEdit(driverInventoryAssociationEndDate);
+          //  let driverInventoryAssociationStartDate=moment(this.advanceTable.driverInventoryAssociationStartDate).format('DD/MM/yyyy');
+          //  let driverInventoryAssociationEndDate=moment(this.advanceTable.driverInventoryAssociationEndDate).format('DD/MM/yyyy');
+          //  this.onBlurUpdateDateEdit(driverInventoryAssociationStartDate);
+          //  this.onBlurUpdateEndDateEdit(driverInventoryAssociationEndDate);
         // this.advanceTable.driverName = this.advanceTable.driverName + '-' + this.advanceTable.driverPhone + '-' + this.Supplier;
         } else 
         {
@@ -141,12 +147,12 @@ driverInventoryAssociationDataSource:any;
       inventory:[this.advanceTable.inventory],
       vehicleCategoryID:[this.advanceTable.vehicleCategoryID],
       vehicleCategory:[this.advanceTable.vehicleCategory],
-  driverInventoryAssociationStartDate: [
-  { value: this.advanceTable.driverInventoryAssociationStartDate, disabled: true }
-],
-      driverInventoryAssociationEndDate: [
-  { value: this.advanceTable.driverInventoryAssociationEndDate, disabled: true }
-],
+//   driverInventoryAssociationStartDate: [
+//   { value: this.advanceTable.driverInventoryAssociationStartDate, disabled: true }
+// ],
+//       driverInventoryAssociationEndDate: [
+//   { value: this.advanceTable.driverInventoryAssociationEndDate, disabled: true }
+// ],
       driverInventoryAssociationStatus: [
   this.advanceTable.driverInventoryAssociationStatus ?? true
 ],
@@ -191,8 +197,8 @@ ngOnInit(): void {
   this.advanceTableForm.controls['driverInventoryAssociationID'].patchValue(this.data.driverInventoryAssociationID);
   this.advanceTableForm.controls['vehicleID'].patchValue(this.data.vehicleID);
   this.advanceTableForm.controls['vehicleCategoryID'].patchValue(this.data.vehicleCategoryID);
-  this.advanceTableForm.controls["driverInventoryAssociationStartDate"].setValue(this.data.driverInventoryAssociationStartDate);
-  this.advanceTableForm.controls["driverInventoryAssociationEndDate"].setValue(this.data.driverInventoryAssociationEndDate);
+  //this.advanceTableForm.controls["driverInventoryAssociationStartDate"].setValue(this.data.driverInventoryAssociationStartDate);
+  //this.advanceTableForm.controls["driverInventoryAssociationEndDate"].setValue(this.data.driverInventoryAssociationEndDate);
   this.advanceTableForm.controls["driverInventoryAssociationStatus"].setValue(this.data.driverInventoryAssociationStatus);
   this.advanceTableForm.controls["activationStatus"].setValue(this.data.activationStatus);
   this.advanceTableForm.patchValue({driverID:this.data.driverID,});
@@ -210,8 +216,8 @@ ngOnInit(): void {
   this.advanceTableForm.patchValue({driverInventoryAssociationID: this.data.driverInventoryAssociationID});
   this.advanceTableForm.controls['inventoryName'].setValue(this.data.inventoryName+'-'+this.data.vehicle+'-'+this.data.vehicleCategory);
   this.advanceTableForm.controls['inventoryID'].patchValue(this.data.inventoryID);
-  this.advanceTableForm.controls["driverInventoryAssociationStartDate"].setValue(this.data.driverInventoryAssociationStartDate);
-  this.advanceTableForm.controls["driverInventoryAssociationEndDate"].setValue(this.data.driverInventoryAssociationEndDate);
+  //this.advanceTableForm.controls["driverInventoryAssociationStartDate"].setValue(this.data.driverInventoryAssociationStartDate);
+  //this.advanceTableForm.controls["driverInventoryAssociationEndDate"].setValue(this.data.driverInventoryAssociationEndDate);
   this.advanceTableForm.controls["driverInventoryAssociationStatus"].setValue(this.data.driverInventoryAssociationStatus);
   this.advanceTableForm.controls["activationStatus"].setValue(this.data.activationStatus);
 }
@@ -455,10 +461,38 @@ submit()
     .subscribe(
     response => 
     {
-      this.dialogRef.close({isClose:false});
-      this._generalService.sendUpdate('DriverInventoryAssociationCreate:DriverInventoryAssociationView:Success');//To Send Updates  
-      this.saveDisabled = true;
-  },
+      console.log(response?.message)
+      // this.dialogRef.close({isClose:false});
+      // this._generalService.sendUpdate('DriverInventoryAssociationCreate:DriverInventoryAssociationView:Success');//To Send Updates  
+      // this.saveDisabled = true;
+      if (response?.message === "No") 
+      {
+        Swal.fire({
+                  title: 'Are you sure?',
+                  text: 'You want to change driver? because Driver Supplier and Inventory Supplier are different?',
+                  icon: 'warning',
+                  showCancelButton: true,
+                  confirmButtonText: 'Yes',
+                  cancelButtonText: 'Cancel',
+                  customClass: {
+                                cancelButton: 'btn btn-danger',
+                                confirmButton: 'btn btn-primary'
+                              },
+                      buttonsStyling: true
+                    }).then((result) => {
+                      if (result.isConfirmed) 
+                      {
+                        this.Post();
+                      }
+                    });
+        this.saveDisabled = true;
+        return;
+      }
+      alert("Driver Inventory Association Created...!!!");
+      this.dialogRef.close();
+      this._generalService.sendUpdate('DriverInventoryAssociationCreate:DriverInventoryAssociationView:Success');//To Send Updates 
+      this.saveDisabled = true; 
+    },
     error =>
     {
        this._generalService.sendUpdate('DriverInventoryAssociationAll:DriverInventoryAssociationView:Failure');//To Send Updates 

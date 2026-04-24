@@ -253,11 +253,13 @@ export class DriverInventoryAssociationService
     {
       advanceTable.driverInventoryAssociationEndDate=null;
     }
+    advanceTable.activationStatus=true;
     return this.httpClient.post<any>(this.API_URL , advanceTable);
   }
   update(advanceTable: DriverInventoryAssociation)
   {
     advanceTable.userID=this.generalService.getUserID();
+    advanceTable.activationStatus=true;
     advanceTable.driverInventoryAssociationStartDateString=this.generalService.getTimeApplicable(advanceTable.driverInventoryAssociationStartDate);
     if(advanceTable.driverInventoryAssociationEndDate)
     {
