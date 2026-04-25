@@ -115,6 +115,22 @@ tr {
   padding: 0 !important;
 }
 
+/* Last-column address/remark textareas (closingOne / duty slip): extra space so label + value don’t merge */
+:host ::ng-deep .cp-closing-field.cp-closing-field--address .mat-mdc-form-field-infix {
+  align-items: flex-start !important;
+  padding-top: 22px !important;
+  min-height: 76px !important;
+}
+
+:host ::ng-deep .cp-closing-field.cp-closing-field--address textarea.mat-mdc-input-element {
+  align-self: stretch !important;
+  height: auto !important;
+  min-height: 3.25rem !important;
+  padding: 8px 0 6px 0 !important;
+  line-height: 1.45 !important;
+  box-sizing: border-box !important;
+}
+
 :host ::ng-deep .cp-closing-field .mat-mdc-select-trigger {
   display: flex !important;
   align-items: center !important;

@@ -65,9 +65,6 @@
                             </div>
 
                             <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
-                                <div class="link-actions-top">
-                                    <a class="link-action" (click)="ViewKAM()">View KAM</a>
-                                </div>
                                 <mat-form-field class="example-full-width cp-booking-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
                                     <mat-label>Customer (Customer Group)</mat-label>
                                     <input required type="text" matInput formControlName="customerCustomerGroup"
@@ -80,11 +77,14 @@
                                         </mat-option>
                                     </mat-autocomplete>
                                 </mat-form-field>
+                                <div class="link-actions-below">
+                                    <a class="link-action" (click)="ViewKAM()">View KAM</a>
+                                </div>
 
                             </div>
                         </div>
 
-                        <div class="row">
+                        <div class="row align-items-start">
                             <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
                                 <!-- <div class="col-xl-3 col-lg-3 col-md-3 col-sm-6 mb-2"> -->
                                 <mat-form-field class="example-full-width cp-booking-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
@@ -153,11 +153,6 @@
                                                 New Booker</a> -->
                             </div>
                             <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
-                                <div class="link-actions-top">
-                                    <a class="link-action" (click)="personShort()">New Passenger</a>
-                                    <span class="link-divider">/</span>
-                                    <a class="link-action" (click)="editPassenger()">Edit Passenger</a>
-                                </div>
                                 <mat-form-field class="example-full-width cp-booking-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
                                     <mat-label>Passenger (Gender, VIP Status)</mat-label>
                                     <input required type="text" matInput formControlName="passenger"
@@ -174,6 +169,11 @@
                                         </mat-option>
                                     </mat-autocomplete>
                                 </mat-form-field>
+                                <div class="link-actions-below">
+                                    <a class="link-action" (click)="personShort()">New Passenger</a>
+                                    <span class="link-divider">/</span>
+                                    <a class="link-action" (click)="editPassenger()">Edit Passenger</a>
+                                </div>
                                 <mat-error *ngIf="advanceTableForm.controls['passenger'].hasError('passengerInvalid')">
                                     Please Select Valid Passenger
                                 </mat-error>

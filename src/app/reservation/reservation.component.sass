@@ -39,6 +39,16 @@ mat-checkbox
   margin-bottom: 2px
   line-height: 1
 
+/* New Passenger / Edit — directly under the field line (reservation customer card) */
+.link-actions-below
+  display: flex
+  justify-content: flex-end
+  align-items: center
+  gap: 4px
+  margin-top: 2px
+  margin-bottom: 2px
+  line-height: 1
+
 .link-action
   cursor: pointer
   color: #007bff
@@ -51,19 +61,44 @@ mat-checkbox
   font-size: 10px
 
 :host ::ng-deep .hint-actions-row
-  display: inline-flex
+  display: flex !important
+  flex-direction: row !important
+  flex-wrap: nowrap !important
   justify-content: flex-end
   align-items: center
   gap: 8px
   width: 100%
+  min-width: 0
   line-height: 1
 
+:host ::ng-deep .hint-actions-row .link-action
+  flex: 0 0 auto
+  white-space: nowrap
+
 :host ::ng-deep .hint-actions-row .mat-mdc-checkbox
+  display: inline-flex !important
+  flex: 0 0 auto
+  width: auto !important
+  max-width: none !important
   margin: 0 !important
 
 :host ::ng-deep .hint-actions-row .mdc-label
   font-size: 10px !important
   font-style: italic
+
+/* Keep saved-address + Google checkbox on one line under geo fields (MDC subscript) */
+:host ::ng-deep .cp-booking-field .mat-mdc-form-field-hint-wrapper
+  display: block
+  width: 100%
+
+:host ::ng-deep .cp-booking-field .mat-mdc-form-field-hint
+  display: flex !important
+  flex-direction: row !important
+  flex-wrap: nowrap !important
+  justify-content: flex-end
+  align-items: center
+  width: 100%
+  max-width: 100%
 
 /* Booking Screen controls: same floating underline theme used in Control Panel. */
 :host ::ng-deep .register-form .cp-booking-field
