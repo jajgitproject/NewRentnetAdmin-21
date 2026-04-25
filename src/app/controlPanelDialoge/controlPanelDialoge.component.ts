@@ -1873,6 +1873,8 @@ export class ControlPanelDialogeComponent {
     const encryptedPickupAddress = encodeURIComponent(this._generalService.encrypt(item.pickup.pickupAddress));
     const encryptedDropOffAddress = encodeURIComponent(this._generalService.encrypt(item.drop.dropOffAddress));
     const encryptedLocationOutAddress = encodeURIComponent(this._generalService.encrypt(item.organizationalEntityName));
+    const encryptedAllotmentStatus = encodeURIComponent(this._generalService.encrypt(item.allotmentStatus));
+    const encryptedDutySlipType = encodeURIComponent(this._generalService.encrypt(item.dutySlipType));
 
     // Create URL with encrypted query parameters
     const url = this.route.serializeUrl(
@@ -1896,7 +1898,10 @@ export class ControlPanelDialogeComponent {
           locationOutTime: encryptedLocationOutTime,
           pickupAddress: encryptedPickupAddress,
           dropOffAddress: encryptedDropOffAddress,
-          locationOutAddress: encryptedLocationOutAddress
+          locationOutAddress: encryptedLocationOutAddress,
+          allotmentStatus: encryptedAllotmentStatus,
+          dutySlipType: encryptedDutySlipType
+         
         }
       }));
     const closingWin = window.open(this._generalService.FormURL + url, '_blank');

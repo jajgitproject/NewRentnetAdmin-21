@@ -21,7 +21,7 @@ import moment from 'moment';
 import { ActivatedRoute, Router } from '@angular/router';
 import { CurrentDutyDetailsComponent } from '../currentDutyDetails/currentDutyDetails.component';
 import { CurrentDutyDetailsService } from '../currentDutyDetails/currentDutyDetails.service';
-import { FormDialogComponent as DutyTollParking} from '../dutyTollParkingEntry/dialogs/form-dialog/form-dialog.component';
+import { FormDialogComponent as DutyTollParking } from '../dutyTollParkingEntry/dialogs/form-dialog/form-dialog.component';
 import { DutyTollParkingEntryService } from '../dutyTollParkingEntry/dutyTollParkingEntry.service';
 import { DutyTollParkingEntry } from '../dutyTollParkingEntry/dutyTollParkingEntry.model';
 import { FormDialogDisputeComponent } from '../dispute/dialogs/form-dialog/form-dialog.component';
@@ -48,7 +48,7 @@ import { DutySACModel } from '../dutySAC/dutySAC.model';
 import { FormDialogComponent as DutySACFormDialogComponent } from '../dutySAC/dialogs/form-dialog/form-dialog.component';
 import { AdditionalDialogComponent } from '../additionalKmsDetails/dialogs/form-dialog/form-dialog.component';
 import { DiscountDetailsDialogComponent } from '../discountDetails/dialogs/discountDetails/discountDetails.component';
-import { FormDialogComponent as DutyStateFormDialogComponent  } from '../dutyState/dialogs/form-dialog/form-dialog.component';
+import { FormDialogComponent as DutyStateFormDialogComponent } from '../dutyState/dialogs/form-dialog/form-dialog.component';
 import { FormDialogComponent as DutyGSTPercentageFormDialogComponent } from '../dutyGSTPercentage/dialogs/form-dialog/form-dialog.component';
 import { FormDialogComponent as DutyExpenseFormDialogComponent } from '../dutyExpense/dialogs/form-dialog/form-dialog.component';
 import { ClosingModel } from './clossingOne.model';
@@ -100,23 +100,23 @@ export class ClossingOneComponent implements OnInit {
   // dataSavedMessage: boolean = false;
   updateData = new Subject<void>();
   AllotmentID: any;
-  DutySlipID:any;
+  DutySlipID: any;
   closingDataAdvanceTable: ClosingDataModel | null;
-    advanceTableMOP:MOPModel | null;
+  advanceTableMOP: MOPModel | null;
   tollParkingAdvanceTable: DutyTollParkingEntry[] | null;
-  showHideTollParkingCard:boolean = false;
-  showHideODOMeterCard:boolean = false;
+  showHideTollParkingCard: boolean = false;
+  showHideODOMeterCard: boolean = false;
 
-  disputeAdvanceTable:Dispute[] | null;
-  showHideDispute:boolean=false;
+  disputeAdvanceTable: Dispute[] | null;
+  showHideDispute: boolean = false;
 
   advanceTableDIT: DutyInterstateTax[] | null;
-  showHideaddDIT:boolean=false;
-  showSAC : boolean = false;
-  showAdditionalKms:boolean = false;
+  showHideaddDIT: boolean = false;
+  showSAC: boolean = false;
+  showAdditionalKms: boolean = false;
   allotmentID: number;
   dutySlipID: number;
-  ReservationID:number;
+  ReservationID: number;
   CustomerID: number;
   PackageID: number;
   PackageTypeID: number;
@@ -133,49 +133,49 @@ export class ClossingOneComponent implements OnInit {
   PickupAddress: string;
   DropOffAddress: string;
   LocationOutAddress: string;
-  CustomerContractID:number;
-  PackageType:string;
+  CustomerContractID: number;
+  PackageType: string;
 
-  showDutyExpense:boolean = false;
-  SearchActivationStatus : boolean=true;
-   showHideaddDiscount:boolean =false;
-  SearchExpense : string = '';
+  showDutyExpense: boolean = false;
+  SearchActivationStatus: boolean = true;
+  showHideaddDiscount: boolean = false;
+  SearchExpense: string = '';
   PageNumber: number = 0;
-  showHideDutyState:boolean=false;
-  showDGP : boolean = false;
-  advanceTableDE:DutyExpenseModel | null;
+  showHideDutyState: boolean = false;
+  showDGP: boolean = false;
+  advanceTableDE: DutyExpenseModel | null;
   advanceTableDGP: DutyGSTPercentage | null;
-  advanceTableDutyState:DutyState | null;
+  advanceTableDutyState: DutyState | null;
   advanceTableSAC: DutySACModel | null;
   advanceTableAD: AdditionalKmsDetails | null;
   advanceTableDD: DiscountDetails | null;
   advanceTableSI: SpecialInstructionDetails | null;
 
-  advanceTableClosingOne : ClosingModel | null;
+  advanceTableClosingOne: ClosingModel | null;
   dataSource: Dispute[] | null;
   dataSourceforCard: any;
   reservationCloseDetail: any;
   mapOfDutySlip: string;
   panelExpanded: boolean = false;
   dutySlipMap: DutySlipMap;
-  showHideSalesPerson: boolean=false;
+  showHideSalesPerson: boolean = false;
   advanceTableSP: ReservationSalesPersonModel | null;
   advanceTableAdvanceDC: AdvanceDetailsClosing | null;
-  showAdvanceDetails : boolean = false;
+  showAdvanceDetails: boolean = false;
   advanceTableSRD: SettledRateClosing | null;
-  showSettledRate : boolean = false;
+  showSettledRate: boolean = false;
   advanceTableKC: KAMDetailsClosing | null;
   showKamCard: boolean = false;
 
   advanceTableASEW: AdditionalSMSDetails | null;
-  showAdditionalSMS : boolean = false;
+  showAdditionalSMS: boolean = false;
 
   advanceTableBD: BillToOther | null;
-  showBillToOther : boolean = false;
-   showMOPOther : boolean = false;
-  showHideDutyStateCustomer:boolean=false;
- advanceTableDutyStateCustomer:DutyStateCustomer | null;
-  showMOP: boolean= false;
+  showBillToOther: boolean = false;
+  showMOPOther: boolean = false;
+  showHideDutyStateCustomer: boolean = false;
+  advanceTableDutyStateCustomer: DutyStateCustomer | null;
+  showMOP: boolean = false;
   invoiceID: any;
   goodForBilling: boolean;
   verifyDuty: boolean;
@@ -184,49 +184,51 @@ export class ClossingOneComponent implements OnInit {
 
   Message: string;
   DSClosing: any;
-  
+
   reservationID: number = 0;
   dialogRequestObject: any;
-   dutySlipImageAllotmentID: any;
+  dutySlipImageAllotmentID: any;
   dutySlipImage: any;
   oDOMAndMDSAdvanceTable: OdoMeterAndManualDutySlipImage;
-  
+  allotmentStatus: string;
+  dutySlipType: string;
+
 
   constructor(
     public httpClient: HttpClient,
     public dialog: MatDialog,
     public clossingOneService: ClossingOneService,
     private snackBar: MatSnackBar,
-    public route:ActivatedRoute,
-    public _generalService: GeneralService, 
-    public currentDutyDetailsService: CurrentDutyDetailsService, 
-    public dutyTollParkingEntryService:DutyTollParkingEntryService,
-    public disputeService:DisputeService,
-    public dutyInterstateTaxService:DutyInterstateTaxService,
-    public dutyExpenseService: DutyExpenseService, 
-    public dutyGSTPercentageService: DutyGSTPercentageService, 
+    public route: ActivatedRoute,
+    public _generalService: GeneralService,
+    public currentDutyDetailsService: CurrentDutyDetailsService,
+    public dutyTollParkingEntryService: DutyTollParkingEntryService,
+    public disputeService: DisputeService,
+    public dutyInterstateTaxService: DutyInterstateTaxService,
+    public dutyExpenseService: DutyExpenseService,
+    public dutyGSTPercentageService: DutyGSTPercentageService,
     public dutyStateService: DutyStateService,
     public dutyStateCustomerService: DutyStateCustomerService,
     public additionalKmsDetailsService: AdditionalKmsDetailsService,
-    public dutySACService: DutySACService, 
+    public dutySACService: DutySACService,
     public discountDetails: DiscountDetailsService,
-     public router:Router,
-     public salesPersonService: SalesPersonService,
-     public specialInstructionDetailsService: SpecialInstructionDetailsService,
-     public specialinformationService: SpecialinformationService,
+    public router: Router,
+    public salesPersonService: SalesPersonService,
+    public specialInstructionDetailsService: SpecialInstructionDetailsService,
+    public specialinformationService: SpecialinformationService,
     public iternallinformationService: IternallinformationService,
     public lumpsuminformationService: LumpsuminformationService,
     public advanceDetailsClosingService: AdvanceDetailsClosingService,
     public settledRateClosingService: SettledRateClosingService,
     public kamDetailsClosingService: KAMDetailsClosingService,
-    public additionalSMSEmailWhatsappService:AdditionalSMSEmailWhatsappService,
-    public billToOtherService:BillToOtherService,
+    public additionalSMSEmailWhatsappService: AdditionalSMSEmailWhatsappService,
+    public billToOtherService: BillToOtherService,
     public singleDutySingleBillForLocalServiceService: SingleDutySingleBillForLocalService,
-    public packageRateDetailsForClosingService: PackageRateDetailsForClosingService, 
-     public mopDetailsService: MOPDetailsService,
-     public controlPanelDialogeService:ControlPanelDialogeService,
-      public _dutySlipImageService: DutySlipImageService,
-       public odoMeterAndManualDutySlipImageService: OdoMeterAndManualDutySlipImageService,
+    public packageRateDetailsForClosingService: PackageRateDetailsForClosingService,
+    public mopDetailsService: MOPDetailsService,
+    public controlPanelDialogeService: ControlPanelDialogeService,
+    public _dutySlipImageService: DutySlipImageService,
+    public odoMeterAndManualDutySlipImageService: OdoMeterAndManualDutySlipImageService,
   ) {
 
   }
@@ -238,29 +240,29 @@ export class ClossingOneComponent implements OnInit {
   @ViewChild(MatMenuTrigger)
   contextMenu: MatMenuTrigger;
   contextMenuPosition = { x: '0px', y: '0px' };
-  
-  ngOnInit() 
-  {
-    this.route.queryParams.subscribe(paramsData =>{
+
+  ngOnInit() {
+    this.route.queryParams.subscribe(paramsData => {
       const encryptedAllotmentID = paramsData.allotmentID;
       this.AllotmentID = this._generalService.decrypt(decodeURIComponent(encryptedAllotmentID));
       const encryptedDutySlipID = paramsData.dutySlipID;
-      this.DutySlipID = this._generalService.decrypt(decodeURIComponent(encryptedDutySlipID));      
-       const encryptedReservationID = paramsData.reservationID;
-      this.ReservationID = Number(this._generalService.decrypt(decodeURIComponent(encryptedReservationID)));     
+      this.DutySlipID = this._generalService.decrypt(decodeURIComponent(encryptedDutySlipID));
+      const encryptedReservationID = paramsData.reservationID;
+      this.ReservationID = Number(this._generalService.decrypt(decodeURIComponent(encryptedReservationID)));
+      this.allotmentStatus = this._generalService.decrypt(decodeURIComponent(paramsData.allotmentStatus));
+      this.dutySlipType = this._generalService.decrypt(decodeURIComponent(paramsData.dutySlipType));
     });
     this.GetClosingData();
-     this.disputeService.disputeData$.subscribe(data => {
-    this.disputeAdvanceTable = data;
-  });
-
-  this.controlPanelDialogeService.getVerifyDutyStatus(this.ReservationID).subscribe(
-    data =>
-    {
-      this.verifyDutyStatusAndCacellationStatus = data.status;
+    this.disputeService.disputeData$.subscribe(data => {
+      this.disputeAdvanceTable = data;
     });
 
-    
+    this.controlPanelDialogeService.getVerifyDutyStatus(this.ReservationID).subscribe(
+      data => {
+        this.verifyDutyStatusAndCacellationStatus = data.status;
+      });
+
+
     this.loadDataForCard();
     this.BookingDataOnClosing();
     this.TollParkingLoadData();
@@ -274,23 +276,20 @@ export class ClossingOneComponent implements OnInit {
     //this.loadDataClosingSalesPerson()
     this.salesPersonLoadData();
     this.settledRateLoadData();
-     this.MOPLoadData();
+    this.MOPLoadData();
     this.loadDataForReservationDiscountClosing();
     this.loadDataForImage();
 
   }
 
- onDataSaved() 
-  {
+  onDataSaved() {
     this.GetClosingData();
     this.DisputeLoadData();
   }
 
-  GetClosingData()
-  {
+  GetClosingData() {
     this.clossingOneService.GetClosingData(this.DutySlipID).subscribe(
-      data =>
-      {
+      data => {
         this.advanceTableClosingOne = data;
         this.invoiceID = this.advanceTableClosingOne.invoiceID;
         this.goodForBilling = this.advanceTableClosingOne.closingDutySlipForBillingModel.goodForBilling;
@@ -300,373 +299,339 @@ export class ClossingOneComponent implements OnInit {
     );
   }
 
-  public BookingDataOnClosing() 
-  {
+  public BookingDataOnClosing() {
     this.clossingOneService.getClosingData(this.AllotmentID).subscribe
-    (
-      data =>   
-      {
-        this.closingDataAdvanceTable = data;
-        this.allotmentID = this.closingDataAdvanceTable.allotmentID;
-        this.dutySlipID = this.closingDataAdvanceTable.dutySlipID;
-        this.ReservationID = this.closingDataAdvanceTable.reservationID;
-        this.CustomerID = this.closingDataAdvanceTable.customerID;
-        this.PackageID = this.closingDataAdvanceTable.packageID;
-        this.PackageTypeID = this.closingDataAdvanceTable?.packageTypeID;
-        this.CustomerContractID = this.closingDataAdvanceTable?.customerContractID;
-        this.PackageType = this.closingDataAdvanceTable?.packageType;
-        this.DutySlipForBillingID = this.closingDataAdvanceTable.dutySlipForBillingID;
-        this.RegistrationNumber = this.closingDataAdvanceTable.registrationNumber;
-        this.InventoryID = this.closingDataAdvanceTable.inventoryID;
-        this.DropOffDate = this.closingDataAdvanceTable.dropOffDate;
-        this.PickupDate = this.closingDataAdvanceTable.pickupDate;
-        this.closureStatus = this.closingDataAdvanceTable.closureStatus;
-        this.PickupTime = this.closingDataAdvanceTable.pickupTime;
-        this.DropOffTime = this.closingDataAdvanceTable.dropOffTime;
-        this.LocationOutDate = this.closingDataAdvanceTable.locationOutDate;
-        this.LocationOutTime = this.closingDataAdvanceTable.locationOutTime;
-        this.PickupAddress = this.closingDataAdvanceTable.pickupAddress;
-        this.DropOffAddress = this.closingDataAdvanceTable.dropOffAddress;
-        this.LocationOutAddress = this.closingDataAdvanceTable.locationOutAddress;
-         this.advanceDetailsLoadData();
-         this.kamCardLoadData();
-        // this.loadDataforAdditionalKMHR();
-        this.DutySACLoadData();
+      (
+        data => {
+          this.closingDataAdvanceTable = data;
+          this.allotmentID = this.closingDataAdvanceTable.allotmentID;
+          this.dutySlipID = this.closingDataAdvanceTable.dutySlipID;
+          this.ReservationID = this.closingDataAdvanceTable.reservationID;
+          this.CustomerID = this.closingDataAdvanceTable.customerID;
+          this.PackageID = this.closingDataAdvanceTable.packageID;
+          this.PackageTypeID = this.closingDataAdvanceTable?.packageTypeID;
+          this.CustomerContractID = this.closingDataAdvanceTable?.customerContractID;
+          this.PackageType = this.closingDataAdvanceTable?.packageType;
+          this.DutySlipForBillingID = this.closingDataAdvanceTable.dutySlipForBillingID;
+          this.RegistrationNumber = this.closingDataAdvanceTable.registrationNumber;
+          this.InventoryID = this.closingDataAdvanceTable.inventoryID;
+          this.DropOffDate = this.closingDataAdvanceTable.dropOffDate;
+          this.PickupDate = this.closingDataAdvanceTable.pickupDate;
+          this.closureStatus = this.closingDataAdvanceTable.closureStatus;
+          this.PickupTime = this.closingDataAdvanceTable.pickupTime;
+          this.DropOffTime = this.closingDataAdvanceTable.dropOffTime;
+          this.LocationOutDate = this.closingDataAdvanceTable.locationOutDate;
+          this.LocationOutTime = this.closingDataAdvanceTable.locationOutTime;
+          this.PickupAddress = this.closingDataAdvanceTable.pickupAddress;
+          this.DropOffAddress = this.closingDataAdvanceTable.dropOffAddress;
+          this.LocationOutAddress = this.closingDataAdvanceTable.locationOutAddress;
+          this.advanceDetailsLoadData();
+          this.kamCardLoadData();
+          // this.loadDataforAdditionalKMHR();
+          this.DutySACLoadData();
           this.salesPersonLoadData();
-      },
-      (error: HttpErrorResponse) => { this.closingDataAdvanceTable = null;}
-    );
+        },
+        (error: HttpErrorResponse) => { this.closingDataAdvanceTable = null; }
+      );
   }
-  
+
   //---------- Start Toll Parking ----------
-  openDutyTollParkingEntry()
-  {
-    const dialogRef=this.dialog.open(DutyTollParking,
-    {
-      data:
+  openDutyTollParkingEntry() {
+    const dialogRef = this.dialog.open(DutyTollParking,
       {
-        action:'add',
-        dutySlipID:this.DutySlipID,
-        verifyDutyStatusAndCacellationStatus:this.verifyDutyStatusAndCacellationStatus
-      }
-    });
+        data:
+        {
+          action: 'add',
+          dutySlipID: this.DutySlipID,
+          verifyDutyStatusAndCacellationStatus: this.verifyDutyStatusAndCacellationStatus
+        }
+      });
     dialogRef.afterClosed().subscribe((res: any) => {
       this.TollParkingLoadData();
     });
   }
 
-  public TollParkingLoadData() 
-   {
+  public TollParkingLoadData() {
     this.dutyTollParkingEntryService.GetTollParkingInfo(this.DutySlipID).subscribe
-    (
-      (data: DutyTollParkingEntry[]) =>   
-      {
-        if(data!= null)
-        {
-          this.showHideTollParkingCard=true;
-        }
-        this.tollParkingAdvanceTable = data;
-      },
-      (error: HttpErrorResponse) => { this.tollParkingAdvanceTable = null;}
-    );
+      (
+        (data: DutyTollParkingEntry[]) => {
+          if (data != null) {
+            this.showHideTollParkingCard = true;
+          }
+          this.tollParkingAdvanceTable = data;
+        },
+        (error: HttpErrorResponse) => { this.tollParkingAdvanceTable = null; }
+      );
   }
   //---------- End Toll Parking ----------
 
   //---------- Start Dispute ----------
-  openDisputes() 
-  {
-   const dialogRef = this.dialog.open(FormDialogDisputeComponent,
-        {
-          data:
-          {
-            action:'add',
-            dutySlipID:this.DutySlipID,
-            verifyDutyStatusAndCacellationStatus:this.verifyDutyStatusAndCacellationStatus
-          }
-        });
-      dialogRef.afterClosed().subscribe((res: any) => {
-        if (res === true) 
+  openDisputes() {
+    const dialogRef = this.dialog.open(FormDialogDisputeComponent,
       {
-    this.DisputeLoadData();
-        
-      }
-      });
-    }
-
-    public DisputeLoadData() 
-    {
-      this.disputeService.getDisputeInfo(this.DutySlipID).subscribe
-      (
-        (data:Dispute[]) =>   
+        data:
         {
-          if(data!= null)
-          {
-            this.showHideDispute=true;
+          action: 'add',
+          dutySlipID: this.DutySlipID,
+          verifyDutyStatusAndCacellationStatus: this.verifyDutyStatusAndCacellationStatus
+        }
+      });
+    dialogRef.afterClosed().subscribe((res: any) => {
+      if (res === true) {
+        this.DisputeLoadData();
+
+      }
+    });
+  }
+
+  public DisputeLoadData() {
+    this.disputeService.getDisputeInfo(this.DutySlipID).subscribe
+      (
+        (data: Dispute[]) => {
+          if (data != null) {
+            this.showHideDispute = true;
           }
           this.disputeAdvanceTable = data;
         },
-      (error: HttpErrorResponse) => { this.disputeAdvanceTable = null;}
+        (error: HttpErrorResponse) => { this.disputeAdvanceTable = null; }
       );
-    }
-  
-    disputeHistoryDetails() 
-    {
-      this.dialog.open(DisputeHistoryComponent, {
-        width: '500px',
-        data: {
-          dutySlipID: this.DutySlipID
-        }
-      });
-    }
+  }
+
+  disputeHistoryDetails() {
+    this.dialog.open(DisputeHistoryComponent, {
+      width: '500px',
+      data: {
+        dutySlipID: this.DutySlipID
+      }
+    });
+  }
   //---------- End Dispute ----------
 
   //---------- Start Interstate Tax ----------
-  dutyInterstateTax()
-    {
-      const dialogRef = this.dialog.open(DITFormDialogComponent, 
+  dutyInterstateTax() {
+    const dialogRef = this.dialog.open(DITFormDialogComponent,
+      {
+        data:
         {
-          data: 
-          {
-            action: 'add',
-            dutySlipID:this.DutySlipID,
-            reservationID:this.ReservationID,
-            registrationNumber:this.RegistrationNumber,
-            pickupDate:this.PickupDate,
-            dropOffDate:this.DropOffDate,
-            verifyDutyStatusAndCacellationStatus:this.verifyDutyStatusAndCacellationStatus
-          }
-        }); 
-        dialogRef.afterClosed().subscribe((res: any) => {
-          this.DutyInterStateTaxLoadData();
-        })   
-    }
-    
-    public DutyInterStateTaxLoadData()
-    {
-      this.dutyInterstateTaxService.getDutyInterstateTaxEntryDetails(this.DutySlipID).subscribe
+          action: 'add',
+          dutySlipID: this.DutySlipID,
+          reservationID: this.ReservationID,
+          registrationNumber: this.RegistrationNumber,
+          pickupDate: this.PickupDate,
+          dropOffDate: this.DropOffDate,
+          verifyDutyStatusAndCacellationStatus: this.verifyDutyStatusAndCacellationStatus
+        }
+      });
+    dialogRef.afterClosed().subscribe((res: any) => {
+      this.DutyInterStateTaxLoadData();
+    })
+  }
+
+  public DutyInterStateTaxLoadData() {
+    this.dutyInterstateTaxService.getDutyInterstateTaxEntryDetails(this.DutySlipID).subscribe
       (
-        data=>
-        {
-          if(data!=null)
-          {
-            this.showHideaddDIT=true;
+        data => {
+          if (data != null) {
+            this.showHideaddDIT = true;
           }
           this.advanceTableDIT = data;
         },
-        (error: HttpErrorResponse) => { this.advanceTableDIT = null;}
+        (error: HttpErrorResponse) => { this.advanceTableDIT = null; }
       );
-    }
+  }
   //---------- End Interstate Tax ----------
 
   //---------- Start Duty Expense ----------
-  openDutyExpense()
-  {
-    const dialogRef = this.dialog.open(DutyExpenseFormDialogComponent, 
+  openDutyExpense() {
+    const dialogRef = this.dialog.open(DutyExpenseFormDialogComponent,
       {
-        data: 
+        data:
         {
-          dutySlipID:this.DutySlipID,
-          record:this.advanceTableDE,
-          verifyDutyStatusAndCacellationStatus:this.verifyDutyStatusAndCacellationStatus
+          dutySlipID: this.DutySlipID,
+          record: this.advanceTableDE,
+          verifyDutyStatusAndCacellationStatus: this.verifyDutyStatusAndCacellationStatus
         }
       });
-      dialogRef.afterClosed().subscribe((res: any) => {
-        this.dutyExpenseLoadData();
-    });  
+    dialogRef.afterClosed().subscribe((res: any) => {
+      this.dutyExpenseLoadData();
+    });
   }
 
-  public dutyExpenseLoadData() 
-  {
-   this.dutyExpenseService.getTableDataClosing(this.DutySlipID,this.SearchActivationStatus, this.PageNumber).subscribe
-   (
-  data=>
-    {
-      if(data!=null)
-        {
-          this.showDutyExpense=true;
-        }
-        this.advanceTableDE=data;
-    },
-     (error: HttpErrorResponse) => { this.advanceTableDE = null;}
-   );
+  public dutyExpenseLoadData() {
+    this.dutyExpenseService.getTableDataClosing(this.DutySlipID, this.SearchActivationStatus, this.PageNumber).subscribe
+      (
+        data => {
+          if (data != null) {
+            this.showDutyExpense = true;
+          }
+          this.advanceTableDE = data;
+        },
+        (error: HttpErrorResponse) => { this.advanceTableDE = null; }
+      );
   }
   //---------- End Duty Expense ----------
 
   //---------- Start Duty GST Percentage ----------
-  openDutyGSTPercentage()
-  {
-    const dialogRef = this.dialog.open(DutyGSTPercentageFormDialogComponent, 
+  openDutyGSTPercentage() {
+    const dialogRef = this.dialog.open(DutyGSTPercentageFormDialogComponent,
       {
-        data: 
+        data:
         {
-          dutySlipID:this.DutySlipID,
+          dutySlipID: this.DutySlipID,
           record: this.advanceTableDGP,
-          verifyDutyStatusAndCacellationStatus:this.verifyDutyStatusAndCacellationStatus
+          verifyDutyStatusAndCacellationStatus: this.verifyDutyStatusAndCacellationStatus
         }
-      }); 
-      dialogRef.afterClosed().subscribe((res: any) => {
-        this.DutyGSTPercentageLoadData();
-    });  
+      });
+    dialogRef.afterClosed().subscribe((res: any) => {
+      this.DutyGSTPercentageLoadData();
+    });
   }
-  DutyGSTPercentageLoadData() 
-  {
+  DutyGSTPercentageLoadData() {
     this.dutyGSTPercentageService.getTableDataClosing(this.DutySlipID).subscribe
-    (
-      data=>   
-        {  
-         if(data !== null){
-           this.showDGP = true;
-         }
-         this.advanceTableDGP = data;
+      (
+        data => {
+          if (data !== null) {
+            this.showDGP = true;
+          }
+          this.advanceTableDGP = data;
         },
-        (error: HttpErrorResponse) => { this.advanceTableDGP = null;}
-       );
+        (error: HttpErrorResponse) => { this.advanceTableDGP = null; }
+      );
   }
   //---------- End Duty GST Percentage ----------
 
   //---------- Start Duty State ----------
-  openDutyState()
-  {
-    const dialogRef = this.dialog.open(DutyStateFormDialogComponent, 
+  openDutyState() {
+    const dialogRef = this.dialog.open(DutyStateFormDialogComponent,
       {
-        data: 
+        data:
         {
-          dutySlipID:this.DutySlipID,
-          record:this.advanceTableDutyState,
-          verifyDutyStatusAndCacellationStatus:this.verifyDutyStatusAndCacellationStatus,
+          dutySlipID: this.DutySlipID,
+          record: this.advanceTableDutyState,
+          verifyDutyStatusAndCacellationStatus: this.verifyDutyStatusAndCacellationStatus,
         }
       });
-      dialogRef.afterClosed().subscribe((res: any) => {
-        // this.loadDutyStateData();
-    });  
+    dialogRef.afterClosed().subscribe((res: any) => {
+      // this.loadDutyStateData();
+    });
   }
-loadDutyStateData() 
-   {
-      this.dutyStateService.getTableDataClosing(this.DutySlipID).subscribe
+  loadDutyStateData() {
+    this.dutyStateService.getTableDataClosing(this.DutySlipID).subscribe
       (
-        data =>   
-        {
-          if(data !== null){
+        data => {
+          if (data !== null) {
             this.showHideDutyState = true;
           }
-          this.advanceTableDutyState = data;         
+          this.advanceTableDutyState = data;
         },
-        (error: HttpErrorResponse) => { this.advanceTableDutyState = null;}
+        (error: HttpErrorResponse) => { this.advanceTableDutyState = null; }
       );
   }
   //---------- End Duty State ----------
 
   //======= Duty State Customer=======//
-openDutyStateCustomer()
-{
-  const dialogRef = this.dialog.open(DutyStateCustomerFormDialogComponent, 
-    {
-      data: 
+  openDutyStateCustomer() {
+    const dialogRef = this.dialog.open(DutyStateCustomerFormDialogComponent,
       {
-        dutySlipID:this.DutySlipID,
-        record:this.advanceTableDutyStateCustomer,
-        verifyDutyStatusAndCacellationStatus:this.verifyDutyStatusAndCacellationStatus,
-        CustomerID:this.CustomerID
-      }
-    });
-    dialogRef.afterClosed().subscribe((res: any) => {
-       this.loadDutyStateDataCustomer();
-  });  
-}
-
- loadDutyStateDataCustomer() 
-   {
-      this.dutyStateCustomerService.getTableDataCustomerClosing(this.DutySlipID).subscribe
-      (
-        data =>   
+        data:
         {
-          if(data !== null){
+          dutySlipID: this.DutySlipID,
+          record: this.advanceTableDutyStateCustomer,
+          verifyDutyStatusAndCacellationStatus: this.verifyDutyStatusAndCacellationStatus,
+          CustomerID: this.CustomerID
+        }
+      });
+    dialogRef.afterClosed().subscribe((res: any) => {
+      this.loadDutyStateDataCustomer();
+    });
+  }
+
+  loadDutyStateDataCustomer() {
+    this.dutyStateCustomerService.getTableDataCustomerClosing(this.DutySlipID).subscribe
+      (
+        data => {
+          if (data !== null) {
             this.showHideDutyStateCustomer = true;
           }
-          this.advanceTableDutyStateCustomer = data;       
+          this.advanceTableDutyStateCustomer = data;
         },
-        (error: HttpErrorResponse) => { this.advanceTableDutyStateCustomer = null;}
+        (error: HttpErrorResponse) => { this.advanceTableDutyStateCustomer = null; }
       );
   }
 
   ///end Duty State Customer=======//
 
   //---------- Start Add Discount ----------
-  addDiscount()
-  {
-  const dialogRef = this.dialog.open(DiscountDetailsDialogComponent, 
-    {
-      data: 
+  addDiscount() {
+    const dialogRef = this.dialog.open(DiscountDetailsDialogComponent,
+      {
+        data:
         {
           // advanceTable: this.advanceTable,
           // action: 'add'
-          allotmentID:this.AllotmentID,
-          verifyDutyStatusAndCacellationStatus:this.verifyDutyStatusAndCacellationStatus
+          allotmentID: this.AllotmentID,
+          verifyDutyStatusAndCacellationStatus: this.verifyDutyStatusAndCacellationStatus
         }
-    });
+      });
     dialogRef.afterClosed().subscribe((res: any) => {
       this.loadDataForReservationDiscountClosing();
     })
   }
 
-  public loadDataForReservationDiscountClosing() 
-  {
-  const allotmentID = this.AllotmentID;
-   this.discountDetails.getTableDataforReservationDiscountClosing(allotmentID).subscribe
-     (
-       (data :DiscountDetails)=>   
-       {
-         if(data !== null){
-       this.showHideaddDiscount = true;
-       }
-         this.advanceTableDD = data;
-       },
-       (error: HttpErrorResponse) => { this.advanceTableDD = null;}
-     );
+  public loadDataForReservationDiscountClosing() {
+    const allotmentID = this.AllotmentID;
+    this.discountDetails.getTableDataforReservationDiscountClosing(allotmentID).subscribe
+      (
+        (data: DiscountDetails) => {
+          if (data !== null) {
+            this.showHideaddDiscount = true;
+          }
+          this.advanceTableDD = data;
+        },
+        (error: HttpErrorResponse) => { this.advanceTableDD = null; }
+      );
   }
   //---------- End Add Discount ----------
 
   //---------- Start Additional KM & HRs ----------
-   openAdditional()
-{
-  const dialogRef = this.dialog.open(AdditionalDialogComponent, 
-    {
-      data: 
+  openAdditional() {
+    const dialogRef = this.dialog.open(AdditionalDialogComponent,
       {
-        dutySlipID: this.DutySlipID,
-        //action: 'edit',
-        record: this.advanceTableAD,
-        verifyDutyStatusAndCacellationStatus:this.verifyDutyStatusAndCacellationStatus
-      }
-    });   
+        data:
+        {
+          dutySlipID: this.DutySlipID,
+          //action: 'edit',
+          record: this.advanceTableAD,
+          verifyDutyStatusAndCacellationStatus: this.verifyDutyStatusAndCacellationStatus
+        }
+      });
     dialogRef.afterClosed().subscribe((res: any) => {
       if (res === true) {
         this.loadDataforAdditionalKMHR();
       }
     });
-}
+  }
 
-public loadDataforAdditionalKMHR() {
-  this.showAdditionalKms = false;
-  this.additionalKmsDetailsService.getAdditionalKmsDetails(this.DutySlipID).subscribe(
-    data => {   
-       if(data !== null && data.length > 0) {
-        this.advanceTableAD = data;  
-        this.showAdditionalKms = this.advanceTableAD[0].additionalKMs !== 0;
-       } 
-    },
-    (error: HttpErrorResponse) => { 
-       this.advanceTableAD = null;
-       this.showAdditionalKms = false;
-    }
-  );
-}
+  public loadDataforAdditionalKMHR() {
+    this.showAdditionalKms = false;
+    this.additionalKmsDetailsService.getAdditionalKmsDetails(this.DutySlipID).subscribe(
+      data => {
+        if (data !== null && data.length > 0) {
+          this.advanceTableAD = data;
+          this.showAdditionalKms = this.advanceTableAD[0].additionalKMs !== 0;
+        }
+      },
+      (error: HttpErrorResponse) => {
+        this.advanceTableAD = null;
+        this.showAdditionalKms = false;
+      }
+    );
+  }
 
   //---------- Start Duty SAC ----------
-  openDutySAC(source: 'anchor' | 'view' | 'unknown' = 'unknown') 
-  {
+  openDutySAC(source: 'anchor' | 'view' | 'unknown' = 'unknown') {
     // #region agent log
-    fetch('http://127.0.0.1:7532/ingest/f2c32722-bd0e-4386-883a-e749a4372080',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'b9234c'},body:JSON.stringify({sessionId:'b9234c',runId:'pre-fix',hypothesisId:'H8',location:'NewRententAdmin-ng21/clossingOne.component.ts:openDutySAC:start',message:'Duty SAC open invoked',data:{source,isArray:Array.isArray(this.advanceTableSAC),length:Array.isArray(this.advanceTableSAC)?this.advanceTableSAC.length:null},timestamp:Date.now()})}).catch(()=>{});
+    fetch('http://127.0.0.1:7532/ingest/f2c32722-bd0e-4386-883a-e749a4372080', { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-Debug-Session-Id': 'b9234c' }, body: JSON.stringify({ sessionId: 'b9234c', runId: 'pre-fix', hypothesisId: 'H8', location: 'NewRententAdmin-ng21/clossingOne.component.ts:openDutySAC:start', message: 'Duty SAC open invoked', data: { source, isArray: Array.isArray(this.advanceTableSAC), length: Array.isArray(this.advanceTableSAC) ? this.advanceTableSAC.length : null }, timestamp: Date.now() }) }).catch(() => { });
     // #endregion
     const dialogRef = this.dialog.open(DutySACFormDialogComponent,
       {
@@ -674,7 +639,7 @@ public loadDataforAdditionalKMHR() {
         {
           dutySlipID: this.DutySlipID,
           record: this.advanceTableSAC,
-          verifyDutyStatusAndCacellationStatus:this.verifyDutyStatusAndCacellationStatus
+          verifyDutyStatusAndCacellationStatus: this.verifyDutyStatusAndCacellationStatus
         }
       });
     dialogRef.afterClosed().subscribe((res: any) => {
@@ -683,46 +648,41 @@ public loadDataforAdditionalKMHR() {
   }
 
   //======= Duty SAC =======//
-  
- DutySACLoadData() 
- {
-   this.dutySACService.getTableData(this.DutySlipID).subscribe
-   (
-     data=>   
-       {  
-        if(data !== null){
-          this.showSAC = true;
-        }
-        this.advanceTableSAC = data;
-       },
-       (error: HttpErrorResponse) => { this.advanceTableSAC = null;}
+
+  DutySACLoadData() {
+    this.dutySACService.getTableData(this.DutySlipID).subscribe
+      (
+        data => {
+          if (data !== null) {
+            this.showSAC = true;
+          }
+          this.advanceTableSAC = data;
+        },
+        (error: HttpErrorResponse) => { this.advanceTableSAC = null; }
       );
- }
+  }
   //---------- End Duty SAC ----------
   //---------- Billing History ----------
-  openBillingHistory()
-  {  
-    const dialogRef = this.dialog.open(BillingHistoryComponent, 
+  openBillingHistory() {
+    const dialogRef = this.dialog.open(BillingHistoryComponent,
       {
-        height:'65%',
-        width:'50%',
-        data: 
+        height: '65%',
+        width: '50%',
+        data:
         {
-          dutySlipID:this.DutySlipID
+          dutySlipID: this.DutySlipID
         }
       });
   }
   //-------------LTR Details---------------
 
-   public LoadLTR() 
-  {
+  public LoadLTR() {
     this.clossingOneService.PackageTypeForLTR(this.PackageTypeID).subscribe
       (
-        (data:any) => {
+        (data: any) => {
           var packageTypeID = data.packageTypeID;
           var packageType = data.packageType;
-          if(packageType === 'Long Term Rental')
-          {
+          if (packageType === 'Long Term Rental') {
             if (packageType === 'Long Term Rental') {
               let baseUrl = this._generalService.FormURL;
               const url = this.router.serializeUrl(
@@ -731,26 +691,26 @@ public loadDataforAdditionalKMHR() {
                     dutySlipID: this.DutySlipID,
                     reservationID: this.ReservationID,
                     customerID: this.CustomerID,
-                    pickupDate:this.PickupDate,
-                    packageID:this.PackageID
+                    pickupDate: this.PickupDate,
+                    packageID: this.PackageID
                   }
                 })
               );
-      
+
               window.open(baseUrl + url, '_blank'); // Open URL in a new tab
             }
-          } 
+          }
           else {
             Swal.fire({
-            title:
-              'This page open only for Long Term Rental.',
-            icon: 'warning',
-          }).then((result) => {
-            if (result.value) {
+              title:
+                'This page open only for Long Term Rental.',
+              icon: 'warning',
+            }).then((result) => {
+              if (result.value) {
 
-        }
-      });
-    }   
+              }
+            });
+          }
         },
         (error: HttpErrorResponse) => { this.dataSource = null; }
       );
@@ -758,19 +718,19 @@ public loadDataforAdditionalKMHR() {
   //-------------View Bill-------------------------
 
   ViewBill(templateAddress) {
-  let baseUrl = this._generalService.FormURL;
+    let baseUrl = this._generalService.FormURL;
 
-  // Use templateAddress directly as the route
-  const url = this.router.serializeUrl(
-    this.router.createUrlTree([`/${templateAddress}`], {
-      queryParams: {
-        invoiceID: this.invoiceID
-      }
-    })
-  );
+    // Use templateAddress directly as the route
+    const url = this.router.serializeUrl(
+      this.router.createUrlTree([`/${templateAddress}`], {
+        queryParams: {
+          invoiceID: this.invoiceID
+        }
+      })
+    );
 
-  window.open(baseUrl + url, '_blank');
-}
+    window.open(baseUrl + url, '_blank');
+  }
 
 
   //  ViewBill(invoiceType)
@@ -797,7 +757,7 @@ public loadDataforAdditionalKMHR() {
   //      vehicleName:this.closingDataAdvanceTable.vehicle
   //     } }));
   //     window.open(baseUrl + url, '_blank');
-    
+
   // } 
   // if(this.invoiceType === 'InvoiceGeneral')
   //   {
@@ -812,123 +772,112 @@ public loadDataforAdditionalKMHR() {
   //   }   
   // }
   //----------Generate Bill----------------
-  public GenerateBill()
-{
-  this.clossingOneService.generateBill(this.DutySlipID)  
-  .subscribe(
-    response =>
-    {
-      this.invoiceID = response.invoiceID;
-      //this.refresh();
-      // this.loadDataForDriver();
-      // this.loadDataForApp();
-      // this.loadDataForGPS();
-      // this.loadDataForBilling();
-      // this.KMForPreviousBooking();     
-       this.showNotification(
-        'snackbar-success',
-        'Updated...!!!',
-        'bottom',
-        'center'
+  public GenerateBill() {
+    this.clossingOneService.generateBill(this.DutySlipID)
+      .subscribe(
+        response => {
+          this.invoiceID = response.invoiceID;
+          //this.refresh();
+          // this.loadDataForDriver();
+          // this.loadDataForApp();
+          // this.loadDataForGPS();
+          // this.loadDataForBilling();
+          // this.KMForPreviousBooking();     
+          this.showNotification(
+            'snackbar-success',
+            'Updated...!!!',
+            'bottom',
+            'center'
+          );
+          //this.ViewBill();
+          this.getInvoiceType()
+        },
+        error => {
+          //this.refresh();
+          // this.loadDataForDriver();
+          // this.loadDataForApp();
+          // this.loadDataForGPS();
+          // this.loadDataForBilling();
+          this.showNotification(
+            'snackbar-danger',
+            'Operation Failed.....!!!',
+            'bottom',
+            'center'
+          );
+        }
+      )
+
+  }
+  public getInvoiceType() {
+    this.controlPanelDialogeService.getInvoiceType(this.invoiceID).subscribe
+      (
+        data => {
+          this.templateAddress = data.templateAddress;
+          if (this.templateAddress !== null) {
+            this.ViewBill(this.templateAddress);
+          }
+        },
+        (error: HttpErrorResponse) => { this.dataSourceforCard = null; }
       );
-      //this.ViewBill();
-      this.getInvoiceType()
-    },
-    error =>
-    {
-      //this.refresh();
-      // this.loadDataForDriver();
-      // this.loadDataForApp();
-      // this.loadDataForGPS();
-      // this.loadDataForBilling();
-      this.showNotification(
-        'snackbar-danger',
-        'Operation Failed.....!!!',
-        'bottom',
-        'center'
-      ); 
-    }
-  )
-
-}
- public getInvoiceType() 
-  {
-     this.controlPanelDialogeService.getInvoiceType(this.invoiceID).subscribe
-   (
-     data =>   
-     {
-       this.templateAddress = data.templateAddress;
-      if(this.templateAddress !== null)
-      {
-        this.ViewBill(this.templateAddress);
-      }
-     },
-     (error: HttpErrorResponse) => { this.dataSourceforCard = null;}
-   );
- }
-
- public loadDataForCard() 
-  {
-     this.packageRateDetailsForClosingService.getPackageRateDetailsForClosingData(this.DutySlipID,this.ReservationID).subscribe
-   (
-     data =>   
-     {
-       this.dataSourceforCard = data;
-     },
-     (error: HttpErrorResponse) => { this.dataSourceforCard = null;}
-   );
- }
-//---------- Start Sales Person ----------
-
- addSalesPerson() {
-  const dialogRef = this.dialog.open(RSPFormDialogComponent, {
-    data: {
-      advanceTable: this.advanceTableSP,
-      action: 'add',
-      reservationID: this.ReservationID
-    }
-  });
-
-  dialogRef.afterClosed().subscribe((res: any) => {
-     if (res) {
-      this.salesPersonLoadData(); // ✅ This will reload the updated list
-      // this.dataSavedMessage = true;
-      this.updateData.next();
-    }
-  });
-}
-
-  public salesPersonLoadData() 
-  {
-     this.salesPersonService.getSalesPerson(this.ReservationID,this.SearchActivationStatus, this.PageNumber).subscribe
-   (
-     (data) => {
-      this.advanceTableSP = data;
-    },
-    (error) => {
-    }
-  );
-   
   }
 
-  public loadDataClosingSalesPerson() 
-  {
-     this.salesPersonService.getTableDataforClosing(this.DutySlipID).subscribe
-   (
-     (data :ReservationSalesPersonModel)=>   
-     {
-      if(data !== null){
-        this.showHideSalesPerson = true;
+  public loadDataForCard() {
+    this.packageRateDetailsForClosingService.getPackageRateDetailsForClosingData(this.DutySlipID, this.ReservationID).subscribe
+      (
+        data => {
+          this.dataSourceforCard = data;
+        },
+        (error: HttpErrorResponse) => { this.dataSourceforCard = null; }
+      );
+  }
+  //---------- Start Sales Person ----------
+
+  addSalesPerson() {
+    const dialogRef = this.dialog.open(RSPFormDialogComponent, {
+      data: {
+        advanceTable: this.advanceTableSP,
+        action: 'add',
+        reservationID: this.ReservationID
       }
-       this.advanceTableSP = data;
-     },
-     (error: HttpErrorResponse) => { this.advanceTableSP = null;}
-   );
-   
+    });
+
+    dialogRef.afterClosed().subscribe((res: any) => {
+      if (res) {
+        this.salesPersonLoadData(); // ✅ This will reload the updated list
+        // this.dataSavedMessage = true;
+        this.updateData.next();
+      }
+    });
+  }
+
+  public salesPersonLoadData() {
+    this.salesPersonService.getSalesPerson(this.ReservationID, this.SearchActivationStatus, this.PageNumber).subscribe
+      (
+        (data) => {
+          this.advanceTableSP = data;
+        },
+        (error) => {
+        }
+      );
+
+  }
+
+  public loadDataClosingSalesPerson() {
+    this.salesPersonService.getTableDataforClosing(this.DutySlipID).subscribe
+      (
+        (data: ReservationSalesPersonModel) => {
+          if (data !== null) {
+            this.showHideSalesPerson = true;
+          }
+          this.advanceTableSP = data;
+        },
+        (error: HttpErrorResponse) => { this.advanceTableSP = null; }
+      );
+
   }
   //---------- End Sales Person ----------
 
-//------------Notification show -----------
+  //------------Notification show -----------
   showNotification(colorName, text, placementFrom, placementAlign) {
     this.snackBar.open(text, '', {
       duration: 2000,
@@ -939,11 +888,9 @@ public loadDataforAdditionalKMHR() {
   }
 
   //---------Calculate Bill------------------------
-  public CalculateBill()
-{
-   if(this.advanceTableClosingOne.closingDutySlipForBillingModel.verifyDuty === null && this.advanceTableClosingOne.closingDutySlipForBillingModel.goodForBilling=== null)
-  {
-     Swal.fire({
+  public CalculateBill() {
+    if (this.advanceTableClosingOne.closingDutySlipForBillingModel.verifyDuty === null && this.advanceTableClosingOne.closingDutySlipForBillingModel.goodForBilling === null) {
+      Swal.fire({
         title:
           'Please checked verify duty and good for billing before calculate.',
         icon: 'warning',
@@ -953,148 +900,130 @@ public loadDataforAdditionalKMHR() {
         }
       });
 
-  }
-  else{
-  this.clossingOneService.calculateBill(this.DutySlipID)  
-  .subscribe(
-    response => 
-    {
-      this.loadDataForCard(); 
-      this.showNotification(
-        'snackbar-success',
-        'Updated...!!!',
-        'bottom',
-        'center'
-      );
-    },
-    // error =>
-    // {      
-    //   this.showNotification(
-    //     'snackbar-danger',
-    //     'Operation Failed.....!!!',
-    //     'bottom',
-    //     'center'
-    //   ); 
-    // }
-    error =>
-    {
-      const errorMessage = error || 'Operation Failed.....!!!';
-      Swal.fire({
-        title: errorMessage,
-        icon: 'error'
-      });
     }
-  )
-}
-
-}
-//----------------Show Map----------------
-GetDutySlipMap()
-{
-  this.clossingOneService.getDutySlipMap(this.DutySlipID).subscribe(
-    data=>
-      {
-    
-        this.dutySlipMap=data;
-        this.mapOfDutySlip=this.dutySlipMap.dutySlipMap;
-      }
-  )
-}
-showMap()
-{
-    window.open(this.mapOfDutySlip, '_blank');
-}
-//----------Close Panels-----------------
-closePanels()
-{
-  this.panelExpanded=false;
-}
-  submit(){}
-
-   //======= Advance Details =======//
-    advanceDetailsLoadData() 
-    {
-      this.advanceDetailsClosingService.getTableData(this.ReservationID,this.SearchActivationStatus, this.PageNumber).subscribe
-      (
-        (data :AdvanceDetailsClosing)=>   
-          {  
-            if(data !== null){
-         this.showAdvanceDetails = true;
-       }  
-           this.advanceTableAdvanceDC = data;
+    else {
+      this.clossingOneService.calculateBill(this.DutySlipID)
+        .subscribe(
+          response => {
+            this.loadDataForCard();
+            this.showNotification(
+              'snackbar-success',
+              'Updated...!!!',
+              'bottom',
+              'center'
+            );
           },
-          (error: HttpErrorResponse) => { this.advanceTableAdvanceDC = null;}
-         );
+          // error =>
+          // {      
+          //   this.showNotification(
+          //     'snackbar-danger',
+          //     'Operation Failed.....!!!',
+          //     'bottom',
+          //     'center'
+          //   ); 
+          // }
+          error => {
+            const errorMessage = error || 'Operation Failed.....!!!';
+            Swal.fire({
+              title: errorMessage,
+              icon: 'error'
+            });
+          }
+        )
     }
-    //======= Settled Rate To Other =======//
-     settledRateLoadData() 
-     {
-       this.settledRateClosingService.GetClosingSettledRate(this.DutySlipID,this.SearchActivationStatus, this.PageNumber).subscribe
-       (
-         (data :SettledRateClosing)=>   
-           {  
-            if(data !== null){
+
+  }
+  //----------------Show Map----------------
+  GetDutySlipMap() {
+    this.clossingOneService.getDutySlipMap(this.DutySlipID).subscribe(
+      data => {
+
+        this.dutySlipMap = data;
+        this.mapOfDutySlip = this.dutySlipMap.dutySlipMap;
+      }
+    )
+  }
+  showMap() {
+    window.open(this.mapOfDutySlip, '_blank');
+  }
+  //----------Close Panels-----------------
+  closePanels() {
+    this.panelExpanded = false;
+  }
+  submit() { }
+
+  //======= Advance Details =======//
+  advanceDetailsLoadData() {
+    this.advanceDetailsClosingService.getTableData(this.ReservationID, this.SearchActivationStatus, this.PageNumber).subscribe
+      (
+        (data: AdvanceDetailsClosing) => {
+          if (data !== null) {
+            this.showAdvanceDetails = true;
+          }
+          this.advanceTableAdvanceDC = data;
+        },
+        (error: HttpErrorResponse) => { this.advanceTableAdvanceDC = null; }
+      );
+  }
+  //======= Settled Rate To Other =======//
+  settledRateLoadData() {
+    this.settledRateClosingService.GetClosingSettledRate(this.DutySlipID, this.SearchActivationStatus, this.PageNumber).subscribe
+      (
+        (data: SettledRateClosing) => {
+          if (data !== null) {
             this.showSettledRate = true;
-           }
-            this.advanceTableSRD = data;
-           },
-           (error: HttpErrorResponse) => { this.advanceTableSRD = null;}
-          );
-     }
-     //======= Kam Card =======//
-     kamCardLoadData() 
-     {
-      this.kamDetailsClosingService.getTableData(this.ReservationID,this.SearchActivationStatus, this.PageNumber).subscribe
-     (
-      (data :KAMDetailsClosing)=>   
-      {  
-       if(data !== null){
-         this.showKamCard = true;
-       }
-       this.advanceTableKC = data;
-      },
-      (error: HttpErrorResponse) => { this.advanceTableKC = null;}
-     );
-     }
+          }
+          this.advanceTableSRD = data;
+        },
+        (error: HttpErrorResponse) => { this.advanceTableSRD = null; }
+      );
+  }
+  //======= Kam Card =======//
+  kamCardLoadData() {
+    this.kamDetailsClosingService.getTableData(this.ReservationID, this.SearchActivationStatus, this.PageNumber).subscribe
+      (
+        (data: KAMDetailsClosing) => {
+          if (data !== null) {
+            this.showKamCard = true;
+          }
+          this.advanceTableKC = data;
+        },
+        (error: HttpErrorResponse) => { this.advanceTableKC = null; }
+      );
+  }
 
   //---------- Start Additional SMS/Email/WhatsApp Details ----------
-  AdditionalSMSEmailWhatsAppDetailsLoadData() 
-  {
+  AdditionalSMSEmailWhatsAppDetailsLoadData() {
     this.additionalSMSEmailWhatsappService.GetAdditionalSMSEmailMessagingData(this.DutySlipID).subscribe
-    (
-      (data : AdditionalSMSDetails)=>   
-      {  
-        if(data !== null)
-        {
-          this.showAdditionalSMS = true;
-        }
-        this.advanceTableASEW = data;
+      (
+        (data: AdditionalSMSDetails) => {
+          if (data !== null) {
+            this.showAdditionalSMS = true;
+          }
+          this.advanceTableASEW = data;
         },
-        (error: HttpErrorResponse) => { this.advanceTableASEW = null;}
+        (error: HttpErrorResponse) => { this.advanceTableASEW = null; }
       );
   }
   //---------- End Additional SMS/Email/WhatsApp Details ----------
 
   //---------- Start Bill To Other Details ----------
-  BillToOtherLoadData() 
-  {
+  BillToOtherLoadData() {
     this.billToOtherService.GetAdditionalSMSEmailMessagingData(this.DutySlipID).subscribe
-    (
-    (data :BillToOther)=>   
-      {  
-        if(data !== null)
-        {
-          this.showBillToOther = true;
-        }
-        this.advanceTableBD = data;
-      },
-      (error: HttpErrorResponse) => { this.advanceTableBD = null;}
-    );
+      (
+        (data: BillToOther) => {
+          if (data !== null) {
+            this.showBillToOther = true;
+          }
+          this.advanceTableBD = data;
+        },
+        (error: HttpErrorResponse) => { this.advanceTableBD = null; }
+      );
   }
   //---------- End Bill To Other Details ----------
 
   //---------UP and Down Key Work------------------  
- scrollToLinkButton() {
+  scrollToLinkButton() {
     const element = document.getElementById('linkButtonSection');
     if (element) {
       element.scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -1102,241 +1031,262 @@ closePanels()
   }
 
   //-----TollParking
-showAndScrollTollParking() {
-  this.showHideTollParkingCard = true;
-  setTimeout(() => {
-    const element = document.getElementById('tollParkingEntry');
-    if (element) {
-      element.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    }
-  }, 0);
-}
+  showAndScrollTollParking() {
+    this.showHideTollParkingCard = true;
+    setTimeout(() => {
+      const element = document.getElementById('tollParkingEntry');
+      if (element) {
+        element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+    }, 0);
+  }
   //-----ODO Meter
-showAndScrollODOMeter() {
-  this.showHideODOMeterCard = true;
-  setTimeout(() => {
-    const element = document.getElementById('OdoMeterImage');
-    if (element) {
-      element.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    }
-  }, 0);
-}
-///-----Dispute
-showAndScrollOpenDisputes() {
-  this.showHideDispute = true;
-  setTimeout(() => {
-    const element = document.getElementById('openDisputes');
-    if (element) {
-      element.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    }
-  }, 0);
-}
-//------DutyInterStateTax
-showAndScrollDutyInterstateTax() {
-  this.showHideaddDIT = true;
-  setTimeout(() => {
-    const element = document.getElementById('dutyInterstateTax');
-    if (element) {
-      element.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    }
-  }, 0);
-}
+  showAndScrollODOMeter() {
+    this.showHideODOMeterCard = true;
+    setTimeout(() => {
+      const element = document.getElementById('OdoMeterImage');
+      if (element) {
+        element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+    }, 0);
+  }
+  ///-----Dispute
+  showAndScrollOpenDisputes() {
+    this.showHideDispute = true;
+    setTimeout(() => {
+      const element = document.getElementById('openDisputes');
+      if (element) {
+        element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+    }, 0);
+  }
+  //------DutyInterStateTax
+  showAndScrollDutyInterstateTax() {
+    this.showHideaddDIT = true;
+    setTimeout(() => {
+      const element = document.getElementById('dutyInterstateTax');
+      if (element) {
+        element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+    }, 0);
+  }
 
-//------OpenDutyExpense
-showAndScrollOpenDutyExpense() {
-  this.showDutyExpense = true;
-  setTimeout(() => {
-    const element = document.getElementById('dutyExpense');
-    if (element) {
-      element.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    }
-  }, 0);
-}
-//------DutyGSTPercentage
-showAndScrollDutyGSTPercentage() {
-  this.showDGP = true;
-  setTimeout(() => {
-    const element = document.getElementById('dutyGSTPercentage');
-    if (element) {
-      element.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    }
-  }, 0);
-}
+  //------OpenDutyExpense
+  showAndScrollOpenDutyExpense() {
+    this.showDutyExpense = true;
+    setTimeout(() => {
+      const element = document.getElementById('dutyExpense');
+      if (element) {
+        element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+    }, 0);
+  }
+  //------DutyGSTPercentage
+  showAndScrollDutyGSTPercentage() {
+    this.showDGP = true;
+    setTimeout(() => {
+      const element = document.getElementById('dutyGSTPercentage');
+      if (element) {
+        element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+    }, 0);
+  }
 
-//------DutyState
-showAndScrollDutyState() {
-  this.showHideDutyState = true;
-  setTimeout(() => {
-    const element = document.getElementById('dutyState');
-    if (element) {
-      element.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    }
-  }, 0);
-}
+  //------DutyState
+  showAndScrollDutyState() {
+    this.showHideDutyState = true;
+    setTimeout(() => {
+      const element = document.getElementById('dutyState');
+      if (element) {
+        element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+    }, 0);
+  }
 
-//------DutyState customer
-showAndScrollDutyStateCustomer() {
-  this.showHideDutyStateCustomer = true;
-  setTimeout(() => {
-    const element = document.getElementById('dutyStateCustomer');
-    if (element) {
-      element.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    }
-  }, 0);
-}
-//------DutySAC
-showAndScrollDutySAC() {
-  this.showSAC = true;
-  setTimeout(() => {
-    const element = document.getElementById('dutySAC');
-    if (element) {
-      element.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    }
-  }, 0);
-}
+  //------DutyState customer
+  showAndScrollDutyStateCustomer() {
+    this.showHideDutyStateCustomer = true;
+    setTimeout(() => {
+      const element = document.getElementById('dutyStateCustomer');
+      if (element) {
+        element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+    }, 0);
+  }
+  //------DutySAC
+  showAndScrollDutySAC() {
+    this.showSAC = true;
+    setTimeout(() => {
+      const element = document.getElementById('dutySAC');
+      if (element) {
+        element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+    }, 0);
+  }
 
-//------AdditionalKm
-showAndScrollAdditionalKm() {
-  this.showAdditionalKms = true;
-  setTimeout(() => {
-    const element = document.getElementById('AdditionalKms');
-    if (element) {
-      element.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    }
-  }, 0);
-}
+  //------AdditionalKm
+  showAndScrollAdditionalKm() {
+    this.showAdditionalKms = true;
+    setTimeout(() => {
+      const element = document.getElementById('AdditionalKms');
+      if (element) {
+        element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+    }, 0);
+  }
 
-//------Mop
-showAndScrollMOP() {
-  this.showMOP = true;
-  setTimeout(() => {
-    const element = document.getElementById('openMop');
-    if (element) {
-      element.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    }
-  }, 0);
-}
-//------Add Discount
-showAndScrollAddDiscount() {
-  this.showHideaddDiscount = true;
-  setTimeout(() => {
-    const element = document.getElementById('addDiscount');
-    if (element) {
-      element.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    }
-  }, 0);
-}
+  //------Mop
+  showAndScrollMOP() {
+    this.showMOP = true;
+    setTimeout(() => {
+      const element = document.getElementById('openMop');
+      if (element) {
+        element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+    }, 0);
+  }
+  //------Add Discount
+  showAndScrollAddDiscount() {
+    this.showHideaddDiscount = true;
+    setTimeout(() => {
+      const element = document.getElementById('addDiscount');
+      if (element) {
+        element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+    }, 0);
+  }
 
-//------Sales Person
-showAndScrollSalesPerson() {
-  this.showHideSalesPerson = true;
-  setTimeout(() => {
-    const element = document.getElementById('salesPerson');
-    if (element) {
-      element.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    }
-  }, 0);
-}
+  //------Sales Person
+  showAndScrollSalesPerson() {
+    this.showHideSalesPerson = true;
+    setTimeout(() => {
+      const element = document.getElementById('salesPerson');
+      if (element) {
+        element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+    }, 0);
+  }
 
-MOPDetails()
-{
-  const dialogRef = this.dialog.open(FormDialogComponent, 
-    {
-      data: 
+  MOPDetails() {
+    const dialogRef = this.dialog.open(FormDialogComponent,
+      {
+        data:
         {
-          advanceTable: this.advanceTableMOP, 
-          reservationID:this.ReservationID,          
+          advanceTable: this.advanceTableMOP,
+          reservationID: this.ReservationID,
           action: 'edit',
-          verifyDutyStatusAndCacellationStatus:this.verifyDutyStatusAndCacellationStatus
+          verifyDutyStatusAndCacellationStatus: this.verifyDutyStatusAndCacellationStatus
         }
-    });
+      });
     dialogRef.afterClosed().subscribe((res: any) => {
       this.MOPLoadData();
-  })
-}
+    })
+  }
 
-public MOPLoadData() 
-{
-   this.mopDetailsService.getModeOfPaymentDetails(this.ReservationID).subscribe
-   (
-    //  data=>   
-    //  {
-    //    this.advanceTableMOP = data;
-    //  }, 
-     (data :MOPModel)=>   
-      {  
-        if(data !== null)
-        {
-          this.showMOPOther = true;
-        }
-        this.advanceTableMOP = data;
-      },
-       (error: HttpErrorResponse) => { this.advanceTableMOP = null;}
-   );  
-}
+  public MOPLoadData() {
+    this.mopDetailsService.getModeOfPaymentDetails(this.ReservationID).subscribe
+      (
+        //  data=>   
+        //  {
+        //    this.advanceTableMOP = data;
+        //  }, 
+        (data: MOPModel) => {
+          if (data !== null) {
+            this.showMOPOther = true;
+          }
+          this.advanceTableMOP = data;
+        },
+        (error: HttpErrorResponse) => { this.advanceTableMOP = null; }
+      );
+  }
 
-  onDutyStatusChanged(event: {verifyDuty: boolean, goodForBilling: boolean, message: string}) {
+  onDutyStatusChanged(event: { verifyDuty: boolean, goodForBilling: boolean, message: string }) {
     this.verifyDuty = event.verifyDuty;
     this.goodForBilling = event.goodForBilling;
     this.Message = event.message;
   }
 
-  openSearchModal() 
-  {
+  openSearchModal() {
     this.searchModal.openModal();
   }
 
   openDutySlipImage() {
-        this._dutySlipImageService.getAllotmentIDForDutySlipImage(this.allotmentID).subscribe(
-          data => {
-            this.dutySlipImageAllotmentID = data;
-            if (this.dutySlipImageAllotmentID.dutySlipImage === null) {
-              this.dialogRequestObject = {
-                action: 'add',
-                dutySlipID: this.dutySlipID,
-                reservationID: this.ReservationID,
-                allotmentID: this.allotmentID,                
-                verifyDutyStatusAndCacellationStatus:this.verifyDutyStatusAndCacellationStatus
-              };
-            }
-            if (this.dutySlipImageAllotmentID.dutySlipImage !== null) {
-              this.dialogRequestObject = {
-                action: 'edit',
-                dutySlipID: this.dutySlipID,
-                reservationID: this.ReservationID,
-                allotmentID: this.allotmentID,
-                verifyDutyStatusAndCacellationStatus:this.verifyDutyStatusAndCacellationStatus
-              };
-            }
-            let dialogRef = this.dialog.open(DutySlipImageDialog, {
-              data: this.dialogRequestObject
-            });
-            dialogRef.afterClosed().subscribe((result: any) => {
-              if (result !== undefined || result !== null) {
-                this.dutySlipImage = result.dutySlipImage;
-                this.loadDataForImage();
-              
-              }
-  
-            });
-          });
-      
-    }
-     public loadDataForImage() 
-       {
-          this.odoMeterAndManualDutySlipImageService.getAllotmentIDForDutySlipImage(this.AllotmentID).subscribe
-          (
-           (data:OdoMeterAndManualDutySlipImage) =>  
-            {
-              if(data.tripEndODOMeterImage !== null || data.tripStartODOMeterImage !== null || data.dutySlipImage !== null)
-             {
-              this.showHideODOMeterCard= true;
-            }
-              this.oDOMAndMDSAdvanceTable = data;         
-            },
-            (error: HttpErrorResponse) => { this.oDOMAndMDSAdvanceTable = null;}
-          );
+    this._dutySlipImageService.getAllotmentIDForDutySlipImage(this.allotmentID).subscribe(
+      data => {
+        this.dutySlipImageAllotmentID = data;
+        if (this.dutySlipImageAllotmentID.dutySlipImage === null) {
+          this.dialogRequestObject = {
+            action: 'add',
+            dutySlipID: this.dutySlipID,
+            reservationID: this.ReservationID,
+            allotmentID: this.allotmentID,
+            verifyDutyStatusAndCacellationStatus: this.verifyDutyStatusAndCacellationStatus
+          };
+        }
+        if (this.dutySlipImageAllotmentID.dutySlipImage !== null) {
+          this.dialogRequestObject = {
+            action: 'edit',
+            dutySlipID: this.dutySlipID,
+            reservationID: this.ReservationID,
+            allotmentID: this.allotmentID,
+            verifyDutyStatusAndCacellationStatus: this.verifyDutyStatusAndCacellationStatus
+          };
+        }
+        let dialogRef = this.dialog.open(DutySlipImageDialog, {
+          data: this.dialogRequestObject
+        });
+        dialogRef.afterClosed().subscribe((result: any) => {
+          if (result !== undefined || result !== null) {
+            this.dutySlipImage = result.dutySlipImage;
+            this.loadDataForImage();
+
+          }
+
+        });
+      });
+
+  }
+  public loadDataForImage() {
+    this.odoMeterAndManualDutySlipImageService.getAllotmentIDForDutySlipImage(this.AllotmentID).subscribe
+      (
+        (data: OdoMeterAndManualDutySlipImage) => {
+          if (data.tripEndODOMeterImage !== null || data.tripStartODOMeterImage !== null || data.dutySlipImage !== null) {
+            this.showHideODOMeterCard = true;
+          }
+          this.oDOMAndMDSAdvanceTable = data;
+        },
+        (error: HttpErrorResponse) => { this.oDOMAndMDSAdvanceTable = null; }
+      );
+  }
+  PrintDS() {
+    let baseUrl = this._generalService.FormURL;
+    if (this.allotmentStatus === 'Alloted') {
+      const dutySlipType = (this?.dutySlipType || '').toString().trim();
+      let url = '';
+      if (dutySlipType === 'GeneralDutySlipWithMap') {
+        url = this.router.serializeUrl(this.router.createUrlTree(['/printdutyslip'],
+          { queryParams: { dutySlipID: this.dutySlipID, reservationID: this.ReservationID } }));
       }
+      else if (dutySlipType === 'GeneralDutySlipWithoutMap') {
+        url = this.router.serializeUrl(this.router.createUrlTree(['/PrintDutySlipWithoutMap'],
+          { queryParams: { dutySlipID: this.dutySlipID, reservationID: this.ReservationID } }));
+      }
+      else {
+        // Fallback: backend sometimes sends null dutySlipType; default to without-map format.
+        url = this.router.serializeUrl(this.router.createUrlTree(['/PrintDutySlipWithoutMap'],
+          { queryParams: { dutySlipID: this.dutySlipID, reservationID: this.ReservationID } }));
+      }
+      window.open(baseUrl + url, '_blank');
+    }
+    else {
+      Swal.fire({
+        title: '',
+        icon: 'warning',
+        html: `<b>Allotment Required.</b>`
+      });
+      return;
+    }
+  }
 }
 
 
