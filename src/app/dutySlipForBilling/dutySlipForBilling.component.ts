@@ -46,8 +46,9 @@ export class DutySlipForBillingComponent implements OnInit {
  advanceTableForm:FormGroup;
  panelExpanded: boolean = false;
  selectedKMType: string = '';
- datetime: any;
- diff: number;
+ datetime: string = '';
+ /** Total KM chain diff; null when not computable. */
+ diff: number | null = null;
  totalKMForManul: any;
  totalKMForApp: any;
  advanceTableBH : BillingHistory | null;
@@ -121,7 +122,9 @@ export class DutySlipForBillingComponent implements OnInit {
       this.advanceTableForm.controls["verifyDuty"].enable();
       this.LoadDataForBilling();
     }
- 
+
+    this.onKeyUp();
+    this.onTimeSelection();
   }
 
   submit()
@@ -1200,60 +1203,121 @@ export class DutySlipForBillingComponent implements OnInit {
     this.onTimeSelection();
   }
 
-  onTimeSelection() 
-    {
-      // ------------LocationOutDateTime--------------
-      var locOutTime = this.advanceTableForm.get("locationOutTimeForBilling").value;
-      var locOutTimeConversion = moment(locOutTime).format('HH:mm');
-      var locOutDate = this.advanceTableForm.get("locationOutDateForBilling").value;
-      var locOutDateConversion = moment(locOutDate).format('yyyy-MM-DD');
-      var locationOutDateTime = locOutDateConversion + ' ' + locOutTimeConversion;
-    
-      // ------------PickupDateTime--------------
-      var pickUpTime = this.advanceTableForm.get("pickUpTimeForBilling").value;
-      var pickUpTimeConversion = moment(pickUpTime).format('HH:mm');
-      var pickUpDate = this.advanceTableForm.get("pickUpDateForBilling").value;
-      var pickUpDateConversion = moment(pickUpDate).format('yyyy-MM-DD');
-      var pickUpDateTime = pickUpDateConversion + ' ' + pickUpTimeConversion;
-    
-      // ------------DropoffDateTime--------------
-      var dropOffTime = this.advanceTableForm.get("dropOffTimeForBilling").value;
-      var dropOffTimeConversion = moment(dropOffTime).format('HH:mm');
-      var dropOffDate = this.advanceTableForm.get("dropOffDateForBilling").value;
-      var dropOffDateConversion = moment(dropOffDate).format('yyyy-MM-DD');
-      var dropOffDateTime = dropOffDateConversion + ' ' + dropOffTimeConversion;
-    
-      // ------------LocationInDateTime--------------
-      var locInTime = this.advanceTableForm.get("locationInTimeForBilling").value;
-      var locInTimeConversion = moment(locInTime).format('HH:mm');
-      var locInDate = this.advanceTableForm.get("locationInDateForBilling").value;
-      var locInDateConversion = moment(locInDate).format('yyyy-MM-DD');
-      var locInDateTime = locInDateConversion + ' ' + locInTimeConversion;
-    
-      // Calculate differences
-      var diff3 = new Date(pickUpDateTime).getTime() - new Date(locationOutDateTime).getTime();
-      var diff2 = new Date(dropOffDateTime).getTime() - new Date(pickUpDateTime).getTime();
-      var diff1 = new Date(locInDateTime).getTime() - new Date(dropOffDateTime).getTime();
-      
-      var totalMilliseconds = diff1 + diff2 + diff3;
-    
-      // Convert to total minutes
-      var totalMinutes = totalMilliseconds / (1000 * 60);
-    
-      // Extract hours and minutes
-      var hours = Math.floor(totalMinutes / 60);
-      var minutes = Math.floor(totalMinutes % 60);
-    
-      // Combine hours and minutes in desired format
-      this.datetime = hours + "." + minutes;
+  onTimeSelection() {
+    const locOutTime = this.advanceTableForm.get('locationOutTimeForBilling')?.value;
+    const locOutDate = this.advanceTableForm.get('locationOutDateForBilling')?.value;
+    const pickUpTime = this.advanceTableForm.get('pickUpTimeForBilling')?.value;
+    const pickUpDate = this.advanceTableForm.get('pickUpDateForBilling')?.value;
+    const dropOffTime = this.advanceTableForm.get('dropOffTimeForBilling')?.value;
+    const dropOffDate = this.advanceTableForm.get('dropOffDateForBilling')?.value;
+    const locInTime = this.advanceTableForm.get('locationInTimeForBilling')?.value;
+    const locInDate = this.advanceTableForm.get('locationInDateForBilling')?.value;
+
+    const hasAll =
+      locOutTime != null &&
+      locOutDate != null &&
+      locOutTime !== '' &&
+      locOutDate !== '' &&
+      pickUpTime != null &&
+      pickUpDate != null &&
+      pickUpTime !== '' &&
+      pickUpDate !== '' &&
+      dropOffTime != null &&
+      dropOffDate != null &&
+      dropOffTime !== '' &&
+      dropOffDate !== '' &&
+      locInTime != null &&
+      locInDate != null &&
+      locInTime !== '' &&
+      locInDate !== '';
+
+    if (!hasAll) {
+      this.datetime = '';
+      return;
+    }
+
+    if (
+      !moment(locOutDate).isValid() ||
+      !moment(locOutTime).isValid() ||
+      !moment(pickUpDate).isValid() ||
+      !moment(pickUpTime).isValid() ||
+      !moment(dropOffDate).isValid() ||
+      !moment(dropOffTime).isValid() ||
+      !moment(locInDate).isValid() ||
+      !moment(locInTime).isValid()
+    ) {
+      this.datetime = '';
+      return;
+    }
+
+    // Moment uses YYYY (not lowercase yyyy) for 4-digit year
+    const locOutTimeConversion = moment(locOutTime).format('HH:mm');
+    const locOutDateConversion = moment(locOutDate).format('YYYY-MM-DD');
+    const locationOutDateTime = locOutDateConversion + ' ' + locOutTimeConversion;
+
+    const pickUpTimeConversion = moment(pickUpTime).format('HH:mm');
+    const pickUpDateConversion = moment(pickUpDate).format('YYYY-MM-DD');
+    const pickUpDateTime = pickUpDateConversion + ' ' + pickUpTimeConversion;
+
+    const dropOffTimeConversion = moment(dropOffTime).format('HH:mm');
+    const dropOffDateConversion = moment(dropOffDate).format('YYYY-MM-DD');
+    const dropOffDateTime = dropOffDateConversion + ' ' + dropOffTimeConversion;
+
+    const locInTimeConversion = moment(locInTime).format('HH:mm');
+    const locInDateConversion = moment(locInDate).format('YYYY-MM-DD');
+    const locInDateTime = locInDateConversion + ' ' + locInTimeConversion;
+
+    const t0 = new Date(locationOutDateTime).getTime();
+    const t1 = new Date(pickUpDateTime).getTime();
+    const t2 = new Date(dropOffDateTime).getTime();
+    const t3 = new Date(locInDateTime).getTime();
+    if (![t0, t1, t2, t3].every((t) => Number.isFinite(t))) {
+      this.datetime = '';
+      return;
+    }
+
+    const diff3 = t1 - t0;
+    const diff2 = t2 - t1;
+    const diff1 = t3 - t2;
+    const totalMilliseconds = diff1 + diff2 + diff3;
+    if (!Number.isFinite(totalMilliseconds)) {
+      this.datetime = '';
+      return;
+    }
+
+    const totalMinutes = totalMilliseconds / (1000 * 60);
+    if (!Number.isFinite(totalMinutes)) {
+      this.datetime = '';
+      return;
+    }
+
+    const hours = Math.floor(totalMinutes / 60);
+    const minutes = Math.floor(totalMinutes % 60);
+    this.datetime = hours + '.' + minutes;
   }
 
-  onKeyUp()
-  {
-    var diff1=this.advanceTableForm.value.locationInKMForBilling - this.advanceTableForm.value.dropOffKMForBilling;
-    var diff2=this.advanceTableForm.value.dropOffKMForBilling - this.advanceTableForm.value.pickUpKMForBilling;
-    var diff3=this.advanceTableForm.value.pickUpKMForBilling - this.advanceTableForm.value.locationOutKMForBilling;
-    this.diff=diff1+diff2+diff3;
+  onKeyUp() {
+    const v = this.advanceTableForm.value;
+    const toNum = (x: any): number | null => {
+      if (x === null || x === undefined || x === '') {
+        return null;
+      }
+      const n = Number(x);
+      return Number.isFinite(n) ? n : null;
+    };
+    const locationIn = toNum(v.locationInKMForBilling);
+    const dropOff = toNum(v.dropOffKMForBilling);
+    const pickUp = toNum(v.pickUpKMForBilling);
+    const locationOut = toNum(v.locationOutKMForBilling);
+    if (locationIn === null || dropOff === null || pickUp === null || locationOut === null) {
+      this.diff = null;
+      return;
+    }
+    const diff1 = locationIn - dropOff;
+    const diff2 = dropOff - pickUp;
+    const diff3 = pickUp - locationOut;
+    const sum = diff1 + diff2 + diff3;
+    this.diff = Number.isFinite(sum) ? sum : null;
   }
 
   addtionOfManulKM()

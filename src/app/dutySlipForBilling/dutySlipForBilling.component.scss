@@ -32,20 +32,24 @@ tbody, thead {
     text-decoration: underline;
   }
 
-  /* Reduce padding and margins for mat-form-field */
-.mat-form-field {
+  /* Reduce padding and margins for mat-form-field (exclude closing grid: MDC sizes those) */
+.mat-form-field:not(.cp-quick-search-field) {
   margin: 0;
   padding: 0;
-  height: 50px; /* Adjust height as needed */
+  height: 50px;
 }
 
-/* Reduce height of input elements */
-.mat-form-field .mat-input-element {
+.mat-form-field.cp-quick-search-field {
+  margin: 0;
+  padding: 0;
+}
+
+/* Reduce height of input elements (exclude closing grid: fixed height breaks MDC floating labels) */
+.mat-form-field:not(.cp-quick-search-field) .mat-input-element {
   height: 20px; /* Adjust height as needed */
 }
 
-/* Reduce height of textarea elements */
-.mat-form-field textarea {
+.mat-form-field:not(.cp-quick-search-field) textarea {
   height: 30px; /* Adjust height as needed */
 }
 
@@ -66,88 +70,81 @@ tr {
   justify-content: space-between;
 }
 
-/* Closing page controls: floating watermark style parity with Control Panel/Booking. */
-:host ::ng-deep .cp-closing-field.mat-mdc-form-field {
+/* Closing (closingOne) duty slip: compact row height, aligned bottoms */
+:host ::ng-deep .cp-closing-form-compact {
+  .mb-2 {
+    margin-bottom: 0.35rem !important;
+  }
+}
+
+/* Closing page controls: floating label + tight vertical rhythm */
+:host ::ng-deep .cp-closing-form-compact .cp-quick-search-field.mat-mdc-form-field {
   width: 100%;
 }
 
-:host ::ng-deep .cp-closing-field .mat-mdc-text-field-wrapper,
-:host ::ng-deep .cp-closing-field .mdc-text-field--filled,
-:host ::ng-deep .cp-closing-field .mat-mdc-form-field-focus-overlay {
+:host ::ng-deep .cp-closing-form-compact .cp-quick-search-field .mat-mdc-text-field-wrapper,
+:host ::ng-deep .cp-closing-form-compact .cp-quick-search-field .mdc-text-field--filled,
+:host ::ng-deep .cp-closing-form-compact .cp-quick-search-field .mat-mdc-form-field-focus-overlay {
   background-color: transparent !important;
 }
 
-:host ::ng-deep .cp-closing-field .mdc-text-field--filled {
+:host ::ng-deep .cp-closing-form-compact .cp-quick-search-field .mdc-text-field--filled {
   border-top-left-radius: 0 !important;
   border-top-right-radius: 0 !important;
 }
 
-:host ::ng-deep .cp-closing-field .mat-mdc-form-field-infix {
-  min-height: 58px !important;
+/*
+ * Textareas (floatLabel=auto): same cp-quick as KM; override global infix flex-end so the label
+ * can start as a watermark in the field and float up on focus / when filled.
+ */
+:host ::ng-deep .cp-closing-form-compact .cp-closing-textarea-field .mat-mdc-form-field-infix {
+  min-height: 56px !important;
   padding-top: 18px !important;
-  padding-bottom: 8px !important;
+  padding-bottom: 10px !important;
   display: flex !important;
-  align-items: center !important;
+  align-items: flex-start !important;
+  box-sizing: border-box !important;
 }
 
-:host ::ng-deep .cp-closing-field .mat-mdc-form-field-subscript-wrapper {
+:host ::ng-deep .cp-closing-form-compact .cp-closing-textarea-field textarea.mat-mdc-input-element {
+  align-self: stretch !important;
+  width: 100% !important;
+  min-height: 2.5rem !important;
+  margin: 0 !important;
+  /* Space under floated label and first line of text */
+  padding: 6px 0 2px 0 !important;
+  line-height: 1.35 !important;
+  box-sizing: border-box !important;
+}
+
+:host ::ng-deep .cp-closing-form-compact .cp-quick-search-field .mat-mdc-form-field-subscript-wrapper {
   margin-top: 0 !important;
 }
 
-:host ::ng-deep .cp-closing-field .mdc-floating-label,
-:host ::ng-deep .cp-closing-field .mat-mdc-floating-label {
+:host ::ng-deep .cp-closing-form-compact .cp-quick-search-field .mdc-floating-label,
+:host ::ng-deep .cp-closing-form-compact .cp-quick-search-field .mat-mdc-floating-label {
   color: #8a8a8a !important;
-  font-size: 11px !important;
   font-weight: 400 !important;
 }
 
-:host ::ng-deep .cp-closing-field .mat-mdc-input-element,
-:host ::ng-deep .cp-closing-field .mat-mdc-select-value-text {
+:host ::ng-deep .cp-closing-form-compact .cp-quick-search-field .mat-mdc-input-element,
+:host ::ng-deep .cp-closing-form-compact .cp-quick-search-field .mat-mdc-select-value-text {
   color: #222 !important;
   font-size: 13px !important;
   font-weight: 400 !important;
   line-height: 1.2 !important;
 }
 
-:host ::ng-deep .cp-closing-field .mat-mdc-input-element {
-  align-self: center !important;
-  margin: 0 !important;
-  padding: 0 !important;
-}
-
-/* Last-column address/remark textareas (closingOne / duty slip): extra space so label + value don’t merge */
-:host ::ng-deep .cp-closing-field.cp-closing-field--address .mat-mdc-form-field-infix {
-  align-items: flex-start !important;
-  padding-top: 22px !important;
-  min-height: 76px !important;
-}
-
-:host ::ng-deep .cp-closing-field.cp-closing-field--address textarea.mat-mdc-input-element {
-  align-self: stretch !important;
-  height: auto !important;
-  min-height: 3.25rem !important;
-  padding: 8px 0 6px 0 !important;
-  line-height: 1.45 !important;
-  box-sizing: border-box !important;
-}
-
-:host ::ng-deep .cp-closing-field .mat-mdc-select-trigger {
-  display: flex !important;
-  align-items: center !important;
-  min-height: 24px !important;
-  padding-bottom: 0 !important;
-}
-
-:host ::ng-deep .cp-closing-field .mdc-line-ripple::before {
+:host ::ng-deep .cp-closing-form-compact .cp-quick-search-field .mdc-line-ripple::before {
   border-bottom-color: #d7d7d7 !important;
 }
 
-:host ::ng-deep .cp-closing-field .mdc-line-ripple::after {
+:host ::ng-deep .cp-closing-form-compact .cp-quick-search-field .mdc-line-ripple::after {
   border-bottom-color: #3f51b5 !important;
 }
 
-:host ::ng-deep .cp-closing-field .mat-mdc-select-arrow,
-:host ::ng-deep .cp-closing-field .mat-icon[matSuffix],
-:host ::ng-deep .cp-closing-field .mat-datepicker-toggle {
+:host ::ng-deep .cp-closing-form-compact .cp-quick-search-field .mat-mdc-select-arrow,
+:host ::ng-deep .cp-closing-form-compact .cp-quick-search-field .mat-icon[matSuffix],
+:host ::ng-deep .cp-closing-form-compact .cp-quick-search-field .mat-datepicker-toggle {
   color: #7a7a7a !important;
 }

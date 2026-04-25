@@ -918,11 +918,11 @@ button[style*="background-color:darkgray"] {
   transition: transform 120ms ease, color 120ms ease;
 }
 
-/* Keep entered values in the lower (visual-center) band, below floated label. */
-.mat-mdc-form-field.cp-quick-search-field .mat-mdc-input-element,
-.mat-mdc-form-field.cp-advance-search-field .mat-mdc-input-element,
-.mat-mdc-form-field.cp-allotment-field .mat-mdc-input-element,
-.mat-mdc-form-field.cp-booking-field .mat-mdc-input-element {
+/* Keep entered values in the lower (visual-center) band, below floated label. (Not textareas — flex-end breaks multiline + label overlap.) */
+.mat-mdc-form-field.cp-quick-search-field .mat-mdc-input-element:not(textarea),
+.mat-mdc-form-field.cp-advance-search-field .mat-mdc-input-element:not(textarea),
+.mat-mdc-form-field.cp-allotment-field .mat-mdc-input-element:not(textarea),
+.mat-mdc-form-field.cp-booking-field .mat-mdc-input-element:not(textarea) {
   align-self: flex-end !important;
   margin: 0 !important;
   padding: 0 0 2px !important;
