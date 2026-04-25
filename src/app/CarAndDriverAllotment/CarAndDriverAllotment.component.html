@@ -319,17 +319,14 @@
                           </button></b><br />
                       </td>
                       <td class="TDValue col-lg-2 col-md-2 col-sm-2 col-xs-2">
-                        <b>
+                        <b class="location-details-header">
                           <button class="BoldButton" mat-button (click)="locationDetailsInfo(item)">
                             Location Details
                           </button>
-                          <mat-icon [matMenuTriggerFor]="menu30" style="
-                                cursor: pointer;
-                                color: blue;
-                                font-size: 14px !important;
-                              ">
-                            more_vert
-                          </mat-icon>
+                          <mat-icon
+                            class="location-details-menu-trigger"
+                            [matMenuTriggerFor]="menu30"
+                          >more_vert</mat-icon>
                         </b>
                         <mat-menu #menu30="matMenu">
                           <a mat-menu-item (click)="TransferLocation(item.reservationID)" target="_blank"

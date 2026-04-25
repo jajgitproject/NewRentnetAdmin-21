@@ -357,6 +357,51 @@ mat-checkbox {
   overflow: hidden;
   text-overflow: ellipsis;
 }
+
+/* Location Details: label then kebab menu, same vertical line as text */
+.location-details-header {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  flex-wrap: nowrap;
+  line-height: 16px;
+}
+
+.location-details-menu-trigger {
+  cursor: pointer;
+  color: blue;
+  flex-shrink: 0;
+  /* Match .BoldButton row height so flex align-items: center is meaningful */
+  width: 16px !important;
+  height: 16px !important;
+  min-width: 16px !important;
+  min-height: 16px !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  font-size: 14px !important;
+  line-height: 16px !important;
+  display: inline-flex !important;
+  align-items: center;
+  justify-content: center;
+  overflow: visible;
+  /* Optical nudge: kebab glyph sits above x-height / baseline vs 10px bold label */
+  transform: translateY(3px);
+}
+
+/* MDC mat-icon: center glyph in our 16px slot */
+:host ::ng-deep .location-details-menu-trigger.mat-icon,
+:host ::ng-deep .location-details-menu-trigger.mat-mdc-icon {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+
+:host ::ng-deep .location-details-menu-trigger svg {
+  display: block;
+  width: 14px !important;
+  height: 14px !important;
+  margin: 0;
+}
 .mat-cell {
   font-size: 10px;
 }
