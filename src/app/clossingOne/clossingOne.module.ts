@@ -57,8 +57,7 @@ import { DutyStateModule } from '../dutyState/dutyState.module';
 import { DutyExpenseService } from '../dutyExpense/dutyExpense.service';
 import { DutyGSTPercentageService } from '../dutyGSTPercentage/dutyGSTPercentage.service';
 import { DutyStateService } from '../dutyState/dutyState.service';
-import { AdditionalKmsDetailsComponent } from '../additionalKmsDetails/additionalKmsDetails.component';
-import { AdditionalDialogComponent } from '../additionalKmsDetails/dialogs/form-dialog/form-dialog.component';
+import { AdditionalKmsDetailsModule } from '../additionalKmsDetails/additionalKmsDetails.module';
 import { DiscountDetailsComponent } from '../discountDetails/discountDetails.component';
 import { DutySACComponent } from '../dutySAC/dutySAC.component';
 import { AdditionalKmsDetailsService } from '../additionalKmsDetails/additionalKmsDetails.service';
@@ -113,9 +112,6 @@ import { OdoMeterAndManualDutySlipImageComponent } from '../odoMeterAndManualDut
     CustomerInformationComponent,
     CurrentdataInformationComponent,
     DutySACComponent,
-    AdditionalKmsDetailsComponent,
-    AdditionalDialogComponent,
-
     ],
   imports: [
     MatTabsModule,
@@ -171,7 +167,8 @@ import { OdoMeterAndManualDutySlipImageComponent } from '../odoMeterAndManualDut
     PackageRateDetailsForClosingModule,
     MOPDetailsModule,
     ReservationDutyslipSearchModule,
-    OdoMeterAndManualDutySlipImageModule
+    OdoMeterAndManualDutySlipImageModule,
+    AdditionalKmsDetailsModule
 
   ],
   exports:[ClossingOneComponent],

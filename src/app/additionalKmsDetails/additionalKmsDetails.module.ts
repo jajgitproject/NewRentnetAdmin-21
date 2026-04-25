@@ -32,7 +32,7 @@ import { AdditionalDialogComponent } from './dialogs/form-dialog/form-dialog.com
 import { MatExpansionModule } from '@angular/material/expansion';
 @NgModule({
   declarations: [
-  
+    AdditionalKmsDetailsComponent,
     AdditionalDialogComponent
   ],
   imports: [
@@ -61,7 +61,7 @@ import { MatExpansionModule } from '@angular/material/expansion';
     MyUploadModule,
     MatExpansionModule
   ],
-  exports: [],
+  exports: [AdditionalKmsDetailsComponent],
   providers: [AdditionalKmsDetailsService,AdvanceService]
 })
 export class AdditionalKmsDetailsModule {}
