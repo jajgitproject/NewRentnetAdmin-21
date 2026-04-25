@@ -2239,18 +2239,7 @@ export class ControlPanelDialogeComponent {
       });
   }
 //----------TrackOnMap------------
-/** Opens eco partner trip tracker when garage out is recorded; otherwise SweetAlert. */
 TrackOnMapInfo(reservationID: number, item?: any) {
-  const hasGarageOut = !!(item?.garageOutDate && item?.garageOutTime);
-
-  if (!hasGarageOut) {
-    Swal.fire({
-      icon: 'info',
-      text: 'You can track trips after Location Out..'
-    });
-    return;
-  }
-
   const rid = Number(
     reservationID != null && reservationID !== ''
       ? reservationID

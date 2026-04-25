@@ -3574,16 +3574,6 @@ getLifeCycleDisplay(status: any): { label: string; color: string } {
 //----------TrackOnMap------------
 
 TrackOnMapInfo(reservationID: number, item?: any) {
-  const hasGarageOut = !!(item?.garageOutDate && item?.garageOutTime);
-
-  if (!hasGarageOut) {
-    Swal.fire({
-      icon: 'info',
-      text: 'You can track trips after Location Out..'
-    });
-    return;
-  }
-
   const rid = Number(
     reservationID != null && reservationID !== ''
       ? reservationID
