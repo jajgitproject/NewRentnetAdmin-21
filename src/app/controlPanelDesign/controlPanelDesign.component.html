@@ -26,16 +26,16 @@
           </mat-panel-title>
         </mat-expansion-panel-header>
 
-        <form class="register-form" [formGroup]="filterForm">
+        <form class="register-form quick-search-panel" [formGroup]="filterForm">
           <div class="row">
             <div class="col-xl-2 col-lg-2 col-md-2 col-sm-12 mb-2">
-              <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+              <mat-form-field class="example-full-width cp-quick-search-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
                 <mat-label>Booking Number</mat-label>
                 <input matInput formControlName="reservationID" (blur)="trimBookingNo()" />
               </mat-form-field>
             </div>
             <div class="col-xl-2 col-lg-2 col-md-2 col-sm-12 mb-2">
-              <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+              <mat-form-field class="example-full-width cp-quick-search-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
                 <mat-label>Pickup Date From</mat-label>
                 <input matInput [matDatepicker]="fromDateQuick" formControlName="fromDate" />
                 <mat-datepicker-toggle matSuffix [for]="fromDateQuick"></mat-datepicker-toggle>
@@ -44,7 +44,7 @@
             </div>
 
             <div class="col-xl-2 col-lg-2 col-md-2 col-sm-12 mb-2">
-              <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+              <mat-form-field class="example-full-width cp-quick-search-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
                 <mat-label>Pickup Date To</mat-label>
                 <input matInput [matDatepicker]="todateQuick" formControlName="toDate" />
                 <mat-datepicker-toggle matSuffix [for]="todateQuick"></mat-datepicker-toggle>
@@ -52,7 +52,7 @@
               </mat-form-field>
             </div>
             <div class="col-xl-2 col-lg-2 col-md-2 col-sm-12 mb-2">
-              <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+              <mat-form-field class="example-full-width cp-quick-search-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
                 <mat-label>Pickup Time From</mat-label>
                 <input matInput [owlDateTimeTrigger]="timeFrom" [owlDateTime]="timeFrom" formControlName="fromTime">
                 <mat-icon matSuffix [owlDateTimeTrigger]="timeFrom">schedule</mat-icon>
@@ -61,7 +61,7 @@
             </div>
 
             <div class="col-xl-2 col-lg-2 col-md-2 col-sm-12 mb-2">
-              <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+              <mat-form-field class="example-full-width cp-quick-search-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
                 <mat-label>Pickup Time To</mat-label>
                 <input matInput [owlDateTimeTrigger]="timeTo" [owlDateTime]="timeTo" formControlName="toTime">
                 <mat-icon matSuffix [owlDateTimeTrigger]="timeTo">schedule</mat-icon>
@@ -69,7 +69,7 @@
               </mat-form-field>
             </div>
             <div class="col-xl-2 col-lg-2 col-md-2 col-sm-12 mb-2">
-              <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+              <mat-form-field class="example-full-width cp-quick-search-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
                 <mat-label>Booking Status</mat-label>
                 <mat-select formControlName="reservationStatus">
                   <mat-option value="All">All</mat-option>
@@ -85,7 +85,7 @@
 
           <div class="row">
             <div class="col-xl-2 col-lg-2 col-md-2 col-sm-12 mb-2">
-              <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+              <mat-form-field class="example-full-width cp-quick-search-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
                 <mat-label>Allotment Status</mat-label>
                 <mat-select formControlName="allotmentStatus">
                   <mat-option value="All">All</mat-option>
@@ -99,7 +99,7 @@
               </mat-form-field>
             </div>
             <div class="col-xl-2 col-lg-2 col-md-2 col-sm-12 mb-2">
-              <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+              <mat-form-field class="example-full-width cp-quick-search-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
                 <mat-label>Dispatch Status</mat-label>
                 <mat-select formControlName="tripStatus">
                   <mat-option value="All">All</mat-option>
@@ -127,7 +127,7 @@
             </div>
 
             <div class="col-xl-2 col-lg-2 col-md-2 col-sm-12 mb-2">
-              <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+              <mat-form-field class="example-full-width cp-quick-search-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
                 <mat-label>Customer Group</mat-label>
                 <input type="text" matInput (keyup)="onCustomerGroupKeyUp($event)" formControlName="customerGroup"
                   [matAutocomplete]="auto" />
@@ -141,7 +141,7 @@
             </div>
             <ng-container *ngIf="filterForm.value.customerGroup!==''">
               <div class="col-xl-2 col-lg-2 col-md-2 col-sm-12 mb-2">
-                <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                <mat-form-field class="example-full-width cp-quick-search-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
                   <mat-label>Customer</mat-label>
                   <input type="text" matInput formControlName="customer" [matAutocomplete]="auto2" />
                   <mat-autocomplete #auto2="matAutocomplete" panelWidth="custom-autocomplete-panel">
@@ -157,7 +157,7 @@
 
             <ng-container *ngIf="filterForm.value.customerGroup===''">
               <div class="col-xl-2 col-lg-2 col-md-2 col-sm-12 mb-2">
-                <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                <mat-form-field class="example-full-width cp-quick-search-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
                   <mat-label>Customer</mat-label>
                   <input type="text" matInput formControlName="customer" [matAutocomplete]="auto3" />
                   <mat-autocomplete #auto3="matAutocomplete" panelWidth="custom-autocomplete-panel">
@@ -171,13 +171,13 @@
               </div>
             </ng-container>
             <div class="col-xl-2 col-lg-2 col-md-2 col-sm-12 mb-2">
-              <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+              <mat-form-field class="example-full-width cp-quick-search-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
                 <mat-label>Passenger Mobile No.</mat-label>
                 <input matInput formControlName="contactMobile" />
               </mat-form-field>
             </div>
             <div class="col-xl-2 col-lg-2 col-md-2 col-sm-12 mb-2">
-              <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+              <mat-form-field class="example-full-width cp-quick-search-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
                 <mat-label>Gender</mat-label>
                 <mat-select formControlName="gender">
                   <mat-option value="All">All</mat-option>
@@ -192,7 +192,7 @@
           <!-- <div class="row">
             
             <div class="col-xl-2 col-lg-2 col-md-2 col-sm-12 mb-2">
-              <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+              <mat-form-field class="example-full-width cp-quick-search-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
                 <mat-label>Reservation Type</mat-label>
                 <mat-select formControlName="reservationType">
                   <mat-option value="All">All</mat-option>
@@ -204,7 +204,7 @@
             </div>
 
             <div class="col-xl-2 col-lg-2 col-md-2 col-sm-12 mb-2">
-              <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+              <mat-form-field class="example-full-width cp-quick-search-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
                 <mat-label>Delays</mat-label>
                 <mat-select formControlName="delays">
                   <mat-option value="All">All</mat-option>
@@ -217,7 +217,7 @@
               </mat-form-field>
             </div>
             <div class="col-xl-2 col-lg-2 col-md-2 col-sm-12 mb-2">
-              <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+              <mat-form-field class="example-full-width cp-quick-search-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
                 <mat-label>Security</mat-label>
                 <mat-select formControlName="security">
                   <mat-option value="All">All</mat-option>
@@ -228,7 +228,7 @@
             </div>
 
             <div class="col-xl-2 col-lg-2 col-md-2 col-sm-12 mb-2">
-              <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+              <mat-form-field class="example-full-width cp-quick-search-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
                 <mat-label>Guest Type</mat-label>
                 <mat-select formControlName="guestType">
                   <mat-option value="All">All</mat-option>
@@ -242,7 +242,7 @@
 
           <div class="row">
             <div class="col-xl-2 col-lg-2 col-md-2 col-sm-12 mb-2">
-              <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+              <mat-form-field class="example-full-width cp-quick-search-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
                 <mat-label>Guest Type</mat-label>
                 <mat-select formControlName="guestType">
                   <mat-option value="All">All</mat-option>
@@ -255,7 +255,7 @@
             </div>
 
             <div class="col-xl-2 col-lg-2 col-md-2 col-sm-12 mb-2">
-              <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+              <mat-form-field class="example-full-width cp-quick-search-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
                 <mat-label>Duty Type</mat-label>
                 <input type="text" matInput formControlName="packageType" [matAutocomplete]="auto12"
                   (keyup)="onPackageTypeChanges($event)">
@@ -268,7 +268,7 @@
               </mat-form-field>
             </div>
             <div class="col-xl-2 col-lg-2 col-md-2 col-sm-12 mb-2">
-              <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+              <mat-form-field class="example-full-width cp-quick-search-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
                 <mat-label>Quality Check Status</mat-label>
                 <mat-select formControlName="qualityStatus">
                   <mat-option value="All">All</mat-option>
@@ -280,7 +280,7 @@
               </mat-form-field>
             </div>
             <div class="col-xl-2 col-lg-2 col-md-2 col-sm-12 mb-2">
-              <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+              <mat-form-field class="example-full-width cp-quick-search-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
                 <mat-label>Ownership</mat-label>
                 <mat-select formControlName="ownership">
                   <mat-option value="All">All</mat-option>
@@ -291,7 +291,7 @@
               </mat-form-field>
             </div>
             <div class="col-xl-2 col-lg-2 col-md-2 col-sm-12 mb-2">
-              <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+              <mat-form-field class="example-full-width cp-quick-search-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
                 <mat-label>SMS/WA Status</mat-label>
                 <mat-select formControlName="messageType">
                   <mat-option value="All">All</mat-option>
@@ -303,7 +303,7 @@
             </div>
 
             <div class="col-xl-2 col-lg-2 col-md-2 col-sm-12 mb-2">
-              <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+              <mat-form-field class="example-full-width cp-quick-search-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
                 <mat-label>Billing Status</mat-label>
                 <mat-select formControlName="billingStatus">
                   <mat-option value="All">All</mat-option>
@@ -316,7 +316,7 @@
           </div>
           <div class="row">
             <div class="col-xl-2 col-lg-2 col-md-2 col-sm-12 mb-2">
-              <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+              <mat-form-field class="example-full-width cp-quick-search-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
                 <mat-label>Reservation Type</mat-label>
                 <mat-select formControlName="reservationType">
                   <mat-option value="All">All</mat-option>
@@ -328,14 +328,14 @@
             </div>
 
             <div class="col-xl-2 col-lg-2 col-md-2 col-sm-12 mb-2">
-              <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+              <mat-form-field class="example-full-width cp-quick-search-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
                 <mat-label>Booking Group Number</mat-label>
                 <input matInput formControlName="reservationGroupID" />
               </mat-form-field>
             </div>
 
             <div class="col-xl-2 col-lg-2 col-md-2 col-sm-12 mb-2">
-              <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+              <mat-form-field class="example-full-width cp-quick-search-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
                 <mat-label>Location</mat-label>
                 <input type="text" matInput formControlName="locationName" [matAutocomplete]="auto1">
                 <mat-autocomplete #auto1="matAutocomplete">
@@ -348,7 +348,7 @@
             </div>
 
             <div class="col-xl-2 col-lg-2 col-md-2 col-sm-12 mb-2">
-              <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+              <mat-form-field class="example-full-width cp-quick-search-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
                 <mat-label>Transfer Location</mat-label>
                 <input type="text" matInput formControlName="transferLocationName" [matAutocomplete]="auto0">
                 <mat-autocomplete #auto0="matAutocomplete">
@@ -361,7 +361,7 @@
             </div>
 
             <div class="col-xl-2 col-lg-2 col-md-2 col-sm-12 mb-2">
-              <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+              <mat-form-field class="example-full-width cp-quick-search-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
                 <mat-label>Trip Type</mat-label>
                 <mat-select formControlName="tripType">
                   <mat-option value="Airport Pickup">Airport Pickup</mat-option>
@@ -374,7 +374,7 @@
             </div>
 
             <div class="col-xl-2 col-lg-2 col-md-2 col-sm-12 mb-2">
-              <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+              <mat-form-field class="example-full-width cp-quick-search-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
                 <mat-label>Reservation Source Detail</mat-label>
                 <input matInput formControlName="reservationSourceDetail" (blur)="trimBookingNo()" />
               </mat-form-field>
@@ -382,7 +382,7 @@
           </div>
 
           <div class="row">
-            <div class="col-12 d-flex justify-content-end align-items-center mb-2" style="gap: 8px;">
+            <div class="col-12 d-flex justify-content-start align-items-center mb-2 quick-search-actions" style="gap: 8px;">
               <button mat-raised-button color="primary" (click)="SearchData()">
                 Search
               </button>
@@ -403,10 +403,10 @@
           </mat-panel-title>
         </mat-expansion-panel-header>
 
-        <form class="register-form" [formGroup]="filterForm">
+        <form class="register-form advance-search-panel" [formGroup]="filterForm">
           <div class="row">
             <div class="col-xl-3 col-lg-3 col-md-3 col-sm-6 mb-2">
-              <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+              <mat-form-field class="example-full-width cp-advance-search-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
                 <mat-label>Pickup Date From</mat-label>
                 <input matInput [matDatepicker]="fromDateAdvance" formControlName="fromDate" />
                 <mat-datepicker-toggle matSuffix [for]="fromDateAdvance"></mat-datepicker-toggle>
@@ -415,7 +415,7 @@
             </div>
 
             <div class="col-xl-3 col-lg-3 col-md-3 col-sm-6 mb-2">
-              <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+              <mat-form-field class="example-full-width cp-advance-search-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
                 <mat-label>Pickup Time From</mat-label>
                 <input matInput [owlDateTimeTrigger]="timeAdvance" [owlDateTime]="timeAdvance"
                   formControlName="fromTime">
@@ -425,7 +425,7 @@
             </div>
 
             <div class="col-xl-3 col-lg-3 col-md-3 col-sm-6 mb-2">
-              <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+              <mat-form-field class="example-full-width cp-advance-search-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
                 <mat-label>Pickup Date To</mat-label>
                 <input matInput [matDatepicker]="todateAdvance" formControlName="toDate" />
                 <mat-datepicker-toggle matSuffix [for]="todateAdvance"></mat-datepicker-toggle>
@@ -434,7 +434,7 @@
             </div>
 
             <div class="col-xl-3 col-lg-3 col-md-3 col-sm-6 mb-2">
-              <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+              <mat-form-field class="example-full-width cp-advance-search-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
                 <mat-label>Pickup Time To</mat-label>
                 <input matInput [owlDateTimeTrigger]="timeToAdvance" [owlDateTime]="timeToAdvance"
                   formControlName="toTime">
@@ -446,7 +446,7 @@
 
           <div class="row">
             <div class="col-xl-3 col-lg-3 col-md-3 col-sm-6 mb-2">
-              <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+              <mat-form-field class="example-full-width cp-advance-search-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
                 <mat-label>Reservation Status</mat-label>
                 <mat-select formControlName="reservationStatus">
                   <mat-option value="All">All</mat-option>
@@ -459,7 +459,7 @@
             </div>
 
             <div class="col-xl-3 col-lg-3 col-md-3 col-sm-6 mb-2">
-              <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+              <mat-form-field class="example-full-width cp-advance-search-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
                 <mat-label>Allotment Status</mat-label>
                 <mat-select formControlName="allotmentStatus">
                   <mat-option value="All">All</mat-option>
@@ -470,7 +470,7 @@
               </mat-form-field>
             </div>
             <div class="col-xl-3 col-lg-3 col-md-3 col-sm-6 mb-2">
-              <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+              <mat-form-field class="example-full-width cp-advance-search-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
                 <mat-label>Trip Status</mat-label>
                 <mat-select formControlName="tripStatus">
                   <mat-option value="All">All</mat-option>
@@ -489,7 +489,7 @@
             </div>
 
             <div class="col-xl-3 col-lg-3 col-md-3 col-sm-6 mb-2">
-              <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+              <mat-form-field class="example-full-width cp-advance-search-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
                 <mat-label>Quality Check Status</mat-label>
                 <mat-select formControlName="qualityStatus">
                   <mat-option value="All">All</mat-option>
@@ -504,7 +504,7 @@
 
           <div class="row">
             <div class="col-xl-3 col-lg-3 col-md-3 col-sm-6 mb-2">
-              <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+              <mat-form-field class="example-full-width cp-advance-search-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
                 <mat-label>Reservation Type</mat-label>
                 <mat-select formControlName="reservationType">
                   <mat-option value="All">All</mat-option>
@@ -516,7 +516,7 @@
             </div>
 
             <div class="col-xl-3 col-lg-3 col-md-3 col-sm-6 mb-2">
-              <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+              <mat-form-field class="example-full-width cp-advance-search-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
                 <mat-label>Delays</mat-label>
                 <mat-select formControlName="delays">
                   <mat-option value="All">All</mat-option>
@@ -529,7 +529,7 @@
               </mat-form-field>
             </div>
             <div class="col-xl-3 col-lg-3 col-md-3 col-sm-6 mb-2">
-              <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+              <mat-form-field class="example-full-width cp-advance-search-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
                 <mat-label>Security</mat-label>
                 <mat-select formControlName="security">
                   <mat-option value="All">All</mat-option>
@@ -540,7 +540,7 @@
             </div>
 
             <div class="col-xl-3 col-lg-3 col-md-3 col-sm-6 mb-2">
-              <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+              <mat-form-field class="example-full-width cp-advance-search-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
                 <mat-label>Guest Type</mat-label>
                 <mat-select formControlName="guestType">
                   <mat-option value="All">All</mat-option>
@@ -553,7 +553,7 @@
           </div>
           <div class="row">
             <div class="col-xl-3 col-lg-3 col-md-3 col-sm-6 mb-2">
-              <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+              <mat-form-field class="example-full-width cp-advance-search-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
                 <mat-label>Disputes</mat-label>
                 <input type="text" matInput formControlName="disputes" [matAutocomplete]="auto25">
                 <mat-autocomplete #auto25="matAutocomplete" panelWidth="custom-autocomplete-panel">
@@ -565,19 +565,19 @@
             </div>
 
             <div class="col-xl-3 col-lg-3 col-md-3 col-sm-6 mb-2">
-              <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+              <mat-form-field class="example-full-width cp-advance-search-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
                 <mat-label>Booking Number</mat-label>
                 <input matInput formControlName="reservationID" />
               </mat-form-field>
             </div>
             <div class="col-xl-3 col-lg-3 col-md-3 col-sm-6 mb-2">
-              <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+              <mat-form-field class="example-full-width cp-advance-search-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
                 <mat-label>Vendor Trip No.</mat-label>
                 <input matInput formControlName="vendorTripNumber" />
               </mat-form-field>
             </div>
             <div class="col-xl-3 col-lg-3 col-md-3 col-sm-6 mb-2">
-              <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+              <mat-form-field class="example-full-width cp-advance-search-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
                 <mat-label>Customer Group</mat-label>
                 <input type="text" matInput (keyup)="onCustomerGroupKeyUp($event)" formControlName="customerGroup"
                   [matAutocomplete]="auto" />
@@ -593,7 +593,7 @@
           <div class="row">
             <ng-container *ngIf="filterForm.value.customerGroup!==''">
               <div class="col-xl-3 col-lg-3 col-md-3 col-sm-6 mb-2">
-                <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                <mat-form-field class="example-full-width cp-advance-search-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
                   <mat-label>Customer</mat-label>
                   <input type="text" matInput formControlName="customer" [matAutocomplete]="auto2" />
                   <mat-autocomplete #auto2="matAutocomplete" panelWidth="custom-autocomplete-panel">
@@ -609,7 +609,7 @@
 
             <ng-container *ngIf="filterForm.value.customerGroup===''">
               <div class="col-xl-3 col-lg-3 col-md-3 col-sm-6 mb-2">
-                <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                <mat-form-field class="example-full-width cp-advance-search-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
                   <mat-label>Customer</mat-label>
                   <input type="text" matInput formControlName="customer" [matAutocomplete]="auto3" />
                   <mat-autocomplete #auto3="matAutocomplete" panelWidth="custom-autocomplete-panel">
@@ -624,7 +624,7 @@
             </ng-container>
             <ng-container *ngIf="filterForm.value.customerGroup!==''">
               <div class="col-xl-3 col-lg-3 col-md-3 col-sm-6 mb-2">
-                <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                <mat-form-field class="example-full-width cp-advance-search-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
                   <mat-label>Booker</mat-label>
                   <input type="text" matInput formControlName="booker" [matAutocomplete]="auto4">
                   <mat-autocomplete #auto4="matAutocomplete" panelWidth="custom-autocomplete-panel">
@@ -640,7 +640,7 @@
 
             <ng-container *ngIf="filterForm.value.customerGroup===''">
               <div class="col-xl-3 col-lg-3 col-md-3 col-sm-6 mb-2">
-                <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                <mat-form-field class="example-full-width cp-advance-search-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
                   <mat-label>Booker</mat-label>
                   <input type="text" matInput formControlName="booker" [matAutocomplete]="auto5">
                   <mat-autocomplete #auto5="matAutocomplete" panelWidth="custom-autocomplete-panel">
@@ -656,7 +656,7 @@
 
             <ng-container *ngIf="filterForm.value.customerGroup!==''">
               <div class="col-xl-3 col-lg-3 col-md-3 col-sm-6 mb-2">
-                <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                <mat-form-field class="example-full-width cp-advance-search-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
                   <mat-label>Passenger</mat-label>
                   <input type="text" matInput formControlName="passenger" [matAutocomplete]="auto6">
                   <mat-autocomplete #auto6="matAutocomplete" panelWidth="custom-autocomplete-panel">
@@ -672,7 +672,7 @@
 
             <ng-container *ngIf="filterForm.value.customerGroup===''">
               <div class="col-xl-3 col-lg-3 col-md-3 col-sm-6 mb-2">
-                <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                <mat-form-field class="example-full-width cp-advance-search-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
                   <mat-label>Passenger</mat-label>
                   <input type="text" matInput formControlName="passenger" [matAutocomplete]="auto7">
                   <mat-autocomplete #auto7="matAutocomplete" panelWidth="custom-autocomplete-panel">
@@ -686,7 +686,7 @@
               </div>
             </ng-container>
             <div class="col-xl-3 col-lg-3 col-md-3 col-sm-6 mb-2">
-              <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+              <mat-form-field class="example-full-width cp-advance-search-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
                 <mat-label>Vehicle Category</mat-label>
                 <input type="text" matInput formControlName="vehicleCategory" [matAutocomplete]="auto8"
                   (keyup)="onVehicleCategoryChanges($event)">
@@ -703,7 +703,7 @@
           <div class="row">
             <ng-container *ngIf="filterForm.value.vehicleCategory!==''">
               <div class="col-xl-3 col-lg-3 col-md-3 col-sm-6 mb-2">
-                <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                <mat-form-field class="example-full-width cp-advance-search-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
                   <mat-label>Vehicle</mat-label>
                   <input type="text" matInput formControlName="vehicleName" [matAutocomplete]="auto9" />
                   <mat-autocomplete #auto9="matAutocomplete" panelWidth="custom-autocomplete-panel">
@@ -717,7 +717,7 @@
 
             <ng-container *ngIf="filterForm.value.vehicleCategory===''">
               <div class="col-xl-3 col-lg-3 col-md-3 col-sm-6 mb-2">
-                <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                <mat-form-field class="example-full-width cp-advance-search-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
                   <mat-label>Vehicle</mat-label>
                   <input type="text" matInput formControlName="vehicleName" [matAutocomplete]="auto10" />
                   <mat-autocomplete #auto10="matAutocomplete" panelWidth="custom-autocomplete-panel">
@@ -729,7 +729,7 @@
               </div>
             </ng-container>
             <div class="col-xl-3 col-lg-3 col-md-3 col-sm-6 mb-2">
-              <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+              <mat-form-field class="example-full-width cp-advance-search-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
                 <mat-label>City</mat-label>
                 <input type="text" matInput [matAutocomplete]="auto11" formControlName="city">
                 <mat-autocomplete #auto11="matAutocomplete" panelWidth="custom-autocomplete-panel">
@@ -740,7 +740,7 @@
               </mat-form-field>
             </div>
             <div class="col-xl-3 col-lg-3 col-md-3 col-sm-6 mb-2">
-              <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+              <mat-form-field class="example-full-width cp-advance-search-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
                 <mat-label>Package Type</mat-label>
                 <input type="text" matInput formControlName="packageType" [matAutocomplete]="auto12"
                   (keyup)="onPackageTypeChanges($event)">
@@ -755,7 +755,7 @@
 
             <ng-container *ngIf="filterForm.value.packageType!==''">
               <div class="col-xl-3 col-lg-3 col-md-3 col-sm-6 mb-2">
-                <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                <mat-form-field class="example-full-width cp-advance-search-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
                   <mat-label>Package</mat-label>
                   <input type="text" matInput formControlName="package" [matAutocomplete]="auto13">
                   <mat-autocomplete #auto13="matAutocomplete" panelWidth="custom-autocomplete-panel">
@@ -770,7 +770,7 @@
 
             <ng-container *ngIf="filterForm.value.packageType===''">
               <div class="col-xl-3 col-lg-3 col-md-3 col-sm-6 mb-2">
-                <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                <mat-form-field class="example-full-width cp-advance-search-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
                   <mat-label>Package</mat-label>
                   <input type="text" matInput formControlName="package" [matAutocomplete]="auto14">
                   <mat-autocomplete #auto14="matAutocomplete" panelWidth="custom-autocomplete-panel">
@@ -785,7 +785,7 @@
           </div>
           <div class="row">
             <div class="col-xl-3 col-lg-3 col-md-3 col-sm-6 mb-2">
-              <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+              <mat-form-field class="example-full-width cp-advance-search-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
                 <mat-label>Supplier</mat-label>
                 <input type="text" matInput formControlName="supplier" [matAutocomplete]="auto15"
                   (keyup)="onSupplierChanges($event)">
@@ -800,7 +800,7 @@
 
             <ng-container *ngIf="filterForm.value.supplier!==''">
               <div class="col-xl-3 col-lg-3 col-md-3 col-sm-6 mb-2">
-                <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                <mat-form-field class="example-full-width cp-advance-search-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
                   <mat-label>Vehicle Inventory</mat-label>
                   <input type="text" matInput formControlName="vehicleInventory" [matAutocomplete]="auto17">
                   <mat-autocomplete #auto17="matAutocomplete" panelWidth="custom-autocomplete-panel">
@@ -816,7 +816,7 @@
 
             <ng-container *ngIf="filterForm.value.supplier===''">
               <div class="col-xl-3 col-lg-3 col-md-3 col-sm-6 mb-2">
-                <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                <mat-form-field class="example-full-width cp-advance-search-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
                   <mat-label>Vehicle Inventory</mat-label>
                   <input type="text" matInput formControlName="vehicleInventory" [matAutocomplete]="auto18">
                   <mat-autocomplete #auto18="matAutocomplete" panelWidth="custom-autocomplete-panel">
@@ -832,7 +832,7 @@
 
             <ng-container *ngIf="filterForm.value.supplier!==''">
               <div class="col-xl-3 col-lg-3 col-md-3 col-sm-6 mb-2">
-                <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                <mat-form-field class="example-full-width cp-advance-search-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
                   <mat-label>Driver</mat-label>
                   <input type="text" matInput formControlName="driver" [matAutocomplete]="auto19">
                   <mat-autocomplete #auto19="matAutocomplete" panelWidth="custom-autocomplete-panel">
@@ -848,7 +848,7 @@
 
             <ng-container *ngIf="filterForm.value.supplier===''">
               <div class="col-xl-3 col-lg-3 col-md-3 col-sm-6 mb-2">
-                <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                <mat-form-field class="example-full-width cp-advance-search-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
                   <mat-label>Driver</mat-label>
                   <input type="text" matInput formControlName="driver" [matAutocomplete]="auto20">
                   <mat-autocomplete #auto20="matAutocomplete" panelWidth="custom-autocomplete-panel">
@@ -864,7 +864,7 @@
 
             <ng-container *ngIf="filterForm.value.supplier!==''">
               <div class="col-xl-3 col-lg-3 col-md-3 col-sm-6 mb-2">
-                <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                <mat-form-field class="example-full-width cp-advance-search-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
                   <mat-label>Driver Official Identity No</mat-label>
                   <input type="text" matInput formControlName="driverOfficialIdentityNumber" [matAutocomplete]="auto25">
                   <mat-autocomplete #auto25="matAutocomplete" panelWidth="custom-autocomplete-panel">
@@ -879,7 +879,7 @@
 
             <ng-container *ngIf="filterForm.value.supplier===''">
               <div class="col-xl-3 col-lg-3 col-md-3 col-sm-6 mb-2">
-                <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                <mat-form-field class="example-full-width cp-advance-search-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
                   <mat-label>Driver Official Identity No</mat-label>
                   <input type="text" matInput formControlName="driverOfficialIdentityNumber" [matAutocomplete]="auto26">
                   <mat-autocomplete #auto26="matAutocomplete" panelWidth="custom-autocomplete-panel">
@@ -892,10 +892,15 @@
               </div>
             </ng-container>
           </div>
-          <div class="col-xl-3 col-lg-3 col-md-6 col-sm-12 mb-2 d-flex align-items-end justify-content-end">
-            <button mat-raised-button color="primary" (click)="SearchData()">
-              Search
-            </button>
+          <div class="row">
+            <div class="col-12 d-flex justify-content-start align-items-center mb-2 advance-search-actions" style="gap: 8px;">
+              <button mat-raised-button color="primary" (click)="SearchData()">
+                Search
+              </button>
+              <button mat-raised-button color="warn" (click)="onNoClick()" tabindex="-1">
+                Reset
+              </button>
+            </div>
           </div>
         </form>
       </mat-expansion-panel>
@@ -916,8 +921,8 @@
                     <div class="d-flex align-items-center" style="flex: 1 1 auto; min-width: 0;">
                       <div class="d-flex align-items-center booking-category-wrap">
                         <span class="booking-category-static-label">Booking Category ({{totalData}})</span>
-                        <mat-form-field class="example-full-width mr-4 booking-category-field" appearance="outline"
-                          floatLabel="always" style="max-width: 240px;margin-left: 5px;">
+                        <mat-form-field class="example-full-width mr-4 booking-category-field cp-booking-category-field" appearance="fill"
+                          floatLabel="auto" subscriptSizing="dynamic" style="max-width: 240px;margin-left: 5px;">
                           <mat-select [(ngModel)]="bookingCategory" (selectionChange)="onRadioChange()">
                             <mat-option value="complete">Complete</mat-option>
                             <mat-option value="incomplete">Incomplete</mat-option>
@@ -3529,3 +3534,4 @@
     </div>
   </div>
 </div>
+

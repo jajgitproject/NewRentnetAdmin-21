@@ -879,6 +879,65 @@ button[style*="background-color:darkgray"] {
   font-size: 14px !important;
 }
 
+/* Control Panel Quick Search: compact underline fields (override tall global infix above). */
+.mat-mdc-form-field.cp-quick-search-field .mat-mdc-form-field-infix,
+.mat-mdc-form-field.cp-advance-search-field .mat-mdc-form-field-infix,
+.mat-mdc-form-field.cp-allotment-field .mat-mdc-form-field-infix,
+.mat-mdc-form-field.cp-booking-field .mat-mdc-form-field-infix {
+  min-height: 54px !important;
+  padding-top: 16px !important;
+  padding-bottom: 10px !important;
+  font-size: 13px !important;
+  display: flex !important;
+  align-items: flex-end !important;
+}
+
+.mat-mdc-form-field.cp-quick-search-field .mat-mdc-floating-label,
+.mat-mdc-form-field.cp-advance-search-field .mat-mdc-floating-label,
+.mat-mdc-form-field.cp-allotment-field .mat-mdc-floating-label,
+.mat-mdc-form-field.cp-booking-field .mat-mdc-floating-label {
+  font-size: 12px !important;
+}
+
+.mat-mdc-form-field.cp-quick-search-field .mat-mdc-input-element,
+.mat-mdc-form-field.cp-quick-search-field .mat-mdc-select-value-text,
+.mat-mdc-form-field.cp-advance-search-field .mat-mdc-input-element,
+.mat-mdc-form-field.cp-advance-search-field .mat-mdc-select-value-text,
+.mat-mdc-form-field.cp-allotment-field .mat-mdc-input-element,
+.mat-mdc-form-field.cp-allotment-field .mat-mdc-select-value-text,
+.mat-mdc-form-field.cp-booking-field .mat-mdc-input-element,
+.mat-mdc-form-field.cp-booking-field .mat-mdc-select-value-text {
+  line-height: 1.2 !important;
+}
+
+/* Legacy behavior: label floats above only on focus/value (watermark-like). */
+.mat-mdc-form-field.cp-quick-search-field .mdc-floating-label,
+.mat-mdc-form-field.cp-advance-search-field .mdc-floating-label,
+.mat-mdc-form-field.cp-allotment-field .mdc-floating-label,
+.mat-mdc-form-field.cp-booking-field .mdc-floating-label {
+  transition: transform 120ms ease, color 120ms ease;
+}
+
+/* Keep entered values in the lower (visual-center) band, below floated label. */
+.mat-mdc-form-field.cp-quick-search-field .mat-mdc-input-element,
+.mat-mdc-form-field.cp-advance-search-field .mat-mdc-input-element,
+.mat-mdc-form-field.cp-allotment-field .mat-mdc-input-element,
+.mat-mdc-form-field.cp-booking-field .mat-mdc-input-element {
+  align-self: flex-end !important;
+  margin: 0 !important;
+  padding: 0 0 2px !important;
+}
+
+.mat-mdc-form-field.cp-quick-search-field .mat-mdc-select-trigger,
+.mat-mdc-form-field.cp-advance-search-field .mat-mdc-select-trigger,
+.mat-mdc-form-field.cp-allotment-field .mat-mdc-select-trigger,
+.mat-mdc-form-field.cp-booking-field .mat-mdc-select-trigger {
+  display: flex !important;
+  align-items: flex-end !important;
+  min-height: 22px !important;
+  padding-bottom: 2px !important;
+}
+
 /* Old app parity: normalize textbox appearance across Bootstrap + Material fields. */
 input.form-control,
 select.form-control {

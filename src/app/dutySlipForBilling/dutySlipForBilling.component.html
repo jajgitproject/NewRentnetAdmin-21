@@ -223,7 +223,7 @@
 
                   <div class="row">
                     <div class="col-xl-3 col-lg-3 col-md-3 col-sm-6 mb-2">
-                      <mat-form-field appearance="outline" floatLabel="always" class="example-full-width">
+                      <mat-form-field appearance="fill" floatLabel="auto" subscriptSizing="dynamic" class="example-full-width cp-closing-field">
                         <mat-label>DS Closing</mat-label>
                         <mat-select formControlName="dsClosing">
                           <mat-option value="Closed">Closed</mat-option>
@@ -234,7 +234,7 @@
                     </div>
 
                     <div class="col-xl-3 col-lg-3 col-md-3 col-sm-6 mb-2">
-                      <mat-form-field appearance="outline" floatLabel="always" class="example-full-width">
+                      <mat-form-field appearance="fill" floatLabel="auto" subscriptSizing="dynamic" class="example-full-width cp-closing-field">
                         <mat-label>Duty Slip Received</mat-label>
                         <mat-select formControlName="physicalDutySlipReceived">
                           <mat-option [value]=true>Yes</mat-option>
@@ -244,14 +244,14 @@
                     </div>
 
                     <div class="col-xl-3 col-lg-3 col-md-3 col-sm-6 mb-2">
-                      <mat-form-field appearance="outline" floatLabel="always" class="example-full-width">
+                      <mat-form-field appearance="fill" floatLabel="auto" subscriptSizing="dynamic" class="example-full-width cp-closing-field">
                         <mat-label>Running Details</mat-label>
                         <textarea matInput formControlName="runningDetails"></textarea>
                       </mat-form-field>
                     </div>
 
                     <div class="col-xl-3 col-lg-3 col-md-3 col-sm-6 mb-2">
-                      <mat-form-field appearance="outline" floatLabel="always" class="example-full-width">
+                      <mat-form-field appearance="fill" floatLabel="auto" subscriptSizing="dynamic" class="example-full-width cp-closing-field">
                         <mat-label>Vendor Remark</mat-label>
                         <textarea matInput formControlName="vendorRemark"></textarea>
                       </mat-form-field>
@@ -260,7 +260,7 @@
 
                   <div class="row">
                     <div class="col-xl-3 col-lg-3 col-md-3 col-sm-6 mb-2">
-                      <mat-form-field appearance="outline" floatLabel="always" class="example-full-width">
+                      <mat-form-field appearance="fill" floatLabel="auto" subscriptSizing="dynamic" class="example-full-width cp-closing-field">
                         <mat-label>Location Out Date</mat-label>
                         <input required matInput [matDatepicker]="locOutDate"
                           formControlName="locationOutDateForBilling" (dateChange)="onLocOutDatepickerChange($event)">
@@ -270,7 +270,7 @@
                     </div>
 
                     <div class="col-xl-3 col-lg-3 col-md-3 col-sm-6 mb-2">
-                      <mat-form-field appearance="outline" floatLabel="always" class="example-full-width">
+                      <mat-form-field appearance="fill" floatLabel="auto" subscriptSizing="dynamic" class="example-full-width cp-closing-field">
                         <mat-label>Location Out Time</mat-label>
                         <input required matInput [owlDateTimeTrigger]="time1" [owlDateTime]="time1"
                           formControlName="locationOutTimeForBilling" (ngModelChange)="onTimeSelection()">
@@ -280,14 +280,14 @@
                     </div>
 
                     <div class="col-xl-3 col-lg-3 col-md-3 col-sm-6 mb-2">
-                      <mat-form-field appearance="outline" floatLabel="always" class="example-full-width">
+                      <mat-form-field appearance="fill" floatLabel="auto" subscriptSizing="dynamic" class="example-full-width cp-closing-field">
                         <mat-label>Location Out KM</mat-label>
                         <input required matInput formControlName="locationOutKMForBilling" (input)="onKeyUp()">
                       </mat-form-field>
                     </div>
 
                     <div class="col-xl-3 col-lg-3 col-md-3 col-sm-6 mb-2">
-                      <mat-form-field appearance="outline" floatLabel="always" class="example-full-width">
+                      <mat-form-field appearance="fill" floatLabel="auto" subscriptSizing="dynamic" class="example-full-width cp-closing-field">
                         <mat-label>Location Out Address</mat-label>
                         <textarea matInput formControlName="locationOutAddressStringForBilling" rows="3"></textarea>
                       </mat-form-field>
@@ -297,7 +297,7 @@
 
                   <div class="row">
                     <div class="col-xl-3 col-lg-3 col-md-3 col-sm-6 mb-2">
-                      <mat-form-field appearance="outline" floatLabel="always" class="example-full-width">
+                      <mat-form-field appearance="fill" floatLabel="auto" subscriptSizing="dynamic" class="example-full-width cp-closing-field">
                         <mat-label>Pickup Date</mat-label>
                         <input required matInput [matDatepicker]="pickDate" formControlName="pickUpDateForBilling"
                           (dateChange)="onPickupDatepickerChange($event)">
@@ -310,7 +310,7 @@
                     </div>
 
                     <div class="col-xl-3 col-lg-3 col-md-3 col-sm-6 mb-2">
-                      <mat-form-field appearance="outline" floatLabel="always" class="example-full-width">
+                      <mat-form-field appearance="fill" floatLabel="auto" subscriptSizing="dynamic" class="example-full-width cp-closing-field">
                         <mat-label>Pickup Time</mat-label>
                         <input required matInput [owlDateTimeTrigger]="time2" [owlDateTime]="time2"
                           formControlName="pickUpTimeForBilling" (ngModelChange)="onTimeSelection()">
@@ -328,14 +328,14 @@
                     </div>
 
                     <div class="col-xl-3 col-lg-3 col-md-3 col-sm-6 mb-2">
-                      <mat-form-field appearance="outline" floatLabel="always" class="example-full-width">
+                      <mat-form-field appearance="fill" floatLabel="auto" subscriptSizing="dynamic" class="example-full-width cp-closing-field">
                         <mat-label>Pickup KM</mat-label>
                         <input required matInput formControlName="pickUpKMForBilling" (input)="onKeyUp()">
                       </mat-form-field>
                     </div>
 
                     <div class="col-xl-3 col-lg-3 col-md-3 col-sm-6 mb-2">
-                      <mat-form-field appearance="outline" floatLabel="always" class="example-full-width">
+                      <mat-form-field appearance="fill" floatLabel="auto" subscriptSizing="dynamic" class="example-full-width cp-closing-field">
                         <mat-label>Pickup Address</mat-label>
                         <textarea matInput formControlName="pickUpAddressStringForBilling" rows="3"></textarea>
                       </mat-form-field>
@@ -344,7 +344,7 @@
 
                   <div class="row">
                     <div class="col-xl-3 col-lg-3 col-md-3 col-sm-6 mb-2">
-                      <mat-form-field appearance="outline" floatLabel="always" class="example-full-width">
+                      <mat-form-field appearance="fill" floatLabel="auto" subscriptSizing="dynamic" class="example-full-width cp-closing-field">
                         <mat-label>DropOff Date</mat-label>
                         <input required matInput [matDatepicker]="dropDate" formControlName="dropOffDateForBilling"
                           (dateChange)="onDropOffDatepickerChange($event)">
@@ -354,7 +354,7 @@
                     </div>
 
                     <div class="col-xl-3 col-lg-3 col-md-3 col-sm-6 mb-2">
-                      <mat-form-field appearance="outline" floatLabel="always" class="example-full-width">
+                      <mat-form-field appearance="fill" floatLabel="auto" subscriptSizing="dynamic" class="example-full-width cp-closing-field">
                         <mat-label>DropOff Time</mat-label>
                         <input required matInput [owlDateTimeTrigger]="time3" [owlDateTime]="time3"
                           formControlName="dropOffTimeForBilling" (ngModelChange)="onTimeSelection()">
@@ -364,14 +364,14 @@
                     </div>
 
                     <div class="col-xl-3 col-lg-3 col-md-3 col-sm-6 mb-2">
-                      <mat-form-field appearance="outline" floatLabel="always" class="example-full-width">
+                      <mat-form-field appearance="fill" floatLabel="auto" subscriptSizing="dynamic" class="example-full-width cp-closing-field">
                         <mat-label>DropOff KM</mat-label>
                         <input required matInput formControlName="dropOffKMForBilling" (input)="onKeyUp()">
                       </mat-form-field>
                     </div>
 
                     <div class="col-xl-3 col-lg-3 col-md-3 col-sm-6 mb-2">
-                      <mat-form-field appearance="outline" floatLabel="always" class="example-full-width">
+                      <mat-form-field appearance="fill" floatLabel="auto" subscriptSizing="dynamic" class="example-full-width cp-closing-field">
                         <mat-label>DropOff Address</mat-label>
                         <textarea matInput formControlName="dropOffAddressStringForBilling" rows="3"></textarea>
                       </mat-form-field>
@@ -380,7 +380,7 @@
 
                   <div class="row">
                     <div class="col-xl-3 col-lg-3 col-md-3 col-sm-6 mb-2">
-                      <mat-form-field appearance="outline" floatLabel="always" class="example-full-width">
+                      <mat-form-field appearance="fill" floatLabel="auto" subscriptSizing="dynamic" class="example-full-width cp-closing-field">
                         <mat-label>LocationIn Date</mat-label>
                         <input required matInput [matDatepicker]="locInDate" formControlName="locationInDateForBilling"
                           (dateChange)="onLocInDatepickerChange($event)">
@@ -390,7 +390,7 @@
                     </div>
 
                     <div class="col-xl-3 col-lg-3 col-md-3 col-sm-6 mb-2">
-                      <mat-form-field appearance="outline" floatLabel="always" class="example-full-width">
+                      <mat-form-field appearance="fill" floatLabel="auto" subscriptSizing="dynamic" class="example-full-width cp-closing-field">
                         <mat-label>LocationIn Time</mat-label>
                         <input required matInput [owlDateTimeTrigger]="time4" [owlDateTime]="time4"
                           formControlName="locationInTimeForBilling" (ngModelChange)="onTimeSelection()">
@@ -400,14 +400,14 @@
                     </div>
 
                     <div class="col-xl-3 col-lg-3 col-md-3 col-sm-6 mb-2">
-                      <mat-form-field appearance="outline" floatLabel="always" class="example-full-width">
+                      <mat-form-field appearance="fill" floatLabel="auto" subscriptSizing="dynamic" class="example-full-width cp-closing-field">
                         <mat-label>LocationIn KM</mat-label>
                         <input required matInput formControlName="locationInKMForBilling" (input)="onKeyUp()">
                       </mat-form-field>
                     </div>
 
                     <div class="col-xl-3 col-lg-3 col-md-3 col-sm-6 mb-2">
-                      <mat-form-field appearance="outline" floatLabel="always" class="example-full-width">
+                      <mat-form-field appearance="fill" floatLabel="auto" subscriptSizing="dynamic" class="example-full-width cp-closing-field">
                         <mat-label>LocationIn Address</mat-label>
                         <textarea matInput formControlName="locationInAddressStringForBilling" rows="3"></textarea>
                       </mat-form-field>
@@ -421,14 +421,14 @@
                     </div>
 
                     <div class="col-xl-3 col-lg-3 col-md-3 col-sm-6 mb-2">
-                      <mat-form-field appearance="outline" floatLabel="always" class="example-full-width">
+                      <mat-form-field appearance="fill" floatLabel="auto" subscriptSizing="dynamic" class="example-full-width cp-closing-field">
                         <mat-label>Date & Time Diff</mat-label>
                         <input matInput [value]="datetime" readonly>
                       </mat-form-field>
                     </div>
 
                     <div class="col-xl-3 col-lg-3 col-md-3 col-sm-6 mb-2">
-                      <mat-form-field appearance="outline" floatLabel="always" class="example-full-width">
+                      <mat-form-field appearance="fill" floatLabel="auto" subscriptSizing="dynamic" class="example-full-width cp-closing-field">
                         <mat-label>KM Diff</mat-label>
                         <input matInput [value]="diff" readonly>
                       </mat-form-field>

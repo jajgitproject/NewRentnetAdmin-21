@@ -3,6 +3,21 @@ mat-card-header
   padding: 5px
   height:30px
   width: 100%
+  display: flex
+  align-items: center
+
+mat-card-header h5
+  margin: 0
+  line-height: 1
+
+:host ::ng-deep .header.bg-cyan
+  min-height: 30px
+  display: flex
+  align-items: center
+
+:host ::ng-deep .header.bg-cyan h2
+  margin: 0
+  line-height: 1.15
 
 mat-card-content
   padding: 10px
@@ -15,4 +30,77 @@ mat-card
 mat-checkbox
   font-style: italic
   font-size: 10% !important
+
+.link-actions-top
+  display: flex
+  justify-content: flex-end
+  align-items: center
+  gap: 4px
+  margin-bottom: 2px
+  line-height: 1
+
+.link-action
+  cursor: pointer
+  color: #007bff
+  font-size: 10px !important
+  font-style: italic
+  text-decoration: none
+
+.link-divider
+  color: #007bff
+  font-size: 10px
+
+:host ::ng-deep .hint-actions-row
+  display: inline-flex
+  justify-content: flex-end
+  align-items: center
+  gap: 8px
+  width: 100%
+  line-height: 1
+
+:host ::ng-deep .hint-actions-row .mat-mdc-checkbox
+  margin: 0 !important
+
+:host ::ng-deep .hint-actions-row .mdc-label
+  font-size: 10px !important
+  font-style: italic
+
+/* Booking Screen controls: same floating underline theme used in Control Panel. */
+:host ::ng-deep .register-form .cp-booking-field
+  width: 100%
+
+:host ::ng-deep .register-form .cp-booking-field .mat-mdc-text-field-wrapper,
+:host ::ng-deep .register-form .cp-booking-field .mdc-text-field--filled,
+:host ::ng-deep .register-form .cp-booking-field .mat-mdc-form-field-focus-overlay
+  background-color: transparent !important
+
+:host ::ng-deep .register-form .cp-booking-field .mdc-text-field--filled
+  border-top-left-radius: 0 !important
+  border-top-right-radius: 0 !important
+
+:host ::ng-deep .register-form .cp-booking-field .mat-mdc-form-field-subscript-wrapper
+  margin-top: 0 !important
+
+:host ::ng-deep .register-form .cp-booking-field .mdc-floating-label,
+:host ::ng-deep .register-form .cp-booking-field .mat-mdc-floating-label
+  color: #8a8a8a !important
+  font-size: 11px !important
+  font-weight: 400 !important
+
+:host ::ng-deep .register-form .cp-booking-field .mat-mdc-input-element,
+:host ::ng-deep .register-form .cp-booking-field .mat-mdc-select-value-text
+  color: #222 !important
+  font-size: 13px !important
+  font-weight: 400 !important
+
+:host ::ng-deep .register-form .cp-booking-field .mdc-line-ripple::before
+  border-bottom-color: #d7d7d7 !important
+
+:host ::ng-deep .register-form .cp-booking-field .mdc-line-ripple::after
+  border-bottom-color: #3f51b5 !important
+
+:host ::ng-deep .register-form .cp-booking-field .mat-datepicker-toggle,
+:host ::ng-deep .register-form .cp-booking-field .mat-icon[matSuffix],
+:host ::ng-deep .register-form .cp-booking-field .mat-mdc-select-arrow
+  color: #7a7a7a !important
 

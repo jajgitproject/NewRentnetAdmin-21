@@ -65,3 +65,73 @@ tr {
   flex-wrap: wrap;
   justify-content: space-between;
 }
+
+/* Closing page controls: floating watermark style parity with Control Panel/Booking. */
+:host ::ng-deep .cp-closing-field.mat-mdc-form-field {
+  width: 100%;
+}
+
+:host ::ng-deep .cp-closing-field .mat-mdc-text-field-wrapper,
+:host ::ng-deep .cp-closing-field .mdc-text-field--filled,
+:host ::ng-deep .cp-closing-field .mat-mdc-form-field-focus-overlay {
+  background-color: transparent !important;
+}
+
+:host ::ng-deep .cp-closing-field .mdc-text-field--filled {
+  border-top-left-radius: 0 !important;
+  border-top-right-radius: 0 !important;
+}
+
+:host ::ng-deep .cp-closing-field .mat-mdc-form-field-infix {
+  min-height: 58px !important;
+  padding-top: 18px !important;
+  padding-bottom: 8px !important;
+  display: flex !important;
+  align-items: center !important;
+}
+
+:host ::ng-deep .cp-closing-field .mat-mdc-form-field-subscript-wrapper {
+  margin-top: 0 !important;
+}
+
+:host ::ng-deep .cp-closing-field .mdc-floating-label,
+:host ::ng-deep .cp-closing-field .mat-mdc-floating-label {
+  color: #8a8a8a !important;
+  font-size: 11px !important;
+  font-weight: 400 !important;
+}
+
+:host ::ng-deep .cp-closing-field .mat-mdc-input-element,
+:host ::ng-deep .cp-closing-field .mat-mdc-select-value-text {
+  color: #222 !important;
+  font-size: 13px !important;
+  font-weight: 400 !important;
+  line-height: 1.2 !important;
+}
+
+:host ::ng-deep .cp-closing-field .mat-mdc-input-element {
+  align-self: center !important;
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+:host ::ng-deep .cp-closing-field .mat-mdc-select-trigger {
+  display: flex !important;
+  align-items: center !important;
+  min-height: 24px !important;
+  padding-bottom: 0 !important;
+}
+
+:host ::ng-deep .cp-closing-field .mdc-line-ripple::before {
+  border-bottom-color: #d7d7d7 !important;
+}
+
+:host ::ng-deep .cp-closing-field .mdc-line-ripple::after {
+  border-bottom-color: #3f51b5 !important;
+}
+
+:host ::ng-deep .cp-closing-field .mat-mdc-select-arrow,
+:host ::ng-deep .cp-closing-field .mat-icon[matSuffix],
+:host ::ng-deep .cp-closing-field .mat-datepicker-toggle {
+  color: #7a7a7a !important;
+}
