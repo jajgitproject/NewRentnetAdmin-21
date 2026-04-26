@@ -242,7 +242,6 @@ onOwnedCheckboxChange(event: any) {
 //---------AttachAnotherDriver-----------------
 InitAttachAnotherDriver(supplierID,ownedSupplier)
 {
-  debugger;
   this.advanceTableService.getDriverList(supplierID,ownedSupplier).subscribe(
     data=>
     {
@@ -258,15 +257,57 @@ InitAttachAnotherDriver(supplierID,ownedSupplier)
       ) 
     });;
 }
+private _asSearchString(v: unknown): string {
+  return v == null || v === undefined ? '' : String(v);
+}
+
+/** Digits only for phone-style matching. */
+private _phoneDigits(s: string): string {
+  return (s || '').replace(/\D/g, '');
+}
+
+private _attachAnotherRowMatches(
+  customer: DriverDropDownForAllotment,
+  filterValue: string,
+  filterDigits: string
+): boolean {
+  const f = (v: unknown) => this._asSearchString(v).toLowerCase();
+  if (f(customer.driverName).includes(filterValue)) {
+    return true;
+  }
+  if (f(customer.supplier).includes(filterValue)) {
+    return true;
+  }
+  if (f(customer.supplierType).includes(filterValue)) {
+    return true;
+  }
+  if (f(customer.ownedSupplier).includes(filterValue)) {
+    return true;
+  }
+  const mobile = f(customer.mobile1);
+  if (mobile.includes(filterValue)) {
+    return true;
+  }
+  if (filterDigits.length >= 3) {
+    const mobileD = this._phoneDigits(this._asSearchString(customer.mobile1));
+    if (mobileD.includes(filterDigits)) {
+      return true;
+    }
+  }
+  return false;
+}
+
 private _filterAttachAnotherDriver(value: string): any {
-  const filterValue = value.toLowerCase();
+  const raw = (value || '').trim();
+  const filterValue = raw.toLowerCase();
   if (filterValue.length < 3) {
     return [];
   }
+  const filterDigits = this._phoneDigits(raw);
 
-  return this.AnotherDriverList.filter(customer => {
-    return customer.driverName.toLowerCase().includes(filterValue);
-  });
+  return (this.AnotherDriverList || []).filter((customer) =>
+    this._attachAnotherRowMatches(customer, filterValue, filterDigits)
+  );
 }
 
 
