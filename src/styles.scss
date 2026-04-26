@@ -262,16 +262,38 @@
 .pac-container {
   box-sizing: border-box !important;
   max-width: min(100vw, 500px) !important;
-  z-index: 2147483000 !important;
+  /* Above MatDialog; works when parent is `body` or `cdk-overlay-container` */
+  z-index: 2147483647 !important;
 }
 
-.cdk-overlay-pane:has([ngx-google-places-autocomplete]) {
+.cdk-overlay-pane:has([ngx-google-places-autocomplete]),
+.cdk-overlay-pane:has(.pac-container) {
   overflow: visible !important;
 }
 
-/* Reparented as last child of cdk-overlay-pane: keep at top of pane stacking */
-.cdk-overlay-pane > .pac-container {
+/* Legacy host (no longer created): keep rules for old sessions. */
+#rentnet-google-places-pac-host {
+  position: fixed !important;
+  inset: 0 !important;
   z-index: 2147483000 !important;
+  pointer-events: none !important;
+  overflow: visible !important;
+}
+
+#rentnet-google-places-pac-host > .pac-container,
+body > .pac-container {
+  background-color: #ffffff !important;
+  transform: translateZ(0) !important;
+  isolation: isolate !important;
+  overflow: visible !important;
+}
+
+#rentnet-google-places-pac-host > .pac-container,
+.cdk-overlay-container > .pac-container,
+.cdk-overlay-pane > .pac-container,
+body > .pac-container {
+  z-index: 2147483647 !important;
+  pointer-events: auto !important;
 }
 
 /* Let the Google Places list extend past the outline; reparented under mat-form-field */

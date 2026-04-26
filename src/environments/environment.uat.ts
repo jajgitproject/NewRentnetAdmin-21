@@ -12,7 +12,7 @@ export const environment = {
   apiUrl: 'https://uatapi.ecoserp.in/',
   BaseURL: 'https://uatapi.ecoserp.in/',
   ImageURL: 'https://uatapi.ecoserp.in/',
-  FormURL: 'http://localhost:4200/#',
+  FormURL: 'http://10.0.1.9/#',
   UnlockEmployeeUrl: 'https://uatconnect.ecoserp.in/',
   googleMapsApiKey: 'AIzaSyAFoLcbOuZfbGJGCdlazGXZbOCYr8dW76c',
 };

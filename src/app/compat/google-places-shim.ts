@@ -1,10 +1,10 @@
 // @ts-nocheck
 /**
  * Local replacement for `ngx-google-places-autocomplete` (see templates).
- * `importLibrary("places")` when needed. In a MatDialog, reparent
- * `.pac-container` to the same `cdk-overlay-pane` (absolute, pane-relative) so
- * it stacks above the dialog; otherwise `document.body` with `position: fixed`
- * and viewport coordinates. Scroll/resize + dialog content scroll listeners, etc.
+ * When `showPopover` is available, mount `.pac-container` in a `popover="manual"`
+ * host so the list shares the browser top layer with Angular 21+ CDK dialogs
+ * (z-index on `body` alone cannot win there — see `efpInPac` debug logs).
+ * Otherwise fall back to last child of `document.body` with `position: fixed`.
  */
 import {
   AfterViewInit,
@@ -26,6 +26,73 @@ const READY_POLL_MS = 150;
 const READY_POLL_MAX_ATTEMPTS = 200;
 let sharedPlacesImportPromise: Promise<unknown> | null = null;
 
+// #region agent log
+const __agentDbg = (message: string, data: any, hypothesisId: string) => {
+  try {
+    fetch('http://127.0.0.1:7830/ingest/e71207c4-423e-4a42-a900-5bc43349cfbe', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'X-Debug-Session-Id': '0ef503' },
+      body: JSON.stringify({
+        sessionId: '0ef503',
+        location: 'google-places-shim.ts',
+        message,
+        data,
+        hypothesisId,
+        runId: 'debug',
+        timestamp: Date.now(),
+      }),
+    }).catch(() => {});
+  } catch {
+    /* noop */
+  }
+};
+// #endregion
+
+const POP_HOST_ID = 'rentnet-google-places-popover';
+
+function supportsManualPopover(): boolean {
+  if (typeof HTMLElement === 'undefined') {
+    return false;
+  }
+  return typeof (HTMLElement.prototype as unknown as { showPopover?: () => void }).showPopover === 'function';
+}
+
+function getOrCreatePacPopHost(): HTMLDivElement | null {
+  if (typeof document === 'undefined' || !document.body) {
+    return null;
+  }
+  let el = document.getElementById(POP_HOST_ID) as HTMLDivElement | null;
+  if (el) {
+    return el;
+  }
+  el = document.createElement('div');
+  el.id = POP_HOST_ID;
+  el.setAttribute('popover', 'manual');
+  el.setAttribute('aria-hidden', 'false');
+  el.style.cssText = [
+    'box-sizing:border-box',
+    'margin:0',
+    'padding:0',
+    'border:0',
+    'background:transparent',
+    'pointer-events:auto',
+    'overflow:visible',
+  ].join(';');
+  document.body.appendChild(el);
+  return el;
+}
+
+function hidePacPopHost(): void {
+  const el = document.getElementById(POP_HOST_ID) as (HTMLDivElement & { hidePopover?: () => void }) | null;
+  if (el && typeof el.hidePopover === 'function') {
+    try {
+      el.hidePopover();
+    } catch {
+      /* noop */
+    }
+  }
+}
+
 @Directive({
   selector: '[ngx-google-places-autocomplete]',
   exportAs: 'ngx-places',
@@ -45,6 +112,10 @@ export class GooglePlaceDirective implements AfterViewInit, OnChanges, OnDestroy
   private scrollRaf = 0;
   private dialogScrollElement: Element | null = null;
   private pacRetryTimers: ReturnType<typeof setTimeout>[] = [];
+  /** Re-assert loop generation; bump to cancel in-flight rAF chain. */
+  private pacLayerLockGen = 0;
+  private pacZOrderObserver: MutationObserver | null = null;
+  private pacZDebounceRaf = 0;
 
   private readonly onWindowScrollOrResize = (): void => {
     if (this.scrollRaf) {
@@ -143,6 +214,20 @@ export class GooglePlaceDirective implements AfterViewInit, OnChanges, OnDestroy
       cancelAnimationFrame(this.scrollRaf);
       this.scrollRaf = 0;
     }
+    this.pacLayerLockGen += 1;
+    if (this.pacZDebounceRaf && typeof cancelAnimationFrame !== 'undefined') {
+      cancelAnimationFrame(this.pacZDebounceRaf);
+      this.pacZDebounceRaf = 0;
+    }
+    if (this.pacZOrderObserver) {
+      try {
+        this.pacZOrderObserver.disconnect();
+      } catch {
+        /* noop */
+      }
+      this.pacZOrderObserver = null;
+    }
+    hidePacPopHost();
     this.autocomplete = null;
   }
 
@@ -159,6 +244,11 @@ export class GooglePlaceDirective implements AfterViewInit, OnChanges, OnDestroy
     const pacContainers = Array.from(
       document.querySelectorAll('.pac-container')
     ) as HTMLElement[];
+    // #region agent log
+    if (pacContainers.length) {
+      __agentDbg('flushPacReposition n', { n: pacContainers.length }, 'H3');
+    }
+    // #endregion
     this.repositionPacContainers(input, pacContainers);
   }
 
@@ -275,52 +365,274 @@ export class GooglePlaceDirective implements AfterViewInit, OnChanges, OnDestroy
     }
   }
 
-  /**
-   * 1) MatDialog: append `.pac-container` to the same `cdk-overlay-pane` as
-   *    a last child, `position: absolute`, offsets from input vs pane rects.
-   * 2) Otherwise: `document.body` + `position: fixed` + viewport coordinates.
-   */
-  private repositionPacContainers(input: HTMLInputElement, pacContainers: HTMLElement[]): void {
-    if (!pacContainers || pacContainers.length === 0) {
+  private applyPacLayerStyles(input: HTMLInputElement, pacEls: HTMLElement[]): void {
+    if (!pacEls || pacEls.length === 0) {
+      return;
+    }
+    if (typeof document === 'undefined' || !document.body) {
       return;
     }
     const ir = input.getBoundingClientRect();
     if (ir.width <= 0 && ir.height <= 0) {
       return;
     }
-
     const w = Math.max(Math.round(ir.width), 260);
-    const pane = input.closest?.('.cdk-overlay-pane') as HTMLElement | null;
+    const usePop = supportsManualPopover();
+    const host = usePop ? getOrCreatePacPopHost() : null;
 
-    pacContainers.forEach((pac) => {
-      if (pane && document.body.contains(pane)) {
-        if (pac.parentElement !== pane) {
-          pane.appendChild(pac);
-        }
-        const pr = pane.getBoundingClientRect();
-        const left = ir.left - pr.left;
-        const top = ir.bottom - pr.top;
-        pac.style.setProperty('position', 'absolute', 'important');
-        pac.style.setProperty('left', `${Math.round(left)}px`, 'important');
-        pac.style.setProperty('top', `${Math.round(top)}px`, 'important');
-        pac.style.setProperty('width', `${w}px`, 'important');
-        pac.style.removeProperty('z-index');
+    for (const pac of pacEls) {
+      if (usePop && host) {
+        host.appendChild(pac);
+        host.style.setProperty('position', 'fixed', 'important');
+        host.style.setProperty('left', `${Math.round(ir.left)}px`, 'important');
+        host.style.setProperty('top', `${Math.round(ir.bottom)}px`, 'important');
+        host.style.setProperty('width', `${w}px`, 'important');
+        host.style.setProperty('z-index', '2147483647', 'important');
+        host.style.setProperty('bottom', 'auto', 'important');
+        host.style.setProperty('right', 'auto', 'important');
+
+        pac.style.setProperty('position', 'static', 'important');
+        pac.style.setProperty('left', 'auto', 'important');
+        pac.style.setProperty('top', 'auto', 'important');
+        pac.style.setProperty('width', '100%', 'important');
+        pac.style.setProperty('z-index', 'auto', 'important');
+        pac.style.setProperty('bottom', 'auto', 'important');
+        pac.style.setProperty('right', 'auto', 'important');
         pac.style.setProperty('pointer-events', 'auto', 'important');
         pac.style.setProperty('opacity', '1', 'important');
+        pac.style.setProperty('transform', 'translateZ(0)', 'important');
+        pac.style.setProperty('isolation', 'isolate', 'important');
+        pac.style.setProperty('overflow', 'visible', 'important');
+        pac.style.setProperty('background-color', '#ffffff', 'important');
+        try {
+          (host as unknown as { showPopover?: () => void }).showPopover?.();
+        } catch {
+          /* noop */
+        }
+      } else {
+        document.body.appendChild(pac);
+        pac.style.setProperty('position', 'fixed', 'important');
+        pac.style.setProperty('left', `${Math.round(ir.left)}px`, 'important');
+        pac.style.setProperty('top', `${Math.round(ir.bottom)}px`, 'important');
+        pac.style.setProperty('width', `${w}px`, 'important');
+        pac.style.setProperty('z-index', '2147483647', 'important');
+        pac.style.setProperty('bottom', 'auto', 'important');
+        pac.style.setProperty('right', 'auto', 'important');
+        pac.style.setProperty('pointer-events', 'auto', 'important');
+        pac.style.setProperty('opacity', '1', 'important');
+        pac.style.setProperty('transform', 'translateZ(0)', 'important');
+        pac.style.setProperty('isolation', 'isolate', 'important');
+        pac.style.setProperty('overflow', 'visible', 'important');
+        pac.style.setProperty('background-color', '#ffffff', 'important');
+      }
+    }
+  }
+
+  private runPacLayerLock(input: HTMLInputElement, maxFrames: number): void {
+    this.pacLayerLockGen += 1;
+    const myGen = this.pacLayerLockGen;
+    let frame = 0;
+    const tick = () => {
+      if (this.destroyed) {
         return;
       }
-
-      if (pac.parentElement !== document.body) {
-        document.body.appendChild(pac);
+      if (this.pacLayerLockGen !== myGen) {
+        return;
       }
-      pac.style.setProperty('position', 'fixed', 'important');
-      pac.style.setProperty('left', `${Math.round(ir.left)}px`, 'important');
-      pac.style.setProperty('top', `${Math.round(ir.bottom)}px`, 'important');
-      pac.style.setProperty('width', `${w}px`, 'important');
-      pac.style.setProperty('z-index', '2147483000', 'important');
-      pac.style.setProperty('pointer-events', 'auto', 'important');
-      pac.style.setProperty('opacity', '1', 'important');
+      const pacs = Array.from(document.querySelectorAll('.pac-container')) as HTMLElement[];
+      if (pacs.length) {
+        this.applyPacLayerStyles(input, pacs);
+        if (typeof queueMicrotask === 'function') {
+          queueMicrotask(() => {
+            if (this.destroyed || this.pacLayerLockGen !== myGen) {
+              return;
+            }
+            const again = Array.from(document.querySelectorAll('.pac-container')) as HTMLElement[];
+            if (again.length) {
+              this.applyPacLayerStyles(input, again);
+            }
+          });
+        }
+      }
+      frame += 1;
+      if (frame < maxFrames) {
+        if (typeof requestAnimationFrame === 'function') {
+          requestAnimationFrame(tick);
+        }
+      } else {
+        const p0 = (Array.from(document.querySelectorAll('.pac-container'))[0] as HTMLElement) || null;
+        if (p0) {
+          // #region agent log
+          const br = p0.getBoundingClientRect();
+          const cx = Math.round(br.left + Math.min(12, Math.max(1, br.width / 2)));
+          const cy = Math.round(br.top + Math.min(12, Math.max(1, br.height / 2)));
+          let efpCenter: { tag: string; cls: string; z: string; pos: string } | null = null;
+          try {
+            const hit = document.elementFromPoint(cx, cy);
+            if (hit) {
+              const cs = getComputedStyle(hit as HTMLElement);
+              efpCenter = {
+                tag: (hit as HTMLElement).tagName,
+                cls: (hit as HTMLElement).className?.toString?.().slice(0, 100) || '',
+                z: cs.zIndex,
+                pos: cs.position,
+              };
+            }
+          } catch {
+            /* noop */
+          }
+          let efpInPac = false;
+          try {
+            const elAt = document.elementFromPoint(cx, cy);
+            efpInPac = !!elAt && (elAt === p0 || p0.contains(elAt));
+          } catch {
+            efpInPac = false;
+          }
+          __agentDbg(
+            'pac lock last frame',
+            {
+              usesPopover: supportsManualPopover(),
+              pos: getComputedStyle(p0).position,
+              efpCenter,
+              efpInPac,
+              cx,
+              cy,
+              br: { w: br.width, h: br.height },
+            },
+            'postfix-verification'
+          );
+          // #endregion
+        }
+      }
+    };
+    if (typeof requestAnimationFrame === 'function') {
+      requestAnimationFrame(tick);
+    }
+  }
+
+  private wirePacStyleObserver(input: HTMLInputElement, watch: HTMLElement): void {
+    if (this.pacZOrderObserver) {
+      try {
+        this.pacZOrderObserver.disconnect();
+      } catch {
+        /* noop */
+      }
+      this.pacZOrderObserver = null;
+    }
+    this.pacZOrderObserver = new MutationObserver(() => {
+      if (this.destroyed) {
+        return;
+      }
+      if (this.pacZDebounceRaf && typeof cancelAnimationFrame !== 'undefined') {
+        cancelAnimationFrame(this.pacZDebounceRaf);
+      }
+      this.pacZDebounceRaf = requestAnimationFrame(() => {
+        this.pacZDebounceRaf = 0;
+        if (this.destroyed) {
+          return;
+        }
+        const pacs = Array.from(document.querySelectorAll('.pac-container')) as HTMLElement[];
+        if (pacs.length) {
+          this.applyPacLayerStyles(input, pacs);
+          this.runPacLayerLock(input, 12);
+        }
+      });
     });
+    this.pacZOrderObserver.observe(watch, { attributes: true, attributeFilter: ['style', 'class'] });
+  }
+
+  /**
+   * `fixed` + viewport px; PAC is in `#rentnet-google-places-popover` + `showPopover`
+   * when supported, else last child of `document.body` with `fixed` on `.pac-container`.
+   */
+  private repositionPacContainers(input: HTMLInputElement, pacContainers: HTMLElement[]): void {
+    if (!pacContainers || pacContainers.length === 0) {
+      if (this.pacZOrderObserver) {
+        try {
+          this.pacZOrderObserver.disconnect();
+        } catch {
+          /* noop */
+        }
+        this.pacZOrderObserver = null;
+      }
+      this.pacLayerLockGen += 1;
+      hidePacPopHost();
+      return;
+    }
+    if (this.pacZOrderObserver) {
+      try {
+        this.pacZOrderObserver.disconnect();
+      } catch {
+        /* noop */
+      }
+      this.pacZOrderObserver = null;
+    }
+    const ir = input.getBoundingClientRect();
+    if (ir.width <= 0 && ir.height <= 0) {
+      return;
+    }
+    if (typeof document === 'undefined' || !document.body) {
+      return;
+    }
+
+    this.applyPacLayerStyles(input, pacContainers);
+
+    // #region agent log
+    const first = pacContainers[0];
+    const pr = (el: Element | null) => {
+      if (!el) {
+        return null;
+      }
+      const cs = getComputedStyle(el as HTMLElement);
+      return {
+        id: (el as HTMLElement).id,
+        z: cs.zIndex,
+        pos: cs.position,
+        pe: cs.pointerEvents,
+        tag: (el as HTMLElement).tagName,
+        cls: (el as HTMLElement).className?.toString?.().slice(0, 100),
+      };
+    };
+    const at = (x: number, y: number) => {
+      try {
+        const e = document.elementFromPoint(x, y);
+        return pr(e);
+      } catch {
+        return { err: true };
+      }
+    };
+    const sx = Math.round(ir.left + 12);
+    const sy = Math.round(ir.bottom + 28);
+    const bodyLast = document.body?.lastElementChild;
+    const snap = {
+      mount: supportsManualPopover() ? 'popover' : 'body',
+      pac0Parent: first?.parentElement === document.body ? 'body' : first?.parentElement?.id,
+      pac0pr: pr(first),
+      bodyLastId: bodyLast ? (bodyLast as HTMLElement).id || bodyLast.tagName : null,
+      cdk: pr(document.querySelector('.cdk-overlay-container')),
+      efp: at(sx, sy),
+    };
+    __agentDbg('reposition sync', snap, 'H2-H4-H5');
+
+    const reportDeferred = (phase: string) => {
+      const f = pacContainers[0];
+      __agentDbg(`reposition ${phase}`, {
+        pac0Parent: f?.parentElement?.id,
+        parentTag: f?.parentElement?.tagName,
+        efp: at(sx, sy),
+        pac0pr: pr(f),
+      }, 'H1-H4');
+    };
+    if (typeof requestAnimationFrame === 'function') {
+      requestAnimationFrame(() => reportDeferred('rAF'));
+    }
+    if (typeof setTimeout === 'function') {
+      setTimeout(() => reportDeferred('t150ms'), 150);
+    }
+    // #endregion
+
+    this.runPacLayerLock(input, 24);
+    this.wirePacStyleObserver(input, first);
   }
 
   private normalizeOptions(options: any): any {
