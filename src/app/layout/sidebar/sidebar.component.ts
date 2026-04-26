@@ -33,6 +33,8 @@ export class SidebarComponent implements OnInit, OnDestroy {
   headerHeight = 60;
   routerObj = null;
   searchText: string;
+  /** True when search box has non-whitespace (submenus stay expanded in template + body class). */
+  searchingOpen = false;
   firstName: string;
   lastName: string;
   constructor(
@@ -67,6 +69,9 @@ export class SidebarComponent implements OnInit, OnDestroy {
     }
   }
   callLevel1Toggle(event: any, element: any) {
+    if (element === 'Masters') {
+      return;
+    }
     if (element === this.level1Menu) {
       this.level1Menu = '0';
     } else {
@@ -141,7 +146,21 @@ export class SidebarComponent implements OnInit, OnDestroy {
 
   
   ngOnDestroy() {
+    this.clearSearchOpenBodyClass();
     this.routerObj.unsubscribe();
+  }
+
+  onSearchTextChange(value: string): void {
+    this.searchingOpen = !!(value && String(value).trim().length);
+    if (this.searchingOpen) {
+      this.renderer.addClass(this.document.body, 'sidebar-search-open');
+    } else {
+      this.clearSearchOpenBodyClass();
+    }
+  }
+
+  private clearSearchOpenBodyClass(): void {
+    this.renderer.removeClass(this.document.body, 'sidebar-search-open');
   }
   initLeftSidebar() {
     const _this = this;

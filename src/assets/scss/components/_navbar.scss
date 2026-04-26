@@ -446,6 +446,19 @@ nav.navbar {
     }
   }
 
+  /* While the sidebar search box has text, keep submenus + search visible (override collapse). */
+  &.submenu-closed.sidebar-search-open {
+    .sidebar .menu .list {
+      li .ml-menu,
+      .header {
+        display: block !important;
+      }
+    }
+    .sidebar-user-panel {
+      display: block !important;
+    }
+  }
+
   section.content {
     margin-left: 75px;
   }

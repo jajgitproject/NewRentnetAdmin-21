@@ -17,12 +17,14 @@
             <div class="profile-usertitle-job "></div>
           </div>
           <div class="user-panel" style="margin-left: 20px;" appearance="outline" >
-            <input type="text" [(ngModel)]="searchText" placeholder="Search">
+            <input type="text" [(ngModel)]="searchText" (ngModelChange)="onSearchTextChange($event)" placeholder="Search">
           </div>
         </li>
         <!-- Top Most level menu -->
-        <li [class.active]="level1Menu === sidebarItem.moduleName && sidebarItem.submenu.length != 0"
-          *ngFor="let sidebarItem of sidebarItems" [routerLinkActive]="sidebarItem.submenu.length != 0 ? 'active' : 'active'">
+        <li
+          [class.active]="(sidebarItem.moduleName === 'Masters' && sidebarItem.submenu.length > 0) || (level1Menu === sidebarItem.moduleName && sidebarItem.submenu.length != 0) || (searchingOpen && sidebarItem.submenu.length > 0)"
+          [class.menu-root-always-open]="sidebarItem.moduleName === 'Masters' && sidebarItem.submenu.length > 0"
+          *ngFor="let sidebarItem of sidebarItems">
           <div class="header" *ngIf="sidebarItem.groupTitle === true">{{sidebarItem.title | translate}}</div>
           <a [routerLink]="sidebarItem.class === '' ? [sidebarItem.path] : null" *ngIf="!sidebarItem.groupTitle;"
             [ngClass]="[sidebarItem.class]" (click)="callLevel1Toggle($event, sidebarItem.moduleName)" class="menu-top">

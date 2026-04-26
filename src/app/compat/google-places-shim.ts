@@ -3,7 +3,7 @@
  * Local replacement for `ngx-google-places-autocomplete` (see templates).
  * When `showPopover` is available, mount `.pac-container` in a `popover="manual"`
  * host so the list shares the browser top layer with Angular 21+ CDK dialogs
- * (z-index on `body` alone cannot win there — see `efpInPac` debug logs).
+ * (z-index on `body` alone is not enough when the dialog uses the browser top layer).
  * Otherwise fall back to last child of `document.body` with `position: fixed`.
  */
 import {
@@ -25,28 +25,6 @@ declare const google: any;
 const READY_POLL_MS = 150;
 const READY_POLL_MAX_ATTEMPTS = 200;
 let sharedPlacesImportPromise: Promise<unknown> | null = null;
-
-// #region agent log
-const __agentDbg = (message: string, data: any, hypothesisId: string) => {
-  try {
-    fetch('http://127.0.0.1:7830/ingest/e71207c4-423e-4a42-a900-5bc43349cfbe', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'X-Debug-Session-Id': '0ef503' },
-      body: JSON.stringify({
-        sessionId: '0ef503',
-        location: 'google-places-shim.ts',
-        message,
-        data,
-        hypothesisId,
-        runId: 'debug',
-        timestamp: Date.now(),
-      }),
-    }).catch(() => {});
-  } catch {
-    /* noop */
-  }
-};
-// #endregion
 
 const POP_HOST_ID = 'rentnet-google-places-popover';
 
@@ -244,11 +222,6 @@ export class GooglePlaceDirective implements AfterViewInit, OnChanges, OnDestroy
     const pacContainers = Array.from(
       document.querySelectorAll('.pac-container')
     ) as HTMLElement[];
-    // #region agent log
-    if (pacContainers.length) {
-      __agentDbg('flushPacReposition n', { n: pacContainers.length }, 'H3');
-    }
-    // #endregion
     this.repositionPacContainers(input, pacContainers);
   }
 
@@ -459,50 +432,6 @@ export class GooglePlaceDirective implements AfterViewInit, OnChanges, OnDestroy
         if (typeof requestAnimationFrame === 'function') {
           requestAnimationFrame(tick);
         }
-      } else {
-        const p0 = (Array.from(document.querySelectorAll('.pac-container'))[0] as HTMLElement) || null;
-        if (p0) {
-          // #region agent log
-          const br = p0.getBoundingClientRect();
-          const cx = Math.round(br.left + Math.min(12, Math.max(1, br.width / 2)));
-          const cy = Math.round(br.top + Math.min(12, Math.max(1, br.height / 2)));
-          let efpCenter: { tag: string; cls: string; z: string; pos: string } | null = null;
-          try {
-            const hit = document.elementFromPoint(cx, cy);
-            if (hit) {
-              const cs = getComputedStyle(hit as HTMLElement);
-              efpCenter = {
-                tag: (hit as HTMLElement).tagName,
-                cls: (hit as HTMLElement).className?.toString?.().slice(0, 100) || '',
-                z: cs.zIndex,
-                pos: cs.position,
-              };
-            }
-          } catch {
-            /* noop */
-          }
-          let efpInPac = false;
-          try {
-            const elAt = document.elementFromPoint(cx, cy);
-            efpInPac = !!elAt && (elAt === p0 || p0.contains(elAt));
-          } catch {
-            efpInPac = false;
-          }
-          __agentDbg(
-            'pac lock last frame',
-            {
-              usesPopover: supportsManualPopover(),
-              pos: getComputedStyle(p0).position,
-              efpCenter,
-              efpInPac,
-              cx,
-              cy,
-              br: { w: br.width, h: br.height },
-            },
-            'postfix-verification'
-          );
-          // #endregion
-        }
       }
     };
     if (typeof requestAnimationFrame === 'function') {
@@ -577,60 +506,7 @@ export class GooglePlaceDirective implements AfterViewInit, OnChanges, OnDestroy
 
     this.applyPacLayerStyles(input, pacContainers);
 
-    // #region agent log
     const first = pacContainers[0];
-    const pr = (el: Element | null) => {
-      if (!el) {
-        return null;
-      }
-      const cs = getComputedStyle(el as HTMLElement);
-      return {
-        id: (el as HTMLElement).id,
-        z: cs.zIndex,
-        pos: cs.position,
-        pe: cs.pointerEvents,
-        tag: (el as HTMLElement).tagName,
-        cls: (el as HTMLElement).className?.toString?.().slice(0, 100),
-      };
-    };
-    const at = (x: number, y: number) => {
-      try {
-        const e = document.elementFromPoint(x, y);
-        return pr(e);
-      } catch {
-        return { err: true };
-      }
-    };
-    const sx = Math.round(ir.left + 12);
-    const sy = Math.round(ir.bottom + 28);
-    const bodyLast = document.body?.lastElementChild;
-    const snap = {
-      mount: supportsManualPopover() ? 'popover' : 'body',
-      pac0Parent: first?.parentElement === document.body ? 'body' : first?.parentElement?.id,
-      pac0pr: pr(first),
-      bodyLastId: bodyLast ? (bodyLast as HTMLElement).id || bodyLast.tagName : null,
-      cdk: pr(document.querySelector('.cdk-overlay-container')),
-      efp: at(sx, sy),
-    };
-    __agentDbg('reposition sync', snap, 'H2-H4-H5');
-
-    const reportDeferred = (phase: string) => {
-      const f = pacContainers[0];
-      __agentDbg(`reposition ${phase}`, {
-        pac0Parent: f?.parentElement?.id,
-        parentTag: f?.parentElement?.tagName,
-        efp: at(sx, sy),
-        pac0pr: pr(f),
-      }, 'H1-H4');
-    };
-    if (typeof requestAnimationFrame === 'function') {
-      requestAnimationFrame(() => reportDeferred('rAF'));
-    }
-    if (typeof setTimeout === 'function') {
-      setTimeout(() => reportDeferred('t150ms'), 150);
-    }
-    // #endregion
-
     this.runPacLayerLock(input, 24);
     this.wirePacStyleObserver(input, first);
   }

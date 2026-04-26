@@ -1116,3 +1116,75 @@ textarea.form-control:focus {
   border-top: 2px solid black !important;
 }
 
+/* Sidebar search: down chevron on expanded top-level items (wins over router hover / side-closed). */
+body.sidebar-search-open .sidebar .menu .list li.active a.menu-toggle.menu-top,
+body.sidebar-search-open .sidebar .menu .list li.active a.menu-toggle {
+  &:before {
+    -webkit-transform: scale(0) !important;
+    transform: scale(0) !important;
+  }
+  &:after {
+    -webkit-transform: scale(1) !important;
+    transform: scale(1) !important;
+  }
+}
+
+body.sidebar-search-open.side-closed .sidebar .menu .list li.active a.menu-toggle.menu-top,
+body.sidebar-search-open.side-closed .sidebar .menu .list li.active a.menu-toggle,
+body.sidebar-search-open.side-closed.side-closed-hover .sidebar .menu .list li.active a.menu-toggle.menu-top,
+body.sidebar-search-open.side-closed.side-closed-hover .sidebar .menu .list li.active a.menu-toggle {
+  &:before,
+  &:after {
+    position: absolute !important;
+    right: 17px !important;
+    top: calc(50% - 7px) !important;
+    font-family: "Font Awesome 5 Free" !important;
+    font-weight: 600 !important;
+    font-size: 12px !important;
+    color: gray !important;
+  }
+  &:before {
+    content: "\f054" !important;
+    -webkit-transform: scale(0) !important;
+    transform: scale(0) !important;
+  }
+  &:after {
+    content: "\f078" !important;
+    -webkit-transform: scale(1) !important;
+    transform: scale(1) !important;
+  }
+}
+
+/* Top "Menu" (Masters): always expanded; keep submenu + down chevron in icon-only (side-closed) mode too. */
+body.side-closed.submenu-closed .sidebar .menu .list li.menu-root-always-open .ml-menu,
+body.side-closed.submenu-closed .sidebar .menu .list li.menu-root-always-open .header {
+  display: block !important;
+}
+
+body.side-closed .sidebar .menu .list li.menu-root-always-open.active a.menu-toggle.menu-top,
+body.side-closed .sidebar .menu .list li.menu-root-always-open.active a.menu-toggle,
+body.side-closed.submenu-closed .sidebar .menu .list li.menu-root-always-open.active a.menu-toggle.menu-top,
+body.side-closed.submenu-closed .sidebar .menu .list li.menu-root-always-open.active a.menu-toggle,
+body.side-closed.submenu-closed.side-closed-hover .sidebar .menu .list li.menu-root-always-open.active a.menu-toggle {
+  &:before,
+  &:after {
+    position: absolute !important;
+    right: 17px !important;
+    top: calc(50% - 7px) !important;
+    font-family: "Font Awesome 5 Free" !important;
+    font-weight: 600 !important;
+    font-size: 12px !important;
+    color: gray !important;
+  }
+  &:before {
+    content: "\f054" !important;
+    -webkit-transform: scale(0) !important;
+    transform: scale(0) !important;
+  }
+  &:after {
+    content: "\f078" !important;
+    -webkit-transform: scale(1) !important;
+    transform: scale(1) !important;
+  }
+}
+
