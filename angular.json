@@ -82,6 +82,27 @@
               ],
               "outputHashing": "all"
             },
+            "uat": {
+              "fileReplacements": [
+                {
+                  "replace": "src/environments/environment.ts",
+                  "with": "src/environments/environment.uat.ts"
+                }
+              ],
+              "budgets": [
+                {
+                  "type": "initial",
+                  "maximumWarning": "4mb",
+                  "maximumError": "6mb"
+                },
+                {
+                  "type": "anyComponentStyle",
+                  "maximumWarning": "14kb",
+                  "maximumError": "18kb"
+                }
+              ],
+              "outputHashing": "all"
+            },
             "development": {
               "optimization": false,
               "extractLicenses": false,
@@ -103,6 +124,9 @@
           "configurations": {
             "production": {
               "buildTarget": "lorax:build:production"
+            },
+            "uat": {
+              "buildTarget": "lorax:build:uat"
             },
             "development": {
               "buildTarget": "lorax:build:development"
