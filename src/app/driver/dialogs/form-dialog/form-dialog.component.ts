@@ -794,10 +794,17 @@ saveDisabled:boolean = true;
   }
 
   AddressChange(address: Address) {
-    this.localAddressString=address.formatted_address
-    this.advanceTableForm.patchValue({latitude:address.geometry.location.lat()});
-    this.advanceTableForm.patchValue({longitude:address.geometry.location.lng()}); 
-        this.advanceTableForm.get('localAddressAddressString')?.updateValueAndValidity();
+    const a = address as any;
+    this.localAddressString = a?.formatted_address;
+    const loc = a?.geometry?.location;
+    if (!loc) {
+      this.advanceTableForm.get('localAddressAddressString')?.updateValueAndValidity();
+      return;
+    }
+    const lat = typeof loc.lat === 'function' ? loc.lat() : loc.lat;
+    const lng = typeof loc.lng === 'function' ? loc.lng() : loc.lng;
+    this.advanceTableForm.patchValue({ latitude: lat, longitude: lng });
+    this.advanceTableForm.get('localAddressAddressString')?.updateValueAndValidity();
   }
 
    onPickupTyping() {

@@ -6,4 +6,5 @@ export const environment = {
   ImageURL: 'https://prodapi.ecoserp.in/',
   FormURL: 'http://10.0.6.8/#',
   UnlockEmployeeUrl: 'https://prodconnect.ecoserp.in/',
+  googleMapsApiKey: 'AIzaSyAFoLcbOuZfbGJGCdlazGXZbOCYr8dW76c',
 };

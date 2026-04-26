@@ -13,7 +13,7 @@ import { DispatchByExecutiveDropDown } from '../../dispatchByExecutiveDropDown.m
 import { HttpErrorResponse } from '@angular/common/http';
 import { OrganizationalEntityDropDown } from 'src/app/organizationalEntityMessage/organizationalEntityDropDown.model';
 import { Observable, of } from 'rxjs';
-import { map, startWith, debounceTime, distinctUntilChanged, switchMap } from 'rxjs/operators';
+import { map, startWith, debounceTime, distinctUntilChanged } from 'rxjs/operators';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { FormDialogFetchComponent } from 'src/app/dispatchFetchData/dialogs/form-dialog/form-dialog.component';
 import { FetchDataFromGPSComponent } from '../fetch-data-from-gps/fetch-data-from-gps.component';
@@ -22,7 +22,6 @@ import { GoogleAddressDropDown } from 'src/app/reservation/googleAddressDropDown
 import { ReservationService } from 'src/app/reservation/reservation.service';
 import moment from 'moment';
 import { ThemeService } from 'ng2-charts';
-declare const google: any;
 
 @Component({
   standalone: false,
@@ -63,9 +62,8 @@ export class FormDialogDBEComponent {
   selectedValue: string;
   locationOutEntry: boolean;
   filteredGoogleAddressOptions: Observable<GoogleAddressDropDown[]> = of([]);
-  filteredGooglePlacesOptions: Observable<string[]> = of([]);
   public GoogleAddressList?: GoogleAddressDropDown[] = [];
-  ifBlock=true;
+  ifBlock = false;
   indeterminate = false;
   labelPosition: 'before' | 'before' = 'before';
   locationOutAddressString: any;
@@ -149,7 +147,6 @@ this.isSaveAllowed = status === 'changes allow';
     }
     // this.loadData();
     this.InitGoogleAddress();
-    this.initLiveGooglePredictions();
   //   if (!this.advanceTableForm.get('locationOutEntryMethod').value) {
   //    this.advanceTableForm.patchValue({ locationOutEntryMethod: "Manual" });
   //  }
@@ -197,75 +194,10 @@ this.isSaveAllowed = status === 'changes allow';
         locationOutLatLongByApp:[''],
         locationOutDateByApp:[new Date()],
         locationOutTimeByApp:[new Date()],
-        googleAddresses:[''],
+        googleAddresses: [true],
       });
 
   }
-  private initLiveGooglePredictions(): void {
-    this.filteredGooglePlacesOptions = this.advanceTableForm.controls['locationOutAddressString'].valueChanges.pipe(
-      startWith(''),
-      debounceTime(200),
-      distinctUntilChanged(),
-      switchMap((value) => {
-        const useGoogle = this.advanceTableForm.value.googleAddresses === true;
-        if (!useGoogle) {
-          return of([]);
-        }
-        return this.getGooglePredictions((value || '').toString());
-      })
-    );
-  }
-
-  private getGooglePredictions(query: string): Observable<string[]> {
-    const trimmed = (query || '').trim();
-    if (trimmed.length < 2 || !(window as any)?.google?.maps?.places?.AutocompleteService) {
-      return of([]);
-    }
-    return new Observable<string[]>((observer) => {
-      try {
-        const service = new google.maps.places.AutocompleteService();
-        service.getPlacePredictions(
-          { input: trimmed, componentRestrictions: { country: 'IN' } },
-          (predictions: any[], status: string) => {
-            const items = status === 'OK' && Array.isArray(predictions)
-              ? predictions.map((p) => p?.description).filter((x) => !!x)
-              : [];
-            observer.next(items);
-            observer.complete();
-          }
-        );
-      } catch {
-        observer.next([]);
-        observer.complete();
-      }
-    });
-  }
-
-  onGooglePredictionSelected(addressText: string): void {
-    if (!addressText) {
-      return;
-    }
-    this.advanceTableForm.patchValue({ locationOutAddressString: addressText });
-    if (!(window as any)?.google?.maps?.Geocoder) {
-      return;
-    }
-    const geocoder = new google.maps.Geocoder();
-    geocoder.geocode({ address: addressText }, (results: any[], status: string) => {
-      if (status === 'OK' && results?.length) {
-        const location = results[0].geometry?.location;
-        const lat = typeof location?.lat === 'function' ? location.lat() : null;
-        const lng = typeof location?.lng === 'function' ? location.lng() : null;
-        if (lat !== null && lng !== null) {
-          this.advanceTableForm.patchValue({
-            locationOutLatitude: lat,
-            locationOutLongitude: lng
-          });
-          this.advanceTableForm.get('locationOutAddressString')?.updateValueAndValidity();
-        }
-      }
-    });
-  }
-
   googlePlacesForm = this.fb.group({
     geoPointID: [''],
     geoLocation: [''],
@@ -447,6 +379,8 @@ this.isSaveAllowed = status === 'changes allow';
           this.getIntervalInTime();
         }
       }
+
+      this.syncIfBlockToGoogleAddresses();
     },
     (error: HttpErrorResponse) => {
       this.dataSource = null;
@@ -514,17 +448,15 @@ this.isSaveAllowed = status === 'changes allow';
     return isValid ? null : { 'whitespace': true };
   }
 
- onAddressTyping() {
-  this.advanceTableForm.patchValue({
-    locationOutLatitude: null,
-    locationOutLongitude: null
-  });
-
-  const control = this.advanceTableForm.get('locationOutAddressString');
-
-  control?.markAsTouched();   // 👈 ye missing hai
-  control?.updateValueAndValidity();
-}
+  onAddressTyping() {
+    this.advanceTableForm.patchValue({
+      locationOutLatitude: null,
+      locationOutLongitude: null
+    });
+    const control = this.advanceTableForm.get('locationOutAddressString');
+    control?.markAsTouched();
+    control?.updateValueAndValidity();
+  }
 // onAddressTyping() {
 //   this.advanceTableForm.patchValue({
 //     locationOutLatitude: null,
@@ -540,33 +472,19 @@ this.isSaveAllowed = status === 'changes allow';
 
 
   AddressChange(address: Address) {
-    if (!address) {
-      console.error('No address provided');
+    const a = address as any;
+    const loc = a?.geometry?.location;
+    if (!loc) {
+      this.advanceTableForm.get('locationOutAddressString')?.updateValueAndValidity();
       return;
     }
-    
-    const lat = address.geometry.location.lat();
-    const lng = address.geometry.location.lng();
-    
-    if (isNaN(lat) || isNaN(lng)) {
-      console.error('Invalid coordinates from Google Maps:', { lat, lng });
-      this.showNotification(
-        'snackbar-danger',
-        'Invalid coordinates from Google Maps',
-        'bottom',
-        'center'
-      );
-      return;
-    }
-    
+    const lat = typeof loc.lat === 'function' ? loc.lat() : loc.lat;
+    const lng = typeof loc.lng === 'function' ? loc.lng() : loc.lng;
     this.advanceTableForm.patchValue({
-      locationOutAddressString: address.formatted_address,
+      locationOutAddressString: a?.formatted_address,
       locationOutLatitude: lat,
       locationOutLongitude: lng
     });
-    
-
-    // Validator ko fir se chalaye
     this.advanceTableForm.get('locationOutAddressString')?.markAsTouched();
     this.advanceTableForm.get('locationOutAddressString')?.updateValueAndValidity();
   }
@@ -1105,20 +1023,22 @@ this.isSaveAllowed = status === 'changes allow';
   //   this.advanceTableForm.patchValue({ locationOutLatitude: lat });
   //   this.advanceTableForm.patchValue({ locationOutLongitude: long });
   // }
-  valueSwitch()
-  {
-    if(this.advanceTableForm.value.googleAddresses===true)
-      {
-        this.ifBlock=false;
-        this.advanceTableForm.controls["locationOutAddressString"].setValue('');
-       
-      }
-      if(this.advanceTableForm.value.googleAddresses===false)
-      {
-        this.ifBlock=true;
-        this.advanceTableForm.controls["locationOutAddressString"].setValue('');
-      }
+  valueSwitch() {
+    if (this.advanceTableForm.value.googleAddresses === true) {
+      this.ifBlock = false;
+    }
+    if (this.advanceTableForm.value.googleAddresses === false) {
+      this.ifBlock = true;
+    }
+    this.advanceTableForm.patchValue({
+      locationOutAddressString: '',
+      locationOutLatitude: null,
+      locationOutLongitude: null
+    });
+  }
 
+  private syncIfBlockToGoogleAddresses(): void {
+    this.ifBlock = this.advanceTableForm.get('googleAddresses')?.value !== true;
   }
 
   private trySetCoordinatesFromAddress(address: string): boolean {
@@ -1318,7 +1238,7 @@ googleAddressValidator(): ValidatorFn {
     // Don't enforce coordinates if manual entry is disabled
     const entryMethod = control.parent.get('locationOutEntryMethod')?.value;
     if (isGoogle && !latitude && entryMethod !== 'App') {
-      return { googleAddressNotSelected: true };
+      return { invalidGeoSearchString: true };
     }
 
     return null;

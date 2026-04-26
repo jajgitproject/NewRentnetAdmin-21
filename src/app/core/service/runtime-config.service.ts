@@ -31,7 +31,7 @@ export class RuntimeConfigService {
    * literal below is the legacy key committed to this repo; rotate it
    * (and lock it down) and override via `runtime-config.json#googleMapsApiKey`.
    */
-  private googleMapsApiKey = 'AIzaSyAFoLcbOuZfbGJGCdlazGXZbOCYr8dW76c';
+  private googleMapsApiKey = '';
 
   constructor() {
     this.applyEnvironmentDefaults();
@@ -42,6 +42,12 @@ export class RuntimeConfigService {
     this.imageUrl = withTrailingSlash(environment.ImageURL);
     this.formUrl = environment.FormURL;
     this.unlockEmployeeUrl = withTrailingSlash(environment.UnlockEmployeeUrl);
+    const k = (environment as { googleMapsApiKey?: string }).googleMapsApiKey;
+    if (typeof k === 'string' && k.trim()) {
+      this.googleMapsApiKey = k.trim();
+    } else {
+      this.googleMapsApiKey = 'AIzaSyAFoLcbOuZfbGJGCdlazGXZbOCYr8dW76c';
+    }
   }
 
   /** Fetch optional overrides before the app bootstraps (see `APP_INITIALIZER` in `AppModule`). */
@@ -131,13 +137,19 @@ export class RuntimeConfigService {
     script.async = true;
     script.dataset.app = 'google-maps';
     script.dataset.key = apiKey;
-    // `libraries=places` is required for google.maps.places.Autocomplete,
-    // which powers the `[ngx-google-places-autocomplete]` directive used on
-    // every address input in the app. `loading=async` silences the console
-    // warning and matches Google's current best practice.
+    // `libraries=places` for Autocomplete. Omit `loading=async` from the URL
+    // so the Places module can load predictably; importLibrary in onload
+    // loads the new Places module when the loader exposes it.
     script.src =
-      `https://maps.googleapis.com/maps/api/js?key=${encodeURIComponent(apiKey)}` +
-      `&libraries=places&loading=async`;
+      `https://maps.googleapis.com/maps/api/js?key=${encodeURIComponent(apiKey)}` + `&libraries=places`;
+    script.addEventListener('load', () => {
+      const maps = (window as any).google?.maps;
+      if (typeof maps?.importLibrary === 'function') {
+        maps.importLibrary('places').catch(() => {
+          /* non-fatal */
+        });
+      }
+    });
     document.head.appendChild(script);
   }
 }

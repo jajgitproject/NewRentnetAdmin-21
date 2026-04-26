@@ -64,7 +64,7 @@
                     </mat-form-field>
                 </div>
             </div> -->
-            <div class="row">
+            <div class="row align-items-start">
                 <ng-container *ngIf="tab === 'Manual'">
 
                     <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
@@ -172,8 +172,8 @@
 
                     </mat-form-field> -->
 
-                    <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2" *ngIf="ifBlock; else elseBlock">
-                        <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                    <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2 address-field-col" *ngIf="ifBlock; else elseBlock">
+                        <mat-form-field class="example-full-width dispatch-address-matfield" appearance="outline" floatLabel="always" subscriptSizing="dynamic">
                             <mat-label>Address</mat-label>
                             <input required type="text" matInput formControlName="locationOutAddressString"
                                 [matAutocomplete]="auto20" (input)="onLocationHubTyping()"
@@ -188,20 +188,13 @@
                                 </mat-option>
                             </mat-autocomplete>
                             <mat-error
-                                *ngIf="advanceTableForm.get('locationOutAddressString')?.hasError('googleAddressNotSelected')">
-                                Please select address from suggestions
-                            </mat-error>
-
-                            <!-- INVALID GOOGLE SELECTION ERROR -->
-                            <mat-error
-                                *ngIf="advanceTableForm.get('locationOutAddressString')?.hasError('googleAddressNotSelected')">
-                                Please select a valid address from suggestions
+                                *ngIf="advanceTableForm.get('locationOutAddressString')?.hasError('invalidGeoSearchString')">
+                                Please select an address from suggestions
                             </mat-error>
 
                         </mat-form-field>
 
-                        <!-- Google Addresses Checkbox (Always Visible) -->
-                        <div style="text-align: right; margin-top: -10px;">
+                        <div class="google-addresses-row">
                             <mat-checkbox color="primary" formControlName="googleAddresses"
                                 [(indeterminate)]="indeterminate" [labelPosition]="labelPosition"
                                 (change)="valueSwitch()">
@@ -212,34 +205,42 @@
 
                     <!-- Else Block for Google Autocomplete -->
                     <ng-template #elseBlock>
-                        <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
-                            <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                        <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2 address-field-col">
+                            <mat-form-field class="example-full-width dispatch-address-matfield" appearance="outline" floatLabel="always" subscriptSizing="dynamic">
                                 <mat-label>Address</mat-label>
-                                <input matInput type="text" [matAutocomplete]="googleAuto"
-                                    formControlName="locationOutAddressString" required (input)="onAddressTyping()" />
-                                <mat-autocomplete #googleAuto="matAutocomplete"
-                                    (optionSelected)="onGooglePredictionSelected($event.option.value)">
-                                    <mat-option *ngFor="let option of ((filteredGooglePlacesOptions | async) || [])"
-                                        [value]="option">
-                                        {{ option }}
-                                    </mat-option>
-                                </mat-autocomplete>
-
-                                <!-- Error message -->
+                                <input
+                                    type="text"
+                                    autocomplete="off"
+                                    placeholder="Address String"
+                                    matInput
+                                    formControlName="locationOutAddressString"
+                                    ngx-google-places-autocomplete
+                                    [options]="options"
+                                    (onAddressChange)="AddressChange($event)"
+                                    required
+                                    (input)="onAddressTyping()"
+                                />
                                 <mat-error
-                                    *ngIf="advanceTableForm.get('locationOutAddressString')?.hasError('required')">
-                                    Please select an Address
+                                    *ngIf="
+                                        advanceTableForm.get('locationOutAddressString')?.invalid &&
+                                        (advanceTableForm.get('locationOutAddressString')?.touched ||
+                                            advanceTableForm.get('locationOutAddressString')?.dirty)
+                                    "
+                                >
+                                    <span
+                                        *ngIf="advanceTableForm.get('locationOutAddressString')?.hasError('required')"
+                                    >
+                                        Address is required
+                                    </span>
+                                    <span
+                                        *ngIf="advanceTableForm.get('locationOutAddressString')?.hasError('invalidGeoSearchString')"
+                                    >
+                                        Please select an address from suggestions
+                                    </span>
                                 </mat-error>
-
-                                <mat-error
-                                    *ngIf="advanceTableForm.get('locationOutAddressString')?.hasError('invalidAddress')">
-                                    Please select address from suggestions
-                                </mat-error>
-
                             </mat-form-field>
 
-                            <!-- Google Addresses Checkbox (Always Visible) -->
-                            <div style="text-align: right; margin-top: -10px;">
+                            <div class="google-addresses-row">
                                 <mat-checkbox color="primary" formControlName="googleAddresses"
                                     [(indeterminate)]="indeterminate" [labelPosition]="labelPosition"
                                     (change)="valueSwitch()">

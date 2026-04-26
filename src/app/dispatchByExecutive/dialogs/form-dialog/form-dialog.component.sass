@@ -1,1 +1,22 @@
+.address-field-col
+  display: flex
+  flex-direction: column
+  align-items: stretch
 
+  .google-addresses-row
+    margin-top: 4px
+    padding-left: 2px
+    display: flex
+    align-items: center
+    justify-content: flex-start
+    min-height: 0
+
+  .dispatch-address-matfield
+    width: 100%
+
+    ::ng-deep .mat-mdc-text-field-wrapper
+      padding-bottom: 0
+
+    ::ng-deep .mat-mdc-form-field-infix
+      min-height: 48px
+      box-sizing: border-box

@@ -9,4 +9,6 @@ export const environment = {
   ImageURL: 'https://uatapi.ecoserp.in/',
   FormURL: 'http://localhost:4200/#',
   UnlockEmployeeUrl: 'https://uatconnect.ecoserp.in/',
+  /** Browser Google Maps JavaScript key; `runtime-config.json` can override. */
+  googleMapsApiKey: 'AIzaSyAFoLcbOuZfbGJGCdlazGXZbOCYr8dW76c',
 };
