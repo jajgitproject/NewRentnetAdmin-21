@@ -122,15 +122,11 @@
   width: 100% !important;
   max-width: 100% !important;
   max-height: 90vh !important;
-  scrollbar-width: none;
-  -ms-overflow-style: none;
 }
 .cdk-overlay-pane.dbe-dialog-centered .mat-mdc-dialog-content,
 .cdk-overlay-pane.dbe-dialog-centered .mdc-dialog__content {
   max-height: calc(90vh - 120px) !important;
   overflow-y: auto !important;
-  scrollbar-width: none;
-  -ms-overflow-style: none;
 }
 
 /* Global dialog scrolling fix for Angular Material 21 (MDC).
@@ -151,26 +147,24 @@
 .cdk-overlay-pane .mat-mdc-dialog-container,
 .cdk-overlay-pane .mdc-dialog__surface {
   max-height: 90vh;
-  scrollbar-width: none;
-  -ms-overflow-style: none;
 }
 .cdk-overlay-pane .mat-mdc-dialog-content,
-.cdk-overlay-pane .mdc-dialog__content {
+.cdk-overlay-pane .mdc-dialog__content,
+.cdk-overlay-pane [mat-dialog-content] {
   max-height: calc(90vh - 120px);
-  overflow-y: auto;
+  overflow-y: auto !important;
   overflow-x: hidden;
-  scrollbar-width: none;
-  -ms-overflow-style: none;
+  /* Native vertical scrollbar visible when content overflows (e.g. Driver form) */
+  scrollbar-gutter: stable;
 }
 
 /* Fallback: if the popup surface has no mat-dialog-content child, let the
    surface itself scroll so long forms aren't clipped. */
 .cdk-overlay-pane .mdc-dialog__surface:not(:has(.mat-mdc-dialog-content)):not(:has(.mdc-dialog__content)),
 .cdk-overlay-pane .mat-mdc-dialog-container:not(:has(.mat-mdc-dialog-content)):not(:has(.mdc-dialog__content)) {
-  overflow-y: auto;
+  overflow-y: auto !important;
   overflow-x: hidden;
-  scrollbar-width: none;
-  -ms-overflow-style: none;
+  scrollbar-gutter: stable;
 }
 
 /* Time & Address Info: one scrollbar — stop the dialog surface from scrolling in addition to mat-dialog-content. */
@@ -209,13 +203,7 @@
   overflow: hidden !important;
 }
 
-/*
- * _modals.scss (via style.scss, loaded before this file) sets
- * .mat-mdc-dialog-content { max-height: none !important; overflow-y: visible !important; }
- * for most dialogs. That prevents scrolling inside mat-dialog-content while the surface
- * uses overflow:hidden — tall content (e.g. Stops on Map iframe) is clipped with no bar.
- * Re-enable a single scroll area on the dialog body for these wide panels only.
- */
+/* Wide panels: single scroll (see _modals.scss + rules above for default overflow-y: auto on dialog content). */
 .cdk-overlay-container
   .cdk-overlay-pane.stops-on-map-wide-dialog
   .mat-mdc-dialog-container
@@ -235,21 +223,7 @@
   max-height: calc(90vh - 200px) !important;
   overflow-y: auto !important;
   overflow-x: hidden !important;
-  scrollbar-width: none !important;
-  -ms-overflow-style: none !important;
-}
-
-/* MatDialog: keep overflow scrollable, hide track visually (no gutter bar) */
-.cdk-overlay-pane .mat-mdc-dialog-content::-webkit-scrollbar,
-.cdk-overlay-pane .mdc-dialog__content::-webkit-scrollbar,
-.cdk-overlay-pane .mdc-dialog__surface::-webkit-scrollbar,
-.cdk-overlay-pane .mat-mdc-dialog-container::-webkit-scrollbar,
-.cdk-overlay-pane.dbe-dialog-centered .mat-mdc-dialog-content::-webkit-scrollbar,
-.cdk-overlay-pane.dbe-dialog-centered .mdc-dialog__content::-webkit-scrollbar {
-  display: none;
-  width: 0;
-  height: 0;
-  background: transparent;
+  scrollbar-gutter: stable;
 }
 
 /* Material timepicker visual parity (light popup with blue actions) */

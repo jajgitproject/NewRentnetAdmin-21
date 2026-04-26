@@ -66,8 +66,14 @@
 .addContainer {
   display: flex;
   flex-direction: column;
+  min-height: 0; /* let mat-dialog-content flex child shrink; needed for body scroll */
   /* Legacy + MDC: overflow:hidden clips many MatDialog bodies (flex + max-height). */
   overflow: visible;
+  .mat-mdc-dialog-content,
+  [mat-dialog-content].mat-mdc-dialog-content {
+    flex: 1 1 auto;
+    min-height: 0;
+  }
   .form {
     display: flex;
     padding-top: 6px;
@@ -186,14 +192,19 @@
 .cdk-overlay-container
   .cdk-overlay-pane:not(.control-panel-main-dialog)
   .mat-mdc-dialog-container
-  .mdc-dialog__content {
+  .mdc-dialog__content,
+.cdk-overlay-container
+  .cdk-overlay-pane:not(.control-panel-main-dialog)
+  .mat-mdc-dialog-container
+  [mat-dialog-content] {
   font-family: Roboto, 'Helvetica Neue', sans-serif;
   font-size: 13px;
   line-height: 1.5;
   color: #555;
-  /* Match role/integration CRUD fixes: avoid zero-height / clipped form areas */
-  max-height: none !important;
-  overflow-y: visible !important;
+  /* Cap height to viewport; vertical scroll when content exceeds browser height */
+  max-height: calc(90vh - 120px) !important;
+  overflow-y: auto !important;
+  overflow-x: hidden !important;
 }
 
 .mat-mdc-dialog-content,
@@ -234,8 +245,9 @@
   .cdk-overlay-pane:not(.control-panel-main-dialog)
   .mat-dialog-container
   .mat-dialog-content {
-  max-height: none !important;
-  overflow-y: visible !important;
+  max-height: calc(90vh - 120px) !important;
+  overflow-y: auto !important;
+  overflow-x: hidden !important;
   font-size: 13px;
   line-height: 1.5;
   color: #555;
