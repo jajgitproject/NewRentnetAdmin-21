@@ -22,7 +22,7 @@
         <form class="register-form m-4" [formGroup]="advanceTableForm" (ngSubmit)="submit">
             <div class="row">
                 <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12 mb-2">
-                    <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                <mat-form-field class="example-full-width passenger-search-field" appearance="outline" floatLabel="always">
                         <mat-label>Search Passenger by Name, Mobile, Email</mat-label>
                         <input required type="text" matInput formControlName="passengerEmployee" [matAutocomplete]="auto5">
                         <mat-autocomplete #auto5="matAutocomplete" (optionSelected)="onPassengerSelected($event.option.value)">
@@ -89,7 +89,7 @@
                     </mat-form-field>
                 </div>  
 
-                <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12 mb-2">
                     <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
                         <mat-label>Activation Status</mat-label>
                         <mat-select formControlName="activationStatus">

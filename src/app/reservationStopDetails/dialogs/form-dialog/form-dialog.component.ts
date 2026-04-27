@@ -668,19 +668,23 @@ export class FormDialogReservationStopDetailsComponent {
   }
 
   googleCheckBox(event: any) {
+    const addressControl = this.advanceTableForm.controls["reservationStopAddress"];
     if (event.checked) {
       this.isGoogleAutoComplete = true;
-      this.advanceTableForm.controls["reservationStopAddress"].setValue('');
+      addressControl.clearValidators();
+      addressControl.updateValueAndValidity();
+      addressControl.setValue('');
       this.advanceTableForm.controls["reservationStopSpotType"].setValue('');
       this.advanceTableForm.controls["reservationStopSpot"].setValue('');
       this.InItCity();
     } else {
       this.isGoogleAutoComplete = false;
-      this.advanceTableForm.controls["reservationStopAddress"].setValue('');
+      addressControl.setValidators([this.StopLocationValidator(this.GoogleAddressList || [])]);
+      addressControl.updateValueAndValidity();
+      addressControl.setValue('');
       this.advanceTableForm.controls["reservationStopSpotType"].setValue('');
       this.advanceTableForm.controls["reservationStopSpot"].setValue('');
     }
-    
   }
 
   onGoogleStopAddressTyping() 
@@ -833,11 +837,23 @@ export class FormDialogReservationStopDetailsComponent {
 
   StopLocationValidator(GoogleAddressList: any[]): ValidatorFn {
     return (control: AbstractControl): ValidationErrors | null => {
+      // Don't validate empty or untouched fields
+      if (!control.value || control.value.trim() === '' || !control.touched) {
+        return null;
+      }
+      // If Google autocomplete is active, skip validation
+      if (this.isGoogleAutoComplete) {
+        return null;
+      }
+      // Only validate if we have a list and the control is dirty
+      if (!GoogleAddressList || GoogleAddressList.length === 0) {
+        return null;
+      }
       const value = control.value?.toLowerCase();
       const match = GoogleAddressList.some(data => (data.geoSearchString).toLowerCase() === value);
-        return match ? null : { reservationStopAddressInvalid: true };
-      };
-    }
+      return match ? null : { reservationStopAddressInvalid: true };
+    };
+  }
 
   onGASelected(selectedStateName: string) {
     const selectedState = this.GoogleAddressList.find(

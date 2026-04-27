@@ -1,0 +1,73 @@
+:host ::ng-deep .mat-mdc-header-cell
+	white-space: nowrap
+	overflow: visible
+	text-overflow: unset
+
+:host ::ng-deep .mat-mdc-cell
+	white-space: nowrap
+	overflow: visible
+	text-overflow: unset
+
+:host ::ng-deep .scrollable-table-container mat-table
+	min-width: 100%
+	width: max-content
+
+:host ::ng-deep .scrollable-table-container
+	overflow-x: auto
+
+.variable-title-wrap
+	width: 10%
+	float: left
+	padding-top: 6px
+	padding-left: 12px
+
+.variable-title-text
+	color: black
+	float: left
+	padding-right: 5px
+	width: 150px
+	padding-top: 8px
+
+.variable-filter-wrap
+	width: 60%
+	float: left
+	padding-top: 6px
+	padding-left: 12px
+
+.variable-filter-group
+	display: flex
+	flex-wrap: nowrap
+	align-items: stretch
+
+.variable-filter-select
+	height: 40px
+	min-width: 185px
+	max-width: 185px
+
+.variable-filter-input
+	height: 40px
+	min-width: 350px
+	padding-left: 8px
+
+.variable-filter-search
+	cursor: pointer
+	height: 40px
+	width: 48px
+	display: flex
+	align-items: center
+	justify-content: center
+
+@media (max-width: 1400px)
+	.variable-title-wrap
+		width: 100%
+		float: none
+
+	.variable-title-text
+		width: auto
+
+	.variable-filter-wrap
+		width: 100%
+		float: none
+
+	.variable-filter-input
+		min-width: 260px

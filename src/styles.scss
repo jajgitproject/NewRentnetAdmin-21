@@ -95,8 +95,16 @@
 .cdk-overlay-container .cdk-overlay-pane:has(.mat-mdc-menu-panel),
 .cdk-overlay-container .cdk-overlay-pane:has(.mat-mdc-select-panel),
 .cdk-overlay-container .cdk-overlay-pane:has(.mat-mdc-autocomplete-panel),
+.cdk-overlay-container .cdk-overlay-pane:has(.mat-autocomplete-panel),
+.cdk-overlay-container .cdk-overlay-pane:has(.stop-location-panel),
 .cdk-overlay-container .cdk-overlay-pane:has(.mat-mdc-tooltip),
 .cdk-overlay-container .cdk-overlay-pane:has(.mat-mdc-snack-bar-container) {
+  z-index: 20000 !important;
+}
+
+.cdk-overlay-container .cdk-overlay-pane:has(.mat-ddc-autocomplete-panel),
+.cdk-overlay-container .cdk-overlay-pane:has(.mat-autocomplete-panel),
+.stop-location-panel {
   z-index: 20000 !important;
 }
 

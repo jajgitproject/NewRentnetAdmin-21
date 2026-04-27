@@ -66,25 +66,25 @@
                                     <div *ngIf="searchcustomerContractCarCategory" style="float: left;"><b>Customer Contract Car Category</b> : {{searchcustomerContractCarCategory}}</div>
                                 </div> -->
 
-                                <div style="width: 60%; float:left;padding-top: 6px;padding-left: 12px;">
-                                    <div class="col-lg-6">
-                                        <div class="form-group">
-                                            <div class="input-group">
+                                <div class="toolbar-left">
+                                    <div class="toolbar-search-wrap">
+                                        <div class="form-group mb-0">
+                                            <div class="input-group toolbar-search-group">
                                                 <!-- Dropdown for selecting Type, Parent, City -->
                                                 <div class="input-group-append input-group-addon">
-                                                    <select style="height: 40px; width: 120px;" class="form-control" [(ngModel)]="selectedFilter">
+                                                    <select class="form-control toolbar-filter-select" [(ngModel)]="selectedFilter">
                                                         <option value="search" hidden>Search By</option>
                                                         <option value="carCategory">Car Category</option>
                                                     </select>
                                                 </div>
                                     
                                                 <!-- Input field for filtering -->
-                                                <input type="text" style="height: 40px; width: 300px;padding-left: 5px;" class="form-control" placeholder="Filter" id="inputGroup"
+                                                <input type="text" class="form-control toolbar-filter-input" placeholder="Filter" id="inputGroup"
                                                     (keyup)="onBackPress($event)" (input)="loadData()" [(ngModel)]="searchTerm" />
                                     
                                                 <!-- Search button -->
                                                 <div class="input-group-append input-group-addon">
-                                                    <span class="input-group-text" style="cursor: pointer; height: 40px; width: 40px; text-align: center;" (click)="loadData()">
+                                                    <span class="input-group-text toolbar-filter-button" (click)="loadData()">
                                                         <i class="fas fa-search"></i>
                                                     </span>
                                                 </div>
@@ -94,34 +94,29 @@
                                     
                                 </div>
                                 
-                                <div style="width: 40%; text-align:right;">
-                                     <button mat-raised-button color="primary" (click)="importFromContract()">
+                                <div class="toolbar-actions">
+                                     <button mat-raised-button color="primary" class="toolbar-button" (click)="importFromContract()">
                                             Import From Contract
                                         </button>                                   
-                                    &nbsp;
                                     <span *ngIf="!isLoading; else loadingSpinner">
-                                        <button mat-raised-button color="primary" (click)="onImportClick()">
+                                        <button mat-raised-button color="primary" class="toolbar-button" (click)="onImportClick()">
                                             Import
                                         </button>
                                     </span>
                                     <ng-template #loadingSpinner>
                                         <mat-spinner diameter="24" style="width: 24px; height: 24px;"></mat-spinner>
                                     </ng-template>
-                                    &nbsp;
-                                    <button mat-raised-button color="primary"
+                                    <button mat-raised-button color="primary" class="toolbar-button"
                                         data-dismiss="modal" data-toggle="modal" data-backdrop="false"
                                         data-target="#exampleModalCenter">
                                         Search
                                     </button>
-                                    &nbsp;
-                                    <button mat-mini-fab color="primary" (click)="addNew()">
+                                    <button mat-mini-fab color="primary" class="toolbar-icon-button" (click)="addNew()">
                                         <mat-icon class="col-white">add</mat-icon>
                                     </button>
-                                    &nbsp;
-                                    <button mat-mini-fab color="primary" (click)="refresh()">
+                                    <button mat-mini-fab color="primary" class="toolbar-icon-button" (click)="refresh()">
                                         <mat-icon class="col-white">refresh</mat-icon>
                                     </button>
-                                    &nbsp;
                                 </div>
                                 </div>
                             </div>

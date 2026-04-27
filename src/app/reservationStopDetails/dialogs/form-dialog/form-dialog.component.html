@@ -164,7 +164,9 @@
                             <mat-label>Stop Location</mat-label>
                             <input required type="text" matInput formControlName="reservationStopAddress"
                                 [matAutocomplete]="auto20">
-                            <mat-autocomplete #auto20="matAutocomplete" (optionSelected)="onGASelected($event.option.value)">
+                            <mat-autocomplete #auto20="matAutocomplete" 
+                                panelClass="stop-location-panel"
+                                (optionSelected)="onGASelected($event.option.value)">
                                 <mat-option *ngFor="let option of filteredGoogleAddressOptions | async"
                                     [value]="option.geoSearchString" (click)="OnGeoLocationClick(option)">
                                     {{option.geoSearchString}}

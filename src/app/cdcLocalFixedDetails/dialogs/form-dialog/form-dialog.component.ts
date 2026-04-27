@@ -1,15 +1,32 @@
 // @ts-nocheck
-import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
+import { MAT_DIALOG_DATA, MatDialogRef, MatDialogModule } from '@angular/material/dialog';
 import { Component, Inject } from '@angular/core';
 import { CDCLocalFixedDetailsService } from '../../cdcLocalFixedDetails.service';
-import { FormControl, Validators, FormGroup, FormBuilder} from '@angular/forms';
+import { FormControl, Validators, FormGroup, FormBuilder, ReactiveFormsModule } from '@angular/forms';
 import { CDCLocalFixedDetails } from '../../cdcLocalFixedDetails.model';
 import { MAT_DATE_LOCALE } from '@angular/material/core';
-import { formatDate } from '@angular/common';
+import { formatDate, CommonModule } from '@angular/common';
 import { GeneralService } from '../../../general/general.service';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatSelectModule } from '@angular/material/select';
+import { MatInputModule } from '@angular/material/input';
+import { MatButtonModule } from '@angular/material/button';
+import { MatIconModule } from '@angular/material/icon';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 
 @Component({
-  standalone: false,
+  standalone: true,
+  imports: [
+    CommonModule,
+    ReactiveFormsModule,
+    MatFormFieldModule,
+    MatSelectModule,
+    MatInputModule,
+    MatButtonModule,
+    MatIconModule,
+    MatProgressSpinnerModule,
+    MatDialogModule,
+  ],
   selector: 'app-form-dialog',
   templateUrl: './form-dialog.component.html',
   styleUrls: ['./form-dialog.component.sass'],

@@ -1,1 +1,79 @@
+// Fix form field display issues
+.example-full-width
+  width: 100% !important
+  max-width: 100% !important
+
+mat-form-field
+  width: 100% !important
+  display: block !important
+
+mat-select
+  width: 100%
+
+.addContainer
+  width: min(620px, 92vw)
+
+// Material Select specific fixes
+::ng-deep
+  mat-form-field
+    width: 100% !important
+    
+  .mat-form-field-wrapper
+    width: 100% !important
+
+  .mat-form-field-infix
+    width: 100% !important
+    min-width: 0 !important
+    padding: 12px 0 !important
+
+  // Simple label styling - no wrapping
+  .mat-form-field-label
+    white-space: nowrap !important
+    overflow: hidden !important
+    text-overflow: ellipsis !important
+    max-width: 100% !important
+    
+  .mat-form-field-appearance-outline .mat-form-field-infix
+    padding-top: 1em !important
+    padding-bottom: 1em !important
+
+  .mat-select
+    width: 100% !important
+    max-width: 100% !important
+
+  .mat-select-trigger
+    width: 100% !important
+    max-width: 100% !important
+    overflow: visible !important
+    white-space: normal !important
+
+  .mat-select-value
+    width: 100% !important
+    max-width: 100% !important
+    overflow: visible !important
+    display: block !important
+    white-space: normal !important
+
+  .mat-select-value-text
+    width: 100% !important
+    overflow: visible !important
+    display: block !important
+    
+
+  // Column widths
+  .col-xl-12,
+  .col-lg-12,
+  .col-md-12,
+  .col-sm-12
+    width: 100% !important
+    max-width: 100% !important
+
+  // Keep this specific long label in one line and fully visible
+  .passenger-search-field .mat-mdc-floating-label.mdc-floating-label
+    font-size: 17px !important
+    white-space: nowrap !important
+    overflow: visible !important
+    text-overflow: clip !important
+    max-width: calc(100% - 10px) !important
+
 

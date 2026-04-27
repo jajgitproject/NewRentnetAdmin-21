@@ -3,7 +3,6 @@ import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { CDCLocalFixedDetailsComponent } from './cdcLocalFixedDetails.component';
-import { FormDialogComponent as advanceTableForm } from './dialogs/form-dialog/form-dialog.component';
 import { DeleteDialogComponent } from './dialogs/delete/delete.component';
 import { MatTableModule } from '@angular/material/table';
 import { MatPaginatorModule } from '@angular/material/paginator';
@@ -30,7 +29,6 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 @NgModule({
   declarations: [
     CDCLocalFixedDetailsComponent,
-    advanceTableForm,
     DeleteDialogComponent
   ],
   imports: [

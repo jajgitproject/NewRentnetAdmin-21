@@ -1,0 +1,40 @@
+/* ============================= */
+/* Angular Material Table Fix */
+/* ============================= */
+
+::ng-deep .mat-mdc-header-cell
+  white-space: nowrap !important
+  overflow: visible !important
+  text-overflow: unset !important
+  word-break: keep-all !important
+
+::ng-deep .mat-mdc-cell
+  white-space: nowrap !important
+  overflow: visible !important
+
+
+/* ============================= */
+/* Scroll enable */
+/* ============================= */
+
+.scrollable-table-container
+  width: 100%
+  overflow-x: auto
+
+
+/* ============================= */
+/* Column spacing improve */
+/* ============================= */
+
+::ng-deep .mat-mdc-header-cell,
+::ng-deep .mat-mdc-cell
+  padding: 8px 16px
+  min-width: 130px
+
+
+/* ============================= */
+/* Optional: header bold */
+/* ============================= */
+
+::ng-deep .mat-mdc-header-cell
+  font-weight: 600

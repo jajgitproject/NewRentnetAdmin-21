@@ -258,19 +258,18 @@
                                     <div *ngIf="SearchBaseRate" style="float: left;"><b>Base Rate</b> : {{SearchBaseRate}}</div>
                                 </div> -->
 
-                                <div style="width: 10%; float:left;padding-top: 6px;padding-left: 12px;">
-                                    <span style="color: black;float:left;padding-right: 5px;width: 150px;padding-top: 8px;">
+                                <div class="variable-title-wrap">
+                                    <span class="variable-title-text">
                                         <b>Variable Details</b>
                                     </span>
                                 </div>
                                 
-                                <div style="width: 60%; float:left;padding-top: 6px;padding-left: 12px;">
-                                    <div class="col-lg-6">
-                                        <div class="form-group">
-                                            <div class="input-group">
+                                <div class="variable-filter-wrap">
+                                    <div class="form-group mb-0">
+                                            <div class="input-group variable-filter-group">
                                                 <!-- Dropdown for selecting Type, Parent, City -->
                                                 <div class="input-group-append input-group-addon">
-                                                    <select style="height: 40px; width: 160px;" class="form-control" [(ngModel)]="selectedFilter">
+                                                    <select class="form-control variable-filter-select" [(ngModel)]="selectedFilter">
                                                         <option value="search" hidden>Search By</option>
                                                         <option value="vehicleCategory">Vehicle Category</option>
                                                         <option value="cityTier">City Tier</option>
@@ -280,17 +279,16 @@
                                                 </div>
                                     
                                                 <!-- Input field for filtering -->
-                                                <input type="text" style="height: 40px; width: 300px;padding-left: 5px;" class="form-control" placeholder="Filter" id="inputGroup"                                       
+                                                <input type="text" class="form-control variable-filter-input" placeholder="Filter" id="inputGroup"                                       
                                                 (keyup)="onBackPress($event)" (input)="loadData()" [(ngModel)]="searchTerm" />
                                     
                                                 <!-- Search button -->
                                                 <div class="input-group-append input-group-addon">
-                                                    <span class="input-group-text" style="cursor: pointer; height: 40px; width: 40px; text-align: center;" (click)="loadData()">
+                                                    <span class="input-group-text variable-filter-search" (click)="loadData()">
                                                         <i class="fas fa-search"></i>
                                                     </span>
                                                 </div>
                                             </div>
-                                        </div>
                                     </div>
                                 </div>
 
