@@ -481,33 +481,9 @@ export class FormDialogComponent implements OnInit {
         response => {
           // console.log(response?.message)
            this.dialogRef.close({isClose:false});
-          // this._generalService.sendUpdate('DriverInventoryAssociationCreate:DriverInventoryAssociationView:Success');//To Send Updates  
-          // this.saveDisabled = true;
-          // if (response?.message === "No") {
-          //   Swal.fire({
-          //     title: 'Are you sure?',
-          //     text: 'You want to change driver? because Driver Supplier and Inventory Supplier are different?',
-          //     icon: 'warning',
-          //     showCancelButton: true,
-          //     confirmButtonText: 'Yes',
-          //     cancelButtonText: 'Cancel',
-          //     customClass: {
-          //       cancelButton: 'btn btn-danger',
-          //       confirmButton: 'btn btn-primary'
-          //     },
-          //     buttonsStyling: true
-          //   }).then((result) => {
-          //     if (result.isConfirmed) {
-          //       this.Post();
-          //     }
-          //   });
-          //   this.saveDisabled = true;
-          //   return;
-          // }
-          alert("Driver Inventory Association Created...!!!");
-          //this.dialogRef.close();
-          this._generalService.sendUpdate('DriverInventoryAssociationCreate:DriverInventoryAssociationView:Success');//To Send Updates 
+          this._generalService.sendUpdate('DriverInventoryAssociationCreate:DriverInventoryAssociationView:Success');//To Send Updates  
           this.saveDisabled = true;
+          alert("Driver Inventory Association Created...!!!");
         },
         error => {
           this._generalService.sendUpdate('DriverInventoryAssociationAll:DriverInventoryAssociationView:Failure');//To Send Updates 
@@ -552,7 +528,7 @@ export class FormDialogComponent implements OnInit {
         this.inventorySupplierID = data.inventorySupplierID;
         console.log("Inventory Supplier ID:", this.inventorySupplierID);
 
-        this.checkSupplierAndProceed(); // ✅ trigger check
+        this.checkSupplierAndProceed();
       },
       (error: HttpErrorResponse) => { this.dataSource = null; }
     );
@@ -572,25 +548,24 @@ export class FormDialogComponent implements OnInit {
   }
 
   checkSupplierAndProceed() {
-    debugger
-    if (this.driverSupplierID && this.inventorySupplierID) {
-       this.saveDisabled = true;
-
-      console.log("Final Compare:", this.driverSupplierID, this.inventorySupplierID);
+    if (this.driverSupplierID && this.inventorySupplierID) {    
 
       if (this.driverSupplierID === this.inventorySupplierID) {
-         this.saveDisabled = false;
         this.Post();
       }
       else {
-        // ❌ DIFFERENT → popup using :contentReference[oaicite:0]{index=0}
+      
         Swal.fire({
           title: 'Are you sure?',
           text: 'You want to change driver? because Driver Supplier and Inventory Supplier are different?',
           icon: 'warning',
           showCancelButton: true,
           confirmButtonText: 'Yes',
-          cancelButtonText: 'Cancel'
+          cancelButtonText: 'Cancel',
+           customClass: {
+                cancelButton: 'btn btn-danger',
+                confirmButton: 'btn btn-primary'
+              },
         }).then(result => {
           if (result.isConfirmed) {
             this.Post();
