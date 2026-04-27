@@ -129,6 +129,7 @@ export class FormDialogComponent implements OnInit {
       this.advanceTable = new DriverInventoryAssociation({});
       this.advanceTable.driverInventoryAssociationStatus = true;
       this.advanceTable.activationStatus = true;
+    
     }
     this.advanceTableForm = this.createContactForm();
   }
@@ -185,6 +186,7 @@ export class FormDialogComponent implements OnInit {
       this.advanceTableForm.controls["inventoryName"].disable();
     }
     if (this.data.text === 'AttachAnotherDriver') {
+        
       this.ownedSupplierChecked = 'Supplier';
       this.advanceTableForm.controls['inventoryName'].disable();
       this.advanceTableForm.controls['inventoryName'].setValue(this.data.inventoryName + '-' + this.data.vehicle + '-' + this.data.vehicleCategory);
@@ -194,7 +196,7 @@ export class FormDialogComponent implements OnInit {
       this.advanceTableForm.controls['vehicleCategoryID'].patchValue(this.data.vehicleCategoryID);
       //this.advanceTableForm.controls["driverInventoryAssociationStartDate"].setValue(this.data.driverInventoryAssociationStartDate);
       //this.advanceTableForm.controls["driverInventoryAssociationEndDate"].setValue(this.data.driverInventoryAssociationEndDate);
-      this.advanceTableForm.controls["driverInventoryAssociationStatus"].setValue(this.data.driverInventoryAssociationStatus);
+      this.advanceTableForm.controls["driverInventoryAssociationStatus"].setValue(true);
       this.advanceTableForm.controls["activationStatus"].setValue(this.data.activationStatus);
       this.advanceTableForm.patchValue({ driverID: this.data.driverID, });
       this.InitAttachAnotherDriver(this.supplierID, this.ownedSupplierChecked);
