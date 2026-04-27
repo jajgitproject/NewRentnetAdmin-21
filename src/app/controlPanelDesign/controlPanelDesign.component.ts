@@ -3248,7 +3248,6 @@ openDropOffByExectiveGPS(item: any)
   const isAlloted = item.lifeCycleStatus?.carAndDriverAlloted === 'Yes';
   const type = item.allotmentType;
   const displayType = type?.toLowerCase() === 'Soft' ? 'Soft' : type;
-  console.log(delay,displayType,isAlloted);
 
   if (isAlloted && delay > 0) {
     return { label: `Alloted (${displayType})`, color: 'red' };
