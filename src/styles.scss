@@ -651,6 +651,7 @@ body > .swal2-container.swal2-backdrop-show {
 .scrollable-table-container {
   height: 70vh;
   overflow-y: auto;
+   overflow-x: auto;
   position: relative;
   background: #fff;
   border-radius: 8px;
