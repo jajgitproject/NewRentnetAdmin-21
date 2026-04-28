@@ -243,7 +243,7 @@
                                 <ng-template #elseBlock2>
                                     <div class="scrollable-table-container">
                                     <div style="width: 100%; overflow-y: hidden;">
-                                        <mat-table #table [dataSource]="dataSource" matSort class="mat-cell floating-header-table"
+                                        <mat-table #table [dataSource]="dataSource" matSort class="mat-cell floating-header-table invoice-attach-grid" style="font-size: 11px; line-height: 1.25;"
                                             (matSortChange)="SortingData($event)">
                                             <ng-container matColumnDef="check">
                                                 <mat-header-cell *matHeaderCellDef>
@@ -380,9 +380,9 @@
                                             </ng-container>
 
 
-                                            <mat-header-row *matHeaderRowDef="displayedColumns"></mat-header-row>
+                                            <mat-header-row *matHeaderRowDef="displayedColumns" style="font-size: 11px; line-height: 1.2;"></mat-header-row>
                                             <mat-row *matRowDef="let row; columns: displayedColumns;"
-                                                [style.cursor]="'pointer'" matRipple>
+                                                [style.cursor]="'pointer'" style="font-size: 11px; line-height: 1.25;" matRipple>
                                             </mat-row>
                                         </mat-table>
                                     </div>

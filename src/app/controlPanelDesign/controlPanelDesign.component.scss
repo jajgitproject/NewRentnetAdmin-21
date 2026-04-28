@@ -283,6 +283,42 @@ app-controlPanelDesign .control-panel-main-header .cp-booking-category-field .ma
   position: relative;
   z-index: 2;
 
+  /* Reduce inter-column spacing in search rows while keeping layout intact. */
+  .row {
+    margin-left: -3px !important;
+    margin-right: -3px !important;
+  }
+
+  .row > [class*="col-"] {
+    padding-left: 3px !important;
+    padding-right: 3px !important;
+  }
+
+  /* Slightly widen each control column as gutters shrink (desktop only). */
+  @media (min-width: 1200px) {
+    .row > .col-xl-2 {
+      flex: 0 0 17.1% !important;
+      max-width: 17.1% !important;
+    }
+
+    .row > .col-xl-3 {
+      flex: 0 0 25.8% !important;
+      max-width: 25.8% !important;
+    }
+  }
+
+  @media (min-width: 992px) and (max-width: 1199px) {
+    .row > .col-lg-2 {
+      flex: 0 0 17.1% !important;
+      max-width: 17.1% !important;
+    }
+
+    .row > .col-lg-3 {
+      flex: 0 0 25.8% !important;
+      max-width: 25.8% !important;
+    }
+  }
+
   .cp-quick-search-field.mat-mdc-form-field,
   .cp-advance-search-field.mat-mdc-form-field {
     width: 100%;

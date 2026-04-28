@@ -169,8 +169,8 @@
 
                                     <ng-container matColumnDef="logo">
                                         <mat-header-cell *matHeaderCellDef>Logo</mat-header-cell>
-                                        <mat-cell *matCellDef="let row" class="table-img" (contextmenu)="onContextMenu($event, row)">
-                                            <img [src]="row.logo ? row.logo : 'assets/images/Flag_of_Not.png'" alt="Logo" (error)="onImageError($event)"/>
+                                        <mat-cell *matCellDef="let row" class="table-img vehicle-logo-cell" (contextmenu)="onContextMenu($event, row)">
+                                            <img class="vehicle-logo-thumb" [src]="row.logo ? row.logo : 'assets/images/Flag_of_Not.png'" alt="Logo" (error)="onImageError($event)"/>
                                         </mat-cell>
                                     </ng-container>
                                     <ng-container matColumnDef="status">
