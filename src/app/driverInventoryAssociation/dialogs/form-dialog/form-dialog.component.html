@@ -32,7 +32,8 @@
                             (optionSelected)="OnDriverSelected($event.option.value)"
                             panelWidth="custom-autocomplete-panel">
                             <mat-option *ngFor="let option of filteredDriverListOptions | async"
-                                [value]="option.driverName" (click)="getDriverlistID(option.driverID)">
+                                [value]="option.driverName + '-' + option.mobile1+ '-' + option.supplier + '-' + option.supplierType + '-' + option.ownedSupplier"
+                                (click)="getDriverlistID(option.driverID)">
                                 {{option.driverName}} - {{option.mobile1}} - {{option.supplier}} -
                                 {{option.supplierType}} - {{option.ownedSupplier}}
                             </mat-option>
@@ -156,7 +157,7 @@
                             *ngIf="saveDisabled && action==='add' || data.text === 'AttachAnotherDriver'"
                             color="primary" [type]="submit" [disabled]="!advanceTableForm.valid"
                             (click)="confirmAdd()">Save</button>
-                        <mat-spinner *ngIf="!saveDisabled" diameter="30"></mat-spinner>
+                        <!-- <mat-spinner *ngIf="!saveDisabled" diameter="30"></mat-spinner> -->
                         <button *ngIf="action==='add'" mat-raised-button color="warn" (click)="onNoClick()"
                             tabindex="-1">Reset</button>
                         <button *ngIf="action==='edit'" mat-raised-button color="warn" (click)="onNoClick()"

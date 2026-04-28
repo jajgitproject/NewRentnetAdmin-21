@@ -316,7 +316,7 @@ export class FormDialogComponent implements OnInit {
 
   OnDriverSelected(selectedDriver: string) {
     const DriverName = this.AnotherDriverList.find(
-      data => data.driverName === selectedDriver
+      data => data.driverName +'-'+ data.mobile1 +'-'+ data.supplier +'-'+ data.supplierType +'-'+ data.ownedSupplier === selectedDriver
     );
     if (selectedDriver) {
       this.getDriverID(DriverName.driverID);
@@ -331,7 +331,7 @@ export class FormDialogComponent implements OnInit {
   driverListTypeValidator(AnotherDriverList: any[]): ValidatorFn {
     return (control: AbstractControl): ValidationErrors | null => {
       const value = control.value?.toLowerCase();
-      const match = AnotherDriverList.some(group => group.driverName.toLowerCase() === value);
+      const match = AnotherDriverList.some(group => ((group.driverName + '-' + group.mobile1 + '-' + group.supplier + '-' + group.supplierType + '-' + group.ownedSupplier).toLowerCase()) === value);
       return match ? null : { driverInvalid: true };
     };
   }
