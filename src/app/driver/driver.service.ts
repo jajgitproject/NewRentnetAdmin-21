@@ -22,7 +22,7 @@ export class DriverService
     return this.httpClient.get(this.API_URL + '/GetDriverPassword' + "/" + referenceID + "/" + type);
   }
   /** CRUD METHODS */
-  getTableData(SearchdriverName:string,searchdriverFatherName:string,searchdriverGradeName:string,searchDriverOfficialIdentityNumber:string, searchhighestQualification:string,searchMobile:string,searchLocation:string, SearchActivationStatus:boolean, PageNumber: number):  Observable<any> 
+  getTableData(SearchdriverName:string,searchdriverFatherName:string,searchdriverGradeName:string,searchDriverOfficialIdentityNumber:string,searchSupplier:string,searchhighestQualification:string,searchMobile:string,searchLocation:string, SearchActivationStatus:boolean, PageNumber: number):  Observable<any> 
   {
     if(SearchdriverName==="")
     {
@@ -40,6 +40,10 @@ export class DriverService
     if(searchDriverOfficialIdentityNumber==="")
     {
       searchDriverOfficialIdentityNumber="null";
+    }
+     if(searchSupplier==="")
+    {
+      searchSupplier="null";
     }
     if(searchhighestQualification==="")
     {
@@ -58,9 +62,9 @@ export class DriverService
     {
       SearchActivationStatus=null;
     }
-    return this.httpClient.get(this.API_URL + "/" +SearchdriverName + '/'+searchdriverFatherName + '/' +searchdriverGradeName + '/' +searchDriverOfficialIdentityNumber + '/' +searchhighestQualification + '/' +searchMobile + '/' +searchLocation + '/' + SearchActivationStatus +'/' + PageNumber + '/driverName/Ascending');
+    return this.httpClient.get(this.API_URL + "/" +SearchdriverName + '/'+searchdriverFatherName + '/' +searchdriverGradeName + '/' +searchDriverOfficialIdentityNumber + '/' +searchSupplier + '/' +searchhighestQualification + '/' +searchMobile + '/' +searchLocation + '/' + SearchActivationStatus +'/' + PageNumber + '/driverName/Ascending');
   }
-  getTableDataSort(SearchdriverName:string,searchdriverFatherName:string,searchdriverGradeName:string,searchDriverOfficialIdentityNumber:string,searchhighestQualification:string,searchMobile:string,searchLocation:string, SearchActivationStatus:boolean, PageNumber: number,coloumName:string,sortType:string):  Observable<any> 
+  getTableDataSort(SearchdriverName:string,searchdriverFatherName:string,searchdriverGradeName:string,searchDriverOfficialIdentityNumber:string,searchSupplier:string,searchhighestQualification:string,searchMobile:string,searchLocation:string, SearchActivationStatus:boolean, PageNumber: number,coloumName:string,sortType:string):  Observable<any> 
   {
     if(SearchdriverName==="")
     {
@@ -78,6 +82,10 @@ export class DriverService
     {
       searchDriverOfficialIdentityNumber="null";
     }
+     if(searchSupplier==="")
+    {
+      searchSupplier="null";
+    }
     if(searchhighestQualification==="")
     {
       searchhighestQualification="null";
@@ -94,7 +102,7 @@ export class DriverService
     {
       SearchActivationStatus=null;
     }
-    return this.httpClient.get(this.API_URL + "/" +SearchdriverName + '/'+ searchdriverFatherName +'/'+ searchdriverGradeName +'/'+ searchDriverOfficialIdentityNumber +'/'+ searchhighestQualification +'/'+ searchMobile +'/'+ searchLocation +'/'+ SearchActivationStatus +'/'+ PageNumber +  '/'+coloumName+'/'+sortType);
+    return this.httpClient.get(this.API_URL + "/" +SearchdriverName + '/'+ searchdriverFatherName +'/'+ searchdriverGradeName +'/'+ searchDriverOfficialIdentityNumber +'/'+ searchSupplier +'/'+ searchhighestQualification +'/'+ searchMobile +'/'+ searchLocation +'/'+ SearchActivationStatus +'/'+ PageNumber +  '/'+coloumName+'/'+sortType);
   }
   add(advanceTable: Driver) 
   {

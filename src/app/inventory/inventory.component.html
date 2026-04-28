@@ -93,7 +93,7 @@
                                                     </mat-select>
                                                 </mat-form-field> -->
                                                 <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
-                                                    <mat-label>Supplier</mat-label>
+                                                    <mat-label>Supplier Name</mat-label>
                                                     <input type="text" matInput [formControl]="supplier" [matAutocomplete]="auto4">
                                                     <mat-autocomplete #auto4="matAutocomplete">
                                                       <mat-option *ngFor="let option of filteredSupplierOptions | async" [value]="option.supplierName">
@@ -158,7 +158,7 @@
                                                         <option value="vehicleCategory">Vehicle Category</option>
                                                         <option value="vehicle">Vehicle</option>
                                                         <option value="registrationNumber">Registration Number</option>
-                                                        <option value="supplier">Supplier</option>
+                                                        <option value="supplier">Supplier Name</option>
                                                         <option value="locationHub">Location</option>
                                                     </select>
                                                 </div>
@@ -254,9 +254,14 @@
                                         <mat-cell *matCellDef="let row" (contextmenu)="onContextMenu($event, row)">
                                             {{row.registrationNumber}}</mat-cell>
                                     </ng-container>
+                                     <ng-container matColumnDef="supplierName">
+                                        <mat-header-cell *matHeaderCellDef mat-sort-header>Supplier Name</mat-header-cell>
+                                        <mat-cell *matCellDef="let row" (contextmenu)="onContextMenu($event, row)">
+                                            {{row.supplierName}}</mat-cell>
+                                    </ng-container>
 
                                     <ng-container matColumnDef="supplierOfficialIdentityNumber">
-                                        <mat-header-cell *matHeaderCellDef mat-sort-header>Supplier</mat-header-cell>
+                                        <mat-header-cell *matHeaderCellDef mat-sort-header>Supplier Official Identity Number</mat-header-cell>
                                         <mat-cell *matCellDef="let row" (contextmenu)="onContextMenu($event, row)">
                                             {{row.supplier}}</mat-cell>
                                     </ng-container>

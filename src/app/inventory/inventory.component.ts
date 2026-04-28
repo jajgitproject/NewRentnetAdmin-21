@@ -44,6 +44,7 @@ export class InventoryComponent implements OnInit {
     'vehicleCategory',
     'vehicle',
     'registrationNumber',
+    'supplierName',
     'supplierOfficialIdentityNumber',
     'locationHub',
     'status',

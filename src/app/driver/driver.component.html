@@ -157,6 +157,7 @@
                                                         <option value="driverFatherName">Driver Father Name</option>
                                                         <option value="driverGrade">Driver Grade</option>
                                                         <option value="identityNo">Identity No</option>
+                                                        <option value="supplier">Supplier Name</option>
                                                         <option value="highestQualification">Highest Qualification</option>
                                                         <option value="mobile">Mobile No</option>
                                                          <option value="location">Location</option>
@@ -237,7 +238,7 @@
                                     </ng-container>
 
                                     <ng-container matColumnDef="supplierOfficialIdentityNumber">
-                                        <mat-header-cell *matHeaderCellDef mat-sort-header>Supplier</mat-header-cell>
+                                        <mat-header-cell *matHeaderCellDef mat-sort-header>Supplier Identity Number</mat-header-cell>
                                         <mat-cell *matCellDef="let row" (contextmenu)="onContextMenu($event, row)">
                                             {{row.supplier}}</mat-cell>
                                     </ng-container>
@@ -252,6 +253,12 @@
                                         <mat-header-cell *matHeaderCellDef mat-sort-header>Identity No.</mat-header-cell>
                                         <mat-cell *matCellDef="let row" (contextmenu)="onContextMenu($event, row)">
                                             {{row.driverOfficialIdentityNumber}}</mat-cell>
+                                    </ng-container>
+
+                                       <ng-container matColumnDef="supplierName">
+                                        <mat-header-cell *matHeaderCellDef mat-sort-header>Supplier Name</mat-header-cell>
+                                        <mat-cell *matCellDef="let row" (contextmenu)="onContextMenu($event, row)">
+                                            {{row.supplierName}}</mat-cell>
                                     </ng-container>
 
                                     <ng-container matColumnDef="hub">
