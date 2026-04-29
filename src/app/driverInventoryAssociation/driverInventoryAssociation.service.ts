@@ -214,8 +214,8 @@ export class DriverInventoryAssociationService {
     return this.httpClient.delete(this.API_URL + '/' + driverInventoryAssociationID + '/' + userID);
   }
 
-  getDriverList(supplierID: number, type: any): Observable<any> {
-    return this.httpClient.get(this.API_URL_Driver + '/GetDriverList' + "/" + supplierID + "/" + type);
+  getDriverList(supplierID: number, type: any, prefix: string): Observable<any> {
+    return this.httpClient.get(this.API_URL_Driver + '/GetDriverList' + "/" + supplierID + "/" + type + "/" + prefix);
   }
   getDriverSupplierID(driverID: number) {
     return this.httpClient.get(this.API_URL + '/GetDriverSupplierID' + "/" + driverID);
