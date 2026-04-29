@@ -176,7 +176,7 @@ export class FormDialogComponent implements OnInit {
       this.advanceTableForm.controls["driverName"].disable();
     }
     if (this.RedirectingFrom === "Inventory") {
-      this.InitDriver();
+      // this.InitDriver();
       //this.advanceTableForm.patchValue({inventoryName:this.Regno + "-" + this.Vehicle + "-" + this.VehicleCategory});
       if (this.action === 'edit') {
         this.advanceTableForm.patchValue({ driverName: this.advanceTable.driverName + "-" + this.advanceTable.driverPhone + "-" + this.Regno + "-" + this.advanceTable.supplier });
@@ -199,7 +199,7 @@ export class FormDialogComponent implements OnInit {
       this.advanceTableForm.controls["driverInventoryAssociationStatus"].setValue(true);
       this.advanceTableForm.controls["activationStatus"].setValue(this.data.activationStatus);
       this.advanceTableForm.patchValue({ driverID: this.data.driverID, });
-      this.InitAttachAnotherDriver(this.supplierID, this.ownedSupplierChecked);
+      // this.InitAttachAnotherDriver(this.supplierID, this.ownedSupplierChecked);
       //this.advanceTableForm.controls['vehicleCategory'].setValue(this.data.vehicleCategory);
     }
     if (this.data.text === 'AttachAnotherCar') {
@@ -235,8 +235,15 @@ export class FormDialogComponent implements OnInit {
   }
 
   //---------AttachAnotherDriver-----------------
-  InitAttachAnotherDriver(supplierID, ownedSupplier) {
-    this.advanceTableService.getDriverList(supplierID, ownedSupplier).subscribe(
+  onKeyupDriverName()
+   {
+    var Prefix = this.advanceTableForm.get("driverName").value;
+      if(Prefix.length < 3)
+      { 
+        this.AnotherDriverList = [];
+        return;
+      }
+    this.advanceTableService.getDriverList(this.supplierID, this.ownedSupplierChecked, Prefix).subscribe(
       data => {
         this.AnotherDriverList = data;
         this.advanceTableForm.controls['driverName'].setValidators([Validators.required,
@@ -293,9 +300,9 @@ export class FormDialogComponent implements OnInit {
   private _filterAttachAnotherDriver(value: string): any {
     const raw = (value || '').trim();
     const filterValue = raw.toLowerCase();
-    if (filterValue.length < 3) {
-      return [];
-    }
+    // if (filterValue.length < 3) {
+    //   return [];
+    // }
     const filterDigits = this._phoneDigits(raw);
 
     return (this.AnotherDriverList || []).filter((customer) =>
