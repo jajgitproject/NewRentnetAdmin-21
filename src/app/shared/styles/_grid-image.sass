@@ -1,0 +1,22 @@
+=grid-image-cell($min-width: 92px)
+  :host ::ng-deep .grid-image-cell
+    height: auto !important
+    width: auto !important
+    min-width: $min-width
+
+=grid-image-thumb($max-width: 84px, $height: 42px)
+  :host ::ng-deep .grid-image-cell .grid-image-thumb
+    display: block
+    max-width: $max-width
+    width: auto
+    height: $height
+    object-fit: contain
+    border-radius: 4px
+
+=grid-image-col($width: 110px)
+  :host ::ng-deep .grid-image-col
+    min-width: $width !important
+    width: $width !important
+    white-space: nowrap !important
+    flex: 0 0 $width !important
+    height: auto !important

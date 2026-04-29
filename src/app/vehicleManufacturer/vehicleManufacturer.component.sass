@@ -1,12 +1,4 @@
-:host ::ng-deep .vehicle-logo-cell
-  height: auto !important
-  width: auto !important
-  min-width: 90px
+@import '../shared/styles/grid-image'
 
-:host ::ng-deep .vehicle-logo-cell .vehicle-logo-thumb
-  display: block
-  max-width: 120px
-  width: auto
-  height: 42px
-  object-fit: contain
-  border-radius: 4px
++grid-image-cell(90px)
++grid-image-thumb(120px, 42px)

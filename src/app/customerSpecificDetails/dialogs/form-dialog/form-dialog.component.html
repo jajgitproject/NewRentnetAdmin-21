@@ -24,18 +24,18 @@
                 <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12 mb-2"> 
                 <span *ngFor="let data of CustomerExtraFieldList">
                               
-                    <span *ngIf="data.fieldControlType==='TextBox'">
+                    <span *ngIf="!isDropDown(data)">
                         <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
                             <mat-label>{{data.fieldName}}</mat-label>
-                            <input  required matInput [formControlName]="data.fieldName" [value]="data.fieldValue">
+                            <input required matInput [formControlName]="data.fieldName">
                         </mat-form-field>
                     </span>
 
-                    <span *ngIf="data.fieldControlType==='DropDown'">
+                    <span *ngIf="isDropDown(data)">
                             <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
                                 <mat-label>{{data.fieldName}}</mat-label>
                                 <mat-select #projVal [class.is-invalid]="projVal.invalid && projVal.touched" [formControlName]="data.fieldName" required>
-                                    <mat-option [value]="item" *ngFor="let item of data.fieldValue.fieldValue" >{{item}}</mat-option>
+                                    <mat-option [value]="item" *ngFor="let item of getDropdownOptions(data)" >{{item}}</mat-option>
                                 </mat-select>
                                 <mat-error>
                                     Please select {{data.fieldName}}

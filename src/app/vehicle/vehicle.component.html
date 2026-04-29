@@ -221,15 +221,10 @@
                                             {{row.vehicleManufacturer}}</mat-cell>
                                     </ng-container>
 
-                                    <!-- <ng-container matColumnDef="image">
-                                        <mat-header-cell *matHeaderCellDef [ngClass]="'tbl-col-width-per-6'">Icon</mat-header-cell>
-                                        <mat-cell *matCellDef="let row" class="table-img tbl-col-width-per-6" (contextmenu)="onContextMenu($event, row)">
-                                           <img src="{{row.vehicleImage}}"/> </mat-cell>
-                                    </ng-container> -->
-                                        <ng-container matColumnDef="image">
+                                    <ng-container matColumnDef="image">
                                         <mat-header-cell *matHeaderCellDef>Icon</mat-header-cell>
-                                        <mat-cell *matCellDef="let row" class="table-img vehicle-icon-cell" (contextmenu)="onContextMenu($event, row)">
-                                            <img class="vehicle-icon-thumb" [src]="row.vehicleImage ? row.vehicleImage : 'assets/images/Flag_of_Not.png'" alt="Icon" (error)="onImageError($event)"/>
+                                        <mat-cell *matCellDef="let row" class="table-img grid-image-cell" (contextmenu)="onContextMenu($event, row)">
+                                            <img class="grid-image-thumb" [src]="row.vehicleImage ? row.vehicleImage : 'assets/images/Flag_of_Not.png'" alt="Icon" (error)="onImageError($event)"/>
                                         </mat-cell>
                                     </ng-container>
 

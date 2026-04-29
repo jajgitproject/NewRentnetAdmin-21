@@ -199,9 +199,9 @@
                                 </ng-container>
 
                                 <ng-container matColumnDef="image">
-                                    <mat-header-cell *matHeaderCellDef class="vehicle-category-image-col">Image</mat-header-cell>
-                                    <mat-cell *matCellDef="let row" class="table-img vehicle-category-image-col" (contextmenu)="onContextMenu($event, row)">
-                                       <img class="vehicle-category-image-thumb" src="{{row.vehicleCategoryImage}}"/> </mat-cell>
+                                    <mat-header-cell *matHeaderCellDef class="grid-image-col">Image</mat-header-cell>
+                                    <mat-cell *matCellDef="let row" class="table-img grid-image-col grid-image-cell" (contextmenu)="onContextMenu($event, row)">
+                                       <img class="grid-image-thumb" src="{{row.vehicleCategoryImage}}"/> </mat-cell>
                                 </ng-container>
 
                                 <ng-container matColumnDef="previousCategory">

@@ -12,7 +12,7 @@ import { GeneralService } from '../../../general/general.service';
 export class DeleteDialogComponent
 {
   verifyDutyStatusAndCacellationStatus: any;
-  isSaveAllowed: boolean = false;
+  isDeleteBlocked: boolean = false;
   constructor(
     public dialogRef: MatDialogRef<DeleteDialogComponent>,
     @Inject(MAT_DIALOG_DATA) public data: any,
@@ -23,11 +23,11 @@ export class DeleteDialogComponent
      this.verifyDutyStatusAndCacellationStatus = data.verifyDutyStatusAndCacellationStatus;
     if (this.verifyDutyStatusAndCacellationStatus !== 'Changes allow') 
     {
-      this.isSaveAllowed = true;
+      this.isDeleteBlocked = true;
     } 
     else
     {
-      this.isSaveAllowed = false;
+      this.isDeleteBlocked = false;
     }
   }
   onNoClick(): void

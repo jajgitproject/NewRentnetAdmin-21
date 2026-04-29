@@ -1,11 +1,11 @@
 <div class="container">
   <h2 mat-dialog-title>Deleting Duty Expense</h2>
   <h3 mat-dialog-title>Are you sure?</h3>
-  <div *ngIf="isSaveAllowed">
+  <div *ngIf="isDeleteBlocked">
     <span style="color:red;margin-bottom: 10px;">{{verifyDutyStatusAndCacellationStatus}}</span>
   </div>
   <div mat-dialog-actions class="mb-1">
-    <button mat-flat-button color="warn" [mat-dialog-close]="1" (click)="confirmDelete()" [disabled]="isSaveAllowed">
+    <button mat-flat-button color="warn" [mat-dialog-close]="1" (click)="confirmDelete()" [disabled]="isDeleteBlocked">
       Delete
     </button>
     <button mat-flat-button (click)="onNoClick()" tabindex="-1">Cancel</button>

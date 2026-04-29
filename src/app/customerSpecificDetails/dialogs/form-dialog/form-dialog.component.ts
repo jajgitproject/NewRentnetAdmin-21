@@ -42,6 +42,8 @@ export class FormDialogComponentCSD
   {       
     
         this.advanceTableForm=this.createContactForm();
+        this.dynamicForm = this.fb.group({});
+        this.dialogTitle = this.data?.action === 'edit' ? 'Edit Customer Specific Details' : 'Add Customer Specific Details';
         this.status=data?.status?.status || data?.status || data;
         // if(this.status!='Changes allow'){
         //   this.buttonDisabled=true;
@@ -54,17 +56,7 @@ export class FormDialogComponentCSD
   }
   public ngOnInit(): void
   {
-    debugger;
     this.InitProjectCode();
-    if(this.data.action==='edit')
-    {
-      // Initialize the dynamic form with form fields
-      this.dynamicForm = this.fb.group({});
-      this.data?.dataSource[0]?.customerSpecificFieldList?.forEach(field => {
-        const control = this.fb.control(field.fieldValue, [Validators.required]);
-        this.dynamicForm.addControl(field.fieldName, control);
-      });
-    }
   }
 
   InitProjectCode()
@@ -72,9 +64,67 @@ export class FormDialogComponentCSD
     this._generalService.GetCustomerRentNetFieldsBasedOnCustomerID(this.data.customerID).subscribe(
       data=>
       {
-        this.CustomerExtraFieldList=data;
+        const existingFields = this.getExistingFields();
+        this.CustomerExtraFieldList = (data && data.length ? data : existingFields) || [];
+        this.buildDynamicForm();
       }
-    );
+    ,
+    () => {
+      this.CustomerExtraFieldList = this.getExistingFields();
+      this.buildDynamicForm();
+    });
+  }
+
+  private getExistingFields(): any[] {
+    return this.data?.dataSource?.[0]?.customerSpecificFieldList || [];
+  }
+
+  private buildDynamicForm(): void {
+    this.dynamicForm = this.fb.group({});
+    const existingValueMap = new Map<string, any>();
+    this.getExistingFields().forEach((field: any) => {
+      if (field?.fieldName) {
+        existingValueMap.set(field.fieldName, field.fieldValue ?? '');
+      }
+    });
+
+    this.CustomerExtraFieldList.forEach((field: any) => {
+      const fieldName = field?.fieldName;
+      if (!fieldName || this.dynamicForm.get(fieldName)) {
+        return;
+      }
+      const valueFromExisting = existingValueMap.get(fieldName);
+      const valueFromField = this.resolveDefaultValue(field);
+      const initialValue = valueFromExisting !== undefined ? valueFromExisting : valueFromField;
+      this.dynamicForm.addControl(fieldName, this.fb.control(initialValue, [Validators.required]));
+    });
+  }
+
+  private resolveDefaultValue(field: any): any {
+    const controlType = (field?.fieldControlType || '').toString().toLowerCase();
+    if (controlType === 'dropdown') {
+      const options = this.getDropdownOptions(field);
+      if (options.length && options.includes(field?.fieldValue)) {
+        return field.fieldValue;
+      }
+      return options.length ? options[0] : '';
+    }
+    return field?.fieldValue ?? '';
+  }
+
+  getDropdownOptions(field: any): any[] {
+    const value = field?.fieldValue;
+    if (Array.isArray(value)) {
+      return value;
+    }
+    if (value && Array.isArray(value.fieldValue)) {
+      return value.fieldValue;
+    }
+    return [];
+  }
+
+  isDropDown(field: any): boolean {
+    return (field?.fieldControlType || '').toString().toLowerCase() === 'dropdown';
   }
 
   showNotification(colorName, text, placementFrom, placementAlign) {
@@ -102,8 +152,11 @@ export class FormDialogComponentCSD
 
   bindValues()
   {
+    this.arr = [];
+    this.arr1 = [];
+    this.arr2 = [];
     this.arr2.push(Object.values(this.dynamicForm.value));
-    this.data.dataSource[0].customerSpecificFieldList.forEach((ele)=>
+    this.getExistingFields().forEach((ele)=>
     {
       this.arr.push(ele.customerReservationFieldID);
       this.arr1.push(ele.fieldName);

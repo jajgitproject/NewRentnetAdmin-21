@@ -1018,6 +1018,31 @@ textarea.form-control:focus {
   border-width: 1px !important;
 }
 
+/* Grid image normalization:
+   Many admin forms reuse `.table-img` on mat-table cells; keep thumbnails
+   compact and readable regardless of source image dimensions. */
+.mat-table .mat-cell.table-img,
+.mat-table .mat-mdc-cell.table-img,
+.mat-mdc-table .mat-mdc-cell.table-img {
+  height: auto !important;
+  width: auto !important;
+  min-width: 88px;
+  border-radius: 0 !important;
+  background: transparent !important;
+  margin-right: 0 !important;
+}
+
+.mat-table .mat-cell.table-img img,
+.mat-table .mat-mdc-cell.table-img img,
+.mat-mdc-table .mat-mdc-cell.table-img img {
+  display: block;
+  max-width: 84px;
+  width: auto;
+  height: 42px;
+  object-fit: contain;
+  border-radius: 4px;
+}
+
 .mdc-text-field--outlined:not(.mdc-text-field--disabled):not(.mdc-text-field--focused)
   .mdc-notched-outline
   .mdc-notched-outline__leading,
@@ -1055,6 +1080,7 @@ textarea.form-control:focus {
 .mat-mdc-form-field:not(.mat-form-field-appearance-outline) .mdc-text-field--filled {
   background-color: transparent !important;
 }
+
 
 /* Invoice table fix: Bootstrap .table adds padding/borders to td globally.
    The invoice components use class="table" on their <table> but rely on
