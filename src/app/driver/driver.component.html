@@ -335,6 +335,11 @@
                                             <mat-icon>delete</mat-icon>
                                             <span>Delete</span>
                                         </button>
+
+                                        <button *ngIf="shouldShowDeleteButton(item)"mat-menu-item (click)="confirmClearIMEI(item)">
+                                            <mat-icon>delete</mat-icon>
+                                            <span>Clear IMEI</span>
+                                        </button>
                                         <!-- <button  mat-menu-item (click)="DriverDrivingLicense(item)">
                                             <mat-icon>how_to_reg</mat-icon>
                                             <span>Driver Driving License</span>

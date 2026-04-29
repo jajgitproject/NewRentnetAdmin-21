@@ -23,6 +23,7 @@ import { Router } from '@angular/router';
 import { DriverGradeDropDown } from '../driverGrade/driverGradeDropDown.model';
 import { QualificationDropDown } from '../general/qualificationDropDown.model';
 import { OrganizationalEntityDropDown } from '../general/organizationalEntityDropDown.model';
+import { ClearIMEIDialogComponent } from './dialogs/clearIMEI/clearIMEI.component';
 
 interface MenuItem {
   label: string;
@@ -487,6 +488,22 @@ export class DriverComponent implements OnInit {
                 }
               }
             }
+            else if(this.MessageArray[0]=="DriverClearIMEI")
+          {
+            if(this.MessageArray[1]=="DriverView")
+            {
+              if(this.MessageArray[2]=="Success")
+              {
+               this.refresh();
+               this.showNotification(
+                'snackbar-success',
+                'IMEI Cleared ...!!!',
+                'bottom',
+                'center'
+              );
+              }
+            }
+          }
             else if (this.MessageArray[0] == "DriverAll") {
               if (this.MessageArray[1] == "DriverView") {
                 if (this.MessageArray[2] == "Failure") {
@@ -570,6 +587,16 @@ export class DriverComponent implements OnInit {
         return data.organizationalEntityName.toLowerCase().indexOf(filterValue) === 0;
       }
     );
+  }
+
+  confirmClearIMEI(row)
+  {
+
+    this.driverID = row.id;
+    const dialogRef = this.dialog.open(ClearIMEIDialogComponent, 
+    {
+      data: row
+    });
   }
 
 }

@@ -29,13 +29,16 @@ import { MyUploadModule } from '../myupload/myupload.module';
 import { GooglePlaceModule } from '@compat/google-places-shim';
 import {MatAutocompleteModule} from '@angular/material/autocomplete';
 // import { TwoDigitDecimaNumberDirective } from './twodigitdecimalnumber.directive';
+import { ClearIMEIDialogComponent } from './dialogs/clearIMEI/clearIMEI.component';
+
 
 
 @NgModule({
   declarations: [
     DriverComponent,
     advanceTableForm,
-    DeleteDialogComponent
+    DeleteDialogComponent,
+    ClearIMEIDialogComponent
   ],
   imports: [
     MatAutocompleteModule,

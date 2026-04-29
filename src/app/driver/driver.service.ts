@@ -152,4 +152,10 @@ export class DriverService
     let userID = this.generalService.getUserID();
     return this.httpClient.delete(this.API_URL + '/'+ driverID + '/'+ userID);
   }
+
+  clearIMEI(driverID: number):  Observable<any> 
+  {
+    let userID = this.generalService.getUserID();
+    return this.httpClient.delete(this.API_URL + '/'+ "clearIMEI" + '/'+ driverID + '/'+ userID);
+  }
 }

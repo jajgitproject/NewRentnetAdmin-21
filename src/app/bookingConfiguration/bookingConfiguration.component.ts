@@ -219,6 +219,7 @@ googlePlacesForm = this.fb.group({
   isCustomerFolded = false;
   isPassengerFolded = false;
   isStopFolded = false;
+  bookerID: any;
 
   constructor(
     public httpClient: HttpClient,
@@ -246,7 +247,7 @@ googlePlacesForm = this.fb.group({
     this.advanceTableForm.patchValue({modeOfPaymentID:0});
     this.GetCustomerDetails();
     this.GetStopDetails();
-    this.GetPassengerDetails();
+    
     this.InitGoogleAddress();
     this.InitServiceLocation();
     this.InitDropOffGoogleAddress();
@@ -337,6 +338,7 @@ toggleStopFold() {
         data => {
           debugger;
           this.customerDetails = data;
+          console.log(this.customerDetails);  
           if(this.customerDetails.customerID === 15)
           {
             this.GetB2CData();
@@ -350,6 +352,7 @@ toggleStopFold() {
           this.customerDetails.dropOffTime
         );
           this.advanceTableForm.patchValue({customerID:this.customerDetails.customerID});
+          this.bookerID = this.customerDetails.primaryBookerID;
           this.advanceTableForm.patchValue({primaryBookerID:this.customerDetails.primaryBookerID});
           this.advanceTableForm.patchValue({pickupDateTime:pickupDateTime});
           this.advanceTableForm.patchValue({pickupDate:this.extractDate(pickupDateTime)});
@@ -366,6 +369,7 @@ toggleStopFold() {
           this.onPickupDateChange();
           this.getSalesManager(this.customerDetails.customerID);
           this.getCustomerKam(this.customerDetails.customerID);
+          this.GetPassengerDetails();
         },
         (error: HttpErrorResponse) => { this.customerDetails = null; }
       );
@@ -539,10 +543,19 @@ private extractTime(dateTime: Date): Date {
 
   public GetPassengerDetails() 
   {
+    
     this.bookingConfigurationService.getPassengerDetails(this.BookingID).subscribe(
         data => {
+          debugger;
           this.passengerDetailsList = data;
-          this.advanceTableForm.patchValue({primaryPassengerID:this.passengerDetailsList[0].passengerID});
+          console.log(this.passengerDetailsList);
+          if(this.passengerDetailsList[0].passengerID == 0)
+          {
+            this.advanceTableForm.patchValue({primaryPassengerID:this.bookerID});
+          }
+          else{
+            this.advanceTableForm.patchValue({primaryPassengerID:this.passengerDetailsList[0].passengerID});
+          }
         },
         (error: HttpErrorResponse) => { this.passengerDetailsList = null; }
       );
