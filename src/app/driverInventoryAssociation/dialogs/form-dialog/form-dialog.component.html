@@ -27,7 +27,7 @@
                 <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12 mb-2" *ngIf="data.text==='AttachAnotherDriver'">
                     <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
                         <mat-label>Driver</mat-label>
-                        <input required type="text" matInput formControlName="driverName" [matAutocomplete]="auto">
+                        <input (keyup)="onKeyupDriverName($event)" required type="text" matInput formControlName="driverName" [matAutocomplete]="auto">
                         <mat-autocomplete #auto="matAutocomplete"
                             (optionSelected)="OnDriverSelected($event.option.value)"
                             panelWidth="custom-autocomplete-panel">
