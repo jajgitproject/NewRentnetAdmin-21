@@ -457,7 +457,7 @@ advanceTableIN: InternalNoteDetails | null;
         this.getStopReservationReason(this.customerID);
         this.getReservationAlertForCustomer(this.customerID);
         this.getAlerMessagetForCustomer(this.customerID);  
-        // this.InitReservationInvoiceGSTDetails( this.customerID);
+        this.InitReservationInvoiceGSTDetails( this.customerID);
         this.InitResrvationGSTForCityID(this.customerID,this.cityID);
         this.GetIsGSTMandatoryWithResrvation(this.customerGroupID);
         const passengerID = this.advanceTable?.primaryPassengerID;
@@ -468,20 +468,20 @@ advanceTableIN: InternalNoteDetails | null;
       {
         this.loadData();
         this.GetIsGSTMandatoryWithResrvation(this.customerGroupID);
-        // this.InitReservationInvoiceGSTDetails(this.customerID);
+        this.InitReservationInvoiceGSTDetails(this.customerID);
         this.getReservationGSTData();
         // this.InitCustomerType();
         this.InitCustomerAndPassenger();
         this.InitCustomerAndBooker();
-        // this.InitPaymentMode();
-        // this.InitDropOffGoogleAddress();
-        // this.InitGoogleAddress();
+        this.InitPaymentMode();
+        this.InitDropOffGoogleAddress();
+        this.InitGoogleAddress();
         // this.InitPackageType();
-        // this.InitServiceLocation();
+        this.InitServiceLocation();
         this.InitPickupSpotType();
         this.InitDropOffSpotType();
         // //this.InitCity();
-        // this.InitReservationSource();
+        this.InitReservationSource();
         
         // Load additional details for edit mode
         this.internalNoteLoadData();
@@ -555,17 +555,17 @@ advanceTableIN: InternalNoteDetails | null;
   // this.advanceTableForm.patchValue({booker:this.primaryBooker+'-'+this.gender+'-'+this.importance+'-'+this.phone+'-'+this.customerDepartment+'-'+this.customerDesignation+'-'+this.customerForBooker});
     this.InitCustomerType();
     this.InitCustomerCustomerGroup();
-    // this.InitGoogleAddress();
+    this.InitGoogleAddress();
     this.InitDropOffGoogleAddress();
-    // this.InitPackageType();
+    this.InitPackageType();
     this.InitPickupSpotType();
     //this.GetServiceLocation();
     this.InitServiceLocationBasedOnCity();
     this.InitDropOffSpotType();
     this.InitPickupSpot();
     this.InitDropOffSpot();
-    // this.InitReservationSource();
-    // this.InitPaymentMode();
+    this.InitReservationSource();
+    this.InitPaymentMode();
     //this.InitCity();
     this.SubscribeUpdateService();
     this.internalNoteLoadData();
@@ -576,7 +576,7 @@ advanceTableIN: InternalNoteDetails | null;
     //this.passengerloadData();
     //this.GetReservationCapping();
     this.GetIsGSTMandatoryWithResrvation(this.customerGroupID);
-    // this.InitReservationInvoiceGSTDetails(this.customerID);
+    this.InitReservationInvoiceGSTDetails(this.customerID);
     this.GetIntervalMin();
   }
   
@@ -620,16 +620,9 @@ onTNCChange(checked: any)
   //     });
   // }
 
-  onKeyupPaymentMode() 
+  InitPaymentMode() 
   {
-    var Prefix = this.advanceTableForm.get("modeOfPayment").value;
-      if(Prefix.length < 3)
-      { 
-        this.PaymentModeList = [];
-        return;
-      }
-    this._generalService.GetModeOfPayment(Prefix).subscribe(
-      
+    this._generalService.GetModeOfPayment().subscribe(
       data => {
         this.PaymentModeList = data;
         const control = this.advanceTableForm.controls['modeOfPayment'];
@@ -865,8 +858,8 @@ getFieldValues() {
         this.customerID=this.advanceTable.customerID;
         this.customerGroupID=this.advanceTable.customerGroupID;
         this.InitProjectCode();
-        // this.InitBooker();
-        // this.InitPassenger();
+        this.InitBooker();
+        this.InitPassenger();
         this.InitCompanyForCustomer();
           this.GetIsGSTMandatoryWithResrvation(this.customerGroupID);
         this.advanceTableForm.patchValue({reservationID:this.advanceTable.reservationID});
@@ -942,11 +935,11 @@ getFieldValues() {
         this.ImagePath=this.advanceTable.attachment;
         this.advanceTableForm.patchValue({attachment:this.ImagePath});
         this.InitCustomerCustomerGroup();
-        // this.InitBooker();
-        // this.InitPassenger();
+        this.InitBooker();
+        this.InitPassenger();
         //this.advanceTable.packageType=this.advanceTable.packageType +' '+"Rate";
-        // this.InitCity(this.advanceTable.packageType);
-        // this.InitDropOffCity(this.advanceTable.packageType);
+        this.InitCity(this.advanceTable.packageType);
+        this.InitDropOffCity(this.advanceTable.packageType);
         let pickupDateOnload = moment(this.advanceTable.pickupDate).format('DD/MM/yyyy');
         this.onPickupDateChangeAndLocationTimeSet(pickupDateOnload);
         this.InitCompanyForCustomer();
@@ -955,9 +948,9 @@ getFieldValues() {
         this.InitDropOffSpot();
         this.InitPickupSpot();
         this.InitServiceLocationBasedOnCity();
-        // this.InitReservationInvoiceGSTDetails( this.customerID);
+        this.InitReservationInvoiceGSTDetails( this.customerID);
         this.getETRDropOffTime();     
-        // this.InitReservationSource();   
+        this.InitReservationSource();   
         //this.GetReservationCapping(this.customerGroupID,this.customerID,this.advanceTable.pickupDate,this.advanceTable.pickupCityID,this.advanceTable.packageTypeID,this.advanceTable.vehicleCategoryID);
      }
       else{
@@ -984,14 +977,8 @@ getFieldValues() {
       : '';
   }
 
-  onPickupGeoLocation(){
-     var Prefix = this.advanceTableForm.get("pickupAddress").value;
-      if(Prefix.length < 3)
-      { 
-        this.GoogleAddressList = [];
-        return;
-      }
-    this._generalService.getGoogleAddress(Prefix ).subscribe(
+  InitGoogleAddress(){
+    this._generalService.getGoogleAddress().subscribe(
       data=>
       {
         this.GoogleAddressList=data;
@@ -1005,10 +992,10 @@ getFieldValues() {
 
   private _filterGA(value: string): any {
     const filterValue = value.toLowerCase();
-    // if(filterValue.length===0)
-    // {
-    //   return []
-    // }
+    if(filterValue.length===0)
+    {
+      return []
+    }
     return this.GoogleAddressList.filter(
       customer => 
       {
@@ -1229,14 +1216,8 @@ getFieldValues() {
   //}
 
    //------------DropOff Google Address -----------------
-   onDropLocationKeyup(){
-    var Prefix = this.advanceTableForm.get("dropOffAddress").value;
-    if(Prefix.length < 3)
-    { 
-      this.DropOffGoogleAddressList = [];
-      return;
-    }
-    this._generalService.getGoogleAddress(Prefix).subscribe(
+   InitDropOffGoogleAddress(){
+    this._generalService.getGoogleAddress().subscribe(
       data=>
       {
         this.DropOffGoogleAddressList=data;
@@ -1249,10 +1230,10 @@ getFieldValues() {
 
   private _filterDropoffGA(value: string): any {
     const filterValue = value.toLowerCase();
-    // if(filterValue.length===0)
-    // {
-    //   return []
-    // }
+    if(filterValue.length===0)
+    {
+      return []
+    }
     return this.DropOffGoogleAddressList.filter(
       customer => 
       {
@@ -1371,8 +1352,8 @@ getFieldValues() {
     this.customerDetailData = customer;
     this.advanceTableForm.patchValue({customerID:this.customerID});
     this.advanceTableForm.patchValue({customerGroupID:this.customerGroupID});
-    // this.InitBooker();
-    // this.InitPassenger();
+    this.InitBooker();
+    this.InitPassenger();
     this.InitProjectCode();
     this.InitCompanyForCustomer();
     this.GetReservationCapping(this.customerGroupID,this.customerID,this.pickupDate,this.cityID,this.packageTypeID,this.vehicleCategoryID);
@@ -1481,20 +1462,14 @@ getFieldValues() {
   }
   
   //------------ Booker -----------------
-  onKeyupBookerName(){
-    var Prefix = this.advanceTableForm.get("booker").value;
-      if(Prefix.length < 3)
-      { 
-        this.BookerList = [];
-        return;
-      }
-    this._generalService.GetCPForBooker(this.customerGroupID || this.advanceTableForm.value.customerGroupID, Prefix).subscribe(
+  InitBooker(){
+    this._generalService.GetCPForBooker(this.customerGroupID || this.advanceTableForm.value.customerGroupID).subscribe(
       data=>
       {
         this.BookerList=data;
-        this.advanceTableForm.controls['booker']?.setValidators([Validators.required,this.primaryBookerValidator(this.BookerList)]);
-        this.advanceTableForm.controls['booker']?.updateValueAndValidity();
-        this.filteredBookerOptions = this.advanceTableForm?.controls['booker'].valueChanges.pipe(
+        this.advanceTableForm.controls['booker'].setValidators([Validators.required,this.primaryBookerValidator(this.BookerList)]);
+        this.advanceTableForm.controls['booker'].updateValueAndValidity();
+        this.filteredBookerOptions = this.advanceTableForm.controls['booker'].valueChanges.pipe(
           startWith(""),
           map(value => this._filterBooker(value || ''))
         ); 
@@ -1532,7 +1507,7 @@ getFieldValues() {
   primaryBookerValidator(BookerList: any[]): ValidatorFn {
     return (control: AbstractControl): ValidationErrors | null => {
       const value = control.value?.toLowerCase();
-      const match = BookerList?.some(option =>
+      const match = BookerList.some(option =>
         (option.customerPersonName + '-' + option.gender + '-' + option.importance + '-' + option.phone + '-' + option.customerDepartment + '-' + option.customerDesignation + '-' + option.customerName)?.toLowerCase() === value
       );
       return match ? null : { primaryBookerInvalid: true };
@@ -1562,14 +1537,8 @@ getFieldValues() {
   }
 
   //------------ Passenger -----------------
-  onKeyupPassengerName(){
-     var Prefix = this.advanceTableForm.get("passenger").value;
-      if(Prefix.length < 3)
-      { 
-        this.PassengerList = [];
-        return;
-      }
-    this._generalService.GetCPForPassenger(this.advanceTableForm.value.customerGroupID, Prefix).subscribe(
+  InitPassenger(){
+    this._generalService.GetCPForPassenger(this.advanceTableForm.value.customerGroupID).subscribe(
       data=>
       {
         this.PassengerList=data;
@@ -1593,9 +1562,9 @@ getFieldValues() {
 
   private _filterPassenger(value: string): any {
   const filterValue = (value || '').toLowerCase();
-  // if (!filterValue || filterValue.length < 3) {
-  //   return [];
-  // }
+  if (!filterValue || filterValue.length < 3) {
+    return [];
+  }
   return this.PassengerList.filter(customer =>
     customer?.customerPersonName?.toLowerCase().includes(filterValue) ||
     customer?.phone?.toLowerCase().includes(filterValue) ||
@@ -1682,17 +1651,11 @@ getFieldValues() {
   }
 
   //------------Pickup City -----------------
-  onPickupCitysKeyUp(PackageType:string)
+  InitCity(PackageType:string)
   {
-     var Prefix = this.advanceTableForm.get("pickupCity").value;
-     if(Prefix.length < 3)
-      { 
-        this.CityList = [];
-        return;
-      }
     if(PackageType === "Local Rate")
       {
-        this._generalService.GetPickupAndDropOffCities(this.contractID,this.packageID ||this.advanceTableForm.value.packageID,Prefix).subscribe(
+        this._generalService.GetPickupAndDropOffCities(this.contractID,this.packageID ||this.advanceTableForm.value.packageID).subscribe(
           data=>
           {
             this.CityList=data;
@@ -1705,13 +1668,7 @@ getFieldValues() {
       }
     else if(PackageType === "Local Lumpsum Rate")
     {
-      var Prefix = this.advanceTableForm.get("pickupCity").value;
-      if(Prefix.length < 3)
-      { 
-        this.CityList = [];
-        return;
-      }
-      this._generalService.GetPickupAndDropOffCitiesForLocalLumpsum(this.contractID,this.packageID ||this.advanceTableForm.value.packageID,Prefix).subscribe(
+      this._generalService.GetPickupAndDropOffCitiesForLocalLumpsum(this.contractID,this.packageID ||this.advanceTableForm.value.packageID).subscribe(
         data=>
         {
           this.CityList=data;
@@ -1725,13 +1682,7 @@ getFieldValues() {
 
     else if(PackageType === "Local On Demand Rate")
     {
-      var Prefix = this.advanceTableForm.get("pickupCity").value;
-      if(Prefix.length < 3)
-      { 
-        this.CityList = [];
-        return;
-      }
-      this._generalService.GetPickupAndDropOffCitiesForLocalOnDemand(this.contractID,this.packageID ||this.advanceTableForm.value.packageID,Prefix).subscribe(
+      this._generalService.GetPickupAndDropOffCitiesForLocalOnDemand(this.contractID,this.packageID ||this.advanceTableForm.value.packageID).subscribe(
       data=>
       {
         this.CityList=data;
@@ -1745,13 +1696,7 @@ getFieldValues() {
 
     else if(PackageType === "Local Transfer Rate")
     {
-      var Prefix = this.advanceTableForm.get("pickupCity").value;
-      if(Prefix.length < 3)
-      { 
-        this.CityList = [];
-        return;
-      }
-      this._generalService.GetPickupAndDropOffCitiesForLocalTransfer(this.contractID,this.packageID ||this.advanceTableForm.value.packageID,Prefix).subscribe(
+      this._generalService.GetPickupAndDropOffCitiesForLocalTransfer(this.contractID,this.packageID ||this.advanceTableForm.value.packageID).subscribe(
       data=>
       {
         this.CityList=data;
@@ -1765,13 +1710,7 @@ getFieldValues() {
 
     else if(PackageType === "Long Term Rental Rate")
     {
-      var Prefix = this.advanceTableForm.get("pickupCity").value;
-      if(Prefix.length < 3)
-      { 
-        this.CityList = [];
-        return;
-      }
-      this._generalService.GetPickupAndDropOffCitiesForLongTermRental(this.contractID,this.packageID ||this.advanceTableForm.value.packageID,Prefix).subscribe(
+      this._generalService.GetPickupAndDropOffCitiesForLongTermRental(this.contractID,this.packageID ||this.advanceTableForm.value.packageID).subscribe(
       data=>
       {
         this.CityList=data;
@@ -1785,13 +1724,7 @@ getFieldValues() {
 
     else if(PackageType === "Outstation Lumpsum Rate")
     {
-      var Prefix = this.advanceTableForm.get("pickupCity").value;
-      if(Prefix.length < 3)
-      { 
-        this.CityList = [];
-        return;
-      }
-      this._generalService.GetPickupAndDropOffCitiesForOutStationLumpsum(this.contractID,this.packageID ||this.advanceTableForm.value.packageID,Prefix).subscribe(
+      this._generalService.GetPickupAndDropOffCitiesForOutStationLumpsum(this.contractID,this.packageID ||this.advanceTableForm.value.packageID).subscribe(
       data=>
       {
         this.CityList=data;
@@ -1805,13 +1738,7 @@ getFieldValues() {
 
     else if(PackageType === "Outstation OneWay Trip Rate")
     {
-      var Prefix = this.advanceTableForm.get("pickupCity").value;
-      if(Prefix.length < 3)
-      { 
-        this.CityList = [];
-        return;
-      }
-      this._generalService.GetPickupAndDropOffCitiesForOutStationOneWayTrip(this.contractID,this.packageID ||this.advanceTableForm.value.packageID,Prefix).subscribe(
+      this._generalService.GetPickupAndDropOffCitiesForOutStationOneWayTrip(this.contractID,this.packageID ||this.advanceTableForm.value.packageID).subscribe(
       data=>
       {
         this.CityList=data;
@@ -1825,13 +1752,7 @@ getFieldValues() {
 
     else if(PackageType === "Outstation Round Trip Rate")
     {
-      var Prefix = this.advanceTableForm.get("pickupCity").value;
-      if(Prefix.length < 3)
-      { 
-        this.CityList = [];
-        return;
-      }
-      this._generalService.GetPickupAndDropOffCitiesForOutStationRoundTrip(this.contractID,this.packageID ||this.advanceTableForm.value.packageID,Prefix).subscribe(
+      this._generalService.GetPickupAndDropOffCitiesForOutStationRoundTrip(this.contractID,this.packageID ||this.advanceTableForm.value.packageID).subscribe(
       data=>
       {
         this.CityList=data;
@@ -1892,17 +1813,11 @@ getFieldValues() {
   }
 
    //------------DropOff City -----------------
-   onDropOffCityKeyup(PackageType:string)
+   InitDropOffCity(PackageType:string)
    {
-      var Prefix = this.advanceTableForm.get("dropOffCity").value;
-      if(Prefix.length < 3)
-      { 
-        this.DropOffCityList = [];
-        return;
-      }
     if(PackageType === 'Local Rate')
       {
-        this._generalService.GetPickupAndDropOffCities(this.contractID,this.packageID ||this.advanceTableForm.value.packageID,Prefix).subscribe(
+        this._generalService.GetPickupAndDropOffCities(this.contractID,this.packageID ||this.advanceTableForm.value.packageID).subscribe(
           data=>
           {
             this.DropOffCityList=data;
@@ -1915,13 +1830,7 @@ getFieldValues() {
       }
     else if(PackageType === 'Local Lumpsum Rate')
     {
-      var Prefix = this.advanceTableForm.get("dropOffCity").value;
-      if(Prefix.length < 3)
-      { 
-        this.DropOffCityList = [];
-        return;
-      }
-      this._generalService.GetPickupAndDropOffCitiesForLocalLumpsum(this.contractID,this.packageID ||this.advanceTableForm.value.packageID,Prefix).subscribe(
+      this._generalService.GetPickupAndDropOffCitiesForLocalLumpsum(this.contractID,this.packageID ||this.advanceTableForm.value.packageID).subscribe(
         data=>
         {
           this.DropOffCityList=data;
@@ -1935,13 +1844,7 @@ getFieldValues() {
 
     else if(PackageType === 'Local On Demand Rate')
     {
-      var Prefix = this.advanceTableForm.get("dropOffCity").value;
-      if(Prefix.length < 3)
-      { 
-        this.DropOffCityList = [];
-        return;
-      }
-      this._generalService.GetPickupAndDropOffCitiesForLocalOnDemand(this.contractID,this.packageID ||this.advanceTableForm.value.packageID,Prefix).subscribe(
+      this._generalService.GetPickupAndDropOffCitiesForLocalOnDemand(this.contractID,this.packageID ||this.advanceTableForm.value.packageID).subscribe(
       data=>
       {
         this.DropOffCityList=data;
@@ -1955,13 +1858,7 @@ getFieldValues() {
 
     else if(PackageType === 'Local Transfer Rate')
     {
-      var Prefix = this.advanceTableForm.get("dropOffCity").value;
-      if(Prefix.length < 3)
-      { 
-        this.DropOffCityList = [];
-        return;
-      }
-      this._generalService.GetPickupAndDropOffCitiesForLocalTransfer(this.contractID,this.packageID ||this.advanceTableForm.value.packageID,Prefix).subscribe(
+      this._generalService.GetPickupAndDropOffCitiesForLocalTransfer(this.contractID,this.packageID ||this.advanceTableForm.value.packageID).subscribe(
       data=>
       {
         this.DropOffCityList=data;
@@ -1975,13 +1872,7 @@ getFieldValues() {
 
     else if(PackageType === 'Long Term Rental Rate')
     {
-      var Prefix = this.advanceTableForm.get("dropOffCity").value;
-      if(Prefix.length < 3)
-      { 
-        this.DropOffCityList = [];
-        return;
-      }
-      this._generalService.GetPickupAndDropOffCitiesForLongTermRental(this.contractID,this.packageID ||this.advanceTableForm.value.packageID,Prefix).subscribe(
+      this._generalService.GetPickupAndDropOffCitiesForLongTermRental(this.contractID,this.packageID ||this.advanceTableForm.value.packageID).subscribe(
       data=>
       {
         this.DropOffCityList=data;
@@ -1995,13 +1886,7 @@ getFieldValues() {
 
     else if(PackageType === 'Outstation Lumpsum Rate')
     {
-      var Prefix = this.advanceTableForm.get("dropOffCity").value;
-      if(Prefix.length < 3)
-      { 
-        this.DropOffCityList = [];
-        return;
-      }
-      this._generalService.GetPickupAndDropOffCitiesForOutStationLumpsum(this.contractID,this.packageID ||this.advanceTableForm.value.packageID,Prefix).subscribe(
+      this._generalService.GetPickupAndDropOffCitiesForOutStationLumpsum(this.contractID,this.packageID ||this.advanceTableForm.value.packageID).subscribe(
       data=>
       {
         this.DropOffCityList=data;
@@ -2015,13 +1900,7 @@ getFieldValues() {
 
     else if(PackageType === 'Outstation OneWay Trip Rate')
     {
-      var Prefix = this.advanceTableForm.get("dropOffCity").value;
-      if(Prefix.length < 3)
-      { 
-        this.DropOffCityList = [];
-        return;
-      }
-      this._generalService.GetPickupAndDropOffCitiesForOutStationOneWayTrip(this.contractID,this.packageID ||this.advanceTableForm.value.packageID,Prefix).subscribe(
+      this._generalService.GetPickupAndDropOffCitiesForOutStationOneWayTrip(this.contractID,this.packageID ||this.advanceTableForm.value.packageID).subscribe(
       data=>
       {
         this.DropOffCityList=data;
@@ -2035,13 +1914,7 @@ getFieldValues() {
 
     else if(PackageType === 'Outstation Round Trip Rate')
     {
-      var Prefix = this.advanceTableForm.get("dropOffCity").value;
-      if(Prefix.length < 3)
-      { 
-        this.DropOffCityList = [];
-        return;
-      }
-      this._generalService.GetPickupAndDropOffCitiesForOutStationRoundTrip(this.contractID,this.packageID ||this.advanceTableForm.value.packageID,Prefix).subscribe(
+      this._generalService.GetPickupAndDropOffCitiesForOutStationRoundTrip(this.contractID,this.packageID ||this.advanceTableForm.value.packageID).subscribe(
       data=>
       {
         this.DropOffCityList=data;
@@ -2095,18 +1968,11 @@ getFieldValues() {
   }
 
   //------------ Vehicle -----------------
-  onKeyupVehicle(PackageType)
+  InitVehicle(PackageType)
   {
-     var Prefix = this.advanceTableForm.get("vehicle").value;
-      if(Prefix.length < 3)
-      { 
-        this.VehicleList = [];
-        return;
-      }
-
     if(PackageType === 'Local Rate')
       {
-        this._generalService.GetVehicleBasedOnContractID(this.contractID,this.packageID || this.advanceTableForm.value.packageID,Prefix).subscribe(
+        this._generalService.GetVehicleBasedOnContractID(this.contractID,this.packageID || this.advanceTableForm.value.packageID).subscribe(
         data=>
         {
           this.VehicleList=data;
@@ -2120,12 +1986,7 @@ getFieldValues() {
 
     else if(PackageType === 'Local Lumpsum Rate')
     {
-     if(Prefix.length < 3)
-      { 
-        this.VehicleList = [];
-        return;
-      }
-      this._generalService.GetVehicleBasedOnContractIDForLocalLumpsum(this.contractID,this.packageID || this.advanceTableForm.value.packageID,Prefix).subscribe(
+      this._generalService.GetVehicleBasedOnContractIDForLocalLumpsum(this.contractID,this.packageID || this.advanceTableForm.value.packageID).subscribe(
       data=>
       {
         this.VehicleList=data;
@@ -2139,12 +2000,7 @@ getFieldValues() {
 
     else if(PackageType === 'Local On Demand Rate')
     {
-       if(Prefix.length < 3)
-      { 
-        this.VehicleList = [];
-        return;
-      }
-      this._generalService.GetVehicleBasedOnContractIDForLocalOnDemand(this.contractID,this.packageID || this.advanceTableForm.value.packageID,Prefix).subscribe(
+      this._generalService.GetVehicleBasedOnContractIDForLocalOnDemand(this.contractID,this.packageID || this.advanceTableForm.value.packageID).subscribe(
       data=>
       {
         this.VehicleList=data;
@@ -2158,13 +2014,7 @@ getFieldValues() {
 
     else if(PackageType === 'Local Transfer Rate')
     {
-      var Prefix = this.advanceTableForm.get("vehicle").value;
-      if(Prefix.length < 3)
-      { 
-        this.VehicleList = [];
-        return;
-      }
-      this._generalService.GetVehicleBasedOnContractIDForLocalTransfer(this.contractID,this.packageID || this.advanceTableForm.value.packageID,Prefix).subscribe(
+      this._generalService.GetVehicleBasedOnContractIDForLocalTransfer(this.contractID,this.packageID || this.advanceTableForm.value.packageID).subscribe(
       data=>
       {
         this.VehicleList=data;
@@ -2178,12 +2028,7 @@ getFieldValues() {
 
     else if(PackageType === 'Long Term Rental Rate')
     {
-       if(Prefix.length < 3)
-      { 
-        this.VehicleList = [];
-        return;
-      }
-      this._generalService.GetVehicleBasedOnContractIDForLongTermRental(this.contractID,this.packageID || this.advanceTableForm.value.packageID,Prefix).subscribe(
+      this._generalService.GetVehicleBasedOnContractIDForLongTermRental(this.contractID,this.packageID || this.advanceTableForm.value.packageID).subscribe(
       data=>
       {
         this.VehicleList=data;
@@ -2197,13 +2042,7 @@ getFieldValues() {
 
     else if(PackageType === 'Outstation Lumpsum Rate')
     {
-      var Prefix = this.advanceTableForm.get("vehicle").value;
-      if(Prefix.length < 3)
-      { 
-        this.VehicleList = [];
-        return;
-      }
-      this._generalService.GetVehicleBasedOnContractIDForOutStationLumpsum(this.contractID,this.packageID || this.advanceTableForm.value.packageID,Prefix).subscribe(
+      this._generalService.GetVehicleBasedOnContractIDForOutStationLumpsum(this.contractID,this.packageID || this.advanceTableForm.value.packageID).subscribe(
       data=>
       {
         this.VehicleList=data;
@@ -2217,13 +2056,7 @@ getFieldValues() {
 
   else if(PackageType === 'Outstation OneWay Trip Rate')
   {
-    var Prefix = this.advanceTableForm.get("vehicle").value;
-    if(Prefix.length < 3)
-    { 
-      this.VehicleList = [];
-      return;
-    }
-    this._generalService.GetVehicleBasedOnContractIDForOutStationOneWayTrip(this.contractID,this.packageID || this.advanceTableForm.value.packageID,Prefix).subscribe(
+    this._generalService.GetVehicleBasedOnContractIDForOutStationOneWayTrip(this.contractID,this.packageID || this.advanceTableForm.value.packageID).subscribe(
     data=>
     {
       this.VehicleList=data;
@@ -2237,13 +2070,7 @@ getFieldValues() {
 
   else if(PackageType === 'Outstation Round Trip Rate')
   {
-    var Prefix = this.advanceTableForm.get("vehicle").value;
-    if(Prefix.length < 3)
-    { 
-      this.VehicleList = [];
-      return;
-    }
-    this._generalService.GetVehicleBasedOnContractIDForOutStationRoundTrip(this.contractID,this.packageID || this.advanceTableForm.value.packageID,Prefix).subscribe(
+    this._generalService.GetVehicleBasedOnContractIDForOutStationRoundTrip(this.contractID,this.packageID || this.advanceTableForm.value.packageID).subscribe(
     data=>
     {
       this.VehicleList=data;
@@ -2300,17 +2127,11 @@ getFieldValues() {
   }
 
   //------------ Type -----------------
-  onKeyupDuty(){
-    
+  InitPackageType(){
+    // Skip until a contract is known; otherwise the URL ends in "undefined"
+    // and the backend returns 400 on page load.
     if (!this.contractID) { return; }
-     var Prefix = this.advanceTableForm.get("packageType").value;
-      if(Prefix.length < 3)
-      { 
-        this.PackageTypeList = [];
-        return;
-      }
-
-    this._generalService.getPackageTypeByContractID(this.contractID,Prefix).subscribe(
+    this._generalService.getPackageTypeByContractID(this.contractID).subscribe(
       data=>
       {
         this.PackageTypeList=data;
@@ -2369,7 +2190,7 @@ DTValidator(PackageTypeList: any[]): ValidatorFn {
     this.packageTypeID=packageTypeID;
     this.packageType=packageType;
     this.advanceTableForm.patchValue({packageTypeID:this.packageTypeID});
-    // this.InitPackage();
+    this.InitPackage();
     this.ETRDropoffDateSet(packageType);
     this.changeDropOffDate(packageType);
     this.GetReservationCapping(this.customerGroupID,this.customerID,this.pickupDate,this.cityID,this.packageTypeID,this.vehicleCategoryID);
@@ -2384,15 +2205,9 @@ DTValidator(PackageTypeList: any[]): ValidatorFn {
   }
 
   //------------ Package -----------------
-  onKeyupPackage()
-  {  
-    var Prefix = this.advanceTableForm.get("package").value;
-      if(Prefix.length < 3)
-      { 
-        this.PackageList = [];
-        return;
-      } 
-    this._generalService.GetPackagesForReservation(this.packageTypeID || this.advanceTableForm.value.packageTypeID,this.advanceTableForm.value.packageType,this.contractID,Prefix,this.customerID || this.advanceTableForm.value.customerID).subscribe(
+  InitPackage()
+  {   
+    this._generalService.GetPackagesForReservation(this.packageTypeID || this.advanceTableForm.value.packageTypeID,this.advanceTableForm.value.packageType,this.contractID).subscribe(
       data=>
       {
         this.PackageList=data;
@@ -2450,9 +2265,9 @@ DTValidator(PackageTypeList: any[]): ValidatorFn {
     // access so a missing record doesn't throw and abort the rest of this
     // function (which would leave downstream form state half-initialised).
     const fallbackPackageType = this.packageType || (this.advanceTable && this.advanceTable.packageType) || '';
-    // this.InitCity(fallbackPackageType);
-    // this.InitDropOffCity(fallbackPackageType);
-    // this.InitVehicle(this.packageType);
+    this.InitCity(fallbackPackageType);
+    this.InitDropOffCity(fallbackPackageType);
+    this.InitVehicle(this.packageType);
     // Re-enabled so Drop-off Time / ETR binds as soon as a Package is picked.
     // Previously only getVehicleID() triggered this, which meant the field
     // stayed blank until a vehicle was also selected.
@@ -2545,10 +2360,19 @@ DTValidator(PackageTypeList: any[]): ValidatorFn {
   //------------ Service Location -----------------
   InitServiceLocationBasedOnCity()
   { 
-    // Keep options empty on focus/click. Load only when user types.
-    this.ServiceLocationList = [];
-    this.filteredServiceLocationOptions = of([] as OrganizationalEntityDropDown[]);
-    this.advanceTableForm.controls['serviceLocation'].setValidators([Validators.required]);
+    // Skip until a pickup city is selected; otherwise the URL ends in
+    // "undefined" and the backend returns 400 on page load.
+    if (!this.cityID) { return; }
+    this._generalService.GetLocationBasedOnCity(this.cityID).subscribe(
+      data=>
+      {
+        this.ServiceLocationList=data;
+        this.advanceTableForm.controls['serviceLocation'].setValidators([Validators.required,this.SLValidator(this.ServiceLocationList)]);
+        this.filteredServiceLocationOptions = this.advanceTableForm.controls['serviceLocation'].valueChanges.pipe(
+          startWith(""),
+          map(value => this._filterServiceLocationBasedOnCity(value || ''))
+        ); 
+      });
   }
 
   private _filterServiceLocationBasedOnCity(value: string): any {
@@ -2588,20 +2412,16 @@ DTValidator(PackageTypeList: any[]): ValidatorFn {
     this.advanceTableForm.patchValue({transferedLocationID:this.serviceLocationID});
   }
 
-  onServiceLocationKeyup(){ 
-     var Prefix = this.advanceTableForm.get("serviceLocation").value;
-      if(Prefix.length < 3)
-      { 
-        this.ServiceLocationList = [];
-        this.filteredServiceLocationOptions = of([] as OrganizationalEntityDropDown[]);
-        return;
-      }
-    this._generalService.GetLocation(Prefix).subscribe(
+  InitServiceLocation(){ 
+    this._generalService.GetLocation().subscribe(
       data=>
       {
         this.ServiceLocationList=data;
         this.advanceTableForm.controls['serviceLocation'].setValidators([Validators.required,this.SLValidator(this.ServiceLocationList)]);
-        this.filteredServiceLocationOptions = of(this.ServiceLocationList || []);
+        this.filteredServiceLocationOptions = this.advanceTableForm.controls['serviceLocation'].valueChanges.pipe(
+          startWith(""),
+          map(value => this._filterServiceLocation(value || ''))
+        ); 
       });
   }
 
@@ -2641,7 +2461,7 @@ DTValidator(PackageTypeList: any[]): ValidatorFn {
     {
       this.ifBlockService=false;
       this.advanceTableForm.controls["serviceLocation"].setValue('');
-      // this.InitServiceLocation();
+      this.InitServiceLocation();
     }
     if(this.advanceTableForm.value.serviceLocationBasedOnCity===false)
     {
@@ -2746,15 +2566,8 @@ DTValidator(PackageTypeList: any[]): ValidatorFn {
   }
 
    //------------ ReservationSource -----------------
-   onKeyupReservationSource(){
-    var Prefix = this.advanceTableForm.get("reservationSource").value;
-      if(Prefix.length < 3)
-      { 
-        this.ReservationSourceList = [];
-        return;
-      } 
-
-    this._generalService.GetReservationSource(Prefix).subscribe(
+   InitReservationSource(){
+    this._generalService.GetReservationSource().subscribe(
       data=>
       {
         this.ReservationSourceList=data;
@@ -3467,8 +3280,8 @@ public validateONReservationGST(): boolean {
         });
         dialogRef.afterClosed().subscribe(res => {
           // received data from dialog-component
-          // this.InitBooker();
-          // this.InitPassenger();
+          this.InitBooker();
+          this.InitPassenger();
         })
       }
     }
@@ -3489,8 +3302,8 @@ public validateONReservationGST(): boolean {
       });
       dialogRef.afterClosed().subscribe(res => {
         // received data from dialog-component
-        // this.InitBooker();
-        // this.InitPassenger();
+        this.InitBooker();
+        this.InitPassenger();
       })
     }
     }
@@ -3521,8 +3334,8 @@ public validateONReservationGST(): boolean {
         });
         dialogRef.afterClosed().subscribe(res => {
           // received data from dialog-component
-          // this.InitBooker();
-          // this.InitPassenger();
+          this.InitBooker();
+          this.InitPassenger();
         })
       }
     }
@@ -3555,8 +3368,8 @@ public validateONReservationGST(): boolean {
         });
         dialogRef.afterClosed().subscribe(res => {
           // received data from dialog-component
-          // this.InitBooker();
-          // this.InitPassenger();
+          this.InitBooker();
+          this.InitPassenger();
         })
       }
     }
@@ -3577,8 +3390,8 @@ public validateONReservationGST(): boolean {
       });
       dialogRef.afterClosed().subscribe(res => {
         // received data from dialog-component
-        // this.InitBooker();
-        // this.InitPassenger();
+        this.InitBooker();
+        this.InitPassenger();
       })
     }
     }
@@ -4142,8 +3955,8 @@ private patchPickupAddress(res: any) {
           {
             this.contractID = data;
             this.noReservationMessage = false;
-            // this.InitPackageType();
-            // this.InitPackage();
+            this.InitPackageType();
+            this.InitPackage();
             if(this.action ==='edit' && this.advanceTable && this.advanceTable.packageType)
             {
               this.advanceTable.packageType = this.advanceTable.packageType + " " + "Rate";
@@ -4151,9 +3964,9 @@ private patchPickupAddress(res: any) {
             // In new-reservation mode `this.advanceTable` may still be null
             // before any contract/package selections exist; guard every access.
             const fallbackPackageType = this.packageType || (this.advanceTable && this.advanceTable.packageType) || '';
-            // this.InitCity(fallbackPackageType);
-            // this.InitDropOffCity(fallbackPackageType);
-            // this.InitVehicle(fallbackPackageType);
+            this.InitCity(fallbackPackageType);
+            this.InitDropOffCity(fallbackPackageType);
+            this.InitVehicle(fallbackPackageType);
             // Retry Drop-off Time calculation now that contractID is known.
             // In edit mode getETRDropOffTime() runs synchronously during
             // loadData() before this async contract lookup completes, so
@@ -4675,11 +4488,11 @@ onTimeInput(event: any): void {
           this.advanceTableForm.patchValue({primaryBookerID:this.primaryBookerID});
           this.advanceTableForm.patchValue({booker:this.primaryBooker+'-'+this.gender+'-'+this.importance+'-'+this.phone+'-'+this.customerDepartment+'-'+this.customerDesignation+'-'+this.customerForBooker});
           this.InitCompanyForCustomer();
-          // this.InitBooker();
-          // this.InitPassenger();
+          this.InitBooker();
+          this.InitPassenger();
           this.InitProjectCode();
           this.GetIsGSTMandatoryWithResrvation(this.customerGroupID);
-          // this.InitReservationInvoiceGSTDetails( this.customerID);
+          this.InitReservationInvoiceGSTDetails( this.customerID);
           this.GetReservationCapping(this.customerGroupID,this.customerID,this.pickupDate,this.cityID,this.packageTypeID,this.vehicleCategoryID);
           this.getETRDropOffTime();
         }
@@ -4739,17 +4552,11 @@ onTimeInput(event: any): void {
 
   //--------------------GST For Billing------------------
 
-  onCustomerConfigurationUp(customerID){
-     const resolvedCustomerID = customerID || this.customerID || this.advanceTableForm.value.customerID;
-     var Prefix = this.advanceTableForm.get("gSTForBilling").value;
-      if(Prefix.length < 3)
-      { 
-        this.ConfigurationInvoicingList = [];
-        return;
-      }
-
-    if (!resolvedCustomerID) { return; }
-    this.reservationService.GetResrvationGSTDetails(resolvedCustomerID,Prefix).subscribe(
+  InitReservationInvoiceGSTDetails(customerID){
+    // Skip when no customer is known yet; otherwise the backend receives the
+    // literal string "undefined" in the URL path and returns 400.
+    if (!customerID) { return; }
+    this.reservationService.GetResrvationGSTDetails(customerID).subscribe(
       data=>
       {
         this.ConfigurationInvoicingList=data;
