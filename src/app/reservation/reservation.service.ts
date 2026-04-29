@@ -405,19 +405,20 @@ export class ReservationService
     {
       return this.httpClient.get(this.API_URL +"/getReservationGSTData/"+ReservationID);
     }
-   updatePickupEdit(advanceTable: any)
-    {
-    if(advanceTable.pickupTime==="")
-    {
-      advanceTable.pickupTime=null;
-    }
-    else
-    {
-      advanceTable.pickupTimeString=this.generalService.getTimeApplicable(advanceTable.pickupTime);
-    }
-    advanceTable.dropOffTimeString=this.generalService.getTimeApplicable(advanceTable.dropOffTime);  
-    return this.httpClient.put<any>(this.API_URL+'/'+'EditPickupTime' , advanceTable);
+   updatePickupEdit(advanceTable: any) {
+  if (advanceTable.pickupTime === "") {
+    advanceTable.pickupTime = null;
+  } else {
+    advanceTable.pickupTimeString = this.generalService.getTimeApplicable(advanceTable.pickupTime);
   }
+  if (!advanceTable.dropOffTime) {
+    advanceTable.dropOffTimeString = null;
+  } else {
+    advanceTable.dropOffTimeString = this.generalService.getTimeApplicable(advanceTable.dropOffTime);
+  }
+
+  return this.httpClient.put<any>(this.API_URL + '/' + 'EditPickupTime', advanceTable);
+}
 }
   
 

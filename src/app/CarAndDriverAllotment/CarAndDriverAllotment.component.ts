@@ -1219,6 +1219,10 @@ getAllDriver()
 
   openAllotCarAndDriver(i: any, allotmentType: string, allotmentID: any) {
   debugger
+  // 👉 Check if HARD allotment already exists
+  let isHardAllotted = this.reservationInfo.some(
+    r => r.allotmentType === 'Hard' && r.allotmentStatus === 'Alloted'
+  );
     let allottedDriverIndex = this.reservationInfo.findIndex(r => r.allotmentStatus === 'Alloted');
   
     if (this.reservationInfo[0].allotmentStatus === 'Cancelled' || this.reservationInfo[0].allotmentStatus === null) {
@@ -1243,20 +1247,28 @@ getAllDriver()
       return;
     }
   
-    //  If a driver is already allotted, restrict popup to only that driver
-    if (allottedDriverIndex !== -1) {
-      let allottedDriverID = this.reservationInfo[allottedDriverIndex].driverID;
+    ////  If a driver is already allotted, restrict popup to only that driver
+    // if (allottedDriverIndex !== -1) {
+    //   let allottedDriverID = this.reservationInfo[allottedDriverIndex].driverID;
   
-      if (this.driverInventoryAssociationDataSource[i].driverID !== allottedDriverID) {
-        //  Prevent popup for any other driver
-        Swal.fire({
-          title: '',
-          text: 'Driver is already assigned on this trip. If you want to change then first deattach assigned driver.',
-          icon: 'warning',
-        });
-        return;
-      }
-    }
+    //   if (this.driverInventoryAssociationDataSource[i].driverID !== allottedDriverID) {
+    //     //  Prevent popup for any other driver
+    //     Swal.fire({
+    //       title: '',
+    //       text: 'Driver is already assigned on this trip. If you want to change then first deattach assigned driver.',
+    //       icon: 'warning',
+    //     });
+    //     return;
+    //   }
+    // }
+     if (isHardAllotted) {
+    Swal.fire({
+      title: '',
+      text: 'Driver is already assigned on this trip. If you want to change then first deattach assigned driver.',
+      icon: 'warning',
+    });
+    return;
+  }
   
     //  Open popup only for the correct driver
     const dialogRef = this.dialog.open(FormDialogComponent, {

@@ -98,20 +98,16 @@ const normalized = (this.status || '').trim().toLowerCase();
       timeDateObject = new Date();
     }
     this.advanceTableForm.patchValue({ pickupTime: timeDateObject });
-    this.advanceTableForm
-      .get('pickupTime')
-      ?.valueChanges.pipe(skip(1), takeUntil(this.destroy$))
-      .subscribe((val: unknown) => {
-        if (val) {
-          this.locationTimeSet(val as Date | string);
-        }
-      });
+    this.locationTimeSet(timeDateObject);
+    
+    this.advanceTableForm.get('pickupTime')?.valueChanges.pipe(takeUntil(this.destroy$)).subscribe((val: unknown) => {
+    console.log("pickupTime changed:", val); // debug
+    if (val) {
+      this.locationTimeSet(val as Date | string);
+    }
+  });
   }
 
-  ngOnDestroy(): void {
-    this.destroy$.next();
-    this.destroy$.complete();
-  }
 
   public noWhitespaceValidator(control: FormControl) {
     const isWhitespace = (control.value || '').trim().length === 0;
@@ -179,7 +175,6 @@ const normalized = (this.status || '').trim().toLowerCase();
     const combinedDateTime = new Date(pickupDate.getFullYear(), pickupDate.getMonth(), pickupDate.getDate(), eventTime.getHours(), eventTime.getMinutes());
     combinedDateTime.setMinutes(combinedDateTime.getMinutes() - 90);
     const locOutDateTime = new Date(combinedDateTime);
-    this.getETRDropOffTime();
   }
   getETRDropOffTime() {
     var pickupTime;
@@ -210,6 +205,7 @@ const normalized = (this.status || '').trim().toLowerCase();
       data => {
         if (data) {
           this.contractID = data;
+          this.getETRDropOffTime();
         }
       });
   }
