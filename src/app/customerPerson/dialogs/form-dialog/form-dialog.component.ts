@@ -229,7 +229,7 @@ export class FormDialogComponentCustomerPerson
       this.advanceTableForm.controls["customerName"].disable();
     }
     this.InitCustomer();
-    this.InitSalutation();
+    // this.InitSalutation();
     this.InitCustomerDesignation();
     this.InitCustomerDepartment();
     this.InitCountryISDCode();
@@ -313,8 +313,14 @@ export class FormDialogComponentCustomerPerson
     };
   }
 
-  InitSalutation(){
-    this._generalService.GetSalutations().subscribe
+  onKeyupSalutation(){
+     var Prefix = this.advanceTableForm.get("salutation").value;
+      if(Prefix.length < 2)
+      { 
+        this.SalutationList = [];
+        return;
+      }
+    this._generalService.GetSalutations(Prefix).subscribe
     (
       data=>{
         this.SalutationList=data;

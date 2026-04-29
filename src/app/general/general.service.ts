@@ -1158,8 +1158,8 @@ GetVehicleBasedOnContractIDForOutStationRoundTrip(contractID: any,PackageID:numb
   GetDocument(): Observable<DocumentDropDown[]> {
     return this.http.get<DocumentDropDown[]>(this.BaseURL + "Document/ForDropDown");
   } 
-  GetSalutations(): Observable<SalutationDropDown[]> {
-    return this.http.get<SalutationDropDown[]>(this.BaseURL + "Salutation/ForDropDown");
+  GetSalutations(Prefix: string): Observable<SalutationDropDown[]> {
+    return this.http.get<SalutationDropDown[]>(this.BaseURL + "Salutation/ForDropDown/" + Prefix);
   }
 
   GetCustomerDesignation(): Observable<CustomerDesignationDropDown[]> {

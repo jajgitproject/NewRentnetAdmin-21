@@ -37,7 +37,7 @@
                 <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
                     <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
                         <mat-label>Salutation</mat-label>
-                        <input (keyup)="onsalutation($event)" required type="text" matInput formControlName="salutation" [matAutocomplete]="auto">
+                        <input (keyup)="onKeyupSalutation($event)" required type="text" matInput formControlName="salutation" [matAutocomplete]="auto">
                         <mat-autocomplete #auto="matAutocomplete"
                             (optionSelected)="OnSalutationSelect($event.option.value)">
                             <mat-option *ngFor="let option of filteredSalutationOptions | async"
@@ -137,7 +137,7 @@
                     </mat-form-field> -->
                     <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
                         <mat-label>Country Code</mat-label>
-                        <input (keyup)="onCountryCodeKeyup($event)" required type="text" matInput formControlName="countryCode" [matAutocomplete]="auto9">
+                        <input  required type="text" matInput formControlName="countryCode" [matAutocomplete]="auto9">
 
                         <mat-autocomplete #auto9="matAutocomplete" (optionSelected)="onCountryCodeSelected($event)">
                             <mat-option *ngFor="let option of filteredCountryCodeOptions | async"
@@ -180,7 +180,7 @@
                     </mat-form-field> -->
                     <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
                         <mat-label>Country Code</mat-label>
-                        <input (keyup)="onCountryCodeKeyup($event)" type="text" matInput formControlName="countryCodes" [matAutocomplete]="auto10">
+                        <input type="text" matInput formControlName="countryCodes" [matAutocomplete]="auto10">
                         <mat-autocomplete #auto10="matAutocomplete" (optionSelected)="onCountryCode($event)">
                             <mat-option *ngFor="let option of filteredCountryCodesOptions | async"
                                 [value]="option.countryISDCode">
@@ -685,7 +685,7 @@
                 <div class="col-xl-3 col-lg-3 col-md-6 col-sm-6 mb-2">
                     <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
                         <mat-label>Salutation</mat-label>
-                        <input required type="text" matInput formControlName="salutation" [matAutocomplete]="auto">
+                        <input (keyup)="onKeyupSalutation($event)" required type="text" matInput formControlName="salutation" [matAutocomplete]="auto">
                         <mat-autocomplete #auto="matAutocomplete"
                             (optionSelected)="OnSalutationSelect($event.option.value)">
                             <mat-option *ngFor="let option of filteredSalutationOptions | async"
