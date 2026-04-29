@@ -479,11 +479,12 @@ GetCitiessAl(): Observable<CityDropDown[]> {
   return this.http.get<RegistrationDropDown[]>(this.BaseURL + "interstateTaxEntry/ForDropDown");
 }
 
-  GetPackagesForReservation(packageTypeID:number,packageType:string,contractID:any): Observable<PackageDropDown[]> {
+  GetPackagesForReservation(packageTypeID:number,packageType:string,contractID:any, prefix: string): Observable<PackageDropDown[]> {
     const words = packageType.split(' ');
     const lastWord = words.pop(); // Remove and get the last word
     const restOfString = words.join(' ');
-    return this.http.get<PackageDropDown[]>(this.BaseURL + "Package/getPackagesForReservation/"+packageTypeID+"/"+restOfString+"/"+contractID);
+    console.log(this.BaseURL + "Package/getPackagesForReservation/"+packageTypeID+"/"+restOfString+"/"+contractID+"/"+prefix)
+    return this.http.get<PackageDropDown[]>(this.BaseURL + "Package/getPackagesForReservation/"+packageTypeID+"/"+restOfString+"/"+contractID+"/"+prefix);
   }
 
   GetCityTiers(): Observable<CityTierDropDown[]> {
@@ -540,8 +541,8 @@ GetCitiessAl(): Observable<CityDropDown[]> {
     return this.http.get<BankDropDown[]>(this.BaseURL + "bank/ForDropDown");
   }
 
-  GetReservationSource(): Observable<ReservationSourceDropDown[]>{
-    return this.http.get<ReservationSourceDropDown[]>(this.BaseURL + "reservationSource/ForDropDown");
+  GetReservationSource(Prefix: string): Observable<ReservationSourceDropDown[]>{
+    return this.http.get<ReservationSourceDropDown[]>(this.BaseURL + "reservationSource/ForDropDown/" + Prefix);
   }
 
   GetGeoPointName(geoPointTypeID: number): Observable<StatesDropDown[]> {
@@ -588,8 +589,8 @@ GetCitiessAl(): Observable<CityDropDown[]> {
   getPickupStop(reservationID:number): Observable<ReservationStopDropDown[]> {
     return this.http.get<ReservationStopDropDown[]>(this.BaseURL + "ReservationPassenger/ForPickupStopDropDown/"+reservationID);
   }
-  getGoogleAddress(): Observable<GoogleAddressDropDown[]> {
-    return this.http.get<GoogleAddressDropDown[]>(this.BaseURL + "GoogleAddress/ForDropDown");
+  getGoogleAddress(prefix: string): Observable<GoogleAddressDropDown[]> {
+    return this.http.get<GoogleAddressDropDown[]>(this.BaseURL + "GoogleAddress/ForDropDown/" + prefix);
   }
   
   getCustomerPersonDetails(): Observable<CustomerPersonDetailsDropDown[]> {
@@ -743,8 +744,8 @@ GetCitiessAl(): Observable<CityDropDown[]> {
     return this.http.get<any[]>(this.BaseURL + "organizationalEntity/getLutForCompanyBranch/"+organizationalEntityID);
   }
 
-  getPackageTypeByContractID(customerContractID:number): Observable<any[]> {
-    return this.http.get<any[]>(this.BaseURL + "contractPackageTypeMapping/getPackageType/" +customerContractID);
+  getPackageTypeByContractID(customerContractID:number,Prefix:string): Observable<any[]> {
+    return this.http.get<any[]>(this.BaseURL + "contractPackageTypeMapping/getPackageType/" +customerContractID + "/" + Prefix);
   }
    getPackageTypeByVendorID(vendorContractID:number): Observable<any[]> {
     return this.http.get<any[]>(this.BaseURL + "contractPackageTypeMapping/GetVendorPackageType/" +vendorContractID);
@@ -939,9 +940,9 @@ nameEmailDuplicateMobile(payload: {
       this.BaseURL + 'supplierContract/ForEmployeeDropDown'
     );
   }
-  GetModeOfPayment(): Observable<ModeOfPaymentDropDown[]> {
+  GetModeOfPayment(Prefix: string): Observable<ModeOfPaymentDropDown[]> {
     return this.http.get<ModeOfPaymentDropDown[]>(
-      this.BaseURL + 'supplierContract/ForModeOfPaymentDropDown'
+      this.BaseURL + 'supplierContract/ForModeOfPaymentDropDown/' + Prefix
     );
   }
 
@@ -1057,84 +1058,84 @@ GetParentMenus(): Observable<ParentMenuDropDown[]> {
 
   }
 
-  GetPickupAndDropOffCities(contractID: any,packageID:any): Observable<CityDropDown[]>
+  GetPickupAndDropOffCities(contractID: any,packageID:any,Prefix: string): Observable<CityDropDown[]>
   {
-    return this.http.get<CityDropDown[]>(this.BaseURL + "city/getPickupAndDropOffCities/" + contractID +"/"+packageID);
+    return this.http.get<CityDropDown[]>(this.BaseURL + "city/getPickupAndDropOffCities/" + contractID +"/"+packageID +"/"+Prefix);
   }
 
-  GetPickupAndDropOffCitiesForLocalLumpsum(contractID: any,packageID:any): Observable<CityDropDown[]> 
+  GetPickupAndDropOffCitiesForLocalLumpsum(contractID: any,packageID:any,Prefix: string): Observable<CityDropDown[]> 
   {
-    return this.http.get<CityDropDown[]>(this.BaseURL + "city/getPickupAndDropOffCitiesForLocalLumpsum/" + contractID +"/"+packageID);
+    return this.http.get<CityDropDown[]>(this.BaseURL + "city/getPickupAndDropOffCitiesForLocalLumpsum/" + contractID +"/"+packageID +"/"+Prefix);
   }
 
-  GetPickupAndDropOffCitiesForLocalOnDemand(contractID: any,packageID:any): Observable<CityDropDown[]> 
+  GetPickupAndDropOffCitiesForLocalOnDemand(contractID: any,packageID:any,Prefix: string): Observable<CityDropDown[]> 
   {
-    return this.http.get<CityDropDown[]>(this.BaseURL + "city/getPickupAndDropOffCitiesForLocalOnDemand/" + contractID +"/"+packageID);
+    return this.http.get<CityDropDown[]>(this.BaseURL + "city/getPickupAndDropOffCitiesForLocalOnDemand/" + contractID +"/"+packageID +"/"+Prefix);
   }
 
-  GetPickupAndDropOffCitiesForLocalTransfer(contractID: any,packageID:any): Observable<CityDropDown[]> 
+  GetPickupAndDropOffCitiesForLocalTransfer(contractID: any,packageID:any,Prefix: string): Observable<CityDropDown[]> 
   {
-    return this.http.get<CityDropDown[]>(this.BaseURL + "city/getPickupAndDropOffCitiesForLocalTransfer/" + contractID +"/"+packageID);
+    return this.http.get<CityDropDown[]>(this.BaseURL + "city/getPickupAndDropOffCitiesForLocalTransfer/" + contractID +"/"+packageID +"/"+Prefix);
   }
 
-  GetPickupAndDropOffCitiesForLongTermRental(contractID: any,packageID:any): Observable<CityDropDown[]> 
+  GetPickupAndDropOffCitiesForLongTermRental(contractID: any,packageID:any,Prefix: string): Observable<CityDropDown[]> 
   {
-    return this.http.get<CityDropDown[]>(this.BaseURL + "city/getPickupAndDropOffCitiesForLongTermRental/" + contractID +"/"+packageID);
+    return this.http.get<CityDropDown[]>(this.BaseURL + "city/getPickupAndDropOffCitiesForLongTermRental/" + contractID +"/"+packageID +"/"+Prefix);
   }
 
-  GetPickupAndDropOffCitiesForOutStationLumpsum(contractID: any,packageID:any): Observable<CityDropDown[]> 
+  GetPickupAndDropOffCitiesForOutStationLumpsum(contractID: any,packageID:any,Prefix: string): Observable<CityDropDown[]> 
   {
-    return this.http.get<CityDropDown[]>(this.BaseURL + "city/getPickupAndDropOffCitiesForOutStationLumpsum/" + contractID +"/"+packageID);
+    return this.http.get<CityDropDown[]>(this.BaseURL + "city/getPickupAndDropOffCitiesForOutStationLumpsum/" + contractID +"/"+packageID +"/"+Prefix);
   }
 
-  GetPickupAndDropOffCitiesForOutStationOneWayTrip(contractID: any,packageID:any): Observable<CityDropDown[]> 
+  GetPickupAndDropOffCitiesForOutStationOneWayTrip(contractID: any,packageID:any,Prefix: string): Observable<CityDropDown[]> 
   {
-    return this.http.get<CityDropDown[]>(this.BaseURL + "city/getPickupAndDropOffCitiesForOutStationOneWayTrip/" + contractID +"/"+packageID);
+    return this.http.get<CityDropDown[]>(this.BaseURL + "city/getPickupAndDropOffCitiesForOutStationOneWayTrip/" + contractID +"/"+packageID +"/"+Prefix);
   }
 
-  GetPickupAndDropOffCitiesForOutStationRoundTrip(contractID: any,packageID:any): Observable<CityDropDown[]> 
+  GetPickupAndDropOffCitiesForOutStationRoundTrip(contractID: any,packageID:any,Prefix: string): Observable<CityDropDown[]> 
   {
-    return this.http.get<CityDropDown[]>(this.BaseURL + "city/getPickupAndDropOffCitiesForOutStationRoundTrip/" + contractID +"/"+packageID);
+    return this.http.get<CityDropDown[]>(this.BaseURL + "city/getPickupAndDropOffCitiesForOutStationRoundTrip/" + contractID +"/"+packageID +"/"+Prefix);
   }
 
-  GetVehicleBasedOnContractID(contractID: any,PackageID:number): Observable<VehicleVehicleCategoryDropDown[]>
+  GetVehicleBasedOnContractID(contractID: any,PackageID:number,Prefix: string): Observable<VehicleVehicleCategoryDropDown[]>
   {
-    return this.http.get<VehicleVehicleCategoryDropDown[]>(this.BaseURL + "vehicle/getVehicleBasedOnContractID/" + contractID+"/"+PackageID);
+    return this.http.get<VehicleVehicleCategoryDropDown[]>(this.BaseURL + "vehicle/getVehicleBasedOnContractID/" + contractID+"/"+PackageID+"/"+Prefix);
   }
 
-GetVehicleBasedOnContractIDForLocalLumpsum(contractID: any,PackageID:number): Observable<VehicleVehicleCategoryDropDown[]> 
+GetVehicleBasedOnContractIDForLocalLumpsum(contractID: any,PackageID:number,Prefix: string): Observable<VehicleVehicleCategoryDropDown[]> 
 {
-  return this.http.get<VehicleVehicleCategoryDropDown[]>(this.BaseURL + "vehicle/getVehicleBasedOnContractIDForLocalLumpsum/" + contractID+"/"+PackageID);
+  return this.http.get<VehicleVehicleCategoryDropDown[]>(this.BaseURL + "vehicle/getVehicleBasedOnContractIDForLocalLumpsum/" + contractID+"/"+PackageID+"/"+Prefix);
 }
 
-GetVehicleBasedOnContractIDForLocalOnDemand(contractID: any,PackageID:number): Observable<VehicleVehicleCategoryDropDown[]> 
+GetVehicleBasedOnContractIDForLocalOnDemand(contractID: any,PackageID:number,Prefix: string): Observable<VehicleVehicleCategoryDropDown[]> 
 {
-  return this.http.get<VehicleVehicleCategoryDropDown[]>(this.BaseURL + "vehicle/getVehicleBasedOnContractIDForLocalOnDemand/" + contractID+"/"+PackageID);
+  return this.http.get<VehicleVehicleCategoryDropDown[]>(this.BaseURL + "vehicle/getVehicleBasedOnContractIDForLocalOnDemand/" + contractID+"/"+PackageID+"/"+Prefix);
 }
 
-GetVehicleBasedOnContractIDForLocalTransfer(contractID: any,PackageID:number): Observable<VehicleVehicleCategoryDropDown[]> 
+GetVehicleBasedOnContractIDForLocalTransfer(contractID: any,PackageID:number,Prefix: string ): Observable<VehicleVehicleCategoryDropDown[]> 
 {
-  return this.http.get<VehicleVehicleCategoryDropDown[]>(this.BaseURL + "vehicle/getVehicleBasedOnContractIDForLocalTransfer/" + contractID+"/"+PackageID);
+  return this.http.get<VehicleVehicleCategoryDropDown[]>(this.BaseURL + "vehicle/getVehicleBasedOnContractIDForLocalTransfer/" + contractID+"/"+PackageID+"/"+Prefix);
 }
 
-GetVehicleBasedOnContractIDForLongTermRental(contractID: any,PackageID:number): Observable<VehicleVehicleCategoryDropDown[]> 
+GetVehicleBasedOnContractIDForLongTermRental(contractID: any,PackageID:number,Prefix: string): Observable<VehicleVehicleCategoryDropDown[]> 
 {
-  return this.http.get<VehicleVehicleCategoryDropDown[]>(this.BaseURL + "vehicle/getVehicleBasedOnContractIDForLongTermRental/" + contractID+"/"+PackageID);
+  return this.http.get<VehicleVehicleCategoryDropDown[]>(this.BaseURL + "vehicle/getVehicleBasedOnContractIDForLongTermRental/" + contractID+"/"+PackageID+"/"+Prefix);
 }
 
-GetVehicleBasedOnContractIDForOutStationLumpsum(contractID: any,PackageID:number): Observable<VehicleVehicleCategoryDropDown[]> 
+GetVehicleBasedOnContractIDForOutStationLumpsum(contractID: any,PackageID:number,Prefix: string ): Observable<VehicleVehicleCategoryDropDown[]> 
 {
-  return this.http.get<VehicleVehicleCategoryDropDown[]>(this.BaseURL + "vehicle/getVehicleBasedOnContractIDForOutStationLumpsum/" + contractID+"/"+PackageID);
+  return this.http.get<VehicleVehicleCategoryDropDown[]>(this.BaseURL + "vehicle/getVehicleBasedOnContractIDForOutStationLumpsum/" + contractID+"/"+PackageID+"/"+Prefix);
 }
 
-GetVehicleBasedOnContractIDForOutStationOneWayTrip(contractID: any,PackageID:number): Observable<VehicleVehicleCategoryDropDown[]> 
+GetVehicleBasedOnContractIDForOutStationOneWayTrip(contractID: any,PackageID:number,Prefix: string): Observable<VehicleVehicleCategoryDropDown[]> 
 {
-  return this.http.get<VehicleVehicleCategoryDropDown[]>(this.BaseURL + "vehicle/getVehicleBasedOnContractIDForOutStationOneWayTrip/" + contractID+"/"+PackageID);
+  return this.http.get<VehicleVehicleCategoryDropDown[]>(this.BaseURL + "vehicle/getVehicleBasedOnContractIDForOutStationOneWayTrip/" + contractID+"/"+PackageID+"/"+Prefix);
 }
 
-GetVehicleBasedOnContractIDForOutStationRoundTrip(contractID: any,PackageID:number): Observable<VehicleVehicleCategoryDropDown[]> 
+GetVehicleBasedOnContractIDForOutStationRoundTrip(contractID: any,PackageID:number,Prefix: string): Observable<VehicleVehicleCategoryDropDown[]> 
 {
-  return this.http.get<VehicleVehicleCategoryDropDown[]>(this.BaseURL + "vehicle/getVehicleBasedOnContractIDForOutStationRoundTrip/" + contractID+"/"+PackageID);
+  return this.http.get<VehicleVehicleCategoryDropDown[]>(this.BaseURL + "vehicle/getVehicleBasedOnContractIDForOutStationRoundTrip/" + contractID+"/"+PackageID+"/"+Prefix);
 }
 
   GetDDLData(DLID: number): Observable<CityDropDown[]> {
@@ -1377,8 +1378,8 @@ getCustomerPerson(): Observable<CustomerPersonDropDown[]> {
   return this.http.get<CustomerPersonDropDown[]>(this.BaseURL + "CustomerPerson/ForDropDown");
 }
 
-GetCPForBooker(customerGroupID:number): Observable<CustomerPersonDropDown[]> {
-  return this.http.get<CustomerPersonDropDown[]>(this.BaseURL + "CustomerPerson/getCPForBooker/"+customerGroupID);
+GetCPForBooker(customerGroupID:number, prefix: string): Observable<CustomerPersonDropDown[]> {
+  return this.http.get<CustomerPersonDropDown[]>(this.BaseURL + "CustomerPerson/getCPForBooker/"+customerGroupID+"/"+prefix);
 }
 
 GetDriverInventoryForCpSearch(supplierID:number): Observable<DriverInventoryAssociationDropDown[]> {
@@ -1401,8 +1402,8 @@ GetDisputes(): Observable<DisputeTypeDropDown[]> {
   return this.http.get<DisputeTypeDropDown[]>(this.BaseURL + "dutySlipForBilling/DisputeTypeDropDown");
 }
 
-GetCPForPassenger(customerGroupID:number): Observable<CustomerPersonDropDown[]> {
-  return this.http.get<CustomerPersonDropDown[]>(this.BaseURL + "CustomerPerson/getCPForPassenger/"+customerGroupID);
+GetCPForPassenger(customerGroupID:number, prefix: string): Observable<CustomerPersonDropDown[]> {
+  return this.http.get<CustomerPersonDropDown[]>(this.BaseURL + "CustomerPerson/getCPForPassenger/"+customerGroupID+"/"+prefix);
 }
 
 GetCPForBookerInCPSearch(): Observable<CustomerPersonDropDown[]> {
@@ -1524,9 +1525,12 @@ getCustomerCategory(): Observable<CustomerCategoryDropDown[]>{
       this.http.get<OrganizationalEntityDropDown[]>(this.BaseURL + "organizationalEntity/ForHubDropDown"));
   }
 
-  GetLocation(): Observable<OrganizationalEntityDropDown[]>{
-    return this.cachedGet('GetLocation', () =>
-      this.http.get<OrganizationalEntityDropDown[]>(this.BaseURL + "organizationalEntity/ForLocationDropDown"));
+  GetLocation(Prefix: string = ''): Observable<OrganizationalEntityDropDown[]>{
+    const normalizedPrefix = (Prefix || '').trim();
+    // Prefix search must stay real-time; do not cache to avoid stale results.
+    return this.http.get<OrganizationalEntityDropDown[]>(
+      this.BaseURL + "organizationalEntity/ForLocationDropDown/" + encodeURIComponent(normalizedPrefix)
+    );
   }
 
   GetLocationBasedOnCity(CityID:number): Observable<OrganizationalEntityDropDown[]>{

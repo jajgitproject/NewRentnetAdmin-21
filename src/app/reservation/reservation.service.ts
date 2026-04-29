@@ -394,8 +394,11 @@ export class ReservationService
   GetResrvationGSTForCityID(customerID:number,cityID:number): Observable<any> {
     return this.httpClient.get(this.generalService.BaseURL + "customerConfigurationInvoicing/GetResrvationGSTForCityID/"+customerID +'/'+cityID);
   }
-  GetResrvationGSTDetails(customerID:number): Observable<CustomerConfigurationInvoicing[]> {
-    return this.httpClient.get<CustomerConfigurationInvoicing[]>(this.generalService.BaseURL + "customerConfigurationInvoicing/GetResrvationGSTDetails/"+customerID);
+  // GetResrvationGSTDetails(customerID:number): Observable<CustomerConfigurationInvoicing[]> {
+  //   return this.httpClient.get<CustomerConfigurationInvoicing[]>(this.generalService.BaseURL + "customerConfigurationInvoicing/GetResrvationGSTDetails/"+customerID);
+  // }
+  GetResrvationGSTDetails(customerID:number,Prefix:string): Observable<CustomerConfigurationInvoicing[]> {
+    return this.httpClient.get<CustomerConfigurationInvoicing[]>(this.generalService.BaseURL + "customerConfigurationInvoicing/GetResrvationGSTDetails/"+customerID+'/'+Prefix);
   }
   GetIsGSTMandatoryWithResrvation(customerGroupID:number): Observable<any> {
     return this.httpClient.get<any>(this.generalService.BaseURL + "customerGroup/GetIsGSTMandatoryWithResrvation/"+customerGroupID);
