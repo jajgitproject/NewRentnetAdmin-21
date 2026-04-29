@@ -1378,8 +1378,8 @@ getCustomerPerson(): Observable<CustomerPersonDropDown[]> {
   return this.http.get<CustomerPersonDropDown[]>(this.BaseURL + "CustomerPerson/ForDropDown");
 }
 
-GetCPForBooker(customerGroupID:number, prefix: string): Observable<CustomerPersonDropDown[]> {
-  return this.http.get<CustomerPersonDropDown[]>(this.BaseURL + "CustomerPerson/getCPForBooker/"+customerGroupID+"/"+prefix);
+GetCPForBooker(customerGroupID:number): Observable<CustomerPersonDropDown[]> {
+  return this.http.get<CustomerPersonDropDown[]>(this.BaseURL + "CustomerPerson/getCPForBooker/"+customerGroupID);
 }
 
 GetDriverInventoryForCpSearch(supplierID:number): Observable<DriverInventoryAssociationDropDown[]> {
