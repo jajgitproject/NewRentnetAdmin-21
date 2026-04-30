@@ -406,8 +406,54 @@ mat-option {
 
 .custom-autocomplete-panel {
   width: max-content !important;
-  max-width: 90vw;
+  max-width: min(92vw, calc(100vw - 24px)) !important;
+  box-sizing: border-box;
   overflow-x: auto;
+}
+
+.custom-autocomplete-panel .mat-mdc-option .mdc-list-item__primary-text {
+  white-space: nowrap !important;
+}
+
+/* All Material autocomplete panels (except Google Places fixed-width): width follows longest option. */
+.mat-mdc-autocomplete-panel:not(.google-autocomplete-panel) {
+  width: max-content !important;
+  max-width: min(92vw, calc(100vw - 24px)) !important;
+  box-sizing: border-box;
+  overflow-x: auto;
+}
+
+.mat-mdc-autocomplete-panel:not(.google-autocomplete-panel) .mat-mdc-option .mdc-list-item__primary-text {
+  white-space: nowrap !important;
+}
+
+/* Material select panels: grow with longest option; cap to viewport. */
+.mat-mdc-select-panel {
+  width: max-content !important;
+  max-width: min(92vw, calc(100vw - 24px)) !important;
+  box-sizing: border-box;
+  overflow-x: auto;
+}
+
+.mat-mdc-select-panel .mat-mdc-option .mdc-list-item__primary-text {
+  white-space: nowrap !important;
+}
+
+/*
+ * Widen the CDK overlay *pane* (not just the inner panel). Otherwise Material
+ * sets pane width = trigger width and long options clip — Control Panel avoids
+ * this on mat-select via [panelWidth]="null"; autocompletes need pane-level sizing.
+ */
+.cdk-overlay-container .cdk-overlay-pane:has(.mat-mdc-autocomplete-panel:not(.google-autocomplete-panel)) {
+  width: max-content !important;
+  max-width: min(92vw, calc(100vw - 24px)) !important;
+  box-sizing: border-box;
+}
+
+.cdk-overlay-container .cdk-overlay-pane:has(.mat-mdc-select-panel) {
+  width: max-content !important;
+  max-width: min(92vw, calc(100vw - 24px)) !important;
+  box-sizing: border-box;
 }
 
 /* ---------------------------------------------------------------------------

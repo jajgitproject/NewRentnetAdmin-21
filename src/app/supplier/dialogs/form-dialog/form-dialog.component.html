@@ -21,7 +21,9 @@
           <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
             <mat-label>Supplier Type</mat-label>
             <input required type="text" matInput [matAutocomplete]="auto4" formControlName="supplierType" />
-            <mat-autocomplete #auto4="matAutocomplete" (optionSelected)="onSupplierType($event.option.value)">
+            <mat-autocomplete #auto4="matAutocomplete" panelWidth="max-content"
+              panelClass="supplier-type-autocomplete-panel"
+              (optionSelected)="onSupplierType($event.option.value)">
               <mat-option *ngFor="let options of filteredSupplierTypeOptions | async" [value]="options.supplierType"
                 (click)="getSupplierTypeID(options.supplierTypeID)">
                 {{ options.supplierType }}
@@ -54,7 +56,8 @@
             <mat-label>Country</mat-label>
             <input required type="text" matInput [matAutocomplete]="auto1" formControlName="country"
               (keyup)="onCountryInputChange($event)" />
-            <mat-autocomplete #auto1="matAutocomplete" (optionSelected)="onCountrySelected($event.option.value)">
+            <mat-autocomplete #auto1="matAutocomplete" panelWidth="max-content"
+              (optionSelected)="onCountrySelected($event.option.value)">
               <mat-option *ngFor="let options of filteredCountryOptions | async" [value]="options.geoPointName"
                 (click)="getCountryID(options.geoPointID)">
                 {{ options.geoPointName }}
@@ -73,7 +76,8 @@
             <mat-label>State</mat-label>
             <input required type="text" matInput [matAutocomplete]="auto2" formControlName="stateName"
               (keyup)="onStateInputChange($event)" />
-            <mat-autocomplete #auto2="matAutocomplete" (optionSelected)="onStateSelected($event.option.value)">
+            <mat-autocomplete #auto2="matAutocomplete" panelWidth="max-content"
+              (optionSelected)="onStateSelected($event.option.value)">
               <mat-option *ngFor="let options of filteredStateOptions | async" [value]="options.geoPointName"
                 (click)="getStateID(options.geoPointID)">
                 {{ options.geoPointName }}
@@ -93,7 +97,8 @@
           <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
             <mat-label>City</mat-label>
             <input required type="text" matInput [matAutocomplete]="auto3" formControlName="city" />
-            <mat-autocomplete #auto3="matAutocomplete" (optionSelected)="onCitySelected($event.option.value)">
+            <mat-autocomplete #auto3="matAutocomplete" panelWidth="max-content"
+              (optionSelected)="onCitySelected($event.option.value)">
               <mat-option *ngFor="let options of filteredCityOptions | async" [value]="options.geoPointName"
                 (click)="getCityID(options.geoPointID)">
                 {{ options.geoPointName }}
@@ -196,7 +201,8 @@
             <mat-label>Company</mat-label>
             <input type="text" matInput [matAutocomplete]="auto10"
               formControlName="ifCreatedFromCompanyReferenceCompany" />
-            <mat-autocomplete #auto10="matAutocomplete" (optionSelected)="onCompanySelected($event.option.value)">
+            <mat-autocomplete #auto10="matAutocomplete" panelWidth="max-content"
+              (optionSelected)="onCompanySelected($event.option.value)">
               <mat-option *ngFor="let options of filteredCompanyOptions | async"
                 [value]="options.organizationalEntityName">
                 {{ options.organizationalEntityName }}
