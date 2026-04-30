@@ -176,8 +176,8 @@ export class FormDialogComponent implements OnInit {
       this.advanceTableForm.controls["driverName"].disable();
     }
     if (this.RedirectingFrom === "Inventory") {
-      // this.InitDriver();
-      //this.advanceTableForm.patchValue({inventoryName:this.Regno + "-" + this.Vehicle + "-" + this.VehicleCategory});
+       this.InitDriver();
+      this.advanceTableForm.patchValue({inventoryName:this.Regno + "-" + this.Vehicle + "-" + this.VehicleCategory});
       if (this.action === 'edit') {
         this.advanceTableForm.patchValue({ driverName: this.advanceTable.driverName + "-" + this.advanceTable.driverPhone + "-" + this.Regno + "-" + this.advanceTable.supplier });
       }
