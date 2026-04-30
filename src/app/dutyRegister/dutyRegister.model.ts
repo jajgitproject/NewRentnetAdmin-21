@@ -109,6 +109,7 @@ export class DutyRegisterModel {
   salesPerson: string;
   physicalDutySlipReceived:boolean;
   activationStatus: boolean;
+  allotmentStatus:string;
 }
 
 

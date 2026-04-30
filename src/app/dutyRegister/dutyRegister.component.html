@@ -132,6 +132,11 @@
                                             <mat-cell *matCellDef="let row" (contextmenu)="onContextMenu($event, row)">
                                                 {{row.modeOfPayment ? row.modeOfPayment : 'N/A'}}</mat-cell>
                                         </ng-container>
+                                            <ng-container matColumnDef="AllotmentStatus">
+                                            <mat-header-cell *matHeaderCellDef mat-sort-header>Allotment Status</mat-header-cell>
+                                            <mat-cell *matCellDef="let row" (contextmenu)="onContextMenu($event, row)">
+                                                {{row.allotmentStatus ? row.allotmentStatus : 'N/A'}}</mat-cell>
+                                        </ng-container>
 
                                         <ng-container matColumnDef="CancellationDateTime">
                                             <mat-header-cell *matHeaderCellDef mat-sort-header>Cancellation Date & Time</mat-header-cell>

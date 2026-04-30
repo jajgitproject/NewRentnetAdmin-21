@@ -49,6 +49,8 @@ export class DutyRegisterComponent implements OnInit {
     // 'BookingType',
     'PickupDate',
     'ModeOfPayment',
+    'AllotmentStatus',
+    'ReservationStatus',
     'CancellationDateTime',
     'Importance',
     'PassengerMobile',
@@ -120,7 +122,6 @@ export class DutyRegisterComponent implements OnInit {
     'InvoiceSummaryDate',
     'DutyExpenseChargeTotal',
     'DutyExpenseNonChargeTotal',
-    'ReservationStatus',
     'SalesPerson',
     'PhysicalDutySlipReceived',
     'LoggedInUser'
