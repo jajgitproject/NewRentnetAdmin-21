@@ -71,7 +71,7 @@
             <div class="col-xl-2 col-lg-2 col-md-2 col-sm-12 mb-2">
               <mat-form-field class="example-full-width cp-quick-search-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
                 <mat-label>Booking Status</mat-label>
-                <mat-select panelClass="control-panel-select-panel" formControlName="reservationStatus">
+                <mat-select panelClass="control-panel-select-panel" [panelWidth]="null" formControlName="reservationStatus">
                   <mat-option value="All">All</mat-option>
                   <mat-option value="Complete">Complete</mat-option>
                   <mat-option value="Incomplete">Incomplete</mat-option>
@@ -87,7 +87,7 @@
             <div class="col-xl-2 col-lg-2 col-md-2 col-sm-12 mb-2">
               <mat-form-field class="example-full-width cp-quick-search-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
                 <mat-label>Allotment Status</mat-label>
-                <mat-select panelClass="control-panel-select-panel" formControlName="allotmentStatus">
+                <mat-select panelClass="control-panel-select-panel" [panelWidth]="null" formControlName="allotmentStatus">
                   <mat-option value="All">All</mat-option>
                   <mat-option value="Unalloted">Unalloted</mat-option>
                   <mat-option value="Unalloted and Delayed">Unalloted and Delayed</mat-option>
@@ -101,7 +101,7 @@
             <div class="col-xl-2 col-lg-2 col-md-2 col-sm-12 mb-2">
               <mat-form-field class="example-full-width cp-quick-search-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
                 <mat-label>Dispatch Status</mat-label>
-                <mat-select panelClass="control-panel-select-panel" formControlName="tripStatus">
+                <mat-select panelClass="control-panel-select-panel" [panelWidth]="null" formControlName="tripStatus">
                   <mat-option value="All">All</mat-option>
                   <mat-option value="Not Dispatched">Not Dispatched</mat-option>
                   <mat-option value="Not Dispatched And Delayed">Not Dispatched And Delayed</mat-option>
@@ -179,7 +179,7 @@
             <div class="col-xl-2 col-lg-2 col-md-2 col-sm-12 mb-2">
               <mat-form-field class="example-full-width cp-quick-search-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
                 <mat-label>Gender</mat-label>
-                <mat-select panelClass="control-panel-select-panel" formControlName="gender">
+                <mat-select panelClass="control-panel-select-panel" [panelWidth]="null" formControlName="gender">
                   <mat-option value="All">All</mat-option>
                   <mat-option value="Male">Male</mat-option>
                   <mat-option value="Female">Female</mat-option>
@@ -194,7 +194,7 @@
             <div class="col-xl-2 col-lg-2 col-md-2 col-sm-12 mb-2">
               <mat-form-field class="example-full-width cp-quick-search-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
                 <mat-label>Reservation Type</mat-label>
-                <mat-select panelClass="control-panel-select-panel" formControlName="reservationType">
+                <mat-select panelClass="control-panel-select-panel" [panelWidth]="null" formControlName="reservationType">
                   <mat-option value="All">All</mat-option>
                   <mat-option value="Event">Event</mat-option>
                   <mat-option value="Delegation">Delegation</mat-option>
@@ -206,7 +206,7 @@
             <div class="col-xl-2 col-lg-2 col-md-2 col-sm-12 mb-2">
               <mat-form-field class="example-full-width cp-quick-search-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
                 <mat-label>Delays</mat-label>
-                <mat-select panelClass="control-panel-select-panel" formControlName="delays">
+                <mat-select panelClass="control-panel-select-panel" [panelWidth]="null" formControlName="delays">
                   <mat-option value="All">All</mat-option>
                   <mat-option value="Delay in Car Allotment">Delay in Car Allotment</mat-option>
                   <mat-option value="Delay in Dispatch">Delay in Dispatch</mat-option>
@@ -219,7 +219,7 @@
             <div class="col-xl-2 col-lg-2 col-md-2 col-sm-12 mb-2">
               <mat-form-field class="example-full-width cp-quick-search-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
                 <mat-label>Security</mat-label>
-                <mat-select panelClass="control-panel-select-panel" formControlName="security">
+                <mat-select panelClass="control-panel-select-panel" [panelWidth]="null" formControlName="security">
                   <mat-option value="All">All</mat-option>
                   <mat-option value="Car Not Moving">Car Not Moving</mat-option>
                   <mat-option value="GPS Location Missing">GPS Location Missing</mat-option>
@@ -230,7 +230,7 @@
             <div class="col-xl-2 col-lg-2 col-md-2 col-sm-12 mb-2">
               <mat-form-field class="example-full-width cp-quick-search-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
                 <mat-label>Guest Type</mat-label>
-                <mat-select panelClass="control-panel-select-panel" formControlName="guestType">
+                <mat-select panelClass="control-panel-select-panel" [panelWidth]="null" formControlName="guestType">
                   <mat-option value="All">All</mat-option>
                   <mat-option value="General">Normal</mat-option>
                   <mat-option value="VIP">VIP</mat-option>
@@ -244,7 +244,7 @@
             <div class="col-xl-2 col-lg-2 col-md-2 col-sm-12 mb-2">
               <mat-form-field class="example-full-width cp-quick-search-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
                 <mat-label>Guest Type</mat-label>
-                <mat-select panelClass="control-panel-select-panel" formControlName="guestType">
+                <mat-select panelClass="control-panel-select-panel" [panelWidth]="null" formControlName="guestType">
                   <mat-option value="All">All</mat-option>
                   <mat-option value="CXO">CXO</mat-option>
                   <mat-option value="General">Normal</mat-option>
@@ -270,7 +270,7 @@
             <div class="col-xl-2 col-lg-2 col-md-2 col-sm-12 mb-2">
               <mat-form-field class="example-full-width cp-quick-search-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
                 <mat-label>Quality Check Status</mat-label>
-                <mat-select panelClass="control-panel-select-panel" formControlName="qualityStatus">
+                <mat-select panelClass="control-panel-select-panel" [panelWidth]="null" formControlName="qualityStatus">
                   <mat-option value="All">All</mat-option>
                   <mat-option value="Quality Check Not Done">Quality Check Not Done</mat-option>
                   <mat-option value="Quality Check Done">Quality Check Done</mat-option>
@@ -282,7 +282,7 @@
             <div class="col-xl-2 col-lg-2 col-md-2 col-sm-12 mb-2">
               <mat-form-field class="example-full-width cp-quick-search-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
                 <mat-label>Ownership</mat-label>
-                <mat-select panelClass="control-panel-select-panel" formControlName="ownership">
+                <mat-select panelClass="control-panel-select-panel" [panelWidth]="null" formControlName="ownership">
                   <mat-option value="All">All</mat-option>
                   <mat-option value="Owned">Owned</mat-option>
                   <mat-option value="Supplier">Supplier</mat-option>
@@ -293,7 +293,7 @@
             <div class="col-xl-2 col-lg-2 col-md-2 col-sm-12 mb-2">
               <mat-form-field class="example-full-width cp-quick-search-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
                 <mat-label>SMS/WA Status</mat-label>
-                <mat-select panelClass="control-panel-select-panel" formControlName="messageType">
+                <mat-select panelClass="control-panel-select-panel" [panelWidth]="null" formControlName="messageType">
                   <mat-option value="All">All</mat-option>
                   <mat-option value="Email">Email</mat-option>
                   <mat-option value="SMS">SMS</mat-option>
@@ -305,7 +305,7 @@
             <div class="col-xl-2 col-lg-2 col-md-2 col-sm-12 mb-2">
               <mat-form-field class="example-full-width cp-quick-search-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
                 <mat-label>Billing Status</mat-label>
-                <mat-select panelClass="control-panel-select-panel" formControlName="billingStatus">
+                <mat-select panelClass="control-panel-select-panel" [panelWidth]="null" formControlName="billingStatus">
                   <mat-option value="All">All</mat-option>
                   <mat-option value="Verified">Verified</mat-option>
                   <mat-option value="Ready To Bill">Ready To Bill</mat-option>
@@ -318,7 +318,7 @@
             <div class="col-xl-2 col-lg-2 col-md-2 col-sm-12 mb-2">
               <mat-form-field class="example-full-width cp-quick-search-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
                 <mat-label>Reservation Type</mat-label>
-                <mat-select panelClass="control-panel-select-panel" formControlName="reservationType">
+                <mat-select panelClass="control-panel-select-panel" [panelWidth]="null" formControlName="reservationType">
                   <mat-option value="All">All</mat-option>
                   <mat-option value="Event">Event</mat-option>
                   <mat-option value="Delegation">Delegation</mat-option>
@@ -363,7 +363,7 @@
             <div class="col-xl-2 col-lg-2 col-md-2 col-sm-12 mb-2">
               <mat-form-field class="example-full-width cp-quick-search-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
                 <mat-label>Trip Type</mat-label>
-                <mat-select panelClass="control-panel-select-panel" formControlName="tripType">
+                <mat-select panelClass="control-panel-select-panel" [panelWidth]="null" formControlName="tripType">
                   <mat-option value="Airport Pickup">Airport Pickup</mat-option>
                   <mat-option value="Airport Drop">Airport Drop</mat-option>
                   <mat-option value="Local">Local</mat-option>
@@ -448,7 +448,7 @@
             <div class="col-xl-3 col-lg-3 col-md-3 col-sm-6 mb-2">
               <mat-form-field class="example-full-width cp-advance-search-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
                 <mat-label>Reservation Status</mat-label>
-                <mat-select panelClass="control-panel-select-panel" formControlName="reservationStatus">
+                <mat-select panelClass="control-panel-select-panel" [panelWidth]="null" formControlName="reservationStatus">
                   <mat-option value="All">All</mat-option>
                   <mat-option value="Confirmed">Booking Confirmed</mat-option>
                   <mat-option value="Approved">Approved</mat-option>
@@ -461,7 +461,7 @@
             <div class="col-xl-3 col-lg-3 col-md-3 col-sm-6 mb-2">
               <mat-form-field class="example-full-width cp-advance-search-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
                 <mat-label>Allotment Status</mat-label>
-                <mat-select panelClass="control-panel-select-panel" formControlName="allotmentStatus">
+                <mat-select panelClass="control-panel-select-panel" [panelWidth]="null" formControlName="allotmentStatus">
                   <mat-option value="All">All</mat-option>
                   <mat-option value="Unalloted">Unalloted</mat-option>
                   <mat-option value="Soft">Alloted(Soft)</mat-option>
@@ -472,7 +472,7 @@
             <div class="col-xl-3 col-lg-3 col-md-3 col-sm-6 mb-2">
               <mat-form-field class="example-full-width cp-advance-search-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
                 <mat-label>Trip Status</mat-label>
-                <mat-select panelClass="control-panel-select-panel" formControlName="tripStatus">
+                <mat-select panelClass="control-panel-select-panel" [panelWidth]="null" formControlName="tripStatus">
                   <mat-option value="All">All</mat-option>
                   <mat-option value="Not Dispatched">Not Dispatched</mat-option>
                   <mat-option value="Dispatched">Dispatched</mat-option>
@@ -491,7 +491,7 @@
             <div class="col-xl-3 col-lg-3 col-md-3 col-sm-6 mb-2">
               <mat-form-field class="example-full-width cp-advance-search-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
                 <mat-label>Quality Check Status</mat-label>
-                <mat-select panelClass="control-panel-select-panel" formControlName="qualityStatus">
+                <mat-select panelClass="control-panel-select-panel" [panelWidth]="null" formControlName="qualityStatus">
                   <mat-option value="All">All</mat-option>
                   <mat-option value="Quality Check Not Done">Quality Check Not Done</mat-option>
                   <mat-option value="Quality Check Done">Quality Check Done</mat-option>
@@ -506,7 +506,7 @@
             <div class="col-xl-3 col-lg-3 col-md-3 col-sm-6 mb-2">
               <mat-form-field class="example-full-width cp-advance-search-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
                 <mat-label>Reservation Type</mat-label>
-                <mat-select panelClass="control-panel-select-panel" formControlName="reservationType">
+                <mat-select panelClass="control-panel-select-panel" [panelWidth]="null" formControlName="reservationType">
                   <mat-option value="All">All</mat-option>
                   <mat-option value="Event">Event</mat-option>
                   <mat-option value="Delegation">Delegation</mat-option>
@@ -518,7 +518,7 @@
             <div class="col-xl-3 col-lg-3 col-md-3 col-sm-6 mb-2">
               <mat-form-field class="example-full-width cp-advance-search-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
                 <mat-label>Delays</mat-label>
-                <mat-select panelClass="control-panel-select-panel" formControlName="delays">
+                <mat-select panelClass="control-panel-select-panel" [panelWidth]="null" formControlName="delays">
                   <mat-option value="All">All</mat-option>
                   <mat-option value="Delay in Car Allotment">Delay in Car Allotment</mat-option>
                   <mat-option value="Delay in Dispatch">Delay in Dispatch</mat-option>
@@ -531,7 +531,7 @@
             <div class="col-xl-3 col-lg-3 col-md-3 col-sm-6 mb-2">
               <mat-form-field class="example-full-width cp-advance-search-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
                 <mat-label>Security</mat-label>
-                <mat-select panelClass="control-panel-select-panel" formControlName="security">
+                <mat-select panelClass="control-panel-select-panel" [panelWidth]="null" formControlName="security">
                   <mat-option value="All">All</mat-option>
                   <mat-option value="Car Not Moving">Car Not Moving</mat-option>
                   <mat-option value="GPS Location Missing">GPS Location Missing</mat-option>
@@ -542,7 +542,7 @@
             <div class="col-xl-3 col-lg-3 col-md-3 col-sm-6 mb-2">
               <mat-form-field class="example-full-width cp-advance-search-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
                 <mat-label>Guest Type</mat-label>
-                <mat-select panelClass="control-panel-select-panel" formControlName="guestType">
+                <mat-select panelClass="control-panel-select-panel" [panelWidth]="null" formControlName="guestType">
                   <mat-option value="All">All</mat-option>
                   <mat-option value="General">Normal</mat-option>
                   <mat-option value="VIP">VIP</mat-option>
@@ -923,7 +923,7 @@
                         <span class="booking-category-static-label">Booking Category ({{totalData}})</span>
                         <mat-form-field class="example-full-width mr-4 booking-category-field cp-booking-category-field" appearance="fill"
                           floatLabel="auto" subscriptSizing="dynamic" style="max-width: 240px;margin-left: 5px;">
-                          <mat-select panelClass="control-panel-select-panel" [(ngModel)]="bookingCategory" (selectionChange)="onRadioChange()">
+                          <mat-select panelClass="control-panel-select-panel" [panelWidth]="null" [(ngModel)]="bookingCategory" (selectionChange)="onRadioChange()">
                             <mat-option value="complete">Complete</mat-option>
                             <mat-option value="incomplete">Incomplete</mat-option>
                             <mat-option value="all">Total Booking</mat-option>
@@ -3043,7 +3043,7 @@
             <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
               <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
                 <mat-label>Reservation Status</mat-label>
-                <mat-select panelClass="control-panel-select-panel" formControlName="reservationStatus">
+                <mat-select panelClass="control-panel-select-panel" [panelWidth]="null" formControlName="reservationStatus">
                   <mat-option value="All">All</mat-option>
                   <mat-option value="Confirmed">Booking Confirmed</mat-option>
                   <mat-option value="Approved">Approved</mat-option>
@@ -3056,7 +3056,7 @@
             <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
               <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
                 <mat-label>Allotment Status</mat-label>
-                <mat-select panelClass="control-panel-select-panel" formControlName="allotmentStatus">
+                <mat-select panelClass="control-panel-select-panel" [panelWidth]="null" formControlName="allotmentStatus">
                   <mat-option value="Unalloted">Unalloted</mat-option>
                   <mat-option value="Soft">Alloted(Soft)</mat-option>
                   <mat-option value="Hard">Alloted(Hard)</mat-option>
@@ -3069,7 +3069,7 @@
             <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
               <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
                 <mat-label>Trip Status</mat-label>
-                <mat-select panelClass="control-panel-select-panel" formControlName="tripStatus">
+                <mat-select panelClass="control-panel-select-panel" [panelWidth]="null" formControlName="tripStatus">
                   <mat-option value="All">All</mat-option>
                   <mat-option value="Not Dispatched">Not Dispatched</mat-option>
                   <mat-option value="Dispatched">Dispatched</mat-option>
@@ -3088,7 +3088,7 @@
             <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
               <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
                 <mat-label>Quality Check Status</mat-label>
-                <mat-select panelClass="control-panel-select-panel" formControlName="qualityStatus">
+                <mat-select panelClass="control-panel-select-panel" [panelWidth]="null" formControlName="qualityStatus">
                   <mat-option value="All">All</mat-option>
                   <mat-option value="Quality Check Not Done">Quality Check Not Done</mat-option>
                   <mat-option value="Quality Check Done">Quality Check Done</mat-option>
@@ -3103,7 +3103,7 @@
             <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
               <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
                 <mat-label>Reservation Type</mat-label>
-                <mat-select panelClass="control-panel-select-panel" formControlName="reservationType">
+                <mat-select panelClass="control-panel-select-panel" [panelWidth]="null" formControlName="reservationType">
                   <mat-option value="All">All</mat-option>
                   <mat-option value="Event">Event</mat-option>
                   <mat-option value="Delegation">Delegation</mat-option>
@@ -3115,7 +3115,7 @@
             <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
               <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
                 <mat-label>Delays</mat-label>
-                <mat-select panelClass="control-panel-select-panel" formControlName="delays">
+                <mat-select panelClass="control-panel-select-panel" [panelWidth]="null" formControlName="delays">
                   <mat-option value="All">All</mat-option>
                   <mat-option value="Delay in Car Allotment">Delay in Car Allotment</mat-option>
                   <mat-option value="Delay in Dispatch">Delay in Dispatch</mat-option>
@@ -3131,7 +3131,7 @@
             <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
               <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
                 <mat-label>Security</mat-label>
-                <mat-select panelClass="control-panel-select-panel" formControlName="security">
+                <mat-select panelClass="control-panel-select-panel" [panelWidth]="null" formControlName="security">
                   <mat-option value="All">All</mat-option>
                   <mat-option value="Car Not Moving">Car Not Moving</mat-option>
                   <mat-option value="GPS Location Missing">GPS Location Missing</mat-option>
@@ -3142,7 +3142,7 @@
             <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
               <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
                 <mat-label>Guest Type</mat-label>
-                <mat-select panelClass="control-panel-select-panel" formControlName="guestType">
+                <mat-select panelClass="control-panel-select-panel" [panelWidth]="null" formControlName="guestType">
                   <mat-option value="All">All</mat-option>
                   <mat-option value="General">Normal</mat-option>
                   <mat-option value="VIP">VIP</mat-option>
@@ -3156,7 +3156,7 @@
             <!-- <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
               <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
                 <mat-label>Disputes</mat-label>
-                <mat-select panelClass="control-panel-select-panel" formControlName="disputes">
+                <mat-select panelClass="control-panel-select-panel" [panelWidth]="null" formControlName="disputes">
                   <mat-option value="Denied By Vendor">Denied By Vendor</mat-option>
                   <mat-option value="Traveller Disputes">Traveller Disputes</mat-option>
                   <mat-option value="Driver Disputes">Driver Disputes</mat-option>

@@ -3,10 +3,17 @@
 // The list of file replacements can be found in `angular.json`.
 
 export const environment = {
-  production: false,
-  apiUrl: 'https://uatapi.ecoserp.in/',
-  BaseURL: 'https://uatapi.ecoserp.in/',
-  ImageURL: 'https://uatapi.ecoserp.in/',
+   production: false,
+  //  apiUrl: 'https://uatapi.ecoserp.in/',
+  //  BaseURL: 'https://uatapi.ecoserp.in/',
+  //  ImageURL: 'https://uatapi.ecoserp.in/',
+  //  FormURL: 'http://localhost:4200/#',
+  //  UnlockEmployeeUrl: 'https://uatconnect.ecoserp.in/',
+  //  googleMapsApiKey: 'AIzaSyAFoLcbOuZfbGJGCdlazGXZbOCYr8dW76c',
+//UAT
+  apiUrl: 'https://localhost:44368/',
+  BaseURL: 'https://localhost:44368/',
+  ImageURL: 'https://localhost:44368/',
   FormURL: 'http://localhost:4200/#',
   UnlockEmployeeUrl: 'https://uatconnect.ecoserp.in/',
   googleMapsApiKey: 'AIzaSyAFoLcbOuZfbGJGCdlazGXZbOCYr8dW76c',
