@@ -97,9 +97,9 @@ export class CustomerIntegrationMappingComponent implements OnInit {
     }
     private _filterCustomer(value: string): any {
       const filterValue = value.toLowerCase();
-      if (filterValue.length < 3) {
-        return [];
-      }
+      // if (filterValue.length < 3) {
+      //   return [];
+      // }
       return this.CustomerList.filter(
         customer =>
         {
@@ -144,15 +144,6 @@ shouldShowDeleteButton(item: any): boolean {
   return item.activationStatus !== false; // Only show delete button if activationStatus is not false (not deleted)
 }
 
-onSearchClick() {
-  if (!this.selectedFilter || this.selectedFilter === 'search') {
-    this.selectedFilter = 'name';
-  }
-
-  this.SearchCustomer = this.searchTerm; // 🔥 MOST IMPORTANT LINE
-
-  this.loadData(); // exact match
-}
   public Filter()
   {
     this.PageNumber = 0;
@@ -164,11 +155,6 @@ onSearchClick() {
     {
       this.loadData();
     }
-  }
-
-  onSearchTermChange(value: string) {
-    this.searchTerm = value ?? '';
-    this.searchTerm$.next(this.searchTerm);
   }
   
    public loadData() 
