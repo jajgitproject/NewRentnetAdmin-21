@@ -35,7 +35,7 @@
                                     <ng-container *ngTemplateOutlet="dutyRegisterSearchFields"></ng-container>
                                 </div>
 
-                                <div class="duty-register-inline-search-actions">
+                                <div class="duty-register-inline-search-actions quick-search-actions">
                                     <button mat-raised-button color="primary" class="duty-register-search-button" (click)="SearchData()">
                                         Search
                                     </button>
@@ -632,10 +632,11 @@
     </div>
 </section>
 <ng-template #dutyRegisterSearchFields>
+                <div class="duty-register-search quick-search-panel">
                 <div class="row">
                     <!-- <div class="col-xl-3 col-lg-3 col-md-6 col-sm-12 mb-2"> -->
                     <div class="col mb-2" style="flex: 0 0 20%; max-width: 20%;">
-                        <mat-form-field appearance="outline" floatLabel="always" class="example-full-width">
+                        <mat-form-field class="example-full-width cp-quick-search-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
                             <mat-label>Customer Group</mat-label>
                             <input type="text" matInput [formControl]="SearchCustomerGroup"  [matAutocomplete]="auto">
                             <mat-autocomplete #auto="matAutocomplete">
@@ -647,7 +648,7 @@
                     </div>
                     
                     <div class="col mb-2" style="flex: 0 0 20%; max-width: 20%;">
-                        <mat-form-field appearance="outline" floatLabel="always" class="example-full-width">
+                        <mat-form-field class="example-full-width cp-quick-search-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
                             <mat-label>Client Name</mat-label>
                             <input type="text" matInput [formControl]="SearchCustomerPerson" [matAutocomplete]="auto1">
                             <mat-autocomplete #auto1="matAutocomplete">
@@ -659,7 +660,7 @@
                     </div>
 
                     <div class="col mb-2" style="flex: 0 0 20%; max-width: 20%;">
-                        <mat-form-field appearance="outline" floatLabel="always" class="example-full-width">
+                        <mat-form-field class="example-full-width cp-quick-search-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
                             <mat-label>Duty Type</mat-label>
                             <input type="text" matInput [formControl]="SearchDutyType" [matAutocomplete]="auto2">
                             <mat-autocomplete #auto2="matAutocomplete">
@@ -671,7 +672,7 @@
                     </div>
 
                     <div class="col mb-2" style="flex: 0 0 20%; max-width: 20%;">
-                        <mat-form-field appearance="outline" floatLabel="always" class="example-full-width">
+                        <mat-form-field class="example-full-width cp-quick-search-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
                             <mat-label>Feedback Date</mat-label>
                             <input type="text" matInput [matDatepicker]="feedbackDate" [(ngModel)]="SearchFeedbackDate">
                             <mat-datepicker-toggle matSuffix [for]="feedbackDate"></mat-datepicker-toggle>
@@ -680,7 +681,7 @@
                     </div>
 
                     <div class="col mb-2" style="flex: 0 0 20%; max-width: 20%;">
-                        <mat-form-field appearance="outline" floatLabel="always" class="example-full-width">
+                        <mat-form-field class="example-full-width cp-quick-search-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
                             <mat-label>Slip Receipt</mat-label>
                             <mat-select [(value)]="SearchSlipReceipt">
                                 <mat-option [value]=true>Yes</mat-option>
@@ -692,7 +693,7 @@
 
                 <div class="row">    
                     <div class="col mb-2" style="flex: 0 0 20%; max-width: 20%;">
-                        <mat-form-field appearance="outline" floatLabel="always" class="example-full-width">
+                        <mat-form-field class="example-full-width cp-quick-search-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
                             <mat-label>Closure Type</mat-label>
                             <mat-select [formControl]="SearchClosureType">
                                 <mat-option value="Dispatched">Dispatched</mat-option>
@@ -706,7 +707,7 @@
                     </div>
 
                     <div class="col mb-2" style="flex: 0 0 20%; max-width: 20%;">
-                        <mat-form-field appearance="outline" floatLabel="always" class="example-full-width">
+                        <mat-form-field class="example-full-width cp-quick-search-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
                             <mat-label>Dispatch Location</mat-label>
                             <input type="text" matInput [formControl]="SearchDispatchLocation" [matAutocomplete]="auto3">
                             <mat-autocomplete #auto3="matAutocomplete">
@@ -719,7 +720,7 @@
                     </div>
 
                     <div class="col mb-2" style="flex: 0 0 20%; max-width: 20%;">
-                        <mat-form-field appearance="outline" floatLabel="always" class="example-full-width">
+                        <mat-form-field class="example-full-width cp-quick-search-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
                             <mat-label>MOP</mat-label>
                             <input type="text" matInput [formControl]="SearchMOP" [matAutocomplete]="auto4">
                             <mat-autocomplete #auto4="matAutocomplete">
@@ -732,7 +733,7 @@
                     </div>
 
                     <div class="col mb-2" style="flex: 0 0 20%; max-width: 20%;">
-                        <mat-form-field appearance="outline" floatLabel="always" class="example-full-width">
+                        <mat-form-field class="example-full-width cp-quick-search-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
                             <mat-label>Vendor Type</mat-label>
                             <input type="text" matInput [formControl]="SearchSupplierType" [matAutocomplete]="auto5">
                             <mat-autocomplete #auto5="matAutocomplete">
@@ -745,7 +746,7 @@
                     </div>
 
                     <div class="col mb-2" style="flex: 0 0 20%; max-width: 20%;">
-                        <mat-form-field appearance="outline" floatLabel="always" class="example-full-width">
+                        <mat-form-field class="example-full-width cp-quick-search-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
                             <mat-label>Vendor</mat-label>
                             <input type="text" matInput [formControl]="SearchSupplier" [matAutocomplete]="auto6">
                             <mat-autocomplete #auto6="matAutocomplete">
@@ -759,7 +760,7 @@
 
                 <div class="row">
                     <div class="col mb-2" style="flex: 0 0 20%; max-width: 20%;">
-                        <mat-form-field appearance="outline" floatLabel="always" class="example-full-width">
+                        <mat-form-field class="example-full-width cp-quick-search-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
                             <mat-label>From Date</mat-label>
                             <input type="text" matInput [matDatepicker]="fromDate" [(ngModel)]="SearchFromDate">
                             <mat-datepicker-toggle matSuffix [for]="fromDate"></mat-datepicker-toggle>
@@ -768,7 +769,7 @@
                     </div>
                     
                     <div class="col mb-2" style="flex: 0 0 20%; max-width: 20%;">
-                        <mat-form-field appearance="outline" floatLabel="always" class="example-full-width">
+                        <mat-form-field class="example-full-width cp-quick-search-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
                             <mat-label>To Date</mat-label>
                             <input type="text" matInput [matDatepicker]="toDate" [(ngModel)]="SearchToDate">
                             <mat-datepicker-toggle matSuffix [for]="toDate"></mat-datepicker-toggle>
@@ -777,7 +778,7 @@
                     </div>                    
 
                     <div class="col mb-2" style="flex: 0 0 20%; max-width: 20%;">
-                        <mat-form-field appearance="outline" floatLabel="always" class="example-full-width">
+                        <mat-form-field class="example-full-width cp-quick-search-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
                             <mat-label>Sales Person</mat-label>
                             <input type="text" matInput [formControl]="SearchSalesPerson" [matAutocomplete]="auto7">
                             <mat-autocomplete #auto7="matAutocomplete">
@@ -789,7 +790,7 @@
                     </div>
 
                     <div class="col mb-2" style="flex: 0 0 20%; max-width: 20%;">
-                        <mat-form-field appearance="outline" floatLabel="always" class="example-full-width">
+                        <mat-form-field class="example-full-width cp-quick-search-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
                             <mat-label>Car Sent</mat-label>
                             <input type="text" matInput [formControl]="SearchCarSend" [matAutocomplete]="auto8">
                             <mat-autocomplete #auto8="matAutocomplete">
@@ -801,7 +802,7 @@
                     </div>
                     
                     <div class="col mb-2" style="flex: 0 0 20%; max-width: 20%;">
-                        <mat-form-field appearance="outline" floatLabel="always" class="example-full-width">
+                        <mat-form-field class="example-full-width cp-quick-search-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
                             <mat-label>Car Booked</mat-label>
                             <input type="text" matInput [formControl]="SearchCarBooked" [matAutocomplete]="auto9">
                             <mat-autocomplete #auto9="matAutocomplete">
@@ -815,7 +816,7 @@
 
                 <div class="row">
                     <div class="col mb-2" style="flex: 0 0 20%; max-width: 20%;">
-                        <mat-form-field appearance="outline" floatLabel="always" class="example-full-width">
+                        <mat-form-field class="example-full-width cp-quick-search-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
                             <mat-label>Customer Type</mat-label>
                             <input type="text" matInput [formControl]="SearchCustomerType" [matAutocomplete]="auto10">
                             <mat-autocomplete #auto10="matAutocomplete">
@@ -827,7 +828,7 @@
                     </div>
 
                     <div class="col mb-2" style="flex: 0 0 20%; max-width: 20%;">
-                        <mat-form-field appearance="outline" floatLabel="always" class="example-full-width">
+                        <mat-form-field class="example-full-width cp-quick-search-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
                             <mat-label>Customer Location</mat-label>
                             <input type="text" matInput [formControl]="SearchCustomerLocationName" [matAutocomplete]="auto11">
                             <mat-autocomplete #auto11="matAutocomplete">
@@ -839,7 +840,7 @@
                     </div>
 
                     <div class="col mb-2" style="flex: 0 0 20%; max-width: 20%;">
-                        <mat-form-field appearance="outline" floatLabel="always" class="example-full-width">
+                        <mat-form-field class="example-full-width cp-quick-search-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
                             <mat-label>Booking Status</mat-label>
                             <mat-select [formControl]="SearchBookingStatus">
                                 <mat-option value="Confirmed">Confirmed</mat-option>
@@ -851,7 +852,7 @@
                     </div>
 
                     <div class="col mb-2" style="flex: 0 0 20%; max-width: 20%;">
-                        <mat-form-field appearance="outline" floatLabel="always" class="example-full-width">
+                        <mat-form-field class="example-full-width cp-quick-search-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
                             <mat-label>Driver</mat-label>
                             <input type="text" matInput [formControl]="SearchDri" [matAutocomplete]="auto15">
                             <mat-autocomplete #auto15="matAutocomplete">
@@ -863,7 +864,7 @@
                     </div>
                     
                     <div class="col mb-2" style="flex: 0 0 20%; max-width: 20%;">
-                        <mat-form-field appearance="outline" floatLabel="always" class="example-full-width">
+                        <mat-form-field class="example-full-width cp-quick-search-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
                             <mat-label>Car No.</mat-label>
                             <input type="text" matInput [formControl]="SearchCarNo" [matAutocomplete]="auto12">
                             <mat-autocomplete #auto12="matAutocomplete">
@@ -877,7 +878,7 @@
 
                 <div class="row">
                     <div class="col mb-2" style="flex: 0 0 20%; max-width: 20%;">
-                        <mat-form-field appearance="outline" floatLabel="always" class="example-full-width">
+                        <mat-form-field class="example-full-width cp-quick-search-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
                             <mat-label>Owned/Supplied</mat-label>
                             <mat-select [formControl]="SearchSupplierO">
                                 <mat-option value="Owned">Owned</mat-option>
@@ -887,21 +888,21 @@
                     </div>
 
                     <div class="col mb-2" style="flex: 0 0 20%; max-width: 20%;">
-                        <mat-form-field appearance="outline" floatLabel="always" class="example-full-width">
+                        <mat-form-field class="example-full-width cp-quick-search-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
                             <mat-label>Reservation No</mat-label>
                             <input type="text" matInput [(ngModel)]="SearchRes">
                         </mat-form-field>
                     </div>
 
                     <div class="col mb-2" style="flex: 0 0 20%; max-width: 20%;">
-                        <mat-form-field appearance="outline" floatLabel="always" class="example-full-width">
+                        <mat-form-field class="example-full-width cp-quick-search-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
                             <mat-label>Duty Slip No</mat-label>
                             <input type="text" matInput [(ngModel)]="SearchDuty">
                         </mat-form-field>
                     </div>
 
                     <div class="col mb-2" style="flex: 0 0 20%; max-width: 20%;">
-                        <mat-form-field appearance="outline" floatLabel="always" class="example-full-width">
+                        <mat-form-field class="example-full-width cp-quick-search-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
                             <mat-label>Guest Name</mat-label>
                             <input type="text" matInput [formControl]="SearchGuestName" [matAutocomplete]="auto13">
                             <mat-autocomplete #auto13="matAutocomplete">
@@ -913,7 +914,7 @@
                     </div>
 
                     <div class="col mb-2" style="flex: 0 0 20%; max-width: 20%;">
-                        <mat-form-field appearance="outline" floatLabel="always" class="example-full-width">
+                        <mat-form-field class="example-full-width cp-quick-search-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
                             <mat-label>Guest Mobile</mat-label>
                             <input type="text" matInput [(ngModel)]="SearchGuestMobile">
                         </mat-form-field>
@@ -923,7 +924,7 @@
 
                 <div class="row">
                     <div class="col mb-2" style="flex: 0 0 20%; max-width: 20%;">
-                        <mat-form-field appearance="outline" floatLabel="always" class="example-full-width">
+                        <mat-form-field class="example-full-width cp-quick-search-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
                             <mat-label>City</mat-label>
                             <input type="text" matInput [formControl]="SearchCity"  [matAutocomplete]="auto14">
                             <mat-autocomplete #auto14="matAutocomplete">
@@ -935,7 +936,7 @@
                     </div>
                     
                     <div class="col mb-2" style="flex: 0 0 20%; max-width: 20%;">
-                        <mat-form-field appearance="outline" floatLabel="always" class="example-full-width">
+                        <mat-form-field class="example-full-width cp-quick-search-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
                             <mat-label>Cancellation Date From</mat-label>
                             <input type="text" matInput [matDatepicker]="cancellationDateFrom" [(ngModel)]="SearchCancellationDateFrom">
                             <mat-datepicker-toggle matSuffix [for]="cancellationDateFrom"></mat-datepicker-toggle>
@@ -944,7 +945,7 @@
                     </div>
                     
                     <div class="col mb-2" style="flex: 0 0 20%; max-width: 20%;">
-                        <mat-form-field appearance="outline" floatLabel="always" class="example-full-width">
+                        <mat-form-field class="example-full-width cp-quick-search-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
                             <mat-label>Cancellation Date To</mat-label>
                             <input type="text" matInput [matDatepicker]="cancellationDateTo" [(ngModel)]="SearchCancellationDateTo">
                             <mat-datepicker-toggle matSuffix [for]="cancellationDateTo"></mat-datepicker-toggle>
@@ -953,7 +954,7 @@
                     </div>
 
                     <div class="col mb-2" style="flex: 0 0 20%; max-width: 20%;">
-                        <mat-form-field appearance="outline" floatLabel="always" class="example-full-width">
+                        <mat-form-field class="example-full-width cp-quick-search-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
                             <mat-label>Bkg Date From</mat-label>
                             <input type="text" matInput [matDatepicker]="bookingDateFrom" [(ngModel)]="SearchBookingDateFrom">
                             <mat-datepicker-toggle matSuffix [for]="bookingDateFrom"></mat-datepicker-toggle>
@@ -962,7 +963,7 @@
                     </div>
                     
                     <div class="col mb-2" style="flex: 0 0 20%; max-width: 20%;">
-                        <mat-form-field appearance="outline" floatLabel="always" class="example-full-width">
+                        <mat-form-field class="example-full-width cp-quick-search-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
                             <mat-label>Bkg Date To</mat-label>
                             <input type="text" matInput [matDatepicker]="bookingDateTo" [(ngModel)]="SearchBookingDate">
                             <mat-datepicker-toggle matSuffix [for]="bookingDateTo"></mat-datepicker-toggle>
@@ -975,7 +976,7 @@
                    <div class="row">
                     <!-- <div class="col-xl-3 col-lg-3 col-md-6 col-sm-12 mb-2"> -->
                     <div class="col mb-2" style="flex: 0 0 20%; max-width: 20%;">
-                        <mat-form-field appearance="outline" floatLabel="always" class="example-full-width">
+                        <mat-form-field class="example-full-width cp-quick-search-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
                             <mat-label>Change MOP Case</mat-label>
                             <mat-select [(value)]="SearchChangeMOPCase">
                                 <mat-option value="true">Yes</mat-option>
@@ -985,7 +986,7 @@
                     </div>
                     
                     <div class="col mb-2" style="flex: 0 0 20%; max-width: 20%;">
-                        <mat-form-field appearance="outline" floatLabel="always" class="example-full-width">
+                        <mat-form-field class="example-full-width cp-quick-search-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
                             <mat-label>Location Group</mat-label>
                             <input type="text" matInput [formControl]="SearchLocationGroup" [matAutocomplete]="auto19">
                             <mat-autocomplete #auto19="matAutocomplete">
@@ -998,7 +999,7 @@
 
                 
                     <div class="col mb-2" style="flex: 0 0 20%; max-width: 20%;">
-                        <mat-form-field appearance="outline" floatLabel="always" class="example-full-width">
+                        <mat-form-field class="example-full-width cp-quick-search-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
                             <mat-label>Bill Date From</mat-label>
                             <input type="text" matInput [matDatepicker]="billDateFrom" [(ngModel)]="SearchBillDateFrom">
                             <mat-datepicker-toggle matSuffix [for]="billDateFrom"></mat-datepicker-toggle>
@@ -1007,7 +1008,7 @@
                     </div>
                     
                     <div class="col mb-2" style="flex: 0 0 20%; max-width: 20%;">
-                        <mat-form-field appearance="outline" floatLabel="always" class="example-full-width">
+                        <mat-form-field class="example-full-width cp-quick-search-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
                             <mat-label>Bill Date To</mat-label>
                             <input type="text" matInput [matDatepicker]="billDateTo" [(ngModel)]="SearchBillToDate">
                             <mat-datepicker-toggle matSuffix [for]="billDateTo"></mat-datepicker-toggle>
@@ -1027,8 +1028,7 @@
                         </div>
                     </div>
                 </div>
-
-
+                </div>
 
                 <!-- <mat-form-field appearance="outline" floatLabel="always" class="example-full-width mb-3">
                     <mat-label>Activation Status</mat-label>
