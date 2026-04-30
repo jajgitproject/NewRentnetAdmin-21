@@ -130,6 +130,21 @@
   overflow-x: auto;
 }
 
+/* mat-select on Control Panel: wide panel + single-line options (Quick / Advance / toolbar / filter modal). */
+.control-panel-select-panel.mat-mdc-select-panel {
+  min-width: min(480px, calc(100vw - 24px)) !important;
+  max-width: min(720px, calc(100vw - 16px)) !important;
+}
+
+.control-panel-select-panel .mat-mdc-option .mdc-list-item__primary-text {
+  white-space: nowrap !important;
+}
+
+.control-panel-select-panel .mat-mdc-option {
+  height: auto;
+  min-height: 48px;
+}
+
 .control-panel-toolbar {
   width: 100%;
 }
