@@ -38,9 +38,15 @@
                                 <div class="duty-register-inline-search-actions">
                                     <button mat-raised-button color="primary" class="duty-register-search-button" (click)="SearchData()">
                                         Search
-                                    </button>&nbsp;&nbsp;
+                                    </button>
+                                    &nbsp;&nbsp;
+                                    
                                     <button mat-raised-button color="warn" class="duty-register-reset-button" (click)="refresh()">
                                         Refresh
+                                    </button>
+                                    &nbsp;&nbsp;
+                                    <button mat-raised-button color="accent" (click)="downloadFilteredCsv()" [disabled]="csvExporting || !hasManualSearch" [matTooltip]="!hasManualSearch ? 'Pehle Search karein' : ''">
+                                        {{ csvExporting ? 'Downloading...' : 'Download CSV' }}
                                     </button>
                                 </div>
                             </mat-expansion-panel>

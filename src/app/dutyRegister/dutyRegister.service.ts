@@ -289,6 +289,8 @@ export class DutyRegisterService
       SearchBillToDate: criteria.SearchBillToDate || "null",
       SearchBillFromDate: criteria.SearchBillFromDate || "null",
       SearchBillStatus:criteria.SearchBillStatus || "null",
+      PageNumber: pageNumber,
+      pageNumber: pageNumber,
       order: "Descending",
       orderbyColumn: "ReservationID"
     };
@@ -332,11 +334,68 @@ export class DutyRegisterService
       SearchLocationGroup: criteria.SearchLocationGroup || "null",
       SearchBillFromDate: criteria.SearchBillFromDate || "null",
       SearchBillToDate: criteria.SearchBillToDate || "null",
-       SearchBillStatus:criteria.SearchBillStatus || "null" ,
-      order: "Descending",
-      orderbyColumn: "ReservationID"
+      SearchBillStatus:criteria.SearchBillStatus || "null",
+      PageNumber: pageNumber,
+      pageNumber: pageNumber,
+      order: sortType || "Descending",
+      orderbyColumn: coloumName || "ReservationID"
     };
     return this.httpClient.post(`${this.API_URL}`, updatedCriteria);
+  }
+
+  exportCsv(criteria: SearchCriteria): Observable<Blob> {
+    const toNull = (value: any) => {
+      if (value === undefined || value === null) {
+        return null;
+      }
+      const text = String(value).trim();
+      if (text === '' || text.toLowerCase() === 'null') {
+        return null;
+      }
+      return value;
+    };
+
+    const updatedCriteria = {
+      SearchCustomerGroup: toNull(criteria.SearchCustomerGroup),
+      SearchCustomerPersonName: toNull(criteria.SearchCustomerPersonName),
+      SearchDutyType: toNull(criteria.SearchDutyType),
+      SearchFeedbackDate: toNull(criteria.SearchFeedbackDate),
+      SearchSlipReceipt: criteria.SearchSlipReceipt,
+      SearchClosureType: toNull(criteria.SearchClosureType),
+      SearchDispatchLocation: toNull(criteria.SearchDispatchLocation),
+      SearchMOP: toNull(criteria.SearchMOP),
+      SearchSupplierType: toNull(criteria.SearchSupplierType),
+      SearchSupplier: toNull(criteria.SearchSupplier),
+      SearchFromDate: toNull(criteria.SearchFromDate),
+      SearchToDate: toNull(criteria.SearchToDate),
+      SearchSalesPersonName: toNull(criteria.SearchSalesPersonName),
+      SearchCarSent: toNull(criteria.SearchCarSent),
+      SearchCarBook: toNull(criteria.SearchCarBook),
+      SearchCustomerType: toNull(criteria.SearchCustomerType),
+      SearchCustomerLocationName: toNull(criteria.SearchCustomerLocationName),
+      SearchBookingStatus: toNull(criteria.SearchBookingStatus),
+      SearchDri: toNull(criteria.SearchDri),
+      SearchCarNo: toNull(criteria.SearchCarNo),
+      SearchSupplierO: toNull(criteria.SearchSupplierO),
+      SearchRes: toNull(criteria.SearchRes),
+      SearchDuty: toNull(criteria.SearchDuty),
+      SearchGuestName: toNull(criteria.SearchGuestName),
+      SearchGuestMobile: toNull(criteria.SearchGuestMobile),
+      SearchCity: toNull(criteria.SearchCity),
+      SearchCancellationDateFrom: toNull(criteria.SearchCancellationDateFrom),
+      SearchCancellationDateTo: toNull(criteria.SearchCancellationDateTo),
+      SearchBookingDateFrom: toNull(criteria.SearchBookingDateFrom),
+      SearchBookingDate: toNull(criteria.SearchBookingDate),
+      SearchChangeMOPCase: toNull(criteria.SearchChangeMOPCase),
+      SearchLocationGroup: toNull(criteria.SearchLocationGroup),
+      SearchBillFromDate: toNull(criteria.SearchBillFromDate),
+      SearchBillToDate: toNull(criteria.SearchBillToDate),
+      SearchBillStatus: toNull(criteria.SearchBillStatus)
+    };
+
+    return this.httpClient.post(`${this.API_URL}/ExportCsv`, updatedCriteria, {
+      responseType: 'blob'
+    });
   }
   
 }

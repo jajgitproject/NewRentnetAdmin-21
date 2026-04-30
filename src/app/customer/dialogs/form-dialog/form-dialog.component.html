@@ -14,7 +14,7 @@
         </button>
     </div>
     <div mat-dialog-content>
-        <form class="register-form m-4" [formGroup]="advanceTableForm" (ngSubmit)="submit">
+        <form class="register-form m-4" [formGroup]="advanceTableForm" (ngSubmit)="confirmAdd()">
 
             <div class="row">
                 <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
@@ -539,8 +539,8 @@
             <div class="row">
                 <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12 mb-2">
                     <div class="example-button-row">
-                        <button mat-raised-button color="primary" *ngIf="saveDisabled" type="submit"
-                            [disabled]="!advanceTableForm.valid" (click)="confirmAdd()">
+                        <button mat-raised-button color="primary" *ngIf="saveDisabled" type="button"
+                            (click)="confirmAdd()">
                             Save
                         </button>
 

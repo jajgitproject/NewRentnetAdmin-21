@@ -235,6 +235,8 @@ export class DutyRegisterComponent implements OnInit {
   SearchBookingDateFrom: string = '';
   SearchBookingDate: string = '';
   SearchBillStatus: string = '';
+  csvExporting: boolean = false;
+  hasManualSearch: boolean = false;
     
   
  
@@ -255,7 +257,7 @@ export class DutyRegisterComponent implements OnInit {
   contextMenuPosition = { x: '0px', y: '0px' };
   ngOnInit() 
   {
-    this.loadData();
+    // this.loadData();
     this.InitCustomerGroup();
     this.InitCustomerPerson();
     this.InitPackageType();
@@ -314,6 +316,7 @@ export class DutyRegisterComponent implements OnInit {
     this.SearchChangeMOPCase = '';
     this.SearchBillStatus = '';
     this.SearchActivationStatus = true;
+    this.hasManualSearch = false;
     this.PageNumber=0;
     this.loadData();
   }
@@ -364,46 +367,7 @@ export class DutyRegisterComponent implements OnInit {
 
   public loadData() 
   {
-    debugger
-    const searchCriteria: SearchCriteria = {
-      SearchCustomerGroup: this.SearchCustomerGroup?.value || "",
-      SearchCustomerPersonName: this.SearchCustomerPerson?.value || "",
-      SearchDutyType: this.SearchDutyType?.value || "",
-      SearchFeedbackDate: this.SearchFeedbackDate !== "" ? moment(this.SearchFeedbackDate).format('MMM DD yyyy') : "",
-      SearchSlipReceipt: this.SearchSlipReceipt,
-      SearchClosureType: this.SearchClosureType?.value || "",
-      SearchDispatchLocation: this.SearchDispatchLocation?.value || "",
-      SearchMOP: this.SearchMOP?.value || "",
-      SearchSupplierType: this.SearchSupplierType?.value || "",
-      SearchSupplier: this.SearchSupplier?.value || "",
-      SearchFromDate: this.SearchFromDate !== "" ? moment(this.SearchFromDate).format('MMM DD yyyy') : "",
-      SearchToDate: this.SearchToDate !== "" ? moment(this.SearchToDate).format('MMM DD yyyy') : "",
-      SearchSalesPersonName: this.SearchSalesPerson?.value || "",
-      SearchCarSent: this.SearchCarSend?.value || "",
-      SearchCarBook: this.SearchCarBooked?.value || "",
-      SearchCustomerType: this.SearchCustomerType?.value || "",
-      SearchCustomerLocationName: this.SearchCustomerLocationName?.value || "",
-      SearchBookingStatus: this.SearchBookingStatus?.value || "",
-      SearchDri: this.SearchDri?.value || "",
-      SearchCarNo: this.SearchCarNo?.value || "",
-      SearchSupplierO: this.SearchSupplierO?.value || "",
-      SearchRes: this.SearchRes || "",
-      SearchDuty: this.SearchDuty || "",
-      SearchGuestName: this.SearchGuestName?.value || "",
-      // SearchGuestEmail: this.SearchGuestEmail || "",
-        SearchGuestMobile: this.SearchGuestMobile || "",
-      SearchCity: this.SearchCity?.value || "",
-      SearchCancellationDateFrom: this.SearchCancellationDateFrom !== "" ? moment(this.SearchCancellationDateFrom).format('MMM DD yyyy') : "",
-      SearchCancellationDateTo: this.SearchCancellationDateTo !== "" ? moment(this.SearchCancellationDateTo).format('MMM DD yyyy') : "",
-      SearchBookingDateFrom: this.SearchBookingDateFrom !== "" ? moment(this.SearchBookingDateFrom).format('MMM DD yyyy') : "",
-      SearchBookingDate: this.SearchBookingDate !== "" ? moment(this.SearchBookingDate).format('MMM DD yyyy') : "",
-      SearchChangeMOPCase: this.SearchChangeMOPCase ,
-      SearchLocationGroup: this.SearchLocationGroup?.value || "null",
-      SearchBillFromDate: this.SearchBillDateFrom !== "" ? moment(this.SearchBillDateFrom).format('MMM DD yyyy') : "",   
-      SearchBillToDate: this.SearchBillToDate !== "" ? moment(this.SearchBillToDate).format('MMM DD yyyy') : "",
-      SearchBillStatus: this.SearchBillStatus,
-
-    };
+    const searchCriteria = this.buildSearchCriteria();
     this.dutyRegisterService.getTableData(searchCriteria,this.PageNumber,).subscribe
     (
       data =>   
@@ -454,22 +418,63 @@ export class DutyRegisterComponent implements OnInit {
 
   public SearchData()
   {
+    this.hasManualSearch = true;
     this.loadData();    
   }
 
-  SortingData(coloumName:any) 
-  {   
-    if (this.sortingData == 1) 
-    {
-      this.sortingData = 0;
-      this.sortType = "Ascending"
+  downloadFilteredCsv() {
+    if (this.csvExporting || !this.hasManualSearch) {
+      return;
     }
-    else 
-    {
-      this.sortingData = 1;
-      this.sortType = "Descending";
-    }
-    const searchCriteria: SearchCriteria = {
+
+    this.csvExporting = true;
+    const searchCriteria = this.buildSearchCriteria();
+    this.dutyRegisterService.exportCsv(searchCriteria).subscribe(
+      (blob: Blob) => {
+        this.csvExporting = false;
+
+        if (!blob || blob.size === 0) {
+          this.showNotification('snackbar-danger', 'No data to export', 'bottom', 'center');
+          return;
+        }
+
+        const contentType = (blob.type || '').toLowerCase();
+        if (contentType.includes('application/json')) {
+          blob.text().then((text) => {
+            if ((text || '').trim() === 'null') {
+              this.showNotification('snackbar-danger', 'No data to export', 'bottom', 'center');
+              return;
+            }
+            const csvBlob = new Blob([text], { type: 'text/csv;charset=utf-8;' });
+            this.triggerCsvDownload(csvBlob);
+          });
+          return;
+        }
+
+        this.triggerCsvDownload(blob);
+      },
+      () => {
+        this.csvExporting = false;
+        this.showNotification('snackbar-danger', 'Error downloading CSV', 'bottom', 'center');
+      }
+    );
+  }
+
+  private triggerCsvDownload(blob: Blob) {
+    const url = window.URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    const timeStamp = moment().format('YYYYMMDD_HHmmss');
+    link.href = url;
+    link.download = `DutyRegister_${timeStamp}.csv`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    window.URL.revokeObjectURL(url);
+    this.showNotification('snackbar-success', 'CSV downloaded', 'bottom', 'center');
+  }
+
+  private buildSearchCriteria(): SearchCriteria {
+    return {
       SearchCustomerGroup: this.SearchCustomerGroup?.value || "",
       SearchCustomerPersonName: this.SearchCustomerPerson?.value || "",
       SearchDutyType: this.SearchDutyType?.value || "",
@@ -495,7 +500,7 @@ export class DutyRegisterComponent implements OnInit {
       SearchDuty: this.SearchDuty || "",
       SearchGuestName: this.SearchGuestName?.value || "",
       // SearchGuestEmail: this.SearchGuestEmail || "",
-      SearchGuestMobile: this.SearchGuestMobile || "", 
+      SearchGuestMobile: this.SearchGuestMobile || "",
       SearchCity: this.SearchCity?.value || "",
       SearchCancellationDateFrom: this.SearchCancellationDateFrom !== "" ? moment(this.SearchCancellationDateFrom).format('MMM DD yyyy') : "",
       SearchCancellationDateTo: this.SearchCancellationDateTo !== "" ? moment(this.SearchCancellationDateTo).format('MMM DD yyyy') : "",
@@ -503,10 +508,25 @@ export class DutyRegisterComponent implements OnInit {
       SearchBookingDate: this.SearchBookingDate !== "" ? moment(this.SearchBookingDate).format('MMM DD yyyy') : "",
       SearchChangeMOPCase: this.SearchChangeMOPCase,
       SearchLocationGroup: this.SearchLocationGroup?.value || "null",
-        SearchBillFromDate: this.SearchBillDateFrom !== "" ? moment(this.SearchBillDateFrom).format('MMM DD yyyy') : "",
-        SearchBillToDate: this.SearchBillToDate !== "" ? moment(this.SearchBillToDate).format('MMM DD yyyy') : "",
-        SearchBillStatus: this.SearchBillStatus,
+      SearchBillFromDate: this.SearchBillDateFrom !== "" ? moment(this.SearchBillDateFrom).format('MMM DD yyyy') : "",
+      SearchBillToDate: this.SearchBillToDate !== "" ? moment(this.SearchBillToDate).format('MMM DD yyyy') : "",
+      SearchBillStatus: this.SearchBillStatus,
     };
+  }
+
+  SortingData(coloumName:any) 
+  {   
+    if (this.sortingData == 1) 
+    {
+      this.sortingData = 0;
+      this.sortType = "Ascending"
+    }
+    else 
+    {
+      this.sortingData = 1;
+      this.sortType = "Descending";
+    }
+    const searchCriteria = this.buildSearchCriteria();
     this.dutyRegisterService.getTableDataSort(searchCriteria,this.PageNumber,coloumName.active,this.sortType).subscribe
     (
       data =>   
