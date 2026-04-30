@@ -77,6 +77,7 @@ export class CustomerIntegrationMappingComponent implements OnInit {
     this.selectedFilter='search';
     this.customer.setValue('');
     this.SearchCustomer='';
+    this.SearchTallyCode='';
     this.searchTerm='';
     this.SearchActivationStatus = true;
     this.PageNumber=0;
@@ -172,23 +173,28 @@ onSearchClick() {
   
    public loadData() 
    {
-    debugger;
+    const typedSearch = this.normalizeText(this.searchTerm);
     switch (this.selectedFilter)
     {
-      case 'Customer':
-        this.customer.setValue(this.searchTerm);
+      case 'customer':
+        this.SearchCustomer = typedSearch;
+        this.SearchTallyCode = '';
         break;
 
 
       case 'TallyCode':
-        this.SearchTallyCode = this.searchTerm;
+        this.SearchTallyCode = typedSearch;
+        this.SearchCustomer = '';
         break;
 
       default:
-        this.SearchCustomer = this.searchTerm || ''; // ✅ FIX
+        if (typedSearch) {
+          this.SearchCustomer = typedSearch;
+          this.SearchTallyCode = '';
+        }
         break;
     }
-      this.customerIntegrationMappingService.getTableData(this.customer.value,this.SearchTallyCode,this.SearchActivationStatus, this.PageNumber).subscribe
+      this.customerIntegrationMappingService.getTableData(this.SearchCustomer,this.SearchTallyCode,this.SearchActivationStatus, this.PageNumber).subscribe
       (
         data =>   
         {
@@ -233,9 +239,18 @@ onSearchClick() {
 
   public SearchData()
   {
+    this.PageNumber = 0;
+    this.selectedFilter = 'search';
+    this.SearchCustomer = this.normalizeText(this.customer.value);
+    this.SearchTallyCode = this.normalizeText(this.SearchTallyCode);
+    this.searchTerm = '';
     this.loadData();
     //this.SearchCustomerIntegrationMapping='';
     
+  }
+
+  private normalizeText(value: any): string {
+    return (value ?? '').toString().trim();
   }
 
 /////////////////for Image Upload////////////////////////////

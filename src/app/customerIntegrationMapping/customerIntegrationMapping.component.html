@@ -205,8 +205,8 @@
                 <input type="text" matInput [formControl]="customer" [matAutocomplete]="auto1">
                 <mat-autocomplete #auto1="matAutocomplete">
                     <mat-option *ngFor="let option of filteredCustomerOptions | async" 
-                    [value]="option.customerName +''+ option.tallyCustomerID" >
-                    {{ option.customerName }}{{ option.tallyCustomerID }}
+                    [value]="option.customerName" >
+                    {{ option.customerName }} - {{ option.tallyCustomerID }}
                     </mat-option>
                 </mat-autocomplete>
                 </mat-form-field>

@@ -595,6 +595,16 @@ export const ROUTES: RouteInfo[] = [
         submenu: [],
         isAccess: false
       },
+       {
+        path: 'customerIntegrationMapping',
+        title: 'Customer Integration Mapping',
+        moduleName: 'customerIntegrationMapping',
+        icon: 'fas fa-tachometer-alt',
+        class: '',
+        groupTitle: false,
+        submenu: [],
+        isAccess: false
+      },
       
       {
         path: 'department',
