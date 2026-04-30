@@ -2106,6 +2106,14 @@ const routes: Routes = [
       },
 
       {
+        path: 'customerIntegrationMapping',
+        loadChildren: () =>
+          import('./customerIntegrationMapping/customerIntegrationMapping.module').then(
+            (m) => m.CustomerIntegrationMappingModule
+          )
+      },
+
+      {
         path: 'customerFuelSurcharge',
         loadChildren: () =>
           import('./customerFuelSurcharge/customerFuelSurcharge.module').then(
