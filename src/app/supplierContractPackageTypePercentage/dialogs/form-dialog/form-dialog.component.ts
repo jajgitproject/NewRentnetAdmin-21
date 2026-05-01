@@ -310,7 +310,7 @@ export class FormDialogComponentHolder {
             if (this.MessageArray[0] == "SupplierContractPackageTypePercentageCreate") {
               if (this.MessageArray[1] == "SupplierContractPackageTypePercentageView") {
                 if (this.MessageArray[2] == "Success") {
-                  //debugger;
+                  
 
                   this.showNotification(
                     'snackbar-success',

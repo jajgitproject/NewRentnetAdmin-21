@@ -95,7 +95,7 @@ export class CustomerPersonDrivingLicenseVerificationComponent implements OnInit
       this.SubscribeUpdateService();
   }
   refresh() {
-    debugger;
+    
   
     this.SearchCustomerPersonDrivingLicenseVerification = '';
     this.SearchDocumentNumber='';
@@ -221,7 +221,7 @@ export class CustomerPersonDrivingLicenseVerificationComponent implements OnInit
             {
               if(this.MessageArray[2]=="Success")
               {
-                debugger;
+                
                 this.refresh();
                 this.showNotification(
                 'snackbar-success',
@@ -302,7 +302,7 @@ export class CustomerPersonDrivingLicenseVerificationComponent implements OnInit
   }
 
   SortingData(coloumName:any) {
-    debugger;
+    
     if (this.sortingData == 1) {
 
       this.sortingData = 0;

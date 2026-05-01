@@ -333,10 +333,10 @@ toggleStopFold() {
 
   public GetCustomerDetails() 
   {
-    debugger;
+    
     this.bookingConfigurationService.getCustomerDetails(this.BookingID).subscribe(
         data => {
-          debugger;
+          
           this.customerDetails = data;
           console.log(this.customerDetails);  
           if(this.customerDetails.customerID === 15)
@@ -546,7 +546,7 @@ private extractTime(dateTime: Date): Date {
     
     this.bookingConfigurationService.getPassengerDetails(this.BookingID).subscribe(
         data => {
-          debugger;
+          
           this.passengerDetailsList = data;
           console.log(this.passengerDetailsList);
           if(this.passengerDetailsList[0].passengerID == 0)
@@ -635,7 +635,7 @@ private extractTime(dateTime: Date): Date {
 
   public Post(): void
   {
-    debugger;
+    
     this.advanceTableForm.patchValue({reservationExecutiveID:this._generalService.getUserID()});
     this.advanceTableForm.patchValue({bookingID:this.BookingID});
     this.advanceTableForm.patchValue({customerTravelRequestNumber:this.customerTravelRequestNumber});
@@ -789,12 +789,12 @@ private extractTime(dateTime: Date): Date {
 
   onPickupDateChange() 
   {
-    debugger;
+    
     this._generalService.GetContractIDBasedOnDate(this.customerDetails.customerID, this.customerDetails.pickupDate.toString()).subscribe(
     data => {
       if (data) 
       {
-        debugger;
+        
         this.contractID = data;
         this.InitPackageType();
       } 
@@ -1245,7 +1245,7 @@ private extractTime(dateTime: Date): Date {
   }
 
   valueSwitch(){  
-       debugger;
+       
     if(this.advanceTableForm.value.googleAddresses===true)
     {
       this.ifBlock=false;

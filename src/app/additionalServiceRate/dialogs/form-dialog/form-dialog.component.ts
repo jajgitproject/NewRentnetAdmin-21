@@ -67,7 +67,7 @@ export class FormDialogComponent
         this.action = data.action;
         if (this.action === 'edit') 
         {
-          debugger;
+          
           this.dialogTitle ='Additional Service Rate';       
           this.advanceTable = data.advanceTable;
           this.searchCityTerm.setValue(this.advanceTable.geoPointName);

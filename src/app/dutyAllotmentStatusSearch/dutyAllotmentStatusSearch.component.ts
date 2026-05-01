@@ -371,7 +371,7 @@ shouldShowDeleteButton(item: any): boolean {
     (
       message => 
       { 
-        debugger;
+        
         //message contains the data sent from service
         this.messageReceived = message.text;
         this.MessageArray=this.messageReceived.split(":");

@@ -735,7 +735,7 @@ export class ClossingOneComponent implements OnInit {
 
   //  ViewBill(invoiceType)
   // {
-  //   debugger;
+  //   
   //   let baseUrl = this._generalService.FormURL;
   //   if(invoiceType === 'InvoiceMultyDuty')
   //   {

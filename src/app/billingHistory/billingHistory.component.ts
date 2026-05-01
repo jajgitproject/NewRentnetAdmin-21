@@ -45,7 +45,7 @@ export class BillingHistoryComponent {
 
   public loadData() 
    {
-    debugger;
+    
       this.billingHistoryService.GetBillingHistoryData(this.DutySlipID, this.PageNumber).subscribe
     (
       (data : NewBillingHistoryModel) =>   
@@ -58,7 +58,7 @@ export class BillingHistoryComponent {
   }
 
   onChangedPage(pageData: PageEvent) {
-    debugger;
+    
       this.isLoading = true;
       this.PageNumber = pageData.pageIndex;
       this.loadData();

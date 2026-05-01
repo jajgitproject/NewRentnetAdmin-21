@@ -35,7 +35,7 @@ export class CustomerConfigurationSupplierService
   }
   add(advanceTable: CustomerConfigurationSupplier) 
   {
-    debugger;
+    
     advanceTable.customerConfigurationSupplierID=-1;
     return this.httpClient.post<any>(this.API_URL , advanceTable);
   }

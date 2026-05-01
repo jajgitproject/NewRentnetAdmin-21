@@ -221,7 +221,7 @@ export class VehicleInterStateTaxComponent implements OnInit {
   }
    public loadData() 
    {
-    debugger;
+    
     if(this.SearchStartDate!==""){
       this.SearchStartDate=moment(this.SearchStartDate).format('MMM DD yyyy');
     }

@@ -21,7 +21,7 @@ export class UnlockEmployeeService
 
   getUnlockData(data:UnlockEmployee)
   {
-    debugger;
+    
     // row.employeeEntityPasswordID; 
     // data.userType="Employee";
     return this.httpClient.post<any>(this.API_URL_auth + '/unlock-account',data);

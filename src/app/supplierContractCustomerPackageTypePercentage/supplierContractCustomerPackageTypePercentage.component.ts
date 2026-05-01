@@ -363,7 +363,7 @@ export class SupplierContractCustomerPackageTypePercentageComponent implements O
             {
               if(this.MessageArray[2]=="Success")
               {
-                //debugger;
+                
                 this.refresh();
                 this.showNotification(
                 'snackbar-success',
@@ -444,7 +444,7 @@ export class SupplierContractCustomerPackageTypePercentageComponent implements O
   }
 
   SortingData(coloumName:any) {
-    //debugger;
+    
     if (this.sortingData == 1) {
 
       this.sortingData = 0;

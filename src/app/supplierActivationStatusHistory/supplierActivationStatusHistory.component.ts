@@ -149,7 +149,7 @@ export class SupplierActivationStatusHistoryComponent implements OnInit {
   }
    public loadData() 
    {
-    debugger;
+    
     switch (this.selectedFilter)
     {
       

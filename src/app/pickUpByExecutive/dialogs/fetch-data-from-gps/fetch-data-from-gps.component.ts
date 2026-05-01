@@ -47,7 +47,7 @@ export class FetchDataFromGPSComponent implements OnInit {
 
   GetDataFromGPS()
   {
-    debugger;
+    
     var pickupDate=moment(this.advanceTableForm.value.pickupDate).format('yyyy-MM-DD');
     var pickupTime=moment(this.advanceTableForm.value.pickupTime).format('HH:mm');
     //var reseravtionID = reseravtionID;

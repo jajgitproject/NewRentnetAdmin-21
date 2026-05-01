@@ -139,7 +139,7 @@ export class FormDialogComponent
   }
   public Put(): void
   {
-    debugger;
+    
     this.advanceTableService.update(this.advanceTableForm.getRawValue())  
     .subscribe(
     response => 
@@ -163,7 +163,7 @@ export class FormDialogComponent
   }
   public confirmAdd(): void 
   {
-    debugger;
+    
        if(this.action=="edit")
        {
           this.Put();

@@ -53,7 +53,7 @@ export class SalutationService
   }
   delete(salutationID: number):  Observable<any> 
   {
-    debugger;
+    
     return this.httpClient.delete(this.API_URL + '/'+ salutationID);
   }
 }

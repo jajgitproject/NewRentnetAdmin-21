@@ -192,7 +192,7 @@ customerPersonID:[''],
     );
     }
     getCustomerID(customerPersonID: any, option: any) {
-      debugger;
+      
       this.customerOptionDetail = option;
       this.customerPersonID= customerPersonID.customerPersonID;
       this.advanceTableForm.patchValue({customerPersonID:this.customerPersonID})

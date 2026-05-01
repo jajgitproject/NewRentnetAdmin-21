@@ -99,7 +99,7 @@ export class UnlockEmployeeComponent implements OnInit {
 
 
   // unlock(row){
-  //   debugger;
+  //   
   //   row.employeeEntityPasswordID; 
   //    this.unlockEmployeeService.getUnlockData(row).subscribe
   //     (

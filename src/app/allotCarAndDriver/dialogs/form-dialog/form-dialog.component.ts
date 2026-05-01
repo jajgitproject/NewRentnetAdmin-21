@@ -295,7 +295,7 @@ allotmentType: any;
           this.dialogRef.close({ isClose: false });
         },
         error => {
-          debugger;
+          
           if(error.error.status === "error")
           {
            this.openShowError(error.error.message);

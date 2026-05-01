@@ -155,7 +155,7 @@ createContactForm(): FormGroup
   public response: { dbPath: '' };
   public ImagePath: string;
   public uploadFinished = (event) => {
-    debugger;
+    
   this.response = event;
   this.ImagePath = this._generalService.getImageURL() + this.response.dbPath;
   }

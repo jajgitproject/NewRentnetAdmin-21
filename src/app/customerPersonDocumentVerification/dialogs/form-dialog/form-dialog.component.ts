@@ -152,7 +152,7 @@ export class FormDialogVerificationComponentHolder
   public Put(): void
   {
     this.saveDisabled=false;
-    debugger;
+    
     this.advanceTableForm.patchValue({customerPersonID:this.advanceTable.customerPersonID});
     this.advanceTableService.update(this.advanceTableForm.getRawValue())  
     .subscribe(

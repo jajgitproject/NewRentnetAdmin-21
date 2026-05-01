@@ -633,7 +633,7 @@ export class FormDialogComponent implements OnInit {
   }
 
   onBlurUpdateEndDateEdit(value: string): void {
-    debugger;
+    
     const validDate = moment(value, 'DD/MM/YYYY', true).isValid();
     if (validDate) {
       const formattedDate = moment(value, 'DD/MM/YYYY').toDate();

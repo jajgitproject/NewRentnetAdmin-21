@@ -3774,7 +3774,7 @@ checkChronologyAndValues(): boolean {
 };
 
 
-debugger;
+
 
   const locationOutDT = getDateTime(form.locationOutDateForBilling, form.locationOutTimeForBilling);
 const pickupDT = getDateTime(form.pickUpDateForBilling, form.pickUpTimeForBilling);

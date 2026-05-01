@@ -322,7 +322,7 @@ export class SupplierContractVehiclePercentageComponent implements OnInit {
             {
               if(this.MessageArray[2]=="Success")
               {
-               // debugger;
+               // 
                 this.refresh();
                 this.showNotification(
                 'snackbar-success',
@@ -403,7 +403,7 @@ export class SupplierContractVehiclePercentageComponent implements OnInit {
   }
 
   SortingData(coloumName:any) {
-    //debugger;
+    
     if (this.sortingData == 1) {
 
       this.sortingData = 0;

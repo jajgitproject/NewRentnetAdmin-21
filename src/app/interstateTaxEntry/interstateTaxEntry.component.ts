@@ -307,7 +307,7 @@ shouldShowDeleteButton(item: any): boolean {
 
    public loadData() 
    {
-    debugger;
+    
     if(this.StartDate!==""){
       this.StartDate=moment(this.StartDate).format('MMM DD yyyy');
     }
@@ -396,7 +396,7 @@ shouldShowDeleteButton(item: any): boolean {
     (
       message => 
       { 
-        debugger;
+        
         //message contains the data sent from service
         this.messageReceived = message.text;
         this.MessageArray=this.messageReceived.split(":");

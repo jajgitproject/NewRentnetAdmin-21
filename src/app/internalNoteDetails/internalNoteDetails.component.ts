@@ -105,7 +105,7 @@ export class InternalNoteDetailsComponent implements OnInit {
           }
       });
       dialogRef.afterClosed().subscribe((res: any) => {
-        debugger;
+        
         this.loadData();
     });
   }

@@ -321,7 +321,7 @@ export class FormDialogComponentHolder {
     this.advanceTableService.add(this.advanceTableForm.getRawValue())
       .subscribe(
         response => {
-          //debugger;
+          
           this.isLoading = false;
           this.dialogRef.close();
 
@@ -379,7 +379,7 @@ export class FormDialogComponentHolder {
             if (this.MessageArray[0] == "SupplierContractCustomerPackageTypePercentageCreate") {
               if (this.MessageArray[1] == "SupplierContractCustomerPackageTypePercentageView") {
                 if (this.MessageArray[2] == "Success") {
-                  //debugger;
+                  
 
                   this.showNotification(
                     'snackbar-success',

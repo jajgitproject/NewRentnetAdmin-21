@@ -19,7 +19,7 @@ export class CustomerReservationFieldValuesService
   /** CRUD METHODS */
   getTableData(customerReservationFieldID:number,searchFieldValue:string,SearchActivationStatus:boolean, PageNumber: number):  Observable<any> 
   {
-    debugger;
+    
     if(customerReservationFieldID===0)
     {
       customerReservationFieldID=0;

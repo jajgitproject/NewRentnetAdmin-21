@@ -170,7 +170,7 @@ export class LumpsumRateDetailsDialogComponent
   }
   public Post(): void
   {
-    debugger;
+    
     this.advanceTableForm.patchValue({reservationID:this.ReservationID});
     this.advanceTableForm.patchValue({lumpsumRateApprovedByEmployeeID:this.reservationDiscountDetailsByEmployeesID });
     this.advanceTableService.add(this.advanceTableForm.getRawValue())  

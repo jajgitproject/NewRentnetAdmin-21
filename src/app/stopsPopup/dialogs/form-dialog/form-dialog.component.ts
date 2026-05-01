@@ -76,7 +76,7 @@ export class FormDialogStopsPopupComponent
   }
   public Post(): void
   {
-    debugger;
+    
     this.advanceTableService.add(this.advanceTableForm.getRawValue())  
     .subscribe(
     response => 

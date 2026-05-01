@@ -98,7 +98,7 @@ export class CustomerPersonDocumentVerificationComponent implements OnInit {
       this.SubscribeUpdateService();
   }
   refresh() {
-    debugger;
+    
   
     this.SearchCustomerPersonDocumentVerification = '';
     this.SearchDocumentNumber='';
@@ -233,7 +233,7 @@ export class CustomerPersonDocumentVerificationComponent implements OnInit {
             {
               if(this.MessageArray[2]=="Success")
               {
-                debugger;
+                
                 this.refresh();
                 this.showNotification(
                 'snackbar-success',
@@ -314,7 +314,7 @@ export class CustomerPersonDocumentVerificationComponent implements OnInit {
   }
  
   SortingData(coloumName:any) {
-    debugger;
+    
     if (this.sortingData == 1) {
 
       this.sortingData = 0;

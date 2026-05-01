@@ -367,7 +367,7 @@ export class FormDialogReservationStopDetailsComponent {
     );
   }
   getStateID(geoPointID: any) {
-    debugger;
+    
     this.geoPointStateID = geoPointID;
     this.InItCity();
     this.advanceTableForm.controls['city'].setValue('');
@@ -440,10 +440,10 @@ export class FormDialogReservationStopDetailsComponent {
               this.countryOnStateID = ele.geoPointID;
               this.geoPointID = ele.geoPointID;
               this.advanceTableForm.controls["countryID"].setValue(this.countryOnStateID);
-              debugger;
+              
               this._generalService.GetStates(this.countryOnStateID).subscribe(
                 data => {
-                  debugger;
+                  
                   this.StateList = data;
                 },
                 error => {
@@ -741,7 +741,7 @@ export class FormDialogReservationStopDetailsComponent {
         (f) =>
           JSON.stringify(f.types) === JSON.stringify(['locality', 'political'])
       )[0].long_name;
-      // debugger;
+      // 
       // this.getCityIDByName(city);
       // this.advanceTableForm.controls["city"].setValue(city);
 
@@ -804,7 +804,7 @@ export class FormDialogReservationStopDetailsComponent {
     // this._generalService.GetCityID(name).subscribe((res: any) => {
     // }, (error: HttpErrorResponse) => {
     // });
-    debugger;
+    
     const data = this._generalService.GetsCityID(name);
 
     this.cityID = parseInt(data.geoPointID);

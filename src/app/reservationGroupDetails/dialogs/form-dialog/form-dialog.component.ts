@@ -227,7 +227,7 @@ export class FormDialogComponent implements OnInit {
   }
 
   ngOnInit() {
-    debugger;
+    
     this.advanceTableForm.controls["kam"].disable();
     this.advanceTableForm.controls["salesExecutive"].disable();
     // this.advanceTableForm.controls["locationName"].disable();

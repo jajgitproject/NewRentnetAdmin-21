@@ -1149,7 +1149,7 @@ public loadPassword()
 
  //start date
  onBlurdateOfLeaving(value: string): void {
-  debugger;
+  
   value= this._generalService.resetDateiflessthan12(value);
 
 const validDate = moment(value, 'DD/MM/YYYY', true).isValid();

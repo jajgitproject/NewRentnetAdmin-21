@@ -111,7 +111,7 @@ export class FormDialogComponent
   }
   
   getTitles(packageTypeID: any) {
-    //debugger;
+    
     this.packageTypeID=packageTypeID;
     this.advanceTableForm.patchValue({packageTypeID:this.packageTypeID});
   }
@@ -219,7 +219,7 @@ export class FormDialogComponent
   }
   public confirmAdd(): void 
   {
-    //debugger;
+    
        if(this.action=="edit")
        {
           this.Put();

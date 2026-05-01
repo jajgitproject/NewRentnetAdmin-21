@@ -317,7 +317,7 @@ export class ControlPanelDesignComponent implements OnInit {
 
 
   onChangedPage(pageData: PageEvent) {
-    debugger;
+    
     if(this.showDataPage === true)
     {
     const toDate = this.filterForm.value.toDate;
@@ -603,7 +603,7 @@ export class ControlPanelDesignComponent implements OnInit {
 
   CovertSoftToHard(item:any,i:any)
     {
-      debugger;
+      
           if(item.allotmentStatus==='Alloted')
           {
             const dialogRef = this.dialog.open(SoftToHardDialogComponent, 
@@ -625,7 +625,7 @@ export class ControlPanelDesignComponent implements OnInit {
 
   refresh() 
   {
-    debugger;
+    
     this.searchTerm = '';
     this.selectedFilter = 'search';
     this._filters = new Filters({});

@@ -275,7 +275,7 @@ export class FormDialogComponent
   }
   
   getemployee(employeeID: any) {
-    //debugger;
+    
     this.employeeID=employeeID;
   }
 
@@ -320,7 +320,7 @@ export class FormDialogComponent
   }
   
   getemployeeIDTitles(employeeID: any) {
-    //debugger;
+    
     this.employeesID=employeeID;
   }
 
@@ -448,7 +448,7 @@ export class FormDialogComponent
   }
   
   getPaymentCycle(paymentCycleID: any) {
-    //debugger;
+    
     this.paymentCycleID=paymentCycleID;
   }
 

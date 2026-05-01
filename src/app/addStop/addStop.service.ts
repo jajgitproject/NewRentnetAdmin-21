@@ -40,7 +40,7 @@ export class AddStopService
 
   add(advanceTable: AddStop) 
   {
-    debugger;
+    
     advanceTable.stopDateString=this.generalService.getDateFrom(advanceTable.stopDate);
     advanceTable.stopTimeString=this.generalService.getDateTo(advanceTable.stopTime);
     advanceTable.addStopID=-1;

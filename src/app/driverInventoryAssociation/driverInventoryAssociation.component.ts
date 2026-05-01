@@ -371,7 +371,7 @@ onBackPress(event)
 
 public loadData() 
 {
-  debugger;
+  
   if(this.driverID===undefined)
   {
     this.driverID=0;

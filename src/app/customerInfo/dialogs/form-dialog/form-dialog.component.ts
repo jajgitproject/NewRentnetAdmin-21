@@ -372,7 +372,7 @@ export class FormDialogCIComponent
 
 //------------ Package -----------------
 // InitPackage(){
-//   debugger;
+//   
 //   this._generalService.GetPackagesForReservation(this.packageTypeID||this.advanceTable.packageTypeID,this.advanceTableForm.value.packageType||this.advanceTable.packageType,this.contractID).subscribe(
 //     data=>
 //     {

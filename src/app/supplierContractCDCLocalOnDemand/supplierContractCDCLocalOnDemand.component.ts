@@ -256,7 +256,7 @@ export class SupplierContractCDCLocalOnDemandComponent implements OnInit {
   }
    public loadData() 
    {
-  debugger;
+  
 
       switch (this.selectedFilter)
       {

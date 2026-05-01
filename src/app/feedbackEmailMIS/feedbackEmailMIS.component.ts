@@ -213,7 +213,7 @@ export class FeedbackEmailMISComponent implements OnInit {
   }
   
   // feedbackCall() {
-  //   debugger;
+  //   
   //   const selectedRows = this.selection.selected; // Get all selected rows
   //   if (selectedRows.length === 0) {
   //     // Show warning if no rows are selected
@@ -248,7 +248,7 @@ export class FeedbackEmailMISComponent implements OnInit {
   // }
 
   feedbackCall() {
-    debugger;
+    
     const selectedRows = this.selection.selected; // Get all selected rows
 
     if (selectedRows.length === 0) {

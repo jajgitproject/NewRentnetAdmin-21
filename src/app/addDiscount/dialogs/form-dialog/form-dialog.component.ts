@@ -74,7 +74,7 @@ export class FormDialogAddDiscountComponent
   }
   public Post(): void
   {
-    debugger;
+    
     this.advanceTableService.add(this.advanceTableForm.getRawValue())  
     .subscribe(
     response => 

@@ -279,7 +279,7 @@ export class DailyReportComponent implements OnInit {
             {
               if(this.MessageArray[2]=="Success")
               {
-                debugger;
+                
                this.refresh();
                this.showNotification(
                 'snackbar-success',

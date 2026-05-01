@@ -513,7 +513,7 @@ export class ReservationGroupDetailsComponent implements OnInit {
   //------- Add Duplicate Record ---------
   // duplicate(item:any)
   // {
-  //   debugger;
+  //   
   //   //item.numberOfBookings = item.numberOfBookings + 1;
   //   this.reservationGroupDetailsService.CreateDuplicate(item.reservationID)
   //   .subscribe(

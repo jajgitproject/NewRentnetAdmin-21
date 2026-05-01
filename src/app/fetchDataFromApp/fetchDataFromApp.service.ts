@@ -70,7 +70,7 @@ export class FetchDataFromAppService
   delete(fetchDataFromAppDetailsID
 : number):  Observable<any> 
   {
-    debugger;
+    
     return this.httpClient.delete(this.API_URL + '/'+ fetchDataFromAppDetailsID
 );
   }

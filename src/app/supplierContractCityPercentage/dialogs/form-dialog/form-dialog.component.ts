@@ -260,7 +260,7 @@ export class FormDialogComponentHolder {
       .subscribe(
         response => {
           this.isLoading = false;
-          //debugger;
+          
           this.dialogRef.close();
 
           this._generalService.sendUpdate('SupplierContractCityPercentageCreate:SupplierContractCityPercentageView:Success');//To Send Updates  
@@ -322,7 +322,7 @@ export class FormDialogComponentHolder {
             if (this.MessageArray[0] == "SupplierContractCityPercentageCreate") {
               if (this.MessageArray[1] == "SupplierContractCityPercentageView") {
                 if (this.MessageArray[2] == "Success") {
-                  //debugger;
+                  
 
                   this.showNotification(
                     'snackbar-success',

@@ -49,7 +49,7 @@ export class OtherDetailsDialogComponent
   {
         // Set the defaults
         this.action = data.action;
-        debugger;
+        
         if (this.action === 'edit') 
         {
           //this.dialogTitle ='Edit Other Details';       
@@ -130,7 +130,7 @@ export class OtherDetailsDialogComponent
   }
   
   getReservationSourceID(reservationSourceID: any) {
-    debugger;
+    
     this.reservationSourceID=reservationSourceID;
     this.advanceTableForm.patchValue({reservationSourceID:this.reservationSourceID || this.reservationSourceID});
   }
@@ -167,7 +167,7 @@ export class OtherDetailsDialogComponent
   }
   public Post(): void
   {
-    debugger;
+    
     this.advanceTableForm.patchValue({reservationID:this.ReservationID});
     this.advanceTableForm.patchValue({discountApprovedByEmployeeID:this.reservationDiscountDetailsByEmployeesID });
     this.advanceTableService.add(this.advanceTableForm.getRawValue())  

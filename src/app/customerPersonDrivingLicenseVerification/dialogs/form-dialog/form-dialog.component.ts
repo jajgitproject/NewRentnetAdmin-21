@@ -165,7 +165,7 @@ export class FormDialogComponentHolder {
       )
   }
   public Put(): void {
-    debugger;
+    
     this.saveDisabled=false;
     //this.advanceTableForm.patchValue({customerPersonID:this.advanceTable.customerPersonID});
     this.advanceTableService.update(this.advanceTableForm.getRawValue())

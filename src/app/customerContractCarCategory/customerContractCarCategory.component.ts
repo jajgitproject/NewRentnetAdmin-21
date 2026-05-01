@@ -477,7 +477,7 @@ export class CustomerContractCarCategoryComponent implements OnInit {
   // }
 
   // saveCustomerContractCarCategory() {
-  //   debugger;
+  //   
   //   this.customerContractCarCategoryService.SaveCustomerContractCarCategory(this.advanceTableForm).subscribe(
   //     response => {
   //       this._generalService.sendUpdate('CustomerContractCarCategoryCreate:CustomerContractCarCategoryView:Success');

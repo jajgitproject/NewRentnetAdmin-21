@@ -100,7 +100,7 @@ export class FormDialogComponent
   }
   
   getTitles(serviceTypeID: any) {
-    //debugger;
+    
     this.serviceTypeID=serviceTypeID;
   }
   formControl = new FormControl('', 
@@ -173,7 +173,7 @@ export class FormDialogComponent
   }
   public Put(): void
   {
-    //debugger;
+    
     this.advanceTableForm.patchValue({serviceTypeID:this.serviceTypeID || this.advanceTable.serviceTypeID});
     this.advanceTableService.update(this.advanceTableForm.getRawValue())  
     .subscribe(
@@ -192,7 +192,7 @@ export class FormDialogComponent
   }
   public confirmAdd(): void 
   {
-    //debugger;
+    
        if(this.action=="edit")
        {
           this.Put();

@@ -351,7 +351,7 @@ export class ControlPanelDialogeComponent {
 }
 
  DriverAllotment(reservationID: number, reservationGroupID: number, pickupDate: any, pickupAddress: any) {
-  // debugger;
+  // 
 
   if (!reservationGroupID) {
     console.warn('⚠️ reservationGroupID is missing!');
@@ -432,7 +432,7 @@ export class ControlPanelDialogeComponent {
   }
 
   CovertSoftToHard(item: any, i: any) {
-    debugger;
+    
     if (item.allotmentStatus === 'Alloted') {
       const dialogRef = this.dialog.open(SoftToHardDialogComponent,
         {

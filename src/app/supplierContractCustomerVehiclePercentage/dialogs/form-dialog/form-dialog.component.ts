@@ -372,7 +372,7 @@ export class FormDialogComponentHolder {
             if (this.MessageArray[0] == "SupplierContractCustomerVehiclePercentageCreate") {
               if (this.MessageArray[1] == "SupplierContractCustomerVehiclePercentageView") {
                 if (this.MessageArray[2] == "Success") {
-                  debugger;
+                  
 
                   this.showNotification(
                     'snackbar-success',

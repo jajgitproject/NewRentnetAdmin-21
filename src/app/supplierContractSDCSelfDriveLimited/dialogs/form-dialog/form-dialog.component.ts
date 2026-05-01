@@ -157,7 +157,7 @@ export class FormDialogComponent {
   }
 
   getTitles(vehicleCategoryID: any) {
-    //debugger;
+    
     this.vehicleCategoryID = vehicleCategoryID;
   }
 
@@ -208,7 +208,7 @@ export class FormDialogComponent {
 
 
   getcityTierID(cityTierID: any) {
-    //debugger;
+    
     this.cityTierID = cityTierID;
   }
 
@@ -259,7 +259,7 @@ export class FormDialogComponent {
   }
 
   getpackageID(packageID: any) {
-    //debugger;
+    
     this.packageID = packageID;
   }
 

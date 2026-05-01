@@ -150,7 +150,7 @@ onCountryInputChange(event: any) {
 }
 
 OnCountryChangeGetStates(){ 
-  debugger;
+  
   this._generalService.GetStates(this.geoPointID).subscribe(
     data =>
     {
@@ -232,11 +232,11 @@ getCityID(payerCityID: any) {
 //             this.countryOnStateID=ele.geoPointID;
 //             this.stateOnCityID = ele.geoPointID;
 //             this.advanceTableForm.controls["countryID"].setValue(this.countryOnStateID);
-//             debugger;
+//             
 //             this._generalService.GetStates(this.countryOnStateID).subscribe(
 //           data =>
 //           {
-//             debugger;
+//             
 //             this.StateList = data; 
 //             //console.log(this.StateList);                   
 //           },
@@ -268,11 +268,11 @@ getCountryBasedOnState(){
             this.countryOnStateID=ele.geoPointID;
             this.geoPointID = ele.geoPointID;
             this.advanceTableForm.controls["countryID"].setValue(this.countryOnStateID);
-            debugger;
+            
             this._generalService.GetStates(this.countryOnStateID).subscribe(
           data =>
           {
-            debugger;
+            
             this.StateList = data; 
           },
           error=>

@@ -174,7 +174,7 @@ getPaymentModeID(paymentModeID: any)
 
   public Put(): void
   {
-   debugger; 
+    
     this.advanceTableForm.patchValue({reservationID:this.reservationID});
     this.advanceTableForm.patchValue({previousModeOfPaymentID:this.previousModeOfPaymentID})
     this.advanceTableService.update(this.advanceTableForm.getRawValue())  

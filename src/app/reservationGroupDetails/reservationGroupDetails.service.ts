@@ -102,7 +102,7 @@ export class ReservationGroupDetailsService
 
   update(advanceTable: ReservationGroupModel)
   {
-    debugger;
+    
     if(!advanceTable.salesExecutiveID)
       {
         advanceTable.salesExecutiveID=0;

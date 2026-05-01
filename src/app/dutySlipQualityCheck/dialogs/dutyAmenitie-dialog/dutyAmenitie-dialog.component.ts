@@ -122,7 +122,7 @@ this.buttonDisabled = normalized !== 'changes allow';
       }
     }
     getAmenitieID(amenitieID: any) {
-      debugger;
+      
       this.amenitieID=amenitieID;
       this.advanceTableForm.patchValue({amenitieID : this.amenitieID});
     }

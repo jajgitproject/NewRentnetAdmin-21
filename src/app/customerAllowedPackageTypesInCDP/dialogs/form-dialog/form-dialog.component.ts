@@ -322,7 +322,7 @@ InitPackageTypes(){
   }
   
   getTitles(packageTypeID: any) {
-    //debugger;
+    
     this.packageTypeID=packageTypeID;
     this.advanceTableForm.patchValue({packageTypeID:this.packageTypeID});
   }

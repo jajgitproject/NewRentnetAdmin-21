@@ -78,7 +78,7 @@ export class SupplierContractVehiclePercentageService
 
   add(advanceTable: SupplierContractVehiclePercentage) 
   {
-    //debugger;
+    
     advanceTable.supplierContractVehiclePercentageID=-1;
     advanceTable.userID=this.generalService.getUserID();
     advanceTable.fromDateString=this.generalService.getTimeApplicable(advanceTable.fromDate);

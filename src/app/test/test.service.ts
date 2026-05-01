@@ -51,7 +51,7 @@ export class TestService
   }
   update(advanceTable: Test)
   {
-    debugger;
+    
     advanceTable.updatedBy=this.generalService.getUserID();
     advanceTable.updateDateTime= this.generalService.getTodaysDate();
     advanceTable.dobString=this.generalService.getTimeFromS(advanceTable.dob);

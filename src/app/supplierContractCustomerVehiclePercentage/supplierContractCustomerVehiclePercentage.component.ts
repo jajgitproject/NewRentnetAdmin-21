@@ -311,7 +311,7 @@ export class SupplierContractCustomerVehiclePercentageComponent implements OnIni
             {
               if(this.MessageArray[2]=="Success")
               {
-                debugger;
+                
                 this.refresh();
                 this.showNotification(
                 'snackbar-success',
@@ -447,7 +447,7 @@ export class SupplierContractCustomerVehiclePercentageComponent implements OnIni
     );
   }
   SortingData(coloumName:any) {
-    debugger;
+    
     if (this.sortingData == 1) {
 
       this.sortingData = 0;

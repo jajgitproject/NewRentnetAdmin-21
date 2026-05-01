@@ -40,7 +40,7 @@ export class PickupDetailsService
 
   add(advanceTable: PickupDetails) 
   {
-    debugger;
+    
     advanceTable.stopDateString=this.generalService.getDateFrom(advanceTable.stopDate);
     advanceTable.stopTimeString=this.generalService.getDateTo(advanceTable.stopTime);
     advanceTable.pickupDetailsID=-1;

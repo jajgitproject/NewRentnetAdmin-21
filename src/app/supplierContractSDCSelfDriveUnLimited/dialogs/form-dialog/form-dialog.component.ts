@@ -161,7 +161,7 @@ onVehicleCategorySelected(selectedVehicleCategory: string) {
   }
 }
 getTitles(vehicleCategoryID: any) {
-  //debugger;
+  
   this.vehicleCategoryID=vehicleCategoryID;
 }
 
@@ -212,7 +212,7 @@ onCityTierSelected(selectedCityTier: string) {
   }
 }
 getcityTierID(cityTierID: any) {
-  //debugger;
+  
   this.cityTierID=cityTierID;
 }
 
@@ -267,7 +267,7 @@ onPackageSelected(selectedPackage: string) {
 }
 
 getpackageID(packageID: any) {
-  //debugger;
+  
   this.packageID=packageID;
 }
 

@@ -817,7 +817,7 @@ public Post(): void {
     .subscribe(
     response => 
     {
-      debugger;
+      
          if (response.status === 'Failure') {
         this.showNotification('snackbar-danger', response.message, 'bottom', 'center');
         this.saveDisabled = true;

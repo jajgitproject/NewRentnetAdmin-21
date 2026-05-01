@@ -187,7 +187,7 @@ export class FormDialogComponent
   }
 
   SortingData(coloumName:any) {
-   debugger;
+   
     if (this.sortingData == 1) {
 
       this.sortingData = 0;
@@ -214,7 +214,7 @@ export class FormDialogComponent
   }
   // public loadData() 
   //  {
-  //   debugger;
+  //   
   //     this.advanceTableService.getTableData(this.reservationID,this.SearchActivationStatus, this.PageNumber).subscribe
   //   (
   //     data =>   

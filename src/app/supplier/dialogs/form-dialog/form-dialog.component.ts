@@ -118,7 +118,7 @@ export class FormDialogComponent
 
   OnInternalExternalChange()
   {
-    debugger;
+    
     if(this.advanceTableForm.value.internalExternal==="Internal")
     {
       this.InitCompany();
@@ -576,7 +576,7 @@ onCompanySelected(selectedCompanyName: string) {
 }
 
 getCompanyID(organizationalEntityID: any) {
-  debugger;
+  
   this.companyID=organizationalEntityID;
   this.advanceTableForm.patchValue({ifCreatedFromCompanyReferenceCompanyID:this.companyID});
 }

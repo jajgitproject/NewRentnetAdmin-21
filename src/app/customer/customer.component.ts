@@ -1131,7 +1131,7 @@ else if (menuItem.label.toLowerCase() === 'customer growth person') {
 }
 
 // openInNewTab(menuItem: any, rowItem: any) {
-//   debugger;
+//   
 //   let baseUrl = this._generalService.FormURL;
 //   const encryptedCustomerID = encodeURIComponent(this._generalService.encrypt(rowItem.customerID.toString()));
 //   const encryptedCustomerName = encodeURIComponent(this._generalService.encrypt(rowItem.customerName));

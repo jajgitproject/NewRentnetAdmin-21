@@ -65,7 +65,7 @@ export class FormDialogComponent
     private snackBar: MatSnackBar,
   public _generalService:GeneralService)
   {
-    debugger;   
+       
     // Set the defaults
         this.action = data.action;
         if (this.action === 'edit') 
@@ -147,7 +147,7 @@ export class FormDialogComponent
   }
   
   getTitles(geoPointTypeID: any) {
-    //debugger;
+    
     this.geoPointTypeID=geoPointTypeID;
   }
 
@@ -189,7 +189,7 @@ export class FormDialogComponent
   }
 
   onParentSelected(selectedSParentName: string) {
-    debugger;
+    
     const selectedParent = this.SpotInCityList.find(
       parent => parent.geoPointName === selectedSParentName
     );

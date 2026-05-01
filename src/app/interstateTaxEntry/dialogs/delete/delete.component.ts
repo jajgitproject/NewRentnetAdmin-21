@@ -26,7 +26,7 @@ export class DeleteDialogComponent
   }
   confirmDelete()
   {
-    debugger;
+    
     this.advanceTableService.delete(this.data.interstateTaxID)  
     .subscribe(
     data => 

@@ -152,7 +152,7 @@ export class RolePageMappingComponent implements OnInit {
   }
    public loadData() 
    {
-    debugger;
+    
     if(this.selectedFilter==='Page')
       {
         this.page.setValue(this.searchTerm);

@@ -67,7 +67,7 @@ export class PackageTypeService
   }
   update(advanceTable: PackageType)
   {
-    //debugger;
+    
     advanceTable.userID=this.generalService.getUserID();
     return this.httpClient.put<any>(this.API_URL , advanceTable);
   }

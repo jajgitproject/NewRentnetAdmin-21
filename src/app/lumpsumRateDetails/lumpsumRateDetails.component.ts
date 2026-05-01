@@ -224,7 +224,7 @@ export class LumpsumRateDetailsComponent implements OnInit {
   }
   LumpsumRate(i:any)
   {
-    debugger;
+    
     const dialogRef = this.dialog.open(LumpsumRateDetailsDialogComponent, 
       {
         data: 

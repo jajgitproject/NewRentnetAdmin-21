@@ -194,7 +194,7 @@ export class FormDialogPersonShortComponent
   }
   
   getTitles(salutationID: any) {
-    debugger;
+    
     this.salutationID=salutationID;
   }
 
@@ -222,7 +222,7 @@ export class FormDialogPersonShortComponent
   }
   
   getDesignation(customerDesignationID: any) {
-    debugger;
+    
     this.customerDesignationID=customerDesignationID;
   }
   InitCustomerDepartment(){
@@ -248,7 +248,7 @@ export class FormDialogPersonShortComponent
   }
   
   getDepartment(customerDepartmentID: any) {
-    debugger;
+    
     this.customerDepartmentID=customerDepartmentID;
   }
 

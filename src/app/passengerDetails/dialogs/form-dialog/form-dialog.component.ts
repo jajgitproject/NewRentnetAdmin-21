@@ -272,7 +272,7 @@ showNotification(colorName, text, placementFrom, placementAlign) {
     }
   
   onPickupStopSelected(selectedStateName: string) {
-    debugger;
+    
     const selectedState = this.ReservationStopList.find(
       data => data.reservationStopAddress === selectedStateName
     );
@@ -323,7 +323,7 @@ showNotification(colorName, text, placementFrom, placementAlign) {
     }
 
   onDropOffStopSelected(selectedStateName: string) {
-    debugger;
+    
     const selectedState = this.ReservationDropOffStopList.find(
       data => data.reservationStopAddress === selectedStateName
     );
@@ -372,7 +372,7 @@ showNotification(colorName, text, placementFrom, placementAlign) {
     }
   
   onPassengerSelected(selectedStateName: string) {
-    debugger;
+    
     const selectedState = this.PassengerList.find(
       data => data.customerPersonName +'-'+
       data.gender +'-'+

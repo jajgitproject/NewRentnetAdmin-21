@@ -191,7 +191,7 @@ export class FormDialogCustomerShortComponent
 
   onCustomerTypeChange()
   {
-    debugger;
+    
     if(this.advanceTableForm.value.customerType==='Corporate Individual')
     {
       this.corporate=true;
@@ -362,7 +362,7 @@ export class FormDialogCustomerShortComponent
     
   // };
   // getCategoryID(customerCategoryID: any) {
-  //   debugger;
+  //   
   //   this.customerCategoryID=customerCategoryID;
   // }
 
@@ -470,7 +470,7 @@ export class FormDialogCustomerShortComponent
   }
 
   // GetStateBasedOnCity(){
-  //   debugger;
+  //   
   //   this._generalService.GetStateAgainstCity(this.advanceTableForm.value.registrationCityID).subscribe(
   //     data=>{
   //       this.StatesLists=data;

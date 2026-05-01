@@ -81,7 +81,7 @@ export class FormDialogDropOffDetailsComponent
   }
 
   public handleAddressChange(address: any) {
-    debugger;
+    
     let tempCity = null;
     address.address_components.forEach(element => {
       if(element.types[0] == 'locality' && tempCity == null) {
@@ -147,7 +147,7 @@ export class FormDialogDropOffDetailsComponent
   }
   public Post(): void
   {
-    //debugger;
+    
 
   // this.advanceTableForm.patchValue({ cityGeoName: this.advanceTable.cityGeoName });
    this.advanceTableForm.patchValue({ stopAddressGeoLocation: this.advanceTable.stopAddressGeoLocation });
@@ -181,7 +181,7 @@ export class FormDialogDropOffDetailsComponent
   }
   public Put(): void
   {
-    debugger;
+    
     this.advanceTableService.update(this.advanceTableForm.getRawValue())  
     .subscribe(
     response => 
@@ -207,7 +207,7 @@ this.SubscribeUpdateService();
   }
   public confirmAdd(): void 
   {
-    debugger;
+    
        if(this.action=="edit")
        {
           this.Put();
@@ -220,7 +220,7 @@ this.SubscribeUpdateService();
 
   public loadDataFD() 
   {
-    debugger;
+    
     this.reservationID=this.idForReservation
      this.advanceTableService.getTableData( this.reservationID,this.dropOffDetailsID,this.stopType,this.SearchActivationStatus, this.PageNumber).subscribe
    (
@@ -249,7 +249,7 @@ this.SubscribeUpdateService();
 
   SubscribeUpdateService()
   {
-    debugger;
+    
     this.subscriptionName=this._generalService.getUpdate().subscribe
     (
       message => 

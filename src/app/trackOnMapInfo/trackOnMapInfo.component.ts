@@ -78,7 +78,7 @@ generateMapUrl(): void {
 
   }
   getTrackOnMap() {
-    debugger;
+    
     this.trackOnMapInfoService.getTrackOnMapInfo(this.dutySlipID).subscribe(
       data => {
         this.dataSource = data;

@@ -1497,7 +1497,7 @@ export class DutySlipForBillingComponent implements OnInit {
   // }
 
   onVDChange(event: any) {
-    //debugger;
+    
   const isChecked = event.checked;
 
   if (!this.advanceTableBH) {

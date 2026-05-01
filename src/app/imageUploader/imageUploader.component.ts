@@ -24,7 +24,7 @@ export class ImageUploaderComponent implements OnInit {
     const formData = new FormData();
     formData.append('file', fileToUpload, fileToUpload.name);
 
-  debugger;
+  
     this.http.post(this._generalService.getBaseURL() + 'fileupload' , formData, { reportProgress: true, observe: 'events'})
       .subscribe(
         event =>

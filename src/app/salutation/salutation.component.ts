@@ -185,7 +185,7 @@ export class SalutationComponent implements OnInit {
     (
       message => 
       { 
-        //debugger;
+        
         //message contains the data sent from service
         this.messageReceived = message.text;
         this.MessageArray=this.messageReceived.split(":");
@@ -197,7 +197,7 @@ export class SalutationComponent implements OnInit {
             {
               if(this.MessageArray[2]=="Success")
               {
-                //debugger;
+                
                 this.refresh();
                 this.showNotification(
                 'snackbar-success',
@@ -278,7 +278,7 @@ export class SalutationComponent implements OnInit {
   }
 
   SortingData(coloumName:any) {
-    //debugger;
+    
     if (this.sortingData == 1) {
 
       this.sortingData = 0;

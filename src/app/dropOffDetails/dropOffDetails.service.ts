@@ -40,7 +40,7 @@ export class DropOffDetailsService
 
   add(advanceTable: DropOffDetails) 
   {
-    debugger;
+    
     advanceTable.stopDateString=this.generalService.getDateFrom(advanceTable.stopDate);
     advanceTable.stopTimeString=this.generalService.getDateTo(advanceTable.stopTime);
     advanceTable.dropOffDetailsID=-1;

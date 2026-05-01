@@ -51,7 +51,7 @@ export class AdditionalServiceRateService
   }
   add(advanceTable: AdditionalServiceRate) 
   {
-    debugger;
+    
     advanceTable.additionalServiceRateID=-1;
     advanceTable.userID=this.generalService.getUserID();
     advanceTable.startDateString=this.generalService.getTimeFromS(advanceTable.startDate);

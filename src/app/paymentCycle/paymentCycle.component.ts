@@ -303,7 +303,7 @@ shouldShowDeleteButton(item: any): boolean {
   }
 
   SortingData(coloumName:any) {
-    //debugger;
+    
     if (this.sortingData == 1) {
 
       this.sortingData = 0;

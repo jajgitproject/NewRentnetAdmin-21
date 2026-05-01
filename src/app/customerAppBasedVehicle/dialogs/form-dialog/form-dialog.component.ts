@@ -241,7 +241,7 @@ getvehicleID(vehicleID: any)
   }
   public Post(): void
   {
-    debugger;
+    
     this.advanceTableForm.patchValue({customerID:this.data.customerID });
     this.advanceTableService.add(this.advanceTableForm.getRawValue())  
     .subscribe(
