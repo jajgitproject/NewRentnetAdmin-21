@@ -2360,8 +2360,6 @@ DTValidator(PackageTypeList: any[]): ValidatorFn {
   //------------ Service Location -----------------
   InitServiceLocationBasedOnCity()
   { 
-    // Skip until a pickup city is selected; otherwise the URL ends in
-    // "undefined" and the backend returns 400 on page load.
     if (!this.cityID) { return; }
     this._generalService.GetLocationBasedOnCity(this.cityID).subscribe(
       data=>
@@ -2391,7 +2389,7 @@ DTValidator(PackageTypeList: any[]): ValidatorFn {
   SLValidator(ServiceLocationList: any[]): ValidatorFn {
       return (control: AbstractControl): ValidationErrors | null => {
         const value = control.value?.toLowerCase();
-        const match = ServiceLocationList.some(data => (data.organizationalEntityName.toLowerCase()) === value);
+        const match = ServiceLocationList?.some(data => (data.organizationalEntityName.toLowerCase()) === value);
         return match ? null : { serviceLocationeInvalid: true };
       };
     }
