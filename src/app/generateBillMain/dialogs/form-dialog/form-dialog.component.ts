@@ -43,8 +43,8 @@ export class FormDialogComponent
   filteredStateOptions: Observable<StateDropDown[]>;
   stateID: any;
 
-  public CityList?: CitiesDropDown[] = [];
-  filteredCityOptions: Observable<CitiesDropDown[]>;
+  public CityList?: CustomerCityModel[] = [];
+  filteredCityOptions: Observable<CustomerCityModel[]>;
   cityID: any;
 
   public VehicleList?: VehicleDropDown[] = [];
@@ -105,6 +105,7 @@ export class FormDialogComponent
           this.advanceTable.activationStatus=true;
         }
         this.advanceTableForm = this.createContactForm();
+        this.advanceTableForm.controls["invoiceDate"].disable();
   }
   
   createContactForm(): FormGroup 
@@ -154,11 +155,11 @@ export class FormDialogComponent
 
   public ngOnInit()
   {
-    this.InitGuest();
+    //this.InitGuest();
     this.InitOrganizationalEntity();
-    this.InitCustomer();
-    this.InitState();
-    this.InitCity();
+    //this.InitCustomer();
+    //this.InitState();
+    //this.InitCity();
     this.InitIGSTPercentage();
     this.InitCSGSTPercentage();
     
@@ -186,9 +187,15 @@ export class FormDialogComponent
   }
   
   //------------- Guest's Drop Down -------------
-  InitGuest()
+  onKeyUpGuest()
   {
-    this._generalService.getCustomerPerson().subscribe(
+     var Prefix = this.advanceTableForm.get("passengerName").value;
+      if(Prefix.length < 3)
+      { 
+        this.AnotherDriverList = [];
+        return;
+      }
+    this._generalService.getCustomerPersonPrefix(Prefix).subscribe(
       data=>
       {
         this.CustomerPersonList=data;
@@ -272,9 +279,15 @@ export class FormDialogComponent
   }
 
   //------------- Customer's Drop Down -------------
-  InitCustomer()
+  onKeyUpCustomer()
   {
-    this._generalService.getCustomer().subscribe(
+     var Prefix = this.advanceTableForm.get("customer").value;
+      if(Prefix.length < 3)
+      { 
+        this.AnotherDriverList = [];
+        return;
+      }
+    this._generalService.getCustomerPrefix(Prefix).subscribe(
     data=>
       {
         this.CustomerList=data;
@@ -309,8 +322,9 @@ export class FormDialogComponent
     this.customerDetailData={customerGroup:this.customerGroup,customerGroupID:this.customerGroupID}
     this.advanceTableForm.patchValue({customerID:this.customerID});
     
+    this.InitState(this.customerID);
     // Auto-populate customer address details
-    this.fetchCustomerAddressDetails(customerID);
+   // this.fetchCustomerAddressDetails(customerID);
   }
 
   // Method to fetch customer address details from API
@@ -534,9 +548,9 @@ export class FormDialogComponent
   }
 
   //------------- State's Drop Down -------------
-  InitState()
+  InitState(customerID)
   {
-    this._generalService.getStateForInterstateTax().subscribe(
+    this._generalService.getStateForCustomer(customerID).subscribe(
       data=>
         {
           this.StateList=data;
@@ -567,6 +581,8 @@ export class FormDialogComponent
   {
     this.stateID=geoPointID;
     this.advanceTableForm.patchValue({stateID:this.stateID});
+    this.InitCity(this.stateID);
+    
   }
   stateValidator(StateLists: any[]): ValidatorFn {
     return (control: AbstractControl): ValidationErrors | null => {
@@ -577,16 +593,17 @@ export class FormDialogComponent
   }
 
   //------------- City's Drop Down -------------
-  InitCity(){
-    this._generalService.GetCitiessAll().subscribe(
+  InitCity(stateID){
+    this._generalService.getCityForCustomer(stateID,this.customerID).subscribe(
       data=>
       {
         this.CityList=data;
+        console.log("City List:", this.CityList); // Debugging log
         this.advanceTableForm.controls['city'].setValidators([Validators.required,
           this.cityValidator(this.CityList)
         ]);
+        
         this.advanceTableForm.controls['city'].updateValueAndValidity();
-
         this.filteredCityOptions = this.advanceTableForm.controls['city'].valueChanges.pipe(
           startWith(""),
           map(value => this._filterCity(value || ''))
@@ -605,10 +622,13 @@ export class FormDialogComponent
       }
     );
   }
-  getTitle(geoPointID: any) 
+  getTitle(geoPointID: any,option) 
   {
     this.cityID=geoPointID;
-    this.advanceTableForm.patchValue({cityID:this.cityID});
+    this.advanceTableForm.patchValue({cityID:this.cityID,
+       billingAddress: option.billingAddress,
+    pinCode: option.billingPin
+    });
   }
   cityValidator(CityList: any[]): ValidatorFn {
     return (control: AbstractControl): ValidationErrors | null => {

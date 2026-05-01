@@ -1213,6 +1213,12 @@ GetVehicleBasedOnContractIDForOutStationRoundTrip(contractID: any,PackageID:numb
   getStateForInterstateTax(): Observable<StateDropDown[]> {
     return this.http.get<StateDropDown[]>(this.BaseURL + "city/ForDropDowns");
   }
+   getStateForCustomer(customerID: number): Observable<StateDropDown[]> {
+    return this.http.get<StateDropDown[]>(this.BaseURL + "customer/getStateDropDowns/" + customerID);
+  }
+   getCityForCustomer(stateID: number, customerID: number): Observable<CustomerCityModel[]> {
+    return this.http.get<CustomerCityModel[]>(this.BaseURL + "customer/GetCityForCustomer/" + stateID + "/" + customerID);
+  }
 
   GetStates(countryID: number): Observable<StatesDropDown[]> {
     
@@ -1377,6 +1383,9 @@ getCustomerType(): Observable<CustomerTypeDropDown[]> {
 getCustomerPerson(): Observable<CustomerPersonDropDown[]> {
   return this.http.get<CustomerPersonDropDown[]>(this.BaseURL + "CustomerPerson/ForDropDown");
 }
+getCustomerPersonPrefix(Prefix: string): Observable<CustomerPersonDropDown[]> {
+  return this.http.get<CustomerPersonDropDown[]>(this.BaseURL + "CustomerPerson/ForDropDownPrefix/" + Prefix);
+}
 
 GetCPForBooker(customerGroupID:number): Observable<CustomerPersonDropDown[]> {
   return this.http.get<CustomerPersonDropDown[]>(this.BaseURL + "CustomerPerson/getCPForBooker/"+customerGroupID);
@@ -1439,6 +1448,10 @@ GetIGSTPercentage(): Observable<IGSTPercentageDropDown[]> {
 getCustomer(): Observable<CustomerCustomerGroupDropDown[]> {
   return this.cachedGet('getCustomer', () =>
     this.http.get<CustomerCustomerGroupDropDown[]>(this.BaseURL + "Customer/ForDropDown"));
+}
+getCustomerPrefix(Prefix: string): Observable<CustomerCustomerGroupDropDown[]> {
+
+    return this.http.get<CustomerCustomerGroupDropDown[]>(this.BaseURL + "Customer/ForDropDownPrefix/" + Prefix);
 }
 
 GetCSGSTPercentage(): Observable<CSGSTPercentageDropDown[]> {
@@ -1615,6 +1628,9 @@ getCustomerCategory(): Observable<CustomerCategoryDropDown[]>{
   }
   GetVehicleCategoryBasedOnRegistrationNumber(supplierID:number): Observable<any[]> {
     return this.http.get<any[]>(this.BaseURL + "customerPersonDriverRestriction/getVehicleCategoryBasedOnRegistrationNumber/"+supplierID);
+  }
+  getCustomerForInvoice(Prefix: string): Observable<CustomerDropDown[]>{
+    return this.http.get<CustomerDropDown[]>(this.BaseURL + "customer/ForSearchInvoiceHome/"+Prefix);
   }
 }
 

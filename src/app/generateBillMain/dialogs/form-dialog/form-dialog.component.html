@@ -47,7 +47,7 @@
                 <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
                     <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
                         <mat-label>Customer</mat-label>
-                        <input required matInput formControlName="customer" [matAutocomplete]="auto1">
+                        <input (keyup)="onKeyUpCustomer()" required matInput formControlName="customer" [matAutocomplete]="auto1">
                         <mat-autocomplete #auto1="matAutocomplete">
                             <mat-option *ngFor="let options of filteredCustomerOptions | async"
                                 [value]="options.customerName" 
@@ -85,7 +85,7 @@
                         <input required matInput formControlName="city" [matAutocomplete]="auto3">
                         <mat-autocomplete #auto3="matAutocomplete">
                             <mat-option *ngFor="let option of filteredCityOptions | async"
-                                [value]="option.geoPointName" (click)="getTitle(option.geoPointID)">
+                                [value]="option.geoPointName" (click)="getTitle(option.geoPointID,option)">
                                 {{option.geoPointName}}
                             </mat-option>
                         </mat-autocomplete>
@@ -120,7 +120,7 @@
                 <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
                     <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
                         <mat-label>Guest</mat-label>
-                        <input required type="text" matInput formControlName="passengerName" [matAutocomplete]="auto4">
+                        <input (keyup)="onKeyUpGuest()" required type="text" matInput formControlName="passengerName" [matAutocomplete]="auto4">
                         <mat-autocomplete #auto4="matAutocomplete">
                             <mat-option *ngFor="let option of filteredCustomerPersonOptions | async"
                             [value]="option.customerPersonName" (click)="getCustomerPersonID(option.customerPersonID)"> 

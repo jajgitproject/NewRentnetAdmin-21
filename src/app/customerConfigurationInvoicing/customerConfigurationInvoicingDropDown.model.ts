@@ -13,3 +13,22 @@ export class CustomerConfigurationInvoicingDropDown {
   
 }
 
+export class CustomerCityModel {
+   geoPointID: number;
+   geoPointName: string;
+   billingAddress: string;
+   billingPin: string;
+
+  constructor(customerCityModel) {
+    {
+       this.geoPointID = customerCityModel.geoPointID || '';
+       this.geoPointName = customerCityModel.geoPointName || '';
+       this.billingAddress = customerCityModel.billingAddress || '';
+       this.billingPin = customerCityModel.billingPin || '';
+    }
+  }
+  
+}
+
+
+
