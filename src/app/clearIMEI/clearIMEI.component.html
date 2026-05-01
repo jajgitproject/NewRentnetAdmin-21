@@ -8,12 +8,12 @@
                             <a routerLink="/dashboard/main">
                                 <i class="fas fa-home"></i> Home</a>|
                             <a href="#" onClick="return false;">Admin</a>|
-                            <a href="#" onClick="return false;">Driver</a>
+                            <a href="#" onClick="return false;">Clear IMEI</a>
                         </li>
                     </ul>
                     <ul class="breadcrumb breadcrumb-style ">
                         <li class="breadcrumb-item">
-                            <h2>Driver</h2>
+                            <h2>Clear IMEI</h2>
                         </li>
                     </ul>
                 </div>
@@ -194,11 +194,11 @@
                                             data-toggle="modal" data-backdrop="false" data-target="#exampleModalCenter">
                                             Search
                                         </button>
-                                        &nbsp;
+                                        <!-- &nbsp;
                                         <button mat-mini-fab color="primary" (click)="addNew()">
                                             <mat-icon class="col-white">add</mat-icon>
-                                        </button>
-                                        &nbsp;
+                                        </button> -->
+                                        <!-- &nbsp; -->
                                         <button mat-mini-fab color="primary" (click)="refresh()">
                                             <mat-icon class="col-white">refresh</mat-icon>
                                         </button>
@@ -322,10 +322,16 @@
                                             <mat-cell *matCellDef="let row; let i=index;" class="pr-0"
                                                 [ngClass]="'tbl-col-width-per-9'">
 
-                                                <button mat-raised-button color="primary"
+                                                <!-- <button mat-raised-button color="primary"
                                                     (contextmenu)="onContextMenu($event, row)"
                                                     (click)="onContextMenu($event, row)">
                                                     Actions
+                                                </button> -->
+
+                                                <button mat-raised-button color="primary"
+                                                        style="min-width:105px"
+                                                        (click)="confirmClearIMEI(row)">
+                                                Clear IMEI
                                                 </button>
                                             </mat-cell>
                                         </ng-container>
@@ -362,11 +368,11 @@
                                             <span>Delete</span>
                                         </button>
 
-                                        <!-- <button *ngIf="shouldShowDeleteButton(item)" mat-menu-item
+                                        <button *ngIf="shouldShowDeleteButton(item)" mat-menu-item
                                             (click)="confirmClearIMEI(item)">
                                             <mat-icon>delete</mat-icon>
                                             <span>Clear IMEI</span>
-                                        </button> -->
+                                        </button>
                                         <!-- <button  mat-menu-item (click)="DriverDrivingLicense(item)">
                                             <mat-icon>how_to_reg</mat-icon>
                                             <span>Driver Driving License</span>

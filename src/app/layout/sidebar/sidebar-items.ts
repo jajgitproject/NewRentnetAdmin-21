@@ -299,6 +299,17 @@ export const ROUTES: RouteInfo[] = [
       },
 
       {
+        path: 'clearIMEI',
+        title: 'Clear IMEI',
+        moduleName: 'clearIMEI',
+        icon: 'fas fa-tachometer-alt',
+        class: '',
+        groupTitle: false,
+        submenu: [],
+        isAccess: false
+      },
+
+      {
         path: 'carMasterMIS',
         title: 'Car Master MIS',
         moduleName: 'carMasterMIS',

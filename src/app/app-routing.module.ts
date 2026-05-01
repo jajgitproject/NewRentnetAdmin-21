@@ -112,6 +112,14 @@ const routes: Routes = [
       },
 
       {
+        path: 'clearIMEI',
+        loadChildren: () =>
+          import('./clearIMEI/clearIMEI.module').then(
+            (m) => m.ClearIMEIModule
+          )
+      },
+
+      {
         path: 'changeCarType',
         loadChildren: () =>
           import('./changeCarType/changeCarType.module').then(
