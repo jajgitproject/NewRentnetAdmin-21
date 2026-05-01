@@ -622,10 +622,10 @@ export class FormDialogComponent
       data=>
       {
         this.CityList=data;
-        this.advanceTableForm.controls['registrationCity'].setValidators([Validators.required,
+        this.advanceTableForm.controls['registrationCity']?.setValidators([Validators.required,
           this.registrationCityValidator(this.CityList)]);
-        this.advanceTableForm.controls['registrationCity'].updateValueAndValidity();
-        this.filteredCityOptions = this.advanceTableForm.controls['registrationCity'].valueChanges.pipe(
+        this.advanceTableForm.controls['registrationCity']?.updateValueAndValidity();
+        this.filteredCityOptions = this.advanceTableForm.controls['registrationCity']?.valueChanges.pipe(
           startWith(""),
           map(value => this._filterCity(value || ''))
         ); 
@@ -814,10 +814,10 @@ export class FormDialogComponent
       data=>
       {
         this.TransmissionTypeList=data;
-        this.advanceTableForm.controls['transmissionType'].setValidators([Validators.required,
+        this.advanceTableForm.controls['transmissionType']?.setValidators([Validators.required,
           this.transmissionTypeValidator(this.TransmissionTypeList)]);
-        this.advanceTableForm.controls['transmissionType'].updateValueAndValidity();
-        this.filteredtransmissionTypeOptions =this.advanceTableForm.controls['transmissionType'].valueChanges.pipe(
+        this.advanceTableForm.controls['transmissionType']?.updateValueAndValidity();
+        this.filteredtransmissionTypeOptions =this.advanceTableForm.controls['transmissionType']?.valueChanges.pipe(
           startWith(""),
           map(value => this._filtertransmissionType(value || ''))
         ); 
