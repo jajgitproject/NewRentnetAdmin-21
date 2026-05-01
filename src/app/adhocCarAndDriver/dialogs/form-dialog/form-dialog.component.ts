@@ -131,6 +131,7 @@ copydetails:boolean = false;
   {
         // Set the defaults
         this.action = data.action;
+        console.log(this.data)
         this.advanceTable = data;
         if (this.action === 'edit') 
         {
@@ -175,7 +176,7 @@ copydetails:boolean = false;
   }
   public ngOnInit(): void
   {
-    this.InitLocation();
+   // this.InitLocation();
     this.InitState();
     this.InitSupplier();
     // this.InitDriver();
@@ -206,9 +207,9 @@ copydetails:boolean = false;
   }
   private _filterCompany(value: string): any {
     const filterValue = value.toLowerCase();
-    if(filterValue.length === 0) {
-      return [];
-    }
+    // if(filterValue.length === 0) {
+    //   return [];
+    // }
     return this.CompanyList.filter(
       customer => 
       {
@@ -386,9 +387,9 @@ copydetails:boolean = false;
 
   private _filterDriver(value: string): any {
     const filterValue = value.toLowerCase();
-    if(filterValue.length === 0) {
-      return [];
-    }
+    // if(filterValue.length === 0) {
+    //   return [];
+    // }
     return this.DriverList.filter(
       customer => 
       {
@@ -581,9 +582,9 @@ copydetails:boolean = false;
   
   private _filterRegistrationNumber(value: string): any {
     const filterValue = value.toLowerCase().trim();
-    if(filterValue.length === 0) {
-      return [];
-    }
+    // if(filterValue.length === 0) {
+    //   return [];
+    // }
     return this.RegistrationNumberList.filter(
       customer => 
       {
@@ -620,6 +621,8 @@ copydetails:boolean = false;
           this.advanceTableForm.patchValue({vehicleID:this.advanceTable?.vehicleID}); 
           this.advanceTableForm.patchValue({vehicleCategory:this.advanceTable?.vehicleCategory});  
           this.advanceTableForm.patchValue({vehicleCategoryID:this.advanceTable?.vehicleCategoryID}); 
+          this.advanceTableForm.patchValue({locationName:this.advanceTable?.locationName});  
+          this.advanceTableForm.patchValue({locationID:this.advanceTable?.locationID}); 
         },
         (error: HttpErrorResponse) => { this.advanceTable = null;});
   }
@@ -1028,12 +1031,20 @@ copydetails:boolean = false;
     if (event === 'Existing') {
       this.advanceTableForm.controls['registrationNumber'].setValue('');
       this.advanceTableForm.controls['vehicleCategory'].setValue('');
-      this.advanceTableForm.controls['vehicle'].setValue('');
+      this.advanceTableForm.controls['vehicle'].setValue('');  
+      this.advanceTableForm.controls['locationName'].setValue('');  
+    
     }
     else{
      this.advanceTableForm.controls['registrationNumber'].setValue('');
       this.advanceTableForm.controls['vehicleCategory'].setValue('');
       this.advanceTableForm.controls['vehicle'].setValue('');
+      this.advanceTableForm.controls['locationName'].setValue(this.data.reservationInfo.transferedLocation);
+      this.InitLocation();
+      this.LocationID = this.data.reservationInfo.transferedLocationID;
+      this.advanceTableForm.patchValue({locationID: this.LocationID});
+
+     
     }
     this.checkAllExisting();
   }
@@ -1060,15 +1071,15 @@ copydetails:boolean = false;
       ); 
     });
   }
-  private _filterLocation(value: string): any {
-    const filterValue = value.toLowerCase();
-    return this.LocationNameList.filter(
-      data => 
-      {
-        return data.organizationalEntityName.toLowerCase().includes(filterValue);
-      }
-    );
-  }
+ private _filterLocation(value: any): any {
+  const filterValue = typeof value === 'string'
+    ? value.toLowerCase()
+    : value?.organizationalEntityName?.toLowerCase() || '';
+
+  return this.LocationNameList.filter(data =>
+    data.organizationalEntityName.toLowerCase().includes(filterValue)
+  );
+}
   OnLocationSelect(selectedLocation: string)
   {
     const selectedLocationName = this.LocationNameList.find(

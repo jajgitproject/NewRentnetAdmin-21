@@ -1626,8 +1626,8 @@ getCustomerCategory(): Observable<CustomerCategoryDropDown[]>{
   GetVehicleBasedOnCategory(vehicleCategoryID:number): Observable<any[]> {
     return this.http.get<any[]>(this.BaseURL + "vehicle/getVehicleBasedOnCategory/"+vehicleCategoryID);
   }
-  GetVehicleCategoryBasedOnRegistrationNumber(supplierID:number): Observable<any[]> {
-    return this.http.get<any[]>(this.BaseURL + "customerPersonDriverRestriction/getVehicleCategoryBasedOnRegistrationNumber/"+supplierID);
+  GetVehicleCategoryBasedOnRegistrationNumber(registrationNumber:number): Observable<any[]> {
+    return this.http.get<any[]>(this.BaseURL + "customerPersonDriverRestriction/getVehicleCategoryBasedOnRegistrationNumber/"+registrationNumber);
   }
   getCustomerForInvoice(Prefix: string): Observable<CustomerDropDown[]>{
     return this.http.get<CustomerDropDown[]>(this.BaseURL + "customer/ForSearchInvoiceHome/"+Prefix);
