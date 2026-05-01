@@ -81,6 +81,7 @@ export class Inventory {
        //this.purchaseDate=new Date();
        this.businessDivision = inventory.businessDivision || '';
        this.isAdhoc = inventory.isAdhoc || '';
+       
     }
   }
   
