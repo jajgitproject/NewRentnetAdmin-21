@@ -23,6 +23,7 @@ import { MatDialogModule } from '@angular/material/dialog';
 import { MatSortModule } from '@angular/material/sort';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatMenuModule } from '@angular/material/menu';
+import { MatTooltipModule } from '@angular/material/tooltip';
 import { InventoryService } from './inventory.service';
 import { InventoryRoutingModule } from './inventory-routing.module';
 import { MyUploadComponent } from '../myupload/myupload.component';
@@ -60,6 +61,7 @@ import { InventoryDocumentService } from '../inventoryDocument/inventoryDocument
     MatSortModule,
     MatToolbarModule,
     MatMenuModule,
+    MatTooltipModule,
     MatProgressSpinnerModule,
     MyUploadModule,
     //TwoDigitDecimaNumberDirective

@@ -622,10 +622,14 @@ export class FormDialogComponent
       data=>
       {
         this.CityList=data;
-        this.advanceTableForm.controls['registrationCity'].setValidators([Validators.required,
+        const registrationCityCtrl = this.advanceTableForm.get('registrationCity');
+        if (!registrationCityCtrl) {
+          return;
+        }
+        registrationCityCtrl.setValidators([Validators.required,
           this.registrationCityValidator(this.CityList)]);
-        this.advanceTableForm.controls['registrationCity'].updateValueAndValidity();
-        this.filteredCityOptions = this.advanceTableForm.controls['registrationCity'].valueChanges.pipe(
+        registrationCityCtrl.updateValueAndValidity();
+        this.filteredCityOptions = registrationCityCtrl.valueChanges.pipe(
           startWith(""),
           map(value => this._filterCity(value || ''))
         ); 
@@ -814,10 +818,14 @@ export class FormDialogComponent
       data=>
       {
         this.TransmissionTypeList=data;
-        this.advanceTableForm.controls['transmissionType'].setValidators([Validators.required,
+        const transmissionTypeCtrl = this.advanceTableForm.get('transmissionType');
+        if (!transmissionTypeCtrl) {
+          return;
+        }
+        transmissionTypeCtrl.setValidators([Validators.required,
           this.transmissionTypeValidator(this.TransmissionTypeList)]);
-        this.advanceTableForm.controls['transmissionType'].updateValueAndValidity();
-        this.filteredtransmissionTypeOptions =this.advanceTableForm.controls['transmissionType'].valueChanges.pipe(
+        transmissionTypeCtrl.updateValueAndValidity();
+        this.filteredtransmissionTypeOptions = transmissionTypeCtrl.valueChanges.pipe(
           startWith(""),
           map(value => this._filtertransmissionType(value || ''))
         ); 
@@ -876,6 +884,25 @@ export class FormDialogComponent
       ? 'Not a valid email'
       : '';
   }
+
+  /** Matches template `activationStatus` (Active=true / Deleted=false); supports API camelCase or PascalCase. */
+  private initialActivationStatus(): boolean {
+    const t = this.advanceTable as any;
+    if (!t) {
+      return true;
+    }
+    if (typeof t.activationStatus === 'boolean') {
+      return t.activationStatus;
+    }
+    if (typeof t.ActivationStatus === 'boolean') {
+      return t.ActivationStatus;
+    }
+    const st = t.status ?? t.Status;
+    if (typeof st === 'string' && st.toLowerCase() === 'deactive') {
+      return false;
+    }
+    return true;
+  }
   
   createContactForm(): FormGroup 
   {
@@ -915,7 +942,8 @@ export class FormDialogComponent
       inventoryCreatedBy: [this.advanceTable?.inventoryCreatedBy],
       //registrationCity: [this.advanceTable?.registrationCity],
       status: [this.advanceTable?.status],
-      businessDivision: [this.advanceTable?.businessDivision]
+      businessDivision: [this.advanceTable?.businessDivision],
+      activationStatus: [this.initialActivationStatus()]
     });
   }
 
