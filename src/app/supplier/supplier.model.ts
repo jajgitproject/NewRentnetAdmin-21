@@ -28,6 +28,7 @@ export class Supplier {
   supplierType:string;
   internalExternal:string;
    supplierOfficialIdentityNumber:string;
+   isAdhoc:boolean;
 
   constructor(supplier) {
     {
@@ -47,6 +48,7 @@ export class Supplier {
       this.supplierTypeID=supplier.supplierTypeID || '';
       this.supplierType=supplier.supplierType || '';
       this.internalExternal=supplier.internalExternal || '';
+      this.isAdhoc = supplier.isAdhoc || '';
     }
   }
   

@@ -258,6 +258,7 @@
                                                 <mat-cell *matCellDef="let row">
                                                      <mat-checkbox color="primary"
                                                         (change)="onCheckBox($event.checked, row)"
+                                                        [disabled]="!isRowSelectable(row)"
                                                         [checked]="row.checked">
                                                     </mat-checkbox>
                                                 </mat-cell>

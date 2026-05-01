@@ -10,15 +10,15 @@
             </div>
         </div>
         <button mat-icon-button (click)="dialogRef.close()" aria-label="Close dialog">
-      <mat-icon>close</mat-icon>
-    </button>
+            <mat-icon>close</mat-icon>
+        </button>
     </div>
     <div mat-dialog-content>
-        <form class="register-form m-4" [formGroup]="advanceTableForm" (ngSubmit)="submit">
+        <form class="register-form m-4" [formGroup]="advanceTableForm" (ngSubmit)="confirmAdd">
 
             <div class="row">
                 <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
-                    <mat-form-field class="example-full-width" appearance="outline"  floatLabel="always">
+                    <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
                         <mat-label>Driver Name</mat-label>
                         <input matInput formControlName="driverName" required>
                         <mat-error *ngIf="advanceTableForm.get('driverName').hasError('required')">
@@ -46,7 +46,7 @@
 
             <div class="row">
                 <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
-                    <mat-form-field class="example-full-width" appearance="outline"  floatLabel="always">
+                    <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
                         <mat-label>Father's Name</mat-label>
                         <input matInput formControlName="driverFatherName" required>
                         <mat-error *ngIf="advanceTableForm.get('driverFatherName').hasError('required')">
@@ -70,23 +70,17 @@
 
                     <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
                         <mat-label>DoB</mat-label>
-                        <input
-                          matInput
-                          [matDatepicker]="dob"
-                          placeholder="DD/MM/YYYY"
-                          formControlName="dob"
-                          (blur)="onBlurUpdateDate($event.target.value)"                       
-                          required
-                        />
+                        <input matInput [matDatepicker]="dob" placeholder="DD/MM/YYYY" formControlName="dob"
+                            (blur)="onBlurUpdateDate($event.target.value)" required />
                         <mat-datepicker-toggle matSuffix [for]="dob"></mat-datepicker-toggle>
                         <mat-datepicker #dob></mat-datepicker>
                         <mat-error *ngIf="advanceTableForm.get('dob')?.hasError('required')">
                             Dob is required
                         </mat-error>
                         <mat-error *ngIf="advanceTableForm.get('dob')?.hasError('invalidDate')">
-                          Invalid date format. Use DD/MM/YYYY.
+                            Invalid date format. Use DD/MM/YYYY.
                         </mat-error>
-                      </mat-form-field>
+                    </mat-form-field>
                 </div>
 
                 <!-- <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
@@ -138,10 +132,10 @@
 
             <div class="row">
                 <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
-                    <mat-form-field class="example-full-width" appearance="outline"  floatLabel="always">
+                    <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
                         <mat-label>Blood Group</mat-label>
-                        <mat-select required #bloodVal [class.is-invalid]="bloodVal.invalid && bloodVal.touched" 
-                        formControlName="bloodGroup">
+                        <mat-select required #bloodVal [class.is-invalid]="bloodVal.invalid && bloodVal.touched"
+                            formControlName="bloodGroup">
                             <mat-option value="O+">O+</mat-option>
                             <mat-option value="O-">O-</mat-option>
                             <mat-option value="A+">A+</mat-option>
@@ -157,12 +151,13 @@
                         </mat-error>
                     </mat-form-field>
                 </div>
-                
+
                 <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
-                    <mat-form-field class="example-full-width" appearance="outline"  floatLabel="always">
+                    <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
                         <mat-label>Driver Status</mat-label>
-                        <mat-select required #driverstatusVal [class.is-invalid]="driverstatusVal.invalid && driverstatusVal.touched" 
-                        formControlName="driverStatus">
+                        <mat-select required #driverstatusVal
+                            [class.is-invalid]="driverstatusVal.invalid && driverstatusVal.touched"
+                            formControlName="driverStatus">
                             <mat-option value="Active">Active</mat-option>
                             <mat-option value="Left">Left</mat-option>
                             <mat-option value="BlackListed">Black Listed</mat-option>
@@ -175,13 +170,14 @@
                         </mat-error>
                     </mat-form-field>
                 </div>
-            </div> 
+            </div>
 
             <div class="row">
                 <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
-                    <mat-form-field class="example-full-width" appearance="outline"  floatLabel="always">
+                    <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
                         <mat-label>Date Of Joining</mat-label>
-                        <input required matInput [matDatepicker]="startDate"  placeholder="DD/MM/YYYY" formControlName="dateOfJoining" (blur)="onBlurUpdateEndDate($event.target.value)" >
+                        <input required matInput [matDatepicker]="startDate" placeholder="DD/MM/YYYY"
+                            formControlName="dateOfJoining" (blur)="onBlurUpdateEndDate($event.target.value)">
                         <mat-datepicker-toggle matSuffix [for]="startDate"></mat-datepicker-toggle>
                         <mat-datepicker #startDate></mat-datepicker>
                         <mat-error *ngIf="advanceTableForm.get('dateOfJoining').hasError('required')">
@@ -189,14 +185,15 @@
                         </mat-error>
                         <mat-error *ngIf="advanceTableForm.get('dateOfJoining')?.hasError('invalidDate')">
                             Invalid date format. Use DD/MM/YYYY.
-                          </mat-error>
+                        </mat-error>
                     </mat-form-field>
                 </div>
 
                 <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
-                    <mat-form-field class="example-full-width" appearance="outline"  floatLabel="always">
+                    <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
                         <mat-label>Date Of Leaving</mat-label>
-                        <input matInput [matDatepicker]="endDate"  placeholder="DD/MM/YYYY" formControlName="dateOfLeaving" (blur)="onBlurdateOfLeaving($event.target.value)" >
+                        <input matInput [matDatepicker]="endDate" placeholder="DD/MM/YYYY"
+                            formControlName="dateOfLeaving" (blur)="onBlurdateOfLeaving($event.target.value)">
                         <mat-datepicker-toggle matSuffix [for]="endDate"></mat-datepicker-toggle>
                         <mat-datepicker #endDate></mat-datepicker>
                         <!-- <mat-error *ngIf="advanceTableForm.get('dateOfLeaving').hasError('required')">
@@ -213,16 +210,10 @@
                 <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
                     <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
                         <mat-label>Local Address String</mat-label>
-                        <input
-                        placeholder="Address String"
-                        matInput
-                        formControlName="localAddressAddressString"
-                        ngx-google-places-autocomplete
-                        [options]="options"
-                        (onAddressChange)="AddressChange($event)"
-                        required (input)="onPickupTyping()"
-                        />
-                           <mat-error *ngIf="
+                        <input placeholder="Address String" matInput formControlName="localAddressAddressString"
+                            ngx-google-places-autocomplete [options]="options" (onAddressChange)="AddressChange($event)"
+                            required (input)="onPickupTyping()" />
+                        <mat-error *ngIf="
 advanceTableForm.get('localAddressAddressString')?.invalid &&
 (advanceTableForm.get('localAddressAddressString')?.touched 
  || advanceTableForm.get('localAddressAddressString')?.dirty)">
@@ -231,7 +222,8 @@ advanceTableForm.get('localAddressAddressString')?.invalid &&
                                 Local Address String is required
                             </span>
 
-                            <span *ngIf="advanceTableForm.get('localAddressAddressString')?.hasError('invalidGeoSearchString')">
+                            <span
+                                *ngIf="advanceTableForm.get('localAddressAddressString')?.hasError('invalidGeoSearchString')">
                                 Please select an address from suggestions
                             </span>
 
@@ -239,7 +231,7 @@ advanceTableForm.get('localAddressAddressString')?.invalid &&
 
                     </mat-form-field>
                 </div>
-                
+
                 <!-- <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
                     <mat-form-field class="example-full-width" appearance="outline" floatLabel="always"> 
                         <mat-label>Local Address City</mat-label>                       
@@ -255,12 +247,12 @@ advanceTableForm.get('localAddressAddressString')?.invalid &&
                             Please select any  Local Address City
                           </mat-error>
                     </mat-form-field>
-                </div> -->       
+                </div> -->
             </div>
 
             <div class="row" [hidden]="isHidden">
                 <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
-                    <mat-form-field class="example-full-width" appearance="outline"  floatLabel="always">
+                    <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
                         <mat-label>Local Address Longitude</mat-label>
                         <input matInput formControlName="longitude" readonly required>
                         <mat-error *ngIf="advanceTableForm.get('longitude').hasError('required')">
@@ -268,21 +260,21 @@ advanceTableForm.get('localAddressAddressString')?.invalid &&
                         </mat-error>
                     </mat-form-field>
                 </div>
-                
-                <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2" >
-                    <mat-form-field class="example-full-width" appearance="outline"  floatLabel="always">
+
+                <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                    <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
                         <mat-label>Local Address Latitude</mat-label>
                         <input matInput formControlName="latitude" readonly required>
                         <mat-error *ngIf="advanceTableForm.get('latitude').hasError('required')">
                             Local Address Latitude is required
                         </mat-error>
                     </mat-form-field>
-                </div>    
+                </div>
             </div>
 
             <div class="row">
                 <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
-                    <mat-form-field class="example-full-width" appearance="outline"  floatLabel="always">
+                    <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
                         <mat-label>Local Address</mat-label>
                         <input matInput formControlName="localAddress" required>
                         <mat-error *ngIf="advanceTableForm.get('localAddress').hasError('required')">
@@ -292,7 +284,7 @@ advanceTableForm.get('localAddressAddressString')?.invalid &&
                 </div>
 
                 <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
-                    <mat-form-field class="example-full-width" appearance="outline"  floatLabel="always">
+                    <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
                         <mat-label>Local Pincode</mat-label>
                         <input matInput formControlName="localPincode" required>
                         <mat-error *ngIf="advanceTableForm.get('localPincode').hasError('required')">
@@ -326,7 +318,7 @@ advanceTableForm.get('localAddressAddressString')?.invalid &&
                 </div> -->
 
                 <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
-                    <mat-form-field class="example-full-width" appearance="outline"  floatLabel="always">
+                    <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
                         <mat-label>Permanent Address</mat-label>
                         <input matInput formControlName="permanentAddress" required>
                         <mat-error *ngIf="advanceTableForm.get('permanentAddress').hasError('required')">
@@ -336,7 +328,7 @@ advanceTableForm.get('localAddressAddressString')?.invalid &&
                 </div>
 
                 <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
-                    <mat-form-field class="example-full-width" appearance="outline"  floatLabel="always">
+                    <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
                         <mat-label>Permanent Address Pincode</mat-label>
                         <input matInput formControlName="permanentAddressPincode" required>
                         <mat-error *ngIf="advanceTableForm.get('permanentAddressPincode').hasError('required')">
@@ -346,24 +338,25 @@ advanceTableForm.get('localAddressAddressString')?.invalid &&
                 </div>
             </div>
 
-            <div class="row">               
-                <div class="col-xl-3 col-lg-3 col-md-1 col-sm-1 mb-1">                   
+            <div class="row">
+                <div class="col-xl-3 col-lg-3 col-md-1 col-sm-1 mb-1">
                     <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
                         <mat-label>Country Code</mat-label>
-                        <input  type="text" matInput formControlName="countryCodes" [matAutocomplete]="auto10" required>
-                        <mat-autocomplete #auto10="matAutocomplete"  (optionSelected)="onCountryCode($event)">
+                        <input type="text" matInput formControlName="countryCodes" [matAutocomplete]="auto10" required>
+                        <mat-autocomplete #auto10="matAutocomplete" (optionSelected)="onCountryCode($event)">
                             <mat-option *ngFor="let option of filteredCountryCodesOptions | async"
                                 [value]="option.countryISDCode">
                                 <div style="display: flex; align-items: center;">
-                                    <img [src]="option.icon" alt="{{option.countryISOCode}}" width="20" height="20" style="margin-right: 8px;">
-                                    <span >{{option.countryISOCode}} {{option.countryISDCode}}</span>
-                                  
-                                  </div>
+                                    <img [src]="option.icon" alt="{{option.countryISOCode}}" width="20" height="20"
+                                        style="margin-right: 8px;">
+                                    <span>{{option.countryISOCode}} {{option.countryISDCode}}</span>
+
+                                </div>
                             </mat-option>
                         </mat-autocomplete>
                         <mat-error *ngIf="advanceTableForm.controls['countryCodes'].hasError('countryTypesInvalid')">
                             Please select a Country Code
-                         </mat-error>
+                        </mat-error>
                     </mat-form-field>
                 </div>
                 <div class="col-xl-3 col-lg-3 col-md-6 col-sm-6 mb-1">
@@ -371,30 +364,31 @@ advanceTableForm.get('localAddressAddressString')?.invalid &&
                         <mat-label>Mobile 1</mat-label>
                         <input matInput formControlName="mobile1" required (input)="onMobileChange()">
                         <mat-error *ngIf="advanceTableForm.get('mobile1').hasError('required')">
-                             Mobile 1 is required
+                            Mobile 1 is required
                         </mat-error>
-                         <mat-error *ngIf="advanceTableForm.get('mobile1').hasError('duplicate')">
-                            Mobile  No  already exist
+                        <mat-error *ngIf="advanceTableForm.get('mobile1').hasError('duplicate')">
+                            Mobile No already exist
                         </mat-error>
                     </mat-form-field>
                 </div>
 
-                <div class="col-xl-3 col-lg-3 col-md-1 col-sm-1 mb-1">                   
+                <div class="col-xl-3 col-lg-3 col-md-1 col-sm-1 mb-1">
                     <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
                         <mat-label>Country Code</mat-label>
-                        <input  type="text" matInput formControlName="countryCode" [matAutocomplete]="auto11">
+                        <input type="text" matInput formControlName="countryCode" [matAutocomplete]="auto11">
                         <mat-autocomplete #auto11="matAutocomplete" (optionSelected)="onCountryCodes($event)">
                             <mat-option *ngFor="let option of filteredCountryCodeOptions | async"
                                 [value]="option.countryISDCode">
                                 <div style="display: flex; align-items: center;">
-                                    <img [src]="option.icon" alt="{{option.countryISOCode}}" width="20" height="20" style="margin-right: 8px;">
-                                    <span >{{option.countryISOCode}} {{option.countryISDCode}}</span>                                  
-                                  </div>
+                                    <img [src]="option.icon" alt="{{option.countryISOCode}}" width="20" height="20"
+                                        style="margin-right: 8px;">
+                                    <span>{{option.countryISOCode}} {{option.countryISDCode}}</span>
+                                </div>
                             </mat-option>
                         </mat-autocomplete>
                         <mat-error *ngIf="advanceTableForm.controls['countryCode'].hasError('countryTypeInvalid')">
-                          Please select a Country Code
-                       </mat-error>
+                            Please select a Country Code
+                        </mat-error>
                     </mat-form-field>
                 </div>
                 <div class="col-xl-3 col-lg-3 col-md-6 col-sm-6 mb-1">
@@ -402,7 +396,7 @@ advanceTableForm.get('localAddressAddressString')?.invalid &&
                         <mat-label>Mobile 2</mat-label>
                         <input matInput formControlName="mobile2">
                         <mat-error *ngIf="advanceTableForm.get('mobile2').hasError('required')">
-                             Mobile 2 is required
+                            Mobile 2 is required
                         </mat-error>
                     </mat-form-field>
                 </div>
@@ -419,7 +413,7 @@ advanceTableForm.get('localAddressAddressString')?.invalid &&
             </div>
 
             <div class="row">
-                
+
                 <!-- <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
                     <mat-form-field class="example-full-width" appearance="outline"  floatLabel="always">
                         <mat-label>Mobile 2</mat-label>
@@ -428,10 +422,10 @@ advanceTableForm.get('localAddressAddressString')?.invalid &&
                 </div> -->
 
                 <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
-                    <mat-form-field class="example-full-width" appearance="outline"  floatLabel="always">
+                    <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
                         <mat-label>English Speaking Skills</mat-label>
                         <mat-select required #essVal [class.is-invalid]="essVal.invalid && essVal.touched"
-                        formControlName="englishSpeakingSkills">
+                            formControlName="englishSpeakingSkills">
                             <mat-option value="Excellent">Excellent</mat-option>
                             <mat-option value="Good">Good</mat-option>
                             <mat-option value="Fair">Fair</mat-option>
@@ -448,7 +442,8 @@ advanceTableForm.get('localAddressAddressString')?.invalid &&
                     <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
                         <mat-label>Company</mat-label>
                         <input required type="text" matInput formControlName="companyName" [matAutocomplete]="auto14">
-                        <mat-autocomplete #auto14="matAutocomplete" (optionSelected)="OnCompanySelect($event.option.value)">
+                        <mat-autocomplete #auto14="matAutocomplete"
+                            (optionSelected)="OnCompanySelect($event.option.value)">
                             <mat-option *ngFor="let option of filteredCompanyOptions | async"
                                 [value]="option.organizationalEntityName"
                                 (click)="getCompanyID(option.organizationalEntityID)">
@@ -479,18 +474,18 @@ advanceTableForm.get('localAddressAddressString')?.invalid &&
                         </mat-error>
                     </mat-form-field>
                 </div> -->
-                <!-- <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+            <!-- <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
                     <mat-form-field class="example-full-width" appearance="outline"  floatLabel="always">
                         <mat-label>Reference Of</mat-label>
                         <input matInput formControlName="referenceOf"> -->
-                        <!-- <mat-error *ngIf="advanceTableForm.get('referenceOf').hasError('required')">
+            <!-- <mat-error *ngIf="advanceTableForm.get('referenceOf').hasError('required')">
                             Reference Of is required
                         </mat-error> -->
-                    <!-- </mat-form-field>
+            <!-- </mat-form-field>
                 </div>
             </div> -->
 
-        <!-- <div class="row">            
+            <!-- <div class="row">            
             <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
                 <mat-form-field class="example-full-width" appearance="outline"  floatLabel="always">
                     <mat-label>Owned/Supplier</mat-label>
@@ -522,12 +517,13 @@ advanceTableForm.get('localAddressAddressString')?.invalid &&
         </div> -->
 
 
-           <div class="row">
+            <div class="row">
                 <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
-                    <mat-form-field class="example-full-width" appearance="outline"  floatLabel="always">
+                    <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
                         <mat-label>Owned/Supplied</mat-label>
-                        <mat-select required #ownedSupplierVal [class.is-invalid]="ownedSupplierVal.invalid && ownedSupplierVal.touched" 
-                        formControlName="ownedSupplier" (selectionChange)="onOwnershipChange()">
+                        <mat-select required #ownedSupplierVal
+                            [class.is-invalid]="ownedSupplierVal.invalid && ownedSupplierVal.touched"
+                            formControlName="ownedSupplier" (selectionChange)="onOwnershipChange()">
                             <mat-option value="Owned">Owned</mat-option>
                             <mat-option value="Supplier">Supplier</mat-option>
                         </mat-select>
@@ -535,18 +531,20 @@ advanceTableForm.get('localAddressAddressString')?.invalid &&
                         <mat-error>
                             Owned/Supplied is required
                         </mat-error>
-                    </mat-form-field>    
-                </div> 
+                    </mat-form-field>
+                </div>
 
                 <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2" *ngIf="owned">
                     <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
                         <mat-label>Supplier</mat-label>
                         <input matInput formControlName="supplier" required [matAutocomplete]="auto20">
-                        <mat-autocomplete #auto20="matAutocomplete" (optionSelected)="OnSupplierForOwnerSelect($event.option.value)">
-                            <mat-option *ngFor="let option of filteredSupplierForOwnerOptions | async" [value]="option.supplierName" (click)="getsupplierIDForOwner(option.supplierID)">
-                              {{option.supplierName}}
+                        <mat-autocomplete #auto20="matAutocomplete"
+                            (optionSelected)="OnSupplierForOwnerSelect($event.option.value)">
+                            <mat-option *ngFor="let option of filteredSupplierForOwnerOptions | async"
+                                [value]="option.supplierName" (click)="getsupplierIDForOwner(option.supplierID)">
+                                {{option.supplierName}}
                             </mat-option>
-                          </mat-autocomplete>
+                        </mat-autocomplete>
                         <mat-error *ngIf="advanceTableForm.get('supplier').hasError('supplierForOwnerInvalid')">
                             Supplier is required
                         </mat-error>
@@ -557,19 +555,21 @@ advanceTableForm.get('localAddressAddressString')?.invalid &&
                     <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
                         <mat-label>Supplier</mat-label>
                         <input required type="text" matInput formControlName="supplier" [matAutocomplete]="auto4">
-                        <mat-autocomplete #auto4="matAutocomplete" (optionSelected)="OnSupplierSelect($event.option.value)">
-                          <mat-option *ngFor="let option of filteredSupplierOptions | async" [value]="option.supplierName" (click)="getsupplierID(option.supplierID)">
-                            {{option.supplierName}}
-                          </mat-option>
+                        <mat-autocomplete #auto4="matAutocomplete"
+                            (optionSelected)="OnSupplierSelect($event.option.value)">
+                            <mat-option *ngFor="let option of filteredSupplierOptions | async"
+                                [value]="option.supplierName" (click)="getsupplierID(option.supplierID)">
+                                {{option.supplierName}}
+                            </mat-option>
                         </mat-autocomplete>
                         <mat-error *ngIf="advanceTableForm.controls['supplier'].hasError('supplierInvalid')">
                             Please select a Supplier
                         </mat-error>
-                      </mat-form-field>
+                    </mat-form-field>
                 </div>
-            </div> 
-        <div class="row">
-                
+            </div>
+            <div class="row">
+
                 <!-- <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2" *ngIf="owned">
                     <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
                         <mat-label>Supplier</mat-label>
@@ -582,26 +582,27 @@ advanceTableForm.get('localAddressAddressString')?.invalid &&
 
                 <!-- <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2" *ngIf="supplier"> -->
                 <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
-                    <mat-form-field class="example-full-width" appearance="outline" floatLabel="always"> 
-                        <mat-label>Location</mat-label>                       
-                        <input required type="text" matInput [matAutocomplete]="auto9"
-                        formControlName="location">
-                        <mat-autocomplete #auto9="matAutocomplete" (optionSelected)="OnLocationSelect($event.option.value)">
+                    <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                        <mat-label>Location</mat-label>
+                        <input required type="text" matInput [matAutocomplete]="auto9" formControlName="location">
+                        <mat-autocomplete #auto9="matAutocomplete"
+                            (optionSelected)="OnLocationSelect($event.option.value)">
                             <mat-option *ngFor="let location of filteredLocationOptions | async"
-                                [value]="location.organizationalEntityName" (click)="getLocationID(location.organizationalEntityID)">
+                                [value]="location.organizationalEntityName"
+                                (click)="getLocationID(location.organizationalEntityID)">
                                 {{location.organizationalEntityName}}
                             </mat-option>
                         </mat-autocomplete>
                         <mat-error *ngIf="advanceTableForm.controls['location'].hasError('locationTypeInvalid')">
-                            Please select a Location 
+                            Please select a Location
                         </mat-error>
                     </mat-form-field>
                 </div>
                 <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
-                    <mat-form-field class="example-full-width" appearance="outline"  floatLabel="always">
+                    <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
                         <mat-label>Police Verification</mat-label>
                         <mat-select required #policeVal [class.is-invalid]="policeVal.invalid && policeVal.touched"
-                        formControlName="policeVerification">
+                            formControlName="policeVerification">
                             <mat-option value="Yes">Yes</mat-option>
                             <mat-option value="No">No</mat-option>
                         </mat-select>
@@ -614,7 +615,7 @@ advanceTableForm.get('localAddressAddressString')?.invalid &&
             </div>
 
             <div class="row">
-                
+
                 <!-- <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
                     <mat-form-field class="example-full-width" appearance="outline" floatLabel="always"> 
                         <mat-label>Hub</mat-label>                       
@@ -651,14 +652,14 @@ advanceTableForm.get('localAddressAddressString')?.invalid &&
             </div>
 
             <div class="row">
-               
+
                 <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
-                    <mat-form-field class="example-full-width" appearance="outline"  floatLabel="always">
+                    <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
                         <mat-label>Medical Insurance</mat-label>
                         <mat-select required #medicalVal [class.is-invalid]="medicalVal.invalid && medicalVal.touched"
-                        formControlName="medicalInsurance">
-                        <mat-option [value]=true>Yes</mat-option>
-                        <mat-option [value]=false>No</mat-option>
+                            formControlName="medicalInsurance">
+                            <mat-option [value]=true>Yes</mat-option>
+                            <mat-option [value]=false>No</mat-option>
                         </mat-select>
 
                         <mat-error>
@@ -678,13 +679,13 @@ advanceTableForm.get('localAddressAddressString')?.invalid &&
                 </div> -->
                 <div class=" col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
                     <mat-label>
-                       Driver Image
+                        Driver Image
                     </mat-label>
                     <br>
                     <a href="{{ ImagePath }}" target="_blank" *ngIf="ImagePath">
                         <img [src]="ImagePath" class="table " style="height: 80px; width: auto;">
                     </a>
-    
+
                     <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
                         <app-myupload (onUploadFinished)="uploadFinished($event)"></app-myupload>
                     </div>
@@ -692,7 +693,7 @@ advanceTableForm.get('localAddressAddressString')?.invalid &&
             </div>
 
             <div class="row">
-                
+
                 <!-- <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
                     <mat-form-field class="example-full-width" appearance="outline"  floatLabel="always">
                         <mat-label>Driving Since Date</mat-label>
@@ -709,7 +710,7 @@ advanceTableForm.get('localAddressAddressString')?.invalid &&
                     </mat-form-field>
                 </div> -->
             </div>
-            
+
             <div class="row">
                 <!-- <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
                     <mat-form-field class="example-full-width" appearance="outline"  floatLabel="always">
@@ -722,24 +723,31 @@ advanceTableForm.get('localAddressAddressString')?.invalid &&
                 <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
                     <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
                         <mat-label>Password</mat-label>
-                        <input name="password" matInput formControlName="password" [type]="showPassword ? 'text' : 'password'">
-                        <mat-icon matSuffix (click)="showPassword = !showPassword">{{ showPassword ? 'visibility_off' : 'visibility' }}</mat-icon>
+                        <input name="password" matInput formControlName="password"
+                            [type]="showPassword ? 'text' : 'password'">
+                        <mat-icon matSuffix (click)="showPassword = !showPassword">{{ showPassword ? 'visibility_off' :
+                            'visibility' }}</mat-icon>
                     </mat-form-field>
                 </div>
 
                 <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
-                    <mat-form-field class="example-full-width" appearance="outline"  floatLabel="always">
+                    <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
                         <mat-label>Confirm Password</mat-label>
-                        <input [type]="showConfirmPassword ? 'text' : 'password'"  name="password" matInput formControlName="confirmPassword" (click)="markAsTouched('confirmPassword')">
-                        
-                        <mat-error *ngIf="advanceTableForm.get('confirmPassword').hasError('required') ">Confirm Password is required</mat-error>
-                        <mat-icon matSuffix (click)="showConfirmPassword = !showConfirmPassword">{{ showConfirmPassword ? 'visibility_off' : 'visibility' }}</mat-icon>
-            
-                        <mat-error *ngIf="advanceTableForm.get('confirmPassword').hasError('confirmPasswordValidator') || advanceTableForm.get('confirmPassword').touched">Passsword and
+                        <input [type]="showConfirmPassword ? 'text' : 'password'" name="password" matInput
+                            formControlName="confirmPassword" (click)="markAsTouched('confirmPassword')">
+
+                        <mat-error *ngIf="advanceTableForm.get('confirmPassword').hasError('required') ">Confirm
+                            Password is required</mat-error>
+                        <mat-icon matSuffix (click)="showConfirmPassword = !showConfirmPassword">{{ showConfirmPassword
+                            ? 'visibility_off' : 'visibility' }}</mat-icon>
+
+                        <mat-error
+                            *ngIf="advanceTableForm.get('confirmPassword').hasError('confirmPasswordValidator') || advanceTableForm.get('confirmPassword').touched">Passsword
+                            and
                             Confirm Password didn't match. </mat-error>
-                        
+
                     </mat-form-field>
-                
+
                 </div>
             </div>
 
@@ -787,34 +795,49 @@ advanceTableForm.get('localAddressAddressString')?.invalid &&
                 </div>
             </div> -->
 
-           <div class="row">
-  <!-- Activation Status -->
-  <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
-    <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
-      <mat-label>Activation Status</mat-label>
-      <mat-select formControlName="activationStatus">
-        <mat-option [value]="true">Active</mat-option>
-        <mat-option [value]="false">Deleted</mat-option>
-      </mat-select>
-      <mat-error *ngIf="advanceTableForm.get('activationStatus')?.hasError('required')">
-        Activation Status is required
-      </mat-error>
-    </mat-form-field>
-  </div>
+            <div class="row">
+                <!-- Activation Status -->
+                <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                    <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                        <mat-label>Is Adhoc</mat-label>
+                        <mat-select formControlName="isAdhoc">
+                            <mat-option [value]="true">Yes</mat-option>
+                            <mat-option [value]="false">No</mat-option>
+                        </mat-select>
+                        <mat-error *ngIf="advanceTableForm.get('isAdhoc')?.hasError('required')">
+                            Is Adhoc is required
+                        </mat-error>
+                    </mat-form-field>
+                </div>
 
-  <!-- Identity No. only in Edit Mode -->
-  <div *ngIf="action === 'edit'" class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
-    <div class="status-display" style="margin-top: 10px;">
-      <strong>Identity No.:</strong>
-      <span>{{ advanceTable.driverOfficialIdentityNumber }}</span>
-    </div>
-  </div>
-        </div>
+                <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                    <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                        <mat-label>Activation Status</mat-label>
+                        <mat-select formControlName="activationStatus">
+                            <mat-option [value]="true">Active</mat-option>
+                            <mat-option [value]="false">Deleted</mat-option>
+                        </mat-select>
+                        <mat-error *ngIf="advanceTableForm.get('activationStatus')?.hasError('required')">
+                            Activation Status is required
+                        </mat-error>
+                    </mat-form-field>
+                </div>
+
+
+                <!-- Identity No. only in Edit Mode -->
+                <div *ngIf="action === 'edit'" class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                    <div class="status-display" style="margin-top: 10px;">
+                        <strong>Identity No.:</strong>
+                        <span>{{ advanceTable.driverOfficialIdentityNumber }}</span>
+                    </div>
+                </div>
+            </div>
 
             <div class="row">
                 <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12 mb-2">
                     <div class="example-button-row">
-                        <button mat-raised-button color="primary" [type]="submit" *ngIf="saveDisabled" [disabled]="!advanceTableForm.valid"  (click)="confirmAdd()">Save</button>
+                        <button mat-raised-button color="primary" [type]="submit" *ngIf="saveDisabled"
+                            [disabled]="!advanceTableForm.valid" (click)="confirmAdd()">Save</button>
                         <mat-spinner *ngIf="!saveDisabled" diameter="30"></mat-spinner>
                         <!-- <button  mat-raised-button color="warn" (click)="reset()" tabindex="-1">Reset</button> -->
                         <button mat-raised-button color="warn" (click)="onNoClick()" tabindex="-1">Cancel</button>
@@ -822,4 +845,4 @@ advanceTableForm.get('localAddressAddressString')?.invalid &&
                 </div>
             </div>
         </form>
-  </div>
+    </div>

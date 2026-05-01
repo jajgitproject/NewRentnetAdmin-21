@@ -26,34 +26,35 @@
                         <div class="responsive_table">
                             <div class="materialTableHeader">
                                 <div class="row">
-                                <div class="modal fade" id="exampleModalCenter" tabindex="-1" role="dialog">
-                                    <div class="modal-dialog modal-dialog-centered">
-                                        <div class="modal-content">
-                                            <div class="modal-header">
-                                                <h5 class="modal-title" id="exampleModalLongTitle">Driver
-                                                </h5>
-                                                <button type="button" class="close" data-dismiss="modal"
-                                                    aria-label="Close">
-                                                    <span aria-hidden="true">&times;</span>
-                                                </button>
-                                            </div>
-                                            <div class="modal-body">
+                                    <div class="modal fade" id="exampleModalCenter" tabindex="-1" role="dialog">
+                                        <div class="modal-dialog modal-dialog-centered">
+                                            <div class="modal-content">
+                                                <div class="modal-header">
+                                                    <h5 class="modal-title" id="exampleModalLongTitle">Driver
+                                                    </h5>
+                                                    <button type="button" class="close" data-dismiss="modal"
+                                                        aria-label="Close">
+                                                        <span aria-hidden="true">&times;</span>
+                                                    </button>
+                                                </div>
+                                                <div class="modal-body">
 
-                                                <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
-                                                    <mat-label>Driver</mat-label>
-                                                    <input type="text" matInput
-                                                        [(ngModel)]="SearchdriverName">
+                                                    <mat-form-field class="example-full-width" appearance="outline"
+                                                        floatLabel="always">
+                                                        <mat-label>Driver</mat-label>
+                                                        <input type="text" matInput [(ngModel)]="SearchdriverName">
 
-                                                </mat-form-field>
+                                                    </mat-form-field>
 
-                                                <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
-                                                    <mat-label>Driver Father Name</mat-label>
-                                                    <input type="text" matInput
-                                                        [(ngModel)]="searchdriverFatherName">
+                                                    <mat-form-field class="example-full-width" appearance="outline"
+                                                        floatLabel="always">
+                                                        <mat-label>Driver Father Name</mat-label>
+                                                        <input type="text" matInput
+                                                            [(ngModel)]="searchdriverFatherName">
 
-                                                </mat-form-field>
+                                                    </mat-form-field>
 
-                                                <!-- <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                                                    <!-- <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
                                                     <mat-label>Driver Grade</mat-label>
                                                     <mat-select [formControl]="driverGrade"
                                                     [(ngModel)]="searchdriverGradeName">
@@ -61,55 +62,57 @@
                                                     </mat-select>
                                                 </mat-form-field> -->
 
-                                                <mat-form-field class="example-full-width" appearance="outline" floatLabel="always"> 
-                                                    <mat-label>Driver Grade</mat-label>                       
-                                                    <input required type="text" matInput [matAutocomplete]="autog"
-                                                    [formControl]="driverGrade"
-                                                    >
-                                                    <mat-autocomplete #autog="matAutocomplete">
-                                                        <mat-option *ngFor="let options of filteredGradeOptions | async"
-                                                            [value]="options.driverGradeName">
-                                                            {{options.driverGradeName}}
-                                                        </mat-option>
-                                                    </mat-autocomplete>
-                                                </mat-form-field>
+                                                    <mat-form-field class="example-full-width" appearance="outline"
+                                                        floatLabel="always">
+                                                        <mat-label>Driver Grade</mat-label>
+                                                        <input required type="text" matInput [matAutocomplete]="autog"
+                                                            [formControl]="driverGrade">
+                                                        <mat-autocomplete #autog="matAutocomplete">
+                                                            <mat-option
+                                                                *ngFor="let options of filteredGradeOptions | async"
+                                                                [value]="options.driverGradeName">
+                                                                {{options.driverGradeName}}
+                                                            </mat-option>
+                                                        </mat-autocomplete>
+                                                    </mat-form-field>
 
-                                                <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
-                                                    <mat-label>Driver Official Identity Number</mat-label>
-                                                    <input type="text" matInput
-                                                        [(ngModel)]="searchDriverOfficialIdentityNumber">
+                                                    <mat-form-field class="example-full-width" appearance="outline"
+                                                        floatLabel="always">
+                                                        <mat-label>Driver Official Identity Number</mat-label>
+                                                        <input type="text" matInput
+                                                            [(ngModel)]="searchDriverOfficialIdentityNumber">
 
-                                                </mat-form-field>
+                                                    </mat-form-field>
 
-                                                <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
-                                                    <mat-label>Highest Qualification</mat-label>
-                                                    <mat-select
-                                                    [(ngModel)]="searchhighestQualification">
-                                                    <mat-option [value]="Qualification.qualification" *ngFor="let Qualification of QualificationList">{{Qualification.qualification}}</mat-option>
-                                                    </mat-select>
-                                                </mat-form-field>
+                                                    <mat-form-field class="example-full-width" appearance="outline"
+                                                        floatLabel="always">
+                                                        <mat-label>Highest Qualification</mat-label>
+                                                        <mat-select [(ngModel)]="searchhighestQualification">
+                                                            <mat-option [value]="Qualification.qualification"
+                                                                *ngFor="let Qualification of QualificationList">{{Qualification.qualification}}</mat-option>
+                                                        </mat-select>
+                                                    </mat-form-field>
 
-                                            <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
-                                                    <mat-label>Mobile No</mat-label>
-                                                    <input type="text" matInput
-                                                        [(ngModel)]="searchMobile">
+                                                    <mat-form-field class="example-full-width" appearance="outline"
+                                                        floatLabel="always">
+                                                        <mat-label>Mobile No</mat-label>
+                                                        <input type="text" matInput [(ngModel)]="searchMobile">
 
-                                                </mat-form-field>
-                                                <mat-form-field class="example-full-width"
-                                                                        appearance="outline" floatLabel="always">
-                                                                        <mat-label>Location</mat-label>
-                                                                        <input type="text" matInput
-                                                                            [matAutocomplete]="auto2"
-                                                                            [formControl]="location">
-                                                                        <mat-autocomplete #auto2="matAutocomplete">
-                                                                            <mat-option
-                                                                                *ngFor="let option of filteredServiceOptions | async"
-                                                                                [value]="option.organizationalEntityName">
-                                                                                {{option.organizationalEntityName}}
-                                                                            </mat-option>
-                                                                        </mat-autocomplete>
-                                                                    </mat-form-field>
-<!-- 
+                                                    </mat-form-field>
+                                                    <mat-form-field class="example-full-width" appearance="outline"
+                                                        floatLabel="always">
+                                                        <mat-label>Location</mat-label>
+                                                        <input type="text" matInput [matAutocomplete]="auto2"
+                                                            [formControl]="location">
+                                                        <mat-autocomplete #auto2="matAutocomplete">
+                                                            <mat-option
+                                                                *ngFor="let option of filteredServiceOptions | async"
+                                                                [value]="option.organizationalEntityName">
+                                                                {{option.organizationalEntityName}}
+                                                            </mat-option>
+                                                        </mat-autocomplete>
+                                                    </mat-form-field>
+                                                    <!-- 
 
 
                                                 <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
@@ -119,25 +122,25 @@
 
                                                 </mat-form-field> -->
 
-                                                <mat-form-field class="example-full-width mb-3"
-                                                    appearance="outline" floatLabel="always">
-                                                    <mat-label>Activation Status</mat-label>
-                                                    <mat-select [(value)]="SearchActivationStatus">
-                                                        <mat-option [value]=true>Active</mat-option>
-                                                        <mat-option [value]=false>Deleted</mat-option>
-                                                    </mat-select>
-                                                </mat-form-field>
+                                                    <mat-form-field class="example-full-width mb-3" appearance="outline"
+                                                        floatLabel="always">
+                                                        <mat-label>Activation Status</mat-label>
+                                                        <mat-select [(value)]="SearchActivationStatus">
+                                                            <mat-option [value]=true>Active</mat-option>
+                                                            <mat-option [value]=false>Deleted</mat-option>
+                                                        </mat-select>
+                                                    </mat-form-field>
 
-                                            </div>
-                                            <div class="modal-footer">
-                                                <button mat-raised-button color="primary" (click)="SearchData()"
-                                                    data-dismiss="modal">Search</button>
+                                                </div>
+                                                <div class="modal-footer">
+                                                    <button mat-raised-button color="primary" (click)="SearchData()"
+                                                        data-dismiss="modal">Search</button>
 
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
-                                </div>
-                                <!-- <div style="width: 70%; float:left;padding-top: 15px;padding-left: 22px;">
+                                    <!-- <div style="width: 70%; float:left;padding-top: 15px;padding-left: 22px;">
                                     <div  style="float: left;"*ngIf="SearchdriverName"><b>Driver</b> : {{SearchdriverName}},</div>
                                     <div style="float: left;" *ngIf="searchdriverFatherName"><b>Driver Father Name</b> :{{searchdriverFatherName}},</div>
                                     <div style="float: left;"*ngIf="driverGrade.value"><b>Driver Grade</b> : {{driverGrade.value}},</div>
@@ -145,56 +148,62 @@
                                     <div style="float: left;"*ngIf="searchhighestQualification"><b>Highest Qualification</b> : {{searchhighestQualification}}</div>
                                 </div> -->
 
-                                <div style="width: 70%; float:left;padding-top: 6px;padding-left: 12px;">
-                                    <div class="col-lg-6">
-                                        <div class="form-group">
-                                            <div class="input-group">
-                                                <!-- Dropdown for selecting Type, Parent, City -->
-                                                <div class="input-group-append input-group-addon">
-                                                    <select style="height: 40px; width: 180px;" class="form-control" [(ngModel)]="selectedFilter">
-                                                        <option value="search" hidden>Search By</option>
-                                                        <option value="driver">Driver</option>
-                                                        <option value="driverFatherName">Driver Father Name</option>
-                                                        <option value="driverGrade">Driver Grade</option>
-                                                        <option value="identityNo">Identity No</option>
-                                                        <option value="supplier">Supplier Name</option>
-                                                        <option value="highestQualification">Highest Qualification</option>
-                                                        <option value="mobile">Mobile No</option>
-                                                         <option value="location">Location</option>
-                                                    </select>
-                                                </div>
-                                    
-                                                <!-- Input field for filtering -->
-                                                <input type="text" style="height: 40px; width: 300px;padding-left: 5px;" class="form-control" placeholder="Filter" id="inputGroup"
-                                                    (keyup)="onBackPress($event)" (input)="loadData()" [(ngModel)]="searchTerm" />
-                                    
-                                                <!-- Search button -->
-                                                <div class="input-group-append input-group-addon">
-                                                    <span class="input-group-text" style="cursor: pointer; height: 40px; width: 40px; text-align: center;" (click)="loadData()">
-                                                        <i class="fas fa-search"></i>
-                                                    </span>
+                                    <div style="width: 70%; float:left;padding-top: 6px;padding-left: 12px;">
+                                        <div class="col-lg-6">
+                                            <div class="form-group">
+                                                <div class="input-group">
+                                                    <!-- Dropdown for selecting Type, Parent, City -->
+                                                    <div class="input-group-append input-group-addon">
+                                                        <select style="height: 40px; width: 180px;" class="form-control"
+                                                            [(ngModel)]="selectedFilter">
+                                                            <option value="search" hidden>Search By</option>
+                                                            <option value="driver">Driver</option>
+                                                            <option value="driverFatherName">Driver Father Name</option>
+                                                            <option value="driverGrade">Driver Grade</option>
+                                                            <option value="identityNo">Identity No</option>
+                                                            <option value="supplier">Supplier Name</option>
+                                                            <option value="highestQualification">Highest Qualification
+                                                            </option>
+                                                            <option value="mobile">Mobile No</option>
+                                                            <option value="location">Location</option>
+                                                        </select>
+                                                    </div>
+
+                                                    <!-- Input field for filtering -->
+                                                    <input type="text"
+                                                        style="height: 40px; width: 300px;padding-left: 5px;"
+                                                        class="form-control" placeholder="Filter" id="inputGroup"
+                                                        (keyup)="onBackPress($event)" (input)="loadData()"
+                                                        [(ngModel)]="searchTerm" />
+
+                                                    <!-- Search button -->
+                                                    <div class="input-group-append input-group-addon">
+                                                        <span class="input-group-text"
+                                                            style="cursor: pointer; height: 40px; width: 40px; text-align: center;"
+                                                            (click)="loadData()">
+                                                            <i class="fas fa-search"></i>
+                                                        </span>
+                                                    </div>
                                                 </div>
                                             </div>
                                         </div>
-                                    </div>                                        
-                                </div>
-                                
-                                <div style="width: 30%; text-align:right;">
-                                    <button mat-raised-button color="primary"
-                                        data-dismiss="modal" data-toggle="modal" data-backdrop="false"
-                                        data-target="#exampleModalCenter">
-                                        Search
-                                    </button>
-                                    &nbsp;
-                                    <button mat-mini-fab color="primary" (click)="addNew()">
-                                        <mat-icon class="col-white">add</mat-icon>
-                                    </button>
-                                    &nbsp;
-                                    <button mat-mini-fab color="primary" (click)="refresh()">
-                                        <mat-icon class="col-white">refresh</mat-icon>
-                                    </button>
-                                    &nbsp;
-                                </div>
+                                    </div>
+
+                                    <div style="width: 30%; text-align:right;">
+                                        <button mat-raised-button color="primary" data-dismiss="modal"
+                                            data-toggle="modal" data-backdrop="false" data-target="#exampleModalCenter">
+                                            Search
+                                        </button>
+                                        &nbsp;
+                                        <button mat-mini-fab color="primary" (click)="addNew()">
+                                            <mat-icon class="col-white">add</mat-icon>
+                                        </button>
+                                        &nbsp;
+                                        <button mat-mini-fab color="primary" (click)="refresh()">
+                                            <mat-icon class="col-white">refresh</mat-icon>
+                                        </button>
+                                        &nbsp;
+                                    </div>
                                 </div>
                             </div>
 
@@ -222,94 +231,110 @@
 
                             </ng-template>
 
-                            <ng-template #elseBlock2  >
+                            <ng-template #elseBlock2>
                                 <div class="scrollable-table-container">
-                                <mat-table #table [dataSource]="dataSource" matSort class="mat-cell floating-header-table" (matSortChange)="SortingData($event)">
+                                    <mat-table #table [dataSource]="dataSource" matSort
+                                        class="mat-cell floating-header-table" (matSortChange)="SortingData($event)">
 
-                                    <ng-container matColumnDef="id">
-                                        <mat-header-cell *matHeaderCellDef mat-sort-header>Id</mat-header-cell>
-                                        <mat-cell *matCellDef="let row">{{row.driverID}}</mat-cell>
-                                    </ng-container>
+                                        <ng-container matColumnDef="id">
+                                            <mat-header-cell *matHeaderCellDef mat-sort-header>Id</mat-header-cell>
+                                            <mat-cell *matCellDef="let row">{{row.driverID}}</mat-cell>
+                                        </ng-container>
 
-                                    <ng-container matColumnDef="driverName">
-                                        <mat-header-cell *matHeaderCellDef mat-sort-header>Driver</mat-header-cell>
-                                        <mat-cell *matCellDef="let row" (contextmenu)="onContextMenu($event, row)">
-                                            {{row.driverName}}</mat-cell>
-                                    </ng-container>
+                                        <ng-container matColumnDef="driverName">
+                                            <mat-header-cell *matHeaderCellDef mat-sort-header>Driver</mat-header-cell>
+                                            <mat-cell *matCellDef="let row" (contextmenu)="onContextMenu($event, row)">
+                                                {{row.driverName}}</mat-cell>
+                                        </ng-container>
 
-                                    <ng-container matColumnDef="supplierOfficialIdentityNumber">
-                                        <mat-header-cell *matHeaderCellDef mat-sort-header>Supplier Identity Number</mat-header-cell>
-                                        <mat-cell *matCellDef="let row" (contextmenu)="onContextMenu($event, row)">
-                                            {{row.supplier}}</mat-cell>
-                                    </ng-container>
+                                        <ng-container matColumnDef="supplierOfficialIdentityNumber">
+                                            <mat-header-cell *matHeaderCellDef mat-sort-header>Supplier Identity
+                                                Number</mat-header-cell>
+                                            <mat-cell *matCellDef="let row" (contextmenu)="onContextMenu($event, row)">
+                                                {{row.supplier}}</mat-cell>
+                                        </ng-container>
 
-                                    <ng-container matColumnDef="driverImage">
-                                        <mat-header-cell *matHeaderCellDef [ngClass]="'tbl-col-width-per-6'">Image</mat-header-cell>
-                                        <mat-cell *matCellDef="let row" class="table-img tbl-col-width-per-6" (contextmenu)="onContextMenu($event, row)">
-                                           <img style="cursor: pointer;" src="{{row.driverImage}}"/> </mat-cell>
-                                    </ng-container>
+                                        <ng-container matColumnDef="driverImage">
+                                            <mat-header-cell *matHeaderCellDef
+                                                [ngClass]="'tbl-col-width-per-6'">Image</mat-header-cell>
+                                            <mat-cell *matCellDef="let row" class="table-img tbl-col-width-per-6"
+                                                (contextmenu)="onContextMenu($event, row)">
+                                                <img style="cursor: pointer;" src="{{row.driverImage}}" /> </mat-cell>
+                                        </ng-container>
 
-                                    <ng-container matColumnDef="driverOfficialIdentityNumber">
-                                        <mat-header-cell *matHeaderCellDef mat-sort-header>Identity No.</mat-header-cell>
-                                        <mat-cell *matCellDef="let row" (contextmenu)="onContextMenu($event, row)">
-                                            {{row.driverOfficialIdentityNumber}}</mat-cell>
-                                    </ng-container>
+                                        <ng-container matColumnDef="driverOfficialIdentityNumber">
+                                            <mat-header-cell *matHeaderCellDef mat-sort-header>Identity
+                                                No.</mat-header-cell>
+                                            <mat-cell *matCellDef="let row" (contextmenu)="onContextMenu($event, row)">
+                                                {{row.driverOfficialIdentityNumber}}</mat-cell>
+                                        </ng-container>
 
-                                       <ng-container matColumnDef="supplierName">
-                                        <mat-header-cell *matHeaderCellDef mat-sort-header>Supplier Name</mat-header-cell>
-                                        <mat-cell *matCellDef="let row" (contextmenu)="onContextMenu($event, row)">
-                                            {{row.supplierName}}</mat-cell>
-                                    </ng-container>
+                                        <ng-container matColumnDef="supplierName">
+                                            <mat-header-cell *matHeaderCellDef mat-sort-header>Supplier
+                                                Name</mat-header-cell>
+                                            <mat-cell *matCellDef="let row" (contextmenu)="onContextMenu($event, row)">
+                                                {{row.supplierName}}</mat-cell>
+                                        </ng-container>
 
-                                    <ng-container matColumnDef="hub">
-                                        <mat-header-cell *matHeaderCellDef mat-sort-header>Hub</mat-header-cell>
-                                        <mat-cell *matCellDef="let row" (contextmenu)="onContextMenu($event, row)">
-                                            {{row.hub}}</mat-cell>
-                                    </ng-container>
+                                        <ng-container matColumnDef="hub">
+                                            <mat-header-cell *matHeaderCellDef mat-sort-header>Hub</mat-header-cell>
+                                            <mat-cell *matCellDef="let row" (contextmenu)="onContextMenu($event, row)">
+                                                {{row.hub}}</mat-cell>
+                                        </ng-container>
 
-                                    <ng-container matColumnDef="location">
-                                        <mat-header-cell *matHeaderCellDef mat-sort-header>Location</mat-header-cell>
-                                        <mat-cell *matCellDef="let row" (contextmenu)="onContextMenu($event, row)">
-                                            {{row.location}}</mat-cell>
-                                    </ng-container>
+                                        <ng-container matColumnDef="location">
+                                            <mat-header-cell *matHeaderCellDef
+                                                mat-sort-header>Location</mat-header-cell>
+                                            <mat-cell *matCellDef="let row" (contextmenu)="onContextMenu($event, row)">
+                                                {{row.location}}</mat-cell>
+                                        </ng-container>
 
-                                    <ng-container matColumnDef="driverEmail">
-                                        <mat-header-cell *matHeaderCellDef mat-sort-header>Email</mat-header-cell>
-                                        <mat-cell *matCellDef="let row" (contextmenu)="onContextMenu($event, row)">
-                                            {{row.driverEmail}}</mat-cell>
-                                    </ng-container>
+                                        <ng-container matColumnDef="driverEmail">
+                                            <mat-header-cell *matHeaderCellDef mat-sort-header>Email</mat-header-cell>
+                                            <mat-cell *matCellDef="let row" (contextmenu)="onContextMenu($event, row)">
+                                                {{row.driverEmail}}</mat-cell>
+                                        </ng-container>
 
-                                    <ng-container matColumnDef="mobile1">
-                                        <mat-header-cell *matHeaderCellDef mat-sort-header>Mobile No</mat-header-cell>
-                                        <mat-cell *matCellDef="let row" (contextmenu)="onContextMenu($event, row)">
-                                            {{row.mobile1}}</mat-cell>
-                                    </ng-container>
-                                    
-                                    <ng-container matColumnDef="status">
-                                        <mat-header-cell *matHeaderCellDef>Status</mat-header-cell>
-                                        <mat-cell *matCellDef="let row">
-                                            {{row.activationStatus===true ? 'Active' : 'Deleted'}}</mat-cell>
-                                    </ng-container>
-                                    <!-- actions -->
-                                    <ng-container matColumnDef="actions">
-                                        <mat-header-cell *matHeaderCellDef class="pr-0"
-                                            [ngClass]="'tbl-col-width-per-9'">Actions</mat-header-cell>
-                                        <mat-cell *matCellDef="let row; let i=index;" class="pr-0"
-                                            [ngClass]="'tbl-col-width-per-9'">
-                                            
-                                            <button mat-raised-button color="primary"
-                                                (contextmenu)="onContextMenu($event, row)"
-                                                (click)="onContextMenu($event, row)">
-                                                Actions
-                                            </button>
-                                        </mat-cell>
-                                    </ng-container>
-                                   
-                                    <mat-header-row *matHeaderRowDef="displayedColumns"></mat-header-row>
-                                    <mat-row *matRowDef="let row; columns: displayedColumns;" [style.cursor]="'pointer'"
-                                        matRipple>
-                                    </mat-row>
-                                </mat-table>
+                                        <ng-container matColumnDef="mobile1">
+                                            <mat-header-cell *matHeaderCellDef mat-sort-header>Mobile
+                                                No</mat-header-cell>
+                                            <mat-cell *matCellDef="let row" (contextmenu)="onContextMenu($event, row)">
+                                                {{row.mobile1}}</mat-cell>
+                                        </ng-container>
+
+                                        <ng-container matColumnDef="isAdhoc">
+                                            <mat-header-cell *matHeaderCellDef mat-sort-header>Is
+                                                Adhoc</mat-header-cell>
+                                            <mat-cell *matCellDef="let row" (contextmenu)="onContextMenu($event, row)">
+                                                {{ row.isAdhoc === true ? 'Yes' : row.isAdhoc === false ? 'No' : 'N/A' }}
+                                            </mat-cell>
+                                        </ng-container>
+
+                                        <ng-container matColumnDef="status">
+                                            <mat-header-cell *matHeaderCellDef>Status</mat-header-cell>
+                                            <mat-cell *matCellDef="let row">
+                                                {{row.activationStatus===true ? 'Active' : 'Deleted'}}</mat-cell>
+                                        </ng-container>
+                                        <!-- actions -->
+                                        <ng-container matColumnDef="actions">
+                                            <mat-header-cell *matHeaderCellDef class="pr-0"
+                                                [ngClass]="'tbl-col-width-per-9'">Actions</mat-header-cell>
+                                            <mat-cell *matCellDef="let row; let i=index;" class="pr-0"
+                                                [ngClass]="'tbl-col-width-per-9'">
+
+                                                <button mat-raised-button color="primary"
+                                                    (contextmenu)="onContextMenu($event, row)"
+                                                    (click)="onContextMenu($event, row)">
+                                                    Actions
+                                                </button>
+                                            </mat-cell>
+                                        </ng-container>
+
+                                        <mat-header-row *matHeaderRowDef="displayedColumns"></mat-header-row>
+                                        <mat-row *matRowDef="let row; columns: displayedColumns;"
+                                            [style.cursor]="'pointer'" matRipple>
+                                        </mat-row>
+                                    </mat-table>
                                 </div>
                                 <!-- Loading spinner -->
                                 <!-- <div *ngIf="exampleDatabase.isTblLoading" class="tbl-spinner">
@@ -331,12 +356,14 @@
                                             <mat-icon>create</mat-icon>
                                             <span>Edit</span>
                                         </button>
-                                        <button *ngIf="shouldShowDeleteButton(item)"mat-menu-item (click)="deleteItem(item)">
+                                        <button *ngIf="shouldShowDeleteButton(item)" mat-menu-item
+                                            (click)="deleteItem(item)">
                                             <mat-icon>delete</mat-icon>
                                             <span>Delete</span>
                                         </button>
 
-                                        <button *ngIf="shouldShowDeleteButton(item)"mat-menu-item (click)="confirmClearIMEI(item)">
+                                        <button *ngIf="shouldShowDeleteButton(item)" mat-menu-item
+                                            (click)="confirmClearIMEI(item)">
                                             <mat-icon>delete</mat-icon>
                                             <span>Clear IMEI</span>
                                         </button>
@@ -351,7 +378,7 @@
                                         </button>
 
                                         <button  mat-menu-item (click)="driverInventoryAssociation(item)"> -->
-                                            <!-- <mat-icon>how_to_reg</mat-icon>
+                                        <!-- <mat-icon>how_to_reg</mat-icon>
                                             <span>Driver Inventory Association</span>
                                         </button> -->
                                         <!-- <button mat-menu-item (click)="refresh()">
@@ -359,12 +386,13 @@
                     <span>Refresh</span>
                   </button> -->
 
-                  <ng-container *ngFor="let menuItem of menuItems">
-                    <button mat-menu-item [matTooltip]="menuItem.tooltip" (click)="openInNewTab(menuItem, item)">
-                      <mat-icon>how_to_reg</mat-icon>
-                      <span>{{ menuItem.label }}</span>
-                    </button>
-                  </ng-container>
+                                        <ng-container *ngFor="let menuItem of menuItems">
+                                            <button mat-menu-item [matTooltip]="menuItem.tooltip"
+                                                (click)="openInNewTab(menuItem, item)">
+                                                <mat-icon>how_to_reg</mat-icon>
+                                                <span>{{ menuItem.label }}</span>
+                                            </button>
+                                        </ng-container>
 
                                     </ng-template>
                                 </mat-menu>

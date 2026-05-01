@@ -504,32 +504,62 @@ export class InvoiceAttachDetachComponent implements OnInit {
     }
   }
 
+  private isTrueValue(value: any): boolean {
+    return value === true || value === 'true' || value === 'True' || value === 1 || value === '1';
+  }
+
+  isRowSelectable(row: any): boolean {
+    return this.isTrueValue(row?.verifyDuty) && this.isTrueValue(row?.goodForBilling);
+  }
+
   
   //---------- Check Box ----------
    checkAll(checkBoxValue: boolean) 
    {
     this.dataSource?.forEach((element: any) => {
+      if (!this.isRowSelectable(element)) {
+        element.checked = false;
+        const blockedIndex = this.selectedInvoices.findIndex(x => x.dutySlipID === element.dutySlipID);
+        if (blockedIndex > -1) {
+          this.selectedInvoices.splice(blockedIndex, 1);
+        }
+        return;
+      }
+
       if(checkBoxValue) 
       {
         this.selectAll = true;
         element.checked = true;
-        this.selectedInvoices.push(element);
+        const exists = this.selectedInvoices.some(x => x.dutySlipID === element.dutySlipID);
+        if (!exists) {
+          this.selectedInvoices.push(element);
+        }
       } 
       else 
       {
         this.selectAll = false;
         element.checked = false;
         const index = this.selectedInvoices.findIndex(x => x.dutySlipID === element.dutySlipID);
-        this.selectedInvoices.splice(index, 1);
+        if (index > -1) {
+          this.selectedInvoices.splice(index, 1);
+        }
       }
     });
   }
 
   onCheckBox(checkBoxValue: boolean, data: any) 
   {
+    if (!this.isRowSelectable(data)) {
+      data.checked = false;
+      return;
+    }
+
     if(checkBoxValue && this.dataSource.includes(data))
     {
-      this.selectedInvoices.push(data);
+      const exists = this.selectedInvoices.some(x => x.dutySlipID === data.dutySlipID);
+      if (!exists) {
+        this.selectedInvoices.push(data);
+      }
       data.checked = true;
     } 
     else if(!checkBoxValue && this.dataSource.includes(data)) 
@@ -537,14 +567,17 @@ export class InvoiceAttachDetachComponent implements OnInit {
       this.selectAll = false;
       data.checked = false;
       const index = this.selectedInvoices.findIndex(x => x.dutySlipID === data.dutySlipID);
-      this.selectedInvoices.splice(index, 1);
+      if (index > -1) {
+        this.selectedInvoices.splice(index, 1);
+      }
     }
   }
 
   isIndeterminate() 
   {
-    const checkedCount = this.dataSource.filter(r => r.checked).length;
-    return checkedCount > 0 && checkedCount < this.dataSource.length;
+    const selectableRows = this.dataSource?.filter(r => this.isRowSelectable(r)) || [];
+    const checkedCount = selectableRows.filter(r => r.checked).length;
+    return checkedCount > 0 && checkedCount < selectableRows.length;
   }
 
   //---------- Post ----------

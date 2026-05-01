@@ -903,7 +903,7 @@ export class FormDialogComponent
       mileage: [this.advanceTable?.mileage],
       fuelType: [this.advanceTable?.fuelType],
       color: [this.advanceTable?.color],
-      // engineNo: [this.advanceTable?.engineNo],
+      isAdhoc: [this.advanceTable?.isAdhoc],
       // chassisNo: [this.advanceTable?.chassisNo],
       //noOfAirbags: [this.advanceTable?.noOfAirbags],
       //transmissionType: [this.advanceTable?.transmissionType],

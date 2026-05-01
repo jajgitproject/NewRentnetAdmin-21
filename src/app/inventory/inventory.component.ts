@@ -47,6 +47,7 @@ export class InventoryComponent implements OnInit {
     'supplierName',
     'supplierOfficialIdentityNumber',
     'locationHub',
+    'isAdhoc',
     'status',
     'actions'
   ];

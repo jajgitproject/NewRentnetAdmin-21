@@ -43,6 +43,7 @@ export class Inventory {
   organizationalEntityID: any;
   userID:number;
   businessDivision:string;
+  isAdhoc:boolean;
    //organizationalEntityOwnership:string;
    //organizationalEntitySupplierID:number;
    //organizationalEntitySupplier:string;
@@ -79,6 +80,7 @@ export class Inventory {
        this.registrationTillDate=new Date();
        //this.purchaseDate=new Date();
        this.businessDivision = inventory.businessDivision || '';
+       this.isAdhoc = inventory.isAdhoc || '';
     }
   }
   

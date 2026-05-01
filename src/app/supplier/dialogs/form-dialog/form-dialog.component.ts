@@ -207,7 +207,7 @@ export class FormDialogComponent
       address: [this.advanceTable.address],
       //pin: [this.advanceTable.pin],
       phone: [this.advanceTable.phone],
-      //fax: [this.advanceTable.fax],
+      isAdhoc: [this.advanceTable.isAdhoc],
       email: [this.advanceTable.email],
       supplierCreatedByEmployeeID: [this.advanceTable.supplierCreatedByEmployeeID],
       ifCreatedFromCompanyReferenceCompanyID: [this.advanceTable.ifCreatedFromCompanyReferenceCompanyID],

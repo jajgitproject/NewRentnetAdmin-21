@@ -50,6 +50,7 @@ export class DriverComponent implements OnInit {
     'hub',
     'location',
     'driverImage',
+     'isAdhoc',
     'status',
     'actions'
   ];

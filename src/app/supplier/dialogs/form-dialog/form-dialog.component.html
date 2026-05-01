@@ -211,6 +211,21 @@
           </mat-form-field>
         </div>
 
+
+<div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+          <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+            <mat-label>Is Adhoc</mat-label>
+            <mat-select formControlName="isAdhoc">
+              <mat-option [value]="true">Yes</mat-option>
+              <mat-option [value]="false">No</mat-option>
+            </mat-select>
+            <mat-error *ngIf="advanceTableForm.get('isAdhoc')?.hasError('required')">
+              Is Adhoc is required
+            </mat-error>
+          </mat-form-field>
+        </div>
+
+
         <!-- Identity No.: always shown in edit -->
         <!-- <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2 d-flex align-items-center justify-content-end"
           *ngIf="action === 'edit' && advanceTable?.supplierOfficialIdentityNumber">

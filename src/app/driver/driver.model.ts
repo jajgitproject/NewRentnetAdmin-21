@@ -60,6 +60,7 @@ export class Driver {
    companyName:string;
    companyID:number;
    userID:number;
+   isAdhoc:boolean;
    
   constructor(driver) {
     {
@@ -103,6 +104,7 @@ export class Driver {
        this.rtoStateID = driver.rtoStateID || '';
        this.policeVerification = driver.policeVerification || '';
        this.driverImage = driver.driverImage || '';
+       this.isAdhoc = driver.isAdhoc || '';
        this.medicalInsurance = driver.medicalInsurance || '';
        this.drivingSinceDateString = driver.drivingSinceDateString || '';
        this.countryCodes = driver.countryCodes || '';

@@ -6,7 +6,7 @@ import { MatPaginator } from '@angular/material/paginator';
 import { MatSort } from '@angular/material/sort';
 import { DataSource } from '@angular/cdk/collections';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import { BehaviorSubject, fromEvent, merge, Observable, Subscription } from 'rxjs';
+import { BehaviorSubject, fromEvent, merge, Observable, of, Subscription } from 'rxjs';
 import { map, startWith } from 'rxjs/operators';
 import { DateAdapter, MAT_DATE_LOCALE } from '@angular/material/core';
 import { MatMenu, MatMenuTrigger } from '@angular/material/menu';
@@ -14,7 +14,7 @@ import { SelectionModel } from '@angular/cdk/collections';
 import { GeneralService } from '../general/general.service';
 // import { MyUploadComponent } from '../myupload/myupload.component';
 import { MyUploadComponent } from '../myupload/myupload.component';
-import { FormControl } from '@angular/forms';
+import { FormControl, Validators } from '@angular/forms';
 import { InvoiceHomeService } from './invoiceHome.service';
 import { InvoiceHome } from './invoiceHome.model';
 import { CustomerDropDown } from '../customer/customerDropDown.model';
@@ -98,7 +98,7 @@ bookerName: FormControl = new FormControl();
   advanceTableForm: any;
   SearchEInvoiceStatus:string='';
   customerGroupID: any;
-  customer : FormControl=new FormControl();
+  customer : FormControl=new FormControl('', Validators.required);
 
   SearchFromDate: string = '';
   startDate : FormControl = new FormControl();
@@ -123,9 +123,9 @@ bookerName: FormControl = new FormControl();
   contextMenu: MatMenuTrigger;
   contextMenuPosition = { x: '0px', y: '0px' };
   ngOnInit() {
-    this.loadData();
+    // this.loadData();
     this.InitCustomerGroup();
-    //this.initCustomer();
+    // this.initAllCustomers();
     this.InitCompany();
     this.InitRegistrationNumber();
     this.SubscribeUpdateService();
@@ -149,12 +149,17 @@ bookerName: FormControl = new FormControl();
     this.customerName.setValue('');
     this.SearchInvoiceStatus = '';
     this.searchTerm = '';
-    this.selectedFilter = 'search';  
+    this.selectedFilter = 'search';
+    // this.initAllCustomers();
     this.loadData();
   }
 
   public SearchData() 
   {
+    if (this.customer.invalid) {
+      this.customer.markAsTouched();
+      return;
+    }
     this.loadData();
   }
  
@@ -182,7 +187,7 @@ bookerName: FormControl = new FormControl();
     {
       this.SearchToDate=moment(this.SearchToDate).format('yyyy-MM-DD');
     }
-    this.invoiceHomeService.getTableData(this.customerName.value,this.customerGroup.value,  this.searchInvoiceNo.replace("/","-"), this.branch.value,this.SearchFromDate,this.SearchToDate,this.SearchInvoiceStatus,this.SearchEInvoiceStatus,this.searchDutySlip,this.searchReservationID,this.searchActivationStatus,this.PageNumber).subscribe(
+    this.invoiceHomeService.getTableData(this.customer.value,this.customerGroup.value,  this.searchInvoiceNo.replace("/","-"), this.branch.value,this.SearchFromDate,this.SearchToDate,this.SearchInvoiceStatus,this.SearchEInvoiceStatus,this.searchDutySlip,this.searchReservationID,this.searchActivationStatus,this.PageNumber).subscribe(
         data => {
           this.dataSource = data;
         },
@@ -366,7 +371,13 @@ bookerName: FormControl = new FormControl();
     );
   
     if (selectedCustomerGroup) {
+      this.customer.setValue('');
       this.getGroupID(selectedCustomerGroup.customerGroupID);
+    } else {
+      // Group cleared — reset customer list to all customers
+      this.customerGroupID = null;
+      this.customer.setValue('');
+      // this.initAllCustomers();
     }
   }
 
@@ -374,8 +385,27 @@ bookerName: FormControl = new FormControl();
     this.customerGroupID=customerGroupID;
     this.InitCustomer();
   }
+
+  //-------Customer (all, no group filter)-------
+  onKeyupCustomerName(event?: any)
+  {
+    const Prefix = ((event?.target?.value ?? this.customer?.value) || '').toString().trim();
+    if (Prefix.length < 3)
+    {
+      this.CustomerList = [];
+      return;
+    }
+    this._generalService.getCustomerForInvoice(Prefix).subscribe(
+    data=>
+    {
+      this.CustomerList=data;
+      this.filteredCustomerOptions = merge(of(Prefix), this.customer.valueChanges).pipe(
+        map(value => this._filterCustomer((value || '').toString()))
+      );
+    });
+  }
   
-  //-------Customer-------
+  //-------Customer (filtered by group)-------
   InitCustomer()
   {
     this._generalService.GetCustomersForCP(this.customerGroupID).subscribe(
@@ -391,6 +421,9 @@ bookerName: FormControl = new FormControl();
 
   private _filterCustomer(value: string): any {
     const filterValue = value.toLowerCase();
+    if (!value || value.length < 3) {
+      return [];
+    }
     return this.CustomerList.filter(
       data => 
       {

@@ -914,6 +914,7 @@ saveDisabled:boolean = true;
       latitude: [this.advanceTable?.latitude],
       longitude: [this.advanceTable?.longitude],
       companyName:[this.advanceTable?.companyName],
+      isAdhoc: [this.advanceTable?.isAdhoc]
     
     }, 
     {
