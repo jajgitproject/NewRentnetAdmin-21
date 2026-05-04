@@ -87,7 +87,7 @@ export class FormDialogComponent implements OnInit {
   DriverSupplierName: any;
   driverSupplierID: number;
   inventorySupplierID: number;
-
+  SupplierID:any;
   constructor(
     public dialogRef: MatDialogRef<FormDialogComponent>,
     @Inject(MAT_DIALOG_DATA) public data: any,
@@ -107,6 +107,8 @@ export class FormDialogComponent implements OnInit {
     this.driverInventoryAssociationDataSource = data.driverInventoryAssociationDataSource;
     this.ownedSupplier = data.driverInventoryAssociationDataSource?.driverOwnedSupplier;
     this.supplierID = data.driverInventoryAssociationDataSource?.inventorySupplierID
+    this.SupplierID = data.supplierID;
+
 
     // Set the defaults
     this.action = data.action;
@@ -348,7 +350,7 @@ export class FormDialogComponent implements OnInit {
 
   //---------Driver-----------------
   InitDriver() {
-    this._generalService.GetDriver().subscribe(
+    this._generalService.GetDriverBySupplierID(this.SupplierID).subscribe(
       data => {
         this.DriverList = data;
         this.advanceTableForm.controls['driverName'].setValidators([Validators.required,
@@ -399,7 +401,7 @@ export class FormDialogComponent implements OnInit {
 
   //-----------Inventory----------------
   InitVehicle() {
-    this._generalService.GetVehicleAsInventory().subscribe(
+    this._generalService.GetVehicleAsInventoryBySupplierID(this.SupplierID).subscribe(
       data => {
         this.VehicleList = data;
         this.advanceTableForm.controls['inventoryName'].setValidators([Validators.required,

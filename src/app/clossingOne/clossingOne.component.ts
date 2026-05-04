@@ -87,7 +87,9 @@ import { FormDialogComponent as DutySlipImageDialog } from '../dutySlipImage/dia
 import { DutySlipImage } from '../dutySlipImage/dutySlipImage.model';
 import { OdoMeterAndManualDutySlipImageService } from '../odoMeterAndManualDutySlipImage/odoMeterAndManualDutySlipImage.service';
 import { OdoMeterAndManualDutySlipImage } from '../odoMeterAndManualDutySlipImage/odoMeterAndManualDutySlipImage.model';
-
+import { FormDialogSRDComponent } from '../settledRateDetails/dialogs/form-dialog/form-dialog.component';
+import { SettledRateDetailsService } from '../settledRateDetails/settledRateDetails.service';
+import { FormDialogComponent as CDTClosingDialogComponent } from '../changeDutyTypeClosing/dialogs/dialogDetails/dialogDetails.component';
 @Component({
   standalone: false,
   selector: 'app-clossingOne',
@@ -135,6 +137,11 @@ export class ClossingOneComponent implements OnInit {
   LocationOutAddress: string;
   CustomerContractID: number;
   PackageType: string;
+  CustomerName: string;
+  TallyCustomerID: number;
+  GstData:any;
+  GstNumber: string;
+  StateName: string;
 
   showDutyExpense: boolean = false;
   SearchActivationStatus: boolean = true;
@@ -173,6 +180,7 @@ export class ClossingOneComponent implements OnInit {
   advanceTableBD: BillToOther | null;
   showBillToOther: boolean = false;
   showMOPOther: boolean = false;
+  showHidesettledRates: boolean = false;
   showHideDutyStateCustomer: boolean = false;
   advanceTableDutyStateCustomer: DutyStateCustomer | null;
   showMOP: boolean = false;
@@ -192,6 +200,9 @@ export class ClossingOneComponent implements OnInit {
   oDOMAndMDSAdvanceTable: OdoMeterAndManualDutySlipImage;
   allotmentStatus: string;
   dutySlipType: string;
+  PickupCityID: number;
+  VehicleCategoryID: number;
+  VehicleID: number;
 
 
   constructor(
@@ -229,6 +240,7 @@ export class ClossingOneComponent implements OnInit {
     public controlPanelDialogeService: ControlPanelDialogeService,
     public _dutySlipImageService: DutySlipImageService,
     public odoMeterAndManualDutySlipImageService: OdoMeterAndManualDutySlipImageService,
+    public settleRateService: SettledRateDetailsService
   ) {
 
   }
@@ -325,11 +337,29 @@ export class ClossingOneComponent implements OnInit {
           this.PickupAddress = this.closingDataAdvanceTable.pickupAddress;
           this.DropOffAddress = this.closingDataAdvanceTable.dropOffAddress;
           this.LocationOutAddress = this.closingDataAdvanceTable.locationOutAddress;
+          this.CustomerName = this.closingDataAdvanceTable.customerName;
+          this.TallyCustomerID = this.closingDataAdvanceTable.tallyCustomerID;
+          this.PickupCityID = this.closingDataAdvanceTable.pickupCityID;
+          this.VehicleCategoryID = this.closingDataAdvanceTable.vehicleCategoryID;
+          this.VehicleID = this.closingDataAdvanceTable.vehicleID;
+         
           this.advanceDetailsLoadData();
           this.kamCardLoadData();
           // this.loadDataforAdditionalKMHR();
           this.DutySACLoadData();
           this.salesPersonLoadData();
+        },
+        (error: HttpErrorResponse) => { this.closingDataAdvanceTable = null; }
+      );
+  }
+   public GSTDataOnClosing() {
+    this.clossingOneService.getClosingGSTData(this.ReservationID).subscribe
+      (
+        data => {
+          this.GstData = data;
+          
+          this.GstNumber = this.GstData.gstNumber;
+          this.StateName = this.GstData.stateName;
         },
         (error: HttpErrorResponse) => { this.closingDataAdvanceTable = null; }
       );
@@ -629,9 +659,9 @@ export class ClossingOneComponent implements OnInit {
   }
 
   //---------- Start Duty SAC ----------
-  openDutySAC(source: 'anchor' | 'view' | 'unknown' = 'unknown') {
+  openDutySAC() {
     // #region agent log
-    fetch('http://127.0.0.1:7532/ingest/f2c32722-bd0e-4386-883a-e749a4372080', { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-Debug-Session-Id': 'b9234c' }, body: JSON.stringify({ sessionId: 'b9234c', runId: 'pre-fix', hypothesisId: 'H8', location: 'NewRententAdmin-ng21/clossingOne.component.ts:openDutySAC:start', message: 'Duty SAC open invoked', data: { source, isArray: Array.isArray(this.advanceTableSAC), length: Array.isArray(this.advanceTableSAC) ? this.advanceTableSAC.length : null }, timestamp: Date.now() }) }).catch(() => { });
+   // fetch('http://127.0.0.1:7532/ingest/f2c32722-bd0e-4386-883a-e749a4372080', { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-Debug-Session-Id': 'b9234c' }, body: JSON.stringify({ sessionId: 'b9234c', runId: 'pre-fix', hypothesisId: 'H8', location: 'NewRententAdmin-ng21/clossingOne.component.ts:openDutySAC:start', message: 'Duty SAC open invoked', data: { source, isArray: Array.isArray(this.advanceTableSAC), length: Array.isArray(this.advanceTableSAC) ? this.advanceTableSAC.length : null }, timestamp: Date.now() }) }).catch(() => { });
     // #endregion
     const dialogRef = this.dialog.open(DutySACFormDialogComponent,
       {
@@ -1204,6 +1234,7 @@ export class ClossingOneComponent implements OnInit {
     this.verifyDuty = event.verifyDuty;
     this.goodForBilling = event.goodForBilling;
     this.Message = event.message;
+     this.GSTDataOnClosing();
   }
 
   openSearchModal() {
@@ -1287,6 +1318,98 @@ export class ClossingOneComponent implements OnInit {
       return;
     }
   }
+
+  //---------- Settled Rate ----------
+   
+   settledRates()
+   {
+    this.settleRateService.getTableData(this.ReservationID,this.SearchActivationStatus, this.PageNumber).subscribe
+    (
+      (dataSRD :SettledRateDetails)=>   
+      {
+        if(dataSRD !== null)
+        {
+          this.advanceTableSRD = dataSRD;
+          const dialogRef = this.dialog.open(FormDialogSRDComponent, 
+          {
+            data: 
+            {
+              reservationID:this.ReservationID,
+              advanceTable:this.advanceTableSRD[0],
+              action: 'edit',
+              status: this.verifyDutyStatusAndCacellationStatus
+            }
+          });
+          dialogRef.afterClosed().subscribe((res: any) => {
+            this.settledRateLoadData();
+            //this.ngOnInit();
+          })
+        }
+        else
+        {
+          const dialogRef = this.dialog.open(FormDialogSRDComponent, 
+          {
+            data: 
+            {
+              reservationID:this.ReservationID,
+              action: 'add',
+              status: this.verifyDutyStatusAndCacellationStatus
+            }
+          });
+          dialogRef.afterClosed().subscribe((res: any) => {
+            this.settledRateLoadData();
+            //this.ngOnInit();
+          })
+        }
+      }
+    );  
+  }
+  
+  settledRateLoadData() 
+  {
+    this.settleRateService.getTableData(this.ReservationID,this.SearchActivationStatus, this.PageNumber).subscribe
+    (
+      (data :SettledRateDetails)=>   
+      {
+        if(data !== null)
+        {
+          this.showHidesettledRates = true;
+        }
+        this.advanceTableSRD = data;
+      },
+     (error: HttpErrorResponse) => { this.advanceTableSRD = null;}
+    );
+  }
+  //------settledRates
+showAndScrollOpenSettledRates() {
+  this.showHidesettledRates = true;
+  setTimeout(() => {
+    const element = document.getElementById('settledRates');
+    if (element) {
+      element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  }, 0);
+}
+
+ changeDutyTypeClosingDetails() {
+    const dialogRef = this.dialog.open(CDTClosingDialogComponent,
+      {
+        data:
+        {
+          pickupDate: this.PickupDate,
+          reservationID: this.ReservationID,
+          customerID: this.CustomerID,
+          pickupCityID: this.PickupCityID,
+          vehicleID: this.VehicleID,
+          vehicleCategoryID: this.VehicleCategoryID,
+          verifyDutyStatusAndCacellationStatus: this.verifyDutyStatusAndCacellationStatus
+        }
+      });
+    dialogRef.afterClosed().subscribe((res: any) => {
+      
+    })
+  }
+
 }
 
 

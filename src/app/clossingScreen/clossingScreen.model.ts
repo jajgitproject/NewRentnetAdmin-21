@@ -805,6 +805,8 @@ export class ClosingDataModel {
   vehicle:string;
   customerContractID:number;
   packageType:string;
+  customerName:string;
+  tallyCustomerID:number;
 
 
   constructor(closingDataModel) {

@@ -2797,6 +2797,13 @@ const routes: Routes = [
             (m) => m.ModeOfPaymentModule
           )
       },
+       {
+        path: 'changeDutyTypeClosing',
+        loadChildren: () =>
+          import('./changeDutyTypeClosing/changeDutyTypeClosing.module').then(
+            (m) => m.ChangeDutyTypeClosingModule
+          )
+      },
 
       {
         path: 'supplierContractPercentage',

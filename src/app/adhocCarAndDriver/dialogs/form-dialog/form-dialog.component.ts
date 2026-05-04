@@ -114,6 +114,7 @@ copydetails:boolean = false;
   vehicleID: any;
   registrationNumber: any;
   reservationID:any;
+  RegistrationNo:any;
   public LocationNameList?: OrganizationalEntityDropDown[] = [];
   filteredLocationNameOptions: Observable<OrganizationalEntityDropDown[]>;
   LocationID: any;
@@ -567,6 +568,26 @@ copydetails:boolean = false;
 //     }
 //   );
 // }
+
+duplicateRegistrationNoCheck() {
+  const regNo = this.advanceTableForm.value.registrationNumber;
+
+  if (!regNo) return;
+
+  this._generalService.GetRegistrationNumberDuplicate(regNo)
+    .subscribe(res => {
+     console.log(res);
+      if (res) {        
+        this.advanceTableForm.get('registrationNumber')
+          .setErrors({ duplicate: true });
+      } else {
+        
+        this.advanceTableForm.get('registrationNumber')
+          .setErrors(null);
+      }
+
+    });
+}
 
   initRegistrationNumber() {
     this._generalService.GetRegistrationNumberDropDown(this.supplierID).subscribe(

@@ -93,6 +93,11 @@
                     </mat-error>
                 </mat-form-field>
             </div>
+            <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2" *ngIf="gstNumber">
+                <span><b>GST Number</b></span>
+               <br/>
+               <span>{{ gstNumber }}({{StateName}})</span>
+            </div>
         </div>
             <div class="row">
                 <!-- <div *ngIf="isSaveAllowed">

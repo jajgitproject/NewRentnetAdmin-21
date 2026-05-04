@@ -918,7 +918,11 @@ nameEmailDuplicateMobile(payload: {
       this.BaseURL + 'customerPersonDriverRestriction/ForDropDown'
     );
   }
-
+GetDriverBySupplierID(SupplierID: number): Observable<DriverDropDown[]> {
+    return this.http.get<DriverDropDown[]>(
+      this.BaseURL + 'customerPersonDriverRestriction/GetDriverBySupplierID/' + SupplierID
+    );
+  }
   getDriverMIS(): Observable<DriverDropDown[]> {
     return this.http.get<DriverDropDown[]>(
       this.BaseURL + 'driverMIS/ForDropDown'
@@ -1294,6 +1298,9 @@ GetVehicleBasedOnContractIDForOutStationRoundTrip(contractID: any,PackageID:numb
   GetVehicleAsInventory(): Observable<VehicleDropDown[]> {
     return this.http.get<VehicleDropDown[]>(this.BaseURL + "Vehicle/getVehicleAsInventoryForDropDown");
   }
+   GetVehicleAsInventoryBySupplierID(SupplierID: number): Observable<VehicleDropDown[]> {
+    return this.http.get<VehicleDropDown[]>(this.BaseURL + "Vehicle/GetVehicleAsInventoryBySupplierID/" + SupplierID);
+  }
 
   getMonthYear(): Observable<MonthlyBusinessReportDropDown[]> {
     return this.http.get<MonthlyBusinessReportDropDown[]>(this.BaseURL + "monthlyBusinessReport/ForDropDown");
@@ -1631,6 +1638,9 @@ getCustomerCategory(): Observable<CustomerCategoryDropDown[]>{
   }
   getCustomerForInvoice(Prefix: string): Observable<CustomerDropDown[]>{
     return this.http.get<CustomerDropDown[]>(this.BaseURL + "customer/ForSearchInvoiceHome/"+Prefix);
+  }
+   GetRegistrationNumberDuplicate(registrationNumber:number): Observable<boolean> {
+    return this.http.get<boolean>(this.BaseURL + "customerPersonDriverRestriction/GetRegistrationNumberDuplicate/"+registrationNumber);
   }
 }
 

@@ -104,6 +104,12 @@ import { DutySlipImageService } from '../dutySlipImage/dutySlipImage.service';
 import { OdoMeterAndManualDutySlipImageService } from '../odoMeterAndManualDutySlipImage/odoMeterAndManualDutySlipImage.service';
 import { OdoMeterAndManualDutySlipImageModule } from '../odoMeterAndManualDutySlipImage/odoMeterAndManualDutySlipImage.module';
 import { OdoMeterAndManualDutySlipImageComponent } from '../odoMeterAndManualDutySlipImage/odoMeterAndManualDutySlipImage.component';
+import { SettledRateDetailsModule } from '../settledRateDetails/settledRateDetails.module';
+import { SettledRateDetailsComponent } from '../settledRateDetails/settledRateDetails.component';
+import { SettledRateDetailsService } from '../settledRateDetails/settledRateDetails.service';
+import {ChangeDutyTypeClosingService} from '../changeDutyTypeClosing/changeDutyTypeClosing.service';
+import { ChangeDutyTypeClosingModule } from '../changeDutyTypeClosing/changeDutyTypeClosing.module';
+
 
 @NgModule({
   declarations: [
@@ -168,7 +174,9 @@ import { OdoMeterAndManualDutySlipImageComponent } from '../odoMeterAndManualDut
     MOPDetailsModule,
     ReservationDutyslipSearchModule,
     OdoMeterAndManualDutySlipImageModule,
-    AdditionalKmsDetailsModule
+    AdditionalKmsDetailsModule,
+    SettledRateDetailsModule,
+    ChangeDutyTypeClosingModule
 
   ],
   exports:[ClossingOneComponent],
@@ -191,6 +199,7 @@ import { OdoMeterAndManualDutySlipImageComponent } from '../odoMeterAndManualDut
               LumpsuminformationService,
               AdvanceDetailsClosingService,
               SettledRateClosingService,
+              SettledRateDetailsService,
               KAMDetailsClosingService,
               BillingHistoryService,
               DutyStateCustomerService,
@@ -198,8 +207,8 @@ import { OdoMeterAndManualDutySlipImageComponent } from '../odoMeterAndManualDut
               SingleDutySingleBillForLocalService,
               PackageRateDetailsForClosingService ,
                MOPDetailsService, ControlPanelDialogeService,
-               ReservationDutyslipSearchService ,DutySlipImageService,OdoMeterAndManualDutySlipImageService  
-                       ]
+               ReservationDutyslipSearchService ,DutySlipImageService,OdoMeterAndManualDutySlipImageService,  
+                   ChangeDutyTypeClosingService    ]
 })
 export class ClossingOneModule {}
 

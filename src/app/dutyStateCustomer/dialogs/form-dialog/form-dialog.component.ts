@@ -13,6 +13,7 @@ import { Observable } from 'rxjs';
 import { map, startWith } from 'rxjs/operators';
 import { MatSnackBar } from '@angular/material/snack-bar';
 
+
 @Component({
   standalone: false,
   selector: 'app-form-dialog',
@@ -40,6 +41,8 @@ export class DutyStateCustomerFormDialogComponent
   verifyDutyStatusAndCacellationStatus: any;
   isSaveAllowed: boolean = false;
   customerID: number;
+  gstNumber: string;
+  StateName: string;
   constructor(
   public dialogRef: MatDialogRef<DutyStateCustomerFormDialogComponent>, 
   @Inject(MAT_DIALOG_DATA) public data: any,
@@ -154,6 +157,8 @@ OnStateSelect(selectedState: string)
   if (selectedState) 
   {
     this.getStateID(StateName.geoPointID);
+     this.gstNumber = StateName.gstNumber;
+     this.StateName= StateName.geoPointName;
   }
 }
 

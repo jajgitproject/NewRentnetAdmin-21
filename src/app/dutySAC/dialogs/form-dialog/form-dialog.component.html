@@ -22,8 +22,13 @@
                 <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
                     <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
                         <mat-label>SAC</mat-label>
-                        <input required type="text" matInput formControlName="sacNumber" (change)="OnSACSelect(advanceTableForm.get('sacNumber')?.value)">
-
+                        <input required type="text" matInput formControlName="sacNumber" [matAutocomplete]="auto">
+                         <mat-autocomplete #auto="matAutocomplete" (optionSelected)="OnSACSelect($event.option.value)">
+                          <mat-option *ngFor="let option of filteredSACNumberOptions | async" 
+                          [value]="option.sacNumber" (click)="getSACID(option.sacid)">
+                            {{option.sacNumber}}
+                          </mat-option>
+                        </mat-autocomplete>
                         <mat-error *ngIf="advanceTableForm.get('sacNumber').hasError('required')">
                             SAC is required
                         </mat-error>

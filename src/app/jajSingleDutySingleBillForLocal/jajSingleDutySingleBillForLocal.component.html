@@ -20,7 +20,7 @@
                 <br> 
                 <span>Original for Recipient</span>
               </h4> -->
-         <div style="text-align: center;">
+          <div style="text-align: center;">
             <strong>TAX INVOICE
               <br />
               Original for Recipient
@@ -260,24 +260,28 @@
               </span>
             </td>
           </tr>
-          <tr class="table-mid-tr"
-            *ngIf="dataSource?.invoicePackageValuesModel && dataSource?.invoicePackageValuesModel?.extraMinutes!=0">
+          <tr class="table-mid-tr" *ngIf="dataSource?.invoicePackageValuesModel?.extraMinutes != 0 
+        && dataSource?.invoicePackageModel?.packageType !== 'Outstation Round Trip'">
+
             <td class="table-midrow-firstcolumn">
               Extra Hours :
               <span *ngIf="dataSource?.invoicePackageValuesModel?.extraMinutes as extra">
-                {{ getHoursAndMinutes(extra).hours }}:{{getHoursAndMinutes(extra).minutes }}
+                {{ getHoursAndMinutes(extra).hours }}:{{ getHoursAndMinutes(extra).minutes }}
               </span>
             </td>
+
             <td class="table-midrow-secondcolumn">
-              <span *ngIf="dataSource?.invoicePackageModel?.extraHRRate!=0">
-                {{dataSource?.invoicePackageModel?.extraHRRate | number:'1.2-2'}}
+              <span *ngIf="dataSource?.invoicePackageModel?.extraHRRate != 0">
+                {{ dataSource?.invoicePackageModel?.extraHRRate | number:'1.2-2' }}
               </span>
             </td>
+
             <td class="table-midrow-thirdcolumn">
-              <span *ngIf="dataSource?.invoicePackageValuesModel?.extraMinutesAmount!=0">
-                {{dataSource?.invoicePackageValuesModel?.extraMinutesAmount}}
+              <span *ngIf="dataSource?.invoicePackageValuesModel?.extraMinutesAmount != 0">
+                {{ dataSource?.invoicePackageValuesModel?.extraMinutesAmount }}
               </span>
             </td>
+
           </tr>
           <tr class="table-mid-tr" *ngIf="dataSource?.totalParkingTollFastagRFIDAmount!=0">
             <td class="table-midrow-firstcolumn">

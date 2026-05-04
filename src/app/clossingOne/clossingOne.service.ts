@@ -31,6 +31,10 @@ export class ClossingOneService
   {
     return this.httpClient.get(this.API_URL_ClosingData+ '/'+ 'GetClosingData' + '/' +AllotmentID);
   }
+   getClosingGSTData(ReservationID:any):  Observable<any> 
+  {
+    return this.httpClient.get(this.API_URL_ClosingData+ '/'+ 'GetGSTData' + '/' +ReservationID);
+  }
   
   GetClosingData(DutySlipID:any): Observable<any> {
     return this.httpClient.get<any>(this.API_URL +"/"+DutySlipID);

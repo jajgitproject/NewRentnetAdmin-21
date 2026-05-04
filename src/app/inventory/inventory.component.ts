@@ -459,7 +459,8 @@ onBackPress(event)
       Vehicle: encodeURIComponent(this._generalService.encrypt(rowItem.vehicle)),
       VehicleCategory: encodeURIComponent(this._generalService.encrypt(rowItem.vehicleCategory)),
       redirectingFrom: encodeURIComponent(this._generalService.encrypt('Inventory')),
-      SupplierName: encodeURIComponent(this._generalService.encrypt(rowItem.supplier))
+      SupplierName: encodeURIComponent(this._generalService.encrypt(rowItem.supplier)),
+      supplierID: encodeURIComponent(this._generalService.encrypt(rowItem.supplierID.toString())),
     };
   
     const url = this.router.serializeUrl(this.router.createUrlTree([menuItem.route], { queryParams }));

@@ -383,9 +383,9 @@ export class DriverComponent implements OnInit {
 
   /////////////////for Image Upload////////////////////////////
   openInNewTab(menuItem: any, rowItem: any) {
-
     let baseUrl = this._generalService.FormURL;
     const encryptedDriverID = encodeURIComponent(this._generalService.encrypt(rowItem.driverID.toString()));
+    const encryptedSupplierID = encodeURIComponent(this._generalService.encrypt(rowItem.supplierID.toString()));
     const encryptedDriverName = encodeURIComponent(this._generalService.encrypt(rowItem.driverName));
     const encryptedSupplierName = encodeURIComponent(this._generalService.encrypt(rowItem.supplier));
     const encryptedDriverPhone = encodeURIComponent(this._generalService.encrypt(rowItem.mobile1));
@@ -420,6 +420,7 @@ export class DriverComponent implements OnInit {
           DriverName: encryptedDriverName,
           redirectingFrom: redirectingFrom,
           supplierName: encryptedSupplierName,
+          supplierID: encryptedSupplierID,
           DriverPhone: encryptedDriverPhone
         }
       }));

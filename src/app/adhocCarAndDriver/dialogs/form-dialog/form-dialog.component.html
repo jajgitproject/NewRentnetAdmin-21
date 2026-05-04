@@ -371,10 +371,13 @@
                <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2" *ngIf="!advanceTableForm.value?.isCarExisting || advanceTableForm.value.isCarExisting === 'New'">
                     <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
                         <mat-label>Registration No</mat-label>
-                        <input matInput formControlName="registrationNumber" required>
+                        <input matInput formControlName="registrationNumber" required  (blur)="duplicateRegistrationNoCheck()">
                         <mat-error *ngIf="advanceTableForm.get('registrationNumber').hasError('required')">
                             Registration No is required
                         </mat-error>
+                        <mat-error *ngIf="advanceTableForm.get('registrationNumber').hasError('duplicate')">
+                            Registration number already exists
+                            </mat-error>
                     </mat-form-field>
                 </div>
                 <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2" *ngIf=" advanceTableForm.value.isCarExisting === 'Existing'">

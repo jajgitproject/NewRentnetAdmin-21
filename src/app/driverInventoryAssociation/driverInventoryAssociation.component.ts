@@ -106,6 +106,7 @@ export class DriverInventoryAssociationComponent implements OnInit {
   SupplierName: any;
   DriverPhone: any;
   Supplier: any;
+  SupplierID: any;
 
   constructor(
     public httpClient: HttpClient,
@@ -143,6 +144,7 @@ export class DriverInventoryAssociationComponent implements OnInit {
       const encryptedDriverPhone = paramsData.DriverPhone;
       const encryptedSupplier = paramsData.supplierName;
       const encryptedRedirectingFrom = paramsData.redirectingFrom;
+      const encryptedSupplierID = paramsData.supplierID;
 
 if (encryptedDriverID && encryptedDriverName && encryptedRedirectingFrom && encryptedDriverPhone && encryptedSupplier)
 {
@@ -151,6 +153,7 @@ if (encryptedDriverID && encryptedDriverName && encryptedRedirectingFrom && encr
   this.DriverPhone = this._generalService.decrypt(decodeURIComponent(encryptedDriverPhone));
   this.RedirectingFrom = this._generalService.decrypt(decodeURIComponent(encryptedRedirectingFrom));
   this.Supplier = this._generalService.decrypt(decodeURIComponent(encryptedSupplier));
+  this.SupplierID = this._generalService.decrypt(decodeURIComponent(encryptedSupplierID));
 }
 
   // Decrypt the parameters if they exist For Inventory
@@ -160,6 +163,7 @@ const encryptedVehicle = paramsData.Vehicle;
 const encryptedVehicleCategory = paramsData.VehicleCategory;
 const encryptedSupplierName = paramsData.SupplierName;
 
+
 if (encryptedVehicleID && encryptedRegNo && encryptedRedirectingFrom && encryptedVehicle && encryptedVehicleCategory && encryptedSupplierName ) 
 {
   this.vehicleID = (this._generalService.decrypt(decodeURIComponent(encryptedVehicleID)));
@@ -168,8 +172,11 @@ if (encryptedVehicleID && encryptedRegNo && encryptedRedirectingFrom && encrypte
   this.VehicleCategory = this._generalService.decrypt(decodeURIComponent(encryptedVehicleCategory));
   this.RedirectingFrom = this._generalService.decrypt(decodeURIComponent(encryptedRedirectingFrom));
   this.SupplierName = this._generalService.decrypt(decodeURIComponent(encryptedSupplierName));
+  this.SupplierID = this._generalService.decrypt(decodeURIComponent(encryptedSupplierID));
+
 }
 
+console.log("Decrypted SupplierID:", this.SupplierID);
     });
 
    
@@ -309,7 +316,8 @@ if (encryptedVehicleID && encryptedRegNo && encryptedRedirectingFrom && encrypte
           redirectingFrom : this.RedirectingFrom,
           supplierName: this.SupplierName,
           driverPhone:this.DriverPhone,
-          supplier:this.Supplier
+          supplier:this.Supplier,
+          supplierID:this.SupplierID
         }
     });
   }

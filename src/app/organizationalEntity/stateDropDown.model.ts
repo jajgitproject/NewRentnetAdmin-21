@@ -4,6 +4,7 @@ export class StatesDropDown {
  
    geoPointID: number;
    geoPointName: string;
+   gstNumber:string;
 
   constructor(stateDropDown) {
     {

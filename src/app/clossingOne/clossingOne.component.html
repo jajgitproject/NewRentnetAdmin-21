@@ -29,633 +29,733 @@
     <app-reservationDutyslipSearch></app-reservationDutyslipSearch>
     <!-- End Search Model Popup Open -->
 
-    
-      <div class="card" style="background-color: #ffffff;padding-top: 10px;">
-        <div class="row" style="padding-left: 30px;">
-          <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2"><h5>Reservation No: {{ReservationID}} </h5> </div>
-        <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2"><h5>DutySlip No: {{DutySlipID}}</h5></div>
+
+    <div class="card" style="background-color: #ffffff;padding-top: 10px;">
+      <div class="row" style="padding-left: 30px;">
+        <div class="col-xl-2 col-lg-2 col-md-12 col-sm-12 mb-2">
+          <h5>Reservation No: {{ReservationID}} </h5>
         </div>
-        
+        <div class="col-xl-2 col-lg-2 col-md-12 col-sm-12 mb-2">
+          <h5>DutySlip No: {{DutySlipID}}</h5>
+        </div>
+        <div class="col-xl-4 col-lg-4 col-md-12 col-sm-12 mb-2">
+          <h5>Customer Name: {{CustomerName}}({{TallyCustomerID}})</h5>
+        </div>
+        <div class="col-xl-4 col-lg-4 col-md-12 col-sm-12 mb-2" *ngIf="GstNumber">
+          <h5>GST Number: {{GstNumber}}({{StateName}})</h5>
+        </div>
       </div>
-    
+
+    </div>
+
 
 
     <div *ngIf="advanceTableClosingOne">
-      <app-dutySlipForBilling [advanceTableClosingOne]="advanceTableClosingOne" [disputeAdvanceTable]="disputeAdvanceTable" 
-      [RegistrationNumber]="RegistrationNumber" [InvoiceID]="invoiceID" [DSClosing]="DSClosing" (dataSaved)="onDataSaved()"  (dutyStatusChanged)="onDutyStatusChanged($event)"></app-dutySlipForBilling>
+      <app-dutySlipForBilling [advanceTableClosingOne]="advanceTableClosingOne"
+        [disputeAdvanceTable]="disputeAdvanceTable" [RegistrationNumber]="RegistrationNumber" [InvoiceID]="invoiceID"
+        [DSClosing]="DSClosing" (dataSaved)="onDataSaved()"
+        (dutyStatusChanged)="onDutyStatusChanged($event)"></app-dutySlipForBilling>
     </div>
 
     <div id="linkButtonSection">&nbsp;
-      <hr/>
+      <hr />
     </div>
- <br>
-      
-        <div class="card" style="background-color: #ffffff;padding-top: 10px;">
-          <div class="row" style="padding-left: 30px;">
-            <div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 mb-2">
-              <h5>
-                <a (click)="openDutyTollParkingEntry()" style="cursor: pointer;color: #007bff;">Toll Parking Entry</a>
-                <a href="javascript:void(0);" (click)="showAndScrollTollParking()">&nbsp;- <b>View</b></a>
-              </h5>
-            </div>
+    <br>
 
-            <div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 mb-2">
-              <h5>
-                <a (click)="dutyInterstateTax()" style="cursor: pointer;color: #007bff;">Interstate Tax Entry</a>
-                <a href="javascript:void(0);" (click)="showAndScrollDutyInterstateTax()">&nbsp;- <b>View</b></a>
-              </h5>
-            </div>
-
-            <div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 mb-2">
-              <h5>
-                <a (click)="openDisputes()" style="cursor: pointer;color: #007bff;">Dispute</a>
-                <a href="javascript:void(0);" (click)="showAndScrollOpenDisputes()">&nbsp;- <b>View</b></a>
-              </h5>
-            </div>
-            <div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 mb-2">
-              <h5>
-                <a (click)="openDutyExpense()" style="cursor: pointer;color: #007bff;">Duty Expense</a>
-                <a href="javascript:void(0);" (click)="showAndScrollOpenDutyExpense()">&nbsp;- <b>View</b></a>
-              </h5>
-            </div>
-          </div>
-
-          <div class="row" style="padding-left: 30px;">
-            <div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 mb-2">
-              <h5>
-                <a (click)="openDutyGSTPercentage()" style="cursor: pointer;color: #007bff;">Duty GST Percentage</a>
-                <a href="javascript:void(0);" (click)="showAndScrollDutyGSTPercentage()">&nbsp;- <b>View</b></a>
-              </h5>
-            </div>
-
-            <div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 mb-2">
-              <h5>
-                <a (click)="openDutyState()" style="cursor: pointer;color: #007bff;">Eco Duty State</a>
-                <a href="javascript:void(0);" (click)="showAndScrollDutyState()">&nbsp;- <b>View</b></a>
-              </h5>
-            </div>
-
-            <div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 mb-2">
-              <h5>
-                <a (click)="openDutyStateCustomer()" style="cursor: pointer;color: #007bff;">Customer Duty State</a>
-                <a href="javascript:void(0);" (click)="showAndScrollDutyStateCustomer()">&nbsp;- <b>View</b></a>
-              </h5>
-            </div>
-
-            <div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 mb-2">
-              <h5>
-                <a href="javascript:void(0);" (click)="$event.preventDefault(); openDutySAC('anchor')" style="cursor: pointer;color: #007bff;">Duty SAC</a>
-                <a href="javascript:void(0);" (click)="showAndScrollDutySAC()">&nbsp;- <b>View</b></a>
-              </h5>
-            </div>
-
-            <div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 mb-2">
-              <h5>
-                <a (click)="openAdditional()" style="cursor: pointer;color: #007bff;">Additional KMs And Minutes</a>
-                <a href="javascript:void(0);" (click)="showAndScrollAdditionalKm()">&nbsp;- <b>View</b></a>
-              </h5>
-            </div>
-
-            <div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 mb-2">
-              <h5>
-                <a (click)="MOPDetails()" style="cursor: pointer;color: #007bff;">MOP Details</a>
-                <a href="javascript:void(0);" (click)="showAndScrollMOP()">&nbsp;- <b>View</b></a>
-              </h5>
-            </div>
-          </div>  
+    <div class="card" style="background-color: #ffffff;padding-top: 10px;">
+      <div class="row" style="padding-left: 30px;">
+        <div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 mb-2">
+          <h5>
+            <a (click)="openDutyTollParkingEntry()" style="cursor: pointer;color: #007bff;">Toll Parking Entry</a>
+            <a href="javascript:void(0);" (click)="showAndScrollTollParking()">&nbsp;- <b>View</b></a>
+          </h5>
         </div>
 
-        <div class="card" style="background-color: #ffffff;padding-top: 10px;">
-          <div class="row" style="padding-left: 30px;">
-            <div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 mb-2">
-              <h5>
-                <a (click)="addDiscount()" style="cursor: pointer;color: #007bff;">Add Discount Details</a>
-                <a href="javascript:void(0);" (click)="showAndScrollAddDiscount()">&nbsp;- <b>View</b></a>
-              </h5>
-            </div>
+        <div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 mb-2">
+          <h5>
+            <a (click)="dutyInterstateTax()" style="cursor: pointer;color: #007bff;">Interstate Tax Entry</a>
+            <a href="javascript:void(0);" (click)="showAndScrollDutyInterstateTax()">&nbsp;- <b>View</b></a>
+          </h5>
+        </div>
 
-            <div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 mb-2">
-              <h5>
-                <a (click)="PrintDS()" style="cursor: pointer;color: #007bff;">Duty Slip Map</a>
-              </h5>
-            </div>
+        <div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 mb-2">
+          <h5>
+            <a (click)="openDisputes()" style="cursor: pointer;color: #007bff;">Dispute</a>
+            <a href="javascript:void(0);" (click)="showAndScrollOpenDisputes()">&nbsp;- <b>View</b></a>
+          </h5>
+        </div>
+        <div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 mb-2">
+          <h5>
+            <a (click)="openDutyExpense()" style="cursor: pointer;color: #007bff;">Duty Expense</a>
+            <a href="javascript:void(0);" (click)="showAndScrollOpenDutyExpense()">&nbsp;- <b>View</b></a>
+          </h5>
+        </div>
+      </div>
 
-            <div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 mb-2">
-              <h5>
-                <a (click)="closePanels()" style="cursor: pointer;color: #007bff;">Close All Panels</a>
-              </h5>
-            </div>
+      <div class="row" style="padding-left: 30px;">
+        <div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 mb-2">
+          <h5>
+            <a (click)="openDutyGSTPercentage()" style="cursor: pointer;color: #007bff;">Duty GST Percentage</a>
+            <a href="javascript:void(0);" (click)="showAndScrollDutyGSTPercentage()">&nbsp;- <b>View</b></a>
+          </h5>
+        </div>
 
-            <div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 mb-2">
-              <h5>
-                <a style="cursor: pointer;color: #007bff;">Duty Slip Type</a>
-              </h5>
-            </div>
-          </div>
+        <div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 mb-2">
+          <h5>
+            <a (click)="openDutyState()" style="cursor: pointer;color: #007bff;">Eco Duty State</a>
+            <a href="javascript:void(0);" (click)="showAndScrollDutyState()">&nbsp;- <b>View</b></a>
+          </h5>
+        </div>
 
-          <div class="row" style="padding-left: 30px;">
-            <div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 mb-2">
-              <h5>
-                <a style="cursor: pointer;color: #007bff;">Billing Type</a>
-              </h5>
-            </div>
-            <div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 mb-2">
-               <h5>
-                <a (click)="openDutySlipImage()" style="cursor: pointer;color: #007bff;">Upload Manual DutySlip Image</a>
-                <a href="javascript:void(0);" (click)="showAndScrollODOMeter()">&nbsp;- <b>View</b></a>
-              </h5>
-              <!-- <button mat-raised-button color="primary" (click)="openDutySlipImage()">
+        <div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 mb-2">
+          <h5>
+            <a (click)="openDutyStateCustomer()" style="cursor: pointer;color: #007bff;">Customer Duty State</a>
+            <a href="javascript:void(0);" (click)="showAndScrollDutyStateCustomer()">&nbsp;- <b>View</b></a>
+          </h5>
+        </div>
+
+        <div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 mb-2">
+          <h5>
+            <a href="javascript:void(0);" (click)="$event.preventDefault(); openDutySAC('anchor')"
+              style="cursor: pointer;color: #007bff;">Duty SAC</a>
+            <a href="javascript:void(0);" (click)="showAndScrollDutySAC()">&nbsp;- <b>View</b></a>
+          </h5>
+        </div>
+
+        <div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 mb-2">
+          <h5>
+            <a (click)="openAdditional()" style="cursor: pointer;color: #007bff;">Additional KMs And Minutes</a>
+            <a href="javascript:void(0);" (click)="showAndScrollAdditionalKm()">&nbsp;- <b>View</b></a>
+          </h5>
+        </div>
+
+        <div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 mb-2">
+          <h5>
+            <a (click)="MOPDetails()" style="cursor: pointer;color: #007bff;">MOP Details</a>
+            <a href="javascript:void(0);" (click)="showAndScrollMOP()">&nbsp;- <b>View</b></a>
+          </h5>
+        </div>
+        <div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 mb-2">
+          <h5>
+            <a (click)="settledRates()" style="cursor: pointer;color: #007bff;">Settled Rate</a>
+            <a href="javascript:void(0);" (click)="showAndScrollOpenSettledRates()">&nbsp;- <b>View</b></a>
+          </h5>
+        </div>
+         <!-- <div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 mb-2">
+          <h5>
+            <a (click)="changeDutyTypeClosingDetails()" style="cursor: pointer;color: #007bff;">Change Duty Type</a>
+            <a href="javascript:void(0);" (click)="showAndScrollOpenSettledRates()">&nbsp;- <b>View</b></a>
+          </h5>
+        </div> -->
+      </div>
+    </div>
+
+    <div class="card" style="background-color: #ffffff;padding-top: 10px;">
+      <div class="row" style="padding-left: 30px;">
+        <div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 mb-2">
+          <h5>
+            <a (click)="addDiscount()" style="cursor: pointer;color: #007bff;">Add Discount Details</a>
+            <a href="javascript:void(0);" (click)="showAndScrollAddDiscount()">&nbsp;- <b>View</b></a>
+          </h5>
+        </div>
+
+        <div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 mb-2">
+          <h5>
+            <a (click)="PrintDS()" style="cursor: pointer;color: #007bff;">Duty Slip Map</a>
+          </h5>
+        </div>
+
+        <div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 mb-2">
+          <h5>
+            <a (click)="closePanels()" style="cursor: pointer;color: #007bff;">Close All Panels</a>
+          </h5>
+        </div>
+
+        <div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 mb-2">
+          <h5>
+            <a style="cursor: pointer;color: #007bff;">Duty Slip Type</a>
+          </h5>
+        </div>
+      </div>
+
+      <div class="row" style="padding-left: 30px;">
+        <div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 mb-2">
+          <h5>
+            <a style="cursor: pointer;color: #007bff;">Billing Type</a>
+          </h5>
+        </div>
+        <div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 mb-2">
+          <h5>
+            <a (click)="openDutySlipImage()" style="cursor: pointer;color: #007bff;">Upload Manual DutySlip Image</a>
+            <a href="javascript:void(0);" (click)="showAndScrollODOMeter()">&nbsp;- <b>View</b></a>
+          </h5>
+          <!-- <button mat-raised-button color="primary" (click)="openDutySlipImage()">
                 Upload Manual DutySlip Image
               </button> -->
-            </div>
+        </div>
 
-              <!-- <div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 mb-2">
+        <!-- <div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 mb-2">
                 <h5>
                   <a (click)="addSalesPerson()" style="cursor: pointer;color: #007bff;">Add Sales Person</a>
                   <a href="javascript:void(0);" (click)="showAndScrollSalesPerson()">&nbsp;- <b>View</b></a>
                 </h5>
-              </div> -->            
-          </div>          
-        </div>
-        
+              </div> -->
       </div>
+    </div>
 
-      <div class="card" style="background-color: #ffffff;padding-top: 10px;">
-        <div class="row" style="padding-left: 30px;padding-top: 10px;padding-bottom: 10px;">
-          <!-- <div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 mb-2">
+  </div>
+
+  <div class="card" style="background-color: #ffffff;padding-top: 10px;">
+    <div class="row" style="padding-left: 30px;padding-top: 10px;padding-bottom: 10px;">
+      <!-- <div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 mb-2">
             <button mat-flat-button style="width: 150px;text-align: center;" color="primary" (click)="CalculateBill()"
                 [type]="submit">Calculate </button>
           </div> -->
-         
-          <div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 mb-2">
-            <button mat-flat-button style="width: 150px;text-align: center;" color="primary" (click)="GenerateBill()"
-                [type]="submit" [disabled]="!(goodForBilling && verifyDuty && Message === 'Success')">Generate Bill</button>
-          </div>
 
-          <div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 mb-2">
-            <button mat-flat-button style="width: 100px;text-align: center;" color="primary" (click)="getInvoiceType()"
-              [type]="submit">View Bill</button>
-          </div>        
-          
-          <div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 mb-2">
-            <button mat-flat-button style="width: 150px;text-align: center;" color="primary" (click)="openBillingHistory()"
-              [type]="submit">Billing History</button>
-          </div>
-
-          <div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 mb-2">
-            <button mat-flat-button style="width: 150px;text-align: center;" color="primary" (click)="LoadLTR()"
-              [type]="submit">Add LTR Details</button>
-          </div>
-        </div>
+      <div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 mb-2">
+        <button mat-flat-button style="width: 150px;text-align: center;" color="primary" (click)="GenerateBill()"
+          [type]="submit" [disabled]="!(goodForBilling && verifyDuty && Message === 'Success')">Generate Bill</button>
       </div>
-     <!-- PackageRateDetails -->
 
- <div class="card" >
-      <div class="header bg-cyan">
-        <h2>Bill Information  
-          <ul class="header-dropdown m-r-10">
-            <li>
-              <a style="color:#fff;padding:15px;position: relative;"  href="javascript:void(0);" (click)="scrollToLinkButton()">Go To Menu</a>              
-            </li>
-          </ul>
-        </h2>      
+      <div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 mb-2">
+        <button mat-flat-button style="width: 100px;text-align: center;" color="primary" (click)="getInvoiceType()"
+          [type]="submit">View Bill</button>
       </div>
-      <mat-accordion>
-        <mat-expansion-panel [expanded]="panelExpanded">
-          <mat-expansion-panel-header>
-            <mat-panel-title></mat-panel-title>
-          </mat-expansion-panel-header>
-          <div>
-            <app-packageRateDetailsForClosing [dataSourceforCard]="dataSourceforCard" [DutySlipID]="DutySlipID" [ReservationID]="ReservationID"></app-packageRateDetailsForClosing>
-          </div>
-        </mat-expansion-panel>
-      </mat-accordion>
-    </div>
 
-    <!-- Customer Information -->
-    <app-customer-information [AllotmentID]="AllotmentID"></app-customer-information>
+      <div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 mb-2">
+        <button mat-flat-button style="width: 150px;text-align: center;" color="primary" (click)="openBillingHistory()"
+          [type]="submit">Billing History</button>
+      </div>
 
-    <!-- Currentdata Information-->
-    <app-currentdata-information [AllotmentID]="AllotmentID"></app-currentdata-information>
-
-    <!-- Car Running Info -->
-    <div class="card">
-      <div style="background-color: #ebeef1;">
-        <app-currentDutyDetails [AllotmentID]="AllotmentID"></app-currentDutyDetails>
+      <div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 mb-2">
+        <button mat-flat-button style="width: 150px;text-align: center;" color="primary" (click)="LoadLTR()"
+          [type]="submit">Add LTR Details</button>
       </div>
     </div>
-
-    <!--Resevation Detail-->
-    <div class="card">
-      <div class="header bg-cyan">
-        <h2>Reservation Details  
-          <ul class="header-dropdown m-r-10">
-            <li>
-              <a style="color:#fff;padding:15px;position: relative;"  href="javascript:void(0);" (click)="scrollToLinkButton()">Go To Menu</a>              
-            </li>
-          </ul>       
-        </h2>
-      </div>
-      <div style="background-color: #ebeef1;">
-        <app-reservationClosingDetails [AllotmentID]="AllotmentID"></app-reservationClosingDetails>
-      </div>
-    </div>
-
-    <!-- Toll Parking -->
-    <div class="card" *ngIf="showHideTollParkingCard" id="tollParkingEntry">
-      <div class="header bg-cyan">
-        <h2>Toll Parking
-          <ul class="header-dropdown m-r-10">
-            <li>
-              <a style="color:#fff;padding:15px;position: relative;"  href="javascript:void(0);" (click)="scrollToLinkButton()">Go To Menu</a>              
-            </li>
-          </ul>
-        </h2>
-      </div>
-      <div style="background-color: #ebeef1;">
-        <app-dutyTollParkingEntry [tollParkingAdvanceTable]="tollParkingAdvanceTable" [AllotmentID]="AllotmentID" [verifyDutyStatusAndCacellationStatus]="verifyDutyStatusAndCacellationStatus"></app-dutyTollParkingEntry>
-      </div>
-    </div>
-
-    <!--Duty Inter State Tax-->
-    <div class="card" *ngIf="showHideaddDIT" id="dutyInterstateTax">
-      <div class="header bg-cyan">
-        <h2>Interstate Tax -
-          <i><a (click)="dutyInterstateTax()" style="cursor: pointer;">Add More</a></i>
-          <ul class="header-dropdown m-r-10">
-            <li>
-              <a style="color:#fff;padding:15px;position: relative;"  href="javascript:void(0);" (click)="scrollToLinkButton()">Go To Menu</a>              
-            </li>
-          </ul>
-        </h2>
-      </div>
-      <div style="background-color: #ebeef1;">
-        <app-dutyInterstateTax [advanceTableDIT]="advanceTableDIT" [dutySlipID]="DutySlipID" [verifyDutyStatusAndCacellationStatus]="verifyDutyStatusAndCacellationStatus"></app-dutyInterstateTax>
-      </div>
-    </div>
-    
-    <!-- Dispute -->
-     <div class="card" *ngIf="showHideDispute" id="openDisputes">
-      <div class="header bg-cyan">
-        <h2>Dispute -
-          <i><a style="cursor: pointer;" (click)="openDisputes()">Add more</a></i>
-          <i><a (click)="disputeHistoryDetails()" style="cursor: pointer;"> - History</a></i>
-          <ul class="header-dropdown m-r-10">
-            <li>
-              <a style="color:#fff;padding:15px;position: relative;"  href="javascript:void(0);" (click)="scrollToLinkButton()">Go To Menu</a>              
-            </li>
-          </ul>
-        </h2>
-      </div>
-      <div>
-        <app-dispute [disputeAdvanceTable]="disputeAdvanceTable" [dutySlipID]="DutySlipID" [reservationID]="ReservationID" [verifyDutyStatusAndCacellationStatus]="verifyDutyStatusAndCacellationStatus"></app-dispute>
-      </div>
-    </div>
-
-    <!-- Duty Expense -->
-    <div class="card" *ngIf="showDutyExpense" id="dutyExpense">
-      <div class="header bg-cyan">
-        <h2>Duty Expense -
-          <i><a style="cursor: pointer;" (click)="openDutyExpense()">Add More</a></i>
-          <ul class="header-dropdown m-r-10">
-            <li>
-              <a style="color:#fff;padding:15px;position: relative;"  href="javascript:void(0);" (click)="scrollToLinkButton()">Go To Menu</a>              
-            </li>
-          </ul>
-        </h2>
-      </div>
-      <mat-accordion>
-        <mat-expansion-panel [expanded]="panelExpanded">
-          <mat-expansion-panel-header>
-            <mat-panel-title>
-            </mat-panel-title>
-          </mat-expansion-panel-header>
-          <div>
-            <app-dutyExpense [advanceTableDE]="advanceTableDE" [dutySlipID]="DutySlipID" [verifyDutyStatusAndCacellationStatus]="verifyDutyStatusAndCacellationStatus"></app-dutyExpense>
-          </div>
-        </mat-expansion-panel>
-      </mat-accordion>
-    </div>
-
-    <!-- Duty GST Percentage -->
-    <div class="card" *ngIf="showDGP" id="dutyGSTPercentage">
-      <div class="header bg-cyan">
-        <h2>Duty GST Percentage
-          <ul class="header-dropdown m-r-10">
-            <li>
-              <a style="color:#fff;padding:15px;position: relative;"  href="javascript:void(0);" (click)="scrollToLinkButton()">Go To Menu</a>              
-            </li>
-          </ul>
-        </h2>      
-      </div>
-      <mat-accordion>
-        <mat-expansion-panel [expanded]="panelExpanded">
-          <mat-expansion-panel-header>
-            <mat-panel-title></mat-panel-title>
-          </mat-expansion-panel-header>
-          <div>
-            <app-dutyGSTPercentage [advanceTableDGP]="advanceTableDGP" [dutySlipID]="DutySlipID" [verifyDutyStatusAndCacellationStatus]="verifyDutyStatusAndCacellationStatus"></app-dutyGSTPercentage>
-          </div>
-        </mat-expansion-panel>
-      </mat-accordion>
-    </div>
-
-    <!-- Duty State Card -->
-    <div class="card" *ngIf="showHideDutyState" id="dutyState">
-      <div class="header bg-cyan">
-        <h2>Duty State
-          <ul class="header-dropdown m-r-10">
-            <li>
-              <a style="color:#fff;padding:15px;position: relative;"  href="javascript:void(0);" (click)="scrollToLinkButton()">Go To Menu</a>              
-            </li>
-          </ul>
-        </h2>        
-      </div>
-      <mat-accordion>
-        <mat-expansion-panel [expanded]="panelExpanded">
-          <mat-expansion-panel-header>
-            <mat-panel-title>
-            </mat-panel-title>
-          </mat-expansion-panel-header>
-          <div>
-            <app-dutyState [advanceTableDutyState]="advanceTableDutyState" [dutySlipID]="DutySlipID" [verifyDutyStatusAndCacellationStatus]="verifyDutyStatusAndCacellationStatus"></app-dutyState>
-          </div>
-        </mat-expansion-panel>
-      </mat-accordion>
-    </div>
-
-        <!-- Duty State Card Customer -->
-    <div class="card" *ngIf="showHideDutyStateCustomer" id="dutyStateCustomer">
-      <div class="header bg-cyan">
-        <h2>Duty State Customer
-          <ul class="header-dropdown m-r-10">
-            <li>
-              <a style="color:#fff;padding:15px;position: relative;"  href="javascript:void(0);" (click)="scrollToLinkButton()">Go To Menu</a>              
-            </li>
-          </ul>
-        </h2>        
-      </div>
-      <mat-accordion>
-        <mat-expansion-panel [expanded]="panelExpanded">
-          <mat-expansion-panel-header>
-            <mat-panel-title>
-            </mat-panel-title>
-          </mat-expansion-panel-header>
-          <div>
-            <app-dutyStateCustomer [advanceTableDutyStateCustomer]="advanceTableDutyStateCustomer" [dutySlipID]="DutySlipID" [verifyDutyStatusAndCacellationStatus]="verifyDutyStatusAndCacellationStatus" [CustomerID]="CustomerID"></app-dutyStateCustomer>
-          </div>
-        </mat-expansion-panel>
-      </mat-accordion>
-    </div>
-
-    <!-- Duty SAC -->
-    <div *ngIf="showSAC" id="dutySAC">
-      <app-dutySAC [advanceTableSAC]="advanceTableSAC" [dutySlipID]="DutySlipID" [AllotmentID]="AllotmentID" [verifyDutyStatusAndCacellationStatus]="verifyDutyStatusAndCacellationStatus"></app-dutySAC>
-    </div>
-  
-    <!-- Additional KM & HRs -->
-    <div *ngIf="showAdditionalKms" id="AdditionalKms">
-      <app-additionalKmsDetails [advanceTableAD]="advanceTableAD" [AllotmentID]="AllotmentID" [verifyDutyStatusAndCacellationStatus]="verifyDutyStatusAndCacellationStatus"></app-additionalKmsDetails>
-    </div>
-
-    <!-- Discount Details -->
-     <div class="card" *ngIf="showHideaddDiscount" id="addDiscount">
-      <div class="header bg-cyan">
-        <h2>Discount Details - 
-          <i><a (click)="addDiscount()" style="cursor: pointer;">Add</a></i>
-        </h2>
-        <ul class="header-dropdown m-r-10">
-          <li>
-            <a style="color:#fff;padding:15px;position: relative;"  href="javascript:void(0);" (click)="scrollToLinkButton()">Go To Menu</a>              
-          </li>
-        </ul>
-      </div>
-      <div>
-        <mat-accordion>
-          <mat-expansion-panel [expanded]="panelExpanded">
-            <mat-expansion-panel-header>
-              <mat-panel-title></mat-panel-title>
-            </mat-expansion-panel-header>
-            <div>
-              <app-discountDetails [advanceTableDD]="advanceTableDD" [AllotmentID]="AllotmentID"></app-discountDetails>
-            </div>
-          </mat-expansion-panel>
-        </mat-accordion>
-      </div>
-    </div>
-
-    <!--Reservation Sales Person-->
-    <div class="card" *ngIf="advanceTableSP" id="salesPerson">
-      <div class="header bg-cyan">
-        <h2>Sales Person - 
-          <i><a (click)="addSalesPerson()" style="cursor: pointer;">Add More</a></i>
-        </h2>
-        <ul class="header-dropdown m-r-10">
-          <li>
-            <a style="color:#fff;padding:15px;position: relative;"  href="javascript:void(0);" (click)="scrollToLinkButton()">Go To Menu</a>              
-          </li>
-        </ul>
-      </div>
-      <div>
-        <mat-accordion>
-          <mat-expansion-panel [expanded]="panelExpanded">
-            <mat-expansion-panel-header>
-              <mat-panel-title></mat-panel-title>
-            </mat-expansion-panel-header>
-            <div>
-              <app-salesPerson *ngIf="advanceTableSP" [advanceTableSP]="advanceTableSP" [reservationID]="ReservationID"
-                [key]="ReservationID" [updateData]="updateData">
-              </app-salesPerson>
-            </div>
-          </mat-expansion-panel>
-        </mat-accordion>
-      </div>
-    </div>
-
-    <!--Special Information-->
-    <app-special-information [AllotmentID]="AllotmentID"></app-special-information>
-
-    <!-- Internal-Information-->
-    <app-internal-information [reservationID]="ReservationID"></app-internal-information>
-
-    <!--Lumpsum-Information-->
-    <app-lumpsum-information [reservationID]="ReservationID"></app-lumpsum-information>
-
-    <!-- Advance Details -->
-    <div class="card" *ngIf="showAdvanceDetails">
-      <div class="header bg-cyan">
-        <h2>Advance Details
-        </h2>
-        <ul class="header-dropdown m-r-10">
-          <li>
-            <a style="color:#fff;padding:15px;position: relative;"  href="javascript:void(0);" (click)="scrollToLinkButton()">Go To Menu</a>              
-          </li>
-        </ul>
-      </div>
-      <div>
-        <mat-accordion>
-          <mat-expansion-panel [expanded]="panelExpanded">
-            <mat-expansion-panel-header>
-              <mat-panel-title>
-              </mat-panel-title>
-            </mat-expansion-panel-header>
-             <div>
-              <app-advanceDetailsClosing [ReservationID]="ReservationID"></app-advanceDetailsClosing>
-            </div>
-          </mat-expansion-panel>
-        </mat-accordion>
-      </div>
-    </div>
-    
-    <!-- Settled Rate -->
-    <div class="card" *ngIf="showSettledRate">
-      <div class="header bg-cyan">
-        <h2>Settled Rate
-        </h2>
-        <ul class="header-dropdown m-r-10">
-            <li>
-              <a style="color:#fff;padding:15px;position: relative;"  href="javascript:void(0);" (click)="scrollToLinkButton()">Go To Menu</a>              
-            </li>
-          </ul>
-      </div>
-      <div>
-        <mat-accordion>
-          <mat-expansion-panel [expanded]="panelExpanded">
-            <mat-expansion-panel-header>
-              <mat-panel-title>
-              </mat-panel-title>
-            </mat-expansion-panel-header>
-             <div>
-              <app-settledRateClosing [dutySlipID]="DutySlipID"></app-settledRateClosing>
-            </div>
-          </mat-expansion-panel>
-        </mat-accordion>
-      </div>
-    </div>
-
-    <!-- Kam Card -->
-    <div class="card" *ngIf="showKamCard">
-      <div class="header bg-cyan">
-        <h2>KAM Details</h2>
-        <ul class="header-dropdown m-r-10">
-          <li>
-            <a style="color:#fff;padding:15px;position: relative;"  href="javascript:void(0);" (click)="scrollToLinkButton()">Go To Menu</a>              
-          </li>
-        </ul>
-      </div>
-      <div>
-        <mat-accordion>
-          <mat-expansion-panel [expanded]="panelExpanded">
-            <mat-expansion-panel-header>
-              <mat-panel-title>
-              </mat-panel-title>
-            </mat-expansion-panel-header>
-           <div>
-              <app-kamDetailsClosing [ReservationID]="ReservationID"></app-kamDetailsClosing>
-            </div>
-          </mat-expansion-panel>
-        </mat-accordion>
-      </div>
-    </div>
-
-    <!-- Additional SMS/Email/WhatsApp Details -->
-    <div class="card" *ngIf="showAdditionalSMS">
-      <div class="header bg-cyan">
-        <h2>Additional SMS/Email/WhatsApp Details</h2>
-        <ul class="header-dropdown m-r-10">
-          <li>
-            <a style="color:#fff;padding:15px;position: relative;"  href="javascript:void(0);" (click)="scrollToLinkButton()">Go To Menu</a>              
-          </li>
-        </ul>
-      </div>
-      <div>
-        <mat-accordion>
-          <mat-expansion-panel [expanded]="panelExpanded">
-            <mat-expansion-panel-header>
-              <mat-panel-title></mat-panel-title>
-            </mat-expansion-panel-header>
-            <div>
-              <app-additionalSMSEmailWhatsapp [advanceTableASEW]="advanceTableASEW" [dutySlipID]="DutySlipID"></app-additionalSMSEmailWhatsapp>
-            </div>
-          </mat-expansion-panel>
-        </mat-accordion>
-      </div>
-    </div>
-
-    <!-- Bill To Other Details -->
-    <div class="card" *ngIf="showBillToOther">
-      <div class="header bg-cyan">
-        <h2>Bill To Other Details</h2>
-        <ul class="header-dropdown m-r-10">
-          <li>
-            <a style="color:#fff;padding:15px;position: relative;"  href="javascript:void(0);" (click)="scrollToLinkButton()">Go To Menu</a>              
-          </li>
-        </ul>
-      </div>
-      <div>
-        <mat-accordion>
-          <mat-expansion-panel [expanded]="panelExpanded">
-            <mat-expansion-panel-header>
-              <mat-panel-title></mat-panel-title>
-            </mat-expansion-panel-header>
-            <div>
-              <app-billToOther [advanceTableBD]="advanceTableBD" [dutySlipID]="DutySlipID"></app-billToOther>
-            </div>
-          </mat-expansion-panel>
-        </mat-accordion>
-      </div>
-    </div>
-
-
-       <!-- ODOMeter Image -->
-      <div class="card" *ngIf="showHideODOMeterCard" id="OdoMeterImage">
-      <div class="header bg-cyan">
-        <h2>ODO Meter and DutySlip Images</h2>
-        <ul class="header-dropdown m-r-10">
-          <li>
-            <a style="color:#fff;padding:15px;position: relative;"  href="javascript:void(0);" (click)="scrollToLinkButton()">Go To Menu</a>              
-          </li>
-        </ul>
-      </div>
-      <div>
-        <mat-accordion>
-          <mat-expansion-panel [expanded]="panelExpanded">
-            <mat-expansion-panel-header>
-              <mat-panel-title>
-              </mat-panel-title>
-            </mat-expansion-panel-header>
-           <div>
-              <app-odoMeterAndManualDutySlipImage [oDOMAndMDSAdvanceTable]="oDOMAndMDSAdvanceTable" [AllotmentID]="AllotmentID" [dutySlipID]="dutySlipID" ></app-odoMeterAndManualDutySlipImage>
-            </div>
-          </mat-expansion-panel>
-        </mat-accordion>
-      </div>
-    </div>
-
-        <div class="card" id="openMop" *ngIf="showMOPOther">
-      <div class="header bg-cyan">
-          <h2>
-            Mode Of Payment - 
-            <i><a (click)="MOPDetails()" style="cursor: pointer;">Edit </a></i>
-            <!-- <i><a (click)="MOPHistoryDetails(ReservationID)" style="cursor: pointer;"> - History</a></i> -->
-          </h2>
-          <ul class="header-dropdown m-r-0">
-            <li>
-              <a class="material-icons" href="javascript:void(0);"  (click)="scrollToLinkButton()">keyboard_arrow_up</a>
-              <a href="#" onClick="return false;">
-                <i class="material-icons">info_outline</i>
-              </a>
-            </li>
-            <li>
-              <a href="#" onClick="return false;">
-                <i class="material-icons">help_outline</i>
-              </a>
-            </li>
-          </ul>
-      </div>
-      <div style="background-color: #ebeef1;">
-        <app-mopDetailsShow [reservationID]="ReservationID" [advanceTableMOP]="advanceTableMOP"></app-mopDetailsShow>
-      </div>  
   </div>
-    
+  <!-- PackageRateDetails -->
+
+  <div class="card">
+    <div class="header bg-cyan">
+      <h2>Bill Information
+        <ul class="header-dropdown m-r-10">
+          <li>
+            <a style="color:#fff;padding:15px;position: relative;" href="javascript:void(0);"
+              (click)="scrollToLinkButton()">Go To Menu</a>
+          </li>
+        </ul>
+      </h2>
+    </div>
+    <mat-accordion>
+      <mat-expansion-panel [expanded]="panelExpanded">
+        <mat-expansion-panel-header>
+          <mat-panel-title></mat-panel-title>
+        </mat-expansion-panel-header>
+        <div>
+          <app-packageRateDetailsForClosing [dataSourceforCard]="dataSourceforCard" [DutySlipID]="DutySlipID"
+            [ReservationID]="ReservationID"></app-packageRateDetailsForClosing>
+        </div>
+      </mat-expansion-panel>
+    </mat-accordion>
+  </div>
+
+  <!-- Customer Information -->
+  <app-customer-information [AllotmentID]="AllotmentID"></app-customer-information>
+
+  <!-- Currentdata Information-->
+  <app-currentdata-information [AllotmentID]="AllotmentID"></app-currentdata-information>
+
+  <!-- Car Running Info -->
+  <div class="card">
+    <div style="background-color: #ebeef1;">
+      <app-currentDutyDetails [AllotmentID]="AllotmentID"></app-currentDutyDetails>
+    </div>
+  </div>
+
+  <!--Resevation Detail-->
+  <div class="card">
+    <div class="header bg-cyan">
+      <h2>Reservation Details
+        <ul class="header-dropdown m-r-10">
+          <li>
+            <a style="color:#fff;padding:15px;position: relative;" href="javascript:void(0);"
+              (click)="scrollToLinkButton()">Go To Menu</a>
+          </li>
+        </ul>
+      </h2>
+    </div>
+    <div style="background-color: #ebeef1;">
+      <app-reservationClosingDetails [AllotmentID]="AllotmentID"></app-reservationClosingDetails>
+    </div>
+  </div>
+
+  <!-- Toll Parking -->
+  <div class="card" *ngIf="showHideTollParkingCard" id="tollParkingEntry">
+    <div class="header bg-cyan">
+      <h2>Toll Parking
+        <ul class="header-dropdown m-r-10">
+          <li>
+            <a style="color:#fff;padding:15px;position: relative;" href="javascript:void(0);"
+              (click)="scrollToLinkButton()">Go To Menu</a>
+          </li>
+        </ul>
+      </h2>
+    </div>
+    <div style="background-color: #ebeef1;">
+      <app-dutyTollParkingEntry [tollParkingAdvanceTable]="tollParkingAdvanceTable" [AllotmentID]="AllotmentID"
+        [verifyDutyStatusAndCacellationStatus]="verifyDutyStatusAndCacellationStatus"></app-dutyTollParkingEntry>
+    </div>
+  </div>
+
+  <!--Duty Inter State Tax-->
+  <div class="card" *ngIf="showHideaddDIT" id="dutyInterstateTax">
+    <div class="header bg-cyan">
+      <h2>Interstate Tax -
+        <i><a (click)="dutyInterstateTax()" style="cursor: pointer;">Add More</a></i>
+        <ul class="header-dropdown m-r-10">
+          <li>
+            <a style="color:#fff;padding:15px;position: relative;" href="javascript:void(0);"
+              (click)="scrollToLinkButton()">Go To Menu</a>
+          </li>
+        </ul>
+      </h2>
+    </div>
+    <div style="background-color: #ebeef1;">
+      <app-dutyInterstateTax [advanceTableDIT]="advanceTableDIT" [dutySlipID]="DutySlipID"
+        [verifyDutyStatusAndCacellationStatus]="verifyDutyStatusAndCacellationStatus"></app-dutyInterstateTax>
+    </div>
+  </div>
+
+  <!-- Dispute -->
+  <div class="card" *ngIf="showHideDispute" id="openDisputes">
+    <div class="header bg-cyan">
+      <h2>Dispute -
+        <i><a style="cursor: pointer;" (click)="openDisputes()">Add more</a></i>
+        <i><a (click)="disputeHistoryDetails()" style="cursor: pointer;"> - History</a></i>
+        <ul class="header-dropdown m-r-10">
+          <li>
+            <a style="color:#fff;padding:15px;position: relative;" href="javascript:void(0);"
+              (click)="scrollToLinkButton()">Go To Menu</a>
+          </li>
+        </ul>
+      </h2>
+    </div>
+    <div>
+      <app-dispute [disputeAdvanceTable]="disputeAdvanceTable" [dutySlipID]="DutySlipID" [reservationID]="ReservationID"
+        [verifyDutyStatusAndCacellationStatus]="verifyDutyStatusAndCacellationStatus"></app-dispute>
+    </div>
+  </div>
+
+  <!-- Duty Expense -->
+  <div class="card" *ngIf="showDutyExpense" id="dutyExpense">
+    <div class="header bg-cyan">
+      <h2>Duty Expense -
+        <i><a style="cursor: pointer;" (click)="openDutyExpense()">Add More</a></i>
+        <ul class="header-dropdown m-r-10">
+          <li>
+            <a style="color:#fff;padding:15px;position: relative;" href="javascript:void(0);"
+              (click)="scrollToLinkButton()">Go To Menu</a>
+          </li>
+        </ul>
+      </h2>
+    </div>
+    <mat-accordion>
+      <mat-expansion-panel [expanded]="panelExpanded">
+        <mat-expansion-panel-header>
+          <mat-panel-title>
+          </mat-panel-title>
+        </mat-expansion-panel-header>
+        <div>
+          <app-dutyExpense [advanceTableDE]="advanceTableDE" [dutySlipID]="DutySlipID"
+            [verifyDutyStatusAndCacellationStatus]="verifyDutyStatusAndCacellationStatus"></app-dutyExpense>
+        </div>
+      </mat-expansion-panel>
+    </mat-accordion>
+  </div>
+
+  <!-- Duty GST Percentage -->
+  <div class="card" *ngIf="showDGP" id="dutyGSTPercentage">
+    <div class="header bg-cyan">
+      <h2>Duty GST Percentage
+        <ul class="header-dropdown m-r-10">
+          <li>
+            <a style="color:#fff;padding:15px;position: relative;" href="javascript:void(0);"
+              (click)="scrollToLinkButton()">Go To Menu</a>
+          </li>
+        </ul>
+      </h2>
+    </div>
+    <mat-accordion>
+      <mat-expansion-panel [expanded]="panelExpanded">
+        <mat-expansion-panel-header>
+          <mat-panel-title></mat-panel-title>
+        </mat-expansion-panel-header>
+        <div>
+          <app-dutyGSTPercentage [advanceTableDGP]="advanceTableDGP" [dutySlipID]="DutySlipID"
+            [verifyDutyStatusAndCacellationStatus]="verifyDutyStatusAndCacellationStatus"></app-dutyGSTPercentage>
+        </div>
+      </mat-expansion-panel>
+    </mat-accordion>
+  </div>
+
+  <!-- Duty State Card -->
+  <div class="card" *ngIf="showHideDutyState" id="dutyState">
+    <div class="header bg-cyan">
+      <h2>Duty State
+        <ul class="header-dropdown m-r-10">
+          <li>
+            <a style="color:#fff;padding:15px;position: relative;" href="javascript:void(0);"
+              (click)="scrollToLinkButton()">Go To Menu</a>
+          </li>
+        </ul>
+      </h2>
+    </div>
+    <mat-accordion>
+      <mat-expansion-panel [expanded]="panelExpanded">
+        <mat-expansion-panel-header>
+          <mat-panel-title>
+          </mat-panel-title>
+        </mat-expansion-panel-header>
+        <div>
+          <app-dutyState [advanceTableDutyState]="advanceTableDutyState" [dutySlipID]="DutySlipID"
+            [verifyDutyStatusAndCacellationStatus]="verifyDutyStatusAndCacellationStatus"></app-dutyState>
+        </div>
+      </mat-expansion-panel>
+    </mat-accordion>
+  </div>
+
+  <!-- Duty State Card Customer -->
+  <div class="card" *ngIf="showHideDutyStateCustomer" id="dutyStateCustomer">
+    <div class="header bg-cyan">
+      <h2>Duty State Customer
+        <ul class="header-dropdown m-r-10">
+          <li>
+            <a style="color:#fff;padding:15px;position: relative;" href="javascript:void(0);"
+              (click)="scrollToLinkButton()">Go To Menu</a>
+          </li>
+        </ul>
+      </h2>
+    </div>
+    <mat-accordion>
+      <mat-expansion-panel [expanded]="panelExpanded">
+        <mat-expansion-panel-header>
+          <mat-panel-title>
+          </mat-panel-title>
+        </mat-expansion-panel-header>
+        <div>
+          <app-dutyStateCustomer [advanceTableDutyStateCustomer]="advanceTableDutyStateCustomer"
+            [dutySlipID]="DutySlipID" [verifyDutyStatusAndCacellationStatus]="verifyDutyStatusAndCacellationStatus"
+            [CustomerID]="CustomerID"></app-dutyStateCustomer>
+        </div>
+      </mat-expansion-panel>
+    </mat-accordion>
+  </div>
+
+  <!-- Duty SAC -->
+  <div *ngIf="showSAC" id="dutySAC">
+    <app-dutySAC [advanceTableSAC]="advanceTableSAC" [dutySlipID]="DutySlipID" [AllotmentID]="AllotmentID"
+      [verifyDutyStatusAndCacellationStatus]="verifyDutyStatusAndCacellationStatus"></app-dutySAC>
+  </div>
+
+  <!-- Additional KM & HRs -->
+  <div *ngIf="showAdditionalKms" id="AdditionalKms">
+    <app-additionalKmsDetails [advanceTableAD]="advanceTableAD" [AllotmentID]="AllotmentID"
+      [verifyDutyStatusAndCacellationStatus]="verifyDutyStatusAndCacellationStatus"></app-additionalKmsDetails>
+  </div>
+
+  <!-- Discount Details -->
+  <div class="card" *ngIf="showHideaddDiscount" id="addDiscount">
+    <div class="header bg-cyan">
+      <h2>Discount Details -
+        <i><a (click)="addDiscount()" style="cursor: pointer;">Add</a></i>
+      </h2>
+      <ul class="header-dropdown m-r-10">
+        <li>
+          <a style="color:#fff;padding:15px;position: relative;" href="javascript:void(0);"
+            (click)="scrollToLinkButton()">Go To Menu</a>
+        </li>
+      </ul>
+    </div>
+    <div>
+      <mat-accordion>
+        <mat-expansion-panel [expanded]="panelExpanded">
+          <mat-expansion-panel-header>
+            <mat-panel-title></mat-panel-title>
+          </mat-expansion-panel-header>
+          <div>
+            <app-discountDetails [advanceTableDD]="advanceTableDD" [AllotmentID]="AllotmentID"></app-discountDetails>
+          </div>
+        </mat-expansion-panel>
+      </mat-accordion>
+    </div>
+  </div>
+
+  <!--Reservation Sales Person-->
+  <div class="card" *ngIf="advanceTableSP" id="salesPerson">
+    <div class="header bg-cyan">
+      <h2>Sales Person -
+        <i><a (click)="addSalesPerson()" style="cursor: pointer;">Add More</a></i>
+      </h2>
+      <ul class="header-dropdown m-r-10">
+        <li>
+          <a style="color:#fff;padding:15px;position: relative;" href="javascript:void(0);"
+            (click)="scrollToLinkButton()">Go To Menu</a>
+        </li>
+      </ul>
+    </div>
+    <div>
+      <mat-accordion>
+        <mat-expansion-panel [expanded]="panelExpanded">
+          <mat-expansion-panel-header>
+            <mat-panel-title></mat-panel-title>
+          </mat-expansion-panel-header>
+          <div>
+            <app-salesPerson *ngIf="advanceTableSP" [advanceTableSP]="advanceTableSP" [reservationID]="ReservationID"
+              [key]="ReservationID" [updateData]="updateData">
+            </app-salesPerson>
+          </div>
+        </mat-expansion-panel>
+      </mat-accordion>
+    </div>
+  </div>
+
+  <!--Special Information-->
+  <app-special-information [AllotmentID]="AllotmentID"></app-special-information>
+
+  <!-- Internal-Information-->
+  <app-internal-information [reservationID]="ReservationID"></app-internal-information>
+
+  <!--Lumpsum-Information-->
+  <app-lumpsum-information [reservationID]="ReservationID"></app-lumpsum-information>
+
+  <!-- Advance Details -->
+  <div class="card" *ngIf="showAdvanceDetails">
+    <div class="header bg-cyan">
+      <h2>Advance Details
+      </h2>
+      <ul class="header-dropdown m-r-10">
+        <li>
+          <a style="color:#fff;padding:15px;position: relative;" href="javascript:void(0);"
+            (click)="scrollToLinkButton()">Go To Menu</a>
+        </li>
+      </ul>
+    </div>
+    <div>
+      <mat-accordion>
+        <mat-expansion-panel [expanded]="panelExpanded">
+          <mat-expansion-panel-header>
+            <mat-panel-title>
+            </mat-panel-title>
+          </mat-expansion-panel-header>
+          <div>
+            <app-advanceDetailsClosing [ReservationID]="ReservationID"></app-advanceDetailsClosing>
+          </div>
+        </mat-expansion-panel>
+      </mat-accordion>
+    </div>
+  </div>
+
+  <!-- Settled Rate -->
+  <div class="card" *ngIf="showSettledRate">
+    <div class="header bg-cyan">
+      <h2>Settled Rate
+      </h2>
+      <ul class="header-dropdown m-r-10">
+        <li>
+          <a style="color:#fff;padding:15px;position: relative;" href="javascript:void(0);"
+            (click)="scrollToLinkButton()">Go To Menu</a>
+        </li>
+      </ul>
+    </div>
+    <div>
+      <mat-accordion>
+        <mat-expansion-panel [expanded]="panelExpanded">
+          <mat-expansion-panel-header>
+            <mat-panel-title>
+            </mat-panel-title>
+          </mat-expansion-panel-header>
+          <div>
+            <app-settledRateClosing [dutySlipID]="DutySlipID"></app-settledRateClosing>
+          </div>
+        </mat-expansion-panel>
+      </mat-accordion>
+    </div>
+  </div>
+
+  <!-- Kam Card -->
+  <div class="card" *ngIf="showKamCard">
+    <div class="header bg-cyan">
+      <h2>KAM Details</h2>
+      <ul class="header-dropdown m-r-10">
+        <li>
+          <a style="color:#fff;padding:15px;position: relative;" href="javascript:void(0);"
+            (click)="scrollToLinkButton()">Go To Menu</a>
+        </li>
+      </ul>
+    </div>
+    <div>
+      <mat-accordion>
+        <mat-expansion-panel [expanded]="panelExpanded">
+          <mat-expansion-panel-header>
+            <mat-panel-title>
+            </mat-panel-title>
+          </mat-expansion-panel-header>
+          <div>
+            <app-kamDetailsClosing [ReservationID]="ReservationID"></app-kamDetailsClosing>
+          </div>
+        </mat-expansion-panel>
+      </mat-accordion>
+    </div>
+  </div>
+
+  <!-- Additional SMS/Email/WhatsApp Details -->
+  <div class="card" *ngIf="showAdditionalSMS">
+    <div class="header bg-cyan">
+      <h2>Additional SMS/Email/WhatsApp Details</h2>
+      <ul class="header-dropdown m-r-10">
+        <li>
+          <a style="color:#fff;padding:15px;position: relative;" href="javascript:void(0);"
+            (click)="scrollToLinkButton()">Go To Menu</a>
+        </li>
+      </ul>
+    </div>
+    <div>
+      <mat-accordion>
+        <mat-expansion-panel [expanded]="panelExpanded">
+          <mat-expansion-panel-header>
+            <mat-panel-title></mat-panel-title>
+          </mat-expansion-panel-header>
+          <div>
+            <app-additionalSMSEmailWhatsapp [advanceTableASEW]="advanceTableASEW"
+              [dutySlipID]="DutySlipID"></app-additionalSMSEmailWhatsapp>
+          </div>
+        </mat-expansion-panel>
+      </mat-accordion>
+    </div>
+  </div>
+
+  <!-- Bill To Other Details -->
+  <div class="card" *ngIf="showBillToOther">
+    <div class="header bg-cyan">
+      <h2>Bill To Other Details</h2>
+      <ul class="header-dropdown m-r-10">
+        <li>
+          <a style="color:#fff;padding:15px;position: relative;" href="javascript:void(0);"
+            (click)="scrollToLinkButton()">Go To Menu</a>
+        </li>
+      </ul>
+    </div>
+    <div>
+      <mat-accordion>
+        <mat-expansion-panel [expanded]="panelExpanded">
+          <mat-expansion-panel-header>
+            <mat-panel-title></mat-panel-title>
+          </mat-expansion-panel-header>
+          <div>
+            <app-billToOther [advanceTableBD]="advanceTableBD" [dutySlipID]="DutySlipID"></app-billToOther>
+          </div>
+        </mat-expansion-panel>
+      </mat-accordion>
+    </div>
+  </div>
+
+
+  <!-- ODOMeter Image -->
+  <div class="card" *ngIf="showHideODOMeterCard" id="OdoMeterImage">
+    <div class="header bg-cyan">
+      <h2>ODO Meter and DutySlip Images</h2>
+      <ul class="header-dropdown m-r-10">
+        <li>
+          <a style="color:#fff;padding:15px;position: relative;" href="javascript:void(0);"
+            (click)="scrollToLinkButton()">Go To Menu</a>
+        </li>
+      </ul>
+    </div>
+    <div>
+      <mat-accordion>
+        <mat-expansion-panel [expanded]="panelExpanded">
+          <mat-expansion-panel-header>
+            <mat-panel-title>
+            </mat-panel-title>
+          </mat-expansion-panel-header>
+          <div>
+            <app-odoMeterAndManualDutySlipImage [oDOMAndMDSAdvanceTable]="oDOMAndMDSAdvanceTable"
+              [AllotmentID]="AllotmentID" [dutySlipID]="dutySlipID"></app-odoMeterAndManualDutySlipImage>
+          </div>
+        </mat-expansion-panel>
+      </mat-accordion>
+    </div>
+  </div>
+
+  <div class="card" id="openMop" *ngIf="showMOPOther">
+    <div class="header bg-cyan">
+      <h2>
+        Mode Of Payment -
+        <i><a (click)="MOPDetails()" style="cursor: pointer;">Edit </a></i>
+        <!-- <i><a (click)="MOPHistoryDetails(ReservationID)" style="cursor: pointer;"> - History</a></i> -->
+      </h2>
+      <ul class="header-dropdown m-r-0">
+        <li>
+          <a class="material-icons" href="javascript:void(0);" (click)="scrollToLinkButton()">keyboard_arrow_up</a>
+          <a href="#" onClick="return false;">
+            <i class="material-icons">info_outline</i>
+          </a>
+        </li>
+        <li>
+          <a href="#" onClick="return false;">
+            <i class="material-icons">help_outline</i>
+          </a>
+        </li>
+      </ul>
+    </div>
+    <div>
+      <mat-accordion>
+        <mat-expansion-panel [expanded]="panelExpanded">
+          <mat-expansion-panel-header>
+            <mat-panel-title>
+            </mat-panel-title>
+          </mat-expansion-panel-header>
+          <div>
+            <app-mopDetailsShow [reservationID]="ReservationID"
+              [advanceTableMOP]="advanceTableMOP"></app-mopDetailsShow>
+          </div>
+        </mat-expansion-panel>
+      </mat-accordion>
+    </div>
+  </div>
+  <!--Settled Rate Card-->
+  <div class="card" id="settledRateCard" *ngIf="showHidesettledRates">
+    <div class="header bg-cyan">
+      <h2>Settled Rate Card </h2>
+      <ul class="header-dropdown m-r-0">
+        <li>
+          <a class="material-icons" href="javascript:void(0);" (click)="scrollToLinkButton()">keyboard_arrow_up</a>
+          <a href="#" onClick="return false;">
+            <i class="material-icons">info_outline</i>
+          </a>
+        </li>
+        <li>
+          <a href="#" onClick="return false;">
+            <i class="material-icons">help_outline</i>
+          </a>
+        </li>
+      </ul>
+    </div>
+    <div>
+      <mat-accordion>
+        <mat-expansion-panel [expanded]="panelExpanded">
+          <mat-expansion-panel-header>
+            <mat-panel-title>
+            </mat-panel-title>
+          </mat-expansion-panel-header>
+          <div>
+            <app-settledRateDetails [advanceTableSRD]="advanceTableSRD" [reservationID]="ReservationID"
+              [status]="verifyDutyStatusAndCacellationStatus"></app-settledRateDetails>
+          </div>
+        </mat-expansion-panel>
+      </mat-accordion>
+    </div>
+  </div>
+
+
 </section>
