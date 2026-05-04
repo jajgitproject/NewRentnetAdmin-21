@@ -65,6 +65,7 @@
     <div class="card" style="background-color: #ffffff;padding-top: 10px;">
       <div class="row" style="padding-left: 30px;">
         <div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 mb-2">
+          <p style="font-size: 12px;">Total Toll / Parking Amount - {{totalTollParking}}</p>
           <h5>
             <a (click)="openDutyTollParkingEntry()" style="cursor: pointer;color: #007bff;">Toll Parking Entry</a>
             <a href="javascript:void(0);" (click)="showAndScrollTollParking()">&nbsp;- <b>View</b></a>
@@ -72,6 +73,7 @@
         </div>
 
         <div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 mb-2">
+          <p style="font-size: 12px;">Total Interstate Tax Amount - {{totalInterStateTax}}</p>
           <h5>
             <a (click)="dutyInterstateTax()" style="cursor: pointer;color: #007bff;">Interstate Tax Entry</a>
             <a href="javascript:void(0);" (click)="showAndScrollDutyInterstateTax()">&nbsp;- <b>View</b></a>
@@ -79,12 +81,15 @@
         </div>
 
         <div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 mb-2">
+          <p style="font-size: 12px;"></p>
           <h5>
             <a (click)="openDisputes()" style="cursor: pointer;color: #007bff;">Dispute</a>
             <a href="javascript:void(0);" (click)="showAndScrollOpenDisputes()">&nbsp;- <b>View</b></a>
           </h5>
         </div>
         <div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 mb-2">
+          <p style="font-size: 12px;">Total Chargeable Amount - {{totalDEChargeableAmount}}</p>
+          <p style="font-size: 12px;">Total Non Chargeable Amount - {{totalDENonChargeableAmount}}</p>
           <h5>
             <a (click)="openDutyExpense()" style="cursor: pointer;color: #007bff;">Duty Expense</a>
             <a href="javascript:void(0);" (click)="showAndScrollOpenDutyExpense()">&nbsp;- <b>View</b></a>
@@ -116,7 +121,7 @@
 
         <div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 mb-2">
           <h5>
-            <a href="javascript:void(0);" (click)="$event.preventDefault(); openDutySAC('anchor')"
+            <a href="javascript:void(0);" (click)="$event.preventDefault(); openDutySAC()"
               style="cursor: pointer;color: #007bff;">Duty SAC</a>
             <a href="javascript:void(0);" (click)="showAndScrollDutySAC()">&nbsp;- <b>View</b></a>
           </h5>

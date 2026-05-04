@@ -181,7 +181,7 @@
                         <tr>
                           <td colspan="6" style="text-align:center; padding:10px 0;">
                             <img *ngIf="dataSource?.mapURL; else noMapImage"
-                                  [src]="dataSource?.mapURL" style="width:320px; height:200px; border:1px solid #ccc;" />
+                                  [src]="dataSource?.mapURL" style="width:420px; height:300px; border:1px solid #ccc;" />
                                   <ng-template #noMapImage>No Image</ng-template>
                           </td>
                           <td valign="top" width="130" align="left" style="padding-left: 5px;">
@@ -272,7 +272,7 @@
               <td align="center" *ngIf="img.tollParkingImage !== '' && img.tollParkingImage !== null">
                 <p class="auto-style3">Image
                       </p>
-                  <img [src]="img.tollParkingImage" id="image1" width="150" height="150" />
+                  <img [src]="img.tollParkingImage" id="image1" width="500" height="500" />
               </td>
             </tr>
           </table>

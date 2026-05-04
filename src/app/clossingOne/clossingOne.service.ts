@@ -60,6 +60,11 @@ export class ClossingOneService
   }
   
 
+  GetTotalTollParInStDispute(DutySlipID:any):  Observable<any> 
+  {
+    return this.httpClient.get(this.API_URL + '/' + 'TotalTollParInStDispute' + '/' + DutySlipID);
+  }
+  
 }
 
   

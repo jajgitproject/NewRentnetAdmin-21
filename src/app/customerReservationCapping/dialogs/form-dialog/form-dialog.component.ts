@@ -157,7 +157,7 @@ export class FormDialogComponent
   }
   
   public Put(): void {
-    this.advanceTableForm.patchValue({cityID:this.geoPointCityID});
+    this.advanceTableForm.patchValue({cityID:this.geoPointCityID || this.advanceTable.cityID});
     this.advanceTableService.update(this.advanceTableForm.getRawValue()).subscribe(
       response => {
         if (response && response.activationStatus && typeof response.activationStatus === 'string' && response.activationStatus.includes("Duplicate")) 

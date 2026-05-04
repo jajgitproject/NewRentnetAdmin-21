@@ -30,3 +30,25 @@ export class ClosingModel {
   }
 }
 
+
+export class TotalTollParInStDisputeModel {
+  totalTollParking:number;
+  totalInterStateTax:number;
+  totalDutyExpenseModel:TotalDutyExpenseModel;
+
+  constructor(totalTollParInStDisputeModel) {
+    this.totalTollParking = totalTollParInStDisputeModel.totalTollParking || '';
+    this.totalInterStateTax = totalTollParInStDisputeModel.totalInterStateTax || '';
+    this.totalDutyExpenseModel = new TotalDutyExpenseModel(totalTollParInStDisputeModel.totalDutyExpenseModel);
+  }
+}
+
+export class TotalDutyExpenseModel {
+  totalDEChargeableAmount:number;
+  totalDENonChargeableAmount:number;
+
+  constructor(totalDutyExpenseModel) {
+    this.totalDEChargeableAmount = totalDutyExpenseModel.totalDEChargeableAmount || '';
+    this.totalDENonChargeableAmount = totalDutyExpenseModel.totalDENonChargeableAmount || '';
+  }
+}

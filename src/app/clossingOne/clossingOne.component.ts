@@ -204,6 +204,12 @@ export class ClossingOneComponent implements OnInit {
   VehicleCategoryID: number;
   VehicleID: number;
 
+  TotalTollParInStDispute: TotalTollParInStDisputeModel | null;
+  totalTollParking:number;
+  totalInterStateTax:number;
+  totalDEChargeableAmount:number;
+  totalDENonChargeableAmount:number;
+
 
   constructor(
     public httpClient: HttpClient,
@@ -274,7 +280,7 @@ export class ClossingOneComponent implements OnInit {
         this.verifyDutyStatusAndCacellationStatus = data.status;
       });
 
-
+    this.GetTotalTollParInStDispute();
     this.loadDataForCard();
     this.BookingDataOnClosing();
     this.TollParkingLoadData();
@@ -1409,6 +1415,20 @@ showAndScrollOpenSettledRates() {
       
     })
   }
+
+  GetTotalTollParInStDispute() 
+  {
+    this.clossingOneService.GetTotalTollParInStDispute(this.DutySlipID).subscribe(
+      data => {
+        this.TotalTollParInStDispute = data;
+        this.totalTollParking = this.TotalTollParInStDispute.totalTollParking;
+        this.totalInterStateTax = this.TotalTollParInStDispute.totalInterStateTax;
+        this.totalDEChargeableAmount = this.TotalTollParInStDispute.totalDutyExpenseModel.totalDEChargeableAmount;
+        this.totalDENonChargeableAmount = this.TotalTollParInStDispute.totalDutyExpenseModel.totalDENonChargeableAmount;
+      }
+    );
+  }
+
 
 }
 
