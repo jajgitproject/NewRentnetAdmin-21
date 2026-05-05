@@ -7,7 +7,7 @@
                     <div class="font-weight-bold p-t-5 font-17">
                         {{dialogTitle}} - {{DutySlipID}}</div>
                     <div *ngIf="isSaveAllowed">
-                        <span style="color:rgb(150, 4, 4);margin-bottom: 10px;font-style: italic;font-size: 12px;">({{verifyDutyStatusAndCacellationStatus}} !!!!!)</span>
+                        <span style="color:rgb(150, 4, 4);margin-bottom: 10px;font-style: italic;font-size: 12px;">({{goodForBillingStatusAndCancellationStatus}} !!!!!)</span>
                     </div>
                 </div>
             </div>
@@ -16,10 +16,10 @@
       <mat-icon>close</mat-icon>
     </button>
     </div>
-    <div mat-dialog-content *ngIf="action==='add'">
+    <div mat-dialog-content *ngIf="action==='add' || action==='edit'">
         <form class="register-form m-4" [formGroup]="advanceTableForm" (ngSubmit)="submit">
             <div class="row">
-                <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2" >
                     <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
                         <mat-label>Toll Parking Type</mat-label>
                         <mat-select required #tollParkingTypeVal [class.is-invalid]="tollParkingTypeVal.invalid && tollParkingTypeVal.touched" formControlName="tollParkingTypeID">
@@ -30,6 +30,7 @@
                         </mat-error>
                     </mat-form-field>
                 </div> 
+                
                 
                 <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
                     <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
@@ -257,7 +258,7 @@
                 </div>
             </div>
             <div class="row">
-                <span style="color:red;margin-bottom: 10px;">{{verifyDutyStatusAndCacellationStatus}}</span>
+                <!-- <span style="color:red;margin-bottom: 10px;">{{goodForBillingStatusAndCancellationStatus}}</span> -->
                 <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12 mb-2">
                     <div class="example-button-row">
                         <button mat-raised-button color="primary" *ngIf="saveDisabled" [type]="submit" [disabled]="!advanceTableForm.valid || isSaveAllowed"  (click)="confirmAdd()">Save</button>

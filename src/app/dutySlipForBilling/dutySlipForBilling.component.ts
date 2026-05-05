@@ -92,15 +92,13 @@ export class DutySlipForBillingComponent implements OnInit, AfterViewInit {
     if (this.suppressInitialDutyStatusEmit) {
       return;
     }
-    // #region agent log
-    fetch('http://127.0.0.1:7830/ingest/e71207c4-423e-4a42-a900-5bc43349cfbe',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'2871b3'},body:JSON.stringify({sessionId:'2871b3',runId:'run2',hypothesisId:'H6',location:'dutySlipForBilling.component.ts:ngOnInit-valueChanges',message:'dutyStatusChanged emitting from valueChanges',data:{verifyDuty:value.verifyDuty,goodForBilling:value.goodForBilling,message:value.message,dutySlipID:this.DutySlipID},timestamp:Date.now()})}).catch(()=>{});
-    // #endregion
     this.dutyStatusChanged.emit({
       verifyDuty: value.verifyDuty,
       goodForBilling: value.goodForBilling,
       message: value.message
     });
   });
+  console.log(this.InvoiceID)
     this.Action = this.advanceTableClosingOne.action;
     this.DutySlipID = this.advanceTableClosingOne.closingDutySlipModel.dutySlipID;
     this.advanceTableForm.patchValue({dutySlipForBillingID : this.advanceTableClosingOne.closingDutySlipForBillingModel.dutySlipForBillingID});
@@ -957,6 +955,16 @@ export class DutySlipForBillingComponent implements OnInit, AfterViewInit {
 
   public LoadDataForBilling()
   {
+    if(this.InvoiceID !== 0) 
+    {
+      this.advanceTableForm.get('verifyDuty')?.disable();
+      this.advanceTableForm.get('goodForBilling')?.disable();
+    } 
+    else 
+    {
+      this.advanceTableForm.get('verifyDuty')?.enable();
+      this.advanceTableForm.get('goodForBilling')?.enable();
+    }
     let locationOutLatForBilling:string;
     let locationOutLongForBilling : string;
     let reportingToGuestLatForBilling:string;

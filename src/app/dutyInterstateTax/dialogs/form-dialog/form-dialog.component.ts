@@ -73,8 +73,9 @@ export class DITFormDialogComponent
   vehicleID: any;
   geoPointName: FormControl = new FormControl();
   errorMessage: string;
-  verifyDutyStatusAndCacellationStatus: any;
+  goodForBillingStatusAndCancellationStatus: any;
   isSaveAllowed: boolean = false;
+  verifyDutyStatusAndCacellationStatus: any;
 
   constructor(
   public dialogRef: MatDialogRef<DITFormDialogComponent>, 
@@ -88,13 +89,16 @@ export class DITFormDialogComponent
   {
         // Set the defaults
         this.action = data.action;
-        this.verifyDutyStatusAndCacellationStatus = data.verifyDutyStatusAndCacellationStatus;
+         this.verifyDutyStatusAndCacellationStatus = data.verifyDutyStatusAndCacellationStatus;
+        this.goodForBillingStatusAndCancellationStatus = data.goodForBillingStatusAndCancellationStatus;
+        console.log(data)
         if (this.action === 'edit') 
         {
           this.dialogTitle ='Duty Interstate Tax';       
           this.advanceTable = data.advanceTable;
           // let startDate=moment(this.advanceTable.taxStartDate).format('DD/MM/yyyy');
           // this.onBlurPaidFromEdit(startDate);
+          
           let endDate=moment(this.advanceTable.taxEndDate).format('DD/MM/yyyy');
           this.onBlurUpdateDateEdit(endDate);
         } else 
@@ -104,7 +108,7 @@ export class DITFormDialogComponent
           //this.advanceTable.activationStatus=true;
         }
         this.advanceTableForm = this.createContactForm();
-        if (this.verifyDutyStatusAndCacellationStatus !== 'Changes allow') 
+        if (this.goodForBillingStatusAndCancellationStatus !== 'Changes Allow') 
         {
           this.isSaveAllowed = true;
         } 
@@ -135,6 +139,31 @@ export class DITFormDialogComponent
       this.PickupDate = this._generalService.decrypt(decodeURIComponent(encryptedPickupDate));
       
     });
+    if(this.action==='edit')
+    {
+        this.isPaidCardVisible = true;
+        this.advanceTableForm.patchValue({dutyInterstateTaxID: this.advanceTable.dutyInterstateTaxID});
+          this.advanceTableForm.patchValue({dutySlipID: this.advanceTable.dutySlipID});
+          this.advanceTableForm.patchValue({interStateTaxID: this.advanceTable.interStateTaxID});
+          this.advanceTableForm.patchValue({taxStartDate: this.advanceTable.taxStartDate});
+          this.advanceTableForm.patchValue({taxEndDate: this.advanceTable.taxEndDate});
+          this.advanceTableForm.patchValue({paidUntilDate: this.advanceTable.paidUntilDate});
+          this.advanceTableForm.patchValue({interStateTaxAmount: this.advanceTable.interStateTaxAmount});
+          this.advanceTableForm.patchValue({amountToBeChargedInCurrentDuty: this.advanceTable.amountToBeChargedInCurrentDuty});
+          this.advanceTableForm.patchValue({interStateTaxPaidBy: this.advanceTable.interStateTaxPaidBy});
+          this.advanceTableForm.patchValue({approvedByID: this.advanceTable.approvedByID});
+          this.advanceTableForm.patchValue({approvedBy: this.advanceTable.approvedBy});
+          this.advanceTableForm.patchValue({approvalStatus: this.advanceTable.approvalStatus});
+          this.advanceTableForm.patchValue({approvalDate: this.advanceTable.approvalDate});
+          this.advanceTableForm.patchValue({approvalRemark: this.advanceTable.approvalRemark});
+          this.advanceTableForm.patchValue({activationStatus: this.advanceTable.activationStatus});
+          this.advanceTableForm.patchValue({stateID: this.advanceTable.stateID});
+          this.advanceTableForm.patchValue({state: this.advanceTable.stateName});
+          this.advanceTableForm.patchValue({dutyInterstateTaxImage: this.advanceTable.dutyInterstateTaxImage});
+          this.advanceTableForm.patchValue({interStateTaxStartDate: this.advanceTable.interStateTaxStartDate});
+          this.advanceTableForm.patchValue({interStateTaxEndDate: this.advanceTable.interStateTaxEndDate});
+
+    }
     this.InitState();
     this.InitStateOnSearch();
     //this.advanceTableForm.patchValue({approvalRemark:'N/A'});

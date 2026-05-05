@@ -189,6 +189,7 @@ export class ClossingOneComponent implements OnInit, AfterViewInit, AfterViewChe
   verifyDuty: boolean;
   templateAddress: any;
   verifyDutyStatusAndCacellationStatus: any;
+  goodForBillingStatusAndCancellationStatus:any;
 
   Message: string;
   DSClosing: any;
@@ -326,6 +327,10 @@ export class ClossingOneComponent implements OnInit, AfterViewInit, AfterViewChe
       data => {
         this.verifyDutyStatusAndCacellationStatus = data.status;
       });
+       this.controlPanelDialogeService.getGoodForBillingStatus(this.ReservationID).subscribe(
+      data => {
+        this.goodForBillingStatusAndCancellationStatus = data.status;
+      });
 
     this.GetTotalTollParInStDispute();
     this.loadDataForCard();
@@ -430,6 +435,7 @@ export class ClossingOneComponent implements OnInit, AfterViewInit, AfterViewChe
         {
           action: 'add',
           dutySlipID: this.DutySlipID,
+          goodForBillingStatusAndCancellationStatus: this.goodForBillingStatusAndCancellationStatus,
           verifyDutyStatusAndCacellationStatus: this.verifyDutyStatusAndCacellationStatus
         }
       });
@@ -506,6 +512,7 @@ export class ClossingOneComponent implements OnInit, AfterViewInit, AfterViewChe
           registrationNumber: this.RegistrationNumber,
           pickupDate: this.PickupDate,
           dropOffDate: this.DropOffDate,
+          goodForBillingStatusAndCancellationStatus: this.goodForBillingStatusAndCancellationStatus,
           verifyDutyStatusAndCacellationStatus: this.verifyDutyStatusAndCacellationStatus
         }
       });

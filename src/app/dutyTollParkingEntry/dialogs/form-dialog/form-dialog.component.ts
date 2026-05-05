@@ -31,7 +31,8 @@ export class FormDialogComponent
   public EmployeeList?: EmployeeDropDown[]=[];
   dutySlipID: any;
   DutySlipID: string;
-  verifyDutyStatusAndCacellationStatus: any;
+  goodForBillingStatusAndCancellationStatus: any;
+   verifyDutyStatusAndCacellationStatus: any;
   isSaveAllowed: boolean = false;
 
   constructor(
@@ -46,11 +47,20 @@ export class FormDialogComponent
         // Set the defaults
         this.action = data.action;
         this.dutySlipID=data.dutySlipID;
+        this.goodForBillingStatusAndCancellationStatus = data.goodForBillingStatusAndCancellationStatus;
         this.verifyDutyStatusAndCacellationStatus = data.verifyDutyStatusAndCacellationStatus;
+        console.log(data.advanceTable)
         if(this.action==='approval')
         {
           this.dialogTitle ='Toll Parking For Duty Slip No.';       
           this.advanceTable = data.advanceTable;
+        }
+        
+         if(this.action==='edit')
+        {
+          this.dialogTitle ='Toll Parking For Duty Slip No.';       
+          this.advanceTable = data.advanceTable;
+          
         }
         
         if(this.action==='add') 
@@ -61,7 +71,8 @@ export class FormDialogComponent
           
         }
         this.advanceTableForm = this.createContactForm();
-        if (this.verifyDutyStatusAndCacellationStatus !== 'Changes allow') 
+        console.log(this.goodForBillingStatusAndCancellationStatus)
+        if (this.goodForBillingStatusAndCancellationStatus !== 'Changes Allow') 
         {
           this.isSaveAllowed = true;
         } 
@@ -102,6 +113,22 @@ export class FormDialogComponent
       this.advanceTableForm.patchValue({approvalRemark:this.advanceTable.approvalRemark});
       this.advanceTableForm.patchValue({approvalDate:this.advanceTable.approvalDate});
       this.advanceTableForm.patchValue({activationStatus:this.advanceTable.activationStatus});
+    }
+    if(this.action==='edit')
+    {
+      this.advanceTableForm.patchValue({dutyTollParkingID:this.advanceTable.dutyTollParkingID});
+      this.advanceTableForm.patchValue({tollParkingTypeID:this.advanceTable.tollParkingTypeID});
+      this.advanceTableForm.patchValue({dutySlipID:this.advanceTable.dutySlipID});
+      this.advanceTableForm.patchValue({tollParkingAmount:this.advanceTable.tollParkingAmount});
+      this.advanceTableForm.patchValue({paymentType:this.advanceTable.paymentType});
+      this.advanceTableForm.patchValue({tollParkingImage:this.advanceTable.tollParkingImage});
+       this.advanceTableForm.patchValue({approvalStatus:this.advanceTable.approvalStatus});
+      this.advanceTableForm.patchValue({approvedByID:this.advanceTable.approvedByID});
+      this.advanceTableForm.patchValue({approvedBy:this.advanceTable.firstName+' '+this.advanceTable.lastName});
+      this.advanceTableForm.patchValue({approvalRemark:this.advanceTable.approvalRemark});
+      this.advanceTableForm.patchValue({approvalDate:this.advanceTable.approvalDate});
+      this.advanceTableForm.patchValue({activationStatus:this.advanceTable.activationStatus});
+       this.InitTollParkingType();
     }
        
   }
@@ -148,7 +175,12 @@ InitTollParkingType() {
   this._generalService.GetTollParkingType().subscribe(
     data =>
     {
-      this.TollParkingTypeList = data;   
+      this.TollParkingTypeList = data; 
+      if (this.action === 'edit') {
+        this.advanceTableForm.patchValue({
+          tollParkingTypeID: this.advanceTable.tollParkingTypeID
+        });
+      }  
     },
   );
  }
@@ -236,7 +268,7 @@ InitTollParkingType() {
   public confirmAdd(): void 
   {
     this.saveDisabled = false;
-       if(this.action=="approval")
+       if(this.action=="approval" || this.action=="edit")
        {
           this.Put();
        }
