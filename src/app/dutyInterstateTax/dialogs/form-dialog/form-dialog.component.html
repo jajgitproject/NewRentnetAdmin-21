@@ -9,7 +9,7 @@
                         for Date Between {{PickupDate | date}} - {{DropOffDate | date}}
                     </div>
                      <div *ngIf="isSaveAllowed">
-                        <span style="color:rgb(150, 4, 4);margin-bottom: 10px;font-style: italic;font-size: 12px;">({{verifyDutyStatusAndCacellationStatus}} !!!!!)</span>
+                        <span style="color:rgb(150, 4, 4);margin-bottom: 10px;font-style: italic;font-size: 12px;">({{goodForBillingStatusAndCancellationStatus}} !!!!!)</span>
                     </div>
                 </div>
             </div>
@@ -372,7 +372,7 @@
 
             <div class="row">
                 <!-- <div *ngIf="isSaveAllowed">
-                    <span style="color:red;margin-bottom: 10px;">{{verifyDutyStatusAndCacellationStatus}}</span>
+                    <span style="color:red;margin-bottom: 10px;">{{goodForBillingStatusAndCancellationStatus}}</span>
                 </div> -->
                 <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12 mb-2">
                     <div class="example-button-row">

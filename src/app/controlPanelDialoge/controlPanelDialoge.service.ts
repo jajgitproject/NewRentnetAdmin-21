@@ -129,6 +129,10 @@ export class ControlPanelDialogeService
   {    
     return this.httpClient.get(this.API_URL_Closing + '/' + 'GetVerifyDutyStatus' + '/' + ReservationID);
   }
+   getGoodForBillingStatus(ReservationID:any): Observable<any> 
+  {    
+    return this.httpClient.get(this.API_URL_Closing + '/' + 'GetGoodForBillingStatus' + '/' + ReservationID);
+  }
    checkInvoiceNumber(ReservationID:any): Observable<any> 
   {    
     return this.httpClient.get(this.API_URL + 'CheckInvoiceNumber' + '/' + ReservationID);

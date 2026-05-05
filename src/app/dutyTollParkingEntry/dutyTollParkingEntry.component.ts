@@ -27,13 +27,14 @@ export class DutyTollParkingEntryComponent implements OnInit {
   @Input() dutySlipID;
   @Input() AllotmentID;
   @Input() verifyDutyStatusAndCacellationStatus;
+  @Input() goodForBillingStatusAndCancellationStatus;
   displayedColumns = [
     'type',
     'amount',
     'paidBy',
     'image',
     'approvalStatus',
-    'approval'
+    'actions'
   ];
   dataSource: DutyTollParkingEntry[] | null;
   dutyTollParkingID: number;
@@ -81,6 +82,17 @@ export class DutyTollParkingEntryComponent implements OnInit {
     });
   }
 
+   editCall(row) {
+      const dialogRef = this.dialog.open(FormDialogComponent, {
+        data: {
+          advanceTable: row,
+          action: 'edit',
+          verifyDutyStatusAndCacellationStatus:this.verifyDutyStatusAndCacellationStatus,
+          goodForBillingStatusAndCancellationStatus:this.goodForBillingStatusAndCancellationStatus
+        }
+      });
+  
+    }
   openDutyTollParkingApproval(row)
   {
     const dialogRef=this.dialog.open(FormDialogComponent,
@@ -89,7 +101,8 @@ export class DutyTollParkingEntryComponent implements OnInit {
         {
           advanceTable:row,
           action:'approval',
-          verifyDutyStatusAndCacellationStatus:this.verifyDutyStatusAndCacellationStatus
+          verifyDutyStatusAndCacellationStatus:this.verifyDutyStatusAndCacellationStatus,
+          goodForBillingStatusAndCancellationStatus:this.goodForBillingStatusAndCancellationStatus
         }
       });
       dialogRef.afterClosed().subscribe((res: any) => {

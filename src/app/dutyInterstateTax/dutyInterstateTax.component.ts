@@ -32,6 +32,7 @@ export class DutyInterstateTaxComponent implements OnInit {
   @Input() advanceTableDIT;
   @Input() dutySlipID;
   @Input() verifyDutyStatusAndCacellationStatus;
+  @Input() goodForBillingStatusAndCancellationStatus;
   displayedColumns = [
     'startDate',
     'endDate',
@@ -39,7 +40,7 @@ export class DutyInterstateTaxComponent implements OnInit {
     'paidBy',
     'image',
     'approvalStatus',
-    'approval'
+    'actions'
   ];
   dataSource: DutyInterstateTax[] | null;
   dutyInterstateTaxID: number=0;
@@ -95,7 +96,10 @@ export class DutyInterstateTaxComponent implements OnInit {
   const dialogRef = this.dialog.open(DITFormDialogComponent, {
     data: {
       advanceTable: row,
-      action: 'edit'
+      action: 'edit',
+      verifyDutyStatusAndCacellationStatus:this.verifyDutyStatusAndCacellationStatus,
+      goodForBillingStatusAndCancellationStatus:this.goodForBillingStatusAndCancellationStatus
+
     }
   });
 

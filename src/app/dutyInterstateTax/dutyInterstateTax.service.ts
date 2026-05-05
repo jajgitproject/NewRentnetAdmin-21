@@ -67,8 +67,10 @@ export class DutyInterstateTaxService
   }
   update(advanceTable: DutyInterstateTax)
   {
-    // advanceTable.updatedBy=this.generalService.getUserID();
-    // advanceTable.updateDateTime= this.generalService.getTodaysDate();
+     advanceTable.approvalRemark = null;
+   advanceTable.taxStartDateString=this.generalService.getTimeApplicable(advanceTable.taxStartDate);
+    advanceTable.approvalDateString=this.generalService.getTimeApplicable(advanceTable.approvalDate);
+    advanceTable.taxEndDateString=this.generalService.getTimeApplicable(advanceTable.taxEndDate);
     advanceTable.userID=this.generalService.getUserID();
     return this.httpClient.put<any>(this.API_URL , advanceTable);
   }
