@@ -542,6 +542,25 @@ body > .swal2-container.swal2-backdrop-show {
 .swal2-popup .swal2-icon.swal2-error {
   border-color: #d9534f !important;
   color: #d9534f !important;
+  position: relative;
+}
+.swal2-popup .swal2-icon.swal2-error [class^='swal2-x-mark-line'] {
+  background-color: #d9534f !important;
+  height: 0.22em !important;
+}
+.swal2-popup .swal2-icon.swal2-error .swal2-x-mark {
+  display: none !important;
+}
+.swal2-popup .swal2-icon.swal2-error::after {
+  content: '\00D7';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -53%);
+  font-size: 34px;
+  line-height: 1;
+  font-weight: 700;
+  color: #d9534f;
 }
 .swal2-popup .swal2-icon.swal2-success {
   border-color: #5cb85c !important;
