@@ -94,6 +94,7 @@ export class DutySlipForBillingComponent implements OnInit {
       message: value.message
     });
   });
+  console.log(this.InvoiceID)
     this.Action = this.advanceTableClosingOne.action;
     this.DutySlipID = this.advanceTableClosingOne.closingDutySlipModel.dutySlipID;
     this.advanceTableForm.patchValue({dutySlipForBillingID : this.advanceTableClosingOne.closingDutySlipForBillingModel.dutySlipForBillingID});
@@ -943,6 +944,16 @@ export class DutySlipForBillingComponent implements OnInit {
 
   public LoadDataForBilling()
   {
+    if(this.InvoiceID !== 0) 
+    {
+      this.advanceTableForm.get('verifyDuty')?.disable();
+      this.advanceTableForm.get('goodForBilling')?.disable();
+    } 
+    else 
+    {
+      this.advanceTableForm.get('verifyDuty')?.enable();
+      this.advanceTableForm.get('goodForBilling')?.enable();
+    }
     let locationOutLatForBilling:string;
     let locationOutLongForBilling : string;
     let reportingToGuestLatForBilling:string;
