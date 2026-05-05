@@ -214,6 +214,19 @@ export class FormDialogComponent
     
   }
   
+  resetOtherFields(): void {
+    this.advanceTableForm.patchValue({
+      packageID: '',
+      package: ''
+    });
+  }
+
+  onPackageChanges(event: any): void {
+    if (event.keyCode === 8) {
+      this.advanceTableForm.controls['packageID'].setValue('');
+    }
+  }
+
   onPackageTypeChanges(event:any)
   {
     this.resetOtherFields();

@@ -14,7 +14,7 @@ import { Subscription } from 'rxjs';
 })
 export class CustomerInformationComponent implements OnInit {
   @Input() AllotmentID: any;
-  customerInformation: any;
+  customerInformation: any = null;
   panelExpanded = false;
    allotmentID: any;
   constructor(private customerService: CustomerInformationService, 

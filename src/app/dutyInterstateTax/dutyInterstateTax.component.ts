@@ -29,7 +29,7 @@ import { FormDialogComponent as  ApprovalFormDialogComponent} from '../dutyInter
   providers: [{ provide: MAT_DATE_LOCALE, useValue: 'en-GB' }]
 })
 export class DutyInterstateTaxComponent implements OnInit {
-  @Input() advanceTableDIT;
+  @Input() advanceTableDIT = [];
   @Input() dutySlipID;
   @Input() verifyDutyStatusAndCacellationStatus;
   displayedColumns = [

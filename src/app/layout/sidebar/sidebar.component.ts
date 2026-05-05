@@ -101,6 +101,11 @@ export class SidebarComponent implements OnInit, OnDestroy {
   ngOnInit() {
     if (this.authService.currentUserValue) {
       this.sidebarItems = ROUTES.filter((sidebarItem) => sidebarItem);
+      this.sidebarItems?.forEach(menuItem => {
+        menuItem?.submenu?.forEach(subItem => {
+          subItem.isAccess = false;
+        });
+      });
       this.getPagesAccessRoleWise(this.authService.currentUserValue.employee.RoleID);
     }
     this.initLeftSidebar();
@@ -127,10 +132,13 @@ export class SidebarComponent implements OnInit, OnDestroy {
           localStorage.setItem('accessPages', JSON.stringify(accessPagesArray));
   
           // Update sidebar items
-          this.sidebarItems?.forEach(menuItem => {
-            menuItem?.submenu?.forEach(subItem => {
-              const subItemTitle = subItem.title.toLowerCase().replace(/\s+/g, '');
-              subItem.isAccess = accessPagesArray.some(page => page.page === subItemTitle);
+          // Defer menu access updates to next tick to avoid ExpressionChanged errors.
+          setTimeout(() => {
+            this.sidebarItems?.forEach(menuItem => {
+              menuItem?.submenu?.forEach(subItem => {
+                const subItemTitle = subItem.title.toLowerCase().replace(/\s+/g, '');
+                subItem.isAccess = accessPagesArray.some(page => page.page === subItemTitle);
+              });
             });
           });
   

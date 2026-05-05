@@ -38,7 +38,7 @@
               *ngFor="let sidebarSubItem of sidebarItem.submenu | filterData: searchText; let i = index"
               [routerLinkActive]="sidebarSubItem.submenu.length > 0 ? '' : 'active'">
               <a [routerLink]="sidebarSubItem.submenu.length > 0 ? null : [sidebarSubItem.path]"
-                (click)="callLevel2Toggle($event,sidebarSubItem.moduleName)" [ngClass]="[sidebarSubItem.class]" *ngIf="sidebarSubItem.isAccess">
+                (click)="callLevel2Toggle($event,sidebarSubItem.moduleName)" [ngClass]="[sidebarSubItem.class]">
                 {{sidebarSubItem.title | translate}} 
               </a>
               <!-- Second level menu -->

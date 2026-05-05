@@ -30,7 +30,7 @@ import { LocationDetailsDialogComponent } from './dialogs/locationDetails-dialog
 })
 export class ReservationClosingDetailsComponent implements OnInit {
  @Input() AllotmentID;
- advanceTableRCD: ReservationClosingDetails | null;
+ advanceTableRCD: ReservationClosingDetails | null = null;
 
   advanceTableForm: FormGroup;
   dataSource: ReservationClosingDetails[] | null;
@@ -45,7 +45,7 @@ export class ReservationClosingDetailsComponent implements OnInit {
   PackageType: string;
   Package: string;
   allotmentID: any;
-  reservationCloseDetail: any;
+  reservationCloseDetail: any = null;
   constructor(
     public route:ActivatedRoute,
     public httpClient: HttpClient,
@@ -94,6 +94,9 @@ export class ReservationClosingDetailsComponent implements OnInit {
   {
     this.reservationClosingDetailsService.getTableData(this.AllotmentID).subscribe((res: any) => {
         this.reservationCloseDetail = res[0];
+        // #region agent log
+        fetch('http://127.0.0.1:7830/ingest/e71207c4-423e-4a42-a900-5bc43349cfbe',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'2871b3'},body:JSON.stringify({sessionId:'2871b3',runId:'run1',hypothesisId:'H5',location:'reservationClosingDetails.component.ts:loadData-subscribe',message:'reservation closing details assigned',data:{allotmentIDInput:this.AllotmentID,hasResponse:!!res,hasDetail:!!this.reservationCloseDetail},timestamp:Date.now()})}).catch(()=>{});
+        // #endregion
     }, (error: HttpErrorResponse) => {
     });
  }

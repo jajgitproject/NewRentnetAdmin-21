@@ -5,7 +5,7 @@ import { DutyInterstateTaxApprovalService } from '../../dutyInterstateTaxApprova
 import { GeneralService } from '../../../general/general.service';
 @Component({
   standalone: false,
-  selector: 'app-delete',
+  selector: 'app-delete-duty-interstate-tax-approval',
   templateUrl: './delete.component.html',
   styleUrls: ['./delete.component.sass']
 })

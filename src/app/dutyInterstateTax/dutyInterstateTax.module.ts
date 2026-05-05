@@ -28,6 +28,7 @@ import { MyUploadComponent } from '../myupload/myupload.component';
 import { MyUploadModule } from '../myupload/myupload.module';
 import { MatAutocompleteModule } from '@angular/material/autocomplete';
 import { DutyInterstateTaxApprovalService } from '../dutyInterstateTaxApproval/dutyInterstateTaxApproval.service';
+import { DutyInterstateTaxApprovalModule } from '../dutyInterstateTaxApproval/dutyInterstateTaxApproval.module';
 import { MatExpansionModule } from '@angular/material/expansion';
 
 @NgModule({
@@ -60,7 +61,8 @@ import { MatExpansionModule } from '@angular/material/expansion';
     MatMenuModule,
     MatProgressSpinnerModule,
     MyUploadModule,
-    MatExpansionModule
+    MatExpansionModule,
+    DutyInterstateTaxApprovalModule
   ],
   providers: [DutyInterstateTaxService,DutyInterstateTaxApprovalService],
   exports:[DutyInterstateTaxComponent]

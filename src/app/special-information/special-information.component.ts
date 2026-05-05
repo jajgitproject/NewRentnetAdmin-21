@@ -12,7 +12,7 @@ import { ActivatedRoute } from '@angular/router';
 })
 export class SpecialinformationComponent implements OnInit {
    @Input() AllotmentID!: number;
-  specialinformation: any;
+  specialinformation: any = null;
     panelExpanded = false;
   allotmentID: any;
 
@@ -34,6 +34,9 @@ export class SpecialinformationComponent implements OnInit {
       this.allotmentID = this._generalService.decrypt(decodeURIComponent(encryptedAllotmentID)); 
     });       
     this.loadSpecialinformation();
+    // #region agent log
+    fetch('http://127.0.0.1:7830/ingest/e71207c4-423e-4a42-a900-5bc43349cfbe',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'2871b3'},body:JSON.stringify({sessionId:'2871b3',runId:'run1',hypothesisId:'H5',location:'special-information.component.ts:ngOnInit',message:'special information init',data:{allotmentIDInput:this.AllotmentID,queryAllotmentID:this.allotmentID},timestamp:Date.now()})}).catch(()=>{});
+    // #endregion
     // this.SubscribeUpdateService();
   }
 
@@ -47,6 +50,9 @@ export class SpecialinformationComponent implements OnInit {
         console.warn('No data received from API');
         this.specialinformation = null;
       }
+      // #region agent log
+      fetch('http://127.0.0.1:7830/ingest/e71207c4-423e-4a42-a900-5bc43349cfbe',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'2871b3'},body:JSON.stringify({sessionId:'2871b3',runId:'run1',hypothesisId:'H5',location:'special-information.component.ts:loadSpecialinformation-subscribe',message:'special information api response processed',data:{allotmentIDInput:this.AllotmentID,hasRows:!!(data&&data.length),hasData:!!this.specialinformation},timestamp:Date.now()})}).catch(()=>{});
+      // #endregion
     },
     (error) => {
       console.error('Error fetching current data information:', error);

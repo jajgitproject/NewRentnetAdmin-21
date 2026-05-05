@@ -202,7 +202,9 @@ InitState()
     data=>
     {
       this.StateList=data;
-      this.filteredStateOptions = this.advanceTableForm.controls["state"].valueChanges.pipe(
+      const stateControl = this.advanceTableForm.get('stateName');
+      if (!stateControl) { return; }
+      this.filteredStateOptions = stateControl.valueChanges.pipe(
         startWith(""),
         map(value => this._filterState(value || ''))
       ); 

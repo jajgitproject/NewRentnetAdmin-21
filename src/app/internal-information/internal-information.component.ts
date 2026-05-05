@@ -13,7 +13,7 @@ import { IternallinformationService } from './internal-information.service';
 export class IternallinformationComponent implements OnInit {
    @Input() AllotmentID!: number;
   @Input() reservationID!: number;
-  iternallinformation: any;
+  iternallinformation: any = null;
     panelExpanded :boolean = false;
   allotmentID: any;
   ReservationID: any;

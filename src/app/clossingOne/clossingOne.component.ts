@@ -1,5 +1,5 @@
 // @ts-nocheck
-import { Component, ElementRef, Input, OnInit, ViewChild } from '@angular/core';
+import { AfterViewChecked, AfterViewInit, Component, ElementRef, Input, OnInit, ViewChild } from '@angular/core';
 import { ClossingOneService } from './clossingOne.service';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { MatDialog } from '@angular/material/dialog';
@@ -98,21 +98,21 @@ import { FormDialogComponent as CDTClosingDialogComponent } from '../changeDutyT
   providers: [{ provide: MAT_DATE_LOCALE, useValue: 'en-GB' }]
 })
 
-export class ClossingOneComponent implements OnInit {
+export class ClossingOneComponent implements OnInit, AfterViewInit, AfterViewChecked {
   // dataSavedMessage: boolean = false;
   updateData = new Subject<void>();
   AllotmentID: any;
   DutySlipID: any;
-  closingDataAdvanceTable: ClosingDataModel | null;
+  closingDataAdvanceTable: ClosingDataModel | null = null;
   advanceTableMOP: MOPModel | null;
   tollParkingAdvanceTable: DutyTollParkingEntry[] | null;
   showHideTollParkingCard: boolean = false;
   showHideODOMeterCard: boolean = false;
 
-  disputeAdvanceTable: Dispute[] | null;
+  disputeAdvanceTable: Dispute[] | null = [];
   showHideDispute: boolean = false;
 
-  advanceTableDIT: DutyInterstateTax[] | null;
+  advanceTableDIT: DutyInterstateTax[] | null = null;
   showHideaddDIT: boolean = false;
   showSAC: boolean = false;
   showAdditionalKms: boolean = false;
@@ -137,11 +137,11 @@ export class ClossingOneComponent implements OnInit {
   LocationOutAddress: string;
   CustomerContractID: number;
   PackageType: string;
-  CustomerName: string;
-  TallyCustomerID: number;
-  GstData:any;
-  GstNumber: string;
-  StateName: string;
+  CustomerName: string = '';
+  TallyCustomerID: number = 0;
+  GstData:any = null;
+  GstNumber: string = '';
+  StateName: string = '';
 
   showDutyExpense: boolean = false;
   SearchActivationStatus: boolean = true;
@@ -158,15 +158,15 @@ export class ClossingOneComponent implements OnInit {
   advanceTableDD: DiscountDetails | null;
   advanceTableSI: SpecialInstructionDetails | null;
 
-  advanceTableClosingOne: ClosingModel | null;
+  advanceTableClosingOne: ClosingModel | null = null;
   dataSource: Dispute[] | null;
-  dataSourceforCard: any;
-  reservationCloseDetail: any;
+  dataSourceforCard: any = null;
+  reservationCloseDetail: any = null;
   mapOfDutySlip: string;
   panelExpanded: boolean = false;
   dutySlipMap: DutySlipMap;
   showHideSalesPerson: boolean = false;
-  advanceTableSP: ReservationSalesPersonModel | null;
+  advanceTableSP: ReservationSalesPersonModel | null = null;
   advanceTableAdvanceDC: AdvanceDetailsClosing | null;
   showAdvanceDetails: boolean = false;
   advanceTableSRD: SettledRateClosing | null;
@@ -205,10 +205,15 @@ export class ClossingOneComponent implements OnInit {
   VehicleID: number;
 
   TotalTollParInStDispute: TotalTollParInStDisputeModel | null;
-  totalTollParking:number;
-  totalInterStateTax:number;
+  totalTollParking:number = 0;
+  totalInterStateTax:number = 0;
   totalDEChargeableAmount:number;
   totalDENonChargeableAmount:number;
+  private viewReady = false;
+  private paramsReady = false;
+  private initialLoadsStarted = false;
+  private debugViewCheckCount = 0;
+  private debugLastViewSnapshot = '';
 
 
   constructor(
@@ -269,10 +274,52 @@ export class ClossingOneComponent implements OnInit {
       this.ReservationID = Number(this._generalService.decrypt(decodeURIComponent(encryptedReservationID)));
       this.allotmentStatus = this._generalService.decrypt(decodeURIComponent(paramsData.allotmentStatus));
       this.dutySlipType = this._generalService.decrypt(decodeURIComponent(paramsData.dutySlipType));
+      // #region agent log
+      fetch('http://127.0.0.1:7830/ingest/e71207c4-423e-4a42-a900-5bc43349cfbe',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'2871b3'},body:JSON.stringify({sessionId:'2871b3',runId:'run1',hypothesisId:'H3',location:'clossingOne.component.ts:ngOnInit-queryParams',message:'params decoded before initial loads',data:{allotmentID:this.AllotmentID,dutySlipID:this.DutySlipID,reservationID:this.ReservationID,showMOPOther:this.showMOPOther,totalInterStateTax:this.totalInterStateTax},timestamp:Date.now()})}).catch(()=>{});
+      // #endregion
+      this.paramsReady = true;
+      this.startInitialLoadsIfReady();
     });
+
+  }
+
+  ngAfterViewInit(): void {
+    this.viewReady = true;
+    this.startInitialLoadsIfReady();
+  }
+
+  ngAfterViewChecked(): void {
+    if (this.debugViewCheckCount >= 12) {
+      return;
+    }
+    const snapshot = JSON.stringify({
+      showMOPOther: this.showMOPOther,
+      totalInterStateTax: this.totalInterStateTax,
+      hasClosingData: !!this.closingDataAdvanceTable,
+      hasAdvanceClosing: !!this.advanceTableClosingOne,
+      hasMop: !!this.advanceTableMOP,
+      disputeLen: Array.isArray(this.disputeAdvanceTable) ? this.disputeAdvanceTable.length : null
+    });
+    if (snapshot !== this.debugLastViewSnapshot) {
+      this.debugLastViewSnapshot = snapshot;
+      this.debugViewCheckCount++;
+      // #region agent log
+      fetch('http://127.0.0.1:7830/ingest/e71207c4-423e-4a42-a900-5bc43349cfbe',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'2871b3'},body:JSON.stringify({sessionId:'2871b3',runId:'run3',hypothesisId:'H8',location:'clossingOne.component.ts:ngAfterViewChecked',message:'view-check snapshot changed',data:{checkCount:this.debugViewCheckCount,showMOPOther:this.showMOPOther,totalInterStateTax:this.totalInterStateTax,hasClosingData:!!this.closingDataAdvanceTable,hasAdvanceClosing:!!this.advanceTableClosingOne,hasMop:!!this.advanceTableMOP,disputeLen:Array.isArray(this.disputeAdvanceTable)?this.disputeAdvanceTable.length:null},timestamp:Date.now()})}).catch(()=>{});
+      // #endregion
+    }
+  }
+
+  private startInitialLoadsIfReady(): void {
+    if (!this.viewReady || !this.paramsReady || this.initialLoadsStarted) {
+      return;
+    }
+    this.initialLoadsStarted = true;
+    // #region agent log
+    fetch('http://127.0.0.1:7830/ingest/e71207c4-423e-4a42-a900-5bc43349cfbe',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'2871b3'},body:JSON.stringify({sessionId:'2871b3',runId:'post-fix',hypothesisId:'H7',location:'clossingOne.component.ts:startInitialLoadsIfReady',message:'starting initial loads after params+view ready',data:{showMOPOther:this.showMOPOther,totalInterStateTax:this.totalInterStateTax,hasClosing:!!this.advanceTableClosingOne,hasCard:!!this.dataSourceforCard},timestamp:Date.now()})}).catch(()=>{});
+    // #endregion
     this.GetClosingData();
     this.disputeService.disputeData$.subscribe(data => {
-      this.disputeAdvanceTable = data;
+      this.disputeAdvanceTable = data ?? [];
     });
 
     this.controlPanelDialogeService.getVerifyDutyStatus(this.ReservationID).subscribe(
@@ -291,13 +338,11 @@ export class ClossingOneComponent implements OnInit {
     this.loadDutyStateData();
     this.loadDutyStateDataCustomer();
     this.loadDataforAdditionalKMHR();
-    //this.loadDataClosingSalesPerson()
     this.salesPersonLoadData();
     this.settledRateLoadData();
     this.MOPLoadData();
     this.loadDataForReservationDiscountClosing();
     this.loadDataForImage();
-
   }
 
   onDataSaved() {
@@ -309,10 +354,10 @@ export class ClossingOneComponent implements OnInit {
     this.clossingOneService.GetClosingData(this.DutySlipID).subscribe(
       data => {
         this.advanceTableClosingOne = data;
-        this.invoiceID = this.advanceTableClosingOne.invoiceID;
-        this.goodForBilling = this.advanceTableClosingOne.closingDutySlipForBillingModel.goodForBilling;
-        this.verifyDuty = this.advanceTableClosingOne.closingDutySlipForBillingModel.verifyDuty;
-        this.DSClosing = this.advanceTableClosingOne.closingDutySlipForBillingModel.dsClosing;
+        this.invoiceID = this.advanceTableClosingOne?.invoiceID;
+        this.goodForBilling = this.advanceTableClosingOne?.closingDutySlipForBillingModel?.goodForBilling;
+        this.verifyDuty = this.advanceTableClosingOne?.closingDutySlipForBillingModel?.verifyDuty;
+        this.DSClosing = this.advanceTableClosingOne?.closingDutySlipForBillingModel?.dsClosing;
       }
     );
   }
@@ -322,38 +367,41 @@ export class ClossingOneComponent implements OnInit {
       (
         data => {
           this.closingDataAdvanceTable = data;
-          this.allotmentID = this.closingDataAdvanceTable.allotmentID;
-          this.dutySlipID = this.closingDataAdvanceTable.dutySlipID;
-          this.ReservationID = this.closingDataAdvanceTable.reservationID;
-          this.CustomerID = this.closingDataAdvanceTable.customerID;
-          this.PackageID = this.closingDataAdvanceTable.packageID;
+          this.allotmentID = this.closingDataAdvanceTable?.allotmentID;
+          this.dutySlipID = this.closingDataAdvanceTable?.dutySlipID;
+          this.ReservationID = this.closingDataAdvanceTable?.reservationID;
+          this.CustomerID = this.closingDataAdvanceTable?.customerID;
+          this.PackageID = this.closingDataAdvanceTable?.packageID;
           this.PackageTypeID = this.closingDataAdvanceTable?.packageTypeID;
           this.CustomerContractID = this.closingDataAdvanceTable?.customerContractID;
           this.PackageType = this.closingDataAdvanceTable?.packageType;
-          this.DutySlipForBillingID = this.closingDataAdvanceTable.dutySlipForBillingID;
-          this.RegistrationNumber = this.closingDataAdvanceTable.registrationNumber;
-          this.InventoryID = this.closingDataAdvanceTable.inventoryID;
-          this.DropOffDate = this.closingDataAdvanceTable.dropOffDate;
-          this.PickupDate = this.closingDataAdvanceTable.pickupDate;
-          this.closureStatus = this.closingDataAdvanceTable.closureStatus;
-          this.PickupTime = this.closingDataAdvanceTable.pickupTime;
-          this.DropOffTime = this.closingDataAdvanceTable.dropOffTime;
-          this.LocationOutDate = this.closingDataAdvanceTable.locationOutDate;
-          this.LocationOutTime = this.closingDataAdvanceTable.locationOutTime;
-          this.PickupAddress = this.closingDataAdvanceTable.pickupAddress;
-          this.DropOffAddress = this.closingDataAdvanceTable.dropOffAddress;
-          this.LocationOutAddress = this.closingDataAdvanceTable.locationOutAddress;
-          this.CustomerName = this.closingDataAdvanceTable.customerName;
-          this.TallyCustomerID = this.closingDataAdvanceTable.tallyCustomerID;
-          this.PickupCityID = this.closingDataAdvanceTable.pickupCityID;
-          this.VehicleCategoryID = this.closingDataAdvanceTable.vehicleCategoryID;
-          this.VehicleID = this.closingDataAdvanceTable.vehicleID;
+          this.DutySlipForBillingID = this.closingDataAdvanceTable?.dutySlipForBillingID;
+          this.RegistrationNumber = this.closingDataAdvanceTable?.registrationNumber;
+          this.InventoryID = this.closingDataAdvanceTable?.inventoryID;
+          this.DropOffDate = this.closingDataAdvanceTable?.dropOffDate;
+          this.PickupDate = this.closingDataAdvanceTable?.pickupDate;
+          this.closureStatus = this.closingDataAdvanceTable?.closureStatus;
+          this.PickupTime = this.closingDataAdvanceTable?.pickupTime;
+          this.DropOffTime = this.closingDataAdvanceTable?.dropOffTime;
+          this.LocationOutDate = this.closingDataAdvanceTable?.locationOutDate;
+          this.LocationOutTime = this.closingDataAdvanceTable?.locationOutTime;
+          this.PickupAddress = this.closingDataAdvanceTable?.pickupAddress;
+          this.DropOffAddress = this.closingDataAdvanceTable?.dropOffAddress;
+          this.LocationOutAddress = this.closingDataAdvanceTable?.locationOutAddress;
+          this.CustomerName = this.closingDataAdvanceTable?.customerName || '';
+          this.TallyCustomerID = this.closingDataAdvanceTable?.tallyCustomerID || 0;
+          this.PickupCityID = this.closingDataAdvanceTable?.pickupCityID;
+          this.VehicleCategoryID = this.closingDataAdvanceTable?.vehicleCategoryID;
+          this.VehicleID = this.closingDataAdvanceTable?.vehicleID;
          
           this.advanceDetailsLoadData();
           this.kamCardLoadData();
           // this.loadDataforAdditionalKMHR();
           this.DutySACLoadData();
           this.salesPersonLoadData();
+          // #region agent log
+          fetch('http://127.0.0.1:7830/ingest/e71207c4-423e-4a42-a900-5bc43349cfbe',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'2871b3'},body:JSON.stringify({sessionId:'2871b3',runId:'run1',hypothesisId:'H3',location:'clossingOne.component.ts:BookingDataOnClosing-subscribe',message:'booking data assigned to bound fields',data:{customerName:this.CustomerName,tallyCustomerID:this.TallyCustomerID,reservationID:this.ReservationID,hasClosingData:!!this.closingDataAdvanceTable},timestamp:Date.now()})}).catch(()=>{});
+          // #endregion
         },
         (error: HttpErrorResponse) => { this.closingDataAdvanceTable = null; }
       );
@@ -362,12 +410,15 @@ export class ClossingOneComponent implements OnInit {
     this.clossingOneService.getClosingGSTData(this.ReservationID).subscribe
       (
         data => {
-          this.GstData = data;
-          
-          this.GstNumber = this.GstData.gstNumber;
-          this.StateName = this.GstData.stateName;
+          this.GstData = data || null;
+          this.GstNumber = this.GstData?.gstNumber || '';
+          this.StateName = this.GstData?.stateName || '';
         },
-        (error: HttpErrorResponse) => { this.closingDataAdvanceTable = null; }
+        (error: HttpErrorResponse) => { 
+          this.GstData = null;
+          this.GstNumber = '';
+          this.StateName = '';
+        }
       );
   }
 
@@ -427,9 +478,9 @@ export class ClossingOneComponent implements OnInit {
           if (data != null) {
             this.showHideDispute = true;
           }
-          this.disputeAdvanceTable = data;
+          this.disputeAdvanceTable = data ?? [];
         },
-        (error: HttpErrorResponse) => { this.disputeAdvanceTable = null; }
+        (error: HttpErrorResponse) => { this.disputeAdvanceTable = []; }
       );
   }
 
@@ -1227,20 +1278,32 @@ export class ClossingOneComponent implements OnInit {
         //    this.advanceTableMOP = data;
         //  }, 
         (data: MOPModel) => {
+          // #region agent log
+          fetch('http://127.0.0.1:7830/ingest/e71207c4-423e-4a42-a900-5bc43349cfbe',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'2871b3'},body:JSON.stringify({sessionId:'2871b3',runId:'run1',hypothesisId:'H1',location:'clossingOne.component.ts:MOPLoadData-before-toggle',message:'mode of payment response received',data:{isNull:data===null,showMOPOtherBefore:this.showMOPOther},timestamp:Date.now()})}).catch(()=>{});
+          // #endregion
           if (data !== null) {
             this.showMOPOther = true;
           }
           this.advanceTableMOP = data;
+          // #region agent log
+          fetch('http://127.0.0.1:7830/ingest/e71207c4-423e-4a42-a900-5bc43349cfbe',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'2871b3'},body:JSON.stringify({sessionId:'2871b3',runId:'run1',hypothesisId:'H1',location:'clossingOne.component.ts:MOPLoadData-after-toggle',message:'mode of payment state updated',data:{showMOPOtherAfter:this.showMOPOther,hasMop:!!this.advanceTableMOP},timestamp:Date.now()})}).catch(()=>{});
+          // #endregion
         },
         (error: HttpErrorResponse) => { this.advanceTableMOP = null; }
       );
   }
 
   onDutyStatusChanged(event: { verifyDuty: boolean, goodForBilling: boolean, message: string }) {
+    // #region agent log
+    fetch('http://127.0.0.1:7830/ingest/e71207c4-423e-4a42-a900-5bc43349cfbe',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'2871b3'},body:JSON.stringify({sessionId:'2871b3',runId:'run2',hypothesisId:'H6',location:'clossingOne.component.ts:onDutyStatusChanged-before',message:'parent received duty status change',data:{verifyDuty:this.verifyDuty,goodForBilling:this.goodForBilling,message:this.Message,incoming:event},timestamp:Date.now()})}).catch(()=>{});
+    // #endregion
     this.verifyDuty = event.verifyDuty;
     this.goodForBilling = event.goodForBilling;
     this.Message = event.message;
      this.GSTDataOnClosing();
+    // #region agent log
+    fetch('http://127.0.0.1:7830/ingest/e71207c4-423e-4a42-a900-5bc43349cfbe',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'2871b3'},body:JSON.stringify({sessionId:'2871b3',runId:'run2',hypothesisId:'H6',location:'clossingOne.component.ts:onDutyStatusChanged-after',message:'parent updated duty status and triggered GST refresh',data:{verifyDuty:this.verifyDuty,goodForBilling:this.goodForBilling,message:this.Message},timestamp:Date.now()})}).catch(()=>{});
+    // #endregion
   }
 
   openSearchModal() {
@@ -1421,10 +1484,13 @@ showAndScrollOpenSettledRates() {
     this.clossingOneService.GetTotalTollParInStDispute(this.DutySlipID).subscribe(
       data => {
         this.TotalTollParInStDispute = data;
-        this.totalTollParking = this.TotalTollParInStDispute.totalTollParking;
-        this.totalInterStateTax = this.TotalTollParInStDispute.totalInterStateTax;
-        this.totalDEChargeableAmount = this.TotalTollParInStDispute.totalDutyExpenseModel.totalDEChargeableAmount;
-        this.totalDENonChargeableAmount = this.TotalTollParInStDispute.totalDutyExpenseModel.totalDENonChargeableAmount;
+        this.totalTollParking = this.TotalTollParInStDispute?.totalTollParking || 0;
+        this.totalInterStateTax = this.TotalTollParInStDispute?.totalInterStateTax || 0;
+        this.totalDEChargeableAmount = this.TotalTollParInStDispute?.totalDutyExpenseModel?.totalDEChargeableAmount;
+        this.totalDENonChargeableAmount = this.TotalTollParInStDispute?.totalDutyExpenseModel?.totalDENonChargeableAmount;
+        // #region agent log
+        fetch('http://127.0.0.1:7830/ingest/e71207c4-423e-4a42-a900-5bc43349cfbe',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'2871b3'},body:JSON.stringify({sessionId:'2871b3',runId:'run1',hypothesisId:'H2',location:'clossingOne.component.ts:GetTotalTollParInStDispute',message:'totals updated from API',data:{totalTollParking:this.totalTollParking,totalInterStateTax:this.totalInterStateTax},timestamp:Date.now()})}).catch(()=>{});
+        // #endregion
       }
     );
   }

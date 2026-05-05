@@ -13,7 +13,7 @@ import { LumpsuminformationService } from './lumpsum-information.service';
 export class LumpsuminformationComponent implements OnInit {
    @Input() AllotmentID!: number;
   @Input() reservationID!: number;
-  lumpsuminformation: any;
+  lumpsuminformation: any = null;
     panelExpanded = false;
   allotmentID: any;
   ReservationID: any;

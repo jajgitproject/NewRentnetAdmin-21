@@ -38,8 +38,8 @@
         <div class="col-xl-2 col-lg-2 col-md-12 col-sm-12 mb-2">
           <h5>DutySlip No: {{DutySlipID}}</h5>
         </div>
-        <div class="col-xl-4 col-lg-4 col-md-12 col-sm-12 mb-2">
-          <h5>Customer Name: {{CustomerName}}({{TallyCustomerID}})</h5>
+        <div class="col-xl-4 col-lg-4 col-md-12 col-sm-12 mb-2" *ngIf="closingDataAdvanceTable">
+          <h5>Customer Name: {{closingDataAdvanceTable?.customerName}}({{closingDataAdvanceTable?.tallyCustomerID}})</h5>
         </div>
         <div class="col-xl-4 col-lg-4 col-md-12 col-sm-12 mb-2" *ngIf="GstNumber">
           <h5>GST Number: {{GstNumber}}({{StateName}})</h5>
@@ -257,7 +257,7 @@
           <mat-panel-title></mat-panel-title>
         </mat-expansion-panel-header>
         <div>
-          <app-packageRateDetailsForClosing [dataSourceforCard]="dataSourceforCard" [DutySlipID]="DutySlipID"
+          <app-packageRateDetailsForClosing *ngIf="dataSourceforCard" [dataSourceforCard]="dataSourceforCard" [DutySlipID]="DutySlipID"
             [ReservationID]="ReservationID"></app-packageRateDetailsForClosing>
         </div>
       </mat-expansion-panel>
