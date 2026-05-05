@@ -62,34 +62,7 @@ export class ChangeDutyTypeClosingComponent implements OnInit {
     // Validators.email,
   ]);
 
-  // ModeOfPayment()
-  // {
-  //   const dialogRef = this.dialog.open(FormDialogComponent, 
-  //     {
-  //       data: 
-  //         {
-  //           advanceTable: this.advanceTableMOP,
-  //           action: 'edit',
-  //           reservationID:this.reservationID, 
-  //         }
-  //     });
-  //     dialogRef.afterClosed().subscribe((res: any) => {
-  //         this.MOPDetails();
-  //     });
-  // }
-  
 
-//   public MOPDetails() 
-//   {
-//      this.mopDetailsService.getModeOfPaymentDetails(this.reservationID).subscribe
-//      (
-//        data=>   
-//        {
-//          this.advanceTableMOP = data;
-//        },
-//        (error: HttpErrorResponse) => { this.advanceTableMOP = null;}
-//      );
-//  }
 
   submit()  {}
 
@@ -167,9 +140,9 @@ export class ChangeDutyTypeClosingComponent implements OnInit {
               }
             }
           }
-          else if(this.MessageArray[0]=="MOPDetailsAll")
+          else if(this.MessageArray[0]=="ChangeDutyTypeClosingAll")
           {
-            if(this.MessageArray[1]=="MOPDetailsView")
+            if(this.MessageArray[1]=="ChangeDutyTypeClosingView")
             {
               if(this.MessageArray[2]=="Failure")
               {

@@ -12,7 +12,9 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 import { ThemeService } from 'ng2-charts';
 import { ChangeDutyTypeClosingService } from '../../changeDutyTypeClosing.service';
 import { ChangeDutyTypeClosingModel } from '../../changeDutyTypeClosing.model';
-
+import { PackageTypeDropDown } from '../packageType/packageTypeDropDown.model';
+import { PackageDropDown } from '../package/packageDropDown.model';
+import Swal from 'sweetalert2';
 
 @Component({
   standalone: false,
@@ -31,8 +33,6 @@ export class FormDialogComponent
   dialogTitle: string;
   advanceTableForm: FormGroup;
   advanceTable: ChangeDutyTypeClosingModel;
-  public PaymentModeList?:ModeOfPaymentDropDown[]=[];
-  filteredPaymentModeOptions: Observable<ModeOfPaymentDropDown[]>;
   paymentModeID: any;
   reservationID: any;
   previousModeOfPaymentID: number;
@@ -45,7 +45,13 @@ export class FormDialogComponent
   vehicleID:number
   packageTypeID:number;
   packageID:number;
-
+  checkCityOrVehicleAvilable:any;
+  packageType:any;
+ public PackageTypeList?:PackageTypeDropDown[]=[];
+  public PackageList?:PackageDropDown[]=[];
+    filteredPackageTypeOptions: Observable<PackageTypeDropDown[]>;  
+    filteredPackageOptions: Observable<PackageDropDown[]>;
+  
   
   constructor(
   public dialogRef: MatDialogRef<FormDialogComponent>, 
@@ -62,6 +68,7 @@ export class FormDialogComponent
         this.pickupCityID = data.pickupCityID;
         this.vehicleCategoryID = data.vehicleCategoryID;
         this.vehicleID = data.vehicleID;
+        console.log("Data received in dialog: ", data);
         this.onPickupDateChange();
         if (this.action === 'edit') 
         {              
@@ -149,29 +156,31 @@ export class FormDialogComponent
           this.dialogRef.close();
           this.showNotification(
             'snackbar-success',
-            'Mode Of Payment Updated...!!!',
+            'Duty Type Updated...!!!',
             'bottom',
             'center'
           );  
         },
     error =>
     {
-     this._generalService.sendUpdate('ModeOfPaymentAll:ModeOfPaymentView:Failure');//To Send Updates  
+     this._generalService.sendUpdate('ChangeDutyTypeClosingAll:ChangeDutyTypeClosingView:Failure');//To Send Updates  
     })
   }
 
  public confirmAdd(): void 
-{
-  const cityExists = this.CityList?.some(c => c.pickupCityID === this.pickupCityID);
-  
-  const vehicleExists = this.VehicleList?.some(v => v.vehicleID === this.vehicleID);
-
-  if (cityExists && vehicleExists) {
-    this.Put(); // ✅ allowed
-  } 
-  else {
-    alert("Selected Package/PackageType ke according Pickup City ya Vehicle valid nahi hai.");
+{ 
+  if(this.checkCityOrVehicleAvilable == true){
+  this.Put();   
   }
+  else{
+    Swal.fire({
+      title: 'City or Vehicle not available',
+      text: 'The selected city or vehicle is not available for the chosen package and contract. Please select a different combination.',  
+      icon: 'error',
+      confirmButtonText: 'OK'
+    });   
+  }
+    
 }
 
    onPickupDateChange() {
@@ -193,10 +202,8 @@ export class FormDialogComponent
             }
             // In new-reservation mode `this.advanceTable` may still be null
             // before any contract/package selections exist; guard every access.
-            const fallbackPackageType = this.packageType || (this.advanceTable && this.advanceTable.packageType) || '';
-            this.InitCity(fallbackPackageType);
-          
-            this.InitVehicle(fallbackPackageType);
+            const fallbackPackageType = this.packageType || (this.advanceTable && this.advanceTable.packageType) || '';          
+             //this.InitVehicle();
           
           } 
           else
@@ -322,176 +329,25 @@ export class FormDialogComponent
       this.advanceTableForm.patchValue({packageID:this.packageID});
      
       const fallbackPackageType = this.packageType || (this.advanceTable && this.advanceTable.packageType) || '';
-      this.InitCity(fallbackPackageType);
-      this.InitVehicle(this.packageType);
+      this.InitVehicle();
 
   
     }
-     //------------Pickup City -----------------
-      InitCity(PackageType:string)
-      {
-        if(PackageType === "Local Rate")
-          {
-            this._generalService.GetPickupAndDropOffCities(this.contractID,this.packageID).subscribe(
-              data=>
-              {
-                this.CityList=data;
-              
-              });
-          }
-        else if(PackageType === "Local Lumpsum Rate")
-        {
-          this._generalService.GetPickupAndDropOffCitiesForLocalLumpsum(this.contractID,this.packageID ).subscribe(
-            data=>
-            {
-              this.CityList=data;
-              
-            });
-        }
     
-        else if(PackageType === "Local On Demand Rate")
-        {
-          this._generalService.GetPickupAndDropOffCitiesForLocalOnDemand(this.contractID,this.packageID ).subscribe(
-          data=>
-          {
-            this.CityList=data;
-           
-          });
-        }
-    
-        else if(PackageType === "Local Transfer Rate")
-        {
-          this._generalService.GetPickupAndDropOffCitiesForLocalTransfer(this.contractID,this.packageID ).subscribe(
-          data=>
-          {
-            this.CityList=data;
-           
-          });
-        }
-    
-        else if(PackageType === "Long Term Rental Rate")
-        {
-          this._generalService.GetPickupAndDropOffCitiesForLongTermRental(this.contractID,this.packageID ).subscribe(
-          data=>
-          {
-            this.CityList=data;
-            
-          });
-        }
-    
-        else if(PackageType === "Outstation Lumpsum Rate")
-        {
-          this._generalService.GetPickupAndDropOffCitiesForOutStationLumpsum(this.contractID,this.packageID ).subscribe(
-          data=>
-          {
-            this.CityList=data;
-            
-           
-          });
-        }
-    
-        else if(PackageType === "Outstation OneWay Trip Rate")
-        {
-          this._generalService.GetPickupAndDropOffCitiesForOutStationOneWayTrip(this.contractID,this.packageID ).subscribe(
-          data=>
-          {
-            this.CityList=data;
-           
-          });
-        }
-    
-        else if(PackageType === "Outstation Round Trip Rate")
-        {
-          this._generalService.GetPickupAndDropOffCitiesForOutStationRoundTrip(this.contractID,this.packageID ).subscribe(
-          data=>
-          {
-            this.CityList=data;
-           
-          });
-        }
-    }
      //------------ Vehicle -----------------
-      InitVehicle(PackageType)
+      InitVehicle()
       {
-        if(PackageType === 'Local Rate')
-          {
-            this._generalService.GetVehicleBasedOnContractID(this.contractID,this.packageID ).subscribe(
+       
+            this.advanceTableService.GetVehiclePackageAndCityAvailable(this.contractID,this.packageType,this.packageID,this.vehicleID,this.pickupCityID).subscribe(
             data=>
             {
-              this.VehicleList=data;
+              this.checkCityOrVehicleAvilable=data;
+              console.log("Vehicle availability data: ", this.checkCityOrVehicleAvilable);
              
             });
-          }
+       
     
-        else if(PackageType === 'Local Lumpsum Rate')
-        {
-          this._generalService.GetVehicleBasedOnContractIDForLocalLumpsum(this.contractID,this.packageID ).subscribe(
-          data=>
-          {
-            this.VehicleList=data;
-           
-          });
-        }
-    
-        else if(PackageType === 'Local On Demand Rate')
-        {
-          this._generalService.GetVehicleBasedOnContractIDForLocalOnDemand(this.contractID,this.packageID ).subscribe(
-          data=>
-          {
-            this.VehicleList=data;
-           
-          });
-        }
-    
-        else if(PackageType === 'Local Transfer Rate')
-        {
-          this._generalService.GetVehicleBasedOnContractIDForLocalTransfer(this.contractID,this.packageID ).subscribe(
-          data=>
-          {
-            this.VehicleList=data;
-            
-          });
-        }
-    
-        else if(PackageType === 'Long Term Rental Rate')
-        {
-          this._generalService.GetVehicleBasedOnContractIDForLongTermRental(this.contractID,this.packageID ).subscribe(
-          data=>
-          {
-            this.VehicleList=data;
-           
-          });
-        }
-    
-        else if(PackageType === 'Outstation Lumpsum Rate')
-        {
-          this._generalService.GetVehicleBasedOnContractIDForOutStationLumpsum(this.contractID,this.packageID ).subscribe(
-          data=>
-          {
-            this.VehicleList=data;
-            
-          });
-        }
-    
-      else if(PackageType === 'Outstation OneWay Trip Rate')
-      {
-        this._generalService.GetVehicleBasedOnContractIDForOutStationOneWayTrip(this.contractID,this.packageID ).subscribe(
-        data=>
-        {
-          this.VehicleList=data;
-         
-        });
-      }
-    
-      else if(PackageType === 'Outstation Round Trip Rate')
-      {
-        this._generalService.GetVehicleBasedOnContractIDForOutStationRoundTrip(this.contractID,this.packageID ).subscribe(
-        data=>
-        {
-          this.VehicleList=data;
-         
-        });
-      }
+      
     }
   
 }

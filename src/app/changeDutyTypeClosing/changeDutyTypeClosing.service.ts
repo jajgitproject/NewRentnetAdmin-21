@@ -17,12 +17,12 @@ export class ChangeDutyTypeClosingService
   constructor(private httpClient: HttpClient, public generalService: GeneralService) 
   {
     this.API_URL=generalService.BaseURL+ "changeDutyTypeClosing";
-    this.API_URL_ForMOPEdit=generalService.BaseURL+ "reservation" + "/updateModeOfPaymentForReservation/";
+
   }
   /** CRUD METHODS */
-  getModeOfPaymentDetails(reservationID: number):  Observable<any> 
+  GetVehiclePackageAndCityAvailable(contractID: number,packageType: string,packageID: number,vehicleID: number,pickupCityID: number):  Observable<any> 
   {
-    return this.httpClient.get(this.API_URL + '/getPaymentMode/' + reservationID);
+    return this.httpClient.get(this.API_URL + '/GetVehiclePackageAndCityAvailable/' + contractID + '/' + packageType + '/' + packageID + '/' + vehicleID + '/' + pickupCityID);
   }
 
   update(advanceTable: ChangeDutyTypeClosingModel)
