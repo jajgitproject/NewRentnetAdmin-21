@@ -1,4 +1,4 @@
-// @ts-nocheck
+
 import { MAT_DIALOG_DATA, MatDialog, MatDialogRef } from '@angular/material/dialog';
 import { Component, Inject, OnInit } from '@angular/core';
 import { ReservationGroupDetailsService } from '../../reservationGroupDetails.service';
@@ -756,8 +756,11 @@ private _filterRD(value: string): any[] {
 
 
   //------------ Booker -----------------
-  InitBooker() {
-    this._generalService.GetCPForBooker(this.customerGroupID || this.advanceTable.customerGroupID).subscribe(
+  InitBooker(event?: any) {
+    debugger;
+    if(event==true)
+    {
+      this._generalService.GetCPForBooker(this.customerGroupID || this.advanceTable.customerGroupID).subscribe(
       data => {
         this.BookerList = data;
         this.advanceTableForm.controls['primaryBooker'].setValidators([Validators.required,
@@ -769,6 +772,22 @@ private _filterRD(value: string): any[] {
           map(value => this._filterBooker(value || ''))
         );
       });
+    }
+    else{
+      this._generalService.GetCPForBookerOnCustomer(this.customerID).subscribe(
+      data => {
+        this.BookerList = data;
+        this.advanceTableForm.controls['primaryBooker'].setValidators([Validators.required,
+        this.primaryBookerValidator(this.BookerList)
+        ]);
+        this.advanceTableForm.controls['primaryBooker'].updateValueAndValidity();
+        this.filteredBookerOptions = this.advanceTableForm.controls['primaryBooker'].valueChanges.pipe(
+          startWith(""),
+          map(value => this._filterBooker(value || ''))
+        );
+      });
+    }
+    
   }
 
   private _filterBooker(value: string): any {
@@ -1205,6 +1224,18 @@ private _filterRD(value: string): any[] {
      
     }
   }
+
+  onAllBookerChange(event: any) {
+    debugger;
+  console.log('All Location:', event.checked);
+
+  if (event.checked) {
+    this.customerGroupID = this.advanceTableForm.get('customerGroupID').value || this.advanceTable.customerGroupID;
+    this.InitBooker(event.checked);
+  } else {
+    this.InitBooker(event.checked);
+  }
+}
 }
 
 

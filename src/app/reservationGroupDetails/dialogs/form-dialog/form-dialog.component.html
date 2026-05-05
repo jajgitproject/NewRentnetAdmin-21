@@ -207,6 +207,14 @@
               Please select a Booker
             </mat-error>
           </mat-form-field>
+          <div style="float: right;margin-top: -20px;">
+              <div style="float: right;font-family: italic;">
+                  <mat-checkbox color="primary" 
+                          (change)="onAllBookerChange($event)">
+                    All Booker
+                  </mat-checkbox>
+              </div>
+          </div>
           <!-- <div class="hint-container">
                     <mat-hint align="end">
                         <div>
@@ -231,7 +239,9 @@
               ">
               No Of Bookings is required
             </mat-error>
+            
           </mat-form-field>
+          
         </div>
       </div>
 
