@@ -19,11 +19,11 @@
         <form class="register-form m-4" [formGroup]="advanceTableForm" (ngSubmit)="submit">
 
             <div class="row">
-                <div class="col-xl-12" *ngIf="data.text==='AttachAnotherDriver'">
+                <!-- <div class="col-xl-12" *ngIf="data.text==='AttachAnotherDriver'">
                     <mat-checkbox (change)="onOwnedCheckboxChange($event)">
                         Owned
                     </mat-checkbox>
-                </div>
+                </div> -->
                 <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12 mb-2" *ngIf="data.text==='AttachAnotherDriver'">
                     <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
                         <mat-label>Driver</mat-label>
@@ -47,11 +47,11 @@
                 <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12 mb-2" *ngIf="data.text!=='AttachAnotherDriver'">
                     <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
                         <mat-label>Driver</mat-label>
-                        <input required type="text" matInput formControlName="driverName" [matAutocomplete]="auto">
+                        <input (keyup)="onKeyupDriverName($event)" required type="text" matInput formControlName="driverName" [matAutocomplete]="auto">
                         <mat-autocomplete #auto="matAutocomplete"
-                            (optionSelected)="OnDriverNameSelected($event.option.value)">
+                            (optionSelected)="OnDriverSelected($event.option.value)">
                             <mat-option *ngFor="let option of filteredDriverOptions | async" [value]="option.driverName"
-                                (click)="getDriverID(option.driverID)">
+                                (click)="getDriverlistID(option.driverID)">
                                 {{option.driverName}}
                             </mat-option>
                         </mat-autocomplete>
