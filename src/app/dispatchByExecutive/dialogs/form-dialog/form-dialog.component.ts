@@ -194,7 +194,7 @@ this.isSaveAllowed = status === 'changes allow';
         locationOutLatLongByApp:[''],
         locationOutDateByApp:[new Date()],
         locationOutTimeByApp:[new Date()],
-        googleAddresses: [true],
+        googleAddresses: [''],
       });
 
   }
@@ -309,7 +309,6 @@ this.isSaveAllowed = status === 'changes allow';
   this.dispatchByExecutiveService.getDispatchDetailsForDriver(this.AllotmentID).subscribe(
     data => {
       this.dataSource = data;
-
       if (this.dataSource[0].locationOutLocationOrHubID === 0) {
 
         this.advanceTableForm.controls["locationOutLocationOrHub"].disable();
@@ -372,6 +371,13 @@ this.isSaveAllowed = status === 'changes allow';
               locationOutLongitude: dataLong
             });
           }
+        }
+        else
+        {
+          this.advanceTableForm.patchValue({
+              locationOutLatitude: this.dataSource[0]?.latitude,
+              locationOutLongitude: this.dataSource[0]?.longitude
+            });
         }
 
         // ✅ ONLY when no saved time → auto interval lagao
