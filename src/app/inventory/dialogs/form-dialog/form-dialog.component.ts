@@ -197,9 +197,9 @@ export class FormDialogComponent
   }
   
   private _filter(value: string): any {
-  if (!value || value.length < 3) {
-    return [];
-  }
+  // if (!value || value.length < 3) {
+  //   return [];
+  // }
   const filterValue = value.toLowerCase();
 
   return this.VehicleCategoryList.filter(customer =>
@@ -256,9 +256,9 @@ export class FormDialogComponent
   }
   
   private _filterVehicle(value: string): any {
-  if (!value || value.length < 3) {
-    return [];
-  }
+  // if (!value || value.length < 3) {
+  //   return [];
+  // }
   const filterValue = value.toLowerCase();
   return this.VehicleList.filter(customer =>
     customer.vehicle.toLowerCase().includes(filterValue)
@@ -407,9 +407,9 @@ export class FormDialogComponent
       });
   }
   private _filterOrganizationalsEntity(value: string): any {
-  if (!value || value.length < 3) {
-    return [];
-  }
+  // if (!value || value.length < 3) {
+  //   return [];
+  // }
   const filterValue = value.toLowerCase();
 
   return this.OrganizationalEntitiesList.filter(customer =>
@@ -489,9 +489,9 @@ export class FormDialogComponent
       });
   }
   private _filtersearchSupplierForOwner(value: string): any {
-  if (!value || value.length < 3) {
-    return [];
-  }
+  // if (!value || value.length < 3) {
+  //   return [];
+  // }
   const filterValue = value.toLowerCase();
 
   return this.SupplierForOwnerList.filter(data =>

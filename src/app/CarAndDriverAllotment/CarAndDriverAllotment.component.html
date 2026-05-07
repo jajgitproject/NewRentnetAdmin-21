@@ -1205,8 +1205,13 @@
                             </mat-autocomplete>
                           </mat-form-field>
                         </div>
+                         <div class="col-xl-2 col-lg-2 col-md-2 col-sm-12 mb-2">
+                          <div class="example-button-row" style="float: right;">
+                            <button mat-raised-button color="primary" (click)="SearchCarAndDriver()">Search</button>
+                          </div>
+                        </div>
 
-                        <div class="col-xl-2 col-lg-2 col-md-2 col-sm-12 mb-2">
+                        <!-- <div class="col-xl-2 col-lg-2 col-md-2 col-sm-12 mb-2">
                           <mat-form-field class="example-full-width cp-allotment-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
                             <mat-label>Associated/Unassociated</mat-label>
                             <mat-select [formControl]="associatedUnassociated">
@@ -1214,7 +1219,7 @@
                               <mat-option value="Unassociated">Unassociated</mat-option>
                             </mat-select>
                           </mat-form-field>
-                        </div>
+                        </div> -->
                         
                       </div>
 
@@ -1229,11 +1234,11 @@
                         <div class="col-xl-2 col-lg-2 col-md-2 col-sm-12 mb-2"></div>
                         <div class="col-xl-2 col-lg-2 col-md-2 col-sm-12 mb-2"></div>
 
-                        <div class="col-xl-2 col-lg-2 col-md-2 col-sm-12 mb-2">
+                        <!-- <div class="col-xl-2 col-lg-2 col-md-2 col-sm-12 mb-2">
                           <div class="example-button-row" style="float: right;">
                             <button mat-raised-button color="primary" (click)="SearchCarAndDriver()">Search</button>
                           </div>
-                        </div>
+                        </div> -->
                       </div>
                     </form>
                   </div>
@@ -1241,7 +1246,7 @@
     </div>
   </div>
 
-  <div class="container-fluid" *ngIf="driverInventoryAssociationDataSource && searchedType === 'Associated'">
+  <div class="container-fluid" *ngIf="driverInventoryAssociationDataSource ">
     <div class="row">
       <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
         <div class="card" style="width: 100%">
@@ -1686,7 +1691,7 @@
               </mat-accordion>
 
               <mat-progress-bar mode="indeterminate" *ngIf="isLoading"></mat-progress-bar>
-              <mat-paginator #paginator [length]="totalData" [pageSize]="recordsPerPage" (page)="onChangedPage($event)"
+              <mat-paginator #paginator [length]="unassociatedTotalData  || driverInventoryAssociationDataSource?.Length" [pageSize]="recordsPerPage" (page)="onChangedPage($event)"
                 showFirstLastButtons></mat-paginator>
             </div>
           </div>
@@ -1697,7 +1702,7 @@
 
   <br>
 
-  <div class="container-fluid" *ngIf="inventoryUnassociatedDataSource && searchedType === 'Unassociated'">
+  <div class="container-fluid" *ngIf="driverInventoryAssociationDataSource && searchedType === 'unAssociated'">
     <div class="row">
       <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
         <div class="card" style="width: 100%">
@@ -1837,8 +1842,8 @@
                 </section>
 
                 <mat-expansion-panel
-                  *ngFor="let data of inventoryUnassociatedDataSource;index as i"
-                  (opened)="GetDriverDutyData(inventoryUnassociatedDataSource[i].driverID,i)"
+                  *ngFor="let data of driverInventoryAssociationDataSource;index as i"
+                  (opened)="GetDriverDutyData(driverInventoryAssociationDataSource[i].driverID,i)"
                   [ngClass]="{ 'striped-header-odd': i % 2 !== 0, 'striped-header-even': i % 2 === 0 }">
                   <mat-expansion-panel-header style="height: 60px;" class="mat-row" #panelH>
                       <span class="mat-cell checkbox-container">
@@ -2076,7 +2081,7 @@
               </mat-accordion>
 
               <mat-progress-bar mode="indeterminate" *ngIf="isLoading"></mat-progress-bar>
-              <mat-paginator #paginator [length]="totalData" [pageSize]="recordsPerPage" (page)="onChangedPage($event)"
+              <mat-paginator #paginator [length]="totalData || driverInventoryAssociationDataSource?.Length" [pageSize]="recordsPerPage" (page)="onChangedPage($event)"
                 showFirstLastButtons></mat-paginator>
             </div>
           </div>

@@ -291,7 +291,7 @@ export class CarAndDriverAllotmentComponent implements OnInit {
   public inventoryUnassociatedDataSource:DriverInventoryAssociation[] | null;
   unassociatedTotalData = 0;
   associatedUnassociated:FormControl = new FormControl('Associated');
-  searchedType: 'Associated' | 'Unassociated' = 'Associated';
+  //searchedType: 'Associated' | 'Unassociated' = 'Associated';
   isLoadingdataUnassociated: boolean = false;
   isSearchClicked: boolean = false;
 
@@ -386,7 +386,8 @@ export class CarAndDriverAllotmentComponent implements OnInit {
     this.supplier.setValue('');
     this.driver.setValue('');
     this.inventory.setValue('');
-    this.carAndDriverAllotmentData();
+    // this.carAndDriverAllotmentData();
+      this.carAndDriverAllotmentDataForUnassociated();
   }
 
   public InitShowAllLocationCheck()
@@ -812,7 +813,8 @@ private _filterInventorySupplier(value: string): any {
             this.allotmentType = this.reservationInfo[0]?.allotmentType;
             this.filterByVehicleCategoryID = this.reservationInfo[0]?.vehicle?.vehicleCategoryID;
             this.filterByVehicleCategory = this.reservationInfo[0]?.vehicle?.vehicleCategory;
-            this.carAndDriverAllotmentData();
+            //this.carAndDriverAllotmentData();
+            this.carAndDriverAllotmentDataForUnassociated();
           }
           else{
             this.reservationInfo=null;
@@ -849,17 +851,18 @@ private _filterInventorySupplier(value: string): any {
   public SearchCarAndDriver() 
   {
     this.isSearchClicked = true;
-    const selected = this.associatedUnassociated.value;
-    if (selected === 'Associated')
-    {
-      this.searchedType = 'Associated';
-      this.carAndDriverAllotmentData();
-    } 
-    else if (selected === 'Unassociated') 
-    {
-      this.searchedType = 'Unassociated';
-      this.carAndDriverAllotmentDataForUnassociated();
-    }
+    this.carAndDriverAllotmentDataForUnassociated();
+    // const selected = this.associatedUnassociated.value;
+    // if (selected === 'Associated')
+    // {
+    //   this.searchedType = 'Associated';
+    //   this.carAndDriverAllotmentData();
+    // } 
+    // else if (selected === 'Unassociated') 
+    // {
+    //   this.searchedType = 'Unassociated';
+    //   this.carAndDriverAllotmentDataForUnassociated();
+    // }
   }
 
 
@@ -867,7 +870,8 @@ private _filterInventorySupplier(value: string): any {
   {
     if (event.keyCode === 8) 
     {
-      this.carAndDriverAllotmentData();
+      // this.carAndDriverAllotmentData();
+        this.carAndDriverAllotmentDataForUnassociated();
     }
   }
 
@@ -986,6 +990,7 @@ carAndDriverAllotmentDataForUnassociated()
   }
   this.isLoadingdataUnassociated = true;
     this.driverInventoryAssociationService.getDataInventoryUnassociation(this.reservationInfo[0].serviceLocationID,
+      this.driverID, this.driver.value,
       this.driverOfficialIdentityNumber.value, this.supplier.value, this.category.value,
       this.vehicle.value, this.inventory.value, this.searchInventoryName,
       this.vendorType.value,this.ownedSupplier.value, this.bookingCount.value, this.monthlyTarget.value,
@@ -994,15 +999,16 @@ carAndDriverAllotmentDataForUnassociated()
       (data: CarAndDriverAllotmentData) => {
       if (data != null) 
       {
-        this.inventoryUnassociatedDataSource  = data.driverInventoryAssociationModel;
-        this.inventoryUnassociatedDataSource ?.forEach(element => {
+        this.driverInventoryAssociationDataSource  = data.driverInventoryAssociationModel;
+        console.log(this.driverInventoryAssociationDataSource)
+        this.driverInventoryAssociationDataSource ?.forEach(element => {
           Object.assign(element, { checked: false });
         });
         this.unassociatedTotalData = data.totalRecords;
       } 
       else 
       {
-        this.inventoryUnassociatedDataSource  = null;
+        this.driverInventoryAssociationDataSource  = null;
         this.unassociatedTotalData = 0;
         // Show message if registration number was searched but no data found
         if (this.inventory.value && this.inventory.value.trim() !== '') {
@@ -1017,7 +1023,7 @@ carAndDriverAllotmentDataForUnassociated()
       this.isLoadingdataUnassociated = false;
       },
       (error: HttpErrorResponse) => { 
-        this.inventoryUnassociatedDataSource  = null;
+        this.driverInventoryAssociationDataSource  = null;
         this.isLoadingdataUnassociated = false;
       }
     ); 
@@ -1240,7 +1246,8 @@ getAllDriver()
       dialogRef.afterClosed().subscribe(res => {
         if (!res.isClose) {
           this.loadData(this._filters, this.currentPage, this.recordsPerPage);
-          this.carAndDriverAllotmentData();
+          //this.carAndDriverAllotmentData();
+            this.carAndDriverAllotmentDataForUnassociated();
         }
       });
   
@@ -1286,7 +1293,8 @@ getAllDriver()
     dialogRef.afterClosed().subscribe(res => {
       if (!res.isClose) {
         this.loadData(this._filters, this.currentPage, this.recordsPerPage);
-        this.carAndDriverAllotmentData();
+        //this.carAndDriverAllotmentData();
+          this.carAndDriverAllotmentDataForUnassociated();
       }
     });
   }
@@ -1354,7 +1362,8 @@ getAllDriver()
   onChangedPage(pageData: PageEvent) {
     this.isLoading = true;
     this.PageNumber = pageData.pageIndex + 1;
-    this.carAndDriverAllotmentData();
+    //this.carAndDriverAllotmentData();
+      this.carAndDriverAllotmentDataForUnassociated();
   }
 //   openAllotCarAndDriver(i: any) {     
 //     if (this.reservationInfo[0].allotmentStatus  === 'Cancelled' || this.reservationInfo[0].allotmentStatus  === null)
@@ -1450,7 +1459,8 @@ getAllDriver()
             dialogRef.afterClosed().subscribe(res => {
               if(res.isClose===false){
                 this.loadData(this._filters, this.currentPage, this.recordsPerPage);
-                this.carAndDriverAllotmentData();
+                //this.carAndDriverAllotmentData();
+                this.carAndDriverAllotmentDataForUnassociated();
               }
             })
         }
@@ -1509,7 +1519,8 @@ getAllDriver()
             dialogRef.afterClosed().subscribe(res => {
               if(res.isClose===false){
                 this.loadData(this._filters, this.currentPage, this.recordsPerPage);
-                this.carAndDriverAllotmentData();
+               // this.carAndDriverAllotmentData();
+                 this.carAndDriverAllotmentDataForUnassociated();
               }
             })
         }
@@ -1764,7 +1775,8 @@ getAllDriver()
       if (res) {
         this.loadData(this._filters, this.currentPage, this.recordsPerPage);
         this.driver.setValue(res.response.driverName);
-        this.carAndDriverAllotmentData();
+        //this.carAndDriverAllotmentData();
+          this.carAndDriverAllotmentDataForUnassociated();
       }
     });
   }
@@ -1808,7 +1820,8 @@ getAllDriver()
     });
     dialogRef.afterClosed().subscribe(res => {
       if(res.isClose===false){
-        this.carAndDriverAllotmentData(); 
+        //this.carAndDriverAllotmentData(); 
+          this.carAndDriverAllotmentDataForUnassociated();
       }
         
     })
@@ -1841,7 +1854,8 @@ getAllDriver()
     dialogRef.afterClosed().subscribe(res => {
       
       if(res.isClose===false){
-        this.carAndDriverAllotmentData(); 
+        //this.carAndDriverAllotmentData(); 
+          this.carAndDriverAllotmentDataForUnassociated();
       }
     })
   }
@@ -1850,20 +1864,20 @@ getAllDriver()
     const dialogRef=this.dialog.open(MyFormDialogComponent, {
       data: {
         advanceTable: this.advanceTable,
-        driverInventoryAssociationDataSource:this.inventoryUnassociatedDataSource[i],
+        driverInventoryAssociationDataSource:this.driverInventoryAssociationDataSource[i],
         action: 'add',
         text:'AttachAnotherDriver',
-        driverInventoryAssociationID:this.inventoryUnassociatedDataSource[i].driverInventoryAssociationID,
-        inventoryID:this.inventoryUnassociatedDataSource[i].inventoryID,
-        inventoryName:this.inventoryUnassociatedDataSource[i].inventoryName,
-        vehicle:this.inventoryUnassociatedDataSource[i].vehicle,
-        vehicleCategory:this.inventoryUnassociatedDataSource[i].vehicleCategory,
-        driverName:this.inventoryUnassociatedDataSource[i].driverName,
-        driverID:this.inventoryUnassociatedDataSource[i].driverID,
-        driverInventoryAssociationStartDate:this.inventoryUnassociatedDataSource[i].driverInventoryAssociationStartDate,
-        driverInventoryAssociationEndDate:this.inventoryUnassociatedDataSource[i].driverInventoryAssociationEndDate,
-        driverInventoryAssociationStatus:this.inventoryUnassociatedDataSource[i].driverInventoryAssociationStatus,
-        activationStatus:this.inventoryUnassociatedDataSource[i].activationStatus,
+        driverInventoryAssociationID:this.driverInventoryAssociationDataSource[i].driverInventoryAssociationID,
+        inventoryID:this.driverInventoryAssociationDataSource[i].inventoryID,
+        inventoryName:this.driverInventoryAssociationDataSource[i].inventoryName,
+        vehicle:this.driverInventoryAssociationDataSource[i].vehicle,
+        vehicleCategory:this.driverInventoryAssociationDataSource[i].vehicleCategory,
+        driverName:this.driverInventoryAssociationDataSource[i].driverName,
+        driverID:this.driverInventoryAssociationDataSource[i].driverID,
+        driverInventoryAssociationStartDate:this.driverInventoryAssociationDataSource[i].driverInventoryAssociationStartDate,
+        driverInventoryAssociationEndDate:this.driverInventoryAssociationDataSource[i].driverInventoryAssociationEndDate,
+        driverInventoryAssociationStatus:this.driverInventoryAssociationDataSource[i].driverInventoryAssociationStatus,
+        activationStatus:this.driverInventoryAssociationDataSource[i].activationStatus,
         driverSupplierName:this.driverInventoryAssociationDataSource[i].driverSupplierName,
         inventorySupplierName:this.driverInventoryAssociationDataSource[i].inventorySupplierName,
       },
@@ -1871,7 +1885,8 @@ getAllDriver()
     dialogRef.afterClosed().subscribe(res => {
       
       if(res.isClose===false){
-        this.carAndDriverAllotmentData(); 
+        //this.carAndDriverAllotmentData();
+          this.carAndDriverAllotmentDataForUnassociated(); 
       }
     })
   }
@@ -1955,7 +1970,8 @@ getAllDriver()
               if(res.isClose===false){
                 this.allotmentDeleted(allotmentID);
                 this.loadData(this._filters, this.currentPage, this.recordsPerPage);
-                this.carAndDriverAllotmentData(); 
+                //this.carAndDriverAllotmentData(); 
+                  this.carAndDriverAllotmentDataForUnassociated();
               }
                
             })
@@ -2015,7 +2031,8 @@ getAllDriver()
       
         if(res.isClose===false){
           this.loadData(this._filters, this.currentPage, this.recordsPerPage);
-          this.carAndDriverAllotmentData(); 
+          //this.carAndDriverAllotmentData();
+            this.carAndDriverAllotmentDataForUnassociated(); 
         }
       })
     
