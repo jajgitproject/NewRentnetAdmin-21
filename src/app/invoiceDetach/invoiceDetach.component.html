@@ -118,7 +118,7 @@
                                             </ng-container>
 
                                             <ng-container matColumnDef="CustomerName">
-                                                <mat-header-cell *matHeaderCellDef mat-sort-header>Customer Namer</mat-header-cell>
+                                                <mat-header-cell *matHeaderCellDef mat-sort-header>Customer Name</mat-header-cell>
                                                 <mat-cell *matCellDef="let row" (contextmenu)="onContextMenu($event, row)">
                                                     {{row.customerName}}</mat-cell>
                                             </ng-container>
@@ -130,11 +130,13 @@
                                             </ng-container>
 
                                             <ng-container matColumnDef="VerifyDuty">
-                                                <mat-header-cell *matHeaderCellDef mat-sort-header>Verified/ GFB</mat-header-cell>
+                                                <mat-header-cell *matHeaderCellDef mat-sort-header>Verified/GFB/Billed</mat-header-cell>
                                                 <mat-cell *matCellDef="let row" (contextmenu)="onContextMenu($event, row)">
-                                                    {{row.verifyDuty === "True" ? 'Verified' : 'Not verfied'}}
+                                                    {{row.verifyDuty === 'True' ? 'Yes' : 'No'}}
                                                     <br>
-                                                    {{row.goodForBilling === "True" ? 'Good For Billing' : 'Not Good For Billing'}}</mat-cell>
+                                                    {{row.goodForBilling === 'True' ? 'Yes' : 'No'}}
+                                                    <br>
+                                                    {{row.invoiceID !== 0 ? 'Yes' : 'No' }}</mat-cell>
                                             </ng-container>
 
                                             <ng-container matColumnDef="InvoiceNumberWithPrefix">

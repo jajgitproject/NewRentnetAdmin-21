@@ -409,7 +409,7 @@
                                     </button></b><br />
                                   {{item.driverName !== "" ? item.driverName : 'Pending'}}<br />
                                   <b class="qc-status-row"><button class="BoldButton" mat-button (click)="qCImageDetails(item)">
-                                      QC Status
+                                      QC
                                     </button>
                                     <mat-icon class="qc-status-dots" [matMenuTriggerFor]="menu8">
                                       more_vert
@@ -420,27 +420,31 @@
                                     <button mat-menu-item (click)="qCImage(item)" [disabled]="ReservationStatus === 'Cancelled'">
                                       QC Status
                                     </button>
+
+                                    <button mat-menu-item (click)="viewQcImage(item,i)" [disabled]="ReservationStatus === 'Cancelled'">
+                                      Verify QC
+                                    </button>
                                   </mat-menu>
                                   <br />
                                   <!-- N/A -->
                                   {{item.activationStatus ? "Uploaded": "N/A"}}
                                   <br />
-                                  <span class="verify-qc-row">
+                                  <!-- <span class="verify-qc-row">
                                     <button class="BoldButton" mat-button (click)="verifyImageDetails(item)">
                                       Verify QC
                                     </button>
                                     <mat-icon class="verify-qc-dots" [matMenuTriggerFor]="menu7">
                                       more_vert
                                     </mat-icon>
-                                  </span>
+                                  </span> -->
                                   <!-- <b><button class="BoldButton" mat-button [matMenuTriggerFor]="menu7">
                                           <mat-icon style="color: blue;font-size: 14px !important; padding-top: 4px">more_vert</mat-icon></button></b> -->
-                                  <mat-menu style="font-size: small;" #menu7="matMenu">
+                                  <!-- <mat-menu style="font-size: small;" #menu7="matMenu">
                                     <button mat-menu-item (click)="viewQcImage(item,i)" [disabled]="ReservationStatus === 'Cancelled'">
                                       Verify QC
                                     </button>
                                   </mat-menu><br>
-                                  {{item.qcCheckedByExecutivePassed? "Verified": "N/A"}}
+                                  {{item.qcCheckedByExecutivePassed? "Verified": "N/A"}} -->
                                   <br />
 
                                     <b>

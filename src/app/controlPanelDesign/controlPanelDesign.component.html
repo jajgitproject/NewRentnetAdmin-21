@@ -382,6 +382,18 @@
           </div>
 
           <div class="row">
+            <div class="col-xl-2 col-lg-2 col-md-2 col-sm-12 mb-2">
+              <mat-form-field class="example-full-width cp-allotment-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
+                <mat-label>Regn. No.</mat-label>
+                <input type="text" matInput [matAutocomplete]="auto81" formControlName="vehicleInventory" />
+                <mat-autocomplete #auto81="matAutocomplete" panelWidth="custom-autocomplete-panel">
+                  <mat-option *ngFor="let option of filteredRegNumberOptions | async" [value]="option.registrationNumber">
+                    {{ option.registrationNumber }}
+                  </mat-option>
+                </mat-autocomplete>
+              </mat-form-field>
+            </div>
+
             <div class="col-12 d-flex justify-content-start align-items-center mb-2 quick-search-actions" style="gap: 8px;">
               <button mat-raised-button color="primary" (click)="SearchData()">
                 Search
@@ -1603,7 +1615,8 @@
 
                             {{data.driverName ? data.driverName: 'N/A'}} - {{data.driverPhone ? data.driverPhone:
                             'N/A'}}
-
+                            <hr>
+                            {{data.supplierAddress ? data.supplierAddress: 'N/A'}}
                           </span>
 
                           <span style="

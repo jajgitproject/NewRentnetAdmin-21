@@ -266,6 +266,8 @@ export class ControlPanelDesignComponent implements OnInit {
   public TransferLocationList?: OrganizationalEntityDropDown[] = [];
   filteredTransferLocationOptions: Observable<OrganizationalEntityDropDown[]> = of([]);
   verifyDutyStatusAndCacellationStatus: any;
+
+  filteredRegNumberOptions:Observable<VehicleDropDown[]>;
     
   constructor(
     public route: Router,
@@ -361,6 +363,7 @@ export class ControlPanelDesignComponent implements OnInit {
     this.safeRun(() => this.InitDisputesOnPageLoad());
     this.safeRun(() => this.InitLocation());
     this.safeRun(() => this.InitTransferLocation());
+    this.safeRun(() => this.InitRegNumber());
 
     const today = this.formatDate(new Date());
     const now = new Date();
@@ -3880,6 +3883,35 @@ setCalculatedLocationOutTime(data: any, interval?: number) {
 
   //console.log('Calculated Location Out Time:', combinedDateTime);
 }
+
+
+    //--------------------ForCascadeRegistrationNumber----
+    InitRegNumber()
+    {
+      this._generalService.GetRegNoForDropDown().subscribe(
+      data=>
+      {
+        this.RegNumberList=data;
+        this.filteredRegNumberOptions = this.filterForm.controls.vehicleInventory.valueChanges.pipe(
+          startWith(""),
+          map(value => this._filterRegNo(value || ''))
+        ); 
+      });
+    }
+
+    private _filterRegNo(value: string): any {
+      const filterValue = value.toLowerCase().trim();
+      // If the input is empty, return an empty list
+      if (filterValue.length === 0) 
+      {
+        return [];
+      }
+      // Return filtered results matching the typed value
+      return this.RegNumberList.filter(data => data.registrationNumber.toLowerCase().includes(filterValue)
+      );
+    }
+
+
 } 
 
 
