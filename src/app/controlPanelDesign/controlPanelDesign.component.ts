@@ -537,7 +537,10 @@ export class ControlPanelDesignComponent implements OnInit {
       packageTypeID:[this._filters.packageTypeID],
       packageID:[this._filters.packageID],
       tripType:[this._filters.tripType],
-      reservationSourceDetail:[this._filters.reservationSourceDetail]
+      reservationSourceDetail:[this._filters.reservationSourceDetail],
+      verifyDuty:[this._filters.verifyDuty],
+      goodForBilling:[this._filters.goodForBilling],
+      billed:[this._filters.billed]
     });
   }
 

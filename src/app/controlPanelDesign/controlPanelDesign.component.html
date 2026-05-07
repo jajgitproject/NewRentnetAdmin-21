@@ -394,6 +394,38 @@
               </mat-form-field>
             </div>
 
+            <div class="col-xl-2 col-lg-2 col-md-2 col-sm-12 mb-2">
+              <mat-form-field class="example-full-width cp-quick-search-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
+                <mat-label>Verify Duty</mat-label>
+                <mat-select [panelWidth]="null" formControlName="verifyDuty">
+                  <mat-option value="true">Yes</mat-option>
+                  <mat-option value="false">No</mat-option>
+                </mat-select>
+              </mat-form-field>
+            </div>
+
+            <div class="col-xl-2 col-lg-2 col-md-2 col-sm-12 mb-2">
+              <mat-form-field class="example-full-width cp-quick-search-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
+                <mat-label>Good For Billing</mat-label>
+                <mat-select [panelWidth]="null" formControlName="goodForBilling">
+                  <mat-option value="true">Yes</mat-option>
+                  <mat-option value="false">No</mat-option>
+                </mat-select>
+              </mat-form-field>
+            </div>
+
+            <div class="col-xl-2 col-lg-2 col-md-2 col-sm-12 mb-2">
+              <mat-form-field class="example-full-width cp-quick-search-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
+                <mat-label>Billed</mat-label>
+                <mat-select [panelWidth]="null" formControlName="billed">
+                  <mat-option value="true">Yes</mat-option>
+                  <mat-option value="false">No</mat-option>
+                </mat-select>
+              </mat-form-field>
+            </div>
+          </div>
+
+          <div class="row">
             <div class="col-12 d-flex justify-content-start align-items-center mb-2 quick-search-actions" style="gap: 8px;">
               <button mat-raised-button color="primary" (click)="SearchData()">
                 Search
@@ -1492,6 +1524,8 @@
                               *ngIf="data.gender == 'Female'" matTooltip="Female"></i>
                             <br>
                             <span *ngIf="data.internalNoteModel !== null" matTooltip="Internal Note"> IN </span>
+                            <br>
+                            <span *ngIf="data.supplierAddress !== null"> Passed </span>
                           </span>
                           <br />
                           <span style="
