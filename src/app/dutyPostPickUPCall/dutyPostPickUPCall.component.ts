@@ -27,7 +27,7 @@ import { FormControl } from '@angular/forms';
   providers: [{ provide: MAT_DATE_LOCALE, useValue: 'en-GB' }]
 })
 export class DutyPostPickUPCallComponent implements OnInit {
-  @Input() dutyPostPickUPCalldataSource : DutyPostPickUPCallModel;
+  @Input() dutyPostPickUPCalldataSource : any;
   @Input() dutyPostPickUPCallID: number;
   @Input() dutySlipID: number;
   @Input() reservationID: number;
@@ -51,7 +51,6 @@ export class DutyPostPickUPCallComponent implements OnInit {
   ReservationID: number;
   dialogTitle: string;
   DutySlipID: any;
-  dutyPostPickUPCalldataSource: any;
 
 
   constructor(
