@@ -14,6 +14,7 @@ export class ClossingOneService
   private API_CalculateBill:string = '';
   private API_GenerateBill:string = '';
   private API_URL_CurrentDutyInfo:string = '';
+  private API_URL_Bill:string = '';
   isTblLoading = true;
   date : any;
   Result:string='Failure';
@@ -25,6 +26,7 @@ export class ClossingOneService
     this.API_GenerateBill =generalService.BaseURL+ "InvoiceGeneral/createInvoiceSingleDuty";
     this.API_CalculateBill =generalService.BaseURL+ "InvoiceCalculation/calculate";
     this.API_URL_CurrentDutyInfo=generalService.BaseURL+ "currentDuty";
+    this.API_URL_Bill = generalService.BaseURL + 'invoicecalculation';
   }
 
   getClosingData(AllotmentID:any):  Observable<any> 
@@ -38,6 +40,9 @@ export class ClossingOneService
   
   GetClosingData(DutySlipID:any): Observable<any> {
     return this.httpClient.get<any>(this.API_URL +"/"+DutySlipID);
+  }
+   GetBillFromTo(CustomerContractID:number,PackageID:number,PackageType:string): Observable<any> {
+    return this.httpClient.get<any>(this.API_URL + "/" + 'GetBillFromTo' + "/" + CustomerContractID + "/" + PackageID + "/" + PackageType);
   }
    PackageTypeForLTR(PackageTypeID:Number)
   {
@@ -64,7 +69,9 @@ export class ClossingOneService
   {
     return this.httpClient.get(this.API_URL + '/' + 'TotalTollParInStDispute' + '/' + DutySlipID);
   }
-  
+  printDutySlipInfo(invoiceID: number): Observable<any> {
+    return this.httpClient.get(this.API_URL_Bill + "/"+'getinvoice'+ "/" + invoiceID);
+  }
 }
 
   

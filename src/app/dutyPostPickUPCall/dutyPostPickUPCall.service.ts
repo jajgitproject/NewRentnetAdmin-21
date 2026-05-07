@@ -27,14 +27,7 @@ export class DutyPostPickUPCallService
     return this.httpClient.get(this.API_URL + "/" + 'getTransferLocationFromReservation' + '/' + ReservationID);
   }
 
-  // getDataDutyPostPickUpCall(dutySlipID: number):  Observable<any> 
-  // {
-  //   return this.httpClient.get(this.API_URL + '/GetPassToSupplierByID/' + dutySlipID);
-  // }
-
-  //  getDataDutyPostPickUpCall(dutySlipID: number): Observable<any> {
-  //   return this.httpClient.get(`${this.API_URL}/GetPassToSupplierByID/${dutySlipID}`);
-  // }
+  
   getDataDutyPostPickUpCall(dutySlipID: number, reservationID: number): Observable<any> {
   return this.httpClient.get(`${this.API_URL}/GetPassToSupplierByID/${dutySlipID}/${reservationID}`);
 }

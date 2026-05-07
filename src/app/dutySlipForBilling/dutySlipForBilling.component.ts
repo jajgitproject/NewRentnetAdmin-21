@@ -1765,6 +1765,7 @@ setVerifyDuty(value: boolean, details: string) {
 
   public ClossingDetails(): boolean
   {
+    debugger
   
     if (!this.advanceTableForm.value.dsClosing) {
       Swal.fire({
@@ -1776,7 +1777,7 @@ setVerifyDuty(value: boolean, details: string) {
       });
       return false;
     }
-    if (!this.advanceTableForm.value.physicalDutySlipReceived) {
+    if (this.advanceTableForm.value.physicalDutySlipReceived === "") {
       Swal.fire({
         title: '',
         text: 'Please Select Duty Slip Received Option.',

@@ -27,7 +27,7 @@ import { FormControl } from '@angular/forms';
   providers: [{ provide: MAT_DATE_LOCALE, useValue: 'en-GB' }]
 })
 export class DutyPostPickUPCallComponent implements OnInit {
-  @Input() DutyPostPickUPCall : DutyPostPickUPCallModel;
+  @Input() dutyPostPickUPCalldataSource : DutyPostPickUPCallModel;
   @Input() dutyPostPickUPCallID: number;
   @Input() dutySlipID: number;
   @Input() reservationID: number;
@@ -35,11 +35,7 @@ export class DutyPostPickUPCallComponent implements OnInit {
   totalData = 0;
   PageNumber: number = 1;
   recordsPerPage = 2;
-  displayedColumns = [
-    'DutyPostPickUPCall',
-    'status',
-    'actions'
-  ];
+ 
   dataSource: DutyPostPickUPCallModel[] | null;
   bankID: number;
   advanceTable: DutyPostPickUPCallModel | null;
@@ -55,8 +51,8 @@ export class DutyPostPickUPCallComponent implements OnInit {
   ReservationID: number;
   dialogTitle: string;
   DutySlipID: any;
-  //  dutyPostPickUPCalldataSource: any[] = [];
-public dutyPostPickUPCalldataSource: any[] = [];
+  dutyPostPickUPCalldataSource: any;
+
 
   constructor(
     public dialogRef: MatDialogRef<DutyPostPickUPCallComponent>,
@@ -70,6 +66,8 @@ public dutyPostPickUPCalldataSource: any[] = [];
   {
     this.dialogTitle = 'Post PickUP Call History';
     this.reservationID = data.reservationID;
+    console.log(data.dutyPostPickUPCalldataSource)
+    this.dutyPostPickUPCalldataSource= data.dutyPostPickUPCalldataSource;
   
   }
   @ViewChild(MatPaginator, { static: true }) paginator: MatPaginator;
@@ -81,7 +79,6 @@ public dutyPostPickUPCalldataSource: any[] = [];
   ngOnInit() 
   {
     this.dutySlipID = this.data.dutySlipID;
-    this.postPickUPCallLoadData();
     this.SubscribeUpdateService();
   }
 
@@ -92,7 +89,7 @@ public dutyPostPickUPCalldataSource: any[] = [];
     this.SearchDutyPostPickUPCall = '';
     this.SearchActivationStatus = true;
     this.PageNumber=0;
-    this.postPickUPCallLoadData();
+
   }
 
   onNoClick(): void {
@@ -138,52 +135,41 @@ shouldShowDeleteButton(item: any): boolean {
   public Filter()
   {
     this.PageNumber = 0;
-    this.postPickUPCallLoadData();
   }
 
   onBackPress(event) {
     if (event.keyCode === 8) 
     {
-      this.postPickUPCallLoadData();
+
     }
   }
 
    onChangedPage(pageData: PageEvent) {
     this.isLoading = true;
     this.PageNumber = pageData.pageIndex + 1;
-  this.postPickUPCallLoadData();
+ 
   }
 
-  // public postPickUPCallLoadData() 
-  // {
-  //     this.dutyPostPickUPCallService.getDataDutyPostPickUpCall(this.dutySlipID).subscribe
-  //     (
-  //       data =>   
-  //       {
-  //         this.dataSource = data;
-  //       },
-  //       (error: HttpErrorResponse) => { this.dataSource = null;}
-  //     );
-  // }
+  
 
-public postPickUPCallLoadData() {
-  this.dutyPostPickUPCallService.getDataDutyPostPickUpCall(this.dutySlipID, this.reservationID).subscribe(
-    data => {
-      if (data) {
-        this.dutyPostPickUPCalldataSource = data;
+// public postPickUPCallLoadData() {
+//   this.dutyPostPickUPCallService.getDataDutyPostPickUpCall(this.dutySlipID, this.reservationID).subscribe(
+//     data => {
+//       if (data) {
+//         this.dutyPostPickUPCalldataSource = data;
 
-        // Fix: get ID from first item
-        this.DutySlipID = data?.dutySlipID;
-      } else {
-        this.dutyPostPickUPCalldataSource = [];
-      }
-    },
-    (error: HttpErrorResponse) => {
-      console.error('Error fetching pickup call data:', error);
-      this.dutyPostPickUPCalldataSource = [];
-    }
-  );
-}
+//         // Fix: get ID from first item
+//         this.DutySlipID = data?.dutySlipID;
+//       } else {
+//         this.dutyPostPickUPCalldataSource = [];
+//       }
+//     },
+//     (error: HttpErrorResponse) => {
+//       console.error('Error fetching pickup call data:', error);
+//       this.dutyPostPickUPCalldataSource = [];
+//     }
+//   );
+// }
 
   showNotification(colorName, text, placementFrom, placementAlign) {
     this.snackBar.open(text, '', {
@@ -206,7 +192,6 @@ public postPickUPCallLoadData() {
     if (this.dataSource?.length>0) 
     {
       this.PageNumber++;
-      this.postPickUPCallLoadData();
     }
   }
   PreviousCall()
@@ -214,13 +199,12 @@ public postPickUPCallLoadData() {
     if(this.PageNumber>0)
     {
       this.PageNumber--;
-      this.postPickUPCallLoadData(); 
     } 
   }
 
   public SearchData()
   {
-    this.postPickUPCallLoadData();
+
     //this.SearchDutyPostPickUPCall='';
     
   }

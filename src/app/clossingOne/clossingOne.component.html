@@ -32,18 +32,25 @@
 
     <div class="card" style="background-color: #ffffff;padding-top: 10px;">
       <div class="row" style="padding-left: 30px;">
-        <div class="col-xl-2 col-lg-2 col-md-12 col-sm-12 mb-2">
-          <h5>Reservation No: {{ReservationID}} </h5>
+        <div class="col-xl-2 col-lg-1 col-md-12 col-sm-12 mb-2">
+          Reservation No:<br/> {{ReservationID}} 
         </div>
-        <div class="col-xl-2 col-lg-2 col-md-12 col-sm-12 mb-2">
-          <h5>DutySlip No: {{DutySlipID}}</h5>
+        <div class="col-xl-1 col-lg-1 col-md-12 col-sm-12 mb-2">
+          DutySlip No: <br/>{{DutySlipID}}
         </div>
-        <div class="col-xl-4 col-lg-4 col-md-12 col-sm-12 mb-2" *ngIf="closingDataAdvanceTable">
-          <h5>Customer Name: {{closingDataAdvanceTable?.customerName}}({{closingDataAdvanceTable?.tallyCustomerID}})</h5>
+         <div class="col-xl-2 col-lg-2 col-md-12 col-sm-12 mb-2" *ngIf="billFromTo">
+          Bill From To: <br/>{{billFromTo}}
         </div>
-        <div class="col-xl-4 col-lg-4 col-md-12 col-sm-12 mb-2" *ngIf="GstNumber">
-          <h5>GST Number: {{GstNumber}}({{StateName}})</h5>
+        <div class="col-xl-3 col-lg-4 col-md-12 col-sm-12 mb-2" *ngIf="closingDataAdvanceTable">
+          Customer Name: <br/>{{closingDataAdvanceTable?.customerName}}({{closingDataAdvanceTable?.tallyCustomerID}})
         </div>
+        <div class="col-xl-2 col-lg-4 col-md-12 col-sm-12 mb-2" *ngIf="GstNumber">
+          GST Number: <br/>{{GstNumber}}({{StateName}})
+        </div>
+         <div class="col-xl-2 col-lg-2 col-md-12 col-sm-12 mb-2" *ngIf="dataSourceForBillNo?.invoiceModel?.invoiceNumberWithPrefix">
+          Bill No: <br/>{{dataSourceForBillNo?.invoiceModel?.invoiceNumberWithPrefix}}
+        </div>
+       
       </div>
 
     </div>

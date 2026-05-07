@@ -90,6 +90,7 @@ import { OdoMeterAndManualDutySlipImage } from '../odoMeterAndManualDutySlipImag
 import { FormDialogSRDComponent } from '../settledRateDetails/dialogs/form-dialog/form-dialog.component';
 import { SettledRateDetailsService } from '../settledRateDetails/settledRateDetails.service';
 import { FormDialogComponent as CDTClosingDialogComponent } from '../changeDutyTypeClosing/dialogs/dialogDetails/dialogDetails.component';
+
 @Component({
   standalone: false,
   selector: 'app-clossingOne',
@@ -142,6 +143,7 @@ export class ClossingOneComponent implements OnInit, AfterViewInit, AfterViewChe
   GstData:any = null;
   GstNumber: string = '';
   StateName: string = '';
+  billFromTo:string;
 
   showDutyExpense: boolean = false;
   SearchActivationStatus: boolean = true;
@@ -215,6 +217,7 @@ export class ClossingOneComponent implements OnInit, AfterViewInit, AfterViewChe
   private initialLoadsStarted = false;
   private debugViewCheckCount = 0;
   private debugLastViewSnapshot = '';
+  dataSourceForBillNo: any = null;
 
 
   constructor(
@@ -252,7 +255,8 @@ export class ClossingOneComponent implements OnInit, AfterViewInit, AfterViewChe
     public controlPanelDialogeService: ControlPanelDialogeService,
     public _dutySlipImageService: DutySlipImageService,
     public odoMeterAndManualDutySlipImageService: OdoMeterAndManualDutySlipImageService,
-    public settleRateService: SettledRateDetailsService
+    public settleRateService: SettledRateDetailsService,
+   
   ) {
 
   }
@@ -280,8 +284,11 @@ export class ClossingOneComponent implements OnInit, AfterViewInit, AfterViewChe
       // #endregion
       this.paramsReady = true;
       this.startInitialLoadsIfReady();
+      
     });
-
+  this.GetClosingData();
+   this.BookingDataOnClosing();
+   this.GSTDataOnClosing();
   }
 
   ngAfterViewInit(): void {
@@ -363,6 +370,7 @@ export class ClossingOneComponent implements OnInit, AfterViewInit, AfterViewChe
         this.goodForBilling = this.advanceTableClosingOne?.closingDutySlipForBillingModel?.goodForBilling;
         this.verifyDuty = this.advanceTableClosingOne?.closingDutySlipForBillingModel?.verifyDuty;
         this.DSClosing = this.advanceTableClosingOne?.closingDutySlipForBillingModel?.dsClosing;
+        this.loadDataForBillNo();
       }
     );
   }
@@ -404,6 +412,7 @@ export class ClossingOneComponent implements OnInit, AfterViewInit, AfterViewChe
           // this.loadDataforAdditionalKMHR();
           this.DutySACLoadData();
           this.salesPersonLoadData();
+          this.GetBillFromTo();
           // #region agent log
           fetch('http://127.0.0.1:7830/ingest/e71207c4-423e-4a42-a900-5bc43349cfbe',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'2871b3'},body:JSON.stringify({sessionId:'2871b3',runId:'run1',hypothesisId:'H3',location:'clossingOne.component.ts:BookingDataOnClosing-subscribe',message:'booking data assigned to bound fields',data:{customerName:this.CustomerName,tallyCustomerID:this.TallyCustomerID,reservationID:this.ReservationID,hasClosingData:!!this.closingDataAdvanceTable},timestamp:Date.now()})}).catch(()=>{});
           // #endregion
@@ -411,11 +420,26 @@ export class ClossingOneComponent implements OnInit, AfterViewInit, AfterViewChe
         (error: HttpErrorResponse) => { this.closingDataAdvanceTable = null; }
       );
   }
+
+  public GetBillFromTo() {
+    this.clossingOneService.GetBillFromTo(this.CustomerContractID, this.PackageID,this.PackageType).subscribe
+      (
+        data => {
+          this.billFromTo = data.billFromTo || null;
+         
+        },
+        (error: HttpErrorResponse) => { 
+          this.billFromTo = null;
+          
+        }
+      );
+  }
    public GSTDataOnClosing() {
     this.clossingOneService.getClosingGSTData(this.ReservationID).subscribe
       (
         data => {
           this.GstData = data || null;
+          console.log('GST Data:', this.GstData);
           this.GstNumber = this.GstData?.gstNumber || '';
           this.StateName = this.GstData?.stateName || '';
         },
@@ -1501,7 +1525,18 @@ showAndScrollOpenSettledRates() {
       }
     );
   }
-
+  public loadDataForBillNo() 
+  {
+     this.clossingOneService.printDutySlipInfo(this.invoiceID).subscribe
+   (
+     data =>   
+     {
+       this.dataSourceForBillNo = data;
+       console.log(this.dataSourceForBillNo);
+     },
+     (error: HttpErrorResponse) => { this.dataSourceForBillNo = null;}
+   );
+ }
 
 }
 
