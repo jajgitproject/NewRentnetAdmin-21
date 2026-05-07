@@ -103,6 +103,7 @@ import { PrintBlankDutySlipComponent } from '../PrintBlankDutySlip/PrintBlankDut
 import { DutySlipAccentureComponent } from '../dutySlipAccenture/dutySlipAccenture.component';
 import { CancelReservationAndAllotmentComponent } from '../cancelReservationAndAllotment/cancelReservationAndAllotment.component';
 import { FormDialogComponentIL } from '../integrationLog/dialogs/form-dialog/form-dialog.component';
+import { LocationOutTimeEditComponent } from '../reservation/dialogs/locationOutTimeEdit/locationOutTimeEdit.component';
 
 @Component({
   standalone: false,
@@ -242,6 +243,7 @@ export class ControlPanelDialogeComponent {
         const details = data?.reservationDetails;
         const list = Array.isArray(details) ? details : details != null ? [details] : [];
         this.reservationInfo = list.length > 0 ? list : null;
+        console.log('Fetched reservation details:', this.reservationInfo);
         this.ReservationStatus = list[0]?.reservationStatus ?? null;
         this.ngZone.run(() => {
           this.cdr.detectChanges();
@@ -493,7 +495,7 @@ export class ControlPanelDialogeComponent {
     }
   }
   //--------- PickupTime Popup ----------
-  pickupTimeUpdate(item) {
+  pickupTimeUpdate(item,i) {
     this.fetchStatusAndOpen(() => {
       const dialogRef = this.dialog.open(PickupTimeFormDialogComponent,
         {
@@ -506,7 +508,9 @@ export class ControlPanelDialogeComponent {
             status: this.status
           }
         });
-      dialogRef.afterClosed().subscribe((res: any) => { });
+      dialogRef.afterClosed().subscribe((res: any) => { 
+        this.loadData(item.reservationID, i);
+      });
     }, item.reservationID);
   }
 
@@ -2545,7 +2549,25 @@ public getInvoiceNumber(item:any ,i: any)
         packageID:[this._filters.packageID]
       });
     }
-
+  //--------- Location Out Time Popup ----------
+  locationOutTimeUpdate(item,i) {
+    this.fetchStatusAndOpen(() => {
+      const dialogRef = this.dialog.open(LocationOutTimeEditComponent,
+        {
+          width: '520px',
+          maxWidth: '96vw',
+          data:
+          {
+            advanceTable: item,
+            customerID: item.customerID,
+            status: this.status
+          }
+        });
+      dialogRef.afterClosed().subscribe((res: any) => { 
+        this.loadData(item.reservationID, i);
+      });
+    }, item.reservationID);
+  }
 
 }
 

@@ -1638,9 +1638,9 @@
                           width: 100px;
                           float: left;
                         ">
-                            <ng-container *ngIf="data.calculatedLocationOutDateTime; else noData">
-                              {{ data.calculatedLocationOutDateTime | date : 'dd-MMM-yy' }}
-                              {{ data.calculatedLocationOutDateTime | date : 'H:mm' }}
+                            <ng-container *ngIf="data.garageOutDate; else noData">
+                              {{ data.garageOutDate | date : 'dd-MMM-yy' }}
+                              {{ data.garageOutTime | date : 'H:mm' }}
                             </ng-container>
 
                             <ng-template #noData>

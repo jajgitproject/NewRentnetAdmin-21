@@ -228,7 +228,7 @@
                                     </mat-icon>
                                   </b><br/>
                                    <mat-menu #menu31="matMenu">
-                                    <a mat-menu-item (click)="pickupTimeUpdate(item)" target="_blank"
+                                    <a mat-menu-item (click)="pickupTimeUpdate(item,i)" target="_blank"
                                       rel="noreferrer noopener" [disabled]="ReservationStatus === 'Cancelled'">
                                      PickUP Time
                                     </a>
@@ -239,6 +239,27 @@
                                   <span>
                                     {{ item.pickup.pickupDate | date : 'dd-MMM-yy' }}
                                     {{ item.pickup.pickupTime ? (item.pickup.pickupTime | date : 'shortTime') : 'TNC' }} </span><br />
+
+                                     <b class="pickup-time-label-row"><button class="BoldButton BoldButtonTopMargin pickup-time-align-btn" mat-button >
+                                      Location Out Time
+                                    </button> 
+                                    <mat-icon class="pickup-time-dots" [matMenuTriggerFor]="menu33"
+                                      style="cursor: pointer; color: blue; font-size: 14px !important;">
+                                      more_vert
+                                    </mat-icon>
+                                  </b><br/>
+                                   <mat-menu #menu33="matMenu">
+                                    <a mat-menu-item (click)="locationOutTimeUpdate(item,i)" target="_blank"
+                                      rel="noreferrer noopener" [disabled]="ReservationStatus === 'Cancelled'">
+                                     Location Out Time
+                                    </a>
+                                  </mat-menu>
+                                  <!-- <span
+                                            *ngIf="item.stopsDetails[0].stopType == 'Pickup'"
+                                          > -->
+                                  <span>
+                                    {{ item.locationOutDate | date : 'dd-MMM-yy' }}
+                                    {{ item.locationOutTime | date : 'shortTime' }} </span><br />
                                   <b><button class="BoldButton BoldButtonTopMargin" mat-button (click)="
                                                 TimeAndAddressInfo(item)
                                               ">

@@ -420,6 +420,16 @@ export class ReservationService
 
   return this.httpClient.put<any>(this.API_URL + '/' + 'EditPickupTime', advanceTable);
 }
+ updateLocationOutEdit(advanceTable: any) {
+  if (advanceTable.locationOutTime === "") {
+    advanceTable.locationOutTime = null;
+  } else {
+    advanceTable.locationOutTimeString = this.generalService.getTimeApplicable(advanceTable.locationOutTime);
+  }
+  
+
+  return this.httpClient.put<any>(this.API_URL + '/' + 'EditLocationOutTime', advanceTable);
+}
 }
   
 

@@ -59,11 +59,13 @@ import { SettledRateDetailsModule } from '../settledRateDetails/settledRateDetai
 import { SettledRateDetailsComponent } from '../settledRateDetails/settledRateDetails.component';
 import { EmailInfoService } from '../EmailInfo/EmailInfo.service';
 import { EmailInfoModule } from '../EmailInfo/EmailInfo.module';
+import { LocationOutTimeEditComponent } from './dialogs/locationOutTimeEdit/locationOutTimeEdit.component';
 @NgModule({
   declarations: [
     ReservationComponent,
     SavedAddressComponent,
-    FormDialogComponent
+    FormDialogComponent,
+    LocationOutTimeEditComponent
   ],
   imports: [
     GooglePlaceModule,

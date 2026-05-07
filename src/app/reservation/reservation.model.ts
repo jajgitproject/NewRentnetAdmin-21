@@ -264,11 +264,15 @@ export class UpdatePickupModel{
    pickupTimeString:string;
      dropOffTime:Date;
   dropOffTimeString:string;
+  locationOutTime:Date;
+  locationOutTimeString:string;
   constructor(modelForReservation) {
    {
       this.reservationID = modelForReservation.reservationID || '';    
       this.pickupTimeString = modelForReservation.pickupTimeString || '';
       this.dropOffTimeString= modelForReservation.dropOffTimeString||'';
+      this.locationOutTimeString = modelForReservation.locationOutTimeString || '';
+      
    }
  }
 
