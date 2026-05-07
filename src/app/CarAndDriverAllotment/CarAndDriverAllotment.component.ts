@@ -291,6 +291,7 @@ export class CarAndDriverAllotmentComponent implements OnInit {
   public inventoryUnassociatedDataSource:DriverInventoryAssociation[] | null;
   unassociatedTotalData = 0;
   associatedUnassociated:FormControl = new FormControl('Associated');
+  searchedType: string = 'unAssociated';
   //searchedType: 'Associated' | 'Unassociated' = 'Associated';
   isLoadingdataUnassociated: boolean = false;
   isSearchClicked: boolean = false;
