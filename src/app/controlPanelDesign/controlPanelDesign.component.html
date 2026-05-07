@@ -1045,7 +1045,7 @@
               <br />
               <!--**************************Start*********************-->
               <div class="accordion-content" style="height:50px" #topScroll (scroll)="syncScroll($event, 'top')">
-                <div style="margin-left: 23px;width: 200%;">
+                <div style="margin-left: 23px;width: 250%;">
                   <span style="
                       font-size: 12px;
                       text-align: left;
@@ -1117,6 +1117,20 @@
                     <i class="fas"
                       [ngClass]="{'fa-arrow-up': sortColumn === 'appCarStatus' && sortDirection === 'asc',
                                             'fa-arrow-down': sortColumn === 'appCarStatus' && sortDirection === 'desc'}"></i>
+                  </span>
+
+                  <span style="
+                      font-size: 12px;
+                      text-align: left;
+                      width: 150px;
+                      float: left;cursor: pointer;" (click)="sortByColumnName('registrationNumber')"
+                    [ngClass]="{'active-sort': sortColumn === 'registrationNumber'}">
+                    <b>Car No-
+                      <br />
+                      Car Sent-/ driver</b>
+                    <i class="fas"
+                      [ngClass]="{'fa-arrow-up': sortColumn === 'registrationNumber' && sortDirection === 'asc',
+                                                'fa-arrow-down': sortColumn === 'registrationNumber' && sortDirection === 'desc'}"></i>
                   </span>
 
                   <span style="
@@ -1202,6 +1216,7 @@
                       [ngClass]="{'fa-arrow-up': sortColumn === 'pickupAddress' && sortDirection === 'asc',
                                                 'fa-arrow-down': sortColumn === 'pickupAddress' && sortDirection === 'desc'}"></i>
                   </span>
+
                   <span style="
                   font-size: 12px;
                   text-align: left;
@@ -1251,19 +1266,7 @@
                                             'fa-arrow-down': sortColumn === 'vehicle' && sortDirection === 'desc'}"></i>
                   </span>
 
-                  <span style="
-                      font-size: 12px;
-                      text-align: left;
-                      width: 150px;
-                      float: left;cursor: pointer;" (click)="sortByColumnName('registrationNumber')"
-                    [ngClass]="{'active-sort': sortColumn === 'registrationNumber'}">
-                    <b>Car No-
-                      <br />
-                      Car Sent-/ driver</b>
-                    <i class="fas"
-                      [ngClass]="{'fa-arrow-up': sortColumn === 'registrationNumber' && sortDirection === 'asc',
-                                                'fa-arrow-down': sortColumn === 'registrationNumber' && sortDirection === 'desc'}"></i>
-                  </span>
+                  
                   <span style="
                   font-size: 12px;
                   text-align: left;
@@ -1308,6 +1311,15 @@
                       [ngClass]="{'fa-arrow-up': sortColumn === 'bookingType' && sortDirection === 'asc',
                                             'fa-arrow-down': sortColumn === 'bookingType' && sortDirection === 'desc'}"></i>
                   </span>
+
+                  <span style="
+                  font-size: 12px;
+                  text-align: left;
+                  width: 250px;
+                  float: left;cursor: pointer;">
+                    <b>Duty Status</b>
+                  </span>
+
                   <!-- <span style="
                   font-size: 12px;
                   text-align: left;
@@ -1442,7 +1454,7 @@
                   style="overflow-x: auto; max-width: 100%">
                   <mat-accordion displayMode="flat" [multi]="false" class="mat-table">
                     <!--**************************Start*********************-->
-                    <mat-expansion-panel style="width: 200%" *ngFor="let data of reservationHeaderInfo; let i = index"
+                    <mat-expansion-panel style="width: 250%" *ngFor="let data of reservationHeaderInfo; let i = index"
                       (opened)="controlPanelDetails(data.reservationID,i)"
                       [ngClass]="{ 'striped-header-odd': i % 2 !== 0, 'striped-header-even': i % 2 === 0 }">
                       <mat-expansion-panel-header style="height: 100%;">
@@ -1577,6 +1589,24 @@
                           </span>
 
                           <span style="
+                                  font-size: 12px;
+                                  text-align: left;
+                                  width: 150px;
+                                  float: left;">
+                            {{data.registrationNumber ? data.registrationNumber: 'N/A'}} - {{data.carSent ?
+                            data.carSent: 'N/A'}}
+                            <br />
+                            <!-- {{data.vehicle!=="" ? data.vehicle : 'N/A'}} -->
+
+                            <!-- <br />
+                            {{data.inventoryOwnedSupplied!=="" ? data.inventoryOwnedSupplied: 'N/A'}} -->
+
+                            {{data.driverName ? data.driverName: 'N/A'}} - {{data.driverPhone ? data.driverPhone:
+                            'N/A'}}
+
+                          </span>
+
+                          <span style="
                           font-size: 12px;
                           text-align: left;
                           width: 100px;
@@ -1653,10 +1683,12 @@
                                   text-align: left;
                                   width: 140px;
                                   float: left;
-                                ">{{data.pickupAddress!=="" ? (data.pickupAddressDetails + ' ' + data.pickupAddress):
-                            'N/A'}}
-                            <br />{{data.dropOffAddress !=="" ? data.dropOffAddress: 'N/A'}}
+                                ">
+                            {{data.pickupAddress!=="" ? (data.pickupAddressDetails + ' ' + data.pickupAddress):'N/A'}}
+                            <hr>
+                            {{data.dropOffAddress !=="" ? data.dropOffAddress: 'N/A'}}
                           </span>
+
                           <span style="
                           font-size: 12px;
                           text-align: left;
@@ -1699,23 +1731,7 @@
                                   float: left;
                                 ">{{data.vehicle !=="" ? data.vehicle: 'N/A'}}
                           </span>
-                          <span style="
-                                  font-size: 12px;
-                                  text-align: left;
-                                  width: 150px;
-                                  float: left;">
-                            {{data.registrationNumber ? data.registrationNumber: 'N/A'}} - {{data.carSent ?
-                            data.carSent: 'N/A'}}
-                            <br />
-                            <!-- {{data.vehicle!=="" ? data.vehicle : 'N/A'}} -->
-
-                            <!-- <br />
-                            {{data.inventoryOwnedSupplied!=="" ? data.inventoryOwnedSupplied: 'N/A'}} -->
-
-                            {{data.driverName ? data.driverName: 'N/A'}} - {{data.driverPhone ? data.driverPhone:
-                            'N/A'}}
-
-                          </span>
+                          
                           <span style="
                                   font-size: 12px;
                                   text-align: left;
@@ -1746,6 +1762,15 @@
                         ">
                             {{ data.bookingType!=="" ? data.bookingType: 'N/A' }}
                           </span>
+
+                          <span style="font-size: 12px;text-align: left;width: 250px;float: left;">
+                            Verified : {{ data.verifyDuty === true ? 'Yes' : 'No' }}
+                            <br>
+                            GoodForBilling : {{ data.goodForBilling === true ? 'Yes' : 'No' }}
+                            <br>
+                            Billed : {{ data.invoiceID !== 0 ? 'Yes' : 'No' }}
+                          </span>
+
                           <!-- <span style="font-size: 12px; text-align: left; width: 130px;float: left;"> -->
                           <!-- <span [ngStyle]="{color: data.reservationStatus === 'Confirmed' || data.reservationStatus === 'Cancelled' ? 'green' : 'red'}">
                               {{ data.reservationStatus || 'N/A' }}
