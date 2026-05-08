@@ -117,6 +117,8 @@ export class InvoiceAttachDetachComponent implements OnInit {
   selectAll:boolean=false;
   selectedInvoices: any[] = []; 
   InvoiceID: any;
+  SearchVerifyDuty:boolean;
+  SearchGoodForBilling:boolean;
 
   constructor(
     public httpClient: HttpClient,
@@ -342,6 +344,8 @@ export class InvoiceAttachDetachComponent implements OnInit {
     this.SearchPackage.setValue('');
     this.SearchDSStatus = '';
     this.SearchBillingStatus = null;
+    this.SearchVerifyDuty = null;
+    this.SearchGoodForBilling = null;
     this.SearchType = '';
     this.PageNumber = 0;
     this.loadData();
@@ -382,7 +386,7 @@ export class InvoiceAttachDetachComponent implements OnInit {
     }
     this.invoiceAttachDetachService.getTableData(this.customer.value,this.SearchBranch.value,this.SearchDutySlipID,this.SearchReservationID,this.SearchGSTType,this.SearchDutyFromDate,
       this.SearchDutyToDate,this.SearchPassengerName,this.SearchPassengerMobile,this.SearchPackageType.value,this.SearchPackage.value,
-      this.SearchDSStatus,this.SearchBillingStatus,this.PageNumber).subscribe
+      this.SearchDSStatus,this.SearchBillingStatus,this.SearchVerifyDuty,this.SearchGoodForBilling,this.PageNumber).subscribe
       (
         data => 
         {
@@ -406,7 +410,7 @@ export class InvoiceAttachDetachComponent implements OnInit {
     }
     this.invoiceAttachDetachService.getTableDataSort(this.customer.value,this.SearchBranch.value,this.SearchDutySlipID,this.SearchReservationID,this.SearchGSTType,this.SearchDutyFromDate,
       this.SearchDutyToDate,this.SearchPassengerName,this.SearchPassengerMobile,this.SearchPackageType.value,this.SearchPackage.value,
-      this.SearchDSStatus,this.SearchBillingStatus,this.PageNumber, coloumName.active, this.sortType).subscribe
+      this.SearchDSStatus,this.SearchBillingStatus,this.SearchVerifyDuty,this.SearchGoodForBilling,this.PageNumber, coloumName.active, this.sortType).subscribe
     (
       data => 
         {

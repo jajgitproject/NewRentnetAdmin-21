@@ -18,7 +18,7 @@ export class InvoiceAttachDetachService {
   /** CRUD METHODS */
   getTableData(SearchCustomerName:string, SearchBranch:string,  SearchDutySlipID:number, SearchReservationID:number, SearchGSTType:string, SearchDutyFromDate:string, 
     SearchDutyToDate:string, SearchPassengerName:string, SearchPassengerMobile:string, SearchPackageType:string, SearchPackage:string, SearchDSStatus:string, 
-    SearchBillingStatus:boolean, PageNumber: number): Observable<any> {  
+    SearchBillingStatus:boolean,SearchVerifyDuty:boolean,SearchGoodForBilling:boolean,PageNumber: number): Observable<any> {  
     if (SearchCustomerName === "")
     {
       SearchCustomerName = "null";
@@ -71,12 +71,20 @@ export class InvoiceAttachDetachService {
     {
       SearchBillingStatus = null;
     }
-    return this.httpClient.get(this.API_URL + "/" + 'GetAllInvoiceAttach' + '/' + SearchCustomerName + '/'+ SearchBranch + '/' + SearchDutySlipID + '/' + SearchReservationID + '/' + SearchGSTType + '/' + SearchDutyFromDate + '/' + SearchDutyToDate + '/' + SearchPassengerName + '/' + SearchPassengerMobile + '/' + SearchPackageType + '/' + SearchPackage + '/' + SearchDSStatus + '/' + SearchBillingStatus + '/' + PageNumber + '/DutySlipID/Descending');
+    if (SearchVerifyDuty === null || SearchVerifyDuty === undefined)
+    {
+      SearchVerifyDuty = null;
+    }
+    if (SearchGoodForBilling === null || SearchGoodForBilling === undefined)
+    {
+      SearchGoodForBilling = null;
+    }
+    return this.httpClient.get(this.API_URL + "/" + 'GetAllInvoiceAttach' + '/' + SearchCustomerName + '/'+ SearchBranch + '/' + SearchDutySlipID + '/' + SearchReservationID + '/' + SearchGSTType + '/' + SearchDutyFromDate + '/' + SearchDutyToDate + '/' + SearchPassengerName + '/' + SearchPassengerMobile + '/' + SearchPackageType + '/' + SearchPackage + '/' + SearchDSStatus + '/' + SearchBillingStatus + '/' + SearchVerifyDuty + '/' + SearchGoodForBilling + '/' + PageNumber + '/DutySlipID/Descending');
   }
 
   getTableDataSort(SearchCustomerName:string, SearchBranch:string,  SearchDutySlipID:number, SearchReservationID:number, SearchGSTType:string, SearchDutyFromDate:string, 
     SearchDutyToDate:string, SearchPassengerName:string, SearchPassengerMobile:string, SearchPackageType:string, SearchPackage:string, SearchDSStatus:string, 
-    SearchBillingStatus:boolean, PageNumber: number, coloumName: string, sortType: string): Observable<any> {
+    SearchBillingStatus:boolean,SearchVerifyDuty:boolean,SearchGoodForBilling:boolean,PageNumber: number, coloumName: string, sortType: string): Observable<any> {
     if (SearchCustomerName === "")
     {
       SearchCustomerName = "null";
@@ -129,7 +137,15 @@ export class InvoiceAttachDetachService {
     {
       SearchBillingStatus = null;
     }
-    return this.httpClient.get(this.API_URL + "/" + 'GetAllInvoiceAttach' + '/' + SearchCustomerName + '/'+ SearchBranch + '/' + SearchDutySlipID + '/' + SearchReservationID + '/' + SearchGSTType + '/' + SearchDutyFromDate + '/' + SearchDutyToDate + '/' + SearchPassengerName + '/' + SearchPassengerMobile + '/' + SearchPackageType + '/' + SearchPackage + '/' + SearchDSStatus + '/' + SearchBillingStatus + '/' + PageNumber + '/' + coloumName + '/' + sortType);
+    if (SearchVerifyDuty === null || SearchVerifyDuty === undefined)
+    {
+      SearchVerifyDuty = null;
+    }
+    if (SearchGoodForBilling === null || SearchGoodForBilling === undefined)
+    {
+      SearchGoodForBilling = null;
+    }
+    return this.httpClient.get(this.API_URL + "/" + 'GetAllInvoiceAttach' + '/' + SearchCustomerName + '/'+ SearchBranch + '/' + SearchDutySlipID + '/' + SearchReservationID + '/' + SearchGSTType + '/' + SearchDutyFromDate + '/' + SearchDutyToDate + '/' + SearchPassengerName + '/' + SearchPassengerMobile + '/' + SearchPackageType + '/' + SearchPackage + '/' + SearchDSStatus + '/' + SearchBillingStatus + '/' + SearchVerifyDuty + '/' + SearchGoodForBilling + '/' + PageNumber + '/' + coloumName + '/' + sortType);
   }
 
  //---------- Edit ----------
