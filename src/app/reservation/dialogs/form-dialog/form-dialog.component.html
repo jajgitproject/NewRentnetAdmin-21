@@ -24,9 +24,16 @@
                 <div class="col-xl-12 col-lg-6 col-md-12 col-sm-12 mb-2">
                     <mat-form-field class="example-full-width"  appearance="outline" floatLabel="always">
                         <mat-label>Pickup Time</mat-label>
-                        <input matInput [owlDateTimeTrigger]="time1" [owlDateTime]="time1" formControlName="pickupTime">
+                        <input matInput [owlDateTimeTrigger]="time1" [owlDateTime]="time1" formControlName="pickupTime"  [disabled]="isTNCSelected">
                         <button mat-icon-button matSuffix type="button" [owlDateTimeTrigger]="time1" class="date-icon" aria-label="Open time picker"><mat-icon>schedule</mat-icon></button>
                         <owl-date-time [pickerType]="'timer'" #time1></owl-date-time>
+                        <mat-hint align="end">
+                                        <div style="float: right; font-size: 10px !important; font-style: italic">
+                                            <mat-checkbox color="primary" [(indeterminate)]="indeterminate"
+                                                [labelPosition]="labelPosition" formControlName="isTimeNotConfirmed"
+                                                (change)="onTNCChange($event.checked)">TNC</mat-checkbox>
+                                        </div>
+                                    </mat-hint>
                     </mat-form-field>
                 </div>
             </div>

@@ -38,6 +38,7 @@ export class FormDialogComponent implements OnInit, OnDestroy {
   pickupDate: any;
   date: any;
   status: string = '';
+   isTNCSelected:boolean = false;
   buttonDisabled: boolean = false;
   constructor(
     public dialogRef: MatDialogRef<FormDialogComponent>,
@@ -83,22 +84,30 @@ const normalized = (this.status || '').trim().toLowerCase();
   createContactForm(): FormGroup {
     return this.fb.group(
       {
-        pickupTime: [''],
+        pickupTime: [this.advanceTableCP.pickup.pickupTime],
         dropOffTime: [''],
+        isTimeNotConfirmed:[this.advanceTableCP.isTimeNotConfirmed],
         reservationID: [this.advanceTableCP.reservationID]
       });
   }
   public ngOnInit(): void {
-    const rawPickupTime = this.advanceTableCP.pickup?.pickupTime;
-    let timeDateObject: Date;
-    if (rawPickupTime) {
-      timeDateObject = moment(rawPickupTime).toDate();
+
+    if(this.advanceTableCP.isTimeNotConfirmed){
+      this.isTNCSelected = true;
+      this.advanceTableForm.get('pickupTime').setValue('');
+      this.advanceTableForm.get('dropOffTime').setValue('');
+      this.advanceTableForm.get('pickupTime').disable();
     }
-    else {
-      timeDateObject = new Date();
-    }
-    this.advanceTableForm.patchValue({ pickupTime: timeDateObject });
-    this.locationTimeSet(timeDateObject);
+    // const rawPickupTime = this.advanceTableCP.pickup?.pickupTime;
+    // let timeDateObject: Date;
+    // if (rawPickupTime) {
+    //   timeDateObject = moment(rawPickupTime).toDate();
+    // }
+    // else {
+    //   timeDateObject = new Date();
+    // }
+    // this.advanceTableForm.patchValue({ pickupTime: timeDateObject });
+    // this.locationTimeSet(timeDateObject);
     
     this.advanceTableForm.get('pickupTime')?.valueChanges.pipe(takeUntil(this.destroy$)).subscribe((val: unknown) => {
     console.log("pickupTime changed:", val); // debug
@@ -123,14 +132,14 @@ const normalized = (this.status || '').trim().toLowerCase();
   }
 
   public Put(): void {
-
+    this.advanceTableForm.patchValue({isTimeNotConfirmed:this.isTNCSelected});
     this.advanceTableForm.patchValue({ reservationID: this.advanceTableCP.reservationID });
     this.advanceTableForm.patchValue({ dropOffTime: this.advanceTable.dropOffTime });
     const payload = this.advanceTableForm.getRawValue();
     this.advanceTableService.updatePickupEdit(payload)
       .subscribe(
         response => {
-          this.dialogRef.close(response);
+            this.dialogRef.close(response);
           this.showNotification(
             'snackbar-success',
             'Pickup Time Updated...!!!',
@@ -151,6 +160,23 @@ const normalized = (this.status || '').trim().toLowerCase();
         }
       )
   }
+  onTNCChange(checked: any)
+{
+  //const isChecked = event.target.checked;
+  const pickupControl = this.advanceTableForm.get('pickupTime');
+  if (checked === true) 
+  {
+    this.isTNCSelected = true;
+    this.advanceTableForm.get('pickupTime').setValue(null);
+    this.advanceTableForm.get('dropOffTime').setValue(null);
+    pickupControl?.disable();
+  }
+  else
+  {
+    pickupControl?.enable();
+    this.isTNCSelected = false;
+  }
+}
   showNotification(colorName, text, placementFrom, placementAlign) {
     this.snackBar.open(text, '', {
       duration: 2000,
