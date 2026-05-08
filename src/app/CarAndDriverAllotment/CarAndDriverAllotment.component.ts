@@ -962,8 +962,8 @@ carAndDriverAllotmentData()
         // Show message if registration number was searched but no data found
         if (this.inventory.value && this.inventory.value.trim() !== '') {
           Swal.fire({
-            title: 'Not Found',
-            text: 'This car does not belong to desired location',
+            //title: 'Not Found',
+            text: 'No records found',
             icon: 'warning',
             confirmButtonText: 'OK'
           });
@@ -990,7 +990,7 @@ carAndDriverAllotmentDataForUnassociated()
     this.driverID = 0;
   }
   this.isLoadingdataUnassociated = true;
-    this.driverInventoryAssociationService.getDataInventoryUnassociation(this.reservationInfo[0].serviceLocationID,
+    this.driverInventoryAssociationService.getDataInventoryUnassociation(this.reservationInfo[0].transferedLocationID,
       this.driverID, this.driver.value,
       this.driverOfficialIdentityNumber.value, this.supplier.value, this.category.value,
       this.vehicle.value, this.inventory.value, this.searchInventoryName,
@@ -1014,8 +1014,8 @@ carAndDriverAllotmentDataForUnassociated()
         // Show message if registration number was searched but no data found
         if (this.inventory.value && this.inventory.value.trim() !== '') {
           Swal.fire({
-            title: 'Not Found',
-            text: 'This car does not belong to desired location',
+            //title: 'Not Found',
+            text: 'No records found',
             icon: 'warning',
             confirmButtonText: 'OK'
           });
