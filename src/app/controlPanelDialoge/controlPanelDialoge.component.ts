@@ -2573,7 +2573,7 @@ public getInvoiceNumber(item:any ,i: any)
    allotmentHistory(item: any) {
 
     this.dialog.open(AllotmentLogDetailsComponent, {
-      width: '500px',
+      width: '1200px',
       data: {
         row: item
       }

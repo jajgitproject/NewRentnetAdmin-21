@@ -13,7 +13,7 @@ allotmentLogID: number;
   allotmentType: string;
   allotmentActionCreateEditCancel: string;
   reason: string;
-  isAutoAllotment?: boolean | null;
+  isAutoAllotment?: boolean;
   inventoryID: number;
   registrationNumber: string;
   vehicleID: number;

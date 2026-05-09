@@ -15,7 +15,7 @@
 
 
 <mat-card>
- <ng-container *ngIf="dataSource && dataSource?.length; else noDataTemplate">
+  <ng-container *ngIf="dataSource && dataSource?.length; else noDataTemplate">
     <mat-card-content>
       <ng-container *ngFor="let item of dataSource; let i = index; let last = last">
         <mat-dialog-content class="of-hidden">
@@ -34,7 +34,7 @@
                 {{item?.driverName || 'N/A' }}
               </span>
             </div>
-             <div class="col-md-2 mb-2">
+            <div class="col-md-2 mb-2">
               <span class="TDValueBold">Registration Number</span><br />
               <span class="TDValue">
                 {{item?.registrationNumber || 'N/A' }}
@@ -43,14 +43,14 @@
             <div class="col-md-2 mb-2">
               <span class="TDValueBold">Date</span><br />
               <span class="TDValue">
-                {{item?.allotmentDate  ? (item.allotmentDate | date: 'dd-MM-yyyy') : 'N/A'}}
+                {{item?.allotmentDate ? (item.allotmentDate | date: 'dd-MM-yyyy') : 'N/A'}}
               </span>
             </div>
 
             <div class="col-md-2 mb-2">
               <span class="TDValueBold">Time</span><br />
               <span class="TDValue">
-               {{ item?.allotmentTime ? (item.allotmentTime | date:'shortTime') : 'N/A' }}
+                {{ item?.allotmentTime ? (item.allotmentTime | date:'shortTime') : 'N/A' }}
               </span>
             </div>
 
@@ -75,6 +75,18 @@
                 {{item?.allotmentType || 'N/A' }}
               </span>
             </div>
+            <div class="col-md-2 mb-2">
+              <span class="TDValueBold">Is Auto Allotment</span><br />
+              <span class="TDValue">
+                {{ item?.isAutoAllotment == true ? 'Yes' : 'No' }}
+              </span>
+            </div>
+            <div class="col-md-2 mb-2">
+              <span class="TDValueBold">Reason</span><br />
+              <span class="TDValue">
+                {{item?.reason || 'N/A' }}
+              </span>
+            </div>
           </div>
         </mat-dialog-content>
 
@@ -90,4 +102,3 @@
     </mat-card-content>
   </ng-template>
 </mat-card>
-
