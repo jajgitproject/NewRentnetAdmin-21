@@ -721,6 +721,7 @@ export class ControlPanelDesignComponent implements OnInit {
           {
             this.reservationHeaderInfo = data.reservationHeaderDetails;
             this.totalData = data.totalRecords;
+            console.log(this.totalData);
              this.reservationHeaderInfo.forEach(row => {
             
             this.setCalculatedLocationOutTime(row);

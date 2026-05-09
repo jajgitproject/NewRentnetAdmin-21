@@ -1731,7 +1731,7 @@
                                 ">
                             {{data.pickupAddress!=="" ? (data.pickupAddressDetails + ' ' + data.pickupAddress):'N/A'}}
                             <hr>
-                            {{data.dropOffAddress !=="" ? data.dropOffAddress: 'N/A'}}
+                            {{data.dropOffAddress !=="" ? ((data.dropOffAddressDetails || '') + ' ' + (data.pickupAddress || '')).trim(): 'N/A'}}
                           </span>
 
                           <span style="
