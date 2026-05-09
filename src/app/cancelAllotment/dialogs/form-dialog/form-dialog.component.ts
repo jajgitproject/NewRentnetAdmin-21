@@ -84,6 +84,7 @@ export class FormDialogCAComponent
         
         this.advanceTableForm = this.createContactForm();
         this.AllotmentID=data.allotmentID;
+        this.reservationID=data.reservationID;
         this.AllotmentStatus=data.allotmentStatus
   }
   formControl = new FormControl('', 
@@ -105,6 +106,7 @@ export class FormDialogCAComponent
     return this.fb.group(
     {
       allotmentID: [this.advanceTable.allotmentID],
+      reservationID: ['this.advanceTable.reservationID'],
       dateOfCancellation: [this.advanceTable.dateOfCancellation],
       timeOfCancellation: [this.advanceTable.timeOfCancellation],
       cancellationByEmployeeID: [this.advanceTable.cancellationByEmployeeID],
@@ -162,6 +164,7 @@ export class FormDialogCAComponent
   public Put(): void
   {
     this.advanceTableForm.patchValue({allotmentID: this.AllotmentID});
+    this.advanceTableForm.patchValue({reservationID: this.reservationID});
     this.advanceTableForm.patchValue({allotmentStatus:this.AllotmentStatus});
     this.advanceTableService.update(this.advanceTableForm.getRawValue())  
     .subscribe(

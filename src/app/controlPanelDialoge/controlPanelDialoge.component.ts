@@ -104,6 +104,7 @@ import { DutySlipAccentureComponent } from '../dutySlipAccenture/dutySlipAccentu
 import { CancelReservationAndAllotmentComponent } from '../cancelReservationAndAllotment/cancelReservationAndAllotment.component';
 import { FormDialogComponentIL } from '../integrationLog/dialogs/form-dialog/form-dialog.component';
 import { LocationOutTimeEditComponent } from '../reservation/dialogs/locationOutTimeEdit/locationOutTimeEdit.component';
+import { AllotmentLogDetailsComponent } from '../allotmentLogDetails/AllotmentLogDetails.component';
 
 @Component({
   standalone: false,
@@ -2567,6 +2568,16 @@ public getInvoiceNumber(item:any ,i: any)
         this.loadData(item.reservationID, i);
       });
     }, item.reservationID);
+  }
+
+   allotmentHistory(item: any) {
+
+    this.dialog.open(AllotmentLogDetailsComponent, {
+      width: '500px',
+      data: {
+        row: item
+      }
+    });
   }
 
 }

@@ -27,10 +27,12 @@ import { MyUploadComponent } from '../myupload/myupload.component';
 import { MyUploadModule } from '../myupload/myupload.module';
 import { MatAutocompleteModule } from '@angular/material/autocomplete';
 import { MatTooltipModule } from '@angular/material/tooltip';
+import { UpdateDriverMobileComponent } from './dialogs/updateDriverMobile/updateDriverMobile.component';
 @NgModule({
   declarations: [
     DriverInventoryAssociationComponent,
-    DeleteDialogComponent
+    DeleteDialogComponent,
+    UpdateDriverMobileComponent
   ],
   imports: [
     MatTooltipModule,

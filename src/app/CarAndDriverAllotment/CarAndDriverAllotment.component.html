@@ -24,7 +24,8 @@
   <div style="display: flex; justify-content: space-between; align-items: center; padding: 10px 20px;">
   <h5 style="margin: 0;"><b>Reservation/Allotment Details</b></h5>
   <div>
-    <button mat-raised-button color="primary" (click)="CancellAllotment(reservationInfo[0].allotmentID)">Cancel Allotment</button>&nbsp; 
+    <button mat-raised-button color="primary" (click)="UpdateDriverMobile()">Update DriverMobile</button>&nbsp; 
+    <button mat-raised-button color="primary" (click)="CancellAllotment(reservationInfo[0].allotmentID,reservationInfo[0].reservationID)">Cancel Allotment</button>&nbsp; 
     <button mat-raised-button color="primary" [matMenuTriggerFor]="menu">Actions</button>&nbsp; 
     <ng-template ></ng-template>
     <span *ngIf="allotmentType==='Soft'">

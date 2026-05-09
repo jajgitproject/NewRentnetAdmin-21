@@ -5,6 +5,7 @@ import { DriverInventoryAssociation } from './driverInventoryAssociation.model';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { DatePipe } from '@angular/common';
 import { GeneralService } from '../general/general.service';
+import { DriverModel } from '../CarAndDriverAllotment/CarAndDriverAllotment.model';
 @Injectable()
 export class DriverInventoryAssociationService {
   private API_URL: string = '';
@@ -223,12 +224,19 @@ export class DriverInventoryAssociationService {
   getDriverList(supplierID: number, type: any, prefix: string): Observable<any> {
     return this.httpClient.get(this.API_URL_Driver + '/GetDriverList' + "/" + supplierID + "/" + type + "/" + prefix);
   }
+   GetAllDriverList(prefix: string): Observable<any> {
+    return this.httpClient.get(this.API_URL_Driver + '/GetAllDriverList' + "/"  + prefix);
+  }
   getDriverSupplierID(driverID: number) {
     return this.httpClient.get(this.API_URL + '/GetDriverSupplierID' + "/" + driverID);
   }
 
   getInventorySupplierID(inventoryID: number) {
     return this.httpClient.get(this.API_URL + '/GetInventorySupplierID' + "/" + inventoryID);
+  }
+  updateDriverMobile(advanceTable: DriverModel) {
+    advanceTable.userID = this.generalService.getUserID();   
+    return this.httpClient.put<any>(this.API_URL + '/UpdateDriverMobile', advanceTable);
   }
 }
 

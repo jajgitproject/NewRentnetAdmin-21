@@ -59,7 +59,7 @@ export class CancelAllotmentService
   }
   update(advanceTable: CancelAllotment)
   {
-    
+      advanceTable.userID=this.generalService.getUserID();
      advanceTable.cancellationByEmployeeID=this.generalService.getUserID();
      advanceTable.dateOfCancellation= this.generalService.getTodaysDate();
      advanceTable.timeOfCancellation= this.generalService.getCurrentTime();

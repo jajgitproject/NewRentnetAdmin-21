@@ -372,6 +372,9 @@
                                     <button mat-menu-item *ngIf="item.allotmentType==='Soft'"
                                       (click)="CovertSoftToHard(item,i)">
                                       Convert To Hard Allotment</button>
+                                       <button mat-menu-item
+                                      (click)="allotmentHistory(item)">
+                                      History</button>
                                   </mat-menu>
 
                                   <div

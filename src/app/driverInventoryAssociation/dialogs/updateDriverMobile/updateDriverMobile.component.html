@@ -1,0 +1,85 @@
+<div class="addContainer">
+    <div class="modalHeader">
+        <div class="editRowModal">
+            <div class="modalHeader clearfix">
+                <!-- <img [src]='advanceTable.img' alt="avatar"> -->
+                <div class="modal-about">
+                    <div class="font-weight-bold p-t-5 font-17">
+                        {{dialogTitle}}</div>
+                             <div *ngIf="normalizedStatus !== 'changes allow' && status"
+       style="color:rgb(150, 4, 4); margin-top:5px; font-style: italic;">
+    ({{status}}!!!!!)
+  </div>
+                </div>
+            </div>
+        </div>
+        <button mat-icon-button (click)="dialogRef.close({isClose:true})" aria-label="Close dialog">
+            <mat-icon>close</mat-icon>
+        </button>
+    </div>
+    <div mat-dialog-content>
+        <form class="register-form m-4" [formGroup]="advanceTableForm" (ngSubmit)="submit()">
+            <div class="row">
+                <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12 mb-2">
+                    <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                        <mat-label>Driver</mat-label>
+                        <input (keyup)="onKeyupDriverName($event)" required type="text" matInput formControlName="driverName" [matAutocomplete]="auto">
+                        <mat-autocomplete #auto="matAutocomplete"
+                            (optionSelected)="OnDriverSelected($event.option.value)"
+                            panelWidth="custom-autocomplete-panel">
+                            <mat-option *ngFor="let option of filteredDriverListOptions | async"
+                                [value]="option.driverName + '-' + option.mobile1+ '-' + option.supplier + '-' + option.supplierType + '-' + option.ownedSupplier"
+                                (click)="getDriverlistID(option.driverID,option.mobile1)">
+                                {{option.driverName}} - {{option.mobile1}} - {{option.supplier}} -
+                                {{option.supplierType}} - {{option.ownedSupplier}}
+                            </mat-option>
+                        </mat-autocomplete>
+
+                        <mat-error *ngIf="advanceTableForm.controls['driverName'].hasError('driverInvalid')">
+                            Please select Driver
+                        </mat-error>
+                    </mat-form-field>
+                </div>
+                 
+            </div>
+            <div class="row">
+                <div class="col-xl-4 col-lg-4 col-md-1 col-sm-1 mb-1">
+                    <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                        <mat-label>Country Code</mat-label>
+                        <input type="text" matInput formControlName="countryCodes" [matAutocomplete]="auto10" required>
+                        <mat-autocomplete #auto10="matAutocomplete" (optionSelected)="onCountryCodes($event)">
+                            <mat-option *ngFor="let option of filteredCountryCodesOptions | async"
+                                [value]="option.countryISDCode">
+                                <div style="display: flex; align-items: center;">
+                                    <img [src]="option.icon" alt="{{option.countryISOCode}}" width="20" height="20"
+                                        style="margin-right: 8px;">
+                                    <span>{{option.countryISOCode}} {{option.countryISDCode}}</span>
+
+                                </div>
+                            </mat-option>
+                        </mat-autocomplete>
+                        <mat-error *ngIf="advanceTableForm.controls['countryCodes'].hasError('countryTypesInvalid')">
+                            Please select a Country Code
+                        </mat-error>
+                    </mat-form-field>
+                </div>
+                 <div class="col-xl-8 col-lg-8 col-md-12 col-sm-12 mb-2">
+                    <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                                   <mat-label>Mobile</mat-label>
+                            <input required matInput formControlName="mobile1" type="text" maxlength="10" pattern="[0-9]*">
+                    </mat-form-field>
+                     </div>        
+            </div>
+
+            <div class="row">
+                <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12 mb-2">
+                    <div class="example-button-row">
+                        <button mat-raised-button color="primary" *ngIf="saveDisabled" type="button"
+                         (click)="confirmAdd()">Save</button>
+                         <mat-spinner *ngIf="!saveDisabled" diameter="30"></mat-spinner>
+                         <button mat-raised-button color="warn" (click)="onNoClick(action)" tabindex="-1">{{ action === 'add' ? 'Reset' :  'Cancel'}}</button>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>

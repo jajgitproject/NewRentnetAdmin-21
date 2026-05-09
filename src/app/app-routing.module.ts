@@ -2797,6 +2797,13 @@ const routes: Routes = [
             (m) => m.ModeOfPaymentModule
           )
       },
+      {
+        path: 'allotmentLogDetails',
+        loadChildren: () =>
+          import('./allotmentLogDetails/allotmentLogDetails.module').then(
+            (m) => m.AllotmentLogDetailsModule
+          )
+      },
        {
         path: 'changeDutyTypeClosing',
         loadChildren: () =>

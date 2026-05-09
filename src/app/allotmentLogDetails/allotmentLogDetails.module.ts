@@ -21,24 +21,18 @@ import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatMenuModule } from '@angular/material/menu';
 import { MyUploadComponent } from '../myupload/myupload.component';
 import { MyUploadModule } from '../myupload/myupload.module';
-import { ControlPanelDialogeComponent } from './controlPanelDialoge.component';
-import { ControlPanelDialogeRoutingModule } from './controlPanelDialoge-routing.module';
-import { CancelReservationAndAllotmentService } from '../cancelReservationAndAllotment/cancelReservationAndAllotment.service';
-import { EmailInfoService } from '../EmailInfo/EmailInfo.service';
-import { IntegrationLogService } from '../integrationLog/integrationLog.service';
-import { ControlPanelDialogEntriesModule } from './control-panel-dialog-entries.module';
-import { AllotmentLogDetailsModule } from '../allotmentLogDetails/allotmentLogDetails.module';
-
+import { AllotmentLogDetailsService } from './allotmentLogDetails.service';
+import { AllotmentLogDetailsRoutingModule } from './allotmentLogDetails-routing.module';
+import { AllotmentLogDetailsComponent } from './AllotmentLogDetails.component';
 @NgModule({
   declarations: [
-    ControlPanelDialogeComponent
+    AllotmentLogDetailsComponent
   ],
-  exports: [ControlPanelDialogeComponent, ControlPanelDialogEntriesModule],
   imports: [
     CommonModule,
     FormsModule,
     ReactiveFormsModule,
-    ControlPanelDialogeRoutingModule,
+    AllotmentLogDetailsRoutingModule,
     MatTableModule,
     MatPaginatorModule,
     MatFormFieldModule,
@@ -56,12 +50,11 @@ import { AllotmentLogDetailsModule } from '../allotmentLogDetails/allotmentLogDe
     MatToolbarModule,
     MatMenuModule,
     MatProgressSpinnerModule,
-    MyUploadModule,
-    ControlPanelDialogEntriesModule,
-    AllotmentLogDetailsModule
+    MyUploadModule
   ],
-  providers: [CancelReservationAndAllotmentService,EmailInfoService ]
+  exports: [AllotmentLogDetailsComponent],
+  providers: [AllotmentLogDetailsService]
 })
-export class ControlPanelDialogeModule {}
+export class AllotmentLogDetailsModule {}
 
 

@@ -58,6 +58,7 @@ import { ReservationLocationTransferLogModule } from '../reservationLocationTran
 import { ReservationLocationTransferLogComponent } from '../reservationLocationTransferLog/reservationLocationTransferLog.component';
 import { AdhocCarAndDriverService } from '../adhocCarAndDriver/adhocCarAndDriver.service';
 import { AdhocCarAndDriverModule } from '../adhocCarAndDriver/adhocCarAndDriver.module';
+import { DriverInventoryAssociationModule } from '../driverInventoryAssociation/driverInventoryAssociation.module';
 
 @NgModule({
   declarations: [
