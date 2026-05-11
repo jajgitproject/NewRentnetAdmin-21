@@ -214,7 +214,7 @@
                         </tr>
                          <tr class="no-border" height="10"  *ngIf="dataSource?.invoicePackageModel?.packageType === 'Outstation Round Trip'">
                           <td valign="top" class="text6" style="padding-bottom: 5px;"  *ngIf="dataSource?.invoicePackageModel?.minimumKM !=0">
-                            &nbsp; {{dataSource?.invoicePackageModel?.minimumKM}} Kms @ min
+                            &nbsp; {{ dataSource?.invoicePackageModel?.minimumKM * dataSource?.invoiceDutyModel?.totalRunningDays }} Kms @ min
                             &nbsp; {{dataSource?.invoicePackageModel?.minimumKM}} kms running per
                              {{dataSource?.invoicePackageModel?.billingOption}}
 
@@ -384,8 +384,11 @@
                           <td valign="top" class="text6">
 
                             &nbsp;</td>
-                          <td valign="top" class="text7">
+                          <!-- <td valign="top" class="text7"  *ngIf="!dataSource?.invoicePackageModel?.packageType?.includes('Local')">
                             {{dataSource?.invoicePackageModel?.driverAllowance}} &nbsp;
+                          </td> -->
+                          <td valign="top" class="text7">
+                            {{dataSource?.invoiceDriverAllownceModel?.totalDriverAllowanceAmount}} &nbsp;
                           </td>
                         </tr>
 

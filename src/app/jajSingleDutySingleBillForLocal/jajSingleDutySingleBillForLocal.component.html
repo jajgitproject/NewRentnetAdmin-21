@@ -32,12 +32,15 @@
             <strong> Branch. Office :</strong> {{dataSource?.invoiceEcoBranchModel?.branchAddress}}<br>
             <strong>Reg. Office :</strong> 45, First Floor, Corner Market, Malviya Nagar, New Delhi-110017<br>
             <strong>Correspondence :</strong>
-            {{dataSource?.invoiceEcoCompanyModel?.correspondenceAddress}}
+            Plot No.45, 1st Floor, Corner Market, Malviya Nagar, <br> New Delhi 110017,
+            <strong>Ph.</strong> 01140794079
+            <strong>Fax.</strong> 01141550515
+            <!-- {{dataSource?.invoiceEcoCompanyModel?.correspondenceAddress}}
             ,{{dataSource?.invoiceEcoCompanyModel?.correspondenceCityName}} ,
             {{dataSource?.invoiceEcoCompanyModel?.correspondenceStateName}}
             ,{{dataSource?.invoiceEcoCompanyModel?.ecoCompanyCountryName}}<br />
-            <strong>Ph.</strong>{{dataSource?.invoiceEcoCompanyModel?.phoneNumber}},
-            <strong>Reservation</strong> : {{dataSource?.invoiceEcoCompanyModel?.emailReservation}}, 24/7 :
+            <strong>Ph.</strong>{{dataSource?.invoiceEcoCompanyModel?.phoneNumber}},-->
+            <strong>Reservation</strong> : {{dataSource?.invoiceEcoCompanyModel?.emailReservation}}, 24/7 : 
             91-11-40794079<br />
             <strong>E-mail :</strong> billing@ecosmobility.com, <strong>Reservation :</strong>cars@ecosmobility.com
             <br />
@@ -183,7 +186,7 @@
               </td>
             </tr>
 
-            <tr *ngIf="dataSource?.invoicePackageValuesModel?.extraKMs != 0">
+            <tr *ngIf="dataSource?.invoicePackageModel?.extraKMRate != 0">
               <td class="table-midrow-firstcolumn">
                 Extra KMs : {{dataSource?.invoicePackageValuesModel?.extraKMs}}
               </td>
@@ -195,7 +198,7 @@
               </td>
             </tr>
 
-            <tr *ngIf="dataSource?.invoicePackageValuesModel?.extraMinutes != 0">
+            <tr *ngIf="dataSource?.invoicePackageModel?.extraHRRate != 0">
               <td class="table-midrow-firstcolumn">
                 Extra Hours :
                 <span *ngIf="dataSource?.invoicePackageValuesModel?.extraMinutes as extra">
@@ -235,7 +238,7 @@
               <td class="table-midrow-firstcolumn">Driver Allowance</td>
               <td class="table-midrow-secondcolumn"></td>
               <td class="table-midrow-thirdcolumn">
-                {{dataSource?.invoicePackageModel?.driverAllowance | number:'1.2-2'}}
+                {{dataSource?.invoiceDriverAllownceModel?.totalDriverAllowanceAmount | number:'1.2-2'}}
               </td>
             </tr>
 
@@ -601,9 +604,9 @@
           Our Responsibility of the Signed duty slip rests till we handover the same to you with the bill.
           Interest @ 24% will be charged if payment is not received as per payment terms settled.
           No Objection pertaining to this invoice would be entertained thereafter.
-          Sent the RTGS/NEFT Payment to: KOTAK MAHINDRA BANK / A/C NO: 3911291161, IFSC CODE: KKBK0004620,
-          PAN NO: AABCE1357N, TINNO: 07860310884, CIN NO: U74999DL1996PTC076375
-          Electronic Mode of Payments as per Section 269SU of Income Tax Act, 1961:
+          Send the RTGS/NEFT Payment to: KOTAK MAHINDRA BANK / A/C NO: 3911291161, IFSC CODE: KKBK0004620, PAN NO: AABCE1357N, <br>
+          CIN NO: L74999DL1996PLC076375
+          Electronic Mode of Payments as per Section 269SU of Income Tax Act, 1961.
           <!-- <a href="https://www.ecosmobility.com/pay-online/"
             target="_blank">https://www.ecosmobility.com/pay-online/</a> -->
         </div>
