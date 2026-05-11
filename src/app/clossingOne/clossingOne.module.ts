@@ -109,6 +109,8 @@ import { SettledRateDetailsComponent } from '../settledRateDetails/settledRateDe
 import { SettledRateDetailsService } from '../settledRateDetails/settledRateDetails.service';
 import {ChangeDutyTypeClosingService} from '../changeDutyTypeClosing/changeDutyTypeClosing.service';
 import { ChangeDutyTypeClosingModule } from '../changeDutyTypeClosing/changeDutyTypeClosing.module';
+import { ChangeCityModule } from '../changeCity/changeCity.module';
+import { ChangeCityService } from '../changeCity/changeCity.service';
 
 
 @NgModule({
@@ -176,8 +178,8 @@ import { ChangeDutyTypeClosingModule } from '../changeDutyTypeClosing/changeDuty
     OdoMeterAndManualDutySlipImageModule,
     AdditionalKmsDetailsModule,
     SettledRateDetailsModule,
-    ChangeDutyTypeClosingModule
-
+    ChangeDutyTypeClosingModule,
+    ChangeCityModule
   ],
   exports:[ClossingOneComponent],
   providers: [ClossingOneService,
@@ -208,7 +210,7 @@ import { ChangeDutyTypeClosingModule } from '../changeDutyTypeClosing/changeDuty
               PackageRateDetailsForClosingService ,
                MOPDetailsService, ControlPanelDialogeService,
                ReservationDutyslipSearchService ,DutySlipImageService,OdoMeterAndManualDutySlipImageService,  
-                   ChangeDutyTypeClosingService    ]
+                   ChangeDutyTypeClosingService,ChangeCityService    ]
 })
 export class ClossingOneModule {}
 

@@ -90,6 +90,7 @@ import { OdoMeterAndManualDutySlipImage } from '../odoMeterAndManualDutySlipImag
 import { FormDialogSRDComponent } from '../settledRateDetails/dialogs/form-dialog/form-dialog.component';
 import { SettledRateDetailsService } from '../settledRateDetails/settledRateDetails.service';
 import { FormDialogComponent as CDTClosingDialogComponent } from '../changeDutyTypeClosing/dialogs/dialogDetails/dialogDetails.component';
+import { FormDialogComponentForCity } from '../changeCity/dialogs/dialogDetails/dialogDetails.component';
 
 @Component({
   standalone: false,
@@ -1537,6 +1538,26 @@ showAndScrollOpenSettledRates() {
      (error: HttpErrorResponse) => { this.dataSourceForBillNo = null;}
    );
  }
+
+ //---------- Change City ----------
+  ChangeCity() 
+  {
+    const dialogRef = this.dialog.open(FormDialogComponentForCity,
+    {
+      data:
+      {
+        action:'edit',
+        reservationID: this.ReservationID,
+        pickupDate: this.PickupDate,          
+        packageTypeID:this.PackageTypeID,
+        customerID: this.CustomerID,
+        verifyDutyStatusAndCacellationStatus: this.verifyDutyStatusAndCacellationStatus
+      }
+    });
+    dialogRef.afterClosed().subscribe((res: any) => {
+      this.BookingDataOnClosing();
+    })
+  }
 
 }
 

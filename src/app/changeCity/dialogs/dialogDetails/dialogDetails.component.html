@@ -1,0 +1,58 @@
+<div class="addContainer">
+    <div class="modalHeader">
+        <div class="editRowModal">
+            <div class="modalHeader clearfix">
+                <div class="modal-about">
+                    <div class="font-weight-bold p-t-5 font-17">
+                        {{dialogTitle}}</div>
+                         <div *ngIf="status && status !== 'Changes allow'"
+                        style="color:rgb(150, 4, 4); margin-top:5px; font-style: italic;">
+                        ({{status}}!!!!!)
+                    </div>
+                </div>
+            </div>
+        </div>
+        <button mat-icon-button (click)="dialogRef.close()" aria-label="Close dialog">
+      <mat-icon>close</mat-icon>
+    </button>
+    </div>
+    <div mat-dialog-content>
+        <form class="register-form m-4" [formGroup]="advanceTableForm" (ngSubmit)="submit">
+            <div class="row">
+                <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12 mb-2">
+                    <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                        <mat-label>Pickup City</mat-label>
+                        <input required type="text" matInput formControlName="pickupCity" [matAutocomplete]="auto4">
+                        <mat-autocomplete #auto4="matAutocomplete" (optionSelected)="onCitySelected($event.option.value)" panelWidth="custom-autocomplete-panel">
+                            <mat-option *ngFor="let option of filteredCitiesOptions | async"
+                                        [value]="option.pickupCity" (click)="getCityID(option.pickupCityID)">
+                                        {{option.pickupCity}}
+                            </mat-option>
+                        </mat-autocomplete>
+                        <mat-error *ngIf="advanceTableForm.controls['pickupCity'].hasError('pickupCityInvalid')">
+                            Please select a valid Pickup City
+                        </mat-error>
+                    </mat-form-field>
+                    <div *ngIf="noCityMessage">
+                        <span style="color: red;">There is no contract on this date.</span>
+                    </div>
+                </div>
+            </div>
+          
+       
+            <div class="row">
+                  <!-- <div class="row" *ngIf="status">
+                        <div class="col-12 mb-1">
+                          <span style="color:red">{{status}}</span>
+                        </div>
+                    </div> -->
+                <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12 mb-2">
+                    <div class="example-button-row">
+                        <button mat-raised-button color="primary" [type]="submit" [disabled]="!advanceTableForm.valid || buttonDisabled"  (click)="Put()">Save</button>
+                        <!-- <button *ngIf="action==='add'" mat-raised-button color="warn" (click)="onNoClick()" tabindex="-1">Reset</button> -->
+                        <button *ngIf="action==='edit'" mat-raised-button color="warn" (click)="onNoClick()" tabindex="-1">Cancel</button>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
