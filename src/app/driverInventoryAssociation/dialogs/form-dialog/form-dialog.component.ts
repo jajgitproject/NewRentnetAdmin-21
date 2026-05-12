@@ -26,7 +26,7 @@ import Swal from 'sweetalert2';
 import { forkJoin } from 'rxjs';
 
 @Component({
-  standalone: true,
+  standalone: false,
   selector: 'app-form-dialog',
   templateUrl: './form-dialog.component.html',
   styleUrls: ['./form-dialog.component.sass'],

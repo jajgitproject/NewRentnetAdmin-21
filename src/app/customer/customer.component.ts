@@ -51,6 +51,7 @@ export class CustomerComponent implements OnInit {
   @Input() action:any;
   
   displayedColumns = [
+    'customerID',
     'tallyCustomerID',
     'customerName',
     'customerGroup',

@@ -28,10 +28,13 @@ import { MyUploadModule } from '../myupload/myupload.module';
 import { MatAutocompleteModule } from '@angular/material/autocomplete';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { UpdateDriverMobileComponent } from './dialogs/updateDriverMobile/updateDriverMobile.component';
+import { FormDialogComponent as advanceTableForm } from './dialogs/form-dialog/form-dialog.component';
+
 @NgModule({
   declarations: [
     DriverInventoryAssociationComponent,
     DeleteDialogComponent,
+    advanceTableForm,
     UpdateDriverMobileComponent
   ],
   imports: [

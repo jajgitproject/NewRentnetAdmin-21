@@ -540,7 +540,9 @@ export class ControlPanelDesignComponent implements OnInit {
       reservationSourceDetail:[this._filters.reservationSourceDetail],
       verifyDuty:[this._filters.verifyDuty],
       goodForBilling:[this._filters.goodForBilling],
-      billed:[this._filters.billed]
+      billed:[this._filters.billed],
+      passed: [this._filters.passed],
+      driverAcceptanceStatus: [this._filters.driverAcceptanceStatus],
     });
   }
 

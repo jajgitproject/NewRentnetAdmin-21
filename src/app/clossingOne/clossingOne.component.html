@@ -42,7 +42,7 @@
           Bill From To: <br/>{{billFromTo}}
         </div>
         <div class="col-xl-3 col-lg-4 col-md-12 col-sm-12 mb-2" *ngIf="closingDataAdvanceTable">
-          Customer Name: <br/>{{closingDataAdvanceTable?.customerName}}({{closingDataAdvanceTable?.tallyCustomerID}})
+          Customer Name: <br/>{{closingDataAdvanceTable?.customerName}}-{{CustomerID}}({{closingDataAdvanceTable?.tallyCustomerID}})
         </div>
         <div class="col-xl-2 col-lg-4 col-md-12 col-sm-12 mb-2" *ngIf="GstNumber">
           GST Number: <br/>{{GstNumber}}({{StateName}})

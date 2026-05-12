@@ -1646,5 +1646,8 @@ getCustomerCategory(): Observable<CustomerCategoryDropDown[]>{
    GetRegistrationNumberDuplicate(registrationNumber:number): Observable<boolean> {
     return this.http.get<boolean>(this.BaseURL + "customerPersonDriverRestriction/GetRegistrationNumberDuplicate/"+registrationNumber);
   }
+    GetDriverNumberDuplicate(driverPhone:number): Observable<boolean> {
+    return this.http.get<boolean>(this.BaseURL + "customerPersonDriverRestriction/GetDriverNumberDuplicate/"+driverPhone);
+  }
 }
 

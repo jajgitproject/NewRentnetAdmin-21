@@ -98,7 +98,7 @@ bookerName: FormControl = new FormControl();
   advanceTableForm: any;
   SearchEInvoiceStatus:string='';
   customerGroupID: any;
-  customer : FormControl=new FormControl('', Validators.required);
+  customer : FormControl=new FormControl();
 
   SearchFromDate: string = '';
   startDate : FormControl = new FormControl();

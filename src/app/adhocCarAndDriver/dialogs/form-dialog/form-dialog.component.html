@@ -142,11 +142,11 @@
                 </div>
             </div>
             
-            <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12 mb-2">
+            <!-- <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12 mb-2">
                 <mat-checkbox (change)="copyVendorToDriver($event)" #copyCheckBox color="primary" [disabled]="copydetails===false">
                     Copy Email or Phone to driver?
                 </mat-checkbox>
-           </div>
+           </div> -->
            <br>
             <!-- Driver Section -->
             <p>Driver</p>
@@ -224,10 +224,13 @@
                 <div class="col-xl-3 col-lg-3 col-md-1 col-sm-1 mb-1" *ngIf="!advanceTableForm.value?.isDriverExisting  || advanceTableForm.value.isDriverExisting === 'New'">
                     <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
                         <mat-label>Phone No</mat-label>
-                        <input matInput formControlName="driverPhone" required>
+                        <input matInput formControlName="driverPhone" required (blur)="duplicateDriverNoCheck()">
                         <mat-error *ngIf="advanceTableForm.get('driverPhone').hasError('required')">
                             Phone No is required
                         </mat-error>
+                         <mat-error *ngIf="advanceTableForm.get('driverPhone').hasError('duplicateDriverNo')">
+                            Driver number already exists
+                            </mat-error>
                     </mat-form-field>
                 </div>
                

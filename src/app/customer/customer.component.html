@@ -236,6 +236,12 @@
                                             <mat-cell *matCellDef="let row" (contextmenu)="onContextMenu($event, row)">
                                                 {{row.tallyCustomerID ? row.tallyCustomerID : 'N/A'}}</mat-cell>
                                         </ng-container>
+                                        <ng-container matColumnDef="customerID">
+                                            <mat-header-cell *matHeaderCellDef
+                                                mat-sort-header>Customer No</mat-header-cell>
+                                            <mat-cell *matCellDef="let row" (contextmenu)="onContextMenu($event, row)">
+                                                {{row.customerID ? row.customerID : 'N/A'}}</mat-cell>
+                                        </ng-container>
 
                                         <ng-container matColumnDef="customerGroup">
                                             <mat-header-cell *matHeaderCellDef mat-sort-header>Group</mat-header-cell>

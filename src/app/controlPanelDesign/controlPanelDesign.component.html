@@ -423,6 +423,25 @@
                 </mat-select>
               </mat-form-field>
             </div>
+            <div class="col-xl-2 col-lg-2 col-md-2 col-sm-12 mb-2">
+              <mat-form-field class="example-full-width cp-quick-search-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
+                <mat-label>Passed to supplier</mat-label>
+                <mat-select [panelWidth]="null" formControlName="passed">
+                  <mat-option value="Passed">Passed</mat-option>
+                  <!-- <mat-option value="Email">Email</mat-option> -->
+                </mat-select>
+              </mat-form-field>
+            </div>
+            <div class="col-xl-2 col-lg-2 col-md-2 col-sm-12 mb-2">
+              <mat-form-field class="example-full-width cp-quick-search-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
+                <mat-label>Driver Acceptance Status</mat-label>
+                <mat-select [panelWidth]="null" formControlName="driverAcceptanceStatus">
+                  <mat-option value="Accepted">Accepted</mat-option>
+                  <mat-option value="Rejected">Rejected</mat-option>
+                   <mat-option value="Pending">Pending</mat-option>
+                </mat-select>
+              </mat-form-field>
+            </div>
           </div>
 
           <div class="row">
@@ -1144,8 +1163,8 @@
                   width: 80px;
                   float: left;cursor: pointer;" (click)="sortByColumnName('lifeCycleStatus.pickedUp')"
                     [ngClass]="{'active-sort': sortColumn === 'lifeCycleStatus.pickedUp'}">
-                    <span matTooltip="Trip and Billing Status" matTooltipPosition="above">
-                      <b>Trip/Billing Status</b></span>
+                    <span matTooltip="Trip and Driver Acceptance" matTooltipPosition="above">
+                      <b>Trip/Driver Acceptance</b></span>
                     <i class="fas"
                       [ngClass]="{'fa-arrow-up': sortColumn === 'lifeCycleStatus.pickedUp' && sortDirection === 'asc',
                                             'fa-arrow-down': sortColumn === 'lifeCycleStatus.pickedUp' && sortDirection === 'desc'}"></i>
@@ -1620,14 +1639,11 @@
                               [ngStyle]="{ color: getLifeCycleDisplay(data.lifeCycleStatus).color }">
                               {{ getLifeCycleDisplay(data.lifeCycleStatus).label || 'N/A' }}
                             </span>
-
-
-                            <!-- <span
-                              *ngIf="!(data.reservationStatus === 'Confirmed' || data.reservationStatus === 'Cancelled' || data.allotmentStatus === 'Alloted' || data.tripStatus)"
-                              [ngStyle]="{ color: data.carStatus === 'Moving' || data.carStatus === 'Car Moving' ? 'green' :
-                                                        data.carStatus === 'Not Moving' ? 'red' : 'black' }">
-                              {{ data.carStatus || 'N/A' }}
-                            </span> -->
+                            <br/>
+                            <span *ngIf="data.driverAcceptanceStatus">
+                              {{ data.driverAcceptanceStatus || 'N/A' }} <ng-container *ngIf="data.driverAcceptanceStatus !== 'Pending'">
+                                  by Driver  </ng-container>
+                            </span>
                           </span>
 
                           <span style="font-size: 12px;text-align: left;width: 100px;float: left;">

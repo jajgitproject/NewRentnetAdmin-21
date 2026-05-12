@@ -20,7 +20,7 @@ import { MatAutocompleteModule } from '@angular/material/autocomplete';
 import { map, startWith } from 'rxjs/operators';
 
 @Component({
-  standalone: true,
+  standalone: false,
   selector: 'app-updateDriverMobile',
   templateUrl: './updateDriverMobile.component.html',
   styleUrls: ['./updateDriverMobile.component.sass'],

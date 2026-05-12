@@ -589,6 +589,25 @@ duplicateRegistrationNoCheck() {
     });
 }
 
+duplicateDriverNoCheck() {
+  const driverPhone = this.advanceTableForm.value.driverPhone;
+
+  if (!driverPhone) return;
+
+  this._generalService.GetDriverNumberDuplicate(driverPhone)
+    .subscribe(res => {
+     console.log(res);
+      if (res) {        
+        this.advanceTableForm.get('driverPhone')
+          .setErrors({ duplicateDriverNo: true });
+      } else {
+        
+        this.advanceTableForm.get('driverPhone')
+          .setErrors(null);
+      }
+
+    });
+}
   initRegistrationNumber() {
     this._generalService.GetRegistrationNumberDropDown(this.supplierID).subscribe(
       data => {
@@ -796,7 +815,14 @@ duplicateRegistrationNoCheck() {
         (data: any)=>   
         {
           this.advanceTable = data;
-          this.advanceTableForm.patchValue({supplierEmail:this.advanceTable.supplierEmail});
+          console.log(this.advanceTable)
+          if(this.advanceTable.supplierEmail === "NULL"){
+            this.advanceTableForm.patchValue({supplierEmail:''});
+          }
+          else{
+            this.advanceTableForm.patchValue({supplierEmail:this.advanceTable.supplierEmail});
+          }
+     
           this.advanceTableForm.patchValue({supplierPhone:this.advanceTable.supplierPhone}); 
           
           this.advanceTableForm.patchValue({supplierTypeID:this.advanceTable.supplierTypeID});  
@@ -875,7 +901,7 @@ duplicateRegistrationNoCheck() {
    }
     this.advanceTableForm.patchValue({supplierPhone:phone4});
     this.advanceTableForm.patchValue({reservationID:this.reservationID});
-    this.advanceTableForm.patchValue({locationID:this.LocationID});
+    //this.advanceTableForm.patchValue({locationID:this.LocationID});
     this.advanceTableForm.patchValue({driverPhone:mobile1}); 
     this.advanceTableService.add(this.advanceTableForm.getRawValue())  
     .subscribe(
@@ -893,6 +919,8 @@ duplicateRegistrationNoCheck() {
     },
     error =>
     {
+      const mobile =this.advanceTableForm?.get('driverPhone').value.split('-')[1];
+       this.advanceTableForm?.patchValue({ driverPhone: mobile});
       this.showNotification(
           'snackbar-danger',
           'Operation Failed...!!!',
@@ -1062,8 +1090,8 @@ duplicateRegistrationNoCheck() {
       this.advanceTableForm.controls['vehicle'].setValue('');
       this.advanceTableForm.controls['locationName'].setValue(this.data.reservationInfo.transferedLocation);
       this.InitLocation();
-      this.LocationID = this.data.reservationInfo.transferedLocationID;
-      this.advanceTableForm.patchValue({locationID: this.LocationID});
+      //this.LocationID = this.data.reservationInfo.transferedLocationID;
+      this.advanceTableForm.patchValue({locationID: this.data.reservationInfo.transferedLocationID});
 
      
     }
