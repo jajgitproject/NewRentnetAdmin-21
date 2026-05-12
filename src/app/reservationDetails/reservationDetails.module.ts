@@ -27,6 +27,7 @@ import { MyUploadModule } from '../myupload/myupload.module';
 import { AdvanceService } from '../advance/advance.service';
 import { FormDialogRDComponent as advanceTableForm } from './dialogs/form-dialog/form-dialog.component';
 import { DeleteDialogComponent } from './dialogs/delete/delete.component';
+import { KamInfoDialogModule } from './dialogs/kam-info-dialog/kam-info-dialog.module';
 import { MatAutocompleteModule } from '@angular/material/autocomplete';
 import { CustomerShortService } from '../customerShort/customerShort.service';
 import { PersonShortService } from '../personShort/personShort.service';
@@ -41,6 +42,7 @@ import { ReservationModule } from '../reservation/reservation.module';
     DeleteDialogComponent
   ],
   imports: [
+    KamInfoDialogModule,
     MatAutocompleteModule,
     CommonModule,
     FormsModule,

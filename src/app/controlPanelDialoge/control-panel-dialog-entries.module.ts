@@ -31,6 +31,7 @@ import { FeedBackDialogModule } from '../feedBack/feedBack-dialog.module';
 import { GarageInModule } from '../garageIn/garageIn.module';
 import { GarageOutDetailsModule } from '../GarageOutDetails/GarageOutDetails.module';
 import { IncidenceModule } from '../incidence/incidence.module';
+import { KamInfoDialogModule } from '../reservationDetails/dialogs/kam-info-dialog/kam-info-dialog.module';
 import { IntegrationLogModule } from '../integrationLog/integrationLog.module';
 import { InterstateTaxEntryModule } from '../interstateTaxEntry/interstateTaxEntry.module';
 import { LifeCycleStatusModule } from '../lifeCycleStatus/lifeCycleStatus.module';
@@ -90,6 +91,7 @@ const CONTROL_PANEL_DIALOG_ENTRY_IMPORTS = [
   GarageOutDetailsModule,
   IncidenceModule,
   IntegrationLogModule,
+  KamInfoDialogModule,
   InterstateTaxEntryModule,
   LifeCycleStatusModule,
   LocationDetailsModule,

@@ -1,4 +1,4 @@
-<div *ngFor="let data of advanceTableRD">
+<div *ngFor="let data of reservationDetailRows">
 <div class="row" style="margin-left: 20px;margin-top: 20px;">
     <div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 mb-2">
         <span>
@@ -28,6 +28,12 @@
         </span>
         <br/>
         <span>{{data.primaryBooker}}</span>
+        <br/>
+        <span>
+            <b><button type="button" class="BoldButton" mat-button (click)="openKamInfo(data)">KAM</button></b>
+        </span>
+        <br/>
+        <span>{{ kamSummaryText(data) }}</span>
     </div>
 
     <div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 mb-2">

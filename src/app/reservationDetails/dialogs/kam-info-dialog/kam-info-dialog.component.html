@@ -1,0 +1,52 @@
+<div class="modalHeader">
+  <div class="editRowModal">
+    <div class="modalHeader clearfix">
+      <div class="modal-about">
+        <div class="font-weight-bold p-t-5 font-17">
+          {{ dialogTitle }}
+        </div>
+        <div *ngIf="data?.customerName" class="kam-subtitle">
+          Customer: {{ data.customerName }}
+        </div>
+      </div>
+    </div>
+  </div>
+  <button mat-icon-button (click)="dialogRef.close()" aria-label="Close dialog">
+    <mat-icon class="small-close-icon">close</mat-icon>
+  </button>
+</div>
+<mat-card>
+  <mat-card-content>
+    <mat-dialog-content class="kam-dialog-body">
+      <div *ngIf="loading" class="kam-loading">Loading…</div>
+      <div *ngIf="loadError" class="kam-error">{{ loadError }}</div>
+      <div *ngIf="!loading && !loadError && kamList.length === 0" class="kam-empty">
+        No active KAM assigned for this customer.
+      </div>
+      <div *ngFor="let k of kamList; let i = index">
+        <div class="row" *ngIf="kamList.length > 1">
+          <div class="col-12 mb-2">
+            <span class="TDValueBold">KAM {{ i + 1 }}</span>
+          </div>
+        </div>
+        <div class="row">
+          <div class="col-lg-6 col-md-12 mb-2">
+            <span class="TDValueBold">Name</span> <br />
+            <span class="TDValue">{{ displayName(k) }}</span>
+          </div>
+          <div class="col-lg-6 col-md-12 mb-2">
+            <span class="TDValueBold">Mobile No.</span> <br />
+            <span class="TDValue">{{ displayMobile(k) }}</span>
+          </div>
+        </div>
+        <div class="row">
+          <div class="col-12 mb-2">
+            <span class="TDValueBold">Email</span> <br />
+            <span class="TDValue kam-email">{{ displayEmail(k) }}</span>
+          </div>
+        </div>
+        <hr *ngIf="i < kamList.length - 1" />
+      </div>
+    </mat-dialog-content>
+  </mat-card-content>
+</mat-card>

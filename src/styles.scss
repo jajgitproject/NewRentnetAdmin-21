@@ -1296,3 +1296,14 @@ body.side-closed.submenu-closed.side-closed-hover .sidebar .menu .list li.menu-r
   }
 }
 
+/* KAM Info dialog: darker body text than default #555 + slightly brighter backdrop */
+.cdk-overlay-container .cdk-overlay-pane.kam-info-dialog-panel .mat-mdc-dialog-container .mat-mdc-dialog-surface,
+.cdk-overlay-container .cdk-overlay-pane.kam-info-dialog-panel .mat-mdc-dialog-container .mdc-dialog__surface {
+  color: #121212 !important;
+  max-width: min(920px, 98vw) !important;
+}
+
+.cdk-overlay-backdrop.kam-info-dialog-backdrop {
+  background: rgba(0, 0, 0, 0.28);
+}
+

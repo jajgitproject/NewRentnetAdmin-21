@@ -88,6 +88,12 @@
                                     </button></b>
                                   </div>
                                   {{ item.customerPerson.customerPersonName }}<br />
+                                  <div class="kam-button-row">
+                                    <b><button type="button" class="BoldButton BoldButtonTopMargin" mat-button (click)="KamInfo(item)">
+                                      KAM
+                                    </button></b>
+                                  </div>
+                                  {{ kamSummaryText(item) }}<br />
                                   <b><button class="BoldButton BoldButtonTopMargin" mat-button (click)="VehicleCategoryInfo(item)">
                                       Vehicle Category
                                     </button></b><br />

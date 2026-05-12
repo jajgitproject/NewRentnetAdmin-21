@@ -1,5 +1,5 @@
 // @ts-nocheck
-import { Component, ElementRef, Input, OnInit, ViewChild } from '@angular/core';
+import { Component, ElementRef, Input, OnChanges, OnInit, SimpleChanges, ViewChild } from '@angular/core';
 import { ReservationDetailsService } from './reservationDetails.service';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { MatDialog } from '@angular/material/dialog';
@@ -9,7 +9,7 @@ import { ReservationDetails } from './reservationDetails.model';
 import { DataSource } from '@angular/cdk/collections';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { BehaviorSubject, fromEvent, merge, Observable, Subscription } from 'rxjs';
-import { map } from 'rxjs/operators';
+import { map, take } from 'rxjs/operators';
 import { DateAdapter, MAT_DATE_LOCALE } from '@angular/material/core';
 import { MatMenu, MatMenuTrigger } from '@angular/material/menu';
 import { SelectionModel } from '@angular/cdk/collections';
@@ -18,7 +18,7 @@ import { MyUploadComponent } from '../myupload/myupload.component';
 import { DeleteDialogCityComponent } from '../dashboard/city-master/dialogscity/delete-city/delete-city.component';
 import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
 import { AdvanceDialogComponent } from '../advance/dialogs/advance-dialog/advance-dialog.component';
-import { FormDialogRDComponent } from './dialogs/form-dialog/form-dialog.component';
+import { KamInfoDialogComponent } from './dialogs/kam-info-dialog/kam-info-dialog.component';
 @Component({
   standalone: false,
   selector: 'app-reservationDetails',
@@ -26,7 +26,7 @@ import { FormDialogRDComponent } from './dialogs/form-dialog/form-dialog.compone
   styleUrls: ['./reservationDetails.component.sass'],
   providers: [{ provide: MAT_DATE_LOCALE, useValue: 'en-GB' }]
 })
-export class ReservationDetailsComponent implements OnInit {
+export class ReservationDetailsComponent implements OnInit, OnChanges {
   @Input() advanceTableRD;
   advanceTable: ReservationDetails | null;
   advanceTableForm: FormGroup;
@@ -54,9 +54,99 @@ export class ReservationDetailsComponent implements OnInit {
   @ViewChild(MatMenuTrigger)
   contextMenu: MatMenuTrigger;
   contextMenuPosition = { x: '0px', y: '0px' };
+
+  /** KAM name line under the KAM button; keyed by customerID */
+  kamSummaryByCustomerId: Record<number, string> = {};
+  kamRowsByCustomerId: Record<number, any[]> = {};
+
+  get reservationDetailRows(): any[] {
+    const rd = this.advanceTableRD as any;
+    if (rd == null) {
+      return [];
+    }
+    return Array.isArray(rd) ? rd : [rd];
+  }
+
   ngOnInit() {
     this.SubscribeUpdateService();
   }
+
+  ngOnChanges(changes: SimpleChanges): void {
+    if (!changes['advanceTableRD'] || !changes['advanceTableRD'].currentValue) {
+      return;
+    }
+    this.kamSummaryByCustomerId = {};
+    this.kamRowsByCustomerId = {};
+    for (const row of this.reservationDetailRows) {
+      const cid = row?.customerID;
+      if (cid == null || cid === '') {
+        continue;
+      }
+      const n = Number(cid);
+      if (Number.isNaN(n)) {
+        continue;
+      }
+      this.kamSummaryByCustomerId[n] = '…';
+      this._generalService.GetCustomerKam(n).pipe(take(1)).subscribe(
+        (kams: any[]) => {
+          const list = kams == null ? [] : Array.isArray(kams) ? kams : [kams];
+          this.kamRowsByCustomerId[n] = list;
+          if (!list.length) {
+            this.kamSummaryByCustomerId[n] = '—';
+            return;
+          }
+          const names = list
+            .map((k) =>
+              `${k.firstName ?? k.FirstName ?? ''} ${k.lastName ?? k.LastName ?? ''}`.trim()
+            )
+            .filter(Boolean);
+          this.kamSummaryByCustomerId[n] = names.length ? names.join(', ') : '—';
+        },
+        () => {
+          this.kamSummaryByCustomerId[n] = '—';
+          this.kamRowsByCustomerId[n] = [];
+        }
+      );
+    }
+  }
+
+  kamSummaryText(data: any): string {
+    const cid = data?.customerID;
+    if (cid == null || cid === '') {
+      return '—';
+    }
+    const n = Number(cid);
+    if (Number.isNaN(n)) {
+      return '—';
+    }
+    return this.kamSummaryByCustomerId[n] ?? '…';
+  }
+
+  openKamInfo(data: any): void {
+    const cid = data?.customerID;
+    if (cid == null || cid === '') {
+      this.showNotification('snackbar-danger', 'Customer ID is missing.', 'bottom', 'center');
+      return;
+    }
+    const n = Number(cid);
+    if (Number.isNaN(n)) {
+      this.showNotification('snackbar-danger', 'Invalid customer ID.', 'bottom', 'center');
+      return;
+    }
+    const cached = this.kamRowsByCustomerId[n];
+    this.dialog.open(KamInfoDialogComponent, {
+      width: '820px',
+      maxWidth: '98vw',
+      panelClass: 'kam-info-dialog-panel',
+      backdropClass: 'kam-info-dialog-backdrop',
+      data: {
+        customerID: n,
+        customerName: data?.customer,
+        kamList: Array.isArray(cached) ? cached.slice() : undefined
+      }
+    });
+  }
+
   formControl = new FormControl('', 
   [
     Validators.required

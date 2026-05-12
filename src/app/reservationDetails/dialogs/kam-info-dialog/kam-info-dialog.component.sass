@@ -1,0 +1,57 @@
+// align with BookerInfo dialog spacing; high contrast for readability
+:host
+  display: block
+  color: #121212
+
+.kam-dialog-body
+  overflow-x: hidden
+  overflow-y: auto
+  max-height: min(70vh, 560px)
+
+.small-close-icon
+  font-size: 20px
+
+.kam-subtitle
+  font-size: 13px
+  font-weight: 500
+  color: #2d2d2d
+  margin-top: 4px
+  line-height: 1.4
+
+.font-17
+  color: #0a0a0a
+
+.TDValueBold
+  color: #0a0a0a
+  font-weight: 600
+
+.TDValue
+  color: #1a1a1a
+  font-size: 15px
+  line-height: 1.5
+  overflow-wrap: anywhere
+  word-break: break-word
+
+.kam-email
+  display: inline-block
+  max-width: 100%
+
+\:host ::ng-deep mat-card
+  background: #ffffff
+  box-shadow: none !important
+
+\:host ::ng-deep .mat-mdc-card-content
+  padding-top: 8px
+
+\:host ::ng-deep .mat-mdc-dialog-content
+  color: #121212
+
+.kam-loading,
+.kam-error,
+.kam-empty
+  font-size: 15px
+  line-height: 1.5
+  color: #1a1a1a
+
+.kam-error
+  color: #b00020

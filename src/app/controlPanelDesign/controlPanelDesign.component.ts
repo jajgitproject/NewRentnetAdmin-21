@@ -3,6 +3,7 @@ import { Component, ElementRef, EventEmitter, Input, OnInit, Output, ViewChild, 
 import { ControlPanelDesignService } from './controlPanelDesign.service';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { MatDialog, MatDialogRef } from '@angular/material/dialog';
+import { MatExpansionPanel } from '@angular/material/expansion';
 import { MatPaginator, PageEvent } from '@angular/material/paginator';
 import { MatSort } from '@angular/material/sort';
 import { GeneralService } from '../general/general.service';
@@ -3797,6 +3798,20 @@ public postPickUPCallLoadData(item: any, popUpOpen = true) {
       }
     });
   }
+  /** Keep inline (green) expansion body closed on single click; Reservation Details opens on double-click only. */
+  onCpReservationExpandedChange(opened: boolean, panel: MatExpansionPanel): void {
+    if (opened) {
+      panel.close();
+    }
+  }
+
+  /** Double-click row title area to open Reservation Details modal. */
+  onReservationHeaderDblClick(event: MouseEvent, reservationID: any, index: number): void {
+    event.preventDefault();
+    event.stopPropagation();
+    this.controlPanelDetails(reservationID, index);
+  }
+
 controlPanelDetails(reservationID:any,index:number) {
       const dialogRef = this.dialog.open(ControlPanelDialogeComponent, {
         width: '100%',

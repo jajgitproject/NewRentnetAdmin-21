@@ -30,6 +30,7 @@ import { SpecialInstructionInfoComponent } from '../SpecialInstructionInfo/Speci
 import moment from 'moment';
 import { DutyPostPickUPCallModel } from '../dutyPostPickUPCall/dutyPostPickUPCall.model';
 import { Observable, Subject } from 'rxjs';
+import { take } from 'rxjs/operators';
 import { ReservationDetails } from '../reservationDetails/reservationDetails.model';
 import { PassengerDetails } from '../passengerDetails/passengerDetails.model';
 import { ReservationLocationTransferLogModel } from '../reservationLocationTransferLog/reservationLocationTransferLog.model';
@@ -45,6 +46,7 @@ import { SoftToHardDialogComponent } from '../cancelAllotment/dialogs/softToHard
 import { VehicleInfoComponent } from '../VehicleInfo/VehicleInfo.component';
 import { VehicleCategoryInfoComponent } from '../VehicleCategoryInfo/VehicleCategoryInfo.component';
 import { BookerInfoComponent } from '../BookerInfo/BookerInfo.component';
+import { KamInfoDialogComponent } from '../reservationDetails/dialogs/kam-info-dialog/kam-info-dialog.component';
 import { FormDialogSendEmsComponent } from '../sendEmsAndEmail/dialogs/form-dialog/form-dialog.component';
 import { PackageInfoComponent } from '../PackageInfo/PackageInfo.component';
 import { FormDialogComponent as PassToSupplierFormDialogComponent } from '../passToSupplier/dialogs/form-dialog/form-dialog.component';
@@ -188,6 +190,11 @@ export class ControlPanelDialogeComponent {
 
   ReservationStatus:any;
 
+  /** Display line under KAM button; keyed by customerID */
+  kamSummaryByCustomerId: Record<number, string> = {};
+  /** Full KAM rows from prefetch — passed into KAM dialog so it does not rely on a second HTTP round-trip */
+  kamRowsByCustomerId: Record<number, any[]> = {};
+
   constructor(
     public dialogRef: MatDialogRef<ControlPanelDialogeComponent>,
     @Inject(MAT_DIALOG_DATA)
@@ -246,6 +253,7 @@ export class ControlPanelDialogeComponent {
         this.reservationInfo = list.length > 0 ? list : null;
         console.log('Fetched reservation details:', this.reservationInfo);
         this.ReservationStatus = list[0]?.reservationStatus ?? null;
+        this.prefetchKamSummaries(list);
         this.ngZone.run(() => {
           this.cdr.detectChanges();
         });
@@ -253,9 +261,91 @@ export class ControlPanelDialogeComponent {
       (error: HttpErrorResponse) => {
         this.reservationInfo = null;
         this.ReservationStatus = null;
+        this.kamSummaryByCustomerId = {};
+        this.kamRowsByCustomerId = {};
         this.cdr.detectChanges();
       }
     );
+  }
+
+  private prefetchKamSummaries(list: any[]): void {
+    this.kamSummaryByCustomerId = {};
+    this.kamRowsByCustomerId = {};
+    const seen = new Set<number>();
+    for (const row of list) {
+      const cid = row?.customerID;
+      if (cid == null || cid === '') {
+        continue;
+      }
+      const n = Number(cid);
+      if (Number.isNaN(n) || seen.has(n)) {
+        continue;
+      }
+      seen.add(n);
+      this.kamSummaryByCustomerId[n] = '…';
+      this._generalService
+        .GetCustomerKam(n)
+        .pipe(take(1))
+        .subscribe(
+          (kams: any[]) => {
+            const arr = kams == null ? [] : Array.isArray(kams) ? kams : [kams];
+            this.kamRowsByCustomerId[n] = arr;
+            if (!arr.length) {
+              this.kamSummaryByCustomerId[n] = '—';
+            } else {
+              const names = arr
+                .map((k) =>
+                  `${k.firstName ?? k.FirstName ?? ''} ${k.lastName ?? k.LastName ?? ''}`.trim()
+                )
+                .filter(Boolean);
+              this.kamSummaryByCustomerId[n] = names.length ? names.join(', ') : '—';
+            }
+            this.ngZone.run(() => this.cdr.detectChanges());
+          },
+          () => {
+            this.kamSummaryByCustomerId[n] = '—';
+            this.kamRowsByCustomerId[n] = [];
+            this.ngZone.run(() => this.cdr.detectChanges());
+          }
+        );
+    }
+  }
+
+  kamSummaryText(item: any): string {
+    const cid = item?.customerID;
+    if (cid == null || cid === '') {
+      return '—';
+    }
+    const n = Number(cid);
+    if (Number.isNaN(n)) {
+      return '—';
+    }
+    return this.kamSummaryByCustomerId[n] ?? '…';
+  }
+
+  KamInfo(item: any): void {
+    const cid = item?.customerID;
+    if (cid == null || cid === '') {
+      Swal.fire({ icon: 'warning', title: 'Customer ID is missing.' });
+      return;
+    }
+    const n = Number(cid);
+    if (Number.isNaN(n)) {
+      Swal.fire({ icon: 'warning', title: 'Invalid customer ID.' });
+      return;
+    }
+    const cached = this.kamRowsByCustomerId[n];
+    this.dialog.open(KamInfoDialogComponent, {
+      width: '820px',
+      maxWidth: '98vw',
+      panelClass: 'kam-info-dialog-panel',
+      backdropClass: 'kam-info-dialog-backdrop',
+      data: {
+        customerID: n,
+        customerName: item?.customerName,
+        kamList: Array.isArray(cached) ? cached.slice() : undefined
+      }
+    });
   }
 
   private onDutyLifecycleDialogClosed(dialogRef: MatDialogRef<any>, apply: (res: any) => void): void {
@@ -654,6 +744,7 @@ export class ControlPanelDialogeComponent {
       }
     });
   }
+
   emailInfo(item) {
     this.dialog.open(EmailInfoComponent, {
       // width: '500px',
