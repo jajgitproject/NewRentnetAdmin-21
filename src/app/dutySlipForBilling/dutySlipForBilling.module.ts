@@ -32,6 +32,7 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatTabsModule } from '@angular/material/tabs';
 import { MatExpansionModule } from '@angular/material/expansion';
 import { ControlPanelDialogeService } from '../controlPanelDialoge/controlPanelDialoge.service';
+import { SummaryOfDutyModule } from '../summaryOfDuty/summary-of-duty.module';
 
 
 @NgModule({
@@ -67,6 +68,7 @@ import { ControlPanelDialogeService } from '../controlPanelDialoge/controlPanelD
     OwlDateTimeModule,
     OwlNativeDateTimeModule,
     MatTooltipModule,
+    SummaryOfDutyModule,
   ],
   exports:[DutySlipForBillingComponent],
   providers: [

@@ -1307,3 +1307,22 @@ body.side-closed.submenu-closed.side-closed-hover .sidebar .menu .list li.menu-r
   background: rgba(0, 0, 0, 0.28);
 }
 
+/* Summary of Duty dialog: 90% of viewport width */
+.cdk-overlay-container .cdk-overlay-pane.summary-of-duty-dialog-panel {
+  max-width: 90vw !important;
+  width: 90vw !important;
+}
+
+.cdk-overlay-container .cdk-overlay-pane.summary-of-duty-dialog-panel .mat-mdc-dialog-container {
+  max-width: 90vw !important;
+  width: 100% !important;
+}
+
+.cdk-overlay-container .cdk-overlay-pane.summary-of-duty-dialog-panel .mat-mdc-dialog-container .mat-mdc-dialog-surface,
+.cdk-overlay-container .cdk-overlay-pane.summary-of-duty-dialog-panel .mat-mdc-dialog-container .mdc-dialog__surface {
+  max-width: 90vw !important;
+  width: 100% !important;
+  color: #121212 !important;
+  padding: 10px 18px 16px !important;
+}
+

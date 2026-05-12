@@ -1,0 +1,77 @@
+<div class="summary-of-duty">
+  <div class="row g-3 summary-of-duty__grid">
+    <div class="col-12 col-lg-7 summary-of-duty__col">
+      <section class="summary-section" *ngIf="packageDetails.length">
+        <div role="heading" aria-level="3" class="summary-section__head">Package Details</div>
+        <div class="summary-section__body">
+          <table class="summary-table">
+            <tbody>
+              <tr *ngFor="let row of packageDetails; trackBy: trackByLabel">
+                <th scope="row" class="summary-table__label">{{ row.label }}</th>
+                <td class="summary-table__value">{{ row.value }}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <section class="summary-section" *ngIf="extraDetails.length">
+        <div role="heading" aria-level="3" class="summary-section__head">Extra Details</div>
+        <div class="summary-section__body">
+          <table class="summary-table">
+            <tbody>
+              <tr *ngFor="let row of extraDetails; trackBy: trackByLabel">
+                <th scope="row" class="summary-table__label">{{ row.label }}</th>
+                <td class="summary-table__value">{{ row.value }}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <section class="summary-section" *ngIf="otherCharges.length">
+        <div role="heading" aria-level="3" class="summary-section__head">Other Charges</div>
+        <div class="summary-section__body">
+          <table class="summary-table">
+            <tbody>
+              <tr *ngFor="let row of otherCharges; trackBy: trackByLabel">
+                <th scope="row" class="summary-table__label">{{ row.label }}</th>
+                <td class="summary-table__value">{{ row.value }}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+    </div>
+
+    <div class="col-12 col-lg-5 summary-of-duty__col">
+      <section class="summary-section" *ngIf="taxDetails.length">
+        <div role="heading" aria-level="3" class="summary-section__head">Tax Details</div>
+        <div class="summary-section__body">
+          <table class="summary-table">
+            <tbody>
+              <tr *ngFor="let row of taxDetails; trackBy: trackByLabel">
+                <th scope="row" class="summary-table__label">{{ row.label }}</th>
+                <td class="summary-table__value">{{ row.value }}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <section class="summary-section summary-section--summary">
+        <div role="heading" aria-level="3" class="summary-section__head">Summary</div>
+        <div class="summary-section__body">
+          <table class="summary-table summary-table--final">
+            <tbody>
+              <tr>
+                <th scope="row" class="summary-table__label summary-table__label--final">{{ finalBillLabel }}</th>
+                <td class="summary-table__value summary-table__value--final">{{ finalBillAmount }}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+    </div>
+  </div>
+</div>

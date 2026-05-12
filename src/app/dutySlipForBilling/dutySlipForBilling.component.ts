@@ -8,8 +8,8 @@ import { MatSort } from '@angular/material/sort';
 import { DataSource } from '@angular/cdk/collections';
 import { Injectable, EventEmitter, Output } from '@angular/core';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import { BehaviorSubject, fromEvent, merge, Observable, Subject, Subscription } from 'rxjs';
-import { map, startWith } from 'rxjs/operators';
+import { BehaviorSubject, fromEvent, merge, Observable, of, Subject, Subscription } from 'rxjs';
+import { catchError, map, startWith, switchMap } from 'rxjs/operators';
 import { DateAdapter, MAT_DATE_LOCALE } from '@angular/material/core';
 import { MatMenu, MatMenuTrigger } from '@angular/material/menu';
 import { SelectionModel } from '@angular/cdk/collections';
@@ -24,6 +24,15 @@ import { BillingHistory } from './dutySlipForBilling.model';
 import { ClosingModel } from '../clossingOne/clossingOne.model';
 import { Dispute } from '../dispute/dispute.model';
 import { ClossingOneService } from '../clossingOne/clossingOne.service';
+import { SummaryOfDutyData } from '../summaryOfDuty/summary-of-duty.model';
+import {
+  SummaryOfDutyDialogComponent,
+  SummaryOfDutyDialogData
+} from '../summaryOfDuty/summary-of-duty-dialog.component';
+import {
+  mapInvoiceCalculationToSummaryOfDuty,
+  unwrapInvoiceCalculationPayload
+} from '../summaryOfDuty/invoice-calculation-to-summary-of-duty.mapper';
 
 
 
@@ -63,6 +72,8 @@ export class DutySlipForBillingComponent implements OnInit, AfterViewInit {
   //DSClosing: any = null;
   showSpinner:boolean = false;
   showSpinnerForVDGB:boolean = false;
+  /** Bill breakdown for Summary of Duty; null uses child demo until mapped from Calculate Bill API. */
+  summaryOfDutyData: SummaryOfDutyData | null = null;
   private suppressInitialDutyStatusEmit = true;
 
   constructor(
@@ -1895,14 +1906,48 @@ setVerifyDuty(value: boolean, details: string) {
   }
       
 
+  private openSummaryOfDutyDialog(): void {
+    const rid = this.advanceTableClosingOne?.closingDutySlipModel?.reservationID;
+    const parts: string[] = [];
+    if (this.DutySlipID != null && this.DutySlipID !== '') {
+      parts.push(`Duty slip ID: ${this.DutySlipID}`);
+    }
+    if (rid != null && rid !== '') {
+      parts.push(`Reservation ID: ${rid}`);
+    }
+    const dialogData: SummaryOfDutyDialogData = {
+      summary: this.summaryOfDutyData,
+      subtitle: parts.length ? parts.join(' · ') : undefined
+    };
+    this.dialog.open(SummaryOfDutyDialogComponent, {
+      width: '90vw',
+      maxWidth: '90vw',
+      maxHeight: '90vh',
+      autoFocus: false,
+      restoreFocus: true,
+      panelClass: 'summary-of-duty-dialog-panel',
+      data: dialogData
+    });
+  }
+
   //---------Calculate Bill------------------------
   public CalculateBill()
   {
-    this.clossingOneService.calculateBill(this.DutySlipID)  
-    .subscribe(
+    this.clossingOneService
+      .calculateBill(this.DutySlipID)
+      .pipe(
+        switchMap((calcRes) =>
+          this.clossingOneService.getDutyBillingSummary(this.DutySlipID).pipe(
+            catchError(() => of(calcRes))
+          )
+        )
+      )
+      .subscribe(
       response => 
       {
-        this.Message = response.message;
+        this.Message = response.message ?? response.Message ?? '';
+        const payload = unwrapInvoiceCalculationPayload(response) ?? response;
+        this.summaryOfDutyData = mapInvoiceCalculationToSummaryOfDuty(payload) ?? null;
         this.dutyStatusChanged.emit({
         verifyDuty: this.advanceTableForm.value.verifyDuty,
         goodForBilling: this.advanceTableForm.value.goodForBilling,
@@ -1915,6 +1960,7 @@ setVerifyDuty(value: boolean, details: string) {
           'center'
         );
         this.saveDisabled = true;
+        this.openSummaryOfDutyDialog();
       },
       error =>
       {

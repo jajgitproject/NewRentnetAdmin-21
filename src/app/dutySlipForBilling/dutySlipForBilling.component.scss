@@ -32,6 +32,7 @@ tbody, thead {
     text-decoration: underline;
   }
 
+
   /* Reduce padding and margins for mat-form-field (exclude closing grid: MDC sizes those) */
 .mat-form-field:not(.cp-quick-search-field) {
   margin: 0;

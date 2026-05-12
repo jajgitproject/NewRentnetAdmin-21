@@ -57,6 +57,26 @@ export class ClossingOneService
   { 
     return this.httpClient.get(this.API_CalculateBill+'/'+dutySlipID);
   }
+
+  /** Full persisted calculation for Summary of Duty: `GET invoicecalculation/duty-billing-summary/{DutySlipID}`. */
+  getDutyBillingSummary(dutySlipID: number | string): Observable<any> {
+    return this.httpClient.get(this.API_URL_Bill + '/duty-billing-summary/' + dutySlipID);
+  }
+
+  /** Full invoice calculation row + nested models (same as `GetInvoiceCalculationByDutySlipID`). */
+  getInvoiceCalculationFullByDutySlipId(dutySlipID: number | string): Observable<any> {
+    return this.httpClient.get(this.API_URL_Bill + '/getinvoice/' + dutySlipID);
+  }
+
+  /** GST row only: `GET invoicecalculation/gst/dutyslip/{dutySlipId}` (same data as `invoiceGSTModel` on getinvoice). */
+  getInvoiceGstByDutySlipId(dutySlipID: number | string): Observable<any> {
+    return this.httpClient.get(this.API_URL_Bill + '/gst/dutyslip/' + dutySlipID);
+  }
+
+  /** GST row by `InvoiceCalculationID`: `GET invoicecalculation/gst/bycalculation/{id}`. */
+  getInvoiceGstByInvoiceCalculationId(invoiceCalculationID: number | string): Observable<any> {
+    return this.httpClient.get(this.API_URL_Bill + '/gst/bycalculation/' + invoiceCalculationID);
+  }
    getDutySlipMap(dutySlipID:any): Observable<any> {
     return this.httpClient.get<any>(this.API_URL_CurrentDutyInfo +'/' +dutySlipID);
   }

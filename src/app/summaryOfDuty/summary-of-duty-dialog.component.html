@@ -1,0 +1,13 @@
+<div class="sod-dialog-header">
+  <div class="sod-dialog-header-text">
+    <h2 class="sod-dialog-title">Summary of Duty</h2>
+    <p class="sod-dialog-subtitle" *ngIf="data?.subtitle">{{ data.subtitle }}</p>
+  </div>
+  <button type="button" mat-icon-button mat-dialog-close class="sod-dialog-close" aria-label="Close">
+    <mat-icon>close</mat-icon>
+  </button>
+</div>
+
+<mat-dialog-content class="sod-dialog-body">
+  <app-summary-of-duty [data]="data?.summary ?? null"></app-summary-of-duty>
+</mat-dialog-content>
