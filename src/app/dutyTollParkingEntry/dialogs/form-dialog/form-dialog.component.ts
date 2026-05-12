@@ -60,7 +60,7 @@ export class FormDialogComponent
         {
           this.dialogTitle ='Toll Parking For Duty Slip No.';       
           this.advanceTable = data.advanceTable;
-          
+          this.advanceTable.activationStatus=true;
         }
         
         if(this.action==='add') 
