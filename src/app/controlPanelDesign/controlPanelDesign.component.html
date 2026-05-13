@@ -100,7 +100,7 @@
             </div>
             <div class="col-xl-2 col-lg-2 col-md-2 col-sm-12 mb-2">
               <mat-form-field class="example-full-width cp-quick-search-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
-                <mat-label>Dispatch Status</mat-label>
+                <mat-label>Trip Status</mat-label>
                 <mat-select panelClass="control-panel-select-panel" [panelWidth]="null" formControlName="tripStatus">
                   <mat-option value="All">All</mat-option>
                   <mat-option value="Not Dispatched">Not Dispatched</mat-option>
@@ -440,6 +440,33 @@
                   <mat-option value="Rejected">Rejected</mat-option>
                    <mat-option value="Pending">Pending</mat-option>
                 </mat-select>
+              </mat-form-field>
+            </div>
+          </div>
+
+          <div class="row">
+            <div class="col-xl-2 col-lg-2 col-md-2 col-sm-12 mb-2">
+              <mat-form-field class="example-full-width cp-advance-search-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
+                <mat-label>Vehicle</mat-label>
+                <input type="text" matInput formControlName="vehicleName" [matAutocomplete]="auto10" />
+                <mat-autocomplete #auto10="matAutocomplete" panelWidth="custom-autocomplete-panel">
+                  <mat-option *ngFor="let options of filteredVehicleOptions | async" [value]="options.vehicle">
+                    {{ options.vehicle }}
+                  </mat-option>
+                </mat-autocomplete>
+              </mat-form-field>
+            </div>
+
+            <div class="col-xl-2 col-lg-2 col-md-2 col-sm-12 mb-2">
+              <mat-form-field class="example-full-width cp-allotment-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
+                <mat-label>Payment Mode</mat-label>
+                <input type="text" matInput formControlName="modeOfPayment" [matAutocomplete]="auto50">
+                <mat-autocomplete #auto50="matAutocomplete" panelWidth="custom-autocomplete-panel">
+                  <mat-option *ngFor="let option of filteredPaymentModeOptions | async"
+                              [value]="option.modeOfPayment">
+                            {{option.modeOfPayment}}
+                  </mat-option>
+                </mat-autocomplete>
               </mat-form-field>
             </div>
           </div>

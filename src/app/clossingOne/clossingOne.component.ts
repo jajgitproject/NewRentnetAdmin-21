@@ -466,6 +466,7 @@ export class ClossingOneComponent implements OnInit, AfterViewInit, AfterViewChe
       });
     dialogRef.afterClosed().subscribe((res: any) => {
       this.TollParkingLoadData();
+      window.location.reload();
     });
   }
 
@@ -497,7 +498,7 @@ export class ClossingOneComponent implements OnInit, AfterViewInit, AfterViewChe
     dialogRef.afterClosed().subscribe((res: any) => {
       if (res === true) {
         this.DisputeLoadData();
-
+        window.location.reload();
       }
     });
   }
@@ -543,6 +544,7 @@ export class ClossingOneComponent implements OnInit, AfterViewInit, AfterViewChe
       });
     dialogRef.afterClosed().subscribe((res: any) => {
       this.DutyInterStateTaxLoadData();
+      window.location.reload();
     })
   }
 
@@ -573,6 +575,7 @@ export class ClossingOneComponent implements OnInit, AfterViewInit, AfterViewChe
       });
     dialogRef.afterClosed().subscribe((res: any) => {
       this.dutyExpenseLoadData();
+      window.location.reload();
     });
   }
 
@@ -603,6 +606,7 @@ export class ClossingOneComponent implements OnInit, AfterViewInit, AfterViewChe
       });
     dialogRef.afterClosed().subscribe((res: any) => {
       this.DutyGSTPercentageLoadData();
+      window.location.reload();
     });
   }
   DutyGSTPercentageLoadData() {
@@ -632,6 +636,7 @@ export class ClossingOneComponent implements OnInit, AfterViewInit, AfterViewChe
       });
     dialogRef.afterClosed().subscribe((res: any) => {
       // this.loadDutyStateData();
+      window.location.reload();
     });
   }
   loadDutyStateData() {
@@ -662,6 +667,7 @@ export class ClossingOneComponent implements OnInit, AfterViewInit, AfterViewChe
       });
     dialogRef.afterClosed().subscribe((res: any) => {
       this.loadDutyStateDataCustomer();
+      window.location.reload();
     });
   }
 
@@ -694,6 +700,7 @@ export class ClossingOneComponent implements OnInit, AfterViewInit, AfterViewChe
       });
     dialogRef.afterClosed().subscribe((res: any) => {
       this.loadDataForReservationDiscountClosing();
+      window.location.reload();
     })
   }
 
@@ -727,6 +734,7 @@ export class ClossingOneComponent implements OnInit, AfterViewInit, AfterViewChe
     dialogRef.afterClosed().subscribe((res: any) => {
       if (res === true) {
         this.loadDataforAdditionalKMHR();
+        window.location.reload();
       }
     });
   }
@@ -763,6 +771,7 @@ export class ClossingOneComponent implements OnInit, AfterViewInit, AfterViewChe
       });
     dialogRef.afterClosed().subscribe((res: any) => {
       this.DutySACLoadData();
+      window.location.reload();
     });
   }
 
@@ -965,6 +974,7 @@ export class ClossingOneComponent implements OnInit, AfterViewInit, AfterViewChe
         this.salesPersonLoadData(); // ✅ This will reload the updated list
         // this.dataSavedMessage = true;
         this.updateData.next();
+        window.location.reload();
       }
     });
   }
@@ -1299,6 +1309,7 @@ export class ClossingOneComponent implements OnInit, AfterViewInit, AfterViewChe
       });
     dialogRef.afterClosed().subscribe((res: any) => {
       this.MOPLoadData();
+      window.location.reload();
     })
   }
 
@@ -1371,7 +1382,7 @@ export class ClossingOneComponent implements OnInit, AfterViewInit, AfterViewChe
           if (result !== undefined || result !== null) {
             this.dutySlipImage = result.dutySlipImage;
             this.loadDataForImage();
-
+            window.location.reload();
           }
 
         });
@@ -1444,6 +1455,7 @@ export class ClossingOneComponent implements OnInit, AfterViewInit, AfterViewChe
           dialogRef.afterClosed().subscribe((res: any) => {
             this.settledRateLoadData();
             //this.ngOnInit();
+            window.location.reload();
           })
         }
         else
@@ -1460,6 +1472,7 @@ export class ClossingOneComponent implements OnInit, AfterViewInit, AfterViewChe
           dialogRef.afterClosed().subscribe((res: any) => {
             this.settledRateLoadData();
             //this.ngOnInit();
+            window.location.reload();
           })
         }
       }
@@ -1507,7 +1520,7 @@ showAndScrollOpenSettledRates() {
         }
       });
     dialogRef.afterClosed().subscribe((res: any) => {
-      
+      window.location.reload();
     })
   }
 
@@ -1555,7 +1568,7 @@ showAndScrollOpenSettledRates() {
       }
     });
     dialogRef.afterClosed().subscribe((res: any) => {
-      this.BookingDataOnClosing();
+      window.location.reload();
     })
   }
 

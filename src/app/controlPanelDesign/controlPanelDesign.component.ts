@@ -131,6 +131,8 @@ import { OrganizationalEntityDropDown } from '../organizationalEntityMessage/org
 import { SpecialInstructionDialogComponent } from '../specialInstruction/dialogs/special-instruction-dialog/special-instruction-dialog.component';
 import { ControlPanelDialogeService } from '../controlPanelDialoge/controlPanelDialoge.service';
 import { InternalNoteDialogComponent } from '../internalNoteDetails/dialogs/internal-note-dialog/internal-note-dialog.component';
+import { ModeOfPaymentDropDown } from '../supplierContract/modeOfPaymentDropDown.model';
+import { InventoryDropDown } from '../inventory/inventoryDropDown.model';
 
 @Component({
   standalone: false,
@@ -268,7 +270,11 @@ export class ControlPanelDesignComponent implements OnInit {
   filteredTransferLocationOptions: Observable<OrganizationalEntityDropDown[]> = of([]);
   verifyDutyStatusAndCacellationStatus: any;
 
+  public RegNumberList: InventoryDropDown[] = [];
   filteredRegNumberOptions:Observable<VehicleDropDown[]>;
+
+  public PaymentModeList?:ModeOfPaymentDropDown[]=[];
+  filteredPaymentModeOptions: Observable<ModeOfPaymentDropDown[]>;
     
   constructor(
     public route: Router,
@@ -365,6 +371,7 @@ export class ControlPanelDesignComponent implements OnInit {
     this.safeRun(() => this.InitLocation());
     this.safeRun(() => this.InitTransferLocation());
     this.safeRun(() => this.InitRegNumber());
+    this.safeRun(() => this.InitPaymentMode());
 
     const today = this.formatDate(new Date());
     const now = new Date();
@@ -544,6 +551,7 @@ export class ControlPanelDesignComponent implements OnInit {
       billed:[this._filters.billed],
       passed: [this._filters.passed],
       driverAcceptanceStatus: [this._filters.driverAcceptanceStatus],
+      modeOfPayment: [this._filters.modeOfPayment],
     });
   }
 
@@ -2142,7 +2150,14 @@ reachedByExecutiveGPS(item:any){
   bookingCountDetailsInfo() {
     this.dialog.open(TotalBookingCountDetailsComponent, {
       width: '500px',
-      data: {}
+      data: 
+      {
+        advanceTable:
+        {
+          fromDate: this._filters.fromDate,
+          toDate: this._filters.toDate,
+        }        
+      }
     });
   }
 
@@ -3906,7 +3921,7 @@ setCalculatedLocationOutTime(data: any, interval?: number) {
 }
 
 
-    //--------------------ForCascadeRegistrationNumber----
+   //---------- Reg Number ----------
     InitRegNumber()
     {
       this._generalService.GetRegNoForDropDown().subscribe(
@@ -3929,6 +3944,29 @@ setCalculatedLocationOutTime(data: any, interval?: number) {
       }
       // Return filtered results matching the typed value
       return this.RegNumberList.filter(data => data.registrationNumber.toLowerCase().includes(filterValue)
+      );
+    }
+
+
+    //---------- Payment Mode ----------
+    InitPaymentMode() 
+    {
+      this._generalService.GetModeOfPayment().subscribe(
+      data => {
+        this.PaymentModeList = data;
+        this.filteredPaymentModeOptions = this.filterForm.controls.modeOfPayment.valueChanges.pipe(
+          startWith(""),
+          map(value => this._filterPaymentMode(value || ''))
+        );
+      });
+    }   
+    private _filterPaymentMode(value: string): any {
+      const filterValue = value.toLowerCase();
+        return this.PaymentModeList?.filter(
+        data => 
+        {
+          return data.modeOfPayment.toLowerCase().includes(filterValue);
+        }
       );
     }
 

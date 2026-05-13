@@ -109,7 +109,7 @@ export class DutySlipForBillingComponent implements OnInit, AfterViewInit {
       message: value.message
     });
   });
-  console.log(this.InvoiceID)
+  
     this.Action = this.advanceTableClosingOne.action;
     this.DutySlipID = this.advanceTableClosingOne.closingDutySlipModel.dutySlipID;
     this.advanceTableForm.patchValue({dutySlipForBillingID : this.advanceTableClosingOne.closingDutySlipForBillingModel.dutySlipForBillingID});
@@ -141,6 +141,7 @@ export class DutySlipForBillingComponent implements OnInit, AfterViewInit {
 
     this.onKeyUp();
     this.onTimeSelection();
+    console.log(this.advanceTableClosingOne.closingReservationForPickupDataModel)
   }
 
   ngAfterViewInit(): void {
@@ -966,6 +967,7 @@ export class DutySlipForBillingComponent implements OnInit, AfterViewInit {
 
   public LoadDataForBilling()
   {
+    console.log(this.advanceTableClosingOne.closingDutySlipForBillingModel);
     if(this.InvoiceID !== 0) 
     {
       this.advanceTableForm.get('verifyDuty')?.disable();
@@ -1134,8 +1136,8 @@ export class DutySlipForBillingComponent implements OnInit, AfterViewInit {
     this.advanceTableForm.patchValue({locationOutLocationOrHubID : this.advanceTableClosingOne.closingDutySlipForBillingModel.locationOutLocationOrHubID});
     this.advanceTableForm.patchValue({locationInLocationOrHubID : this.advanceTableClosingOne.closingDutySlipForBillingModel.locationInLocationOrHubID});
     this.advanceTableForm.patchValue({closureType : this.advanceTableClosingOne.closingDutySlipForBillingModel.closureType});
-    this.advanceTableForm.patchValue({dutyTypeID : this.advanceTableClosingOne.closingDutySlipForBillingModel.dutyTypeID});
-    this.advanceTableForm.patchValue({packageID : this.advanceTableClosingOne.closingDutySlipForBillingModel.packageID});
+    this.advanceTableForm.patchValue({dutyTypeID : this.advanceTableClosingOne.closingReservationForPickupDataModel.packageTypeID});
+    this.advanceTableForm.patchValue({packageID : this.advanceTableClosingOne.closingReservationForPickupDataModel.packageID});
     this.advanceTableForm.patchValue({closureStatus : this.advanceTableClosingOne.closingDutySlipModel.closureStatus});
     this.advanceTableForm.patchValue({closureMethod : this.advanceTableClosingOne.closingDutySlipModel.closureMethod});
     this.advanceTableForm.patchValue({verifyDuty : this.advanceTableClosingOne.closingDutySlipForBillingModel.verifyDuty});
@@ -1866,6 +1868,7 @@ setVerifyDuty(value: boolean, details: string) {
       } 
       this.advanceTableForm.patchValue({actionDetails :'Unchecked',actionTaken : "Verify Duty"});
       //this.saveDisabled = true;      
+      console.log(this.advanceTableForm.getRawValue())
       this.dutySlipForBillingService.update(this.advanceTableForm.getRawValue())  
       .subscribe(
         response => 
@@ -1883,7 +1886,7 @@ setVerifyDuty(value: boolean, details: string) {
           this.buttonText = 'Update';
           this.advanceTableForm.controls["goodForBilling"].enable();
           this.advanceTableForm.controls["verifyDuty"].enable();          
-          if(response.goodForBilling === true && response.verifyDuty === true)
+          if(response.goodForBilling === true || response.verifyDuty === true)
           {
             this.advanceTableForm.controls["goodForBilling"].setValue(false);
             this.advanceTableForm.controls["verifyDuty"].setValue(false);
