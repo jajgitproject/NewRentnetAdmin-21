@@ -221,9 +221,9 @@
               </td>
             </tr>
 
-            <tr *ngIf="dataSource?.invoicePackageFGRModel?.fgrFixedAmount != 0">
+            <!-- <tr *ngIf="dataSource?.invoicePackageFGRModel?.fgrFixedAmount != 0">
               <td class="table-midrow-firstcolumn">
-                FGR Charge {{dataSource?.invoicePackageFGRModel?.fgrkm}} KMs -
+                FGR Charge {{dataSource?.invoicePackageFGRModel?.fgrkm}} KMs - 
                 @ {{dataSource?.invoicePackageFGRModel?.fgrkmRate | number:'1.2-2'}}
               </td>
               <td class="table-midrow-secondcolumn">
@@ -232,6 +232,43 @@
               <td class="table-midrow-thirdcolumn">
                 {{dataSource?.invoicePackageFGRModel?.fgrkmAmount | number:'1.2-2'}}
               </td>
+            </tr> -->
+
+            <tr *ngIf="dataSource?.invoiceNightModel?.totalNightChargesAmount != 0">
+              <td class="table-midrow-firstcolumn">
+                <span *ngIf="dataSource?.invoiceNightModel?.totalNights !=0">
+                  Nights : {{dataSource?.invoiceNightModel?.totalNights}} &nbsp;
+                </span>
+              </td>
+              <td class="table-midrow-secondcolumn">
+                <span *ngIf="dataSource?.invoiceNightModel?.nightChargesPerNight != 0">
+                  {{dataSource?.invoiceNightModel?.nightChargesPerNight}} &nbsp;
+                </span>
+              </td>
+              <td class="table-midrow-thirdcolumn">
+                <span *ngIf="dataSource?.invoiceNightModel?.totalNightChargesAmount != 0">
+                  {{dataSource?.invoiceNightModel?.totalNightChargesAmount}} &nbsp;
+                </span>
+              </td>
+            </tr>
+
+            <tr>
+              <td class="table-midrow-firstcolumn">
+                FGR Charge
+              </td>
+              <td class="table-midrow-secondcolumn">
+              </td>
+              <td class="table-midrow-thirdcolumn">
+                {{dataSource?.invoicePackageFGRModel?.fgrkmAmount + dataSource?.invoicePackageFGRModel.fgrFixedAmount | number:'1.2-2'}}
+              </td>
+            </tr>
+
+            <tr *ngIf="dataSource?.totalChargebleExpenceAmount!=0">
+              <td class="table-midrow-firstcolumn">Total Expense</td>
+              <td class="table-midrow-secondcolumn"></td>
+              <td class="table-midrow-thirdcolumn">
+                {{dataSource?.totalChargebleExpenceAmount}} &nbsp;
+              </td>
             </tr>
 
             <tr *ngIf="dataSource?.invoicePackageModel?.driverAllowance != 0">
@@ -239,6 +276,14 @@
               <td class="table-midrow-secondcolumn"></td>
               <td class="table-midrow-thirdcolumn">
                 {{dataSource?.invoiceDriverAllownceModel?.totalDriverAllowanceAmount | number:'1.2-2'}}
+              </td>
+            </tr>
+
+            <tr *ngIf="dataSource?.totalInterStateAmount != 0">
+              <td class="table-midrow-firstcolumn">Inter State Tax</td>
+              <td class="table-midrow-secondcolumn"></td>
+              <td class="table-midrow-thirdcolumn">
+                {{dataSource?.totalInterStateAmount}}
               </td>
             </tr>
 
