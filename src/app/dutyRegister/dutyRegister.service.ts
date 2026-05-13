@@ -5,6 +5,7 @@ import { DutyRegisterModel, SearchCriteria } from './dutyRegister.model';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { DatePipe } from '@angular/common';
 import { GeneralService } from '../general/general.service';
+import { S } from '@angular/cdk/keycodes';
 @Injectable()
 export class DutyRegisterService 
 {
@@ -254,6 +255,11 @@ export class DutyRegisterService
   getTableData(criteria: SearchCriteria, pageNumber: number): Observable<any> {
     const updatedCriteria = {
       SearchCustomerGroup: criteria.SearchCustomerGroup || "null",
+      SearchCustomer: criteria.SearchCustomer || "null",
+      SearchBranch: criteria.SearchBranch || "null",
+      SearchBranchID: criteria.SearchBranchID || 0,
+      SearchKAM: criteria.SearchKAM || "null",
+      SearchKAMID: criteria.SearchKAMID || 0,
       SearchCustomerPersonName: criteria.SearchCustomerPersonName || "null",
       SearchDutyType: criteria.SearchDutyType || "null",
       SearchFeedbackDate: criteria.SearchFeedbackDate || "null",
@@ -271,6 +277,22 @@ export class DutyRegisterService
       SearchCustomerType: criteria.SearchCustomerType || "null",
       SearchCustomerLocationName: criteria.SearchCustomerLocationName || "null",
       SearchBookingStatus: criteria.SearchBookingStatus || "null",
+      SearchImportance: criteria.SearchImportance || "null",
+      SearchDSVerification:
+            criteria.SearchDSVerification !== null &&
+            criteria.SearchDSVerification !== undefined
+              ? criteria.SearchDSVerification
+              : null,
+      SearchGoodForBill:
+            criteria.SearchGoodForBill !== null &&
+            criteria.SearchGoodForBill !== undefined
+              ? criteria.SearchGoodForBill
+              : null,
+      SearchBillStatus:
+            criteria.SearchBillStatus !== null &&
+            criteria.SearchBillStatus !== undefined
+              ? criteria.SearchBillStatus
+              : null,
       SearchDri: criteria.SearchDri || "null",
       SearchCarNo: criteria.SearchCarNo || "null",
       SearchSupplierO: criteria.SearchSupplierO || "null",
@@ -288,18 +310,23 @@ export class DutyRegisterService
       SearchLocationGroup: criteria.SearchLocationGroup || "null",
       SearchBillToDate: criteria.SearchBillToDate || "null",
       SearchBillFromDate: criteria.SearchBillFromDate || "null",
-      SearchBillStatus:criteria.SearchBillStatus || "null",
       PageNumber: pageNumber,
       pageNumber: pageNumber,
       order: "Descending",
       orderbyColumn: "ReservationID"
     };
+    console.log(`${this.API_URL}`, updatedCriteria);
     return this.httpClient.post(`${this.API_URL}`, updatedCriteria);
   }
 
   getTableDataSort(criteria: SearchCriteria,pageNumber: number,coloumName: string,sortType: string): Observable<any> {
     const updatedCriteria = {
       SearchCustomerGroup: criteria.SearchCustomerGroup || "null",
+      SearchCustomer: criteria.SearchCustomer || "null",
+      SearchBranch: criteria.SearchBranch || "null",
+      SearchBranchID: criteria.SearchBranchID || 0,
+      SearchKAM: criteria.SearchKAM || "null",
+      SearchKAMID: criteria.SearchKAMID || 0,
       SearchCustomerPersonName: criteria.SearchCustomerPersonName || "null",
       SearchDutyType: criteria.SearchDutyType || "null",
       SearchFeedbackDate: criteria.SearchFeedbackDate || "null",
@@ -317,6 +344,10 @@ export class DutyRegisterService
       SearchCustomerType: criteria.SearchCustomerType || "null",
       SearchCustomerLocationName: criteria.SearchCustomerLocationName || "null",
       SearchBookingStatus: criteria.SearchBookingStatus || "null",
+      SearchImportance: criteria.SearchImportance || "null",
+      SearchDSVerification: criteria.SearchDSVerification !== null && criteria.SearchDSVerification !== undefined ? criteria.SearchDSVerification : null,
+      SearchGoodForBill: criteria.SearchGoodForBill !== null && criteria.SearchGoodForBill !== undefined ? criteria.SearchGoodForBill : null,
+      SearchBillStatus: criteria.SearchBillStatus !== null && criteria.SearchBillStatus !== undefined ? criteria.SearchBillStatus : null,
       SearchDri: criteria.SearchDri || "null",
       SearchCarNo: criteria.SearchCarNo || "null",
       SearchSupplierO: criteria.SearchSupplierO || "null",
@@ -334,7 +365,6 @@ export class DutyRegisterService
       SearchLocationGroup: criteria.SearchLocationGroup || "null",
       SearchBillFromDate: criteria.SearchBillFromDate || "null",
       SearchBillToDate: criteria.SearchBillToDate || "null",
-      SearchBillStatus:criteria.SearchBillStatus || "null",
       PageNumber: pageNumber,
       pageNumber: pageNumber,
       order: sortType || "Descending",
@@ -357,6 +387,11 @@ export class DutyRegisterService
 
     const updatedCriteria = {
       SearchCustomerGroup: toNull(criteria.SearchCustomerGroup),
+      SearchCustomer: toNull(criteria.SearchCustomer),
+      SearchBranch: toNull(criteria.SearchBranch),
+      SearchBranchID: criteria.SearchBranchID || 0,
+      SearchKAM: toNull(criteria.SearchKAM),
+      SearchKAMID: criteria.SearchKAMID || 0,
       SearchCustomerPersonName: toNull(criteria.SearchCustomerPersonName),
       SearchDutyType: toNull(criteria.SearchDutyType),
       SearchFeedbackDate: toNull(criteria.SearchFeedbackDate),
@@ -374,6 +409,10 @@ export class DutyRegisterService
       SearchCustomerType: toNull(criteria.SearchCustomerType),
       SearchCustomerLocationName: toNull(criteria.SearchCustomerLocationName),
       SearchBookingStatus: toNull(criteria.SearchBookingStatus),
+      SearchImportance: toNull(criteria.SearchImportance),
+      SearchDSVerification: criteria.SearchDSVerification !== null && criteria.SearchDSVerification !== undefined ? criteria.SearchDSVerification : null,
+      SearchGoodForBill: criteria.SearchGoodForBill !== null && criteria.SearchGoodForBill !== undefined ? criteria.SearchGoodForBill : null,
+      SearchBillStatus: criteria.SearchBillStatus !== null && criteria.SearchBillStatus !== undefined ? criteria.SearchBillStatus : null,                           
       SearchDri: toNull(criteria.SearchDri),
       SearchCarNo: toNull(criteria.SearchCarNo),
       SearchSupplierO: toNull(criteria.SearchSupplierO),
@@ -392,7 +431,7 @@ export class DutyRegisterService
       SearchBillToDate: toNull(criteria.SearchBillToDate),
       SearchBillStatus: toNull(criteria.SearchBillStatus)
     };
-
+    console.log(`${this.API_URL}/ExportCsv`, updatedCriteria);
     return this.httpClient.post(`${this.API_URL}/ExportCsv`, updatedCriteria, {
       responseType: 'blob'
     });

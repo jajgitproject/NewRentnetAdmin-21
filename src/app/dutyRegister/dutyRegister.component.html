@@ -27,14 +27,44 @@
                             <mat-expansion-panel class="duty-register-inline-search-panel" [expanded]="true">
                                 <mat-expansion-panel-header>
                                     <mat-panel-title>
-                                       Duty Register
+                                       Quick Search
                                     </mat-panel-title>
                                 </mat-expansion-panel-header>
 
                                 <div class="duty-register-inline-search-body">
-                                    <ng-container *ngTemplateOutlet="dutyRegisterSearchFields"></ng-container>
+                                    <ng-container *ngTemplateOutlet="dutyRegisterQuickSearch"></ng-container>
                                 </div>
+                                <br/>
+                                <div class="duty-register-inline-search-actions quick-search-actions">
+                                    <button mat-raised-button color="primary" class="duty-register-search-button" (click)="SearchData()">
+                                        Search
+                                    </button>
+                                    &nbsp;&nbsp;
+                                    
+                                    <button mat-raised-button color="warn" class="duty-register-reset-button" (click)="refresh()">
+                                        Refresh
+                                    </button>
+                                    &nbsp;&nbsp;
+                                    <button mat-raised-button color="accent" (click)="downloadFilteredCsv()" [disabled]="csvExporting || !hasManualSearch" [matTooltip]="!hasManualSearch ? 'Pehle Search karein' : ''">
+                                        {{ csvExporting ? 'Downloading...' : 'Download CSV' }}
+                                    </button>
+                                </div>
+                            </mat-expansion-panel>
+                        </mat-accordion>
+                        
+                        <br/>
+                        <mat-accordion class="duty-register-search-accordion">
+                            <mat-expansion-panel class="duty-register-inline-search-panel" [expanded]="false">
+                                <mat-expansion-panel-header>
+                                    <mat-panel-title>
+                                       Advance Search
+                                    </mat-panel-title>
+                                </mat-expansion-panel-header>
 
+                                <div class="duty-register-inline-search-body">
+                                    <ng-container *ngTemplateOutlet="dutyRegisterAdvanceSearch"></ng-container>
+                                </div>
+                                <br/>
                                 <div class="duty-register-inline-search-actions quick-search-actions">
                                     <button mat-raised-button color="primary" class="duty-register-search-button" (click)="SearchData()">
                                         Search
@@ -73,550 +103,455 @@
                                 <ng-template #elseBlock2>
                                     <div class="scrollable-table-container">
                                     <div style="width: 950%; overflow-y: hidden;">
-                                        <mat-table #table [dataSource]="dataSource" matSort class="mat-cell floating-header-table" (matSortChange)="SortingData($event)">
-                                        <ng-container matColumnDef="ReservationID">
-                                            <mat-header-cell *matHeaderCellDef mat-sort-header>Reservation No.</mat-header-cell>
-                                            <mat-cell *matCellDef="let row">{{row.reservationID ? row.reservationID : 'N/A'}}</mat-cell>
-                                        </ng-container>
-
-                                        <ng-container matColumnDef="CustomerType">
-                                            <mat-header-cell *matHeaderCellDef mat-sort-header>Customer Type</mat-header-cell>
-                                            <mat-cell *matCellDef="let row" (contextmenu)="onContextMenu($event, row)">
-                                                {{row.customerType ? row.customerType : 'N/A'}}</mat-cell>
-                                        </ng-container>
-
-                                        <ng-container matColumnDef="CustomerGroup">
-                                            <mat-header-cell *matHeaderCellDef mat-sort-header>Customer Group</mat-header-cell>
-                                            <mat-cell *matCellDef="let row" (contextmenu)="onContextMenu($event, row)">
-                                                {{row.customerGroup ? row.customerGroup : 'N/A'}}</mat-cell>
-                                        </ng-container>
-
-                                        <ng-container matColumnDef="CustomerName">
-                                            <mat-header-cell *matHeaderCellDef mat-sort-header>Customer Name</mat-header-cell>
-                                            <mat-cell *matCellDef="let row" (contextmenu)="onContextMenu($event, row)">
-                                                {{row.customerName ? row.customerName : 'N/A'}}</mat-cell>
-                                        </ng-container>
-
-                                        <ng-container matColumnDef="CustomerPersonName">
-                                            <mat-header-cell *matHeaderCellDef mat-sort-header>Booker Name</mat-header-cell>
-                                            <mat-cell *matCellDef="let row" (contextmenu)="onContextMenu($event, row)">
-                                                {{row.customerPersonName ? row.customerPersonName : 'N/A'}}</mat-cell>
-                                        </ng-container>
-<!-- 
-                                        <ng-container matColumnDef="CustomerSpecificFields">
-                                            <mat-header-cell *matHeaderCellDef mat-sort-header>Customer Specific Fields</mat-header-cell>
-                                            <mat-cell *matCellDef="let row" (contextmenu)="onContextMenu($event, row)">
-                                                {{row.customerSpecificFields ? row.customerSpecificFields : 'N/A'}}</mat-cell>
-                                        </ng-container>                                          
-
-                                        <ng-container matColumnDef="Gender">
-                                            <mat-header-cell *matHeaderCellDef mat-sort-header>Gender</mat-header-cell>
-                                            <mat-cell *matCellDef="let row" (contextmenu)="onContextMenu($event, row)">
-                                                {{row.gender ? row.gender : 'N/A'}}</mat-cell>
-                                        </ng-container> -->
-
-                                        <!-- <ng-container matColumnDef="BookingType">
-                                            <mat-header-cell *matHeaderCellDef mat-sort-header>Booking Type</mat-header-cell>
-                                            <mat-cell *matCellDef="let row" (contextmenu)="onContextMenu($event, row)">
-                                                {{row.bookingType ? row.bookingType : 'N/A'}}</mat-cell>
-                                        </ng-container>  -->
-
-                                        <ng-container matColumnDef="PickupDate">
-                                            <mat-header-cell *matHeaderCellDef mat-sort-header>Pickup Date</mat-header-cell>
-                                            <mat-cell *matCellDef="let row" (contextmenu)="onContextMenu($event, row)">
-                                                {{row.pickupDate ? (row.pickupDate | date:'dd-MM-yyyy') : 'N/A'}}</mat-cell>
-                                        </ng-container>
-
-                                        <ng-container matColumnDef="ModeOfPayment">
-                                            <mat-header-cell *matHeaderCellDef mat-sort-header>Mode Of Payment</mat-header-cell>
-                                            <mat-cell *matCellDef="let row" (contextmenu)="onContextMenu($event, row)">
-                                                {{row.modeOfPayment ? row.modeOfPayment : 'N/A'}}</mat-cell>
-                                        </ng-container>
-                                            <ng-container matColumnDef="AllotmentStatus">
-                                            <mat-header-cell *matHeaderCellDef mat-sort-header>Allotment Status</mat-header-cell>
-                                            <mat-cell *matCellDef="let row" (contextmenu)="onContextMenu($event, row)">
-                                                {{row.allotmentStatus ? row.allotmentStatus : 'N/A'}}</mat-cell>
-                                        </ng-container>
-
-                                        <ng-container matColumnDef="CancellationDateTime">
-                                            <mat-header-cell *matHeaderCellDef mat-sort-header>Cancellation Date & Time</mat-header-cell>
-                                            <mat-cell *matCellDef="let row" (contextmenu)="onContextMenu($event, row)">
-                                                {{row.cancellationDateTime ? (row.cancellationDateTime | date:'dd-MM-yyyy HH:mm:ss') : 'N/A'}}</mat-cell>
-                                        </ng-container>
-
-
-                                        <ng-container matColumnDef="Importance">
-                                            <mat-header-cell *matHeaderCellDef mat-sort-header>Importance</mat-header-cell>
-                                            <mat-cell *matCellDef="let row" (contextmenu)="onContextMenu($event, row)">
-                                                {{row.importance ? row.importance : 'N/A'}}</mat-cell>
-                                        </ng-container>
-
-                                        <ng-container matColumnDef="PassengerMobile">
-                                            <mat-header-cell *matHeaderCellDef mat-sort-header>Primary Mobile</mat-header-cell>
-                                            <mat-cell *matCellDef="let row" (contextmenu)="onContextMenu($event, row)">
-                                                {{row.PassengerMobile ? row.PassengerMobile : 'N/A'}}</mat-cell>
-                                        </ng-container>
-
-                                        <!-- <ng-container matColumnDef="LoyalGuest">
-                                            <mat-header-cell *matHeaderCellDef mat-sort-header>Loyal Guest</mat-header-cell>
-                                            <mat-cell *matCellDef="let row" (contextmenu)="onContextMenu($event, row)">
-                                                {{row.loyalGuest===true ? 'Yes' : (row.loyalGuest===false ? 'No' : 'N/A')}}</mat-cell>
-                                        </ng-container> -->
-
-                                        <ng-container matColumnDef="City">
-                                            <mat-header-cell *matHeaderCellDef mat-sort-header>City</mat-header-cell>
-                                            <mat-cell *matCellDef="let row" (contextmenu)="onContextMenu($event, row)">
-                                                {{row.city ? row.city : 'N/A'}}</mat-cell>
-                                        </ng-container>
-
-                                        <ng-container matColumnDef="PackageType">
-                                            <mat-header-cell *matHeaderCellDef mat-sort-header>Package Type</mat-header-cell>
-                                            <mat-cell *matCellDef="let row" (contextmenu)="onContextMenu($event, row)">
-                                                {{row.packageType ? row.packageType : 'N/A'}}</mat-cell>
-                                        </ng-container>
-
-                                        <ng-container matColumnDef="Package">
-                                            <mat-header-cell *matHeaderCellDef mat-sort-header>Package</mat-header-cell>
-                                            <mat-cell *matCellDef="let row" (contextmenu)="onContextMenu($event, row)">
-                                                {{row.package ? row.package : 'N/A'}}</mat-cell>
-                                        </ng-container>
-
-                                        <ng-container matColumnDef="PickupAddress">
-                                            <mat-header-cell *matHeaderCellDef mat-sort-header>Pickup Address</mat-header-cell>
-                                            <mat-cell *matCellDef="let row" (contextmenu)="onContextMenu($event, row)">
-                                                {{row.pickupAddress ? row.pickupAddress : 'N/A'}}</mat-cell>
-                                        </ng-container>
-
-                                        <!-- <ng-container matColumnDef="ModeOfPaymentChangeReason">
-                                            <mat-header-cell *matHeaderCellDef mat-sort-header>Mode Of Payment Change Reason</mat-header-cell>
-                                            <mat-cell *matCellDef="let row" (contextmenu)="onContextMenu($event, row)">
-                                                {{row.modeOfPaymentChangeReason ? row.modeOfPaymentChangeReason : 'N/A'}}</mat-cell>
-                                        </ng-container> -->
-
-                                        <ng-container matColumnDef="CarSent">
-                                            <mat-header-cell *matHeaderCellDef mat-sort-header>Car Sent</mat-header-cell>
-                                            <mat-cell *matCellDef="let row" (contextmenu)="onContextMenu($event, row)">
-                                                {{row.carSent ? row.carSent : 'N/A'}}</mat-cell>
-                                        </ng-container>
-
-                                        <ng-container matColumnDef="CarBooked">
-                                            <mat-header-cell *matHeaderCellDef mat-sort-header>Car Booked</mat-header-cell>
-                                            <mat-cell *matCellDef="let row" (contextmenu)="onContextMenu($event, row)">
-                                                {{row.carBooked ? row.carBooked : 'N/A'}}</mat-cell>
-                                        </ng-container>
-
-                                        <ng-container matColumnDef="InventoryOwnedSupplied">
-                                            <mat-header-cell *matHeaderCellDef mat-sort-header>Ownership</mat-header-cell>
-                                            <mat-cell *matCellDef="let row" (contextmenu)="onContextMenu($event, row)">
-                                                {{row.inventoryOwnedSupplied ? row.inventoryOwnedSupplied : 'N/A'}}</mat-cell>
-                                        </ng-container>
-
-                                        <ng-container matColumnDef="RegistrationNumber">
-                                            <mat-header-cell *matHeaderCellDef mat-sort-header>Registration Number</mat-header-cell>
-                                            <mat-cell *matCellDef="let row" (contextmenu)="onContextMenu($event, row)">
-                                                {{row.registrationNumber ? row.registrationNumber : 'N/A'}}</mat-cell>
-                                        </ng-container>
-
-                                        <ng-container matColumnDef="DriverName">
-                                            <mat-header-cell *matHeaderCellDef mat-sort-header>Driver Name</mat-header-cell>
-                                            <mat-cell *matCellDef="let row" (contextmenu)="onContextMenu($event, row)">
-                                                {{row.driverName ? row.driverName : 'N/A'}}</mat-cell>
-                                        </ng-container>
-
-                                        <ng-container matColumnDef="DutySlipID">
-                                            <mat-header-cell *matHeaderCellDef mat-sort-header>DutySlip No.</mat-header-cell>
-                                            <mat-cell *matCellDef="let row" (contextmenu)="onContextMenu($event, row)">
-                                                {{row.dutySlipID ? row.dutySlipID : 'N/A'}}</mat-cell>
-                                        </ng-container>
-
-                                        <ng-container matColumnDef="DSClosing">
-                                            <mat-header-cell *matHeaderCellDef mat-sort-header>DS Closing</mat-header-cell>
-                                            <mat-cell *matCellDef="let row" (contextmenu)="onContextMenu($event, row)">
-                                                {{row.dsClosing ? row.dsClosing : 'N/A'}}</mat-cell>
-                                        </ng-container>
-
-                                        <ng-container matColumnDef="ActualCarMovedFrom">
-                                            <mat-header-cell *matHeaderCellDef mat-sort-header>Actual Car Moved From</mat-header-cell>
-                                            <mat-cell *matCellDef="let row" (contextmenu)="onContextMenu($event, row)">
-                                                {{row.actualCarMovedFrom ? row.actualCarMovedFrom : 'N/A'}}</mat-cell>
-                                        </ng-container>
-
-                                        <ng-container matColumnDef="LocationOutAddressString">
-                                            <mat-header-cell *matHeaderCellDef mat-sort-header>Location Out Address</mat-header-cell>
-                                            <mat-cell *matCellDef="let row" (contextmenu)="onContextMenu($event, row)">
-                                                {{row.locationOutAddressString ? row.locationOutAddressString : 'N/A'}}</mat-cell>
-                                        </ng-container>
-
-                                        <ng-container matColumnDef="LocationOutDate">
-                                            <mat-header-cell *matHeaderCellDef mat-sort-header>Location Out Date</mat-header-cell>
-                                            <mat-cell *matCellDef="let row" (contextmenu)="onContextMenu($event, row)">
-                                                {{row.locationOutDate ? (row.locationOutDate | date:'dd-MM-yyyy') : 'N/A'}}</mat-cell>
-                                        </ng-container>
-
-                                        <ng-container matColumnDef="LocationOutTime">
-                                            <mat-header-cell *matHeaderCellDef mat-sort-header>Location Out Time</mat-header-cell>
-                                            <mat-cell *matCellDef="let row" (contextmenu)="onContextMenu($event, row)">
-                                                {{row.locationOutTime ? (row.locationOutTime) : 'N/A'}}</mat-cell>
-                                        </ng-container>
-
-                                        <ng-container matColumnDef="LocationOutKM">
-                                            <mat-header-cell *matHeaderCellDef mat-sort-header>Location Out KM</mat-header-cell>
-                                            <mat-cell *matCellDef="let row" (contextmenu)="onContextMenu($event, row)">
-                                                {{row.locationOutKM ? row.locationOutKM : 'N/A'}}</mat-cell>
-                                        </ng-container>
-
-                                        <ng-container matColumnDef="LocationInDate">
-                                            <mat-header-cell *matHeaderCellDef mat-sort-header>Location In Date</mat-header-cell>
-                                            <mat-cell *matCellDef="let row" (contextmenu)="onContextMenu($event, row)">
-                                                {{row.locationInDate ? (row.locationInDate | date:'dd-MM-yyyy') : 'N/A'}}</mat-cell>
-                                        </ng-container>
-
-                                        <ng-container matColumnDef="LocationInTime">
-                                            <mat-header-cell *matHeaderCellDef mat-sort-header>Location In Time</mat-header-cell>
-                                            <mat-cell *matCellDef="let row" (contextmenu)="onContextMenu($event, row)">
-                                                {{row.locationInTime ? (row.locationInTime) : 'N/A'}}</mat-cell>
-                                        </ng-container>
-
-                                        <ng-container matColumnDef="LocationInKM">
-                                            <mat-header-cell *matHeaderCellDef mat-sort-header>Location In KM</mat-header-cell>
-                                            <mat-cell *matCellDef="let row" (contextmenu)="onContextMenu($event, row)">
-                                                {{row.locationInKM ? row.locationInKM : 'N/A'}}</mat-cell>
-                                        </ng-container>
-
-                                        <ng-container matColumnDef="TripStatus">
-                                            <mat-header-cell *matHeaderCellDef mat-sort-header>Trip Status</mat-header-cell>
-                                            <mat-cell *matCellDef="let row" (contextmenu)="onContextMenu($event, row)">
-                                                {{row.tripStatus ? row.tripStatus : 'N/A'}}</mat-cell>
-                                        </ng-container>
-
-                                        <ng-container matColumnDef="DriverRemark">
-                                            <mat-header-cell *matHeaderCellDef mat-sort-header>Driver Remark</mat-header-cell>
-                                            <mat-cell *matCellDef="let row" (contextmenu)="onContextMenu($event, row)">
-                                                {{row.driverRemark ? row.driverRemark : 'N/A'}}</mat-cell>
-                                        </ng-container>
-
-                                        <ng-container matColumnDef="OrganizationalEntityName">
-                                            <mat-header-cell *matHeaderCellDef mat-sort-header>Organizational Entity</mat-header-cell>
-                                            <mat-cell *matCellDef="let row" (contextmenu)="onContextMenu($event, row)">
-                                                {{row.organizationalEntityName ? row.organizationalEntityName : 'N/A'}}</mat-cell>
-                                        </ng-container>
-
-                                        <ng-container matColumnDef="SupplierName">
-                                            <mat-header-cell *matHeaderCellDef mat-sort-header>Supplier</mat-header-cell>
-                                            <mat-cell *matCellDef="let row" (contextmenu)="onContextMenu($event, row)">
-                                                {{row.supplierName ? row.supplierName : 'N/A'}}</mat-cell>
-                                        </ng-container>
-
-                                        <ng-container matColumnDef="SupplierType">
-                                            <mat-header-cell *matHeaderCellDef mat-sort-header>Supplier Type</mat-header-cell>
-                                            <mat-cell *matCellDef="let row" (contextmenu)="onContextMenu($event, row)">
-                                                {{row.supplierType ? row.supplierType : 'N/A'}}</mat-cell>
-                                        </ng-container>
-
-                                        <ng-container matColumnDef="DisputeType">
-                                            <mat-header-cell *matHeaderCellDef mat-sort-header>Dispute Type</mat-header-cell>
-                                            <mat-cell *matCellDef="let row" (contextmenu)="onContextMenu($event, row)">
-                                                {{row.disputeType ? row.disputeType : 'N/A'}}</mat-cell>
-                                        </ng-container>
-
-                                        <ng-container matColumnDef="SpecialInstruction">
-                                            <mat-header-cell *matHeaderCellDef mat-sort-header>Special Instruction</mat-header-cell>
-                                            <mat-cell *matCellDef="let row" (contextmenu)="onContextMenu($event, row)">
-                                                {{row.specialInstruction ? row.specialInstruction : 'N/A'}}</mat-cell>
-                                        </ng-container>
-
-                                        <ng-container matColumnDef="DateOfFeedback">
-                                            <mat-header-cell *matHeaderCellDef mat-sort-header>Date Of Feedback</mat-header-cell>
-                                            <mat-cell *matCellDef="let row" (contextmenu)="onContextMenu($event, row)">
-                                                {{row.dateOfFeedback ? (row.dateOfFeedback | date:'dd-MM-yyyy') : 'N/A'}}</mat-cell>
-                                        </ng-container>
-
-                                        <ng-container matColumnDef="FeedbackPointsOutOfFive">
-                                            <mat-header-cell *matHeaderCellDef mat-sort-header>Feedback Points</mat-header-cell>
-                                            <mat-cell *matCellDef="let row" (contextmenu)="onContextMenu($event, row)">
-                                                {{row.feedbackPointsOutOfFive ? row.feedbackPointsOutOfFive : 'N/A'}}</mat-cell>
-                                        </ng-container>
-
-                                        <ng-container matColumnDef="FeedbackRemark">
-                                            <mat-header-cell *matHeaderCellDef mat-sort-header>Feedback Remark</mat-header-cell>
-                                            <mat-cell *matCellDef="let row" (contextmenu)="onContextMenu($event, row)">
-                                                {{row.feedbackRemark ? row.feedbackRemark : 'N/A'}}</mat-cell>
-                                        </ng-container>
-
-                                        <ng-container matColumnDef="ManualDutySlipNumber">
-                                            <mat-header-cell *matHeaderCellDef mat-sort-header>Manual Duty Slip Number</mat-header-cell>
-                                            <mat-cell *matCellDef="let row" (contextmenu)="onContextMenu($event, row)">
-                                                {{row.manualDutySlipNumber ? row.manualDutySlipNumber : 'N/A'}}</mat-cell>
-                                        </ng-container>
-
-                                        <ng-container matColumnDef="ReportingToGuestKM">
-                                            <mat-header-cell *matHeaderCellDef mat-sort-header>Reporting To Guest KM</mat-header-cell>
-                                            <mat-cell *matCellDef="let row" (contextmenu)="onContextMenu($event, row)">
-                                                {{row.reportingToGuestKM ? row.reportingToGuestKM : 'N/A'}}</mat-cell>
-                                        </ng-container>
-
-                                        <ng-container matColumnDef="ReportingToGuestTime">
-                                            <mat-header-cell *matHeaderCellDef mat-sort-header>Reporting To Guest Time</mat-header-cell>
-                                            <mat-cell *matCellDef="let row" (contextmenu)="onContextMenu($event, row)">
-                                                {{row.reportingToGuestTime ? (row.reportingToGuestTime) : 'N/A'}}</mat-cell>
-                                        </ng-container>
-
-                                        <ng-container matColumnDef="ReleasingKM">
-                                            <mat-header-cell *matHeaderCellDef mat-sort-header>Releasing KM</mat-header-cell>
-                                            <mat-cell *matCellDef="let row" (contextmenu)="onContextMenu($event, row)">
-                                                {{row.releasingKM ? row.releasingKM : 'N/A'}}</mat-cell>
-                                        </ng-container>
-
-                                        <ng-container matColumnDef="ReleasingTime">
-                                            <mat-header-cell *matHeaderCellDef mat-sort-header>Releasing Time</mat-header-cell>
-                                            <mat-cell *matCellDef="let row" (contextmenu)="onContextMenu($event, row)">
-                                                {{row.releasingTime ? (row.releasingTime) : 'N/A'}}</mat-cell>
-                                        </ng-container>
-                                       
-                                        <ng-container matColumnDef="GoodForBilling">
-                                            <mat-header-cell *matHeaderCellDef mat-sort-header>Good For Billing</mat-header-cell>
-                                            <mat-cell *matCellDef="let row" (contextmenu)="onContextMenu($event, row)">
-                                                {{row.goodForBilling === true ? (row.goodForBilling === true ? 'Yes' : 'No') : 'N/A'}}</mat-cell>
-                                        </ng-container>
-
-                                        <ng-container matColumnDef="BaseFare">
-                                            <mat-header-cell *matHeaderCellDef mat-sort-header>Base Fare</mat-header-cell>
-                                            <mat-cell *matCellDef="let row" (contextmenu)="onContextMenu($event, row)">
-                                                {{row.baseFare ? row.baseFare : 'N/A'}}</mat-cell>
-                                        </ng-container>
-
-                                        <ng-container matColumnDef="CarUpgraded">
-                                            <mat-header-cell *matHeaderCellDef mat-sort-header>Car Upgraded</mat-header-cell>
-                                            <mat-cell *matCellDef="let row" (contextmenu)="onContextMenu($event, row)">
-                                                {{row.carUpgraded ? row.carUpgraded : 'N/A'}}</mat-cell>
-                                        </ng-container>
-
-                                        <ng-container matColumnDef="CustomerCreationDate">
-                                            <mat-header-cell *matHeaderCellDef mat-sort-header>Customer Creation Date</mat-header-cell>
-                                            <mat-cell *matCellDef="let row" (contextmenu)="onContextMenu($event, row)">
-                                                {{row.customerCreationDate ? (row.customerCreationDate | date:'dd-MM-yyyy') : 'N/A'}}</mat-cell>
-                                        </ng-container>
-
-                                        <ng-container matColumnDef="DateOfAllotment">
-                                            <mat-header-cell *matHeaderCellDef mat-sort-header>Date Of Allotment</mat-header-cell>
-                                            <mat-cell *matCellDef="let row" (contextmenu)="onContextMenu($event, row)">
-                                                {{row.dateOfAllotment ? (row.dateOfAllotment | date:'dd-MM-yyyy') : 'N/A'}}</mat-cell>
-                                        </ng-container>
-
-                                        <ng-container matColumnDef="TimeofAllotment">
-                                            <mat-header-cell *matHeaderCellDef mat-sort-header>Time Of Allotment</mat-header-cell>
-                                            <mat-cell *matCellDef="let row" (contextmenu)="onContextMenu($event, row)">
-                                                {{row.timeofAllotment ? row.timeofAllotment : 'N/A'}}</mat-cell>
-                                        </ng-container>
-
-                                        <ng-container matColumnDef="SelfDeclaration">
-                                            <mat-header-cell *matHeaderCellDef mat-sort-header>Self Declaration</mat-header-cell>
-                                            <mat-cell *matCellDef="let row" (contextmenu)="onContextMenu($event, row)">
-                                                {{row.selfDeclaration === true ? (row.selfDeclaration === true ? 'Yes' : 'No') : 'N/A'}}</mat-cell>
-                                        </ng-container>
-
-                                        <ng-container matColumnDef="BodyTemperatureInDegreeCelcius">
-                                            <mat-header-cell *matHeaderCellDef mat-sort-header>Body Temperature In Degree Celcius</mat-header-cell>
-                                            <mat-cell *matCellDef="let row" (contextmenu)="onContextMenu($event, row)">
-                                                {{row.bodyTemperatureInDegreeCelcius ? row.bodyTemperatureInDegreeCelcius : 'N/A'}}</mat-cell>
-                                        </ng-container>
-
-                                        <ng-container matColumnDef="FuelType">
-                                            <mat-header-cell *matHeaderCellDef mat-sort-header>Fuel Type</mat-header-cell>
-                                            <mat-cell *matCellDef="let row" (contextmenu)="onContextMenu($event, row)">
-                                                {{row.fuelType ? row.fuelType : 'N/A'}}</mat-cell>
-                                        </ng-container>
-
-                                        <ng-container matColumnDef="Amount">
-                                            <mat-header-cell *matHeaderCellDef mat-sort-header>Amount</mat-header-cell>
-                                            <mat-cell *matCellDef="let row" (contextmenu)="onContextMenu($event, row)">
-                                                {{row.amount ? row.amount : 'N/A'}}</mat-cell>
-                                        </ng-container>
-
-                                        <ng-container matColumnDef="CustomerCategory">
-                                            <mat-header-cell *matHeaderCellDef mat-sort-header>Customer Category</mat-header-cell>
-                                            <mat-cell *matCellDef="let row" (contextmenu)="onContextMenu($event, row)">
-                                                {{row.customerCategory ? row.customerCategory : 'N/A'}}</mat-cell>
-                                        </ng-container>
-
-                                        <ng-container matColumnDef="FGRKmAmount">
-                                            <mat-header-cell *matHeaderCellDef mat-sort-header>FGR Km Amount</mat-header-cell>
-                                            <mat-cell *matCellDef="let row" (contextmenu)="onContextMenu($event, row)">
-                                                {{row.fgrkmAmount ? row.fgrkmAmount : 'N/A'}}</mat-cell>
-                                        </ng-container>
-
-                                        <ng-container matColumnDef="PackageBaseRate">
-                                            <mat-header-cell *matHeaderCellDef mat-sort-header>Package Base Rate</mat-header-cell>
-                                            <mat-cell *matCellDef="let row" (contextmenu)="onContextMenu($event, row)">
-                                                {{row.packageBaseRate ? row.packageBaseRate : 'N/A'}}</mat-cell>
-                                        </ng-container>
-
-                                        <ng-container matColumnDef="ExtraKMAmount">
-                                            <mat-header-cell *matHeaderCellDef mat-sort-header>Extra KM Amount</mat-header-cell>
-                                            <mat-cell *matCellDef="let row" (contextmenu)="onContextMenu($event, row)">
-                                                {{row.extraKMAmount ? row.extraKMAmount : 'N/A'}}</mat-cell>
-                                        </ng-container>
-
-                                        <ng-container matColumnDef="ExtraMinutesAmount">
-                                            <mat-header-cell *matHeaderCellDef mat-sort-header>Extra Minutes Amount</mat-header-cell>
-                                            <mat-cell *matCellDef="let row" (contextmenu)="onContextMenu($event, row)">
-                                                {{row.extraMinutesAmount ? row.extraMinutesAmount : 'N/A'}}</mat-cell>
-                                        </ng-container>
-
-                                        <ng-container matColumnDef="Revenue">
-                                            <mat-header-cell *matHeaderCellDef mat-sort-header>Revenue</mat-header-cell>
-                                            <mat-cell *matCellDef="let row" (contextmenu)="onContextMenu($event, row)">
-                                                {{row.revenue ? row.revenue : 'N/A'}}</mat-cell>
-                                        </ng-container>
-
-                                        <ng-container matColumnDef="InvoiceNumber">
-                                            <mat-header-cell *matHeaderCellDef mat-sort-header>Invoice Number</mat-header-cell>
-                                            <mat-cell *matCellDef="let row" (contextmenu)="onContextMenu($event, row)">
-                                                {{row.invoiceNumber ? row.invoiceNumber : 'N/A'}}</mat-cell>
-                                        </ng-container>
-                                       
-                                        <ng-container matColumnDef="ManualInvoiceNumber">
-                                            <mat-header-cell *matHeaderCellDef mat-sort-header>Manual Invoice Number</mat-header-cell>
-                                            <mat-cell *matCellDef="let row" (contextmenu)="onContextMenu($event, row)">
-                                                {{row.manualInvoiceNumber ? row.manualInvoiceNumber : 'N/A'}}</mat-cell>
-                                        </ng-container>
-
-                                        <ng-container matColumnDef="InvoiceDate">
-                                            <mat-header-cell *matHeaderCellDef mat-sort-header>Invoice Date</mat-header-cell>
-                                            <mat-cell *matCellDef="let row" (contextmenu)="onContextMenu($event, row)">
-                                                {{row.invoiceDate ? (row.invoiceDate | date:'dd-MM-yyyy') : 'N/A'}}</mat-cell>
-                                        </ng-container>
-
-                                        <ng-container matColumnDef="TotalAmountAfterDiscout">
-                                            <mat-header-cell *matHeaderCellDef mat-sort-header>Total Amount After Discount</mat-header-cell>
-                                            <mat-cell *matCellDef="let row" (contextmenu)="onContextMenu($event, row)">
-                                                {{row.totalAmountAfterDiscout ? row.totalAmountAfterDiscout : 'N/A'}}</mat-cell>
-                                        </ng-container>
-
-                                        <ng-container matColumnDef="InvoiceTotalAmountAfterGST">
-                                            <mat-header-cell *matHeaderCellDef mat-sort-header>Invoice Total Amount After GST</mat-header-cell>
-                                            <mat-cell *matCellDef="let row" (contextmenu)="onContextMenu($event, row)">
-                                                {{row.invoiceTotalAmountAfterGST ? row.invoiceTotalAmountAfterGST : 'N/A'}}</mat-cell>
-                                        </ng-container>
-
-                                        <ng-container matColumnDef="InvoiceStatusActiveOrVoid">
-                                            <mat-header-cell *matHeaderCellDef mat-sort-header>Invoice Status Active Or Void</mat-header-cell>
-                                            <mat-cell *matCellDef="let row" (contextmenu)="onContextMenu($event, row)">
-                                                {{row.invoiceStatusActiveOrVoid ? row.invoiceStatusActiveOrVoid : 'N/A' }}</mat-cell>
-                                        </ng-container>
-
-                                        <ng-container matColumnDef="TotalKMWithAddtionalKM">
-                                            <mat-header-cell *matHeaderCellDef mat-sort-header>Total KM With Addtional KM</mat-header-cell>
-                                            <mat-cell *matCellDef="let row" (contextmenu)="onContextMenu($event, row)">
-                                                {{row.totalKMWithAddtionalKM ? row.totalKMWithAddtionalKM : 'N/A'}}</mat-cell>
-                                        </ng-container>
-
-                                        <ng-container matColumnDef="TotalHoursWithAddtionalHours">
-                                            <mat-header-cell *matHeaderCellDef mat-sort-header>Total Hours With Addtional Hours</mat-header-cell>
-                                            <mat-cell *matCellDef="let row" (contextmenu)="onContextMenu($event, row)">
-                                                {{row.totalHoursWithAddtionalHours ? row.totalHoursWithAddtionalHours : 'N/A'}}</mat-cell>
-                                        </ng-container>
-
-                                        <ng-container matColumnDef="TollParkingType">
-                                            <mat-header-cell *matHeaderCellDef mat-sort-header>Toll Parking Type</mat-header-cell>
-                                            <mat-cell *matCellDef="let row" (contextmenu)="onContextMenu($event, row)">
-                                                {{row.tollParkingType ? row.tollParkingType : 'N/A'}}</mat-cell>
-                                        </ng-container>
-
-                                        <ng-container matColumnDef="TollParkingAmount">
-                                            <mat-header-cell *matHeaderCellDef mat-sort-header>Toll Parking Amount</mat-header-cell>
-                                            <mat-cell *matCellDef="let row" (contextmenu)="onContextMenu($event, row)">
-                                                {{row.tollParkingAmount ? row.tollParkingAmount : 'N/A'}}</mat-cell>
-                                        </ng-container>
-
-                                        <ng-container matColumnDef="InterStateTaxAmount">
-                                            <mat-header-cell *matHeaderCellDef mat-sort-header>Inter State Tax Amount</mat-header-cell>
-                                            <mat-cell *matCellDef="let row" (contextmenu)="onContextMenu($event, row)">
-                                                {{row.interStateTaxAmount ? row.interStateTaxAmount : 'N/A'}}</mat-cell>
-                                        </ng-container>
-
-                                        <ng-container matColumnDef="CommunicationTextSentTo">
-                                            <mat-header-cell *matHeaderCellDef mat-sort-header>Communication Text Sent To</mat-header-cell>
-                                            <mat-cell *matCellDef="let row" (contextmenu)="onContextMenu($event, row)">
-                                                {{row.communicationTextSentTo ? row.communicationTextSentTo : 'N/A'}}</mat-cell>
-                                        </ng-container>
-
-                                        <ng-container matColumnDef="ExtraMinutes">
-                                            <mat-header-cell *matHeaderCellDef mat-sort-header>Extra Minutes</mat-header-cell>
-                                            <mat-cell *matCellDef="let row" (contextmenu)="onContextMenu($event, row)">
-                                                {{row.extraMinutes ? row.extraMinutes : 'N/A'}}</mat-cell>
-                                        </ng-container>
-
-                                        <ng-container matColumnDef="ExtraKMs">
-                                            <mat-header-cell *matHeaderCellDef mat-sort-header>Extra KMs</mat-header-cell>
-                                            <mat-cell *matCellDef="let row" (contextmenu)="onContextMenu($event, row)">
-                                                {{row.extraKMs ? row.extraKMs : 'N/A'}}</mat-cell>
-                                        </ng-container>
-
-                                        <ng-container matColumnDef="TotalFuelSurchargeOnExtraKM">
-                                            <mat-header-cell *matHeaderCellDef mat-sort-header>Total Fuel Surcharge On Extra KM</mat-header-cell>
-                                            <mat-cell *matCellDef="let row" (contextmenu)="onContextMenu($event, row)">
-                                                {{row.totalFuelSurchargeOnExtraKM ? row.totalFuelSurchargeOnExtraKM : 'N/A'}}</mat-cell>
-                                        </ng-container>
-
-                                        <ng-container matColumnDef="TotalFuelSurchargeOnExtraHours">
-                                            <mat-header-cell *matHeaderCellDef mat-sort-header>Total Fuel Surcharge On Extra Hours</mat-header-cell>
-                                            <mat-cell *matCellDef="let row" (contextmenu)="onContextMenu($event, row)">
-                                                {{row.totalFuelSurchargeOnExtraHours ? row.totalFuelSurchargeOnExtraHours : 'N/A'}}</mat-cell>
-                                        </ng-container>
-
-                                        <ng-container matColumnDef="TotalFuelSurchargeOnPackageRate">
-                                            <mat-header-cell *matHeaderCellDef mat-sort-header>Total Fuel Surcharge On Package Rate</mat-header-cell>
-                                            <mat-cell *matCellDef="let row" (contextmenu)="onContextMenu($event, row)">
-                                                {{row.totalFuelSurchargeOnPackageRate ? row.totalFuelSurchargeOnPackageRate : 'N/A'}}</mat-cell>
-                                        </ng-container>
-
-                                        <ng-container matColumnDef="InvoiceSummaryDate">
-                                            <mat-header-cell *matHeaderCellDef mat-sort-header>Invoice Summary Date</mat-header-cell>
-                                            <mat-cell *matCellDef="let row" (contextmenu)="onContextMenu($event, row)">
-                                                {{row.invoiceSummaryDate ? (row.invoiceSummaryDate | date:'dd-MM-yyyy') : 'N/A'}}</mat-cell>
-                                        </ng-container>
-
-                                        <ng-container matColumnDef="DutyExpenseChargeTotal">
-                                            <mat-header-cell *matHeaderCellDef mat-sort-header>Duty Expense Charge Total</mat-header-cell>
-                                            <mat-cell *matCellDef="let row" (contextmenu)="onContextMenu($event, row)">
-                                                {{row.dutyExpenseChargeTotal ? row.dutyExpenseChargeTotal : 'N/A'}}</mat-cell>
-                                        </ng-container>
-
-                                        <ng-container matColumnDef="DutyExpenseNonChargeTotal">
-                                            <mat-header-cell *matHeaderCellDef mat-sort-header>Duty Expense Non Charge Total</mat-header-cell>
-                                            <mat-cell *matCellDef="let row" (contextmenu)="onContextMenu($event, row)">
-                                                {{row.dutyExpenseNonChargeTotal ? row.dutyExpenseNonChargeTotal : 'N/A'}}</mat-cell>
-                                        </ng-container>
-
-                                        <ng-container matColumnDef="ReservationStatus">
-                                            <mat-header-cell *matHeaderCellDef mat-sort-header>Reservation Status</mat-header-cell>
-                                            <mat-cell *matCellDef="let row" (contextmenu)="onContextMenu($event, row)">
-                                                {{row.reservationStatus ? row.reservationStatus : 'N/A'}}</mat-cell>
-                                        </ng-container>
-
-                                        <ng-container matColumnDef="SalesPerson">
-                                            <mat-header-cell *matHeaderCellDef mat-sort-header>Sales Person</mat-header-cell>
-                                            <mat-cell *matCellDef="let row" (contextmenu)="onContextMenu($event, row)">
-                                                {{row.salesPerson?.trim() ? row.salesPerson : 'N/A'}}</mat-cell>
-                                        </ng-container>
-
-                                        <ng-container matColumnDef="PhysicalDutySlipReceived">
-                                            <mat-header-cell *matHeaderCellDef mat-sort-header>Physical Duty Slip Received</mat-header-cell>
-                                            <mat-cell *matCellDef="let row">
-                                                {{row.physicalDutySlipReceived === true ? (row.physicalDutySlipReceived === true ? 'Yes' : 'No') : 'N/A'}}</mat-cell>
-                                        </ng-container>
-
-                                        <ng-container matColumnDef="LoggedInUser">
-                                            <mat-header-cell *matHeaderCellDef mat-sort-header>Logged In User</mat-header-cell>
-                                            <mat-cell *matCellDef="let row" (contextmenu)="onContextMenu($event, row)">
-                                                {{row.loggedInUser?.trim() ? row.loggedInUser : 'N/A'}}</mat-cell>
-                                        </ng-container>
-
-                                       
-                                        <mat-header-row *matHeaderRowDef="displayedColumns"></mat-header-row>
-                                        <mat-row *matRowDef="let row; columns: displayedColumns; trackBy: trackByFn" [style.cursor]="'pointer'" matRipple>
-                                        </mat-row>
+                                        <mat-table #table [dataSource]="dataSource"
+                                                matSort
+                                                class="mat-cell floating-header-table"
+                                                (matSortChange)="SortingData($event)">
+
+                                            <!-- Reservation No -->
+                                            <ng-container matColumnDef="ReservationID">
+                                                <mat-header-cell *matHeaderCellDef mat-sort-header>Res No</mat-header-cell>
+                                                <mat-cell *matCellDef="let row">
+                                                    {{row.reservationID || 'N/A'}}
+                                                </mat-cell>
+                                            </ng-container>
+
+                                            <!-- Pickup Date -->
+                                            <ng-container matColumnDef="PickupDate">
+                                                <mat-header-cell *matHeaderCellDef mat-sort-header>Pickup Date</mat-header-cell>
+                                                <mat-cell *matCellDef="let row">
+                                                    {{row.pickupDate ? (row.pickupDate | date:'dd-MM-yyyy') : 'N/A'}}
+                                                </mat-cell>
+                                            </ng-container>
+
+                                            <!-- Booking Date -->
+                                            <ng-container matColumnDef="BookingDate">
+                                                <mat-header-cell *matHeaderCellDef mat-sort-header>Booking Date</mat-header-cell>
+                                                <mat-cell *matCellDef="let row">
+                                                    {{row.bookingDate || 'N/A'}}
+                                                </mat-cell>
+                                            </ng-container>
+
+                                            <!-- Dispatch Location -->
+                                            <ng-container matColumnDef="DispatchLocation">
+                                                <mat-header-cell *matHeaderCellDef mat-sort-header>Dispatch Location</mat-header-cell>
+                                                <mat-cell *matCellDef="let row">
+                                                    {{row.dispatchLocation || 'N/A'}}
+                                                </mat-cell>
+                                            </ng-container>
+
+                                            <!-- Customer Name -->
+                                            <ng-container matColumnDef="CustomerName">
+                                                <mat-header-cell *matHeaderCellDef mat-sort-header>Customer Name</mat-header-cell>
+                                                <mat-cell *matCellDef="let row">
+                                                    {{row.customerName || 'N/A'}}
+                                                </mat-cell>
+                                            </ng-container>
+
+                                            <!-- Guest Name -->
+                                            <ng-container matColumnDef="GuestName">
+                                                <mat-header-cell *matHeaderCellDef mat-sort-header>Guest Name</mat-header-cell>
+                                                <mat-cell *matCellDef="let row">
+                                                    {{row.guestName || 'N/A'}}
+                                                </mat-cell>
+                                            </ng-container>
+
+                                            <!-- City -->
+                                            <ng-container matColumnDef="City">
+                                                <mat-header-cell *matHeaderCellDef mat-sort-header>City</mat-header-cell>
+                                                <mat-cell *matCellDef="let row">
+                                                    {{row.city || 'N/A'}}
+                                                </mat-cell>
+                                            </ng-container>
+
+                                            <!-- Duty Type -->
+                                            <ng-container matColumnDef="PackageType">
+                                                <mat-header-cell *matHeaderCellDef mat-sort-header>Duty Type</mat-header-cell>
+                                                <mat-cell *matCellDef="let row">
+                                                    {{row.packageType || 'N/A'}}
+                                                </mat-cell>
+                                            </ng-container>
+
+                                            <!-- Car No -->
+                                            <ng-container matColumnDef="CarNumber">
+                                                <mat-header-cell *matHeaderCellDef mat-sort-header>Car No</mat-header-cell>
+                                                <mat-cell *matCellDef="let row">
+                                                    {{row.carNumber || 'N/A'}}
+                                                </mat-cell>
+                                            </ng-container>
+
+                                            <!-- Driver -->
+                                            <ng-container matColumnDef="DriverName">
+                                                <mat-header-cell *matHeaderCellDef mat-sort-header>Driver Name</mat-header-cell>
+                                                <mat-cell *matCellDef="let row">
+                                                    {{row.driverName || 'N/A'}}
+                                                </mat-cell>
+                                            </ng-container>
+
+                                            <!-- Billed Duty Type -->
+                                            <ng-container matColumnDef="BilledDutyType">
+                                                <mat-header-cell *matHeaderCellDef mat-sort-header>Billed Duty Type</mat-header-cell>
+                                                <mat-cell *matCellDef="let row">
+                                                    {{row.billedDutyType || 'N/A'}}
+                                                </mat-cell>
+                                            </ng-container>
+
+                                            <!-- Package -->
+                                            <ng-container matColumnDef="Package">
+                                                <mat-header-cell *matHeaderCellDef mat-sort-header>Package</mat-header-cell>
+                                                <mat-cell *matCellDef="let row">
+                                                    {{row.package || 'N/A'}}
+                                                </mat-cell>
+                                            </ng-container>
+
+                                            <!-- Car Booked -->
+                                            <ng-container matColumnDef="CarBooked">
+                                                <mat-header-cell *matHeaderCellDef mat-sort-header>Car Booked</mat-header-cell>
+                                                <mat-cell *matCellDef="let row">
+                                                    {{row.carBooked || 'N/A'}}
+                                                </mat-cell>
+                                            </ng-container>
+
+                                            <!-- Car Sent -->
+                                            <ng-container matColumnDef="CarSent">
+                                                <mat-header-cell *matHeaderCellDef mat-sort-header>Car Sent</mat-header-cell>
+                                                <mat-cell *matCellDef="let row">
+                                                    {{row.carSent || 'N/A'}}
+                                                </mat-cell>
+                                            </ng-container>
+
+                                            <!-- MOP -->
+                                            <ng-container matColumnDef="ModeOfPayment">
+                                                <mat-header-cell *matHeaderCellDef mat-sort-header>MOP</mat-header-cell>
+                                                <mat-cell *matCellDef="let row">
+                                                    {{row.modeOfPayment || 'N/A'}}
+                                                </mat-cell>
+                                            </ng-container>
+
+                                            <!-- Location Out Date -->
+                                            <ng-container matColumnDef="LocationOutDate">
+                                                <mat-header-cell *matHeaderCellDef mat-sort-header>Location Out Date</mat-header-cell>
+                                                <mat-cell *matCellDef="let row">
+                                                    {{row.locationOutDate ? (row.locationOutDate | date:'dd-MM-yyyy') : 'N/A'}}
+                                                </mat-cell>
+                                            </ng-container>
+
+                                            <!-- Location Out Time -->
+                                            <ng-container matColumnDef="LocationOutTime">
+                                                <mat-header-cell *matHeaderCellDef mat-sort-header>Location Out Time</mat-header-cell>
+                                                <mat-cell *matCellDef="let row">
+                                                    {{row.locationOutTime || 'N/A'}}
+                                                </mat-cell>
+                                            </ng-container>
+
+                                            <!-- Location Out KM -->
+                                            <ng-container matColumnDef="LocationOutKM">
+                                                <mat-header-cell *matHeaderCellDef mat-sort-header>Location Out Odometer</mat-header-cell>
+                                                <mat-cell *matCellDef="let row">
+                                                    {{row.locationOutKM || 'N/A'}}
+                                                </mat-cell>
+                                            </ng-container>
+
+                                            <!-- Reporting Date -->
+                                            <ng-container matColumnDef="reportingDate">
+                                                <mat-header-cell *matHeaderCellDef mat-sort-header>Reporting Date</mat-header-cell>
+                                                <mat-cell *matCellDef="let row">
+                                                    {{row.dsPickUpDate ? (row.dsPickUpDate | date:'dd-MM-yyyy') : 'N/A'}}
+                                                </mat-cell>
+                                            </ng-container>
+
+                                            <!-- Reporting Time -->
+                                            <ng-container matColumnDef="reportingTime">
+                                                <mat-header-cell *matHeaderCellDef mat-sort-header>Reporting Time</mat-header-cell>
+                                                <mat-cell *matCellDef="let row">
+                                                    {{row.pickUpTime || 'N/A'}}
+                                                </mat-cell>
+                                            </ng-container>
+
+                                            <!-- Reporting KM -->
+                                            <ng-container matColumnDef="reportingKM">
+                                                <mat-header-cell *matHeaderCellDef mat-sort-header>Reporting Odometer</mat-header-cell>
+                                                <mat-cell *matCellDef="let row">
+                                                    {{row.pickUpKM || 'N/A'}}
+                                                </mat-cell>
+                                            </ng-container>
+
+                                            <!-- Releasing Date -->
+                                            <ng-container matColumnDef="releasingDate">
+                                                <mat-header-cell *matHeaderCellDef mat-sort-header>Releasing Date</mat-header-cell>
+                                                <mat-cell *matCellDef="let row">
+                                                    {{row.dropOffDate ? (row.dropOffDate | date:'dd-MM-yyyy') : 'N/A'}}
+                                                </mat-cell>
+                                            </ng-container>
+
+                                            <!-- Releasing Time -->
+                                            <ng-container matColumnDef="releasingTime">
+                                                <mat-header-cell *matHeaderCellDef mat-sort-header>Releasing Time</mat-header-cell>
+                                                <mat-cell *matCellDef="let row">
+                                                    {{row.dropOffTime || 'N/A'}}
+                                                </mat-cell>
+                                            </ng-container>
+
+                                            <!-- Releasing KM -->
+                                            <ng-container matColumnDef="releasingKM">
+                                                <mat-header-cell *matHeaderCellDef mat-sort-header>Releasing Odometer</mat-header-cell>
+                                                <mat-cell *matCellDef="let row">
+                                                    {{row.dropOffKM || 'N/A'}}
+                                                </mat-cell>
+                                            </ng-container>
+
+                                            <!-- Location In Date -->
+                                            <ng-container matColumnDef="LocationInDate">
+                                                <mat-header-cell *matHeaderCellDef mat-sort-header>Location In Date</mat-header-cell>
+                                                <mat-cell *matCellDef="let row">
+                                                    {{row.locationInDate ? (row.locationInDate | date:'dd-MM-yyyy') : 'N/A'}}
+                                                </mat-cell>
+                                            </ng-container>
+
+                                            <!-- Location In Time -->
+                                            <ng-container matColumnDef="LocationInTime">
+                                                <mat-header-cell *matHeaderCellDef mat-sort-header>Location In Time</mat-header-cell>
+                                                <mat-cell *matCellDef="let row">
+                                                    {{row.locationInTime || 'N/A'}}
+                                                </mat-cell>
+                                            </ng-container>
+
+                                            <!-- Location In KM -->
+                                            <ng-container matColumnDef="LocationInKM">
+                                                <mat-header-cell *matHeaderCellDef mat-sort-header>Location In Odometer</mat-header-cell>
+                                                <mat-cell *matCellDef="let row">
+                                                    {{row.locationInKM || 'N/A'}}
+                                                </mat-cell>
+                                            </ng-container>
+
+                                            <!-- G2P -->
+                                            <ng-container matColumnDef="G2P">
+                                                <mat-header-cell *matHeaderCellDef mat-sort-header>G2P</mat-header-cell>
+                                                <mat-cell *matCellDef="let row">
+                                                    {{row.g2P || 'N/A'}}
+                                                </mat-cell>
+                                            </ng-container>
+
+                                            <!-- D2G -->
+                                            <ng-container matColumnDef="D2G">
+                                                <mat-header-cell *matHeaderCellDef mat-sort-header>D2G</mat-header-cell>
+                                                <mat-cell *matCellDef="let row">
+                                                    {{row.d2G || 'N/A'}}
+                                                </mat-cell>
+                                            </ng-container>
+
+                                            <!-- App P2D -->
+                                            <ng-container matColumnDef="AppP2D">
+                                                <mat-header-cell *matHeaderCellDef mat-sort-header>App P2D</mat-header-cell>
+                                                <mat-cell *matCellDef="let row">
+                                                    {{row.appP2D || 'N/A'}}
+                                                </mat-cell>
+                                            </ng-container>
+
+                                            <!-- Driver P2D -->
+                                            <ng-container matColumnDef="DriverP2D">
+                                                <mat-header-cell *matHeaderCellDef mat-sort-header>Driver P2D</mat-header-cell>
+                                                <mat-cell *matCellDef="let row">
+                                                    {{row.driverP2D || 'N/A'}}
+                                                </mat-cell>
+                                            </ng-container>
+
+                                            <!-- GPS P2D -->
+                                            <ng-container matColumnDef="GPSP2D">
+                                                <mat-header-cell *matHeaderCellDef mat-sort-header>GPS P2D</mat-header-cell>
+                                                <mat-cell *matCellDef="let row">
+                                                    {{row.gpsP2D || 'N/A'}}
+                                                </mat-cell>
+                                            </ng-container>
+
+                                            <!-- Billed KM -->
+                                            <ng-container matColumnDef="TotalKMWithAddtionalKM">
+                                                <mat-header-cell *matHeaderCellDef mat-sort-header>Billed Kms</mat-header-cell>
+                                                <mat-cell *matCellDef="let row">
+                                                    {{row.totalKMWithAddtionalKM || 'N/A'}}
+                                                </mat-cell>
+                                            </ng-container>
+
+                                            <!-- Billed Hours -->
+                                            <ng-container matColumnDef="TotalHoursWithAddtionalHours">
+                                                <mat-header-cell *matHeaderCellDef mat-sort-header>Billed Hrs</mat-header-cell>
+                                                <mat-cell *matCellDef="let row">
+                                                    {{row.totalHoursWithAddtionalHours || 'N/A'}}
+                                                </mat-cell>
+                                            </ng-container>
+
+                                            <!-- Parking -->
+                                            <ng-container matColumnDef="Parking">
+                                                <mat-header-cell *matHeaderCellDef mat-sort-header>Parking</mat-header-cell>
+                                                <mat-cell *matCellDef="let row">
+                                                    {{row.parking || 'N/A'}}
+                                                </mat-cell>
+                                            </ng-container>
+
+                                            <!-- Toll -->
+                                            <ng-container matColumnDef="Toll">
+                                                <mat-header-cell *matHeaderCellDef mat-sort-header>Toll</mat-header-cell>
+                                                <mat-cell *matCellDef="let row">
+                                                    {{row.toll || 'N/A'}}
+                                                </mat-cell>
+                                            </ng-container>
+
+                                            <!-- Fastag -->
+                                            <ng-container matColumnDef="FasTag">
+                                                <mat-header-cell *matHeaderCellDef mat-sort-header>Fastag</mat-header-cell>
+                                                <mat-cell *matCellDef="let row">
+                                                    {{row.fasTag || 'N/A'}}
+                                                </mat-cell>
+                                            </ng-container>
+
+                                            <!-- Interstate Tax -->
+                                            <ng-container matColumnDef="InvoiceInterstateTax">
+                                                <mat-header-cell *matHeaderCellDef mat-sort-header>Interstate Tax</mat-header-cell>
+                                                <mat-cell *matCellDef="let row">
+                                                    {{row.invoiceInterstateTax || 'N/A'}}
+                                                </mat-cell>
+                                            </ng-container>
+
+                                            <!-- Chargeable Expense -->
+                                            <ng-container matColumnDef="DutyExpenseChargeTotal">
+                                                <mat-header-cell *matHeaderCellDef mat-sort-header>Chargeable Expenses</mat-header-cell>
+                                                <mat-cell *matCellDef="let row">
+                                                    {{row.dutyExpenseChargeTotal || 'N/A'}}
+                                                </mat-cell>
+                                            </ng-container>
+
+                                            <!-- Revenue -->
+                                            <ng-container matColumnDef="Revenue">
+                                                <mat-header-cell *matHeaderCellDef mat-sort-header>Revenue</mat-header-cell>
+                                                <mat-cell *matCellDef="let row">
+                                                    {{row.revenue || 'N/A'}}
+                                                </mat-cell>
+                                            </ng-container>
+
+                                            <!-- SubTotal -->
+                                            <ng-container matColumnDef="SubTotal">
+                                                <mat-header-cell *matHeaderCellDef mat-sort-header>Subtotal</mat-header-cell>
+                                                <mat-cell *matCellDef="let row">
+                                                    {{row.subTotal || 'N/A'}}
+                                                </mat-cell>
+                                            </ng-container>
+
+                                            <!-- GST -->
+                                            <ng-container matColumnDef="GSTAmount">
+                                                <mat-header-cell *matHeaderCellDef mat-sort-header>GST Amount</mat-header-cell>
+                                                <mat-cell *matCellDef="let row">
+                                                    {{row.gstAmount || 'N/A'}}
+                                                </mat-cell>
+                                            </ng-container>
+
+                                            <!-- GST Type -->
+                                            <ng-container matColumnDef="GSTType">
+                                                <mat-header-cell *matHeaderCellDef mat-sort-header>GST Type</mat-header-cell>
+                                                <mat-cell *matCellDef="let row">
+                                                    {{row.gstType || 'N/A'}}
+                                                </mat-cell>
+                                            </ng-container>
+
+                                            <!-- Final Bill -->
+                                            <ng-container matColumnDef="InvoiceTotalAmountAfterGST">
+                                                <mat-header-cell *matHeaderCellDef mat-sort-header>Final Bill Amount</mat-header-cell>
+                                                <mat-cell *matCellDef="let row">
+                                                    {{row.invoiceTotalAmountAfterGST || 'N/A'}}
+                                                </mat-cell>
+                                            </ng-container>
+
+                                            <!-- DS Verify -->
+                                            <ng-container matColumnDef="DSVerifyStatus">
+                                                <mat-header-cell *matHeaderCellDef mat-sort-header>DS Verify Status</mat-header-cell>
+                                                <mat-cell *matCellDef="let row">
+                                                    {{row.dsVerifyStatus || 'N/A'}}
+                                                </mat-cell>
+                                            </ng-container>
+
+                                            <!-- Good For Billing -->
+                                            <ng-container matColumnDef="GoodForBilling">
+                                                <mat-header-cell *matHeaderCellDef mat-sort-header>Good For Bill</mat-header-cell>
+                                                <mat-cell *matCellDef="let row">
+                                                    {{row.goodForBilling === true ? 'Yes' : (row.goodForBilling === false ? 'No' : 'N/A')}}
+                                                </mat-cell>
+                                            </ng-container>
+
+                                            <!-- DS Status -->
+                                            <ng-container matColumnDef="DSStatus">
+                                                <mat-header-cell *matHeaderCellDef mat-sort-header>DS Status</mat-header-cell>
+                                                <mat-cell *matCellDef="let row">
+                                                    {{row.dsStatus || 'N/A'}}
+                                                </mat-cell>
+                                            </ng-container>
+
+                                            <!-- Booking Status -->
+                                            <ng-container matColumnDef="ReservationStatus">
+                                                <mat-header-cell *matHeaderCellDef mat-sort-header>Booking Status</mat-header-cell>
+                                                <mat-cell *matCellDef="let row">
+                                                    {{row.reservationStatus || 'N/A'}}
+                                                </mat-cell>
+                                            </ng-container>
+
+                                            <!-- Ownership -->
+                                            <ng-container matColumnDef="OwnedSupplied">
+                                                <mat-header-cell *matHeaderCellDef mat-sort-header>Owned/Supplier</mat-header-cell>
+                                                <mat-cell *matCellDef="let row">
+                                                    {{row.ownedSupplied || 'N/A'}}
+                                                </mat-cell>
+                                            </ng-container>
+
+                                            <!-- Vendor Type -->
+                                            <ng-container matColumnDef="SupplierType">
+                                                <mat-header-cell *matHeaderCellDef mat-sort-header>Vendor Type</mat-header-cell>
+                                                <mat-cell *matCellDef="let row">
+                                                    {{row.supplierType || 'N/A'}}
+                                                </mat-cell>
+                                            </ng-container>
+
+                                            <!-- Adhoc -->
+                                            <ng-container matColumnDef="AdocStatus">
+                                                <mat-header-cell *matHeaderCellDef mat-sort-header>Adoc Status</mat-header-cell>
+                                                <mat-cell *matCellDef="let row">
+                                                    {{row.adocStatus === true ? 'Yes' : (row.adocStatus === false ? 'No' : 'N/A')}}
+                                                </mat-cell>
+                                            </ng-container>
+
+                                            <!-- Sales -->
+                                            <ng-container matColumnDef="SalesPerson">
+                                                <mat-header-cell *matHeaderCellDef mat-sort-header>Sales Person</mat-header-cell>
+                                                <mat-cell *matCellDef="let row">
+                                                    {{row.salesPerson || 'N/A'}}
+                                                </mat-cell>
+                                            </ng-container>
+
+                                            <!-- KAM -->
+                                            <ng-container matColumnDef="KAM">
+                                                <mat-header-cell *matHeaderCellDef mat-sort-header>KAM</mat-header-cell>
+                                                <mat-cell *matCellDef="let row">
+                                                    {{row.kam || 'N/A'}}
+                                                </mat-cell>
+                                            </ng-container>
+
+                                            <!-- Booking Created -->
+                                            <ng-container matColumnDef="ReservationCreatedBy">
+                                                <mat-header-cell *matHeaderCellDef mat-sort-header>Booking Created By</mat-header-cell>
+                                                <mat-cell *matCellDef="let row">
+                                                    {{row.reservationCreatedBy || 'N/A'}}
+                                                </mat-cell>
+                                            </ng-container>
+
+                                            <!-- Allotment -->
+                                            <ng-container matColumnDef="AllotmentBy">
+                                                <mat-header-cell *matHeaderCellDef mat-sort-header>Allotment By</mat-header-cell>
+                                                <mat-cell *matCellDef="let row">
+                                                    {{row.allotmentBy || 'N/A'}}
+                                                </mat-cell>
+                                            </ng-container>
+
+                                            <mat-header-row *matHeaderRowDef="displayedColumns"></mat-header-row>
+
+                                            <mat-row *matRowDef="let row; columns: displayedColumns;"></mat-row>
+
                                         </mat-table>
                                     </div>
                                     </div>
@@ -636,7 +571,7 @@
         </div>
     </div>
 </section>
-<ng-template #dutyRegisterSearchFields>
+<ng-template>
                 <div class="duty-register-search quick-search-panel">
                 <div class="row">
                     <!-- <div class="col-xl-3 col-lg-3 col-md-6 col-sm-12 mb-2"> -->
@@ -1042,4 +977,319 @@
                         <mat-option [value]=false>Deleted</mat-option>
                     </mat-select>
                 </mat-form-field> -->
+</ng-template>
+
+<ng-template #dutyRegisterAdvanceSearch>
+      <div class="row">
+        <div class="col-xl-3 col-lg-3 col-md-3 col-sm-12 mb-2">
+            <mat-form-field class="example-full-width cp-quick-search-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
+                <mat-label>Branch</mat-label>
+                <input type="text" matInput [formControl]="SearchBranch"  [matAutocomplete]="autoBranch">
+                <mat-autocomplete #autoBranch="matAutocomplete" (optionSelected)="OnBranchSelected($event.option.value)">
+                    <mat-option *ngFor="let option of filteredBranchOptions | async" [value]="option.organizationalEntityName">
+                        {{option.organizationalEntityName}}
+                    </mat-option>
+                </mat-autocomplete>
+            </mat-form-field>
+        </div>
+
+        <div class="col-xl-3 col-lg-3 col-md-3 col-sm-12 mb-2">
+            <mat-form-field class="example-full-width cp-quick-search-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
+                <mat-label>Owned/Supplied</mat-label>
+                <mat-select [formControl]="SearchSupplierO">
+                    <mat-option value="Owned">Owned</mat-option>
+                    <mat-option value="Supplied">Supplied</mat-option>
+                </mat-select>
+            </mat-form-field>
+        </div>
+
+        <div class="col-xl-3 col-lg-3 col-md-3 col-sm-12 mb-2">
+            <mat-form-field class="example-full-width cp-quick-search-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
+                <mat-label>Vendor Type</mat-label>
+                <input type="text" matInput [formControl]="SearchSupplierType" [matAutocomplete]="auto5">
+                <mat-autocomplete #auto5="matAutocomplete">
+                    <mat-option *ngFor="let options of filteredSupplierTypeOptions | async"
+                        [value]="options.supplierType">
+                        {{options.supplierType}}
+                    </mat-option>
+                </mat-autocomplete>
+            </mat-form-field>
+        </div>
+
+        <div class="col-xl-3 col-lg-3 col-md-3 col-sm-12 mb-2">
+            <mat-form-field class="example-full-width cp-quick-search-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
+                <mat-label>Sales Person</mat-label>
+                <input type="text" matInput [formControl]="SearchSalesPerson" [matAutocomplete]="auto7">
+                <mat-autocomplete #auto7="matAutocomplete">
+                    <mat-option *ngFor="let option of filteredSalesPersonOptions | async" [value]="option.salesPerson">
+                        {{option.salesPerson}}
+                    </mat-option>
+                </mat-autocomplete>
+            </mat-form-field>
+        </div>
+      </div>     
+      
+      <div class="row">
+        <div class="col-xl-3 col-lg-3 col-md-3 col-sm-12 mb-2">
+           <mat-form-field class="example-full-width cp-quick-search-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
+                <mat-label>KAM</mat-label>
+                <input type="text" matInput [formControl]="SearchKAM"  [matAutocomplete]="autoKAM">
+                <mat-autocomplete #autoKAM="matAutocomplete" (optionSelected)="OnKAMSelected($event.option.value)">
+                    <mat-option *ngFor="let option of filteredKAMOptions | async" [value]="option.firstName +' '+option.lastName">
+                        {{option.firstName +' '+ option.lastName}}
+                    </mat-option>
+                </mat-autocomplete>
+            </mat-form-field>
+        </div>
+
+        <div class="col-xl-3 col-lg-3 col-md-3 col-sm-12 mb-2">
+            <mat-form-field class="example-full-width cp-quick-search-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
+                <mat-label>Car Booked</mat-label>
+                <input type="text" matInput [formControl]="SearchCarBooked" [matAutocomplete]="auto9">
+                <mat-autocomplete #auto9="matAutocomplete">
+                    <mat-option *ngFor="let option of filteredCarBookedOptions | async" [value]="option.vehicle">
+                        {{option.vehicle}}
+                    </mat-option>
+                </mat-autocomplete>
+            </mat-form-field>
+        </div>
+
+        <div class="col-xl-3 col-lg-3 col-md-3 col-sm-12 mb-2">
+            <mat-form-field class="example-full-width cp-quick-search-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
+                <mat-label>Car Sent</mat-label>
+                <input type="text" matInput [formControl]="SearchCarSend" [matAutocomplete]="auto8">
+                <mat-autocomplete #auto8="matAutocomplete">
+                    <mat-option *ngFor="let option of filteredCarSendOptions | async" [value]="option.vehicle">
+                        {{option.vehicle}}
+                    </mat-option>
+                </mat-autocomplete>
+            </mat-form-field>
+        </div>
+
+        <div class="col-xl-3 col-lg-3 col-md-3 col-sm-12 mb-2">
+            <mat-form-field class="example-full-width cp-quick-search-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
+                <mat-label>Car No.</mat-label>
+                <input type="text" matInput [formControl]="SearchCarNo" [matAutocomplete]="auto12">
+                <mat-autocomplete #auto12="matAutocomplete">
+                    <mat-option *ngFor="let option of filteredCarNoOptions | async" [value]="option.vehicle">
+                        {{option.vehicle}}
+                    </mat-option>
+                </mat-autocomplete>
+            </mat-form-field>
+        </div>
+      </div>
+      
+      <div class="row">
+        <div class="col-xl-3 col-lg-3 col-md-3 col-sm-12 mb-2">
+           <mat-form-field class="example-full-width cp-quick-search-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
+                <mat-label>Driver</mat-label>
+                <input type="text" matInput [formControl]="SearchDri" [matAutocomplete]="auto15">
+                <mat-autocomplete #auto15="matAutocomplete">
+                    <mat-option *ngFor="let option of filteredDriverOptions | async" [value]="option.driverName">
+                        {{option.driverName}}
+                    </mat-option>
+                </mat-autocomplete>
+            </mat-form-field>
+        </div>
+
+        <div class="col-xl-3 col-lg-3 col-md-3 col-sm-12 mb-2">
+            <mat-form-field class="example-full-width cp-quick-search-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
+                <mat-label>Guest Name</mat-label>
+                <input type="text" matInput [formControl]="SearchGuestName" [matAutocomplete]="auto13">
+                <mat-autocomplete #auto13="matAutocomplete">
+                    <mat-option *ngFor="let option of filteredGuestNameOptions | async" [value]="option.customerPersonName">
+                        {{option.customerPersonName}}
+                    </mat-option>
+                </mat-autocomplete>
+            </mat-form-field>
+        </div>
+
+        <div class="col-xl-3 col-lg-3 col-md-3 col-sm-12 mb-2">
+            <mat-form-field class="example-full-width cp-quick-search-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
+                <mat-label>Guest Mobile</mat-label>
+                <input type="text" matInput [(ngModel)]="SearchGuestMobile">
+            </mat-form-field>
+        </div>
+
+        <div class="col-xl-3 col-lg-3 col-md-3 col-sm-12 mb-2">
+            <mat-form-field class="example-full-width cp-quick-search-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
+                <mat-label>Importance</mat-label>
+                <mat-select [formControl]="SearchImportance">
+                    <mat-option value="General">General</mat-option>
+                    <mat-option value="CXO">CXO</mat-option>
+                    <mat-option value="VIP">VIP</mat-option>
+                </mat-select>
+            </mat-form-field>
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="col-xl-3 col-lg-3 col-md-3 col-sm-12 mb-2">
+            <mat-form-field class="example-full-width cp-quick-search-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
+                <mat-label>City</mat-label>
+                <input type="text" matInput [formControl]="SearchCity"  [matAutocomplete]="auto14">
+                <mat-autocomplete #auto14="matAutocomplete">
+                    <mat-option *ngFor="let option of filteredCityOptions | async" [value]="option.geoPointName">
+                        {{option.geoPointName}}
+                    </mat-option>
+                </mat-autocomplete>
+            </mat-form-field>
+        </div>
+
+        <div class="col-xl-3 col-lg-3 col-md-3 col-sm-12 mb-2">
+            <mat-form-field class="example-full-width cp-quick-search-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
+                <mat-label>Bill Date From</mat-label>
+                <input type="text" matInput [matDatepicker]="billDateFrom" [(ngModel)]="SearchBillDateFrom">
+                <mat-datepicker-toggle matSuffix [for]="billDateFrom"></mat-datepicker-toggle>
+                <mat-datepicker #billDateFrom></mat-datepicker>
+            </mat-form-field>
+        </div>
+
+        <div class="col-xl-3 col-lg-3 col-md-3 col-sm-12 mb-2">
+            <mat-form-field class="example-full-width cp-quick-search-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
+                <mat-label>Bill Date To</mat-label>
+                <input type="text" matInput [matDatepicker]="billDateTo" [(ngModel)]="SearchBillToDate">
+                <mat-datepicker-toggle matSuffix [for]="billDateTo"></mat-datepicker-toggle>
+                <mat-datepicker #billDateTo></mat-datepicker>
+            </mat-form-field>
+        </div>
+      </div>
+</ng-template>
+
+
+<ng-template #dutyRegisterQuickSearch>
+    <div class="row">
+        <div class="col-xl-3 col-lg-3 col-md-3 col-sm-12 mb-2">
+            <mat-form-field class="example-full-width cp-quick-search-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
+                <mat-label>Booking Date From</mat-label>
+                <input type="text" matInput [matDatepicker]="bookingDateFrom" [(ngModel)]="SearchBookingDateFrom">
+                <mat-datepicker-toggle matSuffix [for]="bookingDateFrom"></mat-datepicker-toggle>
+                <mat-datepicker #bookingDateFrom></mat-datepicker>
+            </mat-form-field>
+        </div>
+        
+        <div class="col-xl-3 col-lg-3 col-md-3 col-sm-12 mb-2">
+            <mat-form-field class="example-full-width cp-quick-search-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
+                <mat-label>Booking Date To</mat-label>
+                <input type="text" matInput [matDatepicker]="bookingDateTo" [(ngModel)]="SearchBookingDate">
+                <mat-datepicker-toggle matSuffix [for]="bookingDateTo"></mat-datepicker-toggle>
+                <mat-datepicker #bookingDateTo></mat-datepicker>
+            </mat-form-field>
+        </div>
+
+        <div class="col-xl-3 col-lg-3 col-md-3 col-sm-12 mb-2">
+            <mat-form-field class="example-full-width cp-quick-search-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
+                <mat-label>Pickup Date From</mat-label>
+                <input type="text" matInput [matDatepicker]="fromDate" [(ngModel)]="SearchFromDate">
+                <mat-datepicker-toggle matSuffix [for]="fromDate"></mat-datepicker-toggle>
+                <mat-datepicker #fromDate></mat-datepicker>
+            </mat-form-field>
+        </div>
+        
+        <div class="col-xl-3 col-lg-3 col-md-3 col-sm-12 mb-2">
+            <mat-form-field class="example-full-width cp-quick-search-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
+                <mat-label>Pickup Date To</mat-label>
+                <input type="text" matInput [matDatepicker]="toDate" [(ngModel)]="SearchToDate">
+                <mat-datepicker-toggle matSuffix [for]="toDate"></mat-datepicker-toggle>
+                <mat-datepicker #toDate></mat-datepicker>
+            </mat-form-field>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-xl-3 col-lg-3 col-md-3 col-sm-12 mb-2">
+            <mat-form-field class="example-full-width cp-quick-search-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
+                <mat-label>Location</mat-label>
+                <input type="text" matInput [formControl]="SearchCustomerLocationName" [matAutocomplete]="auto11">
+                <mat-autocomplete #auto11="matAutocomplete">
+                    <mat-option *ngFor="let option of filteredCustomerLocationOptions | async" [value]="option.organizationalEntityName">
+                        {{option.organizationalEntityName}}
+                    </mat-option>
+                    </mat-autocomplete>
+            </mat-form-field>
+        </div>
+
+        <div class="col-xl-3 col-lg-3 col-md-3 col-sm-12 mb-2">
+            <mat-form-field class="example-full-width cp-quick-search-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
+                <mat-label>Customer Group</mat-label>
+                <input type="text" matInput [formControl]="SearchCustomerGroup"  [matAutocomplete]="auto"
+                (keydown.backspace)="clearCustomerGroup($event)">
+                <mat-autocomplete #auto="matAutocomplete" (optionSelected)="OnCustomerGroupSelected($event.option.value)">
+                    <mat-option *ngFor="let option of filteredCustomerGroupOptions | async" [value]="option.customerGroup">
+                        {{option.customerGroup}}
+                    </mat-option>
+                </mat-autocomplete>
+            </mat-form-field>
+        </div>
+
+        <div class="col-xl-3 col-lg-3 col-md-3 col-sm-12 mb-2">
+            <mat-form-field class="example-full-width cp-quick-search-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
+                <mat-label>Customer</mat-label>
+                <input type="text" matInput [formControl]="SearchCustomer"  [matAutocomplete]="autoCustomer">
+                <mat-autocomplete #autoCustomer="matAutocomplete">
+                    <mat-option *ngFor="let option of filteredCustomerOptions | async" [value]="option.customerName">
+                        {{option.customerName}}
+                    </mat-option>
+                </mat-autocomplete>
+            </mat-form-field>
+        </div>
+
+        <div class="col-xl-3 col-lg-3 col-md-3 col-sm-12 mb-2">
+            <mat-form-field class="example-full-width cp-quick-search-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
+                <mat-label>MOP</mat-label>
+                <input type="text" matInput [formControl]="SearchMOP" [matAutocomplete]="auto4">
+                <mat-autocomplete #auto4="matAutocomplete">
+                    <mat-option *ngFor="let option of filteredPaymentModeOptions | async"
+                        [value]="option.modeOfPayment">
+                        {{option.modeOfPayment}}
+                    </mat-option>
+                </mat-autocomplete>
+            </mat-form-field>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-xl-3 col-lg-3 col-md-3 col-sm-12 mb-2">
+            <mat-form-field class="example-full-width cp-quick-search-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
+                <mat-label>Booking Status</mat-label>
+                <mat-select [formControl]="SearchBookingStatus">
+                    <mat-option value="Confirmed">Confirmed</mat-option>
+                    <mat-option value="Approved">Approved</mat-option>
+                    <mat-option value="Pending">Pending</mat-option>
+                    <mat-option value="Cancelled">Cancelled</mat-option>
+                </mat-select>
+            </mat-form-field>
+        </div>
+
+        <div class="col-xl-3 col-lg-3 col-md-3 col-sm-12 mb-2">
+            <mat-form-field class="example-full-width cp-quick-search-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
+                <mat-label>DS Verification</mat-label>
+                <mat-select [formControl]="SearchDSVerification">
+                    <mat-option [value]=true>Yes</mat-option>
+                    <mat-option [value]=false>No</mat-option>
+                </mat-select>
+            </mat-form-field>
+        </div>
+
+        <div class="col-xl-3 col-lg-3 col-md-3 col-sm-12 mb-2">
+            <mat-form-field class="example-full-width cp-quick-search-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
+                <mat-label>Good For Bill</mat-label>
+                <mat-select [formControl]="SearchGoodForBill">
+                    <mat-option [value]=true>Yes</mat-option>
+                    <mat-option [value]=false>No</mat-option>
+                </mat-select>
+            </mat-form-field>
+        </div>
+
+        <div class="col-xl-3 col-lg-3 col-md-3 col-sm-12 mb-2">
+            <mat-form-field class="example-full-width cp-quick-search-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
+                <mat-label>DS Bill Status</mat-label>
+                <mat-select [formControl]="SearchBillStatus">
+                    <mat-option [value]=true>Yes</mat-option>
+                    <mat-option [value]=false>No</mat-option>
+                </mat-select>
+            </mat-form-field>
+        </div>
+        
+    </div>
 </ng-template>

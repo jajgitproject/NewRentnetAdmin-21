@@ -1,115 +1,142 @@
 // @ts-nocheck
 import { formatDate, Time } from '@angular/common';
 export class DutyRegisterModel {
+
   reservationID: number;
-  primaryBookerID:number;
-  passengerMobile:string;
-  customerPersonName:string;
-  modeOfPaymentID:number;
-  modeOfPayment:string;
-  reservationGroupID:number;
-  bookingType:string;
-  pickupDate:Date;
-  customerID:number;
-  cancellationDateTime:Date;
-  customerSpecificFields:string;
-  customerName:string;
-  gender:string;
-  importance:string;
-  primaryEmail:string;
-  loyalGuest:boolean;
-  pickupCityID:number;
-  city:string;
-  packageID:number;
-  package:string;
-  packageTypeID:number;
-  packageType:string;
-  pickupAddress:string;
-  modeOfPaymentChangeReason:string;
-  vehicleID:number;
-  carSent:string;
-  carBooked:string;
-  inventoryID:number;
-  registrationNumber:string;
-  driverName:string;
-  dutySlipID:number;
-  dsClosing:string;
-  locationOutAddressString:string;
-  actualCarMovedFrom:string;
-  locationOutDate:Date;
-  locationOutTime:Date;
-  locationOutKM:number;
-  locationInDate:Date;
-  locationInTime:Date;
-  locationInKM:number;
-  tripStatus:string;
-  driverRemark:string;
-  locationOutLocationOrHubID:number;
-  organizationalEntityName:string;
-  supplierID:number;
-  supplierName:string;
-  supplierTypeID:number;
-  supplierType:string;
-  employeeID:number;
-  loggedInUser:string;
-  disputeType:string;
-  specialInstruction:string;
-  dateOfFeedback:Date;
-  feedbackPointsOutOfFive:number;
-  feedbackRemark:string;
-  customerTypeID:number;
-  customerType:string;
-  customerGroupID:number;
+
+  dutySlipID: number;
+
+  pickupDate: Date | null;
+  bookingDate: string;
+
+  dispatchLocation: string;
+
   customerGroup: string;
-  manualDutySlipNumber:string;
-  reportingToGuestKM:number;
-  reportingToGuestTime:Date;
-  releasingKM:number;
-  releasingTime:Date;
-  goodForBilling:boolean;
-  baseFare:number;
-  carUpgraded:string;
-  customerCreationDate:Date;
-  dateOfAllotment:Date;
-  timeofAllotment:Time;
-  selfDeclaration:boolean;
-  bodyTemperatureInDegreeCelcius:number;
-  fuelType:string;
-  amount:number;
-  customerCategory:string;
-  fgrkmAmount:number;
-  packageBaseRate:number;
-  extraKMAmount:number;
-  extraMinutesAmount:number;
-  revenue:number;
-  invoiceNumber:number;
-  manualInvoiceNumber:number;
-  invoiceDate:Date;
-  totalAmountAfterDiscout:number;
-  invoiceTotalAmountAfterGST:Date;
-  invoiceStatusActiveOrVoid:string;
-  totalKMWithAddtionalKM:number;
-  totalHoursWithAddtionalHours:number;
-  tollParkingType:string;
-  tollParkingAmount:number;
-  interStateTaxAmount:number;
-  communicationTextSentTo:string;
-  extraMinutes:number;
-  extraKMs:number;
-  totalFuelSurchargeOnExtraKM:number;
-  totalFuelSurchargeOnExtraHours:number;
-  totalFuelSurchargeOnPackageRate:number;
-  invoiceSummaryID:number;
-  invoiceSummaryDate:Date;
-  dutyExpenseChargeTotal:Date;
-  dutyExpenseNonChargeTotal:Date;
-  reservationStatus:string;
-  inventoryOwnedSupplied:string;
-  salesPersonID: number;
+
+  customerID: number;
+  customerName: string;
+
+  customerType: string;
+
+  bookerName: string;
+  guestName: string;
+  guestMobile: string;
+
+  city: string;
+
+  packageType: string;
+  billedDutyType: string;
+
+  package: string;
+
+  carBooked: string;
+  carSent: string;
+
+  carNumber: string;
+
+  driverName: string;
+
+  modeOfPayment: string;
+
+  locationOutDate: Date | null;
+  locationOutTime: string;
+  locationOutKM: number;
+
+  dsPickUpDate: Date | null;
+  pickUpTime: string;
+  pickUpKM: number;
+
+  dropOffDate: Date | null;
+  dropOffTime: string;
+  dropOffKM: number;
+
+  locationInDate: Date | null;
+  locationInTime: string;
+  locationInKM: number;
+
+  g2P: number;
+  d2G: number;
+
+  appP2D: number;
+  driverP2D: number;
+  gpsP2D: number;
+
+  totalKMWithAddtionalKM: number;
+  totalHoursWithAddtionalHours: number;
+
+  packageBaseRate: number;
+
+  extraMinutes: number;
+  extraHRRate: number;
+  extraMinutesAmount: number;
+
+  extraKMs: number;
+  extraKMRate: number;
+  extraKMAmount: number;
+
+  totalDriverAllowanceAmount: number;
+
+  nightAmount: number;
+
+  toll: number;
+  parking: number;
+  fasTag: number;
+
+  invoiceInterstateTax: number;
+
+  dutyExpenseChargeTotal: number;
+
+  fgrAmount: number;
+
+  revenue: number;
+
+  subTotal: number;
+
+  cgstAmount: number;
+  sgstAmount: number;
+  igstAmount: number;
+
+  gstAmount: number;
+
+  gstType: string;
+
+  invoiceTotalAmountAfterGST: number;
+
+  invoiceNumberWithPrefix: string;
+
+  invoiceDate: Date | null;
+
+  dsVerifyStatus: string;
+
+  goodForBilling: boolean | null;
+
+  dsStatus: string;
+
+  reservationStatus: string;
+
+  ownedSupplied: string;
+
+  supplierType: string;
+
+  adocStatus: boolean | null;
+
   salesPerson: string;
-  physicalDutySlipReceived:boolean;
-  activationStatus: boolean;
-  allotmentStatus:string;
+
+  kam: string;
+
+  reservationCreatedBy: string;
+
+  allotmentBy: string;
+
+  closureType: string;
+
+  disputeType: string;
+
+  pickupLocation: string;
+
+  dropLocation: string;
+
+  invoiceCreatedBy: string;
 }
 
 
@@ -129,6 +156,11 @@ export class SalesPersonDropDownModel {
 export class SearchCriteria 
 {
   SearchCustomerGroup: string;
+  SearchCustomer: string;
+  SearchBranch: string;
+  SearchKAM: string;
+  SearchBranchID: number;
+  SearchKAMID: number;
   SearchCustomerPersonName: string;
   SearchDutyType: string;
   SearchFeedbackDate: string;
@@ -146,6 +178,9 @@ export class SearchCriteria
   SearchCustomerType: string;
   SearchCustomerLocationName: string;
   SearchBookingStatus: string;
+  SearchImportance: string;
+  SearchDSVerification: boolean;
+  SearchGoodForBill: boolean;
   SearchDri: string;
   SearchCarNo: string;
   SearchSupplierO: string;

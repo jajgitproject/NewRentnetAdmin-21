@@ -1,4 +1,4 @@
-// @ts-nocheck
+
 import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
 import { DutyRegisterService } from './dutyRegister.service';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
@@ -30,6 +30,8 @@ import { CustomerGroupDropDown } from '../customerGroup/customerGroupDropDown.mo
 import { CustomerPersonDetailsDropDown } from '../passengerDetails/customerPersonDetailsDropDown.model';
 import { CityDropDown } from '../city/cityDropDown.model';
 import { LocationGroupDropDown } from '../locationGroup/locationGroupDropDown.model';
+import { CustomerDropDown } from '../customer/customerDropDown.model';
+import { EmployeeDropDown } from '../employee/employeeDropDown.model';
 @Component({
   standalone: false,
   selector: 'app-dutyRegister',
@@ -38,94 +40,66 @@ import { LocationGroupDropDown } from '../locationGroup/locationGroupDropDown.mo
   providers: [{ provide: MAT_DATE_LOCALE, useValue: 'en-GB' }]
 })
 export class DutyRegisterComponent implements OnInit {
-  displayedColumns = [
-    'ReservationID',
-    'CustomerType',
-    'CustomerGroup',
-    'CustomerName',
-    'CustomerPersonName',
-    // 'CustomerSpecificFields',
-    // 'Gender',
-    // 'BookingType',
-    'PickupDate',
-    'ModeOfPayment',
-    'AllotmentStatus',
-    'ReservationStatus',
-    'CancellationDateTime',
-    'Importance',
-    'PassengerMobile',
-    // 'LoyalGuest',
-    'City',
-    'PackageType',
-    'Package',
-    'PickupAddress',
-    // 'ModeOfPaymentChangeReason',
-    'CarSent',
-    'CarBooked',
-    'InventoryOwnedSupplied',
-    'RegistrationNumber',
-    'DriverName',
-    'DutySlipID',
-    'LocationOutAddressString',
-    'ActualCarMovedFrom',
-    'LocationOutDate',
-    'LocationOutTime',
-    'LocationOutKM',
-    'LocationInDate',
-    'LocationInTime',
-    'LocationInKM',
-    'TripStatus',
-    'DriverRemark',
-    'OrganizationalEntityName',
-    'SupplierName',
-    'SupplierType',
-    'DisputeType',
-    'SpecialInstruction',
-    'DateOfFeedback',
-    'FeedbackPointsOutOfFive',
-    'FeedbackRemark',
-    'ManualDutySlipNumber',
-    'ReportingToGuestKM',
-    'ReportingToGuestTime',
-    'ReleasingKM',
-    'ReleasingTime',
-    'GoodForBilling',
-    'BaseFare',
-    'CarUpgraded',
-    'CustomerCreationDate',
-    'DateOfAllotment',
-    'TimeofAllotment',
-    'SelfDeclaration',
-    'BodyTemperatureInDegreeCelcius',
-    'FuelType',
-    'Amount',
-    'CustomerCategory',
-    'FGRKmAmount',
-    'PackageBaseRate',
-    'ExtraKMAmount',
-    'ExtraMinutesAmount',
-    'InvoiceNumber',
-    'ManualInvoiceNumber',
-    'InvoiceDate',
-    'TotalAmountAfterDiscout',
-    'InvoiceTotalAmountAfterGST',
-    'TotalKMWithAddtionalKM',
-    'TotalHoursWithAddtionalHours',
-    'TollParkingType',
-    'TollParkingAmount',
-    'CommunicationTextSentTo',
-    'ExtraMinutes',
-    'ExtraKMs',
-    'TotalFuelSurchargeOnExtraKM',
-    'TotalFuelSurchargeOnExtraHours',
-    'TotalFuelSurchargeOnPackageRate',
-    'InvoiceSummaryDate',
-    'DutyExpenseChargeTotal',
-    'DutyExpenseNonChargeTotal',
-    'SalesPerson',
-    'PhysicalDutySlipReceived',
-    'LoggedInUser'
-  ];
+ displayedColumns = [
+  'ReservationID',
+  'PickupDate',
+  'BookingDate',
+  'DispatchLocation',
+  'CustomerName',
+  'GuestName',
+  'City',
+  'PackageType',
+  'CarNumber',
+  'DriverName',
+  'BilledDutyType',
+  'Package',
+  'CarBooked',
+  'CarSent',
+  'ModeOfPayment',
+  'LocationOutDate',
+  'LocationOutTime',
+  'LocationOutKM',
+
+  'reportingDate',
+  'reportingTime',
+  'reportingKM',
+
+  'releasingDate',
+  'releasingTime',
+  'releasingKM',
+
+  'LocationInDate',
+  'LocationInTime',
+  'LocationInKM',
+  'G2P',
+  'D2G',
+  'AppP2D',
+  'DriverP2D',
+  'GPSP2D',
+  'TotalKMWithAddtionalKM',
+  'TotalHoursWithAddtionalHours',
+  'Parking',
+  'Toll',
+  'FasTag',
+  'InvoiceInterstateTax',
+  'DutyExpenseChargeTotal',
+  'Revenue',
+  'SubTotal',
+  'GSTAmount',
+  'GSTType',
+  'InvoiceTotalAmountAfterGST',
+  'DSVerifyStatus',
+  'GoodForBilling',
+  'DSStatus',
+  'ReservationStatus',
+  'OwnedSupplied',
+  'SupplierType',
+  'AdocStatus',
+  'SalesPerson',
+  'KAM',
+  'ReservationCreatedBy',
+  'AllotmentBy'
+];
   
   dataSource: DutyRegisterModel[] | null;
   advanceTable: DutyRegisterModel | null;
@@ -144,6 +118,18 @@ export class DutyRegisterComponent implements OnInit {
   SearchCustomerGroup: FormControl = new FormControl();
   filteredCustomerGroupOptions: Observable<CustomerGroupDropDown[]>;
 
+  public CustomerList?: CustomerDropDown[] = [];
+  SearchCustomer: FormControl = new FormControl();
+  filteredCustomerOptions: Observable<CustomerDropDown[]>;
+
+  public BranchList?: OrganizationalEntityDropDown[] = [];
+  SearchBranch: FormControl = new FormControl();
+  filteredBranchOptions: Observable<OrganizationalEntityDropDown[]>;
+
+  public KAMList?: EmployeeDropDown[] = [];
+  SearchKAM: FormControl = new FormControl();
+  filteredKAMOptions: Observable<EmployeeDropDown[]>;
+
   public CustomerPersonList?: CustomerPersonDetailsDropDown[] = [];
   SearchCustomerPerson: FormControl = new FormControl();
   filteredCustomerPersonOptions: Observable<CustomerPersonDetailsDropDown[]>;
@@ -154,7 +140,9 @@ export class DutyRegisterComponent implements OnInit {
   SearchDutyType : FormControl = new FormControl();
   SearchFeedbackDate: string = '';
 
-  SearchSlipReceipt:boolean | null = null;;
+  SearchSlipReceipt:boolean | null = null;
+  SearchKAMID: number = 0;
+  SearchBranchID: number = 0;
 
   SearchDispatchLocation : FormControl = new FormControl();
   public DispatchLocationList?: OrganizationalEntityDropDown[] = [];
@@ -194,7 +182,11 @@ export class DutyRegisterComponent implements OnInit {
   filteredLocationGroupOptions: Observable<LocationGroupDropDown[]>;
 
   SearchBookingStatus : FormControl = new FormControl();
-
+  SearchImportance : FormControl = new FormControl();
+  SearchDSVerification : FormControl = new FormControl(null);
+  SearchGoodForBill : FormControl = new FormControl(null);
+  SearchBillStatus : FormControl = new FormControl(null);
+  
   SearchLocationGroup : FormControl = new FormControl();
 
   SearchDri : FormControl = new FormControl();
@@ -235,7 +227,6 @@ export class DutyRegisterComponent implements OnInit {
 
   SearchBookingDateFrom: string = '';
   SearchBookingDate: string = '';
-  SearchBillStatus: string = '';
   csvExporting: boolean = false;
   hasManualSearch: boolean = false;
     
@@ -276,6 +267,8 @@ export class DutyRegisterComponent implements OnInit {
     this.InitGuestName();
     this.InitLocationGroup();
     this.InitCities();
+    this.InitBranch();
+    this.InitKAM();
     //this.SubscribeUpdateService();
   }
 
@@ -284,6 +277,9 @@ export class DutyRegisterComponent implements OnInit {
     this.selectedFilter='search';
     this.searchTerm='';
     this.SearchCustomerGroup.setValue('');
+    this.SearchCustomer.setValue('');
+    this.SearchBranch.setValue('');
+    this.SearchKAM.setValue('');
     this.SearchCustomerPerson.setValue('');
     this.SearchDutyType.setValue('');
     this.SearchFeedbackDate = '';
@@ -300,6 +296,10 @@ export class DutyRegisterComponent implements OnInit {
     this.SearchCarSend.setValue('');
     this.SearchCarBooked.setValue('');
     this.SearchBookingStatus.setValue('');
+    this.SearchImportance.setValue('');
+    this.SearchDSVerification.setValue(null);
+    this.SearchGoodForBill.setValue(null);
+    this.SearchBillStatus.setValue(null);
     this.SearchDri.setValue('');
     this.SearchCarNo.setValue('');
     this.SearchSupplierO.setValue('');
@@ -315,7 +315,6 @@ export class DutyRegisterComponent implements OnInit {
     this.SearchBookingDateFrom = '';
     this.SearchBookingDate = '';
     this.SearchChangeMOPCase = '';
-    this.SearchBillStatus = '';
     this.SearchActivationStatus = true;
     this.hasManualSearch = false;
     this.PageNumber=0;
@@ -368,14 +367,20 @@ export class DutyRegisterComponent implements OnInit {
 
   public loadData() 
   {
+    debugger;
     const searchCriteria = this.buildSearchCriteria();
-    this.dutyRegisterService.getTableData(searchCriteria,this.PageNumber,).subscribe
-    (
+    this.dutyRegisterService.getTableData(searchCriteria,this.PageNumber,).subscribe(
       data =>   
       {
+        debugger;
         this.dataSource = data;
+        console.log(this.dataSource);
       },
-    (error: HttpErrorResponse) => { this.dataSource = null;}
+    (error: HttpErrorResponse) => { 
+       console.log(error);
+  debugger;
+  this.dataSource = null;
+    }
     );
   }
   
@@ -424,6 +429,7 @@ export class DutyRegisterComponent implements OnInit {
   }
 
   downloadFilteredCsv() {
+    debugger;
     if (this.csvExporting || !this.hasManualSearch) {
       return;
     }
@@ -432,6 +438,7 @@ export class DutyRegisterComponent implements OnInit {
     const searchCriteria = this.buildSearchCriteria();
     this.dutyRegisterService.exportCsv(searchCriteria).subscribe(
       (blob: Blob) => {
+        debugger;
         this.csvExporting = false;
 
         if (!blob || blob.size === 0) {
@@ -477,6 +484,11 @@ export class DutyRegisterComponent implements OnInit {
   private buildSearchCriteria(): SearchCriteria {
     return {
       SearchCustomerGroup: this.SearchCustomerGroup?.value || "",
+      SearchCustomer: this.SearchCustomer?.value || "",
+      SearchBranch: this.SearchBranch?.value || "",
+      SearchKAM: this.SearchKAM?.value || "",
+      SearchBranchID: this.SearchBranchID,
+      SearchKAMID: this.SearchKAMID,
       SearchCustomerPersonName: this.SearchCustomerPerson?.value || "",
       SearchDutyType: this.SearchDutyType?.value || "",
       SearchFeedbackDate: this.SearchFeedbackDate !== "" ? moment(this.SearchFeedbackDate).format('MMM DD yyyy') : "",
@@ -494,6 +506,10 @@ export class DutyRegisterComponent implements OnInit {
       SearchCustomerType: this.SearchCustomerType?.value || "",
       SearchCustomerLocationName: this.SearchCustomerLocationName?.value || "",
       SearchBookingStatus: this.SearchBookingStatus?.value || "",
+      SearchImportance : this.SearchImportance?.value || "",
+      SearchDSVerification: this.SearchDSVerification?.value,
+      SearchGoodForBill: this.SearchGoodForBill?.value,
+      SearchBillStatus: this.SearchBillStatus?.value,
       SearchDri: this.SearchDri?.value || "",
       SearchCarNo: this.SearchCarNo?.value || "",
       SearchSupplierO: this.SearchSupplierO?.value || "",
@@ -511,7 +527,6 @@ export class DutyRegisterComponent implements OnInit {
       SearchLocationGroup: this.SearchLocationGroup?.value || "null",
       SearchBillFromDate: this.SearchBillDateFrom !== "" ? moment(this.SearchBillDateFrom).format('MMM DD yyyy') : "",
       SearchBillToDate: this.SearchBillToDate !== "" ? moment(this.SearchBillToDate).format('MMM DD yyyy') : "",
-      SearchBillStatus: this.SearchBillStatus,
     };
   }
 
@@ -563,6 +578,138 @@ export class DutyRegisterComponent implements OnInit {
       {
         return data.customerGroup.toLowerCase().indexOf(filterValue)===0;
       });
+  }
+
+  OnCustomerGroupSelected(selectedName: string) {
+    const selectedSL = this.CustomerGroupList.find(
+      data => data.customerGroup === selectedName
+    );
+  
+    if (selectedSL) {
+      this.getCustomerGroupID(selectedSL.customerGroupID);
+    }
+  }
+
+  getCustomerGroupID(customerGroupID: any) {
+    this.InitCustomer(customerGroupID);
+  }
+
+  //---------- Customer ----------
+  InitCustomer(customerGroupID?:any)
+  {
+    this._generalService.GetCustomersForCP(customerGroupID).subscribe(
+    data=>
+    {
+      this.CustomerList = data;
+      this.filteredCustomerOptions =this.SearchCustomer.valueChanges.pipe(
+      startWith(""),
+      map(value => this._filterCustomer(value || ''))
+      ); 
+    });
+  }
+  private _filterCustomer(value: string): any {
+    const filterValue = value.toLowerCase();
+    if (!value || value.length < 0)
+     {
+        return [];   
+      }
+    return this.CustomerList.filter(
+      data => 
+      {
+        return data.customerName.toLowerCase().indexOf(filterValue)===0;
+      });
+  }
+
+  clearCustomerGroup(event: KeyboardEvent) {
+  if (this.SearchCustomerGroup.value) {
+
+    event.preventDefault();
+
+    this.SearchCustomerGroup.setValue('');
+    this.SearchCustomer.setValue('');
+  }
+}
+
+  //----------Branch----------
+  InitBranch()
+  {
+    this._generalService.GetOrganizationalBranch().subscribe(
+    data=>
+    {
+      this.BranchList = data;
+      this.filteredBranchOptions =this.SearchBranch.valueChanges.pipe(
+      startWith(""),
+      map(value => this._filterBranch(value || ''))
+      ); 
+    });
+  }
+  private _filterBranch(value: string): any {
+    const filterValue = value.toLowerCase();
+    if (!value || value.length < 0)
+     {
+        return [];   
+      }
+    return this.BranchList.filter(
+      data => 
+      {
+        return data.organizationalEntityName.toLowerCase().indexOf(filterValue)===0;
+      });
+  }
+
+  OnBranchSelected(selectedName: string) {
+    const selectedSL = this.BranchList.find(
+      data => data.organizationalEntityName === selectedName
+    );
+  
+    if (selectedSL) {
+      this.getBranchID(selectedSL.organizationalEntityID);
+    }
+  }
+
+  getBranchID(BranchID: any) {
+    this.SearchBranchID = BranchID;
+
+  }
+
+  //----------KAM----------
+  InitKAM()
+  {
+    this._generalService.GetEmployee().subscribe(
+    data=>
+    {
+      this.KAMList = data;
+      this.filteredKAMOptions =this.SearchKAM.valueChanges.pipe(
+      startWith(""),
+      map(value => this._filterKAM(value || ''))
+      ); 
+    });
+  }
+  private _filterKAM(value: string): any {
+    const filterValue = value.toLowerCase();
+    if (!value || value.length < 0)
+     {
+        return [];   
+      }
+    return this.KAMList.filter(
+      data => 
+      {
+        return data.firstName.toLowerCase().indexOf(filterValue)===0 || data.lastName.toLowerCase().indexOf(filterValue)===0;
+      });
+  }
+
+  OnKAMSelected(selectedName: string) {
+    const selectedSL = this.KAMList.find(
+      data => data.firstName + ' ' + data.lastName === selectedName
+    );
+  
+    if (selectedSL) {
+      this.getKAMID(selectedSL.employeeID);
+    }
+  }
+
+  getKAMID(KAMID: any) {
+    this.SearchKAMID = KAMID;
+
   }
 
   //---------- Client Name ----------
