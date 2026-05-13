@@ -571,9 +571,6 @@ export function mapInvoiceCalculationToSummaryOfDuty(response: unknown): Summary
   const pkgVals = recordFromModelNode(
     pick(r, 'invoicePackageValuesModel', 'InvoicePackageValuesModel')
   );
-  const addl = recordFromModelNode(
-    pick(r, 'invoiceAddtionalKmsAndHoursModel', 'InvoiceAddtionalKmsAndHoursModel', 'invoiceAdditionalKmsAndHoursModel')
-  );
 
   const gst = resolveInvoiceGst(r);
   const driver = pick<Record<string, unknown>>(r, 'invoiceDriverAllownceModel', 'InvoiceDriverAllownceModel');
@@ -597,29 +594,10 @@ export function mapInvoiceCalculationToSummaryOfDuty(response: unknown): Summary
     value: pkgAmtNum != null ? formatInr(pkgAmtNum) : '—'
   });
 
-  const ekRaw =
-    (addl
-      ? pick(
-          addl,
-          'addtionalKms',
-          'AddtionalKms',
-          'additionalKms',
-          'AdditionalKms'
-        )
-      : undefined) ??
-    (pkgVals ? pick(pkgVals, 'extraKMs', 'ExtraKMs') : undefined);
+  /* Extra Kms / Extra Hrs (qty + amounts): duty summary uses invoicePackageValuesModel only. */
+  const ekRaw = pkgVals ? pick(pkgVals, 'extraKMs', 'ExtraKMs') : undefined;
   const ekNum = toNum(ekRaw);
-  const extraMinutesRaw =
-    (addl
-      ? pick(
-          addl,
-          'addtionalMinutes',
-          'AddtionalMinutes',
-          'additionalMinutes',
-          'AdditionalMinutes'
-        )
-      : undefined) ??
-    (pkgVals ? pick(pkgVals, 'extraMinutes', 'ExtraMinutes') : undefined);
+  const extraMinutesRaw = pkgVals ? pick(pkgVals, 'extraMinutes', 'ExtraMinutes') : undefined;
   const extraMinutesNum = toNum(extraMinutesRaw);
   const extraKmAmtRaw = pkgVals ? pick(pkgVals, 'extraKMAmount', 'ExtraKMAmount') : undefined;
   const extraMinAmtRaw = pkgVals ? pick(pkgVals, 'extraMinutesAmount', 'ExtraMinutesAmount') : undefined;
