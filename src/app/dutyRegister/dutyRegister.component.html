@@ -86,7 +86,7 @@
 
                         <div class="responsive_table">
                             <div class="table-responsive">
-                                <p *ngIf="!dataSource; then thenBlock2 else elseBlock2">
+                                <p *ngIf="!dataSource || dataSource.length === 0; then thenBlock2 else elseBlock2">
                                     This is not rendered
                                 </p>
 

@@ -265,10 +265,10 @@ export class DutyRegisterService
       SearchFeedbackDate: criteria.SearchFeedbackDate || "null",
       SearchSlipReceipt: criteria.SearchSlipReceipt,
       SearchClosureType: criteria.SearchClosureType || "null",
-      SearchDispatchLocation: criteria.SearchDispatchLocation || "null",
+      SearchDispatchLocationName: criteria.SearchDispatchLocation || "null",
       SearchMOP: criteria.SearchMOP || "null",
       SearchSupplierType: criteria.SearchSupplierType || "null",
-      SearchSupplier: criteria.SearchSupplier || "null",
+      SearchSupplierName: criteria.SearchSupplier || "null",
       SearchFromDate: criteria.SearchFromDate || "null",
       SearchToDate: criteria.SearchToDate || "null",
       SearchSalesPersonName: criteria.SearchSalesPersonName || "null",
@@ -311,9 +311,8 @@ export class DutyRegisterService
       SearchBillToDate: criteria.SearchBillToDate || "null",
       SearchBillFromDate: criteria.SearchBillFromDate || "null",
       PageNumber: pageNumber,
-      pageNumber: pageNumber,
-      order: "Descending",
-      orderbyColumn: "ReservationID"
+      Order: "Descending",
+      OrderByColumn: "ReservationID"
     };
     console.log(`${this.API_URL}`, updatedCriteria);
     return this.httpClient.post(`${this.API_URL}`, updatedCriteria);
@@ -332,10 +331,10 @@ export class DutyRegisterService
       SearchFeedbackDate: criteria.SearchFeedbackDate || "null",
       SearchSlipReceipt: criteria.SearchSlipReceipt,
       SearchClosureType: criteria.SearchClosureType || "null",
-      SearchDispatchLocation: criteria.SearchDispatchLocation || "null",
+      SearchDispatchLocationName: criteria.SearchDispatchLocation || "null",
       SearchMOP: criteria.SearchMOP || "null",
       SearchSupplierType: criteria.SearchSupplierType || "null",
-      SearchSupplier: criteria.SearchSupplier || "null",
+      SearchSupplierName: criteria.SearchSupplier || "null",
       SearchFromDate: criteria.SearchFromDate || "null",
       SearchToDate: criteria.SearchToDate || "null",
       SearchSalesPersonName: criteria.SearchSalesPersonName || "null",
@@ -366,9 +365,8 @@ export class DutyRegisterService
       SearchBillFromDate: criteria.SearchBillFromDate || "null",
       SearchBillToDate: criteria.SearchBillToDate || "null",
       PageNumber: pageNumber,
-      pageNumber: pageNumber,
-      order: sortType || "Descending",
-      orderbyColumn: coloumName || "ReservationID"
+      Order: sortType || "Descending",
+      OrderByColumn: coloumName || "ReservationID"
     };
     return this.httpClient.post(`${this.API_URL}`, updatedCriteria);
   }
@@ -397,10 +395,10 @@ export class DutyRegisterService
       SearchFeedbackDate: toNull(criteria.SearchFeedbackDate),
       SearchSlipReceipt: criteria.SearchSlipReceipt,
       SearchClosureType: toNull(criteria.SearchClosureType),
-      SearchDispatchLocation: toNull(criteria.SearchDispatchLocation),
+      SearchDispatchLocationName: toNull(criteria.SearchDispatchLocation),
       SearchMOP: toNull(criteria.SearchMOP),
       SearchSupplierType: toNull(criteria.SearchSupplierType),
-      SearchSupplier: toNull(criteria.SearchSupplier),
+      SearchSupplierName: toNull(criteria.SearchSupplier),
       SearchFromDate: toNull(criteria.SearchFromDate),
       SearchToDate: toNull(criteria.SearchToDate),
       SearchSalesPersonName: toNull(criteria.SearchSalesPersonName),
@@ -428,8 +426,7 @@ export class DutyRegisterService
       SearchChangeMOPCase: toNull(criteria.SearchChangeMOPCase),
       SearchLocationGroup: toNull(criteria.SearchLocationGroup),
       SearchBillFromDate: toNull(criteria.SearchBillFromDate),
-      SearchBillToDate: toNull(criteria.SearchBillToDate),
-      SearchBillStatus: toNull(criteria.SearchBillStatus)
+      SearchBillToDate: toNull(criteria.SearchBillToDate)
     };
     console.log(`${this.API_URL}/ExportCsv`, updatedCriteria);
     return this.httpClient.post(`${this.API_URL}/ExportCsv`, updatedCriteria, {

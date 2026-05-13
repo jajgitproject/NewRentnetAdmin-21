@@ -367,19 +367,17 @@ export class DutyRegisterComponent implements OnInit {
 
   public loadData() 
   {
-    debugger;
     const searchCriteria = this.buildSearchCriteria();
     this.dutyRegisterService.getTableData(searchCriteria,this.PageNumber,).subscribe(
       data =>   
       {
-        debugger;
-        this.dataSource = data;
+        this.dataSource = Array.isArray(data) ? data : [];
         console.log(this.dataSource);
       },
     (error: HttpErrorResponse) => { 
        console.log(error);
-  debugger;
-  this.dataSource = null;
+  this.dataSource = [];
+  this.showNotification('snackbar-danger', error?.message || 'Duty register search failed', 'bottom', 'center');
     }
     );
   }
@@ -429,7 +427,6 @@ export class DutyRegisterComponent implements OnInit {
   }
 
   downloadFilteredCsv() {
-    debugger;
     if (this.csvExporting || !this.hasManualSearch) {
       return;
     }
@@ -438,7 +435,6 @@ export class DutyRegisterComponent implements OnInit {
     const searchCriteria = this.buildSearchCriteria();
     this.dutyRegisterService.exportCsv(searchCriteria).subscribe(
       (blob: Blob) => {
-        debugger;
         this.csvExporting = false;
 
         if (!blob || blob.size === 0) {
@@ -547,10 +543,13 @@ export class DutyRegisterComponent implements OnInit {
     (
       data =>   
       {
-        this.dataSource = data;
+        this.dataSource = Array.isArray(data) ? data : [];
       
       },
-      (error: HttpErrorResponse) => { this.dataSource = null;}
+      (error: HttpErrorResponse) => { 
+        this.dataSource = [];
+        this.showNotification('snackbar-danger', error?.message || 'Duty register search failed', 'bottom', 'center');
+      }
     );
   }
 
