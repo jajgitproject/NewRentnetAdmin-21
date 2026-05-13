@@ -419,6 +419,13 @@ export class Filters {
   reservationGroupID:number;
   tripType:string;
   reservationSourceDetail:string;
+  verifyDuty:string;
+  goodForBilling:string;
+  billed:string;
+  passed:string;
+  driverAcceptanceStatus:string;
+  modeOfPayment:string;
+  carType:string;
   constructor(filter) { 
     this.tripStatus = filter.tripStatus || '';
     this.userID = filter.userID || '';
