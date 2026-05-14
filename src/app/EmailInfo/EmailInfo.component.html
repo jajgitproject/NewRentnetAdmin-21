@@ -50,6 +50,11 @@
 
     .email-section {
       padding: 15px 20px;
+      width: 40%;
+    }
+
+    .email-summary-section {
+      padding: 15px 20px;
       width: 100%;
     }
 
@@ -105,59 +110,69 @@
       <div class="email-section">
         <h3>Traveller Details</h3>
         <table class="email-table">
-          <tr>
+          <!-- <tr>
             <th>Traveller Name</th>
             <td>{{ emailList[0]?.customerPerson?.customerPersonName || 'N/A' }}</td>
-          </tr>
-          <tr>
-            <th>Mobile No.</th>
-            <td>{{ emailList[0]?.customerPerson?.primaryMobile || 'N/A' }}</td>
-          </tr>
-          <tr>
-            <th>Email ID</th>
-            <td>{{ emailList[0]?.customerPerson?.primaryEmail || 'N/A' }}</td>
-          </tr>
-          <tr>
-            <th>Booker Name</th>
-            <td>{{ emailList[0]?.customerPerson?.customerPersonName || 'N/A' }}</td>
-          </tr>
+          </tr> -->
           <tr>
             <th>Customer Name</th>
             <td>{{ emailList[0]?.customerName || 'N/A' }}</td>
           </tr>
+          <tr>
+            <th>Booker Name</th>
+            <td>{{ emailList[0]?.booker?.customerPersonName || 'N/A' }}</td>
+          </tr>
+          <tr>
+            <th>Booker Mobile</th>
+            <td>{{ emailList[0]?.booker?.primaryMobile || 'N/A' }}</td>
+          </tr>
+          <tr>
+            <th>Booker Email ID</th>
+            <td>{{ emailList[0]?.booker?.primaryEmail || 'N/A' }}</td>
+          </tr>
+          
+          
         </table>
       </div>
 
-      <div class="email-section">
+      <div class="email-summary-section">
         <h3>📋 Booking Summary</h3>
         <table class="email-table">
           <thead>
             <tr>
               <th style="width: 10%;">Reservation No.</th>
-              <th style="width: 13%;">Pickup Date & Time</th>
-              <th style="width: 20%;">Pickup City / Address</th>
-              <th style="width: 15%;">Drop Address</th>
+              <th style="width: 10%;">Guest Name</th>
+              <th style="width: 10%;">Guest Mobile</th>
+              <th style="width: 13%;">Pickup Date</th>
+              <th style="width: 13%;">Releasing Date</th>
+              <th style="width: 13%;">Report Time</th>
+              <th style="width: 13%;">City</th>
               <th style="width: 12%;">Car Booked</th>
-              <th style="width: 12%;">Service Type</th>
               <th style="width: 10%;">Package</th>
-              <th style="width: 13%;">Cost Center</th>
+              <th style="width: 20%;">Pickup Address</th>
+              <th style="width: 15%;">Drop Address</th>              
+              <th style="width: 12%;">MOP</th>
             </tr>
           </thead>
           <tbody>
             <tr *ngFor="let info of emailList">
               <td>{{ info?.reservationID || 'N/A' }}</td>
-              <td>{{ (info?.pickup?.pickupDate | date:'dd-MMM-yyyy') || 'N/A' }}, {{ (info?.pickup?.pickupTime | date:'hh:mm a') || 'N/A' }}</td>
+              <td> {{ info?.passenger?.customerPersonName || 'N/A' }}</td>
+              <td> {{ info?.passenger?.primaryMobile || 'N/A' }}</td>
+              <td>{{ (info?.pickup?.pickupDate | date:'dd-MMM-yyyy') || 'N/A' }}</td>
+              <td>{{ (info?.drop?.dropOffDate | date:'dd-MMM-yyyy') || 'N/A' }}</td>
+              <td>{{ info?.reportTime ? (info?.reportTime | date:'HH:mm:ss') : 'N/A' }}</td>
+              <td>{{ info?.city || 'N/A' }}</td>
+              <td>{{ info?.vehicle?.vehicle || 'N/A' }}</td>
+              <td>{{ info?.package?.package || 'N/A' }}</td>
               <td>{{ info?.pickup?.pickupAddress || 'N/A' }}</td>
               <td>{{ info?.drop?.dropOffAddress || 'N/A' }}</td>
-              <td>{{ info?.vehicle?.vehicleCategory || 'N/A' }}</td>
-              <td>{{ info?.package?.serviceType || 'N/A' }}</td>
-              <td>{{ info?.package?.package || 'N/A' }}</td>
-              <td>{{ info?.companyName || 'N/A' }}</td>
+              <td>{{ info?.modeOfPayment || 'N/A' }}</td>
             </tr>
           </tbody>
         </table>
       </div>
-      <div class="email-section">
+      <!-- <div class="email-section">
         <h3>📝 Special Instructions</h3>
 
         <p>
@@ -173,14 +188,14 @@
 
           or itinerary applicable to any of the bookings]
         </p>
-      </div>
+      </div> -->
 
 
 
 
       <div class="email-footer">
         Thank you for choosing <strong>{{ emailList[0]?.companyName || 'N/A' }}</strong>.<br>
-        For any assistance, contact us at 📞 [Phone] | ✉️ [Email] | 🌐 [Website]
+        <!-- For any assistance, contact us at 📞 [Phone] | ✉️ [Email] | 🌐 [Website] -->
       </div>
 
     </div>
