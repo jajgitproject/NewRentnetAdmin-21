@@ -23,13 +23,16 @@
                 <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
                     <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
                         <mat-label>Supplier Name</mat-label>
-                        <input required type="text" matInput formControlName="supplierName" [matAutocomplete]="auto">
+                        <input (keyup)="onKeyupSupplier($event)" required type="text" matInput formControlName="supplierName" [matAutocomplete]="auto">
                         <mat-autocomplete #auto="matAutocomplete" (optionSelected)="OnSupplierSelect($event.option.value)">
                           <mat-option *ngFor="let option of filteredSupplierOptions | async" [value]="option.supplierName" (click)="getSupplierID(option.supplierID,option.address,option.email,option.phone)">
                             {{option.supplierName}}
                           </mat-option>
                         </mat-autocomplete>
                         <mat-error *ngIf="advanceTableForm.controls['supplierName']?.hasError('supplierNameInvalid')">
+                            Please select a Supplier Name
+                        </mat-error>
+                        <mat-error *ngIf="advanceTableForm.get('supplierName')?.hasError('required')">
                             Please select a Supplier Name
                         </mat-error>
                         

@@ -50,6 +50,7 @@ export class FormDialogComponent
     // Set the defaults
     this.action = data.action;
     this.reservationID=data.reservationID;
+
     // Extract and normalize status, control button state
     // this.status = this.extractStatus(data?.status);
     // const normalized = (this.status || '').trim().toLowerCase();
@@ -93,7 +94,7 @@ export class FormDialogComponent
 
   ngOnInit():void
   {
-    this.InitSupplier();
+    //this.InitSupplier();
   }
   
   createContactForm(): FormGroup 
@@ -216,9 +217,15 @@ export class FormDialogComponent
       };
     }
     
-    InitSupplier()
+    onKeyupSupplier()
     {
-      this.passToSupplierService.getSupplier().subscribe(
+      var Prefix = this.advanceTableForm.get("supplierName").value;
+      if(Prefix.length < 3)
+      { 
+        this.SupplierList = [];
+        return;
+      }
+      this.passToSupplierService.getSupplierCode(Prefix).subscribe(
       data=>
       {
         this.SupplierList=data;

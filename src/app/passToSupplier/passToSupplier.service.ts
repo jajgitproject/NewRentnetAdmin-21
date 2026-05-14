@@ -60,6 +60,10 @@ export class PassToSupplierService
     return this.httpClient.get<SupplierDropDownModel[]>(this.API_URL + "/GetSupplierDropDown");
   }
 
+   getSupplierCode(Prefix:string):Observable<SupplierDropDownModel[]> 
+  {
+    return this.httpClient.get<SupplierDropDownModel[]>(this.API_URL + "/GetSupplierCodeDropDown/" + Prefix);
+  }
   getData(reseravtionID: number):  Observable<any> 
   {
     return this.httpClient.get(this.API_URL + '/GetPassToSupplierByID/' + reseravtionID);
