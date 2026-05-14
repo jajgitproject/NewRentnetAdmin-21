@@ -217,7 +217,7 @@ export class FormDialogComponent
       };
     }
     
-    onKeyupSupplier()
+    onKeyupSupplier(_event?: Event)
     {
       var Prefix = this.advanceTableForm.get("supplierName").value;
       if(Prefix.length < 3)

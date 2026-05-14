@@ -29,6 +29,8 @@ export class CustomerSpecificDetailsComponent implements OnInit {
 
   @Input() reservationID:number;
   @Input() dataSourceCSD:CustomerSpecificDetails[];
+  /** Optional caller context (e.g. closing screen); reserved for future use. */
+  @Input() from: string;
 
   constructor(
     public httpClient: HttpClient,

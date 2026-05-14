@@ -7,6 +7,7 @@ import { GeneralService } from '../general/general.service';
 import { ControlPanelDetails } from '../controlPanelDesign/controlPanelDesign.model';
 import { EmailInfoService } from './EmailInfo.service';
 import { HttpErrorResponse } from '@angular/common/http';
+import { EMAIL_INFO_DOWNLOAD_STYLES } from './email-info-download-styles';
 @Component({
   standalone: false,
   selector: 'app-EmailInfo',
@@ -134,6 +135,34 @@ export class EmailInfoComponent {
     console.error('Failed to copy:', err);
   }
 }
+
+  /** Downloads the email preview as a standalone .html file with proper styling (no Angular encapsulation). */
+  downloadEmailHtml(): void {
+    const content = document.getElementById('emailContent');
+    if (!content) {
+      console.warn('[EmailInfo] emailContent not found');
+      return;
+    }
+    const fullDoc =
+      '<!DOCTYPE html><html lang="en"><head><meta charset="utf-8">' +
+      '<meta name="viewport" content="width=device-width, initial-scale=1">' +
+      '<title>Booking Request</title><style>' +
+      EMAIL_INFO_DOWNLOAD_STYLES +
+      '</style></head><body>' +
+      content.outerHTML +
+      '</body></html>';
+    const blob = new Blob([fullDoc], { type: 'text/html;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    const safeId = String(this.reservationID ?? 'booking').replace(/[^\w.-]+/g, '_');
+    a.download = `Booking-Request-${safeId}.html`;
+    a.rel = 'noopener';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  }
 
 }
 
