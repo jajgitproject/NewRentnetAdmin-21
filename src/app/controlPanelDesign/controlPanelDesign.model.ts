@@ -416,7 +416,7 @@ export class Filters {
   customerID:number;
   packageTypeID:number;
   packageID:number;
-  reservationGroupID:number;
+  reservationGroupID:string;
   tripType:string;
   reservationSourceDetail:string;
   verifyDuty:string;
@@ -426,6 +426,8 @@ export class Filters {
   driverAcceptanceStatus:string;
   modeOfPayment:string;
   carType:string;
+  emailtosupplier:string;
+  tncStatus:string;
   constructor(filter) { 
     this.tripStatus = filter.tripStatus || '';
     this.userID = filter.userID || '';
@@ -468,7 +470,7 @@ export class Filters {
     this.customerGroupID=filter.customerGroupID || '';
     this.packageTypeID=filter.packageTypeID || '';
     this.packageID=filter.packageID || '';
-    this.reservationGroupID=filter.reservationGroupID || 0;
+    this.reservationGroupID=filter.reservationGroupID || null;
     this.tripType=filter.tripType || '';
     this.reservationSourceDetail = filter.reservationSourceDetail || '';
   }

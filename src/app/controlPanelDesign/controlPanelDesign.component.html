@@ -398,6 +398,7 @@
               <mat-form-field class="example-full-width cp-quick-search-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
                 <mat-label>Verify Duty</mat-label>
                 <mat-select [panelWidth]="null" formControlName="verifyDuty">
+                  <mat-option value="All">All</mat-option>
                   <mat-option value="true">Yes</mat-option>
                   <mat-option value="false">No</mat-option>
                 </mat-select>
@@ -408,6 +409,7 @@
               <mat-form-field class="example-full-width cp-quick-search-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
                 <mat-label>Good For Billing</mat-label>
                 <mat-select [panelWidth]="null" formControlName="goodForBilling">
+                  <mat-option value="All">All</mat-option>
                   <mat-option value="true">Yes</mat-option>
                   <mat-option value="false">No</mat-option>
                 </mat-select>
@@ -418,33 +420,64 @@
               <mat-form-field class="example-full-width cp-quick-search-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
                 <mat-label>Billed</mat-label>
                 <mat-select [panelWidth]="null" formControlName="billed">
+                  <mat-option value="All">All</mat-option>
                   <mat-option value="true">Yes</mat-option>
                   <mat-option value="false">No</mat-option>
                 </mat-select>
               </mat-form-field>
             </div>
+
             <div class="col-xl-2 col-lg-2 col-md-2 col-sm-12 mb-2">
               <mat-form-field class="example-full-width cp-quick-search-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
                 <mat-label>Passed to supplier</mat-label>
                 <mat-select [panelWidth]="null" formControlName="passed">
-                  <mat-option value="Passed">Passed</mat-option>
-                  <!-- <mat-option value="Email">Email</mat-option> -->
+                  <mat-option value="All">All</mat-option>
+                  <mat-option value="true">Yes</mat-option>
+                  <mat-option value="false">No</mat-option>
+                  <!-- <mat-option value="Passed">Passed</mat-option>
+                  <mat-option value="Email">Email</mat-option> -->
                 </mat-select>
               </mat-form-field>
             </div>
+
             <div class="col-xl-2 col-lg-2 col-md-2 col-sm-12 mb-2">
               <mat-form-field class="example-full-width cp-quick-search-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
-                <mat-label>Driver Acceptance Status</mat-label>
-                <mat-select [panelWidth]="null" formControlName="driverAcceptanceStatus">
-                  <mat-option value="Accepted">Accepted</mat-option>
-                  <mat-option value="Rejected">Rejected</mat-option>
-                   <mat-option value="Pending">Pending</mat-option>
+                <mat-label>Email to supplier</mat-label>
+                <mat-select [panelWidth]="null" formControlName="emailtosupplier">
+                  <mat-option value="All">All</mat-option>
+                  <mat-option value="true">Yes</mat-option>
+                  <mat-option value="false">No</mat-option>
+                  <!-- <mat-option value="Passed">Passed</mat-option>
+                  <mat-option value="Email">Email</mat-option> -->
                 </mat-select>
               </mat-form-field>
             </div>
           </div>
 
           <div class="row">
+            <div class="col-xl-2 col-lg-2 col-md-2 col-sm-12 mb-2">
+              <mat-form-field class="example-full-width cp-quick-search-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
+                <mat-label>Driver Acceptance Status</mat-label>
+                <mat-select [panelWidth]="null" formControlName="driverAcceptanceStatus">
+                  <mat-option value="All">All</mat-option>
+                  <mat-option value="Accepted">Accepted</mat-option>
+                  <mat-option value="Rejected">Rejected</mat-option>
+                   <mat-option value="Pending">Pending</mat-option>
+                </mat-select>
+              </mat-form-field>
+            </div>
+
+            <div class="col-xl-2 col-lg-2 col-md-2 col-sm-12 mb-2">
+              <mat-form-field class="example-full-width cp-quick-search-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
+                <mat-label>TNC Status</mat-label>
+                <mat-select [panelWidth]="null" formControlName="tncStatus">
+                  <mat-option value="TNC">TNC</mat-option>
+                  <mat-option value="NonTNC">Non TNC</mat-option>
+                  <mat-option value="Incomplete">Incomplete</mat-option>
+                </mat-select>
+              </mat-form-field>
+            </div>
+
             <div class="col-xl-2 col-lg-2 col-md-2 col-sm-12 mb-2">
               <mat-form-field class="example-full-width cp-advance-search-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
                 <mat-label>Vehicle</mat-label>
@@ -1851,11 +1884,11 @@
                           </span>
 
                           <span style="font-size: 12px;text-align: left;width: 250px;float: left;">
-                            Verified : {{ data.verifyDuty === true ? 'Yes' : 'No' }}
+                            Verified : {{ data.verifyDuty === null ? 'N/A' : (data.verifyDuty === true ? 'Yes' : 'No') }}
                             <br>
-                            GoodForBilling : {{ data.goodForBilling === true ? 'Yes' : 'No' }}
+                            GoodForBilling : {{ data.goodForBilling == null ? 'N/A' : (data.goodForBilling === true ? 'Yes' : 'No') }}
                             <br>
-                            Billed : {{ data.invoiceID !== 0 ? 'Yes' : 'No' }}
+                            Billed : {{ data.invoiceID === null ? 'N/A' : (data.invoiceID !== 0 ? 'Yes' : 'No') }}
                           </span>
 
                           <!-- <span style="font-size: 12px; text-align: left; width: 130px;float: left;"> -->

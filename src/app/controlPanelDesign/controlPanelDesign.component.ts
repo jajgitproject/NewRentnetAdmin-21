@@ -552,6 +552,8 @@ export class ControlPanelDesignComponent implements OnInit {
       passed: [this._filters.passed],
       driverAcceptanceStatus: [this._filters.driverAcceptanceStatus],
       modeOfPayment: [this._filters.modeOfPayment],
+      emailtosupplier: [this._filters.emailtosupplier],
+      tncStatus: [this._filters.tncStatus],
     });
   }
 
@@ -694,6 +696,7 @@ export class ControlPanelDesignComponent implements OnInit {
 
   public loadDataForHeader(status:string,currentPage: number,pageSize: number,isLoading: boolean,rowIndex?: number)
   {
+    debugger
     if (this.selectedFilter === 'BookingNo')
     {
       this.filterForm.patchValue({ reservationID: this.searchTerm });
