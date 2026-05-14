@@ -1,4 +1,4 @@
-// @ts-nocheck
+//@ts-nocheck
 import { AfterViewChecked, AfterViewInit, Component, ElementRef, Input, OnInit, ViewChild } from '@angular/core';
 import { ClossingOneService } from './clossingOne.service';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
@@ -51,7 +51,7 @@ import { DiscountDetailsDialogComponent } from '../discountDetails/dialogs/disco
 import { FormDialogComponent as DutyStateFormDialogComponent } from '../dutyState/dialogs/form-dialog/form-dialog.component';
 import { FormDialogComponent as DutyGSTPercentageFormDialogComponent } from '../dutyGSTPercentage/dialogs/form-dialog/form-dialog.component';
 import { FormDialogComponent as DutyExpenseFormDialogComponent } from '../dutyExpense/dialogs/form-dialog/form-dialog.component';
-import { ClosingModel } from './clossingOne.model';
+import { ClosingModel, TotalTollParInStDisputeModel } from './clossingOne.model';
 import { BillingHistoryComponent } from '../billingHistory/billingHistory.component';
 import { SalesPersonService } from '../salesPerson/salesPerson.service';
 import { RSPFormDialogComponent } from '../salesPerson/dialogs/form-dialog/form-dialog.component';
@@ -91,6 +91,10 @@ import { FormDialogSRDComponent } from '../settledRateDetails/dialogs/form-dialo
 import { SettledRateDetailsService } from '../settledRateDetails/settledRateDetails.service';
 import { FormDialogComponent as CDTClosingDialogComponent } from '../changeDutyTypeClosing/dialogs/dialogDetails/dialogDetails.component';
 import { FormDialogComponentForCity } from '../changeCity/dialogs/dialogDetails/dialogDetails.component';
+import { CustomerSpecificDetails, CustomerSpecificDetailsData } from '../customerSpecificDetails/customerSpecificDetails.model';
+import { SettledRateDetails } from '../settledRateDetails/settledRateDetails.model';
+import { NewFormService } from '../newForm/newForm.service';
+import { FormDialogComponentCSD } from '../customerSpecificDetails/dialogs/form-dialog/form-dialog.component';
 
 @Component({
   standalone: false,
@@ -161,6 +165,8 @@ export class ClossingOneComponent implements OnInit, AfterViewInit, AfterViewChe
   advanceTableDD: DiscountDetails | null;
   advanceTableSI: SpecialInstructionDetails | null;
 
+  dataSourceCSF:CustomerSpecificDetails[];
+
   advanceTableClosingOne: ClosingModel | null = null;
   dataSource: Dispute[] | null;
   dataSourceforCard: any = null;
@@ -168,7 +174,8 @@ export class ClossingOneComponent implements OnInit, AfterViewInit, AfterViewChe
   mapOfDutySlip: string;
   panelExpanded: boolean = false;
   dutySlipMap: DutySlipMap;
-  showHideSalesPerson: boolean = false;
+  showHideCSF: boolean = false;
+  showHideSalesPerson : boolean = false;
   advanceTableSP: ReservationSalesPersonModel | null = null;
   advanceTableAdvanceDC: AdvanceDetailsClosing | null;
   showAdvanceDetails: boolean = false;
@@ -219,6 +226,8 @@ export class ClossingOneComponent implements OnInit, AfterViewInit, AfterViewChe
   private debugViewCheckCount = 0;
   private debugLastViewSnapshot = '';
   dataSourceForBillNo: any = null;
+  from :string = "Closing";
+  status: any;
 
 
   constructor(
@@ -226,6 +235,7 @@ export class ClossingOneComponent implements OnInit, AfterViewInit, AfterViewChe
     public dialog: MatDialog,
     public clossingOneService: ClossingOneService,
     private snackBar: MatSnackBar,
+    public newFormService: NewFormService,
     public route: ActivatedRoute,
     public _generalService: GeneralService,
     public currentDutyDetailsService: CurrentDutyDetailsService,
@@ -287,9 +297,11 @@ export class ClossingOneComponent implements OnInit, AfterViewInit, AfterViewChe
       this.startInitialLoadsIfReady();
       
     });
+    this.checkVerifyDutyBeforeFormOpen();
   this.GetClosingData();
    this.BookingDataOnClosing();
    this.GSTDataOnClosing();
+   this.CustomerSpecificFieldsloadData();
   }
 
   ngAfterViewInit(): void {
@@ -1285,15 +1297,55 @@ export class ClossingOneComponent implements OnInit, AfterViewInit, AfterViewChe
     }, 0);
   }
 
-  //------Sales Person
-  showAndScrollSalesPerson() {
-    this.showHideSalesPerson = true;
+  //------Customer Specific Fields
+  showAndScrollCustomerSpecificFields() {
+    this.showHideCSF = true;
     setTimeout(() => {
-      const element = document.getElementById('salesPerson');
+      const element = document.getElementById('customerSpecificFields');
       if (element) {
         element.scrollIntoView({ behavior: 'smooth', block: 'start' });
       }
     }, 0);
+  }
+
+  CustomerSpecificFieldsloadData()
+    {
+      this.newFormService.GetCustomerSpecificFields(this.ReservationID).subscribe(
+        (data:CustomerSpecificDetailsData)=>
+        {
+          this.dataSourceCSF = data.reservationDetailsList;
+        }
+      );
+    }
+
+      openCustomerSpecificField()
+      {
+        const dialogRef = this.dialog.open(FormDialogComponentCSD, 
+          {
+            width:'30%',
+            data: 
+              {
+                dataSource:this.dataSourceCSF,
+                reservationID:this.ReservationID,
+                customerID:this.dataSourceCSF[0].customerID,
+                action:"edit",
+                status: this.status
+              }
+          });
+          dialogRef.afterClosed().subscribe((res: any) => {
+            this.CustomerSpecificFieldsloadData();
+      })
+      }
+
+      checkVerifyDutyBeforeFormOpen() {
+    this.clossingOneService.getVerifyDutydata(this.ReservationID).subscribe(
+      data => {
+        
+      this.status=data?.status?.status || data?.status || data;
+      
+      
+    }
+    );
   }
 
   MOPDetails() {

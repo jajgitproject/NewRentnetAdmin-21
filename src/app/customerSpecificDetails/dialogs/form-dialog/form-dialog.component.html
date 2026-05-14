@@ -18,33 +18,65 @@
     </button>
     </div>
     <div mat-dialog-content>
-        <form class="register-form m-4" [formGroup]="dynamicForm" (ngSubmit)="onSubmit()">
+        <form
+  *ngIf="dynamicForm && CustomerExtraFieldList?.length"
+  class="register-form m-4"
+  [formGroup]="dynamicForm"
+  (ngSubmit)="onSubmit()">
 
             <div class="row">
                 <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12 mb-2"> 
-                <span *ngFor="let data of CustomerExtraFieldList">
-                              
-                    <span *ngIf="!isDropDown(data)">
-                        <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
-                            <mat-label>{{data.fieldName}}</mat-label>
-                            <input required matInput [formControlName]="data.fieldName">
-                        </mat-form-field>
-                    </span>
+                    <div *ngFor="let data of CustomerExtraFieldList" class="mb-3">
 
-                    <span *ngIf="isDropDown(data)">
-                            <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                            <!-- TEXTBOX -->
+
+                            <div *ngIf="!isDropDown(data)">
+
+                                <mat-form-field
+                                    class="example-full-width"
+                                    appearance="outline">
+
+                                    <mat-label>{{data.fieldName}}</mat-label>
+
+                                    <input
+                                    matInput
+                                    [formControlName]="data.fieldName">
+
+                                </mat-form-field>
+
+                            </div>
+
+                            <!-- DROPDOWN -->
+
+                            <div *ngIf="isDropDown(data)">
+
+                            <mat-form-field
+                                class="example-full-width"
+                                appearance="outline">
+
                                 <mat-label>{{data.fieldName}}</mat-label>
-                                <mat-select #projVal [class.is-invalid]="projVal.invalid && projVal.touched" [formControlName]="data.fieldName" required>
-                                    <mat-option [value]="item" *ngFor="let item of getDropdownOptions(data)" >{{item}}</mat-option>
+
+                                <mat-select
+                                [formControlName]="data.fieldName">
+
+                                <mat-option
+                                    *ngFor="let item of getDropdownOptions(data)"
+                                    [value]="item">
+
+                                    {{item}}
+
+                                </mat-option>
+
                                 </mat-select>
-                                <mat-error>
-                                    Please select {{data.fieldName}}
-                                </mat-error>
+
                             </mat-form-field>
-                    </span>
-                    
-                </span>
-            </div>
+
+                            </div>
+
+                    </div>
+
+
+                </div>
             </div>                    
             
             <div class="row">

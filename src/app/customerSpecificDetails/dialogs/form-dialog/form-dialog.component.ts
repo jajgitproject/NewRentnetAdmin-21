@@ -1,6 +1,6 @@
-// @ts-nocheck
+
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
-import { Component, ElementRef, HostListener, Inject } from '@angular/core';
+import { ChangeDetectorRef, Component, ElementRef, HostListener, Inject } from '@angular/core';
 import { FormControl, Validators, FormGroup, FormBuilder} from '@angular/forms';
 import { MAT_DATE_LOCALE } from '@angular/material/core';
 import { GeneralService } from '../../../general/general.service';
@@ -37,6 +37,7 @@ export class FormDialogComponentCSD
     private fb: FormBuilder,
     private el: ElementRef,
     private snackBar: MatSnackBar,
+    private cdr: ChangeDetectorRef,
     private advanceTableService:CustomerSpecificDetailsService,
   public _generalService:GeneralService)
   {       
@@ -80,6 +81,7 @@ export class FormDialogComponentCSD
   }
 
   private buildDynamicForm(): void {
+    debugger;
     this.dynamicForm = this.fb.group({});
     const existingValueMap = new Map<string, any>();
     this.getExistingFields().forEach((field: any) => {
@@ -98,6 +100,7 @@ export class FormDialogComponentCSD
       const initialValue = valueFromExisting !== undefined ? valueFromExisting : valueFromField;
       this.dynamicForm.addControl(fieldName, this.fb.control(initialValue, [Validators.required]));
     });
+    this.cdr.detectChanges();
   }
 
   private resolveDefaultValue(field: any): any {

@@ -1,4 +1,4 @@
-// @ts-nocheck
+
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
@@ -111,6 +111,8 @@ import {ChangeDutyTypeClosingService} from '../changeDutyTypeClosing/changeDutyT
 import { ChangeDutyTypeClosingModule } from '../changeDutyTypeClosing/changeDutyTypeClosing.module';
 import { ChangeCityModule } from '../changeCity/changeCity.module';
 import { ChangeCityService } from '../changeCity/changeCity.service';
+import { CustomerSpecificDetailsService } from '../customerSpecificDetails/customerSpecificDetails.service';
+import { CustomerSpecificDetailsModule } from '../customerSpecificDetails/customerSpecificDetails.module';
 
 
 @NgModule({
@@ -179,7 +181,8 @@ import { ChangeCityService } from '../changeCity/changeCity.service';
     AdditionalKmsDetailsModule,
     SettledRateDetailsModule,
     ChangeDutyTypeClosingModule,
-    ChangeCityModule
+    ChangeCityModule,
+    CustomerSpecificDetailsModule
   ],
   exports:[ClossingOneComponent],
   providers: [ClossingOneService,
@@ -210,7 +213,7 @@ import { ChangeCityService } from '../changeCity/changeCity.service';
               PackageRateDetailsForClosingService ,
                MOPDetailsService, ControlPanelDialogeService,
                ReservationDutyslipSearchService ,DutySlipImageService,OdoMeterAndManualDutySlipImageService,  
-                   ChangeDutyTypeClosingService,ChangeCityService    ]
+                   ChangeDutyTypeClosingService,ChangeCityService ,CustomerSpecificDetailsService   ]
 })
 export class ClossingOneModule {}
 
