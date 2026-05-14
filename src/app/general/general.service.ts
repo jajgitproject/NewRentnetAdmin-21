@@ -168,6 +168,29 @@ export class GeneralService {
     this.UnlockEmployeeUrl = this.runtimeConfig.getUnlockEmployeeUrl();
   }
 
+  /**
+   * Joins FormURL (e.g. http://host/# for hash routing) with Router.serializeUrl output (/path?k=v).
+   * Prevents `#//path` when FormURL ends with `#/`.
+   */
+  buildAppWindowUrl(serializedRouterUrl: string): string {
+    const base = (this.FormURL || '').trimEnd();
+    let path = (serializedRouterUrl || '').trim();
+    if (!path.startsWith('/')) {
+      path = '/' + path;
+    }
+    if (!base) {
+      return path;
+    }
+    if (base.includes('#')) {
+      const b = base.replace(/#\/+$/, '#').replace(/\/+$/, '');
+      if (b.endsWith('#')) {
+        return b + '/' + path.replace(/^\/+/, '');
+      }
+      return b.replace(/\/+$/, '') + path;
+    }
+    return base.replace(/\/+$/, '') + path;
+  }
+
   getUserID(): number {
     return this.authService?.currentUserValue?.employee?.EmployeeID ?? 0;
   }

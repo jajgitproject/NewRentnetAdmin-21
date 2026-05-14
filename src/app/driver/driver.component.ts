@@ -317,14 +317,14 @@ export class DriverComponent implements OnInit {
   //        DriverName: rowItem.driverName, 
   //     } }));
 
-  //     window.open(baseUrl + url, '_blank'); 
+  //     window.open(this._generalService.buildAppWindowUrl(url), '_blank'); 
 
   //   } else if(menuItem.label.toLowerCase() === 'document') {
   //     const url = this.router.serializeUrl(this.router.createUrlTree(['/driverDocument'], { queryParams: {
   //       DriverID: rowItem.driverID,
   //        DriverName: rowItem.driverName, 
   //     } }));
-  //     window.open(baseUrl + url, '_blank'); 
+  //     window.open(this._generalService.buildAppWindowUrl(url), '_blank'); 
 
   //   }
 
@@ -336,7 +336,7 @@ export class DriverComponent implements OnInit {
   //        SupplierName:rowItem.supplier,
   //        DriverPhone:rowItem.mobile1
   //     } }));
-  //     window.open(baseUrl + url, '_blank'); 
+  //     window.open(this._generalService.buildAppWindowUrl(url), '_blank'); 
   //        //console.log(CustomerGroup);
   //   }
   // }
@@ -383,49 +383,68 @@ export class DriverComponent implements OnInit {
 
   /////////////////for Image Upload////////////////////////////
   openInNewTab(menuItem: any, rowItem: any) {
-    let baseUrl = this._generalService.FormURL;
-    const encryptedDriverID = encodeURIComponent(this._generalService.encrypt(rowItem.driverID.toString()));
-    const encryptedSupplierID = encodeURIComponent(this._generalService.encrypt(rowItem.supplierID.toString()));
-    const encryptedDriverName = encodeURIComponent(this._generalService.encrypt(rowItem.driverName));
-    const encryptedSupplierName = encodeURIComponent(this._generalService.encrypt(rowItem.supplier));
-    const encryptedDriverPhone = encodeURIComponent(this._generalService.encrypt(rowItem.mobile1));
-    const redirectingFrom = encodeURIComponent(this._generalService.encrypt('Driver'));
-    if (menuItem.label.toLowerCase() === 'driving license') {
-      const url = this.router.serializeUrl(this.router.createUrlTree(['/driverDrivingLicense'], {
-        queryParams: {
-          DriverID: encryptedDriverID,
-          DriverName: encryptedDriverName,
-        }
-      }));
+    try {
+      const label = String(menuItem?.label ?? '').toLowerCase();
 
-      window.open(baseUrl + url, '_blank');
+      const driverId = rowItem?.driverID ?? rowItem?.DriverID;
+      const supplierId = rowItem?.supplierID ?? rowItem?.SupplierID;
+      const driverName = rowItem?.driverName ?? rowItem?.DriverName ?? '';
+      const supplier = rowItem?.supplier ?? rowItem?.Supplier ?? '';
+      const mobile = rowItem?.mobile1 ?? rowItem?.Mobile1 ?? '';
 
-    }
-    else if (menuItem.label.toLowerCase() === 'document') {
-      const url = this.router.serializeUrl(this.router.createUrlTree(['/driverDocument'], {
-        queryParams: {
-          DriverID: encryptedDriverID,
-          DriverName: encryptedDriverName,
-        }
-      }));
+      const enc = (v: unknown) =>
+        this._generalService.encrypt(String(v ?? ''));
 
-      window.open(baseUrl + url, '_blank');
+      const encryptedDriverID = enc(driverId);
+      const encryptedSupplierID = enc(supplierId);
+      const encryptedDriverName = enc(driverName);
+      const encryptedSupplierName = enc(supplier);
+      const encryptedDriverPhone = enc(mobile);
+      const redirectingFrom = enc('Driver');
 
-    }
-    else if (menuItem.label.toLowerCase() === 'inventory association') {
-
-      const url = this.router.serializeUrl(this.router.createUrlTree(['/driverInventoryAssociation'], {
-        queryParams: {
-          DriverID: encryptedDriverID,
-          DriverName: encryptedDriverName,
-          redirectingFrom: redirectingFrom,
-          supplierName: encryptedSupplierName,
-          supplierID: encryptedSupplierID,
-          DriverPhone: encryptedDriverPhone
-        }
-      }));
-
-      window.open(baseUrl + url, '_blank');
+      if (label === 'driving license') {
+        const url = this.router.serializeUrl(
+          this.router.createUrlTree(['driverDrivingLicense'], {
+            queryParams: {
+              DriverID: encryptedDriverID,
+              DriverName: encryptedDriverName,
+            },
+          })
+        );
+        window.open(this._generalService.buildAppWindowUrl(url), '_blank');
+      } else if (label === 'document') {
+        const url = this.router.serializeUrl(
+          this.router.createUrlTree(['driverDocument'], {
+            queryParams: {
+              DriverID: encryptedDriverID,
+              DriverName: encryptedDriverName,
+            },
+          })
+        );
+        window.open(this._generalService.buildAppWindowUrl(url), '_blank');
+      } else if (label === 'inventory association') {
+        const url = this.router.serializeUrl(
+          this.router.createUrlTree(['driverInventoryAssociation'], {
+            queryParams: {
+              DriverID: encryptedDriverID,
+              DriverName: encryptedDriverName,
+              redirectingFrom,
+              supplierName: encryptedSupplierName,
+              supplierID: encryptedSupplierID,
+              DriverPhone: encryptedDriverPhone,
+            },
+          })
+        );
+        window.open(this._generalService.buildAppWindowUrl(url), '_blank');
+      }
+    } catch (e) {
+      console.error('openInNewTab', e);
+      this.showNotification(
+        'snackbar-danger',
+        'Could not open link. Check driver / supplier / mobile data.',
+        'bottom',
+        'center'
+      );
     }
   }
 

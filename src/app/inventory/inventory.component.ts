@@ -451,21 +451,40 @@ onBackPress(event)
   // }
 
   openInNewTab(menuItem: any, rowItem: any) {
-    const formURL = this._generalService.FormURL;
-  
-    const queryParams = {
-      InventoryID: encodeURIComponent(this._generalService.encrypt(rowItem.inventoryID.toString())),
-      RegNo: encodeURIComponent(this._generalService.encrypt(rowItem.registrationNumber)),
-      Vehicle: encodeURIComponent(this._generalService.encrypt(rowItem.vehicle)),
-      VehicleCategory: encodeURIComponent(this._generalService.encrypt(rowItem.vehicleCategory)),
-      redirectingFrom: encodeURIComponent(this._generalService.encrypt('Inventory')),
-      SupplierName: encodeURIComponent(this._generalService.encrypt(rowItem.supplier)),
-      supplierID: encodeURIComponent(this._generalService.encrypt(rowItem.supplierID.toString())),
-    };
-  
-    const url = this.router.serializeUrl(this.router.createUrlTree([menuItem.route], { queryParams }));
-  
-    window.open(formURL + url, '_blank');
+    try {
+      const enc = (v: unknown) =>
+        this._generalService.encrypt(String(v ?? ''));
+
+      const queryParams = {
+        InventoryID: enc(
+          rowItem?.inventoryID ?? rowItem?.InventoryID ?? ''
+        ),
+        RegNo: enc(rowItem?.registrationNumber ?? rowItem?.RegistrationNumber ?? ''),
+        Vehicle: enc(rowItem?.vehicle ?? rowItem?.Vehicle ?? ''),
+        VehicleCategory: enc(
+          rowItem?.vehicleCategory ?? rowItem?.VehicleCategory ?? ''
+        ),
+        redirectingFrom: enc('Inventory'),
+        SupplierName: enc(rowItem?.supplier ?? rowItem?.Supplier ?? ''),
+        supplierID: enc(rowItem?.supplierID ?? rowItem?.SupplierID ?? ''),
+      };
+
+      const routePath = String(menuItem.route || '').replace(/^\//, '');
+      const commands = routePath.split('/').filter(Boolean);
+      const url = this.router.serializeUrl(
+        this.router.createUrlTree(commands, { queryParams })
+      );
+
+      window.open(this._generalService.buildAppWindowUrl(url), '_blank');
+    } catch (e) {
+      console.error('openInNewTab', e);
+      this.showNotification(
+        'snackbar-danger',
+        'Could not open link. Check inventory row data.',
+        'bottom',
+        'center'
+      );
+    }
   }
   
   // inventoryStatus(row) {

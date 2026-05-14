@@ -107,6 +107,12 @@ export const ROUTES: RouteInfo[] = [
       {
         path: 'driverInventoryAssociation',
         title: 'Driver Inventory Association',
+        alternateAccessPageKeys: [
+          'Driver Association',
+          'Inventory Association',
+          'Driver inventory association',
+          'Inventory association',
+        ],
         moduleName: 'driverInventoryAssociation',
         icon: 'fas fa-tachometer-alt',
         class: '',

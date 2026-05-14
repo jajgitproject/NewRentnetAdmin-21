@@ -107,10 +107,36 @@ export class RolePageGuard implements CanActivate {
     if (!meta) {
       return true;
     }
-    if (!routePageAllowed(meta, accessPages)) {
-      return this.router.parseUrl('/dashboard');
+    const allowed = routePageAllowed(meta, accessPages);
+    if (allowed) {
+      return true;
     }
-    return true;
+    if (
+      segment === 'driverInventoryAssociation' &&
+      this.isDriverInventoryEncryptedDeepLink(state.url)
+    ) {
+      return true;
+    }
+    return this.router.parseUrl('/dashboard');
+  }
+
+  /** Same-app context menu opens CryptoJS ciphertext in query; Page table names may not match route keys. */
+  private isDriverInventoryEncryptedDeepLink(url: string): boolean {
+    try {
+      const tree = this.router.parseUrl(url);
+      const q = tree.queryParams || {};
+      const driverId = String(q['DriverID'] ?? '');
+      const invId = String(q['InventoryID'] ?? '');
+      const looksLikeCipher = (v: string) => {
+        if (!v || v.length < 24) {
+          return false;
+        }
+        return v.startsWith('U2FsdGVk') || /^[A-Za-z0-9+%/_=-]+$/.test(v);
+      };
+      return looksLikeCipher(driverId) || looksLikeCipher(invId);
+    } catch {
+      return false;
+    }
   }
 
   private deepestChild(route: ActivatedRouteSnapshot): ActivatedRouteSnapshot {
@@ -122,6 +148,15 @@ export class RolePageGuard implements CanActivate {
   }
 
   private firstUrlSegment(url: string): string {
+    try {
+      const tree = this.router.parseUrl(url);
+      const primary = tree.root.children['primary'];
+      if (primary?.segments?.length) {
+        return primary.segments[0].path;
+      }
+    } catch {
+      /* fall through */
+    }
     const clean = decodeURIComponent(url.split('#')[0].split('?')[0]);
     const parts = clean.split('/').filter((p) => p);
     return parts[0] || '';

@@ -126,17 +126,16 @@ export class DriverInventoryAssociationComponent implements OnInit {
 
   ngOnInit() {
     this.route.queryParams.subscribe(paramsData =>{
-      //this.driverID   = paramsData.DriverID;
-       //this.driverName=paramsData.DriverName;
-      //  this.RedirectingFrom = paramsData.redirectingFrom;
-      //  this.SupplierName = paramsData.SupplierName;
-      //  this.DriverPhone = paramsData.DriverPhone;
-      //  this.vehicleID = paramsData.InventoryID;
-      //  this.RegNo = paramsData.RegNo;
-      //  this.Vehicle = paramsData.Vehicle;
-      //  this.VehicleCategory = paramsData.VehicleCategory;
-      //  this.SupplierName = paramsData.SupplierName;
-
+      const qpDecode = (v: string | undefined): string => {
+        if (v === undefined || v === null || v === '') {
+          return '';
+        }
+        try {
+          return decodeURIComponent(v);
+        } catch {
+          return v;
+        }
+      };
 
       // Decrypt the parameters if they exist For Driver
       const encryptedDriverID = paramsData.DriverID;
@@ -148,12 +147,12 @@ export class DriverInventoryAssociationComponent implements OnInit {
 
 if (encryptedDriverID && encryptedDriverName && encryptedRedirectingFrom && encryptedDriverPhone && encryptedSupplier)
 {
-  this.driverID = this._generalService.decrypt(decodeURIComponent(encryptedDriverID));
-  this.driverName = this._generalService.decrypt(decodeURIComponent(encryptedDriverName));
-  this.DriverPhone = this._generalService.decrypt(decodeURIComponent(encryptedDriverPhone));
-  this.RedirectingFrom = this._generalService.decrypt(decodeURIComponent(encryptedRedirectingFrom));
-  this.Supplier = this._generalService.decrypt(decodeURIComponent(encryptedSupplier));
-  this.SupplierID = this._generalService.decrypt(decodeURIComponent(encryptedSupplierID));
+  this.driverID = this._generalService.decrypt(qpDecode(encryptedDriverID));
+  this.driverName = this._generalService.decrypt(qpDecode(encryptedDriverName));
+  this.DriverPhone = this._generalService.decrypt(qpDecode(encryptedDriverPhone));
+  this.RedirectingFrom = this._generalService.decrypt(qpDecode(encryptedRedirectingFrom));
+  this.Supplier = this._generalService.decrypt(qpDecode(encryptedSupplier));
+  this.SupplierID = this._generalService.decrypt(qpDecode(encryptedSupplierID));
 }
 
   // Decrypt the parameters if they exist For Inventory
@@ -166,14 +165,13 @@ const encryptedSupplierName = paramsData.SupplierName;
 
 if (encryptedVehicleID && encryptedRegNo && encryptedRedirectingFrom && encryptedVehicle && encryptedVehicleCategory && encryptedSupplierName ) 
 {
-  this.vehicleID = (this._generalService.decrypt(decodeURIComponent(encryptedVehicleID)));
-  this.RegNo = this._generalService.decrypt(decodeURIComponent(encryptedRegNo));
-  this.Vehicle = this._generalService.decrypt(decodeURIComponent(encryptedVehicle));
-  this.VehicleCategory = this._generalService.decrypt(decodeURIComponent(encryptedVehicleCategory));
-  this.RedirectingFrom = this._generalService.decrypt(decodeURIComponent(encryptedRedirectingFrom));
-  this.SupplierName = this._generalService.decrypt(decodeURIComponent(encryptedSupplierName));
-  this.SupplierID = this._generalService.decrypt(decodeURIComponent(encryptedSupplierID));
-
+  this.vehicleID = (this._generalService.decrypt(qpDecode(encryptedVehicleID)));
+  this.RegNo = this._generalService.decrypt(qpDecode(encryptedRegNo));
+  this.Vehicle = this._generalService.decrypt(qpDecode(encryptedVehicle));
+  this.VehicleCategory = this._generalService.decrypt(qpDecode(encryptedVehicleCategory));
+  this.RedirectingFrom = this._generalService.decrypt(qpDecode(encryptedRedirectingFrom));
+  this.SupplierName = this._generalService.decrypt(qpDecode(encryptedSupplierName));
+  this.SupplierID = this._generalService.decrypt(qpDecode(encryptedSupplierID));
 }
 
 console.log("Decrypted SupplierID:", this.SupplierID);
