@@ -1,51 +1,116 @@
 // @ts-nocheck
 import { formatDate } from '@angular/common';
 export class EmailInfoModel {
+
+  // Reservation
   reservationID: number;
   reservationStatus: string;
   reservationGroupID: number;
-  customerPerson: CustomerPersonModel;
 
+  // Booker
+  booker: CustomerPersonModel;
+
+  // Passenger
+  passenger: CustomerPersonModel;
+
+  // Customer
   customerID: number | null;
   customerName: string;
   customerGroupID: number;
   customerGroup: string;
+
+  // Vehicle
   vehicle: VehicleModel;
+
+  // Company
   companyName: string;
+
+  // Package
   package: PackageModel;
 
+  // Pickup
   pickup: PickupModel;
+
+  // Drop
   drop: DropOffModel;
 
+  // Organizational Entity
   organizationalEntityName: string;
   organizationalEntityAddressString: string;
 
+  // Transfer
   transferedLocationID: number | null;
   transferedLocation: string;
 
-  specialInstruction: ReservationSpecialInstructionModel[];;
-  constructor(emailInfo) {
-    {
-      this.reservationID = emailInfo.reservationID || 0;
-      this.reservationStatus = emailInfo.reservationStatus || '';
-      this.reservationGroupID = emailInfo.reservationGroupID || 0;
-      this.customerPerson = emailInfo.customerPerson ;  
-      this.customerID = emailInfo.customerID || null;
-      this.customerName = emailInfo.customerName || '';
-      this.customerGroupID = emailInfo.customerGroupID || 0;
-      this.customerGroup = emailInfo.customerGroup || '';
-      this.vehicle = emailInfo.vehicle ;
-      this.companyName = emailInfo.companyName || '';
-      this.package = emailInfo.package ;
-      this.pickup = emailInfo.pickup;
-      this.drop = emailInfo.drop ;
-      this.organizationalEntityName = emailInfo.organizationalEntityName || '';
-      this.organizationalEntityAddressString = emailInfo.organizationalEntityAddressString || '';
-      this.transferedLocationID = emailInfo.transferedLocationID || null;
-      this.transferedLocation = emailInfo.transferedLocation || '';
-      this.specialInstruction = emailInfo.specialInstruction || '';
+  // Extra Fields
+  city: string;
+  modeOfPayment: string;
+  reportTime: Date | null;
 
-    }
+  // Special Instructions
+  specialInstructions: ReservationSpecialInstructionModel[];
+
+  constructor(emailInfo?: any) {
+
+    this.reservationID = emailInfo?.reservationID || 0;
+    this.reservationStatus = emailInfo?.reservationStatus || '';
+    this.reservationGroupID = emailInfo?.reservationGroupID || 0;
+
+    // Booker
+    this.booker = emailInfo?.booker || new CustomerPersonModel();
+
+    // Passenger
+    this.passenger = emailInfo?.passenger || new CustomerPersonModel();
+
+    // Customer
+    this.customerID = emailInfo?.customerID || null;
+    this.customerName = emailInfo?.customerName || '';
+    this.customerGroupID = emailInfo?.customerGroupID || 0;
+    this.customerGroup = emailInfo?.customerGroup || '';
+
+    // Vehicle
+    this.vehicle = emailInfo?.vehicle || new VehicleModel();
+
+    // Company
+    this.companyName = emailInfo?.companyName || '';
+
+    // Package
+    this.package = emailInfo?.package || new PackageModel();
+
+    // Pickup
+    this.pickup = emailInfo?.pickup || new PickupModel();
+
+    // Drop
+    this.drop = emailInfo?.drop || new DropOffModel();
+
+    // Organizational Entity
+    this.organizationalEntityName =
+      emailInfo?.organizationalEntityName || '';
+
+    this.organizationalEntityAddressString =
+      emailInfo?.organizationalEntityAddressString || '';
+
+    // Transfer
+    this.transferedLocationID =
+      emailInfo?.transferedLocationID || null;
+
+    this.transferedLocation =
+      emailInfo?.transferedLocation || '';
+
+    // Extra Fields
+    this.city = emailInfo?.city || '';
+
+    this.modeOfPayment =
+      emailInfo?.modeOfPayment || '';
+
+    this.reportTime =
+      emailInfo?.reportTime
+        ? new Date(emailInfo.reportTime)
+        : null;
+
+    // Special Instructions
+    this.specialInstructions =
+      emailInfo?.specialInstructions || [];
   }
 }
 // ---------------- Customer Person ----------------

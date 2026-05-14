@@ -141,6 +141,7 @@
           <thead>
             <tr>
               <th style="width: 10%;">Reservation No.</th>
+              <th style="width: 10%;">Reservation Group No.</th>
               <th style="width: 10%;">Guest Name</th>
               <th style="width: 10%;">Guest Mobile</th>
               <th style="width: 13%;">Pickup Date</th>
@@ -157,6 +158,7 @@
           <tbody>
             <tr *ngFor="let info of emailList">
               <td>{{ info?.reservationID || 'N/A' }}</td>
+              <td> {{ info?.reservationGroupID || 'N/A' }}</td>
               <td> {{ info?.passenger?.customerPersonName || 'N/A' }}</td>
               <td> {{ info?.passenger?.primaryMobile || 'N/A' }}</td>
               <td>{{ (info?.pickup?.pickupDate | date:'dd-MMM-yyyy') || 'N/A' }}</td>
