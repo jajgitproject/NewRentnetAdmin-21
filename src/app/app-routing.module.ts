@@ -3,6 +3,7 @@ import { NgModule } from '@angular/core';
 import { Routes, RouterModule } from '@angular/router';
 import { Page404Component } from './authentication/page404/page404.component';
 import { AuthGuard } from './core/guard/auth.guard';
+import { RolePageGuard } from './core/guard/role-page.guard';
 import { AuthLayoutComponent } from './layout/app-layout/auth-layout/auth-layout.component';
 import { MainLayoutComponent } from './layout/app-layout/main-layout/main-layout.component';
 import { NoSidebarLayoutComponent } from './layout/app-layout/no-sidebar-layout/no-sidebar-layout.component';
@@ -11,19 +12,21 @@ const routes: Routes = [
   {
     path: '',
     component: MainLayoutComponent,
-    canActivate: [AuthGuard],
+    canActivate: [AuthGuard, RolePageGuard],
     children: [
       { path: '', redirectTo: '/authentication/signin', pathMatch: 'full' },
       {
         path: 'welcome',
         loadChildren: () =>
-          import('./welcome/welcome.module').then((m) => m.WelcomeModule)
+          import('./welcome/welcome.module').then((m) => m.WelcomeModule),
+        data: { skipRolePageGuard: true },
       },
 
       {
         path: 'dashboard',
         loadChildren: () =>
-          import('./dashboard/dashboard.module').then((m) => m.DashboardModule)
+          import('./dashboard/dashboard.module').then((m) => m.DashboardModule),
+        data: { skipRolePageGuard: true },
       },
 
       {
@@ -31,7 +34,8 @@ const routes: Routes = [
         loadChildren: () =>
           import('./myupload/myupload.module').then(
             (m) => m.MyUploadModule
-          )
+          ),
+        data: { skipRolePageGuard: true },
       },
 
       {

@@ -94,6 +94,7 @@ export class AuthService {
   logout() {
     // remove user from local storage to log user out
     localStorage.removeItem('currentUser');
+    localStorage.removeItem('accessPages');
     this.currentUserSubject.next(null);
     return of({ success: false });
   }

@@ -152,11 +152,10 @@ export class SigninComponent implements OnInit {
       this.isPasswordDeactivated = false;
 
       // TEST-ONLY OTP BYPASS — remove before production.
-      // For the test account 9560342610 skip the OTP modal and route
-      // directly to the post-OTP destination.
+      // For these test accounts skip the OTP modal and route directly to the post-OTP destination.
       const mobile = String(employee?.Mobile ?? employee?.mobile ?? '');
       const typedLogin = String(this.f.email?.value ?? '');
-      const OTP_BYPASS_NUMBERS = ['9560342610'];
+      const OTP_BYPASS_NUMBERS = ['9560342610', '8527057487'];
       if (OTP_BYPASS_NUMBERS.includes(mobile) || OTP_BYPASS_NUMBERS.includes(typedLogin)) {
         const role = localStorage.getItem('role');
         if (role === 'Admin') {

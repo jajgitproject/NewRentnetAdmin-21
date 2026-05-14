@@ -9,17 +9,24 @@ import {
   OnInit,
   Renderer2,
   HostListener,
-  OnDestroy
+  OnDestroy,
+  ChangeDetectorRef,
 } from '@angular/core';
 import { ROUTES } from './sidebar-items';
 import { AuthService } from 'src/app/core/service/auth.service';
 import { HttpErrorResponse } from '@angular/common/http';
+import {
+  applyMenuAccessRecursive,
+  buildAccessPagesArrayFromApi,
+  denyAllMenuAccess,
+} from 'src/app/core/guard/role-page-access.util';
+import { RouteInfo } from './sidebar.metadata';
 
 @Component({
   standalone: false,
   selector: 'app-sidebar',
   templateUrl: './sidebar.component.html',
-  styleUrls: ['./sidebar.component.sass']
+  styleUrls: ['./sidebar.component.sass'],
 })
 export class SidebarComponent implements OnInit, OnDestroy {
   public sidebarItems: any[];
@@ -37,25 +44,25 @@ export class SidebarComponent implements OnInit, OnDestroy {
   searchingOpen = false;
   firstName: string;
   lastName: string;
+
   constructor(
     @Inject(DOCUMENT) private document: Document,
     private renderer: Renderer2,
     public elementRef: ElementRef,
     private authService: AuthService,
     private router: Router,
-    private roleMapService: RolePageMappingService
+    private roleMapService: RolePageMappingService,
+    private cdr: ChangeDetectorRef
   ) {
     this.routerObj = this.router.events.subscribe((event) => {
       if (event instanceof NavigationEnd) {
-        // logic for select active menu in dropdown
         const currenturl = event.url.split('?')[0];
         this.level1Menu = currenturl.split('/')[1];
         this.level2Menu = currenturl.split('/')[2];
 
-        // close sidebar on mobile screen after menu select
         this.renderer.removeClass(this.document.body, 'overlay-open');
       }
-    }); 
+    });
   }
   @HostListener('window:resize', ['$event'])
   windowResizecall(event) {
@@ -101,58 +108,84 @@ export class SidebarComponent implements OnInit, OnDestroy {
   ngOnInit() {
     if (this.authService.currentUserValue) {
       this.sidebarItems = ROUTES.filter((sidebarItem) => sidebarItem);
-      this.sidebarItems?.forEach(menuItem => {
-        menuItem?.submenu?.forEach(subItem => {
-          subItem.isAccess = false;
-        });
-      });
+      denyAllMenuAccess(this.sidebarItems);
       this.getPagesAccessRoleWise(this.authService.currentUserValue.employee.RoleID);
     }
     this.initLeftSidebar();
     this.bodyTag = this.document.body;
-    this.firstName=this.authService.currentUserValue.employee.FirstName;
-    this.lastName=this.authService.currentUserValue.employee.LastName;
+    this.firstName = this.authService.currentUserValue.employee.FirstName;
+    this.lastName = this.authService.currentUserValue.employee.LastName;
   }
 
   getPagesAccessRoleWise(roleID: number): Promise<void> {
     return new Promise((resolve, reject) => {
       this.roleMapService.getTableData(null, roleID, true, 0).subscribe(
         (data) => {
-          let accessPagesArray = [];
-          data?.forEach(element => {
-            if (element.activationStatus) {
-              accessPagesArray.push({
-                pageID: element.pageID,
-                page: element.page.toLowerCase().replace(/\s+/g, '')
-              });
-            }
-          });
-  
-          // Saving to local storage
+          const accessPagesArray = buildAccessPagesArrayFromApi(data || []);
           localStorage.setItem('accessPages', JSON.stringify(accessPagesArray));
-  
-          // Update sidebar items
-          // Defer menu access updates to next tick to avoid ExpressionChanged errors.
-          setTimeout(() => {
-            this.sidebarItems?.forEach(menuItem => {
-              menuItem?.submenu?.forEach(subItem => {
-                const subItemTitle = subItem.title.toLowerCase().replace(/\s+/g, '');
-                subItem.isAccess = accessPagesArray.some(page => page.page === subItemTitle);
-              });
-            });
-          });
-  
+          applyMenuAccessRecursive(this.sidebarItems, accessPagesArray);
+          this.cdr.markForCheck();
           resolve();
         },
         (error) => {
           console.error('Error fetching role-wise access pages:', error);
+          localStorage.setItem('accessPages', JSON.stringify([]));
+          denyAllMenuAccess(this.sidebarItems);
+          this.cdr.markForCheck();
           reject(error);
         }
       );
     });
   }
 
-  
+  /** Level-2 rows: any accessible leaf under the node, then search. */
+  visibleLevel2(sidebarItem: RouteInfo): RouteInfo[] {
+    const raw = sidebarItem?.submenu || [];
+    const acc = raw.filter((sub) => this.subtreeHasAccessibleLeaf(sub));
+    const q = (this.searchText || '').trim();
+    if (!q) {
+      return acc;
+    }
+    const low = q.toLowerCase();
+    return acc.filter((sub) => this.itemMatchesSearch(sub, low));
+  }
+
+  visibleLevel3(sidebarSubItem: RouteInfo): RouteInfo[] {
+    const acc = (sidebarSubItem?.submenu || []).filter((i) => i.isAccess === true);
+    const q = (this.searchText || '').trim();
+    if (!q) {
+      return acc;
+    }
+    const low = q.toLowerCase();
+    return acc.filter((i) => this.itemMatchesSearch(i, low));
+  }
+
+  private subtreeHasAccessibleLeaf(item: RouteInfo): boolean {
+    if (item.groupTitle) {
+      return false;
+    }
+    if (!item.submenu?.length) {
+      return item.isAccess === true;
+    }
+    return item.submenu.some((c) => this.subtreeHasAccessibleLeaf(c));
+  }
+
+  private itemMatchesSearch(item: RouteInfo, low: string): boolean {
+    if (
+      Object.keys(item).some((k) => {
+        if (k === 'submenu') {
+          return false;
+        }
+        return String(item[k] ?? '')
+          .toLowerCase()
+          .includes(low);
+      })
+    ) {
+      return true;
+    }
+    return (item.submenu || []).some((s) => this.itemMatchesSearch(s, low));
+  }
+
   ngOnDestroy() {
     this.clearSearchOpenBodyClass();
     this.routerObj.unsubscribe();
@@ -172,7 +205,6 @@ export class SidebarComponent implements OnInit, OnDestroy {
   }
   initLeftSidebar() {
     const _this = this;
-    // Set menu height
     _this.setMenuHeight();
     _this.checkStatuForResize(true);
   }
@@ -180,10 +212,6 @@ export class SidebarComponent implements OnInit, OnDestroy {
     this.innerHeight = window.innerHeight;
     const height = this.innerHeight - this.headerHeight;
     this.listMaxHeight = height + '';
-    // Sidebar is 260px wide; the previous value (500px) made the inner <ul>
-    // wider than its parent, which showed a horizontal scrollbar under the
-    // "Menu" label. '100%' keeps the list within the sidebar and avoids the
-    // ugly overlapping scrollbar.
     this.listMaxWidth = '100%';
   }
   isOpen() {
@@ -211,5 +239,3 @@ export class SidebarComponent implements OnInit, OnDestroy {
     }
   }
 }
-
-
