@@ -1553,9 +1553,8 @@
                       [expanded]="isExpanded[i]"  (opened)="loadData(data.reservationID,i)"
                       [ngClass]="{ 'striped-header-odd': i % 2 !== 0, 'striped-header-even': i % 2 === 0 }">
                       <mat-expansion-panel-header style="height: 100%;"> -->
-                        <mat-panel-title style="margin-top: 10px;margin-bottom: 10px;">
+                        <mat-panel-title class="cp-reservation-panel-title" style="margin-top: 10px;margin-bottom: 10px;">
                           <div class="cp-reservation-dblclick" (dblclick)="onReservationHeaderDblClick($event, data.reservationID, i)">
-                          <br />
                           <span style="
                                   font-size: 12px;
                                   text-align: left;
@@ -1575,7 +1574,6 @@
                             <br>
                             <span *ngIf="data.supplierAddress !== null"> P2S </span>
                           </span>
-                          <br />
                           <span style="
                                   font-size: 12px;
                                   text-align: left;
@@ -1594,7 +1592,6 @@
                                 <br/>
                                 {{ data.reservationEndDate | date : 'dd-MMM-yyyy'}} -->
                           </span>
-                          <br />
                           <span style="
                                   font-size: 12px;
                                   text-align: left;
@@ -2050,7 +2047,6 @@
                                                   data.carStatus === 'Not Moving' ? 'red' : 'black' }">
                                   {{ data.carStatus || 'N/A' }}
                               </span> -->
-                          <br />
                           </div>
                         </mat-panel-title>
                       </mat-expansion-panel-header>

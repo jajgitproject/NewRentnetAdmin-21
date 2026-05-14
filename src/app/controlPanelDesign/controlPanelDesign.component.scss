@@ -124,6 +124,30 @@
   background-color: #ffffff;
 }
 
+/* Align Control Panel grid header strip with reservation row cells (floated columns). */
+.cp-reservation-dblclick::after {
+  content: "";
+  display: table;
+  clear: both;
+}
+
+.cp-reservation-dblclick {
+  box-sizing: border-box;
+}
+
+:host ::ng-deep .accordion-container .mat-expansion-panel-header {
+  padding-left: 23px;
+  align-items: flex-start;
+}
+
+:host ::ng-deep .accordion-container .cp-reservation-panel-title {
+  flex: 1 1 auto;
+  max-width: 100%;
+  width: 100%;
+  display: block;
+  box-sizing: border-box;
+}
+
 .custom-autocomplete-panel {
   width: max-content !important;
   max-width: 90vw;
