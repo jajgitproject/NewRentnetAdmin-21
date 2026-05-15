@@ -167,7 +167,7 @@
               <td> {{ info?.passenger?.primaryMobile || 'N/A' }}</td>
               <td>{{ (info?.pickup?.pickupDate | date:'dd-MMM-yyyy') || 'N/A' }}</td>
               <td>{{ (info?.drop?.dropOffDate | date:'dd-MMM-yyyy') || 'N/A' }}</td>
-              <td>{{ info?.reportTime ? (info?.reportTime | date:'HH:mm:ss') : 'N/A' }}</td>
+              <td>{{ (info?.reportTime ?? info?.pickup?.pickupTime) ? ((info?.reportTime ?? info?.pickup?.pickupTime) | date:'HH:mm:ss') : 'N/A' }}</td>
               <td>{{ info?.city || 'N/A' }}</td>
               <td>{{ info?.vehicle?.vehicle || 'N/A' }}</td>
               <td>{{ info?.package?.package || 'N/A' }}</td>

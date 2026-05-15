@@ -2,8 +2,8 @@
     <div class="si-dialog__header">
         <div>
             <h2 class="si-dialog__title">{{ dialogTitle }}</h2>
-            <span class="si-dialog__status" *ngIf="status && status !== 'Changes allow'">
-                ({{ status }}!!!!!)
+            <span class="si-dialog__status" *ngIf="statusMessage && statusMessage !== 'Changes allow'">
+                ({{ statusMessage }}!!!!!)
             </span>
         </div>
         <button mat-icon-button (click)="dialogRef.close()" aria-label="Close dialog">
@@ -26,10 +26,7 @@
             <div class="si-dialog__row">
                 <mat-form-field class="si-dialog__field" appearance="outline" floatLabel="always">
                     <mat-label>Special Instruction By</mat-label>
-                    <input required matInput formControlName="specialInstructionBy" placeholder="Enter instruction by">
-                    <mat-error *ngIf="advanceTableForm.get('specialInstructionBy').hasError('required')">
-                        Special Instruction By is required
-                    </mat-error>
+                    <input matInput formControlName="specialInstructionBy" placeholder="Enter instruction by">
                 </mat-form-field>
             </div>
 

@@ -39,7 +39,9 @@ export class InternalNoteDetailsService
   {
     advanceTable.reservationInternalNoteID=-1;
     advanceTable.userID=this.generalService.getUserID();
-    //advanceTable.reservationInternalNoteByEmployeeID=this.generalService.getUserID();
+    if (!advanceTable.reservationInternalNoteByEmployeeID) {
+      advanceTable.reservationInternalNoteByEmployeeID = this.generalService.getUserID();
+    }
     return this.httpClient.post<any>(this.API_URL , advanceTable);
   }
   update(advanceTable: InternalNoteDetails)

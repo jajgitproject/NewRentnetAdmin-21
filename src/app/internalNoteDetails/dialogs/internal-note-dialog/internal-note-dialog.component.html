@@ -6,8 +6,8 @@
                 <div class="modal-about">
                     <div class="font-weight-bold p-t-5 font-17">
                         {{dialogTitle}}</div>
-                         <div *ngIf="status && status !== 'Changes allow'" style="color:rgb(150, 4, 4);; margin-top:5px; font-style: italic;">
-                       ({{status}}!!!!!)
+                         <div *ngIf="statusMessage && statusMessage !== 'Changes allow'" style="color:rgb(150, 4, 4);; margin-top:5px; font-style: italic;">
+                       ({{ statusMessage }}!!!!!)
                     </div>
                 </div>
             </div>
@@ -34,14 +34,14 @@
                  
                     <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
                         <mat-label>Internal Note By</mat-label>
-                        <input required type="text" matInput formControlName="reservationInternalNoteByEmployee" [matAutocomplete]="auto5">
+                        <input type="text" matInput formControlName="reservationInternalNoteByEmployee" [matAutocomplete]="auto5">
                         <mat-autocomplete #auto5="matAutocomplete" (optionSelected)="onEmployeeSelected($event.option.value)">
                           <mat-option *ngFor="let option of filteredCreatedByOptionss | async" 
                           [value]="option.firstName +' '+option.lastName" (click)="getemployee(option.employeeID)">
                             {{option.firstName +' '+ option.lastName}}
                           </mat-option>
                         </mat-autocomplete>
-                        <mat-error *ngIf="advanceTableForm.controls['reservationInternalNoteByEmployee'].hasError('reservationInternalNoteByEmployeeInvalid')">
+                        <mat-error *ngIf="advanceTableForm.controls['reservationInternalNoteByEmployee'].value && advanceTableForm.controls['reservationInternalNoteByEmployee'].hasError('reservationInternalNoteByEmployeeInvalid')">
                             Please select a valid Internal Note By
                         </mat-error>
                       </mat-form-field>
@@ -80,8 +80,8 @@
                 <!-- <span style="color: red;">{{status}}</span> -->
                 <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12 mb-2">
                     <div class="example-button-row">
-                        <button mat-raised-button color="primary" *ngIf="saveDisabled" [disabled]="!advanceTableForm.valid || buttonDisabled" [type]="submit" (click)="confirmAdd()">Save</button>
-                        <mat-spinner *ngIf="!saveDisabled" diameter="30"></mat-spinner>
+                        <button mat-raised-button color="primary" *ngIf="!isSaving" [disabled]="!advanceTableForm.valid || isSaving" type="button" (click)="onSaveClick()">Save</button>
+                        <mat-spinner *ngIf="isSaving" diameter="30"></mat-spinner>
                         <button mat-raised-button color="warn" (click)="onNoClick()" tabindex="-1">Cancel</button>
                         
                     </div>

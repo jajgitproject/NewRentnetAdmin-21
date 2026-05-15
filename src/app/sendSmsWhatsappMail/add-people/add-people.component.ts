@@ -66,6 +66,8 @@ export class AddPeopleComponent implements OnInit {
       }
 
   ngOnInit(): void {
+    this.selectedValue = 'number';
+    this.advanceTableForm.patchValue({ addPeople: 'number' });
     this.loadData();
     this.GetCustomerMobile();
     this.getEmployeeMobile();
@@ -101,8 +103,8 @@ export class AddPeopleComponent implements OnInit {
       } else if(this.selectedValue === 'number') {
         this.formDataArray.push({
           primaryMobile: this.advanceTableForm.get('numberMobile')?.value,
-          primaryEmail: this.advanceTableForm.get('numberEmail')?.value,
-          customerPersonName: this.advanceTableForm.value,
+          primaryEmail: this.advanceTableForm.get('numberEmail')?.value || '',
+          customerPersonName: this.advanceTableForm.get('name')?.value || '',
           type: this.advanceTableForm.controls['addPeople'].value
         });
       }
@@ -115,7 +117,7 @@ export class AddPeopleComponent implements OnInit {
     return this.fb.group(
     {
 customerPersonID:[''],
-      addPeople:[this.advanceTable?.addPeople],
+      addPeople:[this.advanceTable?.addPeople || 'number'],
       customer: [this.advanceTable?.customer],
       employeeMobile: [this.advanceTable?.employeeMobile],
       employee: [this.advanceTable?.employee],

@@ -103,10 +103,9 @@ export class EmailInfoModel {
     this.modeOfPayment =
       emailInfo?.modeOfPayment || '';
 
-    this.reportTime =
-      emailInfo?.reportTime
-        ? new Date(emailInfo.reportTime)
-        : null;
+    const reportTimeSource =
+      emailInfo?.reportTime ?? emailInfo?.pickup?.pickupTime ?? null;
+    this.reportTime = reportTimeSource ? new Date(reportTimeSource) : null;
 
     // Special Instructions
     this.specialInstructions =

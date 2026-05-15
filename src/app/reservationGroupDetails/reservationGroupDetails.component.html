@@ -28,15 +28,17 @@
                         <div class="responsive_table">
                             <div class="materialTableHeader">
                                 <div class="row">
-                                    <div style="width: 90%; float:left;padding-top: 15px;padding-left: 22px;">
+                                    <div style="width: 82%; float:left;padding-top: 15px;padding-left: 22px;">
                                         <span *ngIf="advanceTable">Booking for Group No. <b>{{advanceTable.reservationGroupID}}</b>,Customer <b>{{advanceTable.customer}}</b>,No Of Booking <b>{{bookingCount}}</b>,
                                             <!-- Start Date <b>{{advanceTable.reservationStartDate | date:'dd-MM-yyyy'}}</b>, End Date <b>{{advanceTable.reservationEndDate | date:'dd-MM-yyyy'}}</b> -->
                                         </span>
                                     </div>
-                                    <div style="width: 10%;margin-top: 7px;text-align:center;">
+                                    <div style="width: 18%; margin-top: 7px; text-align: center;">
                                         <button mat-raised-button color="primary" (click)="edit(advanceTable,bookingCount)">
-                                            <!-- <mat-icon style="color: blue;">create</mat-icon> -->
                                             <span>Edit</span>
+                                        </button>
+                                        <button mat-raised-button color="primary" style="margin-left: 8px;" (click)="emailInfo()">
+                                            <span>Email format</span>
                                         </button>
                                     </div>
                                 </div>
