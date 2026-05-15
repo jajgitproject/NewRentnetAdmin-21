@@ -114,6 +114,13 @@ const routes: Routes = [
             (m) => m.ChangeVendorModule
           )
       },
+       {
+        path: 'changePickupTime',
+        loadChildren: () =>
+          import('./changePickupTime/changePickupTime.module').then(
+            (m) => m.ChangePickupTimeModule
+          )
+      },
 
       {
         path: 'clearIMEI',
