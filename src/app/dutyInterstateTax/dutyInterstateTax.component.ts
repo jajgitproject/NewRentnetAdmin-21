@@ -102,6 +102,9 @@ export class DutyInterstateTaxComponent implements OnInit {
 
     }
   });
+   dialogRef.afterClosed().subscribe((res: any) => {
+        this.loadData();
+  });     
 
 }
 deleteItem(row)
@@ -134,16 +137,20 @@ deleteItem(row)
       }); 
       dialogRef.afterClosed().subscribe((res: any) => {
         this.loadData();
+        window.location.reload();
     });                       
   }
 
    public loadData() 
    {
-      this.dutyInterstateTaxService.getTableData(this.dutyInterstateTaxID,this.dutySlipID,this.SearchActivationStatus, this.PageNumber).subscribe
+    debugger;
+      this.dutyInterstateTaxService.getDutyInterstateTaxEntryDetails(this.dutySlipID).subscribe
       (
         data =>   
         {
+          debugger;
           this.advanceTableDIT = data;
+          console.log(this.advanceTableDIT);
         },
         (error: HttpErrorResponse) => { this.advanceTableDIT = null;}
       );
