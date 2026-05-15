@@ -19,10 +19,6 @@ export class EmailInfoComponent {
  emailList: EmailInfoModel[] = [];
   dialogTitle: string;
   reservationID: any;
-  hasAnySpecialInstruction = false;
-  mergedInstructions: string = "";
-
-
   constructor(
     public dialogRef: MatDialogRef<EmailInfoComponent>,
     @Inject(MAT_DIALOG_DATA) public data: any,
@@ -58,25 +54,47 @@ export class EmailInfoComponent {
     this.loadData();      
   }
 
-  prepareInstructions() 
-  {
-    const allInstructions: string[] = [];
-    this.emailList.forEach(b => {
-      if (b.specialInstruction && Array.isArray(b.specialInstruction)) {
-        b.specialInstruction.forEach(ins => {
-          if (ins.specialInstruction) {
-            allInstructions.push(ins.specialInstruction);
-          }
-        });
-      }
-    });
+  getReservationGroupNo(): string {
+    const id =
+      this.emailList?.[0]?.reservationGroupID ??
+      this.emailList?.[0]?.ReservationGroupID;
+    return id != null && id !== '' && id !== 0 ? String(id) : 'N/A';
+  }
 
-    this.hasAnySpecialInstruction = allInstructions.length > 0;
-
-    if (this.hasAnySpecialInstruction) 
-    {
-      this.mergedInstructions = allInstructions.join(", ");
+  private formatAddressPair(details: string, google: string): string {
+    const d = (details ?? '').trim();
+    const g = (google ?? '').trim();
+    if (d && g) {
+      return `${d} ${g}`;
     }
+    return d || g || 'N/A';
+  }
+
+  getPickupAddressDisplay(info: any): string {
+    const pickup = info?.pickup;
+    return this.formatAddressPair(
+      pickup?.pickupAddressDetails,
+      pickup?.pickupAddress
+    );
+  }
+
+  getDropAddressDisplay(info: any): string {
+    const drop = info?.drop;
+    return this.formatAddressPair(
+      drop?.dropOffAddressDetails,
+      drop?.dropOffAddress
+    );
+  }
+
+  getSpecialInstructionsDisplay(info: any): string {
+    const list = info?.specialInstructions ?? info?.SpecialInstructions ?? [];
+    if (!Array.isArray(list) || list.length === 0) {
+      return 'N/A';
+    }
+    const texts = list
+      .map((x) => (x?.specialInstruction ?? x?.SpecialInstruction ?? '').trim())
+      .filter(Boolean);
+    return texts.length ? texts.join('; ') : 'N/A';
   }
 
   public loadData() 
@@ -101,9 +119,6 @@ export class EmailInfoComponent {
       this.ngZone.run(() => {
         setTimeout(() => {
           this.emailList = list || [];
-          if (this.emailList && this.emailList.length > 0) {
-            this.prepareInstructions();
-          }
           this.cdr.detectChanges();
         }, 0);
       });

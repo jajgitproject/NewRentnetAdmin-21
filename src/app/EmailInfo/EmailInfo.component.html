@@ -141,28 +141,30 @@
 
       <div class="email-summary-section">
         <h3>📋 Booking Summary</h3>
+        <p class="email-group-header" style="margin: 0 0 12px 0; font-size: 13px; font-weight: 600; color: #333;">
+          Reservation Group No.: {{ getReservationGroupNo() }}
+        </p>
         <table class="email-table">
           <thead>
             <tr>
-              <th style="width: 10%;">Reservation No.</th>
-              <th style="width: 10%;">Reservation Group No.</th>
-              <th style="width: 10%;">Guest Name</th>
+              <th style="width: 11%;">Reservation No.</th>
+              <th style="width: 11%;">Guest Name</th>
               <th style="width: 10%;">Guest Mobile</th>
               <th style="width: 13%;">Pickup Date</th>
               <th style="width: 13%;">Releasing Date</th>
               <th style="width: 13%;">Report Time</th>
               <th style="width: 13%;">City</th>
               <th style="width: 12%;">Car Booked</th>
-              <th style="width: 10%;">Package</th>
-              <th style="width: 20%;">Pickup Address</th>
-              <th style="width: 15%;">Drop Address</th>              
-              <th style="width: 12%;">MOP</th>
+              <th style="width: 9%;">Package</th>
+              <th style="width: 14%;">Special Instruction</th>
+              <th style="width: 18%;">Pickup Address</th>
+              <th style="width: 12%;">Drop Address</th>
+              <th style="width: 8%;">MOP</th>
             </tr>
           </thead>
           <tbody>
             <tr *ngFor="let info of emailList">
               <td>{{ info?.reservationID || 'N/A' }}</td>
-              <td> {{ info?.reservationGroupID || 'N/A' }}</td>
               <td> {{ info?.passenger?.customerPersonName || 'N/A' }}</td>
               <td> {{ info?.passenger?.primaryMobile || 'N/A' }}</td>
               <td>{{ (info?.pickup?.pickupDate | date:'dd-MMM-yyyy') || 'N/A' }}</td>
@@ -171,8 +173,9 @@
               <td>{{ info?.city || 'N/A' }}</td>
               <td>{{ info?.vehicle?.vehicle || 'N/A' }}</td>
               <td>{{ info?.package?.package || 'N/A' }}</td>
-              <td>{{ info?.pickup?.pickupAddress || 'N/A' }}</td>
-              <td>{{ info?.drop?.dropOffAddress || 'N/A' }}</td>
+              <td>{{ getSpecialInstructionsDisplay(info) }}</td>
+              <td>{{ getPickupAddressDisplay(info) }}</td>
+              <td>{{ getDropAddressDisplay(info) }}</td>
               <td>{{ info?.modeOfPayment || 'N/A' }}</td>
             </tr>
           </tbody>
