@@ -1,5 +1,5 @@
 // @ts-nocheck
-import { Component, ElementRef, EventEmitter, Input, OnInit, Output, ViewChild, ViewEncapsulation } from '@angular/core';
+import { Component, ChangeDetectorRef, ElementRef, EventEmitter, Input, OnInit, Output, ViewChild, ViewEncapsulation } from '@angular/core';
 import { ControlPanelDesignService } from './controlPanelDesign.service';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { MatDialog, MatDialogRef } from '@angular/material/dialog';
@@ -301,7 +301,8 @@ export class ControlPanelDesignComponent implements OnInit {
     public interstateTaxEntryService:InterstateTaxEntryService,
     public passToSupplierService: PassToSupplierService,
     public dutyPostPickUPCallService: DutyPostPickUPCallService,
-    public controlPanelDialogeService:ControlPanelDialogeService
+    public controlPanelDialogeService:ControlPanelDialogeService,
+    private cdr: ChangeDetectorRef
   ) {
     this._filters = new Filters({});
     this.filterForm = this.createFilterForm();
@@ -742,6 +743,8 @@ export class ControlPanelDesignComponent implements OnInit {
             this.getIntervalInTime(row);
         
           });
+
+            this.loadMessagingLatestForHeaderRows();
 
             if (rowIndex !== undefined)
             {
@@ -3268,6 +3271,148 @@ openDropOffByExectiveGPS(item: any)
     {
       return 'notDone';
     }
+  }
+
+  private loadMessagingLatestForHeaderRows(): void {
+    const rows = this.reservationHeaderInfo;
+    if (!rows || rows.length === 0) {
+      return;
+    }
+    const ids = [
+      ...new Set(
+        rows
+          .map((r: any) => Number(r?.reservationID ?? r?.ReservationID))
+          .filter((id) => !isNaN(id) && id > 0)
+      ),
+    ];
+    if (ids.length === 0) {
+      return;
+    }
+    this._controlPanelDesignService.getReservationMessagingLatestStatus(ids).subscribe(
+      (raw: any) => {
+        let list = raw;
+        if (typeof list === 'string') {
+          try {
+            list = JSON.parse(list);
+          } catch {
+            list = [];
+          }
+        }
+        const items = Array.isArray(list) ? list : [];
+        const byId = new Map<number, any>();
+        items.forEach((x: any) => {
+          const id = Number(x?.reservationId ?? x?.reservationID ?? x?.ReservationID);
+          if (!isNaN(id) && id > 0) {
+            byId.set(id, x);
+          }
+        });
+        rows.forEach((row: any) => {
+          const id = Number(row?.reservationID ?? row?.ReservationID);
+          const m = byId.get(id);
+          if (m) {
+            row.latestSmsMessageStatus = m.latestSmsMessageStatus ?? m.LatestSmsMessageStatus;
+            row.latestSmsMessageStatusDetails =
+              m.latestSmsMessageStatusDetails ?? m.LatestSmsMessageStatusDetails;
+            row.latestWhatsAppMessageStatus = m.latestWhatsAppMessageStatus ?? m.LatestWhatsAppMessageStatus;
+            row.latestWhatsAppMessageStatusDetails =
+              m.latestWhatsAppMessageStatusDetails ?? m.LatestWhatsAppMessageStatusDetails;
+          }
+        });
+        this.cdr.markForCheck();
+      },
+      () => {}
+    );
+  }
+
+  getControlPanelMessagingHeaderDisplay(row: any): {
+    successBadges: string[];
+    failedBadges: string[];
+    otherParts: string[];
+    tooltip: string;
+  } {
+    const sms = this.readCpMessagingField(row, 'latestSmsMessageStatus', 'LatestSmsMessageStatus');
+    const smsDet = this.readCpMessagingField(row, 'latestSmsMessageStatusDetails', 'LatestSmsMessageStatusDetails');
+    const wa = this.readCpMessagingField(row, 'latestWhatsAppMessageStatus', 'LatestWhatsAppMessageStatus');
+    const waDet = this.readCpMessagingField(row, 'latestWhatsAppMessageStatusDetails', 'LatestWhatsAppMessageStatusDetails');
+
+    const successBadges: string[] = [];
+    const failedBadges: string[] = [];
+    const otherParts: string[] = [];
+
+    const smsCat = this.classifyMessagingStatus(sms);
+    if (smsCat === 's') {
+      successBadges.push('SMS-S');
+    } else if (smsCat === 'f') {
+      failedBadges.push('SMS-F');
+    } else if (smsCat === 'o') {
+      otherParts.push(`SMS:${sms}`);
+    }
+
+    const waCat = this.classifyMessagingStatus(wa);
+    if (waCat === 's') {
+      successBadges.push('WA-S');
+    } else if (waCat === 'f') {
+      failedBadges.push('WA-F');
+    } else if (waCat === 'o') {
+      otherParts.push(`WA:${wa}`);
+    }
+
+    const tooltipParts: string[] = [];
+    if (sms) {
+      tooltipParts.push(`SMS: ${sms}${smsDet ? ' — ' + smsDet : ''}`);
+    }
+    if (wa) {
+      tooltipParts.push(`WhatsApp: ${wa}${waDet ? ' — ' + waDet : ''}`);
+    }
+
+    return {
+      successBadges,
+      failedBadges,
+      otherParts,
+      tooltip: tooltipParts.join('\n'),
+    };
+  }
+
+  private readCpMessagingField(row: any, camel: string, pascal: string): string {
+    if (!row) {
+      return '';
+    }
+    const v = row[camel] ?? row[pascal];
+    if (v === null || v === undefined) {
+      return '';
+    }
+    return String(v).trim();
+  }
+
+  private classifyMessagingStatus(raw: string): 'n' | 's' | 'f' | 'o' {
+    if (!raw) {
+      return 'n';
+    }
+    const u = raw.toUpperCase();
+    if (u === 'OK' || u === 'CREATED' || u === 'SENT' || u === 'DELIVERED' || u === 'READ') {
+      return 's';
+    }
+    if (/^\d{3}$/.test(u)) {
+      const code = parseInt(u, 10);
+      if (code >= 200 && code < 300) {
+        return 's';
+      }
+      if (code >= 400) {
+        return 'f';
+      }
+      return 'o';
+    }
+    if (
+      u.includes('FAIL') ||
+      u.includes('ERROR') ||
+      u.includes('UNDELIVER') ||
+      u.includes('INVALID') ||
+      u.includes('REJECT') ||
+      u === 'FALSE'
+    ) {
+      return 'f';
+    }
+    return 'o';
   }
 
   getAllotmentDisplay(item: any): { label: string; color: string } {
