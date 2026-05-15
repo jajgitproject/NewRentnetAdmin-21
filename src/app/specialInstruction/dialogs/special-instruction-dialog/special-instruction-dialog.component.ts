@@ -105,6 +105,17 @@ export class SpecialInstructionDialogComponent
         
   }
 
+  get statusMessage(): string {
+    const s = this.status;
+    if (s == null || s === '') {
+      return '';
+    }
+    if (typeof s === 'string') {
+      return s;
+    }
+    return s.status ?? s.message ?? '';
+  }
+
   createContactForm(): FormGroup 
   {
     return this.fb.group(

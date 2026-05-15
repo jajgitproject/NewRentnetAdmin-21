@@ -22,9 +22,9 @@ import { map, startWith } from 'rxjs/operators';
   })
 
 export class InternalNoteDialogComponent {
-  saveDisabled:boolean=true;
-  buttonDisabled:boolean=false;
-  status: any;
+  isSaving = false;
+  buttonDisabled = false;
+  status = '';
   action: string;
   dialogTitle: string;
   advanceTableForm: FormGroup;
@@ -61,18 +61,37 @@ export class InternalNoteDialogComponent {
    
     }
     
-    this.status=data?.status?.status || data?.status || data;
-    // if(this.status!='Changes allow'){
-    //   this.buttonDisabled=true;
-    // }
-    if(this.status === 'Changes allow'){
-    this.buttonDisabled = false;  // Save button enable
-} else {
-    this.buttonDisabled = true;   // Save button disable
-}
-   
+    this.status = this.resolveStatus(data);
+    this.buttonDisabled = !this.isChangesAllowed();
     this.advanceTableForm = this.createContactForm();
   }
+
+  get statusMessage(): string {
+    return this.status || '';
+  }
+
+  private resolveStatus(data: any): string {
+    try {
+      const raw = data?.status?.status ?? data?.status ?? data ?? '';
+      if (typeof raw === 'string') {
+        return raw.trim();
+      }
+      if (raw && typeof raw.status === 'string') {
+        return raw.status.trim();
+      }
+      if (raw && typeof raw.message === 'string') {
+        return raw.message.trim();
+      }
+      return '';
+    } catch {
+      return '';
+    }
+  }
+
+  private isChangesAllowed(): boolean {
+    return (this.status || '').toLowerCase().trim() === 'changes allow';
+  }
+
   public ngOnInit(): void
   {
    this.InitEmployee(); 
@@ -110,68 +129,116 @@ export class InternalNoteDialogComponent {
   onNoClick(): void {
     this.dialogRef.close();
   }
+  private resolveEmployeeIdForSave(): number | null {
+    const selected = Number(this.reservationBillingInstructionByEmployeesID);
+    if (selected > 0) {
+      return selected;
+    }
+    const existing = Number(this.advanceTable?.reservationInternalNoteByEmployeeID);
+    if (existing > 0) {
+      return existing;
+    }
+    const loggedIn = Number(this._generalService.getUserID());
+    return loggedIn > 0 ? loggedIn : null;
+  }
+
+  private patchEmployeeIdForSave(): boolean {
+    const employeeId = this.resolveEmployeeIdForSave();
+    if (!employeeId) {
+      this.showNotification(
+        'snackbar-danger',
+        'Unable to resolve employee for Internal Note By. Please select an employee or sign in again.',
+        'bottom',
+        'center'
+      );
+      return false;
+    }
+    this.advanceTableForm.patchValue({ reservationInternalNoteByEmployeeID: employeeId });
+    return true;
+  }
+
   public Post(): void {
-    this.advanceTableForm.patchValue({reservationID:this.ReservationID});
-    this.advanceTableForm.patchValue({reservationInternalNoteByEmployeeID:this.reservationBillingInstructionByEmployeesID });
+    if (!this.patchEmployeeIdForSave()) {
+      this.isSaving = false;
+      return;
+    }
+    this.advanceTableForm.patchValue({ reservationID: this.ReservationID });
     this.advanceTableService.add(this.advanceTableForm.getRawValue())
       .subscribe(
         response => {
-
-
           this.showNotification(
             'snackbar-success',
             'Internal Note Created...!!!',
             'bottom',
             'center'
           );
-          this.saveDisabled=true; 
-          //this._generalService.sendUpdate('InternalNoteCreate:InternalNoteView:Success');//To Send Updates  
-          this.dialogRef.close();
-
+          this.isSaving = false;
+          this.dialogRef.close(true);
         },
         error => {
-          this.showNotification(
-            'snackbar-danger',
-            'Operation Failed...!!!',
-            'bottom',
-            'center'
-          );
-          this.saveDisabled=true; 
-          //this._generalService.sendUpdate('InternalNoteAll:InternalNoteView:Failure');//To Send Updates  
+          const msg =
+            error?.error?.message ||
+            (typeof error?.error === 'string' ? error.error : null) ||
+            'Operation Failed...!!!';
+          this.showNotification('snackbar-danger', msg, 'bottom', 'center');
+          this.isSaving = false;
         }
-      )
+      );
   }
   public Put(): void {
-    this.advanceTableForm.patchValue({reservationID:this.advanceTable.reservationID});
-    this.advanceTableForm.patchValue({reservationInternalNoteByEmployeeID:this.reservationBillingInstructionByEmployeesID || this.advanceTable.reservationInternalNoteByEmployeeID});
+    if (!this.patchEmployeeIdForSave()) {
+      this.isSaving = false;
+      return;
+    }
+    this.advanceTableForm.patchValue({ reservationID: this.advanceTable.reservationID });
 
     this.advanceTableService.update(this.advanceTableForm.getRawValue())
       .subscribe(
         response => {
-          
            this.showNotification(
             'snackbar-success',
             'Internal Note Updated...!!!',
             'bottom',
             'center'
-          );//To Send Updates 
-          this.saveDisabled=true; 
-          this.dialogRef.close(); 
+          );
+          this.isSaving = false;
+          this.dialogRef.close(true);
         },
         error => {
-          //this._generalService.sendUpdate('InternalNoteAll:InternalNoteView:Failure');//To Send Updates  
-          this.showNotification(
-            'snackbar-danger',
-            'Operation Failed...!!!',
-            'bottom',
-            'center'
-          );
-          this.saveDisabled=true; 
+          const msg =
+            error?.error?.message ||
+            (typeof error?.error === 'string' ? error.error : null) ||
+            'Operation Failed...!!!';
+          this.showNotification('snackbar-danger', msg, 'bottom', 'center');
+          this.isSaving = false;
         }
-      )
+      );
   }
+  onSaveClick(): void {
+    if (this.buttonDisabled) {
+      this.showNotification(
+        'snackbar-warning',
+        this.statusMessage || 'Changes are not allowed for this reservation.',
+        'bottom',
+        'center'
+      );
+      return;
+    }
+    if (this.advanceTableForm.invalid) {
+      this.advanceTableForm.markAllAsTouched();
+      this.showNotification(
+        'snackbar-warning',
+        'Please complete required fields.',
+        'bottom',
+        'center'
+      );
+      return;
+    }
+    this.confirmAdd();
+  }
+
    public confirmAdd(): void {
-    this.saveDisabled=false;
+    this.isSaving = true;
       if(this.action=="edit")
        {
         this.Put();
@@ -189,7 +256,9 @@ export class InternalNoteDialogComponent {
       data =>   
       {
         this.EmployeeList = data; 
-        this.advanceTableForm.controls['reservationInternalNoteByEmployee'].setValidators([Validators.required,this.InternalNoteByEmployeeValidator(this.EmployeeList)]);
+        this.advanceTableForm.controls['reservationInternalNoteByEmployee'].setValidators([
+          this.InternalNoteByEmployeeValidator(this.EmployeeList),
+        ]);
         this.advanceTableForm.controls['reservationInternalNoteByEmployee'].updateValueAndValidity();
         this.filteredCreatedByOptionss = this.advanceTableForm.controls['reservationInternalNoteByEmployee'].valueChanges.pipe(
           startWith(""),
@@ -201,8 +270,14 @@ export class InternalNoteDialogComponent {
 
   InternalNoteByEmployeeValidator(EmployeeList: any[]): ValidatorFn {
       return (control: AbstractControl): ValidationErrors | null => {
-        const value = control.value?.toLowerCase();
-        const match = EmployeeList.some(data => ((data.firstName + ' ' + data.lastName).toLowerCase()) === value );
+        const raw = control.value;
+        if (!raw || String(raw).trim() === '') {
+          return null;
+        }
+        const value = String(raw).toLowerCase();
+        const match = EmployeeList.some(
+          (data) => ((data.firstName + ' ' + data.lastName).toLowerCase()) === value
+        );
         return match ? null : { reservationInternalNoteByEmployeeInvalid: true };
       };
     }

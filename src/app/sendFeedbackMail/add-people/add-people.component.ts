@@ -101,8 +101,8 @@ export class AddPeopleComponent implements OnInit {
       } else if(this.selectedValue === 'number') {
         this.formDataArray.push({
           primaryMobile: this.advanceTableForm.get('numberMobile')?.value,
-          primaryEmail: this.advanceTableForm.get('numberEmail')?.value,
-          customerPersonName: this.advanceTableForm.value,
+          primaryEmail: this.advanceTableForm.get('numberEmail')?.value || '',
+          customerPersonName: this.advanceTableForm.get('name')?.value || '',
           type: this.advanceTableForm.controls['addPeople'].value
         });
       }

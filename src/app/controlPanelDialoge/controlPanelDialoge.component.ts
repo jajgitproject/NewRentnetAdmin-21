@@ -104,6 +104,7 @@ import { ControlPanelDialogeService } from './controlPanelDialoge.service';
 import { PrintBlankDutySlipComponent } from '../PrintBlankDutySlip/PrintBlankDutySlip.component';
 import { DutySlipAccentureComponent } from '../dutySlipAccenture/dutySlipAccenture.component';
 import { CancelReservationAndAllotmentComponent } from '../cancelReservationAndAllotment/cancelReservationAndAllotment.component';
+import { editPickupTimeFormDialogComponent } from '../changePickupTime/dialogs/dialogDetails/dialogDetails.component';
 import { FormDialogComponentIL } from '../integrationLog/dialogs/form-dialog/form-dialog.component';
 import { LocationOutTimeEditComponent } from '../reservation/dialogs/locationOutTimeEdit/locationOutTimeEdit.component';
 import { AllotmentLogDetailsComponent } from '../allotmentLogDetails/AllotmentLogDetails.component';
@@ -596,6 +597,29 @@ export class ControlPanelDialogeComponent {
           {
             advanceTable: item,
             customerID: item.customerID,
+            status: this.status
+          }
+        });
+      dialogRef.afterClosed().subscribe((res: any) => { 
+        this.loadData(item.reservationID, i);
+      });
+    }, item.reservationID);
+  }
+
+
+
+   editPickupTimeDetails(item,i) {
+    console.log(item.stopsDetails[0])
+    this.fetchStatusAndOpen(() => {
+      const dialogRef = this.dialog.open(editPickupTimeFormDialogComponent,
+        {
+          width: '520px',
+          maxWidth: '96vw',
+          data:
+          {
+            action: 'edit',
+           advanceTable: item.stopsDetails[0],
+           reservationID: item.reservationID,
             status: this.status
           }
         });

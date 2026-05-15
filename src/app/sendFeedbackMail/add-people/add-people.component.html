@@ -184,20 +184,14 @@
                     <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12 mb-2">
                         <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
                             <mat-label>Name</mat-label>
-                            <input #mobilenoInput matInput formControlName="name" required>
-                            <mat-error *ngIf="advanceTableForm.get('name')?.hasError('required')">
-                                Name is required
-                            </mat-error>
+                            <input matInput formControlName="name">
                         </mat-form-field>
                     </div> 
 
                     <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12 mb-2" >
                         <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
-                            <mat-label> Email</mat-label>
-                            <input #mobilenoInput matInput formControlName="numberEmail" required>
-                            <mat-error *ngIf="advanceTableForm.get('numberEmail')?.hasError('required')">
-                                PrimaryEmail is required
-                            </mat-error>
+                            <mat-label>Email</mat-label>
+                            <input matInput formControlName="numberEmail">
                         </mat-form-field>
                     </div>
                 </ng-container>

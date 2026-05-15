@@ -21,26 +21,26 @@ import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatMenuModule } from '@angular/material/menu';
 import { MyUploadComponent } from '../myupload/myupload.component';
 import { MyUploadModule } from '../myupload/myupload.module';
-import { ControlPanelDialogeComponent } from './controlPanelDialoge.component';
-import { ControlPanelDialogeRoutingModule } from './controlPanelDialoge-routing.module';
-import { CancelReservationAndAllotmentService } from '../cancelReservationAndAllotment/cancelReservationAndAllotment.service';
-import { EmailInfoService } from '../EmailInfo/EmailInfo.service';
-import { IntegrationLogService } from '../integrationLog/integrationLog.service';
-import { ControlPanelDialogEntriesModule } from './control-panel-dialog-entries.module';
-import { AllotmentLogDetailsModule } from '../allotmentLogDetails/allotmentLogDetails.module';
-import{ChangePickupTimeService} from '../changePickupTime/changePickupTime.service';
-import { ChangePickupTimeModule } from '../changePickupTime/changePickupTime.module';
+import { AdvanceService } from '../advance/advance.service';
+import { MatAutocompleteModule } from '@angular/material/autocomplete';
+import { GeneralService } from '../general/general.service';
+import { ChangePickupTimeRoutingModule } from './changePickupTime-routing.module';
+import { ChangePickupTimeComponent } from './changePickupTime.component';
+import { ChangePickupTimeService } from './changePickupTime.service';
+import { editPickupTimeFormDialogComponent } from './dialogs/dialogDetails/dialogDetails.component';
 
+import { GooglePlaceModule } from '@compat/google-places-shim';
 @NgModule({
   declarations: [
-    ControlPanelDialogeComponent
+    editPickupTimeFormDialogComponent,
+    ChangePickupTimeComponent
   ],
-  exports: [ControlPanelDialogeComponent, ControlPanelDialogEntriesModule],
   imports: [
+    
     CommonModule,
     FormsModule,
     ReactiveFormsModule,
-    ControlPanelDialogeRoutingModule,
+    ChangePickupTimeRoutingModule,
     MatTableModule,
     MatPaginatorModule,
     MatFormFieldModule,
@@ -59,12 +59,12 @@ import { ChangePickupTimeModule } from '../changePickupTime/changePickupTime.mod
     MatMenuModule,
     MatProgressSpinnerModule,
     MyUploadModule,
-    ControlPanelDialogEntriesModule,
-    AllotmentLogDetailsModule,
-    ChangePickupTimeModule
+    MatAutocompleteModule,
+    GooglePlaceModule
   ],
-  providers: [CancelReservationAndAllotmentService,EmailInfoService,ChangePickupTimeService ]
+  exports: [ChangePickupTimeComponent, editPickupTimeFormDialogComponent],
+  providers: [ChangePickupTimeService]
 })
-export class ControlPanelDialogeModule {}
+export class ChangePickupTimeModule {}
 
 

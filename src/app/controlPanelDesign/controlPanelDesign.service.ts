@@ -81,6 +81,15 @@ export class ControlPanelDesignService {
     );
   }
 
+  /** Latest SMS/WhatsApp MessageStatus per reservation (batch). */
+  getReservationMessagingLatestStatus(reservationIds: number[]): Observable<any> {
+    const body = { reservationIds: reservationIds || [] };
+    return this.httpClient.post(
+      this.API_URL + 'getReservationMessagingLatestStatus',
+      body
+    );
+  }
+
 
   getReservationDetails(reservationID:any): Observable<any> {    
     return this.httpClient.get(this.API_URL +'getReservationDetails' +'/' +reservationID);

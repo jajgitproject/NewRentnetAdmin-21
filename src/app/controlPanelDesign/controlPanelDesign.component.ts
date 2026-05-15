@@ -1,5 +1,5 @@
 // @ts-nocheck
-import { Component, ElementRef, EventEmitter, Input, OnInit, Output, ViewChild, ViewEncapsulation } from '@angular/core';
+import { Component, ChangeDetectorRef, ElementRef, EventEmitter, Input, OnInit, Output, ViewChild, ViewEncapsulation } from '@angular/core';
 import { ControlPanelDesignService } from './controlPanelDesign.service';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { MatDialog, MatDialogRef } from '@angular/material/dialog';
@@ -301,7 +301,8 @@ export class ControlPanelDesignComponent implements OnInit {
     public interstateTaxEntryService:InterstateTaxEntryService,
     public passToSupplierService: PassToSupplierService,
     public dutyPostPickUPCallService: DutyPostPickUPCallService,
-    public controlPanelDialogeService:ControlPanelDialogeService
+    public controlPanelDialogeService:ControlPanelDialogeService,
+    private cdr: ChangeDetectorRef
   ) {
     this._filters = new Filters({});
     this.filterForm = this.createFilterForm();
@@ -3269,6 +3270,136 @@ openDropOffByExectiveGPS(item: any)
     {
       return 'notDone';
     }
+  }
+
+  getControlPanelMessagingHeaderDisplay(row: any): {
+    successBadges: string[];
+    failedBadges: string[];
+    otherParts: string[];
+    tooltip: string;
+  } {
+    const sms = this.readCpMessagingField(row, 'latestSmsMessageStatus', 'LatestSmsMessageStatus');
+    const smsDet = this.readCpMessagingField(row, 'latestSmsMessageStatusDetails', 'LatestSmsMessageStatusDetails');
+    const wa = this.readCpMessagingField(row, 'latestWhatsAppMessageStatus', 'LatestWhatsAppMessageStatus');
+    const waDet = this.readCpMessagingField(row, 'latestWhatsAppMessageStatusDetails', 'LatestWhatsAppMessageStatusDetails');
+
+    const successBadges: string[] = [];
+    const failedBadges: string[] = [];
+    const otherParts: string[] = [];
+
+    this.appendCpMessagingBadge('SMS', sms, successBadges, failedBadges, otherParts);
+    this.appendCpMessagingBadge('WA', wa, successBadges, failedBadges, otherParts);
+
+    const tooltipParts: string[] = [];
+    const smsLine = this.formatCpMessagingTooltipLine('SMS', sms, smsDet);
+    if (smsLine) {
+      tooltipParts.push(smsLine);
+    }
+    const waLine = this.formatCpMessagingTooltipLine('WhatsApp', wa, waDet);
+    if (waLine) {
+      tooltipParts.push(waLine);
+    }
+
+    return {
+      successBadges,
+      failedBadges,
+      otherParts,
+      tooltip: tooltipParts.join('\n'),
+    };
+  }
+
+  private formatCpMessagingTooltipLine(label: string, status: string, details: string): string {
+    if (!status) {
+      return '';
+    }
+    const st = status.trim();
+    const det = details?.trim() || '';
+    if (det && det.localeCompare(st, undefined, { sensitivity: 'accent' }) !== 0) {
+      return `${label}: ${st} — ${det}`;
+    }
+    return `${label}: ${st}`;
+  }
+
+  private readCpMessagingField(row: any, camel: string, pascal: string): string {
+    if (!row) {
+      return '';
+    }
+    const v = row[camel] ?? row[pascal];
+    if (v === null || v === undefined) {
+      return '';
+    }
+    return String(v).trim();
+  }
+
+  /** Accepted → S, Delivered → D for compact header badges. */
+  private getMessagingStatusLetter(raw: string): 'S' | 'D' | null {
+    if (!raw) {
+      return null;
+    }
+    const u = raw.trim().toUpperCase();
+    if (u === 'ACCEPTED') {
+      return 'S';
+    }
+    if (u === 'DELIVERED') {
+      return 'D';
+    }
+    return null;
+  }
+
+  private appendCpMessagingBadge(
+    prefix: 'SMS' | 'WA',
+    status: string,
+    successBadges: string[],
+    failedBadges: string[],
+    otherParts: string[]
+  ): void {
+    if (!status) {
+      return;
+    }
+    const letter = this.getMessagingStatusLetter(status);
+    if (letter) {
+      successBadges.push(`${prefix}-${letter}`);
+      return;
+    }
+    const cat = this.classifyMessagingStatus(status);
+    if (cat === 's') {
+      successBadges.push(`${prefix}-S`);
+    } else if (cat === 'f') {
+      failedBadges.push(`${prefix}-F`);
+    } else if (cat === 'o') {
+      otherParts.push(`${prefix}:${status}`);
+    }
+  }
+
+  private classifyMessagingStatus(raw: string): 'n' | 's' | 'f' | 'o' {
+    if (!raw) {
+      return 'n';
+    }
+    const u = raw.toUpperCase();
+    if (u === 'OK' || u === 'CREATED' || u === 'SENT' || u === 'READ') {
+      return 's';
+    }
+    if (/^\d{3}$/.test(u)) {
+      const code = parseInt(u, 10);
+      if (code >= 200 && code < 300) {
+        return 's';
+      }
+      if (code >= 400) {
+        return 'f';
+      }
+      return 'o';
+    }
+    if (
+      u.includes('FAIL') ||
+      u.includes('ERROR') ||
+      u.includes('UNDELIVER') ||
+      u.includes('INVALID') ||
+      u.includes('REJECT') ||
+      u === 'FALSE'
+    ) {
+      return 'f';
+    }
+    return 'o';
   }
 
   getAllotmentDisplay(item: any): { label: string; color: string } {

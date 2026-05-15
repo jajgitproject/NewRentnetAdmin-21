@@ -22,6 +22,7 @@ import { FormControl } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { NewDuplicateDialogComponent } from './dialogs/new-duplicate-dialog/new-duplicate-dialog.component';
 import { DuplicateWithRangeDialogComponent } from './dialogs/duplicate-with-range-dialog/duplicate-with-range-dialog.component';
+import { EmailInfoComponent } from '../EmailInfo/EmailInfo.component';
 @Component({
   standalone: false,
   selector: 'app-reservationGroupDetails',
@@ -266,6 +267,36 @@ export class ReservationGroupDetailsComponent implements OnInit {
     //   customerGroupID:encryptedCustomerGroupID                 
     // } }));
     // window.open(this._generalService.FormURL+ url, '_blank');
+  }
+
+  emailInfo(item?: any): void {
+    const row =
+      item ??
+      (this.dataSource && this.dataSource.length ? this.dataSource[0] : null);
+    const reservationID = row?.reservationID ?? null;
+    const reservationGroupID =
+      row?.reservationGroupID ??
+      this.reservationGroupID ??
+      this.advanceTable?.reservationGroupID ??
+      null;
+
+    if (!reservationID && !reservationGroupID) {
+      this.showNotification(
+        'snackbar-warning',
+        'No reservation found for email format.',
+        'bottom',
+        'center'
+      );
+      return;
+    }
+
+    this.dialog.open(EmailInfoComponent, {
+      data: {
+        reservationID,
+        reservationGroupID,
+        advanceTable: row ?? this.advanceTable,
+      },
+    });
   }
 
   edit(row, bookingCount: any) {

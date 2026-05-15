@@ -1628,6 +1628,23 @@
                             <i class="fas fa-female" style="color: #d69fa6; font-size: large"
                               *ngIf="data.gender == 'Female'" matTooltip="Female"></i>
                             <br>
+                            <ng-container *ngIf="getControlPanelMessagingHeaderDisplay(data) as cpMsg">
+                            <span *ngIf="cpMsg.successBadges.length || cpMsg.failedBadges.length || cpMsg.otherParts.length"
+                              [matTooltip]="cpMsg.tooltip"
+                              [matTooltipDisabled]="!cpMsg.tooltip"
+                              matTooltipShowDelay="200"
+                              style="display: block; line-height: 1.35;">
+                              <ng-container *ngFor="let b of cpMsg.successBadges">
+                                <span class="cp-msg-badge cp-msg-badge--ok">{{ b }}</span>
+                              </ng-container>
+                              <ng-container *ngFor="let b of cpMsg.failedBadges">
+                                <span class="cp-msg-badge cp-msg-badge--fail">{{ b }}</span>
+                              </ng-container>
+                              <ng-container *ngFor="let p of cpMsg.otherParts">
+                                <span class="cp-msg-badge cp-msg-badge--other">{{ p }}</span>
+                              </ng-container>
+                            </span>
+                            </ng-container>
                             <span *ngIf="data.internalNoteModel !== null" matTooltip="Internal Note"> IN </span>
                             <br>
                             <span *ngIf="data.supplierAddress !== null"> P2S </span>
