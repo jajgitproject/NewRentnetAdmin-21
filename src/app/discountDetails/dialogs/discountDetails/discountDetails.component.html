@@ -21,17 +21,7 @@
     <div mat-dialog-content>
         <form class="register-form m-4" [formGroup]="advanceTableForm" (ngSubmit)="submit">
             <div class="row">
-                <div class="col-xl-6 col-l66 col-md-12 col-sm-12 mb-2">
-                    <section>
-                        <mat-checkbox formControlName="isAllowedOnPackageRate">Package Rate</mat-checkbox>
-                    </section>
-                </div>
-
-                <div class="col-xl-6 col-l66 col-md-12 col-sm-12 mb-2">
-                    <section>
-                        <mat-checkbox formControlName="isAllowedOnExtras">Extras</mat-checkbox>
-                    </section>
-                </div>
+                
 
                 <div class="col-12">
                     <mat-error *ngIf="advanceTableForm.hasError('atLeastOneRequired') && advanceTableForm.touched">
@@ -44,14 +34,50 @@
                 <div class="col-xl-6 col-lg-12 col-md-12 col-sm-12 mb-2">
                     <mat-form-field class="example-full-width" appearance="outline"  floatLabel="always">
                         <mat-label>Discount Percentage</mat-label>
-                        <input matInput (keypress)="keyPressNumbersDecimal($event)" formControlName="discountPercentage" required>
-                        <mat-error *ngIf="advanceTableForm.get('discountPercentage').hasError('required')">
+                        <input matInput (keypress)="keyPressNumbersDecimal($event)" formControlName="discountPercentage">
+                        <mat-error *ngIf="advanceTableForm.get('discountPercentage').hasError('atLeastOneRequiredNotBoth')">
                             Discount Percentage On Package is required
                         </mat-error>
                     </mat-form-field>
                 </div>
 
-                <div class=" col-xl-6 col-lg-12 col-md-12 col-sm-12 mb-2">
+                <div class="col-xl-3 col-lg-3 col-md-12 col-sm-12 mb-2">
+                    <section>
+                        <mat-checkbox formControlName="isAllowedOnPackageRate">Package Rate</mat-checkbox>
+                    </section>
+                </div>
+
+                <div class="col-xl-3 col-lg-3 col-md-12 col-sm-12 mb-2">
+                    <section>
+                        <mat-checkbox formControlName="isAllowedOnExtras">Extras</mat-checkbox>
+                    </section>
+                </div>
+                   
+            </div>
+
+            <div class="row">
+                <span>
+                    ------------------------------------------------------ OR ----------------------------------------------------
+                </span>
+            </div>
+
+            <br>
+            <br>
+
+            <div class="row">
+                 <div class="col-xl-6 col-lg-12 col-md-12 col-sm-12 mb-2">
+                    <mat-form-field class="example-full-width" appearance="outline"  floatLabel="always">
+                        <mat-label>Fixed Discount Amount</mat-label>
+                        <input matInput  formControlName="fixedAmountDiscount">
+                        <mat-error *ngIf="advanceTableForm.get('fixedAmountDiscount').hasError('atLeastOneRequiredNotBoth')">
+                            Fixed Amount Discount On Package is required
+                        </mat-error>
+                    </mat-form-field>
+                </div>
+            </div>
+
+          <div class="row">
+            <div class=" col-xl-6 col-lg-12 col-md-12 col-sm-12 mb-2">
                     <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
                         <mat-label>Discount Approved By</mat-label>
                         <input required  type="text" matInput formControlName="discountApprovedByEmployee" [matAutocomplete]="auto5">
@@ -65,10 +91,8 @@
                             Please select a valid Discount Approved By
                         </mat-error>                 
                     </mat-form-field>
-                </div>    
-            </div>
+                </div> 
 
-          <div class="row">
             <div class="col-xl-6 col-lg-12 col-md-12 col-sm-12 mb-2">
                 <mat-label>
                     Attachment
@@ -82,8 +106,10 @@
                     <app-myupload (onUploadFinished)="uploadFinished($event)"></app-myupload>
                 </div>
             </div> 
+          </div>
 
-            <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+          <div class="row">
+             <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
                 <mat-form-field class="example-full-width" appearance="outline"  floatLabel="always">
                     <mat-label>Activation Status</mat-label>
                     <mat-select formControlName="activationStatus">
@@ -96,7 +122,6 @@
                     </mat-error>
                 </mat-form-field>
             </div> 
-
           </div>
             <div class="row">
                 <!-- <div class="row" *ngIf="status">

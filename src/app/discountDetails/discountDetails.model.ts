@@ -12,6 +12,7 @@ export class DiscountDetails {
   discountApprovedByEmployee:string;
   activationStatus:boolean;
   userID: number;
+  fixedAmountDiscount:number;
   constructor(discountDetails) {
     {
        this.reservationDiscountID = discountDetails.reservationDiscountID || -1;
@@ -22,6 +23,7 @@ export class DiscountDetails {
        this.isAllowedOnExtras = discountDetails.isAllowedOnExtras || '';
        this.discountApprovedByEmployeeID = discountDetails.discountApprovedByEmployeeID || '';
        this.attachment = discountDetails.attachment || '';
+       this.fixedAmountDiscount = discountDetails.fixedAmountDiscount || '';
     }
   }
   

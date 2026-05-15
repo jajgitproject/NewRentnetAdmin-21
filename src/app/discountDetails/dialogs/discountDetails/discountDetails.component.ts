@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { Component, Inject } from '@angular/core';
 import { DiscountDetailsService } from '../../discountDetails.service';
@@ -14,6 +13,7 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 import { ActivatedRoute } from '@angular/router';
 import { atLeastOneRequired } from './atLeastOneRequired.component';
 import Swal from 'sweetalert2';
+import { atLeastOneRequiredNotBoth } from './atLeastOneRequiredNotBoth.component';
 
 @Component({
   standalone: false,
@@ -97,16 +97,17 @@ export class DiscountDetailsDialogComponent
     return this.fb.group(
     {
       reservationDiscountID: [this.advanceTable.reservationDiscountID],
-       reservationID: [this.ReservationID || 0],
-       allotmentID: [this.AllotmentID || 0],
+      reservationID: [this.ReservationID || 0],
+      allotmentID: [this.AllotmentID || 0],
       activationStatus: [this.advanceTable.activationStatus],
-      discountPercentage: [this.advanceTable.discountPercentage],
+      discountPercentage: [this.advanceTable.discountPercentage || null],
+      fixedAmountDiscount: [this.advanceTable.fixedAmountDiscount || null],
       isAllowedOnPackageRate: [this.advanceTable.isAllowedOnPackageRate || null],
       isAllowedOnExtras: [this.advanceTable.isAllowedOnExtras || null],
       discountApprovedByEmployeeID: [this.advanceTable.discountApprovedByEmployeeID],
       attachment:[this.advanceTable.attachment],
       discountApprovedByEmployee:[this.advanceTable.discountApprovedByEmployee]      
-    }, { validator: atLeastOneRequired });
+    }, { validator: atLeastOneRequiredNotBoth });
   }
   InitEmployee(){
     this._generalService.GetEmployeesForVehicleCategory().subscribe

@@ -44,13 +44,30 @@ export class DiscountDetailsService
 
   add(advanceTable: DiscountDetails) 
   {
+    debugger
     advanceTable.reservationDiscountID=-1;
     advanceTable.userID=this.generalService.getUserID();
+    if(advanceTable.discountPercentage === 0 || advanceTable.discountPercentage === undefined || advanceTable.discountPercentage === null)
+    {
+      advanceTable.discountPercentage = 0;
+    }
+    if(advanceTable.fixedAmountDiscount === 0 || advanceTable.fixedAmountDiscount === undefined || advanceTable.fixedAmountDiscount === null)
+    {
+      advanceTable.fixedAmountDiscount = 0;
+    }
     return this.httpClient.post<any>(this.API_URL , advanceTable);
   }
   update(advanceTable: DiscountDetails)
   {
     advanceTable.userID=this.generalService.getUserID();
+    if(advanceTable.discountPercentage === 0 || advanceTable.discountPercentage === undefined || advanceTable.discountPercentage === null)
+    {
+      advanceTable.discountPercentage = 0;
+    }
+    if(advanceTable.fixedAmountDiscount === 0 || advanceTable.fixedAmountDiscount === undefined || advanceTable.fixedAmountDiscount === null)
+    {
+      advanceTable.fixedAmountDiscount = 0;
+    }
     return this.httpClient.put<any>(this.API_URL , advanceTable);
   }
   delete(reservationDiscountID: number):  Observable<any> 

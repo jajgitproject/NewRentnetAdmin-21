@@ -602,8 +602,13 @@
           <span></span>
         </div>
 
-        <div class="gst-row" *ngIf="dataSource?.invoiceDiscountModel?.discountPercentage">
-          <strong>Total Discount @ {{dataSource?.invoiceDiscountModel?.discountPercentage}} %</strong>
+        <div class="gst-row" *ngIf="dataSource?.invoiceDiscountModel?.discountAmountOnPackage">
+          <strong *ngIf="dataSource?.invoiceDiscountModel?.discountPercentage > 0">
+            Total Discount @ {{dataSource?.invoiceDiscountModel?.discountPercentage}} %
+          </strong>
+          <strong *ngIf="dataSource?.invoiceDiscountModel?.fixedAmountDiscount > 0">
+            Total Discount (Fixed Discount : {{dataSource?.invoiceDiscountModel?.fixedAmountDiscount}})
+          </strong>
           <span *ngIf="dataSource?.invoiceDiscountModel?.discountAmountOnPackage!=0 
                             || dataSource?.invoiceDiscountModel?.discountAmountOnExtraKM!=0 
                             || dataSource?.invoiceDiscountModel?.discountAmountOnExtraHour!=0">

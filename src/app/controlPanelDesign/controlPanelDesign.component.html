@@ -103,25 +103,26 @@
                 <mat-label>Trip Status</mat-label>
                 <mat-select panelClass="control-panel-select-panel" [panelWidth]="null" formControlName="tripStatus">
                   <mat-option value="All">All</mat-option>
-                  <mat-option value="Not Dispatched">Not Dispatched</mat-option>
-                  <mat-option value="Not Dispatched And Delayed">Not Dispatched And Delayed</mat-option>
+                  <mat-option value="Accepted">Accepted</mat-option>
+                  <mat-option value="NotAccepted">Not Accepted</mat-option>
+                  <!-- <mat-option value="Not Dispatched">Not Dispatched</mat-option>
+                  <mat-option value="Not Dispatched And Delayed">Not Dispatched And Delayed</mat-option> -->
                   <mat-option value="Dispatched">Dispatched</mat-option>
                   <mat-option value="Dispatched But Delayed">Dispatched But Delayed</mat-option>
-                  <mat-option value="Dispatched But Not Reached">Dispatched But Not Reached</mat-option>
-                  <mat-option value="Dispatched But Not Reached And Delayed">Dispatched But Not Reached And
-                    Delayed</mat-option>
+                  <!-- <mat-option value="Dispatched But Not Reached">Dispatched But Not Reached</mat-option>
+                  <mat-option value="Dispatched But Not Reached And Delayed">Dispatched But Not Reached And Delayed</mat-option> -->
                   <mat-option value="Reached">Reached</mat-option>
                   <mat-option value="Reached And Delayed">Reached And Delayed</mat-option>
                   <!-- <mat-option value="Dispatched But Not Picked Up">Dispatched But Not Picked Up</mat-option> -->
-                  <mat-option value="Reached But Not Picked Up">Reached But Not Picked Up</mat-option>
-                  <mat-option value="Picked Up">Picked Up</mat-option>
-                  <mat-option value="Picked Up And Delayed">Picked Up And Delayed</mat-option>
-                  <mat-option value="PickedUp and Not Dropped">PickedUp and Not Dropped Off</mat-option>
+                  <!-- <mat-option value="Reached But Not Picked Up">Reached But Not Picked Up</mat-option> -->
+                  <mat-option value="Picked Up">Trip Started</mat-option>
+                  <!-- <mat-option value="Picked Up And Delayed">Picked Up And Delayed</mat-option>
+                  <mat-option value="PickedUp and Not Dropped">PickedUp and Not Dropped Off</mat-option> -->
                   <mat-option value="Dropped Off">Dropped Off</mat-option>
-                  <mat-option value="Dropped and Not GarageIn">Dropped Off and Not GarageIn</mat-option>
-                  <mat-option value="Garage In">Garage In</mat-option>
+                  <!-- <mat-option value="Dropped and Not GarageIn">Dropped Off and Not GarageIn</mat-option> -->
+                  <!-- <mat-option value="Garage In">Garage In</mat-option> -->
                   <mat-option value="Closed">Closed</mat-option>
-                  <mat-option value="UnClosed">UnClosed</mat-option>
+                  <!-- <mat-option value="UnClosed">UnClosed</mat-option> -->
                 </mat-select>
               </mat-form-field>
             </div>
@@ -502,6 +503,14 @@
                 </mat-autocomplete>
               </mat-form-field>
             </div>
+
+            <div class="col-xl-2 col-lg-2 col-md-2 col-sm-12 mb-2">
+              <mat-form-field class="example-full-width cp-quick-search-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
+                <mat-label>Ticket Number</mat-label>
+                <input matInput formControlName="ticketNumb" />
+              </mat-form-field>
+            </div>
+
           </div>
 
           <div class="row">
@@ -1041,7 +1050,7 @@
                     class="col-12 d-flex align-items-center justify-content-between control-panel-toolbar control-panel-header-col"
                     style="flex-wrap: nowrap;">
                     <!-- Left Section -->
-                    <div class="d-flex align-items-center" style="flex: 1 1 auto; min-width: 0;">
+                    <!-- <div class="d-flex align-items-center" style="flex: 1 1 auto; min-width: 0;">
                       <div class="d-flex align-items-center booking-category-wrap">
                         <span class="booking-category-static-label">Booking Category ({{totalData}})</span>
                         <mat-form-field class="example-full-width mr-4 booking-category-field cp-booking-category-field" appearance="fill"
@@ -1059,7 +1068,7 @@
                           </mat-select>
                         </mat-form-field>
                       </div>
-                    </div>
+                    </div> -->
 
                     <!-- Right Section -->
                     <div class="d-flex align-items-center justify-content-end control-panel-actions"
@@ -1193,6 +1202,32 @@
                   <span style="
                       font-size: 12px;
                       text-align: left;
+                      width: 100px;
+                      float: left;cursor: pointer;" (click)="sortByColumnName('pickupDate')"
+                    [ngClass]="{'active-sort': sortColumn === 'pickupDate'}">
+                    <b>Pickup Date/
+                      <br />
+                      Releasing Date</b>
+                    <i class="fas"
+                      [ngClass]="{'fa-arrow-up': sortColumn === 'pickupDate' && sortDirection === 'asc',
+                                                'fa-arrow-down': sortColumn === 'pickupDate' && sortDirection === 'desc'}"></i>
+                  </span>
+
+                  <span style="
+                      font-size: 12px;
+                      text-align: left;
+                      width: 100px;
+                      float: left;cursor: pointer;" (click)="sortByColumnName('locationOutTime')"
+                    [ngClass]="{'active-sort': sortColumn === 'locationOutTime'}">
+                    <b>Location Out Time</b>
+                    <i class="fas"
+                      [ngClass]="{'fa-arrow-up': sortColumn === 'locationOutTime' && sortDirection === 'asc',
+                                                'fa-arrow-down': sortColumn === 'locationOutTime' && sortDirection === 'desc'}"></i>
+                  </span>
+
+                  <span style="
+                      font-size: 12px;
+                      text-align: left;
                       width: 120px;
                       float: left;cursor: pointer;" (click)="sortByColumnName('transferedToLocationName')"
                     [ngClass]="{'active-sort': sortColumn === 'transferedToLocationName'}">
@@ -1231,55 +1266,20 @@
                   </span>
 
                   <span style="
-                  font-size: 12px;
-                  text-align: left;
-                  width: 100px;
-                  float: left;cursor: pointer;" (click)="sortByColumnName('appCarStatus')"
-                    [ngClass]="{'active-sort': sortColumn === 'appCarStatus'}">
-                    <b>Tracking Status</b>
-                    <i class="fas"
-                      [ngClass]="{'fa-arrow-up': sortColumn === 'appCarStatus' && sortDirection === 'asc',
-                                            'fa-arrow-down': sortColumn === 'appCarStatus' && sortDirection === 'desc'}"></i>
-                  </span>
-
-                  <span style="
                       font-size: 12px;
                       text-align: left;
                       width: 150px;
                       float: left;cursor: pointer;" (click)="sortByColumnName('registrationNumber')"
                     [ngClass]="{'active-sort': sortColumn === 'registrationNumber'}">
-                    <b>Car No-
-                      <br />
-                      Car Sent-/ driver</b>
+                    <b>Car No - Car Sent
+                      <br>
+                       Driver - Car Booked</b>
                     <i class="fas"
                       [ngClass]="{'fa-arrow-up': sortColumn === 'registrationNumber' && sortDirection === 'asc',
                                                 'fa-arrow-down': sortColumn === 'registrationNumber' && sortDirection === 'desc'}"></i>
                   </span>
 
-                  <span style="
-                      font-size: 12px;
-                      text-align: left;
-                      width: 100px;
-                      float: left;cursor: pointer;" (click)="sortByColumnName('pickupDate')"
-                    [ngClass]="{'active-sort': sortColumn === 'pickupDate'}">
-                    <b>Pickup Date/
-                      <br />
-                      Releasing Date</b>
-                    <i class="fas"
-                      [ngClass]="{'fa-arrow-up': sortColumn === 'pickupDate' && sortDirection === 'asc',
-                                                'fa-arrow-down': sortColumn === 'pickupDate' && sortDirection === 'desc'}"></i>
-                  </span>
-                  <span style="
-                      font-size: 12px;
-                      text-align: left;
-                      width: 100px;
-                      float: left;cursor: pointer;" (click)="sortByColumnName('locationOutTime')"
-                    [ngClass]="{'active-sort': sortColumn === 'locationOutTime'}">
-                    <b>Location Out Time</b>
-                    <i class="fas"
-                      [ngClass]="{'fa-arrow-up': sortColumn === 'locationOutTime' && sortDirection === 'asc',
-                                                'fa-arrow-down': sortColumn === 'locationOutTime' && sortDirection === 'desc'}"></i>
-                  </span>
+                  
                   <span style="
                   font-size: 12px;
                   text-align: left;
@@ -1291,6 +1291,22 @@
                       [ngClass]="{'fa-arrow-up': sortColumn === 'passengerName' && sortDirection === 'asc',
                                             'fa-arrow-down': sortColumn === 'passengerName' && sortDirection === 'desc'}"></i>
                   </span>
+
+                  <span style="
+                      font-size: 12px;
+                      text-align: left;
+                      width: 140px;
+                      float: left;cursor: pointer;" (click)="sortByColumnName('pickupAddress')"
+                    [ngClass]="{'active-sort': sortColumn === 'pickupAddress'}">
+                    <b>Pickup Address/<br />
+                      Releasing Address
+                    </b>
+                    <i class="fas"
+                      [ngClass]="{'fa-arrow-up': sortColumn === 'pickupAddress' && sortDirection === 'asc',
+                                                'fa-arrow-down': sortColumn === 'pickupAddress' && sortDirection === 'desc'}"></i>
+                  </span>
+
+
                   <span style="
                   font-size: 12px;
                   text-align: left;
@@ -1327,20 +1343,6 @@
                   </span>
 
                   <span style="
-                      font-size: 12px;
-                      text-align: left;
-                      width: 140px;
-                      float: left;cursor: pointer;" (click)="sortByColumnName('pickupAddress')"
-                    [ngClass]="{'active-sort': sortColumn === 'pickupAddress'}">
-                    <b>Pickup Address/<br />
-                      Releasing Address
-                    </b>
-                    <i class="fas"
-                      [ngClass]="{'fa-arrow-up': sortColumn === 'pickupAddress' && sortDirection === 'asc',
-                                                'fa-arrow-down': sortColumn === 'pickupAddress' && sortDirection === 'desc'}"></i>
-                  </span>
-
-                  <span style="
                   font-size: 12px;
                   text-align: left;
                   width: 100px;
@@ -1374,19 +1376,6 @@
                     <i class="fas"
                       [ngClass]="{'fa-arrow-up': sortColumn === 'tripType' && sortDirection === 'asc',
                                             'fa-arrow-down': sortColumn === 'tripType' && sortDirection === 'desc'}"></i>
-                  </span>
-
-
-                  <span style="
-                  font-size: 12px;
-                  text-align: left;
-                  width: 100px;
-                  float: left;cursor: pointer;" (click)="sortByColumnName('vehicle')"
-                    [ngClass]="{'active-sort': sortColumn === 'vehicle'}">
-                    <b>Car Booked</b>
-                    <i class="fas"
-                      [ngClass]="{'fa-arrow-up': sortColumn === 'vehicle' && sortDirection === 'asc',
-                                            'fa-arrow-down': sortColumn === 'vehicle' && sortDirection === 'desc'}"></i>
                   </span>
 
                   
@@ -1438,9 +1427,45 @@
                   <span style="
                   font-size: 12px;
                   text-align: left;
-                  width: 250px;
+                  width: 200px;
                   float: left;cursor: pointer;">
                     <b>Duty Status</b>
+                  </span>
+
+                   <span style="
+                  font-size: 12px;
+                  text-align: left;
+                  width: 100px;
+                  float: left;cursor: pointer;" (click)="sortByColumnName('appCarStatus')"
+                    [ngClass]="{'active-sort': sortColumn === 'appCarStatus'}">
+                    <b>Tracking Status</b>
+                    <i class="fas"
+                      [ngClass]="{'fa-arrow-up': sortColumn === 'appCarStatus' && sortDirection === 'asc',
+                                            'fa-arrow-down': sortColumn === 'appCarStatus' && sortDirection === 'desc'}"></i>
+                  </span>
+
+                  <span style="
+                  font-size: 12px;
+                  text-align: left;
+                  width: 100px;
+                  float: left;cursor: pointer;" (click)="sortByColumnName('ticketNumber')"
+                    [ngClass]="{'active-sort': sortColumn === 'ticketNumber'}">
+                    <b>Ticket Number</b>
+                    <i class="fas"
+                      [ngClass]="{'fa-arrow-up': sortColumn === 'ticketNumber' && sortDirection === 'asc',
+                                            'fa-arrow-down': sortColumn === 'ticketNumber' && sortDirection === 'desc'}"></i>
+                  </span>
+
+                  <span style="
+                  font-size: 12px;
+                  text-align: left;
+                  width: 100px;
+                  float: left;cursor: pointer;" (click)="sortByColumnName('qcCheckedByExecutivePassed')"
+                    [ngClass]="{'active-sort': sortColumn === 'qcCheckedByExecutivePassed'}">
+                    <b>QC Status</b>
+                    <i class="fas"
+                      [ngClass]="{'fa-arrow-up': sortColumn === 'qcCheckedByExecutivePassed' && sortDirection === 'asc',
+                                            'fa-arrow-down': sortColumn === 'qcCheckedByExecutivePassed' && sortDirection === 'desc'}"></i>
                   </span>
 
                   <!-- <span style="
@@ -1625,6 +1650,29 @@
                                 <br/>
                                 {{ data.reservationEndDate | date : 'dd-MMM-yyyy'}} -->
                           </span>
+
+                          <span style="font-size: 12px;text-align: left;width: 100px;float: left;">
+                            {{ data.pickupDate | date : 'dd-MMM-yy' }}
+                            {{ data.pickupTime ? (data.pickupTime | date : 'H:mm') : 'TNC' }}
+                            <br />
+                            {{ data.dropOffDate | date : 'dd-MMM-yy' }}
+                            {{ data.dropOffTime | date : 'H:mm' }}
+                          </span>
+
+                          <span style="font-size: 12px;text-align: left;width: 100px;float: left;">
+                            <ng-container *ngIf="data.garageOutDate; else noData">
+                              {{ data.garageOutDate | date : 'dd-MMM-yy' }}
+                              {{ data.garageOutTime | date : 'H:mm' }}
+                            </ng-container>
+
+                            <ng-template #noData>
+                              N/A
+                            </ng-template>
+                            <br />
+                            {{ data.locationOutDate | date : 'dd-MMM-yy' }}
+                            {{ data.locationOutTime | date : 'H:mm' }}
+                          </span>
+
                           <span style="
                                   font-size: 12px;
                                   text-align: left;
@@ -1653,7 +1701,6 @@
                               *ngIf="(data.reservationStatus === 'Confirmed' || data.reservationStatus === 'Cancelled')"
                               [ngStyle]="{color: data.reservationStatus === 'Confirmed' || data.reservationStatus === 'Cancelled' ? 'green' : 'red'}">
                               {{ data.reservationStatus || 'N/A' }}
-
                             </span>
                             <!-- <span *ngIf="(data.reservationStatus === 'Confirmed'  || data.reservationStatus === 'Cancelled')" 
                             [ngStyle]="{color: AllotmentOnTime(data) === 'onTime' || AllotmentOnTime(data) === 'late' ? 'green' :
@@ -1705,58 +1752,19 @@
                             </span>
                           </span>
 
-                          <span style="font-size: 12px;text-align: left;width: 100px;float: left;">
-                            {{ data.carStatus || 'N/A' }}
-                          </span>
-
-                          <span style="
-                                  font-size: 12px;
-                                  text-align: left;
-                                  width: 150px;
-                                  float: left;">
-                            {{data.registrationNumber ? data.registrationNumber: 'N/A'}} - {{data.carSent ?
-                            data.carSent: 'N/A'}}
+                          <span style="font-size: 12px;text-align: left;width: 150px;float: left;">
+                            {{data.registrationNumber ? data.registrationNumber: 'N/A'}} - {{data.carSent ? data.carSent: 'N/A'}}
                             <br />
                             <!-- {{data.vehicle!=="" ? data.vehicle : 'N/A'}} -->
 
                             <!-- <br />
                             {{data.inventoryOwnedSupplied!=="" ? data.inventoryOwnedSupplied: 'N/A'}} -->
 
-                            {{data.driverName ? data.driverName: 'N/A'}} - {{data.driverPhone ? data.driverPhone:
-                            'N/A'}}
+                            {{data.driverName ? data.driverName: 'N/A'}} - {{data.driverPhone ? data.driverPhone:'N/A'}}
+                            <br>
+                            {{data.vehicle !=="" ? data.vehicle: 'N/A'}}
                           </span>
 
-                          <span style="
-                          font-size: 12px;
-                          text-align: left;
-                          width: 100px;
-                          float: left;
-                        ">
-                            {{ data.pickupDate | date : 'dd-MMM-yy' }}
-                            {{ data.pickupTime ? (data.pickupTime | date : 'H:mm') : 'TNC' }}
-                            <br />
-                            {{ data.dropOffDate | date : 'dd-MMM-yy' }}
-                            {{ data.dropOffTime | date : 'H:mm' }}
-                          </span>
-
-                          <span style="
-                          font-size: 12px;
-                          text-align: left;
-                          width: 100px;
-                          float: left;
-                        ">
-                            <ng-container *ngIf="data.garageOutDate; else noData">
-                              {{ data.garageOutDate | date : 'dd-MMM-yy' }}
-                              {{ data.garageOutTime | date : 'H:mm' }}
-                            </ng-container>
-
-                            <ng-template #noData>
-                              N/A
-                            </ng-template>
-                            <br />
-                            {{ data.locationOutDate | date : 'dd-MMM-yy' }}
-                            {{ data.locationOutTime | date : 'H:mm' }}
-                          </span>
 
                           <span style="
                   font-size: 12px;
@@ -1767,11 +1775,18 @@
                             {{ data.passengerName !=="" ? data.passengerName: 'N/A'}}
                             <br />
                             {{ data.gender !=="" ? data.gender: 'N/A'}}
-                            <!-- <br />
-                            {{ data.primaryMobile !=="" ? data.primaryMobile: 'N/A'}}
                             <br />
+                            {{ data.primaryMobile !=="" ? data.primaryMobile: 'N/A'}}
+                            <!-- <br />
                             {{ data.primaryEmail !=="" ? data.primaryEmail: 'N/A'}} -->
                           </span>
+
+                          <span style="font-size: 12px;text-align: left;width: 140px;float: left;">
+                            {{data.pickupAddress!=="" ? (data.pickupAddressDetails + ' ' + data.pickupAddress):'N/A'}}
+                            <hr>
+                            {{data.dropOffAddress !=="" ? ((data.dropOffAddressDetails || '') + ' ' + (data.pickupAddress || '')).trim(): 'N/A'}}
+                          </span>
+
 
                           <span style="
                                   font-size: 12px;
@@ -1798,35 +1813,19 @@
                                 ">{{data.pickupCity !=="" ? data.pickupCity: 'N/A'}}
                           </span>
 
-                          <span style="
-                                  font-size: 12px;
-                                  text-align: left;
-                                  width: 140px;
-                                  float: left;
-                                ">
-                            {{data.pickupAddress!=="" ? (data.pickupAddressDetails + ' ' + data.pickupAddress):'N/A'}}
-                            <hr>
-                            {{data.dropOffAddress !=="" ? ((data.dropOffAddressDetails || '') + ' ' + (data.pickupAddress || '')).trim(): 'N/A'}}
+                          <span style="font-size: 12px;text-align: left;width: 100px;float: left;">
+                            <span *ngFor="let sp of data.specialInstruction;">
+                              {{sp.specialInstruction!=="" ? sp.specialInstruction: 'N/A'}}
+                            </span>
                           </span>
-
-                          <span style="
-                          font-size: 12px;
-                          text-align: left;
-                          width: 100px;
-                          float: left;
-                        " *ngIf="data.specialInstruction;"><span
-                              *ngFor="let sp of data.specialInstruction;">{{sp.specialInstruction!=="" ?
-                              sp.specialInstruction: 'N/A'}}</span>
-
-                          </span>
-                          <span style="
+                          <!-- <span style="
                           font-size: 12px;
                           text-align: left;
                           width: 100px;
                           float: left;
                         " *ngIf="!data.specialInstruction;"><span>N/A</span>
 
-                          </span>
+                          </span> -->
 
                           <span style="
                                   font-size: 12px;
@@ -1844,20 +1843,13 @@
                                 ">{{data.tripType !=="" ? data.tripType: 'N/A'}}
                           </span>
 
-                          <span style="
-                                  font-size: 12px;
-                                  text-align: left;
-                                  width: 100px;
-                                  float: left;
-                                ">{{data.vehicle !=="" ? data.vehicle: 'N/A'}}
-                          </span>
                           
                           <span style="
                                   font-size: 12px;
                                   text-align: left;
                                   width: 100px;
                                   float: left;">
-                            {{data.inventoryOwnedSupplied ? data.inventoryOwnedSupplied: 'N/A'}}
+                            {{data.inventoryOwnedSupplied !=="" ? data.inventoryOwnedSupplied: 'N/A'}}
                           </span>
                           <span style="
                                   font-size: 12px;
@@ -1866,14 +1858,14 @@
                                   float: left;">
                             {{data.modeOfPayment!=="" ? data.modeOfPayment: 'N/A'}}
                           </span>
-                          <span style="
+                          <!-- <span style="
                           font-size: 12px;
                           text-align: left;
                           width: 100px;
                           float: left;
                         ">
                             {{ data.reservationStartDate | date : 'dd-MMM-yy' }}
-                          </span>
+                          </span> -->
                           <span style="
                           font-size: 12px;
                           text-align: left;
@@ -1883,12 +1875,25 @@
                             {{ data.bookingType!=="" ? data.bookingType: 'N/A' }}
                           </span>
 
-                          <span style="font-size: 12px;text-align: left;width: 250px;float: left;">
+                          <span style="font-size: 12px;text-align: left;width: 200px;float: left;">
                             Verified : {{ data.verifyDuty === null ? 'N/A' : (data.verifyDuty === true ? 'Yes' : 'No') }}
                             <br>
                             GoodForBilling : {{ data.goodForBilling == null ? 'N/A' : (data.goodForBilling === true ? 'Yes' : 'No') }}
                             <br>
                             Billed : {{ data.invoiceID === null ? 'N/A' : (data.invoiceID !== 0 ? 'Yes' : 'No') }}
+                          </span>
+
+
+                          <span style="font-size: 12px;text-align: left;width: 100px;float: left;">
+                            {{ data.carStatus || 'N/A' }}
+                          </span>
+
+                          <span style="font-size: 12px;text-align: left;width: 100px;float: left;">
+                            {{ data.ticketNumber || 'N/A' }}
+                          </span>
+
+                          <span style="font-size: 12px;text-align: left;width: 100px;float: left;">
+                            {{ data.qcCheckedByExecutivePassed == null ? 'N/A' : (data.qcCheckedByExecutivePassed === true ? 'QC Approved' : 'QC Rejected') }}
                           </span>
 
                           <!-- <span style="font-size: 12px; text-align: left; width: 130px;float: left;"> -->

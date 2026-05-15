@@ -428,6 +428,7 @@ export class Filters {
   carType:string;
   emailtosupplier:string;
   tncStatus:string;
+  ticketNumb:string;
   constructor(filter) { 
     this.tripStatus = filter.tripStatus || '';
     this.userID = filter.userID || '';

@@ -554,6 +554,7 @@ export class ControlPanelDesignComponent implements OnInit {
       modeOfPayment: [this._filters.modeOfPayment],
       emailtosupplier: [this._filters.emailtosupplier],
       tncStatus: [this._filters.tncStatus],
+      ticketNumb: [this._filters.ticketNumb],
     });
   }
 
