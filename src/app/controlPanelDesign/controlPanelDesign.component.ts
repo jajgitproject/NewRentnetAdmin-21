@@ -744,8 +744,6 @@ export class ControlPanelDesignComponent implements OnInit {
         
           });
 
-            this.loadMessagingLatestForHeaderRows();
-
             if (rowIndex !== undefined)
             {
               this.isExpanded[rowIndex] = true;
@@ -3273,57 +3271,6 @@ openDropOffByExectiveGPS(item: any)
     }
   }
 
-  private loadMessagingLatestForHeaderRows(): void {
-    const rows = this.reservationHeaderInfo;
-    if (!rows || rows.length === 0) {
-      return;
-    }
-    const ids = [
-      ...new Set(
-        rows
-          .map((r: any) => Number(r?.reservationID ?? r?.ReservationID))
-          .filter((id) => !isNaN(id) && id > 0)
-      ),
-    ];
-    if (ids.length === 0) {
-      return;
-    }
-    this._controlPanelDesignService.getReservationMessagingLatestStatus(ids).subscribe(
-      (raw: any) => {
-        let list = raw;
-        if (typeof list === 'string') {
-          try {
-            list = JSON.parse(list);
-          } catch {
-            list = [];
-          }
-        }
-        const items = Array.isArray(list) ? list : [];
-        const byId = new Map<number, any>();
-        items.forEach((x: any) => {
-          const id = Number(x?.reservationId ?? x?.reservationID ?? x?.ReservationID);
-          if (!isNaN(id) && id > 0) {
-            byId.set(id, x);
-          }
-        });
-        rows.forEach((row: any) => {
-          const id = Number(row?.reservationID ?? row?.ReservationID);
-          const m = byId.get(id);
-          if (m) {
-            row.latestSmsMessageStatus = m.latestSmsMessageStatus ?? m.LatestSmsMessageStatus;
-            row.latestSmsMessageStatusDetails =
-              m.latestSmsMessageStatusDetails ?? m.LatestSmsMessageStatusDetails;
-            row.latestWhatsAppMessageStatus = m.latestWhatsAppMessageStatus ?? m.LatestWhatsAppMessageStatus;
-            row.latestWhatsAppMessageStatusDetails =
-              m.latestWhatsAppMessageStatusDetails ?? m.LatestWhatsAppMessageStatusDetails;
-          }
-        });
-        this.cdr.markForCheck();
-      },
-      () => {}
-    );
-  }
-
   getControlPanelMessagingHeaderDisplay(row: any): {
     successBadges: string[];
     failedBadges: string[];
@@ -3343,11 +3290,13 @@ openDropOffByExectiveGPS(item: any)
     this.appendCpMessagingBadge('WA', wa, successBadges, failedBadges, otherParts);
 
     const tooltipParts: string[] = [];
-    if (sms) {
-      tooltipParts.push(`SMS: ${sms}${smsDet ? ' — ' + smsDet : ''}`);
+    const smsLine = this.formatCpMessagingTooltipLine('SMS', sms, smsDet);
+    if (smsLine) {
+      tooltipParts.push(smsLine);
     }
-    if (wa) {
-      tooltipParts.push(`WhatsApp: ${wa}${waDet ? ' — ' + waDet : ''}`);
+    const waLine = this.formatCpMessagingTooltipLine('WhatsApp', wa, waDet);
+    if (waLine) {
+      tooltipParts.push(waLine);
     }
 
     return {
@@ -3356,6 +3305,18 @@ openDropOffByExectiveGPS(item: any)
       otherParts,
       tooltip: tooltipParts.join('\n'),
     };
+  }
+
+  private formatCpMessagingTooltipLine(label: string, status: string, details: string): string {
+    if (!status) {
+      return '';
+    }
+    const st = status.trim();
+    const det = details?.trim() || '';
+    if (det && det.localeCompare(st, undefined, { sensitivity: 'accent' }) !== 0) {
+      return `${label}: ${st} — ${det}`;
+    }
+    return `${label}: ${st}`;
   }
 
   private readCpMessagingField(row: any, camel: string, pascal: string): string {
