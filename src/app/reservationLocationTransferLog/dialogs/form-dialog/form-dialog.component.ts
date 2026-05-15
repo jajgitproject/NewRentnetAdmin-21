@@ -35,6 +35,7 @@ export class FormDialogComponent
   TransferName: any;
     status: string = '';
   buttonDisabled: boolean = false;
+  saveButtonDisabled: boolean = false;
   dataSource: ReservationLocationTransferLogModel | null;
 
   public TransferedToLocationNameList?: OrganizationalEntityDropDown[] = [];
@@ -60,6 +61,10 @@ export class FormDialogComponent
           //this.dialogTitle ='Reservation Location Transfer';       
           this.advanceTable = data.advanceTable;
           this.ReservationID = data.reservationID;
+          this.allotmentStatus = data.allotmentStatus;
+          if(data.allotmentStatus==='Alloted'){
+            this.saveButtonDisabled = true;
+          }
             // Extract and normalize status, control button state
     this.status = this.extractStatus(data?.status);
     const normalized = (this.status || '').toLowerCase().trim();

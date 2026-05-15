@@ -12,6 +12,10 @@
                         style="color:rgb(150, 4, 4);font-style: italic; margin-bottom:12px;">
                         ({{status}}!!!!)
                     </div>
+                    <div *ngIf="allotmentStatus === 'Alloted'"
+                        style="color:rgb(150, 4, 4);font-style: italic; margin-bottom:12px;">
+                        (This booking cannot be transferred as Driver/Car allocation is done!!!!)
+                    </div>
                 </div>
             </div>
         </div>
@@ -118,7 +122,7 @@
                 <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12 mb-2">
                     <div class="example-button-row">
                         <button mat-raised-button color="primary" *ngIf="saveDisabled" [type]="submit"
-                            [disabled]="!advanceTableForm.valid || buttonDisabled" (click)="confirmAdd()">Save</button>
+                            [disabled]="!advanceTableForm.valid || buttonDisabled || saveButtonDisabled" (click)="confirmAdd()">Save</button>
                         <mat-spinner *ngIf="!saveDisabled" diameter="30"></mat-spinner>
                         <button *ngIf="action==='edit'" mat-raised-button color="warn" (click)="onNoClick()"
                             tabindex="-1">Cancel</button>

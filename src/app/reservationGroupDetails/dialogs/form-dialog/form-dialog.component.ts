@@ -383,7 +383,7 @@ export class FormDialogComponent implements OnInit {
       customerGroupID: [this.advanceTable.customerGroupID],
       // reservationStartDate:[this.advanceTable.reservationStartDate],
       // reservationEndDate:[this.advanceTable.reservationEndDate],
-      numberOfBookings: [this.advanceTable.numberOfBookings],
+      numberOfBookings: [1],
       reservationExecutiveID: [this.advanceTable.reservationExecutiveID],
       salesExecutiveID: [this.advanceTable?.salesExecutiveID],
       salesExecutive: [this.advanceTable.salesExecutive],

@@ -484,7 +484,7 @@ export class ControlPanelDialogeComponent {
     });
   }
   //--------- Transfer Location Popup ----------
-  TransferLocation(reservationID: number, i: any) {
+   TransferLocation(reservationID: number, i: any,item: any) {
      this.fetchStatusAndOpen(() => {
     const dialogRef = this.dialog.open(FormDialogComponentTransferLocation,
       {
@@ -492,7 +492,8 @@ export class ControlPanelDialogeComponent {
         {
           reservationID: reservationID,
           action: 'edit',
-          status: this.status
+          status: this.status,
+          allotmentStatus: item.allotmentStatus
 
         }
       });

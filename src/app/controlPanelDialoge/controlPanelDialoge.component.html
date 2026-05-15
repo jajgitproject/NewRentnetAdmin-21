@@ -356,7 +356,7 @@
                     </mat-icon>
                   </b>
                   <mat-menu #menu30="matMenu">
-                    <a mat-menu-item (click)="TransferLocation(item.reservationID,i)" target="_blank"
+                    <a mat-menu-item (click)="TransferLocation(item.reservationID,i,item)" target="_blank"
                       rel="noreferrer noopener" [disabled]="ReservationStatus === 'Cancelled'">
                       Transfer Location
                     </a>
