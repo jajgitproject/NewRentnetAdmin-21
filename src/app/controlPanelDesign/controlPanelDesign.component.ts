@@ -3339,23 +3339,8 @@ openDropOffByExectiveGPS(item: any)
     const failedBadges: string[] = [];
     const otherParts: string[] = [];
 
-    const smsCat = this.classifyMessagingStatus(sms);
-    if (smsCat === 's') {
-      successBadges.push('SMS-S');
-    } else if (smsCat === 'f') {
-      failedBadges.push('SMS-F');
-    } else if (smsCat === 'o') {
-      otherParts.push(`SMS:${sms}`);
-    }
-
-    const waCat = this.classifyMessagingStatus(wa);
-    if (waCat === 's') {
-      successBadges.push('WA-S');
-    } else if (waCat === 'f') {
-      failedBadges.push('WA-F');
-    } else if (waCat === 'o') {
-      otherParts.push(`WA:${wa}`);
-    }
+    this.appendCpMessagingBadge('SMS', sms, successBadges, failedBadges, otherParts);
+    this.appendCpMessagingBadge('WA', wa, successBadges, failedBadges, otherParts);
 
     const tooltipParts: string[] = [];
     if (sms) {
@@ -3384,12 +3369,52 @@ openDropOffByExectiveGPS(item: any)
     return String(v).trim();
   }
 
+  /** Accepted → S, Delivered → D for compact header badges. */
+  private getMessagingStatusLetter(raw: string): 'S' | 'D' | null {
+    if (!raw) {
+      return null;
+    }
+    const u = raw.trim().toUpperCase();
+    if (u === 'ACCEPTED') {
+      return 'S';
+    }
+    if (u === 'DELIVERED') {
+      return 'D';
+    }
+    return null;
+  }
+
+  private appendCpMessagingBadge(
+    prefix: 'SMS' | 'WA',
+    status: string,
+    successBadges: string[],
+    failedBadges: string[],
+    otherParts: string[]
+  ): void {
+    if (!status) {
+      return;
+    }
+    const letter = this.getMessagingStatusLetter(status);
+    if (letter) {
+      successBadges.push(`${prefix}-${letter}`);
+      return;
+    }
+    const cat = this.classifyMessagingStatus(status);
+    if (cat === 's') {
+      successBadges.push(`${prefix}-S`);
+    } else if (cat === 'f') {
+      failedBadges.push(`${prefix}-F`);
+    } else if (cat === 'o') {
+      otherParts.push(`${prefix}:${status}`);
+    }
+  }
+
   private classifyMessagingStatus(raw: string): 'n' | 's' | 'f' | 'o' {
     if (!raw) {
       return 'n';
     }
     const u = raw.toUpperCase();
-    if (u === 'OK' || u === 'CREATED' || u === 'SENT' || u === 'DELIVERED' || u === 'READ') {
+    if (u === 'OK' || u === 'CREATED' || u === 'SENT' || u === 'READ') {
       return 's';
     }
     if (/^\d{3}$/.test(u)) {
