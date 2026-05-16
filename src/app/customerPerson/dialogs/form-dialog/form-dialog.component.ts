@@ -193,6 +193,7 @@ export class FormDialogComponentCustomerPerson
           this.advanceTable.activationStatus=true;
           this.advanceTable.maskMobileNumber=false;
           this.advanceTable.sendSMSWhatsApp=true;
+          this.advanceTable.sendEmail=true;
           this.advanceTable.preferAppBasedDriver=true;
           if(data.forCP==='CP')
           {
@@ -723,8 +724,8 @@ public Post(): void {
       isPassenger: true,
       isAdmin: false,
       maskMobileNumber: false,
-      sendSMSWhatsApp: false,
-      sendEmail: false,
+      sendSMSWhatsApp: true,
+      sendEmail: true,
       preferAppBasedDriver: false,
       loyalGuest: false,
       password: null,
