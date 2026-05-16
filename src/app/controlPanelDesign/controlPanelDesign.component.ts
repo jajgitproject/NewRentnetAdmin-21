@@ -232,7 +232,7 @@ export class ControlPanelDesignComponent implements OnInit {
   //sortBy:string='Reservation.ReservationID';
   sortBy:string='Reservation.PickupDate, Reservation.PickupTime ';
   orderBy:string='ASC';
-  bookingCategory:string='Confirmed';
+  bookingCategory:string='complete';
   showDataPage: boolean = false;
 
   public advanceTableRLT:ReservationLocationTransferLogModel | null;
@@ -506,7 +506,7 @@ export class ControlPanelDesignComponent implements OnInit {
       vendorTripNumber: [this._filters.vendorTripNumber],
       tripStatus: [this._filters.tripStatus],
       qualityStatus: [this._filters.qualityStatus],
-      reservationStatus: [this._filters.reservationStatus],
+      reservationStatus: [this._filters.reservationStatus || 'Confirmed'],
       allotmentStatus: [this._filters.allotmentStatus],
       billingStatus: [this._filters.billingStatus],
       delays: [this._filters.delays],
@@ -698,7 +698,6 @@ export class ControlPanelDesignComponent implements OnInit {
 
   public loadDataForHeader(status:string,currentPage: number,pageSize: number,isLoading: boolean,rowIndex?: number)
   {
-    debugger
     if (this.selectedFilter === 'BookingNo')
     {
       this.filterForm.patchValue({ reservationID: this.searchTerm });
