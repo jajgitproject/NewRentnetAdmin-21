@@ -69,7 +69,8 @@ export class FormDialogComponent
       remark : [this.advanceTable.remark],
       canCreateReservation: [this.advanceTable.canCreateReservation,Validators.required],
       activationStatus: [this.advanceTable.activationStatus],
-    
+      isThisAKeyAccountManagerRole: [this.advanceTable.isThisAKeyAccountManagerRole],
+      canThisRoleCreateBackDateBooking: [this.advanceTable.canThisRoleCreateBackDateBooking]
     });
   }
   submit() 

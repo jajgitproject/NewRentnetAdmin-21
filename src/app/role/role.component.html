@@ -134,10 +134,23 @@
                                     <mat-cell *matCellDef="let row" (contextmenu)="onContextMenu($event, row)">
                                         {{row.remark}}</mat-cell>
                                 </ng-container>
-                                 <ng-container matColumnDef="canCreateReservation">
+
+                                <ng-container matColumnDef="canCreateReservation">
                                     <mat-header-cell *matHeaderCellDef mat-sort-header >Can Create Reservation</mat-header-cell>
                                     <mat-cell *matCellDef="let row" (contextmenu)="onContextMenu($event, row)">
                                         {{row.canCreateReservation=== true ? 'Yes' : 'No'}}</mat-cell>
+                                </ng-container>
+
+                                <ng-container matColumnDef="isThisAKeyAccountManagerRole">
+                                    <mat-header-cell *matHeaderCellDef mat-sort-header>KAM</mat-header-cell>
+                                    <mat-cell *matCellDef="let row" (contextmenu)="onContextMenu($event, row)">
+                                        {{(row.isThisAKeyAccountManagerRole === null) ? 'N/A' : (row.isThisAKeyAccountManagerRole=== true ? 'Yes' : 'No')}}</mat-cell>
+                                </ng-container>
+
+                                <ng-container matColumnDef="canThisRoleCreateBackDateBooking">
+                                    <mat-header-cell *matHeaderCellDef mat-sort-header >Back Date Booking</mat-header-cell>
+                                    <mat-cell *matCellDef="let row" (contextmenu)="onContextMenu($event, row)">
+                                        {{(row.canThisRoleCreateBackDateBooking === null) ? 'N/A' : (row.canThisRoleCreateBackDateBooking=== true ? 'Yes' : 'No')}}</mat-cell>
                                 </ng-container>
 
                                 <ng-container matColumnDef="status">

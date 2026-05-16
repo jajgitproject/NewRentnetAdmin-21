@@ -30,6 +30,8 @@ export class RoleComponent implements OnInit {
     'roleFor',
     'remark',
    'canCreateReservation',
+   'isThisAKeyAccountManagerRole',
+   'canThisRoleCreateBackDateBooking',
     'status',
     'pages',
     'actions'

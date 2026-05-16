@@ -1645,7 +1645,9 @@
                               </ng-container>
                             </span>
                             </ng-container>
-                            <span *ngIf="data.internalNoteModel !== null" matTooltip="Internal Note"> IN </span>
+                            <span *ngIf="data.specialInstruction !== null" matTooltip="Special Instruction"> SI </span>
+                            <br>
+                             <span *ngIf="data.internalNoteModel !== null" matTooltip="Internal Note"> IN </span>
                             <br>
                             <span *ngIf="data.supplierAddress !== null"> P2S </span>
                           </span>

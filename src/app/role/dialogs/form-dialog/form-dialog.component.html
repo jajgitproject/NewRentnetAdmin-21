@@ -62,6 +62,34 @@
     <div class="row">
       <div class="col-md-6 mb-3">
         <mat-form-field class="w-100" appearance="outline" floatLabel="always">
+          <mat-label>Is Key Account Manager Role</mat-label>
+          <mat-select required #isthis [class.is-invalid]="isthis.invalid && isthis.touched" formControlName="isThisAKeyAccountManagerRole">
+            <mat-option [value]="true">Yes</mat-option>
+            <mat-option [value]="false">No</mat-option>
+          </mat-select>
+          <mat-error *ngIf="advanceTableForm.get('isThisAKeyAccountManagerRole')?.hasError('required')">
+            Is This A Key Account Manager Role is required
+          </mat-error>
+        </mat-form-field>
+      </div>
+
+      <div class="col-md-6 mb-3">
+        <mat-form-field class="w-100" appearance="outline" floatLabel="always">
+          <mat-label>Can Create Back Date Booking</mat-label>
+          <mat-select required #canRoleDate [class.is-invalid]="canRoleDate.invalid && canRoleDate.touched" formControlName="canThisRoleCreateBackDateBooking">
+            <mat-option [value]="true">Yes</mat-option>
+            <mat-option [value]="false">No</mat-option>
+          </mat-select>
+          <mat-error *ngIf="advanceTableForm.get('canThisRoleCreateBackDateBooking')?.hasError('required')">
+            Can This Role Create Back Date Booking is required
+          </mat-error>
+        </mat-form-field>
+      </div>
+    </div>
+
+    <div class="row">
+      <div class="col-md-6 mb-3">
+        <mat-form-field class="w-100" appearance="outline" floatLabel="always">
           <mat-label>Activation Status</mat-label>
           <mat-select formControlName="activationStatus">
             <mat-option [value]="true">Active</mat-option>

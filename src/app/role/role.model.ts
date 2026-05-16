@@ -7,6 +7,8 @@ export class Role {
    remark: string;
    canCreateReservation: boolean;
    activationStatus: boolean;
+   isThisAKeyAccountManagerRole: boolean;
+   canThisRoleCreateBackDateBooking: boolean;
  
 
   constructor(role) {
@@ -17,6 +19,8 @@ export class Role {
        this.remark = role.remark  || '';
        this.activationStatus = role.activationStatus || '';
        this.canCreateReservation = role.canCreateReservation || '';
+       this.isThisAKeyAccountManagerRole = role.isThisAKeyAccountManagerRole || '';
+       this.canThisRoleCreateBackDateBooking = role.canThisRoleCreateBackDateBooking || '';
 
     }
   }

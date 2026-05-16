@@ -2846,7 +2846,7 @@ public validateONReservationGST(): boolean {
     this.advanceTableForm.patchValue({isTimeNotConfirmed:this.isTNCSelected});
     if (this.CustomerDetails()) 
     {
-      if(this.PickupDetails() && this.OtherDetails() || this.validateCustomerSpecificFields())
+      if(this.PickupDetails() && this.OtherDetails() && this.validateCustomerSpecificFields())
       {
         if(!this.advanceTableForm.value.dropOffPriorityOrder)
         {
@@ -2927,7 +2927,7 @@ public validateONReservationGST(): boolean {
     this.advanceTableForm.patchValue({isTimeNotConfirmed:this.isTNCSelected});
     if (this.CustomerDetails()) 
     {
-      if(this.PickupDetails() && this.OtherDetails() || this.validateCustomerSpecificFields())
+      if(this.PickupDetails() && this.OtherDetails() && this.validateCustomerSpecificFields())
       {
         if(!this.advanceTableForm.value.dropOffPriorityOrder)
           {

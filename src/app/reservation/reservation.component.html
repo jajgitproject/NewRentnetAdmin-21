@@ -957,6 +957,9 @@
                                     <input matInput formControlName="ticketNumber" (input)="onNumberInput($event)"
                                         required maxlength="12" minlength="12"
                                         pattern="[0-9]{12}" inputmode="numeric">
+                                    <mat-error *ngIf="advanceTableForm.get('ticketNumber')?.hasError('required')">
+                                        Ticket Number is required
+                                    </mat-error>
                                     <mat-error *ngIf="advanceTableForm.get('ticketNumber')?.hasError('pattern')">
                                         Ticket number must be 12 digits
                                     </mat-error>

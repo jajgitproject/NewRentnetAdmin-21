@@ -232,7 +232,7 @@ export class ControlPanelDesignComponent implements OnInit {
   //sortBy:string='Reservation.ReservationID';
   sortBy:string='Reservation.PickupDate, Reservation.PickupTime ';
   orderBy:string='ASC';
-  bookingCategory:string='complete';
+  bookingCategory:string='Confirmed';
   showDataPage: boolean = false;
 
   public advanceTableRLT:ReservationLocationTransferLogModel | null;
