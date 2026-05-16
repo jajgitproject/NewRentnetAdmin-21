@@ -40,16 +40,27 @@ export class MailToSupplier {
 }
 
 export class MailSupplier {
-  reservationID : number;
-  supplierEmail : string; 
-  cc : string;
-  userID : number;
+
+  reservationID: number;
+
+  supplierEmail: string;
+
+  cc: string;
+
+  userID: number;
+
+  emailContent: string;
 
   constructor(mailToSupplier: any) {
-    this.reservationID = mailToSupplier.reservationID || '';
+
+    this.reservationID = mailToSupplier.reservationID || 0;
+
     this.supplierEmail = mailToSupplier.supplierEmail || '';
+
     this.cc = mailToSupplier.cc || '';
-    this.userID = mailToSupplier.userID || '';
-    
+
+    this.userID = mailToSupplier.userID || 0;
+
+    this.emailContent = mailToSupplier.emailContent || '';
   }
 }

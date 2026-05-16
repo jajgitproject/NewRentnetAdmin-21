@@ -848,7 +848,7 @@ export class ControlPanelDialogeComponent {
   openMailToSupplier(reservationID: any) {
     const dialogRef = this.dialog.open(MTSFormDialogComponent,
       {
-        width: '60%',
+        width: '80%',
         height: '85%',
         data:
         {

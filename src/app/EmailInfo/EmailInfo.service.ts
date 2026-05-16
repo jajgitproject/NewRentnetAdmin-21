@@ -21,6 +21,11 @@ export class EmailInfoService
   {
     return this.httpClient.get(this.API_URL + '/GetEmailDetails/' + reservationID);
   }
+
+  getDataByID(reservationID: number):  Observable<any> 
+  {
+    return this.httpClient.get(this.API_URL + '/GetEmailDetailsByID/' + reservationID);
+  }
 }
   
 
