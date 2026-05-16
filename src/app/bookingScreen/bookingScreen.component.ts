@@ -3,6 +3,7 @@ import { Component, OnInit,} from '@angular/core';
 import { MAT_DATE_LOCALE } from '@angular/material/core';
 import { ActivatedRoute } from '@angular/router';
 import { GeneralService } from '../general/general.service';
+import { ReservationGroupDetailsService } from '../reservationGroupDetails/reservationGroupDetails.service';
 @Component({
   standalone: false,
   selector: 'app-bookingScreen',
@@ -16,7 +17,8 @@ export class BookingScreenComponent implements OnInit {
   ReservationGroupID: string;
   status: any;
   buttonDisabled: boolean = false;
-  constructor(public route:ActivatedRoute,public _generalService: GeneralService
+  constructor(public route:ActivatedRoute,public _generalService: GeneralService,
+     public reservationGroupDetailsService: ReservationGroupDetailsService,
   ) {}
   ngOnInit() 
   {
@@ -41,8 +43,20 @@ export class BookingScreenComponent implements OnInit {
       
         this.buttonDisabled = this.status !== 'Changes allow';
     });
+    this.getAllotmentStatus(this.ReservationID);
   }
-
+public getAllotmentStatus(ReservationID) {
+    this.reservationGroupDetailsService.getAllotmentStatus(ReservationID).subscribe
+      (
+        data => {
+          this.allotmentStatus = data.allotmentStatus;
+          console.log(data.allotmentStatus);
+          
+          
+        },
+        (error: HttpErrorResponse) => { this.allotmentStatus = null; }
+      );
+  }
  
 }
 

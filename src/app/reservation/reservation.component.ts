@@ -64,6 +64,7 @@ import { SpecialInstructionDetails } from '../specialInstructionDetails/specialI
 import { InternalNoteDetailsService } from '../internalNoteDetails/internalNoteDetails.service';
 import { InternalNoteDetails } from '../internalNoteDetails/internalNoteDetails.model';
 import { EmailInfoComponent } from '../EmailInfo/EmailInfo.component';
+import { ReservationGroupDetailsService } from '../reservationGroupDetails/reservationGroupDetails.service';
 
 @Component({
   standalone: false,
@@ -77,6 +78,7 @@ export class ReservationComponent implements OnInit {
   @Input() action:any;
   @Input() fromForm:any;
   @Input() status:any;
+  @Input() allotmentStatus:any;
   advanceTableFormEdit: FormGroup;
   advanceTable:Reservation;
   dataForReservationList:ModelForReservation | null;
@@ -362,6 +364,7 @@ advanceTableIN: InternalNoteDetails | null;
    advanceTableSI: SpecialInstructionDetails | null;
   ReservationStatus: string;
   locationOutIntervalInMinutes: number;
+  IsAlloted:boolean = false;
 
   constructor(
     public httpClient: HttpClient,
@@ -378,6 +381,7 @@ advanceTableIN: InternalNoteDetails | null;
     public _generalService: GeneralService,
      private specialInstructionDetailsService: SpecialInstructionDetailsService,
        public internalNoteDetailsService: InternalNoteDetailsService,
+       public reservationGroupDetailsService: ReservationGroupDetailsService,
   public settleRateService: SettledRateDetailsService,) 
     {      
       this.priorityValues = Array.from({ length: 100 }, (_, i) => i + 1);    
@@ -396,7 +400,7 @@ advanceTableIN: InternalNoteDetails | null;
     } else {
       this.buttonDisabled = false;
     }
-  
+    
     if(this.fromForm !=='newForm')
     {
       this.route.queryParams.subscribe(paramsData =>{
@@ -429,6 +433,9 @@ advanceTableIN: InternalNoteDetails | null;
 
         this.advanceTableForm.patchValue({customerGroupID:this.customerGroupID});
         this.advanceTableForm.patchValue({customerCustomerGroup:this.customerName + '-' + this.customerGroup});
+         const allotmentStatus = paramsData.allotmentStatus;
+         this.allotmentStatus = this._generalService.decrypt(decodeURIComponent(allotmentStatus));
+   
 
       if (encryptedReservationID) {
         this.ReservationID = this._generalService.decrypt(decodeURIComponent(encryptedReservationID));
@@ -518,6 +525,14 @@ advanceTableIN: InternalNoteDetails | null;
 
     const encryptedTransferedLocation = paramsData.transferedLocation;
     this.transferedLocation = this._generalService.decrypt(decodeURIComponent(encryptedTransferedLocation));
+    const allotmentStatus = paramsData.allotmentStatus;
+    this.allotmentStatus = this._generalService.decrypt(decodeURIComponent(allotmentStatus));
+    
+    console.log(this.allotmentStatus )
+    if(this.allotmentStatus === 'Alloted')
+    {
+   this.IsAlloted = true;
+    }
     //this.reservationID=paramsData.reservationID;
     //this.reservationGroupID=paramsData.reservationGroupID;
     //this.transferedLocationID = paramsData.transferedLocationID;
@@ -4887,6 +4902,7 @@ private isEditingAllowed(): boolean {
   
   return false;
 }
+
 }
 
 

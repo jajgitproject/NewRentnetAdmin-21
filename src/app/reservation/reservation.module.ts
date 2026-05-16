@@ -60,6 +60,7 @@ import { SettledRateDetailsComponent } from '../settledRateDetails/settledRateDe
 import { EmailInfoService } from '../EmailInfo/EmailInfo.service';
 import { EmailInfoModule } from '../EmailInfo/EmailInfo.module';
 import { LocationOutTimeEditComponent } from './dialogs/locationOutTimeEdit/locationOutTimeEdit.component';
+import { ReservationGroupDetailsService } from '../reservationGroupDetails/reservationGroupDetails.service';
 @NgModule({
   declarations: [
     ReservationComponent,
@@ -103,7 +104,7 @@ import { LocationOutTimeEditComponent } from './dialogs/locationOutTimeEdit/loca
   providers: [ReservationService,AddPassengersService,CustomerShortService,PersonShortService,ViewKAMService,
               CustomerPersonService,CustomerPersonAddressService, PassengerDetailsService,ReservationStopDetailsService,StopDetailsService,
               SpotInCityService,CityBasedSpotsService,ReservationGroupService,NewFormService,
-            SpecialInstructionService,InternalNoteDetailsService,SettledRateDetailsService,SpecialInstructionDetailsService,EmailInfoService]
+            SpecialInstructionService,ReservationGroupDetailsService,InternalNoteDetailsService,SettledRateDetailsService,SpecialInstructionDetailsService,EmailInfoService]
 })
 export class ReservationModule {}
 

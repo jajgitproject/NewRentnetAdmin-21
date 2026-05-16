@@ -673,7 +673,7 @@ export class ControlPanelDialogeComponent {
       window.open(this._generalService.FormURL + url, '_blank');
     }, item.reservationID);
   }
-  OpenBookingScreen(item) {
+ OpenBookingScreen(item) {
     
     // Fetch status first, then open booking screen
     this.clossingOneService.getVerifyDutydata(item.reservationID).subscribe(
@@ -694,14 +694,19 @@ export class ControlPanelDialogeComponent {
         this.openBookingScreenWithStatus(item, '');
       }
     );
-  }
   
+
+  }
+
+
+   
   openBookingScreenWithStatus(item: any, status: string) {
     const encryptedCustomerID = encodeURIComponent(this._generalService.encrypt(item.customerID.toString()));
     const encryptedCustomerName = encodeURIComponent(this._generalService.encrypt(item.customerName));
     const encryptedReservationGroupID = encodeURIComponent(this._generalService.encrypt(item.reservationGroupID.toString()));
     const encryptedReservationID = encodeURIComponent(this._generalService.encrypt(item.reservationID.toString()));
     const encryptedCustomerGroupID = encodeURIComponent(this._generalService.encrypt(item.customerGroupID.toString()));
+    const allotmentStatus = encodeURIComponent(this._generalService.encrypt(item.allotmentStatus));
     const encryptedAction = encodeURIComponent(this._generalService.encrypt('edit'));
     
     const queryParams: any = {
@@ -710,6 +715,7 @@ export class ControlPanelDialogeComponent {
       customerGroupID: encryptedCustomerGroupID,
       customerID: encryptedCustomerID,
       customerName: encryptedCustomerName,
+      allotmentStatus: allotmentStatus,
       action: encryptedAction
     };
     

@@ -28,6 +28,7 @@ import { ReservationComponent } from '../reservation/reservation.component';
 import { CustomerDepartmentService } from '../customerDepartment/customerDepartment.service';
 import { CustomerDesignationService } from '../customerDesignation/customerDesignation.service';
 import { MatDialogModule, MatDialogRef } from '@angular/material/dialog';
+import { ReservationGroupDetailsService } from '../reservationGroupDetails/reservationGroupDetails.service';
 //import { CustomerSpecificDialogComponent } from '../customerSpecificFields/dialogs/customer-specific-dialog/customer-specific-dialog.component';
 
 @NgModule({
@@ -61,7 +62,7 @@ import { MatDialogModule, MatDialogRef } from '@angular/material/dialog';
     ReservationModule,
     MatDialogModule
   ],
-  providers: [BookingScreenService,CustomerDepartmentService,CustomerDesignationService,
+  providers: [BookingScreenService,CustomerDepartmentService,CustomerDesignationService,ReservationGroupDetailsService,
     {
       provide: MatDialogRef,
       useValue: {}
