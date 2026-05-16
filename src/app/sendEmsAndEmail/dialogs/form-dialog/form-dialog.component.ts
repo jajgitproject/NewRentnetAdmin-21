@@ -216,16 +216,21 @@ export class FormDialogSendEmsComponent {
             sendSMSWhatsApp: true,
             type: element.type
           });
-        } else if (element.customerPersonName.numberMobile) {
-          const mobileParts = element.primaryMobile.split('-');
-          const emailParts = element.primaryEmail.split('-');
-          const name = element.customerPersonName.name;
-          const number = mobileParts[0];
-          const email = emailParts[0];
+        } else if (element.type === 'number') {
+          const code = (element.countryCode || '91')
+            .toString()
+            .replace(/^\+/, '')
+            .trim();
+          const number = (element.primaryMobile || '').toString().trim();
+          const email = (element.primaryEmail || '').toString().trim();
+          const name = (element.customerPersonName || '').toString().trim();
+          if (!number) {
+            return;
+          }
           this.permissionData.push({
-            primaryMobile: '91-' + number,
+            primaryMobile: code + '-' + number,
             primaryEmail: email,
-            customerPersonName: name,
+            customerPersonName: name || number,
             reachedSMSToBooker: true,
             reachedSMSToPassenger: true,
             sendSMSWhatsApp: true,

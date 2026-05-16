@@ -215,16 +215,21 @@ export class FormDialogSendSmsWhatsappMailComponent {
             sendSMSWhatsApp: true,
             type: element.type
           });
-        } else if (element.customerPersonName.numberMobile) {
-          const mobileParts = element.primaryMobile.split('-');
-          const emailParts = element.primaryEmail.split('-');
-          const name = element.customerPersonName.name;
-          const number = mobileParts[0];
-          const email = emailParts[0];
+        } else if (element.type === 'number') {
+          const code = (element.countryCode || '91')
+            .toString()
+            .replace(/^\+/, '')
+            .trim();
+          const number = (element.primaryMobile || '').toString().trim();
+          const email = (element.primaryEmail || '').toString().trim();
+          const name = (element.customerPersonName || '').toString().trim();
+          if (!number) {
+            return;
+          }
           this.permissionData.push({
-            primaryMobile: '91-' + number,
+            primaryMobile: code + '-' + number,
             primaryEmail: email,
-            customerPersonName: name,
+            customerPersonName: name || number,
             reachedSMSToBooker: true,
             reachedSMSToPassenger: true,
             sendSMSWhatsApp: true,
@@ -339,36 +344,47 @@ export class FormDialogSendSmsWhatsappMailComponent {
 
   sendNotification() {
     const apiRequestData = [];
+    const skippedEmailRecipients: string[] = [];
     this.permissionData?.forEach((element) => {
+      const email = (element.primaryEmail ?? '').toString().trim();
+      const displayName =
+        (element.customerPersonName ?? element.primaryMobile ?? '').toString().trim();
+      if (!email) {
+        skippedEmailRecipients.push(displayName || 'recipient');
+      }
+      const typeLower = (element?.type ?? '').toString().toLowerCase();
+      const recipientType =
+        typeLower === 'number'
+          ? 'Not Registered'
+          : (element.isPassenger && element.isBooker === true) ||
+            typeLower === 'customerperson'
+          ? 'Customer Person'
+          : typeLower === 'employee'
+          ? 'Employee'
+          : 'Not Registered';
+
       apiRequestData.push({
-        //ID: parseInt(element.customerPersonID),
-        // "EmployeeID": element?.employeeID || null,
-        // "CustomerPersonID": element?.customerPersonID || null,
-        // "NumberMobileID": null,
         ID: element?.employeeID ?? element?.customerPersonID ?? element?.numberMobileID ?? null,
-        "AllotmentID": element?.allotmentID || 0,
-        Name: element.customerPersonName.toString(),
+        AllotmentID: element?.allotmentID || 0,
+        Name: displayName,
         Mobile: element.primaryMobile.toString(),
-        Email: element.primaryEmail.toString(),
-        Type:
-          (element.isPassenger && element.isBooker === true) ||
-          element?.type?.toLowerCase() === 'customerPerson'
-            ? 'Customer Person'
-            : element?.type?.toLowerCase() === 'employee'
-            ? 'Employee'
-            : 'Not Registered',
+        Email: email,
+        Type: recipientType,
         IsCustomerNotificationsAllowed:
-          element.reachedSMSToBooker === true
-            ? true
-            : false || element.reachedSMSToPassenger === true
-            ? true
-            : false,
-        IsCustomerPersonNotificationsAllowed:
-          element.sendSMSWhatsApp === true ? true : true,
-        SendSMSWhatsApp: element.sendSMSWhatsApp === true ? true : false
+          element.reachedSMSToBooker === true ||
+          element.reachedSMSToPassenger === true,
+        IsCustomerPersonNotificationsAllowed: element.sendSMSWhatsApp !== false,
+        SendSMSWhatsApp: element.sendSMSWhatsApp !== false
       });
     });
-    this.notificationloadData(this.ReservationID, apiRequestData,this.pickupDate);
+    if (skippedEmailRecipients.length > 0) {
+      this.snackBar.open(
+        `Email skipped (no address): ${skippedEmailRecipients.join(', ')}. SMS/WhatsApp will still be sent.`,
+        'OK',
+        { duration: 4500 }
+      );
+    }
+    this.notificationloadData(this.ReservationID, apiRequestData, this.pickupDate);
   }
 
   notificationloadData(ReservationID, additionalData: any,pickDate:any) {

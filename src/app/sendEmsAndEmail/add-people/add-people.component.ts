@@ -100,10 +100,17 @@ export class AddPeopleComponent implements OnInit {
           type: this.advanceTableForm.controls['addPeople'].value
         });
       } else if(this.selectedValue === 'number') {
+        const numberMobile = (this.advanceTableForm.get('numberMobile')?.value || '')
+          .toString()
+          .trim();
+        if (!numberMobile) {
+          return;
+        }
         this.formDataArray.push({
-          primaryMobile: this.advanceTableForm.get('numberMobile')?.value,
+          primaryMobile: numberMobile,
           primaryEmail: this.advanceTableForm.get('numberEmail')?.value || '',
           customerPersonName: this.advanceTableForm.get('name')?.value || '',
+          countryCode: this.advanceTableForm.get('countryCode')?.value || '91',
           type: this.advanceTableForm.controls['addPeople'].value
         });
       }
