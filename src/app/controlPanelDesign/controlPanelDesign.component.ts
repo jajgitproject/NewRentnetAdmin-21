@@ -3291,62 +3291,106 @@ openDropOffByExectiveGPS(item: any)
     successBadges: string[];
     failedBadges: string[];
     otherParts: string[];
+    hasAnyStatus: boolean;
     tooltip: string;
   } {
-    const sms = this.readCpMessagingField(row, 'latestSmsMessageStatus', 'LatestSmsMessageStatus');
-    const smsDet = this.readCpMessagingField(row, 'latestSmsMessageStatusDetails', 'LatestSmsMessageStatusDetails');
-    const wa = this.readCpMessagingField(row, 'latestWhatsAppMessageStatus', 'LatestWhatsAppMessageStatus');
-    const waDet = this.readCpMessagingField(row, 'latestWhatsAppMessageStatusDetails', 'LatestWhatsAppMessageStatusDetails');
+    const passengerSms = this.readCpMessagingField(
+      row,
+      ['latestPassengerSmsMessageStatus', 'latestSmsMessageStatus'],
+      ['LatestPassengerSmsMessageStatus', 'LatestSmsMessageStatus']
+    );
+    const passengerSmsDetails = this.readCpMessagingField(
+      row,
+      ['latestPassengerSmsMessageStatusDetails', 'latestSmsMessageStatusDetails'],
+      ['LatestPassengerSmsMessageStatusDetails', 'LatestSmsMessageStatusDetails']
+    );
+    const passengerWa = this.readCpMessagingField(
+      row,
+      ['latestPassengerWhatsAppMessageStatus', 'latestWhatsAppMessageStatus'],
+      ['LatestPassengerWhatsAppMessageStatus', 'LatestWhatsAppMessageStatus']
+    );
+    const passengerWaDetails = this.readCpMessagingField(
+      row,
+      ['latestPassengerWhatsAppMessageStatusDetails', 'latestWhatsAppMessageStatusDetails'],
+      ['LatestPassengerWhatsAppMessageStatusDetails', 'LatestWhatsAppMessageStatusDetails']
+    );
 
+    const bookerSms = this.readCpMessagingField(
+      row,
+      ['latestBookerSmsMessageStatus'],
+      ['LatestBookerSmsMessageStatus']
+    );
+    const bookerSmsDetails = this.readCpMessagingField(
+      row,
+      ['latestBookerSmsMessageStatusDetails'],
+      ['LatestBookerSmsMessageStatusDetails']
+    );
+    const bookerWa = this.readCpMessagingField(
+      row,
+      ['latestBookerWhatsAppMessageStatus'],
+      ['LatestBookerWhatsAppMessageStatus']
+    );
+    const bookerWaDetails = this.readCpMessagingField(
+      row,
+      ['latestBookerWhatsAppMessageStatusDetails'],
+      ['LatestBookerWhatsAppMessageStatusDetails']
+    );
+
+    const tooltipParts: string[] = [];
     const successBadges: string[] = [];
     const failedBadges: string[] = [];
     const otherParts: string[] = [];
 
-    this.appendCpMessagingBadge('SMS', sms, successBadges, failedBadges, otherParts);
-    this.appendCpMessagingBadge('WA', wa, successBadges, failedBadges, otherParts);
+    // Keep previous compact badge style by using passenger statuses first, then booker as fallback.
+    const effectiveSms = passengerSms || bookerSms;
+    const effectiveWa = passengerWa || bookerWa;
+    this.appendCpMessagingBadge('SMS', effectiveSms, successBadges, failedBadges, otherParts);
+    this.appendCpMessagingBadge('WA', effectiveWa, successBadges, failedBadges, otherParts);
 
-    const tooltipParts: string[] = [];
-    const smsLine = this.formatCpMessagingTooltipLine('SMS', sms, smsDet);
-    if (smsLine) {
-      tooltipParts.push(smsLine);
-    }
-    const waLine = this.formatCpMessagingTooltipLine('WhatsApp', wa, waDet);
-    if (waLine) {
-      tooltipParts.push(waLine);
-    }
+    this.appendCpMessagingTooltipLine(tooltipParts, 'Passenger SMS', passengerSms, passengerSmsDetails);
+    this.appendCpMessagingTooltipLine(tooltipParts, 'Passenger WhatsApp', passengerWa, passengerWaDetails);
+    this.appendCpMessagingTooltipLine(tooltipParts, 'Booker SMS', bookerSms, bookerSmsDetails);
+    this.appendCpMessagingTooltipLine(tooltipParts, 'Booker WhatsApp', bookerWa, bookerWaDetails);
+
+    const hasAnyStatus = !!(successBadges.length || failedBadges.length || otherParts.length);
 
     return {
       successBadges,
       failedBadges,
       otherParts,
+      hasAnyStatus,
       tooltip: tooltipParts.join('\n'),
     };
   }
 
-  private formatCpMessagingTooltipLine(label: string, status: string, details: string): string {
+  private appendCpMessagingTooltipLine(lines: string[], label: string, status: string, details: string): void {
     if (!status) {
-      return '';
+      return;
     }
     const st = status.trim();
     const det = details?.trim() || '';
     if (det && det.localeCompare(st, undefined, { sensitivity: 'accent' }) !== 0) {
-      return `${label}: ${st} — ${det}`;
+      lines.push(`${label}: ${st} — ${det}`);
+      return;
     }
-    return `${label}: ${st}`;
+    lines.push(`${label}: ${st}`);
   }
 
-  private readCpMessagingField(row: any, camel: string, pascal: string): string {
+  private readCpMessagingField(row: any, camelCandidates: string[], pascalCandidates: string[]): string {
     if (!row) {
       return '';
     }
-    const v = row[camel] ?? row[pascal];
-    if (v === null || v === undefined) {
-      return '';
+    const keys = [...(camelCandidates || []), ...(pascalCandidates || [])];
+    for (const key of keys) {
+      const value = row[key];
+      if (value !== null && value !== undefined) {
+        return String(value).trim();
+      }
     }
-    return String(v).trim();
+    return '';
   }
 
-  /** Accepted → S, Delivered → D for compact header badges. */
+  /** Accepted -> S, Delivered -> D for compact badges. */
   private getMessagingStatusLetter(raw: string): 'S' | 'D' | null {
     if (!raw) {
       return null;

@@ -156,12 +156,45 @@ export class FormDialogSendSmsWhatsappMailComponent {
   public loadData() {
     this._generalService.GetPermission(this.ReservationID).subscribe(
       (data) => {
-        this.permissionData = data;
+        this.permissionData = this.normalizePermissionRows(data);
       },
       (error: HttpErrorResponse) => {
         this.permissionData = null;
       }
     );
+  }
+
+  private normalizePermissionRows(rows: any[]): any[] {
+    if (!Array.isArray(rows)) {
+      return [];
+    }
+    return rows.map((row) => ({
+      ...row,
+      type: this.resolveRecipientType(row)
+    }));
+  }
+
+  private resolveRecipientType(element: any): string {
+    const typeLower = (element?.type ?? '').toString().toLowerCase();
+    if (typeLower === 'employee') {
+      return 'Employee';
+    }
+    if (element?.isPassenger === true) {
+      return 'Passenger';
+    }
+    if (element?.isBooker === true) {
+      return 'Booker';
+    }
+    if (typeLower === 'booker') {
+      return 'Booker';
+    }
+    if (typeLower === 'passenger') {
+      return 'Passenger';
+    }
+    if (typeLower === 'number') {
+      return 'Not Registered';
+    }
+    return 'Not Registered';
   }
 
   saveData() {
@@ -195,7 +228,7 @@ export class FormDialogSendSmsWhatsappMailComponent {
             reachedSMSToPassenger: passengerParts,
             sendSMSWhatsApp: sendSMSWhatsAppParts,
             isPassenger: element.isPassenger,
-            type: element.type
+            type: this.resolveRecipientType(element)
           });
         } else if (element.customerPersonName.employee) {
           const mobileParts = element.primaryMobile.split('-');
@@ -213,7 +246,7 @@ export class FormDialogSendSmsWhatsappMailComponent {
             reachedSMSToBooker: true,
             reachedSMSToPassenger: true,
             sendSMSWhatsApp: true,
-            type: element.type
+            type: this.resolveRecipientType(element)
           });
         } else if (element.type === 'number') {
           const code = (element.countryCode || '91')
@@ -233,7 +266,7 @@ export class FormDialogSendSmsWhatsappMailComponent {
             reachedSMSToBooker: true,
             reachedSMSToPassenger: true,
             sendSMSWhatsApp: true,
-            type: element.type
+            type: this.resolveRecipientType(element)
           });
         }
         this.table?.renderRows();
@@ -352,16 +385,7 @@ export class FormDialogSendSmsWhatsappMailComponent {
       if (!email) {
         skippedEmailRecipients.push(displayName || 'recipient');
       }
-      const typeLower = (element?.type ?? '').toString().toLowerCase();
-      const recipientType =
-        typeLower === 'number'
-          ? 'Not Registered'
-          : (element.isPassenger && element.isBooker === true) ||
-            typeLower === 'customerperson'
-          ? 'Customer Person'
-          : typeLower === 'employee'
-          ? 'Employee'
-          : 'Not Registered';
+      const recipientType = this.resolveRecipientType(element);
 
       apiRequestData.push({
         ID: element?.employeeID ?? element?.customerPersonID ?? element?.numberMobileID ?? null,
