@@ -1,4 +1,4 @@
-<div class="row">
+﻿<div class="row">
     <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
         <div class="col-xl-2 col-lg-2 col-md-2 col-sm-12 mb-2">
             <mat-progress-spinner *ngIf="isLoadingdata" mode="indeterminate" diameter="30" strokeWidth="4"></mat-progress-spinner>
@@ -26,7 +26,7 @@
         </div>
 
         <div class="addContainer">
-            <form class="register-form m-4" [formGroup]="advanceTableForm" (ngSubmit)="submit">
+            <form class="register-form m-4" [formGroup]="advanceTableForm" (ngSubmit)="onFormSubmit($event)">
 
                 <mat-card class="example-card">
                     <mat-card-header>
@@ -51,7 +51,7 @@
                                     <input required type="text" matInput formControlName="customerType"
                                         (keyup)="onCustomerTypeKeyUp($event)" [matAutocomplete]="auto">
                                     <mat-autocomplete #auto="matAutocomplete">
-                                        <mat-option *ngFor="let option of filteredCustomerTypeOptions | async"
+                                        <mat-option *ngFor="let option of toArray(filteredCustomerTypeOptions | async)"
                                             [value]="option.customerType"
                                             (click)="getTitles(option.customerTypeID, option)">
                                             {{option.customerType}}
@@ -70,7 +70,7 @@
                                     <input required type="text" matInput formControlName="customerCustomerGroup"
                                         (keyup)="onKeyUp($event)" [matAutocomplete]="auto1">
                                     <mat-autocomplete #auto1="matAutocomplete" (optionSelected)="onCustomerCustomerGroupSelected($event.option.value)">
-                                        <mat-option *ngFor="let option of filteredCustomerCustomerGroupOptions | async"
+                                        <mat-option *ngFor="let option of toArray(filteredCustomerCustomerGroupOptions | async)"
                                             [value]="option.customerName +'-'+option.customerGroup"
                                             (click)="getCustomerCustomerGroupID(option.customerID,option.customerGroupID, option)">
                                             {{option.customerName}} - {{option.customerGroup}}
@@ -103,7 +103,7 @@
                                                 }} - {{option.customerName}}
                                             </mat-option> -->
 
-                                        <mat-option *ngFor="let option of filteredBookerOptions | async"
+                                        <mat-option *ngFor="let option of toArray(filteredBookerOptions | async)"
                                             [value]="option.customerPersonName + '-' + option.gender + '-' + option.importance + '-' + option.phone + '-' +  option.customerDepartment + '-' + option.customerDesignation + '-' + option.customerName"
                                             (click)="getBookerID(option.customerPersonID)">
                                             {{option.customerPersonName}} - {{option.gender}} -
@@ -160,7 +160,7 @@
                                     <mat-autocomplete #auto3="matAutocomplete"
                                         (optionSelected)="onPassengerSelected($event.option.value)"
                                         panelWidth="custom-autocomplete-panel">
-                                        <mat-option *ngFor="let option of filteredPassengerOptions | async"
+                                        <mat-option *ngFor="let option of toArray(filteredPassengerOptions | async)"
                                             [value]="option.customerPersonName + '-' + option.gender + '-' + option.importance + '-' + option.phone + '-' + option.customerDepartment + '-' + option.customerDesignation + '-' + option.customerName"
                                             (click)="getPassengerID(option.customerPersonID, option.customerPersonName)">
                                             {{option.customerPersonName}} - {{option.gender}} -
@@ -227,7 +227,10 @@
                                     <mat-label>Pickup Time</mat-label>
                                     <input matInput [owlDateTimeTrigger]="time1" [owlDateTime]="time1"
                                         formControlName="pickupTime" (ngModelChange)="locationTimeSet($event)"
-                                        [disabled]="isTNCSelected">
+                                        [disabled]="isTNCSelected" [required]="!isTNCSelected">
+                                    <mat-error *ngIf="!isTNCSelected && advanceTableForm.get('pickupTime')?.touched && advanceTableForm.get('pickupTime')?.hasError('required')">
+                                        Pickup Time is required
+                                    </mat-error>
                                     <button mat-icon-button matSuffix type="button" [owlDateTimeTrigger]="time1" class="date-icon" aria-label="Open time picker"><mat-icon>schedule</mat-icon></button>
                                     <owl-date-time [pickerType]="'timer'" #time1></owl-date-time>
                                     <mat-hint align="end">
@@ -263,7 +266,7 @@
                                     <mat-autocomplete #auto6="matAutocomplete"
                                         (optionSelected)="onDTSelected($event.option.value)"
                                         panelWidth="custom-autocomplete-panel">
-                                        <mat-option *ngFor="let option of filteredPackageTypeOptions | async"
+                                        <mat-option *ngFor="let option of toArray(filteredPackageTypeOptions | async)"
                                             [value]="option.packageType"
                                             (click)="getPackageTypeID(option.packageTypeID,option.packageType)">
                                             {{option.packageType}}
@@ -287,7 +290,7 @@
                                     <mat-autocomplete #auto7="matAutocomplete"
                                         (optionSelected)="onPackageSelected($event.option.value)"
                                         panelWidth="custom-autocomplete-panel">
-                                        <mat-option *ngFor="let option of filteredPackageOptions | async"
+                                        <mat-option *ngFor="let option of toArray(filteredPackageOptions | async)"
                                             [value]="option.package" (click)="getPackageID(option.packageID)">
                                             {{option.package}}
                                         </mat-option>
@@ -317,7 +320,7 @@
                                     <mat-autocomplete #auto4="matAutocomplete"
                                         (optionSelected)="onCitySelected($event.option.value)"
                                         panelWidth="custom-autocomplete-panel">
-                                        <mat-option *ngFor="let option of filteredCityOptions | async"
+                                        <mat-option *ngFor="let option of toArray(filteredCityOptions | async)"
                                             [value]="option.geoPointName" (click)="getCityID(option.geoPointID)">
                                             {{option.geoPointName}}
                                         </mat-option>
@@ -347,7 +350,7 @@
                                     <mat-autocomplete #auto5="matAutocomplete"
                                         (optionSelected)="onCarSelected($event.option.value)"
                                         panelWidth="custom-autocomplete-panel">
-                                        <mat-option *ngFor="let option of filteredVehicleOptions | async"
+                                        <mat-option *ngFor="let option of toArray(filteredVehicleOptions | async)"
                                             [value]="option.vehicle"
                                             (click)="getVehicleID(option.vehicleID,option.vehicleCategoryID)">
                                             {{option.vehicle}}
@@ -370,15 +373,15 @@
                             <div class="row"> -->
                             <!-- <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2" *ngIf="ifBlock;else elseBlock"> -->
                             <div class="col-xl-3 col-lg-3 col-md-3 col-sm-6 mb-2" *ngIf="ifBlock;else elseBlock">
-                                <mat-form-field class="example-full-width cp-booking-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
+                                <mat-form-field class="example-full-width cp-booking-field cp-address-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
                                     <!-- <mat-label>Pickup Address (Society/Colony/Area/Nearby Location)</mat-label> -->
                                     <mat-label>Pickup Geo Location</mat-label>
-                                    <input required type="text" matInput formControlName="pickupAddress"
-                                        [matAutocomplete]="auto20" >
+                                    <textarea required matInput formControlName="pickupAddress" rows="2"
+                                        [matAutocomplete]="auto20"></textarea>
                                     <mat-autocomplete #auto20="matAutocomplete"
                                         (optionSelected)="onPGLSelected($event.option.value)"
                                        class="google-autocomplete-panel">
-                                        <mat-option *ngFor="let option of filteredGoogleAddressOptions | async"
+                                        <mat-option *ngFor="let option of toArray(filteredGoogleAddressOptions | async)"
                                             [value]="option.geoSearchString" (click)="OnPickupGeoLocationClick(option)">
                                             {{option.geoSearchString}}
                                         </mat-option>
@@ -413,13 +416,13 @@
                             <ng-template #elseBlock>
                                 <!-- <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2"> -->
                                 <div class="col-xl-3 col-lg-3 col-md-3 col-sm-6 mb-2">
-                                    <mat-form-field class="example-full-width cp-booking-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
+                                    <mat-form-field class="example-full-width cp-booking-field cp-address-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
                                         <!-- <mat-label>Pickup Address (Society/Colony/Area/Nearby Location)</mat-label> -->
                                         <mat-label>Geo Location</mat-label>
-                                        <input matInput ngx-google-places-autocomplete [options]='options'
+                                        <textarea matInput ngx-google-places-autocomplete [options]='options'
                                             #placesRef="ngx-places" (onAddressChange)="handleAddressChange($event)"
-                                            formControlName="pickupAddress"
-                                            (input)="onPickupTyping()">
+                                            formControlName="pickupAddress" rows="2"
+                                            (input)="onPickupTyping()"></textarea>
                                         <!-- <mat-error *ngIf="advanceTableForm.get('pickupAddress').hasError('required')">
                                                 <div style="width: 70%;">
                                                     Pickup Address is required
@@ -465,10 +468,10 @@
 
                             <!-- <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2"> -->
                             <div class="col-xl-3 col-lg-3 col-md-3 col-sm-6 mb-2">
-                                <mat-form-field class="example-full-width cp-booking-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
+                                <mat-form-field class="example-full-width cp-booking-field cp-address-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
                                     <mat-label>Pickup Address Details i.e Street/Flat No./Flight No./Train
                                         No.</mat-label>
-                                    <input required matInput formControlName="pickupAddressDetails">
+                                    <textarea required matInput formControlName="pickupAddressDetails" rows="2"></textarea>
                                     <!-- <mat-error *ngIf="advanceTableForm.get('pickupAddressDetails').hasError('required')">
                                             Pickup Address Details is required
                                         </mat-error> -->
@@ -484,7 +487,7 @@
                                         <input type="text" matInput formControlName="pickupSpotType"
                                             [matAutocomplete]="auto8" (keyup)="onSpotTypeKeyUp($event)">
                                         <mat-autocomplete #auto8="matAutocomplete" (optionSelected)="onPSTSelected($event.option.value)">
-                                            <mat-option *ngFor="let option of filteredPSTOptions | async"
+                                            <mat-option *ngFor="let option of toArray(filteredPSTOptions | async)"
                                                 [value]="option.geoPointType" (click)="getPSTID(option.geoPointTypeID,option.geoPointType)">
                                                 {{option.geoPointType}}
                                             </mat-option>
@@ -504,7 +507,7 @@
                                         <mat-label>Pickup Spot</mat-label>
                                         <input type="text" matInput formControlName="pickupSpot" [matAutocomplete]="auto9">
                                         <mat-autocomplete #auto9="matAutocomplete" (optionSelected)="onPSSelected($event.option.value)">
-                                            <mat-option *ngFor="let option of filteredPSOptions | async"
+                                            <mat-option *ngFor="let option of toArray(filteredPSOptions | async)"
                                                 [value]="option.geoPointName" (click)="getPSpotID(option.geoPointID)">
                                                 {{option.geoPointName}}
                                             </mat-option>
@@ -513,7 +516,7 @@
                                             <div>
                                                 <div *ngIf="selectedCity" style="float: left; display: flex; align-items: center;">
                                                     <b>Selected City</b> : {{selectedCity}}
-                                                    <button (click)="clearCitySelection()" 
+                                                    <button type="button" (click)="clearCitySelection()" 
                                                             style="background: transparent; border: none; color: black; font-size: 12px; cursor: pointer; padding: 0 5px; margin-left: 5px;">
                                                     &#x2716;
                                                     </button>
@@ -576,7 +579,7 @@
                                     <mat-autocomplete #auto10="matAutocomplete"
                                         (optionSelected)="onSLSelectedBasedOnCity($event.option.value)"
                                         panelWidth="custom-autocomplete-panel">
-                                        <mat-option *ngFor="let option of filteredServiceLocationOptions | async"
+                                        <mat-option *ngFor="let option of toArray(filteredServiceLocationOptions | async)"
                                             [value]="option.organizationalEntityName"
                                             (click)="getServiceLocationIDBasedOnCity(option.organizationalEntityID)">
                                             {{option.organizationalEntityName}}
@@ -605,7 +608,7 @@
                                         <mat-autocomplete #auto10="matAutocomplete"
                                             (optionSelected)="onSLSelected($event.option.value)"
                                             panelWidth="custom-autocomplete-panel">
-                                            <mat-option *ngFor="let option of filteredServiceLocationOptions | async"
+                                            <mat-option *ngFor="let option of toArray(filteredServiceLocationOptions | async)"
                                                 [value]="option.organizationalEntityName"
                                                 (click)="getServiceLocationID(option.organizationalEntityID)">
                                                 {{option.organizationalEntityName}}
@@ -753,7 +756,7 @@
                                     <mat-autocomplete #auto14="matAutocomplete"
                                         (optionSelected)="onDropCitySelected($event.option.value)"
                                         panelWidth="custom-autocomplete-panel">
-                                        <mat-option *ngFor="let option of filteredDropOffCityOptions | async"
+                                        <mat-option *ngFor="let option of toArray(filteredDropOffCityOptions | async)"
                                             [value]="option.geoPointName" (click)="getDropOffCityID(option.geoPointID)">
                                             {{option.geoPointName}}
                                         </mat-option>
@@ -789,14 +792,14 @@
                                     *ngIf="dropOffifBlock;else elseBlock2"> -->
                             <div class="col-xl-3 col-lg-3 col-md-3 col-sm-6 mb-2"
                                 *ngIf="dropOffifBlock;else elseBlock2">
-                                <mat-form-field class="example-full-width cp-booking-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
+                                <mat-form-field class="example-full-width cp-booking-field cp-address-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
                                     <mat-label>Drop Off Geo Location</mat-label>
-                                    <input type="text" matInput formControlName="dropOffAddress"
-                                        [matAutocomplete]="auto21">
+                                    <textarea matInput formControlName="dropOffAddress" rows="2"
+                                        [matAutocomplete]="auto21"></textarea>
                                     <mat-autocomplete #auto21="matAutocomplete"
                                         (optionSelected)="onDropGLSelected($event.option.value)"
                                         panelWidth="custom-autocomplete-panel">
-                                        <mat-option *ngFor="let option of filteredDropOffGoogleAddressOptions | async"
+                                        <mat-option *ngFor="let option of toArray(filteredDropOffGoogleAddressOptions | async)"
                                             [value]="option.geoSearchString"
                                             (click)="OnDropOffGeoLocationClick(option)">
                                             {{option.geoSearchString}}
@@ -828,13 +831,14 @@
                             <ng-template #elseBlock2>
                                 <!-- <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2"> -->
                                 <div class="col-xl-3 col-lg-3 col-md-3 col-sm-6 mb-2">
-                                    <mat-form-field class="example-full-width cp-booking-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
+                                    <mat-form-field class="example-full-width cp-booking-field cp-address-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
                                         <mat-label>Geo Location</mat-label>
-                                        <input matInput ngx-google-places-autocomplete [options]='options'
+                                        <textarea matInput ngx-google-places-autocomplete [options]='options'
                                             #placesRef="ngx-places"
                                             (onAddressChange)="handleAddressChangeDropOff($event)"
-                                            formControlName="dropOffAddress"  (input)="onDropOffTyping()"
-                                            (blur)="validateDropOffOnBlur()">
+                                            formControlName="dropOffAddress" rows="2"
+                                            (input)="onDropOffTyping()"
+                                            (blur)="validateDropOffOnBlur()"></textarea>
                                             
                                         <!-- <mat-error *ngIf="advanceTableForm.get('dropOffAddress').hasError('required')">
                                                 DropOff Address is required
@@ -871,10 +875,10 @@
 
                             <!-- <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2"> -->
                             <div class="col-xl-3 col-lg-3 col-md-3 col-sm-6 mb-2">
-                                <mat-form-field class="example-full-width cp-booking-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
+                                <mat-form-field class="example-full-width cp-booking-field cp-address-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
                                     <mat-label>Drop Off Address Details i.e Street/Flat No./Flight No./Train
                                         No.</mat-label>
-                                    <input matInput formControlName="dropOffAddressDetails">
+                                    <textarea matInput formControlName="dropOffAddressDetails" rows="2"></textarea>
                                     <!-- <mat-error *ngIf="advanceTableForm.get('dropOffAddressDetails').hasError('required')">
                                             DropOff Address Details is required
                                         </mat-error> -->
@@ -889,7 +893,7 @@
                                         <input type="text" matInput formControlName="dropOffSpotType"
                                             [matAutocomplete]="auto11">
                                         <mat-autocomplete #auto11="matAutocomplete" (optionSelected)="onDropSTSelected($event.option.value)">
-                                            <mat-option *ngFor="let option of filteredDSTOptions | async"
+                                            <mat-option *ngFor="let option of toArray(filteredDSTOptions | async)"
                                                 [value]="option.geoPointType" (click)="getDSTID(option.geoPointTypeID,option.geoPointType)">
                                                 {{option.geoPointType}}
                                             </mat-option>
@@ -904,7 +908,7 @@
                                         <input type="text" matInput formControlName="dropOffSpot"
                                             [matAutocomplete]="auto12">
                                         <mat-autocomplete #auto12="matAutocomplete" (optionSelected)="onDropSpotSelected($event.option.value)">
-                                            <mat-option *ngFor="let option of filteredDSOptions | async"
+                                            <mat-option *ngFor="let option of toArray(filteredDSOptions | async)"
                                                 [value]="option.geoPointName" (click)="getDSpotID(option.geoPointID)">
                                                 {{option.geoPointName}}
                                             </mat-option>
@@ -913,7 +917,7 @@
                                             <div>
                                                 <div *ngIf="selectedCity" style="float: left; display: flex; align-items: center;">
                                                     <b>Selected City</b> : {{selectedCity}}
-                                                    <button (click)="clearCitySelectionForDropOff()" 
+                                                    <button type="button" (click)="clearCitySelectionForDropOff()" 
                                                             style="background: transparent; border: none; color: black; font-size: 12px; cursor: pointer; padding: 0 5px; margin-left: 5px;">
                                                     &#x2716;
                                                     </button>
@@ -975,7 +979,7 @@
                                     <mat-autocomplete #auto13="matAutocomplete"
                                         (optionSelected)="onRSSelected($event.option.value)"
                                         panelWidth="custom-autocomplete-panel">
-                                        <mat-option *ngFor="let option of filteredReservationSourceOptions | async"
+                                        <mat-option *ngFor="let option of toArray(filteredReservationSourceOptions | async)"
                                             [value]="option.reservationSource"
                                             (click)="getReservationSourceID(option.reservationSourceID)">
                                             {{option.reservationSource}}
@@ -992,7 +996,7 @@
                                         <input required type="text" matInput formControlName="reservationSource"
                                             [matAutocomplete]="auto13">
                                         <mat-autocomplete #auto13="matAutocomplete">
-                                            <mat-option *ngFor="let option of filteredReservationSourceOptions | async"
+                                            <mat-option *ngFor="let option of toArray(filteredReservationSourceOptions | async)"
                                                 [value]="option.reservationSource"
                                                 (click)="getReservationSourceID(option.reservationSourceID)">
                                                 {{option.reservationSource}}
@@ -1045,7 +1049,7 @@
                                             </mat-label>
                                         </td>
                                         <td>
-                                            <a href="{{ ImagePath }}" target="_blank" *ngIf="ImagePath">
+                                            <a href="{{ ImagePath }}" target="_blank" *ngIf="hasPreviewImage(ImagePath)">
                                                 <img [src]="ImagePath" class="table "
                                                     style="height: 80px; width: auto;">
                                             </a>
@@ -1132,7 +1136,7 @@
                     <div style="background-color: #ebeef1;">
                         <div class="row" style="margin:10px">
 
-                            <ng-container *ngFor="let data of CustomerExtraFieldList">
+                            <ng-container *ngFor="let data of toArray(CustomerExtraFieldList)">
                                 <div *ngIf="data.fieldControlType === 'TextBox'"
                                     class="col-xl-3 col-lg-3 col-md-6 col-sm-12 mb-2">
                                     <!-- <div *ngIf="data.fieldControlType === 'TextBox'" class="col-xl-3 col-lg-3 col-md-3 col-sm-6 mb-2"> -->
@@ -1149,7 +1153,7 @@
                                         <mat-label>{{ data.fieldName }}</mat-label>
                                         <mat-select [formControlName]="data.fieldName"
                                             (selectionChange)="getFieldValues()">
-                                            <mat-option *ngFor="let item of data.fieldValue.fieldValue" [value]="item">
+                                            <mat-option *ngFor="let item of toArray(data?.fieldValue?.fieldValue)" [value]="item">
                                                 {{ item }}
                                             </mat-option>
                                         </mat-select>
@@ -1179,7 +1183,7 @@
                                     <mat-autocomplete #auto15="matAutocomplete"
                                         (optionSelected)="onPMSelected($event.option.value)"
                                         panelWidth="custom-autocomplete-panel">
-                                        <mat-option *ngFor="let option of filteredPaymentModeOptions | async"
+                                        <mat-option *ngFor="let option of toArray(filteredPaymentModeOptions | async)"
                                             [value]="option.modeOfPayment"
                                             (click)="getPaymentModeID(option.modeOfPaymentID)">
                                             {{option.modeOfPayment}}
@@ -1197,37 +1201,7 @@
 
                 <br>
 
-                <div class="card" *ngIf="isGSTMandatoryWithReservation === true">
-                    <mat-card-header>
-                        <h5 style="color: white;">GST Details</h5>
-                    </mat-card-header>
-                    <div style="background-color: #ebeef1;">
-                        <div class="row" style="margin: 10px;">
-                            <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
-                                <mat-form-field class="example-full-width cp-booking-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
-                                    <mat-label>GST For Billing</mat-label>
-                                    <input required type="text" matInput formControlName="gSTForBilling"
-                                        [matAutocomplete]="auto12"
-                                        (keyup)="onCustomerConfigurationInvoicingKeyUp($event)">
-                                    <mat-autocomplete #auto12="matAutocomplete"
-                                        (optionSelected)="onReservationInvoiceGSTSelected($event.option.value)"
-                                        panelWidth="custom-autocomplete-panel">
-                                        <mat-option *ngFor="let option of filteredConfigurationInvoicingOptions | async"
-                                            [value]="option.gstNumber + '-' + option.gstRate + '-' + option.billingStateName"
-                                            (click)="getReservationInvoiceGSTDetailsID(option.customerConfigurationInvoicingID)">
-                                            {{option.gstNumber}} - {{option.gstRate}} - {{option.billingStateName}}
-                                        </mat-option>
-                                    </mat-autocomplete>
-                                    <mat-error *ngIf="advanceTableForm.controls['gSTForBilling'].hasError('gSTMandatoryForBillingInvaild')">
-                                        Please select a valid GST For Billing
-                                    </mat-error>
-                                </mat-form-field>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="card" *ngIf="isGSTMandatoryWithReservation === false">
+                <div class="card" *ngIf="isGSTMandatoryWithReservation !== null">
                     <mat-card-header>
                         <h5 style="color: white;">GST Details</h5>
                     </mat-card-header>
@@ -1247,7 +1221,7 @@
                                                 (click)="getReservationInvoiceGSTDetailsID(option.customerConfigurationInvoicingID)">
                                                 {{option.gstNumber}} - {{option.gstRate}} - {{option.billingStateName}}
                                             </mat-option> -->
-                                        <mat-option *ngFor="let option of filteredConfigurationInvoicingOptions | async"
+                                        <mat-option *ngFor="let option of toArray(filteredConfigurationInvoicingOptions | async)"
                                             [value]="option.gstNumber === '--Select--' ? '--Select--' : (option.gstNumber + '-' + option.gstRate + '-' + option.billingStateName)"
                                             (click)="getReservationInvoiceGSTDetailsID(option.customerConfigurationInvoicingID)">
                                             <ng-container *ngIf="option.gstNumber === '--Select--'; else normalOption">
@@ -1321,29 +1295,29 @@
                         <div class="example-button-row">
                             <span style="color:red;margin-bottom: 10px;" *ngIf="status && status !== 'Changes allow' && !status.includes('Changes allow') && buttonDisabled">{{status}}</span>
                             <br>
-                            <span style="color:red;margin-bottom: 10px;" *ngIf="allotmentStatus !== null">This booking is already allotted, so changes are not permitted.</span>
+                            <span style="color:red;margin-bottom: 10px;" *ngIf="allotmentStatus === 'Alloted'">This booking is already allotted, so changes are not permitted.</span>
                            
                             <br>
-                                                       
-                            <button mat-raised-button style="background-color: #bcb4db"  *ngIf="this.action !== 'edit'"
+                            
+                            <button type="button" mat-raised-button style="background-color: #bcb4db"  *ngIf="this.action !== 'edit'"
                                 (click)="confirmAdd()">Save</button>
 
-                            <button mat-raised-button style="background-color: #bcb4db"  *ngIf="this.action === 'edit'"
-                                (click)="confirmAdd()" [disabled]="buttonDisabled || allotmentStatus !== null">Update</button>
+                            <button type="button" mat-raised-button style="background-color: #bcb4db"  *ngIf="this.action === 'edit'"
+                                (click)="confirmAdd()" [disabled]="buttonDisabled || allotmentStatus === 'Alloted'">Update</button>
 
-                            <button mat-raised-button style="background-color: #f29f99"
+                            <button type="button" mat-raised-button style="background-color: #f29f99"
                                 (click)="navigateToNewForms()">Add Details</button>
 
-                            <button mat-raised-button style="background-color: #f29f99"
+                            <button type="button" mat-raised-button style="background-color: #f29f99"
                                 (click)="openSpecialInstrucation()">Special Instruction</button>
 
-                            <button mat-raised-button style="background-color: #f29f99"
+                            <button type="button" mat-raised-button style="background-color: #f29f99"
                                 (click)="InternalNote()">Internal Note</button>
 
-                            <button mat-raised-button style="background-color: #f29f99"
+                            <button type="button" mat-raised-button style="background-color: #f29f99"
                                 (click)="settledRates()">Settled Rate</button>
 
-                            <button mat-raised-button style="background-color: #f29f99"
+                            <button type="button" mat-raised-button style="background-color: #f29f99"
                                 (click)="emailInfo()"> Email format</button>
 
                         </div>

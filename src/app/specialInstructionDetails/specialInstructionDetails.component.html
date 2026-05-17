@@ -1,4 +1,4 @@
-<ng-container *ngFor="let instrucationDetail of advanceTableSI;index as i">
+<ng-container *ngFor="let instrucationDetail of toArray(advanceTableSI);index as i">
 
 <div class="row" style="margin-left: 20px;margin-top: 20px;">
             <!-- <a style="cursor: pointer;color: #007bff;" (click)="specialInstrucationEdit(instrucationDetail)">
@@ -38,10 +38,10 @@
                     </b>                   
                 </span>
                 <br/>
-                <span>
-                    <a href="{{instrucationDetail.specialInstructionAttachment}}" target="_blank" style="cursor: pointer;color: #007bff;">
+                <span *ngIf="hasAttachmentPreview(instrucationDetail.specialInstructionAttachment)">
+                    <a [href]="normalizeAttachmentPath(instrucationDetail.specialInstructionAttachment)" target="_blank" style="cursor: pointer;color: #007bff;">
                     <!-- View -->
-                    <img [src]="instrucationDetail.specialInstructionAttachment" style="max-width: 70px; max-height: 70px;" />
+                    <img [src]="normalizeAttachmentPath(instrucationDetail.specialInstructionAttachment)" style="max-width: 70px; max-height: 70px;" />
                     </a>
                 </span>
             </div>  

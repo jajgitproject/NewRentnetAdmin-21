@@ -61,6 +61,14 @@ const routes: Routes = [
           )
       },
       {
+        path: 'branchOverviewDashboard',
+        loadChildren: () =>
+          import('./branchOverviewDashboard/branchOverviewDashboard.module').then(
+            (m) => m.BranchOverviewDashboardModule
+          ),
+        data: { skipRolePageGuard: true },
+      },
+      {
         path: 'tallyMis',
         loadChildren: () =>
           import('./tallyMis/tallyMis.module').then(

@@ -1733,9 +1733,18 @@ export class ControlPanelDesignComponent implements OnInit {
     const encryptedCustomerID = encodeURIComponent(this._generalService.encrypt(item.customerID.toString()));
     const encryptedCustomerName = encodeURIComponent(this._generalService.encrypt(item.customerName));
     const encryptedReservationGroupID = encodeURIComponent(this._generalService.encrypt(item.reservationGroupID.toString()));
+    const encryptedReservationID = encodeURIComponent(this._generalService.encrypt(item.reservationID.toString()));
+    const encryptedCustomerGroupID = encodeURIComponent(this._generalService.encrypt(item.customerGroupID.toString()));
+    const encryptedAction = encodeURIComponent(this._generalService.encrypt('edit'));
+    const encryptedStatus = encodeURIComponent(this._generalService.encrypt('Changes allow'));
     const url= this.route.serializeUrl(this.route.createUrlTree(['/bookingScreen'], { queryParams: {
-      // reservationGroupID:item.reservationGroupID,reservationID:item.reservationID     
-      reservationGroupID: encryptedReservationGroupID                      
+      reservationID: encryptedReservationID,
+      reservationGroupID: encryptedReservationGroupID,
+      customerGroupID: encryptedCustomerGroupID,
+      customerID: encryptedCustomerID,
+      customerName: encryptedCustomerName,
+      action: encryptedAction,
+      status: encryptedStatus
     } }));
     window.open(this._generalService.FormURL+ url, '_blank');
   }
@@ -1745,11 +1754,18 @@ export class ControlPanelDesignComponent implements OnInit {
     const encryptedCustomerName = encodeURIComponent(this._generalService.encrypt(item.customerName));
     const encryptedReservationGroupID = encodeURIComponent(this._generalService.encrypt(item.reservationGroupID.toString()));
     const encryptedReservationID = encodeURIComponent(this._generalService.encrypt(item.reservationID.toString()));
+    const encryptedCustomerGroupID = encodeURIComponent(this._generalService.encrypt(item.customerGroupID.toString()));
+    const encryptedAction = encodeURIComponent(this._generalService.encrypt('edit'));
+    const encryptedStatus = encodeURIComponent(this._generalService.encrypt('Changes allow'));
 
     const url= this.route.serializeUrl(this.route.createUrlTree(['/bookingScreen'], { queryParams: {
-      
-      reservationID:encryptedReservationID,     
-      reservationGroupID: encryptedReservationGroupID             
+      reservationID: encryptedReservationID,
+      reservationGroupID: encryptedReservationGroupID,
+      customerGroupID: encryptedCustomerGroupID,
+      customerID: encryptedCustomerID,
+      customerName: encryptedCustomerName,
+      action: encryptedAction,
+      status: encryptedStatus
     } }));
     window.open(this._generalService.FormURL+ url, '_blank');
   }

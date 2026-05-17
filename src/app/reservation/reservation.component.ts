@@ -78,7 +78,7 @@ export class ReservationComponent implements OnInit {
   @Input() action:any;
   @Input() fromForm:any;
   @Input() status:any;
-  @Input() allotmentStatus:any;
+  @Input() allotmentStatus:any = '';
   advanceTableFormEdit: FormGroup;
   advanceTable:Reservation;
   dataForReservationList:ModelForReservation | null;
@@ -393,7 +393,8 @@ advanceTableIN: InternalNoteDetails | null;
   contextMenu: MatMenuTrigger;
   contextMenuPosition = { x: '0px', y: '0px' };
   ngOnInit() { 
-    
+    this.applyStaticRequiredValidators();
+
     // Enhanced status checking - allow changes for new duplicated bookings
     if(this.status && this.status !== 'Changes allow' && !this.isEditingAllowed()) {
       this.buttonDisabled = true;
@@ -599,19 +600,22 @@ advanceTableIN: InternalNoteDetails | null;
 
 onTNCChange(checked: any)
 {
-  //const isChecked = event.target.checked;
   const pickupControl = this.advanceTableForm.get('pickupTime');
   if (checked === true) 
   {
     this.isTNCSelected = true;
-    this.advanceTableForm.get('pickupTime').setValue(null);
-    this.advanceTableForm.get('dropOffTime').setValue(null);
+    this.advanceTableForm.get('pickupTime')?.setValue(null);
+    this.advanceTableForm.get('dropOffTime')?.setValue(null);
+    pickupControl?.clearValidators();
     pickupControl?.disable();
+    pickupControl?.updateValueAndValidity({ emitEvent: false });
   }
   else
   {
     pickupControl?.enable();
     this.isTNCSelected = false;
+    pickupControl?.addValidators(Validators.required);
+    pickupControl?.updateValueAndValidity({ emitEvent: false });
   }
 }
 
@@ -742,7 +746,7 @@ onTNCChange(checked: any)
         // updated inside the same check / verify-check pass that first
         // read it, which is what produces NG0100 in dev mode.
         setTimeout(() => {
-          this.CustomerExtraFieldList = data || [];
+          this.CustomerExtraFieldList = this.toArray<CustomerReservationFields>(data);
           this.arr1 = [];
           this.arr2 = [];
 
@@ -792,7 +796,7 @@ onTNCChange(checked: any)
 
 getFieldValues() {
   this.arr = [];
-  this.CustomerExtraFieldList.forEach((field) => {
+  this.toArray<CustomerReservationFields>(this.CustomerExtraFieldList).forEach((field) => {
     const fieldValue = this.advanceTableForm.get(field.fieldName)?.value;
     if (Array.isArray(fieldValue)) {
       const transformedArray = fieldValue.map((item: any) => item.fieldValue);
@@ -801,6 +805,27 @@ getFieldValues() {
       this.arr.push(fieldValue);
     }
   });
+}
+
+toArray<T>(value: any): T[] {
+  if (Array.isArray(value)) {
+    return value;
+  }
+  if (value === null || value === undefined) {
+    return [];
+  }
+  if (typeof value === 'object') {
+    if (Array.isArray(value.data)) {
+      return value.data as T[];
+    }
+    if (Array.isArray(value.result)) {
+      return value.result as T[];
+    }
+    if (Array.isArray(value.items)) {
+      return value.items as T[];
+    }
+  }
+  return [];
 }
 
   InitCustomerAndPassenger()
@@ -947,7 +972,7 @@ getFieldValues() {
           this.advanceTableForm.get('isTimeNotConfirmed')?.setValue(false);
         }
         //this.advanceTableForm.patchValue({isTimeNotConfirmed:this.advanceTable.isTimeNotConfirmed});    
-        this.ImagePath=this.advanceTable.attachment;
+        this.ImagePath=this.normalizeAttachmentPath(this.advanceTable.attachment);
         this.advanceTableForm.patchValue({attachment:this.ImagePath});
         this.InitCustomerCustomerGroup();
         this.InitBooker();
@@ -1603,10 +1628,37 @@ getFieldValues() {
   // }
   PassengerValidator(PassengerList: any[]): ValidatorFn {
     return (control: AbstractControl): ValidationErrors | null => {
-      const value = control.value?.toLowerCase();
-      const match = PassengerList.some(data => ((data.customerPersonName + '-' + data.gender + '-' + data.importance + '-' + data.phone + '-' + data.customerDepartment + '-' + data.customerDesignation + '-' + data.customerName).toLowerCase()) === value);
+      const value = String(control.value ?? '').toLowerCase().trim();
+      const currentPassengerID = this.advanceTableForm?.value?.primaryPassengerID;
+
+      // Prefer ID-based validation. Prefilled text can vary in formatting,
+      // but selected/loaded passenger ID is the reliable key.
+      if (currentPassengerID !== null && currentPassengerID !== undefined && currentPassengerID !== '') {
+        const idMatch = PassengerList.some(
+          data => String(data?.customerPersonID ?? '') === String(currentPassengerID)
+        );
+        if (idMatch) {
+          return null;
+        }
+      }
+
+      const match = PassengerList.some(data =>
+        this.buildPassengerDisplay(data).toLowerCase().trim() === value
+      );
       return match ? null : { passengerInvalid: true };
     };
+  }
+
+  private buildPassengerDisplay(data: any): string {
+    return [
+      data?.customerPersonName ?? '',
+      data?.gender ?? '',
+      data?.importance ?? '',
+      data?.phone ?? '',
+      data?.customerDepartment ?? '',
+      data?.customerDesignation ?? '',
+      data?.customerName ?? ''
+    ].join('-');
   }
 
 
@@ -2632,20 +2684,70 @@ public PostGoogleAddress(): void
   error =>
   {
    
-  }
+      }
 )
 }
 
+private applyStaticRequiredValidators(): void {
+  ['tripType', 'pickupDate', 'pickupAddressDetails', 'pickupAddress'].forEach((name) => {
+    const control = this.advanceTableForm.get(name);
+    if (control) {
+      control.addValidators(Validators.required);
+      control.updateValueAndValidity({ emitEvent: false });
+    }
+  });
+  if (!this.isTNCSelected) {
+    const pickupTimeControl = this.advanceTableForm.get('pickupTime');
+    pickupTimeControl?.addValidators(Validators.required);
+    pickupTimeControl?.updateValueAndValidity({ emitEvent: false });
+  }
+}
+
+private reservationFormValue(): Record<string, unknown> {
+  return this.advanceTableForm.getRawValue() as Record<string, unknown>;
+}
+
+private isEmptyId(value: unknown): boolean {
+  return value === null || value === undefined || value === '' || value === 0 || value === '0';
+}
+
+private isEmptyText(value: unknown): boolean {
+  return value === null || value === undefined || String(value).trim() === '';
+}
+
+private isEmptyValue(value: unknown): boolean {
+  return this.isEmptyId(value);
+}
+
+private isGstForBillingUnset(value: unknown): boolean {
+  const text = String(value ?? '').trim();
+  return text === '' || text.toLowerCase() === '--select--';
+}
+
+public validateReservationForm(): boolean {
+  const isValid = this.CustomerDetails()
+    && this.PickupDetails()
+    && this.OtherDetails()
+    && this.validateCustomerSpecificFields();
+  if (!isValid) {
+    this.advanceTableForm.markAllAsTouched();
+    return false;
+  }
+  if (this.advanceTableForm.invalid) {
+    this.advanceTableForm.markAllAsTouched();
+    Swal.fire({
+      title: '',
+      text: 'Please complete all required fields correctly before saving.',
+      icon: 'warning',
+    });
+    return false;
+  }
+  return true;
+}
+
 public OtherDetails(): boolean {
-  // if (this.advanceTableForm.value.ticketNumber == "") {
-  //   Swal.fire({
-  //     title: '',
-  //     text: 'Please Select Ticket Number.',
-  //     icon: 'warning',
-  //   });
-  //   return false;
-  // }
-  if (this.advanceTableForm.value.ticketNumber === "") {
+  const form = this.reservationFormValue();
+  if (this.isEmptyText(form.ticketNumber)) {
     Swal.fire({
       title: '',
       text: 'Please Select Ticket Number.',
@@ -2653,7 +2755,7 @@ public OtherDetails(): boolean {
     });
     return false;
   }
-  if (this.advanceTableForm.value.reservationSource === "") {
+  if (this.isEmptyText(form.reservationSource)) {
     Swal.fire({
       title: '',
       text: 'Please Select Reservation Source.',
@@ -2662,7 +2764,7 @@ public OtherDetails(): boolean {
     return false;
   }
 
-  if (this.advanceTableForm.value.modeOfPayment === "") {
+  if (this.isEmptyText(form.modeOfPayment)) {
     Swal.fire({
       title: '',
       text: 'Please Select Payment Mode.',
@@ -2689,8 +2791,9 @@ public OtherDetails(): boolean {
   return true;
 }
 public PickupDetails(): boolean {
-   
-  if (this.advanceTableForm.value.pickupDate === null) {
+  const form = this.reservationFormValue();
+
+  if (this.isEmptyValue(form.pickupDate)) {
     Swal.fire({
       title: '',
       text: 'Please Select Pickup Date.',
@@ -2698,7 +2801,15 @@ public PickupDetails(): boolean {
     });
     return false;
   }
-  if (this.advanceTableForm.value.packageTypeID === 0 || this.advanceTableForm.value.packageType === "") {
+  if (!this.isTNCSelected && this.isEmptyValue(form.pickupTime)) {
+    Swal.fire({
+      title: '',
+      text: 'Please Select Pickup Time.',
+      icon: 'warning',
+    });
+    return false;
+  }
+  if (this.isEmptyId(form.packageTypeID) || this.isEmptyText(form.packageType)) {
     Swal.fire({
       title: '',
       text: 'Please Select Duty Type.',
@@ -2706,7 +2817,7 @@ public PickupDetails(): boolean {
     });
     return false;
   }
-  if (this.advanceTableForm.value.packageID === 0 || this.advanceTableForm.value.package === "") {
+  if (this.isEmptyId(form.packageID) || this.isEmptyText(form.package)) {
     Swal.fire({
       title: '',
       text: 'Please Select Package.',
@@ -2714,8 +2825,8 @@ public PickupDetails(): boolean {
     });
     return false;
   }
- 
-  if (this.advanceTableForm.value.pickupCityID === 0 || this.advanceTableForm.value.pickupCity === "") {
+
+  if (this.isEmptyId(form.pickupCityID) || this.isEmptyText(form.pickupCity)) {
     Swal.fire({
       title: '',
       text: 'Please Select Pickup City.',
@@ -2723,7 +2834,7 @@ public PickupDetails(): boolean {
     });
     return false;
   }
-  if (this.advanceTableForm.value.vehicleID === 0 || this.advanceTableForm.value.vehicle === "") {
+  if (this.isEmptyId(form.vehicleID) || this.isEmptyText(form.vehicle)) {
     Swal.fire({
       title: '',
       text: 'Please Select Vehicle.',
@@ -2731,7 +2842,7 @@ public PickupDetails(): boolean {
     });
     return false;
   }
-  if (this.advanceTableForm.value.pickupAddress === "") {
+  if (this.isEmptyText(form.pickupAddress)) {
     Swal.fire({
       title: '',
       text: 'Please Select Pickup Address.',
@@ -2739,7 +2850,7 @@ public PickupDetails(): boolean {
     });
     return false;
   }
-  if (this.advanceTableForm.value.pickupAddressDetails === "") {
+  if (this.isEmptyText(form.pickupAddressDetails)) {
     Swal.fire({
       title: '',
       text: 'Please Select Pickup Address Details.',
@@ -2747,13 +2858,39 @@ public PickupDetails(): boolean {
     });
     return false;
   }
-  if (this.advanceTableForm.value.serviceLocationID === 0 || this.advanceTableForm.value.serviceLocation === "") {
+  if (this.isEmptyId(form.serviceLocationID) || this.isEmptyText(form.serviceLocation)) {
     Swal.fire({
       title: '',
       text: 'Please Select Service Location.',
       icon: 'warning',
     });
     return false;
+  }
+  if (this.isEmptyText(form.tripType)) {
+    Swal.fire({
+      title: '',
+      text: 'Please Select Trip Type.',
+      icon: 'warning',
+    });
+    return false;
+  }
+  if (this.hideLocationOutDateTime) {
+    if (this.isEmptyValue(form.locationOutDate)) {
+      Swal.fire({
+        title: '',
+        text: 'Please Select Location Out Date.',
+        icon: 'warning',
+      });
+      return false;
+    }
+    if (this.isEmptyValue(form.locationOutTime)) {
+      Swal.fire({
+        title: '',
+        text: 'Please Select Location Out Time.',
+        icon: 'warning',
+      });
+      return false;
+    }
   }
   // if (this.advanceTableForm.value.pickupPriorityOrder === 0) {
   //   Swal.fire({
@@ -2766,7 +2903,8 @@ public PickupDetails(): boolean {
   return true;
 }
 public CustomerDetails(): boolean {
-  if (this.advanceTableForm.value.customerTypeID === 0) {
+  const form = this.reservationFormValue();
+  if (this.isEmptyId(form.customerTypeID)) {
     Swal.fire({
       title: '',
       text: 'Please Select Customer Type.',
@@ -2774,7 +2912,7 @@ public CustomerDetails(): boolean {
     });
     return false;
   }
-  if (this.advanceTableForm.value.customerID === 0) {
+  if (this.isEmptyId(form.customerID)) {
     Swal.fire({
       title: '',
       text: 'Please Select Customer Customer Group.',
@@ -2782,7 +2920,7 @@ public CustomerDetails(): boolean {
     });
     return false;
   }
-  if (this.advanceTableForm.value.primaryBookerID === 0 || this.advanceTableForm.value.booker === "") {
+  if (this.isEmptyId(form.primaryBookerID) || this.isEmptyText(form.booker)) {
     Swal.fire({
       title: '',
       text: 'Please Select Booker.',
@@ -2790,25 +2928,13 @@ public CustomerDetails(): boolean {
     });
     return false;
   }
-  if (this.advanceTableForm.value.primaryPassengerID === 0 || this.advanceTableForm.value.passenger === "") {
+  if (this.isEmptyId(form.primaryPassengerID) || this.isEmptyText(form.passenger)) {
     Swal.fire({
       title: '',
       text: 'Please Select Passenger.',
       icon: 'warning',
     });
     return false;
-  }
-  if(this.isGSTMandatoryWithReservation === true)
-  {
-    if (this.advanceTableForm.value.gSTForBilling  === "" || this.advanceTableForm.value.customerConfigurationInvoicingID === 0) 
-    {
-      Swal.fire({
-        title: '',
-        text: 'Please Select GST.',
-        icon: 'warning',
-      });
-      return false;
-    }
   }
   return true;
 }
@@ -2817,8 +2943,8 @@ public validateCustomerSpecificFields(): boolean {
   for (let field of this.CustomerExtraFieldList) {
     if (field.isMandatory) 
     {
-      const value = this.advanceTableForm.value[field.fieldName];
-      if (!value || value.trim() === '') {
+      const value = this.reservationFormValue()[field.fieldName];
+      if (this.isEmptyText(value)) {
         Swal.fire({
           title: '',
           text: `Please fill in ${field.fieldName}.`,
@@ -2830,23 +2956,6 @@ public validateCustomerSpecificFields(): boolean {
   }
   return true;
 }
-public validateONReservationGST(): boolean {
-  if(this.isGSTMandatoryWithReservation === true)
-  {
-    if (this.advanceTableForm.value.gSTForBilling  === "" || this.advanceTableForm.value.customerConfigurationInvoicingID === 0) 
-    {
-      Swal.fire({
-        title: '',
-        text: 'Please Select GST.',
-        icon: 'warning',
-      });
-      return false;
-    }
-  }
-  return true;
-}
-
-
   navigateToControlPanel() 
   {
 
@@ -2859,11 +2968,7 @@ public validateONReservationGST(): boolean {
   public Put(): void
   {
     this.advanceTableForm.patchValue({isTimeNotConfirmed:this.isTNCSelected});
-    if (this.CustomerDetails()) 
-    {
-      if(this.PickupDetails() && this.OtherDetails() && this.validateCustomerSpecificFields())
-      {
-        if(!this.advanceTableForm.value.dropOffPriorityOrder)
+    if(!this.advanceTableForm.value.dropOffPriorityOrder)
         {
           this.advanceTableForm.patchValue({dropOffPriorityOrder:0});
         }
@@ -2876,7 +2981,7 @@ public validateONReservationGST(): boolean {
     {
       this.advanceTableForm.patchValue({customerConfigurationInvoicingID:0});
     }
-    this.reservationService.update(this.advanceTableForm.value)  
+    this.reservationService.update(this.advanceTableForm.getRawValue())  
     .subscribe(
     response => 
     {
@@ -2933,18 +3038,12 @@ public validateONReservationGST(): boolean {
       // this._generalService.sendUpdate('QualificationAll:QualificationView:Failure');//To Send Updates  
     }
   )
-      }
-  }
   }
 
   public PutForReservationEdit(): void
   { 
     this.advanceTableForm.patchValue({isTimeNotConfirmed:this.isTNCSelected});
-    if (this.CustomerDetails()) 
-    {
-      if(this.PickupDetails() && this.OtherDetails() && this.validateCustomerSpecificFields())
-      {
-        if(!this.advanceTableForm.value.dropOffPriorityOrder)
+    if(!this.advanceTableForm.value.dropOffPriorityOrder)
           {
             this.advanceTableForm.patchValue({dropOffPriorityOrder:0});
           }
@@ -2957,7 +3056,7 @@ public validateONReservationGST(): boolean {
     {
       this.advanceTableForm.patchValue({customerConfigurationInvoicingID:0});
     }
-    this.reservationService.updateReservationEdit(this.advanceTableForm.value)  
+    this.reservationService.updateReservationEdit(this.advanceTableForm.getRawValue())  
     .subscribe(
     response => 
     {
@@ -2980,8 +3079,6 @@ public validateONReservationGST(): boolean {
       // this._generalService.sendUpdate('QualificationAll:QualificationView:Failure');//To Send Updates  
     }
   )
-      }
-  }
   }
 
   public Post(): void
@@ -3050,9 +3147,8 @@ public validateONReservationGST(): boolean {
     //window.open(this._generalService.FormURL+ url, '_blank');
   }
 
-  submit() 
-  {
-    // emppty stuff
+  onFormSubmit(event: Event): void {
+    event.preventDefault();
   }
 
   navigateToNewForms() {
@@ -3141,8 +3237,29 @@ public validateONReservationGST(): boolean {
   public ImagePath: string;
   public uploadFinished = (event) => {
   this.response = event;
-  this.ImagePath = this._generalService.getImageURL() + this.response.dbPath;
+  this.ImagePath = this.normalizeAttachmentPath(this._generalService.getImageURL() + this.response.dbPath);
   this.advanceTableForm.patchValue({attachment:this.ImagePath})
+  }
+
+  normalizeAttachmentPath(path: any): string {
+    const value = (path ?? '').toString().trim();
+    if (!value) {
+      return '';
+    }
+    const normalized = value.toLowerCase().replace(/\\/g, '/');
+    if (
+      normalized.endsWith('/images') ||
+      normalized.endsWith('/images/') ||
+      normalized === 'images' ||
+      normalized === 'images/'
+    ) {
+      return '';
+    }
+    return value;
+  }
+
+  hasPreviewImage(path: any): boolean {
+    return this.normalizeAttachmentPath(path).length > 0;
   }
 /////////////////for Image Upload ends////////////////////////////
 
@@ -4149,14 +4266,17 @@ private patchPickupAddress(res: any) {
 
   public confirmAdd(): void 
   {
-       if(this.action=="edit")
-       {
-          this.PutForReservationEdit();
-       }
-       else
-       {
-          this.Put();
-       }
+    if (this.buttonDisabled) {
+      return;
+    }
+    if (!this.validateReservationForm()) {
+      return;
+    }
+    if (this.action === 'edit') {
+      this.PutForReservationEdit();
+    } else {
+      this.Put();
+    }
   }
 
   InitCompanyForCustomer()
@@ -4573,15 +4693,10 @@ onTimeInput(event: any): void {
       data=>
       {
         this.ConfigurationInvoicingList=data;
-        if(this.isGSTMandatoryWithReservation === true)
-        {
-          this.advanceTableForm.controls['gSTForBilling'].setValidators([Validators.required,this.GSTMandatoryValidator(this.ConfigurationInvoicingList)]);
-          this.advanceTableForm.controls['gSTForBilling'].updateValueAndValidity();
-        }
-        else if(this.isGSTMandatoryWithReservation === false)
-        {
-          this.advanceTableForm.controls['gSTForBilling'].setValidators([this.GSTNonMandatoryValidator(this.ConfigurationInvoicingList)]);
-        }        
+        this.advanceTableForm.controls['gSTForBilling'].setValidators([
+          this.GSTNonMandatoryValidator(this.ConfigurationInvoicingList),
+        ]);
+        this.advanceTableForm.controls['gSTForBilling'].updateValueAndValidity();
         this.filteredConfigurationInvoicingOptions = this.advanceTableForm.controls['gSTForBilling'].valueChanges.pipe(
           startWith(""),
           map(value => this._filterReservationInvoiceGSTDetails(value || ''))
@@ -4603,35 +4718,52 @@ onTimeInput(event: any): void {
   }
   
   private _filterReservationInvoiceGSTDetails(value: string): any {
-    const filterValue = value.toLowerCase();
+    const filterValue = (value ?? '').toString().toLowerCase();
     return this.ConfigurationInvoicingList?.filter(
       customer => 
       {
-        return customer.gstNumber.toLowerCase().includes(filterValue) || customer.gstRate.toLowerCase().includes(filterValue) || customer.billingStateName.toLowerCase().includes(filterValue)
+        const gstNumber = String(customer?.gstNumber ?? '').toLowerCase();
+        const gstRate = String(customer?.gstRate ?? '').toLowerCase();
+        const billingState = String(customer?.billingStateName ?? '').toLowerCase();
+        return gstNumber.includes(filterValue) || gstRate.includes(filterValue) || billingState.includes(filterValue);
       }
     );
   }
 
   GSTMandatoryValidator(ConfigurationInvoicingList: any[]): ValidatorFn {
     return (control: AbstractControl): ValidationErrors | null => {
-      const value = control.value?.toLowerCase();
-      const match = ConfigurationInvoicingList.some(group => (group.gstNumber + '-' + group.gstRate + '-' + group.billingStateName ).toLowerCase() === value);
+      const value = String(control.value ?? '').toLowerCase();
+      const match = ConfigurationInvoicingList.some(group =>
+        (String(group?.gstNumber ?? '') + '-' + String(group?.gstRate ?? '') + '-' + String(group?.billingStateName ?? '')).toLowerCase() === value
+      );
       return match ? null : { gSTMandatoryForBillingInvaild: true };
     };
   }
 
   GSTNonMandatoryValidator(ConfigurationInvoicingList: any[]): ValidatorFn {
     return (control: AbstractControl): ValidationErrors | null => {
-      if (!control.value) {
-        return null; // No value to validate, return null (no error)
+      if (this.isGstForBillingUnset(control.value)) {
+        return null;
       }
-      const value = control.value?.toLowerCase();
-      const match = ConfigurationInvoicingList.some(group => (group.gstNumber + '-' + group.gstRate + '-' + group.billingStateName ).toLowerCase() === value);
+      const value = String(control.value).toLowerCase();
+      const match = ConfigurationInvoicingList.some(group => {
+        if (String(group.gstNumber ?? '').toLowerCase() === '--select--') {
+          return value === '--select--';
+        }
+        return (
+          (group.gstNumber + '-' + group.gstRate + '-' + group.billingStateName).toLowerCase() ===
+          value
+        );
+      });
       return match ? null : { gSTNonMandatoryForBillingInvaild: true };
     };
   }
   
   onReservationInvoiceGSTSelected(selectedRGName: string) {
+    if (this.isGstForBillingUnset(selectedRGName)) {
+      this.getReservationInvoiceGSTDetailsID(0);
+      return;
+    }
     const selectedPM = this.ConfigurationInvoicingList.find(
       data => data.gstNumber +'-'+
       data.gstRate +'-'+
@@ -4671,12 +4803,15 @@ onTimeInput(event: any): void {
       this.advanceTable = this.reservationDataSource[0];
       if (!this.advanceTable) { return; }
       let gstValue = "--Select--";
+      let invoicingId = 0;
       if (this.advanceTable?.gstNumber && this.advanceTable?.gstRate && this.advanceTable?.billingStateName)
       {
         gstValue = `${this.advanceTable.gstNumber}-${this.advanceTable.gstRate}-${this.advanceTable.billingStateName}`;
+        invoicingId = this.advanceTable.customerConfigurationInvoicingID ?? 0;
       }
       this.advanceTableForm.patchValue({gSTForBilling:gstValue});
-      this.advanceTableForm.patchValue({customerConfigurationInvoicingID:this.advanceTable.customerConfigurationInvoicingID});
+      this.advanceTableForm.patchValue({customerConfigurationInvoicingID:invoicingId});
+      this.advanceTableForm.controls['gSTForBilling'].updateValueAndValidity();
     });
 }
  onNumberInput(event: any) {

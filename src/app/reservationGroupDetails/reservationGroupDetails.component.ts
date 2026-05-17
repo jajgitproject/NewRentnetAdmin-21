@@ -190,6 +190,8 @@ export class ReservationGroupDetailsComponent implements OnInit {
     const encryptedReservationGroupID = encodeURIComponent(this._generalService.encrypt(item.reservationGroupID.toString()));
     const encryptedCustomerID = encodeURIComponent(this._generalService.encrypt(item.customerID.toString()));
     const encryptedCustomerName = encodeURIComponent(this._generalService.encrypt(item.customer));
+    const encryptedCustomerGroupID = encodeURIComponent(this._generalService.encrypt(item.customerGroupID.toString()));
+    const encryptedAction = encodeURIComponent(this._generalService.encrypt('edit'));
     
     // Always allow changes when editing from reservation group details
     const encryptedStatus = encodeURIComponent(this._generalService.encrypt('Changes allow'));
@@ -198,8 +200,10 @@ export class ReservationGroupDetailsComponent implements OnInit {
       queryParams: {
         reservationID: encryptedReservationID,
         reservationGroupID: encryptedReservationGroupID,
+        customerGroupID: encryptedCustomerGroupID,
         customerID: encryptedCustomerID,
         customerName: encryptedCustomerName,
+        action: encryptedAction,
         status: encryptedStatus
       }
     }));

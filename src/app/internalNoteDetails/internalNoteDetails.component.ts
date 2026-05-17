@@ -29,7 +29,7 @@ import { DeleteDialogComponent } from './dialogs/delete/delete.component';
   providers: [{ provide: MAT_DATE_LOCALE, useValue: 'en-GB' }]
 })
 export class InternalNoteDetailsComponent implements OnInit {
-  @Input() advanceTableINData:InternalNoteDetails | null;
+  @Input() advanceTableINData: InternalNoteDetails[] = [];
   @Input() reservationID;
   @Input() status;
   ReservationID: any;
@@ -87,9 +87,9 @@ export class InternalNoteDetailsComponent implements OnInit {
     (
       (data :InternalNoteDetails)=>   
       {
-        this.advanceTableINData = data;
+        this.advanceTableINData = this.toArray<InternalNoteDetails>(data);
       },
-      (error: HttpErrorResponse) => { this.advanceTableINData = null;}
+      (error: HttpErrorResponse) => { this.advanceTableINData = [];}
     );
   }
   InternalNoteEdit(i:any)
@@ -141,6 +141,27 @@ export class InternalNoteDetailsComponent implements OnInit {
   this.ImagePath = this._generalService.getImageURL() + this.response.dbPath;
   }
 /////////////////for Image Upload ends////////////////////////////
+
+  toArray<T>(value: any): T[] {
+    if (Array.isArray(value)) {
+      return value;
+    }
+    if (value === null || value === undefined) {
+      return [];
+    }
+    if (typeof value === 'object') {
+      if (Array.isArray(value.data)) {
+        return value.data as T[];
+      }
+      if (Array.isArray(value.result)) {
+        return value.result as T[];
+      }
+      if (Array.isArray(value.items)) {
+        return value.items as T[];
+      }
+    }
+    return [];
+  }
 
   /////////////////To Recieve Updates Start////////////////////////////
   messageReceived: string;

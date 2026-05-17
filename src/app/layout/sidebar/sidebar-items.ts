@@ -708,6 +708,16 @@ export const ROUTES: RouteInfo[] = [
         submenu: [],
         isAccess: false
       },
+      {
+        path: 'branchOverviewDashboard',
+        title: 'Branch Overview Dashboard',
+        moduleName: 'branch Overview Dashboard',
+        icon: 'fas fa-building',
+        class: '',
+        groupTitle: false,
+        submenu: [],
+        isAccess: false
+      },
       
       {
         path: 'driverMIS',

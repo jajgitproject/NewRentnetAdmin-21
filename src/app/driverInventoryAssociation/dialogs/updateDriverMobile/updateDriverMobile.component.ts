@@ -2,7 +2,7 @@
 import { MAT_DIALOG_DATA, MatDialogRef, MatDialogModule } from '@angular/material/dialog';
 import { Component, Inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormControl, Validators, FormGroup, FormBuilder, ReactiveFormsModule } from '@angular/forms';
+import { FormControl, Validators, FormGroup, FormBuilder, ReactiveFormsModule, AbstractControl, ValidationErrors, ValidatorFn } from '@angular/forms';
 import { MAT_DATE_LOCALE } from '@angular/material/core';
 import { formatDate } from '@angular/common';
 import { GeneralService } from '../../../general/general.service';
@@ -18,6 +18,7 @@ import { CountryCodeDropDown } from 'src/app/general/countryCodeDropDown.model';
 import { DriverModel } from 'src/app/CarAndDriverAllotment/CarAndDriverAllotment.model';
 import { MatAutocompleteModule } from '@angular/material/autocomplete';
 import { map, startWith } from 'rxjs/operators';
+import { Observable } from 'rxjs';
 
 @Component({
   standalone: false,
@@ -153,7 +154,7 @@ export class UpdateDriverMobileComponent {
   }
 
   //---------AttachAnotherDriver-----------------
-  onKeyupDriverName(_event?: Event) {
+  onKeyupDriverName(_event?: unknown): void {
     var Prefix = this.advanceTableForm.get("driverName").value;
     if (Prefix.length < 3) {
       this.AnotherDriverList = [];
@@ -307,6 +308,21 @@ export class UpdateDriverMobileComponent {
   public confirmAdd(): void {
     this.saveDisabled = false;
     this.Put();
+  }
+
+  /** Reset (add) or close dialog (edit) — wired from template Cancel/Reset. */
+  onNoClick(action?: string): void {
+    if (action === 'add') {
+      this.advanceTableForm.patchValue({
+        driverID: this.advanceTable?.driverID,
+        driverName: '',
+        mobile1: '',
+        countryCodes: '+91',
+      });
+      this.AnotherDriverList = [];
+    } else {
+      this.dialogRef.close();
+    }
   }
 
 

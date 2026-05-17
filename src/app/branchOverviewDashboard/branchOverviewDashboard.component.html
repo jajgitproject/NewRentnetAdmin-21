@@ -1,0 +1,278 @@
+<section class="content">
+  <div class="container-fluid">
+    <div class="block-header">
+      <div class="row">
+        <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+          <ul>
+            <li class="breadcrumb-item bcrumb-1">
+              <a routerLink="/dashboard/main"><i class="fas fa-home"></i> Home</a> |
+              <a href="#" onClick="return false;">Admin</a> |
+              <a href="#" onClick="return false;">Branch Overview Dashboard</a>
+            </li>
+          </ul>
+          <ul class="breadcrumb breadcrumb-style">
+            <li class="breadcrumb-item">
+              <h2>Branch Overview Dashboard</h2>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="bod-page">
+      <!-- Header card -->
+      <div class="bod-card">
+
+        <div class="bod-title-row">
+          <div class="bod-title-left">
+            <span class="bod-page-title">Branch Overview Dashboard</span>
+          </div>
+          <div class="bod-title-right">
+            <button type="button" class="bod-refresh-btn" (click)="onManualRefresh()">
+              <mat-icon>sync</mat-icon> Refresh (30s)
+            </button>
+          </div>
+        </div>
+
+        <div class="bod-meta-bar">
+          <span class="bod-meta-item" *ngIf="!showBranchSelector">
+            <mat-icon>apartment</mat-icon>
+            <span><strong>Branch:</strong> {{ branchName }}</span>
+          </span>
+          <span class="bod-meta-item bod-meta-item--selector" *ngIf="showBranchSelector">
+            <mat-icon>apartment</mat-icon>
+            <mat-form-field appearance="outline" class="bod-branch-field" subscriptSizing="dynamic">
+              <mat-label>Branch</mat-label>
+              <mat-select [formControl]="branchFilter" (selectionChange)="onBranchChange()">
+                <mat-option *ngFor="let b of branches" [value]="b.branchID">
+                  {{ b.branchName }}
+                </mat-option>
+              </mat-select>
+            </mat-form-field>
+          </span>
+          <span class="bod-meta-item bod-meta-warn" *ngIf="noBranchAssigned">
+            <mat-icon>info</mat-icon>
+            <span>No branch assigned for this user</span>
+          </span>
+          <span class="bod-meta-item">
+            <mat-icon>calendar_today</mat-icon>
+            <span><strong>Date:</strong> {{ displayDate }}</span>
+          </span>
+          <span class="bod-meta-item">
+            <mat-icon>schedule</mat-icon>
+            <span><strong>Shift:</strong> {{ shiftLabel }}</span>
+          </span>
+        </div>
+
+        <div class="bod-filters">
+          <mat-form-field appearance="outline" class="bod-field" subscriptSizing="dynamic">
+            <input matInput [matDatepicker]="dp" [formControl]="filterDate" readonly />
+            <mat-datepicker-toggle matIconSuffix [for]="dp"></mat-datepicker-toggle>
+            <mat-datepicker #dp></mat-datepicker>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" class="bod-field" subscriptSizing="dynamic">
+            <mat-select [formControl]="customerFilter">
+              <mat-option value="all">All Customers</mat-option>
+              <mat-option value="c1">Customer A</mat-option>
+              <mat-option value="c2">Customer B</mat-option>
+            </mat-select>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" class="bod-field" subscriptSizing="dynamic">
+            <mat-select [formControl]="dutyTypeFilter">
+              <mat-option value="all">All Duty Types</mat-option>
+              <mat-option value="local">Local</mat-option>
+              <mat-option value="out">Outstation</mat-option>
+            </mat-select>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" class="bod-field" subscriptSizing="dynamic">
+            <mat-select [formControl]="shiftFilter">
+              <mat-option value="all">All Shifts</mat-option>
+              <mat-option value="gen">General</mat-option>
+              <mat-option value="night">Night</mat-option>
+            </mat-select>
+          </mat-form-field>
+
+          <button type="button" class="bod-apply-btn" (click)="onApplyFilters()">Apply</button>
+        </div>
+
+        <!-- 1. Booking Summary -->
+        <div class="bod-section">
+          <div class="bod-section-hd"><span class="bod-num">1</span> BOOKING SUMMARY</div>
+          <div class="bod-grid bod-grid-3">
+            <article class="kpi kpi--blue">
+              <div class="kpi-top">
+                <div class="kpi-icon"><mat-icon>event</mat-icon></div>
+                <div class="kpi-text">
+                  <div class="kpi-label">Total Booking</div>
+                  <div class="kpi-value">{{ totalBooking }}</div>
+                </div>
+              </div>
+              <a class="kpi-foot" href="javascript:void(0)">View Details <span>&gt;</span></a>
+            </article>
+            <article class="kpi kpi--red">
+              <div class="kpi-top">
+                <div class="kpi-icon"><mat-icon>cancel</mat-icon></div>
+                <div class="kpi-text">
+                  <div class="kpi-label">Cancelled</div>
+                  <div class="kpi-value">{{ cancelled }}</div>
+                </div>
+              </div>
+              <a class="kpi-foot" href="javascript:void(0)">View Details <span>&gt;</span></a>
+            </article>
+            <article class="kpi kpi--orange">
+              <div class="kpi-top">
+                <div class="kpi-icon"><mat-icon>warning</mat-icon></div>
+                <div class="kpi-text">
+                  <div class="kpi-label">TNC</div>
+                  <div class="kpi-value">{{ tnc }}</div>
+                </div>
+              </div>
+              <a class="kpi-foot" href="javascript:void(0)">View Details <span>&gt;</span></a>
+            </article>
+          </div>
+        </div>
+
+        <!-- 2 & 3: Allotment + Owned/Supplier -->
+        <div class="bod-split">
+          <div class="bod-section">
+            <div class="bod-section-hd"><span class="bod-num">2</span> ALLOTMENT SUMMARY</div>
+            <div class="bod-grid bod-grid-2">
+              <article class="kpi kpi--green">
+                <div class="kpi-top kpi-top--plain">
+                  <div class="kpi-icon"><mat-icon>person</mat-icon></div>
+                  <div class="kpi-text">
+                    <div class="kpi-label">Total Allotted</div>
+                    <div class="kpi-value">{{ totalAllotted }}</div>
+                  </div>
+                </div>
+                <a class="kpi-foot" href="javascript:void(0)">View Details <span>&gt;</span></a>
+              </article>
+              <article class="kpi kpi--pink">
+                <div class="kpi-top kpi-top--plain">
+                  <div class="kpi-icon"><mat-icon>schedule</mat-icon></div>
+                  <div class="kpi-text">
+                    <div class="kpi-label">Late Allotted</div>
+                    <div class="kpi-value">{{ lateAllotted }}</div>
+                  </div>
+                </div>
+                <a class="kpi-foot" href="javascript:void(0)">View Details <span>&gt;</span></a>
+              </article>
+            </div>
+          </div>
+
+          <div class="bod-section">
+            <div class="bod-section-hd"><span class="bod-num">3</span> OWNED / SUPPLIER SUMMARY</div>
+            <div class="bod-owned-row">
+              <div class="bod-owned-stack">
+                <article class="kpi kpi--purple kpi--sm">
+                  <div class="kpi-top kpi-top--plain">
+                    <div class="kpi-icon"><mat-icon>home</mat-icon></div>
+                    <div class="kpi-text">
+                      <div class="kpi-label">Total Owned</div>
+                      <div class="kpi-value">{{ totalOwned }}</div>
+                    </div>
+                  </div>
+                  <a class="kpi-foot" href="javascript:void(0)">View Details <span>&gt;</span></a>
+                </article>
+                <article class="kpi kpi--sky kpi--sm">
+                  <div class="kpi-top kpi-top--plain">
+                    <div class="kpi-icon"><mat-icon>local_shipping</mat-icon></div>
+                    <div class="kpi-text">
+                      <div class="kpi-label">Total Supplier</div>
+                      <div class="kpi-value">{{ totalSupplier }}</div>
+                    </div>
+                  </div>
+                  <a class="kpi-foot" href="javascript:void(0)">View Details <span>&gt;</span></a>
+                </article>
+              </div>
+              <article class="kpi kpi--chart">
+                <div class="kpi-chart-title">Supplier Type Wise ({{ totalSupplier }})</div>
+                <div class="kpi-chart-body">
+                  <div class="kpi-chart-graph">
+                    <apx-chart
+                      [series]="supplierDonutSeries"
+                      [chart]="donutChart"
+                      [labels]="supplierDonutLabels"
+                      [colors]="supplierDonutColors"
+                      [plotOptions]="donutPlotOptions"
+                      [legend]="donutLegend"
+                      [dataLabels]="donutDataLabels"
+                    ></apx-chart>
+                  </div>
+                  <ul class="kpi-chart-legend">
+                    <li *ngFor="let lbl of supplierDonutLabels; let i = index">
+                      <span class="leg-dot" [style.background]="supplierDonutColors[i]"></span>
+                      <span class="leg-name">{{ lbl }}</span>
+                      <span class="leg-val">{{ supplierDonutSeries[i] }}</span>
+                      <span class="leg-pct">{{ supplierLegendPct(i) }}</span>
+                    </li>
+                  </ul>
+                </div>
+              </article>
+            </div>
+          </div>
+        </div>
+
+        <!-- 4, 5, 6: Status sections -->
+        <div class="bod-grid bod-grid-3">
+          <div class="bod-section bod-section--tight">
+            <div class="bod-section-hd"><span class="bod-num">4</span> DISPATCH STATUS</div>
+            <article class="kpi kpi--amber">
+              <div class="kpi-top kpi-top--plain">
+                <div class="kpi-icon"><mat-icon>local_shipping</mat-icon></div>
+                <div class="kpi-text">
+                  <div class="kpi-label">Late Dispatch</div>
+                  <div class="kpi-value">{{ lateDispatch }}</div>
+                </div>
+              </div>
+              <a class="kpi-foot" href="javascript:void(0)">View Details <span>&gt;</span></a>
+            </article>
+          </div>
+          <div class="bod-section bod-section--tight">
+            <div class="bod-section-hd"><span class="bod-num">5</span> VERIFICATION STATUS</div>
+            <article class="kpi kpi--violet">
+              <div class="kpi-top kpi-top--plain">
+                <div class="kpi-icon"><mat-icon>verified_user</mat-icon></div>
+                <div class="kpi-text">
+                  <div class="kpi-label">Not Verified</div>
+                  <div class="kpi-value">{{ notVerified }}</div>
+                </div>
+              </div>
+              <a class="kpi-foot" href="javascript:void(0)">View Details <span>&gt;</span></a>
+            </article>
+          </div>
+          <div class="bod-section bod-section--tight">
+            <div class="bod-section-hd"><span class="bod-num">6</span> DISPUTE STATUS</div>
+            <article class="kpi kpi--dispute">
+              <div class="kpi-top kpi-top--plain">
+                <div class="kpi-icon"><mat-icon>error_outline</mat-icon></div>
+                <div class="kpi-text">
+                  <div class="kpi-label">Total Dispute</div>
+                  <div class="kpi-value">{{ totalDispute }}</div>
+                </div>
+              </div>
+              <a class="kpi-foot" href="javascript:void(0)">View Details <span>&gt;</span></a>
+            </article>
+          </div>
+        </div>
+
+        <!-- Footer summary strip -->
+        <footer class="bod-footer">
+          <div class="bod-summary">
+            <span class="sum sum--blue"><mat-icon>event</mat-icon> Total Booking: <b>{{ totalBooking }}</b></span>
+            <span class="sum sum--red"><mat-icon>cancel</mat-icon> Cancelled: <b>{{ cancelled }}</b></span>
+            <span class="sum sum--orange"><mat-icon>warning</mat-icon> TNC: <b>{{ tnc }}</b></span>
+            <span class="sum sum--pink"><mat-icon>schedule</mat-icon> Late Allotted: <b>{{ lateAllotted }}</b></span>
+            <span class="sum sum--amber"><mat-icon>local_shipping</mat-icon> Late Dispatch: <b>{{ lateDispatch }}</b></span>
+            <span class="sum sum--violet"><mat-icon>verified_user</mat-icon> Not Verified: <b>{{ notVerified }}</b></span>
+            <span class="sum sum--dispute"><mat-icon>error_outline</mat-icon> Total Dispute: <b>{{ totalDispute }}</b></span>
+          </div>
+        </footer>
+
+      </div>
+    </div>
+  </div>
+</section>

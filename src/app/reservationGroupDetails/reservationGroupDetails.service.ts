@@ -154,8 +154,8 @@ export class ReservationGroupDetailsService
     advanceTable.endDateString=this.datePipe.transform(advanceTable.endDateString, 'yyyy-MM-dd');
     return this.httpClient.post<any>(this.Duplicate_API_URL+'/'+'ForBookingWithDateRange',advanceTable);
   }
- getAllotmentStatus(ReservationID: number): Observable<string> {
-  return this.httpClient.get<string>(
+ getAllotmentStatus(ReservationID: number): Observable<{ allotmentStatus: string }> {
+  return this.httpClient.get<{ allotmentStatus: string }>(
     this.API_URL + '/GetAllotmentStatus/' + ReservationID
   );
 }

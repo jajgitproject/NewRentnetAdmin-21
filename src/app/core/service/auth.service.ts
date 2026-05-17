@@ -58,6 +58,27 @@ export class AuthService {
     }
     const rawEmployee = user.employee ?? user.Employee;
     const token = user.Token ?? user.token;
+
+    const mapBranchInfo = (branch: any) => {
+      if (!branch || typeof branch !== 'object') {
+        return null;
+      }
+      const branchID = branch.BranchID ?? branch.branchID;
+      const branchName = branch.BranchName ?? branch.branchName;
+      if (branchID == null && !branchName) {
+        return null;
+      }
+      return {
+        BranchID: branchID,
+        BranchName: branchName,
+      };
+    };
+
+    const rawBranches = rawEmployee?.branches ?? rawEmployee?.Branches ?? [];
+    const branches = Array.isArray(rawBranches)
+      ? rawBranches.map(mapBranchInfo).filter(Boolean)
+      : [];
+
     const employee =
       rawEmployee && typeof rawEmployee === 'object'
         ? {
@@ -80,6 +101,12 @@ export class AuthService {
               rawEmployee.EmployeeEntityPasswordID ??
               rawEmployee.employeeEntityPasswordID,
             PasswordType: rawEmployee.PasswordType ?? rawEmployee.passwordType,
+            ShowAllLocation:
+              rawEmployee.ShowAllLocation ?? rawEmployee.showAllLocation ?? false,
+            DefaultBranch: mapBranchInfo(
+              rawEmployee.DefaultBranch ?? rawEmployee.defaultBranch
+            ),
+            Branches: branches,
           }
         : rawEmployee;
 

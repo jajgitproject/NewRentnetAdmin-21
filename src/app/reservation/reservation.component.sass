@@ -139,3 +139,25 @@ mat-checkbox
 :host ::ng-deep .register-form .cp-booking-field .mat-mdc-select-arrow
   color: #7a7a7a !important
 
+/* Pickup / drop-off geo + address detail fields: multiline with wrap */
+:host ::ng-deep .register-form .cp-address-field .mat-mdc-form-field-infix
+  min-height: 56px !important
+  padding-top: 18px !important
+  padding-bottom: 10px !important
+  display: flex !important
+  align-items: flex-start !important
+  box-sizing: border-box !important
+
+:host ::ng-deep .register-form .cp-address-field textarea.mat-mdc-input-element
+  align-self: stretch !important
+  width: 100% !important
+  min-height: 2.5rem !important
+  margin: 0 !important
+  padding: 6px 0 2px 0 !important
+  line-height: 1.35 !important
+  white-space: pre-wrap !important
+  word-wrap: break-word !important
+  overflow-wrap: break-word !important
+  resize: vertical
+  box-sizing: border-box !important
+

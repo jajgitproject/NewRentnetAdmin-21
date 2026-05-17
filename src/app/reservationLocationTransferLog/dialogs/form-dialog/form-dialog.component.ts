@@ -33,8 +33,8 @@ export class FormDialogComponent
   ReservationID: any;
   TransferID: any;
   TransferName: any;
-  status: string = '';
-  allotmentStatus: string = '';
+    status: string = '';
+  allotmentStatus?: string;
   buttonDisabled: boolean = false;
   saveButtonDisabled: boolean = false;
   dataSource: ReservationLocationTransferLogModel | null;

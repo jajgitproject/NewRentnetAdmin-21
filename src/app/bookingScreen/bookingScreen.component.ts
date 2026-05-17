@@ -16,7 +16,7 @@ export class BookingScreenComponent implements OnInit {
   action: any;
   ReservationGroupID: string;
   status: any;
-  allotmentStatus: any;
+  allotmentStatus: any = '';
   buttonDisabled: boolean = false;
   constructor(public route:ActivatedRoute,public _generalService: GeneralService,
      public reservationGroupDetailsService: ReservationGroupDetailsService,
@@ -51,11 +51,12 @@ public getAllotmentStatus(ReservationID) {
       (
         data => {
           this.allotmentStatus = data.allotmentStatus;
-          console.log(data.allotmentStatus);
           
           
         },
-        (error: HttpErrorResponse) => { this.allotmentStatus = null; }
+        (error: HttpErrorResponse) => {
+          this.allotmentStatus = null;
+        }
       );
   }
  

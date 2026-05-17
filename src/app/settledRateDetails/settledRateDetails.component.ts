@@ -28,7 +28,7 @@ import { DeleteDialogComponent } from './dialogs/delete/delete.component';
   providers: [{ provide: MAT_DATE_LOCALE, useValue: 'en-GB' }]
 })
 export class SettledRateDetailsComponent implements OnInit {
-  @Input() advanceTableSRD;
+  @Input() advanceTableSRD: SettledRateDetails[] = [];
   @Input() reservationID
   @Input() status;
   advanceTable: SettledRateDetails | null;
@@ -98,12 +98,12 @@ export class SettledRateDetailsComponent implements OnInit {
   {
      this.settledRateDetailsService.getTableData(this.reservationID,this.SearchActivationStatus, this.PageNumber).subscribe
      (
-       (data: SettledRateDetails)=>   
+      (data: any)=>   
        {
-         this.advanceTableSRD = data;
-         this.PackageType = this.advanceTableSRD[0].packageType;
+        this.advanceTableSRD = this.toArray<SettledRateDetails>(data);
+        this.PackageType = this.advanceTableSRD.length > 0 ? this.advanceTableSRD[0].packageType : '';
        },
-       (error: HttpErrorResponse) => { this.advanceTableSRD = null;}
+      (error: HttpErrorResponse) => { this.advanceTableSRD = [];}
      );
  }
   
@@ -129,6 +129,27 @@ export class SettledRateDetailsComponent implements OnInit {
   this.ImagePath = this._generalService.getImageURL() + this.response.dbPath;
   }
 /////////////////for Image Upload ends////////////////////////////
+
+  toArray<T>(value: any): T[] {
+    if (Array.isArray(value)) {
+      return value;
+    }
+    if (value === null || value === undefined) {
+      return [];
+    }
+    if (typeof value === 'object') {
+      if (Array.isArray(value.data)) {
+        return value.data as T[];
+      }
+      if (Array.isArray(value.result)) {
+        return value.result as T[];
+      }
+      if (Array.isArray(value.items)) {
+        return value.items as T[];
+      }
+    }
+    return [];
+  }
 
 
   /////////////////To Recieve Updates Start////////////////////////////

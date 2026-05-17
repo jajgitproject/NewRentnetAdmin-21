@@ -32,7 +32,7 @@ import { DeleteDialogComponent } from './dialogs/delete/delete.component';
 export class SpecialInstructionDetailsComponent implements OnInit {
   //advanceTable: SpecialInstructionDetails | null;
   advanceTableForm: FormGroup;
-  @Input() advanceTableSI:SpecialInstructionDetails | null;
+  @Input() advanceTableSI: SpecialInstructionDetails[] = [];
   @Input() reservationID;
   @Input() status;
  // @Output() outputFromStopDetails = new EventEmitter <boolean> ();
@@ -51,7 +51,7 @@ export class SpecialInstructionDetailsComponent implements OnInit {
     public _generalService: GeneralService,
   ) {
     
-    this.advanceTableSI = new SpecialInstructionDetails({});
+    this.advanceTableSI = [];
     // this.advanceTable.field1='Value 1';
     // this.advanceTable.field2='Value 2';
     // this.advanceTable.field3='Value 3';
@@ -109,11 +109,11 @@ export class SpecialInstructionDetailsComponent implements OnInit {
   {
      this.specialInstructionDetailsService.getspecialInstructionDetails(this.reservationID).subscribe
      (
-       (data: SpecialInstructionDetails)=>   
+      (data: any)=>   
         {
-          this.advanceTableSI = data;    
+         this.advanceTableSI = this.toArray<SpecialInstructionDetails>(data);    
         },
-        (error: HttpErrorResponse) => { this.advanceTableSI = null;}
+       (error: HttpErrorResponse) => { this.advanceTableSI = [];}
       );
  }
 
@@ -172,6 +172,48 @@ export class SpecialInstructionDetailsComponent implements OnInit {
   this.ImagePath = this._generalService.getImageURL() + this.response.dbPath;
   }
 /////////////////for Image Upload ends////////////////////////////
+
+  normalizeAttachmentPath(path: any): string {
+    const value = (path ?? '').toString().trim();
+    if (!value) {
+      return '';
+    }
+    const normalized = value.toLowerCase().replace(/\\/g, '/');
+    if (
+      normalized === 'images' ||
+      normalized === 'images/' ||
+      normalized.endsWith('/images') ||
+      normalized.endsWith('/images/')
+    ) {
+      return '';
+    }
+    return value;
+  }
+
+  hasAttachmentPreview(path: any): boolean {
+    return this.normalizeAttachmentPath(path).length > 0;
+  }
+
+  toArray<T>(value: any): T[] {
+    if (Array.isArray(value)) {
+      return value;
+    }
+    if (value === null || value === undefined) {
+      return [];
+    }
+    if (typeof value === 'object') {
+      if (Array.isArray(value.data)) {
+        return value.data as T[];
+      }
+      if (Array.isArray(value.result)) {
+        return value.result as T[];
+      }
+      if (Array.isArray(value.items)) {
+        return value.items as T[];
+      }
+    }
+    return [];
+  }
 
   /////////////////To Recieve Updates Start////////////////////////////
   messageReceived: string;
