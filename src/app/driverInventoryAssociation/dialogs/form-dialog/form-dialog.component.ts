@@ -30,20 +30,6 @@ import { forkJoin } from 'rxjs';
   selector: 'app-form-dialog',
   templateUrl: './form-dialog.component.html',
   styleUrls: ['./form-dialog.component.sass'],
-  imports: [
-    CommonModule,
-    ReactiveFormsModule,
-    MatDialogModule,
-    MatFormFieldModule,
-    MatInputModule,
-    MatAutocompleteModule,
-    MatSelectModule,
-    MatDatepickerModule,
-    MatCheckboxModule,
-    MatButtonModule,
-    MatIconModule,
-    MatProgressSpinnerModule,
-  ],
   providers: [{ provide: MAT_DATE_LOCALE, useValue: 'en-GB' }]
 })
 

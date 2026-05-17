@@ -393,7 +393,8 @@ export class FormDialogSendSmsWhatsappMailComponent {
       .subscribe(
         (data: any) => {
           this.dialogRef.close();
-          if (data === '"OK"') {
+          const normalizedMessage = this.normalizeNotificationResponse(data);
+          if (normalizedMessage.toLowerCase() === 'ok') {
             this.showNotification(
               'snackbar-success',
               'Sent SMS And Email...!!!',
@@ -401,7 +402,7 @@ export class FormDialogSendSmsWhatsappMailComponent {
               'center'
             );
           } 
-          else if (data === '"Do not send notification"' || data === 'Do not send notification') 
+          else if (normalizedMessage.toLowerCase() === 'do not send notification') 
           {
             Swal.fire({
                       title: '',
@@ -413,7 +414,9 @@ export class FormDialogSendSmsWhatsappMailComponent {
           else {
             this.showNotification(
               'snackbar-danger',
-              'Failed to send SMS and Email...!!!',
+              normalizedMessage
+                ? `Failed to send SMS and Email... ${normalizedMessage}`
+                : 'Failed to send SMS and Email...!!!',
               'bottom',
               'center'
             );
@@ -421,6 +424,24 @@ export class FormDialogSendSmsWhatsappMailComponent {
         },
        
       );
+  }
+
+  private normalizeNotificationResponse(response: any): string {
+    if (response == null || response === undefined) {
+      return '';
+    }
+    if (typeof response === 'string') {
+      return response.replace(/^"+|"+$/g, '').trim();
+    }
+    if (typeof response === 'object') {
+      if (typeof response.message === 'string') {
+        return response.message.replace(/^"+|"+$/g, '').trim();
+      }
+      if (typeof response.result === 'string') {
+        return response.result.replace(/^"+|"+$/g, '').trim();
+      }
+    }
+    return String(response).replace(/^"+|"+$/g, '').trim();
   }
 
   // deleteRecord(row: any) {

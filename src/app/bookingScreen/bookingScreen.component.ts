@@ -16,6 +16,7 @@ export class BookingScreenComponent implements OnInit {
   action: any;
   ReservationGroupID: string;
   status: any;
+  allotmentStatus: any;
   buttonDisabled: boolean = false;
   constructor(public route:ActivatedRoute,public _generalService: GeneralService,
      public reservationGroupDetailsService: ReservationGroupDetailsService,
@@ -41,9 +42,9 @@ export class BookingScreenComponent implements OnInit {
         this.status = '';
       }
       
-        this.buttonDisabled = this.status !== 'Changes allow';
+      this.buttonDisabled = this.status !== 'Changes allow';
+      this.getAllotmentStatus(this.ReservationID);
     });
-    this.getAllotmentStatus(this.ReservationID);
   }
 public getAllotmentStatus(ReservationID) {
     this.reservationGroupDetailsService.getAllotmentStatus(ReservationID).subscribe

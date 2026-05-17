@@ -24,17 +24,6 @@ import { map, startWith } from 'rxjs/operators';
   selector: 'app-updateDriverMobile',
   templateUrl: './updateDriverMobile.component.html',
   styleUrls: ['./updateDriverMobile.component.sass'],
-  imports: [
-    CommonModule,
-    ReactiveFormsModule,
-    MatDialogModule,
-    MatFormFieldModule,
-    MatInputModule,
-    MatButtonModule,
-    MatIconModule,
-    MatProgressSpinnerModule,
-    MatAutocompleteModule
-  ],
   providers: [{ provide: MAT_DATE_LOCALE, useValue: 'en-GB' }]
 })
 
@@ -164,7 +153,7 @@ export class UpdateDriverMobileComponent {
   }
 
   //---------AttachAnotherDriver-----------------
-  onKeyupDriverName() {
+  onKeyupDriverName(_event?: Event) {
     var Prefix = this.advanceTableForm.get("driverName").value;
     if (Prefix.length < 3) {
       this.AnotherDriverList = [];
@@ -264,6 +253,15 @@ export class UpdateDriverMobileComponent {
 
   submit() {
     // emppty stuff
+  }
+
+  onNoClick(action?: string): void {
+    if (action === 'add') {
+      this.advanceTableForm.reset();
+      this.advanceTableForm.patchValue({ countryCodes: '+91' });
+      return;
+    }
+    this.dialogRef.close({ isClose: true });
   }
 
 
