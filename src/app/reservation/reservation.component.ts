@@ -4555,6 +4555,21 @@ ShowDataForStops()
   
   const validDate = moment(value, 'DD/MM/YYYY', true).isValid();
   if (validDate) {
+    const selectedDate = moment(value, 'DD/MM/YYYY').startOf('day');
+    const today = moment().startOf('day');
+    if (selectedDate.isBefore(today) && !this.canThisRoleCreateBackDateBooking()) {
+      Swal.fire({
+        title: '',
+        text: 'You are not allowed to create back date booking',
+        icon: 'warning'
+      });
+      this.advanceTableForm.get('pickupDate')?.setValue('');
+      this.pickupDate = '';
+      if (event?.target) {
+        event.target.value = '';
+      }
+      return;
+    }
     const formattedDate = moment(value, 'DD/MM/YYYY').toDate();
       this.advanceTableForm.get('pickupDate')?.setValue(formattedDate);    
   } else {
@@ -4589,6 +4604,15 @@ onTimeInput(event: any): void {
       this.advanceTableForm.get('pickupTime').setValue(parsedTime);
   }
   this.locationTimeSet(this.advanceTableForm.value.pickupTime);
+}
+
+private canThisRoleCreateBackDateBooking(): boolean {
+  const rawValue = localStorage.getItem('canThisRoleCreateBackDateBooking');
+  if (rawValue == null) {
+    return false;
+  }
+  const normalized = rawValue.toString().trim().toLowerCase();
+  return normalized === 'true' || normalized === '1';
 }
 
   getDataForReservation()
