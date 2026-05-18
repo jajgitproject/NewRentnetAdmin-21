@@ -1432,6 +1432,7 @@
                     <b>Duty Status</b>
                   </span>
 
+                  <ng-container *ngIf="showTrackingStatusColumn">
                    <span style="
                   font-size: 12px;
                   text-align: left;
@@ -1443,6 +1444,7 @@
                       [ngClass]="{'fa-arrow-up': sortColumn === 'appCarStatus' && sortDirection === 'asc',
                                             'fa-arrow-down': sortColumn === 'appCarStatus' && sortDirection === 'desc'}"></i>
                   </span>
+                  </ng-container>
 
                   <span style="
                   font-size: 12px;
@@ -1902,10 +1904,11 @@
                             Billed : {{ data.invoiceID === null ? 'N/A' : (data.invoiceID !== 0 ? 'Yes' : 'No') }}
                           </span>
 
-
+                          <ng-container *ngIf="showTrackingStatusColumn">
                           <span style="font-size: 12px;text-align: left;width: 100px;float: left;">
                             {{ data.carStatus || 'N/A' }}
                           </span>
+                          </ng-container>
 
                           <span style="font-size: 12px;text-align: left;width: 100px;float: left;">
                             {{ data.ticketNumber || 'N/A' }}

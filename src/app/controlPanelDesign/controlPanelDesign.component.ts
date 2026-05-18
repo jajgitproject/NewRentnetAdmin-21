@@ -229,6 +229,8 @@ export class ControlPanelDesignComponent implements OnInit {
   packageID: any;
   supplierID: any;
   showEmptyTableHeader: boolean = false;
+  /** When true, shows the Tracking Status column in the main Control Panel grid. */
+  showTrackingStatusColumn = false;
   //sortBy:string='Reservation.ReservationID';
   sortBy:string='Reservation.PickupDate, Reservation.PickupTime ';
   orderBy:string='ASC';
