@@ -109,6 +109,7 @@ export class SigninComponent implements OnInit {
                 localStorage.setItem('roleID', employee.RoleID ?? employee.roleID);
                 localStorage.setItem('role', employee.Role ?? employee.role);
                 localStorage.setItem('canCreateReservation', employee.CanCreateReservation ?? employee.canCreateReservation);
+                localStorage.setItem('canThisRoleCreateBackDateBooking', employee.CanThisRoleCreateBackDateBooking ?? employee.canThisRoleCreateBackDateBooking);
                 //this.expirationDateService.setExpirationDate(res.employee.PasswordExpirationDate);
                 // Call the method to open ValidateOTP modal on successful login
                 this.calculateDaysLeft();
