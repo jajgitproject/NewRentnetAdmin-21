@@ -191,6 +191,17 @@ export class FormDialogSendSmsWhatsappMailComponent {
     if (typeLower === 'passenger') {
       return 'Passenger';
     }
+    if (typeLower === 'customer person' || typeLower === 'customerperson' || element?.customerPersonID) {
+      // For known customer persons, prefer explicit role flags and keep
+      // "Passenger" precedence when both are true.
+      if (element?.isPassenger === true || element?.reachedSMSToPassenger === true) {
+        return 'Passenger';
+      }
+      if (element?.isBooker === true || element?.reachedSMSToBooker === true) {
+        return 'Booker';
+      }
+      return 'Booker';
+    }
     if (typeLower === 'number') {
       return 'Not Registered';
     }
@@ -391,7 +402,7 @@ export class FormDialogSendSmsWhatsappMailComponent {
         ID: element?.employeeID ?? element?.customerPersonID ?? element?.numberMobileID ?? null,
         AllotmentID: element?.allotmentID || 0,
         Name: displayName,
-        Mobile: element.primaryMobile.toString(),
+        Mobile: (element?.primaryMobile ?? '').toString(),
         Email: email,
         Type: recipientType,
         IsCustomerNotificationsAllowed:
@@ -446,7 +457,18 @@ export class FormDialogSendSmsWhatsappMailComponent {
             );
           }
         },
-       
+        (error: HttpErrorResponse) => {
+          const apiMessage =
+            this.normalizeNotificationResponse(error?.error) ||
+            error?.message ||
+            'Failed to send SMS and Email...!!!';
+          this.showNotification(
+            'snackbar-danger',
+            `Failed to send SMS and Email... ${apiMessage}`,
+            'bottom',
+            'center'
+          );
+        }
       );
   }
 
