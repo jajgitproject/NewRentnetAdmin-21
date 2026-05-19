@@ -1137,7 +1137,7 @@
                         <div class="row" style="margin:10px">
 
                             <ng-container *ngFor="let data of toArray(CustomerExtraFieldList)">
-                                <div *ngIf="data.fieldControlType === 'TextBox'"
+                                <div *ngIf="data.fieldControlType === 'TextBox' && advanceTableForm?.controls?.[data.fieldName]"
                                     class="col-xl-3 col-lg-3 col-md-6 col-sm-12 mb-2">
                                     <!-- <div *ngIf="data.fieldControlType === 'TextBox'" class="col-xl-3 col-lg-3 col-md-3 col-sm-6 mb-2"> -->
                                     <mat-form-field class="example-full-width cp-booking-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
@@ -1146,7 +1146,7 @@
                                     </mat-form-field>
                                 </div>
 
-                                <div *ngIf="data.fieldControlType === 'DropDown'"
+                                <div *ngIf="data.fieldControlType === 'DropDown' && advanceTableForm?.controls?.[data.fieldName]"
                                     class="col-xl-3 col-lg-3 col-md-6 col-sm-12 mb-2">
                                     <!-- <div *ngIf="data.fieldControlType === 'DropDown'" class="col-xl-3 col-lg-3 col-md-3 col-sm-6 mb-2"> -->
                                     <mat-form-field class="example-full-width cp-booking-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">

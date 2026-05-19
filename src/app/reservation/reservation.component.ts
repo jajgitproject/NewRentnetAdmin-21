@@ -523,6 +523,7 @@ advanceTableIN: InternalNoteDetails | null;
 
     const encryptedReservationID = paramsData.reservationID;
     this.reservationID = this._generalService.decrypt(decodeURIComponent(encryptedReservationID));
+    this.ReservationID = this.reservationID;
 
     const encryptedTransferedLocationID = paramsData.transferedLocationID;
     this.transferedLocationID = this._generalService.decrypt(decodeURIComponent(encryptedTransferedLocationID));
@@ -695,7 +696,7 @@ onTNCChange(checked: any)
       if (!value || value.trim() === '') {
       return { modeOfPaymentInvalid: true };
     }
-      const match = PaymentModeList.some(group => group.modeOfPayment.toLowerCase() === value);
+      const match = (PaymentModeList || []).some(group => String(group?.modeOfPayment ?? '').toLowerCase() === value);
       return match ? null : { modeOfPaymentInvalid: true };
     };
   }
@@ -717,14 +718,17 @@ onTNCChange(checked: any)
 
   CustomerSpecificFieldsloadData()
     {
-      this.newFormService.GetCustomerSpecificFields(this.ReservationID).subscribe(
+      const reservationID = this.getCurrentReservationID();
+      if (!reservationID) { return; }
+      this.newFormService.GetCustomerSpecificFields(reservationID).subscribe(
         (data:CustomerSpecificDetailsData)=>
         {
           this.dataSourceCSF = data.reservationDetailsList;
           const fieldValues = this.dataSourceCSF[0]?.customerSpecificFieldList || [];
           fieldValues.forEach((item) => {
-            if (this.advanceTableForm.contains(item.fieldName)) {
-              this.advanceTableForm.get(item.fieldName)?.setValue(item.fieldValue);
+            const control = this.advanceTableForm.controls[item.fieldName];
+            if (control) {
+              control.setValue(item.fieldValue);
             }       
       });
         }
@@ -753,19 +757,33 @@ onTNCChange(checked: any)
         // updated inside the same check / verify-check pass that first
         // read it, which is what produces NG0100 in dev mode.
         setTimeout(() => {
-          this.CustomerExtraFieldList = this.toArray<CustomerReservationFields>(data);
+          const incomingFields = this.toArray<CustomerReservationFields>(data);
+          const previousDynamicKeys = [...this.arr2];
+          previousDynamicKeys.forEach((key) => {
+            if (this.advanceTableForm.contains(key)) {
+              this.advanceTableForm.removeControl(key);
+            }
+          });
+
           this.arr1 = [];
           this.arr2 = [];
 
-          this.CustomerExtraFieldList.forEach((ele) => {
+          incomingFields.forEach((ele) => {
             this.arr1.push(ele.customerReservationFieldID);
             this.arr2.push(ele.fieldName);
 
             const isMandatory = ele.isMandatory ? [Validators.required] : [];
-            this.advanceTableForm.addControl(ele.fieldName, new FormControl('', isMandatory));
+            const existingControl = this.advanceTableForm.controls[ele.fieldName];
+            if (existingControl) {
+              existingControl.setValidators(isMandatory);
+              existingControl.updateValueAndValidity({ emitEvent: false });
+            } else {
+              this.advanceTableForm.addControl(ele.fieldName, new FormControl('', isMandatory));
+            }
           });
+          this.CustomerExtraFieldList = incomingFields;
 
-          if(this.action === 'edit')
+          if(this.shouldUseEditPrefill())
           {
             this.CustomerSpecificFieldsloadData();
           }
@@ -804,7 +822,7 @@ onTNCChange(checked: any)
 getFieldValues() {
   this.arr = [];
   this.toArray<CustomerReservationFields>(this.CustomerExtraFieldList).forEach((field) => {
-    const fieldValue = this.advanceTableForm.get(field.fieldName)?.value;
+    const fieldValue = this.getCustomerFieldValue(field.fieldName);
     if (Array.isArray(fieldValue)) {
       const transformedArray = fieldValue.map((item: any) => item.fieldValue);
       this.arr.push(...transformedArray);
@@ -2296,9 +2314,9 @@ toArray<T>(value: any): T[] {
 
 DTValidator(PackageTypeList: any[]): ValidatorFn {
     return (control: AbstractControl): ValidationErrors | null => {
-      const value = control.value?.toLowerCase();
-      const match = PackageTypeList.some(data =>
-        (data.packageType.toLowerCase()) === value
+      const value = String(control.value ?? '').toLowerCase();
+      const match = (PackageTypeList || []).some(data =>
+        String(data?.packageType ?? '').toLowerCase() === value
       );
       return match ? null : { packageTypeInvalid: true };
     };
@@ -2373,8 +2391,8 @@ DTValidator(PackageTypeList: any[]): ValidatorFn {
 
   PValidator(PackageList: any[]): ValidatorFn {
       return (control: AbstractControl): ValidationErrors | null => {
-        const value = control.value?.toLowerCase();
-        const match = PackageList.some(data =>(data.package.toLowerCase()) === value);
+        const value = String(control.value ?? '').toLowerCase();
+        const match = (PackageList || []).some(data => String(data?.package ?? '').toLowerCase() === value);
         return match ? null : { packageInvalid: true };
       };
     }
@@ -2780,6 +2798,36 @@ private reservationFormValue(): Record<string, unknown> {
   return this.advanceTableForm.getRawValue() as Record<string, unknown>;
 }
 
+private getCustomerFieldValue(fieldName: string): unknown {
+  const targetFieldName = String(fieldName ?? '').trim();
+  if (!targetFieldName) {
+    return undefined;
+  }
+
+  const exactControl = this.advanceTableForm.controls[targetFieldName];
+  if (exactControl) {
+    return exactControl.value;
+  }
+
+  const normalizedTarget = targetFieldName.toLowerCase();
+  const controlKey = Object.keys(this.advanceTableForm.controls).find(
+    key => key.trim().toLowerCase() === normalizedTarget
+  );
+  if (controlKey) {
+    return this.advanceTableForm.controls[controlKey]?.value;
+  }
+
+  const formValue = this.reservationFormValue();
+  if (Object.prototype.hasOwnProperty.call(formValue, targetFieldName)) {
+    return formValue[targetFieldName];
+  }
+
+  const rawKey = Object.keys(formValue).find(
+    key => key.trim().toLowerCase() === normalizedTarget
+  );
+  return rawKey ? formValue[rawKey] : undefined;
+}
+
 private isEmptyId(value: unknown): boolean {
   return value === null || value === undefined || value === '' || value === 0 || value === '0';
 }
@@ -3013,10 +3061,10 @@ public CustomerDetails(): boolean {
 }
 
 public validateCustomerSpecificFields(): boolean {
-  for (let field of this.CustomerExtraFieldList) {
-    if (field.isMandatory) 
+  for (const field of this.toArray<CustomerReservationFields>(this.CustomerExtraFieldList)) {
+    if (field?.isMandatory) 
     {
-      const value = this.reservationFormValue()[field.fieldName];
+      const value = this.getCustomerFieldValue(field.fieldName);
       if (this.isEmptyText(value)) {
         Swal.fire({
           title: '',
@@ -4771,12 +4819,19 @@ private canThisRoleCreateBackDateBooking(): boolean {
     );
   }
 
+  private getCurrentReservationID(): any {
+    return this.ReservationID
+      || this.reservationID
+      || this.advanceTableForm?.value?.reservationID
+      || this.advanceTable?.reservationID;
+  }
+
   private shouldUseEditPrefill(): boolean {
     const normalizedAction = (this.action || '').toString().trim().toLowerCase();
     if (normalizedAction === 'edit') {
       return true;
     }
-    return !!this.ReservationID && !normalizedAction;
+    return !!this.getCurrentReservationID() && !normalizedAction;
   }
 
   showError(controlName: string): boolean {
@@ -4880,7 +4935,7 @@ private canThisRoleCreateBackDateBooking(): boolean {
   GSTMandatoryValidator(ConfigurationInvoicingList: any[]): ValidatorFn {
     return (control: AbstractControl): ValidationErrors | null => {
       const value = String(control.value ?? '').toLowerCase();
-      const match = ConfigurationInvoicingList.some(group =>
+      const match = (ConfigurationInvoicingList || []).some(group =>
         (String(group?.gstNumber ?? '') + '-' + String(group?.gstRate ?? '') + '-' + String(group?.billingStateName ?? '')).toLowerCase() === value
       );
       return match ? null : { gSTMandatoryForBillingInvaild: true };
@@ -4893,7 +4948,7 @@ private canThisRoleCreateBackDateBooking(): boolean {
         return null;
       }
       const value = String(control.value).toLowerCase();
-      const match = ConfigurationInvoicingList.some(group => {
+      const match = (ConfigurationInvoicingList || []).some(group => {
         if (String(group.gstNumber ?? '').toLowerCase() === '--select--') {
           return value === '--select--';
         }
