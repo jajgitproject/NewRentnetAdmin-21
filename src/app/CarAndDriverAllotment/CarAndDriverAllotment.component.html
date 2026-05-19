@@ -1694,7 +1694,7 @@
               </mat-accordion>
 
               <mat-progress-bar mode="indeterminate" *ngIf="isLoading"></mat-progress-bar>
-              <mat-paginator #paginator [length]="unassociatedTotalData  || driverInventoryAssociationDataSource?.Length" [pageSize]="recordsPerPage" (page)="onChangedPage($event)"
+              <mat-paginator #paginator [length]="unassociatedTotalData || driverInventoryAssociationDataSource?.length || 0" [pageIndex]="PageNumber - 1" [pageSize]="recordsPerPage" (page)="onChangedPage($event)"
                 showFirstLastButtons></mat-paginator>
             </div>
           </div>
@@ -1825,9 +1825,9 @@
           <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
             <mat-form-field class="example-full-width">
               <mat-label>Vendor Type</mat-label>
-              <input type="text" matInput [matAutocomplete]="auto35" [formControl]="vendorType" />
+              <input type="text" matInput [matAutocomplete]="auto35" [formControl]="modalVendorType" />
                         <mat-autocomplete #auto35="matAutocomplete" panelWidth="custom-autocomplete-panel">
-                <mat-option *ngFor="let option of filteredVendorTypeOptions | async" [value]="
+                <mat-option *ngFor="let option of VendorTypeList" [value]="
                       option.supplierType
                     ">
                   {{ option.supplierType }}
@@ -1853,10 +1853,10 @@
                      </mat-form-field> -->
             <mat-form-field class="example-full-width">
               <mat-label>Car Category</mat-label>
-              <input type="text" matInput [formControl]="category" [matAutocomplete]="auto9"
+              <input type="text" matInput [formControl]="modalCategory" [matAutocomplete]="auto9"
                 (keyup)="onVehicleAutoCompleteChange($event)" />
               <mat-autocomplete #auto9="matAutocomplete">
-                <mat-option *ngFor="let option of filteredVehicleCategoryOptions | async"
+                <mat-option *ngFor="let option of VehicleCategoryList"
                   [value]="option.vehicleCategory" (click)="getVehicleCategoryID(option.vehicleCategoryID)">
                   {{ option.vehicleCategory }}
                 </mat-option>
@@ -1884,9 +1884,9 @@
                      </mat-form-field> -->
             <mat-form-field class="example-full-width">
               <mat-label>Car</mat-label>
-              <input type="text" matInput [matAutocomplete]="auto1" [formControl]="vehicle" />
+              <input type="text" matInput [matAutocomplete]="auto1" [formControl]="modalVehicle" />
               <mat-autocomplete #auto1="matAutocomplete">
-                <mat-option *ngFor="let option of filteredVehicleOptions | async" [value]="option.vehicle">
+                <mat-option *ngFor="let option of VehicleList" [value]="option.vehicle">
                   {{ option.vehicle }}
                 </mat-option>
               </mat-autocomplete>
@@ -1895,7 +1895,7 @@
           <div class="col-xl-6 col-lg-6 col-md-6 col-sm-6 mb-2">
             <mat-form-field>
               <mat-label>Bookings</mat-label>
-              <mat-select [formControl]="bookingCount">
+              <mat-select [formControl]="modalBookingCount">
                 <mat-option value="0">0 Bookings</mat-option>
                 <mat-option value="1">1 Booking</mat-option>
                 <mat-option value="2">2 Bookings</mat-option>
@@ -1912,7 +1912,7 @@
             <mat-form-field>
               <mat-label>Business Volume</mat-label>
               <!-- <mat-select multiple> -->
-              <mat-select [formControl]="monthlyTarget">
+              <mat-select [formControl]="modalMonthlyTarget">
                 <mat-option value="between 0 - 10">Monthly business between 0 - 10%</mat-option>
                 <mat-option value="between 11 - 20">Monthly business between 11% - 20%</mat-option>
                 <mat-option value="between 21 - 30">Monthly business between 21% - 30%</mat-option>
@@ -1950,7 +1950,7 @@
           <div class="col-xl-6 col-lg-6 col-md-6 col-sm-6 mb-2">
             <mat-form-field>
               <mat-label>Other Criteria</mat-label>
-              <mat-select [formControl]="otherCriteria">
+              <mat-select [formControl]="modalOtherCriteria">
                 <mat-option value="PickupLocation">Currently Near Pickup Location</mat-option>
                 <mat-option value="Online">Online on App</mat-option>
                 <mat-option value="Offline">Offline on App</mat-option>
@@ -1965,10 +1965,10 @@
           <div class="col-xl-6 col-lg-5 col-md-6 col-sm-12 mb-2">
             <mat-form-field class="example-full-width">
               <mat-label>Supplier</mat-label>
-              <input type="text" matInput [formControl]="supplier" [matAutocomplete]="auto4"
+              <input type="text" matInput [formControl]="modalSupplier" [matAutocomplete]="auto4"
                 (keyup)="onAutoCompleteChange($event)" />
               <mat-autocomplete #auto4="matAutocomplete">
-                <mat-option *ngFor="let option of filteredSupplierOptions | async" [value]="option.supplierName"
+                <mat-option *ngFor="let option of SupplierList" [value]="option.supplierName"
                   (click)="getSupplierID(option.supplierID)">
                   {{ option.supplierName }}
                 </mat-option>
@@ -1978,9 +1978,9 @@
           <div class="col-xl-6 col-lg-5 col-md-6 col-sm-12 mb-2">
             <mat-form-field class="example-full-width">
               <mat-label>Driver</mat-label>
-              <input type="text" matInput [matAutocomplete]="auto" [formControl]="driver" />
+              <input type="text" matInput [matAutocomplete]="auto" [formControl]="modalDriver" />
               <mat-autocomplete #auto="matAutocomplete">
-                <mat-option *ngFor="let option of filteredOptions | async" [value]="
+                <mat-option *ngFor="let option of DriverList" [value]="
                      option.driverName +
                      '-' +
                      option.driverPhone +
@@ -2004,9 +2004,9 @@
           <div class="col-xl-6 col-lg-6 col-md-6 col-sm-6 mb-2">
             <mat-form-field class="example-full-width">
               <mat-label>Driver Official Identity No</mat-label>
-              <input type="text" matInput [formControl]="driverOfficialIdentityNumber" [matAutocomplete]="auto25">
+              <input type="text" matInput [formControl]="modalDriverOfficialIdentityNumber" [matAutocomplete]="auto25">
               <mat-autocomplete #auto25="matAutocomplete">
-                <mat-option *ngFor="let option of filteredDriverOfficialIdentityNumberOptions | async"
+                <mat-option *ngFor="let option of DriverOfficialIdentityNumberList"
                   [value]="option.driverOfficialIdentityNumber">
                   {{option.driverOfficialIdentityNumber}}
                 </mat-option>
@@ -2017,9 +2017,9 @@
           <div class="col-xl-6 col-lg-6 col-md-6 col-sm-6 mb-2">
             <mat-form-field class="example-full-width">
               <mat-label>Regn. No.</mat-label>
-              <input type="text" matInput [matAutocomplete]="auto2" [formControl]="inventory" />
+              <input type="text" matInput [matAutocomplete]="auto2" [formControl]="modalInventory" />
               <mat-autocomplete #auto2="matAutocomplete">
-                <mat-option *ngFor="let option of filteredInventoryOptions | async" [value]="
+                <mat-option *ngFor="let option of RegNumberList" [value]="
                      option.registrationNumber +
                      '-' +
                      option.vehicleCategory +
@@ -2040,7 +2040,7 @@
         </div>
       </div>
       <div class="modal-footer">
-        <button mat-raised-button color="primary" (click)="SearchCarAndDriver()" data-dismiss="modal">
+        <button mat-raised-button color="primary" (click)="SearchCarAndDriver(true)" data-dismiss="modal">
           Search
         </button>
       </div>

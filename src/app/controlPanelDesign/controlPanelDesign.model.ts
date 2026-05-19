@@ -432,7 +432,9 @@ export class Filters {
   constructor(filter) { 
     this.tripStatus = filter.tripStatus || '';
     this.userID = filter.userID || '';
-    this.showAllLocation = filter.showAllLocation || '';
+    this.showAllLocation = (typeof filter.showAllLocation === 'boolean')
+      ? filter.showAllLocation
+      : String(filter.showAllLocation).toLowerCase() === 'true';
     this.qualityStatus = filter.qualityStatus || '';
     this.reservationStatus = filter.reservationStatus || '';
     this.allotmentStatus = filter.allotmentStatus || '';

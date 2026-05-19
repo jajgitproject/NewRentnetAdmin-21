@@ -296,6 +296,17 @@ export class CarAndDriverAllotmentComponent implements OnInit {
   //searchedType: 'Associated' | 'Unassociated' = 'Associated';
   isLoadingdataUnassociated: boolean = false;
   isSearchClicked: boolean = false;
+  modalOtherCriteria: FormControl = new FormControl();
+  modalMonthlyTarget: FormControl = new FormControl();
+  modalBookingCount: FormControl = new FormControl();
+  modalVendorType: FormControl = new FormControl();
+  modalOwnedSupplier: FormControl = new FormControl();
+  modalCategory: FormControl = new FormControl();
+  modalVehicle: FormControl = new FormControl();
+  modalInventory: FormControl = new FormControl();
+  modalSupplier: FormControl = new FormControl();
+  modalDriver: FormControl = new FormControl();
+  modalDriverOfficialIdentityNumber: FormControl = new FormControl();
 
   constructor(
     private fb: FormBuilder,
@@ -367,6 +378,14 @@ export class CarAndDriverAllotmentComponent implements OnInit {
 
   }
 
+  private resetPagination(): void {
+    this.PageNumber = 1;
+    this.currentPage = 1;
+    if (this.paginator) {
+      this.paginator.firstPage();
+    }
+  }
+
   // Normalize possible status payload shapes
   private extractStatus(raw: any): string {
     if (!raw) return '';
@@ -388,6 +407,8 @@ export class CarAndDriverAllotmentComponent implements OnInit {
     this.supplier.setValue('');
     this.driver.setValue('');
     this.inventory.setValue('');
+    this.selectedBadge = '';
+    this.resetPagination();
     // this.carAndDriverAllotmentData();
     this.carAndDriverAllotmentDataForUnassociated();
   }
@@ -406,7 +427,8 @@ export class CarAndDriverAllotmentComponent implements OnInit {
     if (event.keyCode === 8) {
       this.vehicleCategoryID = 0;
       this.initVehicle();
-      this.advanceTableForm.controls['vehicle'].setValue('');
+      this.category.setValue('');
+      this.modalCategory.setValue('');
     }
   }
   onAutoCompleteChange(event: any) {
@@ -415,9 +437,21 @@ export class CarAndDriverAllotmentComponent implements OnInit {
       // this.initInventory();
       // this.initInventoryForSupplier();
       this.InitDriver();
-      this.advanceTableForm?.controls['driver'].setValue('');
-      this.advanceTableForm?.controls['inventory'].setValue('');
+      this.driver.setValue('');
+      this.inventory.setValue('');
+      this.modalDriver.setValue('');
+      this.modalInventory.setValue('');
     }
+  }
+
+  private getTransferedLocationID(): number | null {
+    const locationID = this.reservationInfo?.[0]?.transferedLocationID;
+    return typeof locationID === 'number' && locationID > 0 ? locationID : null;
+  }
+
+  private getPrimaryPassengerID(): number | null {
+    const passengerID = this.reservationInfo?.[0]?.passengerDetails?.[0]?.customerPersonID;
+    return typeof passengerID === 'number' && passengerID > 0 ? passengerID : null;
   }
 
   updateSelectedOption() {
@@ -857,8 +891,22 @@ export class CarAndDriverAllotmentComponent implements OnInit {
     this.carAndDriverAllotment();
   }
 
-  public SearchCarAndDriver() {
+  public SearchCarAndDriver(fromModal: boolean = false) {
+    if (fromModal) {
+      this.vendorType.setValue(this.modalVendorType.value || '');
+      this.category.setValue(this.modalCategory.value || '');
+      this.vehicle.setValue(this.modalVehicle.value || '');
+      this.bookingCount.setValue(this.modalBookingCount.value || '');
+      this.monthlyTarget.setValue(this.modalMonthlyTarget.value || '');
+      this.otherCriteria.setValue(this.modalOtherCriteria.value || '');
+      this.ownedSupplier.setValue(this.modalOwnedSupplier.value || '');
+      this.supplier.setValue(this.modalSupplier.value || '');
+      this.driver.setValue(this.modalDriver.value || '');
+      this.driverOfficialIdentityNumber.setValue(this.modalDriverOfficialIdentityNumber.value || '');
+      this.inventory.setValue(this.modalInventory.value || '');
+    }
     this.isSearchClicked = true;
+    this.resetPagination();
     this.carAndDriverAllotmentDataForUnassociated();
     // const selected = this.associatedUnassociated.value;
     // if (selected === 'Associated')
@@ -876,6 +924,7 @@ export class CarAndDriverAllotmentComponent implements OnInit {
 
   onBackPress(event) {
     if (event.keyCode === 8) {
+      this.resetPagination();
       // this.carAndDriverAllotmentData();
       this.carAndDriverAllotmentDataForUnassociated();
     }
@@ -941,8 +990,17 @@ export class CarAndDriverAllotmentComponent implements OnInit {
     if (this.driverID === undefined) {
       this.driverID = 0;
     }
+    const transferedLocationID = this.getTransferedLocationID();
+    if (transferedLocationID === null) {
+      this.driverInventoryAssociationDataSource = null;
+      this.totalData = 0;
+      this.isLoadingdata = false;
+      this.isLoading = false;
+      return;
+    }
     this.isLoadingdata = true;
-    this.driverInventoryAssociationService.getTableData(this.reservationInfo[0].transferedLocationID,
+    this.isLoading = true;
+    this.driverInventoryAssociationService.getTableData(transferedLocationID,
       this.driverID, this.driver.value, this.driverOfficialIdentityNumber.value, this.supplier.value, this.category.value,
       this.vehicle.value, this.inventory.value, this.searchInventoryName,
       this.vendorType.value, this.ownedSupplier.value, this.bookingCount.value, this.monthlyTarget.value,
@@ -970,10 +1028,12 @@ export class CarAndDriverAllotmentComponent implements OnInit {
           }
         }
         this.isLoadingdata = false;
+        this.isLoading = false;
       },
       (error: HttpErrorResponse) => {
         this.driverInventoryAssociationDataSource = null;
         this.isLoadingdata = false;
+        this.isLoading = false;
       }
     );
   }
@@ -986,8 +1046,17 @@ export class CarAndDriverAllotmentComponent implements OnInit {
     if (this.driverID === undefined) {
       this.driverID = 0;
     }
+    const transferedLocationID = this.getTransferedLocationID();
+    if (transferedLocationID === null) {
+      this.driverInventoryAssociationDataSource = null;
+      this.unassociatedTotalData = 0;
+      this.isLoadingdataUnassociated = false;
+      this.isLoading = false;
+      return;
+    }
     this.isLoadingdataUnassociated = true;
-    this.driverInventoryAssociationService.getDataInventoryUnassociation(this.reservationInfo[0].transferedLocationID,
+    this.isLoading = true;
+    this.driverInventoryAssociationService.getDataInventoryUnassociation(transferedLocationID,
       this.driverID, this.driver.value,
       this.driverOfficialIdentityNumber.value, this.supplier.value, this.category.value,
       this.vehicle.value, this.inventory.value, this.searchInventoryName,
@@ -1017,10 +1086,12 @@ export class CarAndDriverAllotmentComponent implements OnInit {
           }
         }
         this.isLoadingdataUnassociated = false;
+        this.isLoading = false;
       },
       (error: HttpErrorResponse) => {
         this.driverInventoryAssociationDataSource = null;
         this.isLoadingdataUnassociated = false;
+        this.isLoading = false;
       }
     );
   }
@@ -1102,8 +1173,14 @@ export class CarAndDriverAllotmentComponent implements OnInit {
       );
   }
 
-  GetDriversRestricted(i: any) {
-    this._carAndDriverAllotmentService.GetDriverRestricted(this.reservationInfo[i]?.passengerDetails[i].customerPersonID).subscribe(
+  GetDriversRestricted() {
+    const passengerID = this.getPrimaryPassengerID();
+    if (passengerID === null) {
+      this.DriversRestrictedForPassengerList = [];
+      this.updateDriverRestrictions();
+      return;
+    }
+    this._carAndDriverAllotmentService.GetDriverRestricted(passengerID).subscribe(
       (data: DriversRestrictedForPassengerModel[]) => {
         this.DriversRestrictedForPassengerList = data;
         this.updateDriverRestrictions();
@@ -1111,8 +1188,14 @@ export class CarAndDriverAllotmentComponent implements OnInit {
     );
   }
 
-  GetCarsRestricted(i: any) {
-    this._carAndDriverAllotmentService.GetCarRestricted(this.reservationInfo[i].passengerDetails[i].customerPersonID).subscribe(
+  GetCarsRestricted() {
+    const passengerID = this.getPrimaryPassengerID();
+    if (passengerID === null) {
+      this.CarsRestrictedForPassengerList = [];
+      this.updateCarRestrictions();
+      return;
+    }
+    this._carAndDriverAllotmentService.GetCarRestricted(passengerID).subscribe(
       (data: CarsRestrictedForPassengerModel[]) => {
         this.CarsRestrictedForPassengerList = data;
         this.updateCarRestrictions();
@@ -1291,8 +1374,8 @@ export class CarAndDriverAllotmentComponent implements OnInit {
 
   GetDriverDutyData(driverID: number, index: number) {
     this.togglePanel(index);
-    this.GetDriversRestricted(index);
-    this.GetCarsRestricted(index);
+    this.GetDriversRestricted();
+    this.GetCarsRestricted();
     this.GetDriverFeedbackAverage(driverID, index);
 
     if (driverID !== null && driverID !== undefined) {
@@ -1339,7 +1422,8 @@ export class CarAndDriverAllotmentComponent implements OnInit {
 
   onChangedPage(pageData: PageEvent) {
     this.isLoading = true;
-    this.PageNumber = pageData.pageIndex + 1;
+    this.currentPage = pageData.pageIndex + 1;
+    this.PageNumber = this.currentPage;
     //this.carAndDriverAllotmentData();
     this.carAndDriverAllotmentDataForUnassociated();
   }
@@ -2355,6 +2439,7 @@ export class CarAndDriverAllotmentComponent implements OnInit {
   // }
 
   fetchSameCategoryVehicles(vendorType = 'All', bookingCount?: number, businessVolume?: string, selectedBadge?: string) {
+    this.resetPagination();
     // 🏷 Selected Badges ko Track karein
     if (!this.selectedBadge) {
       this.selectedBadge = selectedBadge || '';
@@ -2439,6 +2524,7 @@ export class CarAndDriverAllotmentComponent implements OnInit {
   }
 
   fetchOwnedCars() {
+    this.resetPagination();
     this.selectedCategory = this.filterByVehicleCategory;
     this.category.setValue('');
     if (this.pickupDate !== "") {

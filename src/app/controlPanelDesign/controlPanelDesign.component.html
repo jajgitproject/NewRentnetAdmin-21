@@ -3147,8 +3147,9 @@
                 </div>
               </div>
               <mat-progress-bar mode="indeterminate" *ngIf="isLoading"></mat-progress-bar>
-              <mat-paginator #paginator [length]="totalData || reservationHeaderInfo?.length"
-                [pageSize]="recordsPerPage" (page)="onChangedPage($event)" showFirstLastButtons>
+              <mat-paginator #paginator [length]="totalData ?? 0"
+                [pageSize]="recordsPerPage" [pageIndex]="currentPage - 1"
+                (page)="onChangedPage($event)" showFirstLastButtons>
               </mat-paginator>
 
             </div>

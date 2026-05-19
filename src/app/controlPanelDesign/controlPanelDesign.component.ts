@@ -329,22 +329,11 @@ export class ControlPanelDesignComponent implements OnInit {
 
 
   onChangedPage(pageData: PageEvent) {
-    
-    if(this.showDataPage === true)
-    {
-    const toDate = this.filterForm.value.toDate;
-    const fromDate = this.filterForm.value.fromDate ;
-    this.filterForm.patchValue({fromDate: fromDate});
-    this.filterForm.patchValue({toDate: toDate});
-    }
-    else
-    {
-   this.filterForm.patchValue({fromDate: null});
-    this.filterForm.patchValue({toDate: null});
-    }
     this.isLoading = true;
     this.currentPage = pageData.pageIndex + 1;
-    this.InitShowAllLocationCheck();
+    this.recordsPerPage = pageData.pageSize;
+    this.showDataPage = true;
+    this.loadDataForHeader(this.bookingCategory, this.currentPage, this.recordsPerPage, this.isLoading);
   }
 
   ngOnInit() {
@@ -380,14 +369,11 @@ export class ControlPanelDesignComponent implements OnInit {
     const now = new Date();
     this.filterForm.patchValue({fromDate: today});
     this.filterForm.patchValue({toDate: today});
-    this.filterForm.patchValue({showAllLocation: false});
+    this.filterForm.patchValue({showAllLocation: this.getLoginShowAllLocation()});
     // this.filterForm.patchValue({fromTime: now})
 
     // const threeHoursLater = new Date(now.getTime() + 3 * 60 * 60 * 1000);
     // this.filterForm.patchValue({toTime: threeHoursLater});
-    this.safeRun(() =>
-      this.loadDataForHeader(this.bookingCategory, this.currentPage, this.recordsPerPage, this.isLoading)
-    );
     this.safeRun(() => this.InitShowAllLocationCheck());
 
     // Capture status from query params (encrypted) so we can propagate to downstream dialogs
@@ -422,6 +408,39 @@ export class ControlPanelDesignComponent implements OnInit {
     }
   }
 
+  private normalizeBoolean(value: any, fallback: boolean): boolean {
+    if (typeof value === 'boolean') {
+      return value;
+    }
+    if (typeof value === 'string') {
+      const normalized = value.trim().toLowerCase();
+      if (normalized === 'true') {
+        return true;
+      }
+      if (normalized === 'false') {
+        return false;
+      }
+    }
+    if (typeof value === 'number') {
+      return value !== 0;
+    }
+    return fallback;
+  }
+
+  private getLoginShowAllLocation(): boolean {
+    const raw = localStorage.getItem('currentUser');
+    if (!raw) {
+      return false;
+    }
+    try {
+      const parsed = JSON.parse(raw);
+      const loginValue = parsed?.employee?.ShowAllLocation ?? parsed?.employee?.showAllLocation;
+      return this.normalizeBoolean(loginValue, false);
+    } catch {
+      return false;
+    }
+  }
+
   onBackPress(event) 
   {
     if (event.keyCode === 8) 
@@ -443,7 +462,12 @@ export class ControlPanelDesignComponent implements OnInit {
     this.filterForm.controls["fromTime"].setValue('');
     this.filterForm.controls["toTime"].setValue('');
     this.showDataPage = false;
-    this.loadDataForHeader(this.bookingCategory,this.currentPage, this.recordsPerPage, this.isLoading);
+    this.currentPage = 1;
+    if (this.paginator && this.paginator.pageIndex !== 0) {
+      this.paginator.firstPage();
+    } else {
+      this.loadDataForHeader(this.bookingCategory,this.currentPage, this.recordsPerPage, this.isLoading);
+    }
     const today = this.formatDate(new Date());
     const now = new Date();
     this.filterForm.patchValue({fromDate: today});
@@ -460,7 +484,12 @@ export class ControlPanelDesignComponent implements OnInit {
     this.filterForm.controls["toDate"].setValue('');
     this.filterForm.controls["fromTime"].setValue('');
     this.filterForm.controls["toTime"].setValue('');
-    this.loadDataForHeader(this.bookingCategory,this.currentPage, this.recordsPerPage, this.isLoading);
+    this.currentPage = 1;
+    if (this.paginator && this.paginator.pageIndex !== 0) {
+      this.paginator.firstPage();
+    } else {
+      this.loadDataForHeader(this.bookingCategory,this.currentPage, this.recordsPerPage, this.isLoading);
+    }
     const today = this.formatDate(new Date());
     const now = new Date();
     this.filterForm.patchValue({fromDate: today});
@@ -534,7 +563,7 @@ export class ControlPanelDesignComponent implements OnInit {
       vehicleInventory:[this._filters.vehicleInventory],
       driver:[this._filters.driver],
       userID:[this._generalService.getUserID()],
-      showAllLocation:[this._filters.showAllLocation],
+      showAllLocation:[this.normalizeBoolean(this._filters.showAllLocation, this.getLoginShowAllLocation())],
       primarymobile:[this._filters.primarymobile],
       locationName:[this._filters.locationName],
       transferLocationName:[this._filters.transferLocationName],
@@ -566,7 +595,7 @@ export class ControlPanelDesignComponent implements OnInit {
     this._controlPanelDesignService.getShowAllLocationCheck(this._generalService.getUserID()).subscribe(
       data => 
       {
-        this.ShowAllLocation=data.showAllLocation;
+        this.ShowAllLocation = this.normalizeBoolean(data?.showAllLocation, this.getLoginShowAllLocation());
         this.filterForm.patchValue({showAllLocation:this.ShowAllLocation});
         // this.filterForm.controls["fromDate"].setValue('');
         // this.filterForm.controls["toDate"].setValue('');
@@ -585,8 +614,8 @@ export class ControlPanelDesignComponent implements OnInit {
       },
       () =>
       {
-        this.ShowAllLocation = false;
-        this.filterForm.patchValue({showAllLocation: false});
+        this.ShowAllLocation = this.getLoginShowAllLocation();
+        this.filterForm.patchValue({showAllLocation: this.ShowAllLocation});
         this.loadDataForHeader(this.bookingCategory, this.currentPage, this.recordsPerPage, this.isLoading);
       }
     );
@@ -732,8 +761,16 @@ export class ControlPanelDesignComponent implements OnInit {
     {
       this.filterForm.patchValue({ BookingNo: '' });
     }
+    const requestPayload = {
+      ...this.filterForm.getRawValue(),
+      showAllLocation: this.normalizeBoolean(
+        this.filterForm.get('showAllLocation')?.value,
+        this.getLoginShowAllLocation()
+      )
+    };
+    this.filterForm.patchValue({ showAllLocation: requestPayload.showAllLocation }, { emitEvent: false });
     console.log(status);
-    this._controlPanelDesignService.getReservationHeaderDetails(status,this.filterForm.getRawValue(),currentPage,pageSize,this.sortBy,this.orderBy).subscribe(
+    this._controlPanelDesignService.getReservationHeaderDetails(status,requestPayload,currentPage,pageSize,this.sortBy,this.orderBy).subscribe(
       (data: ControlPanelHeaderData) => {
           if (data != null) 
           {
@@ -2493,6 +2530,10 @@ DriverAllotment(reservationID: number, reservationGroupID: number, pickupDate: a
     this.showEmptyTableHeader = true;
     this.showDataPage = true;
     this.currentPage=1;
+    if (this.paginator && this.paginator.pageIndex !== 0) {
+      this.paginator.firstPage();
+      return;
+    }
     this.loadDataForHeader(this.bookingCategory,this.currentPage, this.recordsPerPage, this.isLoading);
   }
 

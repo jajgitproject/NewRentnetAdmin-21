@@ -74,9 +74,9 @@ export class ControlPanelDesignService {
         '/' +
         pageSize+
         '/' +
-        sortBy+
+        encodeURIComponent(sortBy)+
         '/' +
-        orderBy,
+        encodeURIComponent(orderBy),
       _filters
     );
   }

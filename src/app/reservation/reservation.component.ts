@@ -873,7 +873,18 @@ toArray<T>(value: any): T[] {
 
         this.reservationDataSource=data;
         this.advanceTable=this.reservationDataSource[0];
-        this.ReservationStatus = this.advanceTable.reservationStatus;
+        const reservationSourceMissingOnLoad = this.isEmptyText(this.advanceTable?.reservationSource);
+        const normalizedReservationSource = reservationSourceMissingOnLoad ? 'Email' : this.advanceTable.reservationSource;
+        const normalizedReservationSourceDetail = reservationSourceMissingOnLoad
+          ? 'Email'
+          : (this.isEmptyText(this.advanceTable?.reservationSourceDetail) ? '' : this.advanceTable.reservationSourceDetail);
+        const normalizedReservationSourceID = reservationSourceMissingOnLoad
+          ? (this.isEmptyId(this.advanceTable?.reservationSourceID) ? 20 : this.advanceTable.reservationSourceID)
+          : this.advanceTable.reservationSourceID;
+        const normalizedReservationStatus = this.isEmptyText(this.advanceTable?.reservationStatus)
+          ? 'Confirmed'
+          : this.advanceTable.reservationStatus;
+        this.ReservationStatus = normalizedReservationStatus;
         let pickupDate=moment(this.advanceTable.pickupDate).format('DD/MM/yyyy');
           this.onBlurUpdateDateEdit(pickupDate);
         if (this.advanceTable.pickupAddressLatLong) {
@@ -925,7 +936,7 @@ toArray<T>(value: any): T[] {
         this.advanceTableForm.patchValue({pickupDate:this.advanceTable.pickupDate});
         this.advanceTableForm.patchValue({pickupTime:this.advanceTable.pickupTime});
         this.advanceTableForm.patchValue({packageTypeID:this.advanceTable.packageTypeID});
-        this.advanceTableForm.patchValue({packageType:this.advanceTable.packageType +' '+ "Rate"});
+        this.advanceTableForm.patchValue({packageType:this.advanceTable.packageType});
         this.advanceTableForm.patchValue({packageID:this.advanceTable.packageID});
         this.advanceTableForm.patchValue({package:this.advanceTable.package});
         this.advanceTableForm.patchValue({pickupCityID:this.advanceTable.pickupCityID});
@@ -966,11 +977,11 @@ toArray<T>(value: any): T[] {
         //Other Details
         this.advanceTableForm.patchValue({ticketNumber:this.advanceTable.ticketNumber});
         this.advanceTableForm.patchValue({emailLink:this.advanceTable.emailLink});
-        this.advanceTableForm.patchValue({reservationSourceID:this.advanceTable.reservationSourceID});
-        this.advanceTableForm.patchValue({reservationSource:this.advanceTable.reservationSource});
-        this.advanceTableForm.patchValue({reservationSourceDetail:this.advanceTable.reservationSourceDetail});
+        this.advanceTableForm.patchValue({reservationSourceID:normalizedReservationSourceID});
+        this.advanceTableForm.patchValue({reservationSource:normalizedReservationSource});
+        this.advanceTableForm.patchValue({reservationSourceDetail:normalizedReservationSourceDetail});
         this.advanceTableForm.patchValue({referenceNumber:this.advanceTable.referenceNumber});
-        this.advanceTableForm.patchValue({reservationStatus:this.advanceTable.reservationStatus});
+        this.advanceTableForm.patchValue({reservationStatus:normalizedReservationStatus});
         this.advanceTableForm.patchValue({modeOfPaymentID:this.advanceTable.modeOfPaymentID});
         this.advanceTableForm.patchValue({modeOfPayment:this.advanceTable.modeOfPayment}); 
         if (this.advanceTable?.isTimeNotConfirmed === true) 
@@ -991,8 +1002,10 @@ toArray<T>(value: any): T[] {
         //this.advanceTable.packageType=this.advanceTable.packageType +' '+"Rate";
         this.InitCity(this.advanceTable.packageType);
         this.InitDropOffCity(this.advanceTable.packageType);
-        let pickupDateOnload = moment(this.advanceTable.pickupDate).format('DD/MM/yyyy');
-        this.onPickupDateChangeAndLocationTimeSet(pickupDateOnload);
+        let pickupDateOnload = moment(this.advanceTable.pickupDate).format('DD/MM/YYYY');
+        if (this.isValidPickupDateInput(pickupDateOnload)) {
+          this.onPickupDateChangeAndLocationTimeSet(pickupDateOnload);
+        }
         this.InitCompanyForCustomer();
         this.dropOffSpotTypeID=this.advanceTable.dropOffSpotTypeID;
         this.pickupSpotTypeID=this.advanceTable.pickupSpotTypeID;
@@ -2217,8 +2230,57 @@ toArray<T>(value: any): T[] {
         this.filteredPackageTypeOptions = this.advanceTableForm.controls['packageType'].valueChanges.pipe(
           startWith(""),
           map(value => this._filterPackageType(value || ''))
-        ); 
+        );
+        if (this.shouldUseEditPrefill()) {
+          this.normalizeLoadedPackageTypeLabel();
+        }
       });
+  }
+
+  private normalizeLoadedPackageTypeLabel(): void {
+    if (!Array.isArray(this.PackageTypeList) || this.PackageTypeList.length === 0) {
+      return;
+    }
+
+    const formValue = this.advanceTableForm.getRawValue() as Record<string, unknown>;
+    const currentPackageTypeID = formValue['packageTypeID'] ?? this.advanceTable?.packageTypeID;
+    const currentPackageTypeLabel = String(formValue['packageType'] ?? this.advanceTable?.packageType ?? '').trim();
+    let matchedPackageType: any = null;
+
+    if (!this.isEmptyId(currentPackageTypeID)) {
+      matchedPackageType = this.PackageTypeList.find(
+        (item: any) => String(item?.packageTypeID) === String(currentPackageTypeID)
+      );
+    }
+
+    if (!matchedPackageType && currentPackageTypeLabel) {
+      const normalizedCurrentLabel = currentPackageTypeLabel.toLowerCase();
+      matchedPackageType = this.PackageTypeList.find(
+        (item: any) => String(item?.packageType ?? '').trim().toLowerCase() === normalizedCurrentLabel
+      );
+    }
+
+    if (!matchedPackageType && currentPackageTypeLabel) {
+      const normalizedCurrentLabel = currentPackageTypeLabel.toLowerCase();
+      matchedPackageType = this.PackageTypeList.find((item: any) => {
+        const optionLabel = String(item?.packageType ?? '').trim().toLowerCase();
+        return optionLabel.includes(normalizedCurrentLabel) || normalizedCurrentLabel.includes(optionLabel);
+      });
+    }
+
+    if (!matchedPackageType || this.isEmptyText(matchedPackageType.packageType)) {
+      return;
+    }
+
+    this.packageTypeID = matchedPackageType.packageTypeID;
+    this.packageType = matchedPackageType.packageType;
+    if (this.advanceTable) {
+      this.advanceTable.packageType = matchedPackageType.packageType;
+    }
+    this.advanceTableForm.patchValue({
+      packageTypeID: matchedPackageType.packageTypeID,
+      packageType: matchedPackageType.packageType
+    });
   }
 
 //   private _filterPackageType(value: string): any {
@@ -3077,7 +3139,34 @@ public validateCustomerSpecificFields(): boolean {
         'Reservation Updated...!!!',
         'bottom',
         'center'
-      );    
+      );
+      const reservationID = response?.reservationID ?? this.advanceTableForm.value.reservationID ?? this.ReservationID;
+      const reservationGroupID = response?.reservationGroupID ?? this.advanceTableForm.value.reservationGroupID ?? this.reservationGroupID;
+      const customerGroupID = response?.customerGroupID ?? this.advanceTableForm.value.customerGroupID ?? this.customerGroupID;
+
+      this.reservationNo = reservationID;
+      Swal.fire({
+        title: '',
+        text: 'Reservation - ' + this.reservationNo + ' updated. You can add further details from booking details section.',
+        icon: 'warning',
+        showCancelButton: true,
+        showConfirmButton: true,
+        showDenyButton: true,
+        confirmButtonColor: '#3085d6',
+        cancelButtonColor: '#d33',
+        denyButtonColor: '#6c757d',
+        confirmButtonText: 'Add Details',
+        cancelButtonText: 'Reservation List',
+        denyButtonText: 'Control Panel'
+      }).then((result) => {
+        if (result.isConfirmed) {
+          this.takeMeToReservationEditForm(customerGroupID, reservationID, reservationGroupID);
+        } else if (result.isDenied) {
+          this.navigateToControlPanel();
+        } else if (result.isDismissed) {
+          this.takeMeToReservationList({ reservationGroupID });
+        }
+      });
     },
     error =>
     {
@@ -4098,10 +4187,6 @@ private patchPickupAddress(res: any) {
             this.noReservationMessage = false;
             this.InitPackageType();
             this.InitPackage();
-            if(this.action ==='edit' && this.advanceTable && this.advanceTable.packageType)
-            {
-              this.advanceTable.packageType = this.advanceTable.packageType + " " + "Rate";
-            }
             // In new-reservation mode `this.advanceTable` may still be null
             // before any contract/package selections exist; guard every access.
             const fallbackPackageType = this.packageType || (this.advanceTable && this.advanceTable.packageType) || '';
@@ -4586,9 +4671,25 @@ ShowDataForStops()
   } else {
     this.advanceTableForm.get('pickupDate')?.setErrors({ invalidDate: true });
   }
-  this.onPickupDateChangeAndLocationTimeSet(value);
+  if (this.isValidPickupDateInput(value)) {
+    this.onPickupDateChangeAndLocationTimeSet(value);
+  }
   this.pickupDate = value;
   this.GetReservationCapping(this.customerGroupID,this.customerID,this.pickupDate,this.cityID,this.packageTypeID,this.vehicleCategoryID);
+}
+
+private isValidPickupDateInput(value: string): boolean {
+  const trimmedValue = (value || '').trim();
+  if (!trimmedValue) {
+    return false;
+  }
+
+  // Time-only parsing can yield epoch-based strings; ignore those here.
+  if (trimmedValue.includes('1970')) {
+    return false;
+  }
+
+  return moment(trimmedValue, 'DD/MM/YYYY', true).isValid();
 }
 
 onBlurUpdateDateEdit(value: string): void {  

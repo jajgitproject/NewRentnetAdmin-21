@@ -78,7 +78,7 @@ allotmentType: any;
     // status gating
     // this.status = data?.status;
     // this.buttonDisabled = this.status ? this.status.toLowerCase() !== 'changes allow' : false;
-    this.status = data?.status || '';
+    this.status = typeof data?.status === 'string' ? data.status : '';
 
     // ✅ normalize (important)
     this.normalizedStatus = this.status.toLowerCase().trim();
@@ -251,6 +251,20 @@ allotmentType: any;
 
   submit() {
   }
+
+  private parseErrorPayload(error: any): { status: string; message: string } {
+    if (typeof error === 'string') {
+      return { status: '', message: error || 'Operation Failed...!!!' };
+    }
+
+    const payload = error?.error ?? error;
+    const status = String(payload?.status ?? payload?.Status ?? '').toLowerCase();
+    const message =
+      String(payload?.message ?? payload?.Message ?? error?.statusText ?? '').trim() || 'Operation Failed...!!!';
+
+    return { status, message };
+  }
+
   CheckData() {
     if (this.advanceTableForm.value.isDriverAcceptanceRequired === true) {
       this.advanceTableForm.patchValue({isDriverAcceptanceRequired : true});
@@ -291,21 +305,22 @@ allotmentType: any;
             'bottom',
             'center'
           );
+          this.isSubmitting = false;
           this.saveDisabled = true;
           this.dialogRef.close({ isClose: false });
         },
         error => {
-          
-          if(error.error.status === "error")
-          {
-           this.openShowError(error.error.message);
+          const parsedError = this.parseErrorPayload(error);
+          if (parsedError.status === 'error' && parsedError.message) {
+            this.openShowError(parsedError.message);
           }
           this.showNotification(
             'snackbar-danger',
-            'Operation Failed...!!!',
+            parsedError.message,
             'bottom',
             'center'
           );
+          this.isSubmitting = false;
           this.saveDisabled = true;
         }
       )
@@ -323,16 +338,22 @@ allotmentType: any;
             'bottom',
             'center'
           );
+          this.isSubmitting = false;
           this.saveDisabled = true;
           this.dialogRef.close({ isClose: false });
         },
         error => {
+          const parsedError = this.parseErrorPayload(error);
+          if (parsedError.status === 'error' && parsedError.message) {
+            this.openShowError(parsedError.message);
+          }
           this.showNotification(
             'snackbar-danger',
-            'Operation Failed...!!!',
+            parsedError.message,
             'bottom',
             'center'
           );
+          this.isSubmitting = false;
           this.saveDisabled = true;
         }
       )
