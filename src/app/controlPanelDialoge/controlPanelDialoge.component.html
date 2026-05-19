@@ -62,7 +62,7 @@
                     </span>
 
                     <button mat-menu-item
-                      (click)="openSendSmsWhatsappMail(item.reservationID,item.vehicle.vehicle,item.pickup.pickupDate,item.pickup.pickupTime,item.registrationNumber,item?.passengerDetails[0].customerPersonName,item?.stopsDetails[0].city, item,item.customerPersonID)">
+                      (click)="openSendSmsWhatsappMail(item.reservationID,item.vehicle.vehicle,item.pickup.pickupDate,item.pickup.pickupTime,item.registrationNumber,(item.passengerDetails?.length ? item.passengerDetails[0].customerPersonName : null),(item.stopsDetails?.length ? item.stopsDetails[0].city : null), item,item.customerPersonID)">
                       Send SMS
                     </button>
 
@@ -290,7 +290,7 @@
                   <!-- <span
                                             *ngIf="item.stopsDetails[0].stopType == 'Pickup'"
                                             > -->
-                  <span> {{ item.stopsDetails[0].reservationStopAddressDetails }}</span><br />
+                  <span> {{ item.stopsDetails?.length ? item.stopsDetails[0].reservationStopAddressDetails : 'N/A' }}</span><br />
                   <b><button class="BoldButton BoldButtonTopMargin" mat-button (click)="
                                                 TimeAndAddressDrop(item)
                                               ">
@@ -387,7 +387,7 @@
                       Driver Allotment
                     </a>
                     <button mat-menu-item
-                      (click)="openSendSmsWhatsappMail(item.reservationID,item.vehicle.vehicle,item.pickup.pickupDate,item.pickup.pickupTime,item.registrationNumber,item?.passengerDetails[0].customerPersonName,item?.stopsDetails[0].city, item,item.customerPersonID)">
+                      (click)="openSendSmsWhatsappMail(item.reservationID,item.vehicle.vehicle,item.pickup.pickupDate,item.pickup.pickupTime,item.registrationNumber,(item.passengerDetails?.length ? item.passengerDetails[0].customerPersonName : null),(item.stopsDetails?.length ? item.stopsDetails[0].city : null), item,item.customerPersonID)">
                       Send WA/SMS/Mail</button>
 
                     <button mat-menu-item *ngIf="item.allotmentType==='Soft'" (click)="CovertSoftToHard(item,i)">
@@ -573,7 +573,7 @@
                       </b>
                       <button mat-menu-item [disabled]="ReservationStatus === 'Cancelled'"
                         (click)="SendSMS(item.reservationID,item.vehicle.vehicle,item.pickup.pickupDate,item.pickup.pickupTime,item.
-                                                registrationNumber,item?.passengerDetails[0].customerPersonName,item?.stopsDetails[0].city,item,item.customerPerson.primaryMobile,item.customerPerson.primaryEmail)">Send
+                                                registrationNumber,(item.passengerDetails?.length ? item.passengerDetails[0].customerPersonName : null),(item.stopsDetails?.length ? item.stopsDetails[0].city : null),item,item.customerPerson.primaryMobile,item.customerPerson.primaryEmail)">Send
                         SMS</button>
                     </span>
                   </mat-menu>
@@ -884,7 +884,7 @@
                                             item.driverID,
                                             item.registrationNumber,
                                             item.driverName,
-                                            item.passengerDetails[0].reservationPassengerID,
+                                            (item.passengerDetails?.length ? item.passengerDetails[0].reservationPassengerID : null),
                                             item.feedbackRemark,
                                             item
                                           )" [disabled]="ReservationStatus === 'Cancelled'">

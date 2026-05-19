@@ -457,6 +457,9 @@ advanceTableIN: InternalNoteDetails | null;
       if (encryptedAction) {
         this.action = this._generalService.decrypt(decodeURIComponent(encryptedAction));
       }
+      if (this.shouldUseEditPrefill()) {
+        this.action = 'edit';
+      }
             });
           }   
           this.advanceTableForm.controls["customerType"].disable(); 
@@ -556,6 +559,10 @@ advanceTableIN: InternalNoteDetails | null;
   this.advanceTableForm.patchValue({reservationSourceID:20});
   this.advanceTableForm.patchValue({reservationSource:'Email'});
   this.getDataForReservation();
+  if (this.shouldUseEditPrefill()) {
+    this.action = 'edit';
+    this.loadData();
+  }
   
   this.advanceTableForm.patchValue({serviceLocationID:this.transferedLocationID});
   this.advanceTableForm.patchValue({transferedLocationID:this.transferedLocationID});
@@ -861,7 +868,7 @@ toArray<T>(value: any): T[] {
     this.reservationService.getBookingDetails(this.ReservationID).subscribe(
       data=>
       {
-         if (data != null) 
+         if (data != null && Array.isArray(data) && data.length > 0) 
       {
 
         this.reservationDataSource=data;
@@ -869,18 +876,22 @@ toArray<T>(value: any): T[] {
         this.ReservationStatus = this.advanceTable.reservationStatus;
         let pickupDate=moment(this.advanceTable.pickupDate).format('DD/MM/yyyy');
           this.onBlurUpdateDateEdit(pickupDate);
-        var value = this.advanceTable.pickupAddressLatLong.replace(
-          '(',
-          ''
-        );
-        value = value.replace(')', '');
-        var lat = value.split(' ')[2];
-        var long = value.split(' ')[1];
-        this.advanceTableForm.patchValue({pickupAddressLatLong:lat
-          +
-           ',' +
-           long
-       });
+        if (this.advanceTable.pickupAddressLatLong) {
+          var value = this.advanceTable.pickupAddressLatLong.replace(
+            '(',
+            ''
+          );
+          value = value.replace(')', '');
+          var lat = value.split(' ')[2];
+          var long = value.split(' ')[1];
+          this.advanceTableForm.patchValue({pickupAddressLatLong:lat
+            +
+            ',' +
+            long
+        });
+        } else {
+          this.advanceTableForm.patchValue({pickupAddressLatLong:null});
+        }
 
        if(this.advanceTable.dropOffAddressLatLong === null)
        {
@@ -4652,8 +4663,19 @@ private canThisRoleCreateBackDateBooking(): boolean {
           this.InitReservationInvoiceGSTDetails( this.customerID);
           this.GetReservationCapping(this.customerGroupID,this.customerID,this.pickupDate,this.cityID,this.packageTypeID,this.vehicleCategoryID);
           this.getETRDropOffTime();
-        }
+        },
+      (error: HttpErrorResponse) => {
+        this.dataForReservationList = null;
+      }
     );
+  }
+
+  private shouldUseEditPrefill(): boolean {
+    const normalizedAction = (this.action || '').toString().trim().toLowerCase();
+    if (normalizedAction === 'edit') {
+      return true;
+    }
+    return !!this.ReservationID && !normalizedAction;
   }
 
   showError(controlName: string): boolean {

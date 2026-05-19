@@ -369,11 +369,15 @@ export class ControlPanelDialogeComponent {
   TimeAndAddressInfo(item) {
     // Always fetch latest status before opening
     this.fetchStatusAndOpen(() => {
+      const pickupStop = item?.stopsDetails?.length ? item.stopsDetails[0] : null;
+      if (!pickupStop) {
+        return;
+      }
       this.dialog.open(TimeAndAddressInfoComponent, {
         width: '920px',
         maxWidth: '96vw',
         data: {
-          advanceTable: item.stopsDetails[0],
+          advanceTable: pickupStop,
           status: this.status,
           parentRow: item
         }
@@ -382,11 +386,15 @@ export class ControlPanelDialogeComponent {
   }
   TimeAndAddressDrop(item) {
     this.fetchStatusAndOpen(() => {
+      const dropStop = item?.stopsDetails?.length > 1 ? item.stopsDetails[1] : null;
+      if (!dropStop) {
+        return;
+      }
       this.dialog.open(TimeAndAddressInfoComponent, {
         width: '920px',
         maxWidth: '96vw',
         data: {
-          advanceTable: item.stopsDetails[1],
+          advanceTable: dropStop,
           status: this.status,
           parentRow: item,
           locationKind: 'drop'
@@ -610,7 +618,11 @@ export class ControlPanelDialogeComponent {
 
 
    editPickupTimeDetails(item,i) {
-    console.log(item.stopsDetails[0])
+    const pickupStop = item?.stopsDetails?.length ? item.stopsDetails[0] : null;
+    if (!pickupStop) {
+      return;
+    }
+    console.log(pickupStop)
     this.fetchStatusAndOpen(() => {
       const dialogRef = this.dialog.open(editPickupTimeFormDialogComponent,
         {
@@ -619,7 +631,7 @@ export class ControlPanelDialogeComponent {
           data:
           {
             action: 'edit',
-           advanceTable: item.stopsDetails[0],
+           advanceTable: pickupStop,
            reservationID: item.reservationID,
             status: this.status
           }
@@ -2317,8 +2329,8 @@ export class ControlPanelDialogeComponent {
               organizationalEntityName: item.organizationalEntityName,
               dutySlipID: item.dutySlipID,
               incidenceID: this.incidenceID,
-              customerPersonID: item.passengerDetails[0]?.customerPersonID,
-              customerPersonName: item.passengerDetails[0]?.customerPersonName,
+              customerPersonID: item.passengerDetails?.[0]?.customerPersonID,
+              customerPersonName: item.passengerDetails?.[0]?.customerPersonName,
               verifyDutyStatusAndCacellationStatus:this.verifyDutyStatusAndCacellationStatus
             }
           });

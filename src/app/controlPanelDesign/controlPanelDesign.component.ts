@@ -732,6 +732,7 @@ export class ControlPanelDesignComponent implements OnInit {
     {
       this.filterForm.patchValue({ BookingNo: '' });
     }
+    console.log(status);
     this._controlPanelDesignService.getReservationHeaderDetails(status,this.filterForm.getRawValue(),currentPage,pageSize,this.sortBy,this.orderBy).subscribe(
       (data: ControlPanelHeaderData) => {
           if (data != null) 

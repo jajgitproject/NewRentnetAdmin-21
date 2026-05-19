@@ -789,7 +789,6 @@ export class CarAndDriverAllotmentComponent implements OnInit {
         (data: ControlPanelData) => {
           if (data != null) {
             this.reservationInfo = data.reservationDetails;
-            console.log(this.reservationInfo)
             this.allotmentType = this.reservationInfo[0]?.allotmentType;
             this.filterByVehicleCategoryID = this.reservationInfo[0]?.vehicle?.vehicleCategoryID;
             this.filterByVehicleCategory = this.reservationInfo[0]?.vehicle?.vehicleCategory;
@@ -804,6 +803,37 @@ export class CarAndDriverAllotmentComponent implements OnInit {
           this.reservationInfo = null;
         }
       );
+  }
+
+  getDisplayPassengerName(item: any): string {
+    if (!item) {
+      return 'N/A';
+    }
+
+    const passengers = Array.isArray(item.passengerDetails) ? item.passengerDetails : [];
+    if (passengers.length > 0) {
+      const primary = passengers.find((p: any) => {
+        const flag = (p?.isPrimaryPassenger ?? '').toString().trim().toLowerCase();
+        return flag === 'true' || flag === '1' || flag === 'yes';
+      });
+      if (primary?.customerPersonName) {
+        return primary.customerPersonName;
+      }
+
+      const nonBooker = passengers.find((p: any) =>
+        p?.customerPersonName &&
+        item?.customerPerson?.customerPersonName &&
+        p.customerPersonName !== item.customerPerson.customerPersonName
+      );
+      if (nonBooker?.customerPersonName) {
+        return nonBooker.customerPersonName;
+      }
+
+      if (passengers[0]?.customerPersonName) {
+        return passengers[0].customerPersonName;
+      }
+    }
+    return item.primaryPassenger || item.passengerName || item.customerPerson?.customerPersonName || 'N/A';
   }
 
   locationTimeSet(event) {
@@ -1579,10 +1609,14 @@ export class CarAndDriverAllotmentComponent implements OnInit {
     //   .stopsDetails.filter(
     //     (value) => value.reservationStopID === reservationStopID
     //   )[0];
+    const pickupStop = item?.stopsDetails?.[0];
+    if (!pickupStop) {
+      return;
+    }
     this.dialog.open(TimeAndAddressInfoComponent, {
       width: '750px',
       data: {
-        advanceTable: item.stopsDetails[0]
+        advanceTable: pickupStop
       }
     });
   }
@@ -1593,10 +1627,14 @@ export class CarAndDriverAllotmentComponent implements OnInit {
     //   .stopsDetails.filter(
     //     (value) => value.reservationStopID === reservationStopID
     //   )[0];
+    const dropStop = item?.stopsDetails?.[1];
+    if (!dropStop) {
+      return;
+    }
     this.dialog.open(TimeAndAddressInfoComponent, {
       width: '750px',
       data: {
-        advanceTable: item.stopsDetails[1]
+        advanceTable: dropStop
       }
     });
   }

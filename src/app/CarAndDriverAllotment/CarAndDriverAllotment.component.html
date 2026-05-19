@@ -109,13 +109,13 @@
 
                   <span>{{ item.vehicle.vehicle }}</span>
 
-                  <span>{{ item.pickup.pickupAddress.split(',')[0] }}</span>
+                  <span>{{ item.pickup?.pickupAddress ? item.pickup.pickupAddress.split(',')[0] : 'N/A' }}</span>
 
                   <span>{{ item.pickup.pickupTime | date : 'shortTime' }}</span>
 
                   <span>{{ item.pickup.pickupDate | date : 'dd-MMM-yy' }}</span>
 
-                  <span>{{ item.passengerDetails[0].customerPersonName }}</span>
+                  <span>{{ getDisplayPassengerName(item) }}</span>
 
                   <span>{{ item.carVendor }}</span>
 
@@ -276,7 +276,7 @@
                             Pick up Time
                           </button></b><br />
                         <!-- <span
-                            *ngIf="item.stopsDetails[0].stopType == 'Pickup'"
+                            *ngIf="item.stopsDetails?.[0]?.stopType == 'Pickup'"
                           > -->
                         <span>
                           {{ item.pickup.pickupDate | date : 'dd-MMM-yy' }}
@@ -287,7 +287,7 @@
                             Pick up Address
                           </button></b><br />
                         <!-- <span
-                            *ngIf="item.stopsDetails[0].stopType == 'Pickup'"
+                            *ngIf="item.stopsDetails?.[0]?.stopType == 'Pickup'"
                             > -->
                         <span> {{ item.pickup.pickupAddress }}</span><br />
                         <b><button class="BoldButton" mat-button (click)="TimeAndAddressDrop(item)">
@@ -295,7 +295,7 @@
                           </button></b><br />
                         <!-- <span
                             *ngIf="
-                              item.stopsDetails[1].stopType == 'Destination'
+                              item.stopsDetails?.[1]?.stopType == 'Destination'
                             "
                             > -->
                         <span>
@@ -308,7 +308,7 @@
                           </button></b><br />
                         <!-- <span
                             *ngIf="
-                              item.stopsDetails[1].stopType == 'Destination'
+                              item.stopsDetails?.[1]?.stopType == 'Destination'
                             "
                             > -->
                         <span> {{ item.drop.dropOffAddress }}</span><br />
