@@ -11,9 +11,9 @@ export const environment = {
   //  UnlockEmployeeUrl: 'https://uatconnect.ecoserp.in/',
   //  googleMapsApiKey: 'AIzaSyAFoLcbOuZfbGJGCdlazGXZbOCYr8dW76c',
 //UAT
-  apiUrl: 'https://localhost:44368/',
-  BaseURL: 'https://localhost:44368/',
-  ImageURL: 'https://localhost:44368/',
+  apiUrl: 'https://localhost:5001/',
+  BaseURL: 'https://localhost:5001/',
+  ImageURL: 'https://localhost:5001/',
   FormURL: 'http://localhost:4200/#',
   UnlockEmployeeUrl: 'https://uatconnect.ecoserp.in/',
   googleMapsApiKey: 'AIzaSyAFoLcbOuZfbGJGCdlazGXZbOCYr8dW76c',

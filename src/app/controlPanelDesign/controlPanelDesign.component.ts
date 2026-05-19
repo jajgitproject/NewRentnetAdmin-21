@@ -3479,6 +3479,9 @@ openDropOffByExectiveGPS(item: any)
       return 'n';
     }
     const u = raw.toUpperCase();
+    if (u === 'PENDING' || u === 'UNKNOWN') {
+      return 'o';
+    }
     if (u === 'OK' || u === 'CREATED' || u === 'SENT' || u === 'READ') {
       return 's';
     }

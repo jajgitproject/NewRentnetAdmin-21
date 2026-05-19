@@ -121,7 +121,10 @@ export class SigninComponent implements OnInit {
             this.isSubmitting = false;
           },
           (error) => {
-            this.error = error;
+            this.error =
+              typeof error === 'string'
+                ? error
+                : 'Cannot reach API. Start RententAPI (profile RententAPI on https://localhost:5001) and trust the dev certificate.';
             this.isSubmitting = false;
           }
         );
