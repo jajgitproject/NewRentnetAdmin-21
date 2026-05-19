@@ -79,6 +79,7 @@ export class ReservationComponent implements OnInit {
   @Input() fromForm:any;
   @Input() status:any;
   @Input() allotmentStatus:any = '';
+  @Input() allotmentType:any = '';
   advanceTableFormEdit: FormGroup;
   advanceTable:Reservation;
   dataForReservationList:ModelForReservation | null;
@@ -4828,10 +4829,14 @@ private canThisRoleCreateBackDateBooking(): boolean {
 
   private shouldUseEditPrefill(): boolean {
     const normalizedAction = (this.action || '').toString().trim().toLowerCase();
-    if (normalizedAction === 'edit') {
-      return true;
-    }
-    return !!this.getCurrentReservationID() && !normalizedAction;
+    return normalizedAction === 'edit';
+  }
+
+  isAllotmentLockedForEdit(): boolean {
+    const allotment = String(this.allotmentStatus ?? '').trim().toLowerCase();
+    const allotmentType = String(this.allotmentType ?? '').trim().toLowerCase();
+    const status = String(this.status ?? '').trim().toLowerCase();
+    return allotment === 'alloted' && allotmentType === 'hard' && !status.includes('changes allow');
   }
 
   showError(controlName: string): boolean {

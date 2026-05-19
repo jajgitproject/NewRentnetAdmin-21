@@ -26,6 +26,10 @@ export class ReservationDetails {
    customerDesignation: string;
    customerDepartment: string;
    pickupDate: string;
+  locationOutDate: any;
+  locationOutTime: any;
+  locationOutDateString: string;
+  locationOutTimeString: string;
 
   constructor(reservationDetails) {
     {
@@ -51,6 +55,10 @@ export class ReservationDetails {
       this.packageType = reservationDetails.packageType || '';
       this.package = reservationDetails.package || '';
       this.pickupCity = reservationDetails.pickupCity || '';
+      this.locationOutDate = reservationDetails.locationOutDate || '';
+      this.locationOutTime = reservationDetails.locationOutTime || '';
+      this.locationOutDateString = reservationDetails.locationOutDateString || '';
+      this.locationOutTimeString = reservationDetails.locationOutTimeString || '';
     }
   }
   

@@ -1295,7 +1295,7 @@
                         <div class="example-button-row">
                             <span style="color:red;margin-bottom: 10px;" *ngIf="status && status !== 'Changes allow' && !status.includes('Changes allow') && buttonDisabled">{{status}}</span>
                             <br>
-                            <span style="color:red;margin-bottom: 10px;" *ngIf="allotmentStatus === 'Alloted'">This booking is already allotted, so changes are not permitted.</span>
+                            <span style="color:red;margin-bottom: 10px;" *ngIf="isAllotmentLockedForEdit()">This booking is already allotted, so changes are not permitted.</span>
                            
                             <br>
                             
@@ -1303,7 +1303,7 @@
                                 (click)="confirmAdd()">Save</button>
 
                             <button type="button" mat-raised-button style="background-color: #bcb4db"  *ngIf="this.action === 'edit'"
-                                (click)="confirmAdd()" [disabled]="buttonDisabled || allotmentStatus === 'Alloted'">Update</button>
+                                (click)="confirmAdd()" [disabled]="buttonDisabled || isAllotmentLockedForEdit()">Update</button>
 
                             <button type="button" mat-raised-button style="background-color: #f29f99"
                                 (click)="navigateToNewForms()">Add Details</button>
