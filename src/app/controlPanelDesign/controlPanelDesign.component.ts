@@ -819,6 +819,10 @@ export class ControlPanelDesignComponent implements OnInit {
     }
   }
 
+  getSpecialInstructions(instructions: any[]): string {
+    return 'Special Instruction : ' + instructions.map(x => x.specialInstruction).join(', ');
+  }
+
   public loadData(reservationID:any,index:number) {
     this._controlPanelDesignService.getReservationDetails(reservationID).subscribe(
         (data: ControlPanelData) => 
