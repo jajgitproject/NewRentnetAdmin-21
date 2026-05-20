@@ -730,6 +730,9 @@ getBusinessTypeID(businessTypeID: any)
       printRunningDetailOnDutySlip: [this.advanceTable.printRunningDetailOnDutySlip ?? false],
       showRateOnDutySlip: [this.advanceTable.showRateOnDutySlip ?? false],
       showOTPOnDutySlip: [this.advanceTable.showOTPOnDutySlip ?? false],
+      isBookerAllowedToBeCreatedFromReservation: [
+        this.advanceTable.isBookerAllowedToBeCreatedFromReservation ?? false
+      ],
       panNo: [this.advanceTable.panNo],
       gstCustomerType: [this.advanceTable.gstCustomerType],
       segment: [this.advanceTable.segment],
