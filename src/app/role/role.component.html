@@ -153,6 +153,24 @@
                                         {{(row.canThisRoleCreateBackDateBooking === null) ? 'N/A' : (row.canThisRoleCreateBackDateBooking=== true ? 'Yes' : 'No')}}</mat-cell>
                                 </ng-container>
 
+                                <ng-container matColumnDef="canThisRoleCreateBillOnClosingScreen">
+                                    <mat-header-cell *matHeaderCellDef mat-sort-header>CanThisRoleCreateBillOnClosingScreen</mat-header-cell>
+                                    <mat-cell *matCellDef="let row" (contextmenu)="onContextMenu($event, row)">
+                                        {{row.canThisRoleCreateBillOnClosingScreen === true ? 'Yes' : 'No'}}</mat-cell>
+                                </ng-container>
+
+                                <ng-container matColumnDef="canThisRoleViewBillOnClosingScreen">
+                                    <mat-header-cell *matHeaderCellDef mat-sort-header>CanThisRoleViewBillOnClosingScreen</mat-header-cell>
+                                    <mat-cell *matCellDef="let row" (contextmenu)="onContextMenu($event, row)">
+                                        {{row.canThisRoleViewBillOnClosingScreen === true ? 'Yes' : 'No'}}</mat-cell>
+                                </ng-container>
+
+                                <ng-container matColumnDef="canThisRoleDoGoodForBillingOnClosingScreen">
+                                    <mat-header-cell *matHeaderCellDef mat-sort-header>CanThisRoleDoGoodForBillingOnClosingScreen</mat-header-cell>
+                                    <mat-cell *matCellDef="let row" (contextmenu)="onContextMenu($event, row)">
+                                        {{row.canThisRoleDoGoodForBillingOnClosingScreen === true ? 'Yes' : 'No'}}</mat-cell>
+                                </ng-container>
+
                                 <ng-container matColumnDef="status">
                                     <mat-header-cell *matHeaderCellDef mat-sort-header>Status</mat-header-cell>
                                     <mat-cell *matCellDef="let row">

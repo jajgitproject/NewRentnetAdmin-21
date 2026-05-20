@@ -211,6 +211,54 @@
   overflow: hidden !important;
 }
 
+/* Role Create/Edit: override _modals.scss 80vw surface cap + content overflow-x so long mat-labels are not clipped.
+   CDK .cdk-global-overlay-wrapper is display:flex; opening mat-select adds a second overlay pane as a flex sibling,
+   which can shrink the dialog pane unless we forbid flex-shrink and lock min-width.
+   MatDialog adds .mat-mdc-dialog-panel with default max-width ~560px — override via this combined selector. */
+.cdk-overlay-container .cdk-overlay-pane.role-form-wide-dialog.mat-mdc-dialog-panel {
+  width: min(1200px, 98vw) !important;
+  min-width: min(1200px, 98vw) !important;
+  max-width: 98vw !important;
+  flex-shrink: 0 !important;
+  flex-grow: 0 !important;
+  box-sizing: border-box;
+  --mat-dialog-container-max-width: min(1200px, 98vw);
+}
+.cdk-overlay-container .cdk-overlay-pane.role-form-wide-dialog > .mat-mdc-dialog-container {
+  flex-shrink: 0 !important;
+  min-width: 100% !important;
+  width: 100% !important;
+  box-sizing: border-box;
+}
+.cdk-overlay-container .cdk-overlay-pane.role-form-wide-dialog .mdc-dialog__surface,
+.cdk-overlay-container .cdk-overlay-pane.role-form-wide-dialog .mat-mdc-dialog-container,
+.cdk-overlay-container .cdk-overlay-pane.role-form-wide-dialog .mat-mdc-dialog-container .mat-mdc-dialog-surface {
+  width: 100% !important;
+  max-width: 100% !important;
+  flex-shrink: 0 !important;
+  box-sizing: border-box;
+}
+.cdk-overlay-container .cdk-overlay-pane.role-form-wide-dialog .mat-mdc-dialog-content,
+.cdk-overlay-container .cdk-overlay-pane.role-form-wide-dialog .mdc-dialog__content,
+.cdk-overlay-container .cdk-overlay-pane.role-form-wide-dialog [mat-dialog-content] {
+  overflow-x: visible !important;
+}
+/* Dropdown (mat-select) labels: one line, no wrap (outline notch can grow with wide dialog). */
+.cdk-overlay-container .cdk-overlay-pane.role-form-wide-dialog .mat-mdc-form-field-type-mat-select .mdc-floating-label,
+.cdk-overlay-container .cdk-overlay-pane.role-form-wide-dialog .mat-mdc-form-field-type-mat-select .mat-mdc-floating-label,
+.cdk-overlay-container .cdk-overlay-pane.role-form-wide-dialog .mat-mdc-form-field-type-mat-select .mdc-floating-label--float-above {
+  max-width: none !important;
+  white-space: nowrap !important;
+  overflow: visible !important;
+  text-overflow: clip !important;
+}
+.cdk-overlay-container .cdk-overlay-pane.role-form-wide-dialog .mat-mdc-form-field-type-mat-select .mdc-notched-outline__notch {
+  max-width: none !important;
+}
+.cdk-overlay-container .cdk-overlay-pane.role-form-wide-dialog .mat-mdc-form-field-type-mat-select .mat-mdc-text-field-wrapper {
+  overflow: visible;
+}
+
 /* Wide panels: single scroll (see _modals.scss + rules above for default overflow-y: auto on dialog content). */
 .cdk-overlay-container
   .cdk-overlay-pane.stops-on-map-wide-dialog
@@ -450,7 +498,7 @@ mat-option {
   box-sizing: border-box;
 }
 
-.cdk-overlay-container .cdk-overlay-pane:has(.mat-mdc-select-panel) {
+.cdk-overlay-container .cdk-overlay-pane:not(.role-form-wide-dialog):has(.mat-mdc-select-panel) {
   width: max-content !important;
   max-width: min(92vw, calc(100vw - 24px)) !important;
   box-sizing: border-box;

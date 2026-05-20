@@ -91,6 +91,18 @@ export class AuthService {
             CanCreateReservation:
               rawEmployee.CanCreateReservation ??
               rawEmployee.canCreateReservation,
+            CanThisRoleCreateBackDateBooking:
+              rawEmployee.CanThisRoleCreateBackDateBooking ??
+              rawEmployee.canThisRoleCreateBackDateBooking,
+            CanThisRoleCreateBillOnClosingScreen:
+              rawEmployee.CanThisRoleCreateBillOnClosingScreen ??
+              rawEmployee.canThisRoleCreateBillOnClosingScreen,
+            CanThisRoleViewBillOnClosingScreen:
+              rawEmployee.CanThisRoleViewBillOnClosingScreen ??
+              rawEmployee.canThisRoleViewBillOnClosingScreen,
+            CanThisRoleDoGoodForBillingOnClosingScreen:
+              rawEmployee.CanThisRoleDoGoodForBillingOnClosingScreen ??
+              rawEmployee.canThisRoleDoGoodForBillingOnClosingScreen,
             EmployeeEntityID:
               rawEmployee.EmployeeEntityID ?? rawEmployee.employeeEntityID,
             EmployeeID: rawEmployee.EmployeeID ?? rawEmployee.employeeID,

@@ -197,6 +197,9 @@ export class ClossingOneComponent implements OnInit, AfterViewInit, AfterViewChe
   invoiceID: any;
   goodForBilling: boolean;
   verifyDuty: boolean;
+  canThisRoleCreateBillOnClosingScreen = false;
+  canThisRoleViewBillOnClosingScreen = false;
+  canThisRoleDoGoodForBillingOnClosingScreen = false;
   templateAddress: any;
   verifyDutyStatusAndCacellationStatus: any;
   goodForBillingStatusAndCancellationStatus:any;
@@ -281,6 +284,9 @@ export class ClossingOneComponent implements OnInit, AfterViewInit, AfterViewChe
   contextMenuPosition = { x: '0px', y: '0px' };
 
   ngOnInit() {
+    this.canThisRoleCreateBillOnClosingScreen = this.readRoleFlagFromStorage('canThisRoleCreateBillOnClosingScreen');
+    this.canThisRoleViewBillOnClosingScreen = this.readRoleFlagFromStorage('canThisRoleViewBillOnClosingScreen');
+    this.canThisRoleDoGoodForBillingOnClosingScreen = this.readRoleFlagFromStorage('canThisRoleDoGoodForBillingOnClosingScreen');
     this.route.queryParams.subscribe(paramsData => {
       const encryptedAllotmentID = paramsData.allotmentID;
       this.AllotmentID = this._generalService.decrypt(decodeURIComponent(encryptedAllotmentID));
@@ -911,8 +917,20 @@ export class ClossingOneComponent implements OnInit, AfterViewInit, AfterViewChe
 
   //   }   
   // }
+  private readRoleFlagFromStorage(key: string): boolean {
+    const rawValue = localStorage.getItem(key);
+    if (rawValue == null) {
+      return false;
+    }
+    const normalized = rawValue.toString().trim().toLowerCase();
+    return normalized === 'true' || normalized === '1';
+  }
+
   //----------Generate Bill----------------
   public GenerateBill() {
+    if (!this.canThisRoleCreateBillOnClosingScreen) {
+      return;
+    }
     this.clossingOneService.generateBill(this.DutySlipID)
       .subscribe(
         response => {
@@ -949,6 +967,9 @@ export class ClossingOneComponent implements OnInit, AfterViewInit, AfterViewChe
 
   }
   public getInvoiceType() {
+    if (!this.canThisRoleViewBillOnClosingScreen) {
+      return;
+    }
     this.controlPanelDialogeService.getInvoiceType(this.invoiceID).subscribe
       (
         data => {

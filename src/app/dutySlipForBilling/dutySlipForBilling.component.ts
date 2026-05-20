@@ -49,6 +49,7 @@ export class DutySlipForBillingComponent implements OnInit, AfterViewInit {
   @Input() RegistrationNumber;
   @Input() InvoiceID;
   @Input() DSClosing;
+  @Input() canThisRoleDoGoodForBillingOnClosingScreen = false;
   @Output() dataSaved: EventEmitter<void> = new EventEmitter();
   @Output() dutyStatusChanged = new EventEmitter<{verifyDuty: boolean, goodForBilling: boolean,message: string}>();
   //@Output() dutyMessage = new EventEmitter<string>();
@@ -2022,7 +2023,7 @@ onChange() {
          //this.disputeAdvanceTable = data;
           this.showNotification(
             'snackbar-success',
-            'GPS Data Created...!!!',
+            'GPS data updated.',
             'bottom',
             'center'
           ); 

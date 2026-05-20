@@ -32,6 +32,9 @@ export class RoleComponent implements OnInit {
    'canCreateReservation',
    'isThisAKeyAccountManagerRole',
    'canThisRoleCreateBackDateBooking',
+   'canThisRoleCreateBillOnClosingScreen',
+   'canThisRoleViewBillOnClosingScreen',
+   'canThisRoleDoGoodForBillingOnClosingScreen',
     'status',
     'pages',
     'actions'
@@ -83,6 +86,10 @@ export class RoleComponent implements OnInit {
   {
     const dialogRef = this.dialog.open(FormDialogComponent, 
     {
+      panelClass: 'role-form-wide-dialog',
+      width: '1200px',
+      maxWidth: '98vw',
+      minWidth: 'min(1200px, 98vw)',
       data: 
         {
           advanceTable: this.advanceTable,
@@ -93,6 +100,10 @@ export class RoleComponent implements OnInit {
   editCall(row) {
     this.roleID = row.id;
     const dialogRef = this.dialog.open(FormDialogComponent, {
+      panelClass: 'role-form-wide-dialog',
+      width: '1200px',
+      maxWidth: '98vw',
+      minWidth: 'min(1200px, 98vw)',
       data: {
         advanceTable: row,
         action: 'edit'

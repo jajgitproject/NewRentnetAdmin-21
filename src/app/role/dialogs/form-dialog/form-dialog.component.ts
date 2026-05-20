@@ -35,13 +35,11 @@ export class FormDialogComponent
         if (this.action === 'edit') 
         {
           this.dialogTitle ='Role';       
-          this.advanceTable = data.advanceTable;
-          this.advanceTableForm?.controls['canCreateReservation'].setValue(this.advanceTable.canCreateReservation);
+          this.advanceTable = new Role(data.advanceTable);
         } else 
         {
           this.dialogTitle = 'Role';
           this.advanceTable = new Role({});
-          this.advanceTable.activationStatus=true;
         }
         this.advanceTableForm = this.createContactForm();
   }
@@ -67,10 +65,13 @@ export class FormDialogComponent
       role: [this.advanceTable.role,Validators.required],
       roleFor: [this.advanceTable.roleFor,Validators.required],
       remark : [this.advanceTable.remark],
-      canCreateReservation: [this.advanceTable.canCreateReservation,Validators.required],
+      canCreateReservation: [this.advanceTable.canCreateReservation, Validators.required],
       activationStatus: [this.advanceTable.activationStatus],
-      isThisAKeyAccountManagerRole: [this.advanceTable.isThisAKeyAccountManagerRole],
-      canThisRoleCreateBackDateBooking: [this.advanceTable.canThisRoleCreateBackDateBooking]
+      isThisAKeyAccountManagerRole: [this.advanceTable.isThisAKeyAccountManagerRole, Validators.required],
+      canThisRoleCreateBackDateBooking: [this.advanceTable.canThisRoleCreateBackDateBooking, Validators.required],
+      canThisRoleCreateBillOnClosingScreen: [this.advanceTable.canThisRoleCreateBillOnClosingScreen, Validators.required],
+      canThisRoleViewBillOnClosingScreen: [this.advanceTable.canThisRoleViewBillOnClosingScreen, Validators.required],
+      canThisRoleDoGoodForBillingOnClosingScreen: [this.advanceTable.canThisRoleDoGoodForBillingOnClosingScreen, Validators.required]
     });
   }
   submit() 
