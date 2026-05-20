@@ -373,7 +373,7 @@ advanceTableIN: InternalNoteDetails | null;
   ReservationStatus: string;
   locationOutIntervalInMinutes: number;
   IsAlloted:boolean = false;
-
+canCreateReservation: boolean;
   constructor(
     public httpClient: HttpClient,
     private dialog: MatDialog,
@@ -402,7 +402,8 @@ advanceTableIN: InternalNoteDetails | null;
   contextMenuPosition = { x: '0px', y: '0px' };
   ngOnInit() { 
     this.applyStaticRequiredValidators();
-
+     this.canCreateReservation =
+    localStorage.getItem('canCreateReservation') === 'true';
     // Enhanced status checking - allow changes for new duplicated bookings
     if(this.status && this.status !== 'Changes allow' && !this.isEditingAllowed()) {
       this.buttonDisabled = true;

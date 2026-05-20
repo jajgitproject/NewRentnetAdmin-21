@@ -1302,10 +1302,10 @@
                            
                             <br>
                             
-                            <button type="button" mat-raised-button style="background-color: #bcb4db"  *ngIf="this.action !== 'edit'"
+                            <button type="button" mat-raised-button style="background-color: #bcb4db"  *ngIf="this.action !== 'edit' && canCreateReservation"
                                 (click)="confirmAdd()">Save</button>
 
-                            <button type="button" mat-raised-button style="background-color: #bcb4db"  *ngIf="this.action === 'edit'"
+                            <button type="button" mat-raised-button style="background-color: #bcb4db"  *ngIf="this.action === 'edit' && canCreateReservation"
                                 (click)="confirmAdd()" [disabled]="buttonDisabled || isAllotmentLockedForEdit()">Update</button>
 
                             <button type="button" mat-raised-button style="background-color: #f29f99"

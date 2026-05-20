@@ -1437,6 +1437,8 @@
                       </span>
                       <span class="mat-cell" style="font-size: 12px;">
                         {{ data.driverName }}
+                        <br/>
+                        <span *ngIf="data.driverName!==null">{{ data.driverPhone }}</span>                        
                       </span>
                       <span class="mat-cell" style="font-size: 12px;">
 

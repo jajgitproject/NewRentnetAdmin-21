@@ -293,13 +293,13 @@
               </td>
               <td class="table-midrow-secondcolumn"></td>
               <td class="table-midrow-thirdcolumn"></td>
-            </tr>
-
+            </tr>           
             <tr class="table-last-tr">
               <td class="table-lastrow-firstcolumn">&nbsp;</td>
               <td class="table-lastrow-secondcolumn">&nbsp;</td>
               <td class="table-lastrow-thirdcolumn">&nbsp;</td>
             </tr>
+             
 
           </tbody>
         </table>
@@ -582,6 +582,10 @@
       <div class="gst-section" style="z-index: 10; background-color: white;">
         <div class="gst-row"><strong>Sub Total : </strong><span>{{dataSource?.totalAmountAfterExpences |
             number:'1.2-2'}}</span></div>
+            <div class="gst-row" *ngIf="dataSource?.isSEZ===true">Supply meant for Export/supply to SEZ unit or SEZ developer for 
+                          <br/>
+              authorised operations under bond or letter of undertaking
+               <br/> without payment of integrated Tax</div>
         <div class="gst-row">
           <strong>CGST @ {{dataSource?.invoiceGSTModel?.cgstPercentage}}% :</strong>
           <span>{{dataSource?.invoiceGSTModel?.cgstAmount | number:'1.2-2'}}</span>
@@ -659,10 +663,8 @@
           Electronic Mode of Payments as per Section 269SU of Income Tax Act, 1961.
           <!-- <a href="https://www.ecosmobility.com/pay-online/"
             target="_blank">https://www.ecosmobility.com/pay-online/</a> -->
-            <br/><br/>
-            <div *ngIf="dataSource?.isSEZ===true">
-              Supply meant for Export/supply to SEZ unit or SEZ developer for authorised operations under bond or letter of undertaking without payment of integrated Tax
-            </div>
+            <br/>
+           
         </div>
 
         <div class="signature">
