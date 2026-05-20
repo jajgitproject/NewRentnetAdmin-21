@@ -87,6 +87,13 @@ export class ReservationComponent implements OnInit {
   advanceTableRG:ReservationGroup
   reservationDataSource:Reservation[] | null;
   customerDetailData:any;
+  isBookerAllowedToBeCreatedFromReservation = false;
+  /** Wide layout for New Passenger / Create new Booker (matches legacy popup). */
+  private readonly customerPersonQuickAddDialog = {
+    panelClass: 'role-form-wide-dialog',
+    width: '1200px',
+    maxWidth: '98vw',
+  };
   public GoogleAddressList?: GoogleAddressDropDown[] = [];
   public DropOffGoogleAddressList?: GoogleAddressDropDown[] = [];
   public CustomerTypeList?: CustomerTypeDropDown[] = [];
@@ -1401,9 +1408,27 @@ toArray<T>(value: any): T[] {
           this.filteredCustomerCustomerGroupOptions = this.advanceTableForm.controls['customerCustomerGroup'].valueChanges.pipe(
             startWith(""),
             map(value => this._filterCCG(value || ''))
-          ); 
+          );
+          this.syncBookerCreateAllowedFromCurrentCustomerId();
         });
     
+  }
+
+  private applyBookerCreateAllowedFromCustomerRow(
+    row: CustomerCustomerGroupDropDown | undefined
+  ): void {
+    this.isBookerAllowedToBeCreatedFromReservation =
+      row?.isBookerAllowedToBeCreatedFromReservation === true;
+  }
+
+  private syncBookerCreateAllowedFromCurrentCustomerId(): void {
+    const id = this.customerID || this.advanceTableForm?.value?.customerID;
+    if (!id || !this.CustomerCustomerGroupList?.length) {
+      this.isBookerAllowedToBeCreatedFromReservation = false;
+      return;
+    }
+    const row = this.CustomerCustomerGroupList.find((c) => c.customerID === id);
+    this.applyBookerCreateAllowedFromCustomerRow(row);
   }
 
   private _filterCCG(value: string): any {
@@ -1425,6 +1450,7 @@ toArray<T>(value: any): T[] {
     );
     if (CustomerCustomerGroup) 
     {
+      this.applyBookerCreateAllowedFromCustomerRow(CustomerCustomerGroup);
       this.getCustomerCustomerGroupID(CustomerCustomerGroup.customerID,CustomerCustomerGroup.customerGroupID,CustomerCustomerGroup.customerName);
     }
   }
@@ -3547,6 +3573,7 @@ public validateCustomerSpecificFields(): boolean {
       {
       const dialogRef = this.dialog.open(FormDialogComponentCustomerPerson, 
         {
+          ...this.customerPersonQuickAddDialog,
           data: 
             {
               advanceTable: this.customerDetailData,
@@ -3570,6 +3597,7 @@ public validateCustomerSpecificFields(): boolean {
     {
     const dialogRef = this.dialog.open(FormDialogComponentCustomerPerson, 
       {
+        ...this.customerPersonQuickAddDialog,
         data: 
           {
             advanceTable: this.customerDetailData,
@@ -3620,61 +3648,41 @@ public validateCustomerSpecificFields(): boolean {
     }
   }
 
-  personShortBooker()
-  {
-    if(this.action==='edit')
-    {
-      // let customer=this.advanceTableForm.value.customerCustomerGroup?.split('-')[0];
-      // let customerGroup=this.advanceTableForm.value.customerCustomerGroup?.split('-')[1];
-            // let customer= this.customerName;
-            let customerGroup=this.advanceTableForm.controls['customerCustomerGroup'].value.split('-')[1];
-      this.customerDetailData={customerGroup:customerGroup,customerGroupID:this.advanceTableForm.value.customerGroupID,
-        customerID:this.advanceTableForm.value.customerID,customerName:this.customerName}
-        // customerID:this.customerID,customerName:this.customerName}
-      if(this.customerDetailData)
-      {
-      const dialogRef = this.dialog.open(FormDialogComponentCustomerPerson, 
-        {
-          data: 
-            {
-              advanceTable: this.customerDetailData,
-              action: 'add',
-              // forCP:'368807',
-              forCP:'CP',
-              CustomerGroupID:this.customerDetailData.customerGroupID,
-              CustomerGroupName:this.customerDetailData.customerGroup
-            }
-        });
-        dialogRef.afterClosed().subscribe(res => {
-          // received data from dialog-component
-          this.InitBooker();
-          this.InitPassenger();
-        })
+  /** Opens the same customer-person popup as New Passenger; save sets IsBooker = Yes. */
+  createNewBooker() {
+    if (!this.isBookerAllowedToBeCreatedFromReservation) {
+      return;
+    }
+    if (this.action === 'edit') {
+      const customerGroup = this.advanceTableForm.controls['customerCustomerGroup'].value.split('-')[1];
+      this.customerDetailData = {
+        customerGroup: customerGroup,
+        customerGroupID: this.advanceTableForm.value.customerGroupID,
+        customerID: this.customerID,
+        customerName: this.customerName
+      };
+    }
+    if (!this.customerDetailData) {
+      return;
+    }
+    const dialogRef = this.dialog.open(FormDialogComponentCustomerPerson, {
+      ...this.customerPersonQuickAddDialog,
+      data: {
+        advanceTable: this.customerDetailData,
+        action: 'add',
+        forCP: 'CB',
+        CustomerGroupID: this.customerDetailData.customerGroupID,
+        CustomerGroupName: this.customerDetailData.customerGroup
       }
-    }
-    else
-    {
-      if(this.customerDetailData)
-    {
-    const dialogRef = this.dialog.open(FormDialogComponentCustomerPerson, 
-      {
-        data: 
-          {
-            advanceTable: this.customerDetailData,
-            action: 'add',
-            forCP:'CP',
-            CustomerGroupID:this.customerDetailData.customerGroupID,
-            CustomerGroupName:this.customerDetailData.customerGroup
-          }
-      });
-      dialogRef.afterClosed().subscribe(res => {
-        // received data from dialog-component
-        this.InitBooker();
-        this.InitPassenger();
-      })
-    }
-    }
-    
+    });
+    dialogRef.afterClosed().subscribe(() => {
+      this.InitBooker();
+      this.InitPassenger();
+    });
+  }
+
+  personShortBooker() {
+    this.createNewBooker();
   }
 
   AddSpots()

@@ -13,7 +13,7 @@
             <mat-icon>close</mat-icon>
         </button>
     </div>
-    <div mat-dialog-content *ngIf=" this.someAction !== 'CP'">
+    <div mat-dialog-content *ngIf="!isReservationQuickAdd">
         <form class="register-form m-4" [formGroup]="advanceTableForm" (ngSubmit)="submit">
 
             <div class="row">
@@ -662,7 +662,7 @@
         </form>
     </div>
 
-    <div mat-dialog-content *ngIf=" this.someAction === 'CP'">
+    <div mat-dialog-content *ngIf="isReservationQuickAdd" class="cp-quick-add-dialog-content">
         <form class="register-form m-4" [formGroup]="advanceTableForm" (ngSubmit)="submit">
 
             <div class="row">
@@ -933,7 +933,10 @@
                         </mat-error>
                     </mat-form-field>
                 </div>
-                 <div class="col-xl-3 col-lg-3 col-md-6 col-sm-12 mb-2">
+            </div>
+
+            <div class="row">
+                <div class="col-xl-3 col-lg-3 col-md-6 col-sm-12 mb-2">
                     <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
                         <mat-label>Allow Login To Customer App</mat-label>
                         <mat-select required formControlName="allowLoginToCustomerApp">
@@ -959,24 +962,11 @@
                         </mat-error>
                     </mat-form-field>
                 </div>
+            </div>
 
-                <!-- <div class="col-xl-3 col-lg-3 col-md-6 col-sm-12 mb-2">
-                    <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
-                        <mat-label>Activation Status</mat-label>
-                        <mat-select formControlName="activationStatus">
-                            <mat-option [value]="true">Active</mat-option>
-                            <mat-option [value]="false">Deleted</mat-option>
-                        </mat-select>
-                        <mat-error *ngIf="advanceTableForm.get('activationStatus').hasError('required')">
-                            Activation Status is required
-                        </mat-error>
-                    </mat-form-field>
-                </div> -->
-
-                <div class="col-xl-3 col-lg-3 col-md-6 col-sm-12 mb-2">
-                    <div class="example-button-row">
-                        <!-- <button mat-raised-button color="primary" [type]="submit" [disabled]="!advanceTableForm.valid"
-                            (click)="confirmAdd()">Save</button> -->
+            <div class="row cp-quick-add-actions-row">
+                <div class="col-12">
+                    <div class="example-button-row cp-quick-add-actions">
                         <button mat-raised-button color="primary" [type]="submit" *ngIf="saveDisabled"
                             [disabled]="isSaving || !advanceTableForm.valid" (click)="confirmAdd()">
                             {{ isSaving ? 'Saving...' : 'Save' }}

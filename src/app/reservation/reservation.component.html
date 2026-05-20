@@ -114,6 +114,10 @@
                                     <mat-error *ngIf="advanceTableForm.controls['booker'].hasError('primaryBookerInvalid')">
                                         Please Select Valid Booker
                                     </mat-error>
+                                </mat-form-field>
+                                <div class="link-actions-below-left" *ngIf="isBookerAllowedToBeCreatedFromReservation">
+                                    <a class="link-action" (click)="createNewBooker()">Create new Booker</a>
+                                </div>
                                     
                                     <!-- <mat-hint align="end">
                                             <div>
@@ -147,7 +151,6 @@
                                                 </a> -->
                                     <!-- </div>                                            
                                         </mat-hint> -->
-                                </mat-form-field>
                                 
                                 <!-- <a style="cursor: pointer;color: #007bff;float: left;margin-top:-15px;" (click)="addPassengers()">
                                                 New Booker</a> -->

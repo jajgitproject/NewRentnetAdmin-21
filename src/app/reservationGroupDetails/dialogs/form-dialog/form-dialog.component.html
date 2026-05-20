@@ -207,26 +207,14 @@
               Please select a Booker
             </mat-error>
           </mat-form-field>
-          <div style="float: right;margin-top: -20px;">
-              <div style="float: right;font-family: italic;">
-                  <mat-checkbox color="primary" 
-                          (change)="onAllBookerChange($event)">
-                    All Booker
-                  </mat-checkbox>
-              </div>
+          <div class="link-actions-below-left" *ngIf="isBookerAllowedToBeCreatedFromReservation">
+            <a class="link-action" (click)="createNewBooker()">Create new Booker</a>
           </div>
-          <!-- <div class="hint-container">
-                    <mat-hint align="end">
-                        <div>
-                            <a style="cursor: pointer;color: #007bff;
-                                padding: 10px; font-size: 10px !important; font-style: italic;margin-left: 150px;"
-                                (click)="personShort()">
-                                New Booker
-                            </a>
-
-                        </div>
-                    </mat-hint>
-                    </div> -->
+          <div class="booker-all-checkbox">
+            <mat-checkbox color="primary" (change)="onAllBookerChange($event)">
+              All Booker
+            </mat-checkbox>
+          </div>
         </div>
 
         <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">

@@ -98,6 +98,11 @@ export class FormDialogComponentCustomerPerson
   customerID: any;
   CustomerGroupID: any;
   someAction: any;
+
+  /** New Passenger (CP) and Create new Booker (CB) — same compact popup from booking. */
+  get isReservationQuickAdd(): boolean {
+    return this.someAction === 'CP' || this.someAction === 'CB';
+  }
   public formGroup: FormGroup;
 
   referenceID: number;
@@ -195,27 +200,25 @@ export class FormDialogComponentCustomerPerson
           this.advanceTable.sendSMSWhatsApp=true;
           this.advanceTable.sendEmail=true;
           this.advanceTable.preferAppBasedDriver=true;
-          if(data.forCP==='CP')
-          {
-            this.customerID=data.advanceTable.customerID;
-            this.advanceTable.customerName=data.advanceTable.customerName;
-           
-            this.advanceTable.customerGroupID=data.advanceTable.customerGroupID;
-            
-            this.CustomerGroupName=data.advanceTable.customerGroup;
-             this.advanceTableForm = this.createContactForm();
-            //this.advanceTable.customerGroupID=data.CustomerGroupID;
-            //this.advanceTableForm.controls["customerName"].disable();
+          if (data.forCP === 'CP' || data.forCP === 'CB') {
+            this.customerID = data.advanceTable.customerID;
+            this.advanceTable.customerName = data.advanceTable.customerName;
+            this.advanceTable.customerGroupID = data.advanceTable.customerGroupID;
+            this.CustomerGroupName = data.advanceTable.customerGroup;
+            if (data.forCP === 'CB') {
+              this.advanceTable.isBooker = true;
+              this.advanceTable.isPassenger = false;
+            }
+            this.advanceTableForm = this.createContactForm();
           }
          
         }
         
         this.advanceTableForm = this.createContactForm();
         this.someAction=data.forCP
-        if(this.someAction==='CP')
-        {
-          this.CustomerGroupID=data.advanceTable.customerGroupID;
-          this.CustomerGroupName=data.advanceTable.customerGroup;
+        if (this.someAction === 'CP' || this.someAction === 'CB') {
+          this.CustomerGroupID = data.advanceTable.customerGroupID;
+          this.CustomerGroupName = data.advanceTable.customerGroup;
         }
         if(!data.advanceTable)
         {
@@ -225,9 +228,8 @@ export class FormDialogComponentCustomerPerson
   }
   public ngOnInit(): void
   {
-    if(this.someAction==='CP')
-    {
-      this.advanceTableForm.controls["customerName"].disable();
+    if (this.someAction === 'CP' || this.someAction === 'CB') {
+      this.advanceTableForm.controls['customerName'].disable();
     }
     this.InitCustomer();
     this.InitSalutation();
@@ -716,12 +718,27 @@ public Post(): void {
     customerID: this.customerID
   });
 
-  // If action is CP, set default flags
+  // Reservation quick-add: CP = passenger, CB = booker
   if (this.someAction === 'CP') {
     this.advanceTableForm.patchValue({
       isContactPerson: false,
       isBooker: false,
       isPassenger: true,
+      isAdmin: false,
+      maskMobileNumber: false,
+      sendSMSWhatsApp: true,
+      sendEmail: true,
+      preferAppBasedDriver: false,
+      loyalGuest: false,
+      password: null,
+      confirmPassword: null,
+      isDefaultForIntegrationRequest: false
+    });
+  } else if (this.someAction === 'CB') {
+    this.advanceTableForm.patchValue({
+      isContactPerson: false,
+      isBooker: true,
+      isPassenger: false,
       isAdmin: false,
       maskMobileNumber: false,
       sendSMSWhatsApp: true,
@@ -775,7 +792,7 @@ public Post(): void {
     error: (error) => {
       if (error.error?.isDuplicate) {
         this.showNotification('snackbar-warning', error.error.message || 'Duplicate record found', 'bottom', 'center');
-      } else if (this.someAction === 'CP') {
+      } else if (this.someAction === 'CP' || this.someAction === 'CB') {
         this.saveDisabled = true;
         this.showNotification('snackbar-danger', 'Operation Failed.....!!!', 'bottom', 'center');
       }
