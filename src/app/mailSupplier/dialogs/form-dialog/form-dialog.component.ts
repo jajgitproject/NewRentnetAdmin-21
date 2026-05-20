@@ -4,7 +4,6 @@ import { MailSupplierService } from '../../mailSupplier.service';
 import { FormControl, Validators, FormGroup, FormBuilder} from '@angular/forms';
 import { MailToSupplier } from '../../mailSupplier.model';
 import { MAT_DATE_LOCALE } from '@angular/material/core';
-import { formatDate } from '@angular/common';
 import { GeneralService } from '../../../general/general.service';
 import { HttpErrorResponse } from '@angular/common/http';
 import { MatSnackBar } from '@angular/material/snack-bar';
@@ -29,6 +28,7 @@ export class MTSFormDialogComponent implements OnInit
   saveDisabled:boolean=true;
   dataSource: MailToSupplier | null;
   emailList: EmailInfoModel[] = [];
+  loggedInUserName = '';
 
   @ViewChild('mailBodyContainer') mailBodyContainer!: ElementRef;
   
@@ -50,6 +50,10 @@ export class MTSFormDialogComponent implements OnInit
   }
   
   ngOnInit(): void {
+    this.loggedInUserName = this.getLoggedInUserDisplayName();
+    this.advanceTableForm.patchValue({
+      userID: this._generalService.getUserID()
+    });
     this.loadData();
   }
 
@@ -90,9 +94,8 @@ export class MTSFormDialogComponent implements OnInit
   }
 
  public Post(): void {
-
-  const mailBody =
-    this.mailBodyContainer.nativeElement.innerHTML;
+  const tableHtml = this.mailBodyContainer.nativeElement.innerHTML;
+  const mailBody = this.buildSupplierEmailHtml(tableHtml);
 
   const payload = {
     ...this.advanceTableForm.getRawValue(),
@@ -122,6 +125,99 @@ export class MTSFormDialogComponent implements OnInit
     );
 }
 
+  private buildSupplierEmailHtml(tableHtml: string): string {
+    const senderName = this.safeString(this.loggedInUserName) || '{User Name who login into the rentnet}';
+    return `
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Email To Supplier</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 16px;
+      font-family: Arial, sans-serif;
+      color: #111111;
+      background: #ffffff;
+      line-height: 1.4;
+    }
+    .mail-wrap {
+      max-width: 1000px;
+      margin: 0 auto;
+    }
+    .lead {
+      margin: 0 0 24px 0;
+      font-size: 22px;
+      font-weight: 700;
+      color: #2f80c4;
+    }
+    .intro {
+      margin: 0 0 22px 0;
+      font-size: 14px;
+    }
+    .signoff {
+      margin-top: 28px;
+      margin-bottom: 12px;
+      font-size: 14px;
+    }
+    .mail-signature {
+      margin: 0 0 24px 0;
+      font-size: 14px;
+    }
+    .eco-logo {
+      margin: 8px 0 14px 0;
+      width: 160px;
+      height: auto;
+      display: block;
+    }
+    .company-name {
+      margin-top: 10px;
+      font-size: 20px;
+      font-weight: 700;
+      color: #2f80c4;
+    }
+    .contact-line {
+      margin-top: 12px;
+      font-size: 14px;
+    }
+    .contact-line a {
+      color: #2f80c4;
+      text-decoration: underline;
+    }
+    .tagline {
+      margin-top: 14px;
+      font-size: 14px;
+      font-weight: 700;
+      line-height: 1.35;
+    }
+  </style>
+</head>
+<body>
+  <div class="mail-wrap">
+    <p class="lead">Dear ASSOCIATE</p>
+    <p class="intro">Please confirm the following reservation:</p>
+    ${tableHtml}
+    <div class="signoff">
+      <p><u>Thanks</u> and Regards</p>
+    </div>
+    <p class="mail-signature">${senderName}</p>
+    <img class="eco-logo" src="https://prodapi.ecoserp.in/StaticFiles/Images/logoeco.png" alt="ECO Rent A Car Logo" />
+    <div class="company-name">ECO Mobility</div>
+    <div class="contact-line">
+      <strong>24x7 Reservations:</strong> T: +91-11-4079-4079 |
+      E: <a href="mailto:cars@ecosmobility.com">cars@ecosmobility.com</a> |
+      W: <a href="https://www.ecosmobility.com" target="_blank" rel="noopener noreferrer">www.ecosmobility.com</a>
+    </div>
+    <div class="tagline">
+      Ground Transportation in 100+ cities in India and 30+ countries worldwide<br>
+      Chauffeured Car Rental | Employee Transportation Service | Self Drive
+    </div>
+  </div>
+</body>
+</html>`;
+  }
+
   showNotification(colorName, text, placementFrom, placementAlign) {
     this.snackBar.open(text, '', {
       duration: 2000,
@@ -149,7 +245,7 @@ export class MTSFormDialogComponent implements OnInit
       // not collide with the new value (NG0100).
       this.ngZone.run(() => {
         setTimeout(() => {
-          this.emailList = list || [];
+          this.emailList = this.normalizeEmailInfoList(list || []);
           this.cdr.detectChanges();
         }, 0);
       });
@@ -160,6 +256,58 @@ export class MTSFormDialogComponent implements OnInit
       this.emailList = [];
       this.cdr.detectChanges();
     });
+  }
+
+  private normalizeEmailInfoList(list: EmailInfoModel[]): EmailInfoModel[] {
+    return (list || []).map((item) => ({
+      ...item,
+      city: this.safeString(item?.city) || 'N/A',
+      pickup: {
+        ...item?.pickup,
+        pickupAddress: this.safeString(item?.pickup?.pickupAddress) || 'N/A'
+      },
+      drop: {
+        ...item?.drop,
+        dropOffAddress: this.safeString(item?.drop?.dropOffAddress) || 'N/A'
+      },
+      passenger: {
+        ...item?.passenger,
+        customerPersonName: this.safeString(item?.passenger?.customerPersonName) || 'N/A',
+        primaryMobile: this.safeString(item?.passenger?.primaryMobile) || 'N/A'
+      },
+      vehicle: {
+        ...item?.vehicle,
+        vehicle: this.safeString(item?.vehicle?.vehicle) || 'N/A'
+      },
+      package: {
+        ...item?.package,
+        package: this.safeString(item?.package?.package) || 'N/A'
+      }
+    }));
+  }
+
+  private safeString(value: string | null | undefined): string {
+    return (value || '').trim();
+  }
+
+  private getLoggedInUserDisplayName(): string {
+    try {
+      const rawCurrentUser = localStorage.getItem('currentUser');
+      if (rawCurrentUser) {
+        const parsed = JSON.parse(rawCurrentUser);
+        const employee = parsed?.employee ?? parsed?.Employee;
+        const firstName = this.safeString(employee?.FirstName ?? employee?.firstName);
+        const lastName = this.safeString(employee?.LastName ?? employee?.lastName);
+        const fullName = `${firstName} ${lastName}`.trim();
+        if (fullName) {
+          return fullName;
+        }
+      }
+    } catch {
+      // Fall back to existing helper/default when parsing currentUser fails.
+    }
+
+    return this.safeString(this._generalService.getUserName()) || '{User Name who login into the rentnet}';
   }
 }
 
