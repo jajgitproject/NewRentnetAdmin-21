@@ -2609,7 +2609,11 @@ public getInvoiceNumber(item:any ,i: any)
 
  public loadDataForHeader(status:string,currentPage: number,pageSize: number,isLoading: boolean,rowIndex?: number)
   {
-    this._controlPanelDesignService.getReservationHeaderDetails(status,this.filterForm?.getRawValue()?? {},currentPage,pageSize,this.sortBy,this.orderBy).subscribe(
+    const requestPayload = {
+      ...(this.filterForm?.getRawValue() ?? {}),
+      showAllLocation: this.getEffectiveShowAllLocation(this.filterForm?.get('showAllLocation')?.value)
+    };
+    this._controlPanelDesignService.getReservationHeaderDetails(status,requestPayload,currentPage,pageSize,this.sortBy,this.orderBy).subscribe(
       (data: ControlPanelHeaderData) => {
           if (data != null) 
           {
@@ -2670,7 +2674,7 @@ public getInvoiceNumber(item:any ,i: any)
         vehicleInventory:[this._filters.vehicleInventory],
         driver:[this._filters.driver],
         userID:[this._generalService.getUserID()],
-        showAllLocation:[this._filters.showAllLocation],
+        showAllLocation:[this.getEffectiveShowAllLocation(this._filters.showAllLocation)],
         primarymobile:[this._filters.primarymobile],
         locationName:[this._filters.locationName],
         driverOfficialIdentityNumber:[this._filters.driverOfficialIdentityNumber],
@@ -2684,6 +2688,45 @@ public getInvoiceNumber(item:any ,i: any)
         packageID:[this._filters.packageID]
       });
     }
+
+  private normalizeBoolean(value: any, fallback: boolean): boolean {
+    if (typeof value === 'boolean') {
+      return value;
+    }
+    if (typeof value === 'string') {
+      const normalized = value.trim().toLowerCase();
+      if (normalized === 'true') {
+        return true;
+      }
+      if (normalized === 'false') {
+        return false;
+      }
+    }
+    if (typeof value === 'number') {
+      return value !== 0;
+    }
+    return fallback;
+  }
+
+  private getLoginShowAllLocation(): boolean {
+    const raw = localStorage.getItem('currentUser');
+    if (!raw) {
+      return false;
+    }
+    try {
+      const parsed = JSON.parse(raw);
+      const loginValue = parsed?.employee?.ShowAllLocation ?? parsed?.employee?.showAllLocation;
+      return this.normalizeBoolean(loginValue, false);
+    } catch {
+      return false;
+    }
+  }
+
+  private getEffectiveShowAllLocation(candidateValue: any): boolean {
+    const loginShowAllLocation = this.getLoginShowAllLocation();
+    const candidateShowAllLocation = this.normalizeBoolean(candidateValue, loginShowAllLocation);
+    return loginShowAllLocation || candidateShowAllLocation;
+  }
   //--------- Location Out Time Popup ----------
   locationOutTimeUpdate(item,i) {
     this.fetchStatusAndOpen(() => {

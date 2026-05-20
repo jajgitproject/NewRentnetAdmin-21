@@ -441,6 +441,13 @@ export class ControlPanelDesignComponent implements OnInit {
     }
   }
 
+  private getEffectiveShowAllLocation(candidateValue: any): boolean {
+    const loginShowAllLocation = this.getLoginShowAllLocation();
+    const candidateShowAllLocation = this.normalizeBoolean(candidateValue, loginShowAllLocation);
+    // Login/localStorage is source-of-truth when it is true.
+    return loginShowAllLocation || candidateShowAllLocation;
+  }
+
   onBackPress(event) 
   {
     if (event.keyCode === 8) 
@@ -563,7 +570,7 @@ export class ControlPanelDesignComponent implements OnInit {
       vehicleInventory:[this._filters.vehicleInventory],
       driver:[this._filters.driver],
       userID:[this._generalService.getUserID()],
-      showAllLocation:[this.normalizeBoolean(this._filters.showAllLocation, this.getLoginShowAllLocation())],
+      showAllLocation:[this.getEffectiveShowAllLocation(this._filters.showAllLocation)],
       primarymobile:[this._filters.primarymobile],
       locationName:[this._filters.locationName],
       transferLocationName:[this._filters.transferLocationName],
@@ -595,7 +602,7 @@ export class ControlPanelDesignComponent implements OnInit {
     this._controlPanelDesignService.getShowAllLocationCheck(this._generalService.getUserID()).subscribe(
       data => 
       {
-        this.ShowAllLocation = this.normalizeBoolean(data?.showAllLocation, this.getLoginShowAllLocation());
+        this.ShowAllLocation = this.getEffectiveShowAllLocation(data?.showAllLocation);
         this.filterForm.patchValue({showAllLocation:this.ShowAllLocation});
         // this.filterForm.controls["fromDate"].setValue('');
         // this.filterForm.controls["toDate"].setValue('');
@@ -763,10 +770,7 @@ export class ControlPanelDesignComponent implements OnInit {
     }
     const requestPayload = {
       ...this.filterForm.getRawValue(),
-      showAllLocation: this.normalizeBoolean(
-        this.filterForm.get('showAllLocation')?.value,
-        this.getLoginShowAllLocation()
-      )
+      showAllLocation: this.getEffectiveShowAllLocation(this.filterForm.get('showAllLocation')?.value)
     };
     this.filterForm.patchValue({ showAllLocation: requestPayload.showAllLocation }, { emitEvent: false });
     console.log(status);
