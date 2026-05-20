@@ -264,10 +264,12 @@ export class MTSFormDialogComponent implements OnInit
       city: this.safeString(item?.city) || 'N/A',
       pickup: {
         ...item?.pickup,
+        pickupAddressDetails: this.safeString(item?.pickup?.pickupAddressDetails),
         pickupAddress: this.safeString(item?.pickup?.pickupAddress) || 'N/A'
       },
       drop: {
         ...item?.drop,
+        dropOffAddressDetails: this.safeString(item?.drop?.dropOffAddressDetails),
         dropOffAddress: this.safeString(item?.drop?.dropOffAddress) || 'N/A'
       },
       passenger: {
@@ -288,6 +290,26 @@ export class MTSFormDialogComponent implements OnInit
 
   private safeString(value: string | null | undefined): string {
     return (value || '').trim();
+  }
+
+  getPickupAddressDisplay(info: EmailInfoModel): string {
+    const details = this.safeString(info?.pickup?.pickupAddressDetails);
+    const address = this.safeString(info?.pickup?.pickupAddress);
+    return this.joinAddressParts(details, address);
+  }
+
+  getDropAddressDisplay(info: EmailInfoModel): string {
+    const details = this.safeString(info?.drop?.dropOffAddressDetails);
+    const address = this.safeString(info?.drop?.dropOffAddress);
+    return this.joinAddressParts(details, address);
+  }
+
+  private joinAddressParts(firstPart: string, secondPart: string): string {
+    const merged = [firstPart, secondPart]
+      .filter((value) => !!value && value.toUpperCase() !== 'N/A')
+      .join(' ')
+      .trim();
+    return merged || 'N/A';
   }
 
   private getLoggedInUserDisplayName(): string {

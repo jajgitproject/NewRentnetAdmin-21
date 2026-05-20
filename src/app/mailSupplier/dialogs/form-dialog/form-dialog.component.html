@@ -219,8 +219,8 @@
                         <td style="text-align:left;padding:8px 6px;border:1px solid #bfbfbf;font-size:11px;">{{ info?.city || 'N/A' }}</td>
                         <td style="text-align:left;padding:8px 6px;border:1px solid #bfbfbf;font-size:11px;">{{ info?.vehicle?.vehicle || 'N/A' }}</td>
                         <td style="text-align:left;padding:8px 6px;border:1px solid #bfbfbf;font-size:11px;">{{ info?.package?.package || 'N/A' }}</td>
-                        <td style="text-align:left;padding:8px 6px;border:1px solid #bfbfbf;font-size:11px;">{{ info?.pickup?.pickupAddress || 'N/A' }}</td>
-                        <td style="text-align:left;padding:8px 6px;border:1px solid #bfbfbf;font-size:11px;">{{ info?.drop?.dropOffAddress || 'N/A' }}</td>
+                        <td style="text-align:left;padding:8px 6px;border:1px solid #bfbfbf;font-size:11px;">{{ getPickupAddressDisplay(info) }}</td>
+                        <td style="text-align:left;padding:8px 6px;border:1px solid #bfbfbf;font-size:11px;">{{ getDropAddressDisplay(info) }}</td>
                         </tr>
                     </tbody>
                 </table>
