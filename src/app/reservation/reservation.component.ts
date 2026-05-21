@@ -253,7 +253,7 @@ advanceTableIN: InternalNoteDetails | null;
       dropOffSpot: [''],
       dropOffAddress: ['',[]],
       dropOffAddressDetails: [''],
-      ticketNumber: ['',[Validators.required,Validators.pattern(/^[0-9]{12}$/)]],
+      ticketNumber: ['',[Validators.required,Validators.pattern(/^[0-9]{12,15}$/)]],
       attachment: [''],
       emailLink: [''],
       reservationSourceID: [''],

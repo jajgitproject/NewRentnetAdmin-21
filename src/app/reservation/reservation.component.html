@@ -962,13 +962,13 @@
                                 <mat-form-field class="example-full-width cp-booking-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
                                     <mat-label>Ticket Number</mat-label>
                                     <input matInput formControlName="ticketNumber" (input)="onNumberInput($event)"
-                                        required maxlength="12" minlength="12"
-                                        pattern="[0-9]{12}" inputmode="numeric">
+                                        required maxlength="15" minlength="12"
+                                        pattern="[0-9]{12,15}" inputmode="numeric">
                                     <mat-error *ngIf="advanceTableForm.get('ticketNumber')?.hasError('required')">
                                         Ticket Number is required
                                     </mat-error>
                                     <mat-error *ngIf="advanceTableForm.get('ticketNumber')?.hasError('pattern')">
-                                        Ticket number must be 12 digits
+                                        Ticket Number must be 1 to 15 digits
                                     </mat-error>
                                 </mat-form-field>
                             </div>
