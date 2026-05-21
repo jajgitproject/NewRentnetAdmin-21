@@ -8,6 +8,10 @@ export class DutyRegisterModel {
 
   pickupDate: Date | null;
   bookingDate: string;
+  supplierName: string;
+  dsClosedBy: string;
+  dutySlipImage: string;
+  closingDate: Date | null;
 
   dispatchLocation: string;
 

@@ -548,6 +548,34 @@
                                                 </mat-cell>
                                             </ng-container>
 
+                                            <ng-container matColumnDef="SupplierName">
+                                                <mat-header-cell *matHeaderCellDef mat-sort-header>Vendor</mat-header-cell>
+                                                <mat-cell *matCellDef="let row">
+                                                    {{row.supplierName || 'N/A'}}
+                                                </mat-cell>
+                                            </ng-container>
+
+                                            <ng-container matColumnDef="DSClosedBy">
+                                                <mat-header-cell *matHeaderCellDef mat-sort-header>DS Closed By</mat-header-cell>
+                                                <mat-cell *matCellDef="let row">
+                                                    {{ row.dsClosedBy?.trim() ? row.dsClosedBy : 'N/A' }}
+                                                </mat-cell>
+                                            </ng-container>
+
+                                            <ng-container matColumnDef="DutySlipImage">
+                                                <mat-header-cell *matHeaderCellDef mat-sort-header>Manual DS Attached Status</mat-header-cell>
+                                                <mat-cell *matCellDef="let row">
+                                                    {{row.dutySlipImage ? 'Yes' : 'No'}}
+                                                </mat-cell>
+                                            </ng-container>
+
+                                            <ng-container matColumnDef="ClosingDate">
+                                                <mat-header-cell *matHeaderCellDef mat-sort-header>Closing Date</mat-header-cell>
+                                                <mat-cell *matCellDef="let row">
+                                                    {{(row.closingDate | date:'dd-MM-yyyy') || 'N/A'}}
+                                                </mat-cell>
+                                            </ng-container>
+
                                             <mat-header-row *matHeaderRowDef="displayedColumns"></mat-header-row>
 
                                             <mat-row *matRowDef="let row; columns: displayedColumns;"></mat-row>
