@@ -2021,7 +2021,8 @@ export class CarAndDriverAllotmentComponent implements OnInit {
             advanceTable: this.advanceTable,
             allotmentID: allotmentID,
             reservationID: reservationID,
-            status: this.status
+            status: this.status,
+            allotmentType: this.reservationInfo[0].allotmentType
           }
 
         });

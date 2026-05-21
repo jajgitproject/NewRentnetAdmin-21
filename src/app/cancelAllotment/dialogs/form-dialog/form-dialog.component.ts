@@ -45,6 +45,8 @@ export class FormDialogCAComponent
    status: string = '';
   buttonDisabled: boolean = false;
   normalizedStatus: string = '';
+  reservationID: any;
+  allotmentType:any;
   constructor(
     private snackBar: MatSnackBar,
   public dialogRef: MatDialogRef<FormDialogCAComponent>, 
@@ -69,11 +71,11 @@ export class FormDialogCAComponent
         ? !allowedStatuses.includes(this.normalizedStatus)
         : false;
 
-
+        this.advanceTable = data.advanceTable;
         if (this.action === 'edit') 
         {
           this.dialogTitle ='Cancel Allotment';       
-          this.advanceTable = data.advanceTable;
+      
           //this.ImagePath=this.advanceTable.cancelAllotmentSign;
         } else 
         {
@@ -85,7 +87,10 @@ export class FormDialogCAComponent
         this.advanceTableForm = this.createContactForm();
         this.AllotmentID=data.allotmentID;
         this.reservationID=data.reservationID;
-        this.AllotmentStatus=data.allotmentStatus
+        this.AllotmentStatus=data.allotmentStatus;
+        this.allotmentType=data.allotmentType;
+        console.log(this.advanceTable);
+     
   }
   formControl = new FormControl('', 
   [
@@ -115,6 +120,7 @@ export class FormDialogCAComponent
         [Validators.required, this.noWhitespaceValidator]
       ],
       allotmentStatus: [this.advanceTable.allotmentStatus],
+      allotmentType: [this.allotmentType],
 
     });
   }
@@ -166,11 +172,12 @@ export class FormDialogCAComponent
     this.advanceTableForm.patchValue({allotmentID: this.AllotmentID});
     this.advanceTableForm.patchValue({reservationID: this.reservationID});
     this.advanceTableForm.patchValue({allotmentStatus:this.AllotmentStatus});
+    this.advanceTableForm.patchValue({allotmentType:this.allotmentType});
     this.advanceTableService.update(this.advanceTableForm.getRawValue())  
     .subscribe(
     response => 
-    {
-      
+    {debugger
+      console.log(response.message);
       this._generalService.sendUpdate('CancelAllotmentUpdate:CancelAllotmentView:Success');//To Send Updates 
       this.showNotification(
         'snackbar-success',
@@ -183,7 +190,12 @@ export class FormDialogCAComponent
     },
     error =>
     {
-     this._generalService.sendUpdate('CancelAllotmentAll:CancelAllotmentView:Failure');//To Send Updates  
+      this.showNotification(
+    'snackbar-danger',
+    error || 'Cancellation failed',
+    'bottom',
+    'center'
+  ); 
      this.saveDisabled = true;
     }
   )
