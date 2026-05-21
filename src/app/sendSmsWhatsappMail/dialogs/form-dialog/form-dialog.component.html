@@ -14,7 +14,7 @@
   <h5 style="text-align: center;"></h5>
   </div>
   <h5 style="text-align: center;">Dear {{customerPersonName}} Sir,</h5>
-  <h5 style="text-align: center;">   Your Car And Service Staff Details Are Below</h5>
+  <h5 style="text-align: center;">   Your Car And Driver Details Are Below</h5>
   </div>
 <br/>
   <button mat-icon-button (click)="dialogRef.close()" aria-label="Close dialog">
@@ -58,7 +58,7 @@
           <div class="col-xl-4 col-lg-6 col-md-12 col-sm-12 mb-2">
             <span class="TDValueBold">Time</span> <br />
             <span class="TDValue">
-             {{pickupTime |  date : 'H:mm' }}</span
+             {{pickupTime ? (pickupTime | date : 'shortTime') : 'N/A'}}</span
             >
           </div>
 
@@ -71,15 +71,15 @@
         </div>
         <div class="row">
           <div class="col-xl-4 col-lg-6 col-md-12 col-sm-12 mb-2">
-            <span class="TDValueBold">Service Staff Name</span> <br />
+            <span class="TDValueBold">Driver Name</span> <br />
             <span class="TDValue">
-              N/A</span
+              {{driverName ? driverName : 'N/A'}}</span
             >
           </div>
           <div class="col-xl-4 col-lg-6 col-md-12 col-sm-12 mb-2">
-            <span class="TDValueBold">Service Staff Mobile No</span> <br />
+            <span class="TDValueBold">Driver Mobile No</span> <br />
             <span class="TDValue">
-              N/A</span
+              {{driverPhone ? driverPhone : 'N/A'}}</span
             >
           </div>
           <br>
@@ -90,6 +90,19 @@
              {{primaryMobile}}</span
             >
           </div> -->
+        </div>
+        <div class="row" style="margin-top: 4px; margin-bottom: 6px;">
+          <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12 mb-2">
+            <button
+              mat-stroked-button
+              type="button"
+              (click)="copyPopupData()"
+              aria-label="Copy popup details"
+            >
+              <mat-icon style="font-size: 18px; vertical-align: middle;">content_copy</mat-icon>
+              Copy Details
+            </button>
+          </div>
         </div>
 
         <div>

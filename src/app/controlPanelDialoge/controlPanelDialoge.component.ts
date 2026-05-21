@@ -2415,6 +2415,56 @@ TrackOnMapInfo(reservationID: number, item?: any) {
   openSendSmsWhatsappMail(reservationID,vehicle,pickupDate,pickupTime,
       registrationNumber,customerPersonName,city,customerPersonID, item: any)
       {
+        const rowItem =
+          customerPersonID && typeof customerPersonID === 'object'
+            ? customerPersonID
+            : item;
+        const pickText = (...values: any[]) => {
+          for (const value of values) {
+            const text = (value ?? '').toString().trim();
+            if (text && text.toLowerCase() !== 'n/a') {
+              return text;
+            }
+          }
+          return null;
+        };
+        const pickCityFromRow = (row: any) =>
+          pickText(
+            row?.reservationHeaderDetails?.[0]?.pickupCity,
+            row?.reservationDetails?.[0]?.pickupCity,
+            row?.reservationDetails?.[0]?.city,
+            row?.pickupCity,
+            row?.city,
+            row?.pickup?.pickupCity,
+            row?.pickup?.city,
+            row?.header?.pickupCity,
+            row?.stopsDetails?.[0]?.pickupCity,
+            row?.stopsDetails?.[0]?.city
+          );
+        const headerCity = this.reservationHeaderInfo?.find(
+          (x: any) => Number(x?.reservationID) === Number(reservationID)
+        )?.pickupCity;
+        const reservationCity = this.reservationInfo?.find(
+          (x: any) => Number(x?.reservationID) === Number(reservationID)
+        )?.pickupCity;
+        const resolvedCity =
+          pickText(
+            headerCity,
+            reservationCity,
+            pickCityFromRow(rowItem),
+            pickCityFromRow(item),
+            rowItem?.pickupLocation?.cityName,
+            rowItem?.pickupLocation?.city,
+            city
+          );
+        const resolvedRegistrationNumber =
+          registrationNumber ??
+          rowItem?.registrationNumber ??
+          rowItem?.inventory?.registrationNumber;
+        const resolvedCustomerPersonID =
+          customerPersonID && typeof customerPersonID !== 'object'
+            ? customerPersonID
+            : item;
         this.dialog.open(FormDialogSendSmsWhatsappMailComponent, {
           width: '70%',
           data: {
@@ -2424,11 +2474,13 @@ TrackOnMapInfo(reservationID: number, item?: any) {
             vehicle:vehicle,
             pickupDate:pickupDate,
             pickupTime:pickupTime,    
-            registrationNumber:registrationNumber,
+            registrationNumber:resolvedRegistrationNumber,
+            driverName: rowItem?.driverName ?? rowItem?.driver?.driverName,
+            driverPhone: rowItem?.driverPhone ?? rowItem?.driverMobile ?? rowItem?.driver?.mobile1,
             customerPersonName:customerPersonName,
-            city:city,
-            item: item,
-            customerPersonID:customerPersonID
+            city:resolvedCity,
+            item: rowItem,
+            customerPersonID:resolvedCustomerPersonID
           }
         });
     

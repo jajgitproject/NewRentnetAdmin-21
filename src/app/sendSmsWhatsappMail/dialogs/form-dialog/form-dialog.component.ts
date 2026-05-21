@@ -83,7 +83,8 @@ export class FormDialogSendSmsWhatsappMailComponent {
     OrganizationalEntityDropDown[]
   >;
   //public sendEmsAndEmailService: SendEmsAndEmailService
-  DriverName: any;
+  driverName: any;
+  driverPhone: any;
   RegistrationNumber: any;
   AllotmentID: any;
   ReservationID: any;
@@ -132,9 +133,29 @@ export class FormDialogSendSmsWhatsappMailComponent {
     this.vehicle = data.vehicle;
     this.pickupDate = data.pickupDate;
     this.pickupTime = data.pickupTime;
-    this.registrationNumber = data.registrationNumber;
+    this.registrationNumber = data.registrationNumber ?? data?.item?.registrationNumber;
+    this.driverName = data.driverName ?? data?.item?.driverName ?? data?.item?.driver?.driverName;
+    this.driverPhone =
+      data.driverPhone ??
+      data?.item?.driverPhone ??
+      data?.item?.driverMobile ??
+      data?.item?.driver?.mobile1;
     this.customerPersonName = data.customerPersonName;
-    this.city = data.city;
+    this.city = this.pickText(
+      data?.item?.reservationHeaderDetails?.[0]?.pickupCity,
+      data?.item?.reservationDetails?.[0]?.pickupCity,
+      data?.item?.reservationDetails?.[0]?.city,
+      data?.item?.pickupCity,
+      data?.item?.city,
+      data?.pickupCity,
+      data?.item?.pickup?.pickupCity,
+      data?.item?.pickup?.city,
+      data?.item?.pickupLocation?.cityName,
+      data?.item?.pickupLocation?.city,
+      data?.item?.stopsDetails?.[0]?.pickupCity,
+      data?.item?.stopsDetails?.[0]?.city,
+      data?.city
+    );
     this.primaryMobile = data.primaryMobile;
 
     this.primaryEmail = data.primaryEmail;
@@ -151,6 +172,16 @@ export class FormDialogSendSmsWhatsappMailComponent {
       reservationsend: [this.advanceTable.reservationsend],
       additionNo: [this.advanceTable.additionNo]
     });
+  }
+
+  private pickText(...values: any[]): string | null {
+    for (const value of values) {
+      const text = (value ?? '').toString().trim();
+      if (text && text.toLowerCase() !== 'n/a') {
+        return text;
+      }
+    }
+    return null;
   }
 
   public loadData() {
@@ -322,6 +353,65 @@ export class FormDialogSendSmsWhatsappMailComponent {
       this.dialogRef.close();
     }
   }
+
+  copyPopupData(): void {
+    const formatted = [
+      `Booking No: ${this.ReservationID ? this.ReservationID : 'N/A'}`,
+      `City: ${this.city ? this.city : 'N/A'}`,
+      `Date: ${this.pickupDate ? formatDate(this.pickupDate, 'dd-MMM-yy', 'en-GB') : 'N/A'}`,
+      `Car No: ${this.registrationNumber ? this.registrationNumber : 'N/A'}`,
+      `Time: ${this.pickupTime ? formatDate(this.pickupTime, 'h:mm a', 'en-GB') : 'N/A'}`,
+      `Car Send: ${this.vehicle ? this.vehicle : 'N/A'}`,
+      `Driver Name: ${this.driverName ? this.driverName : 'N/A'}`,
+      `Driver Mobile No: ${this.driverPhone ? this.driverPhone : 'N/A'}`
+    ].join('\n');
+
+    if (navigator?.clipboard?.writeText) {
+      navigator.clipboard
+        .writeText(formatted)
+        .then(() => {
+          this.showNotification(
+            'snackbar-success',
+            'Popup details copied.',
+            'bottom',
+            'center'
+          );
+        })
+        .catch(() => this.copyUsingTextareaFallback(formatted));
+      return;
+    }
+
+    this.copyUsingTextareaFallback(formatted);
+  }
+
+  private copyUsingTextareaFallback(text: string): void {
+    const textarea = document.createElement('textarea');
+    textarea.value = text;
+    textarea.style.position = 'fixed';
+    textarea.style.opacity = '0';
+    document.body.appendChild(textarea);
+    textarea.focus();
+    textarea.select();
+
+    try {
+      document.execCommand('copy');
+      this.showNotification(
+        'snackbar-success',
+        'Popup details copied.',
+        'bottom',
+        'center'
+      );
+    } catch {
+      this.showNotification(
+        'snackbar-danger',
+        'Failed to copy popup details.',
+        'bottom',
+        'center'
+      );
+    } finally {
+      document.body.removeChild(textarea);
+    }
+  }
   reset() {
     this.advanceTableForm.reset();
   }
@@ -389,32 +479,46 @@ export class FormDialogSendSmsWhatsappMailComponent {
   sendNotification() {
     const apiRequestData = [];
     const skippedEmailRecipients: string[] = [];
+    const skippedMobileRecipients: string[] = [];
     this.permissionData?.forEach((element) => {
-      const email = (element.primaryEmail ?? '').toString().trim();
+      const rawEmail = (element.primaryEmail ?? '').toString().trim();
+      const email = this.isValidEmail(rawEmail) ? rawEmail : '';
+      const mobile = this.normalizeMobileForNotifications(element?.primaryMobile);
       const displayName =
         (element.customerPersonName ?? element.primaryMobile ?? '').toString().trim();
-      if (!email) {
+      if (rawEmail && !email) {
         skippedEmailRecipients.push(displayName || 'recipient');
       }
+      if (!mobile) {
+        skippedMobileRecipients.push(displayName || 'recipient');
+      }
       const recipientType = this.resolveRecipientType(element);
+      const canSendSmsWhatsApp = element.sendSMSWhatsApp !== false && !!mobile;
 
       apiRequestData.push({
-        ID: element?.employeeID ?? element?.customerPersonID ?? element?.numberMobileID ?? null,
+        ID: element?.employeeID ?? element?.customerPersonID ?? element?.numberMobileID ?? 0,
         AllotmentID: element?.allotmentID || 0,
         Name: displayName,
-        Mobile: (element?.primaryMobile ?? '').toString(),
+        Mobile: mobile ?? '',
         Email: email,
         Type: recipientType,
         IsCustomerNotificationsAllowed:
           element.reachedSMSToBooker === true ||
           element.reachedSMSToPassenger === true,
-        IsCustomerPersonNotificationsAllowed: element.sendSMSWhatsApp !== false,
-        SendSMSWhatsApp: element.sendSMSWhatsApp !== false
+        IsCustomerPersonNotificationsAllowed: canSendSmsWhatsApp,
+        SendSMSWhatsApp: canSendSmsWhatsApp
       });
     });
     if (skippedEmailRecipients.length > 0) {
       this.snackBar.open(
         `Email skipped (no address): ${skippedEmailRecipients.join(', ')}. SMS/WhatsApp will still be sent.`,
+        'OK',
+        { duration: 4500 }
+      );
+    }
+    if (skippedMobileRecipients.length > 0) {
+      this.snackBar.open(
+        `SMS/WhatsApp skipped (invalid mobile): ${skippedMobileRecipients.join(', ')}.`,
         'OK',
         { duration: 4500 }
       );
@@ -488,6 +592,43 @@ export class FormDialogSendSmsWhatsappMailComponent {
       }
     }
     return String(response).replace(/^"+|"+$/g, '').trim();
+  }
+
+  private isValidEmail(email: string): boolean {
+    if (!email) {
+      return false;
+    }
+    const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailPattern.test(email);
+  }
+
+  private normalizeMobileForNotifications(mobile: any): string | null {
+    const raw = (mobile ?? '').toString().trim();
+    if (!raw) {
+      return null;
+    }
+
+    const cleaned = raw.replace(/\s+/g, '');
+    if (cleaned.includes('-')) {
+      const parts = cleaned.split('-').filter((x) => x !== '');
+      if (parts.length >= 2) {
+        const country = parts[0].replace(/\D/g, '');
+        const number = parts.slice(1).join('').replace(/\D/g, '');
+        if (country && number.length >= 10) {
+          return `${country}-${number}`;
+        }
+      }
+      return null;
+    }
+
+    const digits = cleaned.replace(/\D/g, '');
+    if (digits.length >= 12) {
+      return `${digits.slice(0, digits.length - 10)}-${digits.slice(-10)}`;
+    }
+    if (digits.length === 10) {
+      return `91-${digits}`;
+    }
+    return null;
   }
 
   // deleteRecord(row: any) {
