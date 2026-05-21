@@ -1,10 +1,10 @@
-// @ts-nocheck
+//@ts-nocheck
 import {
   MAT_DIALOG_DATA,
   MatDialog,
   MatDialogRef
 } from '@angular/material/dialog';
-import { Component, Inject } from '@angular/core';
+import { ChangeDetectorRef, Component, Inject } from '@angular/core';
 import {
   FormControl,
   Validators,
@@ -114,6 +114,7 @@ export class FormDialogSendSmsWhatsappMailComponent {
     private fb: FormBuilder,
     private snackBar: MatSnackBar,
     public dialog: MatDialog,
+    private cdr: ChangeDetectorRef,
     public _generalService: GeneralService
   ) {
     // Set the defaults
@@ -141,6 +142,7 @@ export class FormDialogSendSmsWhatsappMailComponent {
       data?.item?.driverMobile ??
       data?.item?.driver?.mobile1;
     this.customerPersonName = data.customerPersonName;
+    debugger;
     this.city = this.pickText(
       data?.item?.reservationHeaderDetails?.[0]?.pickupCity,
       data?.item?.reservationDetails?.[0]?.pickupCity,
@@ -188,6 +190,7 @@ export class FormDialogSendSmsWhatsappMailComponent {
     this._generalService.GetPermission(this.ReservationID).subscribe(
       (data) => {
         this.permissionData = this.normalizePermissionRows(data);
+        this.cdr.detectChanges();
       },
       (error: HttpErrorResponse) => {
         this.permissionData = null;
