@@ -98,7 +98,11 @@ export class DutyRegisterComponent implements OnInit {
   'SalesPerson',
   'KAM',
   'ReservationCreatedBy',
-  'AllotmentBy'
+  'AllotmentBy',
+  'SupplierName',
+  'DSClosedBy',
+  'DutySlipImage',
+  'ClosingDate'
 ];
   
   dataSource: DutyRegisterModel[] | null;
