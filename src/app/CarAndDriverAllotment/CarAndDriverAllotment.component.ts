@@ -536,7 +536,7 @@ export class CarAndDriverAllotmentComponent implements OnInit {
 
   private _filter(value: string): any {
     const filterValue = value.toLowerCase();
-    if (filterValue.length === 0) {
+    if (filterValue.length < 4) {
       return [];
     }
     return this.DriverList.filter(
@@ -719,7 +719,7 @@ export class CarAndDriverAllotmentComponent implements OnInit {
     const filterValue = value.toLowerCase().trim();
 
     // If the input is empty, return an empty list
-    if (filterValue.length === 0) {
+    if (filterValue.length < 4) {
       return [];
     }
 

@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { Component, Inject } from '@angular/core';
 import { ReservationLocationTransferLogService } from '../../reservationLocationTransferLog.service';
@@ -45,6 +44,7 @@ export class FormDialogComponent
   TransferedToLocationID: any;
   employeeDataSource:EmployeeDropDown[] | [];
   LocationFrom: string;
+  TransferedFromLocationID: any;
 
   constructor(
     private datePipe: DatePipe,
@@ -57,12 +57,14 @@ export class FormDialogComponent
   {
         // Set the defaults
         this.action = data.action;
+        console.log(data)
         if (this.action === 'edit') 
         {
           //this.dialogTitle ='Reservation Location Transfer';       
           this.advanceTable = data.advanceTable;
           this.ReservationID = data.reservationID;
           this.allotmentStatus = data.allotmentStatus;
+          this.TransferedFromLocationID = data.transferedLocationID;
           if(data.allotmentStatus==='Alloted'){
             this.saveButtonDisabled = true;
           }
@@ -98,10 +100,10 @@ export class FormDialogComponent
     if(this.action === 'edit')
     {
       this.GetTransferedByEmployee();
-      this.loadData();
       this.InitTransferToLocation();
       this.advanceTableForm?.controls["transferDate"].disable();
       this.advanceTableForm?.controls["transferTime"].disable();
+      this.loadData();
     }
     
   }
@@ -120,8 +122,8 @@ export class FormDialogComponent
       transferDate: [],
       transferTime: [],
       transferRemark:[],
-      transferedByEmployeeID:[],
-      transferedByEmployeeName:[],
+      transferedByEmployeeID:[this.advanceTable?.transferedByEmployeeName],
+      transferedByEmployeeName:[this.advanceTable?.transferedToLocationName],
       //activationStatus: [this.advanceTable?.activationStatus],
     });
   }
@@ -231,7 +233,7 @@ InitTransferToLocation() {
         
         this.advanceTableForm.patchValue({transferedFromLocationID:this.dataSource.transferedFromLocationID});
         this.advanceTableForm.patchValue({transferedFromLocationName:this.dataSource.transferedFromLocationName});  
-        this.LocationFrom = this.dataSource.transferedFromLocationName;
+        this.LocationFrom = this.dataSource.transferedToLocationName;
 
         // this.advanceTableForm.patchValue({transferedToLocationID:this.dataSource.transferedToLocationID});
         // this.advanceTableForm.patchValue({transferedToLocationName:this.dataSource.transferedToLocationName});
@@ -274,9 +276,9 @@ InitTransferToLocation() {
   public Put(): void
   {
     this.advanceTableForm.patchValue({reservationID:this.ReservationID});
-    this.advanceTableForm.patchValue({transferedFromLocationID:this.dataSource.transferedToLocationID});
+    this.advanceTableForm.patchValue({transferedFromLocationID:this.TransferedFromLocationID});
     this.advanceTableForm.patchValue({transferedToLocationID:this.TransferedToLocationID});
-    this.advanceTableForm.patchValue({transferedByEmployeeID:this.dataSource.transferedByEmployeeID});
+    //this.advanceTableForm.patchValue({transferedByEmployeeID:this.dataSource.transferedByEmployeeID});
     this.advanceTableService.update(this.advanceTableForm.getRawValue())  
     .subscribe(
       response => 

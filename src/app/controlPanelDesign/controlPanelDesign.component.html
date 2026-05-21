@@ -105,8 +105,8 @@
                   <mat-option value="All">All</mat-option>
                   <mat-option value="Accepted">Accepted</mat-option>
                   <mat-option value="NotAccepted">Not Accepted</mat-option>
-                  <!-- <mat-option value="Not Dispatched">Not Dispatched</mat-option>
-                  <mat-option value="Not Dispatched And Delayed">Not Dispatched And Delayed</mat-option> -->
+                  <mat-option value="Not Dispatched">Not Dispatched</mat-option>
+                  <!-- <mat-option value="Not Dispatched And Delayed">Not Dispatched And Delayed</mat-option> -->
                   <mat-option value="Dispatched">Dispatched</mat-option>
                   <mat-option value="Dispatched But Delayed">Dispatched But Delayed</mat-option>
                   <!-- <mat-option value="Dispatched But Not Reached">Dispatched But Not Reached</mat-option>
@@ -1203,6 +1203,18 @@
                       font-size: 12px;
                       text-align: left;
                       width: 100px;
+                      float: left;cursor: pointer;" (click)="sortByColumnName('locationOutTime')"
+                    [ngClass]="{'active-sort': sortColumn === 'locationOutTime'}">
+                    <b>Location Out Time</b>
+                    <i class="fas"
+                      [ngClass]="{'fa-arrow-up': sortColumn === 'locationOutTime' && sortDirection === 'asc',
+                                                'fa-arrow-down': sortColumn === 'locationOutTime' && sortDirection === 'desc'}"></i>
+                  </span>
+                  
+                  <span style="
+                      font-size: 12px;
+                      text-align: left;
+                      width: 100px;
                       float: left;cursor: pointer;" (click)="sortByColumnName('pickupDate')"
                     [ngClass]="{'active-sort': sortColumn === 'pickupDate'}">
                     <b>Pickup Date/
@@ -1211,18 +1223,6 @@
                     <i class="fas"
                       [ngClass]="{'fa-arrow-up': sortColumn === 'pickupDate' && sortDirection === 'asc',
                                                 'fa-arrow-down': sortColumn === 'pickupDate' && sortDirection === 'desc'}"></i>
-                  </span>
-
-                  <span style="
-                      font-size: 12px;
-                      text-align: left;
-                      width: 100px;
-                      float: left;cursor: pointer;" (click)="sortByColumnName('locationOutTime')"
-                    [ngClass]="{'active-sort': sortColumn === 'locationOutTime'}">
-                    <b>Location Out Time</b>
-                    <i class="fas"
-                      [ngClass]="{'fa-arrow-up': sortColumn === 'locationOutTime' && sortDirection === 'asc',
-                                                'fa-arrow-down': sortColumn === 'locationOutTime' && sortDirection === 'desc'}"></i>
                   </span>
 
                   <span style="
@@ -1631,6 +1631,8 @@
                              <span *ngIf="data.internalNoteModel !== null" matTooltip="Internal Note"> IN </span>
                             &nbsp;
                             <span *ngIf="data.supplierAddress !== null"> P2S </span>
+                            &nbsp;
+                            <span *ngIf="data.emailContent !== null"> E2S </span>
                             <br>
 
                             <ng-container *ngIf="getControlPanelMessagingHeaderDisplay(data) as cpMsg">
@@ -1672,14 +1674,6 @@
                           </span>
 
                           <span style="font-size: 12px;text-align: left;width: 100px;float: left;">
-                            {{ data.pickupDate | date : 'dd-MMM-yy' }}
-                            {{ data.pickupTime ? (data.pickupTime | date : 'H:mm') : 'TNC' }}
-                            <br />
-                            {{ data.dropOffDate | date : 'dd-MMM-yy' }}
-                            {{ data.dropOffTime | date : 'H:mm' }}
-                          </span>
-
-                          <span style="font-size: 12px;text-align: left;width: 100px;float: left;">
                             <ng-container *ngIf="data.garageOutDate; else noData">
                               {{ data.garageOutDate | date : 'dd-MMM-yy' }}
                               {{ data.garageOutTime | date : 'H:mm' }}
@@ -1691,6 +1685,14 @@
                             <br />
                             {{ data.locationOutDate | date : 'dd-MMM-yy' }}
                             {{ data.locationOutTime | date : 'H:mm' }}
+                          </span>
+
+                          <span style="font-size: 12px;text-align: left;width: 100px;float: left;">
+                            {{ data.pickupDate | date : 'dd-MMM-yy' }}
+                            {{ data.pickupTime ? (data.pickupTime | date : 'H:mm') : 'TNC' }}
+                            <br />
+                            {{ data.dropOffDate | date : 'dd-MMM-yy' }}
+                            {{ data.dropOffTime | date : 'H:mm' }}
                           </span>
 
                           <span style="
@@ -1802,9 +1804,13 @@
                           </span>
 
                           <span style="font-size: 12px;text-align: left;width: 140px;float: left;">
-                            {{data.pickupAddress!=="" ? (data.pickupAddressDetails + ' ' + data.pickupAddress):'N/A'}}
+                            Pickup Location : {{data.pickupAddress !=="" ? data.pickupAddress : 'N/A'}}
+                            <br>
+                            Pickup Address : {{data.pickupAddressDetails !=="" ? data.pickupAddressDetails : 'N/A'}}
                             <hr>
-                            {{data.dropOffAddress !=="" ? ((data.dropOffAddressDetails || '') + ' ' + (data.pickupAddress || '')).trim(): 'N/A'}}
+                            DropOff Location : {{data.dropOffAddress !=="" ? (data.dropOffAddress || '').trim() : 'N/A'}}
+                            <br>
+                            DropOff Address : {{data.dropOffAddressDetails !=="" ? (data.dropOffAddressDetails || '').trim() : 'N/A'}}
                           </span>
 
 

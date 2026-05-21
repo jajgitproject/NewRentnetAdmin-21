@@ -150,6 +150,44 @@
               <td class="table-midrow-thirdcolumn"></td>
             </tr>
 
+            <tr *ngIf="dataSource?.invoicePackageModel?.packageType === 'Outstation Round Trip'">
+              <td class="table-midrow-firstcolumn">
+                Total Kms : {{dataSource?.invoiceDutyModel?.totalRunningKM}},
+                &nbsp;Total Days : {{dataSource?.invoiceDutyModel?.totalRunningDays}}
+                &nbsp;&nbsp; {{dataSource?.pickupCity}}
+              </td>
+              <td class="table-midrow-secondcolumn"></td>
+              <td class="table-midrow-thirdcolumn"></td>
+            </tr>
+
+            <tr class="no-border" height="10" *ngIf="dataSource?.invoicePackageModel?.packageType === 'Outstation Round Trip'">
+              <td class="table-midrow-firstcolumn">
+                {{dataSource?.invoicePackageModel?.packageType}} (Trip To:{{dataSource?.tripTo}}),
+                <!-- &nbsp; {{dataSource?.invoicePackageModel?.package}} -->
+              </td>
+              <td class="table-midrow-secondcolumn">
+                &nbsp; {{dataSource?.invoicePackageModel?.baseRate}} &nbsp;
+              </td>
+              <td class="table-midrow-thirdcolumn">
+                &nbsp; {{dataSource?.dutyTotalPackageAmount}}&nbsp;
+              </td>
+            </tr>
+
+            <tr class="no-border" height="10"  *ngIf="dataSource?.invoicePackageModel?.packageType === 'Outstation Round Trip'">
+              <td class="table-midrow-firstcolumn" *ngIf="dataSource?.invoicePackageModel?.minimumKM !=0">
+                {{ dataSource?.invoicePackageModel?.minimumKM * dataSource?.invoiceDutyModel?.totalRunningDays }} Kms @ min
+                &nbsp; {{dataSource?.invoicePackageModel?.minimumKM}} kms running per
+                       {{dataSource?.invoicePackageModel?.billingOption}}
+              </td>
+              <td class="table-midrow-secondcolumn">
+                &nbsp; <!-- {{dataSource?.invoicePackageModel?.baseRate}} --> &nbsp;
+              </td>
+              <td class="table-midrow-thirdcolumn">
+                &nbsp; <!-- {{dataSource?.dutyTotalPackageAmount}} --> &nbsp;
+              </td>
+            </tr>
+
+
             <tr>
               <td class="table-midrow-firstcolumn">
                 <ng-container *ngIf="dataSource?.invoicePackageModel?.packageType === 'Outstation OneWay Trip'">
@@ -264,7 +302,7 @@
             </tr>
 
             <tr *ngIf="dataSource?.totalChargebleExpenceAmount!=0">
-              <td class="table-midrow-firstcolumn">Total Expense</td>
+              <td class="table-midrow-firstcolumn">Other Charges</td>
               <td class="table-midrow-secondcolumn"></td>
               <td class="table-midrow-thirdcolumn">
                 {{dataSource?.totalChargebleExpenceAmount}} &nbsp;
@@ -278,6 +316,23 @@
                 {{dataSource?.invoiceDriverAllownceModel?.totalDriverAllowanceAmount | number:'1.2-2'}}
               </td>
             </tr>
+
+            <tr>
+              <td class="table-midrow-firstcolumn" *ngIf="dataSource?.invoiceFuelSurchargeModel.totalFuelSurchargeOnPackageRate != 0
+                        || dataSource?.invoiceFuelSurchargeModel?.totalFuelSurchargeOnExtraKM!=0 ||
+                         dataSource?.invoiceFuelSurchargeModel?.totalFuelSurchargeOnExtraHours!=0 ">
+                Fuel Surcharge on Rate ({{dataSource?.invoiceFuelSurchargeModel?.totalFuelSurchargeOnPackageRate}})
+                               Extra KM ({{dataSource?.invoiceFuelSurchargeModel?.totalFuelSurchargeOnExtraKM}})
+                               Extra Hr. ({{dataSource?.invoiceFuelSurchargeModel?.totalFuelSurchargeOnExtraHours}})
+              </td>
+              <td class="table-midrow-secondcolumn">&nbsp;</td>
+              <td class="table-midrow-thirdcolumn">
+                <span *ngIf="dataSource?.invoiceFuelSurchargeModel.totalFuelSurchargeOnPackageRate != 0">
+                   {{dataSource?.invoiceFuelSurchargeModel?.totalFuelSurchargeOnPackageRate}} &nbsp;
+                </span>
+              </td>
+            </tr>
+
 
             <tr *ngIf="dataSource?.totalInterStateAmount != 0">
               <td class="table-midrow-firstcolumn">Inter State Tax</td>

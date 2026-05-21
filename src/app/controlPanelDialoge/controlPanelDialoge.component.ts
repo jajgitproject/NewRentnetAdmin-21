@@ -501,8 +501,9 @@ export class ControlPanelDialogeComponent {
           reservationID: reservationID,
           action: 'edit',
           status: this.status,
-          allotmentStatus: item.allotmentStatus
-
+          allotmentStatus: item.allotmentStatus,
+          transferedLocationID: item.transferedLocationID,
+          transferedLocation: item.transferedLocation
         }
       });
     dialogRef.afterClosed().subscribe((res: any) => {
