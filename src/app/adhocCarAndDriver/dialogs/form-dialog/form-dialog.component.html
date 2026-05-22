@@ -29,7 +29,7 @@
                       <mat-select required #typeVal
                         [class.is-invalid]="typeVal.invalid && typeVal.touched" (selectionChange)="getExisting($event.value)" formControlName="isVendorExisting">
                         <mat-option value="Existing">Existing</mat-option>
-                        <mat-option value="New">New</mat-option>
+                        <!-- <mat-option value="New">New</mat-option> -->
                       </mat-select>          
                       <mat-error> Please Select a Type </mat-error>
                     </mat-form-field>
