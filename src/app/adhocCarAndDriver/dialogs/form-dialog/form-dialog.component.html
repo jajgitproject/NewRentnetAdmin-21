@@ -165,15 +165,39 @@
                       <mat-error> Please Select a Type </mat-error>
                     </mat-form-field>
                   </div>
-                 <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2" *ngIf="!advanceTableForm.value?.isDriverExisting  || advanceTableForm.value.isDriverExisting === 'New'">
+                    <div class="col-xl-3 col-lg-3 col-md-1 col-sm-1 mb-1" *ngIf="!advanceTableForm.value?.isDriverExisting  || advanceTableForm.value.isDriverExisting === 'New'">
+                   
                     <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
-                        <mat-label>Driver Name</mat-label>
-                        <input matInput formControlName="driverName" required>
-                        <mat-error *ngIf="advanceTableForm.get('driverName').hasError('required')">
-                            Driver Name is required
-                        </mat-error>
+                        <mat-label>Country Code</mat-label>
+                        <input  type="text" matInput formControlName="countryCodes" [matAutocomplete]="driverNewCountryAuto" required>
+                        <mat-autocomplete #driverNewCountryAuto="matAutocomplete"  (optionSelected)="onCountryCodes($event)">
+                            <mat-option *ngFor="let option of filteredCountryCodesOptions | async"
+                                [value]="option.countryISDCode">
+                                <div style="display: flex; align-items: center;">
+                                    <img [src]="option.icon" alt="{{option.countryISOCode}}" width="20" height="20" style="margin-right: 8px;">
+                                    <span >{{option.countryISOCode}} {{option.countryISDCode}}</span>
+                                  
+                                  </div>
+                            </mat-option>
+                        </mat-autocomplete>
+                        <mat-error *ngIf="advanceTableForm.controls['countryCodes'].hasError('countryTypesInvalid')">
+                            Please select a Country Code
+                         </mat-error>
                     </mat-form-field>
                 </div>
+                <div class="col-xl-3 col-lg-3 col-md-1 col-sm-1 mb-1" *ngIf="!advanceTableForm.value?.isDriverExisting  || advanceTableForm.value.isDriverExisting === 'New'">
+                    <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                        <mat-label>Phone No</mat-label>
+                        <input matInput formControlName="driverPhone" required (blur)="duplicateDriverNoCheck()">
+                        <mat-error *ngIf="advanceTableForm.get('driverPhone').hasError('required')">
+                            Phone No is required
+                        </mat-error>
+                         <!-- <mat-error *ngIf="advanceTableForm.get('driverPhone').hasError('duplicateDriverNo')">
+                            Driver number already exists
+                            </mat-error> -->
+                    </mat-form-field>
+                </div>
+                 
                 <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2" *ngIf=" advanceTableForm.value.isDriverExisting === 'Existing'">
                     <mat-form-field class="example-full-width" appearance="outline" floatLabel="always"> 
                         <mat-label>Driver Name</mat-label>                       
@@ -201,38 +225,16 @@
                         </mat-error> -->
                     </mat-form-field>
                 </div>
-                <div class="col-xl-3 col-lg-3 col-md-1 col-sm-1 mb-1" *ngIf="!advanceTableForm.value?.isDriverExisting  || advanceTableForm.value.isDriverExisting === 'New'">
-                   
+                <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2" *ngIf="!advanceTableForm.value?.isDriverExisting  || advanceTableForm.value.isDriverExisting === 'New'">
                     <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
-                        <mat-label>Country Code</mat-label>
-                        <input  type="text" matInput formControlName="countryCodes" [matAutocomplete]="driverNewCountryAuto" required>
-                        <mat-autocomplete #driverNewCountryAuto="matAutocomplete"  (optionSelected)="onCountryCodes($event)">
-                            <mat-option *ngFor="let option of filteredCountryCodesOptions | async"
-                                [value]="option.countryISDCode">
-                                <div style="display: flex; align-items: center;">
-                                    <img [src]="option.icon" alt="{{option.countryISOCode}}" width="20" height="20" style="margin-right: 8px;">
-                                    <span >{{option.countryISOCode}} {{option.countryISDCode}}</span>
-                                  
-                                  </div>
-                            </mat-option>
-                        </mat-autocomplete>
-                        <mat-error *ngIf="advanceTableForm.controls['countryCodes'].hasError('countryTypesInvalid')">
-                            Please select a Country Code
-                         </mat-error>
-                    </mat-form-field>
-                </div>
-                <div class="col-xl-3 col-lg-3 col-md-1 col-sm-1 mb-1" *ngIf="!advanceTableForm.value?.isDriverExisting  || advanceTableForm.value.isDriverExisting === 'New'">
-                    <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
-                        <mat-label>Phone No</mat-label>
-                        <input matInput formControlName="driverPhone" required (blur)="duplicateDriverNoCheck()">
-                        <mat-error *ngIf="advanceTableForm.get('driverPhone').hasError('required')">
-                            Phone No is required
+                        <mat-label>Driver Name</mat-label>
+                        <input matInput formControlName="driverName" required>
+                        <mat-error *ngIf="advanceTableForm.get('driverName').hasError('required')">
+                            Driver Name is required
                         </mat-error>
-                         <mat-error *ngIf="advanceTableForm.get('driverPhone').hasError('duplicateDriverNo')">
-                            Driver number already exists
-                            </mat-error>
                     </mat-form-field>
                 </div>
+              
                
                 <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2" *ngIf=" advanceTableForm.value.isDriverExisting === 'Existing'">
                     <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
@@ -374,13 +376,15 @@
                <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2" *ngIf="!advanceTableForm.value?.isCarExisting || advanceTableForm.value.isCarExisting === 'New'">
                     <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
                         <mat-label>Registration No</mat-label>
-                        <input matInput formControlName="registrationNumber" required  (blur)="duplicateRegistrationNoCheck()">
+                        <input matInput formControlName="registrationNumber" required  (blur)="duplicateRegistrationNoCheck()"
+                        (keydown)="preventSpace($event)"
+                        (input)="removeSpaces()">
                         <mat-error *ngIf="advanceTableForm.get('registrationNumber').hasError('required')">
                             Registration No is required
                         </mat-error>
-                        <mat-error *ngIf="advanceTableForm.get('registrationNumber').hasError('duplicate')">
+                        <!-- <mat-error *ngIf="advanceTableForm.get('registrationNumber').hasError('duplicate')">
                             Registration number already exists
-                            </mat-error>
+                            </mat-error> -->
                     </mat-form-field>
                 </div>
                 <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2" *ngIf=" advanceTableForm.value.isCarExisting === 'Existing'">

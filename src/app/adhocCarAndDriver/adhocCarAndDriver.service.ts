@@ -65,4 +65,16 @@ export class AdhocCarAndDriverService
   GetSupplierTypeDetails(SupplierType:string): Observable<any[]> {
     return this.httpClient.get<any[]>(this.API_URL  + "/GetSupplierTypeDetails/"+SupplierType);
   }
+  GetSupplierByDriverMobile(driverMobile:string): Observable<string> {
+    return this.httpClient.get<string>(this.API_URL  + "/GetSupplierByDriverMobile/"+driverMobile);
+  }
+   getDriverIdByPhone(driverMobile:string): Observable<number> {
+    return this.httpClient.get<number>(this.API_URL  + "/getDriverIdByPhone/"+driverMobile);
+  }
+   GetSupplierByRegNo(regNo:string): Observable<string> {
+    return this.httpClient.get<string>(this.API_URL  + "/GetSupplierByregNo/"+regNo);
+  }
+   getInventoryIdByregNo(regNo:string): Observable<number> {
+    return this.httpClient.get<number>(this.API_URL  + "/getInventoryIdByregNo/"+regNo);
+  }
 }
