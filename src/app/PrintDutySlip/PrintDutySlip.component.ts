@@ -45,7 +45,8 @@ export class PrintDutySlipComponent {
   reservationInfo:any;
   totalDays: number;
   datetime: string;
-  totalKms: void;
+  totalKms: number = 0;
+  TotalKMGSG: number = 0;
   
   constructor(
     @Optional() @Inject(MAT_DIALOG_DATA) public data: any,

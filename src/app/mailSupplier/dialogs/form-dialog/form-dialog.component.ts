@@ -115,9 +115,16 @@ export class MTSFormDialogComponent implements OnInit
         );
       },
       error => {
+        const stringError = typeof error === 'string' ? error.trim() : '';
+        const backendMessage =
+          stringError ||
+          error?.error?.message ||
+          (typeof error?.error === 'string' ? error.error : '') ||
+          error?.message ||
+          'Operation Failed.....!!!';
         this.showNotification(
           'snackbar-danger',
-          'Operation Failed.....!!!',
+          backendMessage,
           'bottom',
           'center'
         );
