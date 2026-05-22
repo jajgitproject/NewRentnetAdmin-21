@@ -540,13 +540,16 @@ export function enrichInvoiceCalculationWithFullDetail(
  */
 export function mapInvoiceCalculationToSummaryOfDuty(response: unknown): SummaryOfDutyData | null {
   const unwrapped = unwrapInvoiceCalculationPayload(response);
+
   if (unwrapped == null) {
     return null;
   }
+
   const r = unwrapped;
 
   const dutySlipId = pick(r, 'dutySlipID', 'DutySlipID');
   const invoiceCalculationId = pick(r, 'invoiceCalculationID', 'InvoiceCalculationID');
+
   const hasRoot =
     dutySlipId != null ||
     invoiceCalculationId != null ||
@@ -563,57 +566,170 @@ export function mapInvoiceCalculationToSummaryOfDuty(response: unknown): Summary
     r['invoiceAdditionalKmsAndHoursModel'] != null ||
     r['invoiceNightModel'] != null ||
     r['InvoiceNightModel'] != null;
+
   if (!hasRoot) {
     return null;
   }
 
-  const pkg = recordFromModelNode(pick(r, 'invoicePackageModel', 'InvoicePackageModel'));
+  const pkg = recordFromModelNode(
+    pick(r, 'invoicePackageModel', 'InvoicePackageModel')
+  );
+
   const pkgVals = recordFromModelNode(
     pick(r, 'invoicePackageValuesModel', 'InvoicePackageValuesModel')
   );
 
   const gst = resolveInvoiceGst(r);
-  const driver = pick<Record<string, unknown>>(r, 'invoiceDriverAllownceModel', 'InvoiceDriverAllownceModel');
-  const night = recordFromModelNode(pick(r, 'invoiceNightModel', 'InvoiceNightModel'));
-  const pkgFgr = pick<Record<string, unknown>>(r, 'invoicePackageFGRModel', 'InvoicePackageFGRModel');
-  const tollRows = pick(r, 'invoiceTollParkingModel', 'InvoiceTollParkingModel');
-  const istRows = pick(r, 'invoiceInterstateTaxModel', 'InvoiceInterstateTaxModel');
 
-  const totalKm = pick(r, 'totalKMWithAddtionalKM', 'TotalKMWithAddtionalKM');
-  const totalHrs = pick(r, 'totalHoursWithAddtionalHours', 'TotalHoursWithAddtionalHours');
-  const dutyPkgAmt = pick(r, 'dutyTotalPackageAmount', 'DutyTotalPackageAmount');
-  const baseFromVals = pkgVals ? pick(pkgVals, 'packageBaseRate', 'PackageBaseRate') : undefined;
+  const driver = pick<Record<string, unknown>>(
+    r,
+    'invoiceDriverAllownceModel',
+    'InvoiceDriverAllownceModel'
+  );
+
+  const night = recordFromModelNode(
+    pick(r, 'invoiceNightModel', 'InvoiceNightModel')
+  );
+
+  const pkgFgr = pick<Record<string, unknown>>(
+    r,
+    'invoicePackageFGRModel',
+    'InvoicePackageFGRModel'
+  );
+
+  const tollRows = pick(
+    r,
+    'invoiceTollParkingModel',
+    'InvoiceTollParkingModel'
+  );
+
+  const istRows = pick(
+    r,
+    'invoiceInterstateTaxModel',
+    'InvoiceInterstateTaxModel'
+  );
+
+  const totalKm = pick(
+    r,
+    'totalKMWithAddtionalKM',
+    'TotalKMWithAddtionalKM'
+  );
+
+  const totalHrs = pick(
+    r,
+    'totalHoursWithAddtionalHours',
+    'TotalHoursWithAddtionalHours'
+  );
+
+  const dutyPkgAmt = pick(
+    r,
+    'dutyTotalPackageAmount',
+    'DutyTotalPackageAmount'
+  );
+
+  const baseFromVals = pkgVals
+    ? pick(pkgVals, 'packageBaseRate', 'PackageBaseRate')
+    : undefined;
+
+  // ROOT LEVEL VALUES
+  const pickupCity = pick(r, 'pickupCity', 'PickupCity');
+  const vehicle = pick(r, 'vehicle', 'Vehicle');
 
   const packageDetails: SummaryOfDutyRow[] = [];
-  packageDetails.push({ label: 'Total Kms', value: fmtQty(totalKm, 'Kms') });
-  packageDetails.push({ label: 'Total Hrs', value: fmtDutyDurationFromMinutes(totalHrs) });
-  packageDetails.push({ label: 'Package', value: packageDescription(pkg) });
-  const pkgAmtNum = toNum(dutyPkgAmt) ?? toNum(baseFromVals);
+
   packageDetails.push({
-    label: 'Package Amount',
-    value: pkgAmtNum != null ? formatInr(pkgAmtNum) : '—'
+    label: 'Total Kms',
+    value: fmtQty(totalKm, 'Kms')
   });
 
-  /* Extra Kms / Extra Hrs (qty + amounts): duty summary uses invoicePackageValuesModel only. */
-  const ekRaw = pkgVals ? pick(pkgVals, 'extraKMs', 'ExtraKMs') : undefined;
+  packageDetails.push({
+    label: 'Total Hrs',
+    value: fmtDutyDurationFromMinutes(totalHrs)
+  });
+
+  packageDetails.push({
+    label: 'Package',
+    value: packageDescription(pkg)
+  });
+
+  const pkgAmtNum =
+    toNum(dutyPkgAmt) ?? toNum(baseFromVals);
+
+  packageDetails.push({
+    label: 'Package Amount',
+    value: pkgAmtNum != null
+      ? formatInr(pkgAmtNum)
+      : '—'
+  });
+
+  packageDetails.push({
+    label: 'Car Type Booked',
+    value: vehicle ? String(vehicle) : '—'
+  });
+
+  packageDetails.push({
+    label: 'City',
+    value: pickupCity ? String(pickupCity) : '—'
+  });
+
+  /* Extra Kms / Extra Hrs */
+
+  const ekRaw = pkgVals
+    ? pick(pkgVals, 'extraKMs', 'ExtraKMs')
+    : undefined;
+
   const ekNum = toNum(ekRaw);
-  const extraMinutesRaw = pkgVals ? pick(pkgVals, 'extraMinutes', 'ExtraMinutes') : undefined;
+
+  const extraMinutesRaw = pkgVals
+    ? pick(pkgVals, 'extraMinutes', 'ExtraMinutes')
+    : undefined;
+
   const extraMinutesNum = toNum(extraMinutesRaw);
-  const extraKmAmtRaw = pkgVals ? pick(pkgVals, 'extraKMAmount', 'ExtraKMAmount') : undefined;
-  const extraMinAmtRaw = pkgVals ? pick(pkgVals, 'extraMinutesAmount', 'ExtraMinutesAmount') : undefined;
+
+  const extraKmAmtRaw = pkgVals
+    ? pick(pkgVals, 'extraKMAmount', 'ExtraKMAmount')
+    : undefined;
+
+  const extraMinAmtRaw = pkgVals
+    ? pick(pkgVals, 'extraMinutesAmount', 'ExtraMinutesAmount')
+    : undefined;
+
+  const extraKmRate = pkg
+    ? pick(pkg, 'extraKMRate', 'ExtraKMRate')
+    : undefined;
+
+  const extraHrRate = pkg
+    ? pick(pkg, 'extraHRRate', 'ExtraHRRate')
+    : undefined;
 
   const extraDetails: SummaryOfDutyRow[] = [
     {
+      label: 'Extra KM Rate',
+      value: extraKmRate != null
+        ? formatInr(extraKmRate)
+        : '—'
+    },
+    {
       label: 'Extra Kms',
-      value: ekNum == null ? '—' : fmtQty(ekRaw, 'Kms')
+      value: ekNum == null
+        ? '—'
+        : fmtQty(ekRaw, 'Kms')
     },
     {
       label: 'Extra Kms Amt',
       value: formatInrOptionalZeroDash(extraKmAmtRaw)
     },
     {
+      label: 'Extra Hr Rate',
+      value: extraHrRate != null
+        ? formatInr(extraHrRate)
+        : '—'
+    },
+    {
       label: 'Extra Hrs',
-      value: extraMinutesNum == null ? '—' : fmtDutyDurationFromMinutes(extraMinutesRaw)
+      value: extraMinutesNum == null
+        ? '—'
+        : fmtDutyDurationFromMinutes(extraMinutesRaw)
     },
     {
       label: 'Extra Hrs Amt',
@@ -621,38 +737,125 @@ export function mapInvoiceCalculationToSummaryOfDuty(response: unknown): Summary
     }
   ];
 
-  const daN = driver ? toNum(pick(driver, 'totalDriverAllowanceAmount', 'TotalDriverAllowanceAmount')) : null;
+  const daN = driver
+    ? toNum(
+        pick(
+          driver,
+          'totalDriverAllowanceAmount',
+          'TotalDriverAllowanceAmount'
+        )
+      )
+    : null;
+
   const nightN = nightChargeTotal(night);
+
   const fgrN = fgrTotal(pkgFgr);
+
   const ptTotal = parkingTollTotal(tollRows, r);
+
   const istLine = sumInterstate(istRows as unknown[]);
-  const rootIst = toNum(pick(r, 'totalInterStateAmount', 'TotalInterStateAmount'));
-  const istN = istLine ?? (rootIst != null ? rootIst : null);
+
+  const rootIst = toNum(
+    pick(r, 'totalInterStateAmount', 'TotalInterStateAmount')
+  );
+
+  const istN =
+    istLine ?? (rootIst != null ? rootIst : null);
 
   const otherCharges: SummaryOfDutyRow[] = [
-    { label: 'Driver Allowance Amount', value: daN != null ? formatInr(daN) : '—' },
-    { label: 'Night Amount', value: nightN != null ? formatInr(nightN) : '—' },
-    { label: 'FGR', value: fgrN != null ? formatInr(fgrN) : '—' },
-    { label: 'Parking / Toll', value: formatInr(ptTotal) },
-    { label: 'Interstate Tax', value: istN != null ? formatInr(istN) : '—' }
+    {
+      label: 'Driver Allowance Amount',
+      value: daN != null
+        ? formatInr(daN)
+        : '—'
+    },
+    {
+      label: 'Night Amount',
+      value: nightN != null
+        ? formatInr(nightN)
+        : '—'
+    },
+    {
+      label: 'FGR',
+      value: fgrN != null
+        ? formatInr(fgrN)
+        : '—'
+    },
+    {
+      label: 'Parking / Toll',
+      value: formatInr(ptTotal)
+    },
+    {
+      label: 'Interstate Tax',
+      value: istN != null
+        ? formatInr(istN)
+        : '—'
+    }
   ];
 
   const taxDetails: SummaryOfDutyRow[] = [];
-  taxDetails.push({ label: 'Chargeable Expenses GST %', value: gstPercentLabel(gst, r) });
-  taxDetails.push({ label: 'GST Type', value: gstTypeLabel(gst) });
+
+  taxDetails.push({
+    label: 'Chargeable Expenses GST %',
+    value: gstPercentLabel(gst, r)
+  });
+
+  taxDetails.push({
+    label: 'GST Type',
+    value: gstTypeLabel(gst)
+  });
+
   taxDetails.push({
     label: 'GST Amount',
     value: gstAmountDisplay(gst, r)
   });
 
-  const final = toNum(pick(r, 'totalAmountAfterGST', 'TotalAmountAfterGST'));
+  // FINAL BILL
+  const final = toNum(
+    pick(r, 'totalAmountAfterGST', 'TotalAmountAfterGST')
+  );
+
+  // GST AMOUNT
+    const afterGst = toNum(
+    pick(r, 'totalAmountAfterGST', 'TotalAmountAfterGST')
+  );
+
+  const afterExpenses = toNum(
+    pick(r, 'totalAmountAfterExpences', 'TotalAmountAfterExpences')
+  );
+
+  const gstAmount =
+    gstTotalAmount(gst) ??
+    (
+      afterGst != null &&
+      afterExpenses != null
+        ? afterGst - afterExpenses
+        : 0
+    );
+
+  // SUBTOTAL = FINAL - GST
+  const subTotal =
+  final != null
+    ? final - gstAmount
+    : null;
 
   return {
     packageDetails,
     extraDetails,
     otherCharges,
     taxDetails,
+
+    // NEW FIELDS
+    subtotalLabel: 'Subtotal Amount',
+    subtotalAmount:
+      subTotal != null
+        ? formatInr(subTotal)
+        : '—',
+
     finalBillLabel: 'Final Bill Amount',
-    finalBillAmount: final != null ? formatInr(final) : '—'
+    finalBillAmount:
+      final != null
+        ? formatInr(final)
+        : '—'
   };
 }

@@ -142,7 +142,6 @@ export class DutySlipForBillingComponent implements OnInit, AfterViewInit {
 
     this.onKeyUp();
     this.onTimeSelection();
-    console.log(this.advanceTableClosingOne.closingReservationForPickupDataModel)
   }
 
   ngAfterViewInit(): void {
@@ -968,7 +967,6 @@ export class DutySlipForBillingComponent implements OnInit, AfterViewInit {
 
   public LoadDataForBilling()
   {
-    console.log(this.advanceTableClosingOne.closingDutySlipForBillingModel);
     if(this.InvoiceID !== 0) 
     {
       this.advanceTableForm.get('verifyDuty')?.disable();
@@ -1779,7 +1777,6 @@ setVerifyDuty(value: boolean, details: string) {
 
   public ClossingDetails(): boolean
   {
-    debugger
   
     if (!this.advanceTableForm.value.dsClosing) {
       Swal.fire({
@@ -1869,7 +1866,6 @@ setVerifyDuty(value: boolean, details: string) {
       } 
       this.advanceTableForm.patchValue({actionDetails :'Unchecked',actionTaken : "Verify Duty"});
       //this.saveDisabled = true;      
-      console.log(this.advanceTableForm.getRawValue())
       this.dutySlipForBillingService.update(this.advanceTableForm.getRawValue())  
       .subscribe(
         response => 

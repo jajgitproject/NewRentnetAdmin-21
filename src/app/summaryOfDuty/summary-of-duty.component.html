@@ -65,8 +65,21 @@
           <table class="summary-table summary-table--final">
             <tbody>
               <tr>
-                <th scope="row" class="summary-table__label summary-table__label--final">{{ finalBillLabel }}</th>
-                <td class="summary-table__value summary-table__value--final">{{ finalBillAmount }}</td>
+                <th scope="row" class="summary-table__label">
+                  {{ subtotalLabel }}
+                </th>
+                <td class="summary-table__value">
+                  {{ subtotalAmount }}
+                </td>
+              </tr>
+
+              <tr>
+                <th scope="row" class="summary-table__label summary-table__label--final">
+                  {{ finalBillLabel }}
+                </th>
+                <td class="summary-table__value summary-table__value--final">
+                  {{ finalBillAmount }}
+                </td>
               </tr>
             </tbody>
           </table>

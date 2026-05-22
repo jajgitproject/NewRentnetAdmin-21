@@ -7,12 +7,16 @@ const PACKAGE_SECTION_PLACEHOLDER: SummaryOfDutyRow[] = [
   { label: 'Total Kms', value: '—' },
   { label: 'Total Hrs', value: '—' },
   { label: 'Package', value: '—' },
-  { label: 'Package Amount', value: '—' }
+  { label: 'Package Amount', value: '—' },
+  { label: 'City', value: '—' },
+  { label: 'Car Type Booked', value: '—' }
 ];
 
 const EXTRA_SECTION_PLACEHOLDER: SummaryOfDutyRow[] = [
+  { label: 'Extra KM Rate', value: '—' },
   { label: 'Extra Kms', value: '—' },
   { label: 'Extra Kms Amt', value: '—' },
+  { label: 'Extra Hr Rate', value: '—' },
   { label: 'Extra Hrs', value: '—' },
   { label: 'Extra Hrs Amt', value: '—' }
 ];
@@ -47,6 +51,8 @@ export class SummaryOfDutyComponent implements OnInit, OnChanges {
   taxDetails: SummaryOfDutyRow[] = [];
   finalBillLabel = 'Final Bill Amount';
   finalBillAmount = '—';
+  subtotalLabel = 'Subtotal Amount';
+  subtotalAmount = '—';
 
   ngOnInit(): void {
     this.applyModel();
@@ -75,6 +81,8 @@ export class SummaryOfDutyComponent implements OnInit, OnChanges {
       this.extraDetails = [...EXTRA_SECTION_PLACEHOLDER];
       this.otherCharges = [...OTHER_CHARGES_PLACEHOLDER];
       this.taxDetails = [...TAX_SECTION_PLACEHOLDER];
+      this.subtotalLabel = 'Subtotal Amount';
+      this.subtotalAmount = '—';
       this.finalBillLabel = 'Final Bill Amount';
       this.finalBillAmount = '—';
       return;
@@ -84,6 +92,8 @@ export class SummaryOfDutyComponent implements OnInit, OnChanges {
     this.extraDetails = this.mergeRows(EXTRA_SECTION_PLACEHOLDER, src.extraDetails);
     this.otherCharges = this.mergeRows(OTHER_CHARGES_PLACEHOLDER, src.otherCharges);
     this.taxDetails = this.mergeRows(TAX_SECTION_PLACEHOLDER, src.taxDetails);
+    this.subtotalLabel = src.subtotalLabel ?? 'Subtotal Amount';
+    this.subtotalAmount = src.subtotalAmount ?? '—';
     this.finalBillLabel = src.finalBillLabel ?? 'Final Bill Amount';
     this.finalBillAmount = src.finalBillAmount ?? '—';
   }
@@ -98,7 +108,7 @@ export class SummaryOfDutyComponent implements OnInit, OnChanges {
     );
   }
 
-  trackByLabel(_index: number, row: SummaryOfDutyRow): string {
-    return row.label;
-  }
+  trackByLabel(index: number, row: SummaryOfDutyRow): string {
+  return `${index}-${row.label}`;
+}
 }

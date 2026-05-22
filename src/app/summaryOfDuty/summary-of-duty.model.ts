@@ -10,6 +10,9 @@ export interface SummaryOfDutyData {
   otherCharges?: SummaryOfDutyRow[];
   taxDetails?: SummaryOfDutyRow[];
   /** Shown in the Summary card (e.g. Final Bill Amount) */
+  subtotalLabel?: string;
+  subtotalAmount?: string;
+  
   finalBillLabel?: string;
   finalBillAmount?: string;
 }
