@@ -871,8 +871,25 @@ toArray<T>(value: any): T[] {
         this.CustomerPassengerAndBookerList=data;
         this.advanceTableForm.patchValue({customerGroupID:this.CustomerPassengerAndBookerList[0].customerGroupID});
         this.advanceTableForm.patchValue({primaryPassengerID:this.CustomerPassengerAndBookerList[0].primaryPassengerID});
-        //this.advanceTableForm.patchValue({passenger:this.CustomerPassengerAndBookerList[0].customerPersonName+' - '+this.CustomerPassengerAndBookerList[0].gender+' - '+this.CustomerPassengerAndBookerList[0].importance+' - '+this.CustomerPassengerAndBookerList[0].primaryMobile+' - '+this.CustomerPassengerAndBookerList[0].customerDepartment+' - '+this.CustomerPassengerAndBookerList[0].customerDesignation+' - '+this.CustomerPassengerAndBookerList[0].customerName});
-        this.advanceTableForm.patchValue({passenger:this.CustomerPassengerAndBookerList[0].passengerInfo});
+       
+      this.advanceTableForm.patchValue({
+        passenger:
+          this.CustomerPassengerAndBookerList[0].customerPersonName + '-' +
+          this.CustomerPassengerAndBookerList[0].gender + '-' +
+          this.CustomerPassengerAndBookerList[0].importance + '-' +
+          this.CustomerPassengerAndBookerList[0].primaryMobile + '-' +
+          this.CustomerPassengerAndBookerList[0].customerName
+      });
+
+      // only for edit mode
+      setTimeout(() => {
+        this.advanceTableForm.controls['passenger']
+          .setErrors(null);
+
+        this.advanceTableForm.controls['passenger']
+          .updateValueAndValidity();
+      });
+        //this.advanceTableForm.patchValue({passenger:this.CustomerPassengerAndBookerList[0].passengerInfo});
       }
     )
   }
@@ -1697,24 +1714,33 @@ toArray<T>(value: any): T[] {
   //     }
   //   );
   // }
-  PassengerValidator(PassengerList: any[]): ValidatorFn {
+  // PassengerValidator(PassengerList: any[]): ValidatorFn {
+  //   return (control: AbstractControl): ValidationErrors | null => {
+  //     const value = String(control.value ?? '').toLowerCase().trim();
+  //     const currentPassengerID = this.advanceTableForm?.value?.primaryPassengerID;
+
+  //     // Prefer ID-based validation. Prefilled text can vary in formatting,
+  //     // but selected/loaded passenger ID is the reliable key.
+  //     if (currentPassengerID !== null && currentPassengerID !== undefined && currentPassengerID !== '') {
+  //       const idMatch = PassengerList.some(
+  //         data => String(data?.customerPersonID ?? '') === String(currentPassengerID)
+  //       );
+  //       if (idMatch) {
+  //         return null;
+  //       }
+  //     }
+
+  //     const match = PassengerList.some(data =>
+  //       this.buildPassengerDisplay(data).toLowerCase().trim() === value
+  //     );
+  //     return match ? null : { passengerInvalid: true };
+  //   };
+  // }
+ PassengerValidator(PassengerList: any[]): ValidatorFn {
     return (control: AbstractControl): ValidationErrors | null => {
-      const value = String(control.value ?? '').toLowerCase().trim();
-      const currentPassengerID = this.advanceTableForm?.value?.primaryPassengerID;
-
-      // Prefer ID-based validation. Prefilled text can vary in formatting,
-      // but selected/loaded passenger ID is the reliable key.
-      if (currentPassengerID !== null && currentPassengerID !== undefined && currentPassengerID !== '') {
-        const idMatch = PassengerList.some(
-          data => String(data?.customerPersonID ?? '') === String(currentPassengerID)
-        );
-        if (idMatch) {
-          return null;
-        }
-      }
-
-      const match = PassengerList.some(data =>
-        this.buildPassengerDisplay(data).toLowerCase().trim() === value
+      const value = control.value?.toLowerCase();
+      const match = PassengerList.some(option =>
+        (option.customerPersonName + '-' + option.gender + '-' + option.importance + '-' + option.phone + '-' + option.customerName)?.toLowerCase() === value
       );
       return match ? null : { passengerInvalid: true };
     };
@@ -1726,8 +1752,6 @@ toArray<T>(value: any): T[] {
       data?.gender ?? '',
       data?.importance ?? '',
       data?.phone ?? '',
-      data?.customerDepartment ?? '',
-      data?.customerDesignation ?? '',
       data?.customerName ?? ''
     ].join('-');
   }
@@ -1739,8 +1763,6 @@ toArray<T>(value: any): T[] {
               data.gender +'-'+
               data.importance +'-'+
               data.phone +'-'+
-              data.customerDepartment +'-'+
-              data.customerDesignation +'-'+
                data.customerName === selectedPassengerName
     );
   

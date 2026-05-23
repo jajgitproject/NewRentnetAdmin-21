@@ -784,8 +784,7 @@ export class ControlPanelDesignComponent implements OnInit {
             console.log(this.reservationHeaderInfo);
              this.reservationHeaderInfo.forEach(row => {
             
-            this.setCalculatedLocationOutTime(row);
-            this.getIntervalInTime(row);
+            this.setCalculatedLocationOutTime(row, row.locationOutIntervalInMinutes);
         
           });
 
@@ -4288,21 +4287,6 @@ controlPanelDetails(reservationID:any,index:number) {
   this.loadDataForHeader('complete',this.currentPage,50,true);
    
 
-}
-getIntervalInTime(data: any) {
-  const customerID = data?.customerID;
-
-  if (customerID) {
-    this.dispatchByExecutiveService
-      .GetLocationOutIntervalInMinutes(customerID)
-      .subscribe(res => {
-        const interval = res.locationOutIntervalInMinutes;
-        this.setCalculatedLocationOutTime(data, interval);
-      });
-  } else {
-    // 👇 fallback for Not Dispatch / missing data
-    this.setCalculatedLocationOutTime(data);
-  }
 }
 
 setCalculatedLocationOutTime(data: any, interval?: number) {

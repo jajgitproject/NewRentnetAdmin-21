@@ -164,11 +164,10 @@
                                         (optionSelected)="onPassengerSelected($event.option.value)"
                                         panelWidth="custom-autocomplete-panel">
                                         <mat-option *ngFor="let option of toArray(filteredPassengerOptions | async)"
-                                            [value]="option.customerPersonName + '-' + option.gender + '-' + option.importance + '-' + option.phone + '-' + option.customerDepartment + '-' + option.customerDesignation + '-' + option.customerName"
+                                            [value]="option.customerPersonName + '-' + option.gender + '-' + option.importance + '-' + option.phone + '-' + option.customerName"
                                             (click)="getPassengerID(option.customerPersonID, option.customerPersonName)">
                                             {{option.customerPersonName}} - {{option.gender}} -
-                                            {{option.importance}}- {{option.phone}} - {{option.customerDepartment}} -
-                                            {{option.customerDesignation}} - {{option.customerName}}
+                                            {{option.importance}} - {{option.phone}} - {{option.customerName}}
                                         </mat-option>
                                     </mat-autocomplete>
                                 </mat-form-field>
