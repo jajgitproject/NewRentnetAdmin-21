@@ -479,3 +479,15 @@ export class Filters {
   }
 }
 
+export class TransferedLocationDropDown { 
+  transferedLocationID: number;
+  transferLocationName: string;
+
+ constructor(transferedLocationDropDown) {
+   {
+      this.transferedLocationID = transferedLocationDropDown.transferedLocationID || -1;
+      this.transferLocationName = transferedLocationDropDown.transferLocationName || '';
+   }
+ }
+ 
+}

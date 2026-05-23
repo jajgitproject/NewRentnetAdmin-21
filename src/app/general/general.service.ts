@@ -119,6 +119,8 @@ import { BillingTypeDropDown } from '../billingType/billingTypeDropDown.model';
 import { BusinessTypeDropDown } from '../customer/businessTypeDropDown.model';
 import { LocationGroupDropDown } from '../locationGroup/locationGroupDropDown.model';
 import { RuntimeConfigService } from '../core/service/runtime-config.service';
+import { CustomerCustomerGroupDropDown as  CustomerDropDownForControlPanel} from '../customerShort/customerCustomerGroupDropDown.model';
+import { TransferedLocationDropDown } from '../controlPanelDesign/controlPanelDesign.model';
 
 @Injectable({
   providedIn: 'root'
@@ -130,6 +132,7 @@ export class GeneralService {
   ImageURL: string;
   FormURL: string;
   UnlockEmployeeUrl: string;
+  lengthToCheck:number = 3;
 
   // In-memory cache for read-only dropdown/lookup endpoints. Populated lazily
   // on first call per key and reused across the whole app session to avoid
@@ -402,6 +405,55 @@ decrypt(textToDecrypt: string): string{
     let dateTimeFrom = new Date(toDate);
     return dateTimeFrom.toString();
   }
+
+  GetCustomerGroupDropDownForControlPanel(Prefix: string): Observable<CustomerGroupDropDown[]>
+  {
+    return this.http.get<CustomerGroupDropDown[]>(this.BaseURL + "controlPanelDropDown/GetCustomerGroupForDropDown" + '/' + Prefix);
+  }
+
+  GetCustomerDropDownForControlPanel(Prefix: string): Observable<CustomerDropDownForControlPanel[]> 
+  {
+    return this.http.get<CustomerDropDownForControlPanel[]>(this.BaseURL + "controlPanelDropDown/GetCustomerForDropDown" + '/' + Prefix);
+  }
+
+  GetDutyTypeDropDownForControlPanel(Prefix: string): Observable<PackageTypeDropDown[]> 
+  {
+    return this.http.get<PackageTypeDropDown[]>(this.BaseURL + 'controlPanelDropDown/GetDutyTypeForDropDown' + '/' + Prefix);
+  }
+
+  GetLocationDropDownForControlPanel(Prefix: string): Observable<OrganizationalEntityDropDown[]>
+  {
+    return this.http.get<OrganizationalEntityDropDown[]>(this.BaseURL + "controlPanelDropDown/GetLocationForDropDown" + '/' + Prefix);
+  }
+
+  GetTransferLocationDropDownForControlPanel(Prefix: string): Observable<TransferedLocationDropDown[]>
+  {
+    return this.http.get<TransferedLocationDropDown[]>(this.BaseURL + "controlPanelDropDown/GetTransferLocationForDropDown" + '/' + Prefix);
+  }
+
+  GetRegNoDropDownForControlPanel(Prefix: string): Observable<InventoryDropDown[]> 
+  {
+    return this.http.get<InventoryDropDown[]>(this.BaseURL + "controlPanelDropDown/GetRegNoForDropDown" + '/' + Prefix);
+  }
+
+  GetVehicleDropDownForControlPanel(Prefix: string): Observable<VehicleDropDown[]> 
+  {
+    return this.http.get<VehicleDropDown[]>(this.BaseURL + "controlPanelDropDown/GetVehicleForDropDown" + '/' + Prefix);
+  }
+
+  GetModeOfPaymentDropDownForControlPanel(Prefix: string): Observable<ModeOfPaymentDropDown[]> 
+  {
+    return this.http.get<ModeOfPaymentDropDown[]>(this.BaseURL + 'controlPanelDropDown/GetModeOfPaymentForDropDown' + '/' + Prefix);
+  }
+
+
+
+
+
+
+
+
+
 
 GetCitiessAl(): Observable<CityDropDown[]> {
     return this.http.get<CityDropDown[]>(this.BaseURL + "supplierContractCityPercentage/ForDropDownss");

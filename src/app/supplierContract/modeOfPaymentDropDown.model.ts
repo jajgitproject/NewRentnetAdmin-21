@@ -7,7 +7,7 @@ export class ModeOfPaymentDropDown {
   constructor(modeOfPaymentDropDown) {
     {
        this.modeOfPaymentID = modeOfPaymentDropDown.modeOfPaymentID || -1;
-       this.modeOfPayment = modeOfPaymentDropDown.department || '';
+       this.modeOfPayment = modeOfPaymentDropDown.modeOfPayment || '';
     }
   }
   

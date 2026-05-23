@@ -16,7 +16,8 @@ import {
   ControlPanelDetails,
   ControlPanelHeaderData,
   ControlPanelHeaderDetails,
-  Filters
+  Filters,
+  TransferedLocationDropDown
 } from './controlPanelDesign.model';
 import { BookerInfoComponent } from '../BookerInfo/BookerInfo.component';
 import { VehicleCategoryInfoComponent } from '../VehicleCategoryInfo/VehicleCategoryInfo.component';
@@ -127,7 +128,7 @@ import { DutyPostFormDialogComponent } from '../dutyPostPickUPCall/dialogs/form-
 import { SoftToHardDialogComponent } from '../cancelAllotment/dialogs/softToHard-Dialog/softToHard-Dialog.component';
 import { ControlPanelDialogeComponent } from '../controlPanelDialoge/controlPanelDialoge.component';
 import { formatDate } from '@angular/common';
-import { OrganizationalEntityDropDown } from '../organizationalEntityMessage/organizationalEntityDropDown.model';
+import { OrganizationalEntityDropDown} from '../organizationalEntityMessage/organizationalEntityDropDown.model';
 import { SpecialInstructionDialogComponent } from '../specialInstruction/dialogs/special-instruction-dialog/special-instruction-dialog.component';
 import { ControlPanelDialogeService } from '../controlPanelDialoge/controlPanelDialoge.service';
 import { InternalNoteDialogComponent } from '../internalNoteDetails/dialogs/internal-note-dialog/internal-note-dialog.component';
@@ -268,8 +269,8 @@ export class ControlPanelDesignComponent implements OnInit {
   public OrganizationalEntityList?: OrganizationalEntityDropDown[] = [];
   filteredOrganizationalEntityOptions: Observable<OrganizationalEntityDropDown[]> = of([]);
 
-  public TransferLocationList?: OrganizationalEntityDropDown[] = [];
-  filteredTransferLocationOptions: Observable<OrganizationalEntityDropDown[]> = of([]);
+  public TransferLocationList?: TransferedLocationDropDown[] = [];
+  filteredTransferLocationOptions: Observable<TransferedLocationDropDown[]> = of([]);
   verifyDutyStatusAndCacellationStatus: any;
 
   public RegNumberList: InventoryDropDown[] = [];
@@ -347,23 +348,23 @@ export class ControlPanelDesignComponent implements OnInit {
       this.filterForm = this.createFilterForm();
     }
     this.safeRun(() => this.FillVehicleDD());
-    this.safeRun(() => this.FillCustomerGroupDD());
-    this.safeRun(() => this.FillCustomerDDOnPageLoad());
+    // this.safeRun(() => this.FillCustomerGroupDD());
+    // this.safeRun(() => this.FillCustomerDDOnPageLoad());
     this.safeRun(() => this.InitBookerOnPageLoad());
     this.safeRun(() => this.InitPassengerOnPageLoad());
     this.safeRun(() => this.InitVehicleCategories());
     this.safeRun(() => this.InitCities());
-    this.safeRun(() => this.InitPackageType());
+    // this.safeRun(() => this.InitPackageType());
     this.safeRun(() => this.InitPackageOnPageLoad());
     this.safeRun(() => this.InitSupplier());
     this.safeRun(() => this.InitVehicleInventoryOnPageLoad());
     this.safeRun(() => this.InitDriverOnPageLoad());
     this.safeRun(() => this.InitDOINOnPageLoad());
     this.safeRun(() => this.InitDisputesOnPageLoad());
-    this.safeRun(() => this.InitLocation());
-    this.safeRun(() => this.InitTransferLocation());
-    this.safeRun(() => this.InitRegNumber());
-    this.safeRun(() => this.InitPaymentMode());
+    // this.safeRun(() => this.InitLocation());
+    // this.safeRun(() => this.InitTransferLocation());
+    // this.safeRun(() => this.InitRegNumber());
+    // this.safeRun(() => this.InitPaymentMode());
 
     const today = this.formatDate(new Date());
     const now = new Date();
@@ -780,7 +781,7 @@ export class ControlPanelDesignComponent implements OnInit {
           {
             this.reservationHeaderInfo = data.reservationHeaderDetails;
             this.totalData = data.totalRecords;
-            console.log(this.totalData);
+            console.log(this.reservationHeaderInfo);
              this.reservationHeaderInfo.forEach(row => {
             
             this.setCalculatedLocationOutTime(row);
@@ -839,9 +840,29 @@ export class ControlPanelDesignComponent implements OnInit {
       );
   }
 
-  InitLocation()
+  //---------- Location ----------
+  // InitLocation()
+  // {
+  //   this._generalService.GetOrganizationalEntity().subscribe(
+  //   data=>
+  //   {
+  //     this.OrganizationalEntityList=data;
+  //     this.filteredOrganizationalEntityOptions = this.filterForm.controls.locationName.valueChanges.pipe(
+  //       startWith(""),
+  //       map(value => this._filterLocationName(value || ''))
+  //     ); 
+  //   });
+  // }
+
+  onKeyupLocationDropDown()
   {
-    this._generalService.GetOrganizationalEntity().subscribe(
+    var Prefix = this.filterForm.controls.locationName.value;
+    if(Prefix.length < this._generalService.lengthToCheck)
+    { 
+      this.OrganizationalEntityList = [];
+      return;
+    }
+    this._generalService.GetLocationDropDownForControlPanel(Prefix).subscribe(
     data=>
     {
       this.OrganizationalEntityList=data;
@@ -854,9 +875,9 @@ export class ControlPanelDesignComponent implements OnInit {
   
   private _filterLocationName(value: string): any {
     const filterValue = value.toLowerCase();
-    if (filterValue.length < 3) {
-      return [];
-    }
+    // if (filterValue.length < 3) {
+    //   return [];
+    // }
     return this.OrganizationalEntityList.filter(
       data => 
       {
@@ -865,12 +886,32 @@ export class ControlPanelDesignComponent implements OnInit {
     );
   }
 
-  InitTransferLocation()
+  //---------- Transfer Location ----------
+  // InitTransferLocation()
+  // {
+  //   this._generalService.GetOrganizationalEntity().subscribe(
+  //   data=>
+  //   {
+  //     this.TransferLocationList=data;
+  //     this.filteredTransferLocationOptions = this.filterForm.controls.transferLocationName.valueChanges.pipe(
+  //       startWith(""),
+  //       map(value => this._filterTransferLocation(value || ''))
+  //     ); 
+  //   });
+  // }
+  onKeyupTransferLocationDropDown()
   {
-    this._generalService.GetOrganizationalEntity().subscribe(
+    var Prefix = this.filterForm.controls.transferLocationName.value;
+    if(Prefix.length < this._generalService.lengthToCheck)
+    { 
+      this.TransferLocationList = [];
+      return;
+    }
+    this._generalService.GetTransferLocationDropDownForControlPanel(Prefix).subscribe(
     data=>
     {
       this.TransferLocationList=data;
+      console.log('TransferLocationList',this.TransferLocationList);
       this.filteredTransferLocationOptions = this.filterForm.controls.transferLocationName.valueChanges.pipe(
         startWith(""),
         map(value => this._filterTransferLocation(value || ''))
@@ -880,27 +921,47 @@ export class ControlPanelDesignComponent implements OnInit {
   
   private _filterTransferLocation(value: string): any {
     const filterValue = value.toLowerCase();
-    if (filterValue.length < 3) {
-      return [];
-    }
+    // if (filterValue.length < 3) {
+    //   return [];
+    // }
     return this.TransferLocationList.filter(
       data => 
       {
-        return data.organizationalEntityName.toLowerCase().indexOf(filterValue)===0;
+        return data.transferLocationName.toLowerCase().includes(filterValue);
       }
     );
   }
 
   //Customer Group
-  FillCustomerGroupDD() {
-    this._generalService.GetCustomersGroups().subscribe(
+  // FillCustomerGroupDD() {
+  //   this._generalService.GetCustomersGroups().subscribe(
+  //     (data) => {
+  //       this.CustomerGroupList = data;
+  //       this.filteredCustomerGroupOptions =
+  //         this.filterForm.controls.customerGroup.valueChanges.pipe(
+  //           startWith(''),
+  //           map((value) => this._filterCustomerGroup(value || ''))
+  //         );
+  //     },
+  //     (error) => {}
+  //   );
+  // }
+
+  onKeyupCustomerGroupDropDown() 
+  {
+    var Prefix = this.filterForm.controls.customerGroup.value;
+    if(Prefix.length < this._generalService.lengthToCheck)
+    { 
+      this.CustomerGroupList = [];
+      return;
+    }
+    this._generalService.GetCustomerGroupDropDownForControlPanel(Prefix).subscribe(
       (data) => {
         this.CustomerGroupList = data;
-        this.filteredCustomerGroupOptions =
-          this.filterForm.controls.customerGroup.valueChanges.pipe(
-            startWith(''),
-            map((value) => this._filterCustomerGroup(value || ''))
-          );
+        this.filteredCustomerGroupOptions = this.filterForm.controls.customerGroup.valueChanges.pipe(
+          startWith(''),
+          map((value) => this._filterCustomerGroup(value || ''))
+        );
       },
       (error) => {}
     );
@@ -911,9 +972,9 @@ export class ControlPanelDesignComponent implements OnInit {
     // if(filterValue.length === 0) {
     //   return [];
     // }
-     if(filterValue.length < 3) {
-      return [];
-    }
+    //  if(filterValue.length < 3) {
+    //   return [];
+    // }
     return this.CustomerGroupList.filter((data) => {
       return data.customerGroup.toLowerCase().indexOf(filterValue) === 0;
     });
@@ -925,9 +986,9 @@ export class ControlPanelDesignComponent implements OnInit {
     this.filterForm.controls['customer'].setValue('');
     this.filterForm.controls['booker'].setValue('');
     this.filterForm.controls['passenger'].setValue('');
-    this.FillCustomerDD();
-    this.InitBooker();
-    this.InitPassenger();
+    //this.FillCustomerDD();
+    //his.InitBooker();
+    //this.InitPassenger();
   }
 
   onCustomerGroupKeyUp(event) {
@@ -939,15 +1000,34 @@ export class ControlPanelDesignComponent implements OnInit {
   }
 
   //For Customers
-  FillCustomerDD() {
-    this._generalService.GetCustomersForCPSearch(this.customerGroupID).subscribe(
-      (data : CustomerCustomerGroupDropDown[]) => {
+  // FillCustomerDD() {
+  //   this._generalService.GetCustomersForCPSearch(this.customerGroupID).subscribe(
+  //     (data : CustomerCustomerGroupDropDown[]) => {
+  //       this.CustomerList = data;
+  //       this.filteredCustomerOptions =
+  //         this.filterForm.controls.customer.valueChanges.pipe(
+  //           startWith(''),
+  //           map((value) => this._filterCustomer(value || ''))
+  //         );
+  //     },
+  //     (error) => {}
+  //   );
+  // }
+  onKeyupCustomerDropDown() 
+  {
+    var Prefix = this.filterForm.controls.customer.value;
+    if(Prefix.length < this._generalService.lengthToCheck)
+    { 
+      this.CustomerList = [];
+      return;
+    }
+    this._generalService.GetCustomerDropDownForControlPanel(Prefix).subscribe(
+      (data) => {
         this.CustomerList = data;
-        this.filteredCustomerOptions =
-          this.filterForm.controls.customer.valueChanges.pipe(
-            startWith(''),
-            map((value) => this._filterCustomer(value || ''))
-          );
+        this.filteredCustomerOptions = this.filterForm.controls.customer.valueChanges.pipe(
+          startWith(''),
+          map((value) => this._filterCustomer(value || ''))
+        );
       },
       (error) => {}
     );
@@ -958,9 +1038,9 @@ export class ControlPanelDesignComponent implements OnInit {
     // if(filterValue.length === 0) {
     //   return [];
     // }
-     if(filterValue.length < 3) {
-      return [];
-    }
+    //  if(filterValue.length < 3) {
+    //   return [];
+    // }
     return this.CustomerList.filter((data) => {
       return data.customerName.toLowerCase().indexOf(filterValue) === 0 || data.customerGroup.toLowerCase().indexOf(filterValue) === 0;
     });
@@ -1203,7 +1283,8 @@ export class ControlPanelDesignComponent implements OnInit {
   }
 
     //Vehicle
-    FillVehicleDD() {
+    FillVehicleDD() 
+    {
       this._generalService.GetVehicle().subscribe(
         (data) => {
           this.VehicleList = data;
@@ -1237,19 +1318,22 @@ export class ControlPanelDesignComponent implements OnInit {
     //   });
     // }
 
-    InitVehicleDD() {
-      this._generalService.GetVehicles(this.vehicleCategoryID).subscribe(
-        (data) => {
-          this.VehicleList = data;
-          this.filteredVehicleOptions =
-            this.filterForm.controls.vehicleName.valueChanges.pipe(
-              startWith(''),
-              map((value) => this._filterVehicleS(value || ''))
-            );
-        },
-        (error) => {}
-      );
-    }
+    //------------ Vehicle -----------------
+    // InitVehicleDD() 
+    // {
+    //   this._generalService.GetVehicles(this.vehicleCategoryID).subscribe(
+    //     (data) => {
+    //       this.VehicleList = data;
+    //       this.filteredVehicleOptions =
+    //         this.filterForm.controls.vehicleName.valueChanges.pipe(
+    //           startWith(''),
+    //           map((value) => this._filterVehicleS(value || ''))
+    //         );
+    //     },
+    //     (error) => {}
+    //   );
+    // }
+    
   
     // private _filterVehicleS(value: string): any {
     //   const filterValue = value.toLowerCase();
@@ -1260,17 +1344,35 @@ export class ControlPanelDesignComponent implements OnInit {
     //     return data.vehicle.toLowerCase().indexOf(filterValue) === 0;
     //   });
     // }
-    private _filterVehicleS(value: string): any {
 
-  const filterValue = (value || '').toLowerCase();
-  if (!filterValue || filterValue.length < 3) {
-    return [];
-  }
+    onKeyupVehicleDropDown() 
+    {
+      var Prefix = this.filterForm.controls.vehicleName.value;
+      if(Prefix.length < this._generalService.lengthToCheck)
+      { 
+        this.VehicleList = [];
+        return;
+      }
+      this._generalService.GetVehicleDropDownForControlPanel(Prefix).subscribe(
+        (data) => {
+          this.VehicleList = data;
+          this.filteredVehicleOptions = this.filterForm.controls.vehicleName.valueChanges.pipe(
+            startWith(''),
+            map((value) => this._filterVehicleS(value || ''))
+          );
+        },
+        (error) => {}
+      );
+    }
 
-  return this.VehicleList.filter(data =>
-    data.vehicle.toLowerCase().indexOf(filterValue) === 0
-  );
-}
+    private _filterVehicleS(value: string): any { 
+      const filterValue = (value || '').toLowerCase();
+      // if (!filterValue || filterValue.length < 3) {
+      //   return [];
+      // }
+
+      return this.VehicleList.filter(data => data.vehicle.toLowerCase().includes(filterValue));
+    }
 
 
     //City
@@ -1322,8 +1424,26 @@ export class ControlPanelDesignComponent implements OnInit {
     // }
 
     //------------ Type -----------------
-  InitPackageType(){
-    this._generalService.GetPackgeType().subscribe(
+  // InitPackageType(){
+  //   this._generalService.GetPackgeType().subscribe(
+  //     data=>
+  //     {
+  //       this.PackageTypeList=data;
+  //       this.filteredPackageTypeOptions = this.filterForm.controls['packageType'].valueChanges.pipe(
+  //         startWith(""),
+  //         map(value => this._filterPackageType(value || ''))
+  //       ); 
+  //     });
+  // }
+  onKeyupDutyTypeDropDown()
+  {
+    var Prefix = this.filterForm.controls['packageType'].value;
+    if(Prefix.length < this._generalService.lengthToCheck)
+    { 
+      this.PackageTypeList = [];
+      return;
+    }
+    this._generalService.GetDutyTypeDropDownForControlPanel(Prefix).subscribe(
       data=>
       {
         this.PackageTypeList=data;
@@ -4161,11 +4281,11 @@ controlPanelDetails(reservationID:any,index:number) {
     });
 
 
-this.FillCustomerGroupDD(); 
-this.FillCustomerDD();          
-this.FillCustomerDDOnPageLoad(); 
-this.InitPackageType();  
- this.loadDataForHeader('complete',this.currentPage,50,true);
+  this.FillCustomerGroupDD(); 
+  this.FillCustomerDD();          
+  this.FillCustomerDDOnPageLoad(); 
+  this.InitPackageType();  
+  this.loadDataForHeader('complete',this.currentPage,50,true);
    
 
 }
@@ -4220,9 +4340,27 @@ setCalculatedLocationOutTime(data: any, interval?: number) {
 
 
    //---------- Reg Number ----------
-    InitRegNumber()
+    // InitRegNumber()
+    // {
+    //   this._generalService.GetRegNoForDropDown().subscribe(
+    //   data=>
+    //   {
+    //     this.RegNumberList=data;
+    //     this.filteredRegNumberOptions = this.filterForm.controls.vehicleInventory.valueChanges.pipe(
+    //       startWith(""),
+    //       map(value => this._filterRegNo(value || ''))
+    //     ); 
+    //   });
+    // }
+    onKeyupRegnNoDropDown()
     {
-      this._generalService.GetRegNoForDropDown().subscribe(
+      var Prefix = this.filterForm.controls.vehicleInventory.value;
+      if(Prefix.length < this._generalService.lengthToCheck)
+      { 
+        this.RegNumberList = [];
+        return;
+      }
+      this._generalService.GetRegNoDropDownForControlPanel(Prefix).subscribe(
       data=>
       {
         this.RegNumberList=data;
@@ -4236,10 +4374,10 @@ setCalculatedLocationOutTime(data: any, interval?: number) {
     private _filterRegNo(value: string): any {
       const filterValue = value.toLowerCase().trim();
       // If the input is empty, return an empty list
-      if (filterValue.length === 0) 
-      {
-        return [];
-      }
+      // if (filterValue.length === 0) 
+      // {
+      //   return [];
+      // }
       // Return filtered results matching the typed value
       return this.RegNumberList.filter(data => data.registrationNumber.toLowerCase().includes(filterValue)
       );
@@ -4247,9 +4385,26 @@ setCalculatedLocationOutTime(data: any, interval?: number) {
 
 
     //---------- Payment Mode ----------
-    InitPaymentMode() 
+    // InitPaymentMode() 
+    // {
+    //   this._generalService.GetModeOfPayment().subscribe(
+    //   data => {
+    //     this.PaymentModeList = data;
+    //     this.filteredPaymentModeOptions = this.filterForm.controls.modeOfPayment.valueChanges.pipe(
+    //       startWith(""),
+    //       map(value => this._filterPaymentMode(value || ''))
+    //     );
+    //   });
+    // }
+    onKeyupPaymentModeDropDown() 
     {
-      this._generalService.GetModeOfPayment().subscribe(
+      var Prefix = this.filterForm.controls.modeOfPayment.value;
+      if(Prefix.length < this._generalService.lengthToCheck)
+      { 
+        this.PaymentModeList = [];
+        return;
+      }
+      this._generalService.GetModeOfPaymentDropDownForControlPanel(Prefix).subscribe(
       data => {
         this.PaymentModeList = data;
         this.filteredPaymentModeOptions = this.filterForm.controls.modeOfPayment.valueChanges.pipe(
