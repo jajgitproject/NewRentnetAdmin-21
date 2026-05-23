@@ -4426,13 +4426,16 @@ private patchPickupAddress(res: any) {
     }
     if (!this.validateReservationForm()) {
       return;
+    }    
+    if (this.action === 'edit') 
+    {
+      this.PutForReservationEdit();
+    } 
+    else 
+    {
+      this.CheckValidationForSameReservation();
+      //this.Put();
     }
-    this.CheckValidationForSameReservation();
-    // if (this.action === 'edit') {
-    //   this.PutForReservationEdit();
-    // } else {
-    //   this.Put();
-    // }
   }
 
   InitCompanyForCustomer()
@@ -5287,28 +5290,14 @@ private isEditingAllowed(): boolean {
           }).then((result) => {
             if (result.isConfirmed) 
             {
-              if (this.action === 'edit') 
-              {
-                this.PutForReservationEdit();
-              } 
-              else 
-              {
-                this.Put();
-              }
+              this.Put();
             }
           });
 
       } 
       else 
       {
-        if (this.action === 'edit') 
-        {
-          this.PutForReservationEdit();
-        } 
-        else 
-        {
-          this.Put();
-        }
+        this.Put();
       }
     });  
   }
