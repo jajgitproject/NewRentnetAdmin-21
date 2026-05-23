@@ -5,7 +5,7 @@ import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { MatDialog, MatDialogConfig, MatDialogRef } from '@angular/material/dialog';
 import { MatPaginator } from '@angular/material/paginator';
 import { MatSort } from '@angular/material/sort';
-import { ModelForReservation, Reservation, ReservationStatusLog } from './reservation.model';
+import { ModelForReservation, Reservation, ReservationStatusLog, SameReservationModel } from './reservation.model';
 import { DataSource } from '@angular/cdk/collections';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { BehaviorSubject, fromEvent, merge, Observable, of, Subject, Subscription } from 'rxjs';
@@ -65,7 +65,7 @@ import { InternalNoteDetailsService } from '../internalNoteDetails/internalNoteD
 import { InternalNoteDetails } from '../internalNoteDetails/internalNoteDetails.model';
 import { EmailInfoComponent } from '../EmailInfo/EmailInfo.component';
 import { ReservationGroupDetailsService } from '../reservationGroupDetails/reservationGroupDetails.service';
-
+import { DatePipe } from '@angular/common';
 @Component({
   standalone: false,
   selector: 'app-reservation',
@@ -390,7 +390,8 @@ canCreateReservation: boolean;
      private specialInstructionDetailsService: SpecialInstructionDetailsService,
        public internalNoteDetailsService: InternalNoteDetailsService,
        public reservationGroupDetailsService: ReservationGroupDetailsService,
-  public settleRateService: SettledRateDetailsService,) 
+  public settleRateService: SettledRateDetailsService,
+   private datePipe: DatePipe) 
     {      
       this.priorityValues = Array.from({ length: 100 }, (_, i) => i + 1);    
     }
@@ -4426,11 +4427,12 @@ private patchPickupAddress(res: any) {
     if (!this.validateReservationForm()) {
       return;
     }
-    if (this.action === 'edit') {
-      this.PutForReservationEdit();
-    } else {
-      this.Put();
-    }
+    this.CheckValidationForSameReservation();
+    // if (this.action === 'edit') {
+    //   this.PutForReservationEdit();
+    // } else {
+    //   this.Put();
+    // }
   }
 
   InitCompanyForCustomer()
@@ -5253,6 +5255,63 @@ private isEditingAllowed(): boolean {
   
   return false;
 }
+
+
+  //---------- Check Validation For Same Reservation ----------
+  CheckValidationForSameReservation() 
+  {
+    const pickupDate = new Date(this.advanceTableForm.value.pickupDate);
+    const pickupTime = new Date(this.advanceTableForm.value.pickupTime);
+    this.reservationService.CheckValidationForSameReservation(this.customerID, this.passengerID, this.cityID, pickupDate, pickupTime).subscribe(
+    data => 
+    {
+      if (data?.result === true) 
+      {
+        Swal.fire({
+          title: 'Confirmation',
+          html: `
+              <div style="text-align:left">
+                There is already a reservation with same details.<br>
+                <b>Customer : </b> ${this.customer}<br>
+                <b>Passenger : </b> ${this.passengerName}<br>
+                <b>City : </b> ${this.advanceTableForm.value.pickupCity}<br>
+                <b>PickUp Date : </b> ${this.datePipe.transform(pickupDate,'dd-MMM-yyyy')}<br>
+                <b>PickUp Time : </b> ${this.datePipe.transform(pickupTime,'HH:mm')}<br>
+                Do you really want to make this booking?
+              </div>
+            `,
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonText: 'Yes',
+            cancelButtonText: 'No'
+          }).then((result) => {
+            if (result.isConfirmed) 
+            {
+              if (this.action === 'edit') 
+              {
+                this.PutForReservationEdit();
+              } 
+              else 
+              {
+                this.Put();
+              }
+            }
+          });
+
+      } 
+      else 
+      {
+        if (this.action === 'edit') 
+        {
+          this.PutForReservationEdit();
+        } 
+        else 
+        {
+          this.Put();
+        }
+      }
+    });  
+  }
 
 }
 

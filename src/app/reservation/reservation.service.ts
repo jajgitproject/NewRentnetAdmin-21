@@ -1,7 +1,7 @@
 // @ts-nocheck
 import { Injectable } from '@angular/core';
 import { BehaviorSubject, Observable } from 'rxjs';
-import { GoogleAddress, Reservation } from './reservation.model';
+import { GoogleAddress, Reservation, SameReservationModel } from './reservation.model';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { DatePipe } from '@angular/common';
 import { GeneralService } from '../general/general.service';
@@ -19,7 +19,7 @@ export class ReservationService
   isTblLoading = true;
   date : any;
   Result:string='Failure';
-  constructor(private httpClient: HttpClient, public generalService: GeneralService) 
+  constructor(private httpClient: HttpClient, public generalService: GeneralService, private datePipe: DatePipe) 
   {
     this.API_URL=generalService.BaseURL+ "reservation";
     this.RG_API_URL=generalService.BaseURL+ "reservationGroup";
@@ -430,6 +430,14 @@ export class ReservationService
 
   return this.httpClient.put<any>(this.API_URL + '/' + 'EditLocationOutTime', advanceTable);
 }
+
+  CheckValidationForSameReservation(CustomerID: number, PassengerID: number, CityID: number, PickupDate: string, PickupTime: string):Observable<any> 
+  {
+    PickupDate = this.datePipe.transform(PickupDate, 'yyyy-MM-dd');
+    PickupTime = this.datePipe.transform(PickupTime, 'HH:mm');
+    return this.httpClient.get<any>(this.API_URL + '/' + 'CheckValidationForSameReservation' + '/' + CustomerID + '/' + PassengerID + '/' + CityID + '/' + PickupDate + '/' + PickupTime);
+  }
+
 }
   
 
