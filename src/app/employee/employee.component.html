@@ -78,6 +78,9 @@
                                                             <option value="search" hidden>Search By</option>
                                                             <option value="employee">Employee</option>
                                                             <option value="supplier">Supplier Name</option>
+                                                            <option value="email">Email</option>
+                                                            <option value="phone">Phone</option>
+                                                            <option value="officeId">Office ID</option>
                                                         </select>
                                                     </div>
                                         
@@ -162,13 +165,21 @@
                                         <mat-cell *matCellDef="let row" (contextmenu)="onContextMenu($event, row)">
                                             {{row.firstName}}</mat-cell>
                                     </ng-container>
-                                    <ng-container matColumnDef="desgination">
-                                        <!-- <mat-header-cell  *matHeaderCellDef>Desgination,Department</mat-header-cell> -->
-                                        <mat-header-cell *matHeaderCellDef mat-sort-header><span matTooltip="Desgination,Department" matTooltipPosition="above">Des...,Dep...</span></mat-header-cell>
+                                    <ng-container matColumnDef="mobile">
+                                        <mat-header-cell *matHeaderCellDef mat-sort-header>Phone</mat-header-cell>
                                         <mat-cell *matCellDef="let row" (contextmenu)="onContextMenu($event, row)">
-                                            {{row.designation}}-{{row.department}}</mat-cell>
+                                            {{row.mobile || 'N/A'}}</mat-cell>
                                     </ng-container>
-
+                                    <ng-container matColumnDef="email">
+                                        <mat-header-cell *matHeaderCellDef mat-sort-header>Email</mat-header-cell>
+                                        <mat-cell *matCellDef="let row" (contextmenu)="onContextMenu($event, row)">
+                                            {{row.email || 'N/A'}}</mat-cell>
+                                    </ng-container>
+                                    <ng-container matColumnDef="employeeOfficeID">
+                                        <mat-header-cell *matHeaderCellDef mat-sort-header>Office ID</mat-header-cell>
+                                        <mat-cell *matCellDef="let row" (contextmenu)="onContextMenu($event, row)">
+                                            {{row.employeeOfficeID || 'N/A'}}</mat-cell>
+                                    </ng-container>
                                     <ng-container matColumnDef="employeeOf">
                                         <mat-header-cell *matHeaderCellDef mat-sort-header>Employee OF</mat-header-cell>
                                         <mat-cell *matCellDef="let row" (contextmenu)="onContextMenu($event, row)">
@@ -193,11 +204,6 @@
                                     </ng-container>
                                     
 
-                                    <ng-container matColumnDef="status">
-                                        <mat-header-cell *matHeaderCellDef mat-sort-header>Status</mat-header-cell>
-                                        <mat-cell *matCellDef="let row">
-                                            {{row.activationStatus === true ? 'Active' : 'Deleted'}}</mat-cell>
-                                    </ng-container>
                                     <!-- actions -->
                                     <ng-container matColumnDef="actions">
                                         <mat-header-cell *matHeaderCellDef class="pr-0"

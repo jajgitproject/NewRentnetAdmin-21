@@ -152,8 +152,8 @@
                         <div class="example-button-row">
                         <button mat-raised-button 
                                 color="primary" 
-                                [disabled]="!advanceTableForm.valid" 
-                                (click)="Post()">Send Email</button>
+                                [disabled]="!advanceTableForm.valid || isSendingMail" 
+                                (click)="Post()">{{ isSendingMail ? 'Sending...' : 'Send Email' }}</button>
                         </div>
                     </div>
                     

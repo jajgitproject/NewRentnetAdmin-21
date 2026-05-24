@@ -24,7 +24,15 @@ export class EmployeeService
     return this.httpClient.get(this.API_URL_Driver + '/GetDriverPassword' + "/" + referenceID + "/" + type);
   }
   /** CRUD METHODS */
-  getTableData(SearchName:string,SearchSupplierName:string, SearchActivationStatus:boolean, PageNumber: number):  Observable<any> 
+  getTableData(
+    SearchName:string,
+    SearchSupplierName:string,
+    SearchEmail:string,
+    SearchPhone:string,
+    SearchOfficeId:string,
+    SearchActivationStatus:boolean,
+    PageNumber: number
+  ):  Observable<any> 
   {
     if(SearchName==="")
     {
@@ -34,13 +42,35 @@ export class EmployeeService
     {
       SearchSupplierName = "null";
     }
+    if (SearchEmail === "")
+    {
+      SearchEmail = "null";
+    }
+    if (SearchPhone === "")
+    {
+      SearchPhone = "null";
+    }
+    if (SearchOfficeId === "")
+    {
+      SearchOfficeId = "null";
+    }
     if(SearchActivationStatus===null)
     {
       SearchActivationStatus = null;
     }
-    return this.httpClient.get(this.API_URL + "/" +SearchName + '/' + SearchSupplierName + '/' + SearchActivationStatus +'/' + PageNumber + '/employeeID/Ascending');
+    return this.httpClient.get(this.API_URL + "/" +SearchName + '/' + SearchSupplierName + '/' + SearchEmail + '/' + SearchPhone + '/' + SearchOfficeId + '/' + SearchActivationStatus +'/' + PageNumber + '/employeeID/Ascending');
   }
-  getTableDataSort(SearchName:string,SearchSupplierName:string, SearchActivationStatus:boolean, PageNumber: number,coloumName:string,sortType:string):  Observable<any> 
+  getTableDataSort(
+    SearchName:string,
+    SearchSupplierName:string,
+    SearchEmail:string,
+    SearchPhone:string,
+    SearchOfficeId:string,
+    SearchActivationStatus:boolean,
+    PageNumber: number,
+    coloumName:string,
+    sortType:string
+  ):  Observable<any> 
   {
     if(SearchName==="")
     {
@@ -50,11 +80,23 @@ export class EmployeeService
     {
       SearchSupplierName = "null";
     }
+    if (SearchEmail === "")
+    {
+      SearchEmail = "null";
+    }
+    if (SearchPhone === "")
+    {
+      SearchPhone = "null";
+    }
+    if (SearchOfficeId === "")
+    {
+      SearchOfficeId = "null";
+    }
     if(SearchActivationStatus===null)
     {
       SearchActivationStatus = null;
     }
-    return this.httpClient.get(this.API_URL + "/" +SearchName + '/' + SearchSupplierName + '/' + SearchActivationStatus +'/' + PageNumber +  '/'+coloumName+'/'+sortType);
+    return this.httpClient.get(this.API_URL + "/" +SearchName + '/' + SearchSupplierName + '/' + SearchEmail + '/' + SearchPhone + '/' + SearchOfficeId + '/' + SearchActivationStatus +'/' + PageNumber +  '/'+coloumName+'/'+sortType);
   }
   add(advanceTable: Employee) 
   {

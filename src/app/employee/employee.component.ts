@@ -30,12 +30,13 @@ import { Router } from '@angular/router';
 export class EmployeeComponent implements OnInit {
   displayedColumns = [
     'firstName',
+    'mobile',
+    'email',
+    'employeeOfficeID',
     'employeeOf',
-    'desgination',
     'supplierName',
     'role',
     'oldRenNetID',
-    'status',
     'actions'
   ];
   dataSource: Employee[] | null;
@@ -56,6 +57,9 @@ export class EmployeeComponent implements OnInit {
   selectedFilter: string = 'search';
   SearchSupplierName: string = '';
   SearchSupplierNameForFilter: string = '';
+  SearchEmailForFilter: string = '';
+  SearchPhoneForFilter: string = '';
+  SearchOfficeIdForFilter: string = '';
   
   constructor(
     public httpClient: HttpClient,
@@ -83,6 +87,9 @@ export class EmployeeComponent implements OnInit {
     this.PageNumber = 0;
     this.SearchNameForFilter = '';
     this.SearchSupplierNameForFilter = '';
+    this.SearchEmailForFilter = '';
+    this.SearchPhoneForFilter = '';
+    this.SearchOfficeIdForFilter = '';
     this.searchTerm = '';
     this.selectedFilter = 'search';
     this.loadData();
@@ -183,7 +190,15 @@ export class EmployeeComponent implements OnInit {
   {
     if (source === 'popUp')
     {
-      this.employeeService.getTableData(this.SearchName,this.SearchSupplierName, this.SearchActivationStatus, this.PageNumber).subscribe
+      this.employeeService.getTableData(
+        this.SearchName,
+        this.SearchSupplierName,
+        '',
+        '',
+        '',
+        this.SearchActivationStatus,
+        this.PageNumber
+      ).subscribe
       (
         data => {
           this.dataSource = data;
@@ -197,15 +212,57 @@ export class EmployeeComponent implements OnInit {
       {
         case 'employee':
           this.SearchNameForFilter = this.searchTerm;
+          this.SearchSupplierNameForFilter = '';
+          this.SearchEmailForFilter = '';
+          this.SearchPhoneForFilter = '';
+          this.SearchOfficeIdForFilter = '';
           break;
         case 'supplier':
           this.SearchSupplierNameForFilter = this.searchTerm;
+          this.SearchNameForFilter = '';
+          this.SearchEmailForFilter = '';
+          this.SearchPhoneForFilter = '';
+          this.SearchOfficeIdForFilter = '';
+          break;
+        case 'email':
+          this.SearchEmailForFilter = this.searchTerm;
+          this.SearchNameForFilter = '';
+          this.SearchSupplierNameForFilter = '';
+          this.SearchPhoneForFilter = '';
+          this.SearchOfficeIdForFilter = '';
+          break;
+        case 'phone':
+          this.SearchPhoneForFilter = this.searchTerm;
+          this.SearchNameForFilter = '';
+          this.SearchSupplierNameForFilter = '';
+          this.SearchEmailForFilter = '';
+          this.SearchOfficeIdForFilter = '';
+          break;
+        case 'officeId':
+          this.SearchOfficeIdForFilter = this.searchTerm;
+          this.SearchNameForFilter = '';
+          this.SearchSupplierNameForFilter = '';
+          this.SearchEmailForFilter = '';
+          this.SearchPhoneForFilter = '';
           break;
         default:
+          this.SearchNameForFilter = '';
+          this.SearchSupplierNameForFilter = '';
+          this.SearchEmailForFilter = '';
+          this.SearchPhoneForFilter = '';
+          this.SearchOfficeIdForFilter = '';
           this.searchTerm = '';
           break;
       }
-      this.employeeService.getTableData(this.SearchNameForFilter,this.SearchSupplierNameForFilter, this.SearchActivationStatus, this.PageNumber).subscribe
+      this.employeeService.getTableData(
+        this.SearchNameForFilter,
+        this.SearchSupplierNameForFilter,
+        this.SearchEmailForFilter,
+        this.SearchPhoneForFilter,
+        this.SearchOfficeIdForFilter,
+        this.SearchActivationStatus,
+        this.PageNumber
+      ).subscribe
       (
         data => {
           this.dataSource = data;
@@ -360,7 +417,17 @@ export class EmployeeComponent implements OnInit {
       this.sortingData = 1;
       this.sortType = "Descending";
     }
-    this.employeeService.getTableDataSort(this.SearchName,this.SearchSupplierName, this.SearchActivationStatus, this.PageNumber, coloumName.active, this.sortType).subscribe
+    this.employeeService.getTableDataSort(
+      this.SearchNameForFilter,
+      this.SearchSupplierNameForFilter,
+      this.SearchEmailForFilter,
+      this.SearchPhoneForFilter,
+      this.SearchOfficeIdForFilter,
+      this.SearchActivationStatus,
+      this.PageNumber,
+      coloumName.active,
+      this.sortType
+    ).subscribe
       (
         data => {
           this.dataSource = data;

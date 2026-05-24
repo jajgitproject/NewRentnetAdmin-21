@@ -29,6 +29,7 @@ export class MTSFormDialogComponent implements OnInit
   dataSource: MailToSupplier | null;
   emailList: EmailInfoModel[] = [];
   loggedInUserName = '';
+  isSendingMail = false;
 
   @ViewChild('mailBodyContainer') mailBodyContainer!: ElementRef;
   
@@ -94,6 +95,11 @@ export class MTSFormDialogComponent implements OnInit
   }
 
  public Post(): void {
+  if (this.isSendingMail) {
+    return;
+  }
+
+  this.isSendingMail = true;
   const tableHtml = this.mailBodyContainer.nativeElement.innerHTML;
   const mailBody = this.buildSupplierEmailHtml(tableHtml);
 
@@ -105,6 +111,7 @@ export class MTSFormDialogComponent implements OnInit
   this.advanceTableService.add(payload)
     .subscribe(
       response => {
+        this.isSendingMail = false;
         this.dialogRef.close();
 
         this.showNotification(
@@ -115,6 +122,7 @@ export class MTSFormDialogComponent implements OnInit
         );
       },
       error => {
+        this.isSendingMail = false;
         const stringError = typeof error === 'string' ? error.trim() : '';
         const backendMessage =
           stringError ||
@@ -209,7 +217,7 @@ export class MTSFormDialogComponent implements OnInit
       <p><u>Thanks</u> and Regards</p>
     </div>
     <p class="mail-signature">${senderName}</p>
-    <img class="eco-logo" src="https://prodapi.ecoserp.in/StaticFiles/Images/logoeco.png" alt="ECO Rent A Car Logo" />
+    <img class="eco-logo" src="https://prodapi.ecoserp.in/StaticFiles/Images/logoeco1.png" alt="ECO Rent A Car Logo" />
     <div class="company-name">ECO Mobility</div>
     <div class="contact-line">
       <strong>24x7 Reservations:</strong> T: +91-11-4079-4079 |
