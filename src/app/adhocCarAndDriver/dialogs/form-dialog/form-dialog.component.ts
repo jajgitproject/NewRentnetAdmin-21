@@ -116,6 +116,7 @@ export class FormDialogComponent {
   registrationNumber: any;
   reservationID: any;
   RegistrationNo: any;
+  ownedSupplier: boolean = false;
   public LocationNameList?: OrganizationalEntityDropDown[] = [];
   filteredLocationNameOptions: Observable<OrganizationalEntityDropDown[]>;
   LocationID: any;
@@ -565,6 +566,31 @@ export class FormDialogComponent {
   const regNo = this.advanceTableForm.value.registrationNumber;
     if (!regNo) return;
 
+   this.advanceTableService.GetCarOwnedAndSupplier(regNo).subscribe(
+    data => {
+      this.ownedSupplier = data?.ownedSupplier;
+      console.log(this.ownedSupplier);
+
+      // If owned car -> show popup
+      if (this.ownedSupplier === true) {
+        Swal.fire({
+          title: 'This is owned car',
+          text: 'This is owned car',
+          icon: 'warning',
+          confirmButtonText: 'OK'
+        }).then((result) => {
+
+          // When popup closes / OK clicked
+          if (result.isConfirmed) {
+            this.advanceTableForm
+              .get('registrationNumber')
+              ?.setValue('');
+          }
+        });
+
+        return; // stop further execution
+      }
+
 
   this.advanceTableService.GetSupplierByRegNo(regNo).subscribe(
     data => {
@@ -623,6 +649,11 @@ export class FormDialogComponent {
     },
     (error: HttpErrorResponse) => {
       this.supplierName = null;
+    }
+  );
+  },
+    (error: HttpErrorResponse) => {
+      this.ownedSupplier = false;
     }
   );
 }
@@ -738,8 +769,8 @@ export class FormDialogComponent {
         this.advanceTableForm.patchValue({ vehicleID: this.advanceTable?.vehicleID });
         this.advanceTableForm.patchValue({ vehicleCategory: this.advanceTable?.vehicleCategory });
         this.advanceTableForm.patchValue({ vehicleCategoryID: this.advanceTable?.vehicleCategoryID });
-        this.advanceTableForm.patchValue({ locationName: this.advanceTable?.locationName });
-        this.advanceTableForm.patchValue({ locationID: this.advanceTable?.locationID });
+        this.advanceTableForm.patchValue({ locationName: this.data.reservationInfo.transferedLocation });
+        this.advanceTableForm.patchValue({ locationID: this.locationID });
         this.VehicleCategoryList = {
         vehicleCategory: this.advanceTable?.vehicleCategory,
         vehicleCategoryID: this.advanceTable?.vehicleCategoryID

@@ -296,26 +296,24 @@
                         </mat-error> -->
                     </mat-form-field>
                 </div>
-                <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2" *ngIf="!advanceTableForm.value?.isDriverExisting || advanceTableForm.value.isDriverExisting === 'New'">
+                <!-- <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2" *ngIf="!advanceTableForm.value?.isDriverExisting || advanceTableForm.value.isDriverExisting === 'New'">
                     <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
                         <mat-label>Identity Number</mat-label>
                         <input matInput formControlName="driverOfficialIdentityNumber">
-                        <!-- <mat-error *ngIf="advanceTableForm.get('driverOfficialIdentityNumber').hasError('required')">
+                        <mat-error *ngIf="advanceTableForm.get('driverOfficialIdentityNumber').hasError('required')">
                             Identity Number is required
-                        </mat-error> -->
+                        </mat-error>
                     </mat-form-field>
                 </div>
                 <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2" *ngIf=" advanceTableForm.value.isDriverExisting === 'Existing'">
                     <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
                         <mat-label>Identity Number</mat-label>
                         <input matInput formControlName="driverOfficialIdentityNumber" readonly>
-                        <!-- <mat-error *ngIf="advanceTableForm.get('driverOfficialIdentityNumber').hasError('required')">
+                        <mat-error *ngIf="advanceTableForm.get('driverOfficialIdentityNumber').hasError('required')">
                             Identity Number is required
-                        </mat-error> -->
+                        </mat-error>
                     </mat-form-field>
-                </div>
-            </div>
-            <div class="row">
+                </div> -->
                 <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2"  *ngIf="!advanceTableForm.value?.isDriverExisting  || advanceTableForm.value.isDriverExisting === 'New'">
                     <mat-form-field class="example-full-width" appearance="outline" floatLabel="always"> 
                         <mat-label>RTO State</mat-label>                       
@@ -338,6 +336,9 @@
                         <input matInput formControlName="rtoState" readonly>
                     </mat-form-field>
                 </div>
+            </div>
+            <div class="row">
+                
                 <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2" *ngIf="!advanceTableForm.value?.isDriverExisting  || advanceTableForm.value.isDriverExisting === 'New'">
                     <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
                         <mat-label>Company</mat-label>

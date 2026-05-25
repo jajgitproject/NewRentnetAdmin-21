@@ -77,4 +77,7 @@ export class AdhocCarAndDriverService
    getInventoryIdByregNo(regNo:string): Observable<number> {
     return this.httpClient.get<number>(this.API_URL  + "/getInventoryIdByregNo/"+regNo);
   }
+   GetCarOwnedAndSupplier(regNo:string): Observable<boolean> {
+    return this.httpClient.get<boolean>(this.API_URL  + "/GetCarOwnedAndSupplier/"+regNo);
+  }
 }
