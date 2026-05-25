@@ -29,7 +29,7 @@
         <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
           <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
             <mat-label>Customer Group</mat-label>
-            <input type="text" matInput formControlName="customerGroup" [matAutocomplete]="auto"/>
+            <input type="text" matInput formControlName="customerGroup" [matAutocomplete]="auto" />
             <mat-autocomplete #auto="matAutocomplete" (optionSelected)="onCustomerGrouoSelected($event.option.value)"
               panelWidth="custom-autocomplete-panel">
               <mat-option *ngFor="
@@ -40,7 +40,7 @@
                     option.customerGroup
                   )
                 ">
-               {{ option.customerGroup }}
+                {{ option.customerGroup }}
               </mat-option>
             </mat-autocomplete>
             <mat-error *ngIf="
@@ -51,11 +51,11 @@
               Please select a Customer Group
             </mat-error>
           </mat-form-field>
-        
+
         </div>
       </div>
       <div class="row">
-        <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2" *ngIf="this.advanceTableForm.value.customerGroupID">
+        <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2" *ngIf="this.advanceTableForm.value.customerGroupID && IsKAMRole === false">
           <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
             <mat-label>Customer</mat-label>
             <input required type="text" matInput formControlName="customerCustomerGroup" [matAutocomplete]="auto1" />
@@ -73,7 +73,7 @@
                     option.customerType
                   )
                 ">
-               {{ option.customerName }} ## {{ option.tallyCustomerID }} ## {{ option.stateName }}
+                {{ option.customerName }} ## {{ option.tallyCustomerID }} ## {{ option.stateName }}
               </mat-option>
             </mat-autocomplete>
             <mat-error *ngIf="
@@ -101,7 +101,7 @@
                     </mat-hint>
                     </div> -->
         </div>
-        <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2" *ngIf="!this.advanceTableForm.value.customerGroupID">
+        <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2" *ngIf="!this.advanceTableForm.value.customerGroupID && IsKAMRole === false">
           <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
             <mat-label>Customer</mat-label>
             <input required type="text" matInput formControlName="customerCustomerGroup" [matAutocomplete]="auto3" />
@@ -119,7 +119,7 @@
                     option.customerType
                   )
                 ">
-               {{ option.customerName }} ## {{ option.tallyCustomerID }} ## {{ option.stateName }}
+                {{ option.customerName }} ## {{ option.tallyCustomerID }} ## {{ option.stateName }}
               </mat-option>
             </mat-autocomplete>
             <mat-error *ngIf="
@@ -147,6 +147,46 @@
                     </mat-hint>
                     </div> -->
         </div>
+
+        <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2" *ngIf="!this.advanceTableForm.value.customerGroupID && IsKAMRole === true">
+          <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+            <mat-label>Customer</mat-label>
+            <input required type="text" matInput formControlName="customerCustomerGroup" [matAutocomplete]="auto10" />
+            <mat-autocomplete #auto10="matAutocomplete" (optionSelected)="onCustomerRGByKAMSelected($event.option.value)"
+              panelWidth="custom-autocomplete-panel">
+              <mat-option *ngFor="let option of filteredCustomerCustomerGroupOptions | async" 
+                          [value]="option.customerName + '##' + option.tallyCustomerID + '##' + option.stateName" 
+                          (click)="getCustomerIDForRGByKAM(option.customerID,option.customerGroupID,option.customerName,
+                                                      option.customerGroup, option.customerTypeID,option.customerType)">
+                {{ option.customerName }} ## {{ option.tallyCustomerID }} ## {{ option.stateName }}
+              </mat-option>
+            </mat-autocomplete>
+            <mat-error *ngIf="advanceTableForm.controls['customerCustomerGroup'].hasError('customerRGByKAMInvalid')">
+              Please select a Customer
+            </mat-error>
+          </mat-form-field>
+        </div>
+
+
+        <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2" *ngIf="this.advanceTableForm.value.customerGroupID && IsKAMRole === true">
+          <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+            <mat-label>Customer</mat-label>
+            <input required type="text" matInput formControlName="customerCustomerGroup" [matAutocomplete]="auto10" />
+            <mat-autocomplete #auto10="matAutocomplete" (optionSelected)="onCustomerCustomerGroupForRGByKAMSelected($event.option.value)"
+              panelWidth="custom-autocomplete-panel">
+              <mat-option *ngFor="let option of filteredCustomerCustomerGroupOptions | async" 
+                          [value]="option.customerName + '##' + option.tallyCustomerID + '##' + option.stateName" 
+                          (click)="getCustomerCustomerGroupIDForRGByKAM(option.customerID,option.customerGroupID,option.customerName,
+                                                      option.customerGroup, option.customerTypeID,option.customerType)">
+                {{ option.customerName }} ## {{ option.tallyCustomerID }} ## {{ option.stateName }}
+              </mat-option>
+            </mat-autocomplete>
+            <mat-error *ngIf="advanceTableForm.controls['customerCustomerGroup'].hasError('customerRGByKAMInvalid')">
+              Please select a Customer
+            </mat-error>
+          </mat-form-field>
+        </div>
+
         <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
           <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
             <mat-label>Customer Type</mat-label>
@@ -227,9 +267,9 @@
               ">
               No Of Bookings is required
             </mat-error>
-            
+
           </mat-form-field>
-          
+
         </div>
       </div>
 
@@ -412,7 +452,7 @@
         <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
           <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
             <mat-label>Location</mat-label>
-            <input readonly type="text" matInput formControlName="locationName"/>
+            <input readonly type="text" matInput formControlName="locationName" />
             <!-- <mat-autocomplete #auto0="matAutocomplete" (optionSelected)="OnLocationSelect($event.option.value)"
               panelWidth="custom-autocomplete-panel">
               <mat-option *ngFor="let option of filteredLocationNameOptions | async"
@@ -446,8 +486,8 @@
       <div class="row">
         <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12 mb-2">
           <div class="example-button-row">
-            <button mat-raised-button *ngIf="saveDisabled" color="primary" [type]="submit" [disabled]="!advanceTableForm.valid"
-              (click)="confirmAdd()">
+            <button mat-raised-button *ngIf="saveDisabled" color="primary" [type]="submit"
+              [disabled]="!advanceTableForm.valid" (click)="confirmAdd()">
               Save
             </button>
             <mat-spinner *ngIf="!saveDisabled" diameter="30"></mat-spinner>

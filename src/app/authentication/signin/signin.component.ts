@@ -122,6 +122,10 @@ export class SigninComponent implements OnInit {
                   'canThisRoleDoGoodForBillingOnClosingScreen',
                   String(employee.CanThisRoleDoGoodForBillingOnClosingScreen ?? employee.canThisRoleDoGoodForBillingOnClosingScreen ?? false)
                 );
+                localStorage.setItem(
+                  'isThisAKeyAccountManagerRole',
+                  String(employee.IsThisAKeyAccountManagerRole ?? employee.isThisAKeyAccountManagerRole ?? false)
+                );
                 //this.expirationDateService.setExpirationDate(res.employee.PasswordExpirationDate);
                 // Call the method to open ValidateOTP modal on successful login
                 this.calculateDaysLeft();

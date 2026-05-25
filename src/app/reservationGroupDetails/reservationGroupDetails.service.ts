@@ -11,6 +11,7 @@ export class ReservationGroupDetailsService
   private API_URL:string = '';
   private OE_API_URL:string = '';
   private Duplicate_API_URL:string = '';
+  private API_URL_DD:string = '';
   isTblLoading = true;
   date : any;
   Result:string='Failure';
@@ -21,6 +22,7 @@ export class ReservationGroupDetailsService
     this.API_URL=generalService.BaseURL+ "reservationGroup";
     this.OE_API_URL=generalService.BaseURL+ "organizationalEntity";
     this.Duplicate_API_URL=generalService.BaseURL+ "reservationGroupDuplicate";
+    this.API_URL_DD=generalService.BaseURL+ "Customer/";
   }
   /** CRUD METHODS */
   getTableData(ReservationGroupID:number,SearchActivationStatus:boolean, PageNumber: number):  Observable<any> 
@@ -159,6 +161,18 @@ export class ReservationGroupDetailsService
     this.API_URL + '/GetAllotmentStatus/' + ReservationID
   );
 }
+
+  getCustomersForRGByKAM(): Observable<any[]> 
+  {
+    const userID = this.generalService.getUserID();
+    return this.httpClient.get<any[]>(this.API_URL_DD + "GetCustomersForRGByKAM" + "/" + userID);
+  }
+
+  getCustomerCustomerGroupForRGByKAM(CustomerGroupID: number): Observable<any[]> 
+  {
+    const userID = this.generalService.getUserID();
+    return this.httpClient.get<any[]>(this.API_URL_DD + "GetCustomerCustomerGroupForRGByKAM" + "/" + CustomerGroupID + "/" + userID);
+  }
 
 }
   

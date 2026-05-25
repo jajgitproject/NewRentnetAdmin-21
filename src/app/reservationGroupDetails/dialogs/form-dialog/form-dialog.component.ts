@@ -25,6 +25,7 @@ import { OrganizationalEntityDropDown } from 'src/app/organizationalEntityMessag
 import { ReservationGroupService } from 'src/app/reservationGroup/reservationGroup.service';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { CustomerGroupDropDown } from 'src/app/customerGroup/customerGroupDropDown.model';
+import Swal from 'sweetalert2';
 
 @Component({
   standalone: false,
@@ -97,6 +98,8 @@ export class FormDialogComponent implements OnInit {
     maxWidth: '98vw',
   };
 
+  IsKAMRole:boolean;
+
   constructor(
     public dialogRef: MatDialogRef<FormDialogComponent>,
     private dialog: MatDialog,
@@ -127,7 +130,7 @@ export class FormDialogComponent implements OnInit {
     this.reservationID = data.reservationID;
     this.customer = data.customer;
     this.customerGroup = data.customerGroup;
-
+    this.IsKAMRole = localStorage.getItem('isThisAKeyAccountManagerRole') === 'true';
   }
 
   customerShort() {
@@ -257,7 +260,12 @@ export class FormDialogComponent implements OnInit {
       (error: HttpErrorResponse) => { });
   }
 
-  ngOnInit() {
+  ngOnInit() 
+  {
+    if(!this.customerGroupID && this.IsKAMRole === true)
+    {
+      this.InitCustomerForRGByKAM();
+    }
     
     this.advanceTableForm.controls["kam"].disable();
     this.advanceTableForm.controls["salesExecutive"].disable();
@@ -327,7 +335,7 @@ export class FormDialogComponent implements OnInit {
     this.advanceTableForm.get('bookingType')?.setValue('Normal');
     this.advanceTableForm.patchValue({ activationStatus: true });
     this.InitCustomerCustomerG();
-    if(!this.advanceTableForm.value.customerGroupID)
+    if(!this.advanceTableForm.value.customerGroupID && this.IsKAMRole === false)
     {
       this.InitCustomerRD();
     }
@@ -542,8 +550,15 @@ export class FormDialogComponent implements OnInit {
     this.customerGroupID = customerGroupID;
     this.customerGroup = customerGroup;
     this.advanceTableForm.patchValue({ customerGroupID: this.customerGroupID });
-    this.InitCustomerCG(this.customerGroupID)
-  
+    if(this.customerGroupID && this.IsKAMRole === true)
+    {
+      this.InitCustomerCGForRGByKAM(this.customerGroupID);
+    }
+    else if(this.customerGroupID && this.IsKAMRole === false)
+    {
+      this.InitCustomerCG(this.customerGroupID);
+    }  
+    
   }
 
   InitCustomerCG(customerGroupID) {
@@ -1273,6 +1288,169 @@ private _filterRD(value: string): any[] {
     this.InitBooker(event.checked);
   }
 }
+
+
+    //---------- Customer Drop Down by KAM ---------
+    InitCustomerForRGByKAM() 
+    {
+      this.advanceTableService.getCustomersForRGByKAM().subscribe(
+        data => {
+          if(data)
+          {          
+            this.CustomerCustomerGroupList = data;
+            this.advanceTableForm.controls['customerCustomerGroup'].setValidators([Validators.required,this.customerForRGByKAMValidator(this.CustomerCustomerGroupList)]);
+            this.advanceTableForm.controls['customerCustomerGroup'].updateValueAndValidity();
+            this.filteredCustomerCustomerGroupOptions = this.advanceTableForm.controls['customerCustomerGroup'].valueChanges.pipe(
+              startWith(""),
+              map(value => this._filterRGByKAM(value || ''))
+            );
+            this.syncBookerCreateAllowedFromCurrentCustomerId();
+          }
+          else
+          {
+            Swal.fire({
+              title: '',
+              text: 'You are not KAM for this customer.',
+              icon: 'info',
+              confirmButtonText: 'OK'
+            });
+          }
+      });          
+    }
+  
+    private _filterRGByKAM(value: string): any[] {
+      const filterValue = (value || '').toString().trim().toLowerCase();
+      if (!value || value.length < 3) {
+        return [];   
+      }
+      return this.CustomerCustomerGroupList?.filter(customer => {
+        const name  = (customer.customerName || '').toString().toLowerCase();
+        const tally = (customer.tallyCustomerID || '').toString().toLowerCase();
+        const state = (customer.stateName || '').toString().toLowerCase();
+
+        // Return true if typed value matches name OR tally OR state
+        return name.includes(filterValue) || tally.includes(filterValue) || state.includes(filterValue);
+      }) || [];
+    }
+
+    customerForRGByKAMValidator(CustomerCustomerGroupList: any[]): ValidatorFn {
+      return (control: AbstractControl): ValidationErrors | null => {
+        const value = control.value?.toLowerCase();
+        const match = CustomerCustomerGroupList.some(customer => (customer.customerName?.toLowerCase() + '##' + customer.tallyCustomerID + '##' + customer.stateName?.toLowerCase()) === value);
+        return match ? null : { customerRGByKAMInvalid: true };
+      };
+    }
+
+    onCustomerRGByKAMSelected(selectedCustomerName: string) {
+      const selectedCustomer = this.CustomerCustomerGroupList.find(data => data.customerName + '##' + data.tallyCustomerID + '##' + data.stateName === selectedCustomerName);
+      if (selectedCustomer) 
+      {
+        this.applyBookerCreateAllowedFromCustomerRow(selectedCustomer);
+        this.getCustomerIDForRGByKAM(selectedCustomer.customerID, selectedCustomer.customerGroupID, selectedCustomer.customerName, selectedCustomer.customerGroup, selectedCustomer.customerTypeID, selectedCustomer.customerType);
+      }
+    }
+
+  getCustomerIDForRGByKAM(customerID: any, customerGroupID: any, customer: any, customerGroup: any, customerTypeID: any, customerType: any) 
+  {
+    this.customerID = customerID;
+    this.customerGroupID = customerGroupID;
+    this.customerDetailData = customer;
+    this.customer = customer;
+    this.customerTypeID = customerTypeID;
+    this.customerType = customerType;
+    this.customerGroup = customerGroup;
+    this.advanceTableForm.patchValue({ customerID: this.customerID });
+    this.advanceTableForm.patchValue({ customerGroupID: this.customerGroupID });
+    this.advanceTableForm.patchValue({ customerGroup: this.customerGroup });
+    this.advanceTableForm.patchValue({ customerTypeID: this.customerTypeID });
+    this.advanceTableForm.patchValue({ customerType: this.customerType });
+    this.getTransferLocationBasedOnCustomer(this.customerID);
+    this.getSalesManager(this.customerID);
+    this.getCustomerKam(this.customerID);
+    this.customerAlert(this.customerID, this.customerDetailData)
+    this.InitBooker();
+    this.getStopReservationReason(this.customerID);
+  }
+
+
+  //---------- Customer Drop Down by KAM & Customer Group ---------
+  InitCustomerCGForRGByKAM(customerGroupID) 
+  {
+    this.advanceTableService.getCustomerCustomerGroupForRGByKAM(customerGroupID).subscribe(
+      data => {
+        if(data)
+        {
+        this.CustomerCustomerGroupList = data;
+        this.advanceTableForm.controls['customerCustomerGroup'].setValidators([Validators.required,this.customerCGForRGByKAMValidator(this.CustomerCustomerGroupList)]);
+        this.advanceTableForm.controls['customerCustomerGroup'].updateValueAndValidity();
+        this.filteredCustomerCustomerGroupOptions = this.advanceTableForm.controls['customerCustomerGroup'].valueChanges.pipe(
+          startWith(""),
+          map(value => this._filterCCGForRGByKAM(value || ''))
+        );
+        this.syncBookerCreateAllowedFromCurrentCustomerId();
+      }
+      else
+      {
+        Swal.fire({
+          title: '',
+          text: 'You are not KAM for this customer.',
+          icon: 'info',
+          confirmButtonText: 'OK'
+        });
+      }
+    });
+  }
+
+  customerCGForRGByKAMValidator(CustomerCustomerGroupList: any[]): ValidatorFn {
+      return (control: AbstractControl): ValidationErrors | null => {
+        const value = control.value?.toLowerCase();
+        const match = CustomerCustomerGroupList.some(customer => (customer.customerName?.toLowerCase() + '##' + customer.tallyCustomerID + '##' + customer.stateName?.toLowerCase()) === value);
+        return match ? null : { customerRGByKAMInvalid: true };
+      };
+    }
+
+  private _filterCCGForRGByKAM(value: string): any[] {
+    const filterValue = (value || '').toString().trim().toLowerCase();
+    return this.CustomerCustomerGroupList?.filter(customer => {
+      const name  = (customer.customerName || '').toString().toLowerCase();
+      const tally = (customer.tallyCustomerID || '').toString().toLowerCase();
+      const state = (customer.stateName || '').toString().toLowerCase();
+      // Return true if typed value matches name OR tally OR state
+      return name.includes(filterValue) || tally.includes(filterValue) || state.includes(filterValue);
+    }) || [];
+  }
+
+  onCustomerCustomerGroupForRGByKAMSelected(selectedCustomerName: string) {
+    const selectedCustomer = this.CustomerCustomerGroupList.find( data => data.customerName + '##' + data.tallyCustomerID + '##' + data.stateName === selectedCustomerName);
+    if (selectedCustomer) 
+    {
+      this.applyBookerCreateAllowedFromCustomerRow(selectedCustomer);
+      this.getCustomerCustomerGroupIDForRGByKAM(selectedCustomer.customerID, selectedCustomer.customerGroupID, selectedCustomer.customerName, selectedCustomer.customerGroup, selectedCustomer.customerTypeID, selectedCustomer.customerType);
+    }
+  }
+
+  getCustomerCustomerGroupIDForRGByKAM(customerID: any, customerGroupID: any, customer: any, customerGroup: any, customerTypeID: any, customerType: any) {
+    this.customerID = customerID;
+    this.customerGroupID = customerGroupID;
+    this.customerDetailData = customer;
+    this.customer = customer;
+    this.customerTypeID = customerTypeID;
+    this.customerType = customerType;
+    this.customerGroup = customerGroup;
+    this.advanceTableForm.patchValue({ customerID: this.customerID });
+    this.advanceTableForm.patchValue({ customerGroupID: this.customerGroupID });
+    this.advanceTableForm.patchValue({ customerGroup: this.customerGroup });
+    this.advanceTableForm.patchValue({ customerTypeID: this.customerTypeID });
+    this.advanceTableForm.patchValue({ customerType: this.customerType });
+    this.getTransferLocationBasedOnCustomer(this.customerID);
+    this.getSalesManager(this.customerID);
+    this.getCustomerKam(this.customerID);
+    this.customerAlert(this.customerID, this.customerDetailData)
+    this.InitBooker();
+    this.getStopReservationReason(this.customerID);
+  }
+
+
 }
 
 
