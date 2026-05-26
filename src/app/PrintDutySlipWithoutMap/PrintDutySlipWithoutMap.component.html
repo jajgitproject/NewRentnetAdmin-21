@@ -170,9 +170,7 @@
 
                         <tr>
                           <td colspan="2">
-                            <strong>Total Kms : {{dataSource?.locationOutKM +
-                              dataSource?.pickUpKM +
-                              dataSource?.dropOffKM + dataSource?.locationInKM}} </strong>
+                            <strong>Total Kms : {{dataSource?.locationInKM - dataSource?.locationOutKM}} </strong>
                           </td>
                           <td colspan="2">
                             <strong>Total Time : {{datetime}}</strong>
