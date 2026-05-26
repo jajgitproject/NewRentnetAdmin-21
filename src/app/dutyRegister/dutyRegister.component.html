@@ -575,6 +575,48 @@
                                                     {{(row.closingDate | date:'dd-MM-yyyy') || 'N/A'}}
                                                 </mat-cell>
                                             </ng-container>
+                                            <ng-container matColumnDef="ClosureMethod">
+                                                <mat-header-cell *matHeaderCellDef mat-sort-header>Closure Method</mat-header-cell>
+                                                <mat-cell *matCellDef="let row">
+                                                    {{row.closureMethod || 'N/A'}}
+                                                </mat-cell>
+                                            </ng-container>
+                                            <ng-container matColumnDef="BookerEmail">
+                                                <mat-header-cell *matHeaderCellDef mat-sort-header>Booker Email</mat-header-cell>
+                                                <mat-cell *matCellDef="let row">
+                                                    {{row.bookerEmail  || 'N/A'}}
+                                                </mat-cell>
+                                            </ng-container>
+                                            <ng-container matColumnDef="GuestEmail">
+                                                <mat-header-cell *matHeaderCellDef mat-sort-header>Guest Email</mat-header-cell>
+                                                <mat-cell *matCellDef="let row">
+                                                    {{row.guestEmail  || 'N/A'}}
+                                                </mat-cell>
+                                            </ng-container>
+                                            <ng-container matColumnDef="PickupAddress">
+                                                <mat-header-cell *matHeaderCellDef mat-sort-header>Pickup Address </mat-header-cell>
+                                                <mat-cell *matCellDef="let row">
+                                                    {{row.pickupAddress || 'N/A'}}
+                                                </mat-cell>
+                                            </ng-container>
+                                             <ng-container matColumnDef="PickupAddressDetails">
+                                                <mat-header-cell *matHeaderCellDef mat-sort-header>Pickup Address Details</mat-header-cell>
+                                                <mat-cell *matCellDef="let row">
+                                                    {{row.pickupAddressDetails  || 'N/A'}}
+                                                </mat-cell>
+                                            </ng-container>
+                                             <ng-container matColumnDef="DropOffAddress">
+                                                <mat-header-cell *matHeaderCellDef mat-sort-header>DropOff Address</mat-header-cell>
+                                                <mat-cell *matCellDef="let row">
+                                                    {{row.dropOffAddress || 'N/A'}}
+                                                </mat-cell>
+                                            </ng-container>
+                                             <ng-container matColumnDef="CustomerSpecificFields">
+                                                <mat-header-cell *matHeaderCellDef mat-sort-header>Customer SpecificFields</mat-header-cell>
+                                                <mat-cell *matCellDef="let row">
+                                                    {{row.customerSpecificFields || 'N/A'}}
+                                                </mat-cell>
+                                            </ng-container>
 
                                             <mat-header-row *matHeaderRowDef="displayedColumns"></mat-header-row>
 

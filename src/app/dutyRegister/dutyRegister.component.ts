@@ -46,7 +46,9 @@ export class DutyRegisterComponent implements OnInit {
   'BookingDate',
   'DispatchLocation',
   'CustomerName',
+  'BookerEmail',
   'GuestName',
+  'GuestEmail',
   'City',
   'PackageType',
   'CarNumber',
@@ -102,8 +104,14 @@ export class DutyRegisterComponent implements OnInit {
   'SupplierName',
   'DSClosedBy',
   'DutySlipImage',
-  'ClosingDate'
+  'ClosingDate',
+  'ClosureMethod',
+  'PickupAddress',
+  'PickupAddressDetails',
+  'DropOffAddress',
+  'CustomerSpecificFields'
 ];
+
   
   dataSource: DutyRegisterModel[] | null;
   advanceTable: DutyRegisterModel | null;
