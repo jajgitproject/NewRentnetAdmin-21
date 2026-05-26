@@ -3564,7 +3564,7 @@ openDropOffByExectiveGPS(item: any)
     const failedBadges: string[] = [];
     const otherParts: string[] = [];
 
-    // Keep previous compact badge style by using passenger statuses first, then booker as fallback.
+    // Keep compact UI badges with passenger-first fallback.
     const effectiveSms = passengerSms || bookerSms;
     const effectiveWa = passengerWa || bookerWa;
     this.appendCpMessagingBadge('SMS', effectiveSms, successBadges, failedBadges, otherParts);
@@ -3591,12 +3591,37 @@ openDropOffByExectiveGPS(item: any)
       return;
     }
     const st = status.trim();
-    const det = details?.trim() || '';
-    if (det && det.localeCompare(st, undefined, { sensitivity: 'accent' }) !== 0) {
+    const det = this.sanitizeCpMessagingTooltipDetails(details);
+    const stCmp = this.normalizeCpMessagingCompareText(st);
+    const detCmp = this.normalizeCpMessagingCompareText(det);
+    const isDuplicateDetail = !!det && (
+      det.localeCompare(st, undefined, { sensitivity: 'accent' }) === 0 ||
+      (stCmp && detCmp && (detCmp === stCmp || detCmp.includes(stCmp) || stCmp.includes(detCmp)))
+    );
+
+    if (det && !isDuplicateDetail) {
       lines.push(`${label}: ${st} — ${det}`);
       return;
     }
     lines.push(`${label}: ${st}`);
+  }
+
+  private sanitizeCpMessagingTooltipDetails(details: string): string {
+    if (!details) {
+      return '';
+    }
+    return details
+      .replace(/kaleyra\s*ac/gi, '')
+      .replace(/\s{2,}/g, ' ')
+      .replace(/^[-,:;\s]+|[-,:;\s]+$/g, '')
+      .trim();
+  }
+
+  private normalizeCpMessagingCompareText(value: string): string {
+    if (!value) {
+      return '';
+    }
+    return value.toLowerCase().replace(/[^a-z0-9]+/g, '');
   }
 
   private readCpMessagingField(row: any, camelCandidates: string[], pascalCandidates: string[]): string {
@@ -3629,7 +3654,7 @@ openDropOffByExectiveGPS(item: any)
   }
 
   private appendCpMessagingBadge(
-    prefix: 'SMS' | 'WA',
+    prefix: string,
     status: string,
     successBadges: string[],
     failedBadges: string[],

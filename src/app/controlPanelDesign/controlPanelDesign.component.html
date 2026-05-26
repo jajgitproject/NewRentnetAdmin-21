@@ -1642,13 +1642,16 @@
                               <span *ngIf="cpMsg.hasAnyStatus" [matTooltip]="cpMsg.tooltip" [matTooltipDisabled]="!cpMsg.tooltip"
                                      matTooltipShowDelay="200" style="display: block; line-height: 1.35;">
                                 <ng-container *ngFor="let b of cpMsg.successBadges">
-                                  <span class="cp-msg-badge cp-msg-badge--ok">{{ b }}</span>
+                                  <span class="cp-msg-badge cp-msg-badge--ok"
+                                        [class.cp-msg-badge--line-break]="b?.startsWith('WA')">{{ b }}</span>
                                 </ng-container>
                                 <ng-container *ngFor="let b of cpMsg.failedBadges">
-                                  <span class="cp-msg-badge cp-msg-badge--fail">{{ b }}</span>
+                                  <span class="cp-msg-badge cp-msg-badge--fail"
+                                        [class.cp-msg-badge--line-break]="b?.startsWith('WA')">{{ b }}</span>
                                 </ng-container>
                                 <ng-container *ngFor="let p of cpMsg.otherParts">
-                                  <span class="cp-msg-badge cp-msg-badge--other">{{ p }}</span>
+                                  <span class="cp-msg-badge cp-msg-badge--other"
+                                        [class.cp-msg-badge--line-break]="p?.startsWith('WA')">{{ p }}</span>
                                 </ng-container>
                               </span>
                             </ng-container>

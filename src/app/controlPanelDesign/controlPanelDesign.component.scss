@@ -462,6 +462,10 @@ app-controlPanelDesign .control-panel-main-header .cp-booking-category-field .ma
   border-radius: 2px;
   letter-spacing: 0.02em;
 }
+.cp-msg-badge--line-break {
+  display: table;
+  margin-right: 0;
+}
 .cp-msg-badge--ok {
   color: #1b5e20;
   background: #e8f5e9;
