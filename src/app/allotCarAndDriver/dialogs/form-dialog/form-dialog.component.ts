@@ -311,7 +311,7 @@ allotmentType: any;
         },
         error => {
           const parsedError = this.parseErrorPayload(error);
-          if (parsedError.status === 'error' && parsedError.message) {
+          if (parsedError.message) {
             this.openShowError(parsedError.message);
           }
           this.showNotification(
@@ -344,7 +344,7 @@ allotmentType: any;
         },
         error => {
           const parsedError = this.parseErrorPayload(error);
-          if (parsedError.status === 'error' && parsedError.message) {
+          if (parsedError.message) {
             this.openShowError(parsedError.message);
           }
           this.showNotification(
