@@ -316,7 +316,8 @@ $mat-row-horizontal-padding: 12px;
 mat-expansion-panel-header {
   padding: 2px 2px 2px 23px;
   margin: 0px;
-  height: auto;
+  height: auto !important;
+  min-height: 60px;
   display: flex;
   align-items: center;
 }

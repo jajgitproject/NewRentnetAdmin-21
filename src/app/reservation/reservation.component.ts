@@ -4847,6 +4847,7 @@ private canThisRoleCreateBackDateBooking(): boolean {
           this.InitProjectCode();
           this.GetIsGSTMandatoryWithResrvation(this.customerGroupID);
           this.InitReservationInvoiceGSTDetails( this.customerID);
+          this.InitCustomerCustomerGroup();
           this.GetReservationCapping(this.customerGroupID,this.customerID,this.pickupDate,this.cityID,this.packageTypeID,this.vehicleCategoryID);
           this.getETRDropOffTime();
         },
