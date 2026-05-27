@@ -721,6 +721,7 @@ export class ControlPanelDialogeComponent {
     const encryptedCustomerGroupID = encodeURIComponent(this._generalService.encrypt(item.customerGroupID.toString()));
     const allotmentStatus = encodeURIComponent(this._generalService.encrypt(item.allotmentStatus));
     const encryptedAction = encodeURIComponent(this._generalService.encrypt('edit'));
+    const encryptedlocationOutDate = encodeURIComponent(this._generalService.encrypt(item.locationOutDate));
     
     const queryParams: any = {
       reservationID: encryptedReservationID,
@@ -729,7 +730,8 @@ export class ControlPanelDialogeComponent {
       customerID: encryptedCustomerID,
       customerName: encryptedCustomerName,
       allotmentStatus: allotmentStatus,
-      action: encryptedAction
+      action: encryptedAction,
+      locationOutDate: encryptedlocationOutDate
     };
     
     // Add status to query params if available

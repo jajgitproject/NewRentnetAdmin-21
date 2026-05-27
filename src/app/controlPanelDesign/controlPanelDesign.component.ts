@@ -278,7 +278,10 @@ export class ControlPanelDesignComponent implements OnInit {
 
   public PaymentModeList?:ModeOfPaymentDropDown[]=[];
   filteredPaymentModeOptions: Observable<ModeOfPaymentDropDown[]>;
-    
+
+  public SupplierTypeList?: SupplierTypeDropDownModel[] = [];
+  filteredSupplierTypeOptions: Observable<SupplierTypeDropDownModel[]>;
+
   constructor(
     public route: Router,
     public httpClient: HttpClient,
@@ -350,8 +353,8 @@ export class ControlPanelDesignComponent implements OnInit {
     this.safeRun(() => this.FillVehicleDD());
     // this.safeRun(() => this.FillCustomerGroupDD());
     // this.safeRun(() => this.FillCustomerDDOnPageLoad());
-    this.safeRun(() => this.InitBookerOnPageLoad());
-    this.safeRun(() => this.InitPassengerOnPageLoad());
+    // this.safeRun(() => this.InitBookerOnPageLoad());
+    // this.safeRun(() => this.InitPassengerOnPageLoad());
     this.safeRun(() => this.InitVehicleCategories());
     this.safeRun(() => this.InitCities());
     // this.safeRun(() => this.InitPackageType());
@@ -360,7 +363,7 @@ export class ControlPanelDesignComponent implements OnInit {
     this.safeRun(() => this.InitVehicleInventoryOnPageLoad());
     this.safeRun(() => this.InitDriverOnPageLoad());
     this.safeRun(() => this.InitDOINOnPageLoad());
-    this.safeRun(() => this.InitDisputesOnPageLoad());
+    // this.safeRun(() => this.InitDisputesOnPageLoad());
     // this.safeRun(() => this.InitLocation());
     // this.safeRun(() => this.InitTransferLocation());
     // this.safeRun(() => this.InitRegNumber());
@@ -595,6 +598,7 @@ export class ControlPanelDesignComponent implements OnInit {
       emailtosupplier: [this._filters.emailtosupplier],
       tncStatus: [this._filters.tncStatus],
       ticketNumb: [this._filters.ticketNumb],
+      supplierType:[this._filters.supplierType]
     });
   }
 
@@ -1117,8 +1121,28 @@ export class ControlPanelDesignComponent implements OnInit {
       this.bookerID=bookerID;
     }
 
-    InitBookerOnPageLoad(){
-      this._generalService.GetCPForBookerInCPSearch().subscribe(
+    // InitBookerOnPageLoad()
+    // {
+    //   this._generalService.GetCPForBookerInCPSearch().subscribe(
+    //     data=>
+    //     {
+    //       this.BookerList=data;
+    //       this.filteredBookerOptions = this.filterForm.controls['booker'].valueChanges.pipe(
+    //         startWith(""),
+    //         map(value => this._filterBookerOnPageLoad(value || ''))
+    //       ); 
+    //     });
+    // }
+
+    onKeyupBookerDropDown()
+    {
+      var Prefix = this.filterForm.controls.booker.value;
+      if(Prefix.length < this._generalService.lengthToCheck)
+      { 
+        this.BookerList = [];
+        return;
+      }
+      this._generalService.GetBookerDropDownForControlPanel(Prefix).subscribe(
         data=>
         {
           this.BookerList=data;
@@ -1127,16 +1151,15 @@ export class ControlPanelDesignComponent implements OnInit {
             map(value => this._filterBookerOnPageLoad(value || ''))
           ); 
         });
-    }
-  
+    }  
     private _filterBookerOnPageLoad(value: string): any {
       const filterValue = value.toLowerCase().trim();
       // if(filterValue.length === 0) {
       //   return [];
       // }
-       if(filterValue.length < 3) {
-      return [];
-    }
+    //    if(filterValue.length < 3) {
+    //   return [];
+    // }
       return this.BookerList?.filter(
         booker => 
         {
@@ -1184,17 +1207,37 @@ export class ControlPanelDesignComponent implements OnInit {
       this.passengerID=passengerID;
     }
 
-    InitPassengerOnPageLoad(){
-       
-      this._generalService.GetCPForPassengerInCPSearch().subscribe(
-        data=>
-        {
-          this.PassengerList=data;
-          this.filteredPassengerOptions = this.filterForm.controls['passenger'].valueChanges.pipe(
-            startWith(""),
-            map(value => this._filterPassengerOnPageLoad(value || ''))
-          ); 
-        });
+
+    // InitPassengerOnPageLoad()
+    // {   
+    //   this._generalService.GetCPForPassengerInCPSearch().subscribe(
+    //     data=>
+    //     {
+    //       this.PassengerList=data;
+    //       this.filteredPassengerOptions = this.filterForm.controls['passenger'].valueChanges.pipe(
+    //         startWith(""),
+    //         map(value => this._filterPassengerOnPageLoad(value || ''))
+    //       ); 
+    //     });
+    // }
+
+    onKeyupPassengerDropDown()
+    {   
+      var Prefix = this.filterForm.controls.passenger.value;
+      if(Prefix.length < this._generalService.lengthToCheck)
+      { 
+        this.PassengerList = [];
+        return;
+      }
+      this._generalService.GetPassengerDropDownForControlPanel(Prefix).subscribe(
+      data=>
+      {
+        this.PassengerList=data;
+        this.filteredPassengerOptions = this.filterForm.controls['passenger'].valueChanges.pipe(
+          startWith(""),
+          map(value => this._filterPassengerOnPageLoad(value || ''))
+        ); 
+      });
     }
   
     private _filterPassengerOnPageLoad(value: string): any {
@@ -1202,9 +1245,9 @@ export class ControlPanelDesignComponent implements OnInit {
       // if(filterValue.length === 0) {
       //   return [];
       // }
-       if(filterValue.length < 3) {
-      return [];
-    }
+    //    if(filterValue.length < 3) {
+    //   return [];
+    // }
       return this.PassengerList.filter(
         passenger => 
         {
@@ -1843,18 +1886,36 @@ export class ControlPanelDesignComponent implements OnInit {
   // }
 
   //Disputes
-  InitDisputesOnPageLoad(){
-    this._generalService.GetDisputes().subscribe(
-      (data)=>
-      {
-        this.DisputesList=data;
-        this.filteredDisputesOptions = this.filterForm.controls['disputes'].valueChanges.pipe(
-          startWith(""),
-          map(value => this._filterDisputesOnPageLoad(value || ''))
-        ); 
-      });
+  // InitDisputesOnPageLoad()
+  // {
+  //   this._generalService.GetDisputes().subscribe(
+  //     (data)=>
+  //     {
+  //       this.DisputesList=data;
+  //       this.filteredDisputesOptions = this.filterForm.controls['disputes'].valueChanges.pipe(
+  //         startWith(""),
+  //         map(value => this._filterDisputesOnPageLoad(value || ''))
+  //       ); 
+  //     });
+  // }
+  onKeyupDisputesDropDown()
+  {
+    var Prefix = this.filterForm.controls.disputes.value;
+    if(Prefix.length < this._generalService.lengthToCheck)
+    { 
+      this.DisputesList = [];
+      return;
+    }
+    this._generalService.GetDisputeTypeDropDownForControlPanel(Prefix).subscribe(
+    (data)=>
+    {
+      this.DisputesList=data;
+      this.filteredDisputesOptions = this.filterForm.controls['disputes'].valueChanges.pipe(
+        startWith(""),
+        map(value => this._filterDisputesOnPageLoad(value || ''))
+      ); 
+    });
   }
-
   private _filterDisputesOnPageLoad(value: string): any {
     const filterValue = value.toLowerCase().trim();
     return this.DisputesList?.filter(
@@ -4440,6 +4501,38 @@ setCalculatedLocationOutTime(data: any, interval?: number) {
         }
       );
     }
+
+    
+  //---------- Supplier Type ----------
+  onKeyupSupplierTypeDropDown()
+  {
+    var Prefix = this.filterForm.controls.supplierType.value;
+    if(Prefix.length < this._generalService.lengthToCheck)
+    { 
+      this.SupplierTypeList = [];
+      return;
+    }
+    this._generalService.GetSupplierTypeDropDownForControlPanel(Prefix).subscribe(
+    data=>
+    {
+      this.SupplierTypeList=data;
+      this.filteredSupplierTypeOptions = this.filterForm.controls.supplierType.valueChanges.pipe(
+        startWith(""),
+        map(value => this._filterSupplierType(value || ''))
+      );
+    });
+  }
+  private _filterSupplierType(value: string): any {
+    const filterValue = value.toLowerCase();
+    return this.SupplierTypeList.filter(
+      data =>
+      {
+        return data.supplierType.toLowerCase().includes(filterValue);
+      }
+    );
+  }
+
+  
 
 
 } 

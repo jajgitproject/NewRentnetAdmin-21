@@ -19,9 +19,14 @@ export class BookingScreenComponent implements OnInit {
   allotmentStatus: any = '';
   allotmentType: any = '';
   buttonDisabled: boolean = false;
+  IsKAMRole:boolean;
+  LocationOutDate: string;
   constructor(public route:ActivatedRoute,public _generalService: GeneralService,
      public reservationGroupDetailsService: ReservationGroupDetailsService,
-  ) {}
+  ) 
+  {
+    this.IsKAMRole = localStorage.getItem('isThisAKeyAccountManagerRole') === 'true';
+  }
   ngOnInit() 
   {
     this.route.queryParams.subscribe(paramsData =>{
@@ -30,11 +35,13 @@ export class BookingScreenComponent implements OnInit {
       const encryptedReservationGroupID   = paramsData.reservationGroupID;
       const encryptedAction   = paramsData.action;
       const encryptedStatus   = paramsData.status;
+      const encryptedlocationOutDate   = paramsData.locationOutDate;
       
       
       this.ReservationID = this._generalService.decrypt(decodeURIComponent(encryptedReservationID));
       this.ReservationGroupID = this._generalService.decrypt(decodeURIComponent(encryptedReservationGroupID));
       this.action = this._generalService.decrypt(decodeURIComponent(encryptedAction));
+      this.LocationOutDate = this._generalService.decrypt(decodeURIComponent(encryptedlocationOutDate));
       
       // Decrypt status if available in query params
       if(encryptedStatus) {

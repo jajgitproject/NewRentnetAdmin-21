@@ -80,6 +80,8 @@ export class ReservationComponent implements OnInit {
   @Input() status:any;
   @Input() allotmentStatus:any = '';
   @Input() allotmentType:any = '';
+  @Input() IsKAMRole:boolean;
+  @Input() LocationOutDate:string;
   advanceTableFormEdit: FormGroup;
   advanceTable:Reservation;
   dataForReservationList:ModelForReservation | null;
@@ -5286,8 +5288,10 @@ private isEditingAllowed(): boolean {
   //---------- Check Validation For Same Reservation ----------
   CheckValidationForSameReservation() 
   {
+    //alert(this.advanceTableForm.value.pickupTime)
     const pickupDate = new Date(this.advanceTableForm.value.pickupDate);
-    const pickupTime = new Date(this.advanceTableForm.value.pickupTime);
+    //const pickupTime = (new Date(this.advanceTableForm.value.pickupTime)) || null;
+    const pickupTime = (this.advanceTableForm.value.pickupTime) ? (new Date(this.advanceTableForm.value.pickupTime)) : null;
     this.reservationService.CheckValidationForSameReservation(this.customerID, this.passengerID, this.cityID, pickupDate, pickupTime).subscribe(
     data => 
     {

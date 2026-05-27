@@ -446,7 +446,25 @@ decrypt(textToDecrypt: string): string{
     return this.http.get<ModeOfPaymentDropDown[]>(this.BaseURL + 'controlPanelDropDown/GetModeOfPaymentForDropDown' + '/' + Prefix);
   }
 
+  GetSupplierTypeDropDownForControlPanel(Prefix: string): Observable<SupplierTypeDropDownModel[]> 
+  {
+    return this.http.get<SupplierTypeDropDownModel[]>(this.BaseURL + "controlPanelDropDown/GetSupplierTypeForDropDown" + '/' + Prefix);
+  }
 
+  GetDisputeTypeDropDownForControlPanel(Prefix: string): Observable<DisputeTypeDropDown[]> 
+  {
+    return this.http.get<DisputeTypeDropDown[]>(this.BaseURL + "controlPanelDropDown/GetDisputeTypeForDropDown" + '/' + Prefix);
+  }
+
+  GetBookerDropDownForControlPanel(Prefix: string): Observable<CustomerPersonDropDown[]> 
+  {
+    return this.http.get<CustomerPersonDropDown[]>(this.BaseURL + "controlPanelDropDown/GetBookerForDropDown" + '/' + Prefix);
+  }
+
+  GetPassengerDropDownForControlPanel(Prefix: string): Observable<CustomerPersonDropDown[]> 
+  {
+    return this.http.get<CustomerPersonDropDown[]>(this.BaseURL + "controlPanelDropDown/GetPassengerForDropDown" + '/' + Prefix);
+  }
 
 
 

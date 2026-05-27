@@ -120,7 +120,7 @@
                                             <ng-container matColumnDef="PickupDate">
                                                 <mat-header-cell *matHeaderCellDef mat-sort-header>Pickup Date</mat-header-cell>
                                                 <mat-cell *matCellDef="let row">
-                                                    {{row.pickupDate ? (row.pickupDate | date:'dd-MM-yyyy') : 'N/A'}}
+                                                    {{row.pickupDate ? row.pickupDate : 'N/A'}}
                                                 </mat-cell>
                                             </ng-container>
 
@@ -232,7 +232,7 @@
                                             <ng-container matColumnDef="LocationOutDate">
                                                 <mat-header-cell *matHeaderCellDef mat-sort-header>Location Out Date</mat-header-cell>
                                                 <mat-cell *matCellDef="let row">
-                                                    {{row.locationOutDate ? (row.locationOutDate | date:'dd-MM-yyyy') : 'N/A'}}
+                                                    {{row.locationOutDate ? row.locationOutDate : 'N/A'}}
                                                 </mat-cell>
                                             </ng-container>
 
@@ -256,7 +256,7 @@
                                             <ng-container matColumnDef="reportingDate">
                                                 <mat-header-cell *matHeaderCellDef mat-sort-header>Reporting Date</mat-header-cell>
                                                 <mat-cell *matCellDef="let row">
-                                                    {{row.dsPickUpDate ? (row.dsPickUpDate | date:'dd-MM-yyyy') : 'N/A'}}
+                                                    {{row.dsPickUpDate ? row.dsPickUpDate : 'N/A'}}
                                                 </mat-cell>
                                             </ng-container>
 
@@ -280,7 +280,7 @@
                                             <ng-container matColumnDef="releasingDate">
                                                 <mat-header-cell *matHeaderCellDef mat-sort-header>Releasing Date</mat-header-cell>
                                                 <mat-cell *matCellDef="let row">
-                                                    {{row.dropOffDate ? (row.dropOffDate | date:'dd-MM-yyyy') : 'N/A'}}
+                                                    {{row.dropOffDate ? row.dropOffDate : 'N/A'}}
                                                 </mat-cell>
                                             </ng-container>
 
@@ -304,7 +304,7 @@
                                             <ng-container matColumnDef="LocationInDate">
                                                 <mat-header-cell *matHeaderCellDef mat-sort-header>Location In Date</mat-header-cell>
                                                 <mat-cell *matCellDef="let row">
-                                                    {{row.locationInDate ? (row.locationInDate | date:'dd-MM-yyyy') : 'N/A'}}
+                                                    {{row.locationInDate ? row.locationInDate : 'N/A'}}
                                                 </mat-cell>
                                             </ng-container>
 
@@ -572,7 +572,7 @@
                                             <ng-container matColumnDef="ClosingDate">
                                                 <mat-header-cell *matHeaderCellDef mat-sort-header>Closing Date</mat-header-cell>
                                                 <mat-cell *matCellDef="let row">
-                                                    {{(row.closingDate | date:'dd-MM-yyyy') || 'N/A'}}
+                                                    {{row.closingDate || 'N/A'}}
                                                 </mat-cell>
                                             </ng-container>
                                             <ng-container matColumnDef="ClosureMethod">

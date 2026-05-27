@@ -434,7 +434,14 @@ export class ReservationService
   CheckValidationForSameReservation(CustomerID: number, PassengerID: number, CityID: number, PickupDate: string, PickupTime: string):Observable<any> 
   {
     PickupDate = this.datePipe.transform(PickupDate, 'yyyy-MM-dd');
-    PickupTime = this.datePipe.transform(PickupTime, 'HH:mm');
+    if (PickupTime) 
+    {
+      const PickupTime = this.datePipe.transform(PickupTime, 'HH:mm');
+    } 
+    else
+    {
+      PickupTime = null;
+    }
     return this.httpClient.get<any>(this.API_URL + '/' + 'CheckValidationForSameReservation' + '/' + CustomerID + '/' + PassengerID + '/' + CityID + '/' + PickupDate + '/' + PickupTime);
   }
 

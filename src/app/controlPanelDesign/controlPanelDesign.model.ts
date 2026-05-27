@@ -429,6 +429,7 @@ export class Filters {
   emailtosupplier:string;
   tncStatus:string;
   ticketNumb:string;
+  supplierType:string;
   constructor(filter) { 
     this.tripStatus = filter.tripStatus || '';
     this.userID = filter.userID || '';
@@ -476,6 +477,7 @@ export class Filters {
     this.reservationGroupID=filter.reservationGroupID || null;
     this.tripType=filter.tripType || '';
     this.reservationSourceDetail = filter.reservationSourceDetail || '';
+    this.supplierType = filter.supplierType;
   }
 }
 

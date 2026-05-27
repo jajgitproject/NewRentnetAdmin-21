@@ -167,7 +167,8 @@
                             <!-- <strong>Total Kms : {{dataSource?.locationOutKM +
                               dataSource?.pickUpKM +
                               dataSource?.dropOffKM + dataSource?.locationInKM}} </strong> -->
-                              <strong>Total Kms (G2G) : {{TotalKMGSG}} </strong>
+                              <strong *ngIf="TotalKMGSG < 0">Total Kms (G2G) : 0 </strong>
+                              <strong *ngIf="TotalKMGSG > 0">Total Kms (G2G) : {{TotalKMGSG}} </strong>
                           </td>
                           <td colspan="2">
                             <strong>Total Time : {{datetime}}</strong>

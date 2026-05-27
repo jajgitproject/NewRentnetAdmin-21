@@ -170,7 +170,9 @@
 
                         <tr>
                           <td colspan="2">
-                            <strong>Total Kms : {{dataSource?.locationInKM - dataSource?.locationOutKM}} </strong>
+                            <strong *ngIf="(dataSource?.locationInKM - dataSource?.locationOutKM) < 0">Total Kms (G2G) : 0 </strong>
+                            <strong *ngIf="(dataSource?.locationInKM - dataSource?.locationOutKM) > 0">Total Kms (G2G) : {{dataSource?.locationInKM - dataSource?.locationOutKM}} </strong>
+                            <!-- <strong>Total Kms : {{dataSource?.locationInKM - dataSource?.locationOutKM}} </strong> -->
                           </td>
                           <td colspan="2">
                             <strong>Total Time : {{datetime}}</strong>
