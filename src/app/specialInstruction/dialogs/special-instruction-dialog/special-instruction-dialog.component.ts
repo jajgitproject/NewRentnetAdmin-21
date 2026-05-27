@@ -90,13 +90,13 @@ export class SpecialInstructionDialogComponent
           console.error('No valid reservationID found in dialog data:', data);
           this.reservationID = null;
         }
-        this.status=data?.status?.status || data?.status || data;
+        this.status = data?.status?.status ?? data?.status ?? '';
         // if(this.status!='Changes allow'){
         //   // this.saveDisabled=true;
         //   // this.advanceTableForm.disable();
         //   this.buttonDisabled=true;
         // }
-        if(this.status === 'Changes allow'){
+        if(this.status === '' || this.status === 'Changes allow'){
     this.buttonDisabled = false;  // Save button enable
 } else {
     this.buttonDisabled = true;   // Save button disable

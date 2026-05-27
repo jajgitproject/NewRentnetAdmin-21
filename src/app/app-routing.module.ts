@@ -3641,6 +3641,13 @@ const routes: Routes = [
             (m) => m.PrintDutySlipModule
           )
       },
+       {
+        path: 'dutySlipMap',
+        loadChildren: () =>
+          import('./dutySlipMap/dutySlipMap.module').then(
+            (m) => m.DutySlipMapModule
+          )
+      },
      
       {
         path: 'printBlankdutyslip',

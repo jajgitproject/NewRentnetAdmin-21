@@ -88,9 +88,17 @@ export class InternalNoteDialogComponent {
     }
   }
 
-  private isChangesAllowed(): boolean {
-    return (this.status || '').toLowerCase().trim() === 'changes allow';
-  }
+ private isChangesAllowed(): boolean {
+  const status =
+    (this.status || '')
+      .toLowerCase()
+      .trim();
+
+  return (
+    status === '' ||
+    status === 'changes allow'
+  );
+}
 
   public ngOnInit(): void
   {

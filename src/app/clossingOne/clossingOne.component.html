@@ -35,7 +35,7 @@
         <div class="col-xl-2 col-lg-1 col-md-12 col-sm-12 mb-2">
           Reservation No:<br/> {{ReservationID}} 
         </div>
-        <div class="col-xl-1 col-lg-1 col-md-12 col-sm-12 mb-2">
+        <div class="col-xl-2 col-lg-1 col-md-12 col-sm-12 mb-2">
           DutySlip No: <br/>{{DutySlipID}}
         </div>
          <div class="col-xl-2 col-lg-2 col-md-12 col-sm-12 mb-2" *ngIf="billFromTo">
@@ -44,13 +44,17 @@
         <div class="col-xl-3 col-lg-4 col-md-12 col-sm-12 mb-2" *ngIf="closingDataAdvanceTable">
           Customer Name: <br/>{{closingDataAdvanceTable?.customerName}}-{{CustomerID}}({{closingDataAdvanceTable?.tallyCustomerID}})
         </div>
+        <div class="col-xl-3 col-lg-4 col-md-12 col-sm-12 mb-2" *ngIf="closingDataAdvanceTable">
+          Guest Name: <br/>{{closingDataAdvanceTable?.guestName}}
+        </div>       
+      </div>
+      <div class="row" style="padding-left: 30px;">
         <div class="col-xl-2 col-lg-4 col-md-12 col-sm-12 mb-2" *ngIf="GstNumber">
           GST Number: <br/>{{GstNumber}}({{StateName}})
         </div>
          <div class="col-xl-2 col-lg-2 col-md-12 col-sm-12 mb-2" *ngIf="dataSourceForBillNo?.invoiceModel?.invoiceNumberWithPrefix">
           Bill No: <br/>{{dataSourceForBillNo?.invoiceModel?.invoiceNumberWithPrefix}}
         </div>
-       
       </div>
 
     </div>
@@ -227,6 +231,11 @@
           <h5>
             <a style="cursor: pointer;color: #007bff;">Customer Specific Fields</a>
             <a href="javascript:void(0);" (click)="showAndScrollCustomerSpecificFields()">&nbsp;- <b>View</b></a>
+          </h5>
+        </div>
+        <div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 mb-2">
+          <h5>
+            <a (click)="PrintDutyMap()" style="cursor: pointer;color: #007bff;">Duty Map</a>
           </h5>
         </div>
       </div>

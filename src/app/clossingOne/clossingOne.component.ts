@@ -231,7 +231,8 @@ export class ClossingOneComponent implements OnInit, AfterViewInit, AfterViewChe
   dataSourceForBillNo: any = null;
   from :string = "Closing";
   status: any;
-
+  guestName:any;
+  DutySlipMap:any;
 
   constructor(
     public httpClient: HttpClient,
@@ -425,6 +426,8 @@ export class ClossingOneComponent implements OnInit, AfterViewInit, AfterViewChe
           this.PickupCityID = this.closingDataAdvanceTable?.pickupCityID;
           this.VehicleCategoryID = this.closingDataAdvanceTable?.vehicleCategoryID;
           this.VehicleID = this.closingDataAdvanceTable?.vehicleID;
+          this.guestName = this.closingDataAdvanceTable?.guestName;
+          this.DutySlipMap= this.closingDataAdvanceTable?.dutySlipMap;
          
           this.advanceDetailsLoadData();
           this.kamCardLoadData();
@@ -1644,7 +1647,47 @@ showAndScrollOpenSettledRates() {
       window.location.reload();
     })
   }
+PrintDutyMap() {
+  let baseUrl = this._generalService.FormURL;
 
+  if (this.allotmentStatus === 'Alloted') {
+    if(this.DutySlipMap!==null)
+    {
+      const encryptedReservationID = encodeURIComponent(this._generalService.encrypt(this.ReservationID.toString()));
+    const encryptedDutySlipID = encodeURIComponent(this._generalService.encrypt(this.dutySlipID.toString()));
+    const encryptedMapUrl = encodeURIComponent(this._generalService.encrypt(this.DutySlipMap.toString()));
+    const url = this.router.serializeUrl(
+      this.router.createUrlTree(
+        ['/dutySlipMap'],
+        {
+          queryParams: {
+            dutySlipID: encryptedDutySlipID,
+            reservationID: encryptedReservationID,
+            mapUrl: encryptedMapUrl
+          }
+        }
+      )
+    );
+
+    window.open(baseUrl + url, '_blank');
+
+    }
+    else{
+      Swal.fire({
+      icon: 'warning',
+      html: `<b>Duty Map Not Found.</b>`
+    });
+
+    }
+    
+
+  } else {
+    Swal.fire({
+      icon: 'warning',
+      html: `<b>Allotment Required.</b>`
+    });
+  }
+}
 }
 
 
