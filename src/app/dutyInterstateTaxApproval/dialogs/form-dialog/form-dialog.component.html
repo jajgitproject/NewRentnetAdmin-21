@@ -19,9 +19,10 @@
         <form class="register-form m-4" [formGroup]="advanceTableForm" (ngSubmit)="submit">
             <div class="row">
                 <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                    <div class="ui-label">State</div>
                     <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
                         <mat-label>State</mat-label>
-                        <input readonly type="text" matInput [matAutocomplete]="auto3" formControlName="stateName">
+                        <input readonly type="text" matInput placeholder="State" [matAutocomplete]="auto3" formControlName="stateName">
                         <mat-autocomplete #auto3="matAutocomplete">
                             <mat-option *ngFor="let options of filteredStateOptions | async"
                                 [value]="options.geoPointName" (click)="getStateID(options.geoPointID)">
@@ -32,14 +33,15 @@
                 </div>
 
                 <div class=" col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
-                    <!-- <mat-label>
-                        Image
-                    </mat-label> -->
-                    <br />
-                    <span>
-                        <a href="{{advanceTableForm.value.dutyInterstateTaxImage}}" target="_blank" style="cursor: pointer;">
-                            <img [src]="advanceTable.dutyInterstateTaxImage" height="50px" alt="Image">
-                    </a></span>
+                    <div class="ui-label">Image</div>
+                    <ng-container *ngIf="advanceTableForm.value.dutyInterstateTaxImage; else noInterStateTaxImage">
+                      <a [href]="advanceTableForm.value.dutyInterstateTaxImage" target="_blank" style="cursor: pointer;">
+                        <img [src]="advanceTableForm.value.dutyInterstateTaxImage" height="60" alt="Interstate tax proof">
+                      </a>
+                    </ng-container>
+                    <ng-template #noInterStateTaxImage>
+                      <span class="no-image-text">No image available</span>
+                    </ng-template>
 
                 </div>
             </div>
@@ -47,9 +49,10 @@
             <div style="margin-top: 10px;">
                 <div class="row">
                     <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                        <div class="ui-label">Paid From</div>
                         <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
                             <mat-label>Paid From</mat-label>
-                            <input readonly matInput [matDatepicker]="endDate" formControlName="taxStartDate">
+                            <input readonly matInput placeholder="Paid From" [matDatepicker]="endDate" formControlName="taxStartDate">
                             <mat-datepicker-toggle matSuffix [for]="endDate"></mat-datepicker-toggle>
                             <mat-datepicker #endDate></mat-datepicker>
                             <!-- <mat-error *ngIf="advanceTableForm.get('taxStartDate').hasError('required')">
@@ -59,9 +62,10 @@
                     </div>
 
                     <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                        <div class="ui-label">Paid Until</div>
                         <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
                             <mat-label>Paid Until</mat-label>
-                            <input readonly matInput [matDatepicker]="untilDate" formControlName="taxEndDate">
+                            <input readonly matInput placeholder="Paid Until" [matDatepicker]="untilDate" formControlName="taxEndDate">
                             <mat-datepicker-toggle matSuffix [for]="untilDate"></mat-datepicker-toggle>
                             <mat-datepicker #untilDate></mat-datepicker>
                             <!-- <mat-error *ngIf="advanceTableForm.get('taxEndDate').hasError('required')">
@@ -85,9 +89,10 @@
                     </div> -->
 
                     <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                        <div class="ui-label">Amount Paid</div>
                         <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
                             <mat-label>Amount Paid</mat-label>
-                            <input readonly matInput formControlName="interStateTaxAmount">
+                            <input readonly matInput placeholder="Amount Paid" formControlName="interStateTaxAmount">
                             <!-- <mat-error *ngIf="advanceTableForm.get('interStateTaxAmount').hasError('required')">
                                 Approved Paid is required
                             </mat-error> -->
@@ -100,9 +105,10 @@
 
             <div class="row" style="margin-top: 10px;">
                 <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                    <div class="ui-label">Tax Paid By</div>
                     <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
                         <mat-label>Tax Paid By</mat-label>
-                        <input readonly matInput formControlName="interStateTaxPaidBy">
+                        <input readonly matInput placeholder="Tax Paid By" formControlName="interStateTaxPaidBy">
                         <!-- <mat-select readonly #taxPaidByVal
                             [class.is-invalid]="taxPaidByVal.invalid && taxPaidByVal.touched"
                             formControlName="interStateTaxPaidBy">
@@ -115,9 +121,10 @@
                     </mat-form-field>
                 </div>
                 <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                    <div class="ui-label">Amount To Be Charged</div>
                     <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
                         <mat-label>Amount To Be Charged</mat-label>
-                        <input readonly matInput formControlName="amountToBeChargedInCurrentDuty">
+                        <input readonly matInput placeholder="Amount To Be Charged" formControlName="amountToBeChargedInCurrentDuty">
                         <!-- <mat-error *ngIf="advanceTableForm.get('amountToBeChargedInCurrentDuty').hasError('required')">
                             Amount To Be Charged is required
                         </mat-error> -->
@@ -127,18 +134,20 @@
 
             <div class="row" style="margin-top: 10px;">
                 <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                    <div class="ui-label">Approved By</div>
                     <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
                         <mat-label>Approved By</mat-label>
-                        <input readonly matInput formControlName="approvedBy">
+                        <input readonly matInput placeholder="Approved By" formControlName="approvedBy">
                         <!-- <mat-error *ngIf="advanceTableForm.get('approvedBy').hasError('required')">
                             Approved By is required
                         </mat-error> -->
                     </mat-form-field>
                 </div>
                 <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                    <div class="ui-label">Approval Date</div>
                     <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
                         <mat-label>Approval Date</mat-label>
-                        <input readonly matInput [matDatepicker]="startDate" formControlName="approvalDate">
+                        <input readonly matInput placeholder="Approval Date" [matDatepicker]="startDate" formControlName="approvalDate">
                         <mat-datepicker-toggle matSuffix [for]="startDate"></mat-datepicker-toggle>
                         <mat-datepicker [disabled]="true" #startDate></mat-datepicker>
                         <!-- <mat-error *ngIf="advanceTableForm.get('approvalDate').hasError('required')">
@@ -150,15 +159,17 @@
 
             <div class="row">
                 <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                    <div class="ui-label">Approval Remark</div>
                     <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
                         <mat-label>Approval Remark</mat-label>
-                        <input matInput formControlName="approvalRemark">
+                        <input matInput placeholder="Approval Remark" formControlName="approvalRemark">
                         <mat-error *ngIf="advanceTableForm.get('approvalRemark').hasError('required')">
                             Approval Remark is required
                         </mat-error>
                     </mat-form-field>
                 </div>
                 <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                    <div class="ui-label">Approval Status</div>
                     <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
                         <mat-label>Approval Status</mat-label>
                         <mat-select formControlName="approvalStatus">
@@ -174,6 +185,7 @@
 
             <div class="row">
                 <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                    <div class="ui-label">Activation Status</div>
                     <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
                         <mat-label>Activation Status</mat-label>
                         <!-- <input disabled matInput formControlName="activationStatus"> -->

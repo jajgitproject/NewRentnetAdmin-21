@@ -2415,6 +2415,12 @@ TrackOnMapInfo(reservationID: number, item?: any) {
       }
     });
   }
+  canSendSmsWhatsappMail(item: any): boolean {
+    const allotmentStatus = (item?.allotmentStatus ?? '').toString().trim().toLowerCase();
+    const allotmentType = (item?.allotmentType ?? '').toString().trim().toLowerCase();
+    return allotmentStatus === 'alloted' && allotmentType === 'hard';
+  }
+
   openSendSmsWhatsappMail(reservationID,vehicle,pickupDate,pickupTime,
       registrationNumber,customerPersonName,city,customerPersonID, item: any)
       {
@@ -2422,6 +2428,14 @@ TrackOnMapInfo(reservationID: number, item?: any) {
           customerPersonID && typeof customerPersonID === 'object'
             ? customerPersonID
             : item;
+        if (!this.canSendSmsWhatsappMail(rowItem)) {
+          Swal.fire({
+            title: '',
+            icon: 'warning',
+            html: `<b>Send WA/SMS/Mail is allowed only for Alloted (Hard) booking.</b>`
+          });
+          return;
+        }
         const pickText = (...values: any[]) => {
           for (const value of values) {
             const text = (value ?? '').toString().trim();

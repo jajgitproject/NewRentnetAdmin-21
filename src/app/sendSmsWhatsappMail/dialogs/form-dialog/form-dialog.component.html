@@ -174,7 +174,15 @@
             <ng-container matColumnDef="type">
               <mat-header-cell *matHeaderCellDef>Type</mat-header-cell>
               <mat-cell *matCellDef="let row" style="padding: 5px">
-                {{ (row.isPassenger && row.isBooker === true || row?.type?.toLowerCase() === 'customerPerson') ? 'Customer Person' : (row?.type?.toLowerCase() === 'employee' ? 'Employee' : 'Not Registered') }}
+                {{
+                  row?.type?.toLowerCase() === 'booker'
+                    ? 'Booker'
+                    : ((row?.type?.toLowerCase() === 'passenger' ||
+                        row?.type?.toLowerCase() === 'customer person' ||
+                        row?.type?.toLowerCase() === 'customerperson')
+                        ? 'Customer Person'
+                        : (row?.type?.toLowerCase() === 'employee' ? 'Employee' : 'Not Registered'))
+                }}
               </mat-cell>
             </ng-container>
 

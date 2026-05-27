@@ -152,7 +152,7 @@ ngOnInit(): void {
     {
       customerOTPConfigurationID: [this.advanceTable.customerOTPConfigurationID],
       customerID: [this.advanceTable.customerID],
-      otpType : [this.advanceTable.otpType],
+      otpType : [this.advanceTable.otpType, Validators.required],
       startDate: [this.advanceTable.startDate,[Validators.required, this._generalService.dateValidator()]],
       endDate: [this.advanceTable.endDate],
       isStartOTPRequired: [this.advanceTable.isStartOTPRequired,Validators.required],

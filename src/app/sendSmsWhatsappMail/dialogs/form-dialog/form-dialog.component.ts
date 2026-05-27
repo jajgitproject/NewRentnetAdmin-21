@@ -189,7 +189,8 @@ export class FormDialogSendSmsWhatsappMailComponent {
   public loadData() {
     this._generalService.GetPermission(this.ReservationID).subscribe(
       (data) => {
-        this.permissionData = this.normalizePermissionRows(data);
+        const normalizedRows = this.normalizePermissionRows(data);
+        this.permissionData = this.ensureBookerRowPresent(normalizedRows);
         this.cdr.detectChanges();
       },
       (error: HttpErrorResponse) => {
@@ -213,26 +214,24 @@ export class FormDialogSendSmsWhatsappMailComponent {
     if (typeLower === 'employee') {
       return 'Employee';
     }
-    if (element?.isPassenger === true) {
-      return 'Passenger';
-    }
-    if (element?.isBooker === true) {
-      return 'Booker';
-    }
     if (typeLower === 'booker') {
       return 'Booker';
     }
     if (typeLower === 'passenger') {
       return 'Passenger';
     }
+    if (element?.isBooker === true) {
+      return 'Booker';
+    }
+    if (element?.isPassenger === true) {
+      return 'Passenger';
+    }
     if (typeLower === 'customer person' || typeLower === 'customerperson' || element?.customerPersonID) {
-      // For known customer persons, prefer explicit role flags and keep
-      // "Passenger" precedence when both are true.
-      if (element?.isPassenger === true || element?.reachedSMSToPassenger === true) {
-        return 'Passenger';
-      }
       if (element?.isBooker === true || element?.reachedSMSToBooker === true) {
         return 'Booker';
+      }
+      if (element?.isPassenger === true || element?.reachedSMSToPassenger === true) {
+        return 'Passenger';
       }
       return 'Booker';
     }
@@ -240,6 +239,52 @@ export class FormDialogSendSmsWhatsappMailComponent {
       return 'Not Registered';
     }
     return 'Not Registered';
+  }
+
+  private ensureBookerRowPresent(rows: any[]): any[] {
+    const normalizedRows = Array.isArray(rows) ? [...rows] : [];
+    const bookerId = this.customerDetails?.customerPersonID ?? this.data?.item?.primaryBookerID;
+    const hasBooker = normalizedRows.some((row) => {
+      const rowType = this.resolveRecipientType(row);
+      const sameId = bookerId && row?.customerPersonID && Number(row.customerPersonID) === Number(bookerId);
+      return rowType === 'Booker' || sameId;
+    });
+
+    if (hasBooker) {
+      return normalizedRows;
+    }
+
+    const bookerName = this.pickText(
+      this.customerDetails?.customerPersonName,
+      this.data?.item?.bookerName
+    );
+    const bookerMobile = this.pickText(
+      this.customerDetails?.primaryMobile,
+      this.data?.item?.bookerMobile
+    );
+    const bookerEmail = this.pickText(
+      this.customerDetails?.primaryEmail,
+      this.data?.item?.bookerEmail
+    );
+
+    if (!bookerName && !bookerMobile && !bookerEmail) {
+      return normalizedRows;
+    }
+
+    normalizedRows.push({
+      customerPersonName: bookerName || 'Booker',
+      primaryMobile: bookerMobile || '',
+      primaryEmail: bookerEmail || '',
+      customerPersonID: bookerId || 0,
+      isBooker: true,
+      isPassenger: false,
+      reachedSMSToBooker: true,
+      reachedSMSToPassenger: false,
+      sendSMSWhatsApp: true,
+      type: 'Booker'
+    });
+
+    return normalizedRows;
   }
 
   saveData() {
@@ -251,6 +296,7 @@ export class FormDialogSendSmsWhatsappMailComponent {
       }
     });
     dialogRef.afterClosed().subscribe((result: any) => {
+      const newRows: any[] = [];
       result?.forEach((element) => {
         if (element.customerPersonName.customer) {
           const mobileParts = element.primaryMobile.split('-');
@@ -263,7 +309,7 @@ export class FormDialogSendSmsWhatsappMailComponent {
           const number = mobileParts[0];
           const email = emailParts[0];
           const name = nameParts[1];
-          this.permissionData?.push({
+          newRows.push({
             primaryMobile: '91-' + number,
             primaryEmail: email,
             customerPersonName: name,
@@ -283,7 +329,7 @@ export class FormDialogSendSmsWhatsappMailComponent {
           const email = emailParts[0];
           const id = element.employeeID;
           const name = nameParts[1];
-          this.permissionData.push({
+          newRows.push({
             primaryMobile: '91-' + number,
             primaryEmail: email,
             customerPersonName: name,
@@ -304,7 +350,7 @@ export class FormDialogSendSmsWhatsappMailComponent {
           if (!number) {
             return;
           }
-          this.permissionData.push({
+          newRows.push({
             primaryMobile: code + '-' + number,
             primaryEmail: email,
             customerPersonName: name || number,
@@ -314,11 +360,16 @@ export class FormDialogSendSmsWhatsappMailComponent {
             type: this.resolveRecipientType(element)
           });
         }
-        this.table?.renderRows();
-        if (this.permissionData?.length > 0) {
-          this.showNoRecordsFoundMessage = false;
-        }
       });
+
+      if (newRows.length > 0) {
+        this.permissionData = [...(this.permissionData || []), ...newRows];
+        this.table?.renderRows();
+        this.cdr.detectChanges();
+      }
+      if (this.permissionData?.length > 0) {
+        this.showNoRecordsFoundMessage = false;
+      }
     });
   }
 
