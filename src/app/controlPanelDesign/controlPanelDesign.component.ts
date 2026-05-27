@@ -2187,6 +2187,9 @@ reachedByExecutiveGPS(item:any){
   openSendSmsWhatsappMail(reservationID,vehicle,pickupDate,pickupTime,
     registrationNumber,customerPersonName,city,customerPersonID, item: any)
     {
+      if (!this.isMessagingEnabledForAllotment(item)) {
+        return;
+      }
       const rowItem =
         customerPersonID && typeof customerPersonID === 'object'
           ? customerPersonID
@@ -2276,6 +2279,12 @@ reachedByExecutiveGPS(item:any){
         customerPersonID:customerPersonID
       }
     });
+  }
+
+  isMessagingEnabledForAllotment(item: any): boolean {
+    const allotmentStatus = (item?.allotmentStatus ?? '').toString().trim().toLowerCase();
+    const allotmentType = (item?.allotmentType ?? '').toString().trim().toLowerCase();
+    return allotmentStatus === 'alloted' && allotmentType === 'hard';
   }
 
   viewQcImage(item: any,i:any){
