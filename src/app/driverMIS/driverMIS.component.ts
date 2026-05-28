@@ -562,6 +562,42 @@ private _filterOrganizationalsEntity(value: string): any {
       (error: HttpErrorResponse) => { this.dataSource = null;}
     );
   }
+
+  downloadCsv() {
+    let dateFrom = this.searchdateofjoiningfrom;
+    let dateTo = this.searchdateofjoiningto;
+
+    if (dateFrom !== "") {
+      dateFrom = moment(dateFrom).format('MMM DD yyyy');
+    }
+    if (dateTo !== "") {
+      dateTo = moment(dateTo).format('MMM DD yyyy');
+    }
+
+    this.drivermisService.downloadCsv(
+      this.driver.value || '',
+      this.locationHub.value || '',
+      dateFrom || '',
+      dateTo || '',
+      this.supplierType.value || '',
+      this.SearchActivationStatus
+    ).subscribe(
+      (blob: Blob) => {
+        const fileUrl = window.URL.createObjectURL(blob);
+        const anchor = document.createElement('a');
+        anchor.href = fileUrl;
+        anchor.download = `DriverMIS_${moment().format('YYYYMMDD_HHmmss')}.csv`;
+        document.body.appendChild(anchor);
+        anchor.click();
+        document.body.removeChild(anchor);
+        window.URL.revokeObjectURL(fileUrl);
+        this.showNotification('snackbar-success', 'CSV downloaded successfully', 'top', 'center');
+      },
+      (error: HttpErrorResponse) => {
+        this.showNotification('snackbar-danger', 'Failed to download CSV', 'top', 'center');
+      }
+    );
+  }
  
 }
 

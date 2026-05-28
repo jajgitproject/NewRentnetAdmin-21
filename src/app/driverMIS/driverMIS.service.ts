@@ -74,5 +74,38 @@ export class DriverMISService
     }
     return this.httpClient.get(this.API_URL + "/" +SearchdriverName + '/'+ searchlocation +'/'+ searchdateofjoiningfrom +'/' +searchdateofjoiningto + '/'+ searchSupplierType +'/'+ SearchActivationStatus +'/'+ PageNumber +  '/'+coloumName+'/'+sortType);
   }
+
+  downloadCsv(SearchdriverName:string,searchlocation:string,searchdateofjoiningfrom:string, searchdateofjoiningto:string,searchSupplierType:string, SearchActivationStatus:boolean): Observable<Blob>
+  {
+    if(SearchdriverName==="")
+    {
+      SearchdriverName="null";
+    }
+    if(searchlocation==="")
+    {
+      searchlocation="null";
+    }
+    if(searchdateofjoiningfrom==="")
+    {
+      searchdateofjoiningfrom="null";
+    }
+    if(searchdateofjoiningto==="")
+    {
+      searchdateofjoiningto="null";
+    }
+    if(searchSupplierType==="")
+    {
+      searchSupplierType="null";
+    }
+    if(SearchActivationStatus===null)
+    {
+      SearchActivationStatus=null;
+    }
+
+    return this.httpClient.get(
+      this.API_URL + "/export/" + SearchdriverName + '/' + searchlocation + '/' + searchdateofjoiningfrom + '/' + searchdateofjoiningto + '/' + searchSupplierType + '/' + SearchActivationStatus,
+      { responseType: 'blob' }
+    );
+  }
   
 }
