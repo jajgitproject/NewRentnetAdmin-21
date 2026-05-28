@@ -51,6 +51,45 @@ export class CarMasterMISService {
     }
     return this.httpClient.get(this.API_URL + "/" + SearchVehcileCategory + "/" + SearchVehicle + '/' + searchcarLocation + '/'+ searchownedSupplier + '/'+ status + '/'+ searchGps + '/'+ searchCompany + '/' + SearchActivationStatus + '/' + PageNumber + '/InventoryID/Ascending');
   }
+  downloadCsv(
+    SearchVehcileCategory: string,
+    SearchVehicle: string,
+    searchcarLocation: string,
+    searchownedSupplier: string,
+    status: string,
+    searchGps: string,
+    searchCompany: string,
+    SearchActivationStatus: string): Observable<Blob> {
+    if (SearchVehcileCategory === "") {
+      SearchVehcileCategory = "null";
+    }
+    if (SearchVehicle === "") {
+      SearchVehicle = "null";
+    }
+    if (searchcarLocation === "") {
+      searchcarLocation = "null";
+    }
+    if (searchownedSupplier === "") {
+      searchownedSupplier = "null";
+    }
+    if (status === "") {
+      status = "null";
+    }
+    if (searchGps === "") {
+      searchGps = "null";
+    }
+    if (searchCompany === "") {
+      searchCompany = "null";
+    }
+    if (SearchActivationStatus === "") {
+      SearchActivationStatus = "null";
+    }
+
+    return this.httpClient.get(
+      this.API_URL + "/export/" + SearchVehcileCategory + "/" + SearchVehicle + '/' + searchcarLocation + '/'+ searchownedSupplier + '/'+ status + '/'+ searchGps + '/'+ searchCompany + '/' + SearchActivationStatus,
+      { responseType: 'blob' }
+    );
+  }
   getTableDataSort(
     SearchVehcileCategory: string,
     SearchVehicle: string,

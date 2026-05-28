@@ -387,6 +387,34 @@ onBackPress(event)
     );
   }
 
+  downloadCsv() {
+    this.inventoryService.downloadCsv(
+      this.vehicleCategory.value || '',
+      this.vehicle.value || '',
+      this.locationHub.value || '',
+      this.searchownedSupplier || '',
+      this.status || '',
+      this.searchGps || '',
+      this.company.value || '',
+      this.SearchActivationStatus || ''
+    ).subscribe(
+      (blob: Blob) => {
+        const url = window.URL.createObjectURL(blob);
+        const anchor = document.createElement('a');
+        anchor.href = url;
+        anchor.download = `CarMasterMIS_${moment().format('YYYYMMDD_HHmmss')}.csv`;
+        document.body.appendChild(anchor);
+        anchor.click();
+        document.body.removeChild(anchor);
+        window.URL.revokeObjectURL(url);
+        this.showNotification('snackbar-success', 'CSV downloaded successfully', 'top', 'center');
+      },
+      (error: HttpErrorResponse) => {
+        this.showNotification('snackbar-danger', 'Failed to download CSV', 'top', 'center');
+      }
+    );
+  }
+
   onStatusChange(selectedStatus: string) {
     this.status = selectedStatus;
     // this.fetchDataBasedOnStatus();
