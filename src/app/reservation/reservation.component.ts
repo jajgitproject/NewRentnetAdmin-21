@@ -81,7 +81,7 @@ export class ReservationComponent implements OnInit {
   @Input() allotmentStatus:any = '';
   @Input() allotmentType:any = '';
   @Input() IsKAMRole:boolean;
-  @Input() LocationOutDate:string;
+  @Input() LocationOutDate:string | null = null;
   advanceTableFormEdit: FormGroup;
   advanceTable:Reservation;
   dataForReservationList:ModelForReservation | null;
@@ -404,6 +404,7 @@ canCreateReservation: boolean;
   contextMenu: MatMenuTrigger;
   contextMenuPosition = { x: '0px', y: '0px' };
   ngOnInit() { 
+    this.LocationOutDate = this.LocationOutDate?.trim() ? this.LocationOutDate : null;
     this.applyStaticRequiredValidators();
      this.canCreateReservation =
     localStorage.getItem('canCreateReservation') === 'true';
@@ -3230,6 +3231,7 @@ public validateCustomerSpecificFields(): boolean {
     {
       this.advanceTableForm.patchValue({customerConfigurationInvoicingID:0});
     }
+    console.log(this.arr);
     this.reservationService.updateReservationEdit(this.advanceTableForm.getRawValue())  
     .subscribe(
     response => 
@@ -5290,8 +5292,9 @@ private isEditingAllowed(): boolean {
   {
     //alert(this.advanceTableForm.value.pickupTime)
     const pickupDate = new Date(this.advanceTableForm.value.pickupDate);
+    const pickupTime = this.advanceTableForm.value.pickupTime ? this.datePipe.transform(this.advanceTableForm.value.pickupTime, 'HH:mm') : null;
     //const pickupTime = (new Date(this.advanceTableForm.value.pickupTime)) || null;
-    const pickupTime = (this.advanceTableForm.value.pickupTime) ? (new Date(this.advanceTableForm.value.pickupTime)) : null;
+   // const pickupTime = (this.advanceTableForm.value.pickupTime) ? (new Date(this.advanceTableForm.value.pickupTime)) : null;
     this.reservationService.CheckValidationForSameReservation(this.customerID, this.passengerID, this.cityID, pickupDate, pickupTime).subscribe(
     data => 
     {
