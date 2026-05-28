@@ -211,6 +211,45 @@ export class ShowLateAllotmentMISComponent implements OnInit {
     });
   }
 
+  downloadCsv()
+  {
+    let fromDate = this.SearchFromDate;
+    let toDate = this.SearchToDate;
+
+    if (fromDate !== "")
+    {
+      fromDate = moment(fromDate).format('MMM DD yyyy');
+    }
+    if (toDate !== "")
+    {
+      toDate = moment(toDate).format('MMM DD yyyy');
+    }
+
+    this.dutyRegisterService.downloadCsv(
+      fromDate || '',
+      toDate || '',
+      this.SearchServiceLocation.value || '',
+      this.SearchTimeDiff
+    ).subscribe(
+      (blob: Blob) =>
+      {
+        const fileUrl = window.URL.createObjectURL(blob);
+        const anchor = document.createElement('a');
+        anchor.href = fileUrl;
+        anchor.download = `ShowLateAllotmentMIS_${moment().format('YYYYMMDD_HHmmss')}.csv`;
+        document.body.appendChild(anchor);
+        anchor.click();
+        document.body.removeChild(anchor);
+        window.URL.revokeObjectURL(fileUrl);
+        this.showNotification('snackbar-success', 'CSV downloaded successfully', 'top', 'center');
+      },
+      (error: HttpErrorResponse) =>
+      {
+        this.showNotification('snackbar-danger', 'Failed to download CSV', 'top', 'center');
+      }
+    );
+  }
+
 }
 
 

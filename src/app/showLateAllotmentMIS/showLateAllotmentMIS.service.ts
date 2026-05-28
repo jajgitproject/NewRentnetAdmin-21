@@ -49,6 +49,26 @@ export class ShowLateAllotmentMISService
     }
     return this.httpClient.get(this.API_URL + "/" + 'getAllLateAllotment' + '/' + SearchFromDate + '/' + SearchToDate + '/' + SearchServiceLocation + '/' + SearchTimeDiff + '/' + PageNumber +  '/'+coloumName+'/'+sortType);
   }
+
+  downloadCsv(SearchFromDate:string,SearchToDate:string,SearchServiceLocation:string,SearchTimeDiff:number): Observable<Blob>
+  {
+    if(SearchFromDate==="")
+    {
+      SearchFromDate="null";
+    }
+    if(SearchToDate==="")
+    {
+      SearchToDate="null";
+    }
+    if(SearchServiceLocation==="")
+    {
+      SearchServiceLocation="null";
+    }
+    return this.httpClient.get(
+      this.API_URL + "/" + 'exportLateAllotment' + '/' + SearchFromDate + '/' + SearchToDate + '/' + SearchServiceLocation + '/' + SearchTimeDiff,
+      { responseType: 'blob' }
+    );
+  }
   
 }
   
