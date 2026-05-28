@@ -226,7 +226,7 @@ allotmentType: any;
         allotmentRemark: [this.advanceTable.allotmentRemark],
 
         isDriverAcceptanceRequired: [this.advanceTable.isDriverAcceptanceRequired],
-        driverAcceptanceStatus: [this.advanceTable.driverAcceptanceStatus],
+        driverAcceptanceStatus: ['Pending'],
         acceptanceNotificationSentToDriver: [this.advanceTable.acceptanceNotificationSentToDriver],
     
         acceptanceNotificationSentToDriverRemark: [this.advanceTable.acceptanceNotificationSentToDriverRemark],

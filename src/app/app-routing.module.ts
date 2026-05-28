@@ -83,6 +83,15 @@ const routes: Routes = [
             (m) => m.DutyStateModule
           )
       },
+
+      {
+        path: 'reservationOTP',
+        loadChildren: () =>
+          import('./reservationOTP/reservationOTP.module').then(
+            (m) => m.ReservationOTPModule
+          )
+      },
+
       {
         path: 'dutyStateCustomer',
         loadChildren: () =>

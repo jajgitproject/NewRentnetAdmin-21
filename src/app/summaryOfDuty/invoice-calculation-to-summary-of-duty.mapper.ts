@@ -617,8 +617,8 @@ export function mapInvoiceCalculationToSummaryOfDuty(response: unknown): Summary
 
   const totalHrs = pick(
     r,
-    'totalHoursWithAddtionalHours',
-    'TotalHoursWithAddtionalHours'
+    'totalHoursWithAddtionalHoursForDutySummary',
+    'TotalHoursWithAddtionalHoursForDutySummary'
   );
 
   const dutyPkgAmt = pick(
