@@ -95,10 +95,9 @@ export class PrintDutySlipComponent {
       data =>   
       {
         this.dataSource = data;
-        this.TotalKMGSG=this.dataSource?.locationInKM-this.dataSource?.locationOutKM;
-        console.log("TotalKMGSG",this.TotalKMGSG);
+        //this.TotalKMGSG=this.dataSource?.locationInKM-this.dataSource?.locationOutKM;
         this.totalKms =  this.dataSource?.runningDetailsModels ?.reduce((sum: number, item: any) => sum + Number(item.distance || 0), 0);
-        this.getTime();
+        //this.getTime();
       },
       (error: HttpErrorResponse) => { this.dataSource = null});
     }  

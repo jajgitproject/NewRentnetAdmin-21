@@ -742,8 +742,10 @@ onTNCChange(checked: any)
             const control = this.advanceTableForm.controls[item.fieldName];
             if (control) {
               control.setValue(item.fieldValue);
+              this.arr.push(item.fieldValue);
             }       
       });
+      this.advanceTableForm.patchValue({projectCode: this.arr});
         }
       );
     }
