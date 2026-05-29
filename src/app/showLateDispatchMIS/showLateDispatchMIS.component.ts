@@ -18,7 +18,6 @@ import { Form, FormControl } from '@angular/forms';
 import moment from 'moment';
 import { OrganizationalEntityDropDown } from '../organizationalEntity/organizationalEntityDropDown.model';
 import { MatRadioButton } from '@angular/material/radio';
-import { CityDropDown } from '../city/cityDropDown.model';
 @Component({
   standalone: false,
   selector: 'app-showLateDispatchMIS',
@@ -47,8 +46,8 @@ export class ShowLateDispatchMISComponent implements OnInit {
   sortType: string = '';
 
   SearchServiceLocation: FormControl = new FormControl();
-  public ServiceLocationList?: CityDropDown[] = [];
-  filteredServiceLocationOptions: Observable<CityDropDown[]>;
+  public ServiceLocationList?: OrganizationalEntityDropDown[] = [];
+  filteredServiceLocationOptions: Observable<OrganizationalEntityDropDown[]>;
 
   SearchFromDate: string = '';
   SearchToDate: string = '';
@@ -99,17 +98,29 @@ export class ShowLateDispatchMISComponent implements OnInit {
     }
   }
   
+  private formatSearchDate(date: string | Date | null | undefined): string
+  {
+    if (!date || date === '')
+    {
+      return '';
+    }
+    return moment(date).format('MMM DD yyyy');
+  }
+
+  private getSearchParams()
+  {
+    return {
+      fromDate: this.formatSearchDate(this.SearchFromDate),
+      toDate: this.formatSearchDate(this.SearchToDate),
+      serviceLocation: this.SearchServiceLocation.value || '',
+      timeDiff: this.SearchTimeDiff
+    };
+  }
+
   public loadData() 
   {
-    if(this.SearchFromDate!=="")
-    {
-      this.SearchFromDate=moment(this.SearchFromDate).format('MMM DD yyyy');
-    }
-    if(this.SearchToDate!=="")
-    {
-      this.SearchToDate=moment(this.SearchToDate).format('MMM DD yyyy');
-    }
-    this.dutyRegisterService.getTableData(this.SearchFromDate,this.SearchToDate,this.SearchServiceLocation.value,this.SearchTimeDiff,this.PageNumber).subscribe
+    const searchParams = this.getSearchParams();
+    this.dutyRegisterService.getTableData(searchParams.fromDate, searchParams.toDate, searchParams.serviceLocation, searchParams.timeDiff, this.PageNumber).subscribe
     (
       data =>   
       {
@@ -174,7 +185,8 @@ export class ShowLateDispatchMISComponent implements OnInit {
       this.sortingData = 1;
       this.sortType = "Descending";
     }
-    this.dutyRegisterService.getTableDataSort(this.SearchFromDate,this.SearchToDate,this.SearchServiceLocation.value,this.SearchTimeDiff,this.PageNumber,coloumName.active,this.sortType).subscribe
+    const searchParams = this.getSearchParams();
+    this.dutyRegisterService.getTableDataSort(searchParams.fromDate, searchParams.toDate, searchParams.serviceLocation, searchParams.timeDiff, this.PageNumber, coloumName.active, this.sortType).subscribe
     (
       data =>   
       {
@@ -187,7 +199,7 @@ export class ShowLateDispatchMISComponent implements OnInit {
   //---------- Service Location ----------
   InitServiceLocation()
   {
-    this._generalService.GetCitiessAll().subscribe(
+    this._generalService.GetLocation().subscribe(
     data=>
     {
       this.ServiceLocationList=data;
@@ -204,7 +216,7 @@ export class ShowLateDispatchMISComponent implements OnInit {
   }
 
   return this.ServiceLocationList.filter(data => 
-    data.geoPointName.toLowerCase().includes(filterValue)
+    data.organizationalEntityName.toLowerCase().includes(filterValue)
   );
 }
 
@@ -216,6 +228,34 @@ export class ShowLateDispatchMISComponent implements OnInit {
   //     return data.geoPointName.toLowerCase().includes(filterValue);
   //   });
   // }
+
+  downloadCsv()
+  {
+    const searchParams = this.getSearchParams();
+    this.dutyRegisterService.downloadCsv(
+      searchParams.fromDate,
+      searchParams.toDate,
+      searchParams.serviceLocation,
+      searchParams.timeDiff
+    ).subscribe(
+      (blob: Blob) =>
+      {
+        const fileUrl = window.URL.createObjectURL(blob);
+        const anchor = document.createElement('a');
+        anchor.href = fileUrl;
+        anchor.download = `ShowLateDispatchMIS_${moment().format('YYYYMMDD_HHmmss')}.csv`;
+        document.body.appendChild(anchor);
+        anchor.click();
+        document.body.removeChild(anchor);
+        window.URL.revokeObjectURL(fileUrl);
+        this.showNotification('snackbar-success', 'CSV downloaded successfully', 'top', 'center');
+      },
+      (error: HttpErrorResponse) =>
+      {
+        this.showNotification('snackbar-danger', 'Failed to download CSV', 'top', 'center');
+      }
+    );
+  }
 
 }
 

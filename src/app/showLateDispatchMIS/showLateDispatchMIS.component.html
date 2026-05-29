@@ -31,6 +31,10 @@
                                             <!-- <div style="float:left" *ngIf="SearchCustomerGroup"><b>Customer Group</b> : {{SearchCustomerGroup}}</div> -->
                                         </div>
                                         <div style="width: 30%; text-align:right;">
+                                            <button mat-raised-button color="accent" (click)="downloadCsv()">
+                                                Download CSV
+                                            </button>
+                                            &nbsp;
                                             <button mat-raised-button color="primary" data-dismiss="modal" data-toggle="modal" data-backdrop="false" data-target="#exampleModalCenter">
                                                 Search
                                             </button>
@@ -173,8 +177,8 @@
                             <mat-label>Dispatch Location</mat-label>
                             <input type="text" matInput [formControl]="SearchServiceLocation"  [matAutocomplete]="auto">
                             <mat-autocomplete #auto="matAutocomplete">
-                                <mat-option *ngFor="let option of filteredServiceLocationOptions | async" [value]="option.geoPointName">
-                                    {{option.geoPointName}}
+                                <mat-option *ngFor="let option of filteredServiceLocationOptions | async" [value]="option.organizationalEntityName">
+                                    {{option.organizationalEntityName}}
                                 </mat-option>
                             </mat-autocomplete>
                         </mat-form-field>

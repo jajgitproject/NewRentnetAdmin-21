@@ -15,39 +15,49 @@ export class ShowLateDispatchMISService
   {
     this.API_URL=generalService.BaseURL+ "lateAllotmentMIS";
   }
+  private toRouteParam(value: string): string
+  {
+    const routeValue = value === '' ? 'null' : value;
+    return encodeURIComponent(routeValue);
+  }
+
   /** CRUD METHODS */
   getTableData(SearchFromDate:string,SearchToDate:string,SearchServiceLocation:string,SearchTimeDiff:number,PageNumber: number):  Observable<any> 
   {
-    if(SearchFromDate==="")
-    {
-      SearchFromDate="null";
-    }
-    if(SearchToDate==="")
-    {
-      SearchToDate="null";
-    }
-    if(SearchServiceLocation==="")
-    {
-      SearchServiceLocation="null";
-    }
-    return this.httpClient.get(this.API_URL + "/" + 'getAllLateDispatch' + '/' + SearchFromDate + '/' + SearchToDate + '/' + SearchServiceLocation + '/' + SearchTimeDiff + '/' + PageNumber + '/ReservationID/Descending');
+    return this.httpClient.get(
+      this.API_URL + '/getAllLateDispatch/' +
+      this.toRouteParam(SearchFromDate) + '/' +
+      this.toRouteParam(SearchToDate) + '/' +
+      this.toRouteParam(SearchServiceLocation) + '/' +
+      SearchTimeDiff + '/' +
+      PageNumber + '/ReservationID/Descending'
+    );
   }
 
   getTableDataSort(SearchFromDate:string,SearchToDate:string,SearchServiceLocation:string,SearchTimeDiff:number,PageNumber: number,coloumName:string,sortType:string):  Observable<any> 
   {
-    if(SearchFromDate==="")
-    {
-      SearchFromDate="null";
-    }
-    if(SearchToDate==="")
-    {
-      SearchToDate="null";
-    }
-    if(SearchServiceLocation==="")
-    {
-      SearchServiceLocation="null";
-    }
-    return this.httpClient.get(this.API_URL + "/" + 'getAllLateDispatch' + '/' + SearchFromDate + '/' + SearchToDate + '/' + SearchServiceLocation + '/' + SearchTimeDiff + '/' + PageNumber +  '/'+coloumName+'/'+sortType);
+    return this.httpClient.get(
+      this.API_URL + '/getAllLateDispatch/' +
+      this.toRouteParam(SearchFromDate) + '/' +
+      this.toRouteParam(SearchToDate) + '/' +
+      this.toRouteParam(SearchServiceLocation) + '/' +
+      SearchTimeDiff + '/' +
+      PageNumber + '/' +
+      encodeURIComponent(coloumName) + '/' +
+      encodeURIComponent(sortType)
+    );
+  }
+
+  downloadCsv(SearchFromDate:string,SearchToDate:string,SearchServiceLocation:string,SearchTimeDiff:number): Observable<Blob>
+  {
+    return this.httpClient.get(
+      this.API_URL + '/exportLateDispatch/' +
+      this.toRouteParam(SearchFromDate) + '/' +
+      this.toRouteParam(SearchToDate) + '/' +
+      this.toRouteParam(SearchServiceLocation) + '/' +
+      SearchTimeDiff,
+      { responseType: 'blob' }
+    );
   }
   
 }
