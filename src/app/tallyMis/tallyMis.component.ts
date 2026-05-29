@@ -1,32 +1,19 @@
 // @ts-nocheck
-import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
-import { HttpClient, HttpErrorResponse } from '@angular/common/http';
-import { MatDialog, MatDialogRef } from '@angular/material/dialog';
-import { MatPaginator } from '@angular/material/paginator';
-import { MatSort } from '@angular/material/sort';
-import { DataSource } from '@angular/cdk/collections';
-import { MatSnackBar } from '@angular/material/snack-bar';
-import { BehaviorSubject, fromEvent, merge, Observable, Subscription } from 'rxjs';
-import { map, startWith } from 'rxjs/operators';
-import { DateAdapter, MAT_DATE_LOCALE } from '@angular/material/core';
-import { MatMenu, MatMenuTrigger } from '@angular/material/menu';
-import { SelectionModel } from '@angular/cdk/collections';
-import { GeneralService } from '../general/general.service';
-import { MyUploadComponent } from '../myupload/myupload.component';
+import { Component, OnInit } from '@angular/core';
+import { HttpErrorResponse } from '@angular/common/http';
 import { FormControl } from '@angular/forms';
-import { CustomerDropDown } from '../customer/customerDropDown.model';
+import { Observable } from 'rxjs';
+import { debounceTime, distinctUntilChanged, map, startWith, switchMap } from 'rxjs/operators';
+import { MAT_DATE_LOCALE } from '@angular/material/core';
 import moment from 'moment';
-import { Router } from '@angular/router';
-import { CustomerGroupDropDown } from '../customerGroup/customerGroupDropDown.model';
-import { OrganizationalEntityDropDown } from '../organizationalEntityMessage/organizationalEntityDropDown.model';
-import { RegistrationDropDown } from '../carPaidTaxMIS/registrationDropDown.model';
-import { CreditNoteHistoryComponent } from '../creditnotehistory/creditnotehistory.component';
-import { InvoiceBillingHistoryComponent } from '../invoiceBillingHistory/invoiceBillingHistory.component';
-// import { TallyMisService } from './tallyMis.service';
-// import { TallyMis } from './tallyMis.model';
-import { DocumentDropDown } from '../general/documentDropDown.model';
-import { TallyMis } from './tallyMis.model';
+import { GeneralService } from '../general/general.service';
+import { MISTALLY_API_COLUMNS, MISTALLY_COLUMN_ALIASES } from './tallyMis.model';
 import { TallyMisService } from './tallyMis.service';
+
+export interface TallyMisTableColumn {
+  id: string;
+  key: string;
+}
 
 @Component({
   standalone: false,
@@ -36,482 +23,280 @@ import { TallyMisService } from './tallyMis.service';
   providers: [{ provide: MAT_DATE_LOCALE, useValue: 'en-GB' }]
 })
 export class TallyMisComponent implements OnInit {
-  displayedColumns = [
-    'billingBranch',
-    'customerServiceLocation',
-    'customerGSTRNo',
-    'bookedBy',
-    'usedBy',
-    'billno',
-   'billDate',
-   'customerName',
-   'customerid',
-   'carHireCharges',
-   'parkingandToll',
-   'netCCProcessingamount',
-   'subtotal',
-   'netSgstAmount',
-   'netCgstAmount',
-   'netIgstAmount',
-   'finalBillAmount', 
-    'sgstRate' ,
-     'cgstRate' ,
-    'igstRate' ,
-    'roundOff' ,
-    'narration' ,
-    'billAlter' ,
-    'irnno' ,
-   'irndate',
-  ];
+  tableColumns: TallyMisTableColumn[] = [];
+  columnWidths: Record<string, number> = {};
+  dataSource: Record<string, string>[] | null = null;
+  pageNumber: number = 0;
+  sortType: string = 'Ascending';
+  sortColumn: string = 'InvoiceID';
+  csvExporting: boolean = false;
 
-  dataSource: TallyMis[] | null;
-  SearchActivationStatus: boolean = true;
-  PageNumber: number = 0;
-  search: FormControl = new FormControl();
-  isChecked: boolean = false;
-  sortingData: number;
-  sortType: string;
-  dialogRef: MatDialogRef<any>;
-  // SearchFromDate: string = '';
-  // SearchToDate: string = '';
-  SearchTRN:string ='';
-  SearchEcoBookingNo: string = '';
-  SearchStatus:string ='';
-  searchLocation: string = '';
-  searchinvoiceStatusActiveOrVoid: string = '';
-  public DocumentTypeList?:TallyMis[]=[];
-    filteredDocumentTypeOption: Observable<TallyMis[]>;
-    public DocumentList?:DocumentDropDown[]=[];
-    filteredDocumentOption: Observable<DocumentDropDown[]>;
-  documentType : FormControl=new FormControl();
+  searchFromDate: string = '';
+  searchToDate: string = '';
+  customerName: FormControl = new FormControl('');
+  invoiceNumberWithPrefix: FormControl = new FormControl('');
+  branchName: FormControl = new FormControl('');
 
-filteredOrganizationalEntityOptions: Observable<OrganizationalEntityDropDown[]>;
-public OrganizationalEntityList?: OrganizationalEntityDropDown[] = [];
-searchOwnedSupplier:string='';
-searchDocumentType:string='';
-searchDaysRemaning:string='';
-location : FormControl=new FormControl();
-documentName:FormControl=new FormControl();
-searchDocumentName: string = '';
-  searchActivationStatus : boolean=true;
-  searchTerm: any = '';
-  selectedFilter: string = 'search';
-  advanceTableForm: any;
-  SearchFromDate: string = '';
-  startDate : FormControl = new FormControl();
+  branchList: any[] = [];
+  customerList: { customerID: number; customerName: string }[] = [];
+  filteredCustomerOptions: Observable<{ customerID: number; customerName: string }[]>;
+  filteredBranchOptions: Observable<any[]>;
 
-  SearchToDate: string = '';
-  endDate : FormControl = new FormControl();
-  exporting: boolean = false;
   constructor(
-    public httpClient: HttpClient,
-    public dialog: MatDialog,
     public tallyMisService: TallyMisService,
-    private snackBar: MatSnackBar,
-    public router:Router,
-    public _generalService: GeneralService,
-    public route: Router,
+    public _generalService: GeneralService
   ) { }
-  @ViewChild(MatPaginator, { static: true }) paginator: MatPaginator;
-  @ViewChild(MatSort, { static: true }) sort: MatSort;
-  @ViewChild('filter', { static: true }) filter: ElementRef;
-  @ViewChild(MatMenuTrigger)
-  contextMenu: MatMenuTrigger;
-  contextMenuPosition = { x: '0px', y: '0px' };
-  ngOnInit() {
-    // this.loadData();
-    this.InitLocation();
-    this.SubscribeUpdateService();
 
+  ngOnInit() {
+    this.initTableColumns();
+    this.initBranch();
+    this.initCustomerAutocomplete();
+    this.initInvoiceNumberInput();
+  }
+
+  get displayedColumnIds(): string[] {
+    return this.tableColumns.map(c => c.id);
+  }
+
+  getCellValue(row: Record<string, string>, columnKey: string): string {
+    return row[columnKey] ?? '';
+  }
+
+  displayCustomerName(option: { customerName?: string } | string): string {
+    if (!option) {
+      return '';
+    }
+    if (typeof option === 'string') {
+      return option;
+    }
+    return option.customerName || '';
+  }
+
+  getColumnWidth(columnKey: string): string {
+    const width = this.columnWidths[columnKey];
+    return width ? `${width}px` : 'auto';
+  }
+
+  private updateColumnWidths(rows: Record<string, string>[]) {
+    const padding = 40;
+    const minWidth = 72;
+    const maxWidth = 520;
+    const charPx = 7.5;
+    const widths: Record<string, number> = {};
+
+    for (const key of MISTALLY_API_COLUMNS) {
+      let maxLen = key.length;
+      for (const row of rows) {
+        maxLen = Math.max(maxLen, (row[key] || '').length);
+      }
+      widths[key] = Math.min(maxWidth, Math.max(minWidth, Math.ceil(maxLen * charPx + padding)));
+    }
+
+    this.columnWidths = widths;
+  }
+
+  private getCustomerSearchValue(): string {
+    const value = this.customerName.value;
+    if (!value) {
+      return '';
+    }
+    if (typeof value === 'string') {
+      return value;
+    }
+    return value.customerName || '';
+  }
+
+  /** UI and API route use hyphen; invoice table stores slash. */
+  private toInvoiceDisplayValue(value: string): string {
+    return (value || '').replace(/\//g, '-');
+  }
+
+  private getInvoiceSearchValue(): string {
+    const value = this.invoiceNumberWithPrefix.value;
+    if (!value) {
+      return '';
+    }
+    return this.toInvoiceDisplayValue(String(value));
+  }
+
+  private formatDate(dateValue: string): string {
+    if (!dateValue) {
+      return '';
+    }
+    return moment(dateValue).format('yyyy-MM-DD');
+  }
+
+  private initTableColumns() {
+    this.tableColumns = MISTALLY_API_COLUMNS.map((key, index) => ({
+      id: `col_${index}`,
+      key
+    }));
+  }
+
+  private pickField(row: Record<string, unknown>, columnKey: string): string {
+    const aliases = MISTALLY_COLUMN_ALIASES[columnKey] || [columnKey];
+    for (const alias of aliases) {
+      const value = row[alias];
+      if (value !== undefined && value !== null) {
+        return String(value);
+      }
+    }
+    return '';
+  }
+
+  private normalizeRow(row: Record<string, unknown>): Record<string, string> {
+    const normalized: Record<string, string> = {};
+    for (const key of MISTALLY_API_COLUMNS) {
+      normalized[key] = this.pickField(row, key);
+    }
+    return normalized;
+  }
+
+  private initBranch() {
+    this._generalService.GetOrganizationalBranch().subscribe(data => {
+      this.branchList = data || [];
+      this.filteredBranchOptions = this.branchName.valueChanges.pipe(
+        startWith(''),
+        map(value => this.filterBranch(value || ''))
+      );
+    });
+  }
+
+  private filterBranch(value: string): any[] {
+    if (!value || value.length < 2) {
+      return [];
+    }
+    const filterValue = value.toLowerCase();
+    return this.branchList.filter(
+      (x) => (x.organizationalEntityName || '').toLowerCase().includes(filterValue)
+    );
+  }
+
+  private normalizeCustomerOption(customer: any): { customerID: number; customerName: string } {
+    return {
+      customerID: customer?.customerID ?? customer?.CustomerID ?? 0,
+      customerName: (customer?.customerName ?? customer?.CustomerName ?? '').trim()
+    };
+  }
+
+  private initCustomerAutocomplete() {
+    this._generalService.getCustomers().subscribe(data => {
+      this.customerList = (data || [])
+        .map(c => this.normalizeCustomerOption(c))
+        .filter(c => c.customerName);
+      this.filteredCustomerOptions = this.customerName.valueChanges.pipe(
+        startWith(''),
+        map(value => this.filterCustomer(value || ''))
+      );
+    });
+  }
+
+  private filterCustomer(value: string): { customerID: number; customerName: string }[] {
+    if (!value || value.length < 2) {
+      return [];
+    }
+    const filterValue = value.toLowerCase();
+    return this.customerList.filter(
+      (x) => x.customerName.toLowerCase().includes(filterValue)
+    );
+  }
+
+  private initInvoiceNumberInput() {
+    this.invoiceNumberWithPrefix.valueChanges.subscribe(value => {
+      const displayValue = this.toInvoiceDisplayValue(String(value || ''));
+      if (displayValue !== value) {
+        this.invoiceNumberWithPrefix.setValue(displayValue, { emitEvent: false });
+      }
+    });
+  }
+
+  loadData() {
+    const fromDate = this.formatDate(this.searchFromDate);
+    const toDate = this.formatDate(this.searchToDate);
+    const customer = this.getCustomerSearchValue();
+    const invoiceNo = this.getInvoiceSearchValue();
+    const branch = this.branchName.value || '';
+
+    this.tallyMisService
+      .getTableData(fromDate, toDate, customer, invoiceNo, branch, this.pageNumber, this.sortColumn, this.sortType)
+      .subscribe(
+        (data) => {
+          const rows = Array.isArray(data) ? data : [];
+          this.dataSource = rows.map(row => this.normalizeRow(row));
+          this.updateColumnWidths(this.dataSource);
+        },
+        (_error: HttpErrorResponse) => {
+          this.dataSource = [];
+          this.columnWidths = {};
+        }
+      );
+  }
+
+  searchData() {
+    this.pageNumber = 0;
+    this.loadData();
   }
 
   refresh() {
-    this.searchActivationStatus = true;
-    this.PageNumber = 0;
-   this.SearchFromDate = '';
-    this.SearchToDate = '';
-    this.location.setValue('');
-   
-  
-    this.searchTerm = '';
-    this.selectedFilter = 'search';
-  
+    this.pageNumber = 0;
+    this.sortType = 'Ascending';
+    this.sortColumn = 'InvoiceID';
+    this.searchFromDate = '';
+    this.searchToDate = '';
+    this.customerName.setValue('');
+    this.invoiceNumberWithPrefix.setValue('');
+    this.branchName.setValue('');
+    this.dataSource = null;
+    this.columnWidths = {};
+  }
+
+  sortingDataChanged(column: any) {
+    if (this.sortColumn === column.active) {
+      this.sortType = this.sortType === 'Ascending' ? 'Descending' : 'Ascending';
+    } else {
+      this.sortColumn = column.active;
+      this.sortType = 'Ascending';
+    }
     this.loadData();
   }
 
-  public SearchData() {
-    this.loadData();
-
-  }
- 
-  public Filter() {
-    this.PageNumber = 0;
-    this.loadData();
-  }
-
-  onBackPress(event) 
-  {
-    if (event.keyCode === 8) 
-    {
+  nextCall() {
+    if (this.dataSource && this.dataSource.length > 0) {
+      this.pageNumber++;
       this.loadData();
     }
   }
 
-  public loadData() 
-  {
-   if(this.SearchFromDate!=="")
-       {
-         this.SearchFromDate=moment(this.SearchFromDate).format('yyyy-MM-DD');
-       }
-       if(this.SearchToDate!=="")
-       {
-         this.SearchToDate=moment(this.SearchToDate).format('yyyy-MM-DD');
-       }
-    
-    this.tallyMisService.getTableData(this.SearchFromDate, this.SearchToDate, this.location.value, this.PageNumber).subscribe(
-      data => {
-        if (Array.isArray(data)) {
-          this.dataSource = data.map(d => ({
-            ...d,
-            billDate: d.billDate ? moment(d.billDate).format('DD/MM/YYYY') : '',
-            roundOff: ((d.roundOff ?? d.roundoff ?? d.roundOFF ?? d.round_off) || '').toString().trim() === '' ? '' : (d.roundOff ?? d.roundoff ?? d.roundOFF ?? d.round_off),
-            narration: ((d.narration ?? d.Narration ?? d.invoiceNarration) || '').toString().trim() === '' ? '' : (d.narration ?? d.Narration ?? d.invoiceNarration)
-          }));
-        } else {
-          this.dataSource = data;
-        }
+  previousCall() {
+    if (this.pageNumber > 0) {
+      this.pageNumber--;
+      this.loadData();
+    }
+  }
+
+  downloadCsv() {
+    const fromDate = this.formatDate(this.searchFromDate);
+    const toDate = this.formatDate(this.searchToDate);
+    const customer = this.getCustomerSearchValue();
+    const invoiceNo = this.getInvoiceSearchValue();
+    const branch = this.branchName.value || '';
+
+    this.csvExporting = true;
+    this.tallyMisService.downloadCsv(fromDate, toDate, customer, invoiceNo, branch).subscribe(
+      (blob: Blob) => {
+        this.csvExporting = false;
+        const fileUrl = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = fileUrl;
+        a.download = `TallyMIS_${moment().format('YYYYMMDD_HHmmss')}.csv`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        window.URL.revokeObjectURL(fileUrl);
       },
-      (error: HttpErrorResponse) => { this.dataSource = null; }
+      () => {
+        this.csvExporting = false;
+      }
     );
   }
-
-downloadExcel() {
-  this.tallyMisService.exportExcel(
-    this.SearchFromDate,
-    this.SearchToDate,
-    this.location.value,
-    this.PageNumber,
-    'InvoiceID',
-    'Ascending'
-  ).subscribe(
-    (response: any) => {
-
-      // Backend sends HTML Excel as bytes → correct MIME type
-      const blob = new Blob([response], { type: 'application/vnd.ms-excel' });
-
-      const url = window.URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = 'MISTally.xls';     // KEEP .xls because backend creates .xls
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      window.URL.revokeObjectURL(url);
-
-      this.showNotification('snackbar-success', 'Download Completed', 'bottom', 'center');
-    },
-    (error: HttpErrorResponse) => {
-      this.showNotification('snackbar-danger', 'Error downloading Excel', 'bottom', 'center');
-    }
-  );
 }
-
-  // Export all pages to Excel
-  exportAllToExcel() {
-    this.exporting = true;
-    const allData: TallyMis[] = [];
-    let page = 0;
-    const fromDate = this.SearchFromDate ? moment(this.SearchFromDate).format('yyyy-MM-DD') : '';
-    const toDate = this.SearchToDate ? moment(this.SearchToDate).format('yyyy-MM-DD') : '';
-    const locationValue = this.location.value;
-
-    const fetchNext = () => {
-      this.tallyMisService.getTableData(fromDate, toDate, locationValue, page).subscribe(
-        data => {
-          const arr = Array.isArray(data) ? data : [];
-          if (arr.length === 0) {
-            this.generateExcel(allData);
-            this.exporting = false;
-            return;
-          }
-          const mapped = arr.map(d => ({
-            ...d,
-            billDate: d.billDate ? moment(d.billDate).format('DD/MM/YYYY') : '',
-            roundOff: ((d.roundOff ?? d.roundoff ?? d.roundOFF ?? d.round_off) || '').toString().trim() === '' ? '' : (d.roundOff ?? d.roundoff ?? d.roundOFF ?? d.round_off),
-            narration: ((d.narration ?? d.Narration ?? d.invoiceNarration) || '').toString().trim() === '' ? '' : (d.narration ?? d.Narration ?? d.invoiceNarration)
-          }));
-          allData.push(...mapped);
-          page++;
-          fetchNext();
-        },
-        _ => {
-          // On error still try to export what we have
-          this.generateExcel(allData);
-          this.exporting = false;
-        }
-      );
-    };
-    fetchNext();
-  }
-
-  private generateExcel(rows: TallyMis[]) {
-    if (!rows || rows.length === 0) { 
-      this.showNotification('snackbar-danger', 'No data to export', 'bottom', 'center');
-      return; 
-    }
-    
-    // Create CSV content
-    const headers = Object.keys(rows[0]);
-    let csvContent = headers.join(',') + '\n';
-    
-    rows.forEach(row => {
-      const values = headers.map(header => {
-        const value = row[header];
-        // Escape commas and quotes in values
-        if (value === null || value === undefined) return '';
-        const stringValue = String(value);
-        if (stringValue.includes(',') || stringValue.includes('"') || stringValue.includes('\n')) {
-          return '"' + stringValue.replace(/"/g, '""') + '"';
-        }
-        return stringValue;
-      });
-      csvContent += values.join(',') + '\n';
-    });
-    
-    // Create blob and download
-    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-    const link = document.createElement('a');
-    const url = URL.createObjectURL(blob);
-    link.setAttribute('href', url);
-    link.setAttribute('download', 'TallyMIS.csv');
-    link.style.visibility = 'hidden';
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    
-    this.showNotification('snackbar-success', 'Download Excel ', 'bottom', 'center');
-  }
-
-  showNotification(colorName, text, placementFrom, placementAlign) {
-    this.snackBar.open(text, '', {
-      duration: 2000,
-      verticalPosition: placementFrom,
-      horizontalPosition: placementAlign,
-      panelClass: colorName
-    });
-  }
-  onContextMenu(event: MouseEvent, item: TallyMis) {
-    event.preventDefault();
-    this.contextMenuPosition.x = event.clientX + 'px';
-    this.contextMenuPosition.y = event.clientY + 'px';
-    this.contextMenu.menuData = { item: item };
-    this.contextMenu.menu.focusFirstItem('mouse');
-    this.contextMenu.openMenu();
-  }
-
-  NextCall() {
-    if (this.dataSource.length > 0) {
-
-      this.PageNumber++;
-      this.loadData();
-    }
-  }
-  PreviousCall() {
-
-    if (this.PageNumber > 0) {
-      this.PageNumber--;
-      this.loadData();
-    }
-  }
-
-  /////////////////To Recieve Updates Start////////////////////////////
-  messageReceived: string;
-  MessageArray: string[] = [];
-  private subscriptionName: Subscription; //important to create a subscription
-
-  SubscribeUpdateService() {
-    this.subscriptionName = this._generalService.getUpdate().subscribe
-      (
-        message => {
-          //message contains the data sent from service
-          this.messageReceived = message.text;
-          this.MessageArray = this.messageReceived.split(":");
-          if (this.MessageArray.length == 3) {
-            if (this.MessageArray[0] == "UnlockEmployeeCreate") {
-              if (this.MessageArray[1] == "UnlockEmployeeView") {
-                if (this.MessageArray[2] == "Success") {
-                  this.refresh();
-                  this.showNotification(
-                    'snackbar-success',
-                    'Created...!!!',
-                    'bottom',
-                    'center'
-                  );
-                }
-              }
-            }
-            else if (this.MessageArray[0] == "UnlockEmployeeUpdate") {
-              if (this.MessageArray[1] == "UnlockEmployeeView") {
-                if (this.MessageArray[2] == "Success") {
-                  this.refresh();
-                  this.showNotification(
-                    'snackbar-success',
-                    'Updated...!!!',
-                    'bottom',
-                    'center'
-                  );
-                }
-              }
-            }
-            else if (this.MessageArray[0] == "UnlockEmployee") {
-              if (this.MessageArray[1] == "UnlockEmployeeView") {
-                if (this.MessageArray[2] == "Success") {
-                  this.refresh();
-                  this.showNotification(
-                    'snackbar-success',
-                    'Account successfully...!!!',
-                    'bottom',
-                    'center'
-                  );
-                }
-              }
-            }
-            else if (this.MessageArray[0] == "UnlockEmployeeAll") {
-              if (this.MessageArray[1] == "UnlockEmployeeView") {
-                if (this.MessageArray[2] == "Failure") {
-                  this.refresh();
-                  this.showNotification(
-                    'snackbar-danger',
-                    'Operation Failed.....!!!',
-                    'bottom',
-                    'center'
-                  );
-                }
-              }
-            }
-            else if (this.MessageArray[0] == "DataNotFound") {
-              if (this.MessageArray[1] == "DuplicacyError") {
-                if (this.MessageArray[2] == "Failure") {
-                  this.refresh();
-                  this.showNotification(
-                    'snackbar-danger',
-                    'Duplicate Value Found.....!!!',
-                    'bottom',
-                    'center'
-                  );
-                }
-              }
-            }
-          }
-        }
-      );
-  }
-
-  SortingData(coloumName:any) {
-    if (this.sortingData == 1) {
-
-      this.sortingData = 0;
-      this.sortType = "Ascending"
-    }
-    else {
-      this.sortingData = 1;
-      this.sortType = "Descending";
-    }
-    this.tallyMisService.getTableDataSort(this.SearchFromDate, this.SearchToDate, this.location.value, this.PageNumber, coloumName.active, this.sortType).subscribe(
-      data => {
-        if (Array.isArray(data)) {
-          this.dataSource = data.map(d => ({
-            ...d,
-            billDate: d.billDate ? moment(d.billDate).format('DD/MM/YYYY') : '',
-            roundOff: ((d.roundOff ?? d.roundoff ?? d.roundOFF ?? d.round_off) || '').toString().trim() === '' ? '' : (d.roundOff ?? d.roundoff ?? d.roundOFF ?? d.round_off),
-            narration: ((d.narration ?? d.Narration ?? d.invoiceNarration) || '').toString().trim() === '' ? '' : (d.narration ?? d.Narration ?? d.invoiceNarration)
-          }));
-        } else {
-          this.dataSource = data;
-        }
-      },
-      (error: HttpErrorResponse) => { this.dataSource = null; }
-    );
-  }
-  openInNewTab(rowItem: any) {
-    let baseUrl = this._generalService.FormURL;   
-    const url = this.router.serializeUrl(this.router.createUrlTree(['/bookingConfiguration'], { queryParams: {
-      BookingID:rowItem.integrationRequestID,
-      } }));
-      window.open(baseUrl + url, '_blank');
-  }
-
-
-
-   InitLocation(){
-      this.tallyMisService.GetLocation().subscribe(
-        data=>
-          {
-            this.OrganizationalEntityList=data;
-            this.filteredOrganizationalEntityOptions = this.location.valueChanges.pipe(
-              startWith(""),
-              map(value => this._filterOrganizationalEntity(value || ''))
-            ); 
-          });
-    }
-    private _filterOrganizationalEntity(value: string): any {
-      const filterValue = value.toLowerCase();
-       if (!value || value.length < 3)
-     {
-        return [];   
-      }
-      return this.OrganizationalEntityList.filter(
-        customer => 
-        {
-          return customer.organizationalEntityName.toLowerCase().indexOf(filterValue)===0;
-        });
-    }
-
-    
-   
- viewCreditNote(row) {
-    this.dialog.open(CreditNoteHistoryComponent, {
-      width: '500px',
-      data: {
-        invoiceID: row?.invoiceID,
-        invoiceNumberWithPrefix: row?.invoiceNumberWithPrefix
-      }
-    });
-  }
-
-  //---------- Attach/Detach ----------
-  openAttachDetachForAdd() 
-  { 
-    const url = this.route.serializeUrl(
-      this.route.createUrlTree(['/invoiceAttachDetach']));
-      window.open(this._generalService.FormURL + url, '_blank');
-  }
-
-  openAttachDetachForEdit(item:any) 
-  { 
-    const url = this.route.serializeUrl(
-      this.route.createUrlTree(['/invoiceAttachDetach'],{ queryParams: {
-      invoiceNumberWithPrefix:item.invoiceNumberWithPrefix,
-      invoiceID:item.invoiceID
-      } }));
-      window.open(this._generalService.FormURL + url, '_blank');
-  }
-  
-viewInvoiceBilling(row) {
-    this.dialog.open(InvoiceBillingHistoryComponent, {
-      width: '500px',
-      data: {
-        invoiceID: row?.invoiceID,
-        invoiceNumberWithPrefix: row?.invoiceNumberWithPrefix
-      }
-    });
-  }
-
-
-
-   
-
-}
-
-
-

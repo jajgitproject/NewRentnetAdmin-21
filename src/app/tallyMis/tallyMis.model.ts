@@ -1,57 +1,48 @@
 // @ts-nocheck
-export class TallyMis {
-  billingBranch: string;
-  customerServiceLocation: string;
-  customerGSTRNo: string;
-  bookedBy: string;
-  usedBy: string;
-  billno: string;
-  billDate: string;
-  customerName: string;
-  customerid: string;
-  carHireCharges: string;
-  parkingandToll: string;
-  netCCProcessingamount: string;
-  subtotal: string;
-  netSgstAmount: string;
-  netCgstAmount: string;
-  netIgstAmount: string;
-  finalBillAmount: string;
-  sgstRate: string;
-  cgstRate: string;
-  igstRate: string;
-  roundOff: string;
-  narration: string;
-  billAlter: string;
-  irnno: string;
-  irndate: string;
+/** Column order matches MISTally API / CSV export */
+export const MISTALLY_API_COLUMNS: string[] = [
+  'BranchState',
+  'State',
+  'GSTNo',
+  'Billno',
+  'BillDate',
+  'Customerid',
+  'CustomerName',
+  'CarHireCharges',
+  'ParkingandToll',
+  'NetCCProcessingamount',
+  'SUBTOTAL',
+  'NetSgstAmount',
+  'NetCgstAmount',
+  'NetIgstAmount',
+  'FinalBillAmount',
+  'SGSTRate',
+  'CGSTRate',
+  'IGSTRate',
+  'IRNNO',
+  'IRNDATE'
+];
 
-  constructor(tallyMis) {
-    this.billingBranch = tallyMis.billingBranch || '';
-    this.customerServiceLocation = tallyMis.customerServiceLocation || '';
-    this.customerGSTRNo = tallyMis.customerGSTRNo || '';
-    this.bookedBy = tallyMis.bookedBy || '';
-    this.usedBy = tallyMis.usedBy || '';
-    this.billno = tallyMis.billno || '';
-    this.billDate = tallyMis.billDate || '';
-    this.customerName = tallyMis.customerName || '';
-    this.customerid = tallyMis.customerid || '';
-    this.carHireCharges = tallyMis.carHireCharges || '';
-    this.parkingandToll = tallyMis.parkingandToll || '';
-    this.netCCProcessingamount = tallyMis.netCCProcessingamount || '';
-    this.subtotal = tallyMis.subtotal || '';
-    this.netSgstAmount = tallyMis.netSgstAmount || '';
-    this.netCgstAmount = tallyMis.netCgstAmount || '';
-    this.netIgstAmount = tallyMis.netIgstAmount || '';
-    this.finalBillAmount = tallyMis.finalBillAmount || '';
-    this.sgstRate = tallyMis.sgstRate || '';
-    this.cgstRate = tallyMis.cgstRate || '';
-    this.igstRate = tallyMis.igstRate || '';
-    this.roundOff = tallyMis.roundOff || '';
-    this.narration = tallyMis.narration || '';
-    this.billAlter = tallyMis.billAlter || '';
-    this.irnno = tallyMis.irnno || '';
-    this.irndate = tallyMis.irndate || '';
-  }
-}
-
+/** JSON key variants per API property (camelCase + PascalCase) */
+export const MISTALLY_COLUMN_ALIASES: Record<string, string[]> = {
+  BranchState: ['BranchState', 'branchState'],
+  State: ['State', 'state'],
+  GSTNo: ['GSTNo', 'gstNo', 'gstNO'],
+  Billno: ['Billno', 'billno'],
+  BillDate: ['BillDate', 'billDate'],
+  Customerid: ['Customerid', 'customerid', 'customerID'],
+  CustomerName: ['CustomerName', 'customerName'],
+  CarHireCharges: ['CarHireCharges', 'carHireCharges'],
+  ParkingandToll: ['ParkingandToll', 'parkingandToll'],
+  NetCCProcessingamount: ['NetCCProcessingamount', 'netCCProcessingamount'],
+  SUBTOTAL: ['SUBTOTAL', 'subtotal', 'sUBTOTAL'],
+  NetSgstAmount: ['NetSgstAmount', 'netSgstAmount'],
+  NetCgstAmount: ['NetCgstAmount', 'netCgstAmount'],
+  NetIgstAmount: ['NetIgstAmount', 'netIgstAmount'],
+  FinalBillAmount: ['FinalBillAmount', 'finalBillAmount'],
+  SGSTRate: ['SGSTRate', 'sgstRate', 'sGSTRate'],
+  CGSTRate: ['CGSTRate', 'cgstRate', 'cGSTRate'],
+  IGSTRate: ['IGSTRate', 'igstRate', 'iGSTRate'],
+  IRNNO: ['IRNNO', 'irnno', 'iRNNO'],
+  IRNDATE: ['IRNDATE', 'irndate', 'iRNDATE']
+};
