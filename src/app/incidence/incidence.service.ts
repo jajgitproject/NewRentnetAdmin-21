@@ -46,6 +46,9 @@ export class IncidenceService
   {
     advanceTable.incidenceID=-1;
     advanceTable.userID=this.generalService.getUserID();
+    if(advanceTable.assignedToEmployeeID === ""){
+      advanceTable.assignedToEmployeeID= 0;
+    }
     advanceTable.incidenceDateString=this.generalService.getTimeApplicable(advanceTable.incidenceDate);
     advanceTable.incidenceTimeString=this.generalService.getTimeApplicableTO(advanceTable.incidenceTime);
     advanceTable.reportingDateString=this.generalService.getTimeTo(advanceTable.reportingDate);

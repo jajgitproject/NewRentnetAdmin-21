@@ -8,12 +8,12 @@
                             <a routerLink="/dashboard/main">
                                 <i class="fas fa-home"></i> Home</a>|
                             <a href="#" onClick="return false;">Admin</a>|
-                            <a href="#" onClick="return false;">Incidence Type</a>
+                            <a href="#" onClick="return false;">Issue Related To</a>
                         </li> 
                     </ul>
                     <ul class="breadcrumb breadcrumb-style ">
                         <li class="breadcrumb-item">
-                            <h2>Incidence Type</h2>
+                            <h2>Issue Related To</h2>
                         </li>
                     </ul>
                 </div>
@@ -99,7 +99,7 @@
                                 </ng-container>
 
                                 <ng-container matColumnDef="incidenceType">
-                                    <mat-header-cell *matHeaderCellDef mat-sort-header>Incidence Type</mat-header-cell>
+                                    <mat-header-cell *matHeaderCellDef mat-sort-header>Issue Related To</mat-header-cell>
                                     <mat-cell *matCellDef="let row" (contextmenu)="onContextMenu($event, row)">
                                         {{row.incidenceType}}</mat-cell>
                                 </ng-container>
@@ -190,7 +190,7 @@
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title" id="exampleModalLongTitle">Incidence Type
+                <h5 class="modal-title" id="exampleModalLongTitle">Issue Related To
                 </h5>
                 <button type="button" class="close" data-dismiss="modal"
                     aria-label="Close">
@@ -200,7 +200,7 @@
             <div class="modal-body">
 
                 <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
-                    <mat-label>Incidence Type</mat-label>
+                    <mat-label>Issue Related To</mat-label>
                     <input type="text" matInput 
                         [(ngModel)]="SearchIncidenceType">
 

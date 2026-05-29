@@ -152,7 +152,7 @@ this.isSaveAllowed = status === 'changes allow';
     this.initPassenger();
     // this.InitincidenceType();
     // this.initIssueCategory();
-    this.InitEmployee();
+   // this.InitEmployee();
     this.InitDepartment();
     this.getOpenByEmployee();
     const now = new Date();
@@ -439,22 +439,32 @@ this.isSaveAllowed = status === 'changes allow';
   // }
 
   //--------------- Employee Validator -----------
-  employeeNameValidator(EmployeeList: any[]): ValidatorFn {
-    return (control: AbstractControl): ValidationErrors | null => {
-      const value = control.value?.toLowerCase();
-      const match = EmployeeList.some(employee => (employee.firstName + ' ' + employee.lastName).toLowerCase() === value);
-      return match ? null : { employeeNameInvalid: true };
-    };
-  }
+ 
+   employeeNameValidator(EmployeeList: any[]): ValidatorFn {
+        return (control: AbstractControl): ValidationErrors | null => {
+          if (!control.value) {
+            return null; // No value to validate, return null (no error)
+          }
+          const value = control.value?.toLowerCase();
+          const match = EmployeeList.some(employee => (employee.firstName + ' ' + employee.lastName).toLowerCase() === value);
+          return match ? null : { employeeNameInvalid: true };
+        };
+      }
 
   InitEmployee() {
-    this._generalService.GetEmployeesForVehicleCategory().subscribe
+    var Prefix = this.advanceTableForm.get("assignedToEmployeeName").value;
+      if(Prefix.length < 3)
+      { 
+        this.EmployeeList = [];
+        return;
+      }
+    this._generalService.GetEmployeesForVehicleCategoryPrefix(Prefix).subscribe
       (
 
         data => {
 
           this.EmployeeList = data;
-          this.advanceTableForm.controls['assignedToEmployeeName']?.setValidators([Validators.required, this.employeeNameValidator(this.EmployeeList)
+          this.advanceTableForm.controls['assignedToEmployeeName']?.setValidators([this.employeeNameValidator(this.EmployeeList)
           ]);
           this.advanceTableForm.controls['assignedToEmployeeName']?.updateValueAndValidity();
           this.filteredinstructedByOptionss = this.advanceTableForm.controls['assignedToEmployeeName']?.valueChanges.pipe(

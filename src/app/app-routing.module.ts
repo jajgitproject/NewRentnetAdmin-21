@@ -3215,7 +3215,7 @@ const routes: Routes = [
       },
 
       {
-        path: 'incidenceType',
+        path: 'issueRelatedTo',
         loadChildren: () =>
           import('./incidenceType/incidenceType.module').then(
             (m) => m.IncidenceTypeModule

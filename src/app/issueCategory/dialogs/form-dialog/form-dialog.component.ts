@@ -29,6 +29,10 @@ export class FormDialogComponent
   advanceTable: IssueCategory;
   saveDisabled:boolean = true;
   incidenceTypeID: any; // Declare incidenceTypeID as a property
+    departmentID: any;
+    public DepartmentList?: DepartmentDropDown[] = [];
+      filteredDepartmentOptions: Observable<DepartmentDropDown[]>;
+    department: any;
 
   public incidenceTypeList?: IncidenceTypeDropDown[] = [];
 filteredIncidenceTypeOptions: Observable<IncidenceTypeDropDown[]>;
@@ -60,15 +64,18 @@ filteredIncidenceTypeOptions: Observable<IncidenceTypeDropDown[]>;
   public ngOnInit(): void
   {
  
-   this.InitIncidenceType();
+   this.Initdepartment();
   
  }
+
   createContactForm(): FormGroup 
   {
     return this.fb.group(
     {
       issueCategoryID: [this.advanceTable.issueCategoryID],
       incidenceTypeID: [this.advanceTable.incidenceTypeID],
+      departmentID:[this.advanceTable.departmentID],
+      department:[this.advanceTable.department],
       incidenceType: [this.advanceTable.incidenceType],
       issueCategory: [this.advanceTable.issueCategory,[this.noWhitespaceValidator]],
       activationStatus: [this.advanceTable.activationStatus],
@@ -94,6 +101,54 @@ filteredIncidenceTypeOptions: Observable<IncidenceTypeDropDown[]>;
       this.dialogRef.close();
     }
   }
+   Initdepartment() {
+      this._generalService.GetDepartments().subscribe(
+        data => {
+          this.DepartmentList = data;
+          this.advanceTableForm.controls['department'].setValidators([Validators.required,
+            this.departmentTypeValidator(this.DepartmentList)
+          ]);
+          this.advanceTableForm.controls['department'].updateValueAndValidity();
+          this.filteredDepartmentOptions =  this.advanceTableForm.controls['department'].valueChanges.pipe(
+            startWith(""),
+            map(value => this._filterDepartment(value || ''))
+          );
+        });
+    }
+  
+    private _filterDepartment(value: string): any {
+      const filterValue = value.toLowerCase();
+      
+      return this.DepartmentList.filter(
+        customer => {
+          return customer.department.toLowerCase().includes(filterValue);
+        }
+      );
+    }
+  
+    onDepartment(selectedDepartment: string) {
+      const selectdepartment = this.DepartmentList.find(
+        department => department.department === selectedDepartment
+      );
+    
+      if (selectdepartment) {
+        this.getdepartmentID(selectdepartment.departmentID);
+      }
+    }
+  
+    getdepartmentID(departmentID: any) {
+      this.departmentID = departmentID;
+      this.advanceTableForm.patchValue({ departmentID: departmentID });
+      this.InitIncidenceType(this.departmentID);
+    }
+  
+    departmentTypeValidator(DepartmentList: any[]): ValidatorFn {
+      return (control: AbstractControl): ValidationErrors | null => {
+        const value = control.value?.toLowerCase();
+        const match = DepartmentList.some(group => group.department.toLowerCase() === value);
+        return match ? null : { departmentInvalid: true };
+      };
+    }
   public Post(): void {
     this.saveDisabled = false; // Show spinner before making API call
 
@@ -141,8 +196,8 @@ public Put(): void {
        }
   }
 
-  InitIncidenceType() {
-    this._generalService.GetIncidenceTypes().subscribe(data => {
+  InitIncidenceType(departmentID) {
+    this._generalService.getIncidenceTypeByDepartment(departmentID).subscribe(data => {
       this.incidenceTypeList = data;
       this.advanceTableForm.controls['incidenceType'].setValidators([
         Validators.required,
@@ -159,10 +214,10 @@ public Put(): void {
   
   private _filterIncidenceType(value: string): any[] {
     const filterValue = value.toLowerCase();
-     if (!value || value.length < 3)
-     {
-        return [];   
-      }
+    //  if (!value || value.length < 3)
+    //  {
+    //     return [];   
+    //   }
     return this.incidenceTypeList?.filter(item =>
       item.incidenceType?.toLowerCase().includes(filterValue)
     );

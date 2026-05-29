@@ -989,6 +989,9 @@ nameEmailDuplicateMobile(payload: {
   GetIncidenceTypes(): Observable<any[]> {
     return this.http.get<any[]>(this.BaseURL + "IncidenceType/ForDropDown");
   }
+  getIncidenceTypeByDepartment(departmentID:any): Observable<any[]> {
+    return this.http.get<any[]>(this.BaseURL + "incidenceType/GetIncidenceTypeByDepartmentID/"+ departmentID);
+  }
   GetEmployee(): Observable<EmployeeDropDown[]> {
     return this.http.get<EmployeeDropDown[]>(
       this.BaseURL + 'employee/ForDropDowns'
@@ -1035,6 +1038,11 @@ GetDriverBySupplierID(SupplierID: number): Observable<DriverDropDown[]> {
   GetEmployeesForVehicleCategory(): Observable<EmployeeDropDown[]> {
     return this.http.get<EmployeeDropDown[]>(
       this.BaseURL + 'supplierContract/ForEmployeeDropDown'
+    );
+  }
+   GetEmployeesForVehicleCategoryPrefix(Prefix:string): Observable<EmployeeDropDown[]> {
+    return this.http.get<EmployeeDropDown[]>(
+      this.BaseURL + 'supplierContract/ForEmployeeDropDownPrefix/'+Prefix
     );
   }
   GetModeOfPayment(): Observable<ModeOfPaymentDropDown[]> {
@@ -1525,6 +1533,9 @@ GetCPForBookerInCPSearch(): Observable<CustomerPersonDropDown[]> {
 
 GetCPForPassengerInCPSearch(): Observable<CustomerPersonDropDown[]> {
   return this.http.get<CustomerPersonDropDown[]>(this.BaseURL + "CustomerPerson/GetCPASPassengerForCPSearch");
+}
+GetCPForReservationResolution(reservationID:number): Observable<CustomerPersonDropDown[]> {
+  return this.http.get<CustomerPersonDropDown[]>(this.BaseURL + "CustomerPerson/GetCPForReservationResolution/"+ reservationID);
 }
 
 GetPermission(ReservationID:number): Observable<CustomerConfigurationMessaging[]> {

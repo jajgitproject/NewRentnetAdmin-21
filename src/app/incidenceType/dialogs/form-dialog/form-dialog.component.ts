@@ -47,12 +47,12 @@ export class FormDialogComponent
       
         if (this.action === 'edit') 
         {
-          this.dialogTitle ='Incidence Type';       
+          this.dialogTitle ='Issue Related To';       
           this.advanceTable = data.advanceTable;
           this.advanceTableForm?.controls['department'].setValue(this.advanceTable.department);
         } else 
         {
-          this.dialogTitle = 'Incidence Type';
+          this.dialogTitle = 'Issue Related To';
           this.advanceTable = new IncidenceType({});
           this.advanceTable.activationStatus=true;
           this.departmentID = data.departmentID;
@@ -122,10 +122,7 @@ export class FormDialogComponent
   
     private _filterDepartment(value: string): any {
       const filterValue = value.toLowerCase();
-       if (!value || value.length < 3)
-     {
-        return [];   
-      }
+      
       return this.DepartmentList.filter(
         customer => {
           return customer.department.toLowerCase().includes(filterValue);

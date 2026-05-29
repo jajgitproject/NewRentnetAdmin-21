@@ -16,7 +16,41 @@
     <div mat-dialog-content>
         <form class="register-form m-4" [formGroup]="advanceTableForm" (ngSubmit)="submit">
             <div class="row">
-                <div class="col-xl-12 col-lg-6 col-md-12 col-sm-12 mb-2">
+              <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                    <mat-label>Department</mat-label>
+                    <input type="text" matInput required formControlName="department" [matAutocomplete]="auto2">
+                    <mat-autocomplete #auto2="matAutocomplete" 
+                    (optionSelected)="onDepartment($event.option.value)"
+                    >
+                      <mat-option *ngFor="let option of filteredDepartmentOptions | async" [value]="option.department" (click)="getdepartmentID(option.departmentID)">
+                        {{option.department}}
+                      </mat-option>
+                    </mat-autocomplete>
+                    <mat-error *ngIf="advanceTableForm.controls['department']?.hasError('departmentInvalid')">
+                        Please select a Department
+                    </mat-error>
+                  </mat-form-field>
+               </div>
+               <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                    <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                      <mat-label>Issue Related To</mat-label>
+                      <input type="text" matInput required formControlName="incidenceType" [matAutocomplete]="autoIncidence">
+                      <mat-autocomplete #autoIncidence="matAutocomplete"
+                        (optionSelected)="onIncidenceType($event.option.value)">
+                        <mat-option *ngFor="let option of filteredIncidenceTypeOptions | async" [value]="option.incidenceType" (click)="getIncidenceTypeID(option.incidenceTypeID)">
+                          {{ option.incidenceType }}
+                        </mat-option>
+                      </mat-autocomplete>
+                      <mat-error *ngIf="advanceTableForm.controls['incidenceType']?.hasError('incidenceTypeInvalid')">
+                        Please select a valid Issue Related To
+                      </mat-error>
+                    </mat-form-field>
+                  </div>
+             </div>
+            
+            <div class="row">
+                <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
                     <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
                         <mat-label>Issue Category</mat-label>
                         <input required matInput formControlName="issueCategory">
@@ -26,29 +60,7 @@
                         </mat-error>
                     </mat-form-field>
                 </div>
-            </div>
-
-                <div class="row">
-                <div class="col-xl-12 col-lg-6 col-md-12 col-sm-12 mb-2">
-                    <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
-                      <mat-label>Incidence Type</mat-label>
-                      <input type="text" matInput required formControlName="incidenceType" [matAutocomplete]="autoIncidence">
-                      <mat-autocomplete #autoIncidence="matAutocomplete"
-                        (optionSelected)="onIncidenceType($event.option.value)">
-                        <mat-option *ngFor="let option of filteredIncidenceTypeOptions | async" [value]="option.incidenceType" (click)="getIncidenceTypeID(option.incidenceTypeID)">
-                          {{ option.incidenceType }}
-                        </mat-option>
-                      </mat-autocomplete>
-                      <mat-error *ngIf="advanceTableForm.controls['incidenceType']?.hasError('incidenceTypeInvalid')">
-                        Please select a valid Incidence Type
-                      </mat-error>
-                    </mat-form-field>
-                  </div>
-                  
-            </div>
-          
-            <div class="row">
-                <div class="col-xl-12 col-lg-6 col-md-12 col-sm-12 mb-2">
+                <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
                     <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
                         <mat-label>Activation Status</mat-label>
                         <mat-select formControlName="activationStatus">
@@ -62,6 +74,7 @@
                     </mat-form-field>
                 </div>
             </div>
+
             <div class="row">
                 <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12 mb-2">
                     <div class="example-button-row">

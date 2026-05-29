@@ -7,6 +7,8 @@ export class IssueCategory {
     incidenceTypeID: number;
     incidenceType: string;
    activationStatus: boolean;
+   departmentID:number;
+   department:string;
 
   constructor(issueCategory) {
     {
@@ -15,6 +17,9 @@ export class IssueCategory {
         this.incidenceTypeID = issueCategory.incidenceTypeID || -1;
         this.incidenceType = issueCategory.incidenceType || '';
        this.activationStatus = issueCategory.activationStatus || '';
+        this.departmentID = issueCategory.departmentID || '';
+        this.department = issueCategory.department || '';
+
     }
   }
   

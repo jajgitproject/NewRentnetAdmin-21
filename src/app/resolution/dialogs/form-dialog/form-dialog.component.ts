@@ -146,6 +146,7 @@ export class resolutionFormDialogComponent {
         let startDate = moment(this.dataSource[0]?.closureDate).format('DD/MM/yyyy');
         // let endDate = moment(this.advanceTable.closureDate).format('DD/MM/yyyy');
         this.onBlurStartDateEdit(startDate);
+      
       }
     } else {
       this.dialogTitle = 'Resolution';
@@ -783,6 +784,7 @@ this.isSaveAllowed = status === 'changes allow';
       (
         data => {
           this.dataSource = data;
+          console.log(this.dataSource)
           if(this.dataSource && this.dataSource.length > 0) {
             this.advanceTableForm.patchValue({ reservationID: this.dataSource[0]?.reservationID });
             this.advanceTableForm.patchValue({
@@ -824,10 +826,7 @@ this.isSaveAllowed = status === 'changes allow';
             this.advanceTableForm.patchValue({ debitType: this.dataSource[0]?.debitType });
             this.advanceTableForm.patchValue({ debitAmount: this.dataSource[0]?.debitAmount });
 
-            this.onResponsibleChange(1, this.dataSource[0]?.responsible1);
-            this.onResponsibleChange(2, this.dataSource[0]?.responsible2);
-            this.onResponsibleChange(3, this.dataSource[0]?.responsible3);
-            this.onResponsibleChange(4, this.dataSource[0]?.responsible4);
+            this.bindResponsibleData();
             this.ImagePath = this.dataSource[0].reportEvidenceDoc;
           }
         },
@@ -839,6 +838,52 @@ this.isSaveAllowed = status === 'changes allow';
       );
     //  this.tripBackAttachmentloadData();
   }
+  bindResponsibleData() {
+
+  const checkInterval = setInterval(() => {
+
+    const driverLoaded =
+      this.driverOptions &&
+      this.driverOptions.length > 0;
+
+    const vendorLoaded =
+      this.supplierOptions &&
+      this.supplierOptions.length > 0;
+
+    const employeeLoaded =
+      this.employeeOptions &&
+      this.employeeOptions.length > 0;
+
+    const passengerLoaded =
+      this.passengerOptions &&
+      this.passengerOptions.length > 0;
+
+    // wait until all dropdown data loaded
+    if (
+      driverLoaded &&
+      vendorLoaded &&
+      employeeLoaded &&
+      passengerLoaded
+    ) {
+
+      clearInterval(checkInterval);
+
+      for (let i = 1; i <= 4; i++) {
+
+        const selectedValue =
+          this.dataSource?.[0]?.[`responsible${i}`];
+
+        if (selectedValue) {
+          this.onResponsibleChange(
+            i,
+            selectedValue
+          );
+        }
+      }
+    }
+
+  }, 300);
+}
 
   // Fetch the list of drivers
   InitDriver() {
@@ -864,7 +909,7 @@ this.isSaveAllowed = status === 'changes allow';
   InitEmployee() {
     this._generalService.GetEmployeesForVehicleCategory().subscribe(data => {
       this.employeeOptions = data.map(employee => ({
-        name: `${employee.firstName} ${employee.lastName}`,
+        name: `${employee.employeeOfficeID} - ${employee.firstName} ${employee.lastName}`,
         id: employee.employeeID
       }));
     });
@@ -872,7 +917,7 @@ this.isSaveAllowed = status === 'changes allow';
 
   // Fetch the list of passengers
   InitPassenger() {
-    this._generalService.GetCPForPassengerInCPSearch().subscribe(data => {
+    this._generalService.GetCPForReservationResolution(this.reservationID).subscribe(data => {
 
       this.passengerOptions = data.map(passenger => ({
         name: passenger.customerPersonName,
@@ -881,89 +926,172 @@ this.isSaveAllowed = status === 'changes allow';
     });
   }
 
-  onResponsibleChange(responsibleNumber: number, selectedValue: string): void {
-    // Reset corresponding responsible fields
-    this.advanceTableForm.controls[`responsible${responsibleNumber}Option`].setValue(selectedValue);
-    this.advanceTableForm.controls[`responsible${responsibleNumber}Value`].setValue('');
-    this.advanceTableForm.controls[`responsible${responsibleNumber}ID`].setValue('');
-    let recordData = {};
-    if(this.dataSource && this.dataSource.length > 0) {
-      recordData = this.dataSource[0];
-    }
-    const dataSourceDriverKey = `responsible${responsibleNumber}DriverID`;
-    const dataSourceVendorrKey = `responsible${responsibleNumber}VendorID`;
-    const dataSourceEmployeeKey = `responsible${responsibleNumber}EmployeeID`;
-    const dataSourceCustomerPersonKey = `responsible${responsibleNumber}CustomerPersonID`;
-    const dataSourceGuestKey = `responsible${responsibleNumber}responsible4GuestID`;
-    switch (selectedValue) {
-      case 'driver':
-        this[`showAutoComplete${responsibleNumber}`] = true;
-        this[`autoCompleteLabel${responsibleNumber}`] = `Select Driver ${responsibleNumber}`;
-        this[`filteredOptions${responsibleNumber}`] = this.driverOptions;
-        if(recordData && recordData[dataSourceDriverKey] != 0) {
-          const defaultDriver = this.driverOptions.find(driver => driver.id === recordData[dataSourceDriverKey]);
-          if(defaultDriver) {
-            this.advanceTableForm.controls[`responsible${responsibleNumber}Value`].setValue(defaultDriver?.name);
-            this.advanceTableForm.controls[`responsible${responsibleNumber}ID`].setValue(defaultDriver?.id);
-          } 
-        } else if(this.driverID && this.driverName){
-          const defaultDriver = this.driverOptions.find(driver => driver.id === this.driverID);
-          this.advanceTableForm.controls[`responsible${responsibleNumber}Value`].setValue(defaultDriver?.name);
-          this.advanceTableForm.controls[`responsible${responsibleNumber}ID`].setValue(defaultDriver?.id);
+onResponsibleChange(responsibleNumber: number, selectedValue: string): void {
+  // ALWAYS enable first (important when switching from "none")
+  this.advanceTableForm.controls[`responsible${responsibleNumber}Value`].enable();
+  this.advanceTableForm.controls[`responsible${responsibleNumber}ID`].enable();
+
+  // Set option value
+  this.advanceTableForm.controls[`responsible${responsibleNumber}Option`].setValue(selectedValue);
+
+  //  Reset fields
+  this.advanceTableForm.controls[`responsible${responsibleNumber}Value`].setValue('');
+  this.advanceTableForm.controls[`responsible${responsibleNumber}ID`].setValue('');
+
+  // Default UI reset
+  this[`showAutoComplete${responsibleNumber}`] = false;
+  this[`filteredOptions${responsibleNumber}`] = [];
+
+  let recordData: any = {};
+  if (this.dataSource && this.dataSource.length > 0) {
+    recordData = this.dataSource[0];
+  }
+
+  const dataSourceDriverKey = `responsible${responsibleNumber}DriverID`;
+  const dataSourceVendorKey = `responsible${responsibleNumber}VendorID`;
+  const dataSourceEmployeeKey = `responsible${responsibleNumber}EmployeeID`;
+  const dataSourceCustomerPersonKey = `responsible${responsibleNumber}CustomerPersonID`;
+
+  switch (selectedValue) {
+
+    // ================= NONE =================
+    case 'none':
+      this[`showAutoComplete${responsibleNumber}`] = false;
+      this[`filteredOptions${responsibleNumber}`] = [];
+
+      this.advanceTableForm.controls[`responsible${responsibleNumber}Value`].setValue('');
+      this.advanceTableForm.controls[`responsible${responsibleNumber}ID`].setValue('');
+
+      this.advanceTableForm.controls[`responsible${responsibleNumber}Value`].disable();
+      this.advanceTableForm.controls[`responsible${responsibleNumber}ID`].disable();
+      break;
+
+    // ================= DRIVER =================
+    case 'driver':
+      this[`showAutoComplete${responsibleNumber}`] = true;
+      this[`autoCompleteLabel${responsibleNumber}`] = `Select Driver ${responsibleNumber}`;
+      this[`filteredOptions${responsibleNumber}`] = this.driverOptions;
+
+      if (recordData && recordData[dataSourceDriverKey] != 0) {
+        const defaultDriver = this.driverOptions.find(d => d.id === recordData[dataSourceDriverKey]);
+        if (defaultDriver) {
+          this.advanceTableForm.controls[`responsible${responsibleNumber}Value`].setValue(defaultDriver.name);
+          this.advanceTableForm.controls[`responsible${responsibleNumber}ID`].setValue(defaultDriver.id);
         }
-        break;
-      case 'vendor':
-        this[`showAutoComplete${responsibleNumber}`] = true;
-        this[`autoCompleteLabel${responsibleNumber}`] = `Select Vendor ${responsibleNumber}`;
-        this[`filteredOptions${responsibleNumber}`] = this.supplierOptions;
-        if(recordData && recordData[dataSourceVendorrKey] != 0) {
-          const defaultVendor = this.supplierOptions.find(supplier => supplier.id === recordData[dataSourceVendorrKey]);
-          if(defaultVendor) {
-            this.advanceTableForm.controls[`responsible${responsibleNumber}Value`].setValue(defaultVendor?.name);
-            this.advanceTableForm.controls[`responsible${responsibleNumber}ID`].setValue(defaultVendor?.id);
-          } 
+      } else if (this.driverID && this.driverName) {
+        const defaultDriver = this.driverOptions.find(d => d.id === this.driverID);
+        if (defaultDriver) {
+          this.advanceTableForm.controls[`responsible${responsibleNumber}Value`].setValue(defaultDriver.name);
+          this.advanceTableForm.controls[`responsible${responsibleNumber}ID`].setValue(defaultDriver.id);
         }
-          else if(this.supplierID && this.carVendor){
-            const defaultVendor = this.supplierOptions.find(supplier => supplier.id ===this.supplierID);
-            this.advanceTableForm.controls[`responsible${responsibleNumber}Value`].setValue(this.carVendor);
-            this.advanceTableForm.controls[`responsible${responsibleNumber}ID`].setValue(defaultVendor?.id);
-          
+      }
+      break;
+
+    // ================= VENDOR =================
+    case 'vendor':
+      this[`showAutoComplete${responsibleNumber}`] = true;
+      this[`autoCompleteLabel${responsibleNumber}`] = `Select Vendor ${responsibleNumber}`;
+      this[`filteredOptions${responsibleNumber}`] = this.supplierOptions;
+
+      if (recordData && recordData[dataSourceVendorKey] != 0) {
+        const defaultVendor = this.supplierOptions.find(v => v.id === recordData[dataSourceVendorKey]);
+        if (defaultVendor) {
+          this.advanceTableForm.controls[`responsible${responsibleNumber}Value`].setValue(defaultVendor.name);
+          this.advanceTableForm.controls[`responsible${responsibleNumber}ID`].setValue(defaultVendor.id);
         }
-        break;
-      case 'employee':
-        this[`showAutoComplete${responsibleNumber}`] = true;
-        this[`autoCompleteLabel${responsibleNumber}`] = `Select Employee ${responsibleNumber}`;
-        this[`filteredOptions${responsibleNumber}`] = this.employeeOptions;
-        if(recordData && recordData[dataSourceEmployeeKey] != 0) {
-          const defaultEmployee = this.employeeOptions.find(emp => emp.id === recordData[dataSourceEmployeeKey]);
-          if(defaultEmployee) {
-            this.advanceTableForm.controls[`responsible${responsibleNumber}Value`].setValue(defaultEmployee?.name);
-            this.advanceTableForm.controls[`responsible${responsibleNumber}ID`].setValue(defaultEmployee?.id);
-          }
+      } else if (this.supplierID && this.carVendor) {
+        const defaultVendor = this.supplierOptions.find(v => v.id === this.supplierID);
+        if (defaultVendor) {
+          this.advanceTableForm.controls[`responsible${responsibleNumber}Value`].setValue(this.carVendor);
+          this.advanceTableForm.controls[`responsible${responsibleNumber}ID`].setValue(defaultVendor.id);
         }
-        break;
-      case 'guest':
-        this[`showAutoComplete${responsibleNumber}`] = true;
-        this[`autoCompleteLabel${responsibleNumber}`] = `Select Passenger ${responsibleNumber}`;
-        this[`filteredOptions${responsibleNumber}`] = this.passengerOptions;
-        if(recordData && recordData[dataSourceCustomerPersonKey] != 0) {
-          const defaultPassenger= this.passengerOptions.find(passenger => passenger.id === recordData[dataSourceCustomerPersonKey]);
-          if(defaultPassenger) {
-            this.advanceTableForm.controls[`responsible${responsibleNumber}Value`].setValue(defaultPassenger?.name);
-            this.advanceTableForm.controls[`responsible${responsibleNumber}ID`].setValue(defaultPassenger?.id);
-          }
-        } else if(this.CustomerPersonID && this.customerPersonName){
-          const defaultPassenger= this.passengerOptions.find(passenger => passenger.id ===this.CustomerPersonID);
+      }
+      break;
+
+    // ================= EMPLOYEE =================
+    case 'employee':
+      this[`showAutoComplete${responsibleNumber}`] = true;
+      this[`autoCompleteLabel${responsibleNumber}`] = `Select Employee ${responsibleNumber}`;
+      this[`filteredOptions${responsibleNumber}`] = this.employeeOptions;
+
+      if (recordData && recordData[dataSourceEmployeeKey] != 0) {
+        const defaultEmployee = this.employeeOptions.find(e => e.id === recordData[dataSourceEmployeeKey]);
+        if (defaultEmployee) {
+          this.advanceTableForm.controls[`responsible${responsibleNumber}Value`].setValue(defaultEmployee.name);
+          this.advanceTableForm.controls[`responsible${responsibleNumber}ID`].setValue(defaultEmployee.id);
+        }
+      }
+      break;
+
+    // ================= GUEST =================
+    case 'guest':
+      this[`showAutoComplete${responsibleNumber}`] = true;
+      this[`autoCompleteLabel${responsibleNumber}`] = `Select Passenger ${responsibleNumber}`;
+      this[`filteredOptions${responsibleNumber}`] = this.passengerOptions;
+
+      if (recordData && recordData[dataSourceCustomerPersonKey] != 0) {
+        const defaultPassenger = this.passengerOptions.find(p => p.id === recordData[dataSourceCustomerPersonKey]);
+        if (defaultPassenger) {
+          this.advanceTableForm.controls[`responsible${responsibleNumber}Value`].setValue(defaultPassenger.name);
+          this.advanceTableForm.controls[`responsible${responsibleNumber}ID`].setValue(defaultPassenger.id);
+        }
+      } else if (this.CustomerPersonID && this.customerPersonName) {
+        const defaultPassenger = this.passengerOptions.find(p => p.id === this.CustomerPersonID);
+        if (defaultPassenger) {
           this.advanceTableForm.controls[`responsible${responsibleNumber}Value`].setValue(this.customerPersonName);
-          this.advanceTableForm.controls[`responsible${responsibleNumber}ID`].setValue(defaultPassenger?.id);
+          this.advanceTableForm.controls[`responsible${responsibleNumber}ID`].setValue(defaultPassenger.id);
         }
-        break;
-      default:
-        this[`showAutoComplete${responsibleNumber}`] = false;
-        break;
+      }
+      break;
+  }
+  this.updateResponsibleLock();
+}
+updateResponsibleLock(): void {
+
+  for (let i = 1; i <= 4; i++) {
+
+    const optionCtrl = this.advanceTableForm.get(`responsible${i}Option`);
+    const valueCtrl = this.advanceTableForm.get(`responsible${i}Value`);
+    const idCtrl = this.advanceTableForm.get(`responsible${i}ID`);
+
+    const selectedValue = optionCtrl?.value;
+
+    // If THIS field is NONE → only this stays enabled, others disable
+    if (selectedValue === 'none') {
+
+      // keep current row enabled (so user can change it back)
+      optionCtrl?.enable({ emitEvent: false });
+      valueCtrl?.disable({ emitEvent: false });
+      idCtrl?.disable({ emitEvent: false });
+
+    } 
+    else {
+
+      // check if ANY row has NONE selected
+      const anyNoneSelected = [
+        this.advanceTableForm.get('responsible1Option')?.value,
+        this.advanceTableForm.get('responsible2Option')?.value,
+        this.advanceTableForm.get('responsible3Option')?.value,
+        this.advanceTableForm.get('responsible4Option')?.value
+      ].includes('none');
+
+      if (anyNoneSelected) {
+
+        // disable all non-none rows
+        optionCtrl?.disable({ emitEvent: false });
+        valueCtrl?.disable({ emitEvent: false });
+        idCtrl?.disable({ emitEvent: false });
+
+      } else {
+
+        // normal state (all enabled)
+        optionCtrl?.enable({ emitEvent: false });
+        valueCtrl?.enable({ emitEvent: false });
+        idCtrl?.enable({ emitEvent: false });
+      }
     }
   }
-  
+}
   onAutoCompleteSelect(responsibleNumber: number, event: any): void {
     const optionObject = event.option.value;
     this.advanceTableForm.controls[`responsible${responsibleNumber}Value`].setValue(optionObject.name);
