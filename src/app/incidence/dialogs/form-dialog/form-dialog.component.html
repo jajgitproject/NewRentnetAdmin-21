@@ -212,7 +212,7 @@
         </div>
         <div class="col-xl-3 col-lg-3 col-md-6 col-sm-6 mb-2">
           <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
-            <mat-label>Incidence Type</mat-label>
+            <mat-label>Issue Related To</mat-label>
             <input type="text" required matInput formControlName="incidenceType" [matAutocomplete]="auto40" />
             <mat-autocomplete #auto40="matAutocomplete" (optionSelected)="
                     onincidenceTypeSelected($event.option.value)
@@ -224,7 +224,7 @@
               </mat-option>
             </mat-autocomplete>
             <mat-error *ngIf="advanceTableForm.get('incidenceType')?.hasError('required')">
-              Incidence Type is required
+              Issue Related To is required
             </mat-error>
 
             <mat-error *ngIf="
@@ -344,9 +344,10 @@
             <mat-label>Report Source</mat-label>
             <mat-select required #billingVal [class.is-invalid]="billingVal.invalid && billingVal.touched"
               formControlName="reportSource">
-              <mat-option value="Feedback">Feedback</mat-option>
-              <mat-option value="Email">Email</mat-option>
-              <mat-option value="Phone call">Phone call</mat-option>
+              <mat-option value="Guest / Booker Feedback Mail">Guest / Booker Feedback Mail</mat-option>
+              <mat-option value="Guest / Booker Mail">Guest / Booker Mail</mat-option>
+              <mat-option value="Guest / Booker Call">Guest / Booker Call</mat-option>
+              <mat-option value="Internal Audit/Tracking Process by CST">Internal Audit/Tracking Process by CST</mat-option>
             </mat-select>
 
             <mat-error> Report Source is required </mat-error>
