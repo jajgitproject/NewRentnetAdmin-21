@@ -128,6 +128,63 @@ export class SupplierService
 
     return this.httpClient.get(this.API_URL + "/" +SearchName+ "/" +SearchCity+ "/" +SearchAddress+ "/" +SearchPin+ "/" +SearchPhone+ "/" +SearchFax +'/'+SearchEmail +'/'+SearchSupplierStatus +'/'+SearchSupplierVerificationStatus +'/'+SearchSupplierRegistrationDate +'/'+ PageNumber +  '/'+coloumName+'/'+sortType);
   }
+  downloadCsv(SearchName:string,
+    SearchCity:string,
+    SearchAddress:string,
+    SearchPin:string,
+    SearchPhone:string,
+    SearchFax:string,
+    SearchEmail:string,
+    SearchSupplierStatus:string,
+    SearchSupplierVerificationStatus:string,
+    SearchSupplierRegistrationDate:string): Observable<Blob>
+  {
+    if(SearchName==="")
+    {
+      SearchName="null";
+    }
+    if(SearchCity==="")
+    {
+      SearchCity="null";
+    }
+    if(SearchAddress==="")
+    {
+      SearchAddress="null";
+    }
+    if(SearchPin==="")
+    {
+      SearchPin="null";
+    }
+    if(SearchPhone==="")
+    {
+      SearchPhone="null";
+    }
+    if(SearchFax==="")
+    {
+      SearchFax="null";
+    }
+    if(SearchEmail==="")
+      {
+        SearchEmail="null";
+      }
+      if(SearchSupplierStatus==="")
+        {
+          SearchSupplierStatus="null";
+        }
+        if(SearchSupplierVerificationStatus==="")
+          {
+            SearchSupplierVerificationStatus="null";
+          }
+          if(SearchSupplierRegistrationDate==="")
+            {
+              SearchSupplierRegistrationDate="null";
+            }
+
+    return this.httpClient.get(
+      this.API_URL + "/export/" +SearchName+ "/" +SearchCity+ "/" +SearchAddress+ "/" +SearchPin+ "/" +SearchPhone+ "/" +SearchFax +'/'+SearchEmail +'/'+SearchSupplierStatus +'/'+SearchSupplierVerificationStatus +'/'+SearchSupplierRegistrationDate,
+      { responseType: 'blob' }
+    );
+  }
   add(advanceTable: Supplier) 
   {
     advanceTable.supplierID=-1;

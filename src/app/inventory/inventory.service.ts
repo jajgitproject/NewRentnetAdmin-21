@@ -103,6 +103,49 @@ export class InventoryService
     }
     return this.httpClient.get(this.API_URL + "/"+ RegistrationNumber + "/" + InventoryID + '/'+ SearchVehcileCategory + '/'+ SearchVehicle + '/'+ SearchSupplier + '/' + searchLocationHub + '/' + SearchActivationStatus +'/' + PageNumber +  '/'+coloumName+'/'+sortType);
   }
+  downloadCsv(
+    RegistrationNumber:string,InventoryID:number,
+    SearchVehcileCategory:string,
+    SearchVehicle:string,
+    SearchSupplier:string,
+    searchLocationHub:string,
+    SearchActivationStatus:string): Observable<Blob>
+  {
+    if(RegistrationNumber==="")
+      {
+        RegistrationNumber="null";
+      }
+    if(InventoryID===0)
+    {
+      InventoryID=0;
+    }
+    if(SearchVehcileCategory==="")
+    {
+      SearchVehcileCategory="null";
+    }
+
+    if(SearchVehicle==="")
+    {
+      SearchVehicle="null";
+    }
+
+    if(SearchSupplier==="")
+    {
+      SearchSupplier="null";
+    }
+     if(searchLocationHub==="")
+    {
+      searchLocationHub="null";
+    }
+    if(SearchActivationStatus==="")
+    {
+      SearchActivationStatus="null";
+    }
+    return this.httpClient.get(
+      this.API_URL + "/export/"+ RegistrationNumber + "/" + InventoryID + '/'+ SearchVehcileCategory + '/'+ SearchVehicle + '/'+ SearchSupplier + '/' + searchLocationHub + '/' + SearchActivationStatus,
+      { responseType: 'blob' }
+    );
+  }
   add(advanceTable: Inventory) 
   {
     advanceTable.inventoryID=-1;

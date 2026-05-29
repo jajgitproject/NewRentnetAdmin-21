@@ -235,6 +235,36 @@ export class DriverComponent implements OnInit {
         (error: HttpErrorResponse) => { this.dataSource = null; }
       );
   }
+
+  downloadCsv() {
+    this.driverService.downloadCsv(
+      this.SearchdriverName || '',
+      this.searchdriverFatherName || '',
+      this.driverGrade.value || '',
+      this.searchDriverOfficialIdentityNumber || '',
+      this.searchSupplier || '',
+      this.searchhighestQualification || '',
+      this.searchMobile || '',
+      this.location.value || '',
+      this.SearchActivationStatus
+    ).subscribe(
+      (blob: Blob) => {
+        const url = window.URL.createObjectURL(blob);
+        const anchor = document.createElement('a');
+        anchor.href = url;
+        anchor.download = `DriverMaster_${new Date().toISOString().replace(/[:.]/g, '-')}.csv`;
+        document.body.appendChild(anchor);
+        anchor.click();
+        document.body.removeChild(anchor);
+        window.URL.revokeObjectURL(url);
+        this.showNotification('snackbar-success', 'CSV downloaded successfully', 'top', 'center');
+      },
+      () => {
+        this.showNotification('snackbar-danger', 'Failed to download CSV', 'top', 'center');
+      }
+    );
+  }
+
   showNotification(colorName, text, placementFrom, placementAlign) {
     this.snackBar.open(text, '', {
       duration: 2000,

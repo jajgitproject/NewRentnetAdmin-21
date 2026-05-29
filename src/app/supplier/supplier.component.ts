@@ -301,6 +301,37 @@ export class SupplierComponent implements OnInit {
       (error: HttpErrorResponse) => { this.dataSource = null;}
     );
   }
+
+  downloadCsv() {
+    this.supplierService.downloadCsv(
+      this.SearchName || '',
+      this.city.value || '',
+      this.SearchAddress || '',
+      this.SearchPin || '',
+      this.SearchPhone || '',
+      this.SearchFax || '',
+      this.SearchEmail || '',
+      this.SearchSupplierStatus || '',
+      this.SearchSupplierVerificationStatus || '',
+      this.SearchSupplierRegistrationDate || ''
+    ).subscribe(
+      (blob: Blob) => {
+        const url = window.URL.createObjectURL(blob);
+        const anchor = document.createElement('a');
+        anchor.href = url;
+        anchor.download = `SupplierMaster_${new Date().toISOString().replace(/[:.]/g, '-')}.csv`;
+        document.body.appendChild(anchor);
+        anchor.click();
+        document.body.removeChild(anchor);
+        window.URL.revokeObjectURL(url);
+        this.showNotification('snackbar-success', 'CSV downloaded successfully', 'top', 'center');
+      },
+      () => {
+        this.showNotification('snackbar-danger', 'Failed to download CSV', 'top', 'center');
+      }
+    );
+  }
+
   showNotification(colorName, text, placementFrom, placementAlign) {
     this.snackBar.open(text, '', {
       duration: 2000,

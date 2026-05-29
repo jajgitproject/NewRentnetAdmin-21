@@ -397,6 +397,34 @@ onBackPress(event)
       (error: HttpErrorResponse) => { this.dataSource = null;}
     );
   }
+
+  downloadCsv() {
+    this.inventoryService.downloadCsv(
+      this.registrationNumber.value || '',
+      this.InventoryID,
+      this.vehicleCategory.value || '',
+      this.vehicle.value || '',
+      this.supplier.value || '',
+      this.locationHub.value || '',
+      this.SearchActivationStatus || ''
+    ).subscribe(
+      (blob: Blob) => {
+        const url = window.URL.createObjectURL(blob);
+        const anchor = document.createElement('a');
+        anchor.href = url;
+        anchor.download = `InventoryMaster_${new Date().toISOString().replace(/[:.]/g, '-')}.csv`;
+        document.body.appendChild(anchor);
+        anchor.click();
+        document.body.removeChild(anchor);
+        window.URL.revokeObjectURL(url);
+        this.showNotification('snackbar-success', 'CSV downloaded successfully', 'top', 'center');
+      },
+      () => {
+        this.showNotification('snackbar-danger', 'Failed to download CSV', 'top', 'center');
+      }
+    );
+  }
+
   showNotification(colorName, text, placementFrom, placementAlign) {
     this.snackBar.open(text, '', {
       duration: 2000,

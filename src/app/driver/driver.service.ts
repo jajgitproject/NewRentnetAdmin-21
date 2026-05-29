@@ -104,6 +104,50 @@ export class DriverService
     }
     return this.httpClient.get(this.API_URL + "/" +SearchdriverName + '/'+ searchdriverFatherName +'/'+ searchdriverGradeName +'/'+ searchDriverOfficialIdentityNumber +'/'+ searchSupplier +'/'+ searchhighestQualification +'/'+ searchMobile +'/'+ searchLocation +'/'+ SearchActivationStatus +'/'+ PageNumber +  '/'+coloumName+'/'+sortType);
   }
+  downloadCsv(SearchdriverName:string,searchdriverFatherName:string,searchdriverGradeName:string,searchDriverOfficialIdentityNumber:string,searchSupplier:string,searchhighestQualification:string,searchMobile:string,searchLocation:string, SearchActivationStatus:boolean): Observable<Blob>
+  {
+    if(SearchdriverName==="")
+    {
+      SearchdriverName="null";
+    }
+    if(searchdriverFatherName==="")
+    {
+      searchdriverFatherName="null";
+    }
+    if(searchdriverGradeName==="")
+    {
+      searchdriverGradeName="null";
+    }
+    if(searchDriverOfficialIdentityNumber==="")
+    {
+      searchDriverOfficialIdentityNumber="null";
+    }
+     if(searchSupplier==="")
+    {
+      searchSupplier="null";
+    }
+    if(searchhighestQualification==="")
+    {
+      searchhighestQualification="null";
+    }
+    if(searchMobile==="")
+    {
+      searchMobile="null";
+    }
+     if(searchLocation==="")
+    {
+      searchLocation="null";
+    }
+    if(SearchActivationStatus===null)
+    {
+      SearchActivationStatus=null;
+    }
+
+    return this.httpClient.get(
+      this.API_URL + "/export/" +SearchdriverName + '/'+ searchdriverFatherName +'/'+ searchdriverGradeName +'/'+ searchDriverOfficialIdentityNumber +'/'+ searchSupplier +'/'+ searchhighestQualification +'/'+ searchMobile +'/'+ searchLocation +'/'+ SearchActivationStatus,
+      { responseType: 'blob' }
+    );
+  }
   add(advanceTable: Driver) 
   {
     advanceTable.driverID=-1;

@@ -183,7 +183,7 @@ export class AuditTrailComponent implements OnInit {
       .subscribe(
         (data) => {
           const raw = data || [];
-          this.events = this.applyDateFilter(raw);
+          this.events = this.excludeHiddenTables(this.applyDateFilter(raw));
           if (reservationMode) {
             this.reservationTableGroups = this.buildReservationTableGroups(this.events);
             this.prefetchRowsForReservationView(this.events);
@@ -206,12 +206,21 @@ export class AuditTrailComponent implements OnInit {
     return this.activeReservationId != null;
   }
 
+  private readonly excludedTableKeys = new Set<string>(['lifecyclestatus']);
+
   private tableObjectKey(tableName: string | null | undefined): string {
     if (!tableName) return '';
     const s = tableName.replace(/[\[\]]/g, '').trim();
     const i = s.lastIndexOf('.');
     const tail = i >= 0 && i < s.length - 1 ? s.substring(i + 1) : s;
     return tail.toLowerCase();
+  }
+
+  private excludeHiddenTables(events: AuditTrailEvent[]): AuditTrailEvent[] {
+    return (events || []).filter((e) => {
+      const tableHidden = this.excludedTableKeys.has(this.tableObjectKey(e?.tableName));
+      return !tableHidden;
+    });
   }
 
   private buildReservationTableGroups(events: AuditTrailEvent[]): AuditTrailTableGroup[] {
@@ -289,6 +298,10 @@ export class AuditTrailComponent implements OnInit {
     }
     const ln = (e.loginName || '').trim();
     if (ln) {
+      const key = ln.toLowerCase();
+      if (key === 'ecorentuser' || key === 'system') {
+        return 'Driver App';
+      }
       return ln;
     }
     return 'Unknown user';
