@@ -135,6 +135,23 @@
   box-sizing: border-box;
 }
 
+/* Search results grid: horizontal spacing between column headers and row cells */
+$cp-grid-column-padding: 12px;
+
+.cp-grid-header-row > span {
+  box-sizing: border-box;
+  padding-left: $cp-grid-column-padding;
+  padding-right: $cp-grid-column-padding;
+  line-height: 1.45;
+}
+
+:host ::ng-deep .cp-reservation-dblclick > span {
+  box-sizing: border-box;
+  padding-left: $cp-grid-column-padding;
+  padding-right: $cp-grid-column-padding;
+  line-height: 1.45;
+}
+
 :host ::ng-deep .accordion-container .mat-expansion-panel-header {
   padding-left: 23px;
   align-items: flex-start;
