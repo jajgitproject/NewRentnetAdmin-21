@@ -806,6 +806,17 @@ export const ROUTES: RouteInfo[] = [
         isAccess: false
       },
 
+      {
+        path: 'zonalDutyRegister',
+        title: 'Zonal Duty Register',
+        moduleName: 'zonalDutyRegister',
+        icon: 'fas fa-tachometer-alt',
+        class: '',
+        groupTitle: false,
+        submenu: [],
+        isAccess: false
+      },
+
        {
         path: 'changeKamForCustomers',
         title: 'Customer KAM Change',

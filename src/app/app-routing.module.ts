@@ -605,6 +605,14 @@ const routes: Routes = [
             (m) => m.DutyRegisterModule
           )
       },
+
+      {
+        path: 'zonalDutyRegister',
+        loadChildren: () =>
+          import('./zonalDutyRegister/zonalDutyRegister.module').then(
+            (m) => m.ZonalDutyRegisterModule
+          )
+      },
       
       {
         path: 'locationGroupLocationMapping',

@@ -1,0 +1,128 @@
+// @ts-nocheck
+export class ZonalDutyRegisterModel {
+  reservationID: number;
+  dutySlipID: number;
+  pickupDate: string;
+  bookingDate: string;
+  supplierName: string;
+  dsClosedBy: string;
+  dutySlipImage: string;
+  closingDate: string;
+  dispatchLocation: string;
+  customerGroup: string;
+  customerID: number;
+  customerName: string;
+  customerType: string;
+  bookerName: string;
+  guestName: string;
+  city: string;
+  packageType: string;
+  billedDutyType: string;
+  package: string;
+  carBooked: string;
+  carSent: string;
+  carNumber: string;
+  driverName: string;
+  modeOfPayment: string;
+  locationOutDate: string;
+  locationOutTime: string;
+  locationOutKM: number;
+  dsPickUpDate: string;
+  pickUpTime: string;
+  pickUpKM: number;
+  dropOffDate: string;
+  dropOffTime: string;
+  dropOffKM: number;
+  locationInDate: string;
+  locationInTime: string;
+  locationInKM: number;
+  g2P: number;
+  d2G: number;
+  appP2D: number;
+  driverP2D: number;
+  gpsP2D: number;
+  totalKMWithAddtionalKM: number;
+  totalHoursWithAddtionalHours: number;
+  toll: number;
+  parking: number;
+  fasTag: number;
+  invoiceInterstateTax: number;
+  dutyExpenseChargeTotal: number;
+  dsVerifyStatus: string;
+  goodForBilling: boolean | null;
+  dsStatus: string;
+  reservationStatus: string;
+  ownedSupplied: string;
+  supplierType: string;
+  adocStatus: boolean | null;
+  salesPerson: string;
+  kam: string;
+  reservationCreatedBy: string;
+  allotmentBy: string;
+  closureType: string;
+  disputeType: string;
+  pickupLocation: string;
+  dropLocation: string;
+  invoiceCreatedBy: string;
+  closureMethod: string;
+  pickupAddress: string;
+  pickupAddressDetails: string;
+  dropOffAddress: string;
+  customerSpecificFields: string;
+}
+
+export class SalesPersonDropDownModel {
+  salesPersonID: number;
+  salesPerson: string;
+
+  constructor(salesPersonDropDownModel) {
+    this.salesPersonID = salesPersonDropDownModel.salesPersonID || -1;
+    this.salesPerson = salesPersonDropDownModel.salesPerson || '';
+  }
+}
+
+export class SearchCriteria {
+  SearchCustomerGroup: string;
+  SearchCustomer: string;
+  SearchBranch: string;
+  SearchKAM: string;
+  SearchBranchID: number;
+  SearchKAMID: number;
+  SearchCustomerPersonName: string;
+  SearchDutyType: string;
+  SearchFeedbackDate: string;
+  SearchSlipReceipt: boolean;
+  SearchClosureType: string;
+  SearchDispatchLocation: string;
+  SearchMOP: string;
+  SearchSupplierType: string;
+  SearchSupplier: string;
+  SearchFromDate: string;
+  SearchToDate: string;
+  SearchSalesPersonName: string;
+  SearchCarSent: string;
+  SearchCarBook: string;
+  SearchCustomerType: string;
+  SearchCustomerLocationName: string;
+  SearchBookingStatus: string;
+  SearchImportance: string;
+  SearchDSVerification: boolean;
+  SearchGoodForBill: boolean;
+  SearchDri: string;
+  SearchCarNo: string;
+  SearchSupplierO: string;
+  SearchRes: string;
+  SearchDuty: string;
+  SearchGuestName: string;
+  SearchGuestMobile: string;
+  SearchCity: string;
+  SearchCancellationDateFrom: string;
+  SearchCancellationDateTo: string;
+  SearchBookingDateFrom: string;
+  SearchBookingDate: string;
+  SearchChangeMOPCase: string;
+  SearchLocationGroup: string;
+  SearchBillFromDate: string;
+  SearchBillToDate: string;
+  SearchBillStatus: string;
+}

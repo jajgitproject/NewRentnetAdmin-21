@@ -1,0 +1,1321 @@
+<section class="content">
+    <div class="container-fluid">
+        <div class="block-header">
+            <div class="row">
+                <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+                    <ul>
+                        <li class="breadcrumb-item bcrumb-1">
+                            <a routerLink="/dashboard/main">
+                                <i class="fas fa-home"></i> Home</a>|
+                            <a href="#" onClick="return false;">Admin</a>|
+                            <a href="#" onClick="return false;">Zonal Duty Register</a>
+                        </li>
+                    </ul>
+                    <ul class="breadcrumb breadcrumb-style ">
+                        <!-- <li class="breadcrumb-item">
+                            <h2>Zonal Duty Register</h2>
+                        </li> -->
+                    </ul>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                <div class="card">
+                    <div class="body">
+                        <mat-accordion class="zonal-duty-register-search-accordion">
+                            <mat-expansion-panel class="zonal-duty-register-inline-search-panel" [expanded]="true">
+                                <mat-expansion-panel-header>
+                                    <mat-panel-title>
+                                       Quick Search
+                                    </mat-panel-title>
+                                </mat-expansion-panel-header>
+
+                                <div class="zonal-duty-register-inline-search-body">
+                                    <ng-container *ngTemplateOutlet="zonalDutyRegisterQuickSearch"></ng-container>
+                                </div>
+                                <br/>
+                                <div class="zonal-duty-register-inline-search-actions quick-search-actions">
+                                    <button mat-raised-button color="primary" class="zonal-duty-register-search-button" (click)="SearchData()">
+                                        Search
+                                    </button>
+                                    &nbsp;&nbsp;
+                                    
+                                    <button mat-raised-button color="warn" class="zonal-duty-register-reset-button" (click)="refresh()">
+                                        Refresh
+                                    </button>
+                                    &nbsp;&nbsp;
+                                    <button mat-raised-button color="accent" (click)="downloadFilteredCsv()" [disabled]="csvExporting || !hasManualSearch" [matTooltip]="!hasManualSearch ? 'Pehle Search karein' : ''">
+                                        {{ csvExporting ? 'Downloading...' : 'Download CSV' }}
+                                    </button>
+                                </div>
+                            </mat-expansion-panel>
+                        </mat-accordion>
+                        
+                        <br/>
+                        <mat-accordion class="zonal-duty-register-search-accordion">
+                            <mat-expansion-panel class="zonal-duty-register-inline-search-panel" [expanded]="false">
+                                <mat-expansion-panel-header>
+                                    <mat-panel-title>
+                                       Advance Search
+                                    </mat-panel-title>
+                                </mat-expansion-panel-header>
+
+                                <div class="zonal-duty-register-inline-search-body">
+                                    <ng-container *ngTemplateOutlet="zonalDutyRegisterAdvanceSearch"></ng-container>
+                                </div>
+                                <br/>
+                                <div class="zonal-duty-register-inline-search-actions quick-search-actions">
+                                    <button mat-raised-button color="primary" class="zonal-duty-register-search-button" (click)="SearchData()">
+                                        Search
+                                    </button>
+                                    &nbsp;&nbsp;
+                                    
+                                    <button mat-raised-button color="warn" class="zonal-duty-register-reset-button" (click)="refresh()">
+                                        Refresh
+                                    </button>
+                                    &nbsp;&nbsp;
+                                    <button mat-raised-button color="accent" (click)="downloadFilteredCsv()" [disabled]="csvExporting || !hasManualSearch" [matTooltip]="!hasManualSearch ? 'Pehle Search karein' : ''">
+                                        {{ csvExporting ? 'Downloading...' : 'Download CSV' }}
+                                    </button>
+                                </div>
+                            </mat-expansion-panel>
+                        </mat-accordion>
+
+                        <br/>
+
+                        <div class="responsive_table">
+                            <div class="table-responsive">
+                                <p *ngIf="!dataSource || dataSource.length === 0; then thenBlock2 else elseBlock2">
+                                    This is not rendered
+                                </p>
+
+                                <ng-template #thenBlock2>
+                                    <div class="alert alert-primary" style="background-color:#E8E8E8; text-align: center;">No Records Found</div>
+                                    <div class="body">
+                                        <div class="example-button-row">    
+                                            <button mat-raised-button color="primary" (click)="PreviousCall()">Previous</button>
+                                            <button mat-raised-button color="primary" (click)="NextCall()">Next</button>    
+                                        </div>
+                                    </div>    
+                                </ng-template>
+
+                                <ng-template #elseBlock2>
+                                    <div class="scrollable-table-container">
+                                    <div style="width: 950%; overflow-y: hidden;">
+                                        <mat-table #table [dataSource]="dataSource"
+                                                matSort
+                                                class="mat-cell floating-header-table"
+                                                (matSortChange)="SortingData($event)">
+
+                                            <!-- Reservation No -->
+                                            <ng-container matColumnDef="ReservationID">
+                                                <mat-header-cell *matHeaderCellDef mat-sort-header>Res No</mat-header-cell>
+                                                <mat-cell *matCellDef="let row">
+                                                    {{row.reservationID || 'N/A'}}
+                                                </mat-cell>
+                                            </ng-container>
+
+                                            <!-- Pickup Date -->
+                                            <ng-container matColumnDef="PickupDate">
+                                                <mat-header-cell *matHeaderCellDef mat-sort-header>Pickup Date</mat-header-cell>
+                                                <mat-cell *matCellDef="let row">
+                                                    {{row.pickupDate ? row.pickupDate : 'N/A'}}
+                                                </mat-cell>
+                                            </ng-container>
+
+                                            <!-- Booking Date -->
+                                            <ng-container matColumnDef="BookingDate">
+                                                <mat-header-cell *matHeaderCellDef mat-sort-header>Booking Date</mat-header-cell>
+                                                <mat-cell *matCellDef="let row">
+                                                    {{row.bookingDate || 'N/A'}}
+                                                </mat-cell>
+                                            </ng-container>
+
+                                            <!-- Dispatch Location -->
+                                            <ng-container matColumnDef="DispatchLocation">
+                                                <mat-header-cell *matHeaderCellDef mat-sort-header>Dispatch Location</mat-header-cell>
+                                                <mat-cell *matCellDef="let row">
+                                                    {{row.dispatchLocation || 'N/A'}}
+                                                </mat-cell>
+                                            </ng-container>
+
+                                            <!-- Customer Name -->
+                                            <ng-container matColumnDef="CustomerName">
+                                                <mat-header-cell *matHeaderCellDef mat-sort-header>Customer Name</mat-header-cell>
+                                                <mat-cell *matCellDef="let row">
+                                                    {{row.customerName || 'N/A'}}
+                                                </mat-cell>
+                                            </ng-container>
+
+                                            <!-- Booker Name -->
+                                            <ng-container matColumnDef="BookerName">
+                                                <mat-header-cell *matHeaderCellDef mat-sort-header>Booker Name</mat-header-cell>
+                                                <mat-cell *matCellDef="let row">
+                                                    {{row.bookerName || 'N/A'}}
+                                                </mat-cell>
+                                            </ng-container>
+
+                                            <!-- Guest Name -->
+                                            <ng-container matColumnDef="GuestName">
+                                                <mat-header-cell *matHeaderCellDef mat-sort-header>Guest Name</mat-header-cell>
+                                                <mat-cell *matCellDef="let row">
+                                                    {{row.guestName || 'N/A'}}
+                                                </mat-cell>
+                                            </ng-container>
+
+                                            <!-- City -->
+                                            <ng-container matColumnDef="City">
+                                                <mat-header-cell *matHeaderCellDef mat-sort-header>City</mat-header-cell>
+                                                <mat-cell *matCellDef="let row">
+                                                    {{row.city || 'N/A'}}
+                                                </mat-cell>
+                                            </ng-container>
+
+                                            <!-- Duty Type -->
+                                            <ng-container matColumnDef="PackageType">
+                                                <mat-header-cell *matHeaderCellDef mat-sort-header>Duty Type</mat-header-cell>
+                                                <mat-cell *matCellDef="let row">
+                                                    {{row.packageType || 'N/A'}}
+                                                </mat-cell>
+                                            </ng-container>
+
+                                            <!-- Car No -->
+                                            <ng-container matColumnDef="CarNumber">
+                                                <mat-header-cell *matHeaderCellDef mat-sort-header>Car No</mat-header-cell>
+                                                <mat-cell *matCellDef="let row">
+                                                    {{row.carNumber || 'N/A'}}
+                                                </mat-cell>
+                                            </ng-container>
+
+                                            <!-- Driver -->
+                                            <ng-container matColumnDef="DriverName">
+                                                <mat-header-cell *matHeaderCellDef mat-sort-header>Driver Name</mat-header-cell>
+                                                <mat-cell *matCellDef="let row">
+                                                    {{row.driverName || 'N/A'}}
+                                                </mat-cell>
+                                            </ng-container>
+
+                                            <!-- Billed Duty Type -->
+                                            <ng-container matColumnDef="BilledDutyType">
+                                                <mat-header-cell *matHeaderCellDef mat-sort-header>Billed Duty Type</mat-header-cell>
+                                                <mat-cell *matCellDef="let row">
+                                                    {{row.billedDutyType || 'N/A'}}
+                                                </mat-cell>
+                                            </ng-container>
+
+                                            <!-- Package -->
+                                            <ng-container matColumnDef="Package">
+                                                <mat-header-cell *matHeaderCellDef mat-sort-header>Package</mat-header-cell>
+                                                <mat-cell *matCellDef="let row">
+                                                    {{row.package || 'N/A'}}
+                                                </mat-cell>
+                                            </ng-container>
+
+                                            <!-- Car Booked -->
+                                            <ng-container matColumnDef="CarBooked">
+                                                <mat-header-cell *matHeaderCellDef mat-sort-header>Car Booked</mat-header-cell>
+                                                <mat-cell *matCellDef="let row">
+                                                    {{row.carBooked || 'N/A'}}
+                                                </mat-cell>
+                                            </ng-container>
+
+                                            <!-- Car Sent -->
+                                            <ng-container matColumnDef="CarSent">
+                                                <mat-header-cell *matHeaderCellDef mat-sort-header>Car Sent</mat-header-cell>
+                                                <mat-cell *matCellDef="let row">
+                                                    {{row.carSent || 'N/A'}}
+                                                </mat-cell>
+                                            </ng-container>
+
+                                            <!-- MOP -->
+                                            <ng-container matColumnDef="ModeOfPayment">
+                                                <mat-header-cell *matHeaderCellDef mat-sort-header>MOP</mat-header-cell>
+                                                <mat-cell *matCellDef="let row">
+                                                    {{row.modeOfPayment || 'N/A'}}
+                                                </mat-cell>
+                                            </ng-container>
+
+                                            <!-- Location Out Date -->
+                                            <ng-container matColumnDef="LocationOutDate">
+                                                <mat-header-cell *matHeaderCellDef mat-sort-header>Location Out Date</mat-header-cell>
+                                                <mat-cell *matCellDef="let row">
+                                                    {{row.locationOutDate ? row.locationOutDate : 'N/A'}}
+                                                </mat-cell>
+                                            </ng-container>
+
+                                            <!-- Location Out Time -->
+                                            <ng-container matColumnDef="LocationOutTime">
+                                                <mat-header-cell *matHeaderCellDef mat-sort-header>Location Out Time</mat-header-cell>
+                                                <mat-cell *matCellDef="let row">
+                                                    {{row.locationOutTime || 'N/A'}}
+                                                </mat-cell>
+                                            </ng-container>
+
+                                            <!-- Location Out KM -->
+                                            <ng-container matColumnDef="LocationOutKM">
+                                                <mat-header-cell *matHeaderCellDef mat-sort-header>Location Out Odometer</mat-header-cell>
+                                                <mat-cell *matCellDef="let row">
+                                                    {{row.locationOutKM || 'N/A'}}
+                                                </mat-cell>
+                                            </ng-container>
+
+                                            <!-- Reporting Date -->
+                                            <ng-container matColumnDef="reportingDate">
+                                                <mat-header-cell *matHeaderCellDef mat-sort-header>Reporting Date</mat-header-cell>
+                                                <mat-cell *matCellDef="let row">
+                                                    {{row.dsPickUpDate ? row.dsPickUpDate : 'N/A'}}
+                                                </mat-cell>
+                                            </ng-container>
+
+                                            <!-- Reporting Time -->
+                                            <ng-container matColumnDef="reportingTime">
+                                                <mat-header-cell *matHeaderCellDef mat-sort-header>Reporting Time</mat-header-cell>
+                                                <mat-cell *matCellDef="let row">
+                                                    {{row.pickUpTime || 'N/A'}}
+                                                </mat-cell>
+                                            </ng-container>
+
+                                            <!-- Reporting KM -->
+                                            <ng-container matColumnDef="reportingKM">
+                                                <mat-header-cell *matHeaderCellDef mat-sort-header>Reporting Odometer</mat-header-cell>
+                                                <mat-cell *matCellDef="let row">
+                                                    {{row.pickUpKM || 'N/A'}}
+                                                </mat-cell>
+                                            </ng-container>
+
+                                            <!-- Releasing Date -->
+                                            <ng-container matColumnDef="releasingDate">
+                                                <mat-header-cell *matHeaderCellDef mat-sort-header>Releasing Date</mat-header-cell>
+                                                <mat-cell *matCellDef="let row">
+                                                    {{row.dropOffDate ? row.dropOffDate : 'N/A'}}
+                                                </mat-cell>
+                                            </ng-container>
+
+                                            <!-- Releasing Time -->
+                                            <ng-container matColumnDef="releasingTime">
+                                                <mat-header-cell *matHeaderCellDef mat-sort-header>Releasing Time</mat-header-cell>
+                                                <mat-cell *matCellDef="let row">
+                                                    {{row.dropOffTime || 'N/A'}}
+                                                </mat-cell>
+                                            </ng-container>
+
+                                            <!-- Releasing KM -->
+                                            <ng-container matColumnDef="releasingKM">
+                                                <mat-header-cell *matHeaderCellDef mat-sort-header>Releasing Odometer</mat-header-cell>
+                                                <mat-cell *matCellDef="let row">
+                                                    {{row.dropOffKM || 'N/A'}}
+                                                </mat-cell>
+                                            </ng-container>
+
+                                            <!-- Location In Date -->
+                                            <ng-container matColumnDef="LocationInDate">
+                                                <mat-header-cell *matHeaderCellDef mat-sort-header>Location In Date</mat-header-cell>
+                                                <mat-cell *matCellDef="let row">
+                                                    {{row.locationInDate ? row.locationInDate : 'N/A'}}
+                                                </mat-cell>
+                                            </ng-container>
+
+                                            <!-- Location In Time -->
+                                            <ng-container matColumnDef="LocationInTime">
+                                                <mat-header-cell *matHeaderCellDef mat-sort-header>Location In Time</mat-header-cell>
+                                                <mat-cell *matCellDef="let row">
+                                                    {{row.locationInTime || 'N/A'}}
+                                                </mat-cell>
+                                            </ng-container>
+
+                                            <!-- Location In KM -->
+                                            <ng-container matColumnDef="LocationInKM">
+                                                <mat-header-cell *matHeaderCellDef mat-sort-header>Location In Odometer</mat-header-cell>
+                                                <mat-cell *matCellDef="let row">
+                                                    {{row.locationInKM || 'N/A'}}
+                                                </mat-cell>
+                                            </ng-container>
+
+                                            <!-- G2P -->
+                                            <ng-container matColumnDef="G2P">
+                                                <mat-header-cell *matHeaderCellDef mat-sort-header>G2P</mat-header-cell>
+                                                <mat-cell *matCellDef="let row">
+                                                    {{row.g2P || 'N/A'}}
+                                                </mat-cell>
+                                            </ng-container>
+
+                                            <!-- D2G -->
+                                            <ng-container matColumnDef="D2G">
+                                                <mat-header-cell *matHeaderCellDef mat-sort-header>D2G</mat-header-cell>
+                                                <mat-cell *matCellDef="let row">
+                                                    {{row.d2G || 'N/A'}}
+                                                </mat-cell>
+                                            </ng-container>
+
+                                            <!-- App P2D -->
+                                            <ng-container matColumnDef="AppP2D">
+                                                <mat-header-cell *matHeaderCellDef mat-sort-header>App P2D</mat-header-cell>
+                                                <mat-cell *matCellDef="let row">
+                                                    {{row.appP2D || 'N/A'}}
+                                                </mat-cell>
+                                            </ng-container>
+
+                                            <!-- Driver P2D -->
+                                            <ng-container matColumnDef="DriverP2D">
+                                                <mat-header-cell *matHeaderCellDef mat-sort-header>Driver P2D</mat-header-cell>
+                                                <mat-cell *matCellDef="let row">
+                                                    {{row.driverP2D || 'N/A'}}
+                                                </mat-cell>
+                                            </ng-container>
+
+                                            <!-- GPS P2D -->
+                                            <ng-container matColumnDef="GPSP2D">
+                                                <mat-header-cell *matHeaderCellDef mat-sort-header>GPS P2D</mat-header-cell>
+                                                <mat-cell *matCellDef="let row">
+                                                    {{row.gpsP2D || 'N/A'}}
+                                                </mat-cell>
+                                            </ng-container>
+
+                                            <!-- Billed KM -->
+                                            <ng-container matColumnDef="TotalKMWithAddtionalKM">
+                                                <mat-header-cell *matHeaderCellDef mat-sort-header>Billed Kms</mat-header-cell>
+                                                <mat-cell *matCellDef="let row">
+                                                    {{row.totalKMWithAddtionalKM || 'N/A'}}
+                                                </mat-cell>
+                                            </ng-container>
+
+                                            <!-- Billed Hours -->
+                                            <ng-container matColumnDef="TotalHoursWithAddtionalHours">
+                                                <mat-header-cell *matHeaderCellDef mat-sort-header>Billed Hrs</mat-header-cell>
+                                                <mat-cell *matCellDef="let row">
+                                                    {{row.totalHoursWithAddtionalHours || 'N/A'}}
+                                                </mat-cell>
+                                            </ng-container>
+
+                                            <!-- Parking -->
+                                            <ng-container matColumnDef="Parking">
+                                                <mat-header-cell *matHeaderCellDef mat-sort-header>Parking</mat-header-cell>
+                                                <mat-cell *matCellDef="let row">
+                                                    {{row.parking || 'N/A'}}
+                                                </mat-cell>
+                                            </ng-container>
+
+                                            <!-- Toll -->
+                                            <ng-container matColumnDef="Toll">
+                                                <mat-header-cell *matHeaderCellDef mat-sort-header>Toll</mat-header-cell>
+                                                <mat-cell *matCellDef="let row">
+                                                    {{row.toll || 'N/A'}}
+                                                </mat-cell>
+                                            </ng-container>
+
+                                            <!-- Fastag -->
+                                            <ng-container matColumnDef="FasTag">
+                                                <mat-header-cell *matHeaderCellDef mat-sort-header>Fastag</mat-header-cell>
+                                                <mat-cell *matCellDef="let row">
+                                                    {{row.fasTag || 'N/A'}}
+                                                </mat-cell>
+                                            </ng-container>
+
+                                            <!-- Interstate Tax -->
+                                            <ng-container matColumnDef="InvoiceInterstateTax">
+                                                <mat-header-cell *matHeaderCellDef mat-sort-header>Interstate Tax</mat-header-cell>
+                                                <mat-cell *matCellDef="let row">
+                                                    {{row.invoiceInterstateTax || 'N/A'}}
+                                                </mat-cell>
+                                            </ng-container>
+
+                                            <!-- Chargeable Expense -->
+                                            <ng-container matColumnDef="DutyExpenseChargeTotal">
+                                                <mat-header-cell *matHeaderCellDef mat-sort-header>Chargeable Expenses</mat-header-cell>
+                                                <mat-cell *matCellDef="let row">
+                                                    {{row.dutyExpenseChargeTotal || 'N/A'}}
+                                                </mat-cell>
+                                            </ng-container>
+
+                                            <!-- DS Verify -->
+                                            <ng-container matColumnDef="DSVerifyStatus">
+                                                <mat-header-cell *matHeaderCellDef mat-sort-header>DS Verify Status</mat-header-cell>
+                                                <mat-cell *matCellDef="let row">
+                                                    {{row.dsVerifyStatus || 'N/A'}}
+                                                </mat-cell>
+                                            </ng-container>
+
+                                            <!-- Good For Billing -->
+                                            <ng-container matColumnDef="GoodForBilling">
+                                                <mat-header-cell *matHeaderCellDef mat-sort-header>Good For Bill</mat-header-cell>
+                                                <mat-cell *matCellDef="let row">
+                                                    {{row.goodForBilling === true ? 'Yes' : (row.goodForBilling === false ? 'No' : 'N/A')}}
+                                                </mat-cell>
+                                            </ng-container>
+
+                                            <!-- DS Status -->
+                                            <ng-container matColumnDef="DSStatus">
+                                                <mat-header-cell *matHeaderCellDef mat-sort-header>DS Status</mat-header-cell>
+                                                <mat-cell *matCellDef="let row">
+                                                    {{row.dsStatus || 'N/A'}}
+                                                </mat-cell>
+                                            </ng-container>
+
+                                            <!-- Booking Status -->
+                                            <ng-container matColumnDef="ReservationStatus">
+                                                <mat-header-cell *matHeaderCellDef mat-sort-header>Booking Status</mat-header-cell>
+                                                <mat-cell *matCellDef="let row">
+                                                    {{row.reservationStatus || 'N/A'}}
+                                                </mat-cell>
+                                            </ng-container>
+
+                                            <!-- Ownership -->
+                                            <ng-container matColumnDef="OwnedSupplied">
+                                                <mat-header-cell *matHeaderCellDef mat-sort-header>Owned/Supplier</mat-header-cell>
+                                                <mat-cell *matCellDef="let row">
+                                                    {{row.ownedSupplied || 'N/A'}}
+                                                </mat-cell>
+                                            </ng-container>
+
+                                            <!-- Vendor Type -->
+                                            <ng-container matColumnDef="SupplierType">
+                                                <mat-header-cell *matHeaderCellDef mat-sort-header>Vendor Type</mat-header-cell>
+                                                <mat-cell *matCellDef="let row">
+                                                    {{row.supplierType || 'N/A'}}
+                                                </mat-cell>
+                                            </ng-container>
+
+                                            <!-- Adhoc -->
+                                            <ng-container matColumnDef="AdocStatus">
+                                                <mat-header-cell *matHeaderCellDef mat-sort-header>Adoc Status</mat-header-cell>
+                                                <mat-cell *matCellDef="let row">
+                                                    {{row.adocStatus === true ? 'Yes' : (row.adocStatus === false ? 'No' : 'N/A')}}
+                                                </mat-cell>
+                                            </ng-container>
+
+                                            <!-- Sales -->
+                                            <ng-container matColumnDef="SalesPerson">
+                                                <mat-header-cell *matHeaderCellDef mat-sort-header>Sales Person</mat-header-cell>
+                                                <mat-cell *matCellDef="let row">
+                                                    {{row.salesPerson || 'N/A'}}
+                                                </mat-cell>
+                                            </ng-container>
+
+                                            <!-- KAM -->
+                                            <ng-container matColumnDef="KAM">
+                                                <mat-header-cell *matHeaderCellDef mat-sort-header>KAM</mat-header-cell>
+                                                <mat-cell *matCellDef="let row">
+                                                    {{row.kam || 'N/A'}}
+                                                </mat-cell>
+                                            </ng-container>
+
+                                            <!-- Booking Created -->
+                                            <ng-container matColumnDef="ReservationCreatedBy">
+                                                <mat-header-cell *matHeaderCellDef mat-sort-header>Booking Created By</mat-header-cell>
+                                                <mat-cell *matCellDef="let row">
+                                                    {{row.reservationCreatedBy || 'N/A'}}
+                                                </mat-cell>
+                                            </ng-container>
+
+                                            <!-- Allotment -->
+                                            <ng-container matColumnDef="AllotmentBy">
+                                                <mat-header-cell *matHeaderCellDef mat-sort-header>Allotment By</mat-header-cell>
+                                                <mat-cell *matCellDef="let row">
+                                                    {{row.allotmentBy || 'N/A'}}
+                                                </mat-cell>
+                                            </ng-container>
+
+                                            <ng-container matColumnDef="SupplierName">
+                                                <mat-header-cell *matHeaderCellDef mat-sort-header>Vendor</mat-header-cell>
+                                                <mat-cell *matCellDef="let row">
+                                                    {{row.supplierName || 'N/A'}}
+                                                </mat-cell>
+                                            </ng-container>
+
+                                            <ng-container matColumnDef="DSClosedBy">
+                                                <mat-header-cell *matHeaderCellDef mat-sort-header>DS Closed By</mat-header-cell>
+                                                <mat-cell *matCellDef="let row">
+                                                    {{ row.dsClosedBy?.trim() ? row.dsClosedBy : 'N/A' }}
+                                                </mat-cell>
+                                            </ng-container>
+
+                                            <ng-container matColumnDef="DutySlipImage">
+                                                <mat-header-cell *matHeaderCellDef mat-sort-header>Manual DS Attached Status</mat-header-cell>
+                                                <mat-cell *matCellDef="let row">
+                                                    {{row.dutySlipImage ? 'Yes' : 'No'}}
+                                                </mat-cell>
+                                            </ng-container>
+
+                                            <ng-container matColumnDef="ClosingDate">
+                                                <mat-header-cell *matHeaderCellDef mat-sort-header>Closing Date</mat-header-cell>
+                                                <mat-cell *matCellDef="let row">
+                                                    {{row.closingDate || 'N/A'}}
+                                                </mat-cell>
+                                            </ng-container>
+                                            <ng-container matColumnDef="ClosureMethod">
+                                                <mat-header-cell *matHeaderCellDef mat-sort-header>Closure Method</mat-header-cell>
+                                                <mat-cell *matCellDef="let row">
+                                                    {{row.closureMethod || 'N/A'}}
+                                                </mat-cell>
+                                            </ng-container>
+                                            <ng-container matColumnDef="PickupAddress">
+                                                <mat-header-cell *matHeaderCellDef mat-sort-header>Pickup Address </mat-header-cell>
+                                                <mat-cell *matCellDef="let row">
+                                                    {{row.pickupAddress || 'N/A'}}
+                                                </mat-cell>
+                                            </ng-container>
+                                             <ng-container matColumnDef="PickupAddressDetails">
+                                                <mat-header-cell *matHeaderCellDef mat-sort-header>Pickup Address Details</mat-header-cell>
+                                                <mat-cell *matCellDef="let row">
+                                                    {{row.pickupAddressDetails  || 'N/A'}}
+                                                </mat-cell>
+                                            </ng-container>
+                                             <ng-container matColumnDef="DropOffAddress">
+                                                <mat-header-cell *matHeaderCellDef mat-sort-header>DropOff Address</mat-header-cell>
+                                                <mat-cell *matCellDef="let row">
+                                                    {{row.dropOffAddress || 'N/A'}}
+                                                </mat-cell>
+                                            </ng-container>
+                                             <ng-container matColumnDef="CustomerSpecificFields">
+                                                <mat-header-cell *matHeaderCellDef mat-sort-header>Customer SpecificFields</mat-header-cell>
+                                                <mat-cell *matCellDef="let row">
+                                                    {{row.customerSpecificFields || 'N/A'}}
+                                                </mat-cell>
+                                            </ng-container>
+
+                                            <mat-header-row *matHeaderRowDef="displayedColumns"></mat-header-row>
+
+                                            <mat-row *matRowDef="let row; columns: displayedColumns;"></mat-row>
+
+                                        </mat-table>
+                                    </div>
+                                    </div>
+
+                                    <div class="body">
+                                        <div class="example-button-row">
+                                            <button mat-raised-button color="primary" (click)="PreviousCall()">Previous</button>
+                                            <button mat-raised-button color="primary" (click)="NextCall()">Next</button>
+                                        </div>
+                                    </div>
+                                </ng-template>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+<ng-template>
+                <div class="zonal-duty-register-search quick-search-panel">
+                <div class="row">
+                    <!-- <div class="col-xl-3 col-lg-3 col-md-6 col-sm-12 mb-2"> -->
+                    <div class="col mb-2" style="flex: 0 0 20%; max-width: 20%;">
+                        <mat-form-field class="example-full-width cp-quick-search-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
+                            <mat-label>Customer Group</mat-label>
+                            <input type="text" matInput [formControl]="SearchCustomerGroup"  [matAutocomplete]="auto">
+                            <mat-autocomplete #auto="matAutocomplete">
+                                <mat-option *ngFor="let option of filteredCustomerGroupOptions | async" [value]="option.customerGroup">
+                                    {{option.customerGroup}}
+                                </mat-option>
+                            </mat-autocomplete>
+                        </mat-form-field>
+                    </div>
+                    
+                    <div class="col mb-2" style="flex: 0 0 20%; max-width: 20%;">
+                        <mat-form-field class="example-full-width cp-quick-search-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
+                            <mat-label>Client Name</mat-label>
+                            <input type="text" matInput [formControl]="SearchCustomerPerson" [matAutocomplete]="auto1">
+                            <mat-autocomplete #auto1="matAutocomplete">
+                                <mat-option *ngFor="let option of filteredCustomerPersonOptions | async" [value]="option.customerPersonName">
+                                    {{option.customerPersonName}}
+                                </mat-option>
+                            </mat-autocomplete>
+                        </mat-form-field>
+                    </div>
+
+                    <div class="col mb-2" style="flex: 0 0 20%; max-width: 20%;">
+                        <mat-form-field class="example-full-width cp-quick-search-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
+                            <mat-label>Duty Type</mat-label>
+                            <input type="text" matInput [formControl]="SearchDutyType" [matAutocomplete]="auto2">
+                            <mat-autocomplete #auto2="matAutocomplete">
+                                <mat-option *ngFor="let option of filteredPackageTypeOptions | async" [value]="option.packageType">
+                                  {{option.packageType}}
+                                </mat-option>
+                              </mat-autocomplete>
+                        </mat-form-field>
+                    </div>
+
+                    <div class="col mb-2" style="flex: 0 0 20%; max-width: 20%;">
+                        <mat-form-field class="example-full-width cp-quick-search-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
+                            <mat-label>Feedback Date</mat-label>
+                            <input type="text" matInput [matDatepicker]="feedbackDate" [(ngModel)]="SearchFeedbackDate">
+                            <mat-datepicker-toggle matSuffix [for]="feedbackDate"></mat-datepicker-toggle>
+                            <mat-datepicker #feedbackDate></mat-datepicker>
+                        </mat-form-field>
+                    </div>
+
+                    <div class="col mb-2" style="flex: 0 0 20%; max-width: 20%;">
+                        <mat-form-field class="example-full-width cp-quick-search-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
+                            <mat-label>Slip Receipt</mat-label>
+                            <mat-select [(value)]="SearchSlipReceipt">
+                                <mat-option [value]=true>Yes</mat-option>
+                                <mat-option [value]=false>No</mat-option>
+                            </mat-select>
+                        </mat-form-field>
+                    </div>
+                </div>
+
+                <div class="row">    
+                    <div class="col mb-2" style="flex: 0 0 20%; max-width: 20%;">
+                        <mat-form-field class="example-full-width cp-quick-search-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
+                            <mat-label>Closure Type</mat-label>
+                            <mat-select [formControl]="SearchClosureType">
+                                <mat-option value="Dispatched">Dispatched</mat-option>
+                                <mat-option value="PickedUp">PickedUp</mat-option>
+                                <mat-option value="Reached">Reached</mat-option>
+                                <mat-option value="Garage In">Garage In</mat-option>
+                                <mat-option value="Not Dispatched">Not Dispatched</mat-option>
+                                <mat-option value="Dropped Off">Dropped Off</mat-option>
+                            </mat-select>
+                        </mat-form-field>
+                    </div>
+
+                    <div class="col mb-2" style="flex: 0 0 20%; max-width: 20%;">
+                        <mat-form-field class="example-full-width cp-quick-search-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
+                            <mat-label>Dispatch Location</mat-label>
+                            <input type="text" matInput [formControl]="SearchDispatchLocation" [matAutocomplete]="auto3">
+                            <mat-autocomplete #auto3="matAutocomplete">
+                                <mat-option *ngFor="let option of filteredDispatchLocationOptions | async" 
+                                    [value]="option.organizationalEntityName">
+                                  {{option.organizationalEntityName}}
+                                </mat-option>
+                            </mat-autocomplete>
+                        </mat-form-field>
+                    </div>
+
+                    <div class="col mb-2" style="flex: 0 0 20%; max-width: 20%;">
+                        <mat-form-field class="example-full-width cp-quick-search-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
+                            <mat-label>MOP</mat-label>
+                            <input type="text" matInput [formControl]="SearchMOP" [matAutocomplete]="auto4">
+                            <mat-autocomplete #auto4="matAutocomplete">
+                                <mat-option *ngFor="let option of filteredPaymentModeOptions | async"
+                                    [value]="option.modeOfPayment">
+                                    {{option.modeOfPayment}}
+                                </mat-option>
+                            </mat-autocomplete>
+                        </mat-form-field>
+                    </div>
+
+                    <div class="col mb-2" style="flex: 0 0 20%; max-width: 20%;">
+                        <mat-form-field class="example-full-width cp-quick-search-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
+                            <mat-label>Vendor Type</mat-label>
+                            <input type="text" matInput [formControl]="SearchSupplierType" [matAutocomplete]="auto5">
+                            <mat-autocomplete #auto5="matAutocomplete">
+                                <mat-option *ngFor="let options of filteredSupplierTypeOptions | async"
+                                    [value]="options.supplierType">
+                                    {{options.supplierType}}
+                                </mat-option>
+                            </mat-autocomplete>
+                        </mat-form-field>
+                    </div>
+
+                    <div class="col mb-2" style="flex: 0 0 20%; max-width: 20%;">
+                        <mat-form-field class="example-full-width cp-quick-search-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
+                            <mat-label>Vendor</mat-label>
+                            <input type="text" matInput [formControl]="SearchSupplier" [matAutocomplete]="auto6">
+                            <mat-autocomplete #auto6="matAutocomplete">
+                                <mat-option *ngFor="let option of filteredSupplierOptions | async" [value]="option.supplierName">
+                                  {{ option.supplierName }}
+                                </mat-option>
+                              </mat-autocomplete>
+                        </mat-form-field>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col mb-2" style="flex: 0 0 20%; max-width: 20%;">
+                        <mat-form-field class="example-full-width cp-quick-search-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
+                            <mat-label>From Date</mat-label>
+                            <input type="text" matInput [matDatepicker]="fromDate" [(ngModel)]="SearchFromDate">
+                            <mat-datepicker-toggle matSuffix [for]="fromDate"></mat-datepicker-toggle>
+                            <mat-datepicker #fromDate></mat-datepicker>
+                        </mat-form-field>
+                    </div>
+                    
+                    <div class="col mb-2" style="flex: 0 0 20%; max-width: 20%;">
+                        <mat-form-field class="example-full-width cp-quick-search-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
+                            <mat-label>To Date</mat-label>
+                            <input type="text" matInput [matDatepicker]="toDate" [(ngModel)]="SearchToDate">
+                            <mat-datepicker-toggle matSuffix [for]="toDate"></mat-datepicker-toggle>
+                            <mat-datepicker #toDate></mat-datepicker>
+                        </mat-form-field>
+                    </div>                    
+
+                    <div class="col mb-2" style="flex: 0 0 20%; max-width: 20%;">
+                        <mat-form-field class="example-full-width cp-quick-search-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
+                            <mat-label>Sales Person</mat-label>
+                            <input type="text" matInput [formControl]="SearchSalesPerson" [matAutocomplete]="auto7">
+                            <mat-autocomplete #auto7="matAutocomplete">
+                                <mat-option *ngFor="let option of filteredSalesPersonOptions | async" [value]="option.salesPerson">
+                                    {{option.salesPerson}}
+                                </mat-option>
+                            </mat-autocomplete>
+                        </mat-form-field>
+                    </div>
+
+                    <div class="col mb-2" style="flex: 0 0 20%; max-width: 20%;">
+                        <mat-form-field class="example-full-width cp-quick-search-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
+                            <mat-label>Car Sent</mat-label>
+                            <input type="text" matInput [formControl]="SearchCarSend" [matAutocomplete]="auto8">
+                            <mat-autocomplete #auto8="matAutocomplete">
+                                <mat-option *ngFor="let option of filteredCarSendOptions | async" [value]="option.vehicle">
+                                    {{option.vehicle}}
+                                </mat-option>
+                            </mat-autocomplete>
+                        </mat-form-field>
+                    </div>
+                    
+                    <div class="col mb-2" style="flex: 0 0 20%; max-width: 20%;">
+                        <mat-form-field class="example-full-width cp-quick-search-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
+                            <mat-label>Car Booked</mat-label>
+                            <input type="text" matInput [formControl]="SearchCarBooked" [matAutocomplete]="auto9">
+                            <mat-autocomplete #auto9="matAutocomplete">
+                                <mat-option *ngFor="let option of filteredCarBookedOptions | async" [value]="option.vehicle">
+                                    {{option.vehicle}}
+                                </mat-option>
+                            </mat-autocomplete>
+                        </mat-form-field>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col mb-2" style="flex: 0 0 20%; max-width: 20%;">
+                        <mat-form-field class="example-full-width cp-quick-search-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
+                            <mat-label>Customer Type</mat-label>
+                            <input type="text" matInput [formControl]="SearchCustomerType" [matAutocomplete]="auto10">
+                            <mat-autocomplete #auto10="matAutocomplete">
+                                <mat-option *ngFor="let option of filteredCustomerTypeOptions | async" [value]="option.customerType">
+                                    {{option.customerType}}
+                                </mat-option>
+                            </mat-autocomplete>
+                        </mat-form-field>
+                    </div>
+
+                    <div class="col mb-2" style="flex: 0 0 20%; max-width: 20%;">
+                        <mat-form-field class="example-full-width cp-quick-search-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
+                            <mat-label>Customer Location</mat-label>
+                            <input type="text" matInput [formControl]="SearchCustomerLocationName" [matAutocomplete]="auto11">
+                            <mat-autocomplete #auto11="matAutocomplete">
+                                <mat-option *ngFor="let option of filteredCustomerLocationOptions | async" [value]="option.organizationalEntityName">
+                                  {{option.organizationalEntityName}}
+                                </mat-option>
+                              </mat-autocomplete>
+                        </mat-form-field>
+                    </div>
+
+                    <div class="col mb-2" style="flex: 0 0 20%; max-width: 20%;">
+                        <mat-form-field class="example-full-width cp-quick-search-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
+                            <mat-label>Booking Status</mat-label>
+                            <mat-select [formControl]="SearchBookingStatus">
+                                <mat-option value="Confirmed">Confirmed</mat-option>
+                                <mat-option value="Approved">Approved</mat-option>
+                                <mat-option value="Pending">Pending</mat-option>
+                                <mat-option value="Cancelled">Cancelled</mat-option>
+                            </mat-select>
+                        </mat-form-field>
+                    </div>
+
+                    <div class="col mb-2" style="flex: 0 0 20%; max-width: 20%;">
+                        <mat-form-field class="example-full-width cp-quick-search-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
+                            <mat-label>Driver</mat-label>
+                            <input type="text" matInput [formControl]="SearchDri" [matAutocomplete]="auto15">
+                            <mat-autocomplete #auto15="matAutocomplete">
+                                <mat-option *ngFor="let option of filteredDriverOptions | async" [value]="option.driverName">
+                                  {{option.driverName}}
+                                </mat-option>
+                            </mat-autocomplete>
+                        </mat-form-field>
+                    </div>
+                    
+                    <div class="col mb-2" style="flex: 0 0 20%; max-width: 20%;">
+                        <mat-form-field class="example-full-width cp-quick-search-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
+                            <mat-label>Car No.</mat-label>
+                            <input type="text" matInput [formControl]="SearchCarNo" [matAutocomplete]="auto12">
+                            <mat-autocomplete #auto12="matAutocomplete">
+                                <mat-option *ngFor="let option of filteredCarNoOptions | async" [value]="option.vehicle">
+                                  {{option.vehicle}}
+                                </mat-option>
+                            </mat-autocomplete>
+                        </mat-form-field>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col mb-2" style="flex: 0 0 20%; max-width: 20%;">
+                        <mat-form-field class="example-full-width cp-quick-search-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
+                            <mat-label>Owned/Supplied</mat-label>
+                            <mat-select [formControl]="SearchSupplierO">
+                                <mat-option value="Owned">Owned</mat-option>
+                                <mat-option value="Supplied">Supplied</mat-option>
+                            </mat-select>
+                        </mat-form-field>
+                    </div>
+
+                    <div class="col mb-2" style="flex: 0 0 20%; max-width: 20%;">
+                        <mat-form-field class="example-full-width cp-quick-search-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
+                            <mat-label>Reservation No</mat-label>
+                            <input type="text" matInput [(ngModel)]="SearchRes">
+                        </mat-form-field>
+                    </div>
+
+                    <div class="col mb-2" style="flex: 0 0 20%; max-width: 20%;">
+                        <mat-form-field class="example-full-width cp-quick-search-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
+                            <mat-label>Duty Slip No</mat-label>
+                            <input type="text" matInput [(ngModel)]="SearchDuty">
+                        </mat-form-field>
+                    </div>
+
+                    <div class="col mb-2" style="flex: 0 0 20%; max-width: 20%;">
+                        <mat-form-field class="example-full-width cp-quick-search-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
+                            <mat-label>Guest Name</mat-label>
+                            <input type="text" matInput [formControl]="SearchGuestName" [matAutocomplete]="auto13">
+                            <mat-autocomplete #auto13="matAutocomplete">
+                                <mat-option *ngFor="let option of filteredGuestNameOptions | async" [value]="option.customerPersonName">
+                                    {{option.customerPersonName}}
+                                </mat-option>
+                            </mat-autocomplete>
+                        </mat-form-field>
+                    </div>
+
+                    <div class="col mb-2" style="flex: 0 0 20%; max-width: 20%;">
+                        <mat-form-field class="example-full-width cp-quick-search-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
+                            <mat-label>Guest Mobile</mat-label>
+                            <input type="text" matInput [(ngModel)]="SearchGuestMobile">
+                        </mat-form-field>
+                    </div>
+                    
+                </div>
+
+                <div class="row">
+                    <div class="col mb-2" style="flex: 0 0 20%; max-width: 20%;">
+                        <mat-form-field class="example-full-width cp-quick-search-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
+                            <mat-label>City</mat-label>
+                            <input type="text" matInput [formControl]="SearchCity"  [matAutocomplete]="auto14">
+                            <mat-autocomplete #auto14="matAutocomplete">
+                                <mat-option *ngFor="let option of filteredCityOptions | async" [value]="option.geoPointName">
+                                    {{option.geoPointName}}
+                                </mat-option>
+                            </mat-autocomplete>
+                        </mat-form-field>
+                    </div>
+                    
+                    <div class="col mb-2" style="flex: 0 0 20%; max-width: 20%;">
+                        <mat-form-field class="example-full-width cp-quick-search-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
+                            <mat-label>Cancellation Date From</mat-label>
+                            <input type="text" matInput [matDatepicker]="cancellationDateFrom" [(ngModel)]="SearchCancellationDateFrom">
+                            <mat-datepicker-toggle matSuffix [for]="cancellationDateFrom"></mat-datepicker-toggle>
+                            <mat-datepicker #cancellationDateFrom></mat-datepicker>
+                        </mat-form-field>
+                    </div>
+                    
+                    <div class="col mb-2" style="flex: 0 0 20%; max-width: 20%;">
+                        <mat-form-field class="example-full-width cp-quick-search-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
+                            <mat-label>Cancellation Date To</mat-label>
+                            <input type="text" matInput [matDatepicker]="cancellationDateTo" [(ngModel)]="SearchCancellationDateTo">
+                            <mat-datepicker-toggle matSuffix [for]="cancellationDateTo"></mat-datepicker-toggle>
+                            <mat-datepicker #cancellationDateTo></mat-datepicker>
+                        </mat-form-field>
+                    </div>
+
+                    <div class="col mb-2" style="flex: 0 0 20%; max-width: 20%;">
+                        <mat-form-field class="example-full-width cp-quick-search-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
+                            <mat-label>Bkg Date From</mat-label>
+                            <input type="text" matInput [matDatepicker]="bookingDateFrom" [(ngModel)]="SearchBookingDateFrom">
+                            <mat-datepicker-toggle matSuffix [for]="bookingDateFrom"></mat-datepicker-toggle>
+                            <mat-datepicker #bookingDateFrom></mat-datepicker>
+                        </mat-form-field>
+                    </div>
+                    
+                    <div class="col mb-2" style="flex: 0 0 20%; max-width: 20%;">
+                        <mat-form-field class="example-full-width cp-quick-search-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
+                            <mat-label>Bkg Date To</mat-label>
+                            <input type="text" matInput [matDatepicker]="bookingDateTo" [(ngModel)]="SearchBookingDate">
+                            <mat-datepicker-toggle matSuffix [for]="bookingDateTo"></mat-datepicker-toggle>
+                            <mat-datepicker #bookingDateTo></mat-datepicker>
+                        </mat-form-field>
+                    </div>
+                </div>
+
+
+                   <div class="row">
+                    <!-- <div class="col-xl-3 col-lg-3 col-md-6 col-sm-12 mb-2"> -->
+                    <div class="col mb-2" style="flex: 0 0 20%; max-width: 20%;">
+                        <mat-form-field class="example-full-width cp-quick-search-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
+                            <mat-label>Change MOP Case</mat-label>
+                            <mat-select [(value)]="SearchChangeMOPCase">
+                                <mat-option value="true">Yes</mat-option>
+                                <mat-option value="false">No</mat-option>
+                            </mat-select>
+                        </mat-form-field>
+                    </div>
+                    
+                    <div class="col mb-2" style="flex: 0 0 20%; max-width: 20%;">
+                        <mat-form-field class="example-full-width cp-quick-search-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
+                            <mat-label>Location Group</mat-label>
+                            <input type="text" matInput [formControl]="SearchLocationGroup" [matAutocomplete]="auto19">
+                            <mat-autocomplete #auto19="matAutocomplete">
+                                <mat-option *ngFor="let option of filteredLocationGroupOptions | async" [value]="option.locationGroup">
+                                    {{option.locationGroup}}
+                                </mat-option>
+                            </mat-autocomplete>
+                        </mat-form-field>
+                    </div>
+
+                
+                    <div class="col mb-2" style="flex: 0 0 20%; max-width: 20%;">
+                        <mat-form-field class="example-full-width cp-quick-search-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
+                            <mat-label>Bill Date From</mat-label>
+                            <input type="text" matInput [matDatepicker]="billDateFrom" [(ngModel)]="SearchBillDateFrom">
+                            <mat-datepicker-toggle matSuffix [for]="billDateFrom"></mat-datepicker-toggle>
+                            <mat-datepicker #billDateFrom></mat-datepicker>
+                        </mat-form-field>
+                    </div>
+                    
+                    <div class="col mb-2" style="flex: 0 0 20%; max-width: 20%;">
+                        <mat-form-field class="example-full-width cp-quick-search-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
+                            <mat-label>Bill Date To</mat-label>
+                            <input type="text" matInput [matDatepicker]="billDateTo" [(ngModel)]="SearchBillToDate">
+                            <mat-datepicker-toggle matSuffix [for]="billDateTo"></mat-datepicker-toggle>
+                            <mat-datepicker #billDateTo></mat-datepicker>
+                        </mat-form-field>
+                    </div>
+
+                    <div class="col mb-2" style="flex: 0 0 20%; max-width: 20%; display: flex; align-items: center;">
+                        <div class="zonal-duty-register-billing-status">
+                            <label class="zonal-duty-register-billing-status-label">Billing Status</label>
+                            &nbsp;
+                            <mat-radio-group [(ngModel)]="SearchBillStatus" class="zonal-duty-register-billing-status-group">
+                                <!-- <mat-radio-button value="">All</mat-radio-button> -->
+                                <mat-radio-button value="ToBeBilled">To Be Billed</mat-radio-button><br/>
+                                <mat-radio-button value="BillAllotted">Bill Allotted</mat-radio-button>
+                            </mat-radio-group>
+                        </div>
+                    </div>
+                </div>
+                </div>
+
+                <!-- <mat-form-field appearance="outline" floatLabel="always" class="example-full-width mb-3">
+                    <mat-label>Activation Status</mat-label>
+                    <mat-select [(value)]="SearchActivationStatus">
+                        <mat-option [value]=true>Active</mat-option>
+                        <mat-option [value]=false>Deleted</mat-option>
+                    </mat-select>
+                </mat-form-field> -->
+</ng-template>
+
+<ng-template #zonalDutyRegisterAdvanceSearch>
+      <div class="row">
+        <div class="col-xl-3 col-lg-3 col-md-3 col-sm-12 mb-2">
+            <mat-form-field class="example-full-width cp-quick-search-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
+                <mat-label>Branch</mat-label>
+                <input type="text" matInput [formControl]="SearchBranch"  [matAutocomplete]="autoBranch">
+                <mat-autocomplete #autoBranch="matAutocomplete" (optionSelected)="OnBranchSelected($event.option.value)">
+                    <mat-option *ngFor="let option of filteredBranchOptions | async" [value]="option.organizationalEntityName">
+                        {{option.organizationalEntityName}}
+                    </mat-option>
+                </mat-autocomplete>
+            </mat-form-field>
+        </div>
+
+        <div class="col-xl-3 col-lg-3 col-md-3 col-sm-12 mb-2">
+            <mat-form-field class="example-full-width cp-quick-search-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
+                <mat-label>Owned/Supplied</mat-label>
+                <mat-select [formControl]="SearchSupplierO">
+                    <mat-option value="Owned">Owned</mat-option>
+                    <mat-option value="Supplied">Supplied</mat-option>
+                </mat-select>
+            </mat-form-field>
+        </div>
+
+        <div class="col-xl-3 col-lg-3 col-md-3 col-sm-12 mb-2">
+            <mat-form-field class="example-full-width cp-quick-search-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
+                <mat-label>Vendor Type</mat-label>
+                <input type="text" matInput [formControl]="SearchSupplierType" [matAutocomplete]="auto5">
+                <mat-autocomplete #auto5="matAutocomplete">
+                    <mat-option *ngFor="let options of filteredSupplierTypeOptions | async"
+                        [value]="options.supplierType">
+                        {{options.supplierType}}
+                    </mat-option>
+                </mat-autocomplete>
+            </mat-form-field>
+        </div>
+
+        <div class="col-xl-3 col-lg-3 col-md-3 col-sm-12 mb-2">
+            <mat-form-field class="example-full-width cp-quick-search-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
+                <mat-label>Sales Person</mat-label>
+                <input type="text" matInput [formControl]="SearchSalesPerson" [matAutocomplete]="auto7">
+                <mat-autocomplete #auto7="matAutocomplete">
+                    <mat-option *ngFor="let option of filteredSalesPersonOptions | async" [value]="option.salesPerson">
+                        {{option.salesPerson}}
+                    </mat-option>
+                </mat-autocomplete>
+            </mat-form-field>
+        </div>
+      </div>     
+      
+      <div class="row">
+        <div class="col-xl-3 col-lg-3 col-md-3 col-sm-12 mb-2">
+           <mat-form-field class="example-full-width cp-quick-search-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
+                <mat-label>KAM</mat-label>
+                <input type="text" matInput [formControl]="SearchKAM"  [matAutocomplete]="autoKAM">
+                <mat-autocomplete #autoKAM="matAutocomplete" (optionSelected)="OnKAMSelected($event.option.value)">
+                    <mat-option *ngFor="let option of filteredKAMOptions | async" [value]="option.firstName +' '+option.lastName">
+                        {{option.firstName +' '+ option.lastName}}
+                    </mat-option>
+                </mat-autocomplete>
+            </mat-form-field>
+        </div>
+
+        <div class="col-xl-3 col-lg-3 col-md-3 col-sm-12 mb-2">
+            <mat-form-field class="example-full-width cp-quick-search-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
+                <mat-label>Car Booked</mat-label>
+                <input type="text" matInput [formControl]="SearchCarBooked" [matAutocomplete]="auto9">
+                <mat-autocomplete #auto9="matAutocomplete">
+                    <mat-option *ngFor="let option of filteredCarBookedOptions | async" [value]="option.vehicle">
+                        {{option.vehicle}}
+                    </mat-option>
+                </mat-autocomplete>
+            </mat-form-field>
+        </div>
+
+        <div class="col-xl-3 col-lg-3 col-md-3 col-sm-12 mb-2">
+            <mat-form-field class="example-full-width cp-quick-search-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
+                <mat-label>Car Sent</mat-label>
+                <input type="text" matInput [formControl]="SearchCarSend" [matAutocomplete]="auto8">
+                <mat-autocomplete #auto8="matAutocomplete">
+                    <mat-option *ngFor="let option of filteredCarSendOptions | async" [value]="option.vehicle">
+                        {{option.vehicle}}
+                    </mat-option>
+                </mat-autocomplete>
+            </mat-form-field>
+        </div>
+
+        <div class="col-xl-3 col-lg-3 col-md-3 col-sm-12 mb-2">
+            <mat-form-field class="example-full-width cp-quick-search-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
+                <mat-label>Car No.</mat-label>
+                <input type="text" matInput [formControl]="SearchCarNo" [matAutocomplete]="auto12">
+                <mat-autocomplete #auto12="matAutocomplete">
+                    <mat-option *ngFor="let option of filteredCarNoOptions | async" [value]="option.vehicle">
+                        {{option.vehicle}}
+                    </mat-option>
+                </mat-autocomplete>
+            </mat-form-field>
+        </div>
+      </div>
+      
+      <div class="row">
+        <div class="col-xl-3 col-lg-3 col-md-3 col-sm-12 mb-2">
+           <mat-form-field class="example-full-width cp-quick-search-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
+                <mat-label>Driver</mat-label>
+                <input type="text" matInput [formControl]="SearchDri" [matAutocomplete]="auto15">
+                <mat-autocomplete #auto15="matAutocomplete">
+                    <mat-option *ngFor="let option of filteredDriverOptions | async" [value]="option.driverName">
+                        {{option.driverName}}
+                    </mat-option>
+                </mat-autocomplete>
+            </mat-form-field>
+        </div>
+
+        <div class="col-xl-3 col-lg-3 col-md-3 col-sm-12 mb-2">
+            <mat-form-field class="example-full-width cp-quick-search-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
+                <mat-label>Guest Name</mat-label>
+                <input type="text" matInput [formControl]="SearchGuestName" [matAutocomplete]="auto13">
+                <mat-autocomplete #auto13="matAutocomplete">
+                    <mat-option *ngFor="let option of filteredGuestNameOptions | async" [value]="option.customerPersonName">
+                        {{option.customerPersonName}}
+                    </mat-option>
+                </mat-autocomplete>
+            </mat-form-field>
+        </div>
+
+        <div class="col-xl-3 col-lg-3 col-md-3 col-sm-12 mb-2">
+            <mat-form-field class="example-full-width cp-quick-search-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
+                <mat-label>Guest Mobile</mat-label>
+                <input type="text" matInput [(ngModel)]="SearchGuestMobile">
+            </mat-form-field>
+        </div>
+
+        <div class="col-xl-3 col-lg-3 col-md-3 col-sm-12 mb-2">
+            <mat-form-field class="example-full-width cp-quick-search-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
+                <mat-label>Importance</mat-label>
+                <mat-select [formControl]="SearchImportance">
+                    <mat-option value="General">General</mat-option>
+                    <mat-option value="CXO">CXO</mat-option>
+                    <mat-option value="VIP">VIP</mat-option>
+                </mat-select>
+            </mat-form-field>
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="col-xl-3 col-lg-3 col-md-3 col-sm-12 mb-2">
+            <mat-form-field class="example-full-width cp-quick-search-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
+                <mat-label>City</mat-label>
+                <input type="text" matInput [formControl]="SearchCity"  [matAutocomplete]="auto14">
+                <mat-autocomplete #auto14="matAutocomplete">
+                    <mat-option *ngFor="let option of filteredCityOptions | async" [value]="option.geoPointName">
+                        {{option.geoPointName}}
+                    </mat-option>
+                </mat-autocomplete>
+            </mat-form-field>
+        </div>
+
+        <div class="col-xl-3 col-lg-3 col-md-3 col-sm-12 mb-2">
+            <mat-form-field class="example-full-width cp-quick-search-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
+                <mat-label>Bill Date From</mat-label>
+                <input type="text" matInput [matDatepicker]="billDateFrom" [(ngModel)]="SearchBillDateFrom">
+                <mat-datepicker-toggle matSuffix [for]="billDateFrom"></mat-datepicker-toggle>
+                <mat-datepicker #billDateFrom></mat-datepicker>
+            </mat-form-field>
+        </div>
+
+        <div class="col-xl-3 col-lg-3 col-md-3 col-sm-12 mb-2">
+            <mat-form-field class="example-full-width cp-quick-search-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
+                <mat-label>Bill Date To</mat-label>
+                <input type="text" matInput [matDatepicker]="billDateTo" [(ngModel)]="SearchBillToDate">
+                <mat-datepicker-toggle matSuffix [for]="billDateTo"></mat-datepicker-toggle>
+                <mat-datepicker #billDateTo></mat-datepicker>
+            </mat-form-field>
+        </div>
+      </div>
+</ng-template>
+
+
+<ng-template #zonalDutyRegisterQuickSearch>
+    <div class="row">
+        <div class="col-xl-3 col-lg-3 col-md-3 col-sm-12 mb-2">
+            <mat-form-field class="example-full-width cp-quick-search-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
+                <mat-label>Booking Date From</mat-label>
+                <input type="text" matInput [matDatepicker]="bookingDateFrom" [(ngModel)]="SearchBookingDateFrom">
+                <mat-datepicker-toggle matSuffix [for]="bookingDateFrom"></mat-datepicker-toggle>
+                <mat-datepicker #bookingDateFrom></mat-datepicker>
+            </mat-form-field>
+        </div>
+        
+        <div class="col-xl-3 col-lg-3 col-md-3 col-sm-12 mb-2">
+            <mat-form-field class="example-full-width cp-quick-search-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
+                <mat-label>Booking Date To</mat-label>
+                <input type="text" matInput [matDatepicker]="bookingDateTo" [(ngModel)]="SearchBookingDate">
+                <mat-datepicker-toggle matSuffix [for]="bookingDateTo"></mat-datepicker-toggle>
+                <mat-datepicker #bookingDateTo></mat-datepicker>
+            </mat-form-field>
+        </div>
+
+        <div class="col-xl-3 col-lg-3 col-md-3 col-sm-12 mb-2">
+            <mat-form-field class="example-full-width cp-quick-search-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
+                <mat-label>Pickup Date From</mat-label>
+                <input type="text" matInput [matDatepicker]="fromDate" [(ngModel)]="SearchFromDate">
+                <mat-datepicker-toggle matSuffix [for]="fromDate"></mat-datepicker-toggle>
+                <mat-datepicker #fromDate></mat-datepicker>
+            </mat-form-field>
+        </div>
+        
+        <div class="col-xl-3 col-lg-3 col-md-3 col-sm-12 mb-2">
+            <mat-form-field class="example-full-width cp-quick-search-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
+                <mat-label>Pickup Date To</mat-label>
+                <input type="text" matInput [matDatepicker]="toDate" [(ngModel)]="SearchToDate">
+                <mat-datepicker-toggle matSuffix [for]="toDate"></mat-datepicker-toggle>
+                <mat-datepicker #toDate></mat-datepicker>
+            </mat-form-field>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-xl-3 col-lg-3 col-md-3 col-sm-12 mb-2">
+            <mat-form-field class="example-full-width cp-quick-search-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
+                <mat-label>Location</mat-label>
+                <input type="text" matInput [formControl]="SearchCustomerLocationName" [matAutocomplete]="auto11">
+                <mat-autocomplete #auto11="matAutocomplete">
+                    <mat-option *ngFor="let option of filteredCustomerLocationOptions | async" [value]="option.organizationalEntityName">
+                        {{option.organizationalEntityName}}
+                    </mat-option>
+                    </mat-autocomplete>
+            </mat-form-field>
+        </div>
+
+        <div class="col-xl-3 col-lg-3 col-md-3 col-sm-12 mb-2">
+            <mat-form-field class="example-full-width cp-quick-search-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
+                <mat-label>Customer Group</mat-label>
+                <input type="text" matInput [formControl]="SearchCustomerGroup"  [matAutocomplete]="auto"
+                (keydown.backspace)="clearCustomerGroup($event)">
+                <mat-autocomplete #auto="matAutocomplete" (optionSelected)="OnCustomerGroupSelected($event.option.value)">
+                    <mat-option *ngFor="let option of filteredCustomerGroupOptions | async" [value]="option.customerGroup">
+                        {{option.customerGroup}}
+                    </mat-option>
+                </mat-autocomplete>
+            </mat-form-field>
+        </div>
+
+        <div class="col-xl-3 col-lg-3 col-md-3 col-sm-12 mb-2">
+            <mat-form-field class="example-full-width cp-quick-search-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
+                <mat-label>Customer</mat-label>
+                <input type="text" matInput [formControl]="SearchCustomer"  [matAutocomplete]="autoCustomer">
+                <mat-autocomplete #autoCustomer="matAutocomplete">
+                    <mat-option *ngFor="let option of filteredCustomerOptions | async" [value]="option.customerName">
+                        {{option.customerName}}
+                    </mat-option>
+                </mat-autocomplete>
+            </mat-form-field>
+        </div>
+
+        <div class="col-xl-3 col-lg-3 col-md-3 col-sm-12 mb-2">
+            <mat-form-field class="example-full-width cp-quick-search-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
+                <mat-label>MOP</mat-label>
+                <input type="text" matInput [formControl]="SearchMOP" [matAutocomplete]="auto4">
+                <mat-autocomplete #auto4="matAutocomplete">
+                    <mat-option *ngFor="let option of filteredPaymentModeOptions | async"
+                        [value]="option.modeOfPayment">
+                        {{option.modeOfPayment}}
+                    </mat-option>
+                </mat-autocomplete>
+            </mat-form-field>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-xl-3 col-lg-3 col-md-3 col-sm-12 mb-2">
+            <mat-form-field class="example-full-width cp-quick-search-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
+                <mat-label>Booking Status</mat-label>
+                <mat-select [formControl]="SearchBookingStatus">
+                    <mat-option value="Confirmed">Confirmed</mat-option>
+                    <mat-option value="Approved">Approved</mat-option>
+                    <mat-option value="Pending">Pending</mat-option>
+                    <mat-option value="Cancelled">Cancelled</mat-option>
+                </mat-select>
+            </mat-form-field>
+        </div>
+
+        <div class="col-xl-3 col-lg-3 col-md-3 col-sm-12 mb-2">
+            <mat-form-field class="example-full-width cp-quick-search-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
+                <mat-label>DS Verification</mat-label>
+                <mat-select [formControl]="SearchDSVerification">
+                    <mat-option [value]=true>Yes</mat-option>
+                    <mat-option [value]=false>No</mat-option>
+                </mat-select>
+            </mat-form-field>
+        </div>
+
+        <div class="col-xl-3 col-lg-3 col-md-3 col-sm-12 mb-2">
+            <mat-form-field class="example-full-width cp-quick-search-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
+                <mat-label>Good For Bill</mat-label>
+                <mat-select [formControl]="SearchGoodForBill">
+                    <mat-option [value]=true>Yes</mat-option>
+                    <mat-option [value]=false>No</mat-option>
+                </mat-select>
+            </mat-form-field>
+        </div>
+
+        <div class="col-xl-3 col-lg-3 col-md-3 col-sm-12 mb-2">
+            <mat-form-field class="example-full-width cp-quick-search-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
+                <mat-label>DS Bill Status</mat-label>
+                <mat-select [formControl]="SearchBillStatus">
+                    <mat-option [value]=true>Yes</mat-option>
+                    <mat-option [value]=false>No</mat-option>
+                </mat-select>
+            </mat-form-field>
+        </div>
+        
+    </div>
+</ng-template>
