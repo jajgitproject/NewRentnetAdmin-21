@@ -54,7 +54,17 @@
 
         <div class="qr-logo-area">
           <img src="http://www.ecoserp.com/bill_printing/logo.jpg" alt="Logo">
-          <img [src]="'data:image/png;base64,' + dataSource?.invoiceModel?.signedQRCode" alt="QR" />
+          <br>
+          
+          <ng-container *ngIf="dataSource?.invoiceModel?.signedQRCode; else noQR">
+            <img [src]="'data:image/png;base64,' + dataSource?.invoiceModel?.signedQRCode" alt="QR" />
+          </ng-container>
+          
+          <ng-template #noQR>
+            <div class="no-image-box">
+              No QR Image
+            </div>
+          </ng-template>
         </div>
       </div>
 
@@ -317,10 +327,10 @@
               </td>
             </tr>
 
-            <tr>
-              <td class="table-midrow-firstcolumn" *ngIf="dataSource?.invoiceFuelSurchargeModel.totalFuelSurchargeOnPackageRate != 0
+            <tr *ngIf="dataSource?.invoiceFuelSurchargeModel.totalFuelSurchargeOnPackageRate != 0
                         || dataSource?.invoiceFuelSurchargeModel?.totalFuelSurchargeOnExtraKM!=0 ||
                          dataSource?.invoiceFuelSurchargeModel?.totalFuelSurchargeOnExtraHours!=0 ">
+              <td class="table-midrow-firstcolumn">
                 Fuel Surcharge on Rate ({{dataSource?.invoiceFuelSurchargeModel?.totalFuelSurchargeOnPackageRate}})
                                Extra KM ({{dataSource?.invoiceFuelSurchargeModel?.totalFuelSurchargeOnExtraKM}})
                                Extra Hr. ({{dataSource?.invoiceFuelSurchargeModel?.totalFuelSurchargeOnExtraHours}})
