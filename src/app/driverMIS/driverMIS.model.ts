@@ -70,6 +70,7 @@ export class DriverMIS {
   deviceIMEI: string;
   deviceType: string;
   driverCameraProblem: string;
+  registrationNumber: string;
 
   constructor(driverMIS: any) {
     this.driverID = driverMIS.driverID || -1;
@@ -140,6 +141,7 @@ export class DriverMIS {
     this.deviceIMEI = driverMIS.deviceIMEI || '';
     this.deviceType = driverMIS.deviceType || '';
     this.driverCameraProblem = driverMIS.driverCameraProblem || '';
+    this.registrationNumber = driverMIS.registrationNumber || '';
   }
 }
 

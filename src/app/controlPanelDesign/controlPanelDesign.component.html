@@ -1317,9 +1317,7 @@
                       width: 140px;
                       float: left;cursor: pointer;" (click)="sortByColumnName('pickupAddress')"
                     [ngClass]="{'active-sort': sortColumn === 'pickupAddress'}">
-                    <b>Pickup Location/<br />
-                      Pickup Address
-                    </b>
+                    <b>Pickup Address</b>
                     <i class="fas"
                       [ngClass]="{'fa-arrow-up': sortColumn === 'pickupAddress' && sortDirection === 'asc',
                                                 'fa-arrow-down': sortColumn === 'pickupAddress' && sortDirection === 'desc'}"></i>
@@ -1331,9 +1329,7 @@
                       width: 140px;
                       float: left;cursor: pointer;" (click)="sortByColumnName('dropOffAddress')"
                     [ngClass]="{'active-sort': sortColumn === 'dropOffAddress'}">
-                    <b>DropOff Location/<br />
-                      Drop Off Address
-                    </b>
+                    <b>Drop Off Address</b>
                     <i class="fas"
                       [ngClass]="{'fa-arrow-up': sortColumn === 'dropOffAddress' && sortDirection === 'asc',
                                                 'fa-arrow-down': sortColumn === 'dropOffAddress' && sortDirection === 'desc'}"></i>
@@ -1853,14 +1849,10 @@
                           </span>
 
                           <span style="font-size: 12px;text-align: left;width: 140px;float: left;">
-                            Pickup Location : {{data.pickupAddress !== '' ? data.pickupAddress : 'N/A'}}
-                            <br>
                             Pickup Address : {{data.pickupAddressDetails !== '' ? data.pickupAddressDetails : 'N/A'}}
                           </span>
 
                           <span style="font-size: 12px;text-align: left;width: 140px;float: left;">
-                            DropOff Location : {{data.dropOffAddress !== '' ? (data.dropOffAddress || '').trim() : 'N/A'}}
-                            <br>
                             Drop Off Address : {{data.dropOffAddressDetails !== '' ? (data.dropOffAddressDetails || '').trim() : 'N/A'}}
                           </span>
 

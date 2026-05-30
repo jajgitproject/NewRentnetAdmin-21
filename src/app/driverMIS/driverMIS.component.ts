@@ -42,6 +42,7 @@ interface MenuItem {
 export class DriverMISComponent implements OnInit {
   displayedColumns = [
     'driverName',
+    'registrationNumber',
     'driverFatherName',
     'driverGrade',
     'driverEmail',
@@ -117,6 +118,7 @@ export class DriverMISComponent implements OnInit {
     mobile2: "Mobile 2",
     hub: "Hub",
     location: "Location",
+    registrationNumber: "Registration Number",
     supplierType: "Supplier Type",
     supplier: "Supplier",
     englishSpeakingSkills: "English Speaking Skills",

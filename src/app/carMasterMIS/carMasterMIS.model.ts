@@ -40,6 +40,8 @@ export class carMasterMIS {
    inventoryCreatedBy:number;
    status:string;
    vehicle: string;
+   driverName: string;
+   driverOfficialIdentityNumber: string;
    organizationalEntityName:string;
   organizationalEntityID: any;
   userID:number;
@@ -77,6 +79,8 @@ export class carMasterMIS {
        this.inventoryCreatedBy = carMasterMIS.inventoryCreatedBy || '';
        this.status = carMasterMIS.status || '';
        this.vehicle = carMasterMIS.vehicle || '';
+       this.driverName = carMasterMIS.driverName || '';
+       this.driverOfficialIdentityNumber = carMasterMIS.driverOfficialIdentityNumber || '';
        this.registrationFromDate=new Date();
        this.registrationTillDate=new Date();
        //this.purchaseDate=new Date();
