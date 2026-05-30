@@ -193,6 +193,7 @@ saveDisabled:boolean = true;
           this.dialogTitle = 'Driver';
           this.advanceTable = new Driver({});
           this.advanceTable.activationStatus=true;
+          this.advanceTable.isAppLoginAllowed=true;
           this.advanceTable.driverOfficialIdentityNumber='N/A';
           this.advanceTable.aadharAuthenticationToken='N/A';
           this.advanceTableForm = this.createContactForm();
@@ -914,7 +915,8 @@ saveDisabled:boolean = true;
       latitude: [this.advanceTable?.latitude],
       longitude: [this.advanceTable?.longitude],
       companyName:[this.advanceTable?.companyName],
-      isAdhoc: [this.advanceTable?.isAdhoc]
+      isAdhoc: [this.advanceTable?.isAdhoc],
+      isAppLoginAllowed: [this.advanceTable?.isAppLoginAllowed]
     
     }, 
     {

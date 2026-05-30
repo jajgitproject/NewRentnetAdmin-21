@@ -61,6 +61,7 @@ export class Driver {
    companyID:number;
    userID:number;
    isAdhoc:boolean;
+   isAppLoginAllowed:boolean;
    
   constructor(driver) {
     {
@@ -105,6 +106,7 @@ export class Driver {
        this.policeVerification = driver.policeVerification || '';
        this.driverImage = driver.driverImage || '';
        this.isAdhoc = driver.isAdhoc || '';
+       this.isAppLoginAllowed = driver.isAppLoginAllowed ?? true;
        this.medicalInsurance = driver.medicalInsurance || '';
        this.drivingSinceDateString = driver.drivingSinceDateString || '';
        this.countryCodes = driver.countryCodes || '';
