@@ -1,6 +1,6 @@
 // @ts-nocheck
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
-import { Component, Inject } from '@angular/core';
+import { ChangeDetectorRef, Component, Inject, OnInit } from '@angular/core';
 import { ReservationMessagingService } from '../../reservationMessaging.service';
 import { FormControl, Validators, FormGroup, FormBuilder} from '@angular/forms';
 import { ReservationMessaging, ReservationMessagingData } from '../../reservationMessaging.model';
@@ -23,11 +23,11 @@ import { map, startWith } from 'rxjs/operators';
   providers: [{ provide: MAT_DATE_LOCALE, useValue: 'en-GB' }]
 })
 
-export class FormDialogComponent 
+export class FormDialogComponent implements OnInit
 {
   displayedColumns: string[] =
    ['recipientAddress','messageSource','messageDate','recipientName','sentToCustomerPersonOrEmployeeOrBooker','messageType','messageStatus'];
-  dataSource:ReservationMessaging[]| null;
+  dataSource: ReservationMessaging[] | null = null;
   
   reservationID: any;
   SearchActivationStatus :boolean=true;
@@ -61,25 +61,19 @@ export class FormDialogComponent
   public dialogRef: MatDialogRef<FormDialogComponent>, 
   @Inject(MAT_DIALOG_DATA) public data: any,
    public reservationMessagingService: ReservationMessagingService,
-  //public bankService: BankService,
-  public _generalService:GeneralService)
+  public _generalService: GeneralService,
+  private cdr: ChangeDetectorRef)
   {
-    this.reservationID=data.reservationID;
-    this.allotmentID=data.allotmentID;
+    this.reservationID = data.reservationID;
+    this.allotmentID = data.allotmentID ?? 0;
   }
 
   public ngOnInit(): void
   {
     this.initMessageSource();
-    // this.initPerson();
-    this.loadData();
-    // this.filteredPersonsOption = this.personName.valueChanges.pipe(
-    //   startWith(''),
-    //   map(value => {
-    //     const name = typeof value === 'string' ? value : value?.personName;
-    //     return name ? this._filter(name as string) : this.filteredPersonsList.slice();
-    //   }),
-    // );
+    this.dialogRef.afterOpened().subscribe(() => {
+      this.loadData();
+    });
   }
 
   private _filter(value: any): any[] {
@@ -156,26 +150,23 @@ export class FormDialogComponent
      this.reservationMessagingService.getTableData(
       this.reservationID,
       this.allotmentID,
-      this.searchMessageType,
-      this.messageSource.value,
-      this.personName.value?.personName || null,
-      this.searchmessagingStatus,
+      this.searchMessageType || '',
+      this.messageSource.value || '',
+      this.personName.value?.personName || '',
+      this.searchmessagingStatus || '',
       this.SearchActivationStatus,
        this.PageNumber).subscribe
      (
        data =>   
        {
-         this.dataSource = data;
-         console.log(this.dataSource);
-        // this.filteredPersonsList = [];
-        // this.dataSource?.forEach((item: any)=>{
-        //   if((item.customerPersonName !== null && item.customerPersonName !== '') || (item.employee !== null && item.employee !== ''))
-        //     this.filteredPersonsList.push({reservationMessagingID: item.reservationMessagingID, personName: item.customerPersonName || item.employee});
-        // });
-        
+         this.dataSource = Array.isArray(data) ? data : (data ? [data] : []);
+         this.cdr.detectChanges();
        },
        
-       (error: HttpErrorResponse) => { this.dataSource = null;}
+       (_error: HttpErrorResponse) => {
+         this.dataSource = null;
+         this.cdr.detectChanges();
+       }
      );
  }
 
@@ -207,10 +198,13 @@ export class FormDialogComponent
     (
       data =>   
       {
-        this.dataSource = data;
-      
+        this.dataSource = Array.isArray(data) ? data : (data ? [data] : []);
+        this.cdr.detectChanges();
       },
-      (error: HttpErrorResponse) => { this.dataSource = null;}
+      (_error: HttpErrorResponse) => {
+        this.dataSource = null;
+        this.cdr.detectChanges();
+      }
     );
   }
   // public loadData() 

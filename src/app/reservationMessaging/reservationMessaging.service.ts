@@ -24,22 +24,22 @@ export class ReservationMessagingService {
     if (reservationID === 0) {
       reservationID = 0;
     }
-    if (allotmentID === 0 || allotmentID === null) {
+    if (allotmentID === 0 || allotmentID == null || allotmentID === undefined) {
       allotmentID = 0;
     }
 
-    if (searchMessageType === "") {
+    if (!searchMessageType) {
       searchMessageType = null;
     }
 
-    if (searchMessageSource === "") {
+    if (!searchMessageSource) {
       searchMessageSource = null;
     }
 
-    if (searchRecipientName === "") {
+    if (!searchRecipientName) {
       searchRecipientName = null;
     }
-    if (searchmessagingStatus === "") {
+    if (!searchmessagingStatus) {
       searchmessagingStatus = null;
     }
     if (SearchActivationStatus === null) {
