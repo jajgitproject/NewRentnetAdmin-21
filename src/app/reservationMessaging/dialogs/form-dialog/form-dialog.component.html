@@ -28,11 +28,11 @@
                                   <div *ngIf="personName.value" style="float: left;"><b>Person</b> : {{personName.value.personName }}</div>
                               </div>
                               <div style="width: 30%; text-align:right;">
-                                  <button mat-raised-button color="primary"
+                                  <!-- <button mat-raised-button color="primary"
                                       data-dismiss="modal" data-toggle="modal" data-backdrop="false"
                                       data-target="#exampleModalCenter1">
                                       Search
-                                  </button>
+                                  </button> -->
                                   &nbsp;
                           
                                   <button mat-mini-fab color="primary" (click)="refresh()">
@@ -113,7 +113,7 @@
                             <!-- <mat-header-cell *matHeaderCellDef mat-sort-header>Recipient Name</mat-header-cell> -->
                             <mat-header-cell *matHeaderCellDef mat-sort-header>Status</mat-header-cell>
                             <mat-cell *matCellDef="let row" (contextmenu)="onContextMenu($event, row)">
-                                {{row.message}}
+                                {{row.messageStatus}}
                             </mat-cell>
                         </ng-container>
                         

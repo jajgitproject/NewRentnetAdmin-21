@@ -73,13 +73,13 @@ export class FormDialogComponent
     this.initMessageSource();
     // this.initPerson();
     this.loadData();
-    this.filteredPersonsOption = this.personName.valueChanges.pipe(
-      startWith(''),
-      map(value => {
-        const name = typeof value === 'string' ? value : value?.personName;
-        return name ? this._filter(name as string) : this.filteredPersonsList.slice();
-      }),
-    );
+    // this.filteredPersonsOption = this.personName.valueChanges.pipe(
+    //   startWith(''),
+    //   map(value => {
+    //     const name = typeof value === 'string' ? value : value?.personName;
+    //     return name ? this._filter(name as string) : this.filteredPersonsList.slice();
+    //   }),
+    // );
   }
 
   private _filter(value: any): any[] {
@@ -166,11 +166,12 @@ export class FormDialogComponent
        data =>   
        {
          this.dataSource = data;
-        this.filteredPersonsList = [];
-        this.dataSource?.forEach((item: any)=>{
-          if(item.customerPersonName !== null && item.customerPersonName !== '' || item.employee !== null && item.employee !== '')
-            this.filteredPersonsList.push({reservationMessagingID: item.reservationMessagingID, personName: item.customerPersonName || item.employee});
-        });
+         console.log(this.dataSource);
+        // this.filteredPersonsList = [];
+        // this.dataSource?.forEach((item: any)=>{
+        //   if((item.customerPersonName !== null && item.customerPersonName !== '') || (item.employee !== null && item.employee !== ''))
+        //     this.filteredPersonsList.push({reservationMessagingID: item.reservationMessagingID, personName: item.customerPersonName || item.employee});
+        // });
         
        },
        
