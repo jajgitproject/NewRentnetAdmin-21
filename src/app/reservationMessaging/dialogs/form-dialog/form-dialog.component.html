@@ -18,30 +18,7 @@
           <div class="card">
               <div class="body">
                   <div class="responsive_table">
-                      <div class="materialTableHeader">
-                          <div class="row">
-                              <div style="width: 70%; float:left;padding-top: 15px;padding-left: 22px;">
-                                  <div style="float:left" *ngIf="searchMessageType"><b>Type</b> : {{searchMessageType}},</div>
-                                   <!-- <div style="float:left" *ngIf="searchMessageSource"><b>Source</b> : {{searchMessageSource}},</div> -->
-                                   <div *ngIf="messageSource.value" style="float: left;"><b>Source</b> : {{messageSource.value}},</div>
-                                  <!-- <div style="float:left" *ngIf="searchRecipientName"><b>Person</b> : {{searchRecipientName}}</div> -->
-                                  <div *ngIf="personName.value" style="float: left;"><b>Person</b> : {{personName.value.personName }}</div>
-                              </div>
-                              <div style="width: 30%; text-align:right;">
-                                  <!-- <button mat-raised-button color="primary"
-                                      data-dismiss="modal" data-toggle="modal" data-backdrop="false"
-                                      data-target="#exampleModalCenter1">
-                                      Search
-                                  </button> -->
-                                  &nbsp;
-                          
-                                  <button mat-mini-fab color="primary" (click)="refresh()">
-                                      <mat-icon class="col-white">refresh</mat-icon>
-                                  </button>
-                                  &nbsp;
-                              </div>
-                          </div>
-                      </div>
+                      
 
                       <p *ngIf="dataSource === null || dataSource.length === 0; then thenBlock2 else elseBlock2">
                           This is not rendered
@@ -49,138 +26,69 @@
 
                       <ng-template #thenBlock2>
                           <div class="alert alert-primary" style="background-color:#E8E8E8; text-align: center;">No Records Found</div>
-                          <div class="body">
+                          <!-- <div class="body">
                               <div class="example-button-row">
 
                                   <button mat-raised-button color="primary" (click)="PreviousCall()">Previous</button>
                                   <button mat-raised-button color="primary" (click)="NextCall()">Next</button>
 
                               </div>
-                          </div>
+                          </div> -->
 
                       </ng-template>
 
                       <ng-template #elseBlock2>
-                        <mat-dialog-content class="mat-typography">
-                          <mat-table #table [dataSource]="dataSource" matSort class="mat-cell" (matSortChange)="SortingData($event)">
-                          <ng-container matColumnDef="id">
-                              <mat-header-cell *matHeaderCellDef mat-sort-header>Id</mat-header-cell>
-                              <mat-cell *matCellDef="let row">{{row.reservationMessagingID}}</mat-cell>
-                          </ng-container>
+                        <div class="table-responsive" *ngIf="dataSource?.length">
 
-                          <ng-container matColumnDef="messageType">
-                              <mat-header-cell *matHeaderCellDef mat-sort-header>Type</mat-header-cell>
-                              <mat-cell *matCellDef="let row" (contextmenu)="onContextMenu($event, row)">
-                                  {{row.messageType}}</mat-cell>
-                          </ng-container>
+                        <table class="message-log-table">
 
-                          <ng-container matColumnDef="messageSource">
-                            <mat-header-cell *matHeaderCellDef mat-sort-header>Source</mat-header-cell>
-                            <mat-cell *matCellDef="let row" (contextmenu)="onContextMenu($event, row)">
-                                {{row.messageSource}}</mat-cell>
-                        </ng-container>
+                            <thead>
+                            <tr>
+                                <th>Message Type</th>
+                                <th>Recipient Type</th>
+                                <th>Name</th>
+                                <th>Mobile no</th>
+                                <th>Send Date Time</th>
+                                <th>Status</th>
+                            </tr>
+                            </thead>
 
-                        <ng-container matColumnDef="messageDate">
-                            <mat-header-cell *matHeaderCellDef mat-sort-header>DateTime
-                                </mat-header-cell>
-                            <mat-cell *matCellDef="let row" (contextmenu)="onContextMenu($event, row)">
-                                {{row.messageDate |date:'dd-MM-yyyy'}} {{row.messageTime |
-                                    date:'HH:mm'}}</mat-cell>
-                        </ng-container>
-                        <ng-container matColumnDef="recipientName">
-                            <!-- <mat-header-cell *matHeaderCellDef mat-sort-header>Recipient Name</mat-header-cell> -->
-                            <mat-header-cell *matHeaderCellDef mat-sort-header><span matTooltip="Recipient Name" matTooltipPosition="above">Recipient</span></mat-header-cell>
-                            <mat-cell *matCellDef="let row" (contextmenu)="onContextMenu($event, row)">
+                            <tbody>
+
+                            <tr *ngFor="let row of dataSource">
+
+                                <td>
+                                {{ row.messageType === 'WhatsApp' ? 'WA' : 'SMS' }}
+                                </td>
+
+                                <td>
+                                {{ row.sentToCustomerPersonOrEmployeeOrBooker }}
+                                </td>
+
+                                <td>
                                 {{ row.customerPersonName || row.employee }}
-                            </mat-cell>
-                        </ng-container>
+                                </td>
 
-                        <ng-container matColumnDef="sentToCustomerPersonOrEmployeeOrBooker">
-                            <mat-header-cell *matHeaderCellDef mat-sort-header>SendTo</mat-header-cell>
-                            <mat-cell *matCellDef="let row" (contextmenu)="onContextMenu($event, row)">
-                                {{row.sentToCustomerPersonOrEmployeeOrBooker}}</mat-cell>
-                        </ng-container>
+                                <td>
+                                {{ row.recipientAddress }}
+                                </td>
 
-                        <ng-container matColumnDef="recipientAddress">
-                            <mat-header-cell *matHeaderCellDef mat-sort-header style="width:50px">Address</mat-header-cell>
-                            <mat-cell *matCellDef="let row" (contextmenu)="onContextMenu($event, row)">
-                                {{row.recipientAddress}}</mat-cell>
-                        </ng-container>                     
+                                <td>
+                                {{ row.messageDate | date:'dd-MM-yyyy' }}
+                                {{ row.messageTime | date:'HH:mm' }}
+                                </td>
 
-                       
+                                <td>
+                                {{ row.messageStatus }}
+                                </td>
 
-                        <ng-container matColumnDef="messageStatus">
-                            <!-- <mat-header-cell *matHeaderCellDef mat-sort-header>Recipient Name</mat-header-cell> -->
-                            <mat-header-cell *matHeaderCellDef mat-sort-header>Status</mat-header-cell>
-                            <mat-cell *matCellDef="let row" (contextmenu)="onContextMenu($event, row)">
-                                {{row.messageStatus}}
-                            </mat-cell>
-                        </ng-container>
-                        
-                        <!-- <ng-container matColumnDef="messageStatus">
-                            <mat-header-cell *matHeaderCellDef mat-sort-header>Status</mat-header-cell>
-                            <mat-cell *matCellDef="let row" (contextmenu)="onContextMenu($event, row)">
-                              <table> 
-                                <ng-container *ngFor="let data of row.messagingStatus.messagingStatus; let last = last">
-                                  <tr>
-                                    <td>
-                                      <span>{{data}}</span>
-                                      <hr style="border-top: 2px solid black;" *ngIf="!last"> 
-                                    </td>
-                                  </tr>
-                                </ng-container>
-                              </table> 
-                            </mat-cell>
-                          </ng-container> -->
-                        
-                        <!-- <ng-container matColumnDef="recipientName">
-                            <mat-header-cell *matHeaderCellDef mat-sort-header>Recipient Name</mat-header-cell>
-                            <mat-cell *matCellDef="let row" (contextmenu)="onContextMenu($event, row)">
-                                <ng-container *ngIf="row.employee; else customerData">{{ row.employeeName }}</ng-container>
-                                <ng-template #customerData>{{ row.customerPersonName }}</ng-template>
-                            </mat-cell>
-                        </ng-container> -->
-                        
-                          <!-- <ng-container matColumnDef="status">
-                              <mat-header-cell *matHeaderCellDef>Activation Status</mat-header-cell>
-                              <mat-cell *matCellDef="let row" (contextmenu)="onContextMenu($event, row)">
-                                  {{row.activationStatus===true ? 'Active' : 'Deleted'}}</mat-cell>
-                          </ng-container> -->
-                          <!-- actions -->
-                          <!-- <ng-container matColumnDef="actions">
-                              <mat-header-cell *matHeaderCellDef class="pr-0" [ngClass]="'tbl-col-width-per-9'">Actions</mat-header-cell>
-                              <mat-cell *matCellDef="let row; let i=index;" class="pr-0" [ngClass]="'tbl-col-width-per-9'">
-                                  <button mat-raised-button color="primary" (contextmenu)="onContextMenu($event, row)" (click)="onContextMenu($event, row)">
-                                      Actions
-                              </button>
-                              </mat-cell>
-                          </ng-container> -->
-                          <mat-header-row *matHeaderRowDef="displayedColumns"></mat-header-row>
-                          <mat-row *matRowDef="let row; columns: displayedColumns;" [style.cursor]="'pointer'" matRipple>
-                          </mat-row>
-                      </mat-table>
-                 
-                      <!-- Loading spinner -->
-                      <!-- <div *ngIf="exampleDatabase.isTblLoading" class="tbl-spinner">
-                          <mat-progress-spinner color="primary" [diameter]="40" mode="indeterminate">
-                          </mat-progress-spinner>
-                      </div> -->
+                            </tr>
 
-                      <!-- context menu end -->
+                            </tbody>
 
-                      <!-- <div *ngIf="!exampleDatabase.isTblLoading" class="no-results" [style.display]="dataSource.renderedData.length == 0 ? '' : 'none'">
-                          No results
-                      </div> -->
+                        </table>
 
-                      <div class="body">
-                          <div class="example-button-row">
-
-                              <button mat-raised-button color="primary" (click)="PreviousCall()">Previous</button>
-                              <button mat-raised-button color="primary" (click)="NextCall()">Next</button>
-
-                          </div>
-                      </div>
-                    </mat-dialog-content>
+                        </div>
                   </ng-template>
 
                   </div>

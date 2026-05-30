@@ -25,8 +25,14 @@ import { map, startWith } from 'rxjs/operators';
 
 export class FormDialogComponent implements OnInit
 {
-  displayedColumns: string[] =
-   ['recipientAddress','messageSource','messageDate','recipientName','sentToCustomerPersonOrEmployeeOrBooker','messageType','messageStatus'];
+  displayedColumns: string[] = [
+  'messageType',
+  'recipientType',
+  'name',
+  'mobileNo',
+  'sendDateTime',
+  'status'
+];
   dataSource: ReservationMessaging[] | null = null;
   
   reservationID: any;
@@ -160,6 +166,7 @@ export class FormDialogComponent implements OnInit
        data =>   
        {
          this.dataSource = Array.isArray(data) ? data : (data ? [data] : []);
+         console.log(this.dataSource);
          this.cdr.detectChanges();
        },
        
