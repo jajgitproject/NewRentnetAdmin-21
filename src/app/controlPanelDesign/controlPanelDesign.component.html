@@ -1670,7 +1670,7 @@
 
                             <span *ngIf="data.emailContent !== null"> E2S </span>
                             &nbsp;
-                            <span *ngIf="data.isAutoAllotment === true" matTooltip="Auto Soft Allotment"> Auto </span>
+                            <!-- <span *ngIf="data.isAutoAllotment === true" matTooltip="Auto Soft Allotment"> Auto </span> -->
                             <br>
 
                             <ng-container *ngIf="getControlPanelMessagingHeaderDisplay(data) as cpMsg">
@@ -1775,17 +1775,24 @@
                               </span>
                             </span> -->
 
-                            <span
-                              *ngIf="data.reservationStatus === 'Confirmed' || data.reservationStatus === 'Cancelled' || data.reservationStatus === 'Approved'"
-                              [ngStyle]="{ color: getAllotmentDisplay(data).color }">
-                              {{ getAllotmentDisplay(data).label }}
+                            
+                            
+                            <span >
+                              <span
+                                *ngIf="data.reservationStatus === 'Confirmed' || data.reservationStatus === 'Cancelled' || data.reservationStatus === 'Approved'"
+                                [ngStyle]="{ color: getAllotmentDisplay(data).color }">
+                                {{ getAllotmentDisplay(data).label }}
 
-                              <span *ngIf="data.lifeCycleStatus?.carAndDriverAllotedDelayInMinutes !== 0">
-                                Delay
-                                {{Math.floor(data.lifeCycleStatus.carAndDriverAllotedDelayInMinutes / 60)}} hr
-                                {{data.lifeCycleStatus.carAndDriverAllotedDelayInMinutes % 60}} Min
+                                <span *ngIf="data.lifeCycleStatus?.carAndDriverAllotedDelayInMinutes !== 0">
+                                  Delay
+                                  {{Math.floor(data.lifeCycleStatus.carAndDriverAllotedDelayInMinutes / 60)}} hr
+                                  {{data.lifeCycleStatus.carAndDriverAllotedDelayInMinutes % 60}} Min
+                                </span>
                               </span>
                             </span>
+
+                            <span *ngIf="data.isAutoAllotment === true">Auto</span>
+                            <span *ngIf="data.isAutoAllotment !== true">Manual</span>
 
 
 
