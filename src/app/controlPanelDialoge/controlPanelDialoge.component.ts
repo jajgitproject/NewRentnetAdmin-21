@@ -2294,7 +2294,7 @@ export class ControlPanelDialogeComponent {
               driverName: item.driverName,
               organizationalEntityName: item.organizationalEntityName,
               dutySlipID: item.dutySlipID,
-              verifyDutyStatusAndCacellationStatus:this.verifyDutyStatusAndCacellationStatus
+              //verifyDutyStatusAndCacellationStatus:this.verifyDutyStatusAndCacellationStatus
             }
           });
       
@@ -2334,7 +2334,7 @@ export class ControlPanelDialogeComponent {
               incidenceID: this.incidenceID,
               customerPersonID: item.passengerDetails?.[0]?.customerPersonID,
               customerPersonName: item.passengerDetails?.[0]?.customerPersonName,
-              verifyDutyStatusAndCacellationStatus:this.verifyDutyStatusAndCacellationStatus
+              //verifyDutyStatusAndCacellationStatus:this.verifyDutyStatusAndCacellationStatus
             }
           });
         

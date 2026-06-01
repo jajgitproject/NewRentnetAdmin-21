@@ -143,7 +143,7 @@ export class incidenceFormDialogComponent {
   .toLowerCase()
   .replace(/[^a-z\s]/g, ''); // 👈 ye line important hai
 
-this.isSaveAllowed = status === 'changes allow';
+//this.isSaveAllowed = status === 'changes allow';
     }
 
   public ngOnInit(): void {

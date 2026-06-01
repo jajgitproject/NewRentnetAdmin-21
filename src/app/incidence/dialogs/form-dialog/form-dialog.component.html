@@ -8,9 +8,9 @@
             {{ dialogTitle }}
           </div>
           <div *ngIf="!isSaveAllowed">
-            <span
+            <!-- <span
               style="color:rgb(150, 4, 4);margin-bottom: 10px;font-style: italic;font-size: 12px;">({{verifyDutyStatusAndCacellationStatus}}
-              !!!!!)</span>
+              !!!!!)</span> -->
           </div>
         </div>
       </div>
@@ -578,7 +578,7 @@
         <div class="col-xl-3 col-lg-3 col-md-6 col-sm-6 mb-2">
           <div class="example-button-row">
             <button mat-raised-button color="primary" [type]="submit" *ngIf="saveDisabled"
-              [disabled]="!advanceTableForm.valid || !isSaveAllowed" (click)="confirmAdd()">Save</button>
+              [disabled]="!advanceTableForm.valid" (click)="confirmAdd()">Save</button>
             <button *ngIf="action==='add'" mat-raised-button color="warn" (click)="onNoClick()"
               tabindex="-1">Reset</button>
             <button *ngIf="action==='edit'" mat-raised-button color="warn" (click)="onNoClick()"
