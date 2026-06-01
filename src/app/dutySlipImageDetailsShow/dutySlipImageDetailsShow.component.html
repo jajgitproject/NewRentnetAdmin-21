@@ -8,19 +8,43 @@
       </div>
     </div>
   </div>
+
   <button mat-icon-button (click)="dialogRef.close()" aria-label="Close dialog">
     <mat-icon class="small-close-icon">close</mat-icon>
   </button>
 </div>
+
 <mat-card>
   <mat-card-content>
     <mat-dialog-content class="of-hidden">
       <div class="row">
         <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
-          <span class="TDValueBold">DutySlip Image</span> <br />
-          <span class="table-img tbl-col-width-per-12" ><img src="{{dataSource.dutySlipImage}}" (click)="openImageInNewTab(dataSource.dutySlipImage)" style="cursor: pointer;"/></span>
+
+          <span class="TDValueBold">DutySlip Image</span>
+          <br />
+
+          <span class="table-img tbl-col-width-per-12">
+            <img
+              *ngIf="imageUrl"
+              [src]="imageUrl"
+              (click)="openImageInNewTab(imageUrl)"
+              style="cursor: pointer; width: 100%; max-width: 250px;"
+              alt="Duty Slip Image" />
+          </span>
+
+          <!-- Delete Button -->
+         <div class="mt-2" *ngIf="hasImage()">
+  <button
+    mat-stroked-button
+    color="warn"
+    class="delete-btn"
+    (click)="deleteImage()">
+    Delete
+  </button>
+</div>
+
         </div>
-        </div>
+      </div>
     </mat-dialog-content>
   </mat-card-content>
 </mat-card>

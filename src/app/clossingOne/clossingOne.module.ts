@@ -1,4 +1,4 @@
-
+//@ts-nocheck
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
@@ -113,6 +113,7 @@ import { ChangeCityModule } from '../changeCity/changeCity.module';
 import { ChangeCityService } from '../changeCity/changeCity.service';
 import { CustomerSpecificDetailsService } from '../customerSpecificDetails/customerSpecificDetails.service';
 import { CustomerSpecificDetailsModule } from '../customerSpecificDetails/customerSpecificDetails.module';
+import { DutySlipImageModule } from '../dutySlipImage/dutySlipImage.module';
 
 
 @NgModule({
@@ -182,7 +183,8 @@ import { CustomerSpecificDetailsModule } from '../customerSpecificDetails/custom
     SettledRateDetailsModule,
     ChangeDutyTypeClosingModule,
     ChangeCityModule,
-    CustomerSpecificDetailsModule
+    CustomerSpecificDetailsModule,
+    DutySlipImageModule
   ],
   exports:[ClossingOneComponent],
   providers: [ClossingOneService,

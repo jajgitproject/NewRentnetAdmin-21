@@ -1881,16 +1881,32 @@
                                 ">{{data.pickupCity !=="" ? data.pickupCity: 'N/A'}}
                           </span>
 
-                          <span style="font-size: 12px;text-align: left;width: 100px;float: left;">
+                          <span style="font-size: 12px; text-align: left; width: 100px; float: left;">
+
                               <ng-container *ngIf="data.specialInstruction?.length > 0; else noInstruction">
+
                                 <span *ngFor="let sp of data.specialInstruction">
-                                  {{ sp.specialInstruction || 'N/A' }}
+
+                                  <span [matTooltip]="sp.specialInstruction" matTooltipPosition="above">
+
+                                    {{
+                                    sp.specialInstruction?.length > 100
+                                    ? (sp.specialInstruction | slice:0:100) + '...'
+                                    : (sp.specialInstruction || 'N/A')
+                                    }}
+
+                                  </span>
+
+                                  <br>
+
                                 </span>
+
                               </ng-container>
 
                               <ng-template #noInstruction>
                                 N/A
                               </ng-template>
+
                             </span>
                             <!-- <span style="
                           font-size: 12px;

@@ -75,6 +75,7 @@ export class FormDialogComponent
         this.dutySlipID=data.dutySlipID;
         this.reservationID=data.reservationID;
         this.AllotmentID=data.allotmentID;
+        
         if (this.action === 'edit') 
         {
           this.dialogTitle ='Duty Slip Image';     

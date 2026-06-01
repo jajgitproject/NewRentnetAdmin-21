@@ -21,6 +21,10 @@ export class DutySlipImageDetailsShowService
   {
     return this.httpClient.get(this.API_URL + "/" + dutySlipID);
   }
+   delete(dutySlipID: number):  Observable<any> 
+  {
+    return this.httpClient.delete(this.API_URL + '/'+ dutySlipID);
+  }
   
 }
   
