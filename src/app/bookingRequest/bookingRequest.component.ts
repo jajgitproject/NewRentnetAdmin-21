@@ -1,4 +1,4 @@
-// @ts-nocheck
+
 import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { MatDialog, MatDialogRef } from '@angular/material/dialog';
@@ -20,6 +20,7 @@ import { BookingRequest } from './bookingRequest.model';
 import { CustomerDropDown } from '../customer/customerDropDown.model';
 import { Router } from '@angular/router';
 import moment from 'moment';
+import { CustomerGroupDropDown } from '../customerGroup/customerGroupDropDown.model';
 
 @Component({
   standalone: false,
@@ -56,12 +57,14 @@ export class BookingRequestComponent implements OnInit {
   SearchRequestFromDate: string = '';
   SearchRequestToDate: string = '';
   SearchTRN:string ='';
+  SearchiTRN : string ='';
   SearchEcoBookingNo: string = '';
   SearchStatus:string ='';
+  SearchConfirmByEco:boolean = null;
 
-  public CustomerList?:CustomerDropDown[]=[];
-  filteredCustomerOptions: Observable<CustomerDropDown[]>;
-  customerName : FormControl=new FormControl();
+  public CustomerGroupList?:CustomerGroupDropDown[]=[];
+  filteredCustomerGroupOptions: Observable<CustomerGroupDropDown[]>;
+  customerGroupName : FormControl=new FormControl();
 
 
   constructor(
@@ -87,18 +90,18 @@ export class BookingRequestComponent implements OnInit {
 
    //-------------Mode of Payment ------------------
    InitCustomer(){
-    this._generalService.GetCustomers().subscribe(
+    this._generalService.GetCustomersGroups().subscribe(
       data=>
       {                
-        this.CustomerList=data;
-        this.filteredCustomerOptions = this.customerName.valueChanges.pipe(
+        this.CustomerGroupList=data;
+        this.filteredCustomerGroupOptions = this.customerGroupName.valueChanges.pipe(
          startWith(""),
-         map(value => this._filterCustomer(value || ''))
+         map(value => this._filterCustomerGroup(value || ''))
           );
       });
   }
   
-  private _filterCustomer(value: string): any {
+  private _filterCustomerGroup(value: string): any {
     const filterValue = value.toLowerCase();
     // if(filterValue.length === 0) {
     //   return [];
@@ -107,10 +110,10 @@ export class BookingRequestComponent implements OnInit {
     //   return [];   
     // }
 
-    return this.CustomerList?.filter(
+    return this.CustomerGroupList?.filter(
       data => 
       {
-        return data.customerName.toLowerCase().includes(filterValue);
+        return data.customerGroup.toLowerCase().includes(filterValue);
       }
     );
   }
@@ -118,12 +121,13 @@ export class BookingRequestComponent implements OnInit {
   refresh() {
     this.SearchActivationStatus = true;
     this.PageNumber = 0;
-    this.SearchFromDate="";
-    this.SearchToDate="";
+    this.SearchRequestFromDate="";
+    this.SearchRequestToDate="";
     this.SearchTRN="";
+    this.SearchiTRN="";
     this.SearchEcoBookingNo="";
-    this.SearchStatus="";
-    this.customerName.setValue('');
+    this.SearchConfirmByEco=null;
+    this.customerGroupName.setValue('');
     this.loadData();
   }
 
@@ -149,28 +153,25 @@ export class BookingRequestComponent implements OnInit {
 
   public loadData() 
   {
-    if(this.SearchFromDate!=="")
-    {
-      this.SearchFromDate=moment(this.SearchFromDate).format('MMM DD yyyy');
+    debugger;
+    let fromDate = '';
+    let toDate = '';
+
+    if (this.SearchRequestFromDate) {
+      fromDate = moment(this.SearchRequestFromDate)
+        .format('MMM DD YYYY');
     }
-    if(this.SearchToDate!=="")
-    {
-      this.SearchToDate=moment(this.SearchToDate).format('MMM DD yyyy');
+
+    if (this.SearchRequestToDate) {
+      toDate = moment(this.SearchRequestToDate)
+        .format('MMM DD YYYY');
     }
-    if(this.SearchRequestFromDate!=="")
-    {
-      this.SearchRequestFromDate=moment(this.SearchRequestFromDate).format('MMM DD yyyy');
-    }
-    if(this.SearchRequestToDate!=="")
-    {
-      this.SearchRequestToDate=moment(this.SearchRequestToDate).format('MMM DD yyyy');
-    }
-    this.bookingRequestService.getTableData(this.SearchFromDate,this.SearchToDate,this.SearchRequestFromDate,this.SearchRequestToDate,this.SearchTRN,this.customerName.value,this.SearchEcoBookingNo,this.SearchStatus,this.PageNumber).subscribe(
-        data => {
-          this.dataSource = data;
-        },
-        (error: HttpErrorResponse) => { this.dataSource = null; }
-      );
+    this.bookingRequestService.getTableData(fromDate,toDate,this.SearchTRN,this.SearchiTRN,this.customerGroupName.value,this.SearchEcoBookingNo,this.SearchConfirmByEco,this.PageNumber).subscribe(
+      data => {
+        this.dataSource = data;
+      },
+      (error: HttpErrorResponse) => { this.dataSource = null; }
+    );
   }
   showNotification(colorName, text, placementFrom, placementAlign) {
     this.snackBar.open(text, '', {
@@ -302,7 +303,7 @@ export class BookingRequestComponent implements OnInit {
       this.sortingData = 1;
       this.sortType = "Descending";
     }
-    this.bookingRequestService.getTableDataSort(this.SearchFromDate,this.SearchToDate,this.SearchRequestFromDate,this.SearchRequestToDate,this.SearchTRN,this.customerName.value,this.SearchEcoBookingNo,this.SearchStatus,this.PageNumber, coloumName.active, this.sortType).subscribe(
+    this.bookingRequestService.getTableDataSort(this.SearchRequestFromDate,this.SearchRequestToDate,this.SearchTRN,this.SearchiTRN,this.customerGroupName.value,this.SearchEcoBookingNo,this.SearchConfirmByEco,this.PageNumber, coloumName.active, this.sortType).subscribe(
         data => {
           this.dataSource = data;
         },

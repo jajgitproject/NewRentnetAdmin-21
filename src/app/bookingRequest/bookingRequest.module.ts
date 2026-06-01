@@ -1,4 +1,4 @@
-// @ts-nocheck
+
 import { CUSTOM_ELEMENTS_SCHEMA, NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
@@ -27,6 +27,7 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { BookingRequestService } from './bookingRequest.service';
 import { BookingRequestComponent } from './bookingRequest.component';
 import { BookingRequestRoutingModule } from './bookingRequest-routing.module';
+import { MatExpansionModule } from '@angular/material/expansion';
 
 
 @NgModule({
@@ -60,7 +61,8 @@ import { BookingRequestRoutingModule } from './bookingRequest-routing.module';
     MatMenuModule,
     MatProgressSpinnerModule,
     MyUploadModule,
-    CurrentDesginationModule
+    CurrentDesginationModule,
+    MatExpansionModule
  
   ],
   

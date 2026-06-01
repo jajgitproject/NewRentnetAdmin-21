@@ -19,6 +19,144 @@
                 </div>
             </div>
         </div>
+        
+        <mat-accordion class="mb-3">
+            <mat-expansion-panel expanded="true">
+                
+                <mat-expansion-panel-header>
+                <mat-panel-title>
+                    <mat-icon>search</mat-icon>
+                    &nbsp; Quick Search
+                </mat-panel-title>
+                </mat-expansion-panel-header>
+
+                <!-- Row 1 -->
+                <div class="row">
+                <!-- <div class="col-xl-3 col-lg-3 col-md-6 col-sm-12">
+                    <mat-form-field appearance="outline" class="example-full-width">
+                    <mat-label>From Date</mat-label>
+                    <input matInput [matDatepicker]="startDate"
+                            [(ngModel)]="SearchFromDate">
+                    <mat-datepicker-toggle matSuffix [for]="startDate"></mat-datepicker-toggle>
+                    <mat-datepicker #startDate></mat-datepicker>
+                    </mat-form-field>
+                </div>
+
+                <div class="col-xl-3 col-lg-3 col-md-6 col-sm-12">
+                    <mat-form-field appearance="outline" class="example-full-width">
+                    <mat-label>To Date</mat-label>
+                    <input matInput [matDatepicker]="endDate"
+                            [(ngModel)]="SearchToDate">
+                    <mat-datepicker-toggle matSuffix [for]="endDate"></mat-datepicker-toggle>
+                    <mat-datepicker #endDate></mat-datepicker>
+                    </mat-form-field>
+                </div> -->
+                <div class="col-xl-3 col-lg-3 col-md-6 col-sm-12">
+                    <mat-form-field appearance="outline" class="example-full-width">
+                    <mat-label>Request Date From</mat-label>
+                    <input matInput [matDatepicker]="startDate1"
+                            [(ngModel)]="SearchRequestFromDate">
+                    <mat-datepicker-toggle matSuffix [for]="startDate1"></mat-datepicker-toggle>
+                    <mat-datepicker #startDate1></mat-datepicker>
+                    </mat-form-field>
+                </div>
+
+                <div class="col-xl-3 col-lg-3 col-md-6 col-sm-12">
+                    <mat-form-field appearance="outline" class="example-full-width">
+                    <mat-label>Request Date To</mat-label>
+                    <input matInput [matDatepicker]="endDate1"
+                            [(ngModel)]="SearchRequestToDate">
+                    <mat-datepicker-toggle matSuffix [for]="endDate1"></mat-datepicker-toggle>
+                    <mat-datepicker #endDate1></mat-datepicker>
+                    </mat-form-field>
+                </div>
+
+                <div class="col-xl-3 col-lg-3 col-md-6 col-sm-12">
+                    <mat-form-field appearance="outline" class="example-full-width">
+                    <mat-label>Customer Request No.</mat-label>
+                    <input matInput [(ngModel)]="SearchTRN">
+                    </mat-form-field>
+                </div>
+
+                <div class="col-xl-3 col-lg-3 col-md-6 col-sm-12">
+                    <mat-form-field appearance="outline" class="example-full-width">
+                    <mat-label>Eco Booking No</mat-label>
+                    <input matInput [(ngModel)]="SearchEcoBookingNo">
+                    </mat-form-field>
+                </div>
+                </div>
+
+                <!-- Row 2 -->
+                <div class="row">
+                    <div class="col-xl-3 col-lg-3 col-md-6 col-sm-12">
+                        <mat-form-field appearance="outline" class="example-full-width">
+                        <mat-label>iTravel Request No.</mat-label>
+                        <input matInput [(ngModel)]="SearchiTRN">
+                        </mat-form-field>
+                    </div>
+
+                    <div class="col-xl-3 col-lg-3 col-md-6 col-sm-12">
+                        <mat-form-field appearance="outline" class="example-full-width">
+                        <mat-label>Customer Group</mat-label>
+                        <input type="text"
+                                matInput
+                                [matAutocomplete]="auto3"
+                                [formControl]="customerGroupName">
+
+                        <mat-autocomplete #auto3="matAutocomplete">
+                            <mat-option
+                            *ngFor="let option of filteredCustomerGroupOptions | async"
+                            [value]="option.customerGroup">
+                            {{option.customerGroup}}
+                            </mat-option>
+                        </mat-autocomplete>
+                        </mat-form-field>
+                    </div>
+
+                    <!-- <div class="col-xl-3 col-lg-3 col-md-6 col-sm-12">
+                        <mat-form-field appearance="outline" class="example-full-width">
+                        <mat-label>Request Status</mat-label>
+
+                        <mat-select [(ngModel)]="SearchStatus">
+                            <mat-option value="Accepted">Accepted</mat-option>
+                            <mat-option value="Rejected">Rejected</mat-option>
+                            <mat-option value="Requested">Requested</mat-option>
+                            <mat-option value="Pending">Pending</mat-option>
+                        </mat-select>
+
+                        </mat-form-field>
+                    </div> -->
+
+                    <div class="col-xl-3 col-lg-3 col-md-6 col-sm-12">
+                        <mat-form-field class="example-full-width" appearance="outline">
+                            <mat-label>Confirm By Eco</mat-label>
+                            <mat-select [(ngModel)]="SearchConfirmByEco">
+                                <mat-option [value]=true>Yes</mat-option>
+                                <mat-option [value]=false>No</mat-option>
+                            </mat-select>
+                        </mat-form-field>
+                    </div>
+                </div>
+
+                <div class="text-right mb-2">
+                <button mat-raised-button color="primary"
+                        (click)="SearchData()">
+                    Search
+                </button>
+
+                &nbsp;
+
+                <button mat-raised-button color="warn"
+                        (click)="refresh()">
+                    Reset
+                </button>
+                </div>
+
+            </mat-expansion-panel>
+        </mat-accordion>
+
+        <br/>
+
         <div class="row">
             <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
                 <div class="card">
@@ -156,12 +294,12 @@
 
                                         <div style="width: 30%; text-align: right;">
 
-                                            <button mat-raised-button color="primary" data-dismiss="modal"
+                                            <!-- <button mat-raised-button color="primary" data-dismiss="modal"
                                                 data-toggle="modal" data-backDrop="false"
                                                 data-target="#exampleModalCenter">
                                                 Search
                                             </button>
-                                            &nbsp;
+                                            &nbsp; -->
                                             <!-- <button mat-mini-fab color="primary" (click)="addNew()">
                                             <mat-icon class="col-white">add</mat-icon>
                                         </button> -->

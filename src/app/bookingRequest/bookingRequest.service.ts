@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { Injectable } from '@angular/core';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
@@ -17,23 +16,15 @@ export class BookingRequestService {
 
 
   /** CRUD METHODS */
-  getTableData(SearchFromDate:string,
-              SearchToDate:string,
+  getTableData(
               SearchRequestFromDate:string,
               SearchRequestToDate:string,
               SearchTRN:string,
-              SearchCustomer:string,
+              SearchiTRN:string,
+              SearchCustomerGroup:string,
               SearchEcoBookingNo:string,
-              SearchStatus:string,
+              SearchConfirmByEco:boolean,
               PageNumber: number): Observable<any> {
-    if(SearchFromDate === "")
-    {
-      SearchFromDate=null;
-    }
-    if(SearchToDate === "")
-    {
-      SearchToDate=null;
-    }
     if(SearchRequestFromDate === "")
     {
       SearchRequestFromDate=null;
@@ -49,39 +40,35 @@ export class BookingRequestService {
     else {
       SearchTRN = encodeURIComponent(SearchTRN);
     }
-    if(SearchCustomer === "")
+    if(SearchiTRN === "")
     {
-      SearchCustomer=null;
+      SearchiTRN=null;
+    }
+    else {
+      SearchiTRN = encodeURIComponent(SearchiTRN);
+    }
+    if(SearchCustomerGroup === "")
+    {
+      SearchCustomerGroup=null;
     }
     if(SearchEcoBookingNo === "")
     {
       SearchEcoBookingNo=null;
     }
-    if(SearchStatus === "")
-    {
-      SearchStatus=null;
-    }
-    return this.httpClient.get(this.API_URL + '/' + SearchFromDate + '/' + SearchToDate + '/' + SearchRequestFromDate + '/' + SearchRequestToDate + '/' + SearchTRN + '/' + SearchCustomer + '/' + SearchEcoBookingNo + '/' + SearchStatus + '/' + PageNumber + '/IntegrationRequestID/Descending');
+    console.log(this.API_URL + '/' + SearchRequestFromDate + '/' + SearchRequestToDate + '/' + SearchTRN + '/' + SearchiTRN + '/' + SearchCustomerGroup + '/' + SearchEcoBookingNo + '/' + SearchConfirmByEco + '/' + PageNumber + '/IntegrationRequestID/Descending');
+    return this.httpClient.get(this.API_URL + '/' + SearchRequestFromDate + '/' + SearchRequestToDate + '/' + SearchTRN + '/' + SearchiTRN + '/' + SearchCustomerGroup + '/' + SearchEcoBookingNo + '/' + SearchConfirmByEco + '/' + PageNumber + '/IntegrationRequestID/Descending');
 
   }
 
-  getTableDataSort(SearchFromDate:string,
-              SearchToDate:string,
+  getTableDataSort(
               SearchRequestFromDate:string,
               SearchRequestToDate:string,
               SearchTRN:string,
-              SearchCustomer:string,
+              SearchiTRN:string,
+              SearchCustomerGroup:string,
               SearchEcoBookingNo:string,
-              SearchStatus:string,PageNumber: number, coloumName: string, sortType: string): Observable<any> 
+              SearchConfirmByEco:boolean,PageNumber: number, coloumName: string, sortType: string): Observable<any> 
   {
-    if(SearchFromDate === "")
-    {
-      SearchFromDate=null;
-    }
-    if(SearchToDate === "")
-    {
-      SearchToDate=null;
-    }
     if(SearchRequestFromDate === "")
     {
       SearchRequestFromDate=null;
@@ -97,19 +84,22 @@ export class BookingRequestService {
     else {
       SearchTRN = encodeURIComponent(SearchTRN);
     }
-    if(SearchCustomer === "")
+    if(SearchiTRN === "")
     {
-      SearchCustomer=null;
+      SearchiTRN=null;
+    }
+    else {
+      SearchiTRN = encodeURIComponent(SearchiTRN);
+    }
+    if(SearchCustomerGroup === "")
+    {
+      SearchCustomerGroup=null;
     }
     if(SearchEcoBookingNo === "")
     {
       SearchEcoBookingNo=null;
     }
-    if(SearchStatus === "")
-    {
-      SearchStatus=null;
-    }
-    return this.httpClient.get(this.API_URL + '/' + SearchFromDate + '/' + SearchToDate + '/' + SearchRequestFromDate + '/' + SearchRequestToDate + '/' + SearchTRN + '/' + SearchCustomer + '/' + SearchEcoBookingNo + '/' + SearchStatus + '/' +  PageNumber + '/' + coloumName + '/' + sortType);
+    return this.httpClient.get(this.API_URL + '/' + SearchRequestFromDate + '/' + SearchRequestToDate + '/' + SearchTRN + '/' + SearchiTRN + '/' + SearchCustomerGroup + '/' + SearchEcoBookingNo + '/' + SearchConfirmByEco + '/' +  PageNumber + '/' + coloumName + '/' + sortType);
 
   }
 
