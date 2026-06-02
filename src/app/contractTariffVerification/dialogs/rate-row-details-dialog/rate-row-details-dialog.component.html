@@ -1,0 +1,54 @@
+<div mat-dialog-title class="dialog-header">
+  <span class="dialog-title">{{ data.sectionTitle }}</span>
+  <button
+    mat-icon-button
+    type="button"
+    class="btn-close"
+    (click)="close()"
+    [disabled]="actionInProgress"
+    aria-label="Close"
+  >
+    <mat-icon>close</mat-icon>
+  </button>
+</div>
+
+<mat-dialog-content class="dialog-content-no-scroll">
+  <div *ngIf="loading" class="loading">Loading...</div>
+  <div *ngIf="!loading && errorMessage" class="empty error">{{ errorMessage }}</div>
+
+  <div *ngIf="!loading && !errorMessage && fields.length > 0" class="details-grid-4">
+    <div class="detail-cell" *ngFor="let item of fields">
+      <div class="detail-label">{{ item.label }}</div>
+      <div class="detail-value">
+        <ng-container *ngIf="isDateValue(item.value); else plainValue">
+          {{ asDate(item.value) | date: 'dd-MMM-yyyy HH:mm' }}
+        </ng-container>
+        <ng-template #plainValue>{{ formatValue(item.value) }}</ng-template>
+      </div>
+    </div>
+  </div>
+</mat-dialog-content>
+
+<mat-dialog-actions class="dialog-actions" *ngIf="data?.isAuditor || data?.isVerifier">
+  <mat-form-field appearance="outline" class="remarks-field">
+    <mat-label>Remarks (optional)</mat-label>
+    <input matInput [(ngModel)]="remarks" [disabled]="actionInProgress" />
+  </mat-form-field>
+  <button
+    mat-raised-button
+    class="btn-verify"
+    (click)="verify()"
+    [disabled]="actionInProgress || !canVerifyRow"
+    matTooltip="Verify this row for your role track"
+  >
+    Verify
+  </button>
+  <button
+    mat-raised-button
+    color="warn"
+    (click)="reject()"
+    [disabled]="actionInProgress || !canRejectRow"
+  >
+    Reject
+  </button>
+</mat-dialog-actions>

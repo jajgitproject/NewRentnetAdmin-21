@@ -423,6 +423,14 @@ const routes: Routes = [
       },
 
       {
+        path: 'contractTariffVerification',
+        loadChildren: () =>
+          import('./contractTariffVerification/contractTariffVerification.module').then(
+            (m) => m.ContractTariffVerificationModule
+          )
+      },
+
+      {
         path: 'inventoryDocument',
         loadChildren: () =>
           import('./inventoryDocument/inventoryDocument.module').then(

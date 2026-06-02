@@ -1,0 +1,223 @@
+<section class="content">
+  <div class="container-fluid">
+    <div class="block-header">
+      <div class="row">
+        <div class="col-lg-12">
+          <ul>
+            <li class="breadcrumb-item bcrumb-1">
+              <a routerLink="/dashboard/main"><i class="fas fa-home"></i> Home</a> |
+              <span>Contract Tariff Verification</span>
+            </li>
+          </ul>
+          <h2>Contract Tariff Verification</h2>
+        </div>
+      </div>
+    </div>
+
+    <div class="card filter-card sticky-filter-panel">
+      <div class="filter-bar">
+        <div class="filter-contract-col">
+          <mat-form-field class="field-contract" appearance="outline">
+            <mat-label>Customer Contract</mat-label>
+            <input
+              matInput
+              [formControl]="contractControl"
+              [matAutocomplete]="contractAuto"
+              (focus)="onContractInputFocus()"
+              placeholder="Customer · Tally · Contract"
+            />
+            <mat-autocomplete
+              #contractAuto="matAutocomplete"
+              [displayWith]="displayContractFn.bind(this)"
+              (optionSelected)="onContractSelected($event.option.value)"
+            >
+              <mat-option *ngFor="let opt of filteredContracts | async" [value]="opt">
+                <div class="composite-primary">{{ opt.compositeLabel }}</div>
+              </mat-option>
+            </mat-autocomplete>
+            <mat-hint>Customer · Tally · Contract Name</mat-hint>
+          </mat-form-field>
+          <div class="role-hint" *ngIf="isAuditor">You are acting as <strong>Contract Auditor</strong> (auditor status only).</div>
+          <div class="role-hint" *ngIf="isVerifier">You are acting as <strong>Contract Verifier</strong> (verifier status only).</div>
+          <div class="role-hint warn" *ngIf="!isAuditor && !isVerifier">Current role may not perform verify/reject. Page access still requires Contract Auditor or Contract Verifier role mapping.</div>
+        </div>
+
+        <mat-form-field class="field-duty-type" appearance="outline">
+          <mat-label>Duty Type</mat-label>
+          <mat-select [(ngModel)]="selectedPackageTypeId" (selectionChange)="onDutyTypeChange()">
+            <mat-option [value]="null">— Select —</mat-option>
+            <mat-option *ngFor="let dt of dutyTypes" [value]="dt.packageTypeID">{{ dt.packageType }}</mat-option>
+          </mat-select>
+        </mat-form-field>
+
+        <mat-form-field class="field-filter" appearance="outline">
+          <mat-label>City Tier</mat-label>
+          <mat-select
+            [(ngModel)]="selectedCityTierId"
+            [disabled]="!selectedContractId"
+            (selectionChange)="onFilterChange()"
+          >
+            <mat-option [value]="null">All</mat-option>
+            <mat-option *ngFor="let tier of cityTiers" [value]="tier.customerContractCityTiersID">
+              {{ tier.customerContractCityTier }}
+            </mat-option>
+          </mat-select>
+        </mat-form-field>
+
+        <mat-form-field class="field-filter" appearance="outline">
+          <mat-label>Status by Auditor</mat-label>
+          <mat-select [(ngModel)]="selectedAuditorStatusFilter" (selectionChange)="onFilterChange()">
+            <mat-option *ngFor="let opt of statusFilterOptions" [value]="opt.value">{{ opt.label }}</mat-option>
+          </mat-select>
+        </mat-form-field>
+
+        <mat-form-field class="field-filter" appearance="outline">
+          <mat-label>Status by Verifier</mat-label>
+          <mat-select [(ngModel)]="selectedVerifierStatusFilter" (selectionChange)="onFilterChange()">
+            <mat-option *ngFor="let opt of statusFilterOptions" [value]="opt.value">{{ opt.label }}</mat-option>
+          </mat-select>
+        </mat-form-field>
+      </div>
+
+      <div class="filter-actions-row">
+        <div class="filter-actions-primary">
+          <button mat-raised-button color="primary" (click)="search()" [disabled]="loading">Search</button>
+          <button mat-stroked-button type="button" (click)="clearFilters()" [disabled]="loading">Clear</button>
+        </div>
+      </div>
+    </div>
+
+  <div *ngIf="loading" class="loading-overlay">Loading...</div>
+
+  <div class="card" *ngIf="dutyConfig?.fixedColumns && hasSearched">
+    <div class="section-title section-title-bold">Fixed Rates [{{ searchedDutyTypeName }}]</div>
+    <div class="table-wrap">
+      <table mat-table [dataSource]="fixedDataSource" class="ctv-table">
+        <ng-container matColumnDef="select">
+          <th mat-header-cell *matHeaderCellDef>
+            <mat-checkbox
+              (change)="$event ? masterToggle(fixedSelection, fixedDataSource) : null"
+              [checked]="fixedSelection.hasValue() && isAllSelected(fixedSelection, fixedDataSource)"
+              [indeterminate]="fixedSelection.hasValue() && !isAllSelected(fixedSelection, fixedDataSource)"
+              matTooltip="Select all on this page"
+            ></mat-checkbox>
+          </th>
+          <td mat-cell *matCellDef="let row">
+            <mat-checkbox (click)="$event.stopPropagation()" (change)="$event ? toggleRow(fixedSelection, row) : null" [checked]="isRowSelected(fixedSelection, row)"></mat-checkbox>
+          </td>
+        </ng-container>
+        <ng-container *ngFor="let col of fixedDynamicColumns" [matColumnDef]="col.field">
+          <th mat-header-cell *matHeaderCellDef [matTooltip]="col.tooltip">{{ col.header }}</th>
+          <td mat-cell *matCellDef="let row">{{ getCellValue(row, col.field) }}</td>
+        </ng-container>
+        <ng-container matColumnDef="auditorVerificationStatus">
+          <th mat-header-cell *matHeaderCellDef>Auditor Status</th>
+          <td mat-cell *matCellDef="let row"><span [ngClass]="statusClass(row.auditorVerificationStatus)">{{ formatStatus(row.auditorVerificationStatus) }}</span></td>
+        </ng-container>
+        <ng-container matColumnDef="verifierVerificationStatus">
+          <th mat-header-cell *matHeaderCellDef>Verifier Status</th>
+          <td mat-cell *matCellDef="let row"><span [ngClass]="statusClass(row.verifierVerificationStatus)">{{ formatStatus(row.verifierVerificationStatus) }}</span></td>
+        </ng-container>
+        <ng-container matColumnDef="remarks">
+          <th mat-header-cell *matHeaderCellDef>Remarks</th>
+          <td mat-cell *matCellDef="let row">{{ row.remarks || '—' }}</td>
+        </ng-container>
+        <ng-container matColumnDef="updatedBy">
+          <th mat-header-cell *matHeaderCellDef>Updated By</th>
+          <td mat-cell *matCellDef="let row">{{ row.updatedBy || '—' }}</td>
+        </ng-container>
+        <ng-container matColumnDef="updatedDate">
+          <th mat-header-cell *matHeaderCellDef>Updated Date</th>
+          <td mat-cell *matCellDef="let row">{{ row.updatedDate | date: 'dd-MMM-yyyy HH:mm' }}</td>
+        </ng-container>
+        <ng-container matColumnDef="history">
+          <th mat-header-cell *matHeaderCellDef>History</th>
+          <td mat-cell *matCellDef="let row">
+            <button mat-icon-button color="primary" (click)="openHistory(row, $event)" matTooltip="View History (required)">
+              <mat-icon>history</mat-icon>
+            </button>
+          </td>
+        </ng-container>
+        <tr mat-header-row *matHeaderRowDef="fixedDisplayedColumns"></tr>
+        <tr
+          mat-row
+          *matRowDef="let row; columns: fixedDisplayedColumns; trackBy: trackByRateRow"
+          class="clickable-row"
+          (click)="openRowDetails(row, true)"
+          matTooltip="Click to view row details and verify/reject"
+        ></tr>
+      </table>
+      <div *ngIf="fixedDataSource.data.length === 0" class="empty-msg">No fixed details rows.</div>
+    </div>
+  </div>
+
+  <div class="card" *ngIf="hasSearched">
+    <div class="section-title section-title-bold">Variable Rates [{{ searchedDutyTypeName }}]</div>
+    <div class="table-wrap">
+      <table mat-table [dataSource]="rateDataSource" class="ctv-table">
+        <ng-container matColumnDef="select">
+          <th mat-header-cell *matHeaderCellDef>
+            <mat-checkbox
+              (change)="$event ? masterToggle(rateSelection, rateDataSource) : null"
+              [checked]="rateSelection.hasValue() && isAllSelected(rateSelection, rateDataSource)"
+              [indeterminate]="rateSelection.hasValue() && !isAllSelected(rateSelection, rateDataSource)"
+              matTooltip="Select all on this page"
+            ></mat-checkbox>
+          </th>
+          <td mat-cell *matCellDef="let row">
+            <mat-checkbox (click)="$event.stopPropagation()" (change)="$event ? toggleRow(rateSelection, row) : null" [checked]="isRowSelected(rateSelection, row)"></mat-checkbox>
+          </td>
+        </ng-container>
+        <ng-container *ngFor="let col of rateDynamicColumns" [matColumnDef]="col.field">
+          <th mat-header-cell *matHeaderCellDef [matTooltip]="col.tooltip">{{ col.header }}</th>
+          <td mat-cell *matCellDef="let row">
+            <span
+              *ngIf="col.field === 'customerContractCityTier'"
+              [matTooltip]="row.citiesInTier || 'No cities mapped'"
+              matTooltipPosition="above"
+            >{{ getCellValue(row, col.field) }}</span>
+            <span *ngIf="col.field !== 'customerContractCityTier'">{{ getCellValue(row, col.field) }}</span>
+          </td>
+        </ng-container>
+        <ng-container matColumnDef="auditorVerificationStatus">
+          <th mat-header-cell *matHeaderCellDef>Auditor Status</th>
+          <td mat-cell *matCellDef="let row"><span [ngClass]="statusClass(row.auditorVerificationStatus)">{{ formatStatus(row.auditorVerificationStatus) }}</span></td>
+        </ng-container>
+        <ng-container matColumnDef="verifierVerificationStatus">
+          <th mat-header-cell *matHeaderCellDef>Verifier Status</th>
+          <td mat-cell *matCellDef="let row"><span [ngClass]="statusClass(row.verifierVerificationStatus)">{{ formatStatus(row.verifierVerificationStatus) }}</span></td>
+        </ng-container>
+        <ng-container matColumnDef="remarks">
+          <th mat-header-cell *matHeaderCellDef>Remarks</th>
+          <td mat-cell *matCellDef="let row">{{ row.remarks || '—' }}</td>
+        </ng-container>
+        <ng-container matColumnDef="updatedBy">
+          <th mat-header-cell *matHeaderCellDef>Updated By</th>
+          <td mat-cell *matCellDef="let row">{{ row.updatedBy || '—' }}</td>
+        </ng-container>
+        <ng-container matColumnDef="updatedDate">
+          <th mat-header-cell *matHeaderCellDef>Updated Date</th>
+          <td mat-cell *matCellDef="let row">{{ row.updatedDate | date: 'dd-MMM-yyyy HH:mm' }}</td>
+        </ng-container>
+        <ng-container matColumnDef="history">
+          <th mat-header-cell *matHeaderCellDef>History</th>
+          <td mat-cell *matCellDef="let row">
+            <button mat-icon-button color="primary" (click)="openHistory(row, $event)" matTooltip="View History (required)">
+              <mat-icon>history</mat-icon>
+            </button>
+          </td>
+        </ng-container>
+        <tr mat-header-row *matHeaderRowDef="rateDisplayedColumns"></tr>
+        <tr
+          mat-row
+          *matRowDef="let row; columns: rateDisplayedColumns; trackBy: trackByRateRow"
+          class="clickable-row"
+          (click)="openRowDetails(row, false)"
+          matTooltip="Click to view row details and verify/reject"
+        ></tr>
+      </table>
+      <div *ngIf="rateDataSource.data.length === 0" class="empty-msg">No rate rows found.</div>
+    </div>
+  </div>
+  </div>
+</section>

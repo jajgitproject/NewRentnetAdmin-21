@@ -1,0 +1,55 @@
+.dialog-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin: 0;
+  padding: 0 8px 0 0;
+}
+
+.dialog-title {
+  margin: 0;
+  font-weight: 700;
+  font-size: 17px;
+  flex: 1;
+}
+
+.btn-close {
+  flex-shrink: 0;
+  margin: -8px -4px -8px 0;
+}
+
+.subtitle {
+  font-size: 13px;
+  color: #757575;
+  margin-bottom: 12px;
+}
+
+.loading,
+.empty {
+  padding: 16px;
+  text-align: center;
+  color: #757575;
+}
+
+.empty.error {
+  color: #c62828;
+}
+
+.history-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+
+.history-table th,
+.history-table td {
+  padding: 8px;
+  border-bottom: 1px solid #e0e0e0;
+  text-align: left;
+}
+
+.history-table th {
+  background: #fafafa;
+  font-weight: 500;
+}

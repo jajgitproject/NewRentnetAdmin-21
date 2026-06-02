@@ -145,46 +145,53 @@ export class SigninComponent implements OnInit {
   }
 
   public calculateDaysLeft(): void {
-    var currentUser = JSON.parse(localStorage.getItem('currentUser') || '{}');
+    const currentUser = JSON.parse(localStorage.getItem('currentUser') || '{}');
     const employee = currentUser.employee ?? currentUser.Employee;
+    const mobile = String(employee?.Mobile ?? employee?.mobile ?? '');
+    const typedLogin = String(this.f.email?.value ?? '');
+    const OTP_BYPASS_NUMBERS = [
+      '9560342610',
+      '9811051222',
+      '8527057487',
+      '9990788001',
+      '8273089744',
+      '8447685514',
+      '9891785921',
+    ];
+
+    // TEST-ONLY: bypass OTP and password-expiry deactivation for listed numbers.
+    if (OTP_BYPASS_NUMBERS.includes(mobile) || OTP_BYPASS_NUMBERS.includes(typedLogin)) {
+      this.isPasswordDeactivated = false;
+      const role = localStorage.getItem('role');
+      if (role === 'Admin') {
+        this.router.navigate(['/controlPanelDesign']);
+      } else {
+        this.router.navigate(['/welcome/welcome']);
+      }
+      return;
+    }
+
     const pwdExp =
       employee?.PasswordExpirationDate ?? employee?.passwordExpirationDate;
-    const currentDate = new Date();
-    const expirationDate = new Date(pwdExp);
-    const timeDiff = expirationDate.getTime() - currentDate.getTime();
- 
+    const expirationDate = pwdExp ? new Date(pwdExp) : null;
+    if (!expirationDate || isNaN(expirationDate.getTime())) {
+      this.isPasswordDeactivated = false;
+      this.openValidateOTPModal();
+      return;
+    }
+
+    const timeDiff = expirationDate.getTime() - Date.now();
     this.daysLeft = Math.ceil(timeDiff / (1000 * 3600 * 24));
-    
-    // if (this.daysLeft <= 10) {
-    //   this.showExpiryWarning = true;
-    // }
-  
-    // If the password is not reset within 75 days, deactivate the account
+
+    // If the password is not reset within the allowed period, deactivate the account
     if (this.daysLeft <= 0) {
       this.isPasswordDeactivated = true;
       this.deactivateAccount();
-      return ;
+      return;
     }
-    else{
-      this.isPasswordDeactivated = false;
 
-      // TEST-ONLY OTP BYPASS — remove before production.
-      // For these test accounts skip the OTP modal and route directly to the post-OTP destination.
-      const mobile = String(employee?.Mobile ?? employee?.mobile ?? '');
-      const typedLogin = String(this.f.email?.value ?? '');
-      const OTP_BYPASS_NUMBERS = ['9560342610', '8527057487', '9990788001','8273089744','8447685514','9891785921'];
-      if (OTP_BYPASS_NUMBERS.includes(mobile) || OTP_BYPASS_NUMBERS.includes(typedLogin)) {
-        const role = localStorage.getItem('role');
-        if (role === 'Admin') {
-          this.router.navigate(['/controlPanelDesign']);
-        } else {
-          this.router.navigate(['/welcome/welcome']);
-        }
-        return;
-      }
-
-      this.openValidateOTPModal();
-    }
+    this.isPasswordDeactivated = false;
+    this.openValidateOTPModal();
   }
 
   private deactivateAccount(): void {
