@@ -190,6 +190,7 @@ export class FormDialogSendSmsWhatsappMailComponent {
     this._generalService.GetPermission(this.ReservationID).subscribe(
       (data) => {
         const normalizedRows = this.normalizePermissionRows(data);
+        console.log(normalizedRows);
         this.permissionData = this.ensureBookerRowPresent(normalizedRows);
         this.cdr.detectChanges();
       },

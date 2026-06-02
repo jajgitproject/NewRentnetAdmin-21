@@ -1464,7 +1464,7 @@ export class DutySlipForBillingComponent implements OnInit, AfterViewInit {
         this.advanceTableBH.goodForBilling = isChecked;
         this.advanceTableBH.actionTaken = this.advanceTableForm.value.actionTaken;
         this.advanceTableBH.actionDetails = this.advanceTableForm.value.actionDetails;
-        this.CalculateBill();
+        //this.CalculateBill();
       }
       if(isChecked === false)
       {
@@ -1601,12 +1601,19 @@ setVerifyDuty(value: boolean, details: string) {
     response => 
     {   
       this.showSpinnerForVDGB = false; 
-      this.showNotification(
-        'snackbar-success',
-        'Updated...!!!',
-        'bottom',
-        'center'
-      );
+      if(response.actionTaken !== "Verify Duty")
+      {
+        this.showNotification(
+          'snackbar-success',
+          'Updated...!!!',
+          'bottom',
+          'center'
+        );
+      }
+      if(response.actionTaken === "Verify Duty" && response.verifyDuty === true)
+      {
+        this.CalculateBill();
+      }
     },
     error =>
     {
@@ -1933,6 +1940,7 @@ setVerifyDuty(value: boolean, details: string) {
   //---------Calculate Bill------------------------
   public CalculateBill()
   {
+    this.showSpinnerForVDGB = true;
     this.clossingOneService
       .calculateBill(this.DutySlipID)
       .pipe(
@@ -1953,6 +1961,7 @@ setVerifyDuty(value: boolean, details: string) {
         goodForBilling: this.advanceTableForm.value.goodForBilling,
         message: this.Message
       });
+      this.showSpinnerForVDGB = false;
         this.showNotification(
           'snackbar-success',
           'Duty Calculated...!!!',

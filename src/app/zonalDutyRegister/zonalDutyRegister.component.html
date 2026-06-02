@@ -130,15 +130,7 @@
                                                 <mat-cell *matCellDef="let row">
                                                     {{row.bookingDate || 'N/A'}}
                                                 </mat-cell>
-                                            </ng-container>
-
-                                            <!-- Dispatch Location -->
-                                            <ng-container matColumnDef="DispatchLocation">
-                                                <mat-header-cell *matHeaderCellDef mat-sort-header>Dispatch Location</mat-header-cell>
-                                                <mat-cell *matCellDef="let row">
-                                                    {{row.dispatchLocation || 'N/A'}}
-                                                </mat-cell>
-                                            </ng-container>
+                                            </ng-container>                                            
 
                                             <!-- Customer Name -->
                                             <ng-container matColumnDef="CustomerName">
@@ -189,10 +181,25 @@
                                             </ng-container>
 
                                             <!-- Driver -->
+                                            <ng-container matColumnDef="DriverID">
+                                                <mat-header-cell *matHeaderCellDef mat-sort-header>Driver ID</mat-header-cell>
+                                                <mat-cell *matCellDef="let row">
+                                                    {{row.driverID || 'N/A'}}
+                                                </mat-cell>
+                                            </ng-container>
+
                                             <ng-container matColumnDef="DriverName">
                                                 <mat-header-cell *matHeaderCellDef mat-sort-header>Driver Name</mat-header-cell>
                                                 <mat-cell *matCellDef="let row">
                                                     {{row.driverName || 'N/A'}}
+                                                </mat-cell>
+                                            </ng-container>
+
+                                            <!-- Dispatch Location -->
+                                            <ng-container matColumnDef="DispatchLocation">
+                                                <mat-header-cell *matHeaderCellDef mat-sort-header>Dispatch Location</mat-header-cell>
+                                                <mat-cell *matCellDef="let row">
+                                                    {{row.dispatchLocation || 'N/A'}}
                                                 </mat-cell>
                                             </ng-container>
 
@@ -516,24 +523,17 @@
                                                 </mat-cell>
                                             </ng-container>
 
+                                            <ng-container matColumnDef="SupplierID">
+                                                <mat-header-cell *matHeaderCellDef mat-sort-header>Vendor ID</mat-header-cell>
+                                                <mat-cell *matCellDef="let row">
+                                                    {{row.supplierID || 'N/A'}}
+                                                </mat-cell>
+                                            </ng-container>
+                                            
                                             <ng-container matColumnDef="SupplierName">
                                                 <mat-header-cell *matHeaderCellDef mat-sort-header>Vendor</mat-header-cell>
                                                 <mat-cell *matCellDef="let row">
                                                     {{row.supplierName || 'N/A'}}
-                                                </mat-cell>
-                                            </ng-container>
-
-                                            <ng-container matColumnDef="DSClosedBy">
-                                                <mat-header-cell *matHeaderCellDef mat-sort-header>DS Closed By</mat-header-cell>
-                                                <mat-cell *matCellDef="let row">
-                                                    {{ row.dsClosedBy?.trim() ? row.dsClosedBy : 'N/A' }}
-                                                </mat-cell>
-                                            </ng-container>
-
-                                            <ng-container matColumnDef="DutySlipImage">
-                                                <mat-header-cell *matHeaderCellDef mat-sort-header>Manual DS Attached Status</mat-header-cell>
-                                                <mat-cell *matCellDef="let row">
-                                                    {{row.dutySlipImage ? 'Yes' : 'No'}}
                                                 </mat-cell>
                                             </ng-container>
 
@@ -571,6 +571,20 @@
                                                 <mat-header-cell *matHeaderCellDef mat-sort-header>Customer SpecificFields</mat-header-cell>
                                                 <mat-cell *matCellDef="let row">
                                                     {{row.customerSpecificFields || 'N/A'}}
+                                                </mat-cell>
+                                            </ng-container>
+
+                                            <ng-container matColumnDef="DSClosedBy">
+                                                <mat-header-cell *matHeaderCellDef mat-sort-header>DS Closed By</mat-header-cell>
+                                                <mat-cell *matCellDef="let row">
+                                                    {{ row.dsClosedBy?.trim() ? row.dsClosedBy : 'N/A' }}
+                                                </mat-cell>
+                                            </ng-container>
+
+                                            <ng-container matColumnDef="DutySlipImage">
+                                                <mat-header-cell *matHeaderCellDef mat-sort-header>Manual DS Attached Status</mat-header-cell>
+                                                <mat-cell *matCellDef="let row">
+                                                    {{row.dutySlipImage ? 'Yes' : 'No'}}
                                                 </mat-cell>
                                             </ng-container>
 
