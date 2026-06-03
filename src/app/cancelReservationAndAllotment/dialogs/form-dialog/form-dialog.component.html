@@ -48,7 +48,7 @@
             </div>
 
             <div class="row">
-               <div class="row" *ngIf="status">
+               <div class="row" *ngIf="status && status !== 'Changes allow'">
                           <div class="col-12 mb-1">
                             <span style="color:red">{{status}}</span>
                           </div>

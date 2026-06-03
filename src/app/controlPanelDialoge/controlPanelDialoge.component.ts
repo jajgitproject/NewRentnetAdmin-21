@@ -2524,22 +2524,31 @@ TrackOnMapInfo(reservationID: number, item?: any) {
 
   CancellReservation(item:any ,i: any)
   {
-    if(item.allotmentType === 'Hard')
+    // if(item.allotmentType === 'Hard')
+    // {
+    //   Swal.fire({
+    //               title: '',
+    //               icon: 'error',
+    //               html: `<b>Reservation cannot be cancelled as it is already allotted to 
+    //                         ${item.registrationNumber} - ${item.driverName}#${item.driverMobile}.<br><br>
+    //                         Please cancel the Allotment before cancelling the Reservation.
+    //                      </b>
+    //                     `
+    //             })
+    //         return;
+    // }
+    if(item.locationOutDate !== null || item.reportingToGuestDate !== null || item.pickDate !== null || item.garageOutDate !== null || item.locationInDate === 'Dispatched')
     {
       Swal.fire({
-                  title: '',
-                  icon: 'error',
-                  html: `<b>Reservation cannot be cancelled as it is already allotted to 
-                            ${item.registrationNumber} - ${item.driverName}#${item.driverMobile}.<br><br>
-                            Please cancel the Allotment before cancelling the Reservation.
-                         </b>
-                        `
-                })
-            return;
+                title: '',
+                icon: 'error',
+                html: `<b>Reservation cancellation is not allowed after Dispatched.</b>`
+              })
+      return;
     }
-    else if(item.reservationStatus === 'Cancelled')
+    if(item.allotmentStatus === 'Alloted' || item.allotmentStatus === null)
     {
-      this.dialog.open(CancelReservationAndAllotmentComponent, {
+      this.dialog.open(FormDialogCRAComponent, {
       width: '500px',
       data: {
         advanceTable: item

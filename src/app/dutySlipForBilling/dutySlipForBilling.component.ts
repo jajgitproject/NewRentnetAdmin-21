@@ -1464,7 +1464,7 @@ export class DutySlipForBillingComponent implements OnInit, AfterViewInit {
         this.advanceTableBH.goodForBilling = isChecked;
         this.advanceTableBH.actionTaken = this.advanceTableForm.value.actionTaken;
         this.advanceTableBH.actionDetails = this.advanceTableForm.value.actionDetails;
-        //this.CalculateBill();
+        this.CalculateBill();
       }
       if(isChecked === false)
       {

@@ -553,9 +553,9 @@
             <div class="row">
                 <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12 mb-2">
                     <div class="example-button-row">
-                        <button mat-raised-button *ngIf="saveDisabled" color="primary" [type]="submit" [disabled]="!advanceTableForm.valid"
+                        <button mat-raised-button *ngIf="saveDisabled === true" color="primary" [type]="submit" [disabled]="!advanceTableForm.valid"
                             (click)="confirmAdd()">Save</button>
-                        <mat-spinner *ngIf="!saveDisabled" diameter="30"></mat-spinner>
+                        <mat-spinner *ngIf="saveDisabled === false" diameter="30"></mat-spinner>
                         <button *ngIf="action==='add'" mat-raised-button color="warn" (click)="reset()" tabindex="-1">Reset</button>
                         <button *ngIf="action==='edit'" mat-raised-button color="warn" (click)="onNoClick()" tabindex="-1">Cancel</button>
                     </div>

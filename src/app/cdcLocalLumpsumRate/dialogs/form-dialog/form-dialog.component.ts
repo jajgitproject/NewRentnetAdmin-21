@@ -16,7 +16,7 @@ import { CustomerContractCarCategoryDropDown } from 'src/app/customerContractCDC
 import { CustomerContractCityTiersDropDown } from 'src/app/customerContractCDCLocalRate/customerContractCityTiersDropDown.model';
 import { Observable } from 'rxjs';
 import { map, startWith } from 'rxjs/operators';
-
+import { ChangeDetectorRef } from '@angular/core';
 @Component({
   standalone: false,
   selector: 'app-form-dialog',
@@ -58,6 +58,7 @@ export class FormDialogComponent
   public dialogRef: MatDialogRef<FormDialogComponent>, 
   
   @Inject(MAT_DIALOG_DATA) public data: any,
+  private cdr: ChangeDetectorRef,
   public advanceTableService: CDCLocalLumpsumRateService,
     private fb: FormBuilder,
     private el: ElementRef,
@@ -418,6 +419,7 @@ numberOnly(event): boolean {
       {
         this._generalService.sendUpdate('DataNotFound:DuplicacyError:Failure');
         this.saveDisabled = true;
+        this.cdr.detectChanges();
       }
       else 
       {

@@ -597,7 +597,7 @@ export class DutyRegisterComponent implements OnInit {
     return this.CustomerGroupList.filter(
       data => 
       {
-        return data.customerGroup.toLowerCase().indexOf(filterValue)===0;
+        return data.customerGroup.toLowerCase().includes(filterValue);
       });
   }
 
@@ -638,7 +638,7 @@ export class DutyRegisterComponent implements OnInit {
     return this.CustomerList.filter(
       data => 
       {
-        return data.customerName.toLowerCase().indexOf(filterValue)===0;
+        return data.customerName.toLowerCase().includes(filterValue);
       });
   }
 

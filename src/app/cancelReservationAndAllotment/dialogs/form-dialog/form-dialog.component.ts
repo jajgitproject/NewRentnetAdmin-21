@@ -41,6 +41,7 @@ export class FormDialogCRAComponent
   {
         // Set the defaults
         this.action = data.action;
+        console.log(data);
         if (this.action === 'edit') 
         {
           this.dialogTitle ='Cancel Reservation';       
@@ -53,25 +54,36 @@ export class FormDialogCRAComponent
           this.advanceTable = new CancelReservationAndAllotment({});
         }
           
-        // Extract status robustly
-        if(typeof data?.status === 'string') {
-          this.status = data.status;
-        } else if(data?.status && typeof data.status.status === 'string') {
-          this.status = data.status.status;
-        } else {
-          this.status = '';
+        //this.status = data?.status?.status ?? data?.status ?? '';
+        this.status = data?.status?.status ?? data?.status ?? null;
+        console.log(this.status)
+        if(this.status === '' || this.status === null || this.status === 'Changes allow')
+        {
+          this.buttonDisabled = false;  // Save button enable
+        } 
+        else 
+        {
+          this.buttonDisabled = true;   // Save button disable
         }
-        
-        // Set button disabled state
-        const normalizedStatus = (this.status || '').toString().trim().toLowerCase();
-        this.buttonDisabled = normalizedStatus !== 'changes allow';
+        // Extract status robustly
+        // if(typeof data?.status === 'string') {
+        //   this.status = data.status;
+        // } else if(data?.status && typeof data.status.status === 'string') {
+        //   this.status = data.status.status;
+        // } else {
+        //   this.status = '';
+        // }
+        // console.log(this.status);
+        // // Set button disabled state
+        // const normalizedStatus = (this.status || '').toString().trim().toLowerCase();
+        // this.buttonDisabled = normalizedStatus !== 'changes allow';
         
         
         this.advanceTableForm = this.createContactForm();
-        this.AllotmentID=data.allotmentID;
-        this.AllotmentStatus=data.allotmentStatus;
-        this.ReservationID=data.reservationID;
-         this.AllotmentType=data.allotmentType;
+        this.AllotmentID=data?.advanceTable?.allotmentID;
+        this.AllotmentStatus=data?.advanceTable?.allotmentStatus;
+        this.ReservationID=data?.advanceTable?.reservationID;
+        this.AllotmentType=data?.advanceTable?.allotmentType;
   }
   formControl = new FormControl('', 
   [
@@ -91,13 +103,14 @@ export class FormDialogCRAComponent
   {
     return this.fb.group(
     {
-      allotmentID: [this.advanceTable.allotmentID],
-      reservationID: [this.advanceTable.reservationID],
+      allotmentID: [this.AllotmentID],
+      reservationID: [this.ReservationID],
       dateOfCancellation: [this.advanceTable.dateOfCancellation],
       timeOfCancellation: [this.advanceTable.timeOfCancellation],
       cancellationByEmployeeID: [this.advanceTable.cancellationByEmployeeID],
       cancellationRemark: [this.advanceTable.cancellationRemark],
-      allotmentStatus: [this.advanceTable.allotmentStatus],
+      allotmentStatus: [this.AllotmentStatus],
+      allotmentType: [this.AllotmentType],
       cancellationProof: [this.advanceTable.cancellationProof],
       isCancellationChargeable: [this.advanceTable.isCancellationChargeable],
     });
