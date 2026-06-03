@@ -52,7 +52,9 @@ export class DutyRegisterComponent implements OnInit {
   'City',
   'PackageType',
   'CarNumber',
+  'DriverID',
   'DriverName',
+  'DriverMobile',
   'BilledDutyType',
   'Package',
   'CarBooked',
@@ -101,6 +103,7 @@ export class DutyRegisterComponent implements OnInit {
   'KAM',
   'ReservationCreatedBy',
   'AllotmentBy',
+  'SupplierID',
   'SupplierName',
   'DSClosedBy',
   'DutySlipImage',
@@ -242,8 +245,8 @@ export class DutyRegisterComponent implements OnInit {
   csvExporting: boolean = false;
   hasManualSearch: boolean = false;
     
-  
- 
+  UserID:any;
+  IsKAMRole:any;
   
 
   constructor(
@@ -252,7 +255,12 @@ export class DutyRegisterComponent implements OnInit {
     public dutyRegisterService: DutyRegisterService,
     private snackBar: MatSnackBar,
     public _generalService: GeneralService
-  ) {}
+  ) 
+  {
+    this.UserID = this._generalService.getUserID();
+    this.IsKAMRole = localStorage.getItem('isThisAKeyAccountManagerRole') === 'true';
+    console.log("UserID: ", this.UserID,this.IsKAMRole);
+  }
   @ViewChild(MatPaginator, { static: true }) paginator: MatPaginator;
   @ViewChild(MatSort, { static: true }) sort: MatSort;
   @ViewChild('filter', { static: true }) filter: ElementRef;
@@ -263,10 +271,11 @@ export class DutyRegisterComponent implements OnInit {
   {
     // this.loadData();
     this.InitCustomerGroup();
+    this.InitCustomer();
     this.InitCustomerPerson();
     this.InitPackageType();
     this.InitDispatchLocation();
-    this.InitCustomerLocation();
+    //this.InitCustomerLocation();
     this.InitPaymentMode();
     this.InitSupplierType();
     this.InitSupplier();
@@ -568,11 +577,12 @@ export class DutyRegisterComponent implements OnInit {
   //---------- Customer Group ----------
   InitCustomerGroup()
   {
-    this._generalService.getCustomerGroup().subscribe(
+    this.dutyRegisterService.GetCustomerGroupByKAMForDutyRegister(this.IsKAMRole).subscribe(
     data=>
     {
       this.CustomerGroupList = data;
-      this.filteredCustomerGroupOptions =this.SearchCustomerGroup.valueChanges.pipe(
+      console.log("CustomerGroupList: ", this.CustomerGroupList);
+      this.filteredCustomerGroupOptions = this.SearchCustomerGroup.valueChanges.pipe(
       startWith(""),
       map(value => this._filterCustomerGroup(value || ''))
       ); 
@@ -602,16 +612,17 @@ export class DutyRegisterComponent implements OnInit {
   }
 
   getCustomerGroupID(customerGroupID: any) {
-    this.InitCustomer(customerGroupID);
+    //this.InitCustomer(customerGroupID);
   }
 
   //---------- Customer ----------
-  InitCustomer(customerGroupID?:any)
+  InitCustomer()
   {
-    this._generalService.GetCustomersForCP(customerGroupID).subscribe(
+    this.dutyRegisterService.GetCustomerByKAMForDutyRegister(this.IsKAMRole).subscribe(
     data=>
     {
       this.CustomerList = data;
+      console.log("CustomerList: ", this.CustomerList);
       this.filteredCustomerOptions =this.SearchCustomer.valueChanges.pipe(
       startWith(""),
       map(value => this._filterCustomer(value || ''))
@@ -800,10 +811,11 @@ export class DutyRegisterComponent implements OnInit {
   //---------- Dispatch Location ----------
   InitDispatchLocation()
   {
-    this._generalService.GetLocationHub().subscribe(
+    this.dutyRegisterService.GetLocationDropDownForDutyRegister(this.IsKAMRole).subscribe(
     data=>
     {
       this.DispatchLocationList=data;
+      console.log("DispatchLocationList: ", this.DispatchLocationList);
       this.filteredDispatchLocationOptions = this.SearchDispatchLocation.valueChanges.pipe(
       startWith(""),
       map(value => this._filterOrganizationalsEntity(value || ''))
@@ -819,7 +831,7 @@ export class DutyRegisterComponent implements OnInit {
     return this.DispatchLocationList.filter(
     data => 
     {
-      return data.organizationalEntityName.toLowerCase().indexOf(filterValue)===0;
+      return data.organizationalEntityName.toLowerCase().includes(filterValue);
     });
   }
 
