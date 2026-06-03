@@ -35,68 +35,80 @@
         </div>
 
         <div class="bod-meta-bar">
-          <span class="bod-meta-item" *ngIf="!showBranchSelector">
-            <mat-icon>apartment</mat-icon>
-            <span><strong>Branch:</strong> {{ branchName }}</span>
-          </span>
-          <span class="bod-meta-item bod-meta-item--selector" *ngIf="showBranchSelector">
-            <mat-icon>apartment</mat-icon>
-            <mat-form-field appearance="outline" class="bod-branch-field" subscriptSizing="dynamic">
-              <mat-label>Branch</mat-label>
-              <mat-select [formControl]="branchFilter" (selectionChange)="onBranchChange()">
-                <mat-option *ngFor="let b of branches" [value]="b.branchID">
-                  {{ b.branchName }}
-                </mat-option>
-              </mat-select>
-            </mat-form-field>
-          </span>
-          <span class="bod-meta-item bod-meta-warn" *ngIf="noBranchAssigned">
-            <mat-icon>info</mat-icon>
-            <span>No branch assigned for this user</span>
-          </span>
-          <span class="bod-meta-item">
-            <mat-icon>calendar_today</mat-icon>
-            <span><strong>Date:</strong> {{ displayDate }}</span>
-          </span>
-          <span class="bod-meta-item">
-            <mat-icon>schedule</mat-icon>
-            <span><strong>Shift:</strong> {{ shiftLabel }}</span>
-          </span>
+          <div class="bod-meta-left">
+            <span class="bod-meta-item bod-meta-item--selector" *ngIf="showBranchSelector">
+              <mat-icon>apartment</mat-icon>
+              <mat-form-field appearance="outline" class="bod-branch-field" subscriptSizing="dynamic">
+                <mat-label>Branch</mat-label>
+                <input type="text" matInput [formControl]="branchInput" [matAutocomplete]="branchAuto" (focus)="onAutocompleteFocus()" />
+                <mat-autocomplete #branchAuto="matAutocomplete" [displayWith]="displayBranch" (optionSelected)="onBranchOptionSelected($event.option.value)">
+                  <mat-option *ngFor="let b of filteredBranches | async" [value]="b">{{ b.branchName }}</mat-option>
+                </mat-autocomplete>
+              </mat-form-field>
+            </span>
+            <span class="bod-meta-item" *ngIf="!showBranchSelector">
+              <mat-icon>apartment</mat-icon>
+              <span><strong>Branch:</strong> {{ branchName }}</span>
+            </span>
+            <span class="bod-meta-item bod-meta-item--selector" *ngIf="branchID">
+              <mat-icon>place</mat-icon>
+              <mat-form-field appearance="outline" class="bod-location-field" subscriptSizing="dynamic">
+                <mat-label>Location</mat-label>
+                <input type="text" matInput [formControl]="locationInput" [matAutocomplete]="locationAuto" (focus)="onAutocompleteFocus()" />
+                <mat-autocomplete #locationAuto="matAutocomplete" [displayWith]="displayLocation" (optionSelected)="onLocationOptionSelected($event.option.value)">
+                  <mat-option [value]="null">All Locations</mat-option>
+                  <mat-option *ngFor="let l of filteredLocations | async" [value]="l">{{ l.organizationalEntityName }}</mat-option>
+                </mat-autocomplete>
+              </mat-form-field>
+            </span>
+            <span class="bod-meta-item bod-meta-warn" *ngIf="noBranchAssigned">
+              <mat-icon>info</mat-icon>
+              <span>No branch assigned for this user</span>
+            </span>
+            <span class="bod-meta-item">
+              <mat-icon>calendar_today</mat-icon>
+              <span><strong>Date:</strong> {{ displayDateRange }}</span>
+            </span>
+          </div>
+          <div class="bod-meta-right"></div>
         </div>
 
         <div class="bod-filters">
           <mat-form-field appearance="outline" class="bod-field" subscriptSizing="dynamic">
-            <input matInput [matDatepicker]="dp" [formControl]="filterDate" readonly />
-            <mat-datepicker-toggle matIconSuffix [for]="dp"></mat-datepicker-toggle>
-            <mat-datepicker #dp></mat-datepicker>
+            <mat-label>Date From</mat-label>
+            <input matInput [matDatepicker]="dpFrom" [formControl]="filterDateFrom" [max]="filterDateTo.value" [min]="dateFromMin" readonly (dateChange)="onDateFromChange()" />
+            <mat-datepicker-toggle matIconSuffix [for]="dpFrom"></mat-datepicker-toggle>
+            <mat-datepicker #dpFrom></mat-datepicker>
           </mat-form-field>
 
           <mat-form-field appearance="outline" class="bod-field" subscriptSizing="dynamic">
-            <mat-select [formControl]="customerFilter">
-              <mat-option value="all">All Customers</mat-option>
-              <mat-option value="c1">Customer A</mat-option>
-              <mat-option value="c2">Customer B</mat-option>
-            </mat-select>
+            <mat-label>Date To</mat-label>
+            <input matInput [matDatepicker]="dpTo" [formControl]="filterDateTo" [min]="filterDateFrom.value" [max]="dateToMax" readonly (dateChange)="onDateToChange()" />
+            <mat-datepicker-toggle matIconSuffix [for]="dpTo"></mat-datepicker-toggle>
+            <mat-datepicker #dpTo></mat-datepicker>
           </mat-form-field>
 
           <mat-form-field appearance="outline" class="bod-field" subscriptSizing="dynamic">
-            <mat-select [formControl]="dutyTypeFilter">
-              <mat-option value="all">All Duty Types</mat-option>
-              <mat-option value="local">Local</mat-option>
-              <mat-option value="out">Outstation</mat-option>
-            </mat-select>
+            <mat-label>Customer</mat-label>
+            <input type="text" matInput [formControl]="customerInput" [matAutocomplete]="customerAuto" (focus)="onAutocompleteFocus()" />
+            <mat-autocomplete #customerAuto="matAutocomplete" [displayWith]="displayCustomer" (optionSelected)="onCustomerOptionSelected($event.option.value)">
+              <mat-option [value]="null">All Customers</mat-option>
+              <mat-option *ngFor="let c of filteredCustomers | async" [value]="c">{{ c.customerName }}</mat-option>
+            </mat-autocomplete>
           </mat-form-field>
 
           <mat-form-field appearance="outline" class="bod-field" subscriptSizing="dynamic">
-            <mat-select [formControl]="shiftFilter">
-              <mat-option value="all">All Shifts</mat-option>
-              <mat-option value="gen">General</mat-option>
-              <mat-option value="night">Night</mat-option>
-            </mat-select>
+            <mat-label>Duty Type</mat-label>
+            <input type="text" matInput [formControl]="dutyTypeInput" [matAutocomplete]="dutyTypeAuto" (focus)="onAutocompleteFocus()" />
+            <mat-autocomplete #dutyTypeAuto="matAutocomplete" [displayWith]="displayDutyType" (optionSelected)="onDutyTypeOptionSelected($event.option.value)">
+              <mat-option [value]="null">All Duty Types</mat-option>
+              <mat-option *ngFor="let d of filteredDutyTypes | async" [value]="d">{{ d.packageType }}</mat-option>
+            </mat-autocomplete>
           </mat-form-field>
 
           <button type="button" class="bod-apply-btn" (click)="onApplyFilters()">Apply</button>
         </div>
+        <p class="bod-date-error" *ngIf="dateRangeError">{{ dateRangeError }}</p>
 
         <!-- 1. Booking Summary -->
         <div class="bod-section">
@@ -110,7 +122,7 @@
                   <div class="kpi-value">{{ totalBooking }}</div>
                 </div>
               </div>
-              <a class="kpi-foot" href="javascript:void(0)">View Details <span>&gt;</span></a>
+              <a class="kpi-foot" href="javascript:void(0)" (click)="openBookingDetails('totalBooking', 'Total Booking', $event)">View Details <span>&gt;</span></a>
             </article>
             <article class="kpi kpi--red">
               <div class="kpi-top">
@@ -120,7 +132,7 @@
                   <div class="kpi-value">{{ cancelled }}</div>
                 </div>
               </div>
-              <a class="kpi-foot" href="javascript:void(0)">View Details <span>&gt;</span></a>
+              <a class="kpi-foot" href="javascript:void(0)" (click)="openBookingDetails('cancelled', 'Cancelled', $event)">View Details <span>&gt;</span></a>
             </article>
             <article class="kpi kpi--orange">
               <div class="kpi-top">
@@ -130,7 +142,7 @@
                   <div class="kpi-value">{{ tnc }}</div>
                 </div>
               </div>
-              <a class="kpi-foot" href="javascript:void(0)">View Details <span>&gt;</span></a>
+              <a class="kpi-foot" href="javascript:void(0)" (click)="openBookingDetails('tnc', 'TNC', $event)">View Details <span>&gt;</span></a>
             </article>
           </div>
         </div>
@@ -148,7 +160,7 @@
                     <div class="kpi-value">{{ totalAllotted }}</div>
                   </div>
                 </div>
-                <a class="kpi-foot" href="javascript:void(0)">View Details <span>&gt;</span></a>
+                <a class="kpi-foot" href="javascript:void(0)" (click)="openBookingDetails('totalAllotted', 'Total Allotted', $event)">View Details <span>&gt;</span></a>
               </article>
               <article class="kpi kpi--pink">
                 <div class="kpi-top kpi-top--plain">
@@ -158,7 +170,7 @@
                     <div class="kpi-value">{{ lateAllotted }}</div>
                   </div>
                 </div>
-                <a class="kpi-foot" href="javascript:void(0)">View Details <span>&gt;</span></a>
+                <a class="kpi-foot" href="javascript:void(0)" (click)="openBookingDetails('lateAllotted', 'Late Allotted', $event)">View Details <span>&gt;</span></a>
               </article>
             </div>
           </div>
@@ -175,7 +187,7 @@
                       <div class="kpi-value">{{ totalOwned }}</div>
                     </div>
                   </div>
-                  <a class="kpi-foot" href="javascript:void(0)">View Details <span>&gt;</span></a>
+                  <a class="kpi-foot" href="javascript:void(0)" (click)="openBookingDetails('totalOwned', 'Total Owned', $event)">View Details <span>&gt;</span></a>
                 </article>
                 <article class="kpi kpi--sky kpi--sm">
                   <div class="kpi-top kpi-top--plain">
@@ -185,7 +197,7 @@
                       <div class="kpi-value">{{ totalSupplier }}</div>
                     </div>
                   </div>
-                  <a class="kpi-foot" href="javascript:void(0)">View Details <span>&gt;</span></a>
+                  <a class="kpi-foot" href="javascript:void(0)" (click)="openBookingDetails('totalSupplier', 'Total Supplier', $event)">View Details <span>&gt;</span></a>
                 </article>
               </div>
               <article class="kpi kpi--chart">
@@ -193,6 +205,7 @@
                 <div class="kpi-chart-body">
                   <div class="kpi-chart-graph">
                     <apx-chart
+                      *ngIf="supplierChartKey > 0"
                       [series]="supplierDonutSeries"
                       [chart]="donutChart"
                       [labels]="supplierDonutLabels"
@@ -216,6 +229,130 @@
           </div>
         </div>
 
+        <div class="bod-details-panel" *ngIf="detailsVisible">
+          <div class="bod-details-hd">
+            <h3 class="bod-details-title">
+              {{ detailsTitle }} — {{ getDetailsPanelSubtitle() }}
+              <span class="bod-details-header-count" *ngIf="!detailsLoading">{{ getDetailsHeaderCountText() }}</span>
+            </h3>
+            <button type="button" class="bod-details-close" (click)="closeBookingDetails()">
+              <mat-icon>close</mat-icon>
+            </button>
+          </div>
+          <div class="bod-details-loading" *ngIf="detailsLoading">
+            <mat-spinner diameter="36"></mat-spinner>
+            <span>Loading bookings…</span>
+          </div>
+          <div class="bod-details-meta" *ngIf="!detailsLoading">
+            <span>{{ branchName }}</span>
+            <span>{{ locationInput.value }}</span>
+            <span>{{ displayDateRange }}</span>
+            <span>{{ customerInput.value }}</span>
+            <span>{{ dutyTypeInput.value }}</span>
+            <span class="bod-details-count" *ngIf="!detailsLoading && reservationHeaderInfo.length > 0">
+              {{ getDetailsPageRangeText() }}
+            </span>
+          </div>
+          <div class="bod-details-empty" *ngIf="!detailsLoading && reservationHeaderInfo.length === 0">
+            No bookings found for the selected filters.
+          </div>
+
+          <div class="bod-cp-list-wrap" *ngIf="!detailsLoading && reservationHeaderInfo.length > 0">
+            <div class="bod-cp-list-scroll">
+              <div class="bod-cp-header">
+                <span class="col-booking">Booking No</span>
+                <span class="col-out">Garage / Location Out</span>
+                <span class="col-pickup">Pickup / Drop</span>
+                <span class="col-location">Location</span>
+                <span class="col-status">Status / Allotment</span>
+                <span class="col-vehicle">Vehicle / Driver</span>
+                <span class="col-passenger">Passenger</span>
+                <span class="col-customer">Customer</span>
+                <span class="col-package">Duty Type / Package</span>
+                <span class="col-city">City</span>
+              </div>
+              <mat-accordion displayMode="flat" [multi]="false" class="bod-cp-accordion">
+                <mat-expansion-panel *ngFor="let data of reservationHeaderInfo; let i = index" class="bod-cp-row">
+                  <mat-expansion-panel-header>
+                    <mat-panel-title class="bod-cp-row-title">
+                      <span class="col-booking">
+                        <span class="bod-cp-badge" *ngIf="data.newCustomer || data.NewCustomer">New</span>
+                        {{ (data.reservationGroupID ?? data.ReservationGroupID) + '.' + (data.reservationID ?? data.ReservationID) }}
+                      </span>
+                      <span class="col-out">
+                        <ng-container *ngIf="data.garageOutDate || data.GarageOutDate; else noGarageOut">
+                          {{ formatCpDate(data.garageOutDate ?? data.GarageOutDate) }}
+                          {{ formatCpTime(data.garageOutTime ?? data.GarageOutTime) }}
+                        </ng-container>
+                        <ng-template #noGarageOut>N/A</ng-template>
+                        <br />
+                        {{ formatCpDate(data.locationOutDate ?? data.LocationOutDate) }}
+                        {{ formatCpTime(data.locationOutTime ?? data.LocationOutTime) }}
+                      </span>
+                      <span class="col-pickup">
+                        {{ formatCpDate(data.pickupDate ?? data.PickupDate) }}
+                        {{ formatCpTime(data.pickupTime ?? data.PickupTime) }}
+                        <br />
+                        {{ formatCpDate(data.dropOffDate ?? data.DropOffDate) }}
+                      </span>
+                      <span class="col-location">
+                        {{ data.transferedToLocationName ?? data.TransferedToLocationName ?? 'N/A' }}
+                        <span
+                          class="bod-sub"
+                          *ngIf="(data.transferedToLocationName ?? data.TransferedToLocationName) !== (data.transferedFromLocationName ?? data.TransferedFromLocationName)"
+                        >
+                          {{ data.transferedFromLocationName ?? data.TransferedFromLocationName }}
+                        </span>
+                      </span>
+                      <span class="col-status">
+                        {{ data.reservationStatus ?? data.ReservationStatus ?? 'N/A' }}
+                        <br />
+                        {{ data.allotmentStatus ?? data.AllotmentStatus ?? '—' }}
+                      </span>
+                      <span class="col-vehicle">
+                        {{ (data.registrationNumber ?? data.RegistrationNumber) || 'N/A' }}
+                        <br />
+                        {{ (data.driverName ?? data.DriverName) || 'N/A' }}
+                        <span class="bod-sub" *ngIf="data.driverPhone ?? data.DriverPhone">{{ data.driverPhone ?? data.DriverPhone }}</span>
+                      </span>
+                      <span class="col-passenger">
+                        {{ (data.passengerName ?? data.PassengerName) || 'N/A' }}
+                        <br />
+                        {{ (data.primaryMobile ?? data.PrimaryMobile) || '—' }}
+                      </span>
+                      <span class="col-customer">{{ (data.customerName ?? data.CustomerName) || 'N/A' }}</span>
+                      <span class="col-package">
+                        {{ getPackageTypeLabel(data) }}
+                        <br />
+                        {{ getPackageLabel(data) || '—' }}
+                      </span>
+                      <span class="col-city">{{ (data.pickupCity ?? data.PickupCity) || 'N/A' }}</span>
+                    </mat-panel-title>
+                  </mat-expansion-panel-header>
+                  <div class="bod-cp-expanded">
+                    <p><strong>Pickup address:</strong> {{ data.pickupAddressDetails ?? data.PickupAddressDetails ?? 'N/A' }}</p>
+                    <p><strong>Drop address:</strong> {{ data.dropOffAddressDetails ?? data.DropOffAddressDetails ?? 'N/A' }}</p>
+                    <p><strong>Trip to:</strong> {{ data.tripTo ?? data.TripTo ?? 'N/A' }}</p>
+                    <p><strong>Vehicle:</strong> {{ (data.vehicle ?? data.Vehicle) || 'N/A' }}</p>
+                  </div>
+                </mat-expansion-panel>
+              </mat-accordion>
+            </div>
+          </div>
+
+          <mat-paginator
+            class="bod-details-paginator"
+            *ngIf="showDetailsPaginator"
+            [length]="getDisplayTotalCount()"
+            [pageIndex]="detailsPageIndex"
+            [pageSize]="detailsPageSize"
+            [pageSizeOptions]="detailsPageSizeOptions"
+            [disabled]="detailsLoading"
+            (page)="onDetailsPageChange($event)"
+            showFirstLastButtons
+          ></mat-paginator>
+        </div>
+
         <!-- 4, 5, 6: Status sections -->
         <div class="bod-grid bod-grid-3">
           <div class="bod-section bod-section--tight">
@@ -228,7 +365,7 @@
                   <div class="kpi-value">{{ lateDispatch }}</div>
                 </div>
               </div>
-              <a class="kpi-foot" href="javascript:void(0)">View Details <span>&gt;</span></a>
+              <a class="kpi-foot" href="javascript:void(0)" (click)="openBookingDetails('lateDispatch', 'Late Dispatch', $event)">View Details <span>&gt;</span></a>
             </article>
           </div>
           <div class="bod-section bod-section--tight">
@@ -241,7 +378,7 @@
                   <div class="kpi-value">{{ notVerified }}</div>
                 </div>
               </div>
-              <a class="kpi-foot" href="javascript:void(0)">View Details <span>&gt;</span></a>
+              <a class="kpi-foot" href="javascript:void(0)" (click)="openBookingDetails('notVerified', 'Not Verified', $event)">View Details <span>&gt;</span></a>
             </article>
           </div>
           <div class="bod-section bod-section--tight">
@@ -254,7 +391,7 @@
                   <div class="kpi-value">{{ totalDispute }}</div>
                 </div>
               </div>
-              <a class="kpi-foot" href="javascript:void(0)">View Details <span>&gt;</span></a>
+              <a class="kpi-foot" href="javascript:void(0)" (click)="openBookingDetails('totalDispute', 'Total Dispute', $event)">View Details <span>&gt;</span></a>
             </article>
           </div>
         </div>
