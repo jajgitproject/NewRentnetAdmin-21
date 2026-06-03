@@ -989,6 +989,9 @@ toArray<T>(value: any): T[] {
         this.advanceTableForm.patchValue({packageType:this.advanceTable.packageType});
         this.advanceTableForm.patchValue({packageID:this.advanceTable.packageID});
         this.advanceTableForm.patchValue({package:this.advanceTable.package});
+        this.packageTypeID = this.advanceTable.packageTypeID;
+        this.packageType = this.advanceTable.packageType;
+        this.packageID = this.advanceTable.packageID;
         this.advanceTableForm.patchValue({pickupCityID:this.advanceTable.pickupCityID});
         this.advanceTableForm.patchValue({pickupCity:this.advanceTable.pickupCity});
         this.advanceTableForm.patchValue({pickupPriorityOrder:this.advanceTable.pickupPriorityOrder});
@@ -1049,9 +1052,8 @@ toArray<T>(value: any): T[] {
         this.InitCustomerCustomerGroup();
         this.InitBooker();
         this.InitPassenger();
-        //this.advanceTable.packageType=this.advanceTable.packageType +' '+"Rate";
-        this.InitCity(this.advanceTable.packageType);
-        this.InitDropOffCity(this.advanceTable.packageType);
+        // Package-dependent APIs are re-triggered after contract + package
+        // type normalization completes inside onPickupDateChange().
         let pickupDateOnload = moment(this.advanceTable.pickupDate).format('DD/MM/YYYY');
         if (this.isValidPickupDateInput(pickupDateOnload)) {
           this.onPickupDateChangeAndLocationTimeSet(pickupDateOnload);
@@ -2292,7 +2294,7 @@ toArray<T>(value: any): T[] {
   }
 
   //------------ Type -----------------
-  InitPackageType(){
+  InitPackageType(afterInit?: () => void){
     // Skip until a contract is known; otherwise the URL ends in "undefined"
     // and the backend returns 400 on page load.
     if (!this.contractID) { return; }
@@ -2307,6 +2309,9 @@ toArray<T>(value: any): T[] {
         );
         if (this.shouldUseEditPrefill()) {
           this.normalizeLoadedPackageTypeLabel();
+        }
+        if (afterInit) {
+          afterInit();
         }
       });
   }
@@ -4272,24 +4277,42 @@ private patchPickupAddress(res: any) {
           {
             this.contractID = data;
             this.noReservationMessage = false;
-            this.InitPackageType();
-            this.InitPackage();
-            // In new-reservation mode `this.advanceTable` may still be null
-            // before any contract/package selections exist; guard every access.
-            const fallbackPackageType = this.packageType || (this.advanceTable && this.advanceTable.packageType) || '';
-            this.InitCity(fallbackPackageType);
-            this.InitDropOffCity(fallbackPackageType);
-            this.InitVehicle(fallbackPackageType);
-            // Retry Drop-off Time calculation now that contractID is known.
-            // In edit mode getETRDropOffTime() runs synchronously during
-            // loadData() before this async contract lookup completes, so
-            // the original call is aborted by the guard; trigger it again
-            // here once all the inputs are finally available.
-            this.getETRDropOffTime();
+            this.InitPackageType(() => {
+              // normalizeLoadedPackageTypeLabel() may update form values; prefer
+              // latest form state and fall back to component/record values.
+              const normalizedPackageType =
+                this.advanceTableForm.value.packageType ||
+                this.packageType ||
+                (this.advanceTable && this.advanceTable.packageType) ||
+                '';
+              const normalizedPackageTypeID =
+                this.advanceTableForm.value.packageTypeID ||
+                this.packageTypeID ||
+                (this.advanceTable && this.advanceTable.packageTypeID) ||
+                0;
+
+              this.packageType = normalizedPackageType;
+              this.packageTypeID = normalizedPackageTypeID;
+
+              this.InitPackage();
+              this.InitCity(normalizedPackageType);
+              this.InitDropOffCity(normalizedPackageType);
+              this.InitVehicle(normalizedPackageType);
+              // Retry Drop-off Time calculation now that contractID is known.
+              // In edit mode getETRDropOffTime() runs synchronously during
+              // loadData() before this async contract lookup completes, so
+              // the original call is aborted by the guard; trigger it again
+              // here once all the inputs are finally available.
+              this.getETRDropOffTime();
+            });
           } 
           else
           {
             this.noReservationMessage = true;
+            if (this.action === 'edit') {
+              // For edit flow keep loaded package values; avoid wiping update payload.
+              return;
+            }
             this.advanceTableForm.controls['packageTypeID'].setValue(0);
             this.advanceTableForm.controls['packageType'].setValue('');
             this.advanceTableForm.controls['packageID'].setValue(0);

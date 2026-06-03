@@ -5,6 +5,7 @@ export class BookingConfigurationCustomerDetails {
   customerID : number;
   customerName : string;
   aggregatorName:string;
+  packageType:string;
   pickupDate:Date;
   pickupTime:Date;
   dropOffDate:Date;
@@ -25,6 +26,7 @@ export class BookingConfigurationCustomerDetails {
       this.customerID  = bookingConfigurationCustomerDetails.customerID || '';
       this.customerName = bookingConfigurationCustomerDetails.customerName || '';
       this.aggregatorName = bookingConfigurationCustomerDetails.aggregatorName || '';
+      this.packageType = bookingConfigurationCustomerDetails.packageType || '';
       this.pickupDate = bookingConfigurationCustomerDetails.pickupDate || '';
       this.pickupTime = bookingConfigurationCustomerDetails.pickupTime || '';
       this.dropOffDate = bookingConfigurationCustomerDetails.dropOffDate || '';
