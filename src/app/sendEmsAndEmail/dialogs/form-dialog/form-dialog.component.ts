@@ -36,6 +36,10 @@ import {
 } from '../../passenger-dialog/passenger-dialog.component';
 import { AddPeopleComponent } from '../../add-people/add-people.component';
 import Swal from 'sweetalert2';
+import {
+  isValidEmail,
+  normalizeMobileForMessaging
+} from '../../../shared/messaging-validation.util';
 //import { CustomerConfigurationMessaging } from 'src/app/sendSMS/sendSMS.model';
 //import { passengerMobileDataDialogComponent } from '../../passenger-Mobile-and-email/passenger-Mobile-and-email.component';
 
@@ -352,16 +356,29 @@ export class FormDialogSendEmsComponent {
 
   sendNotification() {
     const apiRequestData = [];
+    const skippedEmailRecipients: string[] = [];
+    const skippedMobileRecipients: string[] = [];
     this.permissionData?.forEach((element) => {
+      const rawEmail = (element.primaryEmail ?? '').toString().trim();
+      const email = isValidEmail(rawEmail) ? rawEmail : '';
+      const mobile = normalizeMobileForMessaging(element?.primaryMobile);
+      const displayName = (element.customerPersonName ?? '').toString().trim();
+      if (rawEmail && !email) {
+        skippedEmailRecipients.push(displayName || 'recipient');
+      }
+      if (element.sendSMSWhatsApp === true && !mobile) {
+        skippedMobileRecipients.push(displayName || 'recipient');
+      }
+      const allowCustomerNotifications =
+        element.reachedSMSToBooker === true ||
+        element.reachedSMSToPassenger === true;
+      const canSendSmsWhatsApp = element.sendSMSWhatsApp === true && !!mobile;
+
       apiRequestData.push({
-        //ID: parseInt(element.customerPersonID),
-        // "EmployeeID": element?.employeeID || null,
-        // "CustomerPersonID": element?.customerPersonID || null,
-        // "NumberMobileID": null,
         ID: element?.employeeID ?? element?.customerPersonID ?? element?.numberMobileID ?? null,
-        Name: element.customerPersonName.toString(),
-        Mobile: element.primaryMobile.toString(),
-        Email: element.primaryEmail.toString(),
+        Name: displayName,
+        Mobile: mobile ?? '',
+        Email: email,
         Type:
           (element.isPassenger && element.isBooker === true) ||
           element?.type?.toLowerCase() === 'customerPerson'
@@ -369,17 +386,25 @@ export class FormDialogSendEmsComponent {
             : element?.type?.toLowerCase() === 'employee'
             ? 'Employee'
             : 'Not Registered',
-        IsCustomerNotificationsAllowed:
-          element.reachedSMSToBooker === true
-            ? true
-            : false || element.reachedSMSToPassenger === true
-            ? true
-            : false,
-        IsCustomerPersonNotificationsAllowed:
-          element.sendSMSWhatsApp === true ? true : true,
-        SendSMSWhatsApp: element.sendSMSWhatsApp === true ? true : false
+        IsCustomerNotificationsAllowed: allowCustomerNotifications,
+        IsCustomerPersonNotificationsAllowed: canSendSmsWhatsApp,
+        SendSMSWhatsApp: canSendSmsWhatsApp
       });
     });
+    if (skippedEmailRecipients.length > 0) {
+      this.snackBar.open(
+        `Email skipped (invalid): ${skippedEmailRecipients.join(', ')}.`,
+        'OK',
+        { duration: 4500 }
+      );
+    }
+    if (skippedMobileRecipients.length > 0) {
+      this.snackBar.open(
+        `SMS/WhatsApp skipped (invalid mobile): ${skippedMobileRecipients.join(', ')}.`,
+        'OK',
+        { duration: 4500 }
+      );
+    }
     this.notificationloadData(this.ReservationID, apiRequestData,this.pickupDate);
   }
 
@@ -389,8 +414,16 @@ export class FormDialogSendEmsComponent {
       .subscribe(
         (data: any) => {
           this.dialogRef.close();
-          if (data === '"OK"') 
+          const normalized =
+            typeof data === 'string'
+              ? data.replace(/^"+|"+$/g, '').trim()
+              : String(data ?? '').replace(/^"+|"+$/g, '').trim();
+          const lower = normalized.toLowerCase();
+          if (lower === 'ok' || lower.startsWith('ok warnings:')) 
           {
+            if (lower.startsWith('ok warnings:')) {
+              this.snackBar.open(normalized, 'OK', { duration: 6000 });
+            }
             this.showNotification(
               'snackbar-success',
               'Sent SMS And Email...!!!',

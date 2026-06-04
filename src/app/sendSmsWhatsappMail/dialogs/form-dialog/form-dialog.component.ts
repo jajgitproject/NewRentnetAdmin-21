@@ -33,6 +33,10 @@ import { AddPeopleComponent } from '../../add-people/add-people.component';
 import { ConfigurationMessaging, SendSmsWhatsappMail } from '../../sendSmsWhatsappMail.model';
 import { SendSmsWhatsappMailService } from '../../sendSmsWhatsappMail.service';
 import Swal from 'sweetalert2';
+import {
+  isValidEmail,
+  normalizeMobileForMessaging
+} from '../../../shared/messaging-validation.util';
 //import { CustomerConfigurationMessaging } from 'src/app/sendSMS/sendSMS.model';
 //import { passengerMobileDataDialogComponent } from '../../passenger-Mobile-and-email/passenger-Mobile-and-email.component';
 
@@ -142,7 +146,6 @@ export class FormDialogSendSmsWhatsappMailComponent {
       data?.item?.driverMobile ??
       data?.item?.driver?.mobile1;
     this.customerPersonName = data.customerPersonName;
-    debugger;
     this.city = this.pickText(
       data?.item?.reservationHeaderDetails?.[0]?.pickupCity,
       data?.item?.reservationDetails?.[0]?.pickupCity,
@@ -257,15 +260,18 @@ export class FormDialogSendSmsWhatsappMailComponent {
 
     const bookerName = this.pickText(
       this.customerDetails?.customerPersonName,
-      this.data?.item?.bookerName
+      this.data?.item?.bookerName,
+      this.data?.item?.customerPerson?.customerPersonName
     );
     const bookerMobile = this.pickText(
       this.customerDetails?.primaryMobile,
-      this.data?.item?.bookerMobile
+      this.data?.item?.bookerMobile,
+      this.data?.item?.customerPerson?.primaryMobile
     );
     const bookerEmail = this.pickText(
       this.customerDetails?.primaryEmail,
-      this.data?.item?.bookerEmail
+      this.data?.item?.bookerEmail,
+      this.data?.item?.customerPerson?.primaryEmail
     );
 
     if (!bookerName && !bookerMobile && !bookerEmail) {
@@ -540,19 +546,23 @@ export class FormDialogSendSmsWhatsappMailComponent {
     const skippedMobileRecipients: string[] = [];
     this.permissionData?.forEach((element) => {
       const rawEmail = (element.primaryEmail ?? '').toString().trim();
-      const email = this.isValidEmail(rawEmail) ? rawEmail : '';
-      const mobile = this.normalizeMobileForNotifications(element?.primaryMobile);
+      const email = isValidEmail(rawEmail) ? rawEmail : '';
+      const mobile = normalizeMobileForMessaging(element?.primaryMobile);
       const displayName =
         (element.customerPersonName ?? element.primaryMobile ?? '').toString().trim();
       if (rawEmail && !email) {
         skippedEmailRecipients.push(displayName || 'recipient');
       }
-      if (!mobile) {
+      if (element.sendSMSWhatsApp !== false && !mobile) {
         skippedMobileRecipients.push(displayName || 'recipient');
       }
       const recipientType = this.resolveRecipientType(element);
+      const allowCustomerNotifications =
+        element.reachedSMSToBooker === true ||
+        element.reachedSMSToPassenger === true;
       const canSendSmsWhatsApp = element.sendSMSWhatsApp !== false && !!mobile;
 
+      // Name is the recipient (for logs/skips). API uses reservation passenger in body for Booker / Not Registered.
       apiRequestData.push({
         ID: element?.employeeID ?? element?.customerPersonID ?? element?.numberMobileID ?? 0,
         AllotmentID: element?.allotmentID || 0,
@@ -560,9 +570,7 @@ export class FormDialogSendSmsWhatsappMailComponent {
         Mobile: mobile ?? '',
         Email: email,
         Type: recipientType,
-        IsCustomerNotificationsAllowed:
-          element.reachedSMSToBooker === true ||
-          element.reachedSMSToPassenger === true,
+        IsCustomerNotificationsAllowed: allowCustomerNotifications,
         IsCustomerPersonNotificationsAllowed: canSendSmsWhatsApp,
         SendSMSWhatsApp: canSendSmsWhatsApp
       });
@@ -591,7 +599,11 @@ export class FormDialogSendSmsWhatsappMailComponent {
         (data: any) => {
           this.dialogRef.close();
           const normalizedMessage = this.normalizeNotificationResponse(data);
-          if (normalizedMessage.toLowerCase() === 'ok') {
+          const lowerMessage = normalizedMessage.toLowerCase();
+          if (lowerMessage === 'ok' || lowerMessage.startsWith('ok warnings:')) {
+            if (lowerMessage.startsWith('ok warnings:')) {
+              this.snackBar.open(normalizedMessage, 'OK', { duration: 6000 });
+            }
             this.showNotification(
               'snackbar-success',
               'Sent SMS And Email...!!!',
@@ -650,43 +662,6 @@ export class FormDialogSendSmsWhatsappMailComponent {
       }
     }
     return String(response).replace(/^"+|"+$/g, '').trim();
-  }
-
-  private isValidEmail(email: string): boolean {
-    if (!email) {
-      return false;
-    }
-    const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    return emailPattern.test(email);
-  }
-
-  private normalizeMobileForNotifications(mobile: any): string | null {
-    const raw = (mobile ?? '').toString().trim();
-    if (!raw) {
-      return null;
-    }
-
-    const cleaned = raw.replace(/\s+/g, '');
-    if (cleaned.includes('-')) {
-      const parts = cleaned.split('-').filter((x) => x !== '');
-      if (parts.length >= 2) {
-        const country = parts[0].replace(/\D/g, '');
-        const number = parts.slice(1).join('').replace(/\D/g, '');
-        if (country && number.length >= 10) {
-          return `${country}-${number}`;
-        }
-      }
-      return null;
-    }
-
-    const digits = cleaned.replace(/\D/g, '');
-    if (digits.length >= 12) {
-      return `${digits.slice(0, digits.length - 10)}-${digits.slice(-10)}`;
-    }
-    if (digits.length === 10) {
-      return `91-${digits}`;
-    }
-    return null;
   }
 
   // deleteRecord(row: any) {

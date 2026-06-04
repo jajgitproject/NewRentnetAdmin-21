@@ -42,7 +42,7 @@ export class SendSmsWhatsappMailService {
     };
 
     return this.httpClient.post(
-      this.API_URL + 'sendNotificationsForAllotment' + '/' + UserID + '/'+ reservationID,
+      this.API_URL + 'sendNotifications' + '/' + UserID + '/' + reservationID,
       requestBody,
       httpOptions
     );

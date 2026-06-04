@@ -49,7 +49,16 @@ export class SoftToHardDialogComponent
 
   confirmConverting()
   {
-    this.advanceTableService.updateAllotmentType(this.allotmentTypeData)  
+    const row = Array.isArray(this.allotmentTypeData)
+      ? this.allotmentTypeData[0]
+      : this.allotmentTypeData;
+    const payload = {
+      allotmentID: this.allotmentID ?? row?.allotmentID,
+      reservationID: row?.reservationID,
+      driverID: row?.driverID,
+      userID: this._generalService.getUserID()
+    };
+    this.advanceTableService.updateAllotmentType(payload)
     .subscribe(
     data => 
     {

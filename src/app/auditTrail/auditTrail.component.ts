@@ -2,7 +2,7 @@
 import { Component, OnInit } from '@angular/core';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { FormControl } from '@angular/forms';
-import { forkJoin, Observable } from 'rxjs';
+import { Observable } from 'rxjs';
 import { map, startWith } from 'rxjs/operators';
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 
@@ -175,31 +175,34 @@ export class AuditTrailComponent implements OnInit {
     // Reservation audit: all users, all related tables; ignore form-name filter (API skips it when reservationId set).
     const apiUserId = reservationMode ? null : this.selectedUserId;
     const apiPageName = reservationMode ? '' : pageName;
-    const pageSize = reservationMode ? 500 : 50;
+    const pageSize = reservationMode ? 100 : 50;
     const includeNullUser = true;
 
     this.auditTrailService
       .getEvents(apiUserId, apiPageName, reservationId, 0, pageSize, includeNullUser)
-      .subscribe(
-        (data) => {
+      .subscribe({
+        next: (data) => {
           const raw = data || [];
           this.events = this.excludeHiddenTables(this.applyDateFilter(raw));
           if (reservationMode) {
             this.reservationTableGroups = this.buildReservationTableGroups(this.events);
-            this.prefetchRowsForReservationView(this.events);
           } else {
             this.reservationTableGroups = [];
           }
-          this.isLoadingEvents = false;
         },
-        () => {
+        error: () => {
           this.events = [];
           this.reservationTableGroups = [];
           this.activeReservationId = null;
+          const hint = reservationMode
+            ? 'First search for a reservation can take 1–2 minutes while the index is built. Run Audit_Trail_Performance_Index.sql on the database, restart the API, then search again.'
+            : 'The search may have timed out — try a narrower filter or run Audit_Trail_Performance_Index.sql on the database.';
+          this.snackBar.open('Failed to load audit events. ' + hint, '', { duration: 10000 });
+        },
+        complete: () => {
           this.isLoadingEvents = false;
-          this.snackBar.open('Failed to load audit events', '', { duration: 3000 });
         }
-      );
+      });
   }
 
   isReservationTimelineView(): boolean {
@@ -233,8 +236,7 @@ export class AuditTrailComponent implements OnInit {
       map.get(key)!.push(e);
     }
     const out: AuditTrailTableGroup[] = [];
-    const eventTime = (ev: AuditTrailEvent) =>
-      new Date((ev.eventAtUtc || '').replace(' ', 'T')).getTime() || 0;
+    const eventTime = (ev: AuditTrailEvent) => this.parseAuditEventAtMs(ev.eventAtUtc);
 
     map.forEach((list, tableKey) => {
       list.sort((a, b) => {
@@ -264,28 +266,6 @@ export class AuditTrailComponent implements OnInit {
     const s = tableName.replace(/[\[\]]/g, '').trim();
     const i = s.lastIndexOf('.');
     return i >= 0 && i < s.length - 1 ? s.substring(i + 1) : s;
-  }
-
-  private prefetchRowsForReservationView(events: AuditTrailEvent[]): void {
-    if (!events.length) return;
-    const pending = events.filter((e) => !this.rowsByEventId[e.auditEventId]);
-    if (!pending.length) return;
-    pending.forEach((e) => this.rowsLoadingEventIds.add(e.auditEventId));
-    forkJoin(pending.map((e) => this.auditTrailService.getRows(e.auditEventId))).subscribe(
-      (rowsList) => {
-        pending.forEach((e, idx) => {
-          this.rowsByEventId[e.auditEventId] = rowsList[idx] || [];
-          this.rowsLoadingEventIds.delete(e.auditEventId);
-        });
-      },
-      () => {
-        pending.forEach((e) => {
-          this.rowsLoadingEventIds.delete(e.auditEventId);
-          this.rowsByEventId[e.auditEventId] = [];
-        });
-        this.snackBar.open('Some row details failed to load — expand an item to retry', '', { duration: 4000 });
-      }
-    );
   }
 
   eventUserLabel(e: AuditTrailEvent): string {
@@ -318,7 +298,7 @@ export class AuditTrailComponent implements OnInit {
       : null;
 
     return (events || []).filter(e => {
-      const dt = e?.eventAtUtc ? new Date(e.eventAtUtc).getTime() : NaN;
+      const dt = this.parseAuditEventAtMs(e?.eventAtUtc);
       if (!isFinite(dt)) return false;
       if (fromMs !== null && dt < fromMs) return false;
       if (toMs !== null && dt > toMs) return false;
@@ -397,14 +377,35 @@ export class AuditTrailComponent implements OnInit {
     return op ? `${name} (${op})` : name;
   }
 
+  /** Server returns IST wall-clock as yyyy-MM-dd HH:mm:ss (column name is EventAtUtc but value is IST). */
+  private parseAuditEventAtMs(value: string | null | undefined): number {
+    const raw = (value || '').toString().trim();
+    const m = raw.match(/^(\d{4})-(\d{2})-(\d{2})[ T](\d{2}):(\d{2}):(\d{2})/);
+    if (!m) return NaN;
+    return new Date(
+      parseInt(m[1], 10),
+      parseInt(m[2], 10) - 1,
+      parseInt(m[3], 10),
+      parseInt(m[4], 10),
+      parseInt(m[5], 10),
+      parseInt(m[6], 10)
+    ).getTime();
+  }
+
   formatEventTime(value: string | null | undefined): string {
     const raw = (value || '').toString().trim();
     if (!raw) return '';
-    // Server already provides IST formatted string; if it's a plain string, show as-is.
-    // (Fallback: if it looks like a date string, still format locally.)
-    const dt = new Date(raw);
-    if (!isFinite(dt.getTime())) return raw;
-    return dt.toLocaleString();
+    const ms = this.parseAuditEventAtMs(raw);
+    if (!isFinite(ms)) return raw;
+    return new Date(ms).toLocaleString('en-IN', {
+      day: 'numeric',
+      month: 'numeric',
+      year: 'numeric',
+      hour: 'numeric',
+      minute: '2-digit',
+      second: '2-digit',
+      hour12: true
+    });
   }
 
   prettyJson(raw: string | null | undefined): string {

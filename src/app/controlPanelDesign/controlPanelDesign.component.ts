@@ -105,6 +105,7 @@ import { resolutionFormDialogComponent } from '../resolution/dialogs/form-dialog
 import { ResolutionService } from '../resolution/resolution.service';
 import { DriverOfficialIdentityNumberDD } from '../general/driverOfficialIdentityNumberDD.model';
 import Swal from 'sweetalert2';
+import { isAllotedBooking } from '../shared/messaging-validation.util';
 import { TotalBookingCountDetailsComponent } from '../totalBookingCountDetails/totalBookingCountDetails.component';
 import { FormDialogComponent as InterstateTaxFormDialogComponent } from '../interstateTaxEntry/dialogs/form-dialog/form-dialog.component';
 import { InterstateTaxEntryComponent } from '../interstateTaxEntry/interstateTaxEntry.component';
@@ -829,6 +830,29 @@ export class ControlPanelDesignComponent implements OnInit {
 
   getSpecialInstructions(instructions: any[]): string {
     return 'Special Instruction : ' + instructions.map(x => x.specialInstruction).join(', ');
+  }
+
+  /** Primary guest passenger for VIP / Female labels (not booker). */
+  getPrimaryGuestPassenger(item: any): { importance?: string; gender?: string } | null {
+    const passengers = item?.passengerDetails;
+    if (passengers?.length) {
+      const primary = passengers.find(
+        (p: any) => String(p?.isPrimaryPassenger ?? '').toLowerCase() === 'true'
+      );
+      return primary ?? passengers[0];
+    }
+    if (item?.importance != null || item?.gender != null) {
+      return { importance: item.importance, gender: item.gender };
+    }
+    return null;
+  }
+
+  isVipBooking(item: any): boolean {
+    return this.getPrimaryGuestPassenger(item)?.importance === 'VIP';
+  }
+
+  isFemaleTraveller(item: any): boolean {
+    return this.getPrimaryGuestPassenger(item)?.gender === 'Female';
   }
 
   public loadData(reservationID:any,index:number) {
@@ -2245,16 +2269,35 @@ reachedByExecutiveGPS(item:any){
         });
   }
 
+  private resolveMessagingCustomerPersonId(customerPersonID: any, item: any): any {
+    if (
+      customerPersonID != null &&
+      customerPersonID !== '' &&
+      typeof customerPersonID !== 'object'
+    ) {
+      return customerPersonID;
+    }
+    return (
+      item?.passengerDetails?.[0]?.customerPersonID ??
+      item?.primaryPassengerID ??
+      item?.customerPerson?.customerPersonID ??
+      item?.customerPersonID ??
+      null
+    );
+  }
+
   openSendSmsWhatsappMail(reservationID,vehicle,pickupDate,pickupTime,
-    registrationNumber,customerPersonName,city,customerPersonID, item: any)
+    registrationNumber,customerPersonName,city, item: any, customerPersonID)
     {
       if (!this.isMessagingEnabledForAllotment(item)) {
+        Swal.fire({
+          title: '',
+          icon: 'warning',
+          html: `<b>Send WA/SMS/Mail is available after the booking is allotted.</b>`
+        });
         return;
       }
-      const rowItem =
-        customerPersonID && typeof customerPersonID === 'object'
-          ? customerPersonID
-          : item;
+      const rowItem = item;
       const pickText = (...values: any[]) => {
         for (const value of values) {
           const text = (value ?? '').toString().trim();
@@ -2297,10 +2340,10 @@ reachedByExecutiveGPS(item:any){
         registrationNumber ??
         rowItem?.registrationNumber ??
         rowItem?.inventory?.registrationNumber;
-      const resolvedCustomerPersonID =
-        customerPersonID && typeof customerPersonID !== 'object'
-          ? customerPersonID
-          : item;
+      const resolvedCustomerPersonID = this.resolveMessagingCustomerPersonId(
+        customerPersonID,
+        item
+      );
       this.dialog.open(FormDialogSendSmsWhatsappMailComponent, {
         width: '70%',
         data: {
@@ -2343,9 +2386,7 @@ reachedByExecutiveGPS(item:any){
   }
 
   isMessagingEnabledForAllotment(item: any): boolean {
-    const allotmentStatus = (item?.allotmentStatus ?? '').toString().trim().toLowerCase();
-    const allotmentType = (item?.allotmentType ?? '').toString().trim().toLowerCase();
-    return allotmentStatus === 'alloted' && allotmentType === 'hard';
+    return isAllotedBooking(item);
   }
 
   viewQcImage(item: any,i:any){

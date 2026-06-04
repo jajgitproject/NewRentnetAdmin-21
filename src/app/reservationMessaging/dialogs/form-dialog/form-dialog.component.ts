@@ -27,6 +27,7 @@ export class FormDialogComponent implements OnInit
 {
   displayedColumns: string[] = [
   'messageType',
+  'messageSource',
   'recipientType',
   'name',
   'mobileNo',
@@ -177,7 +178,23 @@ export class FormDialogComponent implements OnInit
      );
  }
 
- public SearchData()
+  formatMessageType(messageType: string): string {
+    if (!messageType) {
+      return '';
+    }
+    switch (messageType) {
+      case 'WhatsApp':
+        return 'WA';
+      case 'SMS':
+        return 'SMS';
+      case 'Email':
+        return 'Email';
+      default:
+        return messageType;
+    }
+  }
+
+  public SearchData()
   {
     this.loadData();
     //this.searchMessageType = '';

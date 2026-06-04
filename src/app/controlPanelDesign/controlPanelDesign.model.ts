@@ -302,6 +302,8 @@ export class PassengerModel {
   dropOffStopAddressDetails: string;
   customerDepartment: string;
   customerDesignation: string;
+  gender: string;
+  importance: string;
   constructor(passenger) {
     this.reservationPassengerID = passenger.reservationPassengerID || '';
     this.customerPersonID = passenger.customerPersonID || '';
@@ -309,7 +311,9 @@ export class PassengerModel {
     this.primaryMobile = passenger.primaryMobile || '';
     this.primaryEmail = passenger.primaryEmail || '';
     this.reservationPickupStopID = passenger.reservationPickupStopID || '';
-    this.isPrimaryPassenger = passenger.reservationPickupStopID || '0';
+    this.isPrimaryPassenger = passenger.isPrimaryPassenger || '0';
+    this.gender = passenger.gender || '';
+    this.importance = passenger.importance || '';
     this.pickupDate = passenger.pickupDate || '';
     this.pickupTime = passenger.pickupTime || '';
     this.pickupStopType = passenger.pickupStopType || '';

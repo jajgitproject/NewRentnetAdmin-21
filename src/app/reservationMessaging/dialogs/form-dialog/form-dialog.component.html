@@ -45,9 +45,10 @@
                             <thead>
                             <tr>
                                 <th>Message Type</th>
+                                <th>Source</th>
                                 <th>Recipient Type</th>
                                 <th>Name</th>
-                                <th>Mobile no</th>
+                                <th>Contact</th>
                                 <th>Send Date Time</th>
                                 <th>Status</th>
                             </tr>
@@ -58,7 +59,11 @@
                             <tr *ngFor="let row of dataSource">
 
                                 <td>
-                                {{ row.messageType === 'WhatsApp' ? 'WA' : 'SMS' }}
+                                {{ formatMessageType(row.messageType) }}
+                                </td>
+
+                                <td>
+                                {{ row.messageSource }}
                                 </td>
 
                                 <td>
