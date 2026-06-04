@@ -384,6 +384,19 @@ export class ControlPanelDialogeComponent {
       });
     }, item.reservationID);
   }
+  getDropOffAddressValue(source: any): string {
+    if (!source) {
+      return '  ';
+    }
+    const raw =
+      source.dropOffAddressDetails ??
+      source.dropOffAddress ??
+      source.drop?.dropOffAddressDetails ??
+      source.drop?.dropOffAddress;
+    const trimmed = (raw ?? '').toString().trim();
+    return trimmed || '  ';
+  }
+
   TimeAndAddressDrop(item) {
     this.fetchStatusAndOpen(() => {
       const dropStop = item?.stopsDetails?.length > 1 ? item.stopsDetails[1] : null;

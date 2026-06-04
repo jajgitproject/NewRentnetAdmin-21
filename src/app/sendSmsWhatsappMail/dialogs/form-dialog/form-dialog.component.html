@@ -114,7 +114,7 @@
         </div>
 
         <div class="example-container mat-elevation-z8">
-          <p *ngIf="showNoRecordsFoundMessage || !permissionData; then thenBlock2 else elseBlock2">
+          <p *ngIf="showNoRecordsFoundMessage && (!permissionData || permissionData.length === 0); then thenBlock2 else elseBlock2">
             Data Not Found
           </p>
 

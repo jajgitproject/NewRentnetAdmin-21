@@ -22,6 +22,7 @@ export class ControlPanelHeaderDetails {
   importance:string;
   vehicle:string;
   vehicleCategory:string;
+  carSent:string;
   registrationNumber:string;
   driverName:string;
   driverPhone:string;
@@ -41,6 +42,7 @@ export class ControlPanelHeaderDetails {
     this.importance = controlPanelHeaderDetails.importance;
     this.vehicle = controlPanelHeaderDetails.vehicle;
     this.vehicleCategory = controlPanelHeaderDetails.vehicleCategory;
+    this.carSent = controlPanelHeaderDetails.carSent;
     this.registrationNumber = controlPanelHeaderDetails.registrationNumber;
     this.driverName = controlPanelHeaderDetails.driverName;
     this.driverPhone = controlPanelHeaderDetails.driverPhone;
@@ -221,8 +223,8 @@ class DropOffModel {
   constructor(drop) {
     this.dropOffTime = drop.dropOffTime || '';
     this.dropOffDate = drop.dropOffDate || '';
-    this.dropOffAddress = drop.dropOffAddress || '';
-    this.dropOffAddressDetails = drop.dropOffAddressDetails || '';
+    this.dropOffAddress = drop.dropOffAddress?.trim() || '  ';
+    this.dropOffAddressDetails = drop.dropOffAddressDetails?.trim() || '  ';
   }
 }
 

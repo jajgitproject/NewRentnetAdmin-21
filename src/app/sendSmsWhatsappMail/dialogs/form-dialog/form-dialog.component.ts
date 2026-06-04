@@ -195,7 +195,7 @@ export class FormDialogSendSmsWhatsappMailComponent {
         this.cdr.detectChanges();
       },
       (error: HttpErrorResponse) => {
-        this.permissionData = null;
+        this.permissionData = [];
       }
     );
   }
@@ -297,16 +297,21 @@ export class FormDialogSendSmsWhatsappMailComponent {
       }
     });
     dialogRef.afterClosed().subscribe((result: any) => {
+      if (!result?.length) {
+        return;
+      }
       const newRows: any[] = [];
-      result?.forEach((element) => {
-        if (element.customerPersonName.customer) {
+      const existing = Array.isArray(this.permissionData) ? this.permissionData : [];
+      result.forEach((element) => {
+        if (element.customerPersonName?.customer) {
           const mobileParts = element.primaryMobile.split('-');
           const emailParts = element.primaryEmail.split('-');
           const nameParts = element.customerPersonName.customer.split('-');
           const id = element.customerPersonID;
-          const bookerParts = element.data[0]?.reachedSMSToBooker;
-          const passengerParts = element.data[0]?.reachedSMSToPassenger;
-          const sendSMSWhatsAppParts = element.data[0]?.sendSMSWhatsApp;
+          const permissionRow = element.data?.[0];
+          const bookerParts = permissionRow?.reachedSMSToBooker;
+          const passengerParts = permissionRow?.reachedSMSToPassenger;
+          const sendSMSWhatsAppParts = permissionRow?.sendSMSWhatsApp;
           const number = mobileParts[0];
           const email = emailParts[0];
           const name = nameParts[1];
@@ -322,7 +327,7 @@ export class FormDialogSendSmsWhatsappMailComponent {
             isPassenger: element.isPassenger,
             type: this.resolveRecipientType(element)
           });
-        } else if (element.customerPersonName.employee) {
+        } else if (element.customerPersonName?.employee) {
           const mobileParts = element.primaryMobile.split('-');
           const emailParts = element.primaryEmail.split('-');
           const nameParts = element.customerPersonName.employee.split('-');
@@ -364,12 +369,10 @@ export class FormDialogSendSmsWhatsappMailComponent {
       });
 
       if (newRows.length > 0) {
-        this.permissionData = [...(this.permissionData || []), ...newRows];
-        this.table?.renderRows();
-        this.cdr.detectChanges();
-      }
-      if (this.permissionData?.length > 0) {
+        this.permissionData = [...existing, ...newRows];
         this.showNoRecordsFoundMessage = false;
+        this.cdr.detectChanges();
+        this.table?.renderRows();
       }
     });
   }

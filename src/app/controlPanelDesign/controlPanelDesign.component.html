@@ -1290,15 +1290,24 @@
                       width: 150px;
                       float: left;cursor: pointer;" (click)="sortByColumnName('registrationNumber')"
                     [ngClass]="{'active-sort': sortColumn === 'registrationNumber'}">
-                    <b>Car No - Car Sent
-                      <br>
-                       Driver - Car Booked</b>
+                    <b>Car No<br>Car Sent<br>Driver</b>
                     <i class="fas"
                       [ngClass]="{'fa-arrow-up': sortColumn === 'registrationNumber' && sortDirection === 'asc',
                                                 'fa-arrow-down': sortColumn === 'registrationNumber' && sortDirection === 'desc'}"></i>
                   </span>
 
-                  
+                  <span style="
+                      font-size: 12px;
+                      text-align: left;
+                      width: 100px;
+                      float: left;cursor: pointer;" (click)="sortByColumnName('vehicle')"
+                    [ngClass]="{'active-sort': sortColumn === 'vehicle'}">
+                    <b>Car Booked</b>
+                    <i class="fas"
+                      [ngClass]="{'fa-arrow-up': sortColumn === 'vehicle' && sortDirection === 'asc',
+                                                'fa-arrow-down': sortColumn === 'vehicle' && sortDirection === 'desc'}"></i>
+                  </span>
+
                   <span style="
                   font-size: 12px;
                   text-align: left;
@@ -1820,16 +1829,15 @@
                           </span>
 
                           <span style="font-size: 12px;text-align: left;width: 150px;float: left;">
-                            {{data.registrationNumber ? data.registrationNumber: 'N/A'}} - {{data.carSent ? data.carSent: 'N/A'}}
+                            {{data.registrationNumber ? data.registrationNumber: 'N/A'}}
                             <br />
-                            <!-- {{data.vehicle!=="" ? data.vehicle : 'N/A'}} -->
-
-                            <!-- <br />
-                            {{data.inventoryOwnedSupplied!=="" ? data.inventoryOwnedSupplied: 'N/A'}} -->
-
+                            {{data.carSent ? data.carSent: 'N/A'}}
+                            <br />
                             {{data.driverName ? data.driverName: 'N/A'}} - {{data.driverPhone ? data.driverPhone:'N/A'}}
-                            <br>
-                            {{data.vehicle !=="" ? data.vehicle: 'N/A'}}
+                          </span>
+
+                          <span style="font-size: 12px;text-align: left;width: 100px;float: left;">
+                            {{ data.vehicle ? data.vehicle : 'N/A' }}
                           </span>
 
 
@@ -1853,7 +1861,7 @@
                           </span>
 
                           <span style="font-size: 12px;text-align: left;width: 140px;float: left;">
-                            Drop Off Address : {{data.dropOffAddressDetails !== '' ? (data.dropOffAddressDetails || '').trim() : 'N/A'}}
+                            {{ getDropOffAddressValue(data) }}
                           </span>
 
                           <span style="
@@ -2494,7 +2502,7 @@
                                               item.stopsDetails[1].stopType == 'Destination'
                                             "
                                             > -->
-                                  <span> {{ item.drop.dropOffAddress }}</span><br />
+                                  <span>{{ getDropOffAddressValue(item.drop) }}</span><br />
                                   <b><button class="BoldButton" mat-button (click)="StopDetailsInfo(item)">
                                       Stop Details
                                     </button></b><br />

@@ -160,7 +160,7 @@ export class FormDialogSendEmsComponent {
         this.permissionData = data;
       },
       (error: HttpErrorResponse) => {
-        this.permissionData = null;
+        this.permissionData = [];
       }
     );
   }
@@ -174,19 +174,25 @@ export class FormDialogSendEmsComponent {
       }
     });
     dialogRef.afterClosed().subscribe((result: any) => {
-      result?.forEach((element) => {
-        if (element.customerPersonName.customer) {
+      if (!result?.length) {
+        return;
+      }
+      const newRows: any[] = [];
+      const existing = Array.isArray(this.permissionData) ? this.permissionData : [];
+      result.forEach((element) => {
+        if (element.customerPersonName?.customer) {
           const mobileParts = element.primaryMobile.split('-');
           const emailParts = element.primaryEmail.split('-');
           const nameParts = element.customerPersonName.customer.split('-');
           const id = element.customerPersonID;
-          const bookerParts = element.data[0]?.reachedSMSToBooker;
-          const passengerParts = element.data[0]?.reachedSMSToPassenger;
-          const sendSMSWhatsAppParts = element.data[0]?.sendSMSWhatsApp;
+          const permissionRow = element.data?.[0];
+          const bookerParts = permissionRow?.reachedSMSToBooker;
+          const passengerParts = permissionRow?.reachedSMSToPassenger;
+          const sendSMSWhatsAppParts = permissionRow?.sendSMSWhatsApp;
           const number = mobileParts[0];
           const email = emailParts[0];
           const name = nameParts[1];
-          this.permissionData?.push({
+          newRows.push({
             primaryMobile: '91-' + number,
             primaryEmail: email,
             customerPersonName: name,
@@ -198,7 +204,7 @@ export class FormDialogSendEmsComponent {
             isPassenger: element.isPassenger,
             type: element.type
           });
-        } else if (element.customerPersonName.employee) {
+        } else if (element.customerPersonName?.employee) {
           const mobileParts = element.primaryMobile.split('-');
           const emailParts = element.primaryEmail.split('-');
           const nameParts = element.customerPersonName.employee.split('-');
@@ -206,7 +212,7 @@ export class FormDialogSendEmsComponent {
           const email = emailParts[0];
           const id = element.employeeID;
           const name = nameParts[1];
-          this.permissionData.push({
+          newRows.push({
             primaryMobile: '91-' + number,
             primaryEmail: email,
             customerPersonName: name,
@@ -227,7 +233,7 @@ export class FormDialogSendEmsComponent {
           if (!number) {
             return;
           }
-          this.permissionData.push({
+          newRows.push({
             primaryMobile: code + '-' + number,
             primaryEmail: email,
             customerPersonName: name || number,
@@ -237,11 +243,12 @@ export class FormDialogSendEmsComponent {
             type: element.type
           });
         }
-        this.table?.renderRows();
-        if (this.permissionData?.length > 0) {
-          this.showNoRecordsFoundMessage = false;
-        }
       });
+      if (newRows.length > 0) {
+        this.permissionData = [...existing, ...newRows];
+        this.showNoRecordsFoundMessage = false;
+        this.table?.renderRows();
+      }
     });
   }
 

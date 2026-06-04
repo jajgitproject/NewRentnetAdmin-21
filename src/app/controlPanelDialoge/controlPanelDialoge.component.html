@@ -316,7 +316,7 @@
                                               item.stopsDetails[1].stopType == 'Destination'
                                             "
                                             > -->
-                  <span> {{ item.drop.dropOffAddress }}</span><br />
+                  <span>{{ getDropOffAddressValue(item.drop) }}</span><br />
                   <b><button class="BoldButton" mat-button (click)="StopDetailsInfo(item)">
                       Stop Details
                     </button></b><br />

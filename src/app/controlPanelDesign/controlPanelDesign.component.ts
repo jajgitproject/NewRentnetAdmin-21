@@ -3916,6 +3916,19 @@ openDropOffByExectiveGPS(item: any)
     //   return 'notDone';
     // }
   }
+  getDropOffAddressValue(source: any): string {
+    if (!source) {
+      return '  ';
+    }
+    const raw =
+      source.dropOffAddressDetails ??
+      source.dropOffAddress ??
+      source.drop?.dropOffAddressDetails ??
+      source.drop?.dropOffAddress;
+    const trimmed = (raw ?? '').toString().trim();
+    return trimmed || '  ';
+  }
+
 getLifeCycleDisplay(status: any): { label: string; color: string } {
   if (status.garageIn === 'Yes')
  {
@@ -4077,7 +4090,9 @@ getLifeCycleDisplay(status: any): { label: string; color: string } {
     const encryptedLocationOutDate = encodeURIComponent(this._generalService.encrypt(item.locationOutDate));
     const encryptedLocationOutTime = encodeURIComponent(this._generalService.encrypt(item.locationOutTime));
     const encryptedPickupAddress = encodeURIComponent(this._generalService.encrypt(item.pickup.pickupAddress));
-    const encryptedDropOffAddress = encodeURIComponent(this._generalService.encrypt(item.drop.dropOffAddress));
+    const encryptedDropOffAddress = encodeURIComponent(
+      this._generalService.encrypt(this.getDropOffAddressValue(item.drop))
+    );
     const encryptedLocationOutAddress = encodeURIComponent(this._generalService.encrypt(item.organizationalEntityName));
   
       // Create URL with encrypted query parameters

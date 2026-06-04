@@ -87,7 +87,7 @@ export class AddPeopleComponent implements OnInit {
           isPassenger: this.customerOptionDetail.isPassenger || false,
           customerPersonID:this.customerOptionDetail.customerPersonID,
 
-          data :this?.permissionData?.values || null,
+          data: Array.isArray(this.permissionData) ? this.permissionData : null,
           type: this.advanceTableForm.controls['addPeople'].value
         });
   
