@@ -3717,6 +3717,13 @@ const routes: Routes = [
           )
       },
       {
+        path: 'DummyInvoiceForCalculationCheck',
+        loadChildren: () =>
+          import('./DummyInvoiceForCalculationCheck/dummyInvoiceForCalculationCheck.module').then(
+            (m) => m.DummyInvoiceForCalculationCheckModule
+          )
+      },
+      {
         path: 'BookingHtmlPage',
         loadChildren: () =>
           import('./bookingHtmlPage/bookingHtmlPage.module').then(

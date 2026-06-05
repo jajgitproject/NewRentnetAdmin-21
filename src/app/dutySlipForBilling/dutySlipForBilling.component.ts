@@ -18,7 +18,7 @@ import { MyUploadComponent } from '../myupload/myupload.component';
 import { AbstractControl, FormBuilder, FormControl, FormGroup, ValidationErrors, ValidatorFn } from '@angular/forms';
 import { MatAccordion } from '@angular/material/expansion';
 import moment from 'moment';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import Swal from 'sweetalert2';
 import { BillingHistory } from './dutySlipForBilling.model';
 import { ClosingModel } from '../clossingOne/clossingOne.model';
@@ -84,6 +84,7 @@ export class DutySlipForBillingComponent implements OnInit, AfterViewInit {
     public clossingOneService: ClossingOneService,
     private snackBar: MatSnackBar,
     public route:ActivatedRoute,
+    private router: Router,
     private fb: FormBuilder,
     public _generalService: GeneralService,  
   ) {
@@ -2047,7 +2048,42 @@ onChange() {
       // (error: HttpErrorResponse) => { this.disputeAdvanceTable = null;}
       );
     }
-  
+
+  canViewDummyInvoice(): boolean {
+    const verifyDuty = this.advanceTableForm?.get('verifyDuty')?.value;
+    const goodForBilling = this.advanceTableForm?.get('goodForBilling')?.value;
+    return verifyDuty === true || goodForBilling === true;
+  }
+
+  openDummyInvoice(): void {
+    if (!this.canViewDummyInvoice()) {
+      this.showNotification(
+        'snackbar-warning',
+        'Please check Verify Duty or Good For Billing before viewing the dummy invoice.',
+        'bottom',
+        'center'
+      );
+      return;
+    }
+
+    if (!this.DutySlipID) {
+      return;
+    }
+
+    const openDummyInvoiceTab = () => {
+      const url = this.router.serializeUrl(
+        this.router.createUrlTree(['/DummyInvoiceForCalculationCheck'], {
+          queryParams: { dutySlipID: this.DutySlipID }
+        })
+      );
+      window.open(this._generalService.FormURL + url, '_blank');
+    };
+
+    this.clossingOneService.calculateBill(this.DutySlipID).subscribe({
+      next: () => openDummyInvoiceTab(),
+      error: () => openDummyInvoiceTab()
+    });
+  }
 
 }
 
