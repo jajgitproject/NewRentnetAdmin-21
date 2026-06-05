@@ -451,7 +451,7 @@ export class incidenceFormDialogComponent {
         };
       }
 
-  InitEmployee() {
+  InitEmployee(_event?: any) {
     var Prefix = this.advanceTableForm.get("assignedToEmployeeName").value;
       if(Prefix.length < 3)
       { 

@@ -573,11 +573,13 @@ GetCitiessAl(): Observable<CityDropDown[]> {
 }
 
   GetPackagesForReservation(packageTypeID:number,packageType:string,contractID:any): Observable<PackageDropDown[]> {
-    const words = packageType.split(' ');
-    const lastWord = words.pop(); // Remove and get the last word
-    const restOfString = words.join(' ');
-    console.log(this.BaseURL + "Package/getPackagesForReservation/"+packageTypeID+"/"+restOfString+"/"+contractID)
-    return this.http.get<PackageDropDown[]>(this.BaseURL + "Package/getPackagesForReservation/"+packageTypeID+"/"+restOfString+"/"+contractID);
+    const rawLabel = (packageType || '').trim();
+    const withoutRateSuffix = rawLabel.replace(/\s+rate$/i, '').trim();
+    const dutyTypeLabel = withoutRateSuffix || rawLabel;
+    const encodedDutyTypeLabel = encodeURIComponent(dutyTypeLabel);
+    return this.http.get<PackageDropDown[]>(
+      this.BaseURL + "Package/getPackagesForReservation/" + packageTypeID + "/" + encodedDutyTypeLabel + "/" + contractID
+    );
   }
 
   GetCityTiers(): Observable<CityTierDropDown[]> {

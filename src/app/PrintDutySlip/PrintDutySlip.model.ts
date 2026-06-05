@@ -40,7 +40,9 @@ export class PrintDutySlip {
   keyAccountManagerName: string;
   keyAccountManagerMobile: string;
   bookerName: string;
+  bookerMobile: string;
   passengerName: string;
+  pickUpAddressString: string;
   passengerMobile: string;
   pickupCity: string;
   package: string;

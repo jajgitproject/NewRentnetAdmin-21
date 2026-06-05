@@ -43,9 +43,9 @@
 
                         <tr>
                           <td>Pickup Date</td>
-                          <td></td>
+                          <td>{{dataSource?.pickUpDate | date : 'dd/MM/yyyy'}}</td>
                           <td>Relesing Date</td>
-                          <td></td>
+                          <td>{{dataSource?.dropOffDate | date : 'dd/MM/yyyy'}}</td>
                           <td></td>
                           <td>&nbsp;</td>
                         </tr>
@@ -53,116 +53,116 @@
                         <tr>
                           <td>
                             <strong>D.S No : </strong><br>
-
+                            {{dataSource?.dutySlipID}}
                           </td>
                           <td>
                             <strong>City : </strong><br>
-                            
+                            {{dataSource?.pickupCity}}
                           </td>
                           <td>
                             <strong>Bkg no : </strong><br>
-                            
+                            {{dataSource?.reservationID}}
                           </td>
                           <td>
                             <strong>Car Booked : </strong><br>
-                            
+                            {{dataSource?.vehicleBooked}}
                           </td>
                           <td>
                             <strong>Car Sent : </strong><br>
-                            
+                            {{dataSource?.vehicleSent}}
                           </td>
                           <td>
                             <strong>Car No : </strong><br>
-                           
+                            {{dataSource?.registrationNumber}}
                           </td>
                         </tr>
 
                         <tr>
                           <td colspan="3">
-                            <strong>Driver Name : </strong>
+                            <strong>Driver Name : </strong>{{dataSource?.driverName}} / {{dataSource?.mobile1}}
                           </td>
                           <td colspan="3">
-                            <strong>Duty Type : </strong>
+                            <strong>Duty Type : </strong>{{dataSource?.packageType}}
                           </td>
                         </tr>
 
                         <tr>
                           <td colspan="6">
-                            <strong>Booker Name/No : </strong>
+                            <strong>Booker Name/No : </strong>{{dataSource?.bookerName}} / {{dataSource?.bookerMobile}}
                           </td>
                         </tr>
 
                         <tr>
                           <td colspan="6">
-                            <strong>Guest Name/No : </strong> 
+                            <strong>Guest Name/No : </strong>{{dataSource?.passengerName}} / {{dataSource?.passengerMobile}}
                           </td>
                         </tr>
 
                         <tr>
                           <td colspan="6">
-                            <strong>Client Name : </strong>
+                            <strong>Client Name : </strong>{{dataSource?.customerName}}
                           </td>
                         </tr>
 
                         <tr>
                           <td colspan="6">
-                            <strong>Reporting Address : </strong>
+                            <strong>Reporting Address : </strong>{{dataSource?.pickUpAddressString}}
                           </td>
                         </tr>
 
                         <tr>
                           <td colspan="6">
                             <p>
-                              <strong>Special Instruction/Trip To : </strong>
+                              <strong>Special Instruction/Trip To : </strong>{{dataSource?.specialInstruction}}
                             </p>
                           </td>
                         </tr>
 
                         <tr>
                           <td colspan="2">
-                            <strong>Out Kms : </strong>
+                            <strong>Out Kms : {{dataSource?.locationOutKM}}</strong>
                           </td>
                           <td colspan="2">
-                            <strong>Out Time : </strong>
+                            <strong>Out Time : {{dataSource?.locationOutTime | date : 'hh:mm a'}}</strong>
                           </td>
                           <td colspan="2">
-                            <strong>Out Date : </strong>
-                          </td>
-                        </tr>
-
-                        <tr>
-                          <td colspan="2">
-                            <strong>Reporting Kms : </strong>
-                          </td>
-                          <td colspan="2">
-                            <strong>Reporting Time : </strong>
-                          </td>
-                          <td colspan="2">
-                            <strong>Reporting Date : </strong>
+                            <strong>Out Date : {{dataSource?.locationOutDate | date : 'dd/MM/yyyy'}}</strong>
                           </td>
                         </tr>
 
                         <tr>
                           <td colspan="2">
-                            <strong>Releasing Kms : </strong>
+                            <strong>Reporting Kms : {{dataSource?.reportingToGuestKM}}</strong>
                           </td>
                           <td colspan="2">
-                            <strong>Releasing time : </strong>
+                            <strong>Reporting Time : {{dataSource?.reportingToGuestTime | date : 'hh:mm a'}}</strong>
                           </td>
                           <td colspan="2">
-                            <strong>Releasing Date : </strong>
+                            <strong>Reporting Date : {{dataSource?.reportingToGuestDate | date : 'dd/MM/yyyy'}}</strong>
                           </td>
                         </tr>
 
                         <tr>
                           <td colspan="2">
-                            <strong>In Kms : </strong>
+                            <strong>Releasing Kms : {{dataSource?.dropOffKM}}</strong>
                           </td>
                           <td colspan="2">
-                            <strong>In Time : </strong>
+                            <strong>Releasing time : {{dataSource?.dropOffTime | date : 'hh:mm a'}}</strong>
                           </td>
                           <td colspan="2">
-                            <strong>In Date : </strong>
+                            <strong>Releasing Date : {{dataSource?.dropOffDate | date : 'dd/MM/yyyy'}}</strong>
+                          </td>
+                        </tr>
+
+                        <tr>
+                          <td colspan="2">
+                            <strong>In Kms : {{dataSource?.locationInKM}}</strong>
+                          </td>
+                          <td colspan="2">
+                            <strong>In Time : {{dataSource?.locationInTime | date : 'hh:mm a'}}</strong>
+                          </td>
+                          <td colspan="2">
+                            <strong>In Date : {{dataSource?.locationInDate | date : 'dd/MM/yyyy'}}</strong>
                           </td>
                         </tr>
 

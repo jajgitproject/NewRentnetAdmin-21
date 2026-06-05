@@ -807,6 +807,13 @@ export class ClosingDataModel {
   packageType:string;
   customerName:string;
   tallyCustomerID:number;
+  pickupCityID:number;
+  city:string;
+  vehicleCategoryID:number;
+  vehicleID :number;
+  guestName:string;
+  dutySlipMap:string;
+  package:string;
 
 
   constructor(closingDataModel) {

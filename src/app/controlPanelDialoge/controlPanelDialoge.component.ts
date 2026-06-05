@@ -108,6 +108,7 @@ import { editPickupTimeFormDialogComponent } from '../changePickupTime/dialogs/d
 import { FormDialogComponentIL } from '../integrationLog/dialogs/form-dialog/form-dialog.component';
 import { LocationOutTimeEditComponent } from '../reservation/dialogs/locationOutTimeEdit/locationOutTimeEdit.component';
 import { AllotmentLogDetailsComponent } from '../allotmentLogDetails/AllotmentLogDetails.component';
+import { isAllotedBooking } from '../shared/messaging-validation.util';
 
 @Component({
   standalone: false,
@@ -269,6 +270,29 @@ export class ControlPanelDialogeComponent {
     );
   }
 
+  /** Primary guest passenger for VIP / Female labels (not booker). */
+  getPrimaryGuestPassenger(item: any): { importance?: string; gender?: string } | null {
+    const passengers = item?.passengerDetails;
+    if (passengers?.length) {
+      const primary = passengers.find(
+        (p: any) => String(p?.isPrimaryPassenger ?? '').toLowerCase() === 'true'
+      );
+      return primary ?? passengers[0];
+    }
+    if (item?.importance != null || item?.gender != null) {
+      return { importance: item.importance, gender: item.gender };
+    }
+    return null;
+  }
+
+  isVipBooking(item: any): boolean {
+    return this.getPrimaryGuestPassenger(item)?.importance === 'VIP';
+  }
+
+  isFemaleTraveller(item: any): boolean {
+    return this.getPrimaryGuestPassenger(item)?.gender === 'Female';
+  }
+
   private prefetchKamSummaries(list: any[]): void {
     this.kamSummaryByCustomerId = {};
     this.kamRowsByCustomerId = {};
@@ -384,6 +408,19 @@ export class ControlPanelDialogeComponent {
       });
     }, item.reservationID);
   }
+  getDropOffAddressValue(source: any): string {
+    if (!source) {
+      return '  ';
+    }
+    const raw =
+      source.dropOffAddressDetails ??
+      source.dropOffAddress ??
+      source.drop?.dropOffAddressDetails ??
+      source.drop?.dropOffAddress;
+    const trimmed = (raw ?? '').toString().trim();
+    return trimmed || '  ';
+  }
+
   TimeAndAddressDrop(item) {
     this.fetchStatusAndOpen(() => {
       const dropStop = item?.stopsDetails?.length > 1 ? item.stopsDetails[1] : null;
@@ -2415,24 +2452,40 @@ TrackOnMapInfo(reservationID: number, item?: any) {
       }
     });
   }
+  /** Manual WA/SMS/Mail from CP is allowed once the booking is allotted (incl. Hard). */
   canSendSmsWhatsappMail(item: any): boolean {
-    const allotmentStatus = (item?.allotmentStatus ?? '').toString().trim().toLowerCase();
-    const allotmentType = (item?.allotmentType ?? '').toString().trim().toLowerCase();
-    return allotmentStatus === 'alloted' && allotmentType === 'hard';
+    if (this.ReservationStatus === 'Cancelled') {
+      return false;
+    }
+    return isAllotedBooking(item);
+  }
+
+  private resolveMessagingCustomerPersonId(customerPersonID: any, item: any): any {
+    if (
+      customerPersonID != null &&
+      customerPersonID !== '' &&
+      typeof customerPersonID !== 'object'
+    ) {
+      return customerPersonID;
+    }
+    return (
+      item?.passengerDetails?.[0]?.customerPersonID ??
+      item?.primaryPassengerID ??
+      item?.customerPerson?.customerPersonID ??
+      item?.customerPersonID ??
+      null
+    );
   }
 
   openSendSmsWhatsappMail(reservationID,vehicle,pickupDate,pickupTime,
-      registrationNumber,customerPersonName,city,customerPersonID, item: any)
+      registrationNumber,customerPersonName,city, item: any, customerPersonID)
       {
-        const rowItem =
-          customerPersonID && typeof customerPersonID === 'object'
-            ? customerPersonID
-            : item;
+        const rowItem = item;
         if (!this.canSendSmsWhatsappMail(rowItem)) {
           Swal.fire({
             title: '',
             icon: 'warning',
-            html: `<b>Send WA/SMS/Mail is allowed only for Alloted (Hard) booking.</b>`
+            html: `<b>Send WA/SMS/Mail is available after the booking is allotted.</b>`
           });
           return;
         }
@@ -2478,10 +2531,10 @@ TrackOnMapInfo(reservationID: number, item?: any) {
           registrationNumber ??
           rowItem?.registrationNumber ??
           rowItem?.inventory?.registrationNumber;
-        const resolvedCustomerPersonID =
-          customerPersonID && typeof customerPersonID !== 'object'
-            ? customerPersonID
-            : item;
+        const resolvedCustomerPersonID = this.resolveMessagingCustomerPersonId(
+          customerPersonID,
+          item
+        );
         this.dialog.open(FormDialogSendSmsWhatsappMailComponent, {
           width: '70%',
           data: {

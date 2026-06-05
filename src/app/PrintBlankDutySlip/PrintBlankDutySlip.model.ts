@@ -40,6 +40,7 @@ export class PrintBlankDutySlip {
   keyAccountManagerName: string;
   keyAccountManagerMobile: string;
   bookerName: string;
+  bookerMobile: string;
   passengerName: string;
   passengerMobile: string;
   pickupCity: string;

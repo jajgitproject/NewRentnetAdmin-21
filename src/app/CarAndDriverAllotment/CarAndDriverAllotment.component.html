@@ -799,6 +799,7 @@
           <mat-accordion>
 
             <mat-expansion-panel
+            (opened)="ensureSearchDropdownsLoaded()"
             >
               <mat-expansion-panel-header>
                 <mat-panel-title>
@@ -1127,7 +1128,7 @@
     <div class="card" style="width: 100%">
       <div class="body">
       <div class="materialTableHeader  full-height-container">
-                    <form class="register-form allotment-search-panel">
+                    <form class="register-form allotment-search-panel" (focusin)="ensureSearchDropdownsLoaded()">
                       <div class="row">
                         <!-- <div class="col-xl-1 col-lg-1 col-md-1 col-sm-12 mb-2">
                           <span><b>Quick Search</b></span>
@@ -1822,7 +1823,7 @@
           <span aria-hidden="true">&times;</span>
         </button>
       </div>
-      <div class="modal-body">
+      <div class="modal-body" (focusin)="ensureSearchDropdownsLoaded()">
         <div class="row">
           <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
             <mat-form-field class="example-full-width">

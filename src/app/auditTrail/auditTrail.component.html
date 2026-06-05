@@ -195,7 +195,7 @@
                 {{ eventTitle(e) }}
               </mat-panel-title>
               <mat-panel-description>
-                {{ (e.eventAtUtc || '') }}
+                {{ formatEventTime(e.eventAtUtc) }}
               </mat-panel-description>
             </mat-expansion-panel-header>
 

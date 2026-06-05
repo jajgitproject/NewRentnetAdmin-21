@@ -1,7 +1,7 @@
 // @ts-nocheck
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import { Observable, timeout } from 'rxjs';
 
 import { GeneralService } from '../general/general.service';
 import { AuditTrailEvent, AuditTrailRow } from './auditTrail.model';
@@ -40,10 +40,11 @@ export class AuditTrailService {
       params = params.set('reservationId', reservationId.toString());
     }
 
+    const timeoutMs = reservationId != null ? 240000 : 120000;
     return this.httpClient.get<AuditTrailEvent[]>(
       this.apiBase + '/events',
       { params }
-    );
+    ).pipe(timeout(timeoutMs));
   }
 
   getRows(auditEventId: number): Observable<AuditTrailRow[]> {

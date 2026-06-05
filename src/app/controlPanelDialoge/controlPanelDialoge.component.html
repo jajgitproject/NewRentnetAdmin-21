@@ -111,18 +111,12 @@
                     </button></b><br />
                   {{ item.package.package }}<br />
                   <b>VIP Booking</b><br />
-                  <label class="TDValue" *ngIf="
-                                              item.customerPerson.importance == 'VIP';
-                                              else general
-                                            ">Yes
+                  <label class="TDValue" *ngIf="isVipBooking(item); else general">Yes
                   </label>
                   <ng-template #general>No</ng-template><br />
 
                   <b>Female Traveller</b><br />
-                  <label class="TDValue" *ngIf="
-                                              item.customerPerson.gender == 'Female';
-                                              else male
-                                            ">Yes
+                  <label class="TDValue" *ngIf="isFemaleTraveller(item); else male">Yes
                   </label>
                   <ng-template #male> No </ng-template> <br />
                   <b><button class="BoldButton BoldButtonTopMargin" mat-button
@@ -316,7 +310,7 @@
                                               item.stopsDetails[1].stopType == 'Destination'
                                             "
                                             > -->
-                  <span> {{ item.drop.dropOffAddress }}</span><br />
+                  <span>{{ getDropOffAddressValue(item.drop) }}</span><br />
                   <b><button class="BoldButton" mat-button (click)="StopDetailsInfo(item)">
                       Stop Details
                     </button></b><br />

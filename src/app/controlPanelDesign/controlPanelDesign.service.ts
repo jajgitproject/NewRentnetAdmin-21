@@ -95,6 +95,10 @@ export class ControlPanelDesignService {
     return this.httpClient.get(this.API_URL +'getReservationDetails' +'/' +reservationID);
   }
 
+  getReservationDetailsForAllotmentLite(reservationID: number): Observable<any> {
+    return this.httpClient.get(this.API_URL + 'getReservationDetailsForAllotmentLite/' + reservationID);
+  }
+
   getShowAllLocationCheck(employeeID:any): Observable<any> {    
     return this.httpClient.get(this.API_URL +'getShowAllLocationCheck' +'/' +employeeID);
   }

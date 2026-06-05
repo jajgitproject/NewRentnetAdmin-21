@@ -22,6 +22,7 @@ export class ControlPanelHeaderDetails {
   importance:string;
   vehicle:string;
   vehicleCategory:string;
+  carSent:string;
   registrationNumber:string;
   driverName:string;
   driverPhone:string;
@@ -41,6 +42,7 @@ export class ControlPanelHeaderDetails {
     this.importance = controlPanelHeaderDetails.importance;
     this.vehicle = controlPanelHeaderDetails.vehicle;
     this.vehicleCategory = controlPanelHeaderDetails.vehicleCategory;
+    this.carSent = controlPanelHeaderDetails.carSent;
     this.registrationNumber = controlPanelHeaderDetails.registrationNumber;
     this.driverName = controlPanelHeaderDetails.driverName;
     this.driverPhone = controlPanelHeaderDetails.driverPhone;
@@ -221,8 +223,8 @@ class DropOffModel {
   constructor(drop) {
     this.dropOffTime = drop.dropOffTime || '';
     this.dropOffDate = drop.dropOffDate || '';
-    this.dropOffAddress = drop.dropOffAddress || '';
-    this.dropOffAddressDetails = drop.dropOffAddressDetails || '';
+    this.dropOffAddress = drop.dropOffAddress?.trim() || '  ';
+    this.dropOffAddressDetails = drop.dropOffAddressDetails?.trim() || '  ';
   }
 }
 
@@ -300,6 +302,8 @@ export class PassengerModel {
   dropOffStopAddressDetails: string;
   customerDepartment: string;
   customerDesignation: string;
+  gender: string;
+  importance: string;
   constructor(passenger) {
     this.reservationPassengerID = passenger.reservationPassengerID || '';
     this.customerPersonID = passenger.customerPersonID || '';
@@ -307,7 +311,9 @@ export class PassengerModel {
     this.primaryMobile = passenger.primaryMobile || '';
     this.primaryEmail = passenger.primaryEmail || '';
     this.reservationPickupStopID = passenger.reservationPickupStopID || '';
-    this.isPrimaryPassenger = passenger.reservationPickupStopID || '0';
+    this.isPrimaryPassenger = passenger.isPrimaryPassenger || '0';
+    this.gender = passenger.gender || '';
+    this.importance = passenger.importance || '';
     this.pickupDate = passenger.pickupDate || '';
     this.pickupTime = passenger.pickupTime || '';
     this.pickupStopType = passenger.pickupStopType || '';
