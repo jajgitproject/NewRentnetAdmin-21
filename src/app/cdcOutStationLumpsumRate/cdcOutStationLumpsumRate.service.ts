@@ -121,4 +121,14 @@ export class CDCOutStationLumpsumRateService
     let userID = this.generalService.getUserID();
     return this.httpClient.delete(this.API_URL + '/'+ cdcOutStationLumpsumRateID + '/'+ userID);
   }
+
+  duplicateInsert(advanceTable: CDCOutStationLumpsumRate) 
+  {
+    advanceTable.cdcOutStationLumpsumRateID=-1;
+    advanceTable.userID=this.generalService.getUserID();
+    advanceTable.nightChargesStartTimeString=this.generalService.getTimeFrom(advanceTable.nightChargesStartTime);
+    advanceTable.nightChargesEndTimeString=this.generalService.getTimeTo(advanceTable.nightChargesEndTime);
+    return this.httpClient.post<any>(this.API_URL+"/"+"Duplicate" , advanceTable);
+  }
+
 }

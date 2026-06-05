@@ -11,6 +11,7 @@ import { CustomerContractCarCategoryDropDown } from 'src/app/customerContractCDC
 import { CustomerContractCityTiersDropDown } from 'src/app/customerContractCDCLocalRate/customerContractCityTiersDropDown.model';
 import { Observable } from 'rxjs';
 import { map, startWith } from 'rxjs/operators';
+import { ChangeDetectorRef } from '@angular/core';
 
 @Component({
   standalone: false,
@@ -51,7 +52,7 @@ export class FormDialogComponent
 
   constructor(
   public dialogRef: MatDialogRef<FormDialogComponent>, 
-  
+  private cdr: ChangeDetectorRef,
   @Inject(MAT_DIALOG_DATA) public data: any,
   public advanceTableService: CDCOutStationLumpsumRateService,
     private fb: FormBuilder,
@@ -60,18 +61,27 @@ export class FormDialogComponent
   {
         // Set the defaults
         this.action = data.action;
-        if (this.action === 'edit') 
+        if (this.action === 'duplicate') 
         {
           this.dialogTitle ='Chauffeur Driven Car Outstation Lumpsum Package';       
           this.advanceTable = data.advanceTable;
-            this.advanceTableForm = this.createContactForm();
-        this.searchVehicleCategory.setValue(this.advanceTable.vehicleCategory);
-        this.searchCityTier.setValue(this.advanceTable.cityTier);
-        this.searchPackage.setValue(this.advanceTable.package);
-        this.advanceTableForm?.patchValue({
-           nightChargesBasedOn: this.advanceTable.nightChargesBasedOn || 'Garage'
-            });
-        } else 
+          this.advanceTableForm = this.createContactForm();
+          this.searchVehicleCategory.setValue(this.advanceTable.vehicleCategory);
+          this.searchCityTier.setValue(this.advanceTable.cityTier);
+          this.searchPackage.setValue(this.advanceTable.package);
+          this.advanceTableForm?.patchValue({nightChargesBasedOn: this.advanceTable.nightChargesBasedOn || 'Garage'});
+        } 
+        else if (this.action === 'edit') 
+        {
+          this.dialogTitle ='Chauffeur Driven Car Outstation Lumpsum Package';       
+          this.advanceTable = data.advanceTable;
+          this.advanceTableForm = this.createContactForm();
+          this.searchVehicleCategory.setValue(this.advanceTable.vehicleCategory);
+          this.searchCityTier.setValue(this.advanceTable.cityTier);
+          this.searchPackage.setValue(this.advanceTable.package);
+          this.advanceTableForm?.patchValue({nightChargesBasedOn: this.advanceTable.nightChargesBasedOn || 'Garage'});
+        } 
+        else 
         {
           this.dialogTitle = 'Chauffeur Driven Car Outstation Lumpsum Package';
           this.advanceTable = new CDCOutStationLumpsumRate({});
@@ -407,17 +417,53 @@ numberOnly(event): boolean {
       }
     )
   }
+
+  public Duplicate(): void
+  {
+    this.advanceTableForm.patchValue({customerContractID:this.advanceTable.customerContractID});
+    this.advanceTableForm.patchValue({customerContractCarCategoryID:this.customerContractCarCategoryID || this.advanceTable.customerContractCarCategoryID});
+    this.advanceTableForm.patchValue({customerContractCityTiersID:this.customerContractCityTiersID || this.advanceTable.customerContractCityTiersID});
+    this.advanceTableForm.patchValue({packageID:this.packageID || this.advanceTable.packageID});
+    this.advanceTableService.duplicateInsert(this.advanceTableForm.getRawValue())  
+    .subscribe(
+    response => 
+    {
+      if(response.activationStatus===false)
+      {
+        this._generalService.sendUpdate('DataNotFound:DuplicacyError:Failure');
+        this.saveDisabled = true;
+        this.cdr.detectChanges();
+      }
+      else 
+      {
+        this.dialogRef.close();
+        this._generalService.sendUpdate('CDCOutStationLumpsumRateUpdate:CDCOutStationLumpsumRateView:Success');
+        this.saveDisabled = true; 
+      }
+    },
+    error =>
+    {
+     this._generalService.sendUpdate('CDCOutStationLumpsumRateAll:CDCOutStationLumpsumRateView:Failure');//To Send Updates 
+     this.saveDisabled = true;
+    }
+  )
+  }
+
   public confirmAdd(): void 
   {
     this.saveDisabled = false;
-       if(this.action=="edit")
-       {
-          this.Put();
-       }
-       else
-       {
-          this.Post();
-       }
+    if(this.action=="duplicate")
+    {
+      this.Duplicate();
+    }
+    if(this.action=="edit")
+    {
+      this.Put();
+    }
+    else
+    {
+      this.Post();
+    }
   }
   
   /////////////////for Image Upload////////////////////////////
