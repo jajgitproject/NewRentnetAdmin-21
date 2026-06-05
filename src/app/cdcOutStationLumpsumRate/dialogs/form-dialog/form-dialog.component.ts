@@ -456,7 +456,7 @@ numberOnly(event): boolean {
     {
       this.Duplicate();
     }
-    if(this.action=="edit")
+    else if(this.action=="edit")
     {
       this.Put();
     }

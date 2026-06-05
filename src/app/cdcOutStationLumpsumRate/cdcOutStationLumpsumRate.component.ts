@@ -354,7 +354,6 @@ InitVehicleCategory(){
       {
 
         this.dataSource = data;
-        console.log(this.dataSource);
        
       },
       (error: HttpErrorResponse) => { this.dataSource = null;}
@@ -418,7 +417,6 @@ InitVehicleCategory(){
     (
       message => 
       { 
-        console.log('Received Message:', message.text);
         //message contains the data sent from service
         this.messageReceived = message.text;
         this.MessageArray=this.messageReceived.split(":");
@@ -478,7 +476,7 @@ InitVehicleCategory(){
             {
               if(this.MessageArray[2]=="Failure")
               {
-               //this.refresh();
+               this.refresh();
                this.showNotification(
                 'snackbar-danger',
                 'Operation Failed.....!!!',
@@ -494,7 +492,7 @@ InitVehicleCategory(){
             {
               if(this.MessageArray[2]=="Failure")
               {
-              //this.refresh();
+              this.refresh();
                this.showNotification(
                 'snackbar-danger',
                 'Duplicate Value Found.....!!!',
