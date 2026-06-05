@@ -103,6 +103,9 @@ export class AuthService {
             CanThisRoleDoGoodForBillingOnClosingScreen:
               rawEmployee.CanThisRoleDoGoodForBillingOnClosingScreen ??
               rawEmployee.canThisRoleDoGoodForBillingOnClosingScreen,
+            CanThisRoleViewDummyInvoice:
+              rawEmployee.CanThisRoleViewDummyInvoice ??
+              rawEmployee.canThisRoleViewDummyInvoice,
             EmployeeEntityID:
               rawEmployee.EmployeeEntityID ?? rawEmployee.employeeEntityID,
             EmployeeID: rawEmployee.EmployeeID ?? rawEmployee.employeeID,

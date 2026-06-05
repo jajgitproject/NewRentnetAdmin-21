@@ -123,6 +123,10 @@ export class SigninComponent implements OnInit {
                   String(employee.CanThisRoleDoGoodForBillingOnClosingScreen ?? employee.canThisRoleDoGoodForBillingOnClosingScreen ?? false)
                 );
                 localStorage.setItem(
+                  'canThisRoleViewDummyInvoice',
+                  String(employee.CanThisRoleViewDummyInvoice ?? employee.canThisRoleViewDummyInvoice ?? false)
+                );
+                localStorage.setItem(
                   'isThisAKeyAccountManagerRole',
                   String(employee.IsThisAKeyAccountManagerRole ?? employee.isThisAKeyAccountManagerRole ?? false)
                 );

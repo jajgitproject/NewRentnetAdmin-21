@@ -71,7 +71,8 @@ export class FormDialogComponent
       canThisRoleCreateBackDateBooking: [this.advanceTable.canThisRoleCreateBackDateBooking, Validators.required],
       canThisRoleCreateBillOnClosingScreen: [this.advanceTable.canThisRoleCreateBillOnClosingScreen, Validators.required],
       canThisRoleViewBillOnClosingScreen: [this.advanceTable.canThisRoleViewBillOnClosingScreen, Validators.required],
-      canThisRoleDoGoodForBillingOnClosingScreen: [this.advanceTable.canThisRoleDoGoodForBillingOnClosingScreen, Validators.required]
+      canThisRoleDoGoodForBillingOnClosingScreen: [this.advanceTable.canThisRoleDoGoodForBillingOnClosingScreen, Validators.required],
+      canThisRoleViewDummyInvoice: [this.advanceTable.canThisRoleViewDummyInvoice, Validators.required]
     });
   }
   submit() 

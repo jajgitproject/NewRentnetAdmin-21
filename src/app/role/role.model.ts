@@ -12,6 +12,7 @@ export class Role {
    canThisRoleCreateBillOnClosingScreen: boolean;
    canThisRoleViewBillOnClosingScreen: boolean;
    canThisRoleDoGoodForBillingOnClosingScreen: boolean;
+   canThisRoleViewDummyInvoice: boolean;
 
   constructor(role) {
     {
@@ -27,6 +28,7 @@ export class Role {
        this.canThisRoleCreateBillOnClosingScreen = role.canThisRoleCreateBillOnClosingScreen ?? true;
        this.canThisRoleViewBillOnClosingScreen = role.canThisRoleViewBillOnClosingScreen ?? true;
        this.canThisRoleDoGoodForBillingOnClosingScreen = role.canThisRoleDoGoodForBillingOnClosingScreen ?? true;
+       this.canThisRoleViewDummyInvoice = role.canThisRoleViewDummyInvoice ?? true;
 
     }
   }

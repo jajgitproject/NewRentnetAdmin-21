@@ -200,6 +200,7 @@ export class ClossingOneComponent implements OnInit, AfterViewInit, AfterViewChe
   canThisRoleCreateBillOnClosingScreen = false;
   canThisRoleViewBillOnClosingScreen = false;
   canThisRoleDoGoodForBillingOnClosingScreen = false;
+  canThisRoleViewDummyInvoice = false;
   templateAddress: any;
   verifyDutyStatusAndCacellationStatus: any;
   goodForBillingStatusAndCancellationStatus:any;
@@ -233,8 +234,6 @@ export class ClossingOneComponent implements OnInit, AfterViewInit, AfterViewChe
   status: any;
   guestName:any;
   DutySlipMap:any;
-  CityName:any;
-  Package:any;
 
   constructor(
     public httpClient: HttpClient,
@@ -290,6 +289,7 @@ export class ClossingOneComponent implements OnInit, AfterViewInit, AfterViewChe
     this.canThisRoleCreateBillOnClosingScreen = this.readRoleFlagFromStorage('canThisRoleCreateBillOnClosingScreen');
     this.canThisRoleViewBillOnClosingScreen = this.readRoleFlagFromStorage('canThisRoleViewBillOnClosingScreen');
     this.canThisRoleDoGoodForBillingOnClosingScreen = this.readRoleFlagFromStorage('canThisRoleDoGoodForBillingOnClosingScreen');
+    this.canThisRoleViewDummyInvoice = this.readRoleFlagFromStorage('canThisRoleViewDummyInvoice');
     this.route.queryParams.subscribe(paramsData => {
       const encryptedAllotmentID = paramsData.allotmentID;
       this.AllotmentID = this._generalService.decrypt(decodeURIComponent(encryptedAllotmentID));
@@ -402,7 +402,6 @@ export class ClossingOneComponent implements OnInit, AfterViewInit, AfterViewChe
       (
         data => {
           this.closingDataAdvanceTable = data;
-          console.log('Closing Data:', this.closingDataAdvanceTable);
           this.allotmentID = this.closingDataAdvanceTable?.allotmentID;
           this.dutySlipID = this.closingDataAdvanceTable?.dutySlipID;
           this.ReservationID = this.closingDataAdvanceTable?.reservationID;
@@ -431,8 +430,6 @@ export class ClossingOneComponent implements OnInit, AfterViewInit, AfterViewChe
           this.VehicleID = this.closingDataAdvanceTable?.vehicleID;
           this.guestName = this.closingDataAdvanceTable?.guestName;
           this.DutySlipMap= this.closingDataAdvanceTable?.dutySlipMap;
-          this.CityName = this.closingDataAdvanceTable?.city;
-          this.Package = this.closingDataAdvanceTable?.package;
          
           this.advanceDetailsLoadData();
           this.kamCardLoadData();

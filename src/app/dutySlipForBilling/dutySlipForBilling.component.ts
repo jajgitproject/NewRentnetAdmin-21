@@ -50,6 +50,7 @@ export class DutySlipForBillingComponent implements OnInit, AfterViewInit {
   @Input() InvoiceID;
   @Input() DSClosing;
   @Input() canThisRoleDoGoodForBillingOnClosingScreen = false;
+  @Input() canThisRoleViewDummyInvoice = false;
   @Output() dataSaved: EventEmitter<void> = new EventEmitter();
   @Output() dutyStatusChanged = new EventEmitter<{verifyDuty: boolean, goodForBilling: boolean,message: string}>();
   //@Output() dutyMessage = new EventEmitter<string>();

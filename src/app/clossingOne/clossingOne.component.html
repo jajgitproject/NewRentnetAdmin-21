@@ -50,15 +50,6 @@
       </div>
       <div class="row" style="padding-left: 30px;">
         <div class="col-xl-2 col-lg-4 col-md-12 col-sm-12 mb-2" *ngIf="GstNumber">
-          Duty Type: <br/>{{PackageType}}
-         </div>
-        <div class="col-xl-2 col-lg-4 col-md-12 col-sm-12 mb-2" *ngIf="GstNumber">
-          Package: <br/>{{Package}}
-        </div>
-        <div class="col-xl-2 col-lg-4 col-md-12 col-sm-12 mb-2" *ngIf="GstNumber">
-          City: <br/>{{CityName}}
-        </div>
-        <div class="col-xl-2 col-lg-4 col-md-12 col-sm-12 mb-2" *ngIf="GstNumber">
           GST Number: <br/>{{GstNumber}}({{StateName}})
         </div>
          <div class="col-xl-2 col-lg-2 col-md-12 col-sm-12 mb-2" *ngIf="dataSourceForBillNo?.invoiceModel?.invoiceNumberWithPrefix">
@@ -75,6 +66,7 @@
         [disputeAdvanceTable]="disputeAdvanceTable" [RegistrationNumber]="RegistrationNumber" [InvoiceID]="invoiceID"
         [DSClosing]="DSClosing"
         [canThisRoleDoGoodForBillingOnClosingScreen]="canThisRoleDoGoodForBillingOnClosingScreen"
+        [canThisRoleViewDummyInvoice]="canThisRoleViewDummyInvoice"
         (dataSaved)="onDataSaved()"
         (dutyStatusChanged)="onDutyStatusChanged($event)"></app-dutySlipForBilling>
     </div>

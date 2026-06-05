@@ -127,6 +127,21 @@
                         </mat-error>
                     </mat-form-field>
                 </div>
+            </div>
+
+            <div class="row">
+                <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                    <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                        <mat-label>CanThisRoleViewDummyInvoice</mat-label>
+                        <mat-select formControlName="canThisRoleViewDummyInvoice">
+                            <mat-option [value]="true">Yes</mat-option>
+                            <mat-option [value]="false">No</mat-option>
+                        </mat-select>
+                        <mat-error *ngIf="advanceTableForm.get('canThisRoleViewDummyInvoice')?.hasError('required')">
+                            CanThisRoleViewDummyInvoice is required
+                        </mat-error>
+                    </mat-form-field>
+                </div>
 
                 <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
                     <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
