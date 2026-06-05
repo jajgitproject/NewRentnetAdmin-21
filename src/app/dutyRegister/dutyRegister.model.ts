@@ -203,6 +203,8 @@ export class SearchCriteria
   SearchBillFromDate:string;
   SearchBillToDate:string;
   SearchBillStatus:string;
+  ShowAllLocation:boolean;
+  UserID:number;
   
 }
 

@@ -500,6 +500,8 @@ export class DutyRegisterComponent implements OnInit {
 
   private buildSearchCriteria(): SearchCriteria {
     return {
+      UserID:this._generalService.getUserID(),
+      ShowAllLocation:null,
       SearchCustomerGroup: this.SearchCustomerGroup?.value || "",
       SearchCustomer: this.SearchCustomer?.value || "",
       SearchBranch: this.SearchBranch?.value || "",
