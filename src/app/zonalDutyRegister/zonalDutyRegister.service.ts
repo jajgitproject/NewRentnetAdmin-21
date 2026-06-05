@@ -263,6 +263,8 @@ export class ZonalDutyRegisterService
 
   getTableData(criteria: SearchCriteria, pageNumber: number): Observable<any> {
     const updatedCriteria = {
+      UserID:this.generalService.getUserID(),
+      ShowAllLocation:null,
       SearchCustomerGroup: criteria.SearchCustomerGroup || "null",
       SearchCustomer: criteria.SearchCustomer || "null",
       SearchBranch: criteria.SearchBranch || "null",
