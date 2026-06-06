@@ -20,54 +20,19 @@ export class ChangeEntityService {
   }
 
   /** CRUD METHODS */
+  private toRouteParam(value: any): string {
+    if (value === null || value === undefined || value === '') {
+      return 'null';
+    }
+    return encodeURIComponent(String(value));
+  }
+
   getTableData(SearchCustomerGroup:string,SearchCustomerName:string,SearchCity:string,SearchVehicle:string,SearchPackageType:string,SearchPakcage:string,
               SearchFromDate: string,SearchToDate: string,SearchReservationID: string,SearchDutySlipID: string,SearchActivationStatus: boolean,PageNumber: number): Observable<any> 
   {
-    if (SearchCustomerGroup === "") 
-    {
-      SearchCustomerGroup = null;
-    }
-    if (SearchCustomerName === "") 
-    {
-      SearchCustomerName = null;
-    }
-    if (SearchCity === "") 
-    {
-      SearchCity = null;
-    }
-    if (SearchVehicle === "") 
-    {
-      SearchVehicle = null;
-    }
-    if (SearchPackageType === "") 
-    {
-      SearchPackageType = null;
-    }
-    if (SearchPakcage === "") 
-    {
-      SearchPakcage = null;
-    }
-    if (SearchFromDate === "") 
-    {
-      SearchFromDate = null;
-    }
-    if (SearchToDate === "") 
-    {
-      SearchToDate = null;
-    }
-    if (SearchReservationID === "") 
-    {
-      SearchReservationID = null;
-    }
-    if (SearchDutySlipID === "") 
-    {
-      SearchDutySlipID = null;
-    }
-    if(SearchActivationStatus === null) 
-    {
-      SearchActivationStatus = null;
-    }
-    return this.httpClient.get(this.API_URL + '/' + SearchCustomerGroup + '/' + SearchCustomerName + '/' + SearchCity + '/' + SearchVehicle + '/' + SearchPackageType + '/' + SearchPakcage + '/' + SearchFromDate + '/' + SearchToDate + '/' + SearchReservationID + '/'+ SearchDutySlipID + '/' + SearchActivationStatus + '/' + PageNumber + '/ReservationID/Descending');
+    return this.httpClient.get(
+      `${this.API_URL}/${this.toRouteParam(SearchCustomerGroup)}/${this.toRouteParam(SearchCustomerName)}/${this.toRouteParam(SearchCity)}/${this.toRouteParam(SearchVehicle)}/${this.toRouteParam(SearchPackageType)}/${this.toRouteParam(SearchPakcage)}/${this.toRouteParam(SearchFromDate)}/${this.toRouteParam(SearchToDate)}/${this.toRouteParam(SearchReservationID)}/${this.toRouteParam(SearchDutySlipID)}/${SearchActivationStatus}/${PageNumber}/ReservationID/Descending`
+    );
   }
 
 
@@ -75,51 +40,9 @@ export class ChangeEntityService {
                    SearchFromDate: string,SearchToDate: string,SearchReservationID: string,SearchDutySlipID: string,SearchActivationStatus: boolean,PageNumber: number,
                    coloumName:string,sortType:string):  Observable<any> 
   {
-     if (SearchCustomerGroup === "") 
-    {
-      SearchCustomerGroup = null;
-    }
-    if (SearchCustomerName === "") 
-    {
-      SearchCustomerName = null;
-    }
-    if (SearchCity === "") 
-    {
-      SearchCity = null;
-    }
-    if (SearchVehicle === "") 
-    {
-      SearchVehicle = null;
-    }
-    if (SearchPackageType === "") 
-    {
-      SearchPackageType = null;
-    }
-    if (SearchPakcage === "") 
-    {
-      SearchPakcage = null;
-    }
-    if (SearchFromDate === "") 
-    {
-      SearchFromDate = null;
-    }
-    if (SearchToDate === "") 
-    {
-      SearchToDate = null;
-    }  
-    if (SearchReservationID === "") 
-    {
-      SearchReservationID = null;
-    }
-    if (SearchDutySlipID === "") 
-    {
-      SearchDutySlipID = null;
-    }
-    if(SearchActivationStatus === null) 
-    {
-      SearchActivationStatus = null;
-    }
-    return this.httpClient.get(this.API_URL + '/' + SearchCustomerGroup + '/' + SearchCustomerName + '/' + SearchCity + '/' + SearchVehicle + '/' + SearchPackageType + '/' + SearchPakcage + '/' + SearchFromDate + '/' + SearchToDate + '/' + SearchReservationID + '/'+ SearchDutySlipID + '/' + SearchActivationStatus + '/' + PageNumber + '/'+coloumName+'/'+sortType);
+    return this.httpClient.get(
+      `${this.API_URL}/${this.toRouteParam(SearchCustomerGroup)}/${this.toRouteParam(SearchCustomerName)}/${this.toRouteParam(SearchCity)}/${this.toRouteParam(SearchVehicle)}/${this.toRouteParam(SearchPackageType)}/${this.toRouteParam(SearchPakcage)}/${this.toRouteParam(SearchFromDate)}/${this.toRouteParam(SearchToDate)}/${this.toRouteParam(SearchReservationID)}/${this.toRouteParam(SearchDutySlipID)}/${SearchActivationStatus}/${PageNumber}/${coloumName}/${sortType}`
+    );
   }
 
 
