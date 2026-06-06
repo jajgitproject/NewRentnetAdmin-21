@@ -1,9 +1,28 @@
 // @ts-nocheck
 import { Injectable } from '@angular/core';
-import { BehaviorSubject, Observable } from 'rxjs';
+import { BehaviorSubject, Observable, of, throwError } from 'rxjs';
+import { catchError, map, switchMap } from 'rxjs/operators';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { DatePipe } from '@angular/common';
 import { GeneralService } from '../general/general.service';
+import { SummaryOfDutyData } from '../summaryOfDuty/summary-of-duty.model';
+import {
+  buildMergedInvoiceCalculationPayload,
+  hasInvoiceCalculationResult,
+  invoiceCalculationNeedsFullDetailMerge,
+  mapInvoiceCalculationToSummaryOfDuty,
+  summaryOfDutyHasDisplayableData,
+  unwrapInvoiceCalculationPayload
+} from '../summaryOfDuty/invoice-calculation-to-summary-of-duty.mapper';
+
+export const SUMMARY_LOAD_FAILED_MESSAGE =
+  'Bill calculated but summary could not be loaded. Check rate card / GST configuration.';
+
+export interface CalculateBillSummaryResult {
+  message: string;
+  payload: Record<string, unknown>;
+  summary: SummaryOfDutyData;
+}
 
 @Injectable()
 export class ClossingOneService 
@@ -56,6 +75,49 @@ export class ClossingOneService
  calculateBill(dutySlipID:any):  Observable<any> 
   { 
     return this.httpClient.get(this.API_CalculateBill+'/'+dutySlipID);
+  }
+
+  /**
+   * Calculate bill, merge duty-billing-summary when needed, and map to Summary of Duty rows.
+   * Throws a string error when calculate returns empty/204 or summary cannot be built.
+   */
+  calculateBillWithSummary(dutySlipID: number | string): Observable<CalculateBillSummaryResult> {
+    return this.calculateBill(dutySlipID).pipe(
+      switchMap((calcRes) => {
+        if (!hasInvoiceCalculationResult(calcRes)) {
+          return throwError(
+            () => 'Bill calculation returned no data. Check rate card / GST configuration.'
+          );
+        }
+        const calc = unwrapInvoiceCalculationPayload(calcRes);
+        if (!invoiceCalculationNeedsFullDetailMerge(calc)) {
+          return of(calcRes);
+        }
+        return this.getDutyBillingSummary(dutySlipID).pipe(
+          map((summaryRes) => buildMergedInvoiceCalculationPayload(calcRes, summaryRes)),
+          switchMap((merged) =>
+            merged == null ? throwError(() => SUMMARY_LOAD_FAILED_MESSAGE) : of(merged)
+          ),
+          catchError(() => throwError(() => SUMMARY_LOAD_FAILED_MESSAGE))
+        );
+      }),
+      switchMap((response) => {
+        const payload =
+          response != null && typeof response === 'object'
+            ? (unwrapInvoiceCalculationPayload(response) ?? (response as Record<string, unknown>))
+            : null;
+        if (payload == null) {
+          return throwError(() => SUMMARY_LOAD_FAILED_MESSAGE);
+        }
+        const summary = mapInvoiceCalculationToSummaryOfDuty(payload);
+        if (!summaryOfDutyHasDisplayableData(summary)) {
+          return throwError(() => SUMMARY_LOAD_FAILED_MESSAGE);
+        }
+        const raw = response as Record<string, unknown>;
+        const message = String(raw?.message ?? raw?.Message ?? '');
+        return of({ message, payload, summary });
+      })
+    );
   }
 
   /** Full persisted calculation for Summary of Duty: `GET invoicecalculation/duty-billing-summary/{DutySlipID}`. */

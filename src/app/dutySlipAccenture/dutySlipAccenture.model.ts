@@ -42,6 +42,7 @@ export class DutySlipAccentureModel {
   bookerMobile:string;
   passengerName:string;
   passengerMobile:string;
+  pickUpAddressString:string;
   pickupCity:string;
   vehicleSent:string;
   vehicleBooked:string;

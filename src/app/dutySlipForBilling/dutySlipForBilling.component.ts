@@ -9,7 +9,7 @@ import { DataSource } from '@angular/cdk/collections';
 import { Injectable, EventEmitter, Output } from '@angular/core';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { BehaviorSubject, fromEvent, merge, Observable, of, Subject, Subscription } from 'rxjs';
-import { catchError, map, startWith, switchMap } from 'rxjs/operators';
+import { map, startWith } from 'rxjs/operators';
 import { DateAdapter, MAT_DATE_LOCALE } from '@angular/material/core';
 import { MatMenu, MatMenuTrigger } from '@angular/material/menu';
 import { SelectionModel } from '@angular/cdk/collections';
@@ -29,10 +29,6 @@ import {
   SummaryOfDutyDialogComponent,
   SummaryOfDutyDialogData
 } from '../summaryOfDuty/summary-of-duty-dialog.component';
-import {
-  mapInvoiceCalculationToSummaryOfDuty,
-  unwrapInvoiceCalculationPayload
-} from '../summaryOfDuty/invoice-calculation-to-summary-of-duty.mapper';
 
 
 
@@ -1466,7 +1462,7 @@ export class DutySlipForBillingComponent implements OnInit, AfterViewInit {
         this.advanceTableBH.goodForBilling = isChecked;
         this.advanceTableBH.actionTaken = this.advanceTableForm.value.actionTaken;
         this.advanceTableBH.actionDetails = this.advanceTableForm.value.actionDetails;
-        this.CalculateBill();
+        this.CalculateBill(true);
       }
       if(isChecked === false)
       {
@@ -1611,10 +1607,6 @@ setVerifyDuty(value: boolean, details: string) {
           'bottom',
           'center'
         );
-      }
-      if(response.actionTaken === "Verify Duty" && response.verifyDuty === true)
-      {
-        this.CalculateBill();
       }
     },
     error =>
@@ -1940,24 +1932,14 @@ setVerifyDuty(value: boolean, details: string) {
   }
 
   //---------Calculate Bill------------------------
-  public CalculateBill()
+  public CalculateBill(showSummaryPopup = false)
   {
     this.showSpinnerForVDGB = true;
-    this.clossingOneService
-      .calculateBill(this.DutySlipID)
-      .pipe(
-        switchMap((calcRes) =>
-          this.clossingOneService.getDutyBillingSummary(this.DutySlipID).pipe(
-            catchError(() => of(calcRes))
-          )
-        )
-      )
-      .subscribe(
+    this.clossingOneService.calculateBillWithSummary(this.DutySlipID).subscribe(
       response => 
       {
-        this.Message = response.message ?? response.Message ?? '';
-        const payload = unwrapInvoiceCalculationPayload(response) ?? response;
-        this.summaryOfDutyData = mapInvoiceCalculationToSummaryOfDuty(payload) ?? null;
+        this.Message = response.message ?? '';
+        this.summaryOfDutyData = response.summary;
         this.dutyStatusChanged.emit({
         verifyDuty: this.advanceTableForm.value.verifyDuty,
         goodForBilling: this.advanceTableForm.value.goodForBilling,
@@ -1971,10 +1953,13 @@ setVerifyDuty(value: boolean, details: string) {
           'center'
         );
         this.saveDisabled = true;
-        this.openSummaryOfDutyDialog();
+        if (showSummaryPopup) {
+          this.openSummaryOfDutyDialog();
+        }
       },
       error =>
       {
+        this.showSpinnerForVDGB = false;
         const errorMessage = error || 'Operation Failed.....!!!';
         Swal.fire({
           title: errorMessage,

@@ -40,6 +40,17 @@ export class ControlPanelDesignService {
       _filters.reservationID = 0;
     }
 
+    if (
+      _filters.dutySlipID === null ||
+      _filters.dutySlipID === undefined ||
+      _filters.dutySlipID.toString() === ''
+    ) {
+      _filters.dutySlipID = 0;
+    } else {
+      const dutySlipId = parseInt(String(_filters.dutySlipID).trim(), 10);
+      _filters.dutySlipID = isNaN(dutySlipId) ? 0 : dutySlipId;
+    }
+
     if (_filters.fromDate != '' && _filters.fromDate != null) {
       _filters.fromDate = this.datepipe.transform(
         _filters.fromDate,

@@ -3,7 +3,7 @@ import { Component, OnInit } from '@angular/core';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { FormControl } from '@angular/forms';
 import { Observable } from 'rxjs';
-import { map, startWith } from 'rxjs/operators';
+import { map, startWith, finalize } from 'rxjs/operators';
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 
 import { GeneralService } from '../general/general.service';
@@ -87,6 +87,26 @@ export class AuditTrailComponent implements OnInit {
         this.pages = [];
       }
     );
+
+    this.pageNameCtrl.valueChanges.subscribe((value) => {
+      if (value == null || value === '') {
+        this.selectedPageFilter = '';
+        return;
+      }
+      if (typeof value === 'object') {
+        this.onPageSelected(value as PageAuditDropDown);
+      }
+    });
+
+    this.userCtrl.valueChanges.subscribe((value) => {
+      if (value == null || value === '') {
+        this.selectedUserId = null;
+        return;
+      }
+      if (typeof value === 'object') {
+        this.onUserSelected(value as EmployeeDropDown);
+      }
+    });
   }
 
   private filterUsers(value: any): EmployeeDropDown[] {
@@ -105,7 +125,18 @@ export class AuditTrailComponent implements OnInit {
       .trim();
     if (!v) return this.pages || [];
     // Bind/search by FormName (Page.Page)
-    return (this.pages || []).filter(p => ((p.page || '')).toLowerCase().includes(v));
+    return (this.pages || []).filter(p => this.pageFieldValue(p).toLowerCase().includes(v));
+  }
+
+  private pageFieldValue(p: PageAuditDropDown | null | undefined): string {
+    if (!p) return '';
+    return (
+      p.page ||
+      (p as any).Page ||
+      p.path ||
+      (p as any).Path ||
+      ''
+    ).toString().trim();
   }
 
   onPageSelected(p: PageAuditDropDown | null): void {
@@ -113,14 +144,11 @@ export class AuditTrailComponent implements OnInit {
       this.selectedPageFilter = '';
       return;
     }
-    // Use Form Name (Page.Page) as filter, to match stored FormName in audit tables.
-    this.selectedPageFilter = p.page || '';
+    this.selectedPageFilter = this.pageFieldValue(p);
   }
 
   pageDisplay(p: PageAuditDropDown): string {
-    if (!p) return '';
-    // Show FormName in the control (table key not shown here)
-    return (p.page || '').trim();
+    return this.pageFieldValue(p);
   }
 
   onUserSelected(emp: EmployeeDropDown): void {
@@ -139,16 +167,30 @@ export class AuditTrailComponent implements OnInit {
     return n;
   }
 
+  private resolvePageName(): string {
+    const raw = this.pageNameCtrl.value;
+    if (raw && typeof raw === 'object') {
+      return this.pageFieldValue(raw as PageAuditDropDown);
+    }
+    const typed = (raw || '').toString().trim();
+    if (typed) {
+      return typed;
+    }
+    return (this.selectedPageFilter || '').toString().trim();
+  }
+
   isSearchDisabled(): boolean {
     if (this.isLoadingEvents) return true;
     const hasUser = this.selectedUserId != null && this.selectedUserId > 0;
     const hasRes = this.parseReservationId() != null;
-    return !hasUser && !hasRes;
+    const hasPage = !!this.resolvePageName();
+    return !hasUser && !hasRes && !hasPage;
   }
 
   search(): void {
     const reservationId = this.parseReservationId();
-    if (!this.selectedUserId && reservationId == null) {
+    const pageName = this.resolvePageName();
+    if (!this.selectedUserId && reservationId == null && !pageName) {
       this.events = [];
       this.activeReservationId = null;
       this.reservationTableGroups = [];
@@ -162,16 +204,6 @@ export class AuditTrailComponent implements OnInit {
     const reservationMode = reservationId != null;
     this.activeReservationId = reservationMode ? reservationId : null;
 
-    let pageName = (this.selectedPageFilter || '').toString();
-    if (!pageName) {
-      const raw = this.pageNameCtrl.value;
-      if (raw && typeof raw === 'object') {
-        pageName = ((raw as PageAuditDropDown).page || '').toString();
-      } else {
-        pageName = (raw || '').toString();
-      }
-    }
-
     // Reservation audit: all users, all related tables; ignore form-name filter (API skips it when reservationId set).
     const apiUserId = reservationMode ? null : this.selectedUserId;
     const apiPageName = reservationMode ? '' : pageName;
@@ -180,6 +212,9 @@ export class AuditTrailComponent implements OnInit {
 
     this.auditTrailService
       .getEvents(apiUserId, apiPageName, reservationId, 0, pageSize, includeNullUser)
+      .pipe(finalize(() => {
+        this.isLoadingEvents = false;
+      }))
       .subscribe({
         next: (data) => {
           const raw = data || [];
@@ -198,9 +233,6 @@ export class AuditTrailComponent implements OnInit {
             ? 'First search for a reservation can take 1–2 minutes while the index is built. Run Audit_Trail_Performance_Index.sql on the database, restart the API, then search again.'
             : 'The search may have timed out — try a narrower filter or run Audit_Trail_Performance_Index.sql on the database.';
           this.snackBar.open('Failed to load audit events. ' + hint, '', { duration: 10000 });
-        },
-        complete: () => {
-          this.isLoadingEvents = false;
         }
       });
   }

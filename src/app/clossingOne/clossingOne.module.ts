@@ -114,6 +114,7 @@ import { ChangeCityService } from '../changeCity/changeCity.service';
 import { CustomerSpecificDetailsService } from '../customerSpecificDetails/customerSpecificDetails.service';
 import { CustomerSpecificDetailsModule } from '../customerSpecificDetails/customerSpecificDetails.module';
 import { DutySlipImageModule } from '../dutySlipImage/dutySlipImage.module';
+import { SummaryOfDutyModule } from '../summaryOfDuty/summary-of-duty.module';
 
 
 @NgModule({
@@ -184,7 +185,8 @@ import { DutySlipImageModule } from '../dutySlipImage/dutySlipImage.module';
     ChangeDutyTypeClosingModule,
     ChangeCityModule,
     CustomerSpecificDetailsModule,
-    DutySlipImageModule
+    DutySlipImageModule,
+    SummaryOfDutyModule
   ],
   exports:[ClossingOneComponent],
   providers: [ClossingOneService,

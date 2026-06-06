@@ -390,6 +390,7 @@ export class Filters {
   security:string;
   disputes:string;
   reservationID: number;
+  dutySlipID: number;
   vendorTripNumber:string;
   fromDate: string;
   toDate: string;
@@ -452,6 +453,7 @@ export class Filters {
     this.security = filter.security || '';
     this.vendorTripNumber = filter.vendorTripNumber || '';
     this.reservationID = filter.reservationID || 0;
+    this.dutySlipID = filter.dutySlipID || 0;
     this.fromDate = filter.fromDate || '';
     this.toDate = filter.toDate || '';
     this.fromTime = filter.fromTime || '';

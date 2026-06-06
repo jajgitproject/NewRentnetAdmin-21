@@ -214,6 +214,14 @@ export class FormDialogSendSmsWhatsappMailComponent {
   }
 
   private resolveRecipientType(element: any): string {
+    const personTypeLower = (element?.personType ?? '').toString().toLowerCase();
+    if (personTypeLower === 'booker') {
+      return 'Booker';
+    }
+    if (personTypeLower === 'passenger') {
+      return 'Passenger';
+    }
+
     const typeLower = (element?.type ?? '').toString().toLowerCase();
     if (typeLower === 'employee') {
       return 'Employee';

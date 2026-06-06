@@ -39,6 +39,11 @@ import { DutyExpenseModel } from '../dutyExpense/dutyExpense.model';
 import { DutyGSTPercentage } from '../dutyGSTPercentage/dutyGSTPercentage.model';
 import { DutyState } from '../dutyState/dutyState.model';
 import Swal from 'sweetalert2';
+import { SummaryOfDutyData } from '../summaryOfDuty/summary-of-duty.model';
+import {
+  SummaryOfDutyDialogComponent,
+  SummaryOfDutyDialogData
+} from '../summaryOfDuty/summary-of-duty-dialog.component';
 import { AdditionalKmsDetails } from '../additionalKmsDetails/additionalKmsDetails.model';
 import { AdditionalKmsDetailsService } from '../additionalKmsDetails/additionalKmsDetails.service';
 import { DiscountDetails } from '../discountDetails/discountDetails.model';
@@ -168,6 +173,7 @@ export class ClossingOneComponent implements OnInit, AfterViewInit, AfterViewChe
   dataSourceCSF:CustomerSpecificDetails[];
 
   advanceTableClosingOne: ClosingModel | null = null;
+  summaryOfDutyData: SummaryOfDutyData | null = null;
   dataSource: Dispute[] | null;
   dataSourceforCard: any = null;
   reservationCloseDetail: any = null;
@@ -1054,6 +1060,29 @@ export class ClossingOneComponent implements OnInit, AfterViewInit, AfterViewChe
     });
   }
 
+  private openSummaryOfDutyDialog(): void {
+    const parts: string[] = [];
+    if (this.DutySlipID != null && this.DutySlipID !== '') {
+      parts.push(`Duty slip ID: ${this.DutySlipID}`);
+    }
+    if (this.ReservationID != null) {
+      parts.push(`Reservation ID: ${this.ReservationID}`);
+    }
+    const dialogData: SummaryOfDutyDialogData = {
+      summary: this.summaryOfDutyData,
+      subtitle: parts.length ? parts.join(' · ') : undefined
+    };
+    this.dialog.open(SummaryOfDutyDialogComponent, {
+      width: '90vw',
+      maxWidth: '90vw',
+      maxHeight: '90vh',
+      autoFocus: false,
+      restoreFocus: true,
+      panelClass: 'summary-of-duty-dialog-panel',
+      data: dialogData
+    });
+  }
+
   //---------Calculate Bill------------------------
   public CalculateBill() {
     if (this.advanceTableClosingOne.closingDutySlipForBillingModel.verifyDuty === null && this.advanceTableClosingOne.closingDutySlipForBillingModel.goodForBilling === null) {
@@ -1069,9 +1098,10 @@ export class ClossingOneComponent implements OnInit, AfterViewInit, AfterViewChe
 
     }
     else {
-      this.clossingOneService.calculateBill(this.DutySlipID)
+      this.clossingOneService.calculateBillWithSummary(this.DutySlipID)
         .subscribe(
           response => {
+            this.summaryOfDutyData = response.summary;
             this.loadDataForCard();
             this.showNotification(
               'snackbar-success',
@@ -1079,16 +1109,8 @@ export class ClossingOneComponent implements OnInit, AfterViewInit, AfterViewChe
               'bottom',
               'center'
             );
+            this.openSummaryOfDutyDialog();
           },
-          // error =>
-          // {      
-          //   this.showNotification(
-          //     'snackbar-danger',
-          //     'Operation Failed.....!!!',
-          //     'bottom',
-          //     'center'
-          //   ); 
-          // }
           error => {
             const errorMessage = error || 'Operation Failed.....!!!';
             Swal.fire({

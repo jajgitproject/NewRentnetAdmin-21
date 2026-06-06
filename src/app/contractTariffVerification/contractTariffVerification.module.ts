@@ -12,6 +12,7 @@ import { MatSelectModule } from '@angular/material/select';
 import { MatAutocompleteModule } from '@angular/material/autocomplete';
 import { MatDialogModule } from '@angular/material/dialog';
 import { MatTooltipModule } from '@angular/material/tooltip';
+import { MatSnackBarModule } from '@angular/material/snack-bar';
 import { ContractTariffVerificationComponent } from './contractTariffVerification.component';
 import { ContractTariffVerificationRoutingModule } from './contractTariffVerification-routing.module';
 import { ContractTariffVerificationService } from './contractTariffVerification.service';
@@ -39,6 +40,7 @@ import { RateRowDetailsDialogComponent } from './dialogs/rate-row-details-dialog
     MatAutocompleteModule,
     MatDialogModule,
     MatTooltipModule,
+    MatSnackBarModule,
   ],
   providers: [ContractTariffVerificationService],
 })

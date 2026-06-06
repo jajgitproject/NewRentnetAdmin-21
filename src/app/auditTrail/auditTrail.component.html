@@ -75,7 +75,7 @@
               >
                 <mat-option [value]="null" (click)="onPageSelected(null)">All forms</mat-option>
                 <mat-option *ngFor="let p of filteredPageOptions | async" [value]="p">
-                  {{ p.page }}
+                  {{ pageDisplay(p) }}
                 </mat-option>
               </mat-autocomplete>
             </mat-form-field>

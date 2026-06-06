@@ -1,8 +1,8 @@
 // @ts-nocheck
 import { ChangeDetectorRef, Component, Inject, OnInit } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
+import { MatSnackBar } from '@angular/material/snack-bar';
 import { finalize } from 'rxjs/operators';
-import Swal from 'sweetalert2';
 import { GeneralService } from '../../../general/general.service';
 import { ContractTariffVerificationService } from '../../contractTariffVerification.service';
 import {
@@ -44,6 +44,7 @@ export class RateRowDetailsDialogComponent implements OnInit {
     },
     private service: ContractTariffVerificationService,
     private generalService: GeneralService,
+    private snackBar: MatSnackBar,
     private cdr: ChangeDetectorRef
   ) {}
 
@@ -119,43 +120,29 @@ export class RateRowDetailsDialogComponent implements OnInit {
 
   private applyAction(action: string) {
     if (!this.data?.isAuditor && !this.data?.isVerifier) {
-      Swal.fire('Access', 'Your role cannot perform verification actions.', 'error');
+      this.showSnack('Your role cannot perform verification actions.', 'snackbar-danger');
       return;
     }
     const eligible = action === 'Verify' ? this.canVerifyRow : this.canRejectRow;
     if (!eligible) {
       const track = this.data.isAuditor ? 'auditor' : 'verifier';
       const display = formatVerificationStatusDisplay(this.getStatusForRole(this.data.row));
-      Swal.fire(
-        'Not allowed',
+      this.showSnack(
         `This row cannot be ${action === 'Verify' ? 'verified' : 'rejected'} on your ${track} track (current status: "${display}").`,
-        'info'
+        'snackbar-warning'
       );
       return;
     }
 
-    const isVerify = action === 'Verify';
-    let message = `You are about to ${isVerify ? 'verify' : 'reject'} this row for your ${
-      this.data.isAuditor ? 'auditor' : 'verifier'
-    } track.`;
-    if (this.remarks?.trim()) {
-      message += `<br><br>Remarks: ${this.remarks.trim()}`;
-    }
+    this.executeAction(action);
+  }
 
-    Swal.fire({
-      title: isVerify ? 'Confirm verification' : 'Confirm rejection',
-      html: message,
-      icon: 'question',
-      showCancelButton: true,
-      confirmButtonText: isVerify ? 'Yes, verify' : 'Yes, reject',
-      cancelButtonText: 'Cancel',
-      reverseButtons: true,
-      focusCancel: true,
-    }).then((result) => {
-      if (!result.isConfirmed) {
-        return;
-      }
-      this.executeAction(action);
+  private showSnack(message: string, panelClass: string): void {
+    this.snackBar.open(message, '', {
+      duration: 4000,
+      verticalPosition: 'bottom',
+      horizontalPosition: 'center',
+      panelClass,
     });
   }
 
@@ -186,15 +173,13 @@ export class RateRowDetailsDialogComponent implements OnInit {
       .subscribe({
         next: (res) => {
           if (res?.result === 'Success' || res?.result === 'PartialSuccess') {
-            Swal.fire('Success', action + ' completed.', 'success').then(() => {
-              this.dialogRef.close({ refresh: true });
-            });
+            this.dialogRef.close({ refresh: true, action, success: true });
           } else {
-            Swal.fire('Failed', res?.errors?.join('\n') || 'Action failed.', 'error');
+            this.showSnack(res?.errors?.join('\n') || 'Action failed.', 'snackbar-danger');
           }
         },
         error: (err) =>
-          Swal.fire('Error', err?.error?.errors?.join('\n') || 'Request failed.', 'error'),
+          this.showSnack(err?.error?.errors?.join('\n') || 'Request failed.', 'snackbar-danger'),
       });
   }
 

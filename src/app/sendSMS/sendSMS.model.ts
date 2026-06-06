@@ -65,6 +65,10 @@ export class CustomerConfigurationMessaging
   sendSMSWhatsApp:boolean;
   primaryMobile:string;
   type:string;
+  personType:string;
+  isBooker:boolean;
+  isPassenger:boolean;
+  customerPersonID:number;
 
   constructor(customerConfigurationMessaging){
     {
@@ -74,6 +78,10 @@ export class CustomerConfigurationMessaging
       this.sendSMSWhatsApp = customerConfigurationMessaging.sendSMSWhatsApp || '';
       this.primaryMobile = customerConfigurationMessaging.primaryMobile || '';
       this.type = customerConfigurationMessaging.type || '';
+      this.personType = customerConfigurationMessaging.personType || '';
+      this.isBooker = customerConfigurationMessaging.isBooker || false;
+      this.isPassenger = customerConfigurationMessaging.isPassenger || false;
+      this.customerPersonID = customerConfigurationMessaging.customerPersonID || 0;
   
     }
   }

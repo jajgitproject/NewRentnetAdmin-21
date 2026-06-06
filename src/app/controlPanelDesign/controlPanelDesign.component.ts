@@ -599,7 +599,8 @@ export class ControlPanelDesignComponent implements OnInit {
       emailtosupplier: [this._filters.emailtosupplier],
       tncStatus: [this._filters.tncStatus],
       ticketNumb: [this._filters.ticketNumb],
-      supplierType:[this._filters.supplierType]
+      supplierType:[this._filters.supplierType],
+      dutySlipID: [this._filters.dutySlipID || '']
     });
   }
 
@@ -824,6 +825,15 @@ export class ControlPanelDesignComponent implements OnInit {
     {
       this.filterForm.patchValue({
         reservationID: value.toString().trim()
+      });
+    }
+  }
+
+  trimDutySlipNo(): void {
+    const value = this.filterForm.get('dutySlipID')?.value;
+    if (value !== null && value !== undefined && value !== '') {
+      this.filterForm.patchValue({
+        dutySlipID: value.toString().trim()
       });
     }
   }

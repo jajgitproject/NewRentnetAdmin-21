@@ -2,6 +2,7 @@
 import { Component, OnInit } from '@angular/core';
 import { FormControl } from '@angular/forms';
 import { MatDialog } from '@angular/material/dialog';
+import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatTableDataSource } from '@angular/material/table';
 import { SelectionModel } from '@angular/cdk/collections';
 import { Observable } from 'rxjs';
@@ -76,8 +77,44 @@ export class ContractTariffVerificationComponent implements OnInit {
   constructor(
     public service: ContractTariffVerificationService,
     public generalService: GeneralService,
-    private dialog: MatDialog
+    private dialog: MatDialog,
+    private snackBar: MatSnackBar
   ) {}
+
+  private swalFire(options: any) {
+    return Swal.fire({ scrollbarPadding: false, ...options });
+  }
+
+  private showNotification(colorName: string, text: string, placementFrom: string, placementAlign: string) {
+    this.snackBar.open(text, '', {
+      duration: 3000,
+      verticalPosition: placementFrom,
+      horizontalPosition: placementAlign,
+      panelClass: colorName,
+    });
+  }
+
+  private restorePageLayoutAfterDialog(): void {
+    document.body.classList.remove('cdk-global-scrollblock');
+    document.body.style.removeProperty('overflow');
+    document.body.style.removeProperty('padding-right');
+    document.body.style.removeProperty('position');
+  }
+
+  private onFullscreenDialogClosed(result?: { refresh?: boolean; success?: boolean; action?: string }): void {
+    setTimeout(() => this.restorePageLayoutAfterDialog(), 0);
+    if (result?.refresh) {
+      this.search();
+    }
+    if (result?.success) {
+      this.showNotification(
+        'snackbar-success',
+        `${result.action || 'Action'} completed.`,
+        'bottom',
+        'center'
+      );
+    }
+  }
 
   ngOnInit() {
     this.role = (localStorage.getItem('role') || '').trim();
@@ -204,7 +241,7 @@ export class ContractTariffVerificationComponent implements OnInit {
 
   search() {
     if (!this.selectedContractId || !this.selectedPackageTypeId) {
-      Swal.fire('Validation', 'Please select Customer Contract and Duty Type.', 'warning');
+      this.swalFire({ title: 'Validation', text: 'Please select Customer Contract and Duty Type.', icon: 'warning' });
       return;
     }
     const pt = this.dutyTypes.find((d) => d.packageTypeID === this.selectedPackageTypeId);
@@ -233,7 +270,11 @@ export class ContractTariffVerificationComponent implements OnInit {
       },
       (err) => {
         this.loading = false;
-        Swal.fire('Error', err?.error?.message || 'Search failed. Ensure database migration has been run.', 'error');
+        this.swalFire({
+          title: 'Error',
+          text: err?.error?.message || 'Search failed. Ensure database migration has been run.',
+          icon: 'error',
+        });
       }
     );
   }
@@ -361,11 +402,11 @@ export class ContractTariffVerificationComponent implements OnInit {
   applyBulk(action: string) {
     const selected = this.getSelectedItems();
     if (selected.length === 0) {
-      Swal.fire('Validation', 'Please select at least one row.', 'warning');
+      this.swalFire({ title: 'Validation', text: 'Please select at least one row.', icon: 'warning' });
       return;
     }
     if (!this.isAuditor && !this.isVerifier) {
-      Swal.fire('Access', 'Your role cannot perform verification actions.', 'error');
+      this.swalFire({ title: 'Access', text: 'Your role cannot perform verification actions.', icon: 'error' });
       return;
     }
 
@@ -384,15 +425,16 @@ export class ContractTariffVerificationComponent implements OnInit {
           return `Row ${i + 1}: ${track} status is "${display}"`;
         })
         .join('<br>');
-      Swal.fire(
-        'No eligible rows',
-        `None of the selected rows can be ${verb}ed on your ${track} track.<br><br>` +
+      this.swalFire({
+        title: 'No eligible rows',
+        html:
+          `None of the selected rows can be ${verb}ed on your ${track} track.<br><br>` +
           (action === 'Verify'
             ? 'Verify is allowed only when status is empty/blank or Rejected.'
             : 'Reject is allowed only when status is empty/blank or Verified.') +
           (reasons ? `<br><br>${reasons}` : ''),
-        'info'
-      );
+        icon: 'info',
+      });
       return;
     }
 
@@ -406,7 +448,7 @@ export class ContractTariffVerificationComponent implements OnInit {
       message +=
         `<br><br><span style="color:#757575">${skippedCount} other selected row(s) are not eligible and will be skipped.</span>`;
     }
-    Swal.fire({
+    this.swalFire({
       title,
       html: message,
       icon: 'question',
@@ -441,33 +483,51 @@ export class ContractTariffVerificationComponent implements OnInit {
     call.subscribe(
       (res) => {
         if (res?.result === 'Success') {
-          Swal.fire('Success', action + ' completed for ' + res.successCount + ' row(s).', 'success');
+          this.swalFire({
+            title: 'Success',
+            text: action + ' completed for ' + res.successCount + ' row(s).',
+            icon: 'success',
+          });
           this.search();
         } else if (res?.result === 'PartialSuccess') {
-          Swal.fire('Partial', res.errors?.join('\n') || 'Some rows failed.', 'warning');
+          this.swalFire({
+            title: 'Partial',
+            text: res.errors?.join('\n') || 'Some rows failed.',
+            icon: 'warning',
+          });
           this.search();
         } else {
-          Swal.fire('Failed', res?.errors?.join('\n') || 'Action failed.', 'error');
+          this.swalFire({
+            title: 'Failed',
+            text: res?.errors?.join('\n') || 'Action failed.',
+            icon: 'error',
+          });
         }
       },
-      (err) => Swal.fire('Error', err?.error?.errors?.join('\n') || 'Request failed.', 'error')
+      (err) =>
+        this.swalFire({
+          title: 'Error',
+          text: err?.error?.errors?.join('\n') || 'Request failed.',
+          icon: 'error',
+        })
     );
   }
 
   private fullScreenDialogConfig() {
     return {
-      width: '100vw',
-      height: '100vh',
-      maxWidth: '100vw',
-      maxHeight: '100vh',
+      width: '100%',
+      height: '100%',
+      maxWidth: '100%',
+      maxHeight: '100%',
       panelClass: 'contract-tariff-fullscreen-dialog',
       autoFocus: false,
+      restoreFocus: true,
     };
   }
 
   openHistory(row: any, event?: Event) {
     event?.stopPropagation();
-    this.dialog.open(VerificationHistoryDialogComponent, {
+    const ref = this.dialog.open(VerificationHistoryDialogComponent, {
       ...this.fullScreenDialogConfig(),
       data: {
         rateTableName: row.rateTableName,
@@ -475,6 +535,7 @@ export class ContractTariffVerificationComponent implements OnInit {
         title: row.rateTableName + ' #' + row.rateRowID,
       },
     });
+    ref.afterClosed().subscribe(() => this.onFullscreenDialogClosed());
   }
 
   openRowDetails(row: any, isFixedSection: boolean) {
@@ -498,11 +559,7 @@ export class ContractTariffVerificationComponent implements OnInit {
         isVerifier: this.isVerifier,
       },
     });
-    ref.afterClosed().subscribe((result) => {
-      if (result?.refresh) {
-        this.search();
-      }
-    });
+    ref.afterClosed().subscribe((result) => this.onFullscreenDialogClosed(result));
   }
 
   getCellValue(row: any, field: string): any {

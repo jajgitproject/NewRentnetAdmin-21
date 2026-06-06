@@ -452,6 +452,7 @@ function packageDescription(pkg: Record<string, unknown> | undefined): string {
   const billing = str(pick(pkg, 'billingOption', 'BillingOption'));
   const minKm = toNum(pick(pkg, 'minimumKM', 'MinimumKM'));
   const minHr = toNum(pick(pkg, 'minimumHours', 'MinimumHours'));
+  const minDays = toNum(pick(pkg, 'minimumDays', 'MinimumDays'));
   const parts: string[] = [];
   if (svc) {
     parts.push(svc);
@@ -473,9 +474,14 @@ function packageDescription(pkg: Record<string, unknown> | undefined): string {
       parts.push(`Service type ID: ${stId}`);
     }
   }
+  if (minDays != null) {
+    parts.push(`${minDays} day(s) min`);
+  }
   if (minKm != null && minHr != null) {
     const hrsStr = hoursMinutesCompactStr(minHr);
     parts.push(hrsStr != null ? `${minKm} Kms / ${hrsStr} Hrs` : `${minKm} Kms`);
+  } else if (minKm != null) {
+    parts.push(`${minKm} Kms min`);
   } else if (ptype && parts.length === 0) {
     parts.push(ptype);
   } else if (ptype && parts.length > 0 && !parts.includes(ptype)) {
@@ -532,6 +538,62 @@ export function enrichInvoiceCalculationWithFullDetail(
   takeIfMissing('invoicePackageModel', 'InvoicePackageModel');
   takeIfMissing('invoicePackageValuesModel', 'InvoicePackageValuesModel');
   return out;
+}
+
+/** True when calculate/duty-billing-summary returned a usable body (not 204 / empty). */
+export function hasInvoiceCalculationResult(response: unknown): boolean {
+  const calc = unwrapInvoiceCalculationPayload(response);
+  if (calc == null) {
+    return false;
+  }
+  const id =
+    pick(calc, 'invoiceCalculationID', 'InvoiceCalculationID') ??
+    pick(calc, 'dutySlipID', 'DutySlipID');
+  if (id != null && id !== '' && Number(id) !== 0) {
+    return true;
+  }
+  return (
+    calc['invoicePackageModel'] != null ||
+    calc['InvoicePackageModel'] != null ||
+    calc['invoiceGSTModel'] != null ||
+    calc['InvoiceGSTModel'] != null ||
+    calc['totalAmountAfterGST'] != null ||
+    calc['TotalAmountAfterGST'] != null
+  );
+}
+
+export function summaryOfDutyHasDisplayableData(data: SummaryOfDutyData | null): boolean {
+  if (!data) {
+    return false;
+  }
+  const hasValue = (rows?: SummaryOfDutyRow[]) =>
+    (rows ?? []).some((r) => r.value != null && r.value !== '—');
+  return (
+    hasValue(data.packageDetails) ||
+    hasValue(data.extraDetails) ||
+    hasValue(data.otherCharges) ||
+    hasValue(data.taxDetails) ||
+    (data.finalBillAmount != null && data.finalBillAmount !== '—')
+  );
+}
+
+/** Merge calculate response with duty-billing-summary when nested GST/package rows are missing. */
+export function buildMergedInvoiceCalculationPayload(
+  calcRes: unknown,
+  summaryRes: unknown
+): Record<string, unknown> | null {
+  const calc = unwrapInvoiceCalculationPayload(calcRes);
+  if (calc == null) {
+    return null;
+  }
+  if (!invoiceCalculationNeedsFullDetailMerge(calc)) {
+    return calc;
+  }
+  const full = unwrapInvoiceCalculationPayload(summaryRes);
+  if (full == null) {
+    return null;
+  }
+  return enrichInvoiceCalculationWithFullDetail(calc, full);
 }
 
 /**
@@ -615,11 +677,13 @@ export function mapInvoiceCalculationToSummaryOfDuty(response: unknown): Summary
     'TotalKMWithAddtionalKM'
   );
 
-  const totalHrs = pick(
-    r,
-    'totalHoursWithAddtionalHoursForDutySummary',
-    'TotalHoursWithAddtionalHoursForDutySummary'
-  );
+  const totalHrs =
+    pick(
+      r,
+      'totalHoursWithAddtionalHoursForDutySummary',
+      'TotalHoursWithAddtionalHoursForDutySummary'
+    ) ??
+    pick(r, 'totalHoursWithAddtionalHours', 'TotalHoursWithAddtionalHours');
 
   const dutyPkgAmt = pick(
     r,

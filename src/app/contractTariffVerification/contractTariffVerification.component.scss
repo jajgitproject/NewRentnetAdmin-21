@@ -101,36 +101,6 @@
   }
 }
 
-::ng-deep .contract-tariff-fullscreen-dialog {
-  .mat-mdc-dialog-container,
-  .mat-dialog-container {
-    width: 100vw !important;
-    height: 100vh !important;
-    max-width: 100vw !important;
-    max-height: 100vh !important;
-    border-radius: 0 !important;
-    padding: 16px 24px !important;
-    box-sizing: border-box;
-    display: flex !important;
-    flex-direction: column !important;
-  }
-
-  .mat-mdc-dialog-content,
-  .mat-dialog-content {
-    flex: 1 1 auto;
-    max-height: none !important;
-    overflow: auto !important;
-  }
-
-  .mat-mdc-dialog-actions,
-  .mat-dialog-actions,
-  .mat-mdc-dialog-title,
-  .mat-dialog-title,
-  [mat-dialog-title] {
-    flex-shrink: 0;
-  }
-}
-
 .status-pending {
   color: #f57c00;
 }

@@ -259,6 +259,43 @@
   overflow: visible;
 }
 
+/* Contract Tariff Verification: fullscreen row details / history dialogs */
+.cdk-overlay-container .cdk-overlay-pane.contract-tariff-fullscreen-dialog {
+  width: 100vw !important;
+  max-width: 100vw !important;
+  height: 100vh !important;
+  max-height: 100vh !important;
+  flex-shrink: 0 !important;
+  flex-grow: 0 !important;
+  box-sizing: border-box;
+}
+.cdk-overlay-container .cdk-overlay-pane.contract-tariff-fullscreen-dialog > .mat-mdc-dialog-container,
+.cdk-overlay-container .cdk-overlay-pane.contract-tariff-fullscreen-dialog > .mat-dialog-container {
+  width: 100% !important;
+  height: 100% !important;
+  max-width: 100% !important;
+  max-height: 100% !important;
+  border-radius: 0 !important;
+  padding: 16px 24px !important;
+  box-sizing: border-box;
+  display: flex !important;
+  flex-direction: column !important;
+  flex-shrink: 0 !important;
+}
+.cdk-overlay-container .cdk-overlay-pane.contract-tariff-fullscreen-dialog .mat-mdc-dialog-content,
+.cdk-overlay-container .cdk-overlay-pane.contract-tariff-fullscreen-dialog .mat-dialog-content {
+  flex: 1 1 auto;
+  max-height: none !important;
+  overflow: auto !important;
+}
+.cdk-overlay-container .cdk-overlay-pane.contract-tariff-fullscreen-dialog .mat-mdc-dialog-actions,
+.cdk-overlay-container .cdk-overlay-pane.contract-tariff-fullscreen-dialog .mat-dialog-actions,
+.cdk-overlay-container .cdk-overlay-pane.contract-tariff-fullscreen-dialog .mat-mdc-dialog-title,
+.cdk-overlay-container .cdk-overlay-pane.contract-tariff-fullscreen-dialog .mat-dialog-title,
+.cdk-overlay-container .cdk-overlay-pane.contract-tariff-fullscreen-dialog [mat-dialog-title] {
+  flex-shrink: 0;
+}
+
 /* Wide panels: single scroll (see _modals.scss + rules above for default overflow-y: auto on dialog content). */
 .cdk-overlay-container
   .cdk-overlay-pane.stops-on-map-wide-dialog
