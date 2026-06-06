@@ -1401,8 +1401,8 @@ GetVehicleBasedOnContractIDForOutStationRoundTrip(contractID: any,PackageID:numb
   GetVehicleAsInventory(): Observable<VehicleDropDown[]> {
     return this.http.get<VehicleDropDown[]>(this.BaseURL + "Vehicle/getVehicleAsInventoryForDropDown");
   }
-   GetVehicleAsInventoryBySupplierID(SupplierID: number): Observable<VehicleDropDown[]> {
-    return this.http.get<VehicleDropDown[]>(this.BaseURL + "Vehicle/GetVehicleAsInventoryBySupplierID/" + SupplierID);
+   GetVehicleAsInventoryBySupplierID(SupplierID: number,DriverType: string): Observable<VehicleDropDown[]> {
+    return this.http.get<VehicleDropDown[]>(this.BaseURL + "Vehicle/GetVehicleAsInventoryBySupplierID/" + SupplierID + "/" + DriverType);
   }
 
   getMonthYear(): Observable<MonthlyBusinessReportDropDown[]> {

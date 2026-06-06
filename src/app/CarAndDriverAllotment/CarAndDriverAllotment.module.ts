@@ -100,7 +100,8 @@ import { DriverInventoryAssociationModule } from '../driverInventoryAssociation/
     MatProgressBarModule,
     MyUploadModule,
     ReservationLocationTransferLogModule,
-    AdhocCarAndDriverModule
+    AdhocCarAndDriverModule,
+    DriverInventoryAssociationModule
   ],
   providers: [CarAndDriverAllotmentService,
               OtherFilterService,

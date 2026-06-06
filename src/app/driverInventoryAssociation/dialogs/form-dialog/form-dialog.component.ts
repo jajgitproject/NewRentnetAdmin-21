@@ -74,6 +74,8 @@ export class FormDialogComponent implements OnInit {
   driverSupplierID: number;
   inventorySupplierID: number;
   SupplierID:any;
+  CarType:any;
+  DriverType:any;
   constructor(
     public dialogRef: MatDialogRef<FormDialogComponent>,
     @Inject(MAT_DIALOG_DATA) public data: any,
@@ -157,8 +159,7 @@ export class FormDialogComponent implements OnInit {
   ngOnInit(): void {
     if (this.RedirectingFrom === "Driver") {
       const DP = this.DriverPhone.split('-')[1];
-      this.InitVehicle();
-
+      this.getDriverInternalORExternal(this.DriverID);
       this.advanceTableForm.patchValue({ driverName: this.DriverName + "-" + DP + "-" + this.Supplier });
       this.advanceTableForm.patchValue({ driverID: this.DriverID });
       this.advanceTableForm.controls["driverName"].disable();
@@ -171,6 +172,7 @@ export class FormDialogComponent implements OnInit {
       }
       this.advanceTableForm.patchValue({ inventoryName: this.Regno + "-" + this.Vehicle + "-" + this.SupplierName });
       this.advanceTableForm.patchValue({ inventoryID: this.VehicleID });
+      this.getCarInternalORExternal(this.VehicleID);
       this.advanceTableForm.controls["inventoryName"].disable();
     }
     if (this.data.text === 'AttachAnotherDriver') {
@@ -187,6 +189,7 @@ export class FormDialogComponent implements OnInit {
       this.advanceTableForm.controls["driverInventoryAssociationStatus"].setValue(true);
       this.advanceTableForm.controls["activationStatus"].setValue(this.data.activationStatus);
       this.advanceTableForm.patchValue({ driverID: this.data.driverID, });
+      this.getCarInternalORExternal(this.data.vehicleID);
       // this.InitAttachAnotherDriver(this.supplierID, this.ownedSupplierChecked);
       //this.advanceTableForm.controls['vehicleCategory'].setValue(this.data.vehicleCategory);
     }
@@ -222,6 +225,30 @@ export class FormDialogComponent implements OnInit {
     }
   }
 
+    getCarInternalORExternal(InventoryID)
+   {
+    
+    this.advanceTableService.getCarInternalORExternal(InventoryID).subscribe(
+      data => {
+        this.CarType=data.carType;
+      });;
+  }
+
+  
+    getDriverInternalORExternal(DriverID)
+   {
+    
+    this.advanceTableService.getDriverInternalORExternal(DriverID).subscribe(
+      data => {
+        this.DriverType=data.driverType;
+        if(this.DriverType !== null)
+      {
+       this.InitVehicle();
+      }  
+      });;
+  }
+
+
   //---------AttachAnotherDriver-----------------
   onKeyupDriverName()
    {
@@ -231,7 +258,7 @@ export class FormDialogComponent implements OnInit {
         this.AnotherDriverList = [];
         return;
       }
-    this.advanceTableService.getDriverList(this.supplierID, this.ownedSupplierChecked, Prefix).subscribe(
+    this.advanceTableService.getDriverList(this.supplierID || this.SupplierID, this.ownedSupplierChecked, Prefix,this.CarType).subscribe(
       data => {
         this.AnotherDriverList = data;
         this.advanceTableForm.controls['driverName'].setValidators([Validators.required,
@@ -387,7 +414,7 @@ export class FormDialogComponent implements OnInit {
 
   //-----------Inventory----------------
   InitVehicle() {
-    this._generalService.GetVehicleAsInventoryBySupplierID(this.SupplierID).subscribe(
+    this._generalService.GetVehicleAsInventoryBySupplierID(this.SupplierID,this.DriverType).subscribe(
       data => {
         this.VehicleList = data;
         this.advanceTableForm.controls['inventoryName'].setValidators([Validators.required,

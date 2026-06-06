@@ -50,9 +50,11 @@
                         <input (keyup)="onKeyupDriverName($event)" required type="text" matInput formControlName="driverName" [matAutocomplete]="auto">
                         <mat-autocomplete #auto="matAutocomplete"
                             (optionSelected)="OnDriverSelected($event.option.value)">
-                            <mat-option *ngFor="let option of filteredDriverOptions | async" [value]="option.driverName"
+                             <mat-option *ngFor="let option of filteredDriverListOptions | async"
+                                [value]="option.driverName + '-' + option.mobile1+ '-' + option.supplier + '-' + option.supplierType + '-' + option.ownedSupplier"
                                 (click)="getDriverlistID(option.driverID)">
-                                {{option.driverName}}
+                                {{option.driverName}} - {{option.mobile1}} - {{option.supplier}} -
+                                {{option.supplierType}} - {{option.ownedSupplier}}
                             </mat-option>
                         </mat-autocomplete>
 

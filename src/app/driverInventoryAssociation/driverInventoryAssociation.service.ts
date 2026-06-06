@@ -221,8 +221,8 @@ export class DriverInventoryAssociationService {
     return this.httpClient.delete(this.API_URL + '/' + driverInventoryAssociationID + '/' + userID);
   }
 
-  getDriverList(supplierID: number, type: any, prefix: string): Observable<any> {
-    return this.httpClient.get(this.API_URL_Driver + '/GetDriverList' + "/" + supplierID + "/" + type + "/" + prefix);
+  getDriverList(supplierID: number, type: any, prefix: string,CarType:string): Observable<any> {
+    return this.httpClient.get(this.API_URL_Driver + '/GetDriverList' + "/" + supplierID + "/" + type + "/" + prefix+"/"+CarType);
   }
    GetAllDriverList(prefix: string): Observable<any> {
     return this.httpClient.get(this.API_URL_Driver + '/GetAllDriverList' + "/"  + prefix);
@@ -237,6 +237,12 @@ export class DriverInventoryAssociationService {
   updateDriverMobile(advanceTable: DriverModel) {
     advanceTable.userID = this.generalService.getUserID();   
     return this.httpClient.put<any>(this.API_URL + '/UpdateDriverMobile', advanceTable);
+  }
+    getCarInternalORExternal(InventoryID: number): Observable<any> {
+    return this.httpClient.get(this.API_URL_Driver + '/GetCarInternalORExternal' + "/" + InventoryID);
+  }
+   getDriverInternalORExternal(DriverID: number): Observable<any> {
+    return this.httpClient.get(this.API_URL_Driver + '/GetDriverInternalORExternal' + "/" + DriverID);
   }
 }
 
