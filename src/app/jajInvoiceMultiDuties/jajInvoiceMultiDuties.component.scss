@@ -441,24 +441,22 @@ body {
     padding-top: 6px;
 }
 
-/* ================= TERMS ================= */
-.terms-box {
+/* ================= TERMS + FOOTER ================= */
+.terms-footer {
+    display: grid;
+    grid-template-columns: 65% 35%;
     margin-top: 6px;
     border: 1px solid #000;
+    page-break-inside: avoid;
+}
+
+.terms-content {
     padding: 6px;
-    page-break-inside: avoid;
+    border-right: 1px solid #000;
 }
 
-/* ================= FOOTER ================= */
-.footer {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    margin-top: 6px;
-    page-break-inside: avoid;
-}
-
-.signature {
+.terms-footer .signature {
     text-align: right;
-    padding-top: 30px;
+    padding: 6px;
     font-weight: bold;
 }

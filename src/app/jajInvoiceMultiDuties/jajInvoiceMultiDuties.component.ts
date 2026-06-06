@@ -97,9 +97,9 @@ export class JajInvoiceMultiDutiesComponent implements OnInit {
    );
  }
 calculateTotals() {
-    // 1️⃣ Basic Amount = sum of all rows
+    // Basic Amount = sum of after-discount line totals (pre-GST)
     this.dataSourceForCalculate.totalBasicAmount = this.dataSourceForInvoiceDuties
-      .map(d => d.totalAmountAfterExpences || 0)
+      .map(d => d.totalAmountAfterDiscount ?? d.totalAmountAfterExpences ?? 0)
       .reduce((a, b) => a + b, 0);
 
     // 2️⃣ Add GST
@@ -158,6 +158,14 @@ getHoursAndMinutes(totalMinutes: number): { hours: number; minutes: number } {
   const hours = Math.floor(totalMinutes / 60);
   const minutes = totalMinutes % 60;
   return { hours, minutes };
+}
+
+get totalTax(): number {
+  const invoice = this.dataSource?.invoiceModel;
+  if (!invoice) {
+    return 0;
+  }
+  return (invoice.cgstAmount || 0) + (invoice.sgstAmount || 0) + (invoice.igstAmount || 0);
 }
 
 }

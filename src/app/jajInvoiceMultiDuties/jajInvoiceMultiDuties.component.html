@@ -145,54 +145,57 @@
 
     <div class="totals-wrapper">
       <div class="amount-words">
-        <b>Amount in Words:</b><br>
-        Rupees {{dataSourceForCalculate?.totalAmountAfterGSTInWords}} Only
+        <strong>Rupees {{dataSourceForCalculate?.totalAmountAfterGSTInWords}} Only</strong>
       </div>
 
       <div class="totals-box">
         <div class="totals-row">
-          <span>Sub Total</span>
+          <span>Basic Amount</span>
           <span><strong>{{dataSourceForCalculate?.totalBasicAmount | number:'1.2-2'}}</strong></span>
         </div>
 
-        <div class="totals-row" *ngIf="dataSource?.invoiceGSTModel?.cgstAmount > 0">
-          <span>CGST @{{dataSource?.invoiceGSTModel?.cgstPercentage}}%</span>
-          <span><strong>{{dataSource?.invoiceGSTModel?.cgstAmount | number:'1.2-2'}}</strong></span>
+        <div class="totals-row">
+          <span>SGST @{{ (dataSource?.invoiceModel?.sgstPercentage ?? 0) | number:'1.2-2' }}</span>
+          <span><strong>{{ (dataSource?.invoiceModel?.sgstAmount ?? 0) | number:'1.2-2' }}</strong></span>
         </div>
 
-        <div class="totals-row" *ngIf="dataSource?.invoiceGSTModel?.sgstAmount > 0">
-          <span>SGST @{{dataSource?.invoiceGSTModel?.sgstPercentage}}%</span>
-          <span><strong>{{dataSource?.invoiceGSTModel?.sgstAmount | number:'1.2-2'}}</strong></span>
+        <div class="totals-row">
+          <span>CGST @{{ (dataSource?.invoiceModel?.cgstPercentage ?? 0) | number:'1.2-2' }}</span>
+          <span><strong>{{ (dataSource?.invoiceModel?.cgstAmount ?? 0) | number:'1.2-2' }}</strong></span>
         </div>
 
-        <div class="totals-row" *ngIf="dataSource?.invoiceGSTModel?.igstAmount > 0">
-          <span>IGST @{{dataSource?.invoiceGSTModel?.igstPercentage}}%</span>
-          <span><strong>{{dataSource?.invoiceGSTModel?.igstAmount | number:'1.2-2'}}</strong></span>
+        <div class="totals-row">
+          <span>IGST @{{ (dataSource?.invoiceModel?.igstPercentage ?? 0) | number:'1.2-2' }}</span>
+          <span><strong>{{ (dataSource?.invoiceModel?.igstAmount ?? 0) | number:'1.2-2' }}</strong></span>
+        </div>
+
+        <div class="totals-row">
+          <span>Total Tax</span>
+          <span><strong>{{totalTax | number:'1.2-2'}}</strong></span>
         </div>
 
         <div class="totals-row bold">
-          <span>Grand Total</span>
+          <span>Total Amount</span>
           <span><strong>{{dataSource?.invoiceModel?.invoiceTotalAmountAfterGST | number:'1.2-2'}}</strong></span>
         </div>
       </div>
     </div>
 
-    <div class="terms-box">
-      <b>Terms & Conditions:</b><br>
-      Our Responsibility of the Signed duty slip rests till we handover the same to you with the bill.
-      Interest @ 24% will be charged if payment is not received as per payment terms settled.
-      No Objection pertaining to this invoice would be entertained thereafter.
-      Send the RTGS/NEFT Payment to: KOTAK MAHINDRA BANK / A/C NO: 3911291161, IFSC CODE: KKBK0004620, PAN NO: AABCE1357N,<br>
-      CIN NO: L74999DL1996PLC076375
-      Electronic Mode of Payments as per Section 269SU of Income Tax Act, 1961.
-      <!-- <a href="https://www.ecosmobility.com/pay-online/" target="_blank">https://www.ecosmobility.com/pay-online/</a> -->
-    </div>
+    <div class="terms-footer">
+      <div class="terms-content">
+        <p class="text1">E &amp; O. E.<br />Terms &amp; conditions</p>
+        <p class="text1">
+          Our Responsibility of the Signed duty slip rests till we handover the same to you with the bill.<br />
+          Interest @ 24% will be charged if payment is not received as per payment terms settled.<br />
+          No Objection pertaining to this invoice would be entertained thereafter.<br />
+          Send the RTGS/NEFT Payment to: KOTAK MAHINDRA BANK / A/C NO: 3911291161, IFSC CODE: KKBK0004620, PAN NO: AABCE1357N, CIN NO:
+          L74999DL1996PLC076375
+        </p>
+      </div>
 
-    <div class="footer">
-      <div></div>
       <div class="signature">
         <p><strong>ECOS (India) Mobility & Hospitality Limited</strong></p>
-        <br><br>
+        <br /><br />
         <img src="assets/images/Picture1.png" width="80px" height="80px" />
         <p>Authorized Signatory</p>
       </div>
