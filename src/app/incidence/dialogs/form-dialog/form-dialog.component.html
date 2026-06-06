@@ -246,8 +246,8 @@
                   ">
               <mat-option *ngFor="
                       let option of filteredIssueCategoryByOptionss | async
-                    " [value]="option.issueCategory" (click)="getIssueCategoryID(option.issueCategoryID)">
-                {{ option.issueCategory }}
+                    " [value]="getIssueCategoryDisplayLabel(option)" (click)="getIssueCategoryID(option.issueCategoryID)">
+                {{ getIssueCategoryDisplayLabel(option) }}
               </mat-option>
             </mat-autocomplete>
             <mat-error *ngIf="advanceTableForm.get('issueCategory')?.hasError('required')">

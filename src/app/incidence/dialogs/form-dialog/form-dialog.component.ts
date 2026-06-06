@@ -698,28 +698,45 @@ incidenceTypeValidator(list: any[]): ValidatorFn {
       ]);
 
       control?.updateValueAndValidity();
+      this.syncIssueCategoryDisplayValue();
 
       this.filteredIssueCategoryByOptionss =
         control?.valueChanges.pipe(
-          startWith(""),
+          startWith(control?.value || ''),
           map(value => this._filterIssueCategory(value || ''))
         );
 
     });
 }
 
+  getIssueCategoryDisplayLabel(item: IssueCategoryDropDown): string {
+    if (!item?.issueCategory) {
+      return '';
+    }
+    return item.severity ? `${item.issueCategory} - ${item.severity}` : item.issueCategory;
+  }
+
+  private syncIssueCategoryDisplayValue(): void {
+    const issueCategoryID = this.issueCategoryID || this.advanceTableForm.get('issueCategoryID')?.value;
+    const selected = this.IssueCategoryList?.find(item => item.issueCategoryID === issueCategoryID);
+    if (selected) {
+      this.advanceTableForm.patchValue({
+        issueCategory: this.getIssueCategoryDisplayLabel(selected)
+      });
+    }
+  }
+
 
   private _filterIssueCategory(value: string): any {
     const filterValue = value.toLowerCase();
     return this.IssueCategoryList.filter(
       customer => {
-        return customer.issueCategory.toString().toLowerCase().includes(filterValue);
+        return this.getIssueCategoryDisplayLabel(customer).toLowerCase().includes(filterValue);
       });
   }
   onIssueCategorySelected(selectedIssueCategory: string) {
-    // Find the selected category from the IssueCategoryList
     const selectedCategory = this.IssueCategoryList.find(
-      data => data.issueCategory === selectedIssueCategory
+      data => this.getIssueCategoryDisplayLabel(data) === selectedIssueCategory
     )
     if (selectedCategory) {
       this.issueCategoryID = selectedCategory.issueCategoryID;
@@ -731,6 +748,12 @@ incidenceTypeValidator(list: any[]): ValidatorFn {
   getIssueCategoryID(issueCategoryID) {
     this.issueCategoryID = issueCategoryID;
     this.advanceTableForm.patchValue({ issueCategoryID: this.issueCategoryID  || this.advanceTable?.issueCategoryID});
+    const selected = this.IssueCategoryList?.find(item => item.issueCategoryID === issueCategoryID);
+    if (selected) {
+      this.advanceTableForm.patchValue({
+        issueCategory: this.getIssueCategoryDisplayLabel(selected)
+      });
+    }
   }
 
   IssueCategoryValidator(list: any[]): ValidatorFn {
@@ -744,7 +767,7 @@ incidenceTypeValidator(list: any[]): ValidatorFn {
       .toLowerCase();
 
     const match = list?.some(item =>
-      item.issueCategory
+      this.getIssueCategoryDisplayLabel(item)
         ?.toString()
         .trim()
         .toLowerCase() === value
@@ -894,9 +917,15 @@ incidenceTypeValidator(list: any[]): ValidatorFn {
               this.advanceTableForm.patchValue({ reporterName: this.dataSource[0].reporterName });
               this.advanceTableForm.patchValue({ incidenceDetails: this.dataSource[0].incidenceDetails });
               this.advanceTableForm.patchValue({ incidenceType: this.dataSource[0].incidenceType });
-              this.advanceTableForm.patchValue({ issueCategory: this.dataSource[0].issueCategory });
               this.advanceTableForm.patchValue({ incidenceTypeID: this.dataSource[0].incidenceTypeID });
               this.advanceTableForm.patchValue({ issueCategoryID: this.dataSource[0].issueCategoryID });
+              this.incidenceTypeID = this.dataSource[0].incidenceTypeID;
+              this.issueCategoryID = this.dataSource[0].issueCategoryID;
+              if (this.incidenceTypeID) {
+                this.initIssueCategory();
+              } else {
+                this.advanceTableForm.patchValue({ issueCategory: this.dataSource[0].issueCategory });
+              }
               this.advanceTableForm.patchValue({ passengerID: this.dataSource[0].passengerID });
               this.advanceTableForm.patchValue({ reportEvidenceDoc: this.dataSource[0].reportEvidenceDoc });
               this.advanceTableForm.patchValue({ type: this.dataSource[0].type });  
