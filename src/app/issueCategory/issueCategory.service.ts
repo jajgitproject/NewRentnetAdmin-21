@@ -17,29 +17,37 @@ export class IssueCategoryService
     this.API_URL=generalService.BaseURL+ "issueCategory";
   }
   /** CRUD METHODS */
-  getTableData(SearchIssueCategory:string, SearchActivationStatus:boolean, PageNumber: number):  Observable<any> 
+  getTableData(SearchIssueCategory:string, SearchSeverity:string, SearchActivationStatus:boolean, PageNumber: number):  Observable<any> 
   {
     if(SearchIssueCategory==="")
     {
       SearchIssueCategory="null";
     }
+    if(SearchSeverity==="" || SearchSeverity==null)
+    {
+      SearchSeverity="null";
+    }
     if(SearchActivationStatus===null)
     {
       SearchActivationStatus=null;
     }
-    return this.httpClient.get(this.API_URL + "/" +SearchIssueCategory + '/' + SearchActivationStatus +'/' + PageNumber + '/IssueCategory/Ascending');
+    return this.httpClient.get(this.API_URL + "/" +SearchIssueCategory + '/' + SearchSeverity + '/' + SearchActivationStatus +'/' + PageNumber + '/IssueCategory/Ascending');
   }
-  getTableDataSort(SearchIssueCategory:string, SearchActivationStatus:Boolean, PageNumber: number,coloumName:string,sortType:string):  Observable<any> 
+  getTableDataSort(SearchIssueCategory:string, SearchSeverity:string, SearchActivationStatus:Boolean, PageNumber: number,coloumName:string,sortType:string):  Observable<any> 
   {
     if(SearchIssueCategory==="")
     {
       SearchIssueCategory="null";
     }
+    if(SearchSeverity==="" || SearchSeverity==null)
+    {
+      SearchSeverity="null";
+    }
     if(SearchActivationStatus===null)
     {
       SearchActivationStatus=null;
     }
-    return this.httpClient.get(this.API_URL + "/" +SearchIssueCategory + '/' + SearchActivationStatus +'/' + PageNumber +  '/'+coloumName+'/'+sortType);
+    return this.httpClient.get(this.API_URL + "/" +SearchIssueCategory + '/' + SearchSeverity + '/' + SearchActivationStatus +'/' + PageNumber +  '/'+coloumName+'/'+sortType);
   }
 
   add(advanceTable: IssueCategory) 

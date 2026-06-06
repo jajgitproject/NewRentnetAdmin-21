@@ -29,6 +29,7 @@ import { FormControl } from '@angular/forms';
 export class IssueCategoryComponent implements OnInit {
   displayedColumns = [
     'issueCategory',
+    'severity',
     'incidenceType',
     'status',
     'actions'
@@ -37,7 +38,9 @@ export class IssueCategoryComponent implements OnInit {
   issuecategoryID: number;
   advanceTable: IssueCategory | null;
   SearchIssueCategory: string = '';
+  SearchSeverity: string = null;
   SearchActivationStatus : boolean=true;
+  severityOptions: string[] = ['Low', 'Medium', 'High', 'Critical'];
   PageNumber: number = 0;
   activation: string;
   sortingData: number;
@@ -68,6 +71,7 @@ export class IssueCategoryComponent implements OnInit {
     this.selectedFilter='search';
     this.searchTerm='';
     this.SearchIssueCategory = '';
+    this.SearchSeverity = null;
     this.SearchActivationStatus = true;
     this.PageNumber=0;
     this.loadData();
@@ -128,7 +132,11 @@ shouldShowDeleteButton(item: any): boolean {
     {
       this.SearchIssueCategory=this.searchTerm;
     }
-      this.issuecategoryService.getTableData(this.SearchIssueCategory,this.SearchActivationStatus, this.PageNumber).subscribe
+    else if(this.selectedFilter==='Severity')
+    {
+      this.SearchSeverity=this.searchTerm;
+    }
+      this.issuecategoryService.getTableData(this.SearchIssueCategory, this.SearchSeverity, this.SearchActivationStatus, this.PageNumber).subscribe
       (
         data =>   
         {
@@ -308,7 +316,7 @@ shouldShowDeleteButton(item: any): boolean {
       this.sortingData = 1;
       this.sortType = "Descending";
     }
-    this.issuecategoryService.getTableDataSort(this.SearchIssueCategory,this.SearchActivationStatus, this.PageNumber,coloumName.active,this.sortType).subscribe
+    this.issuecategoryService.getTableDataSort(this.SearchIssueCategory, this.SearchSeverity, this.SearchActivationStatus, this.PageNumber,coloumName.active,this.sortType).subscribe
     (
       data =>   
       {

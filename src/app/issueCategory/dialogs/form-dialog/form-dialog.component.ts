@@ -28,6 +28,7 @@ export class FormDialogComponent
   advanceTableForm: FormGroup;
   advanceTable: IssueCategory;
   saveDisabled:boolean = true;
+  severityOptions: string[] = ['Low', 'Medium', 'High', 'Critical'];
   incidenceTypeID: any; // Declare incidenceTypeID as a property
     departmentID: any;
     public DepartmentList?: DepartmentDropDown[] = [];
@@ -78,6 +79,7 @@ filteredIncidenceTypeOptions: Observable<IncidenceTypeDropDown[]>;
       department:[this.advanceTable.department],
       incidenceType: [this.advanceTable.incidenceType],
       issueCategory: [this.advanceTable.issueCategory,[this.noWhitespaceValidator]],
+      severity: [this.advanceTable.severity, Validators.required],
       activationStatus: [this.advanceTable.activationStatus],
     });
   }
