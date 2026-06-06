@@ -31,9 +31,12 @@
                     <!-- <mat-label style="margin-left: 18px;">Selfie With Uniform</mat-label> -->
                     <mat-label>DutySlip Image</mat-label>
                     <br>
-                    <a href="{{ ImagePath }}" target="_blank" *ngIf="ImagePath" >
+                    <a href="{{ ImagePath }}" target="_blank" *ngIf="ImagePath && !isPdf" >
                         <img [src]="ImagePath" class="table " style="cursor: pointer;height: 80px; width: auto;">
                     </a>
+
+                    
+                    <img *ngIf="isPdf" src="assets/pdf-icon.png"  style="cursor:pointer;height:20px;width:auto;" (click)="openImageInNewTab(imageUrl)">
     
                     <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2" style="cursor: pointer;right: 15px;">
                         <app-myupload (onUploadFinished)="uploadFinishedSelfie($event)" ></app-myupload>

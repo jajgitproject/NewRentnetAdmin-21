@@ -90,8 +90,8 @@ export class SigninComponent implements OnInit {
         .login(this.f.email.value, this.f.password.value, 'Employee')
         .subscribe(
           (res) => {
-            this.error = res?.Message || null;
-            if(res.Message === "Invalid User: User not found")
+            this.error = res?.loginDetails || null;
+            if(this.error?.includes('User not found'))
             {
               this.errorMessageToBeShown = "User not found";
             }
@@ -102,7 +102,7 @@ export class SigninComponent implements OnInit {
             
             if (res) {
               const token = res.Token ?? res.token;
-              const employee = res.employee ?? res.Employee;
+              const employee = res.employee ?? res.Employee;              
 
               if (token && employee) {
                 localStorage.setItem('expirationDate', employee.PasswordExpirationDate ?? employee.passwordExpirationDate);

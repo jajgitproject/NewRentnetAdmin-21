@@ -37,6 +37,7 @@ export class DutySlipImageDetailsShowComponent {
   dataSource!: DutySlipImageDetailsShow;
 
   imageUrl: string = '';
+  public isPdf: boolean = false;
 
   constructor(
     public dialogRef: MatDialogRef<DutySlipImageDetailsShowComponent>,
@@ -68,15 +69,22 @@ export class DutySlipImageDetailsShowComponent {
         next: (data: DutySlipImageDetailsShow) => {
 
           this.dataSource = data;
+          
 
           // Delay assignment to next cycle
           setTimeout(() => {
             this.imageUrl =
               data?.dutySlipImage || '';
               console.log('Image URL:', this.imageUrl);
-
+            if(this.imageUrl?.toLowerCase().endsWith('.pdf'))
+            {
+              this.isPdf = true;
+              console.log(this.isPdf);
+            }
             this.cdr.detectChanges();
           });
+
+            
         },
 
         error: (error: HttpErrorResponse) => {

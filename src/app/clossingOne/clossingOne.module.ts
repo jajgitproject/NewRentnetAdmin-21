@@ -115,6 +115,9 @@ import { CustomerSpecificDetailsService } from '../customerSpecificDetails/custo
 import { CustomerSpecificDetailsModule } from '../customerSpecificDetails/customerSpecificDetails.module';
 import { DutySlipImageModule } from '../dutySlipImage/dutySlipImage.module';
 import { SummaryOfDutyModule } from '../summaryOfDuty/summary-of-duty.module';
+import { DutySlipImageDetailsShowService } from '../dutySlipImageDetailsShow/dutySlipImageDetailsShow.service';
+import { DutySlipImageService } from '../dutySlipImage/dutySlipImage.service';
+import { DutySlipImageDetailsShowModule } from '../dutySlipImageDetailsShow/dutySlipImageDetailsShow.module';
 
 
 @NgModule({
@@ -186,7 +189,8 @@ import { SummaryOfDutyModule } from '../summaryOfDuty/summary-of-duty.module';
     ChangeCityModule,
     CustomerSpecificDetailsModule,
     DutySlipImageModule,
-    SummaryOfDutyModule
+    SummaryOfDutyModule,
+    DutySlipImageDetailsShowModule
   ],
   exports:[ClossingOneComponent],
   providers: [ClossingOneService,
@@ -217,7 +221,8 @@ import { SummaryOfDutyModule } from '../summaryOfDuty/summary-of-duty.module';
               PackageRateDetailsForClosingService ,
                MOPDetailsService, ControlPanelDialogeService,
                ReservationDutyslipSearchService ,DutySlipImageService,OdoMeterAndManualDutySlipImageService,  
-                   ChangeDutyTypeClosingService,ChangeCityService ,CustomerSpecificDetailsService   ]
+                   ChangeDutyTypeClosingService,ChangeCityService ,CustomerSpecificDetailsService,
+                  DutySlipImageService,DutySlipImageDetailsShowService   ]
 })
 export class ClossingOneModule {}
 

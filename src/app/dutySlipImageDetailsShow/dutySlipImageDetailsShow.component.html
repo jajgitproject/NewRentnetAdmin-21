@@ -25,11 +25,12 @@
 
           <span class="table-img tbl-col-width-per-12">
             <img
-              *ngIf="imageUrl"
+              *ngIf="imageUrl && !isPdf"
               [src]="imageUrl"
               (click)="openImageInNewTab(imageUrl)"
               style="cursor: pointer; width: 100%; max-width: 250px;"
               alt="Duty Slip Image" />
+              <img *ngIf="isPdf" src="assets/pdf-icon.png"  style="cursor:pointer;height:20px;width:auto;" (click)="openImageInNewTab(imageUrl)">
           </span>
 
           <!-- Delete Button -->

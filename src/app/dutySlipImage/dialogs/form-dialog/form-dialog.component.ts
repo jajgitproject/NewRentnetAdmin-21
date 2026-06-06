@@ -15,6 +15,7 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 import { DutyAllotmentDetails } from 'src/app/dutySlipQualityCheckedByExecutive/dutySlipQualityCheckedByExecutive.model';
 import { DutySlipImage } from '../../dutySlipImage.model';
 import { DutySlipImageService } from '../../dutySlipImage.service';
+import { ChangeDetectorRef } from '@angular/core';
 @Component({
   standalone: false,
   selector: 'app-form-dialog',
@@ -59,6 +60,7 @@ export class FormDialogComponent
   dutyQualityCheckList:any;
   verifyDutyStatusAndCacellationStatus: string;
   isSaveAllowed: boolean = false;
+  public isPdf: boolean = false;
 
   constructor(
   public dialogRef: MatDialogRef<FormDialogComponent>, 
@@ -67,7 +69,8 @@ export class FormDialogComponent
   public advanceTableService: DutySlipImageService,
     private fb: FormBuilder,
     private el: ElementRef,
-  public _generalService:GeneralService)
+  public _generalService:GeneralService,
+private cdr: ChangeDetectorRef)
   {
         // Set the defaults
         this.action = data.action;
@@ -111,10 +114,22 @@ export class FormDialogComponent
     this.advanceTableService.getAllotmentIDForDutySlipImage(this.AllotmentID).subscribe(
       data=>{
         this.dutySlipImageData=data;        
-        this.ImagePath=this.dutySlipImageData[0].dutySlipImage;       
+        this.ImagePath=this.dutySlipImageData[0].dutySlipImage; 
+        if(this.ImagePath?.toLowerCase().endsWith('.pdf'))
+        {
+          this.isPdf = true;
+          console.log(this.isPdf);
+        }
+        this.cdr.detectChanges();   
+        console.log(this.ImagePath);   
         
       }
     );
+  }
+
+  openImageInNewTab() 
+  {
+    window.open(this.ImagePath, '_blank');
   }
   
   formControl = new FormControl('', 

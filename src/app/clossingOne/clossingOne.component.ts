@@ -100,7 +100,7 @@ import { CustomerSpecificDetails, CustomerSpecificDetailsData } from '../custome
 import { SettledRateDetails } from '../settledRateDetails/settledRateDetails.model';
 import { NewFormService } from '../newForm/newForm.service';
 import { FormDialogComponentCSD } from '../customerSpecificDetails/dialogs/form-dialog/form-dialog.component';
-
+import { DutySlipImageDetailsShowComponent as DSImage } from '../dutySlipImageDetailsShow/dutySlipImageDetailsShow.component';
 @Component({
   standalone: false,
   selector: 'app-clossingOne',
@@ -1489,6 +1489,18 @@ export class ClossingOneComponent implements OnInit, AfterViewInit, AfterViewChe
       });
 
   }
+
+
+  dutySlipImage() 
+  {
+    this.dialog.open(DSImage, {
+      // width: '250px',
+    data: {
+          dutySlipID: this.dutySlipID,
+        }
+    });
+  }
+
   public loadDataForImage() {
     this.odoMeterAndManualDutySlipImageService.getAllotmentIDForDutySlipImage(this.AllotmentID).subscribe
       (
