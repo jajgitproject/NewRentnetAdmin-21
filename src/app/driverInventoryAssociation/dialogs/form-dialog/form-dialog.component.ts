@@ -189,7 +189,7 @@ export class FormDialogComponent implements OnInit {
       this.advanceTableForm.controls["driverInventoryAssociationStatus"].setValue(true);
       this.advanceTableForm.controls["activationStatus"].setValue(this.data.activationStatus);
       this.advanceTableForm.patchValue({ driverID: this.data.driverID, });
-      this.getCarInternalORExternal(this.data.vehicleID);
+      this.getCarInternalORExternal(this.data.inventoryID);
       // this.InitAttachAnotherDriver(this.supplierID, this.ownedSupplierChecked);
       //this.advanceTableForm.controls['vehicleCategory'].setValue(this.data.vehicleCategory);
     }
