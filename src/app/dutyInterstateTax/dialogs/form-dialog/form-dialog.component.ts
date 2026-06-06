@@ -321,21 +321,13 @@ export class DITFormDialogComponent
   // }
 
 toggleExisting() {
-   this.isExistingCardVisible = !this.isExistingCardVisible;
-   this.isPaidCardVisible = false;
-  // if (this.isExistingCardVisible) 
-  // {
-  //   this.loadDataForApp();
-  // }
+  this.isExistingCardVisible = true;
+  this.isPaidCardVisible = false;
 }
 
-togglePaid(){
-  this.isPaidCardVisible = !this.isPaidCardVisible;
+togglePaid() {
+  this.isPaidCardVisible = true;
   this.isExistingCardVisible = false;
-  // if (this.isExistingCardVisible) 
-  // {
-  //   this.loadDataForApp();
-  // }
 }
 
 InitApprovedBy()
@@ -586,6 +578,10 @@ private _filterStateOnSearch(value: string): any {
     } else {
       this.advanceTableForm.get('taxStartDate')?.setErrors({ invalidDate: true });
     }
+  }
+   onAmountPaidChange()
+  {
+    this.advanceTableForm.patchValue({amountToBeChargedInCurrentDuty:this.advanceTableForm.value.interStateTaxAmount});
   }
 }
 

@@ -21,10 +21,10 @@
     <div mat-dialog-content>
         <form class="register-form m-4" [formGroup]="advanceTableForm" (ngSubmit)="submit">
             <mat-radio-group>
-                <mat-radio-button color="primary" style="margin-right: 70px;" (click)="toggleExisting()"
+                <mat-radio-button color="primary" style="margin-right: 70px;" (change)="toggleExisting()"
                     value="existing">Existing Paid
                     Tax</mat-radio-button>
-                <mat-radio-button (click)="togglePaid()" color="primary" value="paid">Paid For this
+                <mat-radio-button (change)="togglePaid()" color="primary" value="paid">Paid For this
                     Duty</mat-radio-button>
             </mat-radio-group>
             <br />
@@ -154,7 +154,7 @@
                         <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
                             <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
                                 <mat-label>Amount Paid</mat-label>
-                                <input readonly matInput formControlName="interStateTaxAmount">
+                                <input readonly matInput formControlName="interStateTaxAmount" (input)="onAmountPaidChange()">
                                 <!-- <mat-error *ngIf="advanceTableForm.get('interStateTaxAmount').hasError('required')">
                                 Approved Paid is required
                             </mat-error> -->
@@ -243,7 +243,7 @@
                         <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
                             <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
                                 <mat-label>Amount Paid</mat-label>
-                                <input required matInput formControlName="interStateTaxAmount">
+                                <input required matInput formControlName="interStateTaxAmount" (input)="onAmountPaidChange()">
                                 <mat-error *ngIf="advanceTableForm.get('interStateTaxAmount').hasError('required')">
                                     Amount Paid is required
                                 </mat-error>

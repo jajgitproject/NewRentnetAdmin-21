@@ -77,6 +77,7 @@ export class FormDialogComponent
         {
           this.dialogTitle ='Duty Interstate Tax';       
           this.advanceTable = data.advanceTable;
+          console.log(data);
         } else 
         {
           this.dialogTitle = 'Add Interstate Tax to';
@@ -128,7 +129,7 @@ export class FormDialogComponent
     {
       dutyInterstateTaxID: [this.advanceTable?.dutyInterstateTaxID || ''],
       dutySlipID: [this.advanceTable?.dutySlipID || ''],
-      interStateTaxID: [this.advanceTable?.interStateTaxID || ''],
+      interStateTaxID: [this.advanceTable?.interStateTaxID || 0],
       //geoPointID: [this.advanceTable.geoPointID],
       taxStartDate: [this.advanceTable?.taxStartDate || ''],
       taxEndDate: [this.advanceTable?.taxEndDate || ''],
