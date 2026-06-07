@@ -23,7 +23,9 @@ export class AuditTrailService {
     reservationId: number | null,
     pageNumber: number,
     pageSize: number,
-    includeNullUser: boolean = true
+    includeNullUser: boolean = true,
+    fromDate: Date | null = null,
+    toDate: Date | null = null
   ): Observable<AuditTrailEvent[]> {
     let params = new HttpParams()
       .set('pageNumber', pageNumber.toString())
@@ -39,18 +41,36 @@ export class AuditTrailService {
     if (reservationId != null) {
       params = params.set('reservationId', reservationId.toString());
     }
+    if (fromDate) {
+      params = params.set('fromDate', this.formatApiDate(fromDate));
+    }
+    if (toDate) {
+      params = params.set('toDate', this.formatApiDate(toDate));
+    }
 
-    const timeoutMs = reservationId != null ? 240000 : 120000;
+    const timeoutMs = reservationId != null ? 120000 : 120000;
     return this.httpClient.get<AuditTrailEvent[]>(
       this.apiBase + '/events',
       { params }
     ).pipe(timeout(timeoutMs));
   }
 
-  getRows(auditEventId: number): Observable<AuditTrailRow[]> {
+  getRows(auditEventId: number, options?: { lite?: boolean }): Observable<AuditTrailRow[]> {
+    let params = new HttpParams();
+    if (options?.lite) {
+      params = params.set('lite', 'true');
+    }
     return this.httpClient.get<AuditTrailRow[]>(
-      this.apiBase + '/events/' + auditEventId + '/rows'
+      this.apiBase + '/events/' + auditEventId + '/rows',
+      { params }
     );
+  }
+
+  private formatApiDate(value: Date): string {
+    const y = value.getFullYear();
+    const m = String(value.getMonth() + 1).padStart(2, '0');
+    const d = String(value.getDate()).padStart(2, '0');
+    return `${y}-${m}-${d}`;
   }
 }
 

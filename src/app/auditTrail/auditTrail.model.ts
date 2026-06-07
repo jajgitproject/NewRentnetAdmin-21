@@ -11,6 +11,7 @@ export interface AuditTrailEvent {
   hostName?: string | null;
   appName?: string | null;
   loginName?: string | null;
+  userDisplayName?: string | null;
 }
 
 export interface AuditTrailRow {

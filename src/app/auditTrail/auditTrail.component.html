@@ -117,6 +117,9 @@
               mode="indeterminate"
               diameter="24"
             ></mat-progress-spinner>
+            <span *ngIf="isLoadingEvents && activeReservationId" class="audit-loading-hint" style="margin-left:8px;">
+              Loading reservation audit… first search may take a few seconds.
+            </span>
           </div>
         </div>
 
@@ -194,8 +197,10 @@
               <mat-panel-title>
                 {{ eventTitle(e) }}
               </mat-panel-title>
-              <mat-panel-description>
-                {{ formatEventTime(e.eventAtUtc) }}
+              <mat-panel-description class="reservation-panel-desc">
+                <span class="res-user">{{ eventUserLabel(e) }}</span>
+                <span class="res-sep"> · </span>
+                <span class="res-time">{{ formatEventTime(e.eventAtUtc) }}</span>
               </mat-panel-description>
             </mat-expansion-panel-header>
 

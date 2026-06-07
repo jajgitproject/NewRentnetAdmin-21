@@ -204,21 +204,24 @@ export class AuditTrailComponent implements OnInit {
     const reservationMode = reservationId != null;
     this.activeReservationId = reservationMode ? reservationId : null;
 
+    const fromDate = this.fromDateCtrl.value ? new Date(this.fromDateCtrl.value) : null;
+    const toDate = this.toDateCtrl.value ? new Date(this.toDateCtrl.value) : null;
+
     // Reservation audit: all users, all related tables; ignore form-name filter (API skips it when reservationId set).
     const apiUserId = reservationMode ? null : this.selectedUserId;
     const apiPageName = reservationMode ? '' : pageName;
-    const pageSize = reservationMode ? 100 : 50;
+    const pageSize = 50;
     const includeNullUser = true;
 
     this.auditTrailService
-      .getEvents(apiUserId, apiPageName, reservationId, 0, pageSize, includeNullUser)
+      .getEvents(apiUserId, apiPageName, reservationId, 0, pageSize, includeNullUser, fromDate, toDate)
       .pipe(finalize(() => {
         this.isLoadingEvents = false;
       }))
       .subscribe({
         next: (data) => {
           const raw = data || [];
-          this.events = this.excludeHiddenTables(this.applyDateFilter(raw));
+          this.events = this.excludeHiddenTables(raw);
           if (reservationMode) {
             this.reservationTableGroups = this.buildReservationTableGroups(this.events);
           } else {
@@ -230,8 +233,8 @@ export class AuditTrailComponent implements OnInit {
           this.reservationTableGroups = [];
           this.activeReservationId = null;
           const hint = reservationMode
-            ? 'First search for a reservation can take 1–2 minutes while the index is built. Run Audit_Trail_Performance_Index.sql on the database, restart the API, then search again.'
-            : 'The search may have timed out — try a narrower filter or run Audit_Trail_Performance_Index.sql on the database.';
+            ? 'If results look incomplete, run Audit_Trail_Performance_Index.sql and EXEC audit.SyncAuditReservationMap on the database to backfill the reservation index.'
+            : 'The search may have timed out — try a narrower date range or form filter.';
           this.snackBar.open('Failed to load audit events. ' + hint, '', { duration: 10000 });
         }
       });
@@ -301,6 +304,10 @@ export class AuditTrailComponent implements OnInit {
   }
 
   eventUserLabel(e: AuditTrailEvent): string {
+    const displayName = (e?.userDisplayName || '').trim();
+    if (displayName) {
+      return displayName;
+    }
     if (e.userId != null && e.userId > 0) {
       const emp = (this.employees || []).find((x) => x.employeeID === e.userId);
       if (emp) {
@@ -312,7 +319,7 @@ export class AuditTrailComponent implements OnInit {
     if (ln) {
       const key = ln.toLowerCase();
       if (key === 'ecorentuser' || key === 'system') {
-        return 'Driver App';
+        return 'Unknown user';
       }
       return ln;
     }
@@ -343,8 +350,9 @@ export class AuditTrailComponent implements OnInit {
     if (this.rowsLoadingEventIds.has(auditEventId)) return;
 
     this.rowsLoadingEventIds.add(auditEventId);
+    const lite = this.isReservationTimelineView();
 
-    this.auditTrailService.getRows(auditEventId).subscribe(
+    this.auditTrailService.getRows(auditEventId, { lite }).subscribe(
       (rows) => {
         this.rowsByEventId[auditEventId] = rows || [];
         this.rowsLoadingEventIds.delete(auditEventId);
