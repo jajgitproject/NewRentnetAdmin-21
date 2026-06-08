@@ -16,9 +16,9 @@ import { AuthService } from './auth.service';
 
 export class SessionHeartbeatService implements OnDestroy {
 
-  // Keep in sync with EmployeeLoginSessionSettings on API (TODO: 20 / 18 for production)
-  private static readonly INACTIVITY_TIMEOUT_MINUTES = 2;
-  private static readonly INACTIVITY_WARNING_LEAD_MINUTES = 1;
+  // Keep in sync with EmployeeLoginSessionSettings on API (20 min timeout, 2 min warning lead)
+  private static readonly INACTIVITY_TIMEOUT_MINUTES = 20;
+  private static readonly INACTIVITY_WARNING_LEAD_MINUTES = 2;
   private static readonly INACTIVITY_MS = SessionHeartbeatService.INACTIVITY_TIMEOUT_MINUTES * 60 * 1000;
   private static readonly WARNING_MS =
     (SessionHeartbeatService.INACTIVITY_TIMEOUT_MINUTES - SessionHeartbeatService.INACTIVITY_WARNING_LEAD_MINUTES) * 60 * 1000;
