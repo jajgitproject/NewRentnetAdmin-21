@@ -35,8 +35,10 @@ export class RolePageGuard implements CanActivate {
       return true;
     }
 
-    const user = this.auth.currentUserValue;
-    if (!user?.employee?.RoleID) {
+    const user = this.auth.currentUserValue as any;
+    const employee = user?.employee ?? user?.Employee;
+    const roleID = employee?.RoleID ?? employee?.roleID;
+    if (!roleID) {
       return this.router.parseUrl('/authentication/signin');
     }
 
@@ -45,7 +47,7 @@ export class RolePageGuard implements CanActivate {
       return this.evaluate(state, route, cached);
     }
 
-    return this.roleMapService.getTableData(null, user.employee.RoleID, true, 0).pipe(
+    return this.roleMapService.getTableData(null, roleID, true, 0).pipe(
       tap((data) => {
         const arr = buildAccessPagesArrayFromApi(data || []);
         localStorage.setItem('accessPages', JSON.stringify(arr));
@@ -95,15 +97,22 @@ export class RolePageGuard implements CanActivate {
       return true;
     }
 
+    const meta = findSidebarRouteByPath(ROUTES, segment);
     const leaf = this.deepestChild(activated);
     const overrideKey = leaf?.data?.requiredPageKey;
     if (overrideKey) {
-      const k = normalizeMenuPageKey(overrideKey);
-      const ok = !!(k && accessPages.some((p) => p.page === k));
+      if (meta && routePageAllowed(meta, accessPages)) {
+        return true;
+      }
+      const alternateKeys: string[] = leaf?.data?.alternatePageKeys || [];
+      const keys = [
+        normalizeMenuPageKey(overrideKey),
+        ...alternateKeys.map((k: string) => normalizeMenuPageKey(k)),
+      ].filter(Boolean);
+      const ok = keys.some((k) => accessPages.some((p) => p.page === k));
       return ok ? true : this.router.parseUrl('/dashboard');
     }
 
-    const meta = findSidebarRouteByPath(ROUTES, segment);
     if (!meta) {
       return true;
     }

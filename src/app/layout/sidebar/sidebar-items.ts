@@ -130,6 +130,18 @@ export const ROUTES: RouteInfo[] = [
         submenu: [],
         isAccess: false
       },
+      {
+        path: 'employeeLoginMIS',
+        title: 'Employee Login MIS',
+        pageKey: 'Employee Login MIS',
+        moduleName: 'employeeLoginMIS',
+        alternateAccessPageKeys: ['Employee Login Hours MIS', 'employeeLoginHoursMIS'],
+        icon: 'fas fa-tachometer-alt',
+        class: '',
+        groupTitle: false,
+        submenu: [],
+        isAccess: false
+      },
 
       {
         path: 'bookingRequest',
@@ -581,17 +593,6 @@ export const ROUTES: RouteInfo[] = [
       },
 
       {
-        path: 'contractTariffVerification',
-        title: 'Contract Tariff Verification',
-        moduleName: 'contractTariffVerification',
-        icon: 'fas fa-check-double',
-        class: '',
-        groupTitle: false,
-        submenu: [],
-        isAccess: false
-      },
-
-      {
         path: 'customerGroup',
         title: 'Customer Group',
         moduleName: 'customerGroup',
@@ -817,17 +818,6 @@ export const ROUTES: RouteInfo[] = [
         isAccess: false
       },
 
-      {
-        path: 'zonalDutyRegister',
-        title: 'Zonal Duty Register',
-        moduleName: 'zonalDutyRegister',
-        icon: 'fas fa-tachometer-alt',
-        class: '',
-        groupTitle: false,
-        submenu: [],
-        isAccess: false
-      },
-
        {
         path: 'changeKamForCustomers',
         title: 'Customer KAM Change',
@@ -981,8 +971,8 @@ export const ROUTES: RouteInfo[] = [
 
       
       {
-        path: 'issueRelatedTo',
-        title: 'Issue Related To',
+        path: 'incidenceType',
+        title: 'Incidence Type',
         moduleName: 'incidenceType',
         icon: 'fas fa-tachometer-alt',
         class: '',
@@ -1223,17 +1213,6 @@ export const ROUTES: RouteInfo[] = [
         path: 'reservationGroup',
         title: 'Reservation Group',
         moduleName: 'reservationGroup',
-        icon: 'fas fa-tachometer-alt',
-        class: '',
-        groupTitle: false,
-        submenu: [],
-        isAccess: false
-      },
-
-      {
-        path: 'reservationOTP',
-        title: 'Reservation OTP',
-        moduleName: 'reservationOTP',
         icon: 'fas fa-tachometer-alt',
         class: '',
         groupTitle: false,

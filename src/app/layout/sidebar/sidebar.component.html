@@ -27,8 +27,8 @@
           [class.menu-root-always-open]="sidebarItem.moduleName === 'Masters' && visibleLevel2(sidebarItem).length > 0"
           *ngIf="visibleLevel2(sidebarItem).length > 0 || (searchingOpen && sidebarItem.submenu.length > 0)">
           <div class="header" *ngIf="sidebarItem.groupTitle === true">{{sidebarItem.title | translate}}</div>
-          <a [routerLink]="sidebarItem.class === '' ? [sidebarItem.path] : null" *ngIf="!sidebarItem.groupTitle;"
-            [ngClass]="[sidebarItem.class]" (click)="callLevel1Toggle($event, sidebarItem.moduleName)" class="menu-top">
+          <a href="#" *ngIf="!sidebarItem.groupTitle;"
+            [ngClass]="[sidebarItem.class]" (click)="openMenuPage(sidebarItem.class === '' ? sidebarItem.path : null, $event, 1, sidebarItem.moduleName)" class="menu-top">
             <i [ngClass]="[sidebarItem.icon]"></i>
             <span class="hide-menu">{{sidebarItem.title | translate}}
             </span>
@@ -38,8 +38,8 @@
             <li [ngClass]="level2Menu === sidebarSubItem.moduleName? 'activeSub':''"
               *ngFor="let sidebarSubItem of visibleLevel2(sidebarItem); let i = index"
               [routerLinkActive]="sidebarSubItem.submenu.length > 0 ? '' : 'active'">
-              <a [routerLink]="sidebarSubItem.submenu.length > 0 ? null : [sidebarSubItem.path]"
-                (click)="callLevel2Toggle($event,sidebarSubItem.moduleName)" [ngClass]="[sidebarSubItem.class]">
+              <a href="#"
+                (click)="openMenuPage(sidebarSubItem.submenu.length > 0 ? null : sidebarSubItem.path, $event, 2, sidebarSubItem.moduleName)" [ngClass]="[sidebarSubItem.class]">
                 {{sidebarSubItem.title | translate}} 
               </a>
               <!-- Second level menu -->
@@ -47,8 +47,8 @@
                 <li *ngFor="let sidebarSubsubItem of visibleLevel3(sidebarSubItem)"
                   [ngClass]="level3Menu === sidebarSubsubItem.moduleName? 'activeSubSub':''"
                   [routerLinkActive]="sidebarSubsubItem.submenu.length > 0 ? '' : 'active'">
-                  <a [routerLink]="sidebarSubsubItem.submenu.length > 0 ? null : [sidebarSubsubItem.path]"
-                    (click)="callLevel3Toggle($event,sidebarSubsubItem.moduleName)"
+                  <a href="#"
+                    (click)="openMenuPage(sidebarSubsubItem.submenu.length > 0 ? null : sidebarSubsubItem.path, $event, 3, sidebarSubsubItem.moduleName)"
                     [ngClass]="[sidebarSubsubItem.class]">
                     {{ sidebarSubsubItem.title | translate }}
                   </a>

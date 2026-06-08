@@ -1,5 +1,6 @@
 // @ts-nocheck
-import { Component, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
+import { SessionHeartbeatService } from 'src/app/core/service/session-heartbeat.service';
 
 @Component({
   standalone: false,
@@ -7,10 +8,16 @@ import { Component, OnInit } from '@angular/core';
   templateUrl: './main-layout.component.html',
   styleUrls: []
 })
-export class MainLayoutComponent implements OnInit {
-  constructor() {}
+export class MainLayoutComponent implements OnInit, OnDestroy {
+  constructor(private sessionHeartbeatService: SessionHeartbeatService) {}
 
-  ngOnInit(): void {}
+  ngOnInit(): void {
+    this.sessionHeartbeatService.start();
+  }
+
+  ngOnDestroy(): void {
+    this.sessionHeartbeatService.stop();
+  }
 }
 
 

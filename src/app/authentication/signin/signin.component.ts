@@ -6,6 +6,7 @@ import { AuthService } from 'src/app/core/service/auth.service';
 import { MatDialog } from '@angular/material/dialog';
 import { FormDialogComponent } from 'src/app/validateOTP/dialogs/form-dialog/form-dialog.component';
 import { ExpirationDateService } from 'src/app/shared/expirationDate.service';
+import { GeolocationService } from 'src/app/core/service/geolocation.service';
 
 @Component({
   standalone: false,
@@ -37,7 +38,7 @@ export class SigninComponent implements OnInit {
     private authService: AuthService,
     private dialog: MatDialog,
     private expirationDateService:ExpirationDateService,
-   
+    private geolocationService: GeolocationService,
   ) {}
 
   ngOnInit() {
@@ -86,12 +87,18 @@ export class SigninComponent implements OnInit {
         localStorage.setItem('email', this.f.email.value);
         localStorage.setItem('password', this.f.password.value);
       }
-      this.authService
-        .login(this.f.email.value, this.f.password.value, 'Employee')
-        .subscribe(
+      this.geolocationService
+        .requestLoginLocation()
+        .then((location) => {
+          this.authService
+            .login(this.f.email.value, this.f.password.value, 'Employee', location)
+            .subscribe(
           (res) => {
-            this.error = res?.loginDetails || null;
-            if(this.error?.includes('User not found'))
+            this.error = res?.Message || null;
+            if (res?.Status === 'Failure' && res?.Message) {
+              this.errorMessageToBeShown = res.Message;
+            }
+            if(res.Message === "Invalid User: User not found")
             {
               this.errorMessageToBeShown = "User not found";
             }
@@ -145,6 +152,12 @@ export class SigninComponent implements OnInit {
             this.isSubmitting = false;
           }
         );
+        })
+        .catch((geoError: Error) => {
+          this.errorMessageToBeShown = geoError?.message || 'Location permission is required to login.';
+          this.error = this.errorMessageToBeShown;
+          this.isSubmitting = false;
+        });
     }
   }
 

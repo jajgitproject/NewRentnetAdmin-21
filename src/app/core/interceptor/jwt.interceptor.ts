@@ -42,27 +42,14 @@ export class JwtInterceptor implements HttpInterceptor {
       currentUser &&
       ((currentUser as any).Token ?? (currentUser as any).token);
     if (currentUser && bearer) {
-      const emp = (currentUser as any)?.employee;
-      let empId =
-        emp?.EmployeeID ??
-        emp?.employeeID ??
-        (currentUser as any)?.EmployeeID ??
-        (currentUser as any)?.employeeID;
-      if (!empId) {
-        try {
-          const stored = localStorage.getItem('currentUser');
-          if (stored) {
-            const parsed = JSON.parse(stored);
-            const storedEmp = parsed?.employee ?? parsed?.Employee;
-            empId = storedEmp?.EmployeeID ?? storedEmp?.employeeID;
-          }
-        } catch {}
-      }
+      const empId = (currentUser as any)?.employee?.EmployeeID;
+      const sessionGuid = (currentUser as any)?.SessionGuid ?? (currentUser as any)?.sessionGuid;
       request = request.clone({
         setHeaders: {
           Authorization: `Bearer ${bearer}`,
           'X-Audit-FormName': routeFormName,
           ...(empId ? { 'X-Audit-UserId': String(empId) } : {}),
+          ...(sessionGuid ? { 'X-Session-Guid': String(sessionGuid) } : {}),
         },
       });
     } else if (routeFormName) {

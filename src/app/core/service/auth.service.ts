@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 // import { HttpClient } from '@angular/common/http';
 import { BehaviorSubject, Observable, of } from 'rxjs';
-import { map } from 'rxjs/operators';
+import { catchError, map } from 'rxjs/operators';
 import { User } from '../models/user';
 import { HttpClient } from '@angular/common/http';
 import { RuntimeConfigService } from './runtime-config.service';
@@ -20,9 +20,27 @@ export class AuthService {
   ) {
     this.API_URL = this.runtimeConfig.getBaseUrl() + 'Auth';
     const stored = localStorage.getItem('currentUser');
-    this.currentUserSubject = new BehaviorSubject<User | null>(
-      stored ? (JSON.parse(stored) as User) : null
-    );
+    let normalized: User | null = null;
+    if (stored) {
+      try {
+        const parsed = JSON.parse(stored);
+        normalized = this.normalizeLoginResponse(parsed) as User;
+        if (!this.isValidSession(normalized)) {
+          localStorage.removeItem('currentUser');
+          normalized = null;
+        } else {
+          const updated = JSON.stringify(normalized);
+          if (updated !== stored) {
+            localStorage.setItem('currentUser', updated);
+          }
+          this.syncExpirationDateFromEmployee(normalized);
+        }
+      } catch {
+        localStorage.removeItem('currentUser');
+        normalized = null;
+      }
+    }
+    this.currentUserSubject = new BehaviorSubject<User | null>(normalized);
     this.currentUser = this.currentUserSubject.asObservable();
   }
 
@@ -34,18 +52,46 @@ export class AuthService {
     return this.http.post<any>(this.API_URL + 'deactivate-account', user);
   }
 
-  login(email: string, password: string,userType: string) {
-    return this.http
-      .post<any>(this.API_URL + "/authenticate", {email,password,userType})
-      .pipe(
-        map((user) => {
-          const normalized = this.normalizeLoginResponse(user);
-          // store user details and jwt token in local storage to keep user logged in between page refreshes
+  login(
+    email: string,
+    password: string,
+    userType: string,
+    location?: {
+      loginLatitude: number;
+      loginLongitude: number;
+      locationAccuracyMeters?: number;
+      locationCapturedAt: string;
+    }
+  ) {
+    const body: Record<string, unknown> = {
+      email, password, userType,
+      Email: email, Password: password, UserType: userType,
+    };
+    if (location) {
+      body.loginLatitude = location.loginLatitude;
+      body.loginLongitude = location.loginLongitude;
+      body.locationAccuracyMeters = location.locationAccuracyMeters;
+      body.locationCapturedAt = location.locationCapturedAt;
+      body.LoginLatitude = location.loginLatitude;
+      body.LoginLongitude = location.loginLongitude;
+      body.LocationAccuracyMeters = location.locationAccuracyMeters;
+      body.LocationCapturedAt = location.locationCapturedAt;
+    }
+    return this.http.post<any>(this.API_URL + '/authenticate', body).pipe(
+      map((user) => {
+        let parsed: any = user;
+        if (typeof user === 'string') {
+          try { parsed = JSON.parse(user); } catch { parsed = user; }
+        }
+        const normalized = this.normalizeLoginResponse(parsed);
+        if (this.isValidSession(normalized)) {
           localStorage.setItem('currentUser', JSON.stringify(normalized));
+          this.syncExpirationDateFromEmployee(normalized);
           this.currentUserSubject.next(normalized);
-          return normalized;
-        })
-      );
+        }
+        return normalized;
+      })
+    );
   }
 
   /**
@@ -58,6 +104,7 @@ export class AuthService {
     }
     const rawEmployee = user.employee ?? user.Employee;
     const token = user.Token ?? user.token;
+    const sessionGuid = user.SessionGuid ?? user.sessionGuid;
 
     const mapBranchInfo = (branch: any) => {
       if (!branch || typeof branch !== 'object') {
@@ -112,6 +159,9 @@ export class AuthService {
             OTP: rawEmployee.OTP ?? rawEmployee.otp,
             Mobile: rawEmployee.Mobile ?? rawEmployee.mobile,
             FirstName: rawEmployee.FirstName ?? rawEmployee.firstName,
+            LastName: rawEmployee.LastName ?? rawEmployee.lastName,
+            Gender: rawEmployee.Gender ?? rawEmployee.gender,
+            Email: rawEmployee.Email ?? rawEmployee.email,
             EmployeeEntityPasswordID:
               rawEmployee.EmployeeEntityPasswordID ??
               rawEmployee.employeeEntityPasswordID,
@@ -128,17 +178,60 @@ export class AuthService {
     return {
       ...user,
       Token: token,
+      SessionGuid: sessionGuid,
       employee,
       Message: user.Message ?? user.message,
+      Status: user.Status ?? user.status,
     };
   }
 
   logout() {
-    // remove user from local storage to log user out
+    return this.http.post<any>(this.API_URL + '/logout', this.getSessionPayload()).pipe(
+      catchError(() => of(null)),
+      map(() => {
+        this.clearLocalSession();
+        return { success: false };
+      })
+    );
+  }
+
+  clearLocalSession(): void {
     localStorage.removeItem('currentUser');
     localStorage.removeItem('accessPages');
     this.currentUserSubject.next(null);
-    return of({ success: false });
+  }
+
+  private isValidSession(user: any): boolean {
+    if (!user || typeof user !== 'object') {
+      return false;
+    }
+    const status = user.Status ?? user.status;
+    const token = user.Token ?? user.token;
+    const employee = user.employee ?? user.Employee;
+    return status === 'Success' && !!token && !!employee;
+  }
+
+  private syncExpirationDateFromEmployee(user: any): void {
+    const employee = user?.employee ?? user?.Employee;
+    const expirationDate =
+      employee?.PasswordExpirationDate ?? employee?.passwordExpirationDate;
+    if (expirationDate) {
+      localStorage.setItem('expirationDate', expirationDate);
+    }
+  }
+
+  private getSessionPayload(): Record<string, unknown> {
+    const raw = localStorage.getItem('currentUser');
+    if (!raw) return {};
+    try {
+      const user = JSON.parse(raw);
+      const employee = user?.employee ?? user?.Employee;
+      const sessionGuid = user?.SessionGuid ?? user?.sessionGuid;
+      const employeeID = employee?.EmployeeID ?? employee?.employeeID;
+      return { sessionGuid, SessionGuid: sessionGuid, employeeID, EmployeeID: employeeID };
+    } catch {
+      return {};
+    }
   }
 }
 

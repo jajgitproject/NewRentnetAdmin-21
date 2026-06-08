@@ -21,6 +21,7 @@ import {
   denyAllMenuAccess,
 } from 'src/app/core/guard/role-page-access.util';
 import { RouteInfo } from './sidebar.metadata';
+import { Subscription } from 'rxjs';
 
 @Component({
   standalone: false,
@@ -44,6 +45,7 @@ export class SidebarComponent implements OnInit, OnDestroy {
   searchingOpen = false;
   firstName: string;
   lastName: string;
+  private userSub: Subscription;
 
   constructor(
     @Inject(DOCUMENT) private document: Document,
@@ -105,16 +107,47 @@ export class SidebarComponent implements OnInit, OnDestroy {
       this.level3Menu = element;
     }
   }
-  ngOnInit() {
-    if (this.authService.currentUserValue) {
-      this.sidebarItems = ROUTES.filter((sidebarItem) => sidebarItem);
-      denyAllMenuAccess(this.sidebarItems);
-      this.getPagesAccessRoleWise(this.authService.currentUserValue.employee.RoleID);
+
+  openMenuPage(path: string | null, event: MouseEvent, level: 1 | 2 | 3, moduleName: string): void {
+    event.preventDefault();
+    if (level === 1) {
+      this.callLevel1Toggle(event, moduleName);
+    } else if (level === 2) {
+      this.callLevel2Toggle(event, moduleName);
+    } else {
+      this.callLevel3Toggle(event, moduleName);
     }
+    if (!path) {
+      return;
+    }
+    void this.router.navigate(['/', path]);
+  }
+  ngOnInit() {
+    this.userSub = this.authService.currentUser.subscribe((user) => {
+      this.initUserFromSession(user);
+    });
     this.initLeftSidebar();
     this.bodyTag = this.document.body;
-    this.firstName = this.authService.currentUserValue.employee.FirstName;
-    this.lastName = this.authService.currentUserValue.employee.LastName;
+  }
+
+  private initUserFromSession(user: any): void {
+    if (!user) {
+      this.firstName = '';
+      this.lastName = '';
+      return;
+    }
+    const emp = user.employee ?? user.Employee;
+    this.firstName = emp?.FirstName ?? emp?.firstName ?? '';
+    this.lastName = emp?.LastName ?? emp?.lastName ?? '';
+    const roleID = emp?.RoleID ?? emp?.roleID;
+    if (roleID != null) {
+      if (!this.sidebarItems) {
+        this.sidebarItems = ROUTES.filter((sidebarItem) => sidebarItem);
+        denyAllMenuAccess(this.sidebarItems);
+      }
+      this.getPagesAccessRoleWise(roleID);
+    }
+    this.cdr.markForCheck();
   }
 
   getPagesAccessRoleWise(roleID: number): Promise<void> {
@@ -189,6 +222,7 @@ export class SidebarComponent implements OnInit, OnDestroy {
   ngOnDestroy() {
     this.clearSearchOpenBodyClass();
     this.routerObj.unsubscribe();
+    this.userSub?.unsubscribe();
   }
 
   onSearchTextChange(value: string): void {

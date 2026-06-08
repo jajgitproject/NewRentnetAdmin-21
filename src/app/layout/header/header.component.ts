@@ -12,6 +12,7 @@ import {
 import { ActivatedRoute, Router } from '@angular/router';
 import { ConfigService } from 'src/app/config/config.service';
 import { AuthService } from 'src/app/core/service/auth.service';
+import { SessionHeartbeatService } from 'src/app/core/service/session-heartbeat.service';
 import { RightSidebarService } from 'src/app/core/service/rightsidebar.service';
 import { WINDOW } from 'src/app/core/service/window.service';
 import { LanguageService } from 'src/app/core/service/language.service';
@@ -46,6 +47,7 @@ export class HeaderComponent implements OnInit, AfterViewInit {
     private dataService: RightSidebarService,
     private configService: ConfigService,
     private authService: AuthService,
+    private sessionHeartbeatService: SessionHeartbeatService,
     private router: Router,
     private expirationDateService:ExpirationDateService,
     public languageService: LanguageService,
@@ -127,9 +129,18 @@ export class HeaderComponent implements OnInit, AfterViewInit {
       this.flagvalue = val.map((element) => element.flag);
     }
     //this.expirationDate = this.expirationDateService.getExpirationDate();
-    this.expirationDate = localStorage.getItem('expirationDate');
-    if(this.expirationDate)
-    {
+    this.refreshExpirationDate();
+    this.authService.currentUser.subscribe(() => this.refreshExpirationDate());
+  }
+
+  private refreshExpirationDate(): void {
+    const user = this.authService.currentUserValue as any;
+    const emp = user?.employee ?? user?.Employee;
+    this.expirationDate =
+      localStorage.getItem('expirationDate') ??
+      emp?.PasswordExpirationDate ??
+      emp?.passwordExpirationDate;
+    if (this.expirationDate) {
       this.calculateDaysLeft();
     }
   }
@@ -251,10 +262,13 @@ export class HeaderComponent implements OnInit, AfterViewInit {
     );
   }
   logout() {
-    this.authService.logout().subscribe((res) => {
-      if (!res.success) {
+    this.sessionHeartbeatService.stop();
+    this.authService.logout().subscribe({
+      next: () => this.router.navigate(['/authentication/signin']),
+      error: () => {
+        this.authService.clearLocalSession();
         this.router.navigate(['/authentication/signin']);
-      }
+      },
     });
   }
 

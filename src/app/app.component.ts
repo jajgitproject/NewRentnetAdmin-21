@@ -6,6 +6,7 @@ import { PlatformLocation } from '@angular/common';
 import { GeneralService } from './general/general.service';
 import { PageAuditDropDown } from './auditTrail/pageAuditDropDown.model';
 import Swal from 'sweetalert2';
+import { SessionHeartbeatService } from './core/service/session-heartbeat.service';
 @Component({
   standalone: false,
   selector: 'app-root',
@@ -20,8 +21,11 @@ export class AppComponent {
     public _router: Router,
     location: PlatformLocation,
     private spinner: NgxSpinnerService,
-    private generalService: GeneralService
+    private generalService: GeneralService,
+    private sessionHeartbeatService: SessionHeartbeatService
   ) {
+    window.addEventListener('beforeunload', () => this.sessionHeartbeatService.endSessionBeacon());
+    window.addEventListener('pagehide', () => this.sessionHeartbeatService.endSessionBeacon());
     this.initLegacyModalBridge();
     AppComponent.installSwalForegroundGuard();
 

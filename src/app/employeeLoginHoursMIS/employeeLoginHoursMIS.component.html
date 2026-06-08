@@ -1,0 +1,150 @@
+<section class="content">
+  <div class="container-fluid">
+    <div class="block-header">
+      <div class="row">
+        <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+          <ul>
+            <li class="breadcrumb-item bcrumb-1">
+              <a routerLink="/dashboard/main"><i class="fas fa-home"></i> Home</a>|
+              <a href="#" onClick="return false;">Admin</a>|
+              <a href="#" onClick="return false;">Employee Login MIS</a>
+            </li>
+          </ul>
+          <ul class="breadcrumb breadcrumb-style">
+            <li class="breadcrumb-item">
+              <h2>Employee Login MIS</h2>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="row">
+      <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+        <div class="card">
+          <div class="body">
+            <div class="responsive_table">
+              <div class="table-responsive">
+              <div class="employee-login-mis-header">
+                <div class="mis-toolbar">
+                  <div class="mis-tabs">
+                    <button mat-button type="button" [color]="activeTab === 'summary' ? 'primary' : undefined" (click)="setTab('summary')">Summary</button>
+                    <button mat-button type="button" [color]="activeTab === 'sessions' ? 'primary' : undefined" (click)="setTab('sessions')">Sessions</button>
+                    <button mat-button type="button" [color]="activeTab === 'overlaps' ? 'primary' : undefined" (click)="setTab('overlaps')">Overlaps</button>
+                  </div>
+                  <div class="mis-actions">
+                    <button mat-raised-button color="primary" type="button" (click)="search()">Search</button>
+                    <button mat-mini-fab color="primary" type="button" (click)="refresh()" title="Reset filters">
+                      <mat-icon class="col-white">refresh</mat-icon>
+                    </button>
+                  </div>
+                </div>
+
+                <div class="row mis-filters g-2">
+                  <div class="col-xl-2 col-lg-3 col-md-4 col-sm-6">
+                    <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                      <mat-label>From Date (IST)</mat-label>
+                      <input matInput [matDatepicker]="fromPicker" [formControl]="fromDateCtrl" />
+                      <mat-datepicker-toggle matSuffix [for]="fromPicker"></mat-datepicker-toggle>
+                      <mat-datepicker #fromPicker></mat-datepicker>
+                    </mat-form-field>
+                  </div>
+                  <div class="col-xl-2 col-lg-3 col-md-4 col-sm-6">
+                    <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                      <mat-label>To Date (IST)</mat-label>
+                      <input matInput [matDatepicker]="toPicker" [formControl]="toDateCtrl" />
+                      <mat-datepicker-toggle matSuffix [for]="toPicker"></mat-datepicker-toggle>
+                      <mat-datepicker #toPicker></mat-datepicker>
+                    </mat-form-field>
+                  </div>
+                  <div class="col-xl-2 col-lg-3 col-md-4 col-sm-6">
+                    <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                      <mat-label>Employee ID</mat-label>
+                      <input matInput [(ngModel)]="employeeId" placeholder="All" />
+                    </mat-form-field>
+                  </div>
+                  <div class="col-xl-2 col-lg-3 col-md-4 col-sm-6" *ngIf="activeTab === 'summary'">
+                    <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                      <mat-label>Branch ID</mat-label>
+                      <input matInput [(ngModel)]="branchId" placeholder="All" />
+                    </mat-form-field>
+                  </div>
+                  <div class="col-xl-2 col-lg-3 col-md-4 col-sm-6" *ngIf="activeTab === 'summary'">
+                    <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                      <mat-label>Group By</mat-label>
+                      <mat-select [(ngModel)]="groupBy">
+                        <mat-option value="day">Day</mat-option>
+                        <mat-option value="month">Month</mat-option>
+                      </mat-select>
+                    </mat-form-field>
+                  </div>
+                </div>
+
+                <div class="mis-hint" *ngIf="dateRangeLabel">
+                  <small class="text-muted">Date range: {{ dateRangeLabel }} — All times shown in IST (UTC+5:30)</small>
+                </div>
+              </div>
+
+              <mat-progress-bar *ngIf="loading" mode="indeterminate"></mat-progress-bar>
+
+              <div *ngIf="!loading && !hasData; else dataBlock" class="alert alert-primary mis-empty-state">
+                No Records Found
+                <span *ngIf="loadError"> — {{ loadError }}</span>
+              </div>
+
+              <ng-template #dataBlock>
+                <div class="scrollable-table-container" *ngIf="!loading && hasData">
+                  <div *ngIf="activeTab === 'summary'">
+                    <mat-table [dataSource]="summaryRows" class="mat-cell floating-header-table w-100">
+                      <ng-container matColumnDef="employeeName"><mat-header-cell *matHeaderCellDef>Employee</mat-header-cell><mat-cell *matCellDef="let row">{{ row.EmployeeName || row.employeeName }}</mat-cell></ng-container>
+                      <ng-container matColumnDef="periodKey"><mat-header-cell *matHeaderCellDef>Period (IST)</mat-header-cell><mat-cell *matCellDef="let row">{{ row.PeriodKey || row.periodKey }}</mat-cell></ng-container>
+                      <ng-container matColumnDef="sessionCount"><mat-header-cell *matHeaderCellDef>Sessions</mat-header-cell><mat-cell *matCellDef="let row">{{ row.SessionCount || row.sessionCount }}</mat-cell></ng-container>
+                      <ng-container matColumnDef="grossMinutes"><mat-header-cell *matHeaderCellDef>Gross Min</mat-header-cell><mat-cell *matCellDef="let row">{{ row.GrossMinutes || row.grossMinutes }}</mat-cell></ng-container>
+                      <ng-container matColumnDef="overlapMinutes"><mat-header-cell *matHeaderCellDef>Overlap Min</mat-header-cell><mat-cell *matCellDef="let row">{{ row.OverlapMinutes || row.overlapMinutes }}</mat-cell></ng-container>
+                      <ng-container matColumnDef="inactivityMinutesDeducted"><mat-header-cell *matHeaderCellDef>Inactive Deducted</mat-header-cell><mat-cell *matCellDef="let row">{{ formatMinutes(row.InactivityMinutesDeducted ?? row.inactivityMinutesDeducted) }}</mat-cell></ng-container>
+                      <ng-container matColumnDef="netMinutes"><mat-header-cell *matHeaderCellDef>Net Min</mat-header-cell><mat-cell *matCellDef="let row">{{ row.NetMinutes || row.netMinutes }}</mat-cell></ng-container>
+                      <ng-container matColumnDef="netHours"><mat-header-cell *matHeaderCellDef>Net Hours</mat-header-cell><mat-cell *matCellDef="let row">{{ row.NetHours || row.netHours }}</mat-cell></ng-container>
+                      <mat-header-row *matHeaderRowDef="summaryColumns"></mat-header-row>
+                      <mat-row *matRowDef="let row; columns: summaryColumns"></mat-row>
+                    </mat-table>
+                  </div>
+
+                  <div *ngIf="activeTab === 'sessions'">
+                    <mat-table [dataSource]="sessionRows" class="mat-cell floating-header-table w-100">
+                      <ng-container matColumnDef="employeeName"><mat-header-cell *matHeaderCellDef>Employee</mat-header-cell><mat-cell *matCellDef="let row">{{ row.EmployeeName || row.employeeName }}</mat-cell></ng-container>
+                      <ng-container matColumnDef="loginAt"><mat-header-cell *matHeaderCellDef>Login (IST)</mat-header-cell><mat-cell *matCellDef="let row">{{ formatDate(row.LoginAt || row.loginAt) }}</mat-cell></ng-container>
+                      <ng-container matColumnDef="actualEndAt"><mat-header-cell *matHeaderCellDef>Actual End (IST)</mat-header-cell><mat-cell *matCellDef="let row">{{ (row.ActualLogoutAt || row.actualLogoutAt) ? formatDate(row.ActualLogoutAt || row.actualLogoutAt) : '—' }}</mat-cell></ng-container>
+                      <ng-container matColumnDef="recordedEndAt"><mat-header-cell *matHeaderCellDef>Recorded End (IST)</mat-header-cell><mat-cell *matCellDef="let row">{{ formatDate(row.EffectiveEndAt || row.effectiveEndAt) }}</mat-cell></ng-container>
+                      <ng-container matColumnDef="grossDurationMinutes"><mat-header-cell *matHeaderCellDef>Gross Min</mat-header-cell><mat-cell *matCellDef="let row">{{ formatMinutes(row.GrossDurationMinutes ?? row.grossDurationMinutes) }}</mat-cell></ng-container>
+                      <ng-container matColumnDef="inactivityMinutesDeducted"><mat-header-cell *matHeaderCellDef>Inactive Deducted</mat-header-cell><mat-cell *matCellDef="let row">{{ formatMinutes(row.InactivityMinutesDeducted ?? row.inactivityMinutesDeducted) }}</mat-cell></ng-container>
+                      <ng-container matColumnDef="durationMinutes"><mat-header-cell *matHeaderCellDef>Net Min</mat-header-cell><mat-cell *matCellDef="let row">{{ row.DurationMinutes || row.durationMinutes }}</mat-cell></ng-container>
+                      <ng-container matColumnDef="sessionEndReason"><mat-header-cell *matHeaderCellDef>Reason</mat-header-cell><mat-cell *matCellDef="let row" [title]="formatDeduction(row)">{{ formatSessionReason(row) }}</mat-cell></ng-container>
+                      <ng-container matColumnDef="loginLatitude"><mat-header-cell *matHeaderCellDef>Lat</mat-header-cell><mat-cell *matCellDef="let row">{{ row.LoginLatitude || row.loginLatitude }}</mat-cell></ng-container>
+                      <ng-container matColumnDef="loginLongitude"><mat-header-cell *matHeaderCellDef>Long</mat-header-cell><mat-cell *matCellDef="let row">{{ row.LoginLongitude || row.loginLongitude }}</mat-cell></ng-container>
+                      <mat-header-row *matHeaderRowDef="sessionColumns"></mat-header-row>
+                      <mat-row *matRowDef="let row; columns: sessionColumns"></mat-row>
+                    </mat-table>
+                  </div>
+
+                  <div *ngIf="activeTab === 'overlaps'">
+                    <mat-table [dataSource]="overlapRows" class="mat-cell floating-header-table w-100">
+                      <ng-container matColumnDef="employeeName"><mat-header-cell *matHeaderCellDef>Employee</mat-header-cell><mat-cell *matCellDef="let row">{{ row.EmployeeName || row.employeeName }}</mat-cell></ng-container>
+                      <ng-container matColumnDef="overlapStartAt"><mat-header-cell *matHeaderCellDef>Start (IST)</mat-header-cell><mat-cell *matCellDef="let row">{{ formatDate(row.OverlapStartAt || row.overlapStartAt) }}</mat-cell></ng-container>
+                      <ng-container matColumnDef="overlapEndAt"><mat-header-cell *matHeaderCellDef>End (IST)</mat-header-cell><mat-cell *matCellDef="let row">{{ formatDate(row.OverlapEndAt || row.overlapEndAt) }}</mat-cell></ng-container>
+                      <ng-container matColumnDef="overlapMinutes"><mat-header-cell *matHeaderCellDef>Minutes</mat-header-cell><mat-cell *matCellDef="let row">{{ row.OverlapMinutes || row.overlapMinutes }}</mat-cell></ng-container>
+                      <ng-container matColumnDef="sessionIdA"><mat-header-cell *matHeaderCellDef>Session A</mat-header-cell><mat-cell *matCellDef="let row">{{ row.SessionIdA || row.sessionIdA }}</mat-cell></ng-container>
+                      <ng-container matColumnDef="sessionIdB"><mat-header-cell *matHeaderCellDef>Session B</mat-header-cell><mat-cell *matCellDef="let row">{{ row.SessionIdB || row.sessionIdB }}</mat-cell></ng-container>
+                      <mat-header-row *matHeaderRowDef="overlapColumns"></mat-header-row>
+                      <mat-row *matRowDef="let row; columns: overlapColumns"></mat-row>
+                    </mat-table>
+                  </div>
+                </div>
+              </ng-template>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>

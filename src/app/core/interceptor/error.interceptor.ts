@@ -22,7 +22,7 @@ export class ErrorInterceptor implements HttpInterceptor {
       catchError((err: unknown) => {
         const httpErr = err as HttpErrorResponse;
         if (httpErr?.status === 401) {
-          this.authenticationService.logout();
+          this.authenticationService.clearLocalSession();
           location.reload();
         }
 

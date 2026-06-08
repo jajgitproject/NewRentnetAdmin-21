@@ -2586,6 +2586,20 @@ const routes: Routes = [
             (m) => m.DriverMISModule
           )
       },
+      {
+        path: 'employeeLoginMIS',
+        loadChildren: () =>
+          import('./employeeLoginHoursMIS/employeeLoginHoursMIS.module').then(
+            (m) => m.EmployeeLoginHoursMISModule
+          ),
+      },
+      {
+        path: 'employeeLoginHoursMIS',
+        loadChildren: () =>
+          import('./employeeLoginHoursMIS/employeeLoginHoursMIS.module').then(
+            (m) => m.EmployeeLoginHoursMISModule
+          ),
+      },
 
       {
         path: 'dutyAllotmentStatusSearch',

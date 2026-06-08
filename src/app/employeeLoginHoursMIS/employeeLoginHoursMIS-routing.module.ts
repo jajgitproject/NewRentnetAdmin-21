@@ -1,0 +1,12 @@
+// @ts-nocheck
+import { NgModule } from '@angular/core';
+import { Routes, RouterModule } from '@angular/router';
+import { EmployeeLoginHoursMISComponent } from './employeeLoginHoursMIS.component';
+
+const routes: Routes = [{ path: '', component: EmployeeLoginHoursMISComponent }];
+
+@NgModule({
+  imports: [RouterModule.forChild(routes)],
+  exports: [RouterModule],
+})
+export class EmployeeLoginHoursMISRoutingModule {}
