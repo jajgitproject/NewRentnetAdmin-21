@@ -162,7 +162,7 @@ export class BookingConfigurationComponent implements OnInit {
     emailLink: [''],
     reservationSourceID: [''],
     reservationSource: [''],
-    reservationStatus: ['Approved'],
+    reservationStatus: ['Confirmed'],
     primaryPassengerID:[''],
     reservationSourceDetail:[''],
     ecoCompanyID:[11],

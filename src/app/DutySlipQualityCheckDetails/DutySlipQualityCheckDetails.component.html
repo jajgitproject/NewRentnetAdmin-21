@@ -12,9 +12,7 @@
     <mat-icon class="small-close-icon">close</mat-icon>
   </button>
 </div>
-<mat-card>
-  <mat-card-content>
-    <mat-dialog-content class="of-hidden">
+<mat-dialog-content class="of-hidden">
       <div class="row">
         <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
           <span class="TDValueBold">Driver Name</span> <br />
@@ -49,23 +47,48 @@
         </div>
         <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
           <span class="TDValueBold">Front Photo</span> <br />
-          <span class="table-img tbl-col-width-per-12"><img style="cursor: pointer;" src="{{qcDetails.frontPhoto}}" (click)="openImageInNewTab(qcDetails.frontPhoto)"/></span>
+          <span class="table-img tbl-col-width-per-6">
+              <img class="qc-image"
+                  style="cursor: pointer;"
+                  src="{{qcDetails.frontPhoto}}"
+                  (click)="openImageInNewTab(qcDetails.frontPhoto)"/>
+          </span>
         </div>
         <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
           <span class="TDValueBold">Selfie With Uniform</span> <br />
-          <span class="table-img tbl-col-width-per-12"><img style="cursor: pointer;" src="{{qcDetails.selfieWithUniform}}" (click)="openImageInNewTab(qcDetails.selfieWithUniform)"/></span>
+          <span class="table-img tbl-col-width-per-6">
+              <img class="qc-image"
+                  style="cursor: pointer;"
+                  src="{{qcDetails.selfieWithUniform}}"
+                  (click)="openImageInNewTab(qcDetails.selfieWithUniform)"/>
+          </span>
         </div>
         <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
           <span class="TDValueBold">Interiors With Amenities</span> <br />
-          <span class="table-img tbl-col-width-per-12"><img style="cursor: pointer;" src="{{qcDetails.interiorsWithAmenities}}" (click)="openImageInNewTab(qcDetails.interiorsWithAmenities)"/></span>
+          <span class="table-img tbl-col-width-per-6">
+              <img class="qc-image"
+                  style="cursor: pointer;"
+                  src="{{qcDetails.interiorsWithAmenities}}"
+                  (click)="openImageInNewTab(qcDetails.interiorsWithAmenities)"/>
+          </span>
         </div>
         <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
           <span class="TDValueBold">Breath Analyzer</span> <br />
-          <span class="table-img tbl-col-width-per-12"><img style="cursor: pointer;" src="{{qcDetails.isolatedCabin}}" (click)="openImageInNewTab(qcDetails.isolatedCabin)"/></span>
+          <span class="table-img tbl-col-width-per-6">
+              <img class="qc-image"
+                  style="cursor: pointer;"
+                  src="{{qcDetails.breathAnalyzer}}"
+                  (click)="openImageInNewTab(qcDetails.breathAnalyzer)"/>
+          </span>
         </div>
         <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
           <span class="TDValueBold">Body Temperature Image</span> <br />
-          <span class="table-img tbl-col-width-per-12"><img style="cursor: pointer;" src="{{qcDetails.bodyTemperatureImage}}" (click)="openImageInNewTab(qcDetails.bodyTemperatureImage)"/></span>
+          <span class="table-img tbl-col-width-per-6">
+              <img class="qc-image"
+                  style="cursor: pointer;"
+                  src="{{qcDetails.bodyTemperatureImage}}"
+                  (click)="openImageInNewTab(qcDetails.bodyTemperatureImage)"/>
+          </span>
         </div>
       </div>
       <!-- <ng-container matColumnDef="frontPhoto">
@@ -80,5 +103,3 @@
         </div>
       </div> -->
     </mat-dialog-content>
-  </mat-card-content>
-</mat-card>
