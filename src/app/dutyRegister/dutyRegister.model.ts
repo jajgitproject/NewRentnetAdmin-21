@@ -141,6 +141,8 @@ export class DutyRegisterModel {
   dropLocation: string;
 
   invoiceCreatedBy: string;
+
+  customerSpecificFields: string;
 }
 
 
