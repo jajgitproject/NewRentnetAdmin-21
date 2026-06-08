@@ -18,6 +18,7 @@ export class ClosingModel {
   kmComparisionModel: KMComparisionModel;
   invoiceID:number;
   action:string;
+  irn:string;
 
   constructor(closingModel) {
     this.closingReservationForPickupDataModel = new ClosingReservationForPickupDataModel(closingModel.closingReservationForPickupDataModel);

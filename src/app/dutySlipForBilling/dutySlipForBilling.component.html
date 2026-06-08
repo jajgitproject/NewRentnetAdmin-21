@@ -459,7 +459,7 @@
                     <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12 mb-2">
                       <!-- <button mat-flat-button *ngIf="saveDisabled && (Action === 'Cancelled' || !InvoiceID)" style="width: 100%;"  color="primary" [disabled]="!advanceTableForm.valid" (click)="Put()" [type]="submit">{{ buttonText }} -->
                       <button mat-flat-button style="width: 100%;"  color="primary" 
-                          *ngIf="(showSpinner === false) && (Action === 'Cancelled' || !InvoiceID)"  
+                          *ngIf="(showSpinner === false) && (Action === 'Cancelled' || !IRN)"  
                           [disabled]="!advanceTableForm.valid" 
                           (click)="Put()" [type]="submit">{{ buttonText }}
                         <span style="margin-left: 5px;"
@@ -468,7 +468,7 @@
                       </button>
                       <br/>
                       <div *ngIf="Action !== 'Cancelled'">
-                        <button mat-flat-button style="width: 100%;"  color="primary" *ngIf="InvoiceID" disabled>Invoice already created</button>
+                        <button mat-flat-button style="width: 100%;"  color="primary" *ngIf="IRN" disabled>Invoice already created</button>
                       </div>
                       <mat-spinner *ngIf="!saveDisabled" diameter="30"></mat-spinner>
                       <img *ngIf="showSpinner === true" src="assets/images/loader4.gif" width="30">

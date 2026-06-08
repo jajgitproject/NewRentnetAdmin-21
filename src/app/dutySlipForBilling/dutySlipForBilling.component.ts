@@ -44,6 +44,7 @@ export class DutySlipForBillingComponent implements OnInit, AfterViewInit {
   @Input() disputeAdvanceTable : Dispute[] | null;
   @Input() RegistrationNumber;
   @Input() InvoiceID;
+  @Input() IRN;
   @Input() DSClosing;
   @Input() canThisRoleDoGoodForBillingOnClosingScreen = false;
   @Input() canThisRoleViewDummyInvoice = false;

@@ -240,6 +240,7 @@ export class ClossingOneComponent implements OnInit, AfterViewInit, AfterViewChe
   status: any;
   guestName:any;
   DutySlipMap:any;
+  IRN:any;
 
   constructor(
     public httpClient: HttpClient,
@@ -394,7 +395,9 @@ export class ClossingOneComponent implements OnInit, AfterViewInit, AfterViewChe
     this.clossingOneService.GetClosingData(this.DutySlipID).subscribe(
       data => {
         this.advanceTableClosingOne = data;
+        console.log('Closing Data:', this.advanceTableClosingOne);
         this.invoiceID = this.advanceTableClosingOne?.invoiceID;
+        this.IRN = this.advanceTableClosingOne?.irn;
         this.goodForBilling = this.advanceTableClosingOne?.closingDutySlipForBillingModel?.goodForBilling;
         this.verifyDuty = this.advanceTableClosingOne?.closingDutySlipForBillingModel?.verifyDuty;
         this.DSClosing = this.advanceTableClosingOne?.closingDutySlipForBillingModel?.dsClosing;
