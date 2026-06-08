@@ -40,7 +40,7 @@ import { EmployeeDropDown } from '../employee/employeeDropDown.model';
   providers: [{ provide: MAT_DATE_LOCALE, useValue: 'en-GB' }]
 })
 export class ZonalDutyRegisterComponent implements OnInit {
- displayedColumns = [
+ baseDisplayedColumns = [
   'ReservationID',
   'PickupDate',
   'BookingDate',
@@ -100,10 +100,12 @@ export class ZonalDutyRegisterComponent implements OnInit {
   'PickupAddress',
   'PickupAddressDetails',
   'DropOffAddress',
-  'CustomerSpecificFields',
   'DSClosedBy',
   'DutySlipImage',
 ];
+
+  displayedColumns: string[] = [];
+  customerSpecificFieldColumns: { columnId: string; fieldName: string }[] = [];
 
   
   dataSource: ZonalDutyRegisterModel[] | null;
@@ -254,6 +256,7 @@ export class ZonalDutyRegisterComponent implements OnInit {
   contextMenuPosition = { x: '0px', y: '0px' };
   ngOnInit() 
   {
+    this.displayedColumns = [...this.baseDisplayedColumns];
     // this.loadData();
     this.InitCustomerGroup();
     this.InitCustomerPerson();
@@ -376,12 +379,13 @@ export class ZonalDutyRegisterComponent implements OnInit {
     this.zonalDutyRegisterService.getTableData(searchCriteria,this.PageNumber,).subscribe(
       data =>   
       {
-        this.dataSource = Array.isArray(data) ? data : [];
+        this.dataSource = this.applyCustomerSpecificFieldColumns(Array.isArray(data) ? data : []);
         console.log(this.dataSource);
       },
     (error: HttpErrorResponse) => { 
        console.log(error);
   this.dataSource = [];
+  this.applyCustomerSpecificFieldColumns([]);
   this.showNotification('snackbar-danger', error?.message || 'Zonal Duty Register search failed', 'bottom', 'center');
     }
     );
@@ -550,11 +554,12 @@ export class ZonalDutyRegisterComponent implements OnInit {
     (
       data =>   
       {
-        this.dataSource = Array.isArray(data) ? data : [];
+        this.dataSource = this.applyCustomerSpecificFieldColumns(Array.isArray(data) ? data : []);
       
       },
       (error: HttpErrorResponse) => { 
         this.dataSource = [];
+        this.applyCustomerSpecificFieldColumns([]);
         this.showNotification('snackbar-danger', error?.message || 'Zonal Duty Register search failed', 'bottom', 'center');
       }
     );
@@ -1124,6 +1129,110 @@ export class ZonalDutyRegisterComponent implements OnInit {
   trackByFn(index: number, item: any) {
   return item.reservationID || index;
 }
+
+  trackCustomerSpecificFieldColumn(_index: number, col: { columnId: string; fieldName: string }): string {
+    return col.columnId;
+  }
+
+  getCustomerSpecificFieldValue(row: any, fieldName: string): string {
+    const value = row?.customerSpecificFieldMap?.[fieldName];
+    return value !== undefined && value !== null && String(value).trim() !== '' ? String(value) : 'NA';
+  }
+
+  private applyCustomerSpecificFieldColumns(data: ZonalDutyRegisterModel[]): ZonalDutyRegisterModel[] {
+    const rows = Array.isArray(data) ? data : [];
+    const fieldNames = new Set<string>();
+
+    rows.forEach(row => {
+      const items = this.parseCustomerSpecificFields(row.customerSpecificFields);
+      const fieldMap: Record<string, string> = {};
+
+      items.forEach(item => {
+        if (item.fieldName) {
+          fieldNames.add(item.fieldName);
+          fieldMap[item.fieldName] = item.fieldValue ?? '';
+        }
+      });
+
+      (row as any).customerSpecificFieldMap = fieldMap;
+    });
+
+    this.customerSpecificFieldColumns = Array.from(fieldNames)
+      .sort((a, b) => a.localeCompare(b))
+      .map((fieldName, index) => ({
+        columnId: this.buildCustomerSpecificColumnId(fieldName, index),
+        fieldName
+      }));
+
+    const insertIndex = this.baseDisplayedColumns.indexOf('DSClosedBy');
+    const dynamicColumnIds = this.customerSpecificFieldColumns.map(col => col.columnId);
+
+    if (insertIndex === -1) {
+      this.displayedColumns = [
+        ...this.baseDisplayedColumns,
+        ...dynamicColumnIds
+      ];
+    } else {
+      this.displayedColumns = [
+        ...this.baseDisplayedColumns.slice(0, insertIndex),
+        ...dynamicColumnIds,
+        ...this.baseDisplayedColumns.slice(insertIndex)
+      ];
+    }
+
+    return rows;
+  }
+
+  private buildCustomerSpecificColumnId(fieldName: string, index: number): string {
+    const slug = fieldName.replace(/[^a-zA-Z0-9]+/g, '_').replace(/^_|_$/g, '') || 'field';
+    return `csf_${index}_${slug}`;
+  }
+
+  private parseCustomerSpecificFields(value: string | null | undefined): { fieldName: string; fieldValue: string }[] {
+    const trimmed = (value || '').trim();
+    if (!trimmed) {
+      return [];
+    }
+
+    const parseCandidates = [
+      trimmed,
+      `[${trimmed}]`,
+      trimmed.startsWith('[') ? trimmed : `[${trimmed.replace(/^\s*,\s*/, '')}]`
+    ];
+
+    for (const candidate of parseCandidates) {
+      try {
+        const parsed = JSON.parse(candidate);
+        const list = Array.isArray(parsed) ? parsed : [parsed];
+        const mapped = list
+          .map(item => this.extractCustomerSpecificFieldPair(item))
+          .filter(item => item.fieldName || item.fieldValue);
+
+        if (mapped.length) {
+          return mapped;
+        }
+      } catch {
+        // try next parse strategy
+      }
+    }
+
+    const results: { fieldName: string; fieldValue: string }[] = [];
+    const fieldPattern = /"(?:FieldName|fieldName)"\s*:\s*"([^"]*)"[\s\S]*?"(?:FieldValue|fieldValue)"\s*:\s*"([^"]*)"/g;
+    let match;
+
+    while ((match = fieldPattern.exec(trimmed)) !== null) {
+      results.push({ fieldName: match[1], fieldValue: match[2] });
+    }
+
+    return results;
+  }
+
+  private extractCustomerSpecificFieldPair(item: any): { fieldName: string; fieldValue: string } {
+    return {
+      fieldName: item?.FieldName ?? item?.fieldName ?? '',
+      fieldValue: item?.FieldValue ?? item?.fieldValue ?? ''
+    };
+  }
 }
 
 

@@ -567,10 +567,10 @@
                                                     {{row.dropOffAddress || 'N/A'}}
                                                 </mat-cell>
                                             </ng-container>
-                                             <ng-container matColumnDef="CustomerSpecificFields">
-                                                <mat-header-cell *matHeaderCellDef mat-sort-header>Customer SpecificFields</mat-header-cell>
+                                             <ng-container *ngFor="let fieldCol of customerSpecificFieldColumns; trackBy: trackCustomerSpecificFieldColumn" [matColumnDef]="fieldCol.columnId">
+                                                <mat-header-cell *matHeaderCellDef>{{ fieldCol.fieldName }}</mat-header-cell>
                                                 <mat-cell *matCellDef="let row">
-                                                    {{row.customerSpecificFields || 'N/A'}}
+                                                    {{ getCustomerSpecificFieldValue(row, fieldCol.fieldName) }}
                                                 </mat-cell>
                                             </ng-container>
 
