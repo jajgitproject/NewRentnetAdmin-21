@@ -635,7 +635,7 @@
                                              <ng-container matColumnDef="CustomerSpecificFields">
                                                 <mat-header-cell *matHeaderCellDef mat-sort-header>Customer SpecificFields</mat-header-cell>
                                                 <mat-cell *matCellDef="let row">
-                                                    {{row.customerSpecificFields || 'N/A'}}
+                                                    <span class="customer-specific-fields-cell">{{ formatCustomerSpecificFields(row.customerSpecificFields) }}</span>
                                                 </mat-cell>
                                             </ng-container>
 

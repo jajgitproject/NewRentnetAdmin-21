@@ -1143,6 +1143,63 @@ export class DutyRegisterComponent implements OnInit {
   trackByFn(index: number, item: any) {
   return item.reservationID || index;
 }
+
+  formatCustomerSpecificFields(value: string | null | undefined): string {
+    const items = this.parseCustomerSpecificFields(value);
+    if (!items.length) {
+      return value?.trim() || 'N/A';
+    }
+
+    return items
+      .map(item => `${item.fieldName}: ${item.fieldValue}`)
+      .join('\n');
+  }
+
+  private parseCustomerSpecificFields(value: string | null | undefined): { fieldName: string; fieldValue: string }[] {
+    const trimmed = (value || '').trim();
+    if (!trimmed) {
+      return [];
+    }
+
+    const parseCandidates = [
+      trimmed,
+      `[${trimmed}]`,
+      trimmed.startsWith('[') ? trimmed : `[${trimmed.replace(/^\s*,\s*/, '')}]`
+    ];
+
+    for (const candidate of parseCandidates) {
+      try {
+        const parsed = JSON.parse(candidate);
+        const list = Array.isArray(parsed) ? parsed : [parsed];
+        const mapped = list
+          .map(item => this.extractCustomerSpecificFieldPair(item))
+          .filter(item => item.fieldName || item.fieldValue);
+
+        if (mapped.length) {
+          return mapped;
+        }
+      } catch {
+        // try next parse strategy
+      }
+    }
+
+    const results: { fieldName: string; fieldValue: string }[] = [];
+    const fieldPattern = /"(?:FieldName|fieldName)"\s*:\s*"([^"]*)"[\s\S]*?"(?:FieldValue|fieldValue)"\s*:\s*"([^"]*)"/g;
+    let match;
+
+    while ((match = fieldPattern.exec(trimmed)) !== null) {
+      results.push({ fieldName: match[1], fieldValue: match[2] });
+    }
+
+    return results;
+  }
+
+  private extractCustomerSpecificFieldPair(item: any): { fieldName: string; fieldValue: string } {
+    return {
+      fieldName: item?.FieldName ?? item?.fieldName ?? '',
+      fieldValue: item?.FieldValue ?? item?.fieldValue ?? ''
+    };
+  }
 }
 
 
