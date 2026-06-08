@@ -719,7 +719,18 @@
                     </a>
 
                   </mat-menu><br />
-                  N/A<br />
+                  <ng-container
+                    *ngIf="item.dutySlipForBillingCreatedON; else noDataForClosing">
+                    {{ (item.dutySlipForBillingCreatedON | date : 'dd/MM/yyyy') || 'N/A' }} ,
+                    {{ (item.dutySlipForBillingCreatedON | date : 'shortTime') || 'N/A' }}
+                   
+                  </ng-container>
+                  
+                  <ng-template #noDataForClosing>
+                    <span>N/A</span>
+                  </ng-template>
+                   
+                 <br />
 
                   <b class="remark-row">
                     <button class="BoldButton" mat-button (click)="driverRemarkDetails(item)">

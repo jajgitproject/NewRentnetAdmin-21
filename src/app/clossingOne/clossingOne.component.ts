@@ -241,6 +241,8 @@ export class ClossingOneComponent implements OnInit, AfterViewInit, AfterViewChe
   guestName:any;
   DutySlipMap:any;
   IRN:any;
+   CityName:any;
+  Package:any;
 
   constructor(
     public httpClient: HttpClient,
@@ -439,6 +441,8 @@ export class ClossingOneComponent implements OnInit, AfterViewInit, AfterViewChe
           this.VehicleID = this.closingDataAdvanceTable?.vehicleID;
           this.guestName = this.closingDataAdvanceTable?.guestName;
           this.DutySlipMap= this.closingDataAdvanceTable?.dutySlipMap;
+          this.CityName = this.closingDataAdvanceTable?.city;
+          this.Package = this.closingDataAdvanceTable?.package;
          
           this.advanceDetailsLoadData();
           this.kamCardLoadData();
