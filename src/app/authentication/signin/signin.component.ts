@@ -154,7 +154,9 @@ export class SigninComponent implements OnInit {
         );
         })
         .catch((geoError: Error) => {
-          this.errorMessageToBeShown = geoError?.message || 'Location permission is required to login.';
+          this.errorMessageToBeShown =
+            geoError?.message ||
+            'Location permission is required to login. Please allow location access for this site and try again.';
           this.error = this.errorMessageToBeShown;
           this.isSubmitting = false;
         });

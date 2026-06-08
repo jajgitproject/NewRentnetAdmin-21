@@ -5,6 +5,7 @@ import { catchError, map } from 'rxjs/operators';
 import { User } from '../models/user';
 import { HttpClient } from '@angular/common/http';
 import { RuntimeConfigService } from './runtime-config.service';
+import { LoginLocationPayload } from './geolocation.service';
 
 @Injectable({
   providedIn: 'root'
@@ -56,16 +57,13 @@ export class AuthService {
     email: string,
     password: string,
     userType: string,
-    location?: {
-      loginLatitude: number;
-      loginLongitude: number;
-      locationAccuracyMeters?: number;
-      locationCapturedAt: string;
-    }
+    location?: LoginLocationPayload
   ) {
     const body: Record<string, unknown> = {
       email, password, userType,
       Email: email, Password: password, UserType: userType,
+      loginFrom: 'WebAdmin',
+      LoginFrom: 'WebAdmin',
     };
     if (location) {
       body.loginLatitude = location.loginLatitude;

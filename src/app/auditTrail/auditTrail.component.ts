@@ -156,7 +156,16 @@ export class AuditTrailComponent implements OnInit {
       this.selectedUserId = null;
       return;
     }
-    this.selectedUserId = emp.employeeID;
+    this.selectedUserId = emp.employeeID ?? (emp as any).EmployeeID ?? null;
+  }
+
+  private resolveSelectedUserId(): number | null {
+    const raw = this.userCtrl.value;
+    if (raw && typeof raw === 'object') {
+      const id = raw.employeeID ?? (raw as any).EmployeeID;
+      return id != null && id > 0 ? id : null;
+    }
+    return this.selectedUserId != null && this.selectedUserId > 0 ? this.selectedUserId : null;
   }
 
   private parseReservationId(): number | null {
@@ -181,7 +190,7 @@ export class AuditTrailComponent implements OnInit {
 
   isSearchDisabled(): boolean {
     if (this.isLoadingEvents) return true;
-    const hasUser = this.selectedUserId != null && this.selectedUserId > 0;
+    const hasUser = this.resolveSelectedUserId() != null;
     const hasRes = this.parseReservationId() != null;
     const hasPage = !!this.resolvePageName();
     return !hasUser && !hasRes && !hasPage;
@@ -190,7 +199,8 @@ export class AuditTrailComponent implements OnInit {
   search(): void {
     const reservationId = this.parseReservationId();
     const pageName = this.resolvePageName();
-    if (!this.selectedUserId && reservationId == null && !pageName) {
+    const selectedUserId = this.resolveSelectedUserId();
+    if (!selectedUserId && reservationId == null && !pageName) {
       this.events = [];
       this.activeReservationId = null;
       this.reservationTableGroups = [];
@@ -208,10 +218,11 @@ export class AuditTrailComponent implements OnInit {
     const toDate = this.toDateCtrl.value ? new Date(this.toDateCtrl.value) : null;
 
     // Reservation audit: all users, all related tables; ignore form-name filter (API skips it when reservationId set).
-    const apiUserId = reservationMode ? null : this.selectedUserId;
+    const apiUserId = reservationMode ? null : selectedUserId;
     const apiPageName = reservationMode ? '' : pageName;
     const pageSize = 50;
-    const includeNullUser = true;
+    // When a user is selected, exclude NULL UserId system/driver-app noise (same rows for every user).
+    const includeNullUser = reservationMode || selectedUserId == null;
 
     this.auditTrailService
       .getEvents(apiUserId, apiPageName, reservationId, 0, pageSize, includeNullUser, fromDate, toDate)
@@ -309,7 +320,9 @@ export class AuditTrailComponent implements OnInit {
       return displayName;
     }
     if (e.userId != null && e.userId > 0) {
-      const emp = (this.employees || []).find((x) => x.employeeID === e.userId);
+      const emp = (this.employees || []).find((x) =>
+        x.employeeID === e.userId || (x as any).EmployeeID === e.userId
+      );
       if (emp) {
         return this.userDisplay(emp);
       }
