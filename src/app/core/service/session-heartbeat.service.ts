@@ -239,7 +239,7 @@ export class SessionHeartbeatService implements OnDestroy {
 
       title: 'Session Timeout',
 
-      text: `Your Session will end in ${SessionHeartbeatService.INACTIVITY_WARNING_LEAD_MINUTES} Minute${SessionHeartbeatService.INACTIVITY_WARNING_LEAD_MINUTES === 1 ? '' : 's'}.`,
+      text: `Your Session will end in ${SessionHeartbeatService.INACTIVITY_WARNING_LEAD_MINUTES} minutes.`,
 
       icon: 'warning',
 
