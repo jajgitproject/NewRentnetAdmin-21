@@ -134,13 +134,13 @@
 
                         <tr>
                           <td colspan="2">
-                            <strong>Reporting Kms : {{dataSource?.reportingToGuestKM}}</strong>
+                            <strong>Reporting Kms : {{dataSource?.pickUpKM}}</strong>
                           </td>
                           <td colspan="2">
-                            <strong>Reporting Time : {{dataSource?.reportingToGuestTime | date : 'hh:mm a'}}</strong>
+                            <strong>Reporting Time : {{dataSource?.pickUpTime | date : 'hh:mm a'}}</strong>
                           </td>
                           <td colspan="2">
-                            <strong>Reporting Date : {{dataSource?.reportingToGuestDate | date : 'dd/MM/yyyy'}}</strong>
+                            <strong>Reporting Date : {{dataSource?.pickUpDate | date : 'dd/MM/yyyy'}}</strong>
                           </td>
                         </tr>
 
@@ -311,7 +311,9 @@
                           </td>
                           <td valign="top" width="130">
                             User Signature<br />
-                            <!-- <img src="dataSource?.customerSignatureImage" id="image1" width="150" height="150" /> -->
+                            <img *ngIf="dataSource?.customerSignatureImage; else noSignatureImage" 
+                              [src]="dataSource?.customerSignatureImage" id="image1" width="100" height="100" />
+                              <ng-template #noSignatureImage>No Image</ng-template>
                           </td>
 
                           <td width="130" valign="top">
