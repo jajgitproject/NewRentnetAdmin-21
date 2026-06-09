@@ -25,6 +25,7 @@ const OTHER_CHARGES_PLACEHOLDER: SummaryOfDutyRow[] = [
   { label: 'Driver Allowance Amount', value: '—' },
   { label: 'Night Amount', value: '—' },
   { label: 'FGR', value: '—' },
+  { label: 'Fuel Surcharge', value: '—' },
   { label: 'Parking / Toll', value: '—' },
   { label: 'Interstate Tax', value: '—' }
 ];

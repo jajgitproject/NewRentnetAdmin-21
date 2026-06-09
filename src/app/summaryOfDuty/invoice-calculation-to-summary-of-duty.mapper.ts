@@ -432,6 +432,48 @@ function fgrTotal(pkgFgr: Record<string, unknown> | undefined): number | null {
   return kmAmt + fixed;
 }
 
+function fuelSurchargeTotal(
+  fuel: Record<string, unknown> | undefined
+): number | null {
+
+  if (!fuel) {
+    return null;
+  }
+
+  const packageRate =
+    toNum(
+      pick(
+        fuel,
+        'totalFuelSurchargeOnPackageRate',
+        'TotalFuelSurchargeOnPackageRate'
+      )
+    ) ?? 0;
+
+  const extraKm =
+    toNum(
+      pick(
+        fuel,
+        'totalFuelSurchargeOnExtraKM',
+        'TotalFuelSurchargeOnExtraKM'
+      )
+    ) ?? 0;
+
+  const extraHr =
+    toNum(
+      pick(
+        fuel,
+        'totalFuelSurchargeOnExtraHours',
+        'TotalFuelSurchargeOnExtraHours'
+      )
+    ) ?? 0;
+
+  const total = packageRate + extraKm + extraHr;
+
+  console.log('Fuel surcharge total:', total);
+
+  return total;
+}
+
 function packageDescription(pkg: Record<string, unknown> | undefined): string {
   if (!pkg) {
     return '—';
@@ -537,6 +579,10 @@ export function enrichInvoiceCalculationWithFullDetail(
   takeIfMissing('invoiceGSTModel', 'InvoiceGSTModel');
   takeIfMissing('invoicePackageModel', 'InvoicePackageModel');
   takeIfMissing('invoicePackageValuesModel', 'InvoicePackageValuesModel');
+  takeIfMissing('invoicePackageFGRModel','InvoicePackageFGRModel');
+  takeIfMissing('invoiceInterstateTaxModel','InvoiceInterstateTaxModel');
+  takeIfMissing('invoiceTollParkingModel','InvoiceTollParkingModel');
+  takeIfMissing('invoiceFuelSurchargeModel','InvoiceFuelSurchargeModel');
   return out;
 }
 
@@ -658,6 +704,11 @@ export function mapInvoiceCalculationToSummaryOfDuty(response: unknown): Summary
     'invoicePackageFGRModel',
     'InvoicePackageFGRModel'
   );
+  const fuelSurcharge = pick<Record<string, unknown>>(
+  r,
+  'invoiceFuelSurchargeModel',
+  'InvoiceFuelSurchargeModel'
+);
 
   const tollRows = pick(
     r,
@@ -814,6 +865,8 @@ export function mapInvoiceCalculationToSummaryOfDuty(response: unknown): Summary
   const nightN = nightChargeTotal(night);
 
   const fgrN = fgrTotal(pkgFgr);
+  const fuelSurchargeN =
+  fuelSurchargeTotal(fuelSurcharge);
 
   const ptTotal = parkingTollTotal(tollRows, r);
 
@@ -845,6 +898,12 @@ export function mapInvoiceCalculationToSummaryOfDuty(response: unknown): Summary
         ? formatInr(fgrN)
         : '—'
     },
+    {
+  label: 'Fuel Surcharge',
+  value: fuelSurchargeN != null
+    ? formatInr(fuelSurchargeN)
+    : '—'
+},
     {
       label: 'Parking / Toll',
       value: formatInr(ptTotal)
@@ -922,4 +981,5 @@ export function mapInvoiceCalculationToSummaryOfDuty(response: unknown): Summary
         ? formatInr(final)
         : '—'
   };
+  
 }
