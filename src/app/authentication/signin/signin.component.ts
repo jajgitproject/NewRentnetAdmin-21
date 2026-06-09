@@ -1,17 +1,13 @@
 // @ts-nocheck
-import { Component, OnDestroy, OnInit } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { AuthService } from 'src/app/core/service/auth.service';
 import { MatDialog } from '@angular/material/dialog';
 import { FormDialogComponent } from 'src/app/validateOTP/dialogs/form-dialog/form-dialog.component';
 import { ExpirationDateService } from 'src/app/shared/expirationDate.service';
-import {
-  GeolocationService,
-  LoginLocationPayload,
-} from 'src/app/core/service/geolocation.service';
-
-type LocationStatus = 'pending' | 'granted' | 'denied' | 'unsupported';
+// Location-based login disabled for HTTP/VPN (http://10.0.6.8). Re-enable GeolocationService when HTTPS is available.
+// import { GeolocationService, LoginLocationPayload } from 'src/app/core/service/geolocation.service';
 
 @Component({
   standalone: false,
@@ -19,7 +15,7 @@ type LocationStatus = 'pending' | 'granted' | 'denied' | 'unsupported';
   templateUrl: './signin.component.html',
   styleUrls: ['./signin.component.scss']
 })
-export class SigninComponent implements OnInit, OnDestroy {
+export class SigninComponent implements OnInit {
   otpDialogOpen = false;
   loginForm: FormGroup;
   email: string = '';
@@ -36,12 +32,6 @@ export class SigninComponent implements OnInit, OnDestroy {
   showExpiryWarning: boolean = false;
   isPasswordDeactivated: boolean = false;
   errorMessageToBeShown: string = '';
-  locationStatus: LocationStatus = 'pending';
-  loginLocation: LoginLocationPayload | null = null;
-  locationMessage = 'Allow location access when your browser asks. This is required for employee login.';
-  isRequestingLocation = false;
-
-  private unwatchPermission: (() => void) | null = null;
 
   constructor(
     private formBuilder: FormBuilder,
@@ -49,7 +39,6 @@ export class SigninComponent implements OnInit, OnDestroy {
     private authService: AuthService,
     private dialog: MatDialog,
     private expirationDateService: ExpirationDateService,
-    private geolocationService: GeolocationService,
   ) {}
 
   ngOnInit() {
@@ -67,36 +56,6 @@ export class SigninComponent implements OnInit, OnDestroy {
       this.loginForm.patchValue({ email: this.email });
       this.loginForm.patchValue({ password: this.password });
     }
-
-    this.unwatchPermission = this.geolocationService.watchPermissionStatus((status) => {
-      if (status === 'denied' && this.locationStatus !== 'granted') {
-        this.locationStatus = 'denied';
-        this.locationMessage =
-          'Location access is blocked. Click the lock icon in your browser address bar, allow Location for this site, then click Retry location.';
-      }
-    });
-
-    this.requestLocationOnPageLoad();
-  }
-
-  ngOnDestroy() {
-    this.unwatchPermission?.();
-  }
-
-  get canLogin(): boolean {
-    if (this.isSubmitting || this.otpDialogOpen) {
-      return false;
-    }
-    if (this.locationStatus === 'pending' || this.isRequestingLocation) {
-      return false;
-    }
-    if (this.locationStatus === 'unsupported') {
-      return false;
-    }
-    if (this.locationStatus === 'denied' && !this.geolocationService.isLocationFresh(this.loginLocation)) {
-      return false;
-    }
-    return true;
   }
 
   onNumberInput(event: any) {
@@ -110,41 +69,6 @@ export class SigninComponent implements OnInit, OnDestroy {
 
   get f() {
     return this.loginForm.controls;
-  }
-
-  retryLocationAccess() {
-    this.requestLocationOnPageLoad();
-  }
-
-  requestLocationOnPageLoad() {
-    if (!navigator?.geolocation) {
-      this.locationStatus = 'unsupported';
-      this.locationMessage =
-        'Your browser does not support location access. Please use a modern browser with location enabled.';
-      return;
-    }
-
-    this.isRequestingLocation = true;
-    this.locationStatus = 'pending';
-    this.locationMessage = 'Allow location access when your browser asks. This is required for employee login.';
-
-    this.geolocationService
-      .requestLoginLocation()
-      .then((location) => {
-        this.loginLocation = location;
-        this.locationStatus = 'granted';
-        this.locationMessage = 'Location enabled. You can sign in.';
-      })
-      .catch((geoError: Error) => {
-        this.loginLocation = null;
-        this.locationMessage =
-          geoError?.message ||
-          'Location permission is required to login. Please allow location access for this site and try again.';
-        this.locationStatus = 'denied';
-      })
-      .finally(() => {
-        this.isRequestingLocation = false;
-      });
   }
 
   onSubmit() {
@@ -161,34 +85,8 @@ export class SigninComponent implements OnInit, OnDestroy {
       localStorage.setItem('password', this.f.password.value);
     }
 
-    const proceedWithLogin = (location: LoginLocationPayload) => {
-      this.loginLocation = location;
-      this.locationStatus = 'granted';
-      this.authenticateWithLocation(location);
-    };
-
-    if (this.geolocationService.isLocationFresh(this.loginLocation)) {
-      proceedWithLogin(this.loginLocation);
-      return;
-    }
-
-    this.geolocationService
-      .requestLoginLocation()
-      .then((location) => proceedWithLogin(location))
-      .catch((geoError: Error) => {
-        this.errorMessageToBeShown =
-          geoError?.message ||
-          'Location permission is required to login. Please allow location access for this site and try again.';
-        this.error = this.errorMessageToBeShown;
-        this.locationStatus = 'denied';
-        this.locationMessage = this.errorMessageToBeShown;
-        this.isSubmitting = false;
-      });
-  }
-
-  private authenticateWithLocation(location: LoginLocationPayload) {
     this.authService
-      .login(this.f.email.value, this.f.password.value, 'Employee', location)
+      .login(this.f.email.value, this.f.password.value, 'Employee')
       .subscribe(
         (res) => {
           this.error = res?.Message || null;

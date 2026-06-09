@@ -5,7 +5,8 @@ import { catchError, map } from 'rxjs/operators';
 import { User } from '../models/user';
 import { HttpClient } from '@angular/common/http';
 import { RuntimeConfigService } from './runtime-config.service';
-import { LoginLocationPayload } from './geolocation.service';
+// Location-based login disabled for HTTP/VPN internal access. Re-enable when HTTPS is available.
+// import { LoginLocationPayload } from './geolocation.service';
 
 @Injectable({
   providedIn: 'root'
@@ -57,7 +58,6 @@ export class AuthService {
     email: string,
     password: string,
     userType: string,
-    location?: LoginLocationPayload
   ) {
     const body: Record<string, unknown> = {
       email, password, userType,
@@ -65,16 +65,16 @@ export class AuthService {
       loginFrom: 'WebAdmin',
       LoginFrom: 'WebAdmin',
     };
-    if (location) {
-      body.loginLatitude = location.loginLatitude;
-      body.loginLongitude = location.loginLongitude;
-      body.locationAccuracyMeters = location.locationAccuracyMeters;
-      body.locationCapturedAt = location.locationCapturedAt;
-      body.LoginLatitude = location.loginLatitude;
-      body.LoginLongitude = location.loginLongitude;
-      body.LocationAccuracyMeters = location.locationAccuracyMeters;
-      body.LocationCapturedAt = location.locationCapturedAt;
-    }
+    // if (location) {
+    //   body.loginLatitude = location.loginLatitude;
+    //   body.loginLongitude = location.loginLongitude;
+    //   body.locationAccuracyMeters = location.locationAccuracyMeters;
+    //   body.locationCapturedAt = location.locationCapturedAt;
+    //   body.LoginLatitude = location.loginLatitude;
+    //   body.LoginLongitude = location.loginLongitude;
+    //   body.LocationAccuracyMeters = location.locationAccuracyMeters;
+    //   body.LocationCapturedAt = location.locationCapturedAt;
+    // }
     return this.http.post<any>(this.API_URL + '/authenticate', body).pipe(
       map((user) => {
         let parsed: any = user;
