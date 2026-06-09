@@ -19,6 +19,7 @@ export class ClosingModel {
   invoiceID:number;
   action:string;
   irn:string;
+  hasActiveEInvoice:boolean;
 
   constructor(closingModel) {
     this.closingReservationForPickupDataModel = new ClosingReservationForPickupDataModel(closingModel.closingReservationForPickupDataModel);
@@ -28,6 +29,10 @@ export class ClosingModel {
     this.closingDutySlipByGPSModel = new ClosingDutySlipByGPSModel(closingModel.closingDutySlipByGPSModel);
     this.closingDutySlipForBillingModel = new ClosingDutySlipForBillingModel(closingModel.closingDutySlipForBillingModel);
     this.kmComparisionModel = new KMComparisionModel(closingModel.kmComparisionModel);
+    this.invoiceID = closingModel.invoiceID || 0;
+    this.action = closingModel.action || '';
+    this.irn = closingModel.irn || '';
+    this.hasActiveEInvoice = closingModel.hasActiveEInvoice === true;
   }
 }
 

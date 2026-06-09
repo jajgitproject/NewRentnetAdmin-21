@@ -208,8 +208,8 @@ export class ClossingOneComponent implements OnInit, AfterViewInit, AfterViewChe
   canThisRoleDoGoodForBillingOnClosingScreen = false;
   canThisRoleViewDummyInvoice = false;
   templateAddress: any;
-  verifyDutyStatusAndCacellationStatus: any;
-  goodForBillingStatusAndCancellationStatus:any;
+  verifyDutyStatusAndCacellationStatus: any = 'Changes allow';
+  goodForBillingStatusAndCancellationStatus: any = 'Changes Allow';
 
   Message: string;
   DSClosing: any;
@@ -361,15 +361,6 @@ export class ClossingOneComponent implements OnInit, AfterViewInit, AfterViewChe
       this.disputeAdvanceTable = data ?? [];
     });
 
-    this.controlPanelDialogeService.getVerifyDutyStatus(this.ReservationID).subscribe(
-      data => {
-        this.verifyDutyStatusAndCacellationStatus = data.status;
-      });
-       this.controlPanelDialogeService.getGoodForBillingStatus(this.ReservationID).subscribe(
-      data => {
-        this.goodForBillingStatusAndCancellationStatus = data.status;
-      });
-
     this.GetTotalTollParInStDispute();
     this.loadDataForCard();
     this.BookingDataOnClosing();
@@ -393,6 +384,16 @@ export class ClossingOneComponent implements OnInit, AfterViewInit, AfterViewChe
     this.DisputeLoadData();
   }
 
+  private applyEditBlockStatus(hasActiveEInvoice: boolean): void {
+    if (hasActiveEInvoice) {
+      this.goodForBillingStatusAndCancellationStatus = 'E-Invoice Generated - Changes Not Allow';
+      this.verifyDutyStatusAndCacellationStatus = 'E-Invoice Generated - Changes not allow';
+    } else {
+      this.goodForBillingStatusAndCancellationStatus = 'Changes Allow';
+      this.verifyDutyStatusAndCacellationStatus = 'Changes allow';
+    }
+  }
+
   GetClosingData() {
     this.clossingOneService.GetClosingData(this.DutySlipID).subscribe(
       data => {
@@ -403,6 +404,7 @@ export class ClossingOneComponent implements OnInit, AfterViewInit, AfterViewChe
         this.goodForBilling = this.advanceTableClosingOne?.closingDutySlipForBillingModel?.goodForBilling;
         this.verifyDuty = this.advanceTableClosingOne?.closingDutySlipForBillingModel?.verifyDuty;
         this.DSClosing = this.advanceTableClosingOne?.closingDutySlipForBillingModel?.dsClosing;
+        this.applyEditBlockStatus(!!this.advanceTableClosingOne?.hasActiveEInvoice);
         this.loadDataForBillNo();
       }
     );
