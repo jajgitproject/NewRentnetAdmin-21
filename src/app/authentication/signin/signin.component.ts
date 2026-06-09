@@ -1,12 +1,17 @@
 // @ts-nocheck
-import { Component, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { AuthService } from 'src/app/core/service/auth.service';
 import { MatDialog } from '@angular/material/dialog';
 import { FormDialogComponent } from 'src/app/validateOTP/dialogs/form-dialog/form-dialog.component';
 import { ExpirationDateService } from 'src/app/shared/expirationDate.service';
-import { GeolocationService } from 'src/app/core/service/geolocation.service';
+import {
+  GeolocationService,
+  LoginLocationPayload,
+} from 'src/app/core/service/geolocation.service';
+
+type LocationStatus = 'pending' | 'granted' | 'denied' | 'unsupported';
 
 @Component({
   standalone: false,
@@ -14,7 +19,7 @@ import { GeolocationService } from 'src/app/core/service/geolocation.service';
   templateUrl: './signin.component.html',
   styleUrls: ['./signin.component.scss']
 })
-export class SigninComponent implements OnInit {
+export class SigninComponent implements OnInit, OnDestroy {
   otpDialogOpen = false;
   loginForm: FormGroup;
   email: string = '';
@@ -30,20 +35,25 @@ export class SigninComponent implements OnInit {
   daysLeft: number;
   showExpiryWarning: boolean = false;
   isPasswordDeactivated: boolean = false;
-  errorMessageToBeShown:string = '';
+  errorMessageToBeShown: string = '';
+  locationStatus: LocationStatus = 'pending';
+  loginLocation: LoginLocationPayload | null = null;
+  locationMessage = 'Allow location access when your browser asks. This is required for employee login.';
+  isRequestingLocation = false;
+
+  private unwatchPermission: (() => void) | null = null;
 
   constructor(
     private formBuilder: FormBuilder,
     private router: Router,
     private authService: AuthService,
     private dialog: MatDialog,
-    private expirationDateService:ExpirationDateService,
+    private expirationDateService: ExpirationDateService,
     private geolocationService: GeolocationService,
   ) {}
 
   ngOnInit() {
     this.loginForm = this.formBuilder.group({
-      //email: ['', [Validators.required, Validators.email, Validators.minLength(5)]],
       email: ['', [Validators.required, Validators.pattern(/^[0-9]*$/)]],
       password: ['', Validators.required]
     });
@@ -56,15 +66,43 @@ export class SigninComponent implements OnInit {
       this.password = savedPassword;
       this.loginForm.patchValue({ email: this.email });
       this.loginForm.patchValue({ password: this.password });
-      //this.rememberMe=true;
-      // this.checkPasswordStatus();
     }
-    
+
+    this.unwatchPermission = this.geolocationService.watchPermissionStatus((status) => {
+      if (status === 'denied' && this.locationStatus !== 'granted') {
+        this.locationStatus = 'denied';
+        this.locationMessage =
+          'Location access is blocked. Click the lock icon in your browser address bar, allow Location for this site, then click Retry location.';
+      }
+    });
+
+    this.requestLocationOnPageLoad();
   }
+
+  ngOnDestroy() {
+    this.unwatchPermission?.();
+  }
+
+  get canLogin(): boolean {
+    if (this.isSubmitting || this.otpDialogOpen) {
+      return false;
+    }
+    if (this.locationStatus === 'pending' || this.isRequestingLocation) {
+      return false;
+    }
+    if (this.locationStatus === 'unsupported') {
+      return false;
+    }
+    if (this.locationStatus === 'denied' && !this.geolocationService.isLocationFresh(this.loginLocation)) {
+      return false;
+    }
+    return true;
+  }
+
   onNumberInput(event: any) {
-  const input = event.target.value.replace(/[^0-9]/g, ''); // keep only digits
-  this.loginForm.get('email')?.setValue(input, { emitEvent: false });
-}
+    const input = event.target.value.replace(/[^0-9]/g, '');
+    this.loginForm.get('email')?.setValue(input, { emitEvent: false });
+  }
 
   toggleCheckbox(checked: boolean) {
     this.rememberMe = checked;
@@ -74,93 +112,137 @@ export class SigninComponent implements OnInit {
     return this.loginForm.controls;
   }
 
+  retryLocationAccess() {
+    this.requestLocationOnPageLoad();
+  }
+
+  requestLocationOnPageLoad() {
+    if (!navigator?.geolocation) {
+      this.locationStatus = 'unsupported';
+      this.locationMessage =
+        'Your browser does not support location access. Please use a modern browser with location enabled.';
+      return;
+    }
+
+    this.isRequestingLocation = true;
+    this.locationStatus = 'pending';
+    this.locationMessage = 'Allow location access when your browser asks. This is required for employee login.';
+
+    this.geolocationService
+      .requestLoginLocation()
+      .then((location) => {
+        this.loginLocation = location;
+        this.locationStatus = 'granted';
+        this.locationMessage = 'Location enabled. You can sign in.';
+      })
+      .catch((geoError: Error) => {
+        this.loginLocation = null;
+        this.locationMessage =
+          geoError?.message ||
+          'Location permission is required to login. Please allow location access for this site and try again.';
+        this.locationStatus = 'denied';
+      })
+      .finally(() => {
+        this.isRequestingLocation = false;
+      });
+  }
+
   onSubmit() {
     this.formSubmitted = true;
     this.error = null;
     if (this.loginForm.invalid) {
       this.error = 'Username and Password not valid !';
       return;
-    } else {
-      this.isSubmitting = true;
-      if (this.rememberMe) {
-        //store email in local storage if Remember me is checked
-        localStorage.setItem('email', this.f.email.value);
-        localStorage.setItem('password', this.f.password.value);
-      }
-      this.geolocationService
-        .requestLoginLocation()
-        .then((location) => {
-          this.authService
-            .login(this.f.email.value, this.f.password.value, 'Employee', location)
-            .subscribe(
-          (res) => {
-            this.error = res?.Message || null;
-            if (res?.Status === 'Failure' && res?.Message) {
-              this.errorMessageToBeShown = res.Message;
-            }
-            if(res.Message === "Invalid User: User not found")
-            {
-              this.errorMessageToBeShown = "User not found";
-            }
-            else if(res.Message === "Invalid User: Please enter correct username and password")
-            {
-              this.errorMessageToBeShown = "Please enter correct username and password";
-            }
-            
-            if (res) {
-              const token = res.Token ?? res.token;
-              const employee = res.employee ?? res.Employee;              
-
-              if (token && employee) {
-                localStorage.setItem('expirationDate', employee.PasswordExpirationDate ?? employee.passwordExpirationDate);
-                localStorage.setItem('roleID', employee.RoleID ?? employee.roleID);
-                localStorage.setItem('role', employee.Role ?? employee.role);
-                localStorage.setItem('canCreateReservation', employee.CanCreateReservation ?? employee.canCreateReservation);
-                localStorage.setItem('canThisRoleCreateBackDateBooking', employee.CanThisRoleCreateBackDateBooking ?? employee.canThisRoleCreateBackDateBooking);
-                localStorage.setItem(
-                  'canThisRoleCreateBillOnClosingScreen',
-                  String(employee.CanThisRoleCreateBillOnClosingScreen ?? employee.canThisRoleCreateBillOnClosingScreen ?? false)
-                );
-                localStorage.setItem(
-                  'canThisRoleViewBillOnClosingScreen',
-                  String(employee.CanThisRoleViewBillOnClosingScreen ?? employee.canThisRoleViewBillOnClosingScreen ?? false)
-                );
-                localStorage.setItem(
-                  'canThisRoleDoGoodForBillingOnClosingScreen',
-                  String(employee.CanThisRoleDoGoodForBillingOnClosingScreen ?? employee.canThisRoleDoGoodForBillingOnClosingScreen ?? false)
-                );
-                localStorage.setItem(
-                  'canThisRoleViewDummyInvoice',
-                  String(employee.CanThisRoleViewDummyInvoice ?? employee.canThisRoleViewDummyInvoice ?? false)
-                );
-                localStorage.setItem(
-                  'isThisAKeyAccountManagerRole',
-                  String(employee.IsThisAKeyAccountManagerRole ?? employee.isThisAKeyAccountManagerRole ?? false)
-                );
-                //this.expirationDateService.setExpirationDate(res.employee.PasswordExpirationDate);
-                // Call the method to open ValidateOTP modal on successful login
-                this.calculateDaysLeft();
-              
-              }
-            } else {
-              this.error = 'Invalid Login';
-            }
-            this.isSubmitting = false;
-          },
-          (error) => {
-            this.error = error;
-            this.isSubmitting = false;
-          }
-        );
-        })
-        .catch((geoError: Error) => {
-          this.errorMessageToBeShown =
-            geoError?.message ||
-            'Location permission is required to login. Please allow location access for this site and try again.';
-          this.error = this.errorMessageToBeShown;
-          this.isSubmitting = false;
-        });
     }
+
+    this.isSubmitting = true;
+    if (this.rememberMe) {
+      localStorage.setItem('email', this.f.email.value);
+      localStorage.setItem('password', this.f.password.value);
+    }
+
+    const proceedWithLogin = (location: LoginLocationPayload) => {
+      this.loginLocation = location;
+      this.locationStatus = 'granted';
+      this.authenticateWithLocation(location);
+    };
+
+    if (this.geolocationService.isLocationFresh(this.loginLocation)) {
+      proceedWithLogin(this.loginLocation);
+      return;
+    }
+
+    this.geolocationService
+      .requestLoginLocation()
+      .then((location) => proceedWithLogin(location))
+      .catch((geoError: Error) => {
+        this.errorMessageToBeShown =
+          geoError?.message ||
+          'Location permission is required to login. Please allow location access for this site and try again.';
+        this.error = this.errorMessageToBeShown;
+        this.locationStatus = 'denied';
+        this.locationMessage = this.errorMessageToBeShown;
+        this.isSubmitting = false;
+      });
+  }
+
+  private authenticateWithLocation(location: LoginLocationPayload) {
+    this.authService
+      .login(this.f.email.value, this.f.password.value, 'Employee', location)
+      .subscribe(
+        (res) => {
+          this.error = res?.Message || null;
+          if (res?.Status === 'Failure' && res?.Message) {
+            this.errorMessageToBeShown = res.Message;
+          }
+          if (res.Message === 'Invalid User: User not found') {
+            this.errorMessageToBeShown = 'User not found';
+          } else if (res.Message === 'Invalid User: Please enter correct username and password') {
+            this.errorMessageToBeShown = 'Please enter correct username and password';
+          }
+
+          if (res) {
+            const token = res.Token ?? res.token;
+            const employee = res.employee ?? res.Employee;
+
+            if (token && employee) {
+              localStorage.setItem('expirationDate', employee.PasswordExpirationDate ?? employee.passwordExpirationDate);
+              localStorage.setItem('roleID', employee.RoleID ?? employee.roleID);
+              localStorage.setItem('role', employee.Role ?? employee.role);
+              localStorage.setItem('canCreateReservation', employee.CanCreateReservation ?? employee.canCreateReservation);
+              localStorage.setItem('canThisRoleCreateBackDateBooking', employee.CanThisRoleCreateBackDateBooking ?? employee.canThisRoleCreateBackDateBooking);
+              localStorage.setItem(
+                'canThisRoleCreateBillOnClosingScreen',
+                String(employee.CanThisRoleCreateBillOnClosingScreen ?? employee.canThisRoleCreateBillOnClosingScreen ?? false)
+              );
+              localStorage.setItem(
+                'canThisRoleViewBillOnClosingScreen',
+                String(employee.CanThisRoleViewBillOnClosingScreen ?? employee.canThisRoleViewBillOnClosingScreen ?? false)
+              );
+              localStorage.setItem(
+                'canThisRoleDoGoodForBillingOnClosingScreen',
+                String(employee.CanThisRoleDoGoodForBillingOnClosingScreen ?? employee.canThisRoleDoGoodForBillingOnClosingScreen ?? false)
+              );
+              localStorage.setItem(
+                'canThisRoleViewDummyInvoice',
+                String(employee.CanThisRoleViewDummyInvoice ?? employee.canThisRoleViewDummyInvoice ?? false)
+              );
+              localStorage.setItem(
+                'isThisAKeyAccountManagerRole',
+                String(employee.IsThisAKeyAccountManagerRole ?? employee.isThisAKeyAccountManagerRole ?? false)
+              );
+              this.calculateDaysLeft();
+            }
+          } else {
+            this.error = 'Invalid Login';
+          }
+          this.isSubmitting = false;
+        },
+        (error) => {
+          this.error = error;
+          this.isSubmitting = false;
+        }
+      );
   }
 
   public calculateDaysLeft(): void {
@@ -178,7 +260,6 @@ export class SigninComponent implements OnInit {
       '9891785921',
     ];
 
-    // TEST-ONLY: bypass OTP and password-expiry deactivation for listed numbers.
     if (OTP_BYPASS_NUMBERS.includes(mobile) || OTP_BYPASS_NUMBERS.includes(typedLogin)) {
       this.isPasswordDeactivated = false;
       const role = localStorage.getItem('role');
@@ -202,7 +283,6 @@ export class SigninComponent implements OnInit {
     const timeDiff = expirationDate.getTime() - Date.now();
     this.daysLeft = Math.ceil(timeDiff / (1000 * 3600 * 24));
 
-    // If the password is not reset within the allowed period, deactivate the account
     if (this.daysLeft <= 0) {
       this.isPasswordDeactivated = true;
       this.deactivateAccount();
@@ -251,14 +331,4 @@ export class SigninComponent implements OnInit {
       this.otpDialogOpen = false;
     });
   }
-
-  // checkPasswordStatus() {
-  //   const passwordStatus = 'deactivated'; 
-  //   if (passwordStatus === 'deactivated') {
-  //     this.isPasswordDeactivated = true;
-  //   }
-  // }
-
 }
-
-
