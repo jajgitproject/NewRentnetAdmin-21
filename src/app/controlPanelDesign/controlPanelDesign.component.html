@@ -1728,17 +1728,19 @@
                           </span>
 
                           <span style="font-size: 12px;text-align: left;width: 100px;float: left;">
-                            <ng-container *ngIf="data.locationOutDate; else noData">
+                            <!-- <ng-container *ngIf="data.locationOutDate; else noData">
                               {{ data.locationOutDate | date : 'dd-MMM-yy' }}
                               {{ data.locationOutTime | date : 'H:mm' }}
+                            </ng-container> -->
+                            <ng-container *ngIf="data.garageOutDate; else noData">
+                              {{ data.garageOutDate | date : 'dd-MMM-yy' }}
+                            {{ data.garageOutTime | date : 'H:mm' }}
                             </ng-container>
 
                             <ng-template #noData>
                               N/A
                             </ng-template>
-                            <br />
-                            <!-- {{ data.garageOutDate | date : 'dd-MMM-yy' }}
-                            {{ data.garageOutTime | date : 'H:mm' }} -->
+                            
                           </span>
 
                           <span style="font-size: 12px;text-align: left;width: 100px;float: left;">
