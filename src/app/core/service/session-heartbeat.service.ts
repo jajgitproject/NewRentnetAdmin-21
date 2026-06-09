@@ -16,12 +16,13 @@ import { AuthService } from './auth.service';
 
 export class SessionHeartbeatService implements OnDestroy {
 
+  // 20-minute inactivity logout disabled temporarily. Re-enable when ready.
   // Keep in sync with EmployeeLoginSessionSettings on API (20 min timeout, 2 min warning lead)
-  private static readonly INACTIVITY_TIMEOUT_MINUTES = 20;
-  private static readonly INACTIVITY_WARNING_LEAD_MINUTES = 2;
-  private static readonly INACTIVITY_MS = SessionHeartbeatService.INACTIVITY_TIMEOUT_MINUTES * 60 * 1000;
-  private static readonly WARNING_MS =
-    (SessionHeartbeatService.INACTIVITY_TIMEOUT_MINUTES - SessionHeartbeatService.INACTIVITY_WARNING_LEAD_MINUTES) * 60 * 1000;
+  // private static readonly INACTIVITY_TIMEOUT_MINUTES = 20;
+  // private static readonly INACTIVITY_WARNING_LEAD_MINUTES = 2;
+  // private static readonly INACTIVITY_MS = SessionHeartbeatService.INACTIVITY_TIMEOUT_MINUTES * 60 * 1000;
+  // private static readonly WARNING_MS =
+  //   (SessionHeartbeatService.INACTIVITY_TIMEOUT_MINUTES - SessionHeartbeatService.INACTIVITY_WARNING_LEAD_MINUTES) * 60 * 1000;
 
   private static readonly HEARTBEAT_DEBOUNCE_MS = 60 * 1000;
 
@@ -68,15 +69,13 @@ export class SessionHeartbeatService implements OnDestroy {
 
 
   start(): void {
+    // 20-minute inactivity logout disabled temporarily.
+    return;
 
-    this.stop();
-
-    this.monitoring = true;
-
-    this.bindActivityListeners();
-
-    this.resetInactivityTimer();
-
+    // this.stop();
+    // this.monitoring = true;
+    // this.bindActivityListeners();
+    // this.resetInactivityTimer();
   }
 
 
@@ -182,25 +181,18 @@ export class SessionHeartbeatService implements OnDestroy {
 
 
   private resetInactivityTimer(): void {
+    // 20-minute inactivity logout disabled temporarily.
+    return;
 
-    this.clearInactivityTimers();
-
-    this.warningTimeoutId = setTimeout(
-
-      () => this.showInactivityWarning(),
-
-      SessionHeartbeatService.WARNING_MS
-
-    );
-
-    this.logoutTimeoutId = setTimeout(
-
-      () => this.performInactivityLogout(),
-
-      SessionHeartbeatService.INACTIVITY_MS
-
-    );
-
+    // this.clearInactivityTimers();
+    // this.warningTimeoutId = setTimeout(
+    //   () => this.showInactivityWarning(),
+    //   SessionHeartbeatService.WARNING_MS
+    // );
+    // this.logoutTimeoutId = setTimeout(
+    //   () => this.performInactivityLogout(),
+    //   SessionHeartbeatService.INACTIVITY_MS
+    // );
   }
 
 
@@ -239,7 +231,8 @@ export class SessionHeartbeatService implements OnDestroy {
 
       title: 'Session Timeout',
 
-      text: `Your Session will end in ${SessionHeartbeatService.INACTIVITY_WARNING_LEAD_MINUTES} minutes.`,
+      text: 'Your Session will end in 2 minutes.',
+      // text: `Your Session will end in ${SessionHeartbeatService.INACTIVITY_WARNING_LEAD_MINUTES} minutes.`,
 
       icon: 'warning',
 
