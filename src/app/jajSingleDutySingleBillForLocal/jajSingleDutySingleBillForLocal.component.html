@@ -644,10 +644,10 @@
       </div> -->
 
       <!-- GST -->
-      <div class="gst-section" style="z-index: 10; background-color: white;">
+      <div class="gst-section">
         <div class="gst-row"><strong>Sub Total : </strong><span>{{dataSource?.totalAmountAfterExpences |
             number:'1.2-2'}}</span></div>
-            <div class="gst-row" *ngIf="dataSource?.isSEZ===true">Supply meant for Export/supply to SEZ unit or SEZ developer for 
+            <div class="gst-row gst-row-block" *ngIf="dataSource?.isSEZ===true">Supply meant for Export/supply to SEZ unit or SEZ developer for 
                           <br/>
               authorised operations under bond or letter of undertaking
                <br/> without payment of integrated Tax</div>
@@ -672,12 +672,14 @@
         </div>
 
         <div class="gst-row" *ngIf="dataSource?.invoiceDiscountModel?.discountAmountOnPackage">
-          <strong *ngIf="dataSource?.invoiceDiscountModel?.discountPercentage > 0">
-            Total Discount @ {{dataSource?.invoiceDiscountModel?.discountPercentage}} %
-          </strong>
-          <strong *ngIf="dataSource?.invoiceDiscountModel?.fixedAmountDiscount > 0">
-            Total Discount (Fixed Discount : {{dataSource?.invoiceDiscountModel?.fixedAmountDiscount}})
-          </strong>
+          <div class="gst-row-label">
+            <strong *ngIf="dataSource?.invoiceDiscountModel?.discountPercentage > 0">
+              Total Discount @ {{dataSource?.invoiceDiscountModel?.discountPercentage}} %
+            </strong>
+            <strong *ngIf="dataSource?.invoiceDiscountModel?.fixedAmountDiscount > 0">
+              Total Discount (Fixed Discount : {{dataSource?.invoiceDiscountModel?.fixedAmountDiscount}})
+            </strong>
+          </div>
           <span *ngIf="dataSource?.invoiceDiscountModel?.discountAmountOnPackage!=0 
                             || dataSource?.invoiceDiscountModel?.discountAmountOnExtraKM!=0 
                             || dataSource?.invoiceDiscountModel?.discountAmountOnExtraHour!=0">
@@ -687,7 +689,7 @@
           </span>
         </div>
 
-        <div class="gst-row" *ngIf="dataSource?.invoiceSEZModel">
+        <div class="gst-row gst-row-block" *ngIf="dataSource?.invoiceSEZModel">
           <strong>
             {{dataSource?.invoiceEcoBranchModel?.branchLUTNumber}} valid Date
             {{dataSource?.invoiceEcoBranchModel?.branchLUTExpiryDate | date: 'dd/MM/yyyy'}}
@@ -704,8 +706,7 @@
           </span>
         </div>
 
-        <div class="gst-row"
-          style="font-size:16px;font-weight:bold;border-top:1px solid #000;margin-top:6px;padding-top:6px;">
+        <div class="gst-row gst-row-grand-total">
           <strong>Grand Total : </strong><span>{{dataSource?.invoiceModel?.invoiceTotalAmountAfterGST | number:'1.2-2'
             }}</span>
         </div>

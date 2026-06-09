@@ -73,7 +73,7 @@
     <div *ngIf="advanceTableClosingOne">
       <app-dutySlipForBilling [advanceTableClosingOne]="advanceTableClosingOne"
         [disputeAdvanceTable]="disputeAdvanceTable" [RegistrationNumber]="RegistrationNumber" [InvoiceID]="invoiceID"
-        [DSClosing]="DSClosing" [IRN]="IRN"
+        [DSClosing]="DSClosing" [IRN]="IRN" [hasActiveEInvoice]="hasActiveEInvoice"
         [canThisRoleDoGoodForBillingOnClosingScreen]="canThisRoleDoGoodForBillingOnClosingScreen"
         [canThisRoleViewDummyInvoice]="canThisRoleViewDummyInvoice"
         (dataSaved)="onDataSaved()"

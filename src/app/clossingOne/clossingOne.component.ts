@@ -241,6 +241,7 @@ export class ClossingOneComponent implements OnInit, AfterViewInit, AfterViewChe
   guestName:any;
   DutySlipMap:any;
   IRN:any;
+  hasActiveEInvoice = false;
    CityName:any;
   Package:any;
 
@@ -401,6 +402,7 @@ export class ClossingOneComponent implements OnInit, AfterViewInit, AfterViewChe
         console.log('Closing Data:', this.advanceTableClosingOne);
         this.invoiceID = this.advanceTableClosingOne?.invoiceID;
         this.IRN = this.advanceTableClosingOne?.irn;
+        this.hasActiveEInvoice = !!this.advanceTableClosingOne?.hasActiveEInvoice;
         this.goodForBilling = this.advanceTableClosingOne?.closingDutySlipForBillingModel?.goodForBilling;
         this.verifyDuty = this.advanceTableClosingOne?.closingDutySlipForBillingModel?.verifyDuty;
         this.DSClosing = this.advanceTableClosingOne?.closingDutySlipForBillingModel?.dsClosing;

@@ -45,6 +45,7 @@ export class DutySlipForBillingComponent implements OnInit, AfterViewInit {
   @Input() RegistrationNumber;
   @Input() InvoiceID;
   @Input() IRN;
+  @Input() hasActiveEInvoice = false;
   @Input() DSClosing;
   @Input() canThisRoleDoGoodForBillingOnClosingScreen = false;
   @Input() canThisRoleViewDummyInvoice = false;
@@ -134,8 +135,7 @@ export class DutySlipForBillingComponent implements OnInit, AfterViewInit {
     else
     {
       this.buttonText = 'Update';
-      this.advanceTableForm.controls["goodForBilling"].enable();
-      this.advanceTableForm.controls["verifyDuty"].enable();
+      this.syncVerifyDutyAndGoodForBillingState();
       this.LoadDataForBilling();
     }
 
@@ -964,18 +964,28 @@ export class DutySlipForBillingComponent implements OnInit, AfterViewInit {
     this.onTimeSelection();
   }
 
-  public LoadDataForBilling()
-  {
-    if(this.InvoiceID !== 0) 
-    {
+  get isEInvoiceBlockingEdits(): boolean {
+    return this.hasActiveEInvoice === true || this.advanceTableClosingOne?.hasActiveEInvoice === true;
+  }
+
+  private syncVerifyDutyAndGoodForBillingState(): void {
+    if (this.advanceTableClosingOne?.closingDutySlipForBillingModel?.dsClosing === null) {
+      this.advanceTableForm.controls['goodForBilling'].disable();
+      this.advanceTableForm.controls['verifyDuty'].disable();
+      return;
+    }
+    if (this.isEInvoiceBlockingEdits) {
       this.advanceTableForm.get('verifyDuty')?.disable();
       this.advanceTableForm.get('goodForBilling')?.disable();
-    } 
-    else 
-    {
+    } else {
       this.advanceTableForm.get('verifyDuty')?.enable();
       this.advanceTableForm.get('goodForBilling')?.enable();
     }
+  }
+
+  public LoadDataForBilling()
+  {
+    this.syncVerifyDutyAndGoodForBillingState();
     let locationOutLatForBilling:string;
     let locationOutLongForBilling : string;
     let reportingToGuestLatForBilling:string;
@@ -1883,8 +1893,7 @@ setVerifyDuty(value: boolean, details: string) {
             'center'
           );
           this.buttonText = 'Update';
-          this.advanceTableForm.controls["goodForBilling"].enable();
-          this.advanceTableForm.controls["verifyDuty"].enable();          
+          this.syncVerifyDutyAndGoodForBillingState();
           if(response.goodForBilling === true || response.verifyDuty === true)
           {
             this.advanceTableForm.controls["goodForBilling"].setValue(false);
@@ -1988,6 +1997,9 @@ setVerifyDuty(value: boolean, details: string) {
       });
     }
   }
+  if (changes['hasActiveEInvoice']) {
+    this.syncVerifyDutyAndGoodForBillingState();
+  }
 }
  GetClosingData()
   {
@@ -1995,6 +2007,7 @@ setVerifyDuty(value: boolean, details: string) {
       data =>
       {
         this.advanceTableClosingOne = data;
+        this.syncVerifyDutyAndGoodForBillingState();
       }
     );
   }
