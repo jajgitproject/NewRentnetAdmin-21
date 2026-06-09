@@ -14,6 +14,7 @@ export class CDCOutStationLumpsumRate {
   packageRateForSupplier:number;
   extraKmsRate:number;
   extraKmsRateForSupplier:number;
+  extraHRRate:number;
   driverAllowance:number;
   driverAllowanceForSupplier:number;
   kMsPerExtraHR:number;
@@ -26,6 +27,8 @@ export class CDCOutStationLumpsumRate {
   nightChargesEndTimeString:string; 
   graceMinutesForNightCharge:number;
   graceMinutesNightChargeAmount:number;
+  fkmP2P:number;
+  fixedP2PAmount:number;
   additionalKM:number;
   additionalMinutes:number;
   tollChargeable:boolean;
@@ -54,6 +57,7 @@ export class CDCOutStationLumpsumRate {
       this.packageRateForSupplier = cdcOutStationLumpsumRate.packageRateForSupplier || '';
       this.extraKmsRate = cdcOutStationLumpsumRate.extraKmsRate || '';
       this.extraKmsRateForSupplier = cdcOutStationLumpsumRate.extraKmsRateForSupplier || '';
+      this.extraHRRate = cdcOutStationLumpsumRate.extraHRRate || '';
       this.driverAllowance = cdcOutStationLumpsumRate.driverAllowance || '';
       this.driverAllowanceForSupplier = cdcOutStationLumpsumRate.driverAllowanceForSupplier || '';
       this.kMsPerExtraHR = cdcOutStationLumpsumRate.kMsPerExtraHR || '';
@@ -63,7 +67,9 @@ export class CDCOutStationLumpsumRate {
       this.nightChargesStartTimeString = cdcOutStationLumpsumRate.nightChargesStartTimeString || '';
       this.nightChargesEndTimeString = cdcOutStationLumpsumRate.nightChargesEndTimeString || ''; 
       this.graceMinutesForNightCharge = cdcOutStationLumpsumRate.graceMinutesForNightCharge || 0;
-      this.graceMinutesNightChargeAmount = cdcOutStationLumpsumRate.graceMinutesNightChargeAmount || 0;    
+      this.graceMinutesNightChargeAmount = cdcOutStationLumpsumRate.graceMinutesNightChargeAmount || 0;
+      this.fkmP2P = cdcOutStationLumpsumRate.fkmP2P || 0;
+      this.fixedP2PAmount = cdcOutStationLumpsumRate.fixedP2PAmount || 0;
       this.additionalKM = cdcOutStationLumpsumRate.additionalKM || 0;
       this.additionalMinutes = cdcOutStationLumpsumRate.additionalMinutes || 0;
       this.tollChargeable = cdcOutStationLumpsumRate.tollChargeable || '';
