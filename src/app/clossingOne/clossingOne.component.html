@@ -263,7 +263,7 @@
       <div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 mb-2" *ngIf="canThisRoleCreateBillOnClosingScreen">
         <button mat-flat-button style="width: 150px;text-align: center;" color="primary" (click)="GenerateBill()"
           [type]="submit"
-          [disabled]="!(verifyDuty && (!canThisRoleDoGoodForBillingOnClosingScreen || goodForBilling))">Generate Bill</button>
+          [disabled]="!canGenerateBill()">Generate Bill</button>
       </div>
 
       <div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 mb-2" *ngIf="canThisRoleViewBillOnClosingScreen">

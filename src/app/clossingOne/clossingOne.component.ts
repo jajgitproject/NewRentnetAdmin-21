@@ -948,9 +948,24 @@ export class ClossingOneComponent implements OnInit, AfterViewInit, AfterViewChe
     return normalized === 'true' || normalized === '1';
   }
 
+  hasGeneratedInvoice(): boolean {
+    const invoiceId =
+      this.invoiceID ??
+      this.advanceTableClosingOne?.invoiceID ??
+      this.advanceTableClosingOne?.InvoiceID;
+    return Number(invoiceId) > 0;
+  }
+
+  canGenerateBill(): boolean {
+    if (this.hasGeneratedInvoice()) {
+      return false;
+    }
+    return this.verifyDuty && (!this.canThisRoleDoGoodForBillingOnClosingScreen || this.goodForBilling);
+  }
+
   //----------Generate Bill----------------
   public GenerateBill() {
-    if (!this.canThisRoleCreateBillOnClosingScreen) {
+    if (!this.canThisRoleCreateBillOnClosingScreen || !this.canGenerateBill()) {
       return;
     }
     this.clossingOneService.generateBill(this.DutySlipID)
