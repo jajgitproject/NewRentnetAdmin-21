@@ -72,6 +72,7 @@ export class DutySlipForBillingComponent implements OnInit, AfterViewInit {
   //DSClosing: any = null;
   showSpinner:boolean = false;
   showSpinnerForVDGB:boolean = false;
+  showCalculateBillOverlay = false;
   /** Bill breakdown for Summary of Duty; null uses child demo until mapped from Calculate Bill API. */
   summaryOfDutyData: SummaryOfDutyData | null = null;
   private suppressInitialDutyStatusEmit = true;
@@ -1601,7 +1602,9 @@ setVerifyDuty(value: boolean, details: string) {
 
   SaveDataInBillingHistory()
   {
-    this.showSpinnerForVDGB = true;
+    if (!this.showCalculateBillOverlay) {
+      this.showSpinnerForVDGB = true;
+    }
     this.advanceTableBH.dutySlipForBillingID=this.advanceTableForm.value.dutySlipForBillingID;
     this.advanceTableBH.dutySlipID=this.advanceTableForm.value.dutySlipID;
     this.advanceTableBH.userID=this._generalService.getUserID();;
@@ -1609,7 +1612,9 @@ setVerifyDuty(value: boolean, details: string) {
   .subscribe(
     response => 
     {   
-      this.showSpinnerForVDGB = false; 
+      if (!this.showCalculateBillOverlay) {
+        this.showSpinnerForVDGB = false;
+      }
       if(response.actionTaken !== "Verify Duty")
       {
         this.showNotification(
@@ -1622,7 +1627,9 @@ setVerifyDuty(value: boolean, details: string) {
     },
     error =>
     {
-      this.showSpinnerForVDGB = false; 
+      if (!this.showCalculateBillOverlay) {
+        this.showSpinnerForVDGB = false;
+      }
       this.showNotification(
         'snackbar-danger',
         'Operation Failed...!!!',
@@ -1944,7 +1951,12 @@ setVerifyDuty(value: boolean, details: string) {
   //---------Calculate Bill------------------------
   public CalculateBill(showSummaryPopup = false)
   {
-    this.showSpinnerForVDGB = true;
+    if (showSummaryPopup) {
+      this.showCalculateBillOverlay = true;
+    } else {
+      this.showSpinnerForVDGB = true;
+    }
+
     this.clossingOneService.calculateBillWithSummary(this.DutySlipID).subscribe(
       response => 
       {
@@ -1955,7 +1967,11 @@ setVerifyDuty(value: boolean, details: string) {
         goodForBilling: this.advanceTableForm.value.goodForBilling,
         message: this.Message
       });
-      this.showSpinnerForVDGB = false;
+        if (showSummaryPopup) {
+          this.showCalculateBillOverlay = false;
+        } else {
+          this.showSpinnerForVDGB = false;
+        }
         this.showNotification(
           'snackbar-success',
           'Duty Calculated...!!!',
@@ -1969,7 +1985,11 @@ setVerifyDuty(value: boolean, details: string) {
       },
       error =>
       {
-        this.showSpinnerForVDGB = false;
+        if (showSummaryPopup) {
+          this.showCalculateBillOverlay = false;
+        } else {
+          this.showSpinnerForVDGB = false;
+        }
         const errorMessage = error || 'Operation Failed.....!!!';
         Swal.fire({
           title: errorMessage,

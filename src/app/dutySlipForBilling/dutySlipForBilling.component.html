@@ -502,7 +502,7 @@
               View Dummy Invoice
             </button>
             <br>
-            <img *ngIf="showSpinnerForVDGB === true" src="assets/images/loader4.gif" width="30">
+            <img *ngIf="showSpinnerForVDGB && !showCalculateBillOverlay" src="assets/images/loader4.gif" width="30">
           </mat-card-content>
         </mat-card>
 
@@ -512,5 +512,11 @@
   </div>
 </div>
 
+<div *ngIf="showCalculateBillOverlay" class="calculate-bill-blocking-overlay" aria-busy="true" aria-live="polite">
+  <div class="calculate-bill-blocking-dialog" role="alertdialog" aria-modal="true" aria-label="Calculating duty">
+    <mat-spinner diameter="48"></mat-spinner>
+    <p>Calculating duty, please wait...</p>
+  </div>
+</div>
 
 <br>

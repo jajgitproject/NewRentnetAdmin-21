@@ -32,6 +32,33 @@ tbody, thead {
     text-decoration: underline;
   }
 
+.calculate-bill-blocking-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 10000;
+  background: rgba(0, 0, 0, 0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: all;
+}
+
+.calculate-bill-blocking-dialog {
+  background: #fff;
+  padding: 28px 36px;
+  border-radius: 8px;
+  text-align: center;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+  min-width: 240px;
+
+  p {
+    margin: 16px 0 0;
+    font-size: 14px;
+    font-weight: 500;
+    color: #333;
+  }
+}
+
 
   /* Reduce padding and margins for mat-form-field (exclude closing grid: MDC sizes those) */
 .mat-form-field:not(.cp-quick-search-field) {
