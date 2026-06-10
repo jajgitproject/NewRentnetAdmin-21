@@ -615,6 +615,14 @@ const routes: Routes = [
       },
 
       {
+        path: 'driverPayoutMIS',
+        loadChildren: () =>
+          import('./driverPayoutMIS/driverPayoutMIS.module').then(
+            (m) => m.DriverPayoutMISModule
+          )
+      },
+
+      {
         path: 'zonalDutyRegister',
         loadChildren: () =>
           import('./zonalDutyRegister/zonalDutyRegister.module').then(

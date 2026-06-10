@@ -818,6 +818,17 @@ export const ROUTES: RouteInfo[] = [
         isAccess: false
       },
 
+      {
+        path: 'driverPayoutMIS',
+        title: 'Driver Payout MIS',
+        moduleName: 'driverPayoutMIS',
+        icon: 'fas fa-tachometer-alt',
+        class: '',
+        groupTitle: false,
+        submenu: [],
+        isAccess: false
+      },
+
        {
         path: 'changeKamForCustomers',
         title: 'Customer KAM Change',
