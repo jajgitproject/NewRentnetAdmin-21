@@ -3138,12 +3138,11 @@ public validateCustomerSpecificFields(): boolean {
   }
   return true;
 }
-  navigateToControlPanel() 
-  {
-
-    this.router.navigate(['/controlPanelDesign']);
-    //const url= this.router.serializeUrl(this.router.createUrlTree(['/controlPanelDesign']));
-    //window.open(this._generalService.FormURL+ url);
+  navigateToControlPanel(reservationID?: number) {
+    const queryParams = reservationID
+      ? { reservationID: encodeURIComponent(this._generalService.encrypt(String(reservationID))) }
+      : undefined;
+    this.router.navigate(['/controlPanelDesign'], { queryParams });
     Swal.close();
   }
 
@@ -3195,7 +3194,7 @@ public validateCustomerSpecificFields(): boolean {
         }
         else if (result.isDenied) 
         {
-          this.navigateToControlPanel();
+          this.navigateToControlPanel(response.reservationID ?? this.reservationNo);
         } 
         else if (result.isDismissed) 
         {
@@ -3272,7 +3271,7 @@ public validateCustomerSpecificFields(): boolean {
         if (result.isConfirmed) {
           this.takeMeToReservationEditForm(customerGroupID, reservationID, reservationGroupID);
         } else if (result.isDenied) {
-          this.navigateToControlPanel();
+          this.navigateToControlPanel(reservationID);
         } else if (result.isDismissed) {
           this.takeMeToReservationList({ reservationGroupID });
         }

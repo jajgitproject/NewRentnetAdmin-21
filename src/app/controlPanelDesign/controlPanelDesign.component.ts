@@ -259,6 +259,7 @@ export class ControlPanelDesignComponent implements OnInit {
   searchTerm: any = '';
   selectedFilter: string = 'search';
   SearchBookingNo: string = '';
+  pendingReservationId: number | null = null;
 
   sortDirection: 'asc' | 'desc' = 'desc';
   sortColumn: string = 'reservationID';
@@ -379,10 +380,12 @@ export class ControlPanelDesignComponent implements OnInit {
 
     // const threeHoursLater = new Date(now.getTime() + 3 * 60 * 60 * 1000);
     // this.filterForm.patchValue({toTime: threeHoursLater});
+    this.captureReservationIdFromRoute(this.router.snapshot.queryParams);
     this.safeRun(() => this.InitShowAllLocationCheck());
 
     // Capture status from query params (encrypted) so we can propagate to downstream dialogs
     this.router.queryParams.subscribe((params) => {
+      this.captureReservationIdFromRoute(params);
       const encStatus = params && params['status'];
       if (encStatus) {
         try {
@@ -411,6 +414,46 @@ export class ControlPanelDesignComponent implements OnInit {
     } catch (error) {
       console.error('ControlPanel guarded init error:', error);
     }
+  }
+
+  private captureReservationIdFromRoute(params: Record<string, unknown> | null | undefined): void {
+    const raw = params?.['reservationID'] ?? params?.['reservationId'];
+    if (raw == null || raw === '') {
+      return;
+    }
+    const id = this.parseReservationIdFromQuery(String(raw));
+    if (id > 0) {
+      this.pendingReservationId = id;
+    }
+  }
+
+  private parseReservationIdFromQuery(raw: string): number {
+    const trimmed = raw.trim();
+    if (/^\d+$/.test(trimmed)) {
+      return Number(trimmed);
+    }
+    try {
+      const decrypted = this._generalService.decrypt(decodeURIComponent(trimmed));
+      const id = Number(decrypted);
+      return !Number.isNaN(id) && id > 0 ? id : 0;
+    } catch {
+      return 0;
+    }
+  }
+
+  applySingleReservationFilter(reservationID: number): void {
+    this.selectedFilter = 'BookingNo';
+    this.searchTerm = String(reservationID);
+    this.currentPage = 1;
+    this.isLoading = true;
+    this.filterForm.patchValue({
+      reservationID,
+      fromDate: '',
+      toDate: '',
+      fromTime: '',
+      toTime: ''
+    });
+    this.loadDataForHeader(this.bookingCategory, 1, this.recordsPerPage, true, 0);
   }
 
   private normalizeBoolean(value: any, fallback: boolean): boolean {
@@ -616,7 +659,11 @@ export class ControlPanelDesignComponent implements OnInit {
         this.filterForm.controls["fromTime"].setValue('');
         this.filterForm.controls["toTime"].setValue('');
 
-        this.loadDataForHeader(this.bookingCategory,this.currentPage, this.recordsPerPage, this.isLoading);
+        if (this.pendingReservationId) {
+          this.applySingleReservationFilter(this.pendingReservationId);
+        } else {
+          this.loadDataForHeader(this.bookingCategory,this.currentPage, this.recordsPerPage, this.isLoading);
+        }
         // const today = this.formatDate(new Date());
         // const now = new Date();
         // this.filterForm.patchValue({fromDate: today});
@@ -630,7 +677,11 @@ export class ControlPanelDesignComponent implements OnInit {
       {
         this.ShowAllLocation = this.getLoginShowAllLocation();
         this.filterForm.patchValue({showAllLocation: this.ShowAllLocation});
-        this.loadDataForHeader(this.bookingCategory, this.currentPage, this.recordsPerPage, this.isLoading);
+        if (this.pendingReservationId) {
+          this.applySingleReservationFilter(this.pendingReservationId);
+        } else {
+          this.loadDataForHeader(this.bookingCategory, this.currentPage, this.recordsPerPage, this.isLoading);
+        }
       }
     );
   }
@@ -798,6 +849,16 @@ export class ControlPanelDesignComponent implements OnInit {
             {
               this.isExpanded[rowIndex] = true;
             }
+            const pendingId = this.pendingReservationId;
+            if (pendingId && this.reservationHeaderInfo?.length) {
+              const matchIndex = this.reservationHeaderInfo.findIndex(
+                (row) => Number(row.reservationID) === pendingId
+              );
+              const expandIndex = matchIndex >= 0 ? matchIndex : 0;
+              this.isExpanded[expandIndex] = true;
+              this.loadData(pendingId, expandIndex);
+              this.pendingReservationId = null;
+            }
             if (isLoading) 
             {
               this.isLoading = false;
@@ -808,12 +869,18 @@ export class ControlPanelDesignComponent implements OnInit {
             this.reservationHeaderInfo = [];
             this.totalData = 0;
             this.isLoading = false;
+            if (this.pendingReservationId) {
+              this.pendingReservationId = null;
+            }
           }
         },
         (error: HttpErrorResponse) => {
           this.reservationHeaderInfo = [];
           this.totalData = 0;
           this.isLoading = false;
+          if (this.pendingReservationId) {
+            this.pendingReservationId = null;
+          }
         }
       );
   }

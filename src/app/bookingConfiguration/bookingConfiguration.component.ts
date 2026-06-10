@@ -675,7 +675,7 @@ private extractTime(dateTime: Date): Date {
       }).then((result) => {
         if (result.isDenied) 
         {
-          this.navigateToControlPanel();
+          this.navigateToControlPanel(response.data.reservationID);
         } ;
         });
       //this._generalService.sendUpdate('ReservationGroupCreate:ReservationGroupView:Success');//To Send Updates
@@ -695,12 +695,11 @@ private extractTime(dateTime: Date): Date {
     )
   }
   
-   navigateToControlPanel() 
-    {
-  
-      this.router.navigate(['/controlPanelDesign']);
-      //const url= this.router.serializeUrl(this.router.createUrlTree(['/controlPanelDesign']));
-      //window.open(this._generalService.FormURL+ url);
+   navigateToControlPanel(reservationID?: number) {
+      const queryParams = reservationID
+        ? { reservationID: encodeURIComponent(this._generalService.encrypt(String(reservationID))) }
+        : undefined;
+      this.router.navigate(['/controlPanelDesign'], { queryParams });
       Swal.close();
     }
 
