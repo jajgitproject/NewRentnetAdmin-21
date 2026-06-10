@@ -819,6 +819,22 @@ export const ROUTES: RouteInfo[] = [
       },
 
       {
+        path: 'zonalDutyRegister',
+        title: 'Zonal Duty Register',
+        moduleName: 'zonalDutyRegister',
+        alternateAccessPageKeys: [
+          'Zonal Duty Register',
+          'zonaldutyRegister',
+          'ZonalDutyRegister'
+        ],
+        icon: 'fas fa-tachometer-alt',
+        class: '',
+        groupTitle: false,
+        submenu: [],
+        isAccess: false
+      },
+
+      {
         path: 'driverPayoutMIS',
         title: 'Driver Payout MIS',
         moduleName: 'driverPayoutMIS',
