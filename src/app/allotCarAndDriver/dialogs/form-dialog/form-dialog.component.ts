@@ -124,6 +124,19 @@ allotmentType: any;
   }
   
 
+   getDateTime(value: string): string {
+    if (!value) return '';
+    const lines = value.split('\n').map(x => x.trim()).filter(x => x);
+    if (lines.length >= 2) 
+    {
+      const dateParts = lines[0].split('-'); // yyyy-MM-dd
+      const formattedDate = `${dateParts[2]}-${dateParts[1]}-${dateParts[0]}`;
+      return `${formattedDate} & ${lines[1]}`;
+    }
+    return '';
+  }
+  
+
   ngOnInit(): void {
     this.InitDriver();
     this.InitVehicle();

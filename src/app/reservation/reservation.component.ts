@@ -5333,7 +5333,7 @@ private isEditingAllowed(): boolean {
                 <b>Passenger : </b> ${this.passengerName}<br>
                 <b>City : </b> ${this.advanceTableForm.value.pickupCity}<br>
                 <b>PickUp Date : </b> ${this.datePipe.transform(pickupDate,'dd-MMM-yyyy')}<br>
-                <b>PickUp Time : </b> ${this.datePipe.transform(pickupTime,'HH:mm')}<br>
+                <b>PickUp Time : </b> ${pickupTime}<br>
                 Do you really want to make this booking?
               </div>
             `,
