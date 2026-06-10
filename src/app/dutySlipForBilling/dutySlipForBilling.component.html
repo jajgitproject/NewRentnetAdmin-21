@@ -497,8 +497,7 @@
               Good For Billing
             </mat-checkbox>
             &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-            <button *ngIf="canThisRoleViewDummyInvoice" mat-raised-button color="primary" type="button"
-              [disabled]="!canViewDummyInvoice()"
+            <button *ngIf="canThisRoleViewDummyInvoice && canViewDummyInvoice()" mat-raised-button color="primary" type="button"
               (click)="openDummyInvoice()">
               View Dummy Invoice
             </button>

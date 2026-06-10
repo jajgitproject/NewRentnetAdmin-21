@@ -2050,16 +2050,14 @@ onChange() {
     }
 
   canViewDummyInvoice(): boolean {
-    const verifyDuty = this.advanceTableForm?.get('verifyDuty')?.value;
-    const goodForBilling = this.advanceTableForm?.get('goodForBilling')?.value;
-    return verifyDuty === true || goodForBilling === true;
+    return this.advanceTableForm?.get('goodForBilling')?.value === true;
   }
 
   openDummyInvoice(): void {
     if (!this.canViewDummyInvoice()) {
       this.showNotification(
         'snackbar-warning',
-        'Please check Verify Duty or Good For Billing before viewing the dummy invoice.',
+        'Please check Good For Billing before viewing the dummy invoice.',
         'bottom',
         'center'
       );
@@ -2067,21 +2065,30 @@ onChange() {
     }
 
     if (!this.DutySlipID) {
+      this.showNotification(
+        'snackbar-danger',
+        'Duty slip ID is missing. Cannot open dummy invoice.',
+        'bottom',
+        'center'
+      );
       return;
     }
 
-    const openDummyInvoiceTab = () => {
-      const url = this.router.serializeUrl(
-        this.router.createUrlTree(['/DummyInvoiceForCalculationCheck'], {
-          queryParams: { dutySlipID: this.DutySlipID }
-        })
-      );
-      window.open(this._generalService.FormURL + url, '_blank');
-    };
+    const serializedUrl = this.router.serializeUrl(
+      this.router.createUrlTree(['/DummyInvoiceForCalculationCheck'], {
+        queryParams: { dutySlipID: this.DutySlipID }
+      })
+    );
+    const fullUrl = this._generalService.buildAppWindowUrl(serializedUrl);
 
-    this.clossingOneService.calculateBill(this.DutySlipID).subscribe({
-      next: () => openDummyInvoiceTab(),
-      error: () => openDummyInvoiceTab()
+    const opened = window.open(fullUrl, '_blank');
+    if (opened) {
+      opened.focus();
+      return;
+    }
+
+    this.router.navigate(['/DummyInvoiceForCalculationCheck'], {
+      queryParams: { dutySlipID: this.DutySlipID }
     });
   }
 
