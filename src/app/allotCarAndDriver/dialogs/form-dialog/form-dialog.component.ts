@@ -311,9 +311,9 @@ allotmentType: any;
         },
         error => {
           const parsedError = this.parseErrorPayload(error);
-          // if (parsedError.message) {
-          //   this.openShowError(parsedError.message);
-          // }
+          if (parsedError.message) {
+            this.openShowError(parsedError.message);
+          }
           this.showNotification(
             'snackbar-danger',
             parsedError.message,

@@ -1198,7 +1198,8 @@ export class ControlPanelDialogeComponent {
         data => {
           this.dataSource = data;
           this.dialog.open(DutySlipQualityCheckDetailsComponent, {
-            width: '500px',
+            width: '70%',
+            height: '80%',
             data: {
               row: item,
               dataSource: this.dataSource
