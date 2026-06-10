@@ -22,13 +22,13 @@ export class Role {
        this.remark = role.remark  || '';
        // Booleans: default Yes (true) when null/undefined; preserve explicit false from API
        this.activationStatus = role.activationStatus ?? true;
-       this.canCreateReservation = role.canCreateReservation ?? true;
-       this.isThisAKeyAccountManagerRole = role.isThisAKeyAccountManagerRole ?? true;
-       this.canThisRoleCreateBackDateBooking = role.canThisRoleCreateBackDateBooking ?? true;
-       this.canThisRoleCreateBillOnClosingScreen = role.canThisRoleCreateBillOnClosingScreen ?? true;
-       this.canThisRoleViewBillOnClosingScreen = role.canThisRoleViewBillOnClosingScreen ?? true;
-       this.canThisRoleDoGoodForBillingOnClosingScreen = role.canThisRoleDoGoodForBillingOnClosingScreen ?? true;
-       this.canThisRoleViewDummyInvoice = role.canThisRoleViewDummyInvoice ?? true;
+       this.canCreateReservation = role.canCreateReservation ?? '';
+       this.isThisAKeyAccountManagerRole = role.isThisAKeyAccountManagerRole ?? '';
+       this.canThisRoleCreateBackDateBooking = role.canThisRoleCreateBackDateBooking ?? '';
+       this.canThisRoleCreateBillOnClosingScreen = role.canThisRoleCreateBillOnClosingScreen ?? '';
+       this.canThisRoleViewBillOnClosingScreen = role.canThisRoleViewBillOnClosingScreen ?? '';
+       this.canThisRoleDoGoodForBillingOnClosingScreen = role.canThisRoleDoGoodForBillingOnClosingScreen ?? '';
+       this.canThisRoleViewDummyInvoice = role.canThisRoleViewDummyInvoice ?? '';
 
     }
   }
