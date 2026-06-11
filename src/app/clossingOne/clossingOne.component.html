@@ -90,7 +90,10 @@
         <div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 mb-2">
           <p style="font-size: 12px;">Total Toll / Parking Amount - {{totalTollParking}}</p>
           <h5>
-            <a (click)="openDutyTollParkingEntry()" style="cursor: pointer;color: #007bff;">Toll Parking Entry</a>
+            <a (click)="openDutyTollParkingEntry()"
+              [class.closing-entry-disabled]="isEInvoiceBlockingEdits"
+              [style.cursor]="isEInvoiceBlockingEdits ? 'not-allowed' : 'pointer'"
+              [style.color]="isEInvoiceBlockingEdits ? '#6c757d' : '#007bff'">Toll Parking Entry</a>
             <a href="javascript:void(0);" (click)="showAndScrollTollParking()">&nbsp;- <b>View</b></a>
           </h5>
         </div>
@@ -98,7 +101,10 @@
         <div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 mb-2">
           <p style="font-size: 12px;">Total Interstate Tax Amount - {{totalInterStateTax}}</p>
           <h5>
-            <a (click)="dutyInterstateTax()" style="cursor: pointer;color: #007bff;">Interstate Tax Entry</a>
+            <a (click)="dutyInterstateTax()"
+              [class.closing-entry-disabled]="isEInvoiceBlockingEdits"
+              [style.cursor]="isEInvoiceBlockingEdits ? 'not-allowed' : 'pointer'"
+              [style.color]="isEInvoiceBlockingEdits ? '#6c757d' : '#007bff'">Interstate Tax Entry</a>
             <a href="javascript:void(0);" (click)="showAndScrollDutyInterstateTax()">&nbsp;- <b>View</b></a>
           </h5>
         </div>
@@ -114,7 +120,10 @@
           <p style="font-size: 12px;">Total Chargeable Amount - {{totalDEChargeableAmount}}</p>
           <p style="font-size: 12px;">Total Non Chargeable Amount - {{totalDENonChargeableAmount}}</p>
           <h5>
-            <a (click)="openDutyExpense()" style="cursor: pointer;color: #007bff;">Duty Expense</a>
+            <a (click)="openDutyExpense()"
+              [class.closing-entry-disabled]="isEInvoiceBlockingEdits"
+              [style.cursor]="isEInvoiceBlockingEdits ? 'not-allowed' : 'pointer'"
+              [style.color]="isEInvoiceBlockingEdits ? '#6c757d' : '#007bff'">Duty Expense</a>
             <a href="javascript:void(0);" (click)="showAndScrollOpenDutyExpense()">&nbsp;- <b>View</b></a>
           </h5>
         </div>
@@ -123,21 +132,30 @@
       <div class="row" style="padding-left: 30px;">
         <div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 mb-2">
           <h5>
-            <a (click)="openDutyGSTPercentage()" style="cursor: pointer;color: #007bff;">Duty GST Percentage</a>
+            <a (click)="openDutyGSTPercentage()"
+              [class.closing-entry-disabled]="isEInvoiceBlockingEdits"
+              [style.cursor]="isEInvoiceBlockingEdits ? 'not-allowed' : 'pointer'"
+              [style.color]="isEInvoiceBlockingEdits ? '#6c757d' : '#007bff'">Duty GST Percentage</a>
             <a href="javascript:void(0);" (click)="showAndScrollDutyGSTPercentage()">&nbsp;- <b>View</b></a>
           </h5>
         </div>
 
         <div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 mb-2">
           <h5>
-            <a (click)="openDutyState()" style="cursor: pointer;color: #007bff;">Eco Duty State</a>
+            <a (click)="openDutyState()"
+              [class.closing-entry-disabled]="isEInvoiceBlockingEdits"
+              [style.cursor]="isEInvoiceBlockingEdits ? 'not-allowed' : 'pointer'"
+              [style.color]="isEInvoiceBlockingEdits ? '#6c757d' : '#007bff'">Eco Duty State</a>
             <a href="javascript:void(0);" (click)="showAndScrollDutyState()">&nbsp;- <b>View</b></a>
           </h5>
         </div>
 
         <div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 mb-2">
           <h5>
-            <a (click)="openDutyStateCustomer()" style="cursor: pointer;color: #007bff;">Customer Duty State</a>
+            <a (click)="openDutyStateCustomer()"
+              [class.closing-entry-disabled]="isEInvoiceBlockingEdits"
+              [style.cursor]="isEInvoiceBlockingEdits ? 'not-allowed' : 'pointer'"
+              [style.color]="isEInvoiceBlockingEdits ? '#6c757d' : '#007bff'">Customer Duty State</a>
             <a href="javascript:void(0);" (click)="showAndScrollDutyStateCustomer()">&nbsp;- <b>View</b></a>
           </h5>
         </div>
@@ -145,33 +163,47 @@
         <div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 mb-2">
           <h5>
             <a href="javascript:void(0);" (click)="$event.preventDefault(); openDutySAC()"
-              style="cursor: pointer;color: #007bff;">Duty SAC</a>
+              [class.closing-entry-disabled]="isEInvoiceBlockingEdits"
+              [style.cursor]="isEInvoiceBlockingEdits ? 'not-allowed' : 'pointer'"
+              [style.color]="isEInvoiceBlockingEdits ? '#6c757d' : '#007bff'">Duty SAC</a>
             <a href="javascript:void(0);" (click)="showAndScrollDutySAC()">&nbsp;- <b>View</b></a>
           </h5>
         </div>
 
         <div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 mb-2">
           <h5>
-            <a (click)="openAdditional()" style="cursor: pointer;color: #007bff;">Additional KMs And Minutes</a>
+            <a (click)="openAdditional()"
+              [class.closing-entry-disabled]="isEInvoiceBlockingEdits"
+              [style.cursor]="isEInvoiceBlockingEdits ? 'not-allowed' : 'pointer'"
+              [style.color]="isEInvoiceBlockingEdits ? '#6c757d' : '#007bff'">Additional KMs And Minutes</a>
             <a href="javascript:void(0);" (click)="showAndScrollAdditionalKm()">&nbsp;- <b>View</b></a>
           </h5>
         </div>
 
         <div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 mb-2">
           <h5>
-            <a (click)="MOPDetails()" style="cursor: pointer;color: #007bff;">MOP Details</a>
+            <a (click)="MOPDetails()"
+              [class.closing-entry-disabled]="isEInvoiceBlockingEdits"
+              [style.cursor]="isEInvoiceBlockingEdits ? 'not-allowed' : 'pointer'"
+              [style.color]="isEInvoiceBlockingEdits ? '#6c757d' : '#007bff'">MOP Details</a>
             <a href="javascript:void(0);" (click)="showAndScrollMOP()">&nbsp;- <b>View</b></a>
           </h5>
         </div>
         <div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 mb-2">
           <h5>
-            <a (click)="settledRates()" style="cursor: pointer;color: #007bff;">Settled Rate</a>
+            <a (click)="settledRates()"
+              [class.closing-entry-disabled]="isEInvoiceBlockingEdits"
+              [style.cursor]="isEInvoiceBlockingEdits ? 'not-allowed' : 'pointer'"
+              [style.color]="isEInvoiceBlockingEdits ? '#6c757d' : '#007bff'">Settled Rate</a>
             <a href="javascript:void(0);" (click)="showAndScrollOpenSettledRates()">&nbsp;- <b>View</b></a>
           </h5>
         </div>
          <div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 mb-2">
           <h5>
-            <a (click)="changeDutyTypeClosingDetails()" style="cursor: pointer;color: #007bff;">Change Duty Type</a>
+            <a (click)="changeDutyTypeClosingDetails()"
+              [class.closing-entry-disabled]="isEInvoiceBlockingEdits"
+              [style.cursor]="isEInvoiceBlockingEdits ? 'not-allowed' : 'pointer'"
+              [style.color]="isEInvoiceBlockingEdits ? '#6c757d' : '#007bff'">Change Duty Type</a>
             <a href="javascript:void(0);" (click)="showAndScrollOpenSettledRates()">&nbsp;- <b>View</b></a>
           </h5>
         </div>
@@ -187,7 +219,10 @@
 
         <div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 mb-2">
           <h5>
-            <a style="cursor: pointer;color: #007bff;" (click)="ChangeCity()">Change City</a>
+            <a (click)="ChangeCity()"
+              [class.closing-entry-disabled]="isEInvoiceBlockingEdits"
+              [style.cursor]="isEInvoiceBlockingEdits ? 'not-allowed' : 'pointer'"
+              [style.color]="isEInvoiceBlockingEdits ? '#6c757d' : '#007bff'">Change City</a>
           </h5>
         </div>
       </div>
@@ -197,7 +232,10 @@
       <div class="row" style="padding-left: 30px;">
         <div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 mb-2">
           <h5>
-            <a (click)="addDiscount()" style="cursor: pointer;color: #007bff;">Add Discount Details</a>
+            <a (click)="addDiscount()"
+              [class.closing-entry-disabled]="isEInvoiceBlockingEdits"
+              [style.cursor]="isEInvoiceBlockingEdits ? 'not-allowed' : 'pointer'"
+              [style.color]="isEInvoiceBlockingEdits ? '#6c757d' : '#007bff'">Add Discount Details</a>
             <a href="javascript:void(0);" (click)="showAndScrollAddDiscount()">&nbsp;- <b>View</b></a>
           </h5>
         </div>
@@ -229,7 +267,10 @@
         </div>
         <div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 mb-2">
           <h5>
-            <a (click)="openDutySlipImage()" style="cursor: pointer;color: #007bff;">Upload Manual DutySlip Image</a>
+            <a (click)="openDutySlipImage()"
+              [class.closing-entry-disabled]="isEInvoiceBlockingEdits"
+              [style.cursor]="isEInvoiceBlockingEdits ? 'not-allowed' : 'pointer'"
+              [style.color]="isEInvoiceBlockingEdits ? '#6c757d' : '#007bff'">Upload Manual DutySlip Image</a>
             <a (click)="dutySlipImage()" style="cursor: pointer;color: #007bff;">&nbsp;- <b>View</b></a>
           </h5>
           <!-- <button mat-raised-button color="primary" (click)="openDutySlipImage()">
@@ -278,7 +319,7 @@
 
       <div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 mb-2">
         <button mat-flat-button style="width: 150px;text-align: center;" color="primary" (click)="LoadLTR()"
-          [type]="submit">Add LTR Details</button>
+          [type]="submit" [disabled]="isEInvoiceBlockingEdits">Add LTR Details</button>
       </div>
     </div>
   </div>
@@ -399,7 +440,10 @@
   <div class="card" *ngIf="showDutyExpense" id="dutyExpense">
     <div class="header bg-cyan">
       <h2>Duty Expense -
-        <i><a style="cursor: pointer;" (click)="openDutyExpense()">Add More</a></i>
+        <i><a (click)="openDutyExpense()"
+          [class.closing-entry-disabled]="isEInvoiceBlockingEdits"
+          [style.cursor]="isEInvoiceBlockingEdits ? 'not-allowed' : 'pointer'"
+          [style.color]="isEInvoiceBlockingEdits ? '#6c757d' : 'inherit'">Add More</a></i>
         <ul class="header-dropdown m-r-10">
           <li>
             <a style="color:#fff;padding:15px;position: relative;" href="javascript:void(0);"

@@ -494,6 +494,9 @@ export class ClossingOneComponent implements OnInit, AfterViewInit, AfterViewChe
 
   //---------- Start Toll Parking ----------
   openDutyTollParkingEntry() {
+    if (!this.guardEInvoiceEdit()) {
+      return;
+    }
     const dialogRef = this.dialog.open(DutyTollParking,
       {
         data:
@@ -568,6 +571,9 @@ export class ClossingOneComponent implements OnInit, AfterViewInit, AfterViewChe
 
   //---------- Start Interstate Tax ----------
   dutyInterstateTax() {
+    if (!this.guardEInvoiceEdit()) {
+      return;
+    }
     const dialogRef = this.dialog.open(DITFormDialogComponent,
       {
         data:
@@ -604,6 +610,9 @@ export class ClossingOneComponent implements OnInit, AfterViewInit, AfterViewChe
 
   //---------- Start Duty Expense ----------
   openDutyExpense() {
+    if (!this.guardEInvoiceEdit()) {
+      return;
+    }
     const dialogRef = this.dialog.open(DutyExpenseFormDialogComponent,
       {
         data:
@@ -635,6 +644,9 @@ export class ClossingOneComponent implements OnInit, AfterViewInit, AfterViewChe
 
   //---------- Start Duty GST Percentage ----------
   openDutyGSTPercentage() {
+    if (!this.guardEInvoiceEdit()) {
+      return;
+    }
     const dialogRef = this.dialog.open(DutyGSTPercentageFormDialogComponent,
       {
         data:
@@ -665,6 +677,9 @@ export class ClossingOneComponent implements OnInit, AfterViewInit, AfterViewChe
 
   //---------- Start Duty State ----------
   openDutyState() {
+    if (!this.guardEInvoiceEdit()) {
+      return;
+    }
     const dialogRef = this.dialog.open(DutyStateFormDialogComponent,
       {
         data:
@@ -695,6 +710,9 @@ export class ClossingOneComponent implements OnInit, AfterViewInit, AfterViewChe
 
   //======= Duty State Customer=======//
   openDutyStateCustomer() {
+    if (!this.guardEInvoiceEdit()) {
+      return;
+    }
     const dialogRef = this.dialog.open(DutyStateCustomerFormDialogComponent,
       {
         data:
@@ -728,6 +746,9 @@ export class ClossingOneComponent implements OnInit, AfterViewInit, AfterViewChe
 
   //---------- Start Add Discount ----------
   addDiscount() {
+    if (!this.guardEInvoiceEdit()) {
+      return;
+    }
     const dialogRef = this.dialog.open(DiscountDetailsDialogComponent,
       {
         data:
@@ -761,6 +782,9 @@ export class ClossingOneComponent implements OnInit, AfterViewInit, AfterViewChe
 
   //---------- Start Additional KM & HRs ----------
   openAdditional() {
+    if (!this.guardEInvoiceEdit()) {
+      return;
+    }
     const dialogRef = this.dialog.open(AdditionalDialogComponent,
       {
         data:
@@ -797,6 +821,9 @@ export class ClossingOneComponent implements OnInit, AfterViewInit, AfterViewChe
 
   //---------- Start Duty SAC ----------
   openDutySAC() {
+    if (!this.guardEInvoiceEdit()) {
+      return;
+    }
     // #region agent log
    // fetch('http://127.0.0.1:7532/ingest/f2c32722-bd0e-4386-883a-e749a4372080', { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-Debug-Session-Id': 'b9234c' }, body: JSON.stringify({ sessionId: 'b9234c', runId: 'pre-fix', hypothesisId: 'H8', location: 'NewRententAdmin-ng21/clossingOne.component.ts:openDutySAC:start', message: 'Duty SAC open invoked', data: { source, isArray: Array.isArray(this.advanceTableSAC), length: Array.isArray(this.advanceTableSAC) ? this.advanceTableSAC.length : null }, timestamp: Date.now() }) }).catch(() => { });
     // #endregion
@@ -845,6 +872,9 @@ export class ClossingOneComponent implements OnInit, AfterViewInit, AfterViewChe
   //-------------LTR Details---------------
 
   public LoadLTR() {
+    if (!this.guardEInvoiceEdit()) {
+      return;
+    }
     this.clossingOneService.PackageTypeForLTR(this.PackageTypeID).subscribe
       (
         (data: any) => {
@@ -948,6 +978,23 @@ export class ClossingOneComponent implements OnInit, AfterViewInit, AfterViewChe
     return normalized === 'true' || normalized === '1';
   }
 
+  get isEInvoiceBlockingEdits(): boolean {
+    return this.hasActiveEInvoice === true || this.advanceTableClosingOne?.hasActiveEInvoice === true;
+  }
+
+  private guardEInvoiceEdit(): boolean {
+    if (this.isEInvoiceBlockingEdits) {
+      this.showNotification(
+        'snackbar-warning',
+        'E-Invoice (IRN) is already generated and active. Changes are not allowed.',
+        'bottom',
+        'center'
+      );
+      return false;
+    }
+    return true;
+  }
+
   hasGeneratedInvoice(): boolean {
     const invoiceId =
       this.invoiceID ??
@@ -957,7 +1004,7 @@ export class ClossingOneComponent implements OnInit, AfterViewInit, AfterViewChe
   }
 
   canGenerateBill(): boolean {
-    if (this.hasGeneratedInvoice()) {
+    if (this.isEInvoiceBlockingEdits || this.hasGeneratedInvoice()) {
       return false;
     }
     return this.verifyDuty && (!this.canThisRoleDoGoodForBillingOnClosingScreen || this.goodForBilling);
@@ -1423,6 +1470,9 @@ export class ClossingOneComponent implements OnInit, AfterViewInit, AfterViewChe
   }
 
   MOPDetails() {
+    if (!this.guardEInvoiceEdit()) {
+      return;
+    }
     const dialogRef = this.dialog.open(FormDialogComponent,
       {
         data:
@@ -1480,6 +1530,9 @@ export class ClossingOneComponent implements OnInit, AfterViewInit, AfterViewChe
   }
 
   openDutySlipImage() {
+    if (!this.guardEInvoiceEdit()) {
+      return;
+    }
     this._dutySlipImageService.getAllotmentIDForDutySlipImage(this.allotmentID).subscribe(
       data => {
         this.dutySlipImageAllotmentID = data;
@@ -1573,6 +1626,9 @@ export class ClossingOneComponent implements OnInit, AfterViewInit, AfterViewChe
    
    settledRates()
    {
+    if (!this.guardEInvoiceEdit()) {
+      return;
+    }
     this.settleRateService.getTableData(this.ReservationID,this.SearchActivationStatus, this.PageNumber).subscribe
     (
       (dataSRD :SettledRateDetails)=>   
@@ -1644,6 +1700,9 @@ showAndScrollOpenSettledRates() {
 }
 
  changeDutyTypeClosingDetails() {
+    if (!this.guardEInvoiceEdit()) {
+      return;
+    }
     const dialogRef = this.dialog.open(CDTClosingDialogComponent,
       {
         data:
@@ -1693,6 +1752,9 @@ showAndScrollOpenSettledRates() {
  //---------- Change City ----------
   ChangeCity() 
   {
+    if (!this.guardEInvoiceEdit()) {
+      return;
+    }
     const dialogRef = this.dialog.open(FormDialogComponentForCity,
     {
       data:

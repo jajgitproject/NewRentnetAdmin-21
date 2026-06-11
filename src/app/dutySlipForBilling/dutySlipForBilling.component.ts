@@ -969,8 +969,15 @@ export class DutySlipForBillingComponent implements OnInit, AfterViewInit {
     return this.hasActiveEInvoice === true || this.advanceTableClosingOne?.hasActiveEInvoice === true;
   }
 
+  get isDutyCalculated(): boolean {
+    const dsClosing =
+      this.advanceTableClosingOne?.closingDutySlipForBillingModel?.dsClosing ??
+      this.advanceTableForm?.get('dsClosing')?.value;
+    return dsClosing !== null && dsClosing !== undefined && dsClosing !== '';
+  }
+
   private syncVerifyDutyAndGoodForBillingState(): void {
-    if (this.advanceTableClosingOne?.closingDutySlipForBillingModel?.dsClosing === null) {
+    if (!this.isDutyCalculated) {
       this.advanceTableForm.controls['goodForBilling'].disable();
       this.advanceTableForm.controls['verifyDuty'].disable();
       return;
@@ -978,9 +985,13 @@ export class DutySlipForBillingComponent implements OnInit, AfterViewInit {
     if (this.isEInvoiceBlockingEdits) {
       this.advanceTableForm.get('verifyDuty')?.disable();
       this.advanceTableForm.get('goodForBilling')?.disable();
-    } else {
-      this.advanceTableForm.get('verifyDuty')?.enable();
+      return;
+    }
+    this.advanceTableForm.get('verifyDuty')?.enable();
+    if (this.canThisRoleDoGoodForBillingOnClosingScreen) {
       this.advanceTableForm.get('goodForBilling')?.enable();
+    } else {
+      this.advanceTableForm.get('goodForBilling')?.disable();
     }
   }
 
@@ -2019,7 +2030,7 @@ setVerifyDuty(value: boolean, details: string) {
       });
     }
   }
-  if (changes['hasActiveEInvoice']) {
+  if (changes['hasActiveEInvoice'] || changes['canThisRoleDoGoodForBillingOnClosingScreen']) {
     this.syncVerifyDutyAndGoodForBillingState();
   }
 }
