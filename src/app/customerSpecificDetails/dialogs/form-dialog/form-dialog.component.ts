@@ -67,6 +67,7 @@ export class FormDialogComponentCSD
       {
         const existingFields = this.getExistingFields();
         this.CustomerExtraFieldList = (data && data.length ? data : existingFields) || [];
+        console.log("Customer Extra Field List:", this.CustomerExtraFieldList);
         this.buildDynamicForm();
       }
     ,
@@ -102,19 +103,31 @@ export class FormDialogComponentCSD
     });
     this.cdr.detectChanges();
   }
+private resolveDefaultValue(field: any): any {
+  const controlType = (field?.fieldControlType || '')
+    .toString()
+    .toLowerCase();
 
-  private resolveDefaultValue(field: any): any {
-    const controlType = (field?.fieldControlType || '').toString().toLowerCase();
-    if (controlType === 'dropdown') {
-      const options = this.getDropdownOptions(field);
-      if (options.length && options.includes(field?.fieldValue)) {
-        return field.fieldValue;
-      }
-      return options.length ? options[0] : '';
+  if (controlType === 'dropdown') {
+    const options = this.getDropdownOptions(field);
+
+    if (options.length && options.includes(field?.fieldValue)) {
+      return field.fieldValue;
     }
-    return field?.fieldValue ?? '';
+
+    return options.length ? options[0] : '';
   }
 
+  // prevent [object Object]
+  if (
+    field?.fieldValue &&
+    typeof field.fieldValue === 'object'
+  ) {
+    return '';
+  }
+
+  return field?.fieldValue ?? '';
+}
   getDropdownOptions(field: any): any[] {
     const value = field?.fieldValue;
     if (Array.isArray(value)) {
