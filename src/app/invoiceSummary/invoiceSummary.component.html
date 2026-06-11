@@ -122,6 +122,21 @@
                             <ng-template #elseBlock2>
                                  <div class="scrollable-table-container">
                             <mat-table #table [dataSource]="dataSource" matSort class="mat-cell floating-header-table" (matSortChange)="SortingData($event)">
+                                <ng-container matColumnDef="invoiceSummaryID">
+                                    <mat-header-cell *matHeaderCellDef mat-sort-header>Summary No.</mat-header-cell>
+                                    <mat-cell *matCellDef="let row">{{row.invoiceSummaryID}}</mat-cell>
+                                </ng-container>
+
+                                <ng-container matColumnDef="customer">
+                                    <mat-header-cell *matHeaderCellDef mat-sort-header>Customer</mat-header-cell>
+                                    <mat-cell *matCellDef="let row">{{row.customer}}</mat-cell>
+                                </ng-container>
+
+                                <ng-container matColumnDef="state">
+                                    <mat-header-cell *matHeaderCellDef mat-sort-header>State</mat-header-cell>
+                                    <mat-cell *matCellDef="let row">{{row.state}}</mat-cell>
+                                </ng-container>
+
                                 <ng-container matColumnDef="invoiceSummaryDate">
                                     <mat-header-cell *matHeaderCellDef mat-sort-header>Summary Date</mat-header-cell>
                                     <mat-cell *matCellDef="let row">{{formatDate(row.invoiceSummaryDate)}}</mat-cell>

@@ -1765,6 +1765,9 @@ getCustomerCategory(): Observable<CustomerCategoryDropDown[]>{
   getCustomerForInvoice(Prefix: string): Observable<CustomerDropDown[]>{
     return this.http.get<CustomerDropDown[]>(this.BaseURL + "customer/ForSearchInvoiceHome/"+Prefix);
   }
+  GetStateForSearchPrefix(Prefix: string): Observable<StateDropDown[]> {
+    return this.http.get<StateDropDown[]>(this.BaseURL + "state/ForSearchPrefix/" + Prefix);
+  }
    GetRegistrationNumberDuplicate(registrationNumber:number): Observable<boolean> {
     return this.http.get<boolean>(this.BaseURL + "customerPersonDriverRestriction/GetRegistrationNumberDuplicate/"+registrationNumber);
   }

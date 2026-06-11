@@ -22,6 +22,9 @@ import { GeneralService } from '../general/general.service';
 })
 export class InvoiceSummaryComponent implements OnInit {
   displayedColumns = [
+    'invoiceSummaryID',
+    'customer',
+    'state',
     'invoiceSummaryDate',
     'billSubmittedTo',
     'summaryDispatchStatus',
