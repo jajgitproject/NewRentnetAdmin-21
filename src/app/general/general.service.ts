@@ -210,6 +210,22 @@ export class GeneralService {
     return this.ImageURL;
   }
 
+  /** Full URL for StaticFiles/Images assets (signatures, duty slip scans, etc.). */
+  resolveStaticImageUrl(path: string | null | undefined): string | null {
+    const value = (path ?? '').toString().trim();
+    if (!value) {
+      return null;
+    }
+    if (/^https?:\/\//i.test(value)) {
+      return value;
+    }
+    const apiBase = this.getImageURL().replace(/\/+$/, '/');
+    if (value.toLowerCase().includes('staticfiles/images')) {
+      return apiBase + value.replace(/^\/+/, '');
+    }
+    return apiBase + 'StaticFiles/Images/' + value.replace(/^\/+/, '');
+  }
+
   getTodaysDate(): Date {
     return new Date();
   }

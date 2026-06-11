@@ -1773,7 +1773,9 @@ public loadDataForApp()
       this.advanceTableForm.patchValue({locationOutKMForBillingApp:locOut});
       this.advanceTableForm.patchValue({pickUpKMForBillingApp:pickup});
       this.advanceTableForm.patchValue({dropOffKMForBillingApp:dropOff});
-      this.CustomerSignatureByDriver=this.advanceTableApp[0].customerSignatureImage;
+      this.CustomerSignatureByDriver = this._generalService.resolveStaticImageUrl(
+        this.advanceTableApp[0].customerSignatureImage
+      );
 
       if(this.advanceTableApp[0].pickUpDateByApp && this.advanceTableApp[0].dropOffDateByApp)
         {
@@ -1923,7 +1925,9 @@ public loadDataForDriver()
       var pickup=this.advanceTableForm.get("pickUpKMForBilling").value;
       var dropOff=this.advanceTableForm.get("dropOffKMForBilling").value;
    
-      this.CustomerSignatureByDriver=this.advanceTable[0].customerSignatureImage;
+      this.CustomerSignatureByDriver = this._generalService.resolveStaticImageUrl(
+        this.advanceTable[0].customerSignatureImage
+      );
    
       this.advanceTableForm.patchValue({locationOutKMForBillingManual:locOut});
       this.advanceTableForm.patchValue({pickUpKMForBillingManual:pickup});
@@ -2082,7 +2086,9 @@ public loadDataForGPS()
       var pickup=this.advanceTableForm.get("pickUpKMForBilling").value;
       var dropOff=this.advanceTableForm.get("dropOffKMForBilling").value;
    
-      this.CustomerSignatureByDriver=this.advanceTableGPS[0].customerSignatureImage;
+      this.CustomerSignatureByDriver = this._generalService.resolveStaticImageUrl(
+        this.advanceTableGPS[0].customerSignatureImage
+      );
    
       this.advanceTableForm.patchValue({locationOutKMForBillingManual:locOut});
       this.advanceTableForm.patchValue({pickUpKMForBillingManual:pickup});

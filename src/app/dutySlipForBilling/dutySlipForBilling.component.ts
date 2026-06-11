@@ -121,9 +121,12 @@ export class DutySlipForBillingComponent implements OnInit, AfterViewInit {
     this.advanceTableForm.patchValue({closureStatus:'Closed'});
     this.advanceTableForm.patchValue({dutyTypeID : this.advanceTableClosingOne.closingReservationForPickupDataModel.packageTypeID});
     this.advanceTableForm.patchValue({packageID : this.advanceTableClosingOne.closingReservationForPickupDataModel.packageID});
-    if(this.advanceTableClosingOne.closingDutySlipModel.customerSignatureImage)
-    {
-      this.CustomerSignatureImage=this.advanceTableClosingOne.closingDutySlipModel.customerSignatureImage;
+    if (this.advanceTableClosingOne.closingDutySlipModel.customerSignatureImage) {
+      this.CustomerSignatureImage = this._generalService.resolveStaticImageUrl(
+        this.advanceTableClosingOne.closingDutySlipModel.customerSignatureImage
+      );
+      this.advanceTableClosingOne.closingDutySlipModel.customerSignatureImage =
+        this.CustomerSignatureImage;
     }
     
     if(this.advanceTableClosingOne.closingDutySlipForBillingModel.dsClosing === null)
