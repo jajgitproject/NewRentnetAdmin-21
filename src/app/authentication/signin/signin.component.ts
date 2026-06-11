@@ -89,14 +89,23 @@ export class SigninComponent implements OnInit {
       .login(this.f.email.value, this.f.password.value, 'Employee')
       .subscribe(
         (res) => {
-          this.error = res?.Message || null;
-          if (res?.Status === 'Failure' && res?.Message) {
+          console.log('Login response:', res);
+          this.error = res?.Message || res.loginDetails || null;
+          if (res?.Status === 'Failure' && res?.Message) 
+          {
             this.errorMessageToBeShown = res.Message;
           }
-          if (res.Message === 'Invalid User: User not found') {
+          if (res.Message === 'Invalid User: User not found') 
+          {
             this.errorMessageToBeShown = 'User not found';
-          } else if (res.Message === 'Invalid User: Please enter correct username and password') {
+          } 
+          else if (res.Message === 'Invalid User: Please enter correct username and password') 
+          {
             this.errorMessageToBeShown = 'Please enter correct username and password';
+          } 
+          else if (res.loginDetails?.includes('Invalid User: User not found')) 
+          {
+            this.errorMessageToBeShown = 'Unauthorized';
           }
 
           if (res) {
