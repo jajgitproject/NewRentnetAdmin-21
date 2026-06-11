@@ -2766,6 +2766,13 @@ const routes: Routes = [
             (m) => m.InvoiceHomeModule
           )
       },
+      {
+        path: 'invoiceSummary',
+        loadChildren: () =>
+          import('./invoiceSummary/invoiceSummary.module').then(
+            (m) => m.InvoiceSummaryModule
+          )
+      },
 
       {
         path: 'supplierCityMapping',
