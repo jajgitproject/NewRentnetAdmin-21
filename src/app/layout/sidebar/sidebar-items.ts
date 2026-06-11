@@ -998,7 +998,7 @@ export const ROUTES: RouteInfo[] = [
 
       
       {
-        path: 'incidenceType',
+        path: 'issueRelatedTo',
         title: 'Incidence Type',
         moduleName: 'incidenceType',
         icon: 'fas fa-tachometer-alt',
