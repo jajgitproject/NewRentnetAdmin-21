@@ -583,6 +583,8 @@ export function enrichInvoiceCalculationWithFullDetail(
   takeIfMissing('invoiceInterstateTaxModel','InvoiceInterstateTaxModel');
   takeIfMissing('invoiceTollParkingModel','InvoiceTollParkingModel');
   takeIfMissing('invoiceFuelSurchargeModel','InvoiceFuelSurchargeModel');
+  takeIfMissing('invoiceDriverAllownceModel','InvoiceDriverAllownceModel');
+  takeIfMissing('invoiceNightModel','InvoiceNightModel');
   return out;
 }
 
