@@ -1060,6 +1060,16 @@ export const ROUTES: RouteInfo[] = [
         isAccess: false
       },
       {
+        path: 'attachInvoicesToSummary',
+        title: 'Attach Invoices To Summary',
+        moduleName: 'attachInvoicesToSummary',
+        icon: 'fas fa-tachometer-alt',
+        class: '',
+        groupTitle: false,
+        submenu: [],
+        isAccess: false
+      },
+      {
         path: 'invoiceSummary',
         title: 'Invoice Summary',
         moduleName: 'invoiceSummary',

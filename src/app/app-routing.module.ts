@@ -2773,6 +2773,13 @@ const routes: Routes = [
             (m) => m.InvoiceSummaryModule
           )
       },
+      {
+        path: 'attachInvoicesToSummary',
+        loadChildren: () =>
+          import('./attachInvoicesToSummary/attachInvoicesToSummary.module').then(
+            (m) => m.AttachInvoicesToSummaryModule
+          )
+      },
 
       {
         path: 'supplierCityMapping',

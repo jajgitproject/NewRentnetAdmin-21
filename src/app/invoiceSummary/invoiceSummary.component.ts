@@ -12,6 +12,7 @@ import { DeleteDialogComponent } from './dialogs/delete/delete.component';
 import { MAT_DATE_LOCALE } from '@angular/material/core';
 import { MatMenu, MatMenuTrigger } from '@angular/material/menu';
 import { GeneralService } from '../general/general.service';
+import { Router } from '@angular/router';
 
 @Component({
   standalone: false,
@@ -51,7 +52,8 @@ export class InvoiceSummaryComponent implements OnInit {
     public dialog: MatDialog,
     public invoiceSummaryService: InvoiceSummaryService,
     private snackBar: MatSnackBar,
-    public _generalService: GeneralService
+    public _generalService: GeneralService,
+    public router: Router
   ) {}
 
   @ViewChild(MatSort, { static: true }) sort: MatSort;
@@ -156,6 +158,16 @@ export class InvoiceSummaryComponent implements OnInit {
     this.contextMenu.menuData = { item: item };
     this.contextMenu.menu.focusFirstItem('mouse');
     this.contextMenu.openMenu();
+  }
+
+  attachInvoices(item: InvoiceSummary) {
+    const baseUrl = this._generalService.FormURL;
+    const url = this.router.serializeUrl(
+      this.router.createUrlTree(['/attachInvoicesToSummary'], {
+        queryParams: { SummaryID: item.invoiceSummaryID }
+      })
+    );
+    window.open(baseUrl + url, '_blank');
   }
 
   NextCall() {
