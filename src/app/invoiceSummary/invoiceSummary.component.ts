@@ -187,6 +187,18 @@ export class InvoiceSummaryComponent implements OnInit {
     window.open(baseUrl + url, '_blank');
   }
 
+  printInvoiceSummary(item: InvoiceSummary) {
+    const baseUrl = this._generalService.FormURL;
+    const url = this.router.serializeUrl(
+      this.router.createUrlTree(['/printInvoiceSummary'], {
+        queryParams: {
+          SummaryID: item.invoiceSummaryID
+        }
+      })
+    );
+    window.open(baseUrl + url, '_blank');
+  }
+
   NextCall() {
     if (this.dataSource.length > 0) {
       this.pageNumber++;

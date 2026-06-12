@@ -1,0 +1,145 @@
+<section class="content print-page">
+
+  <div class="container-fluid">
+
+    <div class="no-print toolbar">
+
+      <h2>Print Invoice Summary</h2>
+
+      <button type="button" mat-raised-button color="primary" (click)="print()" [disabled]="!data">
+
+        Print
+
+      </button>
+
+    </div>
+
+
+
+    <div *ngIf="isLoading" class="status-message no-print">Loading cover letter...</div>
+
+    <div *ngIf="loadError" class="status-message error no-print">{{ loadError }}</div>
+
+
+
+    <div #printSection id="printSection" class="cover-letter" *ngIf="data">
+
+      <p class="letter-date">Date: {{ formatDate(data.letterDate) }}</p>
+
+
+
+      <div class="address-block">
+
+        <p>{{ data.customerName }}</p>
+
+        <p>{{ data.customerAddress }}</p>
+
+        <p>{{ data.customerCity }}</p>
+
+        <p *ngIf="data.customerState || data.customerPin">
+
+          {{ data.customerState }}<span *ngIf="data.customerState && data.customerPin"> - </span>{{ data.customerPin }}
+
+        </p>
+
+      </div>
+
+
+
+      <p class="subject-line">
+
+        Sub : Forwarding of bills ref Summary No : {{ data.invoiceSummaryID }}
+
+      </p>
+
+
+
+      <p>Dear Customer</p>
+
+
+
+      <p class="body-text">
+
+        Kindly find attached car usage bills as per Summary statement of {{ data.numberOfInvoices }} bills
+
+        for an amount of Rs. {{ formatAmount(data.totalAmount) }} ( {{ data.totalAmountInWords }} Only).
+
+      </p>
+
+
+
+      <p class="body-text">
+
+        Please have the payment expedited as per the contract terms. Please send the invoice wise payment
+
+        details along with your remittance.
+
+        For any assistance, please e-mail us on creditcontrol@ecorentacar.com
+
+      </p>
+
+
+
+      <table class="invoice-table">
+
+        <thead>
+
+          <tr>
+
+            <th>Bill No</th>
+
+            <th>Date</th>
+
+            <th>Guest</th>
+
+            <th class="amount-col">Total Amount</th>
+
+          </tr>
+
+        </thead>
+
+        <tbody>
+
+          <tr *ngFor="let invoice of data.invoices">
+
+            <td>{{ invoice.invoiceNumberWithPrefix }}</td>
+
+            <td>{{ formatDate(invoice.invoiceDate) }}</td>
+
+            <td>{{ invoice.primaryPassengerName }}</td>
+
+            <td class="amount-col">{{ formatAmount(invoice.invoiceTotalAmountAfterGST) }}</td>
+
+          </tr>
+
+          <tr class="total-row">
+
+            <td colspan="3" class="total-label">Total Amount</td>
+
+            <td class="amount-col">{{ formatAmount(data.totalAmount) }}</td>
+
+          </tr>
+
+        </tbody>
+
+      </table>
+
+
+
+      <div class="closing-block">
+
+        <p>Best Regards,</p>
+
+        <p>For ECOS (India) Mobility &amp; Hospitality Limited</p>
+
+        <p class="signatory">Authorized Signatory</p>
+
+      </div>
+
+    </div>
+
+  </div>
+
+</section>
+
+
