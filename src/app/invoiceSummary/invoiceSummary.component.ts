@@ -42,8 +42,8 @@ export class InvoiceSummaryComponent implements OnInit {
   searchSummaryDispatchStatus: string = '';
   searchActivationStatus: boolean = true;
   pageNumber: number = 0;
-  sortType: string;
-  sortingData: number;
+  sortType: string = 'Descending';
+  sortingData: number = 1;
   searchTerm: any = '';
   selectedFilter: string = 'search';
 
@@ -79,6 +79,8 @@ export class InvoiceSummaryComponent implements OnInit {
     this.selectedFilter = 'search';
     this.searchActivationStatus = true;
     this.pageNumber = 0;
+    this.sortType = 'Descending';
+    this.sortingData = 1;
     this.loadData();
   }
 
@@ -167,6 +169,18 @@ export class InvoiceSummaryComponent implements OnInit {
         queryParams: {
           SummaryID: item.invoiceSummaryID,
           CustomerID: item.customerID
+        }
+      })
+    );
+    window.open(baseUrl + url, '_blank');
+  }
+
+  detachInvoices(item: InvoiceSummary) {
+    const baseUrl = this._generalService.FormURL;
+    const url = this.router.serializeUrl(
+      this.router.createUrlTree(['/detachInvoicesFromSummary'], {
+        queryParams: {
+          SummaryID: item.invoiceSummaryID
         }
       })
     );

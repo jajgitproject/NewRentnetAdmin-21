@@ -49,7 +49,7 @@ export class FormDialogComponent {
       this.dialogTitle = 'Invoice Summary';
       this.advanceTable = new InvoiceSummary({});
       this.advanceTable.summaryDispatchStatus = 'No';
-      this.advanceTable.activationStatus = false;
+      this.advanceTable.activationStatus = true;
       this.advanceTable.createdByID = this._generalService.getUserID();
       this.createdByDisplay = this.getLoggedInUserDisplayName();
     }
@@ -335,7 +335,7 @@ export class FormDialogComponent {
     this.EmployeeList = [];
     this.advanceTableForm.patchValue({
       summaryDispatchStatus: 'No',
-      activationStatus: false,
+      activationStatus: true,
       createdByID: this._generalService.getUserID()
     });
     this.updateDispatchValidators('No');

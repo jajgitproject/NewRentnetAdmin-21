@@ -1,0 +1,145 @@
+<section class="content">
+    <div class="container-fluid">
+        <div class="block-header">
+            <div class="row">
+                <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+                    <ul>
+                        <li class="breadcrumb-item bcrumb-1">
+                            <a routerLink="/dashboard/main">
+                                <i class="fas fa-home"></i> Home</a>|
+                            <a href="#" onClick="return false;">Billing</a>|
+                            <a href="#" onClick="return false;">Detach Invoices From Summary</a>
+                        </li>
+                    </ul>
+                    <ul class="breadcrumb breadcrumb-style ">
+                        <li class="breadcrumb-item">
+                            <h2>Detach Invoices From Summary<span *ngIf="summaryID"> - {{summaryID}}</span></h2>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                <div class="card">
+                    <div class="body">
+                        <form [formGroup]="searchForm">
+                            <div class="row">
+                                <div class="col-xl-3 col-lg-3 col-md-6 col-sm-12 mb-2">
+                                    <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                                        <mat-label>Invoice Date From</mat-label>
+                                        <input matInput [matDatepicker]="invoiceDateFromPicker" formControlName="invoiceDateFrom">
+                                        <mat-datepicker-toggle matSuffix [for]="invoiceDateFromPicker"></mat-datepicker-toggle>
+                                        <mat-datepicker #invoiceDateFromPicker></mat-datepicker>
+                                    </mat-form-field>
+                                </div>
+
+                                <div class="col-xl-3 col-lg-3 col-md-6 col-sm-12 mb-2">
+                                    <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                                        <mat-label>Invoice Date To</mat-label>
+                                        <input matInput [matDatepicker]="invoiceDateToPicker" formControlName="invoiceDateTo">
+                                        <mat-datepicker-toggle matSuffix [for]="invoiceDateToPicker"></mat-datepicker-toggle>
+                                        <mat-datepicker #invoiceDateToPicker></mat-datepicker>
+                                    </mat-form-field>
+                                </div>
+
+                                <div class="col-xl-3 col-lg-3 col-md-6 col-sm-12 mb-2">
+                                    <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                                        <mat-label>Invoice No.</mat-label>
+                                        <input matInput formControlName="invoiceNumberWithPrefix">
+                                    </mat-form-field>
+                                </div>
+                            </div>
+
+                            <div class="row mb-3">
+                                <div class="col-12">
+                                    <button mat-raised-button color="primary" type="button" (click)="search()" [disabled]="isLoading">
+                                        Search
+                                    </button>
+                                    &nbsp;
+                                    <button mat-raised-button color="warn" type="button" (click)="reset()">
+                                        Reset
+                                    </button>
+                                    &nbsp;
+                                    <button mat-raised-button color="accent" type="button" (click)="detachInvoices()" [disabled]="isDetaching || !selectedInvoices.length">
+                                        Detach
+                                    </button>
+                                </div>
+                            </div>
+                        </form>
+
+                        <div class="responsive_table">
+                            <p *ngIf="!dataSource; then thenBlock else elseBlock">
+                                This is not rendered
+                            </p>
+
+                            <ng-template #thenBlock>
+                                <div class="alert alert-primary" style="background-color:#E8E8E8; text-align: center;">No Records Found</div>
+                            </ng-template>
+
+                            <ng-template #elseBlock>
+                                <div class="scrollable-table-container">
+                                    <mat-table [dataSource]="dataSource" class="mat-cell floating-header-table">
+                                        <ng-container matColumnDef="check">
+                                            <mat-header-cell *matHeaderCellDef>
+                                                <mat-checkbox color="primary"
+                                                    (change)="checkAll($event.checked)"
+                                                    [checked]="selectAll"
+                                                    [indeterminate]="isIndeterminate()">
+                                                </mat-checkbox>
+                                            </mat-header-cell>
+                                            <mat-cell *matCellDef="let row">
+                                                <mat-checkbox color="primary"
+                                                    (change)="onCheckBox($event.checked, row)"
+                                                    [checked]="row.checked">
+                                                </mat-checkbox>
+                                            </mat-cell>
+                                        </ng-container>
+
+                                        <ng-container matColumnDef="invoiceNumberWithPrefix">
+                                            <mat-header-cell *matHeaderCellDef>Invoice No.</mat-header-cell>
+                                            <mat-cell *matCellDef="let row">{{row.invoiceNumberWithPrefix}}</mat-cell>
+                                        </ng-container>
+
+                                        <ng-container matColumnDef="customerName">
+                                            <mat-header-cell *matHeaderCellDef>Customer Name</mat-header-cell>
+                                            <mat-cell *matCellDef="let row">{{row.customerName}}</mat-cell>
+                                        </ng-container>
+
+                                        <ng-container matColumnDef="invoiceDate">
+                                            <mat-header-cell *matHeaderCellDef>Invoice Date</mat-header-cell>
+                                            <mat-cell *matCellDef="let row">{{formatDate(row.invoiceDate)}}</mat-cell>
+                                        </ng-container>
+
+                                        <ng-container matColumnDef="placeOfSupply">
+                                            <mat-header-cell *matHeaderCellDef>Place of Supply</mat-header-cell>
+                                            <mat-cell *matCellDef="let row">{{row.placeOfSupply}}</mat-cell>
+                                        </ng-container>
+
+                                        <ng-container matColumnDef="invoiceTotalAmountAfterGST">
+                                            <mat-header-cell *matHeaderCellDef>Amount</mat-header-cell>
+                                            <mat-cell *matCellDef="let row" style="text-align: right; justify-content: flex-end;">
+                                                {{row.invoiceTotalAmountAfterGST | number:'1.2-2'}}
+                                            </mat-cell>
+                                        </ng-container>
+
+                                        <mat-header-row *matHeaderRowDef="displayedColumns"></mat-header-row>
+                                        <mat-row *matRowDef="let row; columns: displayedColumns;"></mat-row>
+                                    </mat-table>
+                                </div>
+
+                                <div class="body">
+                                    <div class="example-button-row">
+                                        <button mat-raised-button color="primary" (click)="PreviousCall()">Previous</button>
+                                        <button mat-raised-button color="primary" (click)="NextCall()">Next</button>
+                                    </div>
+                                </div>
+                            </ng-template>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>

@@ -38,7 +38,7 @@ export class InvoiceSummaryService {
         searchActivationStatus +
         '/' +
         pageNumber +
-        '/InvoiceSummaryDate/Descending'
+        '/InvoiceSummaryID/Descending'
     );
   }
 

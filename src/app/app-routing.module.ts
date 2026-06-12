@@ -2780,6 +2780,13 @@ const routes: Routes = [
             (m) => m.AttachInvoicesToSummaryModule
           )
       },
+      {
+        path: 'detachInvoicesFromSummary',
+        loadChildren: () =>
+          import('./detachInvoicesFromSummary/detachInvoicesFromSummary.module').then(
+            (m) => m.DetachInvoicesFromSummaryModule
+          )
+      },
 
       {
         path: 'supplierCityMapping',

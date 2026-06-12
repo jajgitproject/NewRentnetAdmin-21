@@ -5,7 +5,7 @@ import { Observable } from 'rxjs';
 import { GeneralService } from '../general/general.service';
 
 @Injectable()
-export class AttachInvoicesToSummaryService {
+export class DetachInvoicesFromSummaryService {
   private API_URL: string = '';
 
   constructor(private httpClient: HttpClient, public generalService: GeneralService) {
@@ -13,7 +13,7 @@ export class AttachInvoicesToSummaryService {
   }
 
   searchInvoices(
-    customerID: number,
+    summaryID: number,
     invoiceDateFrom: string,
     invoiceDateTo: string,
     invoiceNumberWithPrefix: string,
@@ -33,8 +33,8 @@ export class AttachInvoicesToSummaryService {
 
     const url =
       this.API_URL +
-      '/UnattachedInvoices/' +
-      customerID +
+      '/AttachedInvoices/' +
+      summaryID +
       '/' +
       invoiceDateFrom +
       '/' +
@@ -46,8 +46,8 @@ export class AttachInvoicesToSummaryService {
     return this.httpClient.get(url, { params });
   }
 
-  attachInvoices(summaryID: number, invoiceIDs: number[]): Observable<any> {
-    return this.httpClient.post(this.API_URL + '/AttachInvoices', {
+  detachInvoices(summaryID: number, invoiceIDs: number[]): Observable<any> {
+    return this.httpClient.post(this.API_URL + '/DetachInvoices', {
       summaryID: summaryID,
       userID: this.generalService.getUserID(),
       invoiceIDs: invoiceIDs
