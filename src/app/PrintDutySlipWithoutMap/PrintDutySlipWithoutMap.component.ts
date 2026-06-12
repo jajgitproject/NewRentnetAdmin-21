@@ -26,6 +26,7 @@ import { ActivatedRoute } from '@angular/router';
 import { DutySlipAccentureService } from '../dutySlipAccenture/dutySlipAccenture.service';
 import { ControlPanelDesignService } from '../controlPanelDesign/controlPanelDesign.service';
 import { ControlPanelData } from '../controlPanelDesign/controlPanelDesign.model';
+import { PdfPrintService } from '../general/pdf-print.service';
 import moment from 'moment';
 
 
@@ -48,6 +49,7 @@ export class PrintDutySlipWithoutMapComponent {
   totalDays: number;
   datetime: string;
   totalKms: void;
+  isEmbeddedInIframe = false;
 
   constructor(
     @Optional() @Inject(MAT_DIALOG_DATA) public data: any,
@@ -57,18 +59,21 @@ export class PrintDutySlipWithoutMapComponent {
     public dutySlipAccentureService: DutySlipAccentureService,
     public _controlPanelDesignService: ControlPanelDesignService,
     private snackBar: MatSnackBar,
-    public _generalService: GeneralService
+    public _generalService: GeneralService,
+    private pdfPrintService: PdfPrintService
     ) {}
     @ViewChild(MatPaginator, { static: true }) paginator: MatPaginator;
     @ViewChild(MatSort, { static: true }) sort: MatSort;
     @ViewChild('filter', { static: true }) filter: ElementRef;
     @ViewChild('printSection', { static: false }) printSection: ElementRef;
+    @ViewChild('printableArea', { static: false }) printableArea: ElementRef;
     @ViewChild(MatMenuTrigger)
     contextMenu: MatMenuTrigger;
     contextMenuPosition = { x: '0px', y: '0px' };
   
     ngOnInit() 
     {
+      this.isEmbeddedInIframe = window.self !== window.top;
       this.route.queryParams.subscribe(paramsData =>{
         this.DutySlipID = paramsData.dutySlipID;
         this.ReservationID = paramsData.reservationID;
@@ -97,12 +102,60 @@ export class PrintDutySlipWithoutMapComponent {
       data =>   
       {
         this.dataSource = data;
+        if (this.dataSource?.customerSignatureImage) {
+          this.dataSource.customerSignatureImage = this._generalService.resolveStaticImageUrl(
+            this.dataSource.customerSignatureImage
+          );
+        }
+        this.dataSource.tollParkingsImages = this.normalizeAttachmentImages(
+          this.dataSource?.tollParkingsImages,
+          'tollParkingImage'
+        );
+        this.dataSource.interStateTaxImages = this.normalizeAttachmentImages(
+          this.dataSource?.interStateTaxImages,
+          'interStateTaxImage'
+        );
         console.log("dataSource",this.dataSource);
         this.totalKms =  this.dataSource?.runningDetailsModels ?.reduce((sum: number, item: any) => sum + Number(item.distance || 0), 0);
+        setTimeout(() => this.notifyEmbedParentHeight(), 0);
         //this.getTime();
       },
       (error: HttpErrorResponse) => { this.dataSource = null});
-    }  
+    }
+
+    notifyEmbedParentHeight(): void {
+      if (!this.isEmbeddedInIframe) return;
+      window.parent.postMessage(
+        { type: 'dutySlipIframeResize' },
+        window.location.origin
+      );
+    }
+
+    onEmbedImageLoad(): void {
+      this.notifyEmbedParentHeight();
+    }
+
+    hasTollParkingAttachments(): boolean {
+      return (this.dataSource?.tollParkingsImages?.length ?? 0) > 0;
+    }
+
+    hasInterStateTaxAttachments(): boolean {
+      return (this.dataSource?.interStateTaxImages?.length ?? 0) > 0;
+    }
+
+    private normalizeAttachmentImages(items: any[] | null | undefined, imageKey: string): any[] {
+      return (items ?? [])
+        .map((item) => {
+          const resolved = this._generalService.resolveStaticImageUrl(item?.[imageKey]);
+          return { ...item, [imageKey]: resolved };
+        })
+        .filter((item) => this.isValidAttachmentImage(item?.[imageKey]));
+    }
+
+    private isValidAttachmentImage(url: string | null | undefined): boolean {
+      const value = (url ?? '').trim();
+      return value.length > 0 && value.toLowerCase() !== 'null' && value.toLowerCase() !== 'undefined';
+    }
   
     getTime() 
     {
@@ -145,9 +198,11 @@ export class PrintDutySlipWithoutMapComponent {
       this.datetime = hours + "." + minutes;
     }
 
-    print() 
+    printWithSelectPdf()
     {
-      window.print();
+      const element = this.printableArea?.nativeElement as HTMLElement;
+      const fileName = `DutySlip_${this.DutySlipID || 'print'}`;
+      this.pdfPrintService.printElementAsPdf(element, fileName);
     }
 
   }

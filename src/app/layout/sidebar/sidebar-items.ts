@@ -593,6 +593,22 @@ export const ROUTES: RouteInfo[] = [
       },
 
       {
+        path: 'contractTariffVerification',
+        title: 'Contract Tariff Verification',
+        pageKey: 'Contract Tariff Verification',
+        alternateAccessPageKeys: [
+          'contractTariffVerification',
+          'Contract Tariff',
+        ],
+        moduleName: 'contractTariffVerification',
+        icon: 'fas fa-clipboard-check',
+        class: '',
+        groupTitle: false,
+        submenu: [],
+        isAccess: false
+      },
+
+      {
         path: 'customerGroup',
         title: 'Customer Group',
         moduleName: 'customerGroup',

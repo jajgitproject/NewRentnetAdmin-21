@@ -13,16 +13,20 @@
   </button> -->
 </div>
 <div class="print-container">
+  <div class="print-actions-fixed no-print">
+    <button type="button" mat-raised-button color="primary" (click)="printWithSelectPdf()">Print</button>
+  </div>
   <mat-card>
     <mat-card-content>
       <mat-dialog-content>
+        <div class="printable-area" #printableArea>
         <div id="printElem">
-          <table width="595" border="0" align="center" cellpadding="0" cellspacing="0">
+          <table class="duty-slip-sheet" border="0" align="center" cellpadding="0" cellspacing="0">
             <tr>
-              <td height="840" valign="top">
-                <table width="556" border="0" align="center" cellpadding="0" cellspacing="0">
+              <td valign="top">
+                <table class="duty-slip-sheet" border="0" align="center" cellpadding="0" cellspacing="0">
                   <tr>
-                    <td height="824" align="center" valign="top" class="auto-style1">
+                    <td align="center" valign="top" class="auto-style1">
                       <p>
                         <span class="text-heading">
                           <strong>ECOS (India) Mobility & Hospitality Limited</strong><br />
@@ -184,13 +188,13 @@
                         <tr>
                           <td colspan="6" style="text-align:center; padding:10px 0;">
                             <img *ngIf="dataSource?.mapURL; else noMapImage"
-                                  [src]="dataSource?.mapURL" style="width:420px; height:300px; border:1px solid #ccc;" />
+                                  [src]="dataSource?.mapURL" class="map-image" alt="Duty Slip Map" />
                                   <ng-template #noMapImage>No Image</ng-template>
                           </td>
                           <td valign="top" width="130" align="left" style="padding-left: 5px;">
                             User Signature<br />
                             <img *ngIf="dataSource?.customerSignatureImage; else noSignatureImage" 
-                              [src]="dataSource?.customerSignatureImage" id="image1" width="100" height="100" />
+                              [src]="dataSource?.customerSignatureImage" class="signature-image" alt="User Signature" />
                               <ng-template #noSignatureImage>No Image</ng-template>
 
                             <br />
@@ -269,32 +273,26 @@
           </table>
         </div>
         <br/>
-        <div >
-          <table width="556" border="0" align="center" cellpadding="0" cellspacing="0" class="text2">
+        <div *ngIf="dataSource?.tollParkingsImages?.length">
+          <table class="duty-slip-sheet text2" border="0" align="center" cellpadding="0" cellspacing="0">
             <tr *ngFor="let img of dataSource?.tollParkingsImages">
-              <td align="center" *ngIf="img.tollParkingImage !== '' && img.tollParkingImage !== null">
-                <p class="auto-style3">Image
-                      </p>
-                  <img [src]="img.tollParkingImage" id="image1" width="500" height="500" />
-              </td>
-            </tr>
-          </table>
-        </div>
-        <div >
-          <table width="556" border="0" align="center" cellpadding="0" cellspacing="0" class="text2">
-            <tr *ngFor="let img of dataSource?.interStateTaxImages">
-              <td align="center" *ngIf="img.interStateTaxImages !== '' && img.interStateTaxImages !== null">
+              <td align="center" *ngIf="img.tollParkingImage">
                 <p class="auto-style3">Image</p>
-                  <img [src]="img.interStateTaxImage" id="image1" width="500" height="500" />
+                <img [src]="img.tollParkingImage" class="attachment-image" alt="Toll / Parking" />
               </td>
             </tr>
           </table>
         </div>
-        <hr />
-        <div style="text-align: center">
-          <button type="button" onclick="window.print()" color="primary" mat-raised-button id="print">
-            Print
-          </button>
+        <div *ngIf="dataSource?.interStateTaxImages?.length">
+          <table class="duty-slip-sheet text2" border="0" align="center" cellpadding="0" cellspacing="0">
+            <tr *ngFor="let img of dataSource?.interStateTaxImages">
+              <td align="center" *ngIf="img.interStateTaxImage">
+                <p class="auto-style3">Image</p>
+                <img [src]="img.interStateTaxImage" class="attachment-image" alt="Interstate Tax" />
+              </td>
+            </tr>
+          </table>
+        </div>
         </div>
       </mat-dialog-content>
     </mat-card-content>

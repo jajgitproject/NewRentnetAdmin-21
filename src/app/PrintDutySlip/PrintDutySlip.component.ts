@@ -26,6 +26,7 @@ import { ActivatedRoute } from '@angular/router';
 import { DutySlipAccentureService } from '../dutySlipAccenture/dutySlipAccenture.service';
 import { ControlPanelDesignService } from '../controlPanelDesign/controlPanelDesign.service';
 import { ControlPanelData } from '../controlPanelDesign/controlPanelDesign.model';
+import { PdfPrintService } from '../general/pdf-print.service';
 import moment from 'moment';
 
 
@@ -56,12 +57,14 @@ export class PrintDutySlipComponent {
     public dutySlipAccentureService: DutySlipAccentureService,
     public _controlPanelDesignService: ControlPanelDesignService,
     private snackBar: MatSnackBar,
-    public _generalService: GeneralService
+    public _generalService: GeneralService,
+    private pdfPrintService: PdfPrintService
     ) { }
     @ViewChild(MatPaginator, { static: true }) paginator: MatPaginator;
     @ViewChild(MatSort, { static: true }) sort: MatSort;
     @ViewChild('filter', { static: true }) filter: ElementRef;
     @ViewChild('printSection', { static: false }) printSection: ElementRef;
+    @ViewChild('printableArea', { static: false }) printableArea: ElementRef;
     @ViewChild(MatMenuTrigger)
     contextMenu: MatMenuTrigger;
     contextMenuPosition = { x: '0px', y: '0px' };
@@ -95,6 +98,11 @@ export class PrintDutySlipComponent {
       data =>   
       {
         this.dataSource = data;
+        if (this.dataSource?.customerSignatureImage) {
+          this.dataSource.customerSignatureImage = this._generalService.resolveStaticImageUrl(
+            this.dataSource.customerSignatureImage
+          );
+        }
         //this.TotalKMGSG=this.dataSource?.locationInKM-this.dataSource?.locationOutKM;
         this.totalKms =  this.dataSource?.runningDetailsModels ?.reduce((sum: number, item: any) => sum + Number(item.distance || 0), 0);
         //this.getTime();
@@ -143,10 +151,12 @@ export class PrintDutySlipComponent {
       this.datetime = hours + "." + minutes;
     }
 
-    print() 
+    printWithSelectPdf()
     {
-      window.print();
-    } 
+      const element = this.printableArea?.nativeElement as HTMLElement;
+      const fileName = `DutySlip_${this.DutySlipID || 'print'}`;
+      this.pdfPrintService.printElementAsPdf(element, fileName);
+    }
   }
   
   

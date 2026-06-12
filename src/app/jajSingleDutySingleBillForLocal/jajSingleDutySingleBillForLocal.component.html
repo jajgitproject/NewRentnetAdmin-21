@@ -1,31 +1,20 @@
-<div class="addContainer" #printSection style="background-color: white;">
+<div class="print-actions-fixed no-print">
+  <button type="button" mat-raised-button color="primary" (click)="printWithSelectPdf()">Print</button>
+</div>
+<div class="addContainer printable-area" #printableArea #printSection style="background-color: white;">
   <div class="invoice-container">
     <div id="printElem">
       <!-- HEADER -->
       <div class="header">
-        <div class="header-left">
-          <!-- <h1>TAX INVOICE</h1>
-              
-              <div class="company-address">
-                {{dataSource?.invoiceEcoCompanyModel?.ecoCompanyName}}<br>
-                {{dataSource?.invoiceEcoCompanyModel?.ecoCompanyAddress}}<br>
-                {{dataSource?.invoiceEcoCompanyModel?.ecoCompanyCityName}} , 
-                {{dataSource?.invoiceEcoCompanyModel?.ecoCompanyStateName}} - 
-                {{dataSource?.invoiceEcoCompanyModel?.ecoCompanyPinCode}}<br />
-                <strong> GSTNo :</strong>{{dataSource?.invoiceEcoBranchModel?.branchGSTNumber}} <br />
-              </div> -->
-
-          <!-- <h4>
-                <span style="padding-left:35px">TAX INVOICE</span>
-                <br> 
-                <span>Original for Recipient</span>
-              </h4> -->
-          <div style="text-align: center;">
-            <strong>TAX INVOICE
-              <br />
-              Original for Recipient
-            </strong>
-          </div>
+        <div class="header-title">
+          <strong>TAX INVOICE
+            <br />
+            Original for Recipient
+          </strong>
+        </div>
+        <table class="header-body" cellpadding="0" cellspacing="0" border="0" width="100%">
+          <tr>
+            <td class="header-left" valign="top">
           <div class="company-address">
             <span class="text-heading">ECOS (India) Mobility & Hospitality Limited</span><br />
             (Formerly known as Ecos (India) Mobility & Hospitality Private Limited)<br>
@@ -50,27 +39,26 @@
             IRN : {{dataSource?.invoiceModel?.irn || 'N/A'}}
           </div>
 
-        </div>
-
-        <div class="qr-logo-area">
-          <img src="http://www.ecoserp.com/bill_printing/logo.jpg" alt="Logo">
-          <br>
-          
+            </td>
+            <td class="qr-logo-area" valign="top" align="right">
+          <img class="invoice-logo" [src]="invoiceLogoUrl" alt="Logo">
           <ng-container *ngIf="dataSource?.invoiceModel?.signedQRCode; else noQR">
-            <img [src]="'data:image/png;base64,' + dataSource?.invoiceModel?.signedQRCode" alt="QR" />
+            <img class="qr-code-image" [src]="'data:image/png;base64,' + dataSource?.invoiceModel?.signedQRCode" alt="QR" />
           </ng-container>
-          
           <ng-template #noQR>
             <div class="no-image-box">
               No QR Image
             </div>
           </ng-template>
-        </div>
+            </td>
+          </tr>
+        </table>
       </div>
 
       <!-- Billing DETAILS -->
-      <div class="info-section">
-        <div class="customer-box">
+      <table class="info-section" cellpadding="0" cellspacing="0" border="0" width="100%">
+        <tr>
+          <td class="customer-box" valign="top">
           To,
           <br />
           <strong> {{
@@ -90,18 +78,18 @@
           <strong>GST : </strong>{{dataSource?.invoiceCustomerModel?.customerGSTNumber}} <br />
           <strong>Reverse Charge(Y/N) : </strong> N
 
-        </div>
-
-        <div class="bill-box">
+          </td>
+          <td class="bill-box" valign="top" align="right">
           <b>Bill No : </b> {{dataSource?.invoiceModel?.invoiceNumberWithPrefix}}<br>
           <b>Bill Date : </b> {{dataSource?.invoiceModel?.invoiceDate | date:'dd/MM/yyyy'}}<br>
           <b>DS No : </b> {{dataSource?.dutySlipID}}<br>
           <b>Booking No : </b> {{dataSource?.invoiceReservationModel.reservationID}}<br>
           <b>VEH : </b>{{dataSource?.vehicle}}<br>
-          <b>Trip Date : </b>{{dataSource?.invoiceDutyModel?.dutyStartDateTime | date: 'dd/MM/yyyy'}} - <b>to : </b>{{dataSource?.invoiceDutyModel?.dutyEndDateTime | date: 'dd/MM/yyyy'}}
-          <!-- <b>to : </b>{{dataSource?.invoiceDutyModel?.dutyEndDateTime | date: 'dd/MM/yyyy'}} -->
-        </div>
-      </div>
+          <b>Trip Date : </b>{{dataSource?.invoiceDutyModel?.dutyStartDateTime | date: 'dd/MM/yyyy'}}<br>
+          <b>to : </b>{{dataSource?.invoiceDutyModel?.dutyEndDateTime | date: 'dd/MM/yyyy'}}
+          </td>
+        </tr>
+      </table>
 
       <!-- EXTRA INFO -->
       <div class="extra-info">
@@ -358,13 +346,7 @@
               </td>
               <td class="table-midrow-secondcolumn"></td>
               <td class="table-midrow-thirdcolumn"></td>
-            </tr>           
-            <!-- <tr class="table-last-tr">
-              <td class="table-lastrow-firstcolumn">&nbsp;</td>
-              <td class="table-lastrow-secondcolumn">&nbsp;</td>
-              <td class="table-lastrow-thirdcolumn">&nbsp;</td>
-            </tr> -->
-             
+            </tr>
 
           </tbody>
         </table>
@@ -718,8 +700,9 @@
       </div>
      <div style="clear: both;"></div>
       <!-- FOOTER -->
-      <div class="footer">
-        <div class="terms">
+      <table class="footer" cellpadding="0" cellspacing="0" border="0" width="100%">
+        <tr>
+          <td class="terms" valign="top">
           <b>Terms & Conditions:</b><br>
           Our Responsibility of the Signed duty slip rests till we handover the same to you with the bill.
           Interest @ 24% will be charged if payment is not received as per payment terms settled.
@@ -730,40 +713,39 @@
           <!-- <a href="https://www.ecosmobility.com/pay-online/"
             target="_blank">https://www.ecosmobility.com/pay-online/</a> -->
             <br/>
-           
-        </div>
-
-        <div class="signature">
+          </td>
+          <td class="signature" valign="top" align="right">
           Authorized Signatory<br><br>
           <img src="assets/images/Picture1.png" width="80px" height="80px">
-        </div>
-      </div>
+          </td>
+        </tr>
+      </table>
     </div>
   </div>
-  <br/>
-  <div>
-    <table width="556" border="0" align="center" cellpadding="0" cellspacing="0" class="text2">
-      <tr *ngFor="let img of dataSource?.invoiceTollParkingModel">
-        <td align="center" *ngIf="img.tollParkingImage !== '' && img.tollParkingImage !== null">
-          <p class="auto-style3">Image</p>
-            <img [src]="img.tollParkingImage" id="image1" width="500" height="500" />
-        </td>
-      </tr>
-    </table>
+  <div class="invoice-attachments">
+    <div class="invoice-attachment invoice-attachment--duty-slip" *ngIf="printDutySlipEmbedUrl || dataSource?.dutySlipImage">
+      <iframe *ngIf="printDutySlipEmbedUrl"
+              #dutySlipIframe
+              [src]="printDutySlipEmbedUrl"
+              class="invoice-attachment__pdf invoice-attachment__print-slip"
+              scrolling="no"
+              (load)="onPrintDutySlipIframeLoad($event)"
+              title="Duty Slip"></iframe>
+      <ng-container *ngIf="!printDutySlipEmbedUrl && dataSource?.dutySlipImage">
+        <img *ngIf="!isPdfUrl(dataSource.dutySlipImage)"
+             [src]="dataSource.dutySlipImage"
+             alt=""
+             class="invoice-attachment__image" />
+        <iframe *ngIf="isPdfUrl(dataSource.dutySlipImage)"
+                [src]="dutySlipPdfUrl"
+                class="invoice-attachment__pdf"
+                title="Duty Slip"></iframe>
+      </ng-container>
+    </div>
+
+    <div class="invoice-attachment" *ngFor="let img of rfidFastagAttachments()">
+      <p class="invoice-attachment__label">{{ img.tollParkingType || 'RFID / Fastag' }}</p>
+      <img [src]="img.tollParkingImage" alt="RFID / Fastag" class="invoice-attachment__image" />
+    </div>
   </div>
-  <div>
-    <table width="556" border="0" align="center" cellpadding="0" cellspacing="0" class="text2">
-      <tr *ngFor="let img of dataSource?.invoiceInterstateTaxModel">
-        <td align="center" *ngIf="img.dutyInterStateTaxImage !== '' && img.dutyInterStateTaxImage !== null">
-          <p class="auto-style3">Image</p>
-            <img [src]="img.dutyInterStateTaxImage" id="image1" width="500" height="500" />
-        </td>
-      </tr>
-    </table>
-  </div>
-  <!-- <div style="text-align: center">
-    <button type="button" (click)="print()" color="primary" mat-raised-button id="print">
-      Print
-    </button>
-  </div> -->
 </div>

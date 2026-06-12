@@ -108,6 +108,65 @@
         box-sizing: border-box;
         display: block !important;
         overflow: visible !important;
+        page-break-after: always !important;
+        break-after: page !important;
+    }
+
+    .invoice-attachments {
+        page-break-before: always !important;
+        break-before: page !important;
+        margin-top: 0 !important;
+    }
+
+    .invoice-attachment {
+        page-break-inside: avoid !important;
+        break-inside: avoid !important;
+    }
+
+    .invoice-attachment + .invoice-attachment {
+        page-break-before: always !important;
+        break-before: page !important;
+    }
+
+    .iframe-print-inlined,
+    .iframe-print-fallback {
+        page-break-inside: avoid !important;
+        break-inside: avoid !important;
+    }
+
+    .invoice-logo {
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+        color-adjust: exact !important;
+    }
+
+    .table-div {
+        border-left: 1px solid #000 !important;
+        border-right: 1px solid #000 !important;
+    }
+
+    .invoice-container .table thead th {
+        background-color: #f0f0f0 !important;
+        border-bottom: 1px solid #000 !important;
+        color: #000 !important;
+        text-align: center !important;
+    }
+
+    .table-firstrow-firstcolumn,
+    .table-midrow-firstcolumn {
+        border-left: 1px solid #000 !important;
+        border-right: 2px solid #000 !important;
+    }
+
+    .table-firstrow-secondcolumn,
+    .table-midrow-secondcolumn {
+        border-right: 2px solid #000 !important;
+        text-align: center !important;
+    }
+
+    .table-firstrow-thirdcolumn,
+    .table-midrow-thirdcolumn {
+        border-right: 1px solid #000 !important;
     }
 
     /* force everything together */
@@ -161,10 +220,35 @@
 }
 /* ================= HEADER ================= */
 .header {
-    display: grid;
-    grid-template-columns: 120mm auto;
     border-bottom: 1px solid #000;
     padding-bottom: 10px;
+}
+
+.header-title {
+    text-align: center;
+    margin-bottom: 8px;
+}
+
+.header-body {
+    width: 100%;
+    border-collapse: collapse;
+    border: none;
+
+    td {
+        border: none;
+        vertical-align: top;
+        padding: 0;
+    }
+}
+
+.header-left {
+    width: 72%;
+    padding-right: 4mm;
+}
+
+.qr-logo-area {
+    width: 28%;
+    text-align: right;
 }
 
 .header-left h1 {
@@ -174,25 +258,34 @@
 }
 
 .company-address {
-    margin-top: 6px;
+    margin-top: 0;
     font-size: 12px;
     line-height: 16px;
 }
 
 /* ================= LOGO + QR ================= */
-.qr-logo-area {
-    display: flex;
-    //justify-content: flex-end;
-    flex-direction: column;
-    align-items: flex-end;
-    gap: 0px;
-    padding-top: 5px;
+.invoice-logo {
+    width: 32mm;
+    height: auto;
+    max-width: 32mm;
+    max-height: 36mm;
+    object-fit: contain;
+    display: block;
+    margin-left: auto;
+    margin-bottom: 8px;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
 }
 
-.qr-logo-area img {
+.qr-logo-area .qr-code-image,
+.qr-logo-area img[src^="data:image"] {
     width: 30mm;
     height: 30mm;
+    max-width: 30mm;
+    max-height: 30mm;
     object-fit: contain;
+    display: block;
+    margin-left: auto;
 }
 
 .no-image-box {
@@ -208,20 +301,28 @@
 
 /* ================= INFO ================= */
 .info-section {
-    display: grid;
-    grid-template-columns: 120mm auto;
+    width: 100%;
+    border-collapse: collapse;
+    border: none;
     margin-top: 8px;
     border-bottom: 1px solid #000;
-    padding-bottom: 8px;
+
+    td {
+        border: none;
+        vertical-align: top;
+        padding: 0 0 8px 0;
+        font-size: 13px;
+        line-height: 18px;
+    }
 }
 
-.customer-box,
-.bill-box {
-    font-size: 13px;
-    line-height: 18px;
+.customer-box {
+    width: 68%;
+    padding-right: 4mm;
 }
 
 .bill-box {
+    width: 32%;
     text-align: right;
 }
 
@@ -342,18 +443,28 @@
 .footer {
     margin-top: 6px;
     border-top: 1px solid #000;
-    padding-top: 8px;
-    display: grid;
-    grid-template-columns: 2fr 1fr;
+    width: 100%;
+    border-collapse: collapse;
+    border-left: none;
+    border-right: none;
     flex-grow: 1;
+
+    td {
+        border: none;
+        vertical-align: top;
+        padding-top: 8px;
+    }
 }
 
 .terms {
+    width: 66%;
     font-size: 12px;
     line-height: 17px;
+    padding-right: 4mm;
 }
 
 .signature {
+    width: 34%;
     text-align: right;
     font-size: 14px;
     padding-right: 10px;
@@ -471,7 +582,6 @@ td {
     border: none !important;
 }
 
-/* Header me line rahe */
 .table-header td,
 .table-header th {
     border-bottom: 1px solid #000 !important;
@@ -513,74 +623,145 @@ td {
 /* ================= TABLE ================= */
 .table-div {
     width: 100%;
-    min-height: auto;
+    min-height: 0;
     height: auto;
     overflow: visible;
+    border-left: 1px solid #000;
+    border-right: 1px solid #000;
+    box-sizing: border-box;
 }
 
 .table {
     width: 100%;
     border-collapse: collapse;
+    table-layout: fixed;
+}
+
+.invoice-container .table thead th {
+    background-color: #f0f0f0;
+    font-weight: bold;
+    text-align: center;
+    color: #000;
+    border-bottom: 1px solid #000 !important;
+    padding: 4px 6px;
+    vertical-align: middle;
 }
 
 /* ================= ROWS ================= */
 .table-first-tr,
-.table-mid-tr,
-.table-last-tr {
+.table-mid-tr {
     border: none !important;
     line-height: 8px;
-}
-
-.table-last-tr {
-    line-height: normal;
-}
-
-.table-last-tr td {
-    height: auto;
-    min-height: 0;
-    padding: 0;
 }
 
 /* ================= COLUMNS ================= */
 
 /* FIRST COLUMN */
 .table-firstrow-firstcolumn,
-.table-midrow-firstcolumn,
-.table-lastrow-firstcolumn {
-    width: 130mm;
+.table-midrow-firstcolumn {
+    width: 58%;
     padding-left: 10px;
-
     border-top: none !important;
     border-bottom: none !important;
-    border-left: none !important;
-
-    /* Sirf divider */
-    border-right: 2px solid black !important;
+    border-left: 1px solid #000 !important;
+    border-right: 2px solid #000 !important;
 }
 
 /* SECOND COLUMN */
 .table-firstrow-secondcolumn,
-.table-midrow-secondcolumn,
-.table-lastrow-secondcolumn {
-    width: 30mm;
+.table-midrow-secondcolumn {
+    width: 18%;
+    min-width: 22mm;
     text-align: center;
     padding-right: 10px;
-
+    padding-left: 4px;
     border-top: none !important;
     border-bottom: none !important;
     border-left: none !important;
-
-    /* Sirf divider */
-    border-right: 2px solid black !important;
+    border-right: 2px solid #000 !important;
 }
 
 /* THIRD COLUMN */
 .table-firstrow-thirdcolumn,
-.table-midrow-thirdcolumn,
-.table-lastrow-thirdcolumn {
-    width: 44mm;
+.table-midrow-thirdcolumn {
+    width: 24%;
     text-align: center;
     padding-right: 10px;
+    border-top: none !important;
+    border-bottom: none !important;
+    border-left: none !important;
+    border-right: 1px solid #000 !important;
+}
 
-    border: none !important;
+/* ================= ATTACHMENTS ================= */
+.invoice-attachments {
+    margin-top: 12px;
+    text-align: center;
+    width: 100%;
+}
+
+.invoice-attachment {
+    margin-bottom: 16px;
+    page-break-inside: avoid;
+    break-inside: avoid;
+}
+
+.invoice-attachment + .invoice-attachment {
+    page-break-before: always;
+    break-before: page;
+}
+
+.invoice-attachment__label {
+    font-weight: bold;
+    margin-bottom: 6px;
+}
+
+.invoice-attachment--duty-slip .invoice-attachment__label {
+    display: none;
+}
+
+.invoice-attachment__image {
+    width: auto;
+    height: auto;
+    max-width: 100%;
+    display: inline-block;
+}
+
+.invoice-attachment__pdf {
+    width: 100%;
+    max-width: 100%;
+    height: 900px;
+    border: none;
+    display: block;
+    margin: 0 auto;
+}
+
+.invoice-attachment__print-slip {
+    height: auto;
+    min-height: 0;
+    overflow: hidden;
+}
+
+.print-actions-fixed {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    z-index: 1000;
+}
+
+@media print {
+    .invoice-attachment__image {
+        max-width: none;
+    }
+
+    .invoice-attachment__pdf {
+        height: auto;
+        min-height: 100vh;
+        page-break-inside: avoid;
+    }
+
+    .print-actions-fixed,
+    .no-print {
+        display: none !important;
+    }
 }

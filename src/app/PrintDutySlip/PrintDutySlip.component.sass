@@ -44,3 +44,61 @@
 	padding-left: 2px 
 td, th 
 	border: solid 1px #999 
+
+.print-container
+	width: 100%
+	max-width: none
+
+	mat-dialog-content
+		max-height: none
+		overflow: visible
+
+.duty-slip-sheet
+	width: 100%
+	max-width: 210mm
+	margin: 0 auto
+
+#printElem table
+	width: 100%
+
+.attachment-image,
+.signature-image
+	width: auto
+	height: auto
+	max-width: none
+	display: block
+	margin: 0 auto
+
+.map-image
+	width: auto
+	height: auto
+	max-width: 100%
+	border: 1px solid #ccc
+
+@media print
+	.print-container
+		width: 100%
+
+	.duty-slip-sheet
+		max-width: none
+		width: 100%
+
+	.attachment-image,
+	.signature-image,
+	.map-image
+		max-width: none
+		page-break-inside: avoid
+
+	#print
+		display: none
+
+.print-actions-fixed
+	position: fixed
+	bottom: 24px
+	right: 24px
+	z-index: 1000
+
+@media print
+	.print-actions-fixed,
+	.no-print
+		display: none !important
