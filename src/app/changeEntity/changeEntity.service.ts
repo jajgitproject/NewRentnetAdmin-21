@@ -58,4 +58,8 @@ export class ChangeEntityService {
     return this.httpClient.put<any>(`${this.API_URL}/UpdateEntity/${CustomerID}/${userID}`,advanceTable);
   }
 
+  GetInvoiceGenerated(dutySlipID: string): Observable<any> 
+  {
+    return this.httpClient.get<any>(this.API_URL+"/"+"GetInvoiceGenerated" + "/" + dutySlipID);
+  }
 }

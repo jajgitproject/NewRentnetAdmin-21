@@ -101,7 +101,7 @@
         width: 100% !important;
         max-width: 100% !important;
         height: auto !important;
-        min-height: unset !important;
+        min-height: auto !important;
         margin: 0 !important;
         padding: 3mm !important;
         border: 1px solid #000;
@@ -121,7 +121,7 @@
 
     /* remove extra spacing */
     .table-div {
-        min-height: unset !important;
+        min-height: auto !important;
         margin-bottom: 0 !important;
         padding-bottom: 0 !important;
     }
@@ -185,7 +185,7 @@
     //justify-content: flex-end;
     flex-direction: column;
     align-items: flex-end;
-    gap: 10px;
+    gap: 0px;
     padding-top: 5px;
 }
 
@@ -367,7 +367,7 @@
 /* ================= TEXT ================= */
 .text-heading {
     font-family: arial;
-    font-size: 15pt;
+    font-size: 12pt;
     font-weight: bold;
     color: #000000;
     text-decoration: none;
@@ -528,7 +528,7 @@ td {
 .table-mid-tr,
 .table-last-tr {
     border: none !important;
-    line-height: 10px;
+    line-height: 8px;
 }
 
 .table-last-tr {

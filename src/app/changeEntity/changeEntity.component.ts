@@ -33,6 +33,7 @@ import { PackageDropDown } from '../general/packageDropDown.model';
 import { PackageTypeDropDown } from '../packageType/packageTypeDropDown.model';
 import { MessageBoxFormDialogComponent } from './dialogs/form-dialog/form-dialog/form-dialog.component';
 import { ChangePassengerDetailsComponent } from '../changePassenger/dialogs/changePassengerDetails/changePassengerDetails.component';
+import { forkJoin } from 'rxjs';
 
 @Component({
   standalone: false,
@@ -568,80 +569,112 @@ export class ChangeEntityComponent implements OnInit {
         data => data.package === PackageName
       ); 
     }
- 
 
 
-    UpdateEntity() 
-    {
+UpdateEntity() {
+
+  if (!this.selectedEntity.length) {
+    Swal.fire({
+      title: 'Warning',
+      text: 'Please select at least one duty.',
+      icon: 'warning'
+    });
+    return;
+  }
+
+  const apiCalls = this.selectedEntity.map(row =>
+    this.invoiceHomeService.GetInvoiceGenerated(row.dutySlipID)
+  );
+
+  forkJoin(apiCalls).subscribe((responses: any[]) => {
+
+    // Collect duty slips where invoice generated
+    const generatedDutySlips = this.selectedEntity
+      .filter((row, index) => responses[index]?.result)
+      .map(row => row.dutySlipID);
+
+    // If any invoice generated found
+    if (generatedDutySlips.length > 0) {
+
       Swal.fire({
-        title: 'Are you sure?',
-        text: 'Do you really want to update entities of all the selected duties?',
+        title: 'Not Allowed',
+        html: `
+          Invoice already generated for Duty Slip(s): 
+          <b>${generatedDutySlips.join(', ')}</b>
+          <br><br>
+          Please deselect these duties and try again.
+        `,
         icon: 'warning',
-        showCancelButton: true,
-        confirmButtonText: 'Yes',
-        cancelButtonText: 'No'
-      }).then((result) => {
-        if (result.isConfirmed) 
-        {
-          const dialogRef = this.dialog.open(MessageBoxFormDialogComponent, {
-            width: '600px',
-            data: 
-            {         
-              advanceTable: this.selectedEntity,
-              userID : this._generalService.getUserID()    
-            }
-          });
-          dialogRef.afterClosed().subscribe((res: any) => {
-            if (res) {
-              this.loadData();
-            }
-          });
-        }
+        confirmButtonText: 'OK'
       });
+
+      return;
     }
 
+    // Existing process
+    Swal.fire({
+      title: 'Are you sure?',
+      text: 'Do you really want to update entities of all the selected duties?',
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonText: 'Yes',
+      cancelButtonText: 'No'
+    }).then((result) => {
 
-    //---------- Check Box ----------
-   checkAll(checkBoxValue: boolean) 
-   {
-    this.dataSource?.forEach((element: any) => {
-      if(checkBoxValue) 
-      {
-        this.selectAll = true;
-        element.checked = true;
-        this.selectedEntity.push(element);
-      } 
-      else 
-      {
-        this.selectAll = false;
-        element.checked = false;
-        const index = this.selectedEntity.findIndex(x => x.dutySlipID === element.dutySlipID);
-        this.selectedEntity.splice(index, 1);
+      if (result.isConfirmed) {
+
+        const dialogRef = this.dialog.open(
+          MessageBoxFormDialogComponent,
+          {
+            width: '600px',
+            data: {
+              advanceTable: this.selectedEntity,
+              userID: this._generalService.getUserID()
+            }
+          }
+        );
+
+        dialogRef.afterClosed().subscribe((res: any) => {
+          if (res) {
+            this.loadData();
+          }
+        });
       }
     });
+
+  });
+}
+
+onCheckBox(isChecked: boolean, row: any) {
+
+  row.checked = isChecked;
+
+  if (isChecked) {
+    this.selectedEntity.push(row);
+  } else {
+    this.selectedEntity = this.selectedEntity.filter(
+      x => x.dutySlipID !== row.dutySlipID
+    );
   }
 
-  onCheckBox(checkBoxValue: boolean, data: any) 
-  {
-    if(checkBoxValue && this.dataSource.includes(data))
-    {
-      //this.selectedEntity.push(data);
-      const exists = this.selectedEntity.some(x => x.dutySlipID === data.dutySlipID);
-      if (!exists) 
-      {
-        this.selectedEntity.push(data);
-      }
-      data.checked = true;
-    } 
-    else if(!checkBoxValue && this.dataSource.includes(data)) 
-    {
-      this.selectAll = false;
-      data.checked = false;
-      const index = this.selectedEntity.findIndex(x => x.dutySlipID === data.dutySlipID);
-      this.selectedEntity.splice(index, 1);
+  console.log('selectedEntity', this.selectedEntity);
+}
+
+checkAll(isChecked: boolean) {
+
+  this.selectAll = isChecked;
+  this.selectedEntity = [];
+
+  this.dataSource.forEach(row => {
+    row.checked = isChecked;
+
+    if (isChecked) {
+      this.selectedEntity.push(row);
     }
-  }
+  });
 
+  console.log('selectedEntity', this.selectedEntity);
+}
   isIndeterminate() 
   {
     const checkedCount = this.dataSource.filter(r => r.checked).length;

@@ -80,7 +80,7 @@
           </strong>
           <br />
           <strong>Billing Address:</strong>
-          {{dataSource?.invoiceCustomerModel?.billingAddress}}<br>
+          {{dataSource?.invoiceCustomerModel?.billingAddress}}
           {{dataSource?.invoiceCustomerModel?.billingCityName}},
           {{dataSource?.invoiceCustomerModel?.billingStateName}} - {{dataSource?.invoiceCustomerModel?.billingPin}}
           <br>
@@ -98,8 +98,8 @@
           <b>DS No : </b> {{dataSource?.dutySlipID}}<br>
           <b>Booking No : </b> {{dataSource?.invoiceReservationModel.reservationID}}<br>
           <b>VEH : </b>{{dataSource?.vehicle}}<br>
-          <b>Trip Date : </b>{{dataSource?.invoiceDutyModel?.dutyStartDateTime | date: 'dd/MM/yyyy'}}<br>
-          <b>to : </b>{{dataSource?.invoiceDutyModel?.dutyEndDateTime | date: 'dd/MM/yyyy'}}
+          <b>Trip Date : </b>{{dataSource?.invoiceDutyModel?.dutyStartDateTime | date: 'dd/MM/yyyy'}} - <b>to : </b>{{dataSource?.invoiceDutyModel?.dutyEndDateTime | date: 'dd/MM/yyyy'}}
+          <!-- <b>to : </b>{{dataSource?.invoiceDutyModel?.dutyEndDateTime | date: 'dd/MM/yyyy'}} -->
         </div>
       </div>
 
@@ -359,11 +359,11 @@
               <td class="table-midrow-secondcolumn"></td>
               <td class="table-midrow-thirdcolumn"></td>
             </tr>           
-            <tr class="table-last-tr">
+            <!-- <tr class="table-last-tr">
               <td class="table-lastrow-firstcolumn">&nbsp;</td>
               <td class="table-lastrow-secondcolumn">&nbsp;</td>
               <td class="table-lastrow-thirdcolumn">&nbsp;</td>
-            </tr>
+            </tr> -->
              
 
           </tbody>
