@@ -2,13 +2,9 @@
 import { Component, OnInit } from '@angular/core';
 import { HttpErrorResponse } from '@angular/common/http';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import { FormBuilder, FormGroup, Validators, AbstractControl, ValidationErrors, ValidatorFn } from '@angular/forms';
+import { FormBuilder, FormGroup } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
-import { map, startWith } from 'rxjs/operators';
-import { Observable } from 'rxjs';
 import moment from 'moment';
-import { GeneralService } from '../general/general.service';
-import { CustomerDropDown } from '../supplierCustomerFixedForAllPercentage/customerDropDown.model';
 import { AttachInvoicesToSummaryService } from './attachInvoicesToSummary.service';
 import { AttachInvoicesToSummary } from './attachInvoicesToSummary.model';
 import { MAT_DATE_LOCALE } from '@angular/material/core';
@@ -31,10 +27,9 @@ export class AttachInvoicesToSummaryComponent implements OnInit {
   ];
 
   summaryID: number = 0;
+  customerID: number = 0;
   dataSource: AttachInvoicesToSummary[] | null = null;
   searchForm: FormGroup;
-  public CustomerList?: CustomerDropDown[] = [];
-  filteredCustomerOptions: Observable<CustomerDropDown[]>;
   selectedInvoices: AttachInvoicesToSummary[] = [];
   selectAll = false;
   pageNumber = 0;
@@ -44,13 +39,10 @@ export class AttachInvoicesToSummaryComponent implements OnInit {
   constructor(
     private fb: FormBuilder,
     public attachService: AttachInvoicesToSummaryService,
-    public _generalService: GeneralService,
     private snackBar: MatSnackBar,
     public route: ActivatedRoute
   ) {
     this.searchForm = this.fb.group({
-      customerID: [null, Validators.required],
-      customerName: ['', Validators.required],
       invoiceDateFrom: [null],
       invoiceDateTo: [null],
       invoiceNumberWithPrefix: ['']
@@ -60,58 +52,8 @@ export class AttachInvoicesToSummaryComponent implements OnInit {
   ngOnInit() {
     this.route.queryParams.subscribe((params) => {
       this.summaryID = Number(params.SummaryID || params.summaryID || 0);
+      this.customerID = Number(params.CustomerID || params.customerID || 0);
     });
-
-    this.filteredCustomerOptions = this.searchForm.controls['customerName'].valueChanges.pipe(
-      startWith(''),
-      map((value) => this._filterCustomers(value || ''))
-    );
-  }
-
-  customerValidator(customerList: any[]): ValidatorFn {
-    return (control: AbstractControl): ValidationErrors | null => {
-      if (!control.value) {
-        return { customerTypeInvalid: true };
-      }
-      const value = control.value.toLowerCase();
-      const match = customerList.some((customer) => customer.customerName.toLowerCase() === value);
-      return match ? null : { customerTypeInvalid: true };
-    };
-  }
-
-  InitCustomer() {
-    const prefix = this.searchForm.get('customerName').value;
-    if (!prefix || prefix.length < 3) {
-      this.CustomerList = [];
-      return;
-    }
-    this._generalService.getCustomerForInvoice(prefix).subscribe((data) => {
-      this.CustomerList = data || [];
-      this.searchForm.controls['customerName'].setValidators([
-        Validators.required,
-        this.customerValidator(this.CustomerList)
-      ]);
-      this.searchForm.controls['customerName'].updateValueAndValidity();
-      this.filteredCustomerOptions = this.searchForm.controls['customerName'].valueChanges.pipe(
-        startWith(prefix || ''),
-        map((value) => this._filterCustomers(value || ''))
-      );
-    });
-  }
-
-  private _filterCustomers(value: string): any {
-    const filterValue = value.toLowerCase();
-    if (filterValue.length < 3) {
-      return [];
-    }
-    return (this.CustomerList || []).filter((data) => data.customerName.toLowerCase().includes(filterValue));
-  }
-
-  onCustomerSelected(selectedCustomer: string) {
-    const selectedValue = (this.CustomerList || []).find((data) => data.customerName === selectedCustomer);
-    if (selectedValue) {
-      this.searchForm.patchValue({ customerID: selectedValue.customerID });
-    }
   }
 
   search() {
@@ -119,9 +61,8 @@ export class AttachInvoicesToSummaryComponent implements OnInit {
       this.showNotification('snackbar-danger', 'Summary ID is missing in query string.', 'bottom', 'center');
       return;
     }
-    if (this.searchForm.invalid) {
-      this.searchForm.markAllAsTouched();
-      this.showNotification('snackbar-danger', 'Please select a valid customer.', 'bottom', 'center');
+    if (!this.customerID) {
+      this.showNotification('snackbar-danger', 'Customer ID is missing in query string.', 'bottom', 'center');
       return;
     }
 
@@ -133,6 +74,10 @@ export class AttachInvoicesToSummaryComponent implements OnInit {
   }
 
   loadData() {
+    if (!this.customerID) {
+      return;
+    }
+
     let invoiceDateFrom = '';
     let invoiceDateTo = '';
     if (this.searchForm.get('invoiceDateFrom').value) {
@@ -145,13 +90,7 @@ export class AttachInvoicesToSummaryComponent implements OnInit {
     const invoiceNo = (this.searchForm.get('invoiceNumberWithPrefix').value || '').trim();
 
     this.attachService
-      .searchInvoices(
-        this.searchForm.get('customerID').value,
-        invoiceDateFrom,
-        invoiceDateTo,
-        invoiceNo,
-        this.pageNumber
-      )
+      .searchInvoices(this.customerID, invoiceDateFrom, invoiceDateTo, invoiceNo, this.pageNumber)
       .subscribe(
         (data) => {
           this.isLoading = false;
@@ -170,8 +109,11 @@ export class AttachInvoicesToSummaryComponent implements OnInit {
   }
 
   reset() {
-    this.searchForm.reset();
-    this.CustomerList = [];
+    this.searchForm.reset({
+      invoiceDateFrom: null,
+      invoiceDateTo: null,
+      invoiceNumberWithPrefix: ''
+    });
     this.dataSource = null;
     this.selectedInvoices = [];
     this.selectAll = false;

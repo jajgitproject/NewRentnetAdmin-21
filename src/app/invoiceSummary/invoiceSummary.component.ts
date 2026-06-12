@@ -164,7 +164,10 @@ export class InvoiceSummaryComponent implements OnInit {
     const baseUrl = this._generalService.FormURL;
     const url = this.router.serializeUrl(
       this.router.createUrlTree(['/attachInvoicesToSummary'], {
-        queryParams: { SummaryID: item.invoiceSummaryID }
+        queryParams: {
+          SummaryID: item.invoiceSummaryID,
+          CustomerID: item.customerID
+        }
       })
     );
     window.open(baseUrl + url, '_blank');
