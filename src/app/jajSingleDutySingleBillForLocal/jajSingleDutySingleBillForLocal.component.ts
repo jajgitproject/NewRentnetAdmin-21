@@ -115,7 +115,8 @@ export class JajSingleDutySingleBillForLocalComponent implements OnInit, OnDestr
  }
  printWithSelectPdf() {
   const element = this.printableArea?.nativeElement as HTMLElement;
-  const fileName = `Invoice_${this.invoiceID || 'print'}`;
+  const invoiceNumber = this.dataSource?.invoiceModel?.invoiceNumberWithPrefix?.trim();
+  const fileName = invoiceNumber || `Invoice_${this.invoiceID || 'print'}`;
   const iframeImageFallback = this.dataSource?.dutySlipImage || undefined;
   this.pdfPrintService.printElementAsPdf(element, fileName, {
     iframeImageFallback,

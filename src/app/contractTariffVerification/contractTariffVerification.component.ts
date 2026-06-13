@@ -118,8 +118,8 @@ export class ContractTariffVerificationComponent implements OnInit {
 
   ngOnInit() {
     this.role = (localStorage.getItem('role') || '').trim();
-    this.isAuditor = this.role === 'Contract Auditor';
-    this.isVerifier = this.role === 'Contract Verifier';
+    this.isAuditor = this.generalService.canActAsContractTariffAuditor();
+    this.isVerifier = this.generalService.canActAsContractTariffVerifier();
     this.loadContracts('');
     this.filteredContracts = this.contractControl.valueChanges.pipe(
       startWith(''),
@@ -471,6 +471,8 @@ export class ContractTariffVerificationComponent implements OnInit {
       customerContractID: this.selectedContractId,
       packageTypeID: this.selectedPackageTypeId,
       roleName: this.role,
+      roleTrack: this.generalService.getContractTariffRoleTrack(),
+      roleID: this.generalService.getRoleID(),
       remarks: remarks || '',
       userID: this.generalService.getUserID(),
       items: uniqueRows.map((r) => ({
@@ -555,6 +557,8 @@ export class ContractTariffVerificationComponent implements OnInit {
         customerContractID: this.selectedContractId,
         packageTypeID: this.selectedPackageTypeId,
         roleName: this.role,
+        roleTrack: this.generalService.getContractTariffRoleTrack(),
+        roleID: this.generalService.getRoleID(),
         isAuditor: this.isAuditor,
         isVerifier: this.isVerifier,
       },

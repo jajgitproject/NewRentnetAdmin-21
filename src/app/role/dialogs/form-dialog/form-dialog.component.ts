@@ -72,7 +72,9 @@ export class FormDialogComponent
       canThisRoleCreateBillOnClosingScreen: [this.advanceTable.canThisRoleCreateBillOnClosingScreen, Validators.required],
       canThisRoleViewBillOnClosingScreen: [this.advanceTable.canThisRoleViewBillOnClosingScreen, Validators.required],
       canThisRoleDoGoodForBillingOnClosingScreen: [this.advanceTable.canThisRoleDoGoodForBillingOnClosingScreen, Validators.required],
-      canThisRoleViewDummyInvoice: [this.advanceTable.canThisRoleViewDummyInvoice, Validators.required]
+      canThisRoleViewDummyInvoice: [this.advanceTable.canThisRoleViewDummyInvoice, Validators.required],
+      canActAsContractTariffAuditor: [this.advanceTable.canActAsContractTariffAuditor, Validators.required],
+      canActAsContractTariffVerifier: [this.advanceTable.canActAsContractTariffVerifier, Validators.required]
     });
   }
   submit() 

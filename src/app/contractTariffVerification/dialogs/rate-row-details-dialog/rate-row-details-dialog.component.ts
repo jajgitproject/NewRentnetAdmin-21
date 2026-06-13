@@ -151,6 +151,8 @@ export class RateRowDetailsDialogComponent implements OnInit {
       customerContractID: this.data.customerContractID,
       packageTypeID: this.data.packageTypeID,
       roleName: this.data.roleName,
+      roleTrack: this.data.isAuditor ? 'Auditor' : this.data.isVerifier ? 'Verifier' : null,
+      roleID: this.generalService.getRoleID(),
       remarks: this.remarks,
       userID: this.generalService.getUserID(),
       items: [
