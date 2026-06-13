@@ -77,6 +77,9 @@ export class PageComponent implements OnInit {
   refresh() 
   {
     this.page.setValue('');
+    this.searchTerm = '';
+    this.selectedFilter = 'search';
+    this.SearchPage = '';
     this.SearchActivationStatus = true;
     this.PageNumber=0;
     this.SearchParentMenuID=-1;
@@ -135,11 +138,20 @@ export class PageComponent implements OnInit {
  
   public loadData() 
   {
-    if(this.selectedFilter==='Parent')
-    {
-      this.page.setValue(this.searchTerm)
+    let pageSearch = '';
+
+    if (this.selectedFilter === 'Parent') {
+      this.page.setValue(this.searchTerm);
+      pageSearch = this.searchTerm;
+    } else if (this.selectedFilter === 'Page' || this.selectedFilter === 'search') {
+      pageSearch = this.searchTerm;
+    } else if (this.page.value) {
+      pageSearch = this.page.value;
     }
-      this.pageService.getTableData(this.page.value, this.SearchParentMenuID, this.SearchActivationStatus, this.PageNumber).subscribe
+
+    this.SearchPage = pageSearch;
+
+    this.pageService.getTableData(pageSearch, this.SearchParentMenuID, this.SearchActivationStatus, this.PageNumber).subscribe
     (
       data =>   
       {

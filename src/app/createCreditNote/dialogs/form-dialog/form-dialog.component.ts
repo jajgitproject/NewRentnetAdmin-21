@@ -82,22 +82,20 @@ export class FormDialogComponent
   {
         // Set the defaults
         this.action = data.action;
+        this.advanceTable = data.advanceTable || {};
         if (this.action === 'edit') 
         {
           this.dialogTitle ='Create/Edit Credit Note';       
-          this.advanceTable = data.advanceTable;
-          this.IGSTPercentage = data.advanceTable.igstPercentage || 0;
-          this.CGSTPercentage = data.advanceTable.cgstPercentage || 0;
-          this.SGSTPercentage = data.advanceTable.sgstPercentage || 0;
+          this.IGSTPercentage = this.advanceTable.igstPercentage || 0;
+          this.CGSTPercentage = this.advanceTable.cgstPercentage || 0;
+          this.SGSTPercentage = this.advanceTable.sgstPercentage || 0;
         } else 
         {
           this.dialogTitle = 'Create/Edit Credit Note';
-          this.advanceTable = data.advanceTable;
-          this.IGSTPercentage = data.advanceTable.igstPercentage || 0;
-          this.CGSTPercentage = data.advanceTable.cgstPercentage || 0;
-          this.SGSTPercentage = data.advanceTable.sgstPercentage || 0;
-          //this.advanceTable = new CreateCreditNote({});
-          this.advanceTable.requiresReBilling=true;
+          this.IGSTPercentage = this.advanceTable.igstPercentage || 0;
+          this.CGSTPercentage = this.advanceTable.cgstPercentage || 0;
+          this.SGSTPercentage = this.advanceTable.sgstPercentage || 0;
+          this.advanceTable.requiresReBilling = this.advanceTable.requiresReBilling ?? true;
         }
        this.advanceTableForm = this.createContactForm();
      
@@ -170,7 +168,7 @@ export class FormDialogComponent
       sgstAmount :[this.advanceTable.sgstAmount],
       sgstPercentage: [this.advanceTable.sgstPercentage],
       creditNoteReason:[this.advanceTable.creditNoteReason],
-      requiresReBilling: [this.advanceTable.requiresReBilling],
+      requiresReBilling: [this.advanceTable.requiresReBilling ?? false],
        year: [this.advanceTable.year],
        baseAmount: [this.advanceTable.baseAmount],
       monthName:[this.advanceTable.monthName],

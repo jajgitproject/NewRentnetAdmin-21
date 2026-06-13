@@ -62,8 +62,8 @@ import { CreateCreditNoteComponent } from './createCreditNote.component';
     MyUploadModule,
     //TwoDigitDecimaNumberDirective
   ],
+  exports: [advanceTableForm],
   providers: [CreateCreditNoteService]
 })
 export class CreateCreditNoteModule {}
-
 

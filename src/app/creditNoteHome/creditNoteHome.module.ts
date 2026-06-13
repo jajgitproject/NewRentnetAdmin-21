@@ -27,10 +27,10 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { CreditNoteHomeRoutingModule } from './creditNoteHome-routing.module';
 import { CreditNoteHomeComponent } from './creditNoteHome.component';
 import { CreditNoteHomeService } from './creditNoteHome.service';
-import { CreateCreditNoteService } from '../createCreditNote/createCreditNote.service';
 import { CreditNoteDutyAdjustmentService } from '../creditNoteDutyAdjustment/creditNoteDutyAdjustment.service';
 import { MatExpansionModule } from '@angular/material/expansion';
 import { FormDialogComponent } from './dialogs/form-dialog/form-dialog.component';
+import { CreateCreditNoteModule } from '../createCreditNote/createCreditNote.module';
 
 
 
@@ -66,10 +66,11 @@ import { FormDialogComponent } from './dialogs/form-dialog/form-dialog.component
     MatProgressSpinnerModule,
     MyUploadModule,
     CurrentDesginationModule,
-    MatExpansionModule 
+    MatExpansionModule,
+    CreateCreditNoteModule
   ],
   
-  providers: [CreditNoteHomeService,CreateCreditNoteService,CreditNoteDutyAdjustmentService]
+  providers: [CreditNoteHomeService, CreditNoteDutyAdjustmentService]
 })
 export class CreditNoteHomeModule {}
 

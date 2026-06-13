@@ -353,11 +353,13 @@ export class CreditNoteHomeComponent implements OnInit {
     if(row.approvalStatus!='Approved')
     {
        const dialogRef = this.dialog.open(CreateNote, {
+        width: '900px',
+        maxHeight: '90vh',
+        disableClose: false,
         data: {
           advanceTable: row,
           action: 'edit'
-          
-        }        
+        }
       });
     dialogRef.afterClosed().subscribe((res: any) => {
         if (res === true) 
