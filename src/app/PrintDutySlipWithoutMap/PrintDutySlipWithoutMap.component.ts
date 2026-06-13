@@ -135,12 +135,28 @@ export class PrintDutySlipWithoutMapComponent {
       this.notifyEmbedParentHeight();
     }
 
+    onAttachmentImageError(event: Event): void {
+      const img = event.target as HTMLImageElement;
+      img.style.display = 'none';
+      const label = img.previousElementSibling as HTMLElement | null;
+      if (label?.classList.contains('auto-style3')) {
+        label.style.display = 'none';
+      }
+      this.dataSource.tollParkingsImages = (this.dataSource?.tollParkingsImages ?? [])
+        .filter((item) => this._generalService.isPrintableReceiptImage(item?.tollParkingImage));
+      this.dataSource.interStateTaxImages = (this.dataSource?.interStateTaxImages ?? [])
+        .filter((item) => this._generalService.isPrintableReceiptImage(item?.interStateTaxImage));
+      this.notifyEmbedParentHeight();
+    }
+
     hasTollParkingAttachments(): boolean {
-      return (this.dataSource?.tollParkingsImages?.length ?? 0) > 0;
+      const total = Number(this.dataSource?.totalTollParkingAmount ?? 0);
+      return total > 0 && (this.dataSource?.tollParkingsImages?.length ?? 0) > 0;
     }
 
     hasInterStateTaxAttachments(): boolean {
-      return (this.dataSource?.interStateTaxImages?.length ?? 0) > 0;
+      const total = Number(this.dataSource?.totalInterStateAmount ?? 0);
+      return total > 0 && (this.dataSource?.interStateTaxImages?.length ?? 0) > 0;
     }
 
     private normalizeAttachmentImages(items: any[] | null | undefined, imageKey: string): any[] {
@@ -149,12 +165,11 @@ export class PrintDutySlipWithoutMapComponent {
           const resolved = this._generalService.resolveStaticImageUrl(item?.[imageKey]);
           return { ...item, [imageKey]: resolved };
         })
-        .filter((item) => this.isValidAttachmentImage(item?.[imageKey]));
+        .filter((item) => this._generalService.isPrintableReceiptImage(item?.[imageKey]));
     }
 
     private isValidAttachmentImage(url: string | null | undefined): boolean {
-      const value = (url ?? '').trim();
-      return value.length > 0 && value.toLowerCase() !== 'null' && value.toLowerCase() !== 'undefined';
+      return this._generalService.isPrintableReceiptImage(url);
     }
   
     getTime() 

@@ -226,6 +226,46 @@ export class GeneralService {
     return apiBase + 'StaticFiles/Images/' + value.replace(/^\/+/, '');
   }
 
+  /** Rejects empty paths and folder-only StaticFiles/Images URLs with no filename. */
+  isValidStaticImageUrl(path: string | null | undefined): boolean {
+    const value = (path ?? '').trim();
+    if (!value || /^(null|undefined)$/i.test(value)) {
+      return false;
+    }
+
+    const withoutQuery = value.split('?')[0].replace(/\/+$/, '');
+    if (/\/staticfiles\/images$/i.test(withoutQuery)) {
+      return false;
+    }
+
+    const fileName = withoutQuery.split('/').pop() ?? '';
+    return fileName.length > 0 && fileName.includes('.');
+  }
+
+  /** Skip informational placeholder images stored instead of real toll/interstate scans. */
+  isPlaceholderReceiptImage(path: string | null | undefined): boolean {
+    const value = (path ?? '').toLowerCase();
+    const markers = [
+      'alreadyincluded',
+      'includedwiththeinvoice',
+      'includedwith',
+      'invoicecopy',
+      'receiptsarealready',
+      'toll/parking',
+      'interstatereceipts',
+      'placeholder',
+      'noimage',
+      'no-image',
+      'defaulttoll',
+      'default_ist'
+    ];
+    return markers.some((marker) => value.includes(marker));
+  }
+
+  isPrintableReceiptImage(path: string | null | undefined): boolean {
+    return this.isValidStaticImageUrl(path) && !this.isPlaceholderReceiptImage(path);
+  }
+
   getTodaysDate(): Date {
     return new Date();
   }

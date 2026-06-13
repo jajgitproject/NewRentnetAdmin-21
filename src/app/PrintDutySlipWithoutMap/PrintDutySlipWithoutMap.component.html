@@ -408,7 +408,7 @@
               <td align="center">
                 <p class="auto-style3">Image</p>
                 <img [src]="img.tollParkingImage" class="attachment-image" alt="Toll / Parking"
-                     (load)="onEmbedImageLoad()" /><br>
+                     (load)="onEmbedImageLoad()" (error)="onAttachmentImageError($event)" /><br>
               </td>
             </tr>
           </table>
@@ -419,7 +419,7 @@
               <td align="center">
                 <p class="auto-style3">Image</p>
                 <img [src]="img.interStateTaxImage" class="attachment-image" alt="Interstate Tax"
-                     (load)="onEmbedImageLoad()" /><br>
+                     (load)="onEmbedImageLoad()" (error)="onAttachmentImageError($event)" /><br>
               </td>
             </tr>
           </table>
