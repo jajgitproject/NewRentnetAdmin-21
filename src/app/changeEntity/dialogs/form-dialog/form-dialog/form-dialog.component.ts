@@ -15,11 +15,11 @@ import Swal from 'sweetalert2';
 
 @Component({
   standalone: false,
-    selector: 'app-form-dialog',
-    templateUrl: './form-dialog.component.html',
-    styleUrls: ['./form-dialog.component.sass'],
-    providers: [{ provide: MAT_DATE_LOCALE, useValue: 'en-GB' }]
-  })
+  selector: 'app-form-dialog',
+  templateUrl: './form-dialog.component.html',
+  styleUrls: ['./form-dialog.component.sass'],
+  providers: [{ provide: MAT_DATE_LOCALE, useValue: 'en-GB' }]
+})
 
 export class MessageBoxFormDialogComponent {
   showError: string;
@@ -72,15 +72,14 @@ export class MessageBoxFormDialogComponent {
   }
 
   public Put(): void {
-    this.saveDisabled = false;
+     if (!this.saveDisabled) return;
+     this.saveDisabled = false;
     this.advanceTableService.update(this.advanceTable, this.customerID).subscribe(
       {
         next: (response) => {
           debugger
           if (!response.isSuccess) {
-            const errors = response.Errors || ['Operation Failed'];
-
-
+            const errors = [...new Set(response.Errors || ['Operation Failed'])];
             Swal.fire({
               title: 'Validation Errors',
               icon: 'error',
@@ -89,24 +88,33 @@ export class MessageBoxFormDialogComponent {
              </div></b>`,
               confirmButtonText: 'OK',
               width: '800px'
-            })
-
-
-            this.saveDisabled = true;
+            }).then(() => {
+              // OK click ke baad spinner stop
+              this.saveDisabled = true;
+            });
+    
             return;
           }
 
           // ✅ SUCCESS CASE
           if (response.successMessages?.length) {
-            const formattedMessages = response.successMessages.map((msg: string) => {
-            const parts = msg.replace('Success:', '').trim().split(' ');
-            const reservationNo = parts[0];
-            const dutySlipNo = parts[1];
-            return `ReservationNo: ${reservationNo} , DutySlipNo: ${dutySlipNo}`;
-          });
+            // const formattedMessages = response.successMessages.map((msg: string) => {
+            // const parts = msg.replace('Success:', '').trim().split(' ');
+            // const reservationNo = parts[0];
+            // const dutySlipNo = parts[1];
+            // return `ReservationNo: ${reservationNo} , DutySlipNo: ${dutySlipNo}`;
+
+            const formattedMessages = [...new Set(
+              response.successMessages.map((msg: string) => {
+                const parts = msg.replace('Success:', '').trim().split(' ');
+                const reservationNo = parts[0];
+                const dutySlipNo = parts[1];
+                return `ReservationNo: ${reservationNo} , DutySlipNo: ${dutySlipNo}`;
+              })
+            )];
 
             Swal.fire({
-              icon: 'success',
+               icon: 'success',
               title: 'Entity updated successfully!',
               html: `<div style="text-align:left;">
               ${formattedMessages.map((m: string) => `• ${m}`).join('<br>')}

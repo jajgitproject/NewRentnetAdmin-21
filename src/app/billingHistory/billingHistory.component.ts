@@ -7,6 +7,12 @@ import { HttpErrorResponse } from '@angular/common/http';
 import { BillingHistoryModel, NewBillingHistoryModel } from './billingHistory.model';
 import { BillingHistoryService } from './billingHistory.service';
 import { PageEvent } from '@angular/material/paginator';
+import {
+  Component,
+  Inject,
+  ChangeDetectorRef,
+  AfterViewInit
+} from '@angular/core';
 @Component({
   standalone: false,
   selector: 'app-billingHistory',
@@ -14,58 +20,67 @@ import { PageEvent } from '@angular/material/paginator';
   styleUrls: ['./billingHistory.component.sass'],
   providers: [{ provide: MAT_DATE_LOCALE, useValue: 'en-GB' }]
 })
-export class BillingHistoryComponent {
-  dataSource: BillingHistoryModel[];
-   DutySlipQualityCheckDetails: any;
-  qcDetails:any;
-  dialogTitle: string;
-  ReservationID: any;
-  DutySlipID: any;
-  totalData = 0;
+export class BillingHistoryComponent
+  implements AfterViewInit {
+
+  dataSource: BillingHistoryModel[] = [];
+  totalRecord = 0;
   recordsPerPage = 5;
-  isLoading = true;
-  totalRecord: number;
-  currentPage = 1;
-  PageNumber: number = 0;
+  isLoading = false;
+  PageNumber = 0;
+  DutySlipID: any;
 
   constructor(
     public dialogRef: MatDialogRef<BillingHistoryComponent>,
-    @Inject(MAT_DIALOG_DATA)
-    public data: any,
+    @Inject(MAT_DIALOG_DATA) public data: any,
     public _generalService: GeneralService,
     public billingHistoryService: BillingHistoryService,
+    private cdr: ChangeDetectorRef
   ) {
     this.DutySlipID = data.dutySlipID;
   }
 
-  ngOnInit() 
-  {
+  ngAfterViewInit() {
     this.loadData();
   }
 
-  public loadData() 
-   {
-    
-      this.billingHistoryService.GetBillingHistoryData(this.DutySlipID, this.PageNumber).subscribe
-    (
-      (data : NewBillingHistoryModel) =>   
-      {
-        this.dataSource = data.billingHistoryDetails;
-        this.totalRecord = data.totalRecords;
-      },
-      (error: HttpErrorResponse) => { this.dataSource = null;}
-    );
+  loadData() {
+    this.isLoading = true;
+
+    this.billingHistoryService
+      .GetBillingHistoryData(
+        this.DutySlipID,
+        this.PageNumber
+      )
+      .subscribe({
+        next: (response: NewBillingHistoryModel) => {
+
+          this.dataSource =
+            response?.billingHistoryDetails || [];
+
+          this.totalRecord =
+            response?.totalRecords || 0;
+
+          this.isLoading = false;
+
+          this.cdr.detectChanges();
+        },
+        error: () => {
+          this.dataSource = [];
+          this.totalRecord = 0;
+          this.isLoading = false;
+
+          this.cdr.detectChanges();
+        }
+      });
   }
 
   onChangedPage(pageData: PageEvent) {
-    
-      this.isLoading = true;
-      this.PageNumber = pageData.pageIndex;
-      this.loadData();
-    }
+    this.PageNumber = pageData.pageIndex;
+    this.loadData();
+  }
 
-  onNoClick(): void 
-  {
+  onNoClick() {
     this.dialogRef.close();
   }
 }
