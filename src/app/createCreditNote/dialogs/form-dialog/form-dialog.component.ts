@@ -95,7 +95,6 @@ export class FormDialogComponent
           this.IGSTPercentage = this.advanceTable.igstPercentage || 0;
           this.CGSTPercentage = this.advanceTable.cgstPercentage || 0;
           this.SGSTPercentage = this.advanceTable.sgstPercentage || 0;
-          this.advanceTable.requiresReBilling = this.advanceTable.requiresReBilling ?? true;
         }
        this.advanceTableForm = this.createContactForm();
      
@@ -168,7 +167,7 @@ export class FormDialogComponent
       sgstAmount :[this.advanceTable.sgstAmount],
       sgstPercentage: [this.advanceTable.sgstPercentage],
       creditNoteReason:[this.advanceTable.creditNoteReason],
-      requiresReBilling: [this.advanceTable.requiresReBilling ?? false],
+      requiresReBilling: [this.advanceTable.requiresReBilling || ''],
        year: [this.advanceTable.year],
        baseAmount: [this.advanceTable.baseAmount],
       monthName:[this.advanceTable.monthName],

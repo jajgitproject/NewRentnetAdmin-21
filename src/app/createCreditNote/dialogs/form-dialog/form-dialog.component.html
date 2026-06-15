@@ -104,10 +104,11 @@
                     <mat-form-field class="example-full-width" appearance="outline"  floatLabel="always">
                         <mat-label>Requires Re-Billing</mat-label>
                         <mat-select formControlName="requiresReBilling" required>
+                            <mat-option value="">--Select--</mat-option>
                             <mat-option [value]=true>Yes</mat-option>
                             <mat-option [value]=false>No</mat-option>
                         </mat-select>
-                          <mat-error *ngIf="advanceTableForm.get('requiresReBilling').hasError('required')">
+                          <mat-error *ngIf="advanceTableForm.get('requiresReBilling')?.hasError('required')">
                             Requires Re-Billing is required
                         </mat-error>
                     </mat-form-field>

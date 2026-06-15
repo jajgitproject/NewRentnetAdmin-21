@@ -569,6 +569,11 @@ decrypt(textToDecrypt: string): string{
     return this.http.get<CustomerPersonDropDown[]>(this.BaseURL + "controlPanelDropDown/GetPassengerForDropDown" + '/' + Prefix);
   }
 
+  GetKAMDropDownForControlPanel(Prefix: string): Observable<EmployeeDropDown[]> 
+  {
+    return this.http.get<EmployeeDropDown[]>(this.BaseURL + 'controlPanelDropDown/GetKAMForDropDown' + '/' + Prefix);
+  }
+
 
 
 

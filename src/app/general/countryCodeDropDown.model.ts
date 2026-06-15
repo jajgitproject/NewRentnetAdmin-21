@@ -5,6 +5,7 @@ export class CountryCodeDropDown {
    countryISDCode: string;
    countryISOCode:string;
    icon:string;
+   geoPointName:string;
 
   constructor(countryCodeDropDown) {
     {
@@ -12,6 +13,7 @@ export class CountryCodeDropDown {
        this.countryISDCode = countryCodeDropDown.countryISDCode || '';
        this.countryISOCode = countryCodeDropDown.countryISOCode || '';
        this.icon = countryCodeDropDown.icon || '';
+       this.geoPointName = countryCodeDropDown.icon || '';
     }
   }
   
