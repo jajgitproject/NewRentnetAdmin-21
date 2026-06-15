@@ -1566,7 +1566,7 @@ export class DutySlipForBillingComponent implements OnInit, AfterViewInit {
     if (!this.disputeAdvanceTable || this.disputeAdvanceTable.length === 0) {
       // No disputes, allow verify duty
       this.setVerifyDuty(true, "Checked");
-       this.CalculateBillForVerifyDuty();
+      this.CalculateBillForVerifyDuty();
     } else {
       // Disputes exist: all approvalStatus must be true
       const allApproved = this.disputeAdvanceTable.every(
@@ -1575,10 +1575,7 @@ export class DutySlipForBillingComponent implements OnInit, AfterViewInit {
 
       if (allApproved) {
         this.setVerifyDuty(true, "Checked");
-         this.CalculateBillForVerifyDuty();
-        if (isChecked !== null) {
-    this.SaveDataInBillingHistory();
-  }
+        this.CalculateBillForVerifyDuty();
       }
        else {
         // Show alert and revert checkbox
@@ -2127,20 +2124,21 @@ onChange() {
       queryParams: { dutySlipID: this.DutySlipID }
     });
   }
+
   //---------Calculate Bill For VerifyDuty------------------------
   public CalculateBillForVerifyDuty()
   {
     this.clossingOneService.calculateBillWithSummary(this.DutySlipID).subscribe(
-      response => 
+      response =>
       {
         this.Message = response.message ?? '';
         this.summaryOfDutyData = response.summary;
         this.dutyStatusChanged.emit({
-        verifyDuty: this.advanceTableForm.value.verifyDuty,
-        goodForBilling: this.advanceTableForm.value.goodForBilling,
-        message: this.Message
-      });
-        
+          verifyDuty: this.advanceTableForm.value.verifyDuty,
+          goodForBilling: this.advanceTableForm.value.goodForBilling,
+          message: this.Message
+        });
+
         this.showNotification(
           'snackbar-success',
           'Duty Calculated...!!!',
@@ -2148,27 +2146,18 @@ onChange() {
           'center'
         );
         this.saveDisabled = true;
-        
       },
       error =>
       {
-        
-        const errorMessage = error || 'Operation Failed.....!!!';
-        Swal.fire({
-          title: errorMessage,
-          icon: 'error'
-        }).then(() => {
-            this.advanceTableForm.patchValue({ verifyDuty: true });
-            this.advanceTableForm.patchValue({ goodForBilling: false });
-            this.onGFBChange({ checked: false });
-            this.saveDisabled = true;
-          });
-      })  
+        // Calculation still runs; suppress error popup on Verify Duty only
+        this.advanceTableForm.patchValue({ verifyDuty: true });
+        this.advanceTableForm.patchValue({ goodForBilling: false });
+        this.onGFBChange({ checked: false });
+        this.saveDisabled = true;
+      }
+    );
   }
 }
-
-
-
 
 
 
