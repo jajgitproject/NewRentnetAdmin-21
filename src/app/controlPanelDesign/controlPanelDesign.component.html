@@ -1684,6 +1684,7 @@
                             <span *ngIf="data.emailContent !== null"> E2S </span>
                             &nbsp;
                             <!-- <span *ngIf="data.isAutoAllotment === true" matTooltip="Auto Soft Allotment"> Auto </span> -->
+                            <span *ngIf="data.dutyTrackedByEmployeeName !== null" [matTooltip]="data.dutyTrackedByEmployeeName"> T </span>
                             <br>
 
                             <ng-container *ngIf="getControlPanelMessagingHeaderDisplay(data) as cpMsg">

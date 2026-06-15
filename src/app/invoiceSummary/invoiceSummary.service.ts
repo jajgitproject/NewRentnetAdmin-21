@@ -1,9 +1,9 @@
-// @ts-nocheck
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { InvoiceSummary } from './invoiceSummary.model';
 import { HttpClient } from '@angular/common/http';
 import { GeneralService } from '../general/general.service';
+import { StatesDropDown } from '../organizationalEntity/stateDropDown.model';
 
 @Injectable()
 export class InvoiceSummaryService {
@@ -92,4 +92,11 @@ export class InvoiceSummaryService {
     const userID = this.generalService.getUserID();
     return this.httpClient.delete(this.API_URL + '/' + invoiceSummaryID + '/' + userID);
   }
+
+
+  GetStateBasedOnCustomerForInvoiceSummary(CustomerID: any,Prefix:any): Observable<StatesDropDown[]> 
+  {
+    return this.httpClient.get<StatesDropDown[]>(this.API_URL + "/GetStateBasedOnCustomerForInvoiceSummary" + "/" + CustomerID + "/" + Prefix);   
+  }
+
 }
