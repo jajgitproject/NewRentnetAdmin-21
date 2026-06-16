@@ -7,6 +7,7 @@ import { IntegrationLog } from '../../integrationLog.model';
 import { MAT_DATE_LOCALE } from '@angular/material/core';
 import { GeneralService } from '../../../general/general.service';
 import { MatSnackBar } from '@angular/material/snack-bar';
+import { ChangeDetectorRef } from '@angular/core';
 
 @Component({
   standalone: false,
@@ -21,6 +22,7 @@ export class FormDialogComponentIL {
   advanceTable: IntegrationLog[] = [];
   reservationID: number;
   latestEvents: any = {};
+  filteredData: any[] = [];
   
 
   tabs = [
@@ -43,7 +45,8 @@ export class FormDialogComponentIL {
     public advanceTableService: IntegrationLogService,
     private fb: FormBuilder,
     public _generalService: GeneralService,
-    private snackBar: MatSnackBar
+    private snackBar: MatSnackBar,
+    private cdr: ChangeDetectorRef
   ) {
     this.reservationID = data.reservationID;
     this.advanceTableForm = this.createContactForm();
@@ -67,12 +70,12 @@ export class FormDialogComponentIL {
     : 'tab-failure';
 }
 
-getFilteredData() {
+updateFilteredData() {
 
   const item =
     this.latestEvents[this.selectedTab.toUpperCase()];
 
-  return item ? [item] : [];
+  this.filteredData = item ? [item] : [];
 }
 
   getStatusClass(status: string) {
@@ -97,20 +100,26 @@ getFilteredData() {
 
 
 
-  loadData() {
+loadData() {
   this.advanceTableService.GetIntegrationLogData(this.reservationID)
     .subscribe(data => {
-      console.log('Integration Log Data:', data);
+
       this.advanceTable = Array.isArray(data) ? data : [data];
 
       this.advanceTable.forEach(x => {
         try {
-          x.request = typeof x.request === 'string' ? JSON.parse(x.request) : x.request;
-          x.response = typeof x.response === 'string' ? JSON.parse(x.response) : x.response;
-        } catch { }
+          x.request = typeof x.request === 'string'
+            ? JSON.parse(x.request)
+            : x.request;
+
+          x.response = typeof x.response === 'string'
+            ? JSON.parse(x.response)
+            : x.response;
+        } catch {}
       });
 
       this.buildLatestEvents();
+      this.cdr.detectChanges();
     });
 }
 
@@ -123,23 +132,27 @@ buildLatestEvents() {
 
     const key = item.eventName?.toUpperCase();
 
-    if (!this.latestEvents[key]) {
-      this.latestEvents[key] = item;
-      return;
-    }
-
     if (
-      item.apiIntegrationLogID >
-      this.latestEvents[key].apiIntegrationLogID
+      !this.latestEvents[key] ||
+      item.apiIntegrationLogID > this.latestEvents[key].apiIntegrationLogID
     ) {
       this.latestEvents[key] = item;
     }
 
   });
 
-  console.log(this.latestEvents);
+  this.selectedTab = 'ACCEPT';
+  this.updateFilteredData();
+
+  console.log('Selected Tab:', this.selectedTab);
+  console.log('Filtered Data:', this.filteredData);
 }
 
+
+selectTab(tabKey: string) {
+  this.selectedTab = tabKey;
+  this.updateFilteredData();
+}
 
 resend(item: any) {
 

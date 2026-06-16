@@ -1,12 +1,12 @@
 <h2 mat-dialog-title class="dialog-header d-flex justify-content-between align-items-center">
   
   <span>
-    📡 API Integration Log 
-    <ng-container *ngIf="getFilteredData().length > 0">
-      (Reservation ID: {{getFilteredData()[0]?.reservationID}} 
-      | Travel Request No: {{getFilteredData()[0]?.travelRequestNo}})
-    </ng-container>
-  </span>
+  📡 API Integration Log
+  <ng-container *ngIf="filteredData.length > 0">
+    (Reservation ID: {{filteredData[0]?.reservationID}}
+    | Travel Request No: {{filteredData[0]?.travelRequestNo}})
+  </ng-container>
+</span>
 
   <button mat-icon-button (click)="dialogRef.close()">
     ✖
@@ -25,16 +25,16 @@
         selectedTab === tab.key ? 'active' : '',
         getTabStatusClass(tab.key)
       ]"
-      (click)="selectedTab = tab.key"
+      (click)="selectTab(tab.key)"
     >
       {{tab.label}}
     </div>
   </div>
 
   <!-- 🔥 Data -->
-  <ng-container *ngIf="getFilteredData().length > 0; else noData">
+  <ng-container *ngIf="filteredData.length > 0; else noData">
 
-    <div *ngFor="let item of getFilteredData()">
+  <div *ngFor="let item of filteredData">
 
       <div class="card mb-4">
 
