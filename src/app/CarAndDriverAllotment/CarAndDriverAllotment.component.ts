@@ -1,8 +1,9 @@
 // @ts-nocheck
-import { Component, ElementRef, Input, OnInit, ViewChild } from '@angular/core';
+import { Component, ElementRef, Input, OnInit, ViewChild, ViewChildren, QueryList } from '@angular/core';
 import { CarAndDriverAllotmentService } from './CarAndDriverAllotment.service';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { MatDialog } from '@angular/material/dialog';
+import { MatExpansionPanel } from '@angular/material/expansion';
 import { MatPaginator, PageEvent } from '@angular/material/paginator';
 import { MatSort } from '@angular/material/sort';
 import {
@@ -288,6 +289,8 @@ export class CarAndDriverAllotmentComponent implements OnInit {
   searchRegistration: string = '';
   isDisabled: boolean = true;
   public openedPanelIndex: number;
+  @ViewChildren(MatExpansionPanel) expansionPanels: QueryList<MatExpansionPanel>;
+  private pendingAutoOpenSingleResult = false;
   resAllotmentID: any;
   reservationGroupID: string;
   allotmentType: string;
@@ -1003,6 +1006,7 @@ export class CarAndDriverAllotmentComponent implements OnInit {
       this.inventory.setValue(this.modalInventory.value || '');
     }
     this.isSearchClicked = true;
+    this.pendingAutoOpenSingleResult = true;
     this.resetPagination();
     this.carAndDriverAllotmentDataForUnassociated();
     // const selected = this.associatedUnassociated.value;
@@ -1153,6 +1157,8 @@ export class CarAndDriverAllotmentComponent implements OnInit {
     }
     this.isLoadingdataUnassociated = true;
     this.isLoading = true;
+    const shouldAutoOpenIfSingle = this.pendingAutoOpenSingleResult;
+    this.pendingAutoOpenSingleResult = false;
     this.driverInventoryAssociationService.getDataInventoryUnassociation(transferedLocationID,
       this.driverID, this.driver.value,
       this.driverOfficialIdentityNumber.value, this.supplier.value, this.category.value,
@@ -1163,11 +1169,15 @@ export class CarAndDriverAllotmentComponent implements OnInit {
       (data: CarAndDriverAllotmentData) => {
         if (data != null) {
           this.driverInventoryAssociationDataSource = data.driverInventoryAssociationModel;
+          console.log(this.driverInventoryAssociationDataSource);
           this.driverInventoryAssociationDataSource?.forEach(element => {
             Object.assign(element, { checked: false });
           });
           this.unassociatedTotalData = data.totalRecords;
           this.markPerf('allotment_grid_loaded');
+          if (shouldAutoOpenIfSingle && this.driverInventoryAssociationDataSource?.length === 1) {
+            this.autoOpenSingleSearchResult();
+          }
         }
         else {
           this.driverInventoryAssociationDataSource = null;
@@ -1193,6 +1203,23 @@ export class CarAndDriverAllotmentComponent implements OnInit {
     );
   }
 
+  private autoOpenSingleSearchResult(): void {
+    // if (!this.driverInventoryAssociationDataSource?.length) {
+    //   return;
+    // }
+    setTimeout(() => {
+      const panel = this.expansionPanels?.first;
+      if (!panel) {
+        return;
+      }
+      const sub = panel.afterExpand.subscribe(() => {
+        sub.unsubscribe();
+        this.openAllotCarAndDriver(0, 'Soft or Hard', this.reservationInfo[0]?.allotmentID);
+      });
+      panel.open();
+    });
+  }
+  
   carAndDriverAllotment() {
     if (this.pickupDate !== "") {
       this.pickupDate = moment(this.pickupDate).format('MMM DD yyyy');
@@ -1408,9 +1435,15 @@ export class CarAndDriverAllotmentComponent implements OnInit {
 
       dialogRef.afterClosed().subscribe(res => {
         if (!res.isClose) {
+          this.inventory.setValue('');
+          this.driver.setValue('');
+          this.vendorType.setValue('');
+          this.ownedSupplier.setValue('');
+          this.vehicle.setValue('');
           this.loadData(this._filters, this.currentPage, this.recordsPerPage);
           //this.carAndDriverAllotmentData();
           this.carAndDriverAllotmentDataForUnassociated();
+          
         }
       });
 
@@ -1669,7 +1702,7 @@ export class CarAndDriverAllotmentComponent implements OnInit {
           }
         });
       dialogRef.afterClosed().subscribe(res => {
-        if (res.isClose === false) {
+        if (res.isClose === true) {
           this.loadData(this._filters, this.currentPage, this.recordsPerPage);
           // this.carAndDriverAllotmentData();
           this.carAndDriverAllotmentDataForUnassociated();

@@ -86,6 +86,7 @@ allotmentType: any;
     // ✅ button logic
     this.buttonDisabled = this.normalizedStatus !== 'changes allow';
 
+    console.log(this.action);
 
 
     // Set the defaults
@@ -309,6 +310,158 @@ allotmentType: any;
     if(this.action==='add')
     {
       this.advanceTableForm.patchValue({allotmentType:this.data.allotmentType})
+    this.advanceTableService.add(this.advanceTableForm.getRawValue())
+      .subscribe(
+        response => {
+          this.showNotification(
+            'snackbar-success',
+            'Car And Driver Alloted...!!!',
+            'bottom',
+            'center'
+          );
+          this.isSubmitting = false;
+          this.saveDisabled = true;
+          this.dialogRef.close({ isClose: false });
+        },
+        error => {
+          const parsedError = this.parseErrorPayload(error);
+          if (parsedError.message) {
+            this.openShowError(parsedError.message);
+          }
+          this.showNotification(
+            'snackbar-danger',
+            parsedError.message,
+            'bottom',
+            'center'
+          );
+          this.isSubmitting = false;
+          this.saveDisabled = true;
+        }
+      )
+    }
+    else{
+      this.advanceTableForm.patchValue({allotmentID:this.data.allotmentID})
+      this.advanceTableForm.patchValue({allotmentType:this.data.allotmentType})
+    this.advanceTableService.update(this.advanceTableForm.getRawValue())
+      .subscribe(
+        response => {
+          
+          this.showNotification(
+            'snackbar-success',
+            'Car And Driver Alloted...!!!',
+            'bottom',
+            'center'
+          );
+          this.isSubmitting = false;
+          this.saveDisabled = true;
+          this.dialogRef.close({ isClose: false });
+        },
+        error => {
+          const parsedError = this.parseErrorPayload(error);
+          if (parsedError.message) {
+            this.openShowError(parsedError.message);
+          }
+          this.showNotification(
+            'snackbar-danger',
+            parsedError.message,
+            'bottom',
+            'center'
+          );
+          this.isSubmitting = false;
+          this.saveDisabled = true;
+        }
+      )
+    }
+    
+  }
+
+  public SoftPost(): void {
+    if (this.buttonDisabled) {
+      this.showNotification('snackbar-danger','Changes are not allowed. Status: ' + this.status,'bottom','center');
+      return;
+    }
+    this.saveDisabled = false;
+    this.isSubmitting=true;
+    this.CheckData();
+    if(this.action==='add')
+    {
+      this.advanceTableForm.patchValue({allotmentType:'Soft'})
+    this.advanceTableService.add(this.advanceTableForm.getRawValue())
+      .subscribe(
+        response => {
+          this.showNotification(
+            'snackbar-success',
+            'Car And Driver Alloted...!!!',
+            'bottom',
+            'center'
+          );
+          this.isSubmitting = false;
+          this.saveDisabled = true;
+          this.dialogRef.close({ isClose: false });
+        },
+        error => {
+          const parsedError = this.parseErrorPayload(error);
+          if (parsedError.message) {
+            this.openShowError(parsedError.message);
+          }
+          this.showNotification(
+            'snackbar-danger',
+            parsedError.message,
+            'bottom',
+            'center'
+          );
+          this.isSubmitting = false;
+          this.saveDisabled = true;
+        }
+      )
+    }
+    else{
+      this.advanceTableForm.patchValue({allotmentID:this.data.allotmentID})
+      this.advanceTableForm.patchValue({allotmentType:this.data.allotmentType})
+    this.advanceTableService.update(this.advanceTableForm.getRawValue())
+      .subscribe(
+        response => {
+          
+          this.showNotification(
+            'snackbar-success',
+            'Car And Driver Alloted...!!!',
+            'bottom',
+            'center'
+          );
+          this.isSubmitting = false;
+          this.saveDisabled = true;
+          this.dialogRef.close({ isClose: false });
+        },
+        error => {
+          const parsedError = this.parseErrorPayload(error);
+          if (parsedError.message) {
+            this.openShowError(parsedError.message);
+          }
+          this.showNotification(
+            'snackbar-danger',
+            parsedError.message,
+            'bottom',
+            'center'
+          );
+          this.isSubmitting = false;
+          this.saveDisabled = true;
+        }
+      )
+    }
+    
+  }
+
+  public HardPost(): void {
+    if (this.buttonDisabled) {
+      this.showNotification('snackbar-danger','Changes are not allowed. Status: ' + this.status,'bottom','center');
+      return;
+    }
+    this.saveDisabled = false;
+    this.isSubmitting=true;
+    this.CheckData();
+    if(this.action==='add')
+    {
+      this.advanceTableForm.patchValue({allotmentType:'Hard'})
     this.advanceTableService.add(this.advanceTableForm.getRawValue())
       .subscribe(
         response => {
