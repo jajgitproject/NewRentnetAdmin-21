@@ -151,6 +151,12 @@ export class AuthService {
             CanThisRoleViewDummyInvoice:
               rawEmployee.CanThisRoleViewDummyInvoice ??
               rawEmployee.canThisRoleViewDummyInvoice,
+            CanActAsContractTariffAuditor:
+              rawEmployee.CanActAsContractTariffAuditor ??
+              rawEmployee.canActAsContractTariffAuditor,
+            CanActAsContractTariffVerifier:
+              rawEmployee.CanActAsContractTariffVerifier ??
+              rawEmployee.canActAsContractTariffVerifier,
             EmployeeEntityID:
               rawEmployee.EmployeeEntityID ?? rawEmployee.employeeEntityID,
             EmployeeID: rawEmployee.EmployeeID ?? rawEmployee.employeeID,

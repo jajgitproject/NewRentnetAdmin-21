@@ -199,7 +199,54 @@ export class GeneralService {
   }
 
   getRoleID(): number {
-    return 25;
+    const fromStorage = Number(localStorage.getItem('roleID'));
+    if (fromStorage > 0) {
+      return fromStorage;
+    }
+    return this.authService?.currentUserValue?.employee?.RoleID ?? 0;
+  }
+
+  private readRoleFlagFromStorage(key: string): boolean | null {
+    const value = localStorage.getItem(key);
+    if (value === 'true') {
+      return true;
+    }
+    if (value === 'false') {
+      return false;
+    }
+    return null;
+  }
+
+  canActAsContractTariffAuditor(): boolean {
+    const stored = this.readRoleFlagFromStorage('canActAsContractTariffAuditor');
+    if (stored === true) {
+      return true;
+    }
+    if (stored === false) {
+      return false;
+    }
+    return (localStorage.getItem('role') || '').trim() === 'Contract Auditor';
+  }
+
+  canActAsContractTariffVerifier(): boolean {
+    const stored = this.readRoleFlagFromStorage('canActAsContractTariffVerifier');
+    if (stored === true) {
+      return true;
+    }
+    if (stored === false) {
+      return false;
+    }
+    return (localStorage.getItem('role') || '').trim() === 'Contract Verifier';
+  }
+
+  getContractTariffRoleTrack(): 'Auditor' | 'Verifier' | null {
+    if (this.canActAsContractTariffAuditor()) {
+      return 'Auditor';
+    }
+    if (this.canActAsContractTariffVerifier()) {
+      return 'Verifier';
+    }
+    return null;
   }
 
   getBaseURL(): string {
@@ -520,6 +567,11 @@ decrypt(textToDecrypt: string): string{
   GetPassengerDropDownForControlPanel(Prefix: string): Observable<CustomerPersonDropDown[]> 
   {
     return this.http.get<CustomerPersonDropDown[]>(this.BaseURL + "controlPanelDropDown/GetPassengerForDropDown" + '/' + Prefix);
+  }
+
+  GetKAMDropDownForControlPanel(Prefix: string): Observable<EmployeeDropDown[]> 
+  {
+    return this.http.get<EmployeeDropDown[]>(this.BaseURL + 'controlPanelDropDown/GetKAMForDropDown' + '/' + Prefix);
   }
 
 

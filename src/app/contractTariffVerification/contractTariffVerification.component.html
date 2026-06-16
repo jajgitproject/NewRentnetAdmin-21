@@ -37,9 +37,10 @@
             </mat-autocomplete>
             <mat-hint>Customer · Tally · Contract Name</mat-hint>
           </mat-form-field>
-          <div class="role-hint" *ngIf="isAuditor">You are acting as <strong>Contract Auditor</strong> (auditor status only).</div>
-          <div class="role-hint" *ngIf="isVerifier">You are acting as <strong>Contract Verifier</strong> (verifier status only).</div>
-          <div class="role-hint warn" *ngIf="!isAuditor && !isVerifier">Current role may not perform verify/reject. Page access still requires Contract Auditor or Contract Verifier role mapping.</div>
+          <div class="role-hint" *ngIf="isAuditor">You can verify/reject on the <strong>Auditor Status</strong> track (enabled in Role master).</div>
+          <div class="role-hint" *ngIf="isVerifier && !isAuditor">You can verify/reject on the <strong>Verifier Status</strong> track (enabled in Role master).</div>
+          <div class="role-hint" *ngIf="isAuditor && isVerifier">You can verify/reject on both <strong>Auditor</strong> and <strong>Verifier</strong> tracks (Auditor track is used for row actions).</div>
+          <div class="role-hint warn" *ngIf="!isAuditor && !isVerifier">Verify/Reject is disabled for your role. Enable Contract Tariff Auditor and/or Verifier on the Role master screen.</div>
         </div>
 
         <mat-form-field class="field-duty-type" appearance="outline">

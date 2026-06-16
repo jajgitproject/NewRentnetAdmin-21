@@ -1,4 +1,4 @@
-// @ts-nocheck
+
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { Component, Inject } from '@angular/core';
 import { IntegrationLogService } from '../../integrationLog.service';
@@ -20,6 +20,8 @@ export class FormDialogComponentIL {
   advanceTableForm: FormGroup;
   advanceTable: IntegrationLog[] = [];
   reservationID: number;
+  latestEvents: any = {};
+  
 
   tabs = [
     { key: 'ACCEPT', label: 'Confirmation' },
@@ -27,7 +29,10 @@ export class FormDialogComponentIL {
     { key: 'startDuty', label: 'LocationOut' },
     { key: 'arrived', label: 'Reached' },
     { key: 'startTrip', label: 'Pickup' },
-    { key: 'endTrip', label: 'DropOff' }
+    { key: 'Tracking', label: 'Tracking' },
+    { key: 'endTrip', label: 'DropOff' },
+    { key: 'endDuty', label: 'CloseDuty' },
+    { key: 'ProcessInvoiceRawData', label: 'Invoice' }
   ];
 
   selectedTab: string = 'ACCEPT';
@@ -49,20 +54,26 @@ export class FormDialogComponentIL {
   }
 
 
-  getTabStatusClass(tabKey: string) {
-    const item = this.advanceTable.find(x =>
-      x.eventName?.toUpperCase() === tabKey
-    );
+ getTabStatusClass(tabKey: string) {
 
-    if (!item) return 'tab-default';
-    return item.eventStatus === 'Success' ? 'tab-success' : 'tab-failure';
+  const item = this.latestEvents[tabKey.toUpperCase()];
+
+  if (!item) {
+    return 'tab-default';
   }
 
-  getFilteredData() {
-    return this.advanceTable.filter(x =>
-      x.eventName?.toUpperCase() === this.selectedTab
-    );
-  }
+  return item.eventStatus === 'Success'
+    ? 'tab-success'
+    : 'tab-failure';
+}
+
+getFilteredData() {
+
+  const item =
+    this.latestEvents[this.selectedTab.toUpperCase()];
+
+  return item ? [item] : [];
+}
 
   getStatusClass(status: string) {
     return status === 'Success' ? 'text-success' : 'text-danger';
@@ -87,20 +98,47 @@ export class FormDialogComponentIL {
 
 
   loadData() {
-    this.advanceTableService.GetIntegrationLogData(this.reservationID)
-      .subscribe(data => {
-        this.advanceTable = Array.isArray(data) ? data : [data];
+  this.advanceTableService.GetIntegrationLogData(this.reservationID)
+    .subscribe(data => {
+      console.log('Integration Log Data:', data);
+      this.advanceTable = Array.isArray(data) ? data : [data];
 
-        this.advanceTable.forEach(x => {
-          try {
-            x.request = typeof x.request === 'string' ? JSON.parse(x.request) : x.request;
-            x.response = typeof x.response === 'string' ? JSON.parse(x.response) : x.response;
-          } catch {
-          }
-        });
+      this.advanceTable.forEach(x => {
+        try {
+          x.request = typeof x.request === 'string' ? JSON.parse(x.request) : x.request;
+          x.response = typeof x.response === 'string' ? JSON.parse(x.response) : x.response;
+        } catch { }
       });
-  }
 
+      this.buildLatestEvents();
+    });
+}
+
+
+buildLatestEvents() {
+
+  this.latestEvents = {};
+
+  this.advanceTable.forEach(item => {
+
+    const key = item.eventName?.toUpperCase();
+
+    if (!this.latestEvents[key]) {
+      this.latestEvents[key] = item;
+      return;
+    }
+
+    if (
+      item.apiIntegrationLogID >
+      this.latestEvents[key].apiIntegrationLogID
+    ) {
+      this.latestEvents[key] = item;
+    }
+
+  });
+
+  console.log(this.latestEvents);
+}
 
 
 resend(item: any) {

@@ -32,6 +32,7 @@ export class FormDialogComponent {
   filteredStateOptions: Observable<StateDropDown[]>;
   createdByDisplay: string = '';
   isLoading = false;
+  CustomerID:any;
 
   constructor(
     public dialogRef: MatDialogRef<FormDialogComponent>,
@@ -188,13 +189,15 @@ export class FormDialogComponent {
     });
   }
 
-  InitState() {
+  InitState() 
+  {    
     const prefix = this.advanceTableForm.get('stateName').value;
     if (!prefix || prefix.length < 3) {
       this.StateList = [];
       return;
     }
-    this._generalService.GetStateForSearchPrefix(prefix).subscribe((data) => {
+    console.log(this.advanceTable.customerID,this.CustomerID);
+    this.advanceTableService.GetStateBasedOnCustomerForInvoiceSummary(this.CustomerID || this.advanceTable.customerID,prefix).subscribe((data) => {
       this.StateList = data || [];
       this.advanceTableForm.controls['stateName'].setValidators([
         Validators.required,
@@ -227,6 +230,7 @@ export class FormDialogComponent {
   onCustomerSelected(selectedCustomer: string) {
     const selectedValue = (this.CustomerList || []).find((data) => data.customerName === selectedCustomer);
     if (selectedValue) {
+      this.CustomerID = selectedValue.customerID;
       this.advanceTableForm.patchValue({ customerID: selectedValue.customerID });
     }
   }

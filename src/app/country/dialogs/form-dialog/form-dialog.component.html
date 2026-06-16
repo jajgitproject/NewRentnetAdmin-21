@@ -92,10 +92,10 @@ advanceTableForm.get('geoSearchString')?.invalid &&
                     <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
                         <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
                             <mat-label>ISO Code</mat-label>
-                            <input matInput formControlName="countryISOCode" required>
-                            <mat-error *ngIf="advanceTableForm.get('countryISOCode').hasError('required')">
+                            <input matInput formControlName="countryISOCode">
+                            <!-- <mat-error *ngIf="advanceTableForm.get('countryISOCode').hasError('required')">
                                 ISO Code is required
-                            </mat-error>
+                            </mat-error> -->
     
                         </mat-form-field>
                     </div>  

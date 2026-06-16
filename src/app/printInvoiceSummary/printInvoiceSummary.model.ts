@@ -50,6 +50,10 @@ export class PrintInvoiceSummary {
 
   totalAmountInWords: string;
 
+  state: string;
+
+  billingPin: string;
+
   invoices: PrintInvoiceSummaryLine[];
 
 
@@ -75,6 +79,11 @@ export class PrintInvoiceSummary {
     this.totalAmount = data.totalAmount || 0;
 
     this.totalAmountInWords = data.totalAmountInWords || '';
+
+    this.state = data.state || '';
+
+    this.billingPin = data.billingPin || '';
+
 
     this.invoices = (data.invoices || []).map((line) => new PrintInvoiceSummaryLine(line));
 

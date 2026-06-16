@@ -135,6 +135,7 @@ import { ControlPanelDialogeService } from '../controlPanelDialoge/controlPanelD
 import { InternalNoteDialogComponent } from '../internalNoteDetails/dialogs/internal-note-dialog/internal-note-dialog.component';
 import { ModeOfPaymentDropDown } from '../supplierContract/modeOfPaymentDropDown.model';
 import { InventoryDropDown } from '../inventory/inventoryDropDown.model';
+import { EmployeeDropDown } from 'src/app/employee/employeeDropDown.model';
 
 @Component({
   standalone: false,
@@ -283,6 +284,9 @@ export class ControlPanelDesignComponent implements OnInit {
 
   public SupplierTypeList?: SupplierTypeDropDownModel[] = [];
   filteredSupplierTypeOptions: Observable<SupplierTypeDropDownModel[]>;
+
+  public KAMList?: EmployeeDropDown[] = [];
+  filteredKAMByOptions: Observable<EmployeeDropDown[]>;
 
   constructor(
     public route: Router,
@@ -643,7 +647,8 @@ export class ControlPanelDesignComponent implements OnInit {
       tncStatus: [this._filters.tncStatus],
       ticketNumb: [this._filters.ticketNumb],
       supplierType:[this._filters.supplierType],
-      dutySlipID: [this._filters.dutySlipID || '']
+      dutySlipID: [this._filters.dutySlipID || ''],
+      kAM:[this._filters.kAM],
     });
   }
 
@@ -4665,6 +4670,36 @@ setCalculatedLocationOutTime(data: any, interval?: number) {
     );
   }
 
+  //---------- KAM ----------
+  onKeyupKAMDropDown()
+  {
+    var Prefix = this.filterForm.controls.kAM.value;
+    if(Prefix.length < this._generalService.lengthToCheck)
+    { 
+      this.KAMList = [];
+      return;
+    }
+    this._generalService.GetKAMDropDownForControlPanel(Prefix).subscribe
+    (
+      data =>   
+      {
+        this.KAMList = data;
+        console.log(this.KAMList)
+        this.filteredKAMByOptions = this.filterForm.controls.kAM.valueChanges.pipe(
+          startWith(""),
+          map(value => this._filterKAM(value || ''))
+        );
+      });
+  }
+  private _filterKAM(value: string): any {
+    const filterValue = value.toLowerCase();
+    return this.KAMList.filter(
+    data => 
+    {
+      const fullName = `${data.firstName} ${data.lastName}`.toLowerCase();
+      return fullName.includes(filterValue);
+    });
+  }
   
 
 

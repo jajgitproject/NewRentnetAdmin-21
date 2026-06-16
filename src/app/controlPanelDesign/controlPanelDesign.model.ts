@@ -437,6 +437,7 @@ export class Filters {
   tncStatus:string;
   ticketNumb:string;
   supplierType:string;
+  kAM:string;
   constructor(filter) { 
     this.tripStatus = filter.tripStatus || '';
     this.userID = filter.userID || '';
@@ -486,6 +487,7 @@ export class Filters {
     this.tripType=filter.tripType || '';
     this.reservationSourceDetail = filter.reservationSourceDetail || '';
     this.supplierType = filter.supplierType;
+    this.kAM = filter.kAM;
   }
 }
 

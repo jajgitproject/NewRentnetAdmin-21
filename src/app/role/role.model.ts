@@ -13,6 +13,8 @@ export class Role {
    canThisRoleViewBillOnClosingScreen: boolean;
    canThisRoleDoGoodForBillingOnClosingScreen: boolean;
    canThisRoleViewDummyInvoice: boolean;
+   canActAsContractTariffAuditor: boolean;
+   canActAsContractTariffVerifier: boolean;
 
   constructor(role) {
     {
@@ -29,6 +31,8 @@ export class Role {
        this.canThisRoleViewBillOnClosingScreen = role.canThisRoleViewBillOnClosingScreen ?? '';
        this.canThisRoleDoGoodForBillingOnClosingScreen = role.canThisRoleDoGoodForBillingOnClosingScreen ?? '';
        this.canThisRoleViewDummyInvoice = role.canThisRoleViewDummyInvoice ?? '';
+       this.canActAsContractTariffAuditor = role.canActAsContractTariffAuditor ?? '';
+       this.canActAsContractTariffVerifier = role.canActAsContractTariffVerifier ?? '';
 
     }
   }

@@ -138,6 +138,14 @@ export class SigninComponent implements OnInit {
                 'isThisAKeyAccountManagerRole',
                 String(employee.IsThisAKeyAccountManagerRole ?? employee.isThisAKeyAccountManagerRole ?? false)
               );
+              localStorage.setItem(
+                'canActAsContractTariffAuditor',
+                String(employee.CanActAsContractTariffAuditor ?? employee.canActAsContractTariffAuditor ?? false)
+              );
+              localStorage.setItem(
+                'canActAsContractTariffVerifier',
+                String(employee.CanActAsContractTariffVerifier ?? employee.canActAsContractTariffVerifier ?? false)
+              );
               this.calculateDaysLeft();
             }
           } else {

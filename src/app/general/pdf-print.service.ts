@@ -41,8 +41,9 @@ export class PdfPrintService {
 
     void this.buildPdfHtml(element, options).then((html) => {
       const baseUrl = options?.baseUrl ?? this.generalService.BaseURL?.replace(/\/$/, '');
-      this.generatePdf(html, fileName, baseUrl).subscribe({
-        next: (blob) => this.openPdfBlob(blob),
+      const safeFileName = this.sanitizePdfFileName(fileName);
+      this.generatePdf(html, safeFileName, baseUrl).subscribe({
+        next: (blob) => this.openPdfBlob(blob, safeFileName),
         error: () => this.snackBar.open('Failed to generate PDF.', 'Close', { duration: 4000 })
       });
     }).catch(() => {
@@ -450,19 +451,46 @@ export class PdfPrintService {
     return `${apiBase}/${trimmed}`;
   }
 
-  private openPdfBlob(blob: Blob): void {
+  private sanitizePdfFileName(fileName: string): string {
+    let safe = (fileName ?? '').trim().replace(/\.pdf$/i, '');
+    safe = safe.replace(/[/\\:*?"<>|]/g, '-');
+    safe = safe.replace(/-+/g, '-');
+    safe = safe.replace(/[.\s]+$/g, '');
+    return safe || 'Invoice_print';
+  }
+
+  private escapeHtml(value: string): string {
+    return value
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;');
+  }
+
+  private openPdfBlob(blob: Blob, fileName: string): void {
+    const title = this.sanitizePdfFileName(fileName);
     const url = URL.createObjectURL(blob);
-    const win = window.open(url, '_blank');
+    const win = window.open('', '_blank');
     if (!win) {
+      URL.revokeObjectURL(url);
       this.snackBar.open('Please allow pop-ups to view the PDF.', 'Close', { duration: 4000 });
       return;
     }
-    win.onload = () => {
+
+    const escapedTitle = this.escapeHtml(title);
+    win.document.write(
+      `<!DOCTYPE html><html><head><title>${escapedTitle}</title></head>` +
+      `<body style="margin:0"><embed src="${url}" type="application/pdf" width="100%" height="100%" ` +
+      `style="position:absolute;top:0;left:0;bottom:0;right:0"/></body></html>`
+    );
+    win.document.close();
+
+    setTimeout(() => {
       try {
         win.print();
       } catch {
         // User can print manually from the PDF tab.
       }
-    };
+    }, 300);
   }
 }

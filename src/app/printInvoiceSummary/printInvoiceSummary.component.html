@@ -1,4 +1,4 @@
-<section class="content print-page">
+﻿<section class="content print-page">
 
   <div class="container-fluid">
 
@@ -24,23 +24,39 @@
 
     <div #printSection id="printSection" class="cover-letter" *ngIf="data">
 
-      <p class="letter-date">Date: {{ formatDate(data.letterDate) }}</p>
+      <div class="header-section">
 
+        <div class="header-left">
 
+          <p class="letter-date">Date: {{ formatDate(data.letterDate) }}</p>
 
-      <div class="address-block">
+          <div class="address-block">
 
-        <p>{{ data.customerName }}</p>
+            <p>{{ data.customerName }}</p>
 
-        <p>{{ data.customerAddress }}</p>
+            <p>{{ data.customerAddress }}</p>
 
-        <p>{{ data.customerCity }}</p>
+            <p>{{ data.customerCity }}</p>
 
-        <p *ngIf="data.customerState || data.customerPin">
+            <!-- <p *ngIf="data.customerState || data.customerPin">
 
-          {{ data.customerState }}<span *ngIf="data.customerState && data.customerPin"> - </span>{{ data.customerPin }}
+              {{ data.customerState }}<span *ngIf="data.customerState && data.customerPin"> - </span>{{ data.customerPin }}
 
-        </p>
+            </p> -->
+
+            <p *ngIf="data.state || data.billingPin">
+              {{ data.state }}
+              <span *ngIf="data.state && data.billingPin"> - </span>
+              {{ data.billingPin }}
+            </p>
+
+          </div>
+
+        </div>
+
+        <div class="header-right">
+          <img src="assets/images/bill-logo.jpg" alt="Eco Mobility" style="height: 60px;">
+        </div>
 
       </div>
 
@@ -74,7 +90,7 @@
 
         details along with your remittance.
 
-        For any assistance, please e-mail us on creditcontrol@ecorentacar.com
+        For any assistance, please e-mail us on creditcontrol@ecosmobility.com
 
       </p>
 

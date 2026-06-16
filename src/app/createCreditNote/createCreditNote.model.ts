@@ -52,7 +52,7 @@ export class CreateCreditNote {
        this.cgstAmount = createCreditNote.cgstAmount || '';
        this.sgstAmount = createCreditNote.sgstAmount || '';
        this.creditNoteReason = createCreditNote.creditNoteReason || '';
-       this.requiresReBilling = createCreditNote.requiresReBilling || '';
+       this.requiresReBilling = createCreditNote.requiresReBilling || null;
         this.igstPercentage = createCreditNote.igstPercentage || '';
        this.cgstPercentage = createCreditNote.cgstPercentage || '';
        this.sgstPercentage = createCreditNote.sgstPercentage || '';

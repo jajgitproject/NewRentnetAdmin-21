@@ -23,6 +23,7 @@ import { MyUploadComponent } from '../myupload/myupload.component';
 import { MyUploadModule } from '../myupload/myupload.module';
 import { BillingHistoryRoutingModule } from './billingHistory-routing.module';
 import { BillingHistoryComponent as FormDialogComponent} from './billingHistory.component';
+import { MatProgressBarModule } from '@angular/material/progress-bar';
 @NgModule({
   declarations: [
     FormDialogComponent
@@ -49,7 +50,8 @@ import { BillingHistoryComponent as FormDialogComponent} from './billingHistory.
     MatToolbarModule,
     MatMenuModule,
     MatProgressSpinnerModule,
-    MyUploadModule
+    MyUploadModule,
+    MatProgressBarModule
   ],
   providers: []
 })

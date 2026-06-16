@@ -237,7 +237,7 @@
                                     <ng-container matColumnDef="invoiceTotalAmountAfterGST">
                                         <mat-header-cell *matHeaderCellDef mat-sort-header>Amount</mat-header-cell>
                                         <mat-cell *matCellDef="let row" (contextmenu)="onContextMenu($event, row)">
-                                            {{row.invoiceTotalAmountAfterGST || 'N/A'}}</mat-cell>
+                                            {{row.invoiceTotalAmountAfterGST}}</mat-cell>
                                     </ng-container>
 
                                     <ng-container matColumnDef="customerName">
@@ -263,13 +263,13 @@
                                         <mat-header-cell *matHeaderCellDef mat-sort-header>Credit Notes
                                             Amount</mat-header-cell>
                                         <mat-cell *matCellDef="let row">
-                                            {{row.totalCreditNoteAmount || 'N/A'}}</mat-cell>
+                                            {{row.totalCreditNoteAmount}}</mat-cell>
                                     </ng-container>
                                     <ng-container matColumnDef="pendingAmount">
                                         <mat-header-cell *matHeaderCellDef mat-sort-header>Pending
                                             Amount</mat-header-cell>
                                         <mat-cell *matCellDef="let row">
-                                            {{row.pendingAmount || 'N/A'}}</mat-cell>
+                                            {{row.pendingAmount}}</mat-cell>
                                     </ng-container>
                                     <ng-container matColumnDef="details">
                                         <mat-header-cell *matHeaderCellDef mat-sort-header>Details</mat-header-cell>

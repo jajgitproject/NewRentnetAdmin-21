@@ -12,27 +12,28 @@
     <mat-icon class="small-close-icon">close</mat-icon>
   </button>
 </div>
+<div *ngIf="dataSource?.length">
 <mat-card *ngFor="let dataSourceDetails of dataSource" style="margin-bottom: 16px;">
-  <mat-card-content *ngIf="dataSource">
+  <mat-card-content>
     <mat-dialog-content class="of-hidden">
       
         <div class="row">
           <div class="col-xl-4 col-lg-6 col-md-12 col-sm-12 mb-2">
             <span class="TDValueBold">Employee Name</span> <br />
             <span class="TDValue">
-              {{ dataSourceDetails.employeeName || 'N/A' }}</span
+              {{ dataSourceDetails?.employeeName || 'N/A' }}</span
             >
           </div>
           <div class="col-xl-4 col-lg-6 col-md-12 col-sm-12 mb-2">
             <span class="TDValueBold">Billing Date</span> <br />
             <span class="TDValue">
-              {{ dataSourceDetails.billingDate | date:'dd/MM/YYYY' }}</span
+              {{ dataSourceDetails.billingDate | date:'dd/MM/yyyy' }}</span
             >
           </div>
           <div class="col-xl-4 col-lg-6 col-md-12 col-sm-12 mb-2">
             <span class="TDValueBold">Billing Time</span> <br />
             <span class="TDValue">
-              {{ dataSourceDetails.billingTime | date : 'shortTime' }}</span
+              {{ dataSourceDetails.billingTime | date:'HH:mm' }}</span
             >
           </div>
         </div>
@@ -40,13 +41,13 @@
           <div class="col-xl-4 col-lg-6 col-md-12 col-sm-12 mb-2">
             <span class="TDValueBold">Action Taken</span> <br />
             <span class="TDValue">
-              {{ dataSourceDetails.actionTaken || 'N/A' }}</span
+              {{ dataSourceDetails?.actionTaken || 'N/A' }}</span
             >
           </div>
           <div class="col-xl-4 col-lg-6 col-md-12 col-sm-12 mb-2">
             <span class="TDValueBold">Action Details</span> <br />
             <span class="TDValue">
-              {{ dataSourceDetails.actionDetails || 'N/A' }}</span
+              {{ dataSourceDetails?.actionDetails || 'N/A' }}</span
             >
           </div>
           
@@ -55,6 +56,7 @@
     </mat-dialog-content>
   </mat-card-content>
 </mat-card>
+</div>
 <br>
 <mat-progress-bar mode="indeterminate" *ngIf="isLoading"></mat-progress-bar>
 <mat-paginator #paginator [length]="totalRecord" [pageSize]="recordsPerPage" (page)="onChangedPage($event)"

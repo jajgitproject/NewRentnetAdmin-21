@@ -64,6 +64,28 @@
 
 
 
+.header-section {
+
+  display: flex;
+
+  justify-content: space-between;
+
+  align-items: flex-start;
+
+  margin-bottom: 16px;
+
+}
+
+
+
+.header-right {
+
+  flex-shrink: 0;
+
+}
+
+
+
 .address-block p,
 
 .body-text,

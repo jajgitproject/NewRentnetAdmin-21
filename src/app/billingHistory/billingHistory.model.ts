@@ -12,7 +12,7 @@ export class NewBillingHistoryModel {
 
 export class BillingHistoryModel {
   dutySlipForBillingID: number;
-  EmployeeName: string;
+  employeeName: string;
   billingDate:Date;
   billingTime:Date; 
   actionTaken: string;
@@ -21,7 +21,7 @@ export class BillingHistoryModel {
   constructor(billingHistory) {
     {
       this.dutySlipForBillingID = billingHistory.dutySlipForBillingID || '';
-      this.EmployeeName = billingHistory.EmployeeName || '';
+      this.employeeName = billingHistory.employeeName || '';
       this.billingDate = billingHistory.billingDate || '';
       this.billingTime = billingHistory.billingTime || '';
       this.actionTaken=billingHistory.actionTaken || '';
