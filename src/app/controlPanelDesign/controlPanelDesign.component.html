@@ -1089,25 +1089,11 @@
                     class="col-12 d-flex align-items-center justify-content-between control-panel-toolbar control-panel-header-col"
                     style="flex-wrap: nowrap;">
                     <!-- Left Section -->
-                    <!-- <div class="d-flex align-items-center" style="flex: 1 1 auto; min-width: 0;">
-                      <div class="d-flex align-items-center booking-category-wrap">
-                        <span class="booking-category-static-label">Booking Category ({{totalData}})</span>
-                        <mat-form-field class="example-full-width mr-4 booking-category-field cp-booking-category-field" appearance="fill"
-                          floatLabel="auto" subscriptSizing="dynamic" style="max-width: 240px;margin-left: 5px;">
-                          <mat-select panelClass="control-panel-select-panel" [panelWidth]="null" [(ngModel)]="bookingCategory" (selectionChange)="onRadioChange()">
-                            <mat-option value="complete">Complete</mat-option>
-                            <mat-option value="incomplete">Incomplete</mat-option>
-                            <mat-option value="all">Total Booking</mat-option>
-                            <mat-option value="Confirmed">Confirmed</mat-option>
-                            <mat-option value="Cancelled">Cancelled</mat-option>
-                            <mat-option value="Unalloted">Unalloted</mat-option>
-                            <mat-option value="Soft">Alloted(Soft)</mat-option>
-                            <mat-option value="Hard">Alloted(Hard)</mat-option>
-                            <mat-option value="tnc">TNC</mat-option>
-                          </mat-select>
-                        </mat-form-field>
+                    <div class="d-flex align-items-center driver-app-version-wrap" style="flex: 1 1 auto; min-width: 0;">
+                      <div class="driver-app-version-label" *ngIf="driverAppLatestVersion">
+                        Driver App Latest Version - {{ driverAppLatestVersion }}
                       </div>
-                    </div> -->
+                    </div>
 
                     <!-- Right Section -->
                     <div class="d-flex align-items-center justify-content-end control-panel-actions"
@@ -1717,6 +1703,20 @@
                                   <span class="cp-msg-badge cp-msg-badge--other"
                                         [class.cp-msg-badge--line-break]="p?.startsWith('WA')">{{ p }}</span>
                                 </ng-container>
+                              </span>
+                            </ng-container>
+
+                            <ng-container *ngIf="data.driverAppVersion">
+                              <br>
+                              <span class="cp-driver-app-version"
+                                    [class.cp-driver-app-version--mismatch]="isDriverAppVersionOutdated(data.driverAppVersion)"
+                                    [matTooltip]="'Driver app version'">
+                                {{ data.driverAppVersion }}
+                              </span>
+                              <span *ngIf="isDriverAppVersionOutdated(data.driverAppVersion)"
+                                    class="cp-driver-app-version-old-label"
+                                    matTooltip="Driver app version does not match latest">
+                                Driver is on old version
                               </span>
                             </ng-container>
 

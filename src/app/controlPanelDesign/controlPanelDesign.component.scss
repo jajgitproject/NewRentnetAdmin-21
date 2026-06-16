@@ -210,6 +210,39 @@ $cp-grid-column-padding: 12px;
   gap: 8px;
 }
 
+.driver-app-version-wrap {
+  padding-left: 10px;
+}
+
+.driver-app-version-label {
+  font-size: 13px;
+  font-weight: 600;
+  color: #d32f2f;
+  white-space: nowrap;
+}
+
+.cp-driver-app-version {
+  display: block;
+  font-size: 11px;
+  line-height: 1.3;
+  margin-top: 2px;
+}
+
+.cp-driver-app-version--mismatch {
+  color: #d32f2f;
+  font-weight: 600;
+}
+
+.cp-driver-app-version-old-label {
+  display: block;
+  font-size: 10px;
+  line-height: 1.3;
+  margin-top: 2px;
+  color: #d32f2f;
+  font-weight: 600;
+  font-style: italic;
+}
+
 .control-panel-action-btn {
   height: 36px !important;
   min-height: 36px !important;

@@ -242,6 +242,7 @@ export class ControlPanelDesignComponent implements OnInit {
 
   public advanceTableRLT:ReservationLocationTransferLogModel | null;
   ShowAllLocation: any;
+  driverAppLatestVersion = '';
 
   dataSourceForAppDataMissingStatus: AppDataMissingStatusModel[] | null;
   status:string;
@@ -386,6 +387,7 @@ export class ControlPanelDesignComponent implements OnInit {
     // this.filterForm.patchValue({toTime: threeHoursLater});
     this.captureReservationIdFromRoute(this.router.snapshot.queryParams);
     this.safeRun(() => this.InitShowAllLocationCheck());
+    this.safeRun(() => this.InitDriverAppLatestVersion());
 
     // Capture status from query params (encrypted) so we can propagate to downstream dialogs
     this.router.queryParams.subscribe((params) => {
@@ -691,7 +693,29 @@ export class ControlPanelDesignComponent implements OnInit {
     );
   }
 
-  sortByColumnName(column: any) 
+  public InitDriverAppLatestVersion()
+  {
+    this._controlPanelDesignService.getDriverAppLatestVersion().subscribe(
+      data => {
+        this.driverAppLatestVersion = (data?.appVersion || '').trim();
+        if (this.reservationHeaderInfo?.length) {
+          this.reservationHeaderInfo = [...this.reservationHeaderInfo];
+        }
+      },
+      () => {
+        this.driverAppLatestVersion = '';
+      }
+    );
+  }
+
+  isDriverAppVersionOutdated(driverAppVersion: string | null | undefined): boolean {
+    const latest = (this.driverAppLatestVersion || '').trim();
+    const current = (driverAppVersion || '').trim();
+    if (!current || !latest) return false;
+    return current.localeCompare(latest, undefined, { sensitivity: 'accent' }) !== 0;
+  }
+
+  sortByColumnName(column: any)
   {
     if (this.sortColumn === column) 
     {

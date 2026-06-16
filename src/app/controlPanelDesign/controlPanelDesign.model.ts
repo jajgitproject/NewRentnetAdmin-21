@@ -26,6 +26,7 @@ export class ControlPanelHeaderDetails {
   registrationNumber:string;
   driverName:string;
   driverPhone:string;
+  driverAppVersion?: string;
   reservationStatus:string;
   tripTo:string;
   newCustomer:boolean;

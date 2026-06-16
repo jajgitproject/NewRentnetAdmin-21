@@ -114,6 +114,12 @@ export class ControlPanelDesignService {
     return this.httpClient.get(this.API_URL +'getShowAllLocationCheck' +'/' +employeeID);
   }
 
+  getDriverAppLatestVersion(): Observable<{ appVersion: string }> {
+    return this.httpClient.get<{ appVersion: string }>(
+      this.API_URL + 'getDriverAppLatestVersion'
+    );
+  }
+
   getReservationDetailsForAllotment(
     _filters: Filters,
     currentPage: number,
