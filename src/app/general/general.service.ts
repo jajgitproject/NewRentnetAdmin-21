@@ -1410,6 +1410,14 @@ GetVehicleBasedOnContractIDForOutStationRoundTrip(contractID: any,PackageID:numb
     return this.http.get<EmployeeDropDown[]>(this.BaseURL + "customerKAMChange/ForOLDKAMDropDown");
   }
 
+  GetCustomerChangesBillingExecutive(): Observable<EmployeeDropDown[]> {
+    return this.http.get<EmployeeDropDown[]>(this.BaseURL + "customerBillingExecutiveChange/ForOLDBillingExecutiveDropDown");
+  }
+
+  GetCustomerChangesCollectionExecutive(): Observable<EmployeeDropDown[]> {
+    return this.http.get<EmployeeDropDown[]>(this.BaseURL + "customerCollectionExecutiveChange/ForOLDCollectionExecutiveDropDown");
+  }
+
     GetSalesChangesKam(): Observable<EmployeeDropDown[]> {
     return this.http.get<EmployeeDropDown[]>(this.BaseURL + "customerSalesManagerChange/ForOLDSalesManagerDropDown");
   }

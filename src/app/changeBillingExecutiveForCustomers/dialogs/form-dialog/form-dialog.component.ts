@@ -6,7 +6,7 @@ import { FormControl, Validators, FormGroup, FormBuilder, ValidatorFn, AbstractC
 import { ChangeBillingExecutiveForCustomers } from '../../changeBillingExecutiveForCustomers.model';
 import { MAT_DATE_LOCALE } from '@angular/material/core';
 import { GeneralService } from '../../../general/general.service';
-import { Observable } from 'rxjs';
+import { Observable, of } from 'rxjs';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { EmployeeDropDown } from 'src/app/employee/employeeDropDown.model';
 import { startWith, map } from 'rxjs/operators';
@@ -27,8 +27,8 @@ export class FormDialogComponentHolder {
   advanceTableForm: FormGroup;
   public EmployeeList?: EmployeeDropDown[] = [];
   public billingExecutiveList?: EmployeeDropDown[] = [];
-  filteredOldBillingExecutiveOptions: Observable<EmployeeDropDown[]>;
-  filteredNewBillingExecutiveOptions: Observable<EmployeeDropDown[]>;
+  filteredOldBillingExecutiveOptions: Observable<EmployeeDropDown[]> = of([]);
+  filteredNewBillingExecutiveOptions: Observable<EmployeeDropDown[]> = of([]);
   advanceTable: ChangeBillingExecutiveForCustomers;
   saveDisabled: boolean = true;
   oldBillingExecutiveID: any;
@@ -77,46 +77,58 @@ export class FormDialogComponentHolder {
   }
 
   InitOldBillingExecutive() {
-    this._generalService.GetCustomerChangesBillingExecutive().subscribe((data) => {
-      this.billingExecutiveList = data;
-      this.advanceTableForm.controls['oldCustomerBillingExecutiveEmployee'].setValidators([
-        Validators.required,
-        this.billingExecutiveNameValidator(this.billingExecutiveList)
-      ]);
-      this.advanceTableForm.controls['oldCustomerBillingExecutiveEmployee'].updateValueAndValidity();
-      this.filteredOldBillingExecutiveOptions = this.advanceTableForm.controls['oldCustomerBillingExecutiveEmployee'].valueChanges.pipe(
-        startWith(''),
-        map((value) => this._filterOldBillingExecutive(value || ''))
-      );
+    this._generalService.GetCustomerChangesBillingExecutive().subscribe({
+      next: (data) => {
+        this.billingExecutiveList = data || [];
+        this.advanceTableForm.controls['oldCustomerBillingExecutiveEmployee'].setValidators([
+          Validators.required,
+          this.billingExecutiveNameValidator(this.billingExecutiveList)
+        ]);
+        this.advanceTableForm.controls['oldCustomerBillingExecutiveEmployee'].updateValueAndValidity();
+        this.filteredOldBillingExecutiveOptions = this.advanceTableForm.controls['oldCustomerBillingExecutiveEmployee'].valueChanges.pipe(
+          startWith(''),
+          map((value) => this._filterOldBillingExecutive(value || ''))
+        );
+      },
+      error: () => {
+        this.billingExecutiveList = [];
+        this.filteredOldBillingExecutiveOptions = of([]);
+      }
     });
   }
 
   private _filterOldBillingExecutive(value: string): any {
     const filterValue = value.toLowerCase();
-    return this.billingExecutiveList.filter((data) => {
+    return (this.billingExecutiveList || []).filter((data) => {
       const fullName = `${data.employeeFirstName} ${data.employeeLastName}`.toLowerCase();
       return fullName.includes(filterValue);
     });
   }
 
   InitNewBillingExecutive() {
-    this._generalService.GetEmployees().subscribe((data) => {
-      this.EmployeeList = data;
-      this.advanceTableForm.controls['newCustomerBillingExecutiveEmployee'].setValidators([
-        Validators.required,
-        this.employeeNameValidator(this.EmployeeList)
-      ]);
-      this.advanceTableForm.controls['newCustomerBillingExecutiveEmployee'].updateValueAndValidity();
-      this.filteredNewBillingExecutiveOptions = this.advanceTableForm.controls['newCustomerBillingExecutiveEmployee'].valueChanges.pipe(
-        startWith(''),
-        map((value) => this._filterNewBillingExecutive(value || ''))
-      );
+    this._generalService.GetEmployees().subscribe({
+      next: (data) => {
+        this.EmployeeList = data || [];
+        this.advanceTableForm.controls['newCustomerBillingExecutiveEmployee'].setValidators([
+          Validators.required,
+          this.employeeNameValidator(this.EmployeeList)
+        ]);
+        this.advanceTableForm.controls['newCustomerBillingExecutiveEmployee'].updateValueAndValidity();
+        this.filteredNewBillingExecutiveOptions = this.advanceTableForm.controls['newCustomerBillingExecutiveEmployee'].valueChanges.pipe(
+          startWith(''),
+          map((value) => this._filterNewBillingExecutive(value || ''))
+        );
+      },
+      error: () => {
+        this.EmployeeList = [];
+        this.filteredNewBillingExecutiveOptions = of([]);
+      }
     });
   }
 
   private _filterNewBillingExecutive(value: string): any {
     const filterValue = value.toLowerCase();
-    return this.EmployeeList.filter((data) => {
+    return (this.EmployeeList || []).filter((data) => {
       const fullName = `${data.firstName} ${data.lastName}`.toLowerCase();
       return fullName.includes(filterValue);
     });

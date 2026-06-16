@@ -39,6 +39,23 @@ const routes: Routes = [
       },
 
       {
+        path: 'changeBillingExecutiveForCustomers',
+        loadChildren: () =>
+          import('./changeBillingExecutiveForCustomers/changeBillingExecutiveForCustomers.module').then(
+            (m) => m.ChangeBillingExecutiveForCustomersModule
+          )
+      },
+
+            {
+        path: 'changeCollectionExecutiveForCustomers',
+        loadChildren: () =>
+          import('./changeCollectionExecutiveForCustomers/changeCollectionExecutiveForCustomers.module').then(
+            (m) => m.ChangeCollectionExecutiveForCustomersModule
+          )
+      },
+
+
+            {
         path: 'cdcLocalFixedDetails',
         loadChildren: () =>
           import('./cdcLocalFixedDetails/cdcLocalFixedDetails.module').then(

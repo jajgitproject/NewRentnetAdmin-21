@@ -1,43 +1,42 @@
 // @ts-nocheck
 import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
-import { ChangeBillingExecutiveForCustomersService } from './changeBillingExecutiveForCustomers.service';
+import { ChangeCollectionExecutiveForCustomersService } from './changeCollectionExecutiveForCustomers.service';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { MatDialog } from '@angular/material/dialog';
 import { MatPaginator } from '@angular/material/paginator';
 import { MatSort } from '@angular/material/sort';
-import { ChangeBillingExecutiveForCustomers } from './changeBillingExecutiveForCustomers.model';
+import { ChangeCollectionExecutiveForCustomers } from './changeCollectionExecutiveForCustomers.model';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import { Observable, Subscription } from 'rxjs';
+import { Subscription } from 'rxjs';
 import { FormDialogComponentHolder } from './dialogs/form-dialog/form-dialog.component';
 import { DeleteDialogComponent } from './dialogs/delete/delete.component';
 import { MAT_DATE_LOCALE } from '@angular/material/core';
 import { MatMenu, MatMenuTrigger } from '@angular/material/menu';
 import { GeneralService } from '../general/general.service';
-import { FormControl } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import moment from 'moment';
 import { EmployeeDropDown } from '../employee/employeeDropDown.model';
 
 @Component({
   standalone: false,
-  selector: 'app-changeBillingExecutiveForCustomers',
-  templateUrl: './changeBillingExecutiveForCustomers.component.html',
-  styleUrls: ['./changeBillingExecutiveForCustomers.component.sass'],
+  selector: 'app-changeCollectionExecutiveForCustomers',
+  templateUrl: './changeCollectionExecutiveForCustomers.component.html',
+  styleUrls: ['./changeCollectionExecutiveForCustomers.component.sass'],
   providers: [{ provide: MAT_DATE_LOCALE, useValue: 'en-GB' }]
 })
-export class ChangeBillingExecutiveForCustomersComponent implements OnInit {
+export class ChangeCollectionExecutiveForCustomersComponent implements OnInit {
   displayedColumns = [
-    'oldBillingExecutiveName',
-    'newBillingExecutiveName',
+    'oldCollectionExecutiveName',
+    'newCollectionExecutiveName',
     'startDate',
     'updationDateTime',
     'actions'
   ];
-  dataSource: ChangeBillingExecutiveForCustomers[] | null;
-  changeBillingExecutiveForCustomersID: number;
-  advanceTable: ChangeBillingExecutiveForCustomers | null;
-  SearchNewBillingExecutiveActivationStatus: boolean = true;
-  SearchNewBillingExecutiveActivationFromDate: string = '';
+  dataSource: ChangeCollectionExecutiveForCustomers[] | null;
+  changeCollectionExecutiveForCustomersID: number;
+  advanceTable: ChangeCollectionExecutiveForCustomers | null;
+  SearchNewCollectionExecutiveActivationStatus: boolean = true;
+  SearchNewCollectionExecutiveActivationFromDate: string = '';
   PageNumber: number = 0;
   sortType: string;
   sortingData: number;
@@ -55,7 +54,7 @@ export class ChangeBillingExecutiveForCustomersComponent implements OnInit {
     public httpClient: HttpClient,
     public dialog: MatDialog,
     public router: Router,
-    public changeBillingExecutiveForCustomersService: ChangeBillingExecutiveForCustomersService,
+    public changeCollectionExecutiveForCustomersService: ChangeCollectionExecutiveForCustomersService,
     private snackBar: MatSnackBar,
     public _generalService: GeneralService
   ) {}
@@ -75,7 +74,7 @@ export class ChangeBillingExecutiveForCustomersComponent implements OnInit {
   refresh() {
     this.SearchEmployeeName = '';
     this.SearchStartDate = '';
-    this.SearchNewBillingExecutiveActivationStatus = true;
+    this.SearchNewCollectionExecutiveActivationStatus = true;
     this.searchTerm = '';
     this.selectedFilter = 'search';
     this.PageNumber = 0;
@@ -95,7 +94,7 @@ export class ChangeBillingExecutiveForCustomersComponent implements OnInit {
   }
 
   editCall(row) {
-    this.changeBillingExecutiveForCustomersID = row.id;
+    this.changeCollectionExecutiveForCustomersID = row.id;
     this.dialog.open(FormDialogComponentHolder, {
       width: '900px',
       maxHeight: '90vh',
@@ -112,7 +111,7 @@ export class ChangeBillingExecutiveForCustomersComponent implements OnInit {
   }
 
   deleteItem(row) {
-    this.changeBillingExecutiveForCustomersID = row.id;
+    this.changeCollectionExecutiveForCustomersID = row.id;
     this.dialog.open(DeleteDialogComponent, { data: row });
   }
 
@@ -123,7 +122,7 @@ export class ChangeBillingExecutiveForCustomersComponent implements OnInit {
   }
 
   shouldShowDeleteButton(item: any): boolean {
-    return item.newBillingExecutiveActivationStatus !== false;
+    return item.newCollectionExecutiveActivationStatus !== false;
   }
 
   public Filter() {
@@ -143,7 +142,7 @@ export class ChangeBillingExecutiveForCustomersComponent implements OnInit {
         this.searchTerm = '';
         break;
     }
-    this.changeBillingExecutiveForCustomersService
+    this.changeCollectionExecutiveForCustomersService
       .getTableData(this.SearchEmployeeName, this.SearchFromDate, this.SearchActivationStatus, this.PageNumber)
       .subscribe(
         (data) => {
@@ -164,7 +163,7 @@ export class ChangeBillingExecutiveForCustomersComponent implements OnInit {
     });
   }
 
-  onContextMenu(event: MouseEvent, item: ChangeBillingExecutiveForCustomers) {
+  onContextMenu(event: MouseEvent, item: ChangeCollectionExecutiveForCustomers) {
     event.preventDefault();
     this.contextMenuPosition.x = event.clientX + 'px';
     this.contextMenuPosition.y = event.clientY + 'px';
@@ -196,10 +195,10 @@ export class ChangeBillingExecutiveForCustomersComponent implements OnInit {
       this.messageReceived = message.text;
       this.MessageArray = this.messageReceived.split(':');
       if (this.MessageArray.length == 3) {
-        if (this.MessageArray[0] == 'ChangeBillingExecutiveForCustomersCreate' && this.MessageArray[1] == 'ChangeBillingExecutiveForCustomersView' && this.MessageArray[2] == 'Success') {
+        if (this.MessageArray[0] == 'ChangeCollectionExecutiveForCustomersCreate' && this.MessageArray[1] == 'ChangeCollectionExecutiveForCustomersView' && this.MessageArray[2] == 'Success') {
           this.refresh();
-          this.showNotification('snackbar-success', 'Customer Billing Executive changed successfully...!!!', 'bottom', 'center');
-        } else if (this.MessageArray[0] == 'ChangeBillingExecutiveForCustomersAll' && this.MessageArray[1] == 'ChangeBillingExecutiveForCustomersView' && this.MessageArray[2] == 'Failure') {
+          this.showNotification('snackbar-success', 'Customer Collection Executive changed successfully...!!!', 'bottom', 'center');
+        } else if (this.MessageArray[0] == 'ChangeCollectionExecutiveForCustomersAll' && this.MessageArray[1] == 'ChangeCollectionExecutiveForCustomersView' && this.MessageArray[2] == 'Failure') {
           this.refresh();
           this.showNotification('snackbar-danger', 'Operation Failed.....!!!', 'bottom', 'center');
         }
@@ -221,8 +220,8 @@ export class ChangeBillingExecutiveForCustomersComponent implements OnInit {
       this.sortingData = 1;
       this.sortType = 'Descending';
     }
-    this.changeBillingExecutiveForCustomersService
-      .getTableDataSort(this.SearchEmployeeName, this.SearchNewBillingExecutiveActivationFromDate, this.SearchNewBillingExecutiveActivationStatus, this.PageNumber, coloumName.active, this.sortType)
+    this.changeCollectionExecutiveForCustomersService
+      .getTableDataSort(this.SearchEmployeeName, this.SearchNewCollectionExecutiveActivationFromDate, this.SearchNewCollectionExecutiveActivationStatus, this.PageNumber, coloumName.active, this.sortType)
       .subscribe(
         (data) => {
           this.dataSource = data;

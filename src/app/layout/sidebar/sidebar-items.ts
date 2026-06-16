@@ -1095,7 +1095,28 @@ export const ROUTES: RouteInfo[] = [
         submenu: [],
         isAccess: false
       },
-   
+         {
+        path: 'changeBillingExecutiveForCustomers',
+        title: 'Change Billing Executive For Customers',
+        moduleName: 'changeBillingExecutiveForCustomers',
+        icon: 'fas fa-tachometer-alt',
+        class: '',
+        groupTitle: false,
+        submenu: [],
+        isAccess: false
+      },
+
+            {
+        path: 'changeCollectionExecutiveForCustomers',
+        title: 'Change Collection Executive For Customers',
+        moduleName: 'changeCollectionExecutiveForCustomers',
+        icon: 'fas fa-tachometer-alt',
+        class: '',
+        groupTitle: false,
+        submenu: [],
+        isAccess: false
+      },
+
       {
         path: 'messageType',
         title: 'Message Type',
