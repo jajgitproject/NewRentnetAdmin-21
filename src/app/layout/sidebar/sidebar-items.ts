@@ -1459,6 +1459,17 @@ export const ROUTES: RouteInfo[] = [
       },
 
       {
+        path: 'reservationOTP',
+        title: 'Reservation OTP',
+        moduleName: 'reservationOTP',
+        icon: 'fas fa-tachometer-alt',
+        class: '',
+        groupTitle: false,
+        submenu: [],
+        isAccess: false
+      },
+
+      {
         path: 'vendorContract',
         title: 'Vendor Contract',
         moduleName: 'reservationSource',
