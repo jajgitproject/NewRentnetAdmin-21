@@ -417,7 +417,7 @@ allotmentType: any;
     }
     else{
       this.advanceTableForm.patchValue({allotmentID:this.data.allotmentID})
-      this.advanceTableForm.patchValue({allotmentType:this.data.allotmentType})
+      this.advanceTableForm.patchValue({allotmentType:'Soft'})
     this.advanceTableService.update(this.advanceTableForm.getRawValue())
       .subscribe(
         response => {
@@ -493,7 +493,7 @@ allotmentType: any;
     }
     else{
       this.advanceTableForm.patchValue({allotmentID:this.data.allotmentID})
-      this.advanceTableForm.patchValue({allotmentType:this.data.allotmentType})
+      this.advanceTableForm.patchValue({allotmentType:'Hard'})
     this.advanceTableService.update(this.advanceTableForm.getRawValue())
       .subscribe(
         response => {
