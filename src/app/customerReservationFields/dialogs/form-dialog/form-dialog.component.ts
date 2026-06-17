@@ -66,8 +66,11 @@ export class FormDialogComponentHolder
         {
           this.dialogTitle = 'Reservation Field For ';
           this.advanceTable = new CustomerReservationFields({});
+          this.advanceTable.fieldDataType='Int';
+          this.advanceTable.fieldControlType='TextBox';
+          this.advanceTable.formForField='RentNet';
+          this.advanceTable.isMandatory=true;
           this.advanceTable.activationStatus=true;
-
         }
         this.advanceTableForm = this.createContactForm();    
         this.customerName=data.CustomerName;
