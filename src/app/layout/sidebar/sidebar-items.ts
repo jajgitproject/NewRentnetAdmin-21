@@ -1125,6 +1125,16 @@ export const ROUTES: RouteInfo[] = [
         submenu: [],
         isAccess: false
       },
+      {
+        path: 'bulkChangeCustomerCollectionExecutive',
+        title: 'Bulk Change Customer Collection Executive',
+        moduleName: 'bulkChangeCustomerCollectionExecutive',
+        icon: 'fas fa-tachometer-alt',
+        class: '',
+        groupTitle: false,
+        submenu: [],
+        isAccess: false
+      },
 
             {
         path: 'changeCollectionExecutiveForCustomers',

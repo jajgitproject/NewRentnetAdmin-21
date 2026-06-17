@@ -45,7 +45,13 @@ const routes: Routes = [
             (m) => m.ChangeBillingExecutiveForCustomersModule
           )
       },
-
+      {
+        path: 'bulkChangeCustomerCollectionExecutive',
+        loadChildren: () =>
+          import('./bulkChangeCustomerCollectionExecutive/bulkChangeCustomerCollectionExecutive.module').then(
+            (m) => m.BulkChangeCustomerCollectionExecutiveModule
+          )
+      },
             {
         path: 'changeCollectionExecutiveForCustomers',
         loadChildren: () =>
