@@ -871,6 +871,26 @@ export const ROUTES: RouteInfo[] = [
         submenu: [],
         isAccess: false
       },
+      {
+        path: 'bulkChangeCustomerKAM',
+        title: 'Bulk Change Customer KAM',
+        moduleName: 'bulkChangeCustomerKAM',
+        icon: 'fas fa-tachometer-alt',
+        class: '',
+        groupTitle: false,
+        submenu: [],
+        isAccess: false
+      },
+      {
+        path: 'bulkChangeCustomerBillingExecutive',
+        title: 'Bulk Change Customer Billing Executive',
+        moduleName: 'bulkChangeCustomerBillingExecutive',
+        icon: 'fas fa-tachometer-alt',
+        class: '',
+        groupTitle: false,
+        submenu: [],
+        isAccess: false
+      },
          {
         path: 'changeSaleForCustomers',
         title: 'Customer Sales Manager Change',

@@ -54,6 +54,22 @@ const routes: Routes = [
           )
       },
 
+      {
+        path: 'bulkChangeCustomerKAM',
+        loadChildren: () =>
+          import('./bulkChangeCustomerKAM/bulkChangeCustomerKAM.module').then(
+            (m) => m.BulkChangeCustomerKAMModule
+          )
+      },
+
+      {
+        path: 'bulkChangeCustomerBillingExecutive',
+        loadChildren: () =>
+          import('./bulkChangeCustomerBillingExecutive/bulkChangeCustomerBillingExecutive.module').then(
+            (m) => m.BulkChangeCustomerBillingExecutiveModule
+          )
+      },
+
 
             {
         path: 'cdcLocalFixedDetails',

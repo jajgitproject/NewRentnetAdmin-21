@@ -1,0 +1,56 @@
+.materialTableHeader .bulk-kam-toolbar
+  display: flex
+  align-items: center
+  justify-content: space-between
+  flex-wrap: wrap
+  gap: 16px
+  margin: 0
+
+.toolbar-left
+  flex: 1 1 420px
+  max-width: 520px
+  padding: 6px 0 6px 12px
+
+.toolbar-actions
+  display: flex
+  align-items: center
+  justify-content: flex-end
+  gap: 12px
+  flex: 0 0 auto
+  padding-right: 12px
+
+.toolbar-button
+  min-height: 40px
+  white-space: nowrap
+
+.toolbar-icon-button
+  flex: 0 0 auto
+
+.bulk-kam-search-field
+  width: 100%
+
+:host ::ng-deep .bulk-kam-search-field.mat-mdc-form-field
+  width: 100%
+
+:host ::ng-deep .bulk-kam-search-field .mat-mdc-form-field-subscript-wrapper
+  display: none
+
+:host ::ng-deep .bulk-kam-search-field .mat-mdc-form-field-infix
+  min-height: 44px
+  padding-top: 10px
+  padding-bottom: 10px
+
+@media (max-width: 991px)
+  .materialTableHeader .bulk-kam-toolbar
+    flex-direction: column
+    align-items: stretch
+
+  .toolbar-left
+    flex: 1 1 auto
+    max-width: 100%
+    padding-left: 0
+
+  .toolbar-actions
+    justify-content: flex-start
+    flex-wrap: wrap
+    padding-right: 0

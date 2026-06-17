@@ -1,0 +1,53 @@
+<div class="addContainer">
+    <div class="modalHeader">
+        <div class="editRowModal">
+            <div class="modalHeader clearfix">
+                <div class="modal-about" style="text-align: center;">
+                    <div class="font-weight-bold p-t-5 font-17">Change Billing Executive</div>
+                </div>
+            </div>
+        </div>
+        <button mat-icon-button (click)="onCancel()" aria-label="Close dialog">
+            <mat-icon>close</mat-icon>
+        </button>
+    </div>
+    <div mat-dialog-content>
+        <form class="register-form m-4" [formGroup]="changeForm">
+            <p>Selected records: <b>{{selectedCount}}</b></p>
+            <div class="row">
+                <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12 mb-2">
+                    <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                        <mat-label>New Billing Executive</mat-label>
+                        <input required type="text" matInput autocomplete="off"
+                            formControlName="newBillingExecutive"
+                            [matAutocomplete]="newBillingExecutiveAuto"
+                            placeholder="Type at least 3 characters">
+                        <mat-autocomplete #newBillingExecutiveAuto="matAutocomplete"
+                            (optionSelected)="onEmployeeSelected($event.option.value)">
+                            <mat-option *ngFor="let option of filteredEmployeeOptions | async"
+                                [value]="option.firstName +' '+option.lastName">
+                                {{option.firstName +' '+ option.lastName}}
+                            </mat-option>
+                        </mat-autocomplete>
+                        <mat-error *ngIf="changeForm.controls['newBillingExecutive']?.hasError('required')">
+                            New Billing Executive is required
+                        </mat-error>
+                        <mat-error *ngIf="changeForm.controls['newBillingExecutive']?.hasError('employeeNameInvalid')">
+                            Please select a valid employee
+                        </mat-error>
+                    </mat-form-field>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12 mb-2">
+                    <div class="example-button-row">
+                        <button mat-raised-button color="primary" type="button"
+                            [disabled]="!changeForm.valid || !newEmployeeID"
+                            (click)="onChange()">Change</button>
+                        <button mat-raised-button color="warn" type="button" (click)="onCancel()">Cancel</button>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
