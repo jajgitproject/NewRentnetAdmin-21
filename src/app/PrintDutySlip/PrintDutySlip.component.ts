@@ -151,18 +151,12 @@ export class PrintDutySlipComponent {
       this.datetime = hours + "." + minutes;
     }
 
-    printWithSelectPdf() {
-  const element = this.printableArea?.nativeElement as HTMLElement;
-  const fileName = `DutySlip_${this.DutySlipID || 'print'}`;
-
- 
-  const mapSnapshot = this.staticMapUrl ?? undefined;
-
-  this.pdfPrintService.printElementAsPdf(element, fileName, {
-    iframeImageFallback: mapSnapshot,
-    liveElement: element
-  });
-}
+    printWithSelectPdf()
+    {
+      const element = this.printableArea?.nativeElement as HTMLElement;
+      const fileName = `DutySlip_${this.DutySlipID || 'print'}`;
+      this.pdfPrintService.printElementAsPdf(element, fileName);
+    }
   }
   
   

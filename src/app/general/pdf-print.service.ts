@@ -66,26 +66,8 @@ export class PdfPrintService {
     this.prepareImagePages(clone);
     this.removeDutySlipLabels(clone);
 
-   const docStyles = this.collectDocumentStyles();
-   return `<!DOCTYPE html><html><head><meta charset="utf-8">${docStyles}<style>${PRINT_DOCUMENT_CSS}</style></head><body>${clone.innerHTML}</body></html>`;
+    return `<!DOCTYPE html><html><head><meta charset="utf-8"><style>${PRINT_DOCUMENT_CSS}</style></head><body>${clone.innerHTML}</body></html>`;
   }
-  private collectDocumentStyles(): string {
-  const parts: string[] = [];
-
-  document.querySelectorAll('link[rel="stylesheet"]').forEach((el) => {
-    const link = el as HTMLLinkElement;
-    const href = link.getAttribute('href');
-    if (href) {
-      parts.push(`<link rel="stylesheet" href="${this.absolutizeUrl(href)}">`);
-    }
-  });
-
-  document.querySelectorAll('style').forEach((el) => {
-    parts.push(`<style>${el.textContent}</style>`);
-  });
-
-  return parts.join('\n');
-}
 
   private generatePdf(html: string, fileName: string, baseUrl: string): Observable<Blob> {
     return this.httpClient.post(
@@ -405,27 +387,18 @@ export class PdfPrintService {
       return inlined;
     }
 
-const replacement = document.createElement('div');
-replacement.className = 'iframe-print-fallback';
+    const replacement = document.createElement('div');
+    replacement.className = 'iframe-print-fallback';
 
-if (liveIframe) {
-  replacement.style.width = liveIframe.offsetWidth + 'px';
-  replacement.style.height = liveIframe.offsetHeight + 'px';
-  replacement.style.display = 'inline-block';
-}
-
-if (imageFallback) {
-  const img = document.createElement('img');
-  img.src = this.absolutizeUrl(imageFallback);
-  img.className = 'attachment-image';
-  img.alt = '';
-  img.style.width = '100%';
-  img.style.height = '100%';
-  img.style.objectFit = 'contain';
-  replacement.appendChild(img);
-} else {
-  replacement.textContent = 'Attachment preview unavailable for PDF export.';
-}
+    if (imageFallback) {
+      const img = document.createElement('img');
+      img.src = this.absolutizeUrl(imageFallback);
+      img.className = 'attachment-image';
+      img.alt = '';
+      replacement.appendChild(img);
+    } else {
+      replacement.textContent = 'Attachment preview unavailable for PDF export.';
+    }
 
     return replacement;
   }
