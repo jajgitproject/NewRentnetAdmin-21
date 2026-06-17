@@ -3864,6 +3864,13 @@ const routes: Routes = [
             (m) => m.PrintDutySlipWithoutMapModule
           )
       },
+      {
+        path: 'creditNotePrint',
+        loadChildren: () =>
+          import('./CreditNotePrint/CreditNotePrint.module').then(
+            (m) => m.CreditNotePrintModule
+          )
+      },
     ],
   },
   {

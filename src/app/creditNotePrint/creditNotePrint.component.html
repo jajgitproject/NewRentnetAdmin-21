@@ -1,0 +1,198 @@
+
+<mat-dialog-content #printDutyBill>
+  <div id="printElem"  style=" margin-top: 100px;">
+      <table width="750" border="0" align="center" cellpadding="0" cellspacing="0">
+        <tr class="no-border">
+          <td height="1000" valign="top" class="no-border">
+            <table width="700" border="0" align="center" cellpadding="0" cellspacing="0"  valign="middle">
+              <tr>
+                <td height="900" align="center" valign="top">
+                  <table width="900" border="0" align="center" cellpadding="0" cellspacing="0">
+                    <tr width="850" height="100" class="no-border" align="center">
+                        <td class="no-border" style="font-size: 12pt;">
+                          <span class="text-heading">CREDIT NOTE        
+                            <br />Original for Recipient
+                            <br />    
+                          </span>
+                          <span class="text-subheading"></span>
+                        </td>
+                        <td width="142" class="text1" style="border:none;">
+                          <!-- {{"N/A"}}                         -->
+                          <img src="" width="92" height="73" />           
+                        </td>
+                    </tr>
+
+                    <tr class="no-border" height="100">
+                      <td class="no-border" class="auto-style6">
+                        <span class="text-heading">ECOS (I) MOBILITY &amp; HOSPITALITY PVT. LTD</span><br />
+                        (Formerly known as Ecos (India) Mobility & Hospitality Private Limited)<br/>
+                        <strong>Branch. Office : </strong>{{dataSource?.invoiceEcoBranchModel?.branchAddress}}
+                        <br />
+                        <strong>Reg. Office :</strong> 45, First Floor, Corner Market, Malviya Nagar, New Delhi-110017
+                        <br />
+                        <strong>Correspondence : </strong> {{dataSource?.invoiceEcoCompanyModel?.correspondenceAddress}},
+                        <br />
+                        <strong>Ph. {{dataSource?.invoiceEcoCompanyModel?.phoneNumber}}, </strong>
+                        <strong>Fax. {{dataSource?.invoiceEcoCompanyModel?.fax}}</strong>
+                        <strong>Reservation :</strong> 24/7 : 91-11-40794079<br />
+                        <strong>E-mail :</strong> billing@ecorentacar.com, <strong>Reservation :</strong> cars@ecorentacar.com
+                        <br />
+                        <strong>GST No : {{dataSource?.invoiceEcoBranchModel?.branchGSTNumber}}</strong>
+                        <br />   
+                        LUT : {{dataSource?.invoiceEcoBranchModel?.branchLUTNumber}},  Exp Date : {{dataSource?.invoiceEcoBranchModel?.branchLUTExpiryDate | date: 'yyyy-MM-dd'}}  
+                        <br />  
+                        IRN : {{dataSource?.invoiceModel?.irn}}  
+                      </td>
+                      <td width="142" class="text1">
+                        <img src="http://www.ecoserp.com/bill_printing/logo.jpg" width="92" height="73" /> 
+                      </td>
+                    </tr>
+                  </table>
+
+                  <table width="900" border="0" cellpadding="2" cellspacing="0" class="text1">
+                    <tr>
+                      <td width="369" rowspan="2">To,
+                        <br />
+                        <strong>CustomerName : {{dataSource?.invoiceCustomerModel?.customerName}}</strong>
+                        <br />
+                        <div style="font-size:smaller">
+                          <b>Billing Address </b>: {{dataSource?.invoiceCustomerModel?.billingAddress}}
+                          <br />
+                          State Of Service : {{dataSource?.invoiceCustomerModel?.customerGSTStateName}},<br/>
+                          State code : {{dataSource?.invoiceCustomerModel?.customerGSTStateCode}}
+                          <br />
+                          GST/UIN : {{dataSource?.invoiceEcoBranchModel?.branchGSTNumber}}
+                        </div>                 
+                      </td>
+                      <td width="179" height="35" align="left">
+                        C.N No. : {{dataSource?.creditNoteNumberWithPrefix}}<br/>
+                        C.N Date : {{dataSource?.dateTimeOfGeneration | date: 'yyyy-MM-dd'}}
+                      </td>
+                    </tr>
+                    <tr>
+                      <td height="35" align="left">
+                        Bill No. : {{dataSource?.invoiceModel?.invoiceNumber}}<br/>
+                        Bill Date : {{dataSource?.invoiceModel?.invoiceDate | date: 'yyyy-MM-dd'}}
+                      </td>
+                    </tr>
+                  </table>
+
+                  <table width="900" height="350" border="0" cellpadding="0" cellspacing="0" class="text1">
+                    <tr>
+                      <td width="445" rowspan="8" align="left" valign="top"><table width="100%" cellspacing="0" cellpadding="0">
+                        <tr height="20">
+                          <td width="66%" align="center"><strong>Particulars</strong></td>
+                          <td width="16%" align="center"><strong>Rate</strong></td>
+                          <td width="18%" align="center"><strong>Amount</strong></td>
+                        </tr>
+
+                        <tr class="no-border" height="10">
+                          <td class="no-border" valign="top" class="text6">Income Type : </td>
+                          <td class="no-border" valign="top"  class="text6">&nbsp;</td>
+                          <td class="no-border" valign="top"  class="text6">&nbsp;</td>
+                        </tr>
+
+                        <tr class="no-border" height="10">
+                          <td class="no-border" valign="top" class="text6"></td>
+                          <td class="no-border" valign="top"  class="text6"></td>
+                          <td class="no-border" valign="top"   class="text6"></td>
+                        </tr>
+
+                        <tr class="no-border" height="10">
+                          <td class="no-border" valign="top" class="text6" >Reason of Credit Note : {{dataSource?.creditNoteReason}}<br /></td>
+                          <td class="no-border" valign="top"  class="text6"></td>
+                          <td class="no-border" valign="top"  class="text6">&nbsp;</td>
+                        </tr>
+
+                        <tr class="no-border" height="10">
+                          <td class="no-border" valign="top" class="text6"></td>
+                          <td class="no-border" valign="top"  class="text6"></td>
+                          <td class="no-border" valign="top"   class="text6"></td>
+                        </tr>
+
+                        <tr class="no-border" height="10">
+                          <td class="no-border" valign="top"  class="text6">
+                            <br />
+                            SAC : {{dataSource?.sacNumber}}
+                          </td>
+                          <td class="no-border" valign="top"  class="text6">
+                              &nbsp;</td>
+                          <td class="no-border" valign="top"   class="text6"></td>
+                        </tr>
+
+                        <tr class="no-border" height="10">
+                          <td class="no-border" valign="top"  class="text7">Sub Total &nbsp;</td>
+                          <td class="no-border" valign="top"  class="text6"></td>
+                          <td class="no-border" valign="top"   class="text7">{{dataSource?.baseAmount  | number:'1.2-2'}}</td>
+                        </tr>
+
+                        <tr class="no-border" height="10">
+                          <td class="no-border" class="text6">
+                            <p class="text6" style="text-align:right"> 
+                                      IGST @{{dataSource?.igstPercentage | number:'1.2-2'}}% &nbsp;<br> 
+                                      SGST  @{{dataSource?.sgstPercentage | number:'1.2-2'}}% &nbsp;<br> 
+                                      CGST  @{{dataSource?.cgstPercentage | number:'1.2-2'}}% &nbsp;
+                            </p>
+                          </td>
+                          <td class="no-border" class="text6"></td>
+                          <td class="no-border" class="text7">
+                            {{dataSource?.igstAmount | number:'1.2-2'}}<br />
+                            {{dataSource?.sgstAmount | number:'1.2-2'}}<br />
+                            {{dataSource?.cgstAmount | number:'1.2-2'}}<br />
+                          </td>
+                        </tr>
+
+                        
+                        <tr class="no-border" height="10" class="text6">
+                          <td class="no-border" valign="top"  class="text6">&nbsp;</td>
+                          <td class="no-border" valign="top"  class="text6">&nbsp;</td>
+                          <td class="no-border" valign="top"  class="text7">&nbsp;</td>
+                        </tr>
+
+                        <tr class="text5">
+                          <td valign="top"><br />
+                            Total Rs.<br />
+                            {{dataSource?.creditNoteAmountInWords}} Only
+                            <br />
+                          </td>
+                          <td>&nbsp;</td>
+                          <td valign="top">
+                            0.00
+                            <br />
+                            {{dataSource?.creditNoteAmount  | number:'1.2-2'}}</td>
+                        </tr>
+                      </table>
+                      </td>
+                    </tr>               
+                  </table>
+
+                  <table width="900" border="0" cellpadding="2" cellspacing="0" class="text1">
+                    <tr>
+                      <td width="330" valign="top"></td>
+                      <td width="226" align="left" valign="top">
+                        <p style="font-size:smaller">
+                          <strong>ECOS (I) MOBILITY &amp; HOSPITALITY PVT. LTD.</strong>
+                        </p>                          
+                        <p class="text5">
+                          <img src="assets/images/Picture1.png" width="80px"  height="80px" />
+                        <br />
+                        Authorized Signatory
+                        </p></td>
+                    </tr>
+                  </table>
+                        
+                </td>
+              </tr>
+            </table>
+
+          </td>
+        </tr>
+      </table>
+  </div>
+  <br />
+  <div style="text-align: center">
+    <button type="button" (click)="print()" color="primary" mat-raised-button id="print">
+      Print
+    </button>
+  </div>
+</mat-dialog-content>

@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { MatDialog, MatDialogRef } from '@angular/material/dialog';
@@ -460,6 +459,17 @@ addCreditNote() {
       }
     });
   }
+
+  ViewCreditNote(item)
+  {
+    console.log(item)
+    let baseUrl = this._generalService.FormURL;
+    const url = this.router.serializeUrl(this.router.createUrlTree(['/creditNotePrint'], { queryParams: {
+      invoiceID:item.invoiceID,
+    } }));
+    window.open(baseUrl + url, '_blank');
+  }
+
 
 }
 

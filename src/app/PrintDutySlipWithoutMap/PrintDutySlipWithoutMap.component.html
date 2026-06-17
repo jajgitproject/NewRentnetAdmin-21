@@ -233,13 +233,13 @@
                             </strong>
                           </td>
                           <td></td>
-                          <td align="right" style="padding-right: 5px;">{{dataSource?.totalGST | number:'1.2-2'}}</td>
+                          <td align="right" style="padding-right: 5px;"></td>
                         </tr>
 
                         <tr>
                           <td align="left" style="padding-left: 5px;"><strong>Total Amount</strong></td>
                           <td>&nbsp;</td>
-                          <td align="right" style="padding-right: 5px;">{{dataSource?.totalAmount | number:'1.2-2'}}</td>
+                          <td align="right" style="padding-right: 5px;"></td>
                         </tr>
                       </table>
 
@@ -316,8 +316,7 @@
                           <td valign="top" width="130">
                             User Signature<br />
                             <img *ngIf="dataSource?.customerSignatureImage; else noSignatureImage" 
-                              [src]="dataSource?.customerSignatureImage" class="signature-image" alt="User Signature"
-                              (load)="onEmbedImageLoad()" />
+                              [src]="dataSource?.customerSignatureImage" class="signature-image" alt="User Signature" />
                               <ng-template #noSignatureImage>No Image</ng-template>
                           </td>
 
