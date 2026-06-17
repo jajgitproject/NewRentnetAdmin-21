@@ -34,7 +34,6 @@ import { FormDialogComponent as CIPlusComponent } from '../customerCorporateIndi
 interface MenuItem {
   label: string;
   action: (item: any) => void;
-  tooltip?: string;
   row?: any;
 }
 
@@ -111,38 +110,35 @@ export class CustomerComponent implements OnInit {
   private searchTerm$ = new Subject<string>();
 
   menuItems: any[] = [
-    { label: 'Address', tooltip: 'Address', pageName: 'Address' },
-    { label:'Customer Billing Cycle',tooltip:'Customer Billing Cycle',pageName:'customerbillingcycle'},
-    { label: 'Billing Executive', tooltip: 'Billing Executive', pageName: 'Billing Executive' },
-    { label: 'Blocking', tooltip: 'Customer Blocking', pageName: 'Customer Blocking' },
-    { label: 'Car And Driver Details SMS EMail', tooltip: 'Car And Driver Details SMS EMail', pageName: 'Car And Driver Details SMS EMail' },
-    { label: 'Category Mapping', tooltip: 'Category Mapping', pageName: 'Category Mapping' },
-    { label: 'Billing Configuration', tooltip: 'Billing Configuration', pageName: 'Billing Configuration' },
-    { label: 'Invoicing Configuration', tooltip: 'Invoicing Configuration', pageName: 'Invoicing Configuration' },
-    { label: 'Messaging Configuration', tooltip: 'Messaging Configuration', pageName: 'Messaging Configuration' },
-    { label: 'Reservation Configuration', tooltip: 'Reservation Configuration', pageName: 'Reservation Configuration' },
-    //{ label: 'SEZ Configuration', tooltip: 'SEZ Configuration', pageName: 'SEZ Configuration' },
-    { label: 'Supplier Configuration', tooltip: 'Supplier Configuration', pageName: 'Supplier Configuration' },
-    { label: 'Contract Mapping', tooltip: 'Contract Mapping', pageName: 'Contract Mapping' },
-    { label: 'Collection Executive', tooltip: 'Collection Executive', pageName: 'Collection Executive' },
-    { label: 'Key Account Manager', tooltip: 'Key Account Manager', pageName: 'Key Account Manager' },
-    // { label: 'Reservation Alert', tooltip: 'Reservation Alert', pageName: 'Reservation Alert' },
-    { label: 'Reservation Alert', tooltip: 'Reservation Alert', pageName: 'customerreservationalert' },
-    { label: 'Reservation Field', tooltip: 'Reservation Field', pageName: 'reservationfield' },
-    { label: 'Sales Manager', tooltip: 'Sales Manager', pageName: 'Sales Manager' },
-    { label: 'Stop Reservation', tooltip: 'Stop Reservation', pageName: 'Stop Reservation' },
-    { label: 'Invoice Template', tooltip: 'Invoice Template', pageName: 'Invoice Template' },
-    { label: 'Alert Message', tooltip: 'Alert Message', pageName: 'Alert Message' },
-    // { label: 'Credit Charges', tooltip: 'Credit Charges', pageName: 'Credit Charges' },
-    { label: 'App Based Vehicle', tooltip: 'Customer App Vehicle', pageName: 'Customer App Vehicle' },
-    { label: 'App Based Vehicle Category', tooltip: 'Customer App Based Vehicle Category', pageName: 'Customer App Based Vehicle Category' },
-    { label: 'Customer QC', tooltip: 'Customer QC', pageName: 'Customer QC' },
-    { label: 'Reservation Capping',  tooltip: 'Customer Reservation Capping', pageName: 'Reservation Capping' },
-    { label: 'Round UP', tooltip: 'Round UP', pageName: 'Round UP' },
-    { label: 'Customer OTP Configuration', tooltip: 'Customer OTP Configuration', pageName: 'Customer OTP Configuration' },
-    { label: 'Change KAM for Customers', tooltip: 'Change KAM for Customers', pageName: 'Change KAM for Customers' },
-    { label: 'Payment Terms Code', tooltip: 'Customer Payment Terms Code', pageName: 'customerPaymentTermsCode' },
-    { label: 'Customer Growth Person', tooltip: 'Customer Growth Person', pageName: 'customerGrowthPerson' },
+    { label: 'Address', pageName: 'Address' },
+    { label: 'Customer Billing Cycle', pageName: 'customerbillingcycle' },
+    { label: 'Billing Executive', pageName: 'Billing Executive' },
+    { label: 'Blocking', pageName: 'Customer Blocking' },
+    { label: 'Car And Driver Details SMS EMail', pageName: 'Car And Driver Details SMS EMail' },
+    { label: 'Category Mapping', pageName: 'Category Mapping' },
+    { label: 'Billing Configuration', pageName: 'Billing Configuration' },
+    { label: 'Invoicing Configuration', pageName: 'Invoicing Configuration' },
+    { label: 'Messaging Configuration', pageName: 'Messaging Configuration' },
+    { label: 'Reservation Configuration', pageName: 'Reservation Configuration' },
+    { label: 'Supplier Configuration', pageName: 'Supplier Configuration' },
+    { label: 'Contract Mapping', pageName: 'Contract Mapping' },
+    { label: 'Collection Executive', pageName: 'Collection Executive' },
+    { label: 'Key Account Manager', pageName: 'Key Account Manager' },
+    { label: 'Reservation Alert', pageName: 'customerreservationalert' },
+    { label: 'Reservation Field', pageName: 'reservationfield' },
+    { label: 'Sales Manager', pageName: 'Sales Manager' },
+    { label: 'Stop Reservation', pageName: 'Stop Reservation' },
+    { label: 'Invoice Template', pageName: 'Invoice Template' },
+    { label: 'Alert Message', pageName: 'Alert Message' },
+    { label: 'App Based Vehicle', pageName: 'Customer App Vehicle' },
+    { label: 'App Based Vehicle Category', pageName: 'Customer App Based Vehicle Category' },
+    { label: 'Customer QC', pageName: 'Customer QC' },
+    { label: 'Reservation Capping', pageName: 'Reservation Capping' },
+    { label: 'Round UP', pageName: 'Round UP' },
+    { label: 'Customer OTP Configuration', pageName: 'Customer OTP Configuration' },
+    { label: 'Change KAM for Customers', pageName: 'Change KAM for Customers' },
+    { label: 'Payment Terms Code', pageName: 'customerPaymentTermsCode' },
+    { label: 'Customer Growth Person', pageName: 'customerGrowthPerson' },
   ];
 
   

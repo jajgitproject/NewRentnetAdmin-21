@@ -26,7 +26,6 @@ import { CustomerService } from './customer.service';
 import { CustomerRoutingModule } from './customer-routing.module';
 import { MyUploadComponent } from '../myupload/myupload.component';
 import { MyUploadModule } from '../myupload/myupload.module';
-import {MatTooltipModule} from '@angular/material/tooltip';
 import { MatAutocompleteModule } from '@angular/material/autocomplete';
 import { CustomerCorporateIndividualService } from '../customerCorporateIndividual/customerCorporateIndividual.service';
 // import { TwoDigitDecimaNumberDirective } from './twodigitdecimalnumber.directive';
@@ -41,7 +40,6 @@ import { CustomerCorporateIndividualModule } from '../customerCorporateIndividua
   ],
   imports: [
     MatAutocompleteModule,
-    MatTooltipModule,
     CommonModule,
     FormsModule,
     ReactiveFormsModule,

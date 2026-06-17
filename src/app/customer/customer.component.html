@@ -332,7 +332,7 @@
                                         </button>
 
                                         <ng-container *ngFor="let menuItem of menuItems">
-                                            <button mat-menu-item [matTooltip]="menuItem.tooltip"
+                                            <button mat-menu-item
                                                 (click)="openInNewTab(menuItem, item)">
                                                 <mat-icon>how_to_reg</mat-icon>
                                                 <span>{{ menuItem.label }}</span>
