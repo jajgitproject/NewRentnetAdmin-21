@@ -168,6 +168,7 @@ export class ControlPanelDesignComponent implements OnInit {
 
   public PassengerList?: CustomerPersonDropDown[] = [];
   filteredPassengerOptions: Observable<CustomerPersonDropDown[]> = of([]);
+  cpGuestNamePanelWidth: string | number = 420;
 
   public VehicleCategoryList?: VehicleCategoryDropDown[] = [];
   filteredVehicleCategoryOptions: Observable<VehicleCategoryDropDown[]> = of([]);
@@ -614,7 +615,8 @@ export class ControlPanelDesignComponent implements OnInit {
       customerGroup: [this._filters.customerGroup],
       customer: [this._filters.customer],
       booker: [this._filters.booker],
-      passenger: [this._filters.customer],
+      passenger: [this._filters.passenger],
+      passengerID: [this._filters.passengerID || 0],
       vehicleCategory:[this._filters.vehicleCategory],
       vehicleName: [this._filters.vehicleName],
       city: [this._filters.city],
@@ -1119,6 +1121,7 @@ export class ControlPanelDesignComponent implements OnInit {
     this.filterForm.controls['customer'].setValue('');
     this.filterForm.controls['booker'].setValue('');
     this.filterForm.controls['passenger'].setValue('');
+    this.filterForm.patchValue({ passengerID: 0 });
     //this.FillCustomerDD();
     //his.InitBooker();
     //this.InitPassenger();
@@ -1129,6 +1132,7 @@ export class ControlPanelDesignComponent implements OnInit {
       this.filterForm.controls['customer'].setValue('');
       this.filterForm.controls['booker'].setValue('');
       this.filterForm.controls['passenger'].setValue('');
+      this.filterForm.patchValue({ passengerID: 0 });
     }
   }
 
@@ -1335,6 +1339,7 @@ export class ControlPanelDesignComponent implements OnInit {
     
     getPassengerID(passengerID: any,passengerName:any) {
       this.passengerID=passengerID;
+      this.filterForm.patchValue({ passengerID: passengerID || 0 });
     }
 
 
@@ -1354,9 +1359,11 @@ export class ControlPanelDesignComponent implements OnInit {
     onKeyupPassengerDropDown()
     {   
       var Prefix = this.filterForm.controls.passenger.value;
-      if(Prefix.length < this._generalService.lengthToCheck)
+      if (!Prefix || Prefix.length < this._generalService.lengthToCheck)
       { 
         this.PassengerList = [];
+        this.passengerID = null;
+        this.filterForm.patchValue({ passengerID: 0 }, { emitEvent: false });
         return;
       }
       this._generalService.GetPassengerDropDownForControlPanel(Prefix).subscribe(
@@ -1372,24 +1379,46 @@ export class ControlPanelDesignComponent implements OnInit {
   
     private _filterPassengerOnPageLoad(value: string): any {
       const filterValue = value.toLowerCase().trim();
-      // if(filterValue.length === 0) {
-      //   return [];
-      // }
-    //    if(filterValue.length < 3) {
-    //   return [];
-    // }
       return this.PassengerList.filter(
         passenger => 
         {
-          const combinedField = `${passenger.customerPersonName} ${passenger.phone} ${passenger.customerName}`.toLowerCase();
+          const combinedField = `${passenger.customerPersonName} ${passenger.gender} ${passenger.importance} ${passenger.phone} ${passenger.customerName}`.toLowerCase();
           return combinedField.includes(filterValue);
-          //return customer.customerPersonName.toLowerCase().indexOf(filterValue)===0 || customer.phone.toLowerCase().indexOf(filterValue)===0;
         }
       );
+    }
+
+    buildGuestDisplay(option: CustomerPersonDropDown): string {
+      if (!option) {
+        return '';
+      }
+      return [
+        option.customerPersonName ?? '',
+        option.gender ?? '',
+        option.importance ?? '',
+        option.phone ?? '',
+        option.customerName ?? ''
+      ].join('-');
+    }
+
+    onGuestNamePanelOpened(): void {
+      const active = document.activeElement as HTMLElement | null;
+      const width = active?.getBoundingClientRect?.()?.width;
+      this.cpGuestNamePanelWidth = width ? Math.max(Math.round(width), 420) : 420;
     }
     
     getPassengerIDOnPageLoad(passengerID: any,passengerName:any) {
       this.passengerID=passengerID;
+      this.filterForm.patchValue({ passengerID: passengerID || 0 });
+    }
+
+    onGuestNameSelected(selectedValue: string): void {
+      const selected = this.PassengerList?.find(
+        (p) => this.buildGuestDisplay(p) === selectedValue
+      );
+      if (selected) {
+        this.getPassengerIDOnPageLoad(selected.customerPersonID, selected.customerPersonName);
+      }
     }
 
     // Vehicle Category

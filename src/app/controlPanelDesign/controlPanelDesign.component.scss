@@ -364,14 +364,17 @@ app-controlPanelDesign .control-panel-main-header .cp-booking-category-field .ma
 
 :host ::ng-deep mat-accordion:first-of-type .mat-expansion-panel-body {
   padding: 12px 12px 12px !important;
+  overflow: visible !important;
 }
 
 :host ::ng-deep mat-accordion:nth-of-type(2) .mat-expansion-panel-body {
   padding: 12px 12px 12px !important;
+  overflow: visible !important;
 }
 
 :host ::ng-deep .quick-search-panel,
 :host ::ng-deep .advance-search-panel {
+  overflow: visible;
   position: relative;
   z-index: 2;
 
@@ -491,6 +494,25 @@ app-controlPanelDesign .control-panel-main-header .cp-booking-category-field .ma
   .mb-2 {
     margin-bottom: 0.45rem !important;
   }
+}
+
+:host ::ng-deep .cp-guest-name-field {
+  position: relative;
+  overflow: visible;
+}
+
+::ng-deep .cp-guest-name-autocomplete-panel.mat-mdc-autocomplete-panel {
+  min-width: 420px !important;
+  max-width: min(720px, 92vw) !important;
+  width: auto !important;
+}
+
+::ng-deep .cp-guest-name-autocomplete-panel .mat-mdc-option .mdc-list-item__primary-text {
+  white-space: nowrap !important;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: block;
+  max-width: 100%;
 }
 
 :host ::ng-deep .quick-search-actions .mat-mdc-raised-button,

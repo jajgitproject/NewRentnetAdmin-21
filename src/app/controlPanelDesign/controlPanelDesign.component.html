@@ -1,4 +1,4 @@
-﻿<section class="content">
+<section class="content">
   <div class="container-fluid">
     <!-- <div class="block-header">
       <div class="row">
@@ -545,7 +545,26 @@
               </mat-form-field>
             </div>
 
+            <div class="col-xl-2 col-lg-2 col-md-2 col-sm-12 mb-2 cp-guest-name-field">
+              <mat-form-field class="example-full-width cp-quick-search-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
+                <mat-label>Guest Name</mat-label>
+                <input type="text" matInput formControlName="passenger"
+                  [matAutocomplete]="cpGuestNameAuto" (keyup)="onKeyupPassengerDropDown()">
+              </mat-form-field>
+            </div>
+
           </div>
+
+          <mat-autocomplete #cpGuestNameAuto="matAutocomplete"
+            panelClass="cp-guest-name-autocomplete-panel"
+            [panelWidth]="cpGuestNamePanelWidth"
+            (opened)="onGuestNamePanelOpened()"
+            (optionSelected)="onGuestNameSelected($event.option.value)">
+            <mat-option *ngFor="let option of filteredPassengerOptions | async"
+              [value]="buildGuestDisplay(option)">
+              {{ buildGuestDisplay(option) }}
+            </mat-option>
+          </mat-autocomplete>
 
           <div class="row">
             <div class="col-12 d-flex justify-content-start align-items-center mb-2 quick-search-actions" style="gap: 8px;">
@@ -827,7 +846,7 @@
             <!-- <ng-container *ngIf="filterForm.value.customerGroup!==''">
               <div class="col-xl-3 col-lg-3 col-md-3 col-sm-6 mb-2">
                 <mat-form-field class="example-full-width cp-advance-search-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
-                  <mat-label>Passenger</mat-label>
+                  <mat-label>Guest Name</mat-label>
                   <input type="text" matInput formControlName="passenger" [matAutocomplete]="auto6">
                   <mat-autocomplete #auto6="matAutocomplete" panelWidth="custom-autocomplete-panel">
                     <mat-option *ngFor="let option of filteredPassengerOptions | async"
@@ -842,17 +861,10 @@
 
             <ng-container>
             <!-- <ng-container *ngIf="filterForm.value.customerGroup===''"> -->
-              <div class="col-xl-3 col-lg-3 col-md-3 col-sm-6 mb-2">
+              <div class="col-xl-3 col-lg-3 col-md-3 col-sm-6 mb-2 cp-guest-name-field">
                 <mat-form-field class="example-full-width cp-advance-search-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
-                  <mat-label>Passenger</mat-label>
-                  <input type="text" matInput formControlName="passenger" [matAutocomplete]="auto7" (keyup)="onKeyupPassengerDropDown()">
-                  <mat-autocomplete #auto7="matAutocomplete" panelWidth="custom-autocomplete-panel">
-                    <mat-option *ngFor="let option of filteredPassengerOptions | async"
-                      [value]="option.customerPersonName + '-' + option.phone + '-' + option.customerName"
-                      (click)="getPassengerIDOnPageLoad(option.customerPersonID, option.customerPersonName)">
-                      {{option.customerPersonName}} - {{option.phone}} - {{option.customerName}}
-                    </mat-option>
-                  </mat-autocomplete>
+                  <mat-label>Guest Name</mat-label>
+                  <input type="text" matInput formControlName="passenger" [matAutocomplete]="cpGuestNameAuto" (keyup)="onKeyupPassengerDropDown()">
                 </mat-form-field>
               </div>
             </ng-container>
@@ -1159,7 +1171,7 @@
                       {{filterForm.value.customer}}; &nbsp;</div>
                     <div style="float:left" *ngIf="filterForm.value.booker"><b>Booker</b> : {{filterForm.value.booker}};
                       &nbsp;</div>
-                    <div style="float:left" *ngIf="filterForm.value.passenger"><b>Passenger</b> :
+                    <div style="float:left" *ngIf="filterForm.value.passenger"><b>Guest Name</b> :
                       {{filterForm.value.passenger}}; &nbsp;</div>
                     <div style="float:left" *ngIf="filterForm.value.vehicleCategory"><b>Vehicle Category</b> :
                       {{filterForm.value.vehicleCategory}}; &nbsp;</div>
@@ -3550,33 +3562,19 @@
             </ng-container>
 
             <ng-container *ngIf="filterForm.value.customerGroup!==''">
-              <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+              <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2 cp-guest-name-field">
                 <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
-                  <mat-label>Passenger</mat-label>
-                  <input type="text" matInput formControlName="passenger" [matAutocomplete]="auto6">
-                  <mat-autocomplete #auto6="matAutocomplete">
-                    <mat-option *ngFor="let option of filteredPassengerOptions | async"
-                      [value]="option.customerPersonName + '-' + option.phone + '-' + option.customerName"
-                      (click)="getPassengerID(option.customerPersonID, option.customerPersonName)">
-                      {{option.customerPersonName}} - {{option.phone}} - {{option.customerName}}
-                    </mat-option>
-                  </mat-autocomplete>
+                  <mat-label>Guest Name</mat-label>
+                  <input type="text" matInput formControlName="passenger" [matAutocomplete]="cpGuestNameAuto" (keyup)="onKeyupPassengerDropDown()">
                 </mat-form-field>
               </div>
             </ng-container>
 
             <ng-container *ngIf="filterForm.value.customerGroup===''">
-              <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+              <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2 cp-guest-name-field">
                 <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
-                  <mat-label>Passenger</mat-label>
-                  <input type="text" matInput formControlName="passenger" [matAutocomplete]="auto7">
-                  <mat-autocomplete #auto7="matAutocomplete">
-                    <mat-option *ngFor="let option of filteredPassengerOptions | async"
-                      [value]="option.customerPersonName + '-' + option.phone + '-' + option.customerName"
-                      (click)="getPassengerIDOnPageLoad(option.customerPersonID, option.customerPersonName)">
-                      {{option.customerPersonName}} - {{option.phone}} - {{option.customerName}}
-                    </mat-option>
-                  </mat-autocomplete>
+                  <mat-label>Guest Name</mat-label>
+                  <input type="text" matInput formControlName="passenger" [matAutocomplete]="cpGuestNameAuto" (keyup)="onKeyupPassengerDropDown()">
                 </mat-form-field>
               </div>
             </ng-container>

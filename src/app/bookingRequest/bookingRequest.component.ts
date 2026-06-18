@@ -132,6 +132,7 @@ export class BookingRequestComponent implements OnInit {
   }
 
   public SearchData() {
+    this.PageNumber = 0;
     this.loadData();
 
   }
@@ -153,7 +154,6 @@ export class BookingRequestComponent implements OnInit {
 
   public loadData() 
   {
-    debugger;
     let fromDate = '';
     let toDate = '';
 

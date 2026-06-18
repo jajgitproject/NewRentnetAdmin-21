@@ -401,6 +401,7 @@ export class Filters {
   customer: string;
   booker: string;
   passenger: string;
+  passengerID: number;
   vehicleCategory:string;
   vehicleName: string;
   city:string;
@@ -464,6 +465,7 @@ export class Filters {
     this.customer = filter.customer || '';
     this.booker = filter.booker || '';
     this.passenger = filter.passenger || '';
+    this.passengerID = filter.passengerID || 0;
     this.vehicleCategory=filter.vehicleCategory || '';
     this.vehicleName = filter.vehicleName || '';
     this.city = filter.city || '';
