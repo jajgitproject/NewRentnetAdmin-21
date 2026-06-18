@@ -52,7 +52,7 @@
                                 </div>
                             </div>
 
-                            <div class="row mb-3">
+                            <div class="row action-buttons-row">
                                 <div class="col-12">
                                     <button mat-raised-button color="primary" type="button" (click)="search()" [disabled]="isLoading">
                                         Search
@@ -69,7 +69,7 @@
                             </div>
                         </form>
 
-                        <div class="responsive_table">
+                        <div class="responsive_table results-grid">
                             <p *ngIf="!dataSource; then thenBlock else elseBlock">
                                 This is not rendered
                             </p>
