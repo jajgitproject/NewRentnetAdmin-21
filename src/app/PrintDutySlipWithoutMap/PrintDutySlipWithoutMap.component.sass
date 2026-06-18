@@ -50,6 +50,16 @@ td, th
 	width: 100%
 	max-width: none
 
+	&.print-container--embedded
+		mat-card,
+		.mat-mdc-card-content,
+		mat-dialog-content,
+		.mat-mdc-dialog-content
+			max-width: none !important
+			width: 100% !important
+			padding: 0 !important
+			margin: 0 !important
+
 	mat-dialog-content
 		max-height: none
 		overflow: visible
@@ -62,11 +72,27 @@ td, th
 #printElem table
 	width: 100%
 
-.attachment-image,
+:host img.attachment-image,
+.duty-slip-sheet img.attachment-image
+	width: 100% !important
+	height: auto !important
+	max-width: 186mm !important
+	display: block
+	margin: 0 auto
+	object-fit: contain
+
+.attachment-image
+	width: 100% !important
+	height: auto !important
+	max-width: 186mm !important
+	display: block
+	margin: 0 auto
+	object-fit: contain
+
 .signature-image
 	width: 120px
 	height: 60px
-	max-width: none
+	object-fit: contain
 	display: block
 	margin: 0 auto
 
@@ -84,8 +110,18 @@ td, th
 		max-width: none
 		width: 100%
 
-	.attachment-image,
-	.signature-image,
+	.attachment-image
+		width: 100% !important
+		height: auto !important
+		max-width: 186mm !important
+		page-break-inside: avoid
+
+	.signature-image
+		width: 120px !important
+		height: 60px !important
+		object-fit: contain !important
+		page-break-inside: avoid
+
 	.map-image
 		max-width: none
 		page-break-inside: avoid
