@@ -162,25 +162,13 @@ export class InvoiceSummaryComponent implements OnInit {
     this.contextMenu.openMenu();
   }
 
-  attachInvoices(item: InvoiceSummary) {
+  attachOrDetachInvoices(item: InvoiceSummary) {
     const baseUrl = this._generalService.FormURL;
     const url = this.router.serializeUrl(
-      this.router.createUrlTree(['/attachInvoicesToSummary'], {
+      this.router.createUrlTree(['/attachOrDetachInvoicesToSummary'], {
         queryParams: {
           SummaryID: item.invoiceSummaryID,
           CustomerID: item.customerID
-        }
-      })
-    );
-    window.open(baseUrl + url, '_blank');
-  }
-
-  detachInvoices(item: InvoiceSummary) {
-    const baseUrl = this._generalService.FormURL;
-    const url = this.router.serializeUrl(
-      this.router.createUrlTree(['/detachInvoicesFromSummary'], {
-        queryParams: {
-          SummaryID: item.invoiceSummaryID
         }
       })
     );

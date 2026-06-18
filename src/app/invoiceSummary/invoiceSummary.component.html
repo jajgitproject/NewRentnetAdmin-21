@@ -198,13 +198,9 @@
                                         <mat-icon>delete</mat-icon>
                                         <span>Delete</span>
                                     </button>
-                                    <button mat-menu-item (click)="attachInvoices(item)">
-                                        <mat-icon>attach_file</mat-icon>
-                                        <span>Attach Invoices</span>
-                                    </button>
-                                    <button mat-menu-item (click)="detachInvoices(item)">
-                                        <mat-icon>link_off</mat-icon>
-                                        <span>Detach Invoices</span>
+                                    <button mat-menu-item (click)="attachOrDetachInvoices(item)">
+                                        <mat-icon>swap_horiz</mat-icon>
+                                        <span>Attach or Detach Invoices to Invoice Summary</span>
                                     </button>
                                     <button mat-menu-item (click)="printInvoiceSummary(item)">
                                         <mat-icon>print</mat-icon>

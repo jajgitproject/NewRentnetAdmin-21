@@ -2820,6 +2820,13 @@ const routes: Routes = [
           )
       },
       {
+        path: 'attachOrDetachInvoicesToSummary',
+        loadChildren: () =>
+          import('./attachOrDetachInvoicesToSummary/attachOrDetachInvoicesToSummary.module').then(
+            (m) => m.AttachOrDetachInvoicesToSummaryModule
+          )
+      },
+      {
         path: 'detachInvoicesFromSummary',
         loadChildren: () =>
           import('./detachInvoicesFromSummary/detachInvoicesFromSummary.module').then(
