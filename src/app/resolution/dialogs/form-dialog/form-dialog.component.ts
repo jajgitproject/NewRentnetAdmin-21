@@ -126,8 +126,8 @@ export class resolutionFormDialogComponent {
     this.driverName = data?.item?.driverName;
     this.supplierID = data?.item?.supplierID;
     this.carVendor = data?.item?.carVendor;
-    this.CustomerPersonID = data?.item?.passengerDetails[0]?.customerPersonID;
-    this.customerPersonName = data?.item?.passengerDetails[0]?.customerPersonName;    
+    this.CustomerPersonID = data?.item?.primaryPassengerID || data?.item?.passengerDetails[0]?.customerPersonID;
+    this.customerPersonName = data?.item?.primaryPassenger || data?.item?.passengerDetails[0]?.customerPersonName;    
     this.customerID = data?.item?.customerID;
     this.registrationNumber = data?.item?.registrationNumber;
     this.inventoryID = data?.item?.inventoryID;
@@ -238,7 +238,7 @@ export class resolutionFormDialogComponent {
     return this.fb.group({
       userID: [this.advanceTable?.userID || ''],
       incidenceID: [this.advanceTable?.incidenceID || -1],
-      dutySlipNumber: [this.advanceTable?.dutySlipNumber || ''],
+      dutySlipNumber: [this.advanceTable?.dutySlipNumber || 0],
       reservationID: [this.advanceTable?.reservationID],
       driverName: [this.advanceTable?.driverName || ''],
       locationOutAddressString: [this.advanceTable?.locationOutAddressString || ''],
@@ -276,16 +276,16 @@ export class resolutionFormDialogComponent {
       feedbackEmailAcknowledged: [''],
       responsible1Option: [''],
       responsible1Value: [''],
-      responsible1ID: [''],
+      responsible1ID: [0 || ''],
       responsible2Option: [''],
       responsible2Value: [''],
-      responsible2ID: [''],
+      responsible2ID: [0 || ''],
       responsible3Option: [''],
       responsible3Value: [''],
-      responsible3ID: [''],
+      responsible3ID: [0 || ''],
       responsible4Option: [''],
       responsible4Value: [''],
-      responsible4ID: [''],
+      responsible4ID: [0 || ''],
       followUpAction : [''],
       reminderDateForFollowUp : [''],
       debitTypeID : [''],
@@ -814,8 +814,12 @@ export class resolutionFormDialogComponent {
             this.advanceTableForm.patchValue({ actionTaken: this.dataSource[0]?.actionTaken });
             this.advanceTableForm.patchValue({ closedByEmployeeID: this.dataSource[0]?.closedByEmployeeID });
             this.advanceTableForm.patchValue({ closureComment: this.dataSource[0]?.closureComment });
-            this.advanceTableForm.patchValue({ closureDate: this.dataSource[0]?.closureDate });
-            this.advanceTableForm.patchValue({ closureTime: this.dataSource[0]?.closureTime });
+            if (this.dataSource[0]?.closureDate) {
+              this.advanceTableForm.patchValue({ closureDate: this.dataSource[0]?.closureDate });
+            }
+            if (this.dataSource[0]?.closureTime) {
+              this.advanceTableForm.patchValue({ closureTime: this.dataSource[0]?.closureTime });
+            }
             this.advanceTableForm.patchValue({ feedbackEmailAcknowledged: this.dataSource[0]?.feedbackEmailAcknowledged });
             this.advanceTableForm.patchValue({ incidenceEmailAcknowledged: this.dataSource[0]?.incidenceEmailAcknowledged });
             this.advanceTableForm.patchValue({ incidenceCategory: this.dataSource[0]?.incidenceCategory });
@@ -918,12 +922,19 @@ export class resolutionFormDialogComponent {
   // Fetch the list of passengers
   InitPassenger() {
     this._generalService.GetCPForReservationResolution(this.reservationID).subscribe(data => {
-
-      this.passengerOptions = data.map(passenger => ({
-        name: passenger.customerPersonName,
-        id: passenger.customerPersonID
-      }));
-    });
+      if(data)
+      {
+        this.passengerOptions = data.map(passenger => ({
+          name: passenger.customerPersonName,
+          id: passenger.customerPersonID
+        }));
+      }
+      else
+      {
+        name: null;
+        id: 0
+      }
+    });    
   }
 
 onResponsibleChange(responsibleNumber: number, selectedValue: string): void {

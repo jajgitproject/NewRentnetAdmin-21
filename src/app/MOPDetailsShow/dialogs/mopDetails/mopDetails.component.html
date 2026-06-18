@@ -58,7 +58,7 @@
                     </div> -->
                 <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12 mb-2">
                     <div class="example-button-row">
-                        <button mat-raised-button color="primary" [type]="submit" [disabled]="!advanceTableForm.valid || buttonDisabled"  (click)="confirmAdd()">Save</button>
+                        <button mat-raised-button color="primary" [type]="submit" [disabled]="!advanceTableForm.valid"  (click)="confirmAdd()">Save</button>
                         <!-- <button *ngIf="action==='add'" mat-raised-button color="warn" (click)="onNoClick()" tabindex="-1">Reset</button> -->
                         <button *ngIf="action==='edit'" mat-raised-button color="warn" (click)="onNoClick()" tabindex="-1">Cancel</button>
                     </div>

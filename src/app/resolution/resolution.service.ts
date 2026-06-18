@@ -44,10 +44,15 @@ export class ResolutionService
 
   update(advanceTable: Resolution)
   {
+    debugger
     advanceTable.reminderDateForFollowUpString=this.generalService.getTimeApplicable(advanceTable.reminderDateForFollowUp);
     advanceTable.closureDateString=this.generalService.getTimeApplicable(advanceTable.closureDate);
     advanceTable.closureTimeString=this.generalService.getTimeApplicableTO(advanceTable.closureTime);
-     advanceTable.userID=this.generalService.getUserID();
+    advanceTable.Responsible1GuestID = advanceTable.responsible1CustomerPersonID || 0;
+    advanceTable.Responsible2GuestID = advanceTable.responsible2CustomerPersonID || 0;
+    advanceTable.Responsible3GuestID = advanceTable.responsible3CustomerPersonID || 0;
+    advanceTable.Responsible4GuestID = advanceTable.responsible4CustomerPersonID || 0;
+    advanceTable.userID=this.generalService.getUserID();
     return this.httpClient.put<any>(this.API_URL , advanceTable);
   }
   
