@@ -15,12 +15,28 @@ export class InvoiceSummaryService {
 
   getTableData(
     searchBillSubmittedTo: string,
+    searchSummaryNo:string,
+    searchCustomerName:string,
+    searchSummaryDate:string,
+    searchBillDate:string,
     searchSummaryDispatchStatus: string,
     searchActivationStatus: boolean,
     pageNumber: number
   ): Observable<any> {
     if (searchBillSubmittedTo === '') {
       searchBillSubmittedTo = 'null';
+    }
+    if (searchSummaryNo === '') {
+      searchSummaryNo = 'null';
+    }
+    if (searchCustomerName === '') {
+      searchCustomerName = 'null';
+    }
+    if (searchSummaryDate === '') {
+      searchSummaryDate = 'null';
+    }
+    if (searchBillDate === '') {
+      searchBillDate = 'null';
     }
     if (searchSummaryDispatchStatus === '' || searchSummaryDispatchStatus === null) {
       searchSummaryDispatchStatus = 'null';
@@ -32,6 +48,14 @@ export class InvoiceSummaryService {
       this.API_URL +
         '/' +
         searchBillSubmittedTo +
+        '/' +
+        searchSummaryNo +
+        '/' +
+        searchCustomerName +
+        '/' +
+        searchSummaryDate +
+        '/' +
+        searchBillDate +
         '/' +
         searchSummaryDispatchStatus +
         '/' +

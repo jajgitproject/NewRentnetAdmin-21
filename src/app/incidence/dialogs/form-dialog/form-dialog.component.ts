@@ -90,7 +90,9 @@ export class incidenceFormDialogComponent {
     public route: ActivatedRoute,
     private fb: FormBuilder,
     private snackBar: MatSnackBar,
-    public _generalService: GeneralService) {
+    public _generalService: GeneralService) 
+    {
+      console.log(data);
     this.reservationID = this.data?.item.reservationID;
     this.dutySlipID = this.data?.dutySlipID;
     this.incidenceTypeID = this.data?.item.incidenceTypeID;
@@ -108,8 +110,8 @@ export class incidenceFormDialogComponent {
     this.transferedLocationID = this.data?.item?.transferedLocationID;
     this.supplier= this.data?.item?.carVendor;
     this.isVIP = this.data?.item?.customerPerson?.importance;
-    this.customerPersonName = this.data?.item?.passengerDetails[0]?.customerPersonName;
-    this.passengerID = this.data?.item?.passengerDetails[0]?.customerPersonID;
+    this.customerPersonName = this.data?.item?.primaryPassenger || this.data?.item?.passengerDetails[0]?.customerPersonName;
+    this.passengerID = this.data?.item?.primaryPassengerID || this.data?.item?.passengerDetails[0]?.customerPersonID;
     this.CustomerPersonID = data.CustomerPersonID;
     // Set the defaults
     this.action = data.action;

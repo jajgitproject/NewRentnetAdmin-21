@@ -73,6 +73,10 @@
                                                     <select style="height: 40px; width: 160px;" class="form-control" [(ngModel)]="selectedFilter">
                                                         <option value="search" hidden>Search By</option>
                                                         <option value="billSubmittedTo">Bill Submitted To</option>
+                                                        <option value="SummaryNo">Summary Number</option>
+                                                        <option value="CustomerName">Customer Name</option>
+                                                        <option value="SummaryDate">Summary Date</option>
+                                                        <option value="BillDate">Bill Date</option>
                                                     </select>
                                                 </div>
                                                 <input type="text" style="height: 40px; width: 300px;padding-left: 5px;" class="form-control" placeholder="Filter" id="inputGroup"
@@ -129,7 +133,9 @@
 
                                 <ng-container matColumnDef="customer">
                                     <mat-header-cell *matHeaderCellDef mat-sort-header>Customer</mat-header-cell>
-                                    <mat-cell *matCellDef="let row">{{row.customer}}</mat-cell>
+                                    <mat-cell *matCellDef="let row">
+                                        {{row.customer ? row.customer + (row.tallyCustomerID ? ' - ' + row.tallyCustomerID : '') : 'N/A'}}
+                                    </mat-cell>
                                 </ng-container>
 
                                 <ng-container matColumnDef="state">

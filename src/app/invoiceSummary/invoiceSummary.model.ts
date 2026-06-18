@@ -43,5 +43,6 @@ export class InvoiceSummary {
     this.dispatchedByName = invoiceSummary.dispatchedByName || invoiceSummary.dispatchedBy || '';
     this.dispatchDate = invoiceSummary.dispatchDate || null;
     this.activationStatus = invoiceSummary.activationStatus !== undefined ? invoiceSummary.activationStatus : false;
+    this.invoiceSummaryDate = new Date();
   }
 }

@@ -118,7 +118,7 @@ export class FormDialogComponent {
       billSubmittedTo: [this.advanceTable.billSubmittedTo, [Validators.required, this.noWhitespaceValidator]],
       contactNumber: [this.advanceTable.contactNumber],
       remark: [this.advanceTable.remark],
-      invoiceSummaryDate: [this.advanceTable.invoiceSummaryDate, Validators.required],
+      invoiceSummaryDate: [{value: this.advanceTable.invoiceSummaryDate, disabled: true}, Validators.required],
       summaryDispatchStatus: [this.advanceTable.summaryDispatchStatus || 'No', Validators.required],
       dispatchedByID: [this.advanceTable.dispatchedByID],
       dispatchedByName: [this.advanceTable.dispatchedByName || ''],

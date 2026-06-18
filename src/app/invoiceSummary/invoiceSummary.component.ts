@@ -47,6 +47,11 @@ export class InvoiceSummaryComponent implements OnInit {
   searchTerm: any = '';
   selectedFilter: string = 'search';
 
+  searchSummaryNo: string = '';
+  searchCustomerName: string = '';
+  searchSummaryDate: string = '';
+  searchBillDate: string = '';
+
   constructor(
     public httpClient: HttpClient,
     public dialog: MatDialog,
@@ -118,10 +123,32 @@ export class InvoiceSummaryComponent implements OnInit {
     this.loadData();
   }
 
-  public loadData() {
-    switch (this.selectedFilter) {
+  public loadData() 
+  {
+    if(this.searchSummaryDate!=="")
+    {
+      this.searchSummaryDate=moment(this.searchSummaryDate).format('MMM DD yyyy');
+    }
+    if(this.searchBillDate!=="")
+    {
+      this.searchBillDate=moment(this.searchBillDate).format('MMM DD yyyy');
+    }
+    switch (this.selectedFilter) 
+    {
       case 'billSubmittedTo':
         this.searchBillSubmittedTo = this.searchTerm;
+        break;
+      case 'SummaryNo':
+        this.searchSummaryNo = this.searchTerm;
+        break;
+      case 'CustomerName':
+        this.searchCustomerName = this.searchTerm;
+        break;
+      case 'SummaryDate':
+        this.searchSummaryDate = this.searchTerm;
+        break;
+      case 'BillDate':
+        this.searchBillDate = this.searchTerm;
         break;
       default:
         break;
@@ -130,6 +157,10 @@ export class InvoiceSummaryComponent implements OnInit {
     this.invoiceSummaryService
       .getTableData(
         this.searchBillSubmittedTo,
+        this.searchSummaryNo,
+        this.searchCustomerName,
+        this.searchSummaryDate,
+        this.searchBillDate,
         this.searchSummaryDispatchStatus,
         this.searchActivationStatus,
         this.pageNumber
