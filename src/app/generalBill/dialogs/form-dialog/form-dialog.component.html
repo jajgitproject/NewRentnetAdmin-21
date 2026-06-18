@@ -25,8 +25,17 @@
                         </mat-error>
                     </mat-form-field>
                 </div>
-
                 <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                    <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                        <mat-label>Rate</mat-label>
+                        <input required matInput formControlName="rate" (input)="calculateBaseTotalAmount()">
+                        <mat-error *ngIf="advanceTableForm.get('rate').hasError('required')">
+                            Rate is required
+                        </mat-error>
+                    </mat-form-field>
+                </div>
+
+                <!-- <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
                     <mat-form-field class="example-full-width" appearance="outline" floatLabel="always"> 
                         <mat-label>UOM</mat-label>                       
                         <input required type="text" matInput [matAutocomplete]="auto1"
@@ -41,19 +50,10 @@
                             Please select a UOM 
                         </mat-error>
                     </mat-form-field>
-                </div>
+                </div> -->
             </div>
           
-            <div class="row">
-                <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
-                    <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
-                        <mat-label>Rate</mat-label>
-                        <input required matInput formControlName="rate" (input)="calculateBaseTotalAmount()">
-                        <mat-error *ngIf="advanceTableForm.get('rate').hasError('required')">
-                            Rate is required
-                        </mat-error>
-                    </mat-form-field>
-                </div>
+            <div class="row">               
 
                 <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
                     <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
@@ -63,10 +63,7 @@
                             Quantity is required
                         </mat-error>
                     </mat-form-field>
-                </div>                
-            </div>
-
-            <div class="row">
+                </div>  
                 <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
                     <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
                         <mat-label>Base Amount</mat-label>
@@ -75,9 +72,10 @@
                             Base Amount is required
                         </mat-error>
                     </mat-form-field>
-                </div>                
+                </div>                        
             </div>
 
+           
             <div class="row">
                 <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
                     <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">

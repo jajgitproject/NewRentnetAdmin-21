@@ -22,6 +22,8 @@ import Swal from 'sweetalert2';
 // import { OpenPopUpDialogComponent } from '../../openPopUp/openPopUp.component';
 // import { OpenPopUpDialogComponent } from '../../openPopUp/openPopUp.component';
 import { OpenPopUpDialogComponent} from '../../openPopUp/openPopUp.component'
+import { CustomerCityModel } from 'src/app/customerConfigurationInvoicing/customerConfigurationInvoicingDropDown.model';
+import { MatSnackBar } from '@angular/material/snack-bar';
 
 @Component({
   standalone: false,
@@ -90,6 +92,7 @@ export class FormDialogComponent
   public advanceTableService: GenerateBillMainService,
   private fb: FormBuilder,
   private dialog: MatDialog,
+    private snackBar: MatSnackBar,
   public _generalService:GeneralService)
   {
         // Set the defaults
@@ -102,9 +105,10 @@ export class FormDialogComponent
         {
           this.dialogTitle = 'General Bill';
           this.advanceTable = new GenerateBillMainModel({});
-          this.advanceTable.activationStatus=true;
+        
         }
         this.advanceTableForm = this.createContactForm();
+          this.advanceTable.activationStatus=true;
         this.advanceTableForm.controls["invoiceDate"].disable();
   }
   
@@ -195,7 +199,7 @@ export class FormDialogComponent
         this.AnotherDriverList = [];
         return;
       }
-    this._generalService.getCustomerPersonPrefix(Prefix).subscribe(
+    this._generalService.getCustomerPersonPrefix(this.customerID,Prefix).subscribe(
       data=>
       {
         this.CustomerPersonList=data;
@@ -577,10 +581,11 @@ export class FormDialogComponent
       }
     ); 
   };
-  getStateID(geoPointID: any) 
+  getStateID(geoPointID: any,geoPointName:any) 
   {
     this.stateID=geoPointID;
     this.advanceTableForm.patchValue({stateID:this.stateID});
+    this.advanceTableForm.patchValue({placeOfSupply:geoPointName});
     this.InitCity(this.stateID);
     
   }
@@ -826,8 +831,15 @@ getcsGSTPercentageID(csgstPercentageID:any)
     .subscribe(
     response => 
     {
-      this.dialogRef.close();
-      this._generalService.sendUpdate('GenerateBillMainCreate:GenerateBillMainView:Success');//To Send Updates  
+      console.log(response);
+      this.dialogRef.close(response.invoiceNumberWithPrefix);
+      this.showNotification(
+                'snackbar-success',
+                'Generate Bill Main Created...!!! Invoice Number: '+ response.invoiceNumberWithPrefix,
+                'bottom',
+                'center'
+              );
+      //this._generalService.sendUpdate('GenerateBillMainCreate:GenerateBillMainView:Success:'+ response.invoiceNumberWithPrefix);//To Send Updates  
     },
     error =>
     {
@@ -882,6 +894,14 @@ getcsGSTPercentageID(csgstPercentageID:any)
     {
       this.Post();
     }
+  }
+   showNotification(colorName, text, placementFrom, placementAlign) {
+    this.snackBar.open(text, '', {
+      duration: 2000,
+      verticalPosition: placementFrom,
+      horizontalPosition: placementAlign,
+      panelClass: colorName
+    });
   }
 }
 

@@ -124,6 +124,16 @@ export class GenerateBillMainComponent implements OnInit {
           action: 'add'
         }
     });
+     dialogRef.afterClosed().subscribe((invoiceNo) => {
+    if (invoiceNo) {
+      this.selectedFilter = 'invoiceNumber';
+      this.searchTerm = invoiceNo;
+      this.SearchInvoiceNumberWithPrefix = invoiceNo;
+
+      this.loadData();
+    }
+  });
+
   }
 
   editCall(row) 
@@ -209,6 +219,10 @@ shouldShowDeleteButton(item: any): boolean {
       default:
         this.searchTerm = '';
         break;
+    }
+    if(this.customerPersonName.value)
+    {
+   this.SearchGuset=this.customerPersonName.value;
     }
       this.generateBillMainService.getTableData(this.SearchCustomer,this.SearchInvoiceNumberWithPrefix.replace("/","-"),this.SearchGuset,this.SearchBillDate,this.SearchStartDate,this.SearchEndDate,this.SearchActivationStatus, this.PageNumber).subscribe
       (

@@ -1609,8 +1609,8 @@ getCustomerType(): Observable<CustomerTypeDropDown[]> {
 getCustomerPerson(): Observable<CustomerPersonDropDown[]> {
   return this.http.get<CustomerPersonDropDown[]>(this.BaseURL + "CustomerPerson/ForDropDown");
 }
-getCustomerPersonPrefix(Prefix: string): Observable<CustomerPersonDropDown[]> {
-  return this.http.get<CustomerPersonDropDown[]>(this.BaseURL + "CustomerPerson/ForDropDownPrefix/" + Prefix);
+getCustomerPersonPrefix(customerID: number, Prefix: string): Observable<CustomerPersonDropDown[]> {
+  return this.http.get<CustomerPersonDropDown[]>(this.BaseURL + "CustomerPerson/ForDropDownPrefix/" + customerID + "/" + Prefix);
 }
 
 GetCPForBooker(customerGroupID:number): Observable<CustomerPersonDropDown[]> {

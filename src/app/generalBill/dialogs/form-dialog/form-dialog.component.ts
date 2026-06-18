@@ -96,7 +96,7 @@ export class FormDialogComponent
       rate: [this.advanceTable.rate],
       quantity: [this.advanceTable.quantity],
       baseAmount: [this.advanceTable.baseAmount],
-      uomid: [this.advanceTable.uomid],
+      uomid: [0],
       uom: [this.advanceTable.uom],
       cgstRate: [this.advanceTable.cgstRate],
       cgstAmount: [this.advanceTable.cgstAmount],
@@ -122,9 +122,9 @@ InitUOM()
     data =>
      {
       this.UOMList = data; 
-      this.advanceTableForm.controls['uom'].setValidators([Validators.required,
-        this.uomTypeValidator(this.UOMList)
-      ]);
+      // this.advanceTableForm.controls['uom'].setValidators([Validators.required,
+      //   this.uomTypeValidator(this.UOMList)
+      // ]);
       this.advanceTableForm.controls['uom'].updateValueAndValidity(); 
       this.filteredUOMOptions = this.advanceTableForm.controls['uom'].valueChanges.pipe(
         startWith(""),

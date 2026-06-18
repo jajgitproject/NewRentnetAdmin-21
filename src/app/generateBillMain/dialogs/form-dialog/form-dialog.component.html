@@ -67,7 +67,7 @@
                         <input required matInput formControlName="state"[matAutocomplete]="auto2">
                         <mat-autocomplete #auto2="matAutocomplete">
                             <mat-option *ngFor="let options of filteredStateOptions | async"
-                                [value]="options.geoPointName" (click)="getStateID(options.geoPointID)">
+                                [value]="options.geoPointName" (click)="getStateID(options.geoPointID,options.geoPointName)">
                                 {{options.geoPointName}}
                             </mat-option>
                         </mat-autocomplete>
