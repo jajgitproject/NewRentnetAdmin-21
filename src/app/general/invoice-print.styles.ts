@@ -337,8 +337,22 @@ export const DUTY_SLIP_PRINT_CSS = `
 .duty-slip-sheet td, .duty-slip-sheet th { border: solid 1px #999; }
 .text1 { font-family: arial; font-size: 7pt; text-align: left; padding-left: 2px; }
 .text2 { font-family: arial; font-size: 7pt; text-align: center; padding-left: 2px; }
-.signature-image, .attachment-image {
-  width: auto; height: auto; max-width: 186mm; display: block; margin: 0 auto;
+.attachment-image {
+  width: 100%;
+  height: auto;
+  max-width: 186mm;
+  display: block;
+  margin: 0 auto;
+  object-fit: contain;
+}
+.signature-image {
+  width: 120px;
+  height: 60px;
+  max-width: 120px;
+  max-height: 60px;
+  object-fit: contain;
+  display: block;
+  margin: 0 auto;
 }
 .map-image {
   width: auto; height: auto; max-width: 100%; display: block; margin: 0 auto; border: 1px solid #ccc;

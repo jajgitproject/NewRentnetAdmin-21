@@ -422,6 +422,13 @@ export class PdfPrintService {
       replacement.querySelectorAll('img[src]').forEach((img: HTMLImageElement) => {
         img.src = this.absolutizeUrl(img.getAttribute('src') ?? img.src);
       });
+      replacement.querySelectorAll('img.signature-image').forEach((img: HTMLImageElement) => {
+        img.style.width = '120px';
+        img.style.height = '60px';
+        img.style.objectFit = 'contain';
+        img.style.maxWidth = '120px';
+        img.style.maxHeight = '60px';
+      });
 
       return replacement;
     } catch {
