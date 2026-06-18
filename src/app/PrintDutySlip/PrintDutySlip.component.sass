@@ -61,18 +61,35 @@ td, th
 #printElem table
 	width: 100%
 
-.attachment-image,
+:host img.attachment-image,
+.duty-slip-sheet img.attachment-image
+	width: 100% !important
+	height: auto !important
+	max-width: 186mm !important
+	display: block
+	margin: 0 auto
+	object-fit: contain
+
+.attachment-image
+	width: 100% !important
+	height: auto !important
+	max-width: 186mm !important
+	display: block
+	margin: 0 auto
+	object-fit: contain
+
 .signature-image
-	width: auto
-	height: auto
-	max-width: none
+	width: 120px
+	height: 60px
+	object-fit: contain
 	display: block
 	margin: 0 auto
 
 .map-image
-	width: auto
-	height: auto
-	max-width: 100%
+	width: 100%
+	height: 260px
+	object-fit: cover
+	display: block
 	border: 1px solid #ccc
 
 @media print
@@ -83,10 +100,24 @@ td, th
 		max-width: none
 		width: 100%
 
-	.attachment-image,
-	.signature-image,
+	.attachment-image
+		width: 100% !important
+		height: auto !important
+		max-width: 186mm !important
+		page-break-inside: avoid
+
+	.signature-image
+		width: 120px !important
+		height: 60px !important
+		object-fit: contain !important
+		page-break-inside: avoid
+
 	.map-image
-		max-width: none
+		width: 100% !important
+		height: 260px !important
+		object-fit: cover !important
+		display: block !important
+		border: 1px solid #ccc !important
 		page-break-inside: avoid
 
 	#print

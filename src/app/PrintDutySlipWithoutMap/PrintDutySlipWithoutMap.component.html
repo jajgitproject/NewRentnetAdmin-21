@@ -12,7 +12,7 @@
     <mat-icon class="small-close-icon">close</mat-icon>
   </button> -->
 </div>
-<div class="print-container">
+<div class="print-container" [class.print-container--embedded]="isEmbeddedInIframe">
   <div class="print-actions-fixed no-print" *ngIf="!isEmbeddedInIframe">
     <button type="button" mat-raised-button color="primary" (click)="printWithSelectPdf()">Print</button>
   </div>
