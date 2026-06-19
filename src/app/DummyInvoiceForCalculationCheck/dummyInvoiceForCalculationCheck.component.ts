@@ -98,4 +98,16 @@ export class DummyInvoiceForCalculationCheckComponent implements OnInit {
     const minutes = totalMinutes % 60;
     return { hours, minutes };
   }
+
+  getTotalFuelSurchargeAmount(): number {
+    const fuel = this.dataSource?.invoiceFuelSurchargeModel;
+    if (!fuel) {
+      return 0;
+    }
+    return (
+      (Number(fuel.totalFuelSurchargeOnPackageRate) || 0) +
+      (Number(fuel.totalFuelSurchargeOnExtraKM) || 0) +
+      (Number(fuel.totalFuelSurchargeOnExtraHours) || 0)
+    );
+  }
 }
