@@ -19,6 +19,7 @@ export class CustomerPerson {
   isPassenger:boolean;
   isAdmin:boolean;
   maskMobileNumber:boolean;
+  isPostPickUpCallAllowed:boolean;
   sendSMSWhatsApp:boolean;
   sendEmail:boolean;
   customerDesignationID:number;
@@ -60,6 +61,7 @@ export class CustomerPerson {
        this.isPassenger = customerPerson.isPassenger || '';
        this.isAdmin = customerPerson.isAdmin || '';
        this.maskMobileNumber = customerPerson.maskMobileNumber || '';
+       this.isPostPickUpCallAllowed = customerPerson.isPostPickUpCallAllowed ?? false;
        this.sendSMSWhatsApp = customerPerson.sendSMSWhatsApp || '';
        this.sendEmail = customerPerson.sendEmail || '';
        this.customerDesignationID = customerPerson.customerDesignationID || 0;

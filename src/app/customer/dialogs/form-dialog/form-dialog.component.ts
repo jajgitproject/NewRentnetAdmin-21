@@ -733,6 +733,9 @@ getBusinessTypeID(businessTypeID: any)
       isBookerAllowedToBeCreatedFromReservation: [
         this.advanceTable.isBookerAllowedToBeCreatedFromReservation ?? false
       ],
+      isPostPickUpCallAllowed: [
+        this.advanceTable.isPostPickUpCallAllowed ?? false
+      ],
       panNo: [this.advanceTable.panNo],
       gstCustomerType: [this.advanceTable.gstCustomerType],
       segment: [this.advanceTable.segment],

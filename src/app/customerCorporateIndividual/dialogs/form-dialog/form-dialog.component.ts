@@ -94,6 +94,7 @@ export class FormDialogComponent
       this.dialogTitle = 'Customer Corporate Individual';
       this.advanceTable = new CustomerCorporateIndividualModel({});
       this.advanceTable.activationStatus=true;
+      this.advanceTable.isPostPickUpCallAllowed=false;
     }
     this.advanceTableForm = this.createContactForm();
   }
@@ -146,7 +147,8 @@ export class FormDialogComponent
       countryForISDCodeID: [this.advanceTable.countryForISDCodeID],
       customerDepartmentID: [this.advanceTable.customerDepartmentID],
       customerDesignationID: [this.advanceTable.customerDesignationID],
-      maskMobileNumber:[this.advanceTable.maskMobileNumber]
+      maskMobileNumber:[this.advanceTable.maskMobileNumber],
+      isPostPickUpCallAllowed: [this.advanceTable.isPostPickUpCallAllowed ?? false]
     });
   }
 

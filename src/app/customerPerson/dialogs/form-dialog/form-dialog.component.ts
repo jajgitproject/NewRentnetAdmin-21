@@ -197,6 +197,7 @@ export class FormDialogComponentCustomerPerson
           this.advanceTable = new CustomerPerson({});
           this.advanceTable.activationStatus=true;
           this.advanceTable.maskMobileNumber=false;
+          this.advanceTable.isPostPickUpCallAllowed=false;
           this.advanceTable.sendSMSWhatsApp=true;
           this.advanceTable.sendEmail=true;
           this.advanceTable.preferAppBasedDriver=true;
@@ -547,6 +548,7 @@ export class FormDialogComponentCustomerPerson
       isPassenger: [this.advanceTable.isPassenger],
       isAdmin: [this.advanceTable.isAdmin],
       maskMobileNumber: [this.advanceTable.maskMobileNumber],
+      isPostPickUpCallAllowed: [this.advanceTable.isPostPickUpCallAllowed ?? false],
       sendSMSWhatsApp: [this.advanceTable.sendSMSWhatsApp],
       sendEmail: [this.advanceTable.sendEmail],
       employeeCode: [this.advanceTable.employeeCode],

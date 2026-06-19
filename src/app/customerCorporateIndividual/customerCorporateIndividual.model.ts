@@ -37,6 +37,7 @@ export class CustomerCorporateIndividualModel {
   userID:number;
   countryForISDCodeID:number;
   maskMobileNumber:boolean;
+  isPostPickUpCallAllowed:boolean;
   constructor(customerCorporateIndividualModel) {
     {
       this.corporateCompanyID = customerCorporateIndividualModel.corporateCompanyID || '';
@@ -75,6 +76,7 @@ export class CustomerCorporateIndividualModel {
       this.customerDepartmentID = customerCorporateIndividualModel.customerDepartmentID || '';
       this.countryForISDCodeID = customerCorporateIndividualModel.countryForISDCodeID || '';
       this.maskMobileNumber = customerCorporateIndividualModel.maskMobileNumber || '';
+      this.isPostPickUpCallAllowed = customerCorporateIndividualModel.isPostPickUpCallAllowed ?? false;
     }
   }
 }

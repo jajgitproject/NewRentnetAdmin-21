@@ -46,6 +46,7 @@ export class Customer {
     showRateOnDutySlip:boolean;
       showOTPOnDutySlip:boolean;
       isBookerAllowedToBeCreatedFromReservation:boolean;
+      isPostPickUpCallAllowed:boolean;
       panNo:string;
       gstCustomerType:string;
       segment:string;
@@ -85,6 +86,7 @@ export class Customer {
        this.showRateOnDutySlip = customer.showRateOnDutySlip ?? false;
        this.showOTPOnDutySlip = customer.showOTPOnDutySlip ?? false;
        this.isBookerAllowedToBeCreatedFromReservation = customer.isBookerAllowedToBeCreatedFromReservation ?? false;
+       this.isPostPickUpCallAllowed = customer.isPostPickUpCallAllowed ?? false;
        this.customerSector = customer.customerSector || '';
        this.contactPerson = customer.contactPerson || '';
        this.locationOutIntervalInMinutes =customer.locationOutIntervalInMinutes || 0;
