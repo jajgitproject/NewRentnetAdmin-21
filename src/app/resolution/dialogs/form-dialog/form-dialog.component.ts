@@ -1133,8 +1133,8 @@ InitDebitType(){
       data=>
       {
         this.DebitTypeList=data;
-        this.advanceTableForm.controls['debitType'].setValidators([Validators.required,
-          this.DebitTypeValidator(this.DebitTypeList)]);
+        // this.advanceTableForm.controls['debitType'].setValidators([Validators.required,
+        //   this.DebitTypeValidator(this.DebitTypeList)]);
         this.advanceTableForm.controls['debitType'].updateValueAndValidity();
         this.filteredDebitTypeOptions = this.advanceTableForm.controls['debitType'].valueChanges.pipe(
           startWith(""),

@@ -128,6 +128,18 @@ export class CustomerPersonService
   {
     advanceTable.customerPersonID=-1;
     advanceTable.userID=this.generalService.getUserID();
+     if(advanceTable.primaryMobile==="")
+    {
+      advanceTable.primaryMobile=null;
+    }
+     if(advanceTable.primaryEmail==="")
+    {
+      advanceTable.primaryEmail=null;
+    }
+     if(advanceTable.billingEmail==="")
+    {
+      advanceTable.billingEmail=null;
+    }
 
     if(advanceTable.employeeCode==="")
     {
@@ -138,7 +150,18 @@ export class CustomerPersonService
   update(advanceTable: CustomerPerson)
   {
     advanceTable.userID=this.generalService.getUserID();
-
+     if(advanceTable.primaryMobile==="")
+    {
+      advanceTable.primaryMobile=null;
+    }
+     if(advanceTable.primaryEmail==="")
+    {
+      advanceTable.primaryEmail=null;
+    }
+     if(advanceTable.billingEmail==="")
+    {
+      advanceTable.billingEmail=null;
+    }
     if(advanceTable.employeeCode==="")
     {
       advanceTable.employeeCode=null;

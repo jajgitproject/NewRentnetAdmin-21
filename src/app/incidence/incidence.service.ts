@@ -49,6 +49,12 @@ export class IncidenceService
     if(advanceTable.assignedToEmployeeID === ""){
       advanceTable.assignedToEmployeeID= 0;
     }
+    if(advanceTable.reporterName === ""){
+      advanceTable.reporterName= null;
+    }
+    if(advanceTable.incidencePlace === ""){
+      advanceTable.incidencePlace= null;
+    }
     advanceTable.incidenceDateString=this.generalService.getTimeApplicable(advanceTable.incidenceDate);
     advanceTable.incidenceTimeString=this.generalService.getTimeApplicableTO(advanceTable.incidenceTime);
     advanceTable.reportingDateString=this.generalService.getTimeTo(advanceTable.reportingDate);
@@ -57,6 +63,15 @@ export class IncidenceService
   }
   update(advanceTable: Incidence)
   {
+      if(advanceTable.assignedToEmployeeID === ""){
+      advanceTable.assignedToEmployeeID= 0;
+    }
+     if(advanceTable.reporterName === ""){
+      advanceTable.reporterName= null;
+    }
+    if(advanceTable.incidencePlace === ""){
+      advanceTable.incidencePlace= null;
+    }
    advanceTable.userID=this.generalService.getUserID();
    advanceTable.incidenceDateString=this.generalService.getTimeApplicable(advanceTable.incidenceDate);
    advanceTable.incidenceTimeString=this.generalService.getTimeApplicableTO(advanceTable.incidenceTime);

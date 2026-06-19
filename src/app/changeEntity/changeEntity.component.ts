@@ -139,7 +139,7 @@ export class ChangeEntityComponent implements OnInit {
   ngOnInit() 
   {
     this.filteredCustomerOptions = of([]);
-    this.loadData();
+    //this.loadData();
     this.InitCustomerGroup();
     this.InitCities();
     this.InitVehicle();
@@ -166,7 +166,7 @@ export class ChangeEntityComponent implements OnInit {
     this.customerGroupID = null;
     this.CustomerList = [];
     this.filteredCustomerOptions = of([]);
-    this.loadData();
+   // this.loadData();
   }
 
   public SearchData() 

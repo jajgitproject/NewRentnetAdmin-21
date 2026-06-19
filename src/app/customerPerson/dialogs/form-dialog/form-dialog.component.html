@@ -104,10 +104,10 @@
                 <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
                     <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
                         <mat-label>Primary Email</mat-label>
-                        <input matInput formControlName="primaryEmail" (input)="onPrimaryEmailChange()" required>
-                        <mat-error *ngIf="advanceTableForm.get('primaryEmail')?.hasError('required')">
+                        <input matInput formControlName="primaryEmail" (input)="onPrimaryEmailChange()">
+                        <!-- <mat-error *ngIf="advanceTableForm.get('primaryEmail')?.hasError('required')">
                             Primary Email is required
-                        </mat-error>
+                        </mat-error> -->
                         <!-- <mat-error *ngIf="advanceTableForm.get('primaryEmail')?.hasError('duplicate')">
                             Duplicate Email found for this customer
                         </mat-error> -->
@@ -120,10 +120,10 @@
                 <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
                     <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
                         <mat-label>Billing Email</mat-label>
-                        <input matInput formControlName="billingEmail" required>
-                        <mat-error *ngIf="advanceTableForm.get('billingEmail').hasError('required')">
+                        <input matInput formControlName="billingEmail">
+                        <!-- <mat-error *ngIf="advanceTableForm.get('billingEmail').hasError('required')">
                             Billing Email is required
-                        </mat-error>
+                        </mat-error> -->
                     </mat-form-field>
                 </div>
                 <div class="col-xl-3 col-lg-3 col-md-1 col-sm-1 mb-1">
@@ -142,9 +142,9 @@
                         <mat-autocomplete #auto9="matAutocomplete" (optionSelected)="onCountryCodeSelected($event)">
                             <mat-option *ngFor="let option of filteredCountryCodeOptions | async"
                                 [value]="option.countryISDCode">
-                                <img [src]="option.icon" alt="{{option.countryISOCode}}" width="20" height="20"
+                                <img [src]="option.icon"  width="20" height="20"
                                     style="margin-right: 15px;">
-                                {{option.countryISOCode}} {{option.countryISDCode}}
+                               {{option.countryISDCode}} {{option.geoPointName}}
                             </mat-option>
                         </mat-autocomplete>
 
@@ -157,10 +157,10 @@
                 <div class="col-xl-3 col-lg-3 col-md-6 col-sm-6 mb-1">
                     <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
                         <mat-label>Primary Mobile</mat-label>
-                        <input matInput formControlName="primaryMobile" required (input)="onCustomerPersonName()">
-                        <mat-error *ngIf="advanceTableForm.get('primaryMobile')?.hasError('required')">
+                        <input matInput formControlName="primaryMobile" (input)="onCustomerPersonName()">
+                        <!-- <mat-error *ngIf="advanceTableForm.get('primaryMobile')?.hasError('required')">
                             Primary Mobile is required
-                        </mat-error>
+                        </mat-error> -->
                         <mat-error *ngIf="advanceTableForm.get('primaryMobile')?.hasError('duplicate')">
                             Duplicate Name and Mobile combination found in this Customer Group
                         </mat-error>
@@ -184,9 +184,9 @@
                         <mat-autocomplete #auto10="matAutocomplete" (optionSelected)="onCountryCode($event)">
                             <mat-option *ngFor="let option of filteredCountryCodesOptions | async"
                                 [value]="option.countryISDCode">
-                                <img [src]="option.icon" alt="{{option.countryISOCode}}" width="20" height="20"
+                                <img [src]="option.icon"  width="20" height="20"
                                     style="margin-right: 8px;">
-                                {{option.countryISOCode}} {{option.countryISDCode}}
+                               {{option.countryISDCode}} {{option.geoPointName}}
                             </mat-option>
                         </mat-autocomplete>
 
@@ -216,9 +216,9 @@
                         <mat-autocomplete #auto11="matAutocomplete" (optionSelected)="onCountryCodeMobile($event)">
                             <mat-option *ngFor="let option of filteredMobileCodeOptions | async"
                                 [value]="option.countryISDCode">
-                                <img [src]="option.icon" alt="{{option.countryISOCode}}" width="15" height="15"
+                                <img [src]="option.icon"  width="15" height="15"
                                     style="margin-right: 8px;">
-                                {{option.countryISOCode}} {{option.countryISDCode}}
+                                {{option.countryISDCode}} {{option.geoPointName}}
                             </mat-option>
                         </mat-autocomplete>
 
@@ -735,19 +735,19 @@
                 <div class="col-xl-3 col-lg-3 col-md-6 col-sm-6 mb-2">
                     <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
                         <mat-label>Primary Email</mat-label>
-                        <input matInput formControlName="primaryEmail" required (input)="onPrimaryEmailChange()">
-                        <mat-error *ngIf="advanceTableForm.get('primaryEmail').hasError('required')">
+                        <input matInput formControlName="primaryEmail" (input)="onPrimaryEmailChange()">
+                        <!-- <mat-error *ngIf="advanceTableForm.get('primaryEmail').hasError('required')">
                             Primary Email is required
-                        </mat-error>
+                        </mat-error> -->
                     </mat-form-field>
                 </div>
                 <div class="col-xl-3 col-lg-3 col-md-6 col-sm-6 mb-2">
                     <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
                         <mat-label>Billing Email</mat-label>
-                        <input matInput formControlName="billingEmail" required>
-                        <mat-error *ngIf="advanceTableForm.get('billingEmail').hasError('required')">
+                        <input matInput formControlName="billingEmail">
+                        <!-- <mat-error *ngIf="advanceTableForm.get('billingEmail').hasError('required')">
                             Billing Email is required
-                        </mat-error>
+                        </mat-error> -->
                     </mat-form-field>
                 </div>
                 <div class="col-xl-3 col-lg-3 col-md-6 col-sm-6 mb-2">
@@ -774,9 +774,9 @@
                         <mat-autocomplete #auto9="matAutocomplete" (optionSelected)="onCountryCodeSelected($event)">
                             <mat-option *ngFor="let option of filteredCountryCodeOptions | async"
                                 [value]="option.countryISDCode">
-                                <img [src]="option.icon" alt="{{option.countryISOCode}}" width="20" height="20"
+                                <img [src]="option.icon"  width="20" height="20"
                                     style="margin-right: 15px;">
-                                {{option.countryISOCode}} {{option.countryISDCode}}
+                               {{option.countryISDCode}} {{option.geoPointName}}
                             </mat-option>
                         </mat-autocomplete>
 
@@ -789,10 +789,10 @@
                 <div class="col-xl-3 col-lg-3 col-md-6 col-sm-6 mb-2">
                     <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
                         <mat-label>Primary Mobile</mat-label>
-                        <input matInput formControlName="primaryMobile" required>
-                        <mat-error *ngIf="advanceTableForm.get('primaryMobile').hasError('required')">
+                        <input matInput formControlName="primaryMobile">
+                        <!-- <mat-error *ngIf="advanceTableForm.get('primaryMobile').hasError('required')">
                             Primary Mobile is required
-                        </mat-error>
+                        </mat-error> -->
                     </mat-form-field>
                 </div>
 
@@ -803,9 +803,9 @@
                         <mat-autocomplete #auto10="matAutocomplete" (optionSelected)="onCountryCode($event)">
                             <mat-option *ngFor="let option of filteredCountryCodesOptions | async"
                                 [value]="option.countryISDCode">
-                                <img [src]="option.icon" alt="{{option.countryISOCode}}" width="20" height="20"
+                                <img [src]="option.icon" width="20" height="20"
                                     style="margin-right: 8px;">
-                                {{option.countryISOCode}} {{option.countryISDCode}}
+                                {{option.countryISDCode}} {{option.geoPointName}}
                             </mat-option>
                         </mat-autocomplete>
 
@@ -830,9 +830,9 @@
                         <mat-autocomplete #auto11="matAutocomplete" (optionSelected)="onCountryCodeMobile($event)">
                             <mat-option *ngFor="let option of filteredMobileCodeOptions | async"
                                 [value]="option.countryISDCode">
-                                <img [src]="option.icon" alt="{{option.countryISOCode}}" width="15" height="15"
+                                <img [src]="option.icon"  width="15" height="15"
                                     style="margin-right: 8px;">
-                                {{option.countryISOCode}} {{option.countryISDCode}}
+                                {{option.countryISDCode}} {{option.geoPointName}}
                             </mat-option>
                         </mat-autocomplete>
                     </mat-form-field>
