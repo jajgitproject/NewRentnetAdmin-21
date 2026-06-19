@@ -1055,6 +1055,16 @@ export const ROUTES: RouteInfo[] = [
         isAccess: false
       },
       {
+        path: 'incidenceEmailToBeSentTo',
+        title: 'Incidence Email To Be Sent To',
+        moduleName: 'incidenceEmailToBeSentTo',
+        icon: 'fas fa-tachometer-alt',
+        class: '',
+        groupTitle: false,
+        submenu: [],
+        isAccess: false
+      },
+      {
         path: 'invoiceHome',
         title: 'Invoice Home',
         moduleName: 'invoiceHome',
