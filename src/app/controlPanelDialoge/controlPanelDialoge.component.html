@@ -61,10 +61,10 @@
                       </a>
                     </span>
 
-                    <button mat-menu-item
+                    <!-- <button mat-menu-item
                       (click)="openSendSmsWhatsappMail(item.reservationID,item.vehicle.vehicle,item.pickup.pickupDate,item.pickup.pickupTime,item.registrationNumber,(item.passengerDetails?.length ? item.passengerDetails[0].customerPersonName : null),(data?.pickupCity || item?.pickupCity || item?.pickup?.pickupCity || item?.pickup?.city || (item.stopsDetails?.length ? item.stopsDetails[0].city : null)), item,item.customerPersonID)">
                       Send SMS
-                    </button>
+                    </button> -->
 
                     <button mat-menu-item (click)="getInvoiceNumber(item,i)">
                       Reservation Cancel
@@ -381,7 +381,7 @@
                       Driver Allotment
                     </a>
                     <button mat-menu-item
-                      (click)="openSendSmsWhatsappMail(item.reservationID,item.vehicle.vehicle,item.pickup.pickupDate,item.pickup.pickupTime,item.registrationNumber,(item.passengerDetails?.length ? item.passengerDetails[0].customerPersonName : null),(data?.pickupCity || item?.pickupCity || item?.pickup?.pickupCity || item?.pickup?.city || (item.stopsDetails?.length ? item.stopsDetails[0].city : null)), item,item.customerPersonID)"
+                      (click)="openSendSmsWhatsappMail(item.reservationID,item.vehicleName,item.pickup.pickupDate,item.pickup.pickupTime,item.registrationNumber,(item.passengerDetails?.length ? item.passengerDetails[0].customerPersonName : null),(data?.pickupCity || item?.pickupCity || item?.pickup?.pickupCity || item?.pickup?.city || (item.stopsDetails?.length ? item.stopsDetails[0].city : null)), item,item.customerPersonID)"
                       [disabled]="!canSendSmsWhatsappMail(item)">
                       Send WA/SMS/Mail</button>
 
