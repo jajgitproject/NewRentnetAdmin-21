@@ -6,7 +6,7 @@ import { MatPaginator } from '@angular/material/paginator';
 import { MatSort } from '@angular/material/sort';
 import { DataSource } from '@angular/cdk/collections';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import { BehaviorSubject, fromEvent, merge, Observable, of, Subscription } from 'rxjs';
+import { BehaviorSubject, fromEvent, merge, Observable, of, Subscription, firstValueFrom } from 'rxjs';
 import { map, startWith } from 'rxjs/operators';
 import { DateAdapter, MAT_DATE_LOCALE } from '@angular/material/core';
 import { MatMenu, MatMenuTrigger } from '@angular/material/menu';
@@ -27,6 +27,16 @@ import { CreditNoteHistoryComponent } from '../creditnotehistory/creditnotehisto
 import { InvoiceBillingHistoryComponent } from '../invoiceBillingHistory/invoiceBillingHistory.component';
 import { FormDialogCIComponent } from '../cancelInvoice/dialogs/form-dialog/form-dialog.component';
 import Swal from 'sweetalert2';
+import { BulkBillsDownloadService } from '../bulkBillsDownload/bulkBillsDownload.service';
+import { BackfillStepDialogComponent } from '../bulkBillsDownload/backfill-step-dialog.component';
+
+interface ExistingPdfSummary {
+  invoice: string[];
+  dutySlips: string[];
+  tollParking: string[];
+  interstateTax: string[];
+  reservationEmails: string[];
+}
 
 @Component({
   standalone: false,
@@ -66,6 +76,7 @@ export class InvoiceHomeComponent implements OnInit {
   SearchTRN:string ='';
   SearchEcoBookingNo: string = '';
   SearchStatus:string ='';
+  archivingInvoiceId: number | null = null;
   searchInvoiceNo: string = '';
    searchDutySlip:string='';
    searchReservationID:string='';
@@ -111,6 +122,7 @@ bookerName: FormControl = new FormControl();
     public httpClient: HttpClient,
     public dialog: MatDialog,
     public invoiceHomeService: InvoiceHomeService,
+    private bulkBillsDownloadService: BulkBillsDownloadService,
     private snackBar: MatSnackBar,
     public router:Router,
     public _generalService: GeneralService,
@@ -487,6 +499,258 @@ bookerName: FormControl = new FormControl();
         }
       );
     }
+
+  async generateAndArchivePdfs(row: InvoiceHome) {
+    if (!row?.invoiceID) {
+      return;
+    }
+
+    this.archivingInvoiceId = row.invoiceID;
+    let existingPdfs: ExistingPdfSummary | null = null;
+
+    try {
+      existingPdfs = await this.loadExistingPdfs(row.invoiceID);
+    } catch (err: any) {
+      this.archivingInvoiceId = null;
+      Swal.fire({
+        title: 'Unable to check existing PDFs',
+        text: this.extractPdfGenerationError(err, 'Failed to load archived document records from the database.'),
+        icon: 'error'
+      });
+      return;
+    }
+
+    this.archivingInvoiceId = null;
+
+    const confirmed = await this.confirmPdfGeneration(row, existingPdfs);
+    if (!confirmed) {
+      return;
+    }
+
+    const performedBy = this._generalService.getUserID();
+    this.archivingInvoiceId = row.invoiceID;
+    const stepErrors: string[] = [];
+
+    try {
+      await this.runGeneratePdfsInteractive(row.invoiceID, performedBy, stepErrors);
+      if (stepErrors.length) {
+        Swal.fire({
+          title: 'PDF generation completed with errors',
+          html: stepErrors.join('<br>'),
+          icon: 'warning'
+        });
+        return;
+      }
+
+      Swal.fire({
+        title: 'PDFs generated',
+        text: 'All documents were generated successfully.',
+        icon: 'success'
+      });
+    } catch (err: any) {
+      const message = this.extractPdfGenerationError(err, 'PDF generation failed.');
+      Swal.fire({
+        title: 'PDF generation failed',
+        text: message,
+        icon: 'error'
+      });
+    } finally {
+      this.archivingInvoiceId = null;
+    }
+  }
+
+  private async confirmPdfGeneration(row: InvoiceHome, existingPdfs: ExistingPdfSummary): Promise<boolean> {
+    if (this.hasExistingPdfs(existingPdfs)) {
+      const result = await Swal.fire({
+        title: 'PDFs Already Exist as Below',
+        html: `${this.formatExistingPdfsMessage(existingPdfs)}<br><br><strong>Do you wish to Regenerate?</strong>`,
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonText: 'Yes, regenerate',
+        cancelButtonText: 'No',
+        customClass: {
+          cancelButton: 'btn btn-danger',
+          confirmButton: 'btn btn-primary'
+        },
+        buttonsStyling: true
+      });
+      return !!result.isConfirmed;
+    }
+
+    const result = await Swal.fire({
+      title: 'Generate PDFs?',
+      text: `Generate invoice bill, duty slip(s), toll/parking, and interstate tax PDFs for ${row.invoiceNumberWithPrefix || row.invoiceID}?`,
+      icon: 'question',
+      showCancelButton: true,
+      confirmButtonText: 'Yes, generate',
+      cancelButtonText: 'Cancel',
+      customClass: {
+        cancelButton: 'btn btn-danger',
+        confirmButton: 'btn btn-primary'
+      },
+      buttonsStyling: true
+    });
+    return !!result.isConfirmed;
+  }
+
+  private async loadExistingPdfs(invoiceId: number): Promise<ExistingPdfSummary> {
+    const result = await firstValueFrom(this.bulkBillsDownloadService.getExistingInvoiceDocuments(invoiceId));
+    return {
+      invoice: this.normalizeFileNameList(result?.invoiceFileNames ?? result?.InvoiceFileNames),
+      dutySlips: this.normalizeFileNameList(result?.dutySlipFileNames ?? result?.DutySlipFileNames),
+      tollParking: this.normalizeFileNameList(result?.tollParkingFileNames ?? result?.TollParkingFileNames),
+      interstateTax: this.normalizeFileNameList(result?.interstateTaxFileNames ?? result?.InterstateTaxFileNames),
+      reservationEmails: this.normalizeFileNameList(result?.reservationEmailFileNames ?? result?.ReservationEmailFileNames),
+    };
+  }
+
+  private normalizeFileNameList(values: string[] | null | undefined): string[] {
+    return (values || []).filter((name) => !!name);
+  }
+
+  private hasExistingPdfs(summary: ExistingPdfSummary): boolean {
+    return summary.invoice.length > 0
+      || summary.dutySlips.length > 0
+      || summary.tollParking.length > 0
+      || summary.interstateTax.length > 0
+      || summary.reservationEmails.length > 0;
+  }
+
+  private formatExistingPdfsMessage(summary: ExistingPdfSummary): string {
+    const lines: string[] = [];
+    if (summary.invoice.length) {
+      lines.push(`Invoice = ${summary.invoice.join(', ')}`);
+    }
+    if (summary.dutySlips.length) {
+      lines.push(`Duty Slip = ${summary.dutySlips.join(', ')}`);
+    }
+    if (summary.tollParking.length) {
+      lines.push(`Toll Parking = ${summary.tollParking.join(', ')}`);
+    }
+    if (summary.interstateTax.length) {
+      lines.push(`InterState Tax = ${summary.interstateTax.join(', ')}`);
+    }
+    if (summary.reservationEmails.length) {
+      lines.push(`ReservationEmail = ${summary.reservationEmails.join(', ')}`);
+    }
+    return lines.join('<br>');
+  }
+
+  private async runGeneratePdfsInteractive(
+    invoiceId: number,
+    performedBy: number,
+    stepErrors: string[]
+  ): Promise<void> {
+    await this.generateDocumentStep(
+      'Invoice',
+      () => firstValueFrom(this.bulkBillsDownloadService.generateInvoicePdf(invoiceId, performedBy)),
+      stepErrors
+    );
+
+    const duties = await firstValueFrom(this.bulkBillsDownloadService.getInvoiceDuties(invoiceId));
+    const dutyRows = duties || [];
+    if (!dutyRows.length) {
+      await this.showPdfStepModal('Duty Slip', false, 'NA');
+      return;
+    }
+
+    for (const duty of dutyRows) {
+      const dutySlipId = duty.dutySlipID ?? duty.DutySlipID;
+      if (!dutySlipId) continue;
+
+      await this.generateDocumentStep(
+        'Duty Slip',
+        () => firstValueFrom(this.bulkBillsDownloadService.generateDutySlipPdf(dutySlipId, performedBy, invoiceId)),
+        stepErrors
+      );
+
+      await this.generateReceiptDocumentsStep(
+        'Toll Parking',
+        () => firstValueFrom(this.bulkBillsDownloadService.generateTollParkingPdfs(dutySlipId, performedBy, true)),
+        stepErrors
+      );
+
+      await this.generateReceiptDocumentsStep(
+        'Interstate Tax',
+        () => firstValueFrom(this.bulkBillsDownloadService.generateInterstateTaxPdfs(dutySlipId, performedBy, true)),
+        stepErrors
+      );
+    }
+  }
+
+  private async generateDocumentStep(
+    documentType: string,
+    action: () => Promise<any>,
+    stepErrors: string[]
+  ): Promise<void> {
+    try {
+      const result = await action();
+      const fileName = result?.fileName ?? result?.FileName ?? 'NA';
+      const created = !!fileName && fileName !== 'NA';
+      await this.showPdfStepModal(documentType, created, fileName);
+      if (!created) {
+        stepErrors.push(`${documentType} not created`);
+      }
+    } catch (err) {
+      const message = this.extractPdfGenerationError(err, `${documentType} failed.`);
+      stepErrors.push(message);
+      await this.showPdfStepModal(documentType, false, 'NA');
+    }
+  }
+
+  private async generateReceiptDocumentsStep(
+    documentType: string,
+    action: () => Promise<any[]>,
+    stepErrors: string[]
+  ): Promise<void> {
+    try {
+      const results = await action();
+      const docs = results || [];
+      if (!docs.length) {
+        await this.showPdfStepModal(documentType, false, 'NA');
+        return;
+      }
+      for (const doc of docs) {
+        const fileName = doc?.fileName ?? doc?.FileName ?? 'NA';
+        await this.showPdfStepModal(documentType, true, fileName);
+      }
+    } catch (err) {
+      const message = this.extractPdfGenerationError(err, `${documentType} failed.`);
+      stepErrors.push(message);
+      await this.showPdfStepModal(documentType, false, 'NA');
+    }
+  }
+
+  private showPdfStepModal(documentType: string, created: boolean, fileName: string): Promise<void> {
+    const status = created ? 'Created' : 'Not Created';
+    const name = created && fileName ? fileName : 'NA';
+    const message = `${documentType} ${status} ${name}`;
+    return new Promise((resolve) => {
+      const dialogRef = this.dialog.open(BackfillStepDialogComponent, {
+        width: '480px',
+        disableClose: true,
+        data: {
+          title: 'PDF generation step',
+          message,
+        },
+      });
+      dialogRef.afterClosed().subscribe(() => resolve());
+    });
+  }
+
+  private extractPdfGenerationError(err: any, fallback: string): string {
+    const body = err?.error;
+    if (typeof body === 'string' && body.trim()) {
+      return body;
+    }
+    if (body && typeof body === 'object') {
+      const message = body.message ?? body.Message ?? body.title ?? body.Title;
+      if (message) {
+        return String(message);
+      }
+    }
+    return err?.message || fallback;
+  }
 
  viewCreditNote(row) {
     this.dialog.open(CreditNoteHistoryComponent, {

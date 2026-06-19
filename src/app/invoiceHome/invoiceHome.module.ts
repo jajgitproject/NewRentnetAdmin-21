@@ -33,6 +33,8 @@ import { InvoiceBillingHistoryService } from '../invoiceBillingHistory/invoiceBi
 import { CancelInvoiceService } from '../cancelInvoice/cancelInvoice.service';
 import { CancelInvoiceModule } from '../cancelInvoice/cancelInvoice.module';
 import { MatExpansionModule } from '@angular/material/expansion';
+import { BulkBillsDownloadService } from '../bulkBillsDownload/bulkBillsDownload.service';
+import { BackfillStepDialogModule } from '../bulkBillsDownload/backfill-step-dialog.module';
 
 @NgModule({
   declarations: [
@@ -68,10 +70,11 @@ import { MatExpansionModule } from '@angular/material/expansion';
     CurrentDesginationModule,
     CreditNoteHistoryModule,
     CancelInvoiceModule,
-    MatExpansionModule
+    MatExpansionModule,
+    BackfillStepDialogModule
   ],
   
-  providers: [InvoiceHomeService,CreditNoteHistoryService,InvoiceBillingHistoryService,CancelInvoiceService],
+  providers: [InvoiceHomeService,CreditNoteHistoryService,InvoiceBillingHistoryService,CancelInvoiceService, BulkBillsDownloadService],
 })
 export class InvoiceHomeModule {}
 

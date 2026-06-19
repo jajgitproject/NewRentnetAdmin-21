@@ -2842,6 +2842,14 @@ const routes: Routes = [
       },
 
       {
+        path: 'bulkBillsDownload',
+        loadChildren: () =>
+          import('./bulkBillsDownload/bulkBillsDownload.module').then(
+            (m) => m.BulkBillsDownloadModule
+          )
+      },
+
+      {
         path: 'supplierCityMapping',
         loadChildren: () =>
           import('./supplierCityMapping/supplierCityMapping.module').then(

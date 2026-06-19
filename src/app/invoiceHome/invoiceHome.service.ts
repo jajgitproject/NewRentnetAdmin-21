@@ -11,8 +11,11 @@ export class InvoiceHomeService {
   isTblLoading = true;
   date: any;
   Result: string = 'Failure';
+  private DOCUMENT_API_URL = '';
+
   constructor(private httpClient: HttpClient, public generalService: GeneralService) {
     this.API_URL = generalService.BaseURL + "invoiceHome";
+    this.DOCUMENT_API_URL = generalService.BaseURL + 'documentManagement';
   }
 
   /** CRUD METHODS */
@@ -116,6 +119,13 @@ export class InvoiceHomeService {
       searchActivationStatus = null;
     }
     return this.httpClient.get(this.API_URL + "/" + searchCustomerName + '/' + searchCustomerGroup + '/' + searchInvoiceNo + '/' + searchBranch + '/' + searchFromDate + '/' + searchToDate + '/' + SearchInvoiceStatus + '/' + SearchEInvoice + '/'+ searchDutySlip + '/'+ searchReservationID + '/' + searchActivationStatus + '/' + PageNumber + '/'+coloumName+'/'+sortType);
+  }
+
+  archiveDocuments(invoiceId: number, performedBy: number): Observable<any> {
+    return this.httpClient.post(
+      `${this.DOCUMENT_API_URL}/invoice/${invoiceId}/archive-documents/${performedBy}`,
+      {}
+    );
   }
 
 }

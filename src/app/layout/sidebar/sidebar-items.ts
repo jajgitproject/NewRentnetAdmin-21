@@ -1065,6 +1065,16 @@ export const ROUTES: RouteInfo[] = [
         isAccess: false
       },
       {
+        path: 'bulkBillsDownload',
+        title: 'Bulk Bills Download',
+        moduleName: 'bulkBillsDownload',
+        icon: 'fas fa-file-archive',
+        class: '',
+        groupTitle: false,
+        submenu: [],
+        isAccess: false
+      },
+      {
         path: 'invoiceTemplate',
         title: 'Invoice Template',
         moduleName: 'invoiceTemplate',

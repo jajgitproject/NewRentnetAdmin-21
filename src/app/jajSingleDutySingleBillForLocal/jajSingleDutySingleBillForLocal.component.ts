@@ -152,8 +152,13 @@ buildPrintDutySlipEmbedUrl(): void {
     return;
   }
 
+  const dutySlipType = (this.dataSource?.dutySlipType || '').toString().trim();
+  const route = dutySlipType === 'GeneralDutySlipWithMap'
+    ? 'printdutyslip'
+    : 'PrintDutySlipWithoutMap';
+
   const base = `${window.location.origin}${window.location.pathname}`;
-  const url = `${base}#/PrintDutySlipWithoutMap?dutySlipID=${dutySlipID}&reservationID=${reservationID}`;
+  const url = `${base}#/${route}?dutySlipID=${dutySlipID}&reservationID=${reservationID}`;
   this.printDutySlipEmbedUrl = this.sanitizer.bypassSecurityTrustResourceUrl(url);
 }
 

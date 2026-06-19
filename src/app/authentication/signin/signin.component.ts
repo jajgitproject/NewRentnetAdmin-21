@@ -1,62 +1,109 @@
 // @ts-nocheck
+
 import { Component, OnInit } from '@angular/core';
+
 import { Router } from '@angular/router';
+
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+
 import { AuthService } from 'src/app/core/service/auth.service';
+
 import { MatDialog } from '@angular/material/dialog';
+
 import { FormDialogComponent } from 'src/app/validateOTP/dialogs/form-dialog/form-dialog.component';
+
 import { ExpirationDateService } from 'src/app/shared/expirationDate.service';
 // Location-based login disabled for HTTP/VPN (http://10.0.6.8). Re-enable GeolocationService when HTTPS is available.
 // import { GeolocationService, LoginLocationPayload } from 'src/app/core/service/geolocation.service';
 
 @Component({
+
   standalone: false,
+
   selector: 'app-signin',
+
   templateUrl: './signin.component.html',
+
   styleUrls: ['./signin.component.scss']
+
 })
+
 export class SigninComponent implements OnInit {
+
   otpDialogOpen = false;
+
   loginForm: FormGroup;
+
   email: string = '';
+
   password: string = '';
+
   rememberMe: boolean = false;
+
   formSubmitted = false;
+
   isSubmitting = false;
+
   error: string | null = null;
+
   hide = true;
+
   langStoreValue: string;
+
   defaultFlag: string;
+
   expirationDate: any;
+
   daysLeft: number;
+
   showExpiryWarning: boolean = false;
+
   isPasswordDeactivated: boolean = false;
   errorMessageToBeShown: string = '';
 
   constructor(
+
     private formBuilder: FormBuilder,
+
     private router: Router,
+
     private authService: AuthService,
+
     private dialog: MatDialog,
     private expirationDateService: ExpirationDateService,
   ) {}
 
+
+
   ngOnInit() {
+
     this.loginForm = this.formBuilder.group({
       email: ['', [Validators.required, Validators.pattern(/^[0-9]*$/)]],
+
       password: ['', Validators.required]
+
     });
 
+
+
     const savedEmail = localStorage.getItem('email');
+
     const savedPassword = localStorage.getItem('password');
 
+
+
     if (savedEmail && savedPassword) {
+
       this.email = savedEmail;
+
       this.password = savedPassword;
+
       this.loginForm.patchValue({ email: this.email });
+
       this.loginForm.patchValue({ password: this.password });
     }
   }
+
 
   onNumberInput(event: any) {
     const input = event.target.value.replace(/[^0-9]/g, '');
@@ -64,18 +111,35 @@ export class SigninComponent implements OnInit {
   }
 
   toggleCheckbox(checked: boolean) {
+
     this.rememberMe = checked;
+
   }
+
+
 
   get f() {
+
     return this.loginForm.controls;
+
   }
 
+
+
   onSubmit() {
+
     this.formSubmitted = true;
+
     this.error = null;
+
+    this.errorMessageToBeShown = '';
+
     if (this.loginForm.invalid) {
+
       this.error = 'Username and Password not valid !';
+
+      this.errorMessageToBeShown = this.error;
+
       return;
     }
 
@@ -160,90 +224,181 @@ export class SigninComponent implements OnInit {
       );
   }
 
+
+
   public calculateDaysLeft(): void {
+
     const currentUser = JSON.parse(localStorage.getItem('currentUser') || '{}');
+
     const employee = currentUser.employee ?? currentUser.Employee;
+
     const mobile = String(employee?.Mobile ?? employee?.mobile ?? '');
+
     const typedLogin = String(this.f.email?.value ?? '');
+
     const OTP_BYPASS_NUMBERS = [
+
       '9560342610',
+
       '9811051222',
+
       '8527057487',
+
       '9990788001',
+
       '8273089744',
+
       '8447685514',
+
       '9891785921',
+
     ];
 
+
+
     if (OTP_BYPASS_NUMBERS.includes(mobile) || OTP_BYPASS_NUMBERS.includes(typedLogin)) {
+
       this.isPasswordDeactivated = false;
+
       const role = localStorage.getItem('role');
+
       if (role === 'Admin') {
+
         this.router.navigate(['/controlPanelDesign']);
+
       } else {
+
         this.router.navigate(['/welcome/welcome']);
+
       }
+
       return;
+
     }
+
+
 
     const pwdExp =
+
       employee?.PasswordExpirationDate ?? employee?.passwordExpirationDate;
+
     const expirationDate = pwdExp ? new Date(pwdExp) : null;
+
     if (!expirationDate || isNaN(expirationDate.getTime())) {
+
       this.isPasswordDeactivated = false;
+
       this.openValidateOTPModal();
+
       return;
+
     }
+
+
 
     const timeDiff = expirationDate.getTime() - Date.now();
+
     this.daysLeft = Math.ceil(timeDiff / (1000 * 3600 * 24));
 
+
+
     if (this.daysLeft <= 0) {
+
       this.isPasswordDeactivated = true;
+
       this.deactivateAccount();
+
       return;
+
     }
+
+
 
     this.isPasswordDeactivated = false;
+
     this.openValidateOTPModal();
+
   }
+
+
 
   private deactivateAccount(): void {
+
     const currentUser = JSON.parse(localStorage.getItem('currentUser') || '{}');
+
     const employee = currentUser?.employee ?? currentUser?.Employee;
+
     if (!currentUser || !employee) {
+
       console.error('currentUser or currentUser.employee is null or undefined');
+
       this.error = 'Error: Unable to retrieve current user data';
+
+      this.errorMessageToBeShown = this.error;
+
       return;
+
     }
 
+
+
     const payload = {
+
       EmployeeEntityPasswordID:
+
         employee.EmployeeEntityID ?? employee.employeeEntityID,
+
       UserType: 'Employee'
+
     };
 
+
+
     this.authService.deactivateAccount(payload).subscribe(
+
       res => {
+
         this.router.navigate(['/authentication/signin']);
+
       },
+
       error => {
+
         console.error('Error deactivating account', error);
+
         this.error = error.message ? error.message : 'Error deactivating account';
+
+        this.errorMessageToBeShown = this.error;
+
       }
+
     );
+
   }
 
+
+
   openValidateOTPModal() {
+
     this.otpDialogOpen = true;
+
     const dialogRef = this.dialog.open(FormDialogComponent, {
+
       width: '300px',
+
       disableClose: true,
+
       data: { action: 'validate' }
+
     });
 
+
+
     dialogRef.afterClosed().subscribe(() => {
+
       this.otpDialogOpen = false;
+
     });
+
   }
 }

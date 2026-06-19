@@ -14,13 +14,10 @@ import { RuntimeConfigService } from './runtime-config.service';
 export class AuthService {
   private currentUserSubject: BehaviorSubject<User | null>;
   public currentUser: Observable<User | null>;
-  private API_URL:string = '';
-
   constructor(
     private http: HttpClient,
     private runtimeConfig: RuntimeConfigService
   ) {
-    this.API_URL = this.runtimeConfig.getBaseUrl() + 'Auth';
     const stored = localStorage.getItem('currentUser');
     let normalized: User | null = null;
     if (stored) {
@@ -50,8 +47,12 @@ export class AuthService {
     return this.currentUserSubject.value;
   }
 
+  private get apiUrl(): string {
+    return this.runtimeConfig.getBaseUrl() + 'Auth';
+  }
+
   deactivateAccount(user: any) {
-    return this.http.post<any>(this.API_URL + 'deactivate-account', user);
+    return this.http.post<any>(this.apiUrl + 'deactivate-account', user);
   }
 
   login(
@@ -75,7 +76,7 @@ export class AuthService {
     //   body.LocationAccuracyMeters = location.locationAccuracyMeters;
     //   body.LocationCapturedAt = location.locationCapturedAt;
     // }
-    return this.http.post<any>(this.API_URL + '/authenticate', body).pipe(
+    return this.http.post<any>(this.apiUrl + '/authenticate', body).pipe(
       map((user) => {
         let parsed: any = user;
         if (typeof user === 'string') {
@@ -190,7 +191,7 @@ export class AuthService {
   }
 
   logout() {
-    return this.http.post<any>(this.API_URL + '/logout', this.getSessionPayload()).pipe(
+    return this.http.post<any>(this.apiUrl + '/logout', this.getSessionPayload()).pipe(
       catchError(() => of(null)),
       map(() => {
         this.clearLocalSession();

@@ -2,7 +2,10 @@ import { Injectable } from '@angular/core';
 import { environment } from 'src/environments/environment';
 import { AppRuntimeConfigPatch } from '../config/app-runtime-config.model';
 
-function withTrailingSlash(url: string): string {
+function withTrailingSlash(url: string | undefined): string {
+  if (!url) {
+    return '';
+  }
   const t = url.trim();
   if (!t) {
     return t;
