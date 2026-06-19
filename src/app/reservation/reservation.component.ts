@@ -923,6 +923,7 @@ toArray<T>(value: any): T[] {
 
         this.reservationDataSource=data;
         this.advanceTable=this.reservationDataSource[0];
+        console.log(this.advanceTable);
         const reservationSourceMissingOnLoad = this.isEmptyText(this.advanceTable?.reservationSource);
         const normalizedReservationSource = reservationSourceMissingOnLoad ? 'Email' : this.advanceTable.reservationSource;
         const normalizedReservationSourceDetail = reservationSourceMissingOnLoad
@@ -1065,7 +1066,7 @@ toArray<T>(value: any): T[] {
         this.InitPickupSpot();
         this.InitServiceLocationBasedOnCity();
         this.InitReservationInvoiceGSTDetails( this.customerID);
-        this.getETRDropOffTime();     
+       // this.getETRDropOffTime();     
         this.InitReservationSource();   
         //this.GetReservationCapping(this.customerGroupID,this.customerID,this.advanceTable.pickupDate,this.advanceTable.pickupCityID,this.advanceTable.packageTypeID,this.advanceTable.vehicleCategoryID);
      }
@@ -3989,7 +3990,7 @@ private patchPickupAddress(res: any) {
   {
     this.onPickupDateChange(event);
     this.locationTimeSet(event);
-    this.SetDropOffDate();
+    //this.SetDropOffDate();
   }
 
   GetIntervalMin() 

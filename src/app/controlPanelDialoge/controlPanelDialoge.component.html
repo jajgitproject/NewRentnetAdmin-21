@@ -830,7 +830,7 @@
                   </b>
                   <mat-menu #menu45="matMenu">
                     <a mat-menu-item (click)="postPickUPCall(item)" target="_blank" rel="noreferrer noopener"
-                      [disabled]="ReservationStatus === 'Cancelled'">
+                      [disabled]="!canPostPickUpCall(item)">
                       Post PickUP Call
                     </a>
                     <!-- <button mat-menu-item>History</button> -->
@@ -839,6 +839,9 @@
                       History
                     </a>
                   </mat-menu>
+                  <br/>
+                  {{ item.isPostPickUpCallAllowedToCustomer === false ? 'Post pick up call is not allowed to this customer' : 
+                    (item.isPostPickUpCallAllowedToCustomerPerson === false ? 'Post pick up call is not allowed to this passenger' : '') }}
 
                   <!-- <b>Track on map</b><br />
                                           <b>Dispute</b> <br />

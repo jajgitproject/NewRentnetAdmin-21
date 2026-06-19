@@ -14,6 +14,7 @@ import {
   summaryOfDutyHasDisplayableData,
   unwrapInvoiceCalculationPayload
 } from '../summaryOfDuty/invoice-calculation-to-summary-of-duty.mapper';
+import { ChangeSupplierForInventoryModel } from './clossingOne.model';
 
 export const SUMMARY_LOAD_FAILED_MESSAGE =
   'Bill calculated but summary could not be loaded. Check rate card / GST configuration.';
@@ -154,6 +155,13 @@ export class ClossingOneService
   printDutySlipInfo(invoiceID: number): Observable<any> {
     return this.httpClient.get(this.API_URL_Bill + "/"+'getinvoice'+ "/" + invoiceID);
   }
+
+  updateSupplierForInventory(advanceTable: ChangeSupplierForInventoryModel)
+  {
+    advanceTable.userID=this.generalService.getUserID();
+    return this.httpClient.put<any>(this.API_URL + '/' + 'UpdateSupplierForInventory' , advanceTable);
+  }
+
 }
 
   

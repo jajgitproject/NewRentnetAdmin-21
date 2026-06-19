@@ -96,6 +96,8 @@ export class ControlPanelDetails {
   printRunningDetailOnDutySlip:boolean;
   showRateOnDutySlip:boolean;
   showOTPOnDutySlip:boolean;
+  isPostPickUpCallAllowedToCustomer:boolean;
+  isPostPickUpCallAllowedToCustomerPerson:boolean;
 
   constructor(details) {
     this.reservationID = details.reservationID || '';
@@ -391,6 +393,7 @@ export class Filters {
   security:string;
   disputes:string;
   reservationID: number;
+  resID: string;
   dutySlipID: number;
   vendorTripNumber:string;
   fromDate: string;
@@ -490,7 +493,8 @@ export class Filters {
     this.tripType=filter.tripType || '';
     this.reservationSourceDetail = filter.reservationSourceDetail || '';
     this.supplierType = filter.supplierType;
-    this.kAM = filter.kAM;
+    this.kAM = filter.kAM || '';
+    this.resID = filter.resID || '';
   }
 }
 

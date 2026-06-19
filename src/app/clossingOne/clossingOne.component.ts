@@ -101,6 +101,7 @@ import { SettledRateDetails } from '../settledRateDetails/settledRateDetails.mod
 import { NewFormService } from '../newForm/newForm.service';
 import { FormDialogComponentCSD } from '../customerSpecificDetails/dialogs/form-dialog/form-dialog.component';
 import { DutySlipImageDetailsShowComponent as DSImage } from '../dutySlipImageDetailsShow/dutySlipImageDetailsShow.component';
+import { FormDialogChangeSupplierForInventory } from './dialog/changeSupplierForInventory/changeSupplierForInventory.component';
 @Component({
   standalone: false,
   selector: 'app-clossingOne',
@@ -1812,6 +1813,26 @@ PrintDutyMap() {
     });
   }
 }
+
+
+//---------- Change Supplier For Inventory ----------
+  ChangeSupplierForInventory() 
+  {
+    const dialogRef = this.dialog.open(FormDialogChangeSupplierForInventory,
+    {
+      data:
+      {
+        action:'edit',
+        allotmentID: this.AllotmentID,
+        reservationID: this.ReservationID
+      }
+    });
+    dialogRef.afterClosed().subscribe((res: any) => {
+      window.location.reload();
+    })
+  }
+
+
 }
 
 

@@ -653,6 +653,7 @@ export class ControlPanelDesignComponent implements OnInit {
       supplierType:[this._filters.supplierType],
       dutySlipID: [this._filters.dutySlipID || ''],
       kAM:[this._filters.kAM],
+      resID:[this._filters.resID || ''],
     });
   }
 
@@ -918,11 +919,11 @@ export class ControlPanelDesignComponent implements OnInit {
 
   trimBookingNo()
   {
-    const value = this.filterForm.get('reservationID')?.value;
+    const value = this.filterForm.get('resID')?.value;
     if (value)
     {
       this.filterForm.patchValue({
-        reservationID: value.toString().trim()
+        resID: value.toString().trim()
       });
     }
   }
@@ -4094,7 +4095,7 @@ openDropOffByExectiveGPS(item: any)
   }
   getDropOffAddressValue(source: any): string {
     if (!source) {
-      return '  ';
+      return 'N/A';
     }
     const raw =
       source.dropOffAddressDetails ??
@@ -4102,7 +4103,7 @@ openDropOffByExectiveGPS(item: any)
       source.drop?.dropOffAddressDetails ??
       source.drop?.dropOffAddress;
     const trimmed = (raw ?? '').toString().trim();
-    return trimmed || '  ';
+    return trimmed || 'N/A';
   }
 
 getLifeCycleDisplay(status: any): { label: string; color: string } {
@@ -4112,15 +4113,15 @@ getLifeCycleDisplay(status: any): { label: string; color: string } {
   } 
   else if (status.dropped === 'Yes')
  {
-    return { label: 'Dropped Off', color: 'black' };
+    return { label: 'Trip End', color: 'black' };
   } 
   else if (status.pickedUp === 'Yes') {
   if (status.pickedUpDelayInMinutes > 0)
  {
-      return { label: 'Pickup', color: 'red' };
+      return { label: 'Trip Start', color: 'red' };
  } 
   else {
-      return { label: 'Pickup', color: 'black' };
+      return { label: 'Trip Start', color: 'black' };
     }
   } 
   else if (status.reached === 'Yes') {

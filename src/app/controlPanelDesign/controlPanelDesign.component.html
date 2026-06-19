@@ -31,7 +31,7 @@
             <div class="col-xl-2 col-lg-2 col-md-2 col-sm-12 mb-2">
               <mat-form-field class="example-full-width cp-quick-search-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
                 <mat-label>Booking Number</mat-label>
-                <input matInput formControlName="reservationID" (blur)="trimBookingNo()" />
+                <input matInput formControlName="resID" (blur)="trimBookingNo()" />
               </mat-form-field>
             </div>
             <div class="col-xl-2 col-lg-2 col-md-2 col-sm-12 mb-2">
@@ -1528,6 +1528,18 @@
                                             'fa-arrow-down': sortColumn === 'qcCheckedByExecutivePassed' && sortDirection === 'desc'}"></i>
                   </span>
 
+                  <span style="
+                  font-size: 12px;
+                  text-align: left;
+                  width: 200px;
+                  float: left;cursor: pointer;" (click)="sortByColumnName('reservationCreatedByEmployeeName')"
+                    [ngClass]="{'active-sort': sortColumn === 'reservationCreatedByEmployeeName'}">
+                    <b>Res Created By / Alloted By</b>
+                    <i class="fas"
+                      [ngClass]="{'fa-arrow-up': sortColumn === 'reservationCreatedByEmployeeName' && sortDirection === 'asc',
+                                            'fa-arrow-down': sortColumn === 'reservationCreatedByEmployeeName' && sortDirection === 'desc'}"></i>
+                  </span>
+
                   <!-- <span style="
                   font-size: 12px;
                   text-align: left;
@@ -1691,7 +1703,7 @@
                             &nbsp;
                              <span *ngIf="data.internalNoteModel !== null" matTooltip="Internal Note"> IN </span>
                             &nbsp;
-                            <span *ngIf="data.supplierAddress !== null || data.inventoryOwnedSupplied ==='Supplier'" [matTooltip]="data.rpsName"> P2S </span>
+                            <span *ngIf="data.supplierAddress !== null || data.inventoryOwnedSupplied ==='Supplier'" [matTooltip]="data.rpsName || data.supplierName"> P2S </span>
                             <br>
 
                             <span *ngIf="data.emailContent !== null"> E2S </span>
@@ -2034,6 +2046,12 @@
                             <span style="font-size: 12px;text-align: left;width: 100px;float: left;">
                               {{ data.qcCheckedByExecutivePassed == null ? 'N/A' : (data.qcCheckedByExecutivePassed ===
                               true ? 'QC Approved' : 'QC Rejected') }}
+                            </span>
+
+                            <span style="font-size: 12px;text-align: left;width: 200px;float: left;">
+                              {{ data.reservationCreatedByEmployeeName !== null ? data.reservationCreatedByEmployeeName : 'N/A'}} /
+                              <br>
+                              {{ data.allotmentCreatedByEmployeeName !== null ? data.allotmentCreatedByEmployeeName : 'N/A'}}
                             </span>
 
                           <!-- <span style="font-size: 12px; text-align: left; width: 130px;float: left;"> -->

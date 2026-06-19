@@ -118,6 +118,7 @@ import { SummaryOfDutyModule } from '../summaryOfDuty/summary-of-duty.module';
 import { DutySlipImageDetailsShowService } from '../dutySlipImageDetailsShow/dutySlipImageDetailsShow.service';
 import { DutySlipImageService } from '../dutySlipImage/dutySlipImage.service';
 import { DutySlipImageDetailsShowModule } from '../dutySlipImageDetailsShow/dutySlipImageDetailsShow.module';
+import { FormDialogChangeSupplierForInventory } from './dialog/changeSupplierForInventory/changeSupplierForInventory.component';
 
 
 @NgModule({
@@ -127,6 +128,7 @@ import { DutySlipImageDetailsShowModule } from '../dutySlipImageDetailsShow/duty
     CustomerInformationComponent,
     CurrentdataInformationComponent,
     DutySACComponent,
+    FormDialogChangeSupplierForInventory
     ],
   imports: [
     MatTabsModule,

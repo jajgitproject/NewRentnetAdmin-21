@@ -58,3 +58,22 @@ export class TotalDutyExpenseModel {
     this.totalDENonChargeableAmount = totalDutyExpenseModel.totalDENonChargeableAmount || '';
   }
 }
+
+
+export class ChangeSupplierForInventoryModel {
+  dutySlipID: number;
+  supplierID:number;
+  supplierName:string;
+  reservationID:number;
+  allotmentID:number;
+  userID:number;
+
+  constructor(changeSupplierForInventoryModel) {
+    this.dutySlipID = changeSupplierForInventoryModel.dutySlipID || '';
+    this.supplierID = changeSupplierForInventoryModel.supplierID || '';
+    this.supplierName = changeSupplierForInventoryModel.supplierName || '';
+    this.reservationID = changeSupplierForInventoryModel.reservationID || '';
+    this.allotmentID = changeSupplierForInventoryModel.allotmentID || '';
+    this.userID = changeSupplierForInventoryModel.userID || '';
+  }
+}

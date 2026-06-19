@@ -197,6 +197,9 @@ export class ControlPanelDialogeComponent {
   /** Full KAM rows from prefetch — passed into KAM dialog so it does not rely on a second HTTP round-trip */
   kamRowsByCustomerId: Record<number, any[]> = {};
 
+  IsPostPickUpCallAllowedToCustomer:boolean = false;
+  IsPostPickUpCallAllowedToCustomerPerson:boolean = false;
+
   constructor(
     public dialogRef: MatDialogRef<ControlPanelDialogeComponent>,
     @Inject(MAT_DIALOG_DATA)
@@ -253,6 +256,10 @@ export class ControlPanelDialogeComponent {
         const details = data?.reservationDetails;
         const list = Array.isArray(details) ? details : details != null ? [details] : [];
         this.reservationInfo = list.length > 0 ? list : null;
+
+        this.IsPostPickUpCallAllowedToCustomer = this.reservationInfo[0].isPostPickUpCallAllowedToCustomer;
+        this.IsPostPickUpCallAllowedToCustomerPerson =  this.reservationInfo[0].isPostPickUpCallAllowedToCustomerPerson;
+
         console.log('Fetched reservation details:', this.reservationInfo);
         this.ReservationStatus = list[0]?.reservationStatus ?? null;
         this.prefetchKamSummaries(list);
@@ -2244,6 +2251,9 @@ export class ControlPanelDialogeComponent {
        //--------- postPickUPCall Popup ----------
         postPickUPCall(item:any)
         {
+          if (!this.canPostPickUpCall(item)) {
+            return;
+          }
           if(item && item.dutySlipID === null || item.dutySlipID === undefined || item.dutySlipID === 0 || item.dutySlipID === '')  {
             return;
           }
@@ -2459,6 +2469,14 @@ TrackOnMapInfo(reservationID: number, item?: any) {
       return false;
     }
     return isAllotedBooking(item);
+  }
+
+  canPostPickUpCall(item: any): boolean {
+    if ((this.ReservationStatus === 'Cancelled') || (item.isPostPickUpCallAllowedToCustomer === false && item.isPostPickUpCallAllowedToCustomerPerson === false)) 
+    {
+      return false;
+    }
+    return true;
   }
 
   private resolveMessagingCustomerPersonId(customerPersonID: any, item: any): any {

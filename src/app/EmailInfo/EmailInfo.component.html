@@ -164,9 +164,9 @@
           </thead>
           <tbody>
             <tr *ngFor="let info of emailList">
-              <td>{{ info?.reservationID || 'N/A' }}</td>
-              <td> {{ info?.passenger?.customerPersonName || 'N/A' }}</td>
-              <td> {{ info?.passenger?.primaryMobile || 'N/A' }}</td>
+              <td>{{ getReservationGroupNo() || 'N/A' }}.{{ info?.reservationID || 'N/A' }}</td>
+              <td>{{ info?.passenger?.customerPersonName || 'N/A' }}</td>
+              <td>{{ info?.passenger?.primaryMobile || 'N/A' }}</td>
               <td>{{ (info?.pickup?.pickupDate | date:'dd-MMM-yyyy') || 'N/A' }}</td>
               <td>{{ (info?.drop?.dropOffDate | date:'dd-MMM-yyyy') || 'N/A' }}</td>
               <td>{{ (info?.reportTime ?? info?.pickup?.pickupTime) ? ((info?.reportTime ?? info?.pickup?.pickupTime) | date:'HH:mm') : 'N/A' }}</td>
