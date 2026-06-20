@@ -86,6 +86,14 @@ const routes: Routes = [
       },
 
       {
+        path: 'addB2CServiceLocation',
+        loadChildren: () =>
+          import('./addB2CServiceLocation/addB2CServiceLocation.module').then(
+            (m) => m.AddB2CServiceLocationModule
+          )
+      },
+
+      {
         path: 'driverComplianceDashboard',
         loadChildren: () =>
           import('./driverComplianceDashboard/driverComplianceDashboard.module').then(

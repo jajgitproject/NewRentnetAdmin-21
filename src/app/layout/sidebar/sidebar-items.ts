@@ -104,6 +104,18 @@ export const ROUTES: RouteInfo[] = [
         submenu: [],
         isAccess: false
       },
+
+      {
+        path: 'addB2CServiceLocation',
+        title: 'Add B2C Service Location',
+        moduleName: 'addB2CServiceLocation',
+        icon: 'fas fa-tachometer-alt',
+        class: '',
+        groupTitle: false,
+        submenu: [],
+        isAccess: false
+      },
+      
       {
         path: 'driverInventoryAssociation',
         title: 'Driver Inventory Association',
@@ -1473,6 +1485,8 @@ export const ROUTES: RouteInfo[] = [
         submenu: [],
         isAccess: false
       },
+
+      
 
       {
         path: 'tollParkingType',
