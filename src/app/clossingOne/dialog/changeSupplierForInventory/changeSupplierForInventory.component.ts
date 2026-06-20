@@ -36,6 +36,8 @@ export class FormDialogChangeSupplierForInventory
   supplierID: any;
   ReservationID: any;  
   AllotmentID: any;
+  status: string = '';
+  buttonDisabled = false;
   
   constructor(
   public dialogRef: MatDialogRef<FormDialogChangeSupplierForInventory>, 
@@ -165,10 +167,9 @@ export class FormDialogChangeSupplierForInventory
     this.advanceTableForm.patchValue({supplierID: this.supplierID});
   }
 
-    
-  
-  
-  
+  onNoClick(): void {
+    this.dialogRef.close();
+  }
 }
 
 

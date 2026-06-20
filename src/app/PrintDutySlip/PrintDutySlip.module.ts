@@ -26,6 +26,7 @@ import { MyUploadModule } from '../myupload/myupload.module';
 import { GooglePlaceModule } from '@compat/google-places-shim';
 import { DutySlipAccentureService } from '../dutySlipAccenture/dutySlipAccenture.service';
 import { ControlPanelDesignService } from '../controlPanelDesign/controlPanelDesign.service';
+import { StaticImageComponent } from '../shared/static-image/static-image.component';
 
 @NgModule({
   declarations: [
@@ -55,6 +56,7 @@ import { ControlPanelDesignService } from '../controlPanelDesign/controlPanelDes
     MatProgressSpinnerModule,
     MyUploadModule,
     GooglePlaceModule,
+    StaticImageComponent,
   ],
   exports: [PrintDutySlipComponent],
   providers: [DutySlipAccentureService, ControlPanelDesignService]

@@ -257,20 +257,59 @@ export class GeneralService {
     return this.ImageURL;
   }
 
-  /** Full URL for StaticFiles/Images assets (signatures, duty slip scans, etc.). */
+  /** Strip host and return StaticFiles/Images/... or bare filename. */
+  normalizeStaticImagePath(path: string | null | undefined): string | null {
+    const value = (path ?? '').toString().trim();
+    if (!value || /^(null|undefined)$/i.test(value)) {
+      return null;
+    }
+
+    let normalized = value.replace(/\\/g, '/');
+    if (/^https?:\/\//i.test(normalized)) {
+      try {
+        normalized = new URL(normalized).pathname;
+      } catch {
+        normalized = normalized.replace(/^https?:\/\/[^/]+/i, '');
+      }
+    }
+
+    normalized = normalized.replace(/^\/+/, '');
+    const marker = 'staticfiles/images/';
+    const idx = normalized.toLowerCase().indexOf(marker);
+    if (idx >= 0) {
+      return 'StaticFiles/Images/' + normalized.substring(idx + marker.length).replace(/^\/+/, '');
+    }
+
+    return normalized.includes('/') ? normalized : 'StaticFiles/Images/' + normalized;
+  }
+
+  private buildStaticImageUrlFromPath(relativePath: string, baseUrl: string): string | null {
+    if (!relativePath || !baseUrl) {
+      return null;
+    }
+    const base = baseUrl.replace(/\/+$/, '/');
+    const path = relativePath.replace(/^\/+/, '');
+    if (path.toLowerCase().startsWith('staticfiles/images/')) {
+      return base + path;
+    }
+    return base + 'StaticFiles/Images/' + path.replace(/^\/+/, '');
+  }
+
+  /** Build URL for StaticFiles/Images assets; absolute URLs from the API are returned as-is. */
   resolveStaticImageUrl(path: string | null | undefined): string | null {
     const value = (path ?? '').toString().trim();
-    if (!value) {
+    if (!value || /^(null|undefined)$/i.test(value)) {
       return null;
     }
     if (/^https?:\/\//i.test(value)) {
       return value;
     }
-    const apiBase = this.getImageURL().replace(/\/+$/, '/');
-    if (value.toLowerCase().includes('staticfiles/images')) {
-      return apiBase + value.replace(/^\/+/, '');
+
+    const relativePath = this.normalizeStaticImagePath(path);
+    if (!relativePath) {
+      return null;
     }
-    return apiBase + 'StaticFiles/Images/' + value.replace(/^\/+/, '');
+    return this.buildStaticImageUrlFromPath(relativePath, this.ImageURL);
   }
 
   /** Rejects empty paths and folder-only StaticFiles/Images URLs with no filename. */

@@ -17,7 +17,9 @@
       <div class="row">
         <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
           <span class="TDValueBold">Toll Image</span> <br />
-          <span class="table-img tbl-col-width-per-12" ><img src="{{tollImage}}" (click)="openImageInNewTab(tollImage)" style="cursor: pointer;width: 50px;height: 50px;"/></span>
+          <span class="table-img tbl-col-width-per-12" (click)="openImageInNewTab(tollImage)" style="cursor: pointer;">
+            <app-static-image [src]="tollImage" height="50px" width="50px"></app-static-image>
+          </span>
         </div>
         </div>
     </mat-dialog-content>
@@ -30,7 +32,9 @@
       <div class="row">
         <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
           <span class="TDValueBold">Parking Image</span> <br />
-          <span class="table-img tbl-col-width-per-12" ><img src="{{parkingImage}}" (click)="openImageInNewTab(parkingImage)" style="cursor: pointer;width: 50px;height: 50px;"/></span>
+          <span class="table-img tbl-col-width-per-12" (click)="openImageInNewTab(parkingImage)" style="cursor: pointer;">
+            <app-static-image [src]="parkingImage" height="50px" width="50px"></app-static-image>
+          </span>
         </div>
         </div>
     </mat-dialog-content>
@@ -43,7 +47,9 @@
       <div class="row">
         <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
           <span class="TDValueBold">Parking Image</span> <br />
-          <span class="table-img tbl-col-width-per-12" ><img src="{{istImage}}" (click)="openImageInNewTab(istImage)" style="cursor: pointer;width: 50px;height: 50px;"/></span>
+          <span class="table-img tbl-col-width-per-12" (click)="openImageInNewTab(istImage)" style="cursor: pointer;">
+            <app-static-image [src]="istImage" height="50px" width="50px"></app-static-image>
+          </span>
         </div>
         </div>
     </mat-dialog-content>

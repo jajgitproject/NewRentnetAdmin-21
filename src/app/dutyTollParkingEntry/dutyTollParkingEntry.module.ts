@@ -27,6 +27,7 @@ import { DutyTollParkingEntryRoutingModule } from './dutyTollParkingEntry-routin
 import { MyUploadComponent } from '../myupload/myupload.component';
 import { MyUploadModule } from '../myupload/myupload.module';
 import { MatExpansionModule } from '@angular/material/expansion';
+import { StaticImageComponent } from '../shared/static-image/static-image.component';
 @NgModule({
   declarations: [
     DutyTollParkingEntryComponent,
@@ -56,7 +57,8 @@ import { MatExpansionModule } from '@angular/material/expansion';
     MatMenuModule,
     MatProgressSpinnerModule,
     MyUploadModule,
-    MatExpansionModule
+    MatExpansionModule,
+    StaticImageComponent
   ],
   providers: [DutyTollParkingEntryService],
   exports:[DutyTollParkingEntryComponent]

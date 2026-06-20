@@ -86,9 +86,9 @@
                             <a href="{{advanceTableForm.value.selfieWithUniform}}" target="_blank"
                                 style="cursor: pointer;color: #007bff;">
                                 <!-- View -->
-                                <img [src]="advanceTableForm.value.selfieWithUniform"
-                                    style="max-width: 100px; max-height: 100px;"
-                                    *ngIf="advanceTableForm.value.selfieWithUniform" />
+                                <app-static-image [src]="advanceTableForm.value.selfieWithUniform"
+                                    maxWidth="100px" height="100px"
+                                    *ngIf="advanceTableForm.value.selfieWithUniform"></app-static-image>
                             </a></span>
 
                     </div>
@@ -101,9 +101,9 @@
                             <a href="{{advanceTableForm.value.frontPhoto}}" target="_blank"
                                 style="cursor: pointer;color: #007bff;">
                                 <!-- View -->
-                                <img [src]="advanceTableForm.value.frontPhoto"
-                                    style="max-width: 100px; max-height: 100px;"
-                                    *ngIf="advanceTableForm.value.frontPhoto" />
+                                <app-static-image [src]="advanceTableForm.value.frontPhoto"
+                                    maxWidth="100px" height="100px"
+                                    *ngIf="advanceTableForm.value.frontPhoto"></app-static-image>
                             </a></span>
                     </div>
                 </div>
@@ -119,9 +119,9 @@
                             <a href="{{advanceTableForm.value.interiorsWithAmenities}}" target="_blank"
                                 style="cursor: pointer;color: #007bff;">
                                 <!-- View -->
-                                <img [src]="advanceTableForm.value.interiorsWithAmenities"
-                                    style="max-width: 100px; max-height: 100px;"
-                                    *ngIf="advanceTableForm.value.interiorsWithAmenities" />
+                                <app-static-image [src]="advanceTableForm.value.interiorsWithAmenities"
+                                    maxWidth="100px" height="100px"
+                                    *ngIf="advanceTableForm.value.interiorsWithAmenities"></app-static-image>
                             </a></span>
                     </div>
                     <div class=" col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
@@ -133,9 +133,9 @@
                             <a href="{{advanceTableForm.value.isolatedCabin}}" target="_blank"
                                 style="cursor: pointer;color: #007bff;">
                                 <!-- View -->
-                                <img [src]="advanceTableForm.value.isolatedCabin"
-                                    style="max-width: 100px; max-height: 100px;"
-                                    *ngIf="advanceTableForm.value.isolatedCabin" />
+                                <app-static-image [src]="advanceTableForm.value.isolatedCabin"
+                                    maxWidth="100px" height="100px"
+                                    *ngIf="advanceTableForm.value.isolatedCabin"></app-static-image>
                             </a></span>
                     </div>
                 </div>
@@ -176,8 +176,8 @@
                         <ng-container matColumnDef="amenitieImage">
                             <mat-header-cell *matHeaderCellDef mat-sort-header [ngClass]="'tbl-col-width-per-9'">Image
                             </mat-header-cell>
-                            <mat-cell mat-cell *matCellDef="let row" class="table-img tbl-col-width-per-9"> <img
-                                    [src]="row.amenitieImage" />
+                            <mat-cell mat-cell *matCellDef="let row" class="table-img tbl-col-width-per-9">
+                                <app-static-image [src]="row.amenitieImage"></app-static-image>
                             </mat-cell>
                         </ng-container>
                         <ng-container matColumnDef="amenitieVerified">
@@ -248,7 +248,9 @@
                     <br>
                     <span>
                         <a href="{{advanceTableForm.value.bodyTemperatureImage}}" target="_blank" style="cursor: pointer;color: #007bff;" >
-                               <img [src]="advanceTableForm.value.bodyTemperatureImage" style="max-width: 100px; max-height: 100px;" *ngIf="advanceTableForm.value.selfieWithUniform" />
+                               <app-static-image [src]="advanceTableForm.value.bodyTemperatureImage"
+                                   maxWidth="100px" height="100px"
+                                   *ngIf="advanceTableForm.value.bodyTemperatureImage"></app-static-image>
                     </a></span>
                 </div>
             </div> -->

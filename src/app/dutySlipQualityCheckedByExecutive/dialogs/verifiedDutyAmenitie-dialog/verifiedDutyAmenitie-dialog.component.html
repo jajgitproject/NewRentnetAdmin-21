@@ -46,8 +46,8 @@
           <br>
           <span>
             <a href="{{ advanceTable.amenitieImage }}" target="_blank">
-              <img [src]="advanceTable.amenitieImage" class="table " style="height: 80px; width: auto;"
-                *ngIf="advanceTable.amenitieImage">
+              <app-static-image [src]="advanceTable.amenitieImage" cssClass="table" height="80px" width="auto"
+                *ngIf="advanceTable.amenitieImage"></app-static-image>
             </a></span>
         </div>
 

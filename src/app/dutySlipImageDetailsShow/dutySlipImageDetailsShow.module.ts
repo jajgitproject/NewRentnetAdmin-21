@@ -23,6 +23,7 @@ import { MyUploadComponent } from '../myupload/myupload.component';
 import { MyUploadModule } from '../myupload/myupload.module';
 import { DutySlipImageDetailsShowComponent } from './dutySlipImageDetailsShow.component';
 import { DutySlipImageDetailsShowRoutingModule } from './dutySlipImageDetailsShow-routing.module';
+import { StaticImageComponent } from '../shared/static-image/static-image.component';
 
 @NgModule({
   declarations: [
@@ -50,7 +51,8 @@ import { DutySlipImageDetailsShowRoutingModule } from './dutySlipImageDetailsSho
     MatToolbarModule,
     MatMenuModule,
     MatProgressSpinnerModule,
-    MyUploadModule
+    MyUploadModule,
+    StaticImageComponent
   ],
   exports: [DutySlipImageDetailsShowComponent],
   providers: []

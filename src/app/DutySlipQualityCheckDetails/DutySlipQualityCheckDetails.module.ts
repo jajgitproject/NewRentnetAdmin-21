@@ -23,6 +23,7 @@ import { MatMenuModule } from '@angular/material/menu';
 import { DutySlipQualityCheckDetailsRoutingModule } from './DutySlipQualityCheckDetails-routing.module';
 import { MyUploadComponent } from '../myupload/myupload.component';
 import { MyUploadModule } from '../myupload/myupload.module';
+import { StaticImageComponent } from '../shared/static-image/static-image.component';
 @NgModule({
   declarations: [
     DutySlipQualityCheckDetailsComponent
@@ -49,7 +50,8 @@ import { MyUploadModule } from '../myupload/myupload.module';
     MatToolbarModule,
     MatMenuModule,
     MatProgressSpinnerModule,
-    MyUploadModule
+    MyUploadModule,
+    StaticImageComponent
   ],
   exports: [DutySlipQualityCheckDetailsComponent],
   providers: []

@@ -193,8 +193,8 @@
                           </td>
                           <td valign="top" width="130" align="left" style="padding-left: 5px;">
                             User Signature<br />
-                            <img *ngIf="dataSource?.customerSignatureImage; else noSignatureImage" 
-                              [src]="dataSource?.customerSignatureImage" class="signature-image" alt="User Signature" />
+                            <app-static-image *ngIf="dataSource?.customerSignatureImage; else noSignatureImage"
+                              [src]="dataSource?.customerSignatureImage" cssClass="signature-image" alt="User Signature"></app-static-image>
                               <ng-template #noSignatureImage>No Image</ng-template>
 
                             <br />
@@ -278,7 +278,7 @@
             <tr *ngFor="let img of dataSource?.tollParkingsImages">
               <td align="center" *ngIf="img.tollParkingImage">
                 <p class="auto-style3">Image</p>
-                <img [src]="img.tollParkingImage" class="attachment-image" alt="Toll / Parking" />
+                <app-static-image [src]="img.tollParkingImage" cssClass="attachment-image" alt="Toll / Parking"></app-static-image>
               </td>
             </tr>
           </table>
@@ -288,7 +288,7 @@
             <tr *ngFor="let img of dataSource?.interStateTaxImages">
               <td align="center" *ngIf="img.interStateTaxImage">
                 <p class="auto-style3">Image</p>
-                <img [src]="img.interStateTaxImage" class="attachment-image" alt="Interstate Tax" />
+                <app-static-image [src]="img.interStateTaxImage" cssClass="attachment-image" alt="Interstate Tax"></app-static-image>
               </td>
             </tr>
           </table>

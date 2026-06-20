@@ -7,6 +7,7 @@ import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
 import { NgxSpinnerModule } from 'ngx-spinner';
 
 import { MaterialModule } from './material.module';
+import { StaticImageComponent } from './static-image/static-image.component';
 @NgModule({
   declarations: [],
   imports: [
@@ -15,7 +16,8 @@ import { MaterialModule } from './material.module';
     ReactiveFormsModule,
     RouterModule,
     NgbModule,
-    NgxSpinnerModule
+    NgxSpinnerModule,
+    StaticImageComponent,
   ],
   exports: [
     CommonModule,
@@ -24,7 +26,8 @@ import { MaterialModule } from './material.module';
     RouterModule,
     NgbModule,
     NgxSpinnerModule,
-    MaterialModule
+    MaterialModule,
+    StaticImageComponent,
   ]
 })
 export class SharedModule {}

@@ -34,7 +34,22 @@ export class DutySlipQualityCheckDetailsComponent {
     // Set the defaults
     this.dialogTitle = 'Quality Check Details';
     this.DutySlipQualityCheckDetails = this.data;
-    this.qcDetails = this.data?.dataSource?.[0]
+    this.qcDetails = this.data?.dataSource?.[0];
+    this.mapQcDetailFields();
+  }
+
+  private mapQcDetailFields(): void {
+    if (!this.qcDetails) {
+      return;
+    }
+    this.qcDetails.breatheAnalyzerImage = this.qcDetails.breatheAnalyzerImage
+      || this.qcDetails.breathAnalyzer
+      || this.qcDetails.BreatheAnalyzerImage
+      || this.qcDetails.BreathAnalyzer
+      || null;
+    this.qcDetails.breatheAnalyzerReading = this.qcDetails.breatheAnalyzerReading
+      ?? this.qcDetails.BreatheAnalyzerReading
+      ?? null;
   }
   @ViewChild(MatMenuTrigger)
   contextMenu: MatMenuTrigger;

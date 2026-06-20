@@ -732,10 +732,10 @@
               (load)="onPrintDutySlipIframeLoad($event)"
               title="Duty Slip"></iframe>
       <ng-container *ngIf="!printDutySlipEmbedUrl && dataSource?.dutySlipImage">
-        <img *ngIf="!isPdfUrl(dataSource.dutySlipImage)"
+        <app-static-image *ngIf="!isPdfUrl(dataSource.dutySlipImage)"
              [src]="dataSource.dutySlipImage"
              alt=""
-             class="invoice-attachment__image" />
+             cssClass="invoice-attachment__image"></app-static-image>
         <iframe *ngIf="isPdfUrl(dataSource.dutySlipImage)"
                 [src]="dutySlipPdfUrl"
                 class="invoice-attachment__pdf"
@@ -745,7 +745,7 @@
 
     <div class="invoice-attachment" *ngFor="let img of rfidFastagAttachments()">
       <p class="invoice-attachment__label">{{ img.tollParkingType || 'RFID / Fastag' }}</p>
-      <img [src]="img.tollParkingImage" alt="RFID / Fastag" class="invoice-attachment__image" />
+      <app-static-image [src]="img.tollParkingImage" alt="RFID / Fastag" cssClass="invoice-attachment__image"></app-static-image>
     </div>
   </div>
 </div>

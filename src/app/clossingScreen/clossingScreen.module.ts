@@ -103,6 +103,7 @@ import { DispatchByExecutiveService } from '../dispatchByExecutive/dispatchByExe
 import { BillingHistoryModule } from '../billingHistory/billingHistory.module';
 import { BillingHistoryService } from '../billingHistory/billingHistory.service';
 import { DisputeHistoryService } from '../disputeHistory/disputeHistory.service';
+import { StaticImageComponent } from '../shared/static-image/static-image.component';
 
 @NgModule({
   declarations: [
@@ -160,7 +161,8 @@ import { DisputeHistoryService } from '../disputeHistory/disputeHistory.service'
     DutyStateModule,
     DutySACModule,
     MatTooltipModule,
-    BillingHistoryModule
+    BillingHistoryModule,
+    StaticImageComponent
   ],
   exports:[ClossingScreenComponent],
   providers: [KamCardService,

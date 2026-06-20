@@ -33,6 +33,7 @@ import { MatTabsModule } from '@angular/material/tabs';
 import { MatExpansionModule } from '@angular/material/expansion';
 import { ControlPanelDialogeService } from '../controlPanelDialoge/controlPanelDialoge.service';
 import { SummaryOfDutyModule } from '../summaryOfDuty/summary-of-duty.module';
+import { StaticImageComponent } from '../shared/static-image/static-image.component';
 
 
 @NgModule({
@@ -69,6 +70,7 @@ import { SummaryOfDutyModule } from '../summaryOfDuty/summary-of-duty.module';
     OwlNativeDateTimeModule,
     MatTooltipModule,
     SummaryOfDutyModule,
+    StaticImageComponent,
   ],
   exports:[DutySlipForBillingComponent],
   providers: [

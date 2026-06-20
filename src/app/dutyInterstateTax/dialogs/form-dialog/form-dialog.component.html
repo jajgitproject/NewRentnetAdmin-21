@@ -58,7 +58,7 @@
                     <mat-label style="margin-left: 18px;">Image</mat-label>
                     <br />
                     <a href="{{ ImagePath }}" target="_blank" *ngIf="ImagePath">
-                        <img [src]="ImagePath" class="table " style="height: 80px; width: auto;">
+                        <app-static-image [src]="ImagePath" cssClass="table" height="80px" width="auto"></app-static-image>
                     </a>
 
                     <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
@@ -167,7 +167,7 @@
                             <span>
                                 <a href="{{advanceTableForm.value.dutyInterstateTaxImage}}" target="_blank"
                                     style="cursor: pointer;color: #007bff;">
-                                    <img [src]="advanceTableForm.value.dutyInterstateTaxImage" style="max-width: 100px; max-height: 100px;" alt="Image">
+                                    <app-static-image [src]="advanceTableForm.value.dutyInterstateTaxImage" maxWidth="100px" height="100px" alt="Image"></app-static-image>
                                 </a>
                             </span>
                         </div>
@@ -254,7 +254,7 @@
                             <mat-label style="margin-left: 18px;">Image</mat-label>
                             <br />
                             <a href="{{ ImagePath }}" target="_blank" *ngIf="ImagePath">
-                                <img [src]="ImagePath" class="table " style="height: 80px; width: auto;">
+                                <app-static-image [src]="ImagePath" cssClass="table" height="80px" width="auto"></app-static-image>
                             </a>
         
                             <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">

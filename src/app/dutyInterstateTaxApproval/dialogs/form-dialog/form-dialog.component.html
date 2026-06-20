@@ -36,7 +36,7 @@
                     <div class="ui-label">Image</div>
                     <ng-container *ngIf="advanceTableForm.value.dutyInterstateTaxImage; else noInterStateTaxImage">
                       <a [href]="advanceTableForm.value.dutyInterstateTaxImage" target="_blank" style="cursor: pointer;">
-                        <img [src]="advanceTableForm.value.dutyInterstateTaxImage" height="60" alt="Interstate tax proof">
+                        <app-static-image [src]="advanceTableForm.value.dutyInterstateTaxImage" height="60px" alt="Interstate tax proof"></app-static-image>
                       </a>
                     </ng-container>
                     <ng-template #noInterStateTaxImage>

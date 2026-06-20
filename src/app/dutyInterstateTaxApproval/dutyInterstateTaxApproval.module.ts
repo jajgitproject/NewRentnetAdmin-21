@@ -27,6 +27,7 @@ import { DutyInterstateTaxApprovalRoutingModule } from './dutyInterstateTaxAppro
 import { MyUploadComponent } from '../myupload/myupload.component';
 import { MyUploadModule } from '../myupload/myupload.module';
 import { MatAutocompleteModule } from '@angular/material/autocomplete';
+import { StaticImageComponent } from '../shared/static-image/static-image.component';
 
 @NgModule({
   declarations: [
@@ -57,7 +58,8 @@ import { MatAutocompleteModule } from '@angular/material/autocomplete';
     MatToolbarModule,
     MatMenuModule,
     MatProgressSpinnerModule,
-    MyUploadModule
+    MyUploadModule,
+    StaticImageComponent
   ],
   providers: [DutyInterstateTaxApprovalService]
 })

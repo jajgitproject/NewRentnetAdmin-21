@@ -70,7 +70,10 @@
                                         <ng-container *ngIf="column === 'dutyDate'">
                                           {{ row[column] ? (row[column] | date: 'dd-MM-yyyy') : 'N/A' }}
                                         </ng-container>
-                                        <ng-container *ngIf="column !== 'dutyDate'">
+                                        <ng-container *ngIf="column === 'customerSignatureImage'">
+                                          <app-static-image [src]="row[column]" height="40px" maxWidth="80px"></app-static-image>
+                                        </ng-container>
+                                        <ng-container *ngIf="column !== 'dutyDate' && column !== 'customerSignatureImage'">
                                           {{ row[column] === undefined || row[column] === null || row[column] === 0 ? 'N/A' : row[column] }}
                                         </ng-container>
                                       </mat-cell>

@@ -29,6 +29,7 @@ import { DutySlipQualityCheckedByExecutiveRoutingModule } from './dutySlipQualit
 import { DutySlipQualityCheckedByExecutiveService } from './dutySlipQualityCheckedByExecutive.service';
 import { VerifiedDutyAmenitieDialogComponent } from './dialogs/verifiedDutyAmenitie-dialog/verifiedDutyAmenitie-dialog.component';
 import { MatAutocompleteModule } from '@angular/material/autocomplete';
+import { StaticImageComponent } from '../shared/static-image/static-image.component';
 
 @NgModule({
   declarations: [
@@ -61,6 +62,7 @@ import { MatAutocompleteModule } from '@angular/material/autocomplete';
     MatMenuModule,
     MatProgressSpinnerModule,
     MyUploadModule,
+    StaticImageComponent,
     OwlDateTimeModule,
     OwlNativeDateTimeModule,
     MatCardModule

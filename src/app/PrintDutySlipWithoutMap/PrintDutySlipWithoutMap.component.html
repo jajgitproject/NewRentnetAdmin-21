@@ -315,8 +315,8 @@
                           </td>
                           <td valign="top" width="130">
                             User Signature<br />
-                            <img *ngIf="dataSource?.customerSignatureImage; else noSignatureImage" 
-                              [src]="dataSource?.customerSignatureImage" class="signature-image" alt="User Signature" />
+                            <app-static-image *ngIf="dataSource?.customerSignatureImage; else noSignatureImage"
+                              [src]="dataSource?.customerSignatureImage" cssClass="signature-image" alt="User Signature"></app-static-image>
                               <ng-template #noSignatureImage>No Image</ng-template>
                           </td>
 
@@ -406,8 +406,8 @@
             <tr *ngFor="let img of dataSource?.tollParkingsImages">
               <td align="center">
                 <p class="auto-style3">Image</p>
-                <img [src]="img.tollParkingImage" class="attachment-image" alt="Toll / Parking"
-                     (load)="onEmbedImageLoad()" (error)="onAttachmentImageError($event)" /><br>
+                <app-static-image [src]="img.tollParkingImage" cssClass="attachment-image" alt="Toll / Parking"
+                     (load)="onEmbedImageLoad()"></app-static-image><br>
               </td>
             </tr>
           </table>
@@ -417,8 +417,8 @@
             <tr *ngFor="let img of dataSource?.interStateTaxImages">
               <td align="center">
                 <p class="auto-style3">Image</p>
-                <img [src]="img.interStateTaxImage" class="attachment-image" alt="Interstate Tax"
-                     (load)="onEmbedImageLoad()" (error)="onAttachmentImageError($event)" /><br>
+                <app-static-image [src]="img.interStateTaxImage" cssClass="attachment-image" alt="Interstate Tax"
+                     (load)="onEmbedImageLoad()"></app-static-image><br>
               </td>
             </tr>
           </table>

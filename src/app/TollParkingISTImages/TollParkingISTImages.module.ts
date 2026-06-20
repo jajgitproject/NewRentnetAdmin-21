@@ -24,6 +24,7 @@ import { TollParkingISTImagesRoutingModule } from './TollParkingISTImages-routin
 import { MyUploadComponent } from '../myupload/myupload.component';
 import { MyUploadModule } from '../myupload/myupload.module';
 import { GooglePlaceModule } from '@compat/google-places-shim';
+import { StaticImageComponent } from '../shared/static-image/static-image.component';
 
 @NgModule({
   declarations: [
@@ -53,6 +54,7 @@ import { GooglePlaceModule } from '@compat/google-places-shim';
     MatProgressSpinnerModule,
     MyUploadModule,
     GooglePlaceModule,
+    StaticImageComponent,
   ],
   providers: []
 })

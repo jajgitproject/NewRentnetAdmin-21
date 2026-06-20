@@ -34,10 +34,6 @@
           <span class="TDValue"> {{ (qcDetails.qcTime | date : 'shortTime') || 'N/A' }}</span>
         </div>
         <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
-          <span class="TDValueBold">Body Temperature Celcius</span> <br />
-          <span class="TDValue"> {{qcDetails.bodyTemperatureInDegreeCelcius || 'N/A' }}</span>
-        </div>
-        <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
           <span class="TDValueBold"> Car Reg No</span> <br />
           <span class="TDValue">  {{ qcDetails.carRegNo ||   'N/A' }}</span>
         </div>
@@ -47,59 +43,36 @@
         </div>
         <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
           <span class="TDValueBold">Front Photo</span> <br />
-          <span class="table-img tbl-col-width-per-6">
-              <img class="qc-image"
-                  style="cursor: pointer;"
-                  src="{{qcDetails.frontPhoto}}"
-                  (click)="openImageInNewTab(qcDetails.frontPhoto)"/>
+          <span class="qc-image-wrap">
+              <app-static-image cssClass="qc-image" [src]="qcDetails.frontPhoto" height="80px" maxWidth="100px"
+                  (click)="openImageInNewTab(qcDetails.frontPhoto)"></app-static-image>
           </span>
         </div>
         <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
           <span class="TDValueBold">Selfie With Uniform</span> <br />
-          <span class="table-img tbl-col-width-per-6">
-              <img class="qc-image"
-                  style="cursor: pointer;"
-                  src="{{qcDetails.selfieWithUniform}}"
-                  (click)="openImageInNewTab(qcDetails.selfieWithUniform)"/>
+          <span class="qc-image-wrap">
+              <app-static-image cssClass="qc-image" [src]="qcDetails.selfieWithUniform" height="80px" maxWidth="100px"
+                  (click)="openImageInNewTab(qcDetails.selfieWithUniform)"></app-static-image>
           </span>
         </div>
         <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
           <span class="TDValueBold">Interiors With Amenities</span> <br />
-          <span class="table-img tbl-col-width-per-6">
-              <img class="qc-image"
-                  style="cursor: pointer;"
-                  src="{{qcDetails.interiorsWithAmenities}}"
-                  (click)="openImageInNewTab(qcDetails.interiorsWithAmenities)"/>
+          <span class="qc-image-wrap">
+              <app-static-image cssClass="qc-image" [src]="qcDetails.interiorsWithAmenities" height="80px" maxWidth="100px"
+                  (click)="openImageInNewTab(qcDetails.interiorsWithAmenities)"></app-static-image>
           </span>
         </div>
         <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
-          <span class="TDValueBold">Breath Analyzer</span> <br />
-          <span class="table-img tbl-col-width-per-6">
-              <img class="qc-image"
-                  style="cursor: pointer;"
-                  src="{{qcDetails.breathAnalyzer}}"
-                  (click)="openImageInNewTab(qcDetails.breathAnalyzer)"/>
+          <span class="TDValueBold">Breath Analyzer</span>
+          <span class="TDValue" *ngIf="qcDetails.breatheAnalyzerReading != null"> (Reading: {{ qcDetails.breatheAnalyzerReading }})</span>
+          <br />
+          <span class="qc-image-wrap" *ngIf="qcDetails.breatheAnalyzerImage; else noBreathAnalyzer">
+              <app-static-image cssClass="qc-image" [src]="qcDetails.breatheAnalyzerImage" height="80px" maxWidth="100px"
+                  (click)="openImageInNewTab(qcDetails.breatheAnalyzerImage)"></app-static-image>
           </span>
-        </div>
-        <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
-          <span class="TDValueBold">Body Temperature Image</span> <br />
-          <span class="table-img tbl-col-width-per-6">
-              <img class="qc-image"
-                  style="cursor: pointer;"
-                  src="{{qcDetails.bodyTemperatureImage}}"
-                  (click)="openImageInNewTab(qcDetails.bodyTemperatureImage)"/>
-          </span>
+          <ng-template #noBreathAnalyzer>
+            <span class="TDValue">N/A</span>
+          </ng-template>
         </div>
       </div>
-      <!-- <ng-container matColumnDef="frontPhoto">
-        <mat-header-cell *matHeaderCellDef [ngClass]="'tbl-col-width-per-12'">Image</mat-header-cell>
-        <mat-cell *matCellDef="let row" class="table-img tbl-col-width-per-12" (contextmenu)="onContextMenu($event, row)">
-           <img src="{{row.frontPhoto}}" (click)="openImageInNewTab(row.frontPhoto)"/> </mat-cell>
-    </ng-container> -->
-      <!-- <div class="row">
-        <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
-          <span class="TDValueBold"> Email</span> <br />
-          <span class="TDValue"> {{ DutySlipQualityCheckDetails.primaryEmail }}</span>
-        </div>
-      </div> -->
     </mat-dialog-content>

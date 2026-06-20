@@ -28,6 +28,7 @@ import { AppDutyMISComponent } from './appDutyMIS.component';
 import { AppDutyMISRoutingModule } from './appDutyMIS-routing.module';
 import { MatAutocompleteModule } from '@angular/material/autocomplete';
 import { MatTooltipModule } from '@angular/material/tooltip';
+import { StaticImageComponent } from '../shared/static-image/static-image.component';
 
 @NgModule({
   declarations: [
@@ -59,7 +60,8 @@ import { MatTooltipModule } from '@angular/material/tooltip';
     MatToolbarModule,
     MatMenuModule,
     MatProgressSpinnerModule,
-    MyUploadModule
+    MyUploadModule,
+    StaticImageComponent
   ],
   providers: [AppDutyMISService]
 })

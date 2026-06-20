@@ -24,12 +24,13 @@
           <br />
 
           <span class="table-img tbl-col-width-per-12">
-            <img
+            <app-static-image
               *ngIf="imageUrl && !isPdf"
               [src]="imageUrl"
-              (click)="openImageInNewTab(imageUrl)"
-              style="cursor: pointer; width: 100%; max-width: 250px;"
-              alt="Duty Slip Image" />
+              maxWidth="250px"
+              width="100%"
+              alt="Duty Slip Image"
+              cssClass="duty-slip-image-thumb"></app-static-image>
               <img *ngIf="isPdf" src="assets/pdf-icon.png"  style="cursor:pointer;height:20px;width:auto;" (click)="openImageInNewTab(imageUrl)">
           </span>
 

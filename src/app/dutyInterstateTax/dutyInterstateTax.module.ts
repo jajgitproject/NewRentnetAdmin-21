@@ -30,6 +30,7 @@ import { MatAutocompleteModule } from '@angular/material/autocomplete';
 import { DutyInterstateTaxApprovalService } from '../dutyInterstateTaxApproval/dutyInterstateTaxApproval.service';
 import { DutyInterstateTaxApprovalModule } from '../dutyInterstateTaxApproval/dutyInterstateTaxApproval.module';
 import { MatExpansionModule } from '@angular/material/expansion';
+import { StaticImageComponent } from '../shared/static-image/static-image.component';
 
 @NgModule({
   declarations: [
@@ -62,7 +63,8 @@ import { MatExpansionModule } from '@angular/material/expansion';
     MatProgressSpinnerModule,
     MyUploadModule,
     MatExpansionModule,
-    DutyInterstateTaxApprovalModule
+    DutyInterstateTaxApprovalModule,
+    StaticImageComponent
   ],
   providers: [DutyInterstateTaxService,DutyInterstateTaxApprovalService],
   exports:[DutyInterstateTaxComponent]

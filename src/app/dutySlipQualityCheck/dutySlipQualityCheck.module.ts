@@ -31,6 +31,7 @@ import { DutySlipQualityCheckRoutingModule } from './dutySlipQualityCheck-routin
 import { OwlDateTimeModule, OwlNativeDateTimeModule } from '@danielmoncada/angular-datetime-picker';
 import { DutyAmenitieDialogComponent } from './dialogs/dutyAmenitie-dialog/dutyAmenitie-dialog.component';
 import { DeleteDADialogComponent } from './dialogs/deleteDA/deleteDA.component';
+import { StaticImageComponent } from '../shared/static-image/static-image.component';
 
 @NgModule({
   declarations: [
@@ -66,6 +67,7 @@ import { DeleteDADialogComponent } from './dialogs/deleteDA/deleteDA.component';
     MatMenuModule,
     MatProgressSpinnerModule,
     MyUploadModule,
+    StaticImageComponent,
     //TwoDigitDecimaNumberDirective
   ],
   exports: [advanceTableForm],

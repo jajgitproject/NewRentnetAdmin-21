@@ -51,7 +51,7 @@
                     <mat-label>Amenitie Image</mat-label>
                     <br>
                     <a href="{{ ImagePath }}" target="_blank" *ngIf="ImagePath">
-                        <img [src]="ImagePath" class="table " style="height: 80px; width: auto;">
+                        <app-static-image [src]="ImagePath" cssClass="table" height="80px" width="auto"></app-static-image>
                     </a>
 
                     <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2" style="right: 15px;">

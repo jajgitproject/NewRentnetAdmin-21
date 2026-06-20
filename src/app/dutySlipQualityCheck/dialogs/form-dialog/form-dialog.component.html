@@ -82,7 +82,7 @@
                         <mat-label>Selfie With Uniform</mat-label>
                         <br>
                         <a href="{{ ImagePath }}" target="_blank" *ngIf="ImagePath">
-                            <img [src]="ImagePath" class="table " style="height: 80px; width: auto;">
+                            <app-static-image [src]="ImagePath" cssClass="table" height="80px" width="auto"></app-static-image>
                         </a>
 
                         <div class="col-xl-3 col-lg-3 col-md-12 col-sm-12 mb-2" style="right: 15px;">
@@ -95,7 +95,7 @@
                         <mat-label>Front Photo</mat-label>
                         <br>
                         <a href="{{ ImagePath1 }}" target="_blank" *ngIf="ImagePath1">
-                            <img [src]="ImagePath1" class="table " style="height: 80px; width: auto;">
+                            <app-static-image [src]="ImagePath1" cssClass="table" height="80px" width="auto"></app-static-image>
                         </a>
 
                         <div class="col-xl-3 col-lg-3 col-md-12 col-sm-12 mb-2" style="right: 15px;">
@@ -108,7 +108,7 @@
                         <mat-label>Interiors With Amenities</mat-label>
                         <br>
                         <a href="{{ ImagePath2 }}" target="_blank" *ngIf="ImagePath2">
-                            <img [src]="ImagePath2" class="table " style="height: 80px; width: auto;">
+                            <app-static-image [src]="ImagePath2" cssClass="table" height="80px" width="auto"></app-static-image>
                         </a>
 
                         <div class="col-xl-3 col-lg-3 col-md-12 col-sm-12 mb-2" style="right: 15px;">
@@ -121,7 +121,7 @@
                         <mat-label>Breath Analyzer</mat-label>
                         <br>
                         <a href="{{ ImagePath3 }}" target="_blank" *ngIf="ImagePath3">
-                            <img [src]="ImagePath3" class="table " style="height: 80px; width: auto;">
+                            <app-static-image [src]="ImagePath3" cssClass="table" height="80px" width="auto"></app-static-image>
                         </a>
 
                         <div class="col-xl-3 col-lg-3 col-md-12 col-sm-12 mb-2" style="right: 15px;">
@@ -180,8 +180,8 @@
                         <ng-container matColumnDef="amenitieImage">
                             <mat-header-cell *matHeaderCellDef mat-sort-header [ngClass]="'tbl-col-width-per-9'">Image
                             </mat-header-cell>
-                            <mat-cell mat-cell *matCellDef="let row" class="table-img tbl-col-width-per-9"> <img
-                                    [src]="row.amenitieImage" />
+                            <mat-cell mat-cell *matCellDef="let row" class="table-img tbl-col-width-per-9">
+                                <app-static-image [src]="row.amenitieImage"></app-static-image>
                             </mat-cell>
                         </ng-container>
 
@@ -265,7 +265,7 @@
                 <!-- <mat-label>Body Temperature Image</mat-label>
                     <br>
                     <a href="{{ ImagePath4 }}" target="_blank" *ngIf="ImagePath4">
-                        <img [src]="ImagePath4" class="table " style="height: 80px; width: auto;">
+                        <app-static-image [src]="ImagePath4" cssClass="table" height="80px" width="auto"></app-static-image>
                     </a>
     
                     <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2" style="right: 15px;">
@@ -318,7 +318,7 @@
                     </mat-label>
                     <br>
                     <a href="{{ ImagePath }}" target="_blank" *ngIf="ImagePath">
-                        <img [src]="ImagePath" class="table " style="height: 80px; width: auto;">
+                        <app-static-image [src]="ImagePath" cssClass="table" height="80px" width="auto"></app-static-image>
                     </a>
     
                     <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">

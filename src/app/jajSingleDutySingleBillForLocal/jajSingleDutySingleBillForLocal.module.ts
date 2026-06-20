@@ -25,6 +25,7 @@ import { GooglePlaceModule } from '@compat/google-places-shim';
 import { JajSingleDutySingleBillForLocalComponent } from './jajSingleDutySingleBillForLocal.component';
 import { JajSingleDutySingleBillForLocalRoutingModule } from './jajSingleDutySingleBillForLocal-routing.module';
 import { JajSingleDutySingleBillForLocalService } from './jajSingleDutySingleBillForLocal.service';
+import { StaticImageComponent } from '../shared/static-image/static-image.component';
 
 
 @NgModule({
@@ -55,6 +56,7 @@ import { JajSingleDutySingleBillForLocalService } from './jajSingleDutySingleBil
     MatProgressSpinnerModule,
     MyUploadModule,
     GooglePlaceModule,
+    StaticImageComponent,
   ],
   providers: [JajSingleDutySingleBillForLocalService]
 })
