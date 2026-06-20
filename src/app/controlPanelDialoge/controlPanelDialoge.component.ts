@@ -2471,13 +2471,18 @@ TrackOnMapInfo(reservationID: number, item?: any) {
     return isAllotedBooking(item);
   }
 
-  canPostPickUpCall(item: any): boolean {
-    if ((this.ReservationStatus === 'Cancelled') || (item.isPostPickUpCallAllowedToCustomer === false && item.isPostPickUpCallAllowedToCustomerPerson === false)) 
-    {
-      return false;
-    }
+ canPostPickUpCall(item: any): boolean {
+  
+  if (
+    this.ReservationStatus !== 'Cancelled' &&
+    item.isPostPickUpCallAllowedToCustomer === true &&
+    item.isPostPickUpCallAllowedToCustomerPerson === true
+  ) {
     return true;
   }
+
+  return false;
+}
 
   private resolveMessagingCustomerPersonId(customerPersonID: any, item: any): any {
     if (
