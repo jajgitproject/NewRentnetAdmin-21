@@ -39,7 +39,7 @@ export class TallyMisService {
     branchName: string
   ): Observable<Blob> {
     return this.httpClient.get(
-      `${this.API_URL}/Export/${this.toRouteParam(fromDate)}/${this.toRouteParam(toDate)}/${this.toRouteParam(customerName)}/${this.toRouteParam(invoiceNumberWithPrefix)}/${this.toRouteParam(branchName)}/0/InvoiceID/Ascending`,
+      `${this.API_URL}/Export/${this.toRouteParam(fromDate)}/${this.toRouteParam(toDate)}/${this.toRouteParam(customerName)}/${this.toRouteParam(invoiceNumberWithPrefix)}/${this.toRouteParam(branchName)}/-1/InvoiceID/Ascending`,
       { responseType: 'blob' }
     );
   }
