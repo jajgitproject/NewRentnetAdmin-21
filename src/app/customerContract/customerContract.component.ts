@@ -83,6 +83,7 @@ export class CustomerContractComponent implements OnInit {
     { label: 'Car Category Mapping', },
     { label: 'City Tiers Mapping',  },
     { label: 'Contract Payment Mapping', },
+    { label: 'Customer Contract Integrations Package Type',  },
     { label: 'Contract Package Type Mapping',  },
     { label: 'Local Lumpsum Rate',  },
     { label: 'Local On Demand Rate',  },
@@ -369,7 +370,7 @@ export class CustomerContractComponent implements OnInit {
 
   private getAlwaysVisibleItems() {
     return this.menuItems.filter(item => 
-      ['City Tiers Mapping', 'Contract Package Type Mapping', 'Car Category Mapping','Contract Payment Mapping', 'SD Limited Rate', 'SD Unlimited Rate'].includes(item.label)
+      ['City Tiers Mapping', 'Contract Package Type Mapping', 'Customer Contract Integrations Package Type', 'Car Category Mapping','Contract Payment Mapping', 'SD Limited Rate', 'SD Unlimited Rate'].includes(item.label)
     );
   }
 
@@ -769,6 +770,16 @@ else if(menuItem.label.toLowerCase() === 'local transfer rate') {
     //   CustomerContractName: rowItem.customerContractName,
     //   StartDate:rowItem.customerContractValidFrom,
     //   EndDate:rowItem.customerContractValidTo,
+    CustomerContractID: encryptedCustomerContractID,
+    CustomerContractName: encryptedCustomerContractName,
+    StartDate: encryptedStartDate,
+    EndDate: encryptedEndDate
+  } }));
+  window.open(baseUrl + url, '_blank'); 
+
+}
+else if(menuItem.label.toLowerCase() === 'customer contract integrations package type') {
+  const url = this.router.serializeUrl(this.router.createUrlTree(['/customerContractPackageType'], { queryParams: {
     CustomerContractID: encryptedCustomerContractID,
     CustomerContractName: encryptedCustomerContractName,
     StartDate: encryptedStartDate,

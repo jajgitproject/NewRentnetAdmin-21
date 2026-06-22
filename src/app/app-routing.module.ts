@@ -2749,6 +2749,20 @@ const routes: Routes = [
             (m) => m.CustomerContractCarCategoryModule
           )
       },
+      {
+        path: 'customerContractPackageType',
+        loadChildren: () =>
+          import('./customerContractPackageType/customerContractPackageType.module').then(
+            (m) => m.CustomerContractPackageTypeModule
+          )
+      },
+      {
+        path: 'customerContractPackageTypePackageMapping',
+        loadChildren: () =>
+          import('./customerContractPackageTypePackageMapping/customerContractPackageTypePackageMapping.module').then(
+            (m) => m.CustomerContractPackageTypePackageMappingModule
+          )
+      },
 
       {
         path: 'sdlimitedRate',
