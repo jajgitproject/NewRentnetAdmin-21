@@ -124,9 +124,20 @@
                             <mat-form-field class="example-full-width cp-quick-search-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
                                 <mat-label>Reservation ID</mat-label>
                                 <input type="text" matInput [(ngModel)]="searchReservationID">
-
                             </mat-form-field>
                         </div>
+
+                        <div class="col-xl-3 col-lg-2 col-md-2 col-sm-12 mb-2">
+                            <mat-form-field class="example-full-width cp-quick-search-field mb-3" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
+                                <mat-label>Invoice Type</mat-label>
+                                <mat-select [(ngModel)]="searchInvoiceType">
+                                    <mat-option value="InvoiceSingleDuty">Single Duty Single Invoice</mat-option>
+                                    <mat-option value="InvoiceMultyDuty">Multiple Duty Single Invoice</mat-option>
+                                    <mat-option value="InvoiceGeneral">General Invoice</mat-option>
+                                </mat-select>
+                            </mat-form-field>
+                        </div>
+
                     </div>
 
                     <div class="row quick-search-actions">
@@ -331,8 +342,7 @@
                                     </div>
                                     <mat-menu #contextMenu="matMenu">
                                         <ng-template matMenuContent let-item="item">
-                                            <button mat-menu-item (click)="openAttachDetachForEdit(item)"
-                                                [disabled]="item.invoiceType==='InvoiceGeneral'">
+                                            <button mat-menu-item (click)="openAttachDetachForEdit(item)">
                                                 <mat-icon>create</mat-icon>
                                                 <span>Edit</span>
                                             </button>
@@ -363,7 +373,7 @@
                                                 [disabled]="item.invoiceStatusActiveOrVoid === 'Void'">
                                                 <mat-icon>how_to_reg</mat-icon>
                                                 <span>Cancel Invoice</span>
-                                            </button> -->
+                                            </button>
                                         </ng-template>
                                     </mat-menu>
 
