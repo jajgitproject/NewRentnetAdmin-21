@@ -19,6 +19,7 @@ export class DriverPayoutMISModel {
   locationInKM: string;
   totalKM: string;
   totalHRS: string;
+  totalDays: string;
   invoiceNo: string;
   chargeableExpense: string;
   nonChargeableExpense: string;
