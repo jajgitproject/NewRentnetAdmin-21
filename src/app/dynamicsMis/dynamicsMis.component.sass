@@ -1,0 +1,37 @@
+.scrollable-table-container
+  overflow-x: auto
+  width: 100%
+
+:host ::ng-deep .scrollable-table-container .dynamics-mis-table
+  min-width: 100%
+  width: max-content
+
+:host ::ng-deep .scrollable-table-container .dynamics-mis-table .mat-mdc-header-row,
+:host ::ng-deep .scrollable-table-container .dynamics-mis-table .mat-mdc-row,
+:host ::ng-deep .scrollable-table-container .dynamics-mis-table .mat-header-row,
+:host ::ng-deep .scrollable-table-container .dynamics-mis-table .mat-row
+  min-width: max-content
+
+:host ::ng-deep .scrollable-table-container .dynamics-mis-table .mat-mdc-header-cell,
+:host ::ng-deep .scrollable-table-container .dynamics-mis-table .mat-mdc-cell,
+:host ::ng-deep .scrollable-table-container .dynamics-mis-table .mat-header-cell,
+:host ::ng-deep .scrollable-table-container .dynamics-mis-table .mat-cell
+  flex: 0 0 auto
+  width: auto
+  min-width: auto
+  max-width: none
+  padding: 8px 16px !important
+  white-space: nowrap
+  overflow: visible
+  text-overflow: unset
+  text-align: left
+  box-sizing: border-box
+
+:host ::ng-deep .scrollable-table-container .dynamics-mis-table .mat-mdc-header-cell,
+:host ::ng-deep .scrollable-table-container .dynamics-mis-table .mat-header-cell
+  font-weight: bold
+  font-size: 14px
+
+:host ::ng-deep .scrollable-table-container .dynamics-mis-table .mat-mdc-cell,
+:host ::ng-deep .scrollable-table-container .dynamics-mis-table .mat-cell
+  font-size: 13px

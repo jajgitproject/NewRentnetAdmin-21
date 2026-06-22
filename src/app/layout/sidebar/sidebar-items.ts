@@ -1221,6 +1221,16 @@ export const ROUTES: RouteInfo[] = [
         submenu: [],
         isAccess: false
       },
+      {
+        path: 'dynamicsMis',
+        title: 'Dynamics MIS',
+        moduleName: 'dynamicsMisModule',
+        icon: 'fas fa-tachometer-alt',
+        class: '',
+        groupTitle: false,
+        submenu: [],
+        isAccess: false
+      },
 
       {
         path: 'driverCarChangesMIS',

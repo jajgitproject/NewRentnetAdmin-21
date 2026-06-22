@@ -122,6 +122,13 @@ const routes: Routes = [
             (m) => m.TallyMisModule
           )
       },
+      {
+        path: 'dynamicsMis',
+        loadChildren: () =>
+          import('./dynamicsMis/dynamicsMis.module').then(
+            (m) => m.DynamicsMisModule
+          )
+      },
 
       {
         path: 'dutyState',
