@@ -118,6 +118,7 @@ bookerName: FormControl = new FormControl();
   endDate : FormControl = new FormControl();
   SearchInvoiceStatus:string='';
 
+  searchInvoiceType:string='';
   constructor(
     public httpClient: HttpClient,
     public dialog: MatDialog,
@@ -156,6 +157,7 @@ bookerName: FormControl = new FormControl();
     this.SearchFromDate = '';
     this.SearchToDate = '';
     this.SearchEInvoiceStatus = "";
+    this.searchInvoiceType = "";
     this.searchDutySlip = '';
     this.searchReservationID = '';
     this.customerName.setValue('');
@@ -199,7 +201,7 @@ bookerName: FormControl = new FormControl();
     {
       this.SearchToDate=moment(this.SearchToDate).format('yyyy-MM-DD');
     }
-    this.invoiceHomeService.getTableData(this.customer.value,this.customerGroup.value,  this.searchInvoiceNo.replace("/","-"), this.branch.value,this.SearchFromDate,this.SearchToDate,this.SearchInvoiceStatus,this.SearchEInvoiceStatus,this.searchDutySlip,this.searchReservationID,this.searchActivationStatus,this.PageNumber).subscribe(
+    this.invoiceHomeService.getTableData(this.searchInvoiceType,this.customer.value,this.customerGroup.value,  this.searchInvoiceNo.replace("/","-"), this.branch.value,this.SearchFromDate,this.SearchToDate,this.SearchInvoiceStatus,this.SearchEInvoiceStatus,this.searchDutySlip,this.searchReservationID,this.searchActivationStatus,this.PageNumber).subscribe(
         data => {
           this.dataSource = data;
         },

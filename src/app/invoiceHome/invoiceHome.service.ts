@@ -19,7 +19,8 @@ export class InvoiceHomeService {
   }
 
   /** CRUD METHODS */
-  getTableData(searchCustomerName: string,
+  getTableData(searchInvoiceType: string,
+    searchCustomerName: string,
     searchCustomerGroup: string,
     searchInvoiceNo: string,
     searchBranch: string,
@@ -31,6 +32,9 @@ export class InvoiceHomeService {
       searchReservationID: string,
     searchActivationStatus: boolean,
     PageNumber: number): Observable<any> {
+    if (searchInvoiceType === "") {
+      searchInvoiceType = null;
+    }
     if (searchCustomerName === "") {
       searchCustomerName = null;
     }
@@ -65,7 +69,7 @@ export class InvoiceHomeService {
     if (searchActivationStatus === null) {
       searchActivationStatus = null;
     }
-    return this.httpClient.get(this.API_URL + '/' + searchCustomerName + '/' + searchCustomerGroup + '/' + searchInvoiceNo + '/' + searchBranch + '/' + searchFromDate + '/' + searchToDate + '/' + SearchInvoiceStatus + '/' + SearchEInvoice + '/'+ searchDutySlip + '/'+ searchReservationID + '/' + searchActivationStatus + '/' + PageNumber + '/InvoiceID/Descending');
+    return this.httpClient.get(this.API_URL + '/' + searchInvoiceType + '/' + searchCustomerName + '/' + searchCustomerGroup + '/' + searchInvoiceNo + '/' + searchBranch + '/' + searchFromDate + '/' + searchToDate + '/' + SearchInvoiceStatus + '/' + SearchEInvoice + '/'+ searchDutySlip + '/'+ searchReservationID + '/' + searchActivationStatus + '/' + PageNumber + '/InvoiceID/Descending');
 
   }
 
