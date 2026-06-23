@@ -192,6 +192,16 @@ shouldShowDeleteButton(item: any): boolean {
     }  
   }
 
+  ViewBill(item) {
+    const baseUrl = this._generalService.FormURL;
+    const url = this.router.serializeUrl(this.router.createUrlTree(['/generalBillDetails'], {
+      queryParams: {
+        invoiceID: item.invoiceID
+      }
+    }));
+    window.open(baseUrl + url, '_blank');
+  }
+
    public loadData() 
    {
     if(this.SearchStartDate!=="")
