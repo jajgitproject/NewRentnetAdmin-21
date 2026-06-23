@@ -99,7 +99,6 @@ export class PrintDutySlipComponent {
       data =>   
       {
         this.dataSource = data;
-        console.log(this.dataSource);
         if(!this.dataSource?.runningDetailsModels)
         {
           this.router.navigate(['/PrintDutySlipWithoutMap'],
