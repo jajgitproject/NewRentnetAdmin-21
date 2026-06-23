@@ -202,6 +202,18 @@ shouldShowDeleteButton(item: any): boolean {
     window.open(baseUrl + url, '_blank');
   }
 
+  openAttachDetachForEdit(item: any) {
+    const url = this.router.serializeUrl(
+      this.router.createUrlTree(['/invoiceAttachDetach'], {
+        queryParams: {
+          invoiceNumberWithPrefix: item.invoiceNumberWithPrefix,
+          invoiceID: item.invoiceID
+        }
+      })
+    );
+    window.open(this._generalService.FormURL + url, '_blank');
+  }
+
    public loadData() 
    {
     if(this.SearchStartDate!=="")
