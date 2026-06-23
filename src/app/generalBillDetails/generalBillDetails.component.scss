@@ -12,67 +12,68 @@
   table {
     border-color: black !important;
   }
+
+  .qr-logo-stack {
+    align-items: flex-end !important;
+  }
 }
+
 .custom-table tbody tr {
-    height: 50px;   /* increase row height */
+  height: 50px;
 }
+
 .custom-table td {
-    padding: 15px;
-    vertical-align: middle;
+  padding: 15px;
+  vertical-align: middle;
 }
 
 .qr-logo-area {
-    width: 28%;
-    text-align: right;
-}
-.qr-logo-area .qr-code-image,
-.qr-logo-area img[src^="data:image"] {
-    width: 30mm;
-    height: 30mm;
-    max-width: 30mm;
-    max-height: 30mm;
-    object-fit: contain;
-    display: block;
-    margin-left: auto;
+  width: 28%;
+  vertical-align: top;
+  text-align: right;
 }
 
-/* ================= LOGO + QR ================= */
+.qr-logo-stack {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 6px;
+  margin-left: auto;
+  width: fit-content;
+  max-width: 100%;
+}
+
 .invoice-logo {
-    width: 32mm;
-    height: auto;
-    max-width: 32mm;
-    max-height: 36mm;
-    object-fit: contain;
-    display: block;
-    margin-left: auto;
-    margin-bottom: 8px;
-    -webkit-print-color-adjust: exact;
-    print-color-adjust: exact;
+  width: 32mm;
+  height: auto;
+  max-width: 32mm;
+  max-height: 36mm;
+  object-fit: contain;
+  display: block;
+  margin: 0;
+  -webkit-print-color-adjust: exact;
+  print-color-adjust: exact;
 }
 
-.qr-logo-area .qr-code-image,
-.qr-logo-area img[src^="data:image"] {
-    width: 30mm;
-    height: 30mm;
-    max-width: 30mm;
-    max-height: 30mm;
-    object-fit: contain;
-    display: block;
-    margin-left: auto;
+.qr-logo-stack .qr-code-image,
+.qr-logo-stack img[src^="data:image"] {
+  width: 30mm;
+  height: 30mm;
+  max-width: 30mm;
+  max-height: 30mm;
+  object-fit: contain;
+  display: block;
+  margin: 0;
 }
 
 .no-image-box {
-    width: 30mm;
-    height: 30mm;
-    border: 1px solid #ccc;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 12px;
-    color: #777;
+  width: 30mm;
+  height: 30mm;
+  border: 1px solid #ccc;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  color: #777;
+  margin: 0;
 }
- .invoice-logo {
-        -webkit-print-color-adjust: exact !important;
-        print-color-adjust: exact !important;
-        color-adjust: exact !important;
-    }

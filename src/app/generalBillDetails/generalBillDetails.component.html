@@ -91,16 +91,18 @@
         Reverse Charge (Y/N): N
       </td>
         <td class="qr-logo-area" valign="top" align="right">
-          <img class="invoice-logo" [src]="invoiceLogoUrl" alt="Logo">
-          <ng-container *ngIf="dataSource?.signedQRCode; else noQR">
-            <img class="qr-code-image" [src]="'data:image/png;base64,' + dataSource?.signedQRCode" alt="QR" />
-          </ng-container>
-          <ng-template #noQR>
-            <div class="no-image-box">
-              No QR Image
-            </div>
-          </ng-template>
-            </td>
+          <div class="qr-logo-stack">
+            <img class="invoice-logo" [src]="invoiceLogoUrl" alt="Logo">
+            <ng-container *ngIf="dataSource?.signedQRCode; else noQR">
+              <img class="qr-code-image" [src]="'data:image/png;base64,' + dataSource?.signedQRCode" alt="QR" />
+            </ng-container>
+            <ng-template #noQR>
+              <div class="no-image-box">
+                No QR Image
+              </div>
+            </ng-template>
+          </div>
+        </td>
     </tr>
   </table>
 
