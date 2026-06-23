@@ -845,6 +845,16 @@ export const ROUTES: RouteInfo[] = [
         submenu: [],
         isAccess: false
       },
+      {
+        path: 'dutyregisterforcontractcenter',
+        title: 'Duty Register For Contract Center',
+        moduleName: 'dutyRegisterForContractCenter',
+        icon: 'fas fa-tachometer-alt',
+        class: '',
+        groupTitle: false,
+        submenu: [],
+        isAccess: false
+      },
 
       {
         path: 'zonalDutyRegister',

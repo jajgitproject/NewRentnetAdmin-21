@@ -667,6 +667,13 @@ const routes: Routes = [
             (m) => m.DutyRegisterModule
           )
       },
+      {
+        path: 'dutyregisterforcontractcenter',
+        loadChildren: () =>
+          import('./dutyRegisterForContractCenter/dutyRegisterForContractCenter.module').then(
+            (m) => m.DutyRegisterForContractCenterModule
+          )
+      },
 
       {
         path: 'driverPayoutMIS',

@@ -1,0 +1,872 @@
+﻿<section class="content">
+    <div class="container-fluid">
+        <div class="block-header">
+            <div class="row">
+                <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+                    <ul>
+                        <li class="breadcrumb-item bcrumb-1">
+                            <a routerLink="/dashboard/main">
+                                <i class="fas fa-home"></i> Home</a>|
+                            <a href="#" onClick="return false;">Admin</a>|
+                            <a href="#" onClick="return false;">Duty Register For Contract Center</a>
+                        </li>
+                    </ul>
+                    <ul class="breadcrumb breadcrumb-style ">
+                        <!-- <li class="breadcrumb-item">
+                            <h2>Duty Register For Contract Center</h2>
+                        </li> -->
+                    </ul>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                <div class="card">
+                    <div class="body">
+                        <mat-accordion class="duty-register-search-accordion">
+                            <mat-expansion-panel class="duty-register-inline-search-panel" [expanded]="true">
+                                <mat-expansion-panel-header>
+                                    <mat-panel-title>
+                                       Quick Search
+                                    </mat-panel-title>
+                                </mat-expansion-panel-header>
+
+                                <div class="duty-register-inline-search-body">
+                                    <ng-container *ngTemplateOutlet="dutyRegisterQuickSearch"></ng-container>
+                                </div>
+                                <br/>
+                                <div class="duty-register-inline-search-actions quick-search-actions">
+                                    <button mat-raised-button color="primary" class="duty-register-search-button" (click)="SearchData()">
+                                        Search
+                                    </button>
+                                    &nbsp;&nbsp;
+                                    
+                                    <button mat-raised-button color="warn" class="duty-register-reset-button" (click)="refresh()">
+                                        Refresh
+                                    </button>
+                                    &nbsp;&nbsp;
+                                    <button mat-raised-button color="accent" (click)="downloadFilteredCsv()" [disabled]="csvExporting || !hasManualSearch" [matTooltip]="!hasManualSearch ? 'Pehle Search karein' : ''">
+                                        {{ csvExporting ? 'Downloading...' : 'Download CSV' }}
+                                    </button>
+                                </div>
+                            </mat-expansion-panel>
+                        </mat-accordion>
+                        
+                        <br/>
+                        <mat-accordion class="duty-register-search-accordion">
+                            <mat-expansion-panel class="duty-register-inline-search-panel" [expanded]="false">
+                                <mat-expansion-panel-header>
+                                    <mat-panel-title>
+                                       Advance Search
+                                    </mat-panel-title>
+                                </mat-expansion-panel-header>
+
+                                <div class="duty-register-inline-search-body">
+                                    <ng-container *ngTemplateOutlet="dutyRegisterAdvanceSearch"></ng-container>
+                                </div>
+                                <br/>
+                                <div class="duty-register-inline-search-actions quick-search-actions">
+                                    <button mat-raised-button color="primary" class="duty-register-search-button" (click)="SearchData()">
+                                        Search
+                                    </button>
+                                    &nbsp;&nbsp;
+                                    
+                                    <button mat-raised-button color="warn" class="duty-register-reset-button" (click)="refresh()">
+                                        Refresh
+                                    </button>
+                                    &nbsp;&nbsp;
+                                    <button mat-raised-button color="accent" (click)="downloadFilteredCsv()" [disabled]="csvExporting || !hasManualSearch" [matTooltip]="!hasManualSearch ? 'Pehle Search karein' : ''">
+                                        {{ csvExporting ? 'Downloading...' : 'Download CSV' }}
+                                    </button>
+                                </div>
+                            </mat-expansion-panel>
+                        </mat-accordion>
+
+                        <br/>
+
+                        <div class="responsive_table">
+                            <div class="table-responsive">
+                                <p *ngIf="!dataSource || dataSource.length === 0; then thenBlock2 else elseBlock2">
+                                    This is not rendered
+                                </p>
+
+                                <ng-template #thenBlock2>
+                                    <div class="alert alert-primary" style="background-color:#E8E8E8; text-align: center;">No Records Found</div>
+                                    <div class="body">
+                                        <div class="example-button-row">    
+                                            <button mat-raised-button color="primary" (click)="PreviousCall()">Previous</button>
+                                            <button mat-raised-button color="primary" (click)="NextCall()">Next</button>    
+                                        </div>
+                                    </div>    
+                                </ng-template>
+
+                                <ng-template #elseBlock2>
+                                    <div class="scrollable-table-container">
+                                        <mat-table #table [dataSource]="dataSource"
+                                                matSort
+                                                class="mat-cell floating-header-table duty-register-contract-center-table"
+                                                (matSortChange)="SortingData($event)">
+
+                                            <ng-container *ngFor="let column of displayedColumns" [matColumnDef]="column">
+                                                <mat-header-cell
+                                                    *matHeaderCellDef
+                                                    mat-sort-header
+                                                    [style.flex]="'0 0 auto'"
+                                                    [style.width]="getColumnWidth(column)"
+                                                    [style.min-width]="getColumnWidth(column)"
+                                                    [style.max-width]="getColumnWidth(column)">
+                                                    {{ column }}
+                                                </mat-header-cell>
+                                                <mat-cell
+                                                    *matCellDef="let row"
+                                                    [style.flex]="'0 0 auto'"
+                                                    [style.width]="getColumnWidth(column)"
+                                                    [style.min-width]="getColumnWidth(column)"
+                                                    [style.max-width]="getColumnWidth(column)">
+                                                    {{ getCellDisplayValue(row, column) }}
+                                                </mat-cell>
+                                            </ng-container>
+
+                                            <mat-header-row *matHeaderRowDef="displayedColumns"></mat-header-row>
+                                            <mat-row *matRowDef="let row; columns: displayedColumns;"></mat-row>
+
+                                        </mat-table>
+                                    </div>
+
+                                    <div class="body">
+                                        <div class="example-button-row">
+                                            <button mat-raised-button color="primary" (click)="PreviousCall()">Previous</button>
+                                            <button mat-raised-button color="primary" (click)="NextCall()">Next</button>
+                                        </div>
+                                    </div>
+                                </ng-template>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+<ng-template>
+                <div class="duty-register-search quick-search-panel">
+                <div class="row">
+                    <!-- <div class="col-xl-3 col-lg-3 col-md-6 col-sm-12 mb-2"> -->
+                    <div class="col mb-2" style="flex: 0 0 20%; max-width: 20%;">
+                        <mat-form-field class="example-full-width cp-quick-search-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
+                            <mat-label>Customer Group</mat-label>
+                            <input type="text" matInput [formControl]="SearchCustomerGroup"  [matAutocomplete]="auto">
+                            <mat-autocomplete #auto="matAutocomplete">
+                                <mat-option *ngFor="let option of filteredCustomerGroupOptions | async" [value]="option.customerGroup">
+                                    {{option.customerGroup}}
+                                </mat-option>
+                            </mat-autocomplete>
+                        </mat-form-field>
+                    </div>
+                    
+                    <div class="col mb-2" style="flex: 0 0 20%; max-width: 20%;">
+                        <mat-form-field class="example-full-width cp-quick-search-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
+                            <mat-label>Client Name</mat-label>
+                            <input type="text" matInput [formControl]="SearchCustomerPerson" [matAutocomplete]="auto1">
+                            <mat-autocomplete #auto1="matAutocomplete">
+                                <mat-option *ngFor="let option of filteredCustomerPersonOptions | async" [value]="option.customerPersonName">
+                                    {{option.customerPersonName}}
+                                </mat-option>
+                            </mat-autocomplete>
+                        </mat-form-field>
+                    </div>
+
+                    <div class="col mb-2" style="flex: 0 0 20%; max-width: 20%;">
+                        <mat-form-field class="example-full-width cp-quick-search-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
+                            <mat-label>Duty Type</mat-label>
+                            <input type="text" matInput [formControl]="SearchDutyType" [matAutocomplete]="auto2">
+                            <mat-autocomplete #auto2="matAutocomplete">
+                                <mat-option *ngFor="let option of filteredPackageTypeOptions | async" [value]="option.packageType">
+                                  {{option.packageType}}
+                                </mat-option>
+                              </mat-autocomplete>
+                        </mat-form-field>
+                    </div>
+
+                    <div class="col mb-2" style="flex: 0 0 20%; max-width: 20%;">
+                        <mat-form-field class="example-full-width cp-quick-search-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
+                            <mat-label>Feedback Date</mat-label>
+                            <input type="text" matInput [matDatepicker]="feedbackDate" [(ngModel)]="SearchFeedbackDate">
+                            <mat-datepicker-toggle matSuffix [for]="feedbackDate"></mat-datepicker-toggle>
+                            <mat-datepicker #feedbackDate></mat-datepicker>
+                        </mat-form-field>
+                    </div>
+
+                    <div class="col mb-2" style="flex: 0 0 20%; max-width: 20%;">
+                        <mat-form-field class="example-full-width cp-quick-search-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
+                            <mat-label>Slip Receipt</mat-label>
+                            <mat-select [(value)]="SearchSlipReceipt">
+                                <mat-option [value]=true>Yes</mat-option>
+                                <mat-option [value]=false>No</mat-option>
+                            </mat-select>
+                        </mat-form-field>
+                    </div>
+                </div>
+
+                <div class="row">    
+                    <div class="col mb-2" style="flex: 0 0 20%; max-width: 20%;">
+                        <mat-form-field class="example-full-width cp-quick-search-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
+                            <mat-label>Closure Type</mat-label>
+                            <mat-select [formControl]="SearchClosureType">
+                                <mat-option value="Dispatched">Dispatched</mat-option>
+                                <mat-option value="PickedUp">PickedUp</mat-option>
+                                <mat-option value="Reached">Reached</mat-option>
+                                <mat-option value="Garage In">Garage In</mat-option>
+                                <mat-option value="Not Dispatched">Not Dispatched</mat-option>
+                                <mat-option value="Dropped Off">Dropped Off</mat-option>
+                            </mat-select>
+                        </mat-form-field>
+                    </div>
+
+                    <div class="col mb-2" style="flex: 0 0 20%; max-width: 20%;">
+                        <mat-form-field class="example-full-width cp-quick-search-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
+                            <mat-label>Dispatch Location</mat-label>
+                            <input type="text" matInput [formControl]="SearchDispatchLocation" [matAutocomplete]="auto3">
+                            <mat-autocomplete #auto3="matAutocomplete">
+                                <mat-option *ngFor="let option of filteredDispatchLocationOptions | async" 
+                                    [value]="option.organizationalEntityName">
+                                  {{option.organizationalEntityName}}
+                                </mat-option>
+                            </mat-autocomplete>
+                        </mat-form-field>
+                    </div>
+
+                    <div class="col mb-2" style="flex: 0 0 20%; max-width: 20%;">
+                        <mat-form-field class="example-full-width cp-quick-search-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
+                            <mat-label>MOP</mat-label>
+                            <input type="text" matInput [formControl]="SearchMOP" [matAutocomplete]="auto4">
+                            <mat-autocomplete #auto4="matAutocomplete">
+                                <mat-option *ngFor="let option of filteredPaymentModeOptions | async"
+                                    [value]="option.modeOfPayment">
+                                    {{option.modeOfPayment}}
+                                </mat-option>
+                            </mat-autocomplete>
+                        </mat-form-field>
+                    </div>
+
+                    <div class="col mb-2" style="flex: 0 0 20%; max-width: 20%;">
+                        <mat-form-field class="example-full-width cp-quick-search-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
+                            <mat-label>Vendor Type</mat-label>
+                            <input type="text" matInput [formControl]="SearchSupplierType" [matAutocomplete]="auto5">
+                            <mat-autocomplete #auto5="matAutocomplete">
+                                <mat-option *ngFor="let options of filteredSupplierTypeOptions | async"
+                                    [value]="options.supplierType">
+                                    {{options.supplierType}}
+                                </mat-option>
+                            </mat-autocomplete>
+                        </mat-form-field>
+                    </div>
+
+                    <div class="col mb-2" style="flex: 0 0 20%; max-width: 20%;">
+                        <mat-form-field class="example-full-width cp-quick-search-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
+                            <mat-label>Vendor</mat-label>
+                            <input type="text" matInput [formControl]="SearchSupplier" [matAutocomplete]="auto6">
+                            <mat-autocomplete #auto6="matAutocomplete">
+                                <mat-option *ngFor="let option of filteredSupplierOptions | async" [value]="option.supplierName">
+                                  {{ option.supplierName }}
+                                </mat-option>
+                              </mat-autocomplete>
+                        </mat-form-field>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col mb-2" style="flex: 0 0 20%; max-width: 20%;">
+                        <mat-form-field class="example-full-width cp-quick-search-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
+                            <mat-label>From Date</mat-label>
+                            <input type="text" matInput [matDatepicker]="fromDate" [(ngModel)]="SearchFromDate">
+                            <mat-datepicker-toggle matSuffix [for]="fromDate"></mat-datepicker-toggle>
+                            <mat-datepicker #fromDate></mat-datepicker>
+                        </mat-form-field>
+                    </div>
+                    
+                    <div class="col mb-2" style="flex: 0 0 20%; max-width: 20%;">
+                        <mat-form-field class="example-full-width cp-quick-search-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
+                            <mat-label>To Date</mat-label>
+                            <input type="text" matInput [matDatepicker]="toDate" [(ngModel)]="SearchToDate">
+                            <mat-datepicker-toggle matSuffix [for]="toDate"></mat-datepicker-toggle>
+                            <mat-datepicker #toDate></mat-datepicker>
+                        </mat-form-field>
+                    </div>                    
+
+                    <div class="col mb-2" style="flex: 0 0 20%; max-width: 20%;">
+                        <mat-form-field class="example-full-width cp-quick-search-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
+                            <mat-label>Sales Person</mat-label>
+                            <input type="text" matInput [formControl]="SearchSalesPerson" [matAutocomplete]="auto7">
+                            <mat-autocomplete #auto7="matAutocomplete">
+                                <mat-option *ngFor="let option of filteredSalesPersonOptions | async" [value]="option.salesPerson">
+                                    {{option.salesPerson}}
+                                </mat-option>
+                            </mat-autocomplete>
+                        </mat-form-field>
+                    </div>
+
+                    <div class="col mb-2" style="flex: 0 0 20%; max-width: 20%;">
+                        <mat-form-field class="example-full-width cp-quick-search-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
+                            <mat-label>Car Sent</mat-label>
+                            <input type="text" matInput [formControl]="SearchCarSend" [matAutocomplete]="auto8">
+                            <mat-autocomplete #auto8="matAutocomplete">
+                                <mat-option *ngFor="let option of filteredCarSendOptions | async" [value]="option.vehicle">
+                                    {{option.vehicle}}
+                                </mat-option>
+                            </mat-autocomplete>
+                        </mat-form-field>
+                    </div>
+                    
+                    <div class="col mb-2" style="flex: 0 0 20%; max-width: 20%;">
+                        <mat-form-field class="example-full-width cp-quick-search-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
+                            <mat-label>Car Booked</mat-label>
+                            <input type="text" matInput [formControl]="SearchCarBooked" [matAutocomplete]="auto9">
+                            <mat-autocomplete #auto9="matAutocomplete">
+                                <mat-option *ngFor="let option of filteredCarBookedOptions | async" [value]="option.vehicle">
+                                    {{option.vehicle}}
+                                </mat-option>
+                            </mat-autocomplete>
+                        </mat-form-field>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col mb-2" style="flex: 0 0 20%; max-width: 20%;">
+                        <mat-form-field class="example-full-width cp-quick-search-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
+                            <mat-label>Customer Type</mat-label>
+                            <input type="text" matInput [formControl]="SearchCustomerType" [matAutocomplete]="auto10">
+                            <mat-autocomplete #auto10="matAutocomplete">
+                                <mat-option *ngFor="let option of filteredCustomerTypeOptions | async" [value]="option.customerType">
+                                    {{option.customerType}}
+                                </mat-option>
+                            </mat-autocomplete>
+                        </mat-form-field>
+                    </div>
+
+                    <div class="col mb-2" style="flex: 0 0 20%; max-width: 20%;">
+                        <mat-form-field class="example-full-width cp-quick-search-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
+                            <mat-label>Customer Location</mat-label>
+                            <input type="text" matInput [formControl]="SearchCustomerLocationName" [matAutocomplete]="auto11">
+                            <mat-autocomplete #auto11="matAutocomplete">
+                                <mat-option *ngFor="let option of filteredCustomerLocationOptions | async" [value]="option.organizationalEntityName">
+                                  {{option.organizationalEntityName}}
+                                </mat-option>
+                              </mat-autocomplete>
+                        </mat-form-field>
+                    </div>
+
+                    <div class="col mb-2" style="flex: 0 0 20%; max-width: 20%;">
+                        <mat-form-field class="example-full-width cp-quick-search-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
+                            <mat-label>Booking Status</mat-label>
+                            <mat-select [formControl]="SearchBookingStatus">
+                                <mat-option value="Confirmed">Confirmed</mat-option>
+                                <mat-option value="Approved">Approved</mat-option>
+                                <mat-option value="Pending">Pending</mat-option>
+                                <mat-option value="Cancelled">Cancelled</mat-option>
+                            </mat-select>
+                        </mat-form-field>
+                    </div>
+
+                    <div class="col mb-2" style="flex: 0 0 20%; max-width: 20%;">
+                        <mat-form-field class="example-full-width cp-quick-search-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
+                            <mat-label>Driver</mat-label>
+                            <input type="text" matInput [formControl]="SearchDri" [matAutocomplete]="auto15">
+                            <mat-autocomplete #auto15="matAutocomplete">
+                                <mat-option *ngFor="let option of filteredDriverOptions | async" [value]="option.driverName">
+                                  {{option.driverName}}
+                                </mat-option>
+                            </mat-autocomplete>
+                        </mat-form-field>
+                    </div>
+                    
+                    <div class="col mb-2" style="flex: 0 0 20%; max-width: 20%;">
+                        <mat-form-field class="example-full-width cp-quick-search-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
+                            <mat-label>Car No.</mat-label>
+                            <input type="text" matInput [formControl]="SearchCarNo" [matAutocomplete]="auto12">
+                            <mat-autocomplete #auto12="matAutocomplete">
+                                <mat-option *ngFor="let option of filteredCarNoOptions | async" [value]="option.vehicle">
+                                  {{option.vehicle}}
+                                </mat-option>
+                            </mat-autocomplete>
+                        </mat-form-field>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col mb-2" style="flex: 0 0 20%; max-width: 20%;">
+                        <mat-form-field class="example-full-width cp-quick-search-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
+                            <mat-label>Owned/Supplied</mat-label>
+                            <mat-select [formControl]="SearchSupplierO">
+                                <mat-option value="Owned">Owned</mat-option>
+                                <mat-option value="Supplied">Supplied</mat-option>
+                            </mat-select>
+                        </mat-form-field>
+                    </div>
+
+                    <div class="col mb-2" style="flex: 0 0 20%; max-width: 20%;">
+                        <mat-form-field class="example-full-width cp-quick-search-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
+                            <mat-label>Reservation No</mat-label>
+                            <input type="text" matInput [(ngModel)]="SearchRes">
+                        </mat-form-field>
+                    </div>
+
+                    <div class="col mb-2" style="flex: 0 0 20%; max-width: 20%;">
+                        <mat-form-field class="example-full-width cp-quick-search-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
+                            <mat-label>Duty Slip No</mat-label>
+                            <input type="text" matInput [(ngModel)]="SearchDuty">
+                        </mat-form-field>
+                    </div>
+
+                    <div class="col mb-2" style="flex: 0 0 20%; max-width: 20%;">
+                        <mat-form-field class="example-full-width cp-quick-search-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
+                            <mat-label>Guest Name</mat-label>
+                            <input type="text" matInput [formControl]="SearchGuestName" [matAutocomplete]="auto13">
+                            <mat-autocomplete #auto13="matAutocomplete">
+                                <mat-option *ngFor="let option of filteredGuestNameOptions | async" [value]="option.customerPersonName">
+                                    {{option.customerPersonName}}
+                                </mat-option>
+                            </mat-autocomplete>
+                        </mat-form-field>
+                    </div>
+
+                    <div class="col mb-2" style="flex: 0 0 20%; max-width: 20%;">
+                        <mat-form-field class="example-full-width cp-quick-search-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
+                            <mat-label>Guest Mobile</mat-label>
+                            <input type="text" matInput [(ngModel)]="SearchGuestMobile">
+                        </mat-form-field>
+                    </div>
+                    
+                </div>
+
+                <div class="row">
+                    <div class="col mb-2" style="flex: 0 0 20%; max-width: 20%;">
+                        <mat-form-field class="example-full-width cp-quick-search-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
+                            <mat-label>City</mat-label>
+                            <input type="text" matInput [formControl]="SearchCity"  [matAutocomplete]="auto14">
+                            <mat-autocomplete #auto14="matAutocomplete">
+                                <mat-option *ngFor="let option of filteredCityOptions | async" [value]="option.geoPointName">
+                                    {{option.geoPointName}}
+                                </mat-option>
+                            </mat-autocomplete>
+                        </mat-form-field>
+                    </div>
+                    
+                    <div class="col mb-2" style="flex: 0 0 20%; max-width: 20%;">
+                        <mat-form-field class="example-full-width cp-quick-search-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
+                            <mat-label>Cancellation Date From</mat-label>
+                            <input type="text" matInput [matDatepicker]="cancellationDateFrom" [(ngModel)]="SearchCancellationDateFrom">
+                            <mat-datepicker-toggle matSuffix [for]="cancellationDateFrom"></mat-datepicker-toggle>
+                            <mat-datepicker #cancellationDateFrom></mat-datepicker>
+                        </mat-form-field>
+                    </div>
+                    
+                    <div class="col mb-2" style="flex: 0 0 20%; max-width: 20%;">
+                        <mat-form-field class="example-full-width cp-quick-search-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
+                            <mat-label>Cancellation Date To</mat-label>
+                            <input type="text" matInput [matDatepicker]="cancellationDateTo" [(ngModel)]="SearchCancellationDateTo">
+                            <mat-datepicker-toggle matSuffix [for]="cancellationDateTo"></mat-datepicker-toggle>
+                            <mat-datepicker #cancellationDateTo></mat-datepicker>
+                        </mat-form-field>
+                    </div>
+
+                    <div class="col mb-2" style="flex: 0 0 20%; max-width: 20%;">
+                        <mat-form-field class="example-full-width cp-quick-search-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
+                            <mat-label>Bkg Date From</mat-label>
+                            <input type="text" matInput [matDatepicker]="bookingDateFrom" [(ngModel)]="SearchBookingDateFrom">
+                            <mat-datepicker-toggle matSuffix [for]="bookingDateFrom"></mat-datepicker-toggle>
+                            <mat-datepicker #bookingDateFrom></mat-datepicker>
+                        </mat-form-field>
+                    </div>
+                    
+                    <div class="col mb-2" style="flex: 0 0 20%; max-width: 20%;">
+                        <mat-form-field class="example-full-width cp-quick-search-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
+                            <mat-label>Bkg Date To</mat-label>
+                            <input type="text" matInput [matDatepicker]="bookingDateTo" [(ngModel)]="SearchBookingDate">
+                            <mat-datepicker-toggle matSuffix [for]="bookingDateTo"></mat-datepicker-toggle>
+                            <mat-datepicker #bookingDateTo></mat-datepicker>
+                        </mat-form-field>
+                    </div>
+                </div>
+
+
+                   <div class="row">
+                    <!-- <div class="col-xl-3 col-lg-3 col-md-6 col-sm-12 mb-2"> -->
+                    <div class="col mb-2" style="flex: 0 0 20%; max-width: 20%;">
+                        <mat-form-field class="example-full-width cp-quick-search-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
+                            <mat-label>Change MOP Case</mat-label>
+                            <mat-select [(value)]="SearchChangeMOPCase">
+                                <mat-option value="true">Yes</mat-option>
+                                <mat-option value="false">No</mat-option>
+                            </mat-select>
+                        </mat-form-field>
+                    </div>
+                    
+                    <div class="col mb-2" style="flex: 0 0 20%; max-width: 20%;">
+                        <mat-form-field class="example-full-width cp-quick-search-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
+                            <mat-label>Location Group</mat-label>
+                            <input type="text" matInput [formControl]="SearchLocationGroup" [matAutocomplete]="auto19">
+                            <mat-autocomplete #auto19="matAutocomplete">
+                                <mat-option *ngFor="let option of filteredLocationGroupOptions | async" [value]="option.locationGroup">
+                                    {{option.locationGroup}}
+                                </mat-option>
+                            </mat-autocomplete>
+                        </mat-form-field>
+                    </div>
+
+                
+                    <div class="col mb-2" style="flex: 0 0 20%; max-width: 20%;">
+                        <mat-form-field class="example-full-width cp-quick-search-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
+                            <mat-label>Bill Date From</mat-label>
+                            <input type="text" matInput [matDatepicker]="billDateFrom" [(ngModel)]="SearchBillDateFrom">
+                            <mat-datepicker-toggle matSuffix [for]="billDateFrom"></mat-datepicker-toggle>
+                            <mat-datepicker #billDateFrom></mat-datepicker>
+                        </mat-form-field>
+                    </div>
+                    
+                    <div class="col mb-2" style="flex: 0 0 20%; max-width: 20%;">
+                        <mat-form-field class="example-full-width cp-quick-search-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
+                            <mat-label>Bill Date To</mat-label>
+                            <input type="text" matInput [matDatepicker]="billDateTo" [(ngModel)]="SearchBillToDate">
+                            <mat-datepicker-toggle matSuffix [for]="billDateTo"></mat-datepicker-toggle>
+                            <mat-datepicker #billDateTo></mat-datepicker>
+                        </mat-form-field>
+                    </div>
+
+                    <div class="col mb-2" style="flex: 0 0 20%; max-width: 20%; display: flex; align-items: center;">
+                        <div class="duty-register-billing-status">
+                            <label class="duty-register-billing-status-label">Billing Status</label>
+                            &nbsp;
+                            <mat-radio-group [(ngModel)]="SearchBillStatus" class="duty-register-billing-status-group">
+                                <!-- <mat-radio-button value="">All</mat-radio-button> -->
+                                <mat-radio-button value="ToBeBilled">To Be Billed</mat-radio-button><br/>
+                                <mat-radio-button value="BillAllotted">Bill Allotted</mat-radio-button>
+                            </mat-radio-group>
+                        </div>
+                    </div>
+                </div>
+                </div>
+
+                <!-- <mat-form-field appearance="outline" floatLabel="always" class="example-full-width mb-3">
+                    <mat-label>Activation Status</mat-label>
+                    <mat-select [(value)]="SearchActivationStatus">
+                        <mat-option [value]=true>Active</mat-option>
+                        <mat-option [value]=false>Deleted</mat-option>
+                    </mat-select>
+                </mat-form-field> -->
+</ng-template>
+
+<ng-template #dutyRegisterAdvanceSearch>
+      <div class="row">
+        <div class="col-xl-3 col-lg-3 col-md-3 col-sm-12 mb-2">
+            <mat-form-field class="example-full-width cp-quick-search-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
+                <mat-label>Branch</mat-label>
+                <input type="text" matInput [formControl]="SearchBranch"  [matAutocomplete]="autoBranch">
+                <mat-autocomplete #autoBranch="matAutocomplete" (optionSelected)="OnBranchSelected($event.option.value)">
+                    <mat-option *ngFor="let option of filteredBranchOptions | async" [value]="option.organizationalEntityName">
+                        {{option.organizationalEntityName}}
+                    </mat-option>
+                </mat-autocomplete>
+            </mat-form-field>
+        </div>
+
+        <div class="col-xl-3 col-lg-3 col-md-3 col-sm-12 mb-2">
+            <mat-form-field class="example-full-width cp-quick-search-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
+                <mat-label>Owned/Supplied</mat-label>
+                <mat-select [formControl]="SearchSupplierO">
+                    <mat-option value="Owned">Owned</mat-option>
+                    <mat-option value="Supplied">Supplied</mat-option>
+                </mat-select>
+            </mat-form-field>
+        </div>
+
+        <div class="col-xl-3 col-lg-3 col-md-3 col-sm-12 mb-2">
+            <mat-form-field class="example-full-width cp-quick-search-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
+                <mat-label>Vendor Type</mat-label>
+                <input type="text" matInput [formControl]="SearchSupplierType" [matAutocomplete]="auto5">
+                <mat-autocomplete #auto5="matAutocomplete">
+                    <mat-option *ngFor="let options of filteredSupplierTypeOptions | async"
+                        [value]="options.supplierType">
+                        {{options.supplierType}}
+                    </mat-option>
+                </mat-autocomplete>
+            </mat-form-field>
+        </div>
+
+        <div class="col-xl-3 col-lg-3 col-md-3 col-sm-12 mb-2">
+            <mat-form-field class="example-full-width cp-quick-search-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
+                <mat-label>Sales Person</mat-label>
+                <input type="text" matInput [formControl]="SearchSalesPerson" [matAutocomplete]="auto7">
+                <mat-autocomplete #auto7="matAutocomplete">
+                    <mat-option *ngFor="let option of filteredSalesPersonOptions | async" [value]="option.salesPerson">
+                        {{option.salesPerson}}
+                    </mat-option>
+                </mat-autocomplete>
+            </mat-form-field>
+        </div>
+      </div>     
+      
+      <div class="row">
+        <div class="col-xl-3 col-lg-3 col-md-3 col-sm-12 mb-2">
+           <mat-form-field class="example-full-width cp-quick-search-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
+                <mat-label>KAM</mat-label>
+                <input type="text" matInput [formControl]="SearchKAM"  [matAutocomplete]="autoKAM">
+                <mat-autocomplete #autoKAM="matAutocomplete" (optionSelected)="OnKAMSelected($event.option.value)">
+                    <mat-option *ngFor="let option of filteredKAMOptions | async" [value]="option.firstName +' '+option.lastName">
+                        {{option.firstName +' '+ option.lastName}}
+                    </mat-option>
+                </mat-autocomplete>
+            </mat-form-field>
+        </div>
+
+        <div class="col-xl-3 col-lg-3 col-md-3 col-sm-12 mb-2">
+            <mat-form-field class="example-full-width cp-quick-search-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
+                <mat-label>Car Booked</mat-label>
+                <input type="text" matInput [formControl]="SearchCarBooked" [matAutocomplete]="auto9">
+                <mat-autocomplete #auto9="matAutocomplete">
+                    <mat-option *ngFor="let option of filteredCarBookedOptions | async" [value]="option.vehicle">
+                        {{option.vehicle}}
+                    </mat-option>
+                </mat-autocomplete>
+            </mat-form-field>
+        </div>
+
+        <div class="col-xl-3 col-lg-3 col-md-3 col-sm-12 mb-2">
+            <mat-form-field class="example-full-width cp-quick-search-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
+                <mat-label>Car Sent</mat-label>
+                <input type="text" matInput [formControl]="SearchCarSend" [matAutocomplete]="auto8">
+                <mat-autocomplete #auto8="matAutocomplete">
+                    <mat-option *ngFor="let option of filteredCarSendOptions | async" [value]="option.vehicle">
+                        {{option.vehicle}}
+                    </mat-option>
+                </mat-autocomplete>
+            </mat-form-field>
+        </div>
+
+        <div class="col-xl-3 col-lg-3 col-md-3 col-sm-12 mb-2">
+            <mat-form-field class="example-full-width cp-quick-search-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
+                <mat-label>Car No.</mat-label>
+                <input type="text" matInput [formControl]="SearchCarNo" [matAutocomplete]="auto12">
+                <mat-autocomplete #auto12="matAutocomplete">
+                    <mat-option *ngFor="let option of filteredCarNoOptions | async" [value]="option.vehicle">
+                        {{option.vehicle}}
+                    </mat-option>
+                </mat-autocomplete>
+            </mat-form-field>
+        </div>
+      </div>
+      
+      <div class="row">
+        <div class="col-xl-3 col-lg-3 col-md-3 col-sm-12 mb-2">
+           <mat-form-field class="example-full-width cp-quick-search-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
+                <mat-label>Driver</mat-label>
+                <input type="text" matInput [formControl]="SearchDri" [matAutocomplete]="auto15">
+                <mat-autocomplete #auto15="matAutocomplete">
+                    <mat-option *ngFor="let option of filteredDriverOptions | async" [value]="option.driverName">
+                        {{option.driverName}}
+                    </mat-option>
+                </mat-autocomplete>
+            </mat-form-field>
+        </div>
+
+        <div class="col-xl-3 col-lg-3 col-md-3 col-sm-12 mb-2">
+            <mat-form-field class="example-full-width cp-quick-search-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
+                <mat-label>Guest Name</mat-label>
+                <input type="text" matInput [formControl]="SearchGuestName" [matAutocomplete]="auto13">
+                <mat-autocomplete #auto13="matAutocomplete">
+                    <mat-option *ngFor="let option of filteredGuestNameOptions | async" [value]="option.customerPersonName">
+                        {{option.customerPersonName}}
+                    </mat-option>
+                </mat-autocomplete>
+            </mat-form-field>
+        </div>
+
+        <div class="col-xl-3 col-lg-3 col-md-3 col-sm-12 mb-2">
+            <mat-form-field class="example-full-width cp-quick-search-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
+                <mat-label>Guest Mobile</mat-label>
+                <input type="text" matInput [(ngModel)]="SearchGuestMobile">
+            </mat-form-field>
+        </div>
+
+        <div class="col-xl-3 col-lg-3 col-md-3 col-sm-12 mb-2">
+            <mat-form-field class="example-full-width cp-quick-search-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
+                <mat-label>Importance</mat-label>
+                <mat-select [formControl]="SearchImportance">
+                    <mat-option value="General">General</mat-option>
+                    <mat-option value="CXO">CXO</mat-option>
+                    <mat-option value="VIP">VIP</mat-option>
+                </mat-select>
+            </mat-form-field>
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="col-xl-3 col-lg-3 col-md-3 col-sm-12 mb-2">
+            <mat-form-field class="example-full-width cp-quick-search-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
+                <mat-label>City</mat-label>
+                <input type="text" matInput [formControl]="SearchCity"  [matAutocomplete]="auto14">
+                <mat-autocomplete #auto14="matAutocomplete">
+                    <mat-option *ngFor="let option of filteredCityOptions | async" [value]="option.geoPointName">
+                        {{option.geoPointName}}
+                    </mat-option>
+                </mat-autocomplete>
+            </mat-form-field>
+        </div>
+
+        <div class="col-xl-3 col-lg-3 col-md-3 col-sm-12 mb-2">
+            <mat-form-field class="example-full-width cp-quick-search-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
+                <mat-label>Bill Date From</mat-label>
+                <input type="text" matInput [matDatepicker]="billDateFrom" [(ngModel)]="SearchBillDateFrom">
+                <mat-datepicker-toggle matSuffix [for]="billDateFrom"></mat-datepicker-toggle>
+                <mat-datepicker #billDateFrom></mat-datepicker>
+            </mat-form-field>
+        </div>
+
+        <div class="col-xl-3 col-lg-3 col-md-3 col-sm-12 mb-2">
+            <mat-form-field class="example-full-width cp-quick-search-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
+                <mat-label>Bill Date To</mat-label>
+                <input type="text" matInput [matDatepicker]="billDateTo" [(ngModel)]="SearchBillToDate">
+                <mat-datepicker-toggle matSuffix [for]="billDateTo"></mat-datepicker-toggle>
+                <mat-datepicker #billDateTo></mat-datepicker>
+            </mat-form-field>
+        </div>
+      </div>
+</ng-template>
+
+
+<ng-template #dutyRegisterQuickSearch>
+    <div class="row">
+        <div class="col-xl-3 col-lg-3 col-md-3 col-sm-12 mb-2">
+            <mat-form-field class="example-full-width cp-quick-search-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
+                <mat-label>Booking Date From</mat-label>
+                <input type="text" matInput [matDatepicker]="bookingDateFrom" [(ngModel)]="SearchBookingDateFrom">
+                <mat-datepicker-toggle matSuffix [for]="bookingDateFrom"></mat-datepicker-toggle>
+                <mat-datepicker #bookingDateFrom></mat-datepicker>
+            </mat-form-field>
+        </div>
+        
+        <div class="col-xl-3 col-lg-3 col-md-3 col-sm-12 mb-2">
+            <mat-form-field class="example-full-width cp-quick-search-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
+                <mat-label>Booking Date To</mat-label>
+                <input type="text" matInput [matDatepicker]="bookingDateTo" [(ngModel)]="SearchBookingDate">
+                <mat-datepicker-toggle matSuffix [for]="bookingDateTo"></mat-datepicker-toggle>
+                <mat-datepicker #bookingDateTo></mat-datepicker>
+            </mat-form-field>
+        </div>
+
+        <div class="col-xl-3 col-lg-3 col-md-3 col-sm-12 mb-2">
+            <mat-form-field class="example-full-width cp-quick-search-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
+                <mat-label>Pickup Date From</mat-label>
+                <input type="text" matInput [matDatepicker]="fromDate" [(ngModel)]="SearchFromDate">
+                <mat-datepicker-toggle matSuffix [for]="fromDate"></mat-datepicker-toggle>
+                <mat-datepicker #fromDate></mat-datepicker>
+            </mat-form-field>
+        </div>
+        
+        <div class="col-xl-3 col-lg-3 col-md-3 col-sm-12 mb-2">
+            <mat-form-field class="example-full-width cp-quick-search-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
+                <mat-label>Pickup Date To</mat-label>
+                <input type="text" matInput [matDatepicker]="toDate" [(ngModel)]="SearchToDate">
+                <mat-datepicker-toggle matSuffix [for]="toDate"></mat-datepicker-toggle>
+                <mat-datepicker #toDate></mat-datepicker>
+            </mat-form-field>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-xl-3 col-lg-3 col-md-3 col-sm-12 mb-2">
+            <mat-form-field class="example-full-width cp-quick-search-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
+                <mat-label>Location</mat-label>
+                <input type="text" matInput [formControl]="SearchDispatchLocation" [matAutocomplete]="auto11">
+                <mat-autocomplete #auto11="matAutocomplete">
+                    <mat-option *ngFor="let option of filteredDispatchLocationOptions | async" [value]="option.organizationalEntityName">
+                        {{option.organizationalEntityName}}
+                    </mat-option>
+                    </mat-autocomplete>
+            </mat-form-field>
+        </div>
+
+        <div class="col-xl-3 col-lg-3 col-md-3 col-sm-12 mb-2">
+            <mat-form-field class="example-full-width cp-quick-search-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
+                <mat-label>Customer Group</mat-label>
+                <input type="text" matInput [formControl]="SearchCustomerGroup"  [matAutocomplete]="auto"
+                (keydown.backspace)="clearCustomerGroup($event)">
+                <mat-autocomplete #auto="matAutocomplete" (optionSelected)="OnCustomerGroupSelected($event.option.value)">
+                    <mat-option *ngFor="let option of filteredCustomerGroupOptions | async" [value]="option.customerGroup">
+                        {{option.customerGroup}}
+                    </mat-option>
+                </mat-autocomplete>
+            </mat-form-field>
+        </div>
+
+        <div class="col-xl-3 col-lg-3 col-md-3 col-sm-12 mb-2">
+            <mat-form-field class="example-full-width cp-quick-search-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
+                <mat-label>Customer</mat-label>
+                <input type="text" matInput [formControl]="SearchCustomer"  [matAutocomplete]="autoCustomer">
+                <mat-autocomplete #autoCustomer="matAutocomplete">
+                    <mat-option *ngFor="let option of filteredCustomerOptions | async" [value]="option.customerName">
+                        {{option.customerName}}
+                    </mat-option>
+                </mat-autocomplete>
+            </mat-form-field>
+        </div>
+
+        <div class="col-xl-3 col-lg-3 col-md-3 col-sm-12 mb-2">
+            <mat-form-field class="example-full-width cp-quick-search-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
+                <mat-label>MOP</mat-label>
+                <input type="text" matInput [formControl]="SearchMOP" [matAutocomplete]="auto4">
+                <mat-autocomplete #auto4="matAutocomplete">
+                    <mat-option *ngFor="let option of filteredPaymentModeOptions | async"
+                        [value]="option.modeOfPayment">
+                        {{option.modeOfPayment}}
+                    </mat-option>
+                </mat-autocomplete>
+            </mat-form-field>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-xl-3 col-lg-3 col-md-3 col-sm-12 mb-2">
+            <mat-form-field class="example-full-width cp-quick-search-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
+                <mat-label>Booking Status</mat-label>
+                <mat-select [formControl]="SearchBookingStatus">
+                    <mat-option value="Confirmed">Confirmed</mat-option>
+                    <mat-option value="Approved">Approved</mat-option>
+                    <mat-option value="Pending">Pending</mat-option>
+                    <mat-option value="Cancelled">Cancelled</mat-option>
+                </mat-select>
+            </mat-form-field>
+        </div>
+
+        <div class="col-xl-3 col-lg-3 col-md-3 col-sm-12 mb-2">
+            <mat-form-field class="example-full-width cp-quick-search-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
+                <mat-label>DS Verification</mat-label>
+                <mat-select [formControl]="SearchDSVerification">
+                    <mat-option [value]=true>Yes</mat-option>
+                    <mat-option [value]=false>No</mat-option>
+                </mat-select>
+            </mat-form-field>
+        </div>
+
+        <div class="col-xl-3 col-lg-3 col-md-3 col-sm-12 mb-2">
+            <mat-form-field class="example-full-width cp-quick-search-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
+                <mat-label>Good For Bill</mat-label>
+                <mat-select [formControl]="SearchGoodForBill">
+                    <mat-option [value]=true>Yes</mat-option>
+                    <mat-option [value]=false>No</mat-option>
+                </mat-select>
+            </mat-form-field>
+        </div>
+
+        <div class="col-xl-3 col-lg-3 col-md-3 col-sm-12 mb-2">
+            <mat-form-field class="example-full-width cp-quick-search-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
+                <mat-label>DS Bill Status</mat-label>
+                <mat-select [formControl]="SearchBillStatus">
+                    <mat-option [value]=true>Yes</mat-option>
+                    <mat-option [value]=false>No</mat-option>
+                </mat-select>
+            </mat-form-field>
+        </div>
+        
+    </div>
+</ng-template>
