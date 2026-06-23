@@ -1,5 +1,5 @@
 // @ts-nocheck
-import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
+import { Component, ElementRef, OnInit, ViewChild, ChangeDetectorRef } from '@angular/core';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { MatDialog, MatDialogRef } from '@angular/material/dialog';
 import { MatPaginator } from '@angular/material/paginator';
@@ -29,6 +29,8 @@ import { FormDialogCIComponent } from '../cancelInvoice/dialogs/form-dialog/form
 import Swal from 'sweetalert2';
 import { BulkBillsDownloadService } from '../bulkBillsDownload/bulkBillsDownload.service';
 import { BackfillStepDialogComponent } from '../bulkBillsDownload/backfill-step-dialog.component';
+import { ViewBillPdfService } from '../general/view-bill-pdf.service';
+import { resolveViewBillRoute } from '../general/view-bill-route.util';
 
 interface ExistingPdfSummary {
   invoice: string[];
@@ -124,7 +126,9 @@ bookerName: FormControl = new FormControl();
     public dialog: MatDialog,
     public invoiceHomeService: InvoiceHomeService,
     private bulkBillsDownloadService: BulkBillsDownloadService,
+    private viewBillPdfService: ViewBillPdfService,
     private snackBar: MatSnackBar,
+    private cdr: ChangeDetectorRef,
     public router:Router,
     public _generalService: GeneralService,
     public route: Router,
@@ -507,13 +511,11 @@ bookerName: FormControl = new FormControl();
       return;
     }
 
-    this.archivingInvoiceId = row.invoiceID;
     let existingPdfs: ExistingPdfSummary | null = null;
 
     try {
       existingPdfs = await this.loadExistingPdfs(row.invoiceID);
     } catch (err: any) {
-      this.archivingInvoiceId = null;
       Swal.fire({
         title: 'Unable to check existing PDFs',
         text: this.extractPdfGenerationError(err, 'Failed to load archived document records from the database.'),
@@ -522,19 +524,17 @@ bookerName: FormControl = new FormControl();
       return;
     }
 
-    this.archivingInvoiceId = null;
-
     const confirmed = await this.confirmPdfGeneration(row, existingPdfs);
     if (!confirmed) {
       return;
     }
 
     const performedBy = this._generalService.getUserID();
-    this.archivingInvoiceId = row.invoiceID;
+    this.setArchivingInvoice(row.invoiceID);
     const stepErrors: string[] = [];
 
     try {
-      await this.runGeneratePdfsInteractive(row.invoiceID, performedBy, stepErrors);
+      await this.runGeneratePdfsInteractive(row, performedBy, stepErrors);
       if (stepErrors.length) {
         Swal.fire({
           title: 'PDF generation completed with errors',
@@ -557,8 +557,25 @@ bookerName: FormControl = new FormControl();
         icon: 'error'
       });
     } finally {
-      this.archivingInvoiceId = null;
+      this.clearArchivingInvoice();
     }
+  }
+
+  isArchivingInvoice(invoiceId: number | string | null | undefined): boolean {
+    if (this.archivingInvoiceId == null || invoiceId == null) {
+      return false;
+    }
+    return Number(this.archivingInvoiceId) === Number(invoiceId);
+  }
+
+  private setArchivingInvoice(invoiceId: number | string): void {
+    this.archivingInvoiceId = Number(invoiceId) || null;
+    this.cdr.markForCheck();
+  }
+
+  private clearArchivingInvoice(): void {
+    this.archivingInvoiceId = null;
+    this.cdr.markForCheck();
   }
 
   private async confirmPdfGeneration(row: InvoiceHome, existingPdfs: ExistingPdfSummary): Promise<boolean> {
@@ -639,16 +656,13 @@ bookerName: FormControl = new FormControl();
   }
 
   private async runGeneratePdfsInteractive(
-    invoiceId: number,
+    row: InvoiceHome,
     performedBy: number,
     stepErrors: string[]
   ): Promise<void> {
-    await this.generateDocumentStep(
-      'Invoice',
-      () => firstValueFrom(this.bulkBillsDownloadService.generateInvoicePdf(invoiceId, performedBy)),
-      stepErrors
-    );
+    await this.generateInvoicePdfStep(row, performedBy, stepErrors);
 
+    const invoiceId = row.invoiceID;
     const duties = await firstValueFrom(this.bulkBillsDownloadService.getInvoiceDuties(invoiceId));
     const dutyRows = duties || [];
     if (!dutyRows.length) {
@@ -678,6 +692,34 @@ bookerName: FormControl = new FormControl();
         stepErrors
       );
     }
+  }
+
+  private async generateInvoicePdfStep(
+    row: InvoiceHome,
+    performedBy: number,
+    stepErrors: string[]
+  ): Promise<void> {
+    const useViewBillHtml = this.viewBillPdfService.isGeneralBillRoute(row.templateAddress, row.invoiceType);
+    // #region agent log
+    fetch('http://127.0.0.1:7532/ingest/f2c32722-bd0e-4386-883a-e749a4372080',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'ac95ba'},body:JSON.stringify({sessionId:'ac95ba',hypothesisId:'H2',location:'invoiceHome.component.ts:generateInvoicePdfStep',message:'invoice pdf route decision',data:{invoiceId:row?.invoiceID,invoiceType:row?.invoiceType,templateAddress:row?.templateAddress,useViewBillHtml},timestamp:Date.now()})}).catch(()=>{});
+    // #endregion
+
+    await this.generateDocumentStep(
+      'Invoice',
+      async () => {
+        if (!useViewBillHtml) {
+          return firstValueFrom(this.bulkBillsDownloadService.generateInvoicePdf(row.invoiceID, performedBy));
+        }
+
+        return this.viewBillPdfService.archiveGeneralBillFromViewBill(
+          row.invoiceID,
+          performedBy,
+          row.templateAddress,
+          row.invoiceType
+        );
+      },
+      stepErrors
+    );
   }
 
   private async generateDocumentStep(
@@ -796,32 +838,13 @@ viewInvoiceBilling(row) {
 
    ViewBill(item)
   {
-    debugger
-    let baseUrl = this._generalService.FormURL;
-    if(item.invoiceType === 'InvoiceMultyDuty')
-    {
-      const url = this.router.serializeUrl(this.router.createUrlTree(['/jajInvoiceMultiDuties'], { queryParams: {
-      invoiceID:item.invoiceID,
-    } }));
-    window.open(baseUrl + url, '_blank');
-
-    }
-    else if(item.invoiceType === 'InvoiceSingleDuty')
-   {
-     const url = this.router.serializeUrl(this.router.createUrlTree(['/jajSingleDutySingleBillForLocal'], { queryParams: {
-      invoiceID:item.invoiceID,
-      } }));
-      window.open(baseUrl + url, '_blank');
-    
-  } 
-  if(item.invoiceType === 'InvoiceGeneral')
-    {
-      const url = this.router.serializeUrl(this.router.createUrlTree(['/generalBillDetails'], { queryParams: {
-      invoiceID:item.invoiceID,
-    } }));
-    window.open(baseUrl + url, '_blank');
-
-    }   
+    const route = resolveViewBillRoute(item.templateAddress, item.invoiceType);
+    const url = this.router.serializeUrl(this.router.createUrlTree([`/${route}`], {
+      queryParams: {
+        invoiceID: item.invoiceID,
+      }
+    }));
+    window.open(this._generalService.buildAppWindowUrl(url), '_blank');
   }
 
 //   ViewBill(item) {

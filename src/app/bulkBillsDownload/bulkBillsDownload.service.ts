@@ -64,6 +64,18 @@ export class BulkBillsDownloadService {
     return this.httpClient.post(`${this.API_URL}/invoice/${invoiceId}/generate-pdf/${performedBy}`, {});
   }
 
+  generateInvoicePdfFromViewBillHtml(
+    invoiceId: number,
+    performedBy: number,
+    html: string,
+    baseUrl: string
+  ): Observable<any> {
+    return this.httpClient.post(
+      `${this.API_URL}/invoice/${invoiceId}/generate-pdf-from-view-bill-html/${performedBy}`,
+      { html, baseUrl }
+    );
+  }
+
   generateDutySlipPdf(dutySlipId: number, performedBy: number, invoiceId?: number | null): Observable<any> {
     const invoiceQuery = invoiceId ? `?invoiceId=${invoiceId}` : '';
     return this.httpClient.post(`${this.API_URL}/duty-slip/${dutySlipId}/generate-pdf/${performedBy}${invoiceQuery}`, {});

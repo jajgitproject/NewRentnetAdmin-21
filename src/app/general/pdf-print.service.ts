@@ -51,6 +51,18 @@ export class PdfPrintService {
     });
   }
 
+  async buildPdfHtmlFromElement(
+    element: HTMLElement,
+    options?: { baseUrl?: string; iframeImageFallback?: string; liveElement?: HTMLElement }
+  ): Promise<string> {
+    return this.buildPdfHtml(element, options);
+  }
+
+  async generatePdfBlob(html: string, baseUrl?: string): Promise<Blob> {
+    const resolvedBaseUrl = baseUrl ?? this.generalService.BaseURL?.replace(/\/$/, '');
+    return firstValueFrom(this.generatePdf(html, 'invoice.pdf', resolvedBaseUrl));
+  }
+
   private async buildPdfHtml(
     element: HTMLElement,
     options?: { baseUrl?: string; iframeImageFallback?: string; liveElement?: HTMLElement }

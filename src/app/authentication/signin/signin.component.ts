@@ -124,6 +124,30 @@ export class SigninComponent implements OnInit {
 
   }
 
+  private extractLoginErrorMessage(error: any): string {
+    if (!error) {
+      return 'Login failed. Please try again.';
+    }
+    if (typeof error === 'string') {
+      return error;
+    }
+    const status = error?.status;
+    if (status === 0) {
+      return 'Cannot reach the API at https://localhost:44368. Start RententAPI (IIS Express) and accept the localhost certificate, then retry.';
+    }
+    const body = error?.error;
+    if (typeof body === 'string' && body.trim()) {
+      return body;
+    }
+    if (body && typeof body === 'object') {
+      const message = body.Message ?? body.message ?? body.LoginDetails ?? body.loginDetails;
+      if (message) {
+        return String(message);
+      }
+    }
+    return error?.message || 'Login failed. Please try again.';
+  }
+
 
 
   onSubmit() {
@@ -218,7 +242,8 @@ export class SigninComponent implements OnInit {
           this.isSubmitting = false;
         },
         (error) => {
-          this.error = error;
+          this.error = this.extractLoginErrorMessage(error);
+          this.errorMessageToBeShown = this.error;
           this.isSubmitting = false;
         }
       );
