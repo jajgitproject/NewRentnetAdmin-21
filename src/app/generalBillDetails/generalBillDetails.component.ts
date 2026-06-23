@@ -39,7 +39,7 @@ export class GeneralBillDetailsComponent implements OnInit {
     dataSourceForCalculate: any = {
     invoiceTotalAmountAfterGSTInWords: ''
   };
-
+  invoiceLogoUrl: string | null = null;
   constructor(
     public httpClient: HttpClient,
     public dialog: MatDialog,
@@ -56,6 +56,7 @@ export class GeneralBillDetailsComponent implements OnInit {
   contextMenu: MatMenuTrigger;
   contextMenuPosition = { x: '0px', y: '0px' };
   ngOnInit() {
+    this.invoiceLogoUrl = 'assets/images/logoeco1.png';
     this.route.queryParams.subscribe(paramsData =>{
       this.invoiceID   = paramsData.invoiceID;
     });
@@ -69,7 +70,8 @@ export class GeneralBillDetailsComponent implements OnInit {
    (
      data =>   
      {
-       this.dataSource = data;       
+       this.dataSource = data;    
+       console.log("dataSource",this.dataSource);   
        this.dataSourceForCalculate.invoiceTotalAmountAfterGSTInWords = this.convertNumberToWords(this.dataSource.invoiceTotalAmountAfterGST);
      },
      (error: HttpErrorResponse) => { this.dataSource = null;}

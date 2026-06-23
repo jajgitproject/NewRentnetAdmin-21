@@ -13,3 +13,66 @@
     border-color: black !important;
   }
 }
+.custom-table tbody tr {
+    height: 50px;   /* increase row height */
+}
+.custom-table td {
+    padding: 15px;
+    vertical-align: middle;
+}
+
+.qr-logo-area {
+    width: 28%;
+    text-align: right;
+}
+.qr-logo-area .qr-code-image,
+.qr-logo-area img[src^="data:image"] {
+    width: 30mm;
+    height: 30mm;
+    max-width: 30mm;
+    max-height: 30mm;
+    object-fit: contain;
+    display: block;
+    margin-left: auto;
+}
+
+/* ================= LOGO + QR ================= */
+.invoice-logo {
+    width: 32mm;
+    height: auto;
+    max-width: 32mm;
+    max-height: 36mm;
+    object-fit: contain;
+    display: block;
+    margin-left: auto;
+    margin-bottom: 8px;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+}
+
+.qr-logo-area .qr-code-image,
+.qr-logo-area img[src^="data:image"] {
+    width: 30mm;
+    height: 30mm;
+    max-width: 30mm;
+    max-height: 30mm;
+    object-fit: contain;
+    display: block;
+    margin-left: auto;
+}
+
+.no-image-box {
+    width: 30mm;
+    height: 30mm;
+    border: 1px solid #ccc;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    color: #777;
+}
+ .invoice-logo {
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+        color-adjust: exact !important;
+    }
