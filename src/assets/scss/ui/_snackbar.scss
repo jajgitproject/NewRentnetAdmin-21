@@ -9,8 +9,13 @@
 }
 
 .mat-mdc-snack-bar-container.snackbar-warning .mdc-snackbar__surface {
-  background-color: rgba(255, 230, 0, 0.8);
-  color: #ffffff;
+  background-color: #ffc107;
+  color: #1a1a1a;
+}
+
+.mat-mdc-snack-bar-container.snackbar-warning .mdc-snackbar__label,
+.mat-mdc-snack-bar-container.snackbar-warning .mat-mdc-snack-bar-label {
+  color: #1a1a1a;
 }
 
 .mat-mdc-snack-bar-container.snackbar-danger .mdc-snackbar__surface {

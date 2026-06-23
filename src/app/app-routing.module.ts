@@ -2886,6 +2886,14 @@ const routes: Routes = [
       },
 
       {
+        path: 'invoiceExport',
+        loadChildren: () =>
+          import('./invoiceExport/invoiceExport.module').then(
+            (m) => m.InvoiceExportModule
+          )
+      },
+
+      {
         path: 'supplierCityMapping',
         loadChildren: () =>
           import('./supplierCityMapping/supplierCityMapping.module').then(
