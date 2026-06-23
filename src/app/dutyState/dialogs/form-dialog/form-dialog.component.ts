@@ -12,6 +12,7 @@ import { StatesDropDown } from 'src/app/organizationalEntity/stateDropDown.model
 import { Observable } from 'rxjs';
 import { map, startWith } from 'rxjs/operators';
 import { MatSnackBar } from '@angular/material/snack-bar';
+import Swal from 'sweetalert2';
 
 @Component({
   standalone: false,
@@ -38,6 +39,10 @@ export class FormDialogComponent
   dutySlipID: number;
   tableRecord: any;
   verifyDutyStatusAndCacellationStatus: any;
+  verifyDuty: boolean = false;
+  goodForBilling: boolean = false;
+  invoiceGenerated: boolean = false;
+  dutyStateBlockedMessage = 'Cannot change Eco Duty State after invoice has been issued for this duty.';
   isSaveAllowed: boolean = false;
   constructor(
   public dialogRef: MatDialogRef<FormDialogComponent>, 
@@ -50,6 +55,9 @@ export class FormDialogComponent
         // Set the defaults
         this.action = data.action;
         this.verifyDutyStatusAndCacellationStatus = data.verifyDutyStatusAndCacellationStatus;
+        this.verifyDuty = !!data.verifyDuty;
+        this.goodForBilling = !!data.goodForBilling;
+        this.invoiceGenerated = !!data.invoiceGenerated;
         if (this.action === 'edit') 
         {
           this.dialogTitle =' Duty State'; 
@@ -63,7 +71,11 @@ export class FormDialogComponent
         }
         this.advanceTableForm = this.createContactForm();
         this.dutySlipID=data.dutySlipID;
-        if (this.verifyDutyStatusAndCacellationStatus !== 'Changes allow') 
+        if (this.invoiceGenerated)
+        {
+          this.isSaveAllowed = true;
+        }
+        else if (this.verifyDutyStatusAndCacellationStatus !== 'Changes allow') 
         {
           this.isSaveAllowed = true;
         } 
@@ -197,14 +209,26 @@ getEmployee()
         'center'
       );  
       this.saveDisabled=true;
-      this.dialogRef.close();
+      this.closeDialogAfterSave();
   },
     error =>
     {
-       this._generalService.sendUpdate('DutyStateAll:DutyStateView:Failure');//To Send Updates 
-       this.saveDisabled=true; 
+       this._generalService.sendUpdate('DutyStateAll:DutyStateView:Failure');
+       this.saveDisabled=true;
+       this.showNotification(
+        'snackbar-danger',
+        error?.error?.message || 'Operation Failed.....!!!',
+        'bottom',
+        'center'
+      );
     }
   )
+  }
+
+  private closeDialogAfterSave(): void {
+    this.dialogRef.close({
+      resetBillingVerification: this.showBillingResetWarning
+    });
   }
 
   showNotification(colorName, text, placementFrom, placementAlign) {
@@ -227,27 +251,66 @@ getEmployee()
      
        this._generalService.sendUpdate('DutyStateUpdate:DutyStateView:Success');//To Send Updates  
        this.saveDisabled=true;
-       this.dialogRef.close();
+       this.closeDialogAfterSave();
     
   },
     error =>
     {
-       this._generalService.sendUpdate('DutyStateAll:DutyStateView:Failure');//To Send Updates  
+       this._generalService.sendUpdate('DutyStateAll:DutyStateView:Failure');
        this.saveDisabled=true;
+       this.showNotification(
+        'snackbar-danger',
+        error?.error?.message || 'Operation Failed.....!!!',
+        'bottom',
+        'center'
+      );
     }
   )
   }
-  public confirmAdd(): void 
-  {
-    this.saveDisabled=false;
-       if(this.action=="edit")
-       {
-          this.Put();
-       }
-       else
-       {
-          this.Post();
-       }
+  get showBillingResetWarning(): boolean {
+    return this.verifyDuty || this.goodForBilling;
+  }
+
+  get billingResetMessage(): string {
+    const labels: string[] = [];
+    if (this.verifyDuty) {
+      labels.push('Verify Duty');
+    }
+    if (this.goodForBilling) {
+      labels.push('Good For Billing');
+    }
+    return `${labels.join(' / ')} will be reset based on this action.`;
+  }
+
+  private saveDutyState(): void {
+    this.saveDisabled = false;
+    if (this.action === 'edit') {
+      this.Put();
+    } else {
+      this.Post();
+    }
+  }
+
+  public confirmAdd(): void {
+    if (this.invoiceGenerated) {
+      return;
+    }
+    if (this.showBillingResetWarning) {
+      Swal.fire({
+        title: 'Confirm',
+        text: this.billingResetMessage,
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonText: 'Continue',
+        cancelButtonText: 'Cancel'
+      }).then((result) => {
+        if (result.isConfirmed) {
+          this.saveDutyState();
+        }
+      });
+      return;
+    }
+    this.saveDutyState();
   }
 }
 

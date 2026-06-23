@@ -163,6 +163,7 @@ export class ClossingScreenComponent implements OnInit {
  advanceTableDE:DutyExpenseModel | null;
  advanceTableDutyState:DutyState | null;
  showHideDutyState:boolean=false;
+ dutyStateInvoiceGenerated: boolean = false;
 
   pickUpTime: Date;
   dropOffTime: Date;
@@ -758,6 +759,7 @@ public GenerateBill()
         'bottom',
         'center'
       );
+      this.dutyStateInvoiceGenerated = true;
     },
     error =>
     {
@@ -2941,23 +2943,123 @@ DutyGSTPercentageLoadData()
 }
 
 //======= Duty State=======//
+getDutyStateBillingFlags(): { verifyDuty: boolean; goodForBilling: boolean } {
+  const formVerify = this.advanceTableForm?.get('verifyDuty')?.value;
+  const formGfb = this.advanceTableForm?.get('goodForBilling')?.value;
+  const billing = this.advanceTableBilling?.[0];
+  const verifyDuty = formVerify === true || formVerify === false
+    ? !!formVerify
+    : !!billing?.verifyDuty;
+  const goodForBilling = formGfb === true || formGfb === false
+    ? !!formGfb
+    : !!billing?.goodForBilling;
+  return { verifyDuty, goodForBilling };
+}
+
 openDutyState()
 {
-  const dialogRef = this.dialog.open(DutyStateFormDialogComponent, 
-    {
-      data: 
-      {
-        dutySlipID:this.DutySlipID,
-        record:this.advanceTableDutyState
+  const { verifyDuty, goodForBilling } = this.getDutyStateBillingFlags();
+  this.dutyStateService.hasIssuedInvoice(this.DutySlipID).subscribe((invoiceGenerated) => {
+    if (invoiceGenerated) {
+      this.showNotification(
+        'snackbar-warning',
+        'Cannot change Eco Duty State after invoice has been issued for this duty.',
+        'bottom',
+        'center'
+      );
+      return;
+    }
+    this.openDutyStateDialog(verifyDuty, goodForBilling, false);
+  });
+}
+
+private openDutyStateDialog(verifyDuty: boolean, goodForBilling: boolean, invoiceGenerated: boolean): void {
+  this.dutyStateService.getTableData(this.DutySlipID).subscribe(
+    (data) => {
+      if (data !== null) {
+        this.showHideDutyState = true;
       }
-    });
-    dialogRef.afterClosed().subscribe((res: any) => {
-       this.loadDutyStateData();
-  });  
+      this.advanceTableDutyState = this.dutyStateService.sortDutyStateRecordsNewestFirst(data);
+      const latest = this.dutyStateService.getLatestDutyStateRecord(data);
+      const dialogRef = this.dialog.open(DutyStateFormDialogComponent, 
+        {
+          data: 
+          {
+            dutySlipID: this.DutySlipID,
+            record: this.advanceTableDutyState,
+            advanceTable: latest,
+            action: latest?.dutyStateID ? 'edit' : 'add',
+            verifyDuty,
+            goodForBilling,
+            invoiceGenerated,
+            verifyDutyStatusAndCacellationStatus: 'Changes allow'
+          }
+        });
+      dialogRef.afterClosed().subscribe((res: any) => {
+        if (res?.resetBillingVerification) {
+          this.resetBillingVerificationAfterEcoStateChange();
+        } else {
+          this.loadDutyStateData();
+        }
+      });
+    },
+    () => {
+      const dialogRef = this.dialog.open(DutyStateFormDialogComponent, 
+        {
+          data: 
+          {
+            dutySlipID: this.DutySlipID,
+            record: null,
+            advanceTable: null,
+            action: 'add',
+            verifyDuty,
+            goodForBilling,
+            invoiceGenerated,
+            verifyDutyStatusAndCacellationStatus: 'Changes allow'
+          }
+        });
+      dialogRef.afterClosed().subscribe((res: any) => {
+        if (res?.resetBillingVerification) {
+          this.resetBillingVerificationAfterEcoStateChange();
+        } else {
+          this.loadDutyStateData();
+        }
+      });
+    }
+  );
+}
+
+resetBillingVerificationAfterEcoStateChange(): void {
+  if (!this.advanceTableBH) {
+    this.advanceTableBH = {} as BillingHistory;
+  }
+  this.advanceTableForm.patchValue({
+    actionTaken: 'Verify Duty',
+    actionDetails: 'Unchecked',
+    verifyDuty: false,
+    goodForBilling: false
+  });
+  this.advanceTableBH.verifyDuty = false;
+  this.advanceTableBH.goodForBilling = false;
+  this.advanceTableBH.actionTaken = 'Verify Duty';
+  this.advanceTableBH.actionDetails = 'Unchecked';
+  this.SaveDataInBillingHistory();
+  this.showNotification(
+    'snackbar-warning',
+    'Eco State changed — Verify Duty and Good for Billing have been reset. Please Calculate Bill again.',
+    'bottom',
+    'center'
+  );
+  this.loadDutyStateData();
 }
 
  loadDutyStateData() 
    {
+      this.dutyStateService.hasIssuedInvoice(this.DutySlipID).subscribe(
+        (invoiceGenerated) => {
+          this.dutyStateInvoiceGenerated = invoiceGenerated;
+        }
+      );
       this.dutyStateService.getTableData(this.DutySlipID).subscribe
       (
         data =>   
@@ -2965,7 +3067,7 @@ openDutyState()
           if(data !== null){
             this.showHideDutyState = true;
           }
-          this.advanceTableDutyState = data;         
+          this.advanceTableDutyState = this.dutyStateService.sortDutyStateRecordsNewestFirst(data);         
         },
         (error: HttpErrorResponse) => { this.advanceTableDutyState = null;}
       );

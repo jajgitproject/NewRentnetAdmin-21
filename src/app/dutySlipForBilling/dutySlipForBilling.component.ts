@@ -149,9 +149,6 @@ export class DutySlipForBillingComponent implements OnInit, AfterViewInit {
 
   ngAfterViewInit(): void {
     this.suppressInitialDutyStatusEmit = false;
-    // #region agent log
-    fetch('http://127.0.0.1:7830/ingest/e71207c4-423e-4a42-a900-5bc43349cfbe',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'2871b3'},body:JSON.stringify({sessionId:'2871b3',runId:'post-fix',hypothesisId:'H6',location:'dutySlipForBilling.component.ts:ngAfterViewInit',message:'initial duty status emit suppression disabled',data:{dutySlipID:this.DutySlipID},timestamp:Date.now()})}).catch(()=>{});
-    // #endregion
   }
 
   submit()
@@ -1607,9 +1604,32 @@ setVerifyDuty(value: boolean, details: string) {
   });
 
   this.advanceTableBH.verifyDuty = value;
+  this.advanceTableBH.goodForBilling = false;
   this.advanceTableBH.actionTaken = this.advanceTableForm.value.actionTaken;
   this.advanceTableBH.actionDetails = this.advanceTableForm.value.actionDetails;
   this.SaveDataInBillingHistory();
+}
+
+public resetVerificationForEcoStateChange(): void {
+  const verifyDuty = !!this.advanceTableForm?.get('verifyDuty')?.value;
+  const goodForBilling = !!this.advanceTableForm?.get('goodForBilling')?.value;
+  if (!verifyDuty && !goodForBilling) {
+    return;
+  }
+  if (!this.advanceTableBH) {
+    this.advanceTableBH = {} as BillingHistory;
+  }
+  this.setVerifyDuty(false, 'Unchecked');
+  if (this.advanceTableClosingOne?.closingDutySlipForBillingModel) {
+    this.advanceTableClosingOne.closingDutySlipForBillingModel.verifyDuty = false;
+    this.advanceTableClosingOne.closingDutySlipForBillingModel.goodForBilling = false;
+  }
+  this.showNotification(
+    'snackbar-warning',
+    'Eco State changed — Verify Duty and Good for Billing have been reset. Please Calculate Bill again.',
+    'bottom',
+    'center'
+  );
 }
 
 

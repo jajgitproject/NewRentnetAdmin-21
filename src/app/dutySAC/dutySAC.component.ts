@@ -152,9 +152,6 @@ export class DutySACComponent implements OnInit {
 
   public loadData() {
     const resolvedDutySlipID = this.dutySlipID || this.DutySlipID;
-    // #region agent log
-    fetch('http://127.0.0.1:7532/ingest/f2c32722-bd0e-4386-883a-e749a4372080',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'b9234c'},body:JSON.stringify({sessionId:'b9234c',runId:'pre-fix',hypothesisId:'H16',location:'dutySAC.component.ts:loadData:start',message:'Loading Duty SAC by dutySlipID',data:{inputDutySlipID:this.dutySlipID,routeDutySlipID:this.DutySlipID,resolvedDutySlipID},timestamp:Date.now()})}).catch(()=>{});
-    // #endregion
     if (!resolvedDutySlipID) {
       this.advanceTableSAC = null;
       return;
@@ -329,9 +326,6 @@ export class DutySACComponent implements OnInit {
   openDutySAC(event?: MouseEvent) {
     event?.preventDefault();
     event?.stopPropagation();
-    // #region agent log
-    fetch('http://127.0.0.1:7532/ingest/f2c32722-bd0e-4386-883a-e749a4372080',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'b9234c'},body:JSON.stringify({sessionId:'b9234c',runId:'pre-fix',hypothesisId:'H15',location:'dutySAC.component.ts:openDutySAC:start',message:'Duty SAC Add More clicked',data:{dutySlipID:this.DutySlipID,eventType:event?.type,targetTag:(event?.target as HTMLElement | null)?.tagName || null,isArray:Array.isArray(this.advanceTableSAC),length:Array.isArray(this.advanceTableSAC)?this.advanceTableSAC.length:null},timestamp:Date.now()})}).catch(()=>{});
-    // #endregion
     const resolvedDutySlipID = this.dutySlipID || this.DutySlipID;
     const dialogRef = this.dialog.open(FormDialogComponent, {
       data: {
@@ -341,9 +335,6 @@ export class DutySACComponent implements OnInit {
         verifyDutyStatusAndCacellationStatus: this.verifyDutyStatusAndCacellationStatus
       }
     });
-    // #region agent log
-    fetch('http://127.0.0.1:7532/ingest/f2c32722-bd0e-4386-883a-e749a4372080',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'b9234c'},body:JSON.stringify({sessionId:'b9234c',runId:'pre-fix',hypothesisId:'H15',location:'dutySAC.component.ts:openDutySAC:dialog',message:'Duty SAC Add More dialog opened',data:{dutySlipID:this.DutySlipID},timestamp:Date.now()})}).catch(()=>{});
-    // #endregion
     dialogRef.afterClosed().subscribe((res: any) => {
       this.loadData();
       this.loadDataForclosing();
