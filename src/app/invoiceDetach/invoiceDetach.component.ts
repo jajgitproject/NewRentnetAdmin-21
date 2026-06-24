@@ -338,7 +338,7 @@ export class InvoiceDetachComponent implements OnInit {
     this.SearchBillingStatus = null;
     this.SearchType = '';
     this.PageNumber = 0;
-    this.loadData();
+    //this.loadData();
   }
 
   public SearchData() 
@@ -566,10 +566,11 @@ export class InvoiceDetachComponent implements OnInit {
           }).then(result => {
             if (result.isConfirmed) 
             {
-              const url = this.router.serializeUrl(
-                this.router.createUrlTree(['/invoiceHome'])
-              );
-              window.open(this._generalService.FormURL + url, '_blank');
+              window.location.reload();
+              // const url = this.router.serializeUrl(
+              //   this.router.createUrlTree(['/invoiceHome'])
+              // );
+              // window.open(this._generalService.FormURL + url, '_blank');
             }
           });
       this.refresh();

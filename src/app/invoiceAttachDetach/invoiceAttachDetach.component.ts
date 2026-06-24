@@ -137,25 +137,22 @@ export class InvoiceAttachDetachComponent implements OnInit {
   @ViewChild(MatMenuTrigger)
   contextMenu: MatMenuTrigger;
   contextMenuPosition = { x: '0px', y: '0px' };
-  ngOnInit() 
-  {
-    this.route.queryParams.subscribe(paramsData =>{
-      this.InvoiceNumberWithPrefix = paramsData.invoiceNumberWithPrefix;
-      this.InvoiceID = paramsData.invoiceID;
-    });
+ ngOnInit() {
+  this.route.queryParams.subscribe(paramsData => {
+    this.InvoiceNumberWithPrefix = paramsData.invoiceNumberWithPrefix;
+    this.InvoiceID = paramsData.invoiceID;
 
-    if(this.InvoiceNumberWithPrefix === null || this.InvoiceNumberWithPrefix === undefined)
-    {
+    if (!this.InvoiceNumberWithPrefix) {
       this.loadData();
-    }
-    else
-    {
+    } else {
       this.loadDataForEdit();
     }
-    this.InitCustomer();
-    this.InitBranch();
-    this.InitPackageTypes();
-  }
+  });
+
+  this.InitCustomer();
+  this.InitBranch();
+  this.InitPackageTypes();
+}
 
   advanceTableForm:FormGroup = this.fb.group({
         invoiceID:[],
@@ -348,7 +345,7 @@ export class InvoiceAttachDetachComponent implements OnInit {
     this.SearchGoodForBilling = null;
     this.SearchType = '';
     this.PageNumber = 0;
-    this.loadData();
+    //this.loadData();
   }
 
   public SearchData() 
@@ -603,10 +600,11 @@ export class InvoiceAttachDetachComponent implements OnInit {
           }).then(result => {
             if (result.isConfirmed) 
             {
-              const url = this.router.serializeUrl(
-                this.router.createUrlTree(['/invoiceHome'])
-              );
-              window.open(this._generalService.FormURL + url, '_blank');
+              window.location.reload();
+              // const url = this.router.serializeUrl(
+              //   this.router.createUrlTree(['/invoiceHome'])
+              // );
+              // window.open(this._generalService.FormURL + url, '_blank');
             }
           });
       this.refresh();
@@ -644,6 +642,8 @@ export class InvoiceAttachDetachComponent implements OnInit {
     {
       //const dutyList = response.listofduties ? response.listofduties.join(", ") : "";
       const dutyList = response.result.replace("Success:", "").split(",").map(item => item.split("#")[1]).join(", ");
+      const invoiceNo = response.result.replace("Success:", "").split(",").map(item => item.split("#")[0]).join(", ");
+      console.log('Duty List:', dutyList,invoiceNo); // Log the duty list for debugging
       Swal.fire({
           title: `Invoice Single Duty Created with Duties: ${dutyList}...!!!`,
           icon: 'success',
@@ -652,12 +652,21 @@ export class InvoiceAttachDetachComponent implements OnInit {
             if (result.isConfirmed) 
             {
               const url = this.router.serializeUrl(
-                this.router.createUrlTree(['/invoiceHome'])
-              );
-              window.open(this._generalService.FormURL + url, '_blank');
+      this.router.createUrlTree(
+        ['/invoiceAttachDetach'],
+        {
+          queryParams: {
+            invoiceNumberWithPrefix: dutyList,
+            invoiceID: invoiceNo
+          }
+        }
+      )
+    );
+
+    window.location.href = this._generalService.FormURL + url;
             }
           });
-      this.refresh();
+     // this.refresh();
     },
     error =>
     {
@@ -690,6 +699,8 @@ export class InvoiceAttachDetachComponent implements OnInit {
     response => 
     { 
       const dutyList = response.result.replace("Success:", "").split(",").map(item => item.split("#")[1]).join(", ");
+      const invoiceNo = response.result.replace("Success:", "").split(",").map(item => item.split("#")[0]).join(", ");
+      console.log('Duty List:', dutyList,invoiceNo); // Log the duty list for debugging
       Swal.fire({
           title: `Invoice Multy Duty Created with Duties: ${dutyList}...!!!`,
           icon: 'success',
@@ -697,13 +708,22 @@ export class InvoiceAttachDetachComponent implements OnInit {
           }).then(result => {
             if (result.isConfirmed) 
             {
-              const url = this.router.serializeUrl(
-                this.router.createUrlTree(['/invoiceHome'])
-              );
-              window.open(this._generalService.FormURL + url, '_blank');
+             const url = this.router.serializeUrl(
+      this.router.createUrlTree(
+        ['/invoiceAttachDetach'],
+        {
+          queryParams: {
+            invoiceNumberWithPrefix: dutyList,
+            invoiceID: invoiceNo
+          }
+        }
+      )
+    );
+
+    window.location.href = this._generalService.FormURL + url;
             }
           });
-      this.refresh();
+      //this.refresh();
     },
     error =>
     {

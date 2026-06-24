@@ -107,11 +107,11 @@
           <td>{{duty.package}}</td>
           <td>{{duty.baseRate}}</td>
           <td>{{duty.totalKMWithAddtionalKM}}</td>
-          <td>{{duty.totalHoursWithAddtionalHours / 60}}</td>
+          <td>{{duty.totalHoursWithAddtionalHours / 60 | number:'1.2-2'}}</td>
           <td>{{duty.extraKMs}}</td>
           <td>{{duty.extraKMRate}}</td>
           <td>{{duty.extraKMAmount}}</td>
-          <td>{{duty.extraMinutes / 60}}</td>
+          <td>{{duty.extraMinutes / 60 | number:'1.2-2'}}</td>
           <td>{{duty.extraHRRate}}</td>
           <td>{{duty.extraMinutesAmount}}</td>
           <td>{{duty.tollParkingAmount}}</td>
