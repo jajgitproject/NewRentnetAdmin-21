@@ -162,14 +162,14 @@
     <tr>
        <td>SAC : {{ dataSource?.hsn }}</td>
     </tr>
-   <tr *ngIf="dataSource?.cgstPercentage!=0">
-       <td class="text-right">CGST &nbsp;&nbsp;&nbsp; <span *ngIf="dataSource?.cgstPercentage!=0"> @ {{dataSource?.cgstPercentage}}%</span> &nbsp;&nbsp;&nbsp; <span *ngIf="dataSource?.cgstAmount!=0">{{dataSource?.cgstAmount}}</span></td>
+   <tr>
+       <td class="text-right">CGST &nbsp;&nbsp;&nbsp; @ {{ dataSource?.cgstPercentage ?? 0 }}% &nbsp;&nbsp;&nbsp; {{ dataSource?.cgstAmount ?? 0 }}</td>
     </tr>
-    <tr *ngIf="dataSource?.sgstPercentage!=0">
-      <td class="text-right">SGST &nbsp;&nbsp;&nbsp; <span  *ngIf="dataSource?.sgstPercentage!=0">@ {{dataSource?.sgstPercentage}}% </span> &nbsp;&nbsp;&nbsp; <span *ngIf="dataSource?.sgstAmount!=0">{{dataSource?.sgstAmount}}</span></td>
+    <tr>
+      <td class="text-right">SGST &nbsp;&nbsp;&nbsp; @ {{ dataSource?.sgstPercentage ?? 0 }}% &nbsp;&nbsp;&nbsp; {{ dataSource?.sgstAmount ?? 0 }}</td>
     </tr>
-    <tr *ngIf="dataSource?.igstPercentage!=0">
-      <td class="text-right">IGST  &nbsp;&nbsp;&nbsp;<span  *ngIf="dataSource?.igstPercentage!=0">@ {{dataSource?.igstPercentage}}% </span> &nbsp;&nbsp;&nbsp;  <span *ngIf="dataSource?.igstAmount!=0">{{dataSource?.igstAmount}}</span></td>
+    <tr>
+      <td class="text-right">IGST &nbsp;&nbsp;&nbsp; @ {{ dataSource?.igstPercentage ?? 0 }}% &nbsp;&nbsp;&nbsp; {{ dataSource?.igstAmount ?? 0 }}</td>
     </tr>
   </table>
 
