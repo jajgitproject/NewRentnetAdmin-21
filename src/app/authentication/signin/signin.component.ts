@@ -13,8 +13,7 @@ import { MatDialog } from '@angular/material/dialog';
 import { FormDialogComponent } from 'src/app/validateOTP/dialogs/form-dialog/form-dialog.component';
 
 import { ExpirationDateService } from 'src/app/shared/expirationDate.service';
-// Location-based login disabled for HTTP/VPN (http://10.0.6.8). Re-enable GeolocationService when HTTPS is available.
-// import { GeolocationService, LoginLocationPayload } from 'src/app/core/service/geolocation.service';
+// Login geolocation disabled (EmployeeLoginSessionSettings.RequireLoginLocation = false on API).
 
 @Component({
 

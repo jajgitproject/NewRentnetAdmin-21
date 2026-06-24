@@ -30,9 +30,10 @@
                   <div class="mis-tabs">
                     <button mat-button type="button" [color]="activeTab === 'summary' ? 'primary' : undefined" (click)="setTab('summary')">Summary</button>
                     <button mat-button type="button" [color]="activeTab === 'sessions' ? 'primary' : undefined" (click)="setTab('sessions')">Sessions</button>
-                    <button mat-button type="button" [color]="activeTab === 'overlaps' ? 'primary' : undefined" (click)="setTab('overlaps')">Overlaps</button>
+                    <button mat-button type="button" [color]="activeTab === 'daily' ? 'primary' : undefined" (click)="setTab('daily')">Daily Detail</button>
                   </div>
                   <div class="mis-actions">
+                    <button mat-raised-button color="accent" type="button" [disabled]="loading || exporting || !hasData" (click)="exportExcel()">Export Excel</button>
                     <button mat-raised-button color="primary" type="button" (click)="search()">Search</button>
                     <button mat-mini-fab color="primary" type="button" (click)="refresh()" title="Reset filters">
                       <mat-icon class="col-white">refresh</mat-icon>
@@ -59,14 +60,45 @@
                   </div>
                   <div class="col-xl-2 col-lg-3 col-md-4 col-sm-6">
                     <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
-                      <mat-label>Employee ID</mat-label>
-                      <input matInput [(ngModel)]="employeeId" placeholder="All" />
+                      <mat-label>Employee Name</mat-label>
+                      <input matInput [formControl]="employeeNameCtrl" [matAutocomplete]="nameAuto" placeholder="All" (input)="onNameInput()" />
+                      <mat-autocomplete #nameAuto="matAutocomplete" (optionSelected)="onNameSelected($event.option.value)">
+                        <mat-option *ngFor="let option of filteredNameOptions | async" [value]="option">
+                          {{ fullName(option) }}
+                        </mat-option>
+                      </mat-autocomplete>
                     </mat-form-field>
                   </div>
-                  <div class="col-xl-2 col-lg-3 col-md-4 col-sm-6" *ngIf="activeTab === 'summary'">
+                  <div class="col-xl-2 col-lg-3 col-md-4 col-sm-6">
                     <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
-                      <mat-label>Branch ID</mat-label>
-                      <input matInput [(ngModel)]="branchId" placeholder="All" />
+                      <mat-label>Employee Mobile</mat-label>
+                      <input matInput [formControl]="employeeMobileCtrl" [matAutocomplete]="mobileAuto" placeholder="All" (input)="onMobileInput()" />
+                      <mat-autocomplete #mobileAuto="matAutocomplete" (optionSelected)="onMobileSelected($event.option.value)">
+                        <mat-option *ngFor="let option of filteredMobileOptions | async" [value]="option">
+                          {{ getMobile(option) }} — {{ fullName(option) }}
+                        </mat-option>
+                      </mat-autocomplete>
+                    </mat-form-field>
+                  </div>
+                  <div class="col-xl-2 col-lg-3 col-md-4 col-sm-6">
+                    <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                      <mat-label>Employee Location</mat-label>
+                      <input matInput [formControl]="employeeLocationCtrl" [matAutocomplete]="locationAuto" placeholder="All" (input)="onLocationInput()" />
+                      <mat-autocomplete #locationAuto="matAutocomplete" (optionSelected)="onLocationSelected($event.option.value)">
+                        <mat-option *ngFor="let option of filteredLocationOptions | async" [value]="option">
+                          {{ getLocationName(option) }}
+                        </mat-option>
+                      </mat-autocomplete>
+                    </mat-form-field>
+                  </div>
+                  <div class="col-xl-2 col-lg-3 col-md-4 col-sm-6">
+                    <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                      <mat-label>Status</mat-label>
+                      <mat-select [(ngModel)]="loginStatusFilter">
+                        <mat-option value="all">All</mat-option>
+                        <mat-option value="loggedin">Logged In</mat-option>
+                        <mat-option value="offline">Offline</mat-option>
+                      </mat-select>
                     </mat-form-field>
                   </div>
                   <div class="col-xl-2 col-lg-3 col-md-4 col-sm-6" *ngIf="activeTab === 'summary'">
@@ -83,12 +115,16 @@
                 <div class="mis-hint" *ngIf="dateRangeLabel">
                   <small class="text-muted">Date range: {{ dateRangeLabel }} — All times shown in IST (UTC+5:30)</small>
                 </div>
+                <div class="mis-hint" *ngIf="archiveHint">
+                  <small class="text-muted">{{ archiveHint }}</small>
+                </div>
               </div>
 
-              <mat-progress-bar *ngIf="loading" mode="indeterminate"></mat-progress-bar>
+              <mat-progress-bar *ngIf="loading || exporting" mode="indeterminate"></mat-progress-bar>
 
               <div *ngIf="!loading && !hasData; else dataBlock" class="alert alert-primary mis-empty-state">
-                No Records Found
+                <span *ngIf="!hasSearched">Select filters and click Search to load data.</span>
+                <span *ngIf="hasSearched">No Records Found</span>
                 <span *ngIf="loadError"> — {{ loadError }}</span>
               </div>
 
@@ -97,13 +133,14 @@
                   <div *ngIf="activeTab === 'summary'">
                     <mat-table [dataSource]="summaryRows" class="mat-cell floating-header-table w-100">
                       <ng-container matColumnDef="employeeName"><mat-header-cell *matHeaderCellDef>Employee</mat-header-cell><mat-cell *matCellDef="let row">{{ row.EmployeeName || row.employeeName }}</mat-cell></ng-container>
+                      <ng-container matColumnDef="employeeLocation"><mat-header-cell *matHeaderCellDef>Location</mat-header-cell><mat-cell *matCellDef="let row">{{ row.EmployeeLocation || row.employeeLocation || '—' }}</mat-cell></ng-container>
                       <ng-container matColumnDef="periodKey"><mat-header-cell *matHeaderCellDef>Period (IST)</mat-header-cell><mat-cell *matCellDef="let row">{{ row.PeriodKey || row.periodKey }}</mat-cell></ng-container>
                       <ng-container matColumnDef="sessionCount"><mat-header-cell *matHeaderCellDef>Sessions</mat-header-cell><mat-cell *matCellDef="let row">{{ row.SessionCount || row.sessionCount }}</mat-cell></ng-container>
                       <ng-container matColumnDef="grossMinutes"><mat-header-cell *matHeaderCellDef>Gross Min</mat-header-cell><mat-cell *matCellDef="let row">{{ row.GrossMinutes || row.grossMinutes }}</mat-cell></ng-container>
-                      <ng-container matColumnDef="overlapMinutes"><mat-header-cell *matHeaderCellDef>Overlap Min</mat-header-cell><mat-cell *matCellDef="let row">{{ row.OverlapMinutes || row.overlapMinutes }}</mat-cell></ng-container>
                       <ng-container matColumnDef="inactivityMinutesDeducted"><mat-header-cell *matHeaderCellDef>Inactive Deducted</mat-header-cell><mat-cell *matCellDef="let row">{{ formatMinutes(row.InactivityMinutesDeducted ?? row.inactivityMinutesDeducted) }}</mat-cell></ng-container>
                       <ng-container matColumnDef="netMinutes"><mat-header-cell *matHeaderCellDef>Net Min</mat-header-cell><mat-cell *matCellDef="let row">{{ row.NetMinutes || row.netMinutes }}</mat-cell></ng-container>
                       <ng-container matColumnDef="netHours"><mat-header-cell *matHeaderCellDef>Net Hours</mat-header-cell><mat-cell *matCellDef="let row">{{ row.NetHours || row.netHours }}</mat-cell></ng-container>
+                      <ng-container matColumnDef="status"><mat-header-cell *matHeaderCellDef>Status</mat-header-cell><mat-cell *matCellDef="let row">{{ formatStatus(row) }}</mat-cell></ng-container>
                       <mat-header-row *matHeaderRowDef="summaryColumns"></mat-header-row>
                       <mat-row *matRowDef="let row; columns: summaryColumns"></mat-row>
                     </mat-table>
@@ -112,30 +149,33 @@
                   <div *ngIf="activeTab === 'sessions'">
                     <mat-table [dataSource]="sessionRows" class="mat-cell floating-header-table w-100">
                       <ng-container matColumnDef="employeeName"><mat-header-cell *matHeaderCellDef>Employee</mat-header-cell><mat-cell *matCellDef="let row">{{ row.EmployeeName || row.employeeName }}</mat-cell></ng-container>
+                      <ng-container matColumnDef="employeeLocation"><mat-header-cell *matHeaderCellDef>Location</mat-header-cell><mat-cell *matCellDef="let row">{{ row.EmployeeLocation || row.employeeLocation || '—' }}</mat-cell></ng-container>
                       <ng-container matColumnDef="loginAt"><mat-header-cell *matHeaderCellDef>Login (IST)</mat-header-cell><mat-cell *matCellDef="let row">{{ formatDate(row.LoginAt || row.loginAt) }}</mat-cell></ng-container>
                       <ng-container matColumnDef="actualEndAt"><mat-header-cell *matHeaderCellDef>Actual End (IST)</mat-header-cell><mat-cell *matCellDef="let row">{{ (row.ActualLogoutAt || row.actualLogoutAt) ? formatDate(row.ActualLogoutAt || row.actualLogoutAt) : '—' }}</mat-cell></ng-container>
-                      <ng-container matColumnDef="recordedEndAt"><mat-header-cell *matHeaderCellDef>Recorded End (IST)</mat-header-cell><mat-cell *matCellDef="let row">{{ formatDate(row.EffectiveEndAt || row.effectiveEndAt) }}</mat-cell></ng-container>
+                      <ng-container matColumnDef="recordedEndAt"><mat-header-cell *matHeaderCellDef matTooltip="End time used for hours calculation">Recorded End (IST)</mat-header-cell><mat-cell *matCellDef="let row">{{ formatRecordedEnd(row) }}</mat-cell></ng-container>
                       <ng-container matColumnDef="grossDurationMinutes"><mat-header-cell *matHeaderCellDef>Gross Min</mat-header-cell><mat-cell *matCellDef="let row">{{ formatMinutes(row.GrossDurationMinutes ?? row.grossDurationMinutes) }}</mat-cell></ng-container>
                       <ng-container matColumnDef="inactivityMinutesDeducted"><mat-header-cell *matHeaderCellDef>Inactive Deducted</mat-header-cell><mat-cell *matCellDef="let row">{{ formatMinutes(row.InactivityMinutesDeducted ?? row.inactivityMinutesDeducted) }}</mat-cell></ng-container>
-                      <ng-container matColumnDef="durationMinutes"><mat-header-cell *matHeaderCellDef>Net Min</mat-header-cell><mat-cell *matCellDef="let row">{{ row.DurationMinutes || row.durationMinutes }}</mat-cell></ng-container>
+                      <ng-container matColumnDef="durationMinutes"><mat-header-cell *matHeaderCellDef>Net Min</mat-header-cell><mat-cell *matCellDef="let row">{{ row.DurationMinutes ?? row.durationMinutes ?? '—' }}</mat-cell></ng-container>
                       <ng-container matColumnDef="sessionEndReason"><mat-header-cell *matHeaderCellDef>Reason</mat-header-cell><mat-cell *matCellDef="let row" [title]="formatDeduction(row)">{{ formatSessionReason(row) }}</mat-cell></ng-container>
-                      <ng-container matColumnDef="loginLatitude"><mat-header-cell *matHeaderCellDef>Lat</mat-header-cell><mat-cell *matCellDef="let row">{{ row.LoginLatitude || row.loginLatitude }}</mat-cell></ng-container>
-                      <ng-container matColumnDef="loginLongitude"><mat-header-cell *matHeaderCellDef>Long</mat-header-cell><mat-cell *matCellDef="let row">{{ row.LoginLongitude || row.loginLongitude }}</mat-cell></ng-container>
+                      <ng-container matColumnDef="status"><mat-header-cell *matHeaderCellDef>Status</mat-header-cell><mat-cell *matCellDef="let row">{{ formatStatus(row) }}</mat-cell></ng-container>
                       <mat-header-row *matHeaderRowDef="sessionColumns"></mat-header-row>
                       <mat-row *matRowDef="let row; columns: sessionColumns"></mat-row>
                     </mat-table>
                   </div>
 
-                  <div *ngIf="activeTab === 'overlaps'">
-                    <mat-table [dataSource]="overlapRows" class="mat-cell floating-header-table w-100">
+                  <div *ngIf="activeTab === 'daily'">
+                    <mat-table [dataSource]="dailyRows" class="mat-cell floating-header-table w-100">
                       <ng-container matColumnDef="employeeName"><mat-header-cell *matHeaderCellDef>Employee</mat-header-cell><mat-cell *matCellDef="let row">{{ row.EmployeeName || row.employeeName }}</mat-cell></ng-container>
-                      <ng-container matColumnDef="overlapStartAt"><mat-header-cell *matHeaderCellDef>Start (IST)</mat-header-cell><mat-cell *matCellDef="let row">{{ formatDate(row.OverlapStartAt || row.overlapStartAt) }}</mat-cell></ng-container>
-                      <ng-container matColumnDef="overlapEndAt"><mat-header-cell *matHeaderCellDef>End (IST)</mat-header-cell><mat-cell *matCellDef="let row">{{ formatDate(row.OverlapEndAt || row.overlapEndAt) }}</mat-cell></ng-container>
-                      <ng-container matColumnDef="overlapMinutes"><mat-header-cell *matHeaderCellDef>Minutes</mat-header-cell><mat-cell *matCellDef="let row">{{ row.OverlapMinutes || row.overlapMinutes }}</mat-cell></ng-container>
-                      <ng-container matColumnDef="sessionIdA"><mat-header-cell *matHeaderCellDef>Session A</mat-header-cell><mat-cell *matCellDef="let row">{{ row.SessionIdA || row.sessionIdA }}</mat-cell></ng-container>
-                      <ng-container matColumnDef="sessionIdB"><mat-header-cell *matHeaderCellDef>Session B</mat-header-cell><mat-cell *matCellDef="let row">{{ row.SessionIdB || row.sessionIdB }}</mat-cell></ng-container>
-                      <mat-header-row *matHeaderRowDef="overlapColumns"></mat-header-row>
-                      <mat-row *matRowDef="let row; columns: overlapColumns"></mat-row>
+                      <ng-container matColumnDef="employeeLocation"><mat-header-cell *matHeaderCellDef>Location</mat-header-cell><mat-cell *matCellDef="let row">{{ row.EmployeeLocation || row.employeeLocation || '—' }}</mat-cell></ng-container>
+                      <ng-container matColumnDef="workDateIST"><mat-header-cell *matHeaderCellDef>Work Date (IST)</mat-header-cell><mat-cell *matCellDef="let row">{{ formatWorkDate(row.WorkDateIST || row.workDateIST) }}</mat-cell></ng-container>
+                      <ng-container matColumnDef="sessionCount"><mat-header-cell *matHeaderCellDef>Sessions</mat-header-cell><mat-cell *matCellDef="let row">{{ row.SessionCount || row.sessionCount }}</mat-cell></ng-container>
+                      <ng-container matColumnDef="grossMinutes"><mat-header-cell *matHeaderCellDef>Gross Min</mat-header-cell><mat-cell *matCellDef="let row">{{ row.GrossMinutes ?? row.grossMinutes }}</mat-cell></ng-container>
+                      <ng-container matColumnDef="inactivityMinutesDeducted"><mat-header-cell *matHeaderCellDef>Inactive Deducted</mat-header-cell><mat-cell *matCellDef="let row">{{ formatMinutes(row.InactivityMinutesDeducted ?? row.inactivityMinutesDeducted) }}</mat-cell></ng-container>
+                      <ng-container matColumnDef="netMinutes"><mat-header-cell *matHeaderCellDef>Net Min</mat-header-cell><mat-cell *matCellDef="let row">{{ row.NetMinutes ?? row.netMinutes }}</mat-cell></ng-container>
+                      <ng-container matColumnDef="netHours"><mat-header-cell *matHeaderCellDef>Net Hours</mat-header-cell><mat-cell *matCellDef="let row">{{ row.NetHours ?? row.netHours }}</mat-cell></ng-container>
+                      <ng-container matColumnDef="status"><mat-header-cell *matHeaderCellDef>Status</mat-header-cell><mat-cell *matCellDef="let row">{{ formatStatus(row) }}</mat-cell></ng-container>
+                      <mat-header-row *matHeaderRowDef="dailyColumns"></mat-header-row>
+                      <mat-row *matRowDef="let row; columns: dailyColumns"></mat-row>
                     </mat-table>
                   </div>
                 </div>

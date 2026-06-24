@@ -5,8 +5,7 @@ import { catchError, map } from 'rxjs/operators';
 import { User } from '../models/user';
 import { HttpClient } from '@angular/common/http';
 import { RuntimeConfigService } from './runtime-config.service';
-// Location-based login disabled for HTTP/VPN internal access. Re-enable when HTTPS is available.
-// import { LoginLocationPayload } from './geolocation.service';
+// Login geolocation disabled (EmployeeLoginSessionSettings.RequireLoginLocation = false on API).
 
 @Injectable({
   providedIn: 'root'
@@ -66,16 +65,6 @@ export class AuthService {
       loginFrom: 'WebAdmin',
       LoginFrom: 'WebAdmin',
     };
-    // if (location) {
-    //   body.loginLatitude = location.loginLatitude;
-    //   body.loginLongitude = location.loginLongitude;
-    //   body.locationAccuracyMeters = location.locationAccuracyMeters;
-    //   body.locationCapturedAt = location.locationCapturedAt;
-    //   body.LoginLatitude = location.loginLatitude;
-    //   body.LoginLongitude = location.loginLongitude;
-    //   body.LocationAccuracyMeters = location.locationAccuracyMeters;
-    //   body.LocationCapturedAt = location.locationCapturedAt;
-    // }
     return this.http.post<any>(this.apiUrl + '/authenticate', body).pipe(
       map((user) => {
         let parsed: any = user;

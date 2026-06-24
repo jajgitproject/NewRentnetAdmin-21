@@ -24,8 +24,8 @@ export class AppComponent {
     private generalService: GeneralService,
     private sessionHeartbeatService: SessionHeartbeatService
   ) {
-    window.addEventListener('beforeunload', () => this.sessionHeartbeatService.endSessionBeacon());
-    window.addEventListener('pagehide', () => this.sessionHeartbeatService.endSessionBeacon());
+    window.addEventListener('beforeunload', () => this.sessionHeartbeatService.endSessionBeacon(false));
+    window.addEventListener('pagehide', () => this.sessionHeartbeatService.endSessionBeacon(false));
     this.initLegacyModalBridge();
     AppComponent.installSwalForegroundGuard();
 

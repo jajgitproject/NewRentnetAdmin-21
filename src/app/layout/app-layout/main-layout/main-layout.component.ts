@@ -12,12 +12,11 @@ export class MainLayoutComponent implements OnInit, OnDestroy {
   constructor(private sessionHeartbeatService: SessionHeartbeatService) {}
 
   ngOnInit(): void {
-    // 20-minute inactivity logout disabled temporarily.
-    // this.sessionHeartbeatService.start();
+    this.sessionHeartbeatService.start();
   }
 
   ngOnDestroy(): void {
-    // this.sessionHeartbeatService.stop();
+    this.sessionHeartbeatService.stop();
   }
 }
 

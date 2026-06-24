@@ -12,6 +12,8 @@ import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatNativeDateModule } from '@angular/material/core';
 import { MatIconModule } from '@angular/material/icon';
 import { MatSnackBarModule } from '@angular/material/snack-bar';
+import { MatAutocompleteModule } from '@angular/material/autocomplete';
+import { MatTooltipModule } from '@angular/material/tooltip';
 import { RouterModule } from '@angular/router';
 import { EmployeeLoginHoursMISRoutingModule } from './employeeLoginHoursMIS-routing.module';
 import { EmployeeLoginHoursMISComponent } from './employeeLoginHoursMIS.component';
@@ -35,6 +37,8 @@ import { EmployeeLoginHoursMISService } from './employeeLoginHoursMIS.service';
     MatNativeDateModule,
     MatIconModule,
     MatSnackBarModule,
+    MatAutocompleteModule,
+    MatTooltipModule,
   ],
   providers: [EmployeeLoginHoursMISService],
 })

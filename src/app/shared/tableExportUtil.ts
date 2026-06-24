@@ -3,9 +3,10 @@ import * as XLSX from 'xlsx';
 import { TableElement } from './TableElement';
 
 const getFileName = (name: string) => {
-  const timeSpan = new Date().toISOString();
-  const sheetName = name || 'ExportResult';
-  const fileName = `${sheetName}-${timeSpan}`;
+  const timeSpan = new Date().toISOString().replace(/[:.]/g, '-');
+  const rawSheetName = name || 'ExportResult';
+  const sheetName = rawSheetName.length > 31 ? rawSheetName.substring(0, 31) : rawSheetName;
+  const fileName = `${rawSheetName}-${timeSpan}`;
   return {
     sheetName,
     fileName,

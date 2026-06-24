@@ -1,13 +1,14 @@
 export interface EmployeeLoginHoursSummary {
   employeeID: number;
   employeeName: string;
+  employeeLocation?: string;
   periodKey: string;
   sessionCount: number;
   grossMinutes: number;
-  overlapMinutes: number;
   inactivityMinutesDeducted: number;
   netMinutes: number;
   netHours: number;
+  status?: string;
 }
 
 export interface EmployeeLoginSessionRow {
@@ -23,6 +24,20 @@ export interface EmployeeLoginSessionRow {
   actualLogoutAt?: string;
   inactivityMinutesDeducted?: number;
   sessionEndReason?: string;
-  loginLatitude: number;
-  loginLongitude: number;
+  employeeLocation?: string;
+  status?: string;
+  isArchived?: boolean;
+}
+
+export interface EmployeeLoginHoursDaily {
+  employeeID: number;
+  employeeName: string;
+  employeeLocation?: string;
+  workDateIST: string;
+  sessionCount: number;
+  grossMinutes: number;
+  inactivityMinutesDeducted: number;
+  netMinutes: number;
+  netHours: number;
+  status?: string;
 }
