@@ -70,11 +70,12 @@
         <h3><strong>TAX INVOICE</strong></h3>
         <small>Original for Recipient</small>
       </td>
+    
     </tr>
   </table>
 
   <!-- Company Details -->
-  <table class="no-border" style="margin-top: 10px; line-height: 1.5;">
+  <table class="no-border" style="margin-top: 2px; line-height: 1.5;">
     <tr>
       <td>
         <strong>ECOS (I) MOBILITY & HOSPITALITY LTD.</strong><br />
@@ -92,15 +93,15 @@
       </td>
         <td class="qr-logo-area" valign="top" align="right">
           <div class="qr-logo-stack">
-            <img class="invoice-logo" [src]="invoiceLogoUrl" alt="Logo">
-            <ng-container *ngIf="dataSource?.signedQRCode; else noQR">
+            <img class="invoice-logo" [src]="invoiceLogoUrl" alt="Logo"> 
+             <ng-container *ngIf="dataSource?.signedQRCode; else noQR">
               <img class="qr-code-image" [src]="'data:image/png;base64,' + dataSource?.signedQRCode" alt="QR" />
             </ng-container>
             <ng-template #noQR>
               <div class="no-image-box">
-                No QR Image
+                No QR Image 
               </div>
-            </ng-template>
+            </ng-template> 
           </div>
         </td>
     </tr>
@@ -108,7 +109,7 @@
 
   <!-- Customer + Invoice Info -->
      <hr />
-  <table style="margin-top: 15px;" class="no-border">
+  <table style="margin-top: 2px;" class="no-border">
     <tr>
       <td width="70%">
         <strong>Bill To:</strong><br />
@@ -131,7 +132,7 @@
 
   <!-- Charge Details -->
    
-  <table style="margin-top: 15px;" class="no-border custom-table">
+  <table style="margin-top: 5px;height:230px;" class="no-border custom-table">
     <thead>
       <tr align="center">
         <th>Car Type</th>
@@ -139,8 +140,8 @@
         <th>Amount</th>
       </tr>
     </thead>
-    <tbody>
-      <tr *ngFor="let duty of dataSource?.lineItems">
+    <tbody >
+      <tr style="height: 30px;" *ngFor="let duty of dataSource?.lineItems">
         <td> </td>
         <td >{{duty.narration}}</td>
         <td class="text-right">{{duty.baseAmount}}</td>
@@ -163,13 +164,13 @@
        <td>SAC : {{ dataSource?.hsn }}</td>
     </tr>
    <tr>
-       <td class="text-right">CGST &nbsp;&nbsp;&nbsp; @ {{ dataSource?.cgstPercentage ?? 0 }}% &nbsp;&nbsp;&nbsp; {{ dataSource?.cgstAmount ?? 0 }}</td>
+       <td class="text-right">CGST &nbsp; @ {{ dataSource?.cgstPercentage ?? 0 }}% &nbsp;&nbsp;&nbsp; {{ dataSource?.cgstAmount ?? 0 }}</td>
     </tr>
     <tr>
-      <td class="text-right">SGST &nbsp;&nbsp;&nbsp; @ {{ dataSource?.sgstPercentage ?? 0 }}% &nbsp;&nbsp;&nbsp; {{ dataSource?.sgstAmount ?? 0 }}</td>
+      <td class="text-right">SGST &nbsp; @ {{ dataSource?.sgstPercentage ?? 0 }}% &nbsp;&nbsp;&nbsp; {{ dataSource?.sgstAmount ?? 0 }}</td>
     </tr>
     <tr>
-      <td class="text-right">IGST &nbsp;&nbsp;&nbsp; @ {{ dataSource?.igstPercentage ?? 0 }}% &nbsp;&nbsp;&nbsp; {{ dataSource?.igstAmount ?? 0 }}</td>
+      <td class="text-right">IGST &nbsp; @ {{ dataSource?.igstPercentage ?? 0 }}% &nbsp;&nbsp;&nbsp; {{ dataSource?.igstAmount ?? 0 }}</td>
     </tr>
   </table>
 
@@ -211,7 +212,7 @@
     TIN NO: 07860310884,
     CIN NO: U74999DL1996PTC076375<br />
     Electronic Mode of Payments as per Section 269SU of Income Tax Act, 1961:
-    <a href="https://www.ecorentacar.com/pay-online/" target="_blank">https://www.ecorentacar.com/pay-online/</a>
+    <!-- <a href="https://www.ecorentacar.com/pay-online/" target="_blank">https://www.ecorentacar.com/pay-online/</a> -->
   </div>
 
   <div style="text-align: center; margin-top: 10px; font-weight: bold;">

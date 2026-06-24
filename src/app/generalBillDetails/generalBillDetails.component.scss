@@ -19,7 +19,7 @@
 }
 
 .custom-table tbody tr {
-  height: 50px;
+  height: auto;
 }
 
 .custom-table td {
@@ -44,10 +44,10 @@
 }
 
 .invoice-logo {
-  width: 32mm;
+  width: 25mm;
   height: auto;
-  max-width: 32mm;
-  max-height: 36mm;
+  max-width: 25mm;
+  max-height: 30mm;
   object-fit: contain;
   display: block;
   margin: 0;
@@ -57,9 +57,9 @@
 
 .qr-logo-stack .qr-code-image,
 .qr-logo-stack img[src^="data:image"] {
-  width: 30mm;
-  height: 30mm;
-  max-width: 30mm;
+  width: 25mm;
+  height: auto;
+  max-width: 25mm;
   max-height: 30mm;
   object-fit: contain;
   display: block;
@@ -67,8 +67,8 @@
 }
 
 .no-image-box {
-  width: 30mm;
-  height: 30mm;
+  width: 25mm;
+  height: 25mm;
   border: 1px solid #ccc;
   display: flex;
   align-items: center;
