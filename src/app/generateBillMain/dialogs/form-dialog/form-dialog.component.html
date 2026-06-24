@@ -203,6 +203,20 @@
             </div>
 
             <div class="row">
+                <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                    <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                        <mat-label>SAC Code</mat-label>
+                        <mat-select formControlName="hsn">
+                            <mat-option [value]="">-- Select SAC --</mat-option>
+                            <mat-option *ngFor="let sac of SACList" [value]="sac.sacNumber">
+                                {{ sac.sacNumber }}
+                            </mat-option>
+                        </mat-select>
+                    </mat-form-field>
+                </div>
+            </div>
+
+            <div class="row">
                 <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2" *ngIf="advanceTableForm.value.gst === true">
                     <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
                         <mat-label>GST Type</mat-label>

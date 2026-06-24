@@ -26,7 +26,8 @@ export class DutyState {
        this.changeDateTimeString = dutyState.changeDateTimeString || '';
        this.reasonOfChange=dutyState.reasonOfChange || '';
        this.activationStatus = dutyState.activationStatus || '';
-       this.changeDateTime =new Date();
+       this.changeDateTime = dutyState.changeDateTime ? new Date(dutyState.changeDateTime) : new Date();
+       this.state = dutyState.state || '';
     }
   }
   

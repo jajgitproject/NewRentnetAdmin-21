@@ -490,7 +490,9 @@
 
         <div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 mb-2">
           <h5>
-            <a (click)="openDutyState()" style="cursor: pointer;color: #007bff;">Duty State</a>
+            <a (click)="openDutyState()"
+              [style.cursor]="dutyStateInvoiceGenerated ? 'not-allowed' : 'pointer'"
+              [style.color]="dutyStateInvoiceGenerated ? '#6c757d' : '#007bff'">Duty State</a>
             <a class="material-icons" href="javascript:void(0);"
               (click)="showAndScrollDutyState()">keyboard_arrow_down</a>
           </h5>
@@ -4056,7 +4058,11 @@
             </mat-panel-title>
           </mat-expansion-panel-header>
           <div>
-            <app-dutyState [advanceTableDutyState]="advanceTableDutyState" [dutySlipID]="DutySlipID"></app-dutyState>
+            <app-dutyState [advanceTableDutyState]="advanceTableDutyState" [dutySlipID]="DutySlipID"
+              [verifyDuty]="getDutyStateBillingFlags().verifyDuty"
+              [goodForBilling]="getDutyStateBillingFlags().goodForBilling"
+              [invoiceGenerated]="dutyStateInvoiceGenerated"
+              (billingVerificationReset)="resetBillingVerificationAfterEcoStateChange()"></app-dutyState>
           </div>
         </mat-expansion-panel>
       </mat-accordion>

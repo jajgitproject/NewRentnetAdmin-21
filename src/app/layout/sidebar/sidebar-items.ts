@@ -1107,6 +1107,18 @@ export const ROUTES: RouteInfo[] = [
         isAccess: false
       },
       {
+        path: 'invoiceExport',
+        title: 'Invoice Export',
+        pageKey: 'Invoice Export',
+        moduleName: 'invoiceExport',
+        alternateAccessPageKeys: ['invoiceExport'],
+        icon: 'fas fa-file-excel',
+        class: '',
+        groupTitle: false,
+        submenu: [],
+        isAccess: false
+      },
+      {
         path: 'invoiceTemplate',
         title: 'Invoice Template',
         moduleName: 'invoiceTemplate',

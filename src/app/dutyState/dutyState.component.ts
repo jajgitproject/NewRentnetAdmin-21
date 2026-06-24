@@ -1,5 +1,5 @@
 // @ts-nocheck
-import { Component, ElementRef, Input, OnInit, ViewChild } from '@angular/core';
+import { Component, ElementRef, Input, OnInit, Output, EventEmitter, ViewChild } from '@angular/core';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { MatDialog } from '@angular/material/dialog';
 import { MatPaginator } from '@angular/material/paginator';
@@ -30,6 +30,10 @@ export class DutyStateComponent implements OnInit {
   @Input() advanceTableDutyState;
   @Input() dutySlipID;
   @Input() verifyDutyStatusAndCacellationStatus;
+  @Input() verifyDuty: boolean = false;
+  @Input() goodForBilling: boolean = false;
+  @Input() invoiceGenerated: boolean = false;
+  @Output() billingVerificationReset = new EventEmitter<void>();
   displayedColumns = [
     'state',
     'changeDateTime',
@@ -75,34 +79,71 @@ export class DutyStateComponent implements OnInit {
 
   addNew()
   {
+    if (this.invoiceGenerated) {
+      this.showBlockedByInvoiceNotification();
+      return;
+    }
     const dialogRef = this.dialog.open(FormDialogComponent, 
     {
       data: 
         {
           advanceTable: this.advanceTable,
-          action: 'add'
+          action: 'add',
+          dutySlipID: this.dutySlipID,
+          verifyDuty: this.verifyDuty,
+          goodForBilling: this.goodForBilling,
+          invoiceGenerated: this.invoiceGenerated,
+          verifyDutyStatusAndCacellationStatus: this.verifyDutyStatusAndCacellationStatus
         }
-    }); 
+    });
+    this.handleDutyStateDialogClosed(dialogRef);
   }
 
   editCall(row) {
+    if (this.invoiceGenerated) {
+      this.showBlockedByInvoiceNotification();
+      return;
+    }
     this.dutyStateID = row.id;
     const dialogRef = this.dialog.open(FormDialogComponent, {
       data: {
         advanceTable: row,
         action: 'edit',
-        verifyDutyStatusAndCacellationStatus:this.verifyDutyStatusAndCacellationStatus
+        dutySlipID: this.dutySlipID,
+        verifyDuty: this.verifyDuty,
+        goodForBilling: this.goodForBilling,
+        invoiceGenerated: this.invoiceGenerated,
+        verifyDutyStatusAndCacellationStatus: this.verifyDutyStatusAndCacellationStatus
+      }
+    });
+    this.handleDutyStateDialogClosed(dialogRef);
+  }
+
+  private handleDutyStateDialogClosed(dialogRef): void {
+    dialogRef.afterClosed().subscribe((res: any) => {
+      if (res?.resetBillingVerification) {
+        this.billingVerificationReset.emit();
       }
     });
   }
 
 deleteItem(row)
 {
+  if (this.invoiceGenerated) {
+    this.showBlockedByInvoiceNotification();
+    return;
+  }
   this.dutyStateID = row.id;
   const dialogRef = this.dialog.open(DeleteDialogComponent, 
   {
-    data: row
+    data: {
+      ...row,
+      verifyDuty: this.verifyDuty,
+      goodForBilling: this.goodForBilling,
+      invoiceGenerated: this.invoiceGenerated
+    }
   });
+  this.handleDutyStateDialogClosed(dialogRef);
 }
 
   public Filter()
@@ -117,7 +158,7 @@ deleteItem(row)
       (
         data =>   
         {
-          this.advanceTableDutyState = data;
+          this.advanceTableDutyState = this.dutyStateService.sortDutyStateRecordsNewestFirst(data);
          
         },
         (error: HttpErrorResponse) => { this.advanceTableDutyState = null;}
@@ -129,7 +170,7 @@ deleteItem(row)
       (
         data =>   
         {
-          this.advanceTableDutyState = data;
+          this.advanceTableDutyState = this.dutyStateService.sortDutyStateRecordsNewestFirst(data);
          
         },
         (error: HttpErrorResponse) => { this.advanceTableDutyState = null;}
@@ -143,7 +184,21 @@ deleteItem(row)
       panelClass: colorName
     });
   }
+
+  private showBlockedByInvoiceNotification(): void {
+    this.showNotification(
+      'snackbar-warning',
+      'Cannot change Eco Duty State after invoice has been issued for this duty.',
+      'bottom',
+      'center'
+    );
+  }
   onContextMenu(event: MouseEvent, item: DutyState) {
+    if (this.invoiceGenerated) {
+      event.preventDefault();
+      this.showBlockedByInvoiceNotification();
+      return;
+    }
     event.preventDefault();
     this.contextMenuPosition.x = event.clientX + 'px';
     this.contextMenuPosition.y = event.clientY + 'px';

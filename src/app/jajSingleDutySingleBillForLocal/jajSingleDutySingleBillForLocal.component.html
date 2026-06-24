@@ -41,15 +41,17 @@
 
             </td>
             <td class="qr-logo-area" valign="top" align="right">
-          <img class="invoice-logo" [src]="invoiceLogoUrl" alt="Logo">
-          <ng-container *ngIf="dataSource?.invoiceModel?.signedQRCode; else noQR">
-            <img class="qr-code-image" [src]="'data:image/png;base64,' + dataSource?.invoiceModel?.signedQRCode" alt="QR" />
-          </ng-container>
-          <ng-template #noQR>
-            <div class="no-image-box">
-              No QR Image
-            </div>
-          </ng-template>
+          <div class="qr-logo-stack">
+            <img class="invoice-logo" [src]="invoiceLogoUrl" alt="Logo">
+            <ng-container *ngIf="dataSource?.invoiceModel?.signedQRCode; else noQR">
+              <img class="qr-code-image" [src]="'data:image/png;base64,' + dataSource?.invoiceModel?.signedQRCode" alt="QR" />
+            </ng-container>
+            <ng-template #noQR>
+              <div class="no-image-box">
+                No QR Image
+              </div>
+            </ng-template>
+          </div>
             </td>
           </tr>
         </table>
@@ -91,12 +93,11 @@
         </tr>
       </table>
 
-      <!-- EXTRA INFO -->
-      <div class="extra-info">
-        <b>Cost Center:</b> &nbsp;&nbsp;&nbsp;
-        <b>PO No:</b> &nbsp;&nbsp;&nbsp;
-        <b>Ref By:</b> &nbsp;&nbsp;&nbsp;
-        <b>PNR No:</b>
+      <!-- CUSTOMER SPECIFIC FIELDS -->
+      <div class="extra-info" *ngIf="customerSpecificFieldPairs.length">
+        <ng-container *ngFor="let field of customerSpecificFieldPairs; let last = last">
+          <b>{{ field.fieldName }}:</b> {{ field.fieldValue }}<span *ngIf="!last">&nbsp;&nbsp;&nbsp;</span>
+        </ng-container>
       </div>
 
       <!-- DUTY GRID -->

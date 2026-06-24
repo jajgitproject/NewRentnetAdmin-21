@@ -1,6 +1,7 @@
 // @ts-nocheck
 import { Injectable } from '@angular/core';
 import { BehaviorSubject, Observable } from 'rxjs';
+import { map } from 'rxjs/operators';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { DatePipe } from '@angular/common';
 import { GeneralService } from '../general/general.service';
@@ -71,6 +72,56 @@ export class DutyStateService
   {
    
     return this.httpClient.get(this.API_URL_City);
+  }
+
+  normalizeDutyStateRows(data: any): any[] {
+    if (!data) {
+      return [];
+    }
+    return Array.isArray(data) ? data.filter(Boolean) : [data];
+  }
+
+  isDutyStateRecordNewer(candidate: any, current: any): boolean {
+    if (!current) {
+      return true;
+    }
+    const candidateTime = new Date(candidate?.changeDateTime).getTime();
+    const currentTime = new Date(current?.changeDateTime).getTime();
+    if (!isNaN(candidateTime) && !isNaN(currentTime) && candidateTime !== currentTime) {
+      return candidateTime > currentTime;
+    }
+    return (candidate?.dutyStateID || 0) > (current?.dutyStateID || 0);
+  }
+
+  getLatestDutyStateRecord(data: any): any | null {
+    const rows = this.normalizeDutyStateRows(data);
+    if (rows.length === 0) {
+      return null;
+    }
+    return rows.reduce((latest, row) =>
+      this.isDutyStateRecordNewer(row, latest) ? row : latest
+    );
+  }
+
+  sortDutyStateRecordsNewestFirst(data: any): any {
+    const rows = this.normalizeDutyStateRows(data);
+    if (rows.length === 0) {
+      return data;
+    }
+    const sorted = [...rows].sort((a, b) => {
+      const timeDiff = new Date(b?.changeDateTime).getTime() - new Date(a?.changeDateTime).getTime();
+      if (!isNaN(timeDiff) && timeDiff !== 0) {
+        return timeDiff;
+      }
+      return (b?.dutyStateID || 0) - (a?.dutyStateID || 0);
+    });
+    return Array.isArray(data) ? sorted : sorted[0];
+  }
+
+  hasIssuedInvoice(dutySlipID: number): Observable<boolean> {
+    return this.httpClient.get(`${this.generalService.BaseURL}Closing/${dutySlipID}`).pipe(
+      map((data: any) => Number(data?.invoiceID || data?.InvoiceID) > 0)
+    );
   }
 }
   

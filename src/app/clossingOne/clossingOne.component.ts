@@ -1,5 +1,5 @@
 //@ts-nocheck
-import { AfterViewChecked, AfterViewInit, Component, ElementRef, Input, OnInit, ViewChild } from '@angular/core';
+import { AfterViewInit, Component, ElementRef, Input, OnInit, ViewChild } from '@angular/core';
 import { ClossingOneService } from './clossingOne.service';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { MatDialog } from '@angular/material/dialog';
@@ -54,6 +54,7 @@ import { FormDialogComponent as DutySACFormDialogComponent } from '../dutySAC/di
 import { AdditionalDialogComponent } from '../additionalKmsDetails/dialogs/form-dialog/form-dialog.component';
 import { DiscountDetailsDialogComponent } from '../discountDetails/dialogs/discountDetails/discountDetails.component';
 import { FormDialogComponent as DutyStateFormDialogComponent } from '../dutyState/dialogs/form-dialog/form-dialog.component';
+import { DutySlipForBillingComponent } from '../dutySlipForBilling/dutySlipForBilling.component';
 import { FormDialogComponent as DutyGSTPercentageFormDialogComponent } from '../dutyGSTPercentage/dialogs/form-dialog/form-dialog.component';
 import { FormDialogComponent as DutyExpenseFormDialogComponent } from '../dutyExpense/dialogs/form-dialog/form-dialog.component';
 import { ClosingModel, TotalTollParInStDisputeModel } from './clossingOne.model';
@@ -110,7 +111,7 @@ import { FormDialogChangeSupplierForInventory } from './dialog/changeSupplierFor
   providers: [{ provide: MAT_DATE_LOCALE, useValue: 'en-GB' }]
 })
 
-export class ClossingOneComponent implements OnInit, AfterViewInit, AfterViewChecked {
+export class ClossingOneComponent implements OnInit, AfterViewInit {
   // dataSavedMessage: boolean = false;
   updateData = new Subject<void>();
   AllotmentID: any;
@@ -234,8 +235,6 @@ export class ClossingOneComponent implements OnInit, AfterViewInit, AfterViewChe
   private viewReady = false;
   private paramsReady = false;
   private initialLoadsStarted = false;
-  private debugViewCheckCount = 0;
-  private debugLastViewSnapshot = '';
   dataSourceForBillNo: any = null;
   from :string = "Closing";
   status: any;
@@ -288,6 +287,7 @@ export class ClossingOneComponent implements OnInit, AfterViewInit, AfterViewChe
 
   }
   @ViewChild(ReservationDutyslipSearchComponent) searchModal!: ReservationDutyslipSearchComponent;
+  @ViewChild('dutySlipForBilling') dutySlipForBillingComponent: DutySlipForBillingComponent;
   @ViewChild(MatPaginator, { static: true }) paginator: MatPaginator;
   @ViewChild(MatSort, { static: true }) sort: MatSort;
   @ViewChild('filter', { static: true }) filter: ElementRef;
@@ -310,9 +310,6 @@ export class ClossingOneComponent implements OnInit, AfterViewInit, AfterViewChe
       this.ReservationID = Number(this._generalService.decrypt(decodeURIComponent(encryptedReservationID)));
       this.allotmentStatus = this._generalService.decrypt(decodeURIComponent(paramsData.allotmentStatus));
       this.dutySlipType = this._generalService.decrypt(decodeURIComponent(paramsData.dutySlipType));
-      // #region agent log
-      fetch('http://127.0.0.1:7830/ingest/e71207c4-423e-4a42-a900-5bc43349cfbe',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'2871b3'},body:JSON.stringify({sessionId:'2871b3',runId:'run1',hypothesisId:'H3',location:'clossingOne.component.ts:ngOnInit-queryParams',message:'params decoded before initial loads',data:{allotmentID:this.AllotmentID,dutySlipID:this.DutySlipID,reservationID:this.ReservationID,showMOPOther:this.showMOPOther,totalInterStateTax:this.totalInterStateTax},timestamp:Date.now()})}).catch(()=>{});
-      // #endregion
       this.paramsReady = true;
       this.startInitialLoadsIfReady();
       
@@ -329,35 +326,11 @@ export class ClossingOneComponent implements OnInit, AfterViewInit, AfterViewChe
     this.startInitialLoadsIfReady();
   }
 
-  ngAfterViewChecked(): void {
-    if (this.debugViewCheckCount >= 12) {
-      return;
-    }
-    const snapshot = JSON.stringify({
-      showMOPOther: this.showMOPOther,
-      totalInterStateTax: this.totalInterStateTax,
-      hasClosingData: !!this.closingDataAdvanceTable,
-      hasAdvanceClosing: !!this.advanceTableClosingOne,
-      hasMop: !!this.advanceTableMOP,
-      disputeLen: Array.isArray(this.disputeAdvanceTable) ? this.disputeAdvanceTable.length : null
-    });
-    if (snapshot !== this.debugLastViewSnapshot) {
-      this.debugLastViewSnapshot = snapshot;
-      this.debugViewCheckCount++;
-      // #region agent log
-      fetch('http://127.0.0.1:7830/ingest/e71207c4-423e-4a42-a900-5bc43349cfbe',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'2871b3'},body:JSON.stringify({sessionId:'2871b3',runId:'run3',hypothesisId:'H8',location:'clossingOne.component.ts:ngAfterViewChecked',message:'view-check snapshot changed',data:{checkCount:this.debugViewCheckCount,showMOPOther:this.showMOPOther,totalInterStateTax:this.totalInterStateTax,hasClosingData:!!this.closingDataAdvanceTable,hasAdvanceClosing:!!this.advanceTableClosingOne,hasMop:!!this.advanceTableMOP,disputeLen:Array.isArray(this.disputeAdvanceTable)?this.disputeAdvanceTable.length:null},timestamp:Date.now()})}).catch(()=>{});
-      // #endregion
-    }
-  }
-
   private startInitialLoadsIfReady(): void {
     if (!this.viewReady || !this.paramsReady || this.initialLoadsStarted) {
       return;
     }
     this.initialLoadsStarted = true;
-    // #region agent log
-    fetch('http://127.0.0.1:7830/ingest/e71207c4-423e-4a42-a900-5bc43349cfbe',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'2871b3'},body:JSON.stringify({sessionId:'2871b3',runId:'post-fix',hypothesisId:'H7',location:'clossingOne.component.ts:startInitialLoadsIfReady',message:'starting initial loads after params+view ready',data:{showMOPOther:this.showMOPOther,totalInterStateTax:this.totalInterStateTax,hasClosing:!!this.advanceTableClosingOne,hasCard:!!this.dataSourceforCard},timestamp:Date.now()})}).catch(()=>{});
-    // #endregion
     this.GetClosingData();
     this.disputeService.disputeData$.subscribe(data => {
       this.disputeAdvanceTable = data ?? [];
@@ -455,9 +428,7 @@ export class ClossingOneComponent implements OnInit, AfterViewInit, AfterViewChe
           this.DutySACLoadData();
           this.salesPersonLoadData();
           this.GetBillFromTo();
-          // #region agent log
-          fetch('http://127.0.0.1:7830/ingest/e71207c4-423e-4a42-a900-5bc43349cfbe',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'2871b3'},body:JSON.stringify({sessionId:'2871b3',runId:'run1',hypothesisId:'H3',location:'clossingOne.component.ts:BookingDataOnClosing-subscribe',message:'booking data assigned to bound fields',data:{customerName:this.CustomerName,tallyCustomerID:this.TallyCustomerID,reservationID:this.ReservationID,hasClosingData:!!this.closingDataAdvanceTable},timestamp:Date.now()})}).catch(()=>{});
-          // #endregion
+
         },
         (error: HttpErrorResponse) => { this.closingDataAdvanceTable = null; }
       );
@@ -677,24 +648,99 @@ export class ClossingOneComponent implements OnInit, AfterViewInit, AfterViewChe
   //---------- End Duty GST Percentage ----------
 
   //---------- Start Duty State ----------
+  getDutyStateBillingFlags(): { verifyDuty: boolean; goodForBilling: boolean } {
+    const billing = this.advanceTableClosingOne?.closingDutySlipForBillingModel;
+    return {
+      verifyDuty: !!(this.verifyDuty ?? billing?.verifyDuty),
+      goodForBilling: !!(this.goodForBilling ?? billing?.goodForBilling)
+    };
+  }
+
+  private guardDutyStateEdit(): boolean {
+    if (this.hasGeneratedInvoice()) {
+      this.showNotification(
+        'snackbar-warning',
+        'Cannot change Eco Duty State after invoice has been issued for this duty.',
+        'bottom',
+        'center'
+      );
+      return false;
+    }
+    return this.guardEInvoiceEdit();
+  }
+
   openDutyState() {
-    if (!this.guardEInvoiceEdit()) {
+    if (!this.guardDutyStateEdit()) {
       return;
     }
-    const dialogRef = this.dialog.open(DutyStateFormDialogComponent,
-      {
-        data:
-        {
-          dutySlipID: this.DutySlipID,
-          record: this.advanceTableDutyState,
-          verifyDutyStatusAndCacellationStatus: this.verifyDutyStatusAndCacellationStatus,
+    const { verifyDuty, goodForBilling } = this.getDutyStateBillingFlags();
+    const invoiceGenerated = this.hasGeneratedInvoice();
+    this.dutyStateService.getTableDataClosing(this.DutySlipID).subscribe(
+      (data) => {
+        if (data !== null) {
+          this.showHideDutyState = true;
         }
-      });
-    dialogRef.afterClosed().subscribe((res: any) => {
-      // this.loadDutyStateData();
-      window.location.reload();
-    });
+        this.advanceTableDutyState = this.dutyStateService.sortDutyStateRecordsNewestFirst(data);
+        const latest = this.dutyStateService.getLatestDutyStateRecord(data);
+        const dialogRef = this.dialog.open(DutyStateFormDialogComponent,
+          {
+            data:
+            {
+              dutySlipID: this.DutySlipID,
+              record: this.advanceTableDutyState,
+              advanceTable: latest,
+              action: latest?.dutyStateID ? 'edit' : 'add',
+              verifyDuty,
+              goodForBilling,
+              invoiceGenerated,
+              verifyDutyStatusAndCacellationStatus: this.verifyDutyStatusAndCacellationStatus,
+            }
+          });
+        dialogRef.afterClosed().subscribe((res: any) => {
+          if (res?.resetBillingVerification) {
+            this.resetBillingVerificationAfterEcoStateChange();
+          } else {
+            this.loadDutyStateData();
+          }
+        });
+      },
+      () => {
+        const dialogRef = this.dialog.open(DutyStateFormDialogComponent,
+          {
+            data:
+            {
+              dutySlipID: this.DutySlipID,
+              record: null,
+              advanceTable: null,
+              action: 'add',
+              verifyDuty,
+              goodForBilling,
+              verifyDutyStatusAndCacellationStatus: this.verifyDutyStatusAndCacellationStatus,
+            }
+          });
+        dialogRef.afterClosed().subscribe((res: any) => {
+          if (res?.resetBillingVerification) {
+            this.resetBillingVerificationAfterEcoStateChange();
+          } else {
+            this.loadDutyStateData();
+          }
+        });
+      }
+    );
   }
+
+  resetBillingVerificationAfterEcoStateChange(): void {
+    this.dutySlipForBillingComponent?.resetVerificationForEcoStateChange();
+    this.verifyDuty = false;
+    this.goodForBilling = false;
+    if (this.advanceTableClosingOne?.closingDutySlipForBillingModel) {
+      this.advanceTableClosingOne.closingDutySlipForBillingModel.verifyDuty = false;
+      this.advanceTableClosingOne.closingDutySlipForBillingModel.goodForBilling = false;
+    }
+    this.loadDutyStateData();
+    this.GSTDataOnClosing();
+  }
+
   loadDutyStateData() {
     this.dutyStateService.getTableDataClosing(this.DutySlipID).subscribe
       (
@@ -702,7 +748,7 @@ export class ClossingOneComponent implements OnInit, AfterViewInit, AfterViewChe
           if (data !== null) {
             this.showHideDutyState = true;
           }
-          this.advanceTableDutyState = data;
+          this.advanceTableDutyState = this.dutyStateService.sortDutyStateRecordsNewestFirst(data);
         },
         (error: HttpErrorResponse) => { this.advanceTableDutyState = null; }
       );
@@ -825,9 +871,6 @@ export class ClossingOneComponent implements OnInit, AfterViewInit, AfterViewChe
     if (!this.guardEInvoiceEdit()) {
       return;
     }
-    // #region agent log
-   // fetch('http://127.0.0.1:7532/ingest/f2c32722-bd0e-4386-883a-e749a4372080', { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-Debug-Session-Id': 'b9234c' }, body: JSON.stringify({ sessionId: 'b9234c', runId: 'pre-fix', hypothesisId: 'H8', location: 'NewRententAdmin-ng21/clossingOne.component.ts:openDutySAC:start', message: 'Duty SAC open invoked', data: { source, isArray: Array.isArray(this.advanceTableSAC), length: Array.isArray(this.advanceTableSAC) ? this.advanceTableSAC.length : null }, timestamp: Date.now() }) }).catch(() => { });
-    // #endregion
     const dialogRef = this.dialog.open(DutySACFormDialogComponent,
       {
         data:
@@ -1498,32 +1541,20 @@ export class ClossingOneComponent implements OnInit, AfterViewInit, AfterViewChe
         //    this.advanceTableMOP = data;
         //  }, 
         (data: MOPModel) => {
-          // #region agent log
-          fetch('http://127.0.0.1:7830/ingest/e71207c4-423e-4a42-a900-5bc43349cfbe',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'2871b3'},body:JSON.stringify({sessionId:'2871b3',runId:'run1',hypothesisId:'H1',location:'clossingOne.component.ts:MOPLoadData-before-toggle',message:'mode of payment response received',data:{isNull:data===null,showMOPOtherBefore:this.showMOPOther},timestamp:Date.now()})}).catch(()=>{});
-          // #endregion
           if (data !== null) {
             this.showMOPOther = true;
           }
           this.advanceTableMOP = data;
-          // #region agent log
-          fetch('http://127.0.0.1:7830/ingest/e71207c4-423e-4a42-a900-5bc43349cfbe',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'2871b3'},body:JSON.stringify({sessionId:'2871b3',runId:'run1',hypothesisId:'H1',location:'clossingOne.component.ts:MOPLoadData-after-toggle',message:'mode of payment state updated',data:{showMOPOtherAfter:this.showMOPOther,hasMop:!!this.advanceTableMOP},timestamp:Date.now()})}).catch(()=>{});
-          // #endregion
         },
         (error: HttpErrorResponse) => { this.advanceTableMOP = null; }
       );
   }
 
   onDutyStatusChanged(event: { verifyDuty: boolean, goodForBilling: boolean, message: string }) {
-    // #region agent log
-    fetch('http://127.0.0.1:7830/ingest/e71207c4-423e-4a42-a900-5bc43349cfbe',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'2871b3'},body:JSON.stringify({sessionId:'2871b3',runId:'run2',hypothesisId:'H6',location:'clossingOne.component.ts:onDutyStatusChanged-before',message:'parent received duty status change',data:{verifyDuty:this.verifyDuty,goodForBilling:this.goodForBilling,message:this.Message,incoming:event},timestamp:Date.now()})}).catch(()=>{});
-    // #endregion
     this.verifyDuty = event.verifyDuty;
     this.goodForBilling = event.goodForBilling;
     this.Message = event.message;
      this.GSTDataOnClosing();
-    // #region agent log
-    fetch('http://127.0.0.1:7830/ingest/e71207c4-423e-4a42-a900-5bc43349cfbe',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'2871b3'},body:JSON.stringify({sessionId:'2871b3',runId:'run2',hypothesisId:'H6',location:'clossingOne.component.ts:onDutyStatusChanged-after',message:'parent updated duty status and triggered GST refresh',data:{verifyDuty:this.verifyDuty,goodForBilling:this.goodForBilling,message:this.Message},timestamp:Date.now()})}).catch(()=>{});
-    // #endregion
   }
 
   openSearchModal() {
@@ -1731,9 +1762,6 @@ showAndScrollOpenSettledRates() {
         this.totalInterStateTax = this.TotalTollParInStDispute?.totalInterStateTax || 0;
         this.totalDEChargeableAmount = this.TotalTollParInStDispute?.totalDutyExpenseModel?.totalDEChargeableAmount;
         this.totalDENonChargeableAmount = this.TotalTollParInStDispute?.totalDutyExpenseModel?.totalDENonChargeableAmount;
-        // #region agent log
-        fetch('http://127.0.0.1:7830/ingest/e71207c4-423e-4a42-a900-5bc43349cfbe',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'2871b3'},body:JSON.stringify({sessionId:'2871b3',runId:'run1',hypothesisId:'H2',location:'clossingOne.component.ts:GetTotalTollParInStDispute',message:'totals updated from API',data:{totalTollParking:this.totalTollParking,totalInterStateTax:this.totalInterStateTax},timestamp:Date.now()})}).catch(()=>{});
-        // #endregion
       }
     );
   }
