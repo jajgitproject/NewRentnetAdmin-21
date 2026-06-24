@@ -44,6 +44,7 @@ export class GenerateBillMainModel {
   passengerID:number;
   passengerName:string;
   invoiceNumberIssuedByID:number;
+  hsn:string;
 
   constructor(generateBillMainModel) {
     {
@@ -85,6 +86,7 @@ export class GenerateBillMainModel {
       this.passengerID = generateBillMainModel.passengerID || '';
       this.passengerName = generateBillMainModel.passengerName || '';
       this.invoiceNumberIssuedByID = generateBillMainModel.invoiceNumberIssuedByID || '';
+      this.hsn = generateBillMainModel.hsn || '';
       
       this.invoiceDate = new Date();
       this.billFromDate = new Date();

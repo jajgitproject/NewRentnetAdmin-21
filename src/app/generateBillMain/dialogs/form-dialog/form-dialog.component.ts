@@ -24,6 +24,7 @@ import Swal from 'sweetalert2';
 import { OpenPopUpDialogComponent} from '../../openPopUp/openPopUp.component'
 import { CustomerCityModel } from 'src/app/customerConfigurationInvoicing/customerConfigurationInvoicingDropDown.model';
 import { MatSnackBar } from '@angular/material/snack-bar';
+import { DutySACCDropDown } from 'src/app/dutySAC/dutySACDropDownModel';
 
 @Component({
   standalone: false,
@@ -85,6 +86,8 @@ export class FormDialogComponent
   customerControl=[];
   passengerID: any;
   organizationalEntityID: any;
+
+  public SACList: DutySACCDropDown[] = [];
   
   constructor(
   public dialogRef: MatDialogRef<FormDialogComponent>, 
@@ -153,7 +156,8 @@ export class FormDialogComponent
       cgstPercentage: [this.advanceTable.cgstPercentage],
       sgstPercentage: [this.advanceTable.sgstPercentage],
       passengerID: [this.advanceTable.passengerID],
-      passengerName: [this.advanceTable.passengerName]
+      passengerName: [this.advanceTable.passengerName],
+      hsn: [this.advanceTable.hsn]
     });
   }
 
@@ -161,6 +165,7 @@ export class FormDialogComponent
   {
     //this.InitGuest();
     this.InitOrganizationalEntity();
+    this.InitSAC();
     //this.InitCustomer();
     //this.InitState();
     //this.InitCity();
@@ -188,6 +193,17 @@ export class FormDialogComponent
     
     //this.InitVehicle();
     //this.InitPackageType();
+  }
+
+  InitSAC() {
+    this._generalService.GetSAC().subscribe(
+      (data: DutySACCDropDown[]) => {
+        this.SACList = data ?? [];
+      },
+      () => {
+        this.SACList = [];
+      }
+    );
   }
   
   //------------- Guest's Drop Down -------------

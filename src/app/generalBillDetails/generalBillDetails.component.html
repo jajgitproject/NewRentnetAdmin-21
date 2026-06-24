@@ -160,7 +160,7 @@
   <!-- Taxes -->
   <table style="margin-top: 10px;" class="no-border">
     <tr>
-       <td>SAC : 996601</td>
+       <td>SAC : {{ dataSource?.hsn }}</td>
     </tr>
    <tr *ngIf="dataSource?.cgstPercentage!=0">
        <td class="text-right">CGST &nbsp;&nbsp;&nbsp; <span *ngIf="dataSource?.cgstPercentage!=0"> @ {{dataSource?.cgstPercentage}}%</span> &nbsp;&nbsp;&nbsp; <span *ngIf="dataSource?.cgstAmount!=0">{{dataSource?.cgstAmount}}</span></td>
