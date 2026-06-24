@@ -40,6 +40,7 @@ export class JajSingleDutySingleBillForLocalComponent implements OnInit, OnDestr
   dutySlipPdfUrl: SafeResourceUrl | null = null;
   printDutySlipEmbedUrl: SafeResourceUrl | null = null;
   invoiceLogoUrl: string | null = null;
+  customerSpecificFieldPairs: { fieldName: string; fieldValue: string }[] = [];
   private dutySlipResizeObserver: ResizeObserver | null = null;
   private dutySlipResizeTimeouts: ReturnType<typeof setTimeout>[] = [];
   private readonly onDutySlipIframeMessage = (event: MessageEvent): void => {
@@ -96,6 +97,7 @@ export class JajSingleDutySingleBillForLocalComponent implements OnInit, OnDestr
      data =>   
      {
        this.dataSource = data;
+       this.customerSpecificFieldPairs = this.buildCustomerSpecificFieldPairs(data);
        this.dutySlipPdfUrl = null;
        this.printDutySlipEmbedUrl = null;
        this.buildPrintDutySlipEmbedUrl();
@@ -110,9 +112,73 @@ export class JajSingleDutySingleBillForLocalComponent implements OnInit, OnDestr
          }
        }
      },
-     (error: HttpErrorResponse) => { this.dataSource = null;}
+     (error: HttpErrorResponse) => {
+       this.dataSource = null;
+       this.customerSpecificFieldPairs = [];
+     }
    );
  }
+
+  private buildCustomerSpecificFieldPairs(data: any): { fieldName: string; fieldValue: string }[] {
+    const fromReservationJson = this.parseCustomerSpecificFields(data?.customerSpecificFields);
+    if (fromReservationJson.length) {
+      return fromReservationJson;
+    }
+
+    return (data?.invoiceCustomerFieldsModel ?? [])
+      .filter((field: any) => field?.activationStatus !== false)
+      .map((field: any) => ({
+        fieldName: (field?.customerReservationFieldName ?? '').trim(),
+        fieldValue: (field?.customerReservationFieldValue ?? '').trim()
+      }))
+      .filter((field: { fieldName: string; fieldValue: string }) => field.fieldName || field.fieldValue);
+  }
+
+  private parseCustomerSpecificFields(value: string | null | undefined): { fieldName: string; fieldValue: string }[] {
+    const trimmed = (value || '').trim();
+    if (!trimmed) {
+      return [];
+    }
+
+    const parseCandidates = [
+      trimmed,
+      `[${trimmed}]`,
+      trimmed.startsWith('[') ? trimmed : `[${trimmed.replace(/^\s*,\s*/, '')}]`
+    ];
+
+    for (const candidate of parseCandidates) {
+      try {
+        const parsed = JSON.parse(candidate);
+        const list = Array.isArray(parsed) ? parsed : [parsed];
+        const mapped = list
+          .map(item => this.extractCustomerSpecificFieldPair(item))
+          .filter(item => item.fieldName || item.fieldValue);
+
+        if (mapped.length) {
+          return mapped;
+        }
+      } catch {
+        // try next parse strategy
+      }
+    }
+
+    const results: { fieldName: string; fieldValue: string }[] = [];
+    const fieldPattern = /"(?:FieldName|fieldName)"\s*:\s*"([^"]*)"[\s\S]*?"(?:FieldValue|fieldValue)"\s*:\s*"([^"]*)"/g;
+    let match;
+
+    while ((match = fieldPattern.exec(trimmed)) !== null) {
+      results.push({ fieldName: match[1], fieldValue: match[2] });
+    }
+
+    return results;
+  }
+
+  private extractCustomerSpecificFieldPair(item: any): { fieldName: string; fieldValue: string } {
+    return {
+      fieldName: item?.FieldName ?? item?.fieldName ?? '',
+      fieldValue: item?.FieldValue ?? item?.fieldValue ?? ''
+    };
+  }
  printWithSelectPdf() {
   const element = this.printableArea?.nativeElement as HTMLElement;
   const invoiceNumber = this.dataSource?.invoiceModel?.invoiceNumberWithPrefix?.trim();
