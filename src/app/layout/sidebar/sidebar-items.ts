@@ -1086,6 +1086,16 @@ export const ROUTES: RouteInfo[] = [
         submenu: [],
         isAccess: false
       },
+      {        
+        path: 'incidenceMIS',
+        title: 'Incidence MIS',
+        moduleName: 'incidenceMIS',
+        icon: 'fas fa-tachometer-alt',
+        class: '',
+        groupTitle: false,
+        submenu: [],
+        isAccess: false
+      },
       {
         path: 'invoiceHome',
         title: 'Invoice Home',

@@ -1,0 +1,104 @@
+// @ts-nocheck
+export class IncidenceMIS {
+  incidenceID: number;
+  dispatchLocationID?: number;
+  dispatchLocation: string;
+  reservationID?: number;
+  dutySlipID?: number;
+  pickupDate: string;
+  incidenceDate: string;
+  customerID?: number;
+  customer: string;
+  primaryPassengerID?: number;
+  passengerName: string;
+  vehicle: string;
+  registrationNumber: string;
+  driverOfficialIdentityNumber: string;
+  department: string;
+  reportSource: string;
+  issueRelatedTo: string;
+  issueCategory: string;
+  incidenceDetails: string;
+  actionTaken: string;
+  openDate: string;
+  openTime: string;
+  closureDate: string;
+  closureTime: string;
+  closedByEmployeeID?: number;
+  closedByEmployeeName: string;
+  salesManager: string;
+  vip: string;
+  rootCauseAnalysis: string;
+  openedByEmployeeID?: number;
+  openedByEmployeeName: string;
+  customerGroup: string;
+  customerSalesManager: string;
+  incidenceTypeID?: number;
+  incidenceType: string;
+  supplierID?: number;
+  supplier: string;
+  supplierType: string;
+  responsible1: string;
+  responsible1DriverID?: number;
+  responsible1Driver: string;
+  responsible1VendorID?: number;
+  responsible1Vendor: string;
+  responsible1EmployeeID?: number;
+  responsible1Employee: string;
+  responsible1CustomerPersonID?: number;
+  responsible1CustomerPerson: string;
+  responsible2: string;
+  responsible2DriverID?: number;
+  responsible2Driver: string;
+  responsible2VendorID?: number;
+  responsible2Vendor: string;
+  responsible2EmployeeID?: number;
+  responsible2Employee: string;
+  responsible2CustomerPersonID?: number;
+  responsible2CustomerPerson: string;
+  responsible3: string;
+  responsible3DriverID?: number;
+  responsible3Driver: string;
+  responsible3VendorID?: number;
+  responsible3Vendor: string;
+  responsible3EmployeeID?: number;
+  responsible3Employee: string;
+  responsible3CustomerPersonID?: number;
+  responsible3CustomerPerson: string;
+  responsible4: string;
+  responsible4DriverID?: number;
+  responsible4Driver: string;
+  responsible4VendorID?: number;
+  responsible4Vendor: string;
+  responsible4EmployeeID?: number;
+  responsible4Employee: string;
+  responsible4CustomerPersonID?: number;
+  responsible4CustomerPerson: string;
+  incidenceEmailAcknowledged?: boolean;
+  feedbackEmailAcknowledged?: boolean;
+  debitTypeID?: number;
+  debitType: string;
+  debitAmount?: number;
+
+  constructor(data: Partial<IncidenceMIS> = {}) {
+    Object.assign(this, data);
+  }
+}
+
+export interface IncidenceMISSearchCriteria {
+  searchCustomerGroup?: string;
+  searchCustomer?: string;
+  searchSalesPerson?: string;
+  searchPassengerName?: string;
+  searchVehicleCategoryID?: number;
+  searchVehicleID?: number;
+  searchRegistrationNumber?: string;
+  searchDriver?: string;
+  searchDispatchLocationID?: number;
+  searchIncidenceFromDate?: string;
+  searchIncidenceToDate?: string;
+  searchIncidenceTypeID?: number;
+  pageNumber?: number;
+  orderByColumn?: string;
+  order?: string;
+}
