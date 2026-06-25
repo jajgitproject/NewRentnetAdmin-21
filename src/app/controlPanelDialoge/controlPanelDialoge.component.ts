@@ -2912,6 +2912,73 @@ public getInvoiceNumber(item:any ,i: any)
     });
   }
 
+  //--------- Post PickUP Call SMS Popup ----------
+postPickUPCallSMS(item: any) {
+  if (!this.canPostPickUpCall(item)) {
+    return;
+  }
+
+  // First check if SMS already sent
+  this.dutyPostPickUPCallService.checkSMSStatus(item.allotmentID).subscribe({
+    next: (checkRes: any) => {
+
+      if (checkRes?.isSent) {
+        Swal.fire(
+          'Already Sent!',
+          'This SMS has already been sent one time.',
+          'info'
+        );
+        return;
+      }
+
+      // If not sent, ask confirmation
+      Swal.fire({
+        title: 'Are you sure?',
+        text: 'Do you want to send SMS...!!',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonText: 'Yes, Send it!',
+        cancelButtonText: 'No'
+      }).then((result) => {
+        if (result.isConfirmed) {
+
+          const smsModel = {
+            reservationID: item.reservationID,
+            userID: this._generalService.getUserID(),
+            mobile: item.customerPerson?.primaryMobile,
+            passengerName: item.customerPerson?.customerPersonName
+          };
+
+          this.dutyPostPickUPCallService.sendSMS(smsModel).subscribe({
+            next: (res) => {
+              Swal.fire(
+                'Sent!',
+                'SMS has been sent successfully.',
+                'success'
+              );
+            },
+            error: (err) => {
+              Swal.fire(
+                'Error!',
+                'Failed to send SMS.',
+                'error'
+              );
+            }
+          });
+
+        }
+      });
+
+    },
+    error: (err) => {
+      Swal.fire(
+        'Error!',
+        'Unable to check SMS status.',
+        'error'
+      );
+    }
+  });
+}
 }
 
 

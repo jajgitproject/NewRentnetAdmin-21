@@ -68,6 +68,15 @@ export class DutyPostPickUPCallService
     let userID = this.generalService.getUserID();
     return this.httpClient.delete(this.API_URL + '/'+ bankID + '/'+ userID);
   }
+   sendSMS(advanceTable: any) 
+  {
+   
+    return this.httpClient.post<any>(this.API_URL +'/SendPostPickupSMS' , advanceTable);
+  }
+
+  checkSMSStatus(allotmentID: number) {
+  return this.httpClient.get(this.API_URL + '/checkSMSStatus/' + allotmentID);
+}
 
 }
   
