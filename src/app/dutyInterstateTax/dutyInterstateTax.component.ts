@@ -143,14 +143,11 @@ deleteItem(row)
 
    public loadData() 
    {
-    debugger;
       this.dutyInterstateTaxService.getDutyInterstateTaxEntryDetails(this.dutySlipID).subscribe
       (
         data =>   
         {
-          debugger;
           this.advanceTableDIT = data;
-          console.log(this.advanceTableDIT);
         },
         (error: HttpErrorResponse) => { this.advanceTableDIT = null;}
       );

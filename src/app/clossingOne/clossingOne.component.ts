@@ -1479,7 +1479,6 @@ export class ClossingOneComponent implements OnInit, AfterViewInit {
       this.newFormService.GetCustomerSpecificFields(this.ReservationID).subscribe(
         (data:CustomerSpecificDetailsData)=>
         {
-           console.log(data.reservationDetailsList[0]?.customerSpecificFieldList);
           if (data.reservationDetailsList[0]?.customerSpecificFieldList !== null) {
             this.showCSF= true;
           }

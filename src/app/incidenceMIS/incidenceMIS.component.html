@@ -51,7 +51,7 @@
                       </mat-form-field>
                     </div>
 
-                    <div class="col-md-3">
+                    <!-- <div class="col-md-3">
                       <mat-form-field appearance="outline" class="w-100">
                         <mat-label>Sales Person</mat-label>
                         <input type="text" matInput [formControl]="searchSalesPerson" [matAutocomplete]="autoSalesPerson">
@@ -61,7 +61,7 @@
                           </mat-option>
                         </mat-autocomplete>
                       </mat-form-field>
-                    </div>
+                    </div> -->
 
                     <div class="col-md-3">
                       <mat-form-field appearance="outline" class="w-100">
@@ -206,7 +206,7 @@
                             {{ columnTitleMap[column] || column }}
                           </mat-header-cell>
                           <mat-cell *matCellDef="let row">
-                            {{ getCellDisplayValue(row, column) }}
+                            {{ getCellDisplayValue(row, column) || 'N/A'}}
                           </mat-cell>
                         </ng-container>
 

@@ -26,13 +26,11 @@ export class IncidenceMIS {
   closureTime: string;
   closedByEmployeeID?: number;
   closedByEmployeeName: string;
-  salesManager: string;
   vip: string;
   rootCauseAnalysis: string;
   openedByEmployeeID?: number;
   openedByEmployeeName: string;
   customerGroup: string;
-  customerSalesManager: string;
   incidenceTypeID?: number;
   incidenceType: string;
   supplierID?: number;
