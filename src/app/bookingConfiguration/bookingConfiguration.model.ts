@@ -6,6 +6,8 @@ export class BookingConfigurationCustomerDetails {
   customerName : string;
   aggregatorName:string;
   packageType:string;
+  vehicle :string;
+  customerCodeForAPIIntegration :string;
   pickupDate:Date;
   pickupTime:Date;
   dropOffDate:Date;
@@ -27,6 +29,7 @@ export class BookingConfigurationCustomerDetails {
       this.customerName = bookingConfigurationCustomerDetails.customerName || '';
       this.aggregatorName = bookingConfigurationCustomerDetails.aggregatorName || '';
       this.packageType = bookingConfigurationCustomerDetails.packageType || '';
+      this.vehicle = bookingConfigurationCustomerDetails.vehicle || '';
       this.pickupDate = bookingConfigurationCustomerDetails.pickupDate || '';
       this.pickupTime = bookingConfigurationCustomerDetails.pickupTime || '';
       this.dropOffDate = bookingConfigurationCustomerDetails.dropOffDate || '';
@@ -76,6 +79,7 @@ export class BookingConfigurationPassengerDetails {
   integrationRequestPassengerMobile : string;
   integrationRequestPassengerEmail : string;
   integrationRequestPassengerGender : string;
+  integrationRequestStopType:string;
   pickupStopType : string;
   dropOffStopType : string;
   integrationRequestPickupStopID : number;
@@ -90,6 +94,7 @@ export class BookingConfigurationPassengerDetails {
        this.integrationRequestPassengerMobile = bookingConfigurationPassengerDetails.integrationRequestPassengerMobile || '';
        this.integrationRequestPassengerEmail = bookingConfigurationPassengerDetails.integrationRequestPassengerEmail || '';
        this.integrationRequestPassengerGender  = bookingConfigurationPassengerDetails.integrationRequestPassengerGender || '';
+       this.integrationRequestStopType = bookingConfigurationPassengerDetails.integrationRequestStopType || '';
        this.pickupStopType = bookingConfigurationPassengerDetails.pickupStopType || '';
        this.dropOffStopType = bookingConfigurationPassengerDetails.dropOffStopType || '';
        this.integrationRequestPickupStopID  = bookingConfigurationPassengerDetails.integrationRequestPickupStopID || '';

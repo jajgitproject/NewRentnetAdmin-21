@@ -36,11 +36,10 @@ export class BookingRequestComponent implements OnInit {
     'CustomerName',
     'RequestDate',
     'PickupDate',
-    'RequestStatus',
+    'ConfirmationDateTime',
     'ReservationID',
-    'PickupTime',
-    'RequestTime',
-    'CheckedByEco',
+    'reservationCreatedBy',
+    'RequestStatus',
     'actions'
   ];
 
@@ -82,7 +81,7 @@ export class BookingRequestComponent implements OnInit {
   contextMenu: MatMenuTrigger;
   contextMenuPosition = { x: '0px', y: '0px' };
   ngOnInit() {
-    this.loadData();
+    //this.loadData();
     this.InitCustomer();
     this.SubscribeUpdateService();
 
@@ -169,6 +168,7 @@ export class BookingRequestComponent implements OnInit {
     this.bookingRequestService.getTableData(fromDate,toDate,this.SearchTRN,this.SearchiTRN,this.customerGroupName.value,this.SearchEcoBookingNo,this.SearchConfirmByEco,this.PageNumber).subscribe(
       data => {
         this.dataSource = data;
+        console.log('dataSource', this.dataSource);
       },
       (error: HttpErrorResponse) => { this.dataSource = null; }
     );

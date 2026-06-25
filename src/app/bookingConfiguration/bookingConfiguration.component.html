@@ -18,95 +18,71 @@
     <div style="background-color:#ebeef1;font-size:10px;">
 
         <div class="row" style="margin-left:20px;padding-top:20px;">
-            <div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 mb-2">
+            <div class="col-xl-4 col-lg-6 col-md-12 col-sm-12 mb-2">
                 <b>Request Number</b><br>
                 {{customerDetails?.customerTravelRequestNumber}}
             </div>
 
-            <div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 mb-2">
+            <div class="col-xl-4 col-lg-6 col-md-12 col-sm-12 mb-2">
                 <b>Customer</b><br>
-                {{customerDetails?.customerName}}
+                {{customerDetails?.customerName}}-{{customerDetails?.customerID || 'N/A' }}-{{customerDetails?.customerCodeForAPIIntegration || 'N/A' }}
             </div>
 
-            <div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 mb-2">
-                <b>Aggregator</b><br>
-                {{customerDetails?.aggregatorName}}
-            </div>
-            <div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 mb-2">
-                <b>Duty Type</b><br>
-                {{customerDetails?.packageType}}
-            </div>
-        </div>
-
-        <div *ngFor="let data of passengerDetailsList; index as i">
-
-            <div class="row" style="margin-left:20px;margin-top:10px;">
-                <div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 mb-2">
-                    <b>Passenger({{ i + 1 }}) Name</b><br>
-                    {{data.integrationRequestPassenger}}
-                </div>
-
-                <div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 mb-2">
-                    <b>Passenger({{ i + 1 }}) Mobile</b><br>
-                    {{data.integrationRequestPassengerMobile}}
-                </div>
-
-                <div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 mb-2">
-                    <b>Passenger({{ i + 1 }}) Email</b><br>
-                    {{data.integrationRequestPassengerEmail}}
-                </div>
-
-                <div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 mb-2">
-                    <b>Gender</b><br>
-                    {{data.integrationRequestPassengerGender}}
-                </div>
-            </div>
-
-            <!-- <div class="row" style="margin-left:20px;margin-top:20px;">
-                <div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 mb-2">
-                    <b>Pickup Address</b><br>
-                    {{data.pickupAddress}}
-                </div>
-
-                <div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 mb-2">
-                    <b>Dropoff Address</b><br>
-                    {{data.dropoffAddress}}
+            <!-- <div class="col-xl-4 col-lg-6 col-md-12 col-sm-12 mb-2">
+                <div *ngFor="let data of passengerDetailsList">                
+                <b>Passenger Details</b><br>
+                {{data.integrationRequestPassenger }} - ({{data.integrationRequestPassengerGender}}) ,
+                {{data.integrationRequestPassengerMobile}},
+                {{data.integrationRequestPassengerEmail}}                
                 </div>
             </div> -->
-
-        </div>
+            
+        </div>      
 
         <div *ngFor="let data of stopDetailsList">
 
             <div class="row" style="margin-left:20px;margin-top:20px;">
 
-                <div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 mb-2">
-                    <b>{{ getStopLabel(data.integrationRequestStopType) }} Date & Time</b><br>
-                    {{data.integrationRequestStopDate | date}}
-                    {{data.integrationRequestStopTime | date:'shortTime'}}
-                </div>
-
-                <div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 mb-2">
+                <div class="col-xl-4 col-lg-6 col-md-12 col-sm-12 mb-2">
                     <b>{{ getStopLabel(data.integrationRequestStopType) }} Type</b><br>
                     {{data.integrationRequestStopType || 'N/A'}}
                 </div>
 
-                <div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 mb-2">
+                <div class="col-xl-4 col-lg-6 col-md-12 col-sm-12 mb-2">
+                    <b>{{ getStopLabel(data.integrationRequestStopType) }} Date & Time</b><br>
+                    {{data.integrationRequestStopDate | date}}
+                    {{data.integrationRequestStopTime | date:'shortTime'}}
+                </div>                
+
+                <div class="col-xl-4 col-lg-6 col-md-12 col-sm-12 mb-2">
                     <b>{{ getStopLabel(data.integrationRequestStopType) }} Address Details</b><br>
                     {{data.integrationRequestStopAddress || 'N/A'}}
                 </div>
 
-                <div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 mb-2">
+                <!-- <div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 mb-2">
                     <b>{{ getStopLabel(data.integrationRequestStopType) }} City</b><br>
                     {{data.integrationRequestStopCity || 'N/A'}}
-                </div>
+                </div> -->
 
             </div>
         </div>
 
+        <div class="row" style="margin-left:20px;margin-top:10px;">
+            <div *ngFor="let data of passengerDetailsList; index as i">
+                <div class="col-xl-4 col-lg-6 col-md-12 col-sm-12 mb-2">
+                <b>Passenger({{ i + 1 }}) Details</b><br>
+                {{data.integrationRequestPassenger }} ({{data.integrationRequestPassengerGender}}) -
+                {{data.integrationRequestPassengerMobile}} -
+                {{data.integrationRequestPassengerEmail}}                  
+                </div>
+            </div>
+            
+        </div>     
+
         <form class="register-form quick-search-panel" [formGroup]="advanceTableForm" (ngSubmit)="submit">
             <div class="row" style="margin-left: 20px;margin-top: 5px;">
-              <div class="col-xl-3 col-lg-3 col-md-6 col-sm-6 mb-2" >
+              <div class="col-xl-4 col-lg-4 col-md-6 col-sm-6 mb-2" >
+                <span style="margin-left: 15px;font-weight: bold;">Duty Type</span> : <span>{{customerDetails?.packageType || 'N/A'}}</span>
                 <mat-form-field class="example-full-width cp-quick-search-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
                     <mat-label>Package Type</mat-label>
                     <input required type="text" matInput formControlName="packageType"
@@ -121,7 +97,8 @@
                 </mat-form-field>
               </div>
   
-              <div class="col-xl-3 col-lg-3 col-md-6 col-sm-6 mb-2">
+              <div class="col-xl-4 col-lg-4 col-md-6 col-sm-6 mb-2">
+                <span style="margin-left: 15px;font-weight: bold;">Package</span> : <span>{{customerDetails?.package || 'N/A'}}</span>
                 <mat-form-field class="example-full-width cp-quick-search-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
                     <mat-label>Package</mat-label>
                     <input required type="text" matInput formControlName="package"
@@ -135,7 +112,8 @@
                 </mat-form-field>
               </div>
   
-              <div class="col-xl-3 col-lg-3 col-md-6 col-sm-6 mb-2">
+              <div class="col-xl-4 col-lg-4 col-md-6 col-sm-6 mb-2">
+                <span style="margin-left: 15px;font-weight: bold;">Pickup City</span> : <span>{{stopDetailsList[0].integrationRequestStopCity || 'N/A'}}</span>
                 <mat-form-field class="example-full-width cp-quick-search-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
                     <mat-label>Pickup City</mat-label>
                     <input required type="text" matInput formControlName="pickupCity"
@@ -149,7 +127,13 @@
                 </mat-form-field>
               </div>
   
-              <div class="col-xl-3 col-lg-3 col-md-6 col-sm-6 mb-2">
+              
+            </div>
+
+            <div class="row" style="margin-left: 20px;margin-top: 5px;">
+              <div class="col-xl-4 col-lg-4 col-md-6 col-sm-6 mb-2">
+                <span style="margin-left: 15px;font-weight: bold;">Car</span> : <span>{{customerDetails?.vehicle || 'N/A'}}</span>
+
                 <mat-form-field class="example-full-width cp-quick-search-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
                     <mat-label>Vehicle</mat-label>
                     <input required type="text" matInput formControlName="vehicle"
@@ -163,22 +147,38 @@
                     </mat-autocomplete>
                 </mat-form-field>
               </div>
-            </div>
-              
-            <div class="row" style="margin-left: 20px;margin-top: 5px;">
-                <div class="col-xl-3 col-lg-3 col-md-6 col-sm-6 mb-2">
+
+              <div class="col-xl-4 col-lg-4 col-md-6 col-sm-6 mb-2" style="margin-top: 15px;">
                     <mat-form-field class="example-full-width cp-quick-search-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
                         <mat-label>Request Type</mat-label>
                         <mat-select formControlName="requestType">
                             <mat-option value="Airport Pickup">Airport Pickup</mat-option>
                             <mat-option value="Airport Drop">Airport Drop</mat-option>
+                            <mat-option value="Local">Local</mat-option>
+                            <mat-option value="Outstation">Outstation</mat-option>
                             <mat-option value="Other">Other</mat-option>
                         </mat-select>
                     </mat-form-field>
-                </div>
-  
-                <div class="col-xl-3 col-lg-3 col-md-6 col-sm-6 mb-2">
-                  <!-- <b>Date/Time :</b>&nbsp; <span>{{customerDetails?.pickupDate | date :'dd-MM-yyyy'}} {{customerDetails?.pickupTime | date :'shortTime'}}</span> -->
+              </div>
+
+              <div class="col-xl-4 col-lg-4 col-md-6 col-sm-6 mb-2" style="margin-top: 15px;">
+                  <mat-form-field class="example-full-width cp-quick-search-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
+                      <mat-label>Service Location</mat-label>
+                      <input required type="text" matInput formControlName="serviceLocation"
+                          [matAutocomplete]="auto10">
+                      <mat-autocomplete #auto10="matAutocomplete" (optionSelected)="onSLSelected($event.option.value)">
+                          <mat-option *ngFor="let option of filteredServiceLocationOptions | async"
+                              [value]="option.organizationalEntityName"
+                              (click)="getServiceLocationID(option.organizationalEntityID)">
+                              {{option.organizationalEntityName}}
+                          </mat-option>
+                      </mat-autocomplete>
+                  </mat-form-field>
+              </div>
+            </div>
+              
+            <div class="row" style="margin-left: 20px;margin-top: 5px;">
+                <div class="col-xl-4 col-lg-4 col-md-6 col-sm-6 mb-2">
                    <mat-form-field class="example-full-width mb-3 cp-quick-search-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
                       <mat-label>Pickup DateTime</mat-label>
                       <input
@@ -196,7 +196,7 @@
                   </mat-form-field>
                 </div>
   
-                <div class="col-xl-3 col-lg-3 col-md-6 col-sm-6 mb-2" *ngIf="ifBlock;else elseBlock">
+                <div class="col-xl-4 col-lg-4 col-md-6 col-sm-6 mb-2" *ngIf="ifBlock;else elseBlock">
                   <mat-form-field class="example-full-width cp-quick-search-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
                       <mat-label>Pickup Geo Location</mat-label>
                       <input required type="text" matInput formControlName="pickupAddress"
@@ -215,7 +215,7 @@
                           (change)="valueSwitch()" [(indeterminate)]="indeterminate"
                           [labelPosition]="labelPosition">Google Addresses</mat-checkbox>
                   </div>
-              </div>
+                </div>
   
               <ng-template #elseBlock>
                   <div class="col-xl-3 col-lg-3 col-md-6 col-sm-6 mb-2">
@@ -233,7 +233,7 @@
                   </div>
               </ng-template>
   
-              <div class="col-xl-3 col-lg-3 col-md-6 col-sm-6 mb-2">
+              <div class="col-xl-4 col-lg-4 col-md-6 col-sm-6 mb-2">
                   <mat-form-field class="example-full-width cp-quick-search-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
                       <mat-label>Pickup Address Details </mat-label>
                       <input required matInput formControlName="pickupAddressDetails">
@@ -242,59 +242,26 @@
             </div>
   
             <div class="row" style="margin-left: 20px;margin-top: 5px;">
-              <div class="col-xl-3 col-lg-3 col-md-6 col-sm-6 mb-2">
-                  <mat-form-field class="example-full-width cp-quick-search-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
-                      <mat-label>Service Location</mat-label>
-                      <input required type="text" matInput formControlName="serviceLocation"
-                          [matAutocomplete]="auto10">
-                      <mat-autocomplete #auto10="matAutocomplete" (optionSelected)="onSLSelected($event.option.value)">
-                          <mat-option *ngFor="let option of filteredServiceLocationOptions | async"
-                              [value]="option.organizationalEntityName"
-                              (click)="getServiceLocationID(option.organizationalEntityID)">
-                              {{option.organizationalEntityName}}
-                          </mat-option>
-                      </mat-autocomplete>
-                  </mat-form-field>
-              </div>
-
-              <div class="col-xl-3 col-lg-3 col-md-6 col-sm-6 mb-2">
-                <mat-form-field class="example-full-width cp-quick-search-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
-                    <mat-label>Reservation Status</mat-label>
-                    <mat-select formControlName="reservationStatus">
-                        <mat-option value="Confirmed">Confirmed</mat-option>
-                        <mat-option value="Approved">Approved</mat-option>
-                        <mat-option value="Rejected">Rejected</mat-option>
-                    </mat-select>
-                    <mat-error>
-                        Reservation Status is required
-                    </mat-error>
-                </mat-form-field>
-              </div>
-
-                <div class="col-xl-3 col-lg-3 col-md-6 col-sm-6 mb-2" >
-                <mat-form-field class="example-full-width cp-quick-search-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
-                    <mat-label>Drop Off City</mat-label>
-                    <input type="text" matInput formControlName="dropOffCity"
-                        [matAutocomplete]="auto14">
-                    <mat-autocomplete #auto14="matAutocomplete" (optionSelected)="onDropCitySelected($event.option.value)">
-                        <mat-option *ngFor="let option of filteredDropOffCityOptions | async"
-                            [value]="option.geoPointName" (click)="getDropOffCityID(option.geoPointID)">
-                            {{option.geoPointName}}
-                        </mat-option>
-                    </mat-autocomplete>
-                </mat-form-field>
+                <div class="col-xl-4 col-lg-4 col-md-6 col-sm-6 mb-2">
+                <mat-form-field class="example-full-width mb-3 cp-quick-search-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
+                        <mat-label>DropOff DateTime</mat-label>
+                        <input
+                            matInput
+                            [owlDateTimeTrigger]="date3"
+                            [owlDateTime]="date3"
+                            formControlName="dropOffDateTime"
+                        />
+                    <mat-icon
+                        matSuffix
+                        [owlDateTimeTrigger]="date3"
+                        class="date-icon disabled-icon"
+                    >today</mat-icon>
+                    <owl-date-time #date3></owl-date-time>
+                    </mat-form-field>
                 </div>
 
-                <div class="col-xl-3 col-lg-3 col-md-6 col-sm-6 mb-2">
-                <mat-form-field class="example-full-width cp-quick-search-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
-                    <mat-label>Drop Off Address Details </mat-label>
-                    <input matInput formControlName="dropOffAddressDetails">
-                </mat-form-field>
-                </div>
-            </div>
 
-            <div class="row" style="margin-left: 20px;margin-top: 5px;">
-                <div class="col-xl-3 col-lg-3 col-md-6 col-sm-6 mb-2" *ngIf="dropOffifBlock;else elseBlock2">
+                <div class="col-xl-4 col-lg-4 col-md-6 col-sm-6 mb-2" *ngIf="dropOffifBlock;else elseBlock2">
                     <mat-form-field class="example-full-width cp-quick-search-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
                         <mat-label>Drop Off Geo Location</mat-label>
                         <input type="text" matInput formControlName="dropOffAddress"
@@ -332,22 +299,11 @@
                     </div>
                 </ng-template>
 
-                <div class="col-xl-3 col-lg-3 col-md-6 col-sm-6 mb-2">
-                <!-- <b>Date/Time :</b>&nbsp; <span>{{customerDetails?.dropOffDate | date :'dd-MM-yyyy'}} {{customerDetails?.dropOffTime | date :'shortTime'}}</span> -->
-                <mat-form-field class="example-full-width mb-3 cp-quick-search-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
-                        <mat-label>DropOff DateTime</mat-label>
-                        <input
-                            matInput
-                            [owlDateTimeTrigger]="date3"
-                            [owlDateTime]="date3"
-                            formControlName="dropOffDateTime"
-                        />
-                    <mat-icon
-                        matSuffix
-                        [owlDateTimeTrigger]="date3"
-                        class="date-icon disabled-icon"
-                    >today</mat-icon>
-                    <owl-date-time #date3></owl-date-time>
+
+                <div class="col-xl-4 col-lg-4 col-md-6 col-sm-6 mb-2">
+                    <mat-form-field class="example-full-width cp-quick-search-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
+                        <mat-label>Drop Off Address Details </mat-label>
+                        <input matInput formControlName="dropOffAddressDetails">
                     </mat-form-field>
                 </div>
             </div>

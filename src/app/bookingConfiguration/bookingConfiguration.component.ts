@@ -272,9 +272,12 @@ toggleStopFold() {
 
   public loadData() 
   {
+    debugger; 
     this.bookingConfigurationService.GetReservationByID(this.BookingID).subscribe(
       data => {
+        debugger;
           this.dataSource = data;
+          console.log(this.dataSource);
           this.PackageType = this.dataSource.packageType;
           this.advanceTableForm.patchValue({packageTypeID:this.dataSource.packageTypeID});
           this.advanceTableForm.patchValue({packageType:this.dataSource.packageType});
@@ -333,10 +336,8 @@ toggleStopFold() {
 
   public GetCustomerDetails() 
   {
-    
     this.bookingConfigurationService.getCustomerDetails(this.BookingID).subscribe(
         data => {
-          
           this.customerDetails = data;
           console.log(this.customerDetails);  
           if(this.customerDetails.customerID === 15)
@@ -513,33 +514,54 @@ private extractTime(dateTime: Date): Date {
     };
   }
 
-  public GetStopDetails() 
-  {
-    this.bookingConfigurationService.getStopDetails(this.BookingID).subscribe(
-        data => {
-          this.stopDetailsList = data;
-          // this.advanceTableForm.patchValue({pickupCityID:this.stopDetailsList[0].integrationRequestStopID});
-          // this.advanceTableForm.patchValue({pickupCity:this.stopDetailsList[0].integrationRequestStopCity.split("#")[1]});
-           this.advanceTableForm.patchValue({pickupAddress:this.stopDetailsList[0].integrationRequestStopAddress});
-           this.advanceTableForm.patchValue({pickupAddressLatitude:this.stopDetailsList[0].integrationRequestStopLatitude});
-           this.advanceTableForm.patchValue({pickupAddressLongitude:this.stopDetailsList[0].integrationRequestStopLongitude});
-          // this.advanceTableForm.patchValue({pickupDate:this.stopDetailsList[0].integrationRequestStopDate});
-          // this.advanceTableForm.patchValue({pickupTime:this.stopDetailsList[0].integrationRequestStopTime});
-           this.advanceTableForm.patchValue({pickupStopOrderPriority:this.stopDetailsList[0].priorityOrder});
+  public GetStopDetails() {
+  this.bookingConfigurationService.getStopDetails(this.BookingID).subscribe(
+    data => {
 
-          // this.advanceTableForm.patchValue({dropOffCityID:this.stopDetailsList[1].integrationRequestStopID});
-          // this.advanceTableForm.patchValue({dropOffCity:this.stopDetailsList[1].integrationRequestStopCity.split("#")[1]});
-           this.advanceTableForm.patchValue({dropOffAddress:this.stopDetailsList[1].integrationRequestStopAddress});
-           this.advanceTableForm.patchValue({dropOffAddressLatitude:this.stopDetailsList[1].integrationRequestStopLatitude});
-           this.advanceTableForm.patchValue({dropOffAddressLongitude:this.stopDetailsList[1].integrationRequestStopLongitude});
-          // this.advanceTableForm.patchValue({dropOffDate:this.stopDetailsList[1].integrationRequestStopDate});
-          // this.advanceTableForm.patchValue({dropOffTime:this.stopDetailsList[1].integrationRequestStopTime});
-           this.advanceTableForm.patchValue({dropOffStopOrderPriority:this.stopDetailsList[1].priorityOrder});
-          
-        },
-        (error: HttpErrorResponse) => { this.stopDetailsList = null; }
+      this.stopDetailsList = data;
+      console.log(this.stopDetailsList);
+
+      const pickupStop = this.stopDetailsList.find(
+        x => x.integrationRequestStopType?.toLowerCase() === 'pickup'
       );
-  }
+
+      const dropOffStop = this.stopDetailsList.find(
+        x => x.integrationRequestStopType?.toLowerCase() === 'dropoff'
+      );
+
+      // Pickup Binding
+      if (pickupStop) {
+  this.advanceTableForm.patchValue({
+    pickupCityID: pickupStop.integrationRequestStopID,
+    pickupCity: pickupStop.integrationRequestStopCity,
+
+    pickupAddress: pickupStop.integrationRequestStopAddress,
+    pickupAddressLatitude: pickupStop.integrationRequestStopLatitude,
+    pickupAddressLongitude: pickupStop.integrationRequestStopLongitude,
+    pickupAddressDetails: pickupStop.integrationRequestStopAddress,
+    pickupStopOrderPriority: pickupStop.priorityOrder
+  });
+}
+
+      // DropOff Binding
+      if (dropOffStop) {
+  this.advanceTableForm.patchValue({
+    dropOffCityID: dropOffStop.integrationRequestStopID,
+    dropOffCity: dropOffStop.integrationRequestStopCity,
+
+    dropOffAddress: dropOffStop.integrationRequestStopAddress,
+    dropOffAddressLatitude: dropOffStop.integrationRequestStopLatitude,
+    dropOffAddressLongitude: dropOffStop.integrationRequestStopLongitude,
+    dropOffAddressDetails: dropOffStop.integrationRequestStopAddress,
+    dropOffStopOrderPriority: dropOffStop.priorityOrder
+  });
+}
+    },
+    (error: HttpErrorResponse) => {
+      this.stopDetailsList = null;
+    }
+  );
+}
 
   public GetPassengerDetails() 
   {

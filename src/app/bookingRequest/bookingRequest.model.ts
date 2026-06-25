@@ -12,9 +12,11 @@ export class BookingRequest {
   dropOffDate : Date;
   dropOffTime : Date;
   requestStatus : string;
+  reservationCreatedBy :string;
   reservationID : number;
   checkedByEcoEmployeeID : number;
   checkedByEco : boolean;
+  reservationCreatedOn : Date;
   
   constructor(bookingRequest) {
     {
@@ -29,9 +31,12 @@ export class BookingRequest {
        this.dropOffDate  = bookingRequest.dropOffDate || '';
        this.dropOffTime= bookingRequest.dropOffTime || '';
        this.requestStatus = bookingRequest.requestStatus || '';
+       this.reservationCreatedBy = bookingRequest.reservationCreatedBy || '';
        this.reservationID = bookingRequest.reservationID || '';
        this.checkedByEcoEmployeeID = bookingRequest.checkedByEcoEmployeeID || '';
        this.checkedByEco = bookingRequest.checkedByEco || '';
+        this.reservationCreatedOn = bookingRequest.reservationCreatedOn || '';
+
        
     }
   }

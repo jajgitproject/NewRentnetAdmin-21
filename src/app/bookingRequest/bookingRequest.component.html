@@ -339,79 +339,101 @@
 
                                 <ng-template #elseBlock2>
                                     <div class="scrollable-table-container">
-                                        <mat-table #table [dataSource]="dataSource" matSort class="mat-cell floating-header-table"
-                                            (matSortChange)="SortingData($event)">
+                                        <mat-table #table [dataSource]="dataSource" class="mat-cell floating-header-table">
 
                                             <!-- <ng-container matColumnDef="SR">
-                                                <mat-header-cell *matHeaderCellDef mat-sort-header>Select Request</mat-header-cell>
+                                                <mat-header-cell *matHeaderCellDef>Select Request</mat-header-cell>
                                                 <mat-cell *matCellDef="let row"><a style="color: #007bff;" (click)="openInNewTab(row)"><u>Select</u></a></mat-cell>
                                             </ng-container> -->
 
                                             <ng-container matColumnDef="IntegrationRequestID">
-                                                <mat-header-cell *matHeaderCellDef mat-sort-header>Request No.</mat-header-cell>
+                                                <mat-header-cell *matHeaderCellDef>Request No.</mat-header-cell>
                                                 <mat-cell *matCellDef="let row">{{row.integrationRequestGroupID + '.' + row.integrationRequestID}}</mat-cell>
                                             </ng-container>
 
                                             <ng-container matColumnDef="CustomerTravelRequestNumber">
-                                                <mat-header-cell *matHeaderCellDef mat-sort-header>TR No.</mat-header-cell>
+                                                <mat-header-cell *matHeaderCellDef>TR No.</mat-header-cell>
                                                 <mat-cell *matCellDef="let row">{{row.customerTravelRequestNumber}}</mat-cell>
                                             </ng-container>
 
                                             <ng-container matColumnDef="CustomerName">
-                                                <mat-header-cell *matHeaderCellDef mat-sort-header>Customer Name</mat-header-cell>
+                                                <mat-header-cell *matHeaderCellDef>Customer Name</mat-header-cell>
                                                 <mat-cell *matCellDef="let row" (contextmenu)="onContextMenu($event, row)">
                                                     {{row.customerName ? row.customerName : 'N/A'}}</mat-cell>
                                             </ng-container>
 
                                             <ng-container matColumnDef="RequestDate">
-                                                <mat-header-cell *matHeaderCellDef mat-sort-header>Booking Date</mat-header-cell>
+                                                <mat-header-cell *matHeaderCellDef>
+                                                    Booking DateTime
+                                                </mat-header-cell>
+
                                                 <mat-cell *matCellDef="let row" (contextmenu)="onContextMenu($event, row)">
-                                                    {{ (row.requestDate | date : 'dd-MM-yyyy') || 'N/A'}}</mat-cell>
+                                                    {{
+                                                        row.requestDate
+                                                        ? (row.requestDate | date:'dd-MM-yyyy')
+                                                        + ' '
+                                                        + (row.requestTime ? (row.requestTime | date:'shortTime') : '')
+                                                        : 'N/A'
+                                                    }}
+                                                </mat-cell>
                                             </ng-container>
 
                                             <ng-container matColumnDef="PickupDate">
-                                                <mat-header-cell *matHeaderCellDef mat-sort-header>Pickup Date</mat-header-cell>
-                                                <mat-cell *matCellDef="let row" (contextmenu)="onContextMenu($event, row)">
-                                                    {{row.pickupDate ? (row.pickupDate | date : 'dd-MM-yyyy') : 'N/A'}}</mat-cell>
-                                            </ng-container>
+                                                <mat-header-cell *matHeaderCellDef>
+                                                    Pickup DateTime
+                                                </mat-header-cell>
 
-                                            <ng-container matColumnDef="RequestStatus">
-                                                <mat-header-cell *matHeaderCellDef mat-sort-header>Status</mat-header-cell>
-                                                <mat-cell *matCellDef="let row" (contextmenu)="onContextMenu($event, row)" 
-                                                        [ngClass]="{
-                                                                'status-requested': row.requestStatus === 'Requested',
-                                                                'status-approved': row.requestStatus === 'Approved',
-                                                                'status-rejected': row.requestStatus === 'Rejected' 
-                                                                                || row.requestStatus === 'Cancelled' 
-                                                                                || row.requestStatus === 'Cancel'
-                                                                }">
-                                                    {{row.requestStatus ? row.requestStatus : 'N/A'}}</mat-cell>
+                                                <mat-cell *matCellDef="let row" (contextmenu)="onContextMenu($event, row)">
+                                                    {{
+                                                        (row.pickupDate || row.pickupTime)
+                                                        ? (row.pickupDate ? (row.pickupDate | date:'dd-MM-yyyy') : '')
+                                                        + ' '
+                                                        + (row.pickupTime ? (row.pickupTime | date:'hh:mm a') : '')
+                                                        : 'N/A'
+                                                    }}
+                                                </mat-cell>
                                             </ng-container>
 
                                             <ng-container matColumnDef="ReservationID">
-                                                <mat-header-cell *matHeaderCellDef mat-sort-header>Booking No.</mat-header-cell>
+                                                <mat-header-cell *matHeaderCellDef>Booking No.</mat-header-cell>
                                                 <mat-cell *matCellDef="let row" (contextmenu)="onContextMenu($event, row)">
                                                     {{row.reservationID ? row.reservationGroupID +'.'+row.reservationID : 'N/A'}}</mat-cell>
                                             </ng-container>
 
-                                            <ng-container matColumnDef="PickupTime">
-                                                <mat-header-cell *matHeaderCellDef mat-sort-header>Confirmation Date</mat-header-cell>
+                                            <ng-container matColumnDef="ConfirmationDateTime">
+                                                <mat-header-cell *matHeaderCellDef>
+                                                    Confirmation DateTime
+                                                </mat-header-cell>
+
                                                 <mat-cell *matCellDef="let row" (contextmenu)="onContextMenu($event, row)">
-                                                    {{ (row.pickupDate || row.pickupTime) ? (row.pickupDate ? (row.pickupDate | date:'dd-MM-yyyy') : '') + ' ' + 
-                                                          (row.pickupTime ? (row.pickupTime | date:'shortTime') : '') 
-                                                        : 'N/A' }}</mat-cell>
+                                                    {{ row.reservationCreatedOn ? (row.reservationCreatedOn | date:'dd-MM-yyyy hh:mm a') : 'N/A' }}
+                                                </mat-cell>
                                             </ng-container>
 
-                                            <ng-container matColumnDef="RequestTime">
-                                                <mat-header-cell *matHeaderCellDef mat-sort-header>Booking Time</mat-header-cell>
+                                            <ng-container matColumnDef="reservationCreatedBy">
+                                                <mat-header-cell *matHeaderCellDef>Reservation Created By</mat-header-cell>
                                                 <mat-cell *matCellDef="let row" (contextmenu)="onContextMenu($event, row)">
-                                                    {{row.requestTime ? (row.requestTime | date : 'shortTime') : 'N/A'}}</mat-cell>
+                                                    {{row.reservationCreatedBy ? row.reservationCreatedBy : 'N/A'}}</mat-cell>
                                             </ng-container>
 
-                                            <ng-container matColumnDef="CheckedByEco">
-                                                <mat-header-cell *matHeaderCellDef mat-sort-header>Checked By Eco</mat-header-cell>
-                                                <mat-cell *matCellDef="let row" (contextmenu)="onContextMenu($event, row)">
-                                                    {{row.checkedByEco === true ? 'Yes' : 'No' }}</mat-cell>
+                                            <ng-container matColumnDef="RequestStatus">
+                                                <mat-header-cell *matHeaderCellDef>
+                                                    Status
+                                                </mat-header-cell>
+
+                                                <mat-cell *matCellDef="let row"
+                                                        (contextmenu)="onContextMenu($event, row)"
+                                                        [ngClass]="{
+                                                                'status-requested': row.requestStatus === 'Requested',
+                                                                'status-approved': row.requestStatus === 'Approved' || row.requestStatus === 'Confirmed',
+                                                                'status-rejected': row.requestStatus === 'Rejected' 
+                                                                                    || row.requestStatus === 'Cancelled' 
+                                                                                    || row.requestStatus === 'Cancel'
+                                                        }">
+
+                                                    {{ row.requestStatus === 'Confirmed' ? 'Approved' : (row.requestStatus || 'N/A') }}
+
+                                                </mat-cell>
                                             </ng-container>
                                             <!-- actions -->
                                             <ng-container matColumnDef="actions">

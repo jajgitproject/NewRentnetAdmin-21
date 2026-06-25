@@ -414,7 +414,7 @@ canCreateReservation: boolean;
     } else {
       this.buttonDisabled = false;
     }
-    
+    debugger;
     if(this.fromForm !=='newForm')
     {
       this.route.queryParams.subscribe(paramsData =>{
@@ -436,7 +436,7 @@ canCreateReservation: boolean;
         
         this.customerID = this._generalService.decrypt(decodeURIComponent(encryptedCustomerID));
         this.customerName = this._generalService.decrypt(decodeURIComponent(encryptedCustomerName));
-
+        console.log('Decrypted Customer Name:', this.customerName);
         this.customerTypeID = this._generalService.decrypt(decodeURIComponent(encryptedcustomerTypeID));
         this.customerType = this._generalService.decrypt(decodeURIComponent(encryptedcustomerType));
         this.advanceTableForm.patchValue({customerTypeID:this.customerTypeID});
