@@ -121,6 +121,7 @@ export class ClossingOneComponent implements OnInit, AfterViewInit {
   tollParkingAdvanceTable: DutyTollParkingEntry[] | null;
   showHideTollParkingCard: boolean = false;
   showHideODOMeterCard: boolean = false;
+  showCSF: boolean = false;
 
   disputeAdvanceTable: Dispute[] | null = [];
   showHideDispute: boolean = false;
@@ -1478,8 +1479,13 @@ export class ClossingOneComponent implements OnInit, AfterViewInit {
       this.newFormService.GetCustomerSpecificFields(this.ReservationID).subscribe(
         (data:CustomerSpecificDetailsData)=>
         {
+           console.log(data.reservationDetailsList[0]?.customerSpecificFieldList);
+          if (data.reservationDetailsList[0]?.customerSpecificFieldList !== null) {
+            this.showCSF= true;
+          }
           this.dataSourceCSF = data.reservationDetailsList;
-        }
+        },
+         (error: HttpErrorResponse) => { this.dataSourceCSF = null; }
       );
     }
 

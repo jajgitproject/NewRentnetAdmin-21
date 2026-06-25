@@ -863,7 +863,7 @@
 
 
   <!--Reservation Customer Specific Details-->
-  <div class="card" id="customerSpecificFields">
+  <div class="card" id="customerSpecificFields" *ngIf="showCSF">
     <div class="header bg-cyan">
       <h2>Customer Specific Details - 
         <i><a (click)="openCustomerSpecificField()" style="cursor: pointer;">Edit </a></i>
