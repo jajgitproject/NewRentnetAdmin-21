@@ -44,7 +44,7 @@ export class BookingConfigurationService {
   }
 
   //---------- Create Reservation Group ----------
-  add(advanceTable: ReservationGroupModel) 
+  add(advanceTable: any) 
   {
     advanceTable.reservationGroupID=-1;
     advanceTable.userID = this.generalService.getUserID();

@@ -1,4 +1,4 @@
-// @ts-nocheck
+//@ts-nocheck
 import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { MatDialog, MatDialogRef } from '@angular/material/dialog';
@@ -32,6 +32,7 @@ import { EmployeeDropDown } from '../employee/employeeDropDown.model';
 import { ReservationSourceDropDown } from '../reservation/reservationSourceDropDown.model';
 import { ModeOfPaymentDropDown } from '../modeOfPayment/modeOfPaymentDropDown.model';
 import Swal from 'sweetalert2';
+import { ReservationStopDetails } from '../reservationStopDetails/reservationStopDetails.model';
 
 @Component({
   standalone: false,
@@ -107,7 +108,7 @@ export class BookingConfigurationComponent implements OnInit {
   contractID: any;
   action: string;
   customerTravelRequestNumber: string;
-
+  enrouteStopDetails: ReservationStopDetails[] = [];
 
   advanceTableForm = this.fb.group({
     packageTypeID: [''],
@@ -117,7 +118,7 @@ export class BookingConfigurationComponent implements OnInit {
     vehicleID:[''],
     vehicle:[''],
     vehicleCategoryID:[''],
-    // requestType:[''],
+    requestType:[''],
     pickupCityID:[''],
     pickupCity:[''],
     pickupDateTime:[''],
@@ -521,6 +522,24 @@ private extractTime(dateTime: Date): Date {
       this.stopDetailsList = data;
       console.log(this.stopDetailsList);
 
+      const enrouteStops = this.stopDetailsList.filter(
+        x => x.integrationRequestStopType?.toLowerCase() === 'enroute'
+      );
+
+      this.reservationStops = enrouteStops.map(stop => {
+        return {
+          reservationStopID: stop.integrationRequestStopID,
+          reservationStopType: stop.integrationRequestStopType,
+          reservationStopAddress: stop.integrationRequestStopAddress,
+          reservationStopAddressDetails: stop.integrationRequestStopAddress,
+          reservationStopCity: stop.integrationRequestStopCity,
+          reservationStopDateString: stop.integrationRequestStopDate,
+          reservationStopTimeDateString: stop.integrationRequestStopTime,
+          reservationStopOrderPriority: stop.priorityOrder,
+          activationStatus: true
+        };
+      });
+
       const pickupStop = this.stopDetailsList.find(
         x => x.integrationRequestStopType?.toLowerCase() === 'pickup'
       );
@@ -532,7 +551,7 @@ private extractTime(dateTime: Date): Date {
       // Pickup Binding
       if (pickupStop) {
   this.advanceTableForm.patchValue({
-    pickupCityID: pickupStop.integrationRequestStopID,
+    //pickupCityID: pickupStop.integrationRequestStopID,
     pickupCity: pickupStop.integrationRequestStopCity,
 
     pickupAddress: pickupStop.integrationRequestStopAddress,
@@ -546,7 +565,7 @@ private extractTime(dateTime: Date): Date {
       // DropOff Binding
       if (dropOffStop) {
   this.advanceTableForm.patchValue({
-    dropOffCityID: dropOffStop.integrationRequestStopID,
+    dropOffCityID: 0,
     dropOffCity: dropOffStop.integrationRequestStopCity,
 
     dropOffAddress: dropOffStop.integrationRequestStopAddress,
@@ -664,16 +683,16 @@ private extractTime(dateTime: Date): Date {
     //this.advanceTableForm.patchValue({pickupDate:this.customerDetails.pickupDate});
     // this.advanceTableForm.patchValue({salesExecutiveID:this.salesManagerList[0]?.salesExecutiveID});
     // this.advanceTableForm.patchValue({kamID:this.customerKamList[0]?.kamID});
-    if(!this.advanceTableForm.value.dropOffCityID)
-    {
-      this.advanceTableForm.patchValue({dropOffCityID:0});
-      this.advanceTableForm.patchValue({dropOffCity:null});
-      this.advanceTableForm.patchValue({dropOffAddressDetails:null});
-      this.advanceTableForm.patchValue({dropOffAddress:null});
-      this.advanceTableForm.patchValue({dropOffAddressLatitude:null});
-      this.advanceTableForm.patchValue({dropOffAddressLongitude:null});
-      this.advanceTableForm.patchValue({dropOffStopOrderPriority:0});
-    }
+    // if(!this.advanceTableForm.value.dropOffCityID)
+    // {
+    //   this.advanceTableForm.patchValue({dropOffCityID:0});
+    //   this.advanceTableForm.patchValue({dropOffCity:null});
+    //   this.advanceTableForm.patchValue({dropOffAddressDetails:null});
+    //   this.advanceTableForm.patchValue({dropOffAddress:null});
+    //   this.advanceTableForm.patchValue({dropOffAddressLatitude:null});
+    //   this.advanceTableForm.patchValue({dropOffAddressLongitude:null});
+    //   this.advanceTableForm.patchValue({dropOffStopOrderPriority:0});
+    // }
     this.advanceTableForm.patchValue({pickupDate:this.extractDate(this.advanceTableForm.value.pickupDateTime)});
     this.advanceTableForm.patchValue({pickupTime:this.extractTime(this.advanceTableForm.value.pickupDateTime)});
     this.advanceTableForm.patchValue({dropOffDate:this.extractDate(this.advanceTableForm.value.dropOffDateTime)});
@@ -682,7 +701,10 @@ private extractTime(dateTime: Date): Date {
     this.advanceTableForm.patchValue({pickupTimeString:this._generalService.getTimeFroms(this.advanceTableForm.value.pickupTime)});
     this.advanceTableForm.patchValue({dropOffDateString:this._generalService.getDateFrom(this.advanceTableForm.value.dropOffDate)});
     this.advanceTableForm.patchValue({dropOffTimeString:this._generalService.getTimeFroms(this.advanceTableForm.value.dropOffTime)});
-    this.bookingConfigurationService.add(this.advanceTableForm.getRawValue())  
+    const payload: any = this.advanceTableForm.getRawValue();
+    payload.reservationStops = this.reservationStops;
+    console.log(payload);
+    this.bookingConfigurationService.add(payload)  
     .subscribe(
     response => 
     {
