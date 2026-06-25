@@ -11,6 +11,9 @@
   </div>
 
   <div mat-dialog-content>
+    <div *ngIf="isApprovalFinalized" class="alert alert-info" style="margin-bottom: 12px;">
+      This credit note request has already been {{ advanceTableForm.get('approvalStatus')?.value }} and cannot be modified.
+    </div>
     <form class="register-form" [formGroup]="advanceTableForm" (ngSubmit)="confirmAdd()">
 
       <!-- Row 1: Customer & Invoice -->

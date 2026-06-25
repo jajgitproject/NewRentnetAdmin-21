@@ -11,6 +11,7 @@ export class CreditNoteApproval {
   customerGroupID: number;
   customerGroup: string;
   creditNoteNumber: string;
+  creditNoteNumberWithPrefix: string;
   creditNoteAmount: number;
   creditNoteType: string;
   approvalStatus: string;
@@ -36,6 +37,7 @@ export class CreditNoteApproval {
       this.customerGroupID = creditNoteApproval.customerGroupID || 0;
       this.customerGroup = creditNoteApproval.customerGroup || '';
       this.creditNoteNumber = creditNoteApproval.creditNoteNumber || '';
+      this.creditNoteNumberWithPrefix = creditNoteApproval.creditNoteNumberWithPrefix || '';
       this.creditNoteAmount = creditNoteApproval.creditNoteAmount || 0;
       this.creditNoteType = creditNoteApproval.creditNoteType || '';
       this.approvalStatus = creditNoteApproval.approvalStatus || '';

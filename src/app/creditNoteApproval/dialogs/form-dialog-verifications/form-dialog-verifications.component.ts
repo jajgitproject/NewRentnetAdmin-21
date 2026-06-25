@@ -15,6 +15,7 @@ import { EmployeeDropDown } from 'src/app/employee/employeeDropDown.model';
 import { DocumentDropDown } from 'src/app/general/documentDropDown.model';
 import { CreditNoteApprovalService } from '../../creditNoteApproval.service';
 import { CreditNoteApproval } from '../../creditNoteApproval.model';
+import Swal from 'sweetalert2';
 
 @Component({
   standalone: false,
@@ -37,7 +38,8 @@ export class FormDialogCreditVerificationsComponent
   filteredOptions: Observable<CitiesDropDown[]>;
 
   public EmployeeList?: EmployeeDropDown[]=[];
-  saveDisabled:boolean = false; // Initially false, will be controlled by form validation
+  saveDisabled:boolean = false;
+  isApprovalFinalized = false;
   image: any;
   fileUploadEl: any;
   addressGeoPointID: any;
@@ -92,20 +94,43 @@ selectedTime: string = '';
     setTimeout(() => {
       this.verifiedByName();
       this.refreshFormValues();
+      this.applyFinalizedApprovalState();
     }, 100);
     
     // Monitor form validity to control Save button
     this.advanceTableForm.valueChanges.subscribe(value => {
-      
-      // Enable/disable Save button based on form validity and required fields
+      if (this.isApprovalFinalized) {
+        this.saveDisabled = true;
+        return;
+      }
+
       this.saveDisabled = !this.advanceTableForm.valid || 
                          !value.approvalStatus || 
                          value.approvalStatus === '';
     });
     
-    // Initial check for form validity
-    this.saveDisabled = !this.advanceTableForm.valid || 
-                       !this.advanceTableForm.get('approvalStatus')?.value;
+    this.applyFinalizedApprovalState();
+  }
+
+  private isFinalApprovalStatus(status: string): boolean {
+    const normalized = (status || '').trim().toLowerCase();
+    return normalized === 'approved' || normalized === 'rejected';
+  }
+
+  private applyFinalizedApprovalState(): void {
+    const status =
+      this.advanceTable?.approvalStatus ||
+      this.advanceTableForm?.get('approvalStatus')?.value;
+
+    this.isApprovalFinalized = this.isFinalApprovalStatus(status);
+
+    if (!this.isApprovalFinalized || !this.advanceTableForm) {
+      return;
+    }
+
+    this.saveDisabled = true;
+    this.advanceTableForm.get('approvalStatus')?.disable({ emitEvent: false });
+    this.advanceTableForm.get('approvalRejectionReason')?.disable({ emitEvent: false });
   }
 
   refreshFormValues(): void {
@@ -247,20 +272,37 @@ selectedTime: string = '';
 
   public Put(): void
   {
+    if (this.isApprovalFinalized) {
+      return;
+    }
+
     const formData = this.advanceTableForm.getRawValue();
     
     this.advanceTableService.update(formData)  
     .subscribe(
     response => 
     {
-        this.dialogRef.close('success'); // Pass success result
-        this.showNotification(
-          'snackbar-success',
-           'Credit Note Approval updated successfully...!!!',
-          'bottom',
-          'center'
-        );
-       this._generalService.sendUpdate('CreditNoteApprovalUpdate:CreditNoteApprovalView:Success');//To Send Updates 
+        this.dialogRef.close('success');
+        const creditNoteNumber = response?.creditNoteNumberWithPrefix || '';
+        const isApproved = (formData.approvalStatus || '').toLowerCase() === 'approved';
+
+        if (isApproved && creditNoteNumber) {
+          Swal.fire({
+            title: 'Credit Note Approved Successfully',
+            html: `Credit Note Number: <strong>${creditNoteNumber}</strong>`,
+            icon: 'success',
+            confirmButtonText: 'Ok'
+          });
+        } else {
+          this.showNotification(
+            'snackbar-success',
+            'Credit Note Approval updated successfully...!!!',
+            'bottom',
+            'center'
+          );
+        }
+
+       this._generalService.sendUpdate('CreditNoteApprovalUpdate:CreditNoteApprovalView:Success');
     },
     error =>
     {
@@ -268,8 +310,10 @@ selectedTime: string = '';
      this._generalService.sendUpdate('CreditNoteApprovalAll:CreditNoteApprovalView:Failure');//To Send Updates 
      
      // Re-enable button based on form validity after error
-     this.saveDisabled = !this.advanceTableForm.valid || 
-                        !this.advanceTableForm.get('approvalStatus')?.value;
+     if (!this.isApprovalFinalized) {
+       this.saveDisabled = !this.advanceTableForm.valid || 
+                          !this.advanceTableForm.get('approvalStatus')?.value;
+     }
      
      this.showNotification(
       'snackbar-danger',
@@ -320,7 +364,10 @@ selectedTime: string = '';
   }
   public confirmAdd(): void 
   {
-    
+    if (this.isApprovalFinalized) {
+      return;
+    }
+
     if (this.advanceTableForm.valid) {
       this.saveDisabled = true; // Disable while processing
       this.Put();

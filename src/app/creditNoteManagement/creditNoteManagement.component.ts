@@ -361,9 +361,9 @@ export class CreditNoteManagementComponent implements OnInit {
     width: '600px',
     data: {
       advanceTable: row,
-      invoiceCreditNoteID: this.invoiceCreditNoteID,
-       invoiceNumberWithPrefix: this.invoiceNumberWithPrefix
-
+      invoiceCreditNoteID: row?.invoiceCreditNoteID,
+      invoiceNumberWithPrefix: row?.invoiceNumberWithPrefix,
+      creditNoteNumber: row?.creditNoteNumberWithPrefix || row?.creditNoteNumber
     }
   });
 
