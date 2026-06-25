@@ -833,6 +833,10 @@
                       [disabled]="!canPostPickUpCall(item)">
                       Post PickUP Call
                     </a>
+                    <a mat-menu-item (click)="postPickUPCallSMS(item)" target="_blank" rel="noreferrer noopener"
+                      [disabled]="!canPostPickUpCall(item)">
+                      Post PickUP Call SMS
+                    </a>
                     <!-- <button mat-menu-item>History</button> -->
                     <a mat-menu-item (click)="postPickUPCallLoadDataDetails(item)" target="_blank"
                       rel="noreferrer noopener">

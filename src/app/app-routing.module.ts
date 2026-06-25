@@ -3399,6 +3399,13 @@ const routes: Routes = [
             (m) => m.IncidenceEmailToBeSentToModule
           )
       },
+      {        
+        path: 'incidenceMIS',
+        loadChildren: () =>
+          import('./incidenceMIS/incidenceMIS.module').then(
+            (m) => m.IncidenceMISModule
+          )
+      },
 
       {
         path: 'resolution',

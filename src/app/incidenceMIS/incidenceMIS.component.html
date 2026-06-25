@@ -1,0 +1,233 @@
+<section class="content">
+  <div class="container-fluid">
+    <div class="block-header">
+      <div class="row">
+        <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+          <ul>
+            <li class="breadcrumb-item bcrumb-1">
+              <a routerLink="/dashboard/main">
+                <i class="fas fa-home"></i> Home</a> |
+              <a href="#" onClick="return false;">Admin</a> |
+              <a href="#" onClick="return false;">Incidence MIS</a>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="row">
+      <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+        <div class="card">
+          <div class="body">
+            <mat-accordion class="duty-register-search-accordion">
+              <mat-expansion-panel class="duty-register-inline-search-panel" [expanded]="true">
+                <mat-expansion-panel-header>
+                  <mat-panel-title>Search</mat-panel-title>
+                </mat-expansion-panel-header>
+
+                <div class="duty-register-inline-search-body">
+                  <div class="row">
+                    <div class="col-md-3">
+                      <mat-form-field appearance="outline" class="w-100">
+                        <mat-label>Customer Group</mat-label>
+                        <input type="text" matInput [formControl]="searchCustomerGroup" [matAutocomplete]="autoCustomerGroup">
+                        <mat-autocomplete #autoCustomerGroup="matAutocomplete" [displayWith]="displayCustomerGroup.bind(this)">
+                          <mat-option *ngFor="let option of customerGroupOptions" [value]="option">
+                            {{ option.customerGroup }}
+                          </mat-option>
+                        </mat-autocomplete>
+                      </mat-form-field>
+                    </div>
+
+                    <div class="col-md-3">
+                      <mat-form-field appearance="outline" class="w-100">
+                        <mat-label>Customer Name</mat-label>
+                        <input type="text" matInput [formControl]="searchCustomer" [matAutocomplete]="autoCustomer">
+                        <mat-autocomplete #autoCustomer="matAutocomplete" [displayWith]="displayCustomer.bind(this)">
+                          <mat-option *ngFor="let option of customerOptions" [value]="option">
+                            {{ option.customerName }}
+                          </mat-option>
+                        </mat-autocomplete>
+                      </mat-form-field>
+                    </div>
+
+                    <!-- <div class="col-md-3">
+                      <mat-form-field appearance="outline" class="w-100">
+                        <mat-label>Sales Person</mat-label>
+                        <input type="text" matInput [formControl]="searchSalesPerson" [matAutocomplete]="autoSalesPerson">
+                        <mat-autocomplete #autoSalesPerson="matAutocomplete" [displayWith]="displaySalesPerson.bind(this)">
+                          <mat-option *ngFor="let option of salesPersonOptions" [value]="option">
+                            {{ option.customerSalesManager }}
+                          </mat-option>
+                        </mat-autocomplete>
+                      </mat-form-field>
+                    </div> -->
+
+                    <div class="col-md-3">
+                      <mat-form-field appearance="outline" class="w-100">
+                        <mat-label>Passenger Name</mat-label>
+                        <input type="text" matInput [formControl]="searchPassengerName" [matAutocomplete]="autoPassenger">
+                        <mat-autocomplete #autoPassenger="matAutocomplete" [displayWith]="displayPassenger.bind(this)">
+                          <mat-option *ngFor="let option of passengerOptions" [value]="option">
+                            {{ option.customerPersonName }}
+                          </mat-option>
+                        </mat-autocomplete>
+                      </mat-form-field>
+                    </div>
+
+                    <div class="col-md-3">
+                      <mat-form-field appearance="outline" class="w-100">
+                        <mat-label>Vehicle Category</mat-label>
+                        <mat-select [(ngModel)]="searchVehicleCategoryID">
+                          <mat-option [value]="0">All</mat-option>
+                          <mat-option *ngFor="let item of vehicleCategories" [value]="item.vehicleCategoryID">
+                            {{ item.vehicleCategory }}
+                          </mat-option>
+                        </mat-select>
+                      </mat-form-field>
+                    </div>
+
+                    <div class="col-md-3">
+                      <mat-form-field appearance="outline" class="w-100">
+                        <mat-label>Vehicle</mat-label>
+                        <mat-select [(ngModel)]="searchVehicleID">
+                          <mat-option [value]="0">All</mat-option>
+                          <mat-option *ngFor="let item of vehicles" [value]="item.vehicleID">
+                            {{ item.vehicle }}
+                          </mat-option>
+                        </mat-select>
+                      </mat-form-field>
+                    </div>
+
+                    <div class="col-md-3">
+                      <mat-form-field appearance="outline" class="w-100">
+                        <mat-label>Vehicle Registration Number</mat-label>
+                        <input type="text" matInput [formControl]="searchRegistrationNumber" [matAutocomplete]="autoRegistration">
+                        <mat-autocomplete #autoRegistration="matAutocomplete" [displayWith]="displayRegistration.bind(this)">
+                          <mat-option *ngFor="let option of registrationOptions" [value]="option">
+                            {{ option.registrationNumber }}
+                          </mat-option>
+                        </mat-autocomplete>
+                      </mat-form-field>
+                    </div>
+
+                    <div class="col-md-3">
+                      <mat-form-field appearance="outline" class="w-100">
+                        <mat-label>Driver</mat-label>
+                        <input type="text" matInput [formControl]="searchDriver" [matAutocomplete]="autoDriver">
+                        <mat-autocomplete #autoDriver="matAutocomplete" [displayWith]="displayDriver.bind(this)">
+                          <mat-option *ngFor="let option of driverOptions" [value]="option">
+                            {{ option.driverName }}
+                          </mat-option>
+                        </mat-autocomplete>
+                      </mat-form-field>
+                    </div>
+
+                    <div class="col-md-3">
+                      <mat-form-field appearance="outline" class="w-100">
+                        <mat-label>Dispatch Location</mat-label>
+                        <mat-select [(ngModel)]="searchDispatchLocationID">
+                          <mat-option [value]="0">All</mat-option>
+                          <mat-option *ngFor="let item of dispatchLocations" [value]="item.organizationalEntityID">
+                            {{ item.organizationalEntityName }}
+                          </mat-option>
+                        </mat-select>
+                      </mat-form-field>
+                    </div>
+
+                    <div class="col-md-3">
+                      <mat-form-field appearance="outline" class="w-100">
+                        <mat-label>Incidence From Date</mat-label>
+                        <input matInput [matDatepicker]="fromPicker" [(ngModel)]="searchIncidenceFromDate">
+                        <mat-datepicker-toggle matSuffix [for]="fromPicker"></mat-datepicker-toggle>
+                        <mat-datepicker #fromPicker></mat-datepicker>
+                      </mat-form-field>
+                    </div>
+
+                    <div class="col-md-3">
+                      <mat-form-field appearance="outline" class="w-100">
+                        <mat-label>Incidence To Date</mat-label>
+                        <input matInput [matDatepicker]="toPicker" [(ngModel)]="searchIncidenceToDate">
+                        <mat-datepicker-toggle matSuffix [for]="toPicker"></mat-datepicker-toggle>
+                        <mat-datepicker #toPicker></mat-datepicker>
+                      </mat-form-field>
+                    </div>
+
+                    <div class="col-md-3">
+                      <mat-form-field appearance="outline" class="w-100">
+                        <mat-label>Incidence Type</mat-label>
+                        <mat-select [(ngModel)]="searchIncidenceTypeID">
+                          <mat-option [value]="0">All</mat-option>
+                          <mat-option *ngFor="let item of incidenceTypes" [value]="item.incidenceTypeID">
+                            {{ item.incidenceType }}
+                          </mat-option>
+                        </mat-select>
+                      </mat-form-field>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="duty-register-inline-search-actions quick-search-actions">
+                  <button mat-raised-button color="primary" (click)="SearchData()">Search</button>
+                  &nbsp;&nbsp;
+                  <button mat-raised-button color="warn" (click)="refresh()">Refresh</button>
+                  &nbsp;&nbsp;
+                  <button mat-raised-button color="accent" (click)="downloadFilteredCsv()" [disabled]="csvExporting || !hasManualSearch" [matTooltip]="!hasManualSearch ? 'Run search first' : ''">
+                    {{ csvExporting ? 'Downloading...' : 'Download CSV' }}
+                  </button>
+                </div>
+              </mat-expansion-panel>
+            </mat-accordion>
+
+            <br />
+
+            <div class="responsive_table">
+              <div class="table-responsive">
+                <p *ngIf="!dataSource || dataSource.length === 0; then thenBlock else elseBlock">
+                  This is not rendered
+                </p>
+
+                <ng-template #thenBlock>
+                  <div class="alert alert-primary" style="background-color:#E8E8E8; text-align: center;">No Records Found</div>
+                  <div class="body">
+                    <div class="example-button-row">
+                      <button mat-raised-button color="primary" (click)="PreviousCall()">Previous</button>
+                      <button mat-raised-button color="primary" (click)="NextCall()">Next</button>
+                    </div>
+                  </div>
+                </ng-template>
+
+                <ng-template #elseBlock>
+                  <div class="scrollable-table-container">
+                    <div style="width: 600%; overflow-y: hidden;">
+                      <mat-table #table [dataSource]="dataSource" matSort class="mat-cell floating-header-table">
+                        <ng-container *ngFor="let column of displayedColumns" [matColumnDef]="column">
+                          <mat-header-cell *matHeaderCellDef mat-sort-header>
+                            {{ columnTitleMap[column] || column }}
+                          </mat-header-cell>
+                          <mat-cell *matCellDef="let row">
+                            {{ getCellDisplayValue(row, column) || 'N/A'}}
+                          </mat-cell>
+                        </ng-container>
+
+                        <mat-header-row *matHeaderRowDef="displayedColumns"></mat-header-row>
+                        <mat-row *matRowDef="let row; columns: displayedColumns;"></mat-row>
+                      </mat-table>
+                    </div>
+                  </div>
+
+                  <div class="body">
+                    <div class="example-button-row">
+                      <button mat-raised-button color="primary" (click)="PreviousCall()">Previous</button>
+                      <button mat-raised-button color="primary" (click)="NextCall()">Next</button>
+                    </div>
+                  </div>
+                </ng-template>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
