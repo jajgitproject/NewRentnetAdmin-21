@@ -238,6 +238,7 @@ export class CreditNoteHomeComponent implements OnInit {
 
   public SearchData() 
   {
+    this.PageNumber = 0;
     this.loadData();
   }
  
@@ -280,7 +281,7 @@ export class CreditNoteHomeComponent implements OnInit {
         this.searchTerm = '';
         break;
     }
-    this.creditNoteHomeService.getTableData(this.customer.value,this.customerGroup.value,this.SearchBillNo.replace("/","-"),
+    this.creditNoteHomeService.getTableData(this.customer.value,this.customerGroup.value,this.SearchBillNo.replace(/\//g, '-'),
     this.searchApprovalStatus,this.SearchCreditNoteNumber.replace(/\//g, '-'),this.SearchBranch.value,this.SearchFromDate,
     this.SearchToDate,this.SearchType,this.PageNumber).subscribe
       (
@@ -339,7 +340,7 @@ export class CreditNoteHomeComponent implements OnInit {
       this.sortingData = 1;
       this.sortType = "Descending";
     }
-    this.creditNoteHomeService.getTableDataSort(this.customer.value,this.customerGroup.value,this.SearchBillNo,this.searchApprovalStatus,this.SearchCreditNoteNumber,this.SearchBranch.value,this.SearchFromDate,this.SearchToDate,this.SearchType,this.PageNumber, coloumName.active, this.sortType).subscribe
+    this.creditNoteHomeService.getTableDataSort(this.customer.value,this.customerGroup.value,this.SearchBillNo.replace(/\//g, '-'),this.searchApprovalStatus,this.SearchCreditNoteNumber.replace(/\//g, '-'),this.SearchBranch.value,this.SearchFromDate,this.SearchToDate,this.SearchType,this.PageNumber, coloumName.active, this.sortType).subscribe
     (
       data => {
         this.dataSource = data;

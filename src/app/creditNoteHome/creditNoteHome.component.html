@@ -58,6 +58,13 @@
 
                 <div class="col-xl-2 col-lg-2 col-md-2 col-sm-12 mb-2">
                     <mat-form-field appearance="outline" floatLabel="always" class="example-full-width">
+                        <mat-label>Invoice No.</mat-label>
+                        <input type="text" matInput [(ngModel)]="SearchBillNo" placeholder="Invoice number with prefix">
+                    </mat-form-field>
+                </div>
+
+                <div class="col-xl-2 col-lg-2 col-md-2 col-sm-12 mb-2">
+                    <mat-form-field appearance="outline" floatLabel="always" class="example-full-width">
                         <mat-label>Branch</mat-label>
                         <input type="text" matInput [matAutocomplete]="auto2" [formControl]="SearchBranch">
                         <mat-autocomplete #auto2="matAutocomplete" (optionSelected)="OnBranchSelect($event.option.value)">
@@ -67,8 +74,10 @@
                         </mat-autocomplete>
                     </mat-form-field>
                 </div>
+            </div>
 
-                <div class="col-xl-2 col-lg-2 col-md-2 col-sm-12 mb-2">
+            <div class="row">
+                <div class="col-xl-3 col-lg-3 col-md-3 col-sm-12 mb-2">
                     <mat-form-field appearance="outline" floatLabel="always" class="example-full-width">
                         <mat-label>Date From</mat-label>
                         <input matInput [matDatepicker]="startingDate" [(ngModel)]="SearchFromDate">
@@ -77,19 +86,17 @@
                     </mat-form-field>
                 </div>
 
-                <div class="col-xl-2 col-lg-2 col-md-2 col-sm-12 mb-2">
+                <div class="col-xl-3 col-lg-3 col-md-3 col-sm-12 mb-2">
                     <mat-form-field appearance="outline" floatLabel="always" class="example-full-width">
                         <mat-label>Date To</mat-label>
                         <input matInput [matDatepicker]="endingDate" [(ngModel)]="SearchToDate">
                         <mat-datepicker-toggle matSuffix [for]="endingDate"></mat-datepicker-toggle>
                         <mat-datepicker #endingDate></mat-datepicker>
                     </mat-form-field>
-                </div>                
-            </div>
+                </div>
 
-            <div class="row">
-                <div class="col-xl-2 col-lg-2 col-md-2 col-sm-12 mb-2">
-                    <mat-form-field appearance="outline" floatLabel="always" class="example-full-width mb-3">
+                <div class="col-xl-3 col-lg-3 col-md-3 col-sm-12 mb-2">
+                    <mat-form-field appearance="outline" floatLabel="always" class="example-full-width">
                         <mat-label>Type</mat-label>
                         <mat-select [(ngModel)]="SearchType">
                             <mat-option value="Full">Full</mat-option>
@@ -98,8 +105,8 @@
                     </mat-form-field>
                 </div>
 
-                <div class="col-xl-2 col-lg-2 col-md-2 col-sm-12 mb-2">
-                    <mat-form-field appearance="outline" floatLabel="always" class="example-full-width mb-3">
+                <div class="col-xl-3 col-lg-3 col-md-3 col-sm-12 mb-2">
+                    <mat-form-field appearance="outline" floatLabel="always" class="example-full-width">
                         <mat-label>Approval Status</mat-label>
                         <mat-select [(ngModel)]="searchApprovalStatus">
                             <mat-option value="Approved">Approved</mat-option>
