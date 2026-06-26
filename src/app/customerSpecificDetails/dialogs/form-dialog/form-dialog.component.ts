@@ -166,26 +166,23 @@ private resolveDefaultValue(field: any): any {
   onSubmit() {
   }
 
-  bindValues()
-  {
-    this.arr = [];
-    this.arr1 = [];
-    this.arr2 = [];
-    this.arr2.push(Object.values(this.dynamicForm.value));
-    this.getExistingFields().forEach((ele)=>
-    {
-      this.arr.push(ele.customerReservationFieldID);
-      this.arr1.push(ele.fieldName);
-    });
-  }
+bindValues() {
+  this.arr = [];
+  this.arr1 = [];
+  this.arr2 = Object.values(this.dynamicForm.value);
 
+  this.CustomerExtraFieldList.forEach((ele: any) => {
+    this.arr.push(ele.customerReservationFieldID);
+    this.arr1.push(ele.fieldName);
+  });
+}
 
   public Put(): void
   {
     this.bindValues();
     this.advanceTableForm.patchValue({customerReservationFieldID:this.arr});
     this.advanceTableForm.patchValue({fieldName:this.arr1});
-    this.advanceTableForm.patchValue({fieldValue:this.arr2[0]});
+    this.advanceTableForm.patchValue({fieldValue:this.arr2});
     this.advanceTableForm.patchValue({reservationID:this.data.dataSource[0].reservationID});
     this.advanceTableService.update(this.advanceTableForm.value)  
     .subscribe(
