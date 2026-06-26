@@ -103,6 +103,7 @@ import { NewFormService } from '../newForm/newForm.service';
 import { FormDialogComponentCSD } from '../customerSpecificDetails/dialogs/form-dialog/form-dialog.component';
 import { DutySlipImageDetailsShowComponent as DSImage } from '../dutySlipImageDetailsShow/dutySlipImageDetailsShow.component';
 import { FormDialogChangeSupplierForInventory } from './dialog/changeSupplierForInventory/changeSupplierForInventory.component';
+import { resolveViewBillRoute } from '../general/view-bill-route.util';
 @Component({
   standalone: false,
   selector: 'app-clossingOne',
@@ -960,21 +961,34 @@ export class ClossingOneComponent implements OnInit, AfterViewInit {
   }
   //-------------View Bill-------------------------
 
-  ViewBill(templateAddress) {
-    let baseUrl = this._generalService.FormURL;
+  // ViewBill(templateAddress) {
+  //   let baseUrl = this._generalService.FormURL;
 
-    // Use templateAddress directly as the route
-    const url = this.router.serializeUrl(
-      this.router.createUrlTree([`/${templateAddress}`], {
+  //   // Use templateAddress directly as the route
+  //   const url = this.router.serializeUrl(
+  //     this.router.createUrlTree([`/${templateAddress}`], {
+  //       queryParams: {
+  //         invoiceID: this.invoiceID
+  //       }
+  //     })
+  //   );
+
+  //   window.open(baseUrl + url, '_blank');
+  // }
+
+
+  
+     ViewBill(item)
+    {
+      const route = resolveViewBillRoute(item.templateAddress, item.invoiceType);
+      const url = this.router.serializeUrl(this.router.createUrlTree([`/${route}`], {
         queryParams: {
-          invoiceID: this.invoiceID
+          invoiceID: this.invoiceID,
         }
-      })
-    );
-
-    window.open(baseUrl + url, '_blank');
-  }
-
+      }));
+      window.open(this._generalService.buildAppWindowUrl(url), '_blank');
+    }
+  
 
   //  ViewBill(invoiceType)
   // {
@@ -1104,7 +1118,7 @@ export class ClossingOneComponent implements OnInit, AfterViewInit {
         data => {
           this.templateAddress = data.templateAddress;
           if (this.templateAddress !== null) {
-            this.ViewBill(this.templateAddress);
+            this.ViewBill(data);
           }
         },
         (error: HttpErrorResponse) => { this.dataSourceforCard = null; }
