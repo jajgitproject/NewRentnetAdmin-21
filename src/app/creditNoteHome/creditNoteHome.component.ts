@@ -400,6 +400,17 @@ addCreditNote() {
     window.open(this._generalService.FormURL + url, '_blank');
   }
 
+  RebillingData(item:any)
+  {
+    const url = this.router.serializeUrl(
+      this.router.createUrlTree(['/rebillingData'], { queryParams: {
+        invoiceCreditNoteID: item.invoiceCreditNoteID,
+        creditNoteNumber: item.creditNoteNumberWithPrefix || item.creditNoteNumber,
+        invoiceID: item.invoiceID
+      }}));
+    window.open(this._generalService.FormURL + url, '_blank');
+  }
+
   GenerateECreditNote(row:any)
   {
     if(row.approvalStatus === "Approved")

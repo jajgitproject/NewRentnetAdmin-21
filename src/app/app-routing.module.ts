@@ -356,6 +356,14 @@ const routes: Routes = [
       },
 
       {
+        path: 'rebillingData',
+        loadChildren: () =>
+          import('./rebillingData/rebillingData.module').then(
+            (m) => m.RebillingDataModule
+          )
+      },
+
+      {
         path: 'rateViewForLocalContract',
         loadChildren: () =>
           import('./rateViewForLocalContract/rateViewForLocalContract.module').then(
