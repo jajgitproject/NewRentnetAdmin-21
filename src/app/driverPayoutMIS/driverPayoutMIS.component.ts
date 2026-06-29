@@ -32,6 +32,7 @@ export class DriverPayoutMISComponent implements OnInit {
     'carNo',
     'carBooked',
     'carSent',
+    'driverID',
     'driverOfficialID',
     'driverName',
     'driverMobile',
@@ -47,6 +48,9 @@ export class DriverPayoutMISComponent implements OnInit {
     'totalHRS',
     'totalDays',
     'invoiceNo',
+    'verifyDuty',
+    'goodForBilling',
+    'tripStatus',
     'chargeableExpense',
     'nonChargeableExpense',
     'status',
@@ -67,6 +71,7 @@ export class DriverPayoutMISComponent implements OnInit {
     carNo: 'Car No.',
     carBooked: 'Car booked',
     carSent: 'Car Sent',
+    driverID: 'Driver ID',
     driverOfficialID: 'Driver Official ID',
     driverName: 'Driver Name',
     driverMobile: 'Driver Mobile',
@@ -82,6 +87,9 @@ export class DriverPayoutMISComponent implements OnInit {
     totalHRS: 'Total HRS',
     totalDays: 'Total Days',
     invoiceNo: 'Invoice No.',
+    verifyDuty: 'Verify Duty',
+    goodForBilling: 'Good For Billing',
+    tripStatus: 'Trip Status',
     chargeableExpense: 'Chargeable Expense',
     nonChargeableExpense: 'Non Chargeable Expense',
     status: 'Status',
@@ -190,8 +198,25 @@ export class DriverPayoutMISComponent implements OnInit {
 
   getCellDisplayValue(row: DriverPayoutMISModel, column: string): string {
     const value = row?.[column];
+    if (column === 'verifyDuty' || column === 'goodForBilling') {
+      return this.formatYesNo(value);
+    }
     if (value === null || value === undefined || value === '') {
       return 'N/A';
+    }
+    return String(value);
+  }
+
+  private formatYesNo(value: any): string {
+    if (value === null || value === undefined || value === '') {
+      return 'N/A';
+    }
+    const normalized = String(value).trim().toLowerCase();
+    if (normalized === 'true' || normalized === '1' || normalized === 'yes') {
+      return 'Yes';
+    }
+    if (normalized === 'false' || normalized === '0' || normalized === 'no') {
+      return 'No';
     }
     return String(value);
   }

@@ -6,6 +6,7 @@ export class DriverPayoutMISModel {
   carNo: string;
   carBooked: string;
   carSent: string;
+  driverID: string;
   driverOfficialID: string;
   driverName: string;
   driverMobile: string;
@@ -21,6 +22,9 @@ export class DriverPayoutMISModel {
   totalHRS: string;
   totalDays: string;
   invoiceNo: string;
+  verifyDuty: string;
+  goodForBilling: string;
+  tripStatus: string;
   chargeableExpense: string;
   nonChargeableExpense: string;
   status: string;
