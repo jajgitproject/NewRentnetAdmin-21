@@ -1,6 +1,7 @@
 // @ts-nocheck
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { SessionHeartbeatService } from 'src/app/core/service/session-heartbeat.service';
+import { SessionTokenService } from 'src/app/core/service/session-token.service';
 
 @Component({
   standalone: false,
@@ -9,9 +10,13 @@ import { SessionHeartbeatService } from 'src/app/core/service/session-heartbeat.
   styleUrls: []
 })
 export class MainLayoutComponent implements OnInit, OnDestroy {
-  constructor(private sessionHeartbeatService: SessionHeartbeatService) {}
+  constructor(
+    private sessionHeartbeatService: SessionHeartbeatService,
+    private sessionTokenService: SessionTokenService
+  ) {}
 
   ngOnInit(): void {
+    this.sessionTokenService.startProactiveRefreshScheduling();
     this.sessionHeartbeatService.start();
   }
 

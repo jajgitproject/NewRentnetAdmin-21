@@ -699,24 +699,19 @@ bookerName: FormControl = new FormControl();
     performedBy: number,
     stepErrors: string[]
   ): Promise<void> {
-    const useViewBillHtml = this.viewBillPdfService.isGeneralBillRoute(row.templateAddress, row.invoiceType);
-    // #region agent log
-    fetch('http://127.0.0.1:7532/ingest/f2c32722-bd0e-4386-883a-e749a4372080',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'ac95ba'},body:JSON.stringify({sessionId:'ac95ba',hypothesisId:'H2',location:'invoiceHome.component.ts:generateInvoicePdfStep',message:'invoice pdf route decision',data:{invoiceId:row?.invoiceID,invoiceType:row?.invoiceType,templateAddress:row?.templateAddress,useViewBillHtml},timestamp:Date.now()})}).catch(()=>{});
-    // #endregion
-
     await this.generateDocumentStep(
       'Invoice',
       async () => {
-        if (!useViewBillHtml) {
-          return firstValueFrom(this.bulkBillsDownloadService.generateInvoicePdf(row.invoiceID, performedBy));
+        if (this.viewBillPdfService.isSupportedViewBillRoute(row.templateAddress, row.invoiceType)) {
+          return this.viewBillPdfService.archiveBillFromViewBill(
+            row.invoiceID,
+            performedBy,
+            row.templateAddress,
+            row.invoiceType
+          );
         }
 
-        return this.viewBillPdfService.archiveGeneralBillFromViewBill(
-          row.invoiceID,
-          performedBy,
-          row.templateAddress,
-          row.invoiceType
-        );
+        return firstValueFrom(this.bulkBillsDownloadService.generateInvoicePdf(row.invoiceID, performedBy));
       },
       stepErrors
     );

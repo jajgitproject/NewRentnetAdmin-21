@@ -156,14 +156,16 @@ export class BookingConfigurationComponent implements OnInit {
     customerGroupID:[''],
     customerID:['' ],
     primaryBookerID:[''],
+    salesExecutive:[''],
     salesExecutiveID:[''],
+    kam:[''],
     kamID:[''],
     reservationExecutiveID:[''],
     customerTypeID:[''],
     emailLink: [''],
     reservationSourceID: [''],
     reservationSource: [''],
-    reservationStatus: [''],
+    reservationStatus: ['Approved'],
     primaryPassengerID:[''],
     reservationSourceDetail:[''],
     ecoCompanyID:[11],
@@ -273,12 +275,13 @@ toggleStopFold() {
 
   public loadData() 
   {
-    debugger; 
     this.bookingConfigurationService.GetReservationByID(this.BookingID).subscribe(
       data => {
-        debugger;
+          if (!data) {
+            this.dataSource = null;
+            return;
+          }
           this.dataSource = data;
-          console.log(this.dataSource);
           this.PackageType = this.dataSource.packageType;
           this.advanceTableForm.patchValue({packageTypeID:this.dataSource.packageTypeID});
           this.advanceTableForm.patchValue({packageType:this.dataSource.packageType});
@@ -305,9 +308,15 @@ toggleStopFold() {
           this.advanceTableForm.patchValue({emailLink:this.dataSource.emailLink});
           this.advanceTableForm.patchValue({modeOfPaymentID:this.dataSource.modeOfPaymentID});
           this.advanceTableForm.patchValue({modeOfPayment:this.dataSource.modeOfPayment});
-          this.advanceTableForm.patchValue({reservationStatus:this.dataSource.requestStatus}); 
+          this.advanceTableForm.patchValue({reservationStatus:this.dataSource.requestStatus || 'Approved'});
         },
-        (error: HttpErrorResponse) => { this.dataSource = null; }
+        (error: HttpErrorResponse) => {
+          if (error.status === 204 || error.status === 400) {
+            this.dataSource = null;
+            return;
+          }
+          this.dataSource = null;
+        }
     );
   }
 
@@ -447,15 +456,21 @@ private extractTime(dateTime: Date): Date {
     this._generalService.GetSalesManager(customerID).subscribe(
     data=>
     {
-      this.salesManagerList=data;
-      this.advanceTableForm.patchValue({salesExecutive:this.salesManagerList[0].firstName + ' ' + this.salesManagerList[0].lastName + '-' + this.salesManagerList[0].mobile + '-' + this.salesManagerList[0].email});
+      this.salesManagerList = data || [];
+      if (!this.salesManagerList.length) return;
+
+      const salesExecutive = this.salesManagerList[0].firstName + ' ' + this.salesManagerList[0].lastName + '-' + this.salesManagerList[0].mobile + '-' + this.salesManagerList[0].email;
+      this.advanceTableForm.patchValue({salesExecutive});
       this.advanceTableForm.patchValue({salesExecutiveID:this.salesManagerList[0]?.salesExecutiveID});
-      this.advanceTableForm.controls['salesExecutive'].setValidators([this.salesExecutiveValidator(this.salesManagerList)]);
-      this.advanceTableForm.controls['salesExecutive'].updateValueAndValidity();
-      this.filteredEmployeeOptions = this.advanceTableForm.controls['salesExecutive'].valueChanges.pipe(
-        startWith(""),
-        map(value => this._filterCustomerSE(value || ''))
-      )
+      const salesExecutiveControl = this.advanceTableForm.controls['salesExecutive'];
+      if (salesExecutiveControl) {
+        salesExecutiveControl.setValidators([this.salesExecutiveValidator(this.salesManagerList)]);
+        salesExecutiveControl.updateValueAndValidity();
+        this.filteredEmployeeOptions = salesExecutiveControl.valueChanges.pipe(
+          startWith(""),
+          map(value => this._filterCustomerSE(value || ''))
+        );
+      }
     })
   }
   private _filterCustomerSE(value: string): any {
@@ -484,15 +499,21 @@ private extractTime(dateTime: Date): Date {
     this._generalService.GetCustomerKam(customerID).subscribe(
     data=>
     {
-      this.customerKamList=data;  
-      this.advanceTableForm.patchValue({kam:this.customerKamList[0].firstName + ' ' + this.customerKamList[0].lastName + '-' + this.customerKamList[0].mobile + '-' + this.customerKamList[0].email});
+      this.customerKamList = data || [];
+      if (!this.customerKamList.length) return;
+
+      const kam = this.customerKamList[0].firstName + ' ' + this.customerKamList[0].lastName + '-' + this.customerKamList[0].mobile + '-' + this.customerKamList[0].email;
+      this.advanceTableForm.patchValue({kam});
       this.advanceTableForm.patchValue({kamID:this.customerKamList[0]?.kamID});
-      this.advanceTableForm.controls['kam'].setValidators([this.customerKAMValidator(this.customerKamList)]);
-      this.advanceTableForm.controls['kam'].updateValueAndValidity();
-      this.filteredEmployeesOptions = this.advanceTableForm.controls['kam'].valueChanges.pipe(
-        startWith(""),
-        map(value => this._filterCustomerKAM(value || ''))
-      ) 
+      const kamControl = this.advanceTableForm.controls['kam'];
+      if (kamControl) {
+        kamControl.setValidators([this.customerKAMValidator(this.customerKamList)]);
+        kamControl.updateValueAndValidity();
+        this.filteredEmployeesOptions = kamControl.valueChanges.pipe(
+          startWith(""),
+          map(value => this._filterCustomerKAM(value || ''))
+        );
+      }
     })
   }
   private _filterCustomerKAM(value: string): any {
@@ -590,12 +611,10 @@ private extractTime(dateTime: Date): Date {
           
           this.passengerDetailsList = data;
           console.log(this.passengerDetailsList);
-          if(this.passengerDetailsList[0].passengerID == 0)
-          {
-            this.advanceTableForm.patchValue({primaryPassengerID:this.bookerID});
-          }
-          else{
-            this.advanceTableForm.patchValue({primaryPassengerID:this.passengerDetailsList[0].passengerID});
+          if (this.passengerDetailsList?.length && this.passengerDetailsList[0].passengerID > 0) {
+            this.advanceTableForm.patchValue({ primaryPassengerID: this.passengerDetailsList[0].passengerID });
+          } else {
+            this.advanceTableForm.patchValue({ primaryPassengerID: 0 });
           }
         },
         (error: HttpErrorResponse) => { this.passengerDetailsList = null; }
@@ -676,23 +695,23 @@ private extractTime(dateTime: Date): Date {
 
   public Post(): void
   {
-    
+    const ctrn =
+      this.customerTravelRequestNumber ||
+      this.customerDetails?.customerTravelRequestNumber ||
+      this.advanceTableForm.value.customerTravelRequestNumber ||
+      '';
+
     this.advanceTableForm.patchValue({reservationExecutiveID:this._generalService.getUserID()});
     this.advanceTableForm.patchValue({bookingID:this.BookingID});
-    this.advanceTableForm.patchValue({customerTravelRequestNumber:this.customerTravelRequestNumber});
-    //this.advanceTableForm.patchValue({pickupDate:this.customerDetails.pickupDate});
-    // this.advanceTableForm.patchValue({salesExecutiveID:this.salesManagerList[0]?.salesExecutiveID});
-    // this.advanceTableForm.patchValue({kamID:this.customerKamList[0]?.kamID});
-    // if(!this.advanceTableForm.value.dropOffCityID)
-    // {
-    //   this.advanceTableForm.patchValue({dropOffCityID:0});
-    //   this.advanceTableForm.patchValue({dropOffCity:null});
-    //   this.advanceTableForm.patchValue({dropOffAddressDetails:null});
-    //   this.advanceTableForm.patchValue({dropOffAddress:null});
-    //   this.advanceTableForm.patchValue({dropOffAddressLatitude:null});
-    //   this.advanceTableForm.patchValue({dropOffAddressLongitude:null});
-    //   this.advanceTableForm.patchValue({dropOffStopOrderPriority:0});
-    // }
+    this.advanceTableForm.patchValue({customerTravelRequestNumber: ctrn});
+
+    if (!this.advanceTableForm.value.reservationStatus) {
+      this.advanceTableForm.patchValue({reservationStatus: 'Approved'});
+    }
+    if (!this.advanceTableForm.value.reservationSourceDetail) {
+      this.advanceTableForm.patchValue({reservationSourceDetail: ctrn});
+    }
+
     this.advanceTableForm.patchValue({pickupDate:this.extractDate(this.advanceTableForm.value.pickupDateTime)});
     this.advanceTableForm.patchValue({pickupTime:this.extractTime(this.advanceTableForm.value.pickupDateTime)});
     this.advanceTableForm.patchValue({dropOffDate:this.extractDate(this.advanceTableForm.value.dropOffDateTime)});
@@ -703,12 +722,10 @@ private extractTime(dateTime: Date): Date {
     this.advanceTableForm.patchValue({dropOffTimeString:this._generalService.getTimeFroms(this.advanceTableForm.value.dropOffTime)});
     const payload: any = this.advanceTableForm.getRawValue();
     payload.reservationStops = this.reservationStops;
-    console.log(payload);
     this.bookingConfigurationService.add(payload)  
     .subscribe(
     response => 
     {
-      //this.dialogRef.close();
       Swal.fire({
         title: '',
         text: 'Reservation - '+ response.data.reservationID +' Added.',
@@ -722,18 +739,19 @@ private extractTime(dateTime: Date): Date {
           this.navigateToControlPanel(response.data.reservationID);
         } ;
         });
-      //this._generalService.sendUpdate('ReservationGroupCreate:ReservationGroupView:Success');//To Send Updates
       this.saveDisabled = true; 
     },
     error =>
     {
+        const message =
+          typeof error === 'string'
+            ? error
+            : error?.error?.message || error?.message || 'Failed to save reservation.';
         Swal.fire({
-            title: '',
-            text: error,
-            icon: 'warning',
+            title: 'Save failed',
+            text: message,
+            icon: 'error',
           });
-      
-      //this._generalService.sendUpdate('ReservationGroupAll:ReservationGroupView:Failure');//To Send Updates
       this.saveDisabled = true; 
     }
     )

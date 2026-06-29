@@ -1,23 +1,22 @@
-import { Injectable, OnDestroy } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { Injectable, Injector, OnDestroy } from '@angular/core';
+import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { Router } from '@angular/router';
 import Swal from 'sweetalert2';
 import { RuntimeConfigService } from './runtime-config.service';
 import { AuthService } from './auth.service';
+import { TabSessionCoordinatorService } from './tab-session-coordinator.service';
+import { SessionTokenService } from './session-token.service';
+import {
+  SESSION_HEARTBEAT_DEBOUNCE_MS,
+  SESSION_INACTIVITY_MS,
+  SESSION_INACTIVITY_WARNING_LEAD_MINUTES,
+  SESSION_WARNING_MS,
+} from './session-settings';
+
+const ACTIVITY_DEBOUNCE_MS = 1000;
 
 @Injectable({ providedIn: 'root' })
 export class SessionHeartbeatService implements OnDestroy {
-  // Production: keep in sync with EmployeeLoginSessionSettings on API (20 min timeout, 2 min warning).
-  // UAT/local testing: temporarily use 2 / 1 / 30s debounce here and in EmployeeLoginSessionSettings.cs.
-  private static readonly INACTIVITY_TIMEOUT_MINUTES = 20;
-  private static readonly INACTIVITY_WARNING_LEAD_MINUTES = 2;
-  private static readonly INACTIVITY_MS = SessionHeartbeatService.INACTIVITY_TIMEOUT_MINUTES * 60 * 1000;
-  private static readonly WARNING_MS =
-    (SessionHeartbeatService.INACTIVITY_TIMEOUT_MINUTES - SessionHeartbeatService.INACTIVITY_WARNING_LEAD_MINUTES) * 60 * 1000;
-
-  private static readonly HEARTBEAT_DEBOUNCE_MS = 60 * 1000;
-  private static readonly ACTIVITY_DEBOUNCE_MS = 1000;
-
   private readonly apiUrl: string;
   private warningTimeoutId: ReturnType<typeof setTimeout> | null = null;
   private logoutTimeoutId: ReturnType<typeof setTimeout> | null = null;
@@ -26,6 +25,7 @@ export class SessionHeartbeatService implements OnDestroy {
   private warningVisible = false;
   private monitoring = false;
   private sessionEndSent = false;
+  private sessionExpiredHandling = false;
 
   private readonly activityHandler = () => this.onUserActivity();
 
@@ -33,7 +33,8 @@ export class SessionHeartbeatService implements OnDestroy {
     private http: HttpClient,
     private runtimeConfig: RuntimeConfigService,
     private authService: AuthService,
-    private router: Router
+    private router: Router,
+    private injector: Injector
   ) {
     this.apiUrl = this.runtimeConfig.getBaseUrl() + 'Auth';
   }
@@ -44,6 +45,11 @@ export class SessionHeartbeatService implements OnDestroy {
     this.monitoring = true;
     this.bindActivityListeners();
     this.resetInactivityTimer();
+    try {
+      this.injector.get(SessionTokenService).startProactiveRefreshScheduling();
+    } catch {
+      // SessionTokenService unavailable during early bootstrap.
+    }
   }
 
   stop(): void {
@@ -54,13 +60,55 @@ export class SessionHeartbeatService implements OnDestroy {
       Swal.close();
       this.warningVisible = false;
     }
+    try {
+      this.injector.get(SessionTokenService).stopProactiveRefreshScheduling();
+    } catch {
+      // ignore
+    }
+  }
+
+  /** Graceful logout with user-visible message (401, refresh failure, etc.). */
+  handleSessionExpired(message = 'Your session has expired. Please sign in again.'): void {
+    if (this.sessionExpiredHandling) return;
+    this.sessionExpiredHandling = true;
+
+    this.stop();
+
+    if (Swal.isVisible()) {
+      Swal.close();
+    }
+
+    Swal.fire({
+      title: 'Session Expired',
+      text: message,
+      icon: 'warning',
+      confirmButtonText: 'Sign In',
+      allowOutsideClick: false,
+      allowEscapeKey: false,
+    }).finally(() => {
+      this.authService.clearLocalSession();
+      this.router.navigate(['/authentication/signin']);
+      this.sessionExpiredHandling = false;
+    });
   }
 
   sendHeartbeat(): void {
     const payload = this.getSessionPayload();
     if (!payload) return;
     this.lastHeartbeatSent = Date.now();
-    this.http.post(`${this.apiUrl}/session-heartbeat`, payload).subscribe({ error: () => {} });
+    this.http.post(`${this.apiUrl}/session-heartbeat`, payload).subscribe({
+      next: () => {
+        void this.maybeRefreshTokenAfterHeartbeat();
+      },
+      error: (err: HttpErrorResponse) => {
+        void this.handleHeartbeatError(err);
+      },
+    });
+    try {
+      this.injector.get(TabSessionCoordinatorService).refreshTabPresence();
+    } catch {
+      // Tab coordinator unavailable during early bootstrap.
+    }
   }
 
   endSessionBeacon(inactivityLogout = false): void {
@@ -118,20 +166,27 @@ export class SessionHeartbeatService implements OnDestroy {
     this.activityDebounceId = setTimeout(() => {
       this.activityDebounceId = null;
       if (!this.monitoring || this.warningVisible) return;
+
+      try {
+        this.injector.get(TabSessionCoordinatorService).recordTabActivity();
+      } catch {
+        // ignore
+      }
+
       this.resetInactivityTimer();
       this.sendHeartbeatIfDue();
-    }, SessionHeartbeatService.ACTIVITY_DEBOUNCE_MS);
+    }, ACTIVITY_DEBOUNCE_MS);
   }
 
   private resetInactivityTimer(): void {
     this.clearInactivityTimers();
     this.warningTimeoutId = setTimeout(
       () => this.showInactivityWarning(),
-      SessionHeartbeatService.WARNING_MS
+      SESSION_WARNING_MS
     );
     this.logoutTimeoutId = setTimeout(
       () => this.performInactivityLogout(),
-      SessionHeartbeatService.INACTIVITY_MS
+      SESSION_INACTIVITY_MS
     );
   }
 
@@ -148,11 +203,25 @@ export class SessionHeartbeatService implements OnDestroy {
 
   private showInactivityWarning(): void {
     if (!this.monitoring || this.warningVisible) return;
+
+    let otherTabRecentlyActive = false;
+    try {
+      const coordinator = this.injector.get(TabSessionCoordinatorService);
+      otherTabRecentlyActive = coordinator.hasOpenTabs();
+    } catch {
+      // proceed with default message
+    }
+
     this.warningVisible = true;
+
+    const defaultText = `Your Session will end in ${SESSION_INACTIVITY_WARNING_LEAD_MINUTES} minute(s).`;
+    const text = otherTabRecentlyActive
+      ? `You are inactive in this tab. ${defaultText} Another tab is still active.`
+      : defaultText;
 
     Swal.fire({
       title: 'Session Timeout',
-      text: `Your Session will end in ${SessionHeartbeatService.INACTIVITY_WARNING_LEAD_MINUTES} minute(s).`,
+      text,
       icon: 'warning',
       confirmButtonText: 'Continue Session',
       allowOutsideClick: false,
@@ -169,6 +238,16 @@ export class SessionHeartbeatService implements OnDestroy {
 
   private performInactivityLogout(): void {
     if (!this.monitoring) return;
+
+    try {
+      if (this.injector.get(TabSessionCoordinatorService).isSessionActive()) {
+        this.resetInactivityTimer();
+        return;
+      }
+    } catch {
+      // proceed with logout
+    }
+
     this.stop();
 
     const payload = this.getSessionPayload();
@@ -184,7 +263,6 @@ export class SessionHeartbeatService implements OnDestroy {
       InactivityLogout: true,
     };
 
-    // session-end is AllowAnonymous; query flag ensures inactivity is recorded even if body binding fails.
     this.http.post(`${this.apiUrl}/session-end?inactivityLogout=true`, body).subscribe({
       next: () => {
         this.sessionEndSent = true;
@@ -199,10 +277,40 @@ export class SessionHeartbeatService implements OnDestroy {
     });
   }
 
+  private async handleHeartbeatError(err: HttpErrorResponse): Promise<void> {
+    if (err?.status !== 401 || !this.monitoring) return;
+
+    try {
+      const newToken = await this.injector.get(SessionTokenService).refreshToken();
+      if (newToken) {
+        this.sendHeartbeat();
+        return;
+      }
+    } catch {
+      // fall through to graceful logout
+    }
+
+    this.handleSessionExpired();
+  }
+
   private sendHeartbeatIfDue(): void {
     const now = Date.now();
-    if (now - this.lastHeartbeatSent < SessionHeartbeatService.HEARTBEAT_DEBOUNCE_MS) return;
+    if (now - this.lastHeartbeatSent < SESSION_HEARTBEAT_DEBOUNCE_MS) return;
     this.sendHeartbeat();
+  }
+
+  private async maybeRefreshTokenAfterHeartbeat(): Promise<void> {
+    if (!this.monitoring) return;
+
+    try {
+      const sessionTokenService = this.injector.get(SessionTokenService);
+      const tabCoordinator = this.injector.get(TabSessionCoordinatorService);
+      if (!tabCoordinator.isSessionActive()) return;
+      if (!sessionTokenService.isTokenNearExpiry()) return;
+      await sessionTokenService.refreshIfActive();
+    } catch {
+      // ignore
+    }
   }
 
   private getSessionPayload(): Record<string, unknown> | null {

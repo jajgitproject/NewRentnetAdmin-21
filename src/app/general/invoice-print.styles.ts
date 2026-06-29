@@ -345,11 +345,28 @@ export const DUTY_SLIP_PRINT_CSS = `
   margin: 0 auto;
   object-fit: contain;
 }
+.signature-cell {
+  text-align: center;
+  vertical-align: top;
+  padding: 1px 2px;
+  max-width: 110px;
+  line-height: 1.1;
+}
+.signature-box {
+  width: 100px;
+  height: 40px;
+  margin: 0 auto;
+  overflow: hidden;
+  display: block;
+  line-height: 0;
+  border: 1px solid #999;
+  box-sizing: border-box;
+}
 .signature-image {
-  width: 120px;
-  height: 60px;
-  max-width: 120px;
-  max-height: 60px;
+  width: 100px;
+  height: 40px;
+  max-width: 100px;
+  max-height: 40px;
   object-fit: contain;
   display: block;
   margin: 0 auto;

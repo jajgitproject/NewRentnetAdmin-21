@@ -31,6 +31,10 @@
                                           <!-- <div style="float:left" *ngIf="SearchCustomerGroup"><b>Customer Group</b> : {{SearchCustomerGroup}}</div> -->
                                       </div>
                                       <div style="width: 30%; text-align:right;">
+                                          <button mat-raised-button color="accent" (click)="downloadCsv()" [disabled]="csvExporting">
+                                              Download CSV
+                                          </button>
+                                          &nbsp;
                                           <button mat-raised-button color="primary" data-dismiss="modal" data-toggle="modal" data-backdrop="false" data-target="#exampleModalCenter">
                                               Search
                                           </button>

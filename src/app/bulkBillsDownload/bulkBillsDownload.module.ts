@@ -15,11 +15,10 @@ import { MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatRadioModule } from '@angular/material/radio';
 import { MatAutocompleteModule } from '@angular/material/autocomplete';
-import { MatDialogModule } from '@angular/material/dialog';
+import { MatPaginatorModule } from '@angular/material/paginator';
 import { RouterModule } from '@angular/router';
 import { BulkBillsDownloadRoutingModule } from './bulkBillsDownload-routing.module';
 import { BulkBillsDownloadComponent } from './bulkBillsDownload.component';
-import { BackfillStepDialogModule } from './backfill-step-dialog.module';
 import { BulkBillsDownloadService } from './bulkBillsDownload.service';
 
 @NgModule({
@@ -30,7 +29,6 @@ import { BulkBillsDownloadService } from './bulkBillsDownload.service';
     ReactiveFormsModule,
     RouterModule,
     BulkBillsDownloadRoutingModule,
-    BackfillStepDialogModule,
     MatTableModule,
     MatFormFieldModule,
     MatInputModule,
@@ -44,7 +42,7 @@ import { BulkBillsDownloadService } from './bulkBillsDownload.service';
     MatCheckboxModule,
     MatRadioModule,
     MatAutocompleteModule,
-    MatDialogModule,
+    MatPaginatorModule,
   ],
   providers: [BulkBillsDownloadService],
 })

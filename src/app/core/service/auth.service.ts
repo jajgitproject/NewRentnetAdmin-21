@@ -1,10 +1,12 @@
-import { Injectable } from '@angular/core';
+import { Injectable, Injector } from '@angular/core';
 // import { HttpClient } from '@angular/common/http';
 import { BehaviorSubject, Observable, of } from 'rxjs';
-import { catchError, map } from 'rxjs/operators';
+import { catchError, map, tap } from 'rxjs/operators';
 import { User } from '../models/user';
 import { HttpClient } from '@angular/common/http';
 import { RuntimeConfigService } from './runtime-config.service';
+import { TabSessionCoordinatorService } from './tab-session-coordinator.service';
+import { SessionTokenService } from './session-token.service';
 // Login geolocation disabled (EmployeeLoginSessionSettings.RequireLoginLocation = false on API).
 
 @Injectable({
@@ -15,7 +17,9 @@ export class AuthService {
   public currentUser: Observable<User | null>;
   constructor(
     private http: HttpClient,
-    private runtimeConfig: RuntimeConfigService
+    private runtimeConfig: RuntimeConfigService,
+    private tabSessionCoordinator: TabSessionCoordinatorService,
+    private injector: Injector
   ) {
     const stored = localStorage.getItem('currentUser');
     let normalized: User | null = null;
@@ -76,10 +80,38 @@ export class AuthService {
           localStorage.setItem('currentUser', JSON.stringify(normalized));
           this.syncExpirationDateFromEmployee(normalized);
           this.currentUserSubject.next(normalized);
+          this.tabSessionCoordinator.registerTab();
         }
         return normalized;
+      }),
+      tap((normalized) => {
+        if (this.isValidSession(normalized)) {
+          try {
+            this.injector.get(SessionTokenService).startProactiveRefreshScheduling();
+          } catch {
+            // SessionTokenService unavailable during early bootstrap.
+          }
+        }
       })
     );
+  }
+
+  updateToken(token: string): void {
+    if (!token) return;
+
+    const current = this.currentUserValue as any;
+    if (!current) return;
+
+    const updated = this.normalizeLoginResponse({
+      ...current,
+      Token: token,
+      token,
+    });
+
+    if (!this.isValidSession(updated)) return;
+
+    localStorage.setItem('currentUser', JSON.stringify(updated));
+    this.currentUserSubject.next(updated as User);
   }
 
   /**
@@ -190,9 +222,23 @@ export class AuthService {
   }
 
   clearLocalSession(): void {
+    const sessionGuid = this.getSessionGuidFromStorage();
     localStorage.removeItem('currentUser');
     localStorage.removeItem('accessPages');
     this.currentUserSubject.next(null);
+    this.tabSessionCoordinator.clearCoordinatorState(sessionGuid);
+  }
+
+  private getSessionGuidFromStorage(): string | null {
+    const raw = localStorage.getItem('currentUser');
+    if (!raw) return null;
+    try {
+      const user = JSON.parse(raw);
+      const sessionGuid = user?.SessionGuid ?? user?.sessionGuid;
+      return sessionGuid ? String(sessionGuid) : null;
+    } catch {
+      return null;
+    }
   }
 
   private isValidSession(user: any): boolean {

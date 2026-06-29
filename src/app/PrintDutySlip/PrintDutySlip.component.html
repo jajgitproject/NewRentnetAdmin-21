@@ -191,10 +191,13 @@
                                   [src]="dataSource?.mapURL" class="map-image" alt="Duty Slip Map" />
                                   <ng-template #noMapImage>No Image</ng-template>
                           </td>
-                          <td valign="top" width="130" align="left" style="padding-left: 5px;">
+                          <td valign="top" width="130" align="center" class="signature-cell">
                             User Signature<br />
+                            <div class="signature-box">
                             <app-static-image *ngIf="dataSource?.customerSignatureImage; else noSignatureImage"
-                              [src]="dataSource?.customerSignatureImage" cssClass="signature-image" alt="User Signature"></app-static-image>
+                              [src]="dataSource?.customerSignatureImage" cssClass="signature-image" alt="User Signature"
+                              width="100px" height="40px" maxWidth="100px" maxHeight="40px"></app-static-image>
+                            </div>
                               <ng-template #noSignatureImage>No Image</ng-template>
 
                             <br />

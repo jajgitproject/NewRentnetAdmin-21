@@ -19,6 +19,8 @@ ${PDF_IMAGE_PAGE_CSS}
 
 @Injectable({ providedIn: 'root' })
 export class PdfPrintService {
+  private static readonly SIGNATURE_WIDTH_PX = '100px';
+  private static readonly SIGNATURE_HEIGHT_PX = '40px';
   private apiUrl: string;
 
   constructor(
@@ -74,6 +76,7 @@ export class PdfPrintService {
     this.normalizeLogoForPdf(clone);
     await this.embedInvoiceLogoAsDataUrl(clone, options?.liveElement ?? element);
     this.normalizeAssetImages(clone);
+    this.normalizeSignatureImagesForPdf(clone);
     this.applyDocumentPageBreaks(clone);
     this.prepareImagePages(clone);
     this.removeDutySlipLabels(clone);
@@ -361,6 +364,32 @@ export class PdfPrintService {
     return (text ?? '').trim().toLowerCase() === 'duty slip';
   }
 
+  private normalizeSignatureImagesForPdf(root: HTMLElement): void {
+    const { SIGNATURE_WIDTH_PX: width, SIGNATURE_HEIGHT_PX: height } = PdfPrintService;
+
+    root.querySelectorAll('.signature-box').forEach((box: HTMLElement) => {
+      box.style.width = width;
+      box.style.height = height;
+      box.style.maxWidth = width;
+      box.style.maxHeight = height;
+      box.style.margin = '0 auto';
+      box.style.overflow = 'hidden';
+      box.style.display = 'block';
+      box.style.lineHeight = '0';
+      box.style.boxSizing = 'border-box';
+    });
+
+    root.querySelectorAll('img.signature-image').forEach((img: HTMLImageElement) => {
+      img.style.width = width;
+      img.style.height = height;
+      img.style.objectFit = 'contain';
+      img.style.maxWidth = width;
+      img.style.maxHeight = height;
+      img.style.display = 'block';
+      img.style.margin = '0 auto';
+    });
+  }
+
   private normalizeAssetImages(root: HTMLElement): void {
     root.querySelectorAll('img[src]').forEach((img: HTMLImageElement) => {
       if (img.classList.contains('invoice-logo')) {
@@ -435,11 +464,13 @@ export class PdfPrintService {
         img.src = this.absolutizeUrl(img.getAttribute('src') ?? img.src);
       });
       replacement.querySelectorAll('img.signature-image').forEach((img: HTMLImageElement) => {
-        img.style.width = '120px';
-        img.style.height = '60px';
+        img.style.width = PdfPrintService.SIGNATURE_WIDTH_PX;
+        img.style.height = PdfPrintService.SIGNATURE_HEIGHT_PX;
         img.style.objectFit = 'contain';
-        img.style.maxWidth = '120px';
-        img.style.maxHeight = '60px';
+        img.style.maxWidth = PdfPrintService.SIGNATURE_WIDTH_PX;
+        img.style.maxHeight = PdfPrintService.SIGNATURE_HEIGHT_PX;
+        img.style.display = 'block';
+        img.style.margin = '0 auto';
       });
 
       return replacement;

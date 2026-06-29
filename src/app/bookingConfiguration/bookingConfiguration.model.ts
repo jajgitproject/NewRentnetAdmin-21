@@ -6,6 +6,8 @@ export class BookingConfigurationCustomerDetails {
   customerName : string;
   aggregatorName:string;
   packageType:string;
+  packageID:number;
+  package:string;
   vehicle :string;
   customerCodeForAPIIntegration :string;
   pickupDate:Date;
@@ -29,6 +31,8 @@ export class BookingConfigurationCustomerDetails {
       this.customerName = bookingConfigurationCustomerDetails.customerName || '';
       this.aggregatorName = bookingConfigurationCustomerDetails.aggregatorName || '';
       this.packageType = bookingConfigurationCustomerDetails.packageType || '';
+      this.packageID = bookingConfigurationCustomerDetails.packageID || '';
+      this.package = bookingConfigurationCustomerDetails.package || '';
       this.vehicle = bookingConfigurationCustomerDetails.vehicle || '';
       this.pickupDate = bookingConfigurationCustomerDetails.pickupDate || '';
       this.pickupTime = bookingConfigurationCustomerDetails.pickupTime || '';

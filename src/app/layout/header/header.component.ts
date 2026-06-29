@@ -13,6 +13,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { ConfigService } from 'src/app/config/config.service';
 import { AuthService } from 'src/app/core/service/auth.service';
 import { SessionHeartbeatService } from 'src/app/core/service/session-heartbeat.service';
+import { TabSessionCoordinatorService } from 'src/app/core/service/tab-session-coordinator.service';
 import { RightSidebarService } from 'src/app/core/service/rightsidebar.service';
 import { WINDOW } from 'src/app/core/service/window.service';
 import { LanguageService } from 'src/app/core/service/language.service';
@@ -48,6 +49,7 @@ export class HeaderComponent implements OnInit, AfterViewInit {
     private configService: ConfigService,
     private authService: AuthService,
     private sessionHeartbeatService: SessionHeartbeatService,
+    private tabSessionCoordinator: TabSessionCoordinatorService,
     private router: Router,
     private expirationDateService:ExpirationDateService,
     public languageService: LanguageService,
@@ -263,6 +265,7 @@ export class HeaderComponent implements OnInit, AfterViewInit {
   }
   logout() {
     this.sessionHeartbeatService.stop();
+    this.tabSessionCoordinator.prepareExplicitLogout();
     this.authService.logout().subscribe({
       next: () => this.router.navigate(['/authentication/signin']),
       error: () => {

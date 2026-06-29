@@ -3,6 +3,7 @@ export interface BulkDownloadSearchCriteria {
   customerID?: number | null;
   fromDate?: string | null;
   toDate?: string | null;
+  invoiceNumber?: string | null;
   invoiceIDs?: number[];
 }
 
@@ -23,6 +24,7 @@ export interface StartBulkDownloadJobRequest {
   customerID?: number | null;
   fromDate?: string | null;
   toDate?: string | null;
+  invoiceNumber?: string | null;
   invoiceIDs?: number[];
   downloadMode: string;
 }
@@ -67,8 +69,10 @@ export interface IrnBackfillSearchCriteria {
   customerID?: number | null;
   fromDate?: string | null;
   toDate?: string | null;
+  invoiceNumber?: string | null;
   invoiceIDs?: number[];
   replaceExisting?: boolean;
+  maxCandidates?: number;
 }
 
 export interface InvoiceArchiveStatus {
@@ -78,6 +82,8 @@ export interface InvoiceArchiveStatus {
   missingDutySlipIDs: number[];
   dutySlipsNeedingTollParking: number[];
   dutySlipsNeedingInterstateTax: number[];
+  templateAddress?: string | null;
+  invoiceType?: string | null;
 }
 
 export interface IrnBackfillPreviewResult {

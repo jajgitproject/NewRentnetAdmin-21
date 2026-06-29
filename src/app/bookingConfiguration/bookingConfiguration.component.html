@@ -113,7 +113,7 @@
               </div>
   
               <div class="col-xl-4 col-lg-4 col-md-6 col-sm-6 mb-2">
-                <span style="margin-left: 15px;font-weight: bold;">Pickup City</span> : <span>{{stopDetailsList[0].integrationRequestStopCity || 'N/A'}}</span>
+                <span style="margin-left: 15px;font-weight: bold;">Pickup City</span> : <span>{{stopDetailsList?.[0]?.integrationRequestStopCity || 'N/A'}}</span>
                 <mat-form-field class="example-full-width cp-quick-search-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
                     <mat-label>Pickup City</mat-label>
                     <input required type="text" matInput formControlName="pickupCity"

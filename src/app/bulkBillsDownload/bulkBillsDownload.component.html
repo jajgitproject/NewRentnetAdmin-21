@@ -41,7 +41,8 @@
                 <div class="backfill-panel">
                   <div class="panel-title">IRN PDF backfill</div>
                   <p class="backfill-hint">
-                    Backfill runs one PDF at a time. A modal appears for each document (<code>DocumentType Created/Not Created FileName</code>) and the next PDF is not created until you close it. Use <strong>Cancel backfill</strong> to stop.
+                    Backfill processes up to <strong>{{ maxBackfillBatchSize }}</strong> invoices per run without popups.
+                    Progress is shown in the job panel below.
                   </p>
                   <p class="backfill-hint backfill-hint-secondary">
                     Archives bill, duty slip, toll parking, and interstate tax PDFs for IRN invoices that are still incomplete.
@@ -49,50 +50,78 @@
                     Reservation emails still require manual upload.
                     Matches <code>IrnBackfill_Candidates.sql</code> (all dates). Only missing PDFs are created; existing archived files are left unchanged.
                   </p>
+                  <div class="row bulk-filters g-2 backfill-search-row">
+                    <div class="col-xl-3 col-lg-4 col-md-6 col-sm-12">
+                      <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                        <mat-label>Invoice Number</mat-label>
+                        <input matInput [formControl]="backfillInvoiceNumberCtrl" placeholder="e.g. NAE2627/48" />
+                      </mat-form-field>
+                    </div>
+                    <div class="col-xl-2 col-lg-3 col-md-4 col-sm-6 d-flex align-items-center">
+                      <button mat-raised-button color="primary" type="button" (click)="searchBackfillByInvoice()" [disabled]="backfilling || isBackfillRunning()">
+                        Search &amp; Backfill
+                      </button>
+                    </div>
+                  </div>
+                  <p class="backfill-hint backfill-hint-inline" *ngIf="backfillInvoiceNumberCtrl.value">
+                    Search matches active rows in <code>InvoiceDocument</code> only (partial invoice number match). If a candidate is found, backfill starts automatically.
+                  </p>
+                  <div class="load-error" *ngIf="backfillLoadError">{{ backfillLoadError }}</div>
                   <div class="backfill-actions">
                     <button mat-stroked-button type="button" (click)="previewBackfillCandidates()">Preview candidates</button>
                     <button mat-raised-button color="warn" type="button" (click)="startIrnBackfill()" [disabled]="backfilling || isBackfillRunning()">
                       Backfill IRN PDFs
                     </button>
                     <span class="backfill-count" *ngIf="backfillCandidateCount !== null">
-                      {{ backfillCandidateCount }} candidate(s)
+                      {{ backfillCandidateCount }} candidate(s) (max {{ maxBackfillBatchSize }})
                     </span>
                   </div>
                 </div>
               </div>
 
-              <div *ngIf="activeTab === 'download'">
-                <div class="row bulk-filters g-2">
-                  <div class="col-xl-3 col-lg-4 col-md-6 col-sm-12">
-                    <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
-                      <mat-label>Customer</mat-label>
-                      <input matInput [formControl]="customerCtrl" [matAutocomplete]="customerAuto" placeholder="Type to search" />
-                      <mat-autocomplete #customerAuto="matAutocomplete" [displayWith]="displayCustomer">
-                        <mat-option *ngFor="let customer of filteredCustomerOptions | async" [value]="customer">
-                          {{ customer.customerName }}
-                        </mat-option>
-                      </mat-autocomplete>
-                    </mat-form-field>
+              <div *ngIf="activeTab === 'download'" class="download-tab-layout">
+                <div class="download-search-section">
+                  <div class="row bulk-filters g-2">
+                    <div class="col-xl-3 col-lg-4 col-md-6 col-sm-12">
+                      <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                        <mat-label>Customer</mat-label>
+                        <input matInput [formControl]="customerCtrl" [matAutocomplete]="customerAuto" placeholder="Type to search" />
+                        <mat-autocomplete #customerAuto="matAutocomplete" [displayWith]="displayCustomer">
+                          <mat-option *ngFor="let customer of filteredCustomerOptions | async" [value]="customer">
+                            {{ customer.customerName }}
+                          </mat-option>
+                        </mat-autocomplete>
+                      </mat-form-field>
+                    </div>
+                    <div class="col-xl-2 col-lg-3 col-md-4 col-sm-6">
+                      <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                        <mat-label>Invoice Number</mat-label>
+                        <input matInput [formControl]="invoiceNumberCtrl" placeholder="Invoice number" />
+                      </mat-form-field>
+                    </div>
+                    <div class="col-xl-2 col-lg-3 col-md-4 col-sm-6">
+                      <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                        <mat-label>From Date</mat-label>
+                        <input matInput [matDatepicker]="fromPicker" [formControl]="fromDateCtrl" />
+                        <mat-datepicker-toggle matSuffix [for]="fromPicker"></mat-datepicker-toggle>
+                        <mat-datepicker #fromPicker></mat-datepicker>
+                      </mat-form-field>
+                    </div>
+                    <div class="col-xl-2 col-lg-3 col-md-4 col-sm-6">
+                      <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                        <mat-label>To Date</mat-label>
+                        <input matInput [matDatepicker]="toPicker" [formControl]="toDateCtrl" />
+                        <mat-datepicker-toggle matSuffix [for]="toPicker"></mat-datepicker-toggle>
+                        <mat-datepicker #toPicker></mat-datepicker>
+                      </mat-form-field>
+                    </div>
+                    <div class="col-xl-2 col-lg-3 col-md-4 col-sm-6 d-flex align-items-center">
+                      <button mat-raised-button color="primary" type="button" (click)="search()" [disabled]="loading">Search</button>
+                    </div>
                   </div>
-                  <div class="col-xl-2 col-lg-3 col-md-4 col-sm-6">
-                    <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
-                      <mat-label>From Date</mat-label>
-                      <input matInput [matDatepicker]="fromPicker" [formControl]="fromDateCtrl" />
-                      <mat-datepicker-toggle matSuffix [for]="fromPicker"></mat-datepicker-toggle>
-                      <mat-datepicker #fromPicker></mat-datepicker>
-                    </mat-form-field>
-                  </div>
-                  <div class="col-xl-2 col-lg-3 col-md-4 col-sm-6">
-                    <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
-                      <mat-label>To Date</mat-label>
-                      <input matInput [matDatepicker]="toPicker" [formControl]="toDateCtrl" />
-                      <mat-datepicker-toggle matSuffix [for]="toPicker"></mat-datepicker-toggle>
-                      <mat-datepicker #toPicker></mat-datepicker>
-                    </mat-form-field>
-                  </div>
-                  <div class="col-xl-2 col-lg-3 col-md-4 col-sm-6 d-flex align-items-center">
-                    <button mat-raised-button color="primary" type="button" (click)="search()" [disabled]="loading">Search</button>
-                  </div>
+
+                  <mat-progress-bar *ngIf="loading" mode="indeterminate"></mat-progress-bar>
+                  <div class="load-error" *ngIf="loadError">{{ loadError }}</div>
                 </div>
 
                 <div class="download-panel">
@@ -112,41 +141,81 @@
                   </div>
                 </div>
 
-                <mat-progress-bar *ngIf="loading" mode="indeterminate"></mat-progress-bar>
-                <div class="load-error" *ngIf="loadError">{{ loadError }}</div>
-                <p class="upload-hint" *ngIf="!loading && !invoiceRows.length && !loadError">
-                  Search lists active rows from <code>InvoiceDocument</code> (archived invoice PDFs) filtered by customer and invoice date.
-                </p>
+                <div class="job-panel job-panel-sticky" *ngIf="showDownloadTabJobPanel()">
+                  <div class="panel-title">Job #{{ getActiveJobId() }} — {{ getJobStatus() }}</div>
+                  <div class="job-meta">
+                    <span>Type: {{ activeJob.jobType }}</span>
+                    <span *ngIf="activeJob.downloadMode">Mode: {{ activeJob.downloadMode }}</span>
+                    <span>Processed: {{ activeJob.processedFiles }} / {{ activeJob.totalFiles }}</span>
+                    <span>Success: {{ activeJob.successCount }}</span>
+                    <span>Errors: {{ activeJob.errorCount }}</span>
+                  </div>
+                  <mat-progress-bar mode="determinate" [value]="getJobProgress()"></mat-progress-bar>
+                  <p class="job-message" *ngIf="activeJob.errorMessage">{{ activeJob.errorMessage }}</p>
+                  <div class="job-actions">
+                    <button mat-raised-button color="primary" type="button" (click)="downloadZip()" [disabled]="!canDownloadZip()">Download ZIP</button>
+                    <button mat-stroked-button type="button" (click)="exportErrors()" [disabled]="!jobErrors.length">Export errors CSV</button>
+                    <button mat-button type="button" (click)="clearJob()">Dismiss</button>
+                  </div>
+                  <div class="table-responsive job-error-table-wrap" *ngIf="jobErrors.length">
+                    <table class="error-table">
+                      <thead>
+                        <tr>
+                          <th>File / Invoice</th>
+                          <th>Error</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <tr *ngFor="let err of jobErrors">
+                          <td>{{ err.fileName }}</td>
+                          <td>{{ err.errorDescription }}</td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
 
-                <div class="table-responsive" *ngIf="invoiceRows.length">
-                  <table mat-table [dataSource]="invoiceRows" class="mat-elevation-z1 bulk-table">
-                    <ng-container matColumnDef="select">
-                      <th mat-header-cell *matHeaderCellDef>
-                        <mat-checkbox (change)="$event ? masterToggle() : null" [checked]="isAllSelected()" [indeterminate]="selection.hasValue() && !isAllSelected()"></mat-checkbox>
-                      </th>
-                      <td mat-cell *matCellDef="let row">
-                        <mat-checkbox (click)="$event.stopPropagation()" (change)="$event ? selection.toggle(row) : null" [checked]="selection.isSelected(row)"></mat-checkbox>
-                      </td>
-                    </ng-container>
-                    <ng-container matColumnDef="invoiceNumberWithPrefix">
-                      <th mat-header-cell *matHeaderCellDef>Invoice No</th>
-                      <td mat-cell *matCellDef="let row">{{ row.invoiceNumberWithPrefix }}</td>
-                    </ng-container>
-                    <ng-container matColumnDef="invoiceDate">
-                      <th mat-header-cell *matHeaderCellDef>Invoice Date</th>
-                      <td mat-cell *matCellDef="let row">{{ row.invoiceDate | date:'dd/MM/yyyy' }}</td>
-                    </ng-container>
-                    <ng-container matColumnDef="reservationID">
-                      <th mat-header-cell *matHeaderCellDef>ReservationID</th>
-                      <td mat-cell *matCellDef="let row">{{ row.reservationID || '—' }}</td>
-                    </ng-container>
-                    <ng-container matColumnDef="customerName">
-                      <th mat-header-cell *matHeaderCellDef>CustomerName</th>
-                      <td mat-cell *matCellDef="let row">{{ row.customerName }}</td>
-                    </ng-container>
-                    <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-                    <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
-                  </table>
+                <div class="download-grid-section">
+                  <p class="upload-hint" *ngIf="!loading && !invoiceRows.length && !loadError">
+                    Search lists active rows from <code>InvoiceDocument</code> (archived invoice PDFs) filtered by customer, invoice number, and invoice date.
+                  </p>
+
+                  <div class="table-responsive" *ngIf="invoiceRows.length">
+                    <table mat-table [dataSource]="invoiceDataSource" class="mat-elevation-z1 bulk-table">
+                      <ng-container matColumnDef="select">
+                        <th mat-header-cell *matHeaderCellDef>
+                          <mat-checkbox (change)="$event ? masterToggle() : null" [checked]="isAllSelected()" [indeterminate]="selection.hasValue() && !isAllSelected()"></mat-checkbox>
+                        </th>
+                        <td mat-cell *matCellDef="let row">
+                          <mat-checkbox (click)="$event.stopPropagation()" (change)="$event ? selection.toggle(row) : null" [checked]="selection.isSelected(row)"></mat-checkbox>
+                        </td>
+                      </ng-container>
+                      <ng-container matColumnDef="invoiceNumberWithPrefix">
+                        <th mat-header-cell *matHeaderCellDef>Invoice No</th>
+                        <td mat-cell *matCellDef="let row">{{ row.invoiceNumberWithPrefix }}</td>
+                      </ng-container>
+                      <ng-container matColumnDef="invoiceDate">
+                        <th mat-header-cell *matHeaderCellDef>Invoice Date</th>
+                        <td mat-cell *matCellDef="let row">{{ row.invoiceDate | date:'dd/MM/yyyy' }}</td>
+                      </ng-container>
+                      <ng-container matColumnDef="reservationID">
+                        <th mat-header-cell *matHeaderCellDef>ReservationID</th>
+                        <td mat-cell *matCellDef="let row">{{ row.reservationID || '—' }}</td>
+                      </ng-container>
+                      <ng-container matColumnDef="customerName">
+                        <th mat-header-cell *matHeaderCellDef>CustomerName</th>
+                        <td mat-cell *matCellDef="let row">{{ row.customerName }}</td>
+                      </ng-container>
+                      <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+                      <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
+                    </table>
+                    <mat-paginator
+                      #invoicePaginator
+                      [pageSizeOptions]="invoicePageSizeOptions"
+                      [pageSize]="25"
+                      showFirstLastButtons>
+                    </mat-paginator>
+                  </div>
                 </div>
               </div>
 
@@ -178,16 +247,16 @@
                 <div class="upload-action-row">
                   <button mat-raised-button color="primary" type="button" (click)="uploadFiles()" [disabled]="uploading">Upload</button>
                   <p class="upload-hint upload-hint-inline" *ngIf="uploadType === 'reservationEmail'">
-                    Filename must be numeric only — the name before <code>.pdf</code> must be digits only (e.g. <code>123456.pdf</code>) and the ReservationID must exist in <code>dbo.Reservation</code>. If a file with the same name already exists, it is replaced. Invalid files are skipped with a confirmation dialog and logged in the job error list.
+                    Filename must be numeric only — the name before <code>.pdf</code> must be digits only (e.g. <code>123456.pdf</code>) and the ReservationID must exist in <code>dbo.Reservation</code>. If a file with the same name already exists, it is replaced. Invalid files are skipped with a notification and logged in the job error list.
                   </p>
                   <p class="upload-hint upload-hint-inline" *ngIf="uploadType === 'dutySlip'">
-                    Filename must be numeric only — the name before <code>.pdf</code> must be digits only (e.g. <code>8302.pdf</code>) and the DutySlipID must exist in <code>dbo.DutySlip</code>. If a file with the same name already exists, it is replaced. Invalid files are skipped with a confirmation dialog and logged in the job error list.
+                    Filename must be numeric only — the name before <code>.pdf</code> must be digits only (e.g. <code>8302.pdf</code>) and the DutySlipID must exist in <code>dbo.DutySlip</code>. If a file with the same name already exists, it is replaced. Invalid files are skipped with a notification and logged in the job error list.
                   </p>
                 </div>
               </div>
             </div>
 
-            <div class="job-panel" *ngIf="activeJob">
+            <div class="job-panel" *ngIf="showGlobalJobPanel()">
               <div class="panel-title">Job #{{ getActiveJobId() }} — {{ getJobStatus() }}</div>
               <div class="job-meta">
                 <span>Type: {{ activeJob.jobType }}</span>

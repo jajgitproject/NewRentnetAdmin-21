@@ -157,6 +157,7 @@ export class AppDutyMISComponent implements OnInit {
 
   searchFromDate: string = '';
   searchToDate: string = '';
+  csvExporting = false;
 
   constructor(
     public httpClient: HttpClient,
@@ -489,6 +490,46 @@ shouldShowDeleteButton(item: any): boolean {
             }
           }
         }
+      }
+    );
+  }
+
+  downloadCsv() {
+    if (this.csvExporting) {
+      return;
+    }
+
+    let fromDate = this.searchFromDate;
+    let toDate = this.searchToDate;
+    if (fromDate !== "") {
+      fromDate = moment(fromDate).format('MMM DD yyyy');
+    }
+    if (toDate !== "") {
+      toDate = moment(toDate).format('MMM DD yyyy');
+    }
+
+    this.csvExporting = true;
+    this.appDutyMISService.downloadCsv(
+      fromDate || '',
+      toDate || '',
+      this.dispatch_Location.value || '',
+      this.SearchActivationStatus
+    ).subscribe(
+      (blob: Blob) => {
+        this.csvExporting = false;
+        const fileUrl = window.URL.createObjectURL(blob);
+        const anchor = document.createElement('a');
+        anchor.href = fileUrl;
+        anchor.download = `AppDutyMIS_${moment().format('YYYYMMDD_HHmmss')}.csv`;
+        document.body.appendChild(anchor);
+        anchor.click();
+        document.body.removeChild(anchor);
+        window.URL.revokeObjectURL(fileUrl);
+        this.showNotification('snackbar-success', 'CSV downloaded successfully', 'bottom', 'center');
+      },
+      () => {
+        this.csvExporting = false;
+        this.showNotification('snackbar-danger', 'Failed to download CSV', 'bottom', 'center');
       }
     );
   }

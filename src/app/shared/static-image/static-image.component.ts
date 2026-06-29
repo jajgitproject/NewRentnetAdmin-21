@@ -16,6 +16,7 @@ import { GeneralService } from '../../general/general.service';
       [style.height]="height"
       [style.width]="width"
       [style.max-width]="maxWidth"
+      [style.max-height]="maxHeight"
       (error)="onError()"
       (load)="load.emit($event)" />
   `,
@@ -27,6 +28,7 @@ export class StaticImageComponent implements OnChanges {
   @Input() height: string | null = null;
   @Input() width: string | null = null;
   @Input() maxWidth: string | null = null;
+  @Input() maxHeight: string | null = null;
 
   @Output() load = new EventEmitter<Event>();
   @Output() failed = new EventEmitter<void>();

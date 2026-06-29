@@ -1,15 +1,16 @@
 // @ts-nocheck
-import { Component, ElementRef, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import { Component, ElementRef, OnDestroy, OnInit, ViewChild, AfterViewInit } from '@angular/core';
 import { FormControl } from '@angular/forms';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import { MatDialog } from '@angular/material/dialog';
-import { BackfillStepDialogComponent } from './backfill-step-dialog.component';
+import { MatTableDataSource } from '@angular/material/table';
+import { MatPaginator } from '@angular/material/paginator';
 import { SelectionModel } from '@angular/cdk/collections';
 import { Observable, Subscription, timer, forkJoin, of, firstValueFrom } from 'rxjs';
 import { map, startWith, switchMap } from 'rxjs/operators';
 import moment from 'moment';
 import { GeneralService } from '../general/general.service';
 import { BulkBillsDownloadService } from './bulkBillsDownload.service';
+import { ViewBillPdfService } from '../general/view-bill-pdf.service';
 import {
   BulkDownloadInvoiceSummary,
   BulkDownloadSearchCriteria,
@@ -27,8 +28,9 @@ import {
   templateUrl: './bulkBillsDownload.component.html',
   styleUrls: ['./bulkBillsDownload.component.sass'],
 })
-export class BulkBillsDownloadComponent implements OnInit, OnDestroy {
+export class BulkBillsDownloadComponent implements OnInit, OnDestroy, AfterViewInit {
   @ViewChild('uploadFileInput') uploadFileInput?: ElementRef<HTMLInputElement>;
+  @ViewChild('invoicePaginator') invoicePaginator?: MatPaginator;
 
   activeTab: 'backfill' | 'download' | 'upload' = 'download';
   loading = false;
@@ -37,10 +39,16 @@ export class BulkBillsDownloadComponent implements OnInit, OnDestroy {
   uploading = false;
   backfilling = false;
   backfillCandidateCount: number | null = null;
+  readonly maxBackfillBatchSize = 1000;
 
-  fromDateCtrl = new FormControl(moment().utcOffset('+05:30').subtract(30, 'days').toDate());
-  toDateCtrl = new FormControl(moment().utcOffset('+05:30').toDate());
+  readonly invoicePageSizeOptions = [10, 25, 50, 100];
+
+  fromDateCtrl = new FormControl(this.getTodayDate());
+  toDateCtrl = new FormControl(this.getTodayDate());
   customerCtrl = new FormControl('');
+  invoiceNumberCtrl = new FormControl('');
+  backfillInvoiceNumberCtrl = new FormControl('');
+  backfillLoadError = '';
   downloadInvoices = false;
   downloadDutySlips = false;
   downloadMerge = true;
@@ -51,6 +59,7 @@ export class BulkBillsDownloadComponent implements OnInit, OnDestroy {
   filteredCustomerOptions: Observable<{ customerID: number; customerName: string }[]>;
 
   invoiceRows: BulkDownloadInvoiceSummary[] = [];
+  invoiceDataSource = new MatTableDataSource<BulkDownloadInvoiceSummary>([]);
   selection = new SelectionModel<BulkDownloadInvoiceSummary>(true, []);
   displayedColumns = [
     'select',
@@ -83,11 +92,17 @@ export class BulkBillsDownloadComponent implements OnInit, OnDestroy {
     private service: BulkBillsDownloadService,
     private generalService: GeneralService,
     private snackBar: MatSnackBar,
-    private dialog: MatDialog
+    private viewBillPdfService: ViewBillPdfService
   ) {}
 
   ngOnInit(): void {
     this.initCustomerAutocomplete();
+  }
+
+  ngAfterViewInit(): void {
+    if (this.invoicePaginator) {
+      this.invoiceDataSource.paginator = this.invoicePaginator;
+    }
   }
 
   ngOnDestroy(): void {
@@ -123,13 +138,17 @@ export class BulkBillsDownloadComponent implements OnInit, OnDestroy {
   }
 
   search(): void {
-    const criteria = this.buildSearchCriteria();
-    if (!criteria.customerID && (!criteria.fromDate || !criteria.toDate)) {
-      this.loadError = 'Select a customer or provide a date range.';
+    const invoiceNumber = (this.invoiceNumberCtrl.value || '').trim();
+    const hasDateRange = !!this.fromDateCtrl.value && !!this.toDateCtrl.value;
+    const customer = this.resolveSelectedCustomer();
+
+    if (!invoiceNumber && !hasDateRange && !customer?.customerID) {
+      this.loadError = 'Please select customer, invoice number, or date range';
       this.snackBar.open(this.loadError, 'Close', { duration: 4000 });
       return;
     }
 
+    const criteria = this.buildSearchCriteria();
     this.loading = true;
     this.loadError = '';
     this.selection.clear();
@@ -137,14 +156,20 @@ export class BulkBillsDownloadComponent implements OnInit, OnDestroy {
     this.service.searchInvoices(criteria).subscribe(
       (rows) => {
         this.invoiceRows = (rows || []).map((row) => this.normalizeInvoiceRow(row));
+        this.invoiceDataSource.data = this.invoiceRows;
+        if (this.invoicePaginator) {
+          this.invoiceDataSource.paginator = this.invoicePaginator;
+          this.invoicePaginator.firstPage();
+        }
         this.loading = false;
         if (!this.invoiceRows.length) {
-          this.loadError = 'No archived invoice PDFs found in InvoiceDocument for the selected customer and date range.';
+          this.loadError = 'No archived invoice PDFs found in InvoiceDocument for the selected criteria.';
         }
       },
       (err) => {
         this.loading = false;
         this.invoiceRows = [];
+        this.invoiceDataSource.data = [];
         this.loadError = this.extractError(err, 'Failed to search invoices.');
         this.snackBar.open(this.loadError, 'Close', { duration: 5000 });
       }
@@ -152,43 +177,88 @@ export class BulkBillsDownloadComponent implements OnInit, OnDestroy {
   }
 
   refresh(): void {
-    this.fromDateCtrl.setValue(moment().utcOffset('+05:30').subtract(30, 'days').toDate());
-    this.toDateCtrl.setValue(moment().utcOffset('+05:30').toDate());
+    this.fromDateCtrl.setValue(this.getTodayDate());
+    this.toDateCtrl.setValue(this.getTodayDate());
     this.customerCtrl.setValue('');
+    this.invoiceNumberCtrl.setValue('');
+    this.backfillInvoiceNumberCtrl.setValue('');
+    this.backfillLoadError = '';
     this.setDownloadOption('merge');
     this.backfillCandidateCount = null;
     this.backfillProgressRows = [];
     this.backfillCandidateRows = [];
     this.invoiceRows = [];
+    this.invoiceDataSource.data = [];
     this.selection.clear();
     this.loadError = '';
     this.clearJob();
   }
 
   isAllSelected(): boolean {
-    return this.selection.selected.length === this.invoiceRows.length && this.invoiceRows.length > 0;
+    const rows = this.invoiceDataSource.data;
+    return this.selection.selected.length === rows.length && rows.length > 0;
   }
 
   masterToggle(): void {
+    const rows = this.invoiceDataSource.data;
     if (this.isAllSelected()) {
       this.selection.clear();
       return;
     }
-    this.selection.select(...this.invoiceRows);
+    this.selection.select(...rows);
+  }
+
+  isDownloadJob(): boolean {
+    const jobType = this.activeJob?.jobType || this.activeJob?.JobType || '';
+    return jobType === 'BulkDownload';
+  }
+
+  showDownloadTabJobPanel(): boolean {
+    return !!this.activeJob && this.activeTab === 'download' && !this.isIrnBackfillJob();
+  }
+
+  showGlobalJobPanel(): boolean {
+    return !!this.activeJob && this.activeTab !== 'download';
+  }
+
+  searchBackfillByInvoice(): void {
+    const invoiceNumber = (this.backfillInvoiceNumberCtrl.value || '').trim();
+    if (!invoiceNumber) {
+      this.snackBar.open('Enter an invoice number to search.', 'Close', { duration: 4000 });
+      return;
+    }
+    if (this.backfilling || this.isBackfillRunning()) {
+      return;
+    }
+    this.startIrnBackfill();
   }
 
   previewBackfillCandidates(): void {
     const criteria = this.buildIrnBackfillCriteria();
+    this.backfillLoadError = '';
     this.backfillCandidateCount = null;
     this.service.previewIrnBackfill(criteria).subscribe(
       (result) => {
         const invoices = result?.invoices ?? result?.Invoices ?? [];
         this.backfillCandidateRows = invoices.map((row) => this.normalizeInvoiceRow(row));
         this.backfillCandidateCount = result?.candidateCount ?? result?.CandidateCount ?? this.backfillCandidateRows.length;
-        this.snackBar.open(`${this.backfillCandidateCount} incomplete invoice(s) need IRN PDF backfill.`, 'Close', { duration: 4000 });
+        if (!this.backfillCandidateRows.length) {
+          const msg = criteria.invoiceNumber
+            ? `No backfill candidates found in InvoiceDocument for invoice number "${criteria.invoiceNumber}".`
+            : 'No backfill candidates found.';
+          this.backfillLoadError = msg;
+          this.snackBar.open(msg, 'Close', { duration: 5000 });
+          return;
+        }
+        this.snackBar.open(
+          `${this.backfillCandidateCount} candidate(s) in this batch (max ${this.maxBackfillBatchSize}).`,
+          'Close',
+          { duration: 5000 }
+        );
       },
       (err) => {
-        this.snackBar.open(this.extractError(err, 'Failed to preview backfill candidates.'), 'Close', { duration: 5000 });
+        this.backfillLoadError = this.extractError(err, 'Failed to preview backfill candidates.');
+        this.snackBar.open(this.backfillLoadError, 'Close', { duration: 5000 });
       }
     );
   }
@@ -210,7 +280,11 @@ export class BulkBillsDownloadComponent implements OnInit, OnDestroy {
         this.backfillCandidateRows = (invoices || []).map((row) => this.normalizeInvoiceRow(row));
         if (!this.backfillCandidateRows.length) {
           this.backfilling = false;
-          this.snackBar.open('No invoices matched the backfill criteria.', 'Close', { duration: 5000 });
+          const msg = criteria.invoiceNumber
+            ? `No backfill candidates found in InvoiceDocument for invoice number "${criteria.invoiceNumber}".`
+            : 'No invoices matched the backfill criteria.';
+          this.backfillLoadError = criteria.invoiceNumber ? msg : '';
+          this.snackBar.open(msg, 'Close', { duration: 5000 });
           return;
         }
         this.initBackfillProgressRows(this.backfillCandidateRows);
@@ -333,7 +407,7 @@ export class BulkBillsDownloadComponent implements OnInit, OnDestroy {
       this.uploading = false;
       const message = this.extractError(err, 'Upload failed.');
       if (fileName && this.isNamingConventionError(message)) {
-        await this.showSkippedNamingModal(fileName);
+        this.notifySkippedNamingFile(fileName);
         this.resetUploadFileSelection();
         return;
       }
@@ -660,18 +734,16 @@ export class BulkBillsDownloadComponent implements OnInit, OnDestroy {
     if (gaps.missingInvoiceDocument) {
       await this.archiveDocumentStep(
         'Invoice',
-        () => firstValueFrom(this.service.generateInvoicePdf(invoiceId, performedBy)),
+        () => this.archiveInvoicePdf(invoiceId, performedBy, gaps.templateAddress, gaps.invoiceType),
         stepErrors
       );
-    } else {
-      await this.showStepModal('Invoice', true, 'Already archived');
     }
     if (this.backfillCancelled) return;
 
     const duties = await firstValueFrom(this.service.getInvoiceDuties(invoiceId));
     const dutyRows = duties || [];
     if (!dutyRows.length) {
-      await this.showStepModal('Duty Slip', false, 'NA');
+      stepErrors.push('Duty Slip not created — no duties on invoice.');
       return;
     }
 
@@ -686,8 +758,6 @@ export class BulkBillsDownloadComponent implements OnInit, OnDestroy {
           () => firstValueFrom(this.service.generateDutySlipPdf(dutySlipId, performedBy, invoiceId)),
           stepErrors
         );
-      } else {
-        await this.showStepModal('Duty Slip', true, 'Already archived');
       }
       if (this.backfillCancelled) return;
 
@@ -697,8 +767,6 @@ export class BulkBillsDownloadComponent implements OnInit, OnDestroy {
           () => firstValueFrom(this.service.generateTollParkingPdfs(dutySlipId, performedBy, false)),
           stepErrors
         );
-      } else {
-        await this.showStepModal('Toll Parking', true, 'Already archived / NA');
       }
       if (this.backfillCancelled) return;
 
@@ -708,8 +776,6 @@ export class BulkBillsDownloadComponent implements OnInit, OnDestroy {
           () => firstValueFrom(this.service.generateInterstateTaxPdfs(dutySlipId, performedBy, false)),
           stepErrors
         );
-      } else {
-        await this.showStepModal('Interstate Tax', true, 'Already archived / NA');
       }
     }
   }
@@ -723,14 +789,12 @@ export class BulkBillsDownloadComponent implements OnInit, OnDestroy {
       const result = await action();
       const fileName = result?.fileName ?? result?.FileName ?? 'NA';
       const created = !!fileName && fileName !== 'NA';
-      await this.showStepModal(documentType, created, fileName);
       if (!created) {
         stepErrors.push(`${documentType} not created`);
       }
     } catch (err) {
       const message = this.extractError(err, `${documentType} failed.`);
       stepErrors.push(message);
-      await this.showStepModal(documentType, false, 'NA');
     }
   }
 
@@ -743,33 +807,13 @@ export class BulkBillsDownloadComponent implements OnInit, OnDestroy {
       const results = await action();
       const docs = results || [];
       if (!docs.length) {
-        await this.showStepModal(documentType, false, 'NA');
+        stepErrors.push(`${documentType} not created`);
         return;
-      }
-      for (const doc of docs) {
-        if (this.backfillCancelled) return;
-        const fileName = doc?.fileName ?? doc?.FileName ?? 'NA';
-        await this.showStepModal(documentType, true, fileName);
       }
     } catch (err) {
       const message = this.extractError(err, `${documentType} failed.`);
       stepErrors.push(message);
-      await this.showStepModal(documentType, false, 'NA');
     }
-  }
-
-  private showStepModal(documentType: string, created: boolean, fileName: string): Promise<void> {
-    const status = created ? 'Created' : 'Not Created';
-    const name = created && fileName ? fileName : 'NA';
-    const message = `${documentType} ${status} ${name}`;
-    return new Promise((resolve) => {
-      const dialogRef = this.dialog.open(BackfillStepDialogComponent, {
-        width: '480px',
-        disableClose: true,
-        data: { message },
-      });
-      dialogRef.afterClosed().subscribe(() => resolve());
-    });
   }
 
   private resetUploadFileSelection(): void {
@@ -788,7 +832,7 @@ export class BulkBillsDownloadComponent implements OnInit, OnDestroy {
         validFiles.push(file);
         continue;
       }
-      await this.showSkippedNamingModal(file.name);
+      this.notifySkippedNamingFile(file.name);
     }
     return validFiles;
   }
@@ -824,23 +868,16 @@ export class BulkBillsDownloadComponent implements OnInit, OnDestroy {
       if (!fileName || !this.isNamingConventionError(description)) continue;
       if (this.shownNamingSkipModals.has(fileName)) continue;
       this.shownNamingSkipModals.add(fileName);
-      await this.showSkippedNamingModal(fileName);
+      this.notifySkippedNamingFile(fileName);
     }
   }
 
-  private showSkippedNamingModal(fileName: string): Promise<void> {
-    const message = `${fileName} was skipped as it does not follow the Naming Convention`;
-    return new Promise((resolve) => {
-      const dialogRef = this.dialog.open(BackfillStepDialogComponent, {
-        width: '480px',
-        disableClose: true,
-        data: {
-          title: 'Upload skipped',
-          message,
-        },
-      });
-      dialogRef.afterClosed().subscribe(() => resolve());
-    });
+  private notifySkippedNamingFile(fileName: string): void {
+    this.snackBar.open(
+      `${fileName} was skipped as it does not follow the Naming Convention`,
+      'Close',
+      { duration: 5000 }
+    );
   }
 
   private setBackfillRowStatus(invoiceId: number, status: IrnBackfillProgressStatus, details: string): void {
@@ -858,7 +895,29 @@ export class BulkBillsDownloadComponent implements OnInit, OnDestroy {
   }
 
   private buildIrnBackfillCriteria(): IrnBackfillSearchCriteria {
-    return {};
+    const invoiceNumber = (this.backfillInvoiceNumberCtrl.value || '').trim();
+    return {
+      maxCandidates: this.maxBackfillBatchSize,
+      invoiceNumber: invoiceNumber || null,
+    };
+  }
+
+  private async archiveInvoicePdf(
+    invoiceId: number,
+    performedBy: number,
+    templateAddress?: string | null,
+    invoiceType?: string | null
+  ): Promise<any> {
+    if (this.viewBillPdfService.isSupportedViewBillRoute(templateAddress, invoiceType)) {
+      return this.viewBillPdfService.archiveBillFromViewBill(
+        invoiceId,
+        performedBy,
+        templateAddress,
+        invoiceType
+      );
+    }
+
+    return firstValueFrom(this.service.generateInvoicePdf(invoiceId, performedBy));
   }
 
   private normalizeArchiveStatus(raw: any): InvoiceArchiveStatus {
@@ -872,6 +931,8 @@ export class BulkBillsDownloadComponent implements OnInit, OnDestroy {
       missingDutySlipIDs: Array.isArray(missingDutySlipIDs) ? missingDutySlipIDs : [],
       dutySlipsNeedingTollParking: Array.isArray(dutySlipsNeedingTollParking) ? dutySlipsNeedingTollParking : [],
       dutySlipsNeedingInterstateTax: Array.isArray(dutySlipsNeedingInterstateTax) ? dutySlipsNeedingInterstateTax : [],
+      templateAddress: raw?.templateAddress ?? raw?.TemplateAddress ?? null,
+      invoiceType: raw?.invoiceType ?? raw?.InvoiceType ?? null,
     };
   }
 
@@ -886,11 +947,17 @@ export class BulkBillsDownloadComponent implements OnInit, OnDestroy {
 
   private buildSearchCriteria(): BulkDownloadSearchCriteria {
     const customer = this.resolveSelectedCustomer();
+    const invoiceNumber = (this.invoiceNumberCtrl.value || '').trim();
     return {
       customerID: customer?.customerID || null,
       fromDate: this.formatApiDate(this.fromDateCtrl.value),
       toDate: this.formatApiDate(this.toDateCtrl.value),
+      invoiceNumber: invoiceNumber || null,
     };
+  }
+
+  private getTodayDate(): Date {
+    return moment().utcOffset('+05:30').startOf('day').toDate();
   }
 
   private resolveSelectedCustomer(): { customerID: number; customerName: string } | null {

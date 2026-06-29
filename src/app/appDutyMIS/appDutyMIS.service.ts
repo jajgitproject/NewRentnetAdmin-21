@@ -60,6 +60,23 @@ export class AppDutyMISService
     return this.httpClient.get(this.API_URL + "/" +searchFromDate+ "/" +searchToDate+ "/" +DispatchLocation+ "/" + SearchActivationStatus +'/' + PageNumber +  '/'+coloumName+'/'+sortType);
   }
 
+  downloadCsv(searchFromDate: string, searchToDate: string, dispatchLocation: string, searchActivationStatus: boolean): Observable<Blob>
+  {
+    if (searchFromDate === "")
+      searchFromDate = "null";
+    if (searchToDate === "")
+      searchToDate = "null";
+    if (dispatchLocation === "")
+      dispatchLocation = "null";
+    if (searchActivationStatus === null)
+      searchActivationStatus = null;
+
+    return this.httpClient.get(
+      `${this.API_URL}/export/${searchFromDate}/${searchToDate}/${dispatchLocation}/${searchActivationStatus}`,
+      { responseType: 'blob' }
+    );
+  }
+
   // add(advanceTable: AppDutyMIS) 
   // {
   //   advanceTable.interstateTaxID=-1;
