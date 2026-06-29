@@ -23,28 +23,36 @@
                     </tr>
 
                     <tr class="no-border" height="100">
-                      <td class="no-border" class="auto-style6">
+                      <td class="no-border auto-style6">
                         <span class="text-heading">ECOS (I) MOBILITY &amp; HOSPITALITY PVT. LTD</span><br />
                         (Formerly known as Ecos (India) Mobility & Hospitality Private Limited)<br/>
-                        <strong>Branch. Office : </strong>{{dataSource?.invoiceEcoBranchModel?.branchAddress}}
+                        <strong>Branch. Office : </strong>{{dataSource?.printBranchAddress || dataSource?.invoiceEcoBranchModel?.branchAddress}}
                         <br />
                         <strong>Reg. Office :</strong> 45, First Floor, Corner Market, Malviya Nagar, New Delhi-110017
                         <br />
-                        <strong>Correspondence : </strong> {{dataSource?.invoiceEcoCompanyModel?.correspondenceAddress}},
+                        <strong>Correspondence : </strong> {{dataSource?.printCorrespondenceAddress || dataSource?.invoiceEcoCompanyModel?.correspondenceAddress}},
                         <br />
-                        <strong>Ph. {{dataSource?.invoiceEcoCompanyModel?.phoneNumber}}, </strong>
-                        <strong>Fax. {{dataSource?.invoiceEcoCompanyModel?.fax}}</strong>
+                        <strong>Ph. {{dataSource?.printPhoneNumber || dataSource?.invoiceEcoCompanyModel?.phoneNumber}}, </strong>
+                        <strong>Fax. {{dataSource?.printFax || dataSource?.invoiceEcoCompanyModel?.fax}}</strong>
                         <strong>Reservation :</strong> 24/7 : 91-11-40794079<br />
                         <strong>E-mail :</strong> billing@ecorentacar.com, <strong>Reservation :</strong> cars@ecorentacar.com
                         <br />
-                        <strong>GST No : {{dataSource?.invoiceEcoBranchModel?.branchGSTNumber}}</strong>
+                        <strong>GST No : {{dataSource?.printBranchGSTNumber || dataSource?.invoiceEcoBranchModel?.branchGSTNumber}}</strong>
                         <br />   
-                        LUT : {{dataSource?.invoiceEcoBranchModel?.branchLUTNumber}},  Exp Date : {{dataSource?.invoiceEcoBranchModel?.branchLUTExpiryDate | date: 'yyyy-MM-dd'}}  
+                        LUT : {{dataSource?.printBranchLUTNumber || dataSource?.invoiceEcoBranchModel?.branchLUTNumber}},  Exp Date : {{(dataSource?.printBranchLUTExpiryDate || dataSource?.invoiceEcoBranchModel?.branchLUTExpiryDate) | date: 'yyyy-MM-dd'}}  
                         <br />  
-                        IRN : {{dataSource?.invoiceModel?.irn}}  
+                        IRN : {{dataSource?.printIRN || dataSource?.invoiceModel?.irn}}  
                       </td>
-                      <td width="142" class="text1">
-                        <img src="http://www.ecoserp.com/bill_printing/logo.jpg" width="92" height="73" /> 
+                      <td class="qr-logo-area text1" valign="top" align="right">
+                        <div class="qr-logo-stack">
+                          <ng-container *ngIf="dataSource?.signedQRCode || dataSource?.invoiceModel?.signedQRCode; else noQR">
+                            <img class="qr-code-image"
+                              [src]="'data:image/png;base64,' + (dataSource?.signedQRCode || dataSource?.invoiceModel?.signedQRCode)"
+                              alt="IRN QR Code" />
+                          </ng-container>
+                          <ng-template #noQR></ng-template>
+                          <img class="invoice-logo" src="http://www.ecoserp.com/bill_printing/logo.jpg" alt="Logo" />
+                        </div>
                       </td>
                     </tr>
                   </table>
@@ -53,15 +61,15 @@
                     <tr>
                       <td width="369" rowspan="2">To,
                         <br />
-                        <strong>CustomerName : {{dataSource?.invoiceCustomerModel?.customerName}}</strong>
+                        <strong>CustomerName : {{dataSource?.printCustomerName || dataSource?.invoiceCustomerModel?.customerName}}</strong>
                         <br />
                         <div style="font-size:smaller">
-                          <b>Billing Address </b>: {{dataSource?.invoiceCustomerModel?.billingAddress}}
+                          <b>Billing Address </b>: {{dataSource?.printBillingAddress || dataSource?.invoiceCustomerModel?.billingAddress}}
                           <br />
-                          State Of Service : {{dataSource?.invoiceCustomerModel?.customerGSTStateName}},<br/>
-                          State code : {{dataSource?.invoiceCustomerModel?.customerGSTStateCode}}
+                          State Of Service : {{dataSource?.printCustomerGSTStateName || dataSource?.invoiceCustomerModel?.customerGSTStateName}},<br/>
+                          State code : {{dataSource?.printCustomerGSTStateCode || dataSource?.invoiceCustomerModel?.customerGSTStateCode}}
                           <br />
-                          GST/UIN : {{dataSource?.invoiceEcoBranchModel?.branchGSTNumber}}
+                          GST/UIN : {{dataSource?.printCustomerGSTNumber || dataSource?.invoiceCustomerModel?.customerGSTNumber}}
                         </div>                 
                       </td>
                       <td width="179" height="35" align="left">
@@ -71,8 +79,8 @@
                     </tr>
                     <tr>
                       <td height="35" align="left">
-                        Bill No. : {{dataSource?.invoiceModel?.invoiceNumber}}<br/>
-                        Bill Date : {{dataSource?.invoiceModel?.invoiceDate | date: 'yyyy-MM-dd'}}
+                        Bill No. : {{dataSource?.printInvoiceNumber || dataSource?.invoiceModel?.invoiceNumber}}<br/>
+                        Bill Date : {{(dataSource?.printInvoiceDate || dataSource?.invoiceModel?.invoiceDate) | date: 'yyyy-MM-dd'}}
                       </td>
                     </tr>
                   </table>
@@ -113,7 +121,7 @@
                         <tr class="no-border" height="10">
                           <td class="no-border" valign="top"  class="text6">
                             <br />
-                            SAC : {{dataSource?.sacNumber}}
+                            SAC : {{dataSource?.printSACNumber || dataSource?.sacNumber}}
                           </td>
                           <td class="no-border" valign="top"  class="text6">
                               &nbsp;</td>
