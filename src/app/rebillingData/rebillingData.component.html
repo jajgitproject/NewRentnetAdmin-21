@@ -137,10 +137,34 @@
                                                         </tr>
                                                     </thead>
                                                     <tbody>
-                                                        <tr *ngFor="let item of parsedDetailJson[detail.reBilledInvoiceDetailsID]">
-                                                            <td><strong>{{item.key}}</strong></td>
-                                                            <td style="word-break: break-word;">{{item.value !== null && item.value !== undefined && item.value !== '' ? item.value : 'N/A'}}</td>
-                                                        </tr>
+                                                        <ng-container *ngFor="let item of parsedDetailJson[detail.reBilledInvoiceDetailsID]">
+                                                            <tr *ngIf="!item.isCustomerSpecificFields">
+                                                                <td><strong>{{item.key}}</strong></td>
+                                                                <td style="word-break: break-word;">{{item.value !== null && item.value !== undefined && item.value !== '' ? item.value : 'N/A'}}</td>
+                                                            </tr>
+                                                            <tr *ngIf="item.isCustomerSpecificFields">
+                                                                <td><strong>{{item.key}}</strong></td>
+                                                                <td style="word-break: break-word; padding: 0;">
+                                                                    <table class="table table-bordered table-sm" style="margin: 0;" *ngIf="item.customerSpecificFields?.length; else noCustomerSpecificFields">
+                                                                        <thead>
+                                                                            <tr>
+                                                                                <th style="width: 40%;">Field Name</th>
+                                                                                <th>Field Value</th>
+                                                                            </tr>
+                                                                        </thead>
+                                                                        <tbody>
+                                                                            <tr *ngFor="let csf of item.customerSpecificFields">
+                                                                                <td><strong>{{csf.fieldName || 'N/A'}}</strong></td>
+                                                                                <td>{{csf.fieldValue !== null && csf.fieldValue !== undefined && csf.fieldValue !== '' ? csf.fieldValue : 'N/A'}}</td>
+                                                                            </tr>
+                                                                        </tbody>
+                                                                    </table>
+                                                                    <ng-template #noCustomerSpecificFields>
+                                                                        <span style="padding: 8px; display: block;">N/A</span>
+                                                                    </ng-template>
+                                                                </td>
+                                                            </tr>
+                                                        </ng-container>
                                                     </tbody>
                                                 </table>
                                             </div>

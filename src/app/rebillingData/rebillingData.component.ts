@@ -30,7 +30,7 @@ export class RebillingDataComponent implements OnInit {
   invoiceCreditNoteID: number;
   creditNoteNumber: string;
   expandedDetailId: number | null = null;
-  parsedDetailJson: { [key: number]: { key: string; value: any }[] } = {};
+  parsedDetailJson: { [key: number]: ParsedDetailField[] } = {};
 
   constructor(
     public rebillingDataService: RebillingDataService,
@@ -68,7 +68,7 @@ export class RebillingDataComponent implements OnInit {
     );
   }
 
-  parseDetailJson(jsonString: string): { key: string; value: any }[] {
+  parseDetailJson(jsonString: string): ParsedDetailField[] {
     if (!jsonString) {
       return [];
     }
@@ -78,13 +78,71 @@ export class RebillingDataComponent implements OnInit {
       if (records.length === 0) {
         return [];
       }
-      return Object.keys(records[0]).map(key => ({
-        key,
-        value: records[0][key]
-      }));
+      return Object.keys(records[0]).map(key => {
+        const value = records[0][key];
+        if (this.isCustomerSpecificFieldsKey(key)) {
+          return {
+            key,
+            value,
+            isCustomerSpecificFields: true,
+            customerSpecificFields: this.parseCustomerSpecificFields(value)
+          };
+        }
+        return { key, value };
+      });
     } catch {
       return [{ key: 'Raw Data', value: jsonString }];
     }
+  }
+
+  isCustomerSpecificFieldsKey(key: string): boolean {
+    return (key || '').toLowerCase() === 'customerspecificfields';
+  }
+
+  parseCustomerSpecificFields(value: string | null | undefined): { fieldName: string; fieldValue: string }[] {
+    const trimmed = (value || '').trim();
+    if (!trimmed) {
+      return [];
+    }
+
+    const parseCandidates = [
+      trimmed,
+      `[${trimmed}]`,
+      trimmed.startsWith('[') ? trimmed : `[${trimmed.replace(/^\s*,\s*/, '')}]`
+    ];
+
+    for (const candidate of parseCandidates) {
+      try {
+        const parsed = JSON.parse(candidate);
+        const list = Array.isArray(parsed) ? parsed : [parsed];
+        const mapped = list
+          .map(item => this.extractCustomerSpecificFieldPair(item))
+          .filter(item => item.fieldName || item.fieldValue);
+
+        if (mapped.length) {
+          return mapped;
+        }
+      } catch {
+        // try next parse strategy
+      }
+    }
+
+    const results: { fieldName: string; fieldValue: string }[] = [];
+    const fieldPattern = /"(?:FieldName|fieldName)"\s*:\s*"([^"]*)"[\s\S]*?"(?:FieldValue|fieldValue)"\s*:\s*"([^"]*)"/g;
+    let match;
+
+    while ((match = fieldPattern.exec(trimmed)) !== null) {
+      results.push({ fieldName: match[1], fieldValue: match[2] });
+    }
+
+    return results;
+  }
+
+  private extractCustomerSpecificFieldPair(item: any): { fieldName: string; fieldValue: string } {
+    return {
+      fieldName: item?.FieldName ?? item?.fieldName ?? '',
+      fieldValue: item?.FieldValue ?? item?.fieldValue ?? ''
+    };
   }
 
   toggleDetailJson(detailId: number) {
@@ -103,4 +161,11 @@ export class RebillingDataComponent implements OnInit {
       panelClass: colorName
     });
   }
+}
+
+interface ParsedDetailField {
+  key: string;
+  value: any;
+  isCustomerSpecificFields?: boolean;
+  customerSpecificFields?: { fieldName: string; fieldValue: string }[];
 }
