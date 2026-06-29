@@ -36,6 +36,7 @@ export class FormDialogComponent
   reservationID: any;
   previousModeOfPaymentID: number;
   previousModeOfPayment: string;
+  contractID:any;
   
   constructor(
   public dialogRef: MatDialogRef<FormDialogComponent>, 
@@ -63,6 +64,8 @@ export class FormDialogComponent
         }
         this.advanceTableForm = this.createContactForm();
         this.reservationID=data.reservationID;
+        this.contractID=data.contractID;
+        console.log(data.contractID)
         this.status= data.verifyDutyStatusAndCacellationStatus || data?.status?.status || data?.status;
         // if(this.status !== 'Changes allow'){
         //   this.buttonDisabled=true;
@@ -102,7 +105,7 @@ export class FormDialogComponent
 
 //-------------Mode of Payment ------------------
 InitPaymentMode(){
-  this._generalService.GetModeOfPayment().subscribe(
+  this._generalService.GetModeOfPaymentByContract(this.contractID).subscribe(
     data=>
     {
       this.PaymentModeList=data;

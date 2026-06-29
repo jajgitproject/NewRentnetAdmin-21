@@ -1542,6 +1542,7 @@ export class ClossingOneComponent implements OnInit, AfterViewInit {
         {
           advanceTable: this.advanceTableMOP,
           reservationID: this.ReservationID,
+          contractID: this.CustomerContractID,
           action: 'edit',
           verifyDutyStatusAndCacellationStatus: this.verifyDutyStatusAndCacellationStatus
         }

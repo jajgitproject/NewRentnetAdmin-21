@@ -389,8 +389,10 @@ addCreditNote() {
       window.open(this._generalService.FormURL + url, '_blank');
     }
 
-  DutyAdjust(item:any) 
+ DutyAdjust(item:any) 
   { 
+    if(item.approvalStatus!='Approved' && item.requiresReBilling === false)
+    {
     const url = this.router.serializeUrl(
       this.router.createUrlTree(['/creditNoteDutyAdjustment'],{ queryParams: {
         invoiceCreditNoteID:item.invoiceCreditNoteID,
@@ -399,7 +401,15 @@ addCreditNote() {
       }}));
     window.open(this._generalService.FormURL + url, '_blank');
   }
-
+ else  {
+     Swal.fire({
+                      title: '',
+                      icon: 'warning',
+                      html: `<b>DutyAdjust Not Allowed for Approved Credit Notes with Re-Billing..</b>`
+                      })
+                     return;
+        }
+}
   RebillingData(item:any)
   {
     const url = this.router.serializeUrl(

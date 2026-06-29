@@ -1199,7 +1199,11 @@ GetDriverBySupplierID(SupplierID: number): Observable<DriverDropDown[]> {
       this.BaseURL + 'supplierContract/ForModeOfPaymentDropDown'
     );
   }
-
+ GetModeOfPaymentByContract(contractID: number): Observable<ModeOfPaymentDropDown[]> {
+    return this.http.get<ModeOfPaymentDropDown[]>(
+      this.BaseURL + 'supplierContract/ForModeOfPaymentbyContractDropDown/' + contractID
+    );
+  }
   GetPaymentCycle(): Observable<PaymentCycleDropDown[]> {
     return this.http.get<PaymentCycleDropDown[]>(
       this.BaseURL + 'supplierContract/ForPaymentCycleDropDown'

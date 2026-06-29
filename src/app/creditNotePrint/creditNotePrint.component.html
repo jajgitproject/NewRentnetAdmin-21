@@ -16,10 +16,6 @@
                           </span>
                           <span class="text-subheading"></span>
                         </td>
-                        <td width="142" class="text1" style="border:none;">
-                          <!-- {{"N/A"}}                         -->
-                          <img src="" width="92" height="73" />           
-                        </td>
                     </tr>
 
                     <tr class="no-border" height="100">
@@ -45,13 +41,15 @@
                       </td>
                       <td class="qr-logo-area text1" valign="top" align="right">
                         <div class="qr-logo-stack">
-                          <ng-container *ngIf="dataSource?.signedQRCode || dataSource?.invoiceModel?.signedQRCode; else noQR">
+                          <img class="invoice-logo" src="http://www.ecoserp.com/bill_printing/logo.jpg" alt="Logo" />
+                          <ng-container *ngIf="dataSource?.signedQRCode || dataSource?.invoiceModel?.signedQRCode ; else noQR">
                             <img class="qr-code-image"
                               [src]="'data:image/png;base64,' + (dataSource?.signedQRCode || dataSource?.invoiceModel?.signedQRCode)"
                               alt="IRN QR Code" />
                           </ng-container>
-                          <ng-template #noQR></ng-template>
-                          <img class="invoice-logo" src="http://www.ecoserp.com/bill_printing/logo.jpg" alt="Logo" />
+                          <ng-template #noQR> <div class="no-image-box">
+                No QR Image
+              </div></ng-template>
                         </div>
                       </td>
                     </tr>

@@ -602,7 +602,6 @@ canCreateReservation: boolean;
     this.InitPickupSpot();
     this.InitDropOffSpot();
     this.InitReservationSource();
-    this.InitPaymentMode();
     //this.InitCity();
     this.SubscribeUpdateService();
     this.internalNoteLoadData();
@@ -662,7 +661,7 @@ onTNCChange(checked: any)
 
   InitPaymentMode() 
   {
-    this._generalService.GetModeOfPayment().subscribe(
+    this._generalService.GetModeOfPaymentByContract(this.contractID).subscribe(
       data => {
         this.PaymentModeList = data;
         const control = this.advanceTableForm.controls['modeOfPayment'];
@@ -4298,6 +4297,7 @@ private patchPickupAddress(res: any) {
               this.InitCity(normalizedPackageType);
               this.InitDropOffCity(normalizedPackageType);
               this.InitVehicle(normalizedPackageType);
+              this.InitPaymentMode();
               // Retry Drop-off Time calculation now that contractID is known.
               // In edit mode getETRDropOffTime() runs synchronously during
               // loadData() before this async contract lookup completes, so
