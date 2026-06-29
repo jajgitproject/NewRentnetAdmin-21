@@ -281,7 +281,17 @@ onPrintDutySlipIframeLoad(event: Event): void {
   this.setupDutySlipResizeObserver(iframe);
   this.scheduleDutySlipResizeFallbacks(iframe);
 }
-
+getTotalFuelSurchargeAmount(): number {
+    const fuel = this.dataSource?.invoiceFuelSurchargeModel;
+    if (!fuel) {
+      return 0;
+    }
+    return (
+      (Number(fuel.totalFuelSurchargeOnPackageRate) || 0) +
+      (Number(fuel.totalFuelSurchargeOnExtraKM) || 0) +
+      (Number(fuel.totalFuelSurchargeOnExtraHours) || 0)
+    );
+  }
 }
 
 

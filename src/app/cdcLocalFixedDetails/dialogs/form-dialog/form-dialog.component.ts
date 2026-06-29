@@ -114,7 +114,7 @@ ngOnInit(): void {
       customerContractID: [this.advanceTable?.customerContractID],
       billFromTo: [this.advanceTable?.billFromTo],
       packageJumpCriteria: [this.advanceTable?.packageJumpCriteria],
-      nextPackageSelectionCriteria: [this.advanceTable?.nextPackageSelectionCriteria],
+      nextPackageSelectionCriteria: [{ value: 'Hr to Km', disabled: true }],
       packageGraceMinutes: [this.advanceTable?.packageGraceMinutes],
       packageGraceKms: [this.advanceTable?.packageGraceKms],
       activationStatus: [this.advanceTable?.activationStatus],
