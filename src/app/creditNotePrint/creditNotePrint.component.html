@@ -1,12 +1,12 @@
 
 <mat-dialog-content #printDutyBill>
-  <div id="printElem"  style=" margin-top: 100px;">
+  <div id="printElem" class="print-container">
       <table width="750" border="0" align="center" cellpadding="0" cellspacing="0">
         <tr class="no-border">
-          <td height="1000" valign="top" class="no-border">
+          <td  valign="top" class="no-border">
             <table width="700" border="0" align="center" cellpadding="0" cellspacing="0"  valign="middle">
               <tr>
-                <td height="900" align="center" valign="top">
+                <td align="center" valign="top">
                   <table width="900" border="0" align="center" cellpadding="0" cellspacing="0">
                     <tr width="850" height="100" class="no-border" align="center">
                         <td class="no-border" style="font-size: 12pt;">
@@ -20,7 +20,7 @@
 
                     <tr class="no-border" height="100">
                       <td class="no-border auto-style6">
-                        <span class="text-heading">ECOS (I) MOBILITY &amp; HOSPITALITY PVT. LTD</span><br />
+                        <span class="text-heading">ECOS (I) MOBILITY &amp; HOSPITALITY LTD.</span><br />
                         (Formerly known as Ecos (India) Mobility & Hospitality Private Limited)<br/>
                         <strong>Branch. Office : </strong>{{dataSource?.printBranchAddress || dataSource?.invoiceEcoBranchModel?.branchAddress}}
                         <br />
@@ -39,7 +39,7 @@
                         <br />  
                         IRN : {{dataSource?.printIRN || dataSource?.invoiceModel?.irn}}  
                       </td>
-                      <td class="qr-logo-area text1" valign="top" align="right">
+                      <td class="qr-logo-area text1" valign="top" align="right" style="padding-top:0;">
                         <div class="qr-logo-stack">
                           <img class="invoice-logo" src="http://www.ecoserp.com/bill_printing/logo.jpg" alt="Logo" />
                           <ng-container *ngIf="dataSource?.signedQRCode || dataSource?.invoiceModel?.signedQRCode ; else noQR">
@@ -83,9 +83,10 @@
                     </tr>
                   </table>
 
-                  <table width="900" height="350" border="0" cellpadding="0" cellspacing="0" class="text1">
+                  <table width="900" border="0" cellpadding="0" cellspacing="0" class="text1">
                     <tr>
-                      <td width="445" rowspan="8" align="left" valign="top"><table width="100%" cellspacing="0" cellpadding="0">
+                      <td width="445" rowspan="8" align="left" valign="top">
+                        <table width="100%"  height="300" cellspacing="0" cellpadding="0">
                         <tr height="20">
                           <td width="66%" align="center"><strong>Particulars</strong></td>
                           <td width="16%" align="center"><strong>Rate</strong></td>
@@ -93,7 +94,7 @@
                         </tr>
 
                         <tr class="no-border" height="10">
-                          <td class="no-border" valign="top" class="text6">Income Type : </td>
+                          <td class="no-border" valign="top" class="text6">Income Type : Car Hire Changes </td>
                           <td class="no-border" valign="top"  class="text6">&nbsp;</td>
                           <td class="no-border" valign="top"  class="text6">&nbsp;</td>
                         </tr>
@@ -177,7 +178,7 @@
                       <td width="330" valign="top"></td>
                       <td width="226" align="left" valign="top">
                         <p style="font-size:smaller">
-                          <strong>ECOS (I) MOBILITY &amp; HOSPITALITY PVT. LTD.</strong>
+                          <strong>ECOS (I) MOBILITY &amp; HOSPITALITY LTD.</strong>
                         </p>                          
                         <p class="text5">
                           <img src="assets/images/Picture1.png" width="80px"  height="80px" />
