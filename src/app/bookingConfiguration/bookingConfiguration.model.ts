@@ -22,6 +22,13 @@ export class BookingConfigurationCustomerDetails {
   emailLink:string;
   reservationStatus:string;
   primaryPassengerID:number;
+  requestDate:Date;
+  requestTime:Date;
+  entityCode:string;
+  entityName:string;
+  gstin:string;
+  location:string;
+  specialRequest:string;
   
   constructor(bookingConfigurationCustomerDetails) {
     {
@@ -46,6 +53,13 @@ export class BookingConfigurationCustomerDetails {
       this.emailLink = bookingConfigurationCustomerDetails.emailLink || '';
       this.reservationStatus = bookingConfigurationCustomerDetails.reservationStatus || '';
       this.primaryPassengerID = bookingConfigurationCustomerDetails.primaryPassengerID || '';
+      this.requestDate = bookingConfigurationCustomerDetails.requestDate || '';
+      this.requestTime = bookingConfigurationCustomerDetails.requestTime || '';
+      this.entityCode = bookingConfigurationCustomerDetails.entityCode || '';
+      this.entityName = bookingConfigurationCustomerDetails.entityName || '';
+      this.gstin = bookingConfigurationCustomerDetails.gstin || '';
+      this.location = bookingConfigurationCustomerDetails.location || '';
+      this.specialRequest = bookingConfigurationCustomerDetails.specialRequest || '';
     }
   } 
 }
@@ -58,6 +72,8 @@ export class BookingConfigurationStopDetails {
   integrationRequestStopTime :Date;
   integrationRequestStopCity :string;
   integrationRequestStopAddress :string;
+  integrationRequestStopGeoLocation :string;
+  landmark :string;
   integrationRequestStopLatitude:string;
   integrationRequestStopLongitude:string;
   priorityOrder:number;
@@ -71,6 +87,9 @@ export class BookingConfigurationStopDetails {
        this.integrationRequestStopTime = bookingConfigurationStopDetails.integrationRequestStopTime || '';
        this.integrationRequestStopCity  = bookingConfigurationStopDetails.integrationRequestStopCity || '';
        this.integrationRequestStopAddress = bookingConfigurationStopDetails.integrationRequestStopAddress || '';
+       this.integrationRequestStopGeoLocation = bookingConfigurationStopDetails.integrationRequestStopGeoLocation || '';
+       this.landmark = bookingConfigurationStopDetails.landmark || '';
+       this.priorityOrder = bookingConfigurationStopDetails.priorityOrder || 0;
 
     }
   } 
@@ -88,6 +107,8 @@ export class BookingConfigurationPassengerDetails {
   dropOffStopType : string;
   integrationRequestPickupStopID : number;
   integrationRequestDropoffStopID : number;
+  pickupAddress : string;
+  dropoffAddress : string;
   passengerID : number;
   
   constructor(bookingConfigurationPassengerDetails) {
@@ -103,6 +124,8 @@ export class BookingConfigurationPassengerDetails {
        this.dropOffStopType = bookingConfigurationPassengerDetails.dropOffStopType || '';
        this.integrationRequestPickupStopID  = bookingConfigurationPassengerDetails.integrationRequestPickupStopID || '';
        this.integrationRequestDropoffStopID = bookingConfigurationPassengerDetails.integrationRequestDropoffStopID || '';
+       this.pickupAddress = bookingConfigurationPassengerDetails.pickupAddress || '';
+       this.dropoffAddress = bookingConfigurationPassengerDetails.dropoffAddress || '';
 
     }
   } 

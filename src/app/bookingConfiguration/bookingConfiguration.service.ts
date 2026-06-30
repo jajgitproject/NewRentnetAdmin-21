@@ -38,6 +38,11 @@ export class BookingConfigurationService {
     return this.httpClient.get(this.API_URL +"/PassengerDetails/"+BookingID);
   }
 
+  getIntegrationCustomerSpecificFields(BookingID:number): Observable<any>
+  {
+    return this.httpClient.get(this.API_URL + "/IntegrationCustomerSpecificFields/" + BookingID);
+  }
+
   getPackageVehcileDetails(BookingID:number):  Observable<any> 
   {
     return this.httpClient.get(this.API_URL +"/GetPackageVehicleDetails/"+BookingID);

@@ -196,7 +196,7 @@ html, body {
   width: 100%;
   border-collapse: collapse;
   margin-top: 6px;
-  font-size: 9px;
+  font-size: 7px;
   table-layout: fixed;
 }
 .slip-table thead { display: table-header-group; }
@@ -204,11 +204,12 @@ html, body {
 .slip-table th,
 .slip-table td {
   border: 1px solid #000;
-  padding: 3px;
+  padding: 2px;
   text-align: center;
   vertical-align: middle;
   word-wrap: break-word;
   overflow-wrap: break-word;
+  line-height: 1.1;
 }
 .slip-table th { background: #f2f2f2; font-weight: bold; }
 .text2 { font-size: 7pt; text-align: center; }
@@ -335,14 +336,15 @@ body {
     container: HTMLElement,
     liveDocument?: Document | null
   ): Promise<string> {
-    const billStyles = this.extractDocumentStyles(liveDocument);
     const clone = container.cloneNode(true) as HTMLElement;
     clone.querySelectorAll('.no-print').forEach((el) => el.remove());
     clone.style.boxSizing = 'border-box';
     clone.style.width = '1123px';
     clone.style.maxWidth = '1123px';
     clone.style.margin = '0';
+    clone.style.padding = '0';
     clone.style.minHeight = 'auto';
+    clone.style.overflow = 'hidden';
     await this.embedBillImages(clone, liveDocument, 'img');
     this.applyJajMultiDutyHeaderLayout(clone);
     this.applyJajMultiDutySlipTableStyles(clone);
@@ -350,7 +352,6 @@ body {
     const bodyHtml = clone.outerHTML;
     return `<!DOCTYPE html><html><head><meta charset="utf-8"><style>
 ${ViewBillPdfService.JAJ_MULTI_DUTY_PDF_CSS}
-${billStyles}
 body {
   margin: 0;
   padding: 0;
@@ -358,6 +359,7 @@ body {
   max-width: 1123px;
   box-sizing: border-box;
   background: #fff;
+  overflow: hidden;
   -webkit-print-color-adjust: exact;
   print-color-adjust: exact;
 }
@@ -569,8 +571,9 @@ body {
       const el = table as HTMLTableElement;
       el.style.borderCollapse = 'collapse';
       el.style.width = '100%';
+      el.style.maxWidth = '100%';
       el.style.tableLayout = 'fixed';
-      el.style.fontSize = '9px';
+      el.style.fontSize = '7px';
       el.removeAttribute('cellpadding');
       el.removeAttribute('cellspacing');
 
@@ -590,7 +593,9 @@ body {
       el.querySelectorAll('thead th, thead td').forEach((cell) => {
         const node = cell as HTMLElement;
         node.style.setProperty('border', '1px solid #000', 'important');
-        node.style.padding = '3px';
+        node.style.padding = '2px';
+        node.style.fontSize = '7px';
+        node.style.lineHeight = '1.1';
         node.style.textAlign = 'center';
         node.style.background = '#f2f2f2';
         node.style.fontWeight = 'bold';
@@ -600,7 +605,9 @@ body {
       el.querySelectorAll('tbody td').forEach((cell) => {
         const td = cell as HTMLElement;
         td.style.setProperty('border', '1px solid #000', 'important');
-        td.style.padding = '3px';
+        td.style.padding = '2px';
+        td.style.fontSize = '7px';
+        td.style.lineHeight = '1.1';
         td.style.textAlign = 'center';
         td.style.verticalAlign = 'middle';
       });

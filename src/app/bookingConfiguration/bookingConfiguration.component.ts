@@ -14,7 +14,7 @@ import { SelectionModel } from '@angular/cdk/collections';
 import { GeneralService } from '../general/general.service';
 // import { MyUploadComponent } from '../myupload/myupload.component';
 import { MyUploadComponent } from '../myupload/myupload.component';
-import { AbstractControl, FormBuilder, FormControl, ValidationErrors, ValidatorFn } from '@angular/forms';
+import { AbstractControl, FormBuilder, FormControl, ValidationErrors, ValidatorFn, Validators } from '@angular/forms';
 import { BookingConfigurationService } from './bookingConfiguration.service';
 import { CustomerDropDown } from '../customer/customerDropDown.model';
 import moment from 'moment';
@@ -59,6 +59,7 @@ export class BookingConfigurationComponent implements OnInit {
   b2cDetails: B2cDataDetails | null;
   stopDetailsList: BookingConfigurationStopDetails[] | null;
   passengerDetailsList: BookingConfigurationPassengerDetails[] | null;
+  integrationCustomFields: { fieldName: string; fieldValue: string }[] = [];
   packageVehcileDetailsList: BookingPackageVehcileDetails | null;
 
   public PackageTypeList?:PackageTypeDropDown[]=[];
@@ -105,6 +106,7 @@ export class BookingConfigurationComponent implements OnInit {
   filteredCustomerOptions: Observable<CustomerDropDown[]>;
   customerName : FormControl=new FormControl();
   BookingID: any;
+  returnUrl = '/bookingRequest';
   contractID: any;
   action: string;
   customerTravelRequestNumber: string;
@@ -118,6 +120,11 @@ export class BookingConfigurationComponent implements OnInit {
     vehicleID:[''],
     vehicle:[''],
     vehicleCategoryID:[''],
+    vehicleCategory:[''],
+    carType:[''],
+    ticketNumber:['', [Validators.required, Validators.pattern(/^[0-9]{12,15}$/)]],
+    specialInstructions:[''],
+    internalRemarks:[''],
     requestType:[''],
     pickupCityID:[''],
     pickupCity:[''],
@@ -219,6 +226,7 @@ googlePlacesForm = this.fb.group({
   dataSource:Reservation | null;
   PackageType: string;
   saveDisabled:boolean=true;
+  saving = false;
   isCustomerFolded = false;
   isPassengerFolded = false;
   isStopFolded = false;
@@ -243,7 +251,8 @@ googlePlacesForm = this.fb.group({
   contextMenuPosition = { x: '0px', y: '0px' };
   ngOnInit() {
     this.route.queryParams.subscribe(paramsData =>{
-      this.BookingID = paramsData.BookingID;     
+      this.BookingID = paramsData.BookingID;
+      this.returnUrl = this.resolveReturnUrl(paramsData.returnUrl);
     });
     this.advanceTableForm.patchValue({reservationSourceID:22});
     this.advanceTableForm.patchValue({reservationSource:'Integration'});
@@ -381,9 +390,27 @@ toggleStopFold() {
           this.getSalesManager(this.customerDetails.customerID);
           this.getCustomerKam(this.customerDetails.customerID);
           this.GetPassengerDetails();
+          this.GetIntegrationCustomerSpecificFields();
         },
         (error: HttpErrorResponse) => { this.customerDetails = null; }
       );
+  }
+
+  public GetIntegrationCustomerSpecificFields() {
+    this.bookingConfigurationService.getIntegrationCustomerSpecificFields(this.BookingID).subscribe(
+      data => { this.integrationCustomFields = data || []; },
+      () => { this.integrationCustomFields = []; }
+    );
+  }
+
+  getIntegrationFieldValue(fieldName: string): string {
+    if (!fieldName || !this.integrationCustomFields?.length) {
+      return '';
+    }
+    const match = this.integrationCustomFields.find(
+      field => (field.fieldName || '').toLowerCase() === fieldName.toLowerCase()
+    );
+    return match?.fieldValue || '';
   }
 
  private mergeDateAndTime(pickupDate: any, pickupTime: any): Date {
@@ -437,6 +464,8 @@ private extractTime(dateTime: Date): Date {
           this.advanceTableForm.patchValue({packageID:this.b2cDetails.packageID});
           this.advanceTableForm.patchValue({package:this.b2cDetails.package});
           this.advanceTableForm.patchValue({vehicleCategoryID:this.b2cDetails.vehicleCategoryID});
+          this.advanceTableForm.patchValue({vehicleCategory:this.b2cDetails.vehicleCategory});
+          this.advanceTableForm.patchValue({carType:this.b2cDetails.vehicleCategory});
           this.advanceTableForm.patchValue({vehicleID:this.b2cDetails.vehicleID});
           this.advanceTableForm.patchValue({vehicle:this.b2cDetails.vehicle});
           this.advanceTableForm.patchValue({pickupCityID:this.b2cDetails.cityID});
@@ -543,16 +572,14 @@ private extractTime(dateTime: Date): Date {
       this.stopDetailsList = data;
       console.log(this.stopDetailsList);
 
-      const enrouteStops = this.stopDetailsList.filter(
-        x => x.integrationRequestStopType?.toLowerCase() === 'enroute'
-      );
+      const enrouteStops = this.stopDetailsList.filter(x => this.isIntegrationEnrouteStop(x));
 
       this.reservationStops = enrouteStops.map(stop => {
         return {
           reservationStopID: stop.integrationRequestStopID,
           reservationStopType: stop.integrationRequestStopType,
-          reservationStopAddress: stop.integrationRequestStopAddress,
-          reservationStopAddressDetails: stop.integrationRequestStopAddress,
+          reservationStopAddress: this.getStopAddress(stop),
+          reservationStopAddressDetails: this.getStopLandmark(stop),
           reservationStopCity: stop.integrationRequestStopCity,
           reservationStopDateString: stop.integrationRequestStopDate,
           reservationStopTimeDateString: stop.integrationRequestStopTime,
@@ -575,10 +602,10 @@ private extractTime(dateTime: Date): Date {
     //pickupCityID: pickupStop.integrationRequestStopID,
     pickupCity: pickupStop.integrationRequestStopCity,
 
-    pickupAddress: pickupStop.integrationRequestStopAddress,
+    pickupAddress: this.getStopAddress(pickupStop),
     pickupAddressLatitude: pickupStop.integrationRequestStopLatitude,
     pickupAddressLongitude: pickupStop.integrationRequestStopLongitude,
-    pickupAddressDetails: pickupStop.integrationRequestStopAddress,
+    pickupAddressDetails: this.getStopLandmark(pickupStop),
     pickupStopOrderPriority: pickupStop.priorityOrder
   });
 }
@@ -589,10 +616,10 @@ private extractTime(dateTime: Date): Date {
     dropOffCityID: 0,
     dropOffCity: dropOffStop.integrationRequestStopCity,
 
-    dropOffAddress: dropOffStop.integrationRequestStopAddress,
+    dropOffAddress: this.getStopAddress(dropOffStop),
     dropOffAddressLatitude: dropOffStop.integrationRequestStopLatitude,
     dropOffAddressLongitude: dropOffStop.integrationRequestStopLongitude,
-    dropOffAddressDetails: dropOffStop.integrationRequestStopAddress,
+    dropOffAddressDetails: this.getStopLandmark(dropOffStop),
     dropOffStopOrderPriority: dropOffStop.priorityOrder
   });
 }
@@ -680,12 +707,25 @@ private extractTime(dateTime: Date): Date {
   //   }
   // }
 
+  onTicketNumberInput(event: any): void {
+    const input = event.target.value.replace(/[^0-9]/g, '');
+    this.advanceTableForm.get('ticketNumber')?.setValue(input, { emitEvent: false });
+  }
+
   public confirmAdd(): void 
   {
-    this.saveDisabled = false;
+    if (this.saving) {
+      return;
+    }
+    if (this.advanceTableForm.invalid) {
+      this.advanceTableForm.markAllAsTouched();
+      return;
+    }
+    this.saving = true;
     if(this.action=="edit")
     {
       //this.Put();
+      this.saving = false;
     }
     else
     {
@@ -739,6 +779,7 @@ private extractTime(dateTime: Date): Date {
           this.navigateToControlPanel(response.data.reservationID);
         } ;
         });
+      this.saving = false;
       this.saveDisabled = true; 
     },
     error =>
@@ -752,6 +793,7 @@ private extractTime(dateTime: Date): Date {
             text: message,
             icon: 'error',
           });
+      this.saving = false;
       this.saveDisabled = true; 
     }
     )
@@ -1236,15 +1278,19 @@ private extractTime(dateTime: Date): Date {
     );
   
     if (selectedCar) {
-      this.getVehicleID(selectedCar.vehicleID,selectedCar.vehicleCategoryID);
+      this.getVehicleID(selectedCar.vehicleID, selectedCar.vehicleCategoryID, selectedCar.vehicleCategory);
     }
   }
 
-  getVehicleID(vehicleID: any,vehicleCategoryID:any) {
+  getVehicleID(vehicleID: any,vehicleCategoryID:any, vehicleCategory?: string) {
     this.vehicleID=vehicleID;
     this.vehicleCategoryID=vehicleCategoryID;
     this.advanceTableForm.patchValue({vehicleID:this.vehicleID});
     this.advanceTableForm.patchValue({vehicleCategoryID:this.vehicleCategoryID});
+    if (vehicleCategory) {
+      this.advanceTableForm.patchValue({carType: vehicleCategory});
+      this.advanceTableForm.patchValue({vehicleCategory: vehicleCategory});
+    }
   }
 
 
@@ -1766,6 +1812,213 @@ OnDropOffGeoLocationClick(option:any)
     if (type === 'DropOff') return 'DropOff';
     if (type === 'Enroute') return 'Pickup';
     return 'Stop';
+  }
+
+  get enrouteStops(): BookingConfigurationStopDetails[] {
+    if (!this.stopDetailsList?.length) {
+      return [];
+    }
+    return this.stopDetailsList.filter(stop => this.isIntegrationEnrouteStop(stop));
+  }
+
+  private isIntegrationEnrouteStop(stop: BookingConfigurationStopDetails): boolean {
+    const type = stop?.integrationRequestStopType?.trim().toLowerCase();
+    if (!type) {
+      return false;
+    }
+    if (type === 'start' || type === 'pickup') {
+      return false;
+    }
+    if (type === 'end' || type === 'dropoff') {
+      return false;
+    }
+    return true;
+  }
+
+  getStopAddress(stop: BookingConfigurationStopDetails | null | undefined): string {
+    if (!stop) {
+      return '';
+    }
+    return stop.integrationRequestStopGeoLocation
+      || stop.integrationRequestStopAddress
+      || '';
+  }
+
+  getStopLandmark(stop: BookingConfigurationStopDetails | null | undefined): string {
+    if (!stop) {
+      return '';
+    }
+    if (stop.integrationRequestStopGeoLocation) {
+      return stop.integrationRequestStopAddress || stop.landmark || '';
+    }
+    return stop.landmark || '';
+  }
+
+  getPassengerPickupStop(passenger: BookingConfigurationPassengerDetails): BookingConfigurationStopDetails | null {
+    return this.resolvePassengerStop(
+      passenger?.integrationRequestPickupStopID,
+      'pickup'
+    );
+  }
+
+  getPassengerDropoffStop(passenger: BookingConfigurationPassengerDetails): BookingConfigurationStopDetails | null {
+    return this.resolvePassengerStop(
+      passenger?.integrationRequestDropoffStopID,
+      'dropoff'
+    );
+  }
+
+  private resolvePassengerStop(
+    stopId: number | null | undefined,
+    fallbackType: 'pickup' | 'dropoff'
+  ): BookingConfigurationStopDetails | null {
+    if (!this.stopDetailsList?.length) {
+      return null;
+    }
+    if (stopId) {
+      const linkedStop = this.stopDetailsList.find(s => s.integrationRequestStopID === stopId);
+      if (linkedStop) {
+        return linkedStop;
+      }
+    }
+    return this.stopDetailsList.find(
+      stop => stop.integrationRequestStopType?.toLowerCase() === fallbackType
+    ) || null;
+  }
+
+  getPassengerPickupAddress(passenger: BookingConfigurationPassengerDetails): string {
+    return this.getStopAddress(this.getPassengerPickupStop(passenger))
+      || passenger?.pickupAddress
+      || '';
+  }
+
+  getPassengerDropoffAddress(passenger: BookingConfigurationPassengerDetails): string {
+    return this.getStopAddress(this.getPassengerDropoffStop(passenger))
+      || passenger?.dropoffAddress
+      || '';
+  }
+
+  getPassengerPickupLandmark(passenger: BookingConfigurationPassengerDetails): string {
+    return this.getStopLandmark(this.getPassengerPickupStop(passenger));
+  }
+
+  getPassengerDropoffLandmark(passenger: BookingConfigurationPassengerDetails): string {
+    return this.getStopLandmark(this.getPassengerDropoffStop(passenger));
+  }
+
+  getPassengerDropoffDateTime(passenger: BookingConfigurationPassengerDetails): string {
+    return this.formatStopDateTime(this.getPassengerDropoffStop(passenger));
+  }
+
+  get pickupCityName(): string {
+    const pickupStop = this.stopDetailsList?.find(
+      stop => stop.integrationRequestStopType?.toLowerCase() === 'pickup'
+    );
+    if (pickupStop?.integrationRequestStopCity) {
+      return pickupStop.integrationRequestStopCity;
+    }
+    return this.advanceTableForm?.value?.pickupCity || '--';
+  }
+
+  get requestedCarType(): string {
+    return this.b2cDetails?.vehicleCategory || this.customerDetails?.vehicle || '--';
+  }
+
+  get passengerCount(): number {
+    return this.passengerDetailsList?.length ?? 0;
+  }
+
+  get receivedOnDisplay(): string {
+    if (!this.customerDetails?.requestDate) {
+      return '--';
+    }
+
+    const parts: string[] = [moment(this.customerDetails.requestDate).format('DD MMM YYYY')];
+    if (this.customerDetails.requestTime) {
+      parts.push(moment(this.customerDetails.requestTime).format('HH:mm'));
+    }
+    return parts.join(' ');
+  }
+
+  displayOrDash(value: string | number | null | undefined): string {
+    if (value === null || value === undefined || value === '') {
+      return '--';
+    }
+    return String(value);
+  }
+
+  hasDisplayValue(value: string | number | null | undefined): boolean {
+    if (value === null || value === undefined) {
+      return false;
+    }
+    const text = String(value).trim();
+    return text !== '' && text !== '--';
+  }
+
+  get hasAnyAdditionalInfo(): boolean {
+    return [
+      this.customerDetails?.entityCode,
+      this.customerDetails?.entityName,
+      this.customerDetails?.gstin,
+      this.customerDetails?.location,
+      this.getIntegrationFieldValue('FlightDetails') || this.customerDetails?.specialRequest,
+      this.getIntegrationFieldValue('travelRequestNo'),
+      this.getIntegrationFieldValue('Comments') || this.customerDetails?.specialRequest,
+      this.getIntegrationFieldValue('legNo'),
+      this.getIntegrationFieldValue('companyCode'),
+      this.getIntegrationFieldValue('travellerType'),
+      this.getIntegrationFieldValue('locationToBeBilled'),
+      this.getIntegrationFieldValue('companyGSTN'),
+      this.getIntegrationFieldValue('billingAddress'),
+      this.getIntegrationFieldValue('businessArea'),
+      this.getIntegrationFieldValue('ProjectCode'),
+      this.getIntegrationFieldValue('TaskCode'),
+    ].some(value => this.hasDisplayValue(value));
+  }
+
+  getPassengerDisplayName(passenger: BookingConfigurationPassengerDetails, index: number): string {
+    const name = passenger?.integrationRequestPassenger?.trim();
+    return name || `Passenger ${index + 1}`;
+  }
+
+  getPassengerPickupDateTime(passenger: BookingConfigurationPassengerDetails): string {
+    return this.formatStopDateTime(this.getPassengerPickupStop(passenger));
+  }
+
+  formatStopDateTime(stop: BookingConfigurationStopDetails | null | undefined): string {
+    if (!stop) {
+      return '--';
+    }
+    const parts: string[] = [];
+    if (stop.integrationRequestStopDate) {
+      parts.push(moment(stop.integrationRequestStopDate).format('DD MMM YYYY'));
+    }
+    if (stop.integrationRequestStopTime) {
+      parts.push(moment(stop.integrationRequestStopTime).format('hh:mm A'));
+    }
+    return parts.length ? parts.join(', ') : '--';
+  }
+
+  formatEnrouteStopNo(index: number): number {
+    return index + 1;
+  }
+
+  onBack(): void {
+    this.router.navigateByUrl(this.returnUrl);
+  }
+
+  private resolveReturnUrl(returnUrl?: string): string {
+    const defaultUrl = '/bookingRequest';
+    if (!returnUrl || typeof returnUrl !== 'string') {
+      return defaultUrl;
+    }
+
+    const trimmed = returnUrl.trim();
+    if (!trimmed.startsWith('/') || trimmed.startsWith('//') || trimmed.includes('://')) {
+      return defaultUrl;
+    }
+
+    return trimmed;
   }
 }
 

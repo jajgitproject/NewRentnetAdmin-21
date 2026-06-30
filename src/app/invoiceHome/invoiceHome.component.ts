@@ -352,7 +352,8 @@ bookerName: FormControl = new FormControl();
   openInNewTab(rowItem: any) {
     let baseUrl = this._generalService.FormURL;   
     const url = this.router.serializeUrl(this.router.createUrlTree(['/bookingConfiguration'], { queryParams: {
-      BookingID:rowItem.integrationRequestID,
+      BookingID: rowItem.integrationRequestID,
+      returnUrl: '/invoiceHome',
       } }));
       window.open(baseUrl + url, '_blank');
   }

@@ -315,7 +315,8 @@ export class BookingRequestComponent implements OnInit {
   openInNewTab(rowItem: any) {
     let baseUrl = this._generalService.FormURL;   
     const url = this.router.serializeUrl(this.router.createUrlTree(['/bookingConfiguration'], { queryParams: {
-      BookingID:rowItem.integrationRequestID,
+      BookingID: rowItem.integrationRequestID,
+      returnUrl: '/bookingRequest',
       } }));
       window.open(baseUrl + url, '_blank');
   }
