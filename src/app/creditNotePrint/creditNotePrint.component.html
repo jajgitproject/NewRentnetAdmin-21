@@ -1,205 +1,501 @@
+<!DOCTYPE html>
+<html lang="en">
 
-<mat-dialog-content #printDutyBill>
-  <div id="printElem" class="print-container">
-      <table width="750" border="0" align="center" cellpadding="0" cellspacing="0">
-        <tr class="no-border">
-          <td  valign="top" class="no-border">
-            <table width="700" border="0" align="center" cellpadding="0" cellspacing="0"  valign="middle">
-              <tr>
-                <td align="center" valign="top">
-                  <table width="900" border="0" align="center" cellpadding="0" cellspacing="0">
-                    <tr width="850" height="100" class="no-border" align="center">
-                        <td class="no-border" style="font-size: 12pt;">
-                          <span class="text-heading">CREDIT NOTE        
-                            <br />Original for Recipient
-                            <br />    
-                          </span>
-                          <span class="text-subheading"></span>
-                        </td>
-                    </tr>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Credit Note</title>
 
-                    <tr class="no-border" height="100">
-                      <td class="no-border auto-style6">
-                        <span class="text-heading">ECOS (I) MOBILITY &amp; HOSPITALITY LTD.</span><br />
-                        (Formerly known as Ecos (India) Mobility & Hospitality Private Limited)<br/>
-                        <strong>Branch. Office : </strong>{{dataSource?.printBranchAddress || dataSource?.invoiceEcoBranchModel?.branchAddress}}
-                        <br />
-                        <strong>Reg. Office :</strong> 45, First Floor, Corner Market, Malviya Nagar, New Delhi-110017
-                        <br />
-                        <strong>Correspondence : </strong> {{dataSource?.printCorrespondenceAddress || dataSource?.invoiceEcoCompanyModel?.correspondenceAddress}},
-                        <br />
-                        <strong>Ph. {{dataSource?.printPhoneNumber || dataSource?.invoiceEcoCompanyModel?.phoneNumber}}, </strong>
-                        <strong>Fax. {{dataSource?.printFax || dataSource?.invoiceEcoCompanyModel?.fax}}</strong>
-                        <strong>Reservation :</strong> 24/7 : 91-11-40794079<br />
-                        <strong>E-mail :</strong> billing@ecorentacar.com, <strong>Reservation :</strong> cars@ecorentacar.com
-                        <br />
-                        <strong>GST No : {{dataSource?.printBranchGSTNumber || dataSource?.invoiceEcoBranchModel?.branchGSTNumber}}</strong>
-                        <br />   
-                        LUT : {{dataSource?.printBranchLUTNumber || dataSource?.invoiceEcoBranchModel?.branchLUTNumber}},  Exp Date : {{(dataSource?.printBranchLUTExpiryDate || dataSource?.invoiceEcoBranchModel?.branchLUTExpiryDate) | date: 'yyyy-MM-dd'}}  
-                        <br />  
-                        IRN : {{dataSource?.printIRN || dataSource?.invoiceModel?.irn}}  
-                      </td>
-                      <td class="qr-logo-area text1" valign="top" align="right" style="padding-top:0;">
-                        <div class="qr-logo-stack">
-                          <img class="invoice-logo" src="http://www.ecoserp.com/bill_printing/logo.jpg" alt="Logo" />
-                          <ng-container *ngIf="dataSource?.signedQRCode || dataSource?.invoiceModel?.signedQRCode ; else noQR">
-                            <img class="qr-code-image"
-                              [src]="'data:image/png;base64,' + (dataSource?.signedQRCode || dataSource?.invoiceModel?.signedQRCode)"
-                              alt="IRN QR Code" />
-                          </ng-container>
-                          <ng-template #noQR> <div class="no-image-box">
-                No QR Image
-              </div></ng-template>
-                        </div>
-                      </td>
-                    </tr>
-                  </table>
+  <style>
+    @page {
+      size: A4;
+      margin: 10mm;
+    }
 
-                  <table width="900" border="0" cellpadding="2" cellspacing="0" class="text1">
-                    <tr>
-                      <td width="369" rowspan="2">To,
-                        <br />
-                        <strong>CustomerName : {{dataSource?.printCustomerName || dataSource?.invoiceCustomerModel?.customerName}}</strong>
-                        <br />
-                        <div style="font-size:smaller">
-                          <b>Billing Address </b>: {{dataSource?.printBillingAddress || dataSource?.invoiceCustomerModel?.billingAddress}}
-                          <br />
-                          State Of Service : {{dataSource?.printCustomerGSTStateName || dataSource?.invoiceCustomerModel?.customerGSTStateName}},<br/>
-                          State code : {{dataSource?.printCustomerGSTStateCode || dataSource?.invoiceCustomerModel?.customerGSTStateCode}}
-                          <br />
-                          GST/UIN : {{dataSource?.printCustomerGSTNumber || dataSource?.invoiceCustomerModel?.customerGSTNumber}}
-                        </div>                 
-                      </td>
-                      <td width="179" height="35" align="left">
-                        C.N No. : {{dataSource?.creditNoteNumberWithPrefix}}<br/>
-                        C.N Date : {{dataSource?.dateTimeOfGeneration | date: 'yyyy-MM-dd'}}
-                      </td>
-                    </tr>
-                    <tr>
-                      <td height="35" align="left">
-                        Bill No. : {{dataSource?.printInvoiceNumber || dataSource?.invoiceModel?.invoiceNumber}}<br/>
-                        Bill Date : {{(dataSource?.printInvoiceDate || dataSource?.invoiceModel?.invoiceDate) | date: 'yyyy-MM-dd'}}
-                      </td>
-                    </tr>
-                  </table>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: Arial, Helvetica, sans-serif;
+    }
 
-                  <table width="900" border="0" cellpadding="0" cellspacing="0" class="text1">
-                    <tr>
-                      <td width="445" rowspan="8" align="left" valign="top">
-                        <table width="100%"  height="300" cellspacing="0" cellpadding="0">
-                        <tr height="20">
-                          <td width="66%" align="center"><strong>Particulars</strong></td>
-                          <td width="16%" align="center"><strong>Rate</strong></td>
-                          <td width="18%" align="center"><strong>Amount</strong></td>
-                        </tr>
+    body {
+      background: #d9d9d9;
+      padding: 5px;
+    }
 
-                        <tr class="no-border" height="10">
-                          <td class="no-border" valign="top" class="text6">Income Type : Car Hire Changes </td>
-                          <td class="no-border" valign="top"  class="text6">&nbsp;</td>
-                          <td class="no-border" valign="top"  class="text6">&nbsp;</td>
-                        </tr>
+    /* Print Button */
 
-                        <tr class="no-border" height="10">
-                          <td class="no-border" valign="top" class="text6"></td>
-                          <td class="no-border" valign="top"  class="text6"></td>
-                          <td class="no-border" valign="top"   class="text6"></td>
-                        </tr>
+    .toolbar {
+      text-align: center;
+      margin-bottom: 20px;
+    }
 
-                        <tr class="no-border" height="10">
-                          <td class="no-border" valign="top" class="text6" >Reason of Credit Note : {{dataSource?.creditNoteReason}}<br /></td>
-                          <td class="no-border" valign="top"  class="text6"></td>
-                          <td class="no-border" valign="top"  class="text6">&nbsp;</td>
-                        </tr>
+    .toolbar button {
 
-                        <tr class="no-border" height="10">
-                          <td class="no-border" valign="top" class="text6"></td>
-                          <td class="no-border" valign="top"  class="text6"></td>
-                          <td class="no-border" valign="top"   class="text6"></td>
-                        </tr>
+      padding: 10px 15px;
+      background: #0078D4;
+      color: #fff;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 12px;
 
-                        <tr class="no-border" height="10">
-                          <td class="no-border" valign="top"  class="text6">
-                            <br />
-                            SAC : {{dataSource?.printSACNumber || dataSource?.sacNumber}}
-                          </td>
-                          <td class="no-border" valign="top"  class="text6">
-                              &nbsp;</td>
-                          <td class="no-border" valign="top"   class="text6"></td>
-                        </tr>
+    }
 
-                        <tr class="no-border" height="10">
-                          <td class="no-border" valign="top"  class="text7">Sub Total &nbsp;</td>
-                          <td class="no-border" valign="top"  class="text6"></td>
-                          <td class="no-border" valign="top"   class="text7">{{dataSource?.baseAmount  | number:'1.2-2'}}</td>
-                        </tr>
+    .toolbar button:hover {
+      background: #005fa3;
+    }
 
-                        <tr class="no-border" height="10">
-                          <td class="no-border" class="text6">
-                            <p class="text6" style="text-align:right"> 
-                                      IGST @{{dataSource?.igstPercentage | number:'1.2-2'}}% &nbsp;<br> 
-                                      SGST  @{{dataSource?.sgstPercentage | number:'1.2-2'}}% &nbsp;<br> 
-                                      CGST  @{{dataSource?.cgstPercentage | number:'1.2-2'}}% &nbsp;
-                            </p>
-                          </td>
-                          <td class="no-border" class="text6"></td>
-                          <td class="no-border" class="text7">
-                            {{dataSource?.igstAmount | number:'1.2-2'}}<br />
-                            {{dataSource?.sgstAmount | number:'1.2-2'}}<br />
-                            {{dataSource?.cgstAmount | number:'1.2-2'}}<br />
-                          </td>
-                        </tr>
+    /* A4 Page */
 
-                        
-                        <tr class="no-border" height="10" class="text6">
-                          <td class="no-border" valign="top"  class="text6">&nbsp;</td>
-                          <td class="no-border" valign="top"  class="text6">&nbsp;</td>
-                          <td class="no-border" valign="top"  class="text7">&nbsp;</td>
-                        </tr>
+    .page {
 
-                        <tr class="text5">
-                          <td valign="top"><br />
-                            Total Rs.<br />
-                            {{dataSource?.creditNoteAmountInWords}} Only
-                            <br />
-                          </td>
-                          <td>&nbsp;</td>
-                          <td valign="top">
-                            0.00
-                            <br />
-                            {{dataSource?.creditNoteAmount  | number:'1.2-2'}}</td>
-                        </tr>
-                      </table>
-                      </td>
-                    </tr>               
-                  </table>
+      width: 210mm;
+      min-height: 297mm;
+      margin: auto;
+      background: #fff;
+      padding: 5mm;
+      box-shadow: 0 0 10px rgba(0, 0, 0, .15);
 
-                  <table width="900" border="0" cellpadding="2" cellspacing="0" class="text1">
-                    <tr>
-                      <td width="330" valign="top"></td>
-                      <td width="226" align="left" valign="top">
-                        <p style="font-size:smaller">
-                          <strong>ECOS (I) MOBILITY &amp; HOSPITALITY LTD.</strong>
-                        </p>                          
-                        <p class="text5">
-                          <img src="assets/images/Picture1.png" width="80px"  height="80px" />
-                        <br />
-                        Authorized Signatory
-                        </p></td>
-                    </tr>
-                  </table>
-                        
-                </td>
-              </tr>
-            </table>
+    }
 
+    /* Outer Border */
+
+    .frame {
+
+      border: 2px solid #000;
+      min-height: 281mm;
+      padding: 5mm;
+      display: flex;
+      flex-direction: column;
+
+    }
+
+    /* Title */
+
+    .title {
+
+      text-align: center;
+      border: 2px solid #000;
+      padding: 5px;
+      font-size: 25px;
+      font-weight: bold;
+      letter-spacing: 1px;
+      margin-bottom: 12px;
+
+    }
+
+    /* Header */
+
+    .header {
+
+      display: flex;
+      gap: 8px;
+      margin-bottom: 12px;
+
+    }
+
+    .company {
+
+      width: 55%;
+      border: 1px solid #000;
+      padding: 5px;
+      line-height: 1.6;
+
+    }
+
+    .info {
+
+      width: 45%;
+      border: 1px solid #000;
+
+    }
+
+    .info table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    .info td {
+
+      border: 1px solid #000;
+      padding: 5px;
+
+    }
+
+    /* Section Heading */
+
+    .heading {
+
+      font-weight: bold;
+      border: 1px solid #000;
+      padding: 4px;
+      background: #f2f2f2;
+      margin-top: 5px;
+
+    }
+
+    /* Tables */
+
+    table {
+
+      width: 100%;
+      border-collapse: collapse;
+
+    }
+
+    th,
+    td {
+
+      border: 1px solid #000;
+      padding: 4px;
+      font-size: 10px;
+
+    }
+
+    th {
+
+      background: #efefef;
+
+    }
+
+    .right {
+
+      text-align: right;
+
+    }
+
+    .center {
+
+      text-align: center;
+
+    }
+
+    /* Summary */
+
+    .summary {
+
+      width: 40%;
+      margin-left: auto;
+      margin-top: 15px;
+
+    }
+
+    /* Reason */
+/* 
+    .reason {
+
+      border: 1px solid #000;
+      margin-top: 15px;
+      padding: 5px;
+      min-height: auto;
+
+    } */
+
+    /* Footer */
+
+    .footer {
+
+      padding-top: 5px;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+
+    }
+
+    .signature {
+
+      width: 150px;
+      text-align: center;
+
+    }
+
+    /* Print */
+
+    @media print {
+
+      body {
+
+        background: #fff;
+        padding: 0;
+
+      }
+
+      .toolbar {
+
+        display: none;
+
+      }
+
+      .page {
+
+        width: 100%;
+        min-height: auto;
+        box-shadow: none;
+        padding: 0;
+
+      }
+
+      .frame {
+
+        min-height: 277mm;
+
+      }
+
+    }
+  </style>
+
+  <script>
+  </script>
+
+</head>
+
+<body>
+
+
+
+  <div class="page">
+
+    <div class="frame">
+
+      <div class="title-container">
+
+        <div class="title-text">CREDIT NOTE</div>
+
+        <div class="qr-logo-stack">
+          <img class="invoice-logo" src="http://www.ecoserp.com/bill_printing/logo.jpg" alt="Logo" />
+
+          <ng-container *ngIf="dataSource?.signedQRCode || dataSource?.invoiceModel?.signedQRCode; else noQR">
+            <img class="qr-code-image"
+              [src]="'data:image/png;base64,' + (dataSource?.signedQRCode || dataSource?.invoiceModel?.signedQRCode)"
+              alt="IRN QR Code" />
+          </ng-container>
+
+          <ng-template #noQR>
+            <div class="no-image-box">No QR Image</div>
+          </ng-template>
+        </div>
+
+      </div>
+
+      <div class="header">
+
+        <div class="company">
+
+          <b>ECOS (I) MOBILITY &amp; HOSPITALITY LTD.</b><br>
+          (Formerly known as Ecos (India) Mobility & Hospitality Private Limited)<br>
+          <strong>Branch. Office : </strong>{{dataSource?.printBranchAddress ||
+          dataSource?.invoiceEcoBranchModel?.branchAddress}}
+          <br />
+          <strong>Reg. Office :</strong> 45, First Floor, Corner Market, Malviya Nagar, New Delhi-110017
+          <br />
+          <strong>Correspondence : </strong> {{dataSource?.printCorrespondenceAddress ||
+          dataSource?.invoiceEcoCompanyModel?.correspondenceAddress}},
+          <br />
+          <strong>Ph. {{dataSource?.printPhoneNumber || dataSource?.invoiceEcoCompanyModel?.phoneNumber}}, </strong>
+          <strong>Fax. {{dataSource?.printFax || dataSource?.invoiceEcoCompanyModel?.fax}}</strong>
+          <strong>Reservation :</strong> 24/7 : 91-11-40794079<br />
+          <strong>E-mail :</strong> billing@ecorentacar.com, <strong>Reservation :</strong> cars@ecorentacar.com
+          <br />
+          <strong>GST No : {{dataSource?.printBranchGSTNumber ||
+            dataSource?.invoiceEcoBranchModel?.branchGSTNumber}}</strong>
+          <br />
+           <strong>LUT :</strong> {{dataSource?.printBranchLUTNumber || dataSource?.invoiceEcoBranchModel?.branchLUTNumber}}, <strong>Exp Date :</strong>
+          {{(dataSource?.printBranchLUTExpiryDate || dataSource?.invoiceEcoBranchModel?.branchLUTExpiryDate) | date:
+          'yyyy-MM-dd'}}
+          <br />
+         <strong>IRN :</strong> 
+          <span class="irn-text">
+            {{dataSource?.printIRN || dataSource?.invoiceModel?.irn}}
+          </span>
+
+        </div>
+
+        <div class="info">
+
+          <table>
+
+            <tr>
+              <td><b>C.N No.</b></td>
+              <td>{{dataSource?.creditNoteNumberWithPrefix}}</td>
+            </tr>
+
+            <tr>
+              <td><b>C.N Date</b></td>
+              <td>{{dataSource?.dateTimeOfGeneration | date: 'yyyy-MM-dd'}}
+              </td>
+            </tr>
+
+            <tr>
+              <td><b>Bill No</b></td>
+              <td>{{dataSource?.printInvoiceNumber || dataSource?.invoiceModel?.invoiceNumber}}</td>
+            </tr>
+
+            <tr>
+              <td><b>Bill Date</b></td>
+              <td>{{(dataSource?.printInvoiceDate || dataSource?.invoiceModel?.invoiceDate) | date: 'yyyy-MM-dd'}}
+              </td>
+            </tr>
+
+          </table>
+
+        </div>
+
+      </div>
+
+      <div class="heading">
+        Customer Details
+      </div>
+
+      <table>
+
+        <tr>
+          <td width="20%"><b>Name</b></td>
+          <td>{{dataSource?.printCustomerName || dataSource?.invoiceCustomerModel?.customerName}}</td>
+        </tr>
+
+        <tr>
+          <td><b>BillingAddress</b></td>
+          <td>{{dataSource?.printBillingAddress || dataSource?.invoiceCustomerModel?.billingAddress}}</td>
+        </tr>
+
+        <tr>
+          <td>
+            <b>State Of Service </b>
           </td>
+          <td>{{dataSource?.printCustomerGSTStateName || dataSource?.invoiceCustomerModel?.customerGSTStateName}}</td>
+        </tr>
+        <tr>
+          <td><b>State code </b></td>
+          <td>{{dataSource?.printCustomerGSTStateCode || dataSource?.invoiceCustomerModel?.customerGSTStateCode}}</td>
+        </tr>
+
+        <tr>
+          <td><b>GST/UIN</b></td>
+          <td>{{dataSource?.printCustomerGSTNumber || dataSource?.invoiceCustomerModel?.customerGSTNumber}}</td>
         </tr>
       </table>
+
+      <div class="heading">
+        Credit Note Details
+      </div>
+
+      <table>
+
+        <thead>
+
+          <tr>
+
+            <th> Particulars</th>
+            <th width="12%">Rate</th>
+
+          </tr>
+
+        </thead>
+
+        <tbody>
+
+          <tr>
+            <td><b>Reason for Credit Note:</b> {{dataSource?.creditNoteReason}}</td>
+
+            <td class="center"> </td>
+
+          </tr>
+
+          <tr>
+            <td><b>Income Type:</b> Car Hire Changes</td>
+
+            <td class="center"></td>
+
+          </tr>
+
+          <tr>
+            <td><b>SAC :</b> {{dataSource?.printSACNumber || dataSource?.sacNumber}} </td>
+            <td class="center"></td>
+
+          </tr>
+
+          <tr>
+
+            <td><b>Subtotal</b></td>
+
+            <td class="center"><b>{{dataSource?.baseAmount | number:'1.2-2'}}</b></td>
+
+          </tr>
+
+
+        </tbody>
+
+      </table>
+
+      <table class="summary">
+
+        <tr>
+
+          <td><span>IGST @{{dataSource?.igstPercentage | number:'1.2-2'}}% &nbsp;<br>
+            </span>
+            <span>SGST @{{dataSource?.sgstPercentage | number:'1.2-2'}}% &nbsp;<br>
+            </span>
+            <span>CGST @{{dataSource?.cgstPercentage | number:'1.2-2'}}%
+              &nbsp;</span>
+          </td>
+
+          <td class="center">
+            <span>{{dataSource?.igstAmount | number:'1.2-2'}}<br /></span>
+            <span>{{dataSource?.sgstAmount | number:'1.2-2'}}<br /></span>
+            <span>{{dataSource?.cgstAmount | number:'1.2-2'}}<br /></span>
+          </td>
+        </tr>
+
+        <tr>
+
+          <td><b>Total Credit</b><br>{{dataSource?.creditNoteAmountInWords}} Only
+          </td>
+
+          <td class="center"><b>{{dataSource?.creditNoteAmount | number:'1.2-2'}}</b></td>
+
+        </tr>
+
+      </table>
+      <!-- <div class="reason">
+
+<b>Reason for Credit Note :</b>{{dataSource?.creditNoteReason}}
+<b>Income Type : </b>Car Hire Changes
+<b> SAC :</b> {{dataSource?.printSACNumber || dataSource?.sacNumber}}
+
+</div> -->
+
+      <div class="footer">
+        <div>
+
+          <b>Remarks</b>
+
+          <br><br>
+
+          This credit note is issued against the above-mentioned invoice.
+
+        </div>
+        <div class="signature">
+          <p style="font-size:smaller">
+            <strong>ECOS (I) MOBILITY &amp; HOSPITALITY LTD.</strong>
+          </p>
+          <p class="text5">
+            <img src="assets/images/Picture1.png" width="80px" height="80px" />
+            <br />
+            Authorized Signatory
+          </p>
+
+        </div>
+
+      </div>
+
+    </div>
+
   </div>
-  <br />
-  <div style="text-align: center">
-    <button type="button" (click)="print()" color="primary" mat-raised-button id="print">
-      Print
-    </button>
+  <div class="toolbar">
+    <button onclick="print()">🖨 Print Credit Note</button>
   </div>
-</mat-dialog-content>
+</body>
+
+</html>

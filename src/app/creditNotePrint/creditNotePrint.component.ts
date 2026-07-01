@@ -56,22 +56,26 @@ export class CreditNotePrintComponent implements OnInit {
      data =>   
      {
        this.dataSource = data;
+       console.log(this.dataSource);
      },
      (error: HttpErrorResponse) => { this.dataSource = null;}
    );
  }
 
- print() {
-  const printContent = this.printDutyBill?.nativeElement.innerHTML;
-  const originalContents = document.body.innerHTML;
+//  print() {
+//   const printContent = this.printDutyBill?.nativeElement.innerHTML;
+//   const originalContents = document.body.innerHTML;
 
-  document.body.innerHTML = printContent;
-  window.print();
-  document.body.innerHTML = originalContents;
-  window.location.reload(); // Reload to reset the original content
+//   document.body.innerHTML = printContent;
+//   window.print();
+//   document.body.innerHTML = originalContents;
+//   window.location.reload(); // Reload to reset the original content
+// }
+ print(){
+
+    window.print();
+
 }
-
-
 }
 
 
