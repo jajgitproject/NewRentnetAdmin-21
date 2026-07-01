@@ -56,7 +56,7 @@ export class BulkBillsDownloadComponent implements OnInit, OnDestroy, AfterViewI
   uploadMode: 'bulk' | 'single' = 'bulk';
 
   customerList: { customerID: number; customerName: string }[] = [];
-  filteredCustomerOptions: Observable<{ customerID: number; customerName: string }[]>;
+  filteredCustomerOptions: Observable<{ customerID: number; customerName: string }[]> = of([]);
 
   invoiceRows: BulkDownloadInvoiceSummary[] = [];
   invoiceDataSource = new MatTableDataSource<BulkDownloadInvoiceSummary>([]);
@@ -135,6 +135,11 @@ export class BulkBillsDownloadComponent implements OnInit, OnDestroy, AfterViewI
     if (this.downloadDutySlips) return 'DutySlipsOnly';
     if (this.downloadMerge) return 'Merge';
     return '';
+  }
+
+  getDownloadButtonLabel(): string {
+    const count = this.selection.selected.length;
+    return count ? `Download selected (${count})` : 'Download all results';
   }
 
   search(): void {
@@ -523,6 +528,12 @@ export class BulkBillsDownloadComponent implements OnInit, OnDestroy, AfterViewI
     return typeof option === 'string' ? option : (option.customerName || '');
   }
 
+  formatBackfillCompletedAt(value: string | Date | null | undefined): string {
+    if (!value) return '—';
+    const m = moment(value);
+    return m.isValid() ? m.format('DD/MM/YYYY HH:mm:ss') : String(value);
+  }
+
   private startPolling(jobId: number, isIrnBackfill = false): void {
     this.stopPolling();
     this.pollIsIrnBackfill = isIrnBackfill;
@@ -555,6 +566,7 @@ export class BulkBillsDownloadComponent implements OnInit, OnDestroy, AfterViewI
           const status = this.getJobStatus();
           if (status === 'Completed' || status === 'Partial' || status === 'Failed') {
             this.stopPolling();
+            this.backfilling = false;
             if (isIrnBackfill) {
               this.mergeBackfillProgress(errors || []);
             } else {
@@ -969,18 +981,24 @@ export class BulkBillsDownloadComponent implements OnInit, OnDestroy, AfterViewI
   }
 
   private initCustomerAutocomplete(): void {
-    this.generalService.getCustomers().subscribe((data) => {
-      this.customerList = (data || [])
-        .map((c) => ({
-          customerID: c.customerID ?? c.CustomerID ?? 0,
-          customerName: (c.customerName ?? c.CustomerName ?? '').trim(),
-        }))
-        .filter((c) => c.customerID && c.customerName);
+    this.filteredCustomerOptions = this.customerCtrl.valueChanges.pipe(
+      startWith(this.customerCtrl.value ?? ''),
+      map((value) => this.filterCustomers(typeof value === 'string' ? value : value?.customerName || ''))
+    );
 
-      this.filteredCustomerOptions = this.customerCtrl.valueChanges.pipe(
-        startWith(''),
-        map((value) => this.filterCustomers(typeof value === 'string' ? value : value?.customerName || ''))
-      );
+    this.generalService.getCustomers().subscribe({
+      next: (data) => {
+        this.customerList = (data || [])
+          .map((c) => ({
+            customerID: c.customerID ?? c.CustomerID ?? 0,
+            customerName: (c.customerName ?? c.CustomerName ?? '').trim(),
+          }))
+          .filter((c) => c.customerID && c.customerName);
+        this.customerCtrl.updateValueAndValidity({ emitEvent: true });
+      },
+      error: () => {
+        this.customerList = [];
+      },
     });
   }
 

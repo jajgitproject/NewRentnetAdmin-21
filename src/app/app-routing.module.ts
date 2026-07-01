@@ -2890,7 +2890,17 @@ const routes: Routes = [
         loadChildren: () =>
           import('./bulkBillsDownload/bulkBillsDownload.module').then(
             (m) => m.BulkBillsDownloadModule
-          )
+          ),
+        data: {
+          requiredPageKey: 'Bulk Bills Download',
+          alternatePageKeys: [
+            'bulkBillsDownload',
+            'invoiceHome',
+            'Invoice Home',
+            'controlPanelDesign',
+            'Control Panel',
+          ],
+        },
       },
 
       {

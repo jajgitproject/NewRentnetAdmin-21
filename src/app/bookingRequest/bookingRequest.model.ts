@@ -2,6 +2,7 @@
 import { formatDate } from '@angular/common';
 export class BookingRequest {
   integrationRequestID:number;
+  integrationRequestGroupID?: number;
   customerTravelRequestNumber :string;
   customerID : number;
   customerName : string;
@@ -14,6 +15,7 @@ export class BookingRequest {
   requestStatus : string;
   reservationCreatedBy :string;
   reservationID : number;
+  reservationGroupID?: number;
   checkedByEcoEmployeeID : number;
   checkedByEco : boolean;
   reservationCreatedOn : Date;
@@ -21,6 +23,7 @@ export class BookingRequest {
   constructor(bookingRequest) {
     {
        this.integrationRequestID = bookingRequest.integrationRequestID || '';
+       this.integrationRequestGroupID = bookingRequest.integrationRequestGroupID || '';
        this.customerTravelRequestNumber = bookingRequest.customerTravelRequestNumber || '';
        this.customerID  = bookingRequest.customerID || '';
        this.customerName = bookingRequest.customerName || '';
@@ -33,6 +36,7 @@ export class BookingRequest {
        this.requestStatus = bookingRequest.requestStatus || '';
        this.reservationCreatedBy = bookingRequest.reservationCreatedBy || '';
        this.reservationID = bookingRequest.reservationID || '';
+       this.reservationGroupID = bookingRequest.reservationGroupID || '';
        this.checkedByEcoEmployeeID = bookingRequest.checkedByEcoEmployeeID || '';
        this.checkedByEco = bookingRequest.checkedByEco || '';
         this.reservationCreatedOn = bookingRequest.reservationCreatedOn || '';

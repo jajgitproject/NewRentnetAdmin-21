@@ -123,21 +123,34 @@
   background-color: #f4f6f8
   min-height: calc(100vh - 80px)
   padding: 16px
+  box-sizing: border-box
 
 .bc-layout
   display: flex
   flex-wrap: wrap
   gap: 16px
-  align-items: flex-start
+  align-items: stretch
+  height: calc(100vh - 96px)
+  min-height: 480px
 
 .bc-left-panel,
 .bc-right-panel
   flex: 1 1 480px
   min-width: 0
+  max-height: 100%
+  display: flex
+  flex-direction: column
+  overflow: hidden
   background: #fff
   border: 1px solid #e0e4e8
   border-radius: 8px
-  padding: 20px
+  padding: 0
+
+.bc-right-panel form.quick-search-panel
+  display: flex
+  flex-direction: column
+  flex: 1 1 auto
+  min-height: 0
 
 .bc-panel-header
   display: flex
@@ -145,9 +158,31 @@
   justify-content: space-between
   flex-wrap: wrap
   gap: 8px
-  margin-bottom: 20px
-  padding-bottom: 12px
+  flex-shrink: 0
+  margin-bottom: 0
+  padding: 20px 20px 12px
   border-bottom: 1px solid #eef1f4
+
+.bc-panel-body
+  flex: 1 1 auto
+  min-height: 0
+  overflow-y: auto
+  overflow-x: hidden
+  padding: 20px
+  scrollbar-gutter: stable
+
+  &::-webkit-scrollbar
+    width: 8px
+
+  &::-webkit-scrollbar-track
+    background: #f5f7f9
+
+  &::-webkit-scrollbar-thumb
+    background: #c5cdd6
+    border-radius: 4px
+
+  &::-webkit-scrollbar-thumb:hover
+    background: #90a4ae
 
 .bc-panel-title
   font-size: 16px
@@ -326,14 +361,16 @@
   color: #c62828
 
 .bc-footer
-  margin-top: 24px
-  padding-top: 16px
+  flex-shrink: 0
+  margin-top: 0
+  padding: 16px 20px
   border-top: 1px solid #eef1f4
   display: flex
   align-items: center
   justify-content: flex-end
   flex-wrap: wrap
   gap: 10px
+  background: #fff
 
 .bc-footer .bc-save-btn
   min-width: 200px

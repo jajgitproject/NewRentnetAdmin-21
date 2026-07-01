@@ -14,6 +14,39 @@ export class BookingRequestService {
     this.API_URL = generalService.BaseURL + "bookingRequest";
   }
 
+  private toRouteSegment(value: string | boolean | number | null | undefined): string {
+    if (value === null || value === undefined || value === '') {
+      return 'null';
+    }
+    return encodeURIComponent(String(value));
+  }
+
+  private buildListUrl(
+    SearchRequestFromDate: string,
+    SearchRequestToDate: string,
+    SearchTRN: string,
+    SearchiTRN: string,
+    SearchCustomerGroup: string,
+    SearchEcoBookingNo: string,
+    SearchConfirmByEco: boolean | null,
+    PageNumber: number,
+    orderByColumn: string,
+    order: string
+  ): string {
+    return [
+      this.API_URL,
+      this.toRouteSegment(SearchRequestFromDate),
+      this.toRouteSegment(SearchRequestToDate),
+      this.toRouteSegment(SearchTRN),
+      this.toRouteSegment(SearchiTRN),
+      this.toRouteSegment(SearchCustomerGroup),
+      this.toRouteSegment(SearchEcoBookingNo),
+      this.toRouteSegment(SearchConfirmByEco),
+      PageNumber,
+      orderByColumn,
+      order
+    ].join('/');
+  }
 
   /** CRUD METHODS */
   getTableData(
@@ -23,7 +56,7 @@ export class BookingRequestService {
               SearchiTRN:string,
               SearchCustomerGroup:string,
               SearchEcoBookingNo:string,
-              SearchConfirmByEco:boolean,
+              SearchConfirmByEco: boolean | null,
               PageNumber: number): Observable<any> {
     if(SearchRequestFromDate === "")
     {
@@ -37,15 +70,9 @@ export class BookingRequestService {
     {
       SearchTRN=null;
     }
-    else {
-      SearchTRN = encodeURIComponent(SearchTRN);
-    }
     if(SearchiTRN === "")
     {
       SearchiTRN=null;
-    }
-    else {
-      SearchiTRN = encodeURIComponent(SearchiTRN);
     }
     if(SearchCustomerGroup === "")
     {
@@ -55,8 +82,20 @@ export class BookingRequestService {
     {
       SearchEcoBookingNo=null;
     }
-    console.log(this.API_URL + '/' + SearchRequestFromDate + '/' + SearchRequestToDate + '/' + SearchTRN + '/' + SearchiTRN + '/' + SearchCustomerGroup + '/' + SearchEcoBookingNo + '/' + SearchConfirmByEco + '/' + PageNumber + '/IntegrationRequestID/Descending');
-    return this.httpClient.get(this.API_URL + '/' + SearchRequestFromDate + '/' + SearchRequestToDate + '/' + SearchTRN + '/' + SearchiTRN + '/' + SearchCustomerGroup + '/' + SearchEcoBookingNo + '/' + SearchConfirmByEco + '/' + PageNumber + '/IntegrationRequestID/Descending');
+    const url = this.buildListUrl(
+      SearchRequestFromDate,
+      SearchRequestToDate,
+      SearchTRN,
+      SearchiTRN,
+      SearchCustomerGroup,
+      SearchEcoBookingNo,
+      SearchConfirmByEco,
+      PageNumber,
+      'IntegrationRequestID',
+      'Descending'
+    );
+    console.log(url);
+    return this.httpClient.get(url);
 
   }
 
@@ -67,7 +106,7 @@ export class BookingRequestService {
               SearchiTRN:string,
               SearchCustomerGroup:string,
               SearchEcoBookingNo:string,
-              SearchConfirmByEco:boolean,PageNumber: number, coloumName: string, sortType: string): Observable<any> 
+              SearchConfirmByEco: boolean | null,PageNumber: number, coloumName: string, sortType: string): Observable<any> 
   {
     if(SearchRequestFromDate === "")
     {
@@ -81,15 +120,9 @@ export class BookingRequestService {
     {
       SearchTRN=null;
     }
-    else {
-      SearchTRN = encodeURIComponent(SearchTRN);
-    }
     if(SearchiTRN === "")
     {
       SearchiTRN=null;
-    }
-    else {
-      SearchiTRN = encodeURIComponent(SearchiTRN);
     }
     if(SearchCustomerGroup === "")
     {
@@ -99,7 +132,18 @@ export class BookingRequestService {
     {
       SearchEcoBookingNo=null;
     }
-    return this.httpClient.get(this.API_URL + '/' + SearchRequestFromDate + '/' + SearchRequestToDate + '/' + SearchTRN + '/' + SearchiTRN + '/' + SearchCustomerGroup + '/' + SearchEcoBookingNo + '/' + SearchConfirmByEco + '/' +  PageNumber + '/' + coloumName + '/' + sortType);
+    return this.httpClient.get(this.buildListUrl(
+      SearchRequestFromDate,
+      SearchRequestToDate,
+      SearchTRN,
+      SearchiTRN,
+      SearchCustomerGroup,
+      SearchEcoBookingNo,
+      SearchConfirmByEco,
+      PageNumber,
+      coloumName,
+      sortType
+    ));
 
   }
 

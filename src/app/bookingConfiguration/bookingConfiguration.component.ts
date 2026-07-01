@@ -125,9 +125,9 @@ export class BookingConfigurationComponent implements OnInit {
     ticketNumber:['', [Validators.required, Validators.pattern(/^[0-9]{12,15}$/)]],
     specialInstructions:[''],
     internalRemarks:[''],
-    requestType:[''],
-    pickupCityID:[''],
-    pickupCity:[''],
+    requestType:['', Validators.required],
+    pickupCityID:['', Validators.required],
+    pickupCity:['', Validators.required],
     pickupDateTime:[''],
     pickupDateTimeString:[''],
     pickupDate:[''],
@@ -296,8 +296,6 @@ toggleStopFold() {
           this.advanceTableForm.patchValue({packageType:this.dataSource.packageType});
           this.advanceTableForm.patchValue({packageID:this.dataSource.packageID});
           this.advanceTableForm.patchValue({package:this.dataSource.package});
-          this.advanceTableForm.patchValue({pickupCityID:this.dataSource.pickupCityID});
-          this.advanceTableForm.patchValue({pickupCity:this.dataSource.pickupCity});
           this.advanceTableForm.patchValue({pickupPriorityOrder:this.dataSource.pickupPriorityOrder});
           this.advanceTableForm.patchValue({vehicleID:this.dataSource.vehicleID});
           this.advanceTableForm.patchValue({vehicle:this.dataSource.vehicle});
@@ -308,8 +306,6 @@ toggleStopFold() {
 
           this.advanceTableForm.patchValue({dropOffDate:this.dataSource.dropOffDate});
           this.advanceTableForm.patchValue({dropOffTime:this.dataSource.dropOffTime});
-          this.advanceTableForm.patchValue({dropOffCityID:this.dataSource.dropOffCityID});
-          this.advanceTableForm.patchValue({dropOffCity:this.dataSource.dropOffCity});
           this.advanceTableForm.patchValue({dropOffAddress:this.dataSource.dropOffAddress});
           this.advanceTableForm.patchValue({dropOffAddressDetails:this.dataSource.dropOffAddressDetails});
           this.advanceTableForm.patchValue({dropOffPriorityOrder:this.dataSource.dropOffPriorityOrder});
@@ -391,6 +387,7 @@ toggleStopFold() {
           this.getCustomerKam(this.customerDetails.customerID);
           this.GetPassengerDetails();
           this.GetIntegrationCustomerSpecificFields();
+          this.refreshReservationStops();
         },
         (error: HttpErrorResponse) => { this.customerDetails = null; }
       );
@@ -468,10 +465,6 @@ private extractTime(dateTime: Date): Date {
           this.advanceTableForm.patchValue({carType:this.b2cDetails.vehicleCategory});
           this.advanceTableForm.patchValue({vehicleID:this.b2cDetails.vehicleID});
           this.advanceTableForm.patchValue({vehicle:this.b2cDetails.vehicle});
-          this.advanceTableForm.patchValue({pickupCityID:this.b2cDetails.cityID});
-          this.advanceTableForm.patchValue({pickupCity:this.b2cDetails.city});
-          this.advanceTableForm.patchValue({dropOffCityID:this.b2cDetails.cityID});
-          this.advanceTableForm.patchValue({dropOffCity:this.b2cDetails.city});
           this.advanceTableForm.patchValue({pickupAddress:this.b2cDetails.pickupAddress});
           this.advanceTableForm.patchValue({dropOffAddress:this.b2cDetails.dropOffAddress});
         },
@@ -573,20 +566,7 @@ private extractTime(dateTime: Date): Date {
       console.log(this.stopDetailsList);
 
       const enrouteStops = this.stopDetailsList.filter(x => this.isIntegrationEnrouteStop(x));
-
-      this.reservationStops = enrouteStops.map(stop => {
-        return {
-          reservationStopID: stop.integrationRequestStopID,
-          reservationStopType: stop.integrationRequestStopType,
-          reservationStopAddress: this.getStopAddress(stop),
-          reservationStopAddressDetails: this.getStopLandmark(stop),
-          reservationStopCity: stop.integrationRequestStopCity,
-          reservationStopDateString: stop.integrationRequestStopDate,
-          reservationStopTimeDateString: stop.integrationRequestStopTime,
-          reservationStopOrderPriority: stop.priorityOrder,
-          activationStatus: true
-        };
-      });
+      this.refreshReservationStops(enrouteStops);
 
       const pickupStop = this.stopDetailsList.find(
         x => x.integrationRequestStopType?.toLowerCase() === 'pickup'
@@ -599,9 +579,6 @@ private extractTime(dateTime: Date): Date {
       // Pickup Binding
       if (pickupStop) {
   this.advanceTableForm.patchValue({
-    //pickupCityID: pickupStop.integrationRequestStopID,
-    pickupCity: pickupStop.integrationRequestStopCity,
-
     pickupAddress: this.getStopAddress(pickupStop),
     pickupAddressLatitude: pickupStop.integrationRequestStopLatitude,
     pickupAddressLongitude: pickupStop.integrationRequestStopLongitude,
@@ -613,9 +590,6 @@ private extractTime(dateTime: Date): Date {
       // DropOff Binding
       if (dropOffStop) {
   this.advanceTableForm.patchValue({
-    dropOffCityID: 0,
-    dropOffCity: dropOffStop.integrationRequestStopCity,
-
     dropOffAddress: this.getStopAddress(dropOffStop),
     dropOffAddressLatitude: dropOffStop.integrationRequestStopLatitude,
     dropOffAddressLongitude: dropOffStop.integrationRequestStopLongitude,
@@ -760,6 +734,16 @@ private extractTime(dateTime: Date): Date {
     this.advanceTableForm.patchValue({pickupTimeString:this._generalService.getTimeFroms(this.advanceTableForm.value.pickupTime)});
     this.advanceTableForm.patchValue({dropOffDateString:this._generalService.getDateFrom(this.advanceTableForm.value.dropOffDate)});
     this.advanceTableForm.patchValue({dropOffTimeString:this._generalService.getTimeFroms(this.advanceTableForm.value.dropOffTime)});
+    this.advanceTableForm.patchValue({
+      pickupAddress: this.combineAddressWithDetails(
+        this.advanceTableForm.value.pickupAddress,
+        this.advanceTableForm.value.pickupAddressDetails
+      ),
+      dropOffAddress: this.combineAddressWithDetails(
+        this.advanceTableForm.value.dropOffAddress,
+        this.advanceTableForm.value.dropOffAddressDetails
+      ),
+    });
     const payload: any = this.advanceTableForm.getRawValue();
     payload.reservationStops = this.reservationStops;
     this.bookingConfigurationService.add(payload)  
@@ -1933,7 +1917,7 @@ OnDropOffGeoLocationClick(option:any)
       return '--';
     }
 
-    const parts: string[] = [moment(this.customerDetails.requestDate).format('DD MMM YYYY')];
+    const parts: string[] = [moment(this.customerDetails.requestDate).format('DD/MM/YYYY')];
     if (this.customerDetails.requestTime) {
       parts.push(moment(this.customerDetails.requestTime).format('HH:mm'));
     }
@@ -1991,7 +1975,7 @@ OnDropOffGeoLocationClick(option:any)
     }
     const parts: string[] = [];
     if (stop.integrationRequestStopDate) {
-      parts.push(moment(stop.integrationRequestStopDate).format('DD MMM YYYY'));
+      parts.push(moment(stop.integrationRequestStopDate).format('DD/MM/YYYY'));
     }
     if (stop.integrationRequestStopTime) {
       parts.push(moment(stop.integrationRequestStopTime).format('hh:mm A'));
@@ -2001,6 +1985,44 @@ OnDropOffGeoLocationClick(option:any)
 
   formatEnrouteStopNo(index: number): number {
     return index + 1;
+  }
+
+  private isCognizantBooking(): boolean {
+    const customerName = (this.customerDetails?.customerName || '').toLowerCase();
+    const customerCode = (this.customerDetails?.customerCodeForAPIIntegration || '').toLowerCase();
+    return customerName.includes('cognizant') || customerCode === 'cvx-cvxindia';
+  }
+
+  private refreshReservationStops(enrouteStops?: BookingConfigurationStopDetails[]): void {
+    const stops = enrouteStops
+      ?? this.stopDetailsList?.filter(stop => this.isIntegrationEnrouteStop(stop))
+      ?? [];
+
+    this.reservationStops = this.isCognizantBooking()
+      ? []
+      : stops.map(stop => ({
+          reservationStopID: stop.integrationRequestStopID,
+          reservationStopType: stop.integrationRequestStopType,
+          reservationStopAddress: this.getStopAddress(stop),
+          reservationStopAddressDetails: this.getStopLandmark(stop),
+          reservationStopCity: stop.integrationRequestStopCity,
+          reservationStopDateString: stop.integrationRequestStopDate,
+          reservationStopTimeDateString: stop.integrationRequestStopTime,
+          reservationStopOrderPriority: stop.priorityOrder,
+          activationStatus: true
+        }));
+  }
+
+  private combineAddressWithDetails(address: string, details: string): string {
+    const trimmedAddress = (address || '').trim();
+    const trimmedDetails = (details || '').trim();
+    if (!trimmedAddress) {
+      return trimmedDetails;
+    }
+    if (!trimmedDetails) {
+      return trimmedAddress;
+    }
+    return `${trimmedAddress} ${trimmedDetails}`;
   }
 
   onBack(): void {

@@ -30,18 +30,20 @@ import { CustomerGroupDropDown } from '../customerGroup/customerGroupDropDown.mo
   providers: [{ provide: MAT_DATE_LOCALE, useValue: 'en-GB' }]
 })
 export class BookingRequestComponent implements OnInit {
-  displayedColumns = [
-    'IntegrationRequestID',
-    'CustomerTravelRequestNumber',
-    'CustomerName',
-    'RequestDate',
-    'PickupDate',
-    'ConfirmationDateTime',
-    'ReservationID',
-    'reservationCreatedBy',
-    'RequestStatus',
-    'actions'
+  columnDefinitions = [
+    { key: 'IntegrationRequestID', label: 'Request No.', visible: true },
+    { key: 'CustomerTravelRequestNumber', label: 'TR No.', visible: true },
+    { key: 'CustomerName', label: 'Customer Name', visible: true },
+    { key: 'RequestDate', label: 'Booking Date Time', visible: true },
+    { key: 'PickupDate', label: 'Pickup Date Time', visible: true },
+    { key: 'ConfirmationDateTime', label: 'Confirmation Date Time', visible: true },
+    { key: 'ReservationID', label: 'Booking No.', visible: true },
+    { key: 'reservationCreatedBy', label: 'Reservation Created By', visible: true },
+    { key: 'RequestStatus', label: 'Status', visible: true },
   ];
+
+  filtersCollapsed = false;
+  actionRow: BookingRequest | null = null;
 
   dataSource: BookingRequest[] | null;
   SearchActivationStatus: boolean = true;
@@ -53,13 +55,13 @@ export class BookingRequestComponent implements OnInit {
   dialogRef: MatDialogRef<any>;
   SearchFromDate: string = '';
   SearchToDate: string = '';
-  SearchRequestFromDate: string = '';
-  SearchRequestToDate: string = '';
+  SearchRequestFromDate: Date | null = null;
+  SearchRequestToDate: Date | null = null;
   SearchTRN:string ='';
   SearchiTRN : string ='';
   SearchEcoBookingNo: string = '';
   SearchStatus:string ='';
-  SearchConfirmByEco:boolean = null;
+  SearchConfirmByEco: 'all' | 'yes' | 'no' = 'all';
 
   public CustomerGroupList?:CustomerGroupDropDown[]=[];
   filteredCustomerGroupOptions: Observable<CustomerGroupDropDown[]>;
@@ -81,10 +83,133 @@ export class BookingRequestComponent implements OnInit {
   contextMenu: MatMenuTrigger;
   contextMenuPosition = { x: '0px', y: '0px' };
   ngOnInit() {
-    //this.loadData();
     this.InitCustomer();
     this.SubscribeUpdateService();
+  }
 
+  get visibleColumns(): string[] {
+    return [
+      ...this.columnDefinitions.filter(col => col.visible).map(col => col.key),
+      'actions'
+    ];
+  }
+
+  get activeFilterCount(): number {
+    let count = 0;
+    if (this.SearchRequestFromDate) count++;
+    if (this.SearchRequestToDate) count++;
+    if (this.SearchTRN?.trim()) count++;
+    if (this.SearchEcoBookingNo?.trim()) count++;
+    if (this.SearchiTRN?.trim()) count++;
+    if (this.customerGroupName.value?.trim()) count++;
+    if (this.SearchConfirmByEco !== 'all') count++;
+    if (this.SearchStatus?.trim()) count++;
+    if (this.SearchFromDate) count++;
+    if (this.SearchToDate) count++;
+    return count;
+  }
+
+  toggleFilters(): void {
+    this.filtersCollapsed = !this.filtersCollapsed;
+  }
+
+  toggleColumn(columnKey: string): void {
+    const column = this.columnDefinitions.find(col => col.key === columnKey);
+    if (column) {
+      column.visible = !column.visible;
+    }
+  }
+
+  setColumnVisible(columnKey: string, visible: boolean): void {
+    const column = this.columnDefinitions.find(col => col.key === columnKey);
+    if (column) {
+      column.visible = visible;
+    }
+  }
+
+  setActionRow(row: BookingRequest): void {
+    this.actionRow = row;
+  }
+
+  formatDateTime(dateValue: any, timeValue?: any): string {
+    if (!dateValue && !timeValue) {
+      return 'N/A';
+    }
+
+    const parts: string[] = [];
+    if (dateValue) {
+      parts.push(moment(dateValue).format('DD/MM/YYYY'));
+    }
+    if (timeValue) {
+      parts.push(moment(timeValue).format('h:mm A'));
+    }
+    return parts.join(' ').trim() || 'N/A';
+  }
+
+  getStatusLabel(status: string): string {
+    if (!status) {
+      return 'N/A';
+    }
+    if (status === 'Approved' || status === 'Confirmed') {
+      return 'Confirmed';
+    }
+    return status;
+  }
+
+  getStatusClass(status: string): string {
+    const normalized = (status || '').toLowerCase();
+    if (normalized === 'requested' || normalized === 'pending') {
+      return 'br-status-requested';
+    }
+    if (normalized === 'approved' || normalized === 'confirmed' || normalized === 'accepted') {
+      return 'br-status-confirmed';
+    }
+    if (normalized === 'rejected' || normalized === 'cancelled' || normalized === 'cancel') {
+      return 'br-status-rejected';
+    }
+    return 'br-status-neutral';
+  }
+
+  downloadTable(): void {
+    if (!this.dataSource?.length) {
+      return;
+    }
+
+    const headers = [
+      'Request No.',
+      'TR No.',
+      'Customer Name',
+      'Booking Date Time',
+      'Pickup Date Time',
+      'Confirmation Date Time',
+      'Booking No.',
+      'Reservation Created By',
+      'Status'
+    ];
+
+    const rows = this.dataSource.map(row => [
+      `${row.integrationRequestGroupID || ''}${row.integrationRequestGroupID ? '.' : ''}${row.integrationRequestID}`,
+      row.customerTravelRequestNumber || '',
+      row.customerName || 'N/A',
+      this.formatDateTime(row.requestDate, row.requestTime),
+      this.formatDateTime(row.pickupDate, row.pickupTime),
+      row.reservationCreatedOn ? moment(row.reservationCreatedOn).format('DD/MM/YYYY h:mm A') : 'N/A',
+      row.reservationID ? `${row.reservationGroupID || ''}${row.reservationGroupID ? '.' : ''}${row.reservationID}` : 'N/A',
+      row.reservationCreatedBy || 'N/A',
+      this.getStatusLabel(row.requestStatus)
+    ]);
+
+    const csv = [headers, ...rows]
+      .map(line => line.map(value => `"${String(value).replace(/"/g, '""')}"`).join(','))
+      .join('\n');
+
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `booking-request-${moment().format('YYYYMMDD-HHmmss')}.csv`;
+    link.click();
+    URL.revokeObjectURL(url);
   }
 
    //-------------Mode of Payment ------------------
@@ -100,32 +225,30 @@ export class BookingRequestComponent implements OnInit {
       });
   }
   
-  private _filterCustomerGroup(value: string): any {
-    const filterValue = value.toLowerCase();
-    // if(filterValue.length === 0) {
-    //   return [];
-    // }
-    // if (!value || value.length < 3) {
-    //   return [];   
-    // }
+  private _filterCustomerGroup(value: string): CustomerGroupDropDown[] {
+    const filterValue = (value || '').trim().toLowerCase();
+
+    if (filterValue.length < 3) {
+      return [];
+    }
 
     return this.CustomerGroupList?.filter(
-      data => 
-      {
-        return data.customerGroup.toLowerCase().includes(filterValue);
-      }
-    );
+      data => data.customerGroup.toLowerCase().includes(filterValue)
+    ) || [];
   }
 
   refresh() {
     this.SearchActivationStatus = true;
     this.PageNumber = 0;
-    this.SearchRequestFromDate="";
-    this.SearchRequestToDate="";
-    this.SearchTRN="";
-    this.SearchiTRN="";
-    this.SearchEcoBookingNo="";
-    this.SearchConfirmByEco=null;
+    this.SearchRequestFromDate = null;
+    this.SearchRequestToDate = null;
+    this.SearchTRN = '';
+    this.SearchiTRN = '';
+    this.SearchEcoBookingNo = '';
+    this.SearchConfirmByEco = 'all';
+    this.SearchStatus = '';
+    this.SearchFromDate = '';
+    this.SearchToDate = '';
     this.customerGroupName.setValue('');
     this.loadData();
   }
@@ -151,21 +274,35 @@ export class BookingRequestComponent implements OnInit {
     }
   }
 
-  public loadData() 
-  {
+  private getFormattedSearchDates(): { fromDate: string; toDate: string } {
     let fromDate = '';
     let toDate = '';
 
     if (this.SearchRequestFromDate) {
-      fromDate = moment(this.SearchRequestFromDate)
-        .format('MMM DD YYYY');
+      fromDate = moment(this.SearchRequestFromDate).format('YYYY-MM-DD');
     }
 
     if (this.SearchRequestToDate) {
-      toDate = moment(this.SearchRequestToDate)
-        .format('MMM DD YYYY');
+      toDate = moment(this.SearchRequestToDate).format('YYYY-MM-DD');
     }
-    this.bookingRequestService.getTableData(fromDate,toDate,this.SearchTRN,this.SearchiTRN,this.customerGroupName.value,this.SearchEcoBookingNo,this.SearchConfirmByEco,this.PageNumber).subscribe(
+
+    return { fromDate, toDate };
+  }
+
+  private getConfirmByEcoApiValue(): boolean | null {
+    if (this.SearchConfirmByEco === 'yes') {
+      return true;
+    }
+    if (this.SearchConfirmByEco === 'no') {
+      return false;
+    }
+    return null;
+  }
+
+  public loadData()
+  {
+    const { fromDate, toDate } = this.getFormattedSearchDates();
+    this.bookingRequestService.getTableData(fromDate,toDate,this.SearchTRN,this.SearchiTRN,this.customerGroupName.value,this.SearchEcoBookingNo,this.getConfirmByEcoApiValue(),this.PageNumber).subscribe(
       data => {
         this.dataSource = data;
         console.log('dataSource', this.dataSource);
@@ -183,6 +320,7 @@ export class BookingRequestComponent implements OnInit {
   }
   onContextMenu(event: MouseEvent, item: BookingRequest) {
     event.preventDefault();
+    this.setActionRow(item);
     this.contextMenuPosition.x = event.clientX + 'px';
     this.contextMenuPosition.y = event.clientY + 'px';
     this.contextMenu.menuData = { item: item };
@@ -303,7 +441,8 @@ export class BookingRequestComponent implements OnInit {
       this.sortingData = 1;
       this.sortType = "Descending";
     }
-    this.bookingRequestService.getTableDataSort(this.SearchRequestFromDate,this.SearchRequestToDate,this.SearchTRN,this.SearchiTRN,this.customerGroupName.value,this.SearchEcoBookingNo,this.SearchConfirmByEco,this.PageNumber, coloumName.active, this.sortType).subscribe(
+    const { fromDate, toDate } = this.getFormattedSearchDates();
+    this.bookingRequestService.getTableDataSort(fromDate, toDate, this.SearchTRN, this.SearchiTRN, this.customerGroupName.value, this.SearchEcoBookingNo, this.getConfirmByEcoApiValue(), this.PageNumber, coloumName.active, this.sortType).subscribe(
         data => {
           this.dataSource = data;
         },
@@ -313,7 +452,10 @@ export class BookingRequestComponent implements OnInit {
 
 
   openInNewTab(rowItem: any) {
-    let baseUrl = this._generalService.FormURL;   
+    if (!rowItem) {
+      return;
+    }
+    const baseUrl = this._generalService.FormURL;
     const url = this.router.serializeUrl(this.router.createUrlTree(['/bookingConfiguration'], { queryParams: {
       BookingID: rowItem.integrationRequestID,
       returnUrl: '/bookingRequest',

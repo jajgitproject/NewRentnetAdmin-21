@@ -98,13 +98,13 @@ export class RolePageGuard implements CanActivate {
     }
 
     const meta = findSidebarRouteByPath(ROUTES, segment);
-    const leaf = this.deepestChild(activated);
-    const overrideKey = leaf?.data?.requiredPageKey;
+    const routeData = this.mergedRouteData(activated);
+    const overrideKey = routeData.requiredPageKey;
     if (overrideKey) {
       if (meta && routePageAllowed(meta, accessPages)) {
         return true;
       }
-      const alternateKeys: string[] = leaf?.data?.alternatePageKeys || [];
+      const alternateKeys: string[] = routeData.alternatePageKeys || [];
       const keys = [
         normalizeMenuPageKey(overrideKey),
         ...alternateKeys.map((k: string) => normalizeMenuPageKey(k)),
@@ -129,6 +129,19 @@ export class RolePageGuard implements CanActivate {
     return this.router.parseUrl('/dashboard');
   }
 
+  /** Merge `data` from the activating route and all lazy-loaded descendants. */
+  private mergedRouteData(route: ActivatedRouteSnapshot): Record<string, unknown> {
+    const merged: Record<string, unknown> = {};
+    let r: ActivatedRouteSnapshot | null = route;
+    while (r) {
+      if (r.data) {
+        Object.assign(merged, r.data);
+      }
+      r = r.firstChild;
+    }
+    return merged;
+  }
+
   /** Same-app context menu opens CryptoJS ciphertext in query; Page table names may not match route keys. */
   private isDriverInventoryEncryptedDeepLink(url: string): boolean {
     try {
@@ -146,14 +159,6 @@ export class RolePageGuard implements CanActivate {
     } catch {
       return false;
     }
-  }
-
-  private deepestChild(route: ActivatedRouteSnapshot): ActivatedRouteSnapshot {
-    let r: ActivatedRouteSnapshot = route;
-    while (r.firstChild) {
-      r = r.firstChild;
-    }
-    return r;
   }
 
   private firstUrlSegment(url: string): string {

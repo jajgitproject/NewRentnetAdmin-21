@@ -27,7 +27,7 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { BookingRequestService } from './bookingRequest.service';
 import { BookingRequestComponent } from './bookingRequest.component';
 import { BookingRequestRoutingModule } from './bookingRequest-routing.module';
-import { MatExpansionModule } from '@angular/material/expansion';
+import { MatNativeDateModule } from '@angular/material/core';
 
 
 @NgModule({
@@ -60,9 +60,9 @@ import { MatExpansionModule } from '@angular/material/expansion';
     MatToolbarModule,
     MatMenuModule,
     MatProgressSpinnerModule,
+    MatNativeDateModule,
     MyUploadModule,
-    CurrentDesginationModule,
-    MatExpansionModule
+    CurrentDesginationModule
  
   ],
   
