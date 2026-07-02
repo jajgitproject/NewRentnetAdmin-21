@@ -239,6 +239,27 @@ export class GeneralService {
     return (localStorage.getItem('role') || '').trim() === 'Contract Verifier';
   }
 
+  canResetOdometer(): boolean {
+    if (this.readRoleFlagFromStorage('canResetOdometer') === true) {
+      return true;
+    }
+    try {
+      const currentUser = JSON.parse(localStorage.getItem('currentUser') || '{}');
+      const employee = currentUser?.employee ?? currentUser?.Employee;
+      return !!(employee?.CanResetOdometer ?? employee?.canResetOdometer);
+    } catch {
+      return false;
+    }
+  }
+
+  canDeleteFuelEntry(): boolean {
+    return this.readRoleFlagFromStorage('canDeleteFuelEntry') === true;
+  }
+
+  canFindFuelEntry(): boolean {
+    return this.readRoleFlagFromStorage('canFindFuelEntry') === true;
+  }
+
   getContractTariffRoleTrack(): 'Auditor' | 'Verifier' | null {
     if (this.canActAsContractTariffAuditor()) {
       return 'Auditor';

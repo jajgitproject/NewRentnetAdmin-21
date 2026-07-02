@@ -74,7 +74,10 @@ export class FormDialogComponent
       canThisRoleDoGoodForBillingOnClosingScreen: [this.advanceTable.canThisRoleDoGoodForBillingOnClosingScreen, Validators.required],
       canThisRoleViewDummyInvoice: [this.advanceTable.canThisRoleViewDummyInvoice, Validators.required],
       canActAsContractTariffAuditor: [this.advanceTable.canActAsContractTariffAuditor, Validators.required],
-      canActAsContractTariffVerifier: [this.advanceTable.canActAsContractTariffVerifier, Validators.required]
+      canActAsContractTariffVerifier: [this.advanceTable.canActAsContractTariffVerifier, Validators.required],
+      canResetOdometer: [this.advanceTable.canResetOdometer, Validators.required],
+      canDeleteFuelEntry: [this.advanceTable.canDeleteFuelEntry, Validators.required],
+      canFindFuelEntry: [this.advanceTable.canFindFuelEntry, Validators.required]
     });
   }
   submit() 

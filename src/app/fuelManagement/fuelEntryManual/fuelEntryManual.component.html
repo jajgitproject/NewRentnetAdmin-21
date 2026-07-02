@@ -1,0 +1,675 @@
+<section class="content fuel-entry-manual">
+  <div class="container-fluid">
+    <div class="block-header fuel-page-header">
+      <div class="row align-items-center">
+        <div class="col-md-8">
+          <h2 class="page-title mb-1">Fuel Entry — Manual</h2>
+          <p class="page-subtitle mb-0">Capture dispatch fuel slips, odometer readings, and mileage calculations.</p>
+        </div>
+        <div class="col-md-4 d-none d-md-block text-md-end">
+          <ul class="breadcrumb breadcrumb-style mb-0">
+            <li class="breadcrumb-item bcrumb-1">
+              <a routerLink="/dashboard/main"><i class="fas fa-home"></i> Home</a> |
+              <a href="#" onClick="return false;">Operations</a> |
+              <span>Fuel Entry</span>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="fuel-sticky-toolbar">
+      <div class="d-flex flex-wrap align-items-center gap-2 justify-content-between">
+        <div class="toolbar-actions d-flex flex-wrap align-items-center gap-2">
+          <div class="btn-group-actions d-flex flex-wrap gap-2">
+            <button type="button" class="btn btn-outline-secondary btn-sm" (click)="newEntry()" [disabled]="isSaving">
+              <i class="fas fa-file"></i> New
+            </button>
+            <button
+              type="button"
+              class="btn btn-success btn-sm"
+              (click)="saveAndSubmit()"
+              [disabled]="isSaving || !canEdit"
+            >
+              <i class="fas fa-paper-plane"></i> {{ isSaving ? 'Submitting...' : 'Submit' }}
+            </button>
+            <button
+              type="button"
+              class="btn btn-outline-danger btn-sm"
+              (click)="deleteEntry()"
+              *ngIf="canDeleteFuelEntry"
+              [disabled]="isSaving || !fuelEntryId || !canEdit"
+            >
+              <i class="fas fa-trash"></i> Delete
+            </button>
+          </div>
+          <button
+            type="button"
+            class="btn btn-outline-navy btn-sm"
+            (click)="toggleSearchPanel()"
+            *ngIf="canFindFuelEntry"
+          >
+            <i class="fas" [ngClass]="showSearchPanel ? 'fa-chevron-up' : 'fa-search'"></i>
+            {{ showSearchPanel ? 'Hide Search' : 'Find Entry' }}
+          </button>
+          <button
+            type="button"
+            class="btn btn-outline-warning btn-sm"
+            (click)="openOdometerResetDialog()"
+          >
+            <i class="fas fa-tachometer-alt"></i> Odometer Reset
+          </button>
+        </div>
+        <div class="toolbar-meta d-flex flex-wrap align-items-center gap-2">
+          <span class="meta-chip"><i class="fas fa-user-edit me-1"></i> Manual Dispatch</span>
+          <span class="meta-chip meta-chip-id" *ngIf="fuelEntryNumber">{{ fuelEntryNumber }}</span>
+          <span class="meta-chip" [ngClass]="statusBadgeClass" *ngIf="statusName">{{ statusName }}</span>
+        </div>
+      </div>
+    </div>
+
+    <div *ngIf="isLoadingEntry" class="loading-banner">
+      <i class="fas fa-spinner fa-spin me-2"></i> Loading entry...
+    </div>
+
+    <div class="alert alert-light vehicle-hint mb-3" *ngIf="!vehicleSelected && canEdit">
+      <i class="fas fa-info-circle text-primary me-2"></i>
+      Start by searching and selecting a <strong>Car No.</strong> — vehicle, driver, and fuel type will auto-fill.
+    </div>
+
+    <div class="row g-3 fuel-form-grid">
+      <!-- Left stack: Fuel Information + Fuel Details -->
+      <div class="col-lg-6 fuel-left-stack">
+        <div class="card section-card">
+          <div class="card-header">
+            <i class="fas fa-gas-pump section-icon"></i> Fuel Information
+          </div>
+          <div class="card-body">
+            <div class="row g-3">
+              <div class="col-md-6">
+                <label class="form-label">Date of Fueling <span class="text-danger">*</span></label>
+                <input
+                  type="date"
+                  class="form-control"
+                  [class.is-invalid-field]="fieldInvalid('fuelDate')"
+                  [(ngModel)]="fuelDate"
+                  (ngModelChange)="onFuelDateChanged()"
+                  [disabled]="!canEdit"
+                  [max]="maxFuelDate"
+                />
+                <div class="invalid-feedback d-block" *ngIf="fieldInvalid('fuelDate')">{{ fuelDateError() }}</div>
+              </div>
+              <div class="col-md-6">
+                <label class="form-label">Time of Fueling <span class="text-danger">*</span></label>
+                <input
+                  type="time"
+                  class="form-control"
+                  [class.is-invalid-field]="fieldInvalid('fuelTime')"
+                  [(ngModel)]="fuelTime"
+                  (ngModelChange)="onFuelTimeChanged()"
+                  [disabled]="!canEdit"
+                  [max]="maxFuelTime"
+                />
+                <div class="invalid-feedback d-block" *ngIf="fieldInvalid('fuelTime')">{{ fuelTimeError() }}</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card section-card">
+          <div class="card-header">
+            <i class="fas fa-receipt section-icon"></i> Fuel Details
+          </div>
+          <div class="card-body">
+            <div class="row g-3">
+              <div class="col-md-6">
+                <label class="form-label">Petrol Slip No. <span class="text-danger">*</span></label>
+                <input
+                  class="form-control"
+                  [class.is-invalid-field]="fieldInvalid('fuelSlipNo')"
+                  [(ngModel)]="fuelSlipNo"
+                  (ngModelChange)="clearFieldValidation('fuelSlipNo')"
+                  [disabled]="!canEdit"
+                  placeholder="Slip number"
+                />
+                <div class="invalid-feedback d-block" *ngIf="fieldInvalid('fuelSlipNo')">Petrol slip number is required.</div>
+              </div>
+              <div class="col-md-6">
+                <label class="form-label">Current Meter <span class="text-danger">*</span></label>
+                <input
+                  type="number"
+                  class="form-control"
+                  [class.is-invalid-field]="fieldInvalid('currentMeter')"
+                  [(ngModel)]="currentMeter"
+                  (ngModelChange)="clearFieldValidation('currentMeter'); onCalculationInputChange()"
+                  [disabled]="!canEdit"
+                  placeholder="0"
+                />
+                <div class="invalid-feedback d-block" *ngIf="fieldInvalid('currentMeter')">Current meter is required.</div>
+              </div>
+              <div class="col-md-6">
+                <label class="form-label">Fuel Quantity (Ltr.) <span class="text-danger">*</span></label>
+                <input
+                  type="number"
+                  step="0.001"
+                  class="form-control"
+                  [class.is-invalid-field]="fieldInvalid('fuelQuantity')"
+                  [(ngModel)]="fuelQuantity"
+                  (ngModelChange)="clearFieldValidation('fuelQuantity'); onCalculationInputChange()"
+                  [disabled]="!canEdit"
+                  placeholder="0.000"
+                />
+                <div class="invalid-feedback d-block" *ngIf="fieldInvalid('fuelQuantity')">Fuel quantity must be greater than zero.</div>
+              </div>
+              <div class="col-md-6">
+                <label class="form-label">Amount (₹) <span class="text-danger">*</span></label>
+                <input
+                  type="number"
+                  step="0.01"
+                  class="form-control"
+                  [class.is-invalid-field]="fieldInvalid('amount')"
+                  [(ngModel)]="amount"
+                  (ngModelChange)="clearFieldValidation('amount'); onCalculationInputChange()"
+                  [disabled]="!canEdit"
+                  placeholder="0.00"
+                />
+                <div class="invalid-feedback d-block" *ngIf="fieldInvalid('amount')">Amount must be greater than zero.</div>
+              </div>
+              <div class="col-md-6">
+                <label class="form-label">Pay Mode</label>
+                <select class="form-control" [(ngModel)]="fuelPayModeID" [disabled]="!canEdit">
+                  <option [ngValue]="null">-- Select --</option>
+                  <option *ngFor="let p of payModeOptions()" [ngValue]="lookupId(p)">{{ lookupName(p) }}</option>
+                </select>
+              </div>
+              <div class="col-md-6">
+                <label class="form-label">Fuel Card No.</label>
+                <input
+                  class="form-control"
+                  [(ngModel)]="fuelCardNo"
+                  [disabled]="!canEdit"
+                  placeholder="From inventory master"
+                />
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Vehicle Information -->
+      <div class="col-lg-6 fuel-vehicle-col">
+        <div class="card section-card vehicle-info-card">
+          <div class="card-header">
+            <i class="fas fa-car section-icon"></i> Vehicle Information
+          </div>
+          <div class="card-body">
+            <div class="vehicle-fields-stack">
+              <div class="row g-3">
+                <div class="col-12">
+                  <label class="form-label">Car No. <span class="text-danger">*</span></label>
+                  <mat-form-field class="example-full-width dense-field" appearance="outline" [class.is-invalid-field]="fieldInvalid('carNo')">
+                    <input
+                      type="text"
+                      matInput
+                      [formControl]="carCtrl"
+                      [matAutocomplete]="autoCar"
+                      placeholder="Search registration number"
+                      [disabled]="!canEdit"
+                    />
+                    <mat-autocomplete
+                      #autoCar="matAutocomplete"
+                      [displayWith]="carDisplay.bind(this)"
+                      (optionSelected)="onCarSelected($event.option.value)"
+                    >
+                      <mat-option *ngFor="let c of filteredCarOptions | async" [value]="c">
+                        {{ carDisplay(c) }}
+                      </mat-option>
+                    </mat-autocomplete>
+                  </mat-form-field>
+                  <div class="invalid-feedback d-block" *ngIf="fieldInvalid('carNo')">Car No. is required.</div>
+                </div>
+              </div>
+              <div class="row g-3">
+                <div class="col-md-6">
+                  <label class="form-label">Car Supplier</label>
+                  <div class="readonly-label">{{ supplierName || '—' }}</div>
+                </div>
+                <div class="col-md-6">
+                  <label class="form-label">Car Type</label>
+                  <div class="readonly-label">{{ vehicleCategory || vehicleName || '—' }}</div>
+                </div>
+              </div>
+              <div class="row g-3">
+                <div class="col-md-6">
+                  <label class="form-label">Driver</label>
+                  <mat-form-field class="example-full-width dense-field" appearance="outline" [class.is-invalid-field]="fieldInvalid('driver')">
+                    <input
+                      type="text"
+                      matInput
+                      [formControl]="driverCtrl"
+                      [matAutocomplete]="autoDriver"
+                      placeholder="Search driver name or mobile"
+                      [disabled]="!canEdit"
+                    />
+                    <mat-autocomplete
+                      #autoDriver="matAutocomplete"
+                      [displayWith]="driverDisplay.bind(this)"
+                      (optionSelected)="onDriverSelected($event.option.value)"
+                    >
+                      <mat-option *ngFor="let d of filteredDriverOptions | async" [value]="d">
+                        {{ driverDisplay(d) }}
+                      </mat-option>
+                    </mat-autocomplete>
+                  </mat-form-field>
+                </div>
+                <div class="col-md-6">
+                  <label class="form-label">
+                    Other Than Driver <span class="text-danger" *ngIf="!hasDriverSelected">*</span>
+                  </label>
+                  <input
+                    class="form-control"
+                    [class.is-invalid-field]="fieldInvalid('otherThanDriver')"
+                    [(ngModel)]="otherThanDriver"
+                    (ngModelChange)="clearFieldValidation('otherThanDriver'); onOtherThanDriverInput()"
+                    [disabled]="!canEdit || hasDriverSelected"
+                    placeholder="Person who fueled the vehicle"
+                  />
+                  <div class="field-hint" *ngIf="!hasDriverSelected">Required when no driver is selected.</div>
+                  <div class="invalid-feedback d-block" *ngIf="fieldInvalid('otherThanDriver')">Other than driver is required when no driver is selected.</div>
+                </div>
+              </div>
+              <div class="row g-3">
+                <div class="col-md-6">
+                  <label class="form-label">Fuel Type</label>
+                  <div class="readonly-label">{{ fuelTypeName || '—' }}</div>
+                </div>
+                <div class="col-md-6">
+                  <label class="form-label">Location</label>
+                  <div class="readonly-label">{{ locationName || '—' }}</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Calculated — full width -->
+      <div class="col-12">
+        <div class="card section-card calculated-card">
+          <div class="card-header">
+            <i class="fas fa-calculator section-icon"></i> Calculated Fields
+            <span class="calc-auto-badge">Auto-updated</span>
+          </div>
+          <div class="card-body">
+            <div class="alert alert-info py-2 px-3 small mb-3" *ngIf="isFirstEntryAfterReset">
+              First entry after odometer reset — Debit/Credit is not applied to the driver.
+            </div>
+            <div class="calc-grid">
+              <div class="calc-item">
+                <span class="calc-label">Previous Meter</span>
+                <span class="calc-value">{{ displayCalc(previousMeter) }}</span>
+              </div>
+              <div class="calc-item">
+                <span class="calc-label">Given Average</span>
+                <span class="calc-value">{{ displayCalc(currentAverage) }}</span>
+              </div>
+              <div class="calc-item">
+                <span class="calc-label">Required Average</span>
+                <span class="calc-value">{{ displayCalc(averageMileage) }}</span>
+              </div>
+              <div class="calc-item">
+                <span class="calc-label">Eligibility (Ltr.)</span>
+                <span class="calc-value">{{ displayCalc(eligibility) }}</span>
+              </div>
+              <div class="calc-item">
+                <span class="calc-label">Fuel Shortage (Ltr.)</span>
+                <span class="calc-value" [ngClass]="calcValueClass(fuelShortage)">{{ displayCalc(fuelShortage) }}</span>
+                <span class="calc-hint" *ngIf="fuelShortage != null && fuelShortage < 0">Excess fuel</span>
+              </div>
+              <div class="calc-item">
+                <span class="calc-label">Fuel Rate (₹/Ltr.)</span>
+                <span class="calc-value">{{ displayCalc(fuelRate) }}</span>
+              </div>
+              <div class="calc-item">
+                <span class="calc-label">Debit / Credit Amount</span>
+                <span class="calc-value" [ngClass]="calcValueClass(shortageAmount)">{{ displayCalc(shortageAmount) }}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Documents -->
+      <div class="col-12">
+        <div class="card section-card">
+          <div class="card-header">
+            <i class="fas fa-paperclip section-icon"></i> Document Upload
+          </div>
+          <div class="card-body">
+            <div class="row g-4">
+              <div class="col-md-6">
+                <label class="form-label fw-semibold">Fuel Slip</label>
+                <label class="upload-zone d-block mb-2" *ngIf="canEdit && !fuelSlipDoc">
+                  <input type="file" class="d-none" accept=".jpg,.jpeg,.png,.pdf" (change)="onFileSelected('FuelSlip', $event)" />
+                  <i class="fas fa-cloud-upload-alt fa-2x upload-icon"></i>
+                  <p class="upload-title mb-1">Click to upload fuel slip</p>
+                  <p class="small text-muted mb-0">JPG, PNG, PDF — up to 5 MB</p>
+                </label>
+                <div class="doc-preview" *ngIf="fuelSlipDoc">
+                  <img *ngIf="fuelSlipPreviewUrl && isImageDoc(fuelSlipDoc)" [src]="fuelSlipPreviewUrl" alt="" class="upload-thumb" />
+                  <div *ngIf="!isImageDoc(fuelSlipDoc)" class="upload-thumb pdf-thumb">PDF</div>
+                  <div class="flex-grow-1 small">
+                    <div class="doc-name">{{ docFileName(fuelSlipDoc) }}</div>
+                    <div class="text-muted">{{ formatFileSize(docFileSize(fuelSlipDoc)) }}</div>
+                  </div>
+                  <button type="button" class="btn btn-sm btn-outline-danger" (click)="removeDocument('FuelSlip')" *ngIf="canEdit">
+                    <i class="fas fa-times"></i>
+                  </button>
+                </div>
+              </div>
+              <div class="col-md-6">
+                <label class="form-label fw-semibold">Odometer Photo</label>
+                <label class="upload-zone d-block mb-2" *ngIf="canEdit && !odometerDoc">
+                  <input type="file" class="d-none" accept=".jpg,.jpeg,.png" (change)="onFileSelected('Odometer', $event)" />
+                  <i class="fas fa-camera fa-2x upload-icon"></i>
+                  <p class="upload-title mb-1">Click to upload odometer photo</p>
+                  <p class="small text-muted mb-0">JPG, PNG — up to 5 MB</p>
+                </label>
+                <div class="doc-preview" *ngIf="odometerDoc">
+                  <img *ngIf="odometerPreviewUrl" [src]="odometerPreviewUrl" alt="" class="upload-thumb" />
+                  <div class="flex-grow-1 small">
+                    <div class="doc-name">{{ docFileName(odometerDoc) }}</div>
+                    <div class="text-muted">{{ formatFileSize(docFileSize(odometerDoc)) }}</div>
+                  </div>
+                  <button type="button" class="btn btn-sm btn-outline-danger" (click)="removeDocument('Odometer')" *ngIf="canEdit">
+                    <i class="fas fa-times"></i>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Reason (hidden for now) -->
+      <div class="col-12" *ngIf="showManualEntryReasonSection">
+        <div class="card section-card">
+          <div class="card-header">Manual Entry Reason &amp; Remarks</div>
+          <div class="card-body">
+            <div class="row g-3">
+              <div class="col-md-6">
+                <label class="form-label">Manual Entry Reason</label>
+                <select class="form-control" [(ngModel)]="fuelManualEntryReasonID" [disabled]="!canEdit">
+                  <option [ngValue]="null">-- Select --</option>
+                  <option *ngFor="let r of lookupItems('manualEntryReasons')" [ngValue]="lookupId(r)">
+                    {{ lookupName(r) }}
+                  </option>
+                </select>
+              </div>
+              <div class="col-12">
+                <label class="form-label">Remarks</label>
+                <textarea class="form-control" rows="3" maxlength="500" [(ngModel)]="remarks" [disabled]="!canEdit"></textarea>
+                <div class="form-text text-end">{{ remarksLength }} / 500</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Search (collapsible) -->
+      <div class="col-12" *ngIf="showSearchPanel">
+        <div class="card section-card search-panel">
+          <div class="card-header">
+            <i class="fas fa-search section-icon"></i> Find Existing Entry
+          </div>
+          <div class="card-body">
+            <div class="row g-3 align-items-end">
+              <div class="col-md-4">
+                <label class="form-label">Fuel Slip No.</label>
+                <input class="form-control" [(ngModel)]="searchSlipNo" placeholder="Slip number" />
+              </div>
+              <div class="col-md-3">
+                <label class="form-label">Car No.</label>
+                <mat-form-field class="example-full-width dense-field" appearance="outline">
+                  <input
+                    type="text"
+                    matInput
+                    [formControl]="searchCarCtrl"
+                    [matAutocomplete]="autoSearchCar"
+                    placeholder="Search registration number"
+                  />
+                  <mat-autocomplete
+                    #autoSearchCar="matAutocomplete"
+                    [displayWith]="carDisplay.bind(this)"
+                  >
+                    <mat-option *ngFor="let c of filteredSearchCarOptions | async" [value]="c">
+                      {{ carDisplay(c) }}
+                    </mat-option>
+                  </mat-autocomplete>
+                </mat-form-field>
+              </div>
+              <div class="col-md-3">
+                <label class="form-label">Fuel Slip Date</label>
+                <input type="date" class="form-control" [(ngModel)]="searchFuelDate" />
+              </div>
+              <div class="col-md-2">
+                <button type="button" class="btn btn-navy w-100" (click)="searchSlip()" [disabled]="isSearching">
+                  <i class="fas fa-search"></i> {{ isSearching ? '...' : 'Search' }}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="odometer-reset-backdrop" *ngIf="showOdometerResetDialog" (click)="closeOdometerResetDialog()"></div>
+  <div class="odometer-reset-dialog card section-card" *ngIf="showOdometerResetDialog" role="dialog" aria-modal="true" (click)="$event.stopPropagation()">
+    <div class="card-header d-flex justify-content-between align-items-center">
+      <span><i class="fas fa-tachometer-alt section-icon"></i> Odometer Reset</span>
+      <button type="button" class="btn btn-sm btn-link text-muted" (click)="closeOdometerResetDialog()">
+        <i class="fas fa-times"></i>
+      </button>
+    </div>
+    <div class="card-body">
+      <div class="row g-3 align-items-end odometer-reset-toolbar">
+        <div class="col-md-12">
+          <label class="form-label">Car <span class="text-danger">*</span></label>
+          <input
+            type="text"
+            class="form-control"
+            [formControl]="odometerCarCtrl"
+            [matAutocomplete]="odometerCarAuto"
+            placeholder="Search registration number"
+            (blur)="onOdometerCarBlur()"
+          />
+          <mat-autocomplete
+            #odometerCarAuto="matAutocomplete"
+            [displayWith]="carDisplay.bind(this)"
+            (optionSelected)="onOdometerCarSelected($event.option.value)"
+          >
+            <mat-option *ngFor="let car of filteredOdometerCarOptions | async" [value]="car">
+              {{ carDisplay(car) }}
+            </mat-option>
+          </mat-autocomplete>
+        </div>
+      </div>
+
+      <div class="row g-3 odometer-reset-panels">
+        <div class="col-lg-7">
+          <div class="odometer-reset-list card section-card h-100">
+            <div class="card-header py-2">
+              <i class="fas fa-list section-icon"></i> Reset History
+            </div>
+            <div class="card-body p-0">
+              <div class="odometer-reset-empty" *ngIf="!odometerInventoryID">
+                Select a car to view odometer reset history.
+              </div>
+              <div class="odometer-reset-empty" *ngIf="odometerInventoryID && isLoadingOdometerResetList">
+                <i class="fas fa-spinner fa-spin me-2"></i> Loading resets...
+              </div>
+              <div
+                class="odometer-reset-empty"
+                *ngIf="odometerInventoryID && !isLoadingOdometerResetList && !odometerResetList.length"
+              >
+                No odometer resets recorded for this vehicle.
+              </div>
+              <div class="table-responsive" *ngIf="odometerInventoryID && odometerResetList.length">
+                <table class="table table-sm table-hover odometer-reset-table mb-0">
+                  <thead>
+                    <tr>
+                      <th>Reset Date</th>
+                      <th>Time</th>
+                      <th>Reading</th>
+                      <th>Reason</th>
+                      <th class="text-end">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr
+                      *ngFor="let row of odometerResetList"
+                      [class.table-active]="isSelectedOdometerReset(row)"
+                    >
+                      <td>{{ resetRowDate(row) | date: 'dd-MMM-yyyy' }}</td>
+                      <td>{{ resetRowTime(row) }}</td>
+                      <td>{{ resetRowReading(row) }}</td>
+                      <td class="reason-cell" [title]="resetRowReason(row)">{{ resetRowReason(row) }}</td>
+                      <td class="text-end text-nowrap">
+                        <button
+                          type="button"
+                          class="btn btn-sm btn-outline-primary me-1"
+                          (click)="editOdometerReset(row)"
+                          [disabled]="isSavingOdometerReset"
+                          title="Edit"
+                        >
+                          <i class="fas fa-edit"></i>
+                        </button>
+                        <button
+                          type="button"
+                          class="btn btn-sm btn-outline-danger"
+                          (click)="deleteOdometerReset(row)"
+                          [disabled]="isSavingOdometerReset || !resetRowCanDelete(row)"
+                          title="Delete"
+                        >
+                          <i class="fas fa-trash"></i>
+                        </button>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="col-lg-5">
+          <div class="odometer-reset-form card section-card h-100">
+            <div class="card-header py-2 d-flex justify-content-between align-items-center">
+              <span><i class="fas fa-edit section-icon"></i> {{ odometerResetDialogTitle }}</span>
+              <span class="badge bg-warning text-dark" *ngIf="odometerResetHasPostResetEntries">Post-reset entries exist</span>
+            </div>
+            <div class="card-body">
+              <div class="alert alert-light py-2 px-3 small mb-3" *ngIf="!odometerInventoryID">
+                Select a car to create or edit an odometer reset.
+              </div>
+              <div class="row g-3" *ngIf="odometerInventoryID">
+                <div class="col-md-6">
+                  <label class="form-label">Current Meter</label>
+                  <input type="text" class="form-control" [value]="latestCurrentMeterDisplay" readonly />
+                </div>
+                <div class="col-md-6">
+                  <label class="form-label">Reset Date <span class="text-danger">*</span></label>
+                  <input
+                    type="date"
+                    class="form-control"
+                    [(ngModel)]="odometerResetDate"
+                    [min]="odometerResetMinDate || null"
+                    [max]="todayIso()"
+                    (ngModelChange)="onOdometerResetDateChange()"
+                    [disabled]="!odometerResetCanEditForm || isSavingOdometerReset"
+                  />
+                  <div class="form-text" *ngIf="odometerResetContext?.latestFuelEntryDate || odometerResetContext?.LatestFuelEntryDate">
+                    Latest fuel entry:
+                    {{ (odometerResetContext?.latestFuelEntryDate || odometerResetContext?.LatestFuelEntryDate) | date: 'dd-MMM-yyyy' }}
+                    <span *ngIf="odometerResetContext?.latestFuelEntryTime || odometerResetContext?.LatestFuelEntryTime">
+                      at {{ odometerResetContext?.latestFuelEntryTime || odometerResetContext?.LatestFuelEntryTime }}
+                    </span>
+                  </div>
+                  <div class="form-text text-danger" *ngIf="odometerResetDateRangeInvalid">
+                    Latest fuel entry date is after today. Reset is not possible until today reaches that date.
+                  </div>
+                </div>
+                <div class="col-md-6">
+                  <label class="form-label">Reset Time <span class="text-danger">*</span></label>
+                  <input
+                    type="time"
+                    class="form-control"
+                    [(ngModel)]="odometerResetTime"
+                    [disabled]="!odometerResetCanEditForm || isSavingOdometerReset"
+                  />
+                </div>
+                <div class="col-md-6">
+                  <label class="form-label">New Odometer Reading <span class="text-danger">*</span></label>
+                  <input
+                    type="number"
+                    class="form-control"
+                    min="0"
+                    step="0.01"
+                    [(ngModel)]="odometerNewReading"
+                    placeholder="0"
+                    [disabled]="!odometerResetCanEditForm || isSavingOdometerReset"
+                  />
+                </div>
+                <div class="col-12">
+                  <label class="form-label">Reset Reason <span class="text-danger">*</span></label>
+                  <select
+                    class="form-control"
+                    [(ngModel)]="odometerResetReasonID"
+                    [disabled]="!odometerResetCanEditForm || isSavingOdometerReset"
+                  >
+                    <option [ngValue]="null">Select reason</option>
+                    <option *ngFor="let reason of lookupItems('odometerResetReasons')" [ngValue]="lookupId(reason)">
+                      {{ lookupName(reason) }}
+                    </option>
+                  </select>
+                  <div class="form-text text-warning" *ngIf="!lookupItems('odometerResetReasons').length">
+                    Reset reasons not loaded. Run FuelManagement_OdometerReset_Tables.sql and FuelManagement_Lookup_Seed.sql.
+                  </div>
+                </div>
+                <div class="col-12" *ngIf="isEditingOdometerReset && !odometerResetCanEditForm">
+                  <div class="alert alert-warning py-2 px-3 small mb-0">
+                    This reset cannot be edited because fuel entries already exist after the reset date and time.
+                    Administrator roles may still edit.
+                  </div>
+                </div>
+              </div>
+              <div class="d-flex flex-wrap justify-content-end gap-2 mt-4" *ngIf="odometerInventoryID">
+                <button
+                  type="button"
+                  class="btn btn-outline-danger"
+                  (click)="deleteOdometerReset()"
+                  [disabled]="!isEditingOdometerReset || !odometerResetCanDeleteForm || isSavingOdometerReset"
+                >
+                  <i class="fas fa-trash"></i> Delete
+                </button>
+                <button type="button" class="btn btn-outline-secondary" (click)="closeOdometerResetDialog()" [disabled]="isSavingOdometerReset">
+                  Close
+                </button>
+                <button
+                  type="button"
+                  class="btn btn-warning"
+                  (click)="saveOdometerReset()"
+                  [disabled]="!odometerResetCanEditForm || isSavingOdometerReset"
+                >
+                  <i class="fas fa-save"></i>
+                  {{ isSavingOdometerReset ? 'Saving...' : (isEditingOdometerReset ? 'Update Reset' : 'Save Reset') }}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>

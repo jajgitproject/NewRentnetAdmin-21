@@ -15,6 +15,9 @@ export class Role {
    canThisRoleViewDummyInvoice: boolean;
    canActAsContractTariffAuditor: boolean;
    canActAsContractTariffVerifier: boolean;
+   canResetOdometer: boolean;
+   canDeleteFuelEntry: boolean;
+   canFindFuelEntry: boolean;
 
   constructor(role) {
     {
@@ -31,8 +34,11 @@ export class Role {
        this.canThisRoleViewBillOnClosingScreen = role.canThisRoleViewBillOnClosingScreen ?? '';
        this.canThisRoleDoGoodForBillingOnClosingScreen = role.canThisRoleDoGoodForBillingOnClosingScreen ?? '';
        this.canThisRoleViewDummyInvoice = role.canThisRoleViewDummyInvoice ?? '';
-       this.canActAsContractTariffAuditor = role.canActAsContractTariffAuditor ?? '';
-       this.canActAsContractTariffVerifier = role.canActAsContractTariffVerifier ?? '';
+       this.canActAsContractTariffAuditor = role.canActAsContractTariffAuditor ?? role.CanActAsContractTariffAuditor ?? '';
+       this.canActAsContractTariffVerifier = role.canActAsContractTariffVerifier ?? role.CanActAsContractTariffVerifier ?? '';
+       this.canResetOdometer = role.canResetOdometer ?? role.CanResetOdometer ?? '';
+       this.canDeleteFuelEntry = role.canDeleteFuelEntry ?? role.CanDeleteFuelEntry ?? '';
+       this.canFindFuelEntry = role.canFindFuelEntry ?? role.CanFindFuelEntry ?? '';
 
     }
   }

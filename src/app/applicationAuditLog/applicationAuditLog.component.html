@@ -1,0 +1,215 @@
+<section class="content">
+  <div class="container-fluid">
+    <div class="block-header">
+      <div class="row">
+        <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+          <ul>
+            <li class="breadcrumb-item bcrumb-1">
+              <a routerLink="/dashboard/main">
+                <i class="fas fa-home"></i> Home</a>|
+              <a href="#">Admin</a>|
+              <a href="#">Application Audit Log</a>
+            </li>
+          </ul>
+          <ul class="breadcrumb breadcrumb-style">
+            <li class="breadcrumb-item">
+              <h2>Application Audit Log</h2>
+            </li>
+          </ul>
+          <p class="page-subtitle">
+            Reads structured JSON from <code>Logs/application-audit/</code> — separate from legacy Audit Trail.
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <div class="audit-nav-tabs">
+      <a class="active" routerLink="/applicationAuditLog">Audit Log Dashboard</a>
+      <a routerLink="/applicationAuditSettings">Page Settings</a>
+    </div>
+
+    <div class="card">
+      <div class="body">
+        <div class="row">
+          <div class="col-lg-3 col-md-6 col-sm-12">
+            <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+              <mat-label>User</mat-label>
+              <input
+                type="text"
+                matInput
+                [formControl]="userCtrl"
+                [matAutocomplete]="autoUser"
+                placeholder="Search employee..."
+              />
+              <mat-autocomplete
+                #autoUser="matAutocomplete"
+                [displayWith]="userDisplay.bind(this)"
+              >
+                <mat-option *ngFor="let emp of filteredUserOptions | async" [value]="emp">
+                  {{ userDisplay(emp) }}
+                </mat-option>
+              </mat-autocomplete>
+            </mat-form-field>
+          </div>
+
+          <div class="col-lg-2 col-md-6 col-sm-12">
+            <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+              <mat-label>Page / Form name</mat-label>
+              <mat-select [formControl]="formNameCtrl">
+                <mat-option value="">All pages</mat-option>
+                <mat-option *ngFor="let p of pageOptions" [value]="p">{{ p }}</mat-option>
+              </mat-select>
+            </mat-form-field>
+          </div>
+
+          <div class="col-lg-2 col-md-6 col-sm-12">
+            <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+              <mat-label>Operation</mat-label>
+              <mat-select [formControl]="operationCtrl">
+                <mat-option value="">All</mat-option>
+                <mat-option value="I">Insert</mat-option>
+                <mat-option value="U">Update</mat-option>
+                <mat-option value="D">Delete</mat-option>
+              </mat-select>
+            </mat-form-field>
+          </div>
+
+          <div class="col-lg-2 col-md-6 col-sm-12">
+            <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+              <mat-label>Reservation ID</mat-label>
+              <input type="number" matInput [formControl]="reservationIdCtrl" placeholder="Optional" />
+            </mat-form-field>
+          </div>
+
+          <div class="col-lg-2 col-md-6 col-sm-12">
+            <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+              <mat-label>Record ID</mat-label>
+              <input matInput [formControl]="recordIdCtrl" placeholder="e.g. group id" />
+            </mat-form-field>
+          </div>
+
+          <div class="col-lg-2 col-md-6 col-sm-12">
+            <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+              <mat-label>From date</mat-label>
+              <input matInput [matDatepicker]="fromPicker" [formControl]="fromDateCtrl" />
+              <mat-datepicker-toggle matSuffix [for]="fromPicker"></mat-datepicker-toggle>
+              <mat-datepicker #fromPicker></mat-datepicker>
+            </mat-form-field>
+          </div>
+
+          <div class="col-lg-2 col-md-6 col-sm-12">
+            <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+              <mat-label>To date</mat-label>
+              <input matInput [matDatepicker]="toPicker" [formControl]="toDateCtrl" />
+              <mat-datepicker-toggle matSuffix [for]="toPicker"></mat-datepicker-toggle>
+              <mat-datepicker #toPicker></mat-datepicker>
+            </mat-form-field>
+          </div>
+
+          <div class="col-lg-2 col-md-6 col-sm-12 d-flex align-items-center">
+            <button mat-raised-button color="primary" type="button" (click)="search()" [disabled]="isLoadingEvents">
+              {{ isLoadingEvents ? 'Searching...' : 'Search' }}
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="body">
+        <div class="alert alert-info" role="alert" *ngIf="!isLoadingEvents">
+          Showing <strong>{{ events.length }}</strong> events from log4net store
+          <span *ngIf="formNameCtrl.value"> · Page filter: <strong>{{ formNameCtrl.value }}</strong></span>
+        </div>
+
+        <div *ngIf="isLoadingEvents" class="loading-row">
+          <mat-spinner diameter="36"></mat-spinner>
+          <span>Loading events...</span>
+        </div>
+
+        <div class="table-responsive" *ngIf="!isLoadingEvents">
+          <table class="table table-hover audit-log-table">
+            <thead>
+              <tr>
+                <th>Time (UTC)</th>
+                <th>User</th>
+                <th>Page</th>
+                <th>Operation</th>
+                <th>Record</th>
+                <th>Reservation</th>
+                <th>Source</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let evt of events">
+                <td>{{ timestamp(evt) }}</td>
+                <td>{{ userLabel(evt) }}</td>
+                <td>{{ formName(evt) }}</td>
+                <td>
+                  <span class="badge" [ngClass]="operationBadgeClass(evt.operation || evt.Operation)">
+                    {{ operationDisplay(evt.operation || evt.Operation) }}
+                  </span>
+                </td>
+                <td>{{ recordId(evt) }}</td>
+                <td>{{ reservationId(evt) }}</td>
+                <td>{{ source(evt) }}</td>
+                <td>
+                  <button mat-button color="primary" type="button" (click)="showDetails(evt)">
+                    {{ selectedEvent && eventId(selectedEvent) === eventId(evt) ? 'Hide' : 'Details' }}
+                  </button>
+                </td>
+              </tr>
+              <tr *ngIf="!events.length">
+                <td colspan="8" class="text-center text-muted">No events found. Run a search or trigger a pilot action (e.g. Supplier Payout Mark Paid).</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <div class="card" *ngIf="selectedEvent">
+      <div class="body">
+        <h3 class="detail-title">Event detail — {{ recordId(selectedEvent) }}</h3>
+        <p class="detail-meta">
+          eventId: {{ eventId(selectedEvent) }}
+          <span *ngIf="selectedEvent.correlationId || selectedEvent.CorrelationId">
+            · correlationId: {{ selectedEvent.correlationId || selectedEvent.CorrelationId }}
+          </span>
+          <span *ngIf="selectedEvent.hostName || selectedEvent.HostName">
+            · host: {{ selectedEvent.hostName || selectedEvent.HostName }}
+          </span>
+        </p>
+
+        <div *ngIf="isLoadingDetail" class="loading-row">
+          <mat-spinner diameter="28"></mat-spinner>
+        </div>
+
+        <div class="audit-diff-table-wrap" *ngIf="!isLoadingDetail">
+          <table class="audit-diff-table">
+            <thead>
+              <tr>
+                <th>Field</th>
+                <th>Before</th>
+                <th>After</th>
+                <th>Changed</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr
+                *ngFor="let row of buildDiffTableRows(beforeJson(selectedEvent), afterJson(selectedEvent))"
+                [class.changed-row]="row.change"
+              >
+                <td>{{ row.columnName }}</td>
+                <td>{{ row.before }}</td>
+                <td>{{ row.after }}</td>
+                <td>{{ row.change }}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>

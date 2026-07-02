@@ -26,6 +26,7 @@ export class Inventory {
    registrationCity:string;
    fuelTypeID:number;
    mileage:number;
+   fuelCardNo:string;
    engineNo:string;
    chassisNo:string;
    noOfAirbags:number;
@@ -64,6 +65,7 @@ export class Inventory {
        this.colorID = inventory.colorID || '';
        this.fuelTypeID = inventory.fuelTypeID || '';
        this.mileage = inventory.mileage || '';
+       this.fuelCardNo = inventory.fuelCardNo ?? inventory.FuelCardNo ?? '';
        this.engineNo = inventory.engineNo || '';
        this.chassisNo = inventory.chassisNo || '';
        this.noOfAirbags = inventory.noOfAirbags || '';

@@ -1,0 +1,113 @@
+<section class="content fuel-entry-mis">
+  <div class="container-fluid">
+    <div class="block-header">
+      <div class="row">
+        <div class="col-12">
+          <h2 class="mb-1">Fuel Entry MIS</h2>
+          <p class="text-muted mb-0">Search fuel entries and export filtered results to Excel.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="body">
+        <mat-accordion>
+          <mat-expansion-panel [expanded]="true">
+            <mat-expansion-panel-header>
+              <mat-panel-title>Filters</mat-panel-title>
+            </mat-expansion-panel-header>
+
+            <div class="row g-3">
+              <div class="col-lg-3 col-md-4 col-sm-6">
+                <label class="form-label">From Date</label>
+                <input type="date" class="form-control" [(ngModel)]="fromDate" />
+              </div>
+              <div class="col-lg-3 col-md-4 col-sm-6">
+                <label class="form-label">To Date</label>
+                <input type="date" class="form-control" [(ngModel)]="toDate" />
+              </div>
+              <div class="col-lg-3 col-md-4 col-sm-6">
+                <label class="form-label">Car No.</label>
+                <mat-form-field class="example-full-width dense-field" appearance="outline">
+                  <input type="text" matInput [formControl]="carCtrl" [matAutocomplete]="autoCar" placeholder="Search registration" />
+                  <mat-autocomplete #autoCar="matAutocomplete" [displayWith]="carDisplay.bind(this)">
+                    <mat-option *ngFor="let c of filteredCarOptions | async" [value]="c">{{ carDisplay(c) }}</mat-option>
+                  </mat-autocomplete>
+                </mat-form-field>
+              </div>
+              <div class="col-lg-3 col-md-4 col-sm-6">
+                <label class="form-label">Driver</label>
+                <mat-form-field class="example-full-width dense-field" appearance="outline">
+                  <input type="text" matInput [formControl]="driverCtrl" [matAutocomplete]="autoDriver" placeholder="Search driver" />
+                  <mat-autocomplete #autoDriver="matAutocomplete" [displayWith]="driverDisplay.bind(this)">
+                    <mat-option *ngFor="let d of filteredDriverOptions | async" [value]="d">{{ driverDisplay(d) }}</mat-option>
+                  </mat-autocomplete>
+                </mat-form-field>
+              </div>
+              <div class="col-lg-3 col-md-4 col-sm-6">
+                <label class="form-label">Vendor (Petrol Pump)</label>
+                <select class="form-control" [(ngModel)]="fuelPetrolPumpID">
+                  <option [ngValue]="null">All</option>
+                  <option *ngFor="let p of lookupItems('petrolPumps')" [ngValue]="lookupId(p)">{{ lookupName(p) }}</option>
+                </select>
+              </div>
+              <div class="col-lg-3 col-md-4 col-sm-6">
+                <label class="form-label">Fuel Type</label>
+                <select class="form-control" [(ngModel)]="fuelTypeID">
+                  <option [ngValue]="null">All</option>
+                  <option *ngFor="let f of lookupItems('fuelTypes')" [ngValue]="lookupId(f)">{{ lookupName(f) }}</option>
+                </select>
+              </div>
+              <div class="col-lg-3 col-md-4 col-sm-6">
+                <label class="form-label">Location</label>
+                <select class="form-control" [(ngModel)]="locationID">
+                  <option [ngValue]="null">All</option>
+                  <option *ngFor="let loc of locations" [ngValue]="loc.organizationalEntityID">{{ loc.organizationalEntityName }}</option>
+                </select>
+              </div>
+              <div class="col-lg-3 col-md-4 col-sm-6">
+                <label class="form-label">Status</label>
+                <select class="form-control" [(ngModel)]="statusCode">
+                  <option value="">All</option>
+                  <option *ngFor="let s of lookupItems('statuses')" [value]="lookupCode(s)">{{ lookupName(s) }}</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="d-flex flex-wrap gap-2 mt-3">
+              <button type="button" class="btn btn-primary btn-sm" (click)="search()" [disabled]="isSearching">
+                <i class="fas fa-search"></i> {{ isSearching ? 'Searching...' : 'Search' }}
+              </button>
+              <button type="button" class="btn btn-outline-secondary btn-sm" (click)="resetFilters()">Reset</button>
+              <button type="button" class="btn btn-success btn-sm" (click)="exportExcel()" [disabled]="isExporting || !hasSearched">
+                <i class="fas fa-file-excel"></i> {{ isExporting ? 'Exporting...' : 'Export to Excel' }}
+              </button>
+            </div>
+          </mat-expansion-panel>
+        </mat-accordion>
+
+        <div class="table-responsive mt-3 mis-table-wrap">
+          <table mat-table [dataSource]="rows" class="w-100 fuel-entry-mis-table">
+            <ng-container *ngFor="let col of displayedColumns" [matColumnDef]="col">
+              <th mat-header-cell *matHeaderCellDef>{{ columnTitleMap[col] }}</th>
+              <td mat-cell *matCellDef="let row" [attr.title]="displayValue(row, col, true)">{{ displayValue(row, col) }}</td>
+            </ng-container>
+            <tr mat-header-row *matHeaderRowDef="displayedColumns; sticky: true"></tr>
+            <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
+          </table>
+          <div class="text-center text-muted py-4" *ngIf="hasSearched && !rows.length && !isSearching">
+            No records found for the selected filters.
+          </div>
+        </div>
+
+        <div class="d-flex justify-content-between align-items-center mt-3" *ngIf="hasSearched && totalCount > 0">
+          <span class="small text-muted">{{ totalCount }} record(s) — Page {{ pageNumber }} of {{ totalPages }}</span>
+          <div class="btn-group">
+            <button type="button" class="btn btn-outline-secondary btn-sm" (click)="prevPage()" [disabled]="pageNumber <= 1 || isSearching">Previous</button>
+            <button type="button" class="btn btn-outline-secondary btn-sm" (click)="nextPage()" [disabled]="pageNumber >= totalPages || isSearching">Next</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>

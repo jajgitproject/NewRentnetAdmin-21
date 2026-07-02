@@ -1,0 +1,324 @@
+<section class="content fuel-entry-verification">
+  <div class="container-fluid">
+    <div class="block-header fuel-page-header">
+      <div class="row align-items-center">
+        <div class="col-md-8">
+          <h2 class="page-title mb-1">Fuel Entry Verification</h2>
+          <p class="page-subtitle mb-0">Review pending fuel slips, verify documents, and approve or reject entries.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="card section-card mb-3">
+      <div class="card-header"><i class="fas fa-filter section-icon"></i> Filters</div>
+      <div class="card-body">
+        <div class="row g-3 align-items-end">
+          <div class="col-md-2">
+            <label class="form-label">From Date</label>
+            <input type="date" class="form-control" [(ngModel)]="fromDate" />
+          </div>
+          <div class="col-md-2">
+            <label class="form-label">To Date</label>
+            <input type="date" class="form-control" [(ngModel)]="toDate" />
+          </div>
+          <div class="col-md-2">
+            <label class="form-label">Location</label>
+            <select class="form-control" [(ngModel)]="locationID">
+              <option [ngValue]="null">All</option>
+              <option *ngFor="let loc of locations" [ngValue]="loc.organizationalEntityID || loc.OrganizationalEntityID">
+                {{ loc.organizationalEntityName || loc.OrganizationalEntityName }}
+              </option>
+            </select>
+          </div>
+          <div class="col-md-2">
+            <label class="form-label">Status</label>
+            <select class="form-control" [(ngModel)]="statusCode">
+              <option value="">All</option>
+              <option *ngFor="let s of lookupItems('statuses')" [value]="lookupCode(s)">
+                {{ lookupName(s) }}
+              </option>
+            </select>
+          </div>
+          <div class="col-md-2">
+            <label class="form-label">Entry Source</label>
+            <select class="form-control" [(ngModel)]="entrySourceID">
+              <option [ngValue]="null">All</option>
+              <option *ngFor="let src of lookupItems('entrySources')" [ngValue]="lookupId(src)">
+                {{ lookupName(src) }}
+              </option>
+            </select>
+          </div>
+          <div class="col-md-2">
+            <label class="form-label">Car No.</label>
+            <input class="form-control" [(ngModel)]="registrationNumber" placeholder="Registration" />
+          </div>
+          <div class="col-md-3">
+            <label class="form-label">Driver Name</label>
+            <input class="form-control" [(ngModel)]="driverName" placeholder="Driver or fueled-by name" />
+          </div>
+          <div class="col-md-3 d-flex gap-2">
+            <button type="button" class="btn btn-navy flex-grow-1" (click)="search()" [disabled]="isSearching">
+              <i class="fas fa-search"></i> {{ isSearching ? 'Searching...' : 'Search' }}
+            </button>
+            <button type="button" class="btn btn-outline-secondary" (click)="resetFilters()" [disabled]="isSearching">
+              Reset
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="verify-toolbar mb-3">
+      <div class="d-flex flex-wrap gap-2 align-items-center justify-content-between">
+        <div class="d-flex flex-wrap gap-2">
+          <button type="button" class="btn btn-success btn-sm" (click)="openAction('verify')" [disabled]="isActing">
+            <i class="fas fa-check"></i> Verify
+          </button>
+          <button type="button" class="btn btn-warning btn-sm" (click)="openAction('hold')" [disabled]="isActing">
+            <i class="fas fa-pause"></i> Hold
+          </button>
+          <button type="button" class="btn btn-danger btn-sm" (click)="openAction('reject')" [disabled]="isActing">
+            <i class="fas fa-times"></i> Reject
+          </button>
+        </div>
+        <div class="text-muted small">
+          {{ totalCount }} record(s) · Page {{ pageNumber }} / {{ totalPages }}
+        </div>
+        <div class="d-flex gap-2">
+          <button type="button" class="btn btn-outline-secondary btn-sm" (click)="prevPage()" [disabled]="pageNumber <= 1 || isSearching">
+            Previous
+          </button>
+          <button type="button" class="btn btn-outline-secondary btn-sm" (click)="nextPage()" [disabled]="pageNumber >= totalPages || isSearching">
+            Next
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div class="card section-card">
+      <div class="card-body p-0 table-responsive">
+        <table mat-table [dataSource]="rows" class="verify-table w-100">
+          <ng-container matColumnDef="select">
+            <th mat-header-cell *matHeaderCellDef>
+              <mat-checkbox
+                (change)="$event ? masterToggle() : null"
+                [checked]="selection.hasValue() && isAllSelected()"
+                [indeterminate]="selection.hasValue() && !isAllSelected()"
+              ></mat-checkbox>
+            </th>
+            <td mat-cell *matCellDef="let row">
+              <mat-checkbox
+                (click)="$event.stopPropagation()"
+                (change)="$event ? selection.toggle(row) : null"
+                [checked]="selection.isSelected(row)"
+              ></mat-checkbox>
+            </td>
+          </ng-container>
+
+          <ng-container matColumnDef="fuelEntryNumber">
+            <th mat-header-cell *matHeaderCellDef>Entry No.</th>
+            <td mat-cell *matCellDef="let row">{{ rowNumber(row) }}</td>
+          </ng-container>
+
+          <ng-container matColumnDef="fuelDate">
+            <th mat-header-cell *matHeaderCellDef>Date / Time</th>
+            <td mat-cell *matCellDef="let row">
+              {{ formatDate(row.fuelDate || row.FuelDate) }}
+              <div class="text-muted small">{{ row.fuelTime || row.FuelTime }}</div>
+            </td>
+          </ng-container>
+
+          <ng-container matColumnDef="fuelSlipNo">
+            <th mat-header-cell *matHeaderCellDef>Slip No.</th>
+            <td mat-cell *matCellDef="let row">{{ row.fuelSlipNo || row.FuelSlipNo || '—' }}</td>
+          </ng-container>
+
+          <ng-container matColumnDef="registrationNumber">
+            <th mat-header-cell *matHeaderCellDef>Car No.</th>
+            <td mat-cell *matCellDef="let row">{{ row.registrationNumber || row.RegistrationNumber || '—' }}</td>
+          </ng-container>
+
+          <ng-container matColumnDef="driverName">
+            <th mat-header-cell *matHeaderCellDef>Driver / Fueled By</th>
+            <td mat-cell *matCellDef="let row">{{ row.driverName || row.DriverName || '—' }}</td>
+          </ng-container>
+
+          <ng-container matColumnDef="entrySourceName">
+            <th mat-header-cell *matHeaderCellDef>Source</th>
+            <td mat-cell *matCellDef="let row">{{ row.entrySourceName || row.EntrySourceName || '—' }}</td>
+          </ng-container>
+
+          <ng-container matColumnDef="locationName">
+            <th mat-header-cell *matHeaderCellDef>Location</th>
+            <td mat-cell *matCellDef="let row">{{ row.locationName || row.LocationName || '—' }}</td>
+          </ng-container>
+
+          <ng-container matColumnDef="fuelQuantity">
+            <th mat-header-cell *matHeaderCellDef>Qty (L)</th>
+            <td mat-cell *matCellDef="let row">{{ displayCalc(row.fuelQuantity ?? row.FuelQuantity) }}</td>
+          </ng-container>
+
+          <ng-container matColumnDef="amount">
+            <th mat-header-cell *matHeaderCellDef>Amount</th>
+            <td mat-cell *matCellDef="let row">{{ displayCalc(row.amount ?? row.Amount) }}</td>
+          </ng-container>
+
+          <ng-container matColumnDef="statusName">
+            <th mat-header-cell *matHeaderCellDef>Status</th>
+            <td mat-cell *matCellDef="let row">
+              <span class="status-chip" [ngClass]="statusClass(row.statusCode || row.StatusCode)">
+                {{ row.statusName || row.StatusName }}
+              </span>
+            </td>
+          </ng-container>
+
+          <ng-container matColumnDef="documents">
+            <th mat-header-cell *matHeaderCellDef>Docs</th>
+            <td mat-cell *matCellDef="let row">
+              <button
+                type="button"
+                class="btn btn-link btn-sm doc-btn"
+                [disabled]="!hasFuelSlip(row)"
+                (click)="openImage(row, 'FuelSlip')"
+                title="Fuel slip"
+              >
+                <i class="fas fa-receipt"></i>
+              </button>
+              <button
+                type="button"
+                class="btn btn-link btn-sm doc-btn"
+                [disabled]="!hasOdometer(row)"
+                (click)="openImage(row, 'Odometer')"
+                title="Odometer"
+              >
+                <i class="fas fa-camera"></i>
+              </button>
+            </td>
+          </ng-container>
+
+          <ng-container matColumnDef="actions">
+            <th mat-header-cell *matHeaderCellDef></th>
+            <td mat-cell *matCellDef="let row">
+              <button type="button" class="btn btn-outline-navy btn-sm" (click)="openView(row)">
+                View
+              </button>
+            </td>
+          </ng-container>
+
+          <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+          <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
+        </table>
+
+        <div class="empty-state" *ngIf="!isSearching && !rows.length">
+          No fuel entries found for the selected filters.
+        </div>
+        <div class="loading-state" *ngIf="isSearching">
+          <i class="fas fa-spinner fa-spin me-2"></i> Loading...
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Action modal -->
+  <div class="modal fade show d-block fuel-modal-backdrop" *ngIf="actionMode" tabindex="-1">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">
+            {{ actionMode === 'verify' ? 'Verify' : actionMode === 'hold' ? 'Hold' : 'Reject' }} Fuel Entries
+          </h5>
+          <button type="button" class="btn-close" (click)="closeAction()"></button>
+        </div>
+        <div class="modal-body">
+          <p class="text-muted">{{ selectedIds.length }} entr{{ selectedIds.length === 1 ? 'y' : 'ies' }} selected.</p>
+          <div class="mb-3" *ngIf="actionMode !== 'verify'">
+            <label class="form-label">Reason <span class="text-danger">*</span></label>
+            <input class="form-control" [(ngModel)]="actionReason" maxlength="250" />
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Remarks</label>
+            <textarea class="form-control" rows="3" maxlength="500" [(ngModel)]="actionRemarks"></textarea>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-outline-secondary" (click)="closeAction()">Cancel</button>
+          <button type="button" class="btn btn-navy" (click)="confirmAction()" [disabled]="isActing">
+            {{ isActing ? 'Processing...' : 'Confirm' }}
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- View modal -->
+  <div class="modal fade show d-block fuel-modal-backdrop" *ngIf="showViewModal" tabindex="-1">
+    <div class="modal-dialog modal-lg modal-dialog-scrollable">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Fuel Entry Detail</h5>
+          <button type="button" class="btn-close" (click)="closeView()"></button>
+        </div>
+        <div class="modal-body" *ngIf="isLoadingView">
+          <i class="fas fa-spinner fa-spin"></i> Loading...
+        </div>
+        <div class="modal-body" *ngIf="!isLoadingView && viewDetail">
+          <div class="row g-3 mb-3">
+            <div class="col-md-4"><strong>Entry No.</strong><div>{{ viewDetail.fuelEntryNumber || viewDetail.FuelEntryNumber }}</div></div>
+            <div class="col-md-4"><strong>Status</strong><div>{{ viewDetail.statusName || viewDetail.StatusName }}</div></div>
+            <div class="col-md-4"><strong>Source</strong><div>{{ viewDetail.entrySourceName || viewDetail.EntrySourceName }}</div></div>
+            <div class="col-md-4"><strong>Car No.</strong><div>{{ viewDetail.registrationNumber || viewDetail.RegistrationNumber }}</div></div>
+            <div class="col-md-4"><strong>Slip No.</strong><div>{{ viewDetail.fuelSlipNo || viewDetail.FuelSlipNo }}</div></div>
+            <div class="col-md-4"><strong>Amount</strong><div>{{ displayCalc(viewDetail.amount ?? viewDetail.Amount) }}</div></div>
+            <div class="col-md-4"><strong>Quantity</strong><div>{{ displayCalc(viewDetail.fuelQuantity ?? viewDetail.FuelQuantity) }}</div></div>
+            <div class="col-md-4"><strong>Current Meter</strong><div>{{ displayCalc(viewDetail.currentMeter ?? viewDetail.CurrentMeter) }}</div></div>
+            <div class="col-md-4"><strong>Previous Meter</strong><div>{{ displayCalc(viewDetail.previousMeter ?? viewDetail.PreviousMeter) }}</div></div>
+            <div class="col-md-4"><strong>Fueled By</strong><div>{{ viewDetail.fueledByName || viewDetail.FueledByName || '—' }}</div></div>
+            <div class="col-md-4"><strong>Location</strong><div>{{ viewDetail.locationName || viewDetail.LocationName || '—' }}</div></div>
+          </div>
+
+          <h6 class="mb-2">Status History</h6>
+          <div class="history-timeline" *ngIf="viewHistory.length; else noHistory">
+            <div class="history-item" *ngFor="let h of viewHistory">
+              <div class="history-title">
+                {{ h.statusName || h.StatusName }} · {{ h.actionType || h.ActionType }}
+              </div>
+              <div class="history-meta text-muted small">
+                {{ h.actionByName || h.ActionByName }} · {{ formatDateTime(h.actionDate || h.ActionDate) }}
+              </div>
+              <div class="small" *ngIf="h.reason || h.Reason">Reason: {{ h.reason || h.Reason }}</div>
+              <div class="small" *ngIf="h.remarks || h.Remarks">Remarks: {{ h.remarks || h.Remarks }}</div>
+            </div>
+          </div>
+          <ng-template #noHistory>
+            <div class="text-muted small">No history recorded.</div>
+          </ng-template>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-outline-secondary" (click)="closeView()">Close</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Image modal -->
+  <div class="modal fade show d-block fuel-modal-backdrop" *ngIf="showImageModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">{{ imageModalTitle }}</h5>
+          <button type="button" class="btn-close" (click)="closeImage()"></button>
+        </div>
+        <div class="modal-body text-center">
+          <img *ngIf="imagePreviewUrl" [src]="imagePreviewUrl" alt="" class="preview-image" />
+          <div *ngIf="!imagePreviewUrl" class="text-muted py-4">
+            Preview not available. Use download for PDF or unsupported formats.
+          </div>
+        </div>
+        <div class="modal-footer" *ngIf="imageDownloadUrl">
+          <a class="btn btn-navy" [href]="imageDownloadUrl" target="_blank" rel="noopener">Download</a>
+          <button type="button" class="btn btn-outline-secondary" (click)="closeImage()">Close</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>

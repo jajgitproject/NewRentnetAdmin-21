@@ -692,6 +692,14 @@ const routes: Routes = [
       },
 
       {
+        path: 'supplierPayout',
+        loadChildren: () =>
+          import('./supplierPayout/supplierPayout.module').then(
+            (m) => m.SupplierPayoutModule
+          )
+      },
+
+      {
         path: 'zonalDutyRegister',
         loadChildren: () =>
           import('./zonalDutyRegister/zonalDutyRegister.module').then(
@@ -1091,6 +1099,20 @@ const routes: Routes = [
             (m) => m.AuditTrailModule
           )
         },
+      {
+        path: 'applicationAuditLog',
+        loadChildren: () =>
+          import('./applicationAuditLog/applicationAuditLog.module').then(
+            (m) => m.ApplicationAuditLogModule
+          )
+      },
+      {
+        path: 'applicationAuditSettings',
+        loadChildren: () =>
+          import('./applicationAuditSettings/applicationAuditSettings.module').then(
+            (m) => m.ApplicationAuditSettingsModule
+          )
+      },
       {
         path: 'reservationGroup',
         loadChildren: () =>
@@ -2707,6 +2729,30 @@ const routes: Routes = [
         loadChildren: () =>
           import('./fuelType/fuelType.module').then(
             (m) => m.FuelTypeModule
+          )
+      },
+
+      {
+        path: 'fuelEntryManual',
+        loadChildren: () =>
+          import('./fuelManagement/fuelEntryManual/fuelEntryManual.module').then(
+            (m) => m.FuelEntryManualModule
+          )
+      },
+
+      {
+        path: 'fuelEntryVerification',
+        loadChildren: () =>
+          import('./fuelManagement/fuelEntryVerification/fuelEntryVerification.module').then(
+            (m) => m.FuelEntryVerificationModule
+          )
+      },
+
+      {
+        path: 'fuelEntryMIS',
+        loadChildren: () =>
+          import('./fuelManagement/fuelEntryMIS/fuelEntryMIS.module').then(
+            (m) => m.FuelEntryMISModule
           )
       },
 

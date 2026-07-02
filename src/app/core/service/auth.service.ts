@@ -179,6 +179,12 @@ export class AuthService {
             CanActAsContractTariffVerifier:
               rawEmployee.CanActAsContractTariffVerifier ??
               rawEmployee.canActAsContractTariffVerifier,
+            CanResetOdometer:
+              rawEmployee.CanResetOdometer ?? rawEmployee.canResetOdometer,
+            CanDeleteFuelEntry:
+              rawEmployee.CanDeleteFuelEntry ?? rawEmployee.canDeleteFuelEntry,
+            CanFindFuelEntry:
+              rawEmployee.CanFindFuelEntry ?? rawEmployee.canFindFuelEntry,
             EmployeeEntityID:
               rawEmployee.EmployeeEntityID ?? rawEmployee.employeeEntityID,
             EmployeeID: rawEmployee.EmployeeID ?? rawEmployee.employeeID,

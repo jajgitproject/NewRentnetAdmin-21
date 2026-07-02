@@ -1,0 +1,35 @@
+// @ts-nocheck
+export interface ApplicationAuditLogEvent {
+  eventId?: string;
+  EventId?: string;
+  timestampUtc?: string;
+  TimestampUtc?: string;
+  correlationId?: string;
+  CorrelationId?: string;
+  userId?: number;
+  UserId?: number;
+  loginName?: string;
+  LoginName?: string;
+  userDisplayName?: string;
+  UserDisplayName?: string;
+  formName?: string;
+  FormName?: string;
+  tableName?: string;
+  TableName?: string;
+  operation?: string;
+  Operation?: string;
+  recordId?: string;
+  RecordId?: string;
+  reservationId?: number;
+  ReservationId?: number;
+  beforeJson?: string;
+  BeforeJson?: string;
+  afterJson?: string;
+  AfterJson?: string;
+  hostName?: string;
+  HostName?: string;
+  appName?: string;
+  AppName?: string;
+  source?: string;
+  Source?: string;
+}

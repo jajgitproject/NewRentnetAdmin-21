@@ -233,6 +233,18 @@ export class SigninComponent implements OnInit {
                 'canActAsContractTariffVerifier',
                 String(employee.CanActAsContractTariffVerifier ?? employee.canActAsContractTariffVerifier ?? false)
               );
+              localStorage.setItem(
+                'canResetOdometer',
+                String(employee.CanResetOdometer ?? employee.canResetOdometer ?? false)
+              );
+              localStorage.setItem(
+                'canDeleteFuelEntry',
+                String(employee.CanDeleteFuelEntry ?? employee.canDeleteFuelEntry ?? false)
+              );
+              localStorage.setItem(
+                'canFindFuelEntry',
+                String(employee.CanFindFuelEntry ?? employee.canFindFuelEntry ?? false)
+              );
               this.calculateDaysLeft();
             }
           } else {

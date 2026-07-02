@@ -1,0 +1,426 @@
+.fuel-entry-manual
+  --navy: #1a365d
+  --navy-light: #2c5282
+  --navy-muted: #e8eef5
+  --fuel-input-height: 38px
+  --section-radius: 8px
+
+  .fuel-page-header
+    margin-bottom: 1rem
+
+    .page-title
+      font-size: 1.35rem
+      font-weight: 700
+      color: var(--navy)
+
+    .page-subtitle
+      font-size: 0.875rem
+      color: #6c757d
+
+  .section-card
+    border: 1px solid #e2e8f0
+    border-radius: var(--section-radius)
+    box-shadow: 0 1px 2px rgba(15, 23, 42, 0.06)
+    margin-bottom: 0
+    overflow: hidden
+
+    .card-header
+      background: linear-gradient(180deg, #f8fafc 0%, #f1f5f9 100%)
+      border-bottom: 1px solid #e2e8f0
+      font-weight: 600
+      font-size: 0.875rem
+      color: var(--navy)
+      padding: 0.65rem 1rem
+      display: flex
+      align-items: center
+      gap: 0.5rem
+
+    .card-body
+      padding: 1rem
+
+    .form-label
+      font-size: 0.8125rem
+      font-weight: 600
+      color: #475569
+      margin-bottom: 0.35rem
+
+    .form-control:not(textarea)
+      height: var(--fuel-input-height)
+      min-height: var(--fuel-input-height)
+      padding-top: 0.375rem
+      padding-bottom: 0.375rem
+      line-height: 1.5
+      box-sizing: border-box
+      border-color: #ced4da
+      font-size: 0.875rem
+
+      &:focus
+        border-color: var(--navy-light)
+        box-shadow: 0 0 0 0.15rem rgba(44, 82, 130, 0.15)
+
+    select.form-control
+      height: var(--fuel-input-height)
+      min-height: var(--fuel-input-height)
+
+  .section-icon
+    color: var(--navy-light)
+    width: 1rem
+    text-align: center
+
+    .field-hint
+      font-size: 0.75rem
+      color: #64748b
+      margin-top: 0.25rem
+
+    .readonly-label
+      min-height: var(--fuel-input-height)
+      padding: 0.375rem 0
+      font-size: 0.875rem
+      color: #1e293b
+      font-weight: 500
+
+    .is-invalid-field,
+    .form-control.is-invalid-field
+      border-color: #dc3545 !important
+      box-shadow: 0 0 0 0.15rem rgba(220, 53, 69, 0.15) !important
+
+    ::ng-deep mat-form-field.is-invalid-field .mdc-notched-outline__leading,
+    ::ng-deep mat-form-field.is-invalid-field .mdc-notched-outline__notch,
+    ::ng-deep mat-form-field.is-invalid-field .mdc-notched-outline__trailing
+      border-color: #dc3545 !important
+
+    .invalid-feedback
+      font-size: 0.75rem
+      color: #dc3545
+      margin-top: 0.25rem
+
+  .btn-navy
+    background-color: var(--navy)
+    color: #fff
+    border: none
+
+    &:hover:not(:disabled)
+      background-color: var(--navy-light)
+      color: #fff
+
+  .btn-outline-navy
+    color: var(--navy)
+    border-color: var(--navy-light)
+
+    &:hover:not(:disabled)
+      background-color: var(--navy-muted)
+      color: var(--navy)
+
+  .fuel-sticky-toolbar
+    position: sticky
+    top: 60px
+    z-index: 9
+    background: #fff
+    border: 1px solid #e2e8f0
+    border-radius: var(--section-radius)
+    padding: 0.65rem 1rem
+    margin-bottom: 1rem
+    box-shadow: 0 2px 8px rgba(15, 23, 42, 0.06)
+
+  .toolbar-meta
+    .meta-chip
+      display: inline-flex
+      align-items: center
+      font-size: 0.75rem
+      font-weight: 600
+      padding: 0.25rem 0.65rem
+      border-radius: 999px
+      background: #f1f5f9
+      color: #475569
+
+    .meta-chip-id
+      background: #e2e8f0
+      color: var(--navy)
+      font-family: ui-monospace, monospace
+
+    .status-draft
+      background: #fef3c7
+      color: #92400e
+
+    .status-pending
+      background: #dbeafe
+      color: #1e40af
+
+    .status-verified
+      background: #d1fae5
+      color: #065f46
+
+    .status-rejected
+      background: #fee2e2
+      color: #991b1b
+
+    .status-hold
+      background: #fce7f3
+      color: #9d174d
+
+  .loading-banner
+    background: #f8fafc
+    border: 1px solid #e2e8f0
+    border-radius: var(--section-radius)
+    padding: 0.65rem 1rem
+    margin-bottom: 1rem
+    color: #64748b
+    font-size: 0.875rem
+
+  .vehicle-hint
+    border: 1px solid #bfdbfe
+    background: #eff6ff
+    font-size: 0.875rem
+    padding: 0.65rem 1rem
+    border-radius: var(--section-radius)
+
+  .readonly-field
+    background-color: #f1f5f9
+    color: #334155
+    cursor: default
+
+  .calculated-card
+    .card-header
+      background: linear-gradient(180deg, #eef2ff 0%, #e0e7ff 100%)
+      justify-content: space-between
+
+    .calc-auto-badge
+      font-size: 0.6875rem
+      font-weight: 600
+      text-transform: uppercase
+      letter-spacing: 0.03em
+      color: #4338ca
+      background: rgba(255, 255, 255, 0.7)
+      padding: 0.15rem 0.5rem
+      border-radius: 999px
+
+  .fuel-left-stack
+    display: flex
+    flex-direction: column
+    gap: 0.5rem
+
+  @media (min-width: 992px)
+    .fuel-form-grid
+      > .fuel-left-stack,
+      > .fuel-vehicle-col
+        display: flex
+        flex-direction: column
+
+    .fuel-vehicle-col .vehicle-info-card
+      flex: 1
+      display: flex
+      flex-direction: column
+
+    .fuel-vehicle-col .vehicle-info-card .card-body
+      flex: 1
+      display: flex
+      flex-direction: column
+
+    .vehicle-fields-stack
+      flex: 1
+      display: flex
+      flex-direction: column
+      justify-content: space-between
+      gap: 1.25rem
+      min-height: 100%
+
+  .calc-grid
+    display: grid
+    grid-template-columns: repeat(2, minmax(0, 1fr))
+    gap: 0.75rem
+
+    @media (min-width: 992px)
+      grid-template-columns: repeat(4, minmax(0, 1fr))
+
+    @media (min-width: 1200px)
+      grid-template-columns: repeat(7, minmax(0, 1fr))
+
+  .calc-item
+    background: #f8fafc
+    border: 1px solid #e2e8f0
+    border-radius: 6px
+    padding: 0.65rem 0.75rem
+    min-height: 3.75rem
+    display: flex
+    flex-direction: column
+    justify-content: center
+
+  .calc-label
+    display: block
+    font-size: 0.6875rem
+    font-weight: 600
+    text-transform: uppercase
+    letter-spacing: 0.02em
+    color: #64748b
+    margin-bottom: 0.25rem
+    line-height: 1.3
+
+  .calc-value
+    font-size: 1.05rem
+    font-weight: 700
+    color: var(--navy)
+    font-variant-numeric: tabular-nums
+
+  .calc-value.calc-negative
+    color: #059669
+
+  .calc-value.calc-positive
+    color: #dc2626
+
+  .calc-hint
+    font-size: 0.6875rem
+    color: #059669
+    margin-top: 0.15rem
+
+  .search-panel .card-header
+    background: linear-gradient(180deg, rgba(26, 54, 93, 0.06) 0%, rgba(26, 54, 93, 0.03) 100%)
+
+  .upload-zone
+    border: 2px dashed #cbd5e1
+    border-radius: var(--section-radius)
+    padding: 1.5rem 1rem
+    text-align: center
+    background: #fafbfc
+    cursor: pointer
+    margin-bottom: 0
+    transition: border-color 0.15s ease, background 0.15s ease
+
+    &:hover
+      border-color: var(--navy-light)
+      background: #f0f4f8
+
+    .upload-icon
+      color: #94a3b8
+      margin-bottom: 0.5rem
+
+    .upload-title
+      font-size: 0.875rem
+      font-weight: 600
+      color: #475569
+
+  .upload-thumb
+    width: 64px
+    height: 64px
+    object-fit: cover
+    border-radius: 6px
+    border: 1px solid #dee2e6
+    flex-shrink: 0
+
+  .pdf-thumb
+    display: flex
+    align-items: center
+    justify-content: center
+    background: #e9ecef
+    font-size: 12px
+    font-weight: 700
+    color: #6c757d
+
+  .doc-preview
+    display: flex
+    align-items: center
+    gap: 0.75rem
+    padding: 0.75rem
+    background: #f8fafc
+    border: 1px solid #e2e8f0
+    border-radius: var(--section-radius)
+
+    .doc-name
+      font-weight: 600
+      font-size: 0.8125rem
+      word-break: break-all
+
+  .dense-field
+    width: 100%
+    margin-bottom: 0
+
+    ::ng-deep .mat-mdc-form-field-subscript-wrapper
+      display: none
+
+    ::ng-deep .mat-mdc-text-field-wrapper
+      height: var(--fuel-input-height)
+      padding: 0
+
+    ::ng-deep .mat-mdc-form-field-flex
+      height: var(--fuel-input-height)
+      align-items: center
+
+    ::ng-deep .mat-mdc-form-field-infix
+      min-height: var(--fuel-input-height)
+      height: var(--fuel-input-height)
+      padding-top: 0
+      padding-bottom: 0
+      display: flex
+      align-items: center
+
+    ::ng-deep .mat-mdc-input-element
+      height: 1.5rem
+      margin-top: 0
+      padding: 0
+      box-sizing: border-box
+      font-size: 0.875rem
+
+    ::ng-deep .mdc-notched-outline__leading,
+    ::ng-deep .mdc-notched-outline__notch,
+    ::ng-deep .mdc-notched-outline__trailing
+      border-color: #ced4da
+
+  .fuel-form-grid
+    > [class*='col-']
+      margin-bottom: 0
+
+  .gap-2
+    gap: 0.5rem
+
+  .gap-3
+    gap: 1rem
+
+  .fw-semibold
+    font-weight: 600
+
+  .odometer-reset-backdrop
+    position: fixed
+    inset: 0
+    background: rgba(15, 23, 42, 0.45)
+    z-index: 1040
+
+  .odometer-reset-dialog
+    position: fixed
+    top: 50%
+    left: 50%
+    transform: translate(-50%, -50%)
+    width: min(1080px, calc(100vw - 2rem))
+    max-height: calc(100vh - 2rem)
+    overflow: auto
+    z-index: 1050
+    margin: 0
+
+  .odometer-reset-panels
+    margin-top: 0.5rem
+
+  .odometer-reset-list,
+  .odometer-reset-form
+    min-height: 360px
+
+  .odometer-reset-empty
+    padding: 2rem 1rem
+    text-align: center
+    color: #64748b
+    font-size: 0.9rem
+
+  .odometer-reset-table
+    th
+      font-size: 0.75rem
+      text-transform: uppercase
+      letter-spacing: 0.03em
+      color: #64748b
+      white-space: nowrap
+
+    td
+      vertical-align: middle
+      font-size: 0.875rem
+
+    .reason-cell
+      max-width: 180px
+      overflow: hidden
+      text-overflow: ellipsis
+      white-space: nowrap

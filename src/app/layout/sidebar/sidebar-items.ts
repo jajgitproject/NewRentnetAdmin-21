@@ -106,6 +106,28 @@ export const ROUTES: RouteInfo[] = [
       },
 
       {
+        path: 'applicationAuditLog',
+        title: 'Application Audit Log',
+        moduleName: 'applicationAuditLog',
+        icon: 'fas fa-file-alt',
+        class: '',
+        groupTitle: false,
+        submenu: [],
+        isAccess: false
+      },
+
+      {
+        path: 'applicationAuditSettings',
+        title: 'Application Audit Settings',
+        moduleName: 'applicationAuditSettings',
+        icon: 'fas fa-toggle-on',
+        class: '',
+        groupTitle: false,
+        submenu: [],
+        isAccess: false
+      },
+
+      {
         path: 'addB2CServiceLocation',
         title: 'Add B2C Service Location',
         moduleName: 'addB2CServiceLocation',
@@ -883,6 +905,17 @@ export const ROUTES: RouteInfo[] = [
         isAccess: false
       },
 
+      {
+        path: 'supplierPayout',
+        title: 'Supplier Payout',
+        moduleName: 'supplierPayout',
+        icon: 'fas fa-money-check-alt',
+        class: '',
+        groupTitle: false,
+        submenu: [],
+        isAccess: false
+      },
+
        {
         path: 'changeKamForCustomers',
         title: 'Customer KAM Change',
@@ -981,6 +1014,38 @@ export const ROUTES: RouteInfo[] = [
         title: 'Fuel Type',
         moduleName: 'fuelType',
         icon: 'fas fa-tachometer-alt',
+        class: '',
+        groupTitle: false,
+        submenu: [],
+        isAccess: false
+      },
+
+      {
+        path: 'fuelEntryManual',
+        title: 'Fuel Entry - Manual',
+        moduleName: 'fuelEntryManual',
+        icon: 'fas fa-gas-pump',
+        class: '',
+        groupTitle: false,
+        submenu: [],
+        isAccess: false
+      },
+
+      {
+        path: 'fuelEntryVerification',
+        title: 'Fuel Entry Verification',
+        moduleName: 'fuelEntryVerification',
+        icon: 'fas fa-clipboard-check',
+        class: '',
+        groupTitle: false,
+        submenu: [],
+        isAccess: false
+      },
+      {
+        path: 'fuelEntryMIS',
+        title: 'Fuel Entry MIS',
+        moduleName: 'fuelEntryMIS',
+        icon: 'fas fa-clipboard-check',
         class: '',
         groupTitle: false,
         submenu: [],

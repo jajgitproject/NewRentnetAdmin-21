@@ -1,0 +1,554 @@
+<section class="content">
+
+  <div class="container-fluid">
+
+    <div class="block-header">
+
+      <div class="row">
+
+        <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+
+          <ul>
+
+            <li class="breadcrumb-item bcrumb-1">
+
+              <a routerLink="/dashboard/main"><i class="fas fa-home"></i> Home</a>|
+
+              <a href="#" onClick="return false;">Billing</a>|
+
+              <a href="#" onClick="return false;">Supplier Payout</a>
+
+            </li>
+
+          </ul>
+
+        </div>
+
+      </div>
+
+    </div>
+
+
+
+    <div class="row">
+
+      <div class="col-lg-12">
+
+        <div class="card">
+
+          <div class="body">
+
+            <mat-tab-group (selectedIndexChange)="onTabChange($event)">
+
+              <mat-tab label="Process Payout">
+
+                <div class="tab-body">
+
+                  <mat-accordion class="duty-register-search-accordion">
+
+                    <mat-expansion-panel class="duty-register-inline-search-panel" [expanded]="true">
+
+                      <mat-expansion-panel-header>
+
+                        <mat-panel-title>Search</mat-panel-title>
+
+                      </mat-expansion-panel-header>
+
+                      <div class="duty-register-inline-search-body">
+
+                        <div class="row duty-register-search quick-search-panel">
+
+                          <div class="col-lg-3 col-md-4 col-sm-6">
+
+                            <mat-form-field class="w-100 cp-quick-search-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
+
+                              <mat-label>Supplier</mat-label>
+
+                              <input type="text" matInput [formControl]="supplierCtrl" [matAutocomplete]="autoSupplier" />
+
+                              <mat-autocomplete #autoSupplier="matAutocomplete" (optionSelected)="onSupplierSelect($event.option.value)">
+
+                                <mat-option *ngFor="let option of filteredSupplierOptions | async" [value]="option.supplierName">
+
+                                  {{ option.supplierName }}
+
+                                </mat-option>
+
+                              </mat-autocomplete>
+
+                            </mat-form-field>
+
+                          </div>
+
+                          <div class="col-lg-2 col-md-4 col-sm-6">
+
+                            <mat-form-field class="w-100 cp-quick-search-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
+
+                              <mat-label>From Date</mat-label>
+
+                              <input matInput [matDatepicker]="fromPicker" [(ngModel)]="SearchFromDate" />
+
+                              <mat-datepicker-toggle matSuffix [for]="fromPicker"></mat-datepicker-toggle>
+
+                              <mat-datepicker #fromPicker></mat-datepicker>
+
+                            </mat-form-field>
+
+                          </div>
+
+                          <div class="col-lg-2 col-md-4 col-sm-6">
+
+                            <mat-form-field class="w-100 cp-quick-search-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
+
+                              <mat-label>To Date</mat-label>
+
+                              <input matInput [matDatepicker]="toPicker" [(ngModel)]="SearchToDate" />
+
+                              <mat-datepicker-toggle matSuffix [for]="toPicker"></mat-datepicker-toggle>
+
+                              <mat-datepicker #toPicker></mat-datepicker>
+
+                            </mat-form-field>
+
+                          </div>
+
+                          <div class="col-lg-2 col-md-4 col-sm-6">
+
+                            <mat-form-field class="w-100 cp-quick-search-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
+
+                              <mat-label>Payment Status</mat-label>
+
+                              <mat-select [(ngModel)]="paymentStatus">
+
+                                <mat-option value="UnPaid">UnPaid</mat-option>
+
+                                <mat-option value="Paid">Paid</mat-option>
+
+                                <mat-option value="All">All</mat-option>
+
+                              </mat-select>
+
+                            </mat-form-field>
+
+                          </div>
+
+                          <div class="col-lg-2 col-md-4 col-sm-6 d-flex align-items-center">
+
+                            <mat-checkbox [(ngModel)]="includePaid">Include Paid</mat-checkbox>
+
+                          </div>
+
+                          <div class="col-lg-3 col-md-4 col-sm-6 d-flex align-items-center gap-actions">
+
+                            <button mat-raised-button color="primary" (click)="searchDuties()" [disabled]="loadingDuties">Search</button>
+
+                          </div>
+
+                        </div>
+
+                      </div>
+
+                    </mat-expansion-panel>
+
+                  </mat-accordion>
+
+
+
+                  <div class="payout-amounts row duty-register-search quick-search-panel" *ngIf="selectedSupplierID">
+
+                    <div class="col-lg-3 col-md-4 col-sm-6">
+
+                      <mat-form-field class="w-100 cp-quick-search-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
+
+                        <mat-label>Group Amount</mat-label>
+
+                        <input matInput type="number" [(ngModel)]="groupAmount" min="0" step="0.01" (blur)="onGroupAmountBlur()" />
+
+                        <mat-hint *ngIf="selection.hasValue()">Max: {{ formatMoney(maxAllowedGroupAmount) }} (80% of selected payout eco + adjustment)</mat-hint>
+                        <mat-hint *ngIf="projectedGroupAmountShortfall > 0">
+                          Carry forward {{ formatMoney(projectedGroupAmountShortfall) }} as next group adjustment (included in mismatch)
+                        </mat-hint>
+
+                      </mat-form-field>
+
+                    </div>
+
+                    <div class="col-lg-3 col-md-4 col-sm-6">
+
+                      <mat-form-field class="w-100 cp-quick-search-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
+
+                        <mat-label>Previous Group Adjustment Amount</mat-label>
+
+                        <input matInput type="number" [(ngModel)]="previousGroupAdjustmentAmount" step="0.01" readonly disabled />
+
+                        <mat-hint *ngIf="previousGroupNumber">
+                          From open payout {{ previousGroupNumber }} — eco revenue differences plus unpaid max amount
+                        </mat-hint>
+
+                      </mat-form-field>
+
+                    </div>
+
+                    <div class="col-lg-3 col-md-4 col-sm-6 d-flex align-items-center">
+
+                      <button mat-raised-button color="accent" (click)="markAsPaid()" [disabled]="markingPaid || !selection.hasValue()">
+
+                        Mark as Paid
+
+                      </button>
+
+                    </div>
+
+                    <div class="col-lg-3 col-md-4 col-sm-6 d-flex align-items-center" *ngIf="selection.hasValue()">
+
+                      <span>Selected Payout Eco Total: {{ formatMoney(selectedEcoTotal) }}</span>
+
+                    </div>
+
+                  </div>
+
+
+
+                  <div class="summary-panel" *ngIf="lastSummary">
+
+                    <h5>Payout Summary — {{ lastSummary.groupNumber }}</h5>
+
+                    <p>
+
+                      Supplier: {{ lastSummary.supplierName }} |
+
+                      Duties: {{ lastSummary.dutyCount }} |
+
+                      Group Amount: {{ formatMoney(lastSummary.groupAmount) }} |
+
+                      Adjustment: {{ formatMoney(lastSummary.previousGroupAdjustmentAmount) }} |
+
+                      Mismatch: {{ formatMoney(lastSummary.totalMismatchAmount) }} |
+
+                      Squared Off: {{ lastSummary.isSquaredOff ? 'Yes' : 'No' }}
+
+                      <span *ngIf="lastSummary.previousGroupNumber && lastSummary.isSquaredOff"> | Settled with {{ lastSummary.previousGroupNumber }}</span>
+
+                    </p>
+
+                  </div>
+
+
+
+                  <div class="table-responsive">
+
+                    <table mat-table [dataSource]="dutyRows" class="w-100">
+
+                      <ng-container matColumnDef="select">
+
+                        <th mat-header-cell *matHeaderCellDef>
+
+                          <mat-checkbox (change)="$event ? masterToggle() : null" [checked]="isAllSelected()" [indeterminate]="selection.hasValue() && !isAllSelected()"></mat-checkbox>
+
+                        </th>
+
+                        <td mat-cell *matCellDef="let row">
+
+                          <mat-checkbox *ngIf="row.selectable" (click)="$event.stopPropagation()" (change)="$event ? selection.toggle(row) : null" [checked]="selection.isSelected(row)"></mat-checkbox>
+
+                        </td>
+
+                      </ng-container>
+
+                      <ng-container matColumnDef="dutySlipID"><th mat-header-cell *matHeaderCellDef>Duty Slip</th><td mat-cell *matCellDef="let row">{{ row.dutySlipID }}</td></ng-container>
+
+                      <ng-container matColumnDef="gfbStatus"><th mat-header-cell *matHeaderCellDef>GFB Status</th><td mat-cell *matCellDef="let row">{{ formatGfbStatus(row.goodForBilling) }}</td></ng-container>
+
+                      <ng-container matColumnDef="reservationID"><th mat-header-cell *matHeaderCellDef>Reservation</th><td mat-cell *matCellDef="let row">{{ row.reservationID }}</td></ng-container>
+
+                      <ng-container matColumnDef="customerName"><th mat-header-cell *matHeaderCellDef>Customer</th><td mat-cell *matCellDef="let row">{{ row.customerName }}</td></ng-container>
+
+                      <ng-container matColumnDef="dateOfDuty"><th mat-header-cell *matHeaderCellDef>Date of Duty</th><td mat-cell *matCellDef="let row">{{ formatDisplayDate(row.dateOfDuty) }}</td></ng-container>
+
+                      <ng-container matColumnDef="payoutEcoRevenue"><th mat-header-cell *matHeaderCellDef>Payout Eco Revenue</th><td mat-cell *matCellDef="let row">{{ formatMoney(row.payoutEcoRevenue) }}</td></ng-container>
+
+                      <ng-container matColumnDef="supplierRevenue"><th mat-header-cell *matHeaderCellDef>Supplier Revenue</th><td mat-cell *matCellDef="let row">{{ getSupplierRevenueDisplay(row) }}</td></ng-container>
+
+                      <ng-container matColumnDef="currentEcoRevenue"><th mat-header-cell *matHeaderCellDef>Current Eco Revenue</th><td mat-cell *matCellDef="let row">{{ formatMoney(row.currentEcoRevenue) }}</td></ng-container>
+
+                      <ng-container matColumnDef="mismatchAmount"><th mat-header-cell *matHeaderCellDef>Mismatch</th><td mat-cell *matCellDef="let row">{{ formatMoney(row.mismatchAmount) }}</td></ng-container>
+
+                      <ng-container matColumnDef="paymentStatus"><th mat-header-cell *matHeaderCellDef>Status</th><td mat-cell *matCellDef="let row">{{ row.paymentStatus }}</td></ng-container>
+
+                      <tr mat-header-row *matHeaderRowDef="processDisplayedColumns"></tr>
+
+                      <tr mat-row *matRowDef="let row; columns: processDisplayedColumns"></tr>
+
+                    </table>
+
+                    <p *ngIf="!loadingDuties && dutyRows.length === 0" class="empty-msg">No duty slips found. Select supplier and search.</p>
+
+                    <p *ngIf="loadingDuties" class="empty-msg">Loading...</p>
+
+                  </div>
+
+                </div>
+
+              </mat-tab>
+
+
+
+              <mat-tab label="Payout History">
+
+                <div class="tab-body">
+
+                  <mat-accordion class="duty-register-search-accordion">
+
+                    <mat-expansion-panel class="duty-register-inline-search-panel" [expanded]="true">
+
+                      <mat-expansion-panel-header>
+
+                        <mat-panel-title>Search</mat-panel-title>
+
+                      </mat-expansion-panel-header>
+
+                      <div class="duty-register-inline-search-body">
+
+                        <div class="row duty-register-search quick-search-panel">
+
+                          <div class="col-lg-3 col-md-4 col-sm-6">
+
+                            <mat-form-field class="w-100 cp-quick-search-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
+
+                              <mat-label>Supplier (optional)</mat-label>
+
+                              <input type="text" matInput [formControl]="historySupplierCtrl" [matAutocomplete]="autoHistorySupplier" />
+
+                              <mat-autocomplete #autoHistorySupplier="matAutocomplete" (optionSelected)="onHistorySupplierSelect($event.option.value)">
+
+                                <mat-option *ngFor="let option of filteredHistorySupplierOptions | async" [value]="option.supplierName">
+
+                                  {{ option.supplierName }}
+
+                                </mat-option>
+
+                              </mat-autocomplete>
+
+                            </mat-form-field>
+
+                          </div>
+
+                          <div class="col-lg-2 col-md-4 col-sm-6">
+
+                            <mat-form-field class="w-100 cp-quick-search-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
+
+                              <mat-label>From Date</mat-label>
+
+                              <input matInput [matDatepicker]="historyFromPicker" [(ngModel)]="historyFromDate" />
+
+                              <mat-datepicker-toggle matSuffix [for]="historyFromPicker"></mat-datepicker-toggle>
+
+                              <mat-datepicker #historyFromPicker></mat-datepicker>
+
+                            </mat-form-field>
+
+                          </div>
+
+                          <div class="col-lg-2 col-md-4 col-sm-6">
+
+                            <mat-form-field class="w-100 cp-quick-search-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
+
+                              <mat-label>To Date</mat-label>
+
+                              <input matInput [matDatepicker]="historyToPicker" [(ngModel)]="historyToDate" />
+
+                              <mat-datepicker-toggle matSuffix [for]="historyToPicker"></mat-datepicker-toggle>
+
+                              <mat-datepicker #historyToPicker></mat-datepicker>
+
+                            </mat-form-field>
+
+                          </div>
+
+                          <div class="col-lg-3 col-md-4 col-sm-6 d-flex align-items-center gap-actions">
+
+                            <button mat-raised-button color="primary" (click)="searchHistory()" [disabled]="loadingHistory">Search</button>
+
+                          </div>
+
+                        </div>
+
+                      </div>
+
+                    </mat-expansion-panel>
+
+                  </mat-accordion>
+
+                  <div class="table-responsive">
+
+                    <table mat-table [dataSource]="historyRows" class="w-100">
+
+                      <ng-container matColumnDef="groupNumber"><th mat-header-cell *matHeaderCellDef>Group #</th><td mat-cell *matCellDef="let row">{{ row.groupNumber }}</td></ng-container>
+
+                      <ng-container matColumnDef="groupDate"><th mat-header-cell *matHeaderCellDef>Date</th><td mat-cell *matCellDef="let row">{{ formatDisplayDate(row.groupDate) }}</td></ng-container>
+
+                      <ng-container matColumnDef="supplierName"><th mat-header-cell *matHeaderCellDef>Supplier</th><td mat-cell *matCellDef="let row">{{ row.supplierName }}</td></ng-container>
+
+                      <ng-container matColumnDef="groupAmount"><th mat-header-cell *matHeaderCellDef>Group Amount</th><td mat-cell *matCellDef="let row">{{ formatMoney(row.groupAmount) }}</td></ng-container>
+
+                      <ng-container matColumnDef="previousGroupAdjustmentAmount"><th mat-header-cell *matHeaderCellDef>Adjustment</th><td mat-cell *matCellDef="let row">{{ formatMoney(row.previousGroupAdjustmentAmount) }}</td></ng-container>
+
+                      <ng-container matColumnDef="netSettlementAmount"><th mat-header-cell *matHeaderCellDef>Net</th><td mat-cell *matCellDef="let row">{{ formatMoney(row.netSettlementAmount) }}</td></ng-container>
+
+                      <ng-container matColumnDef="dutyCount"><th mat-header-cell *matHeaderCellDef>Duties</th><td mat-cell *matCellDef="let row">{{ row.dutyCount }}</td></ng-container>
+
+                      <ng-container matColumnDef="totalMismatchAmount"><th mat-header-cell *matHeaderCellDef>Mismatch</th><td mat-cell *matCellDef="let row">{{ formatMoney(row.totalMismatchAmount) }}</td></ng-container>
+
+                      <ng-container matColumnDef="isSquaredOff"><th mat-header-cell *matHeaderCellDef>Squared Off</th><td mat-cell *matCellDef="let row">{{ row.isSquaredOff ? 'Yes' : 'No' }}</td></ng-container>
+
+                      <ng-container matColumnDef="actions">
+
+                        <th mat-header-cell *matHeaderCellDef>Actions</th>
+
+                        <td mat-cell *matCellDef="let row">
+
+                          <button mat-button color="primary" (click)="viewGroup(row)">View</button>
+                          <button mat-button (click)="printGroup(row)">Print</button>
+
+                          <button mat-button (click)="exportGroup(row)">Export</button>
+
+                        </td>
+
+                      </ng-container>
+
+                      <tr mat-header-row *matHeaderRowDef="historyDisplayedColumns"></tr>
+
+                      <tr mat-row *matRowDef="let row; columns: historyDisplayedColumns"></tr>
+
+                    </table>
+
+                    <p *ngIf="!loadingHistory && !historySearched" class="empty-msg">Select filters and click Search to load payout history.</p>
+                    <p *ngIf="!loadingHistory && historySearched && historyRows.length === 0" class="empty-msg">No payout groups found for selected filters.</p>
+                    <p *ngIf="loadingHistory" class="empty-msg">Loading...</p>
+
+                  </div>
+
+
+
+                  <div class="group-detail" *ngIf="selectedHistoryGroup">
+
+                    <h5>Group Details — {{ selectedHistoryGroup.groupNumber }}</h5>
+
+                    <table mat-table [dataSource]="selectedHistoryGroup.lines || []" class="w-100">
+
+                      <ng-container matColumnDef="dutySlipID"><th mat-header-cell *matHeaderCellDef>Duty</th><td mat-cell *matCellDef="let line">{{ line.dutySlipID }}</td></ng-container>
+
+                      <ng-container matColumnDef="gfbStatus"><th mat-header-cell *matHeaderCellDef>GFB Status</th><td mat-cell *matCellDef="let line">{{ formatGfbStatus(line.goodForBilling) }}</td></ng-container>
+
+                      <ng-container matColumnDef="reservationID"><th mat-header-cell *matHeaderCellDef>Reservation</th><td mat-cell *matCellDef="let line">{{ line.reservationID }}</td></ng-container>
+
+                      <ng-container matColumnDef="customerName"><th mat-header-cell *matHeaderCellDef>Customer</th><td mat-cell *matCellDef="let line">{{ line.customerName }}</td></ng-container>
+
+                      <ng-container matColumnDef="supplierRevenue"><th mat-header-cell *matHeaderCellDef>Supplier Revenue</th><td mat-cell *matCellDef="let line">{{ formatMoney(line.supplierAmountForDuty) }}</td></ng-container>
+
+                      <ng-container matColumnDef="payoutEcoRevenue"><th mat-header-cell *matHeaderCellDef>Payout Eco Revenue</th><td mat-cell *matCellDef="let line">{{ formatMoney(line.payoutEcoRevenue) }}</td></ng-container>
+
+                      <ng-container matColumnDef="currentEcoRevenue"><th mat-header-cell *matHeaderCellDef>Current Eco Revenue</th><td mat-cell *matCellDef="let line">{{ formatMoney(line.currentEcoRevenue) }}</td></ng-container>
+
+                      <ng-container matColumnDef="mismatchAmount"><th mat-header-cell *matHeaderCellDef>Mismatch</th><td mat-cell *matCellDef="let line">{{ formatMoney(line.mismatchAmount) }}</td></ng-container>
+
+                      <tr mat-header-row *matHeaderRowDef="groupDetailColumns"></tr>
+
+                      <tr mat-row *matRowDef="let line; columns: groupDetailColumns"></tr>
+
+                    </table>
+
+                  </div>
+
+                </div>
+
+              </mat-tab>
+
+
+
+              <mat-tab label="Reports">
+
+                <div class="tab-body">
+
+                  <div class="row duty-register-search quick-search-panel">
+
+                    <div class="col-lg-3 col-md-4 col-sm-6">
+
+                      <mat-form-field class="w-100 cp-quick-search-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
+
+                        <mat-label>Supplier (optional)</mat-label>
+
+                        <input type="text" matInput [formControl]="reportSupplierCtrl" [matAutocomplete]="autoReportSupplier" />
+
+                        <mat-autocomplete #autoReportSupplier="matAutocomplete" (optionSelected)="onReportSupplierSelect($event.option.value)">
+
+                          <mat-option *ngFor="let option of filteredReportSupplierOptions | async" [value]="option.supplierName">
+
+                            {{ option.supplierName }}
+
+                          </mat-option>
+
+                        </mat-autocomplete>
+
+                      </mat-form-field>
+
+                    </div>
+
+                    <div class="col-lg-2 col-md-4 col-sm-6">
+
+                      <mat-form-field class="w-100 cp-quick-search-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
+
+                        <mat-label>From Date</mat-label>
+
+                        <input matInput [matDatepicker]="reportFromPicker" [(ngModel)]="reportFromDate" />
+
+                        <mat-datepicker-toggle matSuffix [for]="reportFromPicker"></mat-datepicker-toggle>
+
+                        <mat-datepicker #reportFromPicker></mat-datepicker>
+
+                      </mat-form-field>
+
+                    </div>
+
+                    <div class="col-lg-2 col-md-4 col-sm-6">
+
+                      <mat-form-field class="w-100 cp-quick-search-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
+
+                        <mat-label>To Date</mat-label>
+
+                        <input matInput [matDatepicker]="reportToPicker" [(ngModel)]="reportToDate" />
+
+                        <mat-datepicker-toggle matSuffix [for]="reportToPicker"></mat-datepicker-toggle>
+
+                        <mat-datepicker #reportToPicker></mat-datepicker>
+
+                      </mat-form-field>
+
+                    </div>
+
+                    <div class="col-lg-3 col-md-4 col-sm-6 d-flex align-items-center">
+
+                      <button mat-raised-button color="primary" (click)="downloadReport()" [disabled]="downloadingReport">Download Report (CSV)</button>
+
+                    </div>
+
+                  </div>
+
+                </div>
+
+              </mat-tab>
+
+            </mat-tab-group>
+
+          </div>
+
+        </div>
+
+      </div>
+
+    </div>
+
+  </div>
+
+</section>
+

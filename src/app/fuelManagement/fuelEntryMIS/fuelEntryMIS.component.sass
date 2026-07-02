@@ -1,0 +1,41 @@
+.fuel-entry-mis
+  .mis-table-wrap
+    max-height: 65vh
+    overflow: auto
+    width: 100%
+
+  .dense-field
+    width: 100%
+
+  th.mat-mdc-header-cell
+    white-space: nowrap
+    font-size: 0.75rem
+
+  td.mat-mdc-cell
+    white-space: nowrap
+    font-size: 0.75rem
+
+:host ::ng-deep .mis-table-wrap .fuel-entry-mis-table
+  min-width: auto !important
+  width: max-content
+
+:host ::ng-deep .mis-table-wrap .fuel-entry-mis-table .mat-mdc-header-row,
+:host ::ng-deep .mis-table-wrap .fuel-entry-mis-table .mat-mdc-row,
+:host ::ng-deep .mis-table-wrap .fuel-entry-mis-table .mat-header-row,
+:host ::ng-deep .mis-table-wrap .fuel-entry-mis-table .mat-row
+  min-width: max-content
+
+:host ::ng-deep .mis-table-wrap .fuel-entry-mis-table .mat-mdc-header-cell,
+:host ::ng-deep .mis-table-wrap .fuel-entry-mis-table .mat-mdc-cell,
+:host ::ng-deep .mis-table-wrap .fuel-entry-mis-table .mat-header-cell,
+:host ::ng-deep .mis-table-wrap .fuel-entry-mis-table .mat-cell
+  flex: 0 0 auto
+  width: auto
+  min-width: auto
+  max-width: none
+  padding: 6px 10px !important
+  white-space: nowrap
+  overflow: visible
+  text-overflow: unset
+  text-align: left
+  box-sizing: border-box

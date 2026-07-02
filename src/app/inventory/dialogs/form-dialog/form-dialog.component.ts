@@ -928,6 +928,7 @@ export class FormDialogComponent
       colorID: [this.advanceTable?.colorID],
       fuelTypeID: [this.advanceTable?.fuelTypeID],
       mileage: [this.advanceTable?.mileage],
+      fuelCardNo: [this.advanceTable?.fuelCardNo],
       fuelType: [this.advanceTable?.fuelType],
       color: [this.advanceTable?.color],
       isAdhoc: [this.advanceTable?.isAdhoc],
