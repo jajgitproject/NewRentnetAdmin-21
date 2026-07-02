@@ -449,6 +449,7 @@ export class ControlPanelDesignComponent implements OnInit {
   }
 
   applySingleReservationFilter(reservationID: number): void {
+    
     this.selectedFilter = 'BookingNo';
     this.searchTerm = String(reservationID);
     this.currentPage = 1;
@@ -461,6 +462,7 @@ export class ControlPanelDesignComponent implements OnInit {
       toTime: ''
     });
     this.loadDataForHeader(this.bookingCategory, 1, this.recordsPerPage, true, 0);
+    this.filterForm.patchValue({resID : reservationID});
   }
 
   private normalizeBoolean(value: any, fallback: boolean): boolean {

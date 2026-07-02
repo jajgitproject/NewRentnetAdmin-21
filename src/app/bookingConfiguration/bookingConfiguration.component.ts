@@ -151,7 +151,7 @@ export class BookingConfigurationComponent implements OnInit {
     dropOffDateString:[''],
     dropOffTime:[''],
     dropOffTimeString:[''],
-    dropOffCityID:[''],
+    dropOffCityID:[0],
     dropOffCity:[''],
     dropOffAddress:[''],
     dropOffAddressLatitude:[''],
@@ -578,22 +578,28 @@ private extractTime(dateTime: Date): Date {
 
       // Pickup Binding
       if (pickupStop) {
+        const address = this.getStopAddress(pickupStop);
+        const landmark = this.getStopLandmark(pickupStop);
+        const formattedDetails = landmark ? (address ? `${landmark} (${address})` : landmark) : '';
   this.advanceTableForm.patchValue({
-    pickupAddress: this.getStopAddress(pickupStop),
+    pickupAddress: address,
     pickupAddressLatitude: pickupStop.integrationRequestStopLatitude,
     pickupAddressLongitude: pickupStop.integrationRequestStopLongitude,
-    pickupAddressDetails: this.getStopLandmark(pickupStop),
+    pickupAddressDetails: formattedDetails,
     pickupStopOrderPriority: pickupStop.priorityOrder
   });
 }
 
       // DropOff Binding
       if (dropOffStop) {
+        const address = this.getStopAddress(dropOffStop);
+        const landmark = this.getStopLandmark(dropOffStop);
+        const formattedDetails = landmark ? (address ? `${landmark} (${address})` : landmark) : '';
   this.advanceTableForm.patchValue({
-    dropOffAddress: this.getStopAddress(dropOffStop),
+    dropOffAddress: address,
     dropOffAddressLatitude: dropOffStop.integrationRequestStopLatitude,
     dropOffAddressLongitude: dropOffStop.integrationRequestStopLongitude,
-    dropOffAddressDetails: this.getStopLandmark(dropOffStop),
+    dropOffAddressDetails: formattedDetails,
     dropOffStopOrderPriority: dropOffStop.priorityOrder
   });
 }
