@@ -359,14 +359,22 @@ toggleStopFold() {
           {
             this.GetB2CData();
           }
-          const pickupDateTime = this.mergeDateAndTime(
-          this.customerDetails.pickupDate,
-          this.customerDetails.pickupTime
-        );
-        const dropOffDateTime = this.mergeDateAndTime(
-          this.customerDetails.dropOffDate,
-          this.customerDetails.dropOffTime
-        );
+          const pickupTime24 = this.customerDetails.pickupTimeString || this.formatTime24(this.customerDetails.pickupTime);
+          const dropOffTime24 = this.customerDetails.dropOffTimeString || this.formatTime24(this.customerDetails.dropOffTime);
+          const pickupDateTime = this.mergeDateAndTimeFromStrings(
+            this.customerDetails.pickupDate,
+            pickupTime24
+          ) ?? this.mergeDateAndTime(
+            this.customerDetails.pickupDate,
+            this.customerDetails.pickupTime
+          );
+          const dropOffDateTime = this.mergeDateAndTimeFromStrings(
+            this.customerDetails.dropOffDate,
+            dropOffTime24
+          ) ?? this.mergeDateAndTime(
+            this.customerDetails.dropOffDate,
+            this.customerDetails.dropOffTime
+          );
           this.advanceTableForm.patchValue({customerID:this.customerDetails.customerID});
           this.bookerID = this.customerDetails.primaryBookerID;
           this.advanceTableForm.patchValue({primaryBookerID:this.customerDetails.primaryBookerID});
@@ -379,9 +387,9 @@ toggleStopFold() {
           this.advanceTableForm.patchValue({customerGroupID:this.customerDetails.customerGroupID});
           this.advanceTableForm.patchValue({customerTypeID:this.customerDetails.customerTypeID});
           this.advanceTableForm.patchValue({pickupDateString:this._generalService.getDateFrom(this.advanceTableForm.value.pickupDate)});
-          this.advanceTableForm.patchValue({pickupTimeString:this._generalService.getTimeFroms(this.advanceTableForm.value.pickupTime)});
+          this.advanceTableForm.patchValue({pickupTimeString:pickupTime24 || this.formatTime24(this.advanceTableForm.value.pickupTime)});
           this.advanceTableForm.patchValue({dropOffDateString:this._generalService.getDateFrom(this.advanceTableForm.value.dropOffDate)});
-          this.advanceTableForm.patchValue({dropOffTimeString:this._generalService.getTimeFroms(this.advanceTableForm.value.dropOffTime)});
+          this.advanceTableForm.patchValue({dropOffTimeString:dropOffTime24 || this.formatTime24(this.advanceTableForm.value.dropOffTime)});
           this.onPickupDateChange();
           this.getSalesManager(this.customerDetails.customerID);
           this.getCustomerKam(this.customerDetails.customerID);
@@ -410,7 +418,80 @@ toggleStopFold() {
     return match?.fieldValue || '';
   }
 
+ private parseTimeToMoment(value: any): moment.Moment | null {
+  if (value === null || value === undefined || value === '') {
+    return null;
+  }
+
+  if (value instanceof Date) {
+    const parsed = moment(value);
+    return parsed.isValid() ? parsed : null;
+  }
+
+  const candidates = [
+    moment.ISO_8601,
+    'YYYY-MM-DDTHH:mm:ss',
+    'YYYY-MM-DDTHH:mm:ss.SSSZ',
+    'HH:mm',
+    'HH:mm:ss',
+    'h:mm A',
+    'hh:mm A',
+  ];
+  const strict = moment(value, candidates as any, true);
+  if (strict.isValid()) {
+    return strict;
+  }
+
+  const loose = moment(value);
+  return loose.isValid() ? loose : null;
+ }
+
+ private formatTime24(value: any): string | null {
+  if (value === null || value === undefined || value === '') {
+    return null;
+  }
+
+  if (typeof value === 'string') {
+    const trimmed = value.trim();
+    const direct = moment(trimmed, ['HH:mm', 'HH:mm:ss'], true);
+    if (direct.isValid()) {
+      return direct.format('HH:mm');
+    }
+  }
+
+  const parsed = this.parseTimeToMoment(value);
+  return parsed && parsed.isValid() ? parsed.format('HH:mm') : null;
+ }
+
+ private mergeDateAndTimeFromStrings(pickupDate: any, pickupTime24: string | null): Date | null {
+  if (!pickupDate || !pickupTime24) {
+    return null;
+  }
+
+  const dateMoment = moment(pickupDate);
+  const timeMoment = moment(pickupTime24, ['HH:mm', 'HH:mm:ss'], true);
+  if (!dateMoment.isValid() || !timeMoment.isValid()) {
+    return null;
+  }
+
+  return moment({
+    year: dateMoment.year(),
+    month: dateMoment.month(),
+    date: dateMoment.date(),
+    hour: timeMoment.hour(),
+    minute: timeMoment.minute(),
+    second: 0,
+    millisecond: 0,
+  }).toDate();
+ }
+
  private mergeDateAndTime(pickupDate: any, pickupTime: any): Date {
+  const time24 = this.formatTime24(pickupTime);
+  const merged = this.mergeDateAndTimeFromStrings(pickupDate, time24);
+  if (merged) {
+    return merged;
+  }
+
   const dateObj = new Date(pickupDate);
   const timeObj = new Date(pickupTime);
 
@@ -713,6 +794,14 @@ private extractTime(dateTime: Date): Date {
     }
   }
 
+  private normalizeOptionalInt(value: any): number {
+    if (value === null || value === undefined || value === '') {
+      return 0;
+    }
+    const parsed = Number(value);
+    return Number.isFinite(parsed) ? Math.trunc(parsed) : 0;
+  }
+
   public Post(): void
   {
     const ctrn =
@@ -737,9 +826,9 @@ private extractTime(dateTime: Date): Date {
     this.advanceTableForm.patchValue({dropOffDate:this.extractDate(this.advanceTableForm.value.dropOffDateTime)});
     this.advanceTableForm.patchValue({dropOffTime:this.extractTime(this.advanceTableForm.value.dropOffDateTime)});
     this.advanceTableForm.patchValue({pickupDateString:this._generalService.getDateFrom(this.advanceTableForm.value.pickupDate)});
-    this.advanceTableForm.patchValue({pickupTimeString:this._generalService.getTimeFroms(this.advanceTableForm.value.pickupTime)});
+    this.advanceTableForm.patchValue({pickupTimeString:this.formatTime24(this.advanceTableForm.value.pickupDateTime)});
     this.advanceTableForm.patchValue({dropOffDateString:this._generalService.getDateFrom(this.advanceTableForm.value.dropOffDate)});
-    this.advanceTableForm.patchValue({dropOffTimeString:this._generalService.getTimeFroms(this.advanceTableForm.value.dropOffTime)});
+    this.advanceTableForm.patchValue({dropOffTimeString:this.formatTime24(this.advanceTableForm.value.dropOffDateTime)});
     this.advanceTableForm.patchValue({
       pickupAddress: this.combineAddressWithDetails(
         this.advanceTableForm.value.pickupAddress,
@@ -749,6 +838,7 @@ private extractTime(dateTime: Date): Date {
         this.advanceTableForm.value.dropOffAddress,
         this.advanceTableForm.value.dropOffAddressDetails
       ),
+      dropOffCityID: this.normalizeOptionalInt(this.advanceTableForm.value.dropOffCityID),
     });
     const payload: any = this.advanceTableForm.getRawValue();
     payload.reservationStops = this.reservationStops;
@@ -1896,10 +1986,6 @@ OnDropOffGeoLocationClick(option:any)
     return this.getStopLandmark(this.getPassengerDropoffStop(passenger));
   }
 
-  getPassengerDropoffDateTime(passenger: BookingConfigurationPassengerDetails): string {
-    return this.formatStopDateTime(this.getPassengerDropoffStop(passenger));
-  }
-
   get pickupCityName(): string {
     const pickupStop = this.stopDetailsList?.find(
       stop => stop.integrationRequestStopType?.toLowerCase() === 'pickup'
@@ -1972,7 +2058,37 @@ OnDropOffGeoLocationClick(option:any)
   }
 
   getPassengerPickupDateTime(passenger: BookingConfigurationPassengerDetails): string {
+    const requestParts: string[] = [];
+    if (this.customerDetails?.pickupDate) {
+      requestParts.push(moment(this.customerDetails.pickupDate).format('DD/MM/YYYY'));
+    }
+    const requestTime24 = this.customerDetails?.pickupTimeString
+      || this.formatTime24(this.customerDetails?.pickupTime);
+    if (requestTime24) {
+      requestParts.push(requestTime24);
+    }
+    if (requestParts.length) {
+      return requestParts.join(', ');
+    }
+
     return this.formatStopDateTime(this.getPassengerPickupStop(passenger));
+  }
+
+  getPassengerDropoffDateTime(passenger: BookingConfigurationPassengerDetails): string {
+    const requestParts: string[] = [];
+    if (this.customerDetails?.dropOffDate) {
+      requestParts.push(moment(this.customerDetails.dropOffDate).format('DD/MM/YYYY'));
+    }
+    const requestTime24 = this.customerDetails?.dropOffTimeString
+      || this.formatTime24(this.customerDetails?.dropOffTime);
+    if (requestTime24) {
+      requestParts.push(requestTime24);
+    }
+    if (requestParts.length) {
+      return requestParts.join(', ');
+    }
+
+    return this.formatStopDateTime(this.getPassengerDropoffStop(passenger));
   }
 
   formatStopDateTime(stop: BookingConfigurationStopDetails | null | undefined): string {
@@ -1983,9 +2099,13 @@ OnDropOffGeoLocationClick(option:any)
     if (stop.integrationRequestStopDate) {
       parts.push(moment(stop.integrationRequestStopDate).format('DD/MM/YYYY'));
     }
-    if (stop.integrationRequestStopTime) {
-      parts.push(moment(stop.integrationRequestStopTime).format('hh:mm A'));
+
+    const stopTime24 = stop.integrationRequestStopTimeString
+      || this.formatTime24(stop.integrationRequestStopTime);
+    if (stopTime24) {
+      parts.push(stopTime24);
     }
+
     return parts.length ? parts.join(', ') : '--';
   }
 

@@ -13,6 +13,9 @@ import {
   IrnBackfillSearchCriteria,
   IrnBackfillPreviewResult,
   StartIrnBackfillJobResult,
+  ClosingDutySlipBackfillCriteria,
+  ClosingDutySlipBackfillPreviewResult,
+  StartClosingDutySlipBackfillJobResult,
 } from './bulkBillsDownload.model';
 
 @Injectable()
@@ -46,6 +49,27 @@ export class BulkBillsDownloadService {
 
   cancelIrnBackfillJob(jobId: number): Observable<any> {
     return this.httpClient.post(`${this.API_URL}/backfill/irn-archive/cancel/${jobId}`, {});
+  }
+
+  previewClosingDutySlipBackfill(criteria: ClosingDutySlipBackfillCriteria): Observable<ClosingDutySlipBackfillPreviewResult> {
+    return this.httpClient.post<ClosingDutySlipBackfillPreviewResult>(
+      `${this.API_URL}/backfill/closing-duty-slip/preview`,
+      criteria || {}
+    );
+  }
+
+  startClosingDutySlipBackfillJob(
+    criteria: ClosingDutySlipBackfillCriteria,
+    performedBy: number
+  ): Observable<StartClosingDutySlipBackfillJobResult> {
+    return this.httpClient.post<StartClosingDutySlipBackfillJobResult>(
+      `${this.API_URL}/backfill/closing-duty-slip/${performedBy}`,
+      criteria || {}
+    );
+  }
+
+  cancelClosingDutySlipBackfillJob(jobId: number): Observable<any> {
+    return this.httpClient.post(`${this.API_URL}/backfill/closing-duty-slip/cancel/${jobId}`, {});
   }
 
   getInvoiceDuties(invoiceId: number): Observable<any[]> {

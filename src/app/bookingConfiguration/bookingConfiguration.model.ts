@@ -12,8 +12,10 @@ export class BookingConfigurationCustomerDetails {
   customerCodeForAPIIntegration :string;
   pickupDate:Date;
   pickupTime:Date;
+  pickupTimeString:string;
   dropOffDate:Date;
   dropOffTime:Date;
+  dropOffTimeString:string;
   primaryBookerID:number;
   customerTypeID:number;
   customerGroupID:number;
@@ -43,8 +45,10 @@ export class BookingConfigurationCustomerDetails {
       this.vehicle = bookingConfigurationCustomerDetails.vehicle || '';
       this.pickupDate = bookingConfigurationCustomerDetails.pickupDate || '';
       this.pickupTime = bookingConfigurationCustomerDetails.pickupTime || '';
+      this.pickupTimeString = bookingConfigurationCustomerDetails.pickupTimeString || '';
       this.dropOffDate = bookingConfigurationCustomerDetails.dropOffDate || '';
       this.dropOffTime = bookingConfigurationCustomerDetails.dropOffTime || '';
+      this.dropOffTimeString = bookingConfigurationCustomerDetails.dropOffTimeString || '';
       this.primaryBookerID = bookingConfigurationCustomerDetails.primaryBookerID || '';
       this.customerTypeID = bookingConfigurationCustomerDetails.customerTypeID || '';
       this.customerGroupID = bookingConfigurationCustomerDetails.customerGroupID || '';
@@ -70,6 +74,7 @@ export class BookingConfigurationStopDetails {
   integrationRequestStopType :string;
   integrationRequestStopDate :Date;
   integrationRequestStopTime :Date;
+  integrationRequestStopTimeString :string;
   integrationRequestStopCity :string;
   integrationRequestStopAddress :string;
   integrationRequestStopGeoLocation :string;
@@ -85,6 +90,7 @@ export class BookingConfigurationStopDetails {
        this.integrationRequestStopType  = bookingConfigurationStopDetails.integrationRequestStopType || '';
        this.integrationRequestStopDate = bookingConfigurationStopDetails.integrationRequestStopDate || '';
        this.integrationRequestStopTime = bookingConfigurationStopDetails.integrationRequestStopTime || '';
+       this.integrationRequestStopTimeString = bookingConfigurationStopDetails.integrationRequestStopTimeString || '';
        this.integrationRequestStopCity  = bookingConfigurationStopDetails.integrationRequestStopCity || '';
        this.integrationRequestStopAddress = bookingConfigurationStopDetails.integrationRequestStopAddress || '';
        this.integrationRequestStopGeoLocation = bookingConfigurationStopDetails.integrationRequestStopGeoLocation || '';

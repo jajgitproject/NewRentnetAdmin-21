@@ -5,21 +5,27 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatTableDataSource } from '@angular/material/table';
 import { MatPaginator } from '@angular/material/paginator';
 import { SelectionModel } from '@angular/cdk/collections';
-import { Observable, Subscription, timer, forkJoin, of, firstValueFrom } from 'rxjs';
-import { map, startWith, switchMap } from 'rxjs/operators';
+import { Observable, Subscription, timer, forkJoin, of } from 'rxjs';
+import { map, startWith, switchMap, finalize } from 'rxjs/operators';
 import moment from 'moment';
 import { GeneralService } from '../general/general.service';
 import { BulkBillsDownloadService } from './bulkBillsDownload.service';
-import { ViewBillPdfService } from '../general/view-bill-pdf.service';
 import {
   BulkDownloadInvoiceSummary,
   BulkDownloadSearchCriteria,
   BulkUploadJobStatus,
   StartBulkDownloadJobRequest,
   IrnBackfillSearchCriteria,
+  IrnBackfillPreviewResult,
   IrnBackfillProgressRow,
   IrnBackfillProgressStatus,
-  InvoiceArchiveStatus,
+  ClosingDutySlipBackfillCriteria,
+  ClosingDutySlipBackfillPreviewResult,
+  ClosingDutySlipBackfillCandidateRow,
+  ClosingDutySlipBackfillTargetMode,
+  ClosingDutySlipBackfillProgressRow,
+  ClosingDutySlipBackfillProgressStatus,
+  ClosingDutySlipBackfillCompletionSummary,
 } from './bulkBillsDownload.model';
 
 @Component({
@@ -32,14 +38,21 @@ export class BulkBillsDownloadComponent implements OnInit, OnDestroy, AfterViewI
   @ViewChild('uploadFileInput') uploadFileInput?: ElementRef<HTMLInputElement>;
   @ViewChild('invoicePaginator') invoicePaginator?: MatPaginator;
 
-  activeTab: 'backfill' | 'download' | 'upload' = 'download';
+  activeTab: 'backfill' | 'download' | 'upload' | 'closingDutySlip' = 'download';
   loading = false;
   loadError = '';
   downloading = false;
   uploading = false;
   backfilling = false;
-  backfillCandidateCount: number | null = null;
-  readonly maxBackfillBatchSize = 1000;
+  irnBatchSize = 1000;
+  irnBackfillPreview: IrnBackfillPreviewResult | null = null;
+  irnBackfillCandidates: BulkDownloadInvoiceSummary[] = [];
+  irnPreviewLoading = false;
+  irnRunAllBatches = false;
+  irnBatchNumber = 0;
+  irnTotalBatches = 0;
+  irnAllBatchesProcessed = 0;
+  closingBatchSize = 500;
 
   readonly invoicePageSizeOptions = [10, 25, 50, 100];
 
@@ -49,6 +62,22 @@ export class BulkBillsDownloadComponent implements OnInit, OnDestroy, AfterViewI
   invoiceNumberCtrl = new FormControl('');
   backfillInvoiceNumberCtrl = new FormControl('');
   backfillLoadError = '';
+  closingMinPickUpDateCtrl = new FormControl(new Date(2026, 4, 16));
+  closingTargetMode: ClosingDutySlipBackfillTargetMode = 'DryRun';
+  closingBackfillPreview: ClosingDutySlipBackfillPreviewResult | null = null;
+  closingBackfillCandidates: ClosingDutySlipBackfillCandidateRow[] = [];
+  closingBackfillLoadError = '';
+  closingBackfilling = false;
+  closingPreviewLoading = false;
+  closingBackfillProgressRows: ClosingDutySlipBackfillProgressRow[] = [];
+  closingBackfillProgressColumns = ['dutySlipID', 'originalFile', 'status', 'processingType', 'details', 'completedAt'];
+  closingCompletionSummary: ClosingDutySlipBackfillCompletionSummary | null = null;
+  closingJobStartedAt: number | null = null;
+  closingRunAllBatches = false;
+  closingBatchSkip = 0;
+  closingBatchNumber = 0;
+  closingTotalBatches = 0;
+  closingAllBatchesProcessed = 0;
   downloadInvoices = false;
   downloadDutySlips = false;
   downloadMerge = true;
@@ -80,10 +109,9 @@ export class BulkBillsDownloadComponent implements OnInit, OnDestroy, AfterViewI
     'completedAt',
   ];
   private pollIsIrnBackfill = false;
-  private backfillCandidateRows: BulkDownloadInvoiceSummary[] = [];
+  private pollIsClosingBackfill = false;
   private pollSub?: Subscription;
   private backfillCancelled = false;
-  private activeBackfillJobId: number | null = null;
   private selectedFiles: File[] = [];
   selectedFileLabel = '';
   private shownNamingSkipModals = new Set<string>();
@@ -91,8 +119,7 @@ export class BulkBillsDownloadComponent implements OnInit, OnDestroy, AfterViewI
   constructor(
     private service: BulkBillsDownloadService,
     private generalService: GeneralService,
-    private snackBar: MatSnackBar,
-    private viewBillPdfService: ViewBillPdfService
+    private snackBar: MatSnackBar
   ) {}
 
   ngOnInit(): void {
@@ -109,7 +136,7 @@ export class BulkBillsDownloadComponent implements OnInit, OnDestroy, AfterViewI
     this.stopPolling();
   }
 
-  setTab(tab: 'backfill' | 'download' | 'upload'): void {
+  setTab(tab: 'backfill' | 'download' | 'upload' | 'closingDutySlip'): void {
     this.activeTab = tab;
   }
 
@@ -189,9 +216,9 @@ export class BulkBillsDownloadComponent implements OnInit, OnDestroy, AfterViewI
     this.backfillInvoiceNumberCtrl.setValue('');
     this.backfillLoadError = '';
     this.setDownloadOption('merge');
-    this.backfillCandidateCount = null;
+    this.irnBackfillPreview = null;
+    this.irnBackfillCandidates = [];
     this.backfillProgressRows = [];
-    this.backfillCandidateRows = [];
     this.invoiceRows = [];
     this.invoiceDataSource.data = [];
     this.selection.clear();
@@ -219,96 +246,233 @@ export class BulkBillsDownloadComponent implements OnInit, OnDestroy, AfterViewI
   }
 
   showDownloadTabJobPanel(): boolean {
-    return !!this.activeJob && this.activeTab === 'download' && !this.isIrnBackfillJob();
+    return !!this.activeJob && this.activeTab === 'download' && !this.isIrnBackfillJob() && !this.isClosingDutySlipJob();
   }
 
   showGlobalJobPanel(): boolean {
-    return !!this.activeJob && this.activeTab !== 'download';
+    return !!this.activeJob && (this.activeTab === 'backfill' || this.activeTab === 'upload');
   }
 
-  searchBackfillByInvoice(): void {
-    const invoiceNumber = (this.backfillInvoiceNumberCtrl.value || '').trim();
-    if (!invoiceNumber) {
-      this.snackBar.open('Enter an invoice number to search.', 'Close', { duration: 4000 });
-      return;
-    }
-    if (this.backfilling || this.isBackfillRunning()) {
-      return;
-    }
-    this.startIrnBackfill();
-  }
-
-  previewBackfillCandidates(): void {
+  previewIrnBackfill(): void {
     const criteria = this.buildIrnBackfillCriteria();
     this.backfillLoadError = '';
-    this.backfillCandidateCount = null;
-    this.service.previewIrnBackfill(criteria).subscribe(
-      (result) => {
-        const invoices = result?.invoices ?? result?.Invoices ?? [];
-        this.backfillCandidateRows = invoices.map((row) => this.normalizeInvoiceRow(row));
-        this.backfillCandidateCount = result?.candidateCount ?? result?.CandidateCount ?? this.backfillCandidateRows.length;
-        if (!this.backfillCandidateRows.length) {
+    this.irnBackfillPreview = null;
+    this.irnBackfillCandidates = [];
+    this.irnPreviewLoading = true;
+
+    this.service.previewIrnBackfill(criteria).pipe(
+      finalize(() => {
+        this.irnPreviewLoading = false;
+      })
+    ).subscribe({
+      next: (result) => {
+        this.irnBackfillPreview = result;
+        this.irnBackfillCandidates = (result?.invoices ?? result?.Invoices ?? [])
+          .map((row) => this.normalizeInvoiceRow(row));
+        const matched = this.getIrnTotalMatchedCount();
+        if (matched === 0) {
           const msg = criteria.invoiceNumber
-            ? `No backfill candidates found in InvoiceDocument for invoice number "${criteria.invoiceNumber}".`
+            ? `No backfill candidates found for invoice number "${criteria.invoiceNumber}".`
             : 'No backfill candidates found.';
           this.backfillLoadError = msg;
           this.snackBar.open(msg, 'Close', { duration: 5000 });
           return;
         }
         this.snackBar.open(
-          `${this.backfillCandidateCount} candidate(s) in this batch (max ${this.maxBackfillBatchSize}).`,
+          `Matched ${matched} invoice(s); ${this.getIrnEstimatedBatchCount()} batch(es) of ${this.irnBatchSize}.`,
           'Close',
-          { duration: 5000 }
+          { duration: 8000 }
         );
       },
-      (err) => {
+      error: (err) => {
         this.backfillLoadError = this.extractError(err, 'Failed to preview backfill candidates.');
         this.snackBar.open(this.backfillLoadError, 'Close', { duration: 5000 });
-      }
-    );
+      },
+    });
   }
 
-  startIrnBackfill(): void {
+  canStartIrnBackfill(): boolean {
+    return !!this.irnBackfillPreview && this.getIrnTotalMatchedCount() > 0;
+  }
+
+  getIrnTotalMatchedCount(): number {
+    return this.irnBackfillPreview?.totalMatchedCount
+      ?? this.irnBackfillPreview?.TotalMatchedCount
+      ?? 0;
+  }
+
+  getIrnEstimatedBatchCount(): number {
+    const fromPreview = this.irnBackfillPreview?.estimatedBatchCount
+      ?? this.irnBackfillPreview?.EstimatedBatchCount;
+    if (fromPreview && fromPreview > 0) {
+      return fromPreview;
+    }
+    const total = this.getIrnTotalMatchedCount();
+    return total > 0 ? Math.max(1, Math.ceil(total / this.irnBatchSize)) : 1;
+  }
+
+  getIrnRunButtonLabel(): string {
+    const batches = this.getIrnEstimatedBatchCount();
+    if (batches > 1) {
+      return `Backfill IRN PDFs (all ${batches} batches)`;
+    }
+    return 'Backfill IRN PDFs';
+  }
+
+  formatInvoiceDate(value: string | Date | null | undefined): string {
+    if (!value) return '—';
+    const m = moment(value);
+    return m.isValid() ? m.format('DD/MM/YYYY') : String(value);
+  }
+
+  startIrnBackfill(runAllBatches = true): void {
+    if (!this.canStartIrnBackfill()) {
+      return;
+    }
+
     const performedBy = this.generalService.getUserID();
     if (!performedBy) {
       this.snackBar.open('User session not found.', 'Close', { duration: 4000 });
       return;
     }
 
-    const criteria = this.buildIrnBackfillCriteria();
+    this.irnRunAllBatches = runAllBatches;
+    this.irnBatchNumber = 0;
+    this.irnAllBatchesProcessed = 0;
+    this.irnTotalBatches = runAllBatches
+      ? this.getIrnEstimatedBatchCount()
+      : 1;
     this.backfilling = true;
     this.backfillCancelled = false;
-    this.activeBackfillJobId = null;
-    this.service.previewIrnBackfill(criteria).subscribe(
-      async (preview) => {
-        const invoices = preview?.invoices ?? preview?.Invoices ?? this.backfillCandidateRows ?? [];
-        this.backfillCandidateRows = (invoices || []).map((row) => this.normalizeInvoiceRow(row));
-        if (!this.backfillCandidateRows.length) {
+    this.backfillLoadError = '';
+    this.backfillProgressRows = [];
+
+    this.startIrnBackfillBatch(performedBy);
+  }
+
+  private startIrnBackfillBatch(performedBy: number): void {
+    const criteria = this.buildIrnBackfillCriteria();
+
+    this.service.previewIrnBackfill(criteria).subscribe({
+      next: (preview) => {
+        const batchCount = preview?.candidateCount ?? preview?.CandidateCount ?? 0;
+        if (batchCount <= 0) {
           this.backfilling = false;
-          const msg = criteria.invoiceNumber
-            ? `No backfill candidates found in InvoiceDocument for invoice number "${criteria.invoiceNumber}".`
-            : 'No invoices matched the backfill criteria.';
-          this.backfillLoadError = criteria.invoiceNumber ? msg : '';
-          this.snackBar.open(msg, 'Close', { duration: 5000 });
+          this.irnRunAllBatches = false;
+          if (this.irnAllBatchesProcessed > 0) {
+            this.snackBar.open(
+              `All batches completed (${this.irnAllBatchesProcessed} invoice(s) processed).`,
+              'Close',
+              { duration: 10000 }
+            );
+          }
           return;
         }
-        this.initBackfillProgressRows(this.backfillCandidateRows);
-        this.activeJob = {
-          bulkUploadJobID: 0,
-          jobType: 'IrnBackfill',
-          jobStatus: 'Processing',
-          totalFiles: this.backfillCandidateRows.length,
-          processedFiles: 0,
-          successCount: 0,
-          errorCount: 0,
-        };
-        await this.runInteractiveBackfill(this.backfillCandidateRows, performedBy);
+
+        this.initBackfillProgressRowsFromPreview(preview);
+        this.irnBatchNumber += 1;
+
+        this.service.startIrnBackfillJob(criteria, performedBy).subscribe({
+          next: (result) => {
+            const jobId = result?.jobId ?? result?.JobId;
+            if (!jobId) {
+              this.backfilling = false;
+              this.irnRunAllBatches = false;
+              this.snackBar.open('Backfill job did not start.', 'Close', { duration: 5000 });
+              return;
+            }
+            this.activeJob = this.normalizeJob({
+              bulkUploadJobID: jobId,
+              jobType: 'IrnBackfill',
+              jobStatus: result?.jobStatus ?? result?.JobStatus ?? 'Pending',
+              totalFiles: result?.totalInvoices ?? result?.TotalInvoices ?? batchCount,
+              processedFiles: 0,
+              successCount: 0,
+              errorCount: 0,
+            });
+            this.jobErrors = [];
+            this.startPolling(jobId, true, false);
+          },
+          error: (err) => {
+            this.backfilling = false;
+            this.irnRunAllBatches = false;
+            this.backfillLoadError = this.extractError(err, 'Failed to start IRN backfill job.');
+            this.snackBar.open(this.backfillLoadError, 'Close', { duration: 8000 });
+          },
+        });
       },
-      (err) => {
+      error: (err) => {
         this.backfilling = false;
+        this.irnRunAllBatches = false;
         this.snackBar.open(this.extractError(err, 'Failed to load backfill candidates.'), 'Close', { duration: 5000 });
-      }
+      },
+    });
+  }
+
+  private onIrnBatchJobFinished(errors: any[]): void {
+    this.mergeBackfillProgress(errors || []);
+
+    if (this.backfillCancelled) {
+      this.backfilling = false;
+      this.irnRunAllBatches = false;
+      return;
+    }
+
+    const status = this.getJobStatus();
+    if (status === 'Failed') {
+      this.backfilling = false;
+      this.irnRunAllBatches = false;
+      this.snackBar.open('Batch failed. Remaining batches were not started.', 'Close', { duration: 8000 });
+      return;
+    }
+
+    const processedThisBatch = this.activeJob?.processedFiles ?? this.activeJob?.ProcessedFiles ?? 0;
+    this.irnAllBatchesProcessed += processedThisBatch;
+
+    if (!this.irnRunAllBatches) {
+      this.backfilling = false;
+      this.snackBar.open('IRN backfill finished.', 'Close', { duration: 4000 });
+      return;
+    }
+
+    const performedBy = this.generalService.getUserID();
+    if (!performedBy) {
+      this.backfilling = false;
+      this.irnRunAllBatches = false;
+      this.snackBar.open('User session expired before next batch could start.', 'Close', { duration: 8000 });
+      return;
+    }
+
+    this.backfilling = true;
+    this.snackBar.open(
+      `Batch ${this.irnBatchNumber} of ${this.irnTotalBatches} finished. Starting next batch...`,
+      'Close',
+      { duration: 5000 }
     );
+    setTimeout(() => this.startIrnBackfillBatch(performedBy), 1500);
+  }
+
+  private initBackfillProgressRowsFromPreview(preview: IrnBackfillPreviewResult): void {
+    const invoices = (preview?.invoices ?? preview?.Invoices ?? [])
+      .map((row) => this.normalizeInvoiceRow(row));
+    const batchSize = preview?.candidateCount
+      ?? preview?.CandidateCount
+      ?? preview?.willProcessCount
+      ?? preview?.WillProcessCount
+      ?? invoices.length;
+
+    this.backfillProgressRows = [];
+    for (let index = 0; index < batchSize; index++) {
+      const invoice = invoices[index];
+      this.backfillProgressRows.push({
+        invoiceID: invoice?.invoiceID ?? 0,
+        invoiceNumberWithPrefix: invoice?.invoiceNumberWithPrefix ?? `Invoice ${index + 1}`,
+        customerName: invoice?.customerName ?? '',
+        status: 'Pending' as IrnBackfillProgressStatus,
+        details: '',
+        completedAt: null,
+      });
+    }
   }
 
   startDownload(): void {
@@ -456,7 +620,7 @@ export class BulkBillsDownloadComponent implements OnInit, OnDestroy, AfterViewI
 
   canDownloadZip(): boolean {
     const jobType = this.activeJob?.jobType || this.activeJob?.JobType || '';
-    if (jobType === 'IrnBackfill') return false;
+    if (jobType === 'IrnBackfill' || this.isClosingDutySlipJob()) return false;
 
     const status = this.getJobStatus();
     return status === 'Completed' || status === 'Partial';
@@ -465,6 +629,11 @@ export class BulkBillsDownloadComponent implements OnInit, OnDestroy, AfterViewI
   isIrnBackfillJob(): boolean {
     const jobType = this.activeJob?.jobType || this.activeJob?.JobType || '';
     return jobType === 'IrnBackfill';
+  }
+
+  isClosingDutySlipJob(): boolean {
+    const jobType = this.activeJob?.jobType || this.activeJob?.JobType || '';
+    return jobType === 'ClosingDutySlipDryRun' || jobType === 'ClosingDutySlipProduction';
   }
 
   getJobStatus(): string {
@@ -505,22 +674,425 @@ export class BulkBillsDownloadComponent implements OnInit, OnDestroy, AfterViewI
   clearJob(): void {
     this.shownNamingSkipModals.clear();
     this.backfillCancelled = true;
-    if (this.activeBackfillJobId) {
-      this.service.cancelIrnBackfillJob(this.activeBackfillJobId).subscribe({
-        error: () => { /* interactive backfill may not have a server job */ },
-      });
+    const activeJobId = this.getActiveJobId();
+    if (activeJobId && this.isIrnBackfillJob()) {
+      this.service.cancelIrnBackfillJob(activeJobId).subscribe({ error: () => {} });
+    }
+    if (activeJobId && this.isClosingDutySlipJob()) {
+      this.service.cancelClosingDutySlipBackfillJob(activeJobId).subscribe({ error: () => {} });
     }
     this.stopPolling();
     this.backfilling = false;
+    this.closingBackfilling = false;
     this.activeJob = null;
     this.jobErrors = [];
     this.backfillProgressRows = [];
+    this.closingBackfillProgressRows = [];
+    this.closingCompletionSummary = null;
+    this.closingJobStartedAt = null;
+    this.closingRunAllBatches = false;
+    this.closingBatchSkip = 0;
+    this.closingBatchNumber = 0;
+    this.closingTotalBatches = 0;
+    this.closingAllBatchesProcessed = 0;
+    this.irnRunAllBatches = false;
+    this.irnBatchNumber = 0;
+    this.irnTotalBatches = 0;
+    this.irnAllBatchesProcessed = 0;
     this.pollIsIrnBackfill = false;
-    this.activeBackfillJobId = null;
+    this.pollIsClosingBackfill = false;
   }
 
   isBackfillRunning(): boolean {
-    return this.backfilling || this.getJobStatus() === 'Processing';
+    return this.backfilling || this.closingBackfilling || this.getJobStatus() === 'Processing';
+  }
+
+  previewClosingDutySlipBackfill(): void {
+    const criteria = this.buildClosingDutySlipCriteria();
+    this.closingBackfillLoadError = '';
+    this.closingBackfillPreview = null;
+    this.closingBackfillCandidates = [];
+    this.closingCompletionSummary = null;
+    this.closingPreviewLoading = true;
+
+    this.service.previewClosingDutySlipBackfill(criteria).pipe(
+      finalize(() => {
+        this.closingPreviewLoading = false;
+      })
+    ).subscribe({
+      next: (result) => {
+        this.closingBackfillPreview = result;
+        this.closingBackfillCandidates = this.normalizeClosingCandidates(
+          result?.candidates ?? result?.Candidates ?? []
+        );
+        const matched = this.getClosingTotalMatchedCount();
+        const willProcess = result?.willProcessCount ?? result?.WillProcessCount ?? 0;
+        if (matched === 0) {
+          this.closingBackfillLoadError = 'No duty slips matched the selected criteria.';
+        }
+        this.snackBar.open(
+          matched > 0
+            ? `Matched ${matched} duty slip(s); up to ${willProcess} in this run. Source files are validated when you start the run.`
+            : 'No duty slips matched the selected criteria.',
+          'Close',
+          { duration: 8000 }
+        );
+      },
+      error: (err) => {
+        this.closingBackfillLoadError = this.extractError(err, 'Failed to preview closing duty slip backfill.');
+        this.snackBar.open(this.closingBackfillLoadError, 'Close', { duration: 8000 });
+      },
+    });
+  }
+
+  getClosingTotalMatchedCount(): number {
+    return this.closingBackfillPreview?.totalMatchedCount
+      ?? this.closingBackfillPreview?.TotalMatchedCount
+      ?? 0;
+  }
+
+  canStartClosingBackfill(): boolean {
+    return !!this.closingBackfillPreview && this.getClosingTotalMatchedCount() > 0;
+  }
+
+  startClosingDutySlipBackfill(runAllBatches = true): void {
+    if (!this.canStartClosingBackfill()) {
+      return;
+    }
+
+    const performedBy = this.generalService.getUserID();
+    if (!performedBy) {
+      this.snackBar.open('User session not found.', 'Close', { duration: 4000 });
+      return;
+    }
+
+    this.closingRunAllBatches = runAllBatches;
+    this.closingBatchSkip = 0;
+    this.closingBatchNumber = 0;
+    this.closingAllBatchesProcessed = 0;
+    const totalMatched = this.getClosingTotalMatchedCount();
+    this.closingTotalBatches = runAllBatches
+      ? Math.max(1, Math.ceil(totalMatched / this.closingBatchSize))
+      : 1;
+
+    this.closingBackfilling = true;
+    this.closingBackfillLoadError = '';
+    this.closingCompletionSummary = null;
+    this.closingBackfillProgressRows = [];
+    this.closingJobStartedAt = Date.now();
+
+    this.startClosingDutySlipBatch(performedBy);
+  }
+
+  private startClosingDutySlipBatch(performedBy: number): void {
+    const criteria = this.buildClosingDutySlipCriteria(this.closingBatchSkip);
+
+    this.service.startClosingDutySlipBackfillJob(criteria, performedBy).subscribe({
+      next: (result) => {
+        const jobId = result?.jobId ?? result?.JobId;
+        if (!jobId) {
+          this.closingBackfilling = false;
+          this.closingRunAllBatches = false;
+          this.snackBar.open('Backfill job did not start.', 'Close', { duration: 5000 });
+          return;
+        }
+        this.closingBatchNumber = Math.floor(this.closingBatchSkip / this.closingBatchSize) + 1;
+        this.activeJob = this.normalizeJob({
+          bulkUploadJobID: jobId,
+          jobType: criteria.targetMode === 'Production' ? 'ClosingDutySlipProduction' : 'ClosingDutySlipDryRun',
+          jobStatus: result?.jobStatus ?? result?.JobStatus ?? 'Pending',
+          totalFiles: result?.totalDutySlips ?? result?.TotalDutySlips ?? 0,
+          processedFiles: 0,
+          successCount: 0,
+          errorCount: 0,
+        });
+        this.jobErrors = [];
+        this.startPolling(jobId, false, true);
+      },
+      error: (err) => {
+        this.closingBackfilling = false;
+        this.closingRunAllBatches = false;
+        this.closingBackfillLoadError = this.extractError(err, 'Failed to start closing duty slip backfill.');
+        this.snackBar.open(this.closingBackfillLoadError, 'Close', { duration: 8000 });
+      },
+    });
+  }
+
+  private onClosingBatchJobFinished(errors: any[]): void {
+    this.mergeClosingBackfillProgress(errors || []);
+    this.buildClosingCompletionSummary(errors || []);
+
+    const status = this.getJobStatus();
+    if (status === 'Failed') {
+      this.closingBackfilling = false;
+      this.closingRunAllBatches = false;
+      this.snackBar.open('Batch failed. Remaining batches were not started.', 'Close', { duration: 8000 });
+      return;
+    }
+
+    const processedThisBatch = this.activeJob?.processedFiles ?? this.activeJob?.ProcessedFiles ?? 0;
+    this.closingAllBatchesProcessed += processedThisBatch;
+    this.closingBatchSkip += processedThisBatch;
+
+    const totalMatched = this.getClosingTotalMatchedCount();
+    const hasMoreBatches = this.closingRunAllBatches && this.closingBatchSkip < totalMatched;
+
+    if (hasMoreBatches) {
+      const performedBy = this.generalService.getUserID();
+      if (!performedBy) {
+        this.closingBackfilling = false;
+        this.closingRunAllBatches = false;
+        this.snackBar.open('User session expired before next batch could start.', 'Close', { duration: 8000 });
+        return;
+      }
+
+      this.closingBackfilling = true;
+      this.snackBar.open(
+        `Batch ${this.closingBatchNumber} of ${this.closingTotalBatches} finished. Starting next batch...`,
+        'Close',
+        { duration: 5000 }
+      );
+      setTimeout(() => this.startClosingDutySlipBatch(performedBy), 1500);
+      return;
+    }
+
+    this.closingBackfilling = false;
+    this.closingRunAllBatches = false;
+    if (this.closingTotalBatches > 1) {
+      this.snackBar.open(
+        `All ${this.closingTotalBatches} batch(es) completed (${this.closingAllBatchesProcessed} duty slip(s) processed).`,
+        'Close',
+        { duration: 10000 }
+      );
+    }
+  }
+
+  getClosingRunButtonLabel(): string {
+    const batches = this.getClosingEstimatedBatchCount();
+    const mode = this.closingTargetMode === 'Production' ? 'Production' : 'Dry Run';
+    if (batches > 1) {
+      return `Start ${mode} (all ${batches} batches)`;
+    }
+    return `Start ${mode}`;
+  }
+
+  getClosingEstimatedBatchCount(): number {
+    const fromPreview = this.closingBackfillPreview?.estimatedBatchCount
+      ?? this.closingBackfillPreview?.EstimatedBatchCount;
+    if (fromPreview && fromPreview > 0) {
+      return fromPreview;
+    }
+    const total = this.getClosingTotalMatchedCount();
+    return total > 0 ? Math.max(1, Math.ceil(total / this.closingBatchSize)) : 1;
+  }
+
+  getClosingBatchProgressLabel(): string {
+    if (!this.closingBackfilling && !this.isClosingDutySlipJob()) {
+      return '';
+    }
+    if (this.closingTotalBatches <= 1) {
+      return '';
+    }
+    return `Batch ${this.closingBatchNumber} of ${this.closingTotalBatches}`;
+  }
+
+  getClosingElapsedTime(): string {
+    if (!this.closingJobStartedAt) return '—';
+    const elapsedMs = Date.now() - this.closingJobStartedAt;
+    const seconds = Math.floor(elapsedMs / 1000);
+    const minutes = Math.floor(seconds / 60);
+    const remSeconds = seconds % 60;
+    return minutes > 0 ? `${minutes}m ${remSeconds}s` : `${seconds}s`;
+  }
+
+  getClosingRemainingCount(): number {
+    const total = this.activeJob?.totalFiles ?? this.activeJob?.TotalFiles ?? 0;
+    const processed = this.activeJob?.processedFiles ?? this.activeJob?.ProcessedFiles ?? 0;
+    return Math.max(0, total - processed);
+  }
+
+  getClosingSkippedCount(): number {
+    return this.closingBackfillProgressRows.filter((row) => row.status === 'Skipped').length;
+  }
+
+  getClosingCurrentRecordLabel(): string {
+    const rows = this.closingBackfillProgressRows;
+    if (!rows.length) return '—';
+    const last = rows[rows.length - 1];
+    return `${last.dutySlipID} (${last.originalFile || 'n/a'})`;
+  }
+
+  getClosingProgressStatusClass(status: ClosingDutySlipBackfillProgressStatus): string {
+    switch (status) {
+      case 'Success':
+        return 'progress-status-success';
+      case 'Skipped':
+        return 'progress-status-partial';
+      case 'Failed':
+        return 'progress-status-failed';
+      case 'Processing':
+        return 'progress-status-processing';
+      default:
+        return 'progress-status-pending';
+    }
+  }
+
+  formatClosingPickUpDate(row: ClosingDutySlipBackfillCandidateRow | any): string {
+    const value = row?.pickUpDate ?? row?.PickUpDate;
+    if (!value) return '—';
+    const m = moment(value);
+    return m.isValid() ? m.format('DD MMM YYYY') : String(value);
+  }
+
+  formatClosingDutySlipImage(row: ClosingDutySlipBackfillCandidateRow | any): string {
+    return this.stripDutySlipImageUrlPrefix(row?.dutySlipImage ?? row?.DutySlipImage ?? '');
+  }
+
+  private stripDutySlipImageUrlPrefix(value: string): string {
+    if (!value) return '';
+    const trimmed = value.trim().replace(/\\/g, '/');
+    const prefixes = [
+      'https://prodapi.ecoserp.in/StaticFiles/Images/',
+      'http://prodapi.ecoserp.in/StaticFiles/Images/',
+    ];
+    const lower = trimmed.toLowerCase();
+    for (const prefix of prefixes) {
+      if (lower.startsWith(prefix.toLowerCase())) {
+        return trimmed.substring(prefix.length);
+      }
+    }
+    if (trimmed.startsWith('http://') || trimmed.startsWith('https://')) {
+      try {
+        const url = new URL(trimmed);
+        const name = url.pathname.split('/').filter(Boolean).pop();
+        if (name) return name;
+      } catch {
+        // ignore
+      }
+    }
+    const marker = 'staticfiles/images/';
+    const markerIndex = lower.indexOf(marker);
+    if (markerIndex >= 0) {
+      return trimmed.substring(markerIndex + marker.length).replace(/^\/+/, '');
+    }
+    return trimmed;
+  }
+
+  private buildClosingDutySlipCriteria(skipCount = 0): ClosingDutySlipBackfillCriteria {
+    const minDate = this.closingMinPickUpDateCtrl.value;
+    return {
+      minPickUpDate: minDate ? moment(minDate).format('YYYY-MM-DD') : '2026-05-16',
+      maxCandidates: this.closingBatchSize,
+      skipCount,
+      targetMode: this.closingTargetMode,
+    };
+  }
+
+  private normalizeClosingCandidates(rows: any[]): ClosingDutySlipBackfillCandidateRow[] {
+    return (rows || []).map((row) => ({
+      dutySlipID: row?.dutySlipID ?? row?.DutySlipID,
+      reservationID: row?.reservationID ?? row?.ReservationID ?? null,
+      dutySlipImage: this.stripDutySlipImageUrlPrefix(row?.dutySlipImage ?? row?.DutySlipImage ?? ''),
+      pickUpDate: row?.pickUpDate ?? row?.PickUpDate ?? null,
+      status: row?.status ?? row?.Status ?? null,
+      targetRelativePath: row?.targetRelativePath ?? row?.TargetRelativePath ?? null,
+      hasActiveTargetDocument: row?.hasActiveTargetDocument ?? row?.HasActiveTargetDocument ?? false,
+      destinationFileExists: row?.destinationFileExists ?? row?.DestinationFileExists ?? false,
+      sourceFileExists: row?.sourceFileExists ?? row?.SourceFileExists ?? false,
+      sourceFileType: row?.sourceFileType ?? row?.SourceFileType ?? null,
+    }));
+  }
+
+  private mergeClosingBackfillProgress(errorRows: any[]): void {
+    const sortedLogs = (errorRows || [])
+      .map((row) => this.normalizeErrorRow(row))
+      .sort((a, b) => {
+        const ta = a.uploadTimestamp ? new Date(a.uploadTimestamp).getTime() : 0;
+        const tb = b.uploadTimestamp ? new Date(b.uploadTimestamp).getTime() : 0;
+        return ta - tb;
+      });
+
+    this.closingBackfillProgressRows = sortedLogs.map((log) => {
+      const parsed = this.parseClosingLog(log.errorDescription);
+      return {
+        dutySlipID: parsed.dutySlipID,
+        originalFile: parsed.originalFile,
+        status: parsed.status,
+        processingType: parsed.processingType,
+        details: parsed.details,
+        completedAt: log.uploadTimestamp || null,
+      };
+    });
+
+    const total = this.activeJob?.totalFiles ?? this.activeJob?.TotalFiles ?? sortedLogs.length;
+    const isRunning = this.getJobStatus() === 'Processing' || this.getJobStatus() === 'Pending';
+    if (isRunning && this.closingBackfillProgressRows.length < total) {
+      this.closingBackfillProgressRows = [
+        ...this.closingBackfillProgressRows,
+        {
+          dutySlipID: 0,
+          originalFile: '',
+          status: 'Processing',
+          processingType: '',
+          details: 'Processing next record...',
+          completedAt: null,
+        },
+      ];
+    }
+  }
+
+  private parseClosingLog(description: string): {
+    dutySlipID: number;
+    originalFile: string;
+    status: ClosingDutySlipBackfillProgressStatus;
+    processingType: string;
+    details: string;
+  } {
+    const text = description || '';
+    let status: ClosingDutySlipBackfillProgressStatus = 'Failed';
+    if (text.includes('[SUCCESS]')) status = 'Success';
+    else if (text.includes('[SKIPPED]')) status = 'Skipped';
+    else if (text.includes('[FAILED]')) status = 'Failed';
+
+    const fields: Record<string, string> = {};
+    text.split('|').forEach((part) => {
+      const idx = part.indexOf('=');
+      if (idx > 0) {
+        fields[part.slice(0, idx).trim()] = part.slice(idx + 1).trim();
+      }
+    });
+
+    return {
+      dutySlipID: Number(fields.DutySlipID || 0),
+      originalFile: fields.OriginalFile || '',
+      status,
+      processingType: fields.ProcessingType || '',
+      details: fields.Error || fields.DestPath || text,
+    };
+  }
+
+  private buildClosingCompletionSummary(errorRows: any[]): void {
+    const rows = (errorRows || []).map((row) => this.parseClosingLog(this.normalizeErrorRow(row).errorDescription));
+    const successful = rows.filter((r) => r.status === 'Success');
+    const skipped = rows.filter((r) => r.status === 'Skipped');
+    const failed = rows.filter((r) => r.status === 'Failed');
+    const sourcePdfs = rows.filter((r) => (r.processingType || '').toLowerCase().includes('pdf copied')).length;
+    const imagesConverted = rows.filter((r) => (r.processingType || '').toLowerCase().includes('image converted')).length;
+
+    this.closingCompletionSummary = {
+      totalRecords: this.closingBackfillPreview?.totalMatchedCount ?? this.activeJob?.totalFiles ?? rows.length,
+      sourcePdfs: sourcePdfs,
+      sourceImages: imagesConverted,
+      pdfsCopied: sourcePdfs,
+      imagesConverted,
+      successful: successful.length,
+      failed: failed.length,
+      skipped: skipped.length,
+      missingSourceFiles: skipped.filter((r) => (r.details || '').toLowerCase().includes('source')).length,
+      unsupportedFileTypes: skipped.filter((r) => (r.details || '').toLowerCase().includes('unsupported')).length,
+      databaseInserts: successful.length,
+      totalProcessingTimeMs: this.closingJobStartedAt ? Date.now() - this.closingJobStartedAt : 0,
+    };
   }
 
   displayCustomer(option: { customerName?: string } | string): string {
@@ -534,21 +1106,17 @@ export class BulkBillsDownloadComponent implements OnInit, OnDestroy, AfterViewI
     return m.isValid() ? m.format('DD/MM/YYYY HH:mm:ss') : String(value);
   }
 
-  private startPolling(jobId: number, isIrnBackfill = false): void {
+  private startPolling(jobId: number, isIrnBackfill = false, isClosingBackfill = false): void {
     this.stopPolling();
     this.pollIsIrnBackfill = isIrnBackfill;
+    this.pollIsClosingBackfill = isClosingBackfill;
     this.pollSub = timer(0, 2000)
       .pipe(
         switchMap(() =>
-          isIrnBackfill
-            ? forkJoin({
-                job: this.service.getJob(jobId),
-                errors: this.service.getJobErrors(jobId),
-              })
-            : forkJoin({
-                job: this.service.getJob(jobId),
-                errors: this.service.getJobErrors(jobId),
-              })
+          forkJoin({
+            job: this.service.getJob(jobId),
+            errors: this.service.getJobErrors(jobId),
+          })
         )
       )
       .subscribe(
@@ -559,6 +1127,9 @@ export class BulkBillsDownloadComponent implements OnInit, OnDestroy, AfterViewI
             this.jobErrors = (errors || [])
               .map((row) => this.normalizeErrorRow(row))
               .filter((row) => this.parseBackfillLogStatus(row.errorDescription) !== 'Success');
+          } else if (isClosingBackfill) {
+            this.mergeClosingBackfillProgress(errors || []);
+            this.jobErrors = (errors || []).map((row) => this.normalizeErrorRow(row));
           } else {
             this.jobErrors = (errors || []).map((row) => this.normalizeErrorRow(row));
             await this.showNewNamingSkipModals(this.jobErrors);
@@ -567,26 +1138,18 @@ export class BulkBillsDownloadComponent implements OnInit, OnDestroy, AfterViewI
           if (status === 'Completed' || status === 'Partial' || status === 'Failed') {
             this.stopPolling();
             this.backfilling = false;
-            if (isIrnBackfill) {
-              this.mergeBackfillProgress(errors || []);
+            if (isClosingBackfill) {
+              this.onClosingBatchJobFinished(errors || []);
+            } else if (isIrnBackfill) {
+              this.onIrnBatchJobFinished(errors || []);
             } else {
+              this.closingBackfilling = false;
               this.loadJobErrors(jobId);
             }
           }
         },
         () => this.stopPolling()
       );
-  }
-
-  private initBackfillProgressRows(invoices: BulkDownloadInvoiceSummary[]): void {
-    this.backfillProgressRows = (invoices || []).map((invoice) => ({
-      invoiceID: invoice.invoiceID,
-      invoiceNumberWithPrefix: invoice.invoiceNumberWithPrefix,
-      customerName: invoice.customerName,
-      status: 'Pending' as IrnBackfillProgressStatus,
-      details: '',
-      completedAt: null,
-    }));
   }
 
   private mergeBackfillProgress(errorRows: any[]): void {
@@ -663,169 +1226,8 @@ export class BulkBillsDownloadComponent implements OnInit, OnDestroy, AfterViewI
       this.pollSub.unsubscribe();
       this.pollSub = undefined;
     }
-  }
-
-  private async runInteractiveBackfill(invoices: BulkDownloadInvoiceSummary[], performedBy: number): Promise<void> {
-    let successCount = 0;
-    let errorCount = 0;
-
-    try {
-      for (let index = 0; index < invoices.length; index++) {
-        if (this.backfillCancelled) {
-          break;
-        }
-
-        const invoice = invoices[index];
-        this.setBackfillRowStatus(invoice.invoiceID, 'Processing', 'Archiving PDFs…');
-        if (this.activeJob) {
-          this.activeJob.processedFiles = index;
-        }
-
-        const stepErrors: string[] = [];
-        try {
-          await this.archiveInvoiceDocumentsInteractive(invoice.invoiceID, performedBy, stepErrors);
-          if (this.backfillCancelled) {
-            if (!stepErrors.length) {
-              this.setBackfillRowStatus(invoice.invoiceID, 'Partial', 'Cancelled — remaining PDFs not archived.');
-            }
-            break;
-          }
-          if (stepErrors.length) {
-            errorCount++;
-            this.setBackfillRowStatus(invoice.invoiceID, 'Partial', stepErrors.join('; '));
-          } else {
-            successCount++;
-            this.setBackfillRowStatus(invoice.invoiceID, 'Success', 'All PDFs archived.');
-          }
-        } catch (err) {
-          errorCount++;
-          const message = this.extractError(err, 'Archive failed.');
-          stepErrors.push(message);
-          this.setBackfillRowStatus(invoice.invoiceID, 'Failed', message);
-        }
-
-        if (this.activeJob) {
-          this.activeJob.processedFiles = index + 1;
-          this.activeJob.successCount = successCount;
-          this.activeJob.errorCount = errorCount;
-        }
-      }
-    } finally {
-      this.backfilling = false;
-      if (this.activeJob) {
-        this.activeJob.processedFiles = invoices.length;
-        this.activeJob.successCount = successCount;
-        this.activeJob.errorCount = errorCount;
-        if (this.backfillCancelled) {
-          this.activeJob.jobStatus = 'Failed';
-          this.activeJob.errorMessage = 'Cancelled by user.';
-        } else if (successCount === 0) {
-          this.activeJob.jobStatus = 'Failed';
-          this.activeJob.errorMessage = 'No invoices were archived.';
-        } else if (errorCount > 0) {
-          this.activeJob.jobStatus = 'Partial';
-        } else {
-          this.activeJob.jobStatus = 'Completed';
-        }
-      }
-      if (!this.backfillCancelled) {
-        this.snackBar.open('IRN backfill finished.', 'Close', { duration: 4000 });
-      }
-    }
-  }
-
-  private async archiveInvoiceDocumentsInteractive(
-    invoiceId: number,
-    performedBy: number,
-    stepErrors: string[]
-  ): Promise<void> {
-    const gaps = this.normalizeArchiveStatus(
-      await firstValueFrom(this.service.getInvoiceArchiveStatus(invoiceId))
-    );
-
-    if (gaps.missingInvoiceDocument) {
-      await this.archiveDocumentStep(
-        'Invoice',
-        () => this.archiveInvoicePdf(invoiceId, performedBy, gaps.templateAddress, gaps.invoiceType),
-        stepErrors
-      );
-    }
-    if (this.backfillCancelled) return;
-
-    const duties = await firstValueFrom(this.service.getInvoiceDuties(invoiceId));
-    const dutyRows = duties || [];
-    if (!dutyRows.length) {
-      stepErrors.push('Duty Slip not created — no duties on invoice.');
-      return;
-    }
-
-    for (const duty of dutyRows) {
-      if (this.backfillCancelled) return;
-      const dutySlipId = duty.dutySlipID ?? duty.DutySlipID;
-      if (!dutySlipId) continue;
-
-      if (gaps.missingDutySlipIDs.includes(dutySlipId)) {
-        await this.archiveDocumentStep(
-          'Duty Slip',
-          () => firstValueFrom(this.service.generateDutySlipPdf(dutySlipId, performedBy, invoiceId)),
-          stepErrors
-        );
-      }
-      if (this.backfillCancelled) return;
-
-      if (gaps.dutySlipsNeedingTollParking.includes(dutySlipId)) {
-        await this.archiveReceiptDocumentsStep(
-          'Toll Parking',
-          () => firstValueFrom(this.service.generateTollParkingPdfs(dutySlipId, performedBy, false)),
-          stepErrors
-        );
-      }
-      if (this.backfillCancelled) return;
-
-      if (gaps.dutySlipsNeedingInterstateTax.includes(dutySlipId)) {
-        await this.archiveReceiptDocumentsStep(
-          'Interstate Tax',
-          () => firstValueFrom(this.service.generateInterstateTaxPdfs(dutySlipId, performedBy, false)),
-          stepErrors
-        );
-      }
-    }
-  }
-
-  private async archiveDocumentStep(
-    documentType: string,
-    action: () => Promise<any>,
-    stepErrors: string[]
-  ): Promise<void> {
-    try {
-      const result = await action();
-      const fileName = result?.fileName ?? result?.FileName ?? 'NA';
-      const created = !!fileName && fileName !== 'NA';
-      if (!created) {
-        stepErrors.push(`${documentType} not created`);
-      }
-    } catch (err) {
-      const message = this.extractError(err, `${documentType} failed.`);
-      stepErrors.push(message);
-    }
-  }
-
-  private async archiveReceiptDocumentsStep(
-    documentType: string,
-    action: () => Promise<any[]>,
-    stepErrors: string[]
-  ): Promise<void> {
-    try {
-      const results = await action();
-      const docs = results || [];
-      if (!docs.length) {
-        stepErrors.push(`${documentType} not created`);
-        return;
-      }
-    } catch (err) {
-      const message = this.extractError(err, `${documentType} failed.`);
-      stepErrors.push(message);
-    }
+    this.pollIsIrnBackfill = false;
+    this.pollIsClosingBackfill = false;
   }
 
   private resetUploadFileSelection(): void {
@@ -892,16 +1294,6 @@ export class BulkBillsDownloadComponent implements OnInit, OnDestroy, AfterViewI
     );
   }
 
-  private setBackfillRowStatus(invoiceId: number, status: IrnBackfillProgressStatus, details: string): void {
-    const row = this.backfillProgressRows.find((r) => r.invoiceID === invoiceId);
-    if (!row) return;
-    row.status = status;
-    row.details = details;
-    if (status === 'Success' || status === 'Partial' || status === 'Failed') {
-      row.completedAt = new Date().toISOString();
-    }
-  }
-
   private getActiveJobId(): number | null {
     return this.activeJob?.bulkUploadJobID ?? this.activeJob?.BulkUploadJobID ?? null;
   }
@@ -909,42 +1301,8 @@ export class BulkBillsDownloadComponent implements OnInit, OnDestroy, AfterViewI
   private buildIrnBackfillCriteria(): IrnBackfillSearchCriteria {
     const invoiceNumber = (this.backfillInvoiceNumberCtrl.value || '').trim();
     return {
-      maxCandidates: this.maxBackfillBatchSize,
+      maxCandidates: this.irnBatchSize,
       invoiceNumber: invoiceNumber || null,
-    };
-  }
-
-  private async archiveInvoicePdf(
-    invoiceId: number,
-    performedBy: number,
-    templateAddress?: string | null,
-    invoiceType?: string | null
-  ): Promise<any> {
-    if (this.viewBillPdfService.isSupportedViewBillRoute(templateAddress, invoiceType)) {
-      return this.viewBillPdfService.archiveBillFromViewBill(
-        invoiceId,
-        performedBy,
-        templateAddress,
-        invoiceType
-      );
-    }
-
-    return firstValueFrom(this.service.generateInvoicePdf(invoiceId, performedBy));
-  }
-
-  private normalizeArchiveStatus(raw: any): InvoiceArchiveStatus {
-    const missingDutySlipIDs = raw?.missingDutySlipIDs ?? raw?.MissingDutySlipIDs ?? [];
-    const dutySlipsNeedingTollParking = raw?.dutySlipsNeedingTollParking ?? raw?.DutySlipsNeedingTollParking ?? [];
-    const dutySlipsNeedingInterstateTax = raw?.dutySlipsNeedingInterstateTax ?? raw?.DutySlipsNeedingInterstateTax ?? [];
-    return {
-      invoiceID: raw?.invoiceID ?? raw?.InvoiceID ?? 0,
-      isComplete: !!(raw?.isComplete ?? raw?.IsComplete),
-      missingInvoiceDocument: !!(raw?.missingInvoiceDocument ?? raw?.MissingInvoiceDocument),
-      missingDutySlipIDs: Array.isArray(missingDutySlipIDs) ? missingDutySlipIDs : [],
-      dutySlipsNeedingTollParking: Array.isArray(dutySlipsNeedingTollParking) ? dutySlipsNeedingTollParking : [],
-      dutySlipsNeedingInterstateTax: Array.isArray(dutySlipsNeedingInterstateTax) ? dutySlipsNeedingInterstateTax : [],
-      templateAddress: raw?.templateAddress ?? raw?.TemplateAddress ?? null,
-      invoiceType: raw?.invoiceType ?? raw?.InvoiceType ?? null,
     };
   }
 

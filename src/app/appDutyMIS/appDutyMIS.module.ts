@@ -17,6 +17,7 @@ import { MatSelectModule } from '@angular/material/select';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatCardModule } from '@angular/material/card';
 import { MatDatepickerModule } from '@angular/material/datepicker';
+import { MatNativeDateModule } from '@angular/material/core';
 import { MatDialogModule } from '@angular/material/dialog';
 import { MatSortModule } from '@angular/material/sort';
 import { MatToolbarModule } from '@angular/material/toolbar';
@@ -55,6 +56,7 @@ import { StaticImageComponent } from '../shared/static-image/static-image.compon
     MatCheckboxModule,
     MatCardModule,
     MatDatepickerModule,
+    MatNativeDateModule,
     MatDialogModule,
     MatSortModule,
     MatToolbarModule,

@@ -71,11 +71,7 @@ export class AuthService {
     };
     return this.http.post<any>(this.apiUrl + '/authenticate', body).pipe(
       map((user) => {
-        let parsed: any = user;
-        if (typeof user === 'string') {
-          try { parsed = JSON.parse(user); } catch { parsed = user; }
-        }
-        const normalized = this.normalizeLoginResponse(parsed);
+        const normalized = this.parseAuthenticateBody(user);
         if (this.isValidSession(normalized)) {
           localStorage.setItem('currentUser', JSON.stringify(normalized));
           this.syncExpirationDateFromEmployee(normalized);
@@ -118,6 +114,32 @@ export class AuthService {
    * API may return PascalCase (.NET default) or camelCase (System.Text.Json / some proxies).
    * The app expects Token and employee with PascalCase nested fields.
    */
+  private parseAuthenticateBody(user: any): any {
+    if (!user) {
+      return user;
+    }
+
+    let parsed: any = user;
+    if (typeof user === 'string') {
+      try {
+        parsed = JSON.parse(user);
+      } catch {
+        return this.normalizeLoginResponse({ Status: 'Failure', Message: user });
+      }
+    }
+
+    const wrapped = parsed?.LoginDetails ?? parsed?.loginDetails;
+    if (typeof wrapped === 'string' && wrapped.trim()) {
+      try {
+        parsed = JSON.parse(wrapped);
+      } catch {
+        parsed = { Status: 'Failure', Message: wrapped };
+      }
+    }
+
+    return this.normalizeLoginResponse(parsed);
+  }
+
   private normalizeLoginResponse(user: any): any {
     if (!user || typeof user !== 'object') {
       return user;

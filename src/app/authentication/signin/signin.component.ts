@@ -13,6 +13,7 @@ import { MatDialog } from '@angular/material/dialog';
 import { FormDialogComponent } from 'src/app/validateOTP/dialogs/form-dialog/form-dialog.component';
 
 import { ExpirationDateService } from 'src/app/shared/expirationDate.service';
+import { RuntimeConfigService } from 'src/app/core/service/runtime-config.service';
 // Login geolocation disabled (EmployeeLoginSessionSettings.RequireLoginLocation = false on API).
 
 @Component({
@@ -70,6 +71,7 @@ export class SigninComponent implements OnInit {
 
     private dialog: MatDialog,
     private expirationDateService: ExpirationDateService,
+    private runtimeConfig: RuntimeConfigService,
   ) {}
 
 
@@ -132,7 +134,17 @@ export class SigninComponent implements OnInit {
     }
     const status = error?.status;
     if (status === 0) {
-      return 'Cannot reach the API at https://localhost:44368. Start RententAPI (IIS Express) and accept the localhost certificate, then retry.';
+      return `Cannot reach the API at ${this.runtimeConfig.getBaseUrl()}. Check that the API site is running and try again.`;
+    }
+    if (status === 500) {
+      const body = error?.error;
+      if (body && typeof body === 'object') {
+        const message = body.Message ?? body.message;
+        if (message) {
+          return String(message);
+        }
+      }
+      return 'Server error during login. Please contact the administrator.';
     }
     const body = error?.error;
     if (typeof body === 'string' && body.trim()) {
@@ -177,22 +189,28 @@ export class SigninComponent implements OnInit {
       .subscribe(
         (res) => {
           console.log('Login response:', res);
-          this.error = res?.Message || res.loginDetails || null;
-          if (res?.Status === 'Failure' && res?.Message) 
+          const message = res?.Message ?? res?.message;
+          const loginDetails = res?.LoginDetails ?? res?.loginDetails;
+          this.error = message || (typeof loginDetails === 'string' ? loginDetails : null) || null;
+          if (res?.Status === 'Failure' && message)
           {
-            this.errorMessageToBeShown = res.Message;
+            this.errorMessageToBeShown = message;
           }
-          if (res.Message === 'Invalid User: User not found') 
+          if (message === 'Invalid User: User not found')
           {
             this.errorMessageToBeShown = 'User not found';
-          } 
-          else if (res.Message === 'Invalid User: Please enter correct username and password') 
+          }
+          else if (message === 'Invalid User: Please enter correct username and password')
           {
             this.errorMessageToBeShown = 'Please enter correct username and password';
-          } 
-          else if (res.loginDetails?.includes('Invalid User: User not found')) 
+          }
+          else if (typeof loginDetails === 'string' && loginDetails.includes('Invalid User: User not found'))
           {
             this.errorMessageToBeShown = 'Unauthorized';
+          }
+          else if (this.error && !this.errorMessageToBeShown)
+          {
+            this.errorMessageToBeShown = this.error;
           }
 
           if (res) {

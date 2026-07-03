@@ -54,7 +54,7 @@ export class AppDutyMIS {
     this.dutySlipNo = appDutyMIS.dutySlipNo || '';
     this.dutyDate = appDutyMIS.dutyDate ? new Date(appDutyMIS.dutyDate) : null;
     this.dispatchLocation = appDutyMIS.dispatchLocation || '';
-    this.driverName = appDutyMIS.driverName || '';
+    this.driverName = appDutyMIS.driverName || appDutyMIS.drivername || '';
     this.carNo = appDutyMIS.carNo || '';
     this.customerID = appDutyMIS.customerID || 0;
     this.appGarageToStartKm = appDutyMIS.appGarageToStartKm || '';

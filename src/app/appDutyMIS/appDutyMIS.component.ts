@@ -155,9 +155,13 @@ export class AppDutyMISComponent implements OnInit {
   // ToDate: string = '';
   DispatchLocation: string = '';
 
-  searchFromDate: string = '';
-  searchToDate: string = '';
+  searchFromDate: Date | null = null;
+  searchToDate: Date | null = null;
   csvExporting = false;
+  filtersCollapsed = false;
+  private readonly pageSize = 50;
+
+  private readonly zeroAsNaColumns = new Set(['dutySlipID']);
 
   constructor(
     public httpClient: HttpClient,
@@ -233,15 +237,34 @@ export class AppDutyMISComponent implements OnInit {
       }
 
   refresh() {
-
-    this.searchFromDate = '';
-    this.searchToDate = '';
-   this.dispatch_Location.setValue('');
+    this.searchFromDate = null;
+    this.searchToDate = null;
+    this.dispatch_Location.setValue('');
     this.SearchActivationStatus = true;
-    this.PageNumber=0;
+    this.PageNumber = 0;
     this.searchTerm = '';
     this.selectedFilter = 'search';
     this.loadData();
+  }
+
+  get activeFilterCount(): number {
+    let count = 0;
+    if (this.searchFromDate) count++;
+    if (this.searchToDate) count++;
+    if (this.dispatch_Location.value?.trim()) count++;
+    if (this.SearchActivationStatus === false) count++;
+    return count;
+  }
+
+  toggleFilters(): void {
+    this.filtersCollapsed = !this.filtersCollapsed;
+  }
+
+  private formatDateParam(value: Date | null): string {
+    if (!value) {
+      return '';
+    }
+    return moment(value).format('MMM DD yyyy');
   }
 
 //   addNew()
@@ -304,21 +327,40 @@ shouldShowDeleteButton(item: any): boolean {
     }
   }
 
+  private normalizeRows(rows: any[] | null | undefined): AppDutyMIS[] {
+    if (!rows?.length) {
+      return [];
+    }
+
+    return rows.map((row) => this.normalizeRow(row));
+  }
+
+  private normalizeRow(row: any): any {
+    return {
+      ...row,
+      driverName: row.driverName ?? row.drivername ?? null,
+    };
+  }
+
+  getDisplayValue(column: string, row: any): string | number {
+    const value = row[column];
+
+    if (this.zeroAsNaColumns.has(column)) {
+      return value === undefined || value === null || value === 0 ? 'N/A' : value;
+    }
+
+    if (value === undefined || value === null || value === '') {
+      return 'N/A';
+    }
+
+    return value;
+  }
+
    public loadData() 
    {
-   
-    // if(this.StartDate!==""){
-    //   this.StartDate=moment(this.StartDate).format('MMM DD yyyy');
-    // }
-    // if(this.EndDate!==""){
-    //   this.EndDate=moment(this.EndDate).format('MMM DD yyyy');
-    // }
-    if(this.searchFromDate!==""){
-          this.searchFromDate=moment(this.searchFromDate).format('MMM DD yyyy');
-        }
-        if(this.searchToDate!==""){
-          this.searchToDate=moment(this.searchToDate).format('MMM DD yyyy');
-        } 
+    const fromDate = this.formatDateParam(this.searchFromDate);
+    const toDate = this.formatDateParam(this.searchToDate);
+
     switch (this.selectedFilter)
     {
       case 'organizationalEntityName':
@@ -334,13 +376,14 @@ shouldShowDeleteButton(item: any): boolean {
         this.searchTerm = '';
         break;
     }
-      this.appDutyMISService.getTableData(this.searchFromDate,
-        this.searchToDate,
+      this.appDutyMISService.getTableData(fromDate,
+        toDate,
         this.dispatch_Location.value,this.SearchActivationStatus, this.PageNumber).subscribe
       (
         data =>   
         {
-          this.dataSource = data; 
+          const rows = this.normalizeRows(data);
+          this.dataSource = rows.length ? rows : null;
         },
         (error: HttpErrorResponse) => { this.dataSource = null;}
       );
@@ -380,6 +423,7 @@ shouldShowDeleteButton(item: any): boolean {
 
   public SearchData()
   {
+    this.PageNumber = 0;
     this.loadData();
   }
 
@@ -499,39 +543,94 @@ shouldShowDeleteButton(item: any): boolean {
       return;
     }
 
-    let fromDate = this.searchFromDate;
-    let toDate = this.searchToDate;
-    if (fromDate !== "") {
-      fromDate = moment(fromDate).format('MMM DD yyyy');
-    }
-    if (toDate !== "") {
-      toDate = moment(toDate).format('MMM DD yyyy');
+    if (!this.dataSource?.length) {
+      this.showNotification('snackbar-danger', 'No data to export. Run a search first.', 'bottom', 'center');
+      return;
     }
 
+    // All matching rows are already on screen — skip the API round-trip.
+    if (this.dataSource.length < this.pageSize && this.PageNumber === 0) {
+      this.downloadVisibleRowsCsv();
+      return;
+    }
+
+    this.exportFullCsv();
+  }
+
+  private exportFullCsv() {
+    const fromDate = this.formatDateParam(this.searchFromDate);
+    const toDate = this.formatDateParam(this.searchToDate);
+
     this.csvExporting = true;
+    this.showNotification('snackbar-info', 'Preparing CSV export...', 'bottom', 'center');
+
     this.appDutyMISService.downloadCsv(
-      fromDate || '',
-      toDate || '',
+      fromDate,
+      toDate,
       this.dispatch_Location.value || '',
       this.SearchActivationStatus
     ).subscribe(
-      (blob: Blob) => {
+      async (blob: Blob) => {
         this.csvExporting = false;
-        const fileUrl = window.URL.createObjectURL(blob);
-        const anchor = document.createElement('a');
-        anchor.href = fileUrl;
-        anchor.download = `AppDutyMIS_${moment().format('YYYYMMDD_HHmmss')}.csv`;
-        document.body.appendChild(anchor);
-        anchor.click();
-        document.body.removeChild(anchor);
-        window.URL.revokeObjectURL(fileUrl);
+        if (!blob || blob.size === 0) {
+          this.showNotification('snackbar-danger', 'No data available for CSV export', 'bottom', 'center');
+          return;
+        }
+
+        if (blob.type?.includes('json') || blob.type?.includes('text/plain')) {
+          const message = await this.readBlobText(blob);
+          this.showNotification('snackbar-danger', message || 'Failed to download CSV', 'bottom', 'center');
+          return;
+        }
+
+        this.triggerBlobDownload(blob);
         this.showNotification('snackbar-success', 'CSV downloaded successfully', 'bottom', 'center');
       },
       () => {
         this.csvExporting = false;
-        this.showNotification('snackbar-danger', 'Failed to download CSV', 'bottom', 'center');
+        this.downloadVisibleRowsCsv();
       }
     );
+  }
+
+  private triggerBlobDownload(blob: Blob): void {
+    const fileUrl = window.URL.createObjectURL(blob);
+    const anchor = document.createElement('a');
+    anchor.href = fileUrl;
+    anchor.download = `AppDutyMIS_${moment().format('YYYYMMDD_HHmmss')}.csv`;
+    document.body.appendChild(anchor);
+    anchor.click();
+    document.body.removeChild(anchor);
+    window.URL.revokeObjectURL(fileUrl);
+  }
+
+  private downloadVisibleRowsCsv(): void {
+    const headers = this.displayedColumns.map((column) => this.columnTitleMap[column] || column);
+    const rows = (this.dataSource || []).map((row) =>
+      this.displayedColumns.map((column) => {
+        if (column === 'dutyDate') {
+          return row[column] ? moment(row[column]).format('DD-MM-YYYY') : 'N/A';
+        }
+        return String(this.getDisplayValue(column, row));
+      })
+    );
+
+    const csv = [headers, ...rows]
+      .map((line) => line.map((value) => `"${String(value).replace(/"/g, '""')}"`).join(','))
+      .join('\n');
+
+    const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' });
+    this.triggerBlobDownload(blob);
+    this.showNotification('snackbar-success', 'CSV downloaded successfully', 'bottom', 'center');
+  }
+
+  private readBlobText(blob: Blob): Promise<string> {
+    return new Promise((resolve) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(String(reader.result || ''));
+      reader.onerror = () => resolve('');
+      reader.readAsText(blob);
+    });
   }
 
   SortingData(coloumName:any) {
@@ -545,13 +644,14 @@ shouldShowDeleteButton(item: any): boolean {
       this.sortingData = 1;
       this.sortType = "Descending";
     }
-    this.appDutyMISService.getTableDataSort(this.searchFromDate,
-       this.searchToDate,
+    this.appDutyMISService.getTableDataSort(this.formatDateParam(this.searchFromDate),
+       this.formatDateParam(this.searchToDate),
        this.dispatch_Location.value,this.SearchActivationStatus, this.PageNumber,coloumName.active,this.sortType).subscribe
     (
       data =>   
       {
-        this.dataSource = data;     
+        const rows = this.normalizeRows(data);
+        this.dataSource = rows.length ? rows : null;
       },
       (error: HttpErrorResponse) => { this.dataSource = null;}
     );

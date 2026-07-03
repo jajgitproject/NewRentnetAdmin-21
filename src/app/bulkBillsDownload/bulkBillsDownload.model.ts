@@ -87,8 +87,11 @@ export interface InvoiceArchiveStatus {
 }
 
 export interface IrnBackfillPreviewResult {
-  candidateCount: number;
-  invoices: BulkDownloadInvoiceSummary[];
+  totalMatchedCount?: number;
+  candidateCount?: number;
+  willProcessCount?: number;
+  estimatedBatchCount?: number;
+  invoices?: BulkDownloadInvoiceSummary[];
 }
 
 export interface StartIrnBackfillJobResult {
@@ -118,3 +121,75 @@ export const REPLACE_POLICIES = [
   { value: 'ReplaceAll', label: 'Replace existing' },
   { value: 'SkipAll', label: 'Skip if exists' },
 ];
+
+export type ClosingDutySlipBackfillTargetMode = 'DryRun' | 'Production';
+
+export interface ClosingDutySlipBackfillCriteria {
+  minPickUpDate?: string | null;
+  maxCandidates?: number;
+  skipCount?: number;
+  targetMode?: ClosingDutySlipBackfillTargetMode;
+  dutySlipIDs?: number[];
+}
+
+export interface ClosingDutySlipBackfillCandidateRow {
+  dutySlipID: number;
+  reservationID?: number | null;
+  dutySlipImage?: string | null;
+  pickUpDate?: string | null;
+  status?: string | null;
+  targetRelativePath?: string | null;
+  hasActiveTargetDocument?: boolean;
+  destinationFileExists?: boolean;
+  sourceFileExists?: boolean;
+  sourceFileType?: string | null;
+}
+
+export interface ClosingDutySlipBackfillPreviewResult {
+  targetMode?: string | null;
+  targetPathPrefix?: string | null;
+  totalMatchedCount?: number;
+  candidateCount?: number;
+  newDocumentCount?: number;
+  toReplaceCount?: number;
+  missingSourceFileCount?: number;
+  missingReservationCount?: number;
+  existingDestinationFileCount?: number;
+  unsupportedFileTypeCount?: number;
+  willProcessCount?: number;
+  estimatedBatchCount?: number;
+  candidates?: ClosingDutySlipBackfillCandidateRow[];
+}
+
+export interface StartClosingDutySlipBackfillJobResult {
+  jobId: number;
+  jobStatus: string;
+  targetMode?: string | null;
+  totalDutySlips: number;
+}
+
+export type ClosingDutySlipBackfillProgressStatus = 'Pending' | 'Processing' | 'Success' | 'Skipped' | 'Failed';
+
+export interface ClosingDutySlipBackfillProgressRow {
+  dutySlipID: number;
+  originalFile: string;
+  status: ClosingDutySlipBackfillProgressStatus;
+  processingType: string;
+  details: string;
+  completedAt: string | null;
+}
+
+export interface ClosingDutySlipBackfillCompletionSummary {
+  totalRecords: number;
+  sourcePdfs: number;
+  sourceImages: number;
+  pdfsCopied: number;
+  imagesConverted: number;
+  successful: number;
+  failed: number;
+  skipped: number;
+  missingSourceFiles: number;
+  unsupportedFileTypes: number;
+  databaseInserts: number;
+  totalProcessingTimeMs: number;
+}

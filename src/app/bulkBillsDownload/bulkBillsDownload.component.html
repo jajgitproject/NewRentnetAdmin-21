@@ -29,6 +29,7 @@
                   <button mat-button type="button" [color]="activeTab === 'backfill' ? 'primary' : undefined" (click)="setTab('backfill')">Backfill</button>
                   <button mat-button type="button" [color]="activeTab === 'download' ? 'primary' : undefined" (click)="setTab('download')">Download Invoice - DutySlip</button>
                   <button mat-button type="button" [color]="activeTab === 'upload' ? 'primary' : undefined" (click)="setTab('upload')">Upload Documents</button>
+                  <button mat-button type="button" [color]="activeTab === 'closingDutySlip' ? 'primary' : undefined" (click)="setTab('closingDutySlip')">Manual Duty Slips from Closing</button>
                 </div>
                 <div class="bulk-actions">
                   <button mat-mini-fab color="primary" type="button" (click)="refresh()" title="Reset">
@@ -41,40 +42,244 @@
                 <div class="backfill-panel">
                   <div class="panel-title">IRN PDF backfill</div>
                   <p class="backfill-hint">
-                    Backfill processes up to <strong>{{ maxBackfillBatchSize }}</strong> invoices per run without popups.
-                    Progress is shown in the job panel below.
-                  </p>
-                  <p class="backfill-hint backfill-hint-secondary">
                     Archives bill, duty slip, toll parking, and interstate tax PDFs for IRN invoices that are still incomplete.
-                    Fully archived invoices are skipped on re-run. Toll parking and interstate tax are required only when approved receipts with images exist.
-                    Reservation emails still require manual upload.
+                    Fully archived invoices are skipped on re-run. Reservation emails still require manual upload.
                     Matches <code>IrnBackfill_Candidates.sql</code> (all dates). Only missing PDFs are created; existing archived files are left unchanged.
                   </p>
                   <div class="row bulk-filters g-2 backfill-search-row">
                     <div class="col-xl-3 col-lg-4 col-md-6 col-sm-12">
                       <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
                         <mat-label>Invoice Number</mat-label>
-                        <input matInput [formControl]="backfillInvoiceNumberCtrl" placeholder="e.g. NAE2627/48" />
+                        <input matInput [formControl]="backfillInvoiceNumberCtrl" placeholder="e.g. NAE2627/48 (optional)" />
                       </mat-form-field>
                     </div>
-                    <div class="col-xl-2 col-lg-3 col-md-4 col-sm-6 d-flex align-items-center">
-                      <button mat-raised-button color="primary" type="button" (click)="searchBackfillByInvoice()" [disabled]="backfilling || isBackfillRunning()">
-                        Search &amp; Backfill
-                      </button>
+                    <div class="col-xl-3 col-lg-4 col-md-6 col-sm-12">
+                      <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                        <mat-label>Batch size</mat-label>
+                        <input matInput type="number" min="1" max="2000" [(ngModel)]="irnBatchSize"
+                          [disabled]="backfilling || isBackfillRunning()" />
+                      </mat-form-field>
                     </div>
                   </div>
-                  <p class="backfill-hint backfill-hint-inline" *ngIf="backfillInvoiceNumberCtrl.value">
-                    Search matches active rows in <code>InvoiceDocument</code> only (partial invoice number match). If a candidate is found, backfill starts automatically.
+                  <p class="backfill-hint backfill-hint-inline">
+                    Leave invoice number blank to match all incomplete IRN invoices. Partial invoice number matches active <code>InvoiceDocument</code> rows only.
                   </p>
                   <div class="load-error" *ngIf="backfillLoadError">{{ backfillLoadError }}</div>
                   <div class="backfill-actions">
-                    <button mat-stroked-button type="button" (click)="previewBackfillCandidates()">Preview candidates</button>
-                    <button mat-raised-button color="warn" type="button" (click)="startIrnBackfill()" [disabled]="backfilling || isBackfillRunning()">
-                      Backfill IRN PDFs
+                    <button mat-stroked-button type="button"
+                      (click)="previewIrnBackfill()"
+                      [disabled]="irnPreviewLoading || backfilling || isBackfillRunning()">
+                      {{ irnPreviewLoading ? 'Previewing...' : 'Preview' }}
                     </button>
-                    <span class="backfill-count" *ngIf="backfillCandidateCount !== null">
-                      {{ backfillCandidateCount }} candidate(s) (max {{ maxBackfillBatchSize }})
+                    <button mat-raised-button color="warn" type="button"
+                      (click)="startIrnBackfill(true)"
+                      [disabled]="backfilling || isBackfillRunning() || !canStartIrnBackfill()">
+                      {{ getIrnRunButtonLabel() }}
+                    </button>
+                    <button mat-stroked-button type="button"
+                      (click)="startIrnBackfill(false)"
+                      [disabled]="backfilling || isBackfillRunning() || !canStartIrnBackfill()">
+                      Run single batch
+                    </button>
+                    <span class="backfill-count" *ngIf="irnBackfillPreview">
+                      Matched {{ getIrnTotalMatchedCount() }}
+                      · {{ getIrnEstimatedBatchCount() }} batch(es) of {{ irnBatchSize }}
                     </span>
+                  </div>
+                  <p class="backfill-hint backfill-hint-inline" *ngIf="irnBackfillPreview">
+                    Preview lists up to 100 sample rows. Progress is shown in the job panel below when you start a run.
+                  </p>
+                  <div class="backfill-preview-summary" *ngIf="irnBackfillPreview">
+                    <div><strong>Total matched:</strong> {{ getIrnTotalMatchedCount() }}</div>
+                    <div><strong>Batch size:</strong> {{ irnBatchSize }}</div>
+                    <div><strong>Estimated batches:</strong> {{ getIrnEstimatedBatchCount() }}</div>
+                    <div><strong>Per batch (max):</strong> {{ irnBackfillPreview.willProcessCount ?? irnBackfillPreview.WillProcessCount ?? irnBackfillPreview.candidateCount ?? irnBackfillPreview.CandidateCount ?? 0 }}</div>
+                  </div>
+                  <div class="table-responsive" *ngIf="irnBackfillPreview && irnBackfillCandidates.length">
+                    <table class="error-table closing-candidate-table">
+                      <thead>
+                        <tr>
+                          <th>Invoice No</th>
+                          <th>Customer</th>
+                          <th>Invoice Date</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <tr *ngFor="let row of irnBackfillCandidates">
+                          <td>{{ row.invoiceNumberWithPrefix }}</td>
+                          <td>{{ row.customerName }}</td>
+                          <td>{{ formatInvoiceDate(row.invoiceDate) }}</td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              </div>
+
+              <div *ngIf="activeTab === 'closingDutySlip'">
+                <div class="backfill-panel">
+                  <div class="panel-title">Manual Duty Slips from Closing</div>
+                  <p class="backfill-hint">
+                    One-time backfill from <code>DutySlip.DutySlipImage</code> (read-only) into partitioned duty slip PDFs.
+                    Dry Run writes to <strong>DutySlipDocument_Temp</strong> and <code>DocumentRepository/DutySlips_Temp/</code>.
+                    Production writes to <strong>DutySlipDocument</strong> and <code>DocumentRepository/DutySlips/</code>.
+                    Existing destination PDFs and document records are <strong>replaced</strong> on re-run.
+                  </p>
+                  <div class="row bulk-filters g-2 backfill-search-row">
+                    <div class="col-xl-3 col-lg-4 col-md-6 col-sm-12">
+                      <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                        <mat-label>Min Pickup Date</mat-label>
+                        <input matInput [matDatepicker]="closingPickUpPicker" [formControl]="closingMinPickUpDateCtrl" />
+                        <mat-datepicker-toggle matSuffix [for]="closingPickUpPicker"></mat-datepicker-toggle>
+                        <mat-datepicker #closingPickUpPicker></mat-datepicker>
+                      </mat-form-field>
+                    </div>
+                    <div class="col-xl-3 col-lg-4 col-md-6 col-sm-12">
+                      <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                        <mat-label>Run mode</mat-label>
+                        <mat-select [(ngModel)]="closingTargetMode">
+                          <mat-option value="DryRun">Dry Run (Temp table + DutySlips_Temp)</mat-option>
+                          <mat-option value="Production">Production (DutySlipDocument + DutySlips)</mat-option>
+                        </mat-select>
+                      </mat-form-field>
+                    </div>
+                    <div class="col-xl-3 col-lg-4 col-md-6 col-sm-12">
+                      <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                        <mat-label>Batch size</mat-label>
+                        <input matInput type="number" min="1" max="2000" [(ngModel)]="closingBatchSize"
+                          [disabled]="closingBackfilling || isBackfillRunning()" />
+                      </mat-form-field>
+                    </div>
+                  </div>
+                  <div class="load-error" *ngIf="closingBackfillLoadError">{{ closingBackfillLoadError }}</div>
+                  <div class="backfill-actions">
+                    <button mat-stroked-button type="button"
+                      (click)="previewClosingDutySlipBackfill()"
+                      [disabled]="closingPreviewLoading || closingBackfilling || isBackfillRunning()">
+                      {{ closingPreviewLoading ? 'Previewing...' : 'Preview' }}
+                    </button>
+                    <button mat-raised-button color="primary" type="button"
+                      (click)="startClosingDutySlipBackfill(true)"
+                      [disabled]="closingBackfilling || isBackfillRunning() || !canStartClosingBackfill()">
+                      {{ getClosingRunButtonLabel() }}
+                    </button>
+                    <button mat-stroked-button type="button"
+                      (click)="startClosingDutySlipBackfill(false)"
+                      [disabled]="closingBackfilling || isBackfillRunning() || !canStartClosingBackfill()">
+                      Run single batch
+                    </button>
+                    <span class="backfill-count" *ngIf="closingBackfillPreview">
+                      Matched {{ getClosingTotalMatchedCount() }}
+                      · {{ getClosingEstimatedBatchCount() }} batch(es) of {{ closingBatchSize }}
+                    </span>
+                  </div>
+                  <p class="backfill-hint backfill-hint-inline" *ngIf="closingBackfillPreview">
+                    Preview uses the SQL filter only and lists up to 100 sample rows. Existing files and document records will be replaced when you start the run.
+                  </p>
+                  <div class="backfill-preview-summary" *ngIf="closingBackfillPreview">
+                    <div><strong>Total matched:</strong> {{ getClosingTotalMatchedCount() }}</div>
+                    <div><strong>Batch size:</strong> {{ closingBatchSize }}</div>
+                    <div><strong>Estimated batches:</strong> {{ getClosingEstimatedBatchCount() }}</div>
+                    <div><strong>Per batch (max):</strong> {{ closingBackfillPreview.willProcessCount ?? closingBackfillPreview.WillProcessCount ?? 0 }}</div>
+                    <div><strong>New in sample:</strong> {{ closingBackfillPreview.newDocumentCount ?? closingBackfillPreview.NewDocumentCount ?? 0 }}</div>
+                    <div><strong>Will replace in sample:</strong> {{ closingBackfillPreview.toReplaceCount ?? closingBackfillPreview.ToReplaceCount ?? 0 }}</div>
+                    <div><strong>Missing source file:</strong> {{ closingBackfillPreview.missingSourceFileCount ?? closingBackfillPreview.MissingSourceFileCount ?? 0 }}</div>
+                    <div><strong>Missing reservation:</strong> {{ closingBackfillPreview.missingReservationCount ?? closingBackfillPreview.MissingReservationCount ?? 0 }}</div>
+                    <div><strong>Unsupported file type:</strong> {{ closingBackfillPreview.unsupportedFileTypeCount ?? closingBackfillPreview.UnsupportedFileTypeCount ?? 0 }}</div>
+                    <div><strong>Target path:</strong> {{ closingBackfillPreview.targetPathPrefix ?? closingBackfillPreview.TargetPathPrefix }}</div>
+                  </div>
+                  <div class="closing-progress-panel" *ngIf="isClosingDutySlipJob() && activeJob">
+                    <div class="panel-title">Progress {{ getClosingBatchProgressLabel() }}</div>
+                    <div class="backfill-preview-summary" *ngIf="closingTotalBatches > 1">
+                      <div><strong>Overall:</strong> {{ closingAllBatchesProcessed + (activeJob.processedFiles || 0) }} / {{ getClosingTotalMatchedCount() }}</div>
+                    </div>
+                    <div class="backfill-preview-summary">
+                      <div><strong>Processed:</strong> {{ activeJob.processedFiles }} / {{ activeJob.totalFiles }}</div>
+                      <div><strong>Successful:</strong> {{ activeJob.successCount }}</div>
+                      <div><strong>Failed:</strong> {{ activeJob.errorCount }}</div>
+                      <div><strong>Skipped:</strong> {{ getClosingSkippedCount() }}</div>
+                      <div><strong>Remaining:</strong> {{ getClosingRemainingCount() }}</div>
+                      <div><strong>Current:</strong> {{ getClosingCurrentRecordLabel() }}</div>
+                      <div><strong>Elapsed:</strong> {{ getClosingElapsedTime() }}</div>
+                    </div>
+                    <mat-progress-bar mode="determinate" [value]="getJobProgress()"></mat-progress-bar>
+                    <div class="job-actions">
+                      <button mat-stroked-button type="button" (click)="exportErrors()" [disabled]="!jobErrors.length">Export log CSV</button>
+                      <button mat-button type="button" (click)="clearJob()">
+                        <ng-container *ngIf="isBackfillRunning(); else dismissClosingJob">Cancel run</ng-container>
+                        <ng-template #dismissClosingJob>Dismiss</ng-template>
+                      </button>
+                    </div>
+                  </div>
+                  <div class="backfill-preview-summary closing-completion-summary" *ngIf="closingCompletionSummary">
+                    <div class="panel-title">Completion Summary</div>
+                    <div><strong>Total records:</strong> {{ closingCompletionSummary.totalRecords }}</div>
+                    <div><strong>PDFs copied:</strong> {{ closingCompletionSummary.pdfsCopied }}</div>
+                    <div><strong>Images converted:</strong> {{ closingCompletionSummary.imagesConverted }}</div>
+                    <div><strong>Successful:</strong> {{ closingCompletionSummary.successful }}</div>
+                    <div><strong>Failed:</strong> {{ closingCompletionSummary.failed }}</div>
+                    <div><strong>Skipped:</strong> {{ closingCompletionSummary.skipped }}</div>
+                    <div><strong>Missing source files:</strong> {{ closingCompletionSummary.missingSourceFiles }}</div>
+                    <div><strong>Unsupported file types:</strong> {{ closingCompletionSummary.unsupportedFileTypes }}</div>
+                    <div><strong>Database inserts:</strong> {{ closingCompletionSummary.databaseInserts }}</div>
+                    <div><strong>Processing time:</strong> {{ (closingCompletionSummary.totalProcessingTimeMs / 1000) | number:'1.0-0' }}s</div>
+                  </div>
+                  <div class="table-responsive" *ngIf="closingBackfillPreview && closingBackfillCandidates.length">
+                    <table class="error-table closing-candidate-table">
+                      <thead>
+                        <tr>
+                          <th>Duty Slip ID</th>
+                          <th>Pickup Date</th>
+                          <th>Image</th>
+                          <th>Type</th>
+                          <th>Status</th>
+                          <th>Target path</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <tr *ngFor="let row of closingBackfillCandidates">
+                          <td>{{ row.dutySlipID }}</td>
+                          <td>{{ formatClosingPickUpDate(row) }}</td>
+                          <td>{{ formatClosingDutySlipImage(row) }}</td>
+                          <td>{{ row.sourceFileType }}</td>
+                          <td>{{ row.status }}</td>
+                          <td>{{ row.targetRelativePath }}</td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+                  <div class="table-responsive closing-log-table-wrap" *ngIf="closingBackfillProgressRows.length">
+                    <div class="panel-title">Processing Log</div>
+                    <table mat-table [dataSource]="closingBackfillProgressRows" class="mat-elevation-z1 bulk-table backfill-progress-table">
+                      <ng-container matColumnDef="dutySlipID">
+                        <th mat-header-cell *matHeaderCellDef>Duty Slip ID</th>
+                        <td mat-cell *matCellDef="let row">{{ row.dutySlipID || '—' }}</td>
+                      </ng-container>
+                      <ng-container matColumnDef="originalFile">
+                        <th mat-header-cell *matHeaderCellDef>Original file</th>
+                        <td mat-cell *matCellDef="let row">{{ row.originalFile }}</td>
+                      </ng-container>
+                      <ng-container matColumnDef="status">
+                        <th mat-header-cell *matHeaderCellDef>Status</th>
+                        <td mat-cell *matCellDef="let row">
+                          <span class="progress-status-badge" [ngClass]="getClosingProgressStatusClass(row.status)">{{ row.status }}</span>
+                        </td>
+                      </ng-container>
+                      <ng-container matColumnDef="processingType">
+                        <th mat-header-cell *matHeaderCellDef>Processing</th>
+                        <td mat-cell *matCellDef="let row">{{ row.processingType }}</td>
+                      </ng-container>
+                      <ng-container matColumnDef="details">
+                        <th mat-header-cell *matHeaderCellDef>Details</th>
+                        <td mat-cell *matCellDef="let row">{{ row.details }}</td>
+                      </ng-container>
+                      <ng-container matColumnDef="completedAt">
+                        <th mat-header-cell *matHeaderCellDef>Timestamp</th>
+                        <td mat-cell *matCellDef="let row">{{ formatBackfillCompletedAt(row.completedAt) }}</td>
+                      </ng-container>
+                      <tr mat-header-row *matHeaderRowDef="closingBackfillProgressColumns; sticky: true"></tr>
+                      <tr mat-row *matRowDef="let row; columns: closingBackfillProgressColumns" [ngClass]="getClosingProgressStatusClass(row.status)"></tr>
+                    </table>
                   </div>
                 </div>
               </div>
@@ -261,6 +466,8 @@
               <div class="job-meta">
                 <span>Type: {{ activeJob.jobType }}</span>
                 <span *ngIf="activeJob.downloadMode">Mode: {{ activeJob.downloadMode }}</span>
+                <span *ngIf="isIrnBackfillJob() && irnTotalBatches > 1">Batch: {{ irnBatchNumber }} of {{ irnTotalBatches }}</span>
+                <span *ngIf="isIrnBackfillJob() && irnTotalBatches > 1">Overall: {{ irnAllBatchesProcessed + (activeJob.processedFiles || 0) }} / {{ getIrnTotalMatchedCount() }}</span>
                 <span>Processed: {{ activeJob.processedFiles }} / {{ activeJob.totalFiles }}</span>
                 <span>Success: {{ activeJob.successCount }}</span>
                 <span>Errors: {{ activeJob.errorCount }}</span>
@@ -274,7 +481,7 @@
                 IRN backfill finished. Use Download Invoice - DutySlip to download archived PDFs.
               </p>
               <div class="job-actions">
-                <button *ngIf="!isIrnBackfillJob()" mat-raised-button color="primary" type="button" (click)="downloadZip()" [disabled]="!canDownloadZip()">Download ZIP</button>
+                <button *ngIf="!isIrnBackfillJob() && !isClosingDutySlipJob()" mat-raised-button color="primary" type="button" (click)="downloadZip()" [disabled]="!canDownloadZip()">Download ZIP</button>
                 <button mat-stroked-button type="button" (click)="exportErrors()" [disabled]="!jobErrors.length">Export errors CSV</button>
                     <button mat-button type="button" (click)="clearJob()">
                       <ng-container *ngIf="isBackfillRunning(); else dismissJobLabel">Cancel backfill</ng-container>
@@ -309,7 +516,7 @@
                   <tr mat-row *matRowDef="let row; columns: backfillProgressColumns" [ngClass]="getProgressStatusClass(row.status)"></tr>
                 </table>
               </div>
-              <div class="table-responsive" *ngIf="!isIrnBackfillJob() && jobErrors.length">
+              <div class="table-responsive" *ngIf="!isIrnBackfillJob() && !isClosingDutySlipJob() && jobErrors.length">
                 <table class="error-table">
                   <thead>
                     <tr>
