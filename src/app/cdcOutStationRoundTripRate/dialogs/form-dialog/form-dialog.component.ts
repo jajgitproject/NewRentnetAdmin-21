@@ -288,6 +288,8 @@ export class FormDialogComponent
       nightChargesEndTime:[this.advanceTable.nightChargesEndTime],     
       graceMinutesForNightCharge:[this.advanceTable.graceMinutesForNightCharge],
       graceMinutesNightChargeAmount:[this.advanceTable.graceMinutesNightChargeAmount],
+      fkmP2P: [this.advanceTable.fkmP2P],
+      fixedP2PAmount: [this.advanceTable.fixedP2PAmount],
       additionalKM: [this.advanceTable.additionalKM],
       additionalMinutes: [this.advanceTable.additionalMinutes],    
       tollChargeable: [this.advanceTable.tollChargeable],

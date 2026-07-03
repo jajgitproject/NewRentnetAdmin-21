@@ -41,6 +41,8 @@ export class CDCOutStationRoundTripRateComponent implements OnInit {
     'NightCharge',
     'DriverAllowance',
     'BillFromTo',
+    'FKMP2P',
+    'FixedP2PAmount',
     'status',
     'actions'
   ];

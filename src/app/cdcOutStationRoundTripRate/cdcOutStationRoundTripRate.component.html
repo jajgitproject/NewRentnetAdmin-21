@@ -263,6 +263,18 @@
                                         <mat-cell *matCellDef="let row" (contextmenu)="onContextMenu($event, row)">
                                             {{row.billFromTo}}</mat-cell>
                                     </ng-container>
+
+                                    <ng-container matColumnDef="FKMP2P">
+                                        <mat-header-cell *matHeaderCellDef mat-sort-header>FKMP2P</mat-header-cell>
+                                        <mat-cell *matCellDef="let row" (contextmenu)="onContextMenu($event, row)">
+                                            {{row.fkmP2P}}</mat-cell>
+                                    </ng-container>
+
+                                    <ng-container matColumnDef="FixedP2PAmount">
+                                        <mat-header-cell *matHeaderCellDef mat-sort-header>Fixed P2P Amt</mat-header-cell>
+                                        <mat-cell *matCellDef="let row" (contextmenu)="onContextMenu($event, row)">
+                                            {{row.fixedP2PAmount}}</mat-cell>
+                                    </ng-container>
                                     
                                     <ng-container matColumnDef="status">
                                         <mat-header-cell *matHeaderCellDef>Status</mat-header-cell>
