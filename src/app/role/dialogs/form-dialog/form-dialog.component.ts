@@ -77,7 +77,8 @@ export class FormDialogComponent
       canActAsContractTariffVerifier: [this.advanceTable.canActAsContractTariffVerifier, Validators.required],
       canResetOdometer: [this.advanceTable.canResetOdometer, Validators.required],
       canDeleteFuelEntry: [this.advanceTable.canDeleteFuelEntry, Validators.required],
-      canFindFuelEntry: [this.advanceTable.canFindFuelEntry, Validators.required]
+      canFindFuelEntry: [this.advanceTable.canFindFuelEntry, Validators.required],
+      canEditDSAfterGoodForBilling: [this.advanceTable.canEditDSAfterGoodForBilling, Validators.required]
     });
   }
   submit() 

@@ -460,8 +460,8 @@
                     <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12 mb-2">
                       <!-- <button mat-flat-button *ngIf="saveDisabled && (Action === 'Cancelled' || !InvoiceID)" style="width: 100%;"  color="primary" [disabled]="!advanceTableForm.valid" (click)="Put()" [type]="submit">{{ buttonText }} -->
                       <button mat-flat-button style="width: 100%;"  color="primary" 
-                          *ngIf="(showSpinner === false) && (Action === 'Cancelled' || !isDutyCalculated || !isEInvoiceBlockingEdits)"  
-                          [disabled]="!advanceTableForm.valid || (isDutyCalculated && isEInvoiceBlockingEdits)" 
+                          *ngIf="(showSpinner === false) && (Action === 'Cancelled' || !isDutyCalculated || !isDutySlipEditBlocked)"  
+                          [disabled]="!advanceTableForm.valid || (isDutyCalculated && isDutySlipEditBlocked)" 
                           (click)="Put()" [type]="submit">{{ buttonText }}
                         <span style="margin-left: 5px;"
                           *ngIf="advanceTableClosingOne.closingDutySlipForBillingModel.closureType">(Based on
@@ -469,7 +469,8 @@
                       </button>
                       <br/>
                       <div *ngIf="Action !== 'Cancelled'">
-                        <button mat-flat-button style="width: 100%;"  color="primary" *ngIf="isEInvoiceBlockingEdits" disabled>E-Invoice already generated</button>
+                        <button mat-flat-button style="width: 100%;" color="primary" *ngIf="isEInvoiceBlockingEdits" disabled>E-Invoice already generated</button>
+                        <button mat-flat-button style="width: 100%;" color="primary" *ngIf="!isEInvoiceBlockingEdits && isGoodForBillingBlockingEdits" disabled>Good for Billing - edits not allowed</button>
                       </div>
                       <mat-spinner *ngIf="!saveDisabled" diameter="30"></mat-spinner>
                       <img *ngIf="showSpinner === true" src="assets/images/loader4.gif" width="30">

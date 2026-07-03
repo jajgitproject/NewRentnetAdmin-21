@@ -63,6 +63,7 @@ export class BulkBillsDownloadComponent implements OnInit, OnDestroy, AfterViewI
   backfillInvoiceNumberCtrl = new FormControl('');
   backfillLoadError = '';
   closingMinPickUpDateCtrl = new FormControl(new Date(2026, 4, 16));
+  closingDutySlipIdsCtrl = new FormControl('');
   closingTargetMode: ClosingDutySlipBackfillTargetMode = 'DryRun';
   closingBackfillPreview: ClosingDutySlipBackfillPreviewResult | null = null;
   closingBackfillCandidates: ClosingDutySlipBackfillCandidateRow[] = [];
@@ -383,18 +384,18 @@ export class BulkBillsDownloadComponent implements OnInit, OnDestroy, AfterViewI
             }
             this.activeJob = this.normalizeJob({
               bulkUploadJobID: jobId,
-              jobType: 'IrnBackfill',
+          jobType: 'IrnBackfill',
               jobStatus: result?.jobStatus ?? result?.JobStatus ?? 'Pending',
               totalFiles: result?.totalInvoices ?? result?.TotalInvoices ?? batchCount,
-              processedFiles: 0,
-              successCount: 0,
-              errorCount: 0,
+          processedFiles: 0,
+          successCount: 0,
+          errorCount: 0,
             });
             this.jobErrors = [];
             this.startPolling(jobId, true, false);
-          },
+      },
           error: (err) => {
-            this.backfilling = false;
+        this.backfilling = false;
             this.irnRunAllBatches = false;
             this.backfillLoadError = this.extractError(err, 'Failed to start IRN backfill job.');
             this.snackBar.open(this.backfillLoadError, 'Close', { duration: 8000 });
@@ -728,7 +729,10 @@ export class BulkBillsDownloadComponent implements OnInit, OnDestroy, AfterViewI
         const matched = this.getClosingTotalMatchedCount();
         const willProcess = result?.willProcessCount ?? result?.WillProcessCount ?? 0;
         if (matched === 0) {
-          this.closingBackfillLoadError = 'No duty slips matched the selected criteria.';
+          const ids = this.parseDutySlipIds(this.closingDutySlipIdsCtrl.value);
+          this.closingBackfillLoadError = ids.length > 0
+            ? `No duty slips matched ID(s) ${ids.join(', ')}. Check that DutySlipImage is populated and the duty slip is active.`
+            : 'No duty slips matched the selected criteria.';
         }
         this.snackBar.open(
           matched > 0
@@ -980,12 +984,43 @@ export class BulkBillsDownloadComponent implements OnInit, OnDestroy, AfterViewI
 
   private buildClosingDutySlipCriteria(skipCount = 0): ClosingDutySlipBackfillCriteria {
     const minDate = this.closingMinPickUpDateCtrl.value;
-    return {
-      minPickUpDate: minDate ? moment(minDate).format('YYYY-MM-DD') : '2026-05-16',
+    const dutySlipIDs = this.parseDutySlipIds(this.closingDutySlipIdsCtrl.value);
+    const criteria: ClosingDutySlipBackfillCriteria = {
       maxCandidates: this.closingBatchSize,
       skipCount,
       targetMode: this.closingTargetMode,
     };
+    if (dutySlipIDs.length > 0) {
+      criteria.dutySlipIDs = dutySlipIDs;
+    } else {
+      criteria.minPickUpDate = minDate ? moment(minDate).format('YYYY-MM-DD') : '2026-05-16';
+    }
+    return criteria;
+  }
+
+  private parseDutySlipIds(input: string | null | undefined): number[] {
+    if (!input || !String(input).trim()) {
+      return [];
+    }
+
+    const seen = new Set<number>();
+    const ids: number[] = [];
+    for (const part of String(input).split(/[,\s]+/)) {
+      const trimmed = part.trim();
+      if (!trimmed) {
+        continue;
+      }
+
+      const parsed = Number.parseInt(trimmed, 10);
+      if (!Number.isFinite(parsed) || parsed <= 0 || seen.has(parsed)) {
+        continue;
+      }
+
+      seen.add(parsed);
+      ids.push(parsed);
+    }
+
+    return ids;
   }
 
   private normalizeClosingCandidates(rows: any[]): ClosingDutySlipBackfillCandidateRow[] {
@@ -1114,9 +1149,9 @@ export class BulkBillsDownloadComponent implements OnInit, OnDestroy, AfterViewI
       .pipe(
         switchMap(() =>
           forkJoin({
-            job: this.service.getJob(jobId),
-            errors: this.service.getJobErrors(jobId),
-          })
+                job: this.service.getJob(jobId),
+                errors: this.service.getJobErrors(jobId),
+              })
         )
       )
       .subscribe(
@@ -1346,12 +1381,12 @@ export class BulkBillsDownloadComponent implements OnInit, OnDestroy, AfterViewI
 
     this.generalService.getCustomers().subscribe({
       next: (data) => {
-        this.customerList = (data || [])
-          .map((c) => ({
-            customerID: c.customerID ?? c.CustomerID ?? 0,
-            customerName: (c.customerName ?? c.CustomerName ?? '').trim(),
-          }))
-          .filter((c) => c.customerID && c.customerName);
+      this.customerList = (data || [])
+        .map((c) => ({
+          customerID: c.customerID ?? c.CustomerID ?? 0,
+          customerName: (c.customerName ?? c.CustomerName ?? '').trim(),
+        }))
+        .filter((c) => c.customerID && c.customerName);
         this.customerCtrl.updateValueAndValidity({ emitEvent: true });
       },
       error: () => {
@@ -1420,6 +1455,9 @@ export class BulkBillsDownloadComponent implements OnInit, OnDestroy, AfterViewI
 
   private extractError(err: any, fallback: string): string {
     if (typeof err === 'string' && err.trim()) {
+      if (err.trim() === 'Unknown Error') {
+        return 'Cannot reach the API. Ensure the API is running (https://localhost:44368) and environment BaseURL is correct.';
+      }
       return err;
     }
 

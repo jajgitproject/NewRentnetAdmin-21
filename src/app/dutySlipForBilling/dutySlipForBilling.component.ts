@@ -1,5 +1,5 @@
 // @ts-nocheck
-import { AfterViewInit, Component, ElementRef, Input, OnInit, SimpleChanges, ViewChild } from '@angular/core';
+import { AfterViewInit, Component, ElementRef, Input, OnChanges, OnInit, SimpleChanges, ViewChild } from '@angular/core';
 import { DutySlipForBillingService } from './dutySlipForBilling.service';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { MatDialog } from '@angular/material/dialog';
@@ -39,7 +39,7 @@ import {
   styleUrls: ['./dutySlipForBilling.component.scss'],
   providers: [{ provide: MAT_DATE_LOCALE, useValue: 'en-GB' }]
 })
-export class DutySlipForBillingComponent implements OnInit, AfterViewInit {
+export class DutySlipForBillingComponent implements OnInit, AfterViewInit, OnChanges {
   @Input() advanceTableClosingOne : ClosingModel | null;
   @Input() disputeAdvanceTable : Dispute[] | null;
   @Input() RegistrationNumber;
@@ -49,6 +49,7 @@ export class DutySlipForBillingComponent implements OnInit, AfterViewInit {
   @Input() DSClosing;
   @Input() canThisRoleDoGoodForBillingOnClosingScreen = false;
   @Input() canThisRoleViewDummyInvoice = false;
+  @Input() canEditDSAfterGoodForBilling = false;
   @Output() dataSaved: EventEmitter<void> = new EventEmitter();
   @Output() dutyStatusChanged = new EventEmitter<{verifyDuty: boolean, goodForBilling: boolean,message: string}>();
   //@Output() dutyMessage = new EventEmitter<string>();
@@ -99,6 +100,12 @@ export class DutySlipForBillingComponent implements OnInit, AfterViewInit {
   contextMenuPosition = { x: '0px', y: '0px' };
   
 
+  ngOnChanges(changes: SimpleChanges): void {
+    if (changes['hasActiveEInvoice'] || changes['canEditDSAfterGoodForBilling'] || changes['advanceTableClosingOne']) {
+      this.applyDutySlipEditLockState();
+    }
+  }
+
   ngOnInit() 
   {
     this.advanceTableForm.valueChanges.subscribe(value => {
@@ -145,6 +152,7 @@ export class DutySlipForBillingComponent implements OnInit, AfterViewInit {
 
     this.onKeyUp();
     this.onTimeSelection();
+    this.applyDutySlipEditLockState();
   }
 
   ngAfterViewInit(): void {
@@ -969,6 +977,52 @@ export class DutySlipForBillingComponent implements OnInit, AfterViewInit {
     return this.hasActiveEInvoice === true || this.advanceTableClosingOne?.hasActiveEInvoice === true;
   }
 
+  get isGoodForBillingBlockingEdits(): boolean {
+    const isGfb = !!(
+      this.advanceTableClosingOne?.closingDutySlipForBillingModel?.goodForBilling ??
+      this.advanceTableForm?.get('goodForBilling')?.value
+    );
+    return isGfb && !this.canEditDSAfterGoodForBilling;
+  }
+
+  get isDutySlipEditBlocked(): boolean {
+    return this.isEInvoiceBlockingEdits || this.isGoodForBillingBlockingEdits;
+  }
+
+  private applyDutySlipEditLockState(): void {
+    if (!this.advanceTableForm) {
+      return;
+    }
+    if (this.isDutySlipEditBlocked) {
+      this.advanceTableForm.disable({ emitEvent: false });
+      return;
+    }
+    this.advanceTableForm.enable({ emitEvent: false });
+    this.syncVerifyDutyAndGoodForBillingState();
+  }
+
+  private guardDutySlipEdit(): boolean {
+    if (this.isEInvoiceBlockingEdits) {
+      this.showNotification(
+        'snackbar-warning',
+        'E-Invoice (IRN) is already generated and active. Changes are not allowed.',
+        'bottom',
+        'center'
+      );
+      return false;
+    }
+    if (this.isGoodForBillingBlockingEdits) {
+      this.showNotification(
+        'snackbar-warning',
+        'Duty slip is marked Good for Billing. Your role is not allowed to make changes.',
+        'bottom',
+        'center'
+      );
+      return false;
+    }
+    return true;
+  }
+
   get isDutyCalculated(): boolean {
     const dsClosing =
       this.advanceTableClosingOne?.closingDutySlipForBillingModel?.dsClosing ??
@@ -977,6 +1031,11 @@ export class DutySlipForBillingComponent implements OnInit, AfterViewInit {
   }
 
   private syncVerifyDutyAndGoodForBillingState(): void {
+    if (this.isDutySlipEditBlocked) {
+      this.advanceTableForm.get('verifyDuty')?.disable({ emitEvent: false });
+      this.advanceTableForm.get('goodForBilling')?.disable({ emitEvent: false });
+      return;
+    }
     if (!this.isDutyCalculated) {
       this.advanceTableForm.controls['goodForBilling'].disable();
       this.advanceTableForm.controls['verifyDuty'].disable();
@@ -1171,6 +1230,7 @@ export class DutySlipForBillingComponent implements OnInit, AfterViewInit {
     //this.advanceTableForm.patchValue({actionDetails : this.advanceTableClosingOne.closingDutySlipModel.actionDetails});
     this.onKeyUp();
     this.onTimeSelection();
+    this.applyDutySlipEditLockState();
   }
 
   createContactForm(): FormGroup 
@@ -1501,7 +1561,10 @@ export class DutySlipForBillingComponent implements OnInit, AfterViewInit {
       {
         this.SaveDataInBillingHistory();
       }
-      
+      if (this.advanceTableClosingOne?.closingDutySlipForBillingModel) {
+        this.advanceTableClosingOne.closingDutySlipForBillingModel.goodForBilling = isChecked;
+      }
+      this.applyDutySlipEditLockState();
   }
 
   // onVDChange(event: any) 
@@ -1635,6 +1698,9 @@ public resetVerificationForEcoStateChange(): void {
 
   SaveDataInBillingHistory()
   {
+    if (!this.guardDutySlipEdit()) {
+      return;
+    }
     if (!this.showCalculateBillOverlay) {
       this.showSpinnerForVDGB = true;
     }
@@ -1648,6 +1714,10 @@ public resetVerificationForEcoStateChange(): void {
       if (!this.showCalculateBillOverlay) {
         this.showSpinnerForVDGB = false;
       }
+      if (response?.goodForBilling === true && this.advanceTableClosingOne?.closingDutySlipForBillingModel) {
+        this.advanceTableClosingOne.closingDutySlipForBillingModel.goodForBilling = true;
+      }
+      this.applyDutySlipEditLockState();
       if(response.actionTaken !== "Verify Duty")
       {
         this.showNotification(
@@ -1906,6 +1976,9 @@ public resetVerificationForEcoStateChange(): void {
 
   public Put(): void
   {
+    if (!this.guardDutySlipEdit()) {
+      return;
+    }
     this.showSpinner = true;
     //this.saveDisabled = false;
     if (!this.checkChronologyAndValues()) {
@@ -1984,6 +2057,9 @@ public resetVerificationForEcoStateChange(): void {
   //---------Calculate Bill------------------------
   public CalculateBill(showSummaryPopup = false)
   {
+    if (!this.guardDutySlipEdit()) {
+      return;
+    }
     if (showSummaryPopup) {
       this.showCalculateBillOverlay = true;
     } else {

@@ -211,6 +211,7 @@ export class ClossingOneComponent implements OnInit, AfterViewInit {
   canThisRoleViewBillOnClosingScreen = false;
   canThisRoleDoGoodForBillingOnClosingScreen = false;
   canThisRoleViewDummyInvoice = false;
+  canEditDSAfterGoodForBilling = false;
   templateAddress: any;
   verifyDutyStatusAndCacellationStatus: any = 'Changes allow';
   goodForBillingStatusAndCancellationStatus: any = 'Changes Allow';
@@ -303,6 +304,7 @@ export class ClossingOneComponent implements OnInit, AfterViewInit {
     this.canThisRoleViewBillOnClosingScreen = this.readRoleFlagFromStorage('canThisRoleViewBillOnClosingScreen');
     this.canThisRoleDoGoodForBillingOnClosingScreen = this.readRoleFlagFromStorage('canThisRoleDoGoodForBillingOnClosingScreen');
     this.canThisRoleViewDummyInvoice = this.readRoleFlagFromStorage('canThisRoleViewDummyInvoice');
+    this.canEditDSAfterGoodForBilling = this.readRoleFlagFromStorage('canEditDSAfterGoodForBilling');
     this.route.queryParams.subscribe(paramsData => {
       const encryptedAllotmentID = paramsData.allotmentID;
       this.AllotmentID = this._generalService.decrypt(decodeURIComponent(encryptedAllotmentID));
@@ -361,10 +363,13 @@ export class ClossingOneComponent implements OnInit, AfterViewInit {
     this.DisputeLoadData();
   }
 
-  private applyEditBlockStatus(hasActiveEInvoice: boolean): void {
-    if (hasActiveEInvoice) {
+  private applyEditBlockStatus(): void {
+    if (this.isEInvoiceBlockingEdits) {
       this.goodForBillingStatusAndCancellationStatus = 'E-Invoice Generated - Changes Not Allow';
       this.verifyDutyStatusAndCacellationStatus = 'E-Invoice Generated - Changes not allow';
+    } else if (this.isGoodForBillingBlockingEdits) {
+      this.goodForBillingStatusAndCancellationStatus = 'Good for Billing - Changes Not Allow';
+      this.verifyDutyStatusAndCacellationStatus = 'Good for Billing - Changes not allow';
     } else {
       this.goodForBillingStatusAndCancellationStatus = 'Changes Allow';
       this.verifyDutyStatusAndCacellationStatus = 'Changes allow';
@@ -382,7 +387,7 @@ export class ClossingOneComponent implements OnInit, AfterViewInit {
         this.goodForBilling = this.advanceTableClosingOne?.closingDutySlipForBillingModel?.goodForBilling;
         this.verifyDuty = this.advanceTableClosingOne?.closingDutySlipForBillingModel?.verifyDuty;
         this.DSClosing = this.advanceTableClosingOne?.closingDutySlipForBillingModel?.dsClosing;
-        this.applyEditBlockStatus(!!this.advanceTableClosingOne?.hasActiveEInvoice);
+        this.applyEditBlockStatus();
         this.loadDataForBillNo();
       }
     );
@@ -1041,11 +1046,29 @@ export class ClossingOneComponent implements OnInit, AfterViewInit {
     return this.hasActiveEInvoice === true || this.advanceTableClosingOne?.hasActiveEInvoice === true;
   }
 
+  get isGoodForBillingBlockingEdits(): boolean {
+    const isGfb = !!(this.goodForBilling ?? this.advanceTableClosingOne?.closingDutySlipForBillingModel?.goodForBilling);
+    return isGfb && !this.canEditDSAfterGoodForBilling;
+  }
+
+  get isDutySlipEditBlocked(): boolean {
+    return this.isEInvoiceBlockingEdits || this.isGoodForBillingBlockingEdits;
+  }
+
   private guardEInvoiceEdit(): boolean {
     if (this.isEInvoiceBlockingEdits) {
       this.showNotification(
         'snackbar-warning',
         'E-Invoice (IRN) is already generated and active. Changes are not allowed.',
+        'bottom',
+        'center'
+      );
+      return false;
+    }
+    if (this.isGoodForBillingBlockingEdits) {
+      this.showNotification(
+        'snackbar-warning',
+        'Duty slip is marked Good for Billing. Your role is not allowed to make changes.',
         'bottom',
         'center'
       );
@@ -1574,6 +1597,7 @@ export class ClossingOneComponent implements OnInit, AfterViewInit {
     this.verifyDuty = event.verifyDuty;
     this.goodForBilling = event.goodForBilling;
     this.Message = event.message;
+    this.applyEditBlockStatus();
      this.GSTDataOnClosing();
   }
 

@@ -171,6 +171,12 @@
                                         {{row.canThisRoleDoGoodForBillingOnClosingScreen === true ? 'Yes' : 'No'}}</mat-cell>
                                 </ng-container>
 
+                                <ng-container matColumnDef="canEditDSAfterGoodForBilling">
+                                    <mat-header-cell *matHeaderCellDef mat-sort-header>CanEditDSAfterGoodForBilling</mat-header-cell>
+                                    <mat-cell *matCellDef="let row" (contextmenu)="onContextMenu($event, row)">
+                                        {{row.canEditDSAfterGoodForBilling === true ? 'Yes' : 'No'}}</mat-cell>
+                                </ng-container>
+
                                 <ng-container matColumnDef="canThisRoleViewDummyInvoice">
                                     <mat-header-cell *matHeaderCellDef mat-sort-header>CanThisRoleViewDummyInvoice</mat-header-cell>
                                     <mat-cell *matCellDef="let row" (contextmenu)="onContextMenu($event, row)">

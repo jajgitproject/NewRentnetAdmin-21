@@ -122,7 +122,8 @@
                   <p class="backfill-hint">
                     One-time backfill from <code>DutySlip.DutySlipImage</code> (read-only) into partitioned duty slip PDFs.
                     Dry Run writes to <strong>DutySlipDocument_Temp</strong> and <code>DocumentRepository/DutySlips_Temp/</code>.
-                    Production writes to <strong>DutySlipDocument</strong> and <code>DocumentRepository/DutySlips/</code>.
+                    Production writes to <strong>DutySlipDocument</strong> and <code>DocumentRepository/DutySlips/</code>,
+                    replacing any existing archived PDF for that duty slip.
                     Existing destination PDFs and document records are <strong>replaced</strong> on re-run.
                   </p>
                   <div class="row bulk-filters g-2 backfill-search-row">
@@ -150,6 +151,19 @@
                           [disabled]="closingBackfilling || isBackfillRunning()" />
                       </mat-form-field>
                     </div>
+                    <div class="col-xl-3 col-lg-4 col-md-6 col-sm-12">
+                      <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                        <mat-label>Duty Slip ID(s)</mat-label>
+                        <input matInput [formControl]="closingDutySlipIdsCtrl"
+                          placeholder="e.g. 50972 or 50972, 51001"
+                          [disabled]="closingBackfilling || isBackfillRunning()" />
+                        <mat-hint>Optional. Comma-separated IDs target specific duty slips; Min Pickup Date is ignored when IDs are entered.</mat-hint>
+                      </mat-form-field>
+                    </div>
+                  </div>
+                  <div class="backfill-dryrun-warning" *ngIf="closingTargetMode === 'DryRun'">
+                    <strong>Dry Run only:</strong> Bulk Download uses Production <code>DutySlipDocument</code> only.
+                    Dry Run output is written to <code>DutySlipDocument_Temp</code> and will <strong>not</strong> appear in download ZIPs.
                   </div>
                   <div class="load-error" *ngIf="closingBackfillLoadError">{{ closingBackfillLoadError }}</div>
                   <div class="backfill-actions">

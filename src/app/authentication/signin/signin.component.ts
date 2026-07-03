@@ -263,6 +263,10 @@ export class SigninComponent implements OnInit {
                 'canFindFuelEntry',
                 String(employee.CanFindFuelEntry ?? employee.canFindFuelEntry ?? false)
               );
+              localStorage.setItem(
+                'canEditDSAfterGoodForBilling',
+                String(employee.CanEditDSAfterGoodForBilling ?? employee.canEditDSAfterGoodForBilling ?? false)
+              );
               this.calculateDaysLeft();
             }
           } else {

@@ -133,9 +133,7 @@
                         </mat-error>
                     </mat-form-field>
                 </div>
-            </div>
 
-            <div class="row">
                 <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
                     <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
                         <mat-label>CanThisRoleViewDummyInvoice</mat-label>
@@ -149,7 +147,9 @@
                         </mat-error>
                     </mat-form-field>
                 </div>
+            </div>
 
+            <div class="row">
                 <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
                     <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
                         <mat-label>Can Act As Contract Tariff Auditor</mat-label>
@@ -180,9 +180,41 @@
             </div>
 
             <div class="row">
-                <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12 mb-1">
-                    <div class="font-weight-bold text-muted small">Fuel Entry Permissions</div>
+                <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                    <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                        <mat-label>CanEditDSAfterGoodForBilling</mat-label>
+                        <mat-select formControlName="canEditDSAfterGoodForBilling">
+                            <mat-option value="">--Select--</mat-option>
+                            <mat-option [value]="true">Yes</mat-option>
+                            <mat-option [value]="false">No</mat-option>
+                        </mat-select>
+                        <mat-error *ngIf="advanceTableForm.get('canEditDSAfterGoodForBilling')?.hasError('required')">
+                            CanEditDSAfterGoodForBilling is required
+                        </mat-error>
+                    </mat-form-field>
                 </div>
+
+                <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                    <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                        <mat-label>Activation Status</mat-label>
+                        <mat-select formControlName="activationStatus">
+                            <mat-option [value]="true">Active</mat-option>
+                            <mat-option [value]="false">Deleted</mat-option>
+                        </mat-select>
+                        <mat-error *ngIf="advanceTableForm.get('activationStatus')?.hasError('required')">
+                            Activation Status is required
+                        </mat-error>
+                    </mat-form-field>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12 mb-1">
+                    <div class="font-weight-bold text-muted small fuel-permissions-section">Fuel Entry Permissions</div>
+                </div>
+            </div>
+
+            <div class="row">
                 <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
                     <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
                         <mat-label>Can Reset Odometer</mat-label>
@@ -209,6 +241,9 @@
                         </mat-error>
                     </mat-form-field>
                 </div>
+            </div>
+
+            <div class="row">
                 <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
                     <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
                         <mat-label>Can Find Fuel Entry</mat-label>
@@ -219,21 +254,6 @@
                         </mat-select>
                         <mat-error *ngIf="advanceTableForm.get('canFindFuelEntry')?.hasError('required')">
                             Can Find Fuel Entry is required
-                        </mat-error>
-                    </mat-form-field>
-                </div>
-            </div>
-
-            <div class="row">
-                <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
-                    <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
-                        <mat-label>Activation Status</mat-label>
-                        <mat-select formControlName="activationStatus">
-                            <mat-option [value]="true">Active</mat-option>
-                            <mat-option [value]="false">Deleted</mat-option>
-                        </mat-select>
-                        <mat-error *ngIf="advanceTableForm.get('activationStatus')?.hasError('required')">
-                            Activation Status is required
                         </mat-error>
                     </mat-form-field>
                 </div>

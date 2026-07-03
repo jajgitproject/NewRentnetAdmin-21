@@ -201,23 +201,29 @@ export class ErrorInterceptor implements HttpInterceptor {
 
 
   private extractErrorText(httpErr: HttpErrorResponse): string {
-
     const msgFromBody =
-
       httpErr?.error &&
-
       typeof httpErr.error === 'object' &&
-
       httpErr.error !== null &&
-
       'message' in httpErr.error
-
         ? String((httpErr.error as { message?: unknown }).message ?? '')
+        : typeof httpErr?.error === 'string' && httpErr.error.trim()
+          ? httpErr.error.trim()
+          : '';
 
-        : '';
+    if (msgFromBody) {
+      return msgFromBody;
+    }
 
-    return msgFromBody || httpErr?.statusText || 'Error';
+    if (httpErr?.status === 0 || httpErr?.statusText === 'Unknown Error') {
+      return 'Cannot reach the API. Ensure the API is running and environment BaseURL is correct.';
+    }
 
+    if (httpErr?.status === 404) {
+      return 'API endpoint not found. Deploy the latest RentnetAPI build with documentManagement endpoints.';
+    }
+
+    return httpErr?.statusText || 'Error';
   }
 
 }
