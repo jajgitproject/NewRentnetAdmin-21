@@ -33,8 +33,9 @@
           <strong>SAC :</strong> {{dataSource?.invoiceGSTModel?.gstsac}}<br />
           <strong>Ph :</strong> {{dataSource?.invoiceEcoCompanyModel?.phoneNumber}},
           <!-- <strong>Fax :</strong> {{dataSource?.invoiceEcoCompanyModel?.fax}}<br /> -->
-          LUT : {{dataSource?.invoiceEcoBranchModel?.branchLUTNumber}}
-          Exp Date :{{dataSource?.invoiceEcoBranchModel?.branchLUTExpiryDate | date:'dd/MM/yyyy'}}
+          <strong>LUT :</strong> {{dataSource?.invoiceEcoBranchModel?.branchLUTNumber}}
+          <strong>Exp Date :</strong>{{dataSource?.invoiceEcoBranchModel?.branchLUTExpiryDate | date:'dd/MM/yyyy'}}<br />
+          <strong>IRN :</strong> {{dataSource?.invoiceModel?.irn || 'N/A'}}
         </p>
       </div>
 
@@ -52,10 +53,20 @@
           <strong>Reverse Charge (Y/N):</strong> N
         </div>
 
-        <div class="logo-qr">
-          <img class="logo" src="http://www.ecoserp.com/bill_printing/logo.jpg" alt="Logo">
-          <img class="qr" [src]="'data:image/png;base64,' + dataSource?.invoiceModel?.signedQRCode" alt="QR" />
-        </div>
+       <div class="logo-qr">
+    <img class="logo" src="http://www.ecoserp.com/bill_printing/logo.jpg" alt="Logo" />
+
+    <img 
+      *ngIf="dataSource?.invoiceModel?.signedQRCode"
+      class="qr"
+      [src]="'data:image/png;base64,' + dataSource?.invoiceModel?.signedQRCode"
+      alt="QR"
+    />
+
+    <div *ngIf="!dataSource?.invoiceModel?.signedQRCode" class="no-qr">
+      No QR Image
+    </div>
+  </div>
       </div>
     </div>
 

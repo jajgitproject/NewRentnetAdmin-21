@@ -360,19 +360,27 @@ body {
 
 /* ================= LOGO + QR ================= */
 .logo-qr {
+    width: 80px;
     display: flex;
-    justify-content: space-between;
+    flex-direction: column;   /* makes logo on top, QR below */
     align-items: center;
+    gap: 5px; /* space between logo and QR */
+	margin-left: auto;
 }
+
 .logo {
-    width: 90px;
-    height: 45px;
-    border: 1px solid #000;
+    width: 150px;
+    height: auto;
 }
-.qr {
-    width: 55px;
-    height: 55px;
+
+.qr, .no-qr {
+    width: 90px;
+    height: 90px;
     border: 1px solid #000;
+    display: flex;
+    justify-content: right;
+    align-items: right;
+    font-size: 12px;
 }
 
 /* ================= TABLE ================= */

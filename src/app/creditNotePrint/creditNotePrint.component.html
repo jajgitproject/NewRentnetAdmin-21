@@ -33,7 +33,7 @@
 
     .toolbar button {
 
-      padding: 10px 15px;
+      padding: 5px 10px;
       background: #0078D4;
       color: #fff;
       border: none;
@@ -52,11 +52,12 @@
     .page {
 
       width: 210mm;
-      min-height: 297mm;
+      height: auto;
       margin: auto;
       background: #fff;
       padding: 5mm;
       box-shadow: 0 0 10px rgba(0, 0, 0, .15);
+      overflow: hidden;
 
     }
 
@@ -65,7 +66,7 @@
     .frame {
 
       border: 2px solid #000;
-      min-height: 281mm;
+      min-height: auto;
       padding: 5mm;
       display: flex;
       flex-direction: column;
@@ -214,36 +215,27 @@
     /* Print */
 
     @media print {
-
-      body {
-
-        background: #fff;
-        padding: 0;
-
-      }
-
-      .toolbar {
-
-        display: none;
-
-      }
-
-      .page {
-
-        width: 100%;
-        min-height: auto;
-        box-shadow: none;
-        padding: 0;
-
-      }
-
-      .frame {
-
-        min-height: 277mm;
-
-      }
-
+    body {
+        zoom: 0.92; /* shrinks content slightly */
     }
+
+    .header,
+    .heading,
+    table,
+    .summary,
+    .footer {
+        page-break-inside: avoid;
+    }
+
+    tr {
+        page-break-inside: avoid;
+    }
+    .toolbar,
+  button {
+    display: none !important;
+    visibility: hidden !important;
+  }
+}
   </style>
 
   <script>
@@ -263,10 +255,10 @@
 
         <div class="title-text">CREDIT NOTE</div>
 
-        <div class="qr-logo-stack">
+        <div >
           <img class="invoice-logo" src="http://www.ecoserp.com/bill_printing/logo.jpg" alt="Logo" />
 
-          <ng-container *ngIf="dataSource?.signedQRCode || dataSource?.invoiceModel?.signedQRCode; else noQR">
+          <!-- <ng-container *ngIf="dataSource?.signedQRCode || dataSource?.invoiceModel?.signedQRCode; else noQR">
             <img class="qr-code-image"
               [src]="'data:image/png;base64,' + (dataSource?.signedQRCode || dataSource?.invoiceModel?.signedQRCode)"
               alt="IRN QR Code" />
@@ -274,7 +266,7 @@
 
           <ng-template #noQR>
             <div class="no-image-box">No QR Image</div>
-          </ng-template>
+          </ng-template> -->
         </div>
 
       </div>
@@ -294,9 +286,9 @@
           dataSource?.invoiceEcoCompanyModel?.correspondenceAddress}},
           <br />
           <strong>Ph. {{dataSource?.printPhoneNumber || dataSource?.invoiceEcoCompanyModel?.phoneNumber}}, </strong>
-          <strong>Fax. {{dataSource?.printFax || dataSource?.invoiceEcoCompanyModel?.fax}}</strong>
+          <!-- <strong>Fax. {{dataSource?.printFax || dataSource?.invoiceEcoCompanyModel?.fax}}</strong> -->
           <strong>Reservation :</strong> 24/7 : 91-11-40794079<br />
-          <strong>E-mail :</strong> billing@ecorentacar.com, <strong>Reservation :</strong> cars@ecorentacar.com
+          <strong>E-mail :</strong> billing@ecosmobility.com, <strong>Reservation :</strong> cars@ecosmobility.com
           <br />
           <strong>GST No : {{dataSource?.printBranchGSTNumber ||
             dataSource?.invoiceEcoBranchModel?.branchGSTNumber}}</strong>
@@ -337,7 +329,20 @@
               <td>{{(dataSource?.printInvoiceDate || dataSource?.invoiceModel?.invoiceDate) | date: 'yyyy-MM-dd'}}
               </td>
             </tr>
+           <tr class="qr-row">
+  <td colspan="2" class="qr-cell">
+    <ng-container *ngIf="dataSource?.signedQRCode || dataSource?.invoiceModel?.signedQRCode; else noQR">
+      <img class="qr-code-bottom"
+        [src]="'data:image/png;base64,' + (dataSource?.signedQRCode || dataSource?.invoiceModel?.signedQRCode)"
+        alt="IRN QR Code" />
+    </ng-container>
 
+    <ng-template #noQR>
+      <div class="no-image-box">No QR Image</div>
+    </ng-template>
+  </td>
+</tr>
+            
           </table>
 
         </div>
