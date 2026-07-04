@@ -102,7 +102,21 @@
               <ng-container *ngIf="column === 'customerSignatureImage'">
                 <app-static-image [src]="row[column]" height="40px" maxWidth="80px"></app-static-image>
               </ng-container>
-              <ng-container *ngIf="column !== 'dutyDate' && column !== 'customerSignatureImage'">
+              <ng-container *ngIf="column === 'driverName'">
+                <div class="driver-container">
+                  <div class="driver-name">
+                    {{ row.driverName || 'N/A' }}
+                  </div>
+
+                  <div class="driver-id" *ngIf="row.driverOfficialIdentityNumber">
+                    ({{ row.driverOfficialIdentityNumber }})
+                  </div>
+                </div>
+              </ng-container>
+
+              <ng-container *ngIf="column !== 'dutyDate'
+                                && column !== 'customerSignatureImage'
+                                && column !== 'driverName'">
                 {{ getDisplayValue(column, row) }}
               </ng-container>
             </mat-cell>

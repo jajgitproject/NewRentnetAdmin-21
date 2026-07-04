@@ -48,6 +48,7 @@ export class AppDutyMIS {
   bookingEventType: string;
   guestSignature: string;
   organizationalEntityName: string;
+  driverOfficialIdentityNumber:string;
 
   constructor(appDutyMIS: any) {
     this.bookingNo = appDutyMIS.bookingNo || '';
@@ -96,6 +97,7 @@ export class AppDutyMIS {
     this.appLocationInTime = appDutyMIS.appLocationInTime || '';
     this.bookingEventType = appDutyMIS.bookingEventType || '';
     this.guestSignature = appDutyMIS.guestSignature || '';
+    this.driverOfficialIdentityNumber = appDutyMIS.driverOfficialIdentityNumber || '';
   }
 }
 
