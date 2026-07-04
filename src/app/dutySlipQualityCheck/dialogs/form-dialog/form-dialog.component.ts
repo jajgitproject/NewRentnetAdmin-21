@@ -182,7 +182,7 @@ this.buttonDisabled = normalized !== 'changes allow';
         this.ImagePath=this.driverQualityCheckData[0].selfieWithUniform;
         this.ImagePath1=this.driverQualityCheckData[0].frontPhoto;
         this.ImagePath2=this.driverQualityCheckData[0].interiorsWithAmenities
-        this.ImagePath3=this.driverQualityCheckData[0].isolatedCabin;
+        this.ImagePath3=this.driverQualityCheckData[0].breatheAnalyzerImage;
         this.ImagePath4=this.driverQualityCheckData[0].bodyTemperatureImage;
         this.advanceTableForm.patchValue({selfDeclaration:this.driverQualityCheckData[0].selfDeclaration});
         this.advanceTableForm.patchValue({driverRemark:this.driverQualityCheckData[0].driverRemark});

@@ -81,6 +81,8 @@ export class DutyAllotmentDetails{
   driverRemark:string;
   activationStatus:boolean;
   dutySlipImage: string;
+  breatheAnalyzerImage: string;
+  breatheAnalyzerReading: number
 
   constructor(allotmentDetails){
     {
@@ -101,6 +103,8 @@ export class DutyAllotmentDetails{
       this.bodyTemperatureImage=allotmentDetails.bodyTemperatureImage || '';
       this.driverRemark=allotmentDetails.driverRemark || '';
       this.selfDeclaration = allotmentDetails.selfDeclaration || '';
+      this.breatheAnalyzerImage = allotmentDetails.breatheAnalyzerImage || '';
+      this.breatheAnalyzerReading = allotmentDetails.breatheAnalyzerReading || null;
 
       this.qcDate=new Date();
        this.qcTime=new Date();
