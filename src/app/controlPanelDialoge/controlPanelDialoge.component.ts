@@ -2614,15 +2614,15 @@ TrackOnMapInfo(reservationID: number, item?: any) {
     //             })
     //         return;
     // }
-    if(item.locationOutDate !== null || item.reportingToGuestDate !== null || item.pickDate !== null || item.garageOutDate !== null || item.locationInDate === 'Dispatched')
-    {
-      Swal.fire({
-                title: '',
-                icon: 'error',
-                html: `<b>Reservation cancellation is not allowed after Dispatched.</b>`
-              })
-      return;
-    }
+    // if(item.locationOutDate !== null || item.reportingToGuestDate !== null || item.pickDate !== null || item.garageOutDate !== null || item.locationInDate === 'Dispatched')
+    // {
+    //   Swal.fire({
+    //             title: '',
+    //             icon: 'error',
+    //             html: `<b>Reservation cancellation is not allowed after Dispatched.</b>`
+    //           })
+    //   return;
+    // }
     if(item.allotmentStatus === 'Alloted' || item.allotmentStatus === null)
     {
       this.dialog.open(FormDialogCRAComponent, {
