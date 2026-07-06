@@ -16,6 +16,12 @@ import {
   ClosingDutySlipBackfillCriteria,
   ClosingDutySlipBackfillPreviewResult,
   StartClosingDutySlipBackfillJobResult,
+  DutySlipDocumentBackfillCriteria,
+  DutySlipDocumentBackfillPreviewResult,
+  StartDutySlipDocumentBackfillJobResult,
+  DutySlipPackageDownloadCriteria,
+  DutySlipPackageDownloadPreviewResult,
+  StartDutySlipPackageDownloadJobResult,
 } from './bulkBillsDownload.model';
 
 @Injectable()
@@ -70,6 +76,83 @@ export class BulkBillsDownloadService {
 
   cancelClosingDutySlipBackfillJob(jobId: number): Observable<any> {
     return this.httpClient.post(`${this.API_URL}/backfill/closing-duty-slip/cancel/${jobId}`, {});
+  }
+
+  forceClearStuckClosingDutySlipBackfill(): Observable<{ status?: string; clearedCount?: number; ClearedCount?: number; message?: string; Message?: string }> {
+    return this.httpClient.post<{ status?: string; clearedCount?: number; ClearedCount?: number; message?: string; Message?: string }>(
+      `${this.API_URL}/backfill/closing-duty-slip/force-clear-stuck`,
+      {}
+    );
+  }
+
+  previewVerifiedDutySlipBackfill(criteria: DutySlipDocumentBackfillCriteria): Observable<DutySlipDocumentBackfillPreviewResult> {
+    return this.httpClient.post<DutySlipDocumentBackfillPreviewResult>(
+      `${this.API_URL}/backfill/verified-duty-slip/preview`,
+      criteria || {}
+    );
+  }
+
+  startVerifiedDutySlipBackfillJob(
+    criteria: DutySlipDocumentBackfillCriteria,
+    performedBy: number
+  ): Observable<StartDutySlipDocumentBackfillJobResult> {
+    return this.httpClient.post<StartDutySlipDocumentBackfillJobResult>(
+      `${this.API_URL}/backfill/verified-duty-slip/${performedBy}`,
+      criteria || {}
+    );
+  }
+
+  cancelVerifiedDutySlipBackfillJob(jobId: number): Observable<any> {
+    return this.httpClient.post(`${this.API_URL}/backfill/verified-duty-slip/cancel/${jobId}`, {});
+  }
+
+  forceClearStuckVerifiedDutySlipBackfill(): Observable<any> {
+    return this.httpClient.post(`${this.API_URL}/backfill/verified-duty-slip/force-clear-stuck`, {});
+  }
+
+  previewTollInterstateBackfill(criteria: DutySlipDocumentBackfillCriteria): Observable<DutySlipDocumentBackfillPreviewResult> {
+    return this.httpClient.post<DutySlipDocumentBackfillPreviewResult>(
+      `${this.API_URL}/backfill/toll-interstate/preview`,
+      criteria || {}
+    );
+  }
+
+  startTollInterstateBackfillJob(
+    criteria: DutySlipDocumentBackfillCriteria,
+    performedBy: number
+  ): Observable<StartDutySlipDocumentBackfillJobResult> {
+    return this.httpClient.post<StartDutySlipDocumentBackfillJobResult>(
+      `${this.API_URL}/backfill/toll-interstate/${performedBy}`,
+      criteria || {}
+    );
+  }
+
+  cancelTollInterstateBackfillJob(jobId: number): Observable<any> {
+    return this.httpClient.post(`${this.API_URL}/backfill/toll-interstate/cancel/${jobId}`, {});
+  }
+
+  forceClearStuckTollInterstateBackfill(): Observable<any> {
+    return this.httpClient.post(`${this.API_URL}/backfill/toll-interstate/force-clear-stuck`, {});
+  }
+
+  previewDutySlipPackageDownload(
+    criteria: DutySlipPackageDownloadCriteria,
+    performedBy: number
+  ): Observable<DutySlipPackageDownloadPreviewResult> {
+    return this.httpClient.post<DutySlipPackageDownloadPreviewResult>(
+      `${this.API_URL}/download/duty-slip-package/preview/${performedBy}`,
+      criteria || {}
+    );
+  }
+
+  startDutySlipPackageDownloadJob(
+    criteria: DutySlipPackageDownloadCriteria,
+    performedBy: number
+  ): Observable<StartDutySlipPackageDownloadJobResult> {
+    return this.httpClient.post<StartDutySlipPackageDownloadJobResult>(
+      `${this.API_URL}/download/duty-slip-package/start/${performedBy}`,
+      criteria || {}
+    );
   }
 
   getInvoiceDuties(invoiceId: number): Observable<any[]> {

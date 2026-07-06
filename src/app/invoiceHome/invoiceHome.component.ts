@@ -703,19 +703,72 @@ bookerName: FormControl = new FormControl();
     await this.generateDocumentStep(
       'Invoice',
       async () => {
-        if (this.viewBillPdfService.isSupportedViewBillRoute(row.templateAddress, row.invoiceType)) {
-          return this.viewBillPdfService.archiveBillFromViewBill(
-            row.invoiceID,
-            performedBy,
-            row.templateAddress,
-            row.invoiceType
-          );
+        let lastError = '';
+        const useViewBill = this.viewBillPdfService.isSupportedViewBillRoute(
+          row.templateAddress,
+          row.invoiceType
+        );
+
+        if (useViewBill) {
+          try {
+            const viewBillResult = await this.viewBillPdfService.archiveBillFromViewBill(
+              row.invoiceID,
+              performedBy,
+              row.templateAddress,
+              row.invoiceType
+            );
+            if (this.hasArchivedFileName(viewBillResult)) {
+              return viewBillResult;
+            }
+            lastError = this.extractResultMessage(
+              viewBillResult,
+              'View bill capture did not produce an archived file.'
+            );
+          } catch (viewBillErr) {
+            lastError = this.extractPdfGenerationError(viewBillErr, 'View bill PDF capture failed.');
+          }
         }
 
-        return firstValueFrom(this.bulkBillsDownloadService.generateInvoicePdf(row.invoiceID, performedBy));
+        try {
+          const serverResult = await firstValueFrom(
+            this.bulkBillsDownloadService.generateInvoicePdf(row.invoiceID, performedBy)
+          );
+          if (this.hasArchivedFileName(serverResult)) {
+            return serverResult;
+          }
+
+          const serverMessage = this.extractResultMessage(
+            serverResult,
+            'Server PDF generation did not return a file.'
+          );
+          throw new Error(
+            lastError ? `${lastError} Server fallback: ${serverMessage}` : serverMessage
+          );
+        } catch (serverErr) {
+          const serverMessage = this.extractPdfGenerationError(serverErr, 'Server PDF generation failed.');
+          throw new Error(
+            lastError ? `${lastError} Server fallback: ${serverMessage}` : serverMessage
+          );
+        }
       },
       stepErrors
     );
+  }
+
+  private hasArchivedFileName(result: any): boolean {
+    const fileName = result?.fileName ?? result?.FileName;
+    return !!fileName && fileName !== 'NA';
+  }
+
+  private extractResultMessage(result: any, fallback: string): string {
+    if (!result) {
+      return fallback;
+    }
+    if (typeof result === 'string' && result.trim()) {
+      return result.trim();
+    }
+    const message = result.message ?? result.Message ?? result.title ?? result.Title;
+    return message ? String(message) : fallback;
   }
 
   private async generateDocumentStep(
@@ -726,15 +779,18 @@ bookerName: FormControl = new FormControl();
     try {
       const result = await action();
       const fileName = result?.fileName ?? result?.FileName ?? 'NA';
-      const created = !!fileName && fileName !== 'NA';
-      await this.showPdfStepModal(documentType, created, fileName);
+      const created = this.hasArchivedFileName(result);
+      const detail = !created
+        ? this.extractResultMessage(result, `${documentType} not created.`)
+        : '';
+      await this.showPdfStepModal(documentType, created, fileName, detail);
       if (!created) {
-        stepErrors.push(`${documentType} not created`);
+        stepErrors.push(detail || `${documentType} not created`);
       }
     } catch (err) {
       const message = this.extractPdfGenerationError(err, `${documentType} failed.`);
       stepErrors.push(message);
-      await this.showPdfStepModal(documentType, false, 'NA');
+      await this.showPdfStepModal(documentType, false, 'NA', message);
     }
   }
 
@@ -757,14 +813,22 @@ bookerName: FormControl = new FormControl();
     } catch (err) {
       const message = this.extractPdfGenerationError(err, `${documentType} failed.`);
       stepErrors.push(message);
-      await this.showPdfStepModal(documentType, false, 'NA');
+      await this.showPdfStepModal(documentType, false, 'NA', message);
     }
   }
 
-  private showPdfStepModal(documentType: string, created: boolean, fileName: string): Promise<void> {
+  private showPdfStepModal(
+    documentType: string,
+    created: boolean,
+    fileName: string,
+    detailMessage?: string
+  ): Promise<void> {
     const status = created ? 'Created' : 'Not Created';
-    const name = created && fileName ? fileName : 'NA';
-    const message = `${documentType} ${status} ${name}`;
+    const name = created && fileName && fileName !== 'NA' ? fileName : 'NA';
+    let message = `${documentType} ${status} ${name}`;
+    if (!created && detailMessage) {
+      message += `\n\n${detailMessage}`;
+    }
     return new Promise((resolve) => {
       const dialogRef = this.dialog.open(BackfillStepDialogComponent, {
         width: '480px',

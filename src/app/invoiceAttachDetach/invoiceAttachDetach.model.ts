@@ -8,6 +8,7 @@ export class InvoiceAttachDetachModel {
   invoiceID:number;
   invoiceNumber:string;
   pickUpDate:Date;
+  pickUpDateForBilling:Date;
   dropOffDate:Date;
   vehicleID:number;
   vehicle:string;

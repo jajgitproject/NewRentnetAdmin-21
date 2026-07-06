@@ -89,9 +89,31 @@ export class FormDialogComponent
   {
     this.dialogRef.close();
   }
+  private getRolePayload(): any {
+    const raw = this.advanceTableForm.getRawValue();
+    const toBool = (v: any) => v === true || v === 'true' || v === 1 || v === '1';
+    return {
+      ...raw,
+      canCreateReservation: toBool(raw.canCreateReservation),
+      activationStatus: toBool(raw.activationStatus),
+      isThisAKeyAccountManagerRole: toBool(raw.isThisAKeyAccountManagerRole),
+      canThisRoleCreateBackDateBooking: toBool(raw.canThisRoleCreateBackDateBooking),
+      canThisRoleCreateBillOnClosingScreen: toBool(raw.canThisRoleCreateBillOnClosingScreen),
+      canThisRoleViewBillOnClosingScreen: toBool(raw.canThisRoleViewBillOnClosingScreen),
+      canThisRoleDoGoodForBillingOnClosingScreen: toBool(raw.canThisRoleDoGoodForBillingOnClosingScreen),
+      canThisRoleViewDummyInvoice: toBool(raw.canThisRoleViewDummyInvoice),
+      canActAsContractTariffAuditor: toBool(raw.canActAsContractTariffAuditor),
+      canActAsContractTariffVerifier: toBool(raw.canActAsContractTariffVerifier),
+      canResetOdometer: toBool(raw.canResetOdometer),
+      canDeleteFuelEntry: toBool(raw.canDeleteFuelEntry),
+      canFindFuelEntry: toBool(raw.canFindFuelEntry),
+      canEditDSAfterGoodForBilling: toBool(raw.canEditDSAfterGoodForBilling),
+    };
+  }
+
   public Post(): void
   {
-    this.advanceTableService.add(this.advanceTableForm.getRawValue())  
+    this.advanceTableService.add(this.getRolePayload())  
     .subscribe(
     response => 
     {
@@ -106,7 +128,7 @@ export class FormDialogComponent
   }
   public Put(): void
   {
-    this.advanceTableService.update(this.advanceTableForm.getRawValue())  
+    this.advanceTableService.update(this.getRolePayload())  
     .subscribe(
     response => 
     {

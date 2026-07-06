@@ -40,10 +40,21 @@ export class Role {
        this.canResetOdometer = role.canResetOdometer ?? role.CanResetOdometer ?? '';
        this.canDeleteFuelEntry = role.canDeleteFuelEntry ?? role.CanDeleteFuelEntry ?? '';
        this.canFindFuelEntry = role.canFindFuelEntry ?? role.CanFindFuelEntry ?? '';
-       this.canEditDSAfterGoodForBilling = role.canEditDSAfterGoodForBilling ?? role.CanEditDSAfterGoodForBilling ?? '';
+       this.canEditDSAfterGoodForBilling = Role.toBoolOrEmpty(
+         role.canEditDSAfterGoodForBilling ?? role.CanEditDSAfterGoodForBilling
+       );
 
     }
   }
-  
+
+  private static toBoolOrEmpty(value: any): boolean | '' {
+    if (value === true || value === 1 || value === '1' || value === 'true' || value === 'True') {
+      return true;
+    }
+    if (value === false || value === 0 || value === '0' || value === 'false' || value === 'False') {
+      return false;
+    }
+    return '';
+  }
 }
 

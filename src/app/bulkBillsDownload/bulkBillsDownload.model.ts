@@ -193,3 +193,82 @@ export interface ClosingDutySlipBackfillCompletionSummary {
   databaseInserts: number;
   totalProcessingTimeMs: number;
 }
+
+export type DocumentExistsFilter = 'All' | 'Exists' | 'NotExists';
+
+export interface DutySlipDocumentBackfillCriteria {
+  customerID?: number;
+  fromDate?: string | null;
+  toDate?: string | null;
+  maxCandidates?: number;
+  skipCount?: number;
+  targetMode?: ClosingDutySlipBackfillTargetMode;
+  dutySlipIDs?: number[];
+  documentExistsFilter?: DocumentExistsFilter | string;
+}
+
+export interface DutySlipDocumentBackfillCandidateRow {
+  dutySlipID: number;
+  reservationID?: number | null;
+  customerName?: string | null;
+  pickUpDate?: string | null;
+  status?: string | null;
+  targetRelativePath?: string | null;
+  hasActiveTargetDocument?: boolean;
+  tollParkingReceiptCount?: number;
+  interstateReceiptCount?: number;
+  hasAllTollInterstateDocuments?: boolean;
+}
+
+export interface DutySlipDocumentBackfillPreviewResult {
+  targetMode?: string | null;
+  targetPathPrefix?: string | null;
+  totalMatchedCount?: number;
+  candidateCount?: number;
+  newDocumentCount?: number;
+  toReplaceCount?: number;
+  willProcessCount?: number;
+  estimatedBatchCount?: number;
+  candidates?: DutySlipDocumentBackfillCandidateRow[];
+}
+
+export interface StartDutySlipDocumentBackfillJobResult {
+  jobId: number;
+  jobStatus: string;
+  targetMode?: string | null;
+  totalDutySlips: number;
+}
+
+export interface DutySlipPackageDownloadCriteria {
+  customerID: number;
+  fromDate?: string | null;
+  toDate?: string | null;
+  dutySlipIDs?: number[];
+  maxCandidates?: number;
+  skipCount?: number;
+  accumulatorZipRelativePath?: string | null;
+}
+
+export interface DutySlipPackageDownloadRow {
+  dutySlipID: number;
+  reservationID?: number | null;
+  customerName?: string | null;
+  pickUpDate?: string | null;
+  tollReceiptCount?: number;
+  interstateReceiptCount?: number;
+  slipSource?: string | null;
+}
+
+export interface DutySlipPackageDownloadPreviewResult {
+  totalMatchedCount?: number;
+  candidateCount?: number;
+  willProcessCount?: number;
+  estimatedBatchCount?: number;
+  candidates?: DutySlipPackageDownloadRow[];
+}
+
+export interface StartDutySlipPackageDownloadJobResult {
+  jobId: number;
+  jobStatus: string;
+  totalDutySlips: number;
+}

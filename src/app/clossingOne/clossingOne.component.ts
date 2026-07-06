@@ -379,14 +379,16 @@ export class ClossingOneComponent implements OnInit, AfterViewInit {
   GetClosingData() {
     this.clossingOneService.GetClosingData(this.DutySlipID).subscribe(
       data => {
-        this.advanceTableClosingOne = data;
+        // Always normalize via ClosingModel so Verify/GFB flags survive refresh (casing + bool coercion).
+        this.advanceTableClosingOne = new ClosingModel(data);
         console.log('Closing Data:', this.advanceTableClosingOne);
         this.invoiceID = this.advanceTableClosingOne?.invoiceID;
         this.IRN = this.advanceTableClosingOne?.irn;
         this.hasActiveEInvoice = !!this.advanceTableClosingOne?.hasActiveEInvoice;
-        this.goodForBilling = this.advanceTableClosingOne?.closingDutySlipForBillingModel?.goodForBilling;
-        this.verifyDuty = this.advanceTableClosingOne?.closingDutySlipForBillingModel?.verifyDuty;
+        this.goodForBilling = !!this.advanceTableClosingOne?.closingDutySlipForBillingModel?.goodForBilling;
+        this.verifyDuty = !!this.advanceTableClosingOne?.closingDutySlipForBillingModel?.verifyDuty;
         this.DSClosing = this.advanceTableClosingOne?.closingDutySlipForBillingModel?.dsClosing;
+        this.canEditDSAfterGoodForBilling = this.readRoleFlagFromStorage('canEditDSAfterGoodForBilling');
         this.applyEditBlockStatus();
         this.loadDataForBillNo();
       }
@@ -1035,11 +1037,31 @@ export class ClossingOneComponent implements OnInit, AfterViewInit {
   // }
   private readRoleFlagFromStorage(key: string): boolean {
     const rawValue = localStorage.getItem(key);
-    if (rawValue == null) {
+    if (this.isTruthyFlag(rawValue)) {
+      return true;
+    }
+
+    // Fallback: login payload on currentUser (covers stale/missing localStorage keys)
+    try {
+      const currentUser = JSON.parse(localStorage.getItem('currentUser') || '{}');
+      const employee = currentUser?.employee ?? currentUser?.Employee ?? {};
+      const camelKey = key;
+      const pascalKey = key.charAt(0).toUpperCase() + key.slice(1);
+      return this.isTruthyFlag(employee?.[camelKey] ?? employee?.[pascalKey]);
+    } catch {
       return false;
     }
-    const normalized = rawValue.toString().trim().toLowerCase();
-    return normalized === 'true' || normalized === '1';
+  }
+
+  private isTruthyFlag(value: unknown): boolean {
+    if (value === true || value === 1) {
+      return true;
+    }
+    if (value == null) {
+      return false;
+    }
+    const normalized = value.toString().trim().toLowerCase();
+    return normalized === 'true' || normalized === '1' || normalized === 'yes';
   }
 
   get isEInvoiceBlockingEdits(): boolean {
@@ -1047,8 +1069,20 @@ export class ClossingOneComponent implements OnInit, AfterViewInit {
   }
 
   get isGoodForBillingBlockingEdits(): boolean {
-    const isGfb = !!(this.goodForBilling ?? this.advanceTableClosingOne?.closingDutySlipForBillingModel?.goodForBilling);
-    return isGfb && !this.canEditDSAfterGoodForBilling;
+    const billing = this.advanceTableClosingOne?.closingDutySlipForBillingModel;
+    const dutySlip = this.advanceTableClosingOne?.closingDutySlipModel as any;
+    const isGfb = !!(
+      this.goodForBilling === true
+      || billing?.goodForBilling === true
+      || dutySlip?.goodForBilling === true
+      || dutySlip?.GoodForBilling === true
+    );
+    return isGfb && !this.hasDsEditPermission;
+  }
+
+  /** Effective DS Edit permission (session flag and/or currentUser employee). */
+  get hasDsEditPermission(): boolean {
+    return this.canEditDSAfterGoodForBilling === true || this.readRoleFlagFromStorage('canEditDSAfterGoodForBilling');
   }
 
   get isDutySlipEditBlocked(): boolean {

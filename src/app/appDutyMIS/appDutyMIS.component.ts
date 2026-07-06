@@ -163,6 +163,16 @@ export class AppDutyMISComponent implements OnInit {
 
   private readonly zeroAsNaColumns = new Set(['dutySlipID']);
 
+  private getTodayDate(): Date {
+    return moment().utcOffset('+05:30').startOf('day').toDate();
+  }
+
+  private setDefaultDateRange(): void {
+    const today = this.getTodayDate();
+    this.searchFromDate = today;
+    this.searchToDate = today;
+  }
+
   constructor(
     public httpClient: HttpClient,
     public dialog: MatDialog,
@@ -178,7 +188,7 @@ export class AppDutyMISComponent implements OnInit {
   contextMenu: MatMenuTrigger;
   contextMenuPosition = { x: '0px', y: '0px' };
   ngOnInit() {
- 
+    this.setDefaultDateRange();
     this.loadData();
     this.SubscribeUpdateService();
     this.initDispatchLocation();
@@ -237,8 +247,7 @@ export class AppDutyMISComponent implements OnInit {
       }
 
   refresh() {
-    this.searchFromDate = null;
-    this.searchToDate = null;
+    this.setDefaultDateRange();
     this.dispatch_Location.setValue('');
     this.SearchActivationStatus = true;
     this.PageNumber = 0;
@@ -335,14 +344,93 @@ shouldShowDeleteButton(item: any): boolean {
     return rows.map((row) => this.normalizeRow(row));
   }
 
+  private readonly timeColumns = new Set([
+    'locationOutTimeByApp',
+    'reportingToGuestTimeByApp',
+    'dropOffTimeByApp',
+    'locationInTimeByApp',
+  ]);
+
   private normalizeRow(row: any): any {
+    const driverOfficialIdentityNumber =
+      row.driverOfficialIdentityNumber ?? row.DriverOfficialIdentityNumber ?? null;
     return {
       ...row,
-      driverName: row.driverName ?? row.drivername ?? null,
+      driverOfficialIdentityNumber,
+      driverName: driverOfficialIdentityNumber,
+      driverDisplayName: this.formatDriverName({ driverOfficialIdentityNumber }),
+      locationOutTimeByApp: this.formatTimeValue(row.locationOutTimeByApp ?? row.LocationOutTimeByApp),
+      reportingToGuestTimeByApp: this.formatTimeValue(
+        row.reportingToGuestTimeByApp ?? row.ReportingToGuestTimeByApp
+      ),
+      dropOffTimeByApp: this.formatTimeValue(row.dropOffTimeByApp ?? row.DropOffTimeByApp),
+      locationInTimeByApp: this.formatTimeValue(row.locationInTimeByApp ?? row.LocationInTimeByApp),
     };
   }
 
+  formatDriverName(row: any): string {
+    // Driver Name column shows Driver.DriverOfficialIdentityNumber only.
+    const code = (row?.driverOfficialIdentityNumber ?? row?.DriverOfficialIdentityNumber ?? '')
+      .toString()
+      .trim();
+    return code || 'N/A';
+  }
+
+  private formatTimeValue(value: any): string {
+    if (value === undefined || value === null || value === '' || value === 'N/A') {
+      return 'N/A';
+    }
+
+    if (typeof value === 'string') {
+      const trimmed = value.trim();
+      if (!trimmed) {
+        return 'N/A';
+      }
+      const parsed = moment(trimmed, [moment.ISO_8601, 'HH:mm:ss', 'HH:mm:ss.SSSSSSS', 'HH:mm'], true);
+      if (parsed.isValid()) {
+        return parsed.format('HH:mm:ss');
+      }
+      // Already a time-like string from API
+      if (/^\d{1,2}:\d{2}(:\d{2})?/.test(trimmed)) {
+        return trimmed.length === 5 ? `${trimmed}:00` : trimmed;
+      }
+      return trimmed;
+    }
+
+    if (typeof value === 'object') {
+      // Newtonsoft TimeSpan JSON shape
+      const hours = value.hours ?? value.Hours;
+      const minutes = value.minutes ?? value.Minutes;
+      const seconds = value.seconds ?? value.Seconds;
+      if (hours !== undefined || minutes !== undefined || seconds !== undefined) {
+        const pad = (n: number) => String(Math.floor(Math.abs(n || 0))).padStart(2, '0');
+        return `${pad(hours || 0)}:${pad(minutes || 0)}:${pad(seconds || 0)}`;
+      }
+      if (value.ticks != null || value.Ticks != null) {
+        const ticks = Number(value.ticks ?? value.Ticks);
+        if (Number.isFinite(ticks)) {
+          const totalSeconds = Math.floor(Math.abs(ticks) / 10000000);
+          const h = Math.floor(totalSeconds / 3600);
+          const m = Math.floor((totalSeconds % 3600) / 60);
+          const s = totalSeconds % 60;
+          const pad = (n: number) => String(n).padStart(2, '0');
+          return `${pad(h)}:${pad(m)}:${pad(s)}`;
+        }
+      }
+    }
+
+    return 'N/A';
+  }
+
   getDisplayValue(column: string, row: any): string | number {
+    if (column === 'driverName') {
+      return row.driverDisplayName || this.formatDriverName(row);
+    }
+
+    if (this.timeColumns.has(column)) {
+      return this.formatTimeValue(row[column]);
+    }
+
     const value = row[column];
 
     if (this.zeroAsNaColumns.has(column)) {
@@ -350,6 +438,10 @@ shouldShowDeleteButton(item: any): boolean {
     }
 
     if (value === undefined || value === null || value === '') {
+      return 'N/A';
+    }
+
+    if (typeof value === 'object') {
       return 'N/A';
     }
 
@@ -548,12 +640,7 @@ shouldShowDeleteButton(item: any): boolean {
       return;
     }
 
-    // All matching rows are already on screen — skip the API round-trip.
-    if (this.dataSource.length < this.pageSize && this.PageNumber === 0) {
-      this.downloadVisibleRowsCsv();
-      return;
-    }
-
+    // Always export all rows matching filters (not just the current page of 50).
     this.exportFullCsv();
   }
 
@@ -562,7 +649,7 @@ shouldShowDeleteButton(item: any): boolean {
     const toDate = this.formatDateParam(this.searchToDate);
 
     this.csvExporting = true;
-    this.showNotification('snackbar-info', 'Preparing CSV export...', 'bottom', 'center');
+    this.showNotification('snackbar-info', 'Preparing CSV export of all matching records...', 'bottom', 'center');
 
     this.appDutyMISService.downloadCsv(
       fromDate,
@@ -583,21 +670,43 @@ shouldShowDeleteButton(item: any): boolean {
           return;
         }
 
-        this.triggerBlobDownload(blob);
-        this.showNotification('snackbar-success', 'CSV downloaded successfully', 'bottom', 'center');
+        this.triggerBlobDownload(blob, 'xls');
+        this.showNotification('snackbar-success', 'Excel downloaded successfully (all matching records)', 'bottom', 'center');
       },
-      () => {
+      async (err) => {
         this.csvExporting = false;
-        this.downloadVisibleRowsCsv();
+        let message = 'Failed to download full export for all matching records.';
+        try {
+          if (err?.error instanceof Blob) {
+            const text = await this.readBlobText(err.error);
+            try {
+              const json = JSON.parse(text);
+              message = json.Message || json.message || message;
+            } catch {
+              if (text?.trim()) {
+                message = text.trim();
+              }
+            }
+          } else {
+            message =
+              err?.error?.Message
+              || err?.error?.message
+              || err?.message
+              || message;
+          }
+        } catch {
+          // keep default message
+        }
+        this.showNotification('snackbar-danger', message, 'bottom', 'center');
       }
     );
   }
 
-  private triggerBlobDownload(blob: Blob): void {
+  private triggerBlobDownload(blob: Blob, extension: 'csv' | 'xls' | 'xlsx' = 'xls'): void {
     const fileUrl = window.URL.createObjectURL(blob);
     const anchor = document.createElement('a');
     anchor.href = fileUrl;
-    anchor.download = `AppDutyMIS_${moment().format('YYYYMMDD_HHmmss')}.csv`;
+    anchor.download = `AppDutyMIS_${moment().format('YYYYMMDD_HHmmss')}.${extension}`;
     document.body.appendChild(anchor);
     anchor.click();
     document.body.removeChild(anchor);
@@ -611,6 +720,9 @@ shouldShowDeleteButton(item: any): boolean {
         if (column === 'dutyDate') {
           return row[column] ? moment(row[column]).format('DD-MM-YYYY') : 'N/A';
         }
+        if (column === 'driverName') {
+          return this.formatDriverName(row);
+        }
         return String(this.getDisplayValue(column, row));
       })
     );
@@ -620,8 +732,13 @@ shouldShowDeleteButton(item: any): boolean {
       .join('\n');
 
     const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' });
-    this.triggerBlobDownload(blob);
-    this.showNotification('snackbar-success', 'CSV downloaded successfully', 'bottom', 'center');
+    this.triggerBlobDownload(blob, 'csv');
+    this.showNotification(
+      'snackbar-success',
+      'CSV downloaded for visible page only (not full filter result).',
+      'bottom',
+      'center'
+    );
   }
 
   private readBlobText(blob: Blob): Promise<string> {

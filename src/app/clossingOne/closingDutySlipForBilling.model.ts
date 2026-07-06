@@ -3,7 +3,7 @@ export class ClosingDutySlipForBillingModel {
   dutySlipForBillingID: number;
   dutySlipID: number;
 
-  locationOutLocationOrHubID: number;
+  locationOutLocationOrHubID: number | null;
   locationOutDateForBilling: Date;
   locationOutTimeForBilling: Date;
   locationOutKMForBilling: number;
@@ -86,40 +86,64 @@ export class ClosingDutySlipForBillingModel {
   vendorRemark: string;
 
   constructor(closingDutySlipForBillingModel) {
-    this.dutySlipForBillingID = closingDutySlipForBillingModel.dutySlipForBillingID || '';
-    this.dutySlipID = closingDutySlipForBillingModel.dutySlipID || '';
+    this.dutySlipForBillingID = ClosingDutySlipForBillingModel.toIntOrZero(closingDutySlipForBillingModel.dutySlipForBillingID);
+    this.dutySlipID = ClosingDutySlipForBillingModel.toIntOrZero(closingDutySlipForBillingModel.dutySlipID);
 
-    this.locationOutLocationOrHubID = closingDutySlipForBillingModel.locationOutLocationOrHubID || '';
-    this.locationOutDateForBilling = closingDutySlipForBillingModel.locationOutDateForBilling  || '';
-    this.locationOutTimeForBilling = closingDutySlipForBillingModel.locationOutTimeForBilling  || '';
+    this.locationOutLocationOrHubID = ClosingDutySlipForBillingModel.toIntOrNull(
+      closingDutySlipForBillingModel.locationOutLocationOrHubID ?? closingDutySlipForBillingModel.LocationOutLocationOrHubID
+    );
+    this.locationOutDateForBilling = ClosingDutySlipForBillingModel.toNullableDate(
+      closingDutySlipForBillingModel.locationOutDateForBilling
+    );
+    this.locationOutTimeForBilling = ClosingDutySlipForBillingModel.toNullableDate(
+      closingDutySlipForBillingModel.locationOutTimeForBilling
+    );
     this.locationOutKMForBilling = closingDutySlipForBillingModel.locationOutKMForBilling || '';
     this.locationOutLatLongForBilling = closingDutySlipForBillingModel.locationOutLatLongForBilling || '';
     this.locationOutAddressStringForBilling = closingDutySlipForBillingModel.locationOutAddressStringForBilling || '';
 
-    this.reportingToGuestDateForBilling = closingDutySlipForBillingModel.reportingToGuestDateForBilling  || '';
-    this.reportingToGuestTimeForBilling = closingDutySlipForBillingModel.reportingToGuestTimeForBilling  || '';
+    this.reportingToGuestDateForBilling = ClosingDutySlipForBillingModel.toNullableDate(
+      closingDutySlipForBillingModel.reportingToGuestDateForBilling
+    );
+    this.reportingToGuestTimeForBilling = ClosingDutySlipForBillingModel.toNullableDate(
+      closingDutySlipForBillingModel.reportingToGuestTimeForBilling
+    );
     this.reportingToGuestKMForBilling = closingDutySlipForBillingModel.reportingToGuestKMForBilling || '';
     this.reportingToGuestLatLongForBilling = closingDutySlipForBillingModel.reportingToGuestLatLongForBilling || '';
     this.reportingToGuestAddressStringForBilling = closingDutySlipForBillingModel.reportingToGuestAddressStringForBilling || '';
 
-    this.pickUpDateForBilling = closingDutySlipForBillingModel.pickUpDateForBilling  || '';
-    this.pickUpTimeForBilling = closingDutySlipForBillingModel.pickUpTimeForBilling  || '';
+    this.pickUpDateForBilling = ClosingDutySlipForBillingModel.toNullableDate(
+      closingDutySlipForBillingModel.pickUpDateForBilling
+    );
+    this.pickUpTimeForBilling = ClosingDutySlipForBillingModel.toNullableDate(
+      closingDutySlipForBillingModel.pickUpTimeForBilling
+    );
     this.pickUpKMForBilling = closingDutySlipForBillingModel.pickUpKMForBilling || '';
     this.pickUpLatLongForBilling = closingDutySlipForBillingModel.pickUpLatLongForBilling || '';
     this.pickUpAddressStringForBilling = closingDutySlipForBillingModel.pickUpAddressStringForBilling || '';
 
-    this.dropOffDateForBilling = closingDutySlipForBillingModel.dropOffDateForBilling || '';
-    this.dropOffTimeForBilling = closingDutySlipForBillingModel.dropOffTimeForBilling || '';
+    this.dropOffDateForBilling = ClosingDutySlipForBillingModel.toNullableDate(
+      closingDutySlipForBillingModel.dropOffDateForBilling
+    );
+    this.dropOffTimeForBilling = ClosingDutySlipForBillingModel.toNullableDate(
+      closingDutySlipForBillingModel.dropOffTimeForBilling
+    );
     this.dropOffKMForBilling = closingDutySlipForBillingModel.dropOffKMForBilling || '';
     this.dropOffLatLongForBilling = closingDutySlipForBillingModel.dropOffLatLongForBilling || '';
     this.dropOffAddressStringForBilling = closingDutySlipForBillingModel.dropOffAddressStringForBilling || '';
 
-    this.locationInDateForBilling = closingDutySlipForBillingModel.locationInDateForBilling || '';
-    this.locationInTimeForBilling = closingDutySlipForBillingModel.locationInTimeForBilling || '';
+    this.locationInDateForBilling = ClosingDutySlipForBillingModel.toNullableDate(
+      closingDutySlipForBillingModel.locationInDateForBilling
+    );
+    this.locationInTimeForBilling = ClosingDutySlipForBillingModel.toNullableDate(
+      closingDutySlipForBillingModel.locationInTimeForBilling
+    );
     this.locationInKMForBilling = closingDutySlipForBillingModel.locationInKMForBilling || '';
     this.locationInLatLongForBilling = closingDutySlipForBillingModel.locationInLatLongForBilling || '';
     this.locationInAddressStringForBilling = closingDutySlipForBillingModel.locationInAddressStringForBilling || '';
-    this.locationInLocationOrHubID = closingDutySlipForBillingModel.locationInLocationOrHubID || '';
+    this.locationInLocationOrHubID = ClosingDutySlipForBillingModel.toIntOrZero(
+      closingDutySlipForBillingModel.locationInLocationOrHubID ?? closingDutySlipForBillingModel.LocationInLocationOrHubID
+    );
 
     this.disputeKMs = closingDutySlipForBillingModel.disputeKMs || '';
     this.disputeMinutes = closingDutySlipForBillingModel.disputeMinutes || '';
@@ -145,13 +169,48 @@ export class ClosingDutySlipForBillingModel {
     this.discountAmount = closingDutySlipForBillingModel.discountAmount || '';
 
     this.physicalDutySlipReceived = closingDutySlipForBillingModel.physicalDutySlipReceived || '';
-    this.dutySlipForBillingCreatedOn = closingDutySlipForBillingModel.dutySlipForBillingCreatedOn || '';
+    this.dutySlipForBillingCreatedOn = ClosingDutySlipForBillingModel.toNullableDate(
+      closingDutySlipForBillingModel.dutySlipForBillingCreatedOn
+    );
 
-    this.goodForBilling = closingDutySlipForBillingModel.goodForBilling || '';
-    this.verifyDuty = closingDutySlipForBillingModel.verifyDuty || '';
-    this.dsClosing = closingDutySlipForBillingModel.dsClosing || '';
+    this.goodForBilling = ClosingDutySlipForBillingModel.toBool(
+      closingDutySlipForBillingModel.goodForBilling ?? closingDutySlipForBillingModel.GoodForBilling
+    );
+    this.verifyDuty = ClosingDutySlipForBillingModel.toBool(
+      closingDutySlipForBillingModel.verifyDuty ?? closingDutySlipForBillingModel.VerifyDuty
+    );
+    this.dsClosing = (closingDutySlipForBillingModel.dsClosing ?? closingDutySlipForBillingModel.DSClosing) || '';
     this.runningDetails = closingDutySlipForBillingModel.runningDetails || '';
     this.vendorRemark = closingDutySlipForBillingModel.vendorRemark || '';
+  }
+
+  /** Coerce API bool / "True" / 1 into a real boolean (false stays false; do not use || ''). */
+  static toBool(value: any): boolean {
+    return value === true || value === 1 || value === '1'
+      || value === 'true' || value === 'True' || value === 'TRUE';
+  }
+
+  /** Prefer null over '' so JSON binds to int? on the API. */
+  static toIntOrNull(value: any): number | null {
+    if (value === '' || value === null || value === undefined) {
+      return null;
+    }
+    const n = Number(value);
+    return Number.isFinite(n) ? n : null;
+  }
+
+  static toIntOrZero(value: any): number {
+    return ClosingDutySlipForBillingModel.toIntOrNull(value) ?? 0;
+  }
+
+  /** Prefer null over '' so JSON binds to DateTime? on the API. */
+  static toNullableDate(value: any): Date | null {
+    if (value === '' || value === null || value === undefined) {
+      return null;
+    }
+
+    const date = value instanceof Date ? value : new Date(value);
+    return Number.isNaN(date.getTime()) ? null : date;
   }
 }
 

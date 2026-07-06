@@ -265,7 +265,14 @@ export class SigninComponent implements OnInit {
               );
               localStorage.setItem(
                 'canEditDSAfterGoodForBilling',
-                String(employee.CanEditDSAfterGoodForBilling ?? employee.canEditDSAfterGoodForBilling ?? false)
+                (employee.CanEditDSAfterGoodForBilling === true ||
+                  employee.canEditDSAfterGoodForBilling === true ||
+                  employee.CanEditDSAfterGoodForBilling === 'true' ||
+                  employee.canEditDSAfterGoodForBilling === 'true' ||
+                  employee.CanEditDSAfterGoodForBilling === 1 ||
+                  employee.canEditDSAfterGoodForBilling === 1)
+                  ? 'true'
+                  : 'false'
               );
               this.calculateDaysLeft();
             }

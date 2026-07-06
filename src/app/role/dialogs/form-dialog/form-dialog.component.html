@@ -182,14 +182,15 @@
             <div class="row">
                 <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
                     <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
-                        <mat-label>CanEditDSAfterGoodForBilling</mat-label>
+                        <mat-label>DS Edit</mat-label>
                         <mat-select formControlName="canEditDSAfterGoodForBilling">
                             <mat-option value="">--Select--</mat-option>
                             <mat-option [value]="true">Yes</mat-option>
                             <mat-option [value]="false">No</mat-option>
                         </mat-select>
+                        <mat-hint>Allows editing Duty Slip and Verify Duty / Good for Billing after Verified &amp; Good for Billing</mat-hint>
                         <mat-error *ngIf="advanceTableForm.get('canEditDSAfterGoodForBilling')?.hasError('required')">
-                            CanEditDSAfterGoodForBilling is required
+                            DS Edit is required
                         </mat-error>
                     </mat-form-field>
                 </div>

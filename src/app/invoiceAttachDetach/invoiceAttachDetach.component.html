@@ -207,6 +207,10 @@
                                         </div>
 
                                         <div style="width: 100%; text-align: right;">
+                                            <p *ngIf="InvoiceNumberWithPrefix && invoiceBillDate" class="text-warning" style="margin-bottom: 8px;">
+                                                Bill date: {{ invoiceBillDate | date: 'dd-MM-yyyy' }}.
+                                                Duties with billing pickup date after this date cannot be attached.
+                                            </p>
                                             <button mat-raised-button color="primary" data-dismiss="modal"
                                                 data-toggle="modal" data-backDrop="false" *ngIf="InvoiceNumberWithPrefix"
                                                 (click)="AttachDuty()">
@@ -279,7 +283,9 @@
                                                      <mat-checkbox color="primary"
                                                         (change)="onCheckBox($event.checked, row)"
                                                         [disabled]="!isRowSelectable(row)"
-                                                        [checked]="row.checked">
+                                                        [checked]="row.checked"
+                                                        [matTooltip]="isRowBlockedByBillDate(row) ? 'Billing pickup date is after bill date' : ''"
+                                                        matTooltipPosition="above">
                                                     </mat-checkbox>
                                                 </mat-cell>
                                             </ng-container>

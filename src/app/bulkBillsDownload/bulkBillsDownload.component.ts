@@ -26,6 +26,13 @@ import {
   ClosingDutySlipBackfillProgressRow,
   ClosingDutySlipBackfillProgressStatus,
   ClosingDutySlipBackfillCompletionSummary,
+  DutySlipDocumentBackfillCriteria,
+  DutySlipDocumentBackfillPreviewResult,
+  DutySlipDocumentBackfillCandidateRow,
+  DocumentExistsFilter,
+  DutySlipPackageDownloadCriteria,
+  DutySlipPackageDownloadPreviewResult,
+  DutySlipPackageDownloadRow,
 } from './bulkBillsDownload.model';
 
 @Component({
@@ -38,7 +45,7 @@ export class BulkBillsDownloadComponent implements OnInit, OnDestroy, AfterViewI
   @ViewChild('uploadFileInput') uploadFileInput?: ElementRef<HTMLInputElement>;
   @ViewChild('invoicePaginator') invoicePaginator?: MatPaginator;
 
-  activeTab: 'backfill' | 'download' | 'upload' | 'closingDutySlip' = 'download';
+  activeTab: 'backfill' | 'download' | 'upload' | 'closingDutySlip' | 'verifiedDutySlip' | 'tollInterstate' = 'download';
   loading = false;
   loadError = '';
   downloading = false;
@@ -79,14 +86,82 @@ export class BulkBillsDownloadComponent implements OnInit, OnDestroy, AfterViewI
   closingBatchNumber = 0;
   closingTotalBatches = 0;
   closingAllBatchesProcessed = 0;
+
+  readonly docBackfillMinFromDate = new Date(2026, 4, 15);
+  readonly docBackfillMaxRangeDays = 15;
+  readonly dutySlipPackageMaxRangeDays = 31;
+  docBackfillBatchSize = 500;
+  verifiedCustomerCtrl = new FormControl('');
+  verifiedFromDateCtrl = new FormControl(this.getTodayDate());
+  verifiedToDateCtrl = new FormControl(this.getTodayDate());
+  verifiedDutySlipIdsCtrl = new FormControl('');
+  dutySlipPackagePreview: DutySlipPackageDownloadPreviewResult | null = null;
+  dutySlipPackageCandidates: DutySlipPackageDownloadRow[] = [];
+  dutySlipPackageLoadError = '';
+  dutySlipPackagePreviewLoading = false;
+  dutySlipPackageDownloading = false;
+  packageBatchSize = 500;
+  packageRunAllBatches = false;
+  packageBatchSkip = 0;
+  packageBatchNumber = 0;
+  packageTotalBatches = 0;
+  packageAllBatchesProcessed = 0;
+  packageAccumulatorZipPath: string | null = null;
+  packageDownloadProgressRows: {
+    dutySlipID: number;
+    customerName: string;
+    status: string;
+    details: string;
+    completedAt: string | null;
+  }[] = [];
+  packageDownloadProgressColumns = ['dutySlipID', 'customerName', 'status', 'details', 'completedAt'];
+  packageJobStartedAt: number | null = null;
+  verifiedTargetMode: ClosingDutySlipBackfillTargetMode = 'DryRun';
+  verifiedExistsFilter: DocumentExistsFilter = 'All';
+  verifiedBackfillPreview: DutySlipDocumentBackfillPreviewResult | null = null;
+  verifiedBackfillCandidates: DutySlipDocumentBackfillCandidateRow[] = [];
+  verifiedBackfillLoadError = '';
+  verifiedBackfilling = false;
+  verifiedPreviewLoading = false;
+  verifiedBackfillProgressRows: ClosingDutySlipBackfillProgressRow[] = [];
+  verifiedBackfillProgressColumns = ['dutySlipID', 'originalFile', 'status', 'processingType', 'details', 'completedAt'];
+  verifiedBatchSkip = 0;
+  verifiedBatchNumber = 0;
+  verifiedTotalBatches = 0;
+  verifiedAllBatchesProcessed = 0;
+  verifiedRunAllBatches = false;
+  verifiedJobStartedAt: number | null = null;
+
+  tollCustomerCtrl = new FormControl('');
+  tollFromDateCtrl = new FormControl(this.getTodayDate());
+  tollToDateCtrl = new FormControl(this.getTodayDate());
+  tollDutySlipIdsCtrl = new FormControl('');
+  tollExistsFilter: DocumentExistsFilter = 'All';
+  tollTargetMode: ClosingDutySlipBackfillTargetMode = 'DryRun';
+  tollBackfillPreview: DutySlipDocumentBackfillPreviewResult | null = null;
+  tollBackfillCandidates: DutySlipDocumentBackfillCandidateRow[] = [];
+  tollBackfillLoadError = '';
+  tollBackfilling = false;
+  tollPreviewLoading = false;
+  tollBackfillProgressRows: ClosingDutySlipBackfillProgressRow[] = [];
+  tollBackfillProgressColumns = ['dutySlipID', 'originalFile', 'status', 'processingType', 'details', 'completedAt'];
+  tollBatchSkip = 0;
+  tollBatchNumber = 0;
+  tollTotalBatches = 0;
+  tollAllBatchesProcessed = 0;
+  tollRunAllBatches = false;
+  tollJobStartedAt: number | null = null;
+
   downloadInvoices = false;
   downloadDutySlips = false;
   downloadMerge = true;
   uploadType: 'reservationEmail' | 'dutySlip' = 'reservationEmail';
   uploadMode: 'bulk' | 'single' = 'bulk';
 
-  customerList: { customerID: number; customerName: string }[] = [];
-  filteredCustomerOptions: Observable<{ customerID: number; customerName: string }[]> = of([]);
+  customerList: { customerID: number; customerName: string; tallyCustomerID?: number; displayName?: string }[] = [];
+  filteredCustomerOptions: Observable<{ customerID: number; customerName: string; tallyCustomerID?: number; displayName?: string }[]> = of([]);
+  filteredVerifiedCustomerOptions: Observable<{ customerID: number; customerName: string; tallyCustomerID?: number; displayName?: string }[]> = of([]);
+  filteredTollCustomerOptions: Observable<{ customerID: number; customerName: string; tallyCustomerID?: number; displayName?: string }[]> = of([]);
 
   invoiceRows: BulkDownloadInvoiceSummary[] = [];
   invoiceDataSource = new MatTableDataSource<BulkDownloadInvoiceSummary>([]);
@@ -111,6 +186,9 @@ export class BulkBillsDownloadComponent implements OnInit, OnDestroy, AfterViewI
   ];
   private pollIsIrnBackfill = false;
   private pollIsClosingBackfill = false;
+  private pollIsVerifiedBackfill = false;
+  private pollIsTollBackfill = false;
+  private pollIsPackageDownload = false;
   private pollSub?: Subscription;
   private backfillCancelled = false;
   private selectedFiles: File[] = [];
@@ -125,6 +203,8 @@ export class BulkBillsDownloadComponent implements OnInit, OnDestroy, AfterViewI
 
   ngOnInit(): void {
     this.initCustomerAutocomplete();
+    this.initDocBackfillCustomerAutocomplete(this.verifiedCustomerCtrl, (obs) => { this.filteredVerifiedCustomerOptions = obs; });
+    this.initDocBackfillCustomerAutocomplete(this.tollCustomerCtrl, (obs) => { this.filteredTollCustomerOptions = obs; });
   }
 
   ngAfterViewInit(): void {
@@ -137,7 +217,7 @@ export class BulkBillsDownloadComponent implements OnInit, OnDestroy, AfterViewI
     this.stopPolling();
   }
 
-  setTab(tab: 'backfill' | 'download' | 'upload' | 'closingDutySlip'): void {
+  setTab(tab: 'backfill' | 'download' | 'upload' | 'closingDutySlip' | 'verifiedDutySlip' | 'tollInterstate'): void {
     this.activeTab = tab;
   }
 
@@ -196,7 +276,7 @@ export class BulkBillsDownloadComponent implements OnInit, OnDestroy, AfterViewI
         }
         this.loading = false;
         if (!this.invoiceRows.length) {
-          this.loadError = 'No archived invoice PDFs found in InvoiceDocument for the selected criteria.';
+          this.loadError = 'No archived invoice PDFs found for the selected criteria. Generate PDFs from Invoice Home (Actions → Generate PDFs) or run IRN PDF backfill on the Backfill tab first.';
         }
       },
       (err) => {
@@ -251,7 +331,10 @@ export class BulkBillsDownloadComponent implements OnInit, OnDestroy, AfterViewI
   }
 
   showGlobalJobPanel(): boolean {
-    return !!this.activeJob && (this.activeTab === 'backfill' || this.activeTab === 'upload');
+    return !!this.activeJob && (
+      this.activeTab === 'upload'
+      || (this.activeTab === 'verifiedDutySlip' && this.isDutySlipPackageDownloadJob())
+    );
   }
 
   previewIrnBackfill(): void {
@@ -273,8 +356,8 @@ export class BulkBillsDownloadComponent implements OnInit, OnDestroy, AfterViewI
         const matched = this.getIrnTotalMatchedCount();
         if (matched === 0) {
           const msg = criteria.invoiceNumber
-            ? `No backfill candidates found for invoice number "${criteria.invoiceNumber}".`
-            : 'No backfill candidates found.';
+            ? `No IRN backfill candidates for "${criteria.invoiceNumber}". Archives may already be complete (check Download tab), or the invoice has no IRN.`
+            : 'No IRN backfill candidates found for the selected criteria.';
           this.backfillLoadError = msg;
           this.snackBar.open(msg, 'Close', { duration: 5000 });
           return;
@@ -621,7 +704,7 @@ export class BulkBillsDownloadComponent implements OnInit, OnDestroy, AfterViewI
 
   canDownloadZip(): boolean {
     const jobType = this.activeJob?.jobType || this.activeJob?.JobType || '';
-    if (jobType === 'IrnBackfill' || this.isClosingDutySlipJob()) return false;
+    if (jobType === 'IrnBackfill' || this.isClosingDutySlipJob() || this.isVerifiedDutySlipJob() || this.isTollInterstateJob()) return false;
 
     const status = this.getJobStatus();
     return status === 'Completed' || status === 'Partial';
@@ -635,6 +718,30 @@ export class BulkBillsDownloadComponent implements OnInit, OnDestroy, AfterViewI
   isClosingDutySlipJob(): boolean {
     const jobType = this.activeJob?.jobType || this.activeJob?.JobType || '';
     return jobType === 'ClosingDutySlipDryRun' || jobType === 'ClosingDutySlipProduction';
+  }
+
+  isVerifiedDutySlipJob(): boolean {
+    const jobType = this.activeJob?.jobType || this.activeJob?.JobType || '';
+    return jobType === 'VerifiedDutySlipDryRun' || jobType === 'VerifiedDutySlipProduction';
+  }
+
+  isDutySlipPackageDownloadJob(): boolean {
+    const jobType = this.activeJob?.jobType || this.activeJob?.JobType || '';
+    return jobType === 'DutySlipPackageDownload';
+  }
+
+  isTollInterstateJob(): boolean {
+    const jobType = this.activeJob?.jobType || this.activeJob?.JobType || '';
+    return jobType === 'TollInterstateDryRun' || jobType === 'TollInterstateProduction';
+  }
+
+  getTollRunButtonLabel(): string {
+    const mode = this.tollTargetMode === 'Production' ? 'Production' : 'Dry Run';
+    const batches = this.tollBackfillPreview?.estimatedBatchCount ?? this.tollBackfillPreview?.EstimatedBatchCount ?? 1;
+    if (batches > 1) {
+      return `Start ${mode} (all ${batches} batches)`;
+    }
+    return `Start ${mode}`;
   }
 
   getJobStatus(): string {
@@ -682,9 +789,17 @@ export class BulkBillsDownloadComponent implements OnInit, OnDestroy, AfterViewI
     if (activeJobId && this.isClosingDutySlipJob()) {
       this.service.cancelClosingDutySlipBackfillJob(activeJobId).subscribe({ error: () => {} });
     }
+    if (activeJobId && this.isVerifiedDutySlipJob()) {
+      this.service.cancelVerifiedDutySlipBackfillJob(activeJobId).subscribe({ error: () => {} });
+    }
+    if (activeJobId && this.isTollInterstateJob()) {
+      this.service.cancelTollInterstateBackfillJob(activeJobId).subscribe({ error: () => {} });
+    }
     this.stopPolling();
     this.backfilling = false;
     this.closingBackfilling = false;
+    this.verifiedBackfilling = false;
+    this.tollBackfilling = false;
     this.activeJob = null;
     this.jobErrors = [];
     this.backfillProgressRows = [];
@@ -702,10 +817,41 @@ export class BulkBillsDownloadComponent implements OnInit, OnDestroy, AfterViewI
     this.irnAllBatchesProcessed = 0;
     this.pollIsIrnBackfill = false;
     this.pollIsClosingBackfill = false;
+    this.pollIsVerifiedBackfill = false;
+    this.pollIsTollBackfill = false;
+    this.pollIsPackageDownload = false;
+    this.verifiedBackfillProgressRows = [];
+    this.tollBackfillProgressRows = [];
+    this.verifiedBatchSkip = 0;
+    this.verifiedBatchNumber = 0;
+    this.verifiedTotalBatches = 0;
+    this.verifiedAllBatchesProcessed = 0;
+    this.verifiedRunAllBatches = false;
+    this.verifiedJobStartedAt = null;
+    this.tollBatchSkip = 0;
+    this.tollBatchNumber = 0;
+    this.tollTotalBatches = 0;
+    this.tollAllBatchesProcessed = 0;
+    this.tollRunAllBatches = false;
+    this.tollJobStartedAt = null;
+    this.dutySlipPackageDownloading = false;
+    this.packageRunAllBatches = false;
+    this.packageBatchSkip = 0;
+    this.packageBatchNumber = 0;
+    this.packageTotalBatches = 0;
+    this.packageAllBatchesProcessed = 0;
+    this.packageAccumulatorZipPath = null;
+    this.packageDownloadProgressRows = [];
+    this.packageJobStartedAt = null;
   }
 
   isBackfillRunning(): boolean {
-    return this.backfilling || this.closingBackfilling || this.getJobStatus() === 'Processing';
+    return this.backfilling
+      || this.closingBackfilling
+      || this.verifiedBackfilling
+      || this.tollBackfilling
+      || this.dutySlipPackageDownloading
+      || this.getJobStatus() === 'Processing';
   }
 
   previewClosingDutySlipBackfill(): void {
@@ -822,6 +968,36 @@ export class BulkBillsDownloadComponent implements OnInit, OnDestroy, AfterViewI
     });
   }
 
+  isClosingStuckJobError(): boolean {
+    const msg = (this.closingBackfillLoadError || '').toLowerCase();
+    return msg.includes('already running') || msg.includes('stuck');
+  }
+
+  forceClearStuckClosingDutySlipBackfill(): void {
+    this.closingBackfillLoadError = '';
+    this.service.forceClearStuckClosingDutySlipBackfill().subscribe({
+      next: (result) => {
+        const cleared = result?.clearedCount ?? result?.ClearedCount ?? 0;
+        const message =
+          result?.message ??
+          result?.Message ??
+          (cleared > 0
+            ? `Cleared ${cleared} stuck closing duty slip backfill job(s).`
+            : 'No stuck closing duty slip backfill jobs were found.');
+        this.closingBackfilling = false;
+        this.closingRunAllBatches = false;
+        this.activeJob = null;
+        this.pollIsClosingBackfill = false;
+        this.stopPolling();
+        this.snackBar.open(message, 'Close', { duration: 8000 });
+      },
+      error: (err) => {
+        this.closingBackfillLoadError = this.extractError(err, 'Failed to clear stuck backfill job.');
+        this.snackBar.open(this.closingBackfillLoadError, 'Close', { duration: 8000 });
+      },
+    });
+  }
+
   private onClosingBatchJobFinished(errors: any[]): void {
     this.mergeClosingBackfillProgress(errors || []);
     this.buildClosingCompletionSummary(errors || []);
@@ -920,10 +1096,69 @@ export class BulkBillsDownloadComponent implements OnInit, OnDestroy, AfterViewI
   }
 
   getClosingCurrentRecordLabel(): string {
-    const rows = this.closingBackfillProgressRows;
-    if (!rows.length) return '—';
-    const last = rows[rows.length - 1];
-    return `${last.dutySlipID} (${last.originalFile || 'n/a'})`;
+    return this.getDocBackfillCurrentRecordLabel(this.closingBackfillProgressRows);
+  }
+
+  getVerifiedTotalMatchedCount(): number {
+    return this.verifiedBackfillPreview?.totalMatchedCount
+      ?? this.verifiedBackfillPreview?.TotalMatchedCount
+      ?? 0;
+  }
+
+  getTollTotalMatchedCount(): number {
+    return this.tollBackfillPreview?.totalMatchedCount
+      ?? this.tollBackfillPreview?.TotalMatchedCount
+      ?? 0;
+  }
+
+  getVerifiedBatchProgressLabel(): string {
+    return this.getDocBackfillBatchProgressLabel(
+      this.verifiedBackfilling,
+      this.isVerifiedDutySlipJob(),
+      this.verifiedBatchNumber,
+      this.verifiedTotalBatches
+    );
+  }
+
+  getTollBatchProgressLabel(): string {
+    return this.getDocBackfillBatchProgressLabel(
+      this.tollBackfilling,
+      this.isTollInterstateJob(),
+      this.tollBatchNumber,
+      this.tollTotalBatches
+    );
+  }
+
+  getVerifiedElapsedTime(): string {
+    return this.formatDocBackfillElapsedTime(this.verifiedJobStartedAt);
+  }
+
+  getTollElapsedTime(): string {
+    return this.formatDocBackfillElapsedTime(this.tollJobStartedAt);
+  }
+
+  getVerifiedRemainingCount(): number {
+    return this.getDocBackfillRemainingCount();
+  }
+
+  getTollRemainingCount(): number {
+    return this.getDocBackfillRemainingCount();
+  }
+
+  getVerifiedSkippedCount(): number {
+    return this.getDocBackfillSkippedCount(this.verifiedBackfillProgressRows);
+  }
+
+  getTollSkippedCount(): number {
+    return this.getDocBackfillSkippedCount(this.tollBackfillProgressRows);
+  }
+
+  getVerifiedCurrentRecordLabel(): string {
+    return this.getDocBackfillCurrentRecordLabel(this.verifiedBackfillProgressRows);
+  }
+
+  getTollCurrentRecordLabel(): string {
+    return this.getDocBackfillCurrentRecordLabel(this.tollBackfillProgressRows);
   }
 
   getClosingProgressStatusClass(status: ClosingDutySlipBackfillProgressStatus): string {
@@ -1130,21 +1365,521 @@ export class BulkBillsDownloadComponent implements OnInit, OnDestroy, AfterViewI
     };
   }
 
-  displayCustomer(option: { customerName?: string } | string): string {
+  displayCustomer(option: { customerName?: string; displayName?: string } | string): string {
     if (!option) return '';
-    return typeof option === 'string' ? option : (option.customerName || '');
+    if (typeof option === 'string') return option;
+    return option.displayName || option.customerName || '';
+  }
+
+  validateDutySlipPackageDates(fromCtrl: FormControl, toCtrl: FormControl): string | null {
+    const fromVal = fromCtrl.value;
+    const toVal = toCtrl.value;
+    if (!fromVal || !toVal) {
+      return 'From Date and To Date are required when Duty Slip IDs are not entered.';
+    }
+    const fromDate = moment(fromVal).startOf('day');
+    const toDate = moment(toVal).startOf('day');
+    if (toDate.isBefore(fromDate)) {
+      return 'To Date cannot be earlier than From Date.';
+    }
+    if (toDate.diff(fromDate, 'days') + 1 > this.dutySlipPackageMaxRangeDays) {
+      return `Date range cannot exceed ${this.dutySlipPackageMaxRangeDays} days.`;
+    }
+    return null;
+  }
+
+  buildDutySlipPackageCriteria(skipCount = 0): DutySlipPackageDownloadCriteria {
+    const customer = this.resolveSelectedCustomerFrom(this.verifiedCustomerCtrl);
+    const dutySlipIDs = this.parseDutySlipIds(this.verifiedDutySlipIdsCtrl.value);
+    const criteria: DutySlipPackageDownloadCriteria = {
+      customerID: customer?.customerID || 0,
+      maxCandidates: this.packageBatchSize,
+      skipCount,
+    };
+    if (this.packageAccumulatorZipPath) {
+      criteria.accumulatorZipRelativePath = this.packageAccumulatorZipPath;
+    }
+    if (dutySlipIDs.length > 0) {
+      criteria.dutySlipIDs = dutySlipIDs;
+    } else {
+      criteria.fromDate = this.formatApiDate(this.verifiedFromDateCtrl.value);
+      criteria.toDate = this.formatApiDate(this.verifiedToDateCtrl.value);
+    }
+    return criteria;
+  }
+
+  getPackageTotalMatchedCount(): number {
+    return this.dutySlipPackagePreview?.totalMatchedCount ?? 0;
+  }
+
+  getPackageEstimatedBatchCount(): number {
+    const fromPreview = this.dutySlipPackagePreview?.estimatedBatchCount;
+    if (fromPreview && fromPreview > 0) {
+      return fromPreview;
+    }
+    const total = this.getPackageTotalMatchedCount();
+    return total > 0 ? Math.max(1, Math.ceil(total / this.packageBatchSize)) : 1;
+  }
+
+  getPackageRunButtonLabel(): string {
+    const batches = this.getPackageEstimatedBatchCount();
+    if (batches > 1) {
+      return `Start download (all ${batches} batches)`;
+    }
+    return 'Start download';
+  }
+
+  getPackageBatchProgressLabel(): string {
+    if (!this.dutySlipPackageDownloading && !this.isDutySlipPackageDownloadJob()) {
+      return '';
+    }
+    if (this.packageTotalBatches <= 1) {
+      return '';
+    }
+    return `Batch ${this.packageBatchNumber} of ${this.packageTotalBatches}`;
+  }
+
+  previewDutySlipPackageDownload(): void {
+    const customer = this.resolveSelectedCustomerFrom(this.verifiedCustomerCtrl);
+    if (!customer?.customerID) {
+      this.dutySlipPackageLoadError = 'Customer is required.';
+      this.snackBar.open(this.dutySlipPackageLoadError, 'Close', { duration: 5000 });
+      return;
+    }
+    const performedBy = this.generalService.getUserID();
+    if (!performedBy) {
+      this.snackBar.open('User session not found.', 'Close', { duration: 4000 });
+      return;
+    }
+    const dutySlipIDs = this.parseDutySlipIds(this.verifiedDutySlipIdsCtrl.value);
+    if (dutySlipIDs.length === 0) {
+      const dateError = this.validateDutySlipPackageDates(this.verifiedFromDateCtrl, this.verifiedToDateCtrl);
+      if (dateError) {
+        this.dutySlipPackageLoadError = dateError;
+        this.snackBar.open(dateError, 'Close', { duration: 5000 });
+        return;
+      }
+    }
+    this.dutySlipPackageLoadError = '';
+    this.dutySlipPackagePreviewLoading = true;
+    this.service.previewDutySlipPackageDownload(this.buildDutySlipPackageCriteria(), performedBy).pipe(
+      finalize(() => { this.dutySlipPackagePreviewLoading = false; })
+    ).subscribe({
+      next: (result) => {
+        this.dutySlipPackagePreview = result;
+        this.dutySlipPackageCandidates = this.normalizeDutySlipPackageCandidates(result?.candidates ?? []);
+        const matched = result?.totalMatchedCount ?? 0;
+        const batches = result?.estimatedBatchCount ?? this.getPackageEstimatedBatchCount();
+        this.snackBar.open(
+          matched > 0
+            ? `Matched ${matched} duty slip(s); ${batches} batch(es) of ${this.packageBatchSize}.`
+            : 'No duty slips matched.',
+          'Close',
+          { duration: 8000 }
+        );
+      },
+      error: (err) => {
+        this.dutySlipPackageLoadError = this.extractError(err, 'Failed to preview duty slip download.');
+        this.snackBar.open(this.dutySlipPackageLoadError, 'Close', { duration: 8000 });
+      },
+    });
+  }
+
+  canStartDutySlipPackageDownload(): boolean {
+    return !!(this.dutySlipPackagePreview && (this.dutySlipPackagePreview.totalMatchedCount ?? 0) > 0);
+  }
+
+  startDutySlipPackageDownload(runAllBatches = true): void {
+    if (!this.canStartDutySlipPackageDownload()) return;
+
+    const performedBy = this.generalService.getUserID();
+    if (!performedBy) {
+      this.snackBar.open('User session not found.', 'Close', { duration: 4000 });
+      return;
+    }
+
+    this.packageRunAllBatches = runAllBatches;
+    this.packageBatchSkip = 0;
+    this.packageBatchNumber = 0;
+    this.packageAllBatchesProcessed = 0;
+    this.packageAccumulatorZipPath = null;
+    this.packageTotalBatches = runAllBatches
+      ? this.getPackageEstimatedBatchCount()
+      : 1;
+    this.dutySlipPackageDownloading = true;
+    this.dutySlipPackageLoadError = '';
+    this.packageDownloadProgressRows = [];
+    this.packageJobStartedAt = Date.now();
+
+    this.startDutySlipPackageBatch(performedBy);
+  }
+
+  private startDutySlipPackageBatch(performedBy: number): void {
+    const criteria = this.buildDutySlipPackageCriteria(this.packageBatchSkip);
+
+    this.service.startDutySlipPackageDownloadJob(criteria, performedBy).subscribe({
+      next: (result) => {
+        const jobId = result?.jobId ?? result?.JobId;
+        if (!jobId) {
+          this.dutySlipPackageDownloading = false;
+          this.packageRunAllBatches = false;
+          this.snackBar.open('Download job did not start.', 'Close', { duration: 5000 });
+          return;
+        }
+
+        this.packageBatchNumber = Math.floor(this.packageBatchSkip / this.packageBatchSize) + 1;
+        this.initPackageDownloadProgressRows();
+        this.activeJob = this.normalizeJob({
+          bulkUploadJobID: jobId,
+          jobType: 'DutySlipPackageDownload',
+          jobStatus: result?.jobStatus ?? result?.JobStatus ?? 'Pending',
+          totalFiles: result?.totalDutySlips ?? result?.TotalDutySlips ?? 0,
+          processedFiles: 0,
+          successCount: 0,
+          errorCount: 0,
+        });
+        this.jobErrors = [];
+        this.startPolling(jobId, false, false, false, false, true);
+      },
+      error: (err) => {
+        this.dutySlipPackageDownloading = false;
+        this.packageRunAllBatches = false;
+        const message = this.extractError(err, 'Failed to start duty slip download.');
+        this.dutySlipPackageLoadError = message;
+        this.snackBar.open(message, 'Close', { duration: 8000 });
+      },
+    });
+  }
+
+  private initPackageDownloadProgressRows(): void {
+    const batchSize = this.activeJob?.totalFiles ?? this.packageBatchSize;
+    const candidates = this.dutySlipPackageCandidates.slice(0, batchSize);
+    this.packageDownloadProgressRows = [];
+    for (let index = 0; index < batchSize; index++) {
+      const row = candidates[index];
+      this.packageDownloadProgressRows.push({
+        dutySlipID: row?.dutySlipID ?? 0,
+        customerName: row?.customerName ?? '',
+        status: 'Pending',
+        details: '',
+        completedAt: null,
+      });
+    }
+  }
+
+  private onPackageBatchJobFinished(errors: any[]): void {
+    this.mergePackageDownloadProgress(errors || []);
+
+    const status = this.getJobStatus();
+    if (status === 'Failed') {
+      this.dutySlipPackageDownloading = false;
+      this.packageRunAllBatches = false;
+      this.snackBar.open('Batch failed. Remaining batches were not started.', 'Close', { duration: 8000 });
+      return;
+    }
+
+    const processedThisBatch = this.activeJob?.processedFiles ?? this.activeJob?.ProcessedFiles ?? 0;
+    this.packageAllBatchesProcessed += processedThisBatch;
+    this.packageBatchSkip += processedThisBatch;
+
+    if (!this.packageAccumulatorZipPath && this.activeJob?.resultFilePath) {
+      this.packageAccumulatorZipPath = this.activeJob.resultFilePath;
+    }
+
+    const totalMatched = this.getPackageTotalMatchedCount();
+    const hasMoreBatches = this.packageRunAllBatches && this.packageBatchSkip < totalMatched;
+
+    if (hasMoreBatches) {
+      const performedBy = this.generalService.getUserID();
+      if (!performedBy) {
+        this.dutySlipPackageDownloading = false;
+        this.packageRunAllBatches = false;
+        this.snackBar.open('User session expired before next batch could start.', 'Close', { duration: 8000 });
+        return;
+      }
+
+      this.dutySlipPackageDownloading = true;
+      this.snackBar.open(
+        `Batch ${this.packageBatchNumber} of ${this.packageTotalBatches} finished. Starting next batch...`,
+        'Close',
+        { duration: 5000 }
+      );
+      setTimeout(() => this.startDutySlipPackageBatch(performedBy), 1500);
+      return;
+    }
+
+    this.dutySlipPackageDownloading = false;
+    this.packageRunAllBatches = false;
+    if (this.packageTotalBatches > 1) {
+      this.snackBar.open(
+        `All ${this.packageTotalBatches} batch(es) completed (${this.packageAllBatchesProcessed} duty slip(s) processed). Download ZIP when ready.`,
+        'Close',
+        { duration: 10000 }
+      );
+    } else {
+      this.snackBar.open('Duty slip download finished. Download ZIP when ready.', 'Close', { duration: 6000 });
+    }
+  }
+
+  private mergePackageDownloadProgress(errorRows: any[]): void {
+    const sortedLogs = (errorRows || [])
+      .map((row) => this.normalizeErrorRow(row))
+      .sort((a, b) => {
+        const ta = a.uploadTimestamp ? new Date(a.uploadTimestamp).getTime() : 0;
+        const tb = b.uploadTimestamp ? new Date(b.uploadTimestamp).getTime() : 0;
+        return ta - tb;
+      });
+
+    const rows = sortedLogs.map((log) => {
+      const parsed = this.parsePackageDownloadLog(log.errorDescription);
+      const candidate = this.packageDownloadProgressRows.find((row) => row.dutySlipID === parsed.dutySlipID);
+      return {
+        dutySlipID: parsed.dutySlipID,
+        customerName: candidate?.customerName ?? '',
+        status: parsed.status,
+        details: parsed.details,
+        completedAt: log.uploadTimestamp || null,
+      };
+    });
+
+    if (rows.length > 0) {
+      this.packageDownloadProgressRows = rows;
+    }
+
+    const total = this.activeJob?.totalFiles ?? this.activeJob?.TotalFiles ?? this.packageDownloadProgressRows.length;
+    const isRunning = this.getJobStatus() === 'Processing' || this.getJobStatus() === 'Pending';
+    if (isRunning && this.packageDownloadProgressRows.length < total) {
+      this.packageDownloadProgressRows = [
+        ...this.packageDownloadProgressRows,
+        {
+          dutySlipID: 0,
+          customerName: '',
+          status: 'Processing',
+          details: 'Processing next duty slip...',
+          completedAt: null,
+        },
+      ];
+    }
+  }
+
+  private parsePackageDownloadLog(description: string): { dutySlipID: number; status: string; details: string } {
+    const text = description || '';
+    let status = 'Failed';
+    if (text.includes('[SUCCESS]')) status = 'Success';
+    else if (text.includes('[PARTIAL]')) status = 'Partial';
+    else if (text.includes('[FAILED]')) status = 'Failed';
+
+    const fields: Record<string, string> = {};
+    const body = text.replace(/^\[(SUCCESS|PARTIAL|FAILED)\]\s*/, '');
+    body.split('|').forEach((part) => {
+      const idx = part.indexOf('=');
+      if (idx > 0) {
+        fields[part.slice(0, idx).trim()] = part.slice(idx + 1).trim();
+      }
+    });
+
+    return {
+      dutySlipID: Number(fields.DutySlipID || 0),
+      status,
+      details: fields.Details || text,
+    };
+  }
+
+  formatSlipSource(source?: string | null): string {
+    switch ((source || '').toLowerCase()) {
+      case 'archived': return 'Archived';
+      case 'manualimage': return 'Manual scan';
+      case 'systemprint': return 'System print';
+      default: return source || '—';
+    }
+  }
+
+  private normalizeDutySlipPackageCandidates(rows: any[]): DutySlipPackageDownloadRow[] {
+    return (rows || []).map((row) => ({
+      dutySlipID: row.dutySlipID ?? row.DutySlipID ?? 0,
+      reservationID: row.reservationID ?? row.ReservationID ?? null,
+      customerName: row.customerName ?? row.CustomerName ?? null,
+      pickUpDate: row.pickUpDate ?? row.PickUpDate ?? null,
+      tollReceiptCount: row.tollReceiptCount ?? row.TollReceiptCount ?? 0,
+      interstateReceiptCount: row.interstateReceiptCount ?? row.InterstateReceiptCount ?? 0,
+      slipSource: row.slipSource ?? row.SlipSource ?? null,
+    }));
+  }
+
+  validateDocBackfillDates(fromCtrl: FormControl, toCtrl: FormControl): string | null {
+    const fromVal = fromCtrl.value;
+    const toVal = toCtrl.value;
+    if (!fromVal || !toVal) {
+      return 'From Date and To Date are required when Duty Slip IDs are not entered.';
+    }
+    const fromDate = moment(fromVal).startOf('day');
+    const toDate = moment(toVal).startOf('day');
+    const minDate = moment(this.docBackfillMinFromDate).startOf('day');
+    if (fromDate.isBefore(minDate)) {
+      return `From Date cannot be earlier than ${minDate.format('DD-MM-YYYY')}.`;
+    }
+    if (toDate.isBefore(fromDate)) {
+      return 'To Date cannot be earlier than From Date.';
+    }
+    if (toDate.diff(fromDate, 'days') > this.docBackfillMaxRangeDays) {
+      return `Date range cannot exceed ${this.docBackfillMaxRangeDays} days.`;
+    }
+    return null;
+  }
+
+  previewVerifiedDutySlipBackfill(): void {
+    const customer = this.resolveSelectedCustomerFrom(this.verifiedCustomerCtrl);
+    if (!customer?.customerID) {
+      this.verifiedBackfillLoadError = 'Customer is required.';
+      this.snackBar.open(this.verifiedBackfillLoadError, 'Close', { duration: 5000 });
+      return;
+    }
+    const dutySlipIDs = this.parseDutySlipIds(this.verifiedDutySlipIdsCtrl.value);
+    if (dutySlipIDs.length === 0) {
+      const dateError = this.validateDocBackfillDates(this.verifiedFromDateCtrl, this.verifiedToDateCtrl);
+      if (dateError) {
+        this.verifiedBackfillLoadError = dateError;
+        this.snackBar.open(dateError, 'Close', { duration: 5000 });
+        return;
+      }
+    }
+    this.verifiedBackfillLoadError = '';
+    this.verifiedPreviewLoading = true;
+    this.service.previewVerifiedDutySlipBackfill(this.buildVerifiedDutySlipCriteria()).pipe(
+      finalize(() => { this.verifiedPreviewLoading = false; })
+    ).subscribe({
+      next: (result) => {
+        this.verifiedBackfillPreview = result;
+        this.verifiedBackfillCandidates = this.normalizeDocBackfillCandidates(result?.candidates ?? result?.Candidates ?? []);
+        const matched = result?.totalMatchedCount ?? result?.TotalMatchedCount ?? 0;
+        this.snackBar.open(matched > 0 ? `Matched ${matched} duty slip(s).` : 'No duty slips matched.', 'Close', { duration: 8000 });
+      },
+      error: (err) => {
+        this.verifiedBackfillLoadError = this.extractError(err, 'Failed to preview verified duty slip backfill.');
+        this.snackBar.open(this.verifiedBackfillLoadError, 'Close', { duration: 8000 });
+      },
+    });
+  }
+
+  canStartVerifiedBackfill(): boolean {
+    return !!(this.verifiedBackfillPreview && (this.verifiedBackfillPreview.totalMatchedCount ?? this.verifiedBackfillPreview.TotalMatchedCount));
+  }
+
+  startVerifiedDutySlipBackfill(runAllBatches = true): void {
+    if (!this.canStartVerifiedBackfill()) return;
+    const performedBy = this.generalService.getUserID();
+    if (!performedBy) {
+      this.snackBar.open('User session not found.', 'Close', { duration: 4000 });
+      return;
+    }
+    this.verifiedRunAllBatches = runAllBatches;
+    this.verifiedBatchSkip = 0;
+    this.verifiedBatchNumber = 0;
+    this.verifiedAllBatchesProcessed = 0;
+    this.verifiedTotalBatches = this.getDocBackfillEstimatedBatchCount(this.verifiedBackfillPreview, this.docBackfillBatchSize);
+    this.verifiedBackfilling = true;
+    this.verifiedBackfillProgressRows = [];
+    this.verifiedJobStartedAt = Date.now();
+    this.startVerifiedDutySlipBatch(performedBy);
+  }
+
+  previewTollInterstateBackfill(): void {
+    const customer = this.resolveSelectedCustomerFrom(this.tollCustomerCtrl);
+    if (!customer?.customerID) {
+      this.tollBackfillLoadError = 'Customer is required.';
+      this.snackBar.open(this.tollBackfillLoadError, 'Close', { duration: 5000 });
+      return;
+    }
+    const dutySlipIDs = this.parseDutySlipIds(this.tollDutySlipIdsCtrl.value);
+    if (dutySlipIDs.length === 0) {
+      const dateError = this.validateDocBackfillDates(this.tollFromDateCtrl, this.tollToDateCtrl);
+      if (dateError) {
+        this.tollBackfillLoadError = dateError;
+        this.snackBar.open(dateError, 'Close', { duration: 5000 });
+        return;
+      }
+    }
+    this.tollBackfillLoadError = '';
+    this.tollPreviewLoading = true;
+    this.service.previewTollInterstateBackfill(this.buildTollInterstateCriteria()).pipe(
+      finalize(() => { this.tollPreviewLoading = false; })
+    ).subscribe({
+      next: (result) => {
+        this.tollBackfillPreview = result;
+        this.tollBackfillCandidates = this.normalizeDocBackfillCandidates(result?.candidates ?? result?.Candidates ?? []);
+        const matched = result?.totalMatchedCount ?? result?.TotalMatchedCount ?? 0;
+        this.snackBar.open(matched > 0 ? `Matched ${matched} duty slip(s).` : 'No duty slips matched.', 'Close', { duration: 8000 });
+      },
+      error: (err) => {
+        this.tollBackfillLoadError = this.extractError(err, 'Failed to preview toll/interstate backfill.');
+        this.snackBar.open(this.tollBackfillLoadError, 'Close', { duration: 8000 });
+      },
+    });
+  }
+
+  canStartTollBackfill(): boolean {
+    return !!(this.tollBackfillPreview && (this.tollBackfillPreview.totalMatchedCount ?? this.tollBackfillPreview.TotalMatchedCount));
+  }
+
+  startTollInterstateBackfill(runAllBatches = true): void {
+    if (!this.canStartTollBackfill()) return;
+    const performedBy = this.generalService.getUserID();
+    if (!performedBy) {
+      this.snackBar.open('User session not found.', 'Close', { duration: 4000 });
+      return;
+    }
+    this.tollRunAllBatches = runAllBatches;
+    this.tollBatchSkip = 0;
+    this.tollBatchNumber = 0;
+    this.tollAllBatchesProcessed = 0;
+    this.tollTotalBatches = this.getDocBackfillEstimatedBatchCount(this.tollBackfillPreview, this.docBackfillBatchSize);
+    this.tollBackfilling = true;
+    this.tollBackfillProgressRows = [];
+    this.tollJobStartedAt = Date.now();
+    this.startTollInterstateBatch(performedBy);
+  }
+
+  forceClearStuckVerifiedDutySlipBackfill(): void {
+    this.service.forceClearStuckVerifiedDutySlipBackfill().subscribe({
+      next: (res) => {
+        this.snackBar.open(res?.message || `Cleared ${res?.clearedCount ?? 0} stuck job(s).`, 'Close', { duration: 6000 });
+        this.verifiedBackfilling = false;
+      },
+      error: (err) => this.snackBar.open(this.extractError(err, 'Failed to clear stuck job.'), 'Close', { duration: 6000 }),
+    });
+  }
+
+  forceClearStuckTollInterstateBackfill(): void {
+    this.service.forceClearStuckTollInterstateBackfill().subscribe({
+      next: (res) => {
+        this.snackBar.open(res?.message || `Cleared ${res?.clearedCount ?? 0} stuck job(s).`, 'Close', { duration: 6000 });
+        this.tollBackfilling = false;
+      },
+      error: (err) => this.snackBar.open(this.extractError(err, 'Failed to clear stuck job.'), 'Close', { duration: 6000 }),
+    });
+  }
+
+  isVerifiedStuckJobError(): boolean {
+    return !!(this.verifiedBackfillLoadError && /already running|stuck|in-memory lock/i.test(this.verifiedBackfillLoadError));
+  }
+
+  isTollStuckJobError(): boolean {
+    return !!(this.tollBackfillLoadError && /already running|stuck|in-memory lock/i.test(this.tollBackfillLoadError));
   }
 
   formatBackfillCompletedAt(value: string | Date | null | undefined): string {
     if (!value) return '—';
-    const m = moment(value);
+    const m = moment.utc(value).utcOffset('+05:30');
     return m.isValid() ? m.format('DD/MM/YYYY HH:mm:ss') : String(value);
   }
 
-  private startPolling(jobId: number, isIrnBackfill = false, isClosingBackfill = false): void {
+  private startPolling(jobId: number, isIrnBackfill = false, isClosingBackfill = false, isVerifiedBackfill = false, isTollBackfill = false, isPackageDownload = false): void {
     this.stopPolling();
     this.pollIsIrnBackfill = isIrnBackfill;
     this.pollIsClosingBackfill = isClosingBackfill;
+    this.pollIsVerifiedBackfill = isVerifiedBackfill;
+    this.pollIsTollBackfill = isTollBackfill;
+    this.pollIsPackageDownload = isPackageDownload;
     this.pollSub = timer(0, 2000)
       .pipe(
         switchMap(() =>
@@ -1165,6 +1900,15 @@ export class BulkBillsDownloadComponent implements OnInit, OnDestroy, AfterViewI
           } else if (isClosingBackfill) {
             this.mergeClosingBackfillProgress(errors || []);
             this.jobErrors = (errors || []).map((row) => this.normalizeErrorRow(row));
+          } else if (isVerifiedBackfill) {
+            this.mergeDocBackfillProgress(errors || [], 'verified');
+            this.jobErrors = (errors || []).map((row) => this.normalizeErrorRow(row));
+          } else if (isTollBackfill) {
+            this.mergeDocBackfillProgress(errors || [], 'toll');
+            this.jobErrors = (errors || []).map((row) => this.normalizeErrorRow(row));
+          } else if (isPackageDownload) {
+            this.mergePackageDownloadProgress(errors || []);
+            this.jobErrors = (errors || []).map((row) => this.normalizeErrorRow(row));
           } else {
             this.jobErrors = (errors || []).map((row) => this.normalizeErrorRow(row));
             await this.showNewNamingSkipModals(this.jobErrors);
@@ -1175,10 +1919,19 @@ export class BulkBillsDownloadComponent implements OnInit, OnDestroy, AfterViewI
             this.backfilling = false;
             if (isClosingBackfill) {
               this.onClosingBatchJobFinished(errors || []);
+            } else if (isVerifiedBackfill) {
+              this.onDocBackfillBatchJobFinished('verified', errors || []);
+            } else if (isTollBackfill) {
+              this.onDocBackfillBatchJobFinished('toll', errors || []);
+            } else if (isPackageDownload) {
+              this.onPackageBatchJobFinished(errors || []);
             } else if (isIrnBackfill) {
               this.onIrnBatchJobFinished(errors || []);
             } else {
               this.closingBackfilling = false;
+              this.verifiedBackfilling = false;
+              this.tollBackfilling = false;
+              this.dutySlipPackageDownloading = false;
               this.loadJobErrors(jobId);
             }
           }
@@ -1263,6 +2016,9 @@ export class BulkBillsDownloadComponent implements OnInit, OnDestroy, AfterViewI
     }
     this.pollIsIrnBackfill = false;
     this.pollIsClosingBackfill = false;
+    this.pollIsVerifiedBackfill = false;
+    this.pollIsTollBackfill = false;
+    this.pollIsPackageDownload = false;
   }
 
   private resetUploadFileSelection(): void {
@@ -1366,27 +2122,18 @@ export class BulkBillsDownloadComponent implements OnInit, OnDestroy, AfterViewI
   }
 
   private resolveSelectedCustomer(): { customerID: number; customerName: string } | null {
-    const value = this.customerCtrl.value;
-    if (!value) return null;
-    if (typeof value === 'object' && value.customerID) return value;
-    const name = String(value).trim().toLowerCase();
-    return this.customerList.find((c) => c.customerName.toLowerCase() === name) || null;
+    return this.resolveSelectedCustomerFrom(this.customerCtrl);
   }
 
   private initCustomerAutocomplete(): void {
     this.filteredCustomerOptions = this.customerCtrl.valueChanges.pipe(
       startWith(this.customerCtrl.value ?? ''),
-      map((value) => this.filterCustomers(typeof value === 'string' ? value : value?.customerName || ''))
+      map((value) => this.filterCustomers(typeof value === 'string' ? value : value?.displayName || value?.customerName || ''))
     );
 
     this.generalService.getCustomers().subscribe({
       next: (data) => {
-      this.customerList = (data || [])
-        .map((c) => ({
-          customerID: c.customerID ?? c.CustomerID ?? 0,
-          customerName: (c.customerName ?? c.CustomerName ?? '').trim(),
-        }))
-        .filter((c) => c.customerID && c.customerName);
+        this.customerList = this.mapCustomerList(data);
         this.customerCtrl.updateValueAndValidity({ emitEvent: true });
       },
       error: () => {
@@ -1395,10 +2142,305 @@ export class BulkBillsDownloadComponent implements OnInit, OnDestroy, AfterViewI
     });
   }
 
-  private filterCustomers(value: string): { customerID: number; customerName: string }[] {
+  private initDocBackfillCustomerAutocomplete(
+    ctrl: FormControl,
+    assign: (obs: Observable<{ customerID: number; customerName: string; tallyCustomerID?: number; displayName?: string }[]>) => void
+  ): void {
+    assign(ctrl.valueChanges.pipe(
+      startWith(ctrl.value ?? ''),
+      map((value) => this.filterCustomers(typeof value === 'string' ? value : value?.displayName || value?.customerName || ''))
+    ));
+  }
+
+  private mapCustomerList(data: any[]): { customerID: number; customerName: string; tallyCustomerID?: number; displayName?: string }[] {
+    return (data || [])
+      .map((c) => {
+        const customerID = c.customerID ?? c.CustomerID ?? 0;
+        const customerName = (c.customerName ?? c.CustomerName ?? '').trim();
+        const tallyCustomerID = c.tallyCustomerID ?? c.TallyCustomerID ?? 0;
+        const displayName = tallyCustomerID > 0 ? `${tallyCustomerID} - ${customerName}` : customerName;
+        return { customerID, customerName, tallyCustomerID, displayName };
+      })
+      .filter((c) => c.customerID && c.customerName);
+  }
+
+  private filterCustomers(value: string): { customerID: number; customerName: string; tallyCustomerID?: number; displayName?: string }[] {
     if (!value || value.length < 2) return [];
     const filterValue = value.toLowerCase();
-    return this.customerList.filter((c) => c.customerName.toLowerCase().includes(filterValue));
+    return this.customerList.filter((c) =>
+      c.customerName.toLowerCase().includes(filterValue)
+      || String(c.tallyCustomerID || '').includes(filterValue)
+      || (c.displayName || '').toLowerCase().includes(filterValue)
+    );
+  }
+
+  private resolveSelectedCustomerFrom(ctrl: FormControl): { customerID: number; customerName: string } | null {
+    const value = ctrl.value;
+    if (!value) return null;
+    if (typeof value === 'object' && value.customerID) return value;
+    const name = String(value).trim().toLowerCase();
+    return this.customerList.find((c) =>
+      c.customerName.toLowerCase() === name || (c.displayName || '').toLowerCase() === name
+    ) || null;
+  }
+
+  private buildVerifiedDutySlipCriteria(skipCount = 0): DutySlipDocumentBackfillCriteria {
+    const customer = this.resolveSelectedCustomerFrom(this.verifiedCustomerCtrl);
+    const dutySlipIDs = this.parseDutySlipIds(this.verifiedDutySlipIdsCtrl.value);
+    const criteria: DutySlipDocumentBackfillCriteria = {
+      customerID: customer?.customerID,
+      maxCandidates: this.docBackfillBatchSize,
+      skipCount,
+      targetMode: this.verifiedTargetMode,
+      documentExistsFilter: this.verifiedExistsFilter,
+    };
+    if (dutySlipIDs.length > 0) {
+      criteria.dutySlipIDs = dutySlipIDs;
+    } else {
+      criteria.fromDate = this.formatApiDate(this.verifiedFromDateCtrl.value);
+      criteria.toDate = this.formatApiDate(this.verifiedToDateCtrl.value);
+    }
+    return criteria;
+  }
+
+  private buildTollInterstateCriteria(skipCount = 0): DutySlipDocumentBackfillCriteria {
+    const customer = this.resolveSelectedCustomerFrom(this.tollCustomerCtrl);
+    const dutySlipIDs = this.parseDutySlipIds(this.tollDutySlipIdsCtrl.value);
+    const criteria: DutySlipDocumentBackfillCriteria = {
+      customerID: customer?.customerID,
+      maxCandidates: this.docBackfillBatchSize,
+      skipCount,
+      targetMode: this.tollTargetMode,
+      documentExistsFilter: this.tollExistsFilter,
+    };
+    if (dutySlipIDs.length > 0) {
+      criteria.dutySlipIDs = dutySlipIDs;
+    } else {
+      criteria.fromDate = this.formatApiDate(this.tollFromDateCtrl.value);
+      criteria.toDate = this.formatApiDate(this.tollToDateCtrl.value);
+    }
+    return criteria;
+  }
+
+  private normalizeDocBackfillCandidates(rows: any[]): DutySlipDocumentBackfillCandidateRow[] {
+    return (rows || []).map((row) => ({
+      dutySlipID: row?.dutySlipID ?? row?.DutySlipID,
+      reservationID: row?.reservationID ?? row?.ReservationID ?? null,
+      customerName: row?.customerName ?? row?.CustomerName ?? null,
+      pickUpDate: row?.pickUpDate ?? row?.PickUpDate ?? null,
+      status: row?.status ?? row?.Status ?? null,
+      targetRelativePath: row?.targetRelativePath ?? row?.TargetRelativePath ?? null,
+      hasActiveTargetDocument: row?.hasActiveTargetDocument ?? row?.HasActiveTargetDocument ?? false,
+      tollParkingReceiptCount: row?.tollParkingReceiptCount ?? row?.TollParkingReceiptCount ?? 0,
+      interstateReceiptCount: row?.interstateReceiptCount ?? row?.InterstateReceiptCount ?? 0,
+      hasAllTollInterstateDocuments: row?.hasAllTollInterstateDocuments ?? row?.HasAllTollInterstateDocuments ?? false,
+    }));
+  }
+
+  private getDocBackfillEstimatedBatchCount(preview: DutySlipDocumentBackfillPreviewResult | null, batchSize: number): number {
+    const fromPreview = preview?.estimatedBatchCount ?? preview?.EstimatedBatchCount;
+    if (fromPreview && fromPreview > 0) return fromPreview;
+    const total = preview?.totalMatchedCount ?? preview?.TotalMatchedCount ?? 0;
+    return total > 0 ? Math.max(1, Math.ceil(total / batchSize)) : 1;
+  }
+
+  private startVerifiedDutySlipBatch(performedBy: number): void {
+    this.verifiedBatchNumber += 1;
+    const criteria = this.buildVerifiedDutySlipCriteria(this.verifiedBatchSkip);
+    this.service.startVerifiedDutySlipBackfillJob(criteria, performedBy).subscribe({
+      next: (result) => {
+        const jobId = result?.jobId ?? result?.JobId;
+        if (!jobId) {
+          this.verifiedBackfilling = false;
+          this.snackBar.open('Backfill job did not return a job id.', 'Close', { duration: 6000 });
+          return;
+        }
+        this.startPolling(jobId, false, false, true, false);
+      },
+      error: (err) => {
+        this.verifiedBackfilling = false;
+        this.verifiedBackfillLoadError = this.extractError(err, 'Failed to start verified duty slip backfill.');
+        this.snackBar.open(this.verifiedBackfillLoadError, 'Close', { duration: 8000 });
+      },
+    });
+  }
+
+  private startTollInterstateBatch(performedBy: number): void {
+    this.tollBatchNumber += 1;
+    const criteria = this.buildTollInterstateCriteria(this.tollBatchSkip);
+    this.service.startTollInterstateBackfillJob(criteria, performedBy).subscribe({
+      next: (result) => {
+        const jobId = result?.jobId ?? result?.JobId;
+        if (!jobId) {
+          this.tollBackfilling = false;
+          this.snackBar.open('Backfill job did not return a job id.', 'Close', { duration: 6000 });
+          return;
+        }
+        this.startPolling(jobId, false, false, false, true);
+      },
+      error: (err) => {
+        this.tollBackfilling = false;
+        this.tollBackfillLoadError = this.extractError(err, 'Failed to start toll/interstate backfill.');
+        this.snackBar.open(this.tollBackfillLoadError, 'Close', { duration: 8000 });
+      },
+    });
+  }
+
+  private mergeDocBackfillProgress(errorRows: any[], kind: 'verified' | 'toll'): void {
+    const sortedLogs = (errorRows || [])
+      .map((row) => this.normalizeErrorRow(row))
+      .sort((a, b) => {
+        const ta = a.uploadTimestamp ? new Date(a.uploadTimestamp).getTime() : 0;
+        const tb = b.uploadTimestamp ? new Date(b.uploadTimestamp).getTime() : 0;
+        return ta - tb;
+      });
+
+    const rows = sortedLogs.map((log) => {
+      const parsed = this.parseClosingLog(log.errorDescription);
+      return {
+        dutySlipID: parsed.dutySlipID,
+        originalFile: parsed.originalFile,
+        status: parsed.status,
+        processingType: parsed.processingType,
+        details: parsed.details,
+        completedAt: log.uploadTimestamp || null,
+      };
+    });
+
+    const total = this.activeJob?.totalFiles ?? this.activeJob?.TotalFiles ?? rows.length;
+    const isRunning = this.getJobStatus() === 'Processing' || this.getJobStatus() === 'Pending';
+    const progressRows = isRunning && rows.length < total
+      ? [
+          ...rows,
+          {
+            dutySlipID: 0,
+            originalFile: '',
+            status: 'Processing' as ClosingDutySlipBackfillProgressStatus,
+            processingType: '',
+            details: 'Processing next record...',
+            completedAt: null,
+          },
+        ]
+      : rows;
+
+    if (kind === 'verified') {
+      this.verifiedBackfillProgressRows = progressRows;
+    } else {
+      this.tollBackfillProgressRows = progressRows;
+    }
+  }
+
+  private getDocBackfillBatchProgressLabel(
+    backfilling: boolean,
+    isJob: boolean,
+    batchNumber: number,
+    totalBatches: number
+  ): string {
+    if (!backfilling && !isJob) {
+      return '';
+    }
+    if (totalBatches <= 1) {
+      return '';
+    }
+    return `Batch ${batchNumber} of ${totalBatches}`;
+  }
+
+  private formatDocBackfillElapsedTime(startedAt: number | null): string {
+    if (!startedAt) return '—';
+    const elapsedMs = Date.now() - startedAt;
+    const seconds = Math.floor(elapsedMs / 1000);
+    const minutes = Math.floor(seconds / 60);
+    const remSeconds = seconds % 60;
+    return minutes > 0 ? `${minutes}m ${remSeconds}s` : `${seconds}s`;
+  }
+
+  private getDocBackfillRemainingCount(): number {
+    const total = this.activeJob?.totalFiles ?? this.activeJob?.TotalFiles ?? 0;
+    const processed = this.activeJob?.processedFiles ?? this.activeJob?.ProcessedFiles ?? 0;
+    return Math.max(0, total - processed);
+  }
+
+  private getDocBackfillSkippedCount(rows: ClosingDutySlipBackfillProgressRow[]): number {
+    return rows.filter((row) => row.status === 'Skipped').length;
+  }
+
+  private getDocBackfillCurrentRecordLabel(rows: ClosingDutySlipBackfillProgressRow[]): string {
+    if (!rows.length) return '—';
+    const last = rows[rows.length - 1];
+    if (last.status === 'Processing' && rows.length > 1) {
+      const previous = rows[rows.length - 2];
+      return `${previous.dutySlipID} (${previous.originalFile || 'n/a'})`;
+    }
+    return `${last.dutySlipID} (${last.originalFile || 'n/a'})`;
+  }
+
+  private onDocBackfillBatchJobFinished(kind: 'verified' | 'toll', errors: any[]): void {
+    this.mergeDocBackfillProgress(errors || [], kind);
+    const status = this.getJobStatus();
+    if (status === 'Failed') {
+      if (kind === 'verified') {
+        this.verifiedBackfilling = false;
+        this.verifiedRunAllBatches = false;
+      } else {
+        this.tollBackfilling = false;
+        this.tollRunAllBatches = false;
+      }
+      this.snackBar.open('Batch failed. Remaining batches were not started.', 'Close', { duration: 8000 });
+      return;
+    }
+
+    const processedThisBatch = this.activeJob?.processedFiles ?? this.activeJob?.ProcessedFiles ?? 0;
+    if (kind === 'verified') {
+      this.verifiedAllBatchesProcessed += processedThisBatch;
+      this.verifiedBatchSkip += processedThisBatch;
+      const totalMatched = this.verifiedBackfillPreview?.totalMatchedCount ?? this.verifiedBackfillPreview?.TotalMatchedCount ?? 0;
+      if (this.verifiedRunAllBatches && this.verifiedBatchSkip < totalMatched) {
+        const performedBy = this.generalService.getUserID();
+        if (performedBy) {
+          this.snackBar.open(
+            `Batch ${this.verifiedBatchNumber} of ${this.verifiedTotalBatches} finished. Starting next batch...`,
+            'Close',
+            { duration: 5000 }
+          );
+          setTimeout(() => this.startVerifiedDutySlipBatch(performedBy), 1500);
+          return;
+        }
+      }
+      this.verifiedBackfilling = false;
+      this.verifiedRunAllBatches = false;
+      if (this.verifiedTotalBatches > 1) {
+        this.snackBar.open(
+          `All ${this.verifiedTotalBatches} batch(es) completed (${this.verifiedAllBatchesProcessed} duty slip(s) processed).`,
+          'Close',
+          { duration: 10000 }
+        );
+      }
+    } else {
+      this.tollAllBatchesProcessed += processedThisBatch;
+      this.tollBatchSkip += processedThisBatch;
+      const totalMatched = this.tollBackfillPreview?.totalMatchedCount ?? this.tollBackfillPreview?.TotalMatchedCount ?? 0;
+      if (this.tollRunAllBatches && this.tollBatchSkip < totalMatched) {
+        const performedBy = this.generalService.getUserID();
+        if (performedBy) {
+          this.snackBar.open(
+            `Batch ${this.tollBatchNumber} of ${this.tollTotalBatches} finished. Starting next batch...`,
+            'Close',
+            { duration: 5000 }
+          );
+          setTimeout(() => this.startTollInterstateBatch(performedBy), 1500);
+          return;
+        }
+      }
+      this.tollBackfilling = false;
+      this.tollRunAllBatches = false;
+      if (this.tollTotalBatches > 1) {
+        this.snackBar.open(
+          `All ${this.tollTotalBatches} batch(es) completed (${this.tollAllBatchesProcessed} duty slip(s) processed).`,
+          'Close',
+          { duration: 10000 }
+        );
+      }
+    }
   }
 
   private formatApiDate(value: any): string | null {

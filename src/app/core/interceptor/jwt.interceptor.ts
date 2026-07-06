@@ -42,7 +42,10 @@ export class JwtInterceptor implements HttpInterceptor {
       currentUser &&
       ((currentUser as any).Token ?? (currentUser as any).token);
     if (currentUser && bearer) {
-      const empId = (currentUser as any)?.employee?.EmployeeID;
+      const empId =
+        (currentUser as any)?.employee?.EmployeeID ??
+        (currentUser as any)?.employee?.employeeID ??
+        (currentUser as any)?.Employee?.EmployeeID;
       const sessionGuid = (currentUser as any)?.SessionGuid ?? (currentUser as any)?.sessionGuid;
       request = request.clone({
         setHeaders: {

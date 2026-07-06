@@ -67,11 +67,11 @@ export class ClosingDutySlipModel {
   customerSignatureImage: string;
   dutySlipImage: string;
   dutySlipMap: string;
-  // goodForBilling: boolean;
-  // verifyDuty: boolean;
-  // dsClosing: string;
-  // runningDetails: string;
-  // vendorRemark: string;
+  goodForBilling: boolean;
+  verifyDuty: boolean;
+  dsClosing: string;
+  runningDetails: string;
+  vendorRemark: string;
   tripStatus: string;
   registrationNumber: string;
   driverName: string;
@@ -145,15 +145,24 @@ export class ClosingDutySlipModel {
     this.customerSignatureImage = closingDutySlipModel.customerSignatureImage || '';
     this.dutySlipImage = closingDutySlipModel.dutySlipImage || '';
     this.dutySlipMap = closingDutySlipModel.dutySlipMap || '';
-    // this.goodForBilling = closingDutySlipModel.goodForBilling || '';
-    // this.verifyDuty = closingDutySlipModel.verifyDuty || '';
-    // this.dsClosing = closingDutySlipModel.dsClosing || '';
-    // this.runningDetails = closingDutySlipModel.runningDetails || '';
-    // this.vendorRemark = closingDutySlipModel.vendorRemark || '';
+    this.goodForBilling = ClosingDutySlipModel.toBool(
+      closingDutySlipModel.goodForBilling ?? closingDutySlipModel.GoodForBilling
+    );
+    this.verifyDuty = ClosingDutySlipModel.toBool(
+      closingDutySlipModel.verifyDuty ?? closingDutySlipModel.VerifyDuty
+    );
+    this.dsClosing = (closingDutySlipModel.dsClosing ?? closingDutySlipModel.DSClosing) || '';
+    this.runningDetails = closingDutySlipModel.runningDetails || '';
+    this.vendorRemark = closingDutySlipModel.vendorRemark || '';
     this.tripStatus = closingDutySlipModel.tripStatus || '';
     this.registrationNumber = closingDutySlipModel.registrationNumber || '';
     this.driverName = closingDutySlipModel.driverName || '';
     this.activationStatus = closingDutySlipModel.activationStatus  || '';
+  }
+
+  static toBool(value: any): boolean {
+    return value === true || value === 1 || value === '1'
+      || value === 'true' || value === 'True' || value === 'TRUE';
   }
 }
 

@@ -105,11 +105,7 @@
               <ng-container *ngIf="column === 'driverName'">
                 <div class="driver-container">
                   <div class="driver-name">
-                    {{ row.driverName || 'N/A' }}
-                  </div>
-
-                  <div class="driver-id" *ngIf="row.driverOfficialIdentityNumber">
-                    ({{ row.driverOfficialIdentityNumber }})
+                    {{ row.driverDisplayName || formatDriverName(row) }}
                   </div>
                 </div>
               </ng-container>

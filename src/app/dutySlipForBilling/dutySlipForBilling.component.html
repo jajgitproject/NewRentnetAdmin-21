@@ -495,7 +495,7 @@
             </mat-checkbox>
             <!-- <img *ngIf="showSpinnerForVDGB === true" src="assets/images/loader4.gif" width="30"> -->
             &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-            <mat-checkbox *ngIf="canThisRoleDoGoodForBillingOnClosingScreen" formControlName="goodForBilling" (change)="onGFBChange($event)">
+            <mat-checkbox *ngIf="canToggleGoodForBilling" formControlName="goodForBilling" (change)="onGFBChange($event)">
               Good For Billing
             </mat-checkbox>
             &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;

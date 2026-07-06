@@ -76,7 +76,7 @@
         [DSClosing]="DSClosing" [IRN]="IRN" [hasActiveEInvoice]="hasActiveEInvoice"
         [canThisRoleDoGoodForBillingOnClosingScreen]="canThisRoleDoGoodForBillingOnClosingScreen"
         [canThisRoleViewDummyInvoice]="canThisRoleViewDummyInvoice"
-        [canEditDSAfterGoodForBilling]="canEditDSAfterGoodForBilling"
+        [canEditDSAfterGoodForBilling]="hasDsEditPermission"
         (dataSaved)="onDataSaved()"
         (dutyStatusChanged)="onDutyStatusChanged($event)"></app-dutySlipForBilling>
     </div>

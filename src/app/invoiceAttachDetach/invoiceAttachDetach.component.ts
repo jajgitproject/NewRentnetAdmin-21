@@ -117,6 +117,7 @@ export class InvoiceAttachDetachComponent implements OnInit {
   selectAll:boolean=false;
   selectedInvoices: any[] = []; 
   InvoiceID: any;
+  invoiceBillDate: Date | null = null;
   SearchVerifyDuty:boolean;
   SearchGoodForBilling:boolean;
 
@@ -142,6 +143,10 @@ export class InvoiceAttachDetachComponent implements OnInit {
     this.InvoiceNumberWithPrefix = paramsData.invoiceNumberWithPrefix;
     this.InvoiceID = paramsData.invoiceID;
 
+    if (this.InvoiceID) {
+      this.loadInvoiceBillDate();
+    }
+
     if (!this.InvoiceNumberWithPrefix) {
       this.loadData();
     } else {
@@ -153,6 +158,23 @@ export class InvoiceAttachDetachComponent implements OnInit {
   this.InitBranch();
   this.InitPackageTypes();
 }
+
+  loadInvoiceBillDate() {
+    const invoiceId = Number(this.InvoiceID);
+    if (!invoiceId || invoiceId <= 0) {
+      this.invoiceBillDate = null;
+      return;
+    }
+
+    this.invoiceAttachDetachService.getInvoiceBillDate(invoiceId).subscribe(
+      response => {
+        this.invoiceBillDate = response?.invoiceDate ? new Date(response.invoiceDate) : null;
+      },
+      () => {
+        this.invoiceBillDate = null;
+      }
+    );
+  }
 
   advanceTableForm:FormGroup = this.fb.group({
         invoiceID:[],
@@ -509,8 +531,40 @@ export class InvoiceAttachDetachComponent implements OnInit {
     return value === true || value === 'true' || value === 'True' || value === 1 || value === '1';
   }
 
+  private isDutyDateAfterBillDate(row: any): boolean {
+    const dutyDateValue = row?.pickUpDateForBilling || row?.pickUpDate;
+    if (!dutyDateValue) {
+      return false;
+    }
+
+    const dutyDate = new Date(dutyDateValue);
+    dutyDate.setHours(0, 0, 0, 0);
+
+    if (this.InvoiceID && this.invoiceBillDate) {
+      const billDate = new Date(this.invoiceBillDate);
+      billDate.setHours(0, 0, 0, 0);
+      return dutyDate > billDate;
+    }
+
+    if (!this.InvoiceID) {
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      return dutyDate > today;
+    }
+
+    return false;
+  }
+
+  isRowBlockedByBillDate(row: any): boolean {
+    return this.isDutyDateAfterBillDate(row);
+  }
+
   isRowSelectable(row: any): boolean {
-    return this.isTrueValue(row?.verifyDuty) && this.isTrueValue(row?.goodForBilling);
+    if (!this.isTrueValue(row?.verifyDuty) || !this.isTrueValue(row?.goodForBilling)) {
+      return false;
+    }
+
+    return !this.isDutyDateAfterBillDate(row);
   }
 
   

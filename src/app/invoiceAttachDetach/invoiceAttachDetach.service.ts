@@ -273,4 +273,8 @@ export class InvoiceAttachDetachService {
     return this.httpClient.get(this.API_URL + "/" + 'GetAllInvoiceAttachForEdit' + '/' + SearchInvoiceNumberWithPrefix + '/' + SearchCustomerName + '/'+ SearchBranch + '/' + SearchDutySlipID + '/' + SearchReservationID + '/' + SearchGSTType + '/' + SearchDutyFromDate + '/' + SearchDutyToDate + '/' + SearchPassengerName + '/' + SearchPassengerMobile + '/' + SearchPackageType + '/' + SearchPackage + '/' + SearchDSStatus + '/' + SearchBillingStatus + '/' + PageNumber + '/' + coloumName + '/' + sortType);
   }
 
+  getInvoiceBillDate(invoiceId: number): Observable<any> {
+    return this.httpClient.get(this.API_URL + '/GetInvoiceBillDate/' + invoiceId);
+  }
+
 }

@@ -26,10 +26,10 @@
             <div class="bulk-bills-header">
               <div class="bulk-toolbar">
                 <div class="bulk-tabs">
-                  <button mat-button type="button" [color]="activeTab === 'backfill' ? 'primary' : undefined" (click)="setTab('backfill')">Backfill</button>
+                  <button *ngIf="false" mat-button type="button" [color]="activeTab === 'backfill' ? 'primary' : undefined" (click)="setTab('backfill')">Backfill</button>
                   <button mat-button type="button" [color]="activeTab === 'download' ? 'primary' : undefined" (click)="setTab('download')">Download Invoice - DutySlip</button>
                   <button mat-button type="button" [color]="activeTab === 'upload' ? 'primary' : undefined" (click)="setTab('upload')">Upload Documents</button>
-                  <button mat-button type="button" [color]="activeTab === 'closingDutySlip' ? 'primary' : undefined" (click)="setTab('closingDutySlip')">Manual Duty Slips from Closing</button>
+                  <button mat-button type="button" [color]="activeTab === 'verifiedDutySlip' ? 'primary' : undefined" (click)="setTab('verifiedDutySlip')">Download Duty Slips &amp; Toll Parking</button>
                 </div>
                 <div class="bulk-actions">
                   <button mat-mini-fab color="primary" type="button" (click)="refresh()" title="Reset">
@@ -38,7 +38,7 @@
                 </div>
               </div>
 
-              <div *ngIf="activeTab === 'backfill'">
+              <div *ngIf="false && activeTab === 'backfill'">
                 <div class="backfill-panel">
                   <div class="panel-title">IRN PDF backfill</div>
                   <p class="backfill-hint">
@@ -62,7 +62,7 @@
                     </div>
                   </div>
                   <p class="backfill-hint backfill-hint-inline">
-                    Leave invoice number blank to match all incomplete IRN invoices. Partial invoice number matches active <code>InvoiceDocument</code> rows only.
+                    Leave invoice number blank to match all incomplete IRN invoices. Partial invoice number matches any IRN invoice with missing archives, including invoices with no <code>InvoiceDocument</code> row yet.
                   </p>
                   <div class="load-error" *ngIf="backfillLoadError">{{ backfillLoadError }}</div>
                   <div class="backfill-actions">
@@ -116,7 +116,7 @@
                 </div>
               </div>
 
-              <div *ngIf="activeTab === 'closingDutySlip'">
+              <div *ngIf="false && activeTab === 'closingDutySlip'">
                 <div class="backfill-panel">
                   <div class="panel-title">Manual Duty Slips from Closing</div>
                   <p class="backfill-hint">
@@ -181,6 +181,12 @@
                       (click)="startClosingDutySlipBackfill(false)"
                       [disabled]="closingBackfilling || isBackfillRunning() || !canStartClosingBackfill()">
                       Run single batch
+                    </button>
+                    <button mat-stroked-button color="warn" type="button"
+                      *ngIf="isClosingStuckJobError()"
+                      (click)="forceClearStuckClosingDutySlipBackfill()"
+                      [disabled]="closingBackfilling">
+                      Clear stuck job
                     </button>
                     <span class="backfill-count" *ngIf="closingBackfillPreview">
                       Matched {{ getClosingTotalMatchedCount() }}
@@ -298,6 +304,275 @@
                 </div>
               </div>
 
+              <div *ngIf="activeTab === 'verifiedDutySlip'">
+                <div class="backfill-panel">
+                  <div class="panel-title">Download Duty Slips &amp; Toll Parking</div>
+                  <p class="backfill-hint">
+                    Downloads all duty slip types for the selected customer and pickup date range (same scope as Duty Register).
+                    Each duty slip is packaged as one merged PDF: duty slip, then toll parking receipts, then interstate receipts (where available).
+                    PDFs are generated on demand when archives are missing.
+                  </p>
+                  <div class="row bulk-filters g-2 backfill-search-row">
+                    <div class="col-xl-3 col-lg-4 col-md-6 col-sm-12">
+                      <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                        <mat-label>Customer</mat-label>
+                        <input matInput [formControl]="verifiedCustomerCtrl" [matAutocomplete]="verifiedCustomerAuto" placeholder="Tally code or name" />
+                        <mat-autocomplete #verifiedCustomerAuto="matAutocomplete" [displayWith]="displayCustomer">
+                          <mat-option *ngFor="let customer of filteredVerifiedCustomerOptions | async" [value]="customer">
+                            {{ customer.displayName || customer.customerName }}
+                          </mat-option>
+                        </mat-autocomplete>
+                      </mat-form-field>
+                    </div>
+                    <div class="col-xl-2 col-lg-3 col-md-4 col-sm-6">
+                      <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                        <mat-label>From Date</mat-label>
+                        <input matInput [matDatepicker]="verifiedFromPicker" [formControl]="verifiedFromDateCtrl" />
+                        <mat-datepicker-toggle matSuffix [for]="verifiedFromPicker"></mat-datepicker-toggle>
+                        <mat-datepicker #verifiedFromPicker></mat-datepicker>
+                      </mat-form-field>
+                    </div>
+                    <div class="col-xl-2 col-lg-3 col-md-4 col-sm-6">
+                      <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                        <mat-label>To Date</mat-label>
+                        <input matInput [matDatepicker]="verifiedToPicker" [formControl]="verifiedToDateCtrl" />
+                        <mat-datepicker-toggle matSuffix [for]="verifiedToPicker"></mat-datepicker-toggle>
+                        <mat-datepicker #verifiedToPicker></mat-datepicker>
+                      </mat-form-field>
+                    </div>
+                    <div class="col-xl-3 col-lg-4 col-md-6 col-sm-12">
+                      <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                        <mat-label>Duty Slip ID(s)</mat-label>
+                        <input matInput [formControl]="verifiedDutySlipIdsCtrl" placeholder="e.g. 50972, 51001" />
+                        <mat-hint>Optional. Date range ignored when IDs are entered.</mat-hint>
+                      </mat-form-field>
+                    </div>
+                    <div class="col-xl-2 col-lg-3 col-md-4 col-sm-6">
+                      <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                        <mat-label>Batch size</mat-label>
+                        <input matInput type="number" min="1" max="2000" [(ngModel)]="packageBatchSize" [disabled]="dutySlipPackageDownloading || isBackfillRunning()" />
+                      </mat-form-field>
+                    </div>
+                  </div>
+                  <div class="load-error" *ngIf="dutySlipPackageLoadError">{{ dutySlipPackageLoadError }}</div>
+                  <div class="backfill-actions">
+                    <button mat-stroked-button type="button" (click)="previewDutySlipPackageDownload()" [disabled]="dutySlipPackagePreviewLoading || dutySlipPackageDownloading || isBackfillRunning()">
+                      {{ dutySlipPackagePreviewLoading ? 'Previewing...' : 'Preview' }}
+                    </button>
+                    <button mat-raised-button color="primary" type="button" (click)="startDutySlipPackageDownload(true)" [disabled]="dutySlipPackageDownloading || isBackfillRunning() || !canStartDutySlipPackageDownload()">
+                      {{ dutySlipPackageDownloading ? 'Downloading...' : getPackageRunButtonLabel() }}
+                    </button>
+                    <button mat-stroked-button type="button" (click)="startDutySlipPackageDownload(false)" [disabled]="dutySlipPackageDownloading || isBackfillRunning() || !canStartDutySlipPackageDownload()">
+                      Run single batch
+                    </button>
+                  </div>
+                  <div class="backfill-preview-summary" *ngIf="dutySlipPackagePreview">
+                    <div><strong>Total matched:</strong> {{ dutySlipPackagePreview.totalMatchedCount ?? 0 }}</div>
+                    <div><strong>Batch size:</strong> {{ packageBatchSize }}</div>
+                    <div><strong>Estimated batches:</strong> {{ dutySlipPackagePreview.estimatedBatchCount ?? getPackageEstimatedBatchCount() }}</div>
+                    <div><strong>Will download (first batch):</strong> {{ dutySlipPackagePreview.willProcessCount ?? 0 }}</div>
+                  </div>
+                  <div class="table-responsive" *ngIf="dutySlipPackageCandidates.length">
+                    <table class="error-table closing-candidate-table">
+                      <thead>
+                        <tr>
+                          <th>Duty Slip ID</th>
+                          <th>Customer</th>
+                          <th>Pickup Date</th>
+                          <th>Source</th>
+                          <th>Toll</th>
+                          <th>Interstate</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <tr *ngFor="let row of dutySlipPackageCandidates">
+                          <td>{{ row.dutySlipID }}</td>
+                          <td>{{ row.customerName }}</td>
+                          <td>{{ row.pickUpDate ? (row.pickUpDate | date:'dd-MM-yyyy') : 'N/A' }}</td>
+                          <td>{{ formatSlipSource(row.slipSource) }}</td>
+                          <td>{{ row.tollReceiptCount ?? 0 }}</td>
+                          <td>{{ row.interstateReceiptCount ?? 0 }}</td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              </div>
+
+              <div *ngIf="false && activeTab === 'tollInterstate'">
+                <div class="backfill-panel">
+                  <div class="panel-title">Toll Parking &amp; Interstate Archive</div>
+                  <p class="backfill-hint">
+                    Archives approved toll parking and interstate tax receipt PDFs for verified, dropped-off duties.
+                    Dry Run writes to <code>TollParking_Temp/</code> and <code>InterstateTax_Temp/</code> only (no production document records).
+                    Production writes to <code>TollParkingDocument</code>, <code>InterstateTaxDocument</code>, and partitioned folders under
+                    <code>TollParking/</code> and <code>InterstateTax/</code>.
+                  </p>
+                  <div class="row bulk-filters g-2 backfill-search-row">
+                    <div class="col-xl-3 col-lg-4 col-md-6 col-sm-12">
+                      <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                        <mat-label>Customer</mat-label>
+                        <input matInput [formControl]="tollCustomerCtrl" [matAutocomplete]="tollCustomerAuto" placeholder="Tally code or name" />
+                        <mat-autocomplete #tollCustomerAuto="matAutocomplete" [displayWith]="displayCustomer">
+                          <mat-option *ngFor="let customer of filteredTollCustomerOptions | async" [value]="customer">
+                            {{ customer.displayName || customer.customerName }}
+                          </mat-option>
+                        </mat-autocomplete>
+                      </mat-form-field>
+                    </div>
+                    <div class="col-xl-2 col-lg-3 col-md-4 col-sm-6">
+                      <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                        <mat-label>From Date</mat-label>
+                        <input matInput [matDatepicker]="tollFromPicker" [formControl]="tollFromDateCtrl" [min]="docBackfillMinFromDate" />
+                        <mat-datepicker-toggle matSuffix [for]="tollFromPicker"></mat-datepicker-toggle>
+                        <mat-datepicker #tollFromPicker></mat-datepicker>
+                      </mat-form-field>
+                    </div>
+                    <div class="col-xl-2 col-lg-3 col-md-4 col-sm-6">
+                      <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                        <mat-label>To Date</mat-label>
+                        <input matInput [matDatepicker]="tollToPicker" [formControl]="tollToDateCtrl" [min]="docBackfillMinFromDate" />
+                        <mat-datepicker-toggle matSuffix [for]="tollToPicker"></mat-datepicker-toggle>
+                        <mat-datepicker #tollToPicker></mat-datepicker>
+                      </mat-form-field>
+                    </div>
+                    <div class="col-xl-2 col-lg-3 col-md-4 col-sm-6">
+                      <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                        <mat-label>Batch size</mat-label>
+                        <input matInput type="number" min="1" max="2000" [(ngModel)]="docBackfillBatchSize" [disabled]="tollBackfilling || isBackfillRunning()" />
+                      </mat-form-field>
+                    </div>
+                    <div class="col-xl-2 col-lg-3 col-md-4 col-sm-6">
+                      <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                        <mat-label>Documents Exist</mat-label>
+                        <mat-select [(ngModel)]="tollExistsFilter">
+                          <mat-option value="All">All</mat-option>
+                          <mat-option value="Exists">Exists</mat-option>
+                          <mat-option value="NotExists">Not Exists</mat-option>
+                        </mat-select>
+                      </mat-form-field>
+                    </div>
+                    <div class="col-xl-2 col-lg-3 col-md-4 col-sm-6">
+                      <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                        <mat-label>Run mode</mat-label>
+                        <mat-select [(ngModel)]="tollTargetMode">
+                          <mat-option value="DryRun">Dry Run (Temp folders + temp tables)</mat-option>
+                          <mat-option value="Production">Production</mat-option>
+                        </mat-select>
+                      </mat-form-field>
+                    </div>
+                    <div class="col-xl-3 col-lg-4 col-md-6 col-sm-12">
+                      <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                        <mat-label>Duty Slip ID(s)</mat-label>
+                        <input matInput [formControl]="tollDutySlipIdsCtrl" placeholder="e.g. 50972, 51001" />
+                      </mat-form-field>
+                    </div>
+                  </div>
+                  <div class="backfill-dryrun-warning" *ngIf="tollTargetMode === 'DryRun'">
+                    <strong>Dry Run only:</strong> PDFs are written under <code>TollParking_Temp/</code> and <code>InterstateTax_Temp/</code>,
+                    with metadata in <code>TollParkingDocument_Temp</code> and <code>InterstateTaxDocument_Temp</code>.
+                    Production document tables are not updated.
+                  </div>
+                  <div class="load-error" *ngIf="tollBackfillLoadError">{{ tollBackfillLoadError }}</div>
+                  <div class="backfill-actions">
+                    <button mat-stroked-button type="button" (click)="previewTollInterstateBackfill()" [disabled]="tollPreviewLoading || tollBackfilling || isBackfillRunning()">
+                      {{ tollPreviewLoading ? 'Previewing...' : 'Preview' }}
+                    </button>
+                    <button mat-raised-button color="primary" type="button" (click)="startTollInterstateBackfill(true)" [disabled]="tollBackfilling || isBackfillRunning() || !canStartTollBackfill()">
+                      {{ getTollRunButtonLabel() }}
+                    </button>
+                    <button mat-stroked-button type="button" (click)="startTollInterstateBackfill(false)" [disabled]="tollBackfilling || isBackfillRunning() || !canStartTollBackfill()">
+                      Run single batch
+                    </button>
+                    <button mat-stroked-button color="warn" type="button" *ngIf="isTollStuckJobError()" (click)="forceClearStuckTollInterstateBackfill()" [disabled]="tollBackfilling">
+                      Clear stuck job
+                    </button>
+                  </div>
+                  <div class="backfill-preview-summary" *ngIf="tollBackfillPreview">
+                    <div><strong>Total matched:</strong> {{ tollBackfillPreview.totalMatchedCount ?? tollBackfillPreview.TotalMatchedCount ?? 0 }}</div>
+                    <div><strong>Estimated batches:</strong> {{ tollBackfillPreview.estimatedBatchCount ?? tollBackfillPreview.EstimatedBatchCount ?? 0 }}</div>
+                  </div>
+                  <div class="closing-progress-panel" *ngIf="isTollInterstateJob() && activeJob">
+                    <div class="panel-title">Progress {{ getTollBatchProgressLabel() }}</div>
+                    <div class="backfill-preview-summary" *ngIf="tollTotalBatches > 1">
+                      <div><strong>Overall:</strong> {{ tollAllBatchesProcessed + (activeJob.processedFiles || 0) }} / {{ getTollTotalMatchedCount() }}</div>
+                    </div>
+                    <div class="backfill-preview-summary">
+                      <div><strong>Processed:</strong> {{ activeJob.processedFiles }} / {{ activeJob.totalFiles }}</div>
+                      <div><strong>Successful:</strong> {{ activeJob.successCount }}</div>
+                      <div><strong>Failed:</strong> {{ activeJob.errorCount }}</div>
+                      <div><strong>Skipped:</strong> {{ getTollSkippedCount() }}</div>
+                      <div><strong>Remaining:</strong> {{ getTollRemainingCount() }}</div>
+                      <div><strong>Current:</strong> {{ getTollCurrentRecordLabel() }}</div>
+                      <div><strong>Elapsed:</strong> {{ getTollElapsedTime() }}</div>
+                    </div>
+                    <mat-progress-bar mode="determinate" [value]="getJobProgress()"></mat-progress-bar>
+                    <div class="job-actions">
+                      <button mat-stroked-button type="button" (click)="exportErrors()" [disabled]="!jobErrors.length">Export log CSV</button>
+                      <button mat-button type="button" (click)="clearJob()">
+                        <ng-container *ngIf="isBackfillRunning(); else dismissTollJob">Cancel run</ng-container>
+                        <ng-template #dismissTollJob>Dismiss</ng-template>
+                      </button>
+                    </div>
+                  </div>
+                  <div class="table-responsive" *ngIf="tollBackfillCandidates.length">
+                    <table class="error-table closing-candidate-table">
+                      <thead>
+                        <tr>
+                          <th>Duty Slip ID</th>
+                          <th>Customer</th>
+                          <th>TP Receipts</th>
+                          <th>IST Receipts</th>
+                          <th>Status</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <tr *ngFor="let row of tollBackfillCandidates">
+                          <td>{{ row.dutySlipID }}</td>
+                          <td>{{ row.customerName }}</td>
+                          <td>{{ row.tollParkingReceiptCount }}</td>
+                          <td>{{ row.interstateReceiptCount }}</td>
+                          <td>{{ row.status }}</td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+                  <div class="table-responsive closing-log-table-wrap" *ngIf="tollBackfillProgressRows.length">
+                    <div class="panel-title">Processing Log</div>
+                    <table mat-table [dataSource]="tollBackfillProgressRows" class="mat-elevation-z1 bulk-table backfill-progress-table">
+                      <ng-container matColumnDef="dutySlipID">
+                        <th mat-header-cell *matHeaderCellDef>Duty Slip ID</th>
+                        <td mat-cell *matCellDef="let row">{{ row.dutySlipID || '—' }}</td>
+                      </ng-container>
+                      <ng-container matColumnDef="originalFile">
+                        <th mat-header-cell *matHeaderCellDef>Original file</th>
+                        <td mat-cell *matCellDef="let row">{{ row.originalFile }}</td>
+                      </ng-container>
+                      <ng-container matColumnDef="status">
+                        <th mat-header-cell *matHeaderCellDef>Status</th>
+                        <td mat-cell *matCellDef="let row">
+                          <span class="progress-status-badge" [ngClass]="getClosingProgressStatusClass(row.status)">{{ row.status }}</span>
+                        </td>
+                      </ng-container>
+                      <ng-container matColumnDef="processingType">
+                        <th mat-header-cell *matHeaderCellDef>Processing</th>
+                        <td mat-cell *matCellDef="let row">{{ row.processingType }}</td>
+                      </ng-container>
+                      <ng-container matColumnDef="details">
+                        <th mat-header-cell *matHeaderCellDef>Details</th>
+                        <td mat-cell *matCellDef="let row">{{ row.details }}</td>
+                      </ng-container>
+                      <ng-container matColumnDef="completedAt">
+                        <th mat-header-cell *matHeaderCellDef>Timestamp</th>
+                        <td mat-cell *matCellDef="let row">{{ formatBackfillCompletedAt(row.completedAt) }}</td>
+                      </ng-container>
+                      <tr mat-header-row *matHeaderRowDef="tollBackfillProgressColumns; sticky: true"></tr>
+                      <tr mat-row *matRowDef="let row; columns: tollBackfillProgressColumns" [ngClass]="getClosingProgressStatusClass(row.status)"></tr>
+                    </table>
+                  </div>
+                </div>
+              </div>
+
               <div *ngIf="activeTab === 'download'" class="download-tab-layout">
                 <div class="download-search-section">
                   <div class="row bulk-filters g-2">
@@ -307,7 +582,7 @@
                         <input matInput [formControl]="customerCtrl" [matAutocomplete]="customerAuto" placeholder="Type to search" />
                         <mat-autocomplete #customerAuto="matAutocomplete" [displayWith]="displayCustomer">
                           <mat-option *ngFor="let customer of filteredCustomerOptions | async" [value]="customer">
-                            {{ customer.customerName }}
+                            {{ customer.displayName || customer.customerName }}
                           </mat-option>
                         </mat-autocomplete>
                       </mat-form-field>
@@ -397,6 +672,7 @@
                 <div class="download-grid-section">
                   <p class="upload-hint" *ngIf="!loading && !invoiceRows.length && !loadError">
                     Search lists active rows from <code>InvoiceDocument</code> (archived invoice PDFs) filtered by customer, invoice number, and invoice date.
+                    Invoices without an archived bill PDF will not appear here until you generate PDFs from Invoice Home or run IRN PDF backfill.
                   </p>
 
                   <div class="table-responsive" *ngIf="invoiceRows.length">
@@ -482,6 +758,8 @@
                 <span *ngIf="activeJob.downloadMode">Mode: {{ activeJob.downloadMode }}</span>
                 <span *ngIf="isIrnBackfillJob() && irnTotalBatches > 1">Batch: {{ irnBatchNumber }} of {{ irnTotalBatches }}</span>
                 <span *ngIf="isIrnBackfillJob() && irnTotalBatches > 1">Overall: {{ irnAllBatchesProcessed + (activeJob.processedFiles || 0) }} / {{ getIrnTotalMatchedCount() }}</span>
+                <span *ngIf="isDutySlipPackageDownloadJob() && packageTotalBatches > 1">{{ getPackageBatchProgressLabel() }}</span>
+                <span *ngIf="isDutySlipPackageDownloadJob() && packageTotalBatches > 1">Overall: {{ packageAllBatchesProcessed + (activeJob.processedFiles || 0) }} / {{ getPackageTotalMatchedCount() }}</span>
                 <span>Processed: {{ activeJob.processedFiles }} / {{ activeJob.totalFiles }}</span>
                 <span>Success: {{ activeJob.successCount }}</span>
                 <span>Errors: {{ activeJob.errorCount }}</span>
@@ -495,7 +773,7 @@
                 IRN backfill finished. Use Download Invoice - DutySlip to download archived PDFs.
               </p>
               <div class="job-actions">
-                <button *ngIf="!isIrnBackfillJob() && !isClosingDutySlipJob()" mat-raised-button color="primary" type="button" (click)="downloadZip()" [disabled]="!canDownloadZip()">Download ZIP</button>
+                <button *ngIf="!isIrnBackfillJob() && !isClosingDutySlipJob() && !isVerifiedDutySlipJob() && !isTollInterstateJob()" mat-raised-button color="primary" type="button" (click)="downloadZip()" [disabled]="!canDownloadZip()">Download ZIP</button>
                 <button mat-stroked-button type="button" (click)="exportErrors()" [disabled]="!jobErrors.length">Export errors CSV</button>
                     <button mat-button type="button" (click)="clearJob()">
                       <ng-container *ngIf="isBackfillRunning(); else dismissJobLabel">Cancel backfill</ng-container>
@@ -530,7 +808,35 @@
                   <tr mat-row *matRowDef="let row; columns: backfillProgressColumns" [ngClass]="getProgressStatusClass(row.status)"></tr>
                 </table>
               </div>
-              <div class="table-responsive" *ngIf="!isIrnBackfillJob() && !isClosingDutySlipJob() && jobErrors.length">
+              <div class="table-responsive backfill-progress-table-wrap" *ngIf="isDutySlipPackageDownloadJob() && packageDownloadProgressRows.length">
+                <table mat-table [dataSource]="packageDownloadProgressRows" class="mat-elevation-z1 bulk-table backfill-progress-table">
+                  <ng-container matColumnDef="dutySlipID">
+                    <th mat-header-cell *matHeaderCellDef>Duty Slip ID</th>
+                    <td mat-cell *matCellDef="let row">{{ row.dutySlipID || '—' }}</td>
+                  </ng-container>
+                  <ng-container matColumnDef="customerName">
+                    <th mat-header-cell *matHeaderCellDef>Customer</th>
+                    <td mat-cell *matCellDef="let row">{{ row.customerName }}</td>
+                  </ng-container>
+                  <ng-container matColumnDef="status">
+                    <th mat-header-cell *matHeaderCellDef>Status</th>
+                    <td mat-cell *matCellDef="let row">
+                      <span class="progress-status-badge" [ngClass]="getProgressStatusClass(row.status)">{{ row.status }}</span>
+                    </td>
+                  </ng-container>
+                  <ng-container matColumnDef="details">
+                    <th mat-header-cell *matHeaderCellDef>Details</th>
+                    <td mat-cell *matCellDef="let row">{{ row.details }}</td>
+                  </ng-container>
+                  <ng-container matColumnDef="completedAt">
+                    <th mat-header-cell *matHeaderCellDef>Completed</th>
+                    <td mat-cell *matCellDef="let row">{{ formatBackfillCompletedAt(row.completedAt) }}</td>
+                  </ng-container>
+                  <tr mat-header-row *matHeaderRowDef="packageDownloadProgressColumns; sticky: true"></tr>
+                  <tr mat-row *matRowDef="let row; columns: packageDownloadProgressColumns" [ngClass]="getProgressStatusClass(row.status)"></tr>
+                </table>
+              </div>
+              <div class="table-responsive" *ngIf="!isIrnBackfillJob() && !isClosingDutySlipJob() && !isDutySlipPackageDownloadJob() && jobErrors.length">
                 <table class="error-table">
                   <thead>
                     <tr>

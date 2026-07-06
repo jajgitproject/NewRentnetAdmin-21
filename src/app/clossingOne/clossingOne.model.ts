@@ -22,17 +22,55 @@ export class ClosingModel {
   hasActiveEInvoice:boolean;
 
   constructor(closingModel) {
-    this.closingReservationForPickupDataModel = new ClosingReservationForPickupDataModel(closingModel.closingReservationForPickupDataModel);
-    this.closingDutySlipModel = new ClosingDutySlipModel(closingModel.closingDutySlipModel);
-    this.closingDutySlipByDriverModel = new ClosingDutySlipByDriverModel(closingModel.closingDutySlipByDriverModel);
-    this.closingDutySlipByAppModel = new ClosingDutySlipByAppModel(closingModel.closingDutySlipByAppModel);
-    this.closingDutySlipByGPSModel = new ClosingDutySlipByGPSModel(closingModel.closingDutySlipByGPSModel);
-    this.closingDutySlipForBillingModel = new ClosingDutySlipForBillingModel(closingModel.closingDutySlipForBillingModel);
-    this.kmComparisionModel = new KMComparisionModel(closingModel.kmComparisionModel);
-    this.invoiceID = closingModel.invoiceID || 0;
-    this.action = closingModel.action || '';
-    this.irn = closingModel.irn || '';
-    this.hasActiveEInvoice = closingModel.hasActiveEInvoice === true;
+    if (!closingModel) {
+      closingModel = {};
+    }
+    const billingRaw =
+      closingModel.closingDutySlipForBillingModel ??
+      closingModel.ClosingDutySlipForBillingModel ??
+      {};
+    const dutySlipRaw =
+      closingModel.closingDutySlipModel ??
+      closingModel.ClosingDutySlipModel ??
+      {};
+
+    // Prefer billing flags; fall back to DutySlip flags (both tables are updated by BillingHistoryProc).
+    const billingWithFallback = {
+      ...billingRaw,
+      goodForBilling:
+        billingRaw.goodForBilling ??
+        billingRaw.GoodForBilling ??
+        dutySlipRaw.goodForBilling ??
+        dutySlipRaw.GoodForBilling,
+      verifyDuty:
+        billingRaw.verifyDuty ??
+        billingRaw.VerifyDuty ??
+        dutySlipRaw.verifyDuty ??
+        dutySlipRaw.VerifyDuty,
+    };
+
+    this.closingReservationForPickupDataModel = new ClosingReservationForPickupDataModel(
+      closingModel.closingReservationForPickupDataModel ?? closingModel.ClosingReservationForPickupDataModel ?? {}
+    );
+    this.closingDutySlipModel = new ClosingDutySlipModel(dutySlipRaw);
+    this.closingDutySlipByDriverModel = new ClosingDutySlipByDriverModel(
+      closingModel.closingDutySlipByDriverModel ?? closingModel.ClosingDutySlipByDriverModel ?? {}
+    );
+    this.closingDutySlipByAppModel = new ClosingDutySlipByAppModel(
+      closingModel.closingDutySlipByAppModel ?? closingModel.ClosingDutySlipByAppModel ?? {}
+    );
+    this.closingDutySlipByGPSModel = new ClosingDutySlipByGPSModel(
+      closingModel.closingDutySlipByGPSModel ?? closingModel.ClosingDutySlipByGPSModel ?? {}
+    );
+    this.closingDutySlipForBillingModel = new ClosingDutySlipForBillingModel(billingWithFallback);
+    this.kmComparisionModel = new KMComparisionModel(
+      closingModel.kmComparisionModel ?? closingModel.KmComparisionModel ?? {}
+    );
+    this.invoiceID = (closingModel.invoiceID ?? closingModel.InvoiceID) || 0;
+    this.action = (closingModel.action ?? closingModel.Action) || '';
+    this.irn = (closingModel.irn ?? closingModel.IRN) || '';
+    this.hasActiveEInvoice =
+      closingModel.hasActiveEInvoice === true || closingModel.HasActiveEInvoice === true;
   }
 }
 
