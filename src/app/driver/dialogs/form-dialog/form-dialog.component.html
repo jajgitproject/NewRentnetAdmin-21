@@ -83,15 +83,6 @@
                     </mat-form-field>
                 </div>
 
-                <!-- <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
-                    <mat-form-field class="example-full-width" appearance="outline"  floatLabel="always">
-                        <mat-label>Identity No.</mat-label>
-                        <input matInput formControlName="driverOfficialIdentityNumber" required>
-                        <mat-error *ngIf="advanceTableForm.get('driverOfficialIdentityNumber').hasError('required')">
-                            Identity No. is required
-                        </mat-error>
-                    </mat-form-field>
-                </div> -->
             </div>
 
             <!-- <div class="row">
@@ -822,8 +813,22 @@ advanceTableForm.get('localAddressAddressString')?.invalid &&
                         </mat-error>
                     </mat-form-field>
                 </div>
+               <div>
+                
+               </div>
+               
 
-                <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                <!-- Identity No. only in Edit Mode -->
+                <!-- <div *ngIf="action === 'edit'" class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                    <div class="status-display" style="margin-top: 10px;">
+                        <strong>Identity No.:</strong>
+                        <span>{{ advanceTable.driverOfficialIdentityNumber }}</span>
+                    </div>
+                </div> -->
+            </div>
+
+            <div class="row">
+                 <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
                     <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
                         <mat-label>Activation Status</mat-label>
                         <mat-select formControlName="activationStatus">
@@ -835,14 +840,14 @@ advanceTableForm.get('localAddressAddressString')?.invalid &&
                         </mat-error>
                     </mat-form-field>
                 </div>
-
-
-                <!-- Identity No. only in Edit Mode -->
-                <div *ngIf="action === 'edit'" class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
-                    <div class="status-display" style="margin-top: 10px;">
-                        <strong>Identity No.:</strong>
-                        <span>{{ advanceTable.driverOfficialIdentityNumber }}</span>
-                    </div>
+                 <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2" *ngIf="action === 'edit'">
+                    <mat-form-field class="example-full-width" appearance="outline"  floatLabel="always">
+                        <mat-label>Identity No.</mat-label>
+                        <input matInput formControlName="driverOfficialIdentityNumber">
+                        <!-- <mat-error *ngIf="advanceTableForm.get('driverOfficialIdentityNumber').hasError('required')">
+                            Identity No. is required
+                        </mat-error> -->
+                    </mat-form-field>
                 </div>
             </div>
 
