@@ -369,7 +369,7 @@
                                                 <mat-icon>picture_as_pdf</mat-icon>
                                                 <span>Generate PDFs</span>
                                             </button>
-                                            <button mat-menu-item (click)="cancelInvoice(item)"
+                                            <button *ngIf="false" mat-menu-item (click)="cancelInvoice(item)"
                                                 [disabled]="item.invoiceStatusActiveOrVoid === 'Void'">
                                                 <mat-icon>how_to_reg</mat-icon>
                                                 <span>Cancel Invoice</span>
