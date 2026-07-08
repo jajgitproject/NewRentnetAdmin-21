@@ -595,6 +595,12 @@
                     </div>
                     <div class="col-xl-2 col-lg-3 col-md-4 col-sm-6">
                       <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                        <mat-label>Summary ID</mat-label>
+                        <input matInput [formControl]="summaryIdCtrl" placeholder="e.g. 1234" />
+                      </mat-form-field>
+                    </div>
+                    <div class="col-xl-2 col-lg-3 col-md-4 col-sm-6">
+                      <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
                         <mat-label>From Date</mat-label>
                         <input matInput [matDatepicker]="fromPicker" [formControl]="fromDateCtrl" />
                         <mat-datepicker-toggle matSuffix [for]="fromPicker"></mat-datepicker-toggle>
@@ -621,9 +627,8 @@
                 <div class="download-panel">
                   <div class="panel-title">Download options</div>
                   <div class="download-mode-group">
-                    <mat-checkbox [checked]="downloadInvoices" (change)="onDownloadOptionChange('invoices', $event.checked)">Download Invoices</mat-checkbox>
-                    <mat-checkbox [checked]="downloadDutySlips" (change)="onDownloadOptionChange('dutySlips', $event.checked)">Download DutySlips</mat-checkbox>
-                    <mat-checkbox [checked]="downloadMerge" (change)="onDownloadOptionChange('merge', $event.checked)">Merge &amp; Download</mat-checkbox>
+                    <mat-checkbox [checked]="downloadInvoices" (change)="onDownloadOptionChange('invoices', $event.checked)">Invoice Only</mat-checkbox>
+                    <mat-checkbox [checked]="downloadMerge" (change)="onDownloadOptionChange('merge', $event.checked)">Invoice with Duty Slips and Toll Parking</mat-checkbox>
                   </div>
                   <p class="upload-hint" *ngIf="downloadMerge">
                     Merge order per invoice: Invoice + Duty Slip + Toll Parking + Interstate Tax + Reservation Email (PDF only).
@@ -671,8 +676,8 @@
 
                 <div class="download-grid-section">
                   <p class="upload-hint" *ngIf="!loading && !invoiceRows.length && !loadError">
-                    Search lists active rows from <code>InvoiceDocument</code> (archived invoice PDFs) filtered by customer, invoice number, and invoice date.
-                    Invoices without an archived bill PDF will not appear here until you generate PDFs from Invoice Home or run IRN PDF backfill.
+                    Search lists active invoices (<code>Invoice.ActivationStatus = 1</code>) filtered by customer, invoice number, summary ID (<code>Invoice.SummaryID</code>), and invoice date.
+                    Missing PDFs are generated automatically when you download.
                   </p>
 
                   <div class="table-responsive" *ngIf="invoiceRows.length">

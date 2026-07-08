@@ -199,7 +199,7 @@ export class ControlPanelDesignComponent implements OnInit {
 
   totalData = 0;
   recordsPerPage = 50;
-  isLoading = true;
+  isLoading = false;
   currentPage = 1;
   isExpanded = [];
   rowIndex?: number;
@@ -449,20 +449,13 @@ export class ControlPanelDesignComponent implements OnInit {
   }
 
   applySingleReservationFilter(reservationID: number): void {
-    
     this.selectedFilter = 'BookingNo';
     this.searchTerm = String(reservationID);
     this.currentPage = 1;
-    this.isLoading = true;
     this.filterForm.patchValue({
       reservationID,
-      fromDate: '',
-      toDate: '',
-      fromTime: '',
-      toTime: ''
+      resID: reservationID
     });
-    this.loadDataForHeader(this.bookingCategory, 1, this.recordsPerPage, true, 0);
-    this.filterForm.patchValue({resID : reservationID});
   }
 
   private normalizeBoolean(value: any, fallback: boolean): boolean {
@@ -673,8 +666,6 @@ export class ControlPanelDesignComponent implements OnInit {
 
         if (this.pendingReservationId) {
           this.applySingleReservationFilter(this.pendingReservationId);
-        } else {
-          this.loadDataForHeader(this.bookingCategory,this.currentPage, this.recordsPerPage, this.isLoading);
         }
         // const today = this.formatDate(new Date());
         // const now = new Date();
@@ -691,8 +682,6 @@ export class ControlPanelDesignComponent implements OnInit {
         this.filterForm.patchValue({showAllLocation: this.ShowAllLocation});
         if (this.pendingReservationId) {
           this.applySingleReservationFilter(this.pendingReservationId);
-        } else {
-          this.loadDataForHeader(this.bookingCategory, this.currentPage, this.recordsPerPage, this.isLoading);
         }
       }
     );
@@ -2958,11 +2947,12 @@ DriverAllotment(reservationID: number, reservationGroupID: number, pickupDate: a
     this.showEmptyTableHeader = true;
     this.showDataPage = true;
     this.currentPage=1;
+    this.isLoading = true;
     if (this.paginator && this.paginator.pageIndex !== 0) {
       this.paginator.firstPage();
       return;
     }
-    this.loadDataForHeader(this.bookingCategory,this.currentPage, this.recordsPerPage, this.isLoading);
+    this.loadDataForHeader(this.bookingCategory,this.currentPage, this.recordsPerPage, true);
   }
 
   pickupByExecutiveManual(item: any){

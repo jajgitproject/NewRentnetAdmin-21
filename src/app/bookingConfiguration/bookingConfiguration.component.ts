@@ -395,9 +395,9 @@ toggleStopFold() {
           this.advanceTableForm.patchValue({customerGroupID:this.customerDetails.customerGroupID});
           this.advanceTableForm.patchValue({customerTypeID:this.customerDetails.customerTypeID});
           this.advanceTableForm.patchValue({pickupDateString:this._generalService.getDateFrom(this.advanceTableForm.value.pickupDate)});
-          this.advanceTableForm.patchValue({pickupTimeString:pickupTime24 || this.formatTime24(this.advanceTableForm.value.pickupTime)});
+          this.advanceTableForm.patchValue({pickupTimeString:pickupTime24 || this.formatTime24FromDateTime(pickupDateTime)});
           this.advanceTableForm.patchValue({dropOffDateString:this._generalService.getDateFrom(this.advanceTableForm.value.dropOffDate)});
-          this.advanceTableForm.patchValue({dropOffTimeString:dropOffTime24 || this.formatTime24(this.advanceTableForm.value.dropOffTime)});
+          this.advanceTableForm.patchValue({dropOffTimeString:dropOffTime24 || this.formatTime24FromDateTime(dropOffDateTime)});
           this.onPickupDateChange();
           this.getSalesManager(this.customerDetails.customerID);
           this.getCustomerKam(this.customerDetails.customerID);
@@ -461,6 +461,11 @@ toggleStopFold() {
 
   if (typeof value === 'string') {
     const trimmed = value.trim();
+    const twelveHour = moment(trimmed, ['h:mm A', 'hh:mm A', 'h:mm a', 'hh:mm a'], true);
+    if (twelveHour.isValid()) {
+      return twelveHour.format('HH:mm');
+    }
+
     const direct = moment(trimmed, ['HH:mm', 'HH:mm:ss'], true);
     if (direct.isValid()) {
       return direct.format('HH:mm');
@@ -469,6 +474,26 @@ toggleStopFold() {
 
   const parsed = this.parseTimeToMoment(value);
   return parsed && parsed.isValid() ? parsed.format('HH:mm') : null;
+ }
+
+ /** Wall-clock HH:mm from picker Date — avoids AM/PM string ambiguity on save. */
+ private formatTime24FromDateTime(dateTime: any): string | null {
+  if (dateTime === null || dateTime === undefined || dateTime === '') {
+    return null;
+  }
+
+  if (moment.isMoment(dateTime)) {
+    return dateTime.format('HH:mm');
+  }
+
+  const asDate = dateTime instanceof Date ? dateTime : new Date(dateTime);
+  if (!isNaN(asDate.getTime())) {
+    const hours = String(asDate.getHours()).padStart(2, '0');
+    const minutes = String(asDate.getMinutes()).padStart(2, '0');
+    return `${hours}:${minutes}`;
+  }
+
+  return this.formatTime24(dateTime);
  }
 
  private mergeDateAndTimeFromStrings(pickupDate: any, pickupTime24: string | null): Date | null {
@@ -834,9 +859,9 @@ private extractTime(dateTime: Date): Date {
     this.advanceTableForm.patchValue({dropOffDate:this.extractDate(this.advanceTableForm.value.dropOffDateTime)});
     this.advanceTableForm.patchValue({dropOffTime:this.extractTime(this.advanceTableForm.value.dropOffDateTime)});
     this.advanceTableForm.patchValue({pickupDateString:this._generalService.getDateFrom(this.advanceTableForm.value.pickupDate)});
-    this.advanceTableForm.patchValue({pickupTimeString:this.formatTime24(this.advanceTableForm.value.pickupDateTime)});
+    this.advanceTableForm.patchValue({pickupTimeString:this.formatTime24FromDateTime(this.advanceTableForm.value.pickupDateTime)});
     this.advanceTableForm.patchValue({dropOffDateString:this._generalService.getDateFrom(this.advanceTableForm.value.dropOffDate)});
-    this.advanceTableForm.patchValue({dropOffTimeString:this.formatTime24(this.advanceTableForm.value.dropOffDateTime)});
+    this.advanceTableForm.patchValue({dropOffTimeString:this.formatTime24FromDateTime(this.advanceTableForm.value.dropOffDateTime)});
     this.advanceTableForm.patchValue({
       dropOffCityID: this.normalizeOptionalInt(this.advanceTableForm.value.dropOffCityID),
     });

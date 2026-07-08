@@ -4,6 +4,7 @@ export interface BulkDownloadSearchCriteria {
   fromDate?: string | null;
   toDate?: string | null;
   invoiceNumber?: string | null;
+  summaryID?: number | null;
   invoiceIDs?: number[];
 }
 
@@ -25,6 +26,7 @@ export interface StartBulkDownloadJobRequest {
   fromDate?: string | null;
   toDate?: string | null;
   invoiceNumber?: string | null;
+  summaryID?: number | null;
   invoiceIDs?: number[];
   downloadMode: string;
 }
@@ -112,9 +114,8 @@ export interface IrnBackfillProgressRow {
 }
 
 export const DOWNLOAD_MODES = [
-  { value: 'InvoicesOnly', label: 'Invoices only' },
-  { value: 'DutySlipsOnly', label: 'Duty slips only' },
-  { value: 'Merge', label: 'Merge per invoice' },
+  { value: 'InvoicesOnly', label: 'Invoice Only' },
+  { value: 'Merge', label: 'Invoice with Duty Slips and Toll Parking' },
 ];
 
 export const REPLACE_POLICIES = [

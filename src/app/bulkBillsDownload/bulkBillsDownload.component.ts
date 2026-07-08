@@ -67,6 +67,7 @@ export class BulkBillsDownloadComponent implements OnInit, OnDestroy, AfterViewI
   toDateCtrl = new FormControl(this.getTodayDate());
   customerCtrl = new FormControl('');
   invoiceNumberCtrl = new FormControl('');
+  summaryIdCtrl = new FormControl('');
   backfillInvoiceNumberCtrl = new FormControl('');
   backfillLoadError = '';
   closingMinPickUpDateCtrl = new FormControl(new Date(2026, 4, 16));
@@ -153,7 +154,6 @@ export class BulkBillsDownloadComponent implements OnInit, OnDestroy, AfterViewI
   tollJobStartedAt: number | null = null;
 
   downloadInvoices = false;
-  downloadDutySlips = false;
   downloadMerge = true;
   uploadType: 'reservationEmail' | 'dutySlip' = 'reservationEmail';
   uploadMode: 'bulk' | 'single' = 'bulk';
@@ -221,26 +221,24 @@ export class BulkBillsDownloadComponent implements OnInit, OnDestroy, AfterViewI
     this.activeTab = tab;
   }
 
-  setDownloadOption(option: 'invoices' | 'dutySlips' | 'merge'): void {
+  setDownloadOption(option: 'invoices' | 'merge'): void {
     this.downloadInvoices = option === 'invoices';
-    this.downloadDutySlips = option === 'dutySlips';
     this.downloadMerge = option === 'merge';
   }
 
-  onDownloadOptionChange(option: 'invoices' | 'dutySlips' | 'merge', checked: boolean): void {
+  onDownloadOptionChange(option: 'invoices' | 'merge', checked: boolean): void {
     if (checked) {
       this.setDownloadOption(option);
       return;
     }
     // Keep one option selected (mutually exclusive download modes).
-    if (!this.downloadInvoices && !this.downloadDutySlips && !this.downloadMerge) {
+    if (!this.downloadInvoices && !this.downloadMerge) {
       this.setDownloadOption(option);
     }
   }
 
   getSelectedDownloadMode(): string {
     if (this.downloadInvoices) return 'InvoicesOnly';
-    if (this.downloadDutySlips) return 'DutySlipsOnly';
     if (this.downloadMerge) return 'Merge';
     return '';
   }
@@ -252,11 +250,18 @@ export class BulkBillsDownloadComponent implements OnInit, OnDestroy, AfterViewI
 
   search(): void {
     const invoiceNumber = (this.invoiceNumberCtrl.value || '').trim();
+    const summaryId = this.parseSummaryId();
     const hasDateRange = !!this.fromDateCtrl.value && !!this.toDateCtrl.value;
     const customer = this.resolveSelectedCustomer();
 
-    if (!invoiceNumber && !hasDateRange && !customer?.customerID) {
-      this.loadError = 'Please select customer, invoice number, or date range';
+    if (summaryId === -1) {
+      this.loadError = 'Summary ID must be a positive number';
+      this.snackBar.open(this.loadError, 'Close', { duration: 4000 });
+      return;
+    }
+
+    if (!invoiceNumber && !hasDateRange && !customer?.customerID && summaryId === null) {
+      this.loadError = 'Please select customer, invoice number, summary ID, or date range';
       this.snackBar.open(this.loadError, 'Close', { duration: 4000 });
       return;
     }
@@ -294,6 +299,7 @@ export class BulkBillsDownloadComponent implements OnInit, OnDestroy, AfterViewI
     this.toDateCtrl.setValue(this.getTodayDate());
     this.customerCtrl.setValue('');
     this.invoiceNumberCtrl.setValue('');
+    this.summaryIdCtrl.setValue('');
     this.backfillInvoiceNumberCtrl.setValue('');
     this.backfillLoadError = '';
     this.setDownloadOption('merge');
@@ -2109,12 +2115,26 @@ export class BulkBillsDownloadComponent implements OnInit, OnDestroy, AfterViewI
   private buildSearchCriteria(): BulkDownloadSearchCriteria {
     const customer = this.resolveSelectedCustomer();
     const invoiceNumber = (this.invoiceNumberCtrl.value || '').trim();
+    const summaryId = this.parseSummaryId();
     return {
       customerID: customer?.customerID || null,
       fromDate: this.formatApiDate(this.fromDateCtrl.value),
       toDate: this.formatApiDate(this.toDateCtrl.value),
       invoiceNumber: invoiceNumber || null,
+      summaryID: summaryId,
     };
+  }
+
+  private parseSummaryId(): number | null {
+    const raw = (this.summaryIdCtrl.value || '').toString().trim();
+    if (!raw) {
+      return null;
+    }
+    const parsed = Number.parseInt(raw, 10);
+    if (!Number.isFinite(parsed) || parsed <= 0 || String(parsed) !== raw) {
+      return -1;
+    }
+    return parsed;
   }
 
   private getTodayDate(): Date {
