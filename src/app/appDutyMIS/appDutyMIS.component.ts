@@ -189,7 +189,7 @@ export class AppDutyMISComponent implements OnInit {
   contextMenuPosition = { x: '0px', y: '0px' };
   ngOnInit() {
     this.setDefaultDateRange();
-    this.loadData();
+    //this.loadData();
     this.SubscribeUpdateService();
     this.initDispatchLocation();
   }
