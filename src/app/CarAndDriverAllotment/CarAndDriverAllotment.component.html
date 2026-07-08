@@ -1449,35 +1449,23 @@
 
                       </span>
                       <span class="mat-cell" style="font-size: 12px;">
-                        <ng-container *ngIf="data?.previousDuty; else noData">
-                          <ng-container *ngIf="data.previousDuty.split('\n')[1] as pickupDate">
-                            <ng-container *ngIf="data.previousDuty.split('\n')[2] as pickupTime">
-                              {{ pickupDate | date : 'dd MMM yyyy' }}<br>{{ pickupTime }}
-                            </ng-container>
-                          </ng-container>
+                        <ng-container *ngIf="data?.previousDutyDisplay as duty; else noData">
+                          {{ duty.pickupDate | date : 'dd MMM yyyy' }}<br>{{ duty.pickupTime }}
                         </ng-container>
 
                         <ng-template #noData>N/A</ng-template>
                       </span>
                       <span class="mat-cell" style="font-size: 12px;">
-                        <ng-container *ngIf="data?.currentDuty; else noData">
-                          <ng-container *ngIf="data.currentDuty.split('\n')[1] as pickupDate">
-                            <ng-container *ngIf="data.currentDuty.split('\n')[2] as pickupTime">
-                              {{ pickupDate | date : 'dd MMM yyyy' }}<br>{{ pickupTime}}
-                            </ng-container>
-                          </ng-container> </ng-container>
-                        <!-- <span *ngIf="data?.currentDuty; else noDataCurrent">{{ data.currentDuty }}</span> -->
+                        <ng-container *ngIf="data?.currentDutyDisplay as duty; else noDataCurrent">
+                          {{ duty.pickupDate | date : 'dd MMM yyyy' }}<br>{{ duty.pickupTime }}
+                        </ng-container>
                         <ng-template #noDataCurrent>N/A</ng-template>
                       </span>
 
                       <span class="mat-cell" style="font-size: 12px;">
-                        <ng-container *ngIf="data?.futureDuty; else noData">
-                          <ng-container *ngIf="data.futureDuty.split('\n')[1] as pickupDate">
-                            <ng-container *ngIf="data.futureDuty.split('\n')[2] as pickupTime">
-                              {{ pickupDate | date : 'dd MMM yyyy' }}<br>{{ pickupTime}}
-                            </ng-container>
-                          </ng-container> </ng-container>
-                        <!-- <span *ngIf="data?.futureDuty; else noDataFuture">{{ data.futureDuty }}</span> -->
+                        <ng-container *ngIf="data?.futureDutyDisplay as duty; else noDataFuture">
+                          {{ duty.pickupDate | date : 'dd MMM yyyy' }}<br>{{ duty.pickupTime }}
+                        </ng-container>
                         <ng-template #noDataFuture>N/A</ng-template>
                       </span>
                       <!-- <span class="mat-cell" style="font-size: 12px;"> -->

@@ -1,0 +1,148 @@
+<section class="content">
+  <div class="container-fluid">
+    <div class="block-header">
+      <div class="row">
+        <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+          <ul>
+            <li class="breadcrumb-item bcrumb-1">
+              <a routerLink="/dashboard/main"><i class="fas fa-home"></i> Home</a>|
+              <a href="#" onClick="return false;">Admin</a>|
+              <a href="#" onClick="return false;">Dynamics MIS 2.0</a>
+            </li>
+          </ul>
+          <ul class="breadcrumb breadcrumb-style">
+            <li class="breadcrumb-item"><h2>Dynamics MIS 2.0</h2></li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <mat-accordion>
+      <mat-expansion-panel [expanded]="true">
+        <mat-expansion-panel-header>
+          <mat-panel-title>Search</mat-panel-title>
+        </mat-expansion-panel-header>
+
+        <div class="row">
+          <div class="col-xl-3 col-lg-3 col-md-6 col-sm-12 mb-2">
+            <mat-form-field appearance="outline" floatLabel="always" class="example-full-width">
+              <mat-label>From Date</mat-label>
+              <input matInput [matDatepicker]="fromDatePicker" [(ngModel)]="searchFromDate">
+              <mat-datepicker-toggle matSuffix [for]="fromDatePicker"></mat-datepicker-toggle>
+              <mat-datepicker #fromDatePicker></mat-datepicker>
+            </mat-form-field>
+          </div>
+
+          <div class="col-xl-3 col-lg-3 col-md-6 col-sm-12 mb-2">
+            <mat-form-field appearance="outline" floatLabel="always" class="example-full-width">
+              <mat-label>To Date</mat-label>
+              <input matInput [matDatepicker]="toDatePicker" [(ngModel)]="searchToDate">
+              <mat-datepicker-toggle matSuffix [for]="toDatePicker"></mat-datepicker-toggle>
+              <mat-datepicker #toDatePicker></mat-datepicker>
+            </mat-form-field>
+          </div>
+
+          <div class="col-xl-3 col-lg-3 col-md-6 col-sm-12 mb-2">
+            <mat-form-field appearance="outline" floatLabel="always" class="example-full-width">
+              <mat-label>Customer Name</mat-label>
+              <input type="text" matInput [formControl]="customerName" [matAutocomplete]="autoCustomer">
+              <mat-autocomplete #autoCustomer="matAutocomplete" [displayWith]="displayCustomerName">
+                <mat-option *ngFor="let option of filteredCustomerOptions | async" [value]="option">
+                  {{ option.customerName }}
+                </mat-option>
+              </mat-autocomplete>
+            </mat-form-field>
+          </div>
+
+          <div class="col-xl-3 col-lg-3 col-md-6 col-sm-12 mb-2">
+            <mat-form-field appearance="outline" floatLabel="always" class="example-full-width">
+              <mat-label>Invoice Number With Prefix</mat-label>
+              <input type="text" matInput [formControl]="invoiceNumberWithPrefix" placeholder="Exact match (use - instead of /)">
+            </mat-form-field>
+          </div>
+        </div>
+
+        <div class="row">
+          <div class="col-xl-3 col-lg-3 col-md-6 col-sm-12 mb-2">
+            <mat-form-field appearance="outline" floatLabel="always" class="example-full-width">
+              <mat-label>Branch Name</mat-label>
+              <input type="text" matInput [formControl]="branchName" [matAutocomplete]="autoBranch">
+              <mat-autocomplete #autoBranch="matAutocomplete">
+                <mat-option *ngFor="let option of filteredBranchOptions | async" [value]="option.organizationalEntityName">
+                  {{ option.organizationalEntityName }}
+                </mat-option>
+              </mat-autocomplete>
+            </mat-form-field>
+          </div>
+        </div>
+
+        <div class="row">
+          <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+            <button mat-raised-button color="primary" (click)="searchData()">Search</button>
+            &nbsp;
+            <button mat-raised-button color="accent" (click)="downloadCsv()" [disabled]="csvExporting">
+              {{ csvExporting ? 'Downloading...' : 'Download as CSV' }}
+            </button>
+            &nbsp;
+            <button mat-raised-button color="warn" (click)="refresh()">Reset</button>
+          </div>
+        </div>
+      </mat-expansion-panel>
+    </mat-accordion>
+
+    <br />
+    <div class="row">
+      <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+        <div class="card">
+          <div class="body">
+            <div class="responsive_table">
+              <div class="table-responsive">
+                <p *ngIf="!dataSource || dataSource.length === 0; then noData else tableData"></p>
+
+                <ng-template #noData>
+                  <div class="alert alert-primary" style="background-color:#E8E8E8; text-align: center;">No Records Found</div>
+                </ng-template>
+
+                <ng-template #tableData>
+                  <div class="scrollable-table-container">
+                    <mat-table [dataSource]="dataSource" matSort class="mat-cell floating-header-table dynamics-mis-table" (matSortChange)="sortingDataChanged($event)">
+                      <ng-container *ngFor="let col of tableColumns" [matColumnDef]="col.id">
+                        <mat-header-cell
+                          *matHeaderCellDef
+                          mat-sort-header
+                          [style.flex]="'0 0 auto'"
+                          [style.width]="getColumnWidth(col.key)"
+                          [style.min-width]="getColumnWidth(col.key)"
+                          [style.max-width]="getColumnWidth(col.key)">
+                          {{ col.key }}
+                        </mat-header-cell>
+                        <mat-cell
+                          *matCellDef="let row"
+                          [style.flex]="'0 0 auto'"
+                          [style.width]="getColumnWidth(col.key)"
+                          [style.min-width]="getColumnWidth(col.key)"
+                          [style.max-width]="getColumnWidth(col.key)">
+                          {{ getCellValue(row, col.key) }}
+                        </mat-cell>
+                      </ng-container>
+
+                      <mat-header-row *matHeaderRowDef="displayedColumnIds"></mat-header-row>
+                      <mat-row *matRowDef="let row; columns: displayedColumnIds;"></mat-row>
+                    </mat-table>
+                  </div>
+                </ng-template>
+              </div>
+
+              <div class="body">
+                <div class="example-button-row">
+                  <button mat-raised-button color="primary" (click)="previousCall()">Previous</button>
+                  <button mat-raised-button color="primary" (click)="nextCall()">Next</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>

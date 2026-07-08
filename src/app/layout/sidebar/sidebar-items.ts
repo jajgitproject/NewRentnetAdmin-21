@@ -1336,6 +1336,30 @@ export const ROUTES: RouteInfo[] = [
         submenu: [],
         isAccess: false
       },
+      {
+        path: 'tallyMis20',
+        title: 'Tally MIS 2.0',
+        pageKey: 'tallyMis20',
+        moduleName: 'tallyMis20',
+        alternateAccessPageKeys: ['tallyMis20', 'Tally MIS 2.0'],
+        icon: 'fas fa-tachometer-alt',
+        class: '',
+        groupTitle: false,
+        submenu: [],
+        isAccess: false
+      },
+      {
+        path: 'dynamicsMis20',
+        title: 'Dynamics MIS 2.0',
+        pageKey: 'dynamicsMis20',
+        moduleName: 'dynamicsMis20',
+        alternateAccessPageKeys: ['dynamicsMis20', 'Dynamics MIS 2.0'],
+        icon: 'fas fa-tachometer-alt',
+        class: '',
+        groupTitle: false,
+        submenu: [],
+        isAccess: false
+      },
 
       {
         path: 'driverCarChangesMIS',

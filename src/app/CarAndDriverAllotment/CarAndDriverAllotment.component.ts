@@ -187,6 +187,7 @@ export class CarAndDriverAllotmentComponent implements OnInit {
   private searchDropdownsLoaded = false;
   private restrictionsPreloaded = false;
   private fullReservationLoadStarted = false;
+  private deferFullReservationUntilGridLoaded = false;
   private readonly perfMarks: Record<string, number> = {};
   public isChecked = false;
   advanceTableACD: DriverInventoryAssociation;
@@ -291,6 +292,7 @@ export class CarAndDriverAllotmentComponent implements OnInit {
   public openedPanelIndex: number;
   @ViewChildren(MatExpansionPanel) expansionPanels: QueryList<MatExpansionPanel>;
   private pendingAutoOpenSingleResult = false;
+  private pendingAutoOpenAfterRestrictions = false;
   resAllotmentID: any;
   reservationGroupID: string;
   allotmentType: string;
@@ -455,6 +457,7 @@ export class CarAndDriverAllotmentComponent implements OnInit {
     if (this.restrictionsPreloaded) {
       this.updateDriverRestrictions();
       this.updateCarRestrictions();
+      this.tryAutoOpenSingleSearchResult();
       return;
     }
 
@@ -474,11 +477,56 @@ export class CarAndDriverAllotmentComponent implements OnInit {
         this.CarsRestrictedForPassengerList = cars || [];
         this.updateDriverRestrictions();
         this.updateCarRestrictions();
+        this.tryAutoOpenSingleSearchResult();
       },
       () => {
         this.restrictionsPreloaded = false;
       }
     );
+  }
+
+  private parseDutyDisplay(duty: string | null | undefined): { pickupDate: string; pickupTime: string } | null {
+    if (!duty) {
+      return null;
+    }
+    const parts = duty.split('\n');
+    if (parts.length < 3 || !parts[1] || !parts[2]) {
+      return null;
+    }
+    return { pickupDate: parts[1], pickupTime: parts[2] };
+  }
+
+  private enrichGridRow(element: DriverInventoryAssociation): void {
+    Object.assign(element, {
+      checked: false,
+      previousDutyDisplay: this.parseDutyDisplay(element.previousDuty),
+      currentDutyDisplay: this.parseDutyDisplay(element.currentDuty),
+      futureDutyDisplay: this.parseDutyDisplay(element.futureDuty),
+    });
+  }
+
+  private scheduleAutoOpenSingleSearchResult(): void {
+    this.pendingAutoOpenAfterRestrictions = true;
+    this.tryAutoOpenSingleSearchResult();
+  }
+
+  private tryAutoOpenSingleSearchResult(): void {
+    if (!this.pendingAutoOpenAfterRestrictions) {
+      return;
+    }
+
+    const passengerID = this.getPrimaryPassengerID();
+    const restrictionsReady = passengerID === null || this.restrictionsPreloaded;
+    if (!restrictionsReady) {
+      return;
+    }
+
+    this.pendingAutoOpenAfterRestrictions = false;
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        this.autoOpenSingleSearchResult();
+      });
+    });
   }
 
   private loadFullReservationDetails(): void {
@@ -507,13 +555,25 @@ export class CarAndDriverAllotmentComponent implements OnInit {
       );
   }
 
+  private scheduleFullReservationDetailsAfterGrid(): void {
+    this.deferFullReservationUntilGridLoaded = true;
+  }
+
+  private tryLoadDeferredFullReservationDetails(): void {
+    if (!this.deferFullReservationUntilGridLoaded) {
+      return;
+    }
+    this.deferFullReservationUntilGridLoaded = false;
+    this.loadFullReservationDetails();
+  }
+
   private loadAllotmentPageFast(): void {
     this.markPerf('allotment_lite_request');
     this._controlPanelDesignService.getReservationDetailsForAllotmentLite(this.reservationID).subscribe(
       (data: ControlPanelData) => {
         this.markPerf('allotment_lite_loaded');
         this.applyReservationHeader(data, true);
-        this.loadFullReservationDetails();
+        this.scheduleFullReservationDetailsAfterGrid();
       },
       () => {
         this.loadData(this._filters, this.currentPage, this.recordsPerPage);
@@ -1153,6 +1213,7 @@ export class CarAndDriverAllotmentComponent implements OnInit {
       this.unassociatedTotalData = 0;
       this.isLoadingdataUnassociated = false;
       this.isLoading = false;
+      this.tryLoadDeferredFullReservationDetails();
       return;
     }
     this.isLoadingdataUnassociated = true;
@@ -1169,14 +1230,13 @@ export class CarAndDriverAllotmentComponent implements OnInit {
       (data: CarAndDriverAllotmentData) => {
         if (data != null) {
           this.driverInventoryAssociationDataSource = data.driverInventoryAssociationModel;
-          console.log(this.driverInventoryAssociationDataSource);
           this.driverInventoryAssociationDataSource?.forEach(element => {
-            Object.assign(element, { checked: false });
+            this.enrichGridRow(element);
           });
           this.unassociatedTotalData = data.totalRecords;
           this.markPerf('allotment_grid_loaded');
           if (shouldAutoOpenIfSingle && this.driverInventoryAssociationDataSource?.length === 1) {
-            this.autoOpenSingleSearchResult();
+            this.scheduleAutoOpenSingleSearchResult();
           }
         }
         else {
@@ -1194,22 +1254,24 @@ export class CarAndDriverAllotmentComponent implements OnInit {
         }
         this.isLoadingdataUnassociated = false;
         this.isLoading = false;
+        this.tryLoadDeferredFullReservationDetails();
       },
       (error: HttpErrorResponse) => {
         this.driverInventoryAssociationDataSource = null;
         this.isLoadingdataUnassociated = false;
         this.isLoading = false;
+        this.tryLoadDeferredFullReservationDetails();
       }
     );
   }
 
   private autoOpenSingleSearchResult(): void {
-    // if (!this.driverInventoryAssociationDataSource?.length) {
-    //   return;
-    // }
-    setTimeout(() => {
+    const attemptOpen = (retries = 3) => {
       const panel = this.expansionPanels?.first;
       if (!panel) {
+        if (retries > 0) {
+          requestAnimationFrame(() => attemptOpen(retries - 1));
+        }
         return;
       }
       const sub = panel.afterExpand.subscribe(() => {
@@ -1217,7 +1279,8 @@ export class CarAndDriverAllotmentComponent implements OnInit {
         this.openAllotCarAndDriver(0, 'Soft or Hard', this.reservationInfo[0]?.allotmentID);
       });
       panel.open();
-    });
+    };
+    attemptOpen();
   }
   
   carAndDriverAllotment() {

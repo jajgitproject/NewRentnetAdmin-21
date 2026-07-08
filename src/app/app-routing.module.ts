@@ -123,10 +123,24 @@ const routes: Routes = [
           )
       },
       {
+        path: 'tallyMis20',
+        loadChildren: () =>
+          import('./tallyMis20/tallyMis.module').then(
+            (m) => m.TallyMis20Module
+          )
+      },
+      {
         path: 'dynamicsMis',
         loadChildren: () =>
           import('./dynamicsMis/dynamicsMis.module').then(
             (m) => m.DynamicsMisModule
+          )
+      },
+      {
+        path: 'dynamicsMis20',
+        loadChildren: () =>
+          import('./dynamicsMis20/dynamicsMis.module').then(
+            (m) => m.DynamicsMis20Module
           )
       },
 
