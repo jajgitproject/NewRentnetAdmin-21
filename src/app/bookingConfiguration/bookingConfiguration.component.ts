@@ -143,7 +143,7 @@ export class BookingConfigurationComponent implements OnInit {
     pickupAddressDetails:[''],
     serviceLocationID:[''],
     serviceLocation:[''],
-    transferedLocationID:[''],
+    transferedLocationID:[0],
     transferedLocation:[''],
     dropOffDateTime:[''],
     dropOffDateTimeString:[''],
@@ -300,14 +300,22 @@ toggleStopFold() {
           this.advanceTableForm.patchValue({vehicleID:this.dataSource.vehicleID});
           this.advanceTableForm.patchValue({vehicle:this.dataSource.vehicle});
           this.advanceTableForm.patchValue({pickupAddress:this.dataSource.pickupAddress});
-          this.advanceTableForm.patchValue({pickupAddressDetails:this.dataSource.pickupAddressDetails});
+          this.advanceTableForm.patchValue({
+            pickupAddressDetails: this.dataSource.pickupAddressDetails
+              ? `${this.dataSource.pickupAddressDetails} ${this.dataSource.pickupAddress}`
+              : this.dataSource.pickupAddress
+          });
           this.advanceTableForm.patchValue({serviceLocationID:this.dataSource.serviceLocationID});
           this.advanceTableForm.patchValue({serviceLocation:this.dataSource.serviceLocation});
 
           this.advanceTableForm.patchValue({dropOffDate:this.dataSource.dropOffDate});
           this.advanceTableForm.patchValue({dropOffTime:this.dataSource.dropOffTime});
           this.advanceTableForm.patchValue({dropOffAddress:this.dataSource.dropOffAddress});
-          this.advanceTableForm.patchValue({dropOffAddressDetails:this.dataSource.dropOffAddressDetails});
+          this.advanceTableForm.patchValue({
+            dropOffAddressDetails: this.dataSource.dropOffAddressDetails
+              ? `${this.dataSource.dropOffAddressDetails} ${this.dataSource.dropOffAddress}`
+              : this.dataSource.dropOffAddress
+          });
           this.advanceTableForm.patchValue({dropOffPriorityOrder:this.dataSource.dropOffPriorityOrder});
 
           this.advanceTableForm.patchValue({emailLink:this.dataSource.emailLink});
@@ -830,14 +838,6 @@ private extractTime(dateTime: Date): Date {
     this.advanceTableForm.patchValue({dropOffDateString:this._generalService.getDateFrom(this.advanceTableForm.value.dropOffDate)});
     this.advanceTableForm.patchValue({dropOffTimeString:this.formatTime24(this.advanceTableForm.value.dropOffDateTime)});
     this.advanceTableForm.patchValue({
-      pickupAddress: this.combineAddressWithDetails(
-        this.advanceTableForm.value.pickupAddress,
-        this.advanceTableForm.value.pickupAddressDetails
-      ),
-      dropOffAddress: this.combineAddressWithDetails(
-        this.advanceTableForm.value.dropOffAddress,
-        this.advanceTableForm.value.dropOffAddressDetails
-      ),
       dropOffCityID: this.normalizeOptionalInt(this.advanceTableForm.value.dropOffCityID),
     });
     const payload: any = this.advanceTableForm.getRawValue();
