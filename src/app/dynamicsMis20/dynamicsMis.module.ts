@@ -10,6 +10,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
 import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatSortModule } from '@angular/material/sort';
+import { MatPaginatorModule } from '@angular/material/paginator';
 import { MatExpansionModule } from '@angular/material/expansion';
 import { DynamicsMis20Component } from './dynamicsMis.component';
 import { DynamicsMis20RoutingModule } from './dynamicsMis-routing.module';
@@ -30,7 +31,8 @@ import { DynamicsMis20Service } from './dynamicsMis.service';
     MatButtonModule,
     MatCardModule,
     MatDatepickerModule,
-    MatSortModule
+    MatSortModule,
+    MatPaginatorModule
   ],
   providers: [DynamicsMis20Service]
 })

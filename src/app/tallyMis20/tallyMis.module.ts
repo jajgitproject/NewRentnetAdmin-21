@@ -10,6 +10,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
 import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatSortModule } from '@angular/material/sort';
+import { MatPaginatorModule } from '@angular/material/paginator';
 import { MatExpansionModule } from '@angular/material/expansion';
 import { TallyMis20Component } from './tallyMis.component';
 import { TallyMis20RoutingModule } from './tallyMis-routing.module';
@@ -30,7 +31,8 @@ import { TallyMis20Service } from './tallyMis.service';
     MatButtonModule,
     MatCardModule,
     MatDatepickerModule,
-    MatSortModule
+    MatSortModule,
+    MatPaginatorModule
   ],
   providers: [TallyMis20Service]
 })

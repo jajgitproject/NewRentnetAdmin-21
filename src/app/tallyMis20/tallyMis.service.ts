@@ -3,6 +3,8 @@ import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { HttpClient } from '@angular/common/http';
 import { GeneralService } from '../general/general.service';
+import { Mis20PageResponse } from '../dynamicsMis20/dynamicsMis.service';
+
 @Injectable()
 export class TallyMis20Service {
   private API_URL: string = '';
@@ -25,8 +27,8 @@ export class TallyMis20Service {
     pageNumber: number,
     orderByColumn: string,
     order: string
-  ): Observable<Record<string, unknown>[]> {
-    return this.httpClient.get<Record<string, unknown>[]>(
+  ): Observable<Mis20PageResponse> {
+    return this.httpClient.get<Mis20PageResponse>(
       `${this.API_URL}/${this.toRouteParam(fromDate)}/${this.toRouteParam(toDate)}/${this.toRouteParam(customerName)}/${this.toRouteParam(invoiceNumberWithPrefix)}/${this.toRouteParam(branchName)}/${pageNumber}/${encodeURIComponent(orderByColumn)}/${encodeURIComponent(order)}`
     );
   }

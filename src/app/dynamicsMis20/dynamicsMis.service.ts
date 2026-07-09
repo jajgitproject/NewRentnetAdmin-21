@@ -4,6 +4,11 @@ import { Observable } from 'rxjs';
 import { HttpClient } from '@angular/common/http';
 import { GeneralService } from '../general/general.service';
 
+export interface Mis20PageResponse {
+  totalRecords: number;
+  rows: Record<string, unknown>[];
+}
+
 @Injectable()
 export class DynamicsMis20Service {
   private API_URL: string = '';
@@ -26,8 +31,8 @@ export class DynamicsMis20Service {
     pageNumber: number,
     orderByColumn: string,
     order: string
-  ): Observable<Record<string, unknown>[]> {
-    return this.httpClient.get<Record<string, unknown>[]>(
+  ): Observable<Mis20PageResponse> {
+    return this.httpClient.get<Mis20PageResponse>(
       `${this.API_URL}/${this.toRouteParam(fromDate)}/${this.toRouteParam(toDate)}/${this.toRouteParam(customerName)}/${this.toRouteParam(invoiceNumberWithPrefix)}/${this.toRouteParam(branchName)}/${pageNumber}/${encodeURIComponent(orderByColumn)}/${encodeURIComponent(order)}`
     );
   }

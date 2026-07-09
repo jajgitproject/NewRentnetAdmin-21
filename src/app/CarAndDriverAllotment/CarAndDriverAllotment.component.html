@@ -167,7 +167,7 @@
                         <b><button class="BoldButton" mat-button (click)="PackageInfo(item.reservationID)">
                             Package Booked
                           </button></b><br />
-                        {{ item.package.package }}<br />
+                        {{ item.package?.package }}<br />
                         <b>VIP Booking</b><br />
                         <label class="TDValue" *ngIf="
                               item.customerPerson.importance == 'VIP';
@@ -1111,7 +1111,7 @@
                   <div class="row">
                       <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12 mb-2" >
                           <div class="example-button-row" style="float: right;">
-                              <button mat-raised-button color="primary" (click)="SearchCarAndDriver()" >Search</button>
+                              <button mat-raised-button color="primary" [disabled]="isLoading" (click)="SearchCarAndDriver()" >Search</button>
                               
                           </div>
                       </div>
@@ -1128,7 +1128,7 @@
     <div class="card" style="width: 100%">
       <div class="body">
       <div class="materialTableHeader  full-height-container">
-                    <form class="register-form allotment-search-panel" (focusin)="ensureSearchDropdownsLoaded()">
+                    <form class="register-form allotment-search-panel">
                       <div class="row">
                         <!-- <div class="col-xl-1 col-lg-1 col-md-1 col-sm-12 mb-2">
                           <span><b>Quick Search</b></span>
@@ -1136,7 +1136,7 @@
                         <div class="col-xl-2 col-lg-2 col-md-2 col-sm-12 mb-2">
                           <mat-form-field class="example-full-width cp-allotment-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
                             <mat-label>Regn. No.</mat-label>
-                            <input type="text" matInput [matAutocomplete]="auto81" [formControl]="inventory" />
+                            <input type="text" matInput [matAutocomplete]="auto81" [formControl]="inventory" (focus)="ensureRegNumberDropdownLoaded()" />
                             <mat-autocomplete #auto81="matAutocomplete" panelWidth="custom-autocomplete-panel">
                               <mat-option *ngFor="let option of filteredRegNumberOptions | async" [value]="
                                             option.registrationNumber
@@ -1150,7 +1150,7 @@
                         <div class="col-xl-2 col-lg-2 col-md-2 col-sm-12 mb-2">
                           <mat-form-field class="example-full-width cp-allotment-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
                             <mat-label>Driver</mat-label>
-                            <input type="text" matInput [matAutocomplete]="auto80" [formControl]="driver" />
+                            <input type="text" matInput [matAutocomplete]="auto80" [formControl]="driver" (focus)="ensureDriverDropdownLoaded()" />
                             <mat-autocomplete #auto80="matAutocomplete" panelWidth="custom-autocomplete-panel">
                               <mat-option *ngFor="let option of filteredOptions | async" [value]="
                                             option.driverName +
@@ -1174,7 +1174,7 @@
                         <div class="col-xl-2 col-lg-2 col-md-2 col-sm-12 mb-2">
                           <mat-form-field class="example-full-width cp-allotment-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
                             <mat-label>Vendor Type</mat-label>
-                            <input type="text" matInput [matAutocomplete]="auto85" [formControl]="vendorType" />
+                            <input type="text" matInput [matAutocomplete]="auto85" [formControl]="vendorType" (focus)="ensureVendorTypeDropdownLoaded()" />
                             <mat-autocomplete #auto85="matAutocomplete" panelWidth="custom-autocomplete-panel">
                               <mat-option *ngFor="let option of filteredVendorTypeOptions | async" [value]="
                                             option.supplierType
@@ -1199,7 +1199,7 @@
                         <div class="col-xl-2 col-lg-2 col-md-2 col-sm-12 mb-2">
                           <mat-form-field class="example-full-width cp-allotment-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
                             <mat-label>Car</mat-label>
-                            <input type="text" matInput [matAutocomplete]="auto82" [formControl]="vehicle" />
+                            <input type="text" matInput [matAutocomplete]="auto82" [formControl]="vehicle" (focus)="ensureVehicleDropdownLoaded()" />
                             <mat-autocomplete #auto82="matAutocomplete" panelWidth="custom-autocomplete-panel">
                               <mat-option *ngFor="let option of filteredVehicleOptions | async" [value]="option.vehicle">
                                 {{ option.vehicle }}
@@ -1209,7 +1209,7 @@
                         </div>
                          <div class="col-xl-2 col-lg-2 col-md-2 col-sm-12 mb-2">
                           <div class="example-button-row" style="float: right;">
-                            <button mat-raised-button color="primary" (click)="SearchCarAndDriver()">Search</button>
+                            <button mat-raised-button color="primary" [disabled]="isLoading" (click)="SearchCarAndDriver()">Search</button>
                           </div>
                         </div>
 
@@ -1238,7 +1238,7 @@
 
                         <!-- <div class="col-xl-2 col-lg-2 col-md-2 col-sm-12 mb-2">
                           <div class="example-button-row" style="float: right;">
-                            <button mat-raised-button color="primary" (click)="SearchCarAndDriver()">Search</button>
+                            <button mat-raised-button color="primary" [disabled]="isLoading" (click)="SearchCarAndDriver()">Search</button>
                           </div>
                         </div> -->
                       </div>

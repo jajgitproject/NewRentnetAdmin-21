@@ -5,7 +5,6 @@ export const MISTALLY_API_COLUMNS: string[] = [
   'State',
   'GSTNo',
   'Billno',
-  'Series',
   'BillDate',
   'Customerid',
   'CustomerName',
@@ -23,7 +22,8 @@ export const MISTALLY_API_COLUMNS: string[] = [
   'IRNNO',
   'IRNDATE',
   'InvoiceType',
-  'ValidationError'
+  'ValidationError',
+  'Series'
 ];
 
 /** JSON key variants per API property (camelCase + PascalCase) */
