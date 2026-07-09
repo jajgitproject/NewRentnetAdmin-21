@@ -185,6 +185,10 @@ export class CarAndDriverAllotmentComponent implements OnInit {
   recordsPerPage = 20;
   public reservationInfo: ControlPanelDetails[];
   private searchDropdownsLoaded = false;
+  private regNumberDropdownLoaded = false;
+  private driverDropdownLoaded = false;
+  private vehicleDropdownLoaded = false;
+  private vendorTypeDropdownLoaded = false;
   private restrictionsPreloaded = false;
   private fullReservationLoadStarted = false;
   private deferFullReservationUntilGridLoaded = false;
@@ -291,8 +295,8 @@ export class CarAndDriverAllotmentComponent implements OnInit {
   isDisabled: boolean = true;
   public openedPanelIndex: number;
   @ViewChildren(MatExpansionPanel) expansionPanels: QueryList<MatExpansionPanel>;
-  private pendingAutoOpenSingleResult = false;
   private pendingAutoOpenAfterRestrictions = false;
+  private pendingAutoOpenSingleResult = false;
   resAllotmentID: any;
   reservationGroupID: string;
   allotmentType: string;
@@ -430,12 +434,44 @@ export class CarAndDriverAllotmentComponent implements OnInit {
       return;
     }
     this.searchDropdownsLoaded = true;
-    this.InitRegNumber();
-    this.initVehicle();
-    this.InitDriver();
-    this.InitVendorType();
+    this.ensureRegNumberDropdownLoaded();
+    this.ensureDriverDropdownLoaded();
+    this.ensureVehicleDropdownLoaded();
+    this.ensureVendorTypeDropdownLoaded();
     this.InitDOINOnPageLoad();
     this.InitSupplier();
+  }
+
+  ensureRegNumberDropdownLoaded(): void {
+    if (this.regNumberDropdownLoaded) {
+      return;
+    }
+    this.regNumberDropdownLoaded = true;
+    this.InitRegNumber();
+  }
+
+  ensureDriverDropdownLoaded(): void {
+    if (this.driverDropdownLoaded) {
+      return;
+    }
+    this.driverDropdownLoaded = true;
+    this.InitDriver();
+  }
+
+  ensureVehicleDropdownLoaded(): void {
+    if (this.vehicleDropdownLoaded) {
+      return;
+    }
+    this.vehicleDropdownLoaded = true;
+    this.initVehicle();
+  }
+
+  ensureVendorTypeDropdownLoaded(): void {
+    if (this.vendorTypeDropdownLoaded) {
+      return;
+    }
+    this.vendorTypeDropdownLoaded = true;
+    this.InitVendorType();
   }
 
   private applyReservationHeader(data: ControlPanelData, triggerGridLoad: boolean): void {
@@ -1052,6 +1088,9 @@ export class CarAndDriverAllotmentComponent implements OnInit {
   }
 
   public SearchCarAndDriver(fromModal: boolean = false) {
+    if (this.isLoading) {
+      return;
+    }
     if (fromModal) {
       this.vendorType.setValue(this.modalVendorType.value || '');
       this.category.setValue(this.modalCategory.value || '');
@@ -1066,7 +1105,8 @@ export class CarAndDriverAllotmentComponent implements OnInit {
       this.inventory.setValue(this.modalInventory.value || '');
     }
     this.isSearchClicked = true;
-    this.pendingAutoOpenSingleResult = true;
+    const registrationSearch = (this.inventory.value || '').trim();
+    this.pendingAutoOpenSingleResult = registrationSearch.length > 0;
     this.resetPagination();
     this.carAndDriverAllotmentDataForUnassociated();
     // const selected = this.associatedUnassociated.value;
@@ -1200,10 +1240,9 @@ export class CarAndDriverAllotmentComponent implements OnInit {
   }
 
   carAndDriverAllotmentDataForUnassociated() {
-    let PickupDate: string = '';
-    if (this.pickupDate !== "") {
-      this.pickupDate = moment(this.pickupDate).format('MMM DD yyyy');
-    }
+    const pickupDateParam = this.pickupDate !== ''
+      ? moment(this.pickupDate).format('MMM DD yyyy')
+      : '';
     if (this.driverID === undefined) {
       this.driverID = 0;
     }
@@ -1218,6 +1257,9 @@ export class CarAndDriverAllotmentComponent implements OnInit {
     }
     this.isLoadingdataUnassociated = true;
     this.isLoading = true;
+    if (this.isSearchClicked) {
+      this.driverInventoryAssociationDataSource = null;
+    }
     const shouldAutoOpenIfSingle = this.pendingAutoOpenSingleResult;
     this.pendingAutoOpenSingleResult = false;
     this.driverInventoryAssociationService.getDataInventoryUnassociation(transferedLocationID,
@@ -1225,9 +1267,11 @@ export class CarAndDriverAllotmentComponent implements OnInit {
       this.driverOfficialIdentityNumber.value, this.supplier.value, this.category.value,
       this.vehicle.value, this.inventory.value, this.searchInventoryName,
       this.vendorType.value, this.ownedSupplier.value, this.bookingCount.value, this.monthlyTarget.value,
-      this.otherCriteria.value, this.pickupDate, this.searchActivationStatus, this.PageNumber
+      this.otherCriteria.value, pickupDateParam, this.searchActivationStatus, this.PageNumber
     ).subscribe(
       (data: CarAndDriverAllotmentData) => {
+        const rowCount = data?.driverInventoryAssociationModel?.length ?? 0;
+        const searchedReg = (this.inventory.value || '').trim();
         if (data != null) {
           this.driverInventoryAssociationDataSource = data.driverInventoryAssociationModel;
           this.driverInventoryAssociationDataSource?.forEach(element => {
@@ -1235,17 +1279,22 @@ export class CarAndDriverAllotmentComponent implements OnInit {
           });
           this.unassociatedTotalData = data.totalRecords;
           this.markPerf('allotment_grid_loaded');
-          if (shouldAutoOpenIfSingle && this.driverInventoryAssociationDataSource?.length === 1) {
+          if (this.isSearchClicked && searchedReg && rowCount === 0) {
+            Swal.fire({
+              text: 'No records found',
+              icon: 'warning',
+              confirmButtonText: 'OK'
+            });
+          } else if (shouldAutoOpenIfSingle && rowCount === 1) {
+            this.preloadPassengerRestrictions();
             this.scheduleAutoOpenSingleSearchResult();
           }
         }
         else {
           this.driverInventoryAssociationDataSource = null;
           this.unassociatedTotalData = 0;
-          // Show message if registration number was searched but no data found
-          if (this.inventory.value && this.inventory.value.trim() !== '') {
+          if (this.isSearchClicked && searchedReg) {
             Swal.fire({
-              //title: 'Not Found',
               text: 'No records found',
               icon: 'warning',
               confirmButtonText: 'OK'
@@ -1258,29 +1307,25 @@ export class CarAndDriverAllotmentComponent implements OnInit {
       },
       (error: HttpErrorResponse) => {
         this.driverInventoryAssociationDataSource = null;
+        this.unassociatedTotalData = 0;
         this.isLoadingdataUnassociated = false;
         this.isLoading = false;
+        if (this.isSearchClicked) {
+          Swal.fire({
+            text: 'Search timed out or failed. Please try again.',
+            icon: 'error',
+            confirmButtonText: 'OK'
+          });
+        }
         this.tryLoadDeferredFullReservationDetails();
       }
     );
   }
 
   private autoOpenSingleSearchResult(): void {
-    const attemptOpen = (retries = 3) => {
-      const panel = this.expansionPanels?.first;
-      if (!panel) {
-        if (retries > 0) {
-          requestAnimationFrame(() => attemptOpen(retries - 1));
-        }
-        return;
-      }
-      const sub = panel.afterExpand.subscribe(() => {
-        sub.unsubscribe();
-        this.openAllotCarAndDriver(0, 'Soft or Hard', this.reservationInfo[0]?.allotmentID);
-      });
-      panel.open();
-    };
-    attemptOpen();
+    requestAnimationFrame(() => {
+      this.openAllotCarAndDriver(0, 'Soft or Hard', this.reservationInfo[0]?.allotmentID);
+    });
   }
   
   carAndDriverAllotment() {

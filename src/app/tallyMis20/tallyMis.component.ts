@@ -5,6 +5,7 @@ import { FormControl } from '@angular/forms';
 import { Observable } from 'rxjs';
 import { debounceTime, distinctUntilChanged, map, startWith, switchMap } from 'rxjs/operators';
 import { MAT_DATE_LOCALE } from '@angular/material/core';
+import { PageEvent } from '@angular/material/paginator';
 import moment from 'moment';
 import { GeneralService } from '../general/general.service';
 import { MISTALLY_API_COLUMNS, MISTALLY_COLUMN_ALIASES } from './tallyMis.model';
@@ -26,7 +27,9 @@ export class TallyMis20Component implements OnInit {
   tableColumns: TallyMis20TableColumn[] = [];
   columnWidths: Record<string, number> = {};
   dataSource: Record<string, string>[] | null = null;
+  totalRecords = 0;
   pageNumber: number = 0;
+  recordsPerPage = 50;
   sortType: string = 'Ascending';
   sortColumn: string = 'InvoiceID';
   csvExporting: boolean = false;
@@ -231,19 +234,42 @@ export class TallyMis20Component implements OnInit {
       .getTableData(fromDate, toDate, customer, invoiceNo, branch, this.pageNumber, this.sortColumn, this.sortType)
       .subscribe(
         (data) => {
-          const rows = Array.isArray(data) ? data : [];
+          const rows = this.extractRows(data);
+          this.totalRecords = this.extractTotalRecords(data, rows.length);
           this.dataSource = rows.map(row => this.normalizeRow(row));
           this.updateColumnWidths(this.dataSource);
         },
         (_error: HttpErrorResponse) => {
           this.dataSource = [];
+          this.totalRecords = 0;
           this.columnWidths = {};
         }
       );
   }
 
+  private extractRows(data: any): Record<string, unknown>[] {
+    if (Array.isArray(data)) {
+      return data;
+    }
+    return data?.rows ?? data?.Rows ?? [];
+  }
+
+  private extractTotalRecords(data: any, rowCount: number): number {
+    if (Array.isArray(data)) {
+      return rowCount;
+    }
+    return data?.totalRecords ?? data?.TotalRecords ?? rowCount;
+  }
+
+  onChangedPage(pageData: PageEvent) {
+    this.pageNumber = pageData.pageIndex;
+    this.recordsPerPage = pageData.pageSize;
+    this.loadData();
+  }
+
   searchData() {
     this.pageNumber = 0;
+    this.dataSource = [];
     this.loadData();
   }
 
@@ -257,6 +283,7 @@ export class TallyMis20Component implements OnInit {
     this.invoiceNumberWithPrefix.setValue('');
     this.branchName.setValue('');
     this.dataSource = null;
+    this.totalRecords = 0;
     this.columnWidths = {};
   }
 
@@ -267,21 +294,8 @@ export class TallyMis20Component implements OnInit {
       this.sortColumn = column.active;
       this.sortType = 'Ascending';
     }
+    this.pageNumber = 0;
     this.loadData();
-  }
-
-  nextCall() {
-    if (this.dataSource && this.dataSource.length > 0) {
-      this.pageNumber++;
-      this.loadData();
-    }
-  }
-
-  previousCall() {
-    if (this.pageNumber > 0) {
-      this.pageNumber--;
-      this.loadData();
-    }
   }
 
   downloadCsv() {

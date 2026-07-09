@@ -97,7 +97,14 @@
           <div class="body">
             <div class="responsive_table">
               <div class="table-responsive">
-                <p *ngIf="!dataSource || dataSource.length === 0; then noData else tableData"></p>
+                <p *ngIf="dataSource === null; then noSearch else resultsBlock"></p>
+
+                <ng-template #noSearch>
+                  <div class="alert alert-primary" style="background-color:#E8E8E8; text-align: center;">Run a search to view results</div>
+                </ng-template>
+
+                <ng-template #resultsBlock>
+                <p *ngIf="dataSource.length === 0; then noData else tableData"></p>
 
                 <ng-template #noData>
                   <div class="alert alert-primary" style="background-color:#E8E8E8; text-align: center;">No Records Found</div>
@@ -131,13 +138,18 @@
                     </mat-table>
                   </div>
                 </ng-template>
-              </div>
 
-              <div class="body">
-                <div class="example-button-row">
-                  <button mat-raised-button color="primary" (click)="previousCall()">Previous</button>
-                  <button mat-raised-button color="primary" (click)="nextCall()">Next</button>
-                </div>
+                <mat-paginator
+                  *ngIf="dataSource !== null"
+                  [length]="totalRecords"
+                  [pageIndex]="pageNumber"
+                  [pageSize]="recordsPerPage"
+                  [pageSizeOptions]="[50]"
+                  [hidePageSize]="true"
+                  (page)="onChangedPage($event)"
+                  showFirstLastButtons>
+                </mat-paginator>
+                </ng-template>
               </div>
             </div>
           </div>

@@ -17,6 +17,18 @@ export class DriverInventoryAssociationService {
     this.API_URL_Driver = generalService.BaseURL + "driver";
     this.API_URL = generalService.BaseURL + "driverInventoryAssociation";
   }
+
+  /** Encode route segment; ASP.NET decodes before controller null-checks. */
+  private pathSeg(value: any): string {
+    if (value === null || value === undefined) {
+      return 'null';
+    }
+    const text = String(value).trim();
+    if (text === '') {
+      return 'null';
+    }
+    return encodeURIComponent(text);
+  }
   /** CRUD METHODS */
   getDriverInventoryData(driverID: number, searchDriverName: string, vehicleID: number, searchVehicle: string, searchInventoryName: string, searchVehicleCategory: string, searchActivationStatus: boolean, PageNumber: number): Observable<any> {
     if (driverID === 0) {
@@ -96,10 +108,10 @@ export class DriverInventoryAssociationService {
     if (searchInventoryName === "") {
       searchInventoryName = "null";
     }
-    if (SearchVendorType === "") {
+    if (SearchVendorType === "" || SearchVendorType === "All") {
       SearchVendorType = "null";
     }
-    if (SearchOwnedSupplier === "") {
+    if (SearchOwnedSupplier === "" || SearchOwnedSupplier === "All") {
       SearchOwnedSupplier = "null";
     }
     if (SearchBookingCount === "") {
@@ -145,10 +157,10 @@ export class DriverInventoryAssociationService {
     if (searchInventoryName === "") {
       searchInventoryName = "null";
     }
-    if (SearchVendorType === "") {
+    if (SearchVendorType === "" || SearchVendorType === "All") {
       SearchVendorType = "null";
     }
-    if (SearchOwnedSupplier === "") {
+    if (SearchOwnedSupplier === "" || SearchOwnedSupplier === "All") {
       SearchOwnedSupplier = "null";
     }
     if (SearchBookingCount === "") {
@@ -166,7 +178,30 @@ export class DriverInventoryAssociationService {
     if (searchActivationStatus === null) {
       searchActivationStatus = null;
     }
-    return this.httpClient.get(this.API_URL + "/" + 'SearchForDriverInventoryUnassociation' + "/" + servicelocationID + "/" + driverID + "/" + searchDriverName +  "/" + DOIN + "/" + supplierName + "/" + searchCategory + "/" + searchVehicle + "/" + searchRegistration + "/" + searchInventoryName + '/' + SearchVendorType + '/' + SearchOwnedSupplier + '/' + SearchBookingCount + '/' + SearchMonthlyTarget + '/' + SearchOtherCriteria + "/" + pickupDate + '/' + searchActivationStatus + '/' + PageNumber + '/RegistrationNumber/Ascending');
+    const path = [
+      'SearchForDriverInventoryUnassociation',
+      servicelocationID,
+      driverID,
+      searchDriverName,
+      DOIN,
+      supplierName,
+      searchCategory,
+      searchVehicle,
+      searchRegistration,
+      searchInventoryName,
+      SearchVendorType,
+      SearchOwnedSupplier,
+      SearchBookingCount,
+      SearchMonthlyTarget,
+      SearchOtherCriteria,
+      pickupDate,
+      searchActivationStatus,
+      PageNumber,
+      'RegistrationNumber',
+      'Ascending',
+    ].map((segment) => this.pathSeg(segment)).join('/');
+    const url = this.API_URL + '/' + path;
+    return this.httpClient.get(url);
   }
 
   getTableDataSort(driverID: number, searchDriverName: string, searchVehicle: string, searchInventoryName: string, searchVehicleCategory: string, searchActivationStatus: boolean, PageNumber: number, coloumName: string, sortType: string): Observable<any> {

@@ -2,7 +2,6 @@
 /** Column order matches DynamicsMIS API / CSV export */
 export const DYNAMICS_MIS_API_COLUMNS: string[] = [
   'Billno',
-  'Series',
   'BillingBranch',
   'CustomerServiceLocation',
   'GSTNo',
@@ -39,7 +38,8 @@ export const DYNAMICS_MIS_API_COLUMNS: string[] = [
   'LocationBranch',
   'InvoiceID',
   'InvoiceType',
-  'ValidationError'
+  'ValidationError',
+  'Series'
 ];
 
 /** JSON key variants per API property (camelCase + PascalCase) */
