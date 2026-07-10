@@ -284,8 +284,10 @@ toggleStopFold() {
 
   public loadData() 
   {
+    debugger;
     this.bookingConfigurationService.GetReservationByID(this.BookingID).subscribe(
       data => {
+        debugger;
           if (!data) {
             this.dataSource = null;
             return;
@@ -673,9 +675,10 @@ private extractTime(dateTime: Date): Date {
   }
 
   public GetStopDetails() {
+    debugger
   this.bookingConfigurationService.getStopDetails(this.BookingID).subscribe(
     data => {
-
+      debugger;
       this.stopDetailsList = data;
       console.log(this.stopDetailsList);
 
@@ -694,7 +697,7 @@ private extractTime(dateTime: Date): Date {
       if (pickupStop) {
         const address = this.getStopAddress(pickupStop);
         const landmark = this.getStopLandmark(pickupStop);
-        const formattedDetails = landmark ? (address ? `${landmark} (${address})` : landmark) : '';
+        const formattedDetails = landmark ? (address ? `${landmark} (${address})` : landmark) : `${landmark} (${address})`;
   this.advanceTableForm.patchValue({
     pickupAddress: address,
     pickupAddressLatitude: pickupStop.integrationRequestStopLatitude,
@@ -708,7 +711,7 @@ private extractTime(dateTime: Date): Date {
       if (dropOffStop) {
         const address = this.getStopAddress(dropOffStop);
         const landmark = this.getStopLandmark(dropOffStop);
-        const formattedDetails = landmark ? (address ? `${landmark} (${address})` : landmark) : '';
+        const formattedDetails = landmark ? (address ? `${landmark} (${address})` : landmark) : `${landmark} (${address})`;
   this.advanceTableForm.patchValue({
     dropOffAddress: address,
     dropOffAddressLatitude: dropOffStop.integrationRequestStopLatitude,
