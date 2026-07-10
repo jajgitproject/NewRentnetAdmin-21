@@ -1703,7 +1703,7 @@
                             &nbsp;
                              <span *ngIf="data.internalNoteModel !== null" matTooltip="Internal Note"> IN </span>
                             &nbsp;
-                            <span *ngIf="data.supplierAddress !== null || data.inventoryOwnedSupplied ==='Supplier'" [matTooltip]="data.rpsName || data.supplierName"> P2S </span>
+                            <span *ngIf="data.supplierAddress !== null || data.supplierConcernedPersonMobile !== null" [matTooltip]="data.rpsName || data.supplierName"> P2S </span>
                             <br>
 
                             <span *ngIf="data.emailContent !== null"> E2S </span>

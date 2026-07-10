@@ -629,7 +629,17 @@ export class FormDialogSendSmsWhatsappMailComponent {
                     return false;
           }  
           else {
-            this.showNotification(
+            if(normalizedMessage.toLowerCase().includes('same'))
+           {
+             this.showNotification(
+             'snackbar-success',
+              'Sent SMS And Email...!!!',
+              'bottom',
+              'center'
+            );
+            }
+            else{
+               this.showNotification(
               'snackbar-danger',
               normalizedMessage
                 ? `Failed to send SMS and Email... ${normalizedMessage}`
@@ -637,6 +647,9 @@ export class FormDialogSendSmsWhatsappMailComponent {
               'bottom',
               'center'
             );
+
+            }
+           
           }
         },
         (error: HttpErrorResponse) => {
