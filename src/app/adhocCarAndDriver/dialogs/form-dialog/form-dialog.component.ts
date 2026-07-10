@@ -1258,6 +1258,14 @@ removeSpaces() {
     emitEvent: false
   });
 }
+sanitizeDriverName() {
+  const control = this.advanceTableForm.get('driverName');
+  let value = control?.value || '';
+  value = value.replace(/[^a-zA-Z ]/g, '');
+  value = value.replace(/\s+/g, ' ').trimStart();
+
+  control?.setValue(value, { emitEvent: false });
+}
 
 }
 

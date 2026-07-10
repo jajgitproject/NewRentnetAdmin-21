@@ -228,9 +228,12 @@
                 <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2" *ngIf="!advanceTableForm.value?.isDriverExisting  || advanceTableForm.value.isDriverExisting === 'New'">
                     <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
                         <mat-label>Driver Name</mat-label>
-                        <input matInput formControlName="driverName" required>
+                        <input matInput formControlName="driverName" required (input)="sanitizeDriverName()">
                         <mat-error *ngIf="advanceTableForm.get('driverName').hasError('required')">
                             Driver Name is required
+                        </mat-error>
+                         <mat-error *ngIf="advanceTableForm.get('driverName')?.hasError('pattern')">
+                            Only letters are allowed.
                         </mat-error>
                     </mat-form-field>
                 </div>
