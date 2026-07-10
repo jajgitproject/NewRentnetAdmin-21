@@ -1,4 +1,4 @@
-// @ts-nocheck
+
 import { MAT_DIALOG_DATA, MatDialog, MatDialogRef } from '@angular/material/dialog';
 import { Component, ElementRef, HostListener, Inject, Input, ViewChild } from '@angular/core';
 import { FeedBackService } from '../../feedBack.service';
@@ -48,6 +48,7 @@ export class FormDialogComponent {
 
   ];
   dataSource: FeedBack[] | null;
+  attachmentDataSource : FeedBack[] | null;
   action: string;
   dialogTitle: string;
   advanceTableForm: FormGroup;
@@ -185,6 +186,7 @@ export class FormDialogComponent {
   // }
 
   ngOnInit() {
+    debugger;
     this.route.queryParams.subscribe(paramsData => {
       this.tripFeedBackID = paramsData.tripFeedBackID;
       this.dutySlipID = paramsData.dutySlipID;
@@ -366,10 +368,14 @@ export class FormDialogComponent {
     };
   }
   public loadData() {
+    debugger;
     this.feedBackService.getTableData(this.ReservationID, this.SearchActivationStatus, this.PageNumber).subscribe
       (
         data => {
+          debugger;
+          console.log(data);
           this.dataSource = data;
+          console.log(this.dataSource);
           this.dataSource.forEach((row: any) => {
             const feedbackPointsOutOfFive = parseFloat(row?.feedbackPointsOutOfFive)?.toString();
             this.action = 'edit';
@@ -563,8 +569,9 @@ export class FormDialogComponent {
     this.feedBackAttachmentService.getTableData(this.tripFeedBackID, this.SearchActivationStatus, this.PageNumber).subscribe
       (
         data => {
-          this.dataSource = data;
-          this.dataSource.forEach((ele) => {
+          console.log(data);
+          this.attachmentDataSource = data;
+          this.attachmentDataSource.forEach((ele) => {
             if (ele.activationStatus === true) {
               this.activation = "Active";
 

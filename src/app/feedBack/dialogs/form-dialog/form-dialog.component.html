@@ -263,7 +263,7 @@
                                                 {{row.additionalService}}</mat-cell>
                                         </ng-container> -->
                                         <ng-container matColumnDef="reservationID">
-                                            <mat-header-cell *matHeaderCellDef mat-sort-header>Rervation No.</mat-header-cell>
+                                            <mat-header-cell *matHeaderCellDef mat-sort-header>Reservation No.</mat-header-cell>
                                             <mat-cell *matCellDef="let row" (contextmenu)="onContextMenu($event, row)">
                                                 {{row.reservationID}}</mat-cell>
                                         </ng-container>
@@ -275,18 +275,24 @@
                                         </ng-container>
 
                                         <ng-container matColumnDef="tripFeedBackAttachment">
-                                            <mat-header-cell *matHeaderCellDef mat-sort-header  [ngClass]="'tbl-col-width-per-8'">Image
+                                            <mat-header-cell *matHeaderCellDef mat-sort-header>
+                                                Image
                                             </mat-header-cell>
-                                            <!-- <mat-header-cell *matHeaderCellDef mat-sort-header><span matTooltip="Attachment" matTooltipPosition="above">Image...</span></mat-header-cell> -->
-                                            <mat-cell *matCellDef="let row" class="table-img tbl-col-width-per-8" (contextmenu)="onContextMenu($event, row)">
-                                                <img src="{{row.tripFeedBackAttachment}}"/> </mat-cell>
-                                          
-                                          </ng-container>
+
+                                            <mat-cell *matCellDef="let row">
+
+                                                <img *ngIf="attachmentDataSource?.length > 0"
+                                                    [src]="attachmentDataSource[0].tripFeedBackAttachment"
+                                                    width="80"
+                                                    height="80">
+
+                                            </mat-cell>
+                                        </ng-container>
                                         
                                         <ng-container matColumnDef="status">
                                             <mat-header-cell *matHeaderCellDef mat-sort-header>Status</mat-header-cell>
                                             <mat-cell *matCellDef="let row">
-                                                {{activation}}</mat-cell>
+                                                {{row.activationStatus === true ? 'Active' : 'Deleted'}}</mat-cell>
                                         </ng-container>
     
                                         <!-- actions -->
