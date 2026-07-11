@@ -216,11 +216,11 @@
                                             <mat-icon>how_to_reg</mat-icon>
                                             <span>View Bill</span>
                                         </button>
-                                        <button *ngIf="shouldShowDeleteButton(item)" mat-menu-item
+                                        <!-- <button *ngIf="shouldShowDeleteButton(item)" mat-menu-item
                                             (click)="deleteItem(item)">
                                             <mat-icon>delete</mat-icon>
                                             <span>Delete</span>
-                                        </button>
+                                        </button> -->
                                         <ng-container *ngFor="let menuItem of menuItems">
                                             <button mat-menu-item [matTooltip]="menuItem.tooltip"
                                                 (click)="openInNewTab(menuItem, item)">
