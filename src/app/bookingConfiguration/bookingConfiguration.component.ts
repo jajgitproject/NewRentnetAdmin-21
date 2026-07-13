@@ -497,21 +497,19 @@ toggleStopFold() {
   return fallback.isValid() ? fallback.format('MMM DD yyyy') : null;
  }
 
- /** Wall-clock HH:mm from picker Date — avoids AM/PM string ambiguity on save. */
+ /** Wall-clock HH:mm from picker Date — uses moment for consistent 24h formatting. */
  private formatTime24FromDateTime(dateTime: any): string | null {
   if (dateTime === null || dateTime === undefined || dateTime === '') {
     return null;
   }
 
-  if (moment.isMoment(dateTime)) {
-    return dateTime.format('HH:mm');
+  if (typeof dateTime === 'string') {
+    return this.formatTime24(dateTime);
   }
 
-  const asDate = dateTime instanceof Date ? dateTime : new Date(dateTime);
-  if (!isNaN(asDate.getTime())) {
-    const hours = String(asDate.getHours()).padStart(2, '0');
-    const minutes = String(asDate.getMinutes()).padStart(2, '0');
-    return `${hours}:${minutes}`;
+  const asMoment = moment.isMoment(dateTime) ? dateTime : moment(dateTime);
+  if (asMoment.isValid()) {
+    return asMoment.format('HH:mm');
   }
 
   return this.formatTime24(dateTime);

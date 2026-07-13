@@ -315,7 +315,7 @@
                 <mat-label>Pickup Date &amp; Time <span class="bc-required">*</span></mat-label>
                 <input matInput [owlDateTimeTrigger]="date2" [owlDateTime]="date2" formControlName="pickupDateTime" />
                 <mat-icon matSuffix [owlDateTimeTrigger]="date2" class="date-icon disabled-icon">today</mat-icon>
-                <owl-date-time #date2 [hour12Timer]="true"></owl-date-time>
+                <owl-date-time #date2></owl-date-time>
               </mat-form-field>
             </div>
           </div>
@@ -375,7 +375,7 @@
                 <mat-label>Drop Date &amp; Time <span class="bc-required">*</span></mat-label>
                 <input matInput [owlDateTimeTrigger]="date3" [owlDateTime]="date3" formControlName="dropOffDateTime" />
                 <mat-icon matSuffix [owlDateTimeTrigger]="date3" class="date-icon disabled-icon">today</mat-icon>
-                <owl-date-time #date3 [hour12Timer]="true"></owl-date-time>
+                <owl-date-time #date3></owl-date-time>
               </mat-form-field>
             </div>
           </div>
