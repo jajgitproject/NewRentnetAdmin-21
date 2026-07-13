@@ -29,7 +29,6 @@ export class FormDialogComponent {
   public StateList?: StateDropDown[] = [];
   filteredDispatchedByOptions: Observable<EmployeeDropDown[]>;
   filteredCustomerOptions: Observable<CustomerDropDown[]>;
-  filteredStateOptions: Observable<StateDropDown[]>;
   createdByDisplay: string = '';
   isLoading = false;
   CustomerID:any;
@@ -69,6 +68,7 @@ export class FormDialogComponent {
         }];
       }
       if (this.advanceTable.customerID && this.advanceTable.customer) {
+        this.CustomerID = this.advanceTable.customerID;
         this.CustomerList = [{
           customerID: this.advanceTable.customerID,
           customerName: this.advanceTable.customer
@@ -79,18 +79,8 @@ export class FormDialogComponent {
           this.customerValidator(this.CustomerList)
         ]);
         this.advanceTableForm.controls['customerName'].updateValueAndValidity();
-      }
-      if (this.advanceTable.stateID && this.advanceTable.state) {
-        this.StateList = [{
-          geoPointID: this.advanceTable.stateID,
-          geoPointName: this.advanceTable.state
-        }];
-        this.advanceTableForm.patchValue({ stateName: this.advanceTable.state });
-        this.advanceTableForm.controls['stateName'].setValidators([
-          Validators.required,
-          this.stateValidator(this.StateList)
-        ]);
-        this.advanceTableForm.controls['stateName'].updateValueAndValidity();
+        this.loadStatesForCustomer(this.advanceTable.customerID);
+        this.advanceTableForm.get('stateID')?.enable();
       }
     }
 
@@ -102,19 +92,32 @@ export class FormDialogComponent {
       startWith(this.advanceTableForm.controls['customerName'].value || ''),
       map((value) => this._filterCustomers(value || ''))
     );
-    this.filteredStateOptions = this.advanceTableForm.controls['stateName'].valueChanges.pipe(
-      startWith(this.advanceTableForm.controls['stateName'].value || ''),
-      map((value) => this._filterStates(value || ''))
-    );
+
+    if (!this.advanceTableForm.get('customerID').value) {
+      this.advanceTableForm.get('stateID')?.disable();
+    }
+
+    this.advanceTableForm.get('customerName')?.valueChanges.subscribe((customerValue) => {
+      if (!customerValue || customerValue.trim() === '') {
+        this.CustomerID = null;
+        this.StateList = [];
+        this.advanceTableForm.patchValue({
+          customerID: null,
+          stateID: 0,
+          stateName: ''
+        });
+        this.advanceTableForm.get('stateID')?.disable();
+      }
+    });
   }
 
   createContactForm(): FormGroup {
     return this.fb.group({
       invoiceSummaryID: [this.advanceTable.invoiceSummaryID],
-      customerID: [this.advanceTable.customerID, Validators.required],
+      customerID: [this.advanceTable.customerID || null, Validators.required],
       customerName: [this.advanceTable.customerName || this.advanceTable.customer, Validators.required],
-      stateID: [this.advanceTable.stateID, Validators.required],
-      stateName: [this.advanceTable.stateName || this.advanceTable.state, Validators.required],
+      stateID: [this.advanceTable.stateID || 0, [Validators.required, Validators.min(1)]],
+      stateName: [this.advanceTable.stateName || this.advanceTable.state],
       billSubmittedTo: [this.advanceTable.billSubmittedTo, [Validators.required, this.noWhitespaceValidator]],
       contactNumber: [this.advanceTable.contactNumber],
       remark: [this.advanceTable.remark],
@@ -142,17 +145,6 @@ export class FormDialogComponent {
       const value = control.value.toLowerCase();
       const match = customerList.some((customer) => customer.customerName.toLowerCase() === value);
       return match ? null : { customerTypeInvalid: true };
-    };
-  }
-
-  stateValidator(stateList: any[]): ValidatorFn {
-    return (control: AbstractControl): ValidationErrors | null => {
-      if (!control.value) {
-        return { stateTypeInvalid: true };
-      }
-      const value = control.value.toLowerCase();
-      const match = stateList.some((state) => state.geoPointName.toLowerCase() === value);
-      return match ? null : { stateTypeInvalid: true };
     };
   }
 
@@ -189,25 +181,22 @@ export class FormDialogComponent {
     });
   }
 
-  InitState() 
-  {    
-    const prefix = this.advanceTableForm.get('stateName').value;
-    if (!prefix || prefix.length < 3) {
+  loadStatesForCustomer(customerID: number) {
+    if (!customerID) {
       this.StateList = [];
+      this.advanceTableForm.patchValue({ stateID: 0, stateName: '' });
       return;
     }
-    console.log(this.advanceTable.customerID,this.CustomerID);
-    this.advanceTableService.GetStateBasedOnCustomerForInvoiceSummary(this.CustomerID || this.advanceTable.customerID,prefix).subscribe((data) => {
+
+    this._generalService.getStateForCustomer(customerID).subscribe((data) => {
       this.StateList = data || [];
-      this.advanceTableForm.controls['stateName'].setValidators([
-        Validators.required,
-        this.stateValidator(this.StateList)
-      ]);
-      this.advanceTableForm.controls['stateName'].updateValueAndValidity();
-      this.filteredStateOptions = this.advanceTableForm.controls['stateName'].valueChanges.pipe(
-        startWith(prefix || ''),
-        map((value) => this._filterStates(value || ''))
-      );
+      if (this.action === 'edit' && this.advanceTable.stateID) {
+        this.advanceTableForm.patchValue({ stateID: this.advanceTable.stateID });
+        const selectedState = this.StateList.find((state) => state.geoPointID === this.advanceTable.stateID);
+        if (selectedState) {
+          this.advanceTableForm.patchValue({ stateName: selectedState.geoPointName });
+        }
+      }
     });
   }
 
@@ -219,26 +208,31 @@ export class FormDialogComponent {
     return (this.CustomerList || []).filter((data) => data.customerName.toLowerCase().includes(filterValue));
   }
 
-  private _filterStates(value: string): any {
-    const filterValue = value.toLowerCase();
-    if (filterValue.length < 3) {
-      return [];
+  onCustomerSelected(customer: CustomerDropDown) {
+    if (!customer?.customerID) {
+      return;
     }
-    return (this.StateList || []).filter((data) => data.geoPointName.toLowerCase().includes(filterValue));
+
+    this.CustomerID = customer.customerID;
+    this.advanceTableForm.patchValue({
+      customerID: customer.customerID,
+      customerName: customer.customerName,
+      stateID: 0,
+      stateName: ''
+    });
+    this.advanceTableForm.get('stateID')?.enable();
+    this.loadStatesForCustomer(customer.customerID);
   }
 
-  onCustomerSelected(selectedCustomer: string) {
-    const selectedValue = (this.CustomerList || []).find((data) => data.customerName === selectedCustomer);
+  onStateSelected(stateID: number) {
+    const selectedValue = (this.StateList || []).find((data) => data.geoPointID === stateID);
     if (selectedValue) {
-      this.CustomerID = selectedValue.customerID;
-      this.advanceTableForm.patchValue({ customerID: selectedValue.customerID });
-    }
-  }
-
-  onStateSelected(selectedState: string) {
-    const selectedValue = (this.StateList || []).find((data) => data.geoPointName === selectedState);
-    if (selectedValue) {
-      this.advanceTableForm.patchValue({ stateID: selectedValue.geoPointID });
+      this.advanceTableForm.patchValue({
+        stateID: selectedValue.geoPointID,
+        stateName: selectedValue.geoPointName
+      });
+    } else {
+      this.advanceTableForm.patchValue({ stateName: '' });
     }
   }
 
@@ -334,14 +328,19 @@ export class FormDialogComponent {
   reset() {
     this.advanceTableForm.reset();
     this.createdByDisplay = this.getLoggedInUserDisplayName();
+    this.CustomerID = null;
     this.CustomerList = [];
     this.StateList = [];
     this.EmployeeList = [];
     this.advanceTableForm.patchValue({
       summaryDispatchStatus: 'No',
       activationStatus: true,
-      createdByID: this._generalService.getUserID()
+      createdByID: this._generalService.getUserID(),
+      customerID: null,
+      stateID: 0,
+      stateName: ''
     });
+    this.advanceTableForm.get('stateID')?.disable();
     this.updateDispatchValidators('No');
   }
 

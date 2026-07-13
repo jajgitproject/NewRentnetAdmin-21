@@ -19,8 +19,10 @@
                     <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
                         <mat-label>Customer</mat-label>
                         <input type="text" matInput formControlName="customerName" [matAutocomplete]="customerAuto" (keyup)="InitCustomer()">
-                        <mat-autocomplete #customerAuto="matAutocomplete" (optionSelected)="onCustomerSelected($event.option.value)">
-                            <mat-option *ngFor="let option of filteredCustomerOptions | async" [value]="option.customerName">
+                        <mat-autocomplete #customerAuto="matAutocomplete">
+                            <mat-option *ngFor="let option of filteredCustomerOptions | async"
+                                [value]="option.customerName"
+                                (click)="onCustomerSelected(option)">
                                 {{option.customerName}}
                             </mat-option>
                         </mat-autocomplete>
@@ -36,17 +38,14 @@
                 <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
                     <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
                         <mat-label>State</mat-label>
-                        <input type="text" matInput formControlName="stateName" [matAutocomplete]="stateAuto" (keyup)="InitState()">
-                        <mat-autocomplete #stateAuto="matAutocomplete" (optionSelected)="onStateSelected($event.option.value)">
-                            <mat-option *ngFor="let option of filteredStateOptions | async" [value]="option.geoPointName">
-                                {{option.geoPointName}}
+                        <mat-select formControlName="stateID" (selectionChange)="onStateSelected($event.value)">
+                            <mat-option [value]="0">-- Select State --</mat-option>
+                            <mat-option *ngFor="let state of StateList" [value]="state.geoPointID">
+                                {{ state.geoPointName }}
                             </mat-option>
-                        </mat-autocomplete>
-                        <mat-error *ngIf="advanceTableForm.controls['stateName'].hasError('required')">
+                        </mat-select>
+                        <mat-error *ngIf="advanceTableForm.get('stateID').hasError('required') || advanceTableForm.get('stateID').hasError('min')">
                             State is required
-                        </mat-error>
-                        <mat-error *ngIf="advanceTableForm.controls['stateName'].hasError('stateTypeInvalid')">
-                            Please select a valid state
                         </mat-error>
                     </mat-form-field>
                 </div>
