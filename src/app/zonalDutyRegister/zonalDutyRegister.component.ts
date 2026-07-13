@@ -1,5 +1,5 @@
 
-import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
+import { Component, ElementRef, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { ZonalDutyRegisterService } from './zonalDutyRegister.service';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { MatDialog } from '@angular/material/dialog';
@@ -14,6 +14,7 @@ import { DateAdapter, MAT_DATE_LOCALE } from '@angular/material/core';
 import { MatMenu, MatMenuTrigger } from '@angular/material/menu';
 import { SelectionModel } from '@angular/cdk/collections';
 import { GeneralService } from '../general/general.service';
+import { extractExportErrorMessage } from '../general/export-job.helper';
 import { Form, FormControl } from '@angular/forms';
 import { PackageTypeDropDown } from '../packageType/packageTypeDropDown.model';
 import moment from 'moment';
@@ -39,7 +40,7 @@ import { EmployeeDropDown } from '../employee/employeeDropDown.model';
   styleUrls: ['./zonalDutyRegister.component.sass'],
   providers: [{ provide: MAT_DATE_LOCALE, useValue: 'en-GB' }]
 })
-export class ZonalDutyRegisterComponent implements OnInit {
+export class ZonalDutyRegisterComponent implements OnInit, OnDestroy {
  baseDisplayedColumns = [
   'ReservationID',
   'PickupDate',
@@ -236,6 +237,15 @@ export class ZonalDutyRegisterComponent implements OnInit {
   SearchBookingDate: string = '';
   csvExporting: boolean = false;
   hasManualSearch: boolean = false;
+  exportJobId: string | null = null;
+  exportJobStatus: any = null;
+  exportJobRunning = false;
+  exportJobDownloading = false;
+  exportJobError = '';
+  exportJobStartedAt: number | null = null;
+  private exportPollSub?: Subscription;
+  readonly maxPickupDateRangeDays = 15;
+  readonly exportJobType = 'ZonalDutyRegisterExport';
     
   
  
@@ -278,6 +288,10 @@ export class ZonalDutyRegisterComponent implements OnInit {
     this.InitBranch();
     this.InitKAM();
     //this.SubscribeUpdateService();
+  }
+
+  ngOnDestroy() {
+    this.stopExportPolling();
   }
 
   refresh() 
@@ -326,7 +340,8 @@ export class ZonalDutyRegisterComponent implements OnInit {
     this.SearchActivationStatus = true;
     this.hasManualSearch = false;
     this.PageNumber=0;
-    this.loadData();
+    this.dataSource = [];
+    this.clearExportJob();
   }
 
   public Filter()
@@ -431,59 +446,269 @@ export class ZonalDutyRegisterComponent implements OnInit {
 
   public SearchData()
   {
-    this.hasManualSearch = true;
-    this.loadData();    
-  }
-
-  downloadFilteredCsv() {
-    if (this.csvExporting || !this.hasManualSearch) {
+    if (this.exportJobRunning) {
       return;
     }
 
-    this.csvExporting = true;
+    const dateRangeError = this.validatePickupDateRange();
+    if (dateRangeError) {
+      this.showNotification('snackbar-danger', dateRangeError, 'bottom', 'center');
+      return;
+    }
+
+    this.hasManualSearch = true;
+    this.dataSource = [];
+    this.exportJobError = '';
+    this.exportJobStartedAt = Date.now();
     const searchCriteria = this.buildSearchCriteria();
-    this.zonalDutyRegisterService.exportCsv(searchCriteria).subscribe(
-      (blob: Blob) => {
-        this.csvExporting = false;
 
-        if (!blob || blob.size === 0) {
-          this.showNotification('snackbar-danger', 'No data to export', 'bottom', 'center');
+    this.exportJobRunning = true;
+    this.showNotification('snackbar-info', 'Export job started. CSV will be ready when processing completes.', 'bottom', 'center');
+
+    this.zonalDutyRegisterService.startExportJob(searchCriteria).subscribe(
+      (startResult: any) => {
+        const jobId = startResult?.jobId ?? startResult?.JobId;
+        if (!jobId) {
+          this.exportJobRunning = false;
+          this.exportJobError = 'Could not start export job.';
+          this.showNotification('snackbar-danger', this.exportJobError, 'bottom', 'center');
           return;
         }
 
-        const contentType = (blob.type || '').toLowerCase();
-        if (contentType.includes('application/json')) {
-          blob.text().then((text) => {
-            if ((text || '').trim() === 'null') {
-              this.showNotification('snackbar-danger', 'No data to export', 'bottom', 'center');
-              return;
-            }
-            const csvBlob = new Blob([text], { type: 'text/csv;charset=utf-8;' });
-            this.triggerCsvDownload(csvBlob);
-          });
-          return;
-        }
-
-        this.triggerCsvDownload(blob);
+        this.exportJobId = jobId;
+        this.exportJobStatus = {
+          jobId,
+          jobType: startResult?.jobType ?? startResult?.JobType ?? this.exportJobType,
+          status: startResult?.status ?? startResult?.Status ?? 'Pending',
+          message: startResult?.message ?? startResult?.Message ?? 'Export queued'
+        };
+        this.startExportPolling(jobId);
       },
-      () => {
-        this.csvExporting = false;
-        this.showNotification('snackbar-danger', 'Error downloading CSV', 'bottom', 'center');
+      async (error) => {
+        this.exportJobRunning = false;
+        this.exportJobError = await extractExportErrorMessage(error);
+        this.showNotification('snackbar-danger', this.exportJobError, 'bottom', 'center');
       }
     );
   }
 
-  private triggerCsvDownload(blob: Blob) {
+  downloadExportCsv() {
+    if (!this.exportJobId || !this.zonalDutyRegisterService.isExportJobReady(this.exportJobStatus) || this.exportJobDownloading) {
+      return;
+    }
+
+    this.exportJobDownloading = true;
+    this.zonalDutyRegisterService.downloadExportJob(this.exportJobId).subscribe(
+      async (blob: Blob) => {
+        this.exportJobDownloading = false;
+        if (!blob || blob.size === 0) {
+          this.showNotification('snackbar-danger', 'Export file is empty or unavailable.', 'bottom', 'center');
+          return;
+        }
+
+        const contentType = (blob.type || '').toLowerCase();
+        if (contentType.includes('application/json') || contentType.includes('text/plain')) {
+          const text = await blob.text();
+          let message = 'Export file is not ready.';
+          try {
+            const parsed = JSON.parse(text || '{}');
+            message = parsed.message || message;
+          } catch {
+            if (text?.trim()) {
+              message = text;
+            }
+          }
+          this.showNotification('snackbar-danger', message, 'bottom', 'center');
+          return;
+        }
+
+        const fileName = this.exportJobStatus?.fileName ?? this.exportJobStatus?.FileName;
+        this.triggerCsvDownload(blob, fileName);
+        this.zonalDutyRegisterService.getExportJobStatus(this.exportJobId).subscribe(
+          (status) => { this.exportJobStatus = status; },
+          () => {}
+        );
+      },
+      async (error) => {
+        this.exportJobDownloading = false;
+        const message = await extractExportErrorMessage(error);
+        this.showNotification('snackbar-danger', message, 'bottom', 'center');
+      }
+    );
+  }
+
+  canDownloadExport(): boolean {
+    return !!this.exportJobId && this.zonalDutyRegisterService.isExportJobReady(this.exportJobStatus) && !this.exportJobDownloading;
+  }
+
+  isExportJobInProgress(): boolean {
+    return this.exportJobRunning || this.zonalDutyRegisterService.isExportJobRunning(this.exportJobStatus);
+  }
+
+  getExportJobStatusLabel(): string {
+    return this.exportJobStatus?.status ?? this.exportJobStatus?.Status ?? '';
+  }
+
+  getExportJobMessage(): string {
+    return this.exportJobStatus?.message ?? this.exportJobStatus?.Message ?? this.exportJobError ?? '';
+  }
+
+  getExportRowsExported(): number {
+    return this.exportJobStatus?.rowsExported ?? this.exportJobStatus?.RowsExported ?? 0;
+  }
+
+  getExportElapsedTime(): string {
+    if (!this.exportJobStartedAt) {
+      return '—';
+    }
+    const elapsedSeconds = Math.floor((Date.now() - this.exportJobStartedAt) / 1000);
+    const minutes = Math.floor(elapsedSeconds / 60);
+    const seconds = elapsedSeconds % 60;
+    return minutes > 0 ? `${minutes}m ${seconds}s` : `${seconds}s`;
+  }
+
+  private startExportPolling(jobId: string) {
+    this.stopExportPolling();
+    this.exportPollSub = this.zonalDutyRegisterService.pollExportJob(jobId).subscribe(
+      (status: any) => {
+        this.exportJobStatus = status;
+        const current = String(status?.status ?? status?.Status ?? '').toLowerCase();
+
+        if (current === 'failed') {
+          this.exportJobRunning = false;
+          this.exportJobError = status?.message ?? status?.Message ?? 'Export failed.';
+          this.showNotification('snackbar-danger', this.exportJobError, 'bottom', 'center');
+          this.stopExportPolling();
+          return;
+        }
+
+        if (current === 'completed') {
+          this.exportJobRunning = false;
+          const rows = status?.rowsExported ?? status?.RowsExported ?? 0;
+          this.showNotification('snackbar-success', status?.message ?? `Export ready (${rows} rows). Click Download CSV.`, 'bottom', 'center');
+          this.stopExportPolling();
+        }
+      },
+      async (error) => {
+        this.exportJobRunning = false;
+        this.exportJobError = await extractExportErrorMessage(error);
+        this.showNotification('snackbar-danger', this.exportJobError, 'bottom', 'center');
+        this.stopExportPolling();
+      }
+    );
+  }
+
+  private stopExportPolling() {
+    if (this.exportPollSub) {
+      this.exportPollSub.unsubscribe();
+      this.exportPollSub = undefined;
+    }
+  }
+
+  private clearExportJob() {
+    this.stopExportPolling();
+    this.exportJobId = null;
+    this.exportJobStatus = null;
+    this.exportJobRunning = false;
+    this.exportJobDownloading = false;
+    this.exportJobError = '';
+    this.exportJobStartedAt = null;
+  }
+
+  private triggerCsvDownload(blob: Blob, preferredFileName?: string) {
     const url = window.URL.createObjectURL(blob);
     const link = document.createElement('a');
     const timeStamp = moment().format('YYYYMMDD_HHmmss');
     link.href = url;
-    link.download = `ZonalDutyRegister_${timeStamp}.csv`;
+    link.download = preferredFileName || `ZonalDutyRegister_${timeStamp}.csv`;
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
     window.URL.revokeObjectURL(url);
     this.showNotification('snackbar-success', 'CSV downloaded', 'bottom', 'center');
+  }
+
+  private isSearchValueSet(value: any): boolean {
+    if (value === null || value === undefined) {
+      return false;
+    }
+    if (typeof value === 'boolean') {
+      return true;
+    }
+    if (typeof value === 'number') {
+      return value !== 0;
+    }
+    const text = String(value).trim();
+    return text !== '' && text.toLowerCase() !== 'null';
+  }
+
+  hasAdditionalSearchFilters(): boolean {
+    return (
+      this.isSearchValueSet(this.SearchCustomerGroup?.value) ||
+      this.isSearchValueSet(this.SearchCustomer?.value) ||
+      this.isSearchValueSet(this.SearchBranch?.value) ||
+      this.isSearchValueSet(this.SearchKAM?.value) ||
+      this.isSearchValueSet(this.SearchBranchID) ||
+      this.isSearchValueSet(this.SearchKAMID) ||
+      this.isSearchValueSet(this.SearchCustomerPerson?.value) ||
+      this.isSearchValueSet(this.SearchDutyType?.value) ||
+      this.isSearchValueSet(this.SearchFeedbackDate) ||
+      (this.SearchSlipReceipt !== null && this.SearchSlipReceipt !== undefined) ||
+      this.isSearchValueSet(this.SearchClosureType?.value) ||
+      this.isSearchValueSet(this.SearchDispatchLocation?.value) ||
+      this.isSearchValueSet(this.SearchMOP?.value) ||
+      this.isSearchValueSet(this.SearchSupplierType?.value) ||
+      this.isSearchValueSet(this.SearchSupplier?.value) ||
+      this.isSearchValueSet(this.SearchSalesPerson?.value) ||
+      this.isSearchValueSet(this.SearchCarSend?.value) ||
+      this.isSearchValueSet(this.SearchCarBooked?.value) ||
+      this.isSearchValueSet(this.SearchCustomerType?.value) ||
+      this.isSearchValueSet(this.SearchCustomerLocationName?.value) ||
+      this.isSearchValueSet(this.SearchBookingStatus?.value) ||
+      this.isSearchValueSet(this.SearchImportance?.value) ||
+      (this.SearchDSVerification?.value !== null && this.SearchDSVerification?.value !== undefined) ||
+      (this.SearchGoodForBill?.value !== null && this.SearchGoodForBill?.value !== undefined) ||
+      (this.SearchBillStatus?.value !== null && this.SearchBillStatus?.value !== undefined) ||
+      this.isSearchValueSet(this.SearchDri?.value) ||
+      this.isSearchValueSet(this.SearchCarNo?.value) ||
+      this.isSearchValueSet(this.SearchSupplierO?.value) ||
+      this.isSearchValueSet(this.SearchRes) ||
+      this.isSearchValueSet(this.SearchDuty) ||
+      this.isSearchValueSet(this.SearchGuestName?.value) ||
+      this.isSearchValueSet(this.SearchGuestMobile) ||
+      this.isSearchValueSet(this.SearchCity?.value) ||
+      this.isSearchValueSet(this.SearchCancellationDateFrom) ||
+      this.isSearchValueSet(this.SearchCancellationDateTo) ||
+      this.isSearchValueSet(this.SearchBookingDateFrom) ||
+      this.isSearchValueSet(this.SearchBookingDate) ||
+      this.isSearchValueSet(this.SearchChangeMOPCase) ||
+      this.isSearchValueSet(this.SearchLocationGroup?.value) ||
+      this.isSearchValueSet(this.SearchBillDateFrom) ||
+      this.isSearchValueSet(this.SearchBillToDate)
+    );
+  }
+
+  validatePickupDateRange(): string | null {
+    if (!this.SearchFromDate || !this.SearchToDate) {
+      return 'Pickup date range is required. Please select From and To dates.';
+    }
+
+    const fromDate = moment(this.SearchFromDate).startOf('day');
+    const toDate = moment(this.SearchToDate).startOf('day');
+    if (!fromDate.isValid() || !toDate.isValid()) {
+      return 'Please enter valid pickup dates.';
+    }
+    if (toDate.isBefore(fromDate)) {
+      return 'Pickup To Date cannot be earlier than From Date.';
+    }
+    if (!this.hasAdditionalSearchFilters()) {
+      const inclusiveDays = toDate.diff(fromDate, 'days') + 1;
+      if (inclusiveDays > this.maxPickupDateRangeDays) {
+        return `Pickup date range cannot exceed ${this.maxPickupDateRangeDays} days when no other search filters are selected. Add another filter to search a wider range.`;
+      }
+    }
+
+    return null;
   }
 
   private buildSearchCriteria(): SearchCriteria {

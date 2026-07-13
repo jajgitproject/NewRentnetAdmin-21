@@ -1,12 +1,13 @@
 // @ts-nocheck
 import { Injectable } from '@angular/core';
-import { BehaviorSubject, Observable } from 'rxjs';
+import { BehaviorSubject, Observable, throwError, timer } from 'rxjs';
 import { DutyRegisterModel, SearchCriteria } from './dutyRegister.model';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { DatePipe } from '@angular/common';
 import { GeneralService } from '../general/general.service';
 import { S } from '@angular/cdk/keycodes';
 import { OrganizationalEntityDropDown } from '../organizationalEntity/organizationalEntityDropDown.model';
+import { switchMap, takeWhile } from 'rxjs/operators';
 @Injectable()
 export class DutyRegisterService 
 {
@@ -256,7 +257,7 @@ export class DutyRegisterService
   getTableData(criteria: SearchCriteria, pageNumber: number): Observable<any> {
     const updatedCriteria = {
       UserID:this.generalService.getUserID(),
-      ShowAllLocation:null,
+      ShowAllLocation:this.generalService.getShowAllLocation(),
       SearchCustomerGroup: criteria.SearchCustomerGroup || "null",
       SearchCustomer: criteria.SearchCustomer || "null",
       SearchBranch: criteria.SearchBranch || "null",
@@ -323,6 +324,8 @@ export class DutyRegisterService
 
   getTableDataSort(criteria: SearchCriteria,pageNumber: number,coloumName: string,sortType: string): Observable<any> {
     const updatedCriteria = {
+      UserID:this.generalService.getUserID(),
+      ShowAllLocation:this.generalService.getShowAllLocation(),
       SearchCustomerGroup: criteria.SearchCustomerGroup || "null",
       SearchCustomer: criteria.SearchCustomer || "null",
       SearchBranch: criteria.SearchBranch || "null",
@@ -374,7 +377,8 @@ export class DutyRegisterService
     return this.httpClient.post(`${this.API_URL}`, updatedCriteria);
   }
 
-  exportCsv(criteria: SearchCriteria): Observable<Blob> {
+
+  private buildExportCriteria(criteria: SearchCriteria) {
     const toNull = (value: any) => {
       if (value === undefined || value === null) {
         return null;
@@ -386,7 +390,9 @@ export class DutyRegisterService
       return value;
     };
 
-    const updatedCriteria = {
+    return {
+      UserID: this.generalService.getUserID(),
+      ShowAllLocation: this.generalService.getShowAllLocation(),
       SearchCustomerGroup: toNull(criteria.SearchCustomerGroup),
       SearchCustomer: toNull(criteria.SearchCustomer),
       SearchBranch: toNull(criteria.SearchBranch),
@@ -413,7 +419,7 @@ export class DutyRegisterService
       SearchImportance: toNull(criteria.SearchImportance),
       SearchDSVerification: criteria.SearchDSVerification !== null && criteria.SearchDSVerification !== undefined ? criteria.SearchDSVerification : null,
       SearchGoodForBill: criteria.SearchGoodForBill !== null && criteria.SearchGoodForBill !== undefined ? criteria.SearchGoodForBill : null,
-      SearchBillStatus: criteria.SearchBillStatus !== null && criteria.SearchBillStatus !== undefined ? criteria.SearchBillStatus : null,                           
+      SearchBillStatus: criteria.SearchBillStatus !== null && criteria.SearchBillStatus !== undefined ? criteria.SearchBillStatus : null,
       SearchDri: toNull(criteria.SearchDri),
       SearchCarNo: toNull(criteria.SearchCarNo),
       SearchSupplierO: toNull(criteria.SearchSupplierO),
@@ -431,10 +437,58 @@ export class DutyRegisterService
       SearchBillFromDate: toNull(criteria.SearchBillFromDate),
       SearchBillToDate: toNull(criteria.SearchBillToDate)
     };
-    console.log(`${this.API_URL}/ExportCsv`, updatedCriteria);
-    return this.httpClient.post(`${this.API_URL}/ExportCsv`, updatedCriteria, {
+  }
+
+  startExportJob(criteria: SearchCriteria): Observable<any> {
+    const updatedCriteria = this.buildExportCriteria(criteria);
+    return this.httpClient.post(`${this.API_URL}/ExportCsv/StartJob`, updatedCriteria);
+  }
+
+  getExportJobStatus(jobId: string): Observable<any> {
+    return this.httpClient.get(`${this.API_URL}/ExportCsv/JobStatus/${jobId}`);
+  }
+
+  downloadExportJob(jobId: string): Observable<Blob> {
+    return this.httpClient.get(`${this.API_URL}/ExportCsv/Download/${jobId}`, {
       responseType: 'blob'
     });
+  }
+
+  pollExportJob(jobId: string): Observable<any> {
+    return timer(0, 3000).pipe(
+      switchMap(() => this.getExportJobStatus(jobId)),
+      takeWhile((status: any) => this.isExportJobRunning(status), true)
+    );
+  }
+
+  isExportJobRunning(status: any): boolean {
+    const current = String(status?.status ?? status?.Status ?? '').toLowerCase();
+    return current === 'pending' || current === 'running';
+  }
+
+  isExportJobReady(status: any): boolean {
+    const current = String(status?.status ?? status?.Status ?? '').toLowerCase();
+    return current === 'completed' && (status?.fileReady ?? status?.FileReady ?? false);
+  }
+
+  /** @deprecated Use startExportJob — kept for compatibility */
+  startBackgroundExport(criteria: SearchCriteria): Observable<any> {
+    return this.startExportJob(criteria);
+  }
+
+  /** @deprecated Use getExportJobStatus */
+  getBackgroundExportStatus(jobId: string): Observable<any> {
+    return this.getExportJobStatus(jobId);
+  }
+
+  /** @deprecated Use downloadExportJob */
+  downloadBackgroundExport(jobId: string): Observable<Blob> {
+    return this.downloadExportJob(jobId);
+  }
+
+  /** @deprecated Use pollExportJob */
+  pollBackgroundExport(jobId: string): Observable<any> {
+    return this.pollExportJob(jobId);
   }
 
 

@@ -3749,6 +3749,48 @@ openDropOffByExectiveGPS(item: any)
     }
   }
 
+  getOwnershipImpLabel(row: any): string | null {
+    const v = (row?.inventoryOwnedSupplied ?? '').toString().trim();
+    if (v === 'Owned') return 'Own';
+    if (v === 'Supplier') return 'Sup';
+    return null;
+  }
+
+  getOwnershipImpTooltip(row: any): string | null {
+    const v = (row?.inventoryOwnedSupplied ?? '').toString().trim();
+    if (v === 'Owned') return row?.companyName?.trim() || 'Owned';
+    if (v === 'Supplier') {
+      const type = row?.supplierType?.trim();
+      const name = row?.inventorySupplierName?.trim()
+        || row?.supplierName?.trim()
+        || row?.rpsName?.trim();
+      if (type && name) return `${type} - ${name}`;
+      return type || name || 'Supplier';
+    }
+    return null;
+  }
+
+  getOwnershipImpLabel(row: any): string | null {
+    const v = (row?.inventoryOwnedSupplied ?? '').toString().trim();
+    if (v === 'Owned') return 'Own';
+    if (v === 'Supplier') return 'Sup';
+    return null;
+  }
+
+  getOwnershipImpTooltip(row: any): string | null {
+    const v = (row?.inventoryOwnedSupplied ?? '').toString().trim();
+    if (v === 'Owned') return row?.companyName?.trim() || 'Owned';
+    if (v === 'Supplier') {
+      const type = row?.supplierType?.trim();
+      const name = row?.inventorySupplierName?.trim()
+        || row?.supplierName?.trim()
+        || row?.rpsName?.trim();
+      if (type && name) return `${type} - ${name}`;
+      return type || name || 'Supplier';
+    }
+    return null;
+  }
+
   getControlPanelMessagingHeaderDisplay(row: any): {
     successBadges: string[];
     failedBadges: string[];

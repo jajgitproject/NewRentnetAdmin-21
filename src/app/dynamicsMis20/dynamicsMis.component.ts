@@ -1,13 +1,14 @@
 // @ts-nocheck
-import { Component, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import { HttpErrorResponse } from '@angular/common/http';
 import { FormControl } from '@angular/forms';
-import { Observable } from 'rxjs';
+import { Observable, Subscription } from 'rxjs';
 import { map, startWith } from 'rxjs/operators';
 import { MAT_DATE_LOCALE } from '@angular/material/core';
 import { PageEvent } from '@angular/material/paginator';
 import moment from 'moment';
 import { GeneralService } from '../general/general.service';
+import { extractExportErrorMessage } from '../general/export-job.helper';
 import { DYNAMICS_MIS_API_COLUMNS, DYNAMICS_MIS_COLUMN_ALIASES } from './dynamicsMis.model';
 import { DynamicsMis20Service } from './dynamicsMis.service';
 
@@ -23,7 +24,7 @@ export interface DynamicsMis20TableColumn {
   styleUrls: ['./dynamicsMis.component.sass'],
   providers: [{ provide: MAT_DATE_LOCALE, useValue: 'en-GB' }]
 })
-export class DynamicsMis20Component implements OnInit {
+export class DynamicsMis20Component implements OnInit, OnDestroy {
   tableColumns: DynamicsMis20TableColumn[] = [];
   columnWidths: Record<string, number> = {};
   dataSource: Record<string, string>[] | null = null;
@@ -32,7 +33,6 @@ export class DynamicsMis20Component implements OnInit {
   recordsPerPage = 50;
   sortType: string = 'Ascending';
   sortColumn: string = 'InvoiceID';
-  csvExporting: boolean = false;
 
   searchFromDate: string = '';
   searchToDate: string = '';
@@ -45,6 +45,16 @@ export class DynamicsMis20Component implements OnInit {
   filteredCustomerOptions: Observable<{ customerID: number; customerName: string }[]>;
   filteredBranchOptions: Observable<any[]>;
 
+  exportJobId: string | null = null;
+  exportJobStatus: any = null;
+  exportJobRunning = false;
+  exportJobDownloading = false;
+  exportJobError = '';
+  exportJobStartedAt: number | null = null;
+  private exportPollSub?: Subscription;
+  readonly maxDateRangeDays = 15;
+  readonly exportJobType = 'DynamicsMIS20Export';
+
   constructor(
     public dynamicsMisService: DynamicsMis20Service,
     public _generalService: GeneralService
@@ -55,6 +65,10 @@ export class DynamicsMis20Component implements OnInit {
     this.initBranch();
     this.initCustomerAutocomplete();
     this.initInvoiceNumberInput();
+  }
+
+  ngOnDestroy() {
+    this.stopExportPolling();
   }
 
   get displayedColumnIds(): string[] {
@@ -109,7 +123,6 @@ export class DynamicsMis20Component implements OnInit {
     return value.customerName || '';
   }
 
-  /** UI and API route use hyphen; invoice table stores slash. */
   private toInvoiceDisplayValue(value: string): string {
     return (value || '').replace(/\//g, '-');
   }
@@ -223,54 +236,187 @@ export class DynamicsMis20Component implements OnInit {
     });
   }
 
-  loadData() {
+  searchData() {
+    if (this.exportJobRunning) {
+      return;
+    }
+
+    const dateRangeError = this.validateDateRange();
+    if (dateRangeError) {
+      return;
+    }
+
+    this.pageNumber = 0;
+    this.dataSource = null;
+    this.exportJobError = '';
+    this.exportJobStartedAt = Date.now();
+
     const fromDate = this.formatDate(this.searchFromDate);
     const toDate = this.formatDate(this.searchToDate);
     const customer = this.getCustomerSearchValue();
     const invoiceNo = this.getInvoiceSearchValue();
     const branch = this.branchName.value || '';
 
-    this.dynamicsMisService
-      .getTableData(fromDate, toDate, customer, invoiceNo, branch, this.pageNumber, this.sortColumn, this.sortType)
-      .subscribe(
-        (data) => {
-          const rows = this.extractRows(data);
-          this.totalRecords = this.extractTotalRecords(data, rows.length);
-          this.dataSource = rows.map(row => this.normalizeRow(row));
-          this.updateColumnWidths(this.dataSource);
-        },
-        (_error: HttpErrorResponse) => {
-          this.dataSource = [];
-          this.totalRecords = 0;
-          this.columnWidths = {};
+    this.exportJobRunning = true;
+    this.dynamicsMisService.startExportJob(fromDate, toDate, customer, invoiceNo, branch, this.sortColumn, this.sortType).subscribe(
+      (startResult: any) => {
+        const jobId = startResult?.jobId ?? startResult?.JobId;
+        if (!jobId) {
+          this.exportJobRunning = false;
+          this.exportJobError = 'Could not start export job.';
+          return;
         }
-      );
+
+        this.exportJobId = jobId;
+        this.exportJobStatus = {
+          jobId,
+          jobType: startResult?.jobType ?? startResult?.JobType ?? this.exportJobType,
+          status: startResult?.status ?? startResult?.Status ?? 'Pending',
+          message: startResult?.message ?? startResult?.Message ?? 'Export queued'
+        };
+        this.startExportPolling(jobId);
+      },
+      async (error) => {
+        this.exportJobRunning = false;
+        this.exportJobError = await extractExportErrorMessage(error);
+      }
+    );
   }
 
-  private extractRows(data: any): Record<string, unknown>[] {
-    if (Array.isArray(data)) {
-      return data;
+  downloadExportCsv() {
+    if (!this.exportJobId || !this.dynamicsMisService.isExportJobReady(this.exportJobStatus) || this.exportJobDownloading) {
+      return;
     }
-    return data?.rows ?? data?.Rows ?? [];
+
+    this.exportJobDownloading = true;
+    this.dynamicsMisService.downloadExportJob(this.exportJobId).subscribe(
+      async (blob: Blob) => {
+        this.exportJobDownloading = false;
+        if (!blob || blob.size === 0) {
+          return;
+        }
+
+        const fileName = this.exportJobStatus?.fileName ?? this.exportJobStatus?.FileName;
+        this.triggerCsvDownload(blob, fileName);
+        this.dynamicsMisService.getExportJobStatus(this.exportJobId).subscribe((status) => { this.exportJobStatus = status; }, () => {});
+      },
+      async () => {
+        this.exportJobDownloading = false;
+      }
+    );
   }
 
-  private extractTotalRecords(data: any, rowCount: number): number {
-    if (Array.isArray(data)) {
-      return rowCount;
+  canDownloadExport(): boolean {
+    return !!this.exportJobId && this.dynamicsMisService.isExportJobReady(this.exportJobStatus) && !this.exportJobDownloading;
+  }
+
+  isExportJobInProgress(): boolean {
+    return this.exportJobRunning || this.dynamicsMisService.isExportJobRunning(this.exportJobStatus);
+  }
+
+  getExportJobStatusLabel(): string {
+    return this.exportJobStatus?.status ?? this.exportJobStatus?.Status ?? '';
+  }
+
+  getExportJobMessage(): string {
+    return this.exportJobStatus?.message ?? this.exportJobStatus?.Message ?? this.exportJobError ?? '';
+  }
+
+  getExportRowsExported(): number {
+    return this.exportJobStatus?.rowsExported ?? this.exportJobStatus?.RowsExported ?? 0;
+  }
+
+  getExportElapsedTime(): string {
+    if (!this.exportJobStartedAt) return '—';
+    const elapsedSeconds = Math.floor((Date.now() - this.exportJobStartedAt) / 1000);
+    const minutes = Math.floor(elapsedSeconds / 60);
+    const seconds = elapsedSeconds % 60;
+    return minutes > 0 ? `${minutes}m ${seconds}s` : `${seconds}s`;
+  }
+
+  hasAdditionalFilters(): boolean {
+    return !!(this.getCustomerSearchValue().trim() || this.getInvoiceSearchValue().trim() || (this.branchName.value || '').trim());
+  }
+
+  validateDateRange(): string | null {
+    if (!this.searchFromDate || !this.searchToDate) {
+      this.exportJobError = 'Date range is required. Please select From and To dates.';
+      return this.exportJobError;
     }
-    return data?.totalRecords ?? data?.TotalRecords ?? rowCount;
+
+    const fromDate = moment(this.searchFromDate).startOf('day');
+    const toDate = moment(this.searchToDate).startOf('day');
+    if (!fromDate.isValid() || !toDate.isValid()) {
+      this.exportJobError = 'Please enter valid dates.';
+      return this.exportJobError;
+    }
+    if (toDate.isBefore(fromDate)) {
+      this.exportJobError = 'Date To cannot be earlier than From.';
+      return this.exportJobError;
+    }
+    if (!this.hasAdditionalFilters()) {
+      const inclusiveDays = toDate.diff(fromDate, 'days') + 1;
+      if (inclusiveDays > this.maxDateRangeDays) {
+        this.exportJobError = `Date range cannot exceed ${this.maxDateRangeDays} days when no other search filters are selected. Add another filter to search a wider range.`;
+        return this.exportJobError;
+      }
+    }
+
+    this.exportJobError = '';
+    return null;
   }
 
-  onChangedPage(pageData: PageEvent) {
-    this.pageNumber = pageData.pageIndex;
-    this.recordsPerPage = pageData.pageSize;
-    this.loadData();
+  private startExportPolling(jobId: string) {
+    this.stopExportPolling();
+    this.exportPollSub = this.dynamicsMisService.pollExportJob(jobId).subscribe(
+      (status: any) => {
+        this.exportJobStatus = status;
+        const current = String(status?.status ?? status?.Status ?? '').toLowerCase();
+        if (current === 'failed') {
+          this.exportJobRunning = false;
+          this.exportJobError = status?.message ?? status?.Message ?? 'Export failed.';
+          this.stopExportPolling();
+          return;
+        }
+        if (current === 'completed') {
+          this.exportJobRunning = false;
+          this.stopExportPolling();
+        }
+      },
+      async (error) => {
+        this.exportJobRunning = false;
+        this.exportJobError = await extractExportErrorMessage(error);
+        this.stopExportPolling();
+      }
+    );
   }
 
-  searchData() {
-    this.pageNumber = 0;
-    this.dataSource = [];
-    this.loadData();
+  private stopExportPolling() {
+    if (this.exportPollSub) {
+      this.exportPollSub.unsubscribe();
+      this.exportPollSub = undefined;
+    }
+  }
+
+  private clearExportJob() {
+    this.stopExportPolling();
+    this.exportJobId = null;
+    this.exportJobStatus = null;
+    this.exportJobRunning = false;
+    this.exportJobDownloading = false;
+    this.exportJobError = '';
+    this.exportJobStartedAt = null;
+  }
+
+  private triggerCsvDownload(blob: Blob, preferredFileName?: string) {
+    const fileUrl = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = fileUrl;
+    a.download = preferredFileName || `DynamicsMIS20_${moment().format('YYYYMMDD_HHmmss')}.csv`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    window.URL.revokeObjectURL(fileUrl);
   }
 
   refresh() {
@@ -285,42 +431,6 @@ export class DynamicsMis20Component implements OnInit {
     this.dataSource = null;
     this.totalRecords = 0;
     this.columnWidths = {};
-  }
-
-  sortingDataChanged(column: any) {
-    if (this.sortColumn === column.active) {
-      this.sortType = this.sortType === 'Ascending' ? 'Descending' : 'Ascending';
-    } else {
-      this.sortColumn = column.active;
-      this.sortType = 'Ascending';
-    }
-    this.pageNumber = 0;
-    this.loadData();
-  }
-
-  downloadCsv() {
-    const fromDate = this.formatDate(this.searchFromDate);
-    const toDate = this.formatDate(this.searchToDate);
-    const customer = this.getCustomerSearchValue();
-    const invoiceNo = this.getInvoiceSearchValue();
-    const branch = this.branchName.value || '';
-
-    this.csvExporting = true;
-    this.dynamicsMisService.downloadCsv(fromDate, toDate, customer, invoiceNo, branch).subscribe(
-      (blob: Blob) => {
-        this.csvExporting = false;
-        const fileUrl = window.URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = fileUrl;
-        a.download = `DynamicsMIS20_${moment().format('YYYYMMDD_HHmmss')}.csv`;
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-        window.URL.revokeObjectURL(fileUrl);
-      },
-      () => {
-        this.csvExporting = false;
-      }
-    );
+    this.clearExportJob();
   }
 }

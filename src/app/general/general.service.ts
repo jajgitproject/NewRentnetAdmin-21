@@ -195,7 +195,61 @@ export class GeneralService {
   }
 
   getUserID(): number {
-    return this.authService?.currentUserValue?.employee?.EmployeeID ?? 0;
+    const user = this.authService?.currentUserValue as any;
+    const employee = user?.employee ?? user?.Employee;
+    const fromSession =
+      employee?.EmployeeID ??
+      employee?.employeeID ??
+      user?.EmployeeID ??
+      user?.employeeID ??
+      0;
+    if (fromSession > 0) {
+      return fromSession;
+    }
+
+    const raw = localStorage.getItem('currentUser');
+    if (!raw) {
+      return 0;
+    }
+    try {
+      const stored = JSON.parse(raw);
+      const storedEmployee = stored?.employee ?? stored?.Employee;
+      return (
+        storedEmployee?.EmployeeID ??
+        storedEmployee?.employeeID ??
+        stored?.EmployeeID ??
+        stored?.employeeID ??
+        0
+      );
+    } catch {
+      return 0;
+    }
+  }
+
+  getShowAllLocation(): boolean {
+    const user = this.authService?.currentUserValue as any;
+    const employee = user?.employee ?? user?.Employee;
+    const fromSession =
+      employee?.ShowAllLocation ??
+      employee?.showAllLocation;
+    if (fromSession === true || fromSession === 'true' || fromSession === 1) {
+      return true;
+    }
+
+    const raw = localStorage.getItem('currentUser');
+    if (!raw) {
+      return false;
+    }
+    try {
+      const stored = JSON.parse(raw);
+      const storedEmployee = stored?.employee ?? stored?.Employee;
+      const loginValue =
+        storedEmployee?.ShowAllLocation ??
+        storedEmployee?.showAllLocation;
+      return loginValue === true || loginValue === 'true' || loginValue === 1;
+    } catch {
+      return false;
+    }
   }
 
   getRoleID(): number {

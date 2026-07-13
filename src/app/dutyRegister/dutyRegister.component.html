@@ -36,17 +36,13 @@
                                 </div>
                                 <br/>
                                 <div class="duty-register-inline-search-actions quick-search-actions">
-                                    <button mat-raised-button color="primary" class="duty-register-search-button" (click)="SearchData()">
-                                        Search
+                                    <button mat-raised-button color="primary" class="duty-register-search-button" (click)="SearchData()" [disabled]="isExportJobInProgress()">
+                                        {{ isExportJobInProgress() ? 'Exporting...' : 'Search' }}
                                     </button>
                                     &nbsp;&nbsp;
                                     
-                                    <button mat-raised-button color="warn" class="duty-register-reset-button" (click)="refresh()">
+                                    <button mat-raised-button color="warn" class="duty-register-reset-button" (click)="refresh()" [disabled]="isExportJobInProgress()">
                                         Refresh
-                                    </button>
-                                    &nbsp;&nbsp;
-                                    <button mat-raised-button color="accent" (click)="downloadFilteredCsv()" [disabled]="csvExporting || !hasManualSearch" [matTooltip]="!hasManualSearch ? 'Pehle Search karein' : ''">
-                                        {{ csvExporting ? 'Downloading...' : 'Download CSV' }}
                                     </button>
                                 </div>
                             </mat-expansion-panel>
@@ -66,25 +62,40 @@
                                 </div>
                                 <br/>
                                 <div class="duty-register-inline-search-actions quick-search-actions">
-                                    <button mat-raised-button color="primary" class="duty-register-search-button" (click)="SearchData()">
-                                        Search
+                                    <button mat-raised-button color="primary" class="duty-register-search-button" (click)="SearchData()" [disabled]="isExportJobInProgress()">
+                                        {{ isExportJobInProgress() ? 'Exporting...' : 'Search' }}
                                     </button>
                                     &nbsp;&nbsp;
                                     
-                                    <button mat-raised-button color="warn" class="duty-register-reset-button" (click)="refresh()">
+                                    <button mat-raised-button color="warn" class="duty-register-reset-button" (click)="refresh()" [disabled]="isExportJobInProgress()">
                                         Refresh
-                                    </button>
-                                    &nbsp;&nbsp;
-                                    <button mat-raised-button color="accent" (click)="downloadFilteredCsv()" [disabled]="csvExporting || !hasManualSearch" [matTooltip]="!hasManualSearch ? 'Pehle Search karein' : ''">
-                                        {{ csvExporting ? 'Downloading...' : 'Download CSV' }}
                                     </button>
                                 </div>
                             </mat-expansion-panel>
                         </mat-accordion>
 
-                        <br/>
+                        <div class="duty-register-export-job-panel" *ngIf="exportJobId || exportJobError">
+                            <div class="panel-title">Duty Register CSV Export</div>
+                            <div class="export-job-meta" *ngIf="exportJobId">
+                                <span>Job: {{ exportJobId }}</span>
+                                <span class="export-job-stat">Status: {{ getExportJobStatusLabel() || '—' }}</span>
+                                <span class="export-job-stat" *ngIf="isExportJobInProgress() || getExportRowsExported()">Rows: {{ getExportRowsExported() }}</span>
+                                <span class="export-job-stat">Elapsed: {{ getExportElapsedTime() }}</span>
+                            </div>
+                            <mat-progress-bar *ngIf="isExportJobInProgress()" mode="indeterminate"></mat-progress-bar>
+                            <p class="export-job-message" *ngIf="getExportJobMessage()">{{ getExportJobMessage() }}</p>
+                            <div class="export-job-actions">
+                                <button mat-raised-button color="accent" type="button" (click)="downloadExportCsv()" [disabled]="!canDownloadExport()">
+                                    {{ exportJobDownloading ? 'Downloading...' : 'Download CSV' }}
+                                </button>
+                            </div>
+                        </div>
 
-                        <div class="responsive_table">
+                        <p class="export-hint" *ngIf="!exportJobId && !exportJobError">
+                            <strong>Pickup date range is required.</strong> When no other filters are selected, the range is limited to {{ maxPickupDateRangeDays }} days. Add any other search filter to search a wider range. Click <strong>Search</strong> to generate a CSV export in the background.
+                        </p>
+
+                        <div class="responsive_table" *ngIf="false">
                             <div class="table-responsive">
                                 <p *ngIf="!dataSource || dataSource.length === 0; then thenBlock2 else elseBlock2">
                                     This is not rendered
@@ -792,19 +803,21 @@
                 <div class="row">
                     <div class="col mb-2" style="flex: 0 0 20%; max-width: 20%;">
                         <mat-form-field class="example-full-width cp-quick-search-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
-                            <mat-label>From Date</mat-label>
-                            <input type="text" matInput [matDatepicker]="fromDate" [(ngModel)]="SearchFromDate">
+                            <mat-label>Pickup Date From</mat-label>
+                            <input type="text" matInput [matDatepicker]="fromDate" [(ngModel)]="SearchFromDate" required>
                             <mat-datepicker-toggle matSuffix [for]="fromDate"></mat-datepicker-toggle>
                             <mat-datepicker #fromDate></mat-datepicker>
+                            <mat-hint>Required</mat-hint>
                         </mat-form-field>
                     </div>
                     
                     <div class="col mb-2" style="flex: 0 0 20%; max-width: 20%;">
                         <mat-form-field class="example-full-width cp-quick-search-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
-                            <mat-label>To Date</mat-label>
-                            <input type="text" matInput [matDatepicker]="toDate" [(ngModel)]="SearchToDate">
+                            <mat-label>Pickup Date To</mat-label>
+                            <input type="text" matInput [matDatepicker]="toDate" [(ngModel)]="SearchToDate" required>
                             <mat-datepicker-toggle matSuffix [for]="toDate"></mat-datepicker-toggle>
                             <mat-datepicker #toDate></mat-datepicker>
+                            <mat-hint>Required</mat-hint>
                         </mat-form-field>
                     </div>                    
 
@@ -1271,18 +1284,20 @@
         <div class="col-xl-3 col-lg-3 col-md-3 col-sm-12 mb-2">
             <mat-form-field class="example-full-width cp-quick-search-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
                 <mat-label>Pickup Date From</mat-label>
-                <input type="text" matInput [matDatepicker]="fromDate" [(ngModel)]="SearchFromDate">
+                <input type="text" matInput [matDatepicker]="fromDate" [(ngModel)]="SearchFromDate" required>
                 <mat-datepicker-toggle matSuffix [for]="fromDate"></mat-datepicker-toggle>
                 <mat-datepicker #fromDate></mat-datepicker>
+                <mat-hint>Required</mat-hint>
             </mat-form-field>
         </div>
         
         <div class="col-xl-3 col-lg-3 col-md-3 col-sm-12 mb-2">
             <mat-form-field class="example-full-width cp-quick-search-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
                 <mat-label>Pickup Date To</mat-label>
-                <input type="text" matInput [matDatepicker]="toDate" [(ngModel)]="SearchToDate">
+                <input type="text" matInput [matDatepicker]="toDate" [(ngModel)]="SearchToDate" required>
                 <mat-datepicker-toggle matSuffix [for]="toDate"></mat-datepicker-toggle>
                 <mat-datepicker #toDate></mat-datepicker>
+                <mat-hint>Required</mat-hint>
             </mat-form-field>
         </div>
     </div>

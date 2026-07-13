@@ -52,11 +52,11 @@
       </div>
 
       <div class="br-filter-actions">
-        <button mat-flat-button color="primary" class="br-btn-search" (click)="SearchData()">
+        <button mat-flat-button color="primary" class="br-btn-search" (click)="SearchData()" [disabled]="isExportJobInProgress()">
           <mat-icon>search</mat-icon>
-          Search
+          {{ isExportJobInProgress() ? 'Exporting...' : 'Search' }}
         </button>
-        <button mat-stroked-button type="button" class="br-btn-reset" (click)="refresh()">
+        <button mat-stroked-button type="button" class="br-btn-reset" (click)="refresh()" [disabled]="isExportJobInProgress()">
           <mat-icon>refresh</mat-icon>
           Reset
         </button>
@@ -68,7 +68,29 @@
       </div>
     </div>
 
-    <div class="br-table-card">
+    <div class="br-export-job-panel" *ngIf="exportJobId || exportJobError">
+      <div class="panel-title">App MIS CSV Export</div>
+      <div class="export-job-meta" *ngIf="exportJobId">
+        <span>Job Type: {{ exportJobType }}</span>
+        <span>Job: {{ exportJobId }}</span>
+        <span class="export-job-stat">Status: {{ getExportJobStatusLabel() || '—' }}</span>
+        <span class="export-job-stat" *ngIf="isExportJobInProgress() || getExportRowsExported()">Rows: {{ getExportRowsExported() }}</span>
+        <span class="export-job-stat">Elapsed: {{ getExportElapsedTime() }}</span>
+      </div>
+      <mat-progress-bar *ngIf="isExportJobInProgress()" mode="indeterminate"></mat-progress-bar>
+      <p class="export-job-message" *ngIf="getExportJobMessage()">{{ getExportJobMessage() }}</p>
+      <div class="export-job-actions">
+        <button mat-raised-button color="accent" type="button" (click)="downloadExportCsv()" [disabled]="!canDownloadExport()">
+          {{ exportJobDownloading ? 'Downloading...' : 'Download CSV' }}
+        </button>
+      </div>
+    </div>
+
+    <p class="export-hint" *ngIf="!exportJobId && !exportJobError">
+      <strong>Duty date range is required.</strong> When no other filters are selected, the range is limited to {{ maxDateRangeDays }} days. Add dispatch location or activation status to search a wider range.
+    </p>
+
+    <div class="br-table-card" *ngIf="false">
       <div class="br-table-toolbar">
         <div class="br-table-toolbar-spacer"></div>
         <button mat-icon-button type="button" matTooltip="Refresh" (click)="loadData()">

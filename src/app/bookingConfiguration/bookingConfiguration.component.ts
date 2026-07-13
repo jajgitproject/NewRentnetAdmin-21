@@ -478,6 +478,25 @@ toggleStopFold() {
   return parsed && parsed.isValid() ? parsed.format('HH:mm') : null;
  }
 
+ /** Invariant date string for API (MMM DD yyyy) — avoids locale-dependent Date.toString(). */
+ private formatBookingDateString(value: any): string | null {
+  if (value === null || value === undefined || value === '') {
+    return null;
+  }
+
+  const parsed = moment(
+    value,
+    ['DD/MM/YYYY', 'D/M/YYYY', 'DD-MM-YYYY', 'D-M-YYYY', 'MMM DD yyyy', moment.ISO_8601],
+    true
+  );
+  if (parsed.isValid()) {
+    return parsed.format('MMM DD yyyy');
+  }
+
+  const fallback = moment(value);
+  return fallback.isValid() ? fallback.format('MMM DD yyyy') : null;
+ }
+
  /** Wall-clock HH:mm from picker Date — avoids AM/PM string ambiguity on save. */
  private formatTime24FromDateTime(dateTime: any): string | null {
   if (dateTime === null || dateTime === undefined || dateTime === '') {
@@ -861,15 +880,17 @@ private extractTime(dateTime: Date): Date {
     this.advanceTableForm.patchValue({pickupTime:this.extractTime(this.advanceTableForm.value.pickupDateTime)});
     this.advanceTableForm.patchValue({dropOffDate:this.extractDate(this.advanceTableForm.value.dropOffDateTime)});
     this.advanceTableForm.patchValue({dropOffTime:this.extractTime(this.advanceTableForm.value.dropOffDateTime)});
-    this.advanceTableForm.patchValue({pickupDateString:this._generalService.getDateFrom(this.advanceTableForm.value.pickupDate)});
+    this.advanceTableForm.patchValue({pickupDateString:this.formatBookingDateString(this.advanceTableForm.value.pickupDate)});
     this.advanceTableForm.patchValue({pickupTimeString:this.formatTime24FromDateTime(this.advanceTableForm.value.pickupDateTime)});
-    this.advanceTableForm.patchValue({dropOffDateString:this._generalService.getDateFrom(this.advanceTableForm.value.dropOffDate)});
+    this.advanceTableForm.patchValue({dropOffDateString:this.formatBookingDateString(this.advanceTableForm.value.dropOffDate)});
     this.advanceTableForm.patchValue({dropOffTimeString:this.formatTime24FromDateTime(this.advanceTableForm.value.dropOffDateTime)});
     this.advanceTableForm.patchValue({
       dropOffCityID: this.normalizeOptionalInt(this.advanceTableForm.value.dropOffCityID),
     });
     const payload: any = this.advanceTableForm.getRawValue();
     payload.reservationStops = this.reservationStops;
+    payload.pickupTime = null;
+    payload.dropOffTime = null;
     this.bookingConfigurationService.add(payload)  
     .subscribe(
     response => 

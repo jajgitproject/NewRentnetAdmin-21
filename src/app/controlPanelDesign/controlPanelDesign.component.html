@@ -1697,6 +1697,12 @@
                               &nbsp;
                             <i style="color: #0c0c0c; font-size: 10px"
                               *ngIf="data.importance == 'CXO'">CXO</i>
+                            &nbsp;
+                            <span *ngIf="getOwnershipImpLabel(data) as ownLabel"
+                                  [matTooltip]="getOwnershipImpTooltip(data)"
+                                  matTooltipShowDelay="200">
+                              {{ ownLabel }}
+                            </span>
                             <br>
                             
                             <span *ngIf="data.specialInstruction !== null" [matTooltip]="getSpecialInstructions(data.specialInstruction)"> SI </span>

@@ -1,5 +1,5 @@
 // @ts-nocheck
-import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
+import { Component, ElementRef, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { MatDialog } from '@angular/material/dialog';
 import { MatPaginator } from '@angular/material/paginator';
@@ -12,6 +12,7 @@ import { DateAdapter, MAT_DATE_LOCALE } from '@angular/material/core';
 import { MatMenu, MatMenuTrigger } from '@angular/material/menu';
 import { SelectionModel } from '@angular/cdk/collections';
 import { GeneralService } from '../general/general.service';
+import { extractExportErrorMessage } from '../general/export-job.helper';
 import { MyUploadComponent } from '../myupload/myupload.component';
 // import { FormDialogComponent } from '../appDutyMIS/dialogs/form-dialog/form-dialog.component';
 import { DeleteDialogCityComponent } from '../dashboard/city-master/dialogscity/delete-city/delete-city.component';
@@ -33,7 +34,7 @@ import { OrganizationalEntityDropDown } from '../organizationalEntityMessage/org
   styleUrls: ['./appDutyMIS.component.sass'],
   providers: [{ provide: MAT_DATE_LOCALE, useValue: 'en-GB' }]
 })
-export class AppDutyMISComponent implements OnInit {
+export class AppDutyMISComponent implements OnInit, OnDestroy {
   displayedColumns = [
     'reservationID',
     'dutySlipID',
@@ -159,6 +160,15 @@ export class AppDutyMISComponent implements OnInit {
   searchToDate: Date | null = null;
   csvExporting = false;
   filtersCollapsed = false;
+  exportJobId: string | null = null;
+  exportJobStatus: any = null;
+  exportJobRunning = false;
+  exportJobDownloading = false;
+  exportJobError = '';
+  exportJobStartedAt: number | null = null;
+  private exportPollSub?: Subscription;
+  readonly maxDateRangeDays = 15;
+  readonly exportJobType = 'AppMISExport';
   private readonly pageSize = 50;
 
   private readonly zeroAsNaColumns = new Set(['dutySlipID']);
@@ -246,6 +256,13 @@ export class AppDutyMISComponent implements OnInit {
       );
       }
 
+  ngOnDestroy() {
+    this.stopExportPolling();
+    if (this.subscriptionName) {
+      this.subscriptionName.unsubscribe();
+    }
+  }
+
   refresh() {
     this.setDefaultDateRange();
     this.dispatch_Location.setValue('');
@@ -253,7 +270,8 @@ export class AppDutyMISComponent implements OnInit {
     this.PageNumber = 0;
     this.searchTerm = '';
     this.selectedFilter = 'search';
-    this.loadData();
+    this.dataSource = null;
+    this.clearExportJob();
   }
 
   get activeFilterCount(): number {
@@ -515,8 +533,207 @@ shouldShowDeleteButton(item: any): boolean {
 
   public SearchData()
   {
+    if (this.exportJobRunning) {
+      return;
+    }
+
+    const dateRangeError = this.validateDateRange();
+    if (dateRangeError) {
+      this.showNotification('snackbar-danger', dateRangeError, 'bottom', 'center');
+      return;
+    }
+
     this.PageNumber = 0;
-    this.loadData();
+    this.dataSource = null;
+    this.exportJobError = '';
+    this.exportJobStartedAt = Date.now();
+    const fromDate = this.formatDateParam(this.searchFromDate);
+    const toDate = this.formatDateParam(this.searchToDate);
+
+    this.exportJobRunning = true;
+    this.showNotification('snackbar-info', 'Export job started. CSV will be ready when processing completes.', 'bottom', 'center');
+
+    this.appDutyMISService.startExportJob(
+      fromDate,
+      toDate,
+      this.dispatch_Location.value || '',
+      this.SearchActivationStatus
+    ).subscribe(
+      (startResult: any) => {
+        const jobId = startResult?.jobId ?? startResult?.JobId;
+        if (!jobId) {
+          this.exportJobRunning = false;
+          this.exportJobError = 'Could not start export job.';
+          this.showNotification('snackbar-danger', this.exportJobError, 'bottom', 'center');
+          return;
+        }
+
+        this.exportJobId = jobId;
+        this.exportJobStatus = {
+          jobId,
+          jobType: startResult?.jobType ?? startResult?.JobType ?? this.exportJobType,
+          status: startResult?.status ?? startResult?.Status ?? 'Pending',
+          message: startResult?.message ?? startResult?.Message ?? 'Export queued'
+        };
+        this.startExportPolling(jobId);
+      },
+      async (error) => {
+        this.exportJobRunning = false;
+        this.exportJobError = await extractExportErrorMessage(error);
+        this.showNotification('snackbar-danger', this.exportJobError, 'bottom', 'center');
+      }
+    );
+  }
+
+  downloadExportCsv() {
+    if (!this.exportJobId || !this.appDutyMISService.isExportJobReady(this.exportJobStatus) || this.exportJobDownloading) {
+      return;
+    }
+
+    this.exportJobDownloading = true;
+    this.appDutyMISService.downloadExportJob(this.exportJobId).subscribe(
+      async (blob: Blob) => {
+        this.exportJobDownloading = false;
+        if (!blob || blob.size === 0) {
+          this.showNotification('snackbar-danger', 'Export file is empty or unavailable.', 'bottom', 'center');
+          return;
+        }
+
+        const contentType = (blob.type || '').toLowerCase();
+        if (contentType.includes('application/json') || contentType.includes('text/plain')) {
+          const text = await blob.text();
+          let message = 'Export file is not ready.';
+          try {
+            message = JSON.parse(text || '{}').message || message;
+          } catch {
+            if (text?.trim()) message = text;
+          }
+          this.showNotification('snackbar-danger', message, 'bottom', 'center');
+          return;
+        }
+
+        const fileName = this.exportJobStatus?.fileName ?? this.exportJobStatus?.FileName;
+        this.triggerCsvDownload(blob, fileName);
+        this.appDutyMISService.getExportJobStatus(this.exportJobId).subscribe((status) => { this.exportJobStatus = status; }, () => {});
+      },
+      async (error) => {
+        this.exportJobDownloading = false;
+        this.showNotification('snackbar-danger', await extractExportErrorMessage(error), 'bottom', 'center');
+      }
+    );
+  }
+
+  canDownloadExport(): boolean {
+    return !!this.exportJobId && this.appDutyMISService.isExportJobReady(this.exportJobStatus) && !this.exportJobDownloading;
+  }
+
+  isExportJobInProgress(): boolean {
+    return this.exportJobRunning || this.appDutyMISService.isExportJobRunning(this.exportJobStatus);
+  }
+
+  getExportJobStatusLabel(): string {
+    return this.exportJobStatus?.status ?? this.exportJobStatus?.Status ?? '';
+  }
+
+  getExportJobMessage(): string {
+    return this.exportJobStatus?.message ?? this.exportJobStatus?.Message ?? this.exportJobError ?? '';
+  }
+
+  getExportRowsExported(): number {
+    return this.exportJobStatus?.rowsExported ?? this.exportJobStatus?.RowsExported ?? 0;
+  }
+
+  getExportElapsedTime(): string {
+    if (!this.exportJobStartedAt) return '—';
+    const elapsedSeconds = Math.floor((Date.now() - this.exportJobStartedAt) / 1000);
+    const minutes = Math.floor(elapsedSeconds / 60);
+    const seconds = elapsedSeconds % 60;
+    return minutes > 0 ? `${minutes}m ${seconds}s` : `${seconds}s`;
+  }
+
+  hasAdditionalFilters(): boolean {
+    const dispatch = (this.dispatch_Location.value || '').trim();
+    return !!dispatch || this.SearchActivationStatus === false;
+  }
+
+  validateDateRange(): string | null {
+    if (!this.searchFromDate || !this.searchToDate) {
+      return 'Duty date range is required. Please select From and To dates.';
+    }
+
+    const fromDate = moment(this.searchFromDate).startOf('day');
+    const toDate = moment(this.searchToDate).startOf('day');
+    if (!fromDate.isValid() || !toDate.isValid()) {
+      return 'Please enter valid duty dates.';
+    }
+    if (toDate.isBefore(fromDate)) {
+      return 'Duty To cannot be earlier than From.';
+    }
+    if (!this.hasAdditionalFilters()) {
+      const inclusiveDays = toDate.diff(fromDate, 'days') + 1;
+      if (inclusiveDays > this.maxDateRangeDays) {
+        return `Duty date range cannot exceed ${this.maxDateRangeDays} days when no other search filters are selected. Add another filter to search a wider range.`;
+      }
+    }
+    return null;
+  }
+
+  private startExportPolling(jobId: string) {
+    this.stopExportPolling();
+    this.exportPollSub = this.appDutyMISService.pollExportJob(jobId).subscribe(
+      (status: any) => {
+        this.exportJobStatus = status;
+        const current = String(status?.status ?? status?.Status ?? '').toLowerCase();
+        if (current === 'failed') {
+          this.exportJobRunning = false;
+          this.exportJobError = status?.message ?? status?.Message ?? 'Export failed.';
+          this.showNotification('snackbar-danger', this.exportJobError, 'bottom', 'center');
+          this.stopExportPolling();
+          return;
+        }
+        if (current === 'completed') {
+          this.exportJobRunning = false;
+          const rows = status?.rowsExported ?? status?.RowsExported ?? 0;
+          this.showNotification('snackbar-success', status?.message ?? `Export ready (${rows} rows). Click Download CSV.`, 'bottom', 'center');
+          this.stopExportPolling();
+        }
+      },
+      async (error) => {
+        this.exportJobRunning = false;
+        this.exportJobError = await extractExportErrorMessage(error);
+        this.showNotification('snackbar-danger', this.exportJobError, 'bottom', 'center');
+        this.stopExportPolling();
+      }
+    );
+  }
+
+  private stopExportPolling() {
+    if (this.exportPollSub) {
+      this.exportPollSub.unsubscribe();
+      this.exportPollSub = undefined;
+    }
+  }
+
+  private clearExportJob() {
+    this.stopExportPolling();
+    this.exportJobId = null;
+    this.exportJobStatus = null;
+    this.exportJobRunning = false;
+    this.exportJobDownloading = false;
+    this.exportJobError = '';
+    this.exportJobStartedAt = null;
+  }
+
+  private triggerCsvDownload(blob: Blob, preferredFileName?: string) {
+    const fileUrl = window.URL.createObjectURL(blob);
+    const anchor = document.createElement('a');
+    anchor.href = fileUrl;
+    anchor.download = preferredFileName || `AppDutyMIS_${moment().format('YYYYMMDD_HHmmss')}.csv`;
+    document.body.appendChild(anchor);
+    anchor.click();
+    document.body.removeChild(anchor);
+    window.URL.revokeObjectURL(fileUrl);
+    this.showNotification('snackbar-success', 'CSV downloaded', 'bottom', 'center');
   }
 
 /////////////////for Image Upload////////////////////////////

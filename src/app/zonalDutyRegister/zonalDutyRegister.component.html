@@ -36,17 +36,13 @@
                                 </div>
                                 <br/>
                                 <div class="zonal-duty-register-inline-search-actions quick-search-actions">
-                                    <button mat-raised-button color="primary" class="zonal-duty-register-search-button" (click)="SearchData()">
-                                        Search
+                                    <button mat-raised-button color="primary" class="zonal-duty-register-search-button" (click)="SearchData()" [disabled]="isExportJobInProgress()">
+                                        {{ isExportJobInProgress() ? 'Exporting...' : 'Search' }}
                                     </button>
                                     &nbsp;&nbsp;
                                     
-                                    <button mat-raised-button color="warn" class="zonal-duty-register-reset-button" (click)="refresh()">
+                                    <button mat-raised-button color="warn" class="zonal-duty-register-reset-button" (click)="refresh()" [disabled]="isExportJobInProgress()">
                                         Refresh
-                                    </button>
-                                    &nbsp;&nbsp;
-                                    <button mat-raised-button color="accent" (click)="downloadFilteredCsv()" [disabled]="csvExporting || !hasManualSearch" [matTooltip]="!hasManualSearch ? 'Pehle Search karein' : ''">
-                                        {{ csvExporting ? 'Downloading...' : 'Download CSV' }}
                                     </button>
                                 </div>
                             </mat-expansion-panel>
@@ -66,17 +62,13 @@
                                 </div>
                                 <br/>
                                 <div class="zonal-duty-register-inline-search-actions quick-search-actions">
-                                    <button mat-raised-button color="primary" class="zonal-duty-register-search-button" (click)="SearchData()">
-                                        Search
+                                    <button mat-raised-button color="primary" class="zonal-duty-register-search-button" (click)="SearchData()" [disabled]="isExportJobInProgress()">
+                                        {{ isExportJobInProgress() ? 'Exporting...' : 'Search' }}
                                     </button>
                                     &nbsp;&nbsp;
                                     
-                                    <button mat-raised-button color="warn" class="zonal-duty-register-reset-button" (click)="refresh()">
+                                    <button mat-raised-button color="warn" class="zonal-duty-register-reset-button" (click)="refresh()" [disabled]="isExportJobInProgress()">
                                         Refresh
-                                    </button>
-                                    &nbsp;&nbsp;
-                                    <button mat-raised-button color="accent" (click)="downloadFilteredCsv()" [disabled]="csvExporting || !hasManualSearch" [matTooltip]="!hasManualSearch ? 'Pehle Search karein' : ''">
-                                        {{ csvExporting ? 'Downloading...' : 'Download CSV' }}
                                     </button>
                                 </div>
                             </mat-expansion-panel>
@@ -84,7 +76,29 @@
 
                         <br/>
 
-                        <div class="responsive_table">
+                        <div class="zonal-duty-register-export-job-panel" *ngIf="exportJobId || exportJobError">
+                            <div class="panel-title">Zonal Duty Register CSV Export</div>
+                            <div class="export-job-meta" *ngIf="exportJobId">
+                                <span>Job Type: {{ exportJobType }}</span>
+                                <span>Job: {{ exportJobId }}</span>
+                                <span class="export-job-stat">Status: {{ getExportJobStatusLabel() || '—' }}</span>
+                                <span class="export-job-stat" *ngIf="isExportJobInProgress() || getExportRowsExported()">Rows: {{ getExportRowsExported() }}</span>
+                                <span class="export-job-stat">Elapsed: {{ getExportElapsedTime() }}</span>
+                            </div>
+                            <mat-progress-bar *ngIf="isExportJobInProgress()" mode="indeterminate"></mat-progress-bar>
+                            <p class="export-job-message" *ngIf="getExportJobMessage()">{{ getExportJobMessage() }}</p>
+                            <div class="export-job-actions">
+                                <button mat-raised-button color="accent" type="button" (click)="downloadExportCsv()" [disabled]="!canDownloadExport()">
+                                    {{ exportJobDownloading ? 'Downloading...' : 'Download CSV' }}
+                                </button>
+                            </div>
+                        </div>
+
+                        <p class="export-hint" *ngIf="!exportJobId && !exportJobError">
+                            <strong>Pickup date range is required.</strong> When no other filters are selected, the range is limited to {{ maxPickupDateRangeDays }} days. Add any other search filter to search a wider range. Click <strong>Search</strong> to generate a CSV export in the background.
+                        </p>
+
+                        <div class="responsive_table" *ngIf="false">
                             <div class="table-responsive">
                                 <p *ngIf="!dataSource || dataSource.length === 0; then thenBlock2 else elseBlock2">
                                     This is not rendered

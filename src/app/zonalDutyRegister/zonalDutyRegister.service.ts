@@ -6,7 +6,7 @@ import { VehicleDropDown } from '../vehicle/vehicleDropDown.model';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { DatePipe } from '@angular/common';
 import { GeneralService } from '../general/general.service';
-import { S } from '@angular/cdk/keycodes';
+import { extractExportErrorMessage, isExportJobReady, isExportJobRunning, pollExportJob } from '../general/export-job.helper';
 @Injectable()
 export class ZonalDutyRegisterService 
 {
@@ -382,7 +382,7 @@ export class ZonalDutyRegisterService
     return this.httpClient.post(`${this.API_URL}`, updatedCriteria);
   }
 
-  exportCsv(criteria: SearchCriteria): Observable<Blob> {
+  private buildExportCriteria(criteria: SearchCriteria) {
     const toNull = (value: any) => {
       if (value === undefined || value === null) {
         return null;
@@ -394,7 +394,9 @@ export class ZonalDutyRegisterService
       return value;
     };
 
-    const updatedCriteria = {
+    return {
+      UserID: this.generalService.getUserID(),
+      ShowAllLocation: null,
       SearchCustomerGroup: toNull(criteria.SearchCustomerGroup),
       SearchCustomer: toNull(criteria.SearchCustomer),
       SearchBranch: toNull(criteria.SearchBranch),
@@ -421,7 +423,7 @@ export class ZonalDutyRegisterService
       SearchImportance: toNull(criteria.SearchImportance),
       SearchDSVerification: criteria.SearchDSVerification !== null && criteria.SearchDSVerification !== undefined ? criteria.SearchDSVerification : null,
       SearchGoodForBill: criteria.SearchGoodForBill !== null && criteria.SearchGoodForBill !== undefined ? criteria.SearchGoodForBill : null,
-      SearchBillStatus: criteria.SearchBillStatus !== null && criteria.SearchBillStatus !== undefined ? criteria.SearchBillStatus : null,                           
+      SearchBillStatus: criteria.SearchBillStatus !== null && criteria.SearchBillStatus !== undefined ? criteria.SearchBillStatus : null,
       SearchDri: toNull(criteria.SearchDri),
       SearchCarNo: toNull(criteria.SearchCarNo),
       SearchSupplierO: toNull(criteria.SearchSupplierO),
@@ -439,8 +441,35 @@ export class ZonalDutyRegisterService
       SearchBillFromDate: toNull(criteria.SearchBillFromDate),
       SearchBillToDate: toNull(criteria.SearchBillToDate)
     };
-    console.log(`${this.API_URL}/ExportCsv`, updatedCriteria);
-    return this.httpClient.post(`${this.API_URL}/ExportCsv`, updatedCriteria, {
+  }
+
+  startExportJob(criteria: SearchCriteria): Observable<any> {
+    return this.httpClient.post(`${this.API_URL}/ExportCsv/StartJob`, this.buildExportCriteria(criteria));
+  }
+
+  getExportJobStatus(jobId: string): Observable<any> {
+    return this.httpClient.get(`${this.API_URL}/ExportCsv/JobStatus/${jobId}`);
+  }
+
+  downloadExportJob(jobId: string): Observable<Blob> {
+    return this.httpClient.get(`${this.API_URL}/ExportCsv/Download/${jobId}`, { responseType: 'blob' });
+  }
+
+  pollExportJob(jobId: string): Observable<any> {
+    return pollExportJob(this.httpClient, `${this.API_URL}/ExportCsv/JobStatus/${jobId}`);
+  }
+
+  isExportJobRunning(status: any): boolean {
+    return isExportJobRunning(status);
+  }
+
+  isExportJobReady(status: any): boolean {
+    return isExportJobReady(status);
+  }
+
+  /** @deprecated Use startExportJob */
+  exportCsv(criteria: SearchCriteria): Observable<Blob> {
+    return this.httpClient.post(`${this.API_URL}/ExportCsv`, this.buildExportCriteria(criteria), {
       responseType: 'blob'
     });
   }
