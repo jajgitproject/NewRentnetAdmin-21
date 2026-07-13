@@ -177,26 +177,25 @@
                 </div>
             </div>
 
-            <div class="row">              
+            <div class="row">
+                <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                    <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                        <mat-label>Vehicle Type</mat-label>
+                        <mat-select formControlName="vehicleTypeID">
+                            <mat-option [value]="0">-- Select Vehicle Type --</mat-option>
+                            <mat-option *ngFor="let vehicle of VehicleList" [value]="vehicle.vehicleID">
+                                {{ vehicle.vehicle }}
+                            </mat-option>
+                        </mat-select>
+                    </mat-form-field>
+                </div>
+
                 <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
                     <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
                         <mat-label>Place Of Supply</mat-label>
                         <input required matInput formControlName="placeOfSupply">
                         <mat-error *ngIf="advanceTableForm.get('placeOfSupply').hasError('required')">
                             Place Of Supply is required
-                        </mat-error>
-                    </mat-form-field>
-                </div>
-
-                <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
-                    <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
-                        <mat-label>GST</mat-label>
-                        <mat-select formControlName="gst">
-                            <mat-option [value]=true>Yes</mat-option>
-                            <mat-option [value]=false>No</mat-option>
-                        </mat-select>
-                        <mat-error *ngIf="advanceTableForm.get('gst').hasError('required')">
-                            GST is required
                         </mat-error>
                     </mat-form-field>
                 </div>
@@ -212,6 +211,19 @@
                                 {{ sac.sacNumber }}
                             </mat-option>
                         </mat-select>
+                    </mat-form-field>
+                </div>
+
+                <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                    <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                        <mat-label>GST</mat-label>
+                        <mat-select formControlName="gst">
+                            <mat-option [value]=true>Yes</mat-option>
+                            <mat-option [value]=false>No</mat-option>
+                        </mat-select>
+                        <mat-error *ngIf="advanceTableForm.get('gst').hasError('required')">
+                            GST is required
+                        </mat-error>
                     </mat-form-field>
                 </div>
             </div>

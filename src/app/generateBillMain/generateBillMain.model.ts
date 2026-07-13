@@ -18,6 +18,7 @@ export class GenerateBillMainModel {
   invoiceDateString:string;
   invoiceDate:Date;
   placeOfSupply:string;
+  vehicleTypeID:number;
   vehicleID:number;
   vehicle:string;
   dutyType:string;
@@ -67,6 +68,7 @@ export class GenerateBillMainModel {
       this.invoiceNarration = generateBillMainModel.invoiceNarration || '';
       this.invoiceDateString = generateBillMainModel.invoiceDateString || '';
       this.placeOfSupply = generateBillMainModel.placeOfSupply || '';
+      this.vehicleTypeID = generateBillMainModel.vehicleTypeID || generateBillMainModel.vehicleID || '';
       this.vehicleID = generateBillMainModel.vehicleID || '';
       this.vehicle = generateBillMainModel.vehicle || '';
       this.dutyType = generateBillMainModel.dutyType || '';

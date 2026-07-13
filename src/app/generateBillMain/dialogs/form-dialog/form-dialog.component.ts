@@ -137,6 +137,7 @@ export class FormDialogComponent
       invoiceNarration: [this.advanceTable.invoiceNarration],
       invoiceDate: [this.advanceTable.invoiceDate],
       placeOfSupply: [this.advanceTable.placeOfSupply],
+      vehicleTypeID: [this.advanceTable.vehicleTypeID || this.advanceTable.vehicleID || 0],
       vehicleID: [this.advanceTable.vehicleID || 0],
       vehicle: [this.advanceTable.vehicle],
       dutyType: [this.advanceTable.dutyType],
@@ -171,6 +172,7 @@ export class FormDialogComponent
     //this.InitCity();
     this.InitIGSTPercentage();
     this.InitCSGSTPercentage();
+    this.InitVehicle();
     
     // Watch for invoice date changes
     this.advanceTableForm.get('invoiceDate')?.valueChanges.subscribe((invoiceDate) => {
@@ -665,15 +667,8 @@ export class FormDialogComponent
     this._generalService.GetVehicle().subscribe(
       data =>
         {
-          this.VehicleList = data;
-          this.advanceTableForm.controls['vehicle'].setValidators([Validators.required,
-            this.vehicleValidator(this.VehicleList)]);
-          this.advanceTableForm.controls['vehicle'].updateValueAndValidity();
-          this.filteredVehicleOptions = this.advanceTableForm.controls['vehicle'].valueChanges.pipe(
-            startWith(""),
-            map(value => this._filterVehicle(value || ''))
-        );
-      }
+          this.VehicleList = data ?? [];
+        }
     );
   }
   private _filterVehicle(value: string): any {
