@@ -305,19 +305,92 @@ resetTaxes() {
       panelClass: colorName
     });
   }
-  public confirmAdd(): void 
-  {
-    this.saveDisabled = false;
-       if(this.action=="edit")
-       {
-          this.Put();
-       }
-       else
-       {
+  public confirmAdd(): void {
+
+  const amount = Number(this.advanceTableForm.get('invoiceTotalAmountAfterGST')?.value);
+  const creditNoteAmount = Number(this.advanceTableForm.get('creditNoteAmount')?.value);
+  const requiresReBilling = this.advanceTableForm.get('requiresReBilling')?.value;
+
+  // Validate only while adding (or remove this if you want the same validation for edit)
+  if (this.action !== 'edit' && requiresReBilling === false) {
+
+    // Amount and Credit Note Amount are equal
+    if (amount === creditNoteAmount) {
+
+      Swal.fire({
+        title: 'Are you sure?',
+        text: 'Are you sure you do not want to rebill the Duty Slips (DS) associated with this bill?',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonText: 'Yes',
+        cancelButtonText: 'No'
+      }).then((result) => {
+        if (result.isConfirmed) {
+          this.saveDisabled = false;
           this.Post();
-       }
+        }
+      });
+
+      return;
+    }
+
+    // Amount and Credit Note Amount are different
+    if (amount !== creditNoteAmount) {
+
+      Swal.fire({
+        title: 'Invalid Selection',
+        text: 'Credit Note Amount should be equal to Invoice Amount for Re-billing.',
+        icon: 'error',
+        confirmButtonText: 'OK'
+      });
+
+      return;
+    }
   }
-  
+ else if(this.action !== 'edit' && requiresReBilling === true) {
+
+
+    // Amount and Credit Note Amount are equal
+    // if (amount === creditNoteAmount) {
+
+    //   Swal.fire({
+    //     title: 'Are you sure?',
+    //     text: 'Are you sure you do not want to rebill the Duty Slips (DS) associated with this bill?',
+    //     icon: 'warning',
+    //     showCancelButton: true,
+    //     confirmButtonText: 'Yes',
+    //     cancelButtonText: 'No'
+    //   }).then((result) => {
+    //     if (result.isConfirmed) {
+    //       this.saveDisabled = false;
+    //       this.Post();
+    //     }
+    //   });
+
+    //   return;
+    // }
+
+    // Amount and Credit Note Amount are different
+    if (amount > creditNoteAmount) {
+
+      Swal.fire({
+        title: 'Invalid Selection',
+        text: 'In order to rebill the duties, the Credit note amount should be equals to Invoice Amount.',
+        icon: 'error',
+        confirmButtonText: 'OK'
+      });
+
+      return;
+    }
+  }
+  this.saveDisabled = false;
+
+  if (this.action === 'edit') {
+    this.Put();
+  } else {
+    this.Post();
+  }
+}
   /////////////////for Image Upload////////////////////////////
   public response: { dbPath: '' };
   public ImagePath: string = "";

@@ -1702,7 +1702,9 @@ export class DutySlipForBillingComponent implements OnInit, AfterViewInit, OnCha
         this.advanceTableBH.goodForBilling = isChecked;
         this.advanceTableBH.actionTaken = this.advanceTableForm.value.actionTaken;
         this.advanceTableBH.actionDetails = this.advanceTableForm.value.actionDetails;
-        this.CalculateBill(true);
+        this.updateDutyStatus(() => {
+    this.CalculateBill(true);
+});
       }
       if(isChecked === false)
       {
@@ -1785,7 +1787,9 @@ export class DutySlipForBillingComponent implements OnInit, AfterViewInit, OnCha
     if (!this.disputeAdvanceTable || this.disputeAdvanceTable.length === 0) {
       // No disputes, allow verify duty
       this.setVerifyDuty(true, "Checked");
-      this.CalculateBillForVerifyDuty();
+      this.updateDutyStatus(() => {
+    this.CalculateBillForVerifyDuty();
+});
     } else {
       // Disputes exist: all approvalStatus must be true
       const allApproved = this.disputeAdvanceTable.every(
@@ -1794,7 +1798,9 @@ export class DutySlipForBillingComponent implements OnInit, AfterViewInit, OnCha
 
       if (allApproved) {
         this.setVerifyDuty(true, "Checked");
-        this.CalculateBillForVerifyDuty();
+        this.updateDutyStatus(() => {
+    this.CalculateBillForVerifyDuty();
+});
       }
        else {
         // Show alert and revert checkbox
@@ -2421,6 +2427,48 @@ onChange() {
       }
     );
   }
+
+updateDutyStatus(callback?: () => void) {
+
+    // this.showSpinner = true;
+
+    this.dutySlipForBillingService
+        .update(this.advanceTableForm.getRawValue())
+        .subscribe({
+            next: (response) => {
+
+                this.showSpinner = false;
+
+                this.advanceTableForm.patchValue({
+                    verifyDuty: response.verifyDuty,
+                    goodForBilling: response.goodForBilling
+                });
+
+                this.showNotification(
+                    'snackbar-success',
+                    'Updated Successfully',
+                    'bottom',
+                    'center'
+                );
+
+               
+                if (callback) {
+                    callback();
+                }
+            },
+            error: (err) => {
+
+                this.showSpinner = false;
+
+                this.showNotification(
+                    'snackbar-danger',
+                    this.extractApiErrorMessage(err),
+                    'bottom',
+                    'center'
+                );
+            }
+        });
+}
 }
 
 

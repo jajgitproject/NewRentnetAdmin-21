@@ -204,11 +204,11 @@
                                     <mat-icon>add_box</mat-icon>
                                     <span>Add</span>
                                     </button> -->
-                                        <button mat-menu-item (click)="editCall(item)">
+                                        <button mat-menu-item (click)="editCall(item)" [disabled]="item.irnStatus === 'Generated'">
                                             <mat-icon>create</mat-icon>
                                             <span>Edit</span>
                                         </button>
-                                        <button mat-menu-item (click)="openAttachDetachForEdit(item)">
+                                        <button mat-menu-item (click)="openAttachDetachForEdit(item)" [disabled]="item.irnStatus === 'Generated'">
                                             <mat-icon>link</mat-icon>
                                             <span>Attach/Detach Duties</span>
                                         </button>
@@ -223,7 +223,7 @@
                                         </button> -->
                                         <ng-container *ngFor="let menuItem of menuItems">
                                             <button mat-menu-item [matTooltip]="menuItem.tooltip"
-                                                (click)="openInNewTab(menuItem, item)">
+                                                (click)="openInNewTab(menuItem, item)" [disabled]="item.irnStatus === 'Generated'">
                                                 <mat-icon>how_to_reg</mat-icon>
                                                 <span>{{ menuItem.label }}</span>
                                             </button>

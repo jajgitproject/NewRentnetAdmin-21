@@ -82,10 +82,10 @@
         <strong>Branch Office:</strong> {{dataSource?.ecoBranchAddress}}<br />
         <strong>Reg. Office:</strong> 45, First Floor, Corner Market, Malviya Nagar, New Delhi-110017<br />
         <strong>Correspondence:</strong> 45, First Floor, Corner Market, Malviya Nagar, New Delhi-110017<br />
-        <strong>Telephone Reservation 24/7:</strong> 91-11-40794079,
-        <strong>Fax:</strong> 01141550515<br />
-        <strong>Email:</strong> billing@ecorentacar.com,
-        <strong>Reservation:</strong> cars@ecorentacar.com<br />
+        <strong>Telephone Reservation 24/7:</strong> 91-11-40794079,<br />
+        <!-- <strong>Fax:</strong> 01141550515<br /> -->
+        <strong>Email:</strong> billing@ecosmobility.com,
+        <strong>Reservation:</strong> cars@ecosmobility.com<br />
         <strong>GST No:</strong> {{dataSource?.ecoBranchGSTNumber}}<br />
         LUT: {{dataSource?.lutNOForInvoiceModel?.lutNo}},
         Exp. Date: {{dataSource?.lutNOForInvoiceModel?.endDate | date:'dd/MM/yyyy'}}<br />
@@ -126,6 +126,8 @@
       <td width="30%">
         <strong>Invoice No:</strong> {{dataSource?.invoiceNumberWithPrefix}}<br />
         <strong>Invoice Date:</strong> {{dataSource?.invoiceDate | date:'dd/MM/yyyy'}}<br />
+        <strong>SAC : </strong>{{ dataSource?.hsn }}<br />
+        <strong>Car Type : </strong>{{ dataSource?.carType }}
       </td>
     </tr>
   </table>
@@ -160,9 +162,9 @@
 
   <!-- Taxes -->
   <table style="margin-top: 10px;" class="no-border">
-    <tr>
+    <!-- <tr>
        <td>SAC : {{ dataSource?.hsn }}</td>
-    </tr>
+    </tr> -->
    <tr>
        <td class="text-right">CGST &nbsp; @ {{ dataSource?.cgstPercentage ?? 0 }}% &nbsp;&nbsp;&nbsp; {{ dataSource?.cgstAmount ?? 0 }}</td>
     </tr>
@@ -178,7 +180,7 @@
   <hr />
   <table class="no-border">
     <tr>
-      <td><strong>Amount in Words:</strong> {{dataSourceForCalculate.invoiceTotalAmountAfterGSTInWords}}</td>
+      <td class="amount-words"><strong>Amount in Words:</strong> {{dataSourceForCalculate.invoiceTotalAmountAfterGSTInWords}}</td>
       <td class="text-right"><strong>Total Rs:</strong>{{dataSource?.invoiceTotalAmountAfterGST}}</td>
     </tr>
   </table>
@@ -188,12 +190,10 @@
   <table style="margin-top: 10px;font-size: 8pt" class="no-border">
     <tr>
       <td width="70%" valign="top">
-        <strong>E & O. E.</strong><br />
         <strong>Terms & Conditions</strong><br />
         Our Responsibility of the Signed duty slip rests till we handover the same to you with the bill.<br />
         Interest @ 24% will be charged if payment is not received as per payment terms settled.<br />
         No Objection pertaining to this invoice would be entertained thereafter.<br />
-        <br />
         <strong>Sent the RTGS/NEFT Payment to:</strong><br />
         KOTAK MAHINDRA BANK / A/C NO: 3911291161<br />
         IFSC CODE: KKBK0004620
@@ -207,7 +207,7 @@
   </table>
 
   <!-- Footer -->
-  <div style="font-size: 8pt; margin-top: 15px;">
+  <div style="font-size: 8pt; margin-top: 0px;">
     PAN NO: AABCE1357N,
     TIN NO: 07860310884,
     CIN NO: U74999DL1996PTC076375<br />
