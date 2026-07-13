@@ -2,7 +2,7 @@
 import { Injectable } from '@angular/core';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
-import { DatePipe } from '@angular/common';
+import { DatePipe, formatDate } from '@angular/common';
 import { GeneralService } from '../general/general.service';
 import { GenerateBillMainModel } from './generateBillMain.model';
 @Injectable()
@@ -99,8 +99,22 @@ export class GenerateBillMainService
     advanceTable.userID=this.generalService.getUserID();
     advanceTable.invoiceNumberIssuedByID=this.generalService.getUserID();
     advanceTable.invoiceDateString=this.generalService.getTimeApplicable(advanceTable.invoiceDate).toString().slice(0, 19);
-    advanceTable.billFromDateString=this.generalService.getTimeApplicable(advanceTable.billFromDate).toString().slice(0, 19);
-    advanceTable.billToDateString=this.generalService.getTimeApplicable(advanceTable.billToDate).toString().slice(0, 19);
+advanceTable.billFromDateString = formatDate(
+    advanceTable.billFromDate,
+    'yyyy-MM-dd',
+    'en-IN'
+  );
+
+  advanceTable.billToDateString = formatDate(
+    advanceTable.billToDate,
+    'yyyy-MM-dd',
+    'en-IN'
+  );
+
+  // Don't send Date objects
+  advanceTable.billFromDate = advanceTable.billFromDateString as any;
+  advanceTable.billToDate = advanceTable.billToDateString as any;
+
     return this.httpClient.post<any>(this.API_URL , advanceTable);
   }
   update(advanceTable: GenerateBillMainModel)
@@ -108,8 +122,22 @@ export class GenerateBillMainService
     advanceTable.userID=this.generalService.getUserID();
     advanceTable.invoiceNumberIssuedByID=this.generalService.getUserID();
     advanceTable.invoiceDateString=this.generalService.getTimeApplicable(advanceTable.invoiceDate).toString().slice(0, 19);
-    advanceTable.billFromDateString=this.generalService.getTimeApplicable(advanceTable.billFromDate).toString().slice(0, 19);
-    advanceTable.billToDateString=this.generalService.getTimeApplicable(advanceTable.billToDate).toString().slice(0, 19);
+   advanceTable.billFromDateString = formatDate(
+    advanceTable.billFromDate,
+    'yyyy-MM-dd',
+    'en-IN'
+  );
+
+  advanceTable.billToDateString = formatDate(
+    advanceTable.billToDate,
+    'yyyy-MM-dd',
+    'en-IN'
+  );
+
+  // Don't send Date objects
+  advanceTable.billFromDate = advanceTable.billFromDateString as any;
+  advanceTable.billToDate = advanceTable.billToDateString as any;
+
     return this.httpClient.put<any>(this.API_URL , advanceTable);
   }
   delete(invoiceID: number):  Observable<any> 

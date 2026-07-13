@@ -84,15 +84,16 @@ ngOnInit(): void {
       // Allow only 'None' to be selectable manually
       this.disableNoneOption = false;
 
+
       // DO NOT auto-set any value here!
-      this.advanceTableForm.get('nextPackageSelectionCriteria')?.reset(); // Clear previous value
+      this.advanceTableForm.get('nextPackageSelectionCriteria')?.setValue('None'); // Clear previous value
     } else {
       // Disable 'None' option
       this.disableNoneOption = true;
 
       // If previously selected value was 'None', clear it
       if (this.advanceTableForm.get('nextPackageSelectionCriteria')?.value === 'None') {
-        this.advanceTableForm.get('nextPackageSelectionCriteria')?.reset();
+        this.advanceTableForm.get('nextPackageSelectionCriteria')?.reset('Hr to Km'); // Reset to default value
       }
     }
   });
@@ -114,7 +115,7 @@ ngOnInit(): void {
       customerContractID: [this.advanceTable?.customerContractID],
       billFromTo: [this.advanceTable?.billFromTo],
       packageJumpCriteria: [this.advanceTable?.packageJumpCriteria],
-      nextPackageSelectionCriteria: [{ value: 'Hr to Km', disabled: true }],
+      nextPackageSelectionCriteria: [ {value: this.advanceTable?.nextPackageSelectionCriteria || 'Hr to Km', disabled: true }],
       packageGraceMinutes: [this.advanceTable?.packageGraceMinutes],
       packageGraceKms: [this.advanceTable?.packageGraceKms],
       activationStatus: [this.advanceTable?.activationStatus],
