@@ -162,9 +162,11 @@
 
   <!-- Taxes -->
   <table style="margin-top: 10px;" class="no-border">
-    <!-- <tr>
-       <td>SAC : {{ dataSource?.hsn }}</td>
-    </tr> -->
+    <tr *ngIf="dataSource?.isSEZ===true">
+       <td>Supply meant for Export/supply to SEZ unit or SEZ developer for 
+              authorised operations under bond or letter of undertaking
+     without payment of integrated Tax</td>
+    </tr>
    <tr>
        <td class="text-right">CGST &nbsp; @ {{ dataSource?.cgstPercentage ?? 0 }}% &nbsp;&nbsp;&nbsp; {{ dataSource?.cgstAmount ?? 0 }}</td>
     </tr>

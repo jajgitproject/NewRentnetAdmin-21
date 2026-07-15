@@ -58,14 +58,21 @@
         <div class="col-xl-2 col-lg-4 col-md-12 col-sm-12 mb-2">
           City: <br/>{{CityName}}
         </div>
-        <div class="col-xl-2 col-lg-4 col-md-12 col-sm-12 mb-2" *ngIf="GstNumber">
+        <div class="col-xl-2 col-lg-4 col-md-12 col-sm-12 mb-2">
+          Car Booked: <br/>{{carBooked}}
+        </div>
+        <div class="col-xl-2 col-lg-4 col-md-12 col-sm-12 mb-2">
+          Car Sent: <br/>{{carSent}}<br/><span *ngIf="fuelType"> ({{fuelType}})</span>
+        </div>
+      </div>
+     <div class="row" style="padding-left: 30px;">
+       <div class="col-xl-2 col-lg-4 col-md-12 col-sm-12 mb-2" *ngIf="GstNumber">
           GST Number: <br/>{{GstNumber}}({{StateName}})
         </div>
          <div class="col-xl-2 col-lg-2 col-md-12 col-sm-12 mb-2" *ngIf="dataSourceForBillNo?.invoiceModel?.invoiceNumberWithPrefix">
           Bill No: <br/>{{dataSourceForBillNo?.invoiceModel?.invoiceNumberWithPrefix}}
         </div>
-      </div>
-
+     </div>
     </div>
 
 

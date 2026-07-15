@@ -247,6 +247,9 @@ export class ClossingOneComponent implements OnInit, AfterViewInit {
   hasActiveEInvoice = false;
    CityName:any;
   Package:any;
+  carBooked:any;
+  carSent:any;
+  fuelType:any;
 
   constructor(
     public httpClient: HttpClient,
@@ -400,6 +403,7 @@ export class ClossingOneComponent implements OnInit, AfterViewInit {
       (
         data => {
           this.closingDataAdvanceTable = data;
+          console.log('Closing Data:', this.closingDataAdvanceTable);
           this.allotmentID = this.closingDataAdvanceTable?.allotmentID;
           this.dutySlipID = this.closingDataAdvanceTable?.dutySlipID;
           this.ReservationID = this.closingDataAdvanceTable?.reservationID;
@@ -430,6 +434,9 @@ export class ClossingOneComponent implements OnInit, AfterViewInit {
           this.DutySlipMap= this.closingDataAdvanceTable?.dutySlipMap;
           this.CityName = this.closingDataAdvanceTable?.city;
           this.Package = this.closingDataAdvanceTable?.package;
+          this.carBooked=this.closingDataAdvanceTable?.vehicle;
+          this.carSent=this.closingDataAdvanceTable?.carSent;
+          this.fuelType=this.closingDataAdvanceTable?.fuelType;
          
           this.advanceDetailsLoadData();
           this.kamCardLoadData();

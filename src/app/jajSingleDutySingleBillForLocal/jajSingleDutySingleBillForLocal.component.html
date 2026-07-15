@@ -327,7 +327,7 @@
               <td class="table-midrow-secondcolumn">&nbsp;</td>
               <td class="table-midrow-thirdcolumn">
                 <span *ngIf="dataSource?.invoiceFuelSurchargeModel.totalFuelSurchargeOnPackageRate != 0">
-                   {{getTotalFuelSurchargeAmount()}} &nbsp;
+                   {{getTotalFuelSurchargeAmount() | number:'1.2-2'}} &nbsp;
                 </span>
               </td>
             </tr>

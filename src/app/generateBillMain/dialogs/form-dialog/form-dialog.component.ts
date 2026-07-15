@@ -104,6 +104,7 @@ export class FormDialogComponent
         {
           this.dialogTitle ='General Bill';       
           this.advanceTable = data.advanceTable;
+          this.advanceTable.isSEZ = this.advanceTable.isSEZ ? 'Yes' : 'No';
         } else 
         {
           this.dialogTitle = 'General Bill';
@@ -158,7 +159,8 @@ export class FormDialogComponent
       sgstPercentage: [this.advanceTable.sgstPercentage],
       passengerID: [this.advanceTable.passengerID],
       passengerName: [this.advanceTable.passengerName],
-      hsn: [this.advanceTable.hsn]
+      hsn: [this.advanceTable.hsn],
+      isSEZ: [this.advanceTable.isSEZ]
     });
   }
 
@@ -650,7 +652,7 @@ export class FormDialogComponent
     this.cityID=geoPointID;
     this.advanceTableForm.patchValue({cityID:this.cityID,
        billingAddress: option.billingAddress,
-    pinCode: option.billingPin
+    pinCode: option.billingPin,isSEZ: option.isSEZ ? 'Yes' : 'No'
     });
   }
   cityValidator(CityList: any[]): ValidatorFn {
