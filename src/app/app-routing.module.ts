@@ -2917,6 +2917,13 @@ const routes: Routes = [
           )
       },
       {
+        path: 'forcedCreditNoteRebilling',
+        loadChildren: () =>
+          import('./forcedCreditNoteRebilling/forcedCreditNoteRebilling.module').then(
+            (m) => m.ForcedCreditNoteRebillingModule
+          )
+      },
+      {
         path: 'attachInvoicesToSummary',
         loadChildren: () =>
           import('./attachInvoicesToSummary/attachInvoicesToSummary.module').then(

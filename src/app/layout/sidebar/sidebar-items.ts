@@ -561,6 +561,17 @@ export const ROUTES: RouteInfo[] = [
       },
 
       {
+        path: 'forcedCreditNoteRebilling',
+        title: 'Forced Credit Note Rebilling',
+        moduleName: 'forcedCreditNoteRebilling',
+        icon: 'fas fa-redo',
+        class: '',
+        groupTitle: false,
+        submenu: [],
+        isAccess: false
+      },
+
+      {
         path: 'creditNoteManagement',
         title: 'Credit Note Management',
         moduleName: 'creditNoteManagement',
