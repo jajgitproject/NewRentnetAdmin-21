@@ -1702,7 +1702,7 @@ export class DutySlipForBillingComponent implements OnInit, AfterViewInit, OnCha
         this.advanceTableBH.goodForBilling = isChecked;
         this.advanceTableBH.actionTaken = this.advanceTableForm.value.actionTaken;
         this.advanceTableBH.actionDetails = this.advanceTableForm.value.actionDetails;
-        this.updateDutyStatus(() => {
+        this.updateDutyStatus(true, true, () => {
     this.CalculateBill(true);
 });
       }
@@ -1787,7 +1787,7 @@ export class DutySlipForBillingComponent implements OnInit, AfterViewInit, OnCha
     if (!this.disputeAdvanceTable || this.disputeAdvanceTable.length === 0) {
       // No disputes, allow verify duty
       this.setVerifyDuty(true, "Checked");
-      this.updateDutyStatus(() => {
+      this.updateDutyStatus(true,false,() => {
     this.CalculateBillForVerifyDuty();
 });
     } else {
@@ -1798,7 +1798,7 @@ export class DutySlipForBillingComponent implements OnInit, AfterViewInit, OnCha
 
       if (allApproved) {
         this.setVerifyDuty(true, "Checked");
-        this.updateDutyStatus(() => {
+        this.updateDutyStatus(true,false,() => {
     this.CalculateBillForVerifyDuty();
 });
       }
@@ -2428,46 +2428,42 @@ onChange() {
     );
   }
 
-updateDutyStatus(callback?: () => void) {
+updateDutyStatus(verifyDuty: boolean, goodForBilling: boolean, callback?: () => void) {
+  this.advanceTableForm.patchValue({
+    verifyDuty: verifyDuty,
+    goodForBilling: goodForBilling
+  });
 
-    // this.showSpinner = true;
+  this.dutySlipForBillingService
+    .update(this.advanceTableForm.getRawValue())
+    .subscribe({
+      next: (response) => {
 
-    this.dutySlipForBillingService
-        .update(this.advanceTableForm.getRawValue())
-        .subscribe({
-            next: (response) => {
-
-                this.showSpinner = false;
-
-                this.advanceTableForm.patchValue({
-                    verifyDuty: response.verifyDuty,
-                    goodForBilling: response.goodForBilling
-                });
-
-                this.showNotification(
-                    'snackbar-success',
-                    'Updated Successfully',
-                    'bottom',
-                    'center'
-                );
-
-               
-                if (callback) {
-                    callback();
-                }
-            },
-            error: (err) => {
-
-                this.showSpinner = false;
-
-                this.showNotification(
-                    'snackbar-danger',
-                    this.extractApiErrorMessage(err),
-                    'bottom',
-                    'center'
-                );
-            }
+        this.advanceTableForm.patchValue({
+          verifyDuty: response.verifyDuty,
+          goodForBilling: response.goodForBilling
         });
+
+        this.showNotification(
+          'snackbar-success',
+          'Updated Successfully',
+          'bottom',
+          'center'
+        );
+
+        if (callback) {
+          callback();
+        }
+      },
+      error: (err) => {
+        this.showNotification(
+          'snackbar-danger',
+          this.extractApiErrorMessage(err),
+          'bottom',
+          'center'
+        );
+      }
+    });
 }
 }
 
