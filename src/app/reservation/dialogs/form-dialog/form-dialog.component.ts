@@ -40,6 +40,7 @@ export class FormDialogComponent implements OnInit, OnDestroy {
   status: string = '';
    isTNCSelected:boolean = false;
   buttonDisabled: boolean = false;
+  customerID: number;
   constructor(
     public dialogRef: MatDialogRef<FormDialogComponent>,
     private snackBar: MatSnackBar,
@@ -50,6 +51,7 @@ export class FormDialogComponent implements OnInit, OnDestroy {
 
     this.dialogTitle = 'Update Pickup Time';
   this.advanceTableCP = data.advanceTable;
+  this.customerID = this.advanceTableCP.customerID;
   // status extraction (string or nested)
   // this.status = this.extractStatus(data?.status);
   // const normalized = (this.status || '').trim().toLowerCase();
@@ -87,7 +89,8 @@ const normalized = (this.status || '').trim().toLowerCase();
         pickupTime: [this.advanceTableCP.pickup.pickupTime],
         dropOffTime: [''],
         isTimeNotConfirmed:[this.advanceTableCP.isTimeNotConfirmed],
-        reservationID: [this.advanceTableCP.reservationID]
+        reservationID: [this.advanceTableCP.reservationID] ,
+        customerID: [this.advanceTableCP.customerID]
       });
   }
   public ngOnInit(): void {
