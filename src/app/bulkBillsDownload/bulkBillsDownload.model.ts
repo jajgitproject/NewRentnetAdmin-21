@@ -31,6 +31,35 @@ export interface StartBulkDownloadJobRequest {
   downloadMode: string;
 }
 
+export interface CreditNoteSearchCriteria {
+  customerID?: number | null;
+  fromDate?: string | null;
+  toDate?: string | null;
+  creditNoteNumber?: string | null;
+  invoiceNumber?: string | null;
+  creditNoteIDs?: number[];
+}
+
+export interface CreditNoteSummary {
+  invoiceCreditNoteID: number;
+  creditNoteNumberWithPrefix: string;
+  dateTimeOfGeneration?: string | null;
+  creditNoteAmount: number;
+  invoiceID: number;
+  invoiceNumberWithPrefix: string;
+  customerName: string;
+  approvalStatus?: string | null;
+}
+
+export interface StartCreditNoteDownloadJobRequest {
+  customerID?: number | null;
+  fromDate?: string | null;
+  toDate?: string | null;
+  creditNoteNumber?: string | null;
+  invoiceNumber?: string | null;
+  creditNoteIDs?: number[];
+}
+
 export interface BulkUploadJobStatus {
   bulkUploadJobID: number;
   jobType: string;

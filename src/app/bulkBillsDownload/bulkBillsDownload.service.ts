@@ -22,6 +22,9 @@ import {
   DutySlipPackageDownloadCriteria,
   DutySlipPackageDownloadPreviewResult,
   StartDutySlipPackageDownloadJobResult,
+  CreditNoteSearchCriteria,
+  CreditNoteSummary,
+  StartCreditNoteDownloadJobRequest,
 } from './bulkBillsDownload.model';
 
 @Injectable()
@@ -205,6 +208,20 @@ export class BulkBillsDownloadService {
   startDownloadJob(request: StartBulkDownloadJobRequest, performedBy: number): Observable<StartBulkDownloadJobResult> {
     return this.httpClient.post<StartBulkDownloadJobResult>(
       `${this.API_URL}/download/start/${performedBy}`,
+      request
+    );
+  }
+
+  searchCreditNotes(criteria: CreditNoteSearchCriteria): Observable<CreditNoteSummary[]> {
+    return this.httpClient.post<CreditNoteSummary[]>(
+      `${this.API_URL}/download/credit-note/search`,
+      criteria || {}
+    );
+  }
+
+  startCreditNoteDownloadJob(request: StartCreditNoteDownloadJobRequest, performedBy: number): Observable<StartBulkDownloadJobResult> {
+    return this.httpClient.post<StartBulkDownloadJobResult>(
+      `${this.API_URL}/download/credit-note/start/${performedBy}`,
       request
     );
   }

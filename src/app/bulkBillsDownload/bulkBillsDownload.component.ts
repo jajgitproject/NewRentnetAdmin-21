@@ -33,6 +33,9 @@ import {
   DutySlipPackageDownloadCriteria,
   DutySlipPackageDownloadPreviewResult,
   DutySlipPackageDownloadRow,
+  CreditNoteSearchCriteria,
+  CreditNoteSummary,
+  StartCreditNoteDownloadJobRequest,
 } from './bulkBillsDownload.model';
 
 @Component({
@@ -44,8 +47,9 @@ import {
 export class BulkBillsDownloadComponent implements OnInit, OnDestroy, AfterViewInit {
   @ViewChild('uploadFileInput') uploadFileInput?: ElementRef<HTMLInputElement>;
   @ViewChild('invoicePaginator') invoicePaginator?: MatPaginator;
+  @ViewChild('creditNotePaginator') creditNotePaginator?: MatPaginator;
 
-  activeTab: 'backfill' | 'download' | 'upload' | 'closingDutySlip' | 'verifiedDutySlip' | 'tollInterstate' = 'download';
+  activeTab: 'backfill' | 'download' | 'upload' | 'closingDutySlip' | 'verifiedDutySlip' | 'tollInterstate' | 'creditNote' = 'download';
   loading = false;
   loadError = '';
   downloading = false;
@@ -153,6 +157,28 @@ export class BulkBillsDownloadComponent implements OnInit, OnDestroy, AfterViewI
   tollRunAllBatches = false;
   tollJobStartedAt: number | null = null;
 
+  creditNoteCustomerCtrl = new FormControl('');
+  creditNoteNumberCtrl = new FormControl('');
+  creditNoteInvoiceNumberCtrl = new FormControl('');
+  creditNoteFromDateCtrl = new FormControl(this.getTodayDate());
+  creditNoteToDateCtrl = new FormControl(this.getTodayDate());
+  creditNoteRows: CreditNoteSummary[] = [];
+  creditNoteDataSource = new MatTableDataSource<CreditNoteSummary>([]);
+  creditNoteSelection = new SelectionModel<CreditNoteSummary>(true, []);
+  creditNoteDisplayedColumns = [
+    'select',
+    'creditNoteNumberWithPrefix',
+    'dateTimeOfGeneration',
+    'invoiceNumberWithPrefix',
+    'customerName',
+    'creditNoteAmount',
+    'approvalStatus',
+  ];
+  creditNoteLoading = false;
+  creditNoteLoadError = '';
+  creditNoteDownloading = false;
+  filteredCreditNoteCustomerOptions: Observable<{ customerID: number; customerName: string; tallyCustomerID?: number; displayName?: string }[]> = of([]);
+
   downloadInvoices = false;
   downloadMerge = true;
   uploadType: 'reservationEmail' | 'dutySlip' = 'reservationEmail';
@@ -205,11 +231,15 @@ export class BulkBillsDownloadComponent implements OnInit, OnDestroy, AfterViewI
     this.initCustomerAutocomplete();
     this.initDocBackfillCustomerAutocomplete(this.verifiedCustomerCtrl, (obs) => { this.filteredVerifiedCustomerOptions = obs; });
     this.initDocBackfillCustomerAutocomplete(this.tollCustomerCtrl, (obs) => { this.filteredTollCustomerOptions = obs; });
+    this.initDocBackfillCustomerAutocomplete(this.creditNoteCustomerCtrl, (obs) => { this.filteredCreditNoteCustomerOptions = obs; });
   }
 
   ngAfterViewInit(): void {
     if (this.invoicePaginator) {
       this.invoiceDataSource.paginator = this.invoicePaginator;
+    }
+    if (this.creditNotePaginator) {
+      this.creditNoteDataSource.paginator = this.creditNotePaginator;
     }
   }
 
@@ -217,7 +247,7 @@ export class BulkBillsDownloadComponent implements OnInit, OnDestroy, AfterViewI
     this.stopPolling();
   }
 
-  setTab(tab: 'backfill' | 'download' | 'upload' | 'closingDutySlip' | 'verifiedDutySlip' | 'tollInterstate'): void {
+  setTab(tab: 'backfill' | 'download' | 'upload' | 'closingDutySlip' | 'verifiedDutySlip' | 'tollInterstate' | 'creditNote'): void {
     this.activeTab = tab;
   }
 
@@ -310,6 +340,15 @@ export class BulkBillsDownloadComponent implements OnInit, OnDestroy, AfterViewI
     this.invoiceDataSource.data = [];
     this.selection.clear();
     this.loadError = '';
+    this.creditNoteCustomerCtrl.setValue('');
+    this.creditNoteNumberCtrl.setValue('');
+    this.creditNoteInvoiceNumberCtrl.setValue('');
+    this.creditNoteFromDateCtrl.setValue(this.getTodayDate());
+    this.creditNoteToDateCtrl.setValue(this.getTodayDate());
+    this.creditNoteRows = [];
+    this.creditNoteDataSource.data = [];
+    this.creditNoteSelection.clear();
+    this.creditNoteLoadError = '';
     this.clearJob();
   }
 
@@ -606,6 +645,131 @@ export class BulkBillsDownloadComponent implements OnInit, OnDestroy, AfterViewI
         this.snackBar.open(this.extractError(err, 'Failed to start download job.'), 'Close', { duration: 5000 });
       }
     );
+  }
+
+  searchCreditNotes(): void {
+    const creditNoteNumber = (this.creditNoteNumberCtrl.value || '').trim();
+    const invoiceNumber = (this.creditNoteInvoiceNumberCtrl.value || '').trim();
+    const hasDateRange = !!this.creditNoteFromDateCtrl.value && !!this.creditNoteToDateCtrl.value;
+    const customer = this.resolveSelectedCustomerFrom(this.creditNoteCustomerCtrl);
+
+    if (!creditNoteNumber && !invoiceNumber && !hasDateRange && !customer?.customerID) {
+      this.creditNoteLoadError = 'Please select customer, credit note number, invoice number, or date range';
+      this.snackBar.open(this.creditNoteLoadError, 'Close', { duration: 4000 });
+      return;
+    }
+
+    const criteria = this.buildCreditNoteSearchCriteria();
+    this.creditNoteLoading = true;
+    this.creditNoteLoadError = '';
+    this.creditNoteSelection.clear();
+
+    this.service.searchCreditNotes(criteria).subscribe(
+      (rows) => {
+        this.creditNoteRows = (rows || []).map((row) => this.normalizeCreditNoteRow(row));
+        this.creditNoteDataSource.data = this.creditNoteRows;
+        if (this.creditNotePaginator) {
+          this.creditNoteDataSource.paginator = this.creditNotePaginator;
+          this.creditNotePaginator.firstPage();
+        }
+        this.creditNoteLoading = false;
+        if (!this.creditNoteRows.length) {
+          this.creditNoteLoadError = 'No credit notes found for the selected criteria.';
+        }
+      },
+      (err) => {
+        this.creditNoteLoading = false;
+        this.creditNoteRows = [];
+        this.creditNoteDataSource.data = [];
+        this.creditNoteLoadError = this.extractError(err, 'Failed to search credit notes.');
+        this.snackBar.open(this.creditNoteLoadError, 'Close', { duration: 5000 });
+      }
+    );
+  }
+
+  isAllCreditNotesSelected(): boolean {
+    const rows = this.creditNoteDataSource.data;
+    return this.creditNoteSelection.selected.length === rows.length && rows.length > 0;
+  }
+
+  creditNoteMasterToggle(): void {
+    const rows = this.creditNoteDataSource.data;
+    if (this.isAllCreditNotesSelected()) {
+      this.creditNoteSelection.clear();
+      return;
+    }
+    this.creditNoteSelection.select(...rows);
+  }
+
+  getCreditNoteDownloadButtonLabel(): string {
+    const count = this.creditNoteSelection.selected.length;
+    return count ? `Download selected (${count})` : 'Download all results';
+  }
+
+  showCreditNoteTabJobPanel(): boolean {
+    return !!this.activeJob && this.activeTab === 'creditNote' && this.isDownloadJob();
+  }
+
+  startCreditNoteDownload(): void {
+    const performedBy = this.generalService.getUserID();
+    if (!performedBy) {
+      this.snackBar.open('User session not found.', 'Close', { duration: 4000 });
+      return;
+    }
+
+    if (!this.creditNoteRows.length) {
+      this.snackBar.open('Search for credit notes before downloading.', 'Close', { duration: 4000 });
+      return;
+    }
+
+    const request: StartCreditNoteDownloadJobRequest = {
+      ...this.buildCreditNoteSearchCriteria(),
+    };
+
+    const selectedIds = this.creditNoteSelection.selected.map((row) => row.invoiceCreditNoteID);
+    if (selectedIds.length > 0) {
+      request.creditNoteIDs = selectedIds;
+    }
+
+    this.creditNoteDownloading = true;
+    this.service.startCreditNoteDownloadJob(request, performedBy).subscribe(
+      (result) => {
+        this.creditNoteDownloading = false;
+        const jobId = result?.jobId ?? result?.JobId;
+        this.snackBar.open(`Credit note download job ${jobId} started.`, 'Close', { duration: 4000 });
+        this.startPolling(jobId);
+      },
+      (err) => {
+        this.creditNoteDownloading = false;
+        this.snackBar.open(this.extractError(err, 'Failed to start credit note download job.'), 'Close', { duration: 5000 });
+      }
+    );
+  }
+
+  private buildCreditNoteSearchCriteria(): CreditNoteSearchCriteria {
+    const customer = this.resolveSelectedCustomerFrom(this.creditNoteCustomerCtrl);
+    const creditNoteNumber = (this.creditNoteNumberCtrl.value || '').trim();
+    const invoiceNumber = (this.creditNoteInvoiceNumberCtrl.value || '').trim();
+    return {
+      customerID: customer?.customerID || null,
+      fromDate: this.formatApiDate(this.creditNoteFromDateCtrl.value),
+      toDate: this.formatApiDate(this.creditNoteToDateCtrl.value),
+      creditNoteNumber: creditNoteNumber || null,
+      invoiceNumber: invoiceNumber || null,
+    };
+  }
+
+  private normalizeCreditNoteRow(row: any): CreditNoteSummary {
+    return {
+      invoiceCreditNoteID: row.invoiceCreditNoteID ?? row.InvoiceCreditNoteID,
+      creditNoteNumberWithPrefix: row.creditNoteNumberWithPrefix ?? row.CreditNoteNumberWithPrefix ?? '',
+      dateTimeOfGeneration: row.dateTimeOfGeneration ?? row.DateTimeOfGeneration ?? null,
+      creditNoteAmount: row.creditNoteAmount ?? row.CreditNoteAmount ?? 0,
+      invoiceID: row.invoiceID ?? row.InvoiceID ?? 0,
+      invoiceNumberWithPrefix: row.invoiceNumberWithPrefix ?? row.InvoiceNumberWithPrefix ?? '',
+      customerName: row.customerName ?? row.CustomerName ?? '',
+      approvalStatus: row.approvalStatus ?? row.ApprovalStatus ?? null,
+    };
   }
 
   onFilesSelected(event: Event): void {

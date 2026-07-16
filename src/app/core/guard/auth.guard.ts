@@ -21,7 +21,7 @@ export class AuthGuard implements CanActivate {
     const user = this.authService.currentUserValue as any;
     const token = user?.Token ?? user?.token;
     const employee = user?.employee ?? user?.Employee;
-    if (token && employee) {
+    if (token && employee && this.authService.isOtpVerified()) {
       return true;
     }
     void this.router.navigate(['/authentication/signin']);

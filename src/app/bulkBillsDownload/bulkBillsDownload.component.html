@@ -28,6 +28,7 @@
                 <div class="bulk-tabs">
                   <button *ngIf="false" mat-button type="button" [color]="activeTab === 'backfill' ? 'primary' : undefined" (click)="setTab('backfill')">Backfill</button>
                   <button mat-button type="button" [color]="activeTab === 'download' ? 'primary' : undefined" (click)="setTab('download')">Download Invoice - DutySlip</button>
+                  <button mat-button type="button" [color]="activeTab === 'creditNote' ? 'primary' : undefined" (click)="setTab('creditNote')">Download Credit Notes</button>
                   <button mat-button type="button" [color]="activeTab === 'upload' ? 'primary' : undefined" (click)="setTab('upload')">Upload Documents</button>
                   <button mat-button type="button" [color]="activeTab === 'verifiedDutySlip' ? 'primary' : undefined" (click)="setTab('verifiedDutySlip')">Download Duty Slips &amp; Toll Parking</button>
                 </div>
@@ -711,6 +712,152 @@
                     </table>
                     <mat-paginator
                       #invoicePaginator
+                      [pageSizeOptions]="invoicePageSizeOptions"
+                      [pageSize]="25"
+                      showFirstLastButtons>
+                    </mat-paginator>
+                  </div>
+                </div>
+              </div>
+
+              <div *ngIf="activeTab === 'creditNote'" class="download-tab-layout">
+                <div class="download-search-section">
+                  <div class="row bulk-filters g-2">
+                    <div class="col-xl-3 col-lg-4 col-md-6 col-sm-12">
+                      <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                        <mat-label>Customer</mat-label>
+                        <input matInput [formControl]="creditNoteCustomerCtrl" [matAutocomplete]="creditNoteCustomerAuto" placeholder="Type to search" />
+                        <mat-autocomplete #creditNoteCustomerAuto="matAutocomplete" [displayWith]="displayCustomer">
+                          <mat-option *ngFor="let customer of filteredCreditNoteCustomerOptions | async" [value]="customer">
+                            {{ customer.displayName || customer.customerName }}
+                          </mat-option>
+                        </mat-autocomplete>
+                      </mat-form-field>
+                    </div>
+                    <div class="col-xl-2 col-lg-3 col-md-4 col-sm-6">
+                      <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                        <mat-label>Credit Note Number</mat-label>
+                        <input matInput [formControl]="creditNoteNumberCtrl" placeholder="Credit note number" />
+                      </mat-form-field>
+                    </div>
+                    <div class="col-xl-2 col-lg-3 col-md-4 col-sm-6">
+                      <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                        <mat-label>Invoice Number</mat-label>
+                        <input matInput [formControl]="creditNoteInvoiceNumberCtrl" placeholder="Invoice number" />
+                      </mat-form-field>
+                    </div>
+                    <div class="col-xl-2 col-lg-3 col-md-4 col-sm-6">
+                      <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                        <mat-label>From Date</mat-label>
+                        <input matInput [matDatepicker]="creditNoteFromPicker" [formControl]="creditNoteFromDateCtrl" />
+                        <mat-datepicker-toggle matSuffix [for]="creditNoteFromPicker"></mat-datepicker-toggle>
+                        <mat-datepicker #creditNoteFromPicker></mat-datepicker>
+                      </mat-form-field>
+                    </div>
+                    <div class="col-xl-2 col-lg-3 col-md-4 col-sm-6">
+                      <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                        <mat-label>To Date</mat-label>
+                        <input matInput [matDatepicker]="creditNoteToPicker" [formControl]="creditNoteToDateCtrl" />
+                        <mat-datepicker-toggle matSuffix [for]="creditNoteToPicker"></mat-datepicker-toggle>
+                        <mat-datepicker #creditNoteToPicker></mat-datepicker>
+                      </mat-form-field>
+                    </div>
+                    <div class="col-xl-2 col-lg-3 col-md-4 col-sm-6 d-flex align-items-center">
+                      <button mat-raised-button color="primary" type="button" (click)="searchCreditNotes()" [disabled]="creditNoteLoading">Search</button>
+                    </div>
+                  </div>
+
+                  <mat-progress-bar *ngIf="creditNoteLoading" mode="indeterminate"></mat-progress-bar>
+                  <div class="load-error" *ngIf="creditNoteLoadError">{{ creditNoteLoadError }}</div>
+                </div>
+
+                <div class="download-panel">
+                  <div class="download-actions" *ngIf="creditNoteRows.length">
+                    <button mat-raised-button color="accent" type="button" (click)="startCreditNoteDownload()" [disabled]="creditNoteDownloading">
+                      {{ getCreditNoteDownloadButtonLabel() }}
+                    </button>
+                  </div>
+                </div>
+
+                <div class="job-panel job-panel-sticky" *ngIf="showCreditNoteTabJobPanel()">
+                  <div class="panel-title">Job #{{ getActiveJobId() }} — {{ getJobStatus() }}</div>
+                  <div class="job-meta">
+                    <span>Type: {{ activeJob.jobType }}</span>
+                    <span *ngIf="activeJob.downloadMode">Mode: {{ activeJob.downloadMode }}</span>
+                    <span>Processed: {{ activeJob.processedFiles }} / {{ activeJob.totalFiles }}</span>
+                    <span>Success: {{ activeJob.successCount }}</span>
+                    <span>Errors: {{ activeJob.errorCount }}</span>
+                  </div>
+                  <mat-progress-bar mode="determinate" [value]="getJobProgress()"></mat-progress-bar>
+                  <p class="job-message" *ngIf="activeJob.errorMessage">{{ activeJob.errorMessage }}</p>
+                  <div class="job-actions">
+                    <button mat-raised-button color="primary" type="button" (click)="downloadZip()" [disabled]="!canDownloadZip()">Download ZIP</button>
+                    <button mat-stroked-button type="button" (click)="exportErrors()" [disabled]="!jobErrors.length">Export errors CSV</button>
+                    <button mat-button type="button" (click)="clearJob()">Dismiss</button>
+                  </div>
+                  <div class="table-responsive job-error-table-wrap" *ngIf="jobErrors.length">
+                    <table class="error-table">
+                      <thead>
+                        <tr>
+                          <th>Credit Note</th>
+                          <th>Error</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <tr *ngFor="let err of jobErrors">
+                          <td>{{ err.fileName }}</td>
+                          <td>{{ err.errorDescription }}</td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+
+                <div class="download-grid-section">
+                  <p class="upload-hint" *ngIf="!creditNoteLoading && !creditNoteRows.length && !creditNoteLoadError">
+                    Search lists credit notes filtered by customer, credit note number, invoice number, and generation date.
+                    PDFs are generated automatically when you download.
+                  </p>
+
+                  <div class="table-responsive" *ngIf="creditNoteRows.length">
+                    <table mat-table [dataSource]="creditNoteDataSource" class="mat-elevation-z1 bulk-table">
+                      <ng-container matColumnDef="select">
+                        <th mat-header-cell *matHeaderCellDef>
+                          <mat-checkbox (change)="$event ? creditNoteMasterToggle() : null" [checked]="isAllCreditNotesSelected()" [indeterminate]="creditNoteSelection.hasValue() && !isAllCreditNotesSelected()"></mat-checkbox>
+                        </th>
+                        <td mat-cell *matCellDef="let row">
+                          <mat-checkbox (click)="$event.stopPropagation()" (change)="$event ? creditNoteSelection.toggle(row) : null" [checked]="creditNoteSelection.isSelected(row)"></mat-checkbox>
+                        </td>
+                      </ng-container>
+                      <ng-container matColumnDef="creditNoteNumberWithPrefix">
+                        <th mat-header-cell *matHeaderCellDef>Credit Note No</th>
+                        <td mat-cell *matCellDef="let row">{{ row.creditNoteNumberWithPrefix || '—' }}</td>
+                      </ng-container>
+                      <ng-container matColumnDef="dateTimeOfGeneration">
+                        <th mat-header-cell *matHeaderCellDef>C.N Date</th>
+                        <td mat-cell *matCellDef="let row">{{ row.dateTimeOfGeneration | date:'dd/MM/yyyy' }}</td>
+                      </ng-container>
+                      <ng-container matColumnDef="invoiceNumberWithPrefix">
+                        <th mat-header-cell *matHeaderCellDef>Invoice No</th>
+                        <td mat-cell *matCellDef="let row">{{ row.invoiceNumberWithPrefix || '—' }}</td>
+                      </ng-container>
+                      <ng-container matColumnDef="customerName">
+                        <th mat-header-cell *matHeaderCellDef>CustomerName</th>
+                        <td mat-cell *matCellDef="let row">{{ row.customerName }}</td>
+                      </ng-container>
+                      <ng-container matColumnDef="creditNoteAmount">
+                        <th mat-header-cell *matHeaderCellDef>Amount</th>
+                        <td mat-cell *matCellDef="let row">{{ row.creditNoteAmount | number:'1.2-2' }}</td>
+                      </ng-container>
+                      <ng-container matColumnDef="approvalStatus">
+                        <th mat-header-cell *matHeaderCellDef>Approval Status</th>
+                        <td mat-cell *matCellDef="let row">{{ row.approvalStatus || '—' }}</td>
+                      </ng-container>
+                      <tr mat-header-row *matHeaderRowDef="creditNoteDisplayedColumns"></tr>
+                      <tr mat-row *matRowDef="let row; columns: creditNoteDisplayedColumns"></tr>
+                    </table>
+                    <mat-paginator
+                      #creditNotePaginator
                       [pageSizeOptions]="invoicePageSizeOptions"
                       [pageSize]="25"
                       showFirstLastButtons>

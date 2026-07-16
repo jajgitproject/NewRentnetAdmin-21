@@ -7,6 +7,7 @@ import { ValidateOTP } from '../../validateOTP.model';
 import { MAT_DATE_LOCALE } from '@angular/material/core';
 import { formatDate } from '@angular/common';
 import { GeneralService } from '../../../general/general.service';
+import { AuthService } from '../../../core/service/auth.service';
 import { Router } from '@angular/router';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { interval, Subscription } from 'rxjs';
@@ -51,6 +52,7 @@ export class FormDialogComponent implements OnInit, OnDestroy
     private navigateRoute: Router,
     private snackBar: MatSnackBar,
   public _generalService:GeneralService,
+  private authService: AuthService,
   private cdr: ChangeDetectorRef)
   {
         // Set the defaults
@@ -202,7 +204,8 @@ export class FormDialogComponent implements OnInit, OnDestroy
     const enteredOTP = this.advanceTableForm.get('enterOTP')?.value;
     if(this.validateOtp  === enteredOTP && !this.otpExpired)
     {
-      this.dialogRef.close();
+      this.authService.markOtpVerified();
+      this.dialogRef.close({ verified: true });
       // this.navigateRoute.navigate(['/welcome/welcome']);
       if (this.role === 'Admin') {
         this.navigateRoute.navigate(['/controlPanelDesign']);

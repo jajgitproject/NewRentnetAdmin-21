@@ -325,6 +325,8 @@ export class SigninComponent implements OnInit {
 
       this.isPasswordDeactivated = false;
 
+      this.authService.markOtpVerified();
+
       const role = localStorage.getItem('role');
 
       if (role === 'Admin') {
@@ -459,9 +461,14 @@ export class SigninComponent implements OnInit {
 
 
 
-    dialogRef.afterClosed().subscribe(() => {
+    dialogRef.afterClosed().subscribe((result) => {
 
       this.otpDialogOpen = false;
+
+      // Dialog dismissed without completing OTP: drop the half-authenticated session.
+      if (!result?.verified && !this.authService.isOtpVerified()) {
+        this.authService.clearLocalSession();
+      }
 
     });
 

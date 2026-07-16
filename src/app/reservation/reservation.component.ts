@@ -3210,9 +3210,11 @@ public validateCustomerSpecificFields(): boolean {
     },
     error =>
     {
+      // The API now reports partial saves (e.g. stops/passenger rows rolled
+      // back) as a structured error - show its message when available.
       this.showNotification(
         'snackbar-danger',
-        'Operation Failed.....!!!',
+        error?.error?.message || 'Operation Failed.....!!!',
         'bottom',
         'center'
       );
@@ -3281,7 +3283,7 @@ public validateCustomerSpecificFields(): boolean {
     {
       this.showNotification(
         'snackbar-danger',
-        'Operation Failed.....!!!',
+        error?.error?.message || 'Operation Failed.....!!!',
         'bottom',
         'center'
       );
@@ -5354,6 +5356,13 @@ private isEditingAllowed(): boolean {
       {
         this.Put();
       }
+    },
+    () => 
+    {
+      // The duplicate check is only advisory. Previously a failure here silently
+      // dropped the save, leaving the pre-created reservation without its
+      // stops/passenger rows. Proceed with the save instead.
+      this.Put();
     });  
   }
 

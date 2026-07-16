@@ -50,6 +50,36 @@ export class AuthService {
     return this.currentUserSubject.value;
   }
 
+  /** Key that ties the OTP-verified flag to one specific login session. */
+  private otpSessionKey(user?: any): string | null {
+    const u = (user ?? this.currentUserValue) as any;
+    if (!u) {
+      return null;
+    }
+    const sessionGuid = u.SessionGuid ?? u.sessionGuid;
+    if (sessionGuid) {
+      return String(sessionGuid);
+    }
+    const token = u.Token ?? u.token;
+    // Fall back to a token fragment so the flag cannot outlive the session.
+    return token ? 'tok:' + String(token).slice(-32) : null;
+  }
+
+  markOtpVerified(): void {
+    const key = this.otpSessionKey();
+    if (key) {
+      localStorage.setItem('otpVerifiedSession', key);
+    }
+  }
+
+  isOtpVerified(): boolean {
+    const key = this.otpSessionKey();
+    if (!key) {
+      return false;
+    }
+    return localStorage.getItem('otpVerifiedSession') === key;
+  }
+
   private get apiUrl(): string {
     return this.runtimeConfig.getBaseUrl() + 'Auth';
   }
@@ -98,6 +128,8 @@ export class AuthService {
     const current = this.currentUserValue as any;
     if (!current) return;
 
+    const wasOtpVerified = this.isOtpVerified();
+
     const updated = this.normalizeLoginResponse({
       ...current,
       Token: token,
@@ -108,6 +140,9 @@ export class AuthService {
 
     localStorage.setItem('currentUser', JSON.stringify(updated));
     this.currentUserSubject.next(updated as User);
+    if (wasOtpVerified) {
+      this.markOtpVerified();
+    }
   }
 
   /**
@@ -256,6 +291,7 @@ export class AuthService {
     const sessionGuid = this.getSessionGuidFromStorage();
     localStorage.removeItem('currentUser');
     localStorage.removeItem('accessPages');
+    localStorage.removeItem('otpVerifiedSession');
     this.currentUserSubject.next(null);
     this.tabSessionCoordinator.clearCoordinatorState(sessionGuid);
   }
