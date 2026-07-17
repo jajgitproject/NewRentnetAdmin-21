@@ -33,44 +33,59 @@
     <div class="card" style="background-color: #ffffff;padding-top: 10px;">
       <div class="row" style="padding-left: 30px;">
         <div class="col-xl-2 col-lg-1 col-md-12 col-sm-12 mb-2">
-          Reservation No:<br/> {{ReservationID}} 
+          <b>Reservation No:</b><br/> {{ReservationID}} 
         </div>
         <div class="col-xl-2 col-lg-1 col-md-12 col-sm-12 mb-2">
-          DutySlip No: <br/>{{DutySlipID}}
+          <b>DutySlip No:</b> <br/>{{DutySlipID}}
         </div>
          <div class="col-xl-2 col-lg-2 col-md-12 col-sm-12 mb-2" *ngIf="billFromTo">
-          Bill From To: <br/>{{billFromTo}}
+          <b>Bill From To:</b> <br/>{{billFromTo}}
         </div>
         <div class="col-xl-3 col-lg-4 col-md-12 col-sm-12 mb-2" *ngIf="closingDataAdvanceTable">
-          Customer Name: <br/>{{closingDataAdvanceTable?.customerName}}-{{CustomerID}}({{closingDataAdvanceTable?.tallyCustomerID}})
+          <b>Customer Name:</b> <br/>{{closingDataAdvanceTable?.customerName}}-{{CustomerID}}({{closingDataAdvanceTable?.tallyCustomerID}})
         </div>
         <div class="col-xl-3 col-lg-4 col-md-12 col-sm-12 mb-2" *ngIf="closingDataAdvanceTable">
-          Guest Name: <br/>{{closingDataAdvanceTable?.guestName}}
+          <b>Guest Name:</b> <br/>{{closingDataAdvanceTable?.guestName}}
         </div>       
       </div>
       <div class="row" style="padding-left: 30px;">
             <div class="col-xl-2 col-lg-4 col-md-12 col-sm-12 mb-2">
-          Duty Type: <br/>{{PackageType}}
+          <b>Duty Type:</b> <br/>{{PackageType}}
          </div>
         <div class="col-xl-2 col-lg-4 col-md-12 col-sm-12 mb-2">
-          Package: <br/>{{Package}}
+          <b>Package:</b> <br/>{{Package}}
         </div>
         <div class="col-xl-2 col-lg-4 col-md-12 col-sm-12 mb-2">
-          City: <br/>{{CityName}}
+          <b>City:</b> <br/>{{CityName}}
+        </div>
+        <div class="col-xl-2 col-lg-4 col-md-12 col-sm-12 mb-2" *ngIf="closingDataAdvanceTable">
+          <b>Mode of Payment:</b> <br/>{{closingDataAdvanceTable?.modeOfPayment || 'N/A'}}
+        </div>
+        <div class="col-xl-2 col-lg-4 col-md-12 col-sm-12 mb-2" *ngIf="closingDataAdvanceTable">
+          <b>Registration Number:</b> <br/>{{closingDataAdvanceTable?.registrationNumber || 'N/A'}}
         </div>
         <div class="col-xl-2 col-lg-4 col-md-12 col-sm-12 mb-2">
-          Car Booked: <br/>{{carBooked}}
+          <b>Car Booked:</b> <br/>{{carBooked}}
         </div>
         <div class="col-xl-2 col-lg-4 col-md-12 col-sm-12 mb-2">
-          Car Sent: <br/>{{carSent}}<br/><span *ngIf="fuelType"> ({{fuelType}})</span>
+          <b>Car Sent:</b> <br/>{{carSent}}<br/><span *ngIf="fuelType"> ({{fuelType}})</span>
+        </div>
+        <div class="col-xl-2 col-lg-4 col-md-12 col-sm-12 mb-2" *ngIf="closingDataAdvanceTable">
+          <b>Fuel Surcharge on Extra KM:</b> <br/>{{closingDataAdvanceTable?.totalFuelSurchargeOnExtraKM ?? 'N/A'}}
+        </div>
+        <div class="col-xl-2 col-lg-4 col-md-12 col-sm-12 mb-2" *ngIf="closingDataAdvanceTable">
+          <b>Fuel Surcharge on Extra Hours:</b> <br/>{{closingDataAdvanceTable?.totalFuelSurchargeOnExtraHours ?? 'N/A'}}
+        </div>
+        <div class="col-xl-2 col-lg-4 col-md-12 col-sm-12 mb-2" *ngIf="closingDataAdvanceTable">
+          <b>Fuel Surcharge on Package Rate:</b> <br/>{{closingDataAdvanceTable?.totalFuelSurchargeOnPackageRate ?? 'N/A'}}
         </div>
       </div>
      <div class="row" style="padding-left: 30px;">
        <div class="col-xl-2 col-lg-4 col-md-12 col-sm-12 mb-2" *ngIf="GstNumber">
-          GST Number: <br/>{{GstNumber}}({{StateName}})
+          <b>GST Number:</b> <br/>{{GstNumber}}({{StateName}})
         </div>
          <div class="col-xl-2 col-lg-2 col-md-12 col-sm-12 mb-2" *ngIf="dataSourceForBillNo?.invoiceModel?.invoiceNumberWithPrefix">
-          Bill No: <br/>{{dataSourceForBillNo?.invoiceModel?.invoiceNumberWithPrefix}}
+          <b>Bill No:</b> <br/>{{dataSourceForBillNo?.invoiceModel?.invoiceNumberWithPrefix}}
         </div>
      </div>
     </div>

@@ -814,6 +814,10 @@ export class ClosingDataModel {
   guestName:string;
   dutySlipMap:string;
   package:string;
+  modeOfPayment:string;
+  totalFuelSurchargeOnExtraKM:number;
+  totalFuelSurchargeOnExtraHours:number;
+  totalFuelSurchargeOnPackageRate:number;
 
 
   constructor(closingDataModel) {
@@ -841,6 +845,10 @@ export class ClosingDataModel {
       this.locationOutKM = closingDataModel.locationOutKM || '';
       this.locationOutAddress = closingDataModel.locationOutAddress || '';
       this.closureStatus = closingDataModel.closureStatus || '';
+      this.modeOfPayment = closingDataModel.modeOfPayment || '';
+      this.totalFuelSurchargeOnExtraKM = closingDataModel.totalFuelSurchargeOnExtraKM ?? null;
+      this.totalFuelSurchargeOnExtraHours = closingDataModel.totalFuelSurchargeOnExtraHours ?? null;
+      this.totalFuelSurchargeOnPackageRate = closingDataModel.totalFuelSurchargeOnPackageRate ?? null;
     }
   }
 }
