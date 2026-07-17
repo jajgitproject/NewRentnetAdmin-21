@@ -1,6 +1,7 @@
 // @ts-nocheck
 import { Injectable } from '@angular/core';
-import { Observable } from 'rxjs';
+import { Observable, timer } from 'rxjs';
+import { switchMap, takeWhile } from 'rxjs/operators';
 import { HttpClient } from '@angular/common/http';
 import { GeneralService } from '../general/general.service';
 import { SearchCriteria } from './driverPayoutMIS.model';
@@ -54,6 +55,37 @@ export class DriverPayoutMISService {
     return this.httpClient.post(`${this.API_URL}/ExportCsv`, this.buildPayload(criteria), {
       responseType: 'blob'
     });
+  }
+
+  startExportJob(criteria: SearchCriteria): Observable<any> {
+    return this.httpClient.post(`${this.API_URL}/ExportCsv/StartJob`, this.buildPayload(criteria));
+  }
+
+  getExportJobStatus(jobId: string): Observable<any> {
+    return this.httpClient.get(`${this.API_URL}/ExportCsv/JobStatus/${jobId}`);
+  }
+
+  downloadExportJob(jobId: string): Observable<Blob> {
+    return this.httpClient.get(`${this.API_URL}/ExportCsv/Download/${jobId}`, {
+      responseType: 'blob'
+    });
+  }
+
+  pollExportJob(jobId: string): Observable<any> {
+    return timer(0, 3000).pipe(
+      switchMap(() => this.getExportJobStatus(jobId)),
+      takeWhile((status: any) => this.isExportJobRunning(status), true)
+    );
+  }
+
+  isExportJobRunning(status: any): boolean {
+    const current = String(status?.status ?? status?.Status ?? '').toLowerCase();
+    return current === 'pending' || current === 'running';
+  }
+
+  isExportJobReady(status: any): boolean {
+    const current = String(status?.status ?? status?.Status ?? '').toLowerCase();
+    return current === 'completed' && (status?.fileReady ?? status?.FileReady ?? false);
   }
 
   GetLocationDropDownForDutyRegister(isKamRole: boolean): Observable<OrganizationalEntityDropDown[]> {

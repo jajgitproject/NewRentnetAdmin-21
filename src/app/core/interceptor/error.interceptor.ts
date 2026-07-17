@@ -220,7 +220,7 @@ export class ErrorInterceptor implements HttpInterceptor {
     }
 
     if (httpErr?.status === 404) {
-      return 'API endpoint not found. Deploy the latest RentnetAPI build with documentManagement endpoints.';
+      return 'API endpoint not found. Restart or redeploy RentnetAPI with the latest Driver Payout MIS export endpoints.';
     }
 
     return httpErr?.statusText || 'Error';

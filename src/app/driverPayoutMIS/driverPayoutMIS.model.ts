@@ -29,6 +29,10 @@ export class DriverPayoutMISModel {
   nonChargeableExpense: string;
   status: string;
   dispatchLocation: string;
+  serviceLocation: string;
+  pickupLocation: string;
+  g2P: string;
+  d2G: string;
   supplierOfficialIdentityNumber: string;
   supplierName: string;
   supplierType: string;

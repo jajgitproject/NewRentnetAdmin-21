@@ -2,13 +2,12 @@
 import { Component, OnInit } from '@angular/core';
 import { FormControl } from '@angular/forms';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import { HttpErrorResponse } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import { Observable, Subscription } from 'rxjs';
 import { map, startWith } from 'rxjs/operators';
 import { MAT_DATE_LOCALE } from '@angular/material/core';
 import moment from 'moment';
 import { GeneralService } from '../general/general.service';
-import { DriverPayoutMISModel, SearchCriteria } from './driverPayoutMIS.model';
+import { SearchCriteria } from './driverPayoutMIS.model';
 import { DriverPayoutMISService } from './driverPayoutMIS.service';
 import { CustomerDropDown } from '../customer/customerDropDown.model';
 import { DriverDropDown } from '../customerPersonDriverRestriction/driverDropDown.model';
@@ -24,92 +23,15 @@ import { OrganizationalEntityDropDown } from '../organizationalEntity/organizati
   providers: [{ provide: MAT_DATE_LOCALE, useValue: 'en-GB' }]
 })
 export class DriverPayoutMISComponent implements OnInit {
-  displayedColumns = [
-    'reservationNo',
-    'dutySlipNo',
-    'customer',
-    'guestName',
-    'carNo',
-    'carBooked',
-    'carSent',
-    'driverID',
-    'driverOfficialID',
-    'driverName',
-    'driverMobile',
-    'city',
-    'package',
-    'locationOutDate',
-    'locationOutTime',
-    'locationOutKM',
-    'locationInDate',
-    'locationInTime',
-    'locationInKM',
-    'totalKM',
-    'totalHRS',
-    'totalDays',
-    'invoiceNo',
-    'verifyDuty',
-    'goodForBilling',
-    'tripStatus',
-    'chargeableExpense',
-    'nonChargeableExpense',
-    'status',
-    'dispatchLocation',
-    'supplierOfficialIdentityNumber',
-    'supplierName',
-    'supplierType',
-    'ownedOrSupplied',
-    'closingType',
-    'physicalDutySlipReceived'
-  ];
-
-  columnTitleMap = {
-    reservationNo: 'Reservation No.',
-    dutySlipNo: 'Duty Slip No.',
-    customer: 'Customer',
-    guestName: 'Guest Name',
-    carNo: 'Car No.',
-    carBooked: 'Car booked',
-    carSent: 'Car Sent',
-    driverID: 'Driver ID',
-    driverOfficialID: 'Driver Official ID',
-    driverName: 'Driver Name',
-    driverMobile: 'Driver Mobile',
-    city: 'City',
-    package: 'Package',
-    locationOutDate: 'Location Out Date',
-    locationOutTime: 'Location Out Time',
-    locationOutKM: 'Location Out KM',
-    locationInDate: 'Location In Date',
-    locationInTime: 'LocationIn Time',
-    locationInKM: 'Location In KM',
-    totalKM: 'Total KM',
-    totalHRS: 'Total HRS',
-    totalDays: 'Total Days',
-    invoiceNo: 'Invoice No.',
-    verifyDuty: 'Verify Duty',
-    goodForBilling: 'Good For Billing',
-    tripStatus: 'Trip Status',
-    chargeableExpense: 'Chargeable Expense',
-    nonChargeableExpense: 'Non Chargeable Expense',
-    status: 'Status',
-    dispatchLocation: 'Dispatch Location',
-    supplierOfficialIdentityNumber: 'Supplier Official ID',
-    supplierName: 'Supplier Name',
-    supplierType: 'Supplier Type',
-    ownedOrSupplied: 'Owned or Supplied',
-    closingType: 'Closing Type',
-    physicalDutySlipReceived: 'Physical Duty Slip Received'
-  };
-
-  dataSource: DriverPayoutMISModel[] | null = null;
-  PageNumber = 0;
-  sortingData = 1;
-  sortType = '';
-  csvExporting = false;
-  hasManualSearch = false;
+  exportJobId: string | null = null;
+  exportJobStatus: any = null;
+  exportJobRunning = false;
+  exportJobDownloading = false;
+  exportJobError = '';
+  exportJobStartedAt: number | null = null;
+  private exportPollSub?: Subscription;
+  readonly maxPickupDateRangeDays = 31;
   IsKAMRole = false;
-  columnWidths: Record<string, number> = {};
 
   SearchCustomer: FormControl = new FormControl();
   SearchDri: FormControl = new FormControl();
@@ -151,6 +73,7 @@ export class DriverPayoutMISComponent implements OnInit {
   }
 
   refresh() {
+    this.clearExportJob();
     this.SearchCustomer.setValue('');
     this.SearchFromDate = '';
     this.SearchToDate = '';
@@ -159,9 +82,6 @@ export class DriverPayoutMISComponent implements OnInit {
     this.SearchSupplierType.setValue('');
     this.SearchCity.setValue('');
     this.SearchDispatchLocation.setValue('');
-    this.PageNumber = 0;
-    this.dataSource = null;
-    this.hasManualSearch = false;
   }
 
   buildSearchCriteria(): SearchCriteria {
@@ -178,160 +98,252 @@ export class DriverPayoutMISComponent implements OnInit {
     };
   }
 
-  loadData() {
-    const searchCriteria = this.buildSearchCriteria();
-    this.driverPayoutMISService.getTableData(searchCriteria, this.PageNumber).subscribe(
-      (data) => {
-        this.applyTableData(Array.isArray(data) ? data : []);
-      },
-      (error: HttpErrorResponse) => {
-        this.applyTableData([]);
-        this.showNotification('snackbar-danger', error?.message || 'Driver Payout MIS search failed', 'bottom', 'center');
-      }
-    );
-  }
-
-  getColumnWidth(column: string): string {
-    const width = this.columnWidths[column];
-    return width ? `${width}px` : 'auto';
-  }
-
-  getCellDisplayValue(row: DriverPayoutMISModel, column: string): string {
-    const value = row?.[column];
-    if (column === 'verifyDuty' || column === 'goodForBilling') {
-      return this.formatYesNo(value);
-    }
-    if (value === null || value === undefined || value === '') {
-      return 'N/A';
-    }
-    return String(value);
-  }
-
-  private formatYesNo(value: any): string {
-    if (value === null || value === undefined || value === '') {
-      return 'N/A';
-    }
-    const normalized = String(value).trim().toLowerCase();
-    if (normalized === 'true' || normalized === '1' || normalized === 'yes') {
-      return 'Yes';
-    }
-    if (normalized === 'false' || normalized === '0' || normalized === 'no') {
-      return 'No';
-    }
-    return String(value);
-  }
-
-  private applyTableData(rows: DriverPayoutMISModel[]) {
-    this.dataSource = rows;
-    this.updateColumnWidths(rows);
-  }
-
-  private updateColumnWidths(rows: DriverPayoutMISModel[]) {
-    const padding = 24;
-    const minWidth = 56;
-    const maxWidth = 360;
-    const charPx = 7.2;
-    const widths: Record<string, number> = {};
-
-    for (const column of this.displayedColumns) {
-      const header = this.columnTitleMap[column] || column;
-      let maxLen = header.length;
-
-      for (const row of rows) {
-        maxLen = Math.max(maxLen, this.getCellDisplayValue(row, column).length);
-      }
-
-      widths[column] = Math.min(maxWidth, Math.max(minWidth, Math.ceil(maxLen * charPx + padding)));
-    }
-
-    this.columnWidths = widths;
-  }
-
   SearchData() {
-    this.hasManualSearch = true;
-    this.PageNumber = 0;
-    this.loadData();
-  }
-
-  NextCall() {
-    if (this.dataSource?.length > 0) {
-      this.PageNumber++;
-      this.loadData();
-    }
-  }
-
-  PreviousCall() {
-    if (this.PageNumber > 0) {
-      this.PageNumber--;
-      this.loadData();
-    }
-  }
-
-  SortingData(column: any) {
-    if (this.sortingData === 1) {
-      this.sortingData = 0;
-      this.sortType = 'Ascending';
-    } else {
-      this.sortingData = 1;
-      this.sortType = 'Descending';
-    }
-
-    const searchCriteria = this.buildSearchCriteria();
-    this.driverPayoutMISService.getTableDataSort(searchCriteria, this.PageNumber, column.active, this.sortType).subscribe(
-      (data) => {
-        this.applyTableData(Array.isArray(data) ? data : []);
-      },
-      (error: HttpErrorResponse) => {
-        this.applyTableData([]);
-        this.showNotification('snackbar-danger', error?.message || 'Driver Payout MIS search failed', 'bottom', 'center');
-      }
-    );
-  }
-
-  downloadFilteredCsv() {
-    if (this.csvExporting || !this.hasManualSearch) {
+    if (this.exportJobRunning) {
       return;
     }
 
-    this.csvExporting = true;
+    const dateRangeError = this.validatePickupDateRange();
+    if (dateRangeError) {
+      this.showNotification('snackbar-danger', dateRangeError, 'bottom', 'center');
+      return;
+    }
+
+    this.exportJobError = '';
+    this.exportJobStartedAt = Date.now();
     const searchCriteria = this.buildSearchCriteria();
-    this.driverPayoutMISService.exportCsv(searchCriteria).subscribe(
-      (blob: Blob) => {
-        this.csvExporting = false;
+
+    this.exportJobRunning = true;
+    this.showNotification('snackbar-info', 'Export job started. CSV will be ready when processing completes.', 'bottom', 'center');
+
+    this.driverPayoutMISService.startExportJob(searchCriteria).subscribe(
+      (startResult: any) => {
+        const jobId = startResult?.jobId ?? startResult?.JobId;
+        if (!jobId) {
+          this.exportJobRunning = false;
+          this.exportJobError = 'Could not start export job.';
+          this.showNotification('snackbar-danger', this.exportJobError, 'bottom', 'center');
+          return;
+        }
+
+        this.exportJobId = jobId;
+        this.exportJobStatus = {
+          jobId,
+          status: startResult?.status ?? startResult?.Status ?? 'Pending',
+          message: startResult?.message ?? startResult?.Message ?? 'Export queued'
+        };
+        this.startExportPolling(jobId);
+      },
+      async (error) => {
+        this.exportJobRunning = false;
+        this.exportJobError = await this.extractExportErrorMessage(error);
+        this.showNotification('snackbar-danger', this.exportJobError, 'bottom', 'center');
+      }
+    );
+  }
+
+  downloadExportCsv() {
+    if (!this.exportJobId || !this.driverPayoutMISService.isExportJobReady(this.exportJobStatus) || this.exportJobDownloading) {
+      return;
+    }
+
+    this.exportJobDownloading = true;
+    this.driverPayoutMISService.downloadExportJob(this.exportJobId).subscribe(
+      async (blob: Blob) => {
+        this.exportJobDownloading = false;
 
         if (!blob || blob.size === 0) {
-          this.showNotification('snackbar-danger', 'No data to export', 'bottom', 'center');
+          this.showNotification('snackbar-danger', 'Export file is empty or unavailable.', 'bottom', 'center');
           return;
         }
 
         const contentType = (blob.type || '').toLowerCase();
-        if (contentType.includes('application/json')) {
-          blob.text().then((text) => {
-            if ((text || '').trim() === 'null') {
-              this.showNotification('snackbar-danger', 'No data to export', 'bottom', 'center');
-              return;
+        if (contentType.includes('application/json') || contentType.includes('text/plain')) {
+          const text = await blob.text();
+          let message = 'Export file is not ready.';
+          try {
+            const parsed = JSON.parse(text || '{}');
+            message = parsed.message || message;
+          } catch {
+            if (text && text.trim()) {
+              message = text;
             }
-            const csvBlob = new Blob([text], { type: 'text/csv;charset=utf-8;' });
-            this.triggerCsvDownload(csvBlob);
-          });
+          }
+          this.showNotification('snackbar-danger', message, 'bottom', 'center');
           return;
         }
 
-        this.triggerCsvDownload(blob);
+        const fileName = this.exportJobStatus?.fileName ?? this.exportJobStatus?.FileName;
+        this.triggerCsvDownload(blob, fileName);
+        this.driverPayoutMISService.getExportJobStatus(this.exportJobId).subscribe(
+          (status) => {
+            this.exportJobStatus = status;
+          },
+          () => {}
+        );
       },
-      () => {
-        this.csvExporting = false;
-        this.showNotification('snackbar-danger', 'Error downloading CSV', 'bottom', 'center');
+      async (error) => {
+        this.exportJobDownloading = false;
+        const message = await this.extractExportErrorMessage(error);
+        this.showNotification('snackbar-danger', message, 'bottom', 'center');
       }
     );
   }
 
-  private triggerCsvDownload(blob: Blob) {
+  canDownloadExport(): boolean {
+    return !!this.exportJobId && this.driverPayoutMISService.isExportJobReady(this.exportJobStatus) && !this.exportJobDownloading;
+  }
+
+  isExportJobInProgress(): boolean {
+    return this.exportJobRunning || this.driverPayoutMISService.isExportJobRunning(this.exportJobStatus);
+  }
+
+  getExportJobStatusLabel(): string {
+    return this.exportJobStatus?.status ?? this.exportJobStatus?.Status ?? '';
+  }
+
+  getExportJobMessage(): string {
+    return this.exportJobStatus?.message ?? this.exportJobStatus?.Message ?? this.exportJobError ?? '';
+  }
+
+  getExportRowsExported(): number {
+    return this.exportJobStatus?.rowsExported ?? this.exportJobStatus?.RowsExported ?? 0;
+  }
+
+  getExportElapsedTime(): string {
+    if (!this.exportJobStartedAt) {
+      return '—';
+    }
+    const elapsedSeconds = Math.floor((Date.now() - this.exportJobStartedAt) / 1000);
+    const minutes = Math.floor(elapsedSeconds / 60);
+    const seconds = elapsedSeconds % 60;
+    return minutes > 0 ? `${minutes}m ${seconds}s` : `${seconds}s`;
+  }
+
+  private startExportPolling(jobId: string) {
+    this.stopExportPolling();
+    this.exportPollSub = this.driverPayoutMISService.pollExportJob(jobId).subscribe(
+      (status: any) => {
+        this.exportJobStatus = status;
+        const current = String(status?.status ?? status?.Status ?? '').toLowerCase();
+
+        if (current === 'failed') {
+          this.exportJobRunning = false;
+          this.exportJobError = status?.message ?? status?.Message ?? 'Export failed.';
+          this.showNotification('snackbar-danger', this.exportJobError, 'bottom', 'center');
+          this.stopExportPolling();
+          return;
+        }
+
+        if (current === 'completed') {
+          this.exportJobRunning = false;
+          const rows = status?.rowsExported ?? status?.RowsExported ?? 0;
+          this.showNotification(
+            'snackbar-success',
+            status?.message ?? `Export ready (${rows} rows). Click Download CSV.`,
+            'bottom',
+            'center'
+          );
+          this.stopExportPolling();
+        }
+      },
+      async (error) => {
+        this.exportJobRunning = false;
+        this.exportJobError = await this.extractExportErrorMessage(error);
+        this.showNotification('snackbar-danger', this.exportJobError, 'bottom', 'center');
+        this.stopExportPolling();
+      }
+    );
+  }
+
+  private stopExportPolling() {
+    if (this.exportPollSub) {
+      this.exportPollSub.unsubscribe();
+      this.exportPollSub = undefined;
+    }
+  }
+
+  private clearExportJob() {
+    this.stopExportPolling();
+    this.exportJobId = null;
+    this.exportJobStatus = null;
+    this.exportJobRunning = false;
+    this.exportJobDownloading = false;
+    this.exportJobError = '';
+    this.exportJobStartedAt = null;
+  }
+
+  private async extractExportErrorMessage(error: any): Promise<string> {
+    if (!error) {
+      return 'Error starting export';
+    }
+
+    if (typeof error === 'string' && error.trim()) {
+      return error.trim();
+    }
+
+    const blob = error?.error;
+    if (blob instanceof Blob) {
+      const text = await blob.text();
+      try {
+        const parsed = JSON.parse(text || '{}');
+        return parsed.message || parsed.Message || text || 'Error starting export';
+      } catch {
+        return text || 'Error starting export';
+      }
+    }
+
+    if (typeof error?.error === 'string' && error.error.trim()) {
+      return error.error.trim();
+    }
+
+    if (error?.error && typeof error.error === 'object') {
+      return error.error.message || error.error.Message || 'Error starting export';
+    }
+
+    return error?.message || 'Error starting export';
+  }
+
+  validatePickupDateRange(): string | null {
+    if (!this.SearchFromDate || !this.SearchToDate) {
+      return 'Pickup date range is required. Please select From and To dates.';
+    }
+
+    const fromDate = moment(this.SearchFromDate).startOf('day');
+    const toDate = moment(this.SearchToDate).startOf('day');
+    if (!fromDate.isValid() || !toDate.isValid()) {
+      return 'Please enter valid pickup dates.';
+    }
+    if (toDate.isBefore(fromDate)) {
+      return 'Pickup To Date cannot be earlier than From Date.';
+    }
+    if (!this.hasAdditionalSearchFilters()) {
+      const inclusiveDays = toDate.diff(fromDate, 'days') + 1;
+      if (inclusiveDays > this.maxPickupDateRangeDays) {
+        return `Pickup date range cannot exceed ${this.maxPickupDateRangeDays} days when no other search filters are selected. Add another filter to search a wider range.`;
+      }
+    }
+
+    return null;
+  }
+
+  private hasAdditionalSearchFilters(): boolean {
+    return !!(
+      (this.SearchCustomer?.value && String(this.SearchCustomer.value).trim()) ||
+      (this.SearchDri?.value && String(this.SearchDri.value).trim()) ||
+      (this.SearchDriverType?.value && String(this.SearchDriverType.value).trim()) ||
+      (this.SearchSupplierType?.value && String(this.SearchSupplierType.value).trim()) ||
+      (this.SearchCity?.value && String(this.SearchCity.value).trim()) ||
+      (this.SearchDispatchLocation?.value && String(this.SearchDispatchLocation.value).trim())
+    );
+  }
+
+  private triggerCsvDownload(blob: Blob, preferredFileName?: string) {
     const url = window.URL.createObjectURL(blob);
     const link = document.createElement('a');
     const timeStamp = moment().format('YYYYMMDD_HHmmss');
     link.href = url;
-    link.download = `DriverPayoutMIS_${timeStamp}.csv`;
+    link.download = preferredFileName || `DriverPayoutMIS_${timeStamp}.csv`;
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
