@@ -12,6 +12,7 @@ export class DutyRegisterModel {
   dsClosedBy: string;
   dutySlipImage: string;
   closingDate: Date | null;
+  runningDetails: string;
 
   dispatchLocation: string;
 

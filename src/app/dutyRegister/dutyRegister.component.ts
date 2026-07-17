@@ -108,6 +108,7 @@ export class DutyRegisterComponent implements OnInit, OnDestroy {
   'DSClosedBy',
   'DutySlipImage',
   'ClosingDate',
+  'RunningDetails',
   'ClosureMethod',
   'PickupAddress',
   'PickupAddressDetails',

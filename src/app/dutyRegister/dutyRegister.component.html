@@ -607,6 +607,12 @@
                                                     {{row.closingDate || 'N/A'}}
                                                 </mat-cell>
                                             </ng-container>
+                                            <ng-container matColumnDef="RunningDetails">
+                                                <mat-header-cell *matHeaderCellDef mat-sort-header>Remark on DS Closing</mat-header-cell>
+                                                <mat-cell *matCellDef="let row">
+                                                    {{row.runningDetails || 'N/A'}}
+                                                </mat-cell>
+                                            </ng-container>
                                             <ng-container matColumnDef="ClosureMethod">
                                                 <mat-header-cell *matHeaderCellDef mat-sort-header>Closure Method</mat-header-cell>
                                                 <mat-cell *matCellDef="let row">
