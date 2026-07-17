@@ -6,6 +6,7 @@ export class InvoiceSummaryInvoiceItem {
   invoiceDate: Date;
   placeOfSupply: string;
   invoiceTotalAmountAfterGST: number;
+  modeOfPayment: string;
   checked?: boolean;
 
   constructor(item) {
@@ -15,6 +16,7 @@ export class InvoiceSummaryInvoiceItem {
     this.invoiceDate = item?.invoiceDate || null;
     this.placeOfSupply = item?.placeOfSupply || '';
     this.invoiceTotalAmountAfterGST = item?.invoiceTotalAmountAfterGST || 0;
+    this.modeOfPayment = item?.modeOfPayment || '';
     this.checked = item?.checked || false;
   }
 }

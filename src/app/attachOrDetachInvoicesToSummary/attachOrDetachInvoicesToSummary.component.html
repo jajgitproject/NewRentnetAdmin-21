@@ -95,6 +95,10 @@
                                                         <mat-header-cell *matHeaderCellDef>Place of Supply</mat-header-cell>
                                                         <mat-cell *matCellDef="let row">{{row.placeOfSupply}}</mat-cell>
                                                     </ng-container>
+                                                    <ng-container matColumnDef="modeOfPayment">
+                                                        <mat-header-cell *matHeaderCellDef>MOP</mat-header-cell>
+                                                        <mat-cell *matCellDef="let row">{{row.modeOfPayment}}</mat-cell>
+                                                    </ng-container>
                                                     <ng-container matColumnDef="invoiceTotalAmountAfterGST">
                                                         <mat-header-cell *matHeaderCellDef>Amount</mat-header-cell>
                                                         <mat-cell *matCellDef="let row" class="amount-cell">{{row.invoiceTotalAmountAfterGST | number:'1.2-2'}}</mat-cell>
@@ -183,6 +187,10 @@
                                                     <ng-container matColumnDef="placeOfSupply">
                                                         <mat-header-cell *matHeaderCellDef>Place of Supply</mat-header-cell>
                                                         <mat-cell *matCellDef="let row">{{row.placeOfSupply}}</mat-cell>
+                                                    </ng-container>
+                                                    <ng-container matColumnDef="modeOfPayment">
+                                                        <mat-header-cell *matHeaderCellDef>MOP</mat-header-cell>
+                                                        <mat-cell *matCellDef="let row">{{row.modeOfPayment}}</mat-cell>
                                                     </ng-container>
                                                     <ng-container matColumnDef="invoiceTotalAmountAfterGST">
                                                         <mat-header-cell *matHeaderCellDef>Amount</mat-header-cell>

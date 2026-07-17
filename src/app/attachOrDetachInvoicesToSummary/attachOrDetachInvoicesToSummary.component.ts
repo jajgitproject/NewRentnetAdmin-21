@@ -23,6 +23,7 @@ export class AttachOrDetachInvoicesToSummaryComponent implements OnInit {
     'customerName',
     'invoiceDate',
     'placeOfSupply',
+    'modeOfPayment',
     'invoiceTotalAmountAfterGST'
   ];
 
