@@ -5,7 +5,9 @@ import { Resolution } from './resolution.model';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { DatePipe } from '@angular/common';
 import { GeneralService } from '../general/general.service';
-@Injectable()
+@Injectable({
+  providedIn:'root'
+})
 export class ResolutionService 
 {
   private API_URL:string = '';

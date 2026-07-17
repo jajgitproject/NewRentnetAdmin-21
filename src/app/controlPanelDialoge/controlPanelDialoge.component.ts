@@ -2355,6 +2355,24 @@ export class ControlPanelDialogeComponent {
           });
           
         }
+
+incidenceOne(item: any) {
+
+    const encryptedReservationID = encodeURIComponent(this._generalService.encrypt(item.reservationID.toString()));
+   
+    const url = this.route.serializeUrl(
+      this.route.createUrlTree(['/incidence'], {
+        queryParams: {
+          reservationID: encryptedReservationID,
+         
+         
+        }
+      }));
+    const closingWin = window.open(this._generalService.FormURL + url, '_blank');
+    closingWin?.focus();
+  }
+  //--------------------------------------
+
         emitEventToChild() {
     this.eventsSubject.next(true);
   }

@@ -116,43 +116,69 @@ export class resolutionFormDialogComponent {
     // private authService: AuthService ,// Inject the AuthService
 
     public _generalService: GeneralService) {
-    this.reservationID = data?.item.reservationID;
-    this.dutySlipID = data?.item.dutySlipID;
-    this.incidenceTypeID = data?.item.incidenceTypeID;
-    this.issueCategoryID = data?.item.issueCategoryID;
-    this.customerID = data?.item?.customerID;
-    this.customerName = data?.item?.customerName;
-    this.driverID = data?.item?.driverID;
-    this.driverName = data?.item?.driverName;
-    this.supplierID = data?.item?.supplierID;
-    this.carVendor = data?.item?.carVendor;
-    this.CustomerPersonID = data?.item?.primaryPassengerID || data?.item?.passengerDetails[0]?.customerPersonID;
-    this.customerPersonName = data?.item?.primaryPassenger || data?.item?.passengerDetails[0]?.customerPersonName;    
-    this.customerID = data?.item?.customerID;
-    this.registrationNumber = data?.item?.registrationNumber;
-    this.inventoryID = data?.item?.inventoryID;
-    this.customerPersonID = data?.item?.customerPersonID;
-    this.organizationalEntityName = data?.item?.transferedLocation;
-    this.transferedLocationID = data?.item?.transferedLocationID;
-    this.incidenceID = data?.incidenceID;
-    this.CustomerPersonID = data.CustomerPersonID;
-    this.verifyDutyStatusAndCacellationStatus = data.verifyDutyStatusAndCacellationStatus;
-    // Set the defaults
-    this.action = data.action;
-    if (this.action === 'edit') {
-      this.dialogTitle = ' Incidence Resolution';
-      this.advanceTable = data.advanceTable;
-      if (this.dataSource && this.dataSource.length > 0) {
-        let startDate = moment(this.dataSource[0]?.closureDate).format('DD/MM/yyyy');
-        // let endDate = moment(this.advanceTable.closureDate).format('DD/MM/yyyy');
-        this.onBlurStartDateEdit(startDate);
-      
-      }
-    } else {
-      this.dialogTitle = 'Resolution';
-      this.advanceTable = new Resolution({});
-      this.advanceTable.activationStatus = true;
-    }
+    this.reservationID = data?.item?.reservationID;
+this.dutySlipID = data?.item?.dutySlipID;
+this.incidenceTypeID = data?.item?.incidenceTypeID;
+this.issueCategoryID = data?.item?.issueCategoryID;
+
+this.customerID = data?.item?.customerID;
+this.customerName = data?.item?.customerName;
+
+this.driverID = data?.item?.driverID;
+this.driverName = data?.item?.driverName;
+
+this.supplierID = data?.item?.supplierID;
+this.carVendor = data?.item?.carVendor;
+
+this.registrationNumber = data?.item?.registrationNumber;
+this.inventoryID = data?.item?.inventoryID;
+
+this.organizationalEntityName =
+    data?.item?.transferedLocation;
+
+this.transferedLocationID =
+    data?.item?.transferedLocationID;
+
+this.incidenceID =
+    data?.incidenceID ||
+    data?.item?.incidenceID;
+
+this.CustomerPersonID =
+    data?.item?.primaryPassengerID ||
+    data?.item?.passengerDetails?.[0]?.customerPersonID;
+
+this.customerPersonName =
+    data?.item?.primaryPassenger ||
+    data?.item?.passengerDetails?.[0]?.customerPersonName;
+
+this.verifyDutyStatusAndCacellationStatus =
+    data?.verifyDutyStatusAndCacellationStatus;
+
+this.action = data?.action;
+   if (this.action === 'edit') {
+
+  this.dialogTitle = 'Incidence Resolution';
+
+  this.advanceTable = data.item;
+
+  if (this.advanceTable?.closureDate) {
+
+    const closureDate =
+      moment(this.advanceTable.closureDate)
+      .format('DD/MM/YYYY');
+
+    this.onBlurStartDateEdit(closureDate);
+  }
+
+}
+else {
+
+  this.dialogTitle = 'Resolution';
+
+  this.advanceTable = new Resolution({});
+
+  this.advanceTable.activationStatus = true;
+}
     this.advanceTableForm = this.createContactForm();
     // if (this.verifyDutyStatusAndCacellationStatus !== 'Changes allow') 
     // {
@@ -188,8 +214,11 @@ export class resolutionFormDialogComponent {
     const currentTime = new Date(now).toISOString();
     this.advanceTableForm.patchValue({
       reservationID: this.reservationID,
+      incidenceIDt:this.incidenceID,
+      dutySlipID: this.dutySlipID,
       customerName: this.customerName,
       registrationNumber: this.registrationNumber,
+      customerPersonName: this.customerPersonName,
       driverName: this.driverName,
       dispatchLocation: this.organizationalEntityName,
       incidenceDate: currentDate,

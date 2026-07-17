@@ -2,7 +2,7 @@
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
-// import { IncidenceComponent } from './incidence.component';
+import { IncidenceComponent } from './incidence.component';
 import { incidenceFormDialogComponent as advanceTableForm } from './dialogs/form-dialog/form-dialog.component';
 import { DeleteDialogComponent } from './dialogs/delete/delete.component';
 import { MatTableModule } from '@angular/material/table';
@@ -29,11 +29,10 @@ import { MyUploadModule } from '../myupload/myupload.module';
 import { MatAutocompleteModule } from '@angular/material/autocomplete';
 import { incidenceFormDialogComponent } from './dialogs/form-dialog/form-dialog.component';
 import { OwlDateTimeModule, OwlNativeDateTimeModule } from '@danielmoncada/angular-datetime-picker';
+import { MatTooltipModule } from '@angular/material/tooltip';
 @NgModule({
   declarations: [
-    // IncidenceComponent,
-    advanceTableForm,
-    DeleteDialogComponent,
+    IncidenceComponent,
     incidenceFormDialogComponent
   ],
   imports: [
@@ -61,7 +60,8 @@ import { OwlDateTimeModule, OwlNativeDateTimeModule } from '@danielmoncada/angul
     MatToolbarModule,
     MatMenuModule,
     MatProgressSpinnerModule,
-    MyUploadModule
+    MyUploadModule,
+    MatTooltipModule
   ],
   exports: [advanceTableForm],
   providers: [IncidenceService]

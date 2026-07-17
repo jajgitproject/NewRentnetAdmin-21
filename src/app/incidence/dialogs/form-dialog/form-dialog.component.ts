@@ -20,7 +20,7 @@ import moment from 'moment';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { HttpErrorResponse } from '@angular/common/http';
 import { DepartmentDropDown } from 'src/app/general/departmentDropDown.model';
-
+import { incidenceFormDialogComponent } from './dialogs/form-dialog/form-dialog.component';
 @Component({
   standalone: false,
     selector: 'app-form-dialog',

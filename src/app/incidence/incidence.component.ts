@@ -8,25 +8,36 @@ import { MatSort } from '@angular/material/sort';
 import { Incidence } from './incidence.model';
 import { DataSource } from '@angular/cdk/collections';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import { BehaviorSubject, fromEvent, merge, Observable, Subscription } from 'rxjs';
+import {
+  BehaviorSubject,
+  fromEvent,
+  merge,
+  Observable,
+  Subscription,
+} from 'rxjs';
 import { map } from 'rxjs/operators';
 import { DateAdapter, MAT_DATE_LOCALE } from '@angular/material/core';
 import { MatMenu, MatMenuTrigger } from '@angular/material/menu';
 import { SelectionModel } from '@angular/cdk/collections';
 import { GeneralService } from '../general/general.service';
- import { MyUploadComponent } from '../myupload/myupload.component';
-// import { FormDialogComponent } from '../incidence/dialogs/form-dialog/form-dialog.component';
+import { MyUploadComponent } from '../myupload/myupload.component';
 import { DeleteDialogCityComponent } from '../dashboard/city-master/dialogscity/delete-city/delete-city.component';
 import { DeleteDialogComponent } from './dialogs/delete/delete.component';
 import { FormControl } from '@angular/forms';
 import { incidenceFormDialogComponent } from './dialogs/form-dialog/form-dialog.component';
 import { ActivatedRoute } from '@angular/router';
+import { MatTableModule } from '@angular/material/table';
+import { MatMenuModule } from '@angular/material/menu';
+import { MatIconModule } from '@angular/material/icon';
+import { MatTooltipModule } from '@angular/material/tooltip';
+import { MatButtonModule } from '@angular/material/button';
+import { resolutionFormDialogComponent } from '../resolution/dialogs/form-dialog/form-dialog.component';
 @Component({
   standalone: false,
   selector: 'app-incidence',
   templateUrl: './incidence.component.html',
   styleUrls: ['./incidence.component.sass'],
-  providers: [{ provide: MAT_DATE_LOCALE, useValue: 'en-GB' }]
+  providers: [{ provide: MAT_DATE_LOCALE, useValue: 'en-GB' }],
 })
 export class IncidenceComponent implements OnInit {
   // displayedColumns = [
@@ -38,24 +49,37 @@ export class IncidenceComponent implements OnInit {
   incidenceID: number;
   advanceTable: Incidence | null;
   SearchIncidence: string = '';
-  SearchActivationStatus : boolean=true;
+  SearchActivationStatus: boolean = true;
   PageNumber: number = 0;
   activation: string;
   sortingData: number;
   sortType: string;
-  search : FormControl = new FormControl();
+  search: FormControl = new FormControl();
   selectedFilter: string = 'search';
   searchTerm: any = '';
   reservationID: any;
   dutySlipID: any;
 
+  displayedColumns: string[] = [
+    'IncidenceID',
+    'ReservationID',
+    'PassengerID',
+    'IncidenceDate',
+    'IncidenceCategory',
+    'InternalExternalType',
+    'ReportedBy',
+    'IncidenceDetails',
+    'Status',
+    'Actions',
+  ];
+
   constructor(
     public httpClient: HttpClient,
     public dialog: MatDialog,
+    public _generalService: GeneralService,
     public incidenceService: IncidenceService,
+    public route: ActivatedRoute,
     private snackBar: MatSnackBar,
-       public route: ActivatedRoute,
-    public _generalService: GeneralService
   ) {}
   @ViewChild(MatPaginator, { static: true }) paginator: MatPaginator;
   @ViewChild(MatSort, { static: true }) sort: MatSort;
@@ -64,104 +88,196 @@ export class IncidenceComponent implements OnInit {
   contextMenu: MatMenuTrigger;
   contextMenuPosition = { x: '0px', y: '0px' };
   ngOnInit() {
-    this.route.queryParams.subscribe(paramsData => {
-      this.dutySlipID = paramsData.dutySlipID;
-      this.reservationID = paramsData.reservationID;
+    this.route.queryParams.subscribe((paramsData) => {
+      const encryptedReservationID = paramsData.reservationID;
+      this.reservationID = Number(
+        this._generalService.decrypt(
+          decodeURIComponent(encryptedReservationID),
+        ),
+      );
     });
+
     this.loadData();
     this.SubscribeUpdateService();
   }
   refresh() {
-    this.selectedFilter='search';
-    this.searchTerm='';
+    this.selectedFilter = 'search';
+    this.searchTerm = '';
     this.SearchIncidence = '';
     this.SearchActivationStatus = true;
-    this.PageNumber=0;
+    this.PageNumber = 0;
     this.loadData();
   }
 
-  addNew()
-  {
-    const dialogRef = this.dialog.open(incidenceFormDialogComponent, 
-    {
-      data: 
-        {
-          advanceTable: this.advanceTable,
-          action: 'add',
-          reservationID: this.reservationID,
-        }
-    });
-  }
+  addNew(): void {
 
-  editCall(row) {
-    //  alert(row.id);
-  this.incidenceID = row.id;
-  const dialogRef = this.dialog.open(incidenceFormDialogComponent, {
-    data: {
-      advanceTable: row,
-      action: 'edit',
-      reservationID: this.reservationID,
+  const dialogRef = this.dialog.open(
+    incidenceFormDialogComponent,
+    {
+      width: '90%',
+      height: '90%',
+      disableClose: true,
+      data: {
+        action: 'add',
+        item: {
+          reservationID: this.reservationID,
+          dutySlipID: this.dutySlipID,
+          customerID: 0,
+          customerName: '',
+          registrationNumber: '',
+          inventoryID: 0,
+          driverName: '',
+          transferedLocation: '',
+          transferedLocationID: 0,
+          passengerDetails: []
+        }
+      }
+    }
+  );
+
+  dialogRef.afterClosed().subscribe(result => {
+    if (result) {
+      this.loadData();
     }
   });
-
 }
-deleteItem(row)
-{
-  this.incidenceID = row.id;
-  const dialogRef = this.dialog.open(DeleteDialogComponent, 
-  {
-    data: row
+
+  //-------------------------Edit Incidence----------
+  editCall(item: any): void {
+    const dialogRef = this.dialog.open(incidenceFormDialogComponent, {
+      width: '90%',
+      height: '90%',
+      disableClose: true,
+      data: {
+        action: 'edit',
+        item: item,
+        reservationID: item.reservationID,
+        dutySlipID: item.dutySlipID,
+        customerName: item.customerName,
+        customerID: item.customerID,
+        registrationNumber: item.registrationNumber,
+        inventoryID: item.inventoryID,
+        driverName: item.driverName,
+        organizationalEntityName: item.organizationalEntityName,
+        customerPersonID: item.passengerDetails?.[0]?.customerPersonID,
+        customerPersonName: item.passengerDetails?.[0]?.customerPersonName,
+        verifyDutyStatusAndCacellationStatus:
+          item.verifyDutyStatusAndCacellationStatus,
+      },
+    });
+
+    dialogRef.afterClosed().subscribe((result) => {
+      if (result) {
+        this.loadData();
+      }
+    });
+  }
+  //---------------------Resolution
+ createResolution(row: any): void {
+
+  const dialogRef = this.dialog.open(
+    resolutionFormDialogComponent,
+    {
+      width: '90%',
+      height: '90%',
+      disableClose: true,
+      data: {
+        advanceTable: this.advanceTable,
+        action: row.resolutionID ? 'edit' : 'add',
+
+        item: row,
+
+        incidenceID: row.incidenceID,
+        reservationID: row.reservationID,
+        dutySlipID: row.dutySlipID,
+
+        customerID: row.customerID,
+        customerName: row.customerName,
+
+        registrationNumber: row.registrationNumber,
+        inventoryID: row.inventoryID,
+
+        driverName: row.driverName,
+        organizationalEntityName:
+          row.organizationalEntityName,
+
+        customerPersonID:
+          row.passengerDetails?.[0]?.customerPersonID,
+
+        customerPersonName:
+          row.passengerDetails?.[0]?.customerPersonName
+      }
+    }
+  );
+
+  dialogRef.afterClosed().subscribe(result => {
+    if (result) {
+      this.loadData();
+    }
   });
 }
+  //----------------------------
 
-shouldShowDeleteButton(item: any): boolean {
-  return item.activationStatus !== false; // Only show delete button if activationStatus is not false (not deleted)
-}
+  shouldShowDeleteButton(item: any): boolean {
+    return item.activationStatus !== false; // Only show delete button if activationStatus is not false (not deleted)
+  }
 
-  public Filter()
-  {
+  public Filter() {
     this.PageNumber = 0;
     this.loadData();
   }
 
   onBackPress(event) {
-    if (event.keyCode === 8) 
-    {
+    if (event.keyCode === 8) {
       this.loadData();
     }
   }
 
-   public loadData() 
-   {
-    if(this.selectedFilter==='Incidence')
-    {
-      this.SearchIncidence=this.searchTerm;
-    }
-      // this.incidenceService.getTableData(this.SearchIncidence,this.SearchActivationStatus, this.PageNumber).subscribe
-      // (
-      //   data =>   
-      //   {
-      //     this.dataSource = data;
-         
-      //     // this.dataSource.forEach((ele)=>{
-      //     //   if(ele.activationStatus===true){
-      //     //    this.activation="Active"
-      //     //   }
-      //     //   if(ele.activationStatus===false){
-      //     //     this.activation="Deleted"
-      //     //    }
-      //     // })
-         
-      //   },
-      //   (error: HttpErrorResponse) => { this.dataSource = null;}
-      // );
+  public loadData() {
+    this.incidenceService
+      .getTableData(
+        this.reservationID,
+        this.SearchActivationStatus,
+        this.PageNumber,
+      )
+      .subscribe(
+        (response: any) => {
+          console.log('API Response:', response);
+
+          // Case 1: API returns array directly
+          if (Array.isArray(response)) {
+            this.dataSource = response;
+          }
+
+          // Case 2: API returns { data: [...] }
+          else if (response.data && Array.isArray(response.data)) {
+            this.dataSource = response.data;
+          }
+
+          // Case 3: API returns { result: [...] }
+          else if (response.result && Array.isArray(response.result)) {
+            this.dataSource = response.result;
+          }
+
+          // fallback
+          else {
+            this.dataSource = [];
+          }
+
+          console.log('Datasource:', this.dataSource);
+        },
+        (error: HttpErrorResponse) => {
+          console.log(error);
+          this.dataSource = [];
+        },
+      );
   }
   showNotification(colorName, text, placementFrom, placementAlign) {
     this.snackBar.open(text, '', {
       duration: 2000,
       verticalPosition: placementFrom,
       horizontalPosition: placementAlign,
-      panelClass: colorName
+      panelClass: colorName,
     });
   }
   onContextMenu(event: MouseEvent, item: Incidence) {
@@ -172,162 +288,143 @@ shouldShowDeleteButton(item: any): boolean {
     this.contextMenu.menu.focusFirstItem('mouse');
     this.contextMenu.openMenu();
   }
-  NextCall()
-  {
-    if (this.dataSource?.length>0) 
-    {
+  NextCall() {
+    if (this.dataSource?.length > 0) {
       this.PageNumber++;
       this.loadData();
     }
   }
-  PreviousCall()
-  {
-    if(this.PageNumber>0)
-    {
+  PreviousCall() {
+    if (this.PageNumber > 0) {
       this.PageNumber--;
-      this.loadData(); 
-    } 
+      this.loadData();
+    }
   }
 
-  public SearchData()
-  {
+  public SearchData() {
     this.loadData();
     //this.SearchIncidence='';
-    
   }
 
-/////////////////for Image Upload////////////////////////////
+  /////////////////for Image Upload////////////////////////////
   public response: { dbPath: '' };
   public ImagePath: string;
   public uploadFinished = (event) => {
-  this.response = event;
-  this.ImagePath = this._generalService.getImageURL() + this.response.dbPath;
-  }
-/////////////////for Image Upload ends////////////////////////////
+    this.response = event;
+    this.ImagePath = this._generalService.getImageURL() + this.response.dbPath;
+  };
+  /////////////////for Image Upload ends////////////////////////////
 
   /////////////////To Recieve Updates Start////////////////////////////
   messageReceived: string;
-  MessageArray:string[]=[];
+  MessageArray: string[] = [];
   private subscriptionName: Subscription; //important to create a subscription
 
-  SubscribeUpdateService()
-  {
-    this.subscriptionName=this._generalService.getUpdate().subscribe
-    (
-      message => 
-      { 
+  SubscribeUpdateService() {
+    this.subscriptionName = this._generalService
+      .getUpdate()
+      .subscribe((message) => {
         //message contains the data sent from service
         this.messageReceived = message.text;
-        this.MessageArray=this.messageReceived.split(":");
-        if(this.MessageArray.length==3)
-        {
-          if(this.MessageArray[0]=="IncidenceCreate")
-          {
-            if(this.MessageArray[1]=="IncidenceView")
-            {
-              if(this.MessageArray[2]=="Success")
-              {
+        this.MessageArray = this.messageReceived.split(':');
+        if (this.MessageArray.length == 3) {
+          if (this.MessageArray[0] == 'IncidenceCreate') {
+            if (this.MessageArray[1] == 'IncidenceView') {
+              if (this.MessageArray[2] == 'Success') {
                 this.refresh();
                 this.showNotification(
-                'snackbar-success',
-                'Incidence Created...!!!',
-                'bottom',
-                'center'
-              );
+                  'snackbar-success',
+                  'Incidence Created...!!!',
+                  'bottom',
+                  'center',
+                );
               }
             }
-          }
-          else if(this.MessageArray[0]=="IncidenceUpdate")
-          {
-            if(this.MessageArray[1]=="IncidenceView")
-            {
-              if(this.MessageArray[2]=="Success")
-              {
-               this.refresh();
-               this.showNotification(
-                'snackbar-success',
-                'Incidence Updated...!!!',
-                'bottom',
-                'center'
-              );
+          } else if (this.MessageArray[0] == 'IncidenceUpdate') {
+            if (this.MessageArray[1] == 'IncidenceView') {
+              if (this.MessageArray[2] == 'Success') {
+                this.refresh();
+                this.showNotification(
+                  'snackbar-success',
+                  'Incidence Updated...!!!',
+                  'bottom',
+                  'center',
+                );
               }
             }
-          }
-          else if(this.MessageArray[0]=="IncidenceDelete")
-          {
-            if(this.MessageArray[1]=="IncidenceView")
-            {
-              if(this.MessageArray[2]=="Success")
-              {
-               this.refresh();
-               this.showNotification(
-                'snackbar-success',
-                'Incidence Deleted...!!!',
-                'bottom',
-                'center'
-              );
+          } else if (this.MessageArray[0] == 'IncidenceDelete') {
+            if (this.MessageArray[1] == 'IncidenceView') {
+              if (this.MessageArray[2] == 'Success') {
+                this.refresh();
+                this.showNotification(
+                  'snackbar-success',
+                  'Incidence Deleted...!!!',
+                  'bottom',
+                  'center',
+                );
               }
             }
-          }
-          else if(this.MessageArray[0]=="IncidenceAll")
-          {
-            if(this.MessageArray[1]=="IncidenceView")
-            {
-              if(this.MessageArray[2]=="Failure")
-              {
-               this.refresh();
-               this.showNotification(
-                'snackbar-danger',
-                'Operation Failed.....!!!',
-                'bottom',
-                'center'
-              );
+          } else if (this.MessageArray[0] == 'IncidenceAll') {
+            if (this.MessageArray[1] == 'IncidenceView') {
+              if (this.MessageArray[2] == 'Failure') {
+                this.refresh();
+                this.showNotification(
+                  'snackbar-danger',
+                  'Operation Failed.....!!!',
+                  'bottom',
+                  'center',
+                );
               }
             }
-          }
-          else if(this.MessageArray[0]=="DataNotFound")
-          {
-            if(this.MessageArray[1]=="DuplicacyError")
-            {
-              if(this.MessageArray[2]=="Failure")
-              {
-               this.refresh();
-               this.showNotification(
-                'snackbar-danger',
-                'Duplicate Value Found.....!!!',
-                'bottom',
-                'center'
-              );
+          } else if (this.MessageArray[0] == 'DataNotFound') {
+            if (this.MessageArray[1] == 'DuplicacyError') {
+              if (this.MessageArray[2] == 'Failure') {
+                this.refresh();
+                this.showNotification(
+                  'snackbar-danger',
+                  'Duplicate Value Found.....!!!',
+                  'bottom',
+                  'center',
+                );
               }
             }
           }
         }
-      }
-    );
+      });
   }
 
-  SortingData(coloumName:any) {
-   
+  //--------------------------
+  // createResolution(row: any) {
+  //   const dialogRef = this.dialog.open(ResolutionDialogComponent, {
+  //     data: {
+  //       incidenceID: row.IncidenceID,
+  //     },
+  //   });
+  // }
+  //--------------------------------
+  SortingData(coloumName: any) {
     if (this.sortingData == 1) {
-
       this.sortingData = 0;
-      this.sortType = "Ascending"
-    }
-    else {
+      this.sortType = 'Ascending';
+    } else {
       this.sortingData = 1;
-      this.sortType = "Descending";
+      this.sortType = 'Descending';
     }
-    this.incidenceService.getTableDataSort(this.SearchIncidence,this.SearchActivationStatus, this.PageNumber,coloumName.active,this.sortType).subscribe
-    (
-      data =>   
-      {
-        this.dataSource = data;
-      
-      },
-      (error: HttpErrorResponse) => { this.dataSource = null;}
-    );
+    this.incidenceService
+      .getTableDataSort(
+        this.SearchIncidence,
+        this.SearchActivationStatus,
+        this.PageNumber,
+        coloumName.active,
+        this.sortType,
+      )
+      .subscribe(
+        (data) => {
+          this.dataSource = data;
+        },
+        (error: HttpErrorResponse) => {
+          this.dataSource = null;
+        },
+      );
   }
 }
-
-
-

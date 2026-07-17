@@ -1,12 +1,13 @@
 // @ts-nocheck
-import { NgModule } from '@angular/core';
+import { CUSTOM_ELEMENTS_SCHEMA, NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
-import { ResolutionComponent } from './resolution.component';
-import { resolutionFormDialogComponent as advanceTableForm } from './dialogs/form-dialog/form-dialog.component';
+import { EmployeeDemoComponent } from './employeeDemo.component';
+import { FormDialogComponent as advanceTableForm } from './dialogs/form-dialog/form-dialog.component';
 import { DeleteDialogComponent } from './dialogs/delete/delete.component';
 import { MatTableModule } from '@angular/material/table';
 import { MatPaginatorModule } from '@angular/material/paginator';
+import { MatAutocompleteModule } from '@angular/material/autocomplete';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatSnackBarModule } from '@angular/material/snack-bar';
@@ -22,28 +23,37 @@ import { MatDialogModule } from '@angular/material/dialog';
 import { MatSortModule } from '@angular/material/sort';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatMenuModule } from '@angular/material/menu';
-import { ResolutionService } from './resolution.service';
-import { ResolutionRoutingModule } from './resolution-routing.module';
+import { EmployeeDemoService } from './employeeDemo.service';
+import { EmployeeDemoRoutingModule } from './employeeDemo-routing.module';
 import { MyUploadComponent } from '../myupload/myupload.component';
 import { MyUploadModule } from '../myupload/myupload.module';
-import { MatAutocompleteModule } from '@angular/material/autocomplete';
-import { resolutionFormDialogComponent } from './dialogs/form-dialog/form-dialog.component';
-import { OwlDateTimeModule, OwlNativeDateTimeModule } from '@danielmoncada/angular-datetime-picker';
+import { CurrentDesginationService } from '../currentDesgination/currentDesgination.service';
+//import { CurrentDesgination } from '../currentDesgination/currentDesgination.model';
+import { CurrentDesginationModule } from '../currentDesgination/currentDesgination.module';
+import { CurrentDesginationComponent } from '../currentDesgination/currentDesgination.component';
+import { OrganizationalEntityStakeHoldersService } from '../organizationalEntityStakeHolders/organizationalEntityStakeHolders.service';
+import { BrowserModule } from '@angular/platform-browser';
+import { MatTooltipModule } from '@angular/material/tooltip';
+import { CustomerForSalesManagerService } from '../customerForSalesManager/customerForSalesManager.service';
+import { BankService } from '../bank/bank.service';
+
+// import { TwoDigitDecimaNumberDirective } from './twodigitdecimalnumber.directive';
+
 @NgModule({
   declarations: [
-    ResolutionComponent,
+    EmployeeDemoComponent,
     advanceTableForm,
     DeleteDialogComponent,
-    resolutionFormDialogComponent
+   //CurrentDesginationComponent
   ],
   imports: [
+    //BrowserModule,
     CommonModule,
-    OwlDateTimeModule,
-    OwlNativeDateTimeModule,
     FormsModule,
-    MatAutocompleteModule,
+    MatTooltipModule,
     ReactiveFormsModule,
-    ResolutionRoutingModule,
+    EmployeeDemoRoutingModule,
+    MatAutocompleteModule,
     MatTableModule,
     MatPaginatorModule,
     MatFormFieldModule,
@@ -61,12 +71,13 @@ import { OwlDateTimeModule, OwlNativeDateTimeModule } from '@danielmoncada/angul
     MatToolbarModule,
     MatMenuModule,
     MatProgressSpinnerModule,
-    MyUploadModule
+    MyUploadModule,
+    CurrentDesginationModule
+    //TwoDigitDecimaNumberDirective
   ],
-  exports: [advanceTableForm],
-  providers: [ResolutionService]
+  //entryComponents:[CurrentDesginationComponent],
+  providers: [EmployeeDemoService,OrganizationalEntityStakeHoldersService,CustomerForSalesManagerService, BankService]
 })
-export class ResolutionModule {}
-
+export class EmployeeDemoModule {}
 
 

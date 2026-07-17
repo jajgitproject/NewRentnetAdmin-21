@@ -1,13 +1,12 @@
 // @ts-nocheck
 import { NgModule } from '@angular/core';
 import { Routes, RouterModule } from '@angular/router';
-import { IncidenceComponent } from './incidence.component';
-
+import { EmployeeDemoComponent } from './employeeDemo.component';
 
 const routes: Routes = [
   {
     path: '',
-    component: IncidenceComponent
+    component: EmployeeDemoComponent
   }
 ];
 
@@ -15,5 +14,5 @@ const routes: Routes = [
   imports: [RouterModule.forChild(routes)],
   exports: [RouterModule]
 })
-export class IncidenceRoutingModule {}
+export class EmployeeDemoRoutingModule {}
 
