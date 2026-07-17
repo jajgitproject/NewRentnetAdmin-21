@@ -23,6 +23,13 @@ export class GenerateBillMainService
   getCustomerAddressFromGeneral(customerID: number): Observable<any[]> {
     return this.httpClient.get<any[]>(this.generalService.BaseURL + "generalBillMain/ForCustomerBehalfDataDetails/" + customerID);
   }
+
+  /** IsSEZ from CustomerConfigurationInvoicing for Customer + State + Bill Date within StartDate/EndDate */
+  getIsSEZByCustomerStateAndDate(customerID: number, stateID: number, effectiveDate: string): Observable<{ isSEZ: boolean | null }> {
+    return this.httpClient.get<{ isSEZ: boolean | null }>(
+      this.generalService.BaseURL + "customerConfigurationInvoicing/GetIsSEZ/" + customerID + "/" + stateID + "/" + effectiveDate
+    );
+  }
   
   /** CRUD METHODS */
   getTableData(SearchCustomer:string, SearchInvoiceNumberWithPrefix:string,SearchGuset:string,SearchBillDate:string,SearchStartDate:string,SearchEndDate:string, SearchActivationStatus:boolean, PageNumber: number):  Observable<any> 

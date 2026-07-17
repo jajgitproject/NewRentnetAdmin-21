@@ -183,6 +183,10 @@ export class FormDialogComponent
           billFromDate: invoiceDate,
           billToDate: invoiceDate // You can modify this if the logic differs
         });
+        // Refresh Is SEZ if Customer + State already selected (date range may change match)
+        if (this.customerID && this.stateID) {
+          this.loadIsSEZForSelectedState();
+        }
       }
     });
 
@@ -342,7 +346,18 @@ export class FormDialogComponent
     this.customerGroupID = customerGroupID;
     this.customerGroup = customerGroup;
     this.customerDetailData={customerGroup:this.customerGroup,customerGroupID:this.customerGroupID}
-    this.advanceTableForm.patchValue({customerID:this.customerID});
+    this.advanceTableForm.patchValue({
+      customerID:this.customerID,
+      state: '',
+      stateID: '',
+      city: '',
+      cityID: '',
+      billingAddress: '',
+      pinCode: '',
+      isSEZ: ''
+    });
+    this.stateID = null;
+    this.cityID = null;
     
     this.InitState(this.customerID);
     // Auto-populate customer address details
@@ -477,7 +492,8 @@ export class FormDialogComponent
       cityID: '',
       billingAddress: '',
       pinCode: '',
-      customerID: ''
+      customerID: '',
+      isSEZ: ''
     });
 
     // Clear the component variables
@@ -605,8 +621,34 @@ export class FormDialogComponent
     this.advanceTableForm.patchValue({stateID:this.stateID});
     this.advanceTableForm.patchValue({placeOfSupply:geoPointName});
     this.InitCity(this.stateID);
-    
+    this.loadIsSEZForSelectedState();
   }
+
+  /** Fill Is SEZ from CustomerConfigurationInvoicing (CustomerID + StateID + Bill Date in StartDate/EndDate) */
+  loadIsSEZForSelectedState() {
+    if (!this.customerID || !this.stateID) {
+      this.advanceTableForm.patchValue({ isSEZ: '' });
+      return;
+    }
+
+    const billDate =
+      this.advanceTableForm.get('invoiceDate')?.value ||
+      this.advanceTableForm.get('billFromDate')?.value ||
+      new Date();
+
+    const effectiveDate = formatDate(billDate, 'yyyy-MM-dd', 'en-IN');
+
+    this.advanceTableService.getIsSEZByCustomerStateAndDate(this.customerID, this.stateID, effectiveDate).subscribe({
+      next: (data) => {
+        const isSEZ = data?.isSEZ === true;
+        this.advanceTableForm.patchValue({ isSEZ: isSEZ ? 'Yes' : 'No' });
+      },
+      error: () => {
+        this.advanceTableForm.patchValue({ isSEZ: 'No' });
+      }
+    });
+  }
+
   stateValidator(StateLists: any[]): ValidatorFn {
     return (control: AbstractControl): ValidationErrors | null => {
       const value = control.value?.toLowerCase();
@@ -650,7 +692,7 @@ export class FormDialogComponent
     this.cityID=geoPointID;
     this.advanceTableForm.patchValue({cityID:this.cityID,
        billingAddress: option.billingAddress,
-    pinCode: option.billingPin,isSEZ: option.isSEZ ? 'Yes' : 'No'
+    pinCode: option.billingPin
     });
   }
   cityValidator(CityList: any[]): ValidatorFn {
