@@ -181,12 +181,18 @@
                 <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
                     <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
                         <mat-label>Vehicle Type</mat-label>
-                        <mat-select formControlName="vehicleTypeID">
-                            <mat-option [value]="0">-- Select Vehicle Type --</mat-option>
-                            <mat-option *ngFor="let vehicle of VehicleList" [value]="vehicle.vehicleID">
-                                {{ vehicle.vehicle }}
+                        <input type="text" matInput formControlName="vehicle" [matAutocomplete]="autoVehicle"
+                            (keyup)="onKeyUpVehicle()">
+                        <mat-autocomplete #autoVehicle="matAutocomplete">
+                            <mat-option *ngFor="let options of filteredVehicleOptions | async"
+                                [value]="options.vehicle"
+                                (click)="getvehicleID(options.vehicleID)">
+                                {{ options.vehicle }}
                             </mat-option>
-                        </mat-select>
+                        </mat-autocomplete>
+                        <mat-error *ngIf="advanceTableForm.controls['vehicle'].hasError('vehicleInvalid')">
+                            Vehicle Type is required
+                        </mat-error>
                     </mat-form-field>
                 </div>
 

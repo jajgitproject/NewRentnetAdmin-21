@@ -174,7 +174,6 @@ export class FormDialogComponent
     //this.InitCity();
     this.InitIGSTPercentage();
     this.InitCSGSTPercentage();
-    this.InitVehicle();
     
     // Watch for invoice date changes
     this.advanceTableForm.get('invoiceDate')?.valueChanges.subscribe((invoiceDate) => {
@@ -195,7 +194,6 @@ export class FormDialogComponent
       }
     });
     
-    //this.InitVehicle();
     //this.InitPackageType();
   }
 
@@ -663,34 +661,58 @@ export class FormDialogComponent
     };
   }
 
-  //------------- Vehicle's Drop Down -------------
-  InitVehicle() 
+  //------------- Vehicle Type Autocomplete (3+ characters) -------------
+  onKeyUpVehicle()
   {
-    this._generalService.GetVehicle().subscribe(
+    var Prefix = this.advanceTableForm.get("vehicle").value;
+    if (!Prefix || Prefix.length < 3)
+    {
+      this.VehicleList = [];
+      this.filteredVehicleOptions = this.advanceTableForm.controls['vehicle'].valueChanges.pipe(
+        startWith(""),
+        map(() => [])
+      );
+      return;
+    }
+    this._generalService.GetVehicleDropDownForControlPanel(Prefix).subscribe(
       data =>
-        {
-          this.VehicleList = data ?? [];
-        }
-    );
-  }
-  private _filterVehicle(value: string): any {
-    const filterValue = value.toLowerCase();
-    return this.VehicleList.filter(
-      data => 
       {
-        return data.vehicle.toLowerCase().indexOf(filterValue)===0;
+        this.VehicleList = data ?? [];
+        this.advanceTableForm.controls['vehicle'].setValidators([
+          this.vehicleValidator(this.VehicleList)
+        ]);
+        this.advanceTableForm.controls['vehicle'].updateValueAndValidity();
+        this.filteredVehicleOptions = this.advanceTableForm.controls['vehicle'].valueChanges.pipe(
+          startWith(""),
+          map(value => this._filterVehicle(value || ''))
+        );
       }
     );
   }
-  getvehicleID(vehicleID: any) 
+  private _filterVehicle(value: string): any {
+    const filterValue = (value || '').toLowerCase();
+    return this.VehicleList?.filter(
+      data =>
+      {
+        return data.vehicle?.toLowerCase().includes(filterValue);
+      }
+    ) ?? [];
+  }
+  getvehicleID(vehicleID: any)
   {
-    this.vehicleID=vehicleID;
-    this.advanceTableForm.patchValue({vehicleID:this.vehicleID});
+    this.vehicleID = vehicleID;
+    this.advanceTableForm.patchValue({
+      vehicleID: this.vehicleID,
+      vehicleTypeID: this.vehicleID
+    });
   }
   vehicleValidator(VehicleList: any[]): ValidatorFn {
     return (control: AbstractControl): ValidationErrors | null => {
       const value = control.value?.toLowerCase();
-      const match = VehicleList.some(group => group.vehicle.toLowerCase() === value);
+      if (!value) {
+        return null;
+      }
+      const match = VehicleList.some(group => group.vehicle?.toLowerCase() === value);
       return match ? null : { vehicleInvalid: true };
     };
   }
