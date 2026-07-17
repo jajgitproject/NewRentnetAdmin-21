@@ -1,0 +1,29 @@
+<h2 mat-dialog-title>Cancel Upsell</h2>
+<mat-dialog-content>
+  <div *ngIf="isLoading" class="loading-wrap">
+    <mat-spinner diameter="36"></mat-spinner>
+  </div>
+
+  <div *ngIf="!isLoading && singleOption">
+    <p>Upsell Cancelled to <strong>{{ targetCategoryName || selected?.carCategory }}</strong>.</p>
+  </div>
+
+  <div *ngIf="!isLoading && !singleOption">
+    <p>Select the category to restore:</p>
+    <mat-radio-group [(ngModel)]="selected">
+      <mat-radio-button *ngFor="let opt of options" [value]="opt" class="option-row">
+        {{ opt.carCategory }}
+      </mat-radio-button>
+    </mat-radio-group>
+  </div>
+
+  <mat-form-field appearance="outline" class="full-width" *ngIf="!isLoading">
+    <mat-label>Cancel reason (optional)</mat-label>
+    <textarea matInput rows="2" [(ngModel)]="cancelReason" maxlength="500"></textarea>
+  </mat-form-field>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end" *ngIf="!isLoading">
+  <button mat-button (click)="close()">Cancel</button>
+  <button mat-raised-button color="primary" (click)="restore()">Restore</button>
+</mat-dialog-actions>

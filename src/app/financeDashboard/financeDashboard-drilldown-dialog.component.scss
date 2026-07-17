@@ -1,0 +1,76 @@
+:host {
+  display: block;
+}
+
+h2.mat-mdc-dialog-title {
+  margin: 0;
+  padding: 20px 24px 12px;
+  font-weight: 700;
+  color: #312e81;
+}
+
+mat-dialog-content {
+  padding-top: 8px !important;
+}
+
+.fd-loading {
+  display: flex;
+  justify-content: center;
+  padding: 32px;
+}
+
+.fd-drill-content {
+  min-height: 120px;
+}
+
+.fd-drill-table {
+  width: 100%;
+  border-radius: 10px;
+  overflow: hidden;
+  border: 1px solid #e2e8f0;
+}
+
+:host ::ng-deep .fd-drill-table {
+  .mat-mdc-header-row,
+  tr.mat-mdc-header-row {
+    background-color: #4f46e5 !important;
+  }
+
+  .mat-mdc-header-cell,
+  th.mat-mdc-header-cell {
+    background-color: #4f46e5 !important;
+    color: #ffffff !important;
+    font-weight: 600 !important;
+    font-size: 0.78rem !important;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+  }
+
+  .mat-mdc-cell {
+    color: #1e293b;
+  }
+
+  .mat-mdc-row:nth-child(even) .mat-mdc-cell {
+    background: #f8fafc;
+  }
+
+  .mat-mdc-row:hover .mat-mdc-cell {
+    background: #eef2ff;
+  }
+}
+
+.fd-drill-table--hidden {
+  visibility: hidden;
+  position: absolute;
+  pointer-events: none;
+}
+
+mat-paginator {
+  margin-top: 8px;
+  border-radius: 10px;
+  background: #f8fafc;
+}
+
+mat-dialog-actions {
+  padding: 12px 24px 20px !important;
+}

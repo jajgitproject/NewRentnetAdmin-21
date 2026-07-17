@@ -1,0 +1,89 @@
+<h2 mat-dialog-title>Reservation Upsell</h2>
+<mat-dialog-content>
+  <div *ngIf="isLoading" class="loading-wrap">
+    <mat-spinner diameter="36"></mat-spinner>
+  </div>
+
+  <div *ngIf="!isLoading && step === 'confirm'">
+    <p>Do you want to Upsell this Reservation?</p>
+  </div>
+
+  <div *ngIf="!isLoading && step === 'categories'">
+    <p><strong>Current:</strong> {{ currentCarCategory }} ({{ currentRate | number:'1.2-2' }})</p>
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Search category</mat-label>
+      <input matInput [(ngModel)]="filterText" />
+    </mat-form-field>
+    <table class="upsell-grid" *ngIf="filteredCategories.length">
+      <thead>
+        <tr>
+          <th></th>
+          <th>Car Category</th>
+          <th>Contract Rate</th>
+          <th>Difference</th>
+          <th>Vehicle</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let row of filteredCategories">
+          <td>
+            <mat-radio-button
+              [value]="row"
+              [checked]="selectedCategory?.vehicleID === row.vehicleID"
+              (change)="selectedCategory = row">
+            </mat-radio-button>
+          </td>
+          <td>{{ row.carCategory }}</td>
+          <td>{{ row.contractRate | number:'1.2-2' }}</td>
+          <td>{{ row.difference | number:'1.2-2' }}</td>
+          <td>{{ row.vehicleName || row.vehicleID }}</td>
+        </tr>
+      </tbody>
+    </table>
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Remarks</mat-label>
+      <textarea matInput rows="2" [(ngModel)]="remarks" maxlength="500"></textarea>
+    </mat-form-field>
+  </div>
+
+  <div *ngIf="!isLoading && step === 'no-options'">
+    <p>{{ noOptionsMessage }}</p>
+    <p *ngIf="data?.hasActiveUpsell" class="hint-text">
+      This reservation already has an active upsell. Use <strong>Cancel Upsell</strong> on Reservation Details to revert to a prior category.
+    </p>
+  </div>
+
+  <div *ngIf="!isLoading && step === 'decline'">
+    <form [formGroup]="declineForm">
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Reason</mat-label>
+        <mat-select formControlName="reasonID" required>
+          <mat-option *ngFor="let r of declineReasons" [value]="r.reasonID">{{ r.reasonName }}</mat-option>
+        </mat-select>
+      </mat-form-field>
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Comment (optional)</mat-label>
+        <textarea matInput rows="3" formControlName="comment" maxlength="500"></textarea>
+      </mat-form-field>
+    </form>
+  </div>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <ng-container *ngIf="step === 'confirm'">
+    <button mat-button *ngIf="canDeclineUpsell" (click)="onNo()" [disabled]="isLoading">No</button>
+    <button mat-button *ngIf="(!canDeclineUpsell || yesAttempted) && !isLoading" (click)="close()">Close</button>
+    <button mat-raised-button color="primary" (click)="onYes()" [disabled]="isLoading">Yes</button>
+  </ng-container>
+  <ng-container *ngIf="step === 'no-options'">
+    <button mat-raised-button color="primary" (click)="close()">Close</button>
+  </ng-container>
+  <ng-container *ngIf="step === 'categories'">
+    <button mat-button (click)="close()">Cancel</button>
+    <button mat-raised-button color="primary" (click)="confirmUpsell()">Confirm Upsell</button>
+  </ng-container>
+  <ng-container *ngIf="step === 'decline'">
+    <button mat-button (click)="goBackToConfirm()">Back</button>
+    <button mat-raised-button color="primary" (click)="submitDecline()">Save</button>
+  </ng-container>
+</mat-dialog-actions>

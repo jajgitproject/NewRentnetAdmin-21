@@ -1716,6 +1716,7 @@
                             &nbsp;
                             <!-- <span *ngIf="data.isAutoAllotment === true" matTooltip="Auto Soft Allotment"> Auto </span> -->
                             <span *ngIf="data.dutyTrackedByEmployeeName !== null" [matTooltip]="data.dutyTrackedByEmployeeName"> T </span>
+                            <span *ngIf="data.hasActiveUpsell" matTooltip="Reservation Upsold"> UP </span>
                             <br>
 
                             <ng-container *ngIf="getControlPanelMessagingHeaderDisplay(data) as cpMsg">

@@ -116,6 +116,13 @@ const routes: Routes = [
         data: { skipRolePageGuard: true },
       },
       {
+        path: 'financeDashboard',
+        loadChildren: () =>
+          import('./financeDashboard/financeDashboard.module').then(
+            (m) => m.FinanceDashboardModule
+          ),
+      },
+      {
         path: 'tallyMis',
         loadChildren: () =>
           import('./tallyMis/tallyMis.module').then(

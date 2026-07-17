@@ -30,6 +30,7 @@ export class ControlPanelHeaderDetails {
   reservationStatus:string;
   tripTo:string;
   newCustomer:boolean;
+  hasActiveUpsell?: boolean;
   
   
   constructor(controlPanelHeaderDetails) {
@@ -50,6 +51,7 @@ export class ControlPanelHeaderDetails {
     this.reservationStatus = controlPanelHeaderDetails.reservationStatus;
     this.tripTo = controlPanelHeaderDetails.tripTo;
     this.newCustomer = controlPanelHeaderDetails.newCustomer;
+    this.hasActiveUpsell = controlPanelHeaderDetails.hasActiveUpsell;
   }
 }
 

@@ -1,0 +1,239 @@
+<section class="content">
+
+  <div class="container-fluid">
+
+    <div class="block-header">
+
+      <ul class="breadcrumb breadcrumb-style">
+
+        <li class="breadcrumb-item"><h2>Finance Dashboard</h2></li>
+
+      </ul>
+
+    </div>
+
+
+
+    <div class="fd-page">
+
+      <div class="fd-card fd-hero-card">
+        <div class="fd-title-row">
+          <div class="fd-title-block">
+            <span class="fd-title-icon" aria-hidden="true"><mat-icon>insights</mat-icon></span>
+            <div>
+              <span class="fd-title">Finance Dashboard</span>
+              <p class="fd-subtitle">Invoice &amp; credit note series health at a glance</p>
+            </div>
+          </div>
+          <button mat-flat-button class="fd-refresh-btn" type="button" (click)="refresh()" [disabled]="loading">
+            <mat-icon>sync</mat-icon> Refresh
+          </button>
+        </div>
+        <p class="fd-meta" *ngIf="lastRefreshed">
+          <mat-icon class="fd-meta-icon">schedule</mat-icon>
+          Last refreshed: {{ lastRefreshed | date:'dd/MM/yyyy HH:mm:ss' }}
+        </p>
+        <div class="fd-filters">
+
+          <mat-form-field appearance="outline" subscriptSizing="dynamic">
+            <mat-label>Date From</mat-label>
+            <input matInput [matDatepicker]="dpFrom" [formControl]="filterDateFrom" [min]="minFilterDate" [max]="filterDateTo.value || undefined" [disabled]="isDateFilterDisabled" />
+            <mat-datepicker-toggle matIconSuffix [for]="dpFrom" [disabled]="isDateFilterDisabled"></mat-datepicker-toggle>
+            <mat-datepicker #dpFrom></mat-datepicker>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" subscriptSizing="dynamic">
+            <mat-label>Date To</mat-label>
+            <input matInput [matDatepicker]="dpTo" [formControl]="filterDateTo" [min]="filterDateFrom.value || minFilterDate" [disabled]="isDateFilterDisabled" />
+            <mat-datepicker-toggle matIconSuffix [for]="dpTo" [disabled]="isDateFilterDisabled"></mat-datepicker-toggle>
+            <mat-datepicker #dpTo></mat-datepicker>
+          </mat-form-field>
+
+          <mat-checkbox [formControl]="dataFromLaunchDate" class="fd-launch-checkbox">
+            Data from Launch Date
+          </mat-checkbox>
+
+          <mat-form-field appearance="outline" subscriptSizing="dynamic">
+
+            <mat-label>Series</mat-label>
+
+            <mat-select [formControl]="seriesFilter">
+
+              <mat-option [value]="null">All</mat-option>
+
+              <mat-option *ngFor="let s of filterOptions.series" [value]="s.name">{{ s.name }}</mat-option>
+
+            </mat-select>
+
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" subscriptSizing="dynamic">
+
+            <mat-label>Invoice Type</mat-label>
+
+            <mat-select [formControl]="invoiceTypeFilter">
+
+              <mat-option [value]="null">All</mat-option>
+
+              <mat-option *ngFor="let t of filterOptions.invoiceTypes" [value]="t">{{ t }}</mat-option>
+
+            </mat-select>
+
+          </mat-form-field>
+
+          <button mat-flat-button class="fd-apply-btn" type="button" (click)="onApply()" [disabled]="loading">Apply Filters</button>
+
+        </div>
+
+      </div>
+
+
+
+      <div *ngIf="loading" class="fd-loading"><mat-spinner></mat-spinner></div>
+
+
+
+      <div class="fd-card fd-table-card" *ngIf="!loading">
+        <div class="fd-section-header">
+          <mat-radio-group [formControl]="documentTypeFilter" class="fd-doc-type-toggle" aria-label="Document type">
+            <mat-radio-button value="Invoice" class="fd-doc-type-option">Invoice</mat-radio-button>
+            <mat-radio-button value="CreditNote" class="fd-doc-type-option">Credit Note</mat-radio-button>
+          </mat-radio-group>
+          <span class="fd-section-badge" *ngIf="isInvoiceView">Invoice series &amp; validations</span>
+          <span class="fd-section-badge fd-section-badge--credit" *ngIf="!isInvoiceView">Credit note series &amp; validations</span>
+        </div>
+
+        <div *ngIf="isInvoiceView">
+          <div class="fd-kpi-grid fd-kpi-grid--section">
+            <div
+              class="fd-kpi"
+              *ngFor="let card of invoiceKpiCards"
+              [ngClass]="['fd-kpi--' + card.accent, isKpiClickable(card) ? 'fd-kpi--clickable' : '']"
+              (click)="isKpiClickable(card) && openKpiDrillDown(card)">
+              <div class="fd-kpi-icon" aria-hidden="true"><mat-icon>{{ card.icon }}</mat-icon></div>
+              <div class="fd-kpi-body">
+                <div class="fd-kpi-label">{{ card.label }}</div>
+                <div class="fd-kpi-value">{{ formatKpi(card) }}</div>
+              </div>
+            </div>
+          </div>
+
+        <div class="fd-table-wrap fd-table-wrap--invoice">
+
+          <table mat-table [dataSource]="invoiceRows" class="fd-series-table">
+
+              <ng-container matColumnDef="seriesName"><th mat-header-cell *matHeaderCellDef>Series</th><td mat-cell *matCellDef="let r">{{ r.seriesName }}</td></ng-container>
+
+              <ng-container matColumnDef="minNumber"><th mat-header-cell *matHeaderCellDef>Min #</th><td mat-cell *matCellDef="let r">{{ r.minNumber }}</td></ng-container>
+
+              <ng-container matColumnDef="maxNumber"><th mat-header-cell *matHeaderCellDef>Max #</th><td mat-cell *matCellDef="let r">{{ r.maxNumber }}</td></ng-container>
+
+              <ng-container matColumnDef="totalDocuments"><th mat-header-cell *matHeaderCellDef>Total</th><td mat-cell *matCellDef="let r"><button type="button" class="fd-link" (click)="openCellDrillDown(r, 'Invoice', 'TotalDocuments', 'Total')">{{ r.totalDocuments }}</button></td></ng-container>
+
+              <ng-container matColumnDef="wrongInvoiceTypeCount"><th mat-header-cell *matHeaderCellDef>{{ errorColumnHeader('Wrong Inv Type', 'wrongInvoiceTypeCount') }}</th><td mat-cell *matCellDef="let r" [ngClass]="severityClass(r,'wrongInvoiceTypeCount')"><button type="button" class="fd-link" (click)="openCellDrillDown(r, 'Invoice', 'WrongInvoiceType', 'Wrong Invoice Type')">{{ r.wrongInvoiceTypeCount }}</button></td></ng-container>
+
+              <ng-container matColumnDef="generalCount"><th mat-header-cell *matHeaderCellDef>General</th><td mat-cell *matCellDef="let r"><button type="button" class="fd-link" (click)="openCellDrillDown(r, 'Invoice', 'GeneralCount', 'General')">{{ r.generalCount }}</button></td></ng-container>
+
+              <ng-container matColumnDef="singleDutyCount"><th mat-header-cell *matHeaderCellDef>Single Duty</th><td mat-cell *matCellDef="let r"><button type="button" class="fd-link" (click)="openCellDrillDown(r, 'Invoice', 'SingleDutyCount', 'Single Duty')">{{ r.singleDutyCount }}</button></td></ng-container>
+
+              <ng-container matColumnDef="multipleDutyCount"><th mat-header-cell *matHeaderCellDef>Multiple Duty</th><td mat-cell *matCellDef="let r"><button type="button" class="fd-link" (click)="openCellDrillDown(r, 'Invoice', 'MultipleDutyCount', 'Multiple Duty')">{{ r.multipleDutyCount }}</button></td></ng-container>
+
+              <ng-container matColumnDef="duplicateCount"><th mat-header-cell *matHeaderCellDef>{{ errorColumnHeader('Duplicate', 'duplicateCount') }}</th><td mat-cell *matCellDef="let r" [ngClass]="severityClass(r,'duplicateCount')"><button type="button" class="fd-link" (click)="openCellDrillDown(r, 'Invoice', 'DuplicateNumbers', 'Duplicate')">{{ r.duplicateCount }}</button></td></ng-container>
+
+              <ng-container matColumnDef="seriesJumpCount">
+                <th mat-header-cell *matHeaderCellDef>
+                  <div class="fd-jump-header">
+                    <label class="fd-jump-toggle"
+                           (click)="toggleSeriesJumpActiveOnly($event)"
+                           title="Not selected: gaps checked against all invoices (Activation Status not considered). Selected: only invoices with ActivationStatus = 1 are considered.">
+                      <input type="radio" name="seriesJumpActiveOnly" tabindex="-1" [checked]="!!seriesJumpActiveOnly.value" />
+                      <span>Active Only</span>
+                    </label>
+                    <span>{{ errorColumnHeader('Series Jump', 'seriesJumpCount') }}</span>
+                  </div>
+                </th>
+                <td mat-cell *matCellDef="let r" [ngClass]="severityClass(r,'seriesJumpCount')"><button type="button" class="fd-link" (click)="openCellDrillDown(r, 'Invoice', 'SeriesJump', 'Series Jump')">{{ r.seriesJumpCount }}</button></td>
+              </ng-container>
+
+              <ng-container matColumnDef="dateViolationCount"><th mat-header-cell *matHeaderCellDef>{{ errorColumnHeader('Date Viol.', 'dateViolationCount') }}</th><td mat-cell *matCellDef="let r" [ngClass]="severityClass(r,'dateViolationCount')"><button type="button" class="fd-link" (click)="openCellDrillDown(r, 'Invoice', 'DateViolation', 'Date Violation')">{{ r.dateViolationCount }}</button></td></ng-container>
+
+              <ng-container matColumnDef="nullPrefixCount"><th mat-header-cell *matHeaderCellDef>{{ errorColumnHeader('Null Prefix', 'nullPrefixCount') }}</th><td mat-cell *matCellDef="let r" [ngClass]="severityClass(r,'nullPrefixCount')"><button type="button" class="fd-link" (click)="openCellDrillDown(r, 'Invoice', 'NullPrefix', 'Null Prefix')">{{ r.nullPrefixCount }}</button></td></ng-container>
+
+              <ng-container matColumnDef="amountMismatchCount"><th mat-header-cell *matHeaderCellDef>{{ errorColumnHeader('Amt Mismatch', 'amountMismatchCount') }}</th><td mat-cell *matCellDef="let r" [ngClass]="severityClass(r,'amountMismatchCount')"><button type="button" class="fd-link" (click)="openCellDrillDown(r, 'Invoice', 'AmountMismatch', 'Amount Mismatch')">{{ r.amountMismatchCount }}</button></td></ng-container>
+
+              <ng-container matColumnDef="stateGstMismatchCount"><th mat-header-cell *matHeaderCellDef>{{ errorColumnHeader('State/GST', 'stateGstMismatchCount') }}</th><td mat-cell *matCellDef="let r" [ngClass]="severityClass(r,'stateGstMismatchCount')"><button type="button" class="fd-link" (click)="openCellDrillDown(r, 'Invoice', 'StateGstMismatch', 'State GST Mismatch')">{{ r.stateGstMismatchCount }}</button></td></ng-container>
+
+              <ng-container matColumnDef="missingCustomerGstCount"><th mat-header-cell *matHeaderCellDef>{{ errorColumnHeader('Missing GST', 'missingCustomerGstCount') }}</th><td mat-cell *matCellDef="let r" [ngClass]="severityClass(r,'missingCustomerGstCount')"><button type="button" class="fd-link" (click)="openCellDrillDown(r, 'Invoice', 'MissingCustomerGst', 'Missing Customer GST')">{{ r.missingCustomerGstCount }}</button></td></ng-container>
+
+              <ng-container matColumnDef="taxMismatchCount"><th mat-header-cell *matHeaderCellDef>{{ errorColumnHeader('Tax Mismatch', 'taxMismatchCount') }}</th><td mat-cell *matCellDef="let r" [ngClass]="severityClass(r,'taxMismatchCount')"><button type="button" class="fd-link" (click)="openCellDrillDown(r, 'Invoice', 'TaxMismatch', 'Tax Mismatch')">{{ r.taxMismatchCount }}</button></td></ng-container>
+
+              <ng-container matColumnDef="invoiceCalculationMismatchCount"><th mat-header-cell *matHeaderCellDef>{{ errorColumnHeader('Invoice Calc.', 'invoiceCalculationMismatchCount') }}</th><td mat-cell *matCellDef="let r" [ngClass]="severityClass(r,'invoiceCalculationMismatchCount')"><button type="button" class="fd-link" (click)="openCellDrillDown(r, 'Invoice', 'InvoiceCalculation', 'Invoice Calculation')">{{ r.invoiceCalculationMismatchCount }}</button></td></ng-container>
+
+              <tr mat-header-row *matHeaderRowDef="invoiceTableColumns"></tr>
+
+              <tr mat-row *matRowDef="let row; columns: invoiceTableColumns"></tr>
+
+            </table>
+
+        </div>
+        </div>
+
+        <div *ngIf="!isInvoiceView">
+          <div class="fd-kpi-grid fd-kpi-grid--section">
+            <div
+              class="fd-kpi"
+              *ngFor="let card of creditNoteKpiCards"
+              [ngClass]="['fd-kpi--' + card.accent, isKpiClickable(card) ? 'fd-kpi--clickable' : '']"
+              (click)="isKpiClickable(card) && openKpiDrillDown(card)">
+              <div class="fd-kpi-icon" aria-hidden="true"><mat-icon>{{ card.icon }}</mat-icon></div>
+              <div class="fd-kpi-body">
+                <div class="fd-kpi-label">{{ card.label }}</div>
+                <div class="fd-kpi-value">{{ formatKpi(card) }}</div>
+              </div>
+            </div>
+          </div>
+
+        <div class="fd-table-wrap fd-table-wrap--credit">
+
+          <table mat-table [dataSource]="creditNoteRows" class="fd-series-table">
+
+              <ng-container matColumnDef="seriesName"><th mat-header-cell *matHeaderCellDef>Series</th><td mat-cell *matCellDef="let r">{{ r.seriesName }}</td></ng-container>
+
+              <ng-container matColumnDef="minNumber"><th mat-header-cell *matHeaderCellDef>Min #</th><td mat-cell *matCellDef="let r">{{ r.minNumber }}</td></ng-container>
+
+              <ng-container matColumnDef="maxNumber"><th mat-header-cell *matHeaderCellDef>Max #</th><td mat-cell *matCellDef="let r">{{ r.maxNumber }}</td></ng-container>
+
+              <ng-container matColumnDef="totalDocuments"><th mat-header-cell *matHeaderCellDef>Total</th><td mat-cell *matCellDef="let r"><button type="button" class="fd-link" (click)="openCellDrillDown(r, 'CreditNote', 'TotalDocuments', 'Total')">{{ r.totalDocuments }}</button></td></ng-container>
+
+              <ng-container matColumnDef="duplicateCount"><th mat-header-cell *matHeaderCellDef>{{ errorColumnHeader('Duplicate', 'duplicateCount', 'CreditNote') }}</th><td mat-cell *matCellDef="let r" [ngClass]="severityClass(r,'duplicateCount')"><button type="button" class="fd-link" (click)="openCellDrillDown(r, 'CreditNote', 'DuplicateNumbers', 'Duplicate')">{{ r.duplicateCount }}</button></td></ng-container>
+
+              <ng-container matColumnDef="seriesJumpCount"><th mat-header-cell *matHeaderCellDef>{{ errorColumnHeader('Series Jump', 'seriesJumpCount', 'CreditNote') }}</th><td mat-cell *matCellDef="let r" [ngClass]="severityClass(r,'seriesJumpCount')"><button type="button" class="fd-link" (click)="openCellDrillDown(r, 'CreditNote', 'SeriesJump', 'Series Jump')">{{ r.seriesJumpCount }}</button></td></ng-container>
+
+              <ng-container matColumnDef="dateViolationCount"><th mat-header-cell *matHeaderCellDef>{{ errorColumnHeader('Date Viol.', 'dateViolationCount', 'CreditNote') }}</th><td mat-cell *matCellDef="let r" [ngClass]="severityClass(r,'dateViolationCount')"><button type="button" class="fd-link" (click)="openCellDrillDown(r, 'CreditNote', 'DateViolation', 'Date Violation')">{{ r.dateViolationCount }}</button></td></ng-container>
+
+              <ng-container matColumnDef="nullPrefixCount"><th mat-header-cell *matHeaderCellDef>{{ errorColumnHeader('Null Prefix', 'nullPrefixCount', 'CreditNote') }}</th><td mat-cell *matCellDef="let r" [ngClass]="severityClass(r,'nullPrefixCount')"><button type="button" class="fd-link" (click)="openCellDrillDown(r, 'CreditNote', 'NullPrefix', 'Null Prefix')">{{ r.nullPrefixCount }}</button></td></ng-container>
+
+              <ng-container matColumnDef="amountMismatchCount"><th mat-header-cell *matHeaderCellDef>{{ errorColumnHeader('Amt Mismatch', 'amountMismatchCount', 'CreditNote') }}</th><td mat-cell *matCellDef="let r" [ngClass]="severityClass(r,'amountMismatchCount')"><button type="button" class="fd-link" (click)="openCellDrillDown(r, 'CreditNote', 'AmountMismatch', 'Amount Mismatch')">{{ r.amountMismatchCount }}</button></td></ng-container>
+
+              <ng-container matColumnDef="stateGstMismatchCount"><th mat-header-cell *matHeaderCellDef>{{ errorColumnHeader('State/GST', 'stateGstMismatchCount', 'CreditNote') }}</th><td mat-cell *matCellDef="let r" [ngClass]="severityClass(r,'stateGstMismatchCount')"><button type="button" class="fd-link" (click)="openCellDrillDown(r, 'CreditNote', 'StateGstMismatch', 'State GST Mismatch')">{{ r.stateGstMismatchCount }}</button></td></ng-container>
+
+              <ng-container matColumnDef="missingCustomerGstCount"><th mat-header-cell *matHeaderCellDef>{{ errorColumnHeader('Missing GST', 'missingCustomerGstCount', 'CreditNote') }}</th><td mat-cell *matCellDef="let r" [ngClass]="severityClass(r,'missingCustomerGstCount')"><button type="button" class="fd-link" (click)="openCellDrillDown(r, 'CreditNote', 'MissingCustomerGst', 'Missing Customer GST')">{{ r.missingCustomerGstCount }}</button></td></ng-container>
+
+              <ng-container matColumnDef="taxMismatchCount"><th mat-header-cell *matHeaderCellDef>{{ errorColumnHeader('Tax Mismatch', 'taxMismatchCount', 'CreditNote') }}</th><td mat-cell *matCellDef="let r" [ngClass]="severityClass(r,'taxMismatchCount')"><button type="button" class="fd-link" (click)="openCellDrillDown(r, 'CreditNote', 'TaxMismatch', 'Tax Mismatch')">{{ r.taxMismatchCount }}</button></td></ng-container>
+
+              <tr mat-header-row *matHeaderRowDef="creditNoteTableColumns"></tr>
+
+              <tr mat-row *matRowDef="let row; columns: creditNoteTableColumns"></tr>
+
+            </table>
+
+        </div>
+        </div>
+
+      </div>
+
+    </div>
+
+  </div>
+
+</section>

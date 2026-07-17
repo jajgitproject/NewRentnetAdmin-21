@@ -1,0 +1,28 @@
+.loading-wrap {
+  display: flex;
+  justify-content: center;
+  padding: 24px;
+}
+
+.full-width {
+  width: 100%;
+}
+
+.upsell-grid {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 12px;
+}
+
+.upsell-grid th,
+.upsell-grid td {
+  border: 1px solid #ddd;
+  padding: 6px 8px;
+  font-size: 13px;
+}
+
+.hint-text {
+  margin-top: 12px;
+  color: #666;
+  font-size: 13px;
+}

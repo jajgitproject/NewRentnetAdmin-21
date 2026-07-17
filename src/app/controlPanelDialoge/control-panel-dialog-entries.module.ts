@@ -65,6 +65,7 @@ import { TotalBookingCountDetailsModule } from '../totalBookingCountDetails/tota
 import { VendorDetailsModule } from '../vendorDetails/vendorDetails.module';
 import { VehicleCategoryInfoModule } from '../VehicleCategoryInfo/VehicleCategoryInfo.module';
 import { VehicleInfoModule } from '../VehicleInfo/VehicleInfo.module';
+import { ReservationUpsellModule } from '../reservationUpsell/reservationUpsell.module';
 
 const CONTROL_PANEL_DIALOG_ENTRY_IMPORTS = [
   AllotmentStatusDetailsModule,
@@ -124,6 +125,7 @@ const CONTROL_PANEL_DIALOG_ENTRY_IMPORTS = [
   VendorDetailsModule,
   VehicleCategoryInfoModule,
   VehicleInfoModule,
+  ReservationUpsellModule,
 ];
 
 @NgModule({

@@ -13,6 +13,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatSelectModule } from '@angular/material/select';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatCardModule } from '@angular/material/card';
 import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatDialogModule } from '@angular/material/dialog';
@@ -30,6 +31,7 @@ import { ControlPanelDialogEntriesModule } from './control-panel-dialog-entries.
 import { AllotmentLogDetailsModule } from '../allotmentLogDetails/allotmentLogDetails.module';
 import{ChangePickupTimeService} from '../changePickupTime/changePickupTime.service';
 import { ChangePickupTimeModule } from '../changePickupTime/changePickupTime.module';
+import { ReservationUpsellService } from '../reservationUpsell/reservationUpsell.service';
 
 @NgModule({
   declarations: [
@@ -58,12 +60,13 @@ import { ChangePickupTimeModule } from '../changePickupTime/changePickupTime.mod
     MatToolbarModule,
     MatMenuModule,
     MatProgressSpinnerModule,
+    MatTooltipModule,
     MyUploadModule,
     ControlPanelDialogEntriesModule,
     AllotmentLogDetailsModule,
     ChangePickupTimeModule
   ],
-  providers: [CancelReservationAndAllotmentService,EmailInfoService,ChangePickupTimeService ]
+  providers: [CancelReservationAndAllotmentService, EmailInfoService, ChangePickupTimeService, ReservationUpsellService]
 })
 export class ControlPanelDialogeModule {}
 

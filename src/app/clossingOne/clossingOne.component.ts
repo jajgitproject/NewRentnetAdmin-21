@@ -44,6 +44,7 @@ import {
   SummaryOfDutyDialogComponent,
   SummaryOfDutyDialogData
 } from '../summaryOfDuty/summary-of-duty-dialog.component';
+import { hasInvoiceCalculationResult } from '../summaryOfDuty/invoice-calculation-to-summary-of-duty.mapper';
 import { AdditionalKmsDetails } from '../additionalKmsDetails/additionalKmsDetails.model';
 import { AdditionalKmsDetailsService } from '../additionalKmsDetails/additionalKmsDetails.service';
 import { DiscountDetails } from '../discountDetails/discountDetails.model';
@@ -178,6 +179,8 @@ export class ClossingOneComponent implements OnInit, AfterViewInit {
 
   advanceTableClosingOne: ClosingModel | null = null;
   summaryOfDutyData: SummaryOfDutyData | null = null;
+  /** True when duty-billing-summary shows an active InvoiceCalculation for this duty. */
+  hasActiveInvoiceCalculation = false;
   dataSource: Dispute[] | null;
   dataSourceforCard: any = null;
   reservationCloseDetail: any = null;
@@ -394,6 +397,7 @@ export class ClossingOneComponent implements OnInit, AfterViewInit {
         this.canEditDSAfterGoodForBilling = this.readRoleFlagFromStorage('canEditDSAfterGoodForBilling');
         this.applyEditBlockStatus();
         this.loadDataForBillNo();
+        this.refreshHasActiveInvoiceCalculation();
       }
     );
   }
@@ -1126,11 +1130,31 @@ export class ClossingOneComponent implements OnInit, AfterViewInit {
     return Number(invoiceId) > 0;
   }
 
+  /** Probe duty-billing-summary so Generate Bill stays gated after refresh. */
+  refreshHasActiveInvoiceCalculation(): void {
+    if (this.DutySlipID == null || this.DutySlipID === '') {
+      this.hasActiveInvoiceCalculation = false;
+      return;
+    }
+    this.clossingOneService.getDutyBillingSummary(this.DutySlipID).subscribe(
+      (response) => {
+        this.hasActiveInvoiceCalculation = hasInvoiceCalculationResult(response);
+      },
+      () => {
+        this.hasActiveInvoiceCalculation = false;
+      }
+    );
+  }
+
   canGenerateBill(): boolean {
     if (this.isEInvoiceBlockingEdits || this.hasGeneratedInvoice()) {
       return false;
     }
-    return this.verifyDuty && (!this.canThisRoleDoGoodForBillingOnClosingScreen || this.goodForBilling);
+    return (
+      this.verifyDuty &&
+      (!this.canThisRoleDoGoodForBillingOnClosingScreen || this.goodForBilling) &&
+      this.hasActiveInvoiceCalculation
+    );
   }
 
   //----------Generate Bill----------------
@@ -1298,6 +1322,8 @@ export class ClossingOneComponent implements OnInit, AfterViewInit {
         .subscribe(
           response => {
             this.summaryOfDutyData = response.summary;
+            this.hasActiveInvoiceCalculation = hasInvoiceCalculationResult(response.payload)
+              || hasInvoiceCalculationResult(response);
             this.loadDataForCard();
             this.showNotification(
               'snackbar-success',
@@ -1640,6 +1666,7 @@ export class ClossingOneComponent implements OnInit, AfterViewInit {
     this.Message = event.message;
     this.applyEditBlockStatus();
      this.GSTDataOnClosing();
+    this.refreshHasActiveInvoiceCalculation();
   }
 
   openSearchModal() {

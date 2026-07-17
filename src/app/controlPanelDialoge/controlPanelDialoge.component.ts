@@ -109,6 +109,10 @@ import { FormDialogComponentIL } from '../integrationLog/dialogs/form-dialog/for
 import { LocationOutTimeEditComponent } from '../reservation/dialogs/locationOutTimeEdit/locationOutTimeEdit.component';
 import { AllotmentLogDetailsComponent } from '../allotmentLogDetails/AllotmentLogDetails.component';
 import { isAllotedBooking } from '../shared/messaging-validation.util';
+import { ReservationUpsellService } from '../reservationUpsell/reservationUpsell.service';
+import { UpsellFlowDialogComponent } from '../reservationUpsell/dialogs/upsell-flow-dialog/upsell-flow-dialog.component';
+import { CancelUpsellDialogComponent } from '../reservationUpsell/dialogs/cancel-upsell-dialog/cancel-upsell-dialog.component';
+import { ReservationUpsellStatus } from '../reservationUpsell/reservationUpsell.model';
 
 @Component({
   standalone: false,
@@ -199,6 +203,7 @@ export class ControlPanelDialogeComponent {
 
   IsPostPickUpCallAllowedToCustomer:boolean = false;
   IsPostPickUpCallAllowedToCustomerPerson:boolean = false;
+  upsellStatus: ReservationUpsellStatus = new ReservationUpsellStatus();
 
   constructor(
     public dialogRef: MatDialogRef<ControlPanelDialogeComponent>,
@@ -230,6 +235,7 @@ export class ControlPanelDialogeComponent {
     public dutyPostPickUPCallService: DutyPostPickUPCallService,
     public clossingOneService: ClossingOneService,
     public controlPanelDialogeService:ControlPanelDialogeService,
+    private reservationUpsellService: ReservationUpsellService,
     private cdr: ChangeDetectorRef,
     private ngZone: NgZone
   ) {
@@ -263,6 +269,7 @@ export class ControlPanelDialogeComponent {
         console.log('Fetched reservation details:', this.reservationInfo);
         this.ReservationStatus = list[0]?.reservationStatus ?? null;
         this.prefetchKamSummaries(list);
+        this.loadUpsellStatus(reservationID);
         this.ngZone.run(() => {
           this.cdr.detectChanges();
         });
@@ -278,6 +285,74 @@ export class ControlPanelDialogeComponent {
   }
 
   /** Primary guest passenger for VIP / Female labels (not booker). */
+  loadUpsellStatus(reservationID: number): void {
+    const userId = this._generalService.getUserID();
+    if (!reservationID || !userId) {
+      return;
+    }
+    this.reservationUpsellService.getUpsellStatus(reservationID, userId).subscribe({
+      next: (status) => {
+        this.upsellStatus = new ReservationUpsellStatus(status);
+        this.cdr.detectChanges();
+      },
+      error: () => {
+        this.upsellStatus = new ReservationUpsellStatus({ isAuthorized: false, canUpsell: false });
+        this.cdr.detectChanges();
+      }
+    });
+  }
+
+  openUpsellDialog(): void {
+    if (!this.upsellStatus?.canUpsell) {
+      if (this.isUpsellBlockedByAllotment()) {
+        Swal.fire({
+          icon: 'warning',
+          title: 'UP Sell Cannot be Done After Allotment'
+        });
+      } else if (this.upsellStatus?.disabledReason) {
+        Swal.fire({
+          icon: 'warning',
+          title: this.upsellStatus.disabledReason
+        });
+      }
+      return;
+    }
+
+    const dialogRef = this.dialog.open(UpsellFlowDialogComponent, {
+      width: '760px',
+      maxWidth: '95vw',
+      data: {
+        reservationID: this.reservationID,
+        hasActiveUpsell: !!this.upsellStatus?.hasActiveUpsell
+      }
+    });
+    dialogRef.afterClosed().subscribe((result) => {
+      if (result?.saved || result?.declined) {
+        this.loadData(this.reservationID, this.index);
+        this.newDataAddedEvent.emit(true);
+      }
+    });
+  }
+
+  private isUpsellBlockedByAllotment(): boolean {
+    const reason = (this.upsellStatus?.disabledReason || '').toLowerCase();
+    return reason.includes('allotment');
+  }
+
+  openCancelUpsellDialog(): void {
+    const dialogRef = this.dialog.open(CancelUpsellDialogComponent, {
+      width: '520px',
+      maxWidth: '95vw',
+      data: { reservationID: this.reservationID }
+    });
+    dialogRef.afterClosed().subscribe((result) => {
+      if (result?.saved) {
+        this.loadData(this.reservationID, this.index);
+        this.newDataAddedEvent.emit(true);
+      }
+    });
+  }
+
   getPrimaryGuestPassenger(item: any): { importance?: string; gender?: string } | null {
     const passengers = item?.passengerDetails;
     if (passengers?.length) {

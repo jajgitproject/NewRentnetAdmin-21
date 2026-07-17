@@ -958,6 +958,20 @@
                   <b><button class="BoldButton" mat-button (click)="openIntegrationLog(item.reservationID)">
                       Integration Log
                     </button></b>
+                  <br>
+
+                  <b *ngIf="upsellStatus?.isAuthorized"><button class="BoldButton" mat-button
+                      (click)="openUpsellDialog()"
+                      [style.opacity]="!upsellStatus?.canUpsell ? 0.55 : 1"
+                      [matTooltip]="upsellStatus?.disabledReason || ''"
+                      [matTooltipDisabled]="!upsellStatus?.disabledReason">
+                      Up Sell
+                    </button></b><br *ngIf="upsellStatus?.isAuthorized" />
+
+                  <b *ngIf="upsellStatus?.isAuthorized && upsellStatus?.hasActiveUpsell"><button class="BoldButton" mat-button
+                      (click)="openCancelUpsellDialog()">
+                      Cancel Upsell
+                    </button></b><br *ngIf="upsellStatus?.isAuthorized && upsellStatus?.hasActiveUpsell" />
 
 
 

@@ -126,6 +126,14 @@ export class ClossingOneService
     return this.httpClient.get(this.API_URL_Bill + '/duty-billing-summary/' + dutySlipID);
   }
 
+  /** True when an active InvoiceCalculation exists for the duty (uses duty-billing-summary). */
+  hasActiveInvoiceCalculation(dutySlipID: number | string): Observable<boolean> {
+    return this.getDutyBillingSummary(dutySlipID).pipe(
+      map((response) => hasInvoiceCalculationResult(response)),
+      catchError(() => of(false))
+    );
+  }
+
   /** Full invoice calculation row + nested models (same as `GetInvoiceCalculationByDutySlipID`). */
   getInvoiceCalculationFullByDutySlipId(dutySlipID: number | string): Observable<any> {
     return this.httpClient.get(this.API_URL_Bill + '/getinvoice/' + dutySlipID);

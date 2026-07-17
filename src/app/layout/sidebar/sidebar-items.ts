@@ -791,6 +791,16 @@ export const ROUTES: RouteInfo[] = [
         submenu: [],
         isAccess: false
       },
+      {
+        path: 'financeDashboard',
+        title: 'Finance Dashboard',
+        moduleName: 'Finance Dashboard',
+        icon: 'fas fa-file-invoice-dollar',
+        class: '',
+        groupTitle: false,
+        submenu: [],
+        isAccess: false
+      },
       
       {
         path: 'driverMIS',
