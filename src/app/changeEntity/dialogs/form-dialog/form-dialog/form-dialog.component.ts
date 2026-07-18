@@ -1,5 +1,5 @@
-// @ts-nocheck
-import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
+
+import { MAT_DIALOG_DATA, MatDialog, MatDialogRef } from '@angular/material/dialog';
 import { Component, Inject } from '@angular/core';
 import { FormControl, Validators, FormGroup, FormBuilder, AbstractControl, ValidationErrors, ValidatorFn } from '@angular/forms';
 import { MAT_DATE_LOCALE } from '@angular/material/core';
@@ -12,6 +12,7 @@ import { ChangeEntityService } from 'src/app/changeEntity/changeEntity.service';
 import { GeneralService } from 'src/app/general/general.service';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import Swal from 'sweetalert2';
+import { ValidationFormDialogComponent } from '../validationDialog/validationDialog.component';
 
 @Component({
   standalone: false,
@@ -32,12 +33,14 @@ export class MessageBoxFormDialogComponent {
   filteredCustomerOptions: Observable<CustomerCustomerGroupDropDown[]>;
   CustomerList: CustomerCustomerGroupDropDown[] = [];
   customerID: any;
+  customerGroupID: number;
 
   constructor(
     public dialogRef: MatDialogRef<MessageBoxFormDialogComponent>,
     @Inject(MAT_DIALOG_DATA) public data: any,
     public advanceTableService: ChangeEntityService,
     private fb: FormBuilder,
+    public dialog: MatDialog,
     public _generalService: GeneralService,
     private snackBar: MatSnackBar,) {
     // Set the defaults
@@ -80,20 +83,38 @@ export class MessageBoxFormDialogComponent {
           debugger
           if (!response.isSuccess) {
             const errors = [...new Set(response.Errors || ['Operation Failed'])];
-            Swal.fire({
-              title: 'Validation Errors',
-              icon: 'error',
-              html: `<b><div style="text-align:left;">
-              ${errors.map((e: string) => `• ${e}`).join('<br>')}
-             </div></b>`,
-              confirmButtonText: 'OK',
-              width: '800px'
-            }).then(() => {
-              // OK click ke baad spinner stop
-              this.saveDisabled = true;
-            });
+            const selectedCustomer = this.CustomerList.find(
+              x => x.customerID === this.customerID
+            );
+
+            // Swal.fire({
+            //   title: 'Validation Errors',
+            //   icon: 'error',
+            //   html: `<b><div style="text-align:left;">
+            //   ${errors.map((e: string) => `• ${e}`).join('<br>')}
+            //  </div></b>`,
+            //   confirmButtonText: 'OK',
+            //   width: '800px'
+            // }).then(() => {
+            //   // OK click ke baad spinner stop
+            //   this.saveDisabled = true;
+            // });
     
-            return;
+            // return;
+
+            this.dialog.open(ValidationFormDialogComponent,{
+                  width:'700px',
+                  disableClose:true,
+                  data:{
+                      errors:errors,
+                      row:this.advanceTable,
+                      customerID: selectedCustomer.customerID,
+                      customerGroupID: selectedCustomer.customerGroupID,
+                      customerGroup: selectedCustomer.customerGroup,
+                      customerName: selectedCustomer.customerName
+                      
+                  }
+              });
           }
 
           // ✅ SUCCESS CASE
@@ -176,14 +197,20 @@ export class MessageBoxFormDialogComponent {
     const selectedCustomer = this.CustomerList.find(
       data => data.customerName + '-' + data.customerGroup + '-' + data.tallyCustomerID + '-' + data.stateName + '-' + data.cityName === selectedCustomerName);
     if (selectedCustomer) {
-      this.getCustomerID(selectedCustomer.customerID);
+      this.getCustomerID(selectedCustomer);
     }
   }
 
-  getCustomerID(customerID: any) {
-    this.customerID = customerID;
-    this.advanceTableForm.patchValue({ customerID: this.customerID });
-  }
+  getCustomerID(selected: CustomerCustomerGroupDropDown) {
+
+  this.customerID = selected.customerID;
+  this.customerGroupID = selected.customerGroupID;
+
+  this.advanceTableForm.patchValue({
+    customerID: selected.customerID
+  });
+
+}
 
   customerValidator(CustomerList: any[]): ValidatorFn {
     return (control: AbstractControl): ValidationErrors | null => {

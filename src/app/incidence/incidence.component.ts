@@ -59,6 +59,7 @@ export class IncidenceComponent implements OnInit {
   searchTerm: any = '';
   reservationID: any;
   dutySlipID: any;
+  reservationData: any;
 
   displayedColumns: string[] = [
     'IncidenceID',
@@ -98,6 +99,7 @@ export class IncidenceComponent implements OnInit {
     });
 
     this.loadData();
+    this.loadReservationData();
     this.SubscribeUpdateService();
   }
   refresh() {
@@ -119,19 +121,8 @@ export class IncidenceComponent implements OnInit {
       disableClose: true,
       data: {
         action: 'add',
-        item: {
-          reservationID: this.reservationID,
-          dutySlipID: this.dutySlipID,
-          customerID: 0,
-          customerName: '',
-          registrationNumber: '',
-          inventoryID: 0,
-          driverName: '',
-          transferedLocation: '',
-          transferedLocationID: 0,
-          passengerDetails: []
-        }
-      }
+        item: this.reservationData 
+       }
     }
   );
 
@@ -152,27 +143,9 @@ export class IncidenceComponent implements OnInit {
         disableClose: true,
         data: {
           action: 'edit',
-          item: item,
+          item: this.reservationData,
           advanceTable: item,
-          incidenceID: item.incidenceID,
-          reservationID: item.reservationID,
-          dutySlipID: item.dutySlipID,
-          customerName: item.customerName,
-          customerID: item.customerID,
-          registrationNumber: item.registrationNumber,
-          inventoryID: item.inventoryID,
-          driverName: item.driverName,
-          organizationalEntityName: item.organizationalEntityName,
-          customerPersonID:
-            item.passengerID ||
-            item.customerPersonID ||
-            item.passengerDetails?.[0]?.customerPersonID,
-          customerPersonName:
-            item.customerPersonName ||
-            item.customerpersonName ||
-            item.passengerDetails?.[0]?.customerPersonName,
-          verifyDutyStatusAndCacellationStatus:
-            item.verifyDutyStatusAndCacellationStatus,
+          
         },
       });
 
@@ -197,12 +170,7 @@ export class IncidenceComponent implements OnInit {
           advanceTable: row,
           // Resolution is always saved via incidenceEdit PUT.
           action: 'edit',
-          item: {
-            ...row,
-            carVendor: row.carVendor || row.supplierName,
-            supplierName: row.supplierName || row.carVendor,
-            supplierID: row.supplierID || row.inventorySupplierID,
-          },
+          item: this.reservationData,
           incidenceID: row.incidenceID,
           reservationID: row.reservationID || this.reservationID,
           dutySlipID: row.dutySlipID || this.dutySlipID,
@@ -222,6 +190,8 @@ export class IncidenceComponent implements OnInit {
             row.customerPersonName ||
             row.customerpersonName ||
             row.passengerDetails?.[0]?.customerPersonName,
+            
+          
         },
       }
     );
@@ -441,6 +411,30 @@ export class IncidenceComponent implements OnInit {
         },
         (error: HttpErrorResponse) => {
           this.dataSource = null;
+        },
+      );
+  }
+
+  public loadReservationData() {
+    
+    this.incidenceService
+      .getReservationDetails(
+        this.reservationID
+      )
+      .subscribe(
+        (response: any) => {
+         
+          console.log('API Response:', response);
+
+          // Case 1: API returns array directly
+          
+            this.reservationData = response;
+
+          console.log('Datasource:', this.reservationData);
+        },
+        (error: HttpErrorResponse) => {
+          console.log(error);
+          this.reservationData = [];
         },
       );
   }

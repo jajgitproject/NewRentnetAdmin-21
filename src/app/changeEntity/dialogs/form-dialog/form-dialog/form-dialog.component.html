@@ -22,7 +22,7 @@
                             panelWidth="custom-autocomplete-panel">
                             <mat-option *ngFor="let option of filteredCustomerOptions | async" 
                                         [value]="option.customerName + '-' + option.customerGroup + '-' + option.tallyCustomerID + '-' + option.stateName + '-' + option.cityName"
-                                (click)="getCustomerID(option.customerID)">
+                                (click)="getCustomerID(option)">
                                 {{ option.customerName }}-{{ option.customerGroup }}-{{ option.tallyCustomerID }}-{{option.stateName }}-{{ option.cityName }}
                             </mat-option>
                         </mat-autocomplete>

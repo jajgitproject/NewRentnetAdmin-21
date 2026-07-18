@@ -32,11 +32,14 @@ import { CancelInvoiceModule } from '../cancelInvoice/cancelInvoice.module';
 import { MatExpansionModule } from '@angular/material/expansion';
 import { MessageBoxFormDialogComponent } from './dialogs/form-dialog/form-dialog/form-dialog.component';
 import { ChangePassengerService } from '../changePassenger/changePassenger.service';
+import { ValidationFormDialogComponent } from './dialogs/form-dialog/validationDialog/validationDialog.component';
+import { CustomerPersonService } from '../customerPerson/customerPerson.service';
 
 @NgModule({
   declarations: [
     ChangeEntityComponent,
-    MessageBoxFormDialogComponent
+    MessageBoxFormDialogComponent,
+    ValidationFormDialogComponent
   ],
   imports: [
     //BrowserModule,
@@ -70,7 +73,7 @@ import { ChangePassengerService } from '../changePassenger/changePassenger.servi
     MatExpansionModule
   ],
   
-  providers: [ChangeEntityService,ChangePassengerService],
+  providers: [ChangeEntityService,ChangePassengerService,CustomerPersonService],
 })
 export class ChangeEntityModule {}
 

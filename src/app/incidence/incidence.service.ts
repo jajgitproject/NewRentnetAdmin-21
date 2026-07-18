@@ -91,6 +91,12 @@ export class IncidenceService
   getIssueCategory(incidenceTypeID:any): Observable<any[]> {
     return this.httpClient.get<any[]>(this.generalService.BaseURL + "issueCategory/GetIssueCategoryByIncidenceTypeID/" + incidenceTypeID);
   }
+  
+  getReservationDetails(reservationId: number): Observable<any> {
+  return this.httpClient.get<any>(
+    this.API_URL + `/GetReservationDetails/${reservationId}`
+  );
+}
 }
   
 

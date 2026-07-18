@@ -151,9 +151,9 @@
                         <div class="col-xl-2 col-lg-2 col-md-2 col-sm-12 mb-2"></div>
                         <div class="col-xl-2 col-lg-2 col-md-2 col-sm-12 mb-2"></div>
                         <div class="col-xl-2 col-lg-2 col-md-2 col-sm-12 mb-2">
-                            <button mat-raised-button color="primary" (click)="UpdateEntity()">
+                            <!-- <button mat-raised-button color="primary" (click)="UpdateEntity()">
                                 Update Entity
-                            </button>
+                            </button> -->
                         </div>
                     </div>
                 </div>
@@ -297,6 +297,10 @@
                                         </div>
                                         <mat-menu #contextMenu="matMenu">
                                             <ng-template matMenuContent let-item="item">
+                                                <button mat-menu-item (click)="changeEntity(item)">
+                                                    <mat-icon>how_to_reg</mat-icon>
+                                                    <span>Change Entity</span>
+                                                </button>
                                              <button mat-menu-item (click)="OpenPassengerDetails(item)">
                                                     <mat-icon>how_to_reg</mat-icon>
                                                     <span>View</span>

@@ -111,15 +111,8 @@ export class incidenceFormDialogComponent {
     this.supplier= this.data?.item?.carVendor;
     this.isVIP = this.data?.item?.customerPerson?.importance;
     this.customerPersonName =
-      this.data?.item?.primaryPassenger ||
-      this.data?.customerPersonName ||
-      this.data?.item?.passengerDetails?.[0]?.customerPersonName ||
-      this.data?.item?.customerPersonName;
+      this.data?.item?.primaryPassengerName ;
     this.passengerID =
-      this.data?.item?.primaryPassengerID ||
-      this.data?.customerPersonID ||
-      this.data?.item?.passengerDetails?.[0]?.customerPersonID ||
-      this.data?.item?.passengerID ||
       this.data?.item?.customerPersonID;
     this.CustomerPersonID = data.CustomerPersonID;
     // Set the defaults
@@ -158,7 +151,7 @@ export class incidenceFormDialogComponent {
     }
 
   public ngOnInit(): void {
-    this.loadData();
+   // this.loadData();
     this.InitDuty();
     this.initPassenger();
     // this.InitincidenceType();

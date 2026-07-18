@@ -834,7 +834,6 @@ else {
     const targetIncidenceID =
       this.incidenceID ||
       this.data?.incidenceID ||
-      this.data?.item?.incidenceID ||
       this.advanceTable?.incidenceID;
 
     if (!targetIncidenceID) {

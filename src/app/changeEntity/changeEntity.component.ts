@@ -44,7 +44,7 @@ import { forkJoin } from 'rxjs';
 })
 export class ChangeEntityComponent implements OnInit {
   displayedColumns = [
-    'check',
+    //'check',
     'actions',
     'ReservationID',
     'DutySlipID',
@@ -571,115 +571,116 @@ export class ChangeEntityComponent implements OnInit {
     }
 
 
-UpdateEntity() {
+// UpdateEntity() {
 
-  if (!this.selectedEntity.length) {
-    Swal.fire({
-      title: 'Warning',
-      text: 'Please select at least one duty.',
-      icon: 'warning'
-    });
-    return;
-  }
+//   if (!this.selectedEntity.length) {
+//     Swal.fire({
+//       title: 'Warning',
+//       text: 'Please select at least one duty.',
+//       icon: 'warning'
+//     });
+//     return;
+//   }
 
-  const apiCalls = this.selectedEntity.map(row =>
-    this.invoiceHomeService.GetInvoiceGenerated(row.dutySlipID)
-  );
+//   const apiCalls = this.selectedEntity.map(row =>
+//     this.invoiceHomeService.GetInvoiceGenerated(row.dutySlipID)
+//   );
 
-  forkJoin(apiCalls).subscribe((responses: any[]) => {
+//   forkJoin(apiCalls).subscribe((responses: any[]) => {
 
-    // Collect duty slips where invoice generated
-    const generatedDutySlips = this.selectedEntity
-      .filter((row, index) => responses[index]?.result)
-      .map(row => row.dutySlipID);
+//     // Collect duty slips where invoice generated
+//     const generatedDutySlips = this.selectedEntity
+//       .filter((row, index) => responses[index]?.result)
+//       .map(row => row.dutySlipID);
 
-    // If any invoice generated found
-    if (generatedDutySlips.length > 0) {
+//     // If any invoice generated found
+//     if (generatedDutySlips.length > 0) {
 
-      Swal.fire({
-        title: 'Not Allowed',
-        html: `
-          Invoice already generated for Duty Slip(s): 
-          <b>${generatedDutySlips.join(', ')}</b>
-          <br><br>
-          Please deselect these duties and try again.
-        `,
-        icon: 'warning',
-        confirmButtonText: 'OK'
-      });
+//       Swal.fire({
+//         title: 'Not Allowed',
+//         html: `
+//           Invoice already generated for Duty Slip(s): 
+//           <b>${generatedDutySlips.join(', ')}</b>
+//           <br><br>
+//           Please deselect these duties and try again.
+//         `,
+//         icon: 'warning',
+//         confirmButtonText: 'OK'
+//       });
 
-      return;
-    }
+//       return;
+//     }
 
-    // Existing process
-    Swal.fire({
-      title: 'Are you sure?',
-      text: 'Do you really want to update entities of all the selected duties?',
-      icon: 'warning',
-      showCancelButton: true,
-      confirmButtonText: 'Yes',
-      cancelButtonText: 'No'
-    }).then((result) => {
+//     // Existing process
+//     Swal.fire({
+//       title: 'Are you sure?',
+//       text: 'Do you really want to update entities of all the selected duties?',
+//       icon: 'warning',
+//       showCancelButton: true,
+//       confirmButtonText: 'Yes',
+//       cancelButtonText: 'No'
+//     }).then((result) => {
 
-      if (result.isConfirmed) {
+//       if (result.isConfirmed) {
 
-        const dialogRef = this.dialog.open(
-          MessageBoxFormDialogComponent,
-          {
-            width: '600px',
-            data: {
-              advanceTable: this.selectedEntity,
-              userID: this._generalService.getUserID()
-            }
-          }
-        );
+//         const dialogRef = this.dialog.open(
+//           MessageBoxFormDialogComponent,
+//           {
+//             width: '600px',
+//             data: {
+//               advanceTable: this.selectedEntity,
+//               userID: this._generalService.getUserID()
+//             }
+//           }
+//         );
 
-        dialogRef.afterClosed().subscribe((res: any) => {
-          if (res) {
-            this.loadData();
-          }
-        });
-      }
-    });
+//         dialogRef.afterClosed().subscribe((res: any) => {
+//           if (res) {
+//             this.loadData();
+//           }
+//         });
+//       }
+//     });
 
-  });
-}
+//   });
+// }
 
-onCheckBox(isChecked: boolean, row: any) {
+// onCheckBox(isChecked: boolean, row: any) {
 
-  row.checked = isChecked;
+//   row.checked = isChecked;
 
-  if (isChecked) {
-    this.selectedEntity.push(row);
-  } else {
-    this.selectedEntity = this.selectedEntity.filter(
-      x => x.dutySlipID !== row.dutySlipID
-    );
-  }
+//   if (isChecked) {
+//     this.selectedEntity.push(row);
+//   } else {
+//     this.selectedEntity = this.selectedEntity.filter(
+//       x => x.dutySlipID !== row.dutySlipID
+//     );
+//   }
 
-  console.log('selectedEntity', this.selectedEntity);
-}
+//   console.log('selectedEntity', this.selectedEntity);
+// }
 
-checkAll(isChecked: boolean) {
+// checkAll(isChecked: boolean) {
 
-  this.selectAll = isChecked;
-  this.selectedEntity = [];
+//   this.selectAll = isChecked;
+//   this.selectedEntity = [];
 
-  this.dataSource.forEach(row => {
-    row.checked = isChecked;
+//   this.dataSource.forEach(row => {
+//     row.checked = isChecked;
 
-    if (isChecked) {
-      this.selectedEntity.push(row);
-    }
-  });
+//     if (isChecked) {
+//       this.selectedEntity.push(row);
+//     }
+//   });
 
-  console.log('selectedEntity', this.selectedEntity);
-}
-  isIndeterminate() 
-  {
-    const checkedCount = this.dataSource.filter(r => r.checked).length;
-    return checkedCount > 0 && checkedCount < this.dataSource.length;
-  }
+//   console.log('selectedEntity', this.selectedEntity);
+// }
+  // isIndeterminate() 
+  // {
+  //   const checkedCount = this.dataSource.filter(r => r.checked).length;
+  //   return checkedCount > 0 && checkedCount < this.dataSource.length;
+  // }
+  
  OpenPassengerDetails(row:any) 
     {
       const dialogRef = this.dialog.open(ChangePassengerDetailsComponent, {
@@ -697,6 +698,65 @@ checkAll(isChecked: boolean) {
       });  
     }
 
+    //--------------------------------------------------------------------
+
+    changeEntity(row: any) {
+
+  this.invoiceHomeService.GetInvoiceGenerated(row.dutySlipID)
+    .subscribe((response: any) => {
+
+      if (response.result) {
+
+        Swal.fire({
+          title: 'Not Allowed',
+          text: `Invoice already generated for Duty Slip ${row.dutySlipID}`,
+          icon: 'warning'
+        });
+
+        return;
+      }
+
+      Swal.fire({
+        title: 'Confirmation',
+        text: 'Do you really want to Change entity of the selected duty?',
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonText: 'Yes',
+        cancelButtonText: 'No'
+      }).then(result => {
+
+        if (!result.isConfirmed) {
+          return;
+        }
+
+        this.openEntityDialog(row);
+
+      });
+
+    });
+
+}
+openEntityDialog(row: any) {
+
+    const dialogRef = this.dialog.open(
+      MessageBoxFormDialogComponent,
+      {
+        width: '600px',
+        data: {
+          advanceTable: [row],
+          userID: this._generalService.getUserID()
+        }
+      });
+
+    dialogRef.afterClosed().subscribe(res => {
+
+      if (res) {
+        this.loadData();
+      }
+
+    });
+
+}
 
 }
 
