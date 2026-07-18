@@ -21,6 +21,7 @@ export class InvoiceSummary {
   dispatchDate: Date;
   activationStatus: boolean;
   dispatchedByName: string;
+  modeOfPayment: string;
 
   constructor(invoiceSummary) {
     this.invoiceSummaryID = invoiceSummary.invoiceSummaryID || -1;
@@ -43,6 +44,7 @@ export class InvoiceSummary {
     this.dispatchedByName = invoiceSummary.dispatchedByName || invoiceSummary.dispatchedBy || '';
     this.dispatchDate = invoiceSummary.dispatchDate || null;
     this.activationStatus = invoiceSummary.activationStatus !== undefined ? invoiceSummary.activationStatus : false;
+    this.modeOfPayment = invoiceSummary.modeOfPayment || '';
     this.invoiceSummaryDate = new Date();
   }
 }

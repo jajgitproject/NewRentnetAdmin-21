@@ -21,6 +21,7 @@ export class InvoiceSummaryService {
     searchBillDate:string,
     searchSummaryDispatchStatus: string,
     searchActivationStatus: boolean,
+    searchModeOfPayment: string,
     pageNumber: number
   ): Observable<any> {
     if (searchBillSubmittedTo === '') {
@@ -44,6 +45,9 @@ export class InvoiceSummaryService {
     if (searchActivationStatus === null) {
       searchActivationStatus = null;
     }
+    if (searchModeOfPayment === '' || searchModeOfPayment === null) {
+      searchModeOfPayment = 'null';
+    }
     return this.httpClient.get(
       this.API_URL +
         '/' +
@@ -60,6 +64,8 @@ export class InvoiceSummaryService {
         searchSummaryDispatchStatus +
         '/' +
         searchActivationStatus +
+        '/' +
+        searchModeOfPayment +
         '/' +
         pageNumber +
         '/InvoiceSummaryID/Descending'

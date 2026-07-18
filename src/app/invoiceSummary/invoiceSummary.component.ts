@@ -28,6 +28,7 @@ export class InvoiceSummaryComponent implements OnInit {
     'state',
     'invoiceSummaryDate',
     'billSubmittedTo',
+    'modeOfPayment',
     'summaryDispatchStatus',
     'dispatchedBy',
     'dispatchDate',
@@ -51,6 +52,7 @@ export class InvoiceSummaryComponent implements OnInit {
   searchCustomerName: string = '';
   searchSummaryDate: string = '';
   searchBillDate: string = '';
+  searchModeOfPayment: string = '';
 
   constructor(
     public httpClient: HttpClient,
@@ -83,6 +85,11 @@ export class InvoiceSummaryComponent implements OnInit {
     this.searchTerm = '';
     this.selectedFilter = 'search';
     this.searchActivationStatus = true;
+    this.searchSummaryNo = '';
+    this.searchCustomerName = '';
+    this.searchSummaryDate = '';
+    this.searchBillDate = '';
+    this.searchModeOfPayment = '';
     this.pageNumber = 0;
     this.sortType = 'Descending';
     this.sortingData = 1;
@@ -150,6 +157,9 @@ export class InvoiceSummaryComponent implements OnInit {
       case 'BillDate':
         this.searchBillDate = this.searchTerm;
         break;
+      case 'ModeOfPayment':
+        this.searchModeOfPayment = this.searchTerm;
+        break;
       default:
         break;
     }
@@ -163,6 +173,7 @@ export class InvoiceSummaryComponent implements OnInit {
         this.searchBillDate,
         this.searchSummaryDispatchStatus,
         this.searchActivationStatus,
+        this.searchModeOfPayment,
         this.pageNumber
       )
       .subscribe(
