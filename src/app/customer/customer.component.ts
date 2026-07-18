@@ -30,6 +30,7 @@ import { CustomerGroupDropDown } from '../customerGroup/customerGroupDropDown.mo
 import { RoleDropDown } from '../role/roleDropDown.model';
 import { RolePageMappingService } from '../rolePageMapping/rolePageMapping.service';
 import { FormDialogComponent as CIPlusComponent } from '../customerCorporateIndividual/dialogs/form-dialog/form-dialog.component';
+import { FormDialogComponent as IndividualCustomerComponent } from '../individualCustomer/dialogs/form-dialog/form-dialog.component';
 
 interface MenuItem {
   label: string;
@@ -252,6 +253,18 @@ export class CustomerComponent implements OnInit {
     const dialogRef = this.dialog.open(CIPlusComponent, 
     {
       data: 
+        {
+          advanceTable: this.advanceTable,
+          action: 'add'
+        }
+    });
+  }
+
+  IndividualCustomer()
+  {
+    this.dialog.open(IndividualCustomerComponent,
+    {
+      data:
         {
           advanceTable: this.advanceTable,
           action: 'add'

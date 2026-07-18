@@ -2,9 +2,7 @@
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
-import { CustomerComponent } from './customer.component';
-import { FormDialogComponent as advanceTableForm } from './dialogs/form-dialog/form-dialog.component';
-import { DeleteDialogComponent } from './dialogs/delete/delete.component';
+import { FormDialogComponent as IndividualCustomerFormDialog } from './dialogs/form-dialog/form-dialog.component';
 import { MatTableModule } from '@angular/material/table';
 import { MatPaginatorModule } from '@angular/material/paginator';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -22,30 +20,19 @@ import { MatDialogModule } from '@angular/material/dialog';
 import { MatSortModule } from '@angular/material/sort';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatMenuModule } from '@angular/material/menu';
-import { CustomerService } from './customer.service';
-import { CustomerRoutingModule } from './customer-routing.module';
-import { MyUploadComponent } from '../myupload/myupload.component';
-import { MyUploadModule } from '../myupload/myupload.module';
+import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatAutocompleteModule } from '@angular/material/autocomplete';
-import { CustomerCorporateIndividualService } from '../customerCorporateIndividual/customerCorporateIndividual.service';
-// import { TwoDigitDecimaNumberDirective } from './twodigitdecimalnumber.directive';
-import { CustomerCorporateIndividualModule } from '../customerCorporateIndividual/customerCorporateIndividual.module';
-import { IndividualCustomerModule } from '../individualCustomer/individualCustomer.module';
-import { IndividualCustomerService } from '../individualCustomer/individualCustomer.service';
-
 
 @NgModule({
   declarations: [
-    CustomerComponent,
-    advanceTableForm,
-    DeleteDialogComponent
+    IndividualCustomerFormDialog
   ],
   imports: [
     MatAutocompleteModule,
+    MatTooltipModule,
     CommonModule,
     FormsModule,
     ReactiveFormsModule,
-    CustomerRoutingModule,
     MatTableModule,
     MatPaginatorModule,
     MatFormFieldModule,
@@ -62,14 +49,8 @@ import { IndividualCustomerService } from '../individualCustomer/individualCusto
     MatSortModule,
     MatToolbarModule,
     MatMenuModule,
-    MatProgressSpinnerModule,
-    MyUploadModule,
-    CustomerCorporateIndividualModule,
-    IndividualCustomerModule,
-    //TwoDigitDecimaNumberDirective
+    MatProgressSpinnerModule
   ],
-  providers: [CustomerService,CustomerCorporateIndividualService,IndividualCustomerService]
+  exports: [IndividualCustomerFormDialog]
 })
-export class CustomerModule {}
-
-
+export class IndividualCustomerModule {}
