@@ -46,7 +46,7 @@
                 <div class="status-display">
                   <strong style="font-size: 10px;">Customer</strong>
                   <br />
-                  <span style="font-size: 10px;">{{data?.item?.customerName}}</span>
+                  <span style="font-size: 10px;">{{customerName || data?.item?.customerName || dataSource[0]?.customerName}}</span>
                 </div>
               </div>
 
@@ -54,7 +54,7 @@
                 <div class="status-display">
                   <strong style="font-size: 10px;">Passenger</strong>
                   <br />
-                  <span style="font-size: 10px;">{{dataSource[0]?.customerPersonName}}</span>
+                  <span style="font-size: 10px;">{{customerPersonName || dataSource[0]?.customerPersonName}}</span>
                 </div>
               </div>
 
@@ -62,7 +62,7 @@
                 <div class="status-display">
                   <strong style="font-size: 10px;">Car Reg.No.</strong>
                   <br />
-                  <span style="font-size: 10px;">{{data?.item?.registrationNumber}}</span>
+                  <span style="font-size: 10px;">{{registrationNumber || data?.item?.registrationNumber}}</span>
                 </div>
               </div>
 
@@ -70,7 +70,7 @@
                 <div class="status-display">
                   <strong style="font-size: 10px;">Driver</strong>
                   <br />
-                  <span style="font-size: 10px;">{{data?.item?.driverName}}</span>
+                  <span style="font-size: 10px;">{{driverName || data?.item?.driverName}}</span>
                 </div>
               </div>
             </div>

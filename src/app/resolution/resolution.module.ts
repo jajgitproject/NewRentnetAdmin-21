@@ -3,7 +3,6 @@ import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { ResolutionComponent } from './resolution.component';
-import { resolutionFormDialogComponent as advanceTableForm } from './dialogs/form-dialog/form-dialog.component';
 import { DeleteDialogComponent } from './dialogs/delete/delete.component';
 import { MatTableModule } from '@angular/material/table';
 import { MatPaginatorModule } from '@angular/material/paginator';
@@ -24,7 +23,6 @@ import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatMenuModule } from '@angular/material/menu';
 import { ResolutionService } from './resolution.service';
 import { ResolutionRoutingModule } from './resolution-routing.module';
-import { MyUploadComponent } from '../myupload/myupload.component';
 import { MyUploadModule } from '../myupload/myupload.module';
 import { MatAutocompleteModule } from '@angular/material/autocomplete';
 import { resolutionFormDialogComponent } from './dialogs/form-dialog/form-dialog.component';
@@ -32,9 +30,8 @@ import { OwlDateTimeModule, OwlNativeDateTimeModule } from '@danielmoncada/angul
 @NgModule({
   declarations: [
     ResolutionComponent,
-    advanceTableForm,
-    DeleteDialogComponent,
-    resolutionFormDialogComponent
+    resolutionFormDialogComponent,
+    DeleteDialogComponent
   ],
   imports: [
     CommonModule,
@@ -63,7 +60,7 @@ import { OwlDateTimeModule, OwlNativeDateTimeModule } from '@danielmoncada/angul
     MatProgressSpinnerModule,
     MyUploadModule
   ],
-  exports: [advanceTableForm],
+  exports: [resolutionFormDialogComponent],
   providers: [ResolutionService]
 })
 export class ResolutionModule {}

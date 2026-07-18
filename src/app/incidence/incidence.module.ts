@@ -5,6 +5,7 @@ import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { IncidenceComponent } from './incidence.component';
 import { incidenceFormDialogComponent as advanceTableForm } from './dialogs/form-dialog/form-dialog.component';
 import { DeleteDialogComponent } from './dialogs/delete/delete.component';
+import { IncidenceListDialogComponent } from './dialogs/incidence-list-dialog/incidence-list-dialog.component';
 import { MatTableModule } from '@angular/material/table';
 import { MatPaginatorModule } from '@angular/material/paginator';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -30,10 +31,12 @@ import { MatAutocompleteModule } from '@angular/material/autocomplete';
 import { incidenceFormDialogComponent } from './dialogs/form-dialog/form-dialog.component';
 import { OwlDateTimeModule, OwlNativeDateTimeModule } from '@danielmoncada/angular-datetime-picker';
 import { MatTooltipModule } from '@angular/material/tooltip';
+import { ResolutionModule } from '../resolution/resolution.module';
 @NgModule({
   declarations: [
     IncidenceComponent,
-    incidenceFormDialogComponent
+    incidenceFormDialogComponent,
+    IncidenceListDialogComponent
   ],
   imports: [
     CommonModule,
@@ -61,9 +64,11 @@ import { MatTooltipModule } from '@angular/material/tooltip';
     MatMenuModule,
     MatProgressSpinnerModule,
     MyUploadModule,
-    MatTooltipModule
+    MatTooltipModule,
+    // Required so IncidenceListDialog / Incidence page can open resolution MatDialog.
+    ResolutionModule
   ],
-  exports: [advanceTableForm],
+  exports: [advanceTableForm, IncidenceListDialogComponent],
   providers: [IncidenceService]
 })
 export class IncidenceModule {}

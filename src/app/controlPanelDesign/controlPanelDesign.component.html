@@ -3133,20 +3133,10 @@
                                           None <br /> -->
 
                                   <b>
-                                    <button class="BoldButton" mat-button>
+                                    <button class="BoldButton" mat-button (click)="incidenceOne(item)">
                                       Incidence
                                     </button>
-                                    <mat-icon [matMenuTriggerFor]="menu60"
-                                      style="cursor: pointer;color: blue;font-size: 14px !important; padding-top: 4px">
-                                      more_vert
-                                    </mat-icon>
                                   </b>
-                                  <mat-menu #menu60="matMenu">
-                                    <b><button mat-menu-item (click)="incidence(item)"
-                                        [ngClass]="{'disabled-link': !item.allotmentStatus}">
-                                        Incidence
-                                      </button></b>
-                                  </mat-menu>
                                   <b>
                                     <br>
                                     <button class="BoldButton" mat-button>

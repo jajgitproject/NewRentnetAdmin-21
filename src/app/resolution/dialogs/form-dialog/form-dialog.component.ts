@@ -19,6 +19,7 @@ import { AuthService } from 'src/app/core/service/auth.service';
 import moment from 'moment';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { HttpErrorResponse } from '@angular/common/http';
+import { ControlPanelDesignService } from '../../../controlPanelDesign/controlPanelDesign.service';
 
 @Component({
   standalone: false,
@@ -35,17 +36,17 @@ export class resolutionFormDialogComponent {
   dialogTitle: string;
   advanceTableForm: FormGroup;
   advanceTable: Resolution;
-  filteredDutySlipListOptions: Observable<DutySlipDropDown[]>;
+  filteredDutySlipListOptions: Observable<DutySlipDropDown[]> = of([]);
   public DutySlipList?: DutySlipDropDown[] = [];
   // public EmployeeList?: EmployeeDropDown[] = [];
-  filteredIncidenceTypeListOptions: Observable<IncidenceTypeDropDown[]>;
+  filteredIncidenceTypeListOptions: Observable<IncidenceTypeDropDown[]> = of([]);
   public IncidenceTypeList?: IncidenceTypeDropDown[] = [];
-  filteredinstructedByOptionss: Observable<EmployeeDropDown[]>
+  filteredinstructedByOptionss: Observable<EmployeeDropDown[]> = of([]);
   public IssueCategoryList?: IssueCategoryDropDown[] = [];
-  filteredIssueCategoryByOptionss: Observable<IssueCategoryDropDown[]>
+  filteredIssueCategoryByOptionss: Observable<IssueCategoryDropDown[]> = of([]);
 
   // public passengerList?: EmployeesDropDown[] = [];
-  filteredPassengerOptions: Observable<EmployeesDropDown[]>;
+  filteredPassengerOptions: Observable<EmployeesDropDown[]> = of([]);
   messageSubject: Subject<string> = new Subject<any>();
   reservationID: number;
   dutySlipID: any;
@@ -81,7 +82,7 @@ export class resolutionFormDialogComponent {
   passengerList: any[] = [];
   showAutoComplete = false;
 
-  filteredDebitTypeOptions: Observable<DebitTypeModel[]>;
+  filteredDebitTypeOptions: Observable<DebitTypeModel[]> = of([]);
   public DebitTypeList?: DebitTypeModel[] = [];
   // autoCompleteLabel: string = '';
   autoCompleteLabel1: string = 'Responsible1 Name';
@@ -89,6 +90,10 @@ export class resolutionFormDialogComponent {
   autoCompleteLabel3: string = 'Responsible3 Name';
   autoCompleteLabel4: string = 'Responsible4 Name';
   filteredOptions: any[] = [];
+  filteredOptions1: any[] = [];
+  filteredOptions2: any[] = [];
+  filteredOptions3: any[] = [];
+  filteredOptions4: any[] = [];
   employeeOptions: any[] = [];
   driverOptions: any[] = [];
   supplierOptions: any[] = [];
@@ -113,28 +118,40 @@ export class resolutionFormDialogComponent {
     public route: ActivatedRoute,
     private fb: FormBuilder,
     private snackBar: MatSnackBar,
+    private controlPanelService: ControlPanelDesignService,
     // private authService: AuthService ,// Inject the AuthService
 
     public _generalService: GeneralService) {
-    this.reservationID = data?.item?.reservationID;
-this.dutySlipID = data?.item?.dutySlipID;
+    this.reservationID = data?.reservationID || data?.item?.reservationID;
+this.dutySlipID = data?.dutySlipID || data?.item?.dutySlipID;
 this.incidenceTypeID = data?.item?.incidenceTypeID;
 this.issueCategoryID = data?.item?.issueCategoryID;
 
-this.customerID = data?.item?.customerID;
-this.customerName = data?.item?.customerName;
+this.customerID = data?.customerID || data?.item?.customerID;
+this.customerName = data?.customerName || data?.item?.customerName;
 
-this.driverID = data?.item?.driverID;
-this.driverName = data?.item?.driverName;
+this.driverID = data?.item?.driverID || data?.driverID;
+this.driverName =
+  data?.driverName ||
+  data?.item?.driverName ||
+  data?.item?.DriverName;
 
-this.supplierID = data?.item?.supplierID;
-this.carVendor = data?.item?.carVendor;
+this.supplierID =
+  data?.supplierID ||
+  data?.item?.supplierID ||
+  data?.item?.inventorySupplierID;
+this.carVendor =
+  data?.item?.carVendor ||
+  data?.item?.supplierName ||
+  data?.item?.SupplierName;
 
-this.registrationNumber = data?.item?.registrationNumber;
-this.inventoryID = data?.item?.inventoryID;
+this.registrationNumber = data?.registrationNumber || data?.item?.registrationNumber;
+this.inventoryID = data?.inventoryID || data?.item?.inventoryID;
 
 this.organizationalEntityName =
-    data?.item?.transferedLocation;
+    data?.organizationalEntityName ||
+    data?.item?.transferedLocation ||
+    data?.item?.organizationalEntityName;
 
 this.transferedLocationID =
     data?.item?.transferedLocationID;
@@ -144,11 +161,16 @@ this.incidenceID =
     data?.item?.incidenceID;
 
 this.CustomerPersonID =
+    data?.customerPersonID ||
     data?.item?.primaryPassengerID ||
+    data?.item?.passengerID ||
+    data?.item?.customerPersonID ||
     data?.item?.passengerDetails?.[0]?.customerPersonID;
 
 this.customerPersonName =
+    data?.customerPersonName ||
     data?.item?.primaryPassenger ||
+    data?.item?.customerPersonName ||
     data?.item?.passengerDetails?.[0]?.customerPersonName;
 
 this.verifyDutyStatusAndCacellationStatus =
@@ -159,16 +181,7 @@ this.action = data?.action;
 
   this.dialogTitle = 'Incidence Resolution';
 
-  this.advanceTable = data.item;
-
-  if (this.advanceTable?.closureDate) {
-
-    const closureDate =
-      moment(this.advanceTable.closureDate)
-      .format('DD/MM/YYYY');
-
-    this.onBlurStartDateEdit(closureDate);
-  }
+  this.advanceTable = data.item || data.advanceTable || {};
 
 }
 else {
@@ -180,6 +193,12 @@ else {
   this.advanceTable.activationStatus = true;
 }
     this.advanceTableForm = this.createContactForm();
+
+    // Run after form exists — calling this before createContactForm crashes.
+    if (this.action === 'edit' && this.advanceTable?.closureDate) {
+      const closureDate = moment(this.advanceTable.closureDate).format('DD/MM/YYYY');
+      this.onBlurStartDateEdit(closureDate);
+    }
     // if (this.verifyDutyStatusAndCacellationStatus !== 'Changes allow') 
     // {
     //   this.isSaveAllowed = true;
@@ -198,6 +217,7 @@ else {
 
   public ngOnInit(): void {
     this.advanceTableForm.patchValue({incidenceID: this.incidenceID});
+    this.loadReservationContextIfMissing();
     this.InitDriver();
     this.InitVendor();
     this.InitEmployee();
@@ -788,14 +808,16 @@ else {
   getOpenByEmployee() {
     this._generalService.getEmployeeID(this._generalService.getUserID()).subscribe(
       data => {
-        this.employeeDataSource = data;
-        this.advanceTableForm.controls["openedByEmployeeName"].disable();
-        this.advanceTableForm.patchValue({ openedByEmployeeName: this.employeeDataSource[0].firstName + " " + this.employeeDataSource[0].lastName });
-        this.advanceTableForm.patchValue({ openedByEmployeeID: this.employeeDataSource[0].employeeID });
-        this.advanceTableForm.controls["openedByEmployeeName"].disable();
-        this.advanceTableForm.patchValue({ openedByEmployeeName: this.employeeDataSource[0].firstName + " " + this.employeeDataSource[0].lastName });
-        this.advanceTableForm.patchValue({ openedByEmployeeID: this.employeeDataSource[0].employeeID });
-
+        this.employeeDataSource = Array.isArray(data) ? data : [];
+        if (!this.employeeDataSource.length) {
+          return;
+        }
+        const emp = this.employeeDataSource[0];
+        this.advanceTableForm.patchValue({
+          openedByEmployeeName: `${emp.firstName || ''} ${emp.lastName || ''}`.trim(),
+          openedByEmployeeID: emp.employeeID,
+        });
+        this.advanceTableForm.controls['openedByEmployeeName']?.disable();
       });
   }
 
@@ -809,68 +831,171 @@ else {
   }
 
   public loadData() {
+    const targetIncidenceID =
+      this.incidenceID ||
+      this.data?.incidenceID ||
+      this.data?.item?.incidenceID ||
+      this.advanceTable?.incidenceID;
+
+    if (!targetIncidenceID) {
+      this.showNotification(
+        'snackbar-danger',
+        'Incidence ID is required to open resolution.',
+        'bottom',
+        'center'
+      );
+      return;
+    }
+
+    if (!this.reservationID) {
+      this.showNotification(
+        'snackbar-danger',
+        'Reservation ID is required to open resolution.',
+        'bottom',
+        'center'
+      );
+      return;
+    }
+
     this.advanceTableService.getTableData(this.reservationID, true, 0).subscribe
       (
         data => {
-          this.dataSource = data;
-          console.log(this.dataSource)
-          if(this.dataSource && this.dataSource.length > 0) {
-            this.advanceTableForm.patchValue({ reservationID: this.dataSource[0]?.reservationID });
-            this.advanceTableForm.patchValue({
-              incidenceDate
-                : this.dataSource[0]?.incidenceDate
-            });
-            this.advanceTableForm.patchValue({ dutySlipNumber: this.dataSource[0]?.dutySlipID });
-            this.advanceTableForm.patchValue({ customerPersonName: this.dataSource[0]?.customerPersonName });
-            this.advanceTableForm.patchValue({ incidenceTime: this.dataSource[0]?.incidenceTime });
-            this.advanceTableForm.patchValue({ openedByEmployeeDepartment: this.dataSource[0]?.openedByEmployeeDepartment });
-            this.advanceTableForm.patchValue({ reportSource: this.dataSource[0]?.reportSource });
-            this.advanceTableForm.patchValue({ reportedBy: this.dataSource[0]?.reportedBy });
-            this.advanceTableForm.patchValue({ incidencePlace: this.dataSource[0]?.incidencePlace });
-            this.advanceTableForm.patchValue({ openDate: this.dataSource[0]?.openDate });
-            this.advanceTableForm.patchValue({ openTime: this.dataSource[0]?.openTime });
-            this.advanceTableForm.patchValue({ reportingDate: this.dataSource[0]?.reportingDate });
-            this.advanceTableForm.patchValue({ reportingTime: this.dataSource[0]?.reportingTime });
-            this.advanceTableForm.patchValue({ assignedToEmployeeName: this.dataSource[0]?.assignedToEmployeeName });
-            this.advanceTableForm.patchValue({ assignedToEmployeeDepartment: this.dataSource[0]?.assignedToEmployeeDepartment });
-            this.advanceTableForm.patchValue({ reporterName: this.dataSource[0]?.reporterName });
-            this.advanceTableForm.patchValue({ incidenceDetails: this.dataSource[0]?.incidenceDetails });
-            this.advanceTableForm.patchValue({ incidenceType: this.dataSource[0]?.incidenceType });
-            this.advanceTableForm.patchValue({ issueCategory: this.dataSource[0]?.issueCategory });
-            this.advanceTableForm.patchValue({ reportEvidenceDoc: this.dataSource[0]?.reportEvidenceDoc });
-            this.advanceTableForm.patchValue({ issueCategory: this.dataSource[0]?.issueCategory });
-            this.advanceTableForm.patchValue({ rootCauseAnalysis: this.dataSource[0]?.rootCauseAnalysis });
-            this.advanceTableForm.patchValue({ actionTaken: this.dataSource[0]?.actionTaken });
-            this.advanceTableForm.patchValue({ closedByEmployeeID: this.dataSource[0]?.closedByEmployeeID });
-            this.advanceTableForm.patchValue({ closureComment: this.dataSource[0]?.closureComment });
-            if (this.dataSource[0]?.closureDate) {
-              this.advanceTableForm.patchValue({ closureDate: this.dataSource[0]?.closureDate });
+          const rows = Array.isArray(data) ? data : [];
+          if (!rows.length) {
+            // Fall back to the row passed into the dialog so the page still renders.
+            if (this.data?.item?.incidenceID) {
+              this.dataSource = [this.data.item];
+              this.patchResolutionFromRow(this.data.item);
+            } else {
+              this.dataSource = [];
             }
-            if (this.dataSource[0]?.closureTime) {
-              this.advanceTableForm.patchValue({ closureTime: this.dataSource[0]?.closureTime });
-            }
-            this.advanceTableForm.patchValue({ feedbackEmailAcknowledged: this.dataSource[0]?.feedbackEmailAcknowledged });
-            this.advanceTableForm.patchValue({ incidenceEmailAcknowledged: this.dataSource[0]?.incidenceEmailAcknowledged });
-            this.advanceTableForm.patchValue({ incidenceCategory: this.dataSource[0]?.incidenceCategory });
-            this.advanceTableForm.patchValue({ closeByEmployeeName: this.dataSource[0]?.closeByEmployeeName });
-            this.advanceTableForm.patchValue({ followUpAction: this.dataSource[0]?.followUpAction });
-            this.advanceTableForm.patchValue({ reminderDateForFollowUp: this.dataSource[0]?.reminderDateForFollowUp });
-            this.advanceTableForm.patchValue({ debitTypeID: this.dataSource[0]?.debitTypeID });
-            this.advanceTableForm.patchValue({ debitType: this.dataSource[0]?.debitType });
-            this.advanceTableForm.patchValue({ debitAmount: this.dataSource[0]?.debitAmount });
-
-            this.bindResponsibleData();
-            this.ImagePath = this.dataSource[0].reportEvidenceDoc;
+            return;
           }
+
+          const selected =
+            rows.find(
+              (row) => Number(row.incidenceID) === Number(targetIncidenceID)
+            ) || null;
+
+          if (!selected) {
+            this.showNotification(
+              'snackbar-danger',
+              'Selected incidence was not found for this reservation.',
+              'bottom',
+              'center'
+            );
+            // Keep template (*ngIf dataSource[0]) working with the opened row.
+            if (this.data?.item?.incidenceID) {
+              this.dataSource = [this.data.item];
+              this.patchResolutionFromRow(this.data.item);
+            } else {
+              this.dataSource = rows;
+            }
+            return;
+          }
+
+          // Template still binds dataSource[0] — put selected first.
+          this.dataSource = [selected, ...rows.filter(
+            (row) => Number(row.incidenceID) !== Number(selected.incidenceID)
+          )];
+          this.patchResolutionFromRow(selected);
         },
 
         (error: HttpErrorResponse) => {
           console.error('Error fetching data:', error);
-          this.dataSource = [];  // Set to empty array to avoid null/undefined errors
+          if (this.data?.item?.incidenceID) {
+            this.dataSource = [this.data.item];
+            this.patchResolutionFromRow(this.data.item);
+          } else {
+            this.dataSource = [];
+          }
         }
       );
     //  this.tripBackAttachmentloadData();
   }
+
+  private patchResolutionFromRow(selected: any): void {
+    if (!selected) {
+      return;
+    }
+
+    this.incidenceID = selected.incidenceID;
+    this.advanceTableForm.patchValue({ incidenceID: selected.incidenceID });
+    this.advanceTableForm.patchValue({ reservationID: selected?.reservationID || this.reservationID });
+    this.advanceTableForm.patchValue({
+      incidenceDate: selected?.incidenceDate
+    });
+    this.advanceTableForm.patchValue({ dutySlipNumber: selected?.dutySlipID });
+    this.advanceTableForm.patchValue({ customerPersonName: selected?.customerPersonName || this.customerPersonName });
+    this.advanceTableForm.patchValue({ incidenceTime: selected?.incidenceTime });
+    this.advanceTableForm.patchValue({ openedByEmployeeDepartment: selected?.openedByEmployeeDepartment });
+    this.advanceTableForm.patchValue({ reportSource: selected?.reportSource });
+    this.advanceTableForm.patchValue({ reportedBy: selected?.reportedBy });
+    this.advanceTableForm.patchValue({ incidencePlace: selected?.incidencePlace });
+    this.advanceTableForm.patchValue({ openDate: selected?.openDate });
+    this.advanceTableForm.patchValue({ openTime: selected?.openTime });
+    this.advanceTableForm.patchValue({ reportingDate: selected?.reportingDate });
+    this.advanceTableForm.patchValue({ reportingTime: selected?.reportingTime });
+    this.advanceTableForm.patchValue({ assignedToEmployeeName: selected?.assignedToEmployeeName });
+    this.advanceTableForm.patchValue({ assignedToEmployeeDepartment: selected?.assignedToEmployeeDepartment });
+    this.advanceTableForm.patchValue({ reporterName: selected?.reporterName });
+    this.advanceTableForm.patchValue({ incidenceDetails: selected?.incidenceDetails });
+    this.advanceTableForm.patchValue({ incidenceType: selected?.incidenceType });
+    this.advanceTableForm.patchValue({ issueCategory: selected?.issueCategory });
+    this.advanceTableForm.patchValue({ reportEvidenceDoc: selected?.reportEvidenceDoc });
+    this.advanceTableForm.patchValue({ rootCauseAnalysis: selected?.rootCauseAnalysis });
+    this.advanceTableForm.patchValue({ actionTaken: selected?.actionTaken });
+    this.advanceTableForm.patchValue({ closedByEmployeeID: selected?.closedByEmployeeID });
+    this.advanceTableForm.patchValue({ closureComment: selected?.closureComment });
+    if (selected?.closureDate) {
+      this.advanceTableForm.patchValue({ closureDate: selected?.closureDate });
+    }
+    if (selected?.closureTime) {
+      this.advanceTableForm.patchValue({ closureTime: selected?.closureTime });
+    }
+    this.advanceTableForm.patchValue({ feedbackEmailAcknowledged: selected?.feedbackEmailAcknowledged });
+    this.advanceTableForm.patchValue({ incidenceEmailAcknowledged: selected?.incidenceEmailAcknowledged });
+    this.advanceTableForm.patchValue({ incidenceCategory: selected?.incidenceCategory });
+    this.advanceTableForm.patchValue({ closeByEmployeeName: selected?.closeByEmployeeName });
+    this.advanceTableForm.patchValue({ followUpAction: selected?.followUpAction });
+    this.advanceTableForm.patchValue({ reminderDateForFollowUp: selected?.reminderDateForFollowUp });
+    this.advanceTableForm.patchValue({ debitTypeID: selected?.debitTypeID });
+    this.advanceTableForm.patchValue({ debitType: selected?.debitType });
+    this.advanceTableForm.patchValue({ debitAmount: selected?.debitAmount });
+
+    this.driverID = selected.driverID || this.driverID;
+    this.driverName = selected.driverName || this.driverName;
+    this.supplierID = selected.supplierID || this.supplierID;
+    this.carVendor =
+      selected.supplierName || selected.carVendor || this.carVendor;
+    this.CustomerPersonID =
+      selected.passengerID ||
+      selected.customerPersonID ||
+      this.CustomerPersonID;
+    this.customerPersonName =
+      selected.customerPersonName || this.customerPersonName;
+    this.syncReservationResponsibleContext();
+
+    this.bindResponsibleData();
+    this.ImagePath = selected.reportEvidenceDoc;
+  }
+  private getSelectedIncidenceRow(): any {
+    const targetIncidenceID =
+      this.incidenceID ||
+      this.data?.incidenceID ||
+      this.data?.item?.incidenceID;
+
+    if (!this.dataSource?.length) {
+      return null;
+    }
+
+    return (
+      this.dataSource.find(
+        (row) => Number(row.incidenceID) === Number(targetIncidenceID)
+      ) || null
+    );
+  }
+
   bindResponsibleData() {
 
   const checkInterval = setInterval(() => {
@@ -900,11 +1025,12 @@ else {
     ) {
 
       clearInterval(checkInterval);
+      const selectedRow = this.getSelectedIncidenceRow();
 
       for (let i = 1; i <= 4; i++) {
 
         const selectedValue =
-          this.dataSource?.[0]?.[`responsible${i}`];
+          selectedRow?.[`responsible${i}`];
 
         if (selectedValue) {
           this.onResponsibleChange(
@@ -918,52 +1044,148 @@ else {
   }, 300);
 }
 
+  private loadReservationContextIfMissing(): void {
+    const needsCustomer = !this.customerName;
+    const needsDriver = !this.driverName || !this.driverID;
+    const needsReg = !this.registrationNumber;
+    const needsSupplier = !this.carVendor || !this.supplierID;
+    const needsGuest = !this.customerPersonName || !this.CustomerPersonID;
+
+    if (
+      !this.reservationID ||
+      (!needsCustomer && !needsDriver && !needsReg && !needsSupplier && !needsGuest)
+    ) {
+      return;
+    }
+
+    this.controlPanelService.getReservationDetails(this.reservationID).subscribe(
+      (rows) => {
+        const reservation = Array.isArray(rows) ? rows[0] : rows;
+        if (!reservation) {
+          return;
+        }
+
+        this.customerID = this.customerID || reservation.customerID;
+        this.customerName = this.customerName || reservation.customerName;
+        this.driverID = this.driverID || reservation.driverID;
+        this.driverName = this.driverName || reservation.driverName;
+        this.registrationNumber =
+          this.registrationNumber || reservation.registrationNumber;
+        this.inventoryID = this.inventoryID || reservation.inventoryID;
+        this.supplierID =
+          this.supplierID ||
+          reservation.supplierID ||
+          reservation.inventorySupplierID;
+        this.carVendor =
+          this.carVendor ||
+          reservation.carVendor ||
+          reservation.supplierName;
+        this.CustomerPersonID =
+          this.CustomerPersonID ||
+          reservation.primaryPassengerID ||
+          reservation.passengerDetails?.[0]?.customerPersonID;
+        this.customerPersonName =
+          this.customerPersonName ||
+          reservation.primaryPassenger ||
+          reservation.passengerDetails?.[0]?.customerPersonName;
+        this.organizationalEntityName =
+          this.organizationalEntityName ||
+          reservation.organizationalEntityName ||
+          reservation.transferedLocation;
+
+        if (this.data?.item) {
+          this.data.item = {
+            ...this.data.item,
+            customerName: this.customerName,
+            driverName: this.driverName,
+            driverID: this.driverID,
+            registrationNumber: this.registrationNumber,
+            carVendor: this.carVendor,
+            supplierName: this.carVendor,
+            supplierID: this.supplierID,
+          };
+        }
+
+        this.advanceTableForm?.patchValue({
+          customerName: this.customerName,
+          driverName: this.driverName,
+          registrationNumber: this.registrationNumber,
+          customerPersonName: this.customerPersonName,
+          dispatchLocation: this.organizationalEntityName,
+        });
+        this.syncReservationResponsibleContext();
+      },
+      (_error: HttpErrorResponse) => {
+        // Keep dialog usable even if reservation lookup fails.
+      }
+    );
+  }
+
   // Fetch the list of drivers
   InitDriver() {
     this._generalService.GetDriver().subscribe(data => {
-      this.driverOptions = data.map(driver => ({
+      this.driverOptions = (Array.isArray(data) ? data : []).map(driver => ({
         name: driver.driverName,
         id: driver.driverID
       }));
+      this.syncReservationResponsibleContext();
+      this.refreshOpenResponsibleSelections('driver');
     });
   }
 
   // Fetch the list of vendors
   InitVendor() {
     this._generalService.GetAllSuppliers().subscribe(data => {
-      this.supplierOptions = data.map(vendor => ({
+      this.supplierOptions = (Array.isArray(data) ? data : []).map(vendor => ({
         name: vendor.supplierName,
         id: vendor.supplierID
       }));
+      this.syncReservationResponsibleContext();
+      this.refreshOpenResponsibleSelections('vendor');
     });
   }
 
   // Fetch the list of employees
   InitEmployee() {
     this._generalService.GetEmployeesForVehicleCategory().subscribe(data => {
-      this.employeeOptions = data.map(employee => ({
+      this.employeeOptions = (Array.isArray(data) ? data : []).map(employee => ({
         name: `${employee.employeeOfficeID} - ${employee.firstName} ${employee.lastName}`,
         id: employee.employeeID
       }));
+      this.refreshOpenResponsibleSelections('employee');
     });
   }
 
   // Fetch the list of passengers
   InitPassenger() {
     this._generalService.GetCPForReservationResolution(this.reservationID).subscribe(data => {
-      if(data)
-      {
-        this.passengerOptions = data.map(passenger => ({
+      if (data) {
+        this.passengerOptions = (Array.isArray(data) ? data : []).map(passenger => ({
           name: passenger.customerPersonName,
           id: passenger.customerPersonID
         }));
+      } else {
+        this.passengerOptions = [];
       }
-      else
-      {
-        name: null;
-        id: 0
+      this.syncReservationResponsibleContext();
+      this.refreshOpenResponsibleSelections('guest');
+    });
+  }
+
+  private refreshOpenResponsibleSelections(type: string): void {
+    for (let i = 1; i <= 4; i++) {
+      const selected = this.advanceTableForm?.get(`responsible${i}Option`)?.value;
+      if (!selected) {
+        continue;
       }
-    });    
+      if (
+        selected === type ||
+        (type === 'guest' && selected === 'passenger')
+      ) {
+        // Re-apply defaults now that dropdown data is available.
+        this.onResponsibleChange(i, selected);
+      }
+    }
   }
 
 onResponsibleChange(responsibleNumber: number, selectedValue: string): void {
@@ -982,15 +1204,17 @@ onResponsibleChange(responsibleNumber: number, selectedValue: string): void {
   this[`showAutoComplete${responsibleNumber}`] = false;
   this[`filteredOptions${responsibleNumber}`] = [];
 
-  let recordData: any = {};
-  if (this.dataSource && this.dataSource.length > 0) {
-    recordData = this.dataSource[0];
-  }
+  this.syncReservationResponsibleContext();
+  const recordData: any = this.getSelectedIncidenceRow() || this.data?.item || {};
 
   const dataSourceDriverKey = `responsible${responsibleNumber}DriverID`;
   const dataSourceVendorKey = `responsible${responsibleNumber}VendorID`;
   const dataSourceEmployeeKey = `responsible${responsibleNumber}EmployeeID`;
   const dataSourceCustomerPersonKey = `responsible${responsibleNumber}CustomerPersonID`;
+  const savedDriverId = Number(recordData?.[dataSourceDriverKey] || 0);
+  const savedVendorId = Number(recordData?.[dataSourceVendorKey] || 0);
+  const savedEmployeeId = Number(recordData?.[dataSourceEmployeeKey] || 0);
+  const savedGuestId = Number(recordData?.[dataSourceCustomerPersonKey] || 0);
 
   switch (selectedValue) {
 
@@ -1010,81 +1234,181 @@ onResponsibleChange(responsibleNumber: number, selectedValue: string): void {
     case 'driver':
       this[`showAutoComplete${responsibleNumber}`] = true;
       this[`autoCompleteLabel${responsibleNumber}`] = `Select Driver ${responsibleNumber}`;
-      this[`filteredOptions${responsibleNumber}`] = this.driverOptions;
-
-      if (recordData && recordData[dataSourceDriverKey] != 0) {
-        const defaultDriver = this.driverOptions.find(d => d.id === recordData[dataSourceDriverKey]);
-        if (defaultDriver) {
-          this.advanceTableForm.controls[`responsible${responsibleNumber}Value`].setValue(defaultDriver.name);
-          this.advanceTableForm.controls[`responsible${responsibleNumber}ID`].setValue(defaultDriver.id);
-        }
-      } else if (this.driverID && this.driverName) {
-        const defaultDriver = this.driverOptions.find(d => d.id === this.driverID);
-        if (defaultDriver) {
-          this.advanceTableForm.controls[`responsible${responsibleNumber}Value`].setValue(defaultDriver.name);
-          this.advanceTableForm.controls[`responsible${responsibleNumber}ID`].setValue(defaultDriver.id);
-        }
-      }
+      this[`filteredOptions${responsibleNumber}`] = this.ensureOptionInList(
+        this.driverOptions,
+        this.driverID || recordData?.driverID,
+        this.driverName || recordData?.driverName
+      );
+      this.setResponsibleValueFromReservation(
+        responsibleNumber,
+        savedDriverId || Number(this.driverID || recordData?.driverID || 0),
+        savedDriverId
+          ? recordData?.[`responsible${responsibleNumber}DriverName`]
+          : (this.driverName || recordData?.driverName),
+        this.driverOptions
+      );
       break;
 
     // ================= VENDOR =================
     case 'vendor':
       this[`showAutoComplete${responsibleNumber}`] = true;
       this[`autoCompleteLabel${responsibleNumber}`] = `Select Vendor ${responsibleNumber}`;
-      this[`filteredOptions${responsibleNumber}`] = this.supplierOptions;
-
-      if (recordData && recordData[dataSourceVendorKey] != 0) {
-        const defaultVendor = this.supplierOptions.find(v => v.id === recordData[dataSourceVendorKey]);
-        if (defaultVendor) {
-          this.advanceTableForm.controls[`responsible${responsibleNumber}Value`].setValue(defaultVendor.name);
-          this.advanceTableForm.controls[`responsible${responsibleNumber}ID`].setValue(defaultVendor.id);
-        }
-      } else if (this.supplierID && this.carVendor) {
-        const defaultVendor = this.supplierOptions.find(v => v.id === this.supplierID);
-        if (defaultVendor) {
-          this.advanceTableForm.controls[`responsible${responsibleNumber}Value`].setValue(this.carVendor);
-          this.advanceTableForm.controls[`responsible${responsibleNumber}ID`].setValue(defaultVendor.id);
-        }
-      }
+      this[`filteredOptions${responsibleNumber}`] = this.ensureOptionInList(
+        this.supplierOptions,
+        this.supplierID || recordData?.supplierID,
+        this.carVendor || recordData?.supplierName || recordData?.carVendor
+      );
+      this.setResponsibleValueFromReservation(
+        responsibleNumber,
+        savedVendorId || Number(this.supplierID || recordData?.supplierID || 0),
+        savedVendorId
+          ? recordData?.[`responsible${responsibleNumber}VendorName`]
+          : (this.carVendor || recordData?.supplierName || recordData?.carVendor),
+        this.supplierOptions
+      );
       break;
 
     // ================= EMPLOYEE =================
     case 'employee':
       this[`showAutoComplete${responsibleNumber}`] = true;
       this[`autoCompleteLabel${responsibleNumber}`] = `Select Employee ${responsibleNumber}`;
-      this[`filteredOptions${responsibleNumber}`] = this.employeeOptions;
-
-      if (recordData && recordData[dataSourceEmployeeKey] != 0) {
-        const defaultEmployee = this.employeeOptions.find(e => e.id === recordData[dataSourceEmployeeKey]);
-        if (defaultEmployee) {
-          this.advanceTableForm.controls[`responsible${responsibleNumber}Value`].setValue(defaultEmployee.name);
-          this.advanceTableForm.controls[`responsible${responsibleNumber}ID`].setValue(defaultEmployee.id);
-        }
+      this[`filteredOptions${responsibleNumber}`] = this.employeeOptions || [];
+      // Only prefill when a saved employee exists; otherwise leave autocomplete empty for search.
+      if (savedEmployeeId) {
+        this.setResponsibleValueFromReservation(
+          responsibleNumber,
+          savedEmployeeId,
+          recordData?.[`responsible${responsibleNumber}EmployeeName`],
+          this.employeeOptions
+        );
       }
       break;
 
     // ================= GUEST =================
     case 'guest':
+    case 'passenger':
       this[`showAutoComplete${responsibleNumber}`] = true;
-      this[`autoCompleteLabel${responsibleNumber}`] = `Select Passenger ${responsibleNumber}`;
-      this[`filteredOptions${responsibleNumber}`] = this.passengerOptions;
-
-      if (recordData && recordData[dataSourceCustomerPersonKey] != 0) {
-        const defaultPassenger = this.passengerOptions.find(p => p.id === recordData[dataSourceCustomerPersonKey]);
-        if (defaultPassenger) {
-          this.advanceTableForm.controls[`responsible${responsibleNumber}Value`].setValue(defaultPassenger.name);
-          this.advanceTableForm.controls[`responsible${responsibleNumber}ID`].setValue(defaultPassenger.id);
-        }
-      } else if (this.CustomerPersonID && this.customerPersonName) {
-        const defaultPassenger = this.passengerOptions.find(p => p.id === this.CustomerPersonID);
-        if (defaultPassenger) {
-          this.advanceTableForm.controls[`responsible${responsibleNumber}Value`].setValue(this.customerPersonName);
-          this.advanceTableForm.controls[`responsible${responsibleNumber}ID`].setValue(defaultPassenger.id);
-        }
-      }
+      this[`autoCompleteLabel${responsibleNumber}`] = `Select Guest ${responsibleNumber}`;
+      this[`filteredOptions${responsibleNumber}`] = this.ensureOptionInList(
+        this.passengerOptions,
+        this.CustomerPersonID || recordData?.passengerID || recordData?.customerPersonID,
+        this.customerPersonName || recordData?.customerPersonName
+      );
+      this.setResponsibleValueFromReservation(
+        responsibleNumber,
+        savedGuestId ||
+          Number(
+            this.CustomerPersonID ||
+              recordData?.passengerID ||
+              recordData?.customerPersonID ||
+              0
+          ),
+        savedGuestId
+          ? recordData?.[`responsible${responsibleNumber}CustomerPersonName`]
+          : (this.customerPersonName || recordData?.customerPersonName),
+        this.passengerOptions
+      );
       break;
   }
   this.updateResponsibleLock();
+}
+
+private ensureOptionInList(options: any[], id: any, name: any): any[] {
+  const list = Array.isArray(options) ? [...options] : [];
+  const numericId = Number(id || 0);
+  if (!numericId && !name) {
+    return list;
+  }
+  const exists = list.some(
+    (o) =>
+      (numericId && Number(o.id) === numericId) ||
+      (name &&
+        o.name?.toString().trim().toLowerCase() ===
+          name.toString().trim().toLowerCase())
+  );
+  if (!exists && (numericId || name)) {
+    list.unshift({ id: numericId || 0, name: name || '' });
+  }
+  return list;
+}
+
+private setResponsibleValueFromReservation(
+  responsibleNumber: number,
+  id: any,
+  name: any,
+  options: any[]
+): void {
+  const numericId = Number(id || 0);
+  const fromOptions =
+    (numericId &&
+      (options || []).find((o) => Number(o.id) === numericId)) ||
+    (name &&
+      (options || []).find(
+        (o) =>
+          o.name?.toString().trim().toLowerCase() ===
+          name.toString().trim().toLowerCase()
+      ));
+
+  const finalName = fromOptions?.name || name || '';
+  const finalId = fromOptions?.id || numericId || 0;
+
+  if (finalName || finalId) {
+    this.advanceTableForm.controls[`responsible${responsibleNumber}Value`].setValue(
+      finalName
+    );
+    this.advanceTableForm.controls[`responsible${responsibleNumber}ID`].setValue(
+      finalId
+    );
+  }
+}
+
+private syncReservationResponsibleContext(): void {
+  const row = this.getSelectedIncidenceRow() || this.data?.item || {};
+  this.driverID = this.driverID || row.driverID || this.data?.item?.driverID;
+  this.driverName =
+    this.driverName ||
+    row.driverName ||
+    this.data?.item?.driverName ||
+    this.data?.driverName;
+  this.supplierID =
+    this.supplierID ||
+    row.supplierID ||
+    this.data?.item?.supplierID ||
+    this.data?.item?.inventorySupplierID;
+  this.carVendor =
+    this.carVendor ||
+    row.supplierName ||
+    row.carVendor ||
+    this.data?.item?.carVendor ||
+    this.data?.item?.supplierName;
+  this.CustomerPersonID =
+    this.CustomerPersonID ||
+    row.passengerID ||
+    row.customerPersonID ||
+    this.data?.customerPersonID ||
+    this.data?.item?.passengerID;
+  this.customerPersonName =
+    this.customerPersonName ||
+    row.customerPersonName ||
+    this.data?.customerPersonName ||
+    this.data?.item?.customerPersonName;
+
+  // Resolve names from loaded dropdowns when we only have IDs.
+  if (this.driverID && !this.driverName && this.driverOptions?.length) {
+    this.driverName = this.driverOptions.find(
+      (d) => Number(d.id) === Number(this.driverID)
+    )?.name;
+  }
+  if (this.supplierID && !this.carVendor && this.supplierOptions?.length) {
+    this.carVendor = this.supplierOptions.find(
+      (v) => Number(v.id) === Number(this.supplierID)
+    )?.name;
+  }
+  if (this.CustomerPersonID && !this.customerPersonName && this.passengerOptions?.length) {
+    this.customerPersonName = this.passengerOptions.find(
+      (p) => Number(p.id) === Number(this.CustomerPersonID)
+    )?.name;
+  }
 }
 updateResponsibleLock(): void {
 
@@ -1210,13 +1534,19 @@ InitDebitType(){
   getClosedByEmployee() {
     this._generalService.getEmployeeID(this._generalService.getUserID()).subscribe(
       data => {
-        this.employeeDataSource = data;
-        this.advanceTableForm.controls["closeByEmployeeName"].disable();
-        this.advanceTableForm.controls["closureDate"].disable();
-        this.advanceTableForm.controls["closureTime"].disable();
-        this.advanceTableForm.patchValue({ closeByEmployeeName: this.employeeDataSource[0].firstName + " " + this.employeeDataSource[0].lastName });
-        this.advanceTableForm.patchValue({ closeByEmployeeID: this.employeeDataSource[0].employeeID });
-
+        this.employeeDataSource = Array.isArray(data) ? data : [];
+        if (!this.employeeDataSource.length) {
+          return;
+        }
+        const emp = this.employeeDataSource[0];
+        this.advanceTableForm.patchValue({
+          closeByEmployeeName: `${emp.firstName || ''} ${emp.lastName || ''}`.trim(),
+          closeByEmployeeID: emp.employeeID,
+        });
+        // Keep closure fields editable for create/update resolution.
+        this.advanceTableForm.controls['closeByEmployeeName']?.enable();
+        this.advanceTableForm.controls['closureDate']?.enable();
+        this.advanceTableForm.controls['closureTime']?.enable();
       });
   }
 }

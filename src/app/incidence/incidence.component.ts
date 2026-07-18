@@ -144,76 +144,93 @@ export class IncidenceComponent implements OnInit {
 
   //-------------------------Edit Incidence----------
   editCall(item: any): void {
-    const dialogRef = this.dialog.open(incidenceFormDialogComponent, {
-      width: '90%',
-      height: '90%',
-      disableClose: true,
-      data: {
-        action: 'edit',
-        item: item,
-        reservationID: item.reservationID,
-        dutySlipID: item.dutySlipID,
-        customerName: item.customerName,
-        customerID: item.customerID,
-        registrationNumber: item.registrationNumber,
-        inventoryID: item.inventoryID,
-        driverName: item.driverName,
-        organizationalEntityName: item.organizationalEntityName,
-        customerPersonID: item.passengerDetails?.[0]?.customerPersonID,
-        customerPersonName: item.passengerDetails?.[0]?.customerPersonName,
-        verifyDutyStatusAndCacellationStatus:
-          item.verifyDutyStatusAndCacellationStatus,
-      },
+    // Defer so MatMenu can finish closing before MatDialog opens.
+    setTimeout(() => {
+      const dialogRef = this.dialog.open(incidenceFormDialogComponent, {
+        width: '90%',
+        height: '90%',
+        disableClose: true,
+        data: {
+          action: 'edit',
+          item: item,
+          advanceTable: item,
+          incidenceID: item.incidenceID,
+          reservationID: item.reservationID,
+          dutySlipID: item.dutySlipID,
+          customerName: item.customerName,
+          customerID: item.customerID,
+          registrationNumber: item.registrationNumber,
+          inventoryID: item.inventoryID,
+          driverName: item.driverName,
+          organizationalEntityName: item.organizationalEntityName,
+          customerPersonID:
+            item.passengerID ||
+            item.customerPersonID ||
+            item.passengerDetails?.[0]?.customerPersonID,
+          customerPersonName:
+            item.customerPersonName ||
+            item.customerpersonName ||
+            item.passengerDetails?.[0]?.customerPersonName,
+          verifyDutyStatusAndCacellationStatus:
+            item.verifyDutyStatusAndCacellationStatus,
+        },
+      });
+
+      dialogRef.afterClosed().subscribe((result) => {
+        if (result) {
+          this.loadData();
+        }
+      });
     });
+  }
+  //---------------------Resolution
+ createResolution(row: any): void {
+  // Defer so MatMenu can finish closing; otherwise MatDialog often fails to open.
+  setTimeout(() => {
+    const dialogRef = this.dialog.open(
+      resolutionFormDialogComponent,
+      {
+        width: '90%',
+        height: '90%',
+        disableClose: true,
+        data: {
+          advanceTable: row,
+          // Resolution is always saved via incidenceEdit PUT.
+          action: 'edit',
+          item: {
+            ...row,
+            carVendor: row.carVendor || row.supplierName,
+            supplierName: row.supplierName || row.carVendor,
+            supplierID: row.supplierID || row.inventorySupplierID,
+          },
+          incidenceID: row.incidenceID,
+          reservationID: row.reservationID || this.reservationID,
+          dutySlipID: row.dutySlipID || this.dutySlipID,
+          customerID: row.customerID,
+          customerName: row.customerName,
+          registrationNumber: row.registrationNumber,
+          inventoryID: row.inventoryID,
+          driverID: row.driverID,
+          driverName: row.driverName,
+          supplierID: row.supplierID || row.inventorySupplierID,
+          organizationalEntityName: row.organizationalEntityName,
+          customerPersonID:
+            row.passengerID ||
+            row.customerPersonID ||
+            row.passengerDetails?.[0]?.customerPersonID,
+          customerPersonName:
+            row.customerPersonName ||
+            row.customerpersonName ||
+            row.passengerDetails?.[0]?.customerPersonName,
+        },
+      }
+    );
 
     dialogRef.afterClosed().subscribe((result) => {
       if (result) {
         this.loadData();
       }
     });
-  }
-  //---------------------Resolution
- createResolution(row: any): void {
-
-  const dialogRef = this.dialog.open(
-    resolutionFormDialogComponent,
-    {
-      width: '90%',
-      height: '90%',
-      disableClose: true,
-      data: {
-        advanceTable: this.advanceTable,
-        action: row.resolutionID ? 'edit' : 'add',
-
-        item: row,
-
-        incidenceID: row.incidenceID,
-        reservationID: row.reservationID,
-        dutySlipID: row.dutySlipID,
-
-        customerID: row.customerID,
-        customerName: row.customerName,
-
-        registrationNumber: row.registrationNumber,
-        inventoryID: row.inventoryID,
-
-        driverName: row.driverName,
-        organizationalEntityName:
-          row.organizationalEntityName,
-
-        customerPersonID:
-          row.passengerDetails?.[0]?.customerPersonID,
-
-        customerPersonName:
-          row.passengerDetails?.[0]?.customerPersonName
-      }
-    }
-  );
-
-  dialogRef.afterClosed().subscribe(result => {
-    if (result) {
-      this.loadData();
-    }
   });
 }
   //----------------------------

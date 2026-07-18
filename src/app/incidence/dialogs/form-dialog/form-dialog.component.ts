@@ -20,7 +20,6 @@ import moment from 'moment';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { HttpErrorResponse } from '@angular/common/http';
 import { DepartmentDropDown } from 'src/app/general/departmentDropDown.model';
-import { incidenceFormDialogComponent } from './dialogs/form-dialog/form-dialog.component';
 @Component({
   standalone: false,
     selector: 'app-form-dialog',
@@ -93,10 +92,11 @@ export class incidenceFormDialogComponent {
     public _generalService: GeneralService) 
     {
       console.log(data);
-    this.reservationID = this.data?.item.reservationID;
-    this.dutySlipID = this.data?.dutySlipID;
-    this.incidenceTypeID = this.data?.item.incidenceTypeID;
-    this.issueCategoryID = this.data?.item.issueCategoryID;
+    this.reservationID = this.data?.item?.reservationID || this.data?.reservationID;
+    this.dutySlipID = this.data?.dutySlipID || this.data?.item?.dutySlipID;
+    this.incidenceID = this.data?.incidenceID || this.data?.item?.incidenceID;
+    this.incidenceTypeID = this.data?.item?.incidenceTypeID;
+    this.issueCategoryID = this.data?.item?.issueCategoryID;
     this.customerID = this.data?.item?.customerID;
     this.customerName = this.data?.item?.customerName;
     this.customerType = this.data?.item?.customerType;
@@ -110,8 +110,17 @@ export class incidenceFormDialogComponent {
     this.transferedLocationID = this.data?.item?.transferedLocationID;
     this.supplier= this.data?.item?.carVendor;
     this.isVIP = this.data?.item?.customerPerson?.importance;
-    this.customerPersonName = this.data?.item?.primaryPassenger || this.data?.item?.passengerDetails[0]?.customerPersonName;
-    this.passengerID = this.data?.item?.primaryPassengerID || this.data?.item?.passengerDetails[0]?.customerPersonID;
+    this.customerPersonName =
+      this.data?.item?.primaryPassenger ||
+      this.data?.customerPersonName ||
+      this.data?.item?.passengerDetails?.[0]?.customerPersonName ||
+      this.data?.item?.customerPersonName;
+    this.passengerID =
+      this.data?.item?.primaryPassengerID ||
+      this.data?.customerPersonID ||
+      this.data?.item?.passengerDetails?.[0]?.customerPersonID ||
+      this.data?.item?.passengerID ||
+      this.data?.item?.customerPersonID;
     this.CustomerPersonID = data.CustomerPersonID;
     // Set the defaults
     this.action = data.action;
@@ -353,6 +362,7 @@ export class incidenceFormDialogComponent {
       })
     ).subscribe(data => {
       this.DutySlipList = Array.isArray(data) ? data : [];
+      this.syncDutySlipForSave();
       this.advanceTableForm.controls['dutySlipNumber'].setValidators([
         Validators.required,
         this.supplierTypeValidator(this.DutySlipList)
@@ -387,10 +397,43 @@ export class incidenceFormDialogComponent {
     // );
   }
 
+  private syncDutySlipForSave(): void {
+    if (!this.DutySlipList?.length) {
+      return;
+    }
+
+    const targetId = Number(
+      this.dutySlipID ||
+      this.data?.dutySlipID ||
+      this.data?.item?.dutySlipID ||
+      this.advanceTableForm.get('dutySlipNumber')?.value ||
+      0
+    );
+
+    const matched =
+      this.DutySlipList.find((d) => Number(d.dutySlipID) === targetId) ||
+      this.DutySlipList[0];
+
+    if (!matched) {
+      return;
+    }
+
+    this.dutySlipID = matched.dutySlipID;
+    this.advanceTableForm.patchValue({
+      dutySlipNumber: matched.dutySlipID,
+      dutySlipID: matched.dutySlipID,
+    });
+  }
+
   // Validator function
   supplierTypeValidator(dutySlipList: any[]): any {
     return (control: any) => {
-      const isValid = dutySlipList.some(item => item.dutySlipID === control.value);
+      if (control.value === null || control.value === undefined || control.value === '') {
+        return { invalidDutySlip: true };
+      }
+      const isValid = dutySlipList.some(
+        (item) => Number(item.dutySlipID) === Number(control.value)
+      );
       return isValid ? null : { invalidDutySlip: true };
     };
   }
@@ -550,11 +593,10 @@ departmentNameValidator(DepartmentList: any[]): ValidatorFn {
 
         (
           data => {
-            this.passengerList = data;
-            this.advanceTableForm.controls['customerPersonName'].setValidators([Validators.required,
-            this.passengerValidator(this.passengerList)
-            ]);
-            this.advanceTableForm.controls['customerPersonName'].updateValueAndValidity();
+            this.passengerList = Array.isArray(data) ? data : [];
+            // Passenger picker UI is currently hidden, but validators remain —
+            // resolve a valid passenger so Save is not stuck disabled.
+            this.syncPassengerForSave();
             this.filteredPassengerOptions = this.advanceTableForm.controls['customerPersonName'].valueChanges.pipe(
               startWith(""),
               map(value => this._filterCategory(value || ''))
@@ -562,6 +604,63 @@ departmentNameValidator(DepartmentList: any[]): ValidatorFn {
           }
         );
     }
+  }
+
+  private syncPassengerForSave(): void {
+    if (!this.passengerList?.length) {
+      // No passengers available — do not block Save on a hidden field.
+      this.advanceTableForm.controls['customerPersonName'].clearValidators();
+      this.advanceTableForm.controls['customerPersonName'].updateValueAndValidity();
+      return;
+    }
+
+    const targetId = Number(
+      this.passengerID ||
+      this.CustomerPersonID ||
+      this.customerPersonID ||
+      this.data?.item?.primaryPassengerID ||
+      this.data?.item?.passengerDetails?.[0]?.customerPersonID ||
+      0
+    );
+    const targetName = (
+      this.customerPersonName ||
+      this.data?.item?.primaryPassenger ||
+      this.data?.item?.passengerDetails?.[0]?.customerPersonName ||
+      this.advanceTableForm.get('customerPersonName')?.value ||
+      ''
+    )
+      .toString()
+      .trim()
+      .toLowerCase();
+
+    const matched =
+      this.passengerList.find(
+        (p) =>
+          Number(p.primaryPassengerID || p.customerPersonID || p.passengerID) ===
+          targetId
+      ) ||
+      this.passengerList.find(
+        (p) => p.customerPersonName?.toString().trim().toLowerCase() === targetName
+      ) ||
+      this.passengerList[0];
+
+    if (matched) {
+      this.passengerID =
+        matched.primaryPassengerID ||
+        matched.customerPersonID ||
+        matched.passengerID;
+      this.customerPersonName = matched.customerPersonName;
+      this.advanceTableForm.patchValue({
+        customerPersonName: matched.customerPersonName,
+        passengerID: this.passengerID,
+      });
+    }
+
+    this.advanceTableForm.controls['customerPersonName'].setValidators([
+      Validators.required,
+      this.passengerValidator(this.passengerList),
+    ]);
+    this.advanceTableForm.controls['customerPersonName'].updateValueAndValidity();
   }
 
   private _filterCategory(value: any): any {
@@ -893,47 +992,77 @@ incidenceTypeValidator(list: any[]): ValidatorFn {
   }
 
     public loadData() {
+      // Create flow should not load/patch an existing incidence row.
+      if (this.action === 'add') {
+        return;
+      }
+
+      const targetIncidenceID =
+        this.data?.incidenceID ||
+        this.data?.item?.incidenceID ||
+        this.incidenceID ||
+        this.advanceTable?.incidenceID;
+
       this.advanceTableService.getTableData(this.reservationID, true ,0).subscribe
         (
           data => {
             this.dataSource = data;
-            if(this.dataSource && this.dataSource.length > 0) {
-              this.advanceTableForm.patchValue({ reservationID: this.dataSource[0].reservationID });
-              this.advanceTableForm.patchValue({ incidenceDate
-                : this.dataSource[0].incidenceDate
-              });
-              this.advanceTableForm.patchValue({ dutySlipNumber: this.dataSource[0].dutySlipID });
-              this.advanceTableForm.patchValue({ customerPersonName: this.dataSource[0].customerpersonName });
-              this.advanceTableForm.patchValue({ incidenceTime:this.dataSource[0].incidenceTime });
-              this.advanceTableForm.patchValue({ openedByEmployeeDepartment: this.dataSource[0].openedByEmployeeDepartment});
-              this.advanceTableForm.patchValue({ reportSource: this.dataSource[0].reportSource });
-              this.advanceTableForm.patchValue({ reportedBy: this.dataSource[0].reportedBy });
-              this.advanceTableForm.patchValue({ incidencePlace: this.dataSource[0].incidencePlace });
-              this.advanceTableForm.patchValue({ openDate: this.dataSource[0]?.openDate });
-              this.advanceTableForm.patchValue({ openTime: this.dataSource[0]?.openTime });
-              this.advanceTableForm.patchValue({ reportingDate: this.dataSource[0].reportingDate });
-              this.advanceTableForm.patchValue({ reportingTime: this.dataSource[0].reportingTime });
-              this.advanceTableForm.patchValue({ assignedToEmployeeName: this.dataSource[0].assignedToEmployeeName});
-              this.advanceTableForm.patchValue({ assignedToEmployeeID: this.dataSource[0].assignedToEmployeeID});
-              this.advanceTableForm.patchValue({ assignedToEmployeeDepartment: this.dataSource[0].assignedToEmployeeDepartment });
-              this.advanceTableForm.patchValue({ reporterName: this.dataSource[0].reporterName });
-              this.advanceTableForm.patchValue({ incidenceDetails: this.dataSource[0].incidenceDetails });
-              this.advanceTableForm.patchValue({ incidenceType: this.dataSource[0].incidenceType });
-              this.advanceTableForm.patchValue({ incidenceTypeID: this.dataSource[0].incidenceTypeID });
-              this.advanceTableForm.patchValue({ issueCategoryID: this.dataSource[0].issueCategoryID });
-              this.incidenceTypeID = this.dataSource[0].incidenceTypeID;
-              this.issueCategoryID = this.dataSource[0].issueCategoryID;
-              if (this.incidenceTypeID) {
-                this.initIssueCategory();
-              } else {
-                this.advanceTableForm.patchValue({ issueCategory: this.dataSource[0].issueCategory });
-              }
-              this.advanceTableForm.patchValue({ passengerID: this.dataSource[0].passengerID });
-              this.advanceTableForm.patchValue({ reportEvidenceDoc: this.dataSource[0].reportEvidenceDoc });
-              this.advanceTableForm.patchValue({ type: this.dataSource[0].type });  
-              this.advanceTableForm.patchValue({ department: this.dataSource[0].department });              
-              this.ImagePath = this.dataSource[0].reportEvidenceDoc;
-            }          
+            if (!this.dataSource || this.dataSource.length === 0) {
+              return;
+            }
+
+            const selected =
+              this.dataSource.find(
+                (row) => Number(row.incidenceID) === Number(targetIncidenceID)
+              ) || null;
+
+            if (!selected) {
+              this.showNotification(
+                'snackbar-danger',
+                'Selected incidence was not found for this reservation.',
+                'bottom',
+                'center'
+              );
+              return;
+            }
+
+            this.incidenceID = selected.incidenceID;
+            this.advanceTableForm.patchValue({ reservationID: selected.reservationID });
+            this.advanceTableForm.patchValue({ incidenceID: selected.incidenceID });
+            this.advanceTableForm.patchValue({
+              incidenceDate: selected.incidenceDate
+            });
+            this.advanceTableForm.patchValue({ dutySlipNumber: selected.dutySlipID });
+            this.advanceTableForm.patchValue({ customerPersonName: selected.customerpersonName || selected.customerPersonName });
+            this.advanceTableForm.patchValue({ incidenceTime: selected.incidenceTime });
+            this.advanceTableForm.patchValue({ openedByEmployeeDepartment: selected.openedByEmployeeDepartment});
+            this.advanceTableForm.patchValue({ reportSource: selected.reportSource });
+            this.advanceTableForm.patchValue({ reportedBy: selected.reportedBy });
+            this.advanceTableForm.patchValue({ incidencePlace: selected.incidencePlace });
+            this.advanceTableForm.patchValue({ openDate: selected?.openDate });
+            this.advanceTableForm.patchValue({ openTime: selected?.openTime });
+            this.advanceTableForm.patchValue({ reportingDate: selected.reportingDate });
+            this.advanceTableForm.patchValue({ reportingTime: selected.reportingTime });
+            this.advanceTableForm.patchValue({ assignedToEmployeeName: selected.assignedToEmployeeName});
+            this.advanceTableForm.patchValue({ assignedToEmployeeID: selected.assignedToEmployeeID});
+            this.advanceTableForm.patchValue({ assignedToEmployeeDepartment: selected.assignedToEmployeeDepartment });
+            this.advanceTableForm.patchValue({ reporterName: selected.reporterName });
+            this.advanceTableForm.patchValue({ incidenceDetails: selected.incidenceDetails });
+            this.advanceTableForm.patchValue({ incidenceType: selected.incidenceType });
+            this.advanceTableForm.patchValue({ incidenceTypeID: selected.incidenceTypeID });
+            this.advanceTableForm.patchValue({ issueCategoryID: selected.issueCategoryID });
+            this.incidenceTypeID = selected.incidenceTypeID;
+            this.issueCategoryID = selected.issueCategoryID;
+            if (this.incidenceTypeID) {
+              this.initIssueCategory();
+            } else {
+              this.advanceTableForm.patchValue({ issueCategory: selected.issueCategory });
+            }
+            this.advanceTableForm.patchValue({ passengerID: selected.passengerID });
+            this.advanceTableForm.patchValue({ reportEvidenceDoc: selected.reportEvidenceDoc });
+            this.advanceTableForm.patchValue({ type: selected.type });  
+            this.advanceTableForm.patchValue({ department: selected.department });              
+            this.ImagePath = selected.reportEvidenceDoc;
           },
           (error: HttpErrorResponse) => { this.dataSource = null; }
         );

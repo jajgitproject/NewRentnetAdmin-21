@@ -99,9 +99,8 @@ import { CarMovingStatusByAppComponent } from '../carMovingStatusByApp/carMoving
 import { AppDataMissingStatusComponent } from '../appDataMissingStatus/appDataMissingStatus.component';
 import { AppDataMissingStatusModel } from '../appDataMissingStatus/appDataMissingStatus.model';
 import { AppDataMissingStatusService } from '../appDataMissingStatus/appDataMissingStatus.service';
-import { incidenceFormDialogComponent } from '../incidence/dialogs/form-dialog/form-dialog.component';
+import { IncidenceListDialogComponent } from '../incidence/dialogs/incidence-list-dialog/incidence-list-dialog.component';
 import { IncidenceService } from '../incidence/incidence.service';
-import { resolutionFormDialogComponent } from '../resolution/dialogs/form-dialog/form-dialog.component';
 import { ResolutionService } from '../resolution/resolution.service';
 import { DriverOfficialIdentityNumberDD } from '../general/driverOfficialIdentityNumberDD.model';
 import Swal from 'sweetalert2';
@@ -254,8 +253,6 @@ export class ControlPanelDesignComponent implements OnInit {
   locationBeforeTwoMinutesLongitude: string;
   locationBeforeTwoMinutesAddress: any;
   dutySlipID: number;
-  // incidenceID: any;
-  incidenceID: number  
   @Output() newDataAddedEvent = new EventEmitter<boolean>();
   @Input() newDataAddedEvents = new EventEmitter<boolean>();
 
@@ -4206,72 +4203,44 @@ getLifeCycleDisplay(status: any): { label: string; color: string } {
   }
 
   incidence(item: any): void {
-    if (this.incidenceID !== undefined && (!item.incidenceID || item.incidenceID === 0)) { 
-      item.incidenceID = this.incidenceID;
-    } else {
-      this.incidenceID = item.incidenceID;
-    }
-    let dialogRef = this.dialog.open(incidenceFormDialogComponent, {
-      width: '60%',
+    this.openIncidenceListDialog(item, 'incidence');
+  }
+
+  incidenceOne(item: any): void {
+    const encryptedReservationID = encodeURIComponent(
+      this._generalService.encrypt(item.reservationID.toString())
+    );
+    const url = this.route.serializeUrl(
+      this.route.createUrlTree(['/incidence'], {
+        queryParams: {
+          reservationID: encryptedReservationID,
+        },
+      })
+    );
+    const closingWin = window.open(this._generalService.FormURL + url, '_blank');
+    closingWin?.focus();
+  }
+
+  openIncidenceListDialog(item: any, focusAction: 'incidence' | 'resolution'): void {
+    const dialogRef = this.dialog.open(IncidenceListDialogComponent, {
+      width: '90%',
+      maxWidth: '1100px',
       data: {
-        advanceTable: this.advanceTable,
-        action: item.incidenceID === 0 ? 'add' : 'edit',
         item: item,
-        reservationID: item.reservationID ,
-        customerName: item.customerName,
-        customerID: item.customerID,
-        registrationNumber: item.registrationNumber,
-        inventoryID: item.inventoryID,
-        customerPersonID: item.customerPersonID,
-        driverName: item.driverName,
-        organizationalEntityName: item.organizationalEntityName,
-        dutySlipID: item.dutySlipID,
-        
+        reservationID: item.reservationID,
+        focusAction: focusAction,
       }
     });
 
     dialogRef.afterClosed().subscribe(result => {
-      if(result) {
-        this.incidenceID = result.incidenceID;
+      if (result) {
         this.emitEventToChild();
-        // this.ngOnInit();
       }
     });
-    
   }
 
   resolution(item: any): void {
-    if(this.incidenceID === undefined && item.incidenceID != 0) {
-      this.incidenceID = item.incidenceID;
-    }
-    let dialogRef = this.dialog?.open(resolutionFormDialogComponent, {
-      width: '80%',
-      height: '80%',
-      data: {
-        advanceTable: this.advanceTable,
-        action:'edit',
-        item: item,
-        reservationID: item.reservationID ,
-        customerName: item.customerName,
-        customerID: item.customerID,
-        registrationNumber: item.registrationNumber,
-        inventoryID: item.inventoryID,
-        // customerPersonID: item.customerPersonID,
-        driverName: item.driverName,
-        organizationalEntityName: item.organizationalEntityName,
-        dutySlipID: item.dutySlipID,
-        incidenceID: this.incidenceID,
-        customerPersonID: item.passengerDetails[0]?.customerPersonID,
-        customerPersonName: item.passengerDetails[0]?.customerPersonName
-
-      }
-    });
-  
-    dialogRef.afterClosed().subscribe(result => {
-      if (result) {
-        // this.incidenceID = result.incidenceID;
-      }
-    });
+    this.openIncidenceListDialog(item, 'resolution');
   }
   
   openClosingScreen(item: any) {

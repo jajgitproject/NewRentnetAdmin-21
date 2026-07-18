@@ -92,9 +92,8 @@ import { DutyPostFormDialogComponent } from '../dutyPostPickUPCall/dialogs/form-
 import { DutyPostPickUPCallComponent } from '../dutyPostPickUPCall/dutyPostPickUPCall.component';
 import { NextDayInstructionDetailsComponent } from '../NextDayInstructionDetails/NextDayInstructionDetails.component';
 import { FormDialogComponent as DutySlipImageDialog } from '../dutySlipImage/dialogs/form-dialog/form-dialog.component';
-import { incidenceFormDialogComponent } from '../incidence/dialogs/form-dialog/form-dialog.component';
+import { IncidenceListDialogComponent } from '../incidence/dialogs/incidence-list-dialog/incidence-list-dialog.component';
 import { DutySlipImageDetailsShowComponent } from '../dutySlipImageDetailsShow/dutySlipImageDetailsShow.component';
-import { resolutionFormDialogComponent } from '../resolution/dialogs/form-dialog/form-dialog.component';
 import { FormDialogSendSmsWhatsappMailComponent } from '../sendSmsWhatsappMail/dialogs/form-dialog/form-dialog.component';
 import { EmailInfoComponent } from '../EmailInfo/EmailInfo.component';
 import { FormDialogComponent as DutySlipQualityCheckedByExecutive } from '../dutySlipQualityCheckedByExecutive/dialogs/form-dialog/form-dialog.component';
@@ -178,7 +177,6 @@ export class ControlPanelDialogeComponent {
   locationBeforeTwoMinutesLongitude: string;
   locationBeforeTwoMinutesAddress: any;
 
-  incidenceID: number
   @Output() newDataAddedEvent = new EventEmitter<boolean>();
   @Input() newDataAddedEvents = new EventEmitter<boolean>();
 
@@ -2397,38 +2395,7 @@ export class ControlPanelDialogeComponent {
         );
       }
       incidence(item: any): void {
-          if (this.incidenceID !== undefined && (!item.incidenceID || item.incidenceID === 0)) { 
-            item.incidenceID = this.incidenceID;
-          } else {
-            this.incidenceID = item.incidenceID;
-          }
-          let dialogRef = this.dialog.open(incidenceFormDialogComponent, {
-            width: '60%',
-            data: {
-              advanceTable: this.advanceTable,
-              action: item.incidenceID === 0 ? 'add' : 'edit',
-              item: item,
-              reservationID: item.reservationID ,
-              customerName: item.customerName,
-              customerID: item.customerID,
-              registrationNumber: item.registrationNumber,
-              inventoryID: item.inventoryID,
-              customerPersonID: item.customerPersonID,
-              driverName: item.driverName,
-              organizationalEntityName: item.organizationalEntityName,
-              dutySlipID: item.dutySlipID,
-              //verifyDutyStatusAndCacellationStatus:this.verifyDutyStatusAndCacellationStatus
-            }
-          });
-      
-          dialogRef.afterClosed().subscribe(result => {
-            if(result) {
-              this.incidenceID = result.incidenceID;
-              this.emitEventToChild();
-              // this.ngOnInit();
-            }
-          });
-          
+          this.openIncidenceListDialog(item, 'incidence');
         }
 
 incidenceOne(item: any) {
@@ -2451,39 +2418,27 @@ incidenceOne(item: any) {
         emitEventToChild() {
     this.eventsSubject.next(true);
   }
-      
-        resolution(item: any): void {
-          if(this.incidenceID === undefined && item.incidenceID != 0) {
-            this.incidenceID = item.incidenceID;
-          }
-          let dialogRef = this.dialog?.open(resolutionFormDialogComponent, {
-            width: '80%',
-            height: '80%',
+
+        openIncidenceListDialog(item: any, focusAction: 'incidence' | 'resolution'): void {
+          const dialogRef = this.dialog.open(IncidenceListDialogComponent, {
+            width: '90%',
+            maxWidth: '1100px',
             data: {
-              advanceTable: this.advanceTable,
-              action:'edit',
               item: item,
-              reservationID: item.reservationID ,
-              customerName: item.customerName,
-              customerID: item.customerID,
-              registrationNumber: item.registrationNumber,
-              inventoryID: item.inventoryID,
-              // customerPersonID: item.customerPersonID,
-              driverName: item.driverName,
-              organizationalEntityName: item.organizationalEntityName,
-              dutySlipID: item.dutySlipID,
-              incidenceID: this.incidenceID,
-              customerPersonID: item.passengerDetails?.[0]?.customerPersonID,
-              customerPersonName: item.passengerDetails?.[0]?.customerPersonName,
-              //verifyDutyStatusAndCacellationStatus:this.verifyDutyStatusAndCacellationStatus
+              reservationID: item.reservationID,
+              focusAction: focusAction,
             }
           });
-        
+
           dialogRef.afterClosed().subscribe(result => {
             if (result) {
-              // this.incidenceID = result.incidenceID;
+              this.emitEventToChild();
             }
           });
+        }
+      
+        resolution(item: any): void {
+          this.openIncidenceListDialog(item, 'resolution');
         }
  FeedBack(reservationId,cutomerPersonId,allotmentID, primaryPassengerID,dutySlipID,inventoryID,driverID,registrationNumber,driverName,reservationPassengerID,feedbackRemark, item)
   {
