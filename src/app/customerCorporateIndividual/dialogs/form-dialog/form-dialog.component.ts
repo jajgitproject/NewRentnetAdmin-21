@@ -8,7 +8,7 @@ import { GeneralService } from '../../../general/general.service';
 import { CustomerCorporateIndividualService } from '../../customerCorporateIndividual.service';
 import { CorporateCompanyModel, CustomerCorporateIndividualModel, CustomerPersonModel } from '../../customerCorporateIndividual.model';
 import { CustomerTypeDropDown } from 'src/app/customerType/customerTypeDropDown.model';
-import { Observable } from 'rxjs';
+import { Observable, of } from 'rxjs';
 import { map, startWith } from 'rxjs/operators';
 import { SalutationDropDown } from 'src/app/salutation/salutationDropDown.model';
 import { OrganizationalEntityDropDown } from 'src/app/organizationalEntityMessage/organizationalEntityDropDown.model';
@@ -256,38 +256,76 @@ export class FormDialogComponent
     corporateCompanyValidator(CorporateCompanyList: any[]): ValidatorFn {
       return (control: AbstractControl): ValidationErrors | null => {
         const value = control.value?.toLowerCase();
-        const match = CorporateCompanyList.some(group => group.corporateCompany.toLowerCase() === value);
+        if (!value) {
+          return { corporateCompanyInvalid: true };
+        }
+        const match = (CorporateCompanyList || []).some(
+          group => (group.corporateCompany || '').toLowerCase() === value
+        );
         return match ? null : { corporateCompanyInvalid: true };
       };
     }
     InitCorporateCompany()
     {
-      this.customerCorporateIndividualService.getCustomer().subscribe(
-      data=>
-      {
-        this.CorporateCompanyList=data;
-        this.advanceTableForm.controls['corporateCompany'].setValidators([Validators.required,this.corporateCompanyValidator(this.CorporateCompanyList)]);
-        this.advanceTableForm.controls['corporateCompany'].updateValueAndValidity();
+      this.CorporateCompanyList = [];
+      this.filteredCorporateCompanyOptions = of([]);
+      if (this.action === 'edit' && this.advanceTable?.corporateCompanyID) {
+        this.CorporateCompanyList = [{
+          corporateCompanyID: this.advanceTable.corporateCompanyID,
+          corporateCompany: this.advanceTable.corporateCompany
+        }];
+        this.corporateCompanyID = this.advanceTable.corporateCompanyID;
+        this.InitCustomerPerson(this.corporateCompanyID);
+      }
+      this.advanceTableForm.controls['corporateCompany'].setValidators([
+        Validators.required,
+        this.corporateCompanyValidator(this.CorporateCompanyList)
+      ]);
+      this.advanceTableForm.controls['corporateCompany'].updateValueAndValidity({ emitEvent: false });
+    }
+    onKeyUpCorporateCompany()
+    {
+      const Prefix = (this.advanceTableForm.get('corporateCompany')?.value || '').toString().trim();
+      if (Prefix.length < 3) {
+        this.CorporateCompanyList = [];
+        this.filteredCorporateCompanyOptions = of([]);
+        this.advanceTableForm.controls['corporateCompany'].setValidators([
+          Validators.required,
+          this.corporateCompanyValidator(this.CorporateCompanyList)
+        ]);
+        this.advanceTableForm.controls['corporateCompany'].updateValueAndValidity({ emitEvent: false });
+        return;
+      }
+      this._generalService.getCustomerPrefix(Prefix).subscribe(data => {
+        this.CorporateCompanyList = (data || []).map(c => ({
+          corporateCompanyID: c.customerID,
+          corporateCompany: c.customerName
+        }));
+        this.advanceTableForm.controls['corporateCompany'].setValidators([
+          Validators.required,
+          this.corporateCompanyValidator(this.CorporateCompanyList)
+        ]);
+        this.advanceTableForm.controls['corporateCompany'].updateValueAndValidity({ emitEvent: false });
         this.filteredCorporateCompanyOptions = this.advanceTableForm.controls['corporateCompany'].valueChanges.pipe(
-          startWith(""),
+          startWith(Prefix),
           map(value => this._filterCorporateCompany(value || ''))
-        ) 
-      });;
-    }  
-    private _filterCorporateCompany(value: string): any {
-      const filterValue = value.toLowerCase();
-      return this.CorporateCompanyList?.filter(
-        data => 
-        {
-          return data.corporateCompany.toLowerCase().indexOf(filterValue)===0;
-        }
+        );
+      });
+    }
+    private _filterCorporateCompany(value: string): CorporateCompanyModel[] {
+      const filterValue = (value || '').toString().toLowerCase();
+      if (filterValue.length < 3) {
+        return [];
+      }
+      return (this.CorporateCompanyList || []).filter(data =>
+        (data.corporateCompany || '').toLowerCase().includes(filterValue)
       );
-    }    
+    }
     OnCorporateCompany(selectedCorporateCompany: string)
     {
       const CorporateCompany = this.CorporateCompanyList.find(
         data => data.corporateCompany === selectedCorporateCompany);
-      if (selectedCorporateCompany) 
+      if (selectedCorporateCompany && CorporateCompany)
       {
         this.getCustomerCompanyID(CorporateCompany.corporateCompanyID);
       }
@@ -295,8 +333,70 @@ export class FormDialogComponent
     getCustomerCompanyID(corporateCompanyID: any) 
     {
       this.corporateCompanyID = corporateCompanyID;
-      this.advanceTableForm.patchValue({corporateCompanyID:this.corporateCompanyID});
+      this.advanceTableForm.patchValue({
+        corporateCompanyID: this.corporateCompanyID,
+        roundOffInvoiceValue: true,
+        isPostPickUpCallAllowed: true
+      });
       this.InitCustomerPerson(this.corporateCompanyID);
+      this.applyCorporateCompanyDefaults(this.corporateCompanyID);
+    }
+
+    applyCorporateCompanyDefaults(corporateCompanyID: number)
+    {
+      if (!corporateCompanyID) {
+        return;
+      }
+      this.customerCorporateIndividualService.getCorporateCompanyByID(corporateCompanyID).subscribe(customer => {
+        if (customer?.serviceLocationID) {
+          this.locationID = customer.serviceLocationID;
+          this.advanceTableForm.patchValue({
+            locationID: customer.serviceLocationID,
+            location: customer.organizationalEntityName || customer.serviceLocation || ''
+          });
+        }
+      });
+
+      this._generalService.GetCustomerKam(corporateCompanyID).subscribe(kams => {
+        if (kams?.length) {
+          const kam = kams[0];
+          this.employeeID = kam.kamID;
+          this.advanceTableForm.patchValue({
+            employeeID: kam.kamID,
+            employeeName: `${kam.firstName || ''} ${kam.lastName || ''}`.trim()
+          });
+          this.customerCorporateIndividualService.getKAMCity(kam.kamID).subscribe(cities => {
+            if (cities?.length) {
+              this.KAMCityList = cities;
+              this.customerKAMCityID = cities[0].geoPointID;
+              this.advanceTableForm.patchValue({
+                customerKAMCityID: cities[0].geoPointID,
+                customerKAMCity: cities[0].geoPointName
+              });
+              this.advanceTableForm.controls['customerKAMCity'].setValidators([
+                Validators.required,
+                this.kamCityNameValidator(this.KAMCityList)
+              ]);
+              this.advanceTableForm.controls['customerKAMCity'].updateValueAndValidity({ emitEvent: false });
+              this.filteredKAMCityOptions = this.advanceTableForm.controls['customerKAMCity'].valueChanges.pipe(
+                startWith(cities[0].geoPointName || ''),
+                map(value => this._filterKAMCity(value || ''))
+              );
+            }
+          });
+        }
+      });
+
+      this._generalService.GetSalesManager(corporateCompanyID).subscribe(managers => {
+        if (managers?.length) {
+          const manager = managers[0];
+          this.salesManagerID = manager.salesExecutiveID;
+          this.advanceTableForm.patchValue({
+            salesManagerID: manager.salesExecutiveID,
+            salesManagerName: `${manager.firstName || ''} ${manager.lastName || ''}`.trim()
+          });
+        }
+      });
     }
 
 
@@ -347,6 +447,38 @@ export class FormDialogComponent
       this.GetCustomerCorporateIndividualData(customerPersonID);
     }
 
+    private buildEInvoiceAddress(
+      address: string,
+      city: string,
+      state: string,
+      country: string,
+      pin: string
+    ): string {
+      const clean = (v: string) => (v || '').toString().trim();
+      const addressPart = clean(address);
+      const cityPart = clean(city);
+      const statePart = clean(state);
+      const countryPart = clean(country);
+      const pinPart = clean(pin);
+      const joinParts = (addr: string) =>
+        [addr, cityPart, statePart, countryPart, pinPart].filter(Boolean).join(', ');
+
+      const combined = joinParts(addressPart);
+      if (!combined) {
+        return '';
+      }
+      if (combined.length < 10) {
+        return combined;
+      }
+      if (combined.length < 100) {
+        return combined;
+      }
+
+      const suffixParts = [cityPart, statePart, countryPart, pinPart].filter(Boolean);
+      const suffix = suffixParts.length ? ', ' + suffixParts.join(', ') : '';
+      const maxAddressLen = Math.max(0, 99 - suffix.length);
+      return (addressPart.substring(0, maxAddressLen) + suffix).substring(0, 99);
+    }
 
     public GetCustomerCorporateIndividualData(customerPersonID) 
     {
@@ -355,23 +487,60 @@ export class FormDialogComponent
         data =>   
         {
           this.dataSource = data;
-          this.advanceTableForm.patchValue({salutationID:this.dataSource.salutationID});
-          this.advanceTableForm.patchValue({salutation:this.dataSource.salutation});
-          this.advanceTableForm.patchValue({gender:this.dataSource.gender});
-          this.advanceTableForm.patchValue({importance:this.dataSource.importance});
-          this.advanceTableForm.patchValue({primaryMobile:this.dataSource.primaryMobile});
-          this.advanceTableForm.patchValue({primaryEmail:this.dataSource.primaryEmail});
-          this.advanceTableForm.patchValue({billingEmail:this.dataSource.billingEmail});
-          this.advanceTableForm.patchValue({billingAddress:this.dataSource.billingAddress});
-          this.advanceTableForm.patchValue({billingStateID:this.dataSource.billingStateID});
-          this.advanceTableForm.patchValue({billingStateName:this.dataSource.billingStateName});
-          this.advanceTableForm.patchValue({billingCityID:this.dataSource.billingCityID});
-          this.advanceTableForm.patchValue({billingCityName:this.dataSource.billingCityName});
-          this.advanceTableForm.patchValue({billingPin:this.dataSource.billingPin});
-          this.advanceTableForm.patchValue({customerDesignationID:this.dataSource.customerDesignationID});
-          this.advanceTableForm.patchValue({customerDepartmentID:this.dataSource.customerDepartmentID});
-          this.advanceTableForm.patchValue({countryForISDCodeID:this.dataSource.countryForISDCodeID});
-          this.advanceTableForm.patchValue({maskMobileNumber:this.dataSource.maskMobileNumber})
+          const personName = (this.dataSource?.customerPersonName
+            || (this.advanceTableForm.get('customerPersonName')?.value || '').toString().split('##')[0]
+            || '').toString().trim();
+          const billingAddress = this.dataSource?.billingAddress || '';
+          const billingCityName = this.dataSource?.billingCityName || '';
+          const billingStateName = this.dataSource?.billingStateName || '';
+          const countryName = this.dataSource?.countryName || '';
+          const billingPin = this.dataSource?.billingPin || '';
+
+          this.advanceTableForm.patchValue({
+            salutationID: this.dataSource.salutationID,
+            salutation: this.dataSource.salutation,
+            gender: this.dataSource.gender,
+            importance: this.dataSource.importance,
+            primaryMobile: this.dataSource.primaryMobile,
+            primaryEmail: this.dataSource.primaryEmail,
+            billingEmail: this.dataSource.billingEmail,
+            billingName: personName,
+            billingAddress: billingAddress,
+            billingStateID: this.dataSource.billingStateID,
+            billingStateName: billingStateName,
+            billingCityID: this.dataSource.billingCityID,
+            billingCityName: billingCityName,
+            billingPin: billingPin,
+            eInvoiceAddress: this.buildEInvoiceAddress(
+              billingAddress,
+              billingCityName,
+              billingStateName,
+              countryName,
+              billingPin
+            ),
+            customerDesignationID: this.dataSource.customerDesignationID,
+            customerDepartmentID: this.dataSource.customerDepartmentID,
+            countryForISDCodeID: this.dataSource.countryForISDCodeID,
+            maskMobileNumber: this.dataSource.maskMobileNumber
+          });
+
+          if (this.dataSource.billingStateID) {
+            this.billingStateID = this.dataSource.billingStateID;
+            this.OnStateChangeGetCity();
+          }
+
+          // Ensure corporate company default location is on the form (user may change later).
+          if (this.corporateCompanyID) {
+            this.customerCorporateIndividualService.getCorporateCompanyByID(this.corporateCompanyID).subscribe(customer => {
+              if (customer?.serviceLocationID) {
+                this.locationID = customer.serviceLocationID;
+                this.advanceTableForm.patchValue({
+                  locationID: customer.serviceLocationID,
+                  location: customer.organizationalEntityName || customer.serviceLocation || ''
+                });
+              }
+            });
+          }
         },
         (error: HttpErrorResponse) => { this.dataSource = null;}
       );

@@ -77,6 +77,11 @@ export class CustomerCorporateIndividualService
     return this.httpClient.get<CorporateCompanyModel[]>(this.API_URL + '/' + "DropDownForCustomer");
   }
 
+  getCorporateCompanyByID(corporateCompanyID: number): Observable<any>
+  {
+    return this.httpClient.get<any>(this.generalService.BaseURL + 'customer/' + corporateCompanyID);
+  }
+
   getCustomerPerson(CorporateCompanyID:number): Observable<CustomerPersonModel[]> 
   {
     return this.httpClient.get<CustomerPersonModel[]>(this.API_URL + '/' + "DropDownForCustomerPerson" + '/'+ CorporateCompanyID);
