@@ -5,7 +5,6 @@ import { MatDialog } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { MAT_DATE_LOCALE } from '@angular/material/core';
 import moment from 'moment';
-import { forkJoin } from 'rxjs';
 import { AuthService } from '../core/service/auth.service';
 import { FinanceDashboardService } from './financeDashboard.service';
 import { FinanceDashboardDrilldownDialogComponent } from './financeDashboard-drilldown-dialog.component';
@@ -27,44 +26,65 @@ export class FinanceDashboardComponent implements OnInit {
   filterDateFrom = new FormControl<Date>(this.defaultFilterDate());
   filterDateTo = new FormControl<Date>(this.defaultFilterDate());
   dataFromLaunchDate = new FormControl<boolean>(false);
-  seriesFilter = new FormControl<string | null>(null);
-  invoiceTypeFilter = new FormControl<string | null>(null);
   documentTypeFilter = new FormControl<'Invoice' | 'CreditNote'>('Invoice');
   // Series Jump scope: false (default) = gaps checked against all invoices (ActivationStatus ignored),
   // true = only ActivationStatus = 1 invoices are considered.
   seriesJumpActiveOnly = new FormControl<boolean>(false);
 
-  filterOptions: any = { series: [], invoiceTypes: [] };
-
   summary: any = {};
   invoiceRows: any[] = [];
   creditNoteRows: any[] = [];
 
-  // Wrong Inv Type placed early (after Total) so it is always visible without scrolling.
+  // Wrong Inv Type sits after Multiple Duty, before Duplicate.
   invoiceTableColumns = [
-    'seriesName', 'minNumber', 'maxNumber', 'totalDocuments',
-    'wrongInvoiceTypeCount',
+    'seriesName', 'totalDocuments',
     'generalCount', 'singleDutyCount', 'multipleDutyCount',
+    'wrongInvoiceTypeCount',
     'duplicateCount', 'seriesJumpCount', 'dateViolationCount',
     'nullPrefixCount', 'amountMismatchCount', 'stateGstMismatchCount',
     'missingCustomerGstCount', 'taxMismatchCount', 'invoiceCalculationMismatchCount',
   ];
 
   creditNoteTableColumns = [
-    'seriesName', 'minNumber', 'maxNumber', 'totalDocuments',
+    'seriesName', 'totalDocuments',
     'duplicateCount', 'seriesJumpCount', 'dateViolationCount',
     'nullPrefixCount', 'amountMismatchCount', 'stateGstMismatchCount',
     'missingCustomerGstCount', 'taxMismatchCount',
+    'printGstSourceDriftCount', 'cnTaxProfileMismatchCount', 'cnAmountCeilingCount',
+    'multiCreditNoteCount', 'orphanInvoiceLinkCount', 'cnIrnConsistencyCount',
+    'percentageAmountMismatchCount',
   ];
 
-  invoiceKpiCards = [
+  invoiceKpiRow1 = [
     { key: 'totalInvoices', label: 'Total Invoices', validationCode: 'TotalDocuments', docType: 'Invoice', format: 'number', accent: 'blue', icon: 'receipt_long' },
-    { key: 'invoicesWithErrors', label: 'Invoices with Errors', validationCode: 'InvoicesWithErrors', docType: 'Invoice', format: 'number', accent: 'coral', icon: 'error_outline' },
+    { key: 'invoiceRevenueExGst', label: 'Invoice Revenue (ex-GST)', validationCode: null, docType: 'Invoice', format: 'currency', accent: 'teal', icon: 'payments' },
+    { key: 'totalGst', label: 'Total GST', validationCode: null, docType: 'Invoice', format: 'currency', accent: 'amber', icon: 'account_balance' },
+    { key: 'invoiceRevenueIncGst', label: 'Invoice Revenue (inc-GST)', validationCode: null, docType: 'Invoice', format: 'currency', accent: 'blue', icon: 'currency_rupee' },
   ];
+
+  invoiceKpiRow2 = [
+    { key: 'invoicesWithErrors', label: 'Invoices with Errors', validationCode: 'InvoicesWithErrors', docType: 'Invoice', format: 'number', accent: 'coral', icon: 'error_outline' },
+    { key: 'totalDuplicateInvoices', label: 'Total Duplicate Invoices', validationCode: 'DuplicateNumbers', docType: 'Invoice', format: 'number', accent: 'coral', icon: 'content_copy' },
+    { key: 'totalSeriesJumps', label: 'Total Invoice Series Jumps', validationCode: 'SeriesJump', docType: 'Invoice', format: 'number', accent: 'amber', icon: 'trending_flat' },
+    { key: 'invoicesWithIrn', label: 'Invoices with IRN', validationCode: 'InvoicesWithIrn', docType: 'Invoice', format: 'number', accent: 'teal', icon: 'verified' },
+    { key: 'invoicesWithoutIrn', label: 'Invoices without IRN', validationCode: 'InvoicesWithoutIrn', docType: 'Invoice', format: 'number', accent: 'amber', icon: 'unpublished' },
+  ];
+
+  invoiceKpiRow3 = [
+    { key: 'unbilledDuties', label: 'Unbilled Duties', validationCode: null, docType: 'Invoice', format: 'number', accent: 'coral', icon: 'assignment_late' },
+    { key: 'lowestDutySlipUnbilled', label: 'Lowest Duty Slip Unbilled', validationCode: null, docType: 'Invoice', format: 'lowestUnbilled', accent: 'amber', icon: 'event_busy' },
+  ];
+
+  get invoiceKpiCards(): any[] {
+    return [...this.invoiceKpiRow1, ...this.invoiceKpiRow2, ...this.invoiceKpiRow3];
+  }
 
   creditNoteKpiCards = [
     { key: 'totalCreditNotes', label: 'Total Credit Notes', validationCode: 'TotalDocuments', docType: 'CreditNote', format: 'number', accent: 'teal', icon: 'note_add' },
+    { key: 'creditNoteAmount', label: 'CN Amount (gross)', validationCode: null, docType: 'CreditNote', format: 'currency', accent: 'blue', icon: 'payments' },
+    { key: 'creditNoteGst', label: 'CN GST', validationCode: null, docType: 'CreditNote', format: 'currency', accent: 'amber', icon: 'account_balance' },
     { key: 'creditNotesWithErrors', label: 'Credit Notes with Errors', validationCode: 'CreditNotesWithErrors', docType: 'CreditNote', format: 'number', accent: 'amber', icon: 'report_problem' },
+    { key: 'pendingCreditNotes', label: 'Pending Credit Notes', validationCode: 'PendingCreditNotes', docType: 'CreditNote', format: 'number', accent: 'coral', icon: 'hourglass_empty' },
   ];
 
   get activeKpiCards(): any[] {
@@ -80,6 +100,19 @@ export class FinanceDashboardComponent implements OnInit {
       creditNotesWithErrors: summary.creditNotesWithErrors ?? summary.CreditNotesWithErrors,
       totalDuplicateInvoices: summary.totalDuplicateInvoices ?? summary.TotalDuplicateInvoices,
       totalSeriesJumps: summary.totalSeriesJumps ?? summary.TotalSeriesJumps,
+      invoiceRevenueExGst: summary.invoiceRevenueExGst ?? summary.InvoiceRevenueExGst ?? summary.invoiceAmount ?? summary.InvoiceAmount,
+      invoiceRevenueIncGst: summary.invoiceRevenueIncGst ?? summary.InvoiceRevenueIncGst,
+      totalGst: summary.totalGst ?? summary.TotalGst,
+      creditNoteAmount: summary.creditNoteAmount ?? summary.CreditNoteAmount,
+      creditNoteGst: summary.creditNoteGst ?? summary.CreditNoteGst,
+      pendingCreditNotes: summary.pendingCreditNotes ?? summary.PendingCreditNotes,
+      invoicesWithIrn: summary.invoicesWithIrn ?? summary.InvoicesWithIrn,
+      invoicesWithoutIrn: summary.invoicesWithoutIrn ?? summary.InvoicesWithoutIrn,
+      unbilledDuties: summary.unbilledDuties ?? summary.UnbilledDuties,
+      lowestDutySlipUnbilled: summary.lowestDutySlipUnbilled ?? summary.LowestDutySlipUnbilled,
+      lowestUnbilledDutySlipCount: summary.lowestUnbilledDutySlipCount ?? summary.LowestUnbilledDutySlipCount,
+      lowestUnbilledReservationID: summary.lowestUnbilledReservationID ?? summary.LowestUnbilledReservationID,
+      lowestUnbilledDutySlipID: summary.lowestUnbilledDutySlipID ?? summary.LowestUnbilledDutySlipID,
     };
   }
 
@@ -105,6 +138,13 @@ export class FinanceDashboardComponent implements OnInit {
       taxMismatchCount: row.taxMismatchCount ?? row.TaxMismatchCount,
       invoiceCalculationMismatchCount: row.invoiceCalculationMismatchCount ?? row.InvoiceCalculationMismatchCount ?? 0,
       wrongInvoiceTypeCount: row.wrongInvoiceTypeCount ?? row.WrongInvoiceTypeCount ?? 0,
+      printGstSourceDriftCount: row.printGstSourceDriftCount ?? row.PrintGstSourceDriftCount ?? 0,
+      cnTaxProfileMismatchCount: row.cnTaxProfileMismatchCount ?? row.CnTaxProfileMismatchCount ?? 0,
+      cnAmountCeilingCount: row.cnAmountCeilingCount ?? row.CnAmountCeilingCount ?? 0,
+      multiCreditNoteCount: row.multiCreditNoteCount ?? row.MultiCreditNoteCount ?? 0,
+      orphanInvoiceLinkCount: row.orphanInvoiceLinkCount ?? row.OrphanInvoiceLinkCount ?? 0,
+      cnIrnConsistencyCount: row.cnIrnConsistencyCount ?? row.CnIrnConsistencyCount ?? 0,
+      percentageAmountMismatchCount: row.percentageAmountMismatchCount ?? row.PercentageAmountMismatchCount ?? 0,
       severity: {
         duplicateCount: severity.duplicateCount ?? severity.DuplicateCount,
         seriesJumpCount: severity.seriesJumpCount ?? severity.SeriesJumpCount,
@@ -116,6 +156,13 @@ export class FinanceDashboardComponent implements OnInit {
         taxMismatchCount: severity.taxMismatchCount ?? severity.TaxMismatchCount,
         invoiceCalculationMismatchCount: severity.invoiceCalculationMismatchCount ?? severity.InvoiceCalculationMismatchCount,
         wrongInvoiceTypeCount: severity.wrongInvoiceTypeCount ?? severity.WrongInvoiceTypeCount,
+        printGstSourceDriftCount: severity.printGstSourceDriftCount ?? severity.PrintGstSourceDriftCount,
+        cnTaxProfileMismatchCount: severity.cnTaxProfileMismatchCount ?? severity.CnTaxProfileMismatchCount,
+        cnAmountCeilingCount: severity.cnAmountCeilingCount ?? severity.CnAmountCeilingCount,
+        multiCreditNoteCount: severity.multiCreditNoteCount ?? severity.MultiCreditNoteCount,
+        orphanInvoiceLinkCount: severity.orphanInvoiceLinkCount ?? severity.OrphanInvoiceLinkCount,
+        cnIrnConsistencyCount: severity.cnIrnConsistencyCount ?? severity.CnIrnConsistencyCount,
+        percentageAmountMismatchCount: severity.percentageAmountMismatchCount ?? severity.PercentageAmountMismatchCount,
       },
     };
   }
@@ -166,8 +213,8 @@ export class FinanceDashboardComponent implements OnInit {
       filterDateTo: toStr,
       dataFromLaunchDate: !!this.dataFromLaunchDate.value,
       employeeID: this.employeeID,
-      seriesPrefix: this.seriesFilter.value,
-      invoiceType: this.invoiceTypeFilter.value,
+      seriesPrefix: null,
+      invoiceType: null,
       seriesJumpActiveOnly: !!this.seriesJumpActiveOnly.value,
     };
   }
@@ -178,27 +225,11 @@ export class FinanceDashboardComponent implements OnInit {
     this.refresh();
   }
 
-  loadFilterOptions(): void {
-    this.service.getFilterOptions(this.getFilters()).subscribe({
-      next: (opts) => {
-        this.filterOptions = this.normalizeFilterOptions(opts);
-      },
-      error: (err) => {
-        this.snackBar.open(err?.error || 'Failed to load filter options', 'Close', { duration: 4000 });
-      },
-    });
-  }
-
   private loadDashboardData(): void {
     if (this.employeeID <= 0) return;
     this.loading = true;
-    const filters = this.getFilters();
-    forkJoin({
-      opts: this.service.getFilterOptions(filters),
-      dash: this.service.getDashboard(filters),
-    }).subscribe({
-      next: ({ opts, dash }) => {
-        this.filterOptions = this.normalizeFilterOptions(opts);
+    this.service.getDashboard(this.getFilters()).subscribe({
+      next: (dash) => {
         this.applyDashboardResponse(dash);
         this.loading = false;
       },
@@ -208,17 +239,6 @@ export class FinanceDashboardComponent implements OnInit {
         this.snackBar.open(msg, 'Close', { duration: 6000 });
       },
     });
-  }
-
-  private normalizeFilterOptions(opts: any): any {
-    const mapItem = (item: any) => ({
-      id: item?.id ?? item?.ID,
-      name: item?.name ?? item?.Name ?? '',
-    });
-    return {
-      series: (opts?.series ?? opts?.Series ?? []).map(mapItem),
-      invoiceTypes: opts?.invoiceTypes ?? opts?.InvoiceTypes ?? [],
-    };
   }
 
   onApply(): void {
@@ -290,12 +310,50 @@ export class FinanceDashboardComponent implements OnInit {
   }
 
   formatKpi(card: any): string {
+    if (card.format === 'lowestUnbilled') {
+      return this.formatLowestUnbilledCountAndDate();
+    }
+
     const val = this.summary[card.key];
-    return val != null ? String(val) : '—';
+    if (val == null || val === '') return '—';
+    if (card.format === 'currency') {
+      const num = Number(val);
+      if (Number.isNaN(num)) return '—';
+      return new Intl.NumberFormat('en-IN', {
+        style: 'currency',
+        currency: 'INR',
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2,
+      }).format(num);
+    }
+    if (card.format === 'date') {
+      const d = moment(val);
+      return d.isValid() ? d.format('DD/MM/YYYY') : '—';
+    }
+    return String(val);
+  }
+
+  formatLowestUnbilledCountAndDate(): string {
+    const count = Number(this.summary.lowestUnbilledDutySlipCount);
+    const countStr = Number.isFinite(count)
+      ? new Intl.NumberFormat('en-IN').format(count)
+      : '—';
+    if (!count) return countStr;
+
+    const d = moment(this.summary.lowestDutySlipUnbilled);
+    const datePart = d.isValid() ? d.format('DD/MM/YYYY') : '—';
+    return `${countStr}  —  ${datePart}`;
+  }
+
+  formatUnbilledIds(): string {
+    const resId = this.summary.lowestUnbilledReservationID ?? '—';
+    const dsId = this.summary.lowestUnbilledDutySlipID ?? '—';
+    return `ReservationID ${resId} · DutySlipID ${dsId}`;
   }
 
   isKpiClickable(card: any): boolean {
-    return !!card.validationCode && Number(this.summary[card.key]) > 0;
+    if (!card.validationCode) return false;
+    return Number(this.summary[card.key]) > 0;
   }
 
   errorColumnHeader(label: string, field: string, documentType: 'Invoice' | 'CreditNote' = 'Invoice'): string {

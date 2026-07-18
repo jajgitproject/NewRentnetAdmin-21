@@ -53,34 +53,6 @@
             Data from Launch Date
           </mat-checkbox>
 
-          <mat-form-field appearance="outline" subscriptSizing="dynamic">
-
-            <mat-label>Series</mat-label>
-
-            <mat-select [formControl]="seriesFilter">
-
-              <mat-option [value]="null">All</mat-option>
-
-              <mat-option *ngFor="let s of filterOptions.series" [value]="s.name">{{ s.name }}</mat-option>
-
-            </mat-select>
-
-          </mat-form-field>
-
-          <mat-form-field appearance="outline" subscriptSizing="dynamic">
-
-            <mat-label>Invoice Type</mat-label>
-
-            <mat-select [formControl]="invoiceTypeFilter">
-
-              <mat-option [value]="null">All</mat-option>
-
-              <mat-option *ngFor="let t of filterOptions.invoiceTypes" [value]="t">{{ t }}</mat-option>
-
-            </mat-select>
-
-          </mat-form-field>
-
           <button mat-flat-button class="fd-apply-btn" type="button" (click)="onApply()" [disabled]="loading">Apply Filters</button>
 
         </div>
@@ -104,16 +76,48 @@
         </div>
 
         <div *ngIf="isInvoiceView">
-          <div class="fd-kpi-grid fd-kpi-grid--section">
-            <div
-              class="fd-kpi"
-              *ngFor="let card of invoiceKpiCards"
-              [ngClass]="['fd-kpi--' + card.accent, isKpiClickable(card) ? 'fd-kpi--clickable' : '']"
-              (click)="isKpiClickable(card) && openKpiDrillDown(card)">
-              <div class="fd-kpi-icon" aria-hidden="true"><mat-icon>{{ card.icon }}</mat-icon></div>
-              <div class="fd-kpi-body">
-                <div class="fd-kpi-label">{{ card.label }}</div>
-                <div class="fd-kpi-value">{{ formatKpi(card) }}</div>
+          <div class="fd-kpi-stack fd-kpi-grid--section">
+            <div class="fd-kpi-grid fd-kpi-grid--invoice-row1">
+              <div
+                class="fd-kpi"
+                *ngFor="let card of invoiceKpiRow1"
+                [ngClass]="['fd-kpi--' + card.accent, isKpiClickable(card) ? 'fd-kpi--clickable' : '']"
+                (click)="isKpiClickable(card) && openKpiDrillDown(card)">
+                <div class="fd-kpi-icon" aria-hidden="true"><mat-icon>{{ card.icon }}</mat-icon></div>
+                <div class="fd-kpi-body">
+                  <div class="fd-kpi-label">{{ card.label }}</div>
+                  <div class="fd-kpi-value">{{ formatKpi(card) }}</div>
+                </div>
+              </div>
+            </div>
+            <div class="fd-kpi-grid fd-kpi-grid--invoice-row2">
+              <div
+                class="fd-kpi"
+                *ngFor="let card of invoiceKpiRow2"
+                [ngClass]="['fd-kpi--' + card.accent, isKpiClickable(card) ? 'fd-kpi--clickable' : '']"
+                (click)="isKpiClickable(card) && openKpiDrillDown(card)">
+                <div class="fd-kpi-icon" aria-hidden="true"><mat-icon>{{ card.icon }}</mat-icon></div>
+                <div class="fd-kpi-body">
+                  <div class="fd-kpi-label">{{ card.label }}</div>
+                  <div class="fd-kpi-value">{{ formatKpi(card) }}</div>
+                </div>
+              </div>
+            </div>
+            <div class="fd-kpi-grid fd-kpi-grid--invoice-row3">
+              <div
+                class="fd-kpi"
+                *ngFor="let card of invoiceKpiRow3"
+                [ngClass]="['fd-kpi--' + card.accent, isKpiClickable(card) ? 'fd-kpi--clickable' : '']"
+                (click)="isKpiClickable(card) && openKpiDrillDown(card)">
+                <div class="fd-kpi-icon" aria-hidden="true"><mat-icon>{{ card.icon }}</mat-icon></div>
+                <div class="fd-kpi-body">
+                  <div class="fd-kpi-label">{{ card.label }}</div>
+                  <div class="fd-kpi-value" *ngIf="card.format === 'lowestUnbilled'">{{ formatLowestUnbilledCountAndDate() }}</div>
+                  <div class="fd-kpi-sub" *ngIf="card.format === 'lowestUnbilled' && summary.lowestUnbilledDutySlipCount">
+                    {{ formatUnbilledIds() }}
+                  </div>
+                  <div class="fd-kpi-value" *ngIf="card.format !== 'lowestUnbilled'">{{ formatKpi(card) }}</div>
+                </div>
               </div>
             </div>
           </div>
@@ -124,19 +128,15 @@
 
               <ng-container matColumnDef="seriesName"><th mat-header-cell *matHeaderCellDef>Series</th><td mat-cell *matCellDef="let r">{{ r.seriesName }}</td></ng-container>
 
-              <ng-container matColumnDef="minNumber"><th mat-header-cell *matHeaderCellDef>Min #</th><td mat-cell *matCellDef="let r">{{ r.minNumber }}</td></ng-container>
-
-              <ng-container matColumnDef="maxNumber"><th mat-header-cell *matHeaderCellDef>Max #</th><td mat-cell *matCellDef="let r">{{ r.maxNumber }}</td></ng-container>
-
               <ng-container matColumnDef="totalDocuments"><th mat-header-cell *matHeaderCellDef>Total</th><td mat-cell *matCellDef="let r"><button type="button" class="fd-link" (click)="openCellDrillDown(r, 'Invoice', 'TotalDocuments', 'Total')">{{ r.totalDocuments }}</button></td></ng-container>
 
               <ng-container matColumnDef="wrongInvoiceTypeCount"><th mat-header-cell *matHeaderCellDef>{{ errorColumnHeader('Wrong Inv Type', 'wrongInvoiceTypeCount') }}</th><td mat-cell *matCellDef="let r" [ngClass]="severityClass(r,'wrongInvoiceTypeCount')"><button type="button" class="fd-link" (click)="openCellDrillDown(r, 'Invoice', 'WrongInvoiceType', 'Wrong Invoice Type')">{{ r.wrongInvoiceTypeCount }}</button></td></ng-container>
 
-              <ng-container matColumnDef="generalCount"><th mat-header-cell *matHeaderCellDef>General</th><td mat-cell *matCellDef="let r"><button type="button" class="fd-link" (click)="openCellDrillDown(r, 'Invoice', 'GeneralCount', 'General')">{{ r.generalCount }}</button></td></ng-container>
+              <ng-container matColumnDef="generalCount"><th mat-header-cell *matHeaderCellDef>{{ errorColumnHeader('General', 'generalCount') }}</th><td mat-cell *matCellDef="let r"><button type="button" class="fd-link" (click)="openCellDrillDown(r, 'Invoice', 'GeneralCount', 'General')">{{ r.generalCount }}</button></td></ng-container>
 
-              <ng-container matColumnDef="singleDutyCount"><th mat-header-cell *matHeaderCellDef>Single Duty</th><td mat-cell *matCellDef="let r"><button type="button" class="fd-link" (click)="openCellDrillDown(r, 'Invoice', 'SingleDutyCount', 'Single Duty')">{{ r.singleDutyCount }}</button></td></ng-container>
+              <ng-container matColumnDef="singleDutyCount"><th mat-header-cell *matHeaderCellDef>{{ errorColumnHeader('Single Duty', 'singleDutyCount') }}</th><td mat-cell *matCellDef="let r"><button type="button" class="fd-link" (click)="openCellDrillDown(r, 'Invoice', 'SingleDutyCount', 'Single Duty')">{{ r.singleDutyCount }}</button></td></ng-container>
 
-              <ng-container matColumnDef="multipleDutyCount"><th mat-header-cell *matHeaderCellDef>Multiple Duty</th><td mat-cell *matCellDef="let r"><button type="button" class="fd-link" (click)="openCellDrillDown(r, 'Invoice', 'MultipleDutyCount', 'Multiple Duty')">{{ r.multipleDutyCount }}</button></td></ng-container>
+              <ng-container matColumnDef="multipleDutyCount"><th mat-header-cell *matHeaderCellDef>{{ errorColumnHeader('Multiple Duty', 'multipleDutyCount') }}</th><td mat-cell *matCellDef="let r"><button type="button" class="fd-link" (click)="openCellDrillDown(r, 'Invoice', 'MultipleDutyCount', 'Multiple Duty')">{{ r.multipleDutyCount }}</button></td></ng-container>
 
               <ng-container matColumnDef="duplicateCount"><th mat-header-cell *matHeaderCellDef>{{ errorColumnHeader('Duplicate', 'duplicateCount') }}</th><td mat-cell *matCellDef="let r" [ngClass]="severityClass(r,'duplicateCount')"><button type="button" class="fd-link" (click)="openCellDrillDown(r, 'Invoice', 'DuplicateNumbers', 'Duplicate')">{{ r.duplicateCount }}</button></td></ng-container>
 
@@ -161,7 +161,7 @@
 
               <ng-container matColumnDef="amountMismatchCount"><th mat-header-cell *matHeaderCellDef>{{ errorColumnHeader('Amt Mismatch', 'amountMismatchCount') }}</th><td mat-cell *matCellDef="let r" [ngClass]="severityClass(r,'amountMismatchCount')"><button type="button" class="fd-link" (click)="openCellDrillDown(r, 'Invoice', 'AmountMismatch', 'Amount Mismatch')">{{ r.amountMismatchCount }}</button></td></ng-container>
 
-              <ng-container matColumnDef="stateGstMismatchCount"><th mat-header-cell *matHeaderCellDef>{{ errorColumnHeader('State/GST', 'stateGstMismatchCount') }}</th><td mat-cell *matCellDef="let r" [ngClass]="severityClass(r,'stateGstMismatchCount')"><button type="button" class="fd-link" (click)="openCellDrillDown(r, 'Invoice', 'StateGstMismatch', 'State GST Mismatch')">{{ r.stateGstMismatchCount }}</button></td></ng-container>
+              <ng-container matColumnDef="stateGstMismatchCount"><th mat-header-cell *matHeaderCellDef>{{ errorColumnHeader('State Vs GST', 'stateGstMismatchCount') }}</th><td mat-cell *matCellDef="let r" [ngClass]="severityClass(r,'stateGstMismatchCount')"><button type="button" class="fd-link" (click)="openCellDrillDown(r, 'Invoice', 'StateGstMismatch', 'State GST Mismatch')">{{ r.stateGstMismatchCount }}</button></td></ng-container>
 
               <ng-container matColumnDef="missingCustomerGstCount"><th mat-header-cell *matHeaderCellDef>{{ errorColumnHeader('Missing GST', 'missingCustomerGstCount') }}</th><td mat-cell *matCellDef="let r" [ngClass]="severityClass(r,'missingCustomerGstCount')"><button type="button" class="fd-link" (click)="openCellDrillDown(r, 'Invoice', 'MissingCustomerGst', 'Missing Customer GST')">{{ r.missingCustomerGstCount }}</button></td></ng-container>
 
@@ -199,10 +199,6 @@
 
               <ng-container matColumnDef="seriesName"><th mat-header-cell *matHeaderCellDef>Series</th><td mat-cell *matCellDef="let r">{{ r.seriesName }}</td></ng-container>
 
-              <ng-container matColumnDef="minNumber"><th mat-header-cell *matHeaderCellDef>Min #</th><td mat-cell *matCellDef="let r">{{ r.minNumber }}</td></ng-container>
-
-              <ng-container matColumnDef="maxNumber"><th mat-header-cell *matHeaderCellDef>Max #</th><td mat-cell *matCellDef="let r">{{ r.maxNumber }}</td></ng-container>
-
               <ng-container matColumnDef="totalDocuments"><th mat-header-cell *matHeaderCellDef>Total</th><td mat-cell *matCellDef="let r"><button type="button" class="fd-link" (click)="openCellDrillDown(r, 'CreditNote', 'TotalDocuments', 'Total')">{{ r.totalDocuments }}</button></td></ng-container>
 
               <ng-container matColumnDef="duplicateCount"><th mat-header-cell *matHeaderCellDef>{{ errorColumnHeader('Duplicate', 'duplicateCount', 'CreditNote') }}</th><td mat-cell *matCellDef="let r" [ngClass]="severityClass(r,'duplicateCount')"><button type="button" class="fd-link" (click)="openCellDrillDown(r, 'CreditNote', 'DuplicateNumbers', 'Duplicate')">{{ r.duplicateCount }}</button></td></ng-container>
@@ -215,11 +211,25 @@
 
               <ng-container matColumnDef="amountMismatchCount"><th mat-header-cell *matHeaderCellDef>{{ errorColumnHeader('Amt Mismatch', 'amountMismatchCount', 'CreditNote') }}</th><td mat-cell *matCellDef="let r" [ngClass]="severityClass(r,'amountMismatchCount')"><button type="button" class="fd-link" (click)="openCellDrillDown(r, 'CreditNote', 'AmountMismatch', 'Amount Mismatch')">{{ r.amountMismatchCount }}</button></td></ng-container>
 
-              <ng-container matColumnDef="stateGstMismatchCount"><th mat-header-cell *matHeaderCellDef>{{ errorColumnHeader('State/GST', 'stateGstMismatchCount', 'CreditNote') }}</th><td mat-cell *matCellDef="let r" [ngClass]="severityClass(r,'stateGstMismatchCount')"><button type="button" class="fd-link" (click)="openCellDrillDown(r, 'CreditNote', 'StateGstMismatch', 'State GST Mismatch')">{{ r.stateGstMismatchCount }}</button></td></ng-container>
+              <ng-container matColumnDef="stateGstMismatchCount"><th mat-header-cell *matHeaderCellDef>{{ errorColumnHeader('State Vs GST', 'stateGstMismatchCount', 'CreditNote') }}</th><td mat-cell *matCellDef="let r" [ngClass]="severityClass(r,'stateGstMismatchCount')"><button type="button" class="fd-link" (click)="openCellDrillDown(r, 'CreditNote', 'StateGstMismatch', 'State GST Mismatch')">{{ r.stateGstMismatchCount }}</button></td></ng-container>
 
               <ng-container matColumnDef="missingCustomerGstCount"><th mat-header-cell *matHeaderCellDef>{{ errorColumnHeader('Missing GST', 'missingCustomerGstCount', 'CreditNote') }}</th><td mat-cell *matCellDef="let r" [ngClass]="severityClass(r,'missingCustomerGstCount')"><button type="button" class="fd-link" (click)="openCellDrillDown(r, 'CreditNote', 'MissingCustomerGst', 'Missing Customer GST')">{{ r.missingCustomerGstCount }}</button></td></ng-container>
 
               <ng-container matColumnDef="taxMismatchCount"><th mat-header-cell *matHeaderCellDef>{{ errorColumnHeader('Tax Mismatch', 'taxMismatchCount', 'CreditNote') }}</th><td mat-cell *matCellDef="let r" [ngClass]="severityClass(r,'taxMismatchCount')"><button type="button" class="fd-link" (click)="openCellDrillDown(r, 'CreditNote', 'TaxMismatch', 'Tax Mismatch')">{{ r.taxMismatchCount }}</button></td></ng-container>
+
+              <ng-container matColumnDef="printGstSourceDriftCount"><th mat-header-cell *matHeaderCellDef>{{ errorColumnHeader('Print Src', 'printGstSourceDriftCount', 'CreditNote') }}</th><td mat-cell *matCellDef="let r" [ngClass]="severityClass(r,'printGstSourceDriftCount')"><button type="button" class="fd-link" (click)="openCellDrillDown(r, 'CreditNote', 'PrintGstSourceDrift', 'Print GST Source Drift')">{{ r.printGstSourceDriftCount }}</button></td></ng-container>
+
+              <ng-container matColumnDef="cnTaxProfileMismatchCount"><th mat-header-cell *matHeaderCellDef>{{ errorColumnHeader('Tax Profile', 'cnTaxProfileMismatchCount', 'CreditNote') }}</th><td mat-cell *matCellDef="let r" [ngClass]="severityClass(r,'cnTaxProfileMismatchCount')"><button type="button" class="fd-link" (click)="openCellDrillDown(r, 'CreditNote', 'CnTaxProfileMismatch', 'CN Tax Profile')">{{ r.cnTaxProfileMismatchCount }}</button></td></ng-container>
+
+              <ng-container matColumnDef="cnAmountCeilingCount"><th mat-header-cell *matHeaderCellDef>{{ errorColumnHeader('Amt Ceiling', 'cnAmountCeilingCount', 'CreditNote') }}</th><td mat-cell *matCellDef="let r" [ngClass]="severityClass(r,'cnAmountCeilingCount')"><button type="button" class="fd-link" (click)="openCellDrillDown(r, 'CreditNote', 'CnAmountCeiling', 'CN Amount Ceiling')">{{ r.cnAmountCeilingCount }}</button></td></ng-container>
+
+              <ng-container matColumnDef="multiCreditNoteCount"><th mat-header-cell *matHeaderCellDef>{{ errorColumnHeader('Multi CN', 'multiCreditNoteCount', 'CreditNote') }}</th><td mat-cell *matCellDef="let r" [ngClass]="severityClass(r,'multiCreditNoteCount')"><button type="button" class="fd-link" (click)="openCellDrillDown(r, 'CreditNote', 'MultiCreditNote', 'Multi Credit Note')">{{ r.multiCreditNoteCount }}</button></td></ng-container>
+
+              <ng-container matColumnDef="orphanInvoiceLinkCount"><th mat-header-cell *matHeaderCellDef>{{ errorColumnHeader('Orphan Link', 'orphanInvoiceLinkCount', 'CreditNote') }}</th><td mat-cell *matCellDef="let r" [ngClass]="severityClass(r,'orphanInvoiceLinkCount')"><button type="button" class="fd-link" (click)="openCellDrillDown(r, 'CreditNote', 'OrphanInvoiceLink', 'Orphan Invoice Link')">{{ r.orphanInvoiceLinkCount }}</button></td></ng-container>
+
+              <ng-container matColumnDef="cnIrnConsistencyCount"><th mat-header-cell *matHeaderCellDef>{{ errorColumnHeader('IRN Consist.', 'cnIrnConsistencyCount', 'CreditNote') }}</th><td mat-cell *matCellDef="let r" [ngClass]="severityClass(r,'cnIrnConsistencyCount')"><button type="button" class="fd-link" (click)="openCellDrillDown(r, 'CreditNote', 'CnIrnConsistency', 'CN IRN Consistency')">{{ r.cnIrnConsistencyCount }}</button></td></ng-container>
+
+              <ng-container matColumnDef="percentageAmountMismatchCount"><th mat-header-cell *matHeaderCellDef>{{ errorColumnHeader('% vs Amt', 'percentageAmountMismatchCount', 'CreditNote') }}</th><td mat-cell *matCellDef="let r" [ngClass]="severityClass(r,'percentageAmountMismatchCount')"><button type="button" class="fd-link" (click)="openCellDrillDown(r, 'CreditNote', 'PercentageAmountMismatch', 'Percentage vs Amount')">{{ r.percentageAmountMismatchCount }}</button></td></ng-container>
 
               <tr mat-header-row *matHeaderRowDef="creditNoteTableColumns"></tr>
 

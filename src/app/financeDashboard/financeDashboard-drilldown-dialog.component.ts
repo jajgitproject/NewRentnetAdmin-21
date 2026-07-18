@@ -30,7 +30,7 @@ export class FinanceDashboardDrilldownDialogComponent implements OnInit {
   ngOnInit(): void {
     this.displayedColumns = this.isInvoiceDrillDown()
       ? ['invoiceID', 'customerID', 'invoiceCalculationID', 'irnStatus', 'documentNumber', 'invoiceType', 'date', 'customer', 'branch', 'amount', 'user', 'errorDescription']
-      : ['documentNumber', 'invoiceType', 'date', 'customer', 'branch', 'amount', 'user', 'errorDescription'];
+      : ['documentNumber', 'invoiceType', 'irnStatus', 'date', 'customer', 'branch', 'amount', 'user', 'errorDescription'];
     this.load();
   }
 

@@ -334,7 +334,9 @@
       <div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 mb-2" *ngIf="canThisRoleCreateBillOnClosingScreen">
         <button mat-flat-button style="width: 150px;text-align: center;" color="primary" (click)="GenerateBill()"
           [type]="submit"
+          title="Creates a Single Duty invoice for this duty only. For multiple duties on one invoice, use Attach/Detach Duties."
           [disabled]="!canGenerateBill()">Generate Bill</button>
+        <div class="text-muted" style="font-size: 11px; margin-top: 4px;">Single Duty only — Multy Duty via Attach/Detach</div>
       </div>
 
       <div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 mb-2" *ngIf="canThisRoleViewBillOnClosingScreen">

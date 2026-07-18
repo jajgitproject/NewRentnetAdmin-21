@@ -367,26 +367,55 @@ export class InvoiceAttachDetachComponent implements OnInit {
     this.SearchGoodForBilling = null;
     this.SearchType = '';
     this.PageNumber = 0;
-    //this.loadData();
+    if (this.InvoiceNumberWithPrefix) {
+      this.loadDataForEdit();
+    } else {
+      this.loadData();
+    }
   }
 
   public SearchData() 
   {
-    this.loadData();
+    if (this.InvoiceNumberWithPrefix) {
+      this.loadDataForEdit();
+    } else {
+      this.loadData();
+    }
   }
  
   public Filter() 
   {
     this.PageNumber = 0;
-    this.loadData();
+    if (this.InvoiceNumberWithPrefix) {
+      this.loadDataForEdit();
+    } else {
+      this.loadData();
+    }
   }
 
   onBackPress(event) 
   {
     if (event.keyCode === 8) 
     {
-      this.loadData();
+      if (this.InvoiceNumberWithPrefix) {
+        this.loadDataForEdit();
+      } else {
+        this.loadData();
+      }
     }
+  }
+
+  /** Rematch checkbox state from selectedInvoices after paging/search. */
+  rematchCheckedFromSelection() {
+    if (!this.dataSource) {
+      return;
+    }
+    const selectedIds = new Set((this.selectedInvoices || []).map(x => x.dutySlipID));
+    this.dataSource.forEach((row: any) => {
+      row.checked = selectedIds.has(row.dutySlipID);
+    });
+    const selectable = this.dataSource.filter(r => this.isRowSelectable(r));
+    this.selectAll = selectable.length > 0 && selectable.every(r => r.checked);
   }
 
   public loadData() 
@@ -409,7 +438,8 @@ export class InvoiceAttachDetachComponent implements OnInit {
       (
         data => 
         {
-          this.dataSource = data;   
+          this.dataSource = data;
+          this.rematchCheckedFromSelection();
         },
         (error: HttpErrorResponse) => { this.dataSource = null; }
       );
@@ -434,6 +464,7 @@ export class InvoiceAttachDetachComponent implements OnInit {
       data => 
         {
         this.dataSource = data;
+        this.rematchCheckedFromSelection();
       },
       (error: HttpErrorResponse) => { this.dataSource = null; }
     );
@@ -461,7 +492,8 @@ export class InvoiceAttachDetachComponent implements OnInit {
       (
         data => 
         {
-          this.dataSource = data;   
+          this.dataSource = data;
+          this.rematchCheckedFromSelection();
         },
         (error: HttpErrorResponse) => { this.dataSource = null; }
       );
@@ -486,6 +518,7 @@ export class InvoiceAttachDetachComponent implements OnInit {
       data => 
         {
         this.dataSource = data;
+        this.rematchCheckedFromSelection();
       },
       (error: HttpErrorResponse) => { this.dataSource = null; }
     );
@@ -514,7 +547,11 @@ export class InvoiceAttachDetachComponent implements OnInit {
     if (this.dataSource.length > 0) 
     {
       this.PageNumber++;
-      this.loadData();
+      if (this.InvoiceNumberWithPrefix) {
+        this.loadDataForEdit();
+      } else {
+        this.loadData();
+      }
     }
   }
 
@@ -523,7 +560,11 @@ export class InvoiceAttachDetachComponent implements OnInit {
     if (this.PageNumber > 0) 
     {
       this.PageNumber--;
-      this.loadData();
+      if (this.InvoiceNumberWithPrefix) {
+        this.loadDataForEdit();
+      } else {
+        this.loadData();
+      }
     }
   }
 
@@ -638,6 +679,15 @@ export class InvoiceAttachDetachComponent implements OnInit {
   //---------- Post ----------
   AttachDuty()
   {
+    if (!this.selectedInvoices || this.selectedInvoices.length === 0) {
+      Swal.fire({
+        title: 'No Duties Selected!',
+        text: 'Please select at least one duty before attach.',
+        icon: 'warning',
+        confirmButtonText: 'Ok'
+      });
+      return;
+    }
     const duties: number[] = this.selectedInvoices.map(x => x.dutySlipID);
     this.advanceTableForm.patchValue({invoiceID:this.InvoiceID});
     this.advanceTableForm.patchValue({invoiceType:"InvoiceMultyDuty"});
@@ -686,6 +736,15 @@ export class InvoiceAttachDetachComponent implements OnInit {
     });
     return; // stop execution
   }
+    if (this.selectedInvoices.length !== 1) {
+      Swal.fire({
+        title: 'Select exactly one duty',
+        text: 'Single Duty generate creates one invoice per click. For multiple duties use Multy Duty generate.',
+        icon: 'warning',
+        confirmButtonText: 'Ok'
+      });
+      return;
+    }
     const duties: number[] = this.selectedInvoices.map(x => x.dutySlipID);
     this.advanceTableForm.patchValue({invoiceID:0});
     this.advanceTableForm.patchValue({invoiceType:"InvoiceSingleDuty"});
@@ -744,6 +803,15 @@ export class InvoiceAttachDetachComponent implements OnInit {
     });
     return; // stop execution
   }
+    if (this.selectedInvoices.length < 2) {
+      Swal.fire({
+        title: 'Select at least two duties',
+        text: 'Multy Duty invoice requires 2 or more calculated duties. Use Single Duty generate for one duty.',
+        icon: 'warning',
+        confirmButtonText: 'Ok'
+      });
+      return;
+    }
     const duties: number[] = this.selectedInvoices.map(x => x.dutySlipID);
     this.advanceTableForm.patchValue({invoiceID:0});
     this.advanceTableForm.patchValue({invoiceType:"InvoiceMultyDuty"});

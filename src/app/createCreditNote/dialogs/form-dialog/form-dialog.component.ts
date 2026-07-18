@@ -265,8 +265,10 @@ resetTaxes() {
     },
     error =>
     {
-       this._generalService.sendUpdate('CreateCreditNoteAll:CreateCreditNoteView:Failure');//To Send Updates 
-       this.saveDisabled = true; 
+       const msg = error?.error?.message || error?.error?.Message || 'Create Credit Note failed';
+       Swal.fire({ title: msg, icon: 'error', confirmButtonText: 'Ok' });
+       this._generalService.sendUpdate('CreateCreditNoteAll:CreateCreditNoteView:Failure');
+       this.saveDisabled = false; 
     }
   )
   }
@@ -287,13 +289,14 @@ resetTaxes() {
         },
         error =>
         {
+          const msg = error?.error?.message || error?.error?.Message || 'Operation Failed...!!!';
           this.showNotification(
             'snackbar-danger',
-            'Operation Failed...!!!',
+            msg,
             'bottom',
             'center'
           );
-          this.saveDisabled = true;
+          this.saveDisabled = false;
     }
   )
   }
