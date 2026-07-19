@@ -168,9 +168,19 @@ shouldShowDeleteButton(item: any): boolean {
 
   public SearchData()
   {
-    // this.loadData();
-    //this.SearchResolution='';
-    
+    this.loadData();
+  }
+
+  public loadData()
+  {
+    const reservationId = this.reservationID ? Number(this.reservationID) : 0;
+    this.resolutionService.getTableData(reservationId, this.SearchActivationStatus, this.PageNumber).subscribe(
+      data =>
+      {
+        this.dataSource = data;
+      },
+      (error: HttpErrorResponse) => { this.dataSource = null; }
+    );
   }
 
 /////////////////for Image Upload////////////////////////////

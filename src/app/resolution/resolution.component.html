@@ -42,11 +42,11 @@
                                                     <!-- Input field for filtering -->
                                                      
                                                     <input type="text" style="height: 40px; width: 300px;padding-left: 5px;" class="form-control" placeholder="Filter" id="inputGroup"
-                                                        (keyup)="onBackPress($event)" (input)="loadData()" [(ngModel)]="searchTerm" />
+                                                        (keyup)="onBackPress($event)" (input)="SearchData()" [(ngModel)]="searchTerm" />
                                         
                                                     <!-- Search button -->
                                                     <div class="input-group-append input-group-addon">
-                                                        <span class="input-group-text" style="cursor: pointer; height: 40px; width: 40px; text-align: center;" (click)="loadData()">
+                                                        <span class="input-group-text" style="cursor: pointer; height: 40px; width: 40px; text-align: center;" (click)="SearchData()">
                                                             <i class="fas fa-search"></i>
                                                         </span>
                                                     </div>
@@ -73,7 +73,7 @@
                                 </div>
                             </div>
 
-                            <p *ngIf="!dataSource; then thenBlock2 else elseBlock2">
+                            <p *ngIf="!dataSource; then thenBlock2">
                                 This is not rendered
                             </p>
 
