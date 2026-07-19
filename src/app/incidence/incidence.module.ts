@@ -36,6 +36,7 @@ import { ResolutionModule } from '../resolution/resolution.module';
   declarations: [
     IncidenceComponent,
     incidenceFormDialogComponent,
+    DeleteDialogComponent,
     IncidenceListDialogComponent
   ],
   imports: [
