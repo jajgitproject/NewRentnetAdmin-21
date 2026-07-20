@@ -10,7 +10,6 @@ import {
   CarAndDriverAllotment,
   CarAndDriverAllotmentData,
   CarsRestrictedForPassengerModel,
-  DriverDutyData,
   DriverModel,
   DriversRestrictedForPassengerModel,
   TripDetails
@@ -110,16 +109,7 @@ export class CarAndDriverAllotmentComponent implements OnInit {
   data = {
     bookingCount: '', // Yahan "Data Not Found" nahi dikhana hai, to ye blank ya number ho sakta hai
     achievementPercentage: '', // Yahan agar empty hai to "Data Not Found" dikhayega
-    driverAverage: null,
-    previousDuty: '',   // Empty value will show "Data Not Found"
-    currentDuty: '',
-    futureDuty: '' // Yahan bhi "Data Not Found" dikhayega
-  };
-
-  dutyData = {
-    previousDuty: '',   // Empty value will show "Data Not Found"
-    currentDuty: '',
-    futureDuty: ''  // Null value will show "Data Not Found"
+    driverAverage: null
   };
   sortType: string = '';
   selectAll: boolean = false;
@@ -128,9 +118,6 @@ export class CarAndDriverAllotmentComponent implements OnInit {
   driverModelLatLong: DriverModel | null;
   dataSource: CarAndDriverAllotment[];
   dataSourceForDutySlip: DutySlipQualityCheckedByExecutive[] | null;
-  driverDutyData: DriverDutyData[];
-  driverPreviousDutyData: DriverDutyData[];
-  driverNextDutyData: DriverDutyData[];
   CarAndDriverAllotmentID: number;
   advanceTable: Array<TripDetails> = [];
   SearchCarAndDriverAllotment: string = '';
@@ -524,23 +511,9 @@ export class CarAndDriverAllotmentComponent implements OnInit {
     );
   }
 
-  private parseDutyDisplay(duty: string | null | undefined): { pickupDate: string; pickupTime: string } | null {
-    if (!duty) {
-      return null;
-    }
-    const parts = duty.split('\n');
-    if (parts.length < 3 || !parts[1] || !parts[2]) {
-      return null;
-    }
-    return { pickupDate: parts[1], pickupTime: parts[2] };
-  }
-
   private enrichGridRow(element: DriverInventoryAssociation): void {
     Object.assign(element, {
       checked: false,
-      previousDutyDisplay: this.parseDutyDisplay(element.previousDuty),
-      currentDutyDisplay: this.parseDutyDisplay(element.currentDuty),
-      futureDutyDisplay: this.parseDutyDisplay(element.futureDuty),
     });
   }
 
@@ -1701,38 +1674,10 @@ export class CarAndDriverAllotmentComponent implements OnInit {
     }
   }
 
-  GetDriverDutyData(driverID: number, index: number) {
+  onSearchResultPanelOpened(driverID: number, index: number) {
     this.togglePanel(index);
     this.preloadPassengerRestrictions();
     this.GetDriverFeedbackAverage(driverID, index);
-
-    if (driverID !== null && driverID !== undefined) {
-      this.pickupDate = moment(this.pickupDate).format('yyyy-MM-DD');
-      this._carAndDriverAllotmentService.GetDriverDuty(this.pickupDate, driverID).subscribe
-        (
-          (data: DriverDutyData[]) => {
-            this.driverDutyData = data;
-          },
-          (error: HttpErrorResponse) => { this.driverDutyData = null; }
-        );
-
-      this._carAndDriverAllotmentService.GetPreviousDriverDuty(this.pickupDate, driverID).subscribe
-        (
-          (data: DriverDutyData[]) => {
-            this.driverPreviousDutyData = data;
-          },
-          (error: HttpErrorResponse) => { this.driverDutyData = null; }
-        );
-
-      this._carAndDriverAllotmentService.GetNextDriverDuty(this.pickupDate, driverID).subscribe
-        (
-          (data: DriverDutyData[]) => {
-            this.driverNextDutyData = data;
-          },
-          (error: HttpErrorResponse) => { this.driverDutyData = null; }
-        );
-    }
-
   }
 
   GetDriverFeedbackAverage(driverID: any, index: number) {
@@ -2396,27 +2341,6 @@ export class CarAndDriverAllotmentComponent implements OnInit {
           this._generalService.sendUpdate('AllotmentDelete:AcrisCodeView:Failure');//To Send Updates  
         }
       )
-  }
-  DetachFromDuty(allotmentID, allotmentStatus) {
-    const dialogRef = this.dialog.open(FormDialogCAComponent,
-      {
-        width: '400px',
-        data:
-        {
-          advanceTable: this.advanceTable,
-          allotmentID: allotmentID,
-          allotmentStatus: allotmentStatus
-        }
-      });
-    dialogRef.afterClosed().subscribe(res => {
-
-      if (res.isClose === false) {
-        this.loadData(this._filters, this.currentPage, this.recordsPerPage);
-        //this.carAndDriverAllotmentData();
-        this.carAndDriverAllotmentDataForUnassociated();
-      }
-    })
-
   }
   // PassengerHistory() {
   //   this.dialog.open(PassengerHistoryComponent, {

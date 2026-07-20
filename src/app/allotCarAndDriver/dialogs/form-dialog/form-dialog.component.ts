@@ -468,7 +468,7 @@ allotmentType: any;
         response => {
           this.showNotification(
             'snackbar-success',
-            'Car And Driver Alloted...!!!',
+            'Car And Driver Alloted...!!! Notifications are being sent.',
             'bottom',
             'center'
           );
@@ -501,7 +501,7 @@ allotmentType: any;
           
           this.showNotification(
             'snackbar-success',
-            'Car And Driver Alloted...!!!',
+            'Car And Driver Alloted...!!! Notifications are being sent.',
             'bottom',
             'center'
           );

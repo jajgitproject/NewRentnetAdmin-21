@@ -1369,16 +1369,13 @@
                   <span class="mat-header-cell">Vehicle</span>
                   <span class="mat-header-cell">Driver</span>
                   <span class="mat-header-cell">Ownership</span>
-                  <span class="mat-header-cel" style="margin-right: 20px;"><b>Previous Duty</b></span>
-                  <span class="mat-header-cell">On Going Duty</span>
-                  <span class="mat-header-cell">Future Duty</span>
                   <!-- <span class="mat-header-cell">Rating</span>
                   <span class="mat-header-cell">Monthly Business</span> -->
                 </section>
 
                 <mat-expansion-panel
                   *ngFor="let data of driverInventoryAssociationDataSource;index as i"
-                  (opened)="GetDriverDutyData(driverInventoryAssociationDataSource[i].driverID,i)"
+                  (opened)="onSearchResultPanelOpened(driverInventoryAssociationDataSource[i].driverID,i)"
                   [ngClass]="{ 'striped-header-odd': i % 2 !== 0, 'striped-header-even': i % 2 === 0 }">
                   <mat-expansion-panel-header style="height: 60px;" class="mat-row" #panelH>
                       <span class="mat-cell checkbox-container">
@@ -1436,26 +1433,6 @@
                         <br>
                         {{ data.inventorySupplierName }}
 
-                      </span>
-                      <span class="mat-cell" style="font-size: 12px;">
-                        <ng-container *ngIf="data?.previousDutyDisplay as duty; else noData">
-                          {{ duty.pickupDate | date : 'dd MMM yyyy' }}<br>{{ duty.pickupTime }}
-                        </ng-container>
-
-                        <ng-template #noData>N/A</ng-template>
-                      </span>
-                      <span class="mat-cell" style="font-size: 12px;">
-                        <ng-container *ngIf="data?.currentDutyDisplay as duty; else noDataCurrent">
-                          {{ duty.pickupDate | date : 'dd MMM yyyy' }}<br>{{ duty.pickupTime }}
-                        </ng-container>
-                        <ng-template #noDataCurrent>N/A</ng-template>
-                      </span>
-
-                      <span class="mat-cell" style="font-size: 12px;">
-                        <ng-container *ngIf="data?.futureDutyDisplay as duty; else noDataFuture">
-                          {{ duty.pickupDate | date : 'dd MMM yyyy' }}<br>{{ duty.pickupTime }}
-                        </ng-container>
-                        <ng-template #noDataFuture>N/A</ng-template>
                       </span>
                       <!-- <span class="mat-cell" style="font-size: 12px;"> -->
 
@@ -1521,11 +1498,9 @@
 
                                         <!-- Current Car -->
                                         <td class="TDValueActions">
-                                          <div class="sectionHeader">
-                                            <b>Current Car</b>
-                                            <button class="smallLinkButton" mat-button color="primary" (click)="AttachAnotherDriver(i)">Attach another Driver</button>
-                                          </div>
-                                          {{ data.inventoryName }} ({{ data.vehicle }})
+                                          <b>Current Car</b><br />
+                                          {{ data.inventoryName }} ({{ data.vehicle }})<br />
+                                          <button class="smallLinkButton" mat-button color="primary" (click)="AttachAnotherDriver(i)">Attach another Driver</button>
                                         </td>
 
                                         <!-- Current Location -->
@@ -1537,11 +1512,9 @@
 
                                         <!-- Feedback & Comments -->
                                         <td class="TDValueActions">
-                                          <div class="sectionHeader">
-                                            <b>Feedback & Comments</b>
-                                            <button class="smallLinkButton" mat-button color="primary" (click)="DriverFeedbackInfo(i)">View Details</button>
-                                          </div>
-                                          <span>Avg Rating : {{ driverAvg[i] || 'N/A' }}</span>
+                                          <b>Feedback & Comments</b><br />
+                                          <span>Avg Rating : {{ driverAvg[i] || 'N/A' }}</span><br />
+                                          <button class="smallLinkButton" mat-button color="primary" (click)="DriverFeedbackInfo(i)">View Details</button>
                                         </td>
 
                                         <!-- Monthly Business -->
@@ -1552,76 +1525,6 @@
                                       </tr>
                                     </tbody>
                                   </table>
-
-            <table class="driver-table">
-              <tbody>
-                <tr>
-                  <!-- Last Duty Before -->
-                  <td class="TDValueActions">
-                    <b>Last Duty Before {{ pickupDate | date: 'dd MMM yyyy' }}</b><br />
-                    <ng-container *ngIf="driverPreviousDutyData?.length > 0; else noDataBefore">
-                      <div *ngFor="let item of driverPreviousDutyData">
-                        Trip Not Started ({{ item.reservationID }} / {{ item.reservationGroupID }})<br />
-                        Pick up: {{ item.pickupTime | date:'shortTime' }} {{ item.pickupDate | date:'dd MMM yyyy' }}<br />
-                        {{ item.pickupAddressDetails }}, {{ item.pickupAddress }}<br />
-                        Drop Off: {{ item.dropOffTime | date:'shortTime' }} {{ item.dropOffDate | date:'dd MMM yyyy' }}<br />
-                        {{ item.dropOffAddress }}
-                      </div>
-                    </ng-container>
-                    <ng-template #noDataBefore>No Duty</ng-template>
-                     <div class="button-wrapper">
-                    <button mat-button class="smallDetachButton"
-                      (click)="DetachFromDuty(driverPreviousDutyData[0]?.allotmentID, driverPreviousDutyData[0]?.allotmentStatus)">
-                      Detach from Duty
-                    </button>
-                  </div>
-                  </td>
-
-                  <!-- Duty on -->
-                  <td class="TDValueActions">
-                    <b>Duty on {{ pickupDate | date: 'dd MMM yyyy' }}</b><br />
-                    <ng-container *ngIf="driverDutyData?.length > 0; else noDataCurrent">
-                      <div *ngFor="let item1 of driverDutyData">
-                        Status: {{ item1.allotmentStatus }}<br />
-                        Pick up: {{ item1.pickupTime | date:'shortTime' }} {{ item1.pickupDate | date:'dd MMM yyyy' }}<br />
-                        {{ item1.pickupAddressDetails }}, {{ item1.pickupAddress }}<br />
-                        Drop Off: {{ item1.dropOffTime | date:'shortTime' }} {{ item1.dropOffDate | date:'dd MMM yyyy' }}<br />
-                        {{ item1.dropOffAddress }}
-                      </div>
-                    </ng-container>
-                    <ng-template #noDataCurrent>No Duty</ng-template>
-                        <div class="button-wrapper no-margin">
-          <button mat-button class="smallDetachButton"
-            (click)="DetachFromDuty(driverDutyData[0]?.allotmentID, driverDutyData[0]?.allotmentStatus)">
-            Detach from Duty
-          </button>
-        </div>
-                  </td>
-
-                  <!-- First Duty After -->
-                      <td class="TDValueActions">
-                        <b>First Duty After {{ pickupDate | date: 'dd MMM yyyy' }}</b><br />
-                        <ng-container *ngIf="driverNextDutyData?.length > 0; else noDataAfter">
-                          <div *ngFor="let item2 of driverNextDutyData">
-                            Trip Not Started ({{ item2.reservationID }} / {{ item2.reservationGroupID }})<br />
-                            Pick up: {{ item2.pickupTime | date:'shortTime' }} {{ item2.pickupDate | date:'dd MMM yyyy' }}<br />
-                            {{ item2.pickupAddressDetails }}, {{ item2.pickupAddress }}<br />
-                            Drop Off: {{ item2.dropOffTime | date:'shortTime' }} {{ item2.dropOffDate | date:'dd MMM yyyy' }}<br />
-                            {{ item2.dropOffAddress }}
-                          </div>
-                        </ng-container>
-                        <ng-template #noDataAfter>No Duty</ng-template>
-
-                        <div class="button-wrapper">
-                  <button mat-button class="smallDetachButton"
-                    (click)="DetachFromDuty(driverNextDutyData[0]?.allotmentID, driverNextDutyData[0]?.allotmentStatus)">
-                    Detach from Duty
-                  </button>
-                </div>
-                      </td>
-                    </tr>
-                  </tbody>
-                </table>
 
                             <table class="col-lg-12 col-md-12 col-sm-12 col-xs-6">
                               <tbody>
