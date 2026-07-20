@@ -1086,12 +1086,12 @@ export class CarAndDriverAllotmentComponent implements OnInit {
   //       }
   //     )
   // }
-  public loadData(filters: Filters, currentPage: number, pageSize: number) {
+  public loadData(filters: Filters, currentPage: number, pageSize: number, reloadSearchResults: boolean = true) {
     this._controlPanelDesignService
       .getReservationDetailsForAllotment(filters, currentPage, pageSize)
       .subscribe(
         (data: ControlPanelData) => {
-          this.applyReservationHeader(data, true);
+          this.applyReservationHeader(data, reloadSearchResults);
           this.preloadPassengerRestrictions();
         },
         (error: HttpErrorResponse) => {
@@ -1607,16 +1607,14 @@ export class CarAndDriverAllotmentComponent implements OnInit {
       });
 
       dialogRef.afterClosed().subscribe(res => {
-        if (!res.isClose) {
+        if (res && !res.isClose) {
           this.inventory.setValue('');
           this.driver.setValue('');
           this.vendorType.setValue('');
           this.ownedSupplier.setValue('');
           this.vehicle.setValue('');
-          this.loadData(this._filters, this.currentPage, this.recordsPerPage);
-          //this.carAndDriverAllotmentData();
-          this.carAndDriverAllotmentDataForUnassociated();
-          
+          // Refresh reservation header only — search table loads via Search button.
+          this.loadData(this._filters, this.currentPage, this.recordsPerPage, false);
         }
       });
 
@@ -1660,10 +1658,9 @@ export class CarAndDriverAllotmentComponent implements OnInit {
     });
 
     dialogRef.afterClosed().subscribe(res => {
-      if (!res.isClose) {
-        this.loadData(this._filters, this.currentPage, this.recordsPerPage);
-        //this.carAndDriverAllotmentData();
-        this.carAndDriverAllotmentDataForUnassociated();
+      if (res && !res.isClose) {
+        // Refresh reservation header only — search table loads via Search button.
+        this.loadData(this._filters, this.currentPage, this.recordsPerPage, false);
       }
     });
   }
