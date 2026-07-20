@@ -2885,10 +2885,12 @@ DriverAllotment(reservationID: number, reservationGroupID: number, pickupDate: a
     console.warn('⚠️ reservationGroupID is missing!');
   }
 
-  const encryptedReservationGroupID = encodeURIComponent(this._generalService.encrypt(reservationGroupID.toString()));
-  const encryptedReservationID = encodeURIComponent(this._generalService.encrypt(reservationID.toString()));
-  const encryptedPickupDate = encodeURIComponent(this._generalService.encrypt(pickupDate));
-  const encryptedPickupAddress = encodeURIComponent(this._generalService.encrypt(pickupAddress));
+  const encryptedReservationGroupID = encodeURIComponent(this._generalService.encrypt((reservationGroupID ?? '').toString()));
+  const encryptedReservationID = encodeURIComponent(this._generalService.encrypt((reservationID ?? '').toString()));
+  const encryptedPickupDate = encodeURIComponent(this._generalService.encrypt(
+    pickupDate instanceof Date ? pickupDate.toISOString() : (pickupDate ?? '').toString()
+  ));
+  const encryptedPickupAddress = encodeURIComponent(this._generalService.encrypt((pickupAddress ?? '').toString()));
   const encryptedStatus = this.status ? encodeURIComponent(this._generalService.encrypt(this.status)) : undefined;
 
 

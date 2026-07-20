@@ -60,7 +60,7 @@ import { FormDialogNotificationComponent } from './form-dialog/form-dialog.compo
 import { FormBuilder, FormControl, FormGroup } from '@angular/forms';
 import { Address } from '@compat/google-places-shim-objects/address';
 import { DriverDropDown } from '../customerPersonDriverRestriction/driverDropDown.model';
-import { forkJoin, Observable } from 'rxjs';
+import { forkJoin, merge, Observable, of } from 'rxjs';
 import { map, startWith } from 'rxjs/operators';
 import { SearchDriverByLocationComponent } from '../searchDriverByLocation/searchDriverByLocation.component';
 import { VehicleCategoryDropDown } from '../general/vehicleCategoryDropDown.model';
@@ -355,7 +355,9 @@ export class CarAndDriverAllotmentComponent implements OnInit {
       const encryptedReservationID = paramsData.reservationID;
       const encryptedPickupDate = paramsData.pickupDate;
       const encryptedPickupAddress = paramsData.pickupAddress;
-      this.status = paramsData.status;
+      this.status = paramsData.status
+        ? this._generalService.decrypt(decodeURIComponent(paramsData.status))
+        : '';
       this.reservationGroupID = this._generalService.decrypt(decodeURIComponent(encryptedReservationGroupID));
       this.reservationID = this._generalService.decrypt(decodeURIComponent(encryptedReservationID));
       this.pickupDate = this._generalService.decrypt(decodeURIComponent(encryptedPickupDate));
@@ -379,6 +381,7 @@ export class CarAndDriverAllotmentComponent implements OnInit {
     // Defer geo lookup and dropdown APIs until the user opens Advance Search.
     //this.updateSelected();
     this.initVehicleCategories();
+    this.InitVendorType();
     // this.getAllDriver();
     //this.GetDriverDutyData();
     // this.reservationInfo?.forEach(item => item.isOpen = true);
@@ -608,11 +611,24 @@ export class CarAndDriverAllotmentComponent implements OnInit {
     this._controlPanelDesignService.getReservationDetailsForAllotmentLite(this.reservationID).subscribe(
       (data: ControlPanelData) => {
         this.markPerf('allotment_lite_loaded');
-        this.applyReservationHeader(data, true);
-        this.scheduleFullReservationDetailsAfterGrid();
+        // Load reservation header only; car/driver table loads after Search.
+        this.applyReservationHeader(data, false);
+        this.loadFullReservationDetails();
+        this.isLoading = false;
       },
       () => {
-        this.loadData(this._filters, this.currentPage, this.recordsPerPage);
+        this._controlPanelDesignService
+          .getReservationDetailsForAllotment(this._filters, this.currentPage, this.recordsPerPage)
+          .subscribe(
+            (data: ControlPanelData) => {
+              this.applyReservationHeader(data, false);
+              this.isLoading = false;
+            },
+            (error: HttpErrorResponse) => {
+              this.reservationInfo = null;
+              this.isLoading = false;
+            }
+          );
       }
     );
   }
@@ -625,6 +641,9 @@ export class CarAndDriverAllotmentComponent implements OnInit {
         this.ShowAllLocation = data.showAllLocation;
         this._filters.showAllLocation = this.ShowAllLocation;
         this.loadAllotmentPageFast();
+      },
+      () => {
+        this.isLoading = false;
       }
     );
   }
@@ -706,7 +725,7 @@ export class CarAndDriverAllotmentComponent implements OnInit {
     this._generalService.GetSupplierType().subscribe
       (
         data => {
-          this.VendorTypeList = data;
+          this.VendorTypeList = data || [];
           this.filteredVendorTypeOptions = this.vendorType.valueChanges.pipe(
             startWith(this.vendorType.value || ''),
             map(value => this._filterVT(value || ''))
@@ -716,14 +735,89 @@ export class CarAndDriverAllotmentComponent implements OnInit {
   }
 
   private _filterVT(value: string): any {
-    const filterValue = value.toLowerCase();
+    const filterValue = (value || '').toLowerCase();
     if (filterValue.length === 0) {
-      return [];
+      return this.VendorTypeList || [];
     }
-    return this.VendorTypeList.filter(
+    return (this.VendorTypeList || []).filter(
       customer => {
         return customer.supplierType.toLowerCase().includes(filterValue);
       }
+    );
+  }
+
+  onKeyupRegnNoDropDown(event?: any) {
+    const Prefix = ((event?.target?.value ?? this.inventory?.value) || '').toString().trim();
+    if (Prefix.length < this._generalService.lengthToCheck) {
+      this.RegNumberList = [];
+      this.filteredRegNumberOptions = of([]);
+      return;
+    }
+    this._generalService.GetRegNoDropDownForControlPanel(Prefix).subscribe(
+      data => {
+        this.RegNumberList = data || [];
+        this.filteredRegNumberOptions = merge(of(Prefix), this.inventory.valueChanges).pipe(
+          map(value => this._filterRegNo((value || '').toString()))
+        );
+      }
+    );
+  }
+
+  onKeyupDriverDropDown(event?: any) {
+    const Prefix = ((event?.target?.value ?? this.driver?.value) || '').toString().trim();
+    if (Prefix.length < this._generalService.lengthToCheck) {
+      this.DriverList = [];
+      this.filteredOptions = of([]);
+      this.driverID = 0;
+      return;
+    }
+    this.driverInventoryAssociationService.GetAllDriverList(Prefix).subscribe(
+      data => {
+        this.DriverList = data || [];
+        this.filteredOptions = merge(of(Prefix), this.driver.valueChanges).pipe(
+          map(value => this._filterQuickSearchDriver((value || '').toString()))
+        );
+      }
+    );
+  }
+
+  private _filterQuickSearchDriver(value: string): any {
+    const filterValue = (value || '').toLowerCase().trim();
+    if (!filterValue || filterValue.length < this._generalService.lengthToCheck) {
+      return [];
+    }
+    return (this.DriverList || []).filter((driver: any) => {
+      const name = (driver.driverName || '').toString().toLowerCase();
+      const mobile = (driver.mobile1 || driver.driverPhone || '').toString().toLowerCase();
+      const supplier = (driver.supplier || driver.supplierName || '').toString().toLowerCase();
+      return name.includes(filterValue) || mobile.includes(filterValue) || supplier.includes(filterValue);
+    });
+  }
+
+  onKeyupVehicleDropDown(event?: any) {
+    const Prefix = ((event?.target?.value ?? this.vehicle?.value) || '').toString().trim();
+    if (Prefix.length < this._generalService.lengthToCheck) {
+      this.VehicleList = [];
+      this.filteredVehicleOptions = of([]);
+      return;
+    }
+    this._generalService.GetVehicleDropDownForControlPanel(Prefix).subscribe(
+      data => {
+        this.VehicleList = data || [];
+        this.filteredVehicleOptions = merge(of(Prefix), this.vehicle.valueChanges).pipe(
+          map(value => this._filterVehicleQuickSearch((value || '').toString()))
+        );
+      }
+    );
+  }
+
+  private _filterVehicleQuickSearch(value: string): any {
+    const filterValue = (value || '').toLowerCase().trim();
+    if (!filterValue || filterValue.length < this._generalService.lengthToCheck) {
+      return [];
+    }
+    return (this.VehicleList || []).filter(
+      vehicle => (vehicle.vehicle || '').toLowerCase().includes(filterValue)
     );
   }
 
@@ -742,7 +836,7 @@ export class CarAndDriverAllotmentComponent implements OnInit {
 
   private _filter(value: string): any {
     const filterValue = value.toLowerCase();
-    if (filterValue.length < 4) {
+    if (filterValue.length < this._generalService.lengthToCheck) {
       return [];
     }
     return this.DriverList.filter(
@@ -924,12 +1018,10 @@ export class CarAndDriverAllotmentComponent implements OnInit {
   private _filterRegNo(value: string): any {
     const filterValue = value.toLowerCase().trim();
 
-    // If the input is empty, return an empty list
-    if (filterValue.length < 4) {
+    if (filterValue.length < this._generalService.lengthToCheck) {
       return [];
     }
 
-    // Return filtered results matching the typed value
     return this.RegNumberList.filter(customer =>
       customer.registrationNumber.toLowerCase().includes(filterValue)
     );

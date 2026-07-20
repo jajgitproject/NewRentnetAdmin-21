@@ -83,8 +83,9 @@ allotmentType: any;
     // ✅ normalize (important)
     this.normalizedStatus = this.status.toLowerCase().trim();
 
-    // ✅ button logic
-    this.buttonDisabled = this.normalizedStatus !== 'changes allow';
+    // Disable Soft/Hard only when a blocking status is present.
+    // Missing/empty status must keep buttons enabled (common when opened without status query param).
+    this.buttonDisabled = this.normalizedStatus.length > 0 && this.normalizedStatus !== 'changes allow';
 
     console.log(this.action);
 
