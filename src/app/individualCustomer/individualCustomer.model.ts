@@ -40,40 +40,40 @@ export class IndividualCustomerModel {
   constructor(individualCustomerModel) {
     {
       this.customerPersonName = individualCustomerModel.customerPersonName || '';
-      this.salutationID = individualCustomerModel.salutationID || '';
+      this.salutationID = individualCustomerModel.salutationID || 0;
       this.salutation = individualCustomerModel.salutation || '';
       this.gender = individualCustomerModel.gender || '';
       this.importance = individualCustomerModel.importance || '';
       this.primaryMobile = individualCustomerModel.primaryMobile || '';
       this.primaryEmail = individualCustomerModel.primaryEmail || '';
       this.billingEmail = individualCustomerModel.billingEmail || '';
-      this.locationID = individualCustomerModel.locationID || '';
+      this.locationID = individualCustomerModel.locationID || 0;
       this.location = individualCustomerModel.location || '';
       this.gstNumber = individualCustomerModel.gstNumber || '';
       this.gstRate = individualCustomerModel.gstRate || '';
       this.billingName = individualCustomerModel.billingName || '';
       this.billingAddress = individualCustomerModel.billingAddress || '';
-      this.billingCityID = individualCustomerModel.billingCityID || '';
+      this.billingCityID = individualCustomerModel.billingCityID || 0;
       this.billingCityName = individualCustomerModel.billingCityName || '';
-      this.billingStateID = individualCustomerModel.billingStateID || '';
+      this.billingStateID = individualCustomerModel.billingStateID || 0;
       this.billingStateName = individualCustomerModel.billingStateName || '';
       this.billingPin = individualCustomerModel.billingPin || '';
       this.eInvoiceAddress = individualCustomerModel.eInvoiceAddress || '';
-      this.employeeID = individualCustomerModel.employeeID || '';
+      this.employeeID = individualCustomerModel.employeeID || 0;
       this.employeeName = individualCustomerModel.employeeName || '';
-      this.customerKAMCityID = individualCustomerModel.customerKAMCityID || '';
+      this.customerKAMCityID = individualCustomerModel.customerKAMCityID || 0;
       this.customerKAMCity = individualCustomerModel.customerKAMCity || '';
       this.roundOffInvoiceValue = individualCustomerModel.roundOffInvoiceValue ?? false;
-      this.salesManagerID = individualCustomerModel.salesManagerID || '';
+      this.salesManagerID = individualCustomerModel.salesManagerID || 0;
       this.salesManagerName = individualCustomerModel.salesManagerName || '';
       this.activationStatus = individualCustomerModel.activationStatus ?? true;
-      this.userID = individualCustomerModel.userID || '';
-      this.customerDesignationID = individualCustomerModel.customerDesignationID || '';
-      this.customerDepartmentID = individualCustomerModel.customerDepartmentID || '';
-      this.countryForISDCodeID = individualCustomerModel.countryForISDCodeID || '';
-      this.maskMobileNumber = individualCustomerModel.maskMobileNumber || '';
+      this.userID = individualCustomerModel.userID || 0;
+      this.customerDesignationID = individualCustomerModel.customerDesignationID || 0;
+      this.customerDepartmentID = individualCustomerModel.customerDepartmentID || 0;
+      this.countryForISDCodeID = individualCustomerModel.countryForISDCodeID || 0;
+      this.maskMobileNumber = individualCustomerModel.maskMobileNumber ?? false;
       this.isPostPickUpCallAllowed = individualCustomerModel.isPostPickUpCallAllowed ?? false;
-      this.customerContractID = individualCustomerModel.customerContractID || '';
+      this.customerContractID = individualCustomerModel.customerContractID || 0;
       this.customerContractName = individualCustomerModel.customerContractName || '';
     }
   }
