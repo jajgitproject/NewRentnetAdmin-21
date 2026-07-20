@@ -737,6 +737,7 @@ getBusinessTypeID(businessTypeID: any)
         this.advanceTable.isPostPickUpCallAllowed ?? false
       ],
       panNo: [this.advanceTable.panNo],
+      customerIdentityNumber: [this.advanceTable.customerIdentityNumber],
       gstCustomerType: [this.advanceTable.gstCustomerType],
       segment: [this.advanceTable.segment],
       businessType: [this.advanceTable.businessType],

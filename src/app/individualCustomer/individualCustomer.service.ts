@@ -51,6 +51,7 @@ export class IndividualCustomerService {
       locationID: toInt(raw.locationID),
       location: raw.location || '',
       gstNumber: raw.gstNumber || null,
+      customerIdentityNumber: raw.customerIdentityNumber || null,
       gstRate: toDecimalOrNull(raw.gstRate),
       billingName: raw.billingName || '',
       billingAddress: raw.billingAddress || '',

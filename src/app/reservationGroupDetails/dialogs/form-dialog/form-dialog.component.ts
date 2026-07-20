@@ -584,9 +584,10 @@ private _filterCCG(value: string): any[] {
     const name  = (customer.customerName || '').toString().toLowerCase();
     const tally = (customer.tallyCustomerID || '').toString().toLowerCase();
     const state = (customer.stateName || '').toString().toLowerCase();
+    const identity = (customer.customerIdentityNumber || '').toString().toLowerCase();
 
-    // Return true if typed value matches name OR tally OR state
-    return name.includes(filterValue) || tally.includes(filterValue) || state.includes(filterValue);
+    // Return true if typed value matches name OR tally OR state OR identity
+    return name.includes(filterValue) || tally.includes(filterValue) || state.includes(filterValue) || identity.includes(filterValue);
   }) || [];
 }
 
@@ -594,7 +595,7 @@ private _filterCCG(value: string): any[] {
 
   onCustomerSelected(selectedCustomerName: string) {
     const selectedCustomer = this.CustomerCustomerGroupList.find(
-     data => data.customerName + '##' + data.tallyCustomerID + '##' + data.stateName === selectedCustomerName
+     data => data.customerName + '##' + data.tallyCustomerID + '##' + data.stateName + '##' + (data.customerIdentityNumber || '') === selectedCustomerName
     );
 
     if (selectedCustomer) {
@@ -649,9 +650,10 @@ private _filterRD(value: string): any[] {
     const name  = (customer.customerName || '').toString().toLowerCase();
     const tally = (customer.tallyCustomerID || '').toString().toLowerCase();
     const state = (customer.stateName || '').toString().toLowerCase();
+    const identity = (customer.customerIdentityNumber || '').toString().toLowerCase();
 
-    // Return true if typed value matches name OR tally OR state
-    return name.includes(filterValue) || tally.includes(filterValue) || state.includes(filterValue);
+    // Return true if typed value matches name OR tally OR state OR identity
+    return name.includes(filterValue) || tally.includes(filterValue) || state.includes(filterValue) || identity.includes(filterValue);
   }) || [];
 }
 
@@ -659,7 +661,7 @@ private _filterRD(value: string): any[] {
 
   onCustomerRDSelected(selectedCustomerName: string) {
     const selectedCustomer = this.CustomerCustomerGroupList.find(
-     data => data.customerName + '##' + data.tallyCustomerID + '##' + data.stateName === selectedCustomerName
+     data => data.customerName + '##' + data.tallyCustomerID + '##' + data.stateName + '##' + (data.customerIdentityNumber || '') === selectedCustomerName
     );
 
     if (selectedCustomer) {
@@ -785,7 +787,7 @@ private _filterRD(value: string): any[] {
     return (control: AbstractControl): ValidationErrors | null => {
       const value = control.value?.toLowerCase();
       const match = CustomerCustomerGroupList.some(customer =>
-        (customer.customerName?.toLowerCase() + '##' + customer.tallyCustomerID+ '##' + customer.stateName?.toLowerCase()) === value
+        (customer.customerName?.toLowerCase() + '##' + customer.tallyCustomerID+ '##' + customer.stateName?.toLowerCase() + '##' + (customer.customerIdentityNumber || '').toString().toLowerCase()) === value
       );
       return match ? null : { customerInvalid: true };
     };
@@ -1327,22 +1329,23 @@ private _filterRD(value: string): any[] {
         const name  = (customer.customerName || '').toString().toLowerCase();
         const tally = (customer.tallyCustomerID || '').toString().toLowerCase();
         const state = (customer.stateName || '').toString().toLowerCase();
+        const identity = (customer.customerIdentityNumber || '').toString().toLowerCase();
 
-        // Return true if typed value matches name OR tally OR state
-        return name.includes(filterValue) || tally.includes(filterValue) || state.includes(filterValue);
+        // Return true if typed value matches name OR tally OR state OR identity
+        return name.includes(filterValue) || tally.includes(filterValue) || state.includes(filterValue) || identity.includes(filterValue);
       }) || [];
     }
 
     customerForRGByKAMValidator(CustomerCustomerGroupList: any[]): ValidatorFn {
       return (control: AbstractControl): ValidationErrors | null => {
         const value = control.value?.toLowerCase();
-        const match = CustomerCustomerGroupList.some(customer => (customer.customerName?.toLowerCase() + '##' + customer.tallyCustomerID + '##' + customer.stateName?.toLowerCase()) === value);
+        const match = CustomerCustomerGroupList.some(customer => (customer.customerName?.toLowerCase() + '##' + customer.tallyCustomerID + '##' + customer.stateName?.toLowerCase() + '##' + (customer.customerIdentityNumber || '').toString().toLowerCase()) === value);
         return match ? null : { customerRGByKAMInvalid: true };
       };
     }
 
     onCustomerRGByKAMSelected(selectedCustomerName: string) {
-      const selectedCustomer = this.CustomerCustomerGroupList.find(data => data.customerName + '##' + data.tallyCustomerID + '##' + data.stateName === selectedCustomerName);
+      const selectedCustomer = this.CustomerCustomerGroupList.find(data => data.customerName + '##' + data.tallyCustomerID + '##' + data.stateName + '##' + (data.customerIdentityNumber || '') === selectedCustomerName);
       if (selectedCustomer) 
       {
         this.applyBookerCreateAllowedFromCustomerRow(selectedCustomer);
@@ -1404,7 +1407,7 @@ private _filterRD(value: string): any[] {
   customerCGForRGByKAMValidator(CustomerCustomerGroupList: any[]): ValidatorFn {
       return (control: AbstractControl): ValidationErrors | null => {
         const value = control.value?.toLowerCase();
-        const match = CustomerCustomerGroupList.some(customer => (customer.customerName?.toLowerCase() + '##' + customer.tallyCustomerID + '##' + customer.stateName?.toLowerCase()) === value);
+        const match = CustomerCustomerGroupList.some(customer => (customer.customerName?.toLowerCase() + '##' + customer.tallyCustomerID + '##' + customer.stateName?.toLowerCase() + '##' + (customer.customerIdentityNumber || '').toString().toLowerCase()) === value);
         return match ? null : { customerRGByKAMInvalid: true };
       };
     }
@@ -1415,13 +1418,14 @@ private _filterRD(value: string): any[] {
       const name  = (customer.customerName || '').toString().toLowerCase();
       const tally = (customer.tallyCustomerID || '').toString().toLowerCase();
       const state = (customer.stateName || '').toString().toLowerCase();
-      // Return true if typed value matches name OR tally OR state
-      return name.includes(filterValue) || tally.includes(filterValue) || state.includes(filterValue);
+      const identity = (customer.customerIdentityNumber || '').toString().toLowerCase();
+      // Return true if typed value matches name OR tally OR state OR identity
+      return name.includes(filterValue) || tally.includes(filterValue) || state.includes(filterValue) || identity.includes(filterValue);
     }) || [];
   }
 
   onCustomerCustomerGroupForRGByKAMSelected(selectedCustomerName: string) {
-    const selectedCustomer = this.CustomerCustomerGroupList.find( data => data.customerName + '##' + data.tallyCustomerID + '##' + data.stateName === selectedCustomerName);
+    const selectedCustomer = this.CustomerCustomerGroupList.find( data => data.customerName + '##' + data.tallyCustomerID + '##' + data.stateName + '##' + (data.customerIdentityNumber || '') === selectedCustomerName);
     if (selectedCustomer) 
     {
       this.applyBookerCreateAllowedFromCustomerRow(selectedCustomer);

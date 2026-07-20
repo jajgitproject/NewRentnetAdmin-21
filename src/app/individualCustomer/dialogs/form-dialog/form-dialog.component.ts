@@ -130,7 +130,8 @@ export class FormDialogComponent
       customerDepartmentID: [this.advanceTable.customerDepartmentID],
       customerDesignationID: [this.advanceTable.customerDesignationID],
       maskMobileNumber:[this.advanceTable.maskMobileNumber],
-      isPostPickUpCallAllowed: [this.advanceTable.isPostPickUpCallAllowed ?? false]
+      isPostPickUpCallAllowed: [this.advanceTable.isPostPickUpCallAllowed ?? false],
+      customerIdentityNumber: [this.advanceTable.customerIdentityNumber]
     });
   }
 

@@ -48,6 +48,7 @@ export class Customer {
       isBookerAllowedToBeCreatedFromReservation:boolean;
       isPostPickUpCallAllowed:boolean;
       panNo:string;
+      customerIdentityNumber:string;
       gstCustomerType:string;
       segment:string;
       businessType:string;
@@ -93,6 +94,7 @@ export class Customer {
        //this.treatAsNewCustomerTillDate=new Date();
        this.customerCreationDate=new Date();
        this.panNo = customer.panNo || '';
+       this.customerIdentityNumber = customer.customerIdentityNumber || '';
        this.gstCustomerType = customer.gstCustomerType || '';
        this.segment = customer.segment || '';
        this.businessType = customer.businessType || '';

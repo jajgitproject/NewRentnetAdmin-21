@@ -54,6 +54,7 @@ export class CustomerComponent implements OnInit {
     'customerID',
     'tallyCustomerID',
     'customerName',
+    'customerIdentityNumber',
     'customerGroup',
     'customerType',
     'customerCategory',

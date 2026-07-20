@@ -99,6 +99,7 @@ export class CustomerService
   }
   add(advanceTable: Customer) 
   {
+    advanceTable = this.sanitizePayload(advanceTable);
     advanceTable.customerCreatedByID=this.generalService.getUserID();
     advanceTable.customerID=-1;
 
@@ -126,6 +127,7 @@ export class CustomerService
   }
   update(advanceTable: Customer)
   {
+    advanceTable = this.sanitizePayload(advanceTable);
     advanceTable.customerCreatedByID=this.generalService.getUserID();
 
     // if(!advanceTable.maximumAgeOfCarToBeSent){
@@ -148,6 +150,56 @@ export class CustomerService
       }
     advanceTable.customerCreationDateString=this.generalService.getTimeApplicableTO(advanceTable.customerCreationDate);
     return this.httpClient.put<any>(this.API_URL , advanceTable);
+  }
+
+  /** Coerce empty strings so System.Text.Json model binding does not return 400. */
+  private sanitizePayload(raw: any): any {
+    const toInt = (v: any, fallback: number = 0) => {
+      if (v === null || v === undefined || v === '') return fallback;
+      const n = Number(v);
+      return Number.isFinite(n) ? n : fallback;
+    };
+    const toBool = (v: any, fallback: boolean = false) => {
+      if (v === null || v === undefined || v === '') return fallback;
+      if (typeof v === 'boolean') return v;
+      if (v === 'true' || v === 1 || v === '1') return true;
+      if (v === 'false' || v === 0 || v === '0') return false;
+      return fallback;
+    };
+
+    return {
+      ...raw,
+      customerID: toInt(raw.customerID, -1),
+      customerGroupID: toInt(raw.customerGroupID),
+      customerTypeID: toInt(raw.customerTypeID),
+      customerCategoryID: toInt(raw.customerCategoryID),
+      companyID: toInt(raw.companyID),
+      corporateCompanyID: toInt(raw.corporateCompanyID),
+      countryForISDCodeID: toInt(raw.countryForISDCodeID),
+      serviceLocationID: toInt(raw.serviceLocationID),
+      customerCreatedByID: toInt(raw.customerCreatedByID),
+      tallyCustomerID: toInt(raw.tallyCustomerID),
+      maximumAgeOfCarToBeSent: toInt(raw.maximumAgeOfCarToBeSent),
+      locationCollectionInterval: toInt(raw.locationCollectionInterval),
+      locationUploadInterval: toInt(raw.locationUploadInterval),
+      locationOutIntervalInMinutes: toInt(raw.locationOutIntervalInMinutes),
+      businessTypeID: toInt(raw.businessTypeID),
+      newCustomer: toBool(raw.newCustomer, false),
+      activationStatus: toBool(raw.activationStatus, true),
+      customerPriority: toBool(raw.customerPriority, false),
+      latLonRequired: toBool(raw.latLonRequired, false),
+      printRunningDetailOnDutySlip: toBool(raw.printRunningDetailOnDutySlip, false),
+      showRateOnDutySlip: toBool(raw.showRateOnDutySlip, false),
+      showOTPOnDutySlip: toBool(raw.showOTPOnDutySlip, false),
+      isBookerAllowedToBeCreatedFromReservation: toBool(raw.isBookerAllowedToBeCreatedFromReservation, false),
+      isPostPickUpCallAllowed: toBool(raw.isPostPickUpCallAllowed, false),
+      customerIdentityNumber: raw.customerIdentityNumber || '',
+      panNo: raw.panNo || '',
+      gstCustomerType: raw.gstCustomerType || '',
+      segment: raw.segment || '',
+      businessType: raw.businessType || '',
+      businessServices: raw.businessServices || '',
+    };
   }
   delete(customerID: number):  Observable<any> 
   {
