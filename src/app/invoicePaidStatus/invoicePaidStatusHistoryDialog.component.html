@@ -1,0 +1,59 @@
+<div class="modalHeader">
+  <div class="editRowModal">
+    <div class="modalHeader clearfix">
+      <div class="modal-about">
+        <div class="font-weight-bold p-t-5 font-17">
+          {{ dialogTitle }} - {{ invoiceNumber || ('Invoice ID: ' + invoiceID) }}
+        </div>
+      </div>
+    </div>
+  </div>
+  <button mat-icon-button (click)="close()" aria-label="Close dialog">
+    <mat-icon class="small-close-icon">close</mat-icon>
+  </button>
+</div>
+
+<mat-card>
+  <mat-card-content *ngIf="loading">
+    <p>Loading invoice history for Invoice ID {{ invoiceID }}...</p>
+  </mat-card-content>
+
+  <mat-card-content *ngIf="!loading && errorMessage">
+    <p class="error-msg">{{ errorMessage }}</p>
+  </mat-card-content>
+
+  <mat-card-content *ngIf="!loading && !errorMessage && historyRows.length > 0">
+    <mat-dialog-content class="of-hidden">
+      <div class="history-table-wrap">
+        <table class="history-table">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Invoice Number</th>
+              <th>Duties</th>
+              <th>Action</th>
+              <th>Date</th>
+              <th>Time</th>
+              <th>Action By</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let historyItem of historyRows; let i = index">
+              <td>{{ i + 1 }}</td>
+              <td>{{ historyItem?.invoiceNumberWithPrefix || invoiceNumber || 'N/A' }}</td>
+              <td>{{ historyItem?.listOfDuties || 'N/A' }}</td>
+              <td>{{ historyItem?.action || 'N/A' }}</td>
+              <td>{{ (historyItem?.actionDate | date:'dd/MM/yyyy') || 'N/A' }}</td>
+              <td>{{ historyItem?.actionTime || 'N/A' }}</td>
+              <td>{{ historyItem?.actionBy || 'N/A' }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </mat-dialog-content>
+  </mat-card-content>
+
+  <mat-card-content *ngIf="!loading && !errorMessage && historyRows.length === 0">
+    <p>No records found in InvoiceHistory for Invoice ID {{ invoiceID }}.</p>
+  </mat-card-content>
+</mat-card>

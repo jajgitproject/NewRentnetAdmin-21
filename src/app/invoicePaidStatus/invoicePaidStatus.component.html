@@ -1,0 +1,194 @@
+<section class="content">
+  <div class="container-fluid">
+    <div class="block-header">
+      <div class="row">
+        <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+          <ul>
+            <li class="breadcrumb-item bcrumb-1">
+              <a routerLink="/dashboard/main"><i class="fas fa-home"></i> Home</a>|
+              <a href="#" onClick="return false;">Billing</a>|
+              <a href="#" onClick="return false;">Invoice Paid Status</a>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="row">
+      <div class="col-lg-12">
+        <div class="card">
+          <div class="body">
+            <mat-accordion class="duty-register-search-accordion">
+              <mat-expansion-panel class="duty-register-inline-search-panel" [expanded]="true">
+                <mat-expansion-panel-header>
+                  <mat-panel-title>Quick Search</mat-panel-title>
+                </mat-expansion-panel-header>
+
+                <div class="duty-register-inline-search-body">
+                  <div class="row duty-register-search quick-search-panel">
+                    <div class="col-lg-3 col-md-4 col-sm-6">
+                      <mat-form-field class="w-100 cp-quick-search-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
+                        <mat-label>Customer Group</mat-label>
+                        <input type="text" matInput [formControl]="customerGroup" [matAutocomplete]="autoGroup" />
+                        <mat-autocomplete #autoGroup="matAutocomplete"
+                          (optionSelected)="onCustomerGroupSelected($event.option.value)">
+                          <mat-option *ngFor="let options of filteredOptions | async"
+                            [value]="options.customerGroup"
+                            (click)="getGroupID(options.customerGroupID)">
+                            {{ options.customerGroup }}
+                          </mat-option>
+                        </mat-autocomplete>
+                      </mat-form-field>
+                    </div>
+
+                    <div class="col-lg-3 col-md-4 col-sm-6">
+                      <mat-form-field class="w-100 cp-quick-search-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
+                        <mat-label>Customer</mat-label>
+                        <input type="text" matInput [formControl]="customer" [matAutocomplete]="autoCustomer"
+                          (keyup)="onKeyupCustomerName($event)" />
+                        <mat-autocomplete #autoCustomer="matAutocomplete"
+                          (optionSelected)="onCustomerSelected($event.option.value)">
+                          <mat-option *ngFor="let option of filteredCustomerOptions | async"
+                            [value]="option.customerName + '##' + (option.customerIdentityNumber || '')">
+                            {{ option.customerName }} ## {{ option.customerIdentityNumber }}
+                          </mat-option>
+                        </mat-autocomplete>
+                      </mat-form-field>
+                    </div>
+
+                    <div class="col-lg-2 col-md-4 col-sm-6">
+                      <mat-form-field class="w-100 cp-quick-search-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
+                        <mat-label>Invoice Date</mat-label>
+                        <input matInput [matDatepicker]="invoiceDatePicker" [(ngModel)]="invoiceDate" />
+                        <mat-datepicker-toggle matSuffix [for]="invoiceDatePicker"></mat-datepicker-toggle>
+                        <mat-datepicker #invoiceDatePicker></mat-datepicker>
+                      </mat-form-field>
+                    </div>
+
+                    <div class="col-lg-2 col-md-4 col-sm-6">
+                      <mat-form-field class="w-100 cp-quick-search-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
+                        <mat-label>Paid Status</mat-label>
+                        <mat-select [(ngModel)]="paidStatus">
+                          <mat-option value="Yes">Yes</mat-option>
+                          <mat-option value="No">No</mat-option>
+                        </mat-select>
+                      </mat-form-field>
+                    </div>
+
+                    <div class="col-lg-2 col-md-4 col-sm-6 d-flex align-items-center gap-actions">
+                      <button mat-raised-button color="primary" (click)="search()" [disabled]="loading || marking">
+                        Search
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </mat-expansion-panel>
+            </mat-accordion>
+
+            <div class="action-row d-flex align-items-center gap-actions">
+              <button mat-raised-button color="accent"
+                (click)="markAsPaid()"
+                [disabled]="marking || loading || !selection.hasValue()">
+                Mark as Paid
+              </button>
+              <button mat-raised-button
+                (click)="markAsUnpaid()"
+                [disabled]="marking || loading || !selection.hasValue()">
+                Mark as Unpaid
+              </button>
+              <span *ngIf="selection.hasValue() && !marking">Selected: {{ selection.selected.length }}</span>
+            </div>
+
+            <div class="mark-progress-panel" *ngIf="marking">
+              <div class="mark-progress-label">
+                {{ markProgressLabel }} ({{ markProgressCurrent }}/{{ markProgressTotal }}) — {{ markProgressPercent }}%
+              </div>
+              <mat-progress-bar mode="determinate" [value]="markProgressPercent"></mat-progress-bar>
+            </div>
+
+            <div class="table-responsive">
+              <table mat-table [dataSource]="rows" class="w-100">
+                <ng-container matColumnDef="select">
+                  <th mat-header-cell *matHeaderCellDef>
+                    <mat-checkbox
+                      (change)="$event ? masterToggle() : null"
+                      [checked]="isAllSelected()"
+                      [indeterminate]="selection.hasValue() && !isAllSelected()">
+                    </mat-checkbox>
+                  </th>
+                  <td mat-cell *matCellDef="let row">
+                    <mat-checkbox
+                      (click)="$event.stopPropagation()"
+                      (change)="$event ? selection.toggle(row) : null"
+                      [checked]="selection.isSelected(row)">
+                    </mat-checkbox>
+                  </td>
+                </ng-container>
+
+                <ng-container matColumnDef="customerName">
+                  <th mat-header-cell *matHeaderCellDef>Customer Name</th>
+                  <td mat-cell *matCellDef="let row">{{ row.customerName }}</td>
+                </ng-container>
+
+                <ng-container matColumnDef="invoiceNumber">
+                  <th mat-header-cell *matHeaderCellDef>Invoice Number</th>
+                  <td mat-cell *matCellDef="let row">{{ row.invoiceNumber }}</td>
+                </ng-container>
+
+                <ng-container matColumnDef="invoiceDate">
+                  <th mat-header-cell *matHeaderCellDef>Invoice Date</th>
+                  <td mat-cell *matCellDef="let row">{{ formatDisplayDate(row.invoiceDate) }}</td>
+                </ng-container>
+
+                <ng-container matColumnDef="invoiceAmount">
+                  <th mat-header-cell *matHeaderCellDef>Invoice Amount</th>
+                  <td mat-cell *matCellDef="let row">{{ formatMoney(row.invoiceAmount) }}</td>
+                </ng-container>
+
+                <ng-container matColumnDef="paidStatus">
+                  <th mat-header-cell *matHeaderCellDef>Paid Status</th>
+                  <td mat-cell *matCellDef="let row">{{ row.paidStatus }}</td>
+                </ng-container>
+
+                <ng-container matColumnDef="paidStatusBy">
+                  <th mat-header-cell *matHeaderCellDef>Paid Status By</th>
+                  <td mat-cell *matCellDef="let row">{{ row.paidStatusBy || '-' }}</td>
+                </ng-container>
+
+                <ng-container matColumnDef="paidMarkedDate">
+                  <th mat-header-cell *matHeaderCellDef>Paid Marked Date</th>
+                  <td mat-cell *matCellDef="let row">{{ formatDisplayDate(row.paidMarkedDate) || '-' }}</td>
+                </ng-container>
+
+                <ng-container matColumnDef="paidMarkedTime">
+                  <th mat-header-cell *matHeaderCellDef>Paid Marked Time</th>
+                  <td mat-cell *matCellDef="let row">{{ row.paidMarkedTime || '-' }}</td>
+                </ng-container>
+
+                <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+                <tr mat-row *matRowDef="let row; columns: displayedColumns"
+                  class="invoice-row-clickable"
+                  (click)="onRowClick(row)"></tr>
+              </table>
+
+              <p *ngIf="loading" class="empty-msg">Loading...</p>
+              <p *ngIf="!loading && searched && rows.length === 0" class="empty-msg">No invoices found.</p>
+              <p *ngIf="!loading && !searched" class="empty-msg">Select filters and click Search.</p>
+
+              <mat-paginator
+                *ngIf="searched && totalCount > 0"
+                [length]="totalCount"
+                [pageIndex]="pageNumber"
+                [pageSize]="pageSize"
+                [pageSizeOptions]="pageSizeOptions"
+                [disabled]="loading || marking"
+                showFirstLastButtons
+                (page)="onPageChange($event)">
+              </mat-paginator>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>

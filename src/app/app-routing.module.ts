@@ -2917,6 +2917,13 @@ const routes: Routes = [
           )
       },
       {
+        path: 'invoicePaidStatus',
+        loadChildren: () =>
+          import('./invoicePaidStatus/invoicePaidStatus.module').then(
+            (m) => m.InvoicePaidStatusModule
+          )
+      },
+      {
         path: 'invoiceSummary',
         loadChildren: () =>
           import('./invoiceSummary/invoiceSummary.module').then(

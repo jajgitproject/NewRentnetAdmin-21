@@ -1193,6 +1193,16 @@ export const ROUTES: RouteInfo[] = [
         isAccess: false
       },
       {
+        path: 'invoicePaidStatus',
+        title: 'Invoice Paid Status',
+        moduleName: 'invoicePaidStatus',
+        icon: 'fas fa-money-check-alt',
+        class: '',
+        groupTitle: false,
+        submenu: [],
+        isAccess: false
+      },
+      {
         path: 'bulkBillsDownload',
         title: 'Bulk Bills Download',
         pageKey: 'Bulk Bills Download',

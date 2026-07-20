@@ -23,6 +23,7 @@ import { MyUploadComponent } from '../myupload/myupload.component';
 import { MyUploadModule } from '../myupload/myupload.module';
 import { InvoiceBillingHistoryComponent } from './invoiceBillingHistory.component';
 import { InvoiceBillingHistoryRoutingModule } from './invoiceBillingHistory-routing.module';
+import { InvoiceBillingHistoryService } from './invoiceBillingHistory.service';
 @NgModule({
   declarations: [
     InvoiceBillingHistoryComponent
@@ -51,7 +52,8 @@ import { InvoiceBillingHistoryRoutingModule } from './invoiceBillingHistory-rout
     MatProgressSpinnerModule,
     MyUploadModule
   ],
-  providers: []
+  providers: [InvoiceBillingHistoryService],
+  exports: [InvoiceBillingHistoryComponent]
 })
 export class InvoiceBillingHistoryModule {}
 
