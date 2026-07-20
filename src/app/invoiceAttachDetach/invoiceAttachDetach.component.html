@@ -48,8 +48,8 @@
                                                                     <input type="text" matInput [matAutocomplete]="auto1" [formControl]="customer">
                                                                     <mat-autocomplete #auto1="matAutocomplete" (optionSelected)="onCustomerSelected($event.option.value)" panelWidth="custom-autocomplete-panel">
                                                                         <mat-option  *ngFor="let option of filteredCustomerOptions | async"
-                                                                        [value]="option.customerName">
-                                                                        {{option.customerName}}
+                                                                        [value]="option.customerName + '##' + (option.customerIdentityNumber || '')">
+                                                                        {{option.customerName}} ## {{option.customerIdentityNumber}}
                                                                         </mat-option>
                                                                     </mat-autocomplete>
                                                                 </mat-form-field>

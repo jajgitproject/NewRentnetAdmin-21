@@ -236,12 +236,27 @@ export class InvoiceAttachDetachComponent implements OnInit {
     });
   }
 
+  private getCustomerNameForSearch(value: any): string {
+    const raw = (value || '').toString().trim();
+    if (!raw) {
+      return raw;
+    }
+    return raw.split('##')[0].trim();
+  }
+
+  private getCustomerDisplayValue(data: CustomerDropDown): string {
+    return data.customerName + '##' + (data.customerIdentityNumber || '');
+  }
+
   private _filterCustomer(value: string): any {
-    const filterValue = value.toLowerCase();
+    const filterValue = this.getCustomerNameForSearch(value).toLowerCase();
     return this.CustomerList.filter(
       data => 
       {
-        return data.customerName.toLowerCase().includes(filterValue);
+        const identity = (data.customerIdentityNumber || '').toString().toLowerCase();
+        return data.customerName.toLowerCase().includes(filterValue)
+          || identity.includes(filterValue)
+          || this.getCustomerDisplayValue(data).toLowerCase().includes(filterValue);
       }
     );
   }
@@ -249,7 +264,7 @@ export class InvoiceAttachDetachComponent implements OnInit {
   onCustomerSelected(customer: string) 
   {
     const selectedCustomer = this.CustomerList.find(
-      data => data.customerName === customer);
+      data => this.getCustomerDisplayValue(data) === customer);
   }
 
   //---------- Branch ----------
@@ -432,7 +447,7 @@ export class InvoiceAttachDetachComponent implements OnInit {
     {
       this.SearchPackage.setValue(this.SearchPackage.value.replace("/","-"));
     }
-    this.invoiceAttachDetachService.getTableData(this.customer.value,this.SearchBranch.value,this.SearchDutySlipID,this.SearchReservationID,this.SearchGSTType,this.SearchDutyFromDate,
+    this.invoiceAttachDetachService.getTableData(this.getCustomerNameForSearch(this.customer.value),this.SearchBranch.value,this.SearchDutySlipID,this.SearchReservationID,this.SearchGSTType,this.SearchDutyFromDate,
       this.SearchDutyToDate,this.SearchPassengerName,this.SearchPassengerMobile,this.SearchPackageType.value,this.SearchPackage.value,
       this.SearchDSStatus,this.SearchBillingStatus,this.SearchVerifyDuty,this.SearchGoodForBilling,this.PageNumber).subscribe
       (
@@ -457,7 +472,7 @@ export class InvoiceAttachDetachComponent implements OnInit {
       this.sortingData = 1;
       this.sortType = "Descending";
     }
-    this.invoiceAttachDetachService.getTableDataSort(this.customer.value,this.SearchBranch.value,this.SearchDutySlipID,this.SearchReservationID,this.SearchGSTType,this.SearchDutyFromDate,
+    this.invoiceAttachDetachService.getTableDataSort(this.getCustomerNameForSearch(this.customer.value),this.SearchBranch.value,this.SearchDutySlipID,this.SearchReservationID,this.SearchGSTType,this.SearchDutyFromDate,
       this.SearchDutyToDate,this.SearchPassengerName,this.SearchPassengerMobile,this.SearchPackageType.value,this.SearchPackage.value,
       this.SearchDSStatus,this.SearchBillingStatus,this.SearchVerifyDuty,this.SearchGoodForBilling,this.PageNumber, coloumName.active, this.sortType).subscribe
     (
@@ -486,7 +501,7 @@ export class InvoiceAttachDetachComponent implements OnInit {
     {
       this.SearchPackage.setValue(this.SearchPackage.value.replace("/","-"));
     }
-    this.invoiceAttachDetachService.getTableDataForEdit(this.InvoiceNumberWithPrefix.replace("/","-"),this.customer.value,this.SearchBranch.value,this.SearchDutySlipID,this.SearchReservationID,this.SearchGSTType,this.SearchDutyFromDate,
+    this.invoiceAttachDetachService.getTableDataForEdit(this.InvoiceNumberWithPrefix.replace("/","-"),this.getCustomerNameForSearch(this.customer.value),this.SearchBranch.value,this.SearchDutySlipID,this.SearchReservationID,this.SearchGSTType,this.SearchDutyFromDate,
       this.SearchDutyToDate,this.SearchPassengerName,this.SearchPassengerMobile,this.SearchPackageType.value,this.SearchPackage.value,
       this.SearchDSStatus,this.SearchBillingStatus,this.PageNumber).subscribe
       (
@@ -511,7 +526,7 @@ export class InvoiceAttachDetachComponent implements OnInit {
       this.sortingData = 1;
       this.sortType = "Descending";
     }
-    this.invoiceAttachDetachService.getTableDataSortForEdit(this.InvoiceNumberWithPrefix.replace("/","-"),this.customer.value,this.SearchBranch.value,this.SearchDutySlipID,this.SearchReservationID,this.SearchGSTType,this.SearchDutyFromDate,
+    this.invoiceAttachDetachService.getTableDataSortForEdit(this.InvoiceNumberWithPrefix.replace("/","-"),this.getCustomerNameForSearch(this.customer.value),this.SearchBranch.value,this.SearchDutySlipID,this.SearchReservationID,this.SearchGSTType,this.SearchDutyFromDate,
       this.SearchDutyToDate,this.SearchPassengerName,this.SearchPassengerMobile,this.SearchPackageType.value,this.SearchPackage.value,
       this.SearchDSStatus,this.SearchBillingStatus,this.PageNumber, coloumName.active, this.sortType).subscribe
     (
