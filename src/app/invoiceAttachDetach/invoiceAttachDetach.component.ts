@@ -146,12 +146,6 @@ export class InvoiceAttachDetachComponent implements OnInit {
     if (this.InvoiceID) {
       this.loadInvoiceBillDate();
     }
-
-    if (!this.InvoiceNumberWithPrefix) {
-      this.loadData();
-    } else {
-      this.loadDataForEdit();
-    }
   });
 
   this.InitCustomer();
