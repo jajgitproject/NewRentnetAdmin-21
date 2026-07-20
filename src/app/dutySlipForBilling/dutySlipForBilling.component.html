@@ -498,6 +498,9 @@
             <mat-checkbox *ngIf="canToggleGoodForBilling" formControlName="goodForBilling" (change)="onGFBChange($event)">
               Good For Billing
             </mat-checkbox>
+            <span *ngIf="isAutoBillingFlagsLocked" style="margin-left:12px;color:#6c757d;font-size:12px;">
+              (Locked — app billing receipt)
+            </span>
             &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
             <button *ngIf="canThisRoleViewDummyInvoice" mat-raised-button color="primary" type="button"
               [disabled]="!canViewDummyInvoice()"

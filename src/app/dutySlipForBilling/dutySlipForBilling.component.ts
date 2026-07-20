@@ -50,6 +50,8 @@ export class DutySlipForBillingComponent implements OnInit, AfterViewInit, OnCha
   @Input() canThisRoleDoGoodForBillingOnClosingScreen = false;
   @Input() canThisRoleViewDummyInvoice = false;
   @Input() canEditDSAfterGoodForBilling = false;
+  @Input() canEditAutoBilling = false;
+  @Input() hasAppBillingReceipt = false;
   @Output() dataSaved: EventEmitter<void> = new EventEmitter();
   @Output() dutyStatusChanged = new EventEmitter<{verifyDuty: boolean, goodForBilling: boolean,message: string}>();
   //@Output() dutyMessage = new EventEmitter<string>();
@@ -101,8 +103,25 @@ export class DutySlipForBillingComponent implements OnInit, AfterViewInit, OnCha
   
 
   ngOnChanges(changes: SimpleChanges): void {
-    if (changes['hasActiveEInvoice'] || changes['canEditDSAfterGoodForBilling'] || changes['advanceTableClosingOne']) {
+    if (changes['disputeAdvanceTable']) {
+      const hasUnapprovedDispute = this.disputeAdvanceTable?.some(d => d.approvalStatus === false);
+      if (hasUnapprovedDispute) {
+        this.advanceTableForm.patchValue({
+          verifyDuty: false,
+          goodForBilling: false
+        });
+      }
+    }
+    if (
+      changes['hasActiveEInvoice'] ||
+      changes['canEditDSAfterGoodForBilling'] ||
+      changes['canEditAutoBilling'] ||
+      changes['hasAppBillingReceipt'] ||
+      changes['canThisRoleDoGoodForBillingOnClosingScreen'] ||
+      changes['advanceTableClosingOne']
+    ) {
       this.applyDutySlipEditLockState();
+      this.syncVerifyDutyAndGoodForBillingState();
     }
   }
 
@@ -1116,6 +1135,13 @@ export class DutySlipForBillingComponent implements OnInit, AfterViewInit, OnCha
     return this.isEInvoiceBlockingEdits || this.isGoodForBillingBlockingEdits;
   }
 
+  get isAutoBillingFlagsLocked(): boolean {
+    const canEdit =
+      this.canEditAutoBilling === true ||
+      localStorage.getItem('canEditAutoBilling') === 'true';
+    return this.hasAppBillingReceipt === true && !canEdit;
+  }
+
   private applyDutySlipEditLockState(): void {
     if (!this.advanceTableForm) {
       return;
@@ -1173,9 +1199,9 @@ export class DutySlipForBillingComponent implements OnInit, AfterViewInit, OnCha
       this.advanceTableForm.controls['verifyDuty'].disable();
       return;
     }
-    if (this.isEInvoiceBlockingEdits) {
-      this.advanceTableForm.get('verifyDuty')?.disable();
-      this.advanceTableForm.get('goodForBilling')?.disable();
+    if (this.isEInvoiceBlockingEdits || this.isAutoBillingFlagsLocked) {
+      this.advanceTableForm.get('verifyDuty')?.disable({ emitEvent: false });
+      this.advanceTableForm.get('goodForBilling')?.disable({ emitEvent: false });
       return;
     }
     this.advanceTableForm.get('verifyDuty')?.enable({ emitEvent: false });
@@ -1683,6 +1709,14 @@ export class DutySlipForBillingComponent implements OnInit, AfterViewInit, OnCha
 
   onGFBChange(event: any) 
     {
+      if (this.isAutoBillingFlagsLocked) {
+        Swal.fire('', 'Verify Duty / Good for Billing are locked for app-triggered auto billing.', 'warning');
+        this.advanceTableForm.patchValue({
+          goodForBilling: this.advanceTableClosingOne?.closingDutySlipForBillingModel?.goodForBilling
+        });
+        this.syncVerifyDutyAndGoodForBillingState();
+        return false;
+      }
       if(this.advanceTableForm.value.verifyDuty===false || this.advanceTableForm.value.verifyDuty==='' || this.advanceTableForm.value.verifyDuty===null)
       {
         Swal.fire('', 'Please Verify Duty Before Good For Billing.', 'warning');
@@ -1777,6 +1811,15 @@ export class DutySlipForBillingComponent implements OnInit, AfterViewInit, OnCha
 
   onVDChange(event: any) {
     
+  if (this.isAutoBillingFlagsLocked) {
+    Swal.fire('', 'Verify Duty / Good for Billing are locked for app-triggered auto billing.', 'warning');
+    this.advanceTableForm.patchValue({
+      verifyDuty: this.advanceTableClosingOne?.closingDutySlipForBillingModel?.verifyDuty
+    });
+    this.syncVerifyDutyAndGoodForBillingState();
+    return;
+  }
+
   const isChecked = event.checked;
 
   if (!this.advanceTableBH) {
@@ -2286,24 +2329,6 @@ public resetVerificationForEcoStateChange(): void {
       })  
   }
 
-  ngOnChanges(changes: SimpleChanges) {
-  if (changes['disputeAdvanceTable']) {
-
-    // ✅ Check if any dispute has approvalStatus === false
-    const hasUnapprovedDispute = this.disputeAdvanceTable?.some(d => d.approvalStatus === false);
-
-    if (hasUnapprovedDispute) {
-      // ✅ Uncheck fields if any unapproved dispute is found
-      this.advanceTableForm.patchValue({
-        verifyDuty: false,
-        goodForBilling: false
-      });
-    }
-  }
-  if (changes['hasActiveEInvoice'] || changes['canThisRoleDoGoodForBillingOnClosingScreen']) {
-    this.syncVerifyDutyAndGoodForBillingState();
-  }
-}
  GetClosingData()
   {
     this.clossingOneService.GetClosingData(this.advanceTableClosingOne.closingDutySlipModel.dutySlipID).subscribe(

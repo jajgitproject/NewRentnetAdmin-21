@@ -274,6 +274,17 @@ export class SigninComponent implements OnInit {
                   ? 'true'
                   : 'false'
               );
+              localStorage.setItem(
+                'canEditAutoBilling',
+                (employee.CanEditAutoBilling === true ||
+                  employee.canEditAutoBilling === true ||
+                  employee.CanEditAutoBilling === 'true' ||
+                  employee.canEditAutoBilling === 'true' ||
+                  employee.CanEditAutoBilling === 1 ||
+                  employee.canEditAutoBilling === 1)
+                  ? 'true'
+                  : 'false'
+              );
               this.calculateDaysLeft();
             }
           } else {

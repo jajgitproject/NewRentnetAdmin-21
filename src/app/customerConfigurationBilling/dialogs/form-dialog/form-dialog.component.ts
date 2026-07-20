@@ -70,6 +70,7 @@ export class FormDialogComponent
           this.dialogTitle = 'Billing Configuration For';
           this.advanceTable = new CustomerConfigurationBilling({});
           this.advanceTable.activationStatus=true;
+          this.advanceTable.triggerBillingFromApp=false;
         }
         this.advanceTableForm = this.createContactForm();
         this.CustomerID=this.data.CustomerID;
@@ -209,6 +210,7 @@ export class FormDialogComponent
       misRequired: [this.advanceTable.misRequired],
       //documentRequired: [this.advanceTable.documentRequired],
       useOnlyAppDataForBilling: [this.advanceTable.useOnlyAppDataForBilling],
+      triggerBillingFromApp: [this.advanceTable.triggerBillingFromApp === true || this.advanceTable.triggerBillingFromApp === false ? this.advanceTable.triggerBillingFromApp : false],
       mapMandatoryWithDutySlip: [this.advanceTable.mapMandatoryWithDutySlip],
       runningDetailsMandatoryWithDutySlip: [this.advanceTable.runningDetailsMandatoryWithDutySlip],
       // fuelSurchargeFormula: [this.advanceTable.fuelSurchargeFormula],

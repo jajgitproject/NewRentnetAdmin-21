@@ -8,6 +8,7 @@ export class CustomerConfigurationBilling {
   misRequired:boolean;
   documentRequired:boolean;
   useOnlyAppDataForBilling:boolean;
+  triggerBillingFromApp:boolean;
   mapMandatoryWithDutySlip:boolean;
   runningDetailsMandatoryWithDutySlip:boolean;
   //fuelSurchargeFormula:string;
@@ -32,6 +33,9 @@ export class CustomerConfigurationBilling {
        this.misRequired = customerConfigurationBilling.misRequired || '';
        this.documentRequired = customerConfigurationBilling.documentRequired || '';
        this.useOnlyAppDataForBilling = customerConfigurationBilling.useOnlyAppDataForBilling || '';
+       this.triggerBillingFromApp = customerConfigurationBilling.triggerBillingFromApp === true || customerConfigurationBilling.triggerBillingFromApp === false
+         ? customerConfigurationBilling.triggerBillingFromApp
+         : false;
        this.mapMandatoryWithDutySlip = customerConfigurationBilling.mapMandatoryWithDutySlip || '';
        this.runningDetailsMandatoryWithDutySlip = customerConfigurationBilling.runningDetailsMandatoryWithDutySlip || '';
       //  this.fuelSurchargeFormula = customerConfigurationBilling.fuelSurchargeFormula || '';

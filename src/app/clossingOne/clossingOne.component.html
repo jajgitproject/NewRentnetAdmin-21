@@ -99,6 +99,8 @@
         [canThisRoleDoGoodForBillingOnClosingScreen]="canThisRoleDoGoodForBillingOnClosingScreen"
         [canThisRoleViewDummyInvoice]="canThisRoleViewDummyInvoice"
         [canEditDSAfterGoodForBilling]="hasDsEditPermission"
+        [canEditAutoBilling]="hasAutoBillingEditPermission"
+        [hasAppBillingReceipt]="hasAppBillingReceipt"
         (dataSaved)="onDataSaved()"
         (dutyStatusChanged)="onDutyStatusChanged($event)"></app-dutySlipForBilling>
     </div>

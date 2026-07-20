@@ -2986,6 +2986,14 @@ const routes: Routes = [
       },
 
       {
+        path: 'appBillingReceipt',
+        loadChildren: () =>
+          import('./appBillingReceipt/appBillingReceipt.module').then(
+            (m) => m.AppBillingReceiptModule
+          )
+      },
+
+      {
         path: 'supplierCityMapping',
         loadChildren: () =>
           import('./supplierCityMapping/supplierCityMapping.module').then(

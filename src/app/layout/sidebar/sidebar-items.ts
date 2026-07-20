@@ -1223,6 +1223,18 @@ export const ROUTES: RouteInfo[] = [
         isAccess: false
       },
       {
+        path: 'appBillingReceipt',
+        title: 'App Billing Receipt',
+        pageKey: 'App Billing Receipt',
+        moduleName: 'appBillingReceipt',
+        alternateAccessPageKeys: ['appBillingReceipt', 'invoiceExport', 'Invoice Export'],
+        icon: 'fas fa-receipt',
+        class: '',
+        groupTitle: false,
+        submenu: [],
+        isAccess: false
+      },
+      {
         path: 'invoiceTemplate',
         title: 'Invoice Template',
         moduleName: 'invoiceTemplate',

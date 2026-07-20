@@ -148,6 +148,10 @@ export class ClossingOneService
   getInvoiceGstByInvoiceCalculationId(invoiceCalculationID: number | string): Observable<any> {
     return this.httpClient.get(this.API_URL_Bill + '/gst/bycalculation/' + invoiceCalculationID);
   }
+
+  getAppBillingReceiptByDutySlipId(dutySlipID: number | string): Observable<any> {
+    return this.httpClient.get(this.generalService.BaseURL + 'appBillingReceipt/' + dutySlipID);
+  }
    getDutySlipMap(dutySlipID:any): Observable<any> {
     return this.httpClient.get<any>(this.API_URL_CurrentDutyInfo +'/' +dutySlipID);
   }

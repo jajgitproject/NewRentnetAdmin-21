@@ -215,6 +215,8 @@ export class ClossingOneComponent implements OnInit, AfterViewInit {
   canThisRoleDoGoodForBillingOnClosingScreen = false;
   canThisRoleViewDummyInvoice = false;
   canEditDSAfterGoodForBilling = false;
+  canEditAutoBilling = false;
+  hasAppBillingReceipt = false;
   templateAddress: any;
   verifyDutyStatusAndCacellationStatus: any = 'Changes allow';
   goodForBillingStatusAndCancellationStatus: any = 'Changes Allow';
@@ -311,6 +313,7 @@ export class ClossingOneComponent implements OnInit, AfterViewInit {
     this.canThisRoleDoGoodForBillingOnClosingScreen = this.readRoleFlagFromStorage('canThisRoleDoGoodForBillingOnClosingScreen');
     this.canThisRoleViewDummyInvoice = this.readRoleFlagFromStorage('canThisRoleViewDummyInvoice');
     this.canEditDSAfterGoodForBilling = this.readRoleFlagFromStorage('canEditDSAfterGoodForBilling');
+    this.canEditAutoBilling = this.readRoleFlagFromStorage('canEditAutoBilling');
     this.route.queryParams.subscribe(paramsData => {
       const encryptedAllotmentID = paramsData.allotmentID;
       this.AllotmentID = this._generalService.decrypt(decodeURIComponent(encryptedAllotmentID));
@@ -395,9 +398,27 @@ export class ClossingOneComponent implements OnInit, AfterViewInit {
         this.verifyDuty = !!this.advanceTableClosingOne?.closingDutySlipForBillingModel?.verifyDuty;
         this.DSClosing = this.advanceTableClosingOne?.closingDutySlipForBillingModel?.dsClosing;
         this.canEditDSAfterGoodForBilling = this.readRoleFlagFromStorage('canEditDSAfterGoodForBilling');
+        this.canEditAutoBilling = this.readRoleFlagFromStorage('canEditAutoBilling');
         this.applyEditBlockStatus();
         this.loadDataForBillNo();
         this.refreshHasActiveInvoiceCalculation();
+        this.loadAppBillingReceiptFlag();
+      }
+    );
+  }
+
+  private loadAppBillingReceiptFlag(): void {
+    const dutySlipId = Number(this.DutySlipID);
+    if (!dutySlipId) {
+      this.hasAppBillingReceipt = false;
+      return;
+    }
+    this.clossingOneService.getAppBillingReceiptByDutySlipId(dutySlipId).subscribe(
+      () => {
+        this.hasAppBillingReceipt = true;
+      },
+      () => {
+        this.hasAppBillingReceipt = false;
       }
     );
   }
@@ -1094,6 +1115,15 @@ export class ClossingOneComponent implements OnInit, AfterViewInit {
   /** Effective DS Edit permission (session flag and/or currentUser employee). */
   get hasDsEditPermission(): boolean {
     return this.canEditDSAfterGoodForBilling === true || this.readRoleFlagFromStorage('canEditDSAfterGoodForBilling');
+  }
+
+  get hasAutoBillingEditPermission(): boolean {
+    return this.canEditAutoBilling === true || this.readRoleFlagFromStorage('canEditAutoBilling');
+  }
+
+  /** App-triggered auto billing locks VerifyDuty / GoodForBilling unless CanEditAutoBilling. */
+  get isAutoBillingFlagsLocked(): boolean {
+    return this.hasAppBillingReceipt === true && !this.hasAutoBillingEditPermission;
   }
 
   get isDutySlipEditBlocked(): boolean {

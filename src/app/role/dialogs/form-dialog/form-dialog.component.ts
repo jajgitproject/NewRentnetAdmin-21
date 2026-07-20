@@ -78,7 +78,8 @@ export class FormDialogComponent
       canResetOdometer: [this.advanceTable.canResetOdometer, Validators.required],
       canDeleteFuelEntry: [this.advanceTable.canDeleteFuelEntry, Validators.required],
       canFindFuelEntry: [this.advanceTable.canFindFuelEntry, Validators.required],
-      canEditDSAfterGoodForBilling: [this.advanceTable.canEditDSAfterGoodForBilling, Validators.required]
+      canEditDSAfterGoodForBilling: [this.advanceTable.canEditDSAfterGoodForBilling, Validators.required],
+      canEditAutoBilling: [this.advanceTable.canEditAutoBilling === true || this.advanceTable.canEditAutoBilling === false ? this.advanceTable.canEditAutoBilling : false, Validators.required]
     });
   }
   submit() 
@@ -108,6 +109,7 @@ export class FormDialogComponent
       canDeleteFuelEntry: toBool(raw.canDeleteFuelEntry),
       canFindFuelEntry: toBool(raw.canFindFuelEntry),
       canEditDSAfterGoodForBilling: toBool(raw.canEditDSAfterGoodForBilling),
+      canEditAutoBilling: toBool(raw.canEditAutoBilling),
     };
   }
 

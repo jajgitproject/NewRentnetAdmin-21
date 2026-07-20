@@ -19,6 +19,7 @@ export class Role {
    canDeleteFuelEntry: boolean;
    canFindFuelEntry: boolean;
    canEditDSAfterGoodForBilling: boolean;
+   canEditAutoBilling: boolean;
 
   constructor(role) {
     {
@@ -42,6 +43,9 @@ export class Role {
        this.canFindFuelEntry = role.canFindFuelEntry ?? role.CanFindFuelEntry ?? '';
        this.canEditDSAfterGoodForBilling = Role.toBoolOrEmpty(
          role.canEditDSAfterGoodForBilling ?? role.CanEditDSAfterGoodForBilling
+       );
+       this.canEditAutoBilling = Role.toBoolOrEmpty(
+         role.canEditAutoBilling ?? role.CanEditAutoBilling
        );
 
     }
