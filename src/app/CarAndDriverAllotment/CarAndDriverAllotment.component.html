@@ -1137,8 +1137,8 @@
                           <mat-form-field class="example-full-width cp-allotment-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
                             <mat-label>Regn. No.</mat-label>
                             <input type="text" matInput [matAutocomplete]="auto81" [formControl]="inventory"
-                                   (keyup)="onKeyupRegnNoDropDown($event)" />
-                            <mat-autocomplete #auto81="matAutocomplete" panelWidth="custom-autocomplete-panel">
+                                   (input)="onKeyupRegnNoDropDown($event)" />
+                            <mat-autocomplete #auto81="matAutocomplete" panelWidth="auto">
                               <mat-option *ngFor="let option of filteredRegNumberOptions | async" [value]="option.registrationNumber">
                                 {{ option.registrationNumber }}
                               </mat-option>
@@ -1150,8 +1150,8 @@
                           <mat-form-field class="example-full-width cp-allotment-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
                             <mat-label>Driver</mat-label>
                             <input type="text" matInput [matAutocomplete]="auto80" [formControl]="driver"
-                                   (keyup)="onKeyupDriverDropDown($event)" />
-                            <mat-autocomplete #auto80="matAutocomplete" panelWidth="custom-autocomplete-panel">
+                                   (input)="onKeyupDriverDropDown($event)" />
+                            <mat-autocomplete #auto80="matAutocomplete" panelWidth="auto">
                               <mat-option *ngFor="let option of filteredOptions | async"
                                           [value]="option.driverName"
                                           (click)="getDriverID(option.driverID)">
@@ -1188,8 +1188,8 @@
                           <mat-form-field class="example-full-width cp-allotment-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
                             <mat-label>Car</mat-label>
                             <input type="text" matInput [matAutocomplete]="auto82" [formControl]="vehicle"
-                                   (keyup)="onKeyupVehicleDropDown($event)" />
-                            <mat-autocomplete #auto82="matAutocomplete" panelWidth="custom-autocomplete-panel">
+                                   (input)="onKeyupVehicleDropDown($event)" />
+                            <mat-autocomplete #auto82="matAutocomplete" panelWidth="auto">
                               <mat-option *ngFor="let option of filteredVehicleOptions | async" [value]="option.vehicle">
                                 {{ option.vehicle }}
                               </mat-option>
@@ -1350,231 +1350,70 @@
                </div> -->
 
               <!-- Search Criteria Ends    -->
-              <mat-accordion displayMode="flat" multi class="mat-table">
-                <section matSort class="mat-elevation-z2 mat-header-row custom-header">
-                  <!-- <span style="width:2px"></span> -->
-                  <span class="mat-header-cell" style="width:60px">
-                    <mat-checkbox color="primary" (change)="checkAll($event.checked)" [checked]="selectAll"
-                      matTooltip="Select All Driver" matTooltipPosition="above">
-                     All Associated
-                    </mat-checkbox>
-                  </span>
-                  <span class="mat-header-cell">
-                    <div class="col-xl-2 col-lg-2 col-md-2 col-sm-12 mb-2">
-                      <mat-progress-spinner *ngIf="isLoadingdata" mode="indeterminate" diameter="30" strokeWidth="4"></mat-progress-spinner>
-                    </div>
-                  </span>
-                  <span class="mat-header-cell">Location</span>
-                  <span class="mat-header-cell">Reg No</span>
-                  <span class="mat-header-cell">Vehicle</span>
-                  <span class="mat-header-cell">Driver</span>
-                  <span class="mat-header-cell">Ownership</span>
-                  <!-- <span class="mat-header-cell">Rating</span>
-                  <span class="mat-header-cell">Monthly Business</span> -->
-                </section>
-
-                <mat-expansion-panel
-                  *ngFor="let data of driverInventoryAssociationDataSource;index as i"
-                  (opened)="onSearchResultPanelOpened(driverInventoryAssociationDataSource[i].driverID,i)"
-                  [ngClass]="{ 'striped-header-odd': i % 2 !== 0, 'striped-header-even': i % 2 === 0 }">
-                  <mat-expansion-panel-header style="height: 60px;" class="mat-row" #panelH>
-                      <span class="mat-cell checkbox-container">
-                        <mat-checkbox color="primary" (click)="panelH._toggle()"
-                          (change)="onCheckBox($event.checked, data)" [checked]="data.checked"
-                          style="margin: 0;width:5px"></mat-checkbox>
-
-                      </span>
-                      <span class="mat-cell" style="
-                    font-size: 12px;
-                    color: rgb(140, 166, 231);
-                    font-style: italic;
-                  ">
-                        <b><button class="BoldButton" mat-button [matMenuTriggerFor]="menu1">
+              <div class="allotment-results-wrap">
+                <div class="allotment-results-loading" *ngIf="isLoadingdata">
+                  <mat-progress-spinner mode="indeterminate" diameter="28" strokeWidth="3"></mat-progress-spinner>
+                </div>
+                <div class="table-responsive">
+                  <table class="allotment-results-table">
+                    <thead>
+                      <tr>
+                        <th class="col-actions">Actions</th>
+                        <th>Location</th>
+                        <th>Reg No</th>
+                        <th>Vehicle</th>
+                        <th>Driver</th>
+                        <th>Ownership</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr *ngFor="let data of driverInventoryAssociationDataSource; index as i"
+                          [class.row-alt]="i % 2 === 1">
+                        <td class="col-actions">
+                          <button mat-button class="BoldButton allotment-actions-btn"
+                                  [matMenuTriggerFor]="rowActionsMenu">
                             Actions
-                          </button></b>
-                      </span>
-                      <!-- Menu for Actions -->
-                      <mat-menu #menu1="matMenu">
-                        <button mat-menu-item (click)="openAllotCarAndDriver(i,'Soft',reservationInfo[0].allotmentID)">
-                          Soft
-                        </button>
-                        <button mat-menu-item (click)="openAllotCarAndDriver(i,'Hard',reservationInfo[0].allotmentID)">
-                          Hard
-                        </button>
-                      </mat-menu>
-
-                      <span class="mat-cell" style="font-size: 12px;margin-left: -20px;">
-                        {{data.organizationalEntityName }}
-                        <!-- <strong>Location:</strong> {{ data.organizationalEntityName }} <br /> -->
-                        <!-- <strong>Reg No.:</strong> {{ data.inventoryName }} <br />
-                      <strong>Vehicle:</strong> {{ data.vehicle }} <br />
-                      <strong>Driver:</strong> {{ data.driverName }} <br />
-                      <strong>Driver Mobile:</strong> {{ data.phone }} <br />
-                      <strong>Veh. Ownership:</strong> {{ data.inventorySupplierType }} <br />
-                      <strong>Supplier Name:</strong> {{ data.supplierName }} -->
-                      </span>
-
-                      <span class="mat-cell" style="font-size: 12px;">
-                        {{ data.inventoryName }}
-                      </span>
-                      <span class="mat-cell" style="font-size: 12px;">
-
-                        {{ data.vehicle }}
-
-                      </span>
-                      <span class="mat-cell" style="font-size: 12px;">
-                        {{ data.driverName }}
-                        <br/>
-                        <span *ngIf="data.driverName!==null">{{ data.driverPhone }}</span>                        
-                      </span>
-                      <span class="mat-cell" style="font-size: 12px;">
-
-                        {{ data.inventorySupplierType }}
-                        <br>
-                        {{ data.inventorySupplierName }}
-
-                      </span>
-                      <!-- <span class="mat-cell" style="font-size: 12px;"> -->
-
-                        <!-- {{ data.driverAverage }} -->
-                        <!-- Phase 2
-
-
-                      </span> -->
-                      <!-- <span class="mat-cell" style="font-size: 12px;"> -->
-
-                        <!-- {{ data.achievementPercentage }} % -->
-                       <!--   Phase 2
-
-                       </span> -->
-
-                      <!-- <span class="mat-cell status-color">
-                      <b>Bookings</b><br />
-                      <span *ngIf="data?.bookingCount; else nobookingCount">
-                        {{ data.bookingCount }} %
-                      </span>
-                      <ng-template #nobookingCount>Data Not Found</ng-template>
-                      <br />
-                      <b>Business</b><br />
-                      <span *ngIf="data?.achievementPercentage; else noAchievement">
-                        {{ data.achievementPercentage }} %
-                      </span>
-                      <ng-template #noAchievement>Data Not Found</ng-template>
-
-                      <br /><br />
-                      <b>Feedback</b><br />
-                      <span *ngIf="data?.driverAverage; else noFeedback">
-                        {{ data.driverAverage }}
-                      </span>
-                      <ng-template #noFeedback>Data Not Found</ng-template>
-                      <br>
-                      <span style="color: red;">
-                        <b>{{ data.restrictedMessage }}</b>
-                      </span>
-                      <br>
-                      <span style="color: red;">
-                        <b>{{ data.carRestrictedMessage }}</b>
-                      </span>
-                    </span> -->
-                  
-                  </mat-expansion-panel-header>
-                  <div style="width: 100%; padding: 10px;">
-                    <mat-card class="full-width-card">
-                      <mat-card-content  class="full-card-content">
-                          <div class="row">
-                       <table class="driver-table">
-                                    <tbody>
-                                      <tr>
-                                        <!-- Driver Name -->
-                                        <td class="TDValueActions">
-                                          <b>Driver Name</b><br />
-                                          {{ data.driverName }}#{{ data.phone }}<br />
-                                          <span>
-                                            <b>
-                                              <!-- <button class="BoldButton" mat-button (click)="AttachAnotherCar(i)">Attach another car</button> -->
-                                            </b><br />
-                                          </span>
-                                        </td>
-
-                                        <!-- Current Car -->
-                                        <td class="TDValueActions">
-                                          <b>Current Car</b><br />
-                                          {{ data.inventoryName }} ({{ data.vehicle }})<br />
-                                          <button class="smallLinkButton" mat-button color="primary" (click)="AttachAnotherDriver(i)">Attach another Driver</button>
-                                        </td>
-
-                                        <!-- Current Location -->
-                                        <td class="TDValueActions">
-                                          <b>Current Location</b><br />
-                                          {{ city }}, {{ province }}<br />
-                                          {{ country }}<br />
-                                        </td>
-
-                                        <!-- Feedback & Comments -->
-                                        <td class="TDValueActions">
-                                          <b>Feedback & Comments</b><br />
-                                          <span>Avg Rating : {{ driverAvg[i] || 'N/A' }}</span><br />
-                                          <button class="smallLinkButton" mat-button color="primary" (click)="DriverFeedbackInfo(i)">View Details</button>
-                                        </td>
-
-                                        <!-- Monthly Business -->
-                                        <!-- <td class="TDValueActions">
-                                          <b>Monthly Business</b><br />
-                                          <span>{{ data.achievementPercentage }} %</span><br /><br />
-                                        </td> -->
-                                      </tr>
-                                    </tbody>
-                                  </table>
-
-                            <table class="col-lg-12 col-md-12 col-sm-12 col-xs-6">
-                              <tbody>
-                                <tr class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
-                                  <td class="TDValueActions col-lg-2 col-md-2 col-sm-2 col-xs-2">
-                                    <button type="button" class="btn btn-primary"
-                                      (click)="openAllotCarAndDriver(i,'Soft',reservationInfo[0].allotmentID)">
-                                      Allot Car & Driver(Soft)
-                                    </button>
-                                  </td>
-
-                                  <td class="TDValueActions col-lg-2 col-md-2 col-sm-2 col-xs-2">
-                                    <button type="button" class="btn btn-primary"
-                                      (click)="openAllotCarAndDriver(i,'Hard',reservationInfo[0].allotmentID)">
-                                      Allot Car & Driver(Hard)
-                                    </button>
-                                  </td>
-                                  <!-- <td
-                                    class="TDValueActions col-lg-2 col-md-2 col-sm-2 col-xs-2"
-                                  >
-                                    <button
-                                      type="button"
-                                      class="btn btn-primary"
-                                      (click)="opencarWithDriver(i)"
-                                      [disabled]="isDisabled"
-                                    >
-                                      Allot Car with other Driver
-                                    </button>
-                                  </td> -->
-                                  <!-- <td
-                                    class="TDValueActions col-lg-2 col-md-2 col-sm-2 col-xs-2"
-                                  >
-                                    <button
-                                      type="button"
-                                      class="btn btn-primary"
-                                      (click)="openDriverWithCar(i)"
-                                      [disabled]="isDisabled"
-                                    >
-                                      Allot Driver with other Car
-                                    </button>
-                                  </td> -->
-                                </tr>
-                              </tbody>
-                            </table>
-                          </div>
-                      </mat-card-content>
-                    </mat-card>
-                  </div>
-                </mat-expansion-panel>
-              </mat-accordion>
+                          </button>
+                          <mat-menu #rowActionsMenu="matMenu">
+                            <button mat-menu-item
+                                    (click)="openAllotCarAndDriver(i,'Soft',reservationInfo[0].allotmentID)">
+                              Allot Car & Driver (Soft)
+                            </button>
+                            <button mat-menu-item
+                                    (click)="openAllotCarAndDriver(i,'Hard',reservationInfo[0].allotmentID)">
+                              Allot Car & Driver (Hard)
+                            </button>
+                            <button mat-menu-item (click)="AttachAnotherDriver(i)">
+                              Attach another Driver
+                            </button>
+                            <button mat-menu-item (click)="DriverFeedbackInfo(i)">
+                              View Feedback Details
+                            </button>
+                          </mat-menu>
+                        </td>
+                        <td>{{ data.organizationalEntityName }}</td>
+                        <td>{{ data.inventoryName }}</td>
+                        <td>{{ data.vehicle }}</td>
+                        <td>
+                          {{ data.driverName }}
+                          <ng-container *ngIf="data.driverName && data.driverPhone">
+                            <br /><span class="secondary-cell">{{ data.driverPhone }}</span>
+                          </ng-container>
+                        </td>
+                        <td>
+                          {{ data.inventorySupplierType }}
+                          <ng-container *ngIf="data.inventorySupplierName">
+                            <br /><span class="secondary-cell">{{ data.inventorySupplierName }}</span>
+                          </ng-container>
+                        </td>
+                      </tr>
+                      <tr *ngIf="!isLoading && (!driverInventoryAssociationDataSource || driverInventoryAssociationDataSource.length === 0)">
+                        <td colspan="6" class="empty-state">No records found. Use Search to load results.</td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
 
               <mat-progress-bar mode="indeterminate" *ngIf="isLoading"></mat-progress-bar>
               <mat-paginator #paginator [length]="unassociatedTotalData || driverInventoryAssociationDataSource?.length || 0" [pageIndex]="PageNumber - 1" [pageSize]="recordsPerPage" (page)="onChangedPage($event)"

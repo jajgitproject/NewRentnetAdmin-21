@@ -260,7 +260,7 @@ export class DriverInventoryAssociationService {
     return this.httpClient.get(this.API_URL_Driver + '/GetDriverList' + "/" + supplierID + "/" + type + "/" + prefix+"/"+CarType);
   }
    GetAllDriverList(prefix: string): Observable<any> {
-    return this.httpClient.get(this.API_URL_Driver + '/GetAllDriverList' + "/"  + prefix);
+    return this.httpClient.get(this.API_URL_Driver + '/GetAllDriverList' + "/"  + encodeURIComponent(prefix));
   }
   getDriverSupplierID(driverID: number) {
     return this.httpClient.get(this.API_URL + '/GetDriverSupplierID' + "/" + driverID);

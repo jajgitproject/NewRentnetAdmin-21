@@ -650,12 +650,12 @@ decrypt(textToDecrypt: string): string{
 
   GetRegNoDropDownForControlPanel(Prefix: string): Observable<InventoryDropDown[]> 
   {
-    return this.http.get<InventoryDropDown[]>(this.BaseURL + "controlPanelDropDown/GetRegNoForDropDown" + '/' + Prefix);
+    return this.http.get<InventoryDropDown[]>(this.BaseURL + "controlPanelDropDown/GetRegNoForDropDown" + '/' + encodeURIComponent(Prefix));
   }
 
   GetVehicleDropDownForControlPanel(Prefix: string): Observable<VehicleDropDown[]> 
   {
-    return this.http.get<VehicleDropDown[]>(this.BaseURL + "controlPanelDropDown/GetVehicleForDropDown" + '/' + Prefix);
+    return this.http.get<VehicleDropDown[]>(this.BaseURL + "controlPanelDropDown/GetVehicleForDropDown" + '/' + encodeURIComponent(Prefix));
   }
 
   GetModeOfPaymentDropDownForControlPanel(Prefix: string): Observable<ModeOfPaymentDropDown[]> 

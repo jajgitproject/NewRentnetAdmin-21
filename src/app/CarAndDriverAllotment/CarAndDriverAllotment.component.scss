@@ -518,3 +518,88 @@ mat-checkbox {
 .full-height-container {
   min-height: 17vh;   /* ya 70vh */
 }
+
+.allotment-results-wrap {
+  position: relative;
+  width: 100%;
+  margin-top: 8px;
+}
+
+.allotment-results-loading {
+  display: flex;
+  justify-content: center;
+  padding: 8px 0 4px;
+}
+
+.allotment-results-table {
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: fixed;
+  background: #fff;
+  border: 1px solid #f5f5f5;
+  font-family: Roboto, 'Helvetica Neue', sans-serif;
+  font-size: 14px;
+  color: rgba(0, 0, 0, 0.87);
+  line-height: 20px;
+
+  thead th {
+    background: #f8f8f8;
+    color: #222;
+    font-weight: 600;
+    font-size: 14px;
+    line-height: 20px;
+    text-align: left;
+    padding: 12px 8px;
+    border-bottom: 1px solid #efefef;
+    white-space: nowrap;
+  }
+
+  tbody td {
+    padding: 12px 8px;
+    vertical-align: middle;
+    border-bottom: 1px solid #efefef;
+    word-wrap: break-word;
+    font-size: 14px;
+    line-height: 20px;
+    background: #fff;
+  }
+
+  tbody tr:hover {
+    background: rgba(18, 25, 41, 0.04);
+  }
+
+  tbody tr.row-alt td {
+    background: #fafafa;
+  }
+
+  tbody tr.row-alt:hover td {
+    background: rgba(18, 25, 41, 0.04);
+  }
+
+  .col-actions {
+    width: 110px;
+    white-space: nowrap;
+  }
+
+  .secondary-cell {
+    color: rgba(0, 0, 0, 0.6);
+    font-size: 14px;
+    line-height: 20px;
+  }
+
+  .empty-state {
+    text-align: center;
+    color: rgba(0, 0, 0, 0.6);
+    padding: 24px 8px;
+    font-size: 14px;
+  }
+}
+
+.allotment-actions-btn {
+  color: rgb(140, 166, 231) !important;
+  font-style: italic;
+  font-size: 14px !important;
+  line-height: 20px !important;
+  height: auto !important;
+  min-height: 20px !important;
+}
