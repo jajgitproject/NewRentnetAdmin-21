@@ -39,6 +39,11 @@ import { DutyExpenseModel } from '../dutyExpense/dutyExpense.model';
 import { DutyGSTPercentage } from '../dutyGSTPercentage/dutyGSTPercentage.model';
 import { DutyState } from '../dutyState/dutyState.model';
 import Swal from 'sweetalert2';
+import { firstValueFrom } from 'rxjs';
+import {
+  confirmMissingGstnForSingleDuty,
+  extractApiErrorMessage
+} from '../shared/customer-invoicing-gstn-confirm.util';
 import { SummaryOfDutyData } from '../summaryOfDuty/summary-of-duty.model';
 import {
   SummaryOfDutyDialogComponent,
@@ -1158,44 +1163,39 @@ export class ClossingOneComponent implements OnInit, AfterViewInit {
   }
 
   //----------Generate Bill----------------
-  public GenerateBill() {
+  public async GenerateBill() {
     if (!this.canThisRoleCreateBillOnClosingScreen || !this.canGenerateBill()) {
       return;
     }
-    this.clossingOneService.generateBill(this.DutySlipID)
-      .subscribe(
-        response => {
-          this.invoiceID = response.invoiceID;
-          //this.refresh();
-          // this.loadDataForDriver();
-          // this.loadDataForApp();
-          // this.loadDataForGPS();
-          // this.loadDataForBilling();
-          // this.KMForPreviousBooking();     
-          this.showNotification(
-            'snackbar-success',
-            'Updated...!!!',
-            'bottom',
-            'center'
-          );
-          //this.ViewBill();
-          this.getInvoiceType()
-        },
-        error => {
-          //this.refresh();
-          // this.loadDataForDriver();
-          // this.loadDataForApp();
-          // this.loadDataForGPS();
-          // this.loadDataForBilling();
-          this.showNotification(
-            'snackbar-danger',
-            'Operation Failed.....!!!',
-            'bottom',
-            'center'
-          );
-        }
-      )
 
+    try {
+      const check = await firstValueFrom(
+        this.clossingOneService.checkCustomerInvoicingGstn(this.DutySlipID)
+      );
+      const confirmation = await confirmMissingGstnForSingleDuty(check);
+      if (!confirmation.proceed) {
+        return;
+      }
+
+      const response = await firstValueFrom(
+        this.clossingOneService.generateBill(this.DutySlipID, confirmation.acknowledgeMissingGstn)
+      );
+      this.invoiceID = response.invoiceID;
+      this.showNotification(
+        'snackbar-success',
+        'Updated...!!!',
+        'bottom',
+        'center'
+      );
+      this.getInvoiceType();
+    } catch (error) {
+      this.showNotification(
+        'snackbar-danger',
+        extractApiErrorMessage(error),
+        'bottom',
+        'center'
+      );
+    }
   }
   public getInvoiceType() {
     if (!this.canThisRoleViewBillOnClosingScreen) {

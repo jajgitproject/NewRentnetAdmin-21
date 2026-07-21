@@ -5,6 +5,9 @@ import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { DatePipe } from '@angular/common';
 import { GeneralService } from '../general/general.service';
 import { BillingHistory, ClosingDetailShowModel, ClosingTableModel, ReservationSalesPersonModel } from './clossingScreen.model';
+import {
+  CustomerInvoicingGstDutyCheckResult
+} from '../shared/customer-invoicing-gstn-confirm.util';
 @Injectable()
 export class ClossingScreenService 
 {
@@ -17,6 +20,7 @@ export class ClossingScreenService
   private API_DutySlipForBilling:string = '';
   private API_CalculateBill:string = '';
   private API_GenerateBill:string = '';
+  private API_CheckCustomerInvoicingGstn:string = '';
   private API_SalesPerson:string = '';
   isTblLoading = true;
   date : any;
@@ -32,6 +36,7 @@ export class ClossingScreenService
     this.API_CalculateBill =generalService.BaseURL+ "InvoiceCalculation/calculate";
     this.API_SalesPerson =generalService.BaseURL+ "ReservationSalesPerson";
     this.API_GenerateBill =generalService.BaseURL+ "InvoiceGeneral/createInvoiceSingleDuty";
+    this.API_CheckCustomerInvoicingGstn = generalService.BaseURL + 'InvoiceGeneral/checkCustomerInvoicingGstn';
   }
 
   addBillingHistory(advanceTable: BillingHistory)
@@ -214,10 +219,17 @@ export class ClossingScreenService
     return this.httpClient.get(this.API_CalculateBill+'/'+dutySlipID);
   }
 
-  generateBill(dutySlipID:any):  Observable<any> 
+  generateBill(dutySlipID:any, acknowledgeMissingGstn = false):  Observable<any> 
   { 
     let userID=this.generalService.getUserID();
-    return this.httpClient.get(this.API_GenerateBill+'/'+dutySlipID + '/'+userID);
+    const query = acknowledgeMissingGstn ? '?acknowledgeMissingGstn=true' : '';
+    return this.httpClient.get(this.API_GenerateBill+'/'+dutySlipID + '/'+userID + query);
+  }
+
+  checkCustomerInvoicingGstn(dutySlipID: number | string): Observable<CustomerInvoicingGstDutyCheckResult> {
+    return this.httpClient.get<CustomerInvoicingGstDutyCheckResult>(
+      `${this.API_CheckCustomerInvoicingGstn}/${dutySlipID}`
+    );
   }
   getTableDataForReservation(reservationID:any):  Observable<any> 
   {

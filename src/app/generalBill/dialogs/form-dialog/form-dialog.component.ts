@@ -55,14 +55,17 @@ export class FormDialogComponent
     this.igstRate = data.igstRate;
     this.igstAmount = data.igstAmount;
     this.action = data.action;
+    const invoiceLabel = data.invoiceNumberWithPrefix
+      ? `General Bill Line Item - ${data.invoiceNumberWithPrefix}`
+      : 'General Bill Line Item';
     if (this.action === 'edit') 
     {
-      this.dialogTitle ='General Bill Line Item';       
+      this.dialogTitle = invoiceLabel;       
       this.advanceTable = data.advanceTable;
     } 
     else 
     {
-      this.dialogTitle = 'General Bill Line Item';
+      this.dialogTitle = invoiceLabel;
       this.advanceTable = new GeneralBillModel({});
       this.advanceTable.activationStatus=true;
     }

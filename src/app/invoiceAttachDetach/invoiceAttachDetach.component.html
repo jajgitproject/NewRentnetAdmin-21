@@ -206,44 +206,53 @@
                                             </div>
                                         </div>
 
-                                        <div style="width: 100%; text-align: right;">
-                                            <p *ngIf="InvoiceNumberWithPrefix && invoiceBillDate" class="text-warning" style="margin-bottom: 8px;">
+                                        <div class="invoice-attach-toolbar">
+                                            <p *ngIf="InvoiceNumberWithPrefix && invoiceBillDate" class="invoice-attach-toolbar__hint text-warning">
                                                 Bill date: {{ invoiceBillDate | date: 'dd-MM-yyyy' }}.
                                                 Duties with billing pickup date after this date cannot be attached.
                                             </p>
-                                            <button mat-raised-button color="primary" data-dismiss="modal"
-                                                data-toggle="modal" data-backDrop="false" *ngIf="InvoiceNumberWithPrefix"
-                                                (click)="AttachDuty()">
-                                                Attach Duty
-                                            </button>
-                                            &nbsp; 
-                                            <button mat-raised-button color="primary" data-dismiss="modal"
-                                                data-toggle="modal" data-backDrop="false"
-                                               *ngIf="!InvoiceNumberWithPrefix"
-                                                (click)="GenerateSingleInvoiceforSingleDuty()">
-                                                Generate Single Invoice for Single Duty
-                                            </button>
-                                            &nbsp; 
-                                            <button mat-raised-button color="primary" data-dismiss="modal"
-                                                data-toggle="modal" data-backDrop="false" *ngIf="!InvoiceNumberWithPrefix"
-                                                (click)="GenerateSingleInvoiceforMultipleDuties()">
-                                                Generate Single Invoice for Multiple Duties
-                                            </button>
-                                            &nbsp; 
-                                            <button mat-raised-button color="primary" data-dismiss="modal"
-                                                data-toggle="modal" data-backDrop="false"
-                                                data-target="#exampleModalCenter">
-                                                Search
-                                            </button>
-                                            &nbsp;                                           
-                                            <button mat-mini-fab color="primary" (click)="refresh()">
-                                                <mat-icon class="col-white">refresh</mat-icon>
-                                            </button>
+                                            <p *ngIf="!InvoiceNumberWithPrefix" class="invoice-attach-toolbar__hint text-muted">
+                                                Single Duty: one invoice per selected duty. Multiple Duties: one combined invoice for 2+ duties.
+                                                Duties must be calculated first (Closing → Verify / Good for Billing).
+                                            </p>
+                                            <div class="invoice-attach-toolbar__actions">
+                                                <button mat-raised-button color="primary" data-dismiss="modal"
+                                                    data-toggle="modal" data-backDrop="false" *ngIf="InvoiceNumberWithPrefix"
+                                                    (click)="AttachDuty()">
+                                                    Attach Duty
+                                                </button>
+                                                <button mat-raised-button color="primary" data-dismiss="modal"
+                                                    data-toggle="modal" data-backDrop="false"
+                                                    *ngIf="!InvoiceNumberWithPrefix"
+                                                    [disabled]="singleDutyGenerateInProgress || multiDutyGenerateInProgress"
+                                                    (click)="GenerateSingleInvoiceforSingleDuty()">
+                                                    {{ singleDutyGenerateInProgress ? 'Generating...' : 'Generate Single Invoice for Single Duty' }}
+                                                </button>
+                                                <button mat-raised-button color="primary" data-dismiss="modal"
+                                                    data-toggle="modal" data-backDrop="false" *ngIf="!InvoiceNumberWithPrefix"
+                                                    [disabled]="singleDutyGenerateInProgress || multiDutyGenerateInProgress"
+                                                    (click)="GenerateSingleInvoiceforMultipleDuties()">
+                                                    {{ multiDutyGenerateInProgress ? 'Generating...' : 'Generate Single Invoice for Multiple Duties' }}
+                                                </button>
+                                                <button mat-raised-button color="primary" data-dismiss="modal"
+                                                    data-toggle="modal" data-backDrop="false"
+                                                    data-target="#exampleModalCenter">
+                                                    Search
+                                                </button>
+                                                <button mat-mini-fab color="primary" (click)="refresh()">
+                                                    <mat-icon class="col-white">refresh</mat-icon>
+                                                </button>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
 
                                
+                                <div *ngIf="!hasSearched" class="alert alert-info" style="background-color:#E8E8E8; text-align: center;">
+                                    Use Search to load duty records.
+                                </div>
+
+                                <ng-container *ngIf="hasSearched">
                                 <p *ngIf="!dataSource; then thenBlock2 else elseBlock2">
                                     This is not rendered
                                 </p>
@@ -265,8 +274,7 @@
                                 </ng-template>
 
                                 <ng-template #elseBlock2>
-                                    <div class="scrollable-table-container">
-                                    <div style="width: 150%; overflow-y: hidden;">
+                                    <div class="scrollable-table-container invoice-attach-grid-wrap">
                                         <mat-table #table [dataSource]="dataSource" matSort class="mat-cell floating-header-table invoice-attach-grid" style="font-size: 11px; line-height: 1.25;"
                                             (matSortChange)="SortingData($event)">
                                             <ng-container matColumnDef="check">
@@ -284,7 +292,7 @@
                                                         (change)="onCheckBox($event.checked, row)"
                                                         [disabled]="!isRowSelectable(row)"
                                                         [checked]="row.checked"
-                                                        [matTooltip]="isRowBlockedByBillDate(row) ? 'Billing pickup date is after bill date' : ''"
+                                                        [matTooltip]="getRowSelectTooltip(row)"
                                                         matTooltipPosition="above">
                                                     </mat-checkbox>
                                                 </mat-cell>
@@ -316,12 +324,6 @@
                                                 <mat-cell *matCellDef="let row" (contextmenu)="onContextMenu($event, row)">
                                                     {{row.customerState}}</mat-cell>
                                             </ng-container>
-                                            <ng-container matColumnDef="CustomerPersonName">
-                                                <mat-header-cell *matHeaderCellDef mat-sort-header><span matTooltip="Passenger Name" matTooltipPosition="above">
-                                                Passen..</span></mat-header-cell>
-                                                <mat-cell *matCellDef="let row" (contextmenu)="onContextMenu($event, row)">
-                                                    {{row.customerPersonName}}</mat-cell>
-                                            </ng-container>
 
                                             <ng-container matColumnDef="BranchName">
                                                 <mat-header-cell *matHeaderCellDef mat-sort-header>Branch</mat-header-cell>
@@ -332,18 +334,12 @@
                                             <ng-container matColumnDef="VerifyDuty">
                                                 <mat-header-cell *matHeaderCellDef mat-sort-header>Verified/GFB/Billed</mat-header-cell>
                                                 <mat-cell *matCellDef="let row" (contextmenu)="onContextMenu($event, row)">
-                                                    {{row.verifyDuty === 'True' ? 'Yes' : 'No'}}
+                                                    {{ formatYesNo(row.verifyDuty) }}
                                                     <br>
-                                                    {{row.goodForBilling === 'True' ? 'Yes' : 'No'}}
+                                                    {{ formatYesNo(row.goodForBilling) }}
                                                     <br>
-                                                    {{row.invoiceID !== 0 ? 'Yes' : 'No' }}
+                                                    {{ row.invoiceID !== 0 ? 'Yes' : 'No' }}
                                                 </mat-cell>
-                                            </ng-container>
-
-                                            <ng-container matColumnDef="InvoiceNumberWithPrefix">
-                                                <mat-header-cell *matHeaderCellDef mat-sort-header>Invoice Number</mat-header-cell>
-                                                <mat-cell *matCellDef="let row" (contextmenu)="onContextMenu($event, row)">
-                                                    {{row.invoiceNumberWithPrefix || 'N/A'}}</mat-cell>
                                             </ng-container>
 
                                             <ng-container matColumnDef="PickUpDate">
@@ -385,17 +381,9 @@
                                             </ng-container>
 
                                             <ng-container matColumnDef="TotalAmountAfterGST">
-                                                <mat-header-cell *matHeaderCellDef mat-sort-header>Amount</mat-header-cell>
+                                                <mat-header-cell *matHeaderCellDef mat-sort-header>Amt</mat-header-cell>
                                                 <mat-cell *matCellDef="let row" (contextmenu)="onContextMenu($event, row)" style="text-align: right;justify-content: flex-end;">
                                                     {{row.totalAmountAfterGST | number:'1.2-2'}}</mat-cell>
-                                            </ng-container>
-                                            
-                                            <ng-container matColumnDef="DiscountPercentage">
-                                                <mat-header-cell *matHeaderCellDef mat-sort-header>Discount % / Discount</mat-header-cell>
-                                                <mat-cell *matCellDef="let row" (contextmenu)="onContextMenu($event, row)" style="text-align: right;justify-content: flex-end;">
-                                                   {{row.discountPercentage}} %
-                                                   <br>
-                                                   {{row.discount | number:'1.2-2'}}</mat-cell>
                                             </ng-container>
                                             
                                              <!-- actions -->
@@ -415,7 +403,6 @@
                                                 [style.cursor]="'pointer'" style="font-size: 11px; line-height: 1.25;" matRipple>
                                             </mat-row>
                                         </mat-table>
-                                    </div>
                                     </div>
 
                                     <!-- context menu start -->
@@ -444,6 +431,7 @@
 
 
                                 </ng-template>
+                                </ng-container>
                             </div>
 
                             

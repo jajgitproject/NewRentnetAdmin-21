@@ -102,9 +102,12 @@ export class FormDialogComponent
         this.action = data.action;
         if (this.action === 'edit') 
         {
-          this.dialogTitle ='General Bill';       
           this.advanceTable = data.advanceTable;
+          this.dialogTitle = this.advanceTable.invoiceNumberWithPrefix
+            ? `General Bill - ${this.advanceTable.invoiceNumberWithPrefix}`
+            : 'General Bill';
           this.advanceTable.isSEZ = this.advanceTable.isSEZ ? 'Yes' : 'No';
+          this.customerID = this.advanceTable.customerID;
         } else 
         {
           this.dialogTitle = 'General Bill';
@@ -166,7 +169,11 @@ export class FormDialogComponent
 
   public ngOnInit()
   {
-    //this.InitGuest();
+    this.initGuestAutocomplete();
+    this.initCustomerAutocomplete();
+    if (!this.customerID) {
+      this.advanceTableForm.get('passengerName')?.disable({ emitEvent: false });
+    }
     this.InitOrganizationalEntity();
     this.InitSAC();
     //this.InitCustomer();
@@ -201,6 +208,20 @@ export class FormDialogComponent
     //this.InitPackageType();
   }
 
+  private initGuestAutocomplete() {
+    this.filteredCustomerPersonOptions = this.advanceTableForm.controls['passengerName'].valueChanges.pipe(
+      startWith(this.advanceTableForm.controls['passengerName'].value || ''),
+      map(value => this._filterCustomerPerson(typeof value === 'string' ? value : ''))
+    );
+  }
+
+  private initCustomerAutocomplete() {
+    this.filteredCustomerOptions = this.advanceTableForm.controls['customer'].valueChanges.pipe(
+      startWith(this.advanceTableForm.controls['customer'].value || ''),
+      map(value => this._filterCustomer(typeof value === 'string' ? value : ''))
+    );
+  }
+
   InitSAC() {
     this._generalService.GetSAC().subscribe(
       (data: DutySACCDropDown[]) => {
@@ -215,37 +236,33 @@ export class FormDialogComponent
   //------------- Guest's Drop Down -------------
   onKeyUpGuest()
   {
-     var Prefix = this.advanceTableForm.get("passengerName").value;
-      if(Prefix.length < 3)
-      { 
-        this.AnotherDriverList = [];
-        return;
-      }
-    this._generalService.getCustomerPersonPrefix(this.customerID,Prefix).subscribe(
-      data=>
-      {
-        this.CustomerPersonList=data;
-        this.advanceTableForm.controls['passengerName'].setValidators([Validators.required,
+    const prefix = (this.advanceTableForm.get('passengerName')?.value || '').trim();
+    if (!this.customerID) {
+      this.CustomerPersonList = [];
+      return;
+    }
+    if (prefix.length < 3) {
+      this.CustomerPersonList = [];
+      return;
+    }
+    this._generalService.getCustomerPersonPrefix(this.customerID, prefix).subscribe(
+      data => {
+        this.CustomerPersonList = data ?? [];
+        this.advanceTableForm.controls['passengerName'].setValidators([
+          Validators.required,
           this.customerPersonTypeValidator(this.CustomerPersonList)
         ]);
-        this.advanceTableForm.controls['passengerName'].updateValueAndValidity();
-        this.filteredCustomerPersonOptions = this.advanceTableForm.controls['passengerName'].valueChanges.pipe(
-          startWith(""),
-          map(value => this._filterCustomerPerson(value || ''))
-        ); 
+        this.advanceTableForm.controls['passengerName'].updateValueAndValidity({ emitEvent: false });
       });
   }
-  private _filterCustomerPerson(value: string): any {
-    const filterValue = value.toLowerCase();
-    // if (!value || value.length < 3) {
-    //   return [];   
-    // }
-    return this.CustomerPersonList?.filter(
-      data => 
-      {
-        return data.customerPersonName.toLowerCase().indexOf(filterValue)===0;
-      }
-    );
+  private _filterCustomerPerson(value: string): CustomerPersonDropDown[] {
+    const filterValue = (value || '').trim().toLowerCase();
+    if (filterValue.length < 3) {
+      return [];
+    }
+    return (this.CustomerPersonList ?? []).filter(
+      data => data.customerPersonName?.toLowerCase().includes(filterValue)
+    ).slice(0, 50);
   }
   getCustomerPersonID(customerPersonID: any) 
   {
@@ -307,38 +324,30 @@ export class FormDialogComponent
   //------------- Customer's Drop Down -------------
   onKeyUpCustomer()
   {
-     var Prefix = this.advanceTableForm.get("customer").value;
-      if(Prefix.length < 3)
-      { 
-        this.AnotherDriverList = [];
-        return;
-      }
-    this._generalService.getCustomerPrefix(Prefix).subscribe(
-    data=>
-      {
-        this.CustomerList=data;
-        this.advanceTableForm.controls['customer'].setValidators([Validators.required,
+    const prefix = (this.advanceTableForm.get('customer')?.value || '').trim();
+    if (prefix.length < 3) {
+      this.CustomerList = [];
+      return;
+    }
+    this._generalService.getCustomerPrefix(prefix).subscribe(
+      data => {
+        this.CustomerList = data ?? [];
+        this.advanceTableForm.controls['customer'].setValidators([
+          Validators.required,
           this.customerValidator(this.CustomerList)
         ]);
-        this.advanceTableForm.controls['customer'].updateValueAndValidity();
-        this.filteredCustomerOptions = this.advanceTableForm.controls['customer'].valueChanges.pipe(
-          startWith(""),
-          map(value => this._filterCustomer(value || ''))
-        );
-      }
-    ); 
-  }
-  private _filterCustomer(value: string): any {
-    const filterValue = value.toLowerCase();
-    // if (!value || value.length < 3) {
-    //   return [];   
-    // }
-    return this.CustomerList.filter(
-      data => 
-      {
-        return data.customerName.toLowerCase().indexOf(filterValue)===0;
+        this.advanceTableForm.controls['customer'].updateValueAndValidity({ emitEvent: false });
       }
     );
+  }
+  private _filterCustomer(value: string): CustomerCustomerGroupDropDown[] {
+    const filterValue = (value || '').trim().toLowerCase();
+    if (filterValue.length < 3) {
+      return [];
+    }
+    return (this.CustomerList ?? []).filter(
+      data => data.customerName?.toLowerCase().includes(filterValue)
+    ).slice(0, 50);
   };
   getCustomerID(customerID:any, customerGroupID:any, customerGroup:any)
   {     
@@ -354,10 +363,17 @@ export class FormDialogComponent
       cityID: '',
       billingAddress: '',
       pinCode: '',
-      isSEZ: ''
+      isSEZ: '',
+      passengerName: '',
+      passengerID: null,
+      customerPersonNameID: null
     });
     this.stateID = null;
     this.cityID = null;
+    this.CustomerPersonList = [];
+    this.customerPersonNameID = null;
+    this.passengerID = null;
+    this.advanceTableForm.get('passengerName')?.enable({ emitEvent: false });
     
     this.InitState(this.customerID);
     // Auto-populate customer address details
@@ -493,7 +509,10 @@ export class FormDialogComponent
       billingAddress: '',
       pinCode: '',
       customerID: '',
-      isSEZ: ''
+      isSEZ: '',
+      passengerName: '',
+      passengerID: null,
+      customerPersonNameID: null
     });
 
     // Clear the component variables
@@ -503,6 +522,10 @@ export class FormDialogComponent
     this.customerGroupID = null;
     this.customerGroup = null;
     this.customerDetailData = null;
+    this.CustomerPersonList = [];
+    this.customerPersonNameID = null;
+    this.passengerID = null;
+    this.advanceTableForm.get('passengerName')?.disable({ emitEvent: false });
 
     // Clear validation errors
     this.clearAddressValidationErrors();

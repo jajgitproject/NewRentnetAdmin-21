@@ -5,10 +5,14 @@ import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { DatePipe } from '@angular/common';
 import { GeneralService } from '../general/general.service';
 import { InvoiceDutyAttachmentModel } from './invoiceDetach.model';
+import {
+  CustomerInvoicingGstBatchCheckResult
+} from '../shared/customer-invoicing-gstn-confirm.util';
 @Injectable()
 export class InvoiceDetachService {
   private API_URL: string = '';
   private API_URL_Post: string = '';
+  private API_CheckCustomerInvoicingGstn: string = '';
   isTblLoading = true;
   date: any;
   Result: string = 'Failure';
@@ -16,6 +20,7 @@ export class InvoiceDetachService {
   {
     this.API_URL = generalService.BaseURL + "invoiceAttachDetach";
     this.API_URL_Post = generalService.BaseURL + "invoiceDutyAttachment";
+    this.API_CheckCustomerInvoicingGstn = generalService.BaseURL + 'InvoiceGeneral/checkCustomerInvoicingGstn';
   }
 
   /** CRUD METHODS */
@@ -24,6 +29,13 @@ export class InvoiceDetachService {
     //advanceTable.invoiceID=0;
     advanceTable.userID=this.generalService.getUserID();
     return this.httpClient.post<any>(this.API_URL_Post , advanceTable);  
+  }
+
+  checkCustomerInvoicingGstnBatch(dutySlipIds: number[]): Observable<CustomerInvoicingGstBatchCheckResult> {
+    return this.httpClient.post<CustomerInvoicingGstBatchCheckResult>(
+      this.API_CheckCustomerInvoicingGstn,
+      { dutySlipIds }
+    );
   }
 
   getTableData(SearchCustomerName:string, SearchBranch:string,  SearchDutySlipID:number, SearchReservationID:number, SearchGSTType:string, SearchDutyFromDate:string, 

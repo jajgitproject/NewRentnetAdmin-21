@@ -159,6 +159,8 @@
 
               <ng-container matColumnDef="nullPrefixCount"><th mat-header-cell *matHeaderCellDef>{{ errorColumnHeader('Null Prefix', 'nullPrefixCount') }}</th><td mat-cell *matCellDef="let r" [ngClass]="severityClass(r,'nullPrefixCount')"><button type="button" class="fd-link" (click)="openCellDrillDown(r, 'Invoice', 'NullPrefix', 'Null Prefix')">{{ r.nullPrefixCount }}</button></td></ng-container>
 
+              <ng-container matColumnDef="prefixMismatchCount"><th mat-header-cell *matHeaderCellDef>{{ errorColumnHeader('Prefix≠Doc', 'prefixMismatchCount') }}</th><td mat-cell *matCellDef="let r" [ngClass]="severityClass(r,'prefixMismatchCount')"><button type="button" class="fd-link" (click)="openCellDrillDown(r, 'Invoice', 'PrefixMismatch', 'Prefix vs Document')">{{ r.prefixMismatchCount }}</button></td></ng-container>
+
               <ng-container matColumnDef="amountMismatchCount"><th mat-header-cell *matHeaderCellDef>{{ errorColumnHeader('Amt Mismatch', 'amountMismatchCount') }}</th><td mat-cell *matCellDef="let r" [ngClass]="severityClass(r,'amountMismatchCount')"><button type="button" class="fd-link" (click)="openCellDrillDown(r, 'Invoice', 'AmountMismatch', 'Amount Mismatch')">{{ r.amountMismatchCount }}</button></td></ng-container>
 
               <ng-container matColumnDef="stateGstMismatchCount"><th mat-header-cell *matHeaderCellDef>{{ errorColumnHeader('State Vs GST', 'stateGstMismatchCount') }}</th><td mat-cell *matCellDef="let r" [ngClass]="severityClass(r,'stateGstMismatchCount')"><button type="button" class="fd-link" (click)="openCellDrillDown(r, 'Invoice', 'StateGstMismatch', 'State GST Mismatch')">{{ r.stateGstMismatchCount }}</button></td></ng-container>
@@ -168,6 +170,8 @@
               <ng-container matColumnDef="taxMismatchCount"><th mat-header-cell *matHeaderCellDef>{{ errorColumnHeader('Tax Mismatch', 'taxMismatchCount') }}</th><td mat-cell *matCellDef="let r" [ngClass]="severityClass(r,'taxMismatchCount')"><button type="button" class="fd-link" (click)="openCellDrillDown(r, 'Invoice', 'TaxMismatch', 'Tax Mismatch')">{{ r.taxMismatchCount }}</button></td></ng-container>
 
               <ng-container matColumnDef="invoiceCalculationMismatchCount"><th mat-header-cell *matHeaderCellDef>{{ errorColumnHeader('Invoice Calc.', 'invoiceCalculationMismatchCount') }}</th><td mat-cell *matCellDef="let r" [ngClass]="severityClass(r,'invoiceCalculationMismatchCount')"><button type="button" class="fd-link" (click)="openCellDrillDown(r, 'Invoice', 'InvoiceCalculation', 'Invoice Calculation')">{{ r.invoiceCalculationMismatchCount }}</button></td></ng-container>
+
+              <ng-container matColumnDef="generalLinkAmountGapCount"><th mat-header-cell *matHeaderCellDef>{{ errorColumnHeader('Gen vs Duties', 'generalLinkAmountGapCount') }}</th><td mat-cell *matCellDef="let r" [ngClass]="severityClass(r,'generalLinkAmountGapCount')"><button type="button" class="fd-link" (click)="openCellDrillDown(r, 'Invoice', 'GeneralLinkAmountGap', 'General vs Linked Duties')">{{ r.generalLinkAmountGapCount }}</button></td></ng-container>
 
               <tr mat-header-row *matHeaderRowDef="invoiceTableColumns"></tr>
 
@@ -208,6 +212,8 @@
               <ng-container matColumnDef="dateViolationCount"><th mat-header-cell *matHeaderCellDef>{{ errorColumnHeader('Date Viol.', 'dateViolationCount', 'CreditNote') }}</th><td mat-cell *matCellDef="let r" [ngClass]="severityClass(r,'dateViolationCount')"><button type="button" class="fd-link" (click)="openCellDrillDown(r, 'CreditNote', 'DateViolation', 'Date Violation')">{{ r.dateViolationCount }}</button></td></ng-container>
 
               <ng-container matColumnDef="nullPrefixCount"><th mat-header-cell *matHeaderCellDef>{{ errorColumnHeader('Null Prefix', 'nullPrefixCount', 'CreditNote') }}</th><td mat-cell *matCellDef="let r" [ngClass]="severityClass(r,'nullPrefixCount')"><button type="button" class="fd-link" (click)="openCellDrillDown(r, 'CreditNote', 'NullPrefix', 'Null Prefix')">{{ r.nullPrefixCount }}</button></td></ng-container>
+
+              <ng-container matColumnDef="prefixMismatchCount"><th mat-header-cell *matHeaderCellDef>{{ errorColumnHeader('Prefix≠Doc', 'prefixMismatchCount', 'CreditNote') }}</th><td mat-cell *matCellDef="let r" [ngClass]="severityClass(r,'prefixMismatchCount')"><button type="button" class="fd-link" (click)="openCellDrillDown(r, 'CreditNote', 'PrefixMismatch', 'Prefix vs Document')">{{ r.prefixMismatchCount }}</button></td></ng-container>
 
               <ng-container matColumnDef="amountMismatchCount"><th mat-header-cell *matHeaderCellDef>{{ errorColumnHeader('Amt Mismatch', 'amountMismatchCount', 'CreditNote') }}</th><td mat-cell *matCellDef="let r" [ngClass]="severityClass(r,'amountMismatchCount')"><button type="button" class="fd-link" (click)="openCellDrillDown(r, 'CreditNote', 'AmountMismatch', 'Amount Mismatch')">{{ r.amountMismatchCount }}</button></td></ng-container>
 

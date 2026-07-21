@@ -15,6 +15,9 @@ import {
   unwrapInvoiceCalculationPayload
 } from '../summaryOfDuty/invoice-calculation-to-summary-of-duty.mapper';
 import { ChangeSupplierForInventoryModel } from './clossingOne.model';
+import {
+  CustomerInvoicingGstDutyCheckResult
+} from '../shared/customer-invoicing-gstn-confirm.util';
 
 export const SUMMARY_LOAD_FAILED_MESSAGE =
   'Bill calculated but summary could not be loaded. Check rate card / GST configuration.';
@@ -33,6 +36,7 @@ export class ClossingOneService
   private API_URL_ReservationInfo ='';
   private API_CalculateBill:string = '';
   private API_GenerateBill:string = '';
+  private API_CheckCustomerInvoicingGstn:string = '';
   private API_URL_CurrentDutyInfo:string = '';
   private API_URL_Bill:string = '';
   isTblLoading = true;
@@ -44,6 +48,7 @@ export class ClossingOneService
     this.API_URL_ClosingData=generalService.BaseURL+ "dutySlipForBilling";
     this.API_URL_ReservationInfo=generalService.BaseURL+ "reservation";
     this.API_GenerateBill =generalService.BaseURL+ "InvoiceGeneral/createInvoiceSingleDuty";
+    this.API_CheckCustomerInvoicingGstn = generalService.BaseURL + 'InvoiceGeneral/checkCustomerInvoicingGstn';
     this.API_CalculateBill =generalService.BaseURL+ "InvoiceCalculation/calculate";
     this.API_URL_CurrentDutyInfo=generalService.BaseURL+ "currentDuty";
     this.API_URL_Bill = generalService.BaseURL + 'invoicecalculation';
@@ -68,10 +73,17 @@ export class ClossingOneService
   {
     return this.httpClient.get(this.API_URL_ReservationInfo + "/"+'getPackageTypeForLTR'+ "/"+ PackageTypeID);
   }
-    generateBill(dutySlipID:any):  Observable<any> 
+    generateBill(dutySlipID:any, acknowledgeMissingGstn = false):  Observable<any> 
   { 
     let userID=this.generalService.getUserID();
-    return this.httpClient.get(this.API_GenerateBill+'/'+dutySlipID + '/'+userID);
+    const query = acknowledgeMissingGstn ? '?acknowledgeMissingGstn=true' : '';
+    return this.httpClient.get(this.API_GenerateBill+'/'+dutySlipID + '/'+userID + query);
+  }
+
+  checkCustomerInvoicingGstn(dutySlipID: number | string): Observable<CustomerInvoicingGstDutyCheckResult> {
+    return this.httpClient.get<CustomerInvoicingGstDutyCheckResult>(
+      `${this.API_CheckCustomerInvoicingGstn}/${dutySlipID}`
+    );
   }
  calculateBill(dutySlipID:any):  Observable<any> 
   { 

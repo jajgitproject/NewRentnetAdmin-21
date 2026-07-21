@@ -1,5 +1,5 @@
 // @ts-nocheck
-import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
+import { Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { GenerateBillMainService } from './generateBillMain.service';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { MatDialog } from '@angular/material/dialog';
@@ -8,8 +8,8 @@ import { MatSort } from '@angular/material/sort';
 import { GenerateBillMainModel } from './generateBillMain.model';
 import { DataSource } from '@angular/cdk/collections';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import { BehaviorSubject, fromEvent, merge, Observable, Subscription } from 'rxjs';
-import { map, startWith } from 'rxjs/operators';
+import { Subscription } from 'rxjs';
+import { finalize } from 'rxjs/operators';
 import { DateAdapter, MAT_DATE_LOCALE } from '@angular/material/core';
 import { MatMenu, MatMenuTrigger } from '@angular/material/menu';
 import { SelectionModel } from '@angular/cdk/collections';
@@ -21,8 +21,6 @@ import { DeleteDialogComponent } from './dialogs/delete/delete.component';
 import { FormControl } from '@angular/forms';
 import { Router } from '@angular/router';
 import moment from 'moment';
-import { CustomerPersonDropDown } from '../customerPerson/customerPersonDropDown.model';
-import { CustomerDropDown } from '../customer/customerDropDown.model';
 
 @Component({
   standalone: false,
@@ -31,7 +29,7 @@ import { CustomerDropDown } from '../customer/customerDropDown.model';
   styleUrls: ['./generateBillMain.component.sass'],
   providers: [{ provide: MAT_DATE_LOCALE, useValue: 'en-GB' }]
 })
-export class GenerateBillMainComponent implements OnInit {
+export class GenerateBillMainComponent implements OnInit, OnDestroy {
   displayedColumns = [
     'invoiceNumberWithPrefix',
     'customerName',
@@ -45,6 +43,8 @@ export class GenerateBillMainComponent implements OnInit {
     'actions'
   ];
   dataSource: GenerateBillMainModel[] | null;
+  hasSearched = false;
+  isLoading = false;
   advanceTable: GenerateBillMainModel | null;
   SearchCustomer: string = '';
   SearchActivationStatus : boolean=true;
@@ -53,10 +53,6 @@ export class GenerateBillMainComponent implements OnInit {
   sortingData: number;
   sortType: string;
   search : FormControl = new FormControl();
-    public CustomerPersonList?:CustomerPersonDropDown[] = [];
-    filteredCustomerPersonOptions:Observable<CustomerPersonDropDown[]>;
-  selectedFilter: string = 'search';
-  searchTerm: any = '';
   invoiceID: any;
   menuItems: any[] = [
     { label: 'Add Details', tooltip: 'Add Details' },
@@ -70,11 +66,6 @@ export class GenerateBillMainComponent implements OnInit {
   SearchEndDate: string = '';
   endDate : FormControl = new FormControl();
   SearchGuset: string='';
-  customerPersonName : FormControl = new FormControl();
-   public CustomerList?: CustomerDropDown[] = [];
-    filteredCustomerOptions: Observable<CustomerDropDown[]>;
-    
-      CustomerName : FormControl = new FormControl();
     
   constructor(
     public httpClient: HttpClient,
@@ -86,30 +77,72 @@ export class GenerateBillMainComponent implements OnInit {
   ) {}
   @ViewChild(MatPaginator, { static: true }) paginator: MatPaginator;
   @ViewChild(MatSort, { static: true }) sort: MatSort;
-  @ViewChild('filter', { static: true }) filter: ElementRef;
   @ViewChild(MatMenuTrigger)
   contextMenu: MatMenuTrigger;
   contextMenuPosition = { x: '0px', y: '0px' };
+  private loadDataSubscription?: Subscription;
+  private updateSubscription?: Subscription;
+
   ngOnInit() 
   {
-    this.loadData();
-    this.InitGuest();
     this.SubscribeUpdateService();
   }
 
-  refresh() 
+  ngOnDestroy() {
+    this.loadDataSubscription?.unsubscribe();
+    this.updateSubscription?.unsubscribe();
+  }
+
+  private formatSearchDate(value: string | Date | null | undefined): string {
+    if (value === '' || value == null) {
+      return '';
+    }
+    return moment(value).format('YYYY-MM-DD');
+  }
+
+  private buildSearchParams() {
+    const guest = (this.SearchGuset || '').trim();
+    const invoiceNumber = (this.SearchInvoiceNumberWithPrefix || '').replace('/', '-');
+    return {
+      customer: (this.SearchCustomer || '').trim(),
+      invoiceNumber,
+      guest,
+      billDate: this.SearchBillDate || '',
+      startDate: this.formatSearchDate(this.SearchStartDate),
+      endDate: this.formatSearchDate(this.SearchEndDate),
+      activationStatus: this.SearchActivationStatus
+    };
+  }
+
+  isIrnGenerated(row: any): boolean {
+    if (!row) {
+      return false;
+    }
+    const status = row.irnStatus ?? row.IRNStatus ?? '';
+    if (status === 'Generated') {
+      return true;
+    }
+    const irn = row.irn ?? row.IRN ?? '';
+    return typeof irn === 'string' && irn.trim().length > 0;
+  }
+
+  refresh(reload = false) 
   {
-    this.selectedFilter='search';
-    this.SearchStartDate='';
-    this.SearchEndDate='';
-    this.searchTerm='';
     this.SearchCustomer = '';
-     this.SearchGuset='';
-    this.SearchBillDate='';
-    this.SearchInvoiceNumberWithPrefix='';
+    this.SearchInvoiceNumberWithPrefix = '';
+    this.SearchGuset = '';
+    this.SearchBillDate = '';
+    this.SearchStartDate = '';
+    this.SearchEndDate = '';
     this.SearchActivationStatus = true;
-    this.PageNumber=0;
-    this.loadData();
+    this.PageNumber = 0;
+    if (reload) {
+      this.hasSearched = true;
+      this.loadData();
+    } else {
+      this.hasSearched = false;
+      this.dataSource = null;
+    }
   }
 
   addNew()
@@ -126,10 +159,8 @@ export class GenerateBillMainComponent implements OnInit {
     });
      dialogRef.afterClosed().subscribe((invoiceNo) => {
     if (invoiceNo) {
-      this.selectedFilter = 'invoiceNumber';
-      this.searchTerm = invoiceNo;
       this.SearchInvoiceNumberWithPrefix = invoiceNo;
-
+      this.PageNumber = 0;
       this.loadData();
     }
   });
@@ -161,18 +192,13 @@ shouldShowDeleteButton(item: any): boolean {
   return item.activationStatus !== false; // Only show delete button if activationStatus is not false (not deleted)
 }
 
-  public Filter()
+  public SearchData()
   {
+    if (this.isLoading) {
+      return;
+    }
     this.PageNumber = 0;
     this.loadData();
-  }
-
-  onBackPress(event) 
-  {
-    if (event.keyCode === 8) 
-    {
-      this.loadData();
-    }
   }
 
   openInNewTab(menuItem: any, rowItem: any) 
@@ -181,6 +207,7 @@ shouldShowDeleteButton(item: any): boolean {
     if(menuItem.label.toLowerCase() === 'add details') {
       const url = this.router.serializeUrl(this.router.createUrlTree(['/generalBill'], { queryParams: {
         invoiceID: rowItem.invoiceID,
+        invoiceNumberWithPrefix: rowItem.invoiceNumberWithPrefix,
         cgstRate: rowItem.cgstRate,
         cgstAmount: rowItem.cgstAmount,
         sgstRate: rowItem.sgstRate,
@@ -216,44 +243,32 @@ shouldShowDeleteButton(item: any): boolean {
 
    public loadData() 
    {
-    if(this.SearchStartDate!=="")
-    {
-      this.SearchStartDate=moment(this.SearchStartDate).format('YYYY-MM-DD');
+    if (this.isLoading) {
+      return;
     }
-    if(this.SearchEndDate!=="")
-    {
-      this.SearchEndDate=moment(this.SearchEndDate).format('YYYY-MM-DD');
-    }
-    switch (this.selectedFilter)
-    {
-      case 'customer':
-        this.SearchCustomer = this.searchTerm;
-        break;
-        case 'guest':
-        this.SearchGuset = this.searchTerm;
-        break;
-      case 'invoiceNumber':
-        this.SearchInvoiceNumberWithPrefix = this.searchTerm;
-        break;
-      case 'billDate':
-        this.SearchBillDate = this.searchTerm;
-        break;
-      default:
-        this.searchTerm = '';
-        break;
-    }
-    if(this.customerPersonName.value)
-    {
-   this.SearchGuset=this.customerPersonName.value;
-    }
-      this.generateBillMainService.getTableData(this.SearchCustomer,this.SearchInvoiceNumberWithPrefix.replace("/","-"),this.SearchGuset,this.SearchBillDate,this.SearchStartDate,this.SearchEndDate,this.SearchActivationStatus, this.PageNumber).subscribe
-      (
-        data =>   
-        {
+    this.hasSearched = true;
+    this.isLoading = true;
+    const params = this.buildSearchParams();
+    this.loadDataSubscription?.unsubscribe();
+    this.loadDataSubscription = this.generateBillMainService
+      .getTableData(
+        params.customer,
+        params.invoiceNumber,
+        params.guest,
+        params.billDate,
+        params.startDate,
+        params.endDate,
+        params.activationStatus,
+        this.PageNumber
+      )
+      .pipe(finalize(() => { this.isLoading = false; }))
+      .subscribe(
+        data => {
           this.dataSource = data;
-          console.log("dataSource",this.dataSource);
         },
-        (error: HttpErrorResponse) => { this.dataSource = null;}
+        (_error: HttpErrorResponse) => {
+          this.dataSource = null;
+        }
       );
   }
   showNotification(colorName, text, placementFrom, placementAlign) {
@@ -289,13 +304,6 @@ shouldShowDeleteButton(item: any): boolean {
     } 
   }
 
-  public SearchData()
-  {
-    this.loadData();
-    //this.SearchGenerateBillMain='';
-    
-  }
-
 /////////////////for Image Upload////////////////////////////
   public response: { dbPath: '' };
   public ImagePath: string;
@@ -308,11 +316,10 @@ shouldShowDeleteButton(item: any): boolean {
   /////////////////To Recieve Updates Start////////////////////////////
   messageReceived: string;
   MessageArray:string[]=[];
-  private subscriptionName: Subscription; //important to create a subscription
 
   SubscribeUpdateService()
   {
-    this.subscriptionName=this._generalService.getUpdate().subscribe
+    this.updateSubscription=this._generalService.getUpdate().subscribe
     (
       message => 
       { 
@@ -327,7 +334,9 @@ shouldShowDeleteButton(item: any): boolean {
             {
               if(this.MessageArray[2]=="Success")
               {
-                this.refresh();
+                if (this.hasSearched) {
+                  this.loadData();
+                }
                 this.showNotification(
                 'snackbar-success',
                 'Generate Bill Main Created...!!!',
@@ -343,7 +352,9 @@ shouldShowDeleteButton(item: any): boolean {
             {
               if(this.MessageArray[2]=="Success")
               {
-               this.refresh();
+               if (this.hasSearched) {
+                 this.loadData();
+               }
                this.showNotification(
                 'snackbar-success',
                 'Generate Bill Main Updated...!!!',
@@ -359,7 +370,9 @@ shouldShowDeleteButton(item: any): boolean {
             {
               if(this.MessageArray[2]=="Success")
               {
-               this.refresh();
+               if (this.hasSearched) {
+                 this.loadData();
+               }
                this.showNotification(
                 'snackbar-success',
                 'Generate Bill Main Deleted...!!!',
@@ -375,7 +388,9 @@ shouldShowDeleteButton(item: any): boolean {
             {
               if(this.MessageArray[2]=="Failure")
               {
-               this.refresh();
+               if (this.hasSearched) {
+                 this.loadData();
+               }
                this.showNotification(
                 'snackbar-danger',
                 'Operation Failed.....!!!',
@@ -391,7 +406,9 @@ shouldShowDeleteButton(item: any): boolean {
             {
               if(this.MessageArray[2]=="Failure")
               {
-               this.refresh();
+               if (this.hasSearched) {
+                 this.loadData();
+               }
                this.showNotification(
                 'snackbar-danger',
                 'Duplicate Value Found.....!!!',
@@ -406,32 +423,11 @@ shouldShowDeleteButton(item: any): boolean {
     );
   }
 
-   InitGuest(){
-      this._generalService.getCustomerPerson().subscribe(
-        data=>{
-          this.CustomerPersonList=data;
-          this.filteredCustomerPersonOptions = this.customerPersonName.valueChanges.pipe(
-            startWith(""),
-            map(value => this._filterCustomerPerson(value || ''))
-          ); 
-        }
-      )
-    }
-    private _filterCustomerPerson(value: string): any {
-      const filterValue = value.toLowerCase();
-    //   if (!value || value.length < 3) {
-    //   return [];   
-    // }
-      return this.CustomerPersonList?.filter(
-        customer => 
-        {
-          return customer.customerPersonName.toLowerCase().indexOf(filterValue)===0;
-        }
-      );
-    }
-
   SortingData(coloumName:any) 
   {
+    if (!this.hasSearched || this.isLoading) {
+      return;
+    }
     if (this.sortingData == 1) {
 
       this.sortingData = 0;
@@ -441,14 +437,31 @@ shouldShowDeleteButton(item: any): boolean {
       this.sortingData = 1;
       this.sortType = "Descending";
     }
-    this.generateBillMainService.getTableDataSort(this.SearchCustomer,this.SearchInvoiceNumberWithPrefix,this.SearchGuset,this.SearchBillDate,this.SearchStartDate,this.SearchEndDate,this.SearchActivationStatus, this.PageNumber,coloumName.active,this.sortType).subscribe
-    (
-      data =>   
-      {
-        this.dataSource = data;
-      },
-      (error: HttpErrorResponse) => { this.dataSource = null;}
-    );
+    const params = this.buildSearchParams();
+    this.isLoading = true;
+    this.loadDataSubscription?.unsubscribe();
+    this.loadDataSubscription = this.generateBillMainService
+      .getTableDataSort(
+        params.customer,
+        params.invoiceNumber,
+        params.guest,
+        params.billDate,
+        params.startDate,
+        params.endDate,
+        params.activationStatus,
+        this.PageNumber,
+        coloumName.active,
+        this.sortType
+      )
+      .pipe(finalize(() => { this.isLoading = false; }))
+      .subscribe(
+        data => {
+          this.dataSource = data;
+        },
+        (_error: HttpErrorResponse) => {
+          this.dataSource = null;
+        }
+      );
   }
 }
 

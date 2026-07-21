@@ -130,6 +130,18 @@ convertNumberToWords(amount: number): string {
   window.location.reload(); // Reload to reset the original content
 }
 
+  formatExtraKmsHrs(lineItem: any): string {
+    if (!lineItem) {
+      return '';
+    }
+    const quantity = lineItem.quantity ?? lineItem.Quantity;
+    if (quantity == null || quantity === '' || Number(quantity) === 0) {
+      return '';
+    }
+    const uom = (lineItem.uom ?? lineItem.UOM ?? '').toString().trim();
+    return uom ? `${quantity} ${uom}` : `${quantity}`;
+  }
+
 }
 
 

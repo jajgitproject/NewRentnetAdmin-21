@@ -15,18 +15,53 @@ export class InvoiceAttachDetachService {
     this.API_URL = generalService.BaseURL + "invoiceAttachDetach";
   }
 
+  /** Encode path segment; trailing '.' before '/null' breaks ASP.NET routing (LIMITED./null). */
+  private toRouteParam(value: any): string {
+    if (value === null || value === undefined) {
+      return 'null';
+    }
+    const text = String(value).trim();
+    if (text === '' || text === 'null') {
+      return 'null';
+    }
+    if (text.startsWith('#')) {
+      return encodeURIComponent(text);
+    }
+    let normalized = text;
+    while (normalized.endsWith('.')) {
+      normalized = normalized.slice(0, -1);
+    }
+    return encodeURIComponent(normalized).replace(/\./g, '%2E');
+  }
+
+  private toRouteBoolParam(value: boolean | null | undefined): string {
+    if (value === null || value === undefined) {
+      return 'null';
+    }
+    return String(value);
+  }
+
+  private buildGetAllInvoiceAttachPath(
+    SearchCustomerName: string, SearchBranch: string, SearchDutySlipID: number, SearchReservationID: number,
+    SearchGSTType: string, SearchDutyFromDate: string, SearchDutyToDate: string, SearchPassengerName: string,
+    SearchPassengerMobile: string, SearchPackageType: string, SearchPackage: string, SearchDSStatus: string,
+    SearchBillingStatus: boolean, SearchVerifyDuty: boolean, SearchGoodForBilling: boolean,
+    PageNumber: number, coloumName: string, sortType: string): string {
+    return `${this.API_URL}/GetAllInvoiceAttach/${this.toRouteParam(SearchCustomerName)}/${this.toRouteParam(SearchBranch)}/${SearchDutySlipID}/${SearchReservationID}/${this.toRouteParam(SearchGSTType)}/${this.toRouteParam(SearchDutyFromDate)}/${this.toRouteParam(SearchDutyToDate)}/${this.toRouteParam(SearchPassengerName)}/${this.toRouteParam(SearchPassengerMobile)}/${this.toRouteParam(SearchPackageType)}/${this.toRouteParam(SearchPackage)}/${this.toRouteParam(SearchDSStatus)}/${this.toRouteBoolParam(SearchBillingStatus)}/${this.toRouteBoolParam(SearchVerifyDuty)}/${this.toRouteBoolParam(SearchGoodForBilling)}/${PageNumber}/${encodeURIComponent(coloumName)}/${encodeURIComponent(sortType)}`;
+  }
+
+  private buildGetAllInvoiceAttachForEditPath(
+    SearchInvoiceNumberWithPrefix: string, SearchCustomerName: string, SearchBranch: string, SearchDutySlipID: number,
+    SearchReservationID: number, SearchGSTType: string, SearchDutyFromDate: string, SearchDutyToDate: string,
+    SearchPassengerName: string, SearchPassengerMobile: string, SearchPackageType: string, SearchPackage: string,
+    SearchDSStatus: string, SearchBillingStatus: boolean, PageNumber: number, coloumName: string, sortType: string): string {
+    return `${this.API_URL}/GetAllInvoiceAttachForEdit/${this.toRouteParam(SearchInvoiceNumberWithPrefix)}/${this.toRouteParam(SearchCustomerName)}/${this.toRouteParam(SearchBranch)}/${SearchDutySlipID}/${SearchReservationID}/${this.toRouteParam(SearchGSTType)}/${this.toRouteParam(SearchDutyFromDate)}/${this.toRouteParam(SearchDutyToDate)}/${this.toRouteParam(SearchPassengerName)}/${this.toRouteParam(SearchPassengerMobile)}/${this.toRouteParam(SearchPackageType)}/${this.toRouteParam(SearchPackage)}/${this.toRouteParam(SearchDSStatus)}/${this.toRouteBoolParam(SearchBillingStatus)}/${PageNumber}/${encodeURIComponent(coloumName)}/${encodeURIComponent(sortType)}`;
+  }
+
   /** CRUD METHODS */
   getTableData(SearchCustomerName:string, SearchBranch:string,  SearchDutySlipID:number, SearchReservationID:number, SearchGSTType:string, SearchDutyFromDate:string, 
     SearchDutyToDate:string, SearchPassengerName:string, SearchPassengerMobile:string, SearchPackageType:string, SearchPackage:string, SearchDSStatus:string, 
     SearchBillingStatus:boolean,SearchVerifyDuty:boolean,SearchGoodForBilling:boolean,PageNumber: number): Observable<any> {  
-    if (SearchCustomerName === "")
-    {
-      SearchCustomerName = "null";
-    }
-    if (SearchBranch === "")
-    {
-      SearchBranch = "null";
-    }
     if (SearchDutySlipID === null || SearchDutySlipID === undefined)
     {
       SearchDutySlipID = 0;
@@ -34,65 +69,16 @@ export class InvoiceAttachDetachService {
     if (SearchReservationID === null || SearchReservationID === undefined)
     {
       SearchReservationID = 0;
-    }    
-    if (SearchGSTType === "")
-    {
-      SearchGSTType = "null";
     }
-    if (SearchDutyFromDate === "")
-    {
-      SearchDutyFromDate = "null";
-    }
-    if (SearchDutyToDate === "")
-    {
-      SearchDutyToDate = "null";
-    }
-    if (SearchPassengerName === "")
-    {
-      SearchPassengerName = "null";
-    }
-    if (SearchPassengerMobile === "")
-    {
-      SearchPassengerMobile = "null";
-    }
-    if (SearchPackageType === "")
-    {
-      SearchPackageType = "null";
-    }
-    if (SearchPackage === "")
-    {
-      SearchPackage = "null";
-    }
-    if (SearchDSStatus === "")
-    {
-      SearchDSStatus = "null";
-    }
-    if (SearchBillingStatus === null || SearchBillingStatus === undefined)
-    {
-      SearchBillingStatus = null;
-    }
-    if (SearchVerifyDuty === null || SearchVerifyDuty === undefined)
-    {
-      SearchVerifyDuty = null;
-    }
-    if (SearchGoodForBilling === null || SearchGoodForBilling === undefined)
-    {
-      SearchGoodForBilling = null;
-    }
-    return this.httpClient.get(this.API_URL + "/" + 'GetAllInvoiceAttach' + '/' + SearchCustomerName + '/'+ SearchBranch + '/' + SearchDutySlipID + '/' + SearchReservationID + '/' + SearchGSTType + '/' + SearchDutyFromDate + '/' + SearchDutyToDate + '/' + SearchPassengerName + '/' + SearchPassengerMobile + '/' + SearchPackageType + '/' + SearchPackage + '/' + SearchDSStatus + '/' + SearchBillingStatus + '/' + SearchVerifyDuty + '/' + SearchGoodForBilling + '/' + PageNumber + '/DutySlipID/Descending');
+    return this.httpClient.get(this.buildGetAllInvoiceAttachPath(
+      SearchCustomerName, SearchBranch, SearchDutySlipID, SearchReservationID, SearchGSTType, SearchDutyFromDate,
+      SearchDutyToDate, SearchPassengerName, SearchPassengerMobile, SearchPackageType, SearchPackage, SearchDSStatus,
+      SearchBillingStatus, SearchVerifyDuty, SearchGoodForBilling, PageNumber, 'DutySlipID', 'Descending'));
   }
 
   getTableDataSort(SearchCustomerName:string, SearchBranch:string,  SearchDutySlipID:number, SearchReservationID:number, SearchGSTType:string, SearchDutyFromDate:string, 
     SearchDutyToDate:string, SearchPassengerName:string, SearchPassengerMobile:string, SearchPackageType:string, SearchPackage:string, SearchDSStatus:string, 
     SearchBillingStatus:boolean,SearchVerifyDuty:boolean,SearchGoodForBilling:boolean,PageNumber: number, coloumName: string, sortType: string): Observable<any> {
-    if (SearchCustomerName === "")
-    {
-      SearchCustomerName = "null";
-    }
-    if (SearchBranch === "")
-    {
-      SearchBranch = "null";
-    }
     if (SearchDutySlipID === null)
     {
       SearchDutySlipID = 0;
@@ -100,70 +86,17 @@ export class InvoiceAttachDetachService {
     if (SearchReservationID === null)
     {
       SearchReservationID = 0;
-    }    
-    if (SearchGSTType === "")
-    {
-      SearchGSTType = "null";
     }
-    if (SearchDutyFromDate === "")
-    {
-      SearchDutyFromDate = "null";
-    }
-    if (SearchDutyToDate === "")
-    {
-      SearchDutyToDate = "null";
-    }
-    if (SearchPassengerName === "")
-    {
-      SearchPassengerName = "null";
-    }
-    if (SearchPassengerMobile === "")
-    {
-      SearchPassengerMobile = "null";
-    }
-    if (SearchPackageType === "")
-    {
-      SearchPackageType = "null";
-    }
-    if (SearchPackage === "")
-    {
-      SearchPackage = "null";
-    }
-    if (SearchDSStatus === "")
-    {
-      SearchDSStatus = "null";
-    }
-    if (SearchBillingStatus === null || SearchBillingStatus === undefined)
-    {
-      SearchBillingStatus = null;
-    }
-    if (SearchVerifyDuty === null || SearchVerifyDuty === undefined)
-    {
-      SearchVerifyDuty = null;
-    }
-    if (SearchGoodForBilling === null || SearchGoodForBilling === undefined)
-    {
-      SearchGoodForBilling = null;
-    }
-    return this.httpClient.get(this.API_URL + "/" + 'GetAllInvoiceAttach' + '/' + SearchCustomerName + '/'+ SearchBranch + '/' + SearchDutySlipID + '/' + SearchReservationID + '/' + SearchGSTType + '/' + SearchDutyFromDate + '/' + SearchDutyToDate + '/' + SearchPassengerName + '/' + SearchPassengerMobile + '/' + SearchPackageType + '/' + SearchPackage + '/' + SearchDSStatus + '/' + SearchBillingStatus + '/' + SearchVerifyDuty + '/' + SearchGoodForBilling + '/' + PageNumber + '/' + coloumName + '/' + sortType);
+    return this.httpClient.get(this.buildGetAllInvoiceAttachPath(
+      SearchCustomerName, SearchBranch, SearchDutySlipID, SearchReservationID, SearchGSTType, SearchDutyFromDate,
+      SearchDutyToDate, SearchPassengerName, SearchPassengerMobile, SearchPackageType, SearchPackage, SearchDSStatus,
+      SearchBillingStatus, SearchVerifyDuty, SearchGoodForBilling, PageNumber, coloumName, sortType));
   }
 
  //---------- Edit ----------
   getTableDataForEdit(SearchInvoiceNumberWithPrefix:string,SearchCustomerName:string, SearchBranch:string,  SearchDutySlipID:number, SearchReservationID:number, SearchGSTType:string, SearchDutyFromDate:string, 
     SearchDutyToDate:string, SearchPassengerName:string, SearchPassengerMobile:string, SearchPackageType:string, SearchPackage:string, SearchDSStatus:string, 
     SearchBillingStatus:boolean, PageNumber: number): Observable<any> {  
-    if (SearchInvoiceNumberWithPrefix === "")
-    {
-      SearchInvoiceNumberWithPrefix = "null";
-    }
-    if (SearchCustomerName === "")
-    {
-      SearchCustomerName = "null";
-    }
-    if (SearchBranch === "")
-    {
-      SearchBranch = "null";
-    }
     if (SearchDutySlipID === null || SearchDutySlipID === undefined)
     {
       SearchDutySlipID = 0;
@@ -171,61 +104,16 @@ export class InvoiceAttachDetachService {
     if (SearchReservationID === null || SearchReservationID === undefined)
     {
       SearchReservationID = 0;
-    }    
-    if (SearchGSTType === "")
-    {
-      SearchGSTType = "null";
     }
-    if (SearchDutyFromDate === "")
-    {
-      SearchDutyFromDate = "null";
-    }
-    if (SearchDutyToDate === "")
-    {
-      SearchDutyToDate = "null";
-    }
-    if (SearchPassengerName === "")
-    {
-      SearchPassengerName = "null";
-    }
-    if (SearchPassengerMobile === "")
-    {
-      SearchPassengerMobile = "null";
-    }
-    if (SearchPackageType === "")
-    {
-      SearchPackageType = "null";
-    }
-    if (SearchPackage === "")
-    {
-      SearchPackage = "null";
-    }
-    if (SearchDSStatus === "")
-    {
-      SearchDSStatus = "null";
-    }
-    if (SearchBillingStatus === null || SearchBillingStatus === undefined)
-    {
-      SearchBillingStatus = null;
-    }
-    return this.httpClient.get(this.API_URL + "/" + 'GetAllInvoiceAttachForEdit' + '/' + SearchInvoiceNumberWithPrefix + '/' + SearchCustomerName + '/'+ SearchBranch + '/' + SearchDutySlipID + '/' + SearchReservationID + '/' + SearchGSTType + '/' + SearchDutyFromDate + '/' + SearchDutyToDate + '/' + SearchPassengerName + '/' + SearchPassengerMobile + '/' + SearchPackageType + '/' + SearchPackage + '/' + SearchDSStatus + '/' + SearchBillingStatus + '/' + PageNumber + '/DutySlipID/Descending');
+    return this.httpClient.get(this.buildGetAllInvoiceAttachForEditPath(
+      SearchInvoiceNumberWithPrefix, SearchCustomerName, SearchBranch, SearchDutySlipID, SearchReservationID, SearchGSTType,
+      SearchDutyFromDate, SearchDutyToDate, SearchPassengerName, SearchPassengerMobile, SearchPackageType, SearchPackage,
+      SearchDSStatus, SearchBillingStatus, PageNumber, 'DutySlipID', 'Descending'));
   }
 
   getTableDataSortForEdit(SearchInvoiceNumberWithPrefix:string,SearchCustomerName:string, SearchBranch:string,  SearchDutySlipID:number, SearchReservationID:number, SearchGSTType:string, SearchDutyFromDate:string, 
     SearchDutyToDate:string, SearchPassengerName:string, SearchPassengerMobile:string, SearchPackageType:string, SearchPackage:string, SearchDSStatus:string, 
     SearchBillingStatus:boolean, PageNumber: number, coloumName: string, sortType: string): Observable<any> {
-    if (SearchInvoiceNumberWithPrefix === "")
-    {
-      SearchInvoiceNumberWithPrefix = "null";
-    }
-    if (SearchCustomerName === "")
-    {
-      SearchCustomerName = "null";
-    }
-    if (SearchBranch === "")
-    {
-      SearchBranch = "null";
-    }
     if (SearchDutySlipID === null)
     {
       SearchDutySlipID = 0;
@@ -233,44 +121,11 @@ export class InvoiceAttachDetachService {
     if (SearchReservationID === null)
     {
       SearchReservationID = 0;
-    }    
-    if (SearchGSTType === "")
-    {
-      SearchGSTType = "null";
     }
-    if (SearchDutyFromDate === "")
-    {
-      SearchDutyFromDate = "null";
-    }
-    if (SearchDutyToDate === "")
-    {
-      SearchDutyToDate = "null";
-    }
-    if (SearchPassengerName === "")
-    {
-      SearchPassengerName = "null";
-    }
-    if (SearchPassengerMobile === "")
-    {
-      SearchPassengerMobile = "null";
-    }
-    if (SearchPackageType === "")
-    {
-      SearchPackageType = "null";
-    }
-    if (SearchPackage === "")
-    {
-      SearchPackage = "null";
-    }
-    if (SearchDSStatus === "")
-    {
-      SearchDSStatus = "null";
-    }
-    if (SearchBillingStatus === null || SearchBillingStatus === undefined)
-    {
-      SearchBillingStatus = null;
-    }
-    return this.httpClient.get(this.API_URL + "/" + 'GetAllInvoiceAttachForEdit' + '/' + SearchInvoiceNumberWithPrefix + '/' + SearchCustomerName + '/'+ SearchBranch + '/' + SearchDutySlipID + '/' + SearchReservationID + '/' + SearchGSTType + '/' + SearchDutyFromDate + '/' + SearchDutyToDate + '/' + SearchPassengerName + '/' + SearchPassengerMobile + '/' + SearchPackageType + '/' + SearchPackage + '/' + SearchDSStatus + '/' + SearchBillingStatus + '/' + PageNumber + '/' + coloumName + '/' + sortType);
+    return this.httpClient.get(this.buildGetAllInvoiceAttachForEditPath(
+      SearchInvoiceNumberWithPrefix, SearchCustomerName, SearchBranch, SearchDutySlipID, SearchReservationID, SearchGSTType,
+      SearchDutyFromDate, SearchDutyToDate, SearchPassengerName, SearchPassengerMobile, SearchPackageType, SearchPackage,
+      SearchDSStatus, SearchBillingStatus, PageNumber, coloumName, sortType));
   }
 
   getInvoiceBillDate(invoiceId: number): Observable<any> {

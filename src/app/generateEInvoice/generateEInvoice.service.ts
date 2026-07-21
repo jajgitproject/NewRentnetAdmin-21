@@ -38,7 +38,7 @@ export class GenerateEInvoiceService {
     {
       SearchIRNStatus = "null";
     }
-    return this.httpClient.get(this.API_URL + '/InvoiceSearch' + "/" + SearchInvoiceNumber + '/'+ SearchFromDate + '/' + SearchToDate + '/'+ SearchCustomerName + '/' + SearchIRNStatus + '/' + PageNumber + '/InvoiceID/Descending');
+    return this.httpClient.get(this.API_URL + '/InvoiceSearch' + "/" + encodeURIComponent(SearchInvoiceNumber) + '/'+ encodeURIComponent(SearchFromDate) + '/' + encodeURIComponent(SearchToDate) + '/'+ encodeURIComponent(SearchCustomerName) + '/' + encodeURIComponent(SearchIRNStatus) + '/' + PageNumber + '/InvoiceID/Descending');
   }
 
   getTableDataSort(SearchInvoiceNumber:string,SearchFromDate:string,SearchToDate:string,SearchCustomerName:string,SearchIRNStatus:string,PageNumber: number, coloumName: string, sortType: string): Observable<any> {
@@ -62,7 +62,7 @@ export class GenerateEInvoiceService {
     {
       SearchIRNStatus = "null";
     }
-    return this.httpClient.get(this.API_URL + '/InvoiceSearch' + "/" + SearchInvoiceNumber + '/'+ SearchFromDate + '/' + SearchToDate + '/' + SearchCustomerName + '/' + SearchIRNStatus + '/' + PageNumber + '/' + coloumName + '/' + sortType);
+    return this.httpClient.get(this.API_URL + '/InvoiceSearch' + "/" + encodeURIComponent(SearchInvoiceNumber) + '/'+ encodeURIComponent(SearchFromDate) + '/' + encodeURIComponent(SearchToDate) + '/' + encodeURIComponent(SearchCustomerName) + '/' + encodeURIComponent(SearchIRNStatus) + '/' + PageNumber + '/' + coloumName + '/' + sortType);
   }
 
   add(advanceTable: GenerateEInvoiceModel) 

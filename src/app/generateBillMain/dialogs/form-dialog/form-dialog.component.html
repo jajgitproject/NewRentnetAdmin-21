@@ -126,6 +126,8 @@
                             [value]="option.customerPersonName" (click)="getCustomerPersonID(option.customerPersonID)"> 
                             {{option.customerPersonName}}</mat-option>
                         </mat-autocomplete>
+                        <mat-hint *ngIf="!customerID">Select Customer first</mat-hint>
+                        <mat-hint *ngIf="customerID">Type at least 3 characters</mat-hint>
                         <mat-error *ngIf="advanceTableForm.controls['passengerName'].hasError('customerPersonNameInvalid')">
                             Guest is required
                         </mat-error>

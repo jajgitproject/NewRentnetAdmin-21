@@ -36,19 +36,21 @@ export class FinanceDashboardComponent implements OnInit {
   creditNoteRows: any[] = [];
 
   // Wrong Inv Type sits after Multiple Duty, before Duplicate.
+  // Gen vs Duties (Yellow) after Invoice Calc — link-only General header vs linked calcs.
   invoiceTableColumns = [
     'seriesName', 'totalDocuments',
     'generalCount', 'singleDutyCount', 'multipleDutyCount',
     'wrongInvoiceTypeCount',
     'duplicateCount', 'seriesJumpCount', 'dateViolationCount',
-    'nullPrefixCount', 'amountMismatchCount', 'stateGstMismatchCount',
+    'nullPrefixCount', 'prefixMismatchCount', 'amountMismatchCount', 'stateGstMismatchCount',
     'missingCustomerGstCount', 'taxMismatchCount', 'invoiceCalculationMismatchCount',
+    'generalLinkAmountGapCount',
   ];
 
   creditNoteTableColumns = [
     'seriesName', 'totalDocuments',
     'duplicateCount', 'seriesJumpCount', 'dateViolationCount',
-    'nullPrefixCount', 'amountMismatchCount', 'stateGstMismatchCount',
+    'nullPrefixCount', 'prefixMismatchCount', 'amountMismatchCount', 'stateGstMismatchCount',
     'missingCustomerGstCount', 'taxMismatchCount',
     'printGstSourceDriftCount', 'cnTaxProfileMismatchCount', 'cnAmountCeilingCount',
     'multiCreditNoteCount', 'orphanInvoiceLinkCount', 'cnIrnConsistencyCount',
@@ -72,6 +74,7 @@ export class FinanceDashboardComponent implements OnInit {
 
   invoiceKpiRow3 = [
     { key: 'unbilledDuties', label: 'Unbilled Duties', validationCode: null, docType: 'Invoice', format: 'number', accent: 'coral', icon: 'assignment_late' },
+    { key: 'pendingRevenue', label: 'Pending Revenue', validationCode: null, docType: 'Invoice', format: 'currency', accent: 'teal', icon: 'pending_actions' },
     { key: 'lowestDutySlipUnbilled', label: 'Lowest Duty Slip Unbilled', validationCode: null, docType: 'Invoice', format: 'lowestUnbilled', accent: 'amber', icon: 'event_busy' },
   ];
 
@@ -109,6 +112,7 @@ export class FinanceDashboardComponent implements OnInit {
       invoicesWithIrn: summary.invoicesWithIrn ?? summary.InvoicesWithIrn,
       invoicesWithoutIrn: summary.invoicesWithoutIrn ?? summary.InvoicesWithoutIrn,
       unbilledDuties: summary.unbilledDuties ?? summary.UnbilledDuties,
+      pendingRevenue: summary.pendingRevenue ?? summary.PendingRevenue,
       lowestDutySlipUnbilled: summary.lowestDutySlipUnbilled ?? summary.LowestDutySlipUnbilled,
       lowestUnbilledDutySlipCount: summary.lowestUnbilledDutySlipCount ?? summary.LowestUnbilledDutySlipCount,
       lowestUnbilledReservationID: summary.lowestUnbilledReservationID ?? summary.LowestUnbilledReservationID,
@@ -132,12 +136,14 @@ export class FinanceDashboardComponent implements OnInit {
       seriesJumpCount: row.seriesJumpCount ?? row.SeriesJumpCount,
       dateViolationCount: row.dateViolationCount ?? row.DateViolationCount,
       nullPrefixCount: row.nullPrefixCount ?? row.NullPrefixCount,
+      prefixMismatchCount: row.prefixMismatchCount ?? row.PrefixMismatchCount ?? 0,
       amountMismatchCount: row.amountMismatchCount ?? row.AmountMismatchCount,
       stateGstMismatchCount: row.stateGstMismatchCount ?? row.StateGstMismatchCount,
       missingCustomerGstCount: row.missingCustomerGstCount ?? row.MissingCustomerGstCount,
       taxMismatchCount: row.taxMismatchCount ?? row.TaxMismatchCount,
       invoiceCalculationMismatchCount: row.invoiceCalculationMismatchCount ?? row.InvoiceCalculationMismatchCount ?? 0,
       wrongInvoiceTypeCount: row.wrongInvoiceTypeCount ?? row.WrongInvoiceTypeCount ?? 0,
+      generalLinkAmountGapCount: row.generalLinkAmountGapCount ?? row.GeneralLinkAmountGapCount ?? 0,
       printGstSourceDriftCount: row.printGstSourceDriftCount ?? row.PrintGstSourceDriftCount ?? 0,
       cnTaxProfileMismatchCount: row.cnTaxProfileMismatchCount ?? row.CnTaxProfileMismatchCount ?? 0,
       cnAmountCeilingCount: row.cnAmountCeilingCount ?? row.CnAmountCeilingCount ?? 0,
@@ -150,12 +156,14 @@ export class FinanceDashboardComponent implements OnInit {
         seriesJumpCount: severity.seriesJumpCount ?? severity.SeriesJumpCount,
         dateViolationCount: severity.dateViolationCount ?? severity.DateViolationCount,
         nullPrefixCount: severity.nullPrefixCount ?? severity.NullPrefixCount,
+        prefixMismatchCount: severity.prefixMismatchCount ?? severity.PrefixMismatchCount,
         amountMismatchCount: severity.amountMismatchCount ?? severity.AmountMismatchCount,
         stateGstMismatchCount: severity.stateGstMismatchCount ?? severity.StateGstMismatchCount,
         missingCustomerGstCount: severity.missingCustomerGstCount ?? severity.MissingCustomerGstCount,
         taxMismatchCount: severity.taxMismatchCount ?? severity.TaxMismatchCount,
         invoiceCalculationMismatchCount: severity.invoiceCalculationMismatchCount ?? severity.InvoiceCalculationMismatchCount,
         wrongInvoiceTypeCount: severity.wrongInvoiceTypeCount ?? severity.WrongInvoiceTypeCount,
+        generalLinkAmountGapCount: severity.generalLinkAmountGapCount ?? severity.GeneralLinkAmountGapCount,
         printGstSourceDriftCount: severity.printGstSourceDriftCount ?? severity.PrintGstSourceDriftCount,
         cnTaxProfileMismatchCount: severity.cnTaxProfileMismatchCount ?? severity.CnTaxProfileMismatchCount,
         cnAmountCeilingCount: severity.cnAmountCeilingCount ?? severity.CnAmountCeilingCount,

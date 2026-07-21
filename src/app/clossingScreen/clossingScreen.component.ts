@@ -38,6 +38,11 @@ import { FormDialogDisputeComponent } from '../dispute/dialogs/form-dialog/form-
 import { Dispute } from '../dispute/dispute.model';
 import { DisputeService } from '../dispute/dispute.service';
 import Swal from 'sweetalert2';
+import { firstValueFrom } from 'rxjs';
+import {
+  confirmMissingGstnForSingleDuty,
+  extractApiErrorMessage
+} from '../shared/customer-invoicing-gstn-confirm.util';
 import { FormDialogComponent as DutyExpenseFormDialogComponent } from '../dutyExpense/dialogs/form-dialog/form-dialog.component';
 import { DutyExpenseModel } from '../dutyExpense/dutyExpense.model';
 import { DutyExpenseService } from '../dutyExpense/dutyExpense.service';
@@ -741,42 +746,35 @@ public CalculateBill()
 
 }
 
-public GenerateBill()
+public async GenerateBill()
 {
-  this.clossingScreenService.generateBill(this.DutySlipID)  
-  .subscribe(
-    response => 
-    {
-      //this.refresh();
-      // this.loadDataForDriver();
-      // this.loadDataForApp();
-      // this.loadDataForGPS();
-      // this.loadDataForBilling();
-      // this.KMForPreviousBooking();
-       this.showNotification(
-        'snackbar-success',
-        'Updated...!!!',
-        'bottom',
-        'center'
-      );
-      this.dutyStateInvoiceGenerated = true;
-    },
-    error =>
-    {
-      //this.refresh();
-      // this.loadDataForDriver();
-      // this.loadDataForApp();
-      // this.loadDataForGPS();
-      // this.loadDataForBilling();
-      this.showNotification(
-        'snackbar-danger',
-        'Operation Failed.....!!!',
-        'bottom',
-        'center'
-      ); 
+  try {
+    const check = await firstValueFrom(
+      this.clossingScreenService.checkCustomerInvoicingGstn(this.DutySlipID)
+    );
+    const confirmation = await confirmMissingGstnForSingleDuty(check);
+    if (!confirmation.proceed) {
+      return;
     }
-  )
 
+    await firstValueFrom(
+      this.clossingScreenService.generateBill(this.DutySlipID, confirmation.acknowledgeMissingGstn)
+    );
+    this.showNotification(
+      'snackbar-success',
+      'Updated...!!!',
+      'bottom',
+      'center'
+    );
+    this.dutyStateInvoiceGenerated = true;
+  } catch (error) {
+    this.showNotification(
+      'snackbar-danger',
+      extractApiErrorMessage(error),
+      'bottom',
+      'center'
+    );
+  }
 }
 public ClossingDetails(): boolean
 {

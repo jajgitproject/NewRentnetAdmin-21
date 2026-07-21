@@ -89,7 +89,7 @@
         <strong>GST No:</strong> {{dataSource?.ecoBranchGSTNumber}}<br />
         LUT: {{dataSource?.lutNOForInvoiceModel?.lutNo}},
         Exp. Date: {{dataSource?.lutNOForInvoiceModel?.endDate | date:'dd/MM/yyyy'}}<br />
-        Reverse Charge (Y/N): N
+        <strong>IRN No:</strong> {{ dataSource?.irn || 'N/A' }}
       </td>
         <td class="qr-logo-area" valign="top" align="right">
           <div class="qr-logo-stack">
@@ -121,7 +121,8 @@
         <strong>State of Service:</strong> {{dataSource?.customerGSTStateName}},
         <strong>State Code:</strong> {{dataSource?.customerGSTStateCode}}<br />
         <strong>GST/UIN:</strong> {{dataSource?.customerGSTNumber}}<br />
-        <strong>Guest Name:</strong> {{dataSource?.passengerName}}
+        <strong>Guest Name:</strong> {{dataSource?.passengerName}}<br />
+        <strong>Reverse Charge (Y/N):</strong> N
       </td>
       <td width="30%">
         <strong>Invoice No:</strong> {{dataSource?.invoiceNumberWithPrefix}}<br />
@@ -137,19 +138,21 @@
   <table style="margin-top: 5px;height:230px;" class="no-border custom-table">
     <thead>
       <tr align="center">
-        <th>Car Type</th>
         <th>Particulars</th>
+        <th>Extra Kms / Hrs</th>
+        <th>Rate</th>
         <th>Amount</th>
       </tr>
     </thead>
     <tbody >
       <tr style="height: 30px;" *ngFor="let duty of dataSource?.lineItems">
-        <td> </td>
-        <td >{{duty.narration}}</td>
+        <td>{{duty.narration}}</td>
+        <td class="text-center">{{ formatExtraKmsHrs(duty) }}</td>
+        <td class="text-right">{{ duty.rate }}</td>
         <td class="text-right">{{duty.baseAmount}}</td>
       </tr>
       <tr>
-        <td colspan="2" class="text-right"><strong>Total</strong></td>
+        <td colspan="3" class="text-right"><strong>Total</strong></td>
         <td class="text-right">{{dataSource?.totalAmountAfterDiscout}}</td>
       </tr>
     </tbody>

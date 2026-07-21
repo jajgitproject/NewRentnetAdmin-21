@@ -5,18 +5,66 @@
 :host ::ng-deep .invoice-attach-search-dialog .modal-body.quick-search-panel
   padding-top: 1rem
 
+.invoice-attach-toolbar
+  display: flex
+  flex-direction: column
+  align-items: stretch
+  gap: 8px
+  width: 100%
+  margin-bottom: 8px
+
+.invoice-attach-toolbar__hint
+  margin: 0
+  text-align: left
+  line-height: 1.4
+  font-size: 13px
+
+.invoice-attach-toolbar__actions
+  display: flex
+  flex-wrap: wrap
+  justify-content: flex-end
+  align-items: center
+  gap: 8px
+
+:host ::ng-deep .invoice-attach-grid-wrap
+  width: 100%
+  overflow-x: auto
+
 :host ::ng-deep .invoice-attach-grid
-  min-width: 1700px
+  width: 100%
+  min-width: 0
+
+:host ::ng-deep .invoice-attach-grid .mat-header-row,
+:host ::ng-deep .invoice-attach-grid .mat-row
+  width: 100%
+
+:host ::ng-deep .invoice-attach-grid .mat-column-check
+  flex: 0 0 56px
+  max-width: 56px
 
 :host ::ng-deep .invoice-attach-grid .mat-header-cell,
 :host ::ng-deep .invoice-attach-grid .mat-cell
   word-break: normal !important
-  overflow-wrap: normal !important
+  overflow-wrap: anywhere !important
   white-space: normal !important
   line-height: 1.35
   font-size: 12px
   padding: 8px 10px !important
   align-items: flex-start
+  flex: 1 1 0
+  min-width: 0
+  box-sizing: border-box
+
+:host ::ng-deep .invoice-attach-grid .mat-column-check.mat-header-cell,
+:host ::ng-deep .invoice-attach-grid .mat-column-check.mat-cell
+  flex: 0 0 56px
+  max-width: 56px
+  justify-content: center
+  padding-right: 4px !important
+
+:host ::ng-deep .invoice-attach-grid .mat-column-DutySlipID.mat-header-cell,
+:host ::ng-deep .invoice-attach-grid .mat-column-DutySlipID.mat-cell
+  padding-left: 16px !important
 
 :host ::ng-deep .invoice-attach-grid .mat-header-cell
   font-weight: 600

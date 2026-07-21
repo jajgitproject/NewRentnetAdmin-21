@@ -54,7 +54,8 @@ export class GenerateEInvoiceComponent implements OnInit {
     'CancelationDateTime'
   ];
 
-  dataSource: GenerateEInvoiceModel[] | null;
+  dataSource: GenerateEInvoiceModel[] | null = null;
+  hasSearched = false;
   employeeID: number;
   row: GenerateEInvoiceModel | null;
   SearchName: string = '';
@@ -103,7 +104,6 @@ export class GenerateEInvoiceComponent implements OnInit {
   contextMenuPosition = { x: '0px', y: '0px' };
   ngOnInit() 
   {
-    this.loadData();
     this.InitCustomer();
   }
   
@@ -141,6 +141,34 @@ export class GenerateEInvoiceComponent implements OnInit {
       data => data.customerName === customer);
   }
 
+  private getSearchInvoiceNumberForApi(): string {
+    return (this.SearchInvoiceNumber ?? '').trim().replace(/\//g, '-');
+  }
+
+  private getSearchCustomerNameForApi(): string {
+    const value = this.customer.value;
+    return value == null ? '' : String(value).trim();
+  }
+
+  private formatSearchDate(value: string | Date | null | undefined): string {
+    if (value === '' || value == null) {
+      return '';
+    }
+    const formatted = moment(value);
+    return formatted.isValid() ? formatted.format('YYYY-MM-DD') : '';
+  }
+
+  isIrnGenerated(row: any): boolean {
+    if (!row) {
+      return false;
+    }
+    const status = row.irnStatus ?? row.IRNStatus ?? '';
+    if (status === 'Generated') {
+      return true;
+    }
+    const irn = row.irn ?? row.IRN ?? '';
+    return typeof irn === 'string' && irn.trim().length > 0;
+  }
 
   refresh() 
   {
@@ -150,11 +178,13 @@ export class GenerateEInvoiceComponent implements OnInit {
     this.SearchToDate = '';
     this.SearchIRNStatus = '';
     this.PageNumber = 0;
-    this.loadData();
+    this.hasSearched = false;
+    this.dataSource = null;
   }
 
   public SearchData() 
   {
+    this.PageNumber = 0;
     this.loadData();
   }
  
@@ -166,7 +196,7 @@ export class GenerateEInvoiceComponent implements OnInit {
 
   onBackPress(event) 
   {
-    if (event.keyCode === 8) 
+    if (event.keyCode === 8 && this.hasSearched) 
     {
       this.loadData();
     }
@@ -174,18 +204,13 @@ export class GenerateEInvoiceComponent implements OnInit {
 
   public loadData() 
   {
-    if(this.SearchFromDate!=="")
-    {
-      this.SearchFromDate=moment(this.SearchFromDate).format('yyyy-MM-DD');
-    }
-    if(this.SearchToDate!=="")
-    {
-      this.SearchToDate=moment(this.SearchToDate).format('yyyy-MM-DD');
-    }
-    this.generateEInvoiceService.getTableData(this.SearchInvoiceNumber.replace(/\//g, '-'),this.SearchFromDate,this.SearchToDate,this.customer.value,this.SearchIRNStatus,this.PageNumber).subscribe
+    this.hasSearched = true;
+    const fromDate = this.formatSearchDate(this.SearchFromDate);
+    const toDate = this.formatSearchDate(this.SearchToDate);
+    this.generateEInvoiceService.getTableData(this.getSearchInvoiceNumberForApi(), fromDate, toDate, this.getSearchCustomerNameForApi(), this.SearchIRNStatus, this.PageNumber).subscribe
       (
         data => {
-          this.dataSource = data;
+          this.dataSource = data ?? null;
         },
         (error: HttpErrorResponse) => { this.dataSource = null; }
       );
@@ -211,7 +236,7 @@ export class GenerateEInvoiceComponent implements OnInit {
 
   NextCall() 
   {
-    if (this.dataSource.length > 0) 
+    if (this.hasSearched && this.dataSource?.length > 0) 
     {
       this.PageNumber++;
       this.loadData();
@@ -220,7 +245,7 @@ export class GenerateEInvoiceComponent implements OnInit {
 
   PreviousCall() 
   {
-    if (this.PageNumber > 0) 
+    if (this.hasSearched && this.PageNumber > 0) 
     {
       this.PageNumber--;
       this.loadData();
@@ -229,6 +254,9 @@ export class GenerateEInvoiceComponent implements OnInit {
 
   SortingData(coloumName: any) 
   {
+    if (!this.hasSearched) {
+      return;
+    }
     if (this.sortingData == 1) 
     {
       this.sortingData = 0;
@@ -239,10 +267,10 @@ export class GenerateEInvoiceComponent implements OnInit {
       this.sortingData = 1;
       this.sortType = "Descending";
     }
-    this.generateEInvoiceService.getTableDataSort(this.SearchInvoiceNumber.replace(/\//g, '-'),this.SearchFromDate,this.SearchToDate,this.customer.value,this.SearchIRNStatus,this.PageNumber,coloumName.active, this.sortType).subscribe
+    this.generateEInvoiceService.getTableDataSort(this.getSearchInvoiceNumberForApi(), this.formatSearchDate(this.SearchFromDate), this.formatSearchDate(this.SearchToDate), this.getSearchCustomerNameForApi(), this.SearchIRNStatus, this.PageNumber, coloumName.active, this.sortType).subscribe
     (
       data => {
-        this.dataSource = data;
+        this.dataSource = data ?? null;
       },
       (error: HttpErrorResponse) => { this.dataSource = null; }
     );
@@ -328,7 +356,9 @@ export class GenerateEInvoiceComponent implements OnInit {
               'center'
             );
           }
-          this.loadData();
+          if (this.hasSearched) {
+            this.loadData();
+          }
         },
         error => {
             this.showNotification(
@@ -370,7 +400,7 @@ export class GenerateEInvoiceComponent implements OnInit {
           }
         });
         dialogRef.afterClosed().subscribe((res: any) => {
-          if (res === true) 
+          if (res === true && this.hasSearched) 
           {
            this.loadData();
           }

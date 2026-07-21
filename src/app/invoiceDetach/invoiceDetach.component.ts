@@ -30,6 +30,11 @@ import { PackageTypeDropDown } from '../packageType/packageTypeDropDown.model';
 import { PackageDropDown } from '../package/packageDropDown.model';
 import { ActivatedRoute, Router } from '@angular/router';
 import Swal from 'sweetalert2';
+import { firstValueFrom } from 'rxjs';
+import {
+  confirmMissingGstnForBatch,
+  extractApiErrorMessage
+} from '../shared/customer-invoicing-gstn-confirm.util';
 
 @Component({
   standalone: false,
@@ -154,7 +159,8 @@ export class InvoiceDetachComponent implements OnInit {
       invoiceType:[],
       listOfDuties:[[]],
       userID:[],
-      action: []
+      action: [],
+      acknowledgeMissingGstnDutySlipIds: [[]]
     })
     
   //---------- Customer Group ----------
@@ -560,24 +566,21 @@ export class InvoiceDetachComponent implements OnInit {
     { 
       const dutyList = response.result.replace("Success:", "").split(",").map(item => item.split("#")[1]).join(", ");
       Swal.fire({
-          title: `Invoice Detached: ${dutyList}...!!!`,
+          title: `Duties detached from invoice ${dutyList}`,
+          text: 'Duty calculation links were cleared. General bill line items and header amounts are not changed.',
           icon: 'success',
           confirmButtonText: 'Ok'
           }).then(result => {
             if (result.isConfirmed) 
             {
               window.location.reload();
-              // const url = this.router.serializeUrl(
-              //   this.router.createUrlTree(['/invoiceHome'])
-              // );
-              // window.open(this._generalService.FormURL + url, '_blank');
             }
           });
       this.refresh();
     },
     error =>
     {
-      const errorMessage = error || 'Operation Failed.....!!!';
+      const errorMessage = error || 'Detach failed. Please try again.';
       Swal.fire({
           title: errorMessage,
           icon: 'error'
@@ -586,17 +589,31 @@ export class InvoiceDetachComponent implements OnInit {
   }
 
 
-  GenerateSingleInvoiceforSingleDuty()
+  async GenerateSingleInvoiceforSingleDuty()
   {
     const duties: number[] = this.selectedInvoices.map(x => x.dutySlipID);
-    this.advanceTableForm.patchValue({invoiceID:0});
-    this.advanceTableForm.patchValue({invoiceType:"InvoiceSingleDuty"});
-    this.advanceTableForm.patchValue({action:"N/A"});
-    this.advanceTableForm.patchValue({listOfDuties:duties});
-    this.invoiceDetachService.add(this.advanceTableForm.getRawValue()).subscribe(
-    response => 
-    {
-      const dutyList = response.result.replace("Success:", "").split(",").map(item => item.split("#")[1]).join(", ");
+
+    try {
+      const check = await firstValueFrom(
+        this.invoiceDetachService.checkCustomerInvoicingGstnBatch(duties)
+      );
+      const confirmation = await confirmMissingGstnForBatch(check, duties);
+      if (!confirmation.proceed) {
+        return;
+      }
+
+      this.advanceTableForm.patchValue({ invoiceID: 0 });
+      this.advanceTableForm.patchValue({ invoiceType: 'InvoiceSingleDuty' });
+      this.advanceTableForm.patchValue({ action: 'N/A' });
+      this.advanceTableForm.patchValue({ listOfDuties: confirmation.dutiesToGenerate });
+      this.advanceTableForm.patchValue({
+        acknowledgeMissingGstnDutySlipIds: confirmation.acknowledgeMissingGstnDutySlipIds
+      });
+
+      const response = await firstValueFrom(
+        this.invoiceDetachService.add(this.advanceTableForm.getRawValue())
+      );
+      const dutyList = response.result.replace('Success:', '').split(',').map(item => item.split('#')[1]).join(', ');
       Swal.fire({
           title: `Invoice Multy Duty Created with Duties: ${dutyList}...!!!`,
           icon: 'success',
@@ -611,15 +628,12 @@ export class InvoiceDetachComponent implements OnInit {
             }
           });
       this.refresh();
-    },
-    error =>
-    {
-      const errorMessage = error || 'Operation Failed.....!!!';
+    } catch (error) {
       Swal.fire({
-          title: errorMessage,
-          icon: 'error'
-        });
-    });
+        title: extractApiErrorMessage(error),
+        icon: 'error'
+      });
+    }
   }
 
 

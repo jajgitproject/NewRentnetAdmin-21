@@ -11,78 +11,106 @@
                             <a href="#" onClick="return false;">General Bill</a>
                         </li>
                     </ul>
-                    <ul class="breadcrumb breadcrumb-style ">
-                        <li class="breadcrumb-item">
-                            <h2>General Bill</h2>
-                        </li>
-                    </ul>
                 </div>
             </div>
         </div>
+
+        <mat-accordion>
+            <mat-expansion-panel expanded="true">
+                <mat-expansion-panel-header>
+                    <mat-panel-title>
+                        Quick Search
+                    </mat-panel-title>
+                </mat-expansion-panel-header>
+
+                <div class="general-bill-search quick-search-panel">
+                    <div class="row">
+                        <div class="col-xl-2 col-lg-2 col-md-2 col-sm-12 mb-2">
+                            <mat-form-field class="example-full-width cp-quick-search-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
+                                <mat-label>Customer</mat-label>
+                                <input type="text" matInput [(ngModel)]="SearchCustomer">
+                            </mat-form-field>
+                        </div>
+
+                        <div class="col-xl-2 col-lg-2 col-md-2 col-sm-12 mb-2">
+                            <mat-form-field class="example-full-width cp-quick-search-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
+                                <mat-label>Invoice No</mat-label>
+                                <input type="text" matInput [(ngModel)]="SearchInvoiceNumberWithPrefix">
+                            </mat-form-field>
+                        </div>
+
+                        <div class="col-xl-2 col-lg-2 col-md-2 col-sm-12 mb-2">
+                            <mat-form-field class="example-full-width cp-quick-search-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
+                                <mat-label>Guest</mat-label>
+                                <input type="text" matInput [(ngModel)]="SearchGuset">
+                            </mat-form-field>
+                        </div>
+
+                        <div class="col-xl-2 col-lg-2 col-md-2 col-sm-12 mb-2">
+                            <mat-form-field class="example-full-width cp-quick-search-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
+                                <mat-label>Start Date</mat-label>
+                                <input matInput [matDatepicker]="searchStartDate" [(ngModel)]="SearchStartDate">
+                                <mat-datepicker-toggle matSuffix [for]="searchStartDate"></mat-datepicker-toggle>
+                                <mat-datepicker #searchStartDate></mat-datepicker>
+                            </mat-form-field>
+                        </div>
+
+                        <div class="col-xl-2 col-lg-2 col-md-2 col-sm-12 mb-2">
+                            <mat-form-field class="example-full-width cp-quick-search-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
+                                <mat-label>End Date</mat-label>
+                                <input matInput [matDatepicker]="searchEndDate" [(ngModel)]="SearchEndDate">
+                                <mat-datepicker-toggle matSuffix [for]="searchEndDate"></mat-datepicker-toggle>
+                                <mat-datepicker #searchEndDate></mat-datepicker>
+                            </mat-form-field>
+                        </div>
+
+                        <div class="col-xl-2 col-lg-2 col-md-2 col-sm-12 mb-2">
+                            <mat-form-field class="example-full-width cp-quick-search-field mb-3" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
+                                <mat-label>Activation Status</mat-label>
+                                <mat-select [(ngModel)]="SearchActivationStatus">
+                                    <mat-option [value]="true">Active</mat-option>
+                                    <mat-option [value]="false">Deleted</mat-option>
+                                </mat-select>
+                            </mat-form-field>
+                        </div>
+                    </div>
+
+                    <div class="row quick-search-actions">
+                        <div class="col-xl-2 col-lg-2 col-md-2 col-sm-12 mb-2">
+                            <button mat-raised-button color="primary" (click)="SearchData()" [disabled]="isLoading">
+                                Search
+                            </button>
+                        </div>
+                        <div class="col-xl-2 col-lg-2 col-md-2 col-sm-12 mb-2">
+                            <button mat-raised-button color="primary" (click)="refresh()">
+                                Refresh
+                            </button>
+                        </div>
+                        <div class="col-xl-2 col-lg-2 col-md-2 col-sm-12 mb-2"></div>
+                        <div class="col-xl-2 col-lg-2 col-md-2 col-sm-12 mb-2"></div>
+                        <div class="col-xl-2 col-lg-2 col-md-2 col-sm-12 mb-2"></div>
+                        <div class="col-xl-2 col-lg-2 col-md-2 col-sm-12 mb-2">
+                            <button mat-raised-button color="primary" (click)="addNew()">
+                                Add New
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </mat-expansion-panel>
+        </mat-accordion>
+
+        <br>
+
         <div class="row">
             <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
                 <div class="card">
                     <div class="body">
                         <div class="responsive_table">
-                            <div class="materialTableHeader">
-                                <div class="row">
-                                    <div style="width: 70%; float:left;padding-top: 6px;padding-left: 12px;">
-                                        <!-- <div style="float:left" *ngIf="SearchCustomer"><b>GenerateBillMain</b> : {{SearchCustomer}}</div> 
-                                        <div *ngIf="SearchStartDate" style="float: left;"><b>Start Date</b> : {{SearchStartDate}},</div>
-                                        <div *ngIf="SearchEndDate" style="float: left;"><b>End Date</b> : {{SearchEndDate}},</div> -->
-                                        <div class="col-lg-6">
-                                            <div class="form-group">
-                                                <div class="input-group">
-                                                    <!-- Dropdown for selecting Type, Parent, City -->
-                                                    <div class="input-group-append input-group-addon">
-                                                        <select style="height: 40px; width: 150px;" class="form-control"
-                                                            [(ngModel)]="selectedFilter">
-                                                            <option value="search" hidden>Search By</option>
-                                                            <option value="invoiceNumber">Invoice Number</option>
-                                                            <option value="customer">Customer</option>
-                                                            <option value="guest">Guest</option>
-                                                            <option value="billDate">Bill Date</option>
-                                                        </select>
-                                                    </div>
-
-                                                    <!-- Input field for filtering -->
-
-                                                    <input type="text"
-                                                        style="height: 40px; width: 300px;padding-left: 5px;"
-                                                        class="form-control" placeholder="Filter" id="inputGroup"
-                                                        (keyup)="onBackPress($event)" (input)="loadData()"
-                                                        [(ngModel)]="searchTerm" />
-
-                                                    <!-- Search button -->
-                                                    <div class="input-group-append input-group-addon">
-                                                        <span class="input-group-text"
-                                                            style="cursor: pointer; height: 40px; width: 40px; text-align: center;"
-                                                            (click)="loadData()">
-                                                            <i class="fas fa-search"></i>
-                                                        </span>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div style="width: 30%; text-align:right;">
-                                        <button mat-raised-button color="primary" data-dismiss="modal"
-                                            data-toggle="modal" data-backdrop="false" data-target="#exampleModalCenter">
-                                            Search
-                                        </button>
-                                        &nbsp;
-                                        <button mat-mini-fab color="primary" (click)="addNew()">
-                                            <mat-icon class="col-white">add</mat-icon>
-                                        </button>
-                                        &nbsp;
-                                        <button mat-mini-fab color="primary" (click)="refresh()">
-                                            <mat-icon class="col-white">refresh</mat-icon>
-                                        </button>
-                                        &nbsp;
-                                    </div>
-                                </div>
+                            <div *ngIf="!hasSearched" class="alert alert-info" style="background-color:#E8E8E8; text-align: center;">
+                                Use Search to load General Bill records.
                             </div>
 
+                            <ng-container *ngIf="hasSearched">
                             <p *ngIf="!dataSource; then thenBlock2 else elseBlock2">
                                 This is not rendered
                             </p>
@@ -188,27 +216,17 @@
                                     </mat-row>
                                 </mat-table>
                                 </div>
-                                <!-- Loading spinner -->
-                                <!-- <div *ngIf="exampleDatabase.isTblLoading" class="tbl-spinner">
-                                <mat-progress-spinner color="primary" [diameter]="40" mode="indeterminate">
-                                </mat-progress-spinner>
-                            </div> -->
 
-                                <!-- context menu start -->
                                 <div style="visibility: hidden; position: fixed" [style.left]="contextMenuPosition.x"
                                     [style.top]="contextMenuPosition.y" [matMenuTriggerFor]="contextMenu">
                                 </div>
                                 <mat-menu #contextMenu="matMenu">
                                     <ng-template matMenuContent let-item="item">
-                                        <!-- <button mat-menu-item (click)="addNew()">
-                                    <mat-icon>add_box</mat-icon>
-                                    <span>Add</span>
-                                    </button> -->
-                                        <button mat-menu-item (click)="editCall(item)" [disabled]="item.irnStatus === 'Generated'">
+                                        <button mat-menu-item (click)="editCall(item)" [disabled]="isIrnGenerated(item)">
                                             <mat-icon>create</mat-icon>
                                             <span>Edit</span>
                                         </button>
-                                        <button mat-menu-item (click)="openAttachDetachForEdit(item)" [disabled]="item.irnStatus === 'Generated'">
+                                        <button mat-menu-item (click)="openAttachDetachForEdit(item)" [disabled]="isIrnGenerated(item)">
                                             <mat-icon>link</mat-icon>
                                             <span>Attach/Detach Duties</span>
                                         </button>
@@ -216,14 +234,9 @@
                                             <mat-icon>how_to_reg</mat-icon>
                                             <span>View Bill</span>
                                         </button>
-                                        <!-- <button *ngIf="shouldShowDeleteButton(item)" mat-menu-item
-                                            (click)="deleteItem(item)">
-                                            <mat-icon>delete</mat-icon>
-                                            <span>Delete</span>
-                                        </button> -->
                                         <ng-container *ngFor="let menuItem of menuItems">
                                             <button mat-menu-item [matTooltip]="menuItem.tooltip"
-                                                (click)="openInNewTab(menuItem, item)" [disabled]="item.irnStatus === 'Generated'">
+                                                (click)="openInNewTab(menuItem, item)" [disabled]="isIrnGenerated(item)">
                                                 <mat-icon>how_to_reg</mat-icon>
                                                 <span>{{ menuItem.label }}</span>
                                             </button>
@@ -231,12 +244,6 @@
 
                                     </ng-template>
                                 </mat-menu>
-
-                                <!-- context menu end -->
-
-                                <!-- <div *ngIf="!exampleDatabase.isTblLoading" class="no-results" [style.display]="dataSource.renderedData.length == 0 ? '' : 'none'">
-                                No results
-                            </div> -->
 
                                 <div class="body">
                                     <div class="example-button-row">
@@ -249,6 +256,7 @@
                                 </div>
 
                             </ng-template>
+                            </ng-container>
 
                         </div>
                     </div>
@@ -257,73 +265,3 @@
         </div>
     </div>
 </section>
-
-<!-- modelpopup -->
-<div class="modal fade" id="exampleModalCenter" tabindex="-1" role="dialog">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="exampleModalLongTitle">General Bill Main
-                </h5>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button>
-            </div>
-            <div class="modal-body">
-
-                <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
-                    <mat-label>Customer</mat-label>
-                    <input type="text" matInput [(ngModel)]="SearchCustomer">
-                </mat-form-field>
-
-                <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
-                    <mat-label>Invoice No</mat-label>
-                    <input type="text" matInput [(ngModel)]="SearchInvoiceNumberWithPrefix">
-                </mat-form-field>
-
-                <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
-                        <mat-label>Guest</mat-label>
-                        <input type="text" matInput [formControl]="customerPersonName" [matAutocomplete]="auto4">
-                        <mat-autocomplete #auto4="matAutocomplete">
-                            <mat-option *ngFor="let option of filteredCustomerPersonOptions | async"
-                            [value]="option.customerPersonName"> 
-                            {{option.customerPersonName}}</mat-option>
-                        </mat-autocomplete>
-                       
-                    </mat-form-field>
-
-                <!-- <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
-                    <mat-label>Guest</mat-label>
-                    <input type="text" matInput [(ngModel)]="SearchGuset">
-                </mat-form-field> -->
-                
-                <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
-                    <mat-label>Start Date</mat-label>
-                    <input matInput [matDatepicker]="invoiceDate" [(ngModel)]="SearchStartDate">
-                    <mat-datepicker-toggle matSuffix [for]="invoiceDate"></mat-datepicker-toggle>
-                    <mat-datepicker #invoiceDate></mat-datepicker>
-                </mat-form-field>
-
-                <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
-                    <mat-label>End Date</mat-label>
-                    <input matInput [matDatepicker]="billToDate" [(ngModel)]="SearchEndDate">
-                    <mat-datepicker-toggle matSuffix [for]="billToDate"></mat-datepicker-toggle>
-                    <mat-datepicker #billToDate></mat-datepicker>
-                </mat-form-field>
-
-                <mat-form-field class="example-full-width mb-3" appearance="outline" floatLabel="always">
-                    <mat-label>Activation Status</mat-label>
-                    <mat-select [(value)]="SearchActivationStatus">
-                        <mat-option [value]=true>Active</mat-option>
-                        <mat-option [value]=false>Deleted</mat-option>
-                    </mat-select>
-                </mat-form-field>
-
-            </div>
-            <div class="modal-footer">
-                <button mat-raised-button color="primary" (click)="SearchData()" data-dismiss="modal">Search</button>
-
-            </div>
-        </div>
-    </div>
-</div>

@@ -31,6 +31,11 @@ import { PackageDropDown } from '../package/packageDropDown.model';
 import { ActivatedRoute, Router } from '@angular/router';
 import { InvoiceDetachService } from '../invoiceDetach/invoiceDetach.service';
 import Swal from 'sweetalert2';
+import { firstValueFrom } from 'rxjs';
+import {
+  confirmMissingGstnForBatch,
+  extractApiErrorMessage
+} from '../shared/customer-invoicing-gstn-confirm.util';
 
 @Component({
   standalone: false,
@@ -45,20 +50,18 @@ export class InvoiceAttachDetachComponent implements OnInit {
     'DutySlipID',
     'CustomerName',
     'CustomerState',
-    'CustomerPersonName',
     'BranchName',
     'VerifyDuty',
-    'InvoiceNumberWithPrefix',
     'PickUpDate',
     'Vehicle',
     'PackageType',
     'ReservationBillingInstruction',
     'ApplicableGST',
     'TotalAmountAfterGST',
-    'DiscountPercentage',  
   ];
 
-  dataSource: InvoiceAttachDetachModel[] | null;
+  dataSource: InvoiceAttachDetachModel[] | null = null;
+  hasSearched = false;
   employeeID: number;
   row: InvoiceAttachDetachModel | null;
   SearchName: string = '';
@@ -81,6 +84,7 @@ export class InvoiceAttachDetachComponent implements OnInit {
   customerGroup : FormControl=new FormControl();
   searchCustomerName:string='';
   customer : FormControl=new FormControl();
+  selectedCustomerID = 0;
   geoPointTypeID: any;
   customerGroupID: any;
 
@@ -120,6 +124,9 @@ export class InvoiceAttachDetachComponent implements OnInit {
   invoiceBillDate: Date | null = null;
   SearchVerifyDuty:boolean;
   SearchGoodForBilling:boolean;
+
+  singleDutyGenerateInProgress = false;
+  multiDutyGenerateInProgress = false;
 
   constructor(
     public httpClient: HttpClient,
@@ -175,7 +182,8 @@ export class InvoiceAttachDetachComponent implements OnInit {
         invoiceType:[],
         listOfDuties:[[]],
         userID:[],
-        action: []
+        action: [],
+        acknowledgeMissingGstnDutySlipIds: [[]]
       })
       
   //---------- Customer Group ----------
@@ -258,7 +266,25 @@ export class InvoiceAttachDetachComponent implements OnInit {
   onCustomerSelected(customer: string) 
   {
     const selectedCustomer = this.CustomerList.find(
-      data => this.getCustomerDisplayValue(data) === customer);
+      data => data.customerName === customer);
+    this.selectedCustomerID = selectedCustomer?.customerID > 0 ? selectedCustomer.customerID : 0;
+  }
+
+  /** Prefer customer ID from autocomplete; fall back to encoded name search. */
+  private getCustomerSearchParam(): string {
+    const typed = (this.customer.value || '').trim();
+    if (!typed) {
+      this.selectedCustomerID = 0;
+      return '';
+    }
+    if (this.selectedCustomerID > 0) {
+      const selected = this.CustomerList?.find(c => c.customerID === this.selectedCustomerID);
+      if (selected && selected.customerName === typed) {
+        return `#${this.selectedCustomerID}`;
+      }
+    }
+    this.selectedCustomerID = 0;
+    return typed;
   }
 
   //---------- Branch ----------
@@ -355,10 +381,11 @@ export class InvoiceAttachDetachComponent implements OnInit {
     );
   }
 
-  refresh() 
+  refresh(reload = false) 
   {
     this.customerGroup.setValue('');
     this.customer.setValue('');
+    this.selectedCustomerID = 0;
     this.SearchCreditNoteNumber = '';
     this.SearchBranch.setValue('');
     this.SearchDutyFromDate = '';
@@ -376,41 +403,42 @@ export class InvoiceAttachDetachComponent implements OnInit {
     this.SearchGoodForBilling = null;
     this.SearchType = '';
     this.PageNumber = 0;
-    if (this.InvoiceNumberWithPrefix) {
-      this.loadDataForEdit();
+    this.selectedInvoices = [];
+    this.selectAll = false;
+    if (reload) {
+      this.hasSearched = true;
+      this.runSearchLoad();
     } else {
-      this.loadData();
+      this.hasSearched = false;
+      this.dataSource = null;
     }
   }
 
   public SearchData() 
   {
-    if (this.InvoiceNumberWithPrefix) {
-      this.loadDataForEdit();
-    } else {
-      this.loadData();
-    }
+    this.PageNumber = 0;
+    this.runSearchLoad();
   }
  
   public Filter() 
   {
     this.PageNumber = 0;
-    if (this.InvoiceNumberWithPrefix) {
-      this.loadDataForEdit();
-    } else {
-      this.loadData();
-    }
+    this.runSearchLoad();
   }
 
   onBackPress(event) 
   {
-    if (event.keyCode === 8) 
+    if (event.keyCode === 8 && this.hasSearched) 
     {
-      if (this.InvoiceNumberWithPrefix) {
-        this.loadDataForEdit();
-      } else {
-        this.loadData();
-      }
+      this.runSearchLoad();
+    }
+  }
+
+  private runSearchLoad() {
+    if (this.InvoiceNumberWithPrefix) {
+      this.loadDataForEdit();
+    } else {
+      this.loadData();
     }
   }
 
@@ -429,6 +457,7 @@ export class InvoiceAttachDetachComponent implements OnInit {
 
   public loadData() 
   {
+    this.hasSearched = true;
     if(this.SearchDutyFromDate!=="")
     {
       this.SearchDutyFromDate=moment(this.SearchDutyFromDate).format('yyyy-MM-DD');
@@ -441,7 +470,7 @@ export class InvoiceAttachDetachComponent implements OnInit {
     {
       this.SearchPackage.setValue(this.SearchPackage.value.replace("/","-"));
     }
-    this.invoiceAttachDetachService.getTableData(this.getCustomerNameForSearch(this.customer.value),this.SearchBranch.value,this.SearchDutySlipID,this.SearchReservationID,this.SearchGSTType,this.SearchDutyFromDate,
+    this.invoiceAttachDetachService.getTableData(this.getCustomerSearchParam(),this.SearchBranch.value,this.SearchDutySlipID,this.SearchReservationID,this.SearchGSTType,this.SearchDutyFromDate,
       this.SearchDutyToDate,this.SearchPassengerName,this.SearchPassengerMobile,this.SearchPackageType.value,this.SearchPackage.value,
       this.SearchDSStatus,this.SearchBillingStatus,this.SearchVerifyDuty,this.SearchGoodForBilling,this.PageNumber).subscribe
       (
@@ -456,6 +485,9 @@ export class InvoiceAttachDetachComponent implements OnInit {
 
   SortingData(coloumName: any) 
   {
+    if (!this.hasSearched) {
+      return;
+    }
     if (this.sortingData == 1) 
     {
       this.sortingData = 0;
@@ -466,7 +498,7 @@ export class InvoiceAttachDetachComponent implements OnInit {
       this.sortingData = 1;
       this.sortType = "Descending";
     }
-    this.invoiceAttachDetachService.getTableDataSort(this.getCustomerNameForSearch(this.customer.value),this.SearchBranch.value,this.SearchDutySlipID,this.SearchReservationID,this.SearchGSTType,this.SearchDutyFromDate,
+    this.invoiceAttachDetachService.getTableDataSort(this.getCustomerSearchParam(),this.SearchBranch.value,this.SearchDutySlipID,this.SearchReservationID,this.SearchGSTType,this.SearchDutyFromDate,
       this.SearchDutyToDate,this.SearchPassengerName,this.SearchPassengerMobile,this.SearchPackageType.value,this.SearchPackage.value,
       this.SearchDSStatus,this.SearchBillingStatus,this.SearchVerifyDuty,this.SearchGoodForBilling,this.PageNumber, coloumName.active, this.sortType).subscribe
     (
@@ -483,6 +515,7 @@ export class InvoiceAttachDetachComponent implements OnInit {
 
   public loadDataForEdit() 
   {
+    this.hasSearched = true;
     if(this.SearchDutyFromDate!=="")
     {
       this.SearchDutyFromDate=moment(this.SearchDutyFromDate).format('yyyy-MM-DD');
@@ -495,7 +528,7 @@ export class InvoiceAttachDetachComponent implements OnInit {
     {
       this.SearchPackage.setValue(this.SearchPackage.value.replace("/","-"));
     }
-    this.invoiceAttachDetachService.getTableDataForEdit(this.InvoiceNumberWithPrefix.replace("/","-"),this.getCustomerNameForSearch(this.customer.value),this.SearchBranch.value,this.SearchDutySlipID,this.SearchReservationID,this.SearchGSTType,this.SearchDutyFromDate,
+    this.invoiceAttachDetachService.getTableDataForEdit(this.InvoiceNumberWithPrefix.replace("/","-"),this.getCustomerSearchParam(),this.SearchBranch.value,this.SearchDutySlipID,this.SearchReservationID,this.SearchGSTType,this.SearchDutyFromDate,
       this.SearchDutyToDate,this.SearchPassengerName,this.SearchPassengerMobile,this.SearchPackageType.value,this.SearchPackage.value,
       this.SearchDSStatus,this.SearchBillingStatus,this.PageNumber).subscribe
       (
@@ -510,6 +543,9 @@ export class InvoiceAttachDetachComponent implements OnInit {
 
   SortingDataForEdit(coloumName: any) 
   {
+    if (!this.hasSearched) {
+      return;
+    }
     if (this.sortingData == 1) 
     {
       this.sortingData = 0;
@@ -520,7 +556,7 @@ export class InvoiceAttachDetachComponent implements OnInit {
       this.sortingData = 1;
       this.sortType = "Descending";
     }
-    this.invoiceAttachDetachService.getTableDataSortForEdit(this.InvoiceNumberWithPrefix.replace("/","-"),this.getCustomerNameForSearch(this.customer.value),this.SearchBranch.value,this.SearchDutySlipID,this.SearchReservationID,this.SearchGSTType,this.SearchDutyFromDate,
+    this.invoiceAttachDetachService.getTableDataSortForEdit(this.InvoiceNumberWithPrefix.replace("/","-"),this.getCustomerSearchParam(),this.SearchBranch.value,this.SearchDutySlipID,this.SearchReservationID,this.SearchGSTType,this.SearchDutyFromDate,
       this.SearchDutyToDate,this.SearchPassengerName,this.SearchPassengerMobile,this.SearchPackageType.value,this.SearchPackage.value,
       this.SearchDSStatus,this.SearchBillingStatus,this.PageNumber, coloumName.active, this.sortType).subscribe
     (
@@ -553,32 +589,28 @@ export class InvoiceAttachDetachComponent implements OnInit {
 
   NextCall() 
   {
-    if (this.dataSource.length > 0) 
+    if (this.hasSearched && this.dataSource?.length > 0) 
     {
       this.PageNumber++;
-      if (this.InvoiceNumberWithPrefix) {
-        this.loadDataForEdit();
-      } else {
-        this.loadData();
-      }
+      this.runSearchLoad();
     }
   }
 
   PreviousCall() 
   {
-    if (this.PageNumber > 0) 
+    if (this.hasSearched && this.PageNumber > 0) 
     {
       this.PageNumber--;
-      if (this.InvoiceNumberWithPrefix) {
-        this.loadDataForEdit();
-      } else {
-        this.loadData();
-      }
+      this.runSearchLoad();
     }
   }
 
   private isTrueValue(value: any): boolean {
     return value === true || value === 'true' || value === 'True' || value === 1 || value === '1';
+  }
+
+  formatYesNo(value: any): string {
+    return this.isTrueValue(value) ? 'Yes' : 'No';
   }
 
   private isDutyDateAfterBillDate(row: any): boolean {
@@ -609,12 +641,19 @@ export class InvoiceAttachDetachComponent implements OnInit {
     return this.isDutyDateAfterBillDate(row);
   }
 
+  /** Match legacy Attach: allow select unless billing date is after bill date / today. */
   isRowSelectable(row: any): boolean {
-    if (!this.isTrueValue(row?.verifyDuty) || !this.isTrueValue(row?.goodForBilling)) {
-      return false;
-    }
-
     return !this.isDutyDateAfterBillDate(row);
+  }
+
+  getRowSelectTooltip(row: any): string {
+    if (!this.isDutyDateAfterBillDate(row)) {
+      return '';
+    }
+    if (this.InvoiceID && this.invoiceBillDate) {
+      return 'Billing pickup date is after bill date';
+    }
+    return 'Billing pickup date is after today — cannot generate/attach yet';
   }
 
   
@@ -707,24 +746,21 @@ export class InvoiceAttachDetachComponent implements OnInit {
     { 
       const dutyList = response.result.replace("Success:", "").split(",").map(item => item.split("#")[1]).join(", ");
       Swal.fire({
-          title: `Invoice Attached: ${dutyList}...!!!`,
+          title: `Duties linked to invoice ${dutyList}`,
+          text: 'Duty calculations are linked only. General bill line items and header amounts are not changed.',
           icon: 'success',
           confirmButtonText: 'Ok'
           }).then(result => {
             if (result.isConfirmed) 
             {
               window.location.reload();
-              // const url = this.router.serializeUrl(
-              //   this.router.createUrlTree(['/invoiceHome'])
-              // );
-              // window.open(this._generalService.FormURL + url, '_blank');
             }
           });
       this.refresh();
     },
     error =>
     {
-      const errorMessage = error || 'Operation Failed.....!!!';
+      const errorMessage = error || 'Attach failed. Please try again.';
       Swal.fire({
           title: errorMessage,
           icon: 'error'
@@ -733,8 +769,11 @@ export class InvoiceAttachDetachComponent implements OnInit {
   }
 
 
-  GenerateSingleInvoiceforSingleDuty()
+  async GenerateSingleInvoiceforSingleDuty()
   {
+    if (this.singleDutyGenerateInProgress) {
+      return;
+    }
 
     if (!this.selectedInvoices || this.selectedInvoices.length === 0) {
     Swal.fire({
@@ -743,66 +782,120 @@ export class InvoiceAttachDetachComponent implements OnInit {
       icon: 'warning',
       confirmButtonText: 'Ok'
     });
-    return; // stop execution
+    return;
   }
-    if (this.selectedInvoices.length !== 1) {
-      Swal.fire({
-        title: 'Select exactly one duty',
-        text: 'Single Duty generate creates one invoice per click. For multiple duties use Multy Duty generate.',
-        icon: 'warning',
-        confirmButtonText: 'Ok'
-      });
-      return;
-    }
     const duties: number[] = this.selectedInvoices.map(x => x.dutySlipID);
-    this.advanceTableForm.patchValue({invoiceID:0});
-    this.advanceTableForm.patchValue({invoiceType:"InvoiceSingleDuty"});
-    this.advanceTableForm.patchValue({action:"N/A"});
-    this.advanceTableForm.patchValue({listOfDuties:duties});
-    this.invoiceDetachService.add(this.advanceTableForm.getRawValue()).subscribe(
-    response => 
-    {
-      //const dutyList = response.listofduties ? response.listofduties.join(", ") : "";
-      const dutyList = response.result.replace("Success:", "").split(",").map(item => item.split("#")[1]).join(", ");
-      const invoiceNo = response.result.replace("Success:", "").split(",").map(item => item.split("#")[0]).join(", ");
-      console.log('Duty List:', dutyList,invoiceNo); // Log the duty list for debugging
-      Swal.fire({
-          title: `Invoice Single Duty Created with Duties: ${dutyList}...!!!`,
-          icon: 'success',
-          confirmButtonText: 'Ok'
-          }).then(result => {
-            if (result.isConfirmed) 
-            {
-              const url = this.router.serializeUrl(
-      this.router.createUrlTree(
-        ['/invoiceAttachDetach'],
-        {
-          queryParams: {
-            invoiceNumberWithPrefix: dutyList,
-            invoiceID: invoiceNo
-          }
-        }
-      )
-    );
+    this.singleDutyGenerateInProgress = true;
 
-    window.location.href = this._generalService.FormURL + url;
-            }
-          });
-     // this.refresh();
-    },
-    error =>
-    {
-      const errorMessage = error || 'Operation Failed.....!!!';
+    try {
+      const check = await firstValueFrom(
+        this.invoiceDetachService.checkCustomerInvoicingGstnBatch(duties)
+      );
+      const confirmation = await confirmMissingGstnForBatch(check, duties);
+      if (!confirmation.proceed) {
+        return;
+      }
+
+      this.advanceTableForm.patchValue({ invoiceID: 0 });
+      this.advanceTableForm.patchValue({ invoiceType: 'InvoiceSingleDuty' });
+      this.advanceTableForm.patchValue({ action: 'N/A' });
+      this.advanceTableForm.patchValue({ listOfDuties: confirmation.dutiesToGenerate });
+      this.advanceTableForm.patchValue({
+        acknowledgeMissingGstnDutySlipIds: confirmation.acknowledgeMissingGstnDutySlipIds
+      });
+
+      const response = await firstValueFrom(
+        this.invoiceDetachService.add(this.advanceTableForm.getRawValue())
+      );
+      const parsed = this.parseSingleDutyBatchResult(response?.result || '');
+      const successLines = parsed.successes.map(item =>
+        `Duty ${item.dutySlipId}: ${item.invoiceNumber} (${item.action})`
+      ).join('<br/>');
+      const failLines = parsed.failures.map(item =>
+        `Duty ${item.dutySlipId}: ${item.message}`
+      ).join('<br/>');
+
+      if (parsed.successes.length === 0) {
+        Swal.fire({
+          title: 'Invoice generation failed',
+          html: failLines || 'Operation Failed.....!!!',
+          icon: 'error',
+          confirmButtonText: 'Ok'
+        });
+        return;
+      }
+
+      const partial = parsed.failures.length > 0;
       Swal.fire({
-          title: errorMessage,
-          icon: 'error'
+          title: partial
+            ? `${parsed.successes.length} invoice(s) created, ${parsed.failures.length} failed`
+            : `${parsed.successes.length} Single Duty invoice(s) created`,
+          html: successLines + (partial ? `<br/><br/><strong>Failed:</strong><br/>${failLines}` : ''),
+          icon: partial ? 'warning' : 'success',
+          confirmButtonText: 'Ok'
+          }).then(() => {
+            this.selectedInvoices = [];
+            this.selectAll = false;
+            this.refresh(true);
           });
+    } catch (error) {
+      Swal.fire({
+        title: extractApiErrorMessage(error),
+        icon: 'error'
+      });
+    } finally {
+      this.singleDutyGenerateInProgress = false;
+    }
+  }
+
+  private parseSingleDutyBatchResult(result: string): {
+    successes: { invoiceId: string; invoiceNumber: string; dutySlipId: string; action: string }[];
+    failures: { dutySlipId: string; message: string }[];
+  } {
+    const successes: { invoiceId: string; invoiceNumber: string; dutySlipId: string; action: string }[] = [];
+    const failures: { dutySlipId: string; message: string }[] = [];
+
+    if (!result || !result.startsWith('Success:')) {
+      return { successes, failures };
+    }
+
+    const body = result.substring('Success:'.length);
+    const segments = body.split('|Failed:');
+    const successPart = segments[0] || '';
+    const failPart = segments[1] || '';
+
+    successPart.split(',').filter(x => x.trim()).forEach(entry => {
+      const parts = entry.split('#');
+      if (parts.length >= 2) {
+        successes.push({
+          invoiceId: parts[0],
+          invoiceNumber: parts[1],
+          dutySlipId: parts.length >= 3 ? parts[2] : '',
+          action: parts.length >= 4 ? parts[3] : 'Created'
+        });
+      }
     });
+
+    failPart.split(',').filter(x => x.trim()).forEach(entry => {
+      const hashIndex = entry.indexOf('#');
+      if (hashIndex > 0) {
+        failures.push({
+          dutySlipId: entry.substring(0, hashIndex),
+          message: entry.substring(hashIndex + 1)
+        });
+      }
+    });
+
+    return { successes, failures };
   }
 
 
   GenerateSingleInvoiceforMultipleDuties()
   {
+    if (this.multiDutyGenerateInProgress) {
+      return;
+    }
+
     if (!this.selectedInvoices || this.selectedInvoices.length === 0) {
     Swal.fire({
       title: 'No Duties Selected!',
@@ -821,6 +914,7 @@ export class InvoiceAttachDetachComponent implements OnInit {
       });
       return;
     }
+    this.multiDutyGenerateInProgress = true;
     const duties: number[] = this.selectedInvoices.map(x => x.dutySlipID);
     this.advanceTableForm.patchValue({invoiceID:0});
     this.advanceTableForm.patchValue({invoiceType:"InvoiceMultyDuty"});
@@ -829,6 +923,7 @@ export class InvoiceAttachDetachComponent implements OnInit {
     this.invoiceDetachService.add(this.advanceTableForm.getRawValue()).subscribe(
     response => 
     { 
+      this.multiDutyGenerateInProgress = false;
       const dutyList = response.result.replace("Success:", "").split(",").map(item => item.split("#")[1]).join(", ");
       const invoiceNo = response.result.replace("Success:", "").split(",").map(item => item.split("#")[0]).join(", ");
       console.log('Duty List:', dutyList,invoiceNo); // Log the duty list for debugging
@@ -858,7 +953,8 @@ export class InvoiceAttachDetachComponent implements OnInit {
     },
     error =>
     {
-      const errorMessage = error || 'Operation Failed.....!!!';
+      this.multiDutyGenerateInProgress = false;
+      const errorMessage = error?.error?.message || error || 'Operation Failed.....!!!';
       Swal.fire({
           title: errorMessage,
           icon: 'error'
