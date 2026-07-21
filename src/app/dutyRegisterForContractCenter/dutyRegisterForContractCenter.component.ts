@@ -1176,7 +1176,11 @@ export class DutyRegisterForContractCenterComponent implements OnInit {
 
   getCustomerSpecificFieldValue(row: any, fieldName: string): string {
     const value = row?.customerSpecificFieldMap?.[fieldName];
-    return value !== undefined && value !== null && String(value).trim() !== '' ? String(value) : 'NA';
+    const text = value !== undefined && value !== null ? String(value).trim() : '';
+    if (!text || text === '--Select--') {
+      return 'NA';
+    }
+    return text;
   }
 
   private applyCustomerSpecificFieldColumns(data: DutyRegisterModel[]): DutyRegisterModel[] {
