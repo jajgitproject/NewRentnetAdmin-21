@@ -3769,25 +3769,15 @@ openDropOffByExectiveGPS(item: any)
     return null;
   }
 
-  getOwnershipImpLabel(row: any): string | null {
-    const v = (row?.inventoryOwnedSupplied ?? '').toString().trim();
-    if (v === 'Owned') return 'Own';
-    if (v === 'Supplier') return 'Sup';
-    return null;
+  getModeOfPaymentImpLabel(row: any): string | null {
+    const v = (row?.modeOfPayment ?? '').toString().trim();
+    if (!v) return null;
+    return v.length <= 12 ? v : `${v.substring(0, 11)}…`;
   }
 
-  getOwnershipImpTooltip(row: any): string | null {
-    const v = (row?.inventoryOwnedSupplied ?? '').toString().trim();
-    if (v === 'Owned') return row?.companyName?.trim() || 'Owned';
-    if (v === 'Supplier') {
-      const type = row?.supplierType?.trim();
-      const name = row?.inventorySupplierName?.trim()
-        || row?.supplierName?.trim()
-        || row?.rpsName?.trim();
-      if (type && name) return `${type} - ${name}`;
-      return type || name || 'Supplier';
-    }
-    return null;
+  getModeOfPaymentImpTooltip(row: any): string | null {
+    const v = (row?.modeOfPayment ?? '').toString().trim();
+    return v ? `Mode of Payment: ${v}` : null;
   }
 
   getControlPanelMessagingHeaderDisplay(row: any): {

@@ -1734,6 +1734,13 @@
                               {{ ownLabel }}
                             </span>
                             <br>
+                            <span *ngIf="getModeOfPaymentImpLabel(data) as mopLabel"
+                                  [matTooltip]="getModeOfPaymentImpTooltip(data)"
+                                  matTooltipShowDelay="200"
+                                  style="font-size: 11px;">
+                              {{ mopLabel }}
+                            </span>
+                            <br>
                             
                             <span *ngIf="data.specialInstruction !== null" [matTooltip]="getSpecialInstructions(data.specialInstruction)"> SI </span>
                             &nbsp;

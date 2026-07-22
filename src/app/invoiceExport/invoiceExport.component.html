@@ -7,12 +7,12 @@
             <li class="breadcrumb-item bcrumb-1">
               <a routerLink="/dashboard/main"><i class="fas fa-home"></i> Home</a>|
               <a href="#" onClick="return false;">Billing</a>|
-              <a href="#" onClick="return false;">Invoice Export</a>
+              <a href="#" onClick="return false;">Forensic</a>
             </li>
           </ul>
           <ul class="breadcrumb breadcrumb-style">
             <li class="breadcrumb-item">
-              <h2>Invoice Export</h2>
+              <h2>Forensic</h2>
             </li>
           </ul>
         </div>
@@ -76,6 +76,36 @@
                   Download Duplicate Invoices
                 </button>
                 <mat-spinner *ngIf="exporting" diameter="28"></mat-spinner>
+              </div>
+            </div>
+
+            <div class="row export-section-divider">
+              <div class="col-12">
+                <p class="export-hint">
+                  Duties with <strong>Verified = Yes</strong> and <strong>Good for Billing = Yes</strong>
+                  but invoice calculation not completed (uses billing pickup date in the selected range).
+                </p>
+              </div>
+            </div>
+
+            <div class="row">
+              <div class="col-12 export-actions">
+                <button
+                  mat-raised-button
+                  color="warn"
+                  type="button"
+                  (click)="showVerifiedGfbNotCalculatedCount()"
+                  [disabled]="exporting">
+                  Show Not-Calculated Count
+                </button>
+                <button
+                  mat-raised-button
+                  type="button"
+                  class="export-btn-not-calculated"
+                  (click)="downloadVerifiedGfbNotCalculatedList()"
+                  [disabled]="exporting">
+                  Download Not-Calculated Duties
+                </button>
               </div>
             </div>
           </div>

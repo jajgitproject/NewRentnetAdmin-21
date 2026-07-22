@@ -46,9 +46,9 @@
                                                                 <mat-form-field class="example-full-width cp-quick-search-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
                                                                     <mat-label>Customer</mat-label>
                                                                     <input type="text" matInput [matAutocomplete]="auto1" [formControl]="customer">
-                                                                    <mat-autocomplete #auto1="matAutocomplete" (optionSelected)="onCustomerSelected($event.option.value)" panelWidth="custom-autocomplete-panel">
+                                                                    <mat-autocomplete #auto1="matAutocomplete" [displayWith]="displayCustomer" (optionSelected)="onCustomerSelected($event.option.value)" panelWidth="custom-autocomplete-panel">
                                                                         <mat-option  *ngFor="let option of filteredCustomerOptions | async"
-                                                                        [value]="option.customerName + '##' + (option.customerIdentityNumber || '')">
+                                                                        [value]="getCustomerDisplayValue(option)">
                                                                         {{option.customerName}} ## {{option.customerIdentityNumber}}
                                                                         </mat-option>
                                                                     </mat-autocomplete>

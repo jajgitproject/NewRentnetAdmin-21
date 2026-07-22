@@ -363,6 +363,30 @@ mat-expansion-panel-header {
   padding-right: 12px;
 }
 
+.cda-mop-banner {
+  margin: 8px 20px 12px;
+  padding: 10px 16px;
+  background: #f5f8fc;
+  border-left: 4px solid #1976d2;
+}
+
+.cda-mop-label {
+  font-size: 13px;
+  font-weight: 600;
+  margin-right: 12px;
+  color: #555;
+}
+
+.cda-mop-value {
+  font-size: 20px;
+  font-weight: 700;
+  color: #0d47a1;
+}
+
+.cda-mop-inline {
+  font-weight: 700;
+}
+
 :host ::ng-deep .mat-expansion-panel-header .mat-expansion-panel-header-title {
   flex-grow: 1;
   margin-right: 0;

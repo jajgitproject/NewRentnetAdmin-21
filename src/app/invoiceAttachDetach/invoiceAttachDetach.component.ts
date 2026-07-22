@@ -36,6 +36,11 @@ import {
   confirmMissingGstnForBatch,
   extractApiErrorMessage
 } from '../shared/customer-invoicing-gstn-confirm.util';
+import {
+  getCustomerDisplayValue,
+  getCustomerNameFromAutocomplete,
+  resolveCustomerFromAutocomplete
+} from '../shared/customer-autocomplete.util';
 
 @Component({
   standalone: false,
@@ -85,6 +90,8 @@ export class InvoiceAttachDetachComponent implements OnInit {
   searchCustomerName:string='';
   customer : FormControl=new FormControl();
   selectedCustomerID = 0;
+  displayCustomer = (value: string) => getCustomerNameFromAutocomplete(value);
+  getCustomerDisplayValue = getCustomerDisplayValue;
   geoPointTypeID: any;
   customerGroupID: any;
 
@@ -238,36 +245,22 @@ export class InvoiceAttachDetachComponent implements OnInit {
     });
   }
 
-  private getCustomerNameForSearch(value: any): string {
-    const raw = (value || '').toString().trim();
-    if (!raw) {
-      return raw;
-    }
-    return raw.split('##')[0].trim();
-  }
-
-  private getCustomerDisplayValue(data: CustomerDropDown): string {
-    return data.customerName + '##' + (data.customerIdentityNumber || '');
-  }
-
   private _filterCustomer(value: string): any {
-    const filterValue = this.getCustomerNameForSearch(value).toLowerCase();
+    const filterValue = getCustomerNameFromAutocomplete(value).toLowerCase();
     return this.CustomerList.filter(
       data => 
       {
         const identity = (data.customerIdentityNumber || '').toString().toLowerCase();
         return data.customerName.toLowerCase().includes(filterValue)
           || identity.includes(filterValue)
-          || this.getCustomerDisplayValue(data).toLowerCase().includes(filterValue);
+          || getCustomerDisplayValue(data).toLowerCase().includes(filterValue);
       }
     );
   }
 
-  onCustomerSelected(customer: string) 
-  {
-    const selectedCustomer = this.CustomerList.find(
-      data => data.customerName === customer);
-    this.selectedCustomerID = selectedCustomer?.customerID > 0 ? selectedCustomer.customerID : 0;
+  onCustomerSelected(customerValue: string): void {
+    const selected = resolveCustomerFromAutocomplete(customerValue, this.CustomerList);
+    this.selectedCustomerID = selected?.customerID > 0 ? selected.customerID : 0;
   }
 
   /** Prefer customer ID from autocomplete; fall back to encoded name search. */
@@ -277,14 +270,23 @@ export class InvoiceAttachDetachComponent implements OnInit {
       this.selectedCustomerID = 0;
       return '';
     }
+
+    const resolved = resolveCustomerFromAutocomplete(typed, this.CustomerList);
+    if (resolved?.customerID > 0) {
+      this.selectedCustomerID = resolved.customerID;
+      return `#${resolved.customerID}`;
+    }
+
     if (this.selectedCustomerID > 0) {
       const selected = this.CustomerList?.find(c => c.customerID === this.selectedCustomerID);
-      if (selected && selected.customerName === typed) {
+      const namePart = getCustomerNameFromAutocomplete(typed);
+      if (selected && selected.customerName === namePart) {
         return `#${this.selectedCustomerID}`;
       }
     }
+
     this.selectedCustomerID = 0;
-    return typed;
+    return getCustomerNameFromAutocomplete(typed);
   }
 
   //---------- Branch ----------

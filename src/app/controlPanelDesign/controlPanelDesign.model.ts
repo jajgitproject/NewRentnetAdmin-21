@@ -31,6 +31,7 @@ export class ControlPanelHeaderDetails {
   tripTo:string;
   newCustomer:boolean;
   hasActiveUpsell?: boolean;
+  modeOfPayment?: string;
   
   
   constructor(controlPanelHeaderDetails) {
@@ -52,6 +53,7 @@ export class ControlPanelHeaderDetails {
     this.tripTo = controlPanelHeaderDetails.tripTo;
     this.newCustomer = controlPanelHeaderDetails.newCustomer;
     this.hasActiveUpsell = controlPanelHeaderDetails.hasActiveUpsell;
+    this.modeOfPayment = controlPanelHeaderDetails.modeOfPayment || '';
   }
 }
 
@@ -100,6 +102,7 @@ export class ControlPanelDetails {
   showOTPOnDutySlip:boolean;
   isPostPickUpCallAllowedToCustomer:boolean;
   isPostPickUpCallAllowedToCustomerPerson:boolean;
+  modeOfPayment?: string;
 
   constructor(details) {
     this.reservationID = details.reservationID || '';
@@ -114,7 +117,8 @@ export class ControlPanelDetails {
     this.passengerDetails = details.passengerDetails;
     this.stopsDetails = details.stopsDetails;
     this.carVendor = details.carVendor;
-    this.pickupCityID = details.pickupCityID 
+    this.pickupCityID = details.pickupCityID;
+    this.modeOfPayment = details.modeOfPayment || '';
   }
 }
 

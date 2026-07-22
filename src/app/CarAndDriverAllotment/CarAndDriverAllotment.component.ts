@@ -1100,6 +1100,11 @@ export class CarAndDriverAllotmentComponent implements OnInit {
       );
   }
 
+  getAllotmentModeOfPayment(): string | null {
+    const v = (this.reservationInfo?.[0]?.modeOfPayment ?? '').toString().trim();
+    return v || null;
+  }
+
   getDisplayPassengerName(item: any): string {
     if (!item) {
       return 'N/A';

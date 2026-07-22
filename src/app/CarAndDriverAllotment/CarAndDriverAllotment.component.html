@@ -73,6 +73,10 @@
                     </mat-menu>
   </div>
 </div>
+  <div class="cda-mop-banner" *ngIf="getAllotmentModeOfPayment() as mop">
+    <span class="cda-mop-label">Mode of Payment</span>
+    <span class="cda-mop-value">{{ mop }}</span>
+  </div>
   <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
     <div class="card" style="width: 100%">
       <div class="body">
@@ -556,7 +560,7 @@
                         <b>Documents</b><br />
                         View <br />
                         <b>Payment Mode</b><br />
-                        Credit Card <br />
+                        <span class="cda-mop-inline">{{ item.modeOfPayment || 'N/A' }}</span><br />
                         <b>Invoice Clearance</b><br />
                         Approved<br />
                         <b>Amount Paid</b> <br />

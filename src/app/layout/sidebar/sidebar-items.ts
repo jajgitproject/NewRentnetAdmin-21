@@ -1222,10 +1222,10 @@ export const ROUTES: RouteInfo[] = [
       },
       {
         path: 'invoiceExport',
-        title: 'Invoice Export',
+        title: 'Forensic',
         pageKey: 'Invoice Export',
         moduleName: 'invoiceExport',
-        alternateAccessPageKeys: ['invoiceExport'],
+        alternateAccessPageKeys: ['invoiceExport', 'Forensic'],
         icon: 'fas fa-file-excel',
         class: '',
         groupTitle: false,

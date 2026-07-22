@@ -29,6 +29,11 @@ import {
   SummaryOfDutyDialogComponent,
   SummaryOfDutyDialogData
 } from '../summaryOfDuty/summary-of-duty-dialog.component';
+import {
+  billingDateOnly,
+  getBillingTripLegsFromForm,
+  resolveBillingTripLegDateTimes,
+} from '../shared/billing-datetime-chronology.util';
 
 
 
@@ -1476,73 +1481,14 @@ export class DutySlipForBillingComponent implements OnInit, AfterViewInit, OnCha
   }
 
   onTimeSelection() {
-    const locOutTime = this.advanceTableForm.get('locationOutTimeForBilling')?.value;
-    const locOutDate = this.advanceTableForm.get('locationOutDateForBilling')?.value;
-    const pickUpTime = this.advanceTableForm.get('pickUpTimeForBilling')?.value;
-    const pickUpDate = this.advanceTableForm.get('pickUpDateForBilling')?.value;
-    const dropOffTime = this.advanceTableForm.get('dropOffTimeForBilling')?.value;
-    const dropOffDate = this.advanceTableForm.get('dropOffDateForBilling')?.value;
-    const locInTime = this.advanceTableForm.get('locationInTimeForBilling')?.value;
-    const locInDate = this.advanceTableForm.get('locationInDateForBilling')?.value;
-
-    const hasAll =
-      locOutTime != null &&
-      locOutDate != null &&
-      locOutTime !== '' &&
-      locOutDate !== '' &&
-      pickUpTime != null &&
-      pickUpDate != null &&
-      pickUpTime !== '' &&
-      pickUpDate !== '' &&
-      dropOffTime != null &&
-      dropOffDate != null &&
-      dropOffTime !== '' &&
-      dropOffDate !== '' &&
-      locInTime != null &&
-      locInDate != null &&
-      locInTime !== '' &&
-      locInDate !== '';
-
-    if (!hasAll) {
+    const form = this.advanceTableForm.getRawValue();
+    const resolved = resolveBillingTripLegDateTimes(getBillingTripLegsFromForm(form));
+    if (!resolved.ok) {
       this.datetime = '';
       return;
     }
 
-    if (
-      !moment(locOutDate).isValid() ||
-      !moment(locOutTime).isValid() ||
-      !moment(pickUpDate).isValid() ||
-      !moment(pickUpTime).isValid() ||
-      !moment(dropOffDate).isValid() ||
-      !moment(dropOffTime).isValid() ||
-      !moment(locInDate).isValid() ||
-      !moment(locInTime).isValid()
-    ) {
-      this.datetime = '';
-      return;
-    }
-
-    // Moment uses YYYY (not lowercase yyyy) for 4-digit year
-    const locOutTimeConversion = moment(locOutTime).format('HH:mm');
-    const locOutDateConversion = moment(locOutDate).format('YYYY-MM-DD');
-    const locationOutDateTime = locOutDateConversion + ' ' + locOutTimeConversion;
-
-    const pickUpTimeConversion = moment(pickUpTime).format('HH:mm');
-    const pickUpDateConversion = moment(pickUpDate).format('YYYY-MM-DD');
-    const pickUpDateTime = pickUpDateConversion + ' ' + pickUpTimeConversion;
-
-    const dropOffTimeConversion = moment(dropOffTime).format('HH:mm');
-    const dropOffDateConversion = moment(dropOffDate).format('YYYY-MM-DD');
-    const dropOffDateTime = dropOffDateConversion + ' ' + dropOffTimeConversion;
-
-    const locInTimeConversion = moment(locInTime).format('HH:mm');
-    const locInDateConversion = moment(locInDate).format('YYYY-MM-DD');
-    const locInDateTime = locInDateConversion + ' ' + locInTimeConversion;
-
-    const t0 = new Date(locationOutDateTime).getTime();
-    const t1 = new Date(pickUpDateTime).getTime();
-    const t2 = new Date(dropOffDateTime).getTime();
-    const t3 = new Date(locInDateTime).getTime();
+    const [t0, t1, t2, t3] = resolved.dateTimes.map((d) => d.getTime());
     if (![t0, t1, t2, t3].every((t) => Number.isFinite(t))) {
       this.datetime = '';
       return;
@@ -1926,148 +1872,100 @@ public resetVerificationForEcoStateChange(): void {
   }
 
   dateOnly(date: Date): Date {
-    return new Date(date.getFullYear(), date.getMonth(), date.getDate());
+    return billingDateOnly(date) ?? new Date(NaN);
+  }
+
+  private showChronologyValidationError(message: string): void {
+    Swal.fire('Error', message, 'warning').then(() => {
+      this.showSpinner = false;
+    });
   }
 
   checkChronologyAndValues(): boolean {
-    const form = this.advanceTableForm.value;
-    // Date-only validations
-    const pickupDate = this.dateOnly(new Date(form.pickUpDateForBilling));
-    const locationOutDate = this.dateOnly(new Date(form.locationOutDateForBilling));
-    const dropOffDate = this.dateOnly(new Date(form.dropOffDateForBilling));
-    const locationInDate = this.dateOnly(new Date(form.locationInDateForBilling));
-  
+    const form = this.advanceTableForm.getRawValue();
+    const legs = getBillingTripLegsFromForm(form);
+
+    const locationOutDate = billingDateOnly(form.locationOutDateForBilling);
+    const pickupDate = billingDateOnly(form.pickUpDateForBilling);
+    const dropOffDate = billingDateOnly(form.dropOffDateForBilling);
+    const locationInDate = billingDateOnly(form.locationInDateForBilling);
+
+    if (!locationOutDate) {
+      this.showChronologyValidationError('Location Out date is missing or invalid.');
+      return false;
+    }
+    if (!pickupDate) {
+      this.showChronologyValidationError('Pickup date is missing or invalid.');
+      return false;
+    }
+    if (!dropOffDate) {
+      this.showChronologyValidationError('Drop-off date is missing or invalid.');
+      return false;
+    }
+    if (!locationInDate) {
+      this.showChronologyValidationError('Location In date is missing or invalid.');
+      return false;
+    }
+
     if (pickupDate < locationOutDate) {
-      Swal.fire('Error', 'Pickup Date cannot be before Location Out Date.', 'warning')
-      .then(() => {
-        this.showSpinner = false; // ✅ spinner stop after Swal close
-      });
+      this.showChronologyValidationError('Pickup Date cannot be before Location Out Date.');
       return false;
     }
-  
+
     if (dropOffDate < pickupDate) {
-      Swal.fire('Error', 'Drop-off Date cannot be before Pickup Date.', 'warning')
-      .then(() => {
-        this.showSpinner = false; // ✅ spinner stop after Swal close
-      });
+      this.showChronologyValidationError('Drop-off Date cannot be before Pickup Date.');
       return false;
     }
-  
+
     if (locationInDate < dropOffDate) {
-      Swal.fire('Error', 'Location In Date cannot be before Drop-off Date.', 'warning')
-      .then(() => {
-        this.showSpinner = false; // ✅ spinner stop after Swal close
-      });
+      this.showChronologyValidationError('Location In Date cannot be before Drop-off Date.');
       return false;
     }
-  
-    // Date+Time validations
-    const getDateTime = (dateInput: any, timeInput: any): Date | null => {
-    try {
-      let date: Date;
-      let time: Date;
-  
-      // Normalize Date input
-      if (dateInput instanceof Date) {
-        date = dateInput;
-      } else if (typeof dateInput === 'string') {
-        date = new Date(dateInput);
-      } else {
-        return null;
-      }
-  
-      // Normalize Time input
-      if (timeInput instanceof Date) {
-        time = timeInput;
-      } else if (typeof timeInput === 'string') {
-        time = new Date(timeInput);
-      } else {
-        return null;
-      }
-  
-      // Compose final DateTime
-      const final = new Date(
-        date.getFullYear(),
-        date.getMonth(),
-        date.getDate(),
-        time.getHours(),
-        time.getMinutes(),
-        time.getSeconds()
-      );
-  
-      return isNaN(final.getTime()) ? null : final;
-    } catch (err) {
-      return null;
+
+    const resolved = resolveBillingTripLegDateTimes(legs);
+    if (!resolved.ok) {
+      this.showChronologyValidationError(resolved.message);
+      return false;
     }
-  };
-  
-    const locationOutDT = getDateTime(form.locationOutDateForBilling, form.locationOutTimeForBilling);
-  const pickupDT = getDateTime(form.pickUpDateForBilling, form.pickUpTimeForBilling);
-  const dropOffDT = getDateTime(form.dropOffDateForBilling, form.dropOffTimeForBilling);
-  const locationInDT = getDateTime(form.locationInDateForBilling, form.locationInTimeForBilling);
-  
-  if (!locationOutDT || !pickupDT || !dropOffDT || !locationInDT) {
-    Swal.fire('Error', 'One or more DateTime fields are invalid or missing.', 'warning')
-    .then(() => {
-        this.showSpinner = false; // ✅ spinner stop after Swal close
-      });
-    return false;
-  }
-  
+
+    const [locationOutDT, pickupDT, dropOffDT, locationInDT] = resolved.dateTimes;
+
     if (pickupDT < locationOutDT) {
-      Swal.fire('Error', 'Pickup DateTime cannot be before Location Out DateTime.', 'warning')
-      .then(() => {
-        this.showSpinner = false; // ✅ spinner stop after Swal close
-      });
+      this.showChronologyValidationError('Pickup DateTime cannot be before Location Out DateTime.');
       return false;
     }
-  
+
     if (dropOffDT < pickupDT) {
-      Swal.fire('Error', 'Drop-off DateTime cannot be before Pickup DateTime.', 'warning')
-      .then(() => {
-        this.showSpinner = false; // ✅ spinner stop after Swal close
-      });
+      this.showChronologyValidationError('Drop-off DateTime cannot be before Pickup DateTime.');
       return false;
     }
-  
+
     if (locationInDT < dropOffDT) {
-      Swal.fire('Error', 'Location In DateTime cannot be before Drop-off DateTime.', 'warning')
-      .then(() => {
-        this.showSpinner = false; // ✅ spinner stop after Swal close
-      });
-      return (false);
+      this.showChronologyValidationError('Location In DateTime cannot be before Drop-off DateTime.');
+      return false;
     }
-  
+
     // KM validations
     const locationOutKM = Number(form.locationOutKMForBilling);
     const pickupKM = Number(form.pickUpKMForBilling);
     const dropOffKM = Number(form.dropOffKMForBilling);
     const locationInKM = Number(form.locationInKMForBilling);
-  
+
     if (pickupKM < locationOutKM) {
-      Swal.fire('Error', 'Pickup KM cannot be less than Location Out KM.', 'warning')
-      .then(() => {
-        this.showSpinner = false; // ✅ spinner stop after Swal close
-      });
+      this.showChronologyValidationError('Pickup KM cannot be less than Location Out KM.');
       return false;
     }
-  
+
     if (dropOffKM < pickupKM) {
-      Swal.fire('Error', 'Drop-off KM cannot be less than Pickup KM.', 'warning')
-      .then(() => {
-        this.showSpinner = false; // ✅ spinner stop after Swal close
-      });
+      this.showChronologyValidationError('Drop-off KM cannot be less than Pickup KM.');
       return false;
     }
-  
+
     if (locationInKM < dropOffKM) {
-      Swal.fire('Error', 'Location In KM cannot be less than Drop-off KM.', 'warning')
-      .then(() => {
-        this.showSpinner = false; // ✅ spinner stop after Swal close
-      });
+      this.showChronologyValidationError('Location In KM cannot be less than Drop-off KM.');
       return false;
     }
-  
+
     return true;
   }
 
@@ -2154,8 +2052,8 @@ public resetVerificationForEcoStateChange(): void {
       return;
     }
     this.showSpinner = true;
-    //this.saveDisabled = false;
     if (!this.checkChronologyAndValues()) {
+      this.showSpinner = false;
       return;
     }
     //this.saveDisabled = true;
