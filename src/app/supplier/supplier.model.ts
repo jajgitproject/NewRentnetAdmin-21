@@ -29,6 +29,8 @@ export class Supplier {
   internalExternal:string;
    supplierOfficialIdentityNumber:string;
    isAdhoc:boolean;
+   pan:string;
+   oldRentnetCode:number;
 
   constructor(supplier) {
     {
@@ -49,6 +51,8 @@ export class Supplier {
       this.supplierType=supplier.supplierType || '';
       this.internalExternal=supplier.internalExternal || '';
       this.isAdhoc = supplier.isAdhoc || '';
+      this.pan = supplier.pan || '';
+      this.oldRentnetCode = (supplier.oldRentnetCode && supplier.oldRentnetCode !== 0) ? Number(supplier.oldRentnetCode) : null;
     }
   }
   

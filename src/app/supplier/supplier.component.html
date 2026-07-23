@@ -131,7 +131,7 @@
                                                     <input type="text"
                                                         style="height: 40px; width: 300px;padding-left: 5px;"
                                                         class="form-control" placeholder="Filter" id="inputGroup"
-                                                        (keyup)="onBackPress($event)" (input)="loadData()"
+                                                        (keyup)="onBackPress($event)"
                                                         [(ngModel)]="searchTerm" />
 
                                                     <!-- Search button -->
@@ -175,9 +175,20 @@
                                 Check me!
                             </label> -->
                             <!-- <p>Checkbox is {{ isChecked ? 'checked' : 'unchecked' }}</p> -->
-                            <p *ngIf="!dataSource; then thenBlock2 else elseBlock2">
+                            <p *ngIf="!hasSearched; then initialPrompt else searchResultsBlock">
                                 This is not rendered
                             </p>
+
+                            <ng-template #initialPrompt>
+                                <div class="alert alert-primary" style="background-color:#E8E8E8; text-align: center;">
+                                    Use Search to load suppliers</div>
+                            </ng-template>
+
+                            <ng-template #searchResultsBlock>
+                            <p *ngIf="!dataSource || dataSource.length === 0; then thenBlock2 else elseBlock2">
+                                This is not rendered
+                            </p>
+                            </ng-template>
 
                             <ng-template #thenBlock2>
                                 <div class="alert alert-primary" style="background-color:#E8E8E8; text-align: center;">

@@ -225,7 +225,11 @@ export class FormDialogComponent
       supplierTypeID:[this.advanceTable.supplierTypeID],
       supplierType:[this.advanceTable.supplierType],
       internalExternal:[this.advanceTable.internalExternal],
-      supplierOfficialIdentityNumber:[this.advanceTable.supplierOfficialIdentityNumber]
+      pan: [this.advanceTable.pan, [Validators.pattern(/(^$|^[A-Za-z0-9]{10}$)/)]],
+      oldRentnetCode: [
+        (this.advanceTable.oldRentnetCode && this.advanceTable.oldRentnetCode !== 0) ? this.advanceTable.oldRentnetCode : null,
+        [Validators.required, Validators.pattern(/^[0-9]+$/)]
+      ]
     });
   }
 
@@ -251,61 +255,111 @@ showDetails(){
     this.dialogRef.close();
   }
   public Post(): void {
-    this.isLoading = true; // Start loading
+    this.isLoading = true;
     this.advanceTableForm.patchValue({
       supplierTypeID: this.supplierTypeID,
       countryID: this.geoPointID,
       stateID: this.geoPointStateID,
-      addressCityID: this.geoPointCityID
+      addressCityID: this.geoPointCityID,
+      oldRentnetCode: this.getOldRentnetCode()
     });
 
     this.advanceTableService.add(this.advanceTableForm.getRawValue()).subscribe(
       response => {
-        this.isLoading = false; // Stop loading
+        this.isLoading = false;
+        if (response && response.success === false) {
+          if (response.activationStatus === 'Duplicate OldRentnetCode') {
+            this._generalService.sendUpdate('DataNotFound:OldRentnetCodeDuplicacyError:Failure');
+          } else {
+            this._generalService.sendUpdate('SupplierAll:SupplierView:Failure');
+          }
+          return;
+        }
         this.dialogRef.close();
         this._generalService.sendUpdate('SupplierCreate:SupplierView:Success');
       },
       error => {
-        this.isLoading = false; // Stop loading
+        this.isLoading = false;
         this._generalService.sendUpdate('SupplierAll:SupplierView:Failure');
       }
     );
   }
 
   public Put(): void {
-    this.isLoading = true; // Start loading
+    this.isLoading = true;
     this.advanceTableForm.patchValue({
       supplierTypeID: this.supplierTypeID || this.advanceTable.supplierTypeID,
       countryID: this.geoPointID || this.advanceTable.countryID,
       stateID: this.geoPointStateID || this.advanceTable.stateID,
-      addressCityID: this.geoPointCityID || this.advanceTable.addressCityID
+      addressCityID: this.geoPointCityID || this.advanceTable.addressCityID,
+      oldRentnetCode: this.getOldRentnetCode()
     });
 
     this.advanceTableForm.controls['supplierRegistrationDate'].setValue(
       new Date(this.advanceTableForm.controls['supplierRegistrationDate'].value)
     );
 
-    this.advanceTableService.update(this.advanceTableForm.getRawValue()).subscribe(
+    const payload = this.advanceTableForm.getRawValue();
+    delete payload.supplierOfficialIdentityNumber;
+
+    this.advanceTableService.update(payload).subscribe(
       response => {
         if(!response.success)
        {
         this.isLoading = false;
-        this._generalService.sendUpdate('DataNotFound:DuplicacyError:Failure');
+        if (response.activationStatus === 'Duplicate OldRentnetCode') {
+          this._generalService.sendUpdate('DataNotFound:OldRentnetCodeDuplicacyError:Failure');
+        } else {
+          this._generalService.sendUpdate('DataNotFound:DuplicacyError:Failure');
+        }
        }
        else 
        {
         this.dialogRef.close();
         this.isLoading = false;
-       this._generalService.sendUpdate('SupplierUpdate:SupplierView:Success');//To Send Updates 
+       this._generalService.sendUpdate('SupplierUpdate:SupplierView:Success');
        } 
       },
       error => {
-        this.isLoading = false; // Stop loading
+        this.isLoading = false;
         this._generalService.sendUpdate('SupplierAll:SupplierView:Failure');
       }
     );
   
 }
+
+  getOldRentnetCode(): number | null {
+    const value = this.advanceTableForm.get('oldRentnetCode')?.value;
+    if (value === null || value === undefined || value === '') {
+      return null;
+    }
+    return Number(value);
+  }
+
+  keyPressAlphaNumeric(event: KeyboardEvent): boolean {
+    const charCode = event.which ? event.which : event.keyCode;
+    if ((charCode >= 48 && charCode <= 57) || (charCode >= 65 && charCode <= 90) || (charCode >= 97 && charCode <= 122)) {
+      return true;
+    }
+    event.preventDefault();
+    return false;
+  }
+
+  keyPressNumbers(event: KeyboardEvent): boolean {
+    const charCode = event.which ? event.which : event.keyCode;
+    if (charCode >= 48 && charCode <= 57) {
+      return true;
+    }
+    event.preventDefault();
+    return false;
+  }
+
+  onPanBlur(): void {
+    const panControl = this.advanceTableForm.get('pan');
+    if (panControl?.value) {
+      panControl.setValue(String(panControl.value).trim().toUpperCase());
+    }
+  }
   public confirmAdd(): void 
   {
        if(this.action=="edit")

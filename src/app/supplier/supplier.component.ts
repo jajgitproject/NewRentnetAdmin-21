@@ -48,6 +48,7 @@ export class SupplierComponent implements OnInit {
     'actions'
   ];
   dataSource: Supplier[] | null;
+  hasSearched = false;
   supplierID: number;
   advanceTable: Supplier | null; 
   PageNumber: number = 0; 
@@ -168,7 +169,6 @@ export class SupplierComponent implements OnInit {
           map(value => this._filterCity(value || ''))
         ); 
       });
-    this.loadData();
     this.SubscribeUpdateService();
     
  this.supplierMenuItems.sort((a, b) => a.label.localeCompare(b.label));
@@ -250,6 +250,7 @@ export class SupplierComponent implements OnInit {
   }
    public loadData() 
    {
+    this.hasSearched = true;
     
     switch (this.selectedFilter)
     {
@@ -461,7 +462,19 @@ export class SupplierComponent implements OnInit {
           }
           else if(this.MessageArray[0]=="DataNotFound")
           {
-            if(this.MessageArray[1]=="DuplicacyError")
+            if(this.MessageArray[1]=="OldRentnetCodeDuplicacyError")
+            {
+              if(this.MessageArray[2]=="Failure")
+              {
+               this.showNotification(
+                'snackbar-danger',
+                'Old Rentnet Code already exists.....!!!',
+                'bottom',
+                'center'
+              );
+              }
+            }
+            else if(this.MessageArray[1]=="DuplicacyError")
             {
               if(this.MessageArray[2]=="Failure")
               {
