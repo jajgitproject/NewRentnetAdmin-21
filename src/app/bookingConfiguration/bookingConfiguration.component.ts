@@ -284,15 +284,17 @@ toggleStopFold() {
 
   public loadData() 
   {
-    debugger;
     this.bookingConfigurationService.GetReservationByID(this.BookingID).subscribe(
       data => {
-        debugger;
           if (!data) {
             this.dataSource = null;
             return;
           }
           this.dataSource = data;
+          if(this.dataSource?.reservationID !==0)
+          {
+            this.saveDisabled = true;
+          }
           this.PackageType = this.dataSource.packageType;
           this.advanceTableForm.patchValue({packageTypeID:this.dataSource.packageTypeID});
           this.advanceTableForm.patchValue({packageType:this.dataSource.packageType});

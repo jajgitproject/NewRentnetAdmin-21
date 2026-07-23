@@ -87,6 +87,12 @@
          <div class="col-xl-2 col-lg-2 col-md-12 col-sm-12 mb-2" *ngIf="dataSourceForBillNo?.invoiceModel?.invoiceNumberWithPrefix">
           <b>Bill No:</b> <br/>{{dataSourceForBillNo?.invoiceModel?.invoiceNumberWithPrefix}}
         </div>
+        <div class="col-xl-2 col-lg-4 col-md-12 col-sm-12 mb-2" *ngIf="closingDataAdvanceTable">
+          <b>Driver Name:</b> <br/>{{closingDataAdvanceTable?.driverName || 'N/A'}}
+        </div>
+        <div class="col-xl-2 col-lg-4 col-md-12 col-sm-12 mb-2" *ngIf="closingDataAdvanceTable">
+          <b>Driver Mobile:</b> <br/>{{closingDataAdvanceTable?.driverMobile || 'N/A'}}
+        </div>
      </div>
     </div>
 
