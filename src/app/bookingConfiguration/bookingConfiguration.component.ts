@@ -293,7 +293,7 @@ toggleStopFold() {
           this.dataSource = data;
           if(this.dataSource?.reservationID !==0)
           {
-            this.saveDisabled = true;
+            this.saveDisabled = false;
           }
           this.PackageType = this.dataSource.packageType;
           this.advanceTableForm.patchValue({packageTypeID:this.dataSource.packageTypeID});
