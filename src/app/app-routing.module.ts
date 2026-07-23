@@ -137,13 +137,6 @@ const routes: Routes = [
           )
       },
       {
-        path: 'dynamicsMis',
-        loadChildren: () =>
-          import('./dynamicsMis/dynamicsMis.module').then(
-            (m) => m.DynamicsMisModule
-          )
-      },
-      {
         path: 'dynamicsMis20',
         loadChildren: () =>
           import('./dynamicsMis20/dynamicsMis.module').then(
@@ -702,6 +695,26 @@ const routes: Routes = [
           import('./dutyRegisterForContractCenter/dutyRegisterForContractCenter.module').then(
             (m) => m.DutyRegisterForContractCenterModule
           )
+      },
+
+      {
+        path: 'vendorMis',
+        loadChildren: () =>
+          import('./vendorMis/vendorMis.module').then(
+            (m) => m.VendorMisModule
+          )
+      },
+
+      {
+        path: 'billDetailMis',
+        loadChildren: () =>
+          import('./billDetailMis/billDetailMis.module').then(
+            (m) => m.BillDetailMisModule
+          ),
+        data: {
+          requiredPageKey: 'Bill Detail MIS',
+          alternatePageKeys: ['billDetailMis', 'Bill Detail MIS'],
+        },
       },
 
       {

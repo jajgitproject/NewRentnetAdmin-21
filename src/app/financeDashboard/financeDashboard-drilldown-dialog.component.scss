@@ -71,6 +71,13 @@ mat-paginator {
   background: #f8fafc;
 }
 
+.fd-no-data-row td {
+  text-align: center;
+  color: #64748b;
+  padding: 24px 16px !important;
+  font-style: italic;
+}
+
 mat-dialog-actions {
   padding: 12px 24px 20px !important;
 }

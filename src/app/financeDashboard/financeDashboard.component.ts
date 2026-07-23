@@ -26,6 +26,7 @@ export class FinanceDashboardComponent implements OnInit {
   filterDateFrom = new FormControl<Date>(this.defaultFilterDate());
   filterDateTo = new FormControl<Date>(this.defaultFilterDate());
   dataFromLaunchDate = new FormControl<boolean>(false);
+  invoiceNumberSearch = new FormControl<string>('');
   documentTypeFilter = new FormControl<'Invoice' | 'CreditNote'>('Invoice');
   // Series Jump scope: false (default) = gaps checked against all invoices (ActivationStatus ignored),
   // true = only ActivationStatus = 1 invoices are considered.
@@ -315,6 +316,28 @@ export class FinanceDashboardComponent implements OnInit {
 
   openCellDrillDown(row: any, documentType: string, validationCode: string, label: string): void {
     this.openDrillDown(documentType, validationCode, row.seriesName, `${label} — ${row.seriesName}`);
+  }
+
+  searchInvoiceNumber(): void {
+    const term = (this.invoiceNumberSearch.value || '').trim();
+    if (!term) {
+      this.snackBar.open('Enter an invoice number (e.g. NHE2627/1464).', 'Close', { duration: 4000 });
+      return;
+    }
+    if (this.employeeID <= 0) {
+      this.snackBar.open('Unable to resolve logged-in employee. Please sign in again.', 'Close', { duration: 5000 });
+      return;
+    }
+    this.dialog.open(FinanceDashboardDrilldownDialogComponent, {
+      width: '95vw',
+      maxWidth: '1200px',
+      data: {
+        mode: 'invoiceSearch',
+        filters: this.getFilters(),
+        invoiceNumber: term,
+        title: `Invoice search — ${term}`,
+      },
+    });
   }
 
   formatKpi(card: any): string {

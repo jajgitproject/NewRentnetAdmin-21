@@ -1,0 +1,207 @@
+<section class="content">
+  <div class="container-fluid">
+    <div class="block-header">
+      <div class="row">
+        <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+          <ul>
+            <li class="breadcrumb-item bcrumb-1">
+              <a routerLink="/dashboard/main">
+                <i class="fas fa-home"></i> Home</a>|
+              <a href="#" onClick="return false;">Admin</a>|
+              <a href="#" onClick="return false;">Bill Detail MIS</a>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="row">
+      <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+        <div class="card">
+          <div class="body">
+            <mat-accordion class="duty-register-search-accordion">
+              <mat-expansion-panel class="duty-register-inline-search-panel" [expanded]="true">
+                <mat-expansion-panel-header>
+                  <mat-panel-title>Quick Search</mat-panel-title>
+                </mat-expansion-panel-header>
+
+                <div class="duty-register-inline-search-body">
+                  <div class="duty-register-search quick-search-panel">
+                    <div class="row">
+                      <div class="col-xl-3 col-lg-3 col-md-6 col-sm-12 mb-2">
+                        <mat-form-field class="example-full-width cp-quick-search-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
+                          <mat-label>Pickup Date From</mat-label>
+                          <input type="text" matInput [matDatepicker]="fromDate" [(ngModel)]="SearchFromDate" required>
+                          <mat-datepicker-toggle matSuffix [for]="fromDate"></mat-datepicker-toggle>
+                          <mat-datepicker #fromDate></mat-datepicker>
+                          <mat-hint>Required</mat-hint>
+                        </mat-form-field>
+                      </div>
+
+                      <div class="col-xl-3 col-lg-3 col-md-6 col-sm-12 mb-2">
+                        <mat-form-field class="example-full-width cp-quick-search-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
+                          <mat-label>Pickup Date To</mat-label>
+                          <input type="text" matInput [matDatepicker]="toDate" [(ngModel)]="SearchToDate" required>
+                          <mat-datepicker-toggle matSuffix [for]="toDate"></mat-datepicker-toggle>
+                          <mat-datepicker #toDate></mat-datepicker>
+                          <mat-hint>Required</mat-hint>
+                        </mat-form-field>
+                      </div>
+
+                      <div class="col-xl-3 col-lg-3 col-md-6 col-sm-12 mb-2">
+                        <mat-form-field class="example-full-width cp-quick-search-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
+                          <mat-label>Supplier Name</mat-label>
+                          <input type="text" matInput [formControl]="SearchSupplier" [matAutocomplete]="autoSupplier">
+                          <mat-autocomplete #autoSupplier="matAutocomplete">
+                            <mat-option *ngFor="let option of filteredSupplierOptions | async" [value]="option.supplierName">
+                              {{ option.supplierName }}
+                            </mat-option>
+                          </mat-autocomplete>
+                        </mat-form-field>
+                      </div>
+
+                      <div class="col-xl-3 col-lg-3 col-md-6 col-sm-12 mb-2">
+                        <mat-form-field class="example-full-width cp-quick-search-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
+                          <mat-label>Vendor Type</mat-label>
+                          <input type="text" matInput [formControl]="SearchSupplierType" [matAutocomplete]="autoSupplierType">
+                          <mat-autocomplete #autoSupplierType="matAutocomplete">
+                            <mat-option *ngFor="let option of filteredSupplierTypeOptions | async" [value]="option.supplierType">
+                              {{ option.supplierType }}
+                            </mat-option>
+                          </mat-autocomplete>
+                        </mat-form-field>
+                      </div>
+                    </div>
+
+                    <div class="row">
+                      <div class="col-xl-3 col-lg-3 col-md-6 col-sm-12 mb-2">
+                        <mat-form-field class="example-full-width cp-quick-search-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
+                          <mat-label>Location</mat-label>
+                          <input type="text" matInput [formControl]="SearchDispatchLocation" [matAutocomplete]="autoDispatch">
+                          <mat-autocomplete #autoDispatch="matAutocomplete">
+                            <mat-option *ngFor="let option of filteredDispatchLocationOptions | async" [value]="option.organizationalEntityName">
+                              {{ option.organizationalEntityName }}
+                            </mat-option>
+                          </mat-autocomplete>
+                        </mat-form-field>
+                      </div>
+
+                      <div class="col-xl-3 col-lg-3 col-md-6 col-sm-12 mb-2">
+                        <mat-form-field class="example-full-width cp-quick-search-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
+                          <mat-label>Customer Group</mat-label>
+                          <input type="text" matInput [formControl]="SearchCustomerGroup" [matAutocomplete]="autoCustomerGroup">
+                          <mat-autocomplete #autoCustomerGroup="matAutocomplete">
+                            <mat-option *ngFor="let option of filteredCustomerGroupOptions | async" [value]="option.customerGroup">
+                              {{ option.customerGroup }}
+                            </mat-option>
+                          </mat-autocomplete>
+                        </mat-form-field>
+                      </div>
+
+                      <div class="col-xl-3 col-lg-3 col-md-6 col-sm-12 mb-2">
+                        <mat-form-field class="example-full-width cp-quick-search-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
+                          <mat-label>Customer</mat-label>
+                          <input type="text" matInput [formControl]="SearchCustomer" [matAutocomplete]="autoCustomer">
+                          <mat-autocomplete #autoCustomer="matAutocomplete">
+                            <mat-option *ngFor="let option of filteredCustomerOptions | async" [value]="option.customerName">
+                              {{ option.customerName }}
+                            </mat-option>
+                          </mat-autocomplete>
+                        </mat-form-field>
+                      </div>
+
+                      <div class="col-xl-3 col-lg-3 col-md-6 col-sm-12 mb-2">
+                        <mat-form-field class="example-full-width cp-quick-search-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
+                          <mat-label>MOP</mat-label>
+                          <input type="text" matInput [formControl]="SearchMOP" [matAutocomplete]="autoMOP">
+                          <mat-autocomplete #autoMOP="matAutocomplete">
+                            <mat-option *ngFor="let option of filteredMOPOptions | async" [value]="option.modeOfPayment">
+                              {{ option.modeOfPayment }}
+                            </mat-option>
+                          </mat-autocomplete>
+                        </mat-form-field>
+                      </div>
+                    </div>
+
+                    <div class="row">
+                      <div class="col-xl-3 col-lg-3 col-md-6 col-sm-12 mb-2">
+                        <mat-form-field class="example-full-width cp-quick-search-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
+                          <mat-label>Owned/Supplied</mat-label>
+                          <mat-select [formControl]="SearchSupplierO">
+                            <mat-option *ngFor="let option of ownedSuppliedOptions" [value]="option">{{ option }}</mat-option>
+                          </mat-select>
+                        </mat-form-field>
+                      </div>
+
+                      <div class="col-xl-3 col-lg-3 col-md-6 col-sm-12 mb-2">
+                        <mat-form-field class="example-full-width cp-quick-search-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
+                          <mat-label>Driver</mat-label>
+                          <input type="text" matInput [formControl]="SearchDri" [matAutocomplete]="autoDriver">
+                          <mat-autocomplete #autoDriver="matAutocomplete">
+                            <mat-option *ngFor="let option of filteredDriverOptions | async" [value]="option.driverName">
+                              {{ option.driverName }}
+                            </mat-option>
+                          </mat-autocomplete>
+                        </mat-form-field>
+                      </div>
+
+                      <div class="col-xl-3 col-lg-3 col-md-6 col-sm-12 mb-2">
+                        <mat-form-field class="example-full-width cp-quick-search-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
+                          <mat-label>Car No.</mat-label>
+                          <input type="text" matInput [formControl]="SearchCarNo" [matAutocomplete]="autoCarNo">
+                          <mat-autocomplete #autoCarNo="matAutocomplete">
+                            <mat-option *ngFor="let option of filteredCarNoOptions | async" [value]="option.registrationNumber">
+                              {{ option.registrationNumber }}
+                            </mat-option>
+                          </mat-autocomplete>
+                        </mat-form-field>
+                      </div>
+
+                      <div class="col-xl-3 col-lg-3 col-md-6 col-sm-12 mb-2">
+                        <mat-form-field class="example-full-width cp-quick-search-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
+                          <mat-label>City</mat-label>
+                          <input type="text" matInput [formControl]="SearchCity" [matAutocomplete]="autoCity">
+                          <mat-autocomplete #autoCity="matAutocomplete">
+                            <mat-option *ngFor="let option of filteredCityOptions | async" [value]="option.geoPointName">
+                              {{ option.geoPointName }}
+                            </mat-option>
+                          </mat-autocomplete>
+                        </mat-form-field>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <br />
+                <div class="duty-register-inline-search-actions quick-search-actions">
+                  <button mat-raised-button color="primary" class="duty-register-search-button" (click)="SearchData()" [disabled]="isExportJobInProgress()">
+                    {{ isExportJobInProgress() ? 'Exporting...' : 'Search' }}
+                  </button>
+                  &nbsp;&nbsp;
+                  <button mat-raised-button color="warn" class="duty-register-reset-button" (click)="refresh()" [disabled]="isExportJobInProgress()">Refresh</button>
+                </div>
+              </mat-expansion-panel>
+            </mat-accordion>
+
+            <div class="duty-register-export-job-panel" *ngIf="exportJobId || exportJobError">
+              <div class="panel-title">Bill Detail MIS CSV Export</div>
+              <div class="export-job-meta" *ngIf="exportJobId">
+                <span>Job: {{ exportJobId }}</span>
+                <span class="export-job-stat">Status: {{ getExportJobStatusLabel() || '—' }}</span>
+                <span class="export-job-stat" *ngIf="isExportJobInProgress() || getExportRowsExported()">Rows: {{ getExportRowsExported() }}</span>
+                <span class="export-job-stat">Elapsed: {{ getExportElapsedTime() }}</span>
+              </div>
+              <mat-progress-bar *ngIf="isExportJobInProgress()" mode="indeterminate"></mat-progress-bar>
+              <p class="export-job-message" *ngIf="getExportJobMessage()">{{ getExportJobMessage() }}</p>
+              <div class="export-job-actions">
+                <button mat-raised-button color="accent" type="button" (click)="downloadExportCsv()" [disabled]="!canDownloadExport()">
+                  Download CSV
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>

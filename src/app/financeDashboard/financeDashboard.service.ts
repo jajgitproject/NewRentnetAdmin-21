@@ -54,4 +54,22 @@ export class FinanceDashboardService {
       params: this.buildFilterParams(filters),
     });
   }
+
+  searchInvoice(filters: any, invoiceNumber: string, page = 1, pageSize = 25): Observable<any> {
+    return this.httpClient.post<any>(this.API_URL + '/searchInvoice', {
+      filters: {
+        filterDate: filters.filterDateTo || filters.filterDate,
+        filterDateFrom: filters.filterDateFrom || filters.filterDate,
+        filterDateTo: filters.filterDateTo || filters.filterDate,
+        dataFromLaunchDate: !!filters.dataFromLaunchDate,
+        employeeID: filters.employeeID,
+        seriesPrefix: filters.seriesPrefix || null,
+        invoiceType: filters.invoiceType || null,
+        seriesJumpActiveOnly: !!filters.seriesJumpActiveOnly,
+      },
+      invoiceNumber: (invoiceNumber || '').trim(),
+      page,
+      pageSize,
+    });
+  }
 }

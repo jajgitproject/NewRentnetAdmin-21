@@ -5,6 +5,8 @@ import { Observable } from 'rxjs';
 import { GeneralService } from '../general/general.service';
 import {
   InvoiceExportRow,
+  GeneralLineItemInvoiceGapRow,
+  GeneralLinkedDutyGapRow,
   VerifiedGfbNotCalculatedCounts,
   VerifiedGfbNotCalculatedReport,
 } from './invoiceExport.model';
@@ -25,6 +27,28 @@ export class InvoiceExportService {
 
   getDuplicateInvoices(fromDate: string, toDate: string): Observable<InvoiceExportRow[]> {
     return this.httpClient.get<InvoiceExportRow[]>(`${this.API_URL}/duplicates/${fromDate}/${toDate}`);
+  }
+
+  getGeneralLineItemInvoiceGaps(
+    fromDate: string,
+    toDate: string
+  ): Observable<GeneralLineItemInvoiceGapRow[]> {
+    const params = new HttpParams().set('fromDate', fromDate).set('toDate', toDate);
+    return this.httpClient.get<GeneralLineItemInvoiceGapRow[]>(
+      `${this.API_URL}/generalLineItemInvoiceGap`,
+      { params }
+    );
+  }
+
+  getGeneralLinkedDutyGaps(
+    fromDate: string,
+    toDate: string
+  ): Observable<GeneralLinkedDutyGapRow[]> {
+    const params = new HttpParams().set('fromDate', fromDate).set('toDate', toDate);
+    return this.httpClient.get<GeneralLinkedDutyGapRow[]>(
+      `${this.API_URL}/generalLinkedDutyGap`,
+      { params }
+    );
   }
 
   getVerifiedGfbNotCalculatedCounts(

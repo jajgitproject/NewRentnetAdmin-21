@@ -118,6 +118,35 @@
   border: 1px solid rgba(99, 102, 241, 0.12);
 }
 
+.fd-invoice-search-row {
+  margin-top: 4px;
+  padding-top: 12px;
+  border-top: 1px dashed rgba(79, 70, 229, 0.2);
+  align-items: flex-end;
+}
+
+.fd-invoice-search-field {
+  min-width: 280px;
+  flex: 1 1 280px;
+  max-width: 420px;
+}
+
+.fd-search-btn {
+  border-radius: 10px !important;
+  font-weight: 600 !important;
+  letter-spacing: 0.01em;
+  background: linear-gradient(135deg, #312e81, #4338ca) !important;
+  color: #fff !important;
+  box-shadow: 0 4px 14px rgba(49, 46, 129, 0.3);
+}
+
+.fd-search-hint {
+  flex: 1 1 100%;
+  margin: 0;
+  font-size: 12px;
+  color: #64748b;
+}
+
 .fd-filters mat-form-field {
   min-width: 150px;
 }

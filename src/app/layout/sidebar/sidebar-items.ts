@@ -889,6 +889,28 @@ export const ROUTES: RouteInfo[] = [
         isAccess: false
       },
       {
+        path: 'vendorMis',
+        title: 'Vendor MIS',
+        moduleName: 'vendorMis',
+        icon: 'fas fa-file-export',
+        class: '',
+        groupTitle: false,
+        submenu: [],
+        isAccess: false
+      },
+      {
+        path: 'billDetailMis',
+        title: 'Bill Detail MIS',
+        pageKey: 'Bill Detail MIS',
+        moduleName: 'billDetailMis',
+        alternateAccessPageKeys: ['billDetailMis', 'Bill Detail MIS'],
+        icon: 'fas fa-file-invoice',
+        class: '',
+        groupTitle: false,
+        submenu: [],
+        isAccess: false
+      },
+      {
         path: 'dutyregisterforcontractcenter',
         title: 'Duty Register For Contract Center',
         moduleName: 'dutyRegisterForContractCenter',
@@ -1351,16 +1373,6 @@ export const ROUTES: RouteInfo[] = [
         path: 'tallyMis',
         title: 'MIS Tally',
         moduleName: 'tallyMisModule',
-        icon: 'fas fa-tachometer-alt',
-        class: '',
-        groupTitle: false,
-        submenu: [],
-        isAccess: false
-      },
-      {
-        path: 'dynamicsMis',
-        title: 'Dynamics MIS',
-        moduleName: 'dynamicsMisModule',
         icon: 'fas fa-tachometer-alt',
         class: '',
         groupTitle: false,

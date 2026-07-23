@@ -9,6 +9,8 @@ import { TableExportUtil } from '../shared/tableExportUtil';
 import { InvoiceExportService } from './invoiceExport.service';
 import {
   InvoiceExportRow,
+  GeneralLineItemInvoiceGapRow,
+  GeneralLinkedDutyGapRow,
   VerifiedGfbNotCalculatedCounts,
   VerifiedGfbNotCalculatedRow,
 } from './invoiceExport.model';
@@ -41,6 +43,60 @@ export class InvoiceExportComponent implements OnInit {
 
   downloadDuplicateInvoices(): void {
     this.exportInvoices('duplicates');
+  }
+
+  downloadGeneralLineItemInvoiceGap(): void {
+    const validationError = this.validateDates();
+    if (validationError) {
+      this.showNotification('snackbar-warning', validationError);
+      return;
+    }
+
+    const fromDate = this.formatDate(this.fromDateCtrl.value);
+    const toDate = this.formatDate(this.toDateCtrl.value);
+    this.exporting = true;
+    this.invoiceExportService.getGeneralLineItemInvoiceGaps(fromDate, toDate).subscribe({
+      next: (rows) => {
+        this.exporting = false;
+        if (!rows?.length) {
+          this.showNotification(
+            'snackbar-warning',
+            'No general bills with line-item vs invoice header gaps found for the selected date range.'
+          );
+          return;
+        }
+        this.downloadGeneralLineItemGapExcel(rows);
+        this.showNotification('snackbar-success', `${rows.length} record(s) exported successfully.`);
+      },
+      error: (error) => this.handleExportError(error, 'general line-item vs invoice gaps'),
+    });
+  }
+
+  downloadGeneralLinkedDutyGap(): void {
+    const validationError = this.validateDates();
+    if (validationError) {
+      this.showNotification('snackbar-warning', validationError);
+      return;
+    }
+
+    const fromDate = this.formatDate(this.fromDateCtrl.value);
+    const toDate = this.formatDate(this.toDateCtrl.value);
+    this.exporting = true;
+    this.invoiceExportService.getGeneralLinkedDutyGaps(fromDate, toDate).subscribe({
+      next: (rows) => {
+        this.exporting = false;
+        if (!rows?.length) {
+          this.showNotification(
+            'snackbar-warning',
+            'No general bills with header vs linked-duty gaps found for the selected date range.'
+          );
+          return;
+        }
+        this.downloadGeneralLinkedDutyGapExcel(rows);
+        this.showNotification('snackbar-success', `${rows.length} record(s) exported successfully.`);
+      },
+      error: (error) => this.handleExportError(error, 'general header vs linked-duty gaps'),
+    });
   }
 
   showVerifiedGfbNotCalculatedCount(): void {
@@ -234,6 +290,46 @@ export class InvoiceExportComponent implements OnInit {
 
   private formatDate(value: Date): string {
     return moment(value).format('YYYY-MM-DD');
+  }
+
+  private downloadGeneralLineItemGapExcel(rows: GeneralLineItemInvoiceGapRow[]): void {
+    const exportRows = rows.map((row) => ({
+      'Invoice No.': row.invoiceNumberWithPrefix ?? row.InvoiceNumberWithPrefix ?? '',
+      'Invoice.TotalAmountAfterDiscout':
+        row.totalAmountAfterDiscout ?? row.TotalAmountAfterDiscout ?? 0,
+      'InvoiceGeneralLineItems.BaseAmount':
+        row.generalLineItemsBaseAmount ?? row.GeneralLineItemsBaseAmount ?? 0,
+    }));
+    TableExportUtil.exportToExcel(exportRows, 'General-Line-Item-Invoice-Gap');
+  }
+
+  private downloadGeneralLinkedDutyGapExcel(rows: GeneralLinkedDutyGapRow[]): void {
+    const exportRows = rows.map((row) => {
+      const headerAfterGst = row.invoiceTotalAmountAfterGST ?? row.InvoiceTotalAmountAfterGST ?? 0;
+      const linkedAfterGst = row.linkedDutyTotalAfterGST ?? row.LinkedDutyTotalAfterGST ?? 0;
+      return {
+        'Invoice No.': row.invoiceNumberWithPrefix ?? row.InvoiceNumberWithPrefix ?? '',
+        'Invoice.InvoiceTotalAmountAfterGST': headerAfterGst,
+        'Linked InvoiceCalculation TotalAmountAfterGST': linkedAfterGst,
+        Gap: Number((headerAfterGst - linkedAfterGst).toFixed(2)),
+        'Linked Calc Count': row.linkedCalcCount ?? row.LinkedCalcCount ?? 0,
+      };
+    });
+    TableExportUtil.exportToExcel(exportRows, 'General-Header-Linked-Duty-Gap');
+  }
+
+  private handleExportError(error: any, label: string): void {
+    this.exporting = false;
+    const status = error?.status;
+    const msg = error?.error?.message || error?.message;
+    let text = msg || `Failed to export ${label}.`;
+    if (status === 404) {
+      text =
+        'Export API not found on this server (404). Rebuild and restart RententAPI — the Forensic export endpoint is not deployed yet.';
+    } else if (status === 0) {
+      text = 'Could not reach the API. Check that RententAPI is running and the base URL is correct.';
+    }
+    this.showNotification('snackbar-danger', text);
   }
 
   private downloadExcel(rows: InvoiceExportRow[], filePrefix: string): void {

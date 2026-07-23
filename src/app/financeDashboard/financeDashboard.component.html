@@ -57,6 +57,22 @@
 
         </div>
 
+        <div class="fd-filters fd-invoice-search-row">
+          <mat-form-field appearance="outline" subscriptSizing="dynamic" class="fd-invoice-search-field">
+            <mat-label>Invoice No.</mat-label>
+            <input
+              matInput
+              [formControl]="invoiceNumberSearch"
+              placeholder="e.g. NHE2627/1464"
+              (keydown.enter)="searchInvoiceNumber()" />
+            <mat-icon matPrefix>search</mat-icon>
+          </mat-form-field>
+          <button mat-flat-button class="fd-search-btn" type="button" (click)="searchInvoiceNumber()" [disabled]="loading">
+            Search Invoice
+          </button>
+          <p class="fd-search-hint">Finds invoices by full or partial number. Shows why an invoice is included or excluded from the current date filters.</p>
+        </div>
+
       </div>
 
 

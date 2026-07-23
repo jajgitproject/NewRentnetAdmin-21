@@ -37,6 +37,26 @@ export interface VerifiedGfbNotCalculatedRow {
   CalcStatus?: string;
 }
 
+export interface GeneralLineItemInvoiceGapRow {
+  invoiceNumberWithPrefix?: string;
+  totalAmountAfterDiscout?: number;
+  generalLineItemsBaseAmount?: number;
+  InvoiceNumberWithPrefix?: string;
+  TotalAmountAfterDiscout?: number;
+  GeneralLineItemsBaseAmount?: number;
+}
+
+export interface GeneralLinkedDutyGapRow {
+  invoiceNumberWithPrefix?: string;
+  invoiceTotalAmountAfterGST?: number;
+  linkedDutyTotalAfterGST?: number;
+  linkedCalcCount?: number;
+  InvoiceNumberWithPrefix?: string;
+  InvoiceTotalAmountAfterGST?: number;
+  LinkedDutyTotalAfterGST?: number;
+  LinkedCalcCount?: number;
+}
+
 export interface VerifiedGfbNotCalculatedReport {
   counts: VerifiedGfbNotCalculatedCounts;
   items: VerifiedGfbNotCalculatedRow[];

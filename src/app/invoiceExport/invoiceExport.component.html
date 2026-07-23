@@ -82,6 +82,51 @@
             <div class="row export-section-divider">
               <div class="col-12">
                 <p class="export-hint">
+                  General bills where the sum of active <strong>InvoiceGeneralLineItems.BaseAmount</strong>
+                  does not equal <strong>Invoice.TotalAmountAfterDiscout</strong> (invoice date in range).
+                </p>
+              </div>
+            </div>
+
+            <div class="row">
+              <div class="col-12 export-actions">
+                <button
+                  mat-raised-button
+                  color="primary"
+                  type="button"
+                  (click)="downloadGeneralLineItemInvoiceGap()"
+                  [disabled]="exporting">
+                  Invoice General Line-Item Vs Invoice Gap
+                </button>
+              </div>
+            </div>
+
+            <div class="row export-section-divider">
+              <div class="col-12">
+                <p class="export-hint">
+                  General bills with linked duties where <strong>Invoice.InvoiceTotalAmountAfterGST</strong>
+                  differs from the sum of linked <strong>InvoiceCalculation.TotalAmountAfterGST</strong>
+                  by more than ₹1 (includes bills with general line items).
+                </p>
+              </div>
+            </div>
+
+            <div class="row">
+              <div class="col-12 export-actions">
+                <button
+                  mat-raised-button
+                  color="accent"
+                  type="button"
+                  (click)="downloadGeneralLinkedDutyGap()"
+                  [disabled]="exporting">
+                  General Header Vs Linked Duties Gap
+                </button>
+              </div>
+            </div>
+
+            <div class="row export-section-divider">
+              <div class="col-12">
+                <p class="export-hint">
                   Duties with <strong>Verified = Yes</strong> and <strong>Good for Billing = Yes</strong>
                   but invoice calculation not completed (uses billing pickup date in the selected range).
                 </p>

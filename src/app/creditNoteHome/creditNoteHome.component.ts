@@ -97,6 +97,7 @@ export class CreditNoteHomeComponent implements OnInit {
 
   SearchBillNo:string='';
   SearchCreditNoteNo:string='';
+  hasSearched = false;
 
   constructor(
     public httpClient: HttpClient,
@@ -114,7 +115,7 @@ export class CreditNoteHomeComponent implements OnInit {
   contextMenuPosition = { x: '0px', y: '0px' };
   ngOnInit() 
   {
-    this.loadData();
+    this.dataSource = null;
     this.InitCustomerGroup();
     this.InitBranch();
   }
@@ -233,24 +234,27 @@ export class CreditNoteHomeComponent implements OnInit {
     this.searchTerm = '';
     this.selectedFilter = 'search';
     this.searchApprovalStatus = '';
-    this.loadData();
+    this.hasSearched = false;
+    this.dataSource = null;
   }
 
   public SearchData() 
   {
+    this.hasSearched = true;
     this.PageNumber = 0;
     this.loadData();
   }
  
   public Filter() 
   {
+    this.hasSearched = true;
     this.PageNumber = 0;
     this.loadData();
   }
 
   onBackPress(event) 
   {
-    if (event.keyCode === 8) 
+    if (event.keyCode === 8 && this.hasSearched) 
     {
       this.loadData();
     }
