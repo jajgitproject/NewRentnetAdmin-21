@@ -1,5 +1,5 @@
 // @ts-nocheck
-import { Component, ElementRef, Input, OnInit, ViewChild } from '@angular/core';
+import { Component, ElementRef, EventEmitter, Input, OnInit, Output, ViewChild } from '@angular/core';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { MatDialog } from '@angular/material/dialog';
 import { MatPaginator } from '@angular/material/paginator';
@@ -33,6 +33,8 @@ export class DisputeComponent implements OnInit {
   @Input() dutySlipID;
   @Input() reservationID;
   @Input() verifyDutyStatusAndCacellationStatus;
+  @Input() expandPanel = false;
+  @Output() sectionDataChanged = new EventEmitter<void>();
   displayedColumns = [
     'disputeDetails',
     'disputeKM',
@@ -98,6 +100,7 @@ export class DisputeComponent implements OnInit {
     this.SearchActivationStatus = true;
     this.PageNumber = 0;
     this.loadData();
+    this.sectionDataChanged.emit();
   }
 
   addNew() {
@@ -109,8 +112,10 @@ export class DisputeComponent implements OnInit {
           action: 'add'
         }
       });
-    dialogRef.afterClosed().subscribe((res: any) => {
-      this.loadData();
+    dialogRef.afterClosed().subscribe((saved: any) => {
+      if (saved) {
+        this.refresh();
+      }
     });
   }
 
@@ -123,8 +128,10 @@ export class DisputeComponent implements OnInit {
         action: 'edit'
       }
     });
-    dialogRef.afterClosed().subscribe((res: any) => {
-      this.loadData();
+    dialogRef.afterClosed().subscribe((saved: any) => {
+      if (saved) {
+        this.refresh();
+      }
     });
 
   }

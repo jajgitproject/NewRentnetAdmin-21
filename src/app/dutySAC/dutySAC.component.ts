@@ -1,5 +1,5 @@
 // @ts-nocheck
-import { Component, ElementRef, Input, OnInit, ViewChild } from '@angular/core';
+import { Component, ElementRef, EventEmitter, Input, OnChanges, OnInit, Output, SimpleChanges, ViewChild } from '@angular/core';
 import { DutySACService } from './dutySAC.service';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { MatDialog } from '@angular/material/dialog';
@@ -28,11 +28,13 @@ import { ActivatedRoute } from '@angular/router';
   styleUrls: ['./dutySAC.component.sass'],
   providers: [{ provide: MAT_DATE_LOCALE, useValue: 'en-GB' }]
 })
-export class DutySACComponent implements OnInit {
+export class DutySACComponent implements OnInit, OnChanges {
   @Input() advanceTableSAC;
   @Input() dutySlipID;
   @Input() AllotmentID!: number;
   @Input() verifyDutyStatusAndCacellationStatus;
+  @Input() expandPanel = false;
+  @Output() sectionDataChanged = new EventEmitter<void>();
   panelExpanded = false;
   displayedColumns = [
     'reasonOfChange',
@@ -80,6 +82,12 @@ export class DutySACComponent implements OnInit {
   //   this.SubscribeUpdateService();
   // }
 
+   ngOnChanges(changes: SimpleChanges): void {
+    if (changes['expandPanel']?.currentValue === true) {
+      this.panelExpanded = true;
+    }
+  }
+
    ngOnInit() {
     this.route.queryParams.subscribe(paramsData =>{
       const encryptedAllotmentID = paramsData.allotmentID;
@@ -97,6 +105,7 @@ export class DutySACComponent implements OnInit {
     this.PageNumber = 0;
     this.loadData();
     this.loadDataForclosing();
+    this.sectionDataChanged.emit();
   }
 
   addNew() {
@@ -108,6 +117,7 @@ export class DutySACComponent implements OnInit {
           action: 'add'
         }
       });
+    this.handleSectionDialogClosed(dialogRef);
   }
 
   //   editCall(row) {
@@ -131,9 +141,10 @@ export class DutySACComponent implements OnInit {
           verifyDutyStatusAndCacellationStatus:this.verifyDutyStatusAndCacellationStatus
         }
       });
-    dialogRef.afterClosed().subscribe((res: any) => {
-      this.loadData();
-      this.loadDataForclosing();
+    dialogRef.afterClosed().subscribe((saved: any) => {
+      if (saved) {
+        this.refresh();
+      }
     });
   }
 
@@ -143,6 +154,7 @@ export class DutySACComponent implements OnInit {
       {
         data: row
       });
+    this.handleSectionDialogClosed(dialogRef);
   }
 
   public Filter() {
@@ -335,9 +347,10 @@ export class DutySACComponent implements OnInit {
         verifyDutyStatusAndCacellationStatus: this.verifyDutyStatusAndCacellationStatus
       }
     });
-    dialogRef.afterClosed().subscribe((res: any) => {
-      this.loadData();
-      this.loadDataForclosing();
+    dialogRef.afterClosed().subscribe((saved: any) => {
+      if (saved) {
+        this.refresh();
+      }
     });
   }
 
@@ -356,6 +369,14 @@ export class DutySACComponent implements OnInit {
 
   onPanelClose(): void {
     // Optional logic on close
+  }
+
+  private handleSectionDialogClosed(dialogRef): void {
+    dialogRef.afterClosed().subscribe((saved: any) => {
+      if (saved) {
+        this.refresh();
+      }
+    });
   }
 
 }

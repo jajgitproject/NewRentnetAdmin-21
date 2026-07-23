@@ -1,5 +1,5 @@
 // @ts-nocheck
-import { Component, ElementRef, Input, OnInit, ViewChild } from '@angular/core';
+import { Component, ElementRef, EventEmitter, Input, OnChanges, OnInit, Output, SimpleChanges, ViewChild } from '@angular/core';
 import { DutyExpenseService } from './dutyExpense.service';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { MatDialog } from '@angular/material/dialog';
@@ -26,10 +26,22 @@ import { FormControl } from '@angular/forms';
   styleUrls: ['./dutyExpense.component.sass'],
   providers: [{ provide: MAT_DATE_LOCALE, useValue: 'en-GB' }]
 })
-export class DutyExpenseComponent implements OnInit {
+export class DutyExpenseComponent implements OnInit, OnChanges {
+  private _advanceTableDE;
+  private ignoreTableInput = false;
+
+  @Input() set advanceTableDE(value) {
+    if (!this.ignoreTableInput) {
+      this._advanceTableDE = value;
+    }
+  }
+  get advanceTableDE() {
+    return this._advanceTableDE;
+  }
   @Input() dutySlipID;
-  @Input() advanceTableDE;
   @Input() verifyDutyStatusAndCacellationStatus;
+  @Input() inViewDialog = false;
+  @Output() billingChargesChanged = new EventEmitter<void>();
   displayedColumns = [
     'expense',
     'chargeableOrNonChargeable',
@@ -63,9 +75,18 @@ export class DutyExpenseComponent implements OnInit {
   @ViewChild(MatMenuTrigger)
   contextMenu: MatMenuTrigger;
   contextMenuPosition = { x: '0px', y: '0px' };
+  ngOnChanges(changes: SimpleChanges): void {
+    if (changes['dutySlipID']?.currentValue && this.inViewDialog) {
+      this.loadDataClosing();
+    }
+  }
+
   ngOnInit() {
-    this.loadData();
-    this.loadDataClosing();
+    if (this.dutySlipID) {
+      this.loadDataClosing();
+    } else if (!this.advanceTableDE) {
+      this.loadData();
+    }
     this.SubscribeUpdateService();
   }
 
@@ -73,7 +94,23 @@ export class DutyExpenseComponent implements OnInit {
     this.SearchExpense = '';
     this.SearchActivationStatus = true;
     this.PageNumber=0;
-    this.loadData();
+    if (this.dutySlipID) {
+      this.loadDataClosing();
+    } else {
+      this.loadData();
+    }
+  }
+
+  reloadAfterFormChange(): void {
+    if (this.inViewDialog) {
+      this.ignoreTableInput = true;
+    }
+    if (this.dutySlipID) {
+      this.loadDataClosing();
+    } else {
+      this.loadData();
+    }
+    this.billingChargesChanged.emit();
   }
 
   addNew()
@@ -86,6 +123,11 @@ export class DutyExpenseComponent implements OnInit {
           action: 'add'
         }
     });
+    dialogRef.afterClosed().subscribe((saved) => {
+      if (saved) {
+        this.reloadAfterFormChange();
+      }
+    });
   }
 
   editCall(row) {
@@ -97,7 +139,11 @@ export class DutyExpenseComponent implements OnInit {
       verifyDutyStatusAndCacellationStatus:this.verifyDutyStatusAndCacellationStatus
     }
   });
-
+  dialogRef.afterClosed().subscribe((saved) => {
+    if (saved) {
+      this.reloadAfterFormChange();
+    }
+  });
 }
 
 deleteItem(row)
@@ -108,6 +154,11 @@ deleteItem(row)
     data: {
       advanceTable: row,
       verifyDutyStatusAndCacellationStatus:this.verifyDutyStatusAndCacellationStatus
+    }
+  });
+  dialogRef.afterClosed().subscribe((saved) => {
+    if (saved) {
+      this.reloadAfterFormChange();
     }
   });
 }
@@ -127,9 +178,17 @@ public Filter()
     (
       data =>   
       {
-        this.advanceTableDE = data;
+        if (this.inViewDialog) {
+          this.ignoreTableInput = true;
+        }
+        this._advanceTableDE = data;
       },
-      (error: HttpErrorResponse) => { this.advanceTableDE = null;}
+      (error: HttpErrorResponse) => {
+        if (this.inViewDialog) {
+          this.ignoreTableInput = true;
+        }
+        this._advanceTableDE = null;
+      }
     );
   }
    public loadDataClosing() 
@@ -138,9 +197,17 @@ public Filter()
     (
       data =>   
       {
-        this.advanceTableDE = data;
+        if (this.inViewDialog) {
+          this.ignoreTableInput = true;
+        }
+        this._advanceTableDE = data;
       },
-      (error: HttpErrorResponse) => { this.advanceTableDE = null;}
+      (error: HttpErrorResponse) => {
+        if (this.inViewDialog) {
+          this.ignoreTableInput = true;
+        }
+        this._advanceTableDE = null;
+      }
     );
   }
 
@@ -210,6 +277,7 @@ public Filter()
              if(this.MessageArray[2]=="Success")
              {
                this.refresh();
+               this.billingChargesChanged.emit();
                this.showNotification(
                'snackbar-success',
                'Duty Expense Created...!!!',
@@ -226,6 +294,7 @@ public Filter()
              if(this.MessageArray[2]=="Success")
              {
               this.refresh();
+              this.billingChargesChanged.emit();
               this.showNotification(
                'snackbar-success',
                'Duty Expense Updated...!!!',
@@ -242,6 +311,7 @@ public Filter()
              if(this.MessageArray[2]=="Success")
              {
               this.refresh();
+              this.billingChargesChanged.emit();
               this.showNotification(
                'snackbar-success',
                'Duty Expense Deleted...!!!',

@@ -288,7 +288,7 @@ uomTypeValidator(UOMList: any[]): ValidatorFn {
           'center'
         );
         this.saveDisabled=true;
-        this.dialogRef.close();
+        this.dialogRef.close(true);
     },
     error =>
     {
@@ -311,9 +311,9 @@ uomTypeValidator(UOMList: any[]): ValidatorFn {
     response => 
     {
       
-      this._generalService.sendUpdate('DutyExpenseUpdate:DutyExpenseView:Success');//To Send Updates 
+      this._generalService.sendUpdate('DutyExpenseUpdate:DutyExpenseView:Success');
       this.saveDisabled=true;
-      this.dialogRef.close(); 
+      this.dialogRef.close(true); 
     },
     error =>
     {

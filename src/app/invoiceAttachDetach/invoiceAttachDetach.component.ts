@@ -38,7 +38,11 @@ import {
 } from '../shared/customer-invoicing-gstn-confirm.util';
 import {
   getCustomerDisplayValue,
+  getCustomerDisplayLabel,
+  getCustomerIdValue,
+  getCustomerLabelFromAutocomplete,
   getCustomerNameFromAutocomplete,
+  getCustomerTallyId,
   resolveCustomerFromAutocomplete
 } from '../shared/customer-autocomplete.util';
 
@@ -72,7 +76,6 @@ export class InvoiceAttachDetachComponent implements OnInit {
   SearchName: string = '';
   IsLockedOut:boolean=true;
   SearchActivationStatus: boolean = true;
-  PageNumber: number = 0;
   search: FormControl = new FormControl();
   isChecked: boolean = false;
   sortingData: number;
@@ -90,8 +93,9 @@ export class InvoiceAttachDetachComponent implements OnInit {
   searchCustomerName:string='';
   customer : FormControl=new FormControl();
   selectedCustomerID = 0;
-  displayCustomer = (value: string) => getCustomerNameFromAutocomplete(value);
+  displayCustomer = (value: string) => getCustomerLabelFromAutocomplete(value);
   getCustomerDisplayValue = getCustomerDisplayValue;
+  getCustomerDisplayLabel = getCustomerDisplayLabel;
   geoPointTypeID: any;
   customerGroupID: any;
 
@@ -246,14 +250,21 @@ export class InvoiceAttachDetachComponent implements OnInit {
   }
 
   private _filterCustomer(value: string): any {
+    const raw = (value || '').toLowerCase();
     const filterValue = getCustomerNameFromAutocomplete(value).toLowerCase();
     return this.CustomerList.filter(
       data => 
       {
-        const identity = (data.customerIdentityNumber || '').toString().toLowerCase();
-        return data.customerName.toLowerCase().includes(filterValue)
-          || identity.includes(filterValue)
-          || getCustomerDisplayValue(data).toLowerCase().includes(filterValue);
+        const name = (data.customerName || '').toLowerCase();
+        const tally = getCustomerTallyId(data).toLowerCase();
+        const customerId = getCustomerIdValue(data).toLowerCase();
+        const label = getCustomerDisplayLabel(data).toLowerCase();
+        return name.includes(filterValue)
+          || name.includes(raw)
+          || tally.includes(raw)
+          || customerId.includes(raw)
+          || label.includes(raw)
+          || getCustomerDisplayValue(data).toLowerCase().includes(raw);
       }
     );
   }
@@ -404,7 +415,6 @@ export class InvoiceAttachDetachComponent implements OnInit {
     this.SearchVerifyDuty = null;
     this.SearchGoodForBilling = null;
     this.SearchType = '';
-    this.PageNumber = 0;
     this.selectedInvoices = [];
     this.selectAll = false;
     if (reload) {
@@ -418,13 +428,11 @@ export class InvoiceAttachDetachComponent implements OnInit {
 
   public SearchData() 
   {
-    this.PageNumber = 0;
     this.runSearchLoad();
   }
  
   public Filter() 
   {
-    this.PageNumber = 0;
     this.runSearchLoad();
   }
 
@@ -474,7 +482,7 @@ export class InvoiceAttachDetachComponent implements OnInit {
     }
     this.invoiceAttachDetachService.getTableData(this.getCustomerSearchParam(),this.SearchBranch.value,this.SearchDutySlipID,this.SearchReservationID,this.SearchGSTType,this.SearchDutyFromDate,
       this.SearchDutyToDate,this.SearchPassengerName,this.SearchPassengerMobile,this.SearchPackageType.value,this.SearchPackage.value,
-      this.SearchDSStatus,this.SearchBillingStatus,this.SearchVerifyDuty,this.SearchGoodForBilling,this.PageNumber).subscribe
+      this.SearchDSStatus,this.SearchBillingStatus,this.SearchVerifyDuty,this.SearchGoodForBilling,0).subscribe
       (
         data => 
         {
@@ -502,7 +510,7 @@ export class InvoiceAttachDetachComponent implements OnInit {
     }
     this.invoiceAttachDetachService.getTableDataSort(this.getCustomerSearchParam(),this.SearchBranch.value,this.SearchDutySlipID,this.SearchReservationID,this.SearchGSTType,this.SearchDutyFromDate,
       this.SearchDutyToDate,this.SearchPassengerName,this.SearchPassengerMobile,this.SearchPackageType.value,this.SearchPackage.value,
-      this.SearchDSStatus,this.SearchBillingStatus,this.SearchVerifyDuty,this.SearchGoodForBilling,this.PageNumber, coloumName.active, this.sortType).subscribe
+      this.SearchDSStatus,this.SearchBillingStatus,this.SearchVerifyDuty,this.SearchGoodForBilling,0, coloumName.active, this.sortType).subscribe
     (
       data => 
         {
@@ -532,7 +540,7 @@ export class InvoiceAttachDetachComponent implements OnInit {
     }
     this.invoiceAttachDetachService.getTableDataForEdit(this.InvoiceNumberWithPrefix.replace("/","-"),this.getCustomerSearchParam(),this.SearchBranch.value,this.SearchDutySlipID,this.SearchReservationID,this.SearchGSTType,this.SearchDutyFromDate,
       this.SearchDutyToDate,this.SearchPassengerName,this.SearchPassengerMobile,this.SearchPackageType.value,this.SearchPackage.value,
-      this.SearchDSStatus,this.SearchBillingStatus,this.PageNumber).subscribe
+      this.SearchDSStatus,this.SearchBillingStatus,0).subscribe
       (
         data => 
         {
@@ -560,7 +568,7 @@ export class InvoiceAttachDetachComponent implements OnInit {
     }
     this.invoiceAttachDetachService.getTableDataSortForEdit(this.InvoiceNumberWithPrefix.replace("/","-"),this.getCustomerSearchParam(),this.SearchBranch.value,this.SearchDutySlipID,this.SearchReservationID,this.SearchGSTType,this.SearchDutyFromDate,
       this.SearchDutyToDate,this.SearchPassengerName,this.SearchPassengerMobile,this.SearchPackageType.value,this.SearchPackage.value,
-      this.SearchDSStatus,this.SearchBillingStatus,this.PageNumber, coloumName.active, this.sortType).subscribe
+      this.SearchDSStatus,this.SearchBillingStatus,0, coloumName.active, this.sortType).subscribe
     (
       data => 
         {
@@ -587,24 +595,6 @@ export class InvoiceAttachDetachComponent implements OnInit {
     this.contextMenu.menuData = { item: item };
     this.contextMenu.menu.focusFirstItem('mouse');
     this.contextMenu.openMenu();
-  }
-
-  NextCall() 
-  {
-    if (this.hasSearched && this.dataSource?.length > 0) 
-    {
-      this.PageNumber++;
-      this.runSearchLoad();
-    }
-  }
-
-  PreviousCall() 
-  {
-    if (this.hasSearched && this.PageNumber > 0) 
-    {
-      this.PageNumber--;
-      this.runSearchLoad();
-    }
   }
 
   private isTrueValue(value: any): boolean {
@@ -707,6 +697,7 @@ export class InvoiceAttachDetachComponent implements OnInit {
         this.selectedInvoices.push(data);
       }
       data.checked = true;
+      this.syncSelectAllState();
     } 
     else if(!checkBoxValue && this.dataSource.includes(data)) 
     {
@@ -719,7 +710,12 @@ export class InvoiceAttachDetachComponent implements OnInit {
     }
   }
 
-  isIndeterminate() 
+  private syncSelectAllState() {
+    const selectableRows = this.dataSource?.filter(r => this.isRowSelectable(r)) || [];
+    this.selectAll = selectableRows.length > 0 && selectableRows.every(r => r.checked);
+  }
+
+  isIndeterminate()
   {
     const selectableRows = this.dataSource?.filter(r => this.isRowSelectable(r)) || [];
     const checkedCount = selectableRows.filter(r => r.checked).length;

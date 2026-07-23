@@ -1,5 +1,5 @@
 // @ts-nocheck
-import { Component, ElementRef, Input, OnInit, ViewChild } from '@angular/core';
+import { Component, ElementRef, EventEmitter, Input, OnInit, Output, ViewChild } from '@angular/core';
 import { DutyGSTPercentageService } from './dutyGSTPercentage.service';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { MatDialog } from '@angular/material/dialog';
@@ -30,6 +30,7 @@ export class DutyGSTPercentageComponent implements OnInit {
   @Input() advanceTableDGP;
   @Input() dutySlipID;
   @Input() verifyDutyStatusAndCacellationStatus;
+  @Output() sectionDataChanged = new EventEmitter<void>();
   displayedColumns = [
     'reasonOfChange',
     'gstPercentage',
@@ -71,6 +72,7 @@ export class DutyGSTPercentageComponent implements OnInit {
     this.SearchActivationStatus = true;
     this.PageNumber=0;
     this.loadData();
+    this.sectionDataChanged.emit();
   }
 
   addNew()
@@ -83,6 +85,7 @@ export class DutyGSTPercentageComponent implements OnInit {
           action: 'add'
         }
     });
+    this.handleSectionDialogClosed(dialogRef);
   }
 
   editCall(row) {
@@ -94,6 +97,7 @@ export class DutyGSTPercentageComponent implements OnInit {
       verifyDutyStatusAndCacellationStatus:this.verifyDutyStatusAndCacellationStatus
     }
   });
+  this.handleSectionDialogClosed(dialogRef);
 }
 
 deleteItem(row)
@@ -104,6 +108,15 @@ deleteItem(row)
     data: {
       advanceTable: row,
       verifyDutyStatusAndCacellationStatus:this.verifyDutyStatusAndCacellationStatus
+    }
+  });
+  this.handleSectionDialogClosed(dialogRef);
+}
+
+private handleSectionDialogClosed(dialogRef): void {
+  dialogRef.afterClosed().subscribe((saved: any) => {
+    if (saved) {
+      this.refresh();
     }
   });
 }

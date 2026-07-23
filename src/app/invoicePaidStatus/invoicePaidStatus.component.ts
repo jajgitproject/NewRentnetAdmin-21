@@ -15,6 +15,15 @@ import { CustomerDropDown } from '../customer/customerDropDown.model';
 import { InvoicePaidStatusService } from './invoicePaidStatus.service';
 import { InvoicePaidStatusRow } from './invoicePaidStatus.model';
 import { InvoicePaidStatusHistoryDialogComponent } from './invoicePaidStatusHistoryDialog.component';
+import {
+  getCustomerDisplayLabel,
+  getCustomerDisplayValue,
+  getCustomerIdValue,
+  getCustomerLabelFromAutocomplete,
+  getCustomerNameFromAutocomplete,
+  getCustomerTallyId,
+  resolveCustomerFromAutocomplete
+} from '../shared/customer-autocomplete.util';
 
 @Component({
   standalone: false,
@@ -32,6 +41,9 @@ export class InvoicePaidStatusComponent implements OnInit {
   filteredCustomerOptions: Observable<CustomerDropDown[]> = of([]);
   customerGroupID: number | null = null;
   customerID: number | null = null;
+  displayCustomer = (value: string) => getCustomerLabelFromAutocomplete(value);
+  getCustomerDisplayValue = getCustomerDisplayValue;
+  getCustomerDisplayLabel = getCustomerDisplayLabel;
 
   invoiceDate: Date | null = null;
   paidStatus = 'No';
@@ -117,7 +129,7 @@ export class InvoicePaidStatusComponent implements OnInit {
   }
 
   onKeyupCustomerName(event?: any): void {
-    const Prefix = this.getCustomerNameForSearch(event?.target?.value ?? this.customer?.value);
+    const Prefix = getCustomerNameFromAutocomplete(event?.target?.value ?? this.customer?.value);
     if (Prefix.length < 3) {
       if (!this.customerGroupID) {
         this.CustomerList = [];
@@ -145,38 +157,31 @@ export class InvoicePaidStatusComponent implements OnInit {
     });
   }
 
-  private getCustomerDisplayValue(data: CustomerDropDown): string {
-    return data.customerName + '##' + (data.customerIdentityNumber || '');
-  }
-
-  private getCustomerNameForSearch(value: any): string {
-    const raw = (value || '').toString().trim();
-    if (!raw) {
-      return raw;
-    }
-    return raw.split('##')[0].trim();
-  }
-
   private _filterCustomer(value: string): CustomerDropDown[] {
-    const filterValue = this.getCustomerNameForSearch(value).toLowerCase();
+    const raw = (value || '').toLowerCase();
+    const filterValue = getCustomerNameFromAutocomplete(value).toLowerCase();
     if (!filterValue || filterValue.length < 3) {
       return [];
     }
     return this.CustomerList.filter((data) => {
-      const identity = (data.customerIdentityNumber || '').toString().toLowerCase();
+      const name = (data.customerName || '').toLowerCase();
+      const tally = getCustomerTallyId(data).toLowerCase();
+      const customerId = getCustomerIdValue(data).toLowerCase();
+      const label = getCustomerDisplayLabel(data).toLowerCase();
       return (
-        data.customerName?.toLowerCase().includes(filterValue) ||
-        identity.includes(filterValue) ||
-        this.getCustomerDisplayValue(data).toLowerCase().includes(filterValue)
+        name.includes(filterValue) ||
+        name.includes(raw) ||
+        tally.includes(raw) ||
+        customerId.includes(raw) ||
+        label.includes(raw) ||
+        getCustomerDisplayValue(data).toLowerCase().includes(raw)
       );
     });
   }
 
   onCustomerSelected(customerValue: string): void {
-    const selected = this.CustomerList.find(
-      (data) => this.getCustomerDisplayValue(data) === customerValue
-    );
-    this.customerID = selected?.customerID || null;
+    const selected = resolveCustomerFromAutocomplete(customerValue, this.CustomerList);
+    this.customerID = selected?.customerID > 0 ? selected.customerID : null;
   }
 
   formatDate(value: Date | null | undefined): string | null {
@@ -202,7 +207,7 @@ export class InvoicePaidStatusComponent implements OnInit {
         customerGroupID: this.customerGroupID || null,
         customerGroup: this.customerGroup.value || null,
         customerID: this.customerID || null,
-        customerName: this.getCustomerNameForSearch(this.customer.value) || null,
+        customerName: getCustomerNameFromAutocomplete(this.customer.value) || null,
         invoiceDate: this.formatDate(this.invoiceDate),
         paidStatus: this.paidStatus || null,
         pageNumber: this.pageNumber,

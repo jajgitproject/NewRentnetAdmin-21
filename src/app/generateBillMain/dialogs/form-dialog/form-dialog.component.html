@@ -131,25 +131,10 @@
                         <mat-error *ngIf="advanceTableForm.controls['passengerName'].hasError('customerPersonNameInvalid')">
                             Guest is required
                         </mat-error>
-                        <mat-hint>
-                            <div style="padding-left: 150px;padding-top: 0px;">
-                                <a style="cursor: pointer; color: #007bff; font-size: 10px !important; font-style: italic;"
-                                    (click)="personShort()">
-                                    New Guest
-                                </a>
-                            </div>                            
-                        </mat-hint>
                     </mat-form-field>
-                    <!-- <div class="hint-container">
-                        <mat-hint>
-                            <div style="padding-left: 170px;padding-top: 0px;">
-                                <a style="cursor: pointer; color: #007bff; font-size: 10px !important; font-style: italic;"
-                                    (click)="personShort()">
-                                    New Guest
-                                </a>
-                            </div>                            
-                        </mat-hint>
-                    </div> -->
+                    <div class="link-actions-below">
+                        <a class="link-action" (click)="personShort()">New Guest</a>
+                    </div>
                 </div>
             </div>
 

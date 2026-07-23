@@ -233,19 +233,12 @@
               [class.closing-entry-disabled]="isDutySlipEditBlocked"
               [style.cursor]="isDutySlipEditBlocked ? 'not-allowed' : 'pointer'"
               [style.color]="isDutySlipEditBlocked ? '#6c757d' : '#007bff'">Change Duty Type</a>
-            <a href="javascript:void(0);" (click)="showAndScrollOpenSettledRates()">&nbsp;- <b>View</b></a>
+            <a href="javascript:void(0);" (click)="showAndScrollChangeDutyType()">&nbsp;- <b>View</b></a>
           </h5>
         </div>
       </div>
 
       <div class="row" style="padding-left: 30px;">
-        <!-- <div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 mb-2">
-          <h5>
-            <a style="cursor: pointer;color: #007bff;">Customer Specific Fields</a>
-            <a href="javascript:void(0);">&nbsp;- <b>View</b></a>
-          </h5>
-        </div> -->
-
         <div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 mb-2">
           <h5>
             <a (click)="ChangeCity()"
@@ -363,6 +356,8 @@
   </div>
   <!-- PackageRateDetails -->
 
+  <ng-container *ngIf="showEmbeddedDetailPanels">
+
   <div class="card">
     <div class="header bg-cyan">
       <h2>Bill Information
@@ -431,7 +426,9 @@
     </div>
     <div style="background-color: #ebeef1;">
       <app-dutyTollParkingEntry [tollParkingAdvanceTable]="tollParkingAdvanceTable" [AllotmentID]="AllotmentID"
-        [verifyDutyStatusAndCacellationStatus]="verifyDutyStatusAndCacellationStatus" [goodForBillingStatusAndCancellationStatus]="goodForBillingStatusAndCancellationStatus"></app-dutyTollParkingEntry>
+        [dutySlipID]="DutySlipID"
+        [verifyDutyStatusAndCacellationStatus]="verifyDutyStatusAndCacellationStatus" [goodForBillingStatusAndCancellationStatus]="goodForBillingStatusAndCancellationStatus"
+        (billingChargesChanged)="onBillingChargesChanged()"></app-dutyTollParkingEntry>
     </div>
   </div>
 
@@ -450,7 +447,8 @@
     </div>
     <div style="background-color: #ebeef1;">
       <app-dutyInterstateTax [advanceTableDIT]="advanceTableDIT" [dutySlipID]="DutySlipID"
-        [verifyDutyStatusAndCacellationStatus]="verifyDutyStatusAndCacellationStatus" [goodForBillingStatusAndCancellationStatus]="goodForBillingStatusAndCancellationStatus"></app-dutyInterstateTax>
+        [verifyDutyStatusAndCacellationStatus]="verifyDutyStatusAndCacellationStatus" [goodForBillingStatusAndCancellationStatus]="goodForBillingStatusAndCancellationStatus"
+        (billingChargesChanged)="onBillingChargesChanged()"></app-dutyInterstateTax>
     </div>
   </div>
 
@@ -498,7 +496,8 @@
         </mat-expansion-panel-header>
         <div>
           <app-dutyExpense [advanceTableDE]="advanceTableDE" [dutySlipID]="DutySlipID"
-            [verifyDutyStatusAndCacellationStatus]="verifyDutyStatusAndCacellationStatus"></app-dutyExpense>
+            [verifyDutyStatusAndCacellationStatus]="verifyDutyStatusAndCacellationStatus"
+            (billingChargesChanged)="onBillingChargesChanged()"></app-dutyExpense>
         </div>
       </mat-expansion-panel>
     </mat-accordion>
@@ -919,5 +918,7 @@
       </mat-accordion>
     </div>
   </div>
+
+  </ng-container>
 
 </section>

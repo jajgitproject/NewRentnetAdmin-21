@@ -46,7 +46,6 @@ export class ResolutionService
 
   update(advanceTable: Resolution)
   {
-    debugger
     advanceTable.reminderDateForFollowUpString=this.generalService.getTimeApplicable(advanceTable.reminderDateForFollowUp);
     advanceTable.closureDateString=this.generalService.getTimeApplicable(advanceTable.closureDate);
     advanceTable.closureTimeString=this.generalService.getTimeApplicableTO(advanceTable.closureTime);

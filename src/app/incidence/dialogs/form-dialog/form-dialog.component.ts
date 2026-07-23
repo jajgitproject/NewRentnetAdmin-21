@@ -295,9 +295,10 @@ export class incidenceFormDialogComponent {
           this.dialogRef.close(response);
         },
         error => {
+          const message = typeof error === 'string' && error.trim() ? error : 'Operation Failed...!!!';
           this.showNotification(
             'snackbar-danger',
-            'Operation Failed...!!!',
+            message,
             'bottom',
             'center'
           );
@@ -327,9 +328,10 @@ export class incidenceFormDialogComponent {
           this.dialogRef.close(response);
         },
         error => {
+          const message = typeof error === 'string' && error.trim() ? error : 'Operation Failed...!!!';
           this.showNotification(
             'snackbar-danger',
-            'Operation Failed...!!!',
+            message,
             'bottom',
             'center'
           );

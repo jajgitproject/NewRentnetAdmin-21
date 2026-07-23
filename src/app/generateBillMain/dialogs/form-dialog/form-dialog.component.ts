@@ -79,6 +79,11 @@ export class FormDialogComponent
   customerPersonNameID: any;
 
   customerDetailData: any;
+  private readonly customerPersonQuickAddDialog = {
+    panelClass: 'role-form-wide-dialog',
+    width: '1200px',
+    maxWidth: '98vw',
+  };
   // customerGroup_ID: number = 14;
   // customerGroup_Name: string = "Accenture";
   customerGroupID: any;
@@ -541,71 +546,64 @@ export class FormDialogComponent
   }
 
   //------------- New Guest Form -------------
-  personShort() 
-  {
-    const customerControl = this.advanceTableForm.get('customer');
-    if (customerControl && customerControl.value) 
-    {
-      const dialogRef = this.dialog.open(FormDialogComponentCustomerPerson, {
-        width: '800px',
+  private applyCreatedGuest(guest: { customerPersonID: number; customerPersonName: string }): void {
+    if (!guest?.customerPersonID || !guest?.customerPersonName) {
+      return;
+    }
+
+    const newGuest = {
+      customerPersonID: guest.customerPersonID,
+      customerPersonName: guest.customerPersonName,
+    };
+    this.CustomerPersonList = [...(this.CustomerPersonList ?? []), newGuest];
+    this.advanceTableForm.patchValue({
+      passengerName: guest.customerPersonName,
+      customerPersonName: guest.customerPersonName,
+    });
+    this.getCustomerPersonID(guest.customerPersonID);
+    this.advanceTableForm.controls['passengerName'].setValidators([
+      Validators.required,
+      this.customerPersonTypeValidator(this.CustomerPersonList)
+    ]);
+    this.advanceTableForm.controls['passengerName'].updateValueAndValidity({ emitEvent: false });
+  }
+
+  personShort(): void {
+    if (!this.customerID || !this.customerDetailData?.customerGroupID) {
+      this.dialog.open(OpenPopUpDialogComponent, {
+        width: '350px',
         hasBackdrop: true,
         panelClass: 'custom-dialog',
-        data: 
-        {
-          action: 'add',
-          forCP: '368807',
-          CustomerGroupID: this.customerDetailData.customerGroupID,
-          CustomerGroupName: this.customerDetailData.customerGroup
-        }
+        data: {}
       });
+      return;
     }
-    else
-    {
-      const dialogRef = this.dialog.open(OpenPopUpDialogComponent, {
-        width: '350px',  // Adjust the width to a smaller value
-        hasBackdrop: true,
-        panelClass: 'custom-dialog',
-        data: 
-        {
-          //action: 'add',
-          // forCP: '368807',
-          // CustomerGroupID: this.customerDetailData?.customerGroupID,
-          // CustomerGroupName: this.customerDetailData?.customerGroup
-        }
-      });
-    }
-    
-    // const customerControl = this.advanceTableForm.get('customer');
-    // if (customerControl && customerControl.value) 
-    // {
-    //   const dialogRef = this.dialog.open(FormDialogComponentCustomerPerson, {
-    //     width: '600px',
-    //     hasBackdrop: true,
-    //     panelClass: 'custom-dialog',
-    //     data: 
-    //     {
-    //       action: 'add',
-    //       forCP: '368807',
-    //       CustomerGroupID: this.customerDetailData.customerGroupID,
-    //       CustomerGroupName: this.customerDetailData.customerGroup
-    //     }
-    //   });
-    // }
-    // else
-    // {
-    //   customerControl?.setErrors({ customerInvalid: true });
-    //   customerControl?.markAsTouched();
-    //   Swal.fire({
-    //     title: 'Please select a Customersss',
-    //     icon: 'warning',
-    //     // toast: true,
-    //     // position: 'top-end',  // You can change this to 'top-start', 'bottom-start', etc.
-    //     // showConfirmButton: false,
-    //     // timer:5000
-    // }).then((result) => {
-    //   if (result.value) {}
-    // });
-    // }
+
+    const customerName = (this.advanceTableForm.get('customer')?.value || '').trim();
+    const guestCustomerDetail = {
+      ...this.customerDetailData,
+      customerID: this.customerID,
+      customerName,
+    };
+
+    const dialogRef = this.dialog.open(FormDialogComponentCustomerPerson, {
+      ...this.customerPersonQuickAddDialog,
+      hasBackdrop: true,
+      data: {
+        action: 'add',
+        forCP: 'CP',
+        fromGeneralBill: true,
+        advanceTable: guestCustomerDetail,
+        CustomerGroupID: guestCustomerDetail.customerGroupID,
+        CustomerGroupName: guestCustomerDetail.customerGroup,
+      }
+    });
+
+    dialogRef.afterClosed().subscribe((result) => {
+      if (result?.customerPersonID && result?.customerPersonName) {
+        this.applyCreatedGuest(result);
+      }
+    });
   }
 
   //------------- State's Drop Down -------------

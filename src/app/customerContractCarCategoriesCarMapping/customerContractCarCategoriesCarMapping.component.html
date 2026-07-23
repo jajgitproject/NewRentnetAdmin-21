@@ -161,6 +161,12 @@
                                         <mat-cell *matCellDef="let row" (contextmenu)="onContextMenu($event, row)">
                                             {{row.customerVehicleCodeForIntegration}}</mat-cell>
                                     </ng-container>
+
+                                    <ng-container matColumnDef="mileage">
+                                        <mat-header-cell *matHeaderCellDef mat-sort-header>Mileage</mat-header-cell>
+                                        <mat-cell *matCellDef="let row" (contextmenu)="onContextMenu($event, row)">
+                                            {{row.mileage}}</mat-cell>
+                                    </ng-container>
                                     
                                     <ng-container matColumnDef="status">
                                         <mat-header-cell *matHeaderCellDef>Status</mat-header-cell>

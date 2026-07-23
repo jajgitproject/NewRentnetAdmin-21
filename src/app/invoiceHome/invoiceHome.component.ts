@@ -139,6 +139,19 @@ bookerName: FormControl = new FormControl();
   @ViewChild(MatMenuTrigger)
   contextMenu: MatMenuTrigger;
   contextMenuPosition = { x: '0px', y: '0px' };
+
+  isIrnGenerated(row: any): boolean {
+    if (!row) {
+      return false;
+    }
+    const status = row.irnStatus ?? row.IRNStatus ?? '';
+    if (status === 'Generated') {
+      return true;
+    }
+    const irn = row.irn ?? row.IRN ?? row.iRN ?? '';
+    return typeof irn === 'string' && irn.trim().length > 0;
+  }
+
   ngOnInit() {
     // this.loadData();
     this.InitCustomerGroup();
@@ -892,6 +905,9 @@ bookerName: FormControl = new FormControl();
 
   openAttachDetachForEdit(item:any) 
   { 
+    if (this.isIrnGenerated(item)) {
+      return;
+    }
     const url = this.route.serializeUrl(
       this.route.createUrlTree(['/invoiceAttachDetach'],{ queryParams: {
       invoiceNumberWithPrefix:item.invoiceNumberWithPrefix,

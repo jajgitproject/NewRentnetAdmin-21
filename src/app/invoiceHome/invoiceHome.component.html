@@ -342,7 +342,7 @@
                                     </div>
                                     <mat-menu #contextMenu="matMenu">
                                         <ng-template matMenuContent let-item="item">
-                                            <button mat-menu-item (click)="openAttachDetachForEdit(item)">
+                                            <button mat-menu-item (click)="openAttachDetachForEdit(item)" [disabled]="isIrnGenerated(item)">
                                                 <mat-icon>create</mat-icon>
                                                 <span>Edit</span>
                                             </button>

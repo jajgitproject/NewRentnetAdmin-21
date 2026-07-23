@@ -500,6 +500,21 @@ mat-option {
   white-space: nowrap !important;
 }
 
+.invoice-paid-status-customer-panel {
+  min-width: 720px !important;
+  max-height: 420px !important;
+}
+
+.cdk-overlay-container .cdk-overlay-pane:has(.invoice-paid-status-customer-panel) {
+  width: max-content !important;
+  min-width: 720px !important;
+  max-width: min(92vw, calc(100vw - 24px)) !important;
+}
+
+.cdk-overlay-container .cdk-overlay-pane:has(.invoice-paid-status-customer-panel) .invoice-paid-status-customer-panel .mat-mdc-option .mdc-list-item__primary-text {
+  white-space: nowrap !important;
+}
+
 /* All Material autocomplete panels (except Google Places fixed-width): width follows longest option. */
 .mat-mdc-autocomplete-panel:not(.google-autocomplete-panel) {
   width: max-content !important;

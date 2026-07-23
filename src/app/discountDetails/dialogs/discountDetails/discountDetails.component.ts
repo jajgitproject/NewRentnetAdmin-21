@@ -213,7 +213,7 @@ export class DiscountDetailsDialogComponent
           'center'
         );
       this.saveDisabled = true;
-      this.dialogRef.close();
+      this.dialogRef.close(true);
       }
     },
     error =>
@@ -244,7 +244,7 @@ export class DiscountDetailsDialogComponent
         'center'
       );
       this.saveDisabled = true;
-      this.dialogRef.close();
+      this.dialogRef.close(true);
     },
     error =>
     {

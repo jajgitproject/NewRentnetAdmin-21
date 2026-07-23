@@ -1,5 +1,5 @@
 // @ts-nocheck
-import { Component, ElementRef, Input, OnInit, ViewChild } from '@angular/core';
+import { Component, ElementRef, EventEmitter, Input, OnInit, Output, ViewChild } from '@angular/core';
 import { SettledRateDetailsService } from './settledRateDetails.service';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { MatDialog } from '@angular/material/dialog';
@@ -31,6 +31,7 @@ export class SettledRateDetailsComponent implements OnInit {
   @Input() advanceTableSRD: SettledRateDetails[] = [];
   @Input() reservationID
   @Input() status;
+  @Output() sectionDataChanged = new EventEmitter<void>();
   advanceTable: SettledRateDetails | null;
   advanceTableForm: FormGroup;
 
@@ -71,11 +72,17 @@ export class SettledRateDetailsComponent implements OnInit {
     {
       data: this.advanceTableSRD[row],
     });
+    dialogRef.afterClosed().subscribe((saved: any) => {
+      if (saved) {
+        this.refresh();
+      }
+    });
   }
 
   refresh()
   {
     this.loadData();
+    this.sectionDataChanged.emit();
   }
   
   editSettledRate(i:any)
@@ -89,8 +96,10 @@ export class SettledRateDetailsComponent implements OnInit {
              status: this.status
           }
       });
-      dialogRef.afterClosed().subscribe((res: any) => {
-        this.loadData();
+      dialogRef.afterClosed().subscribe((saved: any) => {
+        if (saved) {
+          this.refresh();
+        }
     });
   }
 

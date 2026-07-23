@@ -49,7 +49,7 @@
                                                                     <mat-autocomplete #auto1="matAutocomplete" [displayWith]="displayCustomer" (optionSelected)="onCustomerSelected($event.option.value)" panelWidth="custom-autocomplete-panel">
                                                                         <mat-option  *ngFor="let option of filteredCustomerOptions | async"
                                                                         [value]="getCustomerDisplayValue(option)">
-                                                                        {{option.customerName}} ## {{option.customerIdentityNumber}}
+                                                                        {{ getCustomerDisplayLabel(option) }}
                                                                         </mat-option>
                                                                     </mat-autocomplete>
                                                                 </mat-form-field>
@@ -253,6 +253,9 @@
                                 </div>
 
                                 <ng-container *ngIf="hasSearched">
+                                <p *ngIf="dataSource?.length" class="invoice-attach-row-count text-muted">
+                                    {{ dataSource.length }} {{ dataSource.length === 1 ? 'duty' : 'duties' }} loaded
+                                </p>
                                 <p *ngIf="!dataSource; then thenBlock2 else elseBlock2">
                                     This is not rendered
                                 </p>
@@ -261,16 +264,6 @@
                                     <div class="alert alert-primary"
                                         style="background-color:#E8E8E8; text-align: center;">
                                         No Records Found</div>
-                                    <div class="body">
-                                        <div class="example-button-row">
-
-                                            <button mat-raised-button color="primary"
-                                                (click)="PreviousCall()">Previous</button>
-                                            <button mat-raised-button color="primary" (click)="NextCall()">Next</button>
-
-                                        </div>
-                                    </div>
-
                                 </ng-template>
 
                                 <ng-template #elseBlock2>
@@ -415,18 +408,6 @@
 
                                         </ng-template>
                                     </mat-menu>
-
-
-
-                                    <div class="body">
-                                        <div class="example-button-row">
-
-                                            <button mat-raised-button color="primary"
-                                                (click)="PreviousCall()">Previous</button>
-                                            <button mat-raised-button color="primary" (click)="NextCall()">Next</button>
-
-                                        </div>
-                                    </div>
 
 
 

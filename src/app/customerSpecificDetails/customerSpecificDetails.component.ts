@@ -1,5 +1,5 @@
 // @ts-nocheck
-import { Component, ElementRef, Input, OnInit, ViewChild } from '@angular/core';
+import { Component, ElementRef, EventEmitter, Input, OnInit, Output, ViewChild } from '@angular/core';
 import { CustomerSpecificDetailsService } from './customerSpecificDetails.service';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { MatDialog } from '@angular/material/dialog';
@@ -31,6 +31,7 @@ export class CustomerSpecificDetailsComponent implements OnInit {
   @Input() dataSourceCSD:CustomerSpecificDetails[];
   /** Optional caller context (e.g. closing screen); reserved for future use. */
   @Input() from: string;
+  @Output() sectionDataChanged = new EventEmitter<void>();
 
   constructor(
     public httpClient: HttpClient,
@@ -109,7 +110,7 @@ export class CustomerSpecificDetailsComponent implements OnInit {
             {
               if(this.MessageArray[2]=="Success")
               {
-                
+                this.sectionDataChanged.emit();
                 this.showNotification(
                 'snackbar-success',
                 'CustomerSpecificDetails Created ...!!!',
@@ -125,7 +126,7 @@ export class CustomerSpecificDetailsComponent implements OnInit {
             {
               if(this.MessageArray[2]=="Success")
               {
-               
+               this.sectionDataChanged.emit();
                this.showNotification(
                 'snackbar-success',
                 'CustomerSpecificDetails Updated ...!!!',
@@ -141,7 +142,7 @@ export class CustomerSpecificDetailsComponent implements OnInit {
             {
               if(this.MessageArray[2]=="Success")
               {
-               
+               this.sectionDataChanged.emit();
                this.showNotification(
                 'snackbar-success',
                 'CustomerSpecificDetails Deleted ...!!!',

@@ -208,7 +208,7 @@ getEmployee()
         'center'
       );  
       this.saveDisabled=true;
-      this.dialogRef.close();
+      this.dialogRef.close(true);
   },
     error =>
     {
@@ -238,7 +238,7 @@ getEmployee()
      
        this._generalService.sendUpdate('DutyStateCustomerUpdate:DutyStateCustomerView:Success');//To Send Updates  
        this.saveDisabled=true;
-       this.dialogRef.close();
+       this.dialogRef.close(true);
     
   },
     error =>

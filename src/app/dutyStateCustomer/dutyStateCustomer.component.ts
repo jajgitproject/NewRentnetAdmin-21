@@ -1,5 +1,5 @@
 // @ts-nocheck
-import { Component, ElementRef, Input, OnInit, ViewChild } from '@angular/core';
+import { Component, ElementRef, EventEmitter, Input, OnInit, Output, ViewChild } from '@angular/core';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { MatDialog } from '@angular/material/dialog';
 import { MatPaginator } from '@angular/material/paginator';
@@ -32,6 +32,7 @@ export class DutyStateCustomerComponent implements OnInit {
   @Input() dutySlipID;
   @Input() verifyDutyStatusAndCacellationStatus;
   @Input() CustomerID;
+  @Output() sectionDataChanged = new EventEmitter<void>();
   displayedColumns = [
     'state',
     'changeDateTime',
@@ -73,6 +74,7 @@ export class DutyStateCustomerComponent implements OnInit {
     this.SearchActivationStatus = true;
     this.PageNumber=0;
     this.loadData();
+    this.sectionDataChanged.emit();
   }
 
   addNew()
@@ -84,7 +86,8 @@ export class DutyStateCustomerComponent implements OnInit {
           advanceTable: this.advanceTable,
           action: 'add'
         }
-    }); 
+    });
+    this.handleSectionDialogClosed(dialogRef);
   }
 
   editCall(row) {
@@ -97,6 +100,7 @@ export class DutyStateCustomerComponent implements OnInit {
         CustomerID:this.CustomerID
       }
     });
+    this.handleSectionDialogClosed(dialogRef);
   }
 
 deleteItem(row)
@@ -105,6 +109,15 @@ deleteItem(row)
   const dialogRef = this.dialog.open(DeleteDialogComponent, 
   {
     data: row
+  });
+  this.handleSectionDialogClosed(dialogRef);
+}
+
+private handleSectionDialogClosed(dialogRef): void {
+  dialogRef.afterClosed().subscribe((saved: any) => {
+    if (saved) {
+      this.refresh();
+    }
   });
 }
 

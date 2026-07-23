@@ -30,7 +30,8 @@ export class DeleteDialogComponent
     .subscribe(
     data => 
     {
-       this._generalService.sendUpdate('DiscountDetailsDelete:DiscountDetailsView:Success');//To Send Updates   
+       this._generalService.sendUpdate('DiscountDetailsDelete:DiscountDetailsView:Success');//To Send Updates
+       this.dialogRef.close(true);
     },
     error =>
     {

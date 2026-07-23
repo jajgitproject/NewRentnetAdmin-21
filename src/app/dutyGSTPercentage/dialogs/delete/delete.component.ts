@@ -40,7 +40,8 @@ export class DeleteDialogComponent
     .subscribe(
     data => 
     {
-       this._generalService.sendUpdate('DutyGSTPercentageDelete:DutyGSTPercentageView:Success');//To Send Updates   
+       this._generalService.sendUpdate('DutyGSTPercentageDelete:DutyGSTPercentageView:Success');//To Send Updates
+       this.dialogRef.close(true);
     },
     error =>
     {

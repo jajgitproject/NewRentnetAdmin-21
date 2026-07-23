@@ -454,7 +454,7 @@ private _filterStateOnSearch(value: string): any {
         'center'
       );
       this.saveDisabled=true;
-      this.dialogRef.close();
+      this.dialogRef.close(true);
     
   },
     error =>
@@ -485,9 +485,9 @@ private _filterStateOnSearch(value: string): any {
     .subscribe(
     response => 
     {  
-       this._generalService.sendUpdate('DutyInterstateTaxUpdate:DutyInterstateTaxView:Success');//To Send Updates  
+       this._generalService.sendUpdate('DutyInterstateTaxUpdate:DutyInterstateTaxView:Success');
        this.saveDisabled = true;
-       this.dialogRef.close();
+       this.dialogRef.close(true);
     },
     error =>
     {

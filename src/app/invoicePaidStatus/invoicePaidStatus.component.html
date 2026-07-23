@@ -47,10 +47,13 @@
                         <input type="text" matInput [formControl]="customer" [matAutocomplete]="autoCustomer"
                           (keyup)="onKeyupCustomerName($event)" />
                         <mat-autocomplete #autoCustomer="matAutocomplete"
+                          class="custom-autocomplete-panel invoice-paid-status-customer-panel"
+                          panelWidth="720px"
+                          [displayWith]="displayCustomer"
                           (optionSelected)="onCustomerSelected($event.option.value)">
                           <mat-option *ngFor="let option of filteredCustomerOptions | async"
-                            [value]="option.customerName + '##' + (option.customerIdentityNumber || '')">
-                            {{ option.customerName }} ## {{ option.customerIdentityNumber }}
+                            [value]="getCustomerDisplayValue(option)">
+                            {{ getCustomerDisplayLabel(option) }}
                           </mat-option>
                         </mat-autocomplete>
                       </mat-form-field>

@@ -171,7 +171,7 @@
                                     <mat-radio-button color="primary" value="App">App KM</mat-radio-button>
                                     <mat-radio-button color="primary" value="GPS">
                                       GPS KM &nbsp;
-                                      <a href="javascript:void(0)" (click)="PostDataGPS()"
+                                      <a href="javascript:void(0)" (click)="PostDataGPS($event)"
                                         style="text-align: center; cursor: pointer; color: #007bff;">
                                         (Get KM)
                                       </a>
@@ -255,6 +255,28 @@
                       <mat-form-field appearance="fill" floatLabel="auto" subscriptSizing="dynamic" class="example-full-width cp-quick-search-field cp-closing-textarea-field">
                         <mat-label>Vendor Remark</mat-label>
                         <textarea matInput formControlName="vendorRemark" rows="2"></textarea>
+                      </mat-form-field>
+                    </div>
+                  </div>
+
+                  <div class="row align-items-end">
+                    <div class="col-xl-3 col-lg-3 col-md-6 col-sm-12 mb-2">
+                      <mat-form-field appearance="fill" floatLabel="auto" subscriptSizing="dynamic" class="example-full-width cp-quick-search-field">
+                        <mat-label>Total Driver Allowance</mat-label>
+                        <input matInput type="number" min="0" step="0.01"
+                          [(ngModel)]="totalDriverAllowanceAmount"
+                          [ngModelOptions]="{standalone: true}"
+                          [readonly]="!canEditClosingAllowances">
+                      </mat-form-field>
+                    </div>
+
+                    <div class="col-xl-3 col-lg-3 col-md-6 col-sm-12 mb-2">
+                      <mat-form-field appearance="fill" floatLabel="auto" subscriptSizing="dynamic" class="example-full-width cp-quick-search-field">
+                        <mat-label>Night Allowance</mat-label>
+                        <input matInput type="number" min="0" step="0.01"
+                          [(ngModel)]="totalNightChargesAmount"
+                          [ngModelOptions]="{standalone: true}"
+                          [readonly]="!canEditClosingAllowances">
                       </mat-form-field>
                     </div>
                   </div>
@@ -412,6 +434,25 @@
                         <mat-label>LocationIn Address</mat-label>
                         <textarea matInput formControlName="locationInAddressStringForBilling" rows="2"></textarea>
                       </mat-form-field>
+                    </div>
+                  </div>
+
+                  <div class="row align-items-end">
+                    <div class="col-xl-3 col-lg-3 col-md-6 col-sm-12 mb-2 billing-total-label">
+                      <div class="billing-total-label-title">Total Time (Garage to Garage)</div>
+                      <div class="billing-total-label-value">{{ datetime || '-' }}</div>
+                    </div>
+                    <div class="col-xl-3 col-lg-3 col-md-6 col-sm-12 mb-2 billing-total-label">
+                      <div class="billing-total-label-title">Total KM (Garage to Garage)</div>
+                      <div class="billing-total-label-value">{{ diff !== null && diff !== undefined ? diff : '-' }}</div>
+                    </div>
+                    <div class="col-xl-3 col-lg-3 col-md-6 col-sm-12 mb-2 billing-total-label">
+                      <div class="billing-total-label-title">Total Time (Point to Point)</div>
+                      <div class="billing-total-label-value">{{ datetimeP2P || '-' }}</div>
+                    </div>
+                    <div class="col-xl-3 col-lg-3 col-md-6 col-sm-12 mb-2 billing-total-label">
+                      <div class="billing-total-label-title">Total KM (Point to Point)</div>
+                      <div class="billing-total-label-value">{{ diffP2P !== null && diffP2P !== undefined ? diffP2P : '-' }}</div>
                     </div>
                   </div>
 

@@ -33,6 +33,7 @@ export class DutyStateComponent implements OnInit {
   @Input() verifyDuty: boolean = false;
   @Input() goodForBilling: boolean = false;
   @Input() invoiceGenerated: boolean = false;
+  @Output() sectionDataChanged = new EventEmitter<void>();
   @Output() billingVerificationReset = new EventEmitter<void>();
   displayedColumns = [
     'state',
@@ -75,6 +76,7 @@ export class DutyStateComponent implements OnInit {
     this.SearchActivationStatus = true;
     this.PageNumber=0;
     this.loadData();
+    this.sectionDataChanged.emit();
   }
 
   addNew()
@@ -121,6 +123,9 @@ export class DutyStateComponent implements OnInit {
 
   private handleDutyStateDialogClosed(dialogRef): void {
     dialogRef.afterClosed().subscribe((res: any) => {
+      if (res) {
+        this.refresh();
+      }
       if (res?.resetBillingVerification) {
         this.billingVerificationReset.emit();
       }

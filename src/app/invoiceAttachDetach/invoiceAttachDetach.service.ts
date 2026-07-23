@@ -7,6 +7,8 @@ import { GeneralService } from '../general/general.service';
 @Injectable()
 export class InvoiceAttachDetachService {
   private API_URL: string = '';
+  /** Request all matching rows (no SQL OFFSET/FETCH). */
+  private readonly ALL_ROWS_PAGE = -1;
   isTblLoading = true;
   date: any;
   Result: string = 'Failure';
@@ -73,7 +75,7 @@ export class InvoiceAttachDetachService {
     return this.httpClient.get(this.buildGetAllInvoiceAttachPath(
       SearchCustomerName, SearchBranch, SearchDutySlipID, SearchReservationID, SearchGSTType, SearchDutyFromDate,
       SearchDutyToDate, SearchPassengerName, SearchPassengerMobile, SearchPackageType, SearchPackage, SearchDSStatus,
-      SearchBillingStatus, SearchVerifyDuty, SearchGoodForBilling, PageNumber, 'DutySlipID', 'Descending'));
+      SearchBillingStatus, SearchVerifyDuty, SearchGoodForBilling, this.ALL_ROWS_PAGE, 'DutySlipID', 'Descending'));
   }
 
   getTableDataSort(SearchCustomerName:string, SearchBranch:string,  SearchDutySlipID:number, SearchReservationID:number, SearchGSTType:string, SearchDutyFromDate:string, 
@@ -90,7 +92,7 @@ export class InvoiceAttachDetachService {
     return this.httpClient.get(this.buildGetAllInvoiceAttachPath(
       SearchCustomerName, SearchBranch, SearchDutySlipID, SearchReservationID, SearchGSTType, SearchDutyFromDate,
       SearchDutyToDate, SearchPassengerName, SearchPassengerMobile, SearchPackageType, SearchPackage, SearchDSStatus,
-      SearchBillingStatus, SearchVerifyDuty, SearchGoodForBilling, PageNumber, coloumName, sortType));
+      SearchBillingStatus, SearchVerifyDuty, SearchGoodForBilling, this.ALL_ROWS_PAGE, coloumName, sortType));
   }
 
  //---------- Edit ----------
@@ -108,7 +110,7 @@ export class InvoiceAttachDetachService {
     return this.httpClient.get(this.buildGetAllInvoiceAttachForEditPath(
       SearchInvoiceNumberWithPrefix, SearchCustomerName, SearchBranch, SearchDutySlipID, SearchReservationID, SearchGSTType,
       SearchDutyFromDate, SearchDutyToDate, SearchPassengerName, SearchPassengerMobile, SearchPackageType, SearchPackage,
-      SearchDSStatus, SearchBillingStatus, PageNumber, 'DutySlipID', 'Descending'));
+      SearchDSStatus, SearchBillingStatus, this.ALL_ROWS_PAGE, 'DutySlipID', 'Descending'));
   }
 
   getTableDataSortForEdit(SearchInvoiceNumberWithPrefix:string,SearchCustomerName:string, SearchBranch:string,  SearchDutySlipID:number, SearchReservationID:number, SearchGSTType:string, SearchDutyFromDate:string, 
@@ -125,7 +127,7 @@ export class InvoiceAttachDetachService {
     return this.httpClient.get(this.buildGetAllInvoiceAttachForEditPath(
       SearchInvoiceNumberWithPrefix, SearchCustomerName, SearchBranch, SearchDutySlipID, SearchReservationID, SearchGSTType,
       SearchDutyFromDate, SearchDutyToDate, SearchPassengerName, SearchPassengerMobile, SearchPackageType, SearchPackage,
-      SearchDSStatus, SearchBillingStatus, PageNumber, coloumName, sortType));
+      SearchDSStatus, SearchBillingStatus, this.ALL_ROWS_PAGE, coloumName, sortType));
   }
 
   getInvoiceBillDate(invoiceId: number): Observable<any> {

@@ -98,6 +98,7 @@ export class FormDialogComponentCustomerPerson
   customerID: any;
   CustomerGroupID: any;
   someAction: any;
+  fromGeneralBill = false;
 
   /** New Passenger (CP) and Create new Booker (CB) — same compact popup from booking. */
   get isReservationQuickAdd(): boolean {
@@ -133,6 +134,7 @@ export class FormDialogComponentCustomerPerson
         // Set the defaults
         
         this.action = data.action;
+        this.fromGeneralBill = data.fromGeneralBill === true;
         if (this.action === 'edit') 
         {
           this.CustomerGroupID=data.CustomerGroupID;
@@ -193,14 +195,21 @@ export class FormDialogComponentCustomerPerson
         } 
         else if (this.action === 'add')
         {
-          this.dialogTitle = 'Customer Person for';
+          this.dialogTitle = this.fromGeneralBill ? 'New Guest' : 'Customer Person for';
           this.advanceTable = new CustomerPerson({});
           this.advanceTable.activationStatus=true;
           this.advanceTable.maskMobileNumber=false;
           this.advanceTable.isPostPickUpCallAllowed=false;
           this.advanceTable.sendSMSWhatsApp=true;
           this.advanceTable.sendEmail=true;
-          this.advanceTable.preferAppBasedDriver=true;
+          this.advanceTable.preferAppBasedDriver=this.fromGeneralBill ? false : true;
+          if (this.fromGeneralBill) {
+            this.advanceTable.importance = 'General';
+            this.advanceTable.allowLoginToCDP = false;
+            this.advanceTable.allowLoginToCustomerApp = false;
+            this.advanceTable.loyalGuest = false;
+            this.advanceTable.isPassenger = true;
+          }
           if (data.forCP === 'CP' || data.forCP === 'CB') {
             this.customerID = data.advanceTable.customerID;
             this.advanceTable.customerName = data.advanceTable.customerName;
@@ -232,13 +241,32 @@ export class FormDialogComponentCustomerPerson
     if (this.someAction === 'CP' || this.someAction === 'CB') {
       this.advanceTableForm.controls['customerName'].disable();
     }
+    if (this.fromGeneralBill) {
+      this.advanceTableForm.patchValue({
+        importance: 'General',
+        allowLoginToCDP: false,
+        allowLoginToCustomerApp: false,
+        loyalGuest: false,
+        maskMobileNumber: false,
+        activationStatus: true,
+        preferAppBasedDriver: false,
+        isPassenger: true,
+        isBooker: false,
+        isAdmin: false,
+        isContactPerson: false,
+      });
+    }
     this.InitCustomer();
     this.InitSalutation();
-    this.InitCustomerDesignation();
-    this.InitCustomerDepartment();
+    if (!this.fromGeneralBill) {
+      this.InitCustomerDesignation();
+      this.InitCustomerDepartment();
+    }
     this.InitCountryISDCode();
-    this.InitCountryISDCodes();
-    this.InitCountryMobileCode();
+    if (!this.fromGeneralBill) {
+      this.InitCountryISDCodes();
+      this.InitCountryMobileCode();
+    }
   }
 
   public loadPassword() {
@@ -722,7 +750,7 @@ public Post(): void {
 
   // Reservation quick-add: CP = passenger, CB = booker
   if (this.someAction === 'CP') {
-    this.advanceTableForm.patchValue({
+    const cpDefaults: any = {
       isContactPerson: false,
       isBooker: false,
       isPassenger: true,
@@ -735,7 +763,13 @@ public Post(): void {
       password: null,
       confirmPassword: null,
       isDefaultForIntegrationRequest: false
-    });
+    };
+    if (this.fromGeneralBill) {
+      cpDefaults.importance = 'General';
+      cpDefaults.allowLoginToCDP = false;
+      cpDefaults.allowLoginToCustomerApp = false;
+    }
+    this.advanceTableForm.patchValue(cpDefaults);
   } else if (this.someAction === 'CB') {
     this.advanceTableForm.patchValue({
       isContactPerson: false,
@@ -774,7 +808,14 @@ public Post(): void {
         return;
       }
 
-      this.dialogRef.close();
+      if (this.someAction === 'CP' || this.someAction === 'CB') {
+        this.dialogRef.close({
+          customerPersonID: response.customerPersonID,
+          customerPersonName: response.customerPersonName,
+        });
+      } else {
+        this.dialogRef.close();
+      }
        this._generalService.sendUpdate('CustomerPersonUpdate:CustomerPersonView:Success');//To Send Updates  
          {
           this.saveDisabled = true;

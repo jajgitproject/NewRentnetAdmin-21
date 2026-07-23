@@ -1,5 +1,5 @@
 // @ts-nocheck
-import { Component, ElementRef, Input, OnInit, ViewChild } from '@angular/core';
+import { Component, ElementRef, EventEmitter, Input, OnInit, Output, ViewChild } from '@angular/core';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { MatDialog } from '@angular/material/dialog';
 import { MatPaginator } from '@angular/material/paginator';
@@ -30,6 +30,7 @@ import { FormDialogComponent } from './dialogs/mopDetails/mopDetails.component';
 export class MOPDetailsComponent implements OnInit {
   @Input() advanceTableMOP
   @Input() reservationID;
+  @Output() sectionDataChanged = new EventEmitter<void>();
   advanceTable: MOPModel | null;
   advanceTableForm: FormGroup;
   paymentMode: any;
@@ -124,7 +125,7 @@ export class MOPDetailsComponent implements OnInit {
             {
               if(this.MessageArray[2]=="Success")
               {
-                
+                this.sectionDataChanged.emit();
                 this.showNotification(
                 'snackbar-success',
                 'MOPDetails Created Successfully...!!!',
@@ -140,7 +141,7 @@ export class MOPDetailsComponent implements OnInit {
             {
               if(this.MessageArray[2]=="Success")
               {
-               
+               this.sectionDataChanged.emit();
                this.showNotification(
                 'snackbar-success',
                 'MOPDetails Updated Successfully...!!!',
@@ -156,7 +157,7 @@ export class MOPDetailsComponent implements OnInit {
             {
               if(this.MessageArray[2]=="Success")
               {
-               
+               this.sectionDataChanged.emit();
                this.showNotification(
                 'snackbar-success',
                 'MOPDetails Deleted Successfully...!!!',

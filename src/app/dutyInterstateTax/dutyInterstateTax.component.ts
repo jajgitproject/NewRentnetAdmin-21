@@ -1,5 +1,5 @@
 // @ts-nocheck
-import { Component, ElementRef, Input, OnInit, ViewChild } from '@angular/core';
+import { Component, ElementRef, EventEmitter, Input, OnChanges, OnInit, Output, SimpleChanges, ViewChild } from '@angular/core';
 import { DutyInterstateTaxService } from './dutyInterstateTax.service';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { MatDialog } from '@angular/material/dialog';
@@ -28,11 +28,24 @@ import { FormDialogComponent as  ApprovalFormDialogComponent} from '../dutyInter
   styleUrls: ['./dutyInterstateTax.component.sass'],
   providers: [{ provide: MAT_DATE_LOCALE, useValue: 'en-GB' }]
 })
-export class DutyInterstateTaxComponent implements OnInit {
-  @Input() advanceTableDIT = [];
+export class DutyInterstateTaxComponent implements OnInit, OnChanges {
+  private _advanceTableDIT = [];
+  private ignoreTableInput = false;
+
+  @Input() set advanceTableDIT(value) {
+    if (!this.ignoreTableInput) {
+      this._advanceTableDIT = value;
+    }
+  }
+  get advanceTableDIT() {
+    return this._advanceTableDIT;
+  }
   @Input() dutySlipID;
   @Input() verifyDutyStatusAndCacellationStatus;
   @Input() goodForBillingStatusAndCancellationStatus;
+  @Input() expandPanel = false;
+  @Input() inViewDialog = false;
+  @Output() billingChargesChanged = new EventEmitter<void>();
   displayedColumns = [
     'startDate',
     'endDate',
@@ -68,8 +81,16 @@ export class DutyInterstateTaxComponent implements OnInit {
   @ViewChild(MatMenuTrigger)
   contextMenu: MatMenuTrigger;
   contextMenuPosition = { x: '0px', y: '0px' };
+  ngOnChanges(changes: SimpleChanges): void {
+    if (changes['dutySlipID']?.currentValue && this.inViewDialog) {
+      this.loadData();
+    }
+  }
+
   ngOnInit() {
-    this.loadData();
+    if (this.dutySlipID) {
+      this.loadData();
+    }
     this.SubscribeUpdateService();
   }
   refresh() {
@@ -78,6 +99,15 @@ export class DutyInterstateTaxComponent implements OnInit {
     this.PageNumber=0;
     this.loadData();
   }
+
+  reloadAfterFormChange(): void {
+    if (this.inViewDialog) {
+      this.ignoreTableInput = true;
+    }
+    this.loadData();
+    this.billingChargesChanged.emit();
+  }
+
   addNew()
   {
     const dialogRef = this.dialog.open(DITFormDialogComponent, 
@@ -87,6 +117,11 @@ export class DutyInterstateTaxComponent implements OnInit {
           advanceTable: this.advanceTable,
           action: 'add'
         }
+    });
+    dialogRef.afterClosed().subscribe((saved) => {
+      if (saved) {
+        this.reloadAfterFormChange();
+      }
     });
   }
 
@@ -102,8 +137,10 @@ export class DutyInterstateTaxComponent implements OnInit {
 
     }
   });
-   dialogRef.afterClosed().subscribe((res: any) => {
-        this.loadData();
+   dialogRef.afterClosed().subscribe((saved) => {
+        if (saved) {
+          this.reloadAfterFormChange();
+        }
   });     
 
 }
@@ -113,6 +150,11 @@ deleteItem(row)
   const dialogRef = this.dialog.open(DeleteDialogComponent, 
   {
     data: row
+  });
+  dialogRef.afterClosed().subscribe((saved) => {
+    if (saved) {
+      this.reloadAfterFormChange();
+    }
   });
 }
 
@@ -147,9 +189,15 @@ deleteItem(row)
       (
         data =>   
         {
-          this.advanceTableDIT = data;
+          this.ignoreTableInput = this.inViewDialog || this.ignoreTableInput;
+          this._advanceTableDIT = data;
         },
-        (error: HttpErrorResponse) => { this.advanceTableDIT = null;}
+        (error: HttpErrorResponse) => {
+          if (this.inViewDialog) {
+            this.ignoreTableInput = true;
+          }
+          this._advanceTableDIT = null;
+        }
       );
   }
 
@@ -225,6 +273,7 @@ deleteItem(row)
               if(this.MessageArray[2]=="Success")
               {
                 this.refresh();
+                this.billingChargesChanged.emit();
                 this.showNotification(
                 'snackbar-success',
                 'Duty Interstate Tax Created...!!!',
@@ -241,6 +290,7 @@ deleteItem(row)
               if(this.MessageArray[2]=="Success")
               {
                this.refresh();
+               this.billingChargesChanged.emit();
                this.showNotification(
                 'snackbar-success',
                 'Duty Interstate Tax Updated...!!!',
@@ -257,6 +307,7 @@ deleteItem(row)
               if(this.MessageArray[2]=="Success")
               {
                this.refresh();
+               this.billingChargesChanged.emit();
                this.showNotification(
                 'snackbar-success',
                 'Duty Interstate Tax Deleted...!!!',

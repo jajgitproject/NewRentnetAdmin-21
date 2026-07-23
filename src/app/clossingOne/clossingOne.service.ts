@@ -151,6 +151,16 @@ export class ClossingOneService
     return this.httpClient.get(this.API_URL_Bill + '/getinvoice/' + dutySlipID);
   }
 
+  updateClosingAllowances(
+    dutySlipID: number | string,
+    payload: { totalDriverAllowanceAmount: number; totalNightChargesAmount: number }
+  ): Observable<any> {
+    return this.httpClient.put(
+      `${this.API_URL_Bill}/closing-allowances/${dutySlipID}`,
+      payload
+    );
+  }
+
   /** GST row only: `GET invoicecalculation/gst/dutyslip/{dutySlipId}` (same data as `invoiceGSTModel` on getinvoice). */
   getInvoiceGstByDutySlipId(dutySlipID: number | string): Observable<any> {
     return this.httpClient.get(this.API_URL_Bill + '/gst/dutyslip/' + dutySlipID);
