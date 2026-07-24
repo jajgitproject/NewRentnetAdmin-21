@@ -119,6 +119,7 @@ export class CustomerComponent implements OnInit {
     { label: 'Car And Driver Details SMS EMail', pageName: 'Car And Driver Details SMS EMail' },
     { label: 'Category Mapping', pageName: 'Category Mapping' },
     { label: 'Billing Configuration', pageName: 'Billing Configuration' },
+    { label: 'Bill To Ship To', pageName: 'Bill To Ship To' },
     { label: 'Invoicing Configuration', pageName: 'Invoicing Configuration' },
     { label: 'Messaging Configuration', pageName: 'Messaging Configuration' },
     { label: 'Reservation Configuration', pageName: 'Reservation Configuration' },
@@ -187,13 +188,14 @@ export class CustomerComponent implements OnInit {
     this.roleID = localStorage.getItem('roleID');
     this.role = localStorage.getItem('role');
     this.loadDataforPage(this.roleID);
-    // // Fetch accessPages from localStorage
+    // Fetch accessPages from localStorage
     const accessPagesString = localStorage.getItem('accessPages');
     const accessPages = accessPagesString ? JSON.parse(accessPagesString) : [];
-    // Filter and sort menuItems based on accessPages
+    const isAdmin = (this.role || '').toLowerCase() === 'admin';
+    // Filter and sort menuItems based on accessPages (admin sees all action items)
     const filteredMenuItems = this.menuItems
       .filter(menuItem =>
-        accessPages.some(accessPage =>
+        isAdmin || accessPages.some(accessPage =>
           (menuItem.pageName || menuItem.page || '').toLowerCase().replace(/\s+/g, '') === accessPage.page.toLowerCase().replace(/\s+/g, '')
         )
       )
@@ -939,6 +941,14 @@ else if(menuItem.label.toLowerCase() === 'billing configuration') {
     CustomerName: encryptedCustomerName
   } }));
   window.open(baseUrl + url, '_blank'); 
+
+}
+else if(menuItem.label.toLowerCase() === 'bill to ship to') {
+  const url = this.router.serializeUrl(this.router.createUrlTree(['/customerBillToShipTo'], { queryParams: {
+    CustomerID: encryptedCustomerID,
+    CustomerName: encryptedCustomerName
+  } }));
+  window.open(baseUrl + url, '_blank');
 
 }
 else if(menuItem.label.toLowerCase() === 'invoicing configuration') {

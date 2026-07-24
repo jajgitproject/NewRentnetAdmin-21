@@ -54,6 +54,7 @@ export class Customer {
       businessType:string;
       businessServices:string;
       businessTypeID:number;
+      isBillToShipToCustomer:boolean;
   constructor(customer) {
     {
        this.customerID = customer.customerID || -1;
@@ -99,6 +100,7 @@ export class Customer {
        this.segment = customer.segment || '';
        this.businessType = customer.businessType || '';
        this.businessServices = customer.businessServices || '';
+       this.isBillToShipToCustomer = customer.isBillToShipToCustomer ?? false;
     }
   }
   

@@ -74,6 +74,7 @@ export class IndividualCustomerService {
       countryForISDCodeID: toInt(raw.countryForISDCodeID, 0),
       maskMobileNumber: toBool(raw.maskMobileNumber, false),
       isPostPickUpCallAllowed: toBool(raw.isPostPickUpCallAllowed, false),
+      isBillToShipToCustomer: toBool(raw.isBillToShipToCustomer, false),
       customerContractID: toInt(raw.customerContractID),
       customerContractName: raw.customerContractName || '',
       userID: toInt(raw.userID)

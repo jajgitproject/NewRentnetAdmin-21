@@ -24,9 +24,13 @@
         <div class="card">
           <div class="body">
             <div class="materialTableHeader">
-              <div class="row align-items-center">
-                <div class="col-lg-6">
-                  <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+              <div class="row search-header-row">
+                <div class="col-lg-6 d-flex align-items-center">
+                  <mat-form-field
+                    class="example-full-width activation-status-field"
+                    appearance="outline"
+                    floatLabel="always"
+                  >
                     <mat-label>Activation Status</mat-label>
                     <mat-select [(ngModel)]="SearchActivationStatus" (selectionChange)="SearchData()">
                       <mat-option [value]="true">Yes</mat-option>
@@ -34,7 +38,7 @@
                     </mat-select>
                   </mat-form-field>
                 </div>
-                <div class="col-lg-6 text-right">
+                <div class="col-lg-6 text-right d-flex align-items-center justify-content-end header-actions">
                   <button mat-mini-fab color="primary" (click)="addNew()" matTooltip="Add">
                     <mat-icon class="col-white">add</mat-icon>
                   </button>

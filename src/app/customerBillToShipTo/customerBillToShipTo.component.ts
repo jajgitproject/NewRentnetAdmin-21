@@ -56,7 +56,9 @@ export class CustomerBillToShipToComponent implements OnInit {
       const encryptedCustomerID = paramsData.CustomerID;
       const encryptedCustomerName = paramsData.CustomerName;
       if (encryptedCustomerID && encryptedCustomerName) {
-        this.Customer_ID = this._generalService.decrypt(decodeURIComponent(encryptedCustomerID));
+        this.Customer_ID = Number(
+          this._generalService.decrypt(decodeURIComponent(encryptedCustomerID))
+        );
         this.Customer_Name = this._generalService.decrypt(decodeURIComponent(encryptedCustomerName));
       }
       this.loadData();
@@ -65,13 +67,17 @@ export class CustomerBillToShipToComponent implements OnInit {
   }
 
   SubscribeUpdateService(): void {
-    this.updateSubscription = this._generalService
-      .getUpdate()
-      .subscribe((message: string) => {
-        if (message && message.indexOf('CustomerBillToShipTo') >= 0 && message.indexOf('Success') >= 0) {
-          this.loadData();
-        }
-      });
+    this.updateSubscription = this._generalService.getUpdate().subscribe((message: any) => {
+      const text = message?.text || message || '';
+      if (
+        typeof text === 'string' &&
+        text.indexOf('CustomerBillToShipTo') >= 0 &&
+        text.indexOf('Success') >= 0
+      ) {
+        this.PageNumber = 0;
+        this.loadData();
+      }
+    });
   }
 
   refresh(): void {
@@ -126,17 +132,27 @@ export class CustomerBillToShipToComponent implements OnInit {
         CustomerName: this.Customer_Name,
       },
     });
-    dialogRef.afterClosed().subscribe(() => {});
+    dialogRef.afterClosed().subscribe((saved) => {
+      if (saved) {
+        this.PageNumber = 0;
+        this.loadData();
+      }
+    });
   }
 
   editCall(row: CustomerBillToShipTo): void {
-    this.dialog.open(FormDialogComponent, {
+    const dialogRef = this.dialog.open(FormDialogComponent, {
       data: {
         advanceTable: row,
         action: 'edit',
         CustomerID: this.Customer_ID,
         CustomerName: this.Customer_Name,
       },
+    });
+    dialogRef.afterClosed().subscribe((saved) => {
+      if (saved) {
+        this.loadData();
+      }
     });
   }
 

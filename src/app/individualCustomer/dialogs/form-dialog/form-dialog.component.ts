@@ -78,6 +78,7 @@ export class FormDialogComponent
     this.advanceTable = new IndividualCustomerModel({});
     this.advanceTable.activationStatus = true;
     this.advanceTable.isPostPickUpCallAllowed = false;
+    this.advanceTable.isBillToShipToCustomer = false;
     this.advanceTable.roundOffInvoiceValue = false;
     this.advanceTableForm = this.createContactForm();
   }
@@ -131,6 +132,7 @@ export class FormDialogComponent
       customerDesignationID: [this.advanceTable.customerDesignationID],
       maskMobileNumber:[this.advanceTable.maskMobileNumber],
       isPostPickUpCallAllowed: [this.advanceTable.isPostPickUpCallAllowed ?? false],
+      isBillToShipToCustomer: [this.advanceTable.isBillToShipToCustomer ?? false],
       customerIdentityNumber: [this.advanceTable.customerIdentityNumber]
     });
   }
@@ -152,6 +154,7 @@ export class FormDialogComponent
       this.advanceTableForm.patchValue({
         activationStatus: true,
         isPostPickUpCallAllowed: false,
+        isBillToShipToCustomer: false,
         roundOffInvoiceValue: false
       });
     }

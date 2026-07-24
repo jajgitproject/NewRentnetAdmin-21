@@ -38,7 +38,15 @@
         <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
           <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
             <mat-label>State</mat-label>
-            <mat-select formControlName="stateID" required (selectionChange)="onStateChange()">
+            <mat-select
+              formControlName="stateID"
+              required
+              [compareWith]="compareById"
+              (selectionChange)="onStateChange()"
+            >
+              <mat-select-trigger>
+                {{ getSelectedStateName() }}
+              </mat-select-trigger>
               <mat-option *ngFor="let state of StatesList" [value]="state.geoPointID">
                 {{ state.geoPointName }}
               </mat-option>
@@ -51,7 +59,10 @@
         <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
           <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
             <mat-label>City</mat-label>
-            <mat-select formControlName="cityID" required>
+            <mat-select formControlName="cityID" required [compareWith]="compareById">
+              <mat-select-trigger>
+                {{ getSelectedCityName() }}
+              </mat-select-trigger>
               <mat-option *ngFor="let city of CityList" [value]="city.geoPointID">
                 {{ city.geoPointName }}
               </mat-option>

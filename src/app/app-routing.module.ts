@@ -2163,6 +2163,14 @@ const routes: Routes = [
       },
 
       {
+        path: 'customerBillToShipTo',
+        loadChildren: () =>
+          import('./customerBillToShipTo/customerBillToShipTo.module').then(
+            (m) => m.CustomerBillToShipToModule
+          )
+      },
+
+      {
         path: 'customerConfigurationReservation',
         loadChildren: () =>
           import('./customerConfigurationReservation/customerConfigurationReservation.module').then(

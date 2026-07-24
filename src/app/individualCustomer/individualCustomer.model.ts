@@ -34,6 +34,7 @@ export class IndividualCustomerModel {
   countryForISDCodeID: number;
   maskMobileNumber: boolean;
   isPostPickUpCallAllowed: boolean;
+  isBillToShipToCustomer: boolean;
   customerIdentityNumber: string;
   customerContractID: number;
   customerContractName: string;
@@ -74,6 +75,7 @@ export class IndividualCustomerModel {
       this.countryForISDCodeID = individualCustomerModel.countryForISDCodeID || 0;
       this.maskMobileNumber = individualCustomerModel.maskMobileNumber ?? false;
       this.isPostPickUpCallAllowed = individualCustomerModel.isPostPickUpCallAllowed ?? false;
+      this.isBillToShipToCustomer = individualCustomerModel.isBillToShipToCustomer ?? false;
       this.customerIdentityNumber = individualCustomerModel.customerIdentityNumber || '';
       this.customerContractID = individualCustomerModel.customerContractID || 0;
       this.customerContractName = individualCustomerModel.customerContractName || '';

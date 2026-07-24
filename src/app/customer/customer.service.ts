@@ -193,6 +193,7 @@ export class CustomerService
       showOTPOnDutySlip: toBool(raw.showOTPOnDutySlip, false),
       isBookerAllowedToBeCreatedFromReservation: toBool(raw.isBookerAllowedToBeCreatedFromReservation, false),
       isPostPickUpCallAllowed: toBool(raw.isPostPickUpCallAllowed, false),
+      isBillToShipToCustomer: toBool(raw.isBillToShipToCustomer, false),
       customerIdentityNumber: raw.customerIdentityNumber || '',
       panNo: raw.panNo || '',
       gstCustomerType: raw.gstCustomerType || '',

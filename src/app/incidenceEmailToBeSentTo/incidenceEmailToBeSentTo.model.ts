@@ -7,9 +7,20 @@ export class IncidenceEmailToBeSentTo {
   activationStatus: boolean;
 
   constructor(incidenceEmailToBeSentTo) {
-    this.incidenceEmailToBeSentToID = incidenceEmailToBeSentTo.incidenceEmailToBeSentToID || -1;
-    this.incidenceEmailToBeSentTo = incidenceEmailToBeSentTo.incidenceEmailToBeSentTo || '';
-    this.incidenceEmailToBeSentToType = incidenceEmailToBeSentTo.incidenceEmailToBeSentToType || '';
-    this.activationStatus = incidenceEmailToBeSentTo.activationStatus || '';
+    const src = incidenceEmailToBeSentTo || {};
+    this.incidenceEmailToBeSentToID =
+      src.incidenceEmailToBeSentToID ?? src.IncidenceEmailToBeSentToID ?? -1;
+    this.incidenceEmailToBeSentTo =
+      src.incidenceEmailToBeSentTo ?? src.IncidenceEmailToBeSentTo ?? '';
+    this.incidenceEmailToBeSentToType = (
+      src.incidenceEmailToBeSentToType ??
+      src.IncidenceEmailToBeSentToType ??
+      ''
+    )
+      .toString()
+      .trim();
+    this.activationStatus =
+      src.activationStatus ?? src.ActivationStatus ?? true;
+    this.userID = src.userID ?? src.UserID ?? 0;
   }
 }

@@ -743,6 +743,7 @@ getBusinessTypeID(businessTypeID: any)
       businessType: [this.advanceTable.businessType],
       businessTypeID: [this.advanceTable.businessTypeID],
       businessServices: [this.advanceTable.businessServices],
+      isBillToShipToCustomer: [this.advanceTable.isBillToShipToCustomer ?? false],
     });
   }
 
