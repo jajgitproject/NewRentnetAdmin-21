@@ -253,6 +253,7 @@ export class ZonalDutyRegisterComponent implements OnInit, OnDestroy {
   private exportPollSub?: Subscription;
   readonly maxPickupDateRangeDays = 15;
   readonly exportJobType = 'ZonalDutyRegisterExport';
+  IsKAMRole: any;
     
   
  
@@ -273,6 +274,7 @@ export class ZonalDutyRegisterComponent implements OnInit, OnDestroy {
   contextMenuPosition = { x: '0px', y: '0px' };
   ngOnInit() 
   {
+    this.IsKAMRole = localStorage.getItem('isThisAKeyAccountManagerRole') === 'true';
     this.displayedColumns = [...this.baseDisplayedColumns];
     // this.loadData();
     this.InitCustomerGroup();
