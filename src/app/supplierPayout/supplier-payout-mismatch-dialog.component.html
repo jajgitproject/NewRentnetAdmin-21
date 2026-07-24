@@ -1,0 +1,47 @@
+<h2 mat-dialog-title>Mismatch Duties — {{ data.supplierName }}</h2>
+<mat-dialog-content>
+  <p *ngIf="!data.rows?.length">No duties with open adjustment delta.</p>
+  <table mat-table [dataSource]="data.rows || []" class="w-100" *ngIf="data.rows?.length">
+    <ng-container matColumnDef="dutySlipID">
+      <th mat-header-cell *matHeaderCellDef>Duty</th>
+      <td mat-cell *matCellDef="let row">{{ row.dutySlipID }}</td>
+    </ng-container>
+    <ng-container matColumnDef="reservationID">
+      <th mat-header-cell *matHeaderCellDef>Reservation</th>
+      <td mat-cell *matCellDef="let row">{{ row.reservationID }}</td>
+    </ng-container>
+    <ng-container matColumnDef="customerName">
+      <th mat-header-cell *matHeaderCellDef>Customer</th>
+      <td mat-cell *matCellDef="let row">{{ row.customerName }}</td>
+    </ng-container>
+    <ng-container matColumnDef="payoutEcoRevenueAtFirstPay">
+      <th mat-header-cell *matHeaderCellDef>Payout Eco</th>
+      <td mat-cell *matCellDef="let row">{{ formatMoney(row.payoutEcoRevenueAtFirstPay) }}</td>
+    </ng-container>
+    <ng-container matColumnDef="currentEcoRevenue">
+      <th mat-header-cell *matHeaderCellDef>Current Eco</th>
+      <td mat-cell *matCellDef="let row">{{ formatMoney(row.currentEcoRevenue) }}</td>
+    </ng-container>
+    <ng-container matColumnDef="lockedSupplierPercent">
+      <th mat-header-cell *matHeaderCellDef>Locked %</th>
+      <td mat-cell *matCellDef="let row">{{ formatPercent(row.lockedSupplierPercent) }}</td>
+    </ng-container>
+    <ng-container matColumnDef="targetSupplierRevenue">
+      <th mat-header-cell *matHeaderCellDef>Target Revenue</th>
+      <td mat-cell *matCellDef="let row">{{ formatMoney(row.targetSupplierRevenue) }}</td>
+    </ng-container>
+    <ng-container matColumnDef="cumulativePaidAmount">
+      <th mat-header-cell *matHeaderCellDef>Cumulative Paid</th>
+      <td mat-cell *matCellDef="let row">{{ formatMoney(row.cumulativePaidAmount) }}</td>
+    </ng-container>
+    <ng-container matColumnDef="adjustmentDelta">
+      <th mat-header-cell *matHeaderCellDef>Delta</th>
+      <td mat-cell *matCellDef="let row">{{ formatMoney(row.adjustmentDelta) }}</td>
+    </ng-container>
+    <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+    <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
+  </table>
+</mat-dialog-content>
+<mat-dialog-actions align="end">
+  <button mat-button (click)="close()">Close</button>
+</mat-dialog-actions>

@@ -532,8 +532,8 @@ advanceTableForm.get('localAddressAddressString')?.invalid &&
                         <mat-autocomplete #auto20="matAutocomplete"
                             (optionSelected)="OnSupplierForOwnerSelect($event.option.value)">
                             <mat-option *ngFor="let option of filteredSupplierForOwnerOptions | async"
-                                [value]="option.supplierName" (click)="getsupplierIDForOwner(option.supplierID)">
-                                {{option.supplierName}}
+                                [value]="formatSupplierDisplay(option)" (click)="getsupplierIDForOwner(option.supplierID)">
+                                {{formatSupplierDisplay(option)}}
                             </mat-option>
                         </mat-autocomplete>
                         <mat-error *ngIf="advanceTableForm.get('supplier').hasError('supplierForOwnerInvalid')">
@@ -549,8 +549,8 @@ advanceTableForm.get('localAddressAddressString')?.invalid &&
                         <mat-autocomplete #auto4="matAutocomplete"
                             (optionSelected)="OnSupplierSelect($event.option.value)">
                             <mat-option *ngFor="let option of filteredSupplierOptions | async"
-                                [value]="option.supplierName" (click)="getsupplierID(option.supplierID)">
-                                {{option.supplierName}}
+                                [value]="formatSupplierDisplay(option)" (click)="getsupplierID(option.supplierID)">
+                                {{formatSupplierDisplay(option)}}
                             </mat-option>
                         </mat-autocomplete>
                         <mat-error *ngIf="advanceTableForm.controls['supplier'].hasError('supplierInvalid')">

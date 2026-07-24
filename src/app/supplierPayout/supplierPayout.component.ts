@@ -2,6 +2,7 @@
 import { Component, OnInit } from '@angular/core';
 import { FormControl } from '@angular/forms';
 import { MatSnackBar } from '@angular/material/snack-bar';
+import { MatDialog } from '@angular/material/dialog';
 import { SelectionModel } from '@angular/cdk/collections';
 import { Observable } from 'rxjs';
 import { map, startWith } from 'rxjs/operators';
@@ -15,6 +16,9 @@ import {
   SupplierPayoutGroupSummary,
   SupplierPayoutHistoryRow,
 } from './supplierPayout.model';
+import {
+  SupplierPayoutMismatchDialogComponent,
+} from './supplier-payout-mismatch-dialog.component';
 
 @Component({
   standalone: false,
@@ -34,7 +38,6 @@ export class SupplierPayoutComponent implements OnInit {
 
   SearchFromDate: Date = moment().utcOffset('+05:30').subtract(90, 'days').toDate();
   SearchToDate: Date = moment().utcOffset('+05:30').toDate();
-  includePaid = false;
   paymentStatus = 'UnPaid';
 
   dutyRows: SupplierPayoutDutySlipRow[] = [];
@@ -54,8 +57,10 @@ export class SupplierPayoutComponent implements OnInit {
   ];
 
   groupAmount: number | null = null;
+  over80PercentReason = '';
   previousGroupAdjustmentAmount = 0;
   previousGroupNumber = '';
+  mismatchDutyCount = 0;
   markingPaid = false;
   loadingDuties = false;
   lastSummary: SupplierPayoutGroupSummary | null = null;
@@ -109,7 +114,8 @@ export class SupplierPayoutComponent implements OnInit {
   constructor(
     private service: SupplierPayoutService,
     private generalService: GeneralService,
-    private snackBar: MatSnackBar
+    private snackBar: MatSnackBar,
+    private dialog: MatDialog
   ) {}
 
   ngOnInit(): void {
@@ -178,8 +184,10 @@ export class SupplierPayoutComponent implements OnInit {
     this.selectedSupplierName = match?.supplierName || '';
     this.selection.clear();
     this.lastSummary = null;
+    this.over80PercentReason = '';
     this.previousGroupAdjustmentAmount = 0;
     this.previousGroupNumber = '';
+    this.mismatchDutyCount = 0;
     this.lastGroupAmountBlurConfirmed = null;
     if (this.selectedSupplierID) {
       this.loadPreviousGroupContext();
@@ -191,6 +199,7 @@ export class SupplierPayoutComponent implements OnInit {
       (context) => {
         this.previousGroupAdjustmentAmount = context?.previousGroupAdjustmentAmount || 0;
         this.previousGroupNumber = context?.previousGroupNumber || '';
+        this.mismatchDutyCount = context?.mismatchDutyCount || 0;
       },
       () => {
         this.previousGroupAdjustmentAmount = 0;
@@ -226,7 +235,6 @@ export class SupplierPayoutComponent implements OnInit {
     this.service
       .searchDutySlips({
         supplierID: this.selectedSupplierID,
-        includePaid: this.includePaid,
         fromDate: this.formatDate(this.SearchFromDate),
         toDate: this.formatDate(this.SearchToDate),
         paymentStatus: this.paymentStatus,
@@ -262,16 +270,43 @@ export class SupplierPayoutComponent implements OnInit {
     return this.selection.selected.reduce((sum, row) => sum + (row.payoutEcoRevenue || 0), 0);
   }
 
-  get maxAllowedGroupAmount(): number {
-    return Number((this.selectedEcoTotal * 0.8 + (this.previousGroupAdjustmentAmount || 0)).toFixed(2));
+  get standardPayable80(): number {
+    return Number((this.selectedEcoTotal * 0.8).toFixed(2));
   }
 
-  get projectedGroupAmountShortfall(): number {
-    if (!this.groupAmount || this.groupAmount <= 0 || !this.selection.hasValue()) {
+  get reasonThreshold(): number {
+    const adjustmentAllow = Math.max(0, this.previousGroupAdjustmentAmount || 0);
+    return Number((this.standardPayable80 + adjustmentAllow).toFixed(2));
+  }
+
+  get newDutiesPaymentPortion(): number {
+    if (!this.groupAmount || this.groupAmount <= 0) {
       return 0;
     }
-    const shortfall = Number((this.maxAllowedGroupAmount - Number(this.groupAmount)).toFixed(2));
-    return shortfall > 0 ? shortfall : 0;
+    return Number((Number(this.groupAmount) - (this.previousGroupAdjustmentAmount || 0)).toFixed(2));
+  }
+
+  get requiresOver80Reason(): boolean {
+    if (!this.groupAmount || this.groupAmount <= 0) {
+      return false;
+    }
+    return Number(this.groupAmount) > this.reasonThreshold;
+  }
+
+  get hasOffsettingLedgerMismatch(): boolean {
+    return (
+      this.mismatchDutyCount > 0 &&
+      Math.abs(this.previousGroupAdjustmentAmount || 0) < 0.01
+    );
+  }
+
+  get canMarkAsPaid(): boolean {
+    if (this.markingPaid || !this.groupAmount || this.groupAmount <= 0) {
+      return false;
+    }
+    const hasSelection = this.selection.selected.some((r) => r.selectable);
+    const hasAdjustment = Math.abs(this.previousGroupAdjustmentAmount || 0) >= 0.01;
+    return hasSelection || hasAdjustment || this.hasOffsettingLedgerMismatch;
   }
 
   onGroupAmountBlur(): void {
@@ -303,14 +338,35 @@ export class SupplierPayoutComponent implements OnInit {
 
   private validateGroupAmount(amount: number): { valid: boolean; message?: string } {
     if (!amount || amount <= 0) {
-      return { valid: false, message: 'Group amount cannot be zero.' };
+      return { valid: false, message: 'Group amount paid cannot be zero.' };
     }
-    const maxAllowed = this.maxAllowedGroupAmount;
-    if (amount > maxAllowed) {
+    const selected = this.selection.selected.filter((r) => r.selectable);
+    const hasAdjustment = Math.abs(this.previousGroupAdjustmentAmount || 0) >= 0.01;
+    const hasOffsettingMismatch = this.hasOffsettingLedgerMismatch;
+    if (!selected.length && !hasAdjustment && !hasOffsettingMismatch) {
+      return { valid: false, message: 'Select unpaid duties or settle an open previous group adjustment.' };
+    }
+    const previousAdjustment = this.previousGroupAdjustmentAmount || 0;
+    if (selected.length && previousAdjustment > 0 && amount < previousAdjustment) {
       return {
         valid: false,
-        message: `Group amount cannot be greater than ${this.formatMoney(maxAllowed)} (80% of total payout eco revenue for selected duties plus previous group adjustment amount).`,
+        message: 'Group amount paid is less than the open amount owed from previous group adjustment.',
       };
+    }
+    if (selected.length && this.newDutiesPaymentPortion < 0) {
+      return {
+        valid: false,
+        message: 'Group amount paid is less than the previous group adjustment amount.',
+      };
+    }
+    if (this.requiresOver80Reason && !(this.over80PercentReason || '').trim()) {
+      return {
+        valid: false,
+        message: `Reason is required when group amount exceeds ${this.formatMoney(this.reasonThreshold)}.`,
+      };
+    }
+    if (this.requiresOver80Reason && (this.over80PercentReason || '').trim().length < 10) {
+      return { valid: false, message: 'Reason must be at least 10 characters.' };
     }
     return { valid: true };
   }
@@ -345,14 +401,18 @@ export class SupplierPayoutComponent implements OnInit {
       return this.supplierRevenuePreviewMap;
     }
     const selected = this.selection.selected.filter((r) => r.selectable);
-    if (!selected.length) {
+    if (!selected.length && Math.abs(this.previousGroupAdjustmentAmount || 0) < 0.01) {
+      return this.supplierRevenuePreviewMap;
+    }
+    const portion = this.newDutiesPaymentPortion;
+    if (portion <= 0 || !selected.length) {
       return this.supplierRevenuePreviewMap;
     }
     const totalEco = selected.reduce((sum, row) => sum + (row.payoutEcoRevenue || 0), 0);
     if (totalEco <= 0) {
       return this.supplierRevenuePreviewMap;
     }
-    const amounts = this.allocateGroupAmount(this.groupAmount, selected);
+    const amounts = this.allocateGroupAmount(portion, selected);
     selected.forEach((row, index) => this.supplierRevenuePreviewMap.set(row.dutySlipID, amounts[index]));
     return this.supplierRevenuePreviewMap;
   }
@@ -382,8 +442,10 @@ export class SupplierPayoutComponent implements OnInit {
       return;
     }
     const selected = this.selection.selected.filter((r) => r.selectable);
-    if (!selected.length) {
-      this.showNotification('Select at least one unpaid duty slip.');
+    const hasAdjustment = Math.abs(this.previousGroupAdjustmentAmount || 0) >= 0.01;
+    const hasOffsettingMismatch = this.hasOffsettingLedgerMismatch;
+    if (!selected.length && !hasAdjustment && !hasOffsettingMismatch) {
+      this.showNotification('Select unpaid duties or settle an open previous group adjustment.');
       return;
     }
     const validation = this.validateGroupAmount(Number(this.groupAmount));
@@ -391,14 +453,18 @@ export class SupplierPayoutComponent implements OnInit {
       this.showNotification(validation.message, 'snackbar-danger');
       return;
     }
-    if (this.selectedEcoTotal <= 0) {
+    if (selected.length && this.selectedEcoTotal <= 0) {
       this.showNotification('Selected duties must have payout eco revenue greater than zero.');
       return;
     }
 
     const msg =
-      `Mark ${selected.length} duty slip(s) as paid?\n` +
-      `Group Amount: ${this.groupAmount}\n` +
+      (selected.length
+        ? `Mark ${selected.length} duty slip(s) as paid?\n`
+        : hasOffsettingMismatch
+          ? 'Clear offsetting ledger adjustments (net zero)?\n'
+          : 'Settle open adjustment only?\n') +
+      `Group Amount Paid: ${this.groupAmount}\n` +
       `Previous Group Adjustment: ${this.previousGroupAdjustmentAmount || 0}`;
     if (!window.confirm(msg)) {
       return;
@@ -411,6 +477,7 @@ export class SupplierPayoutComponent implements OnInit {
         supplierID: this.selectedSupplierID,
         groupAmount: this.groupAmount,
         previousGroupAdjustmentAmount: this.previousGroupAdjustmentAmount || 0,
+        over80PercentReason: this.requiresOver80Reason ? (this.over80PercentReason || '').trim() : null,
         dutySlipIDs: selected.map((r) => r.dutySlipID),
       })
       .subscribe(
@@ -418,11 +485,14 @@ export class SupplierPayoutComponent implements OnInit {
           this.markingPaid = false;
           this.lastSummary = summary;
           this.groupAmount = null;
+          this.over80PercentReason = '';
           this.previousGroupAdjustmentAmount = 0;
           this.previousGroupNumber = '';
+          this.mismatchDutyCount = 0;
           this.lastGroupAmountBlurConfirmed = null;
           this.selection.clear();
           this.showNotification(`Payout group ${summary.groupNumber} created.`, 'snackbar-success');
+          this.loadPreviousGroupContext();
           this.searchDuties();
         },
         (err) => {
@@ -431,6 +501,25 @@ export class SupplierPayoutComponent implements OnInit {
           this.showNotification(message, 'snackbar-danger');
         }
       );
+  }
+
+  openMismatchDuties(): void {
+    if (!this.selectedSupplierID) {
+      return;
+    }
+    this.service.getMismatchDuties(this.selectedSupplierID).subscribe(
+      (rows) => {
+        this.dialog.open(SupplierPayoutMismatchDialogComponent, {
+          width: '90vw',
+          maxWidth: '1200px',
+          data: {
+            supplierName: this.selectedSupplierName,
+            rows: rows || [],
+          },
+        });
+      },
+      () => this.showNotification('Failed to load mismatch duties.', 'snackbar-danger')
+    );
   }
 
   searchHistory(): void {
@@ -532,6 +621,10 @@ export class SupplierPayoutComponent implements OnInit {
       return '0.00';
     }
     return Number(value).toFixed(2);
+  }
+
+  absAmount(value: number | null | undefined): number {
+    return Math.abs(Number(value || 0));
   }
 
   private triggerBlobDownload(blob: Blob, fileName: string): void {

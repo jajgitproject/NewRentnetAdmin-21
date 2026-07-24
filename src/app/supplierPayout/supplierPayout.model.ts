@@ -1,6 +1,5 @@
 export interface SupplierPayoutDutySlipSearchCriteria {
   supplierID: number;
-  includePaid?: boolean;
   fromDate?: string | null;
   toDate?: string | null;
   paymentStatus?: string;
@@ -25,6 +24,7 @@ export interface SupplierPayoutMarkPaidRequest {
   supplierID: number;
   groupAmount: number;
   previousGroupAdjustmentAmount: number;
+  over80PercentReason?: string | null;
   dutySlipIDs: number[];
 }
 
@@ -58,6 +58,7 @@ export interface SupplierPayoutGroupSummary {
   isSquaredOff: boolean;
   dutyCount: number;
   totalMismatchAmount: number;
+  over80PercentReason?: string | null;
   lines?: SupplierPayoutGroupDutyRow[];
 }
 
@@ -91,4 +92,18 @@ export interface SupplierPayoutPreviousGroupContext {
   previousSupplierPayoutGroupID?: number | null;
   previousGroupNumber?: string | null;
   previousGroupAdjustmentAmount: number;
+  mismatchDutyCount?: number;
+}
+
+export interface SupplierPayoutMismatchDutyRow {
+  dutySlipID: number;
+  reservationID: number;
+  customerName: string;
+  dateOfDuty?: string | null;
+  payoutEcoRevenueAtFirstPay: number;
+  currentEcoRevenue?: number | null;
+  lockedSupplierPercent: number;
+  targetSupplierRevenue: number;
+  cumulativePaidAmount: number;
+  adjustmentDelta: number;
 }

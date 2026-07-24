@@ -8,8 +8,8 @@ import { MatSort } from '@angular/material/sort';
 import { Supplier } from './supplier.model';
 import { DataSource } from '@angular/cdk/collections';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import { BehaviorSubject, fromEvent, merge, Observable, Subscription } from 'rxjs';
-import { map, startWith } from 'rxjs/operators';
+import { BehaviorSubject, merge, Observable, Subscription } from 'rxjs';
+import { debounceTime, distinctUntilChanged, map, skip, startWith } from 'rxjs/operators';
 import { FormDialogComponent } from './dialogs/form-dialog/form-dialog.component';
 import { DeleteDialogComponent } from './dialogs/delete/delete.component';
 import { DateAdapter, MAT_DATE_LOCALE } from '@angular/material/core';
@@ -37,11 +37,11 @@ interface MenuItem {
 export class SupplierComponent implements OnInit {
   displayedColumns = [
     'supplierName',
+    'supplierCode',
     'city',
     'supplierOfficialIdentityNumber',
     'phone',
     'email',
-    'supplierStatus',
     'isAdhoc',
     'supplierVerificationStatus',
     'supplierRegistrationDate',
@@ -84,8 +84,14 @@ export class SupplierComponent implements OnInit {
   supplierDate: any;
   
  selectedFilter: string = 'search';
+ filterCtrl = new FormControl('');
  searchTerm: any = '';
  filterSelected:boolean = true;
+ filteredFilterOptions: Observable<string[]>;
+ filterSuggestions: string[] = [];
+ private suggestionRefresh$ = new BehaviorSubject<void>(undefined);
+ private readonly supplierStatusOptions = ['Active', 'Inactive'];
+ private readonly verificationStatusOptions = ['Approved', 'UnVerified', 'Rejected', 'Pending'];
 
   // supplierMenuItems: any[] = [
   //   //{ label: 'Rate Card', route: '/supplierRateCard', tooltip: 'Rate Card' },
@@ -172,6 +178,122 @@ export class SupplierComponent implements OnInit {
     this.SubscribeUpdateService();
     
  this.supplierMenuItems.sort((a, b) => a.label.localeCompare(b.label));
+    this.initInlineFilterAutocomplete();
+    this.loadData(true);
+  }
+
+  private initInlineFilterAutocomplete(): void {
+    this.filteredFilterOptions = merge(
+      this.filterCtrl.valueChanges.pipe(startWith('')),
+      this.suggestionRefresh$
+    ).pipe(
+      map(() => this.getLocalFilterOptions(this.filterCtrl.value || ''))
+    );
+
+    this.filterCtrl.valueChanges.pipe(
+      skip(1),
+      debounceTime(300),
+      distinctUntilChanged()
+    ).subscribe((value) => {
+      this.searchTerm = value || '';
+      const term = (value || '').trim();
+      if (term.length >= 3) {
+        this.Filter();
+      } else if (term.length === 0) {
+        this.filterSuggestions = [];
+        this.suggestionRefresh$.next();
+        this.loadData(true);
+      }
+    });
+  }
+
+  onSelectedFilterChange(): void {
+    this.filterCtrl.setValue('', { emitEvent: false });
+    this.searchTerm = '';
+    this.filterSuggestions = [];
+    this.suggestionRefresh$.next();
+    this.loadData(true);
+  }
+
+  onFilterOptionSelected(value: string): void {
+    this.filterCtrl.setValue(value || '');
+    this.searchTerm = value || '';
+    this.Filter();
+  }
+
+  private getEffectiveFilter(): string {
+    return !this.selectedFilter || this.selectedFilter === 'search'
+      ? 'SupplierName'
+      : this.selectedFilter;
+  }
+
+  private getLocalFilterOptions(value: string): string[] {
+    const term = (value || '').trim();
+    if (term.length < 3) {
+      return [];
+    }
+
+    const filter = this.getEffectiveFilter();
+    const lower = term.toLowerCase();
+
+    switch (filter) {
+      case 'city':
+        return this._filterCity(term).map((city) => city.geoPointName);
+      case 'supplierStatus':
+        return this.supplierStatusOptions.filter((option) =>
+          option.toLowerCase().includes(lower)
+        );
+      case 'verificationStatus':
+        return this.verificationStatusOptions.filter((option) =>
+          option.toLowerCase().includes(lower)
+        );
+      default:
+        return this.filterSuggestions.filter((option) =>
+          option.toLowerCase().includes(lower)
+        );
+    }
+  }
+
+  private updateFilterSuggestions(data: Supplier[]): void {
+    const term = (this.filterCtrl.value || '').trim();
+    if (term.length < 3) {
+      this.filterSuggestions = [];
+      return;
+    }
+
+    const filter = this.getEffectiveFilter();
+    const values = (data || [])
+      .map((row) => this.getSuggestionValue(row, filter))
+      .filter((value) => !!value);
+    this.filterSuggestions = [...new Set(values)];
+    this.suggestionRefresh$.next();
+  }
+
+  private getSuggestionValue(row: Supplier, filter: string): string {
+    switch (filter) {
+      case 'SupplierName':
+        return row.supplierName || '';
+      case 'phone':
+        return row.phone || '';
+      case 'email':
+        return row.email || '';
+      case 'supplierRegistrationDate':
+        if (!row.supplierRegistrationDate) {
+          return '';
+        }
+        {
+          const date = new Date(row.supplierRegistrationDate);
+          if (isNaN(date.getTime())) {
+            return '';
+          }
+          const dd = String(date.getDate()).padStart(2, '0');
+          const mm = String(date.getMonth() + 1).padStart(2, '0');
+          const yyyy = date.getFullYear();
+          return `${dd}-${mm}-${yyyy}`;
+        }
+      default:
+        return '';
+    }
   }
   private _filterCity(value: string): any {
     const filterValue = value.toLowerCase();
@@ -188,7 +310,10 @@ export class SupplierComponent implements OnInit {
   onBackPress(event) {
     if (event.keyCode === 8) 
     {
-      this.loadData();
+      const term = (this.filterCtrl.value || '').trim();
+      if (term.length === 0) {
+        this.loadData(true);
+      }
     }
   }
   refresh() {
@@ -202,15 +327,17 @@ export class SupplierComponent implements OnInit {
     this.SearchSupplierStatus= '',
     this.SearchSupplierVerificationStatus= '',
     this.SearchSupplierRegistrationDate= '',
+    this.filterCtrl.setValue('', { emitEvent: false });
     this.searchTerm='';
     this.selectedFilter ='search';
     this.PageNumber=0;
-    this.loadData();
+    this.loadData(true);
   }
 
   public SearchData()
   {
-    this.loadData();    
+    this.PageNumber = 0;
+    this.loadData(false);
   }
   addNew()
   {
@@ -245,40 +372,61 @@ export class SupplierComponent implements OnInit {
   }
   public Filter()
   {
-    this.PageNumber = 0;
-    this.loadData();
+    this.loadData(true);
   }
-   public loadData() 
-   {
-    this.hasSearched = true;
-    
-    switch (this.selectedFilter)
-    {
+
+  private clearSearchCriteria(): void {
+    this.SearchName = '';
+    this.city.setValue('', { emitEvent: false });
+    this.SearchAddress = '';
+    this.SearchPin = '';
+    this.SearchPhone = '';
+    this.SearchFax = '';
+    this.SearchEmail = '';
+    this.SearchSupplierStatus = '';
+    this.SearchSupplierVerificationStatus = '';
+    this.SearchSupplierRegistrationDate = '';
+  }
+
+  private applyInlineSearchCriteria(): void {
+    this.clearSearchCriteria();
+    const term = (this.filterCtrl.value || this.searchTerm || '').trim();
+    const filter = this.getEffectiveFilter();
+
+    switch (filter) {
       case 'SupplierName':
-        this.SearchName = this.searchTerm;
+        this.SearchName = term;
         break;
       case 'city':
-        this.city.setValue(this.searchTerm);
+        this.city.setValue(term, { emitEvent: false });
         break;
-        case 'phone':
-          this.SearchPhone = this.searchTerm;
-          break;
-          case 'email':
-            this.SearchEmail = this.searchTerm;
-            break;
-            case 'supplierStatus':
-              this.SearchSupplierStatus = this.searchTerm;
-              break;
-
-          case 'verificationStatus':
-            this.SearchSupplierVerificationStatus = this.searchTerm;
-            break;
-            case 'supplierRegistrationDate':
-            this.SearchSupplierRegistrationDate = this.searchTerm;
-            break;
+      case 'phone':
+        this.SearchPhone = term;
+        break;
+      case 'email':
+        this.SearchEmail = term;
+        break;
+      case 'supplierStatus':
+        this.SearchSupplierStatus = term;
+        break;
+      case 'verificationStatus':
+        this.SearchSupplierVerificationStatus = term;
+        break;
+      case 'supplierRegistrationDate':
+        this.SearchSupplierRegistrationDate = term;
+        break;
       default:
-        this.searchTerm = '';
         break;
+    }
+  }
+
+   public loadData(fromInlineSearch = false) 
+   {
+    this.hasSearched = true;
+
+    if (fromInlineSearch) {
+      this.PageNumber = 0;
+      this.applyInlineSearchCriteria();
     }
 
       this.supplierService.getTableData(this.SearchName,
@@ -297,6 +445,7 @@ export class SupplierComponent implements OnInit {
       {
 
         this.dataSource = data;
+        this.updateFilterSuggestions(data || []);
        
       },
       (error: HttpErrorResponse) => { this.dataSource = null;}
@@ -333,6 +482,17 @@ export class SupplierComponent implements OnInit {
     );
   }
 
+  getSupplierCode(row: Supplier): string {
+    if (!row) {
+      return '';
+    }
+    const name = row.supplierName || '';
+    const code = row.oldRentnetCode != null && row.oldRentnetCode !== 0
+      ? String(row.oldRentnetCode)
+      : '';
+    return `${name}${code}`;
+  }
+
   showNotification(colorName, text, placementFrom, placementAlign) {
     this.snackBar.open(text, '', {
       duration: 2000,
@@ -357,7 +517,7 @@ export class SupplierComponent implements OnInit {
      
       this.PageNumber++;
       //alert(this.PageNumber + 'mohit')
-      this.loadData();
+      this.loadData(false);
     }
     //alert([this.PageNumber])
   }
@@ -367,7 +527,7 @@ export class SupplierComponent implements OnInit {
     if(this.PageNumber>0)
     {
       this.PageNumber--;
-      this.loadData();    } 
+      this.loadData(false);    } 
   }
 
 /////////////////for Image Upload////////////////////////////
@@ -584,7 +744,7 @@ export class SupplierComponent implements OnInit {
       this.sortType = "Descending";
     }
     this.supplierService.getTableDataSort(this.SearchName,
-      this.SearchCity,
+      this.city.value || '',
       this.SearchAddress,
       this.SearchPin,
       this.SearchPhone,

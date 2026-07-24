@@ -113,7 +113,8 @@
                                                     <!-- Dropdown for selecting Type, Parent, City -->
                                                     <div class="input-group-append input-group-addon">
                                                         <select style="height: 40px; width: 160px;" class="form-control"
-                                                            [(ngModel)]="selectedFilter">
+                                                            [(ngModel)]="selectedFilter"
+                                                            (ngModelChange)="onSelectedFilterChange()">
                                                             <option value="search" hidden>Search By</option>
                                                             <option value="SupplierName">Supplier Name</option>
                                                             <option value="city">City</option>
@@ -129,16 +130,27 @@
 
                                                     <!-- Input field for filtering -->
                                                     <input type="text"
+                                                        matInput
                                                         style="height: 40px; width: 300px;padding-left: 5px;"
-                                                        class="form-control" placeholder="Filter" id="inputGroup"
+                                                        class="form-control" placeholder="Type 3+ characters"
+                                                        id="inputGroup"
                                                         (keyup)="onBackPress($event)"
-                                                        [(ngModel)]="searchTerm" />
+                                                        (keyup.enter)="Filter()"
+                                                        [formControl]="filterCtrl"
+                                                        [matAutocomplete]="filterAuto" />
+                                                    <mat-autocomplete #filterAuto="matAutocomplete"
+                                                        (optionSelected)="onFilterOptionSelected($event.option.value)">
+                                                        <mat-option *ngFor="let option of filteredFilterOptions | async"
+                                                            [value]="option">
+                                                            {{ option }}
+                                                        </mat-option>
+                                                    </mat-autocomplete>
 
                                                     <!-- Search button -->
                                                     <div class="input-group-append input-group-addon">
                                                         <span class="input-group-text"
                                                             style="cursor: pointer; height: 40px; width: 40px; text-align: center;"
-                                                            (click)="loadData()">
+                                                            (click)="Filter()">
                                                             <i class="fas fa-search"></i>
                                                         </span>
                                                     </div>
@@ -247,11 +259,11 @@
                                                 {{row.email}}</mat-cell>
                                         </ng-container>
 
-                                        <ng-container matColumnDef="supplierStatus">
+                                        <ng-container matColumnDef="supplierCode">
                                             <mat-header-cell *matHeaderCellDef mat-sort-header>Supplier
-                                                Status</mat-header-cell>
+                                                Code</mat-header-cell>
                                             <mat-cell *matCellDef="let row">
-                                                {{row.supplierStatus}}</mat-cell>
+                                                {{ getSupplierCode(row) }}</mat-cell>
                                         </ng-container>
 
                                         <ng-container matColumnDef="isAdhoc">
