@@ -2491,12 +2491,15 @@ public resetVerificationForEcoStateChange(): void {
       },
       error =>
       {
+        // #region agent log
+        fetch('http://127.0.0.1:7830/ingest/e71207c4-423e-4a42-a900-5bc43349cfbe',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'50bd31'},body:JSON.stringify({sessionId:'50bd31',runId:'pre-fix',hypothesisId:'D',location:'dutySlipForBilling.CalculateBill:error',message:'CalculateBill failed',data:{dutySlipId:this.DutySlipID,error:String(error),openDummyInvoiceAfter},timestamp:Date.now()})}).catch(()=>{});
+        // #endregion
         if (showSummaryPopup || openDummyInvoiceAfter) {
           this.showCalculateBillOverlay = false;
         } else {
           this.showSpinnerForVDGB = false;
         }
-        const errorMessage = error || 'Operation Failed.....!!!';
+        const errorMessage = this.extractApiErrorMessage(error, 'Operation Failed.....!!!');
         Swal.fire({
           title: errorMessage,
           icon: 'error'
