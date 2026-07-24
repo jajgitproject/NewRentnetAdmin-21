@@ -1,0 +1,143 @@
+<div class="addContainer">
+  <div class="modalHeader">
+    <div class="editRowModal">
+      <div class="modalHeader clearfix">
+        <div class="modal-about">
+          <div class="font-weight-bold p-t-5 font-17">
+            {{ dialogTitle }} {{ CustomerName }}
+          </div>
+        </div>
+      </div>
+    </div>
+    <button mat-icon-button (click)="dialogRef.close()" aria-label="Close dialog">
+      <mat-icon>close</mat-icon>
+    </button>
+  </div>
+
+  <div mat-dialog-content>
+    <form class="register-form m-4" [formGroup]="advanceTableForm">
+      <div class="row">
+        <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+          <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+            <mat-label>Address 1</mat-label>
+            <input matInput formControlName="address1" required maxlength="500" />
+            <mat-error *ngIf="advanceTableForm.get('address1').hasError('required')">
+              Address 1 is required
+            </mat-error>
+          </mat-form-field>
+        </div>
+        <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+          <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+            <mat-label>Address 2</mat-label>
+            <input matInput formControlName="address2" maxlength="500" />
+          </mat-form-field>
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+          <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+            <mat-label>State</mat-label>
+            <mat-select formControlName="stateID" required (selectionChange)="onStateChange()">
+              <mat-option *ngFor="let state of StatesList" [value]="state.geoPointID">
+                {{ state.geoPointName }}
+              </mat-option>
+            </mat-select>
+            <mat-error *ngIf="advanceTableForm.get('stateID').hasError('required')">
+              State is required
+            </mat-error>
+          </mat-form-field>
+        </div>
+        <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+          <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+            <mat-label>City</mat-label>
+            <mat-select formControlName="cityID" required>
+              <mat-option *ngFor="let city of CityList" [value]="city.geoPointID">
+                {{ city.geoPointName }}
+              </mat-option>
+            </mat-select>
+            <mat-error *ngIf="advanceTableForm.get('cityID').hasError('required')">
+              City is required
+            </mat-error>
+          </mat-form-field>
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+          <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+            <mat-label>Pincode</mat-label>
+            <input matInput formControlName="pincode" required maxlength="10" />
+            <mat-error *ngIf="advanceTableForm.get('pincode').hasError('required')">
+              Pincode is required
+            </mat-error>
+          </mat-form-field>
+        </div>
+        <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+          <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+            <mat-label>GST NO</mat-label>
+            <input matInput formControlName="gstno" maxlength="20" />
+          </mat-form-field>
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+          <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+            <mat-label>Start Date</mat-label>
+            <input matInput [matDatepicker]="startDatePicker" formControlName="startDate" required />
+            <mat-datepicker-toggle matSuffix [for]="startDatePicker"></mat-datepicker-toggle>
+            <mat-datepicker #startDatePicker></mat-datepicker>
+            <mat-error *ngIf="advanceTableForm.get('startDate').hasError('required')">
+              Start Date is required
+            </mat-error>
+          </mat-form-field>
+        </div>
+        <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+          <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+            <mat-label>End Date</mat-label>
+            <input matInput [matDatepicker]="endDatePicker" formControlName="endDate" />
+            <mat-datepicker-toggle matSuffix [for]="endDatePicker"></mat-datepicker-toggle>
+            <mat-datepicker #endDatePicker></mat-datepicker>
+          </mat-form-field>
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+          <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+            <mat-label>Activation Status</mat-label>
+            <mat-select formControlName="activationStatus" required>
+              <mat-option [value]="true">Yes</mat-option>
+              <mat-option [value]="false">No</mat-option>
+            </mat-select>
+            <mat-error *ngIf="advanceTableForm.get('activationStatus').hasError('required')">
+              Activation Status is required
+            </mat-error>
+          </mat-form-field>
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12 mb-2">
+          <div class="example-button-row">
+            <button
+              mat-raised-button
+              color="primary"
+              *ngIf="saveDisabled"
+              type="button"
+              [disabled]="!advanceTableForm.valid"
+              (click)="confirmAdd()"
+            >
+              Save
+            </button>
+            <mat-spinner *ngIf="!saveDisabled" diameter="30"></mat-spinner>
+            <button mat-raised-button color="warn" type="button" (click)="onNoClick(action)" tabindex="-1">
+              {{ action === 'add' ? 'Reset' : 'Cancel' }}
+            </button>
+          </div>
+        </div>
+      </div>
+    </form>
+  </div>
+</div>
