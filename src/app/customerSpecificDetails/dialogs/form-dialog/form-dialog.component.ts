@@ -19,6 +19,8 @@ export class FormDialogComponentCSD
 {
   buttonDisabled:boolean=false;
   status: any;
+  allowEditAlways = false;
+  showEditBlockMessage = true;
   action: string;
   dialogTitle: string;
   advanceTableForm: FormGroup;
@@ -45,15 +47,17 @@ export class FormDialogComponentCSD
         this.advanceTableForm=this.createContactForm();
         this.dynamicForm = this.fb.group({});
         this.dialogTitle = this.data?.action === 'edit' ? 'Edit Customer Specific Details' : 'Add Customer Specific Details';
-        this.status=data?.status?.status || data?.status || data;
-        // if(this.status!='Changes allow'){
-        //   this.buttonDisabled=true;
-        // }
-             if(this.status === 'Changes allow'){
-    this.buttonDisabled = false;  // Save button enable
-} else {
-    this.buttonDisabled = true;   // Save button disable
-}
+        this.status = data?.status?.status || data?.status || data;
+        this.allowEditAlways = data?.allowEditAlways === true || data?.from === 'Closing';
+        if (this.allowEditAlways) {
+          this.buttonDisabled = false;
+          this.status = 'Changes allow';
+          this.showEditBlockMessage = false;
+        } else if (this.status === 'Changes allow') {
+          this.buttonDisabled = false;
+        } else {
+          this.buttonDisabled = true;
+        }
   }
   public ngOnInit(): void
   {
@@ -82,7 +86,6 @@ export class FormDialogComponentCSD
   }
 
   private buildDynamicForm(): void {
-    debugger;
     this.dynamicForm = this.fb.group({});
     const existingValueMap = new Map<string, any>();
     this.getExistingFields().forEach((field: any) => {

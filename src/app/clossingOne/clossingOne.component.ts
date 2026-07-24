@@ -1558,7 +1558,7 @@ export class ClossingOneComponent implements OnInit, AfterViewInit {
 
   //------Customer Specific Fields
   showAndScrollCustomerSpecificFields() {
-    this.openClosingSectionView('customerSpecific', 'Customer Specific Fields');
+    this.openCustomerSpecificField();
   }
 
   //------Change Duty Type
@@ -1685,21 +1685,54 @@ export class ClossingOneComponent implements OnInit, AfterViewInit {
 
       openCustomerSpecificField()
       {
-        const dialogRef = this.dialog.open(FormDialogComponentCSD, 
-          {
-            width:'30%',
-            data: 
-              {
-                dataSource:this.dataSourceCSF,
-                reservationID:this.ReservationID,
-                customerID:this.dataSourceCSF[0].customerID,
-                action:"edit",
-                status: this.status
-              }
-          });
-          dialogRef.afterClosed().subscribe((res: any) => {
+        const openDialog = () => {
+          if (!this.dataSourceCSF?.length || !this.dataSourceCSF[0]) {
+            this.showNotification(
+              'snackbar-warning',
+              'No customer specific field data available for this reservation.',
+              'bottom',
+              'center'
+            );
+            return;
+          }
+          const dialogRef = this.dialog.open(FormDialogComponentCSD,
+            {
+              width:'30%',
+              data:
+                {
+                  dataSource:this.dataSourceCSF,
+                  reservationID:this.ReservationID,
+                  customerID:this.dataSourceCSF[0].customerID,
+                  action:"edit",
+                  from: this.from,
+                  allowEditAlways: true,
+                }
+            });
+          dialogRef.afterClosed().subscribe(() => {
             this.CustomerSpecificFieldsloadData();
-      })
+          });
+        };
+
+        if (this.dataSourceCSF?.length && this.dataSourceCSF[0]) {
+          openDialog();
+          return;
+        }
+
+        this.newFormService.GetCustomerSpecificFields(this.ReservationID).subscribe(
+          (data: CustomerSpecificDetailsData) => {
+            this.dataSourceCSF = data?.reservationDetailsList;
+            openDialog();
+          },
+          () => {
+            this.dataSourceCSF = null;
+            this.showNotification(
+              'snackbar-warning',
+              'No customer specific field data available for this reservation.',
+              'bottom',
+              'center'
+            );
+          }
+        );
       }
 
       checkVerifyDutyBeforeFormOpen() {

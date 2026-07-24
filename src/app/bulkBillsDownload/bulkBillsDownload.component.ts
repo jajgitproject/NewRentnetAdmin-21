@@ -2310,7 +2310,7 @@ export class BulkBillsDownloadComponent implements OnInit, OnDestroy, AfterViewI
   }
 
   private initCustomerAutocomplete(): void {
-    this.filteredCustomerOptions = this.customerCtrl.valueChanges.pipe(
+      this.filteredCustomerOptions = this.customerCtrl.valueChanges.pipe(
       startWith(this.customerCtrl.value ?? ''),
       map((value) => this.filterCustomers(typeof value === 'string' ? value : value?.displayName || value?.customerName || ''))
     );

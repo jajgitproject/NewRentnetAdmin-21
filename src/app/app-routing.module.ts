@@ -702,7 +702,11 @@ const routes: Routes = [
         loadChildren: () =>
           import('./vendorMis/vendorMis.module').then(
             (m) => m.VendorMisModule
-          )
+          ),
+        data: {
+          requiredPageKey: 'Vendor MIS',
+          alternatePageKeys: ['vendorMis', 'Vendor MIS'],
+        },
       },
 
       {

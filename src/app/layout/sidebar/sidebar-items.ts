@@ -891,7 +891,9 @@ export const ROUTES: RouteInfo[] = [
       {
         path: 'vendorMis',
         title: 'Vendor MIS',
+        pageKey: 'Vendor MIS',
         moduleName: 'vendorMis',
+        alternateAccessPageKeys: ['vendorMis', 'Vendor MIS'],
         icon: 'fas fa-file-export',
         class: '',
         groupTitle: false,

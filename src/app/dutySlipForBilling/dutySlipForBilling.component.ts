@@ -82,27 +82,28 @@ export class DutySlipForBillingComponent implements OnInit, AfterViewInit, OnCha
    'dropOffTimeForBilling',
    'locationInDateForBilling',
    'locationInTimeForBilling',
-   'dsClosing',
-   'physicalDutySlipReceived',
  ];
- /** KM, address, and related fields editable only when Manual KM is selected. */
+ /** Address fields editable for all closure types (App, Driver, GPS, Manual). */
+ private readonly alwaysEditableAddressControls = [
+   'locationOutAddressStringForBilling',
+   'reportingToGuestAddressStringForBilling',
+   'pickUpAddressStringForBilling',
+   'dropOffAddressStringForBilling',
+   'locationInAddressStringForBilling',
+ ];
+ /** KM, lat/long, and remark fields editable only when Manual KM is selected. */
  private readonly manualKmOnlyControls = [
    'runningDetails',
    'vendorRemark',
    'locationOutKMForBilling',
-   'locationOutAddressStringForBilling',
    'locationOutLatLongForBilling',
    'reportingToGuestKMForBilling',
-   'reportingToGuestAddressStringForBilling',
    'reportingToGuestLatLongForBilling',
    'pickUpKMForBilling',
-   'pickUpAddressStringForBilling',
    'pickUpLatLongForBilling',
    'dropOffKMForBilling',
-   'dropOffAddressStringForBilling',
    'dropOffLatLongForBilling',
    'locationInKMForBilling',
-   'locationInAddressStringForBilling',
    'locationInLatLongForBilling',
  ];
  advanceTableBH : BillingHistory | null;
@@ -120,10 +121,10 @@ export class DutySlipForBillingComponent implements OnInit, AfterViewInit, OnCha
   showCalculateBillOverlay = false;
   /** Bill breakdown for Summary of Duty; null uses child demo until mapped from Calculate Bill API. */
   summaryOfDutyData: SummaryOfDutyData | null = null;
-  totalDriverAllowanceAmount: number | null = null;
-  totalNightChargesAmount: number | null = null;
-  private loadedDriverAllowanceAmount: number | null = null;
-  private loadedNightChargesAmount: number | null = null;
+  totalDriverAllowanceDays: number | null = null;
+  totalNights: number | null = null;
+  private loadedDriverAllowanceDays: number | null = null;
+  private loadedNights: number | null = null;
   private suppressInitialDutyStatusEmit = true;
 
   constructor(
@@ -184,22 +185,16 @@ export class DutySlipForBillingComponent implements OnInit, AfterViewInit, OnCha
         this.CustomerSignatureImage;
     }
     
-    if(this.advanceTableClosingOne.closingDutySlipForBillingModel.dsClosing === null)
-    {
-      this.advanceTableForm.controls["goodForBilling"].disable();
-      this.advanceTableForm.controls["verifyDuty"].disable();
-      this.advanceTableForm.patchValue({goodForBilling : false});
-      this.advanceTableForm.patchValue({verifyDuty : false});
-    }
-    else
-    {
+    if (this.advanceTableClosingOne.closingDutySlipForBillingModel.dsClosing !== null) {
       this.buttonText = 'Update';
-      this.syncVerifyDutyAndGoodForBillingState();
       this.LoadDataForBilling();
+    } else {
+      this.syncVerifyDutyAndGoodForBillingState();
     }
 
     this.onKeyUp();
     this.onTimeSelection();
+    this.applyClosingFieldDefaults();
     this.applyDutySlipEditLockState();
     this.loadClosingAllowances();
   }
@@ -1045,26 +1040,82 @@ export class DutySlipForBillingComponent implements OnInit, AfterViewInit, OnCha
 
   private toAllowanceNumber(value: unknown): number {
     const n = Number(value);
-    return Number.isFinite(n) ? n : 0;
+    return Number.isFinite(n) ? Math.max(0, Math.trunc(n)) : 0;
+  }
+
+  private applyClosingFieldDefaults(): void {
+    if (!this.advanceTableForm) {
+      return;
+    }
+    this.advanceTableForm.patchValue(
+      {
+        dsClosing: 'Closed',
+        physicalDutySlipReceived: true,
+      },
+      { emitEvent: false }
+    );
+    if (this.advanceTableClosingOne?.closingDutySlipForBillingModel) {
+      this.advanceTableClosingOne.closingDutySlipForBillingModel.dsClosing = 'Closed';
+      this.advanceTableClosingOne.closingDutySlipForBillingModel.physicalDutySlipReceived = true;
+    }
+    this.advanceTableForm.get('dsClosing')?.disable({ emitEvent: false });
+    this.advanceTableForm.get('physicalDutySlipReceived')?.disable({ emitEvent: false });
+  }
+
+  private validateClosingStatusForGfb(): boolean {
+    const form = this.advanceTableForm.getRawValue();
+    if (!form.dsClosing) {
+      Swal.fire('', 'Please Select DS Closing Option.', 'warning');
+      return false;
+    }
+    if (
+      form.physicalDutySlipReceived === ''
+      || form.physicalDutySlipReceived === null
+      || form.physicalDutySlipReceived === undefined
+    ) {
+      Swal.fire('', 'Please Select Duty Slip Received Option.', 'warning');
+      return false;
+    }
+    return true;
+  }
+
+  private syncClosingModelFromResponse(response: any): void {
+    const dsClosing = response?.dsClosing ?? response?.DsClosing;
+    const physicalDutySlipReceived =
+      response?.physicalDutySlipReceived ?? response?.PhysicalDutySlipReceived;
+    if (dsClosing !== undefined && dsClosing !== null) {
+      this.advanceTableForm.patchValue({ dsClosing }, { emitEvent: false });
+      if (this.advanceTableClosingOne?.closingDutySlipForBillingModel) {
+        this.advanceTableClosingOne.closingDutySlipForBillingModel.dsClosing = dsClosing;
+      }
+    }
+    if (physicalDutySlipReceived !== undefined && physicalDutySlipReceived !== null) {
+      this.advanceTableForm.patchValue({ physicalDutySlipReceived }, { emitEvent: false });
+      if (this.advanceTableClosingOne?.closingDutySlipForBillingModel) {
+        this.advanceTableClosingOne.closingDutySlipForBillingModel.physicalDutySlipReceived =
+          !!physicalDutySlipReceived;
+      }
+    }
+    this.applyClosingFieldDefaults();
   }
 
   private applyClosingAllowanceValues(response: any): void {
-    this.totalDriverAllowanceAmount = this.toAllowanceNumber(
-      response?.totalDriverAllowanceAmount ?? response?.TotalDriverAllowanceAmount
+    this.totalDriverAllowanceDays = this.toAllowanceNumber(
+      response?.totalDriverAllowanceDays ?? response?.TotalDriverAllowanceDays
     );
-    this.totalNightChargesAmount = this.toAllowanceNumber(
-      response?.totalNightChargesAmount ?? response?.TotalNightChargesAmount
+    this.totalNights = this.toAllowanceNumber(
+      response?.totalNights ?? response?.TotalNights
     );
-    this.loadedDriverAllowanceAmount = this.totalDriverAllowanceAmount;
-    this.loadedNightChargesAmount = this.totalNightChargesAmount;
+    this.loadedDriverAllowanceDays = this.totalDriverAllowanceDays;
+    this.loadedNights = this.totalNights;
   }
 
   private mapClosingAllowancesFromSummary(response: any): void {
     if (response == null) {
-      this.totalDriverAllowanceAmount = 0;
-      this.totalNightChargesAmount = 0;
-      this.loadedDriverAllowanceAmount = 0;
-      this.loadedNightChargesAmount = 0;
+      this.totalDriverAllowanceDays = 0;
+      this.totalNights = 0;
+      this.loadedDriverAllowanceDays = 0;
+      this.loadedNights = 0;
       return;
     }
 
@@ -1075,14 +1126,14 @@ export class DutySlipForBillingComponent implements OnInit, AfterViewInit, OnCha
       response?.invoiceNightModel
       ?? response?.InvoiceNightModel;
 
-    this.totalDriverAllowanceAmount = this.toAllowanceNumber(
-      driver?.totalDriverAllowanceAmount ?? driver?.TotalDriverAllowanceAmount
+    this.totalDriverAllowanceDays = this.toAllowanceNumber(
+      driver?.totalDriverAllowanceDays ?? driver?.TotalDriverAllowanceDays
     );
-    this.totalNightChargesAmount = this.toAllowanceNumber(
-      night?.totalNightChargesAmount ?? night?.TotalNightChargesAmount
+    this.totalNights = this.toAllowanceNumber(
+      night?.totalNights ?? night?.TotalNights
     );
-    this.loadedDriverAllowanceAmount = this.totalDriverAllowanceAmount;
-    this.loadedNightChargesAmount = this.totalNightChargesAmount;
+    this.loadedDriverAllowanceDays = this.totalDriverAllowanceDays;
+    this.loadedNights = this.totalNights;
   }
 
   loadClosingAllowances(): void {
@@ -1094,21 +1145,21 @@ export class DutySlipForBillingComponent implements OnInit, AfterViewInit, OnCha
       (response) => this.mapClosingAllowancesFromSummary(response),
       () => {
         if (!this.isDutyCalculated) {
-          this.totalDriverAllowanceAmount = 0;
-          this.totalNightChargesAmount = 0;
-          this.loadedDriverAllowanceAmount = 0;
-          this.loadedNightChargesAmount = 0;
+          this.totalDriverAllowanceDays = 0;
+          this.totalNights = 0;
+          this.loadedDriverAllowanceDays = 0;
+          this.loadedNights = 0;
         }
       }
     );
   }
 
   private haveClosingAllowancesChanged(): boolean {
-    const driver = this.toAllowanceNumber(this.totalDriverAllowanceAmount);
-    const night = this.toAllowanceNumber(this.totalNightChargesAmount);
+    const driver = this.toAllowanceNumber(this.totalDriverAllowanceDays);
+    const night = this.toAllowanceNumber(this.totalNights);
     return (
-      driver !== this.toAllowanceNumber(this.loadedDriverAllowanceAmount)
-      || night !== this.toAllowanceNumber(this.loadedNightChargesAmount)
+      driver !== this.toAllowanceNumber(this.loadedDriverAllowanceDays)
+      || night !== this.toAllowanceNumber(this.loadedNights)
     );
   }
 
@@ -1119,8 +1170,8 @@ export class DutySlipForBillingComponent implements OnInit, AfterViewInit, OnCha
     }
 
     this.clossingOneService.updateClosingAllowances(this.DutySlipID, {
-      totalDriverAllowanceAmount: this.toAllowanceNumber(this.totalDriverAllowanceAmount),
-      totalNightChargesAmount: this.toAllowanceNumber(this.totalNightChargesAmount),
+      totalDriverAllowanceDays: this.toAllowanceNumber(this.totalDriverAllowanceDays),
+      totalNights: this.toAllowanceNumber(this.totalNights),
     }).subscribe(
       (response) => {
         this.applyClosingAllowanceValues(response);
@@ -1281,15 +1332,19 @@ export class DutySlipForBillingComponent implements OnInit, AfterViewInit, OnCha
     }
     this.advanceTableForm.enable({ emitEvent: false });
     this.applyManualEditMode();
+    this.applyClosingFieldDefaults();
     this.syncVerifyDutyAndGoodForBillingState();
   }
 
-  /** Date/time and DS Closing / Duty Slip Received always editable; KM/address only when Manual KM. */
+  /** Date/time and addresses always editable; KM/lat-long only when Manual KM. DS Closing fields are always locked. */
   private applyManualEditMode(): void {
     if (!this.advanceTableForm || this.isDutySlipEditBlocked) {
       return;
     }
     for (const name of this.alwaysEditableControls) {
+      this.advanceTableForm.get(name)?.enable({ emitEvent: false });
+    }
+    for (const name of this.alwaysEditableAddressControls) {
       this.advanceTableForm.get(name)?.enable({ emitEvent: false });
     }
     const allowManualKmEdit = this.isManualClosureMode;
@@ -1567,6 +1622,7 @@ export class DutySlipForBillingComponent implements OnInit, AfterViewInit, OnCha
     //this.advanceTableForm.patchValue({actionDetails : this.advanceTableClosingOne.closingDutySlipModel.actionDetails});
     this.onKeyUp();
     this.onTimeSelection();
+    this.applyClosingFieldDefaults();
     this.applyDutySlipEditLockState();
   }
 
@@ -1619,10 +1675,10 @@ export class DutySlipForBillingComponent implements OnInit, AfterViewInit, OnCha
 
       goodForBilling: [''],
       verifyDuty: [''],
-      dsClosing:[''],
+      dsClosing: ['Closed'],
       runningDetails:[''],
       vendorRemark:[''],
-      physicalDutySlipReceived:[''],
+      physicalDutySlipReceived:[true],
       actionTaken:[''],
       actionDetails:['']
     });
@@ -1894,6 +1950,11 @@ export class DutySlipForBillingComponent implements OnInit, AfterViewInit, OnCha
       }
       if(isChecked === true)
       {
+        this.applyClosingFieldDefaults();
+        if (!this.validateClosingStatusForGfb()) {
+          this.advanceTableForm.patchValue({ goodForBilling: false });
+          return false;
+        }
         let at = "Checked";
         this.advanceTableForm.patchValue({actionTaken : "GoodForBilling"});
         this.advanceTableForm.patchValue({actionDetails : at});
@@ -2310,6 +2371,7 @@ public resetVerificationForEcoStateChange(): void {
       this.showSpinner = false;
       return;
     }
+    this.applyClosingFieldDefaults();
     //this.saveDisabled = true;
       if (!this.ClossingDetails())
       {
@@ -2323,6 +2385,7 @@ public resetVerificationForEcoStateChange(): void {
         {
           this.DSClosing = response.dsClosing;
           this.buttonText = 'Update';
+          this.syncClosingModelFromResponse(response);
           this.syncVerifyDutyAndGoodForBillingState();
           if(response.goodForBilling === true || response.verifyDuty === true)
           {
@@ -2597,6 +2660,7 @@ onChange() {
   }
 
 updateDutyStatus(verifyDuty: boolean, goodForBilling: boolean, callback?: () => void) {
+  this.applyClosingFieldDefaults();
   this.advanceTableForm.patchValue({
     verifyDuty: verifyDuty,
     goodForBilling: goodForBilling
@@ -2611,6 +2675,10 @@ updateDutyStatus(verifyDuty: boolean, goodForBilling: boolean, callback?: () => 
           verifyDuty: response.verifyDuty,
           goodForBilling: response.goodForBilling
         });
+        this.syncClosingModelFromResponse(response);
+        if (response?.dsClosing ?? response?.DsClosing) {
+          this.buttonText = 'Update';
+        }
 
         this.showNotification(
           'snackbar-success',

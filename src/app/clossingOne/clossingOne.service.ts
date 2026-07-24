@@ -153,7 +153,7 @@ export class ClossingOneService
 
   updateClosingAllowances(
     dutySlipID: number | string,
-    payload: { totalDriverAllowanceAmount: number; totalNightChargesAmount: number }
+    payload: { totalDriverAllowanceDays: number; totalNights: number }
   ): Observable<any> {
     return this.httpClient.put(
       `${this.API_URL_Bill}/closing-allowances/${dutySlipID}`,
