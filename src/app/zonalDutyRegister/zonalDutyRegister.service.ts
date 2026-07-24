@@ -7,6 +7,7 @@ import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { DatePipe } from '@angular/common';
 import { GeneralService } from '../general/general.service';
 import { extractExportErrorMessage, isExportJobReady, isExportJobRunning, pollExportJob } from '../general/export-job.helper';
+import { OrganizationalEntityDropDown } from '../organizationalEntity/organizationalEntityDropDown.model';
 @Injectable()
 export class ZonalDutyRegisterService 
 {
@@ -472,6 +473,24 @@ export class ZonalDutyRegisterService
     return this.httpClient.post(`${this.API_URL}/ExportCsv`, this.buildExportCriteria(criteria), {
       responseType: 'blob'
     });
+  }
+
+  GetLocationDropDownForDutyRegister(IsKAMRole: boolean): Observable<OrganizationalEntityDropDown[]> {
+    const UserID = this.generalService.getUserID();
+    return this.httpClient.get<OrganizationalEntityDropDown[]>(
+      `${this.API_URL}/GetLocationDropDownForDutyRegister/${UserID}/${IsKAMRole}`);
+  }
+
+  GetCustomerByKAMForDutyRegister(IsKAMRole: boolean): Observable<any[]> {
+    const UserID = this.generalService.getUserID();
+    return this.httpClient.get<any[]>(
+      `${this.API_URL}/GetCustomerByKAMForDutyRegister/${UserID}/${IsKAMRole}`);
+  }
+
+  GetCustomerGroupByKAMForDutyRegister(IsKAMRole: boolean): Observable<any[]> {
+    const UserID = this.generalService.getUserID();
+    return this.httpClient.get<any[]>(
+      `${this.API_URL}/GetCustomerGroupByKAMForDutyRegister/${UserID}/${IsKAMRole}`);
   }
   
 }

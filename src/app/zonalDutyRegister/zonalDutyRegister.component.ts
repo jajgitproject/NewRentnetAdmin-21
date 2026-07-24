@@ -45,15 +45,17 @@ export class ZonalDutyRegisterComponent implements OnInit, OnDestroy {
   'ReservationID',
   'PickupDate',
   'BookingDate',
+  'DispatchLocation',
   'CustomerName',
-  'BookerName',
+  'BookerEmail',
   'GuestName',
+  'GuestEmail',
   'City',
   'PackageType',
   'CarNumber',
   'DriverID',
   'DriverName',
-  'DispatchLocation',
+  'DriverMobile',
   'BilledDutyType',
   'Package',
   'CarBooked',
@@ -83,6 +85,10 @@ export class ZonalDutyRegisterComponent implements OnInit, OnDestroy {
   'FasTag',
   'InvoiceInterstateTax',
   'DutyExpenseChargeTotal',
+  'SubTotal',
+  'GSTAmount',
+  'GSTType',
+  'InvoiceTotalAmountAfterGST',
   'DSVerifyStatus',
   'GoodForBilling',
   'DSStatus',
@@ -95,14 +101,15 @@ export class ZonalDutyRegisterComponent implements OnInit, OnDestroy {
   'ReservationCreatedBy',
   'AllotmentBy',
   'SupplierID',
-  'SupplierName',  
+  'SupplierName',
+  'DSClosedBy',
+  'DutySlipImage',
   'ClosingDate',
+  'RunningDetails',
   'ClosureMethod',
   'PickupAddress',
   'PickupAddressDetails',
-  'DropOffAddress',
-  'DSClosedBy',
-  'DutySlipImage',
+  'DropOffAddress'
 ];
 
   displayedColumns: string[] = [];
@@ -793,7 +800,7 @@ export class ZonalDutyRegisterComponent implements OnInit, OnDestroy {
   //---------- Customer Group ----------
   InitCustomerGroup()
   {
-    this._generalService.getCustomerGroup().subscribe(
+    this.zonalDutyRegisterService.GetCustomerGroupByKAMForDutyRegister(this.IsKAMRole).subscribe(
     data=>
     {
       this.CustomerGroupList = data;
@@ -833,7 +840,7 @@ export class ZonalDutyRegisterComponent implements OnInit, OnDestroy {
   //---------- Customer ----------
   InitCustomer(customerGroupID?:any)
   {
-    this._generalService.GetCustomersForCP(customerGroupID).subscribe(
+    this.zonalDutyRegisterService.GetCustomerByKAMForDutyRegister(this.IsKAMRole).subscribe(
     data=>
     {
       this.CustomerList = data;
@@ -1025,7 +1032,7 @@ export class ZonalDutyRegisterComponent implements OnInit, OnDestroy {
   //---------- Dispatch Location ----------
   InitDispatchLocation()
   {
-    this._generalService.GetLocationHub().subscribe(
+    this.zonalDutyRegisterService.GetLocationDropDownForDutyRegister(this.IsKAMRole).subscribe(
     data=>
     {
       this.DispatchLocationList=data;

@@ -154,11 +154,10 @@
                                                 </mat-cell>
                                             </ng-container>
 
-                                            <!-- Booker Name -->
-                                            <ng-container matColumnDef="BookerName">
-                                                <mat-header-cell *matHeaderCellDef mat-sort-header>Booker Name</mat-header-cell>
+                                            <ng-container matColumnDef="BookerEmail">
+                                                <mat-header-cell *matHeaderCellDef mat-sort-header>Booker Email</mat-header-cell>
                                                 <mat-cell *matCellDef="let row">
-                                                    {{row.bookerName || 'N/A'}}
+                                                    {{row.bookerEmail || 'N/A'}}
                                                 </mat-cell>
                                             </ng-container>
 
@@ -167,6 +166,13 @@
                                                 <mat-header-cell *matHeaderCellDef mat-sort-header>Guest Name</mat-header-cell>
                                                 <mat-cell *matCellDef="let row">
                                                     {{row.guestName || 'N/A'}}
+                                                </mat-cell>
+                                            </ng-container>
+
+                                            <ng-container matColumnDef="GuestEmail">
+                                                <mat-header-cell *matHeaderCellDef mat-sort-header>Guest Email</mat-header-cell>
+                                                <mat-cell *matCellDef="let row">
+                                                    {{row.guestEmail || 'N/A'}}
                                                 </mat-cell>
                                             </ng-container>
 
@@ -206,6 +212,13 @@
                                                 <mat-header-cell *matHeaderCellDef mat-sort-header>Driver Name</mat-header-cell>
                                                 <mat-cell *matCellDef="let row">
                                                     {{row.driverName || 'N/A'}}
+                                                </mat-cell>
+                                            </ng-container>
+
+                                            <ng-container matColumnDef="DriverMobile">
+                                                <mat-header-cell *matHeaderCellDef mat-sort-header>Driver Mobile</mat-header-cell>
+                                                <mat-cell *matCellDef="let row">
+                                                    {{row.driverMobile || 'N/A'}}
                                                 </mat-cell>
                                             </ng-container>
 
@@ -449,6 +462,34 @@
                                                 </mat-cell>
                                             </ng-container>
 
+                                            <ng-container matColumnDef="SubTotal">
+                                                <mat-header-cell *matHeaderCellDef mat-sort-header>Subtotal</mat-header-cell>
+                                                <mat-cell *matCellDef="let row">
+                                                    {{row.subTotal || 'N/A'}}
+                                                </mat-cell>
+                                            </ng-container>
+
+                                            <ng-container matColumnDef="GSTAmount">
+                                                <mat-header-cell *matHeaderCellDef mat-sort-header>GST Amount</mat-header-cell>
+                                                <mat-cell *matCellDef="let row">
+                                                    {{row.gstAmount || 'N/A'}}
+                                                </mat-cell>
+                                            </ng-container>
+
+                                            <ng-container matColumnDef="GSTType">
+                                                <mat-header-cell *matHeaderCellDef mat-sort-header>GST Type</mat-header-cell>
+                                                <mat-cell *matCellDef="let row">
+                                                    {{row.gstType || 'N/A'}}
+                                                </mat-cell>
+                                            </ng-container>
+
+                                            <ng-container matColumnDef="InvoiceTotalAmountAfterGST">
+                                                <mat-header-cell *matHeaderCellDef mat-sort-header>Final Bill Amount</mat-header-cell>
+                                                <mat-cell *matCellDef="let row">
+                                                    {{row.invoiceTotalAmountAfterGST || 'N/A'}}
+                                                </mat-cell>
+                                            </ng-container>
+
                                             <!-- DS Verify -->
                                             <ng-container matColumnDef="DSVerifyStatus">
                                                 <mat-header-cell *matHeaderCellDef mat-sort-header>DS Verify Status</mat-header-cell>
@@ -555,6 +596,12 @@
                                                 <mat-header-cell *matHeaderCellDef mat-sort-header>Closing Date</mat-header-cell>
                                                 <mat-cell *matCellDef="let row">
                                                     {{row.closingDate || 'N/A'}}
+                                                </mat-cell>
+                                            </ng-container>
+                                            <ng-container matColumnDef="RunningDetails">
+                                                <mat-header-cell *matHeaderCellDef mat-sort-header>Running Details</mat-header-cell>
+                                                <mat-cell *matCellDef="let row">
+                                                    {{row.runningDetails || 'N/A'}}
                                                 </mat-cell>
                                             </ng-container>
                                             <ng-container matColumnDef="ClosureMethod">
