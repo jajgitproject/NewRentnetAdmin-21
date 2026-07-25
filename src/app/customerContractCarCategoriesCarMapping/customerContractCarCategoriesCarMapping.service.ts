@@ -59,12 +59,14 @@ export class CustomerContractCarCategoriesCarMappingService
   }
   add(advanceTable: CustomerContractCarCategoriesCarMapping) 
   {
+    advanceTable = this.sanitizePayload(advanceTable);
     advanceTable.customerContractCarCategoriesCarMappingID=-1;
     advanceTable.userID=this.generalService.getUserID();
     return this.httpClient.post<any>(this.API_URL , advanceTable);
   }
   update(advanceTable: CustomerContractCarCategoriesCarMapping)
   {
+    advanceTable = this.sanitizePayload(advanceTable);
     advanceTable.userID=this.generalService.getUserID();
     return this.httpClient.put<any>(this.API_URL , advanceTable);
   
@@ -73,5 +75,37 @@ export class CustomerContractCarCategoriesCarMappingService
   {
     let userID = this.generalService.getUserID();
     return this.httpClient.delete(this.API_URL + '/'+ customerContractCarCategoriesCarMappingID + '/'+ userID);
+  }
+
+  private sanitizePayload(raw: any): any {
+    const toIntOrNull = (v: any) => {
+      if (v === null || v === undefined || v === '') return null;
+      const n = Number(v);
+      return Number.isFinite(n) ? n : null;
+    };
+    const toInt = (v: any, fallback: number = 0) => {
+      if (v === null || v === undefined || v === '') return fallback;
+      const n = Number(v);
+      return Number.isFinite(n) ? n : fallback;
+    };
+    const toBool = (v: any, fallback: boolean = true) => {
+      if (v === null || v === undefined || v === '') return fallback;
+      if (typeof v === 'boolean') return v;
+      if (v === 'true' || v === 1 || v === '1') return true;
+      if (v === 'false' || v === 0 || v === '0') return false;
+      return fallback;
+    };
+
+    return {
+      ...raw,
+      customerContractCarCategoriesCarMappingID: toInt(raw.customerContractCarCategoriesCarMappingID, -1),
+      customerContractCarCategoryID: toInt(raw.customerContractCarCategoryID),
+      customerContractID: toInt(raw.customerContractID),
+      vehicleID: toInt(raw.vehicleID),
+      mileage: toIntOrNull(raw.mileage),
+      activationStatus: toBool(raw.activationStatus, true),
+      customerVehicleName: raw.customerVehicleName || '',
+      customerVehicleCodeForIntegration: raw.customerVehicleCodeForIntegration || '',
+    };
   }
 }
