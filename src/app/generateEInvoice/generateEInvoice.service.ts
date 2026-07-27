@@ -84,5 +84,13 @@ export class GenerateEInvoiceService {
     });
   }
 
+  hasInvoiceErrors(invoiceNumber: string): Observable<{ hasErrors?: boolean; HasErrors?: boolean }> {
+    const normalized = (invoiceNumber || '').trim().replace(/-/g, '/');
+    return this.httpClient.post<{ hasErrors?: boolean; HasErrors?: boolean }>(
+      this.generalService.BaseURL + 'financeDashboard/hasInvoiceErrors',
+      { invoiceNumber: normalized, InvoiceNumber: normalized }
+    );
+  }
+
 
 }

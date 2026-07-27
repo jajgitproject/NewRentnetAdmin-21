@@ -260,6 +260,62 @@ export class CreditNoteHomeComponent implements OnInit {
     }
   }
 
+  private hasCreditNoteNumberFilter(): boolean {
+    const value = (this.SearchCreditNoteNumber ?? '').trim();
+    return value !== '' && value.toLowerCase() !== 'null';
+  }
+
+  private runSearchAfterFinanceErrorCheck(searchFn: () => void) {
+    if (!this.hasCreditNoteNumberFilter()) {
+      searchFn();
+      return;
+    }
+
+    const creditNoteNo = (this.SearchCreditNoteNumber ?? '').trim();
+    this.creditNoteHomeService.hasCreditNoteErrors(creditNoteNo).subscribe(
+      (result) => {
+        const hasErrors = !!(result?.hasErrors ?? result?.HasErrors);
+        if (hasErrors) {
+          this.dataSource = null;
+          Swal.fire({
+            title: 'Credit Note Has Errors',
+            icon: 'warning'
+          });
+          return;
+        }
+        searchFn();
+      },
+      () => {
+        searchFn();
+      }
+    );
+  }
+
+  private showCreditNoteHasErrorsIfNeeded(data: any): void {
+    const rows = Array.isArray(data) ? data : [];
+    if (rows.length > 0 || !this.hasCreditNoteNumberFilter()) {
+      this.dataSource = data ?? null;
+      return;
+    }
+
+    const creditNoteNo = (this.SearchCreditNoteNumber ?? '').trim();
+    this.creditNoteHomeService.hasCreditNoteErrors(creditNoteNo).subscribe(
+      (result) => {
+        const hasErrors = !!(result?.hasErrors ?? result?.HasErrors);
+        this.dataSource = null;
+        if (hasErrors) {
+          Swal.fire({
+            title: 'Credit Note Has Errors',
+            icon: 'warning'
+          });
+        }
+      },
+      () => {
+        this.dataSource = null;
+      }
+    );
+  }
+
   public loadData() 
   {
     if(this.SearchFromDate!=="")
@@ -285,15 +341,17 @@ export class CreditNoteHomeComponent implements OnInit {
         this.searchTerm = '';
         break;
     }
-    this.creditNoteHomeService.getTableData(this.customer.value,this.customerGroup.value,this.SearchBillNo.replace(/\//g, '-'),
-    this.searchApprovalStatus,this.SearchCreditNoteNumber.replace(/\//g, '-'),this.SearchBranch.value,this.SearchFromDate,
-    this.SearchToDate,this.SearchType,this.PageNumber).subscribe
-      (
-        data => {
-          this.dataSource = data;
-        },
-        (error: HttpErrorResponse) => { this.dataSource = null; }
-      );
+    this.runSearchAfterFinanceErrorCheck(() => {
+      this.creditNoteHomeService.getTableData(this.customer.value,this.customerGroup.value,this.SearchBillNo.replace(/\//g, '-'),
+      this.searchApprovalStatus,this.SearchCreditNoteNumber.replace(/\//g, '-'),this.SearchBranch.value,this.SearchFromDate,
+      this.SearchToDate,this.SearchType,this.PageNumber).subscribe
+        (
+          data => {
+            this.showCreditNoteHasErrorsIfNeeded(data);
+          },
+          (error: HttpErrorResponse) => { this.dataSource = null; }
+        );
+    });
   }
 
   showNotification(colorName, text, placementFrom, placementAlign) {
@@ -344,13 +402,15 @@ export class CreditNoteHomeComponent implements OnInit {
       this.sortingData = 1;
       this.sortType = "Descending";
     }
-    this.creditNoteHomeService.getTableDataSort(this.customer.value,this.customerGroup.value,this.SearchBillNo.replace(/\//g, '-'),this.searchApprovalStatus,this.SearchCreditNoteNumber.replace(/\//g, '-'),this.SearchBranch.value,this.SearchFromDate,this.SearchToDate,this.SearchType,this.PageNumber, coloumName.active, this.sortType).subscribe
-    (
-      data => {
-        this.dataSource = data;
-      },
-      (error: HttpErrorResponse) => { this.dataSource = null; }
-    );
+    this.runSearchAfterFinanceErrorCheck(() => {
+      this.creditNoteHomeService.getTableDataSort(this.customer.value,this.customerGroup.value,this.SearchBillNo.replace(/\//g, '-'),this.searchApprovalStatus,this.SearchCreditNoteNumber.replace(/\//g, '-'),this.SearchBranch.value,this.SearchFromDate,this.SearchToDate,this.SearchType,this.PageNumber, coloumName.active, this.sortType).subscribe
+      (
+        data => {
+          this.showCreditNoteHasErrorsIfNeeded(data);
+        },
+        (error: HttpErrorResponse) => { this.dataSource = null; }
+      );
+    });
   }
   
  editCall(row) {

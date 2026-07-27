@@ -362,6 +362,18 @@ const routes: Routes = [
       },
 
       {
+        path: 'bookingMis',
+        loadChildren: () =>
+          import('./bookingMis/bookingMis.module').then(
+            (m) => m.BookingMisModule
+          ),
+        data: {
+          requiredPageKey: 'Booking MIS',
+          alternatePageKeys: ['bookingMis', 'Booking MIS'],
+        },
+      },
+
+      {
         path: 'creditNoteDutyAdjustment',
         loadChildren: () =>
           import('./creditNoteDutyAdjustment/creditNoteDutyAdjustment.module').then(
@@ -488,6 +500,18 @@ const routes: Routes = [
           import('./creditNoteManagement/creditNoteManagement.module').then(
             (m) => m.CreditNoteManagementModule
           )
+      },
+
+      {
+        path: 'creditNoteMis',
+        loadChildren: () =>
+          import('./creditNoteMis/creditNoteMis.module').then(
+            (m) => m.CreditNoteMisModule
+          ),
+        data: {
+          requiredPageKey: 'Credit Note MIS',
+          alternatePageKeys: ['creditNoteMis', 'Credit Note MIS'],
+        },
       },
 
       {

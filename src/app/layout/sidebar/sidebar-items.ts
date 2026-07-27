@@ -165,6 +165,18 @@ export const ROUTES: RouteInfo[] = [
         isAccess: false
       },
       {
+        path: 'bookingMis',
+        title: 'Booking MIS',
+        pageKey: 'Booking MIS',
+        moduleName: 'bookingMis',
+        alternateAccessPageKeys: ['bookingMis', 'Booking MIS'],
+        icon: 'fas fa-file-export',
+        class: '',
+        groupTitle: false,
+        submenu: [],
+        isAccess: false
+      },
+      {
         path: 'employeeLoginMIS',
         title: 'Employee Login MIS',
         pageKey: 'Employee Login MIS',
@@ -576,6 +588,19 @@ export const ROUTES: RouteInfo[] = [
         title: 'Credit Note Management',
         moduleName: 'creditNoteManagement',
         icon: 'fas fa-file-invoice',
+        class: '',
+        groupTitle: false,
+        submenu: [],
+        isAccess: false
+      },
+
+      {
+        path: 'creditNoteMis',
+        title: 'Credit Note MIS',
+        pageKey: 'Credit Note MIS',
+        moduleName: 'creditNoteMis',
+        alternateAccessPageKeys: ['creditNoteMis', 'Credit Note MIS'],
+        icon: 'fas fa-file-export',
         class: '',
         groupTitle: false,
         submenu: [],
