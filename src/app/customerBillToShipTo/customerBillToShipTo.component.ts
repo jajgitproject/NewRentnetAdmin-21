@@ -21,6 +21,8 @@ import { FormDialogComponent } from './dialogs/form-dialog/form-dialog.component
 })
 export class CustomerBillToShipToComponent implements OnInit {
   displayedColumns = [
+    'headInBill',
+    'shipToCompany',
     'address1',
     'stateName',
     'cityName',
@@ -32,6 +34,9 @@ export class CustomerBillToShipToComponent implements OnInit {
     'actions',
   ];
 
+  headInBill = '';
+  shipToCompany = '';
+  headInBillOptions = ['Ship To', 'Business Area', 'Site Address'];
   dataSource: CustomerBillToShipTo[] | null = null;
   SearchID = 0;
   SearchActivationStatus: boolean = true;
@@ -126,7 +131,10 @@ export class CustomerBillToShipToComponent implements OnInit {
   addNew(): void {
     const dialogRef = this.dialog.open(FormDialogComponent, {
       data: {
-        advanceTable: new CustomerBillToShipTo({}),
+        advanceTable: new CustomerBillToShipTo({
+          headInBill: this.headInBill,
+          shipToCompany: this.shipToCompany,
+        }),
         action: 'add',
         CustomerID: this.Customer_ID,
         CustomerName: this.Customer_Name,

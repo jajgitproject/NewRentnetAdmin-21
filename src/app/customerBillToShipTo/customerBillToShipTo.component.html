@@ -24,6 +24,32 @@
         <div class="card">
           <div class="body">
             <div class="materialTableHeader">
+              <div class="row top-config-row">
+                <div class="col-lg-3 col-md-6">
+                  <mat-form-field
+                    class="example-full-width top-config-field"
+                    appearance="outline"
+                    floatLabel="always"
+                  >
+                    <mat-label>Head In Bill</mat-label>
+                    <mat-select [(ngModel)]="headInBill" required>
+                      <mat-option *ngFor="let option of headInBillOptions" [value]="option">
+                        {{ option }}
+                      </mat-option>
+                    </mat-select>
+                  </mat-form-field>
+                </div>
+                <div class="col-lg-3 col-md-6">
+                  <mat-form-field
+                    class="example-full-width top-config-field"
+                    appearance="outline"
+                    floatLabel="always"
+                  >
+                    <mat-label>Ship To Company</mat-label>
+                    <input matInput [(ngModel)]="shipToCompany" required maxlength="50" />
+                  </mat-form-field>
+                </div>
+              </div>
               <div class="row search-header-row">
                 <div class="col-lg-6 d-flex align-items-center">
                   <mat-form-field
@@ -54,6 +80,14 @@
 
             <div class="table-responsive" *ngIf="dataSource">
               <table mat-table [dataSource]="dataSource" class="w-100">
+                <ng-container matColumnDef="headInBill">
+                  <th mat-header-cell *matHeaderCellDef>Head In Bill</th>
+                  <td mat-cell *matCellDef="let row">{{ row.headInBill || '-' }}</td>
+                </ng-container>
+                <ng-container matColumnDef="shipToCompany">
+                  <th mat-header-cell *matHeaderCellDef>Ship To Company</th>
+                  <td mat-cell *matCellDef="let row">{{ row.shipToCompany || '-' }}</td>
+                </ng-container>
                 <ng-container matColumnDef="address1">
                   <th mat-header-cell *matHeaderCellDef>Address 1</th>
                   <td mat-cell *matCellDef="let row">{{ row.address1 }}</td>

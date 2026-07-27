@@ -19,6 +19,8 @@ import { FormControl } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 import { GeneralBillDetails } from './generalBillDetails.model';
 import { GeneralBillDetailsService } from './generalBillDetails.service';
+import { CustomerBillToShipTo } from '../customerBillToShipTo/customerBillToShipTo.model';
+import { CustomerBillToShipToService } from '../customerBillToShipTo/customerBillToShipTo.service';
 @Component({
   standalone: false,
   selector: 'app-generalBillDetails',
@@ -40,11 +42,13 @@ export class GeneralBillDetailsComponent implements OnInit {
     invoiceTotalAmountAfterGSTInWords: ''
   };
   invoiceLogoUrl: string | null = null;
+  shipToDetails: CustomerBillToShipTo | null = null;
   constructor(
     public httpClient: HttpClient,
     public dialog: MatDialog,
     public route:ActivatedRoute,
     public generalBillDetailsService: GeneralBillDetailsService,
+    private customerBillToShipToService: CustomerBillToShipToService,
     private snackBar: MatSnackBar,
     public _generalService: GeneralService
   ) {}
@@ -73,8 +77,12 @@ export class GeneralBillDetailsComponent implements OnInit {
        this.dataSource = data;    
        console.log("dataSource",this.dataSource);   
        this.dataSourceForCalculate.invoiceTotalAmountAfterGSTInWords = this.convertNumberToWords(this.dataSource.invoiceTotalAmountAfterGST);
+       this.loadShipToDetails();
      },
-     (error: HttpErrorResponse) => { this.dataSource = null;}
+     (error: HttpErrorResponse) => {
+       this.dataSource = null;
+       this.shipToDetails = null;
+     }
    );
  }
 convertNumberToWords(amount: number): string {
@@ -121,13 +129,19 @@ convertNumberToWords(amount: number): string {
   return `${words} Only`;
 }
  print() {
-  const printContent = this.printSection?.nativeElement.innerHTML;
-  const originalContents = document.body.innerHTML;
+  const previousTitle = document.title;
+  const previousUrl = `${location.pathname}${location.search}${location.hash}`;
+  document.title = 'TAX INVOICE';
+  // Clear hash/query so browser print footer does not show the invoice URL.
+  history.replaceState(null, '', location.pathname || '/');
 
-  document.body.innerHTML = printContent;
+  const restore = () => {
+    document.title = previousTitle;
+    history.replaceState(null, '', previousUrl);
+    window.removeEventListener('afterprint', restore);
+  };
+  window.addEventListener('afterprint', restore);
   window.print();
-  document.body.innerHTML = originalContents;
-  window.location.reload(); // Reload to reset the original content
 }
 
   formatExtraKmsHrs(lineItem: any): string {
@@ -140,6 +154,149 @@ convertNumberToWords(amount: number): string {
     }
     const uom = (lineItem.uom ?? lineItem.UOM ?? '').toString().trim();
     return uom ? `${quantity} ${uom}` : `${quantity}`;
+  }
+
+  hasShipToDetails(): boolean {
+    return !!(this.shipToDetails?.shipToCompany);
+  }
+
+  getShipToCountryName(): string {
+    return (
+      this.shipToDetails?.countryName ||
+      this.dataSource?.shipToCountryName ||
+      this.dataSource?.customerCountryName ||
+      ''
+    );
+  }
+
+  private loadShipToDetails(): void {
+    this.shipToDetails = null;
+    if (!this.dataSource) {
+      return;
+    }
+
+    const inlineShipTo = this.extractInlineShipToDetails(this.dataSource);
+    if (inlineShipTo) {
+      this.shipToDetails = inlineShipTo;
+      return;
+    }
+
+    const shipToId = this.getShipToIdFromSource(this.dataSource);
+    if (shipToId) {
+      this.fetchShipToRecord(shipToId);
+      return;
+    }
+
+    this.generalBillDetailsService
+      .getInvoiceBillToShipToConfigId(
+        Number(this.invoiceID || this.dataSource.invoiceID),
+        this.dataSource.customerName || this.dataSource.billingName
+      )
+      .subscribe({
+        next: (resolvedId) => {
+          if (resolvedId) {
+            this.fetchShipToRecord(resolvedId);
+          }
+        },
+        error: () => {
+          this.shipToDetails = null;
+        },
+      });
+  }
+
+  private getShipToIdFromSource(source: any): number {
+    return Number(
+      source?.customerConfigurationBillToShipToID ||
+      source?.CustomerConfigurationBillToShipToID ||
+      0
+    );
+  }
+
+  private fetchShipToRecord(shipToId: number): void {
+    this.customerBillToShipToService.getById(shipToId).subscribe({
+      next: (data) => {
+        this.shipToDetails = data ? new CustomerBillToShipTo(data) : null;
+      },
+      error: () => {
+        this.loadShipToDetailsByCustomer(shipToId);
+      },
+    });
+  }
+
+  private loadShipToDetailsByCustomer(shipToId: number): void {
+    const customerID = Number(this.dataSource?.customerID || 0);
+    if (!customerID) {
+      this.shipToDetails = null;
+      return;
+    }
+
+    this.customerBillToShipToService.getTableData(0, customerID, null, 0).subscribe({
+      next: (data) => {
+        const record = this.pickShipToRecord(data, shipToId);
+        this.shipToDetails = record ? new CustomerBillToShipTo(record) : null;
+      },
+      error: () => {
+        this.shipToDetails = null;
+      },
+    });
+  }
+
+  private pickShipToRecord(
+    data: any,
+    shipToId: number,
+    allowSingleResult = false
+  ): any {
+    if (!data) {
+      return null;
+    }
+
+    if (!Array.isArray(data)) {
+      const recordId = Number(
+        data.customerConfigurationBillToShipToID ||
+        data.CustomerConfigurationBillToShipToID ||
+        0
+      );
+      return recordId === shipToId ? data : null;
+    }
+
+    const match = data.find(
+      (item) =>
+        Number(
+          item?.customerConfigurationBillToShipToID ||
+          item?.CustomerConfigurationBillToShipToID
+        ) === shipToId
+    );
+    if (match) {
+      return match;
+    }
+
+    return allowSingleResult && data.length === 1 ? data[0] : null;
+  }
+
+  private extractInlineShipToDetails(source: any): CustomerBillToShipTo | null {
+    const nested =
+      source.customerConfigurationBillToShipTo ||
+      source.billToShipTo ||
+      source.shipTo;
+
+    if (nested?.shipToCompany || nested?.ShipToCompany) {
+      return new CustomerBillToShipTo(nested);
+    }
+
+    if (source.shipToCompany || source.ShipToCompany) {
+      return new CustomerBillToShipTo({
+        shipToCompany: source.shipToCompany || source.ShipToCompany,
+        address1: source.shipToAddress1 || source.address1,
+        address2: source.shipToAddress2 || source.address2,
+        cityName: source.shipToCityName || source.cityName,
+        stateName: source.shipToStateName || source.stateName,
+        countryName: source.shipToCountryName || source.countryName,
+        pincode: source.shipToPincode || source.pincode,
+        gstno: source.shipToGstno || source.shipToGSTNO || source.gstno || source.gSTNO,
+      });
+    }
+
+    return null;
   }
 
 }

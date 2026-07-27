@@ -25,6 +25,7 @@ import { OpenPopUpDialogComponent} from '../../openPopUp/openPopUp.component'
 import { CustomerCityModel } from 'src/app/customerConfigurationInvoicing/customerConfigurationInvoicingDropDown.model';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { DutySACCDropDown } from 'src/app/dutySAC/dutySACDropDownModel';
+import { CustomerBillToShipTo } from 'src/app/customerBillToShipTo/customerBillToShipTo.model';
 
 @Component({
   standalone: false,
@@ -93,6 +94,19 @@ export class FormDialogComponent
   organizationalEntityID: any;
 
   public SACList: DutySACCDropDown[] = [];
+
+  headInBillOptions = ['Ship To', 'Business Area', 'Site Address'];
+  billToShipToRecords: CustomerBillToShipTo[] = [];
+  billToShipToStateOptions: { stateID: number; stateName: string }[] = [];
+  billToShipToCityOptions: { cityID: number; cityName: string }[] = [];
+  billToShipToDisplay = {
+    shipToCompany: '',
+    address1: '',
+    address2: '',
+    pincode: '',
+    gstno: '',
+  };
+  showBillToShipToSection = false;
   
   constructor(
   public dialogRef: MatDialogRef<FormDialogComponent>, 
@@ -168,7 +182,15 @@ export class FormDialogComponent
       passengerID: [this.advanceTable.passengerID],
       passengerName: [this.advanceTable.passengerName],
       hsn: [this.advanceTable.hsn],
-      isSEZ: [this.advanceTable.isSEZ]
+      isSEZ: [this.advanceTable.isSEZ],
+      headInBill: [null],
+      billToShipToStateID: [null],
+      billToShipToCityID: [null],
+      customerConfigurationBillToShipToID: [
+        this.advanceTable.customerConfigurationBillToShipToID ||
+          this.advanceTable.CustomerConfigurationBillToShipToID ||
+          null,
+      ],
     });
   }
 
@@ -186,6 +208,21 @@ export class FormDialogComponent
     //this.InitCity();
     this.InitIGSTPercentage();
     this.InitCSGSTPercentage();
+
+    if (this.customerID) {
+      const savedShipToId = Number(
+        this.advanceTable?.customerConfigurationBillToShipToID ||
+          this.advanceTable?.CustomerConfigurationBillToShipToID ||
+          0
+      );
+      if (savedShipToId > 0) {
+        this.advanceTableForm.patchValue(
+          { customerConfigurationBillToShipToID: savedShipToId },
+          { emitEvent: false }
+        );
+      }
+      this.loadBillToShipToRecords(this.customerID);
+    }
     
     // Watch for invoice date changes
     this.advanceTableForm.get('invoiceDate')?.valueChanges.subscribe((invoiceDate) => {
@@ -380,8 +417,9 @@ export class FormDialogComponent
     this.passengerID = null;
     this.advanceTableForm.get('passengerName')?.enable({ emitEvent: false });
     
+    this.clearBillToShipToSection();
     this.InitState(this.customerID);
-    // Auto-populate customer address details
+    this.loadBillToShipToRecords(this.customerID);
    // this.fetchCustomerAddressDetails(customerID);
   }
 
@@ -532,6 +570,8 @@ export class FormDialogComponent
     this.passengerID = null;
     this.advanceTableForm.get('passengerName')?.disable({ emitEvent: false });
 
+    this.clearBillToShipToSection();
+
     // Clear validation errors
     this.clearAddressValidationErrors();
     
@@ -604,6 +644,343 @@ export class FormDialogComponent
         this.applyCreatedGuest(result);
       }
     });
+  }
+
+  compareById = (a: any, b: any): boolean => {
+    if (a == null && b == null) {
+      return true;
+    }
+    if (a == null || b == null) {
+      return false;
+    }
+    return Number(a) === Number(b);
+  };
+
+  private setBillToShipToValidators(enabled: boolean): void {
+    const fields = ['headInBill', 'billToShipToStateID', 'billToShipToCityID', 'customerConfigurationBillToShipToID'];
+    fields.forEach((name) => {
+      const control = this.advanceTableForm.get(name);
+      if (!control) {
+        return;
+      }
+      if (enabled) {
+        control.setValidators([Validators.required]);
+      } else {
+        control.clearValidators();
+      }
+      control.updateValueAndValidity({ emitEvent: false });
+    });
+  }
+
+  private normalizeBillToShipToRecord(raw: any): CustomerBillToShipTo {
+    return new CustomerBillToShipTo(raw);
+  }
+
+  loadBillToShipToRecords(customerID: number): void {
+    if (!customerID) {
+      this.clearBillToShipToSection();
+      return;
+    }
+
+    this.advanceTableService.getBillToShipToForCustomer(customerID).subscribe({
+      next: (data) => {
+        this.billToShipToRecords = (data || [])
+          .map((item) => this.normalizeBillToShipToRecord(item))
+          .filter(
+            (item) =>
+              this.isActiveBillToShipToRecord(item) &&
+              Number(item.customerID) === Number(customerID)
+          );
+        this.showBillToShipToSection = this.billToShipToRecords.length > 0;
+        // Ship to is optional — never block save when empty / deselected.
+        this.setBillToShipToValidators(false);
+        if (this.showBillToShipToSection) {
+          this.restoreBillToShipToSelection();
+        } else {
+          this.clearBillToShipToFormFields();
+        }
+      },
+      error: () => {
+        this.billToShipToRecords = [];
+        this.clearBillToShipToSection();
+      },
+    });
+  }
+
+  private restoreBillToShipToSelection(): void {
+    const selectedId = Number(
+      this.advanceTableForm.get('customerConfigurationBillToShipToID')?.value ||
+        this.advanceTable?.customerConfigurationBillToShipToID ||
+        this.advanceTable?.CustomerConfigurationBillToShipToID ||
+        0
+    );
+    if (!selectedId) {
+      return;
+    }
+
+    const match = this.billToShipToRecords.find(
+      (item) => Number(item.customerConfigurationBillToShipToID) === selectedId
+    );
+    if (match) {
+      this.applyBillToShipToSelection(match);
+      return;
+    }
+
+    this.advanceTableService.getBillToShipToById(selectedId).subscribe({
+      next: (data) => {
+        if (!data) {
+          return;
+        }
+        const record = this.normalizeBillToShipToRecord(data);
+        if (
+          !this.billToShipToRecords.some(
+            (item) =>
+              Number(item.customerConfigurationBillToShipToID) ===
+              Number(record.customerConfigurationBillToShipToID)
+          )
+        ) {
+          this.billToShipToRecords = [...this.billToShipToRecords, record];
+        }
+        this.applyBillToShipToSelection(record);
+      },
+    });
+  }
+
+  private applyBillToShipToSelection(match: CustomerBillToShipTo): void {
+    this.advanceTableForm.patchValue(
+      {
+        headInBill: match.headInBill || null,
+        customerConfigurationBillToShipToID: match.customerConfigurationBillToShipToID,
+      },
+      { emitEvent: false }
+    );
+    this.buildBillToShipToStateOptions();
+    if (
+      match.stateID &&
+      !this.billToShipToStateOptions.some((option) => option.stateID === Number(match.stateID))
+    ) {
+      this.billToShipToStateOptions = [
+        ...this.billToShipToStateOptions,
+        { stateID: Number(match.stateID), stateName: match.stateName || '' },
+      ].sort((a, b) => a.stateName.localeCompare(b.stateName));
+    }
+
+    this.advanceTableForm.patchValue(
+      {
+        billToShipToStateID: Number(match.stateID) || null,
+      },
+      { emitEvent: false }
+    );
+
+    this.buildBillToShipToCityOptions();
+    if (
+      match.cityID &&
+      !this.billToShipToCityOptions.some((option) => option.cityID === Number(match.cityID))
+    ) {
+      this.billToShipToCityOptions = [
+        ...this.billToShipToCityOptions,
+        { cityID: Number(match.cityID), cityName: match.cityName || '' },
+      ].sort((a, b) => a.cityName.localeCompare(b.cityName));
+    }
+
+    this.advanceTableForm.patchValue(
+      {
+        billToShipToCityID: Number(match.cityID) || null,
+      },
+      { emitEvent: false }
+    );
+    this.applySelectedBillToShipToRecord(match);
+  }
+
+  clearBillToShipToSection(): void {
+    this.showBillToShipToSection = false;
+    this.billToShipToRecords = [];
+    this.clearBillToShipToFormFields();
+  }
+
+  private clearBillToShipToFormFields(): void {
+    this.billToShipToStateOptions = [];
+    this.billToShipToCityOptions = [];
+    this.billToShipToDisplay = {
+      shipToCompany: '',
+      address1: '',
+      address2: '',
+      pincode: '',
+      gstno: '',
+    };
+    this.advanceTableForm.patchValue(
+      {
+        headInBill: null,
+        billToShipToStateID: null,
+        billToShipToCityID: null,
+        customerConfigurationBillToShipToID: null,
+      },
+      { emitEvent: false }
+    );
+    this.setBillToShipToValidators(false);
+  }
+
+  onHeadInBillChange(): void {
+    this.billToShipToStateOptions = [];
+    this.billToShipToCityOptions = [];
+    this.billToShipToDisplay = {
+      shipToCompany: '',
+      address1: '',
+      address2: '',
+      pincode: '',
+      gstno: '',
+    };
+    this.advanceTableForm.patchValue(
+      {
+        billToShipToStateID: null,
+        billToShipToCityID: null,
+        customerConfigurationBillToShipToID: null,
+      },
+      { emitEvent: false }
+    );
+    this.buildBillToShipToStateOptions();
+  }
+
+  onBillToShipToStateChange(): void {
+    this.billToShipToCityOptions = [];
+    this.billToShipToDisplay = {
+      shipToCompany: '',
+      address1: '',
+      address2: '',
+      pincode: '',
+      gstno: '',
+    };
+    this.advanceTableForm.patchValue(
+      {
+        billToShipToCityID: null,
+        customerConfigurationBillToShipToID: null,
+      },
+      { emitEvent: false }
+    );
+    this.buildBillToShipToCityOptions();
+  }
+
+  onBillToShipToCityChange(): void {
+    const record = this.findSelectedBillToShipToRecord();
+    if (record) {
+      this.applySelectedBillToShipToRecord(record);
+      return;
+    }
+
+    this.billToShipToDisplay = {
+      shipToCompany: '',
+      address1: '',
+      address2: '',
+      pincode: '',
+      gstno: '',
+    };
+    this.advanceTableForm.patchValue({ customerConfigurationBillToShipToID: null }, { emitEvent: false });
+  }
+
+  private isActiveBillToShipToRecord(item: CustomerBillToShipTo): boolean {
+    const status = item?.activationStatus;
+    if (status === false || status === 0 || status === '0' || status === 'false') {
+      return false;
+    }
+    if (status === true || status === 1 || status === '1' || status === 'true') {
+      return true;
+    }
+    // Active-only API results may omit ActivationStatus in the payload.
+    return true;
+  }
+
+  private getBillToShipToRecordsForCustomerAndHeadInBill(headInBill?: string, stateID?: number): CustomerBillToShipTo[] {
+    const selectedHeadInBill = (headInBill ?? this.advanceTableForm.get('headInBill')?.value ?? '').trim();
+    const selectedId = Number(this.advanceTableForm.get('customerConfigurationBillToShipToID')?.value || 0);
+    if (!this.customerID || !selectedHeadInBill) {
+      return [];
+    }
+
+    return this.billToShipToRecords.filter((item) => {
+      const isSelectedSaved =
+        selectedId > 0 && Number(item.customerConfigurationBillToShipToID) === selectedId;
+      if (!isSelectedSaved && !this.isActiveBillToShipToRecord(item)) {
+        return false;
+      }
+      if (Number(item.customerID) !== Number(this.customerID)) {
+        return false;
+      }
+      if ((item.headInBill || '').trim() !== selectedHeadInBill) {
+        return false;
+      }
+      if (stateID && Number(item.stateID) !== Number(stateID)) {
+        return false;
+      }
+      return true;
+    });
+  }
+
+  private buildBillToShipToStateOptions(): void {
+    const headInBill = (this.advanceTableForm.get('headInBill')?.value || '').trim();
+    if (!this.customerID || !headInBill) {
+      this.billToShipToStateOptions = [];
+      return;
+    }
+
+    const stateMap = new Map<number, string>();
+    this.getBillToShipToRecordsForCustomerAndHeadInBill(headInBill).forEach((item) => {
+      if (Number(item.stateID) > 0) {
+        stateMap.set(Number(item.stateID), item.stateName || '');
+      }
+    });
+    this.billToShipToStateOptions = Array.from(stateMap.entries())
+      .map(([stateID, stateName]) => ({ stateID, stateName }))
+      .sort((a, b) => a.stateName.localeCompare(b.stateName));
+  }
+
+  private buildBillToShipToCityOptions(): void {
+    const headInBill = (this.advanceTableForm.get('headInBill')?.value || '').trim();
+    const stateID = Number(this.advanceTableForm.get('billToShipToStateID')?.value || 0);
+    if (!this.customerID || !headInBill || !stateID) {
+      this.billToShipToCityOptions = [];
+      return;
+    }
+
+    const cityMap = new Map<number, string>();
+    this.getBillToShipToRecordsForCustomerAndHeadInBill(headInBill, stateID).forEach((item) => {
+      if (Number(item.cityID) > 0) {
+        cityMap.set(Number(item.cityID), item.cityName || '');
+      }
+    });
+    this.billToShipToCityOptions = Array.from(cityMap.entries())
+      .map(([cityID, cityName]) => ({ cityID, cityName }))
+      .sort((a, b) => a.cityName.localeCompare(b.cityName));
+  }
+
+  private findSelectedBillToShipToRecord(): CustomerBillToShipTo | null {
+    const headInBill = (this.advanceTableForm.get('headInBill')?.value || '').trim();
+    const stateID = Number(this.advanceTableForm.get('billToShipToStateID')?.value || 0);
+    const cityID = Number(this.advanceTableForm.get('billToShipToCityID')?.value || 0);
+    if (!this.customerID || !headInBill || !stateID || !cityID) {
+      return null;
+    }
+
+    const matches = this.getBillToShipToRecordsForCustomerAndHeadInBill(headInBill, stateID).filter(
+      (item) => Number(item.cityID) === cityID
+    );
+    return matches.length ? matches[0] : null;
+  }
+
+  private applySelectedBillToShipToRecord(record: CustomerBillToShipTo): void {
+    this.billToShipToDisplay = {
+      shipToCompany: record.shipToCompany || '',
+      address1: record.address1 || '',
+      address2: record.address2 || '',
+      pincode: record.pincode || '',
+      gstno: record.gstno || record.gSTNO || '',
+    };
+    this.advanceTableForm.patchValue(
+      {
+        customerConfigurationBillToShipToID: record.customerConfigurationBillToShipToID,
+      },
+      { emitEvent: false }
+    );
+    this.advanceTableForm.get('customerConfigurationBillToShipToID')?.updateValueAndValidity({ emitEvent: false });
   }
 
   //------------- State's Drop Down -------------

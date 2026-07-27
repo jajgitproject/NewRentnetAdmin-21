@@ -13,6 +13,18 @@ export class CustomerBillToShipToService {
     this.API_URL = generalService.BaseURL + 'customerBillToShipTo';
   }
 
+  getById(customerConfigurationBillToShipToID: number): Observable<any> {
+    return this.httpClient.get(
+      `${this.API_URL}/${customerConfigurationBillToShipToID}`
+    );
+  }
+
+  getByCustomerConfigurationBillToShipToID(
+    customerConfigurationBillToShipToID: number
+  ): Observable<any> {
+    return this.getById(customerConfigurationBillToShipToID);
+  }
+
   getTableData(
     searchID: number,
     customerID: number,
@@ -48,6 +60,10 @@ export class CustomerBillToShipToService {
         : Number(model.customerConfigurationBillToShipToID),
       customerID: Number(model.customerID),
       userID: Number(this.generalService.getUserID()),
+      headInBill: (model.headInBill || '').trim(),
+      shipToCompany: (model.shipToCompany || '').trim(),
+      HeadInBill: (model.headInBill || '').trim(),
+      ShipToCompany: (model.shipToCompany || '').trim(),
       address1: model.address1 || '',
       address2: model.address2 || '',
       stateID: Number(model.stateID),

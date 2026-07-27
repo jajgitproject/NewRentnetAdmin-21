@@ -29,6 +29,7 @@ export class FormDialogComponent implements OnInit {
   CityList: CityDropDown[] = [];
   private editStateID: number | null = null;
   private editCityID: number | null = null;
+  headInBillOptions = ['Ship To', 'Business Area', 'Site Address'];
 
   constructor(
     public dialogRef: MatDialogRef<FormDialogComponent>,
@@ -50,7 +51,7 @@ export class FormDialogComponent implements OnInit {
       this.editCityID = this.toId(this.advanceTable.cityID);
     } else {
       this.dialogTitle = 'Bill To / Ship To For';
-      this.advanceTable = new CustomerBillToShipTo({});
+      this.advanceTable = new CustomerBillToShipTo(data.advanceTable || {});
       this.advanceTable.activationStatus = true;
       this.advanceTable.customerID = this.CustomerID;
     }
@@ -67,6 +68,8 @@ export class FormDialogComponent implements OnInit {
     return this.fb.group({
       customerConfigurationBillToShipToID: [this.advanceTable.customerConfigurationBillToShipToID],
       customerID: [this.advanceTable.customerID || this.CustomerID],
+      headInBill: [this.advanceTable.headInBill, [Validators.required, Validators.maxLength(50)]],
+      shipToCompany: [this.advanceTable.shipToCompany, [Validators.required, Validators.maxLength(50)]],
       address1: [this.advanceTable.address1, [Validators.required]],
       address2: [this.advanceTable.address2],
       stateID: [null, [Validators.required]],
@@ -218,6 +221,20 @@ export class FormDialogComponent implements OnInit {
       });
       return;
     }
+    if (!payload.headInBill) {
+      this.snackBar.open('Head In Bill is required.', 'Close', {
+        duration: 4000,
+        panelClass: ['snackbar-danger'],
+      });
+      return;
+    }
+    if (!payload.shipToCompany) {
+      this.snackBar.open('Ship To Company is required.', 'Close', {
+        duration: 4000,
+        panelClass: ['snackbar-danger'],
+      });
+      return;
+    }
 
     this.saveDisabled = false;
 
@@ -279,6 +296,8 @@ export class FormDialogComponent implements OnInit {
       customerID: Number(this.CustomerID),
       stateID: Number(raw.stateID),
       cityID: Number(raw.cityID),
+      headInBill: (raw.headInBill || '').trim(),
+      shipToCompany: (raw.shipToCompany || '').trim(),
       address1: (raw.address1 || '').trim(),
       address2: (raw.address2 || '').trim(),
       pincode: (raw.pincode || '').trim(),

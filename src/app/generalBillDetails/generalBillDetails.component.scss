@@ -3,10 +3,26 @@
     display: none !important;
   }
 
+  @page {
+    size: A4 portrait;
+    margin: 0;
+  }
+
+  html,
   body {
+    margin: 0 !important;
+    padding: 0 !important;
+    background-color: white !important;
     -webkit-print-color-adjust: exact !important;
     print-color-adjust: exact !important;
-    background-color: white !important;
+  }
+
+  #invoiceContainer {
+    width: 210mm !important;
+    max-width: 210mm !important;
+    margin: 0 auto !important;
+    padding: 10mm !important;
+    box-sizing: border-box;
   }
 
   table {
@@ -23,7 +39,7 @@
 }
 
 .custom-table td {
-  padding: 15px;
+  padding: 4px 6px;
   vertical-align: middle;
 }
 

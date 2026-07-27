@@ -30,6 +30,18 @@ export class GenerateBillMainService
       this.generalService.BaseURL + "customerConfigurationInvoicing/GetIsSEZ/" + customerID + "/" + stateID + "/" + effectiveDate
     );
   }
+
+  getBillToShipToForCustomer(customerID: number): Observable<any[]> {
+    return this.httpClient.get<any[]>(
+      `${this.generalService.BaseURL}customerBillToShipTo/0/${customerID}/true/0/CustomerConfigurationBillToShipToID/Ascending`
+    );
+  }
+
+  getBillToShipToById(customerConfigurationBillToShipToID: number): Observable<any> {
+    return this.httpClient.get<any>(
+      `${this.generalService.BaseURL}customerBillToShipTo/${customerConfigurationBillToShipToID}`
+    );
+  }
   
   /** CRUD METHODS */
   getTableData(SearchCustomer:string, SearchInvoiceNumberWithPrefix:string,SearchGuset:string,SearchBillDate:string,SearchStartDate:string,SearchEndDate:string, SearchActivationStatus:boolean, PageNumber: number):  Observable<any> 
