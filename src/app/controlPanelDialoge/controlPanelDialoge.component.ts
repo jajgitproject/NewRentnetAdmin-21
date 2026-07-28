@@ -2939,7 +2939,14 @@ public getInvoiceNumber(item:any ,i: any)
           maxWidth: '96vw',
           data:
           {
-            advanceTable: item,
+            // Pass reservation-table Location Out Time explicitly (not DutySlip.locationOutTime).
+            advanceTable: {
+              ...item,
+              reservationLocationOutTime:
+                item?.reservationLocationOutTime ?? item?.ReservationLocationOutTime ?? null,
+              locationOutTime:
+                item?.reservationLocationOutTime ?? item?.ReservationLocationOutTime ?? item?.locationOutTime ?? null
+            },
             customerID: item.customerID,
             status: this.status
           }

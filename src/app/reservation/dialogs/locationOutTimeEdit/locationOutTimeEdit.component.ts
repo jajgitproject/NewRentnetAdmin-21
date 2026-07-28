@@ -2,13 +2,12 @@
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { Component, Inject, OnDestroy, OnInit } from '@angular/core';
 import { Subject } from 'rxjs';
-import { skip, takeUntil } from 'rxjs/operators';
-import { FormControl, Validators, FormGroup, FormBuilder } from '@angular/forms';
+import { takeUntil } from 'rxjs/operators';
+import { FormControl, FormGroup, FormBuilder } from '@angular/forms';
 import { MAT_DATE_LOCALE } from '@angular/material/core';
-import { formatDate } from '@angular/common';
 import { GeneralService } from '../../../general/general.service';
 import { ReservationService } from '../../reservation.service';
-import { Reservation, UpdatePickupModel } from '../../reservation.model';
+import { UpdatePickupModel } from '../../reservation.model';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import moment from 'moment';
 import { ControlPanelDetails } from 'src/app/controlPanelDesign/controlPanelDesign.model';
@@ -49,25 +48,19 @@ export class LocationOutTimeEditComponent implements OnInit, OnDestroy {
 
     this.dialogTitle = 'Update Location Out Time';
   this.advanceTableCP = data.advanceTable;
-  // status extraction (string or nested)
-  // this.status = this.extractStatus(data?.status);
-  // const normalized = (this.status || '').trim().toLowerCase();
-  // this.buttonDisabled = normalized !== 'changes allow';
   this.status = this.extractStatus(data?.status);
 
-// normalize (safe compare)
-const normalized = (this.status || '').trim().toLowerCase();
+  const normalized = (this.status || '').trim().toLowerCase();
 
-// Only block when status was supplied and is not "changes allow" (e.g. Control Panel Design omits status)
+  // Only block when status was supplied and is not "changes allow"
     this.buttonDisabled = normalized.length > 0 && normalized !== 'changes allow';
 
-// debug
     this.customerID = data.customerID;
-    this.date = this.advanceTableCP.pickup.pickupDate;
-    var date = this.date.split('T');
-    var endDate = date[0];
-    this.pickupDate = endDate;
-    this.onPickupDateChange(this.advanceTableCP.pickup.pickupDate)
+    this.date = this.advanceTableCP?.pickup?.pickupDate;
+    if (this.date) {
+      var date = String(this.date).split('T');
+      this.pickupDate = date[0];
+    }
     this.advanceTable = new UpdatePickupModel({})
     this.advanceTableForm = this.createContactForm();
   }
@@ -83,28 +76,80 @@ const normalized = (this.status || '').trim().toLowerCase();
   createContactForm(): FormGroup {
     return this.fb.group(
       {
-        locationOutTime: [this.advanceTableCP.locationOutTime],
-        reservationID: [this.advanceTableCP.reservationID]
+        locationOutTime: [this.resolveExistingLocationOutTime()],
+        reservationID: [this.advanceTableCP?.reservationID]
       });
   }
+
+  /**
+   * Prefer Reservation.LocationOutTime (reservationLocationOutTime).
+   * Control panel item.locationOutTime is DutySlip and is often empty before dispatch.
+   */
+  private resolveExistingLocationOutTime(): Date | null {
+    const raw =
+      (this.advanceTableCP as any)?.reservationLocationOutTime ??
+      (this.advanceTableCP as any)?.ReservationLocationOutTime ??
+      null;
+
+    return this.toOwlTimeDate(raw);
+  }
+
+  /** Parse API/control-panel time and normalize onto today so owl timer displays it. */
+  private toOwlTimeDate(raw: any): Date | null {
+    if (raw === null || raw === undefined || raw === '') {
+      return null;
+    }
+
+    let parsed: moment.Moment | null = null;
+
+    if (raw instanceof Date && !isNaN(raw.getTime())) {
+      parsed = moment(raw);
+    } else if (typeof raw === 'string' || typeof raw === 'number') {
+      parsed = moment(raw);
+      if (!parsed.isValid()) {
+        parsed = moment(raw, ['HH:mm:ss', 'HH:mm', 'h:mm A', 'hh:mm A'], true);
+      }
+    }
+
+    if (!parsed || !parsed.isValid()) {
+      return null;
+    }
+
+    const normalized = new Date();
+    normalized.setHours(parsed.hours(), parsed.minutes(), parsed.seconds(), 0);
+    return normalized;
+  }
+
   public ngOnInit(): void {
-    const rawPickupTime = this.advanceTableCP.pickup?.pickupTime;
-    let timeDateObject: Date;
-    if (rawPickupTime) {
-      timeDateObject = moment(rawPickupTime).toDate();
+    const existing = this.resolveExistingLocationOutTime();
+    if (existing) {
+      this.advanceTableForm.patchValue({ locationOutTime: existing });
     }
-    else {
-      timeDateObject = new Date();
+
+    // Reload Reservation.LocationOutTime from booking details (Reservation table).
+    const reservationID = this.advanceTableCP?.reservationID;
+    if (!reservationID) {
+      return;
     }
-    this.advanceTableForm.patchValue({ pickupTime: timeDateObject });
-    this.locationTimeSet(timeDateObject);
-    
-    this.advanceTableForm.get('pickupTime')?.valueChanges.pipe(takeUntil(this.destroy$)).subscribe((val: unknown) => {
-    console.log("pickupTime changed:", val); // debug
-    if (val) {
-      this.locationTimeSet(val as Date | string);
-    }
-  });
+    this.advanceTableService.getBookingDetails(reservationID)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(
+        (data: any) => {
+          const row = Array.isArray(data) ? data[0] : data;
+          const reservationTime = this.toOwlTimeDate(
+            row?.locationOutTime ?? row?.locationOutTimeString
+          );
+          if (reservationTime) {
+            this.advanceTableForm.patchValue({ locationOutTime: reservationTime });
+          }
+        },
+        () => { /* keep any value already resolved from dialog data */ }
+      );
+  }
+
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
   }
 
 
@@ -122,10 +167,11 @@ const normalized = (this.status || '').trim().toLowerCase();
   }
 
   public Put(): void {
-
     this.advanceTableForm.patchValue({ reservationID: this.advanceTableCP.reservationID });
-    this.advanceTableForm.patchValue({ dropOffTime: this.advanceTable.dropOffTime });
-    const payload = this.advanceTableForm.getRawValue();
+    const payload = {
+      reservationID: this.advanceTableCP.reservationID,
+      locationOutTime: this.advanceTableForm.get('locationOutTime')?.value,
+    };
     this.advanceTableService.updateLocationOutEdit(payload)
       .subscribe(
         response => {
@@ -165,51 +211,4 @@ const normalized = (this.status || '').trim().toLowerCase();
     this.isSubmitting = true;
     this.Put();
   }
-  locationTimeSet(event: Date | string | { pickupTime?: unknown }) {
-    const pickupDate = new Date(this.pickupDate);
-    const eventTime =
-      event && typeof event === 'object' && 'pickupTime' in event && event.pickupTime != null
-        ? new Date(event.pickupTime as string | number | Date)
-        : new Date(event as string | number | Date);
-    const combinedDateTime = new Date(pickupDate.getFullYear(), pickupDate.getMonth(), pickupDate.getDate(), eventTime.getHours(), eventTime.getMinutes());
-    combinedDateTime.setMinutes(combinedDateTime.getMinutes() - 90);
-    const locOutDateTime = new Date(combinedDateTime);
-  }
-  getETRDropOffTime() {
-    var pickupTime;
-    var pickupDate;
-    if (this.advanceTableForm.value.pickupTime === "" || this.advanceTableForm.value.pickupTime === undefined) {
-      pickupTime = null;
-    }
-    else {
-      pickupTime = moment(this.advanceTableForm.value.pickupTime).format('HH:mm');
-      pickupDate = moment(this.pickupDate).format('DD-MM-YYYY');
-    }
-    this.advanceTableService.getTimeForDropoffTime(this.advanceTableCP.package.packageID, pickupTime, pickupDate, this.contractID, this.advanceTableCP.vehicle.vehicleID, this.advanceTableCP.pickupCityID).pipe(takeUntil(this.destroy$)).subscribe(
-      (data: any) => {
-        if (data.packageType === 'Local On Demand' || data.packageType === 'Long Term Rental' || data.packageType === 'Outstation Lumpsum' || data.packageType === 'Outstation OneWay Trip' || data.packageType === 'Outstation Round Trip') {
-          this.advanceTable.dropOffTime = null;
-        }
-        else {
-          var dropOffTime = data.dropOffTime;
-          dropOffTime = moment(dropOffTime, 'HH:mm').toDate();
-          this.advanceTable.dropOffTime = dropOffTime;
-        }
-      });
-  }
-  onPickupDateChange(event: any) {
-    var date = event.split('T');
-    var endDate = date[0];
-    this._generalService.GetContractIDBasedOnDate(this.customerID, endDate).subscribe(
-      data => {
-        if (data) {
-          this.contractID = data;
-          this.getETRDropOffTime();
-        }
-      });
-  }
-
 }
-
-
-

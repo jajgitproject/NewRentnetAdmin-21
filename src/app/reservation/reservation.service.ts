@@ -184,18 +184,7 @@ export class ReservationService
     {
       advanceTable.pickupSpotTypeID=0;
     }
-    if(advanceTable.customerReservationFieldID=== "")
-    {
-      advanceTable.customerReservationFieldID=null;
-    }
-    if(advanceTable.fieldName=== "")
-    {
-      advanceTable.fieldName=null;
-    }
-    if(advanceTable.projectCode=== "")
-    {
-      advanceTable.projectCode=null;
-    }
+    this.normalizeCustomerSpecificFieldsPayload(advanceTable);
     if(advanceTable.pickupSpotID==="")
     {
       advanceTable.pickupSpotID=0;
@@ -287,18 +276,7 @@ export class ReservationService
     {
       advanceTable.pickupSpotTypeID=0;
     }
-    if(advanceTable.customerReservationFieldID=== "")
-    {
-      advanceTable.customerReservationFieldID=null;
-    }
-    if(advanceTable.fieldName=== "")
-    {
-      advanceTable.fieldName=null;
-    }
-    if(advanceTable.projectCode=== "")
-    {
-      advanceTable.projectCode=null;
-    }
+    this.normalizeCustomerSpecificFieldsPayload(advanceTable);
     if(advanceTable.pickupSpotID==="")
     {
       advanceTable.pickupSpotID=0;
@@ -380,6 +358,68 @@ export class ReservationService
         advanceTable.etrTimeString=this.generalService.getTimeApplicable(advanceTable.etrTime);
       }
     return this.httpClient.put<any>(this.API_URL+'/'+'UpdateReservationForEdit' , advanceTable);
+  }
+
+  /**
+   * Ensure CSF arrays + customerSpecificFields JSON are never wiped to null/"" before PUT.
+   * Backend UpdateReservationForEdit writes DBNull when CustomerReservationFieldID is empty/null.
+   */
+  private normalizeCustomerSpecificFieldsPayload(advanceTable: any): void {
+    if (advanceTable.customerReservationFieldID === '') {
+      advanceTable.customerReservationFieldID = [];
+    }
+    if (advanceTable.fieldName === '') {
+      advanceTable.fieldName = [];
+    }
+    if (advanceTable.projectCode === '') {
+      advanceTable.projectCode = [];
+    }
+    if (advanceTable.fieldValue === '') {
+      advanceTable.fieldValue = [];
+    }
+
+    const ids = Array.isArray(advanceTable.customerReservationFieldID)
+      ? advanceTable.customerReservationFieldID
+      : [];
+    const names = Array.isArray(advanceTable.fieldName) ? advanceTable.fieldName : [];
+    const values = Array.isArray(advanceTable.projectCode)
+      ? advanceTable.projectCode
+      : (Array.isArray(advanceTable.fieldValue) ? advanceTable.fieldValue : []);
+
+    advanceTable.customerReservationFieldID = ids;
+    advanceTable.fieldName = names;
+    advanceTable.projectCode = values;
+    advanceTable.fieldValue = Array.isArray(advanceTable.fieldValue) ? advanceTable.fieldValue : values;
+
+    if (
+      (!advanceTable.customerSpecificFields || advanceTable.customerSpecificFields === '') &&
+      ids.length > 0
+    ) {
+      advanceTable.customerSpecificFields = JSON.stringify(
+        ids.map((id: number, index: number) => ({
+          CustomerReservationFieldID: id,
+          FieldName: names[index] ?? '',
+          FieldValue: values[index] ?? '',
+        }))
+      );
+    }
+  }
+
+  /**
+   * Direct CSF persist used by the control-panel CSF dialog.
+   * Bypasses ReservationProc and writes Reservation.CustomerSpecificFields via SQL.
+   */
+  updateCustomerSpecificFields(payload: {
+    reservationID: number;
+    customerReservationFieldID: number[];
+    fieldName: string[];
+    fieldValue: string[];
+  }): Observable<any> {
+    const body = {
+      ...payload,
+      userID: this.generalService.getUserID(),
+    };
+    return this.httpClient.put<any>(this.API_URL + '/updateReservation', body);
   }
 
   delete(reservationID: number):  Observable<any> 
