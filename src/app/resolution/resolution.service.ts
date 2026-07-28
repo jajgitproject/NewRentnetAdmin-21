@@ -49,10 +49,10 @@ export class ResolutionService
     advanceTable.reminderDateForFollowUpString=this.generalService.getTimeApplicable(advanceTable.reminderDateForFollowUp);
     advanceTable.closureDateString=this.generalService.getTimeApplicable(advanceTable.closureDate);
     advanceTable.closureTimeString=this.generalService.getTimeApplicableTO(advanceTable.closureTime);
-    advanceTable.Responsible1GuestID = advanceTable.responsible1CustomerPersonID || 0;
-    advanceTable.Responsible2GuestID = advanceTable.responsible2CustomerPersonID || 0;
-    advanceTable.Responsible3GuestID = advanceTable.responsible3CustomerPersonID || 0;
-    advanceTable.Responsible4GuestID = advanceTable.responsible4CustomerPersonID || 0;
+    advanceTable.Responsible1GuestID = advanceTable.Responsible1GuestID || advanceTable.responsible1CustomerPersonID || 0;
+    advanceTable.Responsible2GuestID = advanceTable.Responsible2GuestID || advanceTable.responsible2CustomerPersonID || 0;
+    advanceTable.Responsible3GuestID = advanceTable.Responsible3GuestID || advanceTable.responsible3CustomerPersonID || 0;
+    advanceTable.Responsible4GuestID = advanceTable.Responsible4GuestID || advanceTable.responsible4CustomerPersonID || 0;
     advanceTable.userID=this.generalService.getUserID();
     return this.httpClient.put<any>(this.API_URL , advanceTable);
   }

@@ -367,14 +367,27 @@
             </div>
 
             <div class="col-xl-3 col-lg-3 col-md-6 col-sm-6 mb-2">
-              <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+              <mat-form-field class="example-full-width" appearance="outline" floatLabel="always"
+                *ngIf="responsibleValueMode1 === 'autocomplete'">
                 <mat-label>{{ autoCompleteLabel1 }}</mat-label>
-                <input matInput [matAutocomplete]="auto1" formControlName="responsible1Value">
-                <mat-autocomplete #auto1="matAutocomplete" (optionSelected)="onAutoCompleteSelect(1, $event)">
-                  <mat-option *ngFor="let option of filteredOptions1" [value]="option">
+                <input matInput [matAutocomplete]="auto1" formControlName="responsible1Value"
+                  (keyup)="onResponsibleSearch(1, $event)">
+                <mat-autocomplete #auto1="matAutocomplete" [displayWith]="displayResponsibleFn"
+                  (optionSelected)="onAutoCompleteSelect(1, $event)">
+                  <mat-option *ngFor="let option of filteredOptions1" [value]="option.name">
                     {{ option.name }}
                   </mat-option>
                 </mat-autocomplete>
+              </mat-form-field>
+              <mat-form-field class="example-full-width" appearance="outline" floatLabel="always"
+                *ngIf="responsibleValueMode1 === 'select'">
+                <mat-label>{{ autoCompleteLabel1 }}</mat-label>
+                <mat-select formControlName="responsible1ID"
+                  (selectionChange)="onGuestSelect(1, $event.value)">
+                  <mat-option *ngFor="let option of filteredOptions1" [value]="option.id">
+                    {{ option.name }}
+                  </mat-option>
+                </mat-select>
               </mat-form-field>
             </div>
 
@@ -387,7 +400,7 @@
                   <mat-option value="vendor">Vendor</mat-option>
                   <mat-option value="employee">Employee</mat-option>
                   <mat-option value="guest">Guest</mat-option>
-                   
+                  <mat-option value="none">None</mat-option>
                 </mat-select>
                 <mat-error *ngIf="advanceTableForm.get('responsible2Option')?.hasError('required')">Responsible 2 is
                   required</mat-error>
@@ -395,14 +408,27 @@
             </div>
 
             <div class="col-xl-3 col-lg-3 col-md-6 col-sm-6 mb-2">
-              <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+              <mat-form-field class="example-full-width" appearance="outline" floatLabel="always"
+                *ngIf="responsibleValueMode2 === 'autocomplete'">
                 <mat-label>{{ autoCompleteLabel2 }}</mat-label>
-                <input matInput [matAutocomplete]="auto2" formControlName="responsible2Value">
-                <mat-autocomplete #auto2="matAutocomplete" (optionSelected)="onAutoCompleteSelect(2, $event)">
-                  <mat-option *ngFor="let option of filteredOptions2" [value]="option">
+                <input matInput [matAutocomplete]="auto2" formControlName="responsible2Value"
+                  (keyup)="onResponsibleSearch(2, $event)">
+                <mat-autocomplete #auto2="matAutocomplete" [displayWith]="displayResponsibleFn"
+                  (optionSelected)="onAutoCompleteSelect(2, $event)">
+                  <mat-option *ngFor="let option of filteredOptions2" [value]="option.name">
                     {{ option.name }}
                   </mat-option>
                 </mat-autocomplete>
+              </mat-form-field>
+              <mat-form-field class="example-full-width" appearance="outline" floatLabel="always"
+                *ngIf="responsibleValueMode2 === 'select'">
+                <mat-label>{{ autoCompleteLabel2 }}</mat-label>
+                <mat-select formControlName="responsible2ID"
+                  (selectionChange)="onGuestSelect(2, $event.value)">
+                  <mat-option *ngFor="let option of filteredOptions2" [value]="option.id">
+                    {{ option.name }}
+                  </mat-option>
+                </mat-select>
               </mat-form-field>
             </div>
 
@@ -419,7 +445,7 @@
                   <mat-option value="vendor">Vendor</mat-option>
                   <mat-option value="employee">Employee</mat-option>
                   <mat-option value="guest">Guest</mat-option>
-                   
+                  <mat-option value="none">None</mat-option>
                 </mat-select>
                 <mat-error *ngIf="advanceTableForm.get('responsible3Option')?.hasError('required')">Responsible 3 is
                   required</mat-error>
@@ -427,14 +453,27 @@
             </div>
 
             <div class="col-xl-3 col-lg-3 col-md-6 col-sm-6 mb-2">
-              <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+              <mat-form-field class="example-full-width" appearance="outline" floatLabel="always"
+                *ngIf="responsibleValueMode3 === 'autocomplete'">
                 <mat-label>{{ autoCompleteLabel3 }}</mat-label>
-                <input matInput [matAutocomplete]="auto3" formControlName="responsible3Value">
-                <mat-autocomplete #auto3="matAutocomplete" (optionSelected)="onAutoCompleteSelect(3, $event)">
-                  <mat-option *ngFor="let option of filteredOptions3" [value]="option">
+                <input matInput [matAutocomplete]="auto3" formControlName="responsible3Value"
+                  (keyup)="onResponsibleSearch(3, $event)">
+                <mat-autocomplete #auto3="matAutocomplete" [displayWith]="displayResponsibleFn"
+                  (optionSelected)="onAutoCompleteSelect(3, $event)">
+                  <mat-option *ngFor="let option of filteredOptions3" [value]="option.name">
                     {{ option.name }}
                   </mat-option>
                 </mat-autocomplete>
+              </mat-form-field>
+              <mat-form-field class="example-full-width" appearance="outline" floatLabel="always"
+                *ngIf="responsibleValueMode3 === 'select'">
+                <mat-label>{{ autoCompleteLabel3 }}</mat-label>
+                <mat-select formControlName="responsible3ID"
+                  (selectionChange)="onGuestSelect(3, $event.value)">
+                  <mat-option *ngFor="let option of filteredOptions3" [value]="option.id">
+                    {{ option.name }}
+                  </mat-option>
+                </mat-select>
               </mat-form-field>
             </div>
             <!-- Responsible 4 -->
@@ -447,7 +486,7 @@
                   <mat-option value="vendor">Vendor</mat-option>
                   <mat-option value="employee">Employee</mat-option>
                   <mat-option value="guest">Guest</mat-option>
-                   
+                  <mat-option value="none">None</mat-option>
                 </mat-select>
                 <mat-error *ngIf="advanceTableForm.get('responsible4Option')?.hasError('required')">Responsible 4 is
                   required</mat-error>
@@ -455,14 +494,27 @@
             </div>
 
             <div class="col-xl-3 col-lg-3 col-md-6 col-sm-6 mb-2">
-              <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+              <mat-form-field class="example-full-width" appearance="outline" floatLabel="always"
+                *ngIf="responsibleValueMode4 === 'autocomplete'">
                 <mat-label>{{ autoCompleteLabel4 }}</mat-label>
-                <input matInput [matAutocomplete]="auto4" formControlName="responsible4Value">
-                <mat-autocomplete #auto4="matAutocomplete" (optionSelected)="onAutoCompleteSelect(4, $event)">
-                  <mat-option *ngFor="let option of filteredOptions4" [value]="option">
+                <input matInput [matAutocomplete]="auto4" formControlName="responsible4Value"
+                  (keyup)="onResponsibleSearch(4, $event)">
+                <mat-autocomplete #auto4="matAutocomplete" [displayWith]="displayResponsibleFn"
+                  (optionSelected)="onAutoCompleteSelect(4, $event)">
+                  <mat-option *ngFor="let option of filteredOptions4" [value]="option.name">
                     {{ option.name }}
                   </mat-option>
                 </mat-autocomplete>
+              </mat-form-field>
+              <mat-form-field class="example-full-width" appearance="outline" floatLabel="always"
+                *ngIf="responsibleValueMode4 === 'select'">
+                <mat-label>{{ autoCompleteLabel4 }}</mat-label>
+                <mat-select formControlName="responsible4ID"
+                  (selectionChange)="onGuestSelect(4, $event.value)">
+                  <mat-option *ngFor="let option of filteredOptions4" [value]="option.id">
+                    {{ option.name }}
+                  </mat-option>
+                </mat-select>
               </mat-form-field>
             </div>
 

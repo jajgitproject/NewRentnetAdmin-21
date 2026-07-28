@@ -98,12 +98,24 @@ export class resolutionFormDialogComponent {
   driverOptions: any[] = [];
   supplierOptions: any[] = [];
   passengerOptions: any[] = [];
+  /** autocomplete | select | none — controls the value UI for Responsible 1-4 */
+  responsibleValueMode1: 'autocomplete' | 'select' | 'none' = 'none';
+  responsibleValueMode2: 'autocomplete' | 'select' | 'none' = 'none';
+  responsibleValueMode3: 'autocomplete' | 'select' | 'none' = 'none';
+  responsibleValueMode4: 'autocomplete' | 'select' | 'none' = 'none';
+  displayResponsibleFn = (option: any): string => {
+    if (option == null || option === '') {
+      return '';
+    }
+    return typeof option === 'string' ? option : (option.name || '');
+  };
 
   responsibleOptions: { value: string, label: string }[] = [
     { value: 'driver', label: 'Driver' },
     { value: 'vendor', label: 'Vendor' },
     { value: 'employee', label: 'Employee' },
-    { value: 'passenger', label: 'Passenger' }
+    { value: 'guest', label: 'Guest' },
+    { value: 'none', label: 'None' }
   ];
   filteredResponsible1Options: Observable<any[]> = new Observable();
   supplierID: any;
@@ -218,11 +230,10 @@ else {
   public ngOnInit(): void {
     this.advanceTableForm.patchValue({incidenceID: this.incidenceID});
     this.loadReservationContextIfMissing();
-    this.InitDriver();
-    this.InitVendor();
-    this.InitEmployee();
+    // Driver/Vendor/Employee lists are prefix-searched on demand (3+ chars).
+    // Guests are loaded for the reservation dropdown.
+    this.InitPassenger();
     this.InitDuty();
-    this.InitPassenger()
     this.InitincidenceType();
     this.initIssueCategory();
     this.getOpenByEmployee();
@@ -278,10 +289,7 @@ else {
   }
 
   ngOnChanges(): void {
-    this.InitEmployee();
     this.InitPassenger();
-    this.InitDriver();
-    this.InitVendor();
   }
   createContactForm(): FormGroup {
     return this.fb.group({
@@ -368,9 +376,13 @@ else {
       const option = this.advanceTableForm.get(`${responsible}Option`).value;
       const id = this.advanceTableForm.get(`${responsible}ID`).value;
       if (option) {
-      requestObject[`Responsible${index + 1}`] = option;
-      requestObject[`Responsible${index + 1}${option.charAt(0).toUpperCase() + option.slice(1)}ID`] = id;
-
+        requestObject[`Responsible${index + 1}`] = option;
+        if (option === 'guest' || option === 'passenger') {
+          requestObject[`Responsible${index + 1}GuestID`] = id;
+          requestObject[`responsible${index + 1}CustomerPersonID`] = id;
+        } else {
+          requestObject[`Responsible${index + 1}${option.charAt(0).toUpperCase() + option.slice(1)}ID`] = id;
+        }
       }
     });
     this.advanceTableService.update(requestObject)
@@ -996,52 +1008,20 @@ else {
   }
 
   bindResponsibleData() {
-
-  const checkInterval = setInterval(() => {
-
-    const driverLoaded =
-      this.driverOptions &&
-      this.driverOptions.length > 0;
-
-    const vendorLoaded =
-      this.supplierOptions &&
-      this.supplierOptions.length > 0;
-
-    const employeeLoaded =
-      this.employeeOptions &&
-      this.employeeOptions.length > 0;
-
-    const passengerLoaded =
-      this.passengerOptions &&
-      this.passengerOptions.length > 0;
-
-    // wait until all dropdown data loaded
-    if (
-      driverLoaded &&
-      vendorLoaded &&
-      employeeLoaded &&
-      passengerLoaded
-    ) {
-
-      clearInterval(checkInterval);
-      const selectedRow = this.getSelectedIncidenceRow();
-
-      for (let i = 1; i <= 4; i++) {
-
-        const selectedValue =
-          selectedRow?.[`responsible${i}`];
-
-        if (selectedValue) {
-          this.onResponsibleChange(
-            i,
-            selectedValue
-          );
-        }
-      }
+    // Prefix search no longer preloads full driver/vendor/employee lists.
+    // Bind saved responsible values as soon as incidence row is available.
+    const selectedRow = this.getSelectedIncidenceRow();
+    if (!selectedRow) {
+      return;
     }
 
-  }, 300);
-}
+    for (let i = 1; i <= 4; i++) {
+      const selectedValue = selectedRow?.[`responsible${i}`];
+      if (selectedValue) {
+        this.onResponsibleChange(i, selectedValue);
+      }
+    }
+  }
 
   private loadReservationContextIfMissing(): void {
     const needsCustomer = !this.customerName;
@@ -1049,10 +1029,11 @@ else {
     const needsReg = !this.registrationNumber;
     const needsSupplier = !this.carVendor || !this.supplierID;
     const needsGuest = !this.customerPersonName || !this.CustomerPersonID;
+    const needsLocation = !this.transferedLocationID;
 
     if (
       !this.reservationID ||
-      (!needsCustomer && !needsDriver && !needsReg && !needsSupplier && !needsGuest)
+      (!needsCustomer && !needsDriver && !needsReg && !needsSupplier && !needsGuest && !needsLocation)
     ) {
       return;
     }
@@ -1091,6 +1072,10 @@ else {
           this.organizationalEntityName ||
           reservation.organizationalEntityName ||
           reservation.transferedLocation;
+        this.transferedLocationID =
+          this.transferedLocationID ||
+          reservation.transferedLocationID ||
+          reservation.serviceLocationID;
 
         if (this.data?.item) {
           this.data.item = {
@@ -1102,6 +1087,7 @@ else {
             carVendor: this.carVendor,
             supplierName: this.carVendor,
             supplierID: this.supplierID,
+            transferedLocationID: this.transferedLocationID,
           };
         }
 
@@ -1120,43 +1106,27 @@ else {
     );
   }
 
-  // Fetch the list of drivers
+  // Fetch drivers for location + prefix (3+ chars)
   InitDriver() {
-    this._generalService.GetDriver().subscribe(data => {
-      this.driverOptions = (Array.isArray(data) ? data : []).map(driver => ({
-        name: driver.driverName,
-        id: driver.driverID
-      }));
-      this.syncReservationResponsibleContext();
-      this.refreshOpenResponsibleSelections('driver');
-    });
+    // Kept for compatibility; search is on-demand via onResponsibleSearch.
   }
 
-  // Fetch the list of vendors
+  // Fetch vendors for location + prefix (3+ chars)
   InitVendor() {
-    this._generalService.GetAllSuppliers().subscribe(data => {
-      this.supplierOptions = (Array.isArray(data) ? data : []).map(vendor => ({
-        name: vendor.supplierName,
-        id: vendor.supplierID
-      }));
-      this.syncReservationResponsibleContext();
-      this.refreshOpenResponsibleSelections('vendor');
-    });
+    // Kept for compatibility; search is on-demand via onResponsibleSearch.
   }
 
-  // Fetch the list of employees
+  // Fetch employees for prefix (3+ chars)
   InitEmployee() {
-    this._generalService.GetEmployeesForVehicleCategory().subscribe(data => {
-      this.employeeOptions = (Array.isArray(data) ? data : []).map(employee => ({
-        name: `${employee.employeeOfficeID} - ${employee.firstName} ${employee.lastName}`,
-        id: employee.employeeID
-      }));
-      this.refreshOpenResponsibleSelections('employee');
-    });
+    // Kept for compatibility; search is on-demand via onResponsibleSearch.
   }
 
-  // Fetch the list of passengers
+  // Fetch the list of passengers/guests for this reservation
   InitPassenger() {
+    if (!this.reservationID) {
+      this.passengerOptions = [];
+      return;
+    }
     this._generalService.GetCPForReservationResolution(this.reservationID).subscribe(data => {
       if (data) {
         this.passengerOptions = (Array.isArray(data) ? data : []).map(passenger => ({
@@ -1187,6 +1157,227 @@ else {
     }
   }
 
+  private getResponsibleSearchText(responsibleNumber: number): string {
+    const raw = this.advanceTableForm.get(`responsible${responsibleNumber}Value`)?.value;
+    if (raw == null) {
+      return '';
+    }
+    if (typeof raw === 'string') {
+      return raw.trim();
+    }
+    return (raw.name || '').toString().trim();
+  }
+
+  private getTransferedLocationIdForSearch(): number {
+    return Number(
+      this.transferedLocationID ||
+      this.data?.item?.transferedLocationID ||
+      this.getSelectedIncidenceRow()?.transferedLocationID ||
+      0
+    );
+  }
+
+  onResponsibleSearch(responsibleNumber: number, _event?: any): void {
+    const type = this.advanceTableForm.get(`responsible${responsibleNumber}Option`)?.value;
+    const prefix = this.getResponsibleSearchText(responsibleNumber);
+
+    // Typing invalidates previous ID until a new option is selected.
+    this.advanceTableForm.controls[`responsible${responsibleNumber}ID`].setValue('');
+
+    if (!prefix || prefix.length < this._generalService.lengthToCheck) {
+      this[`filteredOptions${responsibleNumber}`] = [];
+      return;
+    }
+
+    if (type === 'driver') {
+      this.searchDrivers(responsibleNumber, prefix);
+    } else if (type === 'vendor') {
+      this.searchVendors(responsibleNumber, prefix);
+    } else if (type === 'employee') {
+      this.searchEmployees(responsibleNumber, prefix);
+    }
+  }
+
+  private searchDrivers(responsibleNumber: number, prefix: string): void {
+    const locationID = this.getTransferedLocationIdForSearch();
+    if (!locationID) {
+      this[`filteredOptions${responsibleNumber}`] = [];
+      this.showNotification(
+        'snackbar-danger',
+        'Transfered location not found for this reservation.',
+        'bottom',
+        'center'
+      );
+      return;
+    }
+
+    this._generalService.GetDriversByLocationPrefix(locationID, prefix).subscribe(
+      (data) => {
+        this.driverOptions = (Array.isArray(data) ? data : []).map((driver) => ({
+          name: driver.driverName,
+          id: driver.driverID
+        }));
+        this[`filteredOptions${responsibleNumber}`] = this.driverOptions;
+      },
+      () => {
+        this[`filteredOptions${responsibleNumber}`] = [];
+      }
+    );
+  }
+
+  /** Build DOIN ## Mobile ## OwnedSupplier ## SupplierName and put it in the textbox. */
+  private setDriverConcatDisplayInTextbox(responsibleNumber: number, driverId: number): void {
+    if (!driverId) {
+      return;
+    }
+    this.advanceTableForm.controls[`responsible${responsibleNumber}ID`].setValue(driverId);
+    this._generalService.GetDriverByID(driverId).subscribe(
+      (driver: any) => {
+        if (!driver) {
+          return;
+        }
+        const display = [
+          driver.driverOfficialIdentityNumber || '',
+          driver.mobile1 || '',
+          driver.ownedSupplier || '',
+          driver.supplier || driver.supplierName || ''
+        ].join(' ## ');
+        this.advanceTableForm.controls[`responsible${responsibleNumber}Value`].setValue(display);
+        this[`filteredOptions${responsibleNumber}`] = [{ id: driverId, name: display }];
+      },
+      () => { /* keep ID; leave name blank if lookup fails */ }
+    );
+  }
+
+  private searchVendors(responsibleNumber: number, prefix: string): void {
+    const locationID = this.getTransferedLocationIdForSearch();
+    if (!locationID) {
+      this[`filteredOptions${responsibleNumber}`] = [];
+      this.showNotification(
+        'snackbar-danger',
+        'Transfered location not found for this reservation.',
+        'bottom',
+        'center'
+      );
+      return;
+    }
+
+    this._generalService.GetSuppliersByLocationPrefix(locationID, prefix).subscribe(
+      (data) => {
+        this.supplierOptions = (Array.isArray(data) ? data : []).map((vendor) => {
+          const display = this.formatVendorDisplay(vendor);
+          return {
+            name: display,
+            id: vendor.supplierID
+          };
+        });
+        this[`filteredOptions${responsibleNumber}`] = this.supplierOptions;
+      },
+      () => {
+        this[`filteredOptions${responsibleNumber}`] = [];
+      }
+    );
+  }
+
+  /** SupplierOfficialIdentityNumber ## Phone — same format for list and textbox. */
+  private formatVendorDisplay(vendor: any): string {
+    if (!vendor) {
+      return '';
+    }
+    const alreadyConcat =
+      vendor.supplierName && String(vendor.supplierName).includes('##')
+        ? String(vendor.supplierName).trim()
+        : '';
+    if (alreadyConcat) {
+      return alreadyConcat;
+    }
+    const code =
+      vendor.supplierOfficialIdentityNumber ||
+      vendor.SupplierOfficialIdentityNumber ||
+      '';
+    const phone =
+      vendor.phone ||
+      vendor.supplierPhone ||
+      vendor.Phone ||
+      '';
+    return `${code} ## ${phone}`.trim();
+  }
+
+  /** Build SupplierOfficialIdentityNumber ## Phone and put it in the textbox. */
+  private setVendorConcatDisplayInTextbox(responsibleNumber: number, supplierId: number): void {
+    if (!supplierId) {
+      return;
+    }
+    this.advanceTableForm.controls[`responsible${responsibleNumber}ID`].setValue(supplierId);
+    this._generalService.GetSupplierByID(supplierId).subscribe(
+      (vendor: any) => {
+        if (!vendor) {
+          return;
+        }
+        const display = this.formatVendorDisplay(vendor);
+        this.advanceTableForm.controls[`responsible${responsibleNumber}Value`].setValue(display);
+        this[`filteredOptions${responsibleNumber}`] = [{ id: supplierId, name: display }];
+      },
+      () => { /* keep ID; leave name blank if lookup fails */ }
+    );
+  }
+
+  private searchEmployees(responsibleNumber: number, prefix: string): void {
+    this._generalService.GetEmployeesForVehicleCategoryPrefix(prefix).subscribe(
+      (data) => {
+        this.employeeOptions = (Array.isArray(data) ? data : []).map((employee) => {
+          const display = this.formatEmployeeDisplay(employee);
+          return {
+            name: display,
+            id: employee.employeeID
+          };
+        });
+        this[`filteredOptions${responsibleNumber}`] = this.employeeOptions;
+      },
+      () => {
+        this[`filteredOptions${responsibleNumber}`] = [];
+      }
+    );
+  }
+
+  /** FirstName LastName ## Mobile — same format for list and textbox. */
+  private formatEmployeeDisplay(employee: any): string {
+    if (!employee) {
+      return '';
+    }
+    const firstName = employee.firstName || employee.FirstName || '';
+    const lastName = employee.lastName || employee.LastName || '';
+    const mobile = employee.mobile || employee.Mobile || '';
+    const fullName = `${firstName} ${lastName}`.trim();
+    return `${fullName} ## ${mobile}`.trim();
+  }
+
+  private setEmployeeConcatDisplayInTextbox(responsibleNumber: number, employeeId: number): void {
+    if (!employeeId) {
+      return;
+    }
+    this.advanceTableForm.controls[`responsible${responsibleNumber}ID`].setValue(employeeId);
+    this._generalService.getEmployeeID(employeeId).subscribe(
+      (data: any) => {
+        const employee = Array.isArray(data) ? data[0] : data;
+        if (!employee) {
+          return;
+        }
+        const display = this.formatEmployeeDisplay(employee);
+        this.advanceTableForm.controls[`responsible${responsibleNumber}Value`].setValue(display);
+        this[`filteredOptions${responsibleNumber}`] = [{ id: employeeId, name: display }];
+      },
+      () => { /* keep ID; leave name blank if lookup fails */ }
+    );
+  }
+
+  onGuestSelect(responsibleNumber: number, selectedId: any): void {
+    const id = Number(selectedId || 0);
+    const option = (this.passengerOptions || []).find((o) => Number(o.id) === id);
+    this.advanceTableForm.controls[`responsible${responsibleNumber}ID`].setValue(id || '');
+    this.advanceTableForm.controls[`responsible${responsibleNumber}Value`].setValue(option?.name || '');
+  }
+
 onResponsibleChange(responsibleNumber: number, selectedValue: string): void {
   // ALWAYS enable first (important when switching from "none")
   this.advanceTableForm.controls[`responsible${responsibleNumber}Value`].enable();
@@ -1202,6 +1393,7 @@ onResponsibleChange(responsibleNumber: number, selectedValue: string): void {
   // Default UI reset
   this[`showAutoComplete${responsibleNumber}`] = false;
   this[`filteredOptions${responsibleNumber}`] = [];
+  this[`responsibleValueMode${responsibleNumber}`] = 'none';
 
   this.syncReservationResponsibleContext();
   const recordData: any = this.getSelectedIncidenceRow() || this.data?.item || {};
@@ -1220,6 +1412,7 @@ onResponsibleChange(responsibleNumber: number, selectedValue: string): void {
     // ================= NONE =================
     case 'none':
       this[`showAutoComplete${responsibleNumber}`] = false;
+      this[`responsibleValueMode${responsibleNumber}`] = 'none';
       this[`filteredOptions${responsibleNumber}`] = [];
 
       this.advanceTableForm.controls[`responsible${responsibleNumber}Value`].setValue('');
@@ -1232,61 +1425,49 @@ onResponsibleChange(responsibleNumber: number, selectedValue: string): void {
     // ================= DRIVER =================
     case 'driver':
       this[`showAutoComplete${responsibleNumber}`] = true;
-      this[`autoCompleteLabel${responsibleNumber}`] = `Select Driver ${responsibleNumber}`;
-      this[`filteredOptions${responsibleNumber}`] = this.ensureOptionInList(
-        this.driverOptions,
-        this.driverID || recordData?.driverID,
-        this.driverName || recordData?.driverName
-      );
-      this.setResponsibleValueFromReservation(
-        responsibleNumber,
-        savedDriverId || Number(this.driverID || recordData?.driverID || 0),
-        savedDriverId
-          ? recordData?.[`responsible${responsibleNumber}DriverName`]
-          : (this.driverName || recordData?.driverName),
-        this.driverOptions
-      );
+      this[`responsibleValueMode${responsibleNumber}`] = 'autocomplete';
+      this[`autoCompleteLabel${responsibleNumber}`] = `Search Driver ${responsibleNumber} (min 3 chars)`;
+      this[`filteredOptions${responsibleNumber}`] = [];
+      {
+        const driverId =
+          savedDriverId || Number(this.driverID || recordData?.driverID || 0);
+        if (driverId) {
+          this.setDriverConcatDisplayInTextbox(responsibleNumber, driverId);
+        }
+      }
       break;
 
     // ================= VENDOR =================
     case 'vendor':
       this[`showAutoComplete${responsibleNumber}`] = true;
-      this[`autoCompleteLabel${responsibleNumber}`] = `Select Vendor ${responsibleNumber}`;
-      this[`filteredOptions${responsibleNumber}`] = this.ensureOptionInList(
-        this.supplierOptions,
-        this.supplierID || recordData?.supplierID,
-        this.carVendor || recordData?.supplierName || recordData?.carVendor
-      );
-      this.setResponsibleValueFromReservation(
-        responsibleNumber,
-        savedVendorId || Number(this.supplierID || recordData?.supplierID || 0),
-        savedVendorId
-          ? recordData?.[`responsible${responsibleNumber}VendorName`]
-          : (this.carVendor || recordData?.supplierName || recordData?.carVendor),
-        this.supplierOptions
-      );
+      this[`responsibleValueMode${responsibleNumber}`] = 'autocomplete';
+      this[`autoCompleteLabel${responsibleNumber}`] = `Search Vendor ${responsibleNumber} (min 3 chars)`;
+      this[`filteredOptions${responsibleNumber}`] = [];
+      {
+        const vendorId =
+          savedVendorId || Number(this.supplierID || recordData?.supplierID || 0);
+        if (vendorId) {
+          this.setVendorConcatDisplayInTextbox(responsibleNumber, vendorId);
+        }
+      }
       break;
 
     // ================= EMPLOYEE =================
     case 'employee':
       this[`showAutoComplete${responsibleNumber}`] = true;
-      this[`autoCompleteLabel${responsibleNumber}`] = `Select Employee ${responsibleNumber}`;
-      this[`filteredOptions${responsibleNumber}`] = this.employeeOptions || [];
-      // Only prefill when a saved employee exists; otherwise leave autocomplete empty for search.
+      this[`responsibleValueMode${responsibleNumber}`] = 'autocomplete';
+      this[`autoCompleteLabel${responsibleNumber}`] = `Search Employee ${responsibleNumber} (min 3 chars)`;
+      this[`filteredOptions${responsibleNumber}`] = [];
       if (savedEmployeeId) {
-        this.setResponsibleValueFromReservation(
-          responsibleNumber,
-          savedEmployeeId,
-          recordData?.[`responsible${responsibleNumber}EmployeeName`],
-          this.employeeOptions
-        );
+        this.setEmployeeConcatDisplayInTextbox(responsibleNumber, savedEmployeeId);
       }
       break;
 
     // ================= GUEST =================
     case 'guest':
     case 'passenger':
-      this[`showAutoComplete${responsibleNumber}`] = true;
+      this[`showAutoComplete${responsibleNumber}`] = false;
+      this[`responsibleValueMode${responsibleNumber}`] = 'select';
       this[`autoCompleteLabel${responsibleNumber}`] = `Select Guest ${responsibleNumber}`;
       this[`filteredOptions${responsibleNumber}`] = this.ensureOptionInList(
         this.passengerOptions,
@@ -1410,55 +1591,47 @@ private syncReservationResponsibleContext(): void {
   }
 }
 updateResponsibleLock(): void {
-
+  // None only clears/hides that slot's value control.
+  // Do not disable other Responsible dropdowns.
   for (let i = 1; i <= 4; i++) {
-
     const optionCtrl = this.advanceTableForm.get(`responsible${i}Option`);
     const valueCtrl = this.advanceTableForm.get(`responsible${i}Value`);
     const idCtrl = this.advanceTableForm.get(`responsible${i}ID`);
-
     const selectedValue = optionCtrl?.value;
 
-    // If THIS field is NONE → only this stays enabled, others disable
-    if (selectedValue === 'none') {
+    optionCtrl?.enable({ emitEvent: false });
 
-      // keep current row enabled (so user can change it back)
-      optionCtrl?.enable({ emitEvent: false });
+    if (selectedValue === 'none' || !selectedValue) {
+      valueCtrl?.setValue('', { emitEvent: false });
+      idCtrl?.setValue('', { emitEvent: false });
       valueCtrl?.disable({ emitEvent: false });
       idCtrl?.disable({ emitEvent: false });
-
-    } 
-    else {
-
-      // check if ANY row has NONE selected
-      const anyNoneSelected = [
-        this.advanceTableForm.get('responsible1Option')?.value,
-        this.advanceTableForm.get('responsible2Option')?.value,
-        this.advanceTableForm.get('responsible3Option')?.value,
-        this.advanceTableForm.get('responsible4Option')?.value
-      ].includes('none');
-
-      if (anyNoneSelected) {
-
-        // disable all non-none rows
-        optionCtrl?.disable({ emitEvent: false });
-        valueCtrl?.disable({ emitEvent: false });
-        idCtrl?.disable({ emitEvent: false });
-
-      } else {
-
-        // normal state (all enabled)
-        optionCtrl?.enable({ emitEvent: false });
-        valueCtrl?.enable({ emitEvent: false });
-        idCtrl?.enable({ emitEvent: false });
-      }
+    } else {
+      valueCtrl?.enable({ emitEvent: false });
+      idCtrl?.enable({ emitEvent: false });
     }
   }
 }
   onAutoCompleteSelect(responsibleNumber: number, event: any): void {
     const optionObject = event.option.value;
-    this.advanceTableForm.controls[`responsible${responsibleNumber}Value`].setValue(optionObject.name);
-    this.advanceTableForm.controls[`responsible${responsibleNumber}ID`].setValue(optionObject.id);
+    // Prefer plain string so the textbox shows the concatenated driver/vendor/employee label.
+    const displayName =
+      typeof optionObject === 'string'
+        ? optionObject
+        : (optionObject?.name || '');
+    const selectedId =
+      typeof optionObject === 'string'
+        ? (this[`filteredOptions${responsibleNumber}`] || []).find(
+            (o) => o.name === optionObject
+          )?.id
+        : optionObject?.id;
+
+    this.advanceTableForm.controls[`responsible${responsibleNumber}Value`].setValue(
+      displayName
+    );
+    this.advanceTableForm.controls[`responsible${responsibleNumber}ID`].setValue(
+      selectedId || ''
+    );
   }
 
    ///----For Image

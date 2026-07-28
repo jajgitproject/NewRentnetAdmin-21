@@ -1238,6 +1238,22 @@ nameEmailDuplicateMobile(payload: {
       this.BaseURL + 'customerPersonDriverRestriction/ForDropDown'
     );
   }
+  GetDriversByLocationPrefix(locationID: number, prefix: string): Observable<DriverDropDown[]> {
+    return this.http.get<DriverDropDown[]>(
+      this.BaseURL + 'driver/GetDriversByLocationPrefix/' + locationID + '/' + encodeURIComponent(prefix)
+    );
+  }
+  GetDriverByID(driverID: number): Observable<any> {
+    return this.http.get<any>(this.BaseURL + 'driver/' + driverID);
+  }
+  GetSuppliersByLocationPrefix(locationID: number, prefix: string): Observable<SupplierDropDown[]> {
+    return this.http.get<SupplierDropDown[]>(
+      this.BaseURL + 'supplier/GetSuppliersByLocationPrefix/' + locationID + '/' + encodeURIComponent(prefix)
+    );
+  }
+  GetSupplierByID(supplierID: number): Observable<any> {
+    return this.http.get<any>(this.BaseURL + 'supplier/' + supplierID);
+  }
 GetDriverBySupplierID(SupplierID: number): Observable<DriverDropDown[]> {
     return this.http.get<DriverDropDown[]>(
       this.BaseURL + 'customerPersonDriverRestriction/GetDriverBySupplierID/' + SupplierID
