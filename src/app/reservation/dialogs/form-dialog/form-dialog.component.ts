@@ -139,6 +139,7 @@ const normalized = (this.status || '').trim().toLowerCase();
     this.advanceTableForm.patchValue({ reservationID: this.advanceTableCP.reservationID });
     this.advanceTableForm.patchValue({ dropOffTime: this.advanceTable.dropOffTime });
     const payload = this.advanceTableForm.getRawValue();
+    payload.pickupDate = this.advanceTableCP.pickup?.pickupDate ?? this.pickupDate;
     this.advanceTableService.updatePickupEdit(payload)
       .subscribe(
         response => {

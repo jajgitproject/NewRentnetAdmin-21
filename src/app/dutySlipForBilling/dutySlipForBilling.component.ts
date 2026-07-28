@@ -91,10 +91,13 @@ export class DutySlipForBillingComponent implements OnInit, AfterViewInit, OnCha
    'dropOffAddressStringForBilling',
    'locationInAddressStringForBilling',
  ];
- /** KM, lat/long, and remark fields editable only when Manual KM is selected. */
- private readonly manualKmOnlyControls = [
+ /** Remark fields editable for all closure types and after Good for Billing (E-Invoice still blocks). */
+ private readonly alwaysEditableRemarkControls = [
    'runningDetails',
    'vendorRemark',
+ ];
+ /** KM and lat/long fields editable for all closure types; stay editable after Good for Billing. */
+ private readonly alwaysEditableKmControls = [
    'locationOutKMForBilling',
    'locationOutLatLongForBilling',
    'reportingToGuestKMForBilling',
@@ -125,6 +128,9 @@ export class DutySlipForBillingComponent implements OnInit, AfterViewInit, OnCha
   totalNights: number | null = null;
   private loadedDriverAllowanceDays: number | null = null;
   private loadedNights: number | null = null;
+  private loadedRunningDetails = '';
+  private loadedVendorRemark = '';
+  private loadedKmValues: Record<string, string> = {};
   private suppressInitialDutyStatusEmit = true;
 
   constructor(
@@ -152,6 +158,18 @@ export class DutySlipForBillingComponent implements OnInit, AfterViewInit, OnCha
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['hasActiveEInvoice'] || changes['canEditDSAfterGoodForBilling'] || changes['advanceTableClosingOne']) {
       this.applyDutySlipEditLockState();
+    }
+    if (changes['disputeAdvanceTable']) {
+      const hasUnapprovedDispute = this.disputeAdvanceTable?.some(d => d.approvalStatus === false);
+      if (hasUnapprovedDispute) {
+        this.advanceTableForm.patchValue({
+          verifyDuty: false,
+          goodForBilling: false
+        });
+      }
+    }
+    if (changes['hasActiveEInvoice'] || changes['canThisRoleDoGoodForBillingOnClosingScreen']) {
+      this.syncVerifyDutyAndGoodForBillingState();
     }
   }
 
@@ -1097,6 +1115,7 @@ export class DutySlipForBillingComponent implements OnInit, AfterViewInit, OnCha
       }
     }
     this.applyClosingFieldDefaults();
+    this.syncLoadedRemarksFromForm();
   }
 
   private applyClosingAllowanceValues(response: any): void {
@@ -1328,6 +1347,8 @@ export class DutySlipForBillingComponent implements OnInit, AfterViewInit, OnCha
     }
     if (this.isDutySlipEditBlocked) {
       this.advanceTableForm.disable({ emitEvent: false });
+      this.applyAlwaysEditableRemarks();
+      this.applyAlwaysEditableKm();
       return;
     }
     this.advanceTableForm.enable({ emitEvent: false });
@@ -1336,7 +1357,27 @@ export class DutySlipForBillingComponent implements OnInit, AfterViewInit, OnCha
     this.syncVerifyDutyAndGoodForBillingState();
   }
 
-  /** Date/time and addresses always editable; KM/lat-long only when Manual KM. DS Closing fields are always locked. */
+  /** Remark On DS Closing and Vendor Remark stay editable unless E-Invoice blocks the duty slip. */
+  private applyAlwaysEditableRemarks(): void {
+    if (!this.advanceTableForm || this.isEInvoiceBlockingEdits) {
+      return;
+    }
+    for (const name of this.alwaysEditableRemarkControls) {
+      this.advanceTableForm.get(name)?.enable({ emitEvent: false });
+    }
+  }
+
+  /** KM and lat/long stay editable unless E-Invoice blocks the duty slip. */
+  private applyAlwaysEditableKm(): void {
+    if (!this.advanceTableForm || this.isEInvoiceBlockingEdits) {
+      return;
+    }
+    for (const name of this.alwaysEditableKmControls) {
+      this.advanceTableForm.get(name)?.enable({ emitEvent: false });
+    }
+  }
+
+  /** Date/time and addresses always editable when form is not GFB-blocked; KM always editable. */
   private applyManualEditMode(): void {
     if (!this.advanceTableForm || this.isDutySlipEditBlocked) {
       return;
@@ -1347,19 +1388,9 @@ export class DutySlipForBillingComponent implements OnInit, AfterViewInit, OnCha
     for (const name of this.alwaysEditableAddressControls) {
       this.advanceTableForm.get(name)?.enable({ emitEvent: false });
     }
-    const allowManualKmEdit = this.isManualClosureMode;
-    for (const name of this.manualKmOnlyControls) {
-      const control = this.advanceTableForm.get(name);
-      if (!control) {
-        continue;
-      }
-      if (allowManualKmEdit) {
-        control.enable({ emitEvent: false });
-      } else {
-        control.disable({ emitEvent: false });
-      }
-    }
-    // Closure type radio must stay selectable so users can switch to Manual.
+    this.applyAlwaysEditableRemarks();
+    this.applyAlwaysEditableKm();
+    // Closure type radio must stay selectable so users can switch closure source.
     this.advanceTableForm.get('closureType')?.enable({ emitEvent: false });
   }
 
@@ -1390,6 +1421,93 @@ export class DutySlipForBillingComponent implements OnInit, AfterViewInit, OnCha
       this.advanceTableClosingOne?.closingDutySlipForBillingModel?.dsClosing ??
       this.advanceTableForm?.get('dsClosing')?.value;
     return dsClosing !== null && dsClosing !== undefined && dsClosing !== '';
+  }
+
+  private normalizeRemark(value: unknown): string {
+    return value == null ? '' : String(value).trim();
+  }
+
+  private syncLoadedRemarksFromForm(): void {
+    const form = this.advanceTableForm?.getRawValue();
+    this.loadedRunningDetails = this.normalizeRemark(form?.runningDetails);
+    this.loadedVendorRemark = this.normalizeRemark(form?.vendorRemark);
+    this.syncLoadedKmFromForm();
+  }
+
+  private normalizeKmField(value: unknown): string {
+    if (value == null || value === '') {
+      return '';
+    }
+    return String(value).trim();
+  }
+
+  private syncLoadedKmFromForm(): void {
+    const form = this.advanceTableForm?.getRawValue();
+    if (!form) {
+      return;
+    }
+    for (const name of this.alwaysEditableKmControls) {
+      this.loadedKmValues[name] = this.normalizeKmField(form[name]);
+    }
+  }
+
+  haveKmChanged(): boolean {
+    const form = this.advanceTableForm?.getRawValue();
+    if (!form) {
+      return false;
+    }
+    return this.alwaysEditableKmControls.some(
+      name => this.normalizeKmField(form[name]) !== (this.loadedKmValues[name] ?? '')
+    );
+  }
+
+  haveRemarksChanged(): boolean {
+    const form = this.advanceTableForm?.getRawValue();
+    if (!form) {
+      return false;
+    }
+    return this.normalizeRemark(form.runningDetails) !== this.loadedRunningDetails
+      || this.normalizeRemark(form.vendorRemark) !== this.loadedVendorRemark;
+  }
+
+  get canSavePartialAfterGfb(): boolean {
+    return this.isGoodForBillingBlockingEdits
+      && !this.isEInvoiceBlockingEdits
+      && this.isDutyCalculated
+      && (this.haveRemarksChanged() || this.haveKmChanged());
+  }
+
+  get canShowSaveButton(): boolean {
+    return this.showSpinner === false
+      && (
+        this.Action === 'Cancelled'
+        || !this.isDutyCalculated
+        || !this.isDutySlipEditBlocked
+        || this.canSavePartialAfterGfb
+      );
+  }
+
+  get isSaveButtonDisabled(): boolean {
+    if (this.canSavePartialAfterGfb) {
+      return false;
+    }
+    return !this.advanceTableForm?.valid
+      || (this.isDutyCalculated && this.isDutySlipEditBlocked);
+  }
+
+  get saveButtonLabel(): string {
+    if (!this.canSavePartialAfterGfb) {
+      return this.buttonText;
+    }
+    const remarksChanged = this.haveRemarksChanged();
+    const kmChanged = this.haveKmChanged();
+    if (remarksChanged && kmChanged) {
+      return 'Save Remarks & KM';
+    }
+    if (kmChanged) {
+      return 'Save KM';
+    }
+    return 'Save Remarks';
   }
 
   /** DS Edit may toggle GFB even without the dedicated GFB role flag. */
@@ -1615,6 +1733,7 @@ export class DutySlipForBillingComponent implements OnInit, AfterViewInit, OnCha
     this.advanceTableForm.patchValue({dsClosing : this.advanceTableClosingOne.closingDutySlipForBillingModel.dsClosing});
     this.advanceTableForm.patchValue({runningDetails : this.advanceTableClosingOne.closingDutySlipForBillingModel.runningDetails});
     this.advanceTableForm.patchValue({vendorRemark : this.advanceTableClosingOne.closingDutySlipForBillingModel.vendorRemark});
+    this.syncLoadedRemarksFromForm();
     this.advanceTableForm.patchValue({physicalDutySlipReceived : this.advanceTableClosingOne.closingDutySlipForBillingModel?.physicalDutySlipReceived});
     this.advanceTableForm.patchValue({goodForBilling : this.advanceTableClosingOne.closingDutySlipForBillingModel.goodForBilling});
     this.selectedClosureType = this.advanceTableClosingOne.closingDutySlipForBillingModel.closureType;
@@ -2361,8 +2480,96 @@ public resetVerificationForEcoStateChange(): void {
     return true;
   }
 
+  private savePartialAfterGfb(): void {
+    if (this.isEInvoiceBlockingEdits) {
+      this.showNotification(
+        'snackbar-warning',
+        'E-Invoice (IRN) is already generated and active. Changes are not allowed.',
+        'bottom',
+        'center'
+      );
+      return;
+    }
+    const remarksChanged = this.haveRemarksChanged();
+    const kmChanged = this.haveKmChanged();
+    if (!remarksChanged && !kmChanged) {
+      this.showNotification(
+        'snackbar-warning',
+        'No remark or KM changes to save.',
+        'bottom',
+        'center'
+      );
+      return;
+    }
+
+    this.showSpinner = true;
+    const form = this.advanceTableForm.getRawValue();
+    this.dutySlipForBillingService.updateRemarks({
+      dutySlipID: form.dutySlipID,
+      dutySlipForBillingID: form.dutySlipForBillingID,
+      runningDetails: form.runningDetails,
+      vendorRemark: form.vendorRemark,
+      locationOutKMForBilling: form.locationOutKMForBilling,
+      locationOutLatLongForBilling: form.locationOutLatLongForBilling,
+      reportingToGuestKMForBilling: form.reportingToGuestKMForBilling,
+      reportingToGuestLatLongForBilling: form.reportingToGuestLatLongForBilling,
+      pickUpKMForBilling: form.pickUpKMForBilling,
+      pickUpLatLongForBilling: form.pickUpLatLongForBilling,
+      dropOffKMForBilling: form.dropOffKMForBilling,
+      dropOffLatLongForBilling: form.dropOffLatLongForBilling,
+      locationInKMForBilling: form.locationInKMForBilling,
+      locationInLatLongForBilling: form.locationInLatLongForBilling,
+    }).subscribe(
+      response => {
+        const runningDetails = response?.runningDetails ?? form.runningDetails ?? '';
+        const vendorRemark = response?.vendorRemark ?? form.vendorRemark ?? '';
+        const kmPatch: Record<string, unknown> = {};
+        for (const name of this.alwaysEditableKmControls) {
+          kmPatch[name] = response?.[name] ?? form[name];
+        }
+        this.advanceTableForm.patchValue({ runningDetails, vendorRemark, ...kmPatch }, { emitEvent: false });
+        if (this.advanceTableClosingOne?.closingDutySlipForBillingModel) {
+          const billing = this.advanceTableClosingOne.closingDutySlipForBillingModel;
+          billing.runningDetails = runningDetails;
+          billing.vendorRemark = vendorRemark;
+          for (const name of this.alwaysEditableKmControls) {
+            (billing as Record<string, unknown>)[name] = kmPatch[name];
+          }
+        }
+        this.loadedRunningDetails = this.normalizeRemark(runningDetails);
+        this.loadedVendorRemark = this.normalizeRemark(vendorRemark);
+        this.syncLoadedKmFromForm();
+        this.showSpinner = false;
+        const successMessage = remarksChanged && kmChanged
+          ? 'Remarks and KM saved...!!!'
+          : kmChanged
+            ? 'KM saved...!!!'
+            : 'Remarks saved...!!!';
+        this.showNotification(
+          'snackbar-success',
+          successMessage,
+          'bottom',
+          'center'
+        );
+      },
+      error => {
+        this.showSpinner = false;
+        this.showNotification(
+          'snackbar-danger',
+          this.extractApiErrorMessage(error, 'Failed to save closing fields.'),
+          'bottom',
+          'center'
+        );
+      }
+    );
+  }
+
   public Put(): void
   {
+    if (this.canSavePartialAfterGfb) {
+      this.savePartialAfterGfb();
+      return;
+    }
     if (!this.guardDutySlipEdit()) {
       return;
     }
@@ -2506,27 +2713,10 @@ public resetVerificationForEcoStateChange(): void {
             this.onGFBChange({ checked: false });
             this.saveDisabled = true;
           });
-      })  
+      }
+    );
   }
 
-  ngOnChanges(changes: SimpleChanges) {
-  if (changes['disputeAdvanceTable']) {
-
-    // ✅ Check if any dispute has approvalStatus === false
-    const hasUnapprovedDispute = this.disputeAdvanceTable?.some(d => d.approvalStatus === false);
-
-    if (hasUnapprovedDispute) {
-      // ✅ Uncheck fields if any unapproved dispute is found
-      this.advanceTableForm.patchValue({
-        verifyDuty: false,
-        goodForBilling: false
-      });
-    }
-  }
-  if (changes['hasActiveEInvoice'] || changes['canThisRoleDoGoodForBillingOnClosingScreen']) {
-    this.syncVerifyDutyAndGoodForBillingState();
-  }
-}
  GetClosingData()
   {
     this.clossingOneService.GetClosingData(this.advanceTableClosingOne.closingDutySlipModel.dutySlipID).subscribe(
@@ -2659,49 +2849,46 @@ onChange() {
     );
   }
 
-updateDutyStatus(verifyDuty: boolean, goodForBilling: boolean, callback?: () => void) {
-  this.applyClosingFieldDefaults();
-  this.advanceTableForm.patchValue({
-    verifyDuty: verifyDuty,
-    goodForBilling: goodForBilling
-  });
-
-  this.dutySlipForBillingService
-    .update(this.advanceTableForm.getRawValue())
-    .subscribe({
-      next: (response) => {
-
-        this.advanceTableForm.patchValue({
-          verifyDuty: response.verifyDuty,
-          goodForBilling: response.goodForBilling
-        });
-        this.syncClosingModelFromResponse(response);
-        if (response?.dsClosing ?? response?.DsClosing) {
-          this.buttonText = 'Update';
-        }
-
-        this.showNotification(
-          'snackbar-success',
-          'Updated Successfully',
-          'bottom',
-          'center'
-        );
-
-        if (callback) {
-          callback();
-        }
-      },
-      error: (err) => {
-        this.showNotification(
-          'snackbar-danger',
-          this.extractApiErrorMessage(err),
-          'bottom',
-          'center'
-        );
-      }
+  updateDutyStatus(verifyDuty: boolean, goodForBilling: boolean, callback?: () => void) {
+    this.applyClosingFieldDefaults();
+    this.advanceTableForm.patchValue({
+      verifyDuty: verifyDuty,
+      goodForBilling: goodForBilling
     });
+
+    this.dutySlipForBillingService
+      .update(this.advanceTableForm.getRawValue())
+      .subscribe({
+        next: (response) => {
+
+          this.advanceTableForm.patchValue({
+            verifyDuty: response.verifyDuty,
+            goodForBilling: response.goodForBilling
+          });
+          this.syncClosingModelFromResponse(response);
+          if (response?.dsClosing ?? response?.DsClosing) {
+            this.buttonText = 'Update';
+          }
+
+          this.showNotification(
+            'snackbar-success',
+            'Updated Successfully',
+            'bottom',
+            'center'
+          );
+
+          if (callback) {
+            callback();
+          }
+        },
+        error: (err) => {
+          this.showNotification(
+            'snackbar-danger',
+            this.extractApiErrorMessage(err),
+            'bottom',
+            'center'
+          );
+        }
+      });
+  }
 }
-}
-
-
-

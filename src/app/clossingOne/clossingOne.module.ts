@@ -120,6 +120,8 @@ import { DutySlipImageService } from '../dutySlipImage/dutySlipImage.service';
 import { DutySlipImageDetailsShowModule } from '../dutySlipImageDetailsShow/dutySlipImageDetailsShow.module';
 import { FormDialogChangeSupplierForInventory } from './dialog/changeSupplierForInventory/changeSupplierForInventory.component';
 import { ClosingSectionViewDialogComponent } from './dialog/closingSectionViewDialog/closingSectionViewDialog.component';
+import { ClosingImageViewDialogComponent } from './dialog/closingImageViewDialog/closingImageViewDialog.component';
+import { StaticImageComponent } from '../shared/static-image/static-image.component';
 
 
 @NgModule({
@@ -130,7 +132,8 @@ import { ClosingSectionViewDialogComponent } from './dialog/closingSectionViewDi
     CurrentdataInformationComponent,
     DutySACComponent,
     FormDialogChangeSupplierForInventory,
-    ClosingSectionViewDialogComponent
+    ClosingSectionViewDialogComponent,
+    ClosingImageViewDialogComponent
     ],
   imports: [
     MatTabsModule,
@@ -194,7 +197,8 @@ import { ClosingSectionViewDialogComponent } from './dialog/closingSectionViewDi
     CustomerSpecificDetailsModule,
     DutySlipImageModule,
     SummaryOfDutyModule,
-    DutySlipImageDetailsShowModule
+    DutySlipImageDetailsShowModule,
+    StaticImageComponent
   ],
   exports:[ClossingOneComponent],
   providers: [ClossingOneService,
