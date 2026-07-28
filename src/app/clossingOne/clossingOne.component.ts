@@ -115,6 +115,9 @@ import {
   ClosingSectionViewDialogComponent,
   ClosingSectionViewDialogData
 } from './dialog/closingSectionViewDialog/closingSectionViewDialog.component';
+import {
+  ClosingImageViewDialogComponent
+} from './dialog/closingImageViewDialog/closingImageViewDialog.component';
 @Component({
   standalone: false,
   selector: 'app-clossingOne',
@@ -1500,16 +1503,6 @@ export class ClossingOneComponent implements OnInit, AfterViewInit {
   showAndScrollTollParking() {
     this.openClosingSectionView('tollParking', 'Toll Parking');
   }
-  //-----ODO Meter
-  showAndScrollODOMeter() {
-    this.showHideODOMeterCard = true;
-    setTimeout(() => {
-      const element = document.getElementById('OdoMeterImage');
-      if (element) {
-        element.scrollIntoView({ behavior: 'smooth', block: 'start' });
-      }
-    }, 0);
-  }
   ///-----Dispute
   showAndScrollOpenDisputes() {
     this.openClosingSectionView('dispute', 'Dispute');
@@ -1846,6 +1839,72 @@ export class ClossingOneComponent implements OnInit, AfterViewInit {
     data: {
           dutySlipID: this.dutySlipID,
         }
+    });
+  }
+
+  viewTripStartODOMeterImage(): void {
+    this.withOdometerImageData((data) => {
+      this.openOdometerImageDialog(
+        'Trip Start ODO Meter Image',
+        data?.tripStartODOMeterImage,
+        'Trip Start ODO Meter image not available.'
+      );
+    });
+  }
+
+  viewTripEndODOMeterImage(): void {
+    this.withOdometerImageData((data) => {
+      this.openOdometerImageDialog(
+        'Trip End ODO Meter Image',
+        data?.tripEndODOMeterImage,
+        'Trip End ODO Meter image not available.'
+      );
+    });
+  }
+
+  private withOdometerImageData(onLoaded: (data: OdoMeterAndManualDutySlipImage) => void): void {
+    if (this.oDOMAndMDSAdvanceTable) {
+      onLoaded(this.oDOMAndMDSAdvanceTable);
+      return;
+    }
+    this.odoMeterAndManualDutySlipImageService.getAllotmentIDForDutySlipImage(this.AllotmentID).subscribe(
+      (data: OdoMeterAndManualDutySlipImage) => {
+        this.oDOMAndMDSAdvanceTable = data;
+        onLoaded(data);
+      },
+      () => {
+        this.showNotification(
+          'snackbar-warning',
+          'Unable to load odometer images.',
+          'bottom',
+          'center'
+        );
+      }
+    );
+  }
+
+  private openOdometerImageDialog(
+    title: string,
+    imageUrl: string | null | undefined,
+    missingMessage: string
+  ): void {
+    const resolvedUrl = this._generalService.resolveStaticImageUrl(imageUrl) || imageUrl;
+    if (!resolvedUrl) {
+      this.showNotification(
+        'snackbar-warning',
+        missingMessage,
+        'bottom',
+        'center'
+      );
+      return;
+    }
+    this.dialog.open(ClosingImageViewDialogComponent, {
+      width: '800px',
+      maxWidth: '90vw',
+      data: {
+        title,
+        imageUrl: resolvedUrl,
+      },
     });
   }
 

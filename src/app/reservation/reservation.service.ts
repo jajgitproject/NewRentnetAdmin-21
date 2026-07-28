@@ -417,6 +417,9 @@ export class ReservationService
   } else {
     advanceTable.dropOffTimeString = this.generalService.getTimeApplicable(advanceTable.dropOffTime);
   }
+  if (advanceTable.pickupDate) {
+    advanceTable.pickupDateString = this.generalService.getTimeApplicable(new Date(advanceTable.pickupDate));
+  }
 
   return this.httpClient.put<any>(this.API_URL + '/' + 'EditPickupTime', advanceTable);
 }

@@ -105,6 +105,41 @@ export class DutySlipForBillingService
     return this.httpClient.put<any>(this.API_URL, advanceTable);
   }
 
+  updateRemarks(payload: {
+    dutySlipID: number;
+    dutySlipForBillingID: number;
+    runningDetails?: string | null;
+    vendorRemark?: string | null;
+    locationOutKMForBilling?: number | null;
+    locationOutLatLongForBilling?: string | null;
+    reportingToGuestKMForBilling?: number | null;
+    reportingToGuestLatLongForBilling?: string | null;
+    pickUpKMForBilling?: number | null;
+    pickUpLatLongForBilling?: string | null;
+    dropOffKMForBilling?: number | null;
+    dropOffLatLongForBilling?: string | null;
+    locationInKMForBilling?: number | null;
+    locationInLatLongForBilling?: string | null;
+  }) {
+    return this.httpClient.put<any>(this.API_URL + '/UpdateRemarks', {
+      dutySlipID: this.toNullableInt(payload.dutySlipID) ?? 0,
+      dutySlipForBillingID: this.toNullableInt(payload.dutySlipForBillingID) ?? 0,
+      runningDetails: payload.runningDetails ?? null,
+      vendorRemark: payload.vendorRemark ?? null,
+      locationOutKMForBilling: payload.locationOutKMForBilling ?? null,
+      locationOutLatLongForBilling: payload.locationOutLatLongForBilling ?? null,
+      reportingToGuestKMForBilling: payload.reportingToGuestKMForBilling ?? null,
+      reportingToGuestLatLongForBilling: payload.reportingToGuestLatLongForBilling ?? null,
+      pickUpKMForBilling: payload.pickUpKMForBilling ?? null,
+      pickUpLatLongForBilling: payload.pickUpLatLongForBilling ?? null,
+      dropOffKMForBilling: payload.dropOffKMForBilling ?? null,
+      dropOffLatLongForBilling: payload.dropOffLatLongForBilling ?? null,
+      locationInKMForBilling: payload.locationInKMForBilling ?? null,
+      locationInLatLongForBilling: payload.locationInLatLongForBilling ?? null,
+      userID: this.generalService.getUserID(),
+    });
+  }
+
   private applyBillingDateString(
     payload: any,
     dateField: string,

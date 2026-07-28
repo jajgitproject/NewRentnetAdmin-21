@@ -181,6 +181,19 @@
   overflow: hidden !important;
 }
 
+/* Trip Start/End ODO image popup: no nested scrollbars — image scales to fit. */
+.cdk-overlay-pane:has(app-closingImageViewDialog) .mdc-dialog__surface,
+.cdk-overlay-pane:has(app-closingImageViewDialog) .mat-mdc-dialog-container {
+  overflow: hidden !important;
+}
+
+.cdk-overlay-pane:has(app-closingImageViewDialog) .mat-mdc-dialog-content,
+.cdk-overlay-pane:has(app-closingImageViewDialog) .mdc-dialog__content,
+.cdk-overlay-pane:has(app-closingImageViewDialog) [mat-dialog-content] {
+  overflow: hidden !important;
+  max-height: none !important;
+}
+
 /* Stop Details: wide modal + single scroll (nested from control panel otherwise stays narrow). */
 .cdk-overlay-pane.stop-details-wide-dialog {
   width: min(1200px, 98vw) !important;

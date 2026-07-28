@@ -39,7 +39,6 @@ export class SupplierComponent implements OnInit {
     'supplierName',
     'supplierCode',
     'city',
-    'supplierOfficialIdentityNumber',
     'phone',
     'email',
     'isAdhoc',
