@@ -1278,9 +1278,34 @@ getcsGSTPercentageID(csgstPercentageID:any)
     }
   }
 
+  private prepareSavePayload(): any
+  {
+    const payload = this.advanceTableForm.getRawValue();
+    if (!payload.invoiceDate)
+    {
+      payload.invoiceDate = new Date();
+    }
+    if (!payload.billFromDate)
+    {
+      payload.billFromDate = new Date();
+    }
+    if (!payload.billToDate)
+    {
+      payload.billToDate = new Date();
+    }
+    if (!payload.passengerID && payload.customerPersonNameID)
+    {
+      payload.passengerID = payload.customerPersonNameID;
+    }
+    if (!payload.ecoBillingBranchID && payload.organizationalEntityID)
+    {
+      payload.ecoBillingBranchID = payload.organizationalEntityID;
+    }
+    return payload;
+  }
+
   public Post(): void
   {
-    debugger
     if(this.advanceTableForm.get('gst').value === false)
     {
       this.advanceTableForm.patchValue({igstPercentage:0});
@@ -1302,7 +1327,7 @@ getcsGSTPercentageID(csgstPercentageID:any)
       this.advanceTableForm.patchValue({cgstPercentage:0});
       this.advanceTableForm.patchValue({sgstPercentage:0});
     }
-    this.advanceTableService.add(this.advanceTableForm.getRawValue())  
+    this.advanceTableService.add(this.prepareSavePayload())  
     .subscribe(
     response => 
     {
@@ -1314,11 +1339,12 @@ getcsGSTPercentageID(csgstPercentageID:any)
                 'bottom',
                 'center'
               );
-      //this._generalService.sendUpdate('GenerateBillMainCreate:GenerateBillMainView:Success:'+ response.invoiceNumberWithPrefix);//To Send Updates  
     },
     error =>
     {
-      this._generalService.sendUpdate('GenerateBillMainAll:GenerateBillMainView:Failure');//To Send Updates  
+      const msg = error?.error?.message || 'Operation Failed.....!!!';
+      this.showNotification('snackbar-danger', msg, 'bottom', 'center');
+      this._generalService.sendUpdate('GenerateBillMainAll:GenerateBillMainView:Failure');
     })
   }
 
@@ -1345,17 +1371,19 @@ getcsGSTPercentageID(csgstPercentageID:any)
         this.advanceTableForm.patchValue({cgstPercentage:0});
         this.advanceTableForm.patchValue({sgstPercentage:0});
       }
-    this.advanceTableService.update(this.advanceTableForm.getRawValue())  
+    this.advanceTableService.update(this.prepareSavePayload())  
     .subscribe(
     response => 
     {
       this.dialogRef.close();
-      this._generalService.sendUpdate('GenerateBillMainUpdate:GenerateBillMainView:Success');//To Send Updates  
+      this._generalService.sendUpdate('GenerateBillMainUpdate:GenerateBillMainView:Success');
        
     },
     error =>
     {
-     this._generalService.sendUpdate('GenerateBillMainAll:GenerateBillMainView:Failure');//To Send Updates  
+      const msg = error?.error?.message || 'Operation Failed.....!!!';
+      this.showNotification('snackbar-danger', msg, 'bottom', 'center');
+      this._generalService.sendUpdate('GenerateBillMainAll:GenerateBillMainView:Failure');
     })
   }
 
