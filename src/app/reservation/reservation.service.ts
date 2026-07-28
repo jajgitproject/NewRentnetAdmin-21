@@ -3,7 +3,7 @@ import { Injectable } from '@angular/core';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { GoogleAddress, Reservation, SameReservationModel } from './reservation.model';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
-import { DatePipe } from '@angular/common';
+import { DatePipe, formatDate } from '@angular/common';
 import { GeneralService } from '../general/general.service';
 import { CustomerConfigurationInvoicing } from '../customerConfigurationInvoicing/customerConfigurationInvoicing.model';
 @Injectable()
@@ -407,27 +407,32 @@ export class ReservationService
       return this.httpClient.get(this.API_URL +"/getReservationGSTData/"+ReservationID);
     }
    updatePickupEdit(advanceTable: any) {
-  if (advanceTable.pickupTime === "") {
+  if (advanceTable.pickupTime === "" || advanceTable.pickupTime == null) {
     advanceTable.pickupTime = null;
+    advanceTable.pickupTimeString = null;
   } else {
-    advanceTable.pickupTimeString = this.generalService.getTimeApplicable(advanceTable.pickupTime);
+    advanceTable.pickupTimeString = formatDate(advanceTable.pickupTime, 'HH:mm:ss', 'en-IN');
   }
   if (!advanceTable.dropOffTime) {
     advanceTable.dropOffTimeString = null;
   } else {
-    advanceTable.dropOffTimeString = this.generalService.getTimeApplicable(advanceTable.dropOffTime);
+    advanceTable.dropOffTimeString = formatDate(advanceTable.dropOffTime, 'HH:mm:ss', 'en-IN');
   }
   if (advanceTable.pickupDate) {
-    advanceTable.pickupDateString = this.generalService.getTimeApplicable(new Date(advanceTable.pickupDate));
+    const pickupDate = advanceTable.pickupDate instanceof Date
+      ? advanceTable.pickupDate
+      : new Date(advanceTable.pickupDate);
+    advanceTable.pickupDateString = formatDate(pickupDate, 'yyyy-MM-dd', 'en-IN');
   }
 
   return this.httpClient.put<any>(this.API_URL + '/' + 'EditPickupTime', advanceTable);
 }
  updateLocationOutEdit(advanceTable: any) {
-  if (advanceTable.locationOutTime === "") {
+  if (advanceTable.locationOutTime === "" || advanceTable.locationOutTime == null) {
     advanceTable.locationOutTime = null;
+    advanceTable.locationOutTimeString = null;
   } else {
-    advanceTable.locationOutTimeString = this.generalService.getTimeApplicable(advanceTable.locationOutTime);
+    advanceTable.locationOutTimeString = formatDate(advanceTable.locationOutTime, 'HH:mm:ss', 'en-IN');
   }
   
 

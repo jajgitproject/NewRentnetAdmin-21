@@ -149,7 +149,11 @@ export class GenerateBillMainComponent implements OnInit, OnDestroy {
   {
     const dialogRef = this.dialog.open(FormDialogComponent, 
     {
-      width: '600px',
+      panelClass: 'general-bill-form-dialog',
+      width: '960px',
+      maxWidth: '98vw',
+      maxHeight: '90vh',
+      autoFocus: false,
       hasBackdrop: true,
       data: 
         {
@@ -171,6 +175,12 @@ export class GenerateBillMainComponent implements OnInit, OnDestroy {
   {
     this.invoiceID = row.id;
     const dialogRef = this.dialog.open(FormDialogComponent, {
+    panelClass: 'general-bill-form-dialog',
+    width: '960px',
+    maxWidth: '98vw',
+    maxHeight: '90vh',
+    autoFocus: false,
+    hasBackdrop: true,
     data: 
     {
       advanceTable: row,
