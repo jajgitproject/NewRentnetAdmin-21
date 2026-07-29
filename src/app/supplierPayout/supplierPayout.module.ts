@@ -15,12 +15,14 @@ import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatTabsModule } from '@angular/material/tabs';
 import { MatIconModule } from '@angular/material/icon';
 import { MatTooltipModule } from '@angular/material/tooltip';
+import { MatDialogModule } from '@angular/material/dialog';
 import { SupplierPayoutComponent } from './supplierPayout.component';
+import { SupplierPayoutMismatchDialogComponent } from './supplier-payout-mismatch-dialog.component';
 import { SupplierPayoutRoutingModule } from './supplierPayout-routing.module';
 import { SupplierPayoutService } from './supplierPayout.service';
 
 @NgModule({
-  declarations: [SupplierPayoutComponent],
+  declarations: [SupplierPayoutComponent, SupplierPayoutMismatchDialogComponent],
   imports: [
     CommonModule,
     FormsModule,
@@ -39,6 +41,7 @@ import { SupplierPayoutService } from './supplierPayout.service';
     MatTabsModule,
     MatIconModule,
     MatTooltipModule,
+    MatDialogModule,
   ],
   providers: [SupplierPayoutService],
 })

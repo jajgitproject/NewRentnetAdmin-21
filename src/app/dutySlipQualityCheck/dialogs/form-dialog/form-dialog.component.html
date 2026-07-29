@@ -280,20 +280,7 @@
                     </mat-form-field>
                 </div>
 
-                <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
-                    <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
-                        <mat-label>Self Declaration</mat-label>
-                        <mat-select required #sdVal [class.is-invalid]="sdVal.invalid && sdVal.touched"
-                            formControlName="selfDeclaration">
-                            <mat-option [value]=true>Yes</mat-option>
-                            <mat-option [value]=false>No</mat-option>
-                        </mat-select>
-
-                        <mat-error>
-                            Please Select Self Declaration
-                        </mat-error>
-                    </mat-form-field>
-                </div>
+                <!-- Self Declaration hidden: always sent as true to API -->
             </div>
 
             <div class="row">

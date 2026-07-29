@@ -1,0 +1,128 @@
+<div class="closing-section-view-dialog">
+  <div class="dialog-header">
+    <h2 mat-dialog-title>{{ data.title }}</h2>
+    <button mat-icon-button type="button" (click)="close()" aria-label="Close">
+      <mat-icon>close</mat-icon>
+    </button>
+  </div>
+
+  <mat-dialog-content class="dialog-body">
+    <ng-container [ngSwitch]="data.section">
+      <app-dutyTollParkingEntry *ngSwitchCase="'tollParking'"
+        [tollParkingAdvanceTable]="ctx.tollParkingAdvanceTable"
+        [inViewDialog]="true"
+        [AllotmentID]="ctx.AllotmentID"
+        [dutySlipID]="ctx.DutySlipID"
+        [verifyDutyStatusAndCacellationStatus]="ctx.verifyDutyStatusAndCacellationStatus"
+        [goodForBillingStatusAndCancellationStatus]="ctx.goodForBillingStatusAndCancellationStatus"
+        [expandPanel]="true"
+        (billingChargesChanged)="onChargesChanged()">
+      </app-dutyTollParkingEntry>
+
+      <app-dutyInterstateTax *ngSwitchCase="'interstate'"
+        [advanceTableDIT]="ctx.advanceTableDIT"
+        [inViewDialog]="true"
+        [dutySlipID]="ctx.DutySlipID"
+        [verifyDutyStatusAndCacellationStatus]="ctx.verifyDutyStatusAndCacellationStatus"
+        [goodForBillingStatusAndCancellationStatus]="ctx.goodForBillingStatusAndCancellationStatus"
+        [expandPanel]="true"
+        (billingChargesChanged)="onChargesChanged()">
+      </app-dutyInterstateTax>
+
+      <app-dispute *ngSwitchCase="'dispute'"
+        [disputeAdvanceTable]="ctx.disputeAdvanceTable"
+        [dutySlipID]="ctx.DutySlipID"
+        [reservationID]="ctx.ReservationID"
+        [verifyDutyStatusAndCacellationStatus]="ctx.verifyDutyStatusAndCacellationStatus"
+        [expandPanel]="true"
+        (sectionDataChanged)="onSectionDataChanged()">
+      </app-dispute>
+
+      <app-dutyExpense *ngSwitchCase="'dutyExpense'"
+        [advanceTableDE]="ctx.advanceTableDE"
+        [inViewDialog]="true"
+        [dutySlipID]="ctx.DutySlipID"
+        [verifyDutyStatusAndCacellationStatus]="ctx.verifyDutyStatusAndCacellationStatus"
+        (billingChargesChanged)="onChargesChanged()">
+      </app-dutyExpense>
+
+      <app-dutyGSTPercentage *ngSwitchCase="'dutyGST'"
+        [advanceTableDGP]="ctx.advanceTableDGP"
+        [dutySlipID]="ctx.DutySlipID"
+        [verifyDutyStatusAndCacellationStatus]="ctx.verifyDutyStatusAndCacellationStatus"
+        (sectionDataChanged)="onSectionDataChanged()">
+      </app-dutyGSTPercentage>
+
+      <app-dutyState *ngSwitchCase="'dutyState'"
+        [advanceTableDutyState]="ctx.advanceTableDutyState"
+        [dutySlipID]="ctx.DutySlipID"
+        [verifyDutyStatusAndCacellationStatus]="ctx.verifyDutyStatusAndCacellationStatus"
+        [verifyDuty]="ctx.verifyDuty"
+        [goodForBilling]="ctx.goodForBilling"
+        [invoiceGenerated]="ctx.invoiceGenerated"
+        (sectionDataChanged)="onSectionDataChanged()">
+      </app-dutyState>
+
+      <app-dutyStateCustomer *ngSwitchCase="'dutyStateCustomer'"
+        [advanceTableDutyStateCustomer]="ctx.advanceTableDutyStateCustomer"
+        [dutySlipID]="ctx.DutySlipID"
+        [verifyDutyStatusAndCacellationStatus]="ctx.verifyDutyStatusAndCacellationStatus"
+        [CustomerID]="ctx.CustomerID"
+        (sectionDataChanged)="onSectionDataChanged()">
+      </app-dutyStateCustomer>
+
+      <app-dutySAC *ngSwitchCase="'dutySAC'"
+        [advanceTableSAC]="ctx.advanceTableSAC"
+        [dutySlipID]="ctx.DutySlipID"
+        [AllotmentID]="ctx.AllotmentID"
+        [verifyDutyStatusAndCacellationStatus]="ctx.verifyDutyStatusAndCacellationStatus"
+        [expandPanel]="true"
+        (sectionDataChanged)="onSectionDataChanged()">
+      </app-dutySAC>
+
+      <app-additionalKmsDetails *ngSwitchCase="'additionalKm'"
+        [advanceTableAD]="ctx.advanceTableAD"
+        [AllotmentID]="ctx.AllotmentID"
+        [dutySlipID]="ctx.DutySlipID"
+        [verifyDutyStatusAndCacellationStatus]="ctx.verifyDutyStatusAndCacellationStatus"
+        [expandPanel]="true"
+        (sectionDataChanged)="onSectionDataChanged()">
+      </app-additionalKmsDetails>
+
+      <app-mopDetailsShow *ngSwitchCase="'mop'"
+        [reservationID]="ctx.ReservationID"
+        [advanceTableMOP]="ctx.advanceTableMOP"
+        (sectionDataChanged)="onSectionDataChanged()">
+      </app-mopDetailsShow>
+
+      <app-settledRateDetails *ngSwitchCase="'settledRates'"
+        [advanceTableSRD]="ctx.advanceTableSRD"
+        [reservationID]="ctx.ReservationID"
+        [status]="ctx.verifyDutyStatusAndCacellationStatus"
+        (sectionDataChanged)="onSectionDataChanged()">
+      </app-settledRateDetails>
+
+      <app-discountDetails *ngSwitchCase="'discount'"
+        [advanceTableDD]="ctx.advanceTableDD"
+        [AllotmentID]="ctx.AllotmentID"
+        (sectionDataChanged)="onSectionDataChanged()">
+      </app-discountDetails>
+
+      <app-customerSpecificDetails *ngSwitchCase="'customerSpecific'"
+        [from]="ctx.from"
+        [dataSourceCSD]="ctx.dataSourceCSF"
+        [reservationID]="ctx.ReservationID"
+        (sectionDataChanged)="onSectionDataChanged()">
+      </app-customerSpecificDetails>
+
+      <app-changeDutyTypeClosing *ngSwitchCase="'changeDutyType'"
+        [reservationID]="ctx.ReservationID"
+        [advanceTableMOP]="ctx.advanceTableMOP">
+      </app-changeDutyTypeClosing>
+    </ng-container>
+  </mat-dialog-content>
+
+  <mat-dialog-actions align="end">
+    <button mat-stroked-button type="button" (click)="close()">Close</button>
+  </mat-dialog-actions>
+</div>

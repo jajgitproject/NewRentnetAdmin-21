@@ -1,0 +1,158 @@
+<section class="content">
+<div class="container-fluid bulk-einvoice-page">
+  <div class="block-header">
+    <h2>E-Invoice</h2>
+    <p class="text-muted page-subtitle">
+      Generate IRN in bulk for active invoices without IRN. Uses the same Webtel flow as Generate E-Invoice (one invoice at a time, throttled).
+    </p>
+  </div>
+
+  <div class="card search-panel">
+    <div class="card-header search-panel__header">
+      <span class="search-panel__title">Search criteria</span>
+      <span class="search-panel__hint">Finance Dashboard flagged invoices are excluded automatically.</span>
+    </div>
+    <div class="body search-panel__body">
+      <div class="row search-panel__fields">
+        <div class="col-xl-2 col-lg-3 col-md-4 col-sm-6">
+          <mat-form-field appearance="outline" floatLabel="always" class="w-100">
+            <mat-label>From date</mat-label>
+            <input matInput [matDatepicker]="fromPicker" [(ngModel)]="fromDate" />
+            <mat-datepicker-toggle matSuffix [for]="fromPicker"></mat-datepicker-toggle>
+            <mat-datepicker #fromPicker></mat-datepicker>
+          </mat-form-field>
+        </div>
+        <div class="col-xl-2 col-lg-3 col-md-4 col-sm-6">
+          <mat-form-field appearance="outline" floatLabel="always" class="w-100">
+            <mat-label>To date</mat-label>
+            <input matInput [matDatepicker]="toPicker" [(ngModel)]="toDate" />
+            <mat-datepicker-toggle matSuffix [for]="toPicker"></mat-datepicker-toggle>
+            <mat-datepicker #toPicker></mat-datepicker>
+          </mat-form-field>
+        </div>
+        <div class="col-xl-2 col-lg-3 col-md-4 col-sm-6">
+          <mat-form-field appearance="outline" floatLabel="always" class="w-100">
+            <mat-label>Customer name</mat-label>
+            <input matInput [matAutocomplete]="customerAuto" [formControl]="customer" placeholder="Type 3+ letters" />
+            <mat-autocomplete #customerAuto="matAutocomplete" (optionSelected)="onCustomerSelected($event.option.value)">
+              <mat-option *ngFor="let option of filteredCustomerOptions | async" [value]="option.customerName">
+                {{ option.customerName }}
+              </mat-option>
+            </mat-autocomplete>
+          </mat-form-field>
+        </div>
+        <div class="col-xl-2 col-lg-3 col-md-4 col-sm-6">
+          <mat-form-field appearance="outline" floatLabel="always" class="w-100">
+            <mat-label>Invoice number (optional)</mat-label>
+            <input matInput [(ngModel)]="invoiceNumber" />
+          </mat-form-field>
+        </div>
+        <div class="col-xl-2 col-lg-3 col-md-4 col-sm-6">
+          <div class="bulk-einvoice-fixed-batch">
+            <strong>Job / batch size</strong>
+            <p class="text-muted mb-0">{{ fixedBatchSize }} invoices per job (fixed)</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="search-panel__actions">
+        <button mat-raised-button color="primary" type="button" (click)="previewCandidates()" [disabled]="previewLoading || jobRunning">
+          Preview
+        </button>
+        <button mat-raised-button color="accent" type="button" (click)="startJob()" [disabled]="!canStartJob()">
+          Start job
+        </button>
+        <button mat-stroked-button color="warn" type="button" (click)="cancelJob()" [disabled]="!jobRunning">
+          Cancel job
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <div class="card results-panel" *ngIf="previewLoading || preview">
+    <div class="body">
+      <div *ngIf="previewLoading" class="results-panel__loading">Loading preview…</div>
+
+      <div *ngIf="preview && !previewLoading" class="preview-summary">
+        <p>
+          <strong>Matched:</strong> {{ preview.totalMatchedCount }} —
+          <strong>This job (one batch):</strong> {{ preview.willProcessCount }} invoice(s)
+          <span> (max {{ fixedBatchSize }})</span>
+          —
+          <strong>Est. duration:</strong> ~{{ preview.estimatedDurationSeconds }}s
+        </p>
+        <p *ngIf="preview.totalMatchedCount > preview.willProcessCount" class="text-muted batch-hint">
+          One job processes at most {{ fixedBatchSize }} invoice(s).
+          This run will take the first {{ preview.willProcessCount }}.
+          About {{ preview.estimatedBatchCount }} separate job run(s) needed to clear all {{ preview.totalMatchedCount }} matched.
+        </p>
+        <p *ngIf="preview.totalMatchedCount <= preview.willProcessCount && preview.totalMatchedCount > 0" class="text-muted batch-hint">
+          All matched invoices fit in one job (max {{ fixedBatchSize }}).
+        </p>
+      </div>
+
+      <div class="table-responsive" *ngIf="preview?.invoices?.length">
+        <table mat-table [dataSource]="preview.invoices" class="w-100">
+          <ng-container matColumnDef="invoiceNumberWithPrefix">
+            <th mat-header-cell *matHeaderCellDef>Invoice #</th>
+            <td mat-cell *matCellDef="let row">{{ row.invoiceNumberWithPrefix }}</td>
+          </ng-container>
+          <ng-container matColumnDef="invoiceDate">
+            <th mat-header-cell *matHeaderCellDef>Date</th>
+            <td mat-cell *matCellDef="let row">{{ row.invoiceDate | date:'dd/MM/yyyy' }}</td>
+          </ng-container>
+          <ng-container matColumnDef="customerName">
+            <th mat-header-cell *matHeaderCellDef>Customer</th>
+            <td mat-cell *matCellDef="let row">{{ row.customerName }}</td>
+          </ng-container>
+          <ng-container matColumnDef="invoiceType">
+            <th mat-header-cell *matHeaderCellDef>Type</th>
+            <td mat-cell *matCellDef="let row">{{ row.invoiceType }}</td>
+          </ng-container>
+          <ng-container matColumnDef="generateIrnInvoiceType">
+            <th mat-header-cell *matHeaderCellDef>IRN type</th>
+            <td mat-cell *matCellDef="let row">{{ row.generateIrnInvoiceType }}</td>
+          </ng-container>
+          <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+          <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
+        </table>
+      </div>
+
+      <p *ngIf="preview && !previewLoading && !preview.invoices?.length" class="text-muted mb-0">
+        No eligible invoices found for the selected filters.
+      </p>
+    </div>
+  </div>
+
+  <div class="card" *ngIf="activeJob || jobRunning">
+    <div class="body">
+      <h5>Job progress</h5>
+      <p>
+        Status: <strong>{{ getJobStatusLabel() }}</strong>
+        <span *ngIf="activeJob"> — Processed: {{ activeJob.processedFiles || 0 }} / {{ activeJob.totalFiles || 0 }}
+          (OK: {{ activeJob.successCount || 0 }}, Failed: {{ activeJob.errorCount || 0 }})</span>
+      </p>
+      <mat-progress-bar mode="indeterminate" *ngIf="jobRunning"></mat-progress-bar>
+    </div>
+  </div>
+
+  <div class="card" *ngIf="jobErrors?.length">
+    <div class="body">
+      <h5>Job log</h5>
+      <div class="table-responsive">
+        <table class="table table-sm">
+          <thead>
+            <tr><th>Invoice</th><th>Result</th></tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let e of jobErrors">
+              <td>{{ e.fileName || e.FileName }}</td>
+              <td>{{ e.errorDescription || e.ErrorDescription }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+</section>

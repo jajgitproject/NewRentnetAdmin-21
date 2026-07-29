@@ -9,7 +9,7 @@ import { ModelForReservation, Reservation, ReservationStatusLog, SameReservation
 import { DataSource } from '@angular/cdk/collections';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { BehaviorSubject, fromEvent, merge, Observable, of, Subject, Subscription } from 'rxjs';
-import { map, startWith } from 'rxjs/operators';
+import { map, startWith, switchMap, catchError } from 'rxjs/operators';
 import { DateAdapter, MAT_DATE_LOCALE } from '@angular/material/core';
 import { MatMenu, MatMenuTrigger } from '@angular/material/menu';
 import { SelectionModel } from '@angular/cdk/collections';
@@ -736,15 +736,20 @@ onTNCChange(checked: any)
         (data:CustomerSpecificDetailsData)=>
         {
           this.dataSourceCSF = data.reservationDetailsList;
+          this.arr = [];
           const fieldValues = this.dataSourceCSF[0]?.customerSpecificFieldList || [];
-          fieldValues.forEach((item) => {
-            const control = this.advanceTableForm.controls[item.fieldName];
-            if (control) {
-              control.setValue(item.fieldValue);
-              this.arr.push(item.fieldValue);
-            }       
-      });
-      this.advanceTableForm.patchValue({projectCode: this.arr});
+          // Prefill from saved JSON using the same field-name matching as save/validate.
+          // Keep projectCode[] index-aligned with CustomerExtraFieldList / fieldName[].
+          this.toArray<CustomerReservationFields>(this.CustomerExtraFieldList).forEach((field) => {
+            const saved = fieldValues.find((item) =>
+              String(item?.fieldName ?? '').trim().toLowerCase() ===
+              String(field?.fieldName ?? '').trim().toLowerCase()
+            );
+            const value = saved?.fieldValue ?? '';
+            this.setCustomerFieldValue(field.fieldName, value);
+            this.arr.push(value);
+          });
+          this.advanceTableForm.patchValue({projectCode: this.arr});
         }
       );
     }
@@ -797,8 +802,9 @@ onTNCChange(checked: any)
           });
           this.CustomerExtraFieldList = incomingFields;
 
-          if(this.shouldUseEditPrefill())
-          {
+          // Prefill saved CSF whenever a reservation is open — not only when
+          // action === 'edit' (some entry paths omit action but still pass reservationID).
+          if (this.getCurrentReservationID()) {
             this.CustomerSpecificFieldsloadData();
           }
 
@@ -836,14 +842,170 @@ onTNCChange(checked: any)
 getFieldValues() {
   this.arr = [];
   this.toArray<CustomerReservationFields>(this.CustomerExtraFieldList).forEach((field) => {
-    const fieldValue = this.getCustomerFieldValue(field.fieldName);
-    if (Array.isArray(fieldValue)) {
-      const transformedArray = fieldValue.map((item: any) => item.fieldValue);
-      this.arr.push(...transformedArray);
-    } else if (fieldValue !== null && fieldValue !== undefined) {
-      this.arr.push(fieldValue);
-    }
+    this.arr.push(this.normalizeCustomerFieldValue(this.getCustomerFieldValue(field.fieldName)));
   });
+}
+
+/** Build the CSF payload used by PUT reservation/updateReservation (proven control-panel path). */
+private buildCustomerSpecificFieldsPayload(reservationIDOverride?: number): {
+  reservationID: number;
+  customerReservationFieldID: number[];
+  fieldName: string[];
+  fieldValue: string[];
+  customerSpecificFields: string;
+} | null {
+  const fields = this.toArray<CustomerReservationFields>(this.CustomerExtraFieldList);
+  if (!fields.length) {
+    return null;
+  }
+
+  const reservationID = Number(
+    reservationIDOverride
+      ?? this.getCurrentReservationID()
+      ?? this.advanceTableForm?.value?.reservationID
+  );
+  if (!reservationID || Number.isNaN(reservationID)) {
+    return null;
+  }
+
+  const customerReservationFieldID: number[] = [];
+  const fieldName: string[] = [];
+  const fieldValue: string[] = [];
+
+  fields.forEach((field) => {
+    customerReservationFieldID.push(Number(field.customerReservationFieldID));
+    fieldName.push(String(field.fieldName ?? ''));
+    fieldValue.push(this.normalizeCustomerFieldValue(this.getCustomerFieldValue(field.fieldName)));
+  });
+
+  // PascalCase JSON matches what ReservationProc / GetCustomerSpecificFieldsData already store/read.
+  const customerSpecificFields = JSON.stringify(
+    customerReservationFieldID.map((id, index) => ({
+      CustomerReservationFieldID: id,
+      FieldName: fieldName[index],
+      FieldValue: fieldValue[index],
+    }))
+  );
+
+  return { reservationID, customerReservationFieldID, fieldName, fieldValue, customerSpecificFields };
+}
+
+private applyCustomerSpecificFieldsToForm(
+  payload: {
+    customerReservationFieldID: number[];
+    fieldName: string[];
+    fieldValue: string[];
+  } | null
+): void {
+  if (!payload) {
+    return;
+  }
+  this.arr = [...payload.fieldValue];
+  this.arr1 = [...payload.customerReservationFieldID];
+  this.arr2 = [...payload.fieldName];
+  this.advanceTableForm.patchValue({
+    projectCode: this.arr,
+    customerReservationFieldID: this.arr1,
+    fieldName: this.arr2,
+  });
+}
+
+/** Merge CSF arrays + JSON onto the booking update body so API never receives null CSF. */
+private buildReservationSaveBody(
+  csfPayload: {
+    reservationID: number;
+    customerReservationFieldID: number[];
+    fieldName: string[];
+    fieldValue: string[];
+    customerSpecificFields: string;
+  } | null
+): any {
+  const body = { ...this.advanceTableForm.getRawValue() };
+
+  // Keep TicketNumber as a trimmed string (never drop it from the edit payload).
+  const ticketNumber = this.normalizeCustomerFieldValue(
+    body.ticketNumber ?? this.advanceTableForm.get('ticketNumber')?.value
+  );
+  body.ticketNumber = ticketNumber;
+
+  if (!csfPayload) {
+    body.customerReservationFieldID = Array.isArray(body.customerReservationFieldID)
+      ? body.customerReservationFieldID
+      : [];
+    body.fieldName = Array.isArray(body.fieldName) ? body.fieldName : [];
+    body.projectCode = Array.isArray(body.projectCode) ? body.projectCode : [];
+    body.fieldValue = Array.isArray(body.fieldValue) ? body.fieldValue : [];
+    body.customerSpecificFields = body.customerSpecificFields || null;
+    return body;
+  }
+
+  body.customerReservationFieldID = [...csfPayload.customerReservationFieldID];
+  body.fieldName = [...csfPayload.fieldName];
+  body.projectCode = [...csfPayload.fieldValue];
+  body.fieldValue = [...csfPayload.fieldValue];
+  body.customerSpecificFields = csfPayload.customerSpecificFields;
+  if (!body.reservationID) {
+    body.reservationID = csfPayload.reservationID;
+  }
+  return body;
+}
+
+private normalizeCustomerFieldValue(value: unknown): string {
+  if (value === null || value === undefined) {
+    return '';
+  }
+  if (typeof value === 'string') {
+    return value;
+  }
+  if (typeof value === 'number' || typeof value === 'boolean') {
+    return String(value);
+  }
+  if (Array.isArray(value)) {
+    return value
+      .map((item) => this.normalizeCustomerFieldValue(item))
+      .filter((item) => item !== '')
+      .join(', ');
+  }
+  if (typeof value === 'object' && value !== null && 'fieldValue' in (value as Record<string, unknown>)) {
+    return this.normalizeCustomerFieldValue((value as Record<string, unknown>).fieldValue);
+  }
+  return '';
+}
+
+isTextBoxField(field: any): boolean {
+  const type = String(field?.fieldControlType ?? '').trim().toLowerCase().replace(/\s+/g, '');
+  return type === 'textbox' || type === 'text' || type === '';
+}
+
+isDropDownField(field: any): boolean {
+  const type = String(field?.fieldControlType ?? '').trim().toLowerCase().replace(/\s+/g, '');
+  return type === 'dropdown' || type === 'select';
+}
+
+/** Persist CSF via the direct SQL endpoint after booking update (ReservationProc may not keep CSF). */
+private persistCustomerSpecificFields(reservationID?: number): Observable<any> {
+  const payload = this.buildCustomerSpecificFieldsPayload(reservationID);
+  if (!payload) {
+    return of(null);
+  }
+  this.applyCustomerSpecificFieldsToForm(payload);
+  return this.reservationService.updateCustomerSpecificFields({
+    reservationID: payload.reservationID,
+    customerReservationFieldID: payload.customerReservationFieldID,
+    fieldName: payload.fieldName,
+    fieldValue: payload.fieldValue,
+  }).pipe(
+    catchError((error) => {
+      console.error('Customer specific fields save failed', error);
+      this.showNotification(
+        'snackbar-danger',
+        error?.error?.message || 'Customer Specific Fields failed to save.',
+        'bottom',
+        'center'
+      );
+      return of(null);
+    })
+  );
 }
 
 toArray<T>(value: any): T[] {
@@ -2137,146 +2299,182 @@ toArray<T>(value: any): T[] {
   //------------ Vehicle -----------------
   InitVehicle(PackageType)
   {
+    if (!this.contractID) {
+      return;
+    }
+
+    const packageID = this.packageID || this.advanceTableForm.value.packageID;
+    if (!packageID) {
+      return;
+    }
+
     if(PackageType === 'Local Rate')
       {
-        this._generalService.GetVehicleBasedOnContractID(this.contractID,this.packageID || this.advanceTableForm.value.packageID).subscribe(
+        this._generalService.GetVehicleBasedOnContractID(this.contractID, packageID).subscribe(
         data=>
         {
-          this.VehicleList=data;
-          this.advanceTableForm.controls['vehicle'].setValidators([Validators.required,this.CValidator(this.VehicleList)]);
-          this.filteredVehicleOptions = this.advanceTableForm.controls['vehicle'].valueChanges.pipe(
-          startWith(""),
-          map(value => this._filterVehicle(value || ''))
-          ); 
+          this.applyVehicleList(data);
         });
       }
 
     else if(PackageType === 'Local Lumpsum Rate')
     {
-      this._generalService.GetVehicleBasedOnContractIDForLocalLumpsum(this.contractID,this.packageID || this.advanceTableForm.value.packageID).subscribe(
+      this._generalService.GetVehicleBasedOnContractIDForLocalLumpsum(this.contractID, packageID).subscribe(
       data=>
       {
-        this.VehicleList=data;
-        this.advanceTableForm.controls['vehicle'].setValidators([Validators.required,this.CValidator(this.VehicleList)]);
-        this.filteredVehicleOptions = this.advanceTableForm.controls['vehicle'].valueChanges.pipe(
-        startWith(""),
-        map(value => this._filterVehicle(value || ''))
-        ); 
+        this.applyVehicleList(data);
       });
     }
 
     else if(PackageType === 'Local On Demand Rate')
     {
-      this._generalService.GetVehicleBasedOnContractIDForLocalOnDemand(this.contractID,this.packageID || this.advanceTableForm.value.packageID).subscribe(
+      this._generalService.GetVehicleBasedOnContractIDForLocalOnDemand(this.contractID, packageID).subscribe(
       data=>
       {
-        this.VehicleList=data;
-        this.advanceTableForm.controls['vehicle'].setValidators([Validators.required,this.CValidator(this.VehicleList)]);
-        this.filteredVehicleOptions = this.advanceTableForm.controls['vehicle'].valueChanges.pipe(
-        startWith(""),
-        map(value => this._filterVehicle(value || ''))
-        ); 
+        this.applyVehicleList(data);
       });
     }
 
     else if(PackageType === 'Local Transfer Rate')
     {
-      this._generalService.GetVehicleBasedOnContractIDForLocalTransfer(this.contractID,this.packageID || this.advanceTableForm.value.packageID).subscribe(
+      this._generalService.GetVehicleBasedOnContractIDForLocalTransfer(this.contractID, packageID).subscribe(
       data=>
       {
-        this.VehicleList=data;
-        this.advanceTableForm.controls['vehicle'].setValidators([Validators.required,this.CValidator(this.VehicleList)]);
-        this.filteredVehicleOptions = this.advanceTableForm.controls['vehicle'].valueChanges.pipe(
-        startWith(""),
-        map(value => this._filterVehicle(value || ''))
-        ); 
+        this.applyVehicleList(data);
       });
     }
 
     else if(PackageType === 'Long Term Rental Rate')
     {
-      this._generalService.GetVehicleBasedOnContractIDForLongTermRental(this.contractID,this.packageID || this.advanceTableForm.value.packageID).subscribe(
+      this._generalService.GetVehicleBasedOnContractIDForLongTermRental(this.contractID, packageID).subscribe(
       data=>
       {
-        this.VehicleList=data;
-        this.advanceTableForm.controls['vehicle'].setValidators([Validators.required,this.CValidator(this.VehicleList)]);
-        this.filteredVehicleOptions = this.advanceTableForm.controls['vehicle'].valueChanges.pipe(
-        startWith(""),
-        map(value => this._filterVehicle(value || ''))
-        ); 
+        this.applyVehicleList(data);
       });
     }
 
     else if(PackageType === 'Outstation Lumpsum Rate')
     {
-      this._generalService.GetVehicleBasedOnContractIDForOutStationLumpsum(this.contractID,this.packageID || this.advanceTableForm.value.packageID).subscribe(
+      this._generalService.GetVehicleBasedOnContractIDForOutStationLumpsum(this.contractID, packageID).subscribe(
       data=>
       {
-        this.VehicleList=data;
-        this.advanceTableForm.controls['vehicle'].setValidators([Validators.required,this.CValidator(this.VehicleList)]);
-        this.filteredVehicleOptions = this.advanceTableForm.controls['vehicle'].valueChanges.pipe(
-        startWith(""),
-        map(value => this._filterVehicle(value || ''))
-        ); 
+        this.applyVehicleList(data);
       });
     }
 
   else if(PackageType === 'Outstation OneWay Trip Rate')
   {
-    this._generalService.GetVehicleBasedOnContractIDForOutStationOneWayTrip(this.contractID,this.packageID || this.advanceTableForm.value.packageID).subscribe(
+    this._generalService.GetVehicleBasedOnContractIDForOutStationOneWayTrip(this.contractID, packageID).subscribe(
     data=>
     {
-      this.VehicleList=data;
-      this.advanceTableForm.controls['vehicle'].setValidators([Validators.required,this.CValidator(this.VehicleList)]);
-      this.filteredVehicleOptions = this.advanceTableForm.controls['vehicle'].valueChanges.pipe(
-      startWith(""),
-      map(value => this._filterVehicle(value || ''))
-      ); 
+      this.applyVehicleList(data);
     });
   }
 
   else if(PackageType === 'Outstation Round Trip Rate')
   {
-    this._generalService.GetVehicleBasedOnContractIDForOutStationRoundTrip(this.contractID,this.packageID || this.advanceTableForm.value.packageID).subscribe(
+    this._generalService.GetVehicleBasedOnContractIDForOutStationRoundTrip(this.contractID, packageID).subscribe(
     data=>
     {
-      this.VehicleList=data;
-      this.advanceTableForm.controls['vehicle'].setValidators([Validators.required,this.CValidator(this.VehicleList)]);
-      this.filteredVehicleOptions = this.advanceTableForm.controls['vehicle'].valueChanges.pipe(
-      startWith(""),
-      map(value => this._filterVehicle(value || ''))
-      ); 
+      this.applyVehicleList(data);
     });
   }
 }
 
-  private _filterVehicle(value: string): any {
-    const filterValue = value.toLowerCase();
-    //  if (!value || value.length < 3) {
-    // return [];   
-    //  }
+  private applyVehicleList(data: any): void {
+    this.VehicleList = this.toArray(data);
+    const vehicleControl = this.advanceTableForm.controls['vehicle'];
+    vehicleControl.setValidators([Validators.required, this.CValidator(this.VehicleList)]);
+    this.filteredVehicleOptions = vehicleControl.valueChanges.pipe(
+      startWith(vehicleControl.value || ''),
+      map(value => this._filterVehicle(value || ''))
+    );
 
-    return this.VehicleList?.filter(
-      customer => 
-      {
-        return customer.vehicle.toLowerCase().includes(filterValue);
-      }
+    // Rematch saved vehicle to dropdown option labels (same pattern as package type).
+    // Without this, edit mode shows the old label but CValidator marks it invalid.
+    if (this.shouldUseEditPrefill() || this.getCurrentReservationID()) {
+      this.normalizeLoadedVehicleLabel();
+    }
+    vehicleControl.updateValueAndValidity({ emitEvent: false });
+  }
+
+  private normalizeLoadedVehicleLabel(): void {
+    if (!Array.isArray(this.VehicleList) || this.VehicleList.length === 0) {
+      return;
+    }
+
+    const formValue = this.advanceTableForm.getRawValue() as Record<string, unknown>;
+    const currentVehicleID = formValue['vehicleID'] ?? this.advanceTable?.vehicleID ?? this.vehicleID;
+    const currentVehicleLabel = String(formValue['vehicle'] ?? this.advanceTable?.vehicle ?? '').trim();
+    let matchedVehicle: any = null;
+
+    if (!this.isEmptyId(currentVehicleID)) {
+      matchedVehicle = this.VehicleList.find(
+        (item: any) => String(item?.vehicleID) === String(currentVehicleID)
+      );
+    }
+
+    if (!matchedVehicle && currentVehicleLabel) {
+      const normalizedCurrentLabel = currentVehicleLabel.toLowerCase();
+      matchedVehicle = this.VehicleList.find(
+        (item: any) => String(item?.vehicle ?? '').trim().toLowerCase() === normalizedCurrentLabel
+      );
+    }
+
+    if (!matchedVehicle && currentVehicleLabel) {
+      const normalizedCurrentLabel = currentVehicleLabel.toLowerCase();
+      matchedVehicle = this.VehicleList.find((item: any) => {
+        const optionLabel = String(item?.vehicle ?? '').trim().toLowerCase();
+        return optionLabel.includes(normalizedCurrentLabel) || normalizedCurrentLabel.includes(optionLabel);
+      });
+    }
+
+    if (!matchedVehicle || this.isEmptyText(matchedVehicle.vehicle)) {
+      return;
+    }
+
+    this.vehicleID = matchedVehicle.vehicleID;
+    this.vehicleCategoryID = matchedVehicle.vehicleCategoryID;
+    if (this.advanceTable) {
+      this.advanceTable.vehicle = matchedVehicle.vehicle;
+      this.advanceTable.vehicleID = matchedVehicle.vehicleID;
+      this.advanceTable.vehicleCategoryID = matchedVehicle.vehicleCategoryID;
+    }
+    this.advanceTableForm.patchValue({
+      vehicleID: matchedVehicle.vehicleID,
+      vehicle: matchedVehicle.vehicle,
+      vehicleCategoryID: matchedVehicle.vehicleCategoryID,
+    }, { emitEvent: false });
+  }
+
+  private _filterVehicle(value: string): any {
+    const filterValue = String(value ?? '').toLowerCase();
+    return this.toArray(this.VehicleList).filter(
+      (customer: any) => String(customer?.vehicle ?? '').toLowerCase().includes(filterValue)
     );
   }
 
   CValidator(VehicleList: any[]): ValidatorFn {
       return (control: AbstractControl): ValidationErrors | null => {
-        const value = control.value?.toLowerCase();
-        const match = VehicleList.some(data =>
-          (data.vehicle.toLowerCase()) === value
+        const list = this.toArray(VehicleList);
+        // While the car list is still loading, don't mark the saved edit value invalid.
+        if (!list.length) {
+          return null;
+        }
+        const value = String(control.value ?? '').trim().toLowerCase();
+        if (!value) {
+          return null;
+        }
+        const match = list.some(data =>
+          String(data?.vehicle ?? '').trim().toLowerCase() === value
         );
         return match ? null : { vehicleInvalid: true };
       };
     }
   
   onCarSelected(selectedCarName: string) {
-    const selectedCar = this.VehicleList.find(
-      data => data.vehicle === selectedCarName
+    const selectedCar = this.toArray(this.VehicleList).find(
+      (data: any) => data.vehicle === selectedCarName
     );
   
     if (selectedCar) {
@@ -2859,23 +3057,31 @@ private reservationFormValue(): Record<string, unknown> {
   return this.advanceTableForm.getRawValue() as Record<string, unknown>;
 }
 
-private getCustomerFieldValue(fieldName: string): unknown {
+private resolveCustomerFieldControlKey(fieldName: string): string | undefined {
   const targetFieldName = String(fieldName ?? '').trim();
   if (!targetFieldName) {
     return undefined;
   }
 
-  const exactControl = this.advanceTableForm.controls[targetFieldName];
-  if (exactControl) {
-    return exactControl.value;
+  if (this.advanceTableForm.controls[targetFieldName]) {
+    return targetFieldName;
   }
 
   const normalizedTarget = targetFieldName.toLowerCase();
-  const controlKey = Object.keys(this.advanceTableForm.controls).find(
+  return Object.keys(this.advanceTableForm.controls).find(
     key => key.trim().toLowerCase() === normalizedTarget
   );
+}
+
+private getCustomerFieldValue(fieldName: string): unknown {
+  const controlKey = this.resolveCustomerFieldControlKey(fieldName);
   if (controlKey) {
     return this.advanceTableForm.controls[controlKey]?.value;
+  }
+
+  const targetFieldName = String(fieldName ?? '').trim();
+  if (!targetFieldName) {
+    return undefined;
   }
 
   const formValue = this.reservationFormValue();
@@ -2883,10 +3089,18 @@ private getCustomerFieldValue(fieldName: string): unknown {
     return formValue[targetFieldName];
   }
 
+  const normalizedTarget = targetFieldName.toLowerCase();
   const rawKey = Object.keys(formValue).find(
     key => key.trim().toLowerCase() === normalizedTarget
   );
   return rawKey ? formValue[rawKey] : undefined;
+}
+
+private setCustomerFieldValue(fieldName: string, value: unknown): void {
+  const controlKey = this.resolveCustomerFieldControlKey(fieldName);
+  if (controlKey) {
+    this.advanceTableForm.controls[controlKey].setValue(value ?? '');
+  }
 }
 
 private isEmptyId(value: unknown): boolean {
@@ -3148,12 +3362,13 @@ public validateCustomerSpecificFields(): boolean {
 
   public Put(): void
   {
+    const csfPayload = this.buildCustomerSpecificFieldsPayload();
+    this.applyCustomerSpecificFieldsToForm(csfPayload);
     this.advanceTableForm.patchValue({isTimeNotConfirmed:this.isTNCSelected});
     if(!this.advanceTableForm.value.dropOffPriorityOrder)
         {
           this.advanceTableForm.patchValue({dropOffPriorityOrder:0});
         }
-    this.advanceTableForm.patchValue({projectCode:this.arr});
     if(this.advanceTableForm.value.customerConfigurationInvoicingID !== 0)
     {
       this.advanceTableForm.patchValue({customerConfigurationInvoicingID:this.customerConfigurationInvoicingID});
@@ -3162,7 +3377,13 @@ public validateCustomerSpecificFields(): boolean {
     {
       this.advanceTableForm.patchValue({customerConfigurationInvoicingID:0});
     }
-    this.reservationService.update(this.advanceTableForm.getRawValue())  
+    const saveBody = this.buildReservationSaveBody(csfPayload);
+    this.reservationService.update(saveBody)  
+    .pipe(
+      switchMap((response) =>
+        this.persistCustomerSpecificFields(response?.reservationID).pipe(map(() => response))
+      )
+    )
     .subscribe(
     response => 
     {
@@ -3225,12 +3446,13 @@ public validateCustomerSpecificFields(): boolean {
 
   public PutForReservationEdit(): void
   { 
+    const csfPayload = this.buildCustomerSpecificFieldsPayload();
+    this.applyCustomerSpecificFieldsToForm(csfPayload);
     this.advanceTableForm.patchValue({isTimeNotConfirmed:this.isTNCSelected});
     if(!this.advanceTableForm.value.dropOffPriorityOrder)
           {
             this.advanceTableForm.patchValue({dropOffPriorityOrder:0});
           }
-    this.advanceTableForm.patchValue({projectCode:this.arr});
     if(this.advanceTableForm.value.customerConfigurationInvoicingID !== 0)
     {
       this.advanceTableForm.patchValue({customerConfigurationInvoicingID:this.customerConfigurationInvoicingID});
@@ -3239,8 +3461,18 @@ public validateCustomerSpecificFields(): boolean {
     {
       this.advanceTableForm.patchValue({customerConfigurationInvoicingID:0});
     }
-    console.log(this.arr);
-    this.reservationService.updateReservationEdit(this.advanceTableForm.getRawValue())  
+    const saveBody = this.buildReservationSaveBody(csfPayload);
+    this.reservationService.updateReservationEdit(saveBody)  
+    .pipe(
+      switchMap((response) => {
+        const reservationID = response?.reservationID
+          ?? this.advanceTableForm.value.reservationID
+          ?? this.ReservationID;
+        // Save CSF via direct SQL endpoint AFTER booking update so ReservationProc
+        // cannot wipe/overwrite CustomerSpecificFields.
+        return this.persistCustomerSpecificFields(reservationID).pipe(map(() => response));
+      })
+    )
     .subscribe(
     response => 
     {
@@ -4477,6 +4709,8 @@ private patchPickupAddress(res: any) {
     if (this.buttonDisabled) {
       return;
     }
+    // Sync CSF arrays from live controls before validation/save.
+    this.applyCustomerSpecificFieldsToForm(this.buildCustomerSpecificFieldsPayload());
     if (!this.validateReservationForm()) {
       return;
     }    

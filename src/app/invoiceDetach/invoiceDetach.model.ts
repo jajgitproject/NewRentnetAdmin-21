@@ -35,5 +35,6 @@ export class InvoiceDutyAttachmentModel {
   listOfDuties: number[];  
   userID:number;
   action:string;
+  acknowledgeMissingGstnDutySlipIds?: number[];
 }
 

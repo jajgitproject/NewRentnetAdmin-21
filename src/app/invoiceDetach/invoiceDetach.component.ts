@@ -30,6 +30,11 @@ import { PackageTypeDropDown } from '../packageType/packageTypeDropDown.model';
 import { PackageDropDown } from '../package/packageDropDown.model';
 import { ActivatedRoute, Router } from '@angular/router';
 import Swal from 'sweetalert2';
+import { firstValueFrom } from 'rxjs';
+import {
+  confirmMissingGstnForBatch,
+  extractApiErrorMessage
+} from '../shared/customer-invoicing-gstn-confirm.util';
 
 @Component({
   standalone: false,
@@ -40,6 +45,8 @@ import Swal from 'sweetalert2';
 })
 export class InvoiceDetachComponent implements OnInit {
   @Input() InvoiceID;
+  /** Passed from attach parent when embedded on edit page (avoids queryParams race). */
+  @Input() InvoiceNumberWithPrefixInput: string;
   displayedColumns = [
     'check',
     'DutySlipID',
@@ -133,20 +140,30 @@ export class InvoiceDetachComponent implements OnInit {
   contextMenuPosition = { x: '0px', y: '0px' };
   ngOnInit() 
   {
-    this.route.queryParams.subscribe(paramsData =>{
-      this.InvoiceNumberWithPrefix = paramsData.invoiceNumberWithPrefix;
-    });
-    if(this.InvoiceNumberWithPrefix === null || this.InvoiceNumberWithPrefix === undefined)
-    {
-      this.loadData();
-    }
-    else
-    {
-      this.loadDataForEdit();
+    if (this.InvoiceNumberWithPrefixInput) {
+      this.InvoiceNumberWithPrefix = this.InvoiceNumberWithPrefixInput;
+      this.runPagedLoad();
+    } else {
+      this.route.queryParams.subscribe(paramsData => {
+        this.InvoiceNumberWithPrefix = paramsData.invoiceNumberWithPrefix || '';
+        this.runPagedLoad();
+      });
     }
     this.InitCustomer();
     this.InitBranch();
     this.InitPackageTypes();
+  }
+
+  private isEditMode(): boolean {
+    return !!(this.InvoiceNumberWithPrefix && String(this.InvoiceNumberWithPrefix).trim());
+  }
+
+  private runPagedLoad(): void {
+    if (this.isEditMode()) {
+      this.loadDataForEdit();
+    } else {
+      this.loadData();
+    }
   }
 
   advanceTableForm:FormGroup = this.fb.group({
@@ -154,7 +171,8 @@ export class InvoiceDetachComponent implements OnInit {
       invoiceType:[],
       listOfDuties:[[]],
       userID:[],
-      action: []
+      action: [],
+      acknowledgeMissingGstnDutySlipIds: [[]]
     })
     
   //---------- Customer Group ----------
@@ -338,25 +356,25 @@ export class InvoiceDetachComponent implements OnInit {
     this.SearchBillingStatus = null;
     this.SearchType = '';
     this.PageNumber = 0;
-    //this.loadData();
+    this.runPagedLoad();
   }
 
   public SearchData() 
   {
-    this.loadData();
+    this.runPagedLoad();
   }
  
   public Filter() 
   {
     this.PageNumber = 0;
-    this.loadData();
+    this.runPagedLoad();
   }
 
   onBackPress(event) 
   {
     if (event.keyCode === 8) 
     {
-      this.loadData();
+      this.runPagedLoad();
     }
   }
 
@@ -397,6 +415,10 @@ export class InvoiceDetachComponent implements OnInit {
     {
       this.sortingData = 1;
       this.sortType = "Descending";
+    }
+    if (this.isEditMode()) {
+      this.SortingDataForEdit(coloumName);
+      return;
     }
     this.invoiceDetachService.getTableDataSort(this.customer.value,this.SearchBranch.value,this.SearchDutySlipID,this.SearchReservationID,this.SearchGSTType,this.SearchDutyFromDate,
       this.SearchDutyToDate,this.SearchPassengerName,this.SearchPassengerMobile,this.SearchPackageType.value,this.SearchPackage.value,
@@ -485,7 +507,7 @@ export class InvoiceDetachComponent implements OnInit {
     if (this.dataSource.length > 0) 
     {
       this.PageNumber++;
-      this.loadData();
+      this.runPagedLoad();
     }
   }
 
@@ -494,7 +516,7 @@ export class InvoiceDetachComponent implements OnInit {
     if (this.PageNumber > 0) 
     {
       this.PageNumber--;
-      this.loadData();
+      this.runPagedLoad();
     }
   }
 
@@ -560,24 +582,21 @@ export class InvoiceDetachComponent implements OnInit {
     { 
       const dutyList = response.result.replace("Success:", "").split(",").map(item => item.split("#")[1]).join(", ");
       Swal.fire({
-          title: `Invoice Detached: ${dutyList}...!!!`,
+          title: `Duties detached from invoice ${dutyList}`,
+          text: 'Duty calculation links were cleared. General bill line items and header amounts are not changed.',
           icon: 'success',
           confirmButtonText: 'Ok'
           }).then(result => {
             if (result.isConfirmed) 
             {
               window.location.reload();
-              // const url = this.router.serializeUrl(
-              //   this.router.createUrlTree(['/invoiceHome'])
-              // );
-              // window.open(this._generalService.FormURL + url, '_blank');
             }
           });
       this.refresh();
     },
     error =>
     {
-      const errorMessage = error || 'Operation Failed.....!!!';
+      const errorMessage = error || 'Detach failed. Please try again.';
       Swal.fire({
           title: errorMessage,
           icon: 'error'
@@ -586,17 +605,31 @@ export class InvoiceDetachComponent implements OnInit {
   }
 
 
-  GenerateSingleInvoiceforSingleDuty()
+  async GenerateSingleInvoiceforSingleDuty()
   {
     const duties: number[] = this.selectedInvoices.map(x => x.dutySlipID);
-    this.advanceTableForm.patchValue({invoiceID:0});
-    this.advanceTableForm.patchValue({invoiceType:"InvoiceSingleDuty"});
-    this.advanceTableForm.patchValue({action:"N/A"});
-    this.advanceTableForm.patchValue({listOfDuties:duties});
-    this.invoiceDetachService.add(this.advanceTableForm.getRawValue()).subscribe(
-    response => 
-    {
-      const dutyList = response.result.replace("Success:", "").split(",").map(item => item.split("#")[1]).join(", ");
+
+    try {
+      const check = await firstValueFrom(
+        this.invoiceDetachService.checkCustomerInvoicingGstnBatch(duties)
+      );
+      const confirmation = await confirmMissingGstnForBatch(check, duties);
+      if (!confirmation.proceed) {
+        return;
+      }
+
+      this.advanceTableForm.patchValue({ invoiceID: 0 });
+      this.advanceTableForm.patchValue({ invoiceType: 'InvoiceSingleDuty' });
+      this.advanceTableForm.patchValue({ action: 'N/A' });
+      this.advanceTableForm.patchValue({ listOfDuties: confirmation.dutiesToGenerate });
+      this.advanceTableForm.patchValue({
+        acknowledgeMissingGstnDutySlipIds: confirmation.acknowledgeMissingGstnDutySlipIds
+      });
+
+      const response = await firstValueFrom(
+        this.invoiceDetachService.add(this.advanceTableForm.getRawValue())
+      );
+      const dutyList = response.result.replace('Success:', '').split(',').map(item => item.split('#')[1]).join(', ');
       Swal.fire({
           title: `Invoice Multy Duty Created with Duties: ${dutyList}...!!!`,
           icon: 'success',
@@ -611,15 +644,12 @@ export class InvoiceDetachComponent implements OnInit {
             }
           });
       this.refresh();
-    },
-    error =>
-    {
-      const errorMessage = error || 'Operation Failed.....!!!';
+    } catch (error) {
       Swal.fire({
-          title: errorMessage,
-          icon: 'error'
-        });
-    });
+        title: extractApiErrorMessage(error),
+        icon: 'error'
+      });
+    }
   }
 
 

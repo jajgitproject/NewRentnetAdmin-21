@@ -39,6 +39,7 @@
               *ngFor="let sidebarSubItem of visibleLevel2(sidebarItem); let i = index"
               [routerLinkActive]="sidebarSubItem.submenu.length > 0 ? '' : 'active'">
               <a href="#"
+                [routerLink]="sidebarSubItem.submenu.length > 0 ? null : ['/', sidebarSubItem.path]"
                 (click)="openMenuPage(sidebarSubItem.submenu.length > 0 ? null : sidebarSubItem.path, $event, 2, sidebarSubItem.moduleName)" [ngClass]="[sidebarSubItem.class]">
                 {{sidebarSubItem.title | translate}} 
               </a>
@@ -48,6 +49,7 @@
                   [ngClass]="level3Menu === sidebarSubsubItem.moduleName? 'activeSubSub':''"
                   [routerLinkActive]="sidebarSubsubItem.submenu.length > 0 ? '' : 'active'">
                   <a href="#"
+                    [routerLink]="sidebarSubsubItem.submenu.length > 0 ? null : ['/', sidebarSubsubItem.path]"
                     (click)="openMenuPage(sidebarSubsubItem.submenu.length > 0 ? null : sidebarSubsubItem.path, $event, 3, sidebarSubsubItem.moduleName)"
                     [ngClass]="[sidebarSubsubItem.class]">
                     {{ sidebarSubsubItem.title | translate }}

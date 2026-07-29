@@ -2,6 +2,7 @@
 import { ChangeDetectorRef, Component, Inject, NgZone, OnInit } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { PageEvent } from '@angular/material/paginator';
+import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatTableDataSource } from '@angular/material/table';
 import { FinanceDashboardService } from './financeDashboard.service';
 
@@ -23,15 +24,27 @@ export class FinanceDashboardDrilldownDialogComponent implements OnInit {
     public dialogRef: MatDialogRef<FinanceDashboardDrilldownDialogComponent>,
     @Inject(MAT_DIALOG_DATA) public data: any,
     private service: FinanceDashboardService,
+    private snackBar: MatSnackBar,
     private ngZone: NgZone,
     private cdr: ChangeDetectorRef
   ) {}
 
   ngOnInit(): void {
-    this.displayedColumns = this.isInvoiceDrillDown()
-      ? ['invoiceID', 'customerID', 'invoiceCalculationID', 'irnStatus', 'documentNumber', 'invoiceType', 'date', 'customer', 'branch', 'amount', 'user', 'errorDescription']
-      : ['documentNumber', 'invoiceType', 'irnStatus', 'date', 'customer', 'branch', 'amount', 'user', 'errorDescription'];
+    if (this.data?.mode === 'invoiceSearch') {
+      this.displayedColumns = [
+        'invoiceID', 'documentNumber', 'seriesName', 'invoiceType', 'date',
+        'customer', 'branch', 'amount', 'dashboardStatus'
+      ];
+    } else {
+      this.displayedColumns = this.isInvoiceDrillDown()
+        ? ['invoiceID', 'customerID', 'invoiceCalculationID', 'irnStatus', 'documentNumber', 'invoiceType', 'date', 'customer', 'branch', 'amount', 'user', 'errorDescription']
+        : ['documentNumber', 'invoiceType', 'irnStatus', 'date', 'customer', 'branch', 'amount', 'user', 'errorDescription'];
+    }
     this.load();
+  }
+
+  isInvoiceSearchMode(): boolean {
+    return this.data?.mode === 'invoiceSearch';
   }
 
   private isInvoiceDrillDown(): boolean {
@@ -40,27 +53,45 @@ export class FinanceDashboardDrilldownDialogComponent implements OnInit {
 
   load(): void {
     this.loading = true;
-    this.service
-      .getDrillDown(
-        this.data.filters,
-        this.data.documentType,
-        this.data.validationCode,
-        this.data.seriesName,
-        this.pageIndex + 1,
-        this.pageSize
-      )
-      .subscribe({
+    const request$ = this.isInvoiceSearchMode()
+      ? this.service.searchInvoice(
+          this.data.filters,
+          this.data.invoiceNumber,
+          this.pageIndex + 1,
+          this.pageSize
+        )
+      : this.service.getDrillDown(
+          this.data.filters,
+          this.data.documentType,
+          this.data.validationCode,
+          this.data.seriesName,
+          this.pageIndex + 1,
+          this.pageSize
+        );
+
+    request$.subscribe({
         next: (res) => {
           const rows = res?.rows ?? res?.Rows ?? [];
           this.dataSource.data = rows.map((r) => this.normalizeRow(r));
           this.totalRecords = res?.totalRecords ?? res?.TotalRecords ?? 0;
           this.loading = false;
+          const queryError = res?.queryError ?? res?.QueryError;
+          if (queryError) {
+            this.snackBar.open('Drill-down query failed. Restart the API if this endpoint was recently updated.', 'Close', { duration: 8000 });
+          }
           this.ngZone.run(() => this.cdr.detectChanges());
         },
-        error: () => {
+        error: (err) => {
           this.dataSource.data = [];
           this.totalRecords = 0;
           this.loading = false;
+          const msg = typeof err?.error === 'string'
+            ? err.error
+            : err?.error?.message || err?.message
+              || (this.isInvoiceSearchMode()
+                ? 'Invoice search failed. Restart the API if this endpoint was recently added.'
+                : 'Failed to load drill-down data.');
+          this.snackBar.open(msg, 'Close', { duration: 7000 });
           this.ngZone.run(() => this.cdr.detectChanges());
         },
       });
@@ -73,6 +104,7 @@ export class FinanceDashboardDrilldownDialogComponent implements OnInit {
       invoiceCalculationID: row?.invoiceCalculationID ?? row?.InvoiceCalculationID,
       irnStatus: row?.irnStatus ?? row?.IrnStatus,
       documentNumber: row?.documentNumber ?? row?.DocumentNumber,
+      seriesName: row?.seriesName ?? row?.SeriesName,
       invoiceType: row?.invoiceType ?? row?.InvoiceType,
       date: row?.date ?? row?.Date,
       customer: row?.customer ?? row?.Customer,
@@ -80,6 +112,7 @@ export class FinanceDashboardDrilldownDialogComponent implements OnInit {
       amount: row?.amount ?? row?.Amount,
       user: row?.user ?? row?.User,
       errorDescription: row?.errorDescription ?? row?.ErrorDescription,
+      dashboardStatus: row?.dashboardStatus ?? row?.DashboardStatus,
     };
   }
 

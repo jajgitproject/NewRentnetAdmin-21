@@ -30,7 +30,8 @@ export class DeleteDialogComponent
     .subscribe(
     data => 
     {
-       this._generalService.sendUpdate('DutyTollParkingEntryDelete:DutyTollParkingEntryView:Success');//To Send Updates   
+       this._generalService.sendUpdate('DutyTollParkingEntryDelete:DutyTollParkingEntryView:Success');
+       this.dialogRef.close(true);
     },
     error =>
     {

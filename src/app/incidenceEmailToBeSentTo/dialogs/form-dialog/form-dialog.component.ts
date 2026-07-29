@@ -1,6 +1,6 @@
 // @ts-nocheck
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
-import { Component, Inject } from '@angular/core';
+import { Component, Inject, OnInit } from '@angular/core';
 import { IncidenceEmailToBeSentToService } from '../../incidenceEmailToBeSentTo.service';
 import { FormControl, Validators, FormGroup, FormBuilder } from '@angular/forms';
 import { IncidenceEmailToBeSentTo } from '../../incidenceEmailToBeSentTo.model';
@@ -14,14 +14,13 @@ import { GeneralService } from '../../../general/general.service';
   styleUrls: ['./form-dialog.component.sass'],
   providers: [{ provide: MAT_DATE_LOCALE, useValue: 'en-GB' }]
 })
-export class FormDialogComponent {
+export class FormDialogComponent implements OnInit {
   showError: string;
   action: string;
   dialogTitle: string;
   advanceTableForm: FormGroup;
   advanceTable: IncidenceEmailToBeSentTo;
   saveDisabled: boolean = true;
-  typeOptions: string[] = ['Internal', 'External'];
 
   constructor(
     public dialogRef: MatDialogRef<FormDialogComponent>,
@@ -33,7 +32,7 @@ export class FormDialogComponent {
     this.action = data.action;
     if (this.action === 'edit') {
       this.dialogTitle = 'Incidence Email To Be Sent To';
-      this.advanceTable = data.advanceTable;
+      this.advanceTable = new IncidenceEmailToBeSentTo(data.advanceTable || {});
     } else {
       this.dialogTitle = 'Incidence Email To Be Sent To';
       this.advanceTable = new IncidenceEmailToBeSentTo({});
@@ -43,11 +42,25 @@ export class FormDialogComponent {
     this.advanceTableForm = this.createContactForm();
   }
 
+  ngOnInit(): void {
+    if (this.action === 'edit') {
+      const type = this.advanceTable?.incidenceEmailToBeSentToType;
+      if (type) {
+        this.advanceTableForm.patchValue({
+          incidenceEmailToBeSentToType: type
+        });
+      }
+    }
+  }
+
   createContactForm(): FormGroup {
     return this.fb.group({
       incidenceEmailToBeSentToID: [this.advanceTable.incidenceEmailToBeSentToID],
       incidenceEmailToBeSentTo: [this.advanceTable.incidenceEmailToBeSentTo, [Validators.required, this.noWhitespaceValidator]],
-      incidenceEmailToBeSentToType: [this.advanceTable.incidenceEmailToBeSentToType, Validators.required],
+      incidenceEmailToBeSentToType: [
+        this.advanceTable.incidenceEmailToBeSentToType || (this.action === 'add' ? 'Internal' : ''),
+        Validators.required
+      ],
       activationStatus: [this.advanceTable.activationStatus, Validators.required]
     });
   }

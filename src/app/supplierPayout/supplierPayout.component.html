@@ -132,12 +132,6 @@
 
                           </div>
 
-                          <div class="col-lg-2 col-md-4 col-sm-6 d-flex align-items-center">
-
-                            <mat-checkbox [(ngModel)]="includePaid">Include Paid</mat-checkbox>
-
-                          </div>
-
                           <div class="col-lg-3 col-md-4 col-sm-6 d-flex align-items-center gap-actions">
 
                             <button mat-raised-button color="primary" (click)="searchDuties()" [disabled]="loadingDuties">Search</button>
@@ -160,13 +154,13 @@
 
                       <mat-form-field class="w-100 cp-quick-search-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
 
-                        <mat-label>Group Amount</mat-label>
+                        <mat-label>Group Amount Paid</mat-label>
 
                         <input matInput type="number" [(ngModel)]="groupAmount" min="0" step="0.01" (blur)="onGroupAmountBlur()" />
 
-                        <mat-hint *ngIf="selection.hasValue()">Max: {{ formatMoney(maxAllowedGroupAmount) }} (80% of selected payout eco + adjustment)</mat-hint>
-                        <mat-hint *ngIf="projectedGroupAmountShortfall > 0">
-                          Carry forward {{ formatMoney(projectedGroupAmountShortfall) }} as next group adjustment (included in mismatch)
+                        <mat-hint *ngIf="selection.hasValue()">Standard 80% Payable: {{ formatMoney(standardPayable80) }}</mat-hint>
+                        <mat-hint *ngIf="selection.hasValue() || previousGroupAdjustmentAmount">
+                          Reason threshold: {{ formatMoney(reasonThreshold) }}
                         </mat-hint>
 
                       </mat-form-field>
@@ -181,9 +175,34 @@
 
                         <input matInput type="number" [(ngModel)]="previousGroupAdjustmentAmount" step="0.01" readonly disabled />
 
-                        <mat-hint *ngIf="previousGroupNumber">
-                          From open payout {{ previousGroupNumber }} — eco revenue differences plus unpaid max amount
+                        <mat-hint *ngIf="hasOffsettingLedgerMismatch">
+                          Offsetting duty adjustments net to zero — cleared on next Mark as Paid
                         </mat-hint>
+                        <mat-hint *ngIf="previousGroupNumber && previousGroupAdjustmentAmount >= 0 && !hasOffsettingLedgerMismatch">
+                          Open adjustment from ledger{{ previousGroupNumber ? ' (last group ' + previousGroupNumber + ')' : '' }}
+                        </mat-hint>
+                        <mat-hint *ngIf="previousGroupAdjustmentAmount < 0">
+                          Credit from eco decrease — netted into new duties allocation (last group {{ previousGroupNumber }})
+                        </mat-hint>
+
+                      </mat-form-field>
+
+                      <button mat-stroked-button type="button" class="mt-2" (click)="openMismatchDuties()"
+                        [disabled]="!selectedSupplierID || mismatchDutyCount === 0">
+                        View Mismatch Duties ({{ mismatchDutyCount }})
+                      </button>
+
+                    </div>
+
+                    <div class="col-lg-3 col-md-4 col-sm-6" *ngIf="requiresOver80Reason">
+
+                      <mat-form-field class="w-100 cp-quick-search-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
+
+                        <mat-label>Reason (required above threshold)</mat-label>
+
+                        <textarea matInput rows="3" [(ngModel)]="over80PercentReason"></textarea>
+
+                        <mat-hint>Minimum 10 characters</mat-hint>
 
                       </mat-form-field>
 
@@ -191,7 +210,7 @@
 
                     <div class="col-lg-3 col-md-4 col-sm-6 d-flex align-items-center">
 
-                      <button mat-raised-button color="accent" (click)="markAsPaid()" [disabled]="markingPaid || !selection.hasValue()">
+                      <button mat-raised-button color="accent" (click)="markAsPaid()" [disabled]="!canMarkAsPaid">
 
                         Mark as Paid
 
@@ -199,9 +218,15 @@
 
                     </div>
 
-                    <div class="col-lg-3 col-md-4 col-sm-6 d-flex align-items-center" *ngIf="selection.hasValue()">
+                    <div class="col-lg-3 col-md-4 col-sm-6 d-flex align-items-center" *ngIf="selection.hasValue() || previousGroupAdjustmentAmount">
 
-                      <span>Selected Payout Eco Total: {{ formatMoney(selectedEcoTotal) }}</span>
+                      <span *ngIf="selection.hasValue()">Selected Payout Eco Total: {{ formatMoney(selectedEcoTotal) }}</span>
+                      <span *ngIf="selection.hasValue() && groupAmount">
+                        · New duties portion: {{ formatMoney(newDutiesPaymentPortion) }}
+                        <span *ngIf="previousGroupAdjustmentAmount < 0">
+                          (includes {{ formatMoney(absAmount(previousGroupAdjustmentAmount)) }} credit)
+                        </span>
+                      </span>
 
                     </div>
 

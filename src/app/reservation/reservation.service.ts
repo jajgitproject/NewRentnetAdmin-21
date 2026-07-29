@@ -3,7 +3,7 @@ import { Injectable } from '@angular/core';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { GoogleAddress, Reservation, SameReservationModel } from './reservation.model';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
-import { DatePipe } from '@angular/common';
+import { DatePipe, formatDate } from '@angular/common';
 import { GeneralService } from '../general/general.service';
 import { CustomerConfigurationInvoicing } from '../customerConfigurationInvoicing/customerConfigurationInvoicing.model';
 @Injectable()
@@ -184,18 +184,7 @@ export class ReservationService
     {
       advanceTable.pickupSpotTypeID=0;
     }
-    if(advanceTable.customerReservationFieldID=== "")
-    {
-      advanceTable.customerReservationFieldID=null;
-    }
-    if(advanceTable.fieldName=== "")
-    {
-      advanceTable.fieldName=null;
-    }
-    if(advanceTable.projectCode=== "")
-    {
-      advanceTable.projectCode=null;
-    }
+    this.normalizeCustomerSpecificFieldsPayload(advanceTable);
     if(advanceTable.pickupSpotID==="")
     {
       advanceTable.pickupSpotID=0;
@@ -287,18 +276,7 @@ export class ReservationService
     {
       advanceTable.pickupSpotTypeID=0;
     }
-    if(advanceTable.customerReservationFieldID=== "")
-    {
-      advanceTable.customerReservationFieldID=null;
-    }
-    if(advanceTable.fieldName=== "")
-    {
-      advanceTable.fieldName=null;
-    }
-    if(advanceTable.projectCode=== "")
-    {
-      advanceTable.projectCode=null;
-    }
+    this.normalizeCustomerSpecificFieldsPayload(advanceTable);
     if(advanceTable.pickupSpotID==="")
     {
       advanceTable.pickupSpotID=0;
@@ -382,6 +360,68 @@ export class ReservationService
     return this.httpClient.put<any>(this.API_URL+'/'+'UpdateReservationForEdit' , advanceTable);
   }
 
+  /**
+   * Ensure CSF arrays + customerSpecificFields JSON are never wiped to null/"" before PUT.
+   * Backend UpdateReservationForEdit writes DBNull when CustomerReservationFieldID is empty/null.
+   */
+  private normalizeCustomerSpecificFieldsPayload(advanceTable: any): void {
+    if (advanceTable.customerReservationFieldID === '') {
+      advanceTable.customerReservationFieldID = [];
+    }
+    if (advanceTable.fieldName === '') {
+      advanceTable.fieldName = [];
+    }
+    if (advanceTable.projectCode === '') {
+      advanceTable.projectCode = [];
+    }
+    if (advanceTable.fieldValue === '') {
+      advanceTable.fieldValue = [];
+    }
+
+    const ids = Array.isArray(advanceTable.customerReservationFieldID)
+      ? advanceTable.customerReservationFieldID
+      : [];
+    const names = Array.isArray(advanceTable.fieldName) ? advanceTable.fieldName : [];
+    const values = Array.isArray(advanceTable.projectCode)
+      ? advanceTable.projectCode
+      : (Array.isArray(advanceTable.fieldValue) ? advanceTable.fieldValue : []);
+
+    advanceTable.customerReservationFieldID = ids;
+    advanceTable.fieldName = names;
+    advanceTable.projectCode = values;
+    advanceTable.fieldValue = Array.isArray(advanceTable.fieldValue) ? advanceTable.fieldValue : values;
+
+    if (
+      (!advanceTable.customerSpecificFields || advanceTable.customerSpecificFields === '') &&
+      ids.length > 0
+    ) {
+      advanceTable.customerSpecificFields = JSON.stringify(
+        ids.map((id: number, index: number) => ({
+          CustomerReservationFieldID: id,
+          FieldName: names[index] ?? '',
+          FieldValue: values[index] ?? '',
+        }))
+      );
+    }
+  }
+
+  /**
+   * Direct CSF persist used by the control-panel CSF dialog.
+   * Bypasses ReservationProc and writes Reservation.CustomerSpecificFields via SQL.
+   */
+  updateCustomerSpecificFields(payload: {
+    reservationID: number;
+    customerReservationFieldID: number[];
+    fieldName: string[];
+    fieldValue: string[];
+  }): Observable<any> {
+    const body = {
+      ...payload,
+      userID: this.generalService.getUserID(),
+    };
+    return this.httpClient.put<any>(this.API_URL + '/updateReservation', body);
+  }
+
   delete(reservationID: number):  Observable<any> 
   {
     return this.httpClient.delete(this.API_URL + '/'+ reservationID);
@@ -407,24 +447,32 @@ export class ReservationService
       return this.httpClient.get(this.API_URL +"/getReservationGSTData/"+ReservationID);
     }
    updatePickupEdit(advanceTable: any) {
-  if (advanceTable.pickupTime === "") {
+  if (advanceTable.pickupTime === "" || advanceTable.pickupTime == null) {
     advanceTable.pickupTime = null;
+    advanceTable.pickupTimeString = null;
   } else {
-    advanceTable.pickupTimeString = this.generalService.getTimeApplicable(advanceTable.pickupTime);
+    advanceTable.pickupTimeString = formatDate(advanceTable.pickupTime, 'HH:mm:ss', 'en-IN');
   }
   if (!advanceTable.dropOffTime) {
     advanceTable.dropOffTimeString = null;
   } else {
-    advanceTable.dropOffTimeString = this.generalService.getTimeApplicable(advanceTable.dropOffTime);
+    advanceTable.dropOffTimeString = formatDate(advanceTable.dropOffTime, 'HH:mm:ss', 'en-IN');
+  }
+  if (advanceTable.pickupDate) {
+    const pickupDate = advanceTable.pickupDate instanceof Date
+      ? advanceTable.pickupDate
+      : new Date(advanceTable.pickupDate);
+    advanceTable.pickupDateString = formatDate(pickupDate, 'yyyy-MM-dd', 'en-IN');
   }
 
   return this.httpClient.put<any>(this.API_URL + '/' + 'EditPickupTime', advanceTable);
 }
  updateLocationOutEdit(advanceTable: any) {
-  if (advanceTable.locationOutTime === "") {
+  if (advanceTable.locationOutTime === "" || advanceTable.locationOutTime == null) {
     advanceTable.locationOutTime = null;
+    advanceTable.locationOutTimeString = null;
   } else {
-    advanceTable.locationOutTimeString = this.generalService.getTimeApplicable(advanceTable.locationOutTime);
+    advanceTable.locationOutTimeString = formatDate(advanceTable.locationOutTime, 'HH:mm:ss', 'en-IN');
   }
   
 

@@ -98,6 +98,11 @@
                     <div class="body">
                         <div class="responsive_table">
                             <div class="table-responsive">
+                            <div *ngIf="!hasSearched" class="alert alert-info" style="background-color:#E8E8E8; text-align: center;">
+                                Use Search to load E-Invoice records.
+                            </div>
+
+                            <ng-container *ngIf="hasSearched">
                                 <p *ngIf="!dataSource; then thenBlock2 else elseBlock2">
                                     This is not rendered
                                 </p>
@@ -211,7 +216,7 @@
                                     <mat-menu #contextMenu="matMenu">
                                         <ng-template matMenuContent let-item="item">
                                             
-                                            <button mat-menu-item (click)="ConfirmGenerateEInvoice(item)">
+                                            <button mat-menu-item [disabled]="isIrnGenerated(item)" (click)="ConfirmGenerateEInvoice(item)">
                                                 <mat-icon>create</mat-icon>
                                                 <span>Generate E-Invoice</span>
                                             </button>
@@ -224,10 +229,6 @@
                                             <button mat-menu-item  [disabled]="item.irn === null" (click)="ViewEInvoice(item)">
                                                 <mat-icon>create</mat-icon>
                                                 <span>View  E-Invoice</span>
-                                            </button>
-                                             <button mat-menu-item [disabled]="item.irn === null" (click)="dynamicEInvoice(item)">
-                                                <mat-icon>create</mat-icon>
-                                                <span>Dynamic E-Invoice</span>
                                             </button>
 
                                         </ng-template>                                       
@@ -250,6 +251,7 @@
                                         </div>
                                     </div>
                                 </ng-template>
+                            </ng-container>
                             </div>
 
                         </div>

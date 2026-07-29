@@ -29,11 +29,14 @@ import { OrganizationalEntityDropDown } from '../organizationalEntityMessage/org
 })
 export class OrganizationalEntityStakeHoldersComponent implements OnInit {
   displayedColumns = [
-    'organizationalEntityType',
-    'organizationalEntityName',
+    'employee',
+    'department',
+    'designation',
+    'positionType',
+    'isHOD',
+    'isResponsibleForChildEntities',
     'startDate',
-   'endDate',
-   'positionType', 
+    'endDate',
     'activationStatus',
     'actions'
   ];

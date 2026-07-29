@@ -171,7 +171,7 @@
                                     <mat-radio-button color="primary" value="App">App KM</mat-radio-button>
                                     <mat-radio-button color="primary" value="GPS">
                                       GPS KM &nbsp;
-                                      <a href="javascript:void(0)" (click)="PostDataGPS()"
+                                      <a href="javascript:void(0)" (click)="PostDataGPS($event)"
                                         style="text-align: center; cursor: pointer; color: #007bff;">
                                         (Get KM)
                                       </a>
@@ -227,8 +227,6 @@
                         <mat-label>DS Closing</mat-label>
                         <mat-select formControlName="dsClosing">
                           <mat-option value="Closed">Closed</mat-option>
-                          <mat-option value="VirtualClosing">Virtual Closing</mat-option>
-                          <mat-option value="Disputed">Disputed</mat-option>
                         </mat-select>
                       </mat-form-field>
                     </div>
@@ -237,8 +235,7 @@
                       <mat-form-field appearance="fill" floatLabel="auto" subscriptSizing="dynamic" class="example-full-width cp-quick-search-field">
                         <mat-label>Duty Slip Received</mat-label>
                         <mat-select formControlName="physicalDutySlipReceived">
-                          <mat-option [value]=true>Yes</mat-option>
-                          <mat-option [value]=false>No</mat-option>
+                          <mat-option [value]="true">Yes</mat-option>
                         </mat-select>
                       </mat-form-field>
                     </div>
@@ -255,6 +252,28 @@
                       <mat-form-field appearance="fill" floatLabel="auto" subscriptSizing="dynamic" class="example-full-width cp-quick-search-field cp-closing-textarea-field">
                         <mat-label>Vendor Remark</mat-label>
                         <textarea matInput formControlName="vendorRemark" rows="2"></textarea>
+                      </mat-form-field>
+                    </div>
+                  </div>
+
+                  <div class="row align-items-end">
+                    <div class="col-xl-3 col-lg-3 col-md-6 col-sm-12 mb-2">
+                      <mat-form-field appearance="fill" floatLabel="auto" subscriptSizing="dynamic" class="example-full-width cp-quick-search-field">
+                        <mat-label>Number of Days</mat-label>
+                        <input matInput type="number" min="0" step="1"
+                          [(ngModel)]="totalDriverAllowanceDays"
+                          [ngModelOptions]="{standalone: true}"
+                          [readonly]="!canEditClosingAllowances">
+                      </mat-form-field>
+                    </div>
+
+                    <div class="col-xl-3 col-lg-3 col-md-6 col-sm-12 mb-2">
+                      <mat-form-field appearance="fill" floatLabel="auto" subscriptSizing="dynamic" class="example-full-width cp-quick-search-field">
+                        <mat-label>Number of Nights</mat-label>
+                        <input matInput type="number" min="0" step="1"
+                          [(ngModel)]="totalNights"
+                          [ngModelOptions]="{standalone: true}"
+                          [readonly]="!canEditClosingAllowances">
                       </mat-form-field>
                     </div>
                   </div>
@@ -416,6 +435,25 @@
                   </div>
 
                   <div class="row align-items-end">
+                    <div class="col-xl-3 col-lg-3 col-md-6 col-sm-12 mb-2 billing-total-label">
+                      <div class="billing-total-label-title">Total Time (Garage to Garage)</div>
+                      <div class="billing-total-label-value">{{ datetime || '-' }}</div>
+                    </div>
+                    <div class="col-xl-3 col-lg-3 col-md-6 col-sm-12 mb-2 billing-total-label">
+                      <div class="billing-total-label-title">Total KM (Garage to Garage)</div>
+                      <div class="billing-total-label-value">{{ diff !== null && diff !== undefined ? diff : '-' }}</div>
+                    </div>
+                    <div class="col-xl-3 col-lg-3 col-md-6 col-sm-12 mb-2 billing-total-label">
+                      <div class="billing-total-label-title">Total Time (Point to Point)</div>
+                      <div class="billing-total-label-value">{{ datetimeP2P || '-' }}</div>
+                    </div>
+                    <div class="col-xl-3 col-lg-3 col-md-6 col-sm-12 mb-2 billing-total-label">
+                      <div class="billing-total-label-title">Total KM (Point to Point)</div>
+                      <div class="billing-total-label-value">{{ diffP2P !== null && diffP2P !== undefined ? diffP2P : '-' }}</div>
+                    </div>
+                  </div>
+
+                  <div class="row align-items-end">
                     <div class="col-xl-3 col-lg-3 col-md-6 col-sm-12 mb-2" style="font-size: 15px; padding-top: 4px;">
                       <mat-label
                         style="border-bottom: 1px solid rgba(0, 0, 0, 0.42); padding: 2px 0; width: 215px; display: inline-block;"><strong>Total</strong></mat-label>
@@ -460,17 +498,19 @@
                     <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12 mb-2">
                       <!-- <button mat-flat-button *ngIf="saveDisabled && (Action === 'Cancelled' || !InvoiceID)" style="width: 100%;"  color="primary" [disabled]="!advanceTableForm.valid" (click)="Put()" [type]="submit">{{ buttonText }} -->
                       <button mat-flat-button style="width: 100%;"  color="primary" 
-                          *ngIf="(showSpinner === false) && (Action === 'Cancelled' || !isDutyCalculated || !isDutySlipEditBlocked)"  
-                          [disabled]="!advanceTableForm.valid || (isDutyCalculated && isDutySlipEditBlocked)" 
-                          (click)="Put()" [type]="submit">{{ buttonText }}
+                          *ngIf="canShowSaveButton"  
+                          [disabled]="isSaveButtonDisabled" 
+                          (click)="Put()" [type]="submit">{{ saveButtonLabel }}
                         <span style="margin-left: 5px;"
-                          *ngIf="advanceTableClosingOne.closingDutySlipForBillingModel.closureType">(Based on
+                          *ngIf="!canSavePartialAfterGfb && advanceTableClosingOne.closingDutySlipForBillingModel.closureType">(Based on
                           {{advanceTableClosingOne.closingDutySlipForBillingModel.closureType}} KM)</span>
                       </button>
                       <br/>
                       <div *ngIf="Action !== 'Cancelled'">
                         <button mat-flat-button style="width: 100%;" color="primary" *ngIf="isEInvoiceBlockingEdits" disabled>E-Invoice already generated</button>
-                        <button mat-flat-button style="width: 100%;" color="primary" *ngIf="!isEInvoiceBlockingEdits && isGoodForBillingBlockingEdits" disabled>Good for Billing - edits not allowed</button>
+                        <p *ngIf="!isEInvoiceBlockingEdits && isGoodForBillingBlockingEdits && isDutyCalculated" class="cp-gfb-remarks-note">
+                          Other fields are locked after Good for Billing. You may still edit and save remarks and KM.
+                        </p>
                       </div>
                       <mat-spinner *ngIf="!saveDisabled" diameter="30"></mat-spinner>
                       <img *ngIf="showSpinner === true" src="assets/images/loader4.gif" width="30">

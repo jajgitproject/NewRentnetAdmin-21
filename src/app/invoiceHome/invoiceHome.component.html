@@ -45,8 +45,8 @@
                                 <mat-autocomplete #auto1="matAutocomplete"
                                     (optionSelected)="onCustomerSelected($event.option.value)"  panelWidth="custom-autocomplete-panel">
                                     <mat-option *ngFor="let option of filteredCustomerOptions | async"
-                                        [value]="option.customerName">
-                                        {{option.customerName}}
+                                        [value]="option.customerName + '##' + (option.customerIdentityNumber || '')">
+                                        {{option.customerName}} ## {{option.customerIdentityNumber}}
                                     </mat-option>
                                 </mat-autocomplete>
                                 <!-- <mat-error *ngIf="customer.hasError('required')">Customer is required</mat-error> -->
@@ -117,13 +117,14 @@
                             <mat-form-field class="example-full-width cp-quick-search-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
                                 <mat-label>Duty Slip No</mat-label>
                                 <input type="text" matInput [(ngModel)]="searchDutySlip">
-
+                                <mat-hint>Comma-separated IDs supported</mat-hint>
                             </mat-form-field>
                         </div>
                         <div class="col-xl-2 col-lg-2 col-md-2 col-sm-12 mb-2">
                             <mat-form-field class="example-full-width cp-quick-search-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
                                 <mat-label>Reservation ID</mat-label>
                                 <input type="text" matInput [(ngModel)]="searchReservationID">
+                                <mat-hint>Comma-separated IDs supported</mat-hint>
                             </mat-form-field>
                         </div>
 
@@ -342,7 +343,7 @@
                                     </div>
                                     <mat-menu #contextMenu="matMenu">
                                         <ng-template matMenuContent let-item="item">
-                                            <button mat-menu-item (click)="openAttachDetachForEdit(item)">
+                                            <button mat-menu-item (click)="openAttachDetachForEdit(item)" [disabled]="isIrnGenerated(item)">
                                                 <mat-icon>create</mat-icon>
                                                 <span>Edit</span>
                                             </button>

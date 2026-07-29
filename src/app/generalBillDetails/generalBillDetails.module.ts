@@ -23,6 +23,7 @@ import { MyUploadComponent } from '../myupload/myupload.component';
 import { MyUploadModule } from '../myupload/myupload.module';
 import { GooglePlaceModule } from '@compat/google-places-shim';
 import { GeneralBillDetailsService } from './generalBillDetails.service';
+import { CustomerBillToShipToService } from '../customerBillToShipTo/customerBillToShipTo.service';
 import { GeneralBillDetailsRoutingModule } from './generalBillDetails-routing.module';
 import { GeneralBillDetailsComponent } from './generalBillDetails.component';
 
@@ -55,7 +56,7 @@ import { GeneralBillDetailsComponent } from './generalBillDetails.component';
     MyUploadModule,
     GooglePlaceModule,
   ],
-  providers: [GeneralBillDetailsService]
+  providers: [GeneralBillDetailsService, CustomerBillToShipToService]
 })
 export class GeneralBillDetailsModule {}
 

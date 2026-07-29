@@ -159,18 +159,40 @@
                                     <mat-cell *matCellDef="let row">{{row.organizationalEntityStakeHoldersid}}</mat-cell>
                                 </ng-container>
 
-
-
-                                <ng-container matColumnDef="organizationalEntityType">
-                                    <mat-header-cell *matHeaderCellDef mat-sort-header>Entity Type</mat-header-cell>
+                                <ng-container matColumnDef="employee">
+                                    <mat-header-cell *matHeaderCellDef mat-sort-header>Employee</mat-header-cell>
                                     <mat-cell *matCellDef="let row" (contextmenu)="onContextMenu($event, row)">
-                                        {{row.organizationalEntityType}}</mat-cell>
+                                        {{row.firstName}} {{row.lastName}}</mat-cell>
                                 </ng-container>
 
-                                <ng-container matColumnDef="organizationalEntityName">
-                                    <mat-header-cell *matHeaderCellDef mat-sort-header>Entity</mat-header-cell>
+                                <ng-container matColumnDef="department">
+                                    <mat-header-cell *matHeaderCellDef mat-sort-header>Department</mat-header-cell>
                                     <mat-cell *matCellDef="let row" (contextmenu)="onContextMenu($event, row)">
-                                        {{row.organizationalEntityName}}</mat-cell>
+                                        {{row.department}}</mat-cell>
+                                </ng-container>
+
+                                <ng-container matColumnDef="designation">
+                                    <mat-header-cell *matHeaderCellDef mat-sort-header>Designation</mat-header-cell>
+                                    <mat-cell *matCellDef="let row" (contextmenu)="onContextMenu($event, row)">
+                                        {{row.designation}}</mat-cell>
+                                </ng-container>
+
+                                <ng-container matColumnDef="positionType">
+                                    <mat-header-cell *matHeaderCellDef mat-sort-header>Position Type</mat-header-cell>
+                                    <mat-cell *matCellDef="let row" (contextmenu)="onContextMenu($event, row)">
+                                        {{row.positionType}}</mat-cell>
+                                </ng-container>
+
+                                <ng-container matColumnDef="isHOD">
+                                    <mat-header-cell *matHeaderCellDef mat-sort-header>Is HOD</mat-header-cell>
+                                    <mat-cell *matCellDef="let row" (contextmenu)="onContextMenu($event, row)">
+                                        {{row.isHOD === true ? 'Yes' : 'No'}}</mat-cell>
+                                </ng-container>
+
+                                <ng-container matColumnDef="isResponsibleForChildEntities">
+                                    <mat-header-cell *matHeaderCellDef mat-sort-header>Is Responsible for</mat-header-cell>
+                                    <mat-cell *matCellDef="let row" (contextmenu)="onContextMenu($event, row)">
+                                        {{row.isResponsibleForChildEntities === true ? 'Yes' : 'No'}}</mat-cell>
                                 </ng-container>
 
                                 <ng-container matColumnDef="startDate">
@@ -178,19 +200,15 @@
                                     <mat-cell *matCellDef="let row" (contextmenu)="onContextMenu($event, row)">
                                         {{row.startDate| date: 'dd-MM-yyyy'}}</mat-cell>
                                 </ng-container>
+
                                 <ng-container matColumnDef="endDate">
                                     <mat-header-cell *matHeaderCellDef mat-sort-header>End Date</mat-header-cell>
                                     <mat-cell *matCellDef="let row" (contextmenu)="onContextMenu($event, row)">
                                         {{row.endDate| date: 'dd-MM-yyyy'}}</mat-cell>
                                 </ng-container>
-                                <ng-container matColumnDef="positionType">
-                                    <mat-header-cell *matHeaderCellDef mat-sort-header>Position Type</mat-header-cell>
-                                    <mat-cell *matCellDef="let row" (contextmenu)="onContextMenu($event, row)">
-                                        {{row.positionType}}</mat-cell>
-                                </ng-container>
-                                
+
                                 <ng-container matColumnDef="activationStatus">
-                                    <mat-header-cell *matHeaderCellDef mat-sort-header> Activation Status</mat-header-cell>
+                                    <mat-header-cell *matHeaderCellDef mat-sort-header>Activation Status</mat-header-cell>
                                     <mat-cell *matCellDef="let row" (contextmenu)="onContextMenu($event, row)">
                                         {{row.activationStatus === true ? 'Active' : 'Deleted'}}</mat-cell>
                                 </ng-container>

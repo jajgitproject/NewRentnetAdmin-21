@@ -29,6 +29,23 @@
                         </mat-error>
                     </mat-form-field>
                 </div>
+
+                <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                    <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                        <mat-label>Customer Type</mat-label>
+                        <input required type="text" matInput [matAutocomplete]="auto1" formControlName="customerType">
+                        <mat-autocomplete #auto1="matAutocomplete"
+                            (optionSelected)="OnCustomerTypeSelect($event.option.value)">
+                            <mat-option *ngFor="let options of filteredTypeOptions | async"
+                                [value]="options.customerType" (click)="getTypeID(options.customerTypeID)">
+                                {{options.customerType}}
+                            </mat-option>
+                        </mat-autocomplete>
+                        <mat-error *ngIf="advanceTableForm.controls['customerType'].hasError('customerTypeInvalid')">
+                            Please select a Customer Type
+                        </mat-error>
+                    </mat-form-field>
+                </div>
             </div>
             <div class="row">
                 <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
@@ -66,23 +83,6 @@
             </div>
 
             <div class="row">
-                <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
-                    <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
-                        <mat-label>Customer Type</mat-label>
-                        <input required type="text" matInput [matAutocomplete]="auto1" formControlName="customerType">
-                        <mat-autocomplete #auto1="matAutocomplete"
-                            (optionSelected)="OnCustomerTypeSelect($event.option.value)">
-                            <mat-option *ngFor="let options of filteredTypeOptions | async"
-                                [value]="options.customerType" (click)="getTypeID(options.customerTypeID)">
-                                {{options.customerType}}
-                            </mat-option>
-                        </mat-autocomplete>
-                        <mat-error *ngIf="advanceTableForm.controls['customerType'].hasError('customerTypeInvalid')">
-                            Please select a Customer Type
-                        </mat-error>
-                    </mat-form-field>
-                </div>
-
                 <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2"
                     *ngIf="advanceTableForm.value.customerType==='Corporate Individual'">
                     <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
@@ -430,7 +430,6 @@
                             <mat-option value="GeneralDutySlipWithMap">
                                 General Duty Slip With Map
                             </mat-option>
-
                             <mat-option value="GeneralDutySlipWithoutMap">
                                 General Duty Slip Without Map
                             </mat-option>
@@ -448,7 +447,6 @@
                     </mat-form-field>
                 </div>
             </div>
-
 
             <div class="row">
                 <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
@@ -525,9 +523,8 @@
                 </div>
                 <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
                     <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
-                        <mat-label>Business Type</mat-label>                      
-                        <input type="text" matInput [matAutocomplete]="auto15"
-                        formControlName="businessType">
+                        <mat-label>Business Type</mat-label>
+                        <input type="text" matInput [matAutocomplete]="auto15" formControlName="businessType">
                         <mat-autocomplete #auto15="matAutocomplete" (optionSelected)="OnBusinessTypeSelect($event.option.value)">
                             <mat-option *ngFor="let options of filteredBusinessTypeOptions | async"
                                 [value]="options.businessTypeName" (click)="getBusinessTypeID(options.businessTypeID)">
@@ -541,18 +538,44 @@
                 </div>
             </div>
 
-             <div class="row">
+            <div class="row">
                 <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
-                   <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                    <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                        <mat-label>Customer Identity Number</mat-label>
+                        <input matInput formControlName="customerIdentityNumber">
+                    </mat-form-field>
+                </div>
+                <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                    <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                        <mat-label>IsBillToShipToCustomer</mat-label>
+                        <mat-select formControlName="isBillToShipToCustomer">
+                            <mat-option [value]=true>Yes</mat-option>
+                            <mat-option [value]=false>No</mat-option>
+                        </mat-select>
+                    </mat-form-field>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                    <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
                         <mat-label>Activation Status</mat-label>
                         <mat-select formControlName="activationStatus">
                             <mat-option [value]=true>Active</mat-option>
                             <mat-option [value]=false>Deleted</mat-option>
                         </mat-select>
-
                         <mat-error *ngIf="advanceTableForm.get('activationStatus').hasError('required')">
                             Activation Status is required
                         </mat-error>
+                    </mat-form-field>
+                </div>
+                <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                    <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                        <mat-label>Show Distance On Duty Slip PDF</mat-label>
+                        <mat-select formControlName="showDistanceOnDutySlipPdf">
+                            <mat-option [value]="true">Yes</mat-option>
+                            <mat-option [value]="false">No</mat-option>
+                        </mat-select>
                     </mat-form-field>
                 </div>
             </div>

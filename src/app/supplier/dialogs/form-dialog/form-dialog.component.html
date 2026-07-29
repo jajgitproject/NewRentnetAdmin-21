@@ -224,26 +224,40 @@
             </mat-error>
           </mat-form-field>
         </div>
-
-
-        <!-- Identity No.: always shown in edit -->
-        <!-- <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2 d-flex align-items-center justify-content-end"
-          *ngIf="action === 'edit' && advanceTable?.supplierOfficialIdentityNumber">
-          <div>
-            <b>Identity No.:</b> {{ advanceTable.supplierOfficialIdentityNumber }}
-          </div>
-        </div> -->
       </div>
 
-      <div class="row" *ngIf="action === 'edit'">
-      <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+      <div class="row">
+        <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
           <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
-            <mat-label>Supplier Official Identity Number</mat-label>
-            <input matInput formControlName="supplierOfficialIdentityNumber" />
-            <!-- <mat-error *ngIf="advanceTableForm.get('supplierCreationRemark').hasError('required')">
-                            Remark is required
-                        </mat-error> -->
+            <mat-label>PAN</mat-label>
+            <input matInput formControlName="pan" maxlength="10" (keypress)="keyPressAlphaNumeric($event)" (blur)="onPanBlur()" />
+            <mat-error *ngIf="advanceTableForm.get('pan')?.hasError('pattern')">
+              PAN must be 10 alphanumeric characters
+            </mat-error>
           </mat-form-field>
+        </div>
+
+        <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+          <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+            <mat-label>Old Rentnet Code</mat-label>
+            <input matInput formControlName="oldRentnetCode" required (keypress)="keyPressNumbers($event)" />
+            <mat-error *ngIf="advanceTableForm.get('oldRentnetCode')?.hasError('required')">
+              Old Rentnet Code is required
+            </mat-error>
+            <mat-error *ngIf="advanceTableForm.get('oldRentnetCode')?.hasError('pattern')">
+              Old Rentnet Code must be numeric
+            </mat-error>
+          </mat-form-field>
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+          <div class="status-display">
+            <strong>Supplier Official Identity Number: </strong>
+            <span *ngIf="action === 'edit'">{{ advanceTable.supplierOfficialIdentityNumber }}</span>
+            <span *ngIf="action === 'add'">Auto-generated on save</span>
+          </div>
         </div>
       </div>
 

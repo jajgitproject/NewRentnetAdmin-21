@@ -1,6 +1,6 @@
-/** Keep in sync with EmployeeLoginSessionSettings on API (20 min timeout, 2 min warning). */
-export const SESSION_INACTIVITY_TIMEOUT_MINUTES = 20;
-export const SESSION_INACTIVITY_WARNING_LEAD_MINUTES = 2;
+/** Keep in sync with EmployeeLoginSessionSettings on API (120 min timeout, 15 min warning). */
+export const SESSION_INACTIVITY_TIMEOUT_MINUTES = 120;
+export const SESSION_INACTIVITY_WARNING_LEAD_MINUTES = 15;
 
 /** Tab registry prune threshold for open-tab / last-tab detection. */
 export const SESSION_TAB_STALE_MS = 2 * 60 * 1000;

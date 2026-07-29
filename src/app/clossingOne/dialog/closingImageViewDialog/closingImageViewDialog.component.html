@@ -1,0 +1,33 @@
+<div class="modalHeader">
+  <div class="editRowModal">
+    <div class="modalHeader clearfix">
+      <div class="modal-about">
+        <div class="font-weight-bold p-t-5 font-17">
+          {{ dialogTitle }}
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <button mat-icon-button (click)="dialogRef.close()" aria-label="Close dialog">
+    <mat-icon class="small-close-icon">close</mat-icon>
+  </button>
+</div>
+
+<mat-dialog-content class="closing-image-view-dialog-content">
+  <div class="closing-image-view">
+    <div *ngIf="imageUrl && !isPdf" class="closing-image-view__frame" (click)="openImageInNewTab()">
+      <app-static-image
+        [src]="imageUrl"
+        maxWidth="100%"
+        maxHeight="70vh"
+        [alt]="dialogTitle"
+        cssClass="closing-image-view__img"></app-static-image>
+    </div>
+    <img
+      *ngIf="isPdf"
+      src="assets/pdf-icon.png"
+      class="closing-image-view__pdf"
+      (click)="openImageInNewTab()" />
+  </div>
+</mat-dialog-content>

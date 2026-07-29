@@ -19,7 +19,7 @@
   <div style="background-color: #ffffff;">
     <div class="responsive_table">
       <mat-accordion>
-        <mat-expansion-panel [expanded]="panelExpanded" class="p-0 m-0" (opened)="onPanelOpen()" (closed)="onPanelClose()">
+        <mat-expansion-panel [expanded]="expandPanel || panelExpanded" [hideToggle]="expandPanel" class="p-0 m-0" (opened)="onPanelOpen()" (closed)="onPanelClose()">
           <mat-expansion-panel-header>
             <mat-panel-title></mat-panel-title>
           </mat-expansion-panel-header>

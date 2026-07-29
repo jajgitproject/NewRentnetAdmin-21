@@ -45,15 +45,17 @@ export class ZonalDutyRegisterComponent implements OnInit, OnDestroy {
   'ReservationID',
   'PickupDate',
   'BookingDate',
+  'DispatchLocation',
   'CustomerName',
-  'BookerName',
+  'BookerEmail',
   'GuestName',
+  'GuestEmail',
   'City',
   'PackageType',
   'CarNumber',
   'DriverID',
   'DriverName',
-  'DispatchLocation',
+  'DriverMobile',
   'BilledDutyType',
   'Package',
   'CarBooked',
@@ -83,6 +85,10 @@ export class ZonalDutyRegisterComponent implements OnInit, OnDestroy {
   'FasTag',
   'InvoiceInterstateTax',
   'DutyExpenseChargeTotal',
+  'SubTotal',
+  'GSTAmount',
+  'GSTType',
+  'InvoiceTotalAmountAfterGST',
   'DSVerifyStatus',
   'GoodForBilling',
   'DSStatus',
@@ -95,14 +101,15 @@ export class ZonalDutyRegisterComponent implements OnInit, OnDestroy {
   'ReservationCreatedBy',
   'AllotmentBy',
   'SupplierID',
-  'SupplierName',  
+  'SupplierName',
+  'DSClosedBy',
+  'DutySlipImage',
   'ClosingDate',
+  'RunningDetails',
   'ClosureMethod',
   'PickupAddress',
   'PickupAddressDetails',
-  'DropOffAddress',
-  'DSClosedBy',
-  'DutySlipImage',
+  'DropOffAddress'
 ];
 
   displayedColumns: string[] = [];
@@ -246,6 +253,7 @@ export class ZonalDutyRegisterComponent implements OnInit, OnDestroy {
   private exportPollSub?: Subscription;
   readonly maxPickupDateRangeDays = 15;
   readonly exportJobType = 'ZonalDutyRegisterExport';
+  IsKAMRole: any;
     
   
  
@@ -266,6 +274,7 @@ export class ZonalDutyRegisterComponent implements OnInit, OnDestroy {
   contextMenuPosition = { x: '0px', y: '0px' };
   ngOnInit() 
   {
+    this.IsKAMRole = localStorage.getItem('isThisAKeyAccountManagerRole') === 'true';
     this.displayedColumns = [...this.baseDisplayedColumns];
     // this.loadData();
     this.InitCustomerGroup();
@@ -688,7 +697,15 @@ export class ZonalDutyRegisterComponent implements OnInit, OnDestroy {
     );
   }
 
+  isDutySlipIdSearchActive(): boolean {
+    return this.isSearchValueSet(this.SearchDuty);
+  }
+
   validatePickupDateRange(): string | null {
+    if (this.isDutySlipIdSearchActive()) {
+      return null;
+    }
+
     if (!this.SearchFromDate || !this.SearchToDate) {
       return 'Pickup date range is required. Please select From and To dates.';
     }
@@ -730,8 +747,12 @@ export class ZonalDutyRegisterComponent implements OnInit, OnDestroy {
       SearchMOP: this.SearchMOP?.value || "",
       SearchSupplierType: this.SearchSupplierType?.value || "",
       SearchSupplier: this.SearchSupplier?.value || "",
-      SearchFromDate: this.SearchFromDate !== "" ? moment(this.SearchFromDate).format('MMM DD yyyy') : "",
-      SearchToDate: this.SearchToDate !== "" ? moment(this.SearchToDate).format('MMM DD yyyy') : "",
+      SearchFromDate: this.isDutySlipIdSearchActive()
+        ? ""
+        : (this.SearchFromDate !== "" ? moment(this.SearchFromDate).format('MMM DD yyyy') : ""),
+      SearchToDate: this.isDutySlipIdSearchActive()
+        ? ""
+        : (this.SearchToDate !== "" ? moment(this.SearchToDate).format('MMM DD yyyy') : ""),
       SearchSalesPersonName: this.SearchSalesPerson?.value || "",
       SearchCarSent: this.SearchCarSend?.value || "",
       SearchCarBook: this.SearchCarBooked?.value || "",
@@ -793,7 +814,7 @@ export class ZonalDutyRegisterComponent implements OnInit, OnDestroy {
   //---------- Customer Group ----------
   InitCustomerGroup()
   {
-    this._generalService.getCustomerGroup().subscribe(
+    this.zonalDutyRegisterService.GetCustomerGroupByKAMForDutyRegister(this.IsKAMRole).subscribe(
     data=>
     {
       this.CustomerGroupList = data;
@@ -833,7 +854,7 @@ export class ZonalDutyRegisterComponent implements OnInit, OnDestroy {
   //---------- Customer ----------
   InitCustomer(customerGroupID?:any)
   {
-    this._generalService.GetCustomersForCP(customerGroupID).subscribe(
+    this.zonalDutyRegisterService.GetCustomerByKAMForDutyRegister(this.IsKAMRole).subscribe(
     data=>
     {
       this.CustomerList = data;
@@ -1025,7 +1046,7 @@ export class ZonalDutyRegisterComponent implements OnInit, OnDestroy {
   //---------- Dispatch Location ----------
   InitDispatchLocation()
   {
-    this._generalService.GetLocationHub().subscribe(
+    this.zonalDutyRegisterService.GetLocationDropDownForDutyRegister(this.IsKAMRole).subscribe(
     data=>
     {
       this.DispatchLocationList=data;
@@ -1361,7 +1382,11 @@ export class ZonalDutyRegisterComponent implements OnInit, OnDestroy {
 
   getCustomerSpecificFieldValue(row: any, fieldName: string): string {
     const value = row?.customerSpecificFieldMap?.[fieldName];
-    return value !== undefined && value !== null && String(value).trim() !== '' ? String(value) : 'NA';
+    const text = value !== undefined && value !== null ? String(value).trim() : '';
+    if (!text || text === '--Select--') {
+      return 'NA';
+    }
+    return text;
   }
 
   private applyCustomerSpecificFieldColumns(data: ZonalDutyRegisterModel[]): ZonalDutyRegisterModel[] {

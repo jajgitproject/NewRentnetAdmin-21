@@ -29,6 +29,7 @@ export class BookingScreenComponent implements OnInit {
   }
   ngOnInit() 
   {
+
     this.route.queryParams.subscribe(paramsData =>{
       
       const encryptedReservationID   = paramsData.reservationID;

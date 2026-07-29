@@ -674,6 +674,99 @@
     <div mat-dialog-content *ngIf="isReservationQuickAdd" class="cp-quick-add-dialog-content">
         <form class="register-form m-4" [formGroup]="advanceTableForm" (ngSubmit)="submit">
 
+            <ng-container *ngIf="fromGeneralBill; else reservationQuickAddFields">
+                <div class="row">
+                    <div class="col-xl-3 col-lg-3 col-md-6 col-sm-6 mb-2">
+                        <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                            <mat-label>Customer</mat-label>
+                            <input required type="text" matInput formControlName="customerName" [matAutocomplete]="auto15">
+                            <mat-autocomplete #auto15="matAutocomplete">
+                                <mat-option *ngFor="let option of filteredCustomerOptions | async"
+                                    [value]="option.customerName" (click)="getCustomerID(option.customerID)">
+                                    {{option.customerName}}
+                                </mat-option>
+                            </mat-autocomplete>
+                            <mat-error *ngIf="advanceTableForm.controls['customerName'].hasError('customerInvalid')">
+                                Please select a Customer
+                            </mat-error>
+                        </mat-form-field>
+                    </div>
+
+                    <div class="col-xl-3 col-lg-3 col-md-6 col-sm-6 mb-2">
+                        <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                            <mat-label>Salutation</mat-label>
+                            <input required type="text" matInput formControlName="salutation" [matAutocomplete]="auto">
+                            <mat-autocomplete #auto="matAutocomplete"
+                                (optionSelected)="OnSalutationSelect($event.option.value)">
+                                <mat-option *ngFor="let option of filteredSalutationOptions | async"
+                                    [value]="option.salutation" (click)="getTitles(option.salutationID)">
+                                    {{option.salutation}}
+                                </mat-option>
+                            </mat-autocomplete>
+                            <mat-error *ngIf="advanceTableForm.controls['salutation'].hasError('salutationInvalid')">
+                                Please select a Salutation
+                            </mat-error>
+                        </mat-form-field>
+                    </div>
+
+                    <div class="col-xl-3 col-lg-3 col-md-6 col-sm-6 mb-2">
+                        <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                            <mat-label>Customer Person Name</mat-label>
+                            <input matInput formControlName="customerPersonName" required>
+                            <mat-error *ngIf="advanceTableForm.get('customerPersonName').hasError('required')">
+                                Customer Person Name is required
+                            </mat-error>
+                        </mat-form-field>
+                    </div>
+
+                    <div class="col-xl-3 col-lg-3 col-md-6 col-sm-6 mb-2">
+                        <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                            <mat-label>Gender</mat-label>
+                            <mat-select required formControlName="gender">
+                                <mat-option value="Male">Male</mat-option>
+                                <mat-option value="Female">Female</mat-option>
+                                <mat-option value="Other">Other</mat-option>
+                            </mat-select>
+                            <mat-error>Gender is required</mat-error>
+                        </mat-form-field>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-xl-4 col-lg-4 col-md-6 col-sm-12 mb-2">
+                        <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                            <mat-label>Primary Email</mat-label>
+                            <input matInput formControlName="primaryEmail" (input)="onPrimaryEmailChange()">
+                        </mat-form-field>
+                    </div>
+
+                    <div class="col-xl-4 col-lg-4 col-md-6 col-sm-6 mb-2">
+                        <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                            <mat-label>Country Code</mat-label>
+                            <input required type="text" matInput formControlName="countryCode" [matAutocomplete]="auto9">
+                            <mat-autocomplete #auto9="matAutocomplete" (optionSelected)="onCountryCodeSelected($event)">
+                                <mat-option *ngFor="let option of filteredCountryCodeOptions | async"
+                                    [value]="option.countryISDCode">
+                                    <img [src]="option.icon" width="20" height="20" style="margin-right: 15px;">
+                                    {{option.countryISDCode}} {{option.geoPointName}}
+                                </mat-option>
+                            </mat-autocomplete>
+                            <mat-error *ngIf="advanceTableForm.get('countryCode').hasError('required')">
+                                Country Code is required
+                            </mat-error>
+                        </mat-form-field>
+                    </div>
+
+                    <div class="col-xl-4 col-lg-4 col-md-6 col-sm-6 mb-2">
+                        <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                            <mat-label>Primary Mobile</mat-label>
+                            <input matInput formControlName="primaryMobile">
+                        </mat-form-field>
+                    </div>
+                </div>
+            </ng-container>
+
+            <ng-template #reservationQuickAddFields>
             <div class="row">
                 <div class="col-xl-3 col-lg-3 col-md-6 col-sm-6 mb-2">
                     <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
@@ -730,7 +823,7 @@
             </div>
 
             <div class="row">
-                <div class="col-xl-3 col-lg-3 col-md-6 col-sm-6 mb-2">
+                <div class="col-xl-3 col-lg-3 col-md-6 col-sm-6 mb-2" *ngIf="!fromGeneralBill">
                     <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
                         <mat-label>Importance</mat-label>
                         <mat-select required formControlName="importance">
@@ -745,21 +838,15 @@
                     <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
                         <mat-label>Primary Email</mat-label>
                         <input matInput formControlName="primaryEmail" (input)="onPrimaryEmailChange()">
-                        <!-- <mat-error *ngIf="advanceTableForm.get('primaryEmail').hasError('required')">
-                            Primary Email is required
-                        </mat-error> -->
                     </mat-form-field>
                 </div>
-                <div class="col-xl-3 col-lg-3 col-md-6 col-sm-6 mb-2">
+                <div class="col-xl-3 col-lg-3 col-md-6 col-sm-6 mb-2" *ngIf="!fromGeneralBill">
                     <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
                         <mat-label>Billing Email</mat-label>
                         <input matInput formControlName="billingEmail">
-                        <!-- <mat-error *ngIf="advanceTableForm.get('billingEmail').hasError('required')">
-                            Billing Email is required
-                        </mat-error> -->
                     </mat-form-field>
                 </div>
-                <div class="col-xl-3 col-lg-3 col-md-6 col-sm-6 mb-2">
+                <div class="col-xl-3 col-lg-3 col-md-6 col-sm-6 mb-2" *ngIf="!fromGeneralBill">
                     <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
                         <mat-label>Mask Mobile Number</mat-label>
                         <mat-select required #mmnVal [class.is-invalid]="mmnVal.invalid && mmnVal.touched"
@@ -805,7 +892,7 @@
                     </mat-form-field>
                 </div>
 
-                <div class="col-xl-3 col-lg-3 col-md-6 col-sm-6 mb-2">
+                <div class="col-xl-3 col-lg-3 col-md-6 col-sm-6 mb-2" *ngIf="!fromGeneralBill">
                     <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
                         <mat-label>Country Code</mat-label>
                         <input type="text" matInput formControlName="countryCodes" [matAutocomplete]="auto10">
@@ -820,18 +907,15 @@
 
                     </mat-form-field>
                 </div>
-                <div class="col-xl-3 col-lg-3 col-md-6 col-sm-6 mb-2">
+                <div class="col-xl-3 col-lg-3 col-md-6 col-sm-6 mb-2" *ngIf="!fromGeneralBill">
                     <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
                         <mat-label>Secondary Mobile1</mat-label>
                         <input matInput formControlName="secondaryMobile1">
-                        <!-- <mat-error *ngIf="advanceTableForm.get('secondaryMobile1').hasError('required')">
-                            Secondary Mobile1 is required
-                        </mat-error> -->
                     </mat-form-field>
                 </div>
             </div>
 
-            <div class="row">
+            <div class="row" *ngIf="!fromGeneralBill">
                 <div class="col-xl-3 col-lg-3 col-md-6 col-sm-6 mb-2">
                     <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
                         <mat-label>Country Code</mat-label>
@@ -903,7 +987,7 @@
                 </div>
             </div>
 
-            <div class="row">
+            <div class="row" *ngIf="!fromGeneralBill">
                 <div class="col-xl-3 col-lg-3 col-md-6 col-sm-12 mb-2">
                     <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
                         <mat-label>Loyal Guest</mat-label>
@@ -972,6 +1056,7 @@
                     </mat-form-field>
                 </div>
             </div>
+            </ng-template>
 
             <div class="row cp-quick-add-actions-row">
                 <div class="col-12">

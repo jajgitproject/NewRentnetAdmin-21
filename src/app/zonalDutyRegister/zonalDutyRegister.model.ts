@@ -8,13 +8,17 @@ export class ZonalDutyRegisterModel {
   dsClosedBy: string;
   dutySlipImage: string;
   closingDate: string;
+  runningDetails: string;
   dispatchLocation: string;
   customerGroup: string;
   customerID: number;
   customerName: string;
   customerType: string;
   bookerName: string;
+  bookerEmail: string;
   guestName: string;
+  guestEmail: string;
+  guestMobile: string;
   city: string;
   packageType: string;
   billedDutyType: string;
@@ -23,6 +27,8 @@ export class ZonalDutyRegisterModel {
   carSent: string;
   carNumber: string;
   driverName: string;
+  driverID: string;
+  driverMobile: string;
   modeOfPayment: string;
   locationOutDate: string;
   locationOutTime: string;
@@ -48,6 +54,10 @@ export class ZonalDutyRegisterModel {
   fasTag: number;
   invoiceInterstateTax: number;
   dutyExpenseChargeTotal: number;
+  subTotal: number;
+  gstAmount: number;
+  gstType: string;
+  invoiceTotalAmountAfterGST: number;
   dsVerifyStatus: string;
   goodForBilling: boolean | null;
   dsStatus: string;
@@ -64,11 +74,11 @@ export class ZonalDutyRegisterModel {
   pickupLocation: string;
   dropLocation: string;
   invoiceCreatedBy: string;
-  closureMethod: string;
   pickupAddress: string;
   pickupAddressDetails: string;
   dropOffAddress: string;
   customerSpecificFields: string;
+  supplierID: string;
 }
 
 export class SalesPersonDropDownModel {
@@ -124,7 +134,7 @@ export class SearchCriteria {
   SearchLocationGroup: string;
   SearchBillFromDate: string;
   SearchBillToDate: string;
-  SearchBillStatus: string;
+  SearchBillStatus: boolean;
   ShowAllLocation:boolean;
   UserID:number;
 }

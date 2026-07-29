@@ -409,7 +409,7 @@ this.buttonDisabled = this.status !== 'Changes allow'; // true अगर status 
           'center'
         );
         this.saveDisabled=true;
-        this.dialogRef.close();
+        this.dialogRef.close(true);
     },
       error =>
       {
@@ -437,7 +437,7 @@ this.buttonDisabled = this.status !== 'Changes allow'; // true अगर status 
           'center'
         );
         this.saveDisabled=true;
-        this.dialogRef.close();
+        this.dialogRef.close(true);
     },
       error =>
       {

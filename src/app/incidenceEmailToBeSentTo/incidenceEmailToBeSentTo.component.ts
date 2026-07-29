@@ -80,7 +80,7 @@ export class IncidenceEmailToBeSentToComponent implements OnInit {
   }
 
   editCall(row) {
-    this.incidenceEmailToBeSentToID = row.id;
+    this.incidenceEmailToBeSentToID = row.incidenceEmailToBeSentToID;
     this.dialog.open(FormDialogComponent, {
       data: {
         advanceTable: row,
@@ -90,7 +90,7 @@ export class IncidenceEmailToBeSentToComponent implements OnInit {
   }
 
   deleteItem(row) {
-    this.incidenceEmailToBeSentToID = row.id;
+    this.incidenceEmailToBeSentToID = row.incidenceEmailToBeSentToID;
     this.dialog.open(DeleteDialogComponent, {
       data: row
     });

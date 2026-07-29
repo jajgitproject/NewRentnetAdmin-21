@@ -126,28 +126,15 @@
                             [value]="option.customerPersonName" (click)="getCustomerPersonID(option.customerPersonID)"> 
                             {{option.customerPersonName}}</mat-option>
                         </mat-autocomplete>
+                        <mat-hint *ngIf="!customerID">Select Customer first</mat-hint>
+                        <mat-hint *ngIf="customerID">Type at least 3 characters</mat-hint>
                         <mat-error *ngIf="advanceTableForm.controls['passengerName'].hasError('customerPersonNameInvalid')">
                             Guest is required
                         </mat-error>
-                        <mat-hint>
-                            <div style="padding-left: 150px;padding-top: 0px;">
-                                <a style="cursor: pointer; color: #007bff; font-size: 10px !important; font-style: italic;"
-                                    (click)="personShort()">
-                                    New Guest
-                                </a>
-                            </div>                            
-                        </mat-hint>
                     </mat-form-field>
-                    <!-- <div class="hint-container">
-                        <mat-hint>
-                            <div style="padding-left: 170px;padding-top: 0px;">
-                                <a style="cursor: pointer; color: #007bff; font-size: 10px !important; font-style: italic;"
-                                    (click)="personShort()">
-                                    New Guest
-                                </a>
-                            </div>                            
-                        </mat-hint>
-                    </div> -->
+                    <div class="link-actions-below">
+                        <a class="link-action" (click)="personShort()">New Guest</a>
+                    </div>
                 </div>
             </div>
 
@@ -350,10 +337,107 @@
                 </div>
             </div> -->
 
+            <div class="bill-to-ship-to-section" *ngIf="customerID && showBillToShipToSection">
+                <div class="section-title">Ship to</div>
+                <div class="row">
+                    <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                        <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                            <mat-label>Head In Bill</mat-label>
+                            <mat-select
+                                formControlName="headInBill"
+                                (selectionChange)="onHeadInBillChange()"
+                            >
+                                <mat-option [value]="null">-- Select --</mat-option>
+                                <mat-option *ngFor="let option of headInBillOptions" [value]="option">
+                                    {{ option }}
+                                </mat-option>
+                            </mat-select>
+                        </mat-form-field>
+                    </div>
+                    <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                        <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                            <mat-label>State</mat-label>
+                            <mat-select
+                                formControlName="billToShipToStateID"
+                                [compareWith]="compareById"
+                                [disabled]="!advanceTableForm.get('headInBill')?.value"
+                                (selectionChange)="onBillToShipToStateChange()"
+                            >
+                                <mat-option [value]="null">-- Select --</mat-option>
+                                <mat-option
+                                    *ngFor="let option of billToShipToStateOptions"
+                                    [value]="option.stateID"
+                                >
+                                    {{ option.stateName }}
+                                </mat-option>
+                            </mat-select>
+                        </mat-form-field>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                        <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                            <mat-label>City</mat-label>
+                            <mat-select
+                                formControlName="billToShipToCityID"
+                                [compareWith]="compareById"
+                                [disabled]="!advanceTableForm.get('billToShipToStateID')?.value"
+                                (selectionChange)="onBillToShipToCityChange()"
+                            >
+                                <mat-option [value]="null">-- Select --</mat-option>
+                                <mat-option
+                                    *ngFor="let option of billToShipToCityOptions"
+                                    [value]="option.cityID"
+                                >
+                                    {{ option.cityName }}
+                                </mat-option>
+                            </mat-select>
+                        </mat-form-field>
+                    </div>
+                    <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                        <div class="bill-to-ship-to-span-field">
+                            <div class="bill-to-ship-to-span-label">Ship To Company</div>
+                            <div class="bill-to-ship-to-span-value">{{ billToShipToDisplay.shipToCompany || '-' }}</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                        <div class="bill-to-ship-to-span-field">
+                            <div class="bill-to-ship-to-span-label">Address 1</div>
+                            <div class="bill-to-ship-to-span-value">{{ billToShipToDisplay.address1 || '-' }}</div>
+                        </div>
+                    </div>
+                    <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                        <div class="bill-to-ship-to-span-field">
+                            <div class="bill-to-ship-to-span-label">Address 2</div>
+                            <div class="bill-to-ship-to-span-value">{{ billToShipToDisplay.address2 || '-' }}</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                        <div class="bill-to-ship-to-span-field">
+                            <div class="bill-to-ship-to-span-label">Pin Code</div>
+                            <div class="bill-to-ship-to-span-value">{{ billToShipToDisplay.pincode || '-' }}</div>
+                        </div>
+                    </div>
+                    <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                        <div class="bill-to-ship-to-span-field">
+                            <div class="bill-to-ship-to-span-label">GST No.</div>
+                            <div class="bill-to-ship-to-span-value">{{ billToShipToDisplay.gstno || '-' }}</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             <div class="row">
                 <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12 mb-2">
                     <div class="example-button-row">
-                        <button mat-raised-button color="primary" [type]="submit" [disabled]="!advanceTableForm.valid"  (click)="confirmAdd()">Save</button>
+                        <button mat-raised-button color="primary" type="submit" [disabled]="!advanceTableForm.valid"  (click)="confirmAdd()">Save</button>
                         <button *ngIf="action==='add'" mat-raised-button color="warn" (click)="onNoClick()"
                         tabindex="-1">Reset</button>
                     <button *ngIf="action==='edit'" mat-raised-button color="warn" (click)="onNoClick()"

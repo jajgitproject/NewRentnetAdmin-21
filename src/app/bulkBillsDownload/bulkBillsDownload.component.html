@@ -30,7 +30,7 @@
                   <button mat-button type="button" [color]="activeTab === 'download' ? 'primary' : undefined" (click)="setTab('download')">Download Invoice - DutySlip</button>
                   <button mat-button type="button" [color]="activeTab === 'creditNote' ? 'primary' : undefined" (click)="setTab('creditNote')">Download Credit Notes</button>
                   <button mat-button type="button" [color]="activeTab === 'upload' ? 'primary' : undefined" (click)="setTab('upload')">Upload Documents</button>
-                  <button mat-button type="button" [color]="activeTab === 'verifiedDutySlip' ? 'primary' : undefined" (click)="setTab('verifiedDutySlip')">Download Duty Slips &amp; Toll Parking</button>
+                  <button mat-button type="button" [color]="activeTab === 'verifiedDutySlip' ? 'primary' : undefined" (click)="setTab('verifiedDutySlip')">Download Duty Slips, Toll Parking &amp; Interstate</button>
                 </div>
                 <div class="bulk-actions">
                   <button mat-mini-fab color="primary" type="button" (click)="refresh()" title="Reset">
@@ -307,7 +307,7 @@
 
               <div *ngIf="activeTab === 'verifiedDutySlip'">
                 <div class="backfill-panel">
-                  <div class="panel-title">Download Duty Slips &amp; Toll Parking</div>
+                  <div class="panel-title">Download Duty Slips, Toll Parking &amp; Interstate</div>
                   <p class="backfill-hint">
                     Downloads all duty slip types for the selected customer and pickup date range (same scope as Duty Register).
                     Each duty slip is packaged as one merged PDF: duty slip, then toll parking receipts, then interstate receipts,

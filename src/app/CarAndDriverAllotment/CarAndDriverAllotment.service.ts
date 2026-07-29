@@ -44,18 +44,6 @@ export class CarAndDriverAllotmentService
     return this.httpClient.get(this.API_URL_LatLong+ '/CalculateDistances/'+PickupAddress);
   }
 
-  GetDriverDuty(PickupDate:any,DriverID:any){
-    return this.httpClient.get(this.Allotment_URL+ '/ForDriverDutyData/'+PickupDate+"/"+DriverID);
-  }
-
-  GetPreviousDriverDuty(PickupDate:any,DriverID:any){
-    return this.httpClient.get(this.Allotment_URL+ '/ForPreviousDriverDutyData/'+PickupDate+"/"+DriverID);
-  }
-
-  GetNextDriverDuty(PickupDate:any,DriverID:any){
-    return this.httpClient.get(this.Allotment_URL+ '/ForNextDriverDutyData/'+PickupDate+"/"+DriverID);
-  }
-
   GetAllotmentStatus(reservationID:any){
     return this.httpClient.get(this.Allotment_URL+ '/getAllotmentStatus/'+reservationID);
   }

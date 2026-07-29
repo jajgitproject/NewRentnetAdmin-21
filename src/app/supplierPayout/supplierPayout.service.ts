@@ -12,6 +12,7 @@ import {
   SupplierPayoutMarkPaidRequest,
   SupplierPayoutReportCriteria,
   SupplierPayoutPreviousGroupContext,
+  SupplierPayoutMismatchDutyRow,
 } from './supplierPayout.model';
 
 @Injectable()
@@ -32,6 +33,10 @@ export class SupplierPayoutService {
 
   getPreviousGroupContext(supplierId: number): Observable<SupplierPayoutPreviousGroupContext> {
     return this.httpClient.get<SupplierPayoutPreviousGroupContext>(`${this.API_URL}/supplier/${supplierId}/previousGroupContext`);
+  }
+
+  getMismatchDuties(supplierId: number): Observable<SupplierPayoutMismatchDutyRow[]> {
+    return this.httpClient.get<SupplierPayoutMismatchDutyRow[]>(`${this.API_URL}/supplier/${supplierId}/mismatchDuties`);
   }
 
   getGroup(groupId: number): Observable<SupplierPayoutGroupSummary> {

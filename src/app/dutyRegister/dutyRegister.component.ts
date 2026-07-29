@@ -738,7 +738,15 @@ export class DutyRegisterComponent implements OnInit, OnDestroy {
     );
   }
 
+  isDutySlipIdSearchActive(): boolean {
+    return this.isSearchValueSet(this.SearchDuty);
+  }
+
   validatePickupDateRange(): string | null {
+    if (this.isDutySlipIdSearchActive()) {
+      return null;
+    }
+
     if (!this.SearchFromDate || !this.SearchToDate) {
       return 'Pickup date range is required. Please select From and To dates.';
     }
@@ -780,8 +788,12 @@ export class DutyRegisterComponent implements OnInit, OnDestroy {
       SearchMOP: this.SearchMOP?.value || "",
       SearchSupplierType: this.SearchSupplierType?.value || "",
       SearchSupplier: this.SearchSupplier?.value || "",
-      SearchFromDate: this.SearchFromDate !== "" ? moment(this.SearchFromDate).format('MMM DD yyyy') : "",
-      SearchToDate: this.SearchToDate !== "" ? moment(this.SearchToDate).format('MMM DD yyyy') : "",
+      SearchFromDate: this.isDutySlipIdSearchActive()
+        ? ""
+        : (this.SearchFromDate !== "" ? moment(this.SearchFromDate).format('MMM DD yyyy') : ""),
+      SearchToDate: this.isDutySlipIdSearchActive()
+        ? ""
+        : (this.SearchToDate !== "" ? moment(this.SearchToDate).format('MMM DD yyyy') : ""),
       SearchSalesPersonName: this.SearchSalesPerson?.value || "",
       SearchCarSent: this.SearchCarSend?.value || "",
       SearchCarBook: this.SearchCarBooked?.value || "",
@@ -1414,7 +1426,11 @@ export class DutyRegisterComponent implements OnInit, OnDestroy {
 
   getCustomerSpecificFieldValue(row: any, fieldName: string): string {
     const value = row?.customerSpecificFieldMap?.[fieldName];
-    return value !== undefined && value !== null && String(value).trim() !== '' ? String(value) : 'NA';
+    const text = value !== undefined && value !== null ? String(value).trim() : '';
+    if (!text || text === '--Select--') {
+      return 'NA';
+    }
+    return text;
   }
 
   private applyCustomerSpecificFieldColumns(data: DutyRegisterModel[]): DutyRegisterModel[] {

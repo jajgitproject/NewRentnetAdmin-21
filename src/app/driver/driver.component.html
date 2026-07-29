@@ -251,11 +251,11 @@
                                                 {{row.driverName}}</mat-cell>
                                         </ng-container>
 
-                                        <ng-container matColumnDef="supplierOfficialIdentityNumber">
-                                            <mat-header-cell *matHeaderCellDef mat-sort-header>Supplier Identity
-                                                Number</mat-header-cell>
+                                        <ng-container matColumnDef="supplierCode">
+                                            <mat-header-cell *matHeaderCellDef mat-sort-header>Supplier
+                                                Code</mat-header-cell>
                                             <mat-cell *matCellDef="let row" (contextmenu)="onContextMenu($event, row)">
-                                                {{row.supplier}}</mat-cell>
+                                                {{ getSupplierCode(row) }}</mat-cell>
                                         </ng-container>
 
                                         <ng-container matColumnDef="driverImage">

@@ -787,6 +787,8 @@ export class ClosingDataModel {
   packageTypeID:number;
   inventoryID:number;
   registrationNumber:string;
+  driverName:string;
+  driverMobile:string;
 
   pickupDate:Date;
   pickupTime:Date;

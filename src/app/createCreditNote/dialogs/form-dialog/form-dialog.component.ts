@@ -265,7 +265,9 @@ resetTaxes() {
     },
     error =>
     {
-       const msg = error?.error?.message || error?.error?.Message || 'Create Credit Note failed';
+       const msg = (typeof error === 'string' && error.trim())
+         ? error.trim()
+         : (error?.error?.message || error?.error?.Message || error?.message || 'Create Credit Note failed');
        Swal.fire({ title: msg, icon: 'error', confirmButtonText: 'Ok' });
        this._generalService.sendUpdate('CreateCreditNoteAll:CreateCreditNoteView:Failure');
        this.saveDisabled = false; 
@@ -308,92 +310,61 @@ resetTaxes() {
       panelClass: colorName
     });
   }
+  private isRequiresRebillingYes(value: any): boolean {
+    return value === true || value === 'true' || value === 1 || value === '1';
+  }
+
   public confirmAdd(): void {
+    const amount = Number(this.advanceTableForm.get('invoiceTotalAmountAfterGST')?.value);
+    const creditNoteAmount = Number(this.advanceTableForm.get('creditNoteAmount')?.value);
+    const requiresReBilling = this.isRequiresRebillingYes(
+      this.advanceTableForm.get('requiresReBilling')?.value
+    );
 
-  const amount = Number(this.advanceTableForm.get('invoiceTotalAmountAfterGST')?.value);
-  const creditNoteAmount = Number(this.advanceTableForm.get('creditNoteAmount')?.value);
-  const requiresReBilling = this.advanceTableForm.get('requiresReBilling')?.value;
+    // Always store a real boolean on the form for the API
+    this.advanceTableForm.patchValue({ requiresReBilling });
 
-  // Validate only while adding (or remove this if you want the same validation for edit)
-  if (this.action !== 'edit' && requiresReBilling === false) {
+    if (this.action !== 'edit') {
+      // Error ONLY when Requires Re-Billing = Yes and amounts differ
+      if (requiresReBilling && amount !== creditNoteAmount) {
+        Swal.fire({
+          title: 'Invalid Selection',
+          text: 'Credit Note Amount should be equal to Invoice Amount for Re-billing.',
+          icon: 'error',
+          confirmButtonText: 'OK'
+        });
+        return;
+      }
 
-    // Amount and Credit Note Amount are equal
-    if (amount === creditNoteAmount) {
+      // Requires Re-Billing = No and amounts equal — confirm user does not want to rebill
+      if (!requiresReBilling && amount === creditNoteAmount) {
+        Swal.fire({
+          title: 'Are you sure?',
+          text: 'Are you sure you do not want to rebill the Duty Slips (DS) associated with this bill?',
+          icon: 'warning',
+          showCancelButton: true,
+          confirmButtonText: 'Yes',
+          cancelButtonText: 'No'
+        }).then((result) => {
+          if (result.isConfirmed) {
+            this.saveDisabled = false;
+            this.Post();
+          }
+        });
+        return;
+      }
 
-      Swal.fire({
-        title: 'Are you sure?',
-        text: 'Are you sure you do not want to rebill the Duty Slips (DS) associated with this bill?',
-        icon: 'warning',
-        showCancelButton: true,
-        confirmButtonText: 'Yes',
-        cancelButtonText: 'No'
-      }).then((result) => {
-        if (result.isConfirmed) {
-          this.saveDisabled = false;
-          this.Post();
-        }
-      });
-
-      return;
+      // Requires Re-Billing = No and amounts different — allow save (no error)
     }
 
-    // Amount and Credit Note Amount are different
-    if (amount !== creditNoteAmount) {
+    this.saveDisabled = false;
 
-      Swal.fire({
-        title: 'Invalid Selection',
-        text: 'Credit Note Amount should be equal to Invoice Amount for Re-billing.',
-        icon: 'error',
-        confirmButtonText: 'OK'
-      });
-
-      return;
+    if (this.action === 'edit') {
+      this.Put();
+    } else {
+      this.Post();
     }
   }
- else if(this.action !== 'edit' && requiresReBilling === true) {
-
-
-    // Amount and Credit Note Amount are equal
-    // if (amount === creditNoteAmount) {
-
-    //   Swal.fire({
-    //     title: 'Are you sure?',
-    //     text: 'Are you sure you do not want to rebill the Duty Slips (DS) associated with this bill?',
-    //     icon: 'warning',
-    //     showCancelButton: true,
-    //     confirmButtonText: 'Yes',
-    //     cancelButtonText: 'No'
-    //   }).then((result) => {
-    //     if (result.isConfirmed) {
-    //       this.saveDisabled = false;
-    //       this.Post();
-    //     }
-    //   });
-
-    //   return;
-    // }
-
-    // Amount and Credit Note Amount are different
-    if (amount > creditNoteAmount) {
-
-      Swal.fire({
-        title: 'Invalid Selection',
-        text: 'In order to rebill the duties, the Credit note amount should be equals to Invoice Amount.',
-        icon: 'error',
-        confirmButtonText: 'OK'
-      });
-
-      return;
-    }
-  }
-  this.saveDisabled = false;
-
-  if (this.action === 'edit') {
-    this.Put();
-  } else {
-    this.Post();
-  }
-}
   /////////////////for Image Upload////////////////////////////
   public response: { dbPath: '' };
   public ImagePath: string = "";

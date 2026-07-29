@@ -7,6 +7,7 @@ export class CustomerContractCarCategoriesCarMapping {
    customerVehicleName:string;
    customerVehicleCodeForIntegration:string;
    vehicleID: number;
+   mileage: number | null;
    activationStatus:boolean;
    vehicle:string;
    userID:number;
@@ -20,6 +21,7 @@ export class CustomerContractCarCategoriesCarMapping {
        this.customerContractName = customerContractCarCategoriesCarMapping.customerContractName || '';
        this.customerVehicleName = customerContractCarCategoriesCarMapping.customerVehicleName || '';
        this.customerVehicleCodeForIntegration = customerContractCarCategoriesCarMapping.customerVehicleCodeForIntegration || '';
+       this.mileage = customerContractCarCategoriesCarMapping.mileage ?? null;
        this.activationStatus = customerContractCarCategoriesCarMapping.activationStatus || '';
     }
   }

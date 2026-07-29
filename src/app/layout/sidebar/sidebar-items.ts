@@ -165,6 +165,18 @@ export const ROUTES: RouteInfo[] = [
         isAccess: false
       },
       {
+        path: 'bookingMis',
+        title: 'Booking MIS',
+        pageKey: 'Booking MIS',
+        moduleName: 'bookingMis',
+        alternateAccessPageKeys: ['bookingMis', 'Booking MIS'],
+        icon: 'fas fa-file-export',
+        class: '',
+        groupTitle: false,
+        submenu: [],
+        isAccess: false
+      },
+      {
         path: 'employeeLoginMIS',
         title: 'Employee Login MIS',
         pageKey: 'Employee Login MIS',
@@ -581,6 +593,19 @@ export const ROUTES: RouteInfo[] = [
         submenu: [],
         isAccess: false
       },
+
+      {
+        path: 'creditNoteMis',
+        title: 'Credit Note MIS',
+        pageKey: 'Credit Note MIS',
+        moduleName: 'creditNoteMis',
+        alternateAccessPageKeys: ['creditNoteMis', 'Credit Note MIS'],
+        icon: 'fas fa-file-export',
+        class: '',
+        groupTitle: false,
+        submenu: [],
+        isAccess: false
+      },
       
       {
         path: 'currency',
@@ -889,6 +914,30 @@ export const ROUTES: RouteInfo[] = [
         isAccess: false
       },
       {
+        path: 'vendorMis',
+        title: 'Vendor MIS',
+        pageKey: 'Vendor MIS',
+        moduleName: 'vendorMis',
+        alternateAccessPageKeys: ['vendorMis', 'Vendor MIS'],
+        icon: 'fas fa-file-export',
+        class: '',
+        groupTitle: false,
+        submenu: [],
+        isAccess: false
+      },
+      {
+        path: 'billDetailMis',
+        title: 'Bill Detail MIS',
+        pageKey: 'Bill Detail MIS',
+        moduleName: 'billDetailMis',
+        alternateAccessPageKeys: ['billDetailMis', 'Bill Detail MIS'],
+        icon: 'fas fa-file-invoice',
+        class: '',
+        groupTitle: false,
+        submenu: [],
+        isAccess: false
+      },
+      {
         path: 'dutyregisterforcontractcenter',
         title: 'Duty Register For Contract Center',
         moduleName: 'dutyRegisterForContractCenter',
@@ -1106,6 +1155,19 @@ export const ROUTES: RouteInfo[] = [
         isAccess: false
       },
 
+      {
+        path: 'bulkEInvoice',
+        title: 'Bulk E-Invoice',
+        pageKey: 'Bulk E-Invoice',
+        moduleName: 'bulkEInvoice',
+        alternateAccessPageKeys: ['bulkEInvoice', 'generateEInvoice', 'Generate E - Invoice'],
+        icon: 'fas fa-file-invoice',
+        class: '',
+        groupTitle: false,
+        submenu: [],
+        isAccess: false
+      },
+
 
       {
         path: 'gstPercentage',
@@ -1193,6 +1255,16 @@ export const ROUTES: RouteInfo[] = [
         isAccess: false
       },
       {
+        path: 'invoicePaidStatus',
+        title: 'Invoice Paid Status',
+        moduleName: 'invoicePaidStatus',
+        icon: 'fas fa-money-check-alt',
+        class: '',
+        groupTitle: false,
+        submenu: [],
+        isAccess: false
+      },
+      {
         path: 'bulkBillsDownload',
         title: 'Bulk Bills Download',
         pageKey: 'Bulk Bills Download',
@@ -1212,10 +1284,10 @@ export const ROUTES: RouteInfo[] = [
       },
       {
         path: 'invoiceExport',
-        title: 'Invoice Export',
+        title: 'Forensic',
         pageKey: 'Invoice Export',
         moduleName: 'invoiceExport',
-        alternateAccessPageKeys: ['invoiceExport'],
+        alternateAccessPageKeys: ['invoiceExport', 'Forensic'],
         icon: 'fas fa-file-excel',
         class: '',
         groupTitle: false,
@@ -1353,16 +1425,6 @@ export const ROUTES: RouteInfo[] = [
         path: 'tallyMis',
         title: 'MIS Tally',
         moduleName: 'tallyMisModule',
-        icon: 'fas fa-tachometer-alt',
-        class: '',
-        groupTitle: false,
-        submenu: [],
-        isAccess: false
-      },
-      {
-        path: 'dynamicsMis',
-        title: 'Dynamics MIS',
-        moduleName: 'dynamicsMisModule',
         icon: 'fas fa-tachometer-alt',
         class: '',
         groupTitle: false,

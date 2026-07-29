@@ -64,6 +64,7 @@ export class GeneralBillComponent implements OnInit {
 
   invoiceGeneralLineItemsID: any;
   invoiceID: any;
+  invoiceNumberWithPrefix: string = '';
   cgstRate: any;
   cgstAmount: any;
   sgstRate: any;
@@ -90,6 +91,7 @@ export class GeneralBillComponent implements OnInit {
   {
     this.route.queryParams.subscribe(paramsData =>{
       this.invoiceID = paramsData.invoiceID;
+      this.invoiceNumberWithPrefix = paramsData.invoiceNumberWithPrefix || '';
       this.cgstRate = paramsData.cgstRate;
       this.cgstAmount = paramsData.cgstAmount;
       this.sgstRate = paramsData.sgstRate;
@@ -122,6 +124,7 @@ export class GeneralBillComponent implements OnInit {
           advanceTable: this.advanceTable,
           action: 'add',
           invoiceID:this.invoiceID,
+          invoiceNumberWithPrefix: this.invoiceNumberWithPrefix,
           cgstRate:this.cgstRate,
           cgstAmount:this.cgstAmount,
           sgstRate:this.sgstRate,
@@ -141,6 +144,7 @@ export class GeneralBillComponent implements OnInit {
         advanceTable: row,
         action: 'edit',
         invoiceID:this.invoiceID,
+        invoiceNumberWithPrefix: this.invoiceNumberWithPrefix,
         cgstRate:this.cgstRate,
         cgstAmount:this.cgstAmount,
         sgstRate:this.sgstRate,

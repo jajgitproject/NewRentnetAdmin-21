@@ -78,6 +78,7 @@ export class FormDialogComponent
     this.advanceTable = new IndividualCustomerModel({});
     this.advanceTable.activationStatus = true;
     this.advanceTable.isPostPickUpCallAllowed = false;
+    this.advanceTable.isBillToShipToCustomer = false;
     this.advanceTable.roundOffInvoiceValue = false;
     this.advanceTableForm = this.createContactForm();
   }
@@ -130,7 +131,9 @@ export class FormDialogComponent
       customerDepartmentID: [this.advanceTable.customerDepartmentID],
       customerDesignationID: [this.advanceTable.customerDesignationID],
       maskMobileNumber:[this.advanceTable.maskMobileNumber],
-      isPostPickUpCallAllowed: [this.advanceTable.isPostPickUpCallAllowed ?? false]
+      isPostPickUpCallAllowed: [this.advanceTable.isPostPickUpCallAllowed ?? false],
+      isBillToShipToCustomer: [this.advanceTable.isBillToShipToCustomer ?? false],
+      customerIdentityNumber: [this.advanceTable.customerIdentityNumber]
     });
   }
 
@@ -151,6 +154,7 @@ export class FormDialogComponent
       this.advanceTableForm.patchValue({
         activationStatus: true,
         isPostPickUpCallAllowed: false,
+        isBillToShipToCustomer: false,
         roundOffInvoiceValue: false
       });
     }
@@ -169,13 +173,61 @@ export class FormDialogComponent
     });
   }
 
+  private parseActivationStatus(response: any): string | null {
+    if (!response) return null;
+    if (typeof response === 'string') {
+      try {
+        const parsed = JSON.parse(response);
+        return parsed?.activationStatus ?? response;
+      } catch {
+        return response;
+      }
+    }
+    if (typeof response.activationStatus === 'string') {
+      return response.activationStatus;
+    }
+    return null;
+  }
+
+  private extractHttpErrorMessage(error: any): string {
+    const body = error?.error;
+    if (!body) {
+      return error?.message || 'Operation Failed...!!!';
+    }
+    if (typeof body === 'string') {
+      try {
+        const parsed = JSON.parse(body);
+        if (parsed?.activationStatus) {
+          return String(parsed.activationStatus).replace(/^\+/, '');
+        }
+        return body;
+      } catch {
+        return body;
+      }
+    }
+    if (body.activationStatus) {
+      return String(body.activationStatus).replace(/^\+/, '');
+    }
+    if (body.title) {
+      return body.title;
+    }
+    if (body.errors) {
+      const firstKey = Object.keys(body.errors)[0];
+      if (firstKey && body.errors[firstKey]?.length) {
+        return `${firstKey}: ${body.errors[firstKey][0]}`;
+      }
+    }
+    return 'Operation Failed...!!!';
+  }
+
   public Post(): void
   {
     this.individualCustomerService.add(this.advanceTableForm.getRawValue())
     .subscribe(
       response =>
       {
-        if (response && response.activationStatus && typeof response.activationStatus === 'string' && response.activationStatus.includes("Duplicate"))
+        const activationStatus = this.parseActivationStatus(response);
+        if (activationStatus && activationStatus.includes("Duplicate"))
         {
           this.showNotification(
               'snackbar-danger',
@@ -185,11 +237,11 @@ export class FormDialogComponent
               );
           this.saveDisabled = true;
         }
-        else if (response && response.activationStatus && typeof response.activationStatus === 'string' && response.activationStatus.startsWith('+'))
+        else if (activationStatus && activationStatus.startsWith('+'))
         {
           this.showNotification(
               'snackbar-danger',
-              'Operation Failed...!!!',
+              activationStatus.replace(/^\+/, '') || 'Operation Failed...!!!',
               'bottom',
               'center'
               );
@@ -210,7 +262,7 @@ export class FormDialogComponent
       {
         this.showNotification(
           'snackbar-danger',
-          'Operation Failed...!!!',
+          this.extractHttpErrorMessage(error),
           'bottom',
           'center'
         );

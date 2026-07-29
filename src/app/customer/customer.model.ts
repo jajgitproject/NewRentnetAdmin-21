@@ -45,14 +45,17 @@ export class Customer {
     printRunningDetailOnDutySlip:boolean;  
     showRateOnDutySlip:boolean;
       showOTPOnDutySlip:boolean;
+      showDistanceOnDutySlipPdf:boolean;
       isBookerAllowedToBeCreatedFromReservation:boolean;
       isPostPickUpCallAllowed:boolean;
       panNo:string;
+      customerIdentityNumber:string;
       gstCustomerType:string;
       segment:string;
       businessType:string;
       businessServices:string;
       businessTypeID:number;
+      isBillToShipToCustomer:boolean;
   constructor(customer) {
     {
        this.customerID = customer.customerID || -1;
@@ -85,6 +88,7 @@ export class Customer {
        this.printRunningDetailOnDutySlip = customer.printRunningDetailOnDutySlip ?? false;
        this.showRateOnDutySlip = customer.showRateOnDutySlip ?? false;
        this.showOTPOnDutySlip = customer.showOTPOnDutySlip ?? false;
+       this.showDistanceOnDutySlipPdf = customer.showDistanceOnDutySlipPdf ?? false;
        this.isBookerAllowedToBeCreatedFromReservation = customer.isBookerAllowedToBeCreatedFromReservation ?? false;
        this.isPostPickUpCallAllowed = customer.isPostPickUpCallAllowed ?? false;
        this.customerSector = customer.customerSector || '';
@@ -93,10 +97,12 @@ export class Customer {
        //this.treatAsNewCustomerTillDate=new Date();
        this.customerCreationDate=new Date();
        this.panNo = customer.panNo || '';
+       this.customerIdentityNumber = customer.customerIdentityNumber || '';
        this.gstCustomerType = customer.gstCustomerType || '';
        this.segment = customer.segment || '';
        this.businessType = customer.businessType || '';
        this.businessServices = customer.businessServices || '';
+       this.isBillToShipToCustomer = customer.isBillToShipToCustomer ?? false;
     }
   }
   

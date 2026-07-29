@@ -217,7 +217,8 @@ InitTollParkingType() {
           'center'
         );
         this.saveDisabled=true;
-        this.dialogRef.close();
+        this.dialogRef.close(true);
+        this._generalService.sendUpdate('DutyTollParkingEntryCreate:DutyTollParkingEntryView:Success');
     
   },
     error =>
@@ -229,6 +230,7 @@ InitTollParkingType() {
         'center'
       );
       this.saveDisabled=true;
+      this._generalService.sendUpdate('DutyTollParkingEntryAll:DutyTollParkingEntryView:Failure');
     }
   )
   }
@@ -248,8 +250,8 @@ InitTollParkingType() {
           'center'
         );
         this.saveDisabled=true;
-        this.dialogRef.close();
-       //this._generalService.sendUpdate('DutyTollParkingEntryUpdate:DutyTollParkingEntryView:Success');//To Send Updates  
+        this.dialogRef.close(true);
+        this._generalService.sendUpdate('DutyTollParkingEntryUpdate:DutyTollParkingEntryView:Success');
        
     },
     error =>
@@ -261,7 +263,7 @@ InitTollParkingType() {
         'center'
       );
       this.saveDisabled=true;
-     //this._generalService.sendUpdate('DutyTollParkingEntryAll:DutyTollParkingEntryView:Failure');//To Send Updates  
+      this._generalService.sendUpdate('DutyTollParkingEntryAll:DutyTollParkingEntryView:Failure');
     }
   )
   }

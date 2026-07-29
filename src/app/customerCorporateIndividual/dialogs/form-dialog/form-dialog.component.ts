@@ -95,6 +95,7 @@ export class FormDialogComponent
       this.advanceTable = new CustomerCorporateIndividualModel({});
       this.advanceTable.activationStatus=true;
       this.advanceTable.isPostPickUpCallAllowed=false;
+      this.advanceTable.isBillToShipToCustomer=false;
     }
     this.advanceTableForm = this.createContactForm();
   }
@@ -148,7 +149,9 @@ export class FormDialogComponent
       customerDepartmentID: [this.advanceTable.customerDepartmentID],
       customerDesignationID: [this.advanceTable.customerDesignationID],
       maskMobileNumber:[this.advanceTable.maskMobileNumber],
-      isPostPickUpCallAllowed: [this.advanceTable.isPostPickUpCallAllowed ?? false]
+      isPostPickUpCallAllowed: [this.advanceTable.isPostPickUpCallAllowed ?? false],
+      isBillToShipToCustomer: [this.advanceTable.isBillToShipToCustomer ?? false],
+      customerIdentityNumber: [this.advanceTable.customerIdentityNumber]
     });
   }
 

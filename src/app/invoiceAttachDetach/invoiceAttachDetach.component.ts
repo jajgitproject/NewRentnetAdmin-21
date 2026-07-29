@@ -31,6 +31,20 @@ import { PackageDropDown } from '../package/packageDropDown.model';
 import { ActivatedRoute, Router } from '@angular/router';
 import { InvoiceDetachService } from '../invoiceDetach/invoiceDetach.service';
 import Swal from 'sweetalert2';
+import { firstValueFrom } from 'rxjs';
+import {
+  confirmMissingGstnForBatch,
+  extractApiErrorMessage
+} from '../shared/customer-invoicing-gstn-confirm.util';
+import {
+  getCustomerDisplayValue,
+  getCustomerDisplayLabel,
+  getCustomerIdValue,
+  getCustomerLabelFromAutocomplete,
+  getCustomerNameFromAutocomplete,
+  getCustomerTallyId,
+  resolveCustomerFromAutocomplete
+} from '../shared/customer-autocomplete.util';
 
 @Component({
   standalone: false,
@@ -45,26 +59,23 @@ export class InvoiceAttachDetachComponent implements OnInit {
     'DutySlipID',
     'CustomerName',
     'CustomerState',
-    'CustomerPersonName',
     'BranchName',
     'VerifyDuty',
-    'InvoiceNumberWithPrefix',
     'PickUpDate',
     'Vehicle',
     'PackageType',
     'ReservationBillingInstruction',
     'ApplicableGST',
     'TotalAmountAfterGST',
-    'DiscountPercentage',  
   ];
 
-  dataSource: InvoiceAttachDetachModel[] | null;
+  dataSource: InvoiceAttachDetachModel[] | null = null;
+  hasSearched = false;
   employeeID: number;
   row: InvoiceAttachDetachModel | null;
   SearchName: string = '';
   IsLockedOut:boolean=true;
   SearchActivationStatus: boolean = true;
-  PageNumber: number = 0;
   search: FormControl = new FormControl();
   isChecked: boolean = false;
   sortingData: number;
@@ -81,6 +92,10 @@ export class InvoiceAttachDetachComponent implements OnInit {
   customerGroup : FormControl=new FormControl();
   searchCustomerName:string='';
   customer : FormControl=new FormControl();
+  selectedCustomerID = 0;
+  displayCustomer = (value: string) => getCustomerLabelFromAutocomplete(value);
+  getCustomerDisplayValue = getCustomerDisplayValue;
+  getCustomerDisplayLabel = getCustomerDisplayLabel;
   geoPointTypeID: any;
   customerGroupID: any;
 
@@ -118,8 +133,17 @@ export class InvoiceAttachDetachComponent implements OnInit {
   selectedInvoices: any[] = []; 
   InvoiceID: any;
   invoiceBillDate: Date | null = null;
+  invoiceCustomerName: string = '';
+  invoiceAnchorGstNumbers: string[] = [];
+  hasMixedInvoiceGst = false;
+  activeGstKey: string | null = null;
+  groupedDutySections: any[] = [];
+  readonly noGstConfiguredKey = '(No GST configured)';
   SearchVerifyDuty:boolean;
   SearchGoodForBilling:boolean;
+
+  singleDutyGenerateInProgress = false;
+  multiDutyGenerateInProgress = false;
 
   constructor(
     public httpClient: HttpClient,
@@ -146,12 +170,6 @@ export class InvoiceAttachDetachComponent implements OnInit {
     if (this.InvoiceID) {
       this.loadInvoiceBillDate();
     }
-
-    if (!this.InvoiceNumberWithPrefix) {
-      this.loadData();
-    } else {
-      this.loadDataForEdit();
-    }
   });
 
   this.InitCustomer();
@@ -163,17 +181,126 @@ export class InvoiceAttachDetachComponent implements OnInit {
     const invoiceId = Number(this.InvoiceID);
     if (!invoiceId || invoiceId <= 0) {
       this.invoiceBillDate = null;
+      this.invoiceCustomerName = '';
+      this.invoiceAnchorGstNumbers = [];
+      this.hasMixedInvoiceGst = false;
+      this.activeGstKey = null;
       return;
     }
 
     this.invoiceAttachDetachService.getInvoiceBillDate(invoiceId).subscribe(
       response => {
         this.invoiceBillDate = response?.invoiceDate ? new Date(response.invoiceDate) : null;
+        this.invoiceCustomerName = response?.invoiceCustomerName || '';
+        this.invoiceAnchorGstNumbers = response?.distinctInvoiceGstNumbers || [];
+        this.hasMixedInvoiceGst = !!response?.hasMixedGst;
+        this.applyInvoiceGstAnchor();
+        this.buildGroupedDutySections();
       },
       () => {
         this.invoiceBillDate = null;
+        this.invoiceCustomerName = '';
+        this.invoiceAnchorGstNumbers = [];
+        this.hasMixedInvoiceGst = false;
+        this.activeGstKey = null;
       }
     );
+  }
+
+  normalizeGstKey(gstNumber?: string): string {
+    if (!gstNumber || !String(gstNumber).trim()) {
+      return this.noGstConfiguredKey;
+    }
+    return String(gstNumber).trim().toUpperCase();
+  }
+
+  applyInvoiceGstAnchor() {
+    if (!this.InvoiceID) {
+      return;
+    }
+
+    if (this.invoiceAnchorGstNumbers.length === 1) {
+      this.activeGstKey = this.normalizeGstKey(this.invoiceAnchorGstNumbers[0]);
+      return;
+    }
+
+    if (this.hasMixedInvoiceGst) {
+      this.activeGstKey = null;
+      return;
+    }
+
+    this.activeGstKey = this.noGstConfiguredKey;
+  }
+
+  buildGroupedDutySections() {
+    if (!this.dataSource || !this.dataSource.length) {
+      this.groupedDutySections = [];
+      return;
+    }
+
+    const groups = new Map<string, any[]>();
+    this.dataSource.forEach((row: any) => {
+      const key = this.normalizeGstKey(row.invoiceGstNumber);
+      if (!groups.has(key)) {
+        groups.set(key, []);
+      }
+      groups.get(key).push(row);
+    });
+
+    this.groupedDutySections = Array.from(groups.entries())
+      .sort((a, b) => {
+        if (a[0] === this.noGstConfiguredKey) {
+          return 1;
+        }
+        if (b[0] === this.noGstConfiguredKey) {
+          return -1;
+        }
+        return a[0].localeCompare(b[0]);
+      })
+      .map(([gstKey, duties]) => ({
+        gstKey,
+        gstLabel: gstKey === this.noGstConfiguredKey ? gstKey : gstKey,
+        duties,
+        dutyCount: duties.length,
+        selectable: this.isGroupSelectable(gstKey),
+        customerState: duties[0]?.customerState || ''
+      }));
+  }
+
+  isGroupSelectable(gstKey: string): boolean {
+    if (this.activeGstKey === null || this.activeGstKey === undefined) {
+      return true;
+    }
+    return gstKey === this.activeGstKey;
+  }
+
+  isSameGstGroup(row: any): boolean {
+    return this.isGroupSelectable(this.normalizeGstKey(row?.invoiceGstNumber));
+  }
+
+  getGstSelectionBanner(): string {
+    if (this.hasMixedInvoiceGst && this.InvoiceID) {
+      return 'This invoice already has multiple GSTINs on Finance Dashboard — contact billing. You may only attach duties from one GSTIN group at a time.';
+    }
+    if (this.InvoiceID && this.invoiceAnchorGstNumbers.length === 1) {
+      return `This invoice uses GSTIN ${this.invoiceAnchorGstNumbers[0]} — only matching duties can be attached.`;
+    }
+    if (this.activeGstKey && this.activeGstKey !== this.noGstConfiguredKey) {
+      return `Selected GSTIN group: ${this.activeGstKey}. Duties from other GSTIN groups cannot be selected together.`;
+    }
+    if (this.activeGstKey === this.noGstConfiguredKey) {
+      return 'Selected group: duties with no GST configured. Mixed GSTINs cannot be billed together.';
+    }
+    return 'Select duties from one GSTIN group only. Mixed GSTINs cannot be billed together on a Multi-Duty invoice.';
+  }
+
+  getGroupHeaderLabel(section: any): string {
+    const countLabel = `${section.dutyCount} ${section.dutyCount === 1 ? 'duty' : 'duties'}`;
+    if (section.gstKey === this.noGstConfiguredKey) {
+      return `${section.gstLabel} (${countLabel})`;
+    }
+    const stateSuffix = section.customerState ? ` — ${section.customerState}` : '';
+    return `${section.gstLabel}${stateSuffix} (${countLabel})`;
   }
 
   advanceTableForm:FormGroup = this.fb.group({
@@ -181,7 +308,8 @@ export class InvoiceAttachDetachComponent implements OnInit {
         invoiceType:[],
         listOfDuties:[[]],
         userID:[],
-        action: []
+        action: [],
+        acknowledgeMissingGstnDutySlipIds: [[]]
       })
       
   //---------- Customer Group ----------
@@ -237,19 +365,54 @@ export class InvoiceAttachDetachComponent implements OnInit {
   }
 
   private _filterCustomer(value: string): any {
-    const filterValue = value.toLowerCase();
+    const raw = (value || '').toLowerCase();
+    const filterValue = getCustomerNameFromAutocomplete(value).toLowerCase();
     return this.CustomerList.filter(
       data => 
       {
-        return data.customerName.toLowerCase().includes(filterValue);
+        const name = (data.customerName || '').toLowerCase();
+        const tally = getCustomerTallyId(data).toLowerCase();
+        const customerId = getCustomerIdValue(data).toLowerCase();
+        const label = getCustomerDisplayLabel(data).toLowerCase();
+        return name.includes(filterValue)
+          || name.includes(raw)
+          || tally.includes(raw)
+          || customerId.includes(raw)
+          || label.includes(raw)
+          || getCustomerDisplayValue(data).toLowerCase().includes(raw);
       }
     );
   }
 
-  onCustomerSelected(customer: string) 
-  {
-    const selectedCustomer = this.CustomerList.find(
-      data => data.customerName === customer);
+  onCustomerSelected(customerValue: string): void {
+    const selected = resolveCustomerFromAutocomplete(customerValue, this.CustomerList);
+    this.selectedCustomerID = selected?.customerID > 0 ? selected.customerID : 0;
+  }
+
+  /** Prefer customer ID from autocomplete; fall back to encoded name search. */
+  private getCustomerSearchParam(): string {
+    const typed = (this.customer.value || '').trim();
+    if (!typed) {
+      this.selectedCustomerID = 0;
+      return '';
+    }
+
+    const resolved = resolveCustomerFromAutocomplete(typed, this.CustomerList);
+    if (resolved?.customerID > 0) {
+      this.selectedCustomerID = resolved.customerID;
+      return `#${resolved.customerID}`;
+    }
+
+    if (this.selectedCustomerID > 0) {
+      const selected = this.CustomerList?.find(c => c.customerID === this.selectedCustomerID);
+      const namePart = getCustomerNameFromAutocomplete(typed);
+      if (selected && selected.customerName === namePart) {
+        return `#${this.selectedCustomerID}`;
+      }
+    }
+
+    this.selectedCustomerID = 0;
+    return getCustomerNameFromAutocomplete(typed);
   }
 
   //---------- Branch ----------
@@ -346,10 +509,11 @@ export class InvoiceAttachDetachComponent implements OnInit {
     );
   }
 
-  refresh() 
+  refresh(reload = false) 
   {
     this.customerGroup.setValue('');
     this.customer.setValue('');
+    this.selectedCustomerID = 0;
     this.SearchCreditNoteNumber = '';
     this.SearchBranch.setValue('');
     this.SearchDutyFromDate = '';
@@ -366,42 +530,45 @@ export class InvoiceAttachDetachComponent implements OnInit {
     this.SearchVerifyDuty = null;
     this.SearchGoodForBilling = null;
     this.SearchType = '';
-    this.PageNumber = 0;
-    if (this.InvoiceNumberWithPrefix) {
-      this.loadDataForEdit();
+    this.selectedInvoices = [];
+    this.selectAll = false;
+    if (this.InvoiceID) {
+      this.applyInvoiceGstAnchor();
     } else {
-      this.loadData();
+      this.activeGstKey = null;
+    }
+    if (reload) {
+      this.hasSearched = true;
+      this.runSearchLoad();
+    } else {
+      this.hasSearched = false;
+      this.dataSource = null;
     }
   }
 
   public SearchData() 
   {
-    if (this.InvoiceNumberWithPrefix) {
-      this.loadDataForEdit();
-    } else {
-      this.loadData();
-    }
+    this.runSearchLoad();
   }
  
   public Filter() 
   {
-    this.PageNumber = 0;
-    if (this.InvoiceNumberWithPrefix) {
-      this.loadDataForEdit();
-    } else {
-      this.loadData();
-    }
+    this.runSearchLoad();
   }
 
   onBackPress(event) 
   {
-    if (event.keyCode === 8) 
+    if (event.keyCode === 8 && this.hasSearched) 
     {
-      if (this.InvoiceNumberWithPrefix) {
-        this.loadDataForEdit();
-      } else {
-        this.loadData();
-      }
+      this.runSearchLoad();
+    }
+  }
+
+  private runSearchLoad() {
+    if (this.InvoiceID || this.InvoiceNumberWithPrefix) {
+      this.loadDataForEdit();
+    } else {
+      this.loadData();
     }
   }
 
@@ -420,6 +587,7 @@ export class InvoiceAttachDetachComponent implements OnInit {
 
   public loadData() 
   {
+    this.hasSearched = true;
     if(this.SearchDutyFromDate!=="")
     {
       this.SearchDutyFromDate=moment(this.SearchDutyFromDate).format('yyyy-MM-DD');
@@ -432,13 +600,14 @@ export class InvoiceAttachDetachComponent implements OnInit {
     {
       this.SearchPackage.setValue(this.SearchPackage.value.replace("/","-"));
     }
-    this.invoiceAttachDetachService.getTableData(this.customer.value,this.SearchBranch.value,this.SearchDutySlipID,this.SearchReservationID,this.SearchGSTType,this.SearchDutyFromDate,
+    this.invoiceAttachDetachService.getTableData(this.getCustomerSearchParam(),this.SearchBranch.value,this.SearchDutySlipID,this.SearchReservationID,this.SearchGSTType,this.SearchDutyFromDate,
       this.SearchDutyToDate,this.SearchPassengerName,this.SearchPassengerMobile,this.SearchPackageType.value,this.SearchPackage.value,
-      this.SearchDSStatus,this.SearchBillingStatus,this.SearchVerifyDuty,this.SearchGoodForBilling,this.PageNumber).subscribe
+      this.SearchDSStatus,this.SearchBillingStatus,this.SearchVerifyDuty,this.SearchGoodForBilling,0).subscribe
       (
         data => 
         {
           this.dataSource = data;
+          this.buildGroupedDutySections();
           this.rematchCheckedFromSelection();
         },
         (error: HttpErrorResponse) => { this.dataSource = null; }
@@ -447,6 +616,9 @@ export class InvoiceAttachDetachComponent implements OnInit {
 
   SortingData(coloumName: any) 
   {
+    if (!this.hasSearched) {
+      return;
+    }
     if (this.sortingData == 1) 
     {
       this.sortingData = 0;
@@ -457,13 +629,14 @@ export class InvoiceAttachDetachComponent implements OnInit {
       this.sortingData = 1;
       this.sortType = "Descending";
     }
-    this.invoiceAttachDetachService.getTableDataSort(this.customer.value,this.SearchBranch.value,this.SearchDutySlipID,this.SearchReservationID,this.SearchGSTType,this.SearchDutyFromDate,
+    this.invoiceAttachDetachService.getTableDataSort(this.getCustomerSearchParam(),this.SearchBranch.value,this.SearchDutySlipID,this.SearchReservationID,this.SearchGSTType,this.SearchDutyFromDate,
       this.SearchDutyToDate,this.SearchPassengerName,this.SearchPassengerMobile,this.SearchPackageType.value,this.SearchPackage.value,
-      this.SearchDSStatus,this.SearchBillingStatus,this.SearchVerifyDuty,this.SearchGoodForBilling,this.PageNumber, coloumName.active, this.sortType).subscribe
+      this.SearchDSStatus,this.SearchBillingStatus,this.SearchVerifyDuty,this.SearchGoodForBilling,0, coloumName.active, this.sortType).subscribe
     (
       data => 
         {
         this.dataSource = data;
+        this.buildGroupedDutySections();
         this.rematchCheckedFromSelection();
       },
       (error: HttpErrorResponse) => { this.dataSource = null; }
@@ -474,6 +647,7 @@ export class InvoiceAttachDetachComponent implements OnInit {
 
   public loadDataForEdit() 
   {
+    this.hasSearched = true;
     if(this.SearchDutyFromDate!=="")
     {
       this.SearchDutyFromDate=moment(this.SearchDutyFromDate).format('yyyy-MM-DD');
@@ -486,13 +660,14 @@ export class InvoiceAttachDetachComponent implements OnInit {
     {
       this.SearchPackage.setValue(this.SearchPackage.value.replace("/","-"));
     }
-    this.invoiceAttachDetachService.getTableDataForEdit(this.InvoiceNumberWithPrefix.replace("/","-"),this.customer.value,this.SearchBranch.value,this.SearchDutySlipID,this.SearchReservationID,this.SearchGSTType,this.SearchDutyFromDate,
+    this.invoiceAttachDetachService.getTableDataForEdit(Number(this.InvoiceID) || 0, (this.InvoiceNumberWithPrefix || '').replace("/","-"),this.getCustomerSearchParam(),this.SearchBranch.value,this.SearchDutySlipID,this.SearchReservationID,this.SearchGSTType,this.SearchDutyFromDate,
       this.SearchDutyToDate,this.SearchPassengerName,this.SearchPassengerMobile,this.SearchPackageType.value,this.SearchPackage.value,
-      this.SearchDSStatus,this.SearchBillingStatus,this.PageNumber).subscribe
+      this.SearchDSStatus,this.SearchBillingStatus,0).subscribe
       (
         data => 
         {
           this.dataSource = data;
+          this.buildGroupedDutySections();
           this.rematchCheckedFromSelection();
         },
         (error: HttpErrorResponse) => { this.dataSource = null; }
@@ -501,6 +676,9 @@ export class InvoiceAttachDetachComponent implements OnInit {
 
   SortingDataForEdit(coloumName: any) 
   {
+    if (!this.hasSearched) {
+      return;
+    }
     if (this.sortingData == 1) 
     {
       this.sortingData = 0;
@@ -511,13 +689,14 @@ export class InvoiceAttachDetachComponent implements OnInit {
       this.sortingData = 1;
       this.sortType = "Descending";
     }
-    this.invoiceAttachDetachService.getTableDataSortForEdit(this.InvoiceNumberWithPrefix.replace("/","-"),this.customer.value,this.SearchBranch.value,this.SearchDutySlipID,this.SearchReservationID,this.SearchGSTType,this.SearchDutyFromDate,
+    this.invoiceAttachDetachService.getTableDataSortForEdit(Number(this.InvoiceID) || 0, (this.InvoiceNumberWithPrefix || '').replace("/","-"),this.getCustomerSearchParam(),this.SearchBranch.value,this.SearchDutySlipID,this.SearchReservationID,this.SearchGSTType,this.SearchDutyFromDate,
       this.SearchDutyToDate,this.SearchPassengerName,this.SearchPassengerMobile,this.SearchPackageType.value,this.SearchPackage.value,
-      this.SearchDSStatus,this.SearchBillingStatus,this.PageNumber, coloumName.active, this.sortType).subscribe
+      this.SearchDSStatus,this.SearchBillingStatus,0, coloumName.active, this.sortType).subscribe
     (
       data => 
         {
         this.dataSource = data;
+        this.buildGroupedDutySections();
         this.rematchCheckedFromSelection();
       },
       (error: HttpErrorResponse) => { this.dataSource = null; }
@@ -542,34 +721,12 @@ export class InvoiceAttachDetachComponent implements OnInit {
     this.contextMenu.openMenu();
   }
 
-  NextCall() 
-  {
-    if (this.dataSource.length > 0) 
-    {
-      this.PageNumber++;
-      if (this.InvoiceNumberWithPrefix) {
-        this.loadDataForEdit();
-      } else {
-        this.loadData();
-      }
-    }
-  }
-
-  PreviousCall() 
-  {
-    if (this.PageNumber > 0) 
-    {
-      this.PageNumber--;
-      if (this.InvoiceNumberWithPrefix) {
-        this.loadDataForEdit();
-      } else {
-        this.loadData();
-      }
-    }
-  }
-
   private isTrueValue(value: any): boolean {
     return value === true || value === 'true' || value === 'True' || value === 1 || value === '1';
+  }
+
+  formatYesNo(value: any): string {
+    return this.isTrueValue(value) ? 'Yes' : 'No';
   }
 
   private isDutyDateAfterBillDate(row: any): boolean {
@@ -600,12 +757,45 @@ export class InvoiceAttachDetachComponent implements OnInit {
     return this.isDutyDateAfterBillDate(row);
   }
 
+  /** Match legacy Attach: allow select unless billing date is after bill date / today, and GST group matches. */
   isRowSelectable(row: any): boolean {
-    if (!this.isTrueValue(row?.verifyDuty) || !this.isTrueValue(row?.goodForBilling)) {
-      return false;
+    return !this.isDutyDateAfterBillDate(row) && this.isSameGstGroup(row);
+  }
+
+  getRowSelectTooltip(row: any): string {
+    if (this.isDutyDateAfterBillDate(row)) {
+      if (this.InvoiceID && this.invoiceBillDate) {
+        return 'Billing pickup date is after bill date';
+      }
+      return 'Billing pickup date is after today — cannot generate/attach yet';
+    }
+    if (!this.isSameGstGroup(row)) {
+      if (this.InvoiceID && this.invoiceAnchorGstNumbers.length === 1) {
+        return `This duty has a different GSTIN than invoice ${this.invoiceAnchorGstNumbers[0]}`;
+      }
+      if (this.activeGstKey) {
+        return `This duty belongs to a different GSTIN group than ${this.activeGstKey}`;
+      }
+      return 'Select duties from one GSTIN group only';
+    }
+    return '';
+  }
+
+  private syncActiveGstKeyFromSelection() {
+    if (this.selectedInvoices.length === 0) {
+      if (!this.InvoiceID || this.hasMixedInvoiceGst) {
+        this.activeGstKey = null;
+      } else {
+        this.applyInvoiceGstAnchor();
+      }
+      this.buildGroupedDutySections();
+      return;
     }
 
-    return !this.isDutyDateAfterBillDate(row);
+    if (this.activeGstKey === null || this.activeGstKey === undefined) {
+      this.activeGstKey = this.normalizeGstKey(this.selectedInvoices[0]?.invoiceGstNumber);
+      this.buildGroupedDutySections();
+    }
   }
 
   
@@ -657,6 +847,8 @@ export class InvoiceAttachDetachComponent implements OnInit {
         this.selectedInvoices.push(data);
       }
       data.checked = true;
+      this.syncActiveGstKeyFromSelection();
+      this.syncSelectAllState();
     } 
     else if(!checkBoxValue && this.dataSource.includes(data)) 
     {
@@ -666,10 +858,61 @@ export class InvoiceAttachDetachComponent implements OnInit {
       if (index > -1) {
         this.selectedInvoices.splice(index, 1);
       }
+      this.syncActiveGstKeyFromSelection();
     }
   }
 
-  isIndeterminate() 
+  checkAllInGroup(section: any, checkBoxValue: boolean) {
+    if (!section?.selectable) {
+      return;
+    }
+
+    section.duties.forEach((element: any) => {
+      if (!this.isRowSelectable(element)) {
+        element.checked = false;
+        const blockedIndex = this.selectedInvoices.findIndex(x => x.dutySlipID === element.dutySlipID);
+        if (blockedIndex > -1) {
+          this.selectedInvoices.splice(blockedIndex, 1);
+        }
+        return;
+      }
+
+      if (checkBoxValue) {
+        element.checked = true;
+        const exists = this.selectedInvoices.some(x => x.dutySlipID === element.dutySlipID);
+        if (!exists) {
+          this.selectedInvoices.push(element);
+        }
+      } else {
+        element.checked = false;
+        const index = this.selectedInvoices.findIndex(x => x.dutySlipID === element.dutySlipID);
+        if (index > -1) {
+          this.selectedInvoices.splice(index, 1);
+        }
+      }
+    });
+
+    this.syncActiveGstKeyFromSelection();
+    this.syncSelectAllState();
+  }
+
+  isGroupIndeterminate(section: any): boolean {
+    const selectableRows = (section?.duties || []).filter(r => this.isRowSelectable(r));
+    const checkedCount = selectableRows.filter(r => r.checked).length;
+    return checkedCount > 0 && checkedCount < selectableRows.length;
+  }
+
+  isGroupFullySelected(section: any): boolean {
+    const selectableRows = (section?.duties || []).filter(r => this.isRowSelectable(r));
+    return selectableRows.length > 0 && selectableRows.every(r => r.checked);
+  }
+
+  private syncSelectAllState() {
+    const selectableRows = this.dataSource?.filter(r => this.isRowSelectable(r)) || [];
+    this.selectAll = selectableRows.length > 0 && selectableRows.every(r => r.checked);
+  }
+
+  isIndeterminate()
   {
     const selectableRows = this.dataSource?.filter(r => this.isRowSelectable(r)) || [];
     const checkedCount = selectableRows.filter(r => r.checked).length;
@@ -698,24 +941,21 @@ export class InvoiceAttachDetachComponent implements OnInit {
     { 
       const dutyList = response.result.replace("Success:", "").split(",").map(item => item.split("#")[1]).join(", ");
       Swal.fire({
-          title: `Invoice Attached: ${dutyList}...!!!`,
+          title: `Duties linked to invoice ${dutyList}`,
+          text: 'Duty calculations are linked only. General bill line items and header amounts are not changed.',
           icon: 'success',
           confirmButtonText: 'Ok'
           }).then(result => {
             if (result.isConfirmed) 
             {
               window.location.reload();
-              // const url = this.router.serializeUrl(
-              //   this.router.createUrlTree(['/invoiceHome'])
-              // );
-              // window.open(this._generalService.FormURL + url, '_blank');
             }
           });
       this.refresh();
     },
     error =>
     {
-      const errorMessage = error || 'Operation Failed.....!!!';
+      const errorMessage = error || 'Attach failed. Please try again.';
       Swal.fire({
           title: errorMessage,
           icon: 'error'
@@ -724,8 +964,11 @@ export class InvoiceAttachDetachComponent implements OnInit {
   }
 
 
-  GenerateSingleInvoiceforSingleDuty()
+  async GenerateSingleInvoiceforSingleDuty()
   {
+    if (this.singleDutyGenerateInProgress) {
+      return;
+    }
 
     if (!this.selectedInvoices || this.selectedInvoices.length === 0) {
     Swal.fire({
@@ -734,66 +977,120 @@ export class InvoiceAttachDetachComponent implements OnInit {
       icon: 'warning',
       confirmButtonText: 'Ok'
     });
-    return; // stop execution
+    return;
   }
-    if (this.selectedInvoices.length !== 1) {
-      Swal.fire({
-        title: 'Select exactly one duty',
-        text: 'Single Duty generate creates one invoice per click. For multiple duties use Multy Duty generate.',
-        icon: 'warning',
-        confirmButtonText: 'Ok'
-      });
-      return;
-    }
     const duties: number[] = this.selectedInvoices.map(x => x.dutySlipID);
-    this.advanceTableForm.patchValue({invoiceID:0});
-    this.advanceTableForm.patchValue({invoiceType:"InvoiceSingleDuty"});
-    this.advanceTableForm.patchValue({action:"N/A"});
-    this.advanceTableForm.patchValue({listOfDuties:duties});
-    this.invoiceDetachService.add(this.advanceTableForm.getRawValue()).subscribe(
-    response => 
-    {
-      //const dutyList = response.listofduties ? response.listofduties.join(", ") : "";
-      const dutyList = response.result.replace("Success:", "").split(",").map(item => item.split("#")[1]).join(", ");
-      const invoiceNo = response.result.replace("Success:", "").split(",").map(item => item.split("#")[0]).join(", ");
-      console.log('Duty List:', dutyList,invoiceNo); // Log the duty list for debugging
-      Swal.fire({
-          title: `Invoice Single Duty Created with Duties: ${dutyList}...!!!`,
-          icon: 'success',
-          confirmButtonText: 'Ok'
-          }).then(result => {
-            if (result.isConfirmed) 
-            {
-              const url = this.router.serializeUrl(
-      this.router.createUrlTree(
-        ['/invoiceAttachDetach'],
-        {
-          queryParams: {
-            invoiceNumberWithPrefix: dutyList,
-            invoiceID: invoiceNo
-          }
-        }
-      )
-    );
+    this.singleDutyGenerateInProgress = true;
 
-    window.location.href = this._generalService.FormURL + url;
-            }
-          });
-     // this.refresh();
-    },
-    error =>
-    {
-      const errorMessage = error || 'Operation Failed.....!!!';
+    try {
+      const check = await firstValueFrom(
+        this.invoiceDetachService.checkCustomerInvoicingGstnBatch(duties)
+      );
+      const confirmation = await confirmMissingGstnForBatch(check, duties);
+      if (!confirmation.proceed) {
+        return;
+      }
+
+      this.advanceTableForm.patchValue({ invoiceID: 0 });
+      this.advanceTableForm.patchValue({ invoiceType: 'InvoiceSingleDuty' });
+      this.advanceTableForm.patchValue({ action: 'N/A' });
+      this.advanceTableForm.patchValue({ listOfDuties: confirmation.dutiesToGenerate });
+      this.advanceTableForm.patchValue({
+        acknowledgeMissingGstnDutySlipIds: confirmation.acknowledgeMissingGstnDutySlipIds
+      });
+
+      const response = await firstValueFrom(
+        this.invoiceDetachService.add(this.advanceTableForm.getRawValue())
+      );
+      const parsed = this.parseSingleDutyBatchResult(response?.result || '');
+      const successLines = parsed.successes.map(item =>
+        `Duty ${item.dutySlipId}: ${item.invoiceNumber} (${item.action})`
+      ).join('<br/>');
+      const failLines = parsed.failures.map(item =>
+        `Duty ${item.dutySlipId}: ${item.message}`
+      ).join('<br/>');
+
+      if (parsed.successes.length === 0) {
+        Swal.fire({
+          title: 'Invoice generation failed',
+          html: failLines || 'Operation Failed.....!!!',
+          icon: 'error',
+          confirmButtonText: 'Ok'
+        });
+        return;
+      }
+
+      const partial = parsed.failures.length > 0;
       Swal.fire({
-          title: errorMessage,
-          icon: 'error'
+          title: partial
+            ? `${parsed.successes.length} invoice(s) created, ${parsed.failures.length} failed`
+            : `${parsed.successes.length} Single Duty invoice(s) created`,
+          html: successLines + (partial ? `<br/><br/><strong>Failed:</strong><br/>${failLines}` : ''),
+          icon: partial ? 'warning' : 'success',
+          confirmButtonText: 'Ok'
+          }).then(() => {
+            this.selectedInvoices = [];
+            this.selectAll = false;
+            this.refresh(true);
           });
+    } catch (error) {
+      Swal.fire({
+        title: extractApiErrorMessage(error),
+        icon: 'error'
+      });
+    } finally {
+      this.singleDutyGenerateInProgress = false;
+    }
+  }
+
+  private parseSingleDutyBatchResult(result: string): {
+    successes: { invoiceId: string; invoiceNumber: string; dutySlipId: string; action: string }[];
+    failures: { dutySlipId: string; message: string }[];
+  } {
+    const successes: { invoiceId: string; invoiceNumber: string; dutySlipId: string; action: string }[] = [];
+    const failures: { dutySlipId: string; message: string }[] = [];
+
+    if (!result || !result.startsWith('Success:')) {
+      return { successes, failures };
+    }
+
+    const body = result.substring('Success:'.length);
+    const segments = body.split('|Failed:');
+    const successPart = segments[0] || '';
+    const failPart = segments[1] || '';
+
+    successPart.split(',').filter(x => x.trim()).forEach(entry => {
+      const parts = entry.split('#');
+      if (parts.length >= 2) {
+        successes.push({
+          invoiceId: parts[0],
+          invoiceNumber: parts[1],
+          dutySlipId: parts.length >= 3 ? parts[2] : '',
+          action: parts.length >= 4 ? parts[3] : 'Created'
+        });
+      }
     });
+
+    failPart.split(',').filter(x => x.trim()).forEach(entry => {
+      const hashIndex = entry.indexOf('#');
+      if (hashIndex > 0) {
+        failures.push({
+          dutySlipId: entry.substring(0, hashIndex),
+          message: entry.substring(hashIndex + 1)
+        });
+      }
+    });
+
+    return { successes, failures };
   }
 
 
   GenerateSingleInvoiceforMultipleDuties()
   {
+    if (this.multiDutyGenerateInProgress) {
+      return;
+    }
+
     if (!this.selectedInvoices || this.selectedInvoices.length === 0) {
     Swal.fire({
       title: 'No Duties Selected!',
@@ -812,6 +1109,7 @@ export class InvoiceAttachDetachComponent implements OnInit {
       });
       return;
     }
+    this.multiDutyGenerateInProgress = true;
     const duties: number[] = this.selectedInvoices.map(x => x.dutySlipID);
     this.advanceTableForm.patchValue({invoiceID:0});
     this.advanceTableForm.patchValue({invoiceType:"InvoiceMultyDuty"});
@@ -820,6 +1118,7 @@ export class InvoiceAttachDetachComponent implements OnInit {
     this.invoiceDetachService.add(this.advanceTableForm.getRawValue()).subscribe(
     response => 
     { 
+      this.multiDutyGenerateInProgress = false;
       const dutyList = response.result.replace("Success:", "").split(",").map(item => item.split("#")[1]).join(", ");
       const invoiceNo = response.result.replace("Success:", "").split(",").map(item => item.split("#")[0]).join(", ");
       console.log('Duty List:', dutyList,invoiceNo); // Log the duty list for debugging
@@ -849,7 +1148,8 @@ export class InvoiceAttachDetachComponent implements OnInit {
     },
     error =>
     {
-      const errorMessage = error || 'Operation Failed.....!!!';
+      this.multiDutyGenerateInProgress = false;
+      const errorMessage = error?.error?.message || error || 'Operation Failed.....!!!';
       Swal.fire({
           title: errorMessage,
           icon: 'error'

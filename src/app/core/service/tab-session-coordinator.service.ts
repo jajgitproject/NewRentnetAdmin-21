@@ -138,7 +138,7 @@ export class TabSessionCoordinatorService {
     return Object.keys(registry).length > 0;
   }
 
-  /** True if any tab had activity within the full inactivity timeout window (20 min). */
+  /** True if any tab had activity within the full inactivity timeout window (120 min). */
   isSessionActive(): boolean {
     const sessionGuid = this.getSessionGuid();
     if (!sessionGuid) return false;

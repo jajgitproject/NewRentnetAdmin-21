@@ -38,6 +38,8 @@ export class CustomerCorporateIndividualModel {
   countryForISDCodeID:number;
   maskMobileNumber:boolean;
   isPostPickUpCallAllowed:boolean;
+  isBillToShipToCustomer:boolean;
+  customerIdentityNumber:string;
   constructor(customerCorporateIndividualModel) {
     {
       this.corporateCompanyID = customerCorporateIndividualModel.corporateCompanyID || '';
@@ -77,6 +79,8 @@ export class CustomerCorporateIndividualModel {
       this.countryForISDCodeID = customerCorporateIndividualModel.countryForISDCodeID || '';
       this.maskMobileNumber = customerCorporateIndividualModel.maskMobileNumber || '';
       this.isPostPickUpCallAllowed = customerCorporateIndividualModel.isPostPickUpCallAllowed ?? false;
+      this.isBillToShipToCustomer = customerCorporateIndividualModel.isBillToShipToCustomer ?? false;
+      this.customerIdentityNumber = customerCorporateIndividualModel.customerIdentityNumber || '';
     }
   }
 }

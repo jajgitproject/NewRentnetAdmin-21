@@ -27,6 +27,7 @@ import { GenerateBillMainRoutingModule } from './generateBillMain-routing.module
 import { MyUploadComponent } from '../myupload/myupload.component';
 import { MyUploadModule } from '../myupload/myupload.module';
 import {MatAutocompleteModule} from '@angular/material/autocomplete';
+import { MatExpansionModule } from '@angular/material/expansion';
 import { CustomerPersonService } from '../customerPerson/customerPerson.service';
 import { OpenPopUpDialogComponent } from './openPopUp/openPopUp.component';
 @NgModule({
@@ -59,7 +60,8 @@ import { OpenPopUpDialogComponent } from './openPopUp/openPopUp.component';
     MatMenuModule,
     MatProgressSpinnerModule,
     MyUploadModule,
-    MatAutocompleteModule
+    MatAutocompleteModule,
+    MatExpansionModule
   ],
   providers: [GenerateBillMainService,CustomerPersonService]
 })

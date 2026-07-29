@@ -1,5 +1,5 @@
 // @ts-nocheck
-import { Component, ElementRef, Input, OnInit, ViewChild } from '@angular/core';
+import { Component, ElementRef, EventEmitter, Input, OnChanges, OnInit, Output, SimpleChanges, ViewChild } from '@angular/core';
 import { AdditionalKmsDetailsService } from './additionalKmsDetails.service';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { MatDialog } from '@angular/material/dialog';
@@ -28,12 +28,14 @@ import { ActivatedRoute } from '@angular/router';
   styleUrls: ['./additionalKmsDetails.component.sass'],
   providers: [{ provide: MAT_DATE_LOCALE, useValue: 'en-GB' }]
 })
-export class AdditionalKmsDetailsComponent implements OnInit {
+export class AdditionalKmsDetailsComponent implements OnInit, OnChanges {
   @Input() advanceTableAD:AdditionalKmsDetails |any[] | null;
   @Input() dutySlipID;
     @Input() AllotmentID!: any;
   @Input() customerGroupID;
   @Input() verifyDutyStatusAndCacellationStatus;
+  @Input() expandPanel = false;
+  @Output() sectionDataChanged = new EventEmitter<void>();
   advanceTable: AdditionalKmsDetails | null;
   advanceTableForm: FormGroup;
   SearchActivationStatus : boolean=true;
@@ -66,12 +68,25 @@ DutySlipID: any;
   //   this.loadData();
   // }
 
+   ngOnChanges(changes: SimpleChanges): void {
+    if (changes['expandPanel']?.currentValue === true) {
+      this.panelExpanded = true;
+    }
+  }
+
    ngOnInit() {
+    if (this.dutySlipID) {
+      this.DutySlipID = this.dutySlipID;
+    }
     this.route.queryParams.subscribe(paramsData =>{
       const encryptedAllotmentID = paramsData.allotmentID;
       const encryptedDutySlipID = paramsData.dutySlipID;
-      this.AllotmentID = (this._generalService.decrypt(decodeURIComponent(encryptedAllotmentID)));
-      this.DutySlipID = (this._generalService.decrypt(decodeURIComponent(encryptedDutySlipID)));            
+      if (encryptedAllotmentID && !this.AllotmentID) {
+        this.AllotmentID = (this._generalService.decrypt(decodeURIComponent(encryptedAllotmentID)));
+      }
+      if (encryptedDutySlipID && !this.DutySlipID) {
+        this.DutySlipID = (this._generalService.decrypt(decodeURIComponent(encryptedDutySlipID)));
+      }
     });
      this.loadDataforClosing();
     this.loadData();
@@ -94,18 +109,9 @@ DutySlipID: any;
           verifyDutyStatusAndCacellationStatus:this.verifyDutyStatusAndCacellationStatus
         }
       });
-      dialogRef.afterClosed().subscribe((res: any) => {
-        this.loadData();
-        this.loadDataforClosing();
-        if (res) {
-          if (res.action === 'edit') {
-            this.showNotification(
-              'snackbar-success',
-              'Additional Kms Details Updated Successfully...!!!',
-              'bottom',
-              'center'
-            );
-          }
+      dialogRef.afterClosed().subscribe((saved: any) => {
+        if (saved) {
+          this.refresh();
         }
       });
   }
@@ -131,6 +137,7 @@ DutySlipID: any;
   {
       this.loadDataforClosing();
     this.loadData();
+    this.sectionDataChanged.emit();
   }
   
   showNotification(colorName, text, placementFrom, placementAlign) {
@@ -263,9 +270,10 @@ DutySlipID: any;
         record: this.advanceTableAD
       }
     });   
-    dialogRef.afterClosed().subscribe((res: any) => {
-      this.loadData();
-      this.loadDataforClosing();
+    dialogRef.afterClosed().subscribe((saved: any) => {
+      if (saved) {
+        this.refresh();
+      }
     })
 }
 
@@ -320,11 +328,12 @@ showAndScrollAdditionalKm() {
       }
     });
 
-    dialogRef.afterClosed().subscribe((res: any) => {
+    dialogRef.afterClosed().subscribe((saved: any) => {
       this.isEditingKms = false;
       this.isEditingMinutes = false;
-      this.loadData();
-      this.loadDataforClosing();
+      if (saved) {
+        this.refresh();
+      }
     });
   }
 

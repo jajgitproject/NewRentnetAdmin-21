@@ -40,7 +40,8 @@ export class DeleteDialogComponent
     .subscribe(
     data => 
     {
-       this._generalService.sendUpdate('DutyExpenseDelete:DutyExpenseView:Success');//To Send Updates   
+       this._generalService.sendUpdate('DutyExpenseDelete:DutyExpenseView:Success');
+       this.dialogRef.close(true);
     },
     error =>
     {

@@ -17,6 +17,11 @@ import { map, startWith } from 'rxjs/operators';
 import { AbstractControl, } from '@angular/forms';
 import { StateDropDown } from 'src/app/state/stateDropDown.model';
 import { SupplierDropDown } from 'src/app/supplier/supplierDropDown.model';
+import {
+  filterSuppliersByDisplay,
+  formatSupplierDisplay,
+  supplierMatchesDisplay,
+} from 'src/app/supplier/supplier-display.util';
 import { OrganizationalEntityDropDown } from 'src/app/organizationalEntityMessage/organizationalEntityDropDown.model';
 import { DriverGradeDropDown } from 'src/app/driverGrade/driverGradeDropDown.model';
 import { ConfirmPasswordValidator } from './confirm-password.validator';
@@ -456,6 +461,7 @@ saveDisabled:boolean = true;
           this.supplieTypeValidator(this.SupplierList)
         ]);
         this.advanceTableForm.controls['supplier'].updateValueAndValidity();
+        this.syncSupplierDisplayFromId(this.SupplierList, this.advanceTable?.supplierID);
         this.filteredSupplierOptions =this.advanceTableForm.controls['supplier'].valueChanges.pipe(
           startWith(""),
           map(value => this._filterSupplier(value || ''))
@@ -463,24 +469,28 @@ saveDisabled:boolean = true;
       });
   }
 
+  formatSupplierDisplay = formatSupplierDisplay;
+
+  private syncSupplierDisplayFromId(list: SupplierDropDown[], supplierId: number): void {
+    const match = list?.find((item) => item.supplierID === supplierId);
+    if (match) {
+      this.advanceTableForm.patchValue({ supplier: formatSupplierDisplay(match) });
+    }
+  }
+
   private _filterSupplier(value: string): any {
-  // if (!value || value.length < 3) {
-  //   return [];
-  // }
   const filterValue = value.toLowerCase();
 
-  return this.SupplierList.filter(customer =>
-    customer.supplierName.toLowerCase().includes(filterValue)
-  );
+  return filterSuppliersByDisplay(this.SupplierList, filterValue);
 }
 
   
   OnSupplierSelect(selectedSupplier: string)
   {
     const SupplierName = this.SupplierList.find(
-      data => data.supplierName === selectedSupplier
+      data => supplierMatchesDisplay(data, selectedSupplier)
     );
-    if (selectedSupplier) 
+    if (SupplierName) 
     {
       this.getSupplierID(SupplierName.supplierID);
     }
@@ -494,7 +504,7 @@ saveDisabled:boolean = true;
   supplieTypeValidator(SupplierList: any[]): ValidatorFn {
     return (control: AbstractControl): ValidationErrors | null => {
       const value = control.value?.toLowerCase();
-      const match = SupplierList.some(group => group.supplierName?.toLowerCase() === value);
+      const match = SupplierList.some(group => supplierMatchesDisplay(group, control.value));
       return match ? null : { supplierTypeInvalid: true };
     };
   }
@@ -505,7 +515,7 @@ saveDisabled:boolean = true;
       {
         this.SupplierForOwnershipList=data;
         
-        this.advanceTableForm.patchValue({supplier:this.SupplierForOwnershipList[0].supplierName});
+        this.advanceTableForm.patchValue({supplier:formatSupplierDisplay(this.SupplierForOwnershipList[0])});
         this.advanceTableForm.patchValue({supplierID:this.SupplierForOwnershipList[0].supplierID});
       
       });
@@ -529,7 +539,7 @@ saveDisabled:boolean = true;
   supplierNameValidatorForOwner(SupplierForOwnerList: any[]): ValidatorFn {
     return (control: AbstractControl): ValidationErrors | null => {
       const value = control.value?.toLowerCase();
-      const match = SupplierForOwnerList.some(group => group.supplierName.toLowerCase() === value);
+      const match = SupplierForOwnerList.some(group => supplierMatchesDisplay(group, control.value));
       return match ? null : { supplierForOwnerInvalid: true };
     };
   }
@@ -543,6 +553,7 @@ saveDisabled:boolean = true;
         this.advanceTableForm.controls['supplier'].setValidators([Validators.required,
           this.supplierNameValidatorForOwner(this.SupplierForOwnerList)]);
         this.advanceTableForm.controls['supplier'].updateValueAndValidity();
+        this.syncSupplierDisplayFromId(this.SupplierForOwnerList, this.advanceTable?.supplierID);
         this.filteredSupplierForOwnerOptions = this.advanceTableForm.controls['supplier'].valueChanges.pipe(
           startWith(""),
           map(value => this._filtersearchSupplierForOwner(value || ''))
@@ -550,23 +561,18 @@ saveDisabled:boolean = true;
       });
   }
   private _filtersearchSupplierForOwner(value: string): any {
-  // if (!value || value.length < 3) {
-  //   return [];
-  // }
   const filterValue = value.toLowerCase();
 
-  return this.SupplierForOwnerList.filter(data =>
-    data.supplierName.toLowerCase().includes(filterValue)
-  );
+  return filterSuppliersByDisplay(this.SupplierForOwnerList, filterValue);
 }
 
 
   OnSupplierForOwnerSelect(selectedSupplier: string)
   {
     const SupplierName = this.SupplierForOwnerList.find(
-      data => data.supplierName === selectedSupplier
+      data => supplierMatchesDisplay(data, selectedSupplier)
     );
-    if (selectedSupplier) 
+    if (SupplierName) 
     {
       this.getsupplierIDForOwner(SupplierName.supplierID);
     }
@@ -916,9 +922,14 @@ saveDisabled:boolean = true;
       longitude: [this.advanceTable?.longitude],
       companyName:[this.advanceTable?.companyName],
       isAdhoc: [this.advanceTable?.isAdhoc],
-      isAppLoginAllowed: [this.advanceTable?.isAppLoginAllowed]
+      isAppLoginAllowed: [this.advanceTable?.isAppLoginAllowed],
+      oldRentnetCode: [
+        (this.advanceTable.oldRentnetCode && this.advanceTable.oldRentnetCode !== 0)
+          ? this.advanceTable.oldRentnetCode : null,
+        [Validators.pattern(/^[0-9]+$/)]
+      ]
     
-    }, 
+    },
     {
       validator: ConfirmPasswordValidator("password", "confirmPassword")
     }
@@ -960,8 +971,6 @@ public loadPassword()
   }
   public Post(): void
   {
-    debugger
-    
     //this.advanceTableForm.patchValue({supplierID:this.supplierID});
     const phone1 = this.advanceTableForm.get('countryCodes').value;
     const phone2 = this.advanceTableForm.get('mobile1').value;
@@ -993,10 +1002,16 @@ public loadPassword()
        ',' +
        this.advanceTableForm.value.longitude
    });
+    this.advanceTableForm.patchValue({ oldRentnetCode: this.getOldRentnetCode() });
     this.advanceTableService.add(this.advanceTableForm.getRawValue())  
     .subscribe(
     response => 
     {
+        if (response?.activationStatus === 'Duplicate OldRentnetCode') {
+          this._generalService.sendUpdate('DataNotFound:OldRentnetCodeDuplicacyError:Failure');
+          this.saveDisabled = true;
+          return;
+        }
         this.dialogRef.close();
        this._generalService.sendUpdate('DriverCreate:DriverView:Success');//To Send Updates 
        this.saveDisabled = true; 
@@ -1040,10 +1055,16 @@ public loadPassword()
        ',' +
        this.advanceTableForm.value.longitude
    });
+    this.advanceTableForm.patchValue({ oldRentnetCode: this.getOldRentnetCode() });
     this.advanceTableService.update(this.advanceTableForm.getRawValue())  
     .subscribe(
     response => 
     {
+        if (response?.activationStatus === 'Duplicate OldRentnetCode') {
+          this._generalService.sendUpdate('DataNotFound:OldRentnetCodeDuplicacyError:Failure');
+          this.saveDisabled = true;
+          return;
+        }
         this.dialogRef.close();
        this._generalService.sendUpdate('DriverUpdate:DriverView:Success');//To Send Updates  
        this.saveDisabled = true;
@@ -1068,6 +1089,23 @@ public loadPassword()
           this.Post();
        }
 
+  }
+
+  getOldRentnetCode(): number | null {
+    const value = this.advanceTableForm.get('oldRentnetCode')?.value;
+    if (value === null || value === undefined || value === '') {
+      return null;
+    }
+    return Number(value);
+  }
+
+  keyPressNumbers(event: KeyboardEvent): boolean {
+    const charCode = event.which ? event.which : event.keyCode;
+    if (charCode >= 48 && charCode <= 57) {
+      return true;
+    }
+    event.preventDefault();
+    return false;
   }
 
   // onBlurUpdateDate(value: string): void {

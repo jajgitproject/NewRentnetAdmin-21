@@ -2,7 +2,7 @@
 import { AfterViewInit, Component, ElementRef, Input, OnInit, ViewChild } from '@angular/core';
 import { ClossingOneService } from './clossingOne.service';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
-import { MatDialog } from '@angular/material/dialog';
+import { MatDialog, MatDialogRef } from '@angular/material/dialog';
 import { MatPaginator } from '@angular/material/paginator';
 import { MatSort } from '@angular/material/sort';
 import { DataSource } from '@angular/cdk/collections';
@@ -39,6 +39,11 @@ import { DutyExpenseModel } from '../dutyExpense/dutyExpense.model';
 import { DutyGSTPercentage } from '../dutyGSTPercentage/dutyGSTPercentage.model';
 import { DutyState } from '../dutyState/dutyState.model';
 import Swal from 'sweetalert2';
+import { firstValueFrom } from 'rxjs';
+import {
+  confirmMissingGstnForSingleDuty,
+  extractApiErrorMessage
+} from '../shared/customer-invoicing-gstn-confirm.util';
 import { SummaryOfDutyData } from '../summaryOfDuty/summary-of-duty.model';
 import {
   SummaryOfDutyDialogComponent,
@@ -105,6 +110,14 @@ import { FormDialogComponentCSD } from '../customerSpecificDetails/dialogs/form-
 import { DutySlipImageDetailsShowComponent as DSImage } from '../dutySlipImageDetailsShow/dutySlipImageDetailsShow.component';
 import { FormDialogChangeSupplierForInventory } from './dialog/changeSupplierForInventory/changeSupplierForInventory.component';
 import { resolveViewBillRoute } from '../general/view-bill-route.util';
+import {
+  ClosingSectionKey,
+  ClosingSectionViewDialogComponent,
+  ClosingSectionViewDialogData
+} from './dialog/closingSectionViewDialog/closingSectionViewDialog.component';
+import {
+  ClosingImageViewDialogComponent
+} from './dialog/closingImageViewDialog/closingImageViewDialog.component';
 @Component({
   standalone: false,
   selector: 'app-clossingOne',
@@ -186,6 +199,8 @@ export class ClossingOneComponent implements OnInit, AfterViewInit {
   reservationCloseDetail: any = null;
   mapOfDutySlip: string;
   panelExpanded: boolean = false;
+  showEmbeddedDetailPanels = false;
+  closingSectionViewDialogRef: MatDialogRef<ClosingSectionViewDialogComponent> | null = null;
   dutySlipMap: DutySlipMap;
   showHideCSF: boolean = false;
   showHideSalesPerson : boolean = false;
@@ -522,7 +537,7 @@ export class ClossingOneComponent implements OnInit, AfterViewInit {
       });
     dialogRef.afterClosed().subscribe((res: any) => {
       this.TollParkingLoadData();
-      window.location.reload();
+      this.recalculateBillQuietly();
     });
   }
 
@@ -534,6 +549,7 @@ export class ClossingOneComponent implements OnInit, AfterViewInit {
             this.showHideTollParkingCard = true;
           }
           this.tollParkingAdvanceTable = data;
+          this.refreshClosingSectionViewDialogContext();
         },
         (error: HttpErrorResponse) => { this.tollParkingAdvanceTable = null; }
       );
@@ -567,6 +583,7 @@ export class ClossingOneComponent implements OnInit, AfterViewInit {
             this.showHideDispute = true;
           }
           this.disputeAdvanceTable = data ?? [];
+          this.refreshClosingSectionViewDialogContext();
         },
         (error: HttpErrorResponse) => { this.disputeAdvanceTable = []; }
       );
@@ -603,7 +620,7 @@ export class ClossingOneComponent implements OnInit, AfterViewInit {
       });
     dialogRef.afterClosed().subscribe((res: any) => {
       this.DutyInterStateTaxLoadData();
-      window.location.reload();
+      this.recalculateBillQuietly();
     })
   }
 
@@ -615,6 +632,7 @@ export class ClossingOneComponent implements OnInit, AfterViewInit {
             this.showHideaddDIT = true;
           }
           this.advanceTableDIT = data;
+          this.refreshClosingSectionViewDialogContext();
         },
         (error: HttpErrorResponse) => { this.advanceTableDIT = null; }
       );
@@ -637,7 +655,7 @@ export class ClossingOneComponent implements OnInit, AfterViewInit {
       });
     dialogRef.afterClosed().subscribe((res: any) => {
       this.dutyExpenseLoadData();
-      window.location.reload();
+      this.recalculateBillQuietly();
     });
   }
 
@@ -649,6 +667,7 @@ export class ClossingOneComponent implements OnInit, AfterViewInit {
             this.showDutyExpense = true;
           }
           this.advanceTableDE = data;
+          this.refreshClosingSectionViewDialogContext();
         },
         (error: HttpErrorResponse) => { this.advanceTableDE = null; }
       );
@@ -682,6 +701,7 @@ export class ClossingOneComponent implements OnInit, AfterViewInit {
             this.showDGP = true;
           }
           this.advanceTableDGP = data;
+          this.refreshClosingSectionViewDialogContext();
         },
         (error: HttpErrorResponse) => { this.advanceTableDGP = null; }
       );
@@ -790,6 +810,7 @@ export class ClossingOneComponent implements OnInit, AfterViewInit {
             this.showHideDutyState = true;
           }
           this.advanceTableDutyState = this.dutyStateService.sortDutyStateRecordsNewestFirst(data);
+          this.refreshClosingSectionViewDialogContext();
         },
         (error: HttpErrorResponse) => { this.advanceTableDutyState = null; }
       );
@@ -825,6 +846,7 @@ export class ClossingOneComponent implements OnInit, AfterViewInit {
             this.showHideDutyStateCustomer = true;
           }
           this.advanceTableDutyStateCustomer = data;
+          this.refreshClosingSectionViewDialogContext();
         },
         (error: HttpErrorResponse) => { this.advanceTableDutyStateCustomer = null; }
       );
@@ -862,6 +884,7 @@ export class ClossingOneComponent implements OnInit, AfterViewInit {
             this.showHideaddDiscount = true;
           }
           this.advanceTableDD = data;
+          this.refreshClosingSectionViewDialogContext();
         },
         (error: HttpErrorResponse) => { this.advanceTableDD = null; }
       );
@@ -899,10 +922,12 @@ export class ClossingOneComponent implements OnInit, AfterViewInit {
           this.advanceTableAD = data;
           this.showAdditionalKms = this.advanceTableAD[0].additionalKMs !== 0;
         }
+        this.refreshClosingSectionViewDialogContext();
       },
       (error: HttpErrorResponse) => {
         this.advanceTableAD = null;
         this.showAdditionalKms = false;
+        this.refreshClosingSectionViewDialogContext();
       }
     );
   }
@@ -937,6 +962,7 @@ export class ClossingOneComponent implements OnInit, AfterViewInit {
             this.showSAC = true;
           }
           this.advanceTableSAC = data;
+          this.refreshClosingSectionViewDialogContext();
         },
         (error: HttpErrorResponse) => { this.advanceTableSAC = null; }
       );
@@ -1188,44 +1214,39 @@ export class ClossingOneComponent implements OnInit, AfterViewInit {
   }
 
   //----------Generate Bill----------------
-  public GenerateBill() {
+  public async GenerateBill() {
     if (!this.canThisRoleCreateBillOnClosingScreen || !this.canGenerateBill()) {
       return;
     }
-    this.clossingOneService.generateBill(this.DutySlipID)
-      .subscribe(
-        response => {
-          this.invoiceID = response.invoiceID;
-          //this.refresh();
-          // this.loadDataForDriver();
-          // this.loadDataForApp();
-          // this.loadDataForGPS();
-          // this.loadDataForBilling();
-          // this.KMForPreviousBooking();     
-          this.showNotification(
-            'snackbar-success',
-            'Updated...!!!',
-            'bottom',
-            'center'
-          );
-          //this.ViewBill();
-          this.getInvoiceType()
-        },
-        error => {
-          //this.refresh();
-          // this.loadDataForDriver();
-          // this.loadDataForApp();
-          // this.loadDataForGPS();
-          // this.loadDataForBilling();
-          this.showNotification(
-            'snackbar-danger',
-            'Operation Failed.....!!!',
-            'bottom',
-            'center'
-          );
-        }
-      )
 
+    try {
+      const check = await firstValueFrom(
+        this.clossingOneService.checkCustomerInvoicingGstn(this.DutySlipID)
+      );
+      const confirmation = await confirmMissingGstnForSingleDuty(check);
+      if (!confirmation.proceed) {
+        return;
+      }
+
+      const response = await firstValueFrom(
+        this.clossingOneService.generateBill(this.DutySlipID, confirmation.acknowledgeMissingGstn)
+      );
+      this.invoiceID = response.invoiceID;
+      this.showNotification(
+        'snackbar-success',
+        'Updated...!!!',
+        'bottom',
+        'center'
+      );
+      this.getInvoiceType();
+    } catch (error) {
+      this.showNotification(
+        'snackbar-danger',
+        extractApiErrorMessage(error),
+        'bottom',
+        'center'
+      );
+    }
   }
   public getInvoiceType() {
     if (!this.canThisRoleViewBillOnClosingScreen) {
@@ -1333,6 +1354,42 @@ export class ClossingOneComponent implements OnInit, AfterViewInit {
     });
   }
 
+  /** Recalculate bill after extras / toll / interstate changes without opening Summary dialog. */
+  recalculateBillQuietly(): void {
+    if (!this.DutySlipID || this.isEInvoiceBlockingEdits) {
+      return;
+    }
+    this.clossingOneService.calculateBillWithSummary(this.DutySlipID).subscribe(
+      response => {
+        this.summaryOfDutyData = response.summary;
+        this.hasActiveInvoiceCalculation = hasInvoiceCalculationResult(response.payload)
+          || hasInvoiceCalculationResult(response);
+        this.GetTotalTollParInStDispute();
+        this.loadDataForCard();
+      },
+      error => {
+        const errorMessage = error || 'Bill recalculation failed.';
+        this.showNotification('snackbar-danger', errorMessage, 'bottom', 'center');
+      }
+    );
+  }
+
+  onBillingChargesChanged(): void {
+    const openSection = this.closingSectionViewDialogRef?.componentInstance?.data?.section;
+    if (openSection === 'tollParking') {
+      this.TollParkingLoadData();
+    } else if (openSection === 'interstate') {
+      this.DutyInterStateTaxLoadData();
+    } else if (openSection === 'dutyExpense') {
+      this.dutyExpenseLoadData();
+    } else {
+      this.TollParkingLoadData();
+      this.DutyInterStateTaxLoadData();
+      this.dutyExpenseLoadData();
+    }
+    this.recalculateBillQuietly();
+  }
+
   //---------Calculate Bill------------------------
   public CalculateBill() {
     if (this.advanceTableClosingOne.closingDutySlipForBillingModel.verifyDuty === null && this.advanceTableClosingOne.closingDutySlipForBillingModel.goodForBilling === null) {
@@ -1415,6 +1472,7 @@ export class ClossingOneComponent implements OnInit, AfterViewInit {
             this.showSettledRate = true;
           }
           this.advanceTableSRD = data;
+          this.refreshClosingSectionViewDialogContext();
         },
         (error: HttpErrorResponse) => { this.advanceTableSRD = null; }
       );
@@ -1473,139 +1531,164 @@ export class ClossingOneComponent implements OnInit, AfterViewInit {
 
   //-----TollParking
   showAndScrollTollParking() {
-    this.showHideTollParkingCard = true;
-    setTimeout(() => {
-      const element = document.getElementById('tollParkingEntry');
-      if (element) {
-        element.scrollIntoView({ behavior: 'smooth', block: 'start' });
-      }
-    }, 0);
-  }
-  //-----ODO Meter
-  showAndScrollODOMeter() {
-    this.showHideODOMeterCard = true;
-    setTimeout(() => {
-      const element = document.getElementById('OdoMeterImage');
-      if (element) {
-        element.scrollIntoView({ behavior: 'smooth', block: 'start' });
-      }
-    }, 0);
+    this.openClosingSectionView('tollParking', 'Toll Parking');
   }
   ///-----Dispute
   showAndScrollOpenDisputes() {
-    this.showHideDispute = true;
-    setTimeout(() => {
-      const element = document.getElementById('openDisputes');
-      if (element) {
-        element.scrollIntoView({ behavior: 'smooth', block: 'start' });
-      }
-    }, 0);
+    this.openClosingSectionView('dispute', 'Dispute');
   }
   //------DutyInterStateTax
   showAndScrollDutyInterstateTax() {
-    this.showHideaddDIT = true;
-    setTimeout(() => {
-      const element = document.getElementById('dutyInterstateTax');
-      if (element) {
-        element.scrollIntoView({ behavior: 'smooth', block: 'start' });
-      }
-    }, 0);
+    this.openClosingSectionView('interstate', 'Interstate Tax');
   }
 
   //------OpenDutyExpense
   showAndScrollOpenDutyExpense() {
-    this.showDutyExpense = true;
-    setTimeout(() => {
-      const element = document.getElementById('dutyExpense');
-      if (element) {
-        element.scrollIntoView({ behavior: 'smooth', block: 'start' });
-      }
-    }, 0);
+    this.openClosingSectionView('dutyExpense', 'Duty Expense');
   }
   //------DutyGSTPercentage
   showAndScrollDutyGSTPercentage() {
-    this.showDGP = true;
-    setTimeout(() => {
-      const element = document.getElementById('dutyGSTPercentage');
-      if (element) {
-        element.scrollIntoView({ behavior: 'smooth', block: 'start' });
-      }
-    }, 0);
+    this.openClosingSectionView('dutyGST', 'Duty GST Percentage');
   }
 
   //------DutyState
   showAndScrollDutyState() {
-    this.showHideDutyState = true;
-    setTimeout(() => {
-      const element = document.getElementById('dutyState');
-      if (element) {
-        element.scrollIntoView({ behavior: 'smooth', block: 'start' });
-      }
-    }, 0);
+    this.openClosingSectionView('dutyState', 'Eco Duty State');
   }
 
   //------DutyState customer
   showAndScrollDutyStateCustomer() {
-    this.showHideDutyStateCustomer = true;
-    setTimeout(() => {
-      const element = document.getElementById('dutyStateCustomer');
-      if (element) {
-        element.scrollIntoView({ behavior: 'smooth', block: 'start' });
-      }
-    }, 0);
+    this.openClosingSectionView('dutyStateCustomer', 'Customer Duty State');
   }
   //------DutySAC
   showAndScrollDutySAC() {
-    this.showSAC = true;
-    setTimeout(() => {
-      const element = document.getElementById('dutySAC');
-      if (element) {
-        element.scrollIntoView({ behavior: 'smooth', block: 'start' });
-      }
-    }, 0);
+    this.openClosingSectionView('dutySAC', 'Duty SAC');
   }
 
   //------AdditionalKm
   showAndScrollAdditionalKm() {
-    this.showAdditionalKms = true;
-    setTimeout(() => {
-      const element = document.getElementById('AdditionalKms');
-      if (element) {
-        element.scrollIntoView({ behavior: 'smooth', block: 'start' });
-      }
-    }, 0);
+    this.openClosingSectionView('additionalKm', 'Additional KMs And Minutes');
   }
 
   //------Mop
   showAndScrollMOP() {
-    this.showMOP = true;
-    setTimeout(() => {
-      const element = document.getElementById('openMop');
-      if (element) {
-        element.scrollIntoView({ behavior: 'smooth', block: 'start' });
-      }
-    }, 0);
+    this.openClosingSectionView('mop', 'MOP Details');
   }
   //------Add Discount
   showAndScrollAddDiscount() {
-    this.showHideaddDiscount = true;
-    setTimeout(() => {
-      const element = document.getElementById('addDiscount');
-      if (element) {
-        element.scrollIntoView({ behavior: 'smooth', block: 'start' });
-      }
-    }, 0);
+    this.openClosingSectionView('discount', 'Discount Details');
   }
 
   //------Customer Specific Fields
   showAndScrollCustomerSpecificFields() {
-    this.showHideCSF = true;
-    setTimeout(() => {
-      const element = document.getElementById('customerSpecificFields');
-      if (element) {
-        element.scrollIntoView({ behavior: 'smooth', block: 'start' });
-      }
-    }, 0);
+    this.openCustomerSpecificField();
+  }
+
+  //------Change Duty Type
+  showAndScrollChangeDutyType() {
+    this.openClosingSectionView('changeDutyType', 'Change Duty Type');
+  }
+
+  buildClosingSectionContext(): Record<string, any> {
+    const billingFlags = this.getDutyStateBillingFlags();
+    return {
+      tollParkingAdvanceTable: this.tollParkingAdvanceTable,
+      advanceTableDIT: this.advanceTableDIT,
+      disputeAdvanceTable: this.disputeAdvanceTable,
+      advanceTableDE: this.advanceTableDE,
+      advanceTableDGP: this.advanceTableDGP,
+      advanceTableDutyState: this.advanceTableDutyState,
+      advanceTableDutyStateCustomer: this.advanceTableDutyStateCustomer,
+      advanceTableSAC: this.advanceTableSAC,
+      advanceTableAD: this.advanceTableAD,
+      advanceTableMOP: this.advanceTableMOP,
+      advanceTableSRD: this.advanceTableSRD,
+      advanceTableDD: this.advanceTableDD,
+      dataSourceCSF: this.dataSourceCSF,
+      AllotmentID: this.AllotmentID,
+      DutySlipID: this.DutySlipID,
+      ReservationID: this.ReservationID,
+      CustomerID: this.CustomerID,
+      verifyDutyStatusAndCacellationStatus: this.verifyDutyStatusAndCacellationStatus,
+      goodForBillingStatusAndCancellationStatus: this.goodForBillingStatusAndCancellationStatus,
+      verifyDuty: billingFlags.verifyDuty,
+      goodForBilling: billingFlags.goodForBilling,
+      invoiceGenerated: this.hasGeneratedInvoice(),
+      from: this.from
+    };
+  }
+
+  refreshClosingSectionViewDialogContext(): void {
+    this.closingSectionViewDialogRef?.componentInstance?.refreshContext();
+  }
+
+  onClosingSectionDataChanged(): void {
+    const section = this.closingSectionViewDialogRef?.componentInstance?.data?.section;
+    switch (section) {
+      case 'tollParking':
+        this.TollParkingLoadData();
+        break;
+      case 'interstate':
+        this.DutyInterStateTaxLoadData();
+        break;
+      case 'dispute':
+        this.DisputeLoadData();
+        break;
+      case 'dutyExpense':
+        this.dutyExpenseLoadData();
+        break;
+      case 'dutyGST':
+        this.DutyGSTPercentageLoadData();
+        break;
+      case 'dutyState':
+        this.loadDutyStateData();
+        break;
+      case 'dutyStateCustomer':
+        this.loadDutyStateDataCustomer();
+        break;
+      case 'dutySAC':
+        this.DutySACLoadData();
+        break;
+      case 'additionalKm':
+        this.loadDataforAdditionalKMHR();
+        break;
+      case 'settledRates':
+        this.settledRateLoadData();
+        break;
+      case 'discount':
+        this.loadDataForReservationDiscountClosing();
+        break;
+      case 'mop':
+      case 'changeDutyType':
+        this.MOPLoadData();
+        break;
+      case 'customerSpecific':
+        this.CustomerSpecificFieldsloadData();
+        break;
+    }
+  }
+
+  openClosingSectionView(section: ClosingSectionKey, title: string): void {
+    const dialogData: ClosingSectionViewDialogData = {
+      title,
+      section,
+      context: this.buildClosingSectionContext(),
+      getContextSnapshot: () => this.buildClosingSectionContext(),
+      onBillingChargesChanged: () => this.onBillingChargesChanged(),
+      onSectionDataChanged: () => this.onClosingSectionDataChanged()
+    };
+    this.closingSectionViewDialogRef = this.dialog.open(ClosingSectionViewDialogComponent, {
+      width: '90vw',
+      maxWidth: '90vw',
+      maxHeight: '90vh',
+      autoFocus: false,
+      restoreFocus: true,
+      panelClass: 'closing-section-view-dialog-panel',
+      data: dialogData
+    });
+    this.closingSectionViewDialogRef.afterClosed().subscribe(() => {
+      this.closingSectionViewDialogRef = null;
+    });
   }
 
   CustomerSpecificFieldsloadData()
@@ -1617,6 +1700,7 @@ export class ClossingOneComponent implements OnInit, AfterViewInit {
             this.showCSF= true;
           }
           this.dataSourceCSF = data.reservationDetailsList;
+          this.refreshClosingSectionViewDialogContext();
         },
          (error: HttpErrorResponse) => { this.dataSourceCSF = null; }
       );
@@ -1624,21 +1708,54 @@ export class ClossingOneComponent implements OnInit, AfterViewInit {
 
       openCustomerSpecificField()
       {
-        const dialogRef = this.dialog.open(FormDialogComponentCSD, 
-          {
-            width:'30%',
-            data: 
-              {
-                dataSource:this.dataSourceCSF,
-                reservationID:this.ReservationID,
-                customerID:this.dataSourceCSF[0].customerID,
-                action:"edit",
-                status: this.status
-              }
-          });
-          dialogRef.afterClosed().subscribe((res: any) => {
+        const openDialog = () => {
+          if (!this.dataSourceCSF?.length || !this.dataSourceCSF[0]) {
+            this.showNotification(
+              'snackbar-warning',
+              'No customer specific field data available for this reservation.',
+              'bottom',
+              'center'
+            );
+            return;
+          }
+          const dialogRef = this.dialog.open(FormDialogComponentCSD,
+            {
+              width:'30%',
+              data:
+                {
+                  dataSource:this.dataSourceCSF,
+                  reservationID:this.ReservationID,
+                  customerID:this.dataSourceCSF[0].customerID,
+                  action:"edit",
+                  from: this.from,
+                  allowEditAlways: true,
+                }
+            });
+          dialogRef.afterClosed().subscribe(() => {
             this.CustomerSpecificFieldsloadData();
-      })
+          });
+        };
+
+        if (this.dataSourceCSF?.length && this.dataSourceCSF[0]) {
+          openDialog();
+          return;
+        }
+
+        this.newFormService.GetCustomerSpecificFields(this.ReservationID).subscribe(
+          (data: CustomerSpecificDetailsData) => {
+            this.dataSourceCSF = data?.reservationDetailsList;
+            openDialog();
+          },
+          () => {
+            this.dataSourceCSF = null;
+            this.showNotification(
+              'snackbar-warning',
+              'No customer specific field data available for this reservation.',
+              'bottom',
+              'center'
+            );
+          }
+        );
       }
 
       checkVerifyDutyBeforeFormOpen() {
@@ -1685,6 +1802,7 @@ export class ClossingOneComponent implements OnInit, AfterViewInit {
             this.showMOPOther = true;
           }
           this.advanceTableMOP = data;
+          this.refreshClosingSectionViewDialogContext();
         },
         (error: HttpErrorResponse) => { this.advanceTableMOP = null; }
       );
@@ -1751,6 +1869,72 @@ export class ClossingOneComponent implements OnInit, AfterViewInit {
     data: {
           dutySlipID: this.dutySlipID,
         }
+    });
+  }
+
+  viewTripStartODOMeterImage(): void {
+    this.withOdometerImageData((data) => {
+      this.openOdometerImageDialog(
+        'Trip Start ODO Meter Image',
+        data?.tripStartODOMeterImage,
+        'Trip Start ODO Meter image not available.'
+      );
+    });
+  }
+
+  viewTripEndODOMeterImage(): void {
+    this.withOdometerImageData((data) => {
+      this.openOdometerImageDialog(
+        'Trip End ODO Meter Image',
+        data?.tripEndODOMeterImage,
+        'Trip End ODO Meter image not available.'
+      );
+    });
+  }
+
+  private withOdometerImageData(onLoaded: (data: OdoMeterAndManualDutySlipImage) => void): void {
+    if (this.oDOMAndMDSAdvanceTable) {
+      onLoaded(this.oDOMAndMDSAdvanceTable);
+      return;
+    }
+    this.odoMeterAndManualDutySlipImageService.getAllotmentIDForDutySlipImage(this.AllotmentID).subscribe(
+      (data: OdoMeterAndManualDutySlipImage) => {
+        this.oDOMAndMDSAdvanceTable = data;
+        onLoaded(data);
+      },
+      () => {
+        this.showNotification(
+          'snackbar-warning',
+          'Unable to load odometer images.',
+          'bottom',
+          'center'
+        );
+      }
+    );
+  }
+
+  private openOdometerImageDialog(
+    title: string,
+    imageUrl: string | null | undefined,
+    missingMessage: string
+  ): void {
+    const resolvedUrl = this._generalService.resolveStaticImageUrl(imageUrl) || imageUrl;
+    if (!resolvedUrl) {
+      this.showNotification(
+        'snackbar-warning',
+        missingMessage,
+        'bottom',
+        'center'
+      );
+      return;
+    }
+    this.dialog.open(ClosingImageViewDialogComponent, {
+      width: '800px',
+      maxWidth: '90vw',
+      data: {
+        title,
+        imageUrl: resolvedUrl,
+      },
     });
   }
 
@@ -1864,13 +2048,7 @@ export class ClossingOneComponent implements OnInit, AfterViewInit {
   }
   //------settledRates
 showAndScrollOpenSettledRates() {
-  this.showHidesettledRates = true;
-  setTimeout(() => {
-    const element = document.getElementById('settledRates');
-    if (element) {
-      element.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    }
-  }, 0);
+  this.openClosingSectionView('settledRates', 'Settled Rate');
 }
 
  changeDutyTypeClosingDetails() {

@@ -730,6 +730,7 @@ getBusinessTypeID(businessTypeID: any)
       printRunningDetailOnDutySlip: [this.advanceTable.printRunningDetailOnDutySlip ?? false],
       showRateOnDutySlip: [this.advanceTable.showRateOnDutySlip ?? false],
       showOTPOnDutySlip: [this.advanceTable.showOTPOnDutySlip ?? false],
+      showDistanceOnDutySlipPdf: [this.advanceTable.showDistanceOnDutySlipPdf ?? false],
       isBookerAllowedToBeCreatedFromReservation: [
         this.advanceTable.isBookerAllowedToBeCreatedFromReservation ?? false
       ],
@@ -737,11 +738,13 @@ getBusinessTypeID(businessTypeID: any)
         this.advanceTable.isPostPickUpCallAllowed ?? false
       ],
       panNo: [this.advanceTable.panNo],
+      customerIdentityNumber: [this.advanceTable.customerIdentityNumber],
       gstCustomerType: [this.advanceTable.gstCustomerType],
       segment: [this.advanceTable.segment],
       businessType: [this.advanceTable.businessType],
       businessTypeID: [this.advanceTable.businessTypeID],
       businessServices: [this.advanceTable.businessServices],
+      isBillToShipToCustomer: [this.advanceTable.isBillToShipToCustomer ?? false],
     });
   }
 

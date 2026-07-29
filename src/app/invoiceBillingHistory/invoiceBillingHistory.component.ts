@@ -11,7 +11,6 @@ import { HttpErrorResponse } from '@angular/common/http';
   standalone: false,
   selector: 'app-invoiceBillingHistory',
   templateUrl: './invoiceBillingHistory.component.html',
-  styleUrls: ['./invoiceBillingHistory.component.sass'],
   providers: [{ provide: MAT_DATE_LOCALE, useValue: 'en-GB' }]
 })
 export class InvoiceBillingHistoryComponent {

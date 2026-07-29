@@ -184,7 +184,7 @@ this.buttonDisabled = normalized !== 'changes allow';
         this.ImagePath2=this.driverQualityCheckData[0].interiorsWithAmenities
         this.ImagePath3=this.driverQualityCheckData[0].breatheAnalyzerImage;
         this.ImagePath4=this.driverQualityCheckData[0].bodyTemperatureImage;
-        this.advanceTableForm.patchValue({selfDeclaration:this.driverQualityCheckData[0].selfDeclaration});
+        this.advanceTableForm.patchValue({selfDeclaration: true});
         this.advanceTableForm.patchValue({driverRemark:this.driverQualityCheckData[0].driverRemark});
         this.advanceTableForm.patchValue({activationStatus:this.driverQualityCheckData[0].activationStatus});
       }
@@ -252,7 +252,7 @@ this.buttonDisabled = normalized !== 'changes allow';
       isolatedCabin: [''],
       bodyTemperatureInDegreeCelcius: [0.0],
       bodyTemperatureImage: [''],
-      selfDeclaration: [''],
+      selfDeclaration: [true],
       driverRemark: [''],
       activationStatus: ['']
     });
@@ -321,6 +321,7 @@ this.buttonDisabled = normalized !== 'changes allow';
   {
     this.advanceTableForm.patchValue({dutySlipID:this.dutySlipID});
     this.advanceTableForm.patchValue({allotmentID:this.AllotmentID});
+    this.advanceTableForm.patchValue({selfDeclaration: true});
     //this.advanceTableForm.patchValue({interStateTaxStateID:this.interStateTaxStateID});
     this.advanceTableService.add(this.advanceTableForm.getRawValue())  
     .subscribe(
@@ -366,6 +367,7 @@ this.buttonDisabled = normalized !== 'changes allow';
     this.advanceTableForm.patchValue({interiorsWithAmenities:this.ImagePath2});
     this.advanceTableForm.patchValue({isolatedCabin:this.ImagePath3});
     this.advanceTableForm.patchValue({bodyTemperatureImage:this.ImagePath4});
+    this.advanceTableForm.patchValue({selfDeclaration: true});
     this.advanceTableService.update(this.advanceTableForm.getRawValue())  
     .subscribe(
     response => 

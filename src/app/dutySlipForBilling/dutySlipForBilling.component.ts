@@ -29,6 +29,11 @@ import {
   SummaryOfDutyDialogComponent,
   SummaryOfDutyDialogData
 } from '../summaryOfDuty/summary-of-duty-dialog.component';
+import {
+  billingDateOnly,
+  getBillingTripLegsFromForm,
+  resolveBillingTripLegDateTimes,
+} from '../shared/billing-datetime-chronology.util';
 
 
 
@@ -59,10 +64,53 @@ export class DutySlipForBillingComponent implements OnInit, AfterViewInit, OnCha
  panelExpanded: boolean = false;
  selectedKMType: string = '';
  datetime: string = '';
- /** Total KM chain diff; null when not computable. */
+ /** Total KM chain diff (Garage to Garage); null when not computable. */
  diff: number | null = null;
+ /** Point-to-point time (pickup → drop-off). */
+ datetimeP2P: string = '';
+ /** Point-to-point KM (dropOff − pickUp). */
+ diffP2P: number | null = null;
  totalKMForManul: any;
  totalKMForApp: any;
+ /** Date/time and duty-slip status fields stay editable for all closure types (App, Driver, GPS, Manual). */
+ private readonly alwaysEditableControls = [
+   'locationOutDateForBilling',
+   'locationOutTimeForBilling',
+   'reportingToGuestDateForBilling',
+   'reportingToGuestTimeForBilling',
+   'pickUpDateForBilling',
+   'pickUpTimeForBilling',
+   'dropOffDateForBilling',
+   'dropOffTimeForBilling',
+   'locationInDateForBilling',
+   'locationInTimeForBilling',
+ ];
+ /** Address fields editable for all closure types (App, Driver, GPS, Manual). */
+ private readonly alwaysEditableAddressControls = [
+   'locationOutAddressStringForBilling',
+   'reportingToGuestAddressStringForBilling',
+   'pickUpAddressStringForBilling',
+   'dropOffAddressStringForBilling',
+   'locationInAddressStringForBilling',
+ ];
+ /** Remark fields editable for all closure types and after Good for Billing (E-Invoice still blocks). */
+ private readonly alwaysEditableRemarkControls = [
+   'runningDetails',
+   'vendorRemark',
+ ];
+ /** KM and lat/long fields editable for all closure types; stay editable after Good for Billing. */
+ private readonly alwaysEditableKmControls = [
+   'locationOutKMForBilling',
+   'locationOutLatLongForBilling',
+   'reportingToGuestKMForBilling',
+   'reportingToGuestLatLongForBilling',
+   'pickUpKMForBilling',
+   'pickUpLatLongForBilling',
+   'dropOffKMForBilling',
+   'dropOffLatLongForBilling',
+   'locationInKMForBilling',
+   'locationInLatLongForBilling',
+ ];
  advanceTableBH : BillingHistory | null;
  CustomerSignatureImage :string = null;
  buttonText: string = 'Save';
@@ -78,6 +126,13 @@ export class DutySlipForBillingComponent implements OnInit, AfterViewInit, OnCha
   showCalculateBillOverlay = false;
   /** Bill breakdown for Summary of Duty; null uses child demo until mapped from Calculate Bill API. */
   summaryOfDutyData: SummaryOfDutyData | null = null;
+  totalDriverAllowanceDays: number | null = null;
+  totalNights: number | null = null;
+  private loadedDriverAllowanceDays: number | null = null;
+  private loadedNights: number | null = null;
+  private loadedRunningDetails = '';
+  private loadedVendorRemark = '';
+  private loadedKmValues: Record<string, string> = {};
   private suppressInitialDutyStatusEmit = true;
 
   constructor(
@@ -123,6 +178,18 @@ export class DutySlipForBillingComponent implements OnInit, AfterViewInit, OnCha
       this.applyDutySlipEditLockState();
       this.syncVerifyDutyAndGoodForBillingState();
     }
+    if (changes['disputeAdvanceTable']) {
+      const hasUnapprovedDispute = this.disputeAdvanceTable?.some(d => d.approvalStatus === false);
+      if (hasUnapprovedDispute) {
+        this.advanceTableForm.patchValue({
+          verifyDuty: false,
+          goodForBilling: false
+        });
+      }
+    }
+    if (changes['hasActiveEInvoice'] || changes['canThisRoleDoGoodForBillingOnClosingScreen']) {
+      this.syncVerifyDutyAndGoodForBillingState();
+    }
   }
 
   ngOnInit() 
@@ -155,23 +222,18 @@ export class DutySlipForBillingComponent implements OnInit, AfterViewInit, OnCha
         this.CustomerSignatureImage;
     }
     
-    if(this.advanceTableClosingOne.closingDutySlipForBillingModel.dsClosing === null)
-    {
-      this.advanceTableForm.controls["goodForBilling"].disable();
-      this.advanceTableForm.controls["verifyDuty"].disable();
-      this.advanceTableForm.patchValue({goodForBilling : false});
-      this.advanceTableForm.patchValue({verifyDuty : false});
-    }
-    else
-    {
+    if (this.advanceTableClosingOne.closingDutySlipForBillingModel.dsClosing !== null) {
       this.buttonText = 'Update';
-      this.syncVerifyDutyAndGoodForBillingState();
       this.LoadDataForBilling();
+    } else {
+      this.syncVerifyDutyAndGoodForBillingState();
     }
 
     this.onKeyUp();
     this.onTimeSelection();
+    this.applyClosingFieldDefaults();
     this.applyDutySlipEditLockState();
+    this.loadClosingAllowances();
   }
 
   ngAfterViewInit(): void {
@@ -181,6 +243,13 @@ export class DutySlipForBillingComponent implements OnInit, AfterViewInit, OnCha
   submit()
   {
 
+  }
+
+  get isManualClosureMode(): boolean {
+    const closureType =
+      this.advanceTableForm?.get('closureType')?.value
+      ?? this.advanceTableClosingOne?.closingDutySlipForBillingModel?.closureType;
+    return closureType === 'Manual';
   }
 
   toggleBillingManualVisibility(event:any) {
@@ -216,8 +285,8 @@ export class DutySlipForBillingComponent implements OnInit, AfterViewInit, OnCha
       this.LoadDataForBilling();
       }
  
-    } 
-    
+    }
+    this.applyManualEditMode();
   }
 
    InitApp()
@@ -1002,6 +1071,162 @@ export class DutySlipForBillingComponent implements OnInit, AfterViewInit, OnCha
     return this.canEditDSAfterGoodForBilling === true || this.readDsEditFromSession();
   }
 
+  get canEditClosingAllowances(): boolean {
+    return this.isDutyCalculated && !this.isDutySlipEditBlocked;
+  }
+
+  private toAllowanceNumber(value: unknown): number {
+    const n = Number(value);
+    return Number.isFinite(n) ? Math.max(0, Math.trunc(n)) : 0;
+  }
+
+  private applyClosingFieldDefaults(): void {
+    if (!this.advanceTableForm) {
+      return;
+    }
+    this.advanceTableForm.patchValue(
+      {
+        dsClosing: 'Closed',
+        physicalDutySlipReceived: true,
+      },
+      { emitEvent: false }
+    );
+    if (this.advanceTableClosingOne?.closingDutySlipForBillingModel) {
+      this.advanceTableClosingOne.closingDutySlipForBillingModel.dsClosing = 'Closed';
+      this.advanceTableClosingOne.closingDutySlipForBillingModel.physicalDutySlipReceived = true;
+    }
+    this.advanceTableForm.get('dsClosing')?.disable({ emitEvent: false });
+    this.advanceTableForm.get('physicalDutySlipReceived')?.disable({ emitEvent: false });
+  }
+
+  private validateClosingStatusForGfb(): boolean {
+    const form = this.advanceTableForm.getRawValue();
+    if (!form.dsClosing) {
+      Swal.fire('', 'Please Select DS Closing Option.', 'warning');
+      return false;
+    }
+    if (
+      form.physicalDutySlipReceived === ''
+      || form.physicalDutySlipReceived === null
+      || form.physicalDutySlipReceived === undefined
+    ) {
+      Swal.fire('', 'Please Select Duty Slip Received Option.', 'warning');
+      return false;
+    }
+    return true;
+  }
+
+  private syncClosingModelFromResponse(response: any): void {
+    const dsClosing = response?.dsClosing ?? response?.DsClosing;
+    const physicalDutySlipReceived =
+      response?.physicalDutySlipReceived ?? response?.PhysicalDutySlipReceived;
+    if (dsClosing !== undefined && dsClosing !== null) {
+      this.advanceTableForm.patchValue({ dsClosing }, { emitEvent: false });
+      if (this.advanceTableClosingOne?.closingDutySlipForBillingModel) {
+        this.advanceTableClosingOne.closingDutySlipForBillingModel.dsClosing = dsClosing;
+      }
+    }
+    if (physicalDutySlipReceived !== undefined && physicalDutySlipReceived !== null) {
+      this.advanceTableForm.patchValue({ physicalDutySlipReceived }, { emitEvent: false });
+      if (this.advanceTableClosingOne?.closingDutySlipForBillingModel) {
+        this.advanceTableClosingOne.closingDutySlipForBillingModel.physicalDutySlipReceived =
+          !!physicalDutySlipReceived;
+      }
+    }
+    this.applyClosingFieldDefaults();
+    this.syncLoadedRemarksFromForm();
+  }
+
+  private applyClosingAllowanceValues(response: any): void {
+    this.totalDriverAllowanceDays = this.toAllowanceNumber(
+      response?.totalDriverAllowanceDays ?? response?.TotalDriverAllowanceDays
+    );
+    this.totalNights = this.toAllowanceNumber(
+      response?.totalNights ?? response?.TotalNights
+    );
+    this.loadedDriverAllowanceDays = this.totalDriverAllowanceDays;
+    this.loadedNights = this.totalNights;
+  }
+
+  private mapClosingAllowancesFromSummary(response: any): void {
+    if (response == null) {
+      this.totalDriverAllowanceDays = 0;
+      this.totalNights = 0;
+      this.loadedDriverAllowanceDays = 0;
+      this.loadedNights = 0;
+      return;
+    }
+
+    const driver =
+      response?.invoiceDriverAllownceModel
+      ?? response?.InvoiceDriverAllownceModel;
+    const night =
+      response?.invoiceNightModel
+      ?? response?.InvoiceNightModel;
+
+    this.totalDriverAllowanceDays = this.toAllowanceNumber(
+      driver?.totalDriverAllowanceDays ?? driver?.TotalDriverAllowanceDays
+    );
+    this.totalNights = this.toAllowanceNumber(
+      night?.totalNights ?? night?.TotalNights
+    );
+    this.loadedDriverAllowanceDays = this.totalDriverAllowanceDays;
+    this.loadedNights = this.totalNights;
+  }
+
+  loadClosingAllowances(): void {
+    if (this.DutySlipID == null || this.DutySlipID === '') {
+      return;
+    }
+
+    this.clossingOneService.getDutyBillingSummary(this.DutySlipID).subscribe(
+      (response) => this.mapClosingAllowancesFromSummary(response),
+      () => {
+        if (!this.isDutyCalculated) {
+          this.totalDriverAllowanceDays = 0;
+          this.totalNights = 0;
+          this.loadedDriverAllowanceDays = 0;
+          this.loadedNights = 0;
+        }
+      }
+    );
+  }
+
+  private haveClosingAllowancesChanged(): boolean {
+    const driver = this.toAllowanceNumber(this.totalDriverAllowanceDays);
+    const night = this.toAllowanceNumber(this.totalNights);
+    return (
+      driver !== this.toAllowanceNumber(this.loadedDriverAllowanceDays)
+      || night !== this.toAllowanceNumber(this.loadedNights)
+    );
+  }
+
+  private saveClosingAllowancesIfChanged(onComplete?: () => void): void {
+    if (!this.canEditClosingAllowances || !this.haveClosingAllowancesChanged()) {
+      onComplete?.();
+      return;
+    }
+
+    this.clossingOneService.updateClosingAllowances(this.DutySlipID, {
+      totalDriverAllowanceDays: this.toAllowanceNumber(this.totalDriverAllowanceDays),
+      totalNights: this.toAllowanceNumber(this.totalNights),
+    }).subscribe(
+      (response) => {
+        this.applyClosingAllowanceValues(response);
+        onComplete?.();
+      },
+      (error) => {
+        this.showSpinner = false;
+        this.showNotification(
+          'snackbar-danger',
+          this.extractApiErrorMessage(error, 'Failed to save driver/night allowance.'),
+          'bottom',
+          'center'
+        );
+      }
+    );
+  }
+
   private readDsEditFromSession(): boolean {
     const fromStorage = localStorage.getItem('canEditDSAfterGoodForBilling');
     if (this.isTruthyFlag(fromStorage)) {
@@ -1148,10 +1373,51 @@ export class DutySlipForBillingComponent implements OnInit, AfterViewInit, OnCha
     }
     if (this.isDutySlipEditBlocked) {
       this.advanceTableForm.disable({ emitEvent: false });
+      this.applyAlwaysEditableRemarks();
+      this.applyAlwaysEditableKm();
       return;
     }
     this.advanceTableForm.enable({ emitEvent: false });
+    this.applyManualEditMode();
+    this.applyClosingFieldDefaults();
     this.syncVerifyDutyAndGoodForBillingState();
+  }
+
+  /** Remark On DS Closing and Vendor Remark stay editable unless E-Invoice blocks the duty slip. */
+  private applyAlwaysEditableRemarks(): void {
+    if (!this.advanceTableForm || this.isEInvoiceBlockingEdits) {
+      return;
+    }
+    for (const name of this.alwaysEditableRemarkControls) {
+      this.advanceTableForm.get(name)?.enable({ emitEvent: false });
+    }
+  }
+
+  /** KM and lat/long stay editable unless E-Invoice blocks the duty slip. */
+  private applyAlwaysEditableKm(): void {
+    if (!this.advanceTableForm || this.isEInvoiceBlockingEdits) {
+      return;
+    }
+    for (const name of this.alwaysEditableKmControls) {
+      this.advanceTableForm.get(name)?.enable({ emitEvent: false });
+    }
+  }
+
+  /** Date/time and addresses always editable when form is not GFB-blocked; KM always editable. */
+  private applyManualEditMode(): void {
+    if (!this.advanceTableForm || this.isDutySlipEditBlocked) {
+      return;
+    }
+    for (const name of this.alwaysEditableControls) {
+      this.advanceTableForm.get(name)?.enable({ emitEvent: false });
+    }
+    for (const name of this.alwaysEditableAddressControls) {
+      this.advanceTableForm.get(name)?.enable({ emitEvent: false });
+    }
+    this.applyAlwaysEditableRemarks();
+    this.applyAlwaysEditableKm();
+    // Closure type radio must stay selectable so users can switch closure source.
+    this.advanceTableForm.get('closureType')?.enable({ emitEvent: false });
   }
 
   private guardDutySlipEdit(): boolean {
@@ -1181,6 +1447,93 @@ export class DutySlipForBillingComponent implements OnInit, AfterViewInit, OnCha
       this.advanceTableClosingOne?.closingDutySlipForBillingModel?.dsClosing ??
       this.advanceTableForm?.get('dsClosing')?.value;
     return dsClosing !== null && dsClosing !== undefined && dsClosing !== '';
+  }
+
+  private normalizeRemark(value: unknown): string {
+    return value == null ? '' : String(value).trim();
+  }
+
+  private syncLoadedRemarksFromForm(): void {
+    const form = this.advanceTableForm?.getRawValue();
+    this.loadedRunningDetails = this.normalizeRemark(form?.runningDetails);
+    this.loadedVendorRemark = this.normalizeRemark(form?.vendorRemark);
+    this.syncLoadedKmFromForm();
+  }
+
+  private normalizeKmField(value: unknown): string {
+    if (value == null || value === '') {
+      return '';
+    }
+    return String(value).trim();
+  }
+
+  private syncLoadedKmFromForm(): void {
+    const form = this.advanceTableForm?.getRawValue();
+    if (!form) {
+      return;
+    }
+    for (const name of this.alwaysEditableKmControls) {
+      this.loadedKmValues[name] = this.normalizeKmField(form[name]);
+    }
+  }
+
+  haveKmChanged(): boolean {
+    const form = this.advanceTableForm?.getRawValue();
+    if (!form) {
+      return false;
+    }
+    return this.alwaysEditableKmControls.some(
+      name => this.normalizeKmField(form[name]) !== (this.loadedKmValues[name] ?? '')
+    );
+  }
+
+  haveRemarksChanged(): boolean {
+    const form = this.advanceTableForm?.getRawValue();
+    if (!form) {
+      return false;
+    }
+    return this.normalizeRemark(form.runningDetails) !== this.loadedRunningDetails
+      || this.normalizeRemark(form.vendorRemark) !== this.loadedVendorRemark;
+  }
+
+  get canSavePartialAfterGfb(): boolean {
+    return this.isGoodForBillingBlockingEdits
+      && !this.isEInvoiceBlockingEdits
+      && this.isDutyCalculated
+      && (this.haveRemarksChanged() || this.haveKmChanged());
+  }
+
+  get canShowSaveButton(): boolean {
+    return this.showSpinner === false
+      && (
+        this.Action === 'Cancelled'
+        || !this.isDutyCalculated
+        || !this.isDutySlipEditBlocked
+        || this.canSavePartialAfterGfb
+      );
+  }
+
+  get isSaveButtonDisabled(): boolean {
+    if (this.canSavePartialAfterGfb) {
+      return false;
+    }
+    return !this.advanceTableForm?.valid
+      || (this.isDutyCalculated && this.isDutySlipEditBlocked);
+  }
+
+  get saveButtonLabel(): string {
+    if (!this.canSavePartialAfterGfb) {
+      return this.buttonText;
+    }
+    const remarksChanged = this.haveRemarksChanged();
+    const kmChanged = this.haveKmChanged();
+    if (remarksChanged && kmChanged) {
+      return 'Save Remarks & KM';
+    }
+    if (kmChanged) {
+      return 'Save KM';
+    }
+    return 'Save Remarks';
   }
 
   /** DS Edit may toggle GFB even without the dedicated GFB role flag. */
@@ -1406,6 +1759,7 @@ export class DutySlipForBillingComponent implements OnInit, AfterViewInit, OnCha
     this.advanceTableForm.patchValue({dsClosing : this.advanceTableClosingOne.closingDutySlipForBillingModel.dsClosing});
     this.advanceTableForm.patchValue({runningDetails : this.advanceTableClosingOne.closingDutySlipForBillingModel.runningDetails});
     this.advanceTableForm.patchValue({vendorRemark : this.advanceTableClosingOne.closingDutySlipForBillingModel.vendorRemark});
+    this.syncLoadedRemarksFromForm();
     this.advanceTableForm.patchValue({physicalDutySlipReceived : this.advanceTableClosingOne.closingDutySlipForBillingModel?.physicalDutySlipReceived});
     this.advanceTableForm.patchValue({goodForBilling : this.advanceTableClosingOne.closingDutySlipForBillingModel.goodForBilling});
     this.selectedClosureType = this.advanceTableClosingOne.closingDutySlipForBillingModel.closureType;
@@ -1413,6 +1767,7 @@ export class DutySlipForBillingComponent implements OnInit, AfterViewInit, OnCha
     //this.advanceTableForm.patchValue({actionDetails : this.advanceTableClosingOne.closingDutySlipModel.actionDetails});
     this.onKeyUp();
     this.onTimeSelection();
+    this.applyClosingFieldDefaults();
     this.applyDutySlipEditLockState();
   }
 
@@ -1465,10 +1820,10 @@ export class DutySlipForBillingComponent implements OnInit, AfterViewInit, OnCha
 
       goodForBilling: [''],
       verifyDuty: [''],
-      dsClosing:[''],
+      dsClosing: ['Closed'],
       runningDetails:[''],
       vendorRemark:[''],
-      physicalDutySlipReceived:[''],
+      physicalDutySlipReceived:[true],
       actionTaken:[''],
       actionDetails:['']
     });
@@ -1511,26 +1866,11 @@ export class DutySlipForBillingComponent implements OnInit, AfterViewInit, OnCha
     const locInTime = this.advanceTableForm.get('locationInTimeForBilling')?.value;
     const locInDate = this.advanceTableForm.get('locationInDateForBilling')?.value;
 
-    const hasAll =
-      locOutTime != null &&
-      locOutDate != null &&
-      locOutTime !== '' &&
-      locOutDate !== '' &&
-      pickUpTime != null &&
-      pickUpDate != null &&
-      pickUpTime !== '' &&
-      pickUpDate !== '' &&
-      dropOffTime != null &&
-      dropOffDate != null &&
-      dropOffTime !== '' &&
-      dropOffDate !== '' &&
-      locInTime != null &&
-      locInDate != null &&
-      locInTime !== '' &&
-      locInDate !== '';
+    const hasAll = this.hasAllRequiredDateTimeFields();
 
     if (!hasAll) {
       this.datetime = '';
+      this.datetimeP2P = '';
       return;
     }
 
@@ -1545,6 +1885,7 @@ export class DutySlipForBillingComponent implements OnInit, AfterViewInit, OnCha
       !moment(locInTime).isValid()
     ) {
       this.datetime = '';
+      this.datetimeP2P = '';
       return;
     }
 
@@ -1571,31 +1912,62 @@ export class DutySlipForBillingComponent implements OnInit, AfterViewInit, OnCha
     const t3 = new Date(locInDateTime).getTime();
     if (![t0, t1, t2, t3].every((t) => Number.isFinite(t))) {
       this.datetime = '';
+      this.datetimeP2P = '';
       return;
     }
 
-    const diff3 = t1 - t0;
-    const diff2 = t2 - t1;
-    const diff1 = t3 - t2;
-    const totalMilliseconds = diff1 + diff2 + diff3;
-    if (!Number.isFinite(totalMilliseconds)) {
-      this.datetime = '';
-      return;
-    }
+    const formatHoursMinutes = (totalMilliseconds: number): string => {
+      const totalMinutes = totalMilliseconds / (1000 * 60);
+      if (!Number.isFinite(totalMinutes)) {
+        return '';
+      }
+      const hours = Math.floor(totalMinutes / 60);
+      const minutes = Math.floor(totalMinutes % 60);
+      return hours + '.' + minutes;
+    };
 
-    const totalMinutes = totalMilliseconds / (1000 * 60);
-    if (!Number.isFinite(totalMinutes)) {
-      this.datetime = '';
-      return;
-    }
+    // Garage to Garage: locOut → pickUp → dropOff → locIn
+    const g2gMs = (t1 - t0) + (t2 - t1) + (t3 - t2);
+    this.datetime = Number.isFinite(g2gMs) ? formatHoursMinutes(g2gMs) : '';
 
-    const hours = Math.floor(totalMinutes / 60);
-    const minutes = Math.floor(totalMinutes % 60);
-    this.datetime = hours + '.' + minutes;
+    // Point to Point: pickUp → dropOff
+    const p2pMs = t2 - t1;
+    this.datetimeP2P = Number.isFinite(p2pMs) ? formatHoursMinutes(p2pMs) : '';
+  }
+
+  /** True when all eight required location-out / pickup / drop-off / location-in date+time fields are present. */
+  hasAllRequiredDateTimeFields(): boolean {
+    const locOutTime = this.advanceTableForm.get('locationOutTimeForBilling')?.value;
+    const locOutDate = this.advanceTableForm.get('locationOutDateForBilling')?.value;
+    const pickUpTime = this.advanceTableForm.get('pickUpTimeForBilling')?.value;
+    const pickUpDate = this.advanceTableForm.get('pickUpDateForBilling')?.value;
+    const dropOffTime = this.advanceTableForm.get('dropOffTimeForBilling')?.value;
+    const dropOffDate = this.advanceTableForm.get('dropOffDateForBilling')?.value;
+    const locInTime = this.advanceTableForm.get('locationInTimeForBilling')?.value;
+    const locInDate = this.advanceTableForm.get('locationInDateForBilling')?.value;
+
+    return (
+      locOutTime != null &&
+      locOutDate != null &&
+      locOutTime !== '' &&
+      locOutDate !== '' &&
+      pickUpTime != null &&
+      pickUpDate != null &&
+      pickUpTime !== '' &&
+      pickUpDate !== '' &&
+      dropOffTime != null &&
+      dropOffDate != null &&
+      dropOffTime !== '' &&
+      dropOffDate !== '' &&
+      locInTime != null &&
+      locInDate != null &&
+      locInTime !== '' &&
+      locInDate !== ''
+    );
   }
 
   onKeyUp() {
-    const v = this.advanceTableForm.value;
+    const v = this.advanceTableForm.getRawValue();
     const toNum = (x: any): number | null => {
       if (x === null || x === undefined || x === '') {
         return null;
@@ -1609,6 +1981,7 @@ export class DutySlipForBillingComponent implements OnInit, AfterViewInit, OnCha
     const locationOut = toNum(v.locationOutKMForBilling);
     if (locationIn === null || dropOff === null || pickUp === null || locationOut === null) {
       this.diff = null;
+      this.diffP2P = null;
       return;
     }
     const diff1 = locationIn - dropOff;
@@ -1616,6 +1989,7 @@ export class DutySlipForBillingComponent implements OnInit, AfterViewInit, OnCha
     const diff3 = pickUp - locationOut;
     const sum = diff1 + diff2 + diff3;
     this.diff = Number.isFinite(sum) ? sum : null;
+    this.diffP2P = Number.isFinite(diff2) ? diff2 : null;
   }
 
   addtionOfManulKM()
@@ -1729,6 +2103,11 @@ export class DutySlipForBillingComponent implements OnInit, AfterViewInit, OnCha
       }
       if(isChecked === true)
       {
+        this.applyClosingFieldDefaults();
+        if (!this.validateClosingStatusForGfb()) {
+          this.advanceTableForm.patchValue({ goodForBilling: false });
+          return false;
+        }
         let at = "Checked";
         this.advanceTableForm.patchValue({actionTaken : "GoodForBilling"});
         this.advanceTableForm.patchValue({actionDetails : at});
@@ -1737,8 +2116,8 @@ export class DutySlipForBillingComponent implements OnInit, AfterViewInit, OnCha
         this.advanceTableBH.actionTaken = this.advanceTableForm.value.actionTaken;
         this.advanceTableBH.actionDetails = this.advanceTableForm.value.actionDetails;
         this.updateDutyStatus(true, true, () => {
-    this.CalculateBill(true);
-});
+          this.CalculateBill(false, true);
+        });
       }
       if(isChecked === false)
       {
@@ -1969,155 +2348,108 @@ public resetVerificationForEcoStateChange(): void {
   }
 
   dateOnly(date: Date): Date {
-    return new Date(date.getFullYear(), date.getMonth(), date.getDate());
+    return billingDateOnly(date) ?? new Date(NaN);
+  }
+
+  private showChronologyValidationError(message: string): void {
+    Swal.fire('Error', message, 'warning').then(() => {
+      this.showSpinner = false;
+    });
   }
 
   checkChronologyAndValues(): boolean {
-    const form = this.advanceTableForm.value;
-    // Date-only validations
-    const pickupDate = this.dateOnly(new Date(form.pickUpDateForBilling));
-    const locationOutDate = this.dateOnly(new Date(form.locationOutDateForBilling));
-    const dropOffDate = this.dateOnly(new Date(form.dropOffDateForBilling));
-    const locationInDate = this.dateOnly(new Date(form.locationInDateForBilling));
-  
+    const form = this.advanceTableForm.getRawValue();
+    const legs = getBillingTripLegsFromForm(form);
+
+    const locationOutDate = billingDateOnly(form.locationOutDateForBilling);
+    const pickupDate = billingDateOnly(form.pickUpDateForBilling);
+    const dropOffDate = billingDateOnly(form.dropOffDateForBilling);
+    const locationInDate = billingDateOnly(form.locationInDateForBilling);
+
+    if (!locationOutDate) {
+      this.showChronologyValidationError('Location Out date is missing or invalid.');
+      return false;
+    }
+    if (!pickupDate) {
+      this.showChronologyValidationError('Pickup date is missing or invalid.');
+      return false;
+    }
+    if (!dropOffDate) {
+      this.showChronologyValidationError('Drop-off date is missing or invalid.');
+      return false;
+    }
+    if (!locationInDate) {
+      this.showChronologyValidationError('Location In date is missing or invalid.');
+      return false;
+    }
+
     if (pickupDate < locationOutDate) {
-      Swal.fire('Error', 'Pickup Date cannot be before Location Out Date.', 'warning')
-      .then(() => {
-        this.showSpinner = false; // ✅ spinner stop after Swal close
-      });
+      this.showChronologyValidationError('Pickup Date cannot be before Location Out Date.');
       return false;
     }
-  
+
     if (dropOffDate < pickupDate) {
-      Swal.fire('Error', 'Drop-off Date cannot be before Pickup Date.', 'warning')
-      .then(() => {
-        this.showSpinner = false; // ✅ spinner stop after Swal close
-      });
+      this.showChronologyValidationError('Drop-off Date cannot be before Pickup Date.');
       return false;
     }
-  
+
     if (locationInDate < dropOffDate) {
-      Swal.fire('Error', 'Location In Date cannot be before Drop-off Date.', 'warning')
-      .then(() => {
-        this.showSpinner = false; // ✅ spinner stop after Swal close
-      });
+      this.showChronologyValidationError('Location In Date cannot be before Drop-off Date.');
       return false;
     }
-  
-    // Date+Time validations
-    const getDateTime = (dateInput: any, timeInput: any): Date | null => {
-    try {
-      let date: Date;
-      let time: Date;
-  
-      // Normalize Date input
-      if (dateInput instanceof Date) {
-        date = dateInput;
-      } else if (typeof dateInput === 'string') {
-        date = new Date(dateInput);
-      } else {
-        return null;
-      }
-  
-      // Normalize Time input
-      if (timeInput instanceof Date) {
-        time = timeInput;
-      } else if (typeof timeInput === 'string') {
-        time = new Date(timeInput);
-      } else {
-        return null;
-      }
-  
-      // Compose final DateTime
-      const final = new Date(
-        date.getFullYear(),
-        date.getMonth(),
-        date.getDate(),
-        time.getHours(),
-        time.getMinutes(),
-        time.getSeconds()
-      );
-  
-      return isNaN(final.getTime()) ? null : final;
-    } catch (err) {
-      return null;
+
+    const resolved = resolveBillingTripLegDateTimes(legs);
+    if (!resolved.ok) {
+      this.showChronologyValidationError(resolved.message);
+      return false;
     }
-  };
-  
-    const locationOutDT = getDateTime(form.locationOutDateForBilling, form.locationOutTimeForBilling);
-  const pickupDT = getDateTime(form.pickUpDateForBilling, form.pickUpTimeForBilling);
-  const dropOffDT = getDateTime(form.dropOffDateForBilling, form.dropOffTimeForBilling);
-  const locationInDT = getDateTime(form.locationInDateForBilling, form.locationInTimeForBilling);
-  
-  if (!locationOutDT || !pickupDT || !dropOffDT || !locationInDT) {
-    Swal.fire('Error', 'One or more DateTime fields are invalid or missing.', 'warning')
-    .then(() => {
-        this.showSpinner = false; // ✅ spinner stop after Swal close
-      });
-    return false;
-  }
-  
+
+    const [locationOutDT, pickupDT, dropOffDT, locationInDT] = resolved.dateTimes;
+
     if (pickupDT < locationOutDT) {
-      Swal.fire('Error', 'Pickup DateTime cannot be before Location Out DateTime.', 'warning')
-      .then(() => {
-        this.showSpinner = false; // ✅ spinner stop after Swal close
-      });
+      this.showChronologyValidationError('Pickup DateTime cannot be before Location Out DateTime.');
       return false;
     }
-  
+
     if (dropOffDT < pickupDT) {
-      Swal.fire('Error', 'Drop-off DateTime cannot be before Pickup DateTime.', 'warning')
-      .then(() => {
-        this.showSpinner = false; // ✅ spinner stop after Swal close
-      });
+      this.showChronologyValidationError('Drop-off DateTime cannot be before Pickup DateTime.');
       return false;
     }
-  
+
     if (locationInDT < dropOffDT) {
-      Swal.fire('Error', 'Location In DateTime cannot be before Drop-off DateTime.', 'warning')
-      .then(() => {
-        this.showSpinner = false; // ✅ spinner stop after Swal close
-      });
-      return (false);
+      this.showChronologyValidationError('Location In DateTime cannot be before Drop-off DateTime.');
+      return false;
     }
-  
+
     // KM validations
     const locationOutKM = Number(form.locationOutKMForBilling);
     const pickupKM = Number(form.pickUpKMForBilling);
     const dropOffKM = Number(form.dropOffKMForBilling);
     const locationInKM = Number(form.locationInKMForBilling);
-  
+
     if (pickupKM < locationOutKM) {
-      Swal.fire('Error', 'Pickup KM cannot be less than Location Out KM.', 'warning')
-      .then(() => {
-        this.showSpinner = false; // ✅ spinner stop after Swal close
-      });
+      this.showChronologyValidationError('Pickup KM cannot be less than Location Out KM.');
       return false;
     }
-  
+
     if (dropOffKM < pickupKM) {
-      Swal.fire('Error', 'Drop-off KM cannot be less than Pickup KM.', 'warning')
-      .then(() => {
-        this.showSpinner = false; // ✅ spinner stop after Swal close
-      });
+      this.showChronologyValidationError('Drop-off KM cannot be less than Pickup KM.');
       return false;
     }
-  
+
     if (locationInKM < dropOffKM) {
-      Swal.fire('Error', 'Location In KM cannot be less than Drop-off KM.', 'warning')
-      .then(() => {
-        this.showSpinner = false; // ✅ spinner stop after Swal close
-      });
+      this.showChronologyValidationError('Location In KM cannot be less than Drop-off KM.');
       return false;
     }
-  
+
     return true;
   }
 
   public ClossingDetails(): boolean
   {
-  
-    if (!this.advanceTableForm.value.dsClosing) {
+    const form = this.advanceTableForm.getRawValue();
+
+    if (!form.dsClosing) {
       Swal.fire({
         title: '',
         text: 'Please Select DS Closing Option.',
@@ -2127,7 +2459,7 @@ public resetVerificationForEcoStateChange(): void {
       });
       return false;
     }
-    if (this.advanceTableForm.value.physicalDutySlipReceived === "") {
+    if (form.physicalDutySlipReceived === "") {
       Swal.fire({
         title: '',
         text: 'Please Select Duty Slip Received Option.',
@@ -2139,7 +2471,7 @@ public resetVerificationForEcoStateChange(): void {
     }
     //-------------Location OUT ---------------
    
-    if (!this.advanceTableForm.value.locationOutAddressStringForBilling) {
+    if (!form.locationOutAddressStringForBilling) {
       Swal.fire({
         title: '',
         text: 'Please Select Location Out Address.',
@@ -2152,7 +2484,7 @@ public resetVerificationForEcoStateChange(): void {
     
   //----------Pick UP ----------------------
   
-    if (!this.advanceTableForm.value.pickUpAddressStringForBilling) {
+    if (!form.pickUpAddressStringForBilling) {
       Swal.fire({
         title: '',
         text: 'Please Select Pick up Address.',
@@ -2165,7 +2497,7 @@ public resetVerificationForEcoStateChange(): void {
   
   //--------------Drop Off-------------------
   
-    if (!this.advanceTableForm.value.dropOffAddressStringForBilling) {
+    if (!form.dropOffAddressStringForBilling) {
       Swal.fire({
         title: '',
         text: 'Please Select Drop Off Address.',
@@ -2178,7 +2510,7 @@ public resetVerificationForEcoStateChange(): void {
    
     //-----------Location In----------------------
   
-    if (!this.advanceTableForm.value.locationInAddressStringForBilling) {
+    if (!form.locationInAddressStringForBilling) {
       Swal.fire({
         title: '',
         text: 'Please Select Location In Address.',
@@ -2191,16 +2523,105 @@ public resetVerificationForEcoStateChange(): void {
     return true;
   }
 
+  private savePartialAfterGfb(): void {
+    if (this.isEInvoiceBlockingEdits) {
+      this.showNotification(
+        'snackbar-warning',
+        'E-Invoice (IRN) is already generated and active. Changes are not allowed.',
+        'bottom',
+        'center'
+      );
+      return;
+    }
+    const remarksChanged = this.haveRemarksChanged();
+    const kmChanged = this.haveKmChanged();
+    if (!remarksChanged && !kmChanged) {
+      this.showNotification(
+        'snackbar-warning',
+        'No remark or KM changes to save.',
+        'bottom',
+        'center'
+      );
+      return;
+    }
+
+    this.showSpinner = true;
+    const form = this.advanceTableForm.getRawValue();
+    this.dutySlipForBillingService.updateRemarks({
+      dutySlipID: form.dutySlipID,
+      dutySlipForBillingID: form.dutySlipForBillingID,
+      runningDetails: form.runningDetails,
+      vendorRemark: form.vendorRemark,
+      locationOutKMForBilling: form.locationOutKMForBilling,
+      locationOutLatLongForBilling: form.locationOutLatLongForBilling,
+      reportingToGuestKMForBilling: form.reportingToGuestKMForBilling,
+      reportingToGuestLatLongForBilling: form.reportingToGuestLatLongForBilling,
+      pickUpKMForBilling: form.pickUpKMForBilling,
+      pickUpLatLongForBilling: form.pickUpLatLongForBilling,
+      dropOffKMForBilling: form.dropOffKMForBilling,
+      dropOffLatLongForBilling: form.dropOffLatLongForBilling,
+      locationInKMForBilling: form.locationInKMForBilling,
+      locationInLatLongForBilling: form.locationInLatLongForBilling,
+    }).subscribe(
+      response => {
+        const runningDetails = response?.runningDetails ?? form.runningDetails ?? '';
+        const vendorRemark = response?.vendorRemark ?? form.vendorRemark ?? '';
+        const kmPatch: Record<string, unknown> = {};
+        for (const name of this.alwaysEditableKmControls) {
+          kmPatch[name] = response?.[name] ?? form[name];
+        }
+        this.advanceTableForm.patchValue({ runningDetails, vendorRemark, ...kmPatch }, { emitEvent: false });
+        if (this.advanceTableClosingOne?.closingDutySlipForBillingModel) {
+          const billing = this.advanceTableClosingOne.closingDutySlipForBillingModel;
+          billing.runningDetails = runningDetails;
+          billing.vendorRemark = vendorRemark;
+          for (const name of this.alwaysEditableKmControls) {
+            (billing as Record<string, unknown>)[name] = kmPatch[name];
+          }
+        }
+        this.loadedRunningDetails = this.normalizeRemark(runningDetails);
+        this.loadedVendorRemark = this.normalizeRemark(vendorRemark);
+        this.syncLoadedKmFromForm();
+        this.showSpinner = false;
+        const successMessage = remarksChanged && kmChanged
+          ? 'Remarks and KM saved...!!!'
+          : kmChanged
+            ? 'KM saved...!!!'
+            : 'Remarks saved...!!!';
+        this.showNotification(
+          'snackbar-success',
+          successMessage,
+          'bottom',
+          'center'
+        );
+      },
+      error => {
+        this.showSpinner = false;
+        this.showNotification(
+          'snackbar-danger',
+          this.extractApiErrorMessage(error, 'Failed to save closing fields.'),
+          'bottom',
+          'center'
+        );
+      }
+    );
+  }
+
   public Put(): void
   {
+    if (this.canSavePartialAfterGfb) {
+      this.savePartialAfterGfb();
+      return;
+    }
     if (!this.guardDutySlipEdit()) {
       return;
     }
     this.showSpinner = true;
-    //this.saveDisabled = false;
     if (!this.checkChronologyAndValues()) {
+      this.showSpinner = false;
       return;
     }
+    this.applyClosingFieldDefaults();
     //this.saveDisabled = true;
       if (!this.ClossingDetails())
       {
@@ -2212,24 +2633,25 @@ public resetVerificationForEcoStateChange(): void {
       .subscribe(
         response => 
         {
-          this.showSpinner = false;
           this.DSClosing = response.dsClosing;
-          // this.saveDisabled = false;
-          // this.CalculateBill();
-          this.showNotification(
-            'snackbar-success',
-            'Saved...!!!',
-            'bottom',
-            'center'
-          );
           this.buttonText = 'Update';
+          this.syncClosingModelFromResponse(response);
           this.syncVerifyDutyAndGoodForBillingState();
           if(response.goodForBilling === true || response.verifyDuty === true)
           {
             this.advanceTableForm.controls["goodForBilling"].setValue(false);
             this.advanceTableForm.controls["verifyDuty"].setValue(false);
           }
-          //this.LoadDataForBilling();
+          const finishPutSuccess = () => {
+            this.showSpinner = false;
+            this.showNotification(
+              'snackbar-success',
+              'Saved...!!!',
+              'bottom',
+              'center'
+            );
+          };
+          this.saveClosingAllowancesIfChanged(finishPutSuccess);
         },
         error =>
         {
@@ -2272,12 +2694,17 @@ public resetVerificationForEcoStateChange(): void {
   }
 
   //---------Calculate Bill------------------------
-  public CalculateBill(showSummaryPopup = false)
+  /**
+   * @param showSummaryPopup when true, opens Summary of Duty dialog after success
+   * @param openDummyInvoiceAfter when true (GFB path), opens Dummy Invoice in a new tab and never shows Summary
+   */
+  public CalculateBill(showSummaryPopup = false, openDummyInvoiceAfter = false)
   {
-    if (!this.guardDutySlipEdit()) {
+    // GFB path already persisted status; skip edit guard so calc still runs after GFB lock.
+    if (!openDummyInvoiceAfter && !this.guardDutySlipEdit()) {
       return;
     }
-    if (showSummaryPopup) {
+    if (showSummaryPopup || openDummyInvoiceAfter) {
       this.showCalculateBillOverlay = true;
     } else {
       this.showSpinnerForVDGB = true;
@@ -2293,7 +2720,7 @@ public resetVerificationForEcoStateChange(): void {
         goodForBilling: this.advanceTableForm.value.goodForBilling,
         message: this.Message
       });
-        if (showSummaryPopup) {
+        if (showSummaryPopup || openDummyInvoiceAfter) {
           this.showCalculateBillOverlay = false;
         } else {
           this.showSpinnerForVDGB = false;
@@ -2305,18 +2732,21 @@ public resetVerificationForEcoStateChange(): void {
           'center'
         );
         this.saveDisabled = true;
-        if (showSummaryPopup) {
+        this.loadClosingAllowances();
+        if (openDummyInvoiceAfter) {
+          this.openDummyInvoice();
+        } else if (showSummaryPopup) {
           this.openSummaryOfDutyDialog();
         }
       },
       error =>
       {
-        if (showSummaryPopup) {
+        if (showSummaryPopup || openDummyInvoiceAfter) {
           this.showCalculateBillOverlay = false;
         } else {
           this.showSpinnerForVDGB = false;
         }
-        const errorMessage = error || 'Operation Failed.....!!!';
+        const errorMessage = this.extractApiErrorMessage(error, 'Operation Failed.....!!!');
         Swal.fire({
           title: errorMessage,
           icon: 'error'
@@ -2326,7 +2756,8 @@ public resetVerificationForEcoStateChange(): void {
             this.onGFBChange({ checked: false });
             this.saveDisabled = true;
           });
-      })  
+      }
+    );
   }
 
  GetClosingData()
@@ -2348,8 +2779,16 @@ onChange() {
   });
 }
 
- public PostDataGPS() 
+ public PostDataGPS(event?: Event) 
     {
+      if (event) {
+        event.preventDefault();
+        event.stopPropagation();
+      }
+      if (!this.hasAllRequiredDateTimeFields()) {
+        Swal.fire('', 'Please fill all date and time fields.', 'warning');
+        return;
+      }
       this.dutySlipForBillingService.PostDataGPS(this.advanceTableClosingOne.closingDutySlipModel.dutySlipID,this.RegistrationNumber).subscribe
       (
         data => 
@@ -2453,44 +2892,46 @@ onChange() {
     );
   }
 
-updateDutyStatus(verifyDuty: boolean, goodForBilling: boolean, callback?: () => void) {
-  this.advanceTableForm.patchValue({
-    verifyDuty: verifyDuty,
-    goodForBilling: goodForBilling
-  });
-
-  this.dutySlipForBillingService
-    .update(this.advanceTableForm.getRawValue())
-    .subscribe({
-      next: (response) => {
-
-        this.advanceTableForm.patchValue({
-          verifyDuty: response.verifyDuty,
-          goodForBilling: response.goodForBilling
-        });
-
-        this.showNotification(
-          'snackbar-success',
-          'Updated Successfully',
-          'bottom',
-          'center'
-        );
-
-        if (callback) {
-          callback();
-        }
-      },
-      error: (err) => {
-        this.showNotification(
-          'snackbar-danger',
-          this.extractApiErrorMessage(err),
-          'bottom',
-          'center'
-        );
-      }
+  updateDutyStatus(verifyDuty: boolean, goodForBilling: boolean, callback?: () => void) {
+    this.applyClosingFieldDefaults();
+    this.advanceTableForm.patchValue({
+      verifyDuty: verifyDuty,
+      goodForBilling: goodForBilling
     });
+
+    this.dutySlipForBillingService
+      .update(this.advanceTableForm.getRawValue())
+      .subscribe({
+        next: (response) => {
+
+          this.advanceTableForm.patchValue({
+            verifyDuty: response.verifyDuty,
+            goodForBilling: response.goodForBilling
+          });
+          this.syncClosingModelFromResponse(response);
+          if (response?.dsClosing ?? response?.DsClosing) {
+            this.buttonText = 'Update';
+          }
+
+          this.showNotification(
+            'snackbar-success',
+            'Updated Successfully',
+            'bottom',
+            'center'
+          );
+
+          if (callback) {
+            callback();
+          }
+        },
+        error: (err) => {
+          this.showNotification(
+            'snackbar-danger',
+            this.extractApiErrorMessage(err),
+            'bottom',
+            'center'
+          );
+        }
+      });
+  }
 }
-}
-
-
-

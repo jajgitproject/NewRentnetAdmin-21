@@ -46,7 +46,7 @@ export class DriverComponent implements OnInit {
     'driverEmail',
     'mobile1',
     'driverOfficialIdentityNumber',
-    'supplierOfficialIdentityNumber',
+    'supplierCode',
     'hub',
     'location',
     'driverImage',
@@ -263,6 +263,17 @@ export class DriverComponent implements OnInit {
         this.showNotification('snackbar-danger', 'Failed to download CSV', 'top', 'center');
       }
     );
+  }
+
+  getSupplierCode(row: Driver): string {
+    if (!row) {
+      return '';
+    }
+    const name = row.supplierName || '';
+    const code = row.supplierOldRentnetCode != null && row.supplierOldRentnetCode !== 0
+      ? String(row.supplierOldRentnetCode)
+      : '';
+    return `${name}${code}`;
   }
 
   showNotification(colorName, text, placementFrom, placementAlign) {
@@ -569,7 +580,17 @@ export class DriverComponent implements OnInit {
               }
             }
             else if (this.MessageArray[0] == "DataNotFound") {
-              if (this.MessageArray[1] == "DuplicacyError") {
+              if (this.MessageArray[1] == "OldRentnetCodeDuplicacyError") {
+                if (this.MessageArray[2] == "Failure") {
+                  this.showNotification(
+                    'snackbar-danger',
+                    'Old Rentnet Code already exists.....!!!',
+                    'bottom',
+                    'center'
+                  );
+                }
+              }
+              else if (this.MessageArray[1] == "DuplicacyError") {
                 if (this.MessageArray[2] == "Failure") {
                   this.refresh();
                   this.showNotification(

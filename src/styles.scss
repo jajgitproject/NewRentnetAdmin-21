@@ -181,6 +181,19 @@
   overflow: hidden !important;
 }
 
+/* Trip Start/End ODO image popup: no nested scrollbars — image scales to fit. */
+.cdk-overlay-pane:has(app-closingImageViewDialog) .mdc-dialog__surface,
+.cdk-overlay-pane:has(app-closingImageViewDialog) .mat-mdc-dialog-container {
+  overflow: hidden !important;
+}
+
+.cdk-overlay-pane:has(app-closingImageViewDialog) .mat-mdc-dialog-content,
+.cdk-overlay-pane:has(app-closingImageViewDialog) .mdc-dialog__content,
+.cdk-overlay-pane:has(app-closingImageViewDialog) [mat-dialog-content] {
+  overflow: hidden !important;
+  max-height: none !important;
+}
+
 /* Stop Details: wide modal + single scroll (nested from control panel otherwise stays narrow). */
 .cdk-overlay-pane.stop-details-wide-dialog {
   width: min(1200px, 98vw) !important;
@@ -257,6 +270,36 @@
 }
 .cdk-overlay-container .cdk-overlay-pane.role-form-wide-dialog .mat-mdc-form-field-type-mat-select .mat-mdc-text-field-wrapper {
   overflow: visible;
+}
+
+/* General Bill create/edit: centered wide dialog (Ship To two-column layout). */
+.cdk-overlay-container .cdk-overlay-pane.general-bill-form-dialog.mat-mdc-dialog-panel {
+  width: min(960px, 98vw) !important;
+  min-width: min(960px, 98vw) !important;
+  max-width: 98vw !important;
+  flex-shrink: 0 !important;
+  flex-grow: 0 !important;
+  box-sizing: border-box;
+  --mat-dialog-container-max-width: min(960px, 98vw);
+}
+.cdk-overlay-container .cdk-overlay-pane.general-bill-form-dialog > .mat-mdc-dialog-container {
+  flex-shrink: 0 !important;
+  min-width: 100% !important;
+  width: 100% !important;
+  box-sizing: border-box;
+}
+.cdk-overlay-container .cdk-overlay-pane.general-bill-form-dialog .mdc-dialog__surface,
+.cdk-overlay-container .cdk-overlay-pane.general-bill-form-dialog .mat-mdc-dialog-container,
+.cdk-overlay-container .cdk-overlay-pane.general-bill-form-dialog .mat-mdc-dialog-container .mat-mdc-dialog-surface {
+  width: 100% !important;
+  max-width: 100% !important;
+  flex-shrink: 0 !important;
+  box-sizing: border-box;
+}
+.cdk-overlay-container .cdk-overlay-pane.general-bill-form-dialog .mat-mdc-dialog-content,
+.cdk-overlay-container .cdk-overlay-pane.general-bill-form-dialog .mdc-dialog__content,
+.cdk-overlay-container .cdk-overlay-pane.general-bill-form-dialog [mat-dialog-content] {
+  overflow-x: visible !important;
 }
 
 /* Contract Tariff Verification: fullscreen row details / history dialogs */
@@ -497,6 +540,21 @@ mat-option {
 }
 
 .custom-autocomplete-panel .mat-mdc-option .mdc-list-item__primary-text {
+  white-space: nowrap !important;
+}
+
+.invoice-paid-status-customer-panel {
+  min-width: 720px !important;
+  max-height: 420px !important;
+}
+
+.cdk-overlay-container .cdk-overlay-pane:has(.invoice-paid-status-customer-panel) {
+  width: max-content !important;
+  min-width: 720px !important;
+  max-width: min(92vw, calc(100vw - 24px)) !important;
+}
+
+.cdk-overlay-container .cdk-overlay-pane:has(.invoice-paid-status-customer-panel) .invoice-paid-status-customer-panel .mat-mdc-option .mdc-list-item__primary-text {
   white-space: nowrap !important;
 }
 

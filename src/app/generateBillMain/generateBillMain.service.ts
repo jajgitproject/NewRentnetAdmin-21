@@ -30,6 +30,18 @@ export class GenerateBillMainService
       this.generalService.BaseURL + "customerConfigurationInvoicing/GetIsSEZ/" + customerID + "/" + stateID + "/" + effectiveDate
     );
   }
+
+  getBillToShipToForCustomer(customerID: number): Observable<any[]> {
+    return this.httpClient.get<any[]>(
+      `${this.generalService.BaseURL}customerBillToShipTo/0/${customerID}/true/0/CustomerConfigurationBillToShipToID/Ascending`
+    );
+  }
+
+  getBillToShipToById(customerConfigurationBillToShipToID: number): Observable<any> {
+    return this.httpClient.get<any>(
+      `${this.generalService.BaseURL}customerBillToShipTo/${customerConfigurationBillToShipToID}`
+    );
+  }
   
   /** CRUD METHODS */
   getTableData(SearchCustomer:string, SearchInvoiceNumberWithPrefix:string,SearchGuset:string,SearchBillDate:string,SearchStartDate:string,SearchEndDate:string, SearchActivationStatus:boolean, PageNumber: number):  Observable<any> 
@@ -105,23 +117,25 @@ export class GenerateBillMainService
     advanceTable.invoiceID=-1;
     advanceTable.userID=this.generalService.getUserID();
     advanceTable.invoiceNumberIssuedByID=this.generalService.getUserID();
-    advanceTable.invoiceDateString=this.generalService.getTimeApplicable(advanceTable.invoiceDate).toString().slice(0, 19);
-advanceTable.billFromDateString = formatDate(
-    advanceTable.billFromDate,
-    'yyyy-MM-dd',
-    'en-IN'
-  );
-
-  advanceTable.billToDateString = formatDate(
-    advanceTable.billToDate,
-    'yyyy-MM-dd',
-    'en-IN'
-  );
-
-  // Don't send Date objects
-  advanceTable.billFromDate = advanceTable.billFromDateString as any;
-  advanceTable.billToDate = advanceTable.billToDateString as any;
-
+    advanceTable.customerID = Number(advanceTable.customerID) || 0;
+    advanceTable.cityID = Number(advanceTable.cityID) || 0;
+    advanceTable.passengerID = Number(advanceTable.passengerID || advanceTable.customerPersonNameID) || 0;
+    advanceTable.ecoBillingBranchID = Number(advanceTable.ecoBillingBranchID) || 0;
+    const shipToId = Number(advanceTable.customerConfigurationBillToShipToID);
+    advanceTable.customerConfigurationBillToShipToID = shipToId > 0 ? shipToId : null;
+    advanceTable.invoiceDateString = formatDate(advanceTable.invoiceDate, 'yyyy-MM-dd', 'en-IN');
+    advanceTable.billFromDateString = formatDate(
+      advanceTable.billFromDate,
+      'yyyy-MM-dd',
+      'en-IN'
+    );
+    advanceTable.billToDateString = formatDate(
+      advanceTable.billToDate,
+      'yyyy-MM-dd',
+      'en-IN'
+    );
+    advanceTable.billFromDate = advanceTable.billFromDateString as any;
+    advanceTable.billToDate = advanceTable.billToDateString as any;
     return this.httpClient.post<any>(this.API_URL , advanceTable);
   }
   update(advanceTable: GenerateBillMainModel)

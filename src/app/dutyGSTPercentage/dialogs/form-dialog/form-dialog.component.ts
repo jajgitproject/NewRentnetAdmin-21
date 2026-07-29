@@ -196,7 +196,6 @@ InitEmployee()
 
   public Post(): void
   { 
-    debugger
     this.advanceTableForm.patchValue({dutySlipID:this.DutySlipID});
     this.advanceTableForm.patchValue({changedByID:this.employeeDataSource[0].employeeID});
     this.advanceTableService.add(this.advanceTableForm.getRawValue())  
@@ -204,7 +203,8 @@ InitEmployee()
       response => 
       {
       
-          this.dialogRef.close();
+          this.dialogRef.close(true);
+          this._generalService.sendUpdate('DutyGSTPercentageCreate:DutyGSTPercentageView:Success');
           this.showNotification(
             'snackbar-success',
             'Duty GST Percentage Create...!!!',
@@ -241,7 +241,8 @@ InitEmployee()
             'center'
           );
           this.saveDisabled=true;
-          this.dialogRef.close();
+          this.dialogRef.close(true);
+          this._generalService.sendUpdate('DutyGSTPercentageUpdate:DutyGSTPercentageView:Success');
       },
       error =>
       {

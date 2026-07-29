@@ -156,7 +156,9 @@
                                 </p>
 
                                 <ng-template #thenBlock2>
-                                    <div class="alert alert-primary" style="background-color:#E8E8E8; text-align: center;">No Records Found</div>
+                                    <div class="alert alert-primary" style="background-color:#E8E8E8; text-align: center;">
+                                        {{ hasSearched ? 'No Records Found' : 'Use Search to load credit notes.' }}
+                                    </div>
                                     <div class="body">
                                         <div class="example-button-row">
                                             <button mat-raised-button color="primary" (click)="PreviousCall()">Previous</button>

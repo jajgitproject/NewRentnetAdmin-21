@@ -149,6 +149,13 @@
                         </mat-error>
                     </mat-form-field>
                 </div>
+
+                <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                    <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                        <mat-label>Customer Identity Number</mat-label>
+                        <input matInput formControlName="customerIdentityNumber">
+                    </mat-form-field>
+                </div>
             </div>
 
 
@@ -319,6 +326,18 @@
                         </mat-select>
                     </mat-form-field>
                 </div>
+                <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                    <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                        <mat-label>IsBillToShipToCustomer</mat-label>
+                        <mat-select formControlName="isBillToShipToCustomer">
+                            <mat-option [value]="true">Yes</mat-option>
+                            <mat-option [value]="false">No</mat-option>
+                        </mat-select>
+                    </mat-form-field>
+                </div>
+            </div>
+
+            <div class="row">
                 <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
                     <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
                         <mat-label>Activation Status</mat-label>

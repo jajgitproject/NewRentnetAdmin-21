@@ -12,8 +12,11 @@
                         </li>
                     </ul>
                     <ul class="breadcrumb breadcrumb-style ">
-                        <li class="breadcrumb-item">
+                        <li class="breadcrumb-item" *ngIf="!invoiceNumberWithPrefix">
                             <h2>General Bill Line Items</h2>
+                        </li>
+                        <li class="breadcrumb-item" *ngIf="invoiceNumberWithPrefix">
+                            <h2>General Bill Line Items - {{invoiceNumberWithPrefix}}</h2>
                         </li>
                     </ul>
                 </div>

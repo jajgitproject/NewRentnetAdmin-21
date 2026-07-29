@@ -1,5 +1,5 @@
 <div id="invoiceContainer"
-  style="width: 210mm; min-height: 297mm; margin: auto; background: #fff; padding: 3mm; font-family: Arial, sans-serif; font-size: 10pt; color: #000;">
+  style="width: 210mm; margin: auto; background: #fff; padding: 3mm; font-family: Arial, sans-serif; font-size: 10pt; color: #000;">
 
   <style>
     #invoiceContainer table {
@@ -42,7 +42,25 @@
     #invoiceContainer hr {
       border: none;
       border-top: 1px solid #000;
-      margin: 10px 0;
+      margin: 4px 0;
+    }
+
+    #invoiceContainer .charge-details-table {
+      height: auto;
+      margin-top: 4px;
+    }
+
+    #invoiceContainer .charge-details-table th,
+    #invoiceContainer .charge-details-table td {
+      padding: 4px 6px;
+    }
+
+    #invoiceContainer .charge-details-table tbody tr {
+      height: auto;
+    }
+
+    #invoiceContainer .section-spacer {
+      margin-top: 4px;
     }
 
     @media print {
@@ -50,15 +68,26 @@
         display: none !important;
       }
 
-      body {
+      @page {
+        size: A4 portrait;
         margin: 0;
+      }
+
+      html,
+      body {
+        margin: 0 !important;
+        padding: 0 !important;
         -webkit-print-color-adjust: exact !important;
         print-color-adjust: exact !important;
       }
 
       #invoiceContainer {
-        width: 100%;
-        padding: 15mm;
+        width: 210mm;
+        max-width: 210mm;
+        min-height: auto;
+        margin: 0 auto !important;
+        padding: 10mm !important;
+        box-sizing: border-box;
       }
     }
   </style>
@@ -89,7 +118,7 @@
         <strong>GST No:</strong> {{dataSource?.ecoBranchGSTNumber}}<br />
         LUT: {{dataSource?.lutNOForInvoiceModel?.lutNo}},
         Exp. Date: {{dataSource?.lutNOForInvoiceModel?.endDate | date:'dd/MM/yyyy'}}<br />
-        Reverse Charge (Y/N): N
+        <strong>IRN No:</strong> {{ dataSource?.irn || 'N/A' }}
       </td>
         <td class="qr-logo-area" valign="top" align="right">
           <div class="qr-logo-stack">
@@ -111,7 +140,7 @@
      <hr />
   <table style="margin-top: 2px;" class="no-border">
     <tr>
-      <td width="70%">
+      <td width="70%" valign="top" style="vertical-align: top;">
         <strong>Bill To:</strong><br />
         {{dataSource?.billingName}}<br />
         {{dataSource?.billingAddress}},
@@ -121,9 +150,19 @@
         <strong>State of Service:</strong> {{dataSource?.customerGSTStateName}},
         <strong>State Code:</strong> {{dataSource?.customerGSTStateCode}}<br />
         <strong>GST/UIN:</strong> {{dataSource?.customerGSTNumber}}<br />
-        <strong>Guest Name:</strong> {{dataSource?.passengerName}}
+        <strong>Guest Name:</strong> {{dataSource?.passengerName}}<br />
+        <strong>Reverse Charge (Y/N):</strong> N
+        <ng-container *ngIf="hasShipToDetails()">
+          <br /><br />
+          <strong>Ship to:</strong><br />
+          {{ shipToDetails?.shipToCompany }}<br />
+          {{ shipToDetails?.address1 }}<ng-container *ngIf="shipToDetails?.address2">, {{ shipToDetails?.address2 }}</ng-container>,
+          {{ shipToDetails?.cityName }} - {{ shipToDetails?.stateName }},
+          {{ getShipToCountryName() }} - {{ shipToDetails?.pincode }}<br />
+          <strong>GST:</strong> {{ shipToDetails?.gstno || shipToDetails?.gSTNO }}
+        </ng-container>
       </td>
-      <td width="30%">
+      <td width="30%" valign="top" style="vertical-align: top;">
         <strong>Invoice No:</strong> {{dataSource?.invoiceNumberWithPrefix}}<br />
         <strong>Invoice Date:</strong> {{dataSource?.invoiceDate | date:'dd/MM/yyyy'}}<br />
         <strong>SAC : </strong>{{ dataSource?.hsn }}<br />
@@ -134,22 +173,24 @@
 
   <!-- Charge Details -->
    
-  <table style="margin-top: 5px;height:230px;" class="no-border custom-table">
+  <table class="no-border custom-table charge-details-table">
     <thead>
       <tr align="center">
-        <th>Car Type</th>
         <th>Particulars</th>
+        <th>Extra Kms / Hrs</th>
+        <th>Rate</th>
         <th>Amount</th>
       </tr>
     </thead>
-    <tbody >
-      <tr style="height: 30px;" *ngFor="let duty of dataSource?.lineItems">
-        <td> </td>
-        <td >{{duty.narration}}</td>
+    <tbody>
+      <tr *ngFor="let duty of dataSource?.lineItems">
+        <td>{{duty.narration}}</td>
+        <td class="text-center">{{ formatExtraKmsHrs(duty) }}</td>
+        <td class="text-right">{{ duty.rate }}</td>
         <td class="text-right">{{duty.baseAmount}}</td>
       </tr>
       <tr>
-        <td colspan="2" class="text-right"><strong>Total</strong></td>
+        <td colspan="3" class="text-right"><strong>Total</strong></td>
         <td class="text-right">{{dataSource?.totalAmountAfterDiscout}}</td>
       </tr>
     </tbody>
@@ -157,11 +198,8 @@
   </table>
     <hr />
 
-
-    
-
   <!-- Taxes -->
-  <table style="margin-top: 10px;" class="no-border">
+  <table class="no-border section-spacer">
     <tr *ngIf="dataSource?.isSEZ===true">
        <td>Supply meant for Export/supply to SEZ unit or SEZ developer for 
               authorised operations under bond or letter of undertaking
@@ -189,7 +227,7 @@
   <hr />
 
   <!-- Terms and Signature -->
-  <table style="margin-top: 10px;font-size: 8pt" class="no-border">
+  <table class="no-border section-spacer" style="font-size: 8pt">
     <tr>
       <td width="70%" valign="top">
         <strong>Terms & Conditions</strong><br />
@@ -224,5 +262,5 @@
 </div>
   <!-- Print Button -->
   <div class="text-center mt-3 no-print" style="margin-top: 15px;">
-    <button class="btn btn-primary" onclick="window.print()">Print</button>
+    <button class="btn btn-primary" type="button" (click)="print()">Print</button>
   </div>

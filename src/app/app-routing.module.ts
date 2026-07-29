@@ -13,6 +13,7 @@ const routes: Routes = [
     path: '',
     component: MainLayoutComponent,
     canActivate: [AuthGuard, RolePageGuard],
+    canActivateChild: [RolePageGuard],
     children: [
       { path: '', redirectTo: '/authentication/signin', pathMatch: 'full' },
       {
@@ -134,13 +135,6 @@ const routes: Routes = [
         loadChildren: () =>
           import('./tallyMis20/tallyMis.module').then(
             (m) => m.TallyMis20Module
-          )
-      },
-      {
-        path: 'dynamicsMis',
-        loadChildren: () =>
-          import('./dynamicsMis/dynamicsMis.module').then(
-            (m) => m.DynamicsMisModule
           )
       },
       {
@@ -369,6 +363,18 @@ const routes: Routes = [
       },
 
       {
+        path: 'bookingMis',
+        loadChildren: () =>
+          import('./bookingMis/bookingMis.module').then(
+            (m) => m.BookingMisModule
+          ),
+        data: {
+          requiredPageKey: 'Booking MIS',
+          alternatePageKeys: ['bookingMis', 'Booking MIS'],
+        },
+      },
+
+      {
         path: 'creditNoteDutyAdjustment',
         loadChildren: () =>
           import('./creditNoteDutyAdjustment/creditNoteDutyAdjustment.module').then(
@@ -457,6 +463,18 @@ const routes: Routes = [
       },
 
       {
+        path: 'bulkEInvoice',
+        loadChildren: () =>
+          import('./bulkEInvoice/bulkEInvoice.module').then(
+            (m) => m.BulkEInvoiceModule
+          ),
+        data: {
+          requiredPageKey: 'Bulk E-Invoice',
+          alternatePageKeys: ['bulkEInvoice', 'generateEInvoice', 'Generate E - Invoice'],
+        },
+      },
+
+      {
         path: 'dynamicEInvoice',
         loadChildren: () =>
           import('./dynamicEInvoice/dynamicEInvoice.module').then(
@@ -495,6 +513,18 @@ const routes: Routes = [
           import('./creditNoteManagement/creditNoteManagement.module').then(
             (m) => m.CreditNoteManagementModule
           )
+      },
+
+      {
+        path: 'creditNoteMis',
+        loadChildren: () =>
+          import('./creditNoteMis/creditNoteMis.module').then(
+            (m) => m.CreditNoteMisModule
+          ),
+        data: {
+          requiredPageKey: 'Credit Note MIS',
+          alternatePageKeys: ['creditNoteMis', 'Credit Note MIS'],
+        },
       },
 
       {
@@ -702,6 +732,30 @@ const routes: Routes = [
           import('./dutyRegisterForContractCenter/dutyRegisterForContractCenter.module').then(
             (m) => m.DutyRegisterForContractCenterModule
           )
+      },
+
+      {
+        path: 'vendorMis',
+        loadChildren: () =>
+          import('./vendorMis/vendorMis.module').then(
+            (m) => m.VendorMisModule
+          ),
+        data: {
+          requiredPageKey: 'Vendor MIS',
+          alternatePageKeys: ['vendorMis', 'Vendor MIS'],
+        },
+      },
+
+      {
+        path: 'billDetailMis',
+        loadChildren: () =>
+          import('./billDetailMis/billDetailMis.module').then(
+            (m) => m.BillDetailMisModule
+          ),
+        data: {
+          requiredPageKey: 'Bill Detail MIS',
+          alternatePageKeys: ['billDetailMis', 'Bill Detail MIS'],
+        },
       },
 
       {
@@ -2146,6 +2200,14 @@ const routes: Routes = [
       },
 
       {
+        path: 'customerBillToShipTo',
+        loadChildren: () =>
+          import('./customerBillToShipTo/customerBillToShipTo.module').then(
+            (m) => m.CustomerBillToShipToModule
+          )
+      },
+
+      {
         path: 'customerConfigurationReservation',
         loadChildren: () =>
           import('./customerConfigurationReservation/customerConfigurationReservation.module').then(
@@ -2914,6 +2976,13 @@ const routes: Routes = [
         loadChildren: () =>
           import('./invoiceHome/invoiceHome.module').then(
             (m) => m.InvoiceHomeModule
+          )
+      },
+      {
+        path: 'invoicePaidStatus',
+        loadChildren: () =>
+          import('./invoicePaidStatus/invoicePaidStatus.module').then(
+            (m) => m.InvoicePaidStatusModule
           )
       },
       {

@@ -38,6 +38,16 @@ import { FormDialogDisputeComponent } from '../dispute/dialogs/form-dialog/form-
 import { Dispute } from '../dispute/dispute.model';
 import { DisputeService } from '../dispute/dispute.service';
 import Swal from 'sweetalert2';
+import {
+  billingDateOnly,
+  getBillingTripLegsFromForm,
+  resolveBillingTripLegDateTimes,
+} from '../shared/billing-datetime-chronology.util';
+import { firstValueFrom } from 'rxjs';
+import {
+  confirmMissingGstnForSingleDuty,
+  extractApiErrorMessage
+} from '../shared/customer-invoicing-gstn-confirm.util';
 import { FormDialogComponent as DutyExpenseFormDialogComponent } from '../dutyExpense/dialogs/form-dialog/form-dialog.component';
 import { DutyExpenseModel } from '../dutyExpense/dutyExpense.model';
 import { DutyExpenseService } from '../dutyExpense/dutyExpense.service';
@@ -741,42 +751,35 @@ public CalculateBill()
 
 }
 
-public GenerateBill()
+public async GenerateBill()
 {
-  this.clossingScreenService.generateBill(this.DutySlipID)  
-  .subscribe(
-    response => 
-    {
-      //this.refresh();
-      // this.loadDataForDriver();
-      // this.loadDataForApp();
-      // this.loadDataForGPS();
-      // this.loadDataForBilling();
-      // this.KMForPreviousBooking();
-       this.showNotification(
-        'snackbar-success',
-        'Updated...!!!',
-        'bottom',
-        'center'
-      );
-      this.dutyStateInvoiceGenerated = true;
-    },
-    error =>
-    {
-      //this.refresh();
-      // this.loadDataForDriver();
-      // this.loadDataForApp();
-      // this.loadDataForGPS();
-      // this.loadDataForBilling();
-      this.showNotification(
-        'snackbar-danger',
-        'Operation Failed.....!!!',
-        'bottom',
-        'center'
-      ); 
+  try {
+    const check = await firstValueFrom(
+      this.clossingScreenService.checkCustomerInvoicingGstn(this.DutySlipID)
+    );
+    const confirmation = await confirmMissingGstnForSingleDuty(check);
+    if (!confirmation.proceed) {
+      return;
     }
-  )
 
+    await firstValueFrom(
+      this.clossingScreenService.generateBill(this.DutySlipID, confirmation.acknowledgeMissingGstn)
+    );
+    this.showNotification(
+      'snackbar-success',
+      'Updated...!!!',
+      'bottom',
+      'center'
+    );
+    this.dutyStateInvoiceGenerated = true;
+  } catch (error) {
+    this.showNotification(
+      'snackbar-danger',
+      extractApiErrorMessage(error),
+      'bottom',
+      'center'
+    );
+  }
 }
 public ClossingDetails(): boolean
 {
@@ -3815,16 +3818,34 @@ isPickupTimeInvalid(): boolean {
 }
 
 dateOnly(date: Date): Date {
-  return new Date(date.getFullYear(), date.getMonth(), date.getDate());
+  return billingDateOnly(date) ?? new Date(NaN);
 }
 
 checkChronologyAndValues(): boolean {
-  const form = this.advanceTableForm.value;
-  // Date-only validations
-  const pickupDate = this.dateOnly(new Date(form.pickUpDateForBilling));
-  const locationOutDate = this.dateOnly(new Date(form.locationOutDateForBilling));
-  const dropOffDate = this.dateOnly(new Date(form.dropOffDateForBilling));
-  const locationInDate = this.dateOnly(new Date(form.locationInDateForBilling));
+  const form = this.advanceTableForm.getRawValue();
+  const legs = getBillingTripLegsFromForm(form);
+
+  const locationOutDate = billingDateOnly(form.locationOutDateForBilling);
+  const pickupDate = billingDateOnly(form.pickUpDateForBilling);
+  const dropOffDate = billingDateOnly(form.dropOffDateForBilling);
+  const locationInDate = billingDateOnly(form.locationInDateForBilling);
+
+  if (!locationOutDate) {
+    Swal.fire('Error', 'Location Out date is missing or invalid.', 'warning');
+    return false;
+  }
+  if (!pickupDate) {
+    Swal.fire('Error', 'Pickup date is missing or invalid.', 'warning');
+    return false;
+  }
+  if (!dropOffDate) {
+    Swal.fire('Error', 'Drop-off date is missing or invalid.', 'warning');
+    return false;
+  }
+  if (!locationInDate) {
+    Swal.fire('Error', 'Location In date is missing or invalid.', 'warning');
+    return false;
+  }
 
   if (pickupDate < locationOutDate) {
     Swal.fire('Error', 'Pickup Date cannot be before Location Out Date.', 'warning');
@@ -3841,58 +3862,13 @@ checkChronologyAndValues(): boolean {
     return false;
   }
 
-  // Date+Time validations
-  const getDateTime = (dateInput: any, timeInput: any): Date | null => {
-  try {
-    let date: Date;
-    let time: Date;
-
-    // Normalize Date input
-    if (dateInput instanceof Date) {
-      date = dateInput;
-    } else if (typeof dateInput === 'string') {
-      date = new Date(dateInput);
-    } else {
-      return null;
-    }
-
-    // Normalize Time input
-    if (timeInput instanceof Date) {
-      time = timeInput;
-    } else if (typeof timeInput === 'string') {
-      time = new Date(timeInput);
-    } else {
-      return null;
-    }
-
-    // Compose final DateTime
-    const final = new Date(
-      date.getFullYear(),
-      date.getMonth(),
-      date.getDate(),
-      time.getHours(),
-      time.getMinutes(),
-      time.getSeconds()
-    );
-
-    return isNaN(final.getTime()) ? null : final;
-  } catch (err) {
-    return null;
+  const resolved = resolveBillingTripLegDateTimes(legs);
+  if (!resolved.ok) {
+    Swal.fire('Error', resolved.message, 'warning');
+    return false;
   }
-};
 
-
-
-
-  const locationOutDT = getDateTime(form.locationOutDateForBilling, form.locationOutTimeForBilling);
-const pickupDT = getDateTime(form.pickUpDateForBilling, form.pickUpTimeForBilling);
-const dropOffDT = getDateTime(form.dropOffDateForBilling, form.dropOffTimeForBilling);
-const locationInDT = getDateTime(form.locationInDateForBilling, form.locationInTimeForBilling);
-
-if (!locationOutDT || !pickupDT || !dropOffDT || !locationInDT) {
-  Swal.fire('Error', 'One or more DateTime fields are invalid or missing.', 'warning');
-  return false;
-}
+  const [locationOutDT, pickupDT, dropOffDT, locationInDT] = resolved.dateTimes;
 
   if (pickupDT < locationOutDT) {
     Swal.fire('Error', 'Pickup DateTime cannot be before Location Out DateTime.', 'warning');

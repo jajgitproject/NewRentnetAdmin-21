@@ -1,0 +1,32 @@
+.closing-image-view-dialog-content
+  overflow: hidden !important
+  max-height: none !important
+  padding: 0 16px 16px
+
+.closing-image-view
+  display: flex
+  justify-content: center
+  align-items: center
+  padding: 8px 0
+  width: 100%
+.closing-image-view__frame
+  cursor: pointer
+  display: flex
+  justify-content: center
+  align-items: center
+  width: 100%
+
+:host ::ng-deep .closing-image-view__img
+  display: block
+  max-width: 100%
+  max-height: 70vh
+  width: auto
+  height: auto
+  object-fit: contain
+  margin: 0 auto
+  border-radius: 0
+
+.closing-image-view__pdf
+  cursor: pointer
+  height: 48px
+  width: auto

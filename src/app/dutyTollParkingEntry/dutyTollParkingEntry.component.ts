@@ -1,5 +1,5 @@
 // @ts-nocheck
-import { Component, ElementRef, Input, OnInit, ViewChild } from '@angular/core';
+import { Component, ElementRef, EventEmitter, Input, OnChanges, OnInit, Output, SimpleChanges, ViewChild } from '@angular/core';
 import { DutyTollParkingEntryService } from './dutyTollParkingEntry.service';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { MatDialog } from '@angular/material/dialog';
@@ -22,12 +22,25 @@ import { FormControl } from '@angular/forms';
   styleUrls: ['./dutyTollParkingEntry.component.sass'],
   providers: [{ provide: MAT_DATE_LOCALE, useValue: 'en-GB' }]
 })
-export class DutyTollParkingEntryComponent implements OnInit {
-  @Input() tollParkingAdvanceTable;
+export class DutyTollParkingEntryComponent implements OnInit, OnChanges {
+  private _tollParkingAdvanceTable;
+  private ignoreTableInput = false;
+
+  @Input() set tollParkingAdvanceTable(value) {
+    if (!this.ignoreTableInput) {
+      this._tollParkingAdvanceTable = value;
+    }
+  }
+  get tollParkingAdvanceTable() {
+    return this._tollParkingAdvanceTable;
+  }
   @Input() dutySlipID;
   @Input() AllotmentID;
   @Input() verifyDutyStatusAndCacellationStatus;
   @Input() goodForBillingStatusAndCancellationStatus;
+  @Input() expandPanel = false;
+  @Input() inViewDialog = false;
+  @Output() billingChargesChanged = new EventEmitter<void>();
   displayedColumns = [
     'type',
     'amount',
@@ -60,14 +73,41 @@ export class DutyTollParkingEntryComponent implements OnInit {
   @ViewChild(MatMenuTrigger)
   contextMenu: MatMenuTrigger;
   contextMenuPosition = { x: '0px', y: '0px' };
+  ngOnChanges(changes: SimpleChanges): void {
+    if (changes['dutySlipID']?.currentValue && this.inViewDialog) {
+      this.loadDataClosing();
+    }
+  }
+
   ngOnInit() {
-    this.loadData();
+    if (this.dutySlipID) {
+      this.loadDataClosing();
+    } else if (!this.tollParkingAdvanceTable) {
+      this.loadData();
+    }
     this.SubscribeUpdateService();
   }
   refresh() {
     this.SearchActivationStatus = true;
     this.PageNumber=0;
-    this.loadData();
+    if (this.dutySlipID) {
+      this.ignoreTableInput = this.inViewDialog || this.ignoreTableInput;
+      this.loadDataClosing();
+    } else {
+      this.loadData();
+    }
+  }
+
+  reloadAfterFormChange(): void {
+    if (this.inViewDialog) {
+      this.ignoreTableInput = true;
+    }
+    if (this.dutySlipID) {
+      this.loadDataClosing();
+    } else {
+      this.loadData();
+    }
+    this.billingChargesChanged.emit();
   }
 
   addNew()
@@ -80,6 +120,11 @@ export class DutyTollParkingEntryComponent implements OnInit {
           action: 'add'
         }
     });
+    dialogRef.afterClosed().subscribe((saved) => {
+      if (saved) {
+        this.reloadAfterFormChange();
+      }
+    });
   }
 
    editCall(row) {
@@ -91,7 +136,11 @@ export class DutyTollParkingEntryComponent implements OnInit {
           goodForBillingStatusAndCancellationStatus:this.goodForBillingStatusAndCancellationStatus
         }
       });
-  
+      dialogRef.afterClosed().subscribe((saved) => {
+        if (saved) {
+          this.reloadAfterFormChange();
+        }
+      });
     }
   openDutyTollParkingApproval(row)
   {
@@ -105,8 +154,10 @@ export class DutyTollParkingEntryComponent implements OnInit {
           goodForBillingStatusAndCancellationStatus:this.goodForBillingStatusAndCancellationStatus
         }
       });
-      dialogRef.afterClosed().subscribe((res: any) => {
-        this.loadData();
+      dialogRef.afterClosed().subscribe((saved) => {
+        if (saved) {
+          this.reloadAfterFormChange();
+        }
     });
   }
 deleteItem(row)
@@ -115,6 +166,11 @@ deleteItem(row)
   const dialogRef = this.dialog.open(DeleteDialogComponent, 
   {
     data: row
+  });
+  dialogRef.afterClosed().subscribe((saved) => {
+    if (saved) {
+      this.reloadAfterFormChange();
+    }
   });
 }
 
@@ -134,6 +190,26 @@ deleteItem(row)
         },
         (error: HttpErrorResponse) => { this.dataSource = null;}
       );
+  }
+
+  public loadDataClosing() {
+    if (!this.dutySlipID) {
+      return;
+    }
+    this.dutyTollParkingEntryService.GetTollParkingInfo(this.dutySlipID).subscribe(
+      (data: DutyTollParkingEntry[]) => {
+        if (this.inViewDialog) {
+          this.ignoreTableInput = true;
+        }
+        this._tollParkingAdvanceTable = data;
+      },
+      (error: HttpErrorResponse) => {
+        if (this.inViewDialog) {
+          this.ignoreTableInput = true;
+        }
+        this._tollParkingAdvanceTable = null;
+      }
+    );
   }
   showNotification(colorName, text, placementFrom, placementAlign) {
     this.snackBar.open(text, '', {
@@ -207,6 +283,7 @@ deleteItem(row)
               if(this.MessageArray[2]=="Success")
               {
                 this.refresh();
+                this.billingChargesChanged.emit();
                 this.showNotification(
                 'snackbar-success',
                 'Duty Toll Parking Entry Created...!!!',
@@ -223,6 +300,7 @@ deleteItem(row)
               if(this.MessageArray[2]=="Success")
               {
                this.refresh();
+               this.billingChargesChanged.emit();
                this.showNotification(
                 'snackbar-success',
                 'Duty Toll Parking Entry Updated...!!!',
@@ -239,6 +317,7 @@ deleteItem(row)
               if(this.MessageArray[2]=="Success")
               {
                this.refresh();
+               this.billingChargesChanged.emit();
                this.showNotification(
                 'snackbar-success',
                 'Duty Toll Parking Entry Deleted...!!!',

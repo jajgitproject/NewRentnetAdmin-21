@@ -139,6 +139,19 @@ bookerName: FormControl = new FormControl();
   @ViewChild(MatMenuTrigger)
   contextMenu: MatMenuTrigger;
   contextMenuPosition = { x: '0px', y: '0px' };
+
+  isIrnGenerated(row: any): boolean {
+    if (!row) {
+      return false;
+    }
+    const status = row.irnStatus ?? row.IRNStatus ?? '';
+    if (status === 'Generated') {
+      return true;
+    }
+    const irn = row.irn ?? row.IRN ?? row.iRN ?? '';
+    return typeof irn === 'string' && irn.trim().length > 0;
+  }
+
   ngOnInit() {
     // this.loadData();
     this.InitCustomerGroup();
@@ -178,6 +191,7 @@ bookerName: FormControl = new FormControl();
       this.customer.markAsTouched();
       return;
     }
+    this.PageNumber = 0;
     this.loadData();
   }
  
@@ -205,12 +219,21 @@ bookerName: FormControl = new FormControl();
     {
       this.SearchToDate=moment(this.SearchToDate).format('yyyy-MM-DD');
     }
-    this.invoiceHomeService.getTableData(this.searchInvoiceType,this.customer.value,this.customerGroup.value,  this.searchInvoiceNo.replace("/","-"), this.branch.value,this.SearchFromDate,this.SearchToDate,this.SearchInvoiceStatus,this.SearchEInvoiceStatus,this.searchDutySlip,this.searchReservationID,this.searchActivationStatus,this.PageNumber).subscribe(
+    const customerName = this.getCustomerNameForSearch(this.customer.value);
+    this.invoiceHomeService.getTableData(this.searchInvoiceType,customerName,this.customerGroup.value,  this.searchInvoiceNo, this.branch.value,this.SearchFromDate,this.SearchToDate,this.SearchInvoiceStatus,this.SearchEInvoiceStatus,this.searchDutySlip,this.searchReservationID,this.searchActivationStatus,this.PageNumber).subscribe(
         data => {
           this.dataSource = data;
         },
         (error: HttpErrorResponse) => { this.dataSource = null; }
       );
+  }
+
+  private getCustomerNameForSearch(value: any): string {
+    const raw = (value || '').toString().trim();
+    if (!raw) {
+      return raw;
+    }
+    return raw.split('##')[0].trim();
   }
 
   showNotification(colorName, text, placementFrom, placementAlign) {
@@ -340,7 +363,8 @@ bookerName: FormControl = new FormControl();
       this.sortingData = 1;
       this.sortType = "Descending";
     }
-    this.invoiceHomeService.getTableDataSort(this.searchCustomerName, this.searchCustomerGroup, this.searchInvoiceNo, this.searchBranch, this.SearchFromDate, this.SearchToDate, this.SearchInvoiceStatus, this.SearchEInvoiceStatus,this.searchDutySlip,this.searchReservationID,this.searchActivationStatus, this.PageNumber, coloumName.active, this.sortType).subscribe
+    const customerName = this.getCustomerNameForSearch(this.customer.value);
+    this.invoiceHomeService.getTableDataSort(this.searchInvoiceType, customerName, this.customerGroup.value, this.searchInvoiceNo, this.branch.value, this.SearchFromDate, this.SearchToDate, this.SearchInvoiceStatus, this.SearchEInvoiceStatus,this.searchDutySlip,this.searchReservationID,this.searchActivationStatus, this.PageNumber, coloumName.active, this.sortType).subscribe
     (
       data =>   
       {
@@ -408,7 +432,7 @@ bookerName: FormControl = new FormControl();
   //-------Customer (all, no group filter)-------
   onKeyupCustomerName(event?: any)
   {
-    const Prefix = ((event?.target?.value ?? this.customer?.value) || '').toString().trim();
+    const Prefix = this.getCustomerNameForSearch(event?.target?.value ?? this.customer?.value);
     if (Prefix.length < 3)
     {
       this.CustomerList = [];
@@ -438,15 +462,22 @@ bookerName: FormControl = new FormControl();
     });
   }
 
+  private getCustomerDisplayValue(data: CustomerDropDown): string {
+    return data.customerName + '##' + (data.customerIdentityNumber || '');
+  }
+
   private _filterCustomer(value: string): any {
-    const filterValue = value.toLowerCase();
-    if (!value || value.length < 3) {
+    const filterValue = this.getCustomerNameForSearch(value).toLowerCase();
+    if (!filterValue || filterValue.length < 3) {
       return [];
     }
     return this.CustomerList.filter(
       data => 
       {
-        return data.customerName.toLowerCase().includes(filterValue);
+        const identity = (data.customerIdentityNumber || '').toString().toLowerCase();
+        return data.customerName.toLowerCase().includes(filterValue)
+          || identity.includes(filterValue)
+          || this.getCustomerDisplayValue(data).toLowerCase().includes(filterValue);
       }
     );
   }
@@ -454,7 +485,7 @@ bookerName: FormControl = new FormControl();
   onCustomerSelected(customer: string) 
   {
     const selectedCustomer = this.CustomerList.find(
-      data => data.customerName === customer);
+      data => this.getCustomerDisplayValue(data) === customer);
   }
 
    InitCompany(){
@@ -876,6 +907,9 @@ bookerName: FormControl = new FormControl();
 
   openAttachDetachForEdit(item:any) 
   { 
+    if (this.isIrnGenerated(item)) {
+      return;
+    }
     const url = this.route.serializeUrl(
       this.route.createUrlTree(['/invoiceAttachDetach'],{ queryParams: {
       invoiceNumberWithPrefix:item.invoiceNumberWithPrefix,

@@ -63,7 +63,7 @@
               panelWidth="custom-autocomplete-panel">
               <mat-option *ngFor="
                   let option of filteredCustomerCustomerGroupOptions | async
-                " [value]="option.customerName + '##' + option.tallyCustomerID + '##' + option.stateName" (click)="
+                " [value]="option.customerName + '##' + option.tallyCustomerID + '##' + option.stateName + '##' + (option.customerIdentityNumber || '')" (click)="
                   getCustomerCustomerGroupID(
                     option.customerID,
                     option.customerGroupID,
@@ -73,7 +73,7 @@
                     option.customerType
                   )
                 ">
-                {{ option.customerName }} ## {{ option.tallyCustomerID }} ## {{ option.stateName }}
+                {{ option.customerName }} ## {{ option.tallyCustomerID }} ## {{ option.stateName }} ## {{ option.customerIdentityNumber }}
               </mat-option>
             </mat-autocomplete>
             <mat-error *ngIf="
@@ -109,7 +109,7 @@
               panelWidth="custom-autocomplete-panel">
               <mat-option *ngFor="
                   let option of filteredCustomerCustomerGroupOptions | async
-                " [value]="option.customerName + '##' + option.tallyCustomerID + '##' + option.stateName" (click)="
+                " [value]="option.customerName + '##' + option.tallyCustomerID + '##' + option.stateName + '##' + (option.customerIdentityNumber || '')" (click)="
                   getCustomerIDForRD(
                     option.customerID,
                     option.customerGroupID,
@@ -119,7 +119,7 @@
                     option.customerType
                   )
                 ">
-                {{ option.customerName }} ## {{ option.tallyCustomerID }} ## {{ option.stateName }}
+                {{ option.customerName }} ## {{ option.tallyCustomerID }} ## {{ option.stateName }} ## {{ option.customerIdentityNumber }}
               </mat-option>
             </mat-autocomplete>
             <mat-error *ngIf="
@@ -155,10 +155,10 @@
             <mat-autocomplete #auto10="matAutocomplete" (optionSelected)="onCustomerRGByKAMSelected($event.option.value)"
               panelWidth="custom-autocomplete-panel">
               <mat-option *ngFor="let option of filteredCustomerCustomerGroupOptions | async" 
-                          [value]="option.customerName + '##' + option.tallyCustomerID + '##' + option.stateName" 
+                          [value]="option.customerName + '##' + option.tallyCustomerID + '##' + option.stateName + '##' + (option.customerIdentityNumber || '')" 
                           (click)="getCustomerIDForRGByKAM(option.customerID,option.customerGroupID,option.customerName,
                                                       option.customerGroup, option.customerTypeID,option.customerType)">
-                {{ option.customerName }} ## {{ option.tallyCustomerID }} ## {{ option.stateName }}
+                {{ option.customerName }} ## {{ option.tallyCustomerID }} ## {{ option.stateName }} ## {{ option.customerIdentityNumber }}
               </mat-option>
             </mat-autocomplete>
             <mat-error *ngIf="advanceTableForm.controls['customerCustomerGroup'].hasError('customerRGByKAMInvalid')">
@@ -175,10 +175,10 @@
             <mat-autocomplete #auto10="matAutocomplete" (optionSelected)="onCustomerCustomerGroupForRGByKAMSelected($event.option.value)"
               panelWidth="custom-autocomplete-panel">
               <mat-option *ngFor="let option of filteredCustomerCustomerGroupOptions | async" 
-                          [value]="option.customerName + '##' + option.tallyCustomerID + '##' + option.stateName" 
+                          [value]="option.customerName + '##' + option.tallyCustomerID + '##' + option.stateName + '##' + (option.customerIdentityNumber || '')" 
                           (click)="getCustomerCustomerGroupIDForRGByKAM(option.customerID,option.customerGroupID,option.customerName,
                                                       option.customerGroup, option.customerTypeID,option.customerType)">
-                {{ option.customerName }} ## {{ option.tallyCustomerID }} ## {{ option.stateName }}
+                {{ option.customerName }} ## {{ option.tallyCustomerID }} ## {{ option.stateName }} ## {{ option.customerIdentityNumber }}
               </mat-option>
             </mat-autocomplete>
             <mat-error *ngIf="advanceTableForm.controls['customerCustomerGroup'].hasError('customerRGByKAMInvalid')">

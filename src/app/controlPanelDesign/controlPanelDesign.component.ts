@@ -2885,10 +2885,12 @@ DriverAllotment(reservationID: number, reservationGroupID: number, pickupDate: a
     console.warn('⚠️ reservationGroupID is missing!');
   }
 
-  const encryptedReservationGroupID = encodeURIComponent(this._generalService.encrypt(reservationGroupID.toString()));
-  const encryptedReservationID = encodeURIComponent(this._generalService.encrypt(reservationID.toString()));
-  const encryptedPickupDate = encodeURIComponent(this._generalService.encrypt(pickupDate));
-  const encryptedPickupAddress = encodeURIComponent(this._generalService.encrypt(pickupAddress));
+  const encryptedReservationGroupID = encodeURIComponent(this._generalService.encrypt((reservationGroupID ?? '').toString()));
+  const encryptedReservationID = encodeURIComponent(this._generalService.encrypt((reservationID ?? '').toString()));
+  const encryptedPickupDate = encodeURIComponent(this._generalService.encrypt(
+    pickupDate instanceof Date ? pickupDate.toISOString() : (pickupDate ?? '').toString()
+  ));
+  const encryptedPickupAddress = encodeURIComponent(this._generalService.encrypt((pickupAddress ?? '').toString()));
   const encryptedStatus = this.status ? encodeURIComponent(this._generalService.encrypt(this.status)) : undefined;
 
 
@@ -3767,25 +3769,15 @@ openDropOffByExectiveGPS(item: any)
     return null;
   }
 
-  getOwnershipImpLabel(row: any): string | null {
-    const v = (row?.inventoryOwnedSupplied ?? '').toString().trim();
-    if (v === 'Owned') return 'Own';
-    if (v === 'Supplier') return 'Sup';
-    return null;
+  getModeOfPaymentImpLabel(row: any): string | null {
+    const v = (row?.modeOfPayment ?? '').toString().trim();
+    if (!v) return null;
+    return v.length <= 12 ? v : `${v.substring(0, 11)}…`;
   }
 
-  getOwnershipImpTooltip(row: any): string | null {
-    const v = (row?.inventoryOwnedSupplied ?? '').toString().trim();
-    if (v === 'Owned') return row?.companyName?.trim() || 'Owned';
-    if (v === 'Supplier') {
-      const type = row?.supplierType?.trim();
-      const name = row?.inventorySupplierName?.trim()
-        || row?.supplierName?.trim()
-        || row?.rpsName?.trim();
-      if (type && name) return `${type} - ${name}`;
-      return type || name || 'Supplier';
-    }
-    return null;
+  getModeOfPaymentImpTooltip(row: any): string | null {
+    const v = (row?.modeOfPayment ?? '').toString().trim();
+    return v ? `Mode of Payment: ${v}` : null;
   }
 
   getControlPanelMessagingHeaderDisplay(row: any): {

@@ -1,5 +1,5 @@
 // @ts-nocheck
-import { Component, ElementRef, Input, OnInit, ViewChild } from '@angular/core';
+import { Component, ElementRef, EventEmitter, Input, OnInit, Output, ViewChild } from '@angular/core';
 import { DiscountDetailsService } from './discountDetails.service';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { MatDialog } from '@angular/material/dialog';
@@ -31,6 +31,7 @@ export class DiscountDetailsComponent implements OnInit {
   @Input() reservationID;
    @Input() AllotmentID: number;
    @Input() status;
+  @Output() sectionDataChanged = new EventEmitter<void>();
   advanceTable: DiscountDetails | null;
   advanceTableForm: FormGroup;
   ReservationID: any;
@@ -101,9 +102,10 @@ export class DiscountDetailsComponent implements OnInit {
             status: this.status
           }
       });
-      dialogRef.afterClosed().subscribe((res: any) => {
-        // this.discountDetailsLoadData();
-        this.loadDataForReservationDiscountClosing();
+      dialogRef.afterClosed().subscribe((saved: any) => {
+        if (saved) {
+          this.refresh();
+        }
       })
     }
 
@@ -114,12 +116,18 @@ export class DiscountDetailsComponent implements OnInit {
     {
       data: this.advanceTableDD[row],
     });
+    dialogRef.afterClosed().subscribe((saved: any) => {
+      if (saved) {
+        this.refresh();
+      }
+    });
   }
 
   refresh()
   {
     this.discountDetailsLoadData();
     this.loadDataForReservationDiscountClosing();
+    this.sectionDataChanged.emit();
   }
   
     public discountDetailsLoadData() 
@@ -305,10 +313,11 @@ export class DiscountDetailsComponent implements OnInit {
           reservationID:this.reservationID
         }
     });
-    dialogRef.afterClosed().subscribe((res: any) => {
-     this.discountDetailsLoadData();
-      this.loadDataForReservationDiscountClosing();
-})
+    dialogRef.afterClosed().subscribe((saved: any) => {
+      if (saved) {
+        this.refresh();
+      }
+    })
 }
 
 showAndScrollAddDiscount() {

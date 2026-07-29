@@ -110,7 +110,11 @@ export class PrintDutySlipComponent {
           );
         }
         //this.TotalKMGSG=this.dataSource?.locationInKM-this.dataSource?.locationOutKM;
-        this.totalKms =  this.dataSource?.runningDetailsModels ?.reduce((sum: number, item: any) => sum + Number(item.distance || 0), 0);
+        if (this.dataSource?.showDistanceOnDutySlipPdf === true) {
+          this.totalKms = this.dataSource?.runningDetailsModels?.reduce((sum: number, item: any) => sum + Number(item.distance || 0), 0);
+        } else {
+          this.totalKms = 0;
+        }
         //this.getTime();
       },
       (error: HttpErrorResponse) => { this.dataSource = null});

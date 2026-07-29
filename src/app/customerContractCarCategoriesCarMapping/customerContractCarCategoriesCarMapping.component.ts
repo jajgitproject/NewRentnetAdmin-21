@@ -34,6 +34,7 @@ export class CustomerContractCarCategoriesCarMappingComponent implements OnInit 
     'vehicle',
     'customerVehicleName',
     'customerVehicleCodeForIntegration',
+    'mileage',
     'status',
     'actions'
   ];

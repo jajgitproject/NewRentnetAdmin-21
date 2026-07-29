@@ -113,4 +113,12 @@ export class CreditNoteHomeService {
     advanceTable.userID=this.generalService.getUserID();
     return this.httpClient.post<any>(this.API_URL_Generate_Cancel + '/CancelCreditNoteIRN/', advanceTable);
   }
+
+  hasCreditNoteErrors(creditNoteNumber: string): Observable<{ hasErrors?: boolean; HasErrors?: boolean }> {
+    const normalized = (creditNoteNumber || '').trim().replace(/-/g, '/');
+    return this.httpClient.post<{ hasErrors?: boolean; HasErrors?: boolean }>(
+      this.generalService.BaseURL + 'financeDashboard/hasCreditNoteErrors',
+      { creditNoteNumber: normalized, CreditNoteNumber: normalized }
+    );
+  }
 }

@@ -162,7 +162,7 @@
                         </tr>
 
                         <tr>
-                          <td colspan="2">
+                          <td colspan="2" *ngIf="dataSource?.showDistanceOnDutySlipPdf === true">
                             <strong>Total Kms : {{dataSource?.locationOutKM + dataSource?.reportingToGuestKM + dataSource?.pickUpKM + dataSource?.locationInKM}}</strong>
                           </td>
                           <td colspan="2">

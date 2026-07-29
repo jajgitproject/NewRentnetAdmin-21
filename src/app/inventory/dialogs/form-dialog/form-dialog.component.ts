@@ -14,6 +14,11 @@ import { VehicleCategoryDropDown } from 'src/app/vehicleCategory/vehicleCategory
 import { VehicleDropDown } from 'src/app/vehicle/vehicleDropDown.model';
 import { OrganizationalEntityDropDown } from 'src/app/organizationalEntity/organizationalEntityDropDown.model';
 import { SupplierDropDown } from 'src/app/supplier/supplierDropDown.model';
+import {
+  filterSuppliersByDisplay,
+  formatSupplierDisplay,
+  supplierMatchesDisplay,
+} from 'src/app/supplier/supplier-display.util';
 import { CitiesDropDown } from 'src/app/organizationalEntity/citiesDropDown.model';
 import { ColorDropDown } from 'src/app/color/colorDropDown.model';
 import { FuelTypeDropDown } from 'src/app/fuelType/fuelTypeDropDown.model';
@@ -467,10 +472,18 @@ export class FormDialogComponent
 
   supplierNameValidatorForOwner(SupplierForOwnerList: any[]): ValidatorFn {
     return (control: AbstractControl): ValidationErrors | null => {
-      const value = control.value?.toLowerCase();
-      const match = SupplierForOwnerList.some(group => group.supplierName.toLowerCase() === value);
+      const match = SupplierForOwnerList.some(group => supplierMatchesDisplay(group, control.value));
       return match ? null : { supplierForOwnerInvalid: true };
     };
+  }
+
+  formatSupplierDisplay = formatSupplierDisplay;
+
+  private syncSupplierDisplayFromId(list: SupplierDropDown[], supplierId: number): void {
+    const match = list?.find((item) => item.supplierID === supplierId);
+    if (match) {
+      this.advanceTableForm.patchValue({ supplier: formatSupplierDisplay(match) });
+    }
   }
 
   InitSupplierForOwner()
@@ -482,6 +495,7 @@ export class FormDialogComponent
         this.advanceTableForm.controls['supplier'].setValidators([Validators.required,
           this.supplierNameValidatorForOwner(this.SupplierForOwnerList)]);
         this.advanceTableForm.controls['supplier'].updateValueAndValidity();
+        this.syncSupplierDisplayFromId(this.SupplierForOwnerList, this.advanceTable?.supplierID);
         this.filteredSupplierForOwnerOptions = this.advanceTableForm.controls['supplier'].valueChanges.pipe(
           startWith(""),
           map(value => this._filtersearchSupplierForOwner(value || ''))
@@ -489,14 +503,9 @@ export class FormDialogComponent
       });
   }
   private _filtersearchSupplierForOwner(value: string): any {
-  // if (!value || value.length < 3) {
-  //   return [];
-  // }
   const filterValue = value.toLowerCase();
 
-  return this.SupplierForOwnerList.filter(data =>
-    data.supplierName.toLowerCase().includes(filterValue)
-  );
+  return filterSuppliersByDisplay(this.SupplierForOwnerList, filterValue);
 }
 
 
@@ -511,11 +520,11 @@ export class FormDialogComponent
   OnSupplierForOwnerSelect(selectedSupplier: string)
   {
     const SupplierName = this.SupplierForOwnerList.find(
-      data => data.supplierName === selectedSupplier
+      data => supplierMatchesDisplay(data, selectedSupplier)
     );
-    if (selectedSupplier) 
+    if (SupplierName) 
     {
-      this.getsupplierID(SupplierName.supplierID);
+      this.getsupplierIDForOwner(SupplierName.supplierID);
     }
   }
   getsupplierIDForOwner(supplierID: any)
@@ -533,6 +542,7 @@ export class FormDialogComponent
         this.advanceTableForm.controls['supplier'].setValidators([Validators.required,
           this.supplierNameValidator(this.SupplierList)]);
         this.advanceTableForm.controls['supplier'].updateValueAndValidity();
+        this.syncSupplierDisplayFromId(this.SupplierList, this.advanceTable?.supplierID);
         this.filteredSupplierOptions = this.advanceTableForm.controls['supplier'].valueChanges.pipe(
           startWith(""),
           map(value => this._filtersearchSupplier(value || ''))
@@ -546,9 +556,7 @@ export class FormDialogComponent
   }
   const filterValue = value.toLowerCase();
 
-  return this.SupplierList.filter(data =>
-    data.supplierName.toLowerCase().includes(filterValue)
-  );
+  return filterSuppliersByDisplay(this.SupplierList, filterValue);
 }
 
   // private _filtersearchSupplier(value: string): any {
@@ -562,9 +570,9 @@ export class FormDialogComponent
   OnSupplierSelect(selectedSupplier: string)
   {
     const SupplierName = this.SupplierList.find(
-      data => data.supplierName === selectedSupplier
+      data => supplierMatchesDisplay(data, selectedSupplier)
     );
-    if (selectedSupplier) 
+    if (SupplierName) 
     {
       this.getsupplierID(SupplierName.supplierID);
     }
@@ -578,8 +586,7 @@ export class FormDialogComponent
   //-------------- Supplier Validator -------------
   supplierNameValidator(SupplierList: any[]): ValidatorFn {
     return (control: AbstractControl): ValidationErrors | null => {
-      const value = control.value?.toLowerCase();
-      const match = SupplierList.some(group => group.supplierName.toLowerCase() === value);
+      const match = SupplierList.some(group => supplierMatchesDisplay(group, control.value));
       return match ? null : { supplierInvalid: true };
     };
   }
@@ -590,7 +597,7 @@ export class FormDialogComponent
       data=>
       {
         this.SupplierForOwnershipList=data;
-        this.advanceTableForm.patchValue({supplier:this.SupplierForOwnershipList[0].supplierName});
+        this.advanceTableForm.patchValue({supplier:formatSupplierDisplay(this.SupplierForOwnershipList[0])});
         this.advanceTableForm.patchValue({supplierID:this.SupplierForOwnershipList[0].supplierID});
       });
   }

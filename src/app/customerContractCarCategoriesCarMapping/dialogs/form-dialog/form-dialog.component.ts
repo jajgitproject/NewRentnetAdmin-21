@@ -186,6 +186,7 @@ this.CustomerContractID= data.customerContractID;
       vehicleID: [this.advanceTable.vehicleID],
       customerVehicleName: [this.advanceTable.customerVehicleName, [Validators.required]],
       customerVehicleCodeForIntegration: [this.advanceTable.customerVehicleCodeForIntegration],
+      mileage: [this.advanceTable.mileage],
       activationStatus: [this.advanceTable.activationStatus],
       vehicle:[this.advanceTable.vehicle, [Validators.required]],
     });

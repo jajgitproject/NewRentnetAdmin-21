@@ -25,6 +25,7 @@ import { OpenPopUpDialogComponent} from '../../openPopUp/openPopUp.component'
 import { CustomerCityModel } from 'src/app/customerConfigurationInvoicing/customerConfigurationInvoicingDropDown.model';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { DutySACCDropDown } from 'src/app/dutySAC/dutySACDropDownModel';
+import { CustomerBillToShipTo } from 'src/app/customerBillToShipTo/customerBillToShipTo.model';
 
 @Component({
   standalone: false,
@@ -79,6 +80,11 @@ export class FormDialogComponent
   customerPersonNameID: any;
 
   customerDetailData: any;
+  private readonly customerPersonQuickAddDialog = {
+    panelClass: 'role-form-wide-dialog',
+    width: '1200px',
+    maxWidth: '98vw',
+  };
   // customerGroup_ID: number = 14;
   // customerGroup_Name: string = "Accenture";
   customerGroupID: any;
@@ -88,6 +94,19 @@ export class FormDialogComponent
   organizationalEntityID: any;
 
   public SACList: DutySACCDropDown[] = [];
+
+  headInBillOptions = ['Ship To', 'Business Area', 'Site Address'];
+  billToShipToRecords: CustomerBillToShipTo[] = [];
+  billToShipToStateOptions: { stateID: number; stateName: string }[] = [];
+  billToShipToCityOptions: { cityID: number; cityName: string }[] = [];
+  billToShipToDisplay = {
+    shipToCompany: '',
+    address1: '',
+    address2: '',
+    pincode: '',
+    gstno: '',
+  };
+  showBillToShipToSection = false;
   
   constructor(
   public dialogRef: MatDialogRef<FormDialogComponent>, 
@@ -102,9 +121,12 @@ export class FormDialogComponent
         this.action = data.action;
         if (this.action === 'edit') 
         {
-          this.dialogTitle ='General Bill';       
           this.advanceTable = data.advanceTable;
+          this.dialogTitle = this.advanceTable.invoiceNumberWithPrefix
+            ? `General Bill - ${this.advanceTable.invoiceNumberWithPrefix}`
+            : 'General Bill';
           this.advanceTable.isSEZ = this.advanceTable.isSEZ ? 'Yes' : 'No';
+          this.customerID = this.advanceTable.customerID;
         } else 
         {
           this.dialogTitle = 'General Bill';
@@ -160,13 +182,25 @@ export class FormDialogComponent
       passengerID: [this.advanceTable.passengerID],
       passengerName: [this.advanceTable.passengerName],
       hsn: [this.advanceTable.hsn],
-      isSEZ: [this.advanceTable.isSEZ]
+      isSEZ: [this.advanceTable.isSEZ],
+      headInBill: [null],
+      billToShipToStateID: [null],
+      billToShipToCityID: [null],
+      customerConfigurationBillToShipToID: [
+        this.advanceTable.customerConfigurationBillToShipToID ||
+          this.advanceTable.CustomerConfigurationBillToShipToID ||
+          null,
+      ],
     });
   }
 
   public ngOnInit()
   {
-    //this.InitGuest();
+    this.initGuestAutocomplete();
+    this.initCustomerAutocomplete();
+    if (!this.customerID) {
+      this.advanceTableForm.get('passengerName')?.disable({ emitEvent: false });
+    }
     this.InitOrganizationalEntity();
     this.InitSAC();
     //this.InitCustomer();
@@ -174,6 +208,21 @@ export class FormDialogComponent
     //this.InitCity();
     this.InitIGSTPercentage();
     this.InitCSGSTPercentage();
+
+    if (this.customerID) {
+      const savedShipToId = Number(
+        this.advanceTable?.customerConfigurationBillToShipToID ||
+          this.advanceTable?.CustomerConfigurationBillToShipToID ||
+          0
+      );
+      if (savedShipToId > 0) {
+        this.advanceTableForm.patchValue(
+          { customerConfigurationBillToShipToID: savedShipToId },
+          { emitEvent: false }
+        );
+      }
+      this.loadBillToShipToRecords(this.customerID);
+    }
     
     // Watch for invoice date changes
     this.advanceTableForm.get('invoiceDate')?.valueChanges.subscribe((invoiceDate) => {
@@ -201,6 +250,20 @@ export class FormDialogComponent
     //this.InitPackageType();
   }
 
+  private initGuestAutocomplete() {
+    this.filteredCustomerPersonOptions = this.advanceTableForm.controls['passengerName'].valueChanges.pipe(
+      startWith(this.advanceTableForm.controls['passengerName'].value || ''),
+      map(value => this._filterCustomerPerson(typeof value === 'string' ? value : ''))
+    );
+  }
+
+  private initCustomerAutocomplete() {
+    this.filteredCustomerOptions = this.advanceTableForm.controls['customer'].valueChanges.pipe(
+      startWith(this.advanceTableForm.controls['customer'].value || ''),
+      map(value => this._filterCustomer(typeof value === 'string' ? value : ''))
+    );
+  }
+
   InitSAC() {
     this._generalService.GetSAC().subscribe(
       (data: DutySACCDropDown[]) => {
@@ -215,37 +278,33 @@ export class FormDialogComponent
   //------------- Guest's Drop Down -------------
   onKeyUpGuest()
   {
-     var Prefix = this.advanceTableForm.get("passengerName").value;
-      if(Prefix.length < 3)
-      { 
-        this.AnotherDriverList = [];
-        return;
-      }
-    this._generalService.getCustomerPersonPrefix(this.customerID,Prefix).subscribe(
-      data=>
-      {
-        this.CustomerPersonList=data;
-        this.advanceTableForm.controls['passengerName'].setValidators([Validators.required,
+    const prefix = (this.advanceTableForm.get('passengerName')?.value || '').trim();
+    if (!this.customerID) {
+      this.CustomerPersonList = [];
+      return;
+    }
+    if (prefix.length < 3) {
+      this.CustomerPersonList = [];
+      return;
+    }
+    this._generalService.getCustomerPersonPrefix(this.customerID, prefix).subscribe(
+      data => {
+        this.CustomerPersonList = data ?? [];
+        this.advanceTableForm.controls['passengerName'].setValidators([
+          Validators.required,
           this.customerPersonTypeValidator(this.CustomerPersonList)
         ]);
-        this.advanceTableForm.controls['passengerName'].updateValueAndValidity();
-        this.filteredCustomerPersonOptions = this.advanceTableForm.controls['passengerName'].valueChanges.pipe(
-          startWith(""),
-          map(value => this._filterCustomerPerson(value || ''))
-        ); 
+        this.advanceTableForm.controls['passengerName'].updateValueAndValidity({ emitEvent: false });
       });
   }
-  private _filterCustomerPerson(value: string): any {
-    const filterValue = value.toLowerCase();
-    // if (!value || value.length < 3) {
-    //   return [];   
-    // }
-    return this.CustomerPersonList?.filter(
-      data => 
-      {
-        return data.customerPersonName.toLowerCase().indexOf(filterValue)===0;
-      }
-    );
+  private _filterCustomerPerson(value: string): CustomerPersonDropDown[] {
+    const filterValue = (value || '').trim().toLowerCase();
+    if (filterValue.length < 3) {
+      return [];
+    }
+    return (this.CustomerPersonList ?? []).filter(
+      data => data.customerPersonName?.toLowerCase().includes(filterValue)
+    ).slice(0, 50);
   }
   getCustomerPersonID(customerPersonID: any) 
   {
@@ -307,38 +366,30 @@ export class FormDialogComponent
   //------------- Customer's Drop Down -------------
   onKeyUpCustomer()
   {
-     var Prefix = this.advanceTableForm.get("customer").value;
-      if(Prefix.length < 3)
-      { 
-        this.AnotherDriverList = [];
-        return;
-      }
-    this._generalService.getCustomerPrefix(Prefix).subscribe(
-    data=>
-      {
-        this.CustomerList=data;
-        this.advanceTableForm.controls['customer'].setValidators([Validators.required,
+    const prefix = (this.advanceTableForm.get('customer')?.value || '').trim();
+    if (prefix.length < 3) {
+      this.CustomerList = [];
+      return;
+    }
+    this._generalService.getCustomerPrefix(prefix).subscribe(
+      data => {
+        this.CustomerList = data ?? [];
+        this.advanceTableForm.controls['customer'].setValidators([
+          Validators.required,
           this.customerValidator(this.CustomerList)
         ]);
-        this.advanceTableForm.controls['customer'].updateValueAndValidity();
-        this.filteredCustomerOptions = this.advanceTableForm.controls['customer'].valueChanges.pipe(
-          startWith(""),
-          map(value => this._filterCustomer(value || ''))
-        );
-      }
-    ); 
-  }
-  private _filterCustomer(value: string): any {
-    const filterValue = value.toLowerCase();
-    // if (!value || value.length < 3) {
-    //   return [];   
-    // }
-    return this.CustomerList.filter(
-      data => 
-      {
-        return data.customerName.toLowerCase().indexOf(filterValue)===0;
+        this.advanceTableForm.controls['customer'].updateValueAndValidity({ emitEvent: false });
       }
     );
+  }
+  private _filterCustomer(value: string): CustomerCustomerGroupDropDown[] {
+    const filterValue = (value || '').trim().toLowerCase();
+    if (filterValue.length < 3) {
+      return [];
+    }
+    return (this.CustomerList ?? []).filter(
+      data => data.customerName?.toLowerCase().includes(filterValue)
+    ).slice(0, 50);
   };
   getCustomerID(customerID:any, customerGroupID:any, customerGroup:any)
   {     
@@ -354,13 +405,21 @@ export class FormDialogComponent
       cityID: '',
       billingAddress: '',
       pinCode: '',
-      isSEZ: ''
+      isSEZ: '',
+      passengerName: '',
+      passengerID: null,
+      customerPersonNameID: null
     });
     this.stateID = null;
     this.cityID = null;
+    this.CustomerPersonList = [];
+    this.customerPersonNameID = null;
+    this.passengerID = null;
+    this.advanceTableForm.get('passengerName')?.enable({ emitEvent: false });
     
+    this.clearBillToShipToSection();
     this.InitState(this.customerID);
-    // Auto-populate customer address details
+    this.loadBillToShipToRecords(this.customerID);
    // this.fetchCustomerAddressDetails(customerID);
   }
 
@@ -493,7 +552,10 @@ export class FormDialogComponent
       billingAddress: '',
       pinCode: '',
       customerID: '',
-      isSEZ: ''
+      isSEZ: '',
+      passengerName: '',
+      passengerID: null,
+      customerPersonNameID: null
     });
 
     // Clear the component variables
@@ -503,6 +565,12 @@ export class FormDialogComponent
     this.customerGroupID = null;
     this.customerGroup = null;
     this.customerDetailData = null;
+    this.CustomerPersonList = [];
+    this.customerPersonNameID = null;
+    this.passengerID = null;
+    this.advanceTableForm.get('passengerName')?.disable({ emitEvent: false });
+
+    this.clearBillToShipToSection();
 
     // Clear validation errors
     this.clearAddressValidationErrors();
@@ -518,71 +586,401 @@ export class FormDialogComponent
   }
 
   //------------- New Guest Form -------------
-  personShort() 
-  {
-    const customerControl = this.advanceTableForm.get('customer');
-    if (customerControl && customerControl.value) 
-    {
-      const dialogRef = this.dialog.open(FormDialogComponentCustomerPerson, {
-        width: '800px',
+  private applyCreatedGuest(guest: { customerPersonID: number; customerPersonName: string }): void {
+    if (!guest?.customerPersonID || !guest?.customerPersonName) {
+      return;
+    }
+
+    const newGuest = {
+      customerPersonID: guest.customerPersonID,
+      customerPersonName: guest.customerPersonName,
+    };
+    this.CustomerPersonList = [...(this.CustomerPersonList ?? []), newGuest];
+    this.advanceTableForm.patchValue({
+      passengerName: guest.customerPersonName,
+      customerPersonName: guest.customerPersonName,
+    });
+    this.getCustomerPersonID(guest.customerPersonID);
+    this.advanceTableForm.controls['passengerName'].setValidators([
+      Validators.required,
+      this.customerPersonTypeValidator(this.CustomerPersonList)
+    ]);
+    this.advanceTableForm.controls['passengerName'].updateValueAndValidity({ emitEvent: false });
+  }
+
+  personShort(): void {
+    if (!this.customerID || !this.customerDetailData?.customerGroupID) {
+      this.dialog.open(OpenPopUpDialogComponent, {
+        width: '350px',
         hasBackdrop: true,
         panelClass: 'custom-dialog',
-        data: 
-        {
-          action: 'add',
-          forCP: '368807',
-          CustomerGroupID: this.customerDetailData.customerGroupID,
-          CustomerGroupName: this.customerDetailData.customerGroup
-        }
+        data: {}
       });
+      return;
     }
-    else
-    {
-      const dialogRef = this.dialog.open(OpenPopUpDialogComponent, {
-        width: '350px',  // Adjust the width to a smaller value
-        hasBackdrop: true,
-        panelClass: 'custom-dialog',
-        data: 
-        {
-          //action: 'add',
-          // forCP: '368807',
-          // CustomerGroupID: this.customerDetailData?.customerGroupID,
-          // CustomerGroupName: this.customerDetailData?.customerGroup
+
+    const customerName = (this.advanceTableForm.get('customer')?.value || '').trim();
+    const guestCustomerDetail = {
+      ...this.customerDetailData,
+      customerID: this.customerID,
+      customerName,
+    };
+
+    const dialogRef = this.dialog.open(FormDialogComponentCustomerPerson, {
+      ...this.customerPersonQuickAddDialog,
+      hasBackdrop: true,
+      data: {
+        action: 'add',
+        forCP: 'CP',
+        fromGeneralBill: true,
+        advanceTable: guestCustomerDetail,
+        CustomerGroupID: guestCustomerDetail.customerGroupID,
+        CustomerGroupName: guestCustomerDetail.customerGroup,
+      }
+    });
+
+    dialogRef.afterClosed().subscribe((result) => {
+      if (result?.customerPersonID && result?.customerPersonName) {
+        this.applyCreatedGuest(result);
+      }
+    });
+  }
+
+  compareById = (a: any, b: any): boolean => {
+    if (a == null && b == null) {
+      return true;
+    }
+    if (a == null || b == null) {
+      return false;
+    }
+    return Number(a) === Number(b);
+  };
+
+  private setBillToShipToValidators(enabled: boolean): void {
+    const fields = ['headInBill', 'billToShipToStateID', 'billToShipToCityID', 'customerConfigurationBillToShipToID'];
+    fields.forEach((name) => {
+      const control = this.advanceTableForm.get(name);
+      if (!control) {
+        return;
+      }
+      if (enabled) {
+        control.setValidators([Validators.required]);
+      } else {
+        control.clearValidators();
+      }
+      control.updateValueAndValidity({ emitEvent: false });
+    });
+  }
+
+  private normalizeBillToShipToRecord(raw: any): CustomerBillToShipTo {
+    return new CustomerBillToShipTo(raw);
+  }
+
+  loadBillToShipToRecords(customerID: number): void {
+    if (!customerID) {
+      this.clearBillToShipToSection();
+      return;
+    }
+
+    this.advanceTableService.getBillToShipToForCustomer(customerID).subscribe({
+      next: (data) => {
+        this.billToShipToRecords = (data || [])
+          .map((item) => this.normalizeBillToShipToRecord(item))
+          .filter(
+            (item) =>
+              this.isActiveBillToShipToRecord(item) &&
+              Number(item.customerID) === Number(customerID)
+          );
+        this.showBillToShipToSection = this.billToShipToRecords.length > 0;
+        // Ship to is optional — never block save when empty / deselected.
+        this.setBillToShipToValidators(false);
+        if (this.showBillToShipToSection) {
+          this.restoreBillToShipToSelection();
+        } else {
+          this.clearBillToShipToFormFields();
         }
-      });
+      },
+      error: () => {
+        this.billToShipToRecords = [];
+        this.clearBillToShipToSection();
+      },
+    });
+  }
+
+  private restoreBillToShipToSelection(): void {
+    const selectedId = Number(
+      this.advanceTableForm.get('customerConfigurationBillToShipToID')?.value ||
+        this.advanceTable?.customerConfigurationBillToShipToID ||
+        this.advanceTable?.CustomerConfigurationBillToShipToID ||
+        0
+    );
+    if (!selectedId) {
+      return;
     }
-    
-    // const customerControl = this.advanceTableForm.get('customer');
-    // if (customerControl && customerControl.value) 
-    // {
-    //   const dialogRef = this.dialog.open(FormDialogComponentCustomerPerson, {
-    //     width: '600px',
-    //     hasBackdrop: true,
-    //     panelClass: 'custom-dialog',
-    //     data: 
-    //     {
-    //       action: 'add',
-    //       forCP: '368807',
-    //       CustomerGroupID: this.customerDetailData.customerGroupID,
-    //       CustomerGroupName: this.customerDetailData.customerGroup
-    //     }
-    //   });
-    // }
-    // else
-    // {
-    //   customerControl?.setErrors({ customerInvalid: true });
-    //   customerControl?.markAsTouched();
-    //   Swal.fire({
-    //     title: 'Please select a Customersss',
-    //     icon: 'warning',
-    //     // toast: true,
-    //     // position: 'top-end',  // You can change this to 'top-start', 'bottom-start', etc.
-    //     // showConfirmButton: false,
-    //     // timer:5000
-    // }).then((result) => {
-    //   if (result.value) {}
-    // });
-    // }
+
+    const match = this.billToShipToRecords.find(
+      (item) => Number(item.customerConfigurationBillToShipToID) === selectedId
+    );
+    if (match) {
+      this.applyBillToShipToSelection(match);
+      return;
+    }
+
+    this.advanceTableService.getBillToShipToById(selectedId).subscribe({
+      next: (data) => {
+        if (!data) {
+          return;
+        }
+        const record = this.normalizeBillToShipToRecord(data);
+        if (
+          !this.billToShipToRecords.some(
+            (item) =>
+              Number(item.customerConfigurationBillToShipToID) ===
+              Number(record.customerConfigurationBillToShipToID)
+          )
+        ) {
+          this.billToShipToRecords = [...this.billToShipToRecords, record];
+        }
+        this.applyBillToShipToSelection(record);
+      },
+    });
+  }
+
+  private applyBillToShipToSelection(match: CustomerBillToShipTo): void {
+    this.advanceTableForm.patchValue(
+      {
+        headInBill: match.headInBill || null,
+        customerConfigurationBillToShipToID: match.customerConfigurationBillToShipToID,
+      },
+      { emitEvent: false }
+    );
+    this.buildBillToShipToStateOptions();
+    if (
+      match.stateID &&
+      !this.billToShipToStateOptions.some((option) => option.stateID === Number(match.stateID))
+    ) {
+      this.billToShipToStateOptions = [
+        ...this.billToShipToStateOptions,
+        { stateID: Number(match.stateID), stateName: match.stateName || '' },
+      ].sort((a, b) => a.stateName.localeCompare(b.stateName));
+    }
+
+    this.advanceTableForm.patchValue(
+      {
+        billToShipToStateID: Number(match.stateID) || null,
+      },
+      { emitEvent: false }
+    );
+
+    this.buildBillToShipToCityOptions();
+    if (
+      match.cityID &&
+      !this.billToShipToCityOptions.some((option) => option.cityID === Number(match.cityID))
+    ) {
+      this.billToShipToCityOptions = [
+        ...this.billToShipToCityOptions,
+        { cityID: Number(match.cityID), cityName: match.cityName || '' },
+      ].sort((a, b) => a.cityName.localeCompare(b.cityName));
+    }
+
+    this.advanceTableForm.patchValue(
+      {
+        billToShipToCityID: Number(match.cityID) || null,
+      },
+      { emitEvent: false }
+    );
+    this.applySelectedBillToShipToRecord(match);
+  }
+
+  clearBillToShipToSection(): void {
+    this.showBillToShipToSection = false;
+    this.billToShipToRecords = [];
+    this.clearBillToShipToFormFields();
+  }
+
+  private clearBillToShipToFormFields(): void {
+    this.billToShipToStateOptions = [];
+    this.billToShipToCityOptions = [];
+    this.billToShipToDisplay = {
+      shipToCompany: '',
+      address1: '',
+      address2: '',
+      pincode: '',
+      gstno: '',
+    };
+    this.advanceTableForm.patchValue(
+      {
+        headInBill: null,
+        billToShipToStateID: null,
+        billToShipToCityID: null,
+        customerConfigurationBillToShipToID: null,
+      },
+      { emitEvent: false }
+    );
+    this.setBillToShipToValidators(false);
+  }
+
+  onHeadInBillChange(): void {
+    this.billToShipToStateOptions = [];
+    this.billToShipToCityOptions = [];
+    this.billToShipToDisplay = {
+      shipToCompany: '',
+      address1: '',
+      address2: '',
+      pincode: '',
+      gstno: '',
+    };
+    this.advanceTableForm.patchValue(
+      {
+        billToShipToStateID: null,
+        billToShipToCityID: null,
+        customerConfigurationBillToShipToID: null,
+      },
+      { emitEvent: false }
+    );
+    this.buildBillToShipToStateOptions();
+  }
+
+  onBillToShipToStateChange(): void {
+    this.billToShipToCityOptions = [];
+    this.billToShipToDisplay = {
+      shipToCompany: '',
+      address1: '',
+      address2: '',
+      pincode: '',
+      gstno: '',
+    };
+    this.advanceTableForm.patchValue(
+      {
+        billToShipToCityID: null,
+        customerConfigurationBillToShipToID: null,
+      },
+      { emitEvent: false }
+    );
+    this.buildBillToShipToCityOptions();
+  }
+
+  onBillToShipToCityChange(): void {
+    const record = this.findSelectedBillToShipToRecord();
+    if (record) {
+      this.applySelectedBillToShipToRecord(record);
+      return;
+    }
+
+    this.billToShipToDisplay = {
+      shipToCompany: '',
+      address1: '',
+      address2: '',
+      pincode: '',
+      gstno: '',
+    };
+    this.advanceTableForm.patchValue({ customerConfigurationBillToShipToID: null }, { emitEvent: false });
+  }
+
+  private isActiveBillToShipToRecord(item: CustomerBillToShipTo): boolean {
+    const status = item?.activationStatus;
+    if (status === false || status === 0 || status === '0' || status === 'false') {
+      return false;
+    }
+    if (status === true || status === 1 || status === '1' || status === 'true') {
+      return true;
+    }
+    // Active-only API results may omit ActivationStatus in the payload.
+    return true;
+  }
+
+  private getBillToShipToRecordsForCustomerAndHeadInBill(headInBill?: string, stateID?: number): CustomerBillToShipTo[] {
+    const selectedHeadInBill = (headInBill ?? this.advanceTableForm.get('headInBill')?.value ?? '').trim();
+    const selectedId = Number(this.advanceTableForm.get('customerConfigurationBillToShipToID')?.value || 0);
+    if (!this.customerID || !selectedHeadInBill) {
+      return [];
+    }
+
+    return this.billToShipToRecords.filter((item) => {
+      const isSelectedSaved =
+        selectedId > 0 && Number(item.customerConfigurationBillToShipToID) === selectedId;
+      if (!isSelectedSaved && !this.isActiveBillToShipToRecord(item)) {
+        return false;
+      }
+      if (Number(item.customerID) !== Number(this.customerID)) {
+        return false;
+      }
+      if ((item.headInBill || '').trim() !== selectedHeadInBill) {
+        return false;
+      }
+      if (stateID && Number(item.stateID) !== Number(stateID)) {
+        return false;
+      }
+      return true;
+    });
+  }
+
+  private buildBillToShipToStateOptions(): void {
+    const headInBill = (this.advanceTableForm.get('headInBill')?.value || '').trim();
+    if (!this.customerID || !headInBill) {
+      this.billToShipToStateOptions = [];
+      return;
+    }
+
+    const stateMap = new Map<number, string>();
+    this.getBillToShipToRecordsForCustomerAndHeadInBill(headInBill).forEach((item) => {
+      if (Number(item.stateID) > 0) {
+        stateMap.set(Number(item.stateID), item.stateName || '');
+      }
+    });
+    this.billToShipToStateOptions = Array.from(stateMap.entries())
+      .map(([stateID, stateName]) => ({ stateID, stateName }))
+      .sort((a, b) => a.stateName.localeCompare(b.stateName));
+  }
+
+  private buildBillToShipToCityOptions(): void {
+    const headInBill = (this.advanceTableForm.get('headInBill')?.value || '').trim();
+    const stateID = Number(this.advanceTableForm.get('billToShipToStateID')?.value || 0);
+    if (!this.customerID || !headInBill || !stateID) {
+      this.billToShipToCityOptions = [];
+      return;
+    }
+
+    const cityMap = new Map<number, string>();
+    this.getBillToShipToRecordsForCustomerAndHeadInBill(headInBill, stateID).forEach((item) => {
+      if (Number(item.cityID) > 0) {
+        cityMap.set(Number(item.cityID), item.cityName || '');
+      }
+    });
+    this.billToShipToCityOptions = Array.from(cityMap.entries())
+      .map(([cityID, cityName]) => ({ cityID, cityName }))
+      .sort((a, b) => a.cityName.localeCompare(b.cityName));
+  }
+
+  private findSelectedBillToShipToRecord(): CustomerBillToShipTo | null {
+    const headInBill = (this.advanceTableForm.get('headInBill')?.value || '').trim();
+    const stateID = Number(this.advanceTableForm.get('billToShipToStateID')?.value || 0);
+    const cityID = Number(this.advanceTableForm.get('billToShipToCityID')?.value || 0);
+    if (!this.customerID || !headInBill || !stateID || !cityID) {
+      return null;
+    }
+
+    const matches = this.getBillToShipToRecordsForCustomerAndHeadInBill(headInBill, stateID).filter(
+      (item) => Number(item.cityID) === cityID
+    );
+    return matches.length ? matches[0] : null;
+  }
+
+  private applySelectedBillToShipToRecord(record: CustomerBillToShipTo): void {
+    this.billToShipToDisplay = {
+      shipToCompany: record.shipToCompany || '',
+      address1: record.address1 || '',
+      address2: record.address2 || '',
+      pincode: record.pincode || '',
+      gstno: record.gstno || record.gSTNO || '',
+    };
+    this.advanceTableForm.patchValue(
+      {
+        customerConfigurationBillToShipToID: record.customerConfigurationBillToShipToID,
+      },
+      { emitEvent: false }
+    );
+    this.advanceTableForm.get('customerConfigurationBillToShipToID')?.updateValueAndValidity({ emitEvent: false });
   }
 
   //------------- State's Drop Down -------------
@@ -880,9 +1278,34 @@ getcsGSTPercentageID(csgstPercentageID:any)
     }
   }
 
+  private prepareSavePayload(): any
+  {
+    const payload = this.advanceTableForm.getRawValue();
+    if (!payload.invoiceDate)
+    {
+      payload.invoiceDate = new Date();
+    }
+    if (!payload.billFromDate)
+    {
+      payload.billFromDate = new Date();
+    }
+    if (!payload.billToDate)
+    {
+      payload.billToDate = new Date();
+    }
+    if (!payload.passengerID && payload.customerPersonNameID)
+    {
+      payload.passengerID = payload.customerPersonNameID;
+    }
+    if (!payload.ecoBillingBranchID && payload.organizationalEntityID)
+    {
+      payload.ecoBillingBranchID = payload.organizationalEntityID;
+    }
+    return payload;
+  }
+
   public Post(): void
   {
-    debugger
     if(this.advanceTableForm.get('gst').value === false)
     {
       this.advanceTableForm.patchValue({igstPercentage:0});
@@ -904,7 +1327,7 @@ getcsGSTPercentageID(csgstPercentageID:any)
       this.advanceTableForm.patchValue({cgstPercentage:0});
       this.advanceTableForm.patchValue({sgstPercentage:0});
     }
-    this.advanceTableService.add(this.advanceTableForm.getRawValue())  
+    this.advanceTableService.add(this.prepareSavePayload())  
     .subscribe(
     response => 
     {
@@ -916,11 +1339,12 @@ getcsGSTPercentageID(csgstPercentageID:any)
                 'bottom',
                 'center'
               );
-      //this._generalService.sendUpdate('GenerateBillMainCreate:GenerateBillMainView:Success:'+ response.invoiceNumberWithPrefix);//To Send Updates  
     },
     error =>
     {
-      this._generalService.sendUpdate('GenerateBillMainAll:GenerateBillMainView:Failure');//To Send Updates  
+      const msg = error?.error?.message || 'Operation Failed.....!!!';
+      this.showNotification('snackbar-danger', msg, 'bottom', 'center');
+      this._generalService.sendUpdate('GenerateBillMainAll:GenerateBillMainView:Failure');
     })
   }
 
@@ -947,17 +1371,19 @@ getcsGSTPercentageID(csgstPercentageID:any)
         this.advanceTableForm.patchValue({cgstPercentage:0});
         this.advanceTableForm.patchValue({sgstPercentage:0});
       }
-    this.advanceTableService.update(this.advanceTableForm.getRawValue())  
+    this.advanceTableService.update(this.prepareSavePayload())  
     .subscribe(
     response => 
     {
       this.dialogRef.close();
-      this._generalService.sendUpdate('GenerateBillMainUpdate:GenerateBillMainView:Success');//To Send Updates  
+      this._generalService.sendUpdate('GenerateBillMainUpdate:GenerateBillMainView:Success');
        
     },
     error =>
     {
-     this._generalService.sendUpdate('GenerateBillMainAll:GenerateBillMainView:Failure');//To Send Updates  
+      const msg = error?.error?.message || 'Operation Failed.....!!!';
+      this.showNotification('snackbar-danger', msg, 'bottom', 'center');
+      this._generalService.sendUpdate('GenerateBillMainAll:GenerateBillMainView:Failure');
     })
   }
 
