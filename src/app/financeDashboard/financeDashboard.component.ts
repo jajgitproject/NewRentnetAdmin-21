@@ -44,8 +44,9 @@ export class FinanceDashboardComponent implements OnInit {
     'wrongInvoiceTypeCount',
     'duplicateCount', 'seriesJumpCount', 'dateViolationCount',
     'nullPrefixCount', 'prefixMismatchCount', 'amountMismatchCount', 'stateGstMismatchCount',
-    'missingCustomerGstCount', 'taxMismatchCount', 'invoiceCalculationMismatchCount',
+    'missingCustomerGstCount', 'taxMismatchCount',     'invoiceCalculationMismatchCount',
     'generalLinkAmountGapCount',
+    'multiDutyLinkAmountGapCount',
   ];
 
   creditNoteTableColumns = [
@@ -145,6 +146,7 @@ export class FinanceDashboardComponent implements OnInit {
       invoiceCalculationMismatchCount: row.invoiceCalculationMismatchCount ?? row.InvoiceCalculationMismatchCount ?? 0,
       wrongInvoiceTypeCount: row.wrongInvoiceTypeCount ?? row.WrongInvoiceTypeCount ?? 0,
       generalLinkAmountGapCount: row.generalLinkAmountGapCount ?? row.GeneralLinkAmountGapCount ?? 0,
+      multiDutyLinkAmountGapCount: row.multiDutyLinkAmountGapCount ?? row.MultiDutyLinkAmountGapCount ?? 0,
       printGstSourceDriftCount: row.printGstSourceDriftCount ?? row.PrintGstSourceDriftCount ?? 0,
       cnTaxProfileMismatchCount: row.cnTaxProfileMismatchCount ?? row.CnTaxProfileMismatchCount ?? 0,
       cnAmountCeilingCount: row.cnAmountCeilingCount ?? row.CnAmountCeilingCount ?? 0,
@@ -165,6 +167,7 @@ export class FinanceDashboardComponent implements OnInit {
         invoiceCalculationMismatchCount: severity.invoiceCalculationMismatchCount ?? severity.InvoiceCalculationMismatchCount,
         wrongInvoiceTypeCount: severity.wrongInvoiceTypeCount ?? severity.WrongInvoiceTypeCount,
         generalLinkAmountGapCount: severity.generalLinkAmountGapCount ?? severity.GeneralLinkAmountGapCount,
+        multiDutyLinkAmountGapCount: severity.multiDutyLinkAmountGapCount ?? severity.MultiDutyLinkAmountGapCount,
         printGstSourceDriftCount: severity.printGstSourceDriftCount ?? severity.PrintGstSourceDriftCount,
         cnTaxProfileMismatchCount: severity.cnTaxProfileMismatchCount ?? severity.CnTaxProfileMismatchCount,
         cnAmountCeilingCount: severity.cnAmountCeilingCount ?? severity.CnAmountCeilingCount,

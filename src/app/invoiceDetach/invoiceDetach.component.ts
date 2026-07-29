@@ -118,6 +118,7 @@ export class InvoiceDetachComponent implements OnInit {
   SearchDSStatus:string = '';
   SearchBillingStatus:boolean;
   InvoiceNumberWithPrefix: string = '';
+  refreshInProgress = false;
   
   selectAll:boolean=false;
   selectedInvoices: any[] = []; 
@@ -601,6 +602,49 @@ export class InvoiceDetachComponent implements OnInit {
           title: errorMessage,
           icon: 'error'
         });
+    });
+  }
+
+  RefreshMultiDutyInvoice()
+  {
+    if (!this.InvoiceID || this.refreshInProgress) {
+      return;
+    }
+
+    Swal.fire({
+      title: 'Refresh invoice totals?',
+      text: 'Re-aggregate all linked duty calculations into the Multi-Duty invoice header. Use after recalculating duties on Closing.',
+      icon: 'question',
+      showCancelButton: true,
+      confirmButtonText: 'Refresh',
+      cancelButtonText: 'Cancel'
+    }).then(result => {
+      if (!result.isConfirmed) {
+        return;
+      }
+
+      this.refreshInProgress = true;
+      const userId = this._generalService.getUserID();
+      this.invoiceDetachService.refreshMultiDutyInvoice(this.InvoiceID, userId).subscribe(
+        response => {
+          this.refreshInProgress = false;
+          const parts = (response?.result || '').replace('Success:', '').split('#');
+          const invoiceNo = parts.length > 1 ? parts[1] : this.InvoiceNumberWithPrefix;
+          Swal.fire({
+            title: 'Invoice totals refreshed',
+            text: invoiceNo ? `Updated ${invoiceNo}` : 'Multi-Duty invoice header updated from linked calculations.',
+            icon: 'success',
+            confirmButtonText: 'Ok'
+          }).then(() => window.location.reload());
+        },
+        error => {
+          this.refreshInProgress = false;
+          Swal.fire({
+            title: extractApiErrorMessage(error),
+            icon: 'error'
+          });
+        }
+      );
     });
   }
 

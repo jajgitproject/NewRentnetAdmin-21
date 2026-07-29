@@ -23,6 +23,13 @@ export class InvoiceDetachService {
     this.API_CheckCustomerInvoicingGstn = generalService.BaseURL + 'InvoiceGeneral/checkCustomerInvoicingGstn';
   }
 
+  refreshMultiDutyInvoice(invoiceId: number, userId: number): Observable<any> {
+    return this.httpClient.post<any>(
+      `${this.API_URL_Post}/refreshMultiDutyInvoice/${invoiceId}/${userId}`,
+      {}
+    );
+  }
+
   /** CRUD METHODS */
   add(advanceTable: InvoiceDutyAttachmentModel) 
   {
