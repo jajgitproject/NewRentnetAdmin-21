@@ -818,13 +818,15 @@ advanceTableForm.get('localAddressAddressString')?.invalid &&
                </div>
                
 
-                <!-- Identity No. only in Edit Mode -->
-                <!-- <div *ngIf="action === 'edit'" class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
-                    <div class="status-display" style="margin-top: 10px;">
-                        <strong>Identity No.:</strong>
-                        <span>{{ advanceTable.driverOfficialIdentityNumber }}</span>
-                    </div>
-                </div> -->
+                <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                    <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                        <mat-label>Old Rentnet Code</mat-label>
+                        <input matInput formControlName="oldRentnetCode" (keypress)="keyPressNumbers($event)" />
+                        <mat-error *ngIf="advanceTableForm.get('oldRentnetCode')?.hasError('pattern')">
+                            Old Rentnet Code must be numeric
+                        </mat-error>
+                    </mat-form-field>
+                </div>
             </div>
 
             <div class="row">
@@ -838,15 +840,6 @@ advanceTableForm.get('localAddressAddressString')?.invalid &&
                         <mat-error *ngIf="advanceTableForm.get('activationStatus')?.hasError('required')">
                             Activation Status is required
                         </mat-error>
-                    </mat-form-field>
-                </div>
-                 <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2" *ngIf="action === 'edit'">
-                    <mat-form-field class="example-full-width" appearance="outline"  floatLabel="always">
-                        <mat-label>Identity No.</mat-label>
-                        <input matInput formControlName="driverOfficialIdentityNumber">
-                        <!-- <mat-error *ngIf="advanceTableForm.get('driverOfficialIdentityNumber').hasError('required')">
-                            Identity No. is required
-                        </mat-error> -->
                     </mat-form-field>
                 </div>
             </div>

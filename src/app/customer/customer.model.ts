@@ -45,6 +45,7 @@ export class Customer {
     printRunningDetailOnDutySlip:boolean;  
     showRateOnDutySlip:boolean;
       showOTPOnDutySlip:boolean;
+      showDistanceOnDutySlipPdf:boolean;
       isBookerAllowedToBeCreatedFromReservation:boolean;
       isPostPickUpCallAllowed:boolean;
       panNo:string;
@@ -87,6 +88,7 @@ export class Customer {
        this.printRunningDetailOnDutySlip = customer.printRunningDetailOnDutySlip ?? false;
        this.showRateOnDutySlip = customer.showRateOnDutySlip ?? false;
        this.showOTPOnDutySlip = customer.showOTPOnDutySlip ?? false;
+       this.showDistanceOnDutySlipPdf = customer.showDistanceOnDutySlipPdf ?? false;
        this.isBookerAllowedToBeCreatedFromReservation = customer.isBookerAllowedToBeCreatedFromReservation ?? false;
        this.isPostPickUpCallAllowed = customer.isPostPickUpCallAllowed ?? false;
        this.customerSector = customer.customerSector || '';

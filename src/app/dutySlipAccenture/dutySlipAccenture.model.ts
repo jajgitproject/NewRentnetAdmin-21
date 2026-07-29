@@ -32,6 +32,7 @@ export class DutySlipAccentureModel {
   printRunningDetailOnDutySlip:string;
   showRateOnDutySlip:string;
   showOTPOnDutySlip:string;
+  showDistanceOnDutySlipPdf:boolean;
   tripTo:string;
   specialInstruction:string;
   customerName:string;

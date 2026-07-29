@@ -174,7 +174,7 @@
 
                         <tr>
                           <td colspan="2">
-                            <strong *ngIf="dataSource?.totalRunningKM > 0">Total Kms : {{dataSource?.totalRunningKM}} </strong>
+                            <strong *ngIf="dataSource?.showDistanceOnDutySlipPdf === true && dataSource?.totalRunningKM > 0">Total Kms : {{dataSource?.totalRunningKM}} </strong>
                             <!-- <strong>Total Kms : {{dataSource?.locationInKM - dataSource?.locationOutKM}} </strong> -->
                           </td>
                           <td colspan="2">
@@ -352,7 +352,7 @@
 
                 <!-- <table width="556" border="0" cellpadding="0" cellspacing="0" class="text2" *ngIf="dataSource?.runningDetailsModels === null">
                   <tr>
-                    <td colspan="6" style="text-align:center; font-weight:bold; font-size:11px;">
+                    <td [attr.colspan]="dataSource?.showDistanceOnDutySlipPdf === true ? 6 : 5" style="text-align:center; font-weight:bold; font-size:11px;">
                       Running Detail
                     </td>
                   </tr>
@@ -363,7 +363,7 @@
 
                 <table width="556" border="0" cellpadding="0" cellspacing="0" class="text2" *ngIf="dataSource?.runningDetailsModels !== null">
                   <tr>
-                    <td colspan="6" style="text-align:center; font-weight:bold; font-size:11px;">
+                    <td [attr.colspan]="dataSource?.showDistanceOnDutySlipPdf === true ? 6 : 5" style="text-align:center; font-weight:bold; font-size:11px;">
                       Running Detail
                     </td>
                   </tr>
@@ -373,7 +373,7 @@
                     <td>Start Location</td>
                     <td>End Time</td>
                     <td>End Location</td>
-                    <td>Distance</td>
+                    <td *ngIf="dataSource?.showDistanceOnDutySlipPdf === true">Distance</td>
                   </tr>
 
                   <tr *ngFor="let runningDetails of dataSource?.runningDetailsModels;index as i">
@@ -382,10 +382,10 @@
                     <td>{{runningDetails?.start_GPS_location}}</td>
                     <td>{{runningDetails?.endtime}}</td>
                     <td>{{runningDetails?.end_GPS_location}}</td>
-                    <td>{{runningDetails?.distance}}</td>
+                    <td *ngIf="dataSource?.showDistanceOnDutySlipPdf === true">{{runningDetails?.distance}}</td>
                   </tr>
 
-                  <tr style="font-weight:bold; text-align:center;">
+                  <tr style="font-weight:bold; text-align:center;" *ngIf="dataSource?.showDistanceOnDutySlipPdf === true">
                     <td></td>
                     <td></td>
                     <td></td>

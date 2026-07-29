@@ -46,6 +46,8 @@ export class Driver {
    supplierName:string;
    supplierOldRentnetCode:number;
    supplierOfficialIdentityNumber:string;
+   oldRentnetCode:number;
+   driverOfficialIdentityCode:string;
    englishSpeakingSkills:string;
    referenceOf:string;
    rtoStateID:number;
@@ -103,6 +105,8 @@ export class Driver {
        this.supplier = driver.supplier || '';
        this.supplierName = driver.supplierName || '';
        this.supplierOldRentnetCode = (driver.supplierOldRentnetCode && driver.supplierOldRentnetCode !== 0) ? Number(driver.supplierOldRentnetCode) : null;
+       this.oldRentnetCode = (driver.oldRentnetCode && driver.oldRentnetCode !== 0) ? Number(driver.oldRentnetCode) : null;
+       this.driverOfficialIdentityCode = driver.driverOfficialIdentityCode || '';
        this.supplierOfficialIdentityNumber = driver.supplierOfficialIdentityNumber || '';
        this.englishSpeakingSkills = driver.englishSpeakingSkills || '';
        this.referenceOf = driver.referenceOf || '';

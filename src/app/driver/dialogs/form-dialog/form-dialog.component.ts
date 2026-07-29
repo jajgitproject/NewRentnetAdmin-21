@@ -922,9 +922,14 @@ saveDisabled:boolean = true;
       longitude: [this.advanceTable?.longitude],
       companyName:[this.advanceTable?.companyName],
       isAdhoc: [this.advanceTable?.isAdhoc],
-      isAppLoginAllowed: [this.advanceTable?.isAppLoginAllowed]
+      isAppLoginAllowed: [this.advanceTable?.isAppLoginAllowed],
+      oldRentnetCode: [
+        (this.advanceTable.oldRentnetCode && this.advanceTable.oldRentnetCode !== 0)
+          ? this.advanceTable.oldRentnetCode : null,
+        [Validators.pattern(/^[0-9]+$/)]
+      ]
     
-    }, 
+    },
     {
       validator: ConfirmPasswordValidator("password", "confirmPassword")
     }
@@ -966,8 +971,6 @@ public loadPassword()
   }
   public Post(): void
   {
-    debugger
-    
     //this.advanceTableForm.patchValue({supplierID:this.supplierID});
     const phone1 = this.advanceTableForm.get('countryCodes').value;
     const phone2 = this.advanceTableForm.get('mobile1').value;
@@ -999,10 +1002,16 @@ public loadPassword()
        ',' +
        this.advanceTableForm.value.longitude
    });
+    this.advanceTableForm.patchValue({ oldRentnetCode: this.getOldRentnetCode() });
     this.advanceTableService.add(this.advanceTableForm.getRawValue())  
     .subscribe(
     response => 
     {
+        if (response?.activationStatus === 'Duplicate OldRentnetCode') {
+          this._generalService.sendUpdate('DataNotFound:OldRentnetCodeDuplicacyError:Failure');
+          this.saveDisabled = true;
+          return;
+        }
         this.dialogRef.close();
        this._generalService.sendUpdate('DriverCreate:DriverView:Success');//To Send Updates 
        this.saveDisabled = true; 
@@ -1046,10 +1055,16 @@ public loadPassword()
        ',' +
        this.advanceTableForm.value.longitude
    });
+    this.advanceTableForm.patchValue({ oldRentnetCode: this.getOldRentnetCode() });
     this.advanceTableService.update(this.advanceTableForm.getRawValue())  
     .subscribe(
     response => 
     {
+        if (response?.activationStatus === 'Duplicate OldRentnetCode') {
+          this._generalService.sendUpdate('DataNotFound:OldRentnetCodeDuplicacyError:Failure');
+          this.saveDisabled = true;
+          return;
+        }
         this.dialogRef.close();
        this._generalService.sendUpdate('DriverUpdate:DriverView:Success');//To Send Updates  
        this.saveDisabled = true;
@@ -1074,6 +1089,23 @@ public loadPassword()
           this.Post();
        }
 
+  }
+
+  getOldRentnetCode(): number | null {
+    const value = this.advanceTableForm.get('oldRentnetCode')?.value;
+    if (value === null || value === undefined || value === '') {
+      return null;
+    }
+    return Number(value);
+  }
+
+  keyPressNumbers(event: KeyboardEvent): boolean {
+    const charCode = event.which ? event.which : event.keyCode;
+    if (charCode >= 48 && charCode <= 57) {
+      return true;
+    }
+    event.preventDefault();
+    return false;
   }
 
   // onBlurUpdateDate(value: string): void {

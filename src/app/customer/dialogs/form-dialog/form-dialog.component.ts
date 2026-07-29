@@ -730,6 +730,7 @@ getBusinessTypeID(businessTypeID: any)
       printRunningDetailOnDutySlip: [this.advanceTable.printRunningDetailOnDutySlip ?? false],
       showRateOnDutySlip: [this.advanceTable.showRateOnDutySlip ?? false],
       showOTPOnDutySlip: [this.advanceTable.showOTPOnDutySlip ?? false],
+      showDistanceOnDutySlipPdf: [this.advanceTable.showDistanceOnDutySlipPdf ?? false],
       isBookerAllowedToBeCreatedFromReservation: [
         this.advanceTable.isBookerAllowedToBeCreatedFromReservation ?? false
       ],
