@@ -2,7 +2,7 @@
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { Component, ElementRef, HostListener, Inject } from '@angular/core';
 import { CustomerGroupSBTDomainService } from '../../customerGroupSBTDomain.service';
-import { FormControl, Validators, FormGroup, FormBuilder, AbstractControl, ValidationErrors, ValidatorFn} from '@angular/forms';
+import { FormControl, Validators, FormGroup, FormBuilder, AbstractControl, ValidationErrors, ValidatorFn, AsyncValidatorFn} from '@angular/forms';
 import { CustomerGroupSBTDomain } from '../../customerGroupSBTDomain.model';
 import { MAT_DATE_LOCALE } from '@angular/material/core';
 import { formatDate } from '@angular/common';
@@ -13,8 +13,8 @@ import { CitiesDropDown } from 'src/app/organizationalEntity/citiesDropDown.mode
 import { SupplierRateCardDropDown } from 'src/app/supplierRateCard/supplierRateCardDropDown.model';
 import { CustomerCategoryDropDown } from 'src/app/customerCategory/customerCategoryDropDown.model';
 import { CustomerPersonModel, CustomerPersonModels } from 'src/app/customerCorporateIndividual/customerCorporateIndividual.model';
-import { Observable } from 'rxjs';
-import { map, startWith } from 'rxjs/operators';
+import { Observable, of, timer } from 'rxjs';
+import { catchError, map, startWith, switchMap } from 'rxjs/operators';
 @Component({
   standalone: false,
   selector: 'app-form-dialog',
@@ -118,7 +118,8 @@ sbtDomain: [this.advanceTable?.sbtDomain || '',
     Validators.required,
     Validators.pattern(/^(?!:\/\/)([a-zA-Z0-9-]+\.)+[a-zA-Z]{2,}$/),
     this.noWhitespaceValidator
-  ]
+  ],
+  [this.sbtDomainUniqueValidator()]
 ],
 
 allowPassengerToMakeReservation: [this.advanceTable.allowPassengerToMakeReservation],
@@ -140,6 +141,24 @@ allowPassengerToLoginCDP: [this.advanceTable.allowPassengerToLoginCDP],
     return isValid ? null : { 'whitespace': true };
 }
 
+  private sbtDomainUniqueValidator(): AsyncValidatorFn {
+    return (control: AbstractControl): Observable<ValidationErrors | null> => {
+      const sbtDomain = (control.value || '').trim();
+      if (!sbtDomain) {
+        return of(null);
+      }
+
+      const currentID = Number(this.advanceTable?.customerGroupSBTDomainID) || -1;
+      return timer(300).pipe(
+        switchMap(() =>
+          this.advanceTableService.checkDuplicateSBTDomain(sbtDomain, currentID)
+        ),
+        map(response => response.isDuplicate ? { duplicate: true } : null),
+        catchError(() => of(null))
+      );
+    };
+  }
+
   submit() 
   {
     // emppty stuff
@@ -156,8 +175,10 @@ allowPassengerToLoginCDP: [this.advanceTable.allowPassengerToLoginCDP],
   public Post(): void
   {
     this.advanceTableForm.patchValue({ customerGroupID:this.data.customerGroupID });
-    
-    this.advanceTableService.add(this.advanceTableForm.getRawValue())  
+
+    const formValue = this.advanceTableForm.getRawValue();
+    formValue.sbtDomain = formValue.sbtDomain.trim().toLowerCase();
+    this.advanceTableService.add(formValue)
     .subscribe(
     response => 
     {
@@ -168,15 +189,16 @@ allowPassengerToLoginCDP: [this.advanceTable.allowPassengerToLoginCDP],
     },
     error =>
     {
-       this._generalService.sendUpdate('CustomerGroupSBTDomainAll:CustomerGroupSBTDomainView:Failure');//To Send Updates  
-       this.saveDisabled = true;
+       this.handleSaveError(error);
     }
   )
   }
   public Put(): void
   {
     this.advanceTableForm.patchValue({ customerGroupID:this.advanceTable.customerGroupID });
-    this.advanceTableService.update(this.advanceTableForm.getRawValue())  
+    const formValue = this.advanceTableForm.getRawValue();
+    formValue.sbtDomain = formValue.sbtDomain.trim().toLowerCase();
+    this.advanceTableService.update(formValue)
     .subscribe(
     response => 
     {
@@ -187,11 +209,23 @@ allowPassengerToLoginCDP: [this.advanceTable.allowPassengerToLoginCDP],
     },
     error =>
     {
-     this._generalService.sendUpdate('CustomerGroupSBTDomainAll:CustomerGroupSBTDomainView:Failure');//To Send Updates  
-     this.saveDisabled = true;
+     this.handleSaveError(error);
     }
   )
   }
+
+private handleSaveError(error: any): void {
+  this.saveDisabled = true;
+  if (error?.status === 409) {
+    const domainControl = this.advanceTableForm.get('sbtDomain');
+    domainControl?.setErrors({ ...(domainControl.errors || {}), duplicate: true });
+    domainControl?.markAsTouched();
+    return;
+  }
+
+  this._generalService.sendUpdate('CustomerGroupSBTDomainAll:CustomerGroupSBTDomainView:Failure');
+}
+
 public confirmAdd(): void {
   if (this.advanceTableForm.invalid) {
     this.advanceTableForm.markAllAsTouched();
