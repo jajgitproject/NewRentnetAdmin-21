@@ -1155,6 +1155,19 @@ export const ROUTES: RouteInfo[] = [
         isAccess: false
       },
 
+      {
+        path: 'bulkEInvoice',
+        title: 'Bulk E-Invoice',
+        pageKey: 'Bulk E-Invoice',
+        moduleName: 'bulkEInvoice',
+        alternateAccessPageKeys: ['bulkEInvoice', 'generateEInvoice', 'Generate E - Invoice'],
+        icon: 'fas fa-file-invoice',
+        class: '',
+        groupTitle: false,
+        submenu: [],
+        isAccess: false
+      },
+
 
       {
         path: 'gstPercentage',

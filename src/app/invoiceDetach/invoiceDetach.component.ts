@@ -45,6 +45,8 @@ import {
 })
 export class InvoiceDetachComponent implements OnInit {
   @Input() InvoiceID;
+  /** Passed from attach parent when embedded on edit page (avoids queryParams race). */
+  @Input() InvoiceNumberWithPrefixInput: string;
   displayedColumns = [
     'check',
     'DutySlipID',
@@ -138,20 +140,30 @@ export class InvoiceDetachComponent implements OnInit {
   contextMenuPosition = { x: '0px', y: '0px' };
   ngOnInit() 
   {
-    this.route.queryParams.subscribe(paramsData =>{
-      this.InvoiceNumberWithPrefix = paramsData.invoiceNumberWithPrefix;
-    });
-    if(this.InvoiceNumberWithPrefix === null || this.InvoiceNumberWithPrefix === undefined)
-    {
-      this.loadData();
-    }
-    else
-    {
-      this.loadDataForEdit();
+    if (this.InvoiceNumberWithPrefixInput) {
+      this.InvoiceNumberWithPrefix = this.InvoiceNumberWithPrefixInput;
+      this.runPagedLoad();
+    } else {
+      this.route.queryParams.subscribe(paramsData => {
+        this.InvoiceNumberWithPrefix = paramsData.invoiceNumberWithPrefix || '';
+        this.runPagedLoad();
+      });
     }
     this.InitCustomer();
     this.InitBranch();
     this.InitPackageTypes();
+  }
+
+  private isEditMode(): boolean {
+    return !!(this.InvoiceNumberWithPrefix && String(this.InvoiceNumberWithPrefix).trim());
+  }
+
+  private runPagedLoad(): void {
+    if (this.isEditMode()) {
+      this.loadDataForEdit();
+    } else {
+      this.loadData();
+    }
   }
 
   advanceTableForm:FormGroup = this.fb.group({
@@ -344,25 +356,25 @@ export class InvoiceDetachComponent implements OnInit {
     this.SearchBillingStatus = null;
     this.SearchType = '';
     this.PageNumber = 0;
-    //this.loadData();
+    this.runPagedLoad();
   }
 
   public SearchData() 
   {
-    this.loadData();
+    this.runPagedLoad();
   }
  
   public Filter() 
   {
     this.PageNumber = 0;
-    this.loadData();
+    this.runPagedLoad();
   }
 
   onBackPress(event) 
   {
     if (event.keyCode === 8) 
     {
-      this.loadData();
+      this.runPagedLoad();
     }
   }
 
@@ -403,6 +415,10 @@ export class InvoiceDetachComponent implements OnInit {
     {
       this.sortingData = 1;
       this.sortType = "Descending";
+    }
+    if (this.isEditMode()) {
+      this.SortingDataForEdit(coloumName);
+      return;
     }
     this.invoiceDetachService.getTableDataSort(this.customer.value,this.SearchBranch.value,this.SearchDutySlipID,this.SearchReservationID,this.SearchGSTType,this.SearchDutyFromDate,
       this.SearchDutyToDate,this.SearchPassengerName,this.SearchPassengerMobile,this.SearchPackageType.value,this.SearchPackage.value,
@@ -491,7 +507,7 @@ export class InvoiceDetachComponent implements OnInit {
     if (this.dataSource.length > 0) 
     {
       this.PageNumber++;
-      this.loadData();
+      this.runPagedLoad();
     }
   }
 
@@ -500,7 +516,7 @@ export class InvoiceDetachComponent implements OnInit {
     if (this.PageNumber > 0) 
     {
       this.PageNumber--;
-      this.loadData();
+      this.runPagedLoad();
     }
   }
 

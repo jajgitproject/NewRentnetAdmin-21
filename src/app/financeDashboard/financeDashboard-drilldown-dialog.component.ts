@@ -75,6 +75,10 @@ export class FinanceDashboardDrilldownDialogComponent implements OnInit {
           this.dataSource.data = rows.map((r) => this.normalizeRow(r));
           this.totalRecords = res?.totalRecords ?? res?.TotalRecords ?? 0;
           this.loading = false;
+          const queryError = res?.queryError ?? res?.QueryError;
+          if (queryError) {
+            this.snackBar.open('Drill-down query failed. Restart the API if this endpoint was recently updated.', 'Close', { duration: 8000 });
+          }
           this.ngZone.run(() => this.cdr.detectChanges());
         },
         error: (err) => {

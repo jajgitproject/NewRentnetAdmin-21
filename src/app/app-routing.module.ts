@@ -13,6 +13,7 @@ const routes: Routes = [
     path: '',
     component: MainLayoutComponent,
     canActivate: [AuthGuard, RolePageGuard],
+    canActivateChild: [RolePageGuard],
     children: [
       { path: '', redirectTo: '/authentication/signin', pathMatch: 'full' },
       {
@@ -459,6 +460,18 @@ const routes: Routes = [
           import('./generateEInvoice/generateEInvoice.module').then(
             (m) => m.GenerateEInvoiceModule
           )
+      },
+
+      {
+        path: 'bulkEInvoice',
+        loadChildren: () =>
+          import('./bulkEInvoice/bulkEInvoice.module').then(
+            (m) => m.BulkEInvoiceModule
+          ),
+        data: {
+          requiredPageKey: 'Bulk E-Invoice',
+          alternatePageKeys: ['bulkEInvoice', 'generateEInvoice', 'Generate E - Invoice'],
+        },
       },
 
       {

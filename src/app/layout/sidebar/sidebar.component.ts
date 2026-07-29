@@ -120,7 +120,7 @@ export class SidebarComponent implements OnInit, OnDestroy {
     if (!path) {
       return;
     }
-    void this.router.navigate(['/', path]);
+    void this.router.navigateByUrl('/' + path);
   }
   ngOnInit() {
     this.userSub = this.authService.currentUser.subscribe((user) => {

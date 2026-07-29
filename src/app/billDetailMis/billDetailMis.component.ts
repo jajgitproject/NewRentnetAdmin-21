@@ -50,6 +50,7 @@ export class BillDetailMisComponent implements OnInit, OnDestroy {
   SearchBookingStatus: FormControl = new FormControl('');
   SearchFromDate = '';
   SearchToDate = '';
+  SearchDuty = '';
   SearchBillDateFrom = '';
   SearchBillToDate = '';
 
@@ -115,6 +116,7 @@ export class BillDetailMisComponent implements OnInit, OnDestroy {
     this.SearchBookingStatus.setValue('');
     this.SearchFromDate = '';
     this.SearchToDate = '';
+    this.SearchDuty = '';
     this.SearchBillDateFrom = '';
     this.SearchBillToDate = '';
   }
@@ -129,13 +131,18 @@ export class BillDetailMisComponent implements OnInit, OnDestroy {
       SearchMOP: this.SearchMOP?.value || '',
       SearchSupplierType: this.SearchSupplierType?.value || '',
       SearchSupplier: this.SearchSupplier?.value || '',
-      SearchFromDate: this.SearchFromDate !== '' ? moment(this.SearchFromDate).format('MMM DD yyyy') : '',
-      SearchToDate: this.SearchToDate !== '' ? moment(this.SearchToDate).format('MMM DD yyyy') : '',
+      SearchFromDate: this.isDutySlipIdSearchActive()
+        ? ''
+        : (this.SearchFromDate !== '' ? moment(this.SearchFromDate).format('MMM DD yyyy') : ''),
+      SearchToDate: this.isDutySlipIdSearchActive()
+        ? ''
+        : (this.SearchToDate !== '' ? moment(this.SearchToDate).format('MMM DD yyyy') : ''),
       SearchSupplierO: this.normalizeSelect(this.SearchSupplierO?.value),
       SearchDri: this.SearchDri?.value || '',
       SearchCarNo: this.SearchCarNo?.value || '',
       SearchCity: this.SearchCity?.value || '',
       SearchBookingStatus: this.normalizeSelect(this.SearchBookingStatus?.value),
+      SearchDuty: this.SearchDuty || '',
       SearchBillFromDate: this.SearchBillDateFrom !== '' ? moment(this.SearchBillDateFrom).format('MMM DD yyyy') : '',
       SearchBillToDate: this.SearchBillToDate !== '' ? moment(this.SearchBillToDate).format('MMM DD yyyy') : ''
     };
@@ -257,7 +264,15 @@ export class BillDetailMisComponent implements OnInit, OnDestroy {
     return minutes > 0 ? `${minutes}m ${seconds}s` : `${seconds}s`;
   }
 
+  isDutySlipIdSearchActive(): boolean {
+    return this.isSearchValueSet(this.SearchDuty);
+  }
+
   validatePickupDateRange(): string | null {
+    if (this.isDutySlipIdSearchActive()) {
+      return null;
+    }
+
     if (!this.SearchFromDate || !this.SearchToDate) {
       return 'Pickup date range is required. Please select From and To dates.';
     }
@@ -292,6 +307,7 @@ export class BillDetailMisComponent implements OnInit, OnDestroy {
       || this.isSearchValueSet(this.SearchCarNo?.value)
       || this.isSearchValueSet(this.SearchCity?.value)
       || this.isSearchValueSet(this.SearchBookingStatus?.value)
+      || this.isSearchValueSet(this.SearchDuty)
       || this.isSearchValueSet(this.SearchBillDateFrom)
       || this.isSearchValueSet(this.SearchBillToDate);
   }

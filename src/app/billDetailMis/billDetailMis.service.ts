@@ -43,6 +43,7 @@ export class BillDetailMisService {
       SearchCarNo: this.toNull(criteria.SearchCarNo),
       SearchCity: this.toNull(criteria.SearchCity),
       SearchBookingStatus: this.toNull(criteria.SearchBookingStatus),
+      SearchDuty: this.toNull(criteria.SearchDuty),
       SearchBillFromDate: this.toNull(criteria.SearchBillFromDate),
       SearchBillToDate: this.toNull(criteria.SearchBillToDate)
     };

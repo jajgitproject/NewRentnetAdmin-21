@@ -3,6 +3,7 @@ import { Injectable } from '@angular/core';
 import {
   ActivatedRouteSnapshot,
   CanActivate,
+  CanActivateChild,
   Router,
   RouterStateSnapshot,
   UrlTree,
@@ -20,7 +21,7 @@ import {
 } from './role-page-access.util';
 
 @Injectable({ providedIn: 'root' })
-export class RolePageGuard implements CanActivate {
+export class RolePageGuard implements CanActivate, CanActivateChild {
   constructor(
     private router: Router,
     private auth: AuthService,
@@ -28,6 +29,20 @@ export class RolePageGuard implements CanActivate {
   ) {}
 
   canActivate(
+    route: ActivatedRouteSnapshot,
+    state: RouterStateSnapshot
+  ): Observable<boolean | UrlTree> | boolean | UrlTree {
+    return this.guardRoute(route, state);
+  }
+
+  canActivateChild(
+    childRoute: ActivatedRouteSnapshot,
+    state: RouterStateSnapshot
+  ): Observable<boolean | UrlTree> | boolean | UrlTree {
+    return this.guardRoute(childRoute, state);
+  }
+
+  private guardRoute(
     route: ActivatedRouteSnapshot,
     state: RouterStateSnapshot
   ): Observable<boolean | UrlTree> | boolean | UrlTree {

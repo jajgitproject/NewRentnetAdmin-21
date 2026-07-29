@@ -15,6 +15,7 @@ export class SearchCriteria {
   SearchCarNo: string;
   SearchCity: string;
   SearchBookingStatus: string;
+  SearchDuty: string;
   SearchBillFromDate: string;
   SearchBillToDate: string;
   PageNumber?: number;

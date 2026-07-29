@@ -21,6 +21,7 @@ export class InvoiceAttachDetachModel {
   reservationBillingInstruction:string;
   applicableGST:boolean;
   gstPercentage:number;
+  invoiceGstNumber?: string;
   totalAmountAfterGST:number;
   discountPercentage:number;
   discount:number;
@@ -35,6 +36,14 @@ export class InvoiceDutyAttachmentModel {
   listOfDuties: number[];  
   userID:number;
   action:string;
+}
+
+export interface InvoiceBillDateContext {
+  invoiceDate?: string;
+  invoiceCustomerId?: number;
+  invoiceCustomerName?: string;
+  distinctInvoiceGstNumbers?: string[];
+  hasMixedGst?: boolean;
 }
 
 

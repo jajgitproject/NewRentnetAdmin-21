@@ -4,6 +4,7 @@ import { BehaviorSubject, Observable } from 'rxjs';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { DatePipe } from '@angular/common';
 import { GeneralService } from '../general/general.service';
+import { InvoiceBillDateContext } from './invoiceAttachDetach.model';
 @Injectable()
 export class InvoiceAttachDetachService {
   private API_URL: string = '';
@@ -53,11 +54,13 @@ export class InvoiceAttachDetachService {
   }
 
   private buildGetAllInvoiceAttachForEditPath(
+    invoiceId: number,
     SearchInvoiceNumberWithPrefix: string, SearchCustomerName: string, SearchBranch: string, SearchDutySlipID: number,
     SearchReservationID: number, SearchGSTType: string, SearchDutyFromDate: string, SearchDutyToDate: string,
     SearchPassengerName: string, SearchPassengerMobile: string, SearchPackageType: string, SearchPackage: string,
     SearchDSStatus: string, SearchBillingStatus: boolean, PageNumber: number, coloumName: string, sortType: string): string {
-    return `${this.API_URL}/GetAllInvoiceAttachForEdit/${this.toRouteParam(SearchInvoiceNumberWithPrefix)}/${this.toRouteParam(SearchCustomerName)}/${this.toRouteParam(SearchBranch)}/${SearchDutySlipID}/${SearchReservationID}/${this.toRouteParam(SearchGSTType)}/${this.toRouteParam(SearchDutyFromDate)}/${this.toRouteParam(SearchDutyToDate)}/${this.toRouteParam(SearchPassengerName)}/${this.toRouteParam(SearchPassengerMobile)}/${this.toRouteParam(SearchPackageType)}/${this.toRouteParam(SearchPackage)}/${this.toRouteParam(SearchDSStatus)}/${this.toRouteBoolParam(SearchBillingStatus)}/${PageNumber}/${encodeURIComponent(coloumName)}/${encodeURIComponent(sortType)}`;
+    const resolvedInvoiceId = invoiceId && invoiceId > 0 ? invoiceId : 0;
+    return `${this.API_URL}/GetAllInvoiceAttachForEdit/${resolvedInvoiceId}/${this.toRouteParam(SearchInvoiceNumberWithPrefix)}/${this.toRouteParam(SearchCustomerName)}/${this.toRouteParam(SearchBranch)}/${SearchDutySlipID}/${SearchReservationID}/${this.toRouteParam(SearchGSTType)}/${this.toRouteParam(SearchDutyFromDate)}/${this.toRouteParam(SearchDutyToDate)}/${this.toRouteParam(SearchPassengerName)}/${this.toRouteParam(SearchPassengerMobile)}/${this.toRouteParam(SearchPackageType)}/${this.toRouteParam(SearchPackage)}/${this.toRouteParam(SearchDSStatus)}/${this.toRouteBoolParam(SearchBillingStatus)}/${PageNumber}/${encodeURIComponent(coloumName)}/${encodeURIComponent(sortType)}`;
   }
 
   /** CRUD METHODS */
@@ -96,7 +99,7 @@ export class InvoiceAttachDetachService {
   }
 
  //---------- Edit ----------
-  getTableDataForEdit(SearchInvoiceNumberWithPrefix:string,SearchCustomerName:string, SearchBranch:string,  SearchDutySlipID:number, SearchReservationID:number, SearchGSTType:string, SearchDutyFromDate:string, 
+  getTableDataForEdit(invoiceId: number, SearchInvoiceNumberWithPrefix:string,SearchCustomerName:string, SearchBranch:string,  SearchDutySlipID:number, SearchReservationID:number, SearchGSTType:string, SearchDutyFromDate:string, 
     SearchDutyToDate:string, SearchPassengerName:string, SearchPassengerMobile:string, SearchPackageType:string, SearchPackage:string, SearchDSStatus:string, 
     SearchBillingStatus:boolean, PageNumber: number): Observable<any> {  
     if (SearchDutySlipID === null || SearchDutySlipID === undefined)
@@ -108,12 +111,12 @@ export class InvoiceAttachDetachService {
       SearchReservationID = 0;
     }
     return this.httpClient.get(this.buildGetAllInvoiceAttachForEditPath(
-      SearchInvoiceNumberWithPrefix, SearchCustomerName, SearchBranch, SearchDutySlipID, SearchReservationID, SearchGSTType,
+      invoiceId, SearchInvoiceNumberWithPrefix, SearchCustomerName, SearchBranch, SearchDutySlipID, SearchReservationID, SearchGSTType,
       SearchDutyFromDate, SearchDutyToDate, SearchPassengerName, SearchPassengerMobile, SearchPackageType, SearchPackage,
       SearchDSStatus, SearchBillingStatus, this.ALL_ROWS_PAGE, 'DutySlipID', 'Descending'));
   }
 
-  getTableDataSortForEdit(SearchInvoiceNumberWithPrefix:string,SearchCustomerName:string, SearchBranch:string,  SearchDutySlipID:number, SearchReservationID:number, SearchGSTType:string, SearchDutyFromDate:string, 
+  getTableDataSortForEdit(invoiceId: number, SearchInvoiceNumberWithPrefix:string,SearchCustomerName:string, SearchBranch:string,  SearchDutySlipID:number, SearchReservationID:number, SearchGSTType:string, SearchDutyFromDate:string, 
     SearchDutyToDate:string, SearchPassengerName:string, SearchPassengerMobile:string, SearchPackageType:string, SearchPackage:string, SearchDSStatus:string, 
     SearchBillingStatus:boolean, PageNumber: number, coloumName: string, sortType: string): Observable<any> {
     if (SearchDutySlipID === null)
@@ -125,13 +128,13 @@ export class InvoiceAttachDetachService {
       SearchReservationID = 0;
     }
     return this.httpClient.get(this.buildGetAllInvoiceAttachForEditPath(
-      SearchInvoiceNumberWithPrefix, SearchCustomerName, SearchBranch, SearchDutySlipID, SearchReservationID, SearchGSTType,
+      invoiceId, SearchInvoiceNumberWithPrefix, SearchCustomerName, SearchBranch, SearchDutySlipID, SearchReservationID, SearchGSTType,
       SearchDutyFromDate, SearchDutyToDate, SearchPassengerName, SearchPassengerMobile, SearchPackageType, SearchPackage,
       SearchDSStatus, SearchBillingStatus, this.ALL_ROWS_PAGE, coloumName, sortType));
   }
 
-  getInvoiceBillDate(invoiceId: number): Observable<any> {
-    return this.httpClient.get(this.API_URL + '/GetInvoiceBillDate/' + invoiceId);
+  getInvoiceBillDate(invoiceId: number): Observable<InvoiceBillDateContext> {
+    return this.httpClient.get<InvoiceBillDateContext>(this.API_URL + '/GetInvoiceBillDate/' + invoiceId);
   }
 
 }

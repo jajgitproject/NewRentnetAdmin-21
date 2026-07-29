@@ -133,6 +133,12 @@ export class InvoiceAttachDetachComponent implements OnInit {
   selectedInvoices: any[] = []; 
   InvoiceID: any;
   invoiceBillDate: Date | null = null;
+  invoiceCustomerName: string = '';
+  invoiceAnchorGstNumbers: string[] = [];
+  hasMixedInvoiceGst = false;
+  activeGstKey: string | null = null;
+  groupedDutySections: any[] = [];
+  readonly noGstConfiguredKey = '(No GST configured)';
   SearchVerifyDuty:boolean;
   SearchGoodForBilling:boolean;
 
@@ -175,17 +181,126 @@ export class InvoiceAttachDetachComponent implements OnInit {
     const invoiceId = Number(this.InvoiceID);
     if (!invoiceId || invoiceId <= 0) {
       this.invoiceBillDate = null;
+      this.invoiceCustomerName = '';
+      this.invoiceAnchorGstNumbers = [];
+      this.hasMixedInvoiceGst = false;
+      this.activeGstKey = null;
       return;
     }
 
     this.invoiceAttachDetachService.getInvoiceBillDate(invoiceId).subscribe(
       response => {
         this.invoiceBillDate = response?.invoiceDate ? new Date(response.invoiceDate) : null;
+        this.invoiceCustomerName = response?.invoiceCustomerName || '';
+        this.invoiceAnchorGstNumbers = response?.distinctInvoiceGstNumbers || [];
+        this.hasMixedInvoiceGst = !!response?.hasMixedGst;
+        this.applyInvoiceGstAnchor();
+        this.buildGroupedDutySections();
       },
       () => {
         this.invoiceBillDate = null;
+        this.invoiceCustomerName = '';
+        this.invoiceAnchorGstNumbers = [];
+        this.hasMixedInvoiceGst = false;
+        this.activeGstKey = null;
       }
     );
+  }
+
+  normalizeGstKey(gstNumber?: string): string {
+    if (!gstNumber || !String(gstNumber).trim()) {
+      return this.noGstConfiguredKey;
+    }
+    return String(gstNumber).trim().toUpperCase();
+  }
+
+  applyInvoiceGstAnchor() {
+    if (!this.InvoiceID) {
+      return;
+    }
+
+    if (this.invoiceAnchorGstNumbers.length === 1) {
+      this.activeGstKey = this.normalizeGstKey(this.invoiceAnchorGstNumbers[0]);
+      return;
+    }
+
+    if (this.hasMixedInvoiceGst) {
+      this.activeGstKey = null;
+      return;
+    }
+
+    this.activeGstKey = this.noGstConfiguredKey;
+  }
+
+  buildGroupedDutySections() {
+    if (!this.dataSource || !this.dataSource.length) {
+      this.groupedDutySections = [];
+      return;
+    }
+
+    const groups = new Map<string, any[]>();
+    this.dataSource.forEach((row: any) => {
+      const key = this.normalizeGstKey(row.invoiceGstNumber);
+      if (!groups.has(key)) {
+        groups.set(key, []);
+      }
+      groups.get(key).push(row);
+    });
+
+    this.groupedDutySections = Array.from(groups.entries())
+      .sort((a, b) => {
+        if (a[0] === this.noGstConfiguredKey) {
+          return 1;
+        }
+        if (b[0] === this.noGstConfiguredKey) {
+          return -1;
+        }
+        return a[0].localeCompare(b[0]);
+      })
+      .map(([gstKey, duties]) => ({
+        gstKey,
+        gstLabel: gstKey === this.noGstConfiguredKey ? gstKey : gstKey,
+        duties,
+        dutyCount: duties.length,
+        selectable: this.isGroupSelectable(gstKey),
+        customerState: duties[0]?.customerState || ''
+      }));
+  }
+
+  isGroupSelectable(gstKey: string): boolean {
+    if (this.activeGstKey === null || this.activeGstKey === undefined) {
+      return true;
+    }
+    return gstKey === this.activeGstKey;
+  }
+
+  isSameGstGroup(row: any): boolean {
+    return this.isGroupSelectable(this.normalizeGstKey(row?.invoiceGstNumber));
+  }
+
+  getGstSelectionBanner(): string {
+    if (this.hasMixedInvoiceGst && this.InvoiceID) {
+      return 'This invoice already has multiple GSTINs on Finance Dashboard — contact billing. You may only attach duties from one GSTIN group at a time.';
+    }
+    if (this.InvoiceID && this.invoiceAnchorGstNumbers.length === 1) {
+      return `This invoice uses GSTIN ${this.invoiceAnchorGstNumbers[0]} — only matching duties can be attached.`;
+    }
+    if (this.activeGstKey && this.activeGstKey !== this.noGstConfiguredKey) {
+      return `Selected GSTIN group: ${this.activeGstKey}. Duties from other GSTIN groups cannot be selected together.`;
+    }
+    if (this.activeGstKey === this.noGstConfiguredKey) {
+      return 'Selected group: duties with no GST configured. Mixed GSTINs cannot be billed together.';
+    }
+    return 'Select duties from one GSTIN group only. Mixed GSTINs cannot be billed together on a Multi-Duty invoice.';
+  }
+
+  getGroupHeaderLabel(section: any): string {
+    const countLabel = `${section.dutyCount} ${section.dutyCount === 1 ? 'duty' : 'duties'}`;
+    if (section.gstKey === this.noGstConfiguredKey) {
+      return `${section.gstLabel} (${countLabel})`;
+    }
+    const stateSuffix = section.customerState ? ` — ${section.customerState}` : '';
+    return `${section.gstLabel}${stateSuffix} (${countLabel})`;
   }
 
   advanceTableForm:FormGroup = this.fb.group({
@@ -417,6 +532,11 @@ export class InvoiceAttachDetachComponent implements OnInit {
     this.SearchType = '';
     this.selectedInvoices = [];
     this.selectAll = false;
+    if (this.InvoiceID) {
+      this.applyInvoiceGstAnchor();
+    } else {
+      this.activeGstKey = null;
+    }
     if (reload) {
       this.hasSearched = true;
       this.runSearchLoad();
@@ -445,7 +565,7 @@ export class InvoiceAttachDetachComponent implements OnInit {
   }
 
   private runSearchLoad() {
-    if (this.InvoiceNumberWithPrefix) {
+    if (this.InvoiceID || this.InvoiceNumberWithPrefix) {
       this.loadDataForEdit();
     } else {
       this.loadData();
@@ -487,6 +607,7 @@ export class InvoiceAttachDetachComponent implements OnInit {
         data => 
         {
           this.dataSource = data;
+          this.buildGroupedDutySections();
           this.rematchCheckedFromSelection();
         },
         (error: HttpErrorResponse) => { this.dataSource = null; }
@@ -515,6 +636,7 @@ export class InvoiceAttachDetachComponent implements OnInit {
       data => 
         {
         this.dataSource = data;
+        this.buildGroupedDutySections();
         this.rematchCheckedFromSelection();
       },
       (error: HttpErrorResponse) => { this.dataSource = null; }
@@ -538,13 +660,14 @@ export class InvoiceAttachDetachComponent implements OnInit {
     {
       this.SearchPackage.setValue(this.SearchPackage.value.replace("/","-"));
     }
-    this.invoiceAttachDetachService.getTableDataForEdit(this.InvoiceNumberWithPrefix.replace("/","-"),this.getCustomerSearchParam(),this.SearchBranch.value,this.SearchDutySlipID,this.SearchReservationID,this.SearchGSTType,this.SearchDutyFromDate,
+    this.invoiceAttachDetachService.getTableDataForEdit(Number(this.InvoiceID) || 0, (this.InvoiceNumberWithPrefix || '').replace("/","-"),this.getCustomerSearchParam(),this.SearchBranch.value,this.SearchDutySlipID,this.SearchReservationID,this.SearchGSTType,this.SearchDutyFromDate,
       this.SearchDutyToDate,this.SearchPassengerName,this.SearchPassengerMobile,this.SearchPackageType.value,this.SearchPackage.value,
       this.SearchDSStatus,this.SearchBillingStatus,0).subscribe
       (
         data => 
         {
           this.dataSource = data;
+          this.buildGroupedDutySections();
           this.rematchCheckedFromSelection();
         },
         (error: HttpErrorResponse) => { this.dataSource = null; }
@@ -566,13 +689,14 @@ export class InvoiceAttachDetachComponent implements OnInit {
       this.sortingData = 1;
       this.sortType = "Descending";
     }
-    this.invoiceAttachDetachService.getTableDataSortForEdit(this.InvoiceNumberWithPrefix.replace("/","-"),this.getCustomerSearchParam(),this.SearchBranch.value,this.SearchDutySlipID,this.SearchReservationID,this.SearchGSTType,this.SearchDutyFromDate,
+    this.invoiceAttachDetachService.getTableDataSortForEdit(Number(this.InvoiceID) || 0, (this.InvoiceNumberWithPrefix || '').replace("/","-"),this.getCustomerSearchParam(),this.SearchBranch.value,this.SearchDutySlipID,this.SearchReservationID,this.SearchGSTType,this.SearchDutyFromDate,
       this.SearchDutyToDate,this.SearchPassengerName,this.SearchPassengerMobile,this.SearchPackageType.value,this.SearchPackage.value,
       this.SearchDSStatus,this.SearchBillingStatus,0, coloumName.active, this.sortType).subscribe
     (
       data => 
         {
         this.dataSource = data;
+        this.buildGroupedDutySections();
         this.rematchCheckedFromSelection();
       },
       (error: HttpErrorResponse) => { this.dataSource = null; }
@@ -633,19 +757,45 @@ export class InvoiceAttachDetachComponent implements OnInit {
     return this.isDutyDateAfterBillDate(row);
   }
 
-  /** Match legacy Attach: allow select unless billing date is after bill date / today. */
+  /** Match legacy Attach: allow select unless billing date is after bill date / today, and GST group matches. */
   isRowSelectable(row: any): boolean {
-    return !this.isDutyDateAfterBillDate(row);
+    return !this.isDutyDateAfterBillDate(row) && this.isSameGstGroup(row);
   }
 
   getRowSelectTooltip(row: any): string {
-    if (!this.isDutyDateAfterBillDate(row)) {
-      return '';
+    if (this.isDutyDateAfterBillDate(row)) {
+      if (this.InvoiceID && this.invoiceBillDate) {
+        return 'Billing pickup date is after bill date';
+      }
+      return 'Billing pickup date is after today — cannot generate/attach yet';
     }
-    if (this.InvoiceID && this.invoiceBillDate) {
-      return 'Billing pickup date is after bill date';
+    if (!this.isSameGstGroup(row)) {
+      if (this.InvoiceID && this.invoiceAnchorGstNumbers.length === 1) {
+        return `This duty has a different GSTIN than invoice ${this.invoiceAnchorGstNumbers[0]}`;
+      }
+      if (this.activeGstKey) {
+        return `This duty belongs to a different GSTIN group than ${this.activeGstKey}`;
+      }
+      return 'Select duties from one GSTIN group only';
     }
-    return 'Billing pickup date is after today — cannot generate/attach yet';
+    return '';
+  }
+
+  private syncActiveGstKeyFromSelection() {
+    if (this.selectedInvoices.length === 0) {
+      if (!this.InvoiceID || this.hasMixedInvoiceGst) {
+        this.activeGstKey = null;
+      } else {
+        this.applyInvoiceGstAnchor();
+      }
+      this.buildGroupedDutySections();
+      return;
+    }
+
+    if (this.activeGstKey === null || this.activeGstKey === undefined) {
+      this.activeGstKey = this.normalizeGstKey(this.selectedInvoices[0]?.invoiceGstNumber);
+      this.buildGroupedDutySections();
+    }
   }
 
   
@@ -697,6 +847,7 @@ export class InvoiceAttachDetachComponent implements OnInit {
         this.selectedInvoices.push(data);
       }
       data.checked = true;
+      this.syncActiveGstKeyFromSelection();
       this.syncSelectAllState();
     } 
     else if(!checkBoxValue && this.dataSource.includes(data)) 
@@ -707,7 +858,53 @@ export class InvoiceAttachDetachComponent implements OnInit {
       if (index > -1) {
         this.selectedInvoices.splice(index, 1);
       }
+      this.syncActiveGstKeyFromSelection();
     }
+  }
+
+  checkAllInGroup(section: any, checkBoxValue: boolean) {
+    if (!section?.selectable) {
+      return;
+    }
+
+    section.duties.forEach((element: any) => {
+      if (!this.isRowSelectable(element)) {
+        element.checked = false;
+        const blockedIndex = this.selectedInvoices.findIndex(x => x.dutySlipID === element.dutySlipID);
+        if (blockedIndex > -1) {
+          this.selectedInvoices.splice(blockedIndex, 1);
+        }
+        return;
+      }
+
+      if (checkBoxValue) {
+        element.checked = true;
+        const exists = this.selectedInvoices.some(x => x.dutySlipID === element.dutySlipID);
+        if (!exists) {
+          this.selectedInvoices.push(element);
+        }
+      } else {
+        element.checked = false;
+        const index = this.selectedInvoices.findIndex(x => x.dutySlipID === element.dutySlipID);
+        if (index > -1) {
+          this.selectedInvoices.splice(index, 1);
+        }
+      }
+    });
+
+    this.syncActiveGstKeyFromSelection();
+    this.syncSelectAllState();
+  }
+
+  isGroupIndeterminate(section: any): boolean {
+    const selectableRows = (section?.duties || []).filter(r => this.isRowSelectable(r));
+    const checkedCount = selectableRows.filter(r => r.checked).length;
+    return checkedCount > 0 && checkedCount < selectableRows.length;
+  }
+
+  isGroupFullySelected(section: any): boolean {
+    const selectableRows = (section?.duties || []).filter(r => this.isRowSelectable(r));
+    return selectableRows.length > 0 && selectableRows.every(r => r.checked);
   }
 
   private syncSelectAllState() {

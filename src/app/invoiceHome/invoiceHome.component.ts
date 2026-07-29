@@ -191,6 +191,7 @@ bookerName: FormControl = new FormControl();
       this.customer.markAsTouched();
       return;
     }
+    this.PageNumber = 0;
     this.loadData();
   }
  
@@ -219,7 +220,7 @@ bookerName: FormControl = new FormControl();
       this.SearchToDate=moment(this.SearchToDate).format('yyyy-MM-DD');
     }
     const customerName = this.getCustomerNameForSearch(this.customer.value);
-    this.invoiceHomeService.getTableData(this.searchInvoiceType,customerName,this.customerGroup.value,  this.searchInvoiceNo.replace("/","-"), this.branch.value,this.SearchFromDate,this.SearchToDate,this.SearchInvoiceStatus,this.SearchEInvoiceStatus,this.searchDutySlip,this.searchReservationID,this.searchActivationStatus,this.PageNumber).subscribe(
+    this.invoiceHomeService.getTableData(this.searchInvoiceType,customerName,this.customerGroup.value,  this.searchInvoiceNo, this.branch.value,this.SearchFromDate,this.SearchToDate,this.SearchInvoiceStatus,this.SearchEInvoiceStatus,this.searchDutySlip,this.searchReservationID,this.searchActivationStatus,this.PageNumber).subscribe(
         data => {
           this.dataSource = data;
         },
@@ -362,7 +363,8 @@ bookerName: FormControl = new FormControl();
       this.sortingData = 1;
       this.sortType = "Descending";
     }
-    this.invoiceHomeService.getTableDataSort(this.searchCustomerName, this.searchCustomerGroup, this.searchInvoiceNo, this.searchBranch, this.SearchFromDate, this.SearchToDate, this.SearchInvoiceStatus, this.SearchEInvoiceStatus,this.searchDutySlip,this.searchReservationID,this.searchActivationStatus, this.PageNumber, coloumName.active, this.sortType).subscribe
+    const customerName = this.getCustomerNameForSearch(this.customer.value);
+    this.invoiceHomeService.getTableDataSort(this.searchInvoiceType, customerName, this.customerGroup.value, this.searchInvoiceNo, this.branch.value, this.SearchFromDate, this.SearchToDate, this.SearchInvoiceStatus, this.SearchEInvoiceStatus,this.searchDutySlip,this.searchReservationID,this.searchActivationStatus, this.PageNumber, coloumName.active, this.sortType).subscribe
     (
       data =>   
       {
