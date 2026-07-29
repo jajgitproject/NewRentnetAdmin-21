@@ -5,7 +5,7 @@ import { MatPaginator } from '@angular/material/paginator';
 import { MatSort } from '@angular/material/sort';
 import { DataSource } from '@angular/cdk/collections';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import { BehaviorSubject, fromEvent, merge, Observable, Subscription } from 'rxjs';
+import { BehaviorSubject, fromEvent, merge, Observable, Subscription, of } from 'rxjs';
 import { map, startWith } from 'rxjs/operators';
 import { DateAdapter, MAT_DATE_LOCALE } from '@angular/material/core';
 import { MatMenu, MatMenuTrigger } from '@angular/material/menu';
@@ -68,9 +68,9 @@ export class CreditNoteHomeComponent implements OnInit {
   dialogRef: MatDialogRef<any>;
   ActiveStatus: any;
   last: any;
-   filteredCustomerOptions:Observable<CustomerDropDown[]>;
+   filteredCustomerOptions:Observable<CustomerDropDown[]>=of([]);
    public CustomerList?:CustomerDropDown[]=[];
-   filteredOptions: Observable<CustomerGroupDropDown[]>;
+   filteredOptions: Observable<CustomerGroupDropDown[]>=of([]);
    public customerGroupList?: CustomerGroupDropDown[] = [];
 
   searchTerm: any = '';
@@ -84,7 +84,7 @@ export class CreditNoteHomeComponent implements OnInit {
 
   SearchCreditNoteNumber: string = '';
   public OrganizationalEntityList?: OrganizationalEntityDropDown[] = [];
-  filteredBranchOptions: Observable<ModeOfPaymentDropDown[]>;
+  filteredBranchOptions: Observable<ModeOfPaymentDropDown[]>=of([]);
   SearchBranch: FormControl=new FormControl();
 
   SearchFromDate: string = '';

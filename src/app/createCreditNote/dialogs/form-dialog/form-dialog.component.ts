@@ -159,6 +159,7 @@ export class FormDialogComponent
       customerName: [this.advanceTable.customerName],
       customerID: [this.advanceTable.customerID],
       invoiceTotalAmountAfterGST: [this.advanceTable.invoiceTotalAmountAfterGST],
+      pendingAmount: [this.advanceTable.pendingAmount],
       creditNoteAmount: [this.advanceTable.creditNoteAmount],
       cgstAmount: [this.advanceTable.cgstAmount],
       cgstPercentage :[this.advanceTable.cgstPercentage],
@@ -178,7 +179,12 @@ export class FormDialogComponent
     });
   }
   calculateTax() {
-  const creditNoteAmount = parseFloat(this.advanceTableForm.get('creditNoteAmount')?.value) || 0;
+  let creditNoteAmount = parseFloat(this.advanceTableForm.get('creditNoteAmount')?.value) || 0;
+  const remainingBalance = parseFloat(this.advanceTableForm.get('pendingAmount')?.value) || 0;
+  if (remainingBalance > 0 && creditNoteAmount > remainingBalance + 1) {
+    creditNoteAmount = remainingBalance;
+    this.advanceTableForm.patchValue({ creditNoteAmount: remainingBalance });
+  }
   const sgst_rate = parseFloat(this.advanceTableForm.get('sgstPercentage')?.value) || 0;
   const cgst_rate = parseFloat(this.advanceTableForm.get('cgstPercentage')?.value) || 0;
   const igst_rate = parseFloat(this.advanceTableForm.get('igstPercentage')?.value) || 0;
@@ -317,12 +323,23 @@ resetTaxes() {
   public confirmAdd(): void {
     const amount = Number(this.advanceTableForm.get('invoiceTotalAmountAfterGST')?.value);
     const creditNoteAmount = Number(this.advanceTableForm.get('creditNoteAmount')?.value);
+    const remainingBalance = Number(this.advanceTableForm.get('pendingAmount')?.value);
     const requiresReBilling = this.isRequiresRebillingYes(
       this.advanceTableForm.get('requiresReBilling')?.value
     );
 
     // Always store a real boolean on the form for the API
     this.advanceTableForm.patchValue({ requiresReBilling });
+
+    if (remainingBalance > 0 && creditNoteAmount > remainingBalance + 1) {
+      Swal.fire({
+        title: 'Invalid Amount',
+        text: `Credit note amount cannot exceed the remaining balance of ${remainingBalance}.`,
+        icon: 'error',
+        confirmButtonText: 'OK'
+      });
+      return;
+    }
 
     if (this.action !== 'edit') {
       // Error ONLY when Requires Re-Billing = Yes and amounts differ

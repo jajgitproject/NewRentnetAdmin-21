@@ -1,10 +1,10 @@
 // @ts-nocheck
-import { CUSTOM_ELEMENTS_SCHEMA, NgModule } from '@angular/core';
+import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { FormDialogComponent } from './dialogs/form-dialog/form-dialog.component';
 import { MatTableModule } from '@angular/material/table';
 import { MatPaginatorModule } from '@angular/material/paginator';
-import { MatAutocompleteModule } from '@angular/material/autocomplete';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatSnackBarModule } from '@angular/material/snack-bar';
@@ -21,32 +21,19 @@ import { MatSortModule } from '@angular/material/sort';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatMenuModule } from '@angular/material/menu';
 import { MyUploadModule } from '../myupload/myupload.module';
-import { CurrentDesginationModule } from '../currentDesgination/currentDesgination.module';
-import { BrowserModule } from '@angular/platform-browser';
 import { MatTooltipModule } from '@angular/material/tooltip';
-import { CreditNoteHomeRoutingModule } from './creditNoteHome-routing.module';
-import { CreditNoteHomeComponent } from './creditNoteHome.component';
-import { CreditNoteHomeService } from './creditNoteHome.service';
-import { CreditNoteDutyAdjustmentService } from '../creditNoteDutyAdjustment/creditNoteDutyAdjustment.service';
-import { MatExpansionModule } from '@angular/material/expansion';
-import { FormDialogComponent } from './dialogs/form-dialog/form-dialog.component';
-import { CreateCreditNoteSharedModule } from '../createCreditNote/createCreditNote-shared.module';
+import { MatAutocompleteModule } from '@angular/material/autocomplete';
+import { CreateCreditNoteService } from './createCreditNote.service';
 
-
-
+/** Dialog-only exports for Credit Note Home; no routing (avoids path '' conflict). */
 @NgModule({
-  declarations: [
-    CreditNoteHomeComponent,
-    FormDialogComponent
-  ],
+  declarations: [FormDialogComponent],
   imports: [
-    //BrowserModule,
+    MatAutocompleteModule,
+    MatTooltipModule,
     CommonModule,
     FormsModule,
-    MatTooltipModule,
     ReactiveFormsModule,
-    CreditNoteHomeRoutingModule,
-    MatAutocompleteModule,
     MatTableModule,
     MatPaginatorModule,
     MatFormFieldModule,
@@ -65,13 +52,8 @@ import { CreateCreditNoteSharedModule } from '../createCreditNote/createCreditNo
     MatMenuModule,
     MatProgressSpinnerModule,
     MyUploadModule,
-    CurrentDesginationModule,
-    MatExpansionModule,
-    CreateCreditNoteSharedModule
   ],
-  
-  providers: [CreditNoteHomeService, CreditNoteDutyAdjustmentService]
+  exports: [FormDialogComponent],
+  providers: [CreateCreditNoteService],
 })
-export class CreditNoteHomeModule {}
-
-
+export class CreateCreditNoteSharedModule {}

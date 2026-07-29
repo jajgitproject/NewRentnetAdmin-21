@@ -69,7 +69,6 @@ export class InvoiceSummaryComponent implements OnInit {
   contextMenuPosition = { x: '0px', y: '0px' };
 
   ngOnInit() {
-    this.loadData();
     this.SubscribeUpdateService();
   }
 

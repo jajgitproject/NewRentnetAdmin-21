@@ -2,7 +2,6 @@
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
-import { FormDialogComponent as advanceTableForm } from './dialogs/form-dialog/form-dialog.component';
 import { MatTableModule } from '@angular/material/table';
 import { MatPaginatorModule } from '@angular/material/paginator';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -20,22 +19,18 @@ import { MatDialogModule } from '@angular/material/dialog';
 import { MatSortModule } from '@angular/material/sort';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatMenuModule } from '@angular/material/menu';
-import { MyUploadComponent } from '../myupload/myupload.component';
 import { MyUploadModule } from '../myupload/myupload.module';
-import {MatTooltipModule} from '@angular/material/tooltip';
+import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatAutocompleteModule } from '@angular/material/autocomplete';
 import { CreateCreditNoteService } from './createCreditNote.service';
 import { CreateCreditNoteRoutingModule } from './createCreditNote-routing.module';
 import { CreateCreditNoteComponent } from './createCreditNote.component';
-// import { TwoDigitDecimaNumberDirective } from './twodigitdecimalnumber.directive';
-
+import { CreateCreditNoteSharedModule } from './createCreditNote-shared.module';
 
 @NgModule({
-  declarations: [
-    CreateCreditNoteComponent,
-    advanceTableForm
-  ],
+  declarations: [CreateCreditNoteComponent],
   imports: [
+    CreateCreditNoteSharedModule,
     MatAutocompleteModule,
     MatTooltipModule,
     CommonModule,
@@ -60,10 +55,7 @@ import { CreateCreditNoteComponent } from './createCreditNote.component';
     MatMenuModule,
     MatProgressSpinnerModule,
     MyUploadModule,
-    //TwoDigitDecimaNumberDirective
   ],
-  exports: [advanceTableForm],
-  providers: [CreateCreditNoteService]
+  providers: [CreateCreditNoteService],
 })
 export class CreateCreditNoteModule {}
-
