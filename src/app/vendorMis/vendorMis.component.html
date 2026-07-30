@@ -51,12 +51,13 @@
                       <div class="col-xl-3 col-lg-3 col-md-6 col-sm-12 mb-2">
                         <mat-form-field class="example-full-width cp-quick-search-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
                           <mat-label>Supplier Name</mat-label>
-                          <input type="text" matInput [formControl]="SearchSupplier" [matAutocomplete]="autoSupplier">
+                          <input type="text" matInput [formControl]="SearchSupplier" [matAutocomplete]="autoSupplier" autocomplete="off">
                           <mat-autocomplete #autoSupplier="matAutocomplete">
                             <mat-option *ngFor="let option of filteredSupplierOptions | async" [value]="option.supplierName">
                               {{ option.supplierName }}
                             </mat-option>
                           </mat-autocomplete>
+                          <mat-hint>Type at least 3 characters</mat-hint>
                         </mat-form-field>
                       </div>
 
@@ -89,24 +90,26 @@
                       <div class="col-xl-3 col-lg-3 col-md-6 col-sm-12 mb-2">
                         <mat-form-field class="example-full-width cp-quick-search-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
                           <mat-label>Customer Group</mat-label>
-                          <input type="text" matInput [formControl]="SearchCustomerGroup" [matAutocomplete]="autoCustomerGroup">
+                          <input type="text" matInput [formControl]="SearchCustomerGroup" [matAutocomplete]="autoCustomerGroup" autocomplete="off">
                           <mat-autocomplete #autoCustomerGroup="matAutocomplete">
                             <mat-option *ngFor="let option of filteredCustomerGroupOptions | async" [value]="option.customerGroup">
                               {{ option.customerGroup }}
                             </mat-option>
                           </mat-autocomplete>
+                          <mat-hint>Type at least 3 characters</mat-hint>
                         </mat-form-field>
                       </div>
 
                       <div class="col-xl-3 col-lg-3 col-md-6 col-sm-12 mb-2">
                         <mat-form-field class="example-full-width cp-quick-search-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
                           <mat-label>Customer</mat-label>
-                          <input type="text" matInput [formControl]="SearchCustomer" [matAutocomplete]="autoCustomer">
+                          <input type="text" matInput [formControl]="SearchCustomer" [matAutocomplete]="autoCustomer" autocomplete="off">
                           <mat-autocomplete #autoCustomer="matAutocomplete">
                             <mat-option *ngFor="let option of filteredCustomerOptions | async" [value]="option.customerName">
                               {{ option.customerName }}
                             </mat-option>
                           </mat-autocomplete>
+                          <mat-hint>Type at least 3 characters</mat-hint>
                         </mat-form-field>
                       </div>
 
@@ -136,24 +139,26 @@
                       <div class="col-xl-3 col-lg-3 col-md-6 col-sm-12 mb-2">
                         <mat-form-field class="example-full-width cp-quick-search-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
                           <mat-label>Driver</mat-label>
-                          <input type="text" matInput [formControl]="SearchDri" [matAutocomplete]="autoDriver">
+                          <input type="text" matInput [formControl]="SearchDri" [matAutocomplete]="autoDriver" autocomplete="off">
                           <mat-autocomplete #autoDriver="matAutocomplete">
                             <mat-option *ngFor="let option of filteredDriverOptions | async" [value]="option.driverName">
                               {{ option.driverName }}
                             </mat-option>
                           </mat-autocomplete>
+                          <mat-hint>Type at least 3 characters</mat-hint>
                         </mat-form-field>
                       </div>
 
                       <div class="col-xl-3 col-lg-3 col-md-6 col-sm-12 mb-2">
                         <mat-form-field class="example-full-width cp-quick-search-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
                           <mat-label>Car No.</mat-label>
-                          <input type="text" matInput [formControl]="SearchCarNo" [matAutocomplete]="autoCarNo">
+                          <input type="text" matInput [formControl]="SearchCarNo" [matAutocomplete]="autoCarNo" autocomplete="off">
                           <mat-autocomplete #autoCarNo="matAutocomplete">
-                            <mat-option *ngFor="let option of filteredCarNoOptions | async" [value]="option.registrationNumber">
-                              {{ option.registrationNumber }}
+                            <mat-option *ngFor="let option of filteredCarNoOptions | async" [value]="option.vehicle">
+                              {{ option.vehicle }}
                             </mat-option>
                           </mat-autocomplete>
+                          <mat-hint>Type at least 3 characters</mat-hint>
                         </mat-form-field>
                       </div>
 
@@ -166,6 +171,24 @@
                               {{ option.geoPointName }}
                             </mat-option>
                           </mat-autocomplete>
+                        </mat-form-field>
+                      </div>
+                    </div>
+
+                    <div class="row">
+                      <div class="col-xl-3 col-lg-3 col-md-6 col-sm-12 mb-2">
+                        <mat-form-field class="example-full-width cp-quick-search-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
+                          <mat-label>Reservation ID</mat-label>
+                          <input type="text" matInput [(ngModel)]="SearchRes">
+                          <mat-hint>Comma-separated IDs supported</mat-hint>
+                        </mat-form-field>
+                      </div>
+
+                      <div class="col-xl-3 col-lg-3 col-md-6 col-sm-12 mb-2">
+                        <mat-form-field class="example-full-width cp-quick-search-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
+                          <mat-label>Duty Slip ID</mat-label>
+                          <input type="text" matInput [(ngModel)]="SearchDuty">
+                          <mat-hint>Comma-separated IDs supported</mat-hint>
                         </mat-form-field>
                       </div>
                     </div>

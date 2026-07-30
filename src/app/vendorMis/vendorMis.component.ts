@@ -4,7 +4,7 @@ import { FormControl } from '@angular/forms';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { MAT_DATE_LOCALE } from '@angular/material/core';
 import moment from 'moment';
-import { Observable, Subscription } from 'rxjs';
+import { Observable, of, Subscription } from 'rxjs';
 import { map, startWith } from 'rxjs/operators';
 import { GeneralService } from '../general/general.service';
 import { SearchCriteria } from './vendorMis.model';
@@ -16,7 +16,7 @@ import { SupplierDropDown } from '../supplier/supplierDropDown.model';
 import { ModeOfPaymentDropDown } from '../modeOfPayment/modeOfPaymentDropDown.model';
 import { CityDropDown } from '../city/cityDropDown.model';
 import { DriverDropDown } from '../customerPersonDriverRestriction/driverDropDown.model';
-import { InventoryDropDown } from '../inventory/inventoryDropDown.model';
+import { VehicleDropDown } from '../vehicle/vehicleDropDown.model';
 import { OrganizationalEntityDropDown } from '../organizationalEntity/organizationalEntityDropDown.model';
 
 @Component({
@@ -52,6 +52,8 @@ export class VendorMisComponent implements OnInit, OnDestroy {
   SearchToDate = '';
   SearchBillDateFrom = '';
   SearchBillToDate = '';
+  SearchRes = '';
+  SearchDuty = '';
 
   CustomerGroupList: CustomerGroupDropDown[] = [];
   CustomerList: CustomerDropDown[] = [];
@@ -60,18 +62,18 @@ export class VendorMisComponent implements OnInit, OnDestroy {
   MOPList: ModeOfPaymentDropDown[] = [];
   CityList: CityDropDown[] = [];
   DriverList: DriverDropDown[] = [];
-  CarNoList: InventoryDropDown[] = [];
+  CarNoList: VehicleDropDown[] = [];
   DispatchLocationList: OrganizationalEntityDropDown[] = [];
 
-  filteredCustomerGroupOptions: Observable<CustomerGroupDropDown[]>;
-  filteredCustomerOptions: Observable<CustomerDropDown[]>;
-  filteredSupplierTypeOptions: Observable<SupplierTypeDropDownModel[]>;
-  filteredSupplierOptions: Observable<SupplierDropDown[]>;
-  filteredMOPOptions: Observable<ModeOfPaymentDropDown[]>;
-  filteredCityOptions: Observable<CityDropDown[]>;
-  filteredDriverOptions: Observable<DriverDropDown[]>;
-  filteredCarNoOptions: Observable<InventoryDropDown[]>;
-  filteredDispatchLocationOptions: Observable<OrganizationalEntityDropDown[]>;
+  filteredCustomerGroupOptions: Observable<CustomerGroupDropDown[]> = of([]);
+  filteredCustomerOptions: Observable<CustomerDropDown[]> = of([]);
+  filteredSupplierTypeOptions: Observable<SupplierTypeDropDownModel[]> = of([]);
+  filteredSupplierOptions: Observable<SupplierDropDown[]> = of([]);
+  filteredMOPOptions: Observable<ModeOfPaymentDropDown[]> = of([]);
+  filteredCityOptions: Observable<CityDropDown[]> = of([]);
+  filteredDriverOptions: Observable<DriverDropDown[]> = of([]);
+  filteredCarNoOptions: Observable<VehicleDropDown[]> = of([]);
+  filteredDispatchLocationOptions: Observable<OrganizationalEntityDropDown[]> = of([]);
 
   ownedSuppliedOptions = ['All', 'Owned', 'Supplied'];
   bookingStatusOptions = ['All', 'Confirmed', 'Cancelled', 'Completed'];
@@ -117,6 +119,8 @@ export class VendorMisComponent implements OnInit, OnDestroy {
     this.SearchToDate = '';
     this.SearchBillDateFrom = '';
     this.SearchBillToDate = '';
+    this.SearchRes = '';
+    this.SearchDuty = '';
   }
 
   buildSearchCriteria(): SearchCriteria {
@@ -137,7 +141,9 @@ export class VendorMisComponent implements OnInit, OnDestroy {
       SearchCity: this.SearchCity?.value || '',
       SearchBookingStatus: this.normalizeSelect(this.SearchBookingStatus?.value),
       SearchBillFromDate: this.SearchBillDateFrom !== '' ? moment(this.SearchBillDateFrom).format('MMM DD yyyy') : '',
-      SearchBillToDate: this.SearchBillToDate !== '' ? moment(this.SearchBillToDate).format('MMM DD yyyy') : ''
+      SearchBillToDate: this.SearchBillToDate !== '' ? moment(this.SearchBillToDate).format('MMM DD yyyy') : '',
+      SearchRes: this.SearchRes || '',
+      SearchDuty: this.SearchDuty || ''
     };
   }
 
@@ -258,6 +264,10 @@ export class VendorMisComponent implements OnInit, OnDestroy {
   }
 
   validatePickupDateRange(): string | null {
+    if (this.isIdSearchActive()) {
+      return null;
+    }
+
     if (!this.SearchFromDate || !this.SearchToDate) {
       return 'Pickup date range is required. Please select From and To dates.';
     }
@@ -280,6 +290,10 @@ export class VendorMisComponent implements OnInit, OnDestroy {
     return null;
   }
 
+  isIdSearchActive(): boolean {
+    return this.isSearchValueSet(this.SearchRes) || this.isSearchValueSet(this.SearchDuty);
+  }
+
   hasAdditionalSearchFilters(): boolean {
     return this.isSearchValueSet(this.SearchCustomerGroup?.value)
       || this.isSearchValueSet(this.SearchCustomer?.value)
@@ -293,7 +307,9 @@ export class VendorMisComponent implements OnInit, OnDestroy {
       || this.isSearchValueSet(this.SearchCity?.value)
       || this.isSearchValueSet(this.SearchBookingStatus?.value)
       || this.isSearchValueSet(this.SearchBillDateFrom)
-      || this.isSearchValueSet(this.SearchBillToDate);
+      || this.isSearchValueSet(this.SearchBillToDate)
+      || this.isSearchValueSet(this.SearchRes)
+      || this.isSearchValueSet(this.SearchDuty);
   }
 
   private isSearchValueSet(value: any): boolean {
@@ -418,8 +434,8 @@ export class VendorMisComponent implements OnInit, OnDestroy {
     this.vendorMisService.GetCustomerGroupByKAMForDutyRegister(this.IsKAMRole).subscribe((data) => {
       this.CustomerGroupList = data || [];
       this.filteredCustomerGroupOptions = this.SearchCustomerGroup.valueChanges.pipe(
-        startWith(''),
-        map((value) => this.filterList(this.CustomerGroupList, value, 'customerGroup'))
+        startWith(this.SearchCustomerGroup.value || ''),
+        map((value) => this.filterTypeaheadList(this.CustomerGroupList, value, 'customerGroup'))
       );
     });
   }
@@ -428,8 +444,8 @@ export class VendorMisComponent implements OnInit, OnDestroy {
     this.vendorMisService.GetCustomerByKAMForDutyRegister(this.IsKAMRole).subscribe((data) => {
       this.CustomerList = data || [];
       this.filteredCustomerOptions = this.SearchCustomer.valueChanges.pipe(
-        startWith(''),
-        map((value) => this.filterList(this.CustomerList, value, 'customerName'))
+        startWith(this.SearchCustomer.value || ''),
+        map((value) => this.filterTypeaheadList(this.CustomerList, value, 'customerName'))
       );
     });
   }
@@ -438,7 +454,7 @@ export class VendorMisComponent implements OnInit, OnDestroy {
     this.vendorMisService.GetLocationDropDownForDutyRegister(this.IsKAMRole).subscribe((data) => {
       this.DispatchLocationList = data || [];
       this.filteredDispatchLocationOptions = this.SearchDispatchLocation.valueChanges.pipe(
-        startWith(''),
+        startWith(this.SearchDispatchLocation.value || ''),
         map((value) => this.filterList(this.DispatchLocationList, value, 'organizationalEntityName'))
       );
     });
@@ -448,7 +464,7 @@ export class VendorMisComponent implements OnInit, OnDestroy {
     this.generalService.GetModeOfPayment().subscribe((data) => {
       this.MOPList = data || [];
       this.filteredMOPOptions = this.SearchMOP.valueChanges.pipe(
-        startWith(''),
+        startWith(this.SearchMOP.value || ''),
         map((value) => this.filterList(this.MOPList, value, 'modeOfPayment'))
       );
     });
@@ -458,7 +474,7 @@ export class VendorMisComponent implements OnInit, OnDestroy {
     this.generalService.GetSupplierType().subscribe((data) => {
       this.SupplierTypeList = data || [];
       this.filteredSupplierTypeOptions = this.SearchSupplierType.valueChanges.pipe(
-        startWith(''),
+        startWith(this.SearchSupplierType.value || ''),
         map((value) => this.filterList(this.SupplierTypeList, value, 'supplierType'))
       );
     });
@@ -468,8 +484,8 @@ export class VendorMisComponent implements OnInit, OnDestroy {
     this.generalService.getSupplier().subscribe((data) => {
       this.SupplierList = data || [];
       this.filteredSupplierOptions = this.SearchSupplier.valueChanges.pipe(
-        startWith(''),
-        map((value) => this.filterList(this.SupplierList, value, 'supplierName'))
+        startWith(this.SearchSupplier.value || ''),
+        map((value) => this.filterTypeaheadList(this.SupplierList, value, 'supplierName'))
       );
     });
   }
@@ -478,7 +494,7 @@ export class VendorMisComponent implements OnInit, OnDestroy {
     this.generalService.GetCitiessAll().subscribe((data) => {
       this.CityList = data || [];
       this.filteredCityOptions = this.SearchCity.valueChanges.pipe(
-        startWith(''),
+        startWith(this.SearchCity.value || ''),
         map((value) => this.filterList(this.CityList, value, 'geoPointName'))
       );
     });
@@ -488,8 +504,8 @@ export class VendorMisComponent implements OnInit, OnDestroy {
     this.generalService.GetDriver().subscribe((data) => {
       this.DriverList = data || [];
       this.filteredDriverOptions = this.SearchDri.valueChanges.pipe(
-        startWith(''),
-        map((value) => this.filterList(this.DriverList, value, 'driverName'))
+        startWith(this.SearchDri.value || ''),
+        map((value) => this.filterTypeaheadList(this.DriverList, value, 'driverName'))
       );
     });
   }
@@ -498,17 +514,38 @@ export class VendorMisComponent implements OnInit, OnDestroy {
     this.generalService.GetRegistrationNumber().subscribe((data) => {
       this.CarNoList = data || [];
       this.filteredCarNoOptions = this.SearchCarNo.valueChanges.pipe(
-        startWith(''),
-        map((value) => this.filterList(this.CarNoList, value, 'registrationNumber'))
+        startWith(this.SearchCarNo.value || ''),
+        map((value) => this.filterTypeaheadList(this.CarNoList, value, 'vehicle'))
       );
     });
   }
 
-  private filterList(list: any[], value: string, field: string): any[] {
-    const filterValue = String(value || '').toLowerCase();
-    if (!filterValue) {
-      return list.slice(0, 50);
+  /** Typeahead: suggestions only after 3+ characters (no full list on focus). */
+  private filterTypeaheadList(list: any[], value: string, field: string): any[] {
+    const filterValue = String(value || '').toLowerCase().trim();
+    if (filterValue.length < 3) {
+      return [];
     }
-    return list.filter((item) => String(item[field] || '').toLowerCase().includes(filterValue)).slice(0, 50);
+
+    const pascalField = field.charAt(0).toUpperCase() + field.slice(1);
+    const getText = (item: any) => String(item?.[field] ?? item?.[pascalField] ?? '').toLowerCase();
+
+    return (list || [])
+      .filter((item) => getText(item).includes(filterValue))
+      .slice(0, 50);
+  }
+
+  private filterList(list: any[], value: string, field: string): any[] {
+    const filterValue = String(value || '').toLowerCase().trim();
+    const pascalField = field.charAt(0).toUpperCase() + field.slice(1);
+    const getText = (item: any) => String(item?.[field] ?? item?.[pascalField] ?? '').toLowerCase();
+
+    if (!filterValue) {
+      return (list || []).slice(0, 50);
+    }
+
+    return (list || [])
+      .filter((item) => getText(item).includes(filterValue))
+      .slice(0, 50);
   }
 }

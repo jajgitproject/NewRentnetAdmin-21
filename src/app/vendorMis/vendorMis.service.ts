@@ -44,7 +44,9 @@ export class VendorMisService {
       SearchCity: this.toNull(criteria.SearchCity),
       SearchBookingStatus: this.toNull(criteria.SearchBookingStatus),
       SearchBillFromDate: this.toNull(criteria.SearchBillFromDate),
-      SearchBillToDate: this.toNull(criteria.SearchBillToDate)
+      SearchBillToDate: this.toNull(criteria.SearchBillToDate),
+      SearchRes: this.toNull(criteria.SearchRes),
+      SearchDuty: this.toNull(criteria.SearchDuty)
     };
   }
 
