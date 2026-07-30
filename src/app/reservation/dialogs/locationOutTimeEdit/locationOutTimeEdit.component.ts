@@ -3,7 +3,7 @@ import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { Component, Inject, OnDestroy, OnInit } from '@angular/core';
 import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
-import { FormControl, FormGroup, FormBuilder } from '@angular/forms';
+import { FormControl, FormGroup, FormBuilder, Validators } from '@angular/forms';
 import { MAT_DATE_LOCALE } from '@angular/material/core';
 import { GeneralService } from '../../../general/general.service';
 import { ReservationService } from '../../reservation.service';
@@ -46,7 +46,7 @@ export class LocationOutTimeEditComponent implements OnInit, OnDestroy {
     private fb: FormBuilder,
   public _generalService: GeneralService) {
 
-    this.dialogTitle = 'Update Location Out Time';
+    this.dialogTitle = 'Update Location Out Date & Time';
   this.advanceTableCP = data.advanceTable;
   this.status = this.extractStatus(data?.status);
 
@@ -74,9 +74,11 @@ export class LocationOutTimeEditComponent implements OnInit, OnDestroy {
   }
 
   createContactForm(): FormGroup {
+    const existingDate = this.resolveExistingLocationOutDate();
     return this.fb.group(
       {
-        locationOutTime: [this.resolveExistingLocationOutTime()],
+        locationOutDate: [existingDate ? new Date(existingDate) : null, Validators.required],
+        locationOutTime: [this.resolveExistingLocationOutTime(), Validators.required],
         reservationID: [this.advanceTableCP?.reservationID]
       });
   }
@@ -92,6 +94,16 @@ export class LocationOutTimeEditComponent implements OnInit, OnDestroy {
       null;
 
     return this.toOwlTimeDate(raw);
+  }
+
+  private resolveExistingLocationOutDate(): string | null {
+    const raw =
+      (this.advanceTableCP as any)?.reservationLocationOutDate ??
+      (this.advanceTableCP as any)?.ReservationLocationOutDate ??
+      (this.advanceTableCP as any)?.locationOutDate ??
+      null;
+
+    return this.normalizeDateValue(raw);
   }
 
   /** Parse API/control-panel time and normalize onto today so owl timer displays it. */
@@ -120,13 +132,37 @@ export class LocationOutTimeEditComponent implements OnInit, OnDestroy {
     return normalized;
   }
 
+  private normalizeDateValue(value: any): string | null {
+    if (!value) {
+      return null;
+    }
+    if (value instanceof Date) {
+      return moment(value).format('YYYY-MM-DD');
+    }
+    const asString = String(value);
+    if (asString.includes('T')) {
+      return asString.split('T')[0];
+    }
+    if (asString.includes('/')) {
+      const parts = asString.split('/');
+      if (parts.length === 3) {
+        return `${parts[2]}-${parts[1]}-${parts[0]}`;
+      }
+    }
+    return moment(value).isValid() ? moment(value).format('YYYY-MM-DD') : null;
+  }
+
   public ngOnInit(): void {
-    const existing = this.resolveExistingLocationOutTime();
-    if (existing) {
-      this.advanceTableForm.patchValue({ locationOutTime: existing });
+    const existingTime = this.resolveExistingLocationOutTime();
+    const existingDate = this.resolveExistingLocationOutDate();
+    if (existingTime || existingDate) {
+      this.advanceTableForm.patchValue({
+        locationOutTime: existingTime ?? this.advanceTableForm.get('locationOutTime')?.value,
+        locationOutDate: existingDate ? new Date(existingDate) : this.advanceTableForm.get('locationOutDate')?.value
+      });
     }
 
-    // Reload Reservation.LocationOutTime from booking details (Reservation table).
+    // Reload Reservation Location Out Date/Time from booking details (Reservation table).
     const reservationID = this.advanceTableCP?.reservationID;
     if (!reservationID) {
       return;
@@ -139,8 +175,18 @@ export class LocationOutTimeEditComponent implements OnInit, OnDestroy {
           const reservationTime = this.toOwlTimeDate(
             row?.locationOutTime ?? row?.locationOutTimeString
           );
+          const reservationDate = this.normalizeDateValue(
+            row?.locationOutDate ?? row?.locationOutDateString
+          );
+          const patch: any = {};
           if (reservationTime) {
-            this.advanceTableForm.patchValue({ locationOutTime: reservationTime });
+            patch.locationOutTime = reservationTime;
+          }
+          if (reservationDate) {
+            patch.locationOutDate = new Date(reservationDate);
+          }
+          if (Object.keys(patch).length) {
+            this.advanceTableForm.patchValue(patch);
           }
         },
         () => { /* keep any value already resolved from dialog data */ }
@@ -168,9 +214,11 @@ export class LocationOutTimeEditComponent implements OnInit, OnDestroy {
 
   public Put(): void {
     this.advanceTableForm.patchValue({ reservationID: this.advanceTableCP.reservationID });
+    const formValue = this.advanceTableForm.getRawValue();
     const payload = {
       reservationID: this.advanceTableCP.reservationID,
-      locationOutTime: this.advanceTableForm.get('locationOutTime')?.value,
+      locationOutDate: formValue.locationOutDate,
+      locationOutTime: formValue.locationOutTime,
     };
     this.advanceTableService.updateLocationOutEdit(payload)
       .subscribe(
@@ -178,7 +226,7 @@ export class LocationOutTimeEditComponent implements OnInit, OnDestroy {
           this.dialogRef.close(response);
           this.showNotification(
             'snackbar-success',
-            'Location Out Time Updated...!!!',
+            'Location Out Date & Time Updated...!!!',
             'bottom',
             'center'
           );

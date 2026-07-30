@@ -2949,11 +2949,15 @@ public getInvoiceNumber(item:any ,i: any)
           maxWidth: '96vw',
           data:
           {
-            // Pass reservation-table Location Out Time explicitly (not DutySlip.locationOutTime).
+            // Pass reservation-table Location Out Date/Time explicitly (not DutySlip fields).
             advanceTable: {
               ...item,
+              reservationLocationOutDate:
+                item?.reservationLocationOutDate ?? item?.ReservationLocationOutDate ?? item?.locationOutDate ?? null,
               reservationLocationOutTime:
                 item?.reservationLocationOutTime ?? item?.ReservationLocationOutTime ?? null,
+              locationOutDate:
+                item?.reservationLocationOutDate ?? item?.ReservationLocationOutDate ?? item?.locationOutDate ?? null,
               locationOutTime:
                 item?.reservationLocationOutTime ?? item?.ReservationLocationOutTime ?? item?.locationOutTime ?? null
             },

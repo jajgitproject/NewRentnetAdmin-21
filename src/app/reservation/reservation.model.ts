@@ -260,17 +260,25 @@ export class ModelForReservation {
 }
 export class UpdatePickupModel{
    reservationID : number;
+   pickupDate: Date;
+   pickupDateString: string;
       pickupTime:Date;
    pickupTimeString:string;
      dropOffTime:Date;
   dropOffTimeString:string;
+  locationOutDate: Date;
+  locationOutDateString: string;
   locationOutTime:Date;
   locationOutTimeString:string;
   constructor(modelForReservation) {
    {
-      this.reservationID = modelForReservation.reservationID || '';    
+      this.reservationID = modelForReservation.reservationID || '';
+      this.pickupDate = modelForReservation.pickupDate || null;
+      this.pickupDateString = modelForReservation.pickupDateString || '';
       this.pickupTimeString = modelForReservation.pickupTimeString || '';
       this.dropOffTimeString= modelForReservation.dropOffTimeString||'';
+      this.locationOutDate = modelForReservation.locationOutDate || null;
+      this.locationOutDateString = modelForReservation.locationOutDateString || '';
       this.locationOutTimeString = modelForReservation.locationOutTimeString || '';
       
    }

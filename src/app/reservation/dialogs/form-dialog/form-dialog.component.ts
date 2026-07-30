@@ -2,7 +2,7 @@
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { Component, Inject, OnDestroy, OnInit } from '@angular/core';
 import { Subject } from 'rxjs';
-import { skip, takeUntil } from 'rxjs/operators';
+import { takeUntil } from 'rxjs/operators';
 import { FormControl, Validators, FormGroup, FormBuilder } from '@angular/forms';
 import { MAT_DATE_LOCALE } from '@angular/material/core';
 import { formatDate } from '@angular/common';
@@ -34,13 +34,13 @@ export class FormDialogComponent implements OnInit, OnDestroy {
   indeterminate = false;
   labelPosition: 'before' | 'before' = 'before';
   contractID: any;
-  customerID: any;
   pickupDate: any;
   date: any;
   status: string = '';
    isTNCSelected:boolean = false;
   buttonDisabled: boolean = false;
   customerID: number;
+  noReservationMessage: boolean = false;
   constructor(
     public dialogRef: MatDialogRef<FormDialogComponent>,
     private snackBar: MatSnackBar,
@@ -49,7 +49,7 @@ export class FormDialogComponent implements OnInit, OnDestroy {
     private fb: FormBuilder,
   public _generalService: GeneralService) {
 
-    this.dialogTitle = 'Update Pickup Time';
+    this.dialogTitle = 'Update Pickup Date & Time';
   this.advanceTableCP = data.advanceTable;
   this.customerID = this.advanceTableCP.customerID;
   // status extraction (string or nested)
@@ -65,14 +65,12 @@ const normalized = (this.status || '').trim().toLowerCase();
     this.buttonDisabled = normalized.length > 0 && normalized !== 'changes allow';
 
 // debug
-    this.customerID = data.customerID;
+    this.customerID = data.customerID ?? this.advanceTableCP.customerID;
     this.date = this.advanceTableCP.pickup.pickupDate;
-    var date = this.date.split('T');
-    var endDate = date[0];
-    this.pickupDate = endDate;
-    this.onPickupDateChange(this.advanceTableCP.pickup.pickupDate)
+    this.pickupDate = this.normalizePickupDateValue(this.date);
     this.advanceTable = new UpdatePickupModel({})
     this.advanceTableForm = this.createContactForm();
+    this.onPickupDateChange(this.pickupDate);
   }
   private extractStatus(input: any): string {
     try {
@@ -86,6 +84,7 @@ const normalized = (this.status || '').trim().toLowerCase();
   createContactForm(): FormGroup {
     return this.fb.group(
       {
+        pickupDate: [this.pickupDate ? new Date(this.pickupDate) : null, Validators.required],
         pickupTime: [this.advanceTableCP.pickup.pickupTime],
         dropOffTime: [''],
         isTimeNotConfirmed:[this.advanceTableCP.isTimeNotConfirmed],
@@ -101,25 +100,19 @@ const normalized = (this.status || '').trim().toLowerCase();
       this.advanceTableForm.get('dropOffTime').setValue('');
       this.advanceTableForm.get('pickupTime').disable();
     }
-    // const rawPickupTime = this.advanceTableCP.pickup?.pickupTime;
-    // let timeDateObject: Date;
-    // if (rawPickupTime) {
-    //   timeDateObject = moment(rawPickupTime).toDate();
-    // }
-    // else {
-    //   timeDateObject = new Date();
-    // }
-    // this.advanceTableForm.patchValue({ pickupTime: timeDateObject });
-    // this.locationTimeSet(timeDateObject);
     
     this.advanceTableForm.get('pickupTime')?.valueChanges.pipe(takeUntil(this.destroy$)).subscribe((val: unknown) => {
-    console.log("pickupTime changed:", val); // debug
     if (val) {
       this.locationTimeSet(val as Date | string);
+      this.getETRDropOffTime();
     }
   });
   }
 
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
+  }
 
   public noWhitespaceValidator(control: FormControl) {
     const isWhitespace = (control.value || '').trim().length === 0;
@@ -139,14 +132,14 @@ const normalized = (this.status || '').trim().toLowerCase();
     this.advanceTableForm.patchValue({ reservationID: this.advanceTableCP.reservationID });
     this.advanceTableForm.patchValue({ dropOffTime: this.advanceTable.dropOffTime });
     const payload = this.advanceTableForm.getRawValue();
-    payload.pickupDate = this.advanceTableCP.pickup?.pickupDate ?? this.pickupDate;
+    payload.pickupDate = payload.pickupDate ?? this.pickupDate ?? this.advanceTableCP.pickup?.pickupDate;
     this.advanceTableService.updatePickupEdit(payload)
       .subscribe(
         response => {
             this.dialogRef.close(response);
           this.showNotification(
             'snackbar-success',
-            'Pickup Time Updated...!!!',
+            'Pickup Date & Time Updated...!!!',
             'bottom',
             'center'
           );
@@ -190,14 +183,15 @@ const normalized = (this.status || '').trim().toLowerCase();
     });
   }
   public confirmAdd(): void {
-    if (this.buttonDisabled || this.isSubmitting) {
-      return; // blocked by status
+    if (this.buttonDisabled || this.isSubmitting || this.noReservationMessage) {
+      return; // blocked by status or missing contract
     }
     this.isSubmitting = true;
     this.Put();
   }
   locationTimeSet(event: Date | string | { pickupTime?: unknown }) {
-    const pickupDate = new Date(this.pickupDate);
+    const pickupDateValue = this.advanceTableForm?.get('pickupDate')?.value ?? this.pickupDate;
+    const pickupDate = new Date(pickupDateValue);
     const eventTime =
       event && typeof event === 'object' && 'pickupTime' in event && event.pickupTime != null
         ? new Date(event.pickupTime as string | number | Date)
@@ -209,12 +203,17 @@ const normalized = (this.status || '').trim().toLowerCase();
   getETRDropOffTime() {
     var pickupTime;
     var pickupDate;
-    if (this.advanceTableForm.value.pickupTime === "" || this.advanceTableForm.value.pickupTime === undefined) {
+    const formPickupTime = this.advanceTableForm.getRawValue().pickupTime;
+    const formPickupDate = this.advanceTableForm.getRawValue().pickupDate ?? this.pickupDate;
+    if (formPickupTime === "" || formPickupTime === undefined || formPickupTime === null) {
       pickupTime = null;
     }
     else {
-      pickupTime = moment(this.advanceTableForm.value.pickupTime).format('HH:mm');
-      pickupDate = moment(this.pickupDate).format('DD-MM-YYYY');
+      pickupTime = moment(formPickupTime).format('HH:mm');
+      pickupDate = moment(formPickupDate).format('DD-MM-YYYY');
+    }
+    if (!this.contractID || pickupTime == null) {
+      return;
     }
     this.advanceTableService.getTimeForDropoffTime(this.advanceTableCP.package.packageID, pickupTime, pickupDate, this.contractID, this.advanceTableCP.vehicle.vehicleID, this.advanceTableCP.pickupCityID).pipe(takeUntil(this.destroy$)).subscribe(
       (data: any) => {
@@ -228,19 +227,53 @@ const normalized = (this.status || '').trim().toLowerCase();
         }
       });
   }
+
+  onPickupDateFormChange(event: any): void {
+    const value = event?.value ?? this.advanceTableForm.get('pickupDate')?.value;
+    this.onPickupDateChange(value);
+    const pickupTime = this.advanceTableForm.getRawValue().pickupTime;
+    if (pickupTime) {
+      this.locationTimeSet(pickupTime);
+    }
+  }
+
   onPickupDateChange(event: any) {
-    var date = event.split('T');
-    var endDate = date[0];
+    const endDate = this.normalizePickupDateValue(event);
+    if (!endDate) {
+      return;
+    }
+    this.pickupDate = endDate;
     this._generalService.GetContractIDBasedOnDate(this.customerID, endDate).subscribe(
       data => {
         if (data) {
           this.contractID = data;
+          this.noReservationMessage = false;
           this.getETRDropOffTime();
+        } else {
+          this.contractID = null;
+          this.noReservationMessage = true;
         }
       });
   }
 
+  private normalizePickupDateValue(value: any): string {
+    if (!value) {
+      return null;
+    }
+    if (value instanceof Date) {
+      return moment(value).format('YYYY-MM-DD');
+    }
+    const asString = String(value);
+    if (asString.includes('T')) {
+      return asString.split('T')[0];
+    }
+    if (asString.includes('/')) {
+      const parts = asString.split('/');
+      if (parts.length === 3) {
+        return `${parts[2]}-${parts[1]}-${parts[0]}`;
+      }
+    }
+    return moment(value).isValid() ? moment(value).format('YYYY-MM-DD') : asString;
+  }
+
 }
-
-
-

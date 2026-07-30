@@ -474,7 +474,14 @@ export class ReservationService
   } else {
     advanceTable.locationOutTimeString = formatDate(advanceTable.locationOutTime, 'HH:mm:ss', 'en-IN');
   }
-  
+  if (advanceTable.locationOutDate) {
+    const locationOutDate = advanceTable.locationOutDate instanceof Date
+      ? advanceTable.locationOutDate
+      : new Date(advanceTable.locationOutDate);
+    advanceTable.locationOutDateString = formatDate(locationOutDate, 'yyyy-MM-dd', 'en-IN');
+  } else {
+    advanceTable.locationOutDateString = null;
+  }
 
   return this.httpClient.put<any>(this.API_URL + '/' + 'EditLocationOutTime', advanceTable);
 }

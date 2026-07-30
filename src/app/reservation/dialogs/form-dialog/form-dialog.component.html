@@ -21,7 +21,19 @@
         <form class="register-form m-4" [formGroup]="advanceTableForm" (ngSubmit)="submit()">
            
             <div class="row">
-                <div class="col-xl-12 col-lg-6 col-md-12 col-sm-12 mb-2">
+                <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                    <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                        <mat-label>Pickup Date</mat-label>
+                        <input matInput [matDatepicker]="pickupDatePicker" formControlName="pickupDate"
+                            (dateChange)="onPickupDateFormChange($event)">
+                        <mat-datepicker-toggle matSuffix [for]="pickupDatePicker"></mat-datepicker-toggle>
+                        <mat-datepicker #pickupDatePicker></mat-datepicker>
+                    </mat-form-field>
+                    <div *ngIf="noReservationMessage">
+                        <span style="color: red;">There is no contract on this date.</span>
+                    </div>
+                </div>
+                <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
                     <mat-form-field class="example-full-width"  appearance="outline" floatLabel="always">
                         <mat-label>Pickup Time</mat-label>
                         <input matInput [owlDateTimeTrigger]="time1" [owlDateTime]="time1" formControlName="pickupTime"  [disabled]="isTNCSelected">
@@ -48,7 +60,7 @@
                 <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12 mb-2">
                     <div class="example-button-row">
                         <button mat-raised-button color="primary" type="button"
-                          [disabled]="!advanceTableForm.valid || buttonDisabled || isSubmitting"
+                          [disabled]="!advanceTableForm.valid || buttonDisabled || isSubmitting || noReservationMessage"
                           (click)="confirmAdd()">
                           <span *ngIf="!isSubmitting">Save</span>
                           <span *ngIf="isSubmitting">Saving…</span>
