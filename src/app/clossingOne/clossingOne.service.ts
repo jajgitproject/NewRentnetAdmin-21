@@ -14,7 +14,7 @@ import {
   summaryOfDutyHasDisplayableData,
   unwrapInvoiceCalculationPayload
 } from '../summaryOfDuty/invoice-calculation-to-summary-of-duty.mapper';
-import { ChangeSupplierForInventoryModel } from './clossingOne.model';
+import { ChangeSupplierForInventoryModel, ClosingModel } from './clossingOne.model';
 import {
   CustomerInvoicingGstDutyCheckResult
 } from '../shared/customer-invoicing-gstn-confirm.util';
@@ -26,6 +26,11 @@ export interface CalculateBillSummaryResult {
   message: string;
   payload: Record<string, unknown>;
   summary: SummaryOfDutyData;
+}
+
+export interface ActiveEInvoiceState {
+  hasActiveEInvoice: boolean;
+  irn: string | null;
 }
 
 @Injectable()
@@ -66,6 +71,26 @@ export class ClossingOneService
   GetClosingData(DutySlipID:any): Observable<any> {
     return this.httpClient.get<any>(this.API_URL +"/"+DutySlipID);
   }
+
+  /** Re-fetch IRN block state from the server (used before saves and on poll). */
+  refreshActiveEInvoiceState(dutySlipID: number | string): Observable<ActiveEInvoiceState> {
+    return this.GetClosingData(dutySlipID).pipe(
+      map((data) => {
+        const closing = new ClosingModel(data);
+        return {
+          hasActiveEInvoice: closing.hasActiveEInvoice === true,
+          irn: closing.irn ?? null,
+        };
+      }),
+      catchError(() =>
+        of({
+          hasActiveEInvoice: false,
+          irn: null,
+        })
+      )
+    );
+  }
+
    GetBillFromTo(CustomerContractID:number,PackageID:number,PackageType:string): Observable<any> {
     return this.httpClient.get<any>(this.API_URL + "/" + 'GetBillFromTo' + "/" + CustomerContractID + "/" + PackageID + "/" + PackageType);
   }

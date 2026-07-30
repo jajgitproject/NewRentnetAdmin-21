@@ -20,6 +20,7 @@ import { MatAccordion } from '@angular/material/expansion';
 import moment from 'moment';
 import { ActivatedRoute, Router } from '@angular/router';
 import Swal from 'sweetalert2';
+import { firstValueFrom } from 'rxjs';
 import { BillingHistory } from './dutySlipForBilling.model';
 import { ClosingModel } from '../clossingOne/clossingOne.model';
 import { Dispute } from '../dispute/dispute.model';
@@ -1416,6 +1417,38 @@ export class DutySlipForBillingComponent implements OnInit, AfterViewInit, OnCha
     return true;
   }
 
+  applyExternalEInvoiceState(state: { hasActiveEInvoice: boolean; irn?: string | null }): void {
+    this.hasActiveEInvoice = state.hasActiveEInvoice === true;
+    if (state.irn !== undefined) {
+      this.IRN = state.irn;
+    }
+    if (this.advanceTableClosingOne) {
+      this.advanceTableClosingOne.hasActiveEInvoice = this.hasActiveEInvoice;
+      if (state.irn !== undefined) {
+        this.advanceTableClosingOne.irn = state.irn;
+      }
+    }
+    this.applyDutySlipEditLockState();
+  }
+
+  private async refreshEInvoiceStateBeforeSave(): Promise<boolean> {
+    const dutySlipId = this.DutySlipID
+      ?? this.advanceTableClosingOne?.closingDutySlipModel?.dutySlipID
+      ?? this.advanceTableForm?.get('dutySlipID')?.value;
+    if (dutySlipId == null || dutySlipId === '') {
+      return this.guardDutySlipEdit();
+    }
+    try {
+      const state = await firstValueFrom(
+        this.clossingOneService.refreshActiveEInvoiceState(dutySlipId)
+      );
+      this.applyExternalEInvoiceState(state);
+    } catch {
+      // Fall back to in-memory guard when refresh fails.
+    }
+    return this.guardDutySlipEdit();
+  }
+
   get isDutyCalculated(): boolean {
     const dsClosing =
       this.advanceTableClosingOne?.closingDutySlipForBillingModel?.dsClosing ??
@@ -2564,8 +2597,12 @@ public resetVerificationForEcoStateChange(): void {
     );
   }
 
-  public Put(): void
+  public async Put(): Promise<void>
   {
+    const allowed = await this.refreshEInvoiceStateBeforeSave();
+    if (!allowed) {
+      return;
+    }
     if (this.canSavePartialAfterGfb) {
       this.savePartialAfterGfb();
       return;

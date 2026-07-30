@@ -20,7 +20,6 @@ import { MatDialogModule } from '@angular/material/dialog';
 import { MatSortModule } from '@angular/material/sort';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatMenuModule } from '@angular/material/menu';
-import { MyUploadModule } from '../myupload/myupload.module';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatAutocompleteModule } from '@angular/material/autocomplete';
 import { CreateCreditNoteService } from './createCreditNote.service';
@@ -51,7 +50,6 @@ import { CreateCreditNoteService } from './createCreditNote.service';
     MatToolbarModule,
     MatMenuModule,
     MatProgressSpinnerModule,
-    MyUploadModule,
   ],
   exports: [FormDialogComponent],
   providers: [CreateCreditNoteService],

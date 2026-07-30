@@ -6,7 +6,7 @@ import { MatPaginator } from '@angular/material/paginator';
 import { MatSort } from '@angular/material/sort';
 import { DataSource } from '@angular/cdk/collections';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import { BehaviorSubject, fromEvent, merge, Observable, Subscription } from 'rxjs';
+import { BehaviorSubject, fromEvent, merge, Observable, of, Subscription } from 'rxjs';
 import { map, startWith } from 'rxjs/operators';
 import { FormDialogComponent } from './dialogs/form-dialog/form-dialog.component';
 import { DateAdapter, MAT_DATE_LOCALE } from '@angular/material/core';
@@ -92,7 +92,7 @@ export class CreateCreditNoteComponent implements OnInit {
   selectedFilter: string = 'search';
   filterSelected:boolean = true;
   public CustomerList?: CustomerDropDown[] = [];
-  filteredCustomerOptions: Observable<CustomerDropDown[]>;
+  filteredCustomerOptions: Observable<CustomerDropDown[]> = of([]);
 
   
   constructor(
@@ -120,7 +120,6 @@ export class CreateCreditNoteComponent implements OnInit {
     this.role = localStorage.getItem('role');
     this.loadDataforPage(this.roleID);
     this.InitCustomer();
-   
   }
   
  

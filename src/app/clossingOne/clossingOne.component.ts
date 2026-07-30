@@ -1,5 +1,5 @@
 //@ts-nocheck
-import { AfterViewInit, Component, ElementRef, Input, OnInit, ViewChild } from '@angular/core';
+import { AfterViewInit, Component, ElementRef, Input, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { ClossingOneService } from './clossingOne.service';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { MatDialog, MatDialogRef } from '@angular/material/dialog';
@@ -8,7 +8,7 @@ import { MatSort } from '@angular/material/sort';
 import { DataSource } from '@angular/cdk/collections';
 import { Injectable, EventEmitter, Output } from '@angular/core';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import { BehaviorSubject, fromEvent, merge, Observable, Subject, Subscription } from 'rxjs';
+import { BehaviorSubject, fromEvent, interval, merge, Observable, Subject, Subscription } from 'rxjs';
 import { map, startWith } from 'rxjs/operators';
 import { DateAdapter, MAT_DATE_LOCALE } from '@angular/material/core';
 import { MatMenu, MatMenuTrigger } from '@angular/material/menu';
@@ -126,7 +126,7 @@ import {
   providers: [{ provide: MAT_DATE_LOCALE, useValue: 'en-GB' }]
 })
 
-export class ClossingOneComponent implements OnInit, AfterViewInit {
+export class ClossingOneComponent implements OnInit, AfterViewInit, OnDestroy {
   // dataSavedMessage: boolean = false;
   updateData = new Subject<void>();
   AllotmentID: any;
@@ -263,6 +263,8 @@ export class ClossingOneComponent implements OnInit, AfterViewInit {
   DutySlipMap:any;
   IRN:any;
   hasActiveEInvoice = false;
+  private irnPollSubscription: Subscription | null = null;
+  private readonly irnPollIntervalMs = 60000;
    CityName:any;
   Package:any;
   carBooked:any;
@@ -377,6 +379,62 @@ export class ClossingOneComponent implements OnInit, AfterViewInit {
     this.MOPLoadData();
     this.loadDataForReservationDiscountClosing();
     this.loadDataForImage();
+    this.startIrnStatePolling();
+  }
+
+  ngOnDestroy(): void {
+    this.irnPollSubscription?.unsubscribe();
+  }
+
+  private startIrnStatePolling(): void {
+    this.irnPollSubscription?.unsubscribe();
+    this.irnPollSubscription = interval(this.irnPollIntervalMs).subscribe(() => {
+      this.refreshActiveEInvoiceStateQuietly();
+    });
+  }
+
+  private refreshActiveEInvoiceStateQuietly(): void {
+    if (!this.DutySlipID) {
+      return;
+    }
+    this.clossingOneService.refreshActiveEInvoiceState(this.DutySlipID).subscribe(
+      (state) => this.applyActiveEInvoiceState(state)
+    );
+  }
+
+  private applyActiveEInvoiceState(state: { hasActiveEInvoice: boolean; irn?: string | null }): void {
+    this.hasActiveEInvoice = state.hasActiveEInvoice === true;
+    if (state.irn !== undefined) {
+      this.IRN = state.irn;
+    }
+    if (this.advanceTableClosingOne) {
+      this.advanceTableClosingOne.hasActiveEInvoice = this.hasActiveEInvoice;
+      if (state.irn !== undefined) {
+        this.advanceTableClosingOne.irn = state.irn;
+      }
+    }
+    this.applyEditBlockStatus();
+    this.dutySlipForBillingComponent?.applyExternalEInvoiceState(state);
+  }
+
+  /** Refresh IRN state from server, then run action only if edits are still allowed. */
+  private runIfEditAllowed(action: () => void): void {
+    if (!this.DutySlipID) {
+      return;
+    }
+    this.clossingOneService.refreshActiveEInvoiceState(this.DutySlipID).subscribe({
+      next: (state) => {
+        this.applyActiveEInvoiceState(state);
+        if (this.guardEInvoiceEdit()) {
+          action();
+        }
+      },
+      error: () => {
+        if (this.guardEInvoiceEdit()) {
+          action();
+        }
+      },
+    });
   }
 
   onDataSaved() {
@@ -501,9 +559,7 @@ export class ClossingOneComponent implements OnInit, AfterViewInit {
 
   //---------- Start Toll Parking ----------
   openDutyTollParkingEntry() {
-    if (!this.guardEInvoiceEdit()) {
-      return;
-    }
+    this.runIfEditAllowed(() => {
     const dialogRef = this.dialog.open(DutyTollParking,
       {
         data:
@@ -517,6 +573,7 @@ export class ClossingOneComponent implements OnInit, AfterViewInit {
     dialogRef.afterClosed().subscribe((res: any) => {
       this.TollParkingLoadData();
       this.recalculateBillQuietly();
+    });
     });
   }
 
@@ -537,6 +594,7 @@ export class ClossingOneComponent implements OnInit, AfterViewInit {
 
   //---------- Start Dispute ----------
   openDisputes() {
+    this.runIfEditAllowed(() => {
     const dialogRef = this.dialog.open(FormDialogDisputeComponent,
       {
         data:
@@ -551,6 +609,7 @@ export class ClossingOneComponent implements OnInit, AfterViewInit {
         this.DisputeLoadData();
         window.location.reload();
       }
+    });
     });
   }
 
@@ -580,9 +639,7 @@ export class ClossingOneComponent implements OnInit, AfterViewInit {
 
   //---------- Start Interstate Tax ----------
   dutyInterstateTax() {
-    if (!this.guardEInvoiceEdit()) {
-      return;
-    }
+    this.runIfEditAllowed(() => {
     const dialogRef = this.dialog.open(DITFormDialogComponent,
       {
         data:
@@ -600,7 +657,8 @@ export class ClossingOneComponent implements OnInit, AfterViewInit {
     dialogRef.afterClosed().subscribe((res: any) => {
       this.DutyInterStateTaxLoadData();
       this.recalculateBillQuietly();
-    })
+    });
+    });
   }
 
   public DutyInterStateTaxLoadData() {
@@ -620,9 +678,7 @@ export class ClossingOneComponent implements OnInit, AfterViewInit {
 
   //---------- Start Duty Expense ----------
   openDutyExpense() {
-    if (!this.guardEInvoiceEdit()) {
-      return;
-    }
+    this.runIfEditAllowed(() => {
     const dialogRef = this.dialog.open(DutyExpenseFormDialogComponent,
       {
         data:
@@ -635,6 +691,7 @@ export class ClossingOneComponent implements OnInit, AfterViewInit {
     dialogRef.afterClosed().subscribe((res: any) => {
       this.dutyExpenseLoadData();
       this.recalculateBillQuietly();
+    });
     });
   }
 
@@ -655,9 +712,7 @@ export class ClossingOneComponent implements OnInit, AfterViewInit {
 
   //---------- Start Duty GST Percentage ----------
   openDutyGSTPercentage() {
-    if (!this.guardEInvoiceEdit()) {
-      return;
-    }
+    this.runIfEditAllowed(() => {
     const dialogRef = this.dialog.open(DutyGSTPercentageFormDialogComponent,
       {
         data:
@@ -670,6 +725,7 @@ export class ClossingOneComponent implements OnInit, AfterViewInit {
     dialogRef.afterClosed().subscribe((res: any) => {
       this.DutyGSTPercentageLoadData();
       window.location.reload();
+    });
     });
   }
   DutyGSTPercentageLoadData() {
@@ -710,6 +766,7 @@ export class ClossingOneComponent implements OnInit, AfterViewInit {
   }
 
   openDutyState() {
+    this.runIfEditAllowed(() => {
     if (!this.guardDutyStateEdit()) {
       return;
     }
@@ -767,6 +824,7 @@ export class ClossingOneComponent implements OnInit, AfterViewInit {
         });
       }
     );
+    });
   }
 
   resetBillingVerificationAfterEcoStateChange(): void {
@@ -798,9 +856,7 @@ export class ClossingOneComponent implements OnInit, AfterViewInit {
 
   //======= Duty State Customer=======//
   openDutyStateCustomer() {
-    if (!this.guardEInvoiceEdit()) {
-      return;
-    }
+    this.runIfEditAllowed(() => {
     const dialogRef = this.dialog.open(DutyStateCustomerFormDialogComponent,
       {
         data:
@@ -814,6 +870,7 @@ export class ClossingOneComponent implements OnInit, AfterViewInit {
     dialogRef.afterClosed().subscribe((res: any) => {
       this.loadDutyStateDataCustomer();
       window.location.reload();
+    });
     });
   }
 
@@ -835,9 +892,7 @@ export class ClossingOneComponent implements OnInit, AfterViewInit {
 
   //---------- Start Add Discount ----------
   addDiscount() {
-    if (!this.guardEInvoiceEdit()) {
-      return;
-    }
+    this.runIfEditAllowed(() => {
     const dialogRef = this.dialog.open(DiscountDetailsDialogComponent,
       {
         data:
@@ -851,7 +906,8 @@ export class ClossingOneComponent implements OnInit, AfterViewInit {
     dialogRef.afterClosed().subscribe((res: any) => {
       this.loadDataForReservationDiscountClosing();
       window.location.reload();
-    })
+    });
+    });
   }
 
   public loadDataForReservationDiscountClosing() {
@@ -872,9 +928,7 @@ export class ClossingOneComponent implements OnInit, AfterViewInit {
 
   //---------- Start Additional KM & HRs ----------
   openAdditional() {
-    if (!this.guardEInvoiceEdit()) {
-      return;
-    }
+    this.runIfEditAllowed(() => {
     const dialogRef = this.dialog.open(AdditionalDialogComponent,
       {
         data:
@@ -890,6 +944,7 @@ export class ClossingOneComponent implements OnInit, AfterViewInit {
         this.loadDataforAdditionalKMHR();
         window.location.reload();
       }
+    });
     });
   }
 
@@ -913,9 +968,7 @@ export class ClossingOneComponent implements OnInit, AfterViewInit {
 
   //---------- Start Duty SAC ----------
   openDutySAC() {
-    if (!this.guardEInvoiceEdit()) {
-      return;
-    }
+    this.runIfEditAllowed(() => {
     const dialogRef = this.dialog.open(DutySACFormDialogComponent,
       {
         data:
@@ -928,6 +981,7 @@ export class ClossingOneComponent implements OnInit, AfterViewInit {
     dialogRef.afterClosed().subscribe((res: any) => {
       this.DutySACLoadData();
       window.location.reload();
+    });
     });
   }
 
@@ -962,9 +1016,7 @@ export class ClossingOneComponent implements OnInit, AfterViewInit {
   //-------------LTR Details---------------
 
   public LoadLTR() {
-    if (!this.guardEInvoiceEdit()) {
-      return;
-    }
+    this.runIfEditAllowed(() => {
     this.clossingOneService.PackageTypeForLTR(this.PackageTypeID).subscribe
       (
         (data: any) => {
@@ -1002,6 +1054,7 @@ export class ClossingOneComponent implements OnInit, AfterViewInit {
         },
         (error: HttpErrorResponse) => { this.dataSource = null; }
       );
+    });
   }
   //-------------View Bill-------------------------
 
@@ -1246,6 +1299,7 @@ export class ClossingOneComponent implements OnInit, AfterViewInit {
   //---------- Start Sales Person ----------
 
   addSalesPerson() {
+    this.runIfEditAllowed(() => {
     const dialogRef = this.dialog.open(RSPFormDialogComponent, {
       data: {
         advanceTable: this.advanceTableSP,
@@ -1261,6 +1315,7 @@ export class ClossingOneComponent implements OnInit, AfterViewInit {
         this.updateData.next();
         window.location.reload();
       }
+    });
     });
   }
 
@@ -1326,22 +1381,48 @@ export class ClossingOneComponent implements OnInit, AfterViewInit {
 
   /** Recalculate bill after extras / toll / interstate changes without opening Summary dialog. */
   recalculateBillQuietly(): void {
-    if (!this.DutySlipID || this.isEInvoiceBlockingEdits) {
+    if (!this.DutySlipID) {
       return;
     }
-    this.clossingOneService.calculateBillWithSummary(this.DutySlipID).subscribe(
-      response => {
-        this.summaryOfDutyData = response.summary;
-        this.hasActiveInvoiceCalculation = hasInvoiceCalculationResult(response.payload)
-          || hasInvoiceCalculationResult(response);
-        this.GetTotalTollParInStDispute();
-        this.loadDataForCard();
+    this.clossingOneService.refreshActiveEInvoiceState(this.DutySlipID).subscribe({
+      next: (state) => {
+        this.applyActiveEInvoiceState(state);
+        if (this.isEInvoiceBlockingEdits) {
+          return;
+        }
+        this.clossingOneService.calculateBillWithSummary(this.DutySlipID).subscribe(
+          response => {
+            this.summaryOfDutyData = response.summary;
+            this.hasActiveInvoiceCalculation = hasInvoiceCalculationResult(response.payload)
+              || hasInvoiceCalculationResult(response);
+            this.GetTotalTollParInStDispute();
+            this.loadDataForCard();
+          },
+          error => {
+            const errorMessage = error || 'Bill recalculation failed.';
+            this.showNotification('snackbar-danger', errorMessage, 'bottom', 'center');
+          }
+        );
       },
-      error => {
-        const errorMessage = error || 'Bill recalculation failed.';
-        this.showNotification('snackbar-danger', errorMessage, 'bottom', 'center');
-      }
-    );
+      error: () => {
+        if (this.isEInvoiceBlockingEdits) {
+          return;
+        }
+        this.clossingOneService.calculateBillWithSummary(this.DutySlipID).subscribe(
+          response => {
+            this.summaryOfDutyData = response.summary;
+            this.hasActiveInvoiceCalculation = hasInvoiceCalculationResult(response.payload)
+              || hasInvoiceCalculationResult(response);
+            this.GetTotalTollParInStDispute();
+            this.loadDataForCard();
+          },
+          error => {
+            const errorMessage = error || 'Bill recalculation failed.';
+            this.showNotification('snackbar-danger', errorMessage, 'bottom', 'center');
+          }
+        );
+      },
+    });
   }
 
   onBillingChargesChanged(): void {
@@ -1678,6 +1759,7 @@ export class ClossingOneComponent implements OnInit, AfterViewInit {
 
       openCustomerSpecificField()
       {
+        this.runIfEditAllowed(() => {
         const openDialog = () => {
           if (!this.dataSourceCSF?.length || !this.dataSourceCSF[0]) {
             this.showNotification(
@@ -1698,7 +1780,7 @@ export class ClossingOneComponent implements OnInit, AfterViewInit {
                   customerID:this.dataSourceCSF[0].customerID,
                   action:"edit",
                   from: this.from,
-                  allowEditAlways: true,
+                  allowEditAlways: false,
                 }
             });
           dialogRef.afterClosed().subscribe(() => {
@@ -1726,6 +1808,7 @@ export class ClossingOneComponent implements OnInit, AfterViewInit {
             );
           }
         );
+        });
       }
 
       checkVerifyDutyBeforeFormOpen() {
@@ -1740,9 +1823,7 @@ export class ClossingOneComponent implements OnInit, AfterViewInit {
   }
 
   MOPDetails() {
-    if (!this.guardEInvoiceEdit()) {
-      return;
-    }
+    this.runIfEditAllowed(() => {
     const dialogRef = this.dialog.open(FormDialogComponent,
       {
         data:
@@ -1757,7 +1838,8 @@ export class ClossingOneComponent implements OnInit, AfterViewInit {
     dialogRef.afterClosed().subscribe((res: any) => {
       this.MOPLoadData();
       window.location.reload();
-    })
+    });
+    });
   }
 
   public MOPLoadData() {
@@ -1792,9 +1874,7 @@ export class ClossingOneComponent implements OnInit, AfterViewInit {
   }
 
   openDutySlipImage() {
-    if (!this.guardEInvoiceEdit()) {
-      return;
-    }
+    this.runIfEditAllowed(() => {
     this._dutySlipImageService.getAllotmentIDForDutySlipImage(this.allotmentID).subscribe(
       data => {
         this.dutySlipImageAllotmentID = data;
@@ -1828,7 +1908,7 @@ export class ClossingOneComponent implements OnInit, AfterViewInit {
 
         });
       });
-
+    });
   }
 
 
@@ -1954,9 +2034,7 @@ export class ClossingOneComponent implements OnInit, AfterViewInit {
    
    settledRates()
    {
-    if (!this.guardEInvoiceEdit()) {
-      return;
-    }
+    this.runIfEditAllowed(() => {
     this.settleRateService.getTableData(this.ReservationID,this.SearchActivationStatus, this.PageNumber).subscribe
     (
       (dataSRD :SettledRateDetails)=>   
@@ -1999,6 +2077,7 @@ export class ClossingOneComponent implements OnInit, AfterViewInit {
         }
       }
     );  
+    });
   }
   
   settledRateLoadData() 
@@ -2022,9 +2101,7 @@ showAndScrollOpenSettledRates() {
 }
 
  changeDutyTypeClosingDetails() {
-    if (!this.guardEInvoiceEdit()) {
-      return;
-    }
+    this.runIfEditAllowed(() => {
     const dialogRef = this.dialog.open(CDTClosingDialogComponent,
       {
         data:
@@ -2040,7 +2117,8 @@ showAndScrollOpenSettledRates() {
       });
     dialogRef.afterClosed().subscribe((res: any) => {
       window.location.reload();
-    })
+    });
+    });
   }
 
   GetTotalTollParInStDispute() 
@@ -2071,9 +2149,7 @@ showAndScrollOpenSettledRates() {
  //---------- Change City ----------
   ChangeCity() 
   {
-    if (!this.guardEInvoiceEdit()) {
-      return;
-    }
+    this.runIfEditAllowed(() => {
     const dialogRef = this.dialog.open(FormDialogComponentForCity,
     {
       data:
@@ -2088,7 +2164,8 @@ showAndScrollOpenSettledRates() {
     });
     dialogRef.afterClosed().subscribe((res: any) => {
       window.location.reload();
-    })
+    });
+    });
   }
 PrintDutyMap() {
   let baseUrl = this._generalService.FormURL;
@@ -2136,6 +2213,7 @@ PrintDutyMap() {
 //---------- Change Supplier For Inventory ----------
   ChangeSupplierForInventory() 
   {
+    this.runIfEditAllowed(() => {
     const dialogRef = this.dialog.open(FormDialogChangeSupplierForInventory,
     {
       data:
@@ -2147,7 +2225,8 @@ PrintDutyMap() {
     });
     dialogRef.afterClosed().subscribe((res: any) => {
       window.location.reload();
-    })
+    });
+    });
   }
 
 

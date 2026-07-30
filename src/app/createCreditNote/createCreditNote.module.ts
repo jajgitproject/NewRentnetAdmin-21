@@ -19,9 +19,9 @@ import { MatDialogModule } from '@angular/material/dialog';
 import { MatSortModule } from '@angular/material/sort';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatMenuModule } from '@angular/material/menu';
-import { MyUploadModule } from '../myupload/myupload.module';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatAutocompleteModule } from '@angular/material/autocomplete';
+import { MatNativeDateModule, MatRippleModule } from '@angular/material/core';
 import { CreateCreditNoteService } from './createCreditNote.service';
 import { CreateCreditNoteRoutingModule } from './createCreditNote-routing.module';
 import { CreateCreditNoteComponent } from './createCreditNote.component';
@@ -30,13 +30,14 @@ import { CreateCreditNoteSharedModule } from './createCreditNote-shared.module';
 @NgModule({
   declarations: [CreateCreditNoteComponent],
   imports: [
+    // Routing first so path:'' maps to CreateCreditNoteComponent (not a nested MyUpload route).
+    CreateCreditNoteRoutingModule,
     CreateCreditNoteSharedModule,
     MatAutocompleteModule,
     MatTooltipModule,
     CommonModule,
     FormsModule,
     ReactiveFormsModule,
-    CreateCreditNoteRoutingModule,
     MatTableModule,
     MatPaginatorModule,
     MatFormFieldModule,
@@ -54,7 +55,8 @@ import { CreateCreditNoteSharedModule } from './createCreditNote-shared.module';
     MatToolbarModule,
     MatMenuModule,
     MatProgressSpinnerModule,
-    MyUploadModule,
+    MatRippleModule,
+    MatNativeDateModule,
   ],
   providers: [CreateCreditNoteService],
 })

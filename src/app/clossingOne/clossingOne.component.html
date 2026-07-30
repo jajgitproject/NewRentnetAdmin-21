@@ -141,7 +141,10 @@
         <div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 mb-2">
           <p style="font-size: 12px;"></p>
           <h5>
-            <a (click)="openDisputes()" style="cursor: pointer;color: #007bff;">Dispute</a>
+            <a (click)="openDisputes()"
+              [class.closing-entry-disabled]="isDutySlipEditBlocked"
+              [style.cursor]="isDutySlipEditBlocked ? 'not-allowed' : 'pointer'"
+              [style.color]="isDutySlipEditBlocked ? '#6c757d' : '#007bff'">Dispute</a>
             <a href="javascript:void(0);" (click)="showAndScrollOpenDisputes()">&nbsp;- <b>View</b></a>
           </h5>
         </div>
@@ -250,7 +253,10 @@
 
         <div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 mb-2">
           <h5>
-            <a (click)="ChangeSupplierForInventory()" style="cursor: pointer;color: #007bff;">Change Supplier</a>
+            <a (click)="ChangeSupplierForInventory()"
+              [class.closing-entry-disabled]="isDutySlipEditBlocked"
+              [style.cursor]="isDutySlipEditBlocked ? 'not-allowed' : 'pointer'"
+              [style.color]="isDutySlipEditBlocked ? '#6c757d' : '#007bff'">Change Supplier</a>
           </h5>
         </div>
 
@@ -639,7 +645,10 @@
   <div class="card" *ngIf="advanceTableSP" id="salesPerson">
     <div class="header bg-cyan">
       <h2>Sales Person -
-        <i><a (click)="addSalesPerson()" style="cursor: pointer;">Add More</a></i>
+        <i><a (click)="addSalesPerson()"
+          [class.closing-entry-disabled]="isDutySlipEditBlocked"
+          [style.cursor]="isDutySlipEditBlocked ? 'not-allowed' : 'pointer'"
+          [style.color]="isDutySlipEditBlocked ? '#6c757d' : 'inherit'">Add More</a></i>
       </h2>
       <ul class="header-dropdown m-r-10">
         <li>
@@ -907,7 +916,10 @@
   <div class="card" id="customerSpecificFields">
     <div class="header bg-cyan">
       <h2>Customer Specific Details - 
-        <i><a (click)="openCustomerSpecificField()" style="cursor: pointer;">Edit </a></i>
+        <i><a (click)="openCustomerSpecificField()"
+          [class.closing-entry-disabled]="isDutySlipEditBlocked"
+          [style.cursor]="isDutySlipEditBlocked ? 'not-allowed' : 'pointer'"
+          [style.color]="isDutySlipEditBlocked ? '#6c757d' : 'inherit'">Edit </a></i>
       </h2>
       <ul class="header-dropdown m-r-10">
         <li>

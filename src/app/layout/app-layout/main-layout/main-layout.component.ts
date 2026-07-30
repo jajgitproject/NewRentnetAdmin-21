@@ -24,5 +24,3 @@ export class MainLayoutComponent implements OnInit, OnDestroy {
     this.sessionHeartbeatService.stop();
   }
 }
-
-
