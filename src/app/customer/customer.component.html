@@ -220,7 +220,8 @@
                             <ng-template #elseBlock2>
                                 <div class="scrollable-table-container">
                                     <mat-table #table [dataSource]="dataSource" matSort
-                                        class="mat-cell floating-header-table" (matSortChange)="SortingData($event)">
+                                        class="mat-cell floating-header-table customer-table"
+                                        (matSortChange)="SortingData($event)">
 
                                         <ng-container matColumnDef="id">
                                             <mat-header-cell *matHeaderCellDef mat-sort-header>Id</mat-header-cell>

@@ -35,6 +35,100 @@
   width: 35%
   text-align: left
 
+.scrollable-table-container
+  overflow: auto
+
+:host ::ng-deep .customer-table
+  min-width: 1450px
+
+:host ::ng-deep .customer-table .mat-header-row,
+:host ::ng-deep .customer-table .mat-row,
+:host ::ng-deep .customer-table .mat-mdc-header-row,
+:host ::ng-deep .customer-table .mat-mdc-row
+  min-width: 1450px
+
+:host ::ng-deep .customer-table .mat-header-cell,
+:host ::ng-deep .customer-table .mat-cell,
+:host ::ng-deep .customer-table .mat-mdc-header-cell,
+:host ::ng-deep .customer-table .mat-mdc-cell
+  flex: 0 0 120px
+  box-sizing: border-box
+  padding: 10px 12px !important
+  line-height: 1.35
+  overflow: hidden
+  text-overflow: ellipsis
+  white-space: nowrap
+
+:host ::ng-deep .customer-table .mat-column-customerID,
+:host ::ng-deep .customer-table .mat-column-tallyCustomerID
+  flex-basis: 105px
+
+:host ::ng-deep .customer-table .mat-column-customerName
+  flex: 1 0 220px
+  min-width: 220px
+
+:host ::ng-deep .customer-table .mat-column-customerIdentityNumber
+  flex-basis: 175px
+
+:host ::ng-deep .customer-table .mat-column-customerGroup
+  flex: 1 0 180px
+  min-width: 180px
+
+:host ::ng-deep .customer-table .mat-column-customerType,
+:host ::ng-deep .customer-table .mat-column-customerCategory
+  flex-basis: 130px
+
+:host ::ng-deep .customer-table .mat-column-cityName
+  flex-basis: 110px
+
+:host ::ng-deep .customer-table .mat-column-keyAccountManagerName,
+:host ::ng-deep .customer-table .mat-column-salesManagerName
+  flex-basis: 155px
+
+:host ::ng-deep .customer-table .mat-column-actions
+  flex-basis: 120px
+  justify-content: center
+  overflow: visible
+  text-overflow: unset
+  white-space: nowrap
+  padding: 6px 8px !important
+
+:host ::ng-deep .customer-table .mat-column-actions .mat-mdc-raised-button,
+:host ::ng-deep .customer-table .mat-column-actions .mat-raised-button
+  height: 32px !important
+  min-height: 32px !important
+  max-height: 32px !important
+  line-height: normal !important
+  padding: 0 12px !important
+  display: inline-flex !important
+  align-items: center !important
+  justify-content: center !important
+
+:host ::ng-deep .customer-table .mat-column-actions .mdc-button__label
+  line-height: 1.2 !important
+  white-space: nowrap !important
+
+:host ::ng-deep .customer-toolbar-right .mat-mdc-raised-button,
+:host ::ng-deep .customer-toolbar-right .mat-raised-button
+  height: 36px !important
+  min-height: 36px !important
+  max-height: 36px !important
+  line-height: normal !important
+  display: inline-flex !important
+  align-items: center !important
+  justify-content: center !important
+  vertical-align: middle
+
+:host ::ng-deep .customer-toolbar-right .mdc-button__label
+  line-height: 1.2 !important
+  white-space: nowrap !important
+
+:host ::ng-deep .customer-table .mat-row:nth-child(even)
+  background: #fafbfe
+
+:host ::ng-deep .customer-table .mat-row:hover
+  background: #eef4ff
+
 @media (max-width: 1200px)
   .customer-toolbar-left
     width: 100%
