@@ -53,6 +53,7 @@ import { FormDialogComponent as PassToSupplierFormDialogComponent } from '../pas
 import { FormDialogComponent as MessagingDialog } from '../reservationMessaging/dialogs/form-dialog/form-dialog.component';
 import { MTSFormDialogComponent } from '../mailSupplier/dialogs/form-dialog/form-dialog.component';
 import { PassengerInfoComponent } from '../PassengerInfo/PassengerInfo.component';
+import { PassengerPlacardComponent } from '../PassengerPlacard/PassengerPlacard.component';
 import { TimeAndAddressInfoComponent } from '../TimeAndAddressInfo/TimeAndAddressInfo.component';
 import { StopOnMapInfoComponent } from '../StopOnMapInfo/StopOnMapInfo.component';
 import { StopDetailsInfoComponent } from '../StopDetailsInfo/StopDetailsInfo.component';
@@ -1003,6 +1004,15 @@ export class ControlPanelDialogeComponent {
       width: '500px',
       data: {
         advanceTable: item.passengerDetails
+      }
+    });
+  }
+
+  openPassengerPlacard(passengerName: string) {
+    this.dialog.open(PassengerPlacardComponent, {
+      width: '640px',
+      data: {
+        passengerName: passengerName || ''
       }
     });
   }

@@ -43,6 +43,7 @@ import { NextDayInstructionDetailsModule } from '../NextDayInstructionDetails/Ne
 import { NoDataDialogModule } from '../no-data-dialog/no-data-dialog.module';
 import { PackageInfoModule } from '../PackageInfo/PackageInfo.module';
 import { PassengerInfoModule } from '../PassengerInfo/PassengerInfo.module';
+import { PassengerPlacardModule } from '../PassengerPlacard/PassengerPlacard.module';
 import { PasswordModule } from '../password/password.module';
 import { PassToSupplierModule } from '../passToSupplier/passToSupplier.module';
 import { PickUpByExecutiveModule } from '../pickUpByExecutive/pickUpByExecutive.module';
@@ -103,6 +104,7 @@ const CONTROL_PANEL_DIALOG_ENTRY_IMPORTS = [
   NoDataDialogModule,
   PackageInfoModule,
   PassengerInfoModule,
+  PassengerPlacardModule,
   PasswordModule,
   PassToSupplierModule,
   PickUpByExecutiveModule,
