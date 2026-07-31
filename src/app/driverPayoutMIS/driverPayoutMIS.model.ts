@@ -6,10 +6,7 @@ export class DriverPayoutMISModel {
   carNo: string;
   carBooked: string;
   carSent: string;
-  driverID: string;
   driverOfficialID: string;
-  driverName: string;
-  driverMobile: string;
   city: string;
   package: string;
   locationOutDate: string;
@@ -39,6 +36,9 @@ export class DriverPayoutMISModel {
   ownedOrSupplied: string;
   closingType: string;
   physicalDutySlipReceived: string;
+  driverID: string;
+  driverName: string;
+  driverMobile: string;
 }
 
 export class SearchCriteria {
