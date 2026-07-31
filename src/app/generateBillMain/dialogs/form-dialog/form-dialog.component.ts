@@ -364,9 +364,21 @@ export class FormDialogComponent
   }
 
   //------------- Customer's Drop Down -------------
+  private getCustomerDisplayValue(data: CustomerCustomerGroupDropDown): string {
+    return (data.customerName || '') + '##' + (data.customerIdentityNumber || '');
+  }
+
+  private getCustomerNameForSearch(value: any): string {
+    const raw = (value || '').toString().trim();
+    if (!raw) {
+      return raw;
+    }
+    return raw.split('##')[0].trim();
+  }
+
   onKeyUpCustomer()
   {
-    const prefix = (this.advanceTableForm.get('customer')?.value || '').trim();
+    const prefix = this.getCustomerNameForSearch(this.advanceTableForm.get('customer')?.value);
     if (prefix.length < 3) {
       this.CustomerList = [];
       return;
@@ -383,13 +395,16 @@ export class FormDialogComponent
     );
   }
   private _filterCustomer(value: string): CustomerCustomerGroupDropDown[] {
-    const filterValue = (value || '').trim().toLowerCase();
+    const filterValue = this.getCustomerNameForSearch(value).toLowerCase();
     if (filterValue.length < 3) {
       return [];
     }
-    return (this.CustomerList ?? []).filter(
-      data => data.customerName?.toLowerCase().includes(filterValue)
-    ).slice(0, 50);
+    return (this.CustomerList ?? []).filter(data => {
+      const identity = (data.customerIdentityNumber || '').toString().toLowerCase();
+      return data.customerName?.toLowerCase().includes(filterValue)
+        || identity.includes(filterValue)
+        || this.getCustomerDisplayValue(data).toLowerCase().includes(filterValue);
+    }).slice(0, 50);
   };
   getCustomerID(customerID:any, customerGroupID:any, customerGroup:any)
   {     
@@ -579,8 +594,11 @@ export class FormDialogComponent
 
   customerValidator(CustomerList: any[]): ValidatorFn {
     return (control: AbstractControl): ValidationErrors | null => {
-      const value = control.value?.toLowerCase();
-      const match = CustomerList.some(group => group.customerName?.toLowerCase() === value);
+      const value = (control.value || '').toString().trim().toLowerCase();
+      const match = CustomerList.some(group =>
+        this.getCustomerDisplayValue(group).toLowerCase() === value
+        || group.customerName?.toLowerCase() === value
+      );
       return match ? null : { customerInvalid: true };
     };
   }
@@ -619,7 +637,7 @@ export class FormDialogComponent
       return;
     }
 
-    const customerName = (this.advanceTableForm.get('customer')?.value || '').trim();
+    const customerName = this.getCustomerNameForSearch(this.advanceTableForm.get('customer')?.value);
     const guestCustomerDetail = {
       ...this.customerDetailData,
       customerID: this.customerID,
@@ -1281,6 +1299,10 @@ getcsGSTPercentageID(csgstPercentageID:any)
   private prepareSavePayload(): any
   {
     const payload = this.advanceTableForm.getRawValue();
+    if (payload.customer)
+    {
+      payload.customer = this.getCustomerNameForSearch(payload.customer);
+    }
     if (!payload.invoiceDate)
     {
       payload.invoiceDate = new Date();
