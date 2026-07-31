@@ -42,7 +42,10 @@ import Swal from 'sweetalert2';
 import { firstValueFrom } from 'rxjs';
 import {
   confirmMissingGstnForSingleDuty,
-  extractApiErrorMessage
+  extractApiErrorMessage,
+  extractOrphanInvoiceDate,
+  extractOrphanInvoiceNumber,
+  formatOrphanInvoiceLabel
 } from '../shared/customer-invoicing-gstn-confirm.util';
 import { SummaryOfDutyData } from '../summaryOfDuty/summary-of-duty.model';
 import {
@@ -1242,6 +1245,7 @@ export class ClossingOneComponent implements OnInit, AfterViewInit, OnDestroy {
       return;
     }
 
+    let acknowledgeMissingGstn = false;
     try {
       const check = await firstValueFrom(
         this.clossingOneService.checkCustomerInvoicingGstn(this.DutySlipID)
@@ -1251,17 +1255,66 @@ export class ClossingOneComponent implements OnInit, AfterViewInit, OnDestroy {
         return;
       }
 
-      const response = await firstValueFrom(
-        this.clossingOneService.generateBill(this.DutySlipID, confirmation.acknowledgeMissingGstn)
-      );
-      this.invoiceID = response.invoiceID;
+      acknowledgeMissingGstn = confirmation.acknowledgeMissingGstn;
+      await this.createBillAfterConfirmations(acknowledgeMissingGstn, false);
+    } catch (error) {
+      const orphanInvoice =
+        error?.error?.orphanInvoice ||
+        extractOrphanInvoiceNumber(extractApiErrorMessage(error));
+
+      if (orphanInvoice) {
+        const orphanInvoiceDate =
+          error?.error?.orphanInvoiceDate || extractOrphanInvoiceDate(error);
+        await this.handleOrphanInvoiceGenerateBill(
+          orphanInvoice,
+          acknowledgeMissingGstn,
+          orphanInvoiceDate
+        );
+        return;
+      }
+
       this.showNotification(
-        'snackbar-success',
-        'Updated...!!!',
+        'snackbar-danger',
+        extractApiErrorMessage(error),
         'bottom',
         'center'
       );
-      this.getInvoiceType();
+    }
+  }
+
+  private async handleOrphanInvoiceGenerateBill(
+    orphanInvoice: string,
+    acknowledgeMissingGstn: boolean,
+    orphanInvoiceDate?: string | null
+  ): Promise<void> {
+    const invoiceLabel = formatOrphanInvoiceLabel(orphanInvoice, orphanInvoiceDate);
+    const confirm = await Swal.fire({
+      title: 'Confirm',
+      text: `This Duty can be attached from Backend to ${invoiceLabel}. Do you want to create a New Bill.`,
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonText: 'Yes',
+      cancelButtonText: 'No',
+    });
+
+    if (!confirm.isConfirmed) {
+      await Swal.fire({
+        title: 'Invoice not generated',
+        text: `Ask Backend To repair ${invoiceLabel}`,
+        icon: 'info',
+        confirmButtonText: 'Ok',
+      });
+      return;
+    }
+
+    try {
+      await this.createBillAfterConfirmations(acknowledgeMissingGstn, true);
+      await Swal.fire({
+        title: 'Bill created',
+        text: `Ask Backend to make a 0 Value ${invoiceLabel} to maintain the Invoice Series`,
+        icon: 'info',
+        confirmButtonText: 'Ok',
+      });
     } catch (error) {
       this.showNotification(
         'snackbar-danger',
@@ -1270,6 +1323,27 @@ export class ClossingOneComponent implements OnInit, AfterViewInit, OnDestroy {
         'center'
       );
     }
+  }
+
+  private async createBillAfterConfirmations(
+    acknowledgeMissingGstn: boolean,
+    acknowledgeOrphanAndCreateNew: boolean
+  ): Promise<void> {
+    const response = await firstValueFrom(
+      this.clossingOneService.generateBill(
+        this.DutySlipID,
+        acknowledgeMissingGstn,
+        acknowledgeOrphanAndCreateNew
+      )
+    );
+    this.invoiceID = response.invoiceID;
+    this.showNotification(
+      'snackbar-success',
+      'Updated...!!!',
+      'bottom',
+      'center'
+    );
+    this.getInvoiceType();
   }
   public getInvoiceType() {
     if (!this.canThisRoleViewBillOnClosingScreen) {
@@ -1472,9 +1546,8 @@ export class ClossingOneComponent implements OnInit, AfterViewInit, OnDestroy {
             this.openSummaryOfDutyDialog();
           },
           error => {
-            const errorMessage = error || 'Operation Failed.....!!!';
             Swal.fire({
-              title: errorMessage,
+              title: extractApiErrorMessage(error),
               icon: 'error'
             });
           }

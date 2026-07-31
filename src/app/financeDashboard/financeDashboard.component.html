@@ -21,7 +21,7 @@
           <div class="fd-title-block">
             <span class="fd-title-icon" aria-hidden="true"><mat-icon>insights</mat-icon></span>
             <div>
-              <span class="fd-title">Finance Dashboard</span>
+          <span class="fd-title">Finance Dashboard</span>
               <p class="fd-subtitle">Invoice &amp; credit note series health at a glance</p>
             </div>
           </div>
@@ -114,8 +114,8 @@
                 (click)="isKpiClickable(card) && openKpiDrillDown(card)">
                 <div class="fd-kpi-icon" aria-hidden="true"><mat-icon>{{ card.icon }}</mat-icon></div>
                 <div class="fd-kpi-body">
-                  <div class="fd-kpi-label">{{ card.label }}</div>
-                  <div class="fd-kpi-value">{{ formatKpi(card) }}</div>
+          <div class="fd-kpi-label">{{ card.label }}</div>
+          <div class="fd-kpi-value">{{ formatKpi(card) }}</div>
                 </div>
               </div>
             </div>
@@ -212,13 +212,13 @@
                 <div class="fd-kpi-value">{{ formatKpi(card) }}</div>
               </div>
             </div>
-          </div>
+      </div>
 
         <div class="fd-table-wrap fd-table-wrap--credit">
 
           <table mat-table [dataSource]="creditNoteRows" class="fd-series-table">
 
-              <ng-container matColumnDef="seriesName"><th mat-header-cell *matHeaderCellDef>Series</th><td mat-cell *matCellDef="let r">{{ r.seriesName }}</td></ng-container>
+            <ng-container matColumnDef="seriesName"><th mat-header-cell *matHeaderCellDef>Series</th><td mat-cell *matCellDef="let r">{{ r.seriesName }}</td></ng-container>
 
               <ng-container matColumnDef="totalDocuments"><th mat-header-cell *matHeaderCellDef>Total</th><td mat-cell *matCellDef="let r"><button type="button" class="fd-link" (click)="openCellDrillDown(r, 'CreditNote', 'TotalDocuments', 'Total')">{{ r.totalDocuments }}</button></td></ng-container>
 
@@ -258,7 +258,7 @@
 
               <tr mat-row *matRowDef="let row; columns: creditNoteTableColumns"></tr>
 
-            </table>
+          </table>
 
         </div>
         </div>

@@ -98,11 +98,21 @@ export class ClossingOneService
   {
     return this.httpClient.get(this.API_URL_ReservationInfo + "/"+'getPackageTypeForLTR'+ "/"+ PackageTypeID);
   }
-    generateBill(dutySlipID:any, acknowledgeMissingGstn = false):  Observable<any> 
-  { 
-    let userID=this.generalService.getUserID();
-    const query = acknowledgeMissingGstn ? '?acknowledgeMissingGstn=true' : '';
-    return this.httpClient.get(this.API_GenerateBill+'/'+dutySlipID + '/'+userID + query);
+  generateBill(
+    dutySlipID: any,
+    acknowledgeMissingGstn = false,
+    acknowledgeOrphanAndCreateNew = false
+  ): Observable<any> {
+    let userID = this.generalService.getUserID();
+    const params: string[] = [];
+    if (acknowledgeMissingGstn) {
+      params.push('acknowledgeMissingGstn=true');
+    }
+    if (acknowledgeOrphanAndCreateNew) {
+      params.push('acknowledgeOrphanAndCreateNew=true');
+    }
+    const query = params.length ? '?' + params.join('&') : '';
+    return this.httpClient.get(this.API_GenerateBill + '/' + dutySlipID + '/' + userID + query);
   }
 
   checkCustomerInvoicingGstn(dutySlipID: number | string): Observable<CustomerInvoicingGstDutyCheckResult> {
