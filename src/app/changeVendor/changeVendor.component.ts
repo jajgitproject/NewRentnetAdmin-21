@@ -31,6 +31,8 @@ import { ChangeVendorService } from './changeVendor.service';
 import { ChangeVendorFormDialogComponent } from './dialogs/form-dialog/form-dialog.component';
 import { ChangeEntityModel } from './changeVendor.model';
 import { ChangeVendorDetailsComponent } from './dialogs/changeVendorDetails/changeVendorDetails.component';
+import { PassToSupplierService } from '../passToSupplier/passToSupplier.service';
+import { SupplierDropDownModel } from '../passToSupplier/passToSupplier.model';
 import moment from 'moment';
 
 
@@ -49,6 +51,7 @@ export class ChangeVendorComponent implements OnInit {
     'actions',
     'ReservationID',
     'DutySlipID',
+    'Vendor',
     'CustomerName',
     'CustomerGroup',
     'PrimaryPassenger',
@@ -118,6 +121,11 @@ export class ChangeVendorComponent implements OnInit {
   searchReservationID:string = '';
   searchDutySlipID:string = '';
 
+  SearchVendor:string = '';
+  public VendorList?:SupplierDropDownModel[] = [];
+  filteredVendorOptions?:Observable<SupplierDropDownModel[]>;
+  vendor:FormControl = new FormControl();
+
   selectAll:boolean=false;
   selectedEntity: any[] = [];
   
@@ -130,6 +138,7 @@ export class ChangeVendorComponent implements OnInit {
       public router:Router,
       public _generalService: GeneralService,
       public route: Router,
+      public passToSupplierService: PassToSupplierService,
     ) { }
     @ViewChild(MatPaginator, { static: true }) paginator?:MatPaginator;
     @ViewChild(MatSort, { static: true }) sort?:MatSort;
@@ -140,6 +149,7 @@ export class ChangeVendorComponent implements OnInit {
     ngOnInit() 
     {
       this.filteredCustomerOptions = of([]);
+      this.filteredVendorOptions = of([]);
       this.loadData();
       this.InitCustomerGroup();
       this.InitCities();
@@ -158,15 +168,19 @@ export class ChangeVendorComponent implements OnInit {
       this.vehicle.setValue('');
       this.packageType.setValue('');
       this.package.setValue('');
+      this.vendor.setValue('');
       this.SearchFromDate = '';
       this.SearchToDate = '';
       this.searchReservationID = '';
-      this.searchDutySlipID = '';    
+      this.searchDutySlipID = '';
+      this.SearchVendor = '';
       this.searchTerm = '';
       this.selectedFilter = 'search';
       this.customerGroupID = null;
       this.CustomerList = [];
       this.filteredCustomerOptions = of([]);
+      this.VendorList = [];
+      this.filteredVendorOptions = of([]);
       this.loadData();
     }
 
@@ -230,6 +244,7 @@ export class ChangeVendorComponent implements OnInit {
       this.SearchVehicle = this.vehicle.value || '';
       this.SearchPackageType = this.packageType.value || '';
       this.SearchPakcage = packageValue || '';
+      this.SearchVendor = this.vendor.value || '';
 
       return {
         customerGroup: this.customerGroup.value || null,
@@ -242,6 +257,7 @@ export class ChangeVendorComponent implements OnInit {
         searchToDate,
         reservationIDs,
         dutySlipIDs,
+        vendor: this.vendor.value || null,
       };
     }
 
@@ -260,7 +276,8 @@ export class ChangeVendorComponent implements OnInit {
         params.reservationIDs,
         params.dutySlipIDs,
         this.searchActivationStatus,
-        this.PageNumber
+        this.PageNumber,
+        params.vendor
       ).subscribe(
       data => 
       {
@@ -297,7 +314,8 @@ export class ChangeVendorComponent implements OnInit {
         this.searchActivationStatus,
         this.PageNumber,
         coloumName.active,
-        this.sortType
+        this.sortType,
+        params.vendor
       ).subscribe
       (
         data =>   
@@ -569,6 +587,50 @@ export class ChangeVendorComponent implements OnInit {
       const selectedPackageName = this.PackageList?.find(
         data => data.package === PackageName
       ); 
+    }
+
+
+    //---------- Vendor (Supplier Official Identity Number) ----------
+    onKeyupVendor(event?: any) {
+      const prefix = ((event?.target?.value ?? this.vendor?.value) || '').toString().trim();
+      if (prefix.length < 3) {
+        this.VendorList = [];
+        this.filteredVendorOptions = of([]);
+        return;
+      }
+
+      this.passToSupplierService.getSupplierCode(encodeURIComponent(prefix)).subscribe(
+        data => {
+          this.VendorList = data || [];
+          this.filteredVendorOptions = merge(of(prefix), this.vendor.valueChanges).pipe(
+            map(value => this._filterVendor((value || '').toString()))
+          );
+        },
+        () => {
+          this.VendorList = [];
+          this.filteredVendorOptions = of([]);
+        }
+      );
+    }
+
+    private _filterVendor(value: string): any {
+      const filterValue = value.toLowerCase();
+      if (!value || value.length < 3) {
+        return [];
+      }
+      return (this.VendorList || []).filter(
+        data => data.supplierName?.toLowerCase().includes(filterValue)
+      );
+    }
+
+    onVendorSelected(vendorName: string) {
+      const selectedVendor = this.VendorList?.find(
+        data => data.supplierName === vendorName
+      );
+      if (selectedVendor?.supplierName) {
+        this.vendor.setValue(selectedVendor.supplierName);
+        this.SearchVendor = selectedVendor.supplierName;
+      }
     }
  
 

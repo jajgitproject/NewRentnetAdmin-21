@@ -132,7 +132,22 @@
                                 <mat-label>Duty Slip No</mat-label>
                                 <input type="text" matInput [(ngModel)]="searchDutySlipID">
                             </mat-form-field>
-                        </div>                        
+                        </div>
+
+                        <div class="col-xl-2 col-lg-2 col-md-2 col-sm-12 mb-2">
+                            <mat-form-field appearance="outline" floatLabel="always" class="example-full-width">
+                                <mat-label>Vendor</mat-label>
+                                <input type="text" matInput [formControl]="vendor" [matAutocomplete]="autoVendor"
+                                    (keyup)="onKeyupVendor($event)">
+                                <mat-autocomplete #autoVendor="matAutocomplete" panelWidth="custom-autocomplete-panel"
+                                    (optionSelected)="onVendorSelected($event.option.value)">
+                                    <mat-option *ngFor="let option of filteredVendorOptions | async"
+                                        [value]="option.supplierName">
+                                        {{option.supplierName}}
+                                    </mat-option>
+                                </mat-autocomplete>
+                            </mat-form-field>
+                        </div>
                     </div>
 
                     <div class="row">
@@ -206,6 +221,11 @@
                                                 <ng-container matColumnDef="DutySlipID">
                                                     <mat-header-cell *matHeaderCellDef mat-sort-header>Duty Slip</mat-header-cell>
                                                     <mat-cell *matCellDef="let row">{{row.dutySlipID}}</mat-cell>
+                                                </ng-container>
+
+                                                <ng-container matColumnDef="Vendor">
+                                                    <mat-header-cell *matHeaderCellDef mat-sort-header>Vendor</mat-header-cell>
+                                                    <mat-cell *matCellDef="let row">{{row.vendor}}</mat-cell>
                                                 </ng-container>
 
                                                 <ng-container matColumnDef="CustomerName">

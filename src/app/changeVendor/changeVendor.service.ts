@@ -28,21 +28,26 @@ export class ChangeVendorService {
   }
 
   getTableData(SearchCustomerGroup:any,SearchCustomerName:any,SearchCity:any,SearchVehicle:any,SearchPackageType:any,SearchPakcage:any,
-              SearchFromDate:any,SearchToDate:any,SearchReservationID:any,SearchDutySlipID:any,SearchActivationStatus:any,PageNumber:number):Observable<any> 
+              SearchFromDate:any,SearchToDate:any,SearchReservationID:any,SearchDutySlipID:any,SearchActivationStatus:any,PageNumber:number,
+              SearchVendor:any = null):Observable<any> 
   {
-    return this.httpClient.get(
-      `${this.API_URL}/${this.toRouteParam(SearchCustomerGroup)}/${this.toRouteParam(SearchCustomerName)}/${this.toRouteParam(SearchCity)}/${this.toRouteParam(SearchVehicle)}/${this.toRouteParam(SearchPackageType)}/${this.toRouteParam(SearchPakcage)}/${this.toRouteParam(SearchFromDate)}/${this.toRouteParam(SearchToDate)}/${this.toRouteParam(SearchReservationID)}/${this.toRouteParam(SearchDutySlipID)}/${SearchActivationStatus}/${PageNumber}/ReservationID/Descending`
-    );
+    let url = `${this.API_URL}/${this.toRouteParam(SearchCustomerGroup)}/${this.toRouteParam(SearchCustomerName)}/${this.toRouteParam(SearchCity)}/${this.toRouteParam(SearchVehicle)}/${this.toRouteParam(SearchPackageType)}/${this.toRouteParam(SearchPakcage)}/${this.toRouteParam(SearchFromDate)}/${this.toRouteParam(SearchToDate)}/${this.toRouteParam(SearchReservationID)}/${this.toRouteParam(SearchDutySlipID)}/${SearchActivationStatus}/${PageNumber}/ReservationID/Descending`;
+    if (SearchVendor) {
+      url += `?Vendor=${this.toRouteParam(SearchVendor)}`;
+    }
+    return this.httpClient.get(url);
   }
 
 
   getTableDataSort(SearchCustomerGroup:any,SearchCustomerName:any,SearchCity:any,SearchVehicle:any,SearchPackageType:any,SearchPakcage:any,
                    SearchFromDate:any,SearchToDate:any,SearchReservationID:any,SearchDutySlipID:any,SearchActivationStatus:any,PageNumber:number,
-                   coloumName:string,sortType:string):Observable<any> 
+                   coloumName:string,sortType:string,SearchVendor:any = null):Observable<any> 
   {
-    return this.httpClient.get(
-      `${this.API_URL}/${this.toRouteParam(SearchCustomerGroup)}/${this.toRouteParam(SearchCustomerName)}/${this.toRouteParam(SearchCity)}/${this.toRouteParam(SearchVehicle)}/${this.toRouteParam(SearchPackageType)}/${this.toRouteParam(SearchPakcage)}/${this.toRouteParam(SearchFromDate)}/${this.toRouteParam(SearchToDate)}/${this.toRouteParam(SearchReservationID)}/${this.toRouteParam(SearchDutySlipID)}/${SearchActivationStatus}/${PageNumber}/${coloumName}/${sortType}`
-    );
+    let url = `${this.API_URL}/${this.toRouteParam(SearchCustomerGroup)}/${this.toRouteParam(SearchCustomerName)}/${this.toRouteParam(SearchCity)}/${this.toRouteParam(SearchVehicle)}/${this.toRouteParam(SearchPackageType)}/${this.toRouteParam(SearchPakcage)}/${this.toRouteParam(SearchFromDate)}/${this.toRouteParam(SearchToDate)}/${this.toRouteParam(SearchReservationID)}/${this.toRouteParam(SearchDutySlipID)}/${SearchActivationStatus}/${PageNumber}/${coloumName}/${sortType}`;
+    if (SearchVendor) {
+      url += `?Vendor=${this.toRouteParam(SearchVendor)}`;
+    }
+    return this.httpClient.get(url);
   }
 
 
