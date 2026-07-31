@@ -41,7 +41,7 @@
                         <div class="col-xl-2 col-lg-2 col-md-2 col-sm-12 mb-2">
                             <mat-form-field appearance="outline" floatLabel="always" class="example-full-width">
                                 <mat-label>Customer</mat-label>
-                                <input type="text" matInput [matAutocomplete]="auto2" [formControl]="customer">
+                                <input type="text" matInput [matAutocomplete]="auto2" [formControl]="customer" (keyup)="onKeyupCustomerName($event)">
                                 <mat-autocomplete #auto2="matAutocomplete" (optionSelected)="onCustomerSelected($event.option.value)">
                                     <mat-option *ngFor="let option of filteredCustomerOptions | async"
                                         [value]="option.customerName">
@@ -92,7 +92,7 @@
                             <mat-form-field appearance="outline" floatLabel="always" class="example-full-width">
                             <mat-label>Package</mat-label>
                             <input type="text" matInput [formControl]="package" [matAutocomplete]="auto6">
-                            <mat-autocomplete #auto6="matAutocomplete" panelWidth="custom-autocomplete-panel" (optionSelected)="onPackageTypeSelected($event.option.value)">
+                            <mat-autocomplete #auto6="matAutocomplete" panelWidth="custom-autocomplete-panel" (optionSelected)="onPackageSelected($event.option.value)">
                                 <mat-option *ngFor="let option of filteredPackageOptions | async" [value]="option.package">
                                 {{option.package}}
                                 </mat-option>
