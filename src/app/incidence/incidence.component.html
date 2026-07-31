@@ -229,7 +229,7 @@
                           <span>Edit/View - Incidence</span>
                         </button>
 
-                        <button mat-menu-item (click)="createResolution(row)">
+                        <button mat-menu-item *ngIf="canCloseIncident" (click)="createResolution(row)">
                           <mat-icon>assignment</mat-icon>
                           <span>Create/Edit/View - Resolution</span>
                         </button>

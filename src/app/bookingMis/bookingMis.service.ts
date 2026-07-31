@@ -28,7 +28,7 @@ export class BookingMisService {
   private buildExportCriteria(criteria: SearchCriteria) {
     return {
       UserID: this.generalService.getUserID(),
-      ShowAllLocation: this.generalService.getShowAllLocation(),
+      ShowAllLocation: null,
       SearchModeOfPayment: this.toNull(criteria.SearchModeOfPayment),
       SearchServiceLocation: this.toNull(criteria.SearchServiceLocation),
       SearchCustomer: this.toNull(criteria.SearchCustomer),

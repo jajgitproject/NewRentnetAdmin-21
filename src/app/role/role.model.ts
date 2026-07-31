@@ -18,6 +18,7 @@ export class Role {
    canResetOdometer: boolean;
    canDeleteFuelEntry: boolean;
    canFindFuelEntry: boolean;
+   canCloseIncident: boolean;
    canEditDSAfterGoodForBilling: boolean;
 
   constructor(role) {
@@ -40,6 +41,7 @@ export class Role {
        this.canResetOdometer = role.canResetOdometer ?? role.CanResetOdometer ?? '';
        this.canDeleteFuelEntry = role.canDeleteFuelEntry ?? role.CanDeleteFuelEntry ?? '';
        this.canFindFuelEntry = role.canFindFuelEntry ?? role.CanFindFuelEntry ?? '';
+       this.canCloseIncident = role.canCloseIncident ?? role.CanCloseIncident ?? '';
        this.canEditDSAfterGoodForBilling = Role.toBoolOrEmpty(
          role.canEditDSAfterGoodForBilling ?? role.CanEditDSAfterGoodForBilling
        );

@@ -78,6 +78,7 @@ export class FormDialogComponent
       canResetOdometer: [this.advanceTable.canResetOdometer, Validators.required],
       canDeleteFuelEntry: [this.advanceTable.canDeleteFuelEntry, Validators.required],
       canFindFuelEntry: [this.advanceTable.canFindFuelEntry, Validators.required],
+      canCloseIncident: [this.advanceTable.canCloseIncident, Validators.required],
       canEditDSAfterGoodForBilling: [this.advanceTable.canEditDSAfterGoodForBilling, Validators.required]
     });
   }
@@ -107,6 +108,7 @@ export class FormDialogComponent
       canResetOdometer: toBool(raw.canResetOdometer),
       canDeleteFuelEntry: toBool(raw.canDeleteFuelEntry),
       canFindFuelEntry: toBool(raw.canFindFuelEntry),
+      canCloseIncident: toBool(raw.canCloseIncident),
       canEditDSAfterGoodForBilling: toBool(raw.canEditDSAfterGoodForBilling),
     };
   }

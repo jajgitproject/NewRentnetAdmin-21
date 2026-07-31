@@ -314,6 +314,19 @@ export class GeneralService {
     return this.readRoleFlagFromStorage('canFindFuelEntry') === true;
   }
 
+  canCloseIncident(): boolean {
+    if (this.readRoleFlagFromStorage('canCloseIncident') === true) {
+      return true;
+    }
+    try {
+      const currentUser = JSON.parse(localStorage.getItem('currentUser') || '{}');
+      const employee = currentUser?.employee ?? currentUser?.Employee;
+      return !!(employee?.CanCloseIncident ?? employee?.canCloseIncident);
+    } catch {
+      return false;
+    }
+  }
+
   getContractTariffRoleTrack(): 'Auditor' | 'Verifier' | null {
     if (this.canActAsContractTariffAuditor()) {
       return 'Auditor';

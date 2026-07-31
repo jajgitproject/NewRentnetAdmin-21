@@ -6,6 +6,7 @@ import { IncidenceService } from '../../incidence.service';
 import { Incidence } from '../../incidence.model';
 import { incidenceFormDialogComponent } from '../form-dialog/form-dialog.component';
 import { resolutionFormDialogComponent } from '../../../resolution/dialogs/form-dialog/form-dialog.component';
+import { GeneralService } from '../../../general/general.service';
 
 @Component({
   standalone: false,
@@ -18,6 +19,7 @@ export class IncidenceListDialogComponent implements OnInit {
   loading = false;
   focusAction: 'incidence' | 'resolution' = 'incidence';
   reservationContext: any;
+  canCloseIncident = false;
 
   displayedColumns: string[] = [
     'IncidenceID',
@@ -34,12 +36,14 @@ export class IncidenceListDialogComponent implements OnInit {
     @Inject(MAT_DIALOG_DATA) public data: any,
     public dialog: MatDialog,
     public incidenceService: IncidenceService,
+    private generalService: GeneralService,
   ) {
     this.reservationContext = data?.item || {};
     this.focusAction = data?.focusAction === 'resolution' ? 'resolution' : 'incidence';
   }
 
   ngOnInit(): void {
+    this.canCloseIncident = this.generalService.canCloseIncident();
     this.loadData();
   }
 
@@ -156,6 +160,9 @@ export class IncidenceListDialogComponent implements OnInit {
   }
 
   openResolution(row: any): void {
+    if (!this.canCloseIncident) {
+      return;
+    }
     // Same merge as Edit — incidence list rows omit reservation/passenger context.
     const item = {
       ...(this.reservationContext || {}),

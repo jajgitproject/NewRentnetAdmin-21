@@ -1,7 +1,7 @@
 // @ts-nocheck
 export class SearchCriteria {
   UserID: number;
-  ShowAllLocation: boolean;
+  ShowAllLocation: boolean | null;
   SearchModeOfPayment: string;
   SearchServiceLocation: string;
   SearchCustomer: string;

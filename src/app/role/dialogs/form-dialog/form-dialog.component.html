@@ -258,6 +258,19 @@
                         </mat-error>
                     </mat-form-field>
                 </div>
+                <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                    <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                        <mat-label>Can Close Incident</mat-label>
+                        <mat-select formControlName="canCloseIncident">
+                            <mat-option value="">--Select--</mat-option>
+                            <mat-option [value]="true">Yes</mat-option>
+                            <mat-option [value]="false">No</mat-option>
+                        </mat-select>
+                        <mat-error *ngIf="advanceTableForm.get('canCloseIncident')?.hasError('required')">
+                            Can Close Incident is required
+                        </mat-error>
+                    </mat-form-field>
+                </div>
             </div>
 
             <div class="row">

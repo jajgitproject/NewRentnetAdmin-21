@@ -85,6 +85,7 @@
               mat-stroked-button
               color="accent"
               class="action-btn"
+              *ngIf="canCloseIncident"
               [class.emphasize]="focusAction === 'resolution'"
               (click)="openResolution(row)"
             >

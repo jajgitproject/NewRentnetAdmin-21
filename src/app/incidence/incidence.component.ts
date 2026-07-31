@@ -60,6 +60,7 @@ export class IncidenceComponent implements OnInit {
   reservationID: any;
   dutySlipID: any;
   reservationData: any;
+  canCloseIncident = false;
 
   displayedColumns: string[] = [
     'IncidenceID',
@@ -89,6 +90,7 @@ export class IncidenceComponent implements OnInit {
   contextMenu: MatMenuTrigger;
   contextMenuPosition = { x: '0px', y: '0px' };
   ngOnInit() {
+    this.canCloseIncident = this._generalService.canCloseIncident();
     this.route.queryParams.subscribe((paramsData) => {
       const encryptedReservationID = paramsData.reservationID;
       this.reservationID = Number(
@@ -158,6 +160,9 @@ export class IncidenceComponent implements OnInit {
   }
   //---------------------Resolution
  createResolution(row: any): void {
+  if (!this.canCloseIncident) {
+    return;
+  }
   // Defer so MatMenu can finish closing; otherwise MatDialog often fails to open.
   setTimeout(() => {
     const dialogRef = this.dialog.open(

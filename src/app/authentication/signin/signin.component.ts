@@ -264,6 +264,10 @@ export class SigninComponent implements OnInit {
                 String(employee.CanFindFuelEntry ?? employee.canFindFuelEntry ?? false)
               );
               localStorage.setItem(
+                'canCloseIncident',
+                String(employee.CanCloseIncident ?? employee.canCloseIncident ?? false)
+              );
+              localStorage.setItem(
                 'canEditDSAfterGoodForBilling',
                 (employee.CanEditDSAfterGoodForBilling === true ||
                   employee.canEditDSAfterGoodForBilling === true ||

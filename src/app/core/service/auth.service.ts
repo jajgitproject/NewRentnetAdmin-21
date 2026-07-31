@@ -242,6 +242,8 @@ export class AuthService {
               rawEmployee.CanDeleteFuelEntry ?? rawEmployee.canDeleteFuelEntry,
             CanFindFuelEntry:
               rawEmployee.CanFindFuelEntry ?? rawEmployee.canFindFuelEntry,
+            CanCloseIncident:
+              rawEmployee.CanCloseIncident ?? rawEmployee.canCloseIncident,
             CanEditDSAfterGoodForBilling:
               rawEmployee.CanEditDSAfterGoodForBilling ??
               rawEmployee.canEditDSAfterGoodForBilling,

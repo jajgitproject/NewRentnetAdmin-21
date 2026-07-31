@@ -136,7 +136,7 @@ export class BookingMisComponent implements OnInit, OnDestroy {
   buildSearchCriteria(): SearchCriteria {
     return {
       UserID: this.generalService.getUserID(),
-      ShowAllLocation: this.generalService.getShowAllLocation(),
+      ShowAllLocation: null,
       SearchModeOfPayment: this.modeOfPayment?.value || '',
       SearchServiceLocation: this.serviceLocation?.value || '',
       SearchCustomer: this.customer?.value || '',
