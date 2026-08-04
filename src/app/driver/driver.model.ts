@@ -7,6 +7,13 @@ export class Driver {
    driverFatherName:string;
    driverGrade:string;
    driverEmail:string;
+   driverRemark:string;
+   driverBackGroundVerificationCheck:boolean;
+   driverBackGroundVerificationCheckIssueDate:Date;
+   driverBackGroundVerificationCheckIssueDateString:string;
+   driverFitnessCertificate:boolean;
+   driverFitnessCertificateIssueDate:Date;
+   driverFitnessCertificateIssueDateString:string;
    driverOfficialIdentityNumber:string;
    aadharAuthenticationToken:string;
    dob:Date;
@@ -73,6 +80,11 @@ export class Driver {
        this.driverID = driver.driverID || -1;
        this.driverName = driver.driverName || '';
        this.driverEmail = driver.driverEmail || '';
+       this.driverRemark = driver.driverRemark || '';
+       this.driverBackGroundVerificationCheck = driver.driverBackGroundVerificationCheck ?? null;
+       this.driverBackGroundVerificationCheckIssueDateString = driver.driverBackGroundVerificationCheckIssueDateString || '';
+       this.driverFitnessCertificate = driver.driverFitnessCertificate ?? null;
+       this.driverFitnessCertificateIssueDateString = driver.driverFitnessCertificateIssueDateString || '';
        this.driverGradeID = driver.driverGradeID || '';
        this.driverFatherName = driver.driverFatherName || '';
        this.driverOfficialIdentityNumber = driver.driverOfficialIdentityNumber || '';
@@ -131,6 +143,10 @@ export class Driver {
        this.dateOfJoining=new Date();
        //this.dateOfLeaving=new Date();
        this.drivingSinceDate=new Date();
+       this.driverBackGroundVerificationCheckIssueDate = driver.driverBackGroundVerificationCheckIssueDate
+         ? new Date(driver.driverBackGroundVerificationCheckIssueDate) : null;
+       this.driverFitnessCertificateIssueDate = driver.driverFitnessCertificateIssueDate
+         ? new Date(driver.driverFitnessCertificateIssueDate) : null;
     }
   }
 

@@ -623,6 +623,85 @@ advanceTableForm.get('localAddressAddressString')?.invalid &&
             </div>
 
             <div class="row">
+                <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                    <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                        <mat-label>Driver Email</mat-label>
+                        <input matInput formControlName="driverEmail" type="email">
+                    </mat-form-field>
+                </div>
+                <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                    <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                        <mat-label>Driver Remark</mat-label>
+                        <input matInput formControlName="driverRemark">
+                    </mat-form-field>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                    <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                        <mat-label>Background Verification Check</mat-label>
+                        <mat-select required formControlName="driverBackGroundVerificationCheck"
+                            (selectionChange)="onBackGroundVerificationChange($event.value)">
+                            <mat-option [value]="true">Yes</mat-option>
+                            <mat-option [value]="false">No</mat-option>
+                        </mat-select>
+                        <mat-error *ngIf="advanceTableForm.get('driverBackGroundVerificationCheck')?.hasError('required')">
+                            Background Verification Check is required
+                        </mat-error>
+                    </mat-form-field>
+                </div>
+                <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                    <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                        <mat-label>Background Verification Issue Date</mat-label>
+                        <input matInput [matDatepicker]="bgvIssueDate" placeholder="DD/MM/YYYY"
+                            formControlName="driverBackGroundVerificationCheckIssueDate"
+                            (blur)="onBlurBackGroundVerificationIssueDate($event.target.value)">
+                        <mat-datepicker-toggle matSuffix [for]="bgvIssueDate"></mat-datepicker-toggle>
+                        <mat-datepicker #bgvIssueDate></mat-datepicker>
+                        <mat-error *ngIf="advanceTableForm.get('driverBackGroundVerificationCheckIssueDate')?.hasError('required')">
+                            Background Verification Issue Date is required
+                        </mat-error>
+                        <mat-error *ngIf="advanceTableForm.get('driverBackGroundVerificationCheckIssueDate')?.hasError('invalidDate')">
+                            Invalid date format. Use DD/MM/YYYY.
+                        </mat-error>
+                    </mat-form-field>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                    <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                        <mat-label>Fitness Certificate</mat-label>
+                        <mat-select required formControlName="driverFitnessCertificate"
+                            (selectionChange)="onFitnessCertificateChange($event.value)">
+                            <mat-option [value]="true">Yes</mat-option>
+                            <mat-option [value]="false">No</mat-option>
+                        </mat-select>
+                        <mat-error *ngIf="advanceTableForm.get('driverFitnessCertificate')?.hasError('required')">
+                            Fitness Certificate is required
+                        </mat-error>
+                    </mat-form-field>
+                </div>
+                <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                    <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                        <mat-label>Fitness Certificate Issue Date</mat-label>
+                        <input matInput [matDatepicker]="fitnessIssueDate" placeholder="DD/MM/YYYY"
+                            formControlName="driverFitnessCertificateIssueDate"
+                            (blur)="onBlurFitnessCertificateIssueDate($event.target.value)">
+                        <mat-datepicker-toggle matSuffix [for]="fitnessIssueDate"></mat-datepicker-toggle>
+                        <mat-datepicker #fitnessIssueDate></mat-datepicker>
+                        <mat-error *ngIf="advanceTableForm.get('driverFitnessCertificateIssueDate')?.hasError('required')">
+                            Fitness Certificate Issue Date is required
+                        </mat-error>
+                        <mat-error *ngIf="advanceTableForm.get('driverFitnessCertificateIssueDate')?.hasError('invalidDate')">
+                            Invalid date format. Use DD/MM/YYYY.
+                        </mat-error>
+                    </mat-form-field>
+                </div>
+            </div>
+
+            <div class="row">
 
                 <!-- <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
                     <mat-form-field class="example-full-width" appearance="outline" floatLabel="always"> 

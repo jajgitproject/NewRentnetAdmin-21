@@ -149,6 +149,14 @@ saveDisabled:boolean = true;
           this.onBlurUpdateEndDateEdit(dateOfJoining);
           this.onBlurUpdatedateOfLeavingEdit(dateOfLeaving);
           this.onBlurUpdatedrivingSinceDateEdit(drivingSinceDate);
+          if (this.advanceTable.driverBackGroundVerificationCheckIssueDate) {
+            const bgvIssueDate = moment(this.advanceTable.driverBackGroundVerificationCheckIssueDate).format('DD/MM/yyyy');
+            this.onBlurBackGroundVerificationIssueDateEdit(bgvIssueDate);
+          }
+          if (this.advanceTable.driverFitnessCertificateIssueDate) {
+            const fitnessIssueDate = moment(this.advanceTable.driverFitnessCertificateIssueDate).format('DD/MM/yyyy');
+            this.onBlurFitnessCertificateIssueDateEdit(fitnessIssueDate);
+          }
           if (this.advanceTable.mobile1) {
             const mobileParts = this.advanceTable.mobile1.split('-');
             const countryCodes = '+'+''+mobileParts[0];
@@ -223,10 +231,49 @@ saveDisabled:boolean = true;
     this.InitCountryISDCode();
     this.InitCompany();
 
+    this.setupConditionalDateValidators();
+
     if (this.action === 'edit') {
       // Show field errors immediately for incomplete/invalid DB records
       setTimeout(() => this.showAllValidationErrors(), 0);
     }
+  }
+
+  setupConditionalDateValidators(): void {
+    this.onBackGroundVerificationChange(
+      this.advanceTableForm?.get('driverBackGroundVerificationCheck')?.value
+    );
+    this.onFitnessCertificateChange(
+      this.advanceTableForm?.get('driverFitnessCertificate')?.value
+    );
+  }
+
+  onBackGroundVerificationChange(value: boolean): void {
+    const dateControl = this.advanceTableForm?.get('driverBackGroundVerificationCheckIssueDate');
+    if (!dateControl) {
+      return;
+    }
+    if (value === true) {
+      dateControl.setValidators([Validators.required]);
+    } else {
+      dateControl.clearValidators();
+      dateControl.setValue(null);
+    }
+    dateControl.updateValueAndValidity({ emitEvent: false });
+  }
+
+  onFitnessCertificateChange(value: boolean): void {
+    const dateControl = this.advanceTableForm?.get('driverFitnessCertificateIssueDate');
+    if (!dateControl) {
+      return;
+    }
+    if (value === true) {
+      dateControl.setValidators([Validators.required]);
+    } else {
+      dateControl.clearValidators();
+      dateControl.setValue(null);
+    }
+    dateControl.updateValueAndValidity({ emitEvent: false });
   }
  
   companyNameValidator(CompanyList: any[]): ValidatorFn {
@@ -936,7 +983,12 @@ saveDisabled:boolean = true;
       bloodGroup: [this.advanceTable?.bloodGroup, [Validators.required]],
       driverStatus: [this.advanceTable?.driverStatus, [Validators.required]],
       dateOfJoining: [this.advanceTable?.dateOfJoining, [Validators.required]],
-      //driverEmail: [this.advanceTable?.driverEmail],
+      driverEmail: [this.advanceTable?.driverEmail],
+      driverRemark: [this.advanceTable?.driverRemark],
+      driverBackGroundVerificationCheck: [this.advanceTable?.driverBackGroundVerificationCheck, [Validators.required]],
+      driverBackGroundVerificationCheckIssueDate: [this.advanceTable?.driverBackGroundVerificationCheckIssueDate],
+      driverFitnessCertificate: [this.advanceTable?.driverFitnessCertificate, [Validators.required]],
+      driverFitnessCertificateIssueDate: [this.advanceTable?.driverFitnessCertificateIssueDate],
       dateOfLeaving: [this.advanceTable?.dateOfLeaving],
       localAddressAddressString: [this.advanceTable?.localAddressAddressString,[Validators.required, this.googlePickupValidator()]],
       localAddressLatLong: [this.advanceTable?.localAddressLatLong],
@@ -1462,6 +1514,72 @@ else{
 } else {
 this.advanceTableForm?.get('drivingSinceDate')?.setErrors({ invalidDate: true });
 }
+}
+
+onBlurBackGroundVerificationIssueDate(value: string): void {
+  if (!value) {
+    if (this.advanceTableForm?.get('driverBackGroundVerificationCheck')?.value === true) {
+      this.advanceTableForm?.get('driverBackGroundVerificationCheckIssueDate')?.setErrors({ required: true });
+    } else {
+      this.advanceTableForm?.get('driverBackGroundVerificationCheckIssueDate')?.setValue(null);
+    }
+    return;
+  }
+  value = this._generalService.resetDateiflessthan12(value);
+  const validDate = moment(value, 'DD/MM/YYYY', true).isValid();
+  if (validDate) {
+    const formattedDate = moment(value, 'DD/MM/YYYY').toDate();
+    this.advanceTableForm?.get('driverBackGroundVerificationCheckIssueDate')?.setValue(formattedDate);
+  } else {
+    this.advanceTableForm?.get('driverBackGroundVerificationCheckIssueDate')?.setErrors({ invalidDate: true });
+  }
+}
+
+onBlurBackGroundVerificationIssueDateEdit(value: string): void {
+  const validDate = moment(value, 'DD/MM/YYYY', true).isValid();
+  if (validDate) {
+    const formattedDate = moment(value, 'DD/MM/YYYY').toDate();
+    if (this.action === 'edit') {
+      this.advanceTable.driverBackGroundVerificationCheckIssueDate = formattedDate;
+    } else {
+      this.advanceTableForm?.get('driverBackGroundVerificationCheckIssueDate')?.setValue(formattedDate);
+    }
+  } else {
+    this.advanceTableForm?.get('driverBackGroundVerificationCheckIssueDate')?.setErrors({ invalidDate: true });
+  }
+}
+
+onBlurFitnessCertificateIssueDate(value: string): void {
+  if (!value) {
+    if (this.advanceTableForm?.get('driverFitnessCertificate')?.value === true) {
+      this.advanceTableForm?.get('driverFitnessCertificateIssueDate')?.setErrors({ required: true });
+    } else {
+      this.advanceTableForm?.get('driverFitnessCertificateIssueDate')?.setValue(null);
+    }
+    return;
+  }
+  value = this._generalService.resetDateiflessthan12(value);
+  const validDate = moment(value, 'DD/MM/YYYY', true).isValid();
+  if (validDate) {
+    const formattedDate = moment(value, 'DD/MM/YYYY').toDate();
+    this.advanceTableForm?.get('driverFitnessCertificateIssueDate')?.setValue(formattedDate);
+  } else {
+    this.advanceTableForm?.get('driverFitnessCertificateIssueDate')?.setErrors({ invalidDate: true });
+  }
+}
+
+onBlurFitnessCertificateIssueDateEdit(value: string): void {
+  const validDate = moment(value, 'DD/MM/YYYY', true).isValid();
+  if (validDate) {
+    const formattedDate = moment(value, 'DD/MM/YYYY').toDate();
+    if (this.action === 'edit') {
+      this.advanceTable.driverFitnessCertificateIssueDate = formattedDate;
+    } else {
+      this.advanceTableForm?.get('driverFitnessCertificateIssueDate')?.setValue(formattedDate);
+    }
+  } else {
+    this.advanceTableForm?.get('driverFitnessCertificateIssueDate')?.setErrors({ invalidDate: true });
+  }
 }
 
   /////////////////for Image Upload////////////////////////////

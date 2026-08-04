@@ -168,6 +168,20 @@ export class DriverService
       advanceTable.dateOfLeaving=null;
     }
     advanceTable.drivingSinceDateString=this.generalService.getTimeApplicable(advanceTable.drivingSinceDate);
+    if (advanceTable.driverBackGroundVerificationCheckIssueDate) {
+      advanceTable.driverBackGroundVerificationCheckIssueDateString =
+        this.generalService.getTimeApplicable(advanceTable.driverBackGroundVerificationCheckIssueDate);
+    } else {
+      advanceTable.driverBackGroundVerificationCheckIssueDate = null;
+      advanceTable.driverBackGroundVerificationCheckIssueDateString = null;
+    }
+    if (advanceTable.driverFitnessCertificateIssueDate) {
+      advanceTable.driverFitnessCertificateIssueDateString =
+        this.generalService.getTimeApplicable(advanceTable.driverFitnessCertificateIssueDate);
+    } else {
+      advanceTable.driverFitnessCertificateIssueDate = null;
+      advanceTable.driverFitnessCertificateIssueDateString = null;
+    }
     return this.httpClient.post<any>(this.API_URL , advanceTable);
   }
   update(advanceTable: Driver)
@@ -189,6 +203,20 @@ export class DriverService
       advanceTable.dateOfLeaving=null;
     }
     advanceTable.drivingSinceDateString=this.generalService.getTimeApplicable(advanceTable.drivingSinceDate);
+    if (advanceTable.driverBackGroundVerificationCheckIssueDate) {
+      advanceTable.driverBackGroundVerificationCheckIssueDateString =
+        this.generalService.getTimeApplicable(advanceTable.driverBackGroundVerificationCheckIssueDate);
+    } else {
+      advanceTable.driverBackGroundVerificationCheckIssueDate = null;
+      advanceTable.driverBackGroundVerificationCheckIssueDateString = null;
+    }
+    if (advanceTable.driverFitnessCertificateIssueDate) {
+      advanceTable.driverFitnessCertificateIssueDateString =
+        this.generalService.getTimeApplicable(advanceTable.driverFitnessCertificateIssueDate);
+    } else {
+      advanceTable.driverFitnessCertificateIssueDate = null;
+      advanceTable.driverFitnessCertificateIssueDateString = null;
+    }
     return this.httpClient.put<any>(this.API_URL , advanceTable);
   }
   delete(driverID: number):  Observable<any> 
