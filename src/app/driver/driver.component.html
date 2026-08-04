@@ -251,6 +251,13 @@
                                                 {{row.driverName}}</mat-cell>
                                         </ng-container>
 
+                                        <ng-container matColumnDef="oldRentnetCode">
+                                            <mat-header-cell *matHeaderCellDef mat-sort-header>Old Rentnet
+                                                Code</mat-header-cell>
+                                            <mat-cell *matCellDef="let row" (contextmenu)="onContextMenu($event, row)">
+                                                {{ row.oldRentnetCode != null && row.oldRentnetCode !== 0 ? row.oldRentnetCode : '' }}</mat-cell>
+                                        </ng-container>
+
                                         <ng-container matColumnDef="supplierCode">
                                             <mat-header-cell *matHeaderCellDef mat-sort-header>Supplier
                                                 Code</mat-header-cell>

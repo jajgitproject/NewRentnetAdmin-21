@@ -41,7 +41,9 @@ interface MenuItem {
 })
 export class DriverComponent implements OnInit {
   displayedColumns = [
+    'actions',
     'driverName',
+    'oldRentnetCode',
     'supplierName',
     'driverEmail',
     'mobile1',
@@ -51,8 +53,7 @@ export class DriverComponent implements OnInit {
     'location',
     'driverImage',
      'isAdhoc',
-    'status',
-    'actions'
+    'status'
   ];
 
   dataSource: Driver[] | null;
