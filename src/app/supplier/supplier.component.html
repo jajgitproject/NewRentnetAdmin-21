@@ -110,29 +110,11 @@
                                         <div class="col-lg-6">
                                             <div class="form-group">
                                                 <div class="input-group">
-                                                    <!-- Dropdown for selecting Type, Parent, City -->
-                                                    <div class="input-group-append input-group-addon">
-                                                        <select style="height: 40px; width: 160px;" class="form-control"
-                                                            [(ngModel)]="selectedFilter"
-                                                            (ngModelChange)="onSelectedFilterChange()">
-                                                            <option value="search" hidden>Search By</option>
-                                                            <option value="SupplierName">Supplier Name</option>
-                                                            <option value="city">City</option>
-                                                            <option value="phone">Phone</option>
-                                                            <option value="email">Email</option>
-                                                            <option value="supplierStatus">Supplier Status</option>
-                                                            <option value="verificationStatus">Verification Status
-                                                            </option>
-                                                            <option value="supplierRegistrationDate">Registration Date
-                                                            </option>
-                                                        </select>
-                                                    </div>
-
-                                                    <!-- Input field for filtering -->
                                                     <input type="text"
                                                         matInput
-                                                        style="height: 40px; width: 300px;padding-left: 5px;"
-                                                        class="form-control" placeholder="Type 3+ characters"
+                                                        style="height: 40px; width: 460px;padding-left: 5px;"
+                                                        class="form-control"
+                                                        placeholder="Search by Supplier Name / Old Rentnet Code / PAN"
                                                         id="inputGroup"
                                                         (keyup)="onBackPress($event)"
                                                         (keyup.enter)="Filter()"
@@ -231,7 +213,7 @@
                                             <mat-header-cell *matHeaderCellDef mat-sort-header>Supplier
                                                 Name</mat-header-cell>
                                             <mat-cell *matCellDef="let row" (contextmenu)="onContextMenu($event, row)">
-                                                {{row.supplierName}}</mat-cell>
+                                                {{ formatSupplierDisplay(row) }}</mat-cell>
                                         </ng-container>
 
                                         <ng-container matColumnDef="city">
@@ -259,12 +241,46 @@
                                                 {{ getSupplierCode(row) }}</mat-cell>
                                         </ng-container>
 
+                                        <ng-container matColumnDef="supplierType">
+                                            <mat-header-cell *matHeaderCellDef mat-sort-header>Supplier
+                                                Type</mat-header-cell>
+                                            <mat-cell *matCellDef="let row">
+                                                {{ row.supplierType || 'N/A' }}</mat-cell>
+                                        </ng-container>
+
+                                        <ng-container matColumnDef="paymentBasis">
+                                            <mat-header-cell *matHeaderCellDef mat-sort-header>Payment
+                                                Basis</mat-header-cell>
+                                            <mat-cell *matCellDef="let row">
+                                                {{ row.paymentBasis || 'N/A' }}</mat-cell>
+                                        </ng-container>
+
+                                        <ng-container matColumnDef="dateOfAgreement">
+                                            <mat-header-cell *matHeaderCellDef mat-sort-header>Date Of
+                                                Agreement</mat-header-cell>
+                                            <mat-cell *matCellDef="let row">
+                                                {{ row.dateOfAgreement ? (row.dateOfAgreement | date: 'dd-MM-yyyy') : 'N/A' }}
+                                            </mat-cell>
+                                        </ng-container>
+
+                                        <ng-container matColumnDef="supplierAgreementBranch">
+                                            <mat-header-cell *matHeaderCellDef mat-sort-header>Branch</mat-header-cell>
+                                            <mat-cell *matCellDef="let row">
+                                                {{ row.supplierAgreementBranch || 'N/A' }}</mat-cell>
+                                        </ng-container>
+
                                         <ng-container matColumnDef="isAdhoc">
                                             <mat-header-cell *matHeaderCellDef mat-sort-header>Is
                                                 Adhoc</mat-header-cell>
                                             <mat-cell *matCellDef="let row" (contextmenu)="onContextMenu($event, row)">
                                                 {{ row.isAdhoc === true ? 'Yes' : row.isAdhoc === false ? 'No' : 'N/A' }}
                                             </mat-cell>
+                                        </ng-container>
+
+                                        <ng-container matColumnDef="supplierCreationRemark">
+                                            <mat-header-cell *matHeaderCellDef mat-sort-header>Remark</mat-header-cell>
+                                            <mat-cell *matCellDef="let row">
+                                                {{ row.supplierCreationRemark || 'N/A' }}</mat-cell>
                                         </ng-container>
 
                                         <ng-container matColumnDef="supplierVerificationStatus">

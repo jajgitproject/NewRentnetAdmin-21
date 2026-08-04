@@ -31,6 +31,11 @@ export class Supplier {
    isAdhoc:boolean;
    pan:string;
    oldRentnetCode:number;
+   paymentBasis:string;
+   supplierPercentage:number;
+   dateOfAgreement:string;
+   supplierAgreementBranchID:number;
+   supplierAgreementBranch:string;
 
   constructor(supplier) {
     {
@@ -53,6 +58,15 @@ export class Supplier {
       this.isAdhoc = supplier.isAdhoc || '';
       this.pan = supplier.pan || '';
       this.oldRentnetCode = (supplier.oldRentnetCode && supplier.oldRentnetCode !== 0) ? Number(supplier.oldRentnetCode) : null;
+      this.paymentBasis = supplier.paymentBasis || '';
+      this.supplierPercentage = (supplier.supplierPercentage !== null && supplier.supplierPercentage !== undefined && supplier.supplierPercentage !== '')
+        ? Number(supplier.supplierPercentage)
+        : null;
+      this.dateOfAgreement = supplier.dateOfAgreement || null;
+      this.supplierAgreementBranchID = (supplier.supplierAgreementBranchID && supplier.supplierAgreementBranchID !== 0)
+        ? Number(supplier.supplierAgreementBranchID)
+        : null;
+      this.supplierAgreementBranch = supplier.supplierAgreementBranch || '';
     }
   }
   

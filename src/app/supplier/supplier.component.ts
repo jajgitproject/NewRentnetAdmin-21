@@ -21,6 +21,7 @@ import { MyUploadComponent } from '../myupload/myupload.component';
 import { FormControl } from '@angular/forms';
 import { Router } from '@angular/router';
 import { CitiesDropDown } from '../organizationalEntity/citiesDropDown.model';
+import { formatSupplierDisplay } from './supplier-display.util';
 interface MenuItem {
   label: string;
   action: (item: any) => void;
@@ -36,15 +37,20 @@ interface MenuItem {
 })
 export class SupplierComponent implements OnInit {
   displayedColumns = [
+    'actions',
     'supplierName',
     'supplierCode',
+    'supplierType',
+    'paymentBasis',
+    'dateOfAgreement',
+    'supplierAgreementBranch',
     'city',
     'phone',
     'email',
     'isAdhoc',
+    'supplierCreationRemark',
     'supplierVerificationStatus',
-    'supplierRegistrationDate',
-    'actions'
+    'supplierRegistrationDate'
   ];
   dataSource: Supplier[] | null;
   hasSearched = false;
@@ -89,8 +95,7 @@ export class SupplierComponent implements OnInit {
  filteredFilterOptions: Observable<string[]>;
  filterSuggestions: string[] = [];
  private suggestionRefresh$ = new BehaviorSubject<void>(undefined);
- private readonly supplierStatusOptions = ['Active', 'Inactive'];
- private readonly verificationStatusOptions = ['Approved', 'UnVerified', 'Rejected', 'Pending'];
+ formatSupplierDisplay = formatSupplierDisplay;
 
   // supplierMenuItems: any[] = [
   //   //{ label: 'Rate Card', route: '/supplierRateCard', tooltip: 'Rate Card' },
@@ -220,37 +225,16 @@ export class SupplierComponent implements OnInit {
     this.Filter();
   }
 
-  private getEffectiveFilter(): string {
-    return !this.selectedFilter || this.selectedFilter === 'search'
-      ? 'SupplierName'
-      : this.selectedFilter;
-  }
-
   private getLocalFilterOptions(value: string): string[] {
     const term = (value || '').trim();
     if (term.length < 3) {
       return [];
     }
 
-    const filter = this.getEffectiveFilter();
     const lower = term.toLowerCase();
-
-    switch (filter) {
-      case 'city':
-        return this._filterCity(term).map((city) => city.geoPointName);
-      case 'supplierStatus':
-        return this.supplierStatusOptions.filter((option) =>
-          option.toLowerCase().includes(lower)
-        );
-      case 'verificationStatus':
-        return this.verificationStatusOptions.filter((option) =>
-          option.toLowerCase().includes(lower)
-        );
-      default:
-        return this.filterSuggestions.filter((option) =>
-          option.toLowerCase().includes(lower)
-        );
-    }
+    return this.filterSuggestions.filter((option) =>
+      option.toLowerCase().includes(lower)
+    );
   }
 
   private updateFilterSuggestions(data: Supplier[]): void {
@@ -260,39 +244,31 @@ export class SupplierComponent implements OnInit {
       return;
     }
 
-    const filter = this.getEffectiveFilter();
     const values = (data || [])
-      .map((row) => this.getSuggestionValue(row, filter))
-      .filter((value) => !!value);
+      .map((row) => formatSupplierDisplay(row))
+      .filter((value) => !!value && value !== '##');
     this.filterSuggestions = [...new Set(values)];
     this.suggestionRefresh$.next();
   }
 
-  private getSuggestionValue(row: Supplier, filter: string): string {
-    switch (filter) {
-      case 'SupplierName':
-        return row.supplierName || '';
-      case 'phone':
-        return row.phone || '';
-      case 'email':
-        return row.email || '';
-      case 'supplierRegistrationDate':
-        if (!row.supplierRegistrationDate) {
-          return '';
-        }
-        {
-          const date = new Date(row.supplierRegistrationDate);
-          if (isNaN(date.getTime())) {
-            return '';
-          }
-          const dd = String(date.getDate()).padStart(2, '0');
-          const mm = String(date.getMonth() + 1).padStart(2, '0');
-          const yyyy = date.getFullYear();
-          return `${dd}-${mm}-${yyyy}`;
-        }
-      default:
-        return '';
+  private getSearchTerm(): string {
+    let term = (this.filterCtrl.value || this.searchTerm || '').trim();
+    // If autocomplete selection is Name#Code#PAN, search using the typed/selected text's name part
+    // so backend OR-match still works for PAN / OldRentnetCode typed values.
+    if (term.includes('#')) {
+      const parts = term.split('#');
+      // Prefer Old Rentnet Code when present, else name, else PAN
+      if (parts[1] && parts[1].trim()) {
+        return parts[1].trim();
+      }
+      if (parts[0] && parts[0].trim()) {
+        return parts[0].trim();
+      }
+      if (parts[2] && parts[2].trim()) {
+        return parts[2].trim();
+      }
     }
+    return term;
   }
   private _filterCity(value: string): any {
     const filterValue = value.toLowerCase();
@@ -389,34 +365,7 @@ export class SupplierComponent implements OnInit {
 
   private applyInlineSearchCriteria(): void {
     this.clearSearchCriteria();
-    const term = (this.filterCtrl.value || this.searchTerm || '').trim();
-    const filter = this.getEffectiveFilter();
-
-    switch (filter) {
-      case 'SupplierName':
-        this.SearchName = term;
-        break;
-      case 'city':
-        this.city.setValue(term, { emitEvent: false });
-        break;
-      case 'phone':
-        this.SearchPhone = term;
-        break;
-      case 'email':
-        this.SearchEmail = term;
-        break;
-      case 'supplierStatus':
-        this.SearchSupplierStatus = term;
-        break;
-      case 'verificationStatus':
-        this.SearchSupplierVerificationStatus = term;
-        break;
-      case 'supplierRegistrationDate':
-        this.SearchSupplierRegistrationDate = term;
-        break;
-      default:
-        break;
-    }
+    this.SearchName = this.getSearchTerm();
   }
 
    public loadData(fromInlineSearch = false) 

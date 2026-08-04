@@ -57,6 +57,8 @@ export class FormDialogComponent
   public CompanyList?: OrganizationalEntityDropDown[] = [];
   filteredCompanyOptions: Observable<OrganizationalEntityDropDown[]>;
 
+  public BranchList?: OrganizationalEntityDropDown[] = [];
+
   image: any;
   fileUploadEl: any;
   stateOnCityID: any;
@@ -113,6 +115,7 @@ export class FormDialogComponent
   {
     this.InitCountries();
     this.InitSupplierType();
+    this.InitAgreementBranch();
     //this.InitCompany();
   }
 
@@ -229,8 +232,37 @@ export class FormDialogComponent
       oldRentnetCode: [
         (this.advanceTable.oldRentnetCode && this.advanceTable.oldRentnetCode !== 0) ? this.advanceTable.oldRentnetCode : null,
         [Validators.required, Validators.pattern(/^[0-9]+$/)]
+      ],
+      paymentBasis: [this.advanceTable.paymentBasis || ''],
+      supplierPercentage: [
+        (this.advanceTable.supplierPercentage !== null && this.advanceTable.supplierPercentage !== undefined)
+          ? this.advanceTable.supplierPercentage
+          : null
+      ],
+      dateOfAgreement: [
+        this.advanceTable.dateOfAgreement
+          ? new Date(this.advanceTable.dateOfAgreement)
+          : null
+      ],
+      supplierAgreementBranchID: [
+        (this.advanceTable.supplierAgreementBranchID && this.advanceTable.supplierAgreementBranchID !== 0)
+          ? this.advanceTable.supplierAgreementBranchID
+          : null
       ]
     });
+  }
+
+  OnPaymentBasisChange(): void {
+    if (this.advanceTableForm.value.paymentBasis !== 'Percentage Basis') {
+      this.advanceTableForm.controls['supplierPercentage'].setValue(null);
+    }
+  }
+
+  InitAgreementBranch(): void {
+    this._generalService.GetOrganizationalBranch().subscribe(
+      data => {
+        this.BranchList = data || [];
+      });
   }
 
   public noWhitespaceValidator(control: FormControl) {
@@ -264,7 +296,8 @@ showDetails(){
       oldRentnetCode: this.getOldRentnetCode()
     });
 
-    this.advanceTableService.add(this.advanceTableForm.getRawValue()).subscribe(
+    const payload = this.buildSupplierPayload(this.advanceTableForm.getRawValue());
+    this.advanceTableService.add(payload).subscribe(
       response => {
         this.isLoading = false;
         if (response && response.success === false) {
@@ -299,7 +332,7 @@ showDetails(){
       new Date(this.advanceTableForm.controls['supplierRegistrationDate'].value)
     );
 
-    const payload = this.advanceTableForm.getRawValue();
+    const payload = this.buildSupplierPayload(this.advanceTableForm.getRawValue());
     delete payload.supplierOfficialIdentityNumber;
 
     this.advanceTableService.update(payload).subscribe(
@@ -336,6 +369,56 @@ showDetails(){
     return Number(value);
   }
 
+  getPaymentBasis(): string | null {
+    const value = this.advanceTableForm.get('paymentBasis')?.value;
+    if (value === null || value === undefined || value === '') {
+      return null;
+    }
+    return value;
+  }
+
+  getSupplierPercentage(): number | null {
+    if (this.advanceTableForm.get('paymentBasis')?.value !== 'Percentage Basis') {
+      return null;
+    }
+    const value = this.advanceTableForm.get('supplierPercentage')?.value;
+    if (value === null || value === undefined || value === '') {
+      return null;
+    }
+    const parsed = Number(value);
+    return Number.isFinite(parsed) ? parsed : null;
+  }
+
+  /** Normalize optional fields so empty strings are never sent for decimal/nullables (API 400). */
+  buildSupplierPayload(raw: any): any {
+    const payload = { ...raw };
+    payload.paymentBasis = this.getPaymentBasis();
+    payload.supplierPercentage = this.getSupplierPercentage();
+    if (payload.paymentBasis === '' || payload.paymentBasis === undefined) {
+      payload.paymentBasis = null;
+    }
+    if (payload.supplierPercentage === '' || payload.supplierPercentage === undefined || Number.isNaN(payload.supplierPercentage)) {
+      payload.supplierPercentage = null;
+    }
+
+    const dateValue = this.advanceTableForm.get('dateOfAgreement')?.value;
+    if (!dateValue || dateValue === '') {
+      payload.dateOfAgreement = null;
+    } else {
+      const parsed = dateValue instanceof Date ? dateValue : new Date(dateValue);
+      payload.dateOfAgreement = isNaN(parsed.getTime()) ? null : parsed;
+    }
+
+    const branchId = this.advanceTableForm.get('supplierAgreementBranchID')?.value;
+    if (branchId === null || branchId === undefined || branchId === '' || Number(branchId) <= 0) {
+      payload.supplierAgreementBranchID = null;
+    } else {
+      payload.supplierAgreementBranchID = Number(branchId);
+    }
+
+    return payload;
+  }
+
   keyPressAlphaNumeric(event: KeyboardEvent): boolean {
     const charCode = event.which ? event.which : event.keyCode;
     if ((charCode >= 48 && charCode <= 57) || (charCode >= 65 && charCode <= 90) || (charCode >= 97 && charCode <= 122)) {
@@ -359,6 +442,15 @@ showDetails(){
     if (panControl?.value) {
       panControl.setValue(String(panControl.value).trim().toUpperCase());
     }
+  }
+
+  keyPressNumbersDecimal(event): boolean {
+    const charCode = (event.which) ? event.which : event.keyCode;
+    if (charCode != 46 && charCode > 31 && (charCode < 48 || charCode > 57)) {
+      event.preventDefault();
+      return false;
+    }
+    return true;
   }
   public confirmAdd(): void 
   {

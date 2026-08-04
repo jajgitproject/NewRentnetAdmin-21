@@ -253,6 +253,49 @@
 
       <div class="row">
         <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+          <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+            <mat-label>Payment Basis</mat-label>
+            <mat-select formControlName="paymentBasis" (selectionChange)="OnPaymentBasisChange()">
+              <mat-option value="">--Select--</mat-option>
+              <mat-option value="Net Basis">Net Basis</mat-option>
+              <mat-option value="Percentage Basis">Percentage Basis</mat-option>
+            </mat-select>
+          </mat-form-field>
+        </div>
+
+        <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2" *ngIf="advanceTableForm.value.paymentBasis === 'Percentage Basis'">
+          <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+            <mat-label>Supplier Percentage</mat-label>
+            <input matInput formControlName="supplierPercentage" (keypress)="keyPressNumbersDecimal($event)" />
+          </mat-form-field>
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+          <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+            <mat-label>Date Of Agreement</mat-label>
+            <input matInput [matDatepicker]="dateOfAgreementPicker" formControlName="dateOfAgreement" />
+            <mat-datepicker-toggle matSuffix [for]="dateOfAgreementPicker"></mat-datepicker-toggle>
+            <mat-datepicker #dateOfAgreementPicker></mat-datepicker>
+          </mat-form-field>
+        </div>
+
+        <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+          <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+            <mat-label>Supplier Agreement Branch</mat-label>
+            <mat-select formControlName="supplierAgreementBranchID">
+              <mat-option [value]="null">--Select--</mat-option>
+              <mat-option *ngFor="let branch of BranchList" [value]="branch.organizationalEntityID">
+                {{ branch.organizationalEntityName }}
+              </mat-option>
+            </mat-select>
+          </mat-form-field>
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
           <div class="status-display">
             <strong>Supplier Official Identity Number: </strong>
             <span *ngIf="action === 'edit'">{{ advanceTable.supplierOfficialIdentityNumber }}</span>
