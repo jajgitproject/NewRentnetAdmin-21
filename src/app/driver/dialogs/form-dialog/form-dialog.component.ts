@@ -222,6 +222,11 @@ saveDisabled:boolean = true;
     this.InitCountryISDCodes();
     this.InitCountryISDCode();
     this.InitCompany();
+
+    if (this.action === 'edit') {
+      // Show field errors immediately for incomplete/invalid DB records
+      setTimeout(() => this.showAllValidationErrors(), 0);
+    }
   }
  
   companyNameValidator(CompanyList: any[]): ValidatorFn {
@@ -236,10 +241,9 @@ saveDisabled:boolean = true;
     this._generalService.GetCompany().subscribe(
       data=>{
         this.CompanyList=data;
-        this.advanceTableForm.controls['companyName'].setValidators([Validators.required,
+        this.applyControlValidators('companyName', [Validators.required,
           this.companyNameValidator(this.CompanyList)
         ]);
-        this.advanceTableForm.controls['companyName'].updateValueAndValidity();
         this.filteredCompanyOptions = this.advanceTableForm.controls['companyName'].valueChanges.pipe(
           startWith(""),
           map(value => this._filterCompany(value || ''))
@@ -286,10 +290,9 @@ saveDisabled:boolean = true;
     (
       data=>{
         this.CountryCodesList=data;
-        this.advanceTableForm.controls['countryCode'].setValidators([Validators.required,
+        this.applyControlValidators('countryCode', [Validators.required,
           this.countryTypeValidator(this.CountryCodesList)
         ]);
-        this.advanceTableForm.controls['countryCode'].updateValueAndValidity();
 
         this.filteredCountryCodeOptions = this.advanceTableForm.controls['countryCode'].valueChanges.pipe(
           startWith(""),
@@ -330,10 +333,9 @@ saveDisabled:boolean = true;
     (
       data=>{
         this.CountryCodeList=data;
-        this.advanceTableForm.controls['countryCodes'].setValidators([Validators.required,
+        this.applyControlValidators('countryCodes', [Validators.required,
           this.countryTypesValidator(this.CountryCodeList)
         ]);
-        this.advanceTableForm.controls['countryCodes'].updateValueAndValidity();
         this.filteredCountryCodesOptions = this.advanceTableForm.controls['countryCodes'].valueChanges.pipe(
           startWith(""),
           map(value => this._filterCountryCodes(value || ''))
@@ -364,15 +366,16 @@ saveDisabled:boolean = true;
       data=>
       {
         this.CityList=data;
-        this.advanceTableForm.controls['localAddressCity'].setValidators([Validators.required,
+        this.applyControlValidators('localAddressCity', [Validators.required,
           this.cityTypeValidator(this.CityList)
         ]);
-        this.advanceTableForm.controls['localAddressCity'].updateValueAndValidity();
-
-        this.filteredOptions = this.advanceTableForm.controls['localAddressCity'].valueChanges.pipe(
-          startWith(""),
-          map(value => this._filter(value || ''))
-        ); 
+        const control = this.advanceTableForm.get('localAddressCity');
+        if (control) {
+          this.filteredOptions = control.valueChanges.pipe(
+            startWith(""),
+            map(value => this._filter(value || ''))
+          );
+        }
       });
   }
 
@@ -412,14 +415,16 @@ saveDisabled:boolean = true;
       data=>
       {
         this.CitiesList=data;
-        this.advanceTableForm.controls['permanentAddressCity'].setValidators([Validators.required,
+        this.applyControlValidators('permanentAddressCity', [Validators.required,
           this.permanentTypeValidator(this.CitiesList)
         ]);
-        this.advanceTableForm.controls['permanentAddressCity'].updateValueAndValidity();
-        this.filteredCityOptions =this.advanceTableForm.controls['permanentAddressCity'].valueChanges.pipe(
-          startWith(""),
-          map(value => this._filtering(value || ''))
-        ); 
+        const control = this.advanceTableForm.get('permanentAddressCity');
+        if (control) {
+          this.filteredCityOptions = control.valueChanges.pipe(
+            startWith(""),
+            map(value => this._filtering(value || ''))
+          );
+        }
       });
   }
 
@@ -459,10 +464,9 @@ saveDisabled:boolean = true;
       data=>
       {
         this.SupplierList=data;
-        this.advanceTableForm.controls['supplier'].setValidators([Validators.required,
+        this.applyControlValidators('supplier', [Validators.required,
           this.supplieTypeValidator(this.SupplierList)
         ]);
-        this.advanceTableForm.controls['supplier'].updateValueAndValidity();
         this.syncSupplierDisplayFromId(this.SupplierList, this.advanceTable?.supplierID);
         this.filteredSupplierOptions =this.advanceTableForm.controls['supplier'].valueChanges.pipe(
           startWith(""),
@@ -552,9 +556,8 @@ saveDisabled:boolean = true;
       data=>
       {
         this.SupplierForOwnerList=data;
-        this.advanceTableForm.controls['supplier'].setValidators([Validators.required,
+        this.applyControlValidators('supplier', [Validators.required,
           this.supplierNameValidatorForOwner(this.SupplierForOwnerList)]);
-        this.advanceTableForm.controls['supplier'].updateValueAndValidity();
         this.syncSupplierDisplayFromId(this.SupplierForOwnerList, this.advanceTable?.supplierID);
         this.filteredSupplierForOwnerOptions = this.advanceTableForm.controls['supplier'].valueChanges.pipe(
           startWith(""),
@@ -597,14 +600,16 @@ saveDisabled:boolean = true;
       data=>
       { 
         this.HubList=data;
-        this.advanceTableForm.controls['hub'].setValidators([
+        this.applyControlValidators('hub', [
           this.hubTypeValidator(this.HubList)
         ]);
-        this.advanceTableForm.controls['hub'].updateValueAndValidity();
-        this.filteredHubOptions = this.advanceTableForm.controls['hub'].valueChanges.pipe(
-          startWith(""),
-          map(value => this._filterHub(value || ''))
-        ); 
+        const control = this.advanceTableForm.get('hub');
+        if (control) {
+          this.filteredHubOptions = control.valueChanges.pipe(
+            startWith(""),
+            map(value => this._filterHub(value || ''))
+          );
+        }
       });
   }
 
@@ -652,10 +657,9 @@ saveDisabled:boolean = true;
       data=>
       {
         this.LocationList=data;
-        this.advanceTableForm.controls['location'].setValidators([Validators.required,
+        this.applyControlValidators('location', [Validators.required,
           this.locationTypeValidator(this.LocationList)
         ]);
-        this.advanceTableForm.controls['location'].updateValueAndValidity();
         this.filteredLocationOptions = this.advanceTableForm.controls['location'].valueChanges.pipe(
           startWith(""),
           map(value => this._filterLocation(value || ''))
@@ -758,15 +762,16 @@ saveDisabled:boolean = true;
     this._generalService.getStateForInterstateTax().subscribe(
       data=>{
         this.StateLists=data;
-        this.advanceTableForm.controls['rtoState'].setValidators([Validators.required,
+        this.applyControlValidators('rtoState', [Validators.required,
           this.stateTypeValidator(this.StateLists)
         ]);
-        this.advanceTableForm.controls['rtoState'].updateValueAndValidity();
-        this.filteredStateOptions = this.advanceTableForm.controls['rtoState'].valueChanges.pipe(
-          startWith(""),
-          map(value => this._filterState(value || ''))
-        ); 
-       
+        const control = this.advanceTableForm.get('rtoState');
+        if (control) {
+          this.filteredStateOptions = control.valueChanges.pipe(
+            startWith(""),
+            map(value => this._filterState(value || ''))
+          );
+        }
       }
      
     );
@@ -863,68 +868,111 @@ saveDisabled:boolean = true;
   markAsTouched(controlName: string) {
     this.advanceTableForm.controls[controlName].markAsTouched();
   }
+
+  /** Force Material to display mat-error on every invalid control. */
+  showAllValidationErrors(): void {
+    if (!this.advanceTableForm) {
+      return;
+    }
+    this.advanceTableForm.markAllAsTouched();
+    Object.keys(this.advanceTableForm.controls).forEach((key) => {
+      const control = this.advanceTableForm.get(key);
+      if (!control) {
+        return;
+      }
+      control.markAsTouched({ onlySelf: true });
+      control.markAsDirty({ onlySelf: true });
+      control.updateValueAndValidity({ onlySelf: true, emitEvent: false });
+    });
+    this.advanceTableForm.updateValueAndValidity({ emitEvent: false });
+  }
+
+  private scrollToFirstInvalidControl(): void {
+    setTimeout(() => {
+      const invalidControl = this.el.nativeElement.querySelector(
+        '.mat-form-field.ng-invalid, .mat-mdc-form-field.ng-invalid, .ng-invalid[formcontrolname]'
+      );
+      if (invalidControl) {
+        invalidControl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
+    }, 0);
+  }
+
+  /** Safe apply validators then re-show errors in edit mode. */
+  private applyControlValidators(controlName: string, validators: any[]): void {
+    const control = this.advanceTableForm?.get(controlName);
+    if (!control) {
+      return;
+    }
+    control.setValidators(validators);
+    control.updateValueAndValidity({ emitEvent: false });
+    if (this.action === 'edit') {
+      control.markAsTouched({ onlySelf: true });
+      control.markAsDirty({ onlySelf: true });
+    }
+  }
   
   createContactForm(): FormGroup 
   {
     return this.fb.group(
     {
       driverID: [this.advanceTable?.driverID],
-      driverName: [this.toUpperValue(this.advanceTable?.driverName)],
+      driverName: [this.toUpperValue(this.advanceTable?.driverName), [Validators.required]],
       //driverGradeID: [this.advanceTable?.driverGradeID],
       //driverGrade:[this.advanceTable?.driverGrade],
-      driverFatherName: [this.toUpperValue(this.advanceTable?.driverFatherName)],
+      driverFatherName: [this.toUpperValue(this.advanceTable?.driverFatherName), [Validators.required]],
       driverOfficialIdentityNumber: [this.advanceTable?.driverOfficialIdentityNumber],
       //aadharAuthenticationToken: [this.advanceTable?.aadharAuthenticationToken],
-      dob:[this.advanceTable?.dob],
+      dob:[this.advanceTable?.dob, [Validators.required]],
       //idMark: [this.advanceTable?.idMark],
       // password: [''],
       // confirmPassword: [''],
-      countryCodes:['+91'],
-      countryCode:['+91'],
+      countryCodes:[this.advanceTable?.countryCodes || '+91', [Validators.required]],
+      countryCode:[this.advanceTable?.countryCode || '+91', [Validators.required]],
       password: ['eco'],
       confirmPassword: ['eco'],
       //highestQualificationID: [this.advanceTable?.highestQualificationID],
       //highestQualification: [this.advanceTable?.highestQualification],
-      bloodGroup: [this.advanceTable?.bloodGroup],
-      driverStatus: [this.advanceTable?.driverStatus],
-      dateOfJoining: [this.advanceTable?.dateOfJoining],
+      bloodGroup: [this.advanceTable?.bloodGroup, [Validators.required]],
+      driverStatus: [this.advanceTable?.driverStatus, [Validators.required]],
+      dateOfJoining: [this.advanceTable?.dateOfJoining, [Validators.required]],
       //driverEmail: [this.advanceTable?.driverEmail],
       dateOfLeaving: [this.advanceTable?.dateOfLeaving],
-      localAddressAddressString: [this.advanceTable?.localAddressAddressString,[this.googlePickupValidator()]],
+      localAddressAddressString: [this.advanceTable?.localAddressAddressString,[Validators.required, this.googlePickupValidator()]],
       localAddressLatLong: [this.advanceTable?.localAddressLatLong],
       //localAddressCityID: [this.advanceTable?.localAddressCityID],
       //localAddressCity: [this.advanceTable?.localAddressCity],
-      localAddress: [this.advanceTable?.localAddress],
-      localPincode: [this.advanceTable?.localPincode],
+      localAddress: [this.advanceTable?.localAddress, [Validators.required]],
+      localPincode: [this.advanceTable?.localPincode, [Validators.required]],
       companyID: [this.advanceTable?.companyID],
       //permanentAddressCityID: [this.advanceTable?.permanentAddressCityID],
       //permanentAddressCity: [this.advanceTable?.permanentAddressCity],
-      permanentAddress: [this.advanceTable?.permanentAddress],
-      permanentAddressPincode: [this.advanceTable?.permanentAddressPincode],
-      mobile1: [this.advanceTable?.mobile1],
+      permanentAddress: [this.advanceTable?.permanentAddress, [Validators.required]],
+      permanentAddressPincode: [this.advanceTable?.permanentAddressPincode, [Validators.required]],
+      mobile1: [this.advanceTable?.mobile1, [Validators.required]],
       mobile2: [this.advanceTable?.mobile2],
       //hubID: [this.advanceTable?.hubID],
       //hub: [this.advanceTable?.hub],
       locationID: [this.advanceTable?.locationID],
-      location: [this.advanceTable?.location],
-      ownedSupplier: [this.advanceTable?.ownedSupplier],
+      location: [this.advanceTable?.location, [Validators.required]],
+      ownedSupplier: [this.advanceTable?.ownedSupplier, [Validators.required]],
       driverGradeName: [this.advanceTable?.driverGradeName],
       supplierID: [this.advanceTable?.supplierID],
       supplier: [this.advanceTable?.supplier],
-      englishSpeakingSkills: [this.advanceTable?.englishSpeakingSkills],
+      englishSpeakingSkills: [this.advanceTable?.englishSpeakingSkills, [Validators.required]],
       //referenceOf: [this.advanceTable?.referenceOf],
       //rtoStateID: [this.advanceTable?.rtoStateID],
       //rtoState: [this.advanceTable?.rtoState],
-      policeVerification: [this.advanceTable?.policeVerification],
+      policeVerification: [this.advanceTable?.policeVerification, [Validators.required]],
       driverImage: [this.advanceTable?.driverImage],
-      medicalInsurance: [this.advanceTable?.medicalInsurance],
+      medicalInsurance: [this.advanceTable?.medicalInsurance, [Validators.required]],
       //drivingSinceDate: [this.advanceTable?.drivingSinceDate],
       activationStatus: [this.advanceTable?.activationStatus ?? true],
       latitude: [this.advanceTable?.latitude],
       longitude: [this.advanceTable?.longitude],
-      companyName:[this.advanceTable?.companyName],
-      isAdhoc: [this.advanceTable?.isAdhoc],
-      isAppLoginAllowed: [this.advanceTable?.isAppLoginAllowed],
+      companyName:[this.advanceTable?.companyName, [Validators.required]],
+      isAdhoc: [this.advanceTable?.isAdhoc, [Validators.required]],
+      isAppLoginAllowed: [this.advanceTable?.isAppLoginAllowed, [Validators.required]],
       oldRentnetCode: [
         (this.advanceTable.oldRentnetCode && this.advanceTable.oldRentnetCode !== 0)
           ? this.advanceTable.oldRentnetCode : null,
@@ -1091,6 +1139,13 @@ public loadPassword()
   }
   public confirmAdd(): void 
   {
+    this.showAllValidationErrors();
+    if (!this.advanceTableForm.valid) {
+      this.scrollToFirstInvalidControl();
+      this.saveDisabled = true;
+      return;
+    }
+
     this.saveDisabled = false;
     const driverStatus = this.advanceTableForm.get('driverStatus')?.value;
     if (driverStatus && String(driverStatus).toLowerCase() === 'active') {

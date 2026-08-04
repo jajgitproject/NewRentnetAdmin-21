@@ -446,6 +446,9 @@ advanceTableForm.get('localAddressAddressString')?.invalid &&
                                 {{option.organizationalEntityName}}
                             </mat-option>
                         </mat-autocomplete>
+                        <mat-error *ngIf="advanceTableForm.controls['companyName'].hasError('required')">
+                            Company is required
+                        </mat-error>
                         <mat-error *ngIf="advanceTableForm.controls['companyName'].hasError('companyNameInvalid')">
                             Please select a Company
                         </mat-error>
@@ -541,8 +544,11 @@ advanceTableForm.get('localAddressAddressString')?.invalid &&
                                 {{formatSupplierDisplay(option)}}
                             </mat-option>
                         </mat-autocomplete>
-                        <mat-error *ngIf="advanceTableForm.get('supplier').hasError('supplierForOwnerInvalid')">
+                        <mat-error *ngIf="advanceTableForm.get('supplier').hasError('required')">
                             Supplier is required
+                        </mat-error>
+                        <mat-error *ngIf="advanceTableForm.get('supplier').hasError('supplierForOwnerInvalid')">
+                            Please select a Supplier
                         </mat-error>
                     </mat-form-field>
                 </div>
@@ -558,6 +564,9 @@ advanceTableForm.get('localAddressAddressString')?.invalid &&
                                 {{formatSupplierDisplay(option)}}
                             </mat-option>
                         </mat-autocomplete>
+                        <mat-error *ngIf="advanceTableForm.controls['supplier'].hasError('required')">
+                            Supplier is required
+                        </mat-error>
                         <mat-error *ngIf="advanceTableForm.controls['supplier'].hasError('supplierInvalid')">
                             Please select a Supplier
                         </mat-error>
@@ -589,6 +598,9 @@ advanceTableForm.get('localAddressAddressString')?.invalid &&
                                 {{location.organizationalEntityName}}
                             </mat-option>
                         </mat-autocomplete>
+                        <mat-error *ngIf="advanceTableForm.controls['location'].hasError('required')">
+                            Location is required
+                        </mat-error>
                         <mat-error *ngIf="advanceTableForm.controls['location'].hasError('locationTypeInvalid')">
                             Please select a Location
                         </mat-error>
@@ -852,8 +864,12 @@ advanceTableForm.get('localAddressAddressString')?.invalid &&
             <div class="row">
                 <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12 mb-2">
                     <div class="example-button-row">
-                        <button mat-raised-button color="primary" [type]="submit" *ngIf="saveDisabled"
-                            [disabled]="!advanceTableForm.valid" (click)="confirmAdd()">Save</button>
+                        <div *ngIf="saveDisabled && advanceTableForm?.invalid"
+                            style="color:#c62828; margin-bottom: 10px; font-size: 13px;">
+                            Please fix the highlighted validation errors before saving.
+                        </div>
+                        <button mat-raised-button color="primary" type="button" *ngIf="saveDisabled"
+                            (click)="confirmAdd()">Save</button>
                         <mat-spinner *ngIf="!saveDisabled" diameter="30"></mat-spinner>
                         <!-- <button  mat-raised-button color="warn" (click)="reset()" tabindex="-1">Reset</button> -->
                         <button mat-raised-button color="warn" (click)="onNoClick()" tabindex="-1">Cancel</button>
