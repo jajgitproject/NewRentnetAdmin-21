@@ -126,8 +126,9 @@ saveDisabled:boolean = true;
         this.action = data.action;
         if (this.action === 'edit') 
         {
-          this.dialogTitle ='Driver';       
-          this.advanceTable = data.advanceTable;
+          this.dialogTitle ='Driver';
+          // Clone so mobile/lat-long parsing does not mutate the search-result row
+          this.advanceTable = Object.assign(new Driver({}), data.advanceTable);
           this.referenceID=this.advanceTable.driverID;
           this.loadPassword();
           this.ImagePath=this.advanceTable.driverImage;
@@ -157,20 +158,12 @@ saveDisabled:boolean = true;
             const fitnessIssueDate = moment(this.advanceTable.driverFitnessCertificateIssueDate).format('DD/MM/yyyy');
             this.onBlurFitnessCertificateIssueDateEdit(fitnessIssueDate);
           }
-          if (this.advanceTable.mobile1) {
-            const mobileParts = this.advanceTable.mobile1.split('-');
-            const countryCodes = '+'+''+mobileParts[0];
-            this.advanceTable.countryCodes=countryCodes;
-            const mobile1 = mobileParts[1];
-            this.advanceTable.mobile1=mobile1;
-        }
-        if (this.advanceTable.mobile2) {
-          const mobileParts = this.advanceTable.mobile2.split('-');
-          const countryCode = '+'+''+mobileParts[0];
-          this.advanceTable.countryCode=countryCode;
-          const mobile2 = mobileParts[1];
-          this.advanceTable.mobile2=mobile2;
-      }
+          const mobile1Parsed = this.parseMobileForForm(this.advanceTable.mobile1);
+          this.advanceTable.countryCodes = mobile1Parsed.isd;
+          this.advanceTable.mobile1 = mobile1Parsed.number;
+          const mobile2Parsed = this.parseMobileForForm(this.advanceTable.mobile2);
+          this.advanceTable.countryCode = mobile2Parsed.isd;
+          this.advanceTable.mobile2 = mobile2Parsed.number;
            if(this.advanceTable.ownedSupplier==='Owned')
           {
             this.owned=true;
@@ -213,6 +206,24 @@ saveDisabled:boolean = true;
           this.advanceTable.aadharAuthenticationToken='N/A';
           this.advanceTableForm = this.createContactForm();
         }
+  }
+
+  /** Split "91-98765..." into ISD + number without treating a bare number as an ISD. */
+  private parseMobileForForm(fullMobile: string, defaultIsd = '+91'): { isd: string; number: string } {
+    if (!fullMobile) {
+      return { isd: defaultIsd, number: '' };
+    }
+    const value = String(fullMobile).trim();
+    if (value.includes('-')) {
+      const [isdPart, ...rest] = value.split('-');
+      const number = rest.join('-');
+      const isd = isdPart.startsWith('+') ? isdPart : '+' + isdPart;
+      return { isd, number: number || '' };
+    }
+    if (value.startsWith('+')) {
+      return { isd: value, number: '' };
+    }
+    return { isd: defaultIsd, number: value };
   }
   public ngOnInit(): void
   {
@@ -532,10 +543,12 @@ saveDisabled:boolean = true;
   }
 
   private _filterSupplier(value: string): any {
-  const filterValue = value.toLowerCase();
-
-  return filterSuppliersByDisplay(this.SupplierList, filterValue);
-}
+    const filterValue = (value || '').trim();
+    if (filterValue.length < 3) {
+      return [];
+    }
+    return filterSuppliersByDisplay(this.SupplierList, filterValue);
+  }
 
   
   OnSupplierSelect(selectedSupplier: string)
@@ -613,10 +626,12 @@ saveDisabled:boolean = true;
       });
   }
   private _filtersearchSupplierForOwner(value: string): any {
-  const filterValue = value.toLowerCase();
-
-  return filterSuppliersByDisplay(this.SupplierForOwnerList, filterValue);
-}
+    const filterValue = (value || '').trim();
+    if (filterValue.length < 3) {
+      return [];
+    }
+    return filterSuppliersByDisplay(this.SupplierForOwnerList, filterValue);
+  }
 
 
   OnSupplierForOwnerSelect(selectedSupplier: string)

@@ -536,7 +536,8 @@ advanceTableForm.get('localAddressAddressString')?.invalid &&
                 <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2" *ngIf="owned">
                     <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
                         <mat-label>Supplier</mat-label>
-                        <input matInput formControlName="supplier" required [matAutocomplete]="auto20">
+                        <input matInput formControlName="supplier" required [matAutocomplete]="auto20"
+                            placeholder="Type at least 3 characters">
                         <mat-autocomplete #auto20="matAutocomplete"
                             (optionSelected)="OnSupplierForOwnerSelect($event.option.value)">
                             <mat-option *ngFor="let option of filteredSupplierForOwnerOptions | async"
@@ -556,7 +557,8 @@ advanceTableForm.get('localAddressAddressString')?.invalid &&
                 <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2" *ngIf="supplier">
                     <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
                         <mat-label>Supplier</mat-label>
-                        <input required type="text" matInput formControlName="supplier" [matAutocomplete]="auto4">
+                        <input required type="text" matInput formControlName="supplier" [matAutocomplete]="auto4"
+                            placeholder="Type at least 3 characters">
                         <mat-autocomplete #auto4="matAutocomplete"
                             (optionSelected)="OnSupplierSelect($event.option.value)">
                             <mat-option *ngFor="let option of filteredSupplierOptions | async"
@@ -567,7 +569,7 @@ advanceTableForm.get('localAddressAddressString')?.invalid &&
                         <mat-error *ngIf="advanceTableForm.controls['supplier'].hasError('required')">
                             Supplier is required
                         </mat-error>
-                        <mat-error *ngIf="advanceTableForm.controls['supplier'].hasError('supplierInvalid')">
+                        <mat-error *ngIf="advanceTableForm.controls['supplier'].hasError('supplierTypeInvalid')">
                             Please select a Supplier
                         </mat-error>
                     </mat-form-field>
