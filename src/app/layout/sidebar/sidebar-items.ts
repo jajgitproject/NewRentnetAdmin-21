@@ -1269,13 +1269,6 @@ export const ROUTES: RouteInfo[] = [
         title: 'Bulk Bills Download',
         pageKey: 'Bulk Bills Download',
         moduleName: 'bulkBillsDownload',
-        alternateAccessPageKeys: [
-          'bulkBillsDownload',
-          'invoiceHome',
-          'Invoice Home',
-          'controlPanelDesign',
-          'Control Panel',
-        ],
         icon: 'fas fa-file-archive',
         class: '',
         groupTitle: false,

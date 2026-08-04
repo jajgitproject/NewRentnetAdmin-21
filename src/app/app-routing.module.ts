@@ -3036,13 +3036,6 @@ const routes: Routes = [
           ),
         data: {
           requiredPageKey: 'Bulk Bills Download',
-          alternatePageKeys: [
-            'bulkBillsDownload',
-            'invoiceHome',
-            'Invoice Home',
-            'controlPanelDesign',
-            'Control Panel',
-          ],
         },
       },
 
