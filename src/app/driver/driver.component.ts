@@ -1,5 +1,5 @@
 // @ts-nocheck
-import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
+import { AfterViewChecked, Component, ElementRef, HostListener, OnInit, ViewChild } from '@angular/core';
 import { DriverService } from './driver.service';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { MatDialog } from '@angular/material/dialog';
@@ -39,12 +39,13 @@ interface MenuItem {
   styleUrls: ['./driver.component.sass'],
   providers: [{ provide: MAT_DATE_LOCALE, useValue: 'en-GB' }]
 })
-export class DriverComponent implements OnInit {
+export class DriverComponent implements OnInit, AfterViewChecked {
   displayedColumns = [
     'actions',
     'driverName',
     'oldRentnetCode',
     'supplierName',
+    'supplierType',
     'driverEmail',
     'mobile1',
     'driverOfficialIdentityNumber',
@@ -110,7 +111,13 @@ export class DriverComponent implements OnInit {
   @ViewChild('filter', { static: true }) filter: ElementRef;
   @ViewChild(MatMenuTrigger)
   contextMenu: MatMenuTrigger;
+  @ViewChild('topScroll') topScroll: ElementRef<HTMLDivElement>;
+  @ViewChild('bottomScroll') bottomScroll: ElementRef<HTMLDivElement>;
   contextMenuPosition = { x: '0px', y: '0px' };
+  tableScrollWidth = 1600;
+  private syncingScroll = false;
+  private lastMeasuredWidth = 0;
+
   ngOnInit() {
     this.loadData();
     this.InitDriverGrade();
@@ -118,6 +125,51 @@ export class DriverComponent implements OnInit {
     this.initLocation();
     this.menuItems.sort((a, b) => a.label.localeCompare(b.label));
     this.SubscribeUpdateService();
+  }
+
+  ngAfterViewChecked() {
+    this.measureTableScrollWidth();
+  }
+
+  @HostListener('window:resize')
+  onWindowResize() {
+    this.updateTableScrollWidth();
+  }
+
+  syncScroll(event: Event, source: 'top' | 'bottom') {
+    if (this.syncingScroll) {
+      return;
+    }
+    this.syncingScroll = true;
+    const scrollLeft = (event.target as HTMLElement).scrollLeft;
+    if (source === 'top' && this.bottomScroll?.nativeElement) {
+      this.bottomScroll.nativeElement.scrollLeft = scrollLeft;
+    } else if (source === 'bottom' && this.topScroll?.nativeElement) {
+      this.topScroll.nativeElement.scrollLeft = scrollLeft;
+    }
+    this.syncingScroll = false;
+  }
+
+  measureTableScrollWidth() {
+    const el = this.bottomScroll?.nativeElement;
+    if (!el) {
+      return;
+    }
+    const table = el.querySelector('.driver-table') as HTMLElement;
+    const width = Math.max(el.scrollWidth || 0, table?.scrollWidth || 0, table?.offsetWidth || 0, 1600);
+    if (width && width !== this.lastMeasuredWidth) {
+      this.lastMeasuredWidth = width;
+      // Defer to avoid ExpressionChangedAfterItHasBeenCheckedError
+      setTimeout(() => {
+        this.tableScrollWidth = width;
+      }, 0);
+    }
+  }
+
+  updateTableScrollWidth() {
+    setTimeout(() => this.measureTableScrollWidth(), 0);
+    setTimeout(() => this.measureTableScrollWidth(), 100);
+    setTimeout(() => this.measureTableScrollWidth(), 300);
   }
   refresh() {
     this.SearchdriverName = '';
@@ -223,6 +275,7 @@ export class DriverComponent implements OnInit {
 
           this.dataSource = data;
           console.log(data);
+          this.updateTableScrollWidth();
           // this.dataSource.forEach((ele)=>{
           //   if(ele.activationStatus===true){
           //     this.activeData="Active";
@@ -628,6 +681,7 @@ export class DriverComponent implements OnInit {
       (
         data => {
           this.dataSource = data;
+          this.updateTableScrollWidth();
         },
         (error: HttpErrorResponse) => { this.dataSource = null; }
       );

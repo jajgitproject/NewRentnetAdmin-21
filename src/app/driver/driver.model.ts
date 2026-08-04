@@ -44,6 +44,7 @@ export class Driver {
    supplierID:number;
    supplier:string;
    supplierName:string;
+   supplierType:string;
    supplierOldRentnetCode:number;
    supplierOfficialIdentityNumber:string;
    oldRentnetCode:number;
@@ -104,6 +105,7 @@ export class Driver {
        this.supplierID = driver.supplierID || '';
        this.supplier = driver.supplier || '';
        this.supplierName = driver.supplierName || '';
+       this.supplierType = driver.supplierType || '';
        this.supplierOldRentnetCode = (driver.supplierOldRentnetCode && driver.supplierOldRentnetCode !== 0) ? Number(driver.supplierOldRentnetCode) : null;
        this.oldRentnetCode = (driver.oldRentnetCode && driver.oldRentnetCode !== 0) ? Number(driver.oldRentnetCode) : null;
        this.driverOfficialIdentityCode = driver.driverOfficialIdentityCode || '';
@@ -136,7 +138,16 @@ export class Driver {
 }
 
 
+  export class DriverDuplicateMobileModel {
+  driverID: number;
+  driverName: string;
+  mobile1: string;
+  mobile2: string;
+  driverOfficialIdentityNumber: string;
+}
+
   export class MobileEmailModel{
   mobile1: string;
   isDuplicate: boolean;
+  duplicates?: DriverDuplicateMobileModel[];
 }

@@ -285,6 +285,13 @@
                                                 {{row.supplierName}}</mat-cell>
                                         </ng-container>
 
+                                        <ng-container matColumnDef="supplierType">
+                                            <mat-header-cell *matHeaderCellDef mat-sort-header>Supplier
+                                                Type</mat-header-cell>
+                                            <mat-cell *matCellDef="let row" (contextmenu)="onContextMenu($event, row)">
+                                                {{ row.supplierType || '' }}</mat-cell>
+                                        </ng-container>
+
                                         <ng-container matColumnDef="supplierOfficialIdentityNumber">
                                             <mat-header-cell *matHeaderCellDef mat-sort-header>Supplier Official
                                                 Identity Number</mat-header-cell>

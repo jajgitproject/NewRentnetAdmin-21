@@ -236,9 +236,16 @@
                             </ng-template>
 
                             <ng-template #elseBlock2>
-                                <div class="scrollable-table-container">
+                                <div class="driver-table-wrap">
+                                    <div class="driver-top-scroll" #topScroll (scroll)="syncScroll($event, 'top')">
+                                        <div class="driver-top-scroll-spacer"
+                                            [style.width.px]="tableScrollWidth"
+                                            [style.minWidth.px]="1600"></div>
+                                    </div>
+                                    <div class="scrollable-table-container" #bottomScroll
+                                        (scroll)="syncScroll($event, 'bottom')">
                                     <mat-table #table [dataSource]="dataSource" matSort
-                                        class="mat-cell floating-header-table" (matSortChange)="SortingData($event)">
+                                        class="mat-cell floating-header-table driver-table" (matSortChange)="SortingData($event)">
 
                                         <ng-container matColumnDef="id">
                                             <mat-header-cell *matHeaderCellDef mat-sort-header>Id</mat-header-cell>
@@ -248,7 +255,7 @@
                                         <ng-container matColumnDef="driverName">
                                             <mat-header-cell *matHeaderCellDef mat-sort-header>Driver</mat-header-cell>
                                             <mat-cell *matCellDef="let row" (contextmenu)="onContextMenu($event, row)">
-                                                {{row.driverName}}</mat-cell>
+                                                {{ row.driverName | uppercase }}</mat-cell>
                                         </ng-container>
 
                                         <ng-container matColumnDef="oldRentnetCode">
@@ -266,9 +273,8 @@
                                         </ng-container>
 
                                         <ng-container matColumnDef="driverImage">
-                                            <mat-header-cell *matHeaderCellDef
-                                                [ngClass]="'tbl-col-width-per-6'">Image</mat-header-cell>
-                                            <mat-cell *matCellDef="let row" class="table-img tbl-col-width-per-6"
+                                            <mat-header-cell *matHeaderCellDef>Image</mat-header-cell>
+                                            <mat-cell *matCellDef="let row" class="table-img"
                                                 (contextmenu)="onContextMenu($event, row)">
                                                 <img style="cursor: pointer;" src="{{row.driverImage}}" /> </mat-cell>
                                         </ng-container>
@@ -285,6 +291,13 @@
                                                 Name</mat-header-cell>
                                             <mat-cell *matCellDef="let row" (contextmenu)="onContextMenu($event, row)">
                                                 {{row.supplierName}}</mat-cell>
+                                        </ng-container>
+
+                                        <ng-container matColumnDef="supplierType">
+                                            <mat-header-cell *matHeaderCellDef mat-sort-header>Supplier
+                                                Type</mat-header-cell>
+                                            <mat-cell *matCellDef="let row" (contextmenu)="onContextMenu($event, row)">
+                                                {{ row.supplierType || '' }}</mat-cell>
                                         </ng-container>
 
                                         <ng-container matColumnDef="hub">
@@ -328,10 +341,8 @@
                                         </ng-container>
                                         <!-- actions -->
                                         <ng-container matColumnDef="actions">
-                                            <mat-header-cell *matHeaderCellDef class="pr-0"
-                                                [ngClass]="'tbl-col-width-per-9'">Actions</mat-header-cell>
-                                            <mat-cell *matCellDef="let row; let i=index;" class="pr-0"
-                                                [ngClass]="'tbl-col-width-per-9'">
+                                            <mat-header-cell *matHeaderCellDef>Actions</mat-header-cell>
+                                            <mat-cell *matCellDef="let row; let i=index;">
 
                                                 <button mat-raised-button color="primary"
                                                     (contextmenu)="onContextMenu($event, row)"
@@ -346,6 +357,7 @@
                                             [style.cursor]="'pointer'" matRipple>
                                         </mat-row>
                                     </mat-table>
+                                </div>
                                 </div>
                                 <!-- Loading spinner -->
                                 <!-- <div *ngIf="exampleDatabase.isTblLoading" class="tbl-spinner">

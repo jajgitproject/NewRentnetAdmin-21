@@ -20,7 +20,8 @@
                 <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
                     <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
                         <mat-label>Driver Name</mat-label>
-                        <input matInput formControlName="driverName" required>
+                        <input matInput formControlName="driverName" required class="uppercase-input"
+                            (input)="forceUppercase('driverName')">
                         <mat-error *ngIf="advanceTableForm.get('driverName').hasError('required')">
                             Driver Name is required
                         </mat-error>
@@ -48,7 +49,8 @@
                 <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
                     <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
                         <mat-label>Father's Name</mat-label>
-                        <input matInput formControlName="driverFatherName" required>
+                        <input matInput formControlName="driverFatherName" required class="uppercase-input"
+                            (input)="forceUppercase('driverFatherName')">
                         <mat-error *ngIf="advanceTableForm.get('driverFatherName').hasError('required')">
                             Father's Name is required
                         </mat-error>
@@ -385,9 +387,12 @@ advanceTableForm.get('localAddressAddressString')?.invalid &&
                 <div class="col-xl-3 col-lg-3 col-md-6 col-sm-6 mb-1">
                     <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
                         <mat-label>Mobile 2</mat-label>
-                        <input matInput formControlName="mobile2">
+                        <input matInput formControlName="mobile2" (input)="onMobile2Change()">
                         <mat-error *ngIf="advanceTableForm.get('mobile2').hasError('required')">
                             Mobile 2 is required
+                        </mat-error>
+                        <mat-error *ngIf="advanceTableForm.get('mobile2').hasError('duplicate')">
+                            Mobile No already exist
                         </mat-error>
                     </mat-form-field>
                 </div>
@@ -829,7 +834,7 @@ advanceTableForm.get('localAddressAddressString')?.invalid &&
                 </div>
             </div>
 
-            <div class="row">
+            <div class="row" *ngIf="shouldShowActivationStatus()">
                  <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
                     <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
                         <mat-label>Activation Status</mat-label>

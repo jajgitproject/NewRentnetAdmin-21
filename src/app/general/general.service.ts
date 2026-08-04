@@ -91,6 +91,7 @@ import { GSTPercentageDropDown } from '../dutyGSTPercentage/gSTPercentageDropDow
 import { InvoiceTemplateDropDown } from '../invoiceTemplate/invoiceTemplateDropDown.model';
 import { DutySACCDropDown } from '../dutySAC/dutySACDropDownModel';
 import { MobileEmailModel } from '../employee/employee.model';
+import { MobileEmailModel as DriverMobileEmailModel } from '../driver/driver.model';
 import { CustomerAlertMessageTypeForDropDown } from '../customerAlertMessage/customerAlertMessage.model';
 //import { AllotmentDetails } from '../dutySlipQualityChecked/dutySlipQualityCheckedBy.model';
 import { TransmissionTypeDropDown } from '../transmissionType/transmissionTypeDropDown.model';
@@ -1125,8 +1126,23 @@ nameEmailDuplicateMobile(payload: {
   );
 }
 
-   DuplicateMobileForDriver(Mobile1:string): Observable<MobileEmailModel>{
-    return this.http.get<MobileEmailModel>(this.BaseURL + "driver/checkDuplicateMobile/" + Mobile1);
+   DuplicateMobileForDriver(
+    Mobile1: string,
+    Mobile2: string = null,
+    ExcludeDriverID: number = -1
+  ): Observable<DriverMobileEmailModel> {
+    let url = this.BaseURL + 'driver/checkDuplicateMobile/' + encodeURIComponent(Mobile1 || 'null');
+    const params: string[] = [];
+    if (Mobile2) {
+      params.push('Mobile2=' + encodeURIComponent(Mobile2));
+    }
+    if (ExcludeDriverID != null && ExcludeDriverID > 0) {
+      params.push('ExcludeDriverID=' + ExcludeDriverID);
+    }
+    if (params.length) {
+      url += '?' + params.join('&');
+    }
+    return this.http.get<DriverMobileEmailModel>(url);
   }
 
   DuplicateEmail(Email:string): Observable<MobileEmailModel>{

@@ -30,6 +30,8 @@ import { DriverModel } from 'src/app/CarAndDriverAllotment/CarAndDriverAllotment
 import { CountryCodeDropDown } from 'src/app/general/countryCodeDropDown.model';
 import {  ValidationErrors, ValidatorFn } from '@angular/forms';
 import moment from 'moment';
+import Swal from 'sweetalert2';
+import { DriverDuplicateMobileModel } from '../../driver.model';
 
 @Component({
   standalone: false,
@@ -867,10 +869,10 @@ saveDisabled:boolean = true;
     return this.fb.group(
     {
       driverID: [this.advanceTable?.driverID],
-      driverName: [this.advanceTable?.driverName],
+      driverName: [this.toUpperValue(this.advanceTable?.driverName)],
       //driverGradeID: [this.advanceTable?.driverGradeID],
       //driverGrade:[this.advanceTable?.driverGrade],
-      driverFatherName: [this.advanceTable?.driverFatherName],
+      driverFatherName: [this.toUpperValue(this.advanceTable?.driverFatherName)],
       driverOfficialIdentityNumber: [this.advanceTable?.driverOfficialIdentityNumber],
       //aadharAuthenticationToken: [this.advanceTable?.aadharAuthenticationToken],
       dob:[this.advanceTable?.dob],
@@ -917,7 +919,7 @@ saveDisabled:boolean = true;
       driverImage: [this.advanceTable?.driverImage],
       medicalInsurance: [this.advanceTable?.medicalInsurance],
       //drivingSinceDate: [this.advanceTable?.drivingSinceDate],
-      activationStatus: [this.advanceTable?.activationStatus],
+      activationStatus: [this.advanceTable?.activationStatus ?? true],
       latitude: [this.advanceTable?.latitude],
       longitude: [this.advanceTable?.longitude],
       companyName:[this.advanceTable?.companyName],
@@ -1003,6 +1005,8 @@ public loadPassword()
        this.advanceTableForm.value.longitude
    });
     this.advanceTableForm.patchValue({ oldRentnetCode: this.getOldRentnetCode() });
+    this.forceUppercase('driverName');
+    this.forceUppercase('driverFatherName');
     this.advanceTableService.add(this.advanceTableForm.getRawValue())  
     .subscribe(
     response => 
@@ -1010,6 +1014,9 @@ public loadPassword()
         if (response?.activationStatus === 'Duplicate OldRentnetCode') {
           this._generalService.sendUpdate('DataNotFound:OldRentnetCodeDuplicacyError:Failure');
           this.saveDisabled = true;
+          return;
+        }
+        if (this.handleDuplicateMobileResponse(response)) {
           return;
         }
         this.dialogRef.close();
@@ -1056,6 +1063,8 @@ public loadPassword()
        this.advanceTableForm.value.longitude
    });
     this.advanceTableForm.patchValue({ oldRentnetCode: this.getOldRentnetCode() });
+    this.forceUppercase('driverName');
+    this.forceUppercase('driverFatherName');
     this.advanceTableService.update(this.advanceTableForm.getRawValue())  
     .subscribe(
     response => 
@@ -1063,6 +1072,9 @@ public loadPassword()
         if (response?.activationStatus === 'Duplicate OldRentnetCode') {
           this._generalService.sendUpdate('DataNotFound:OldRentnetCodeDuplicacyError:Failure');
           this.saveDisabled = true;
+          return;
+        }
+        if (this.handleDuplicateMobileResponse(response)) {
           return;
         }
         this.dialogRef.close();
@@ -1080,15 +1092,128 @@ public loadPassword()
   public confirmAdd(): void 
   {
     this.saveDisabled = false;
-       if(this.action=="edit")
-       {
-          this.Put();
-       }
-       else
-       {
-          this.Post();
-       }
+    const driverStatus = this.advanceTableForm.get('driverStatus')?.value;
+    if (driverStatus && String(driverStatus).toLowerCase() === 'active') {
+      const mobiles = this.buildMobileValues();
+      if (mobiles.mobile1 && mobiles.mobile2
+        && String(mobiles.mobile1).toLowerCase() === String(mobiles.mobile2).toLowerCase()) {
+        this.showDuplicateMobilePopup([], 'Mobile1 and Mobile2 cannot be the same.');
+        this.advanceTableForm.get('mobile1')?.setErrors({ duplicate: true });
+        this.saveDisabled = true;
+        return;
+      }
+      const excludeDriverId = this.action === 'edit'
+        ? (this.advanceTable?.driverID || -1)
+        : -1;
+      this._generalService.DuplicateMobileForDriver(mobiles.mobile1, mobiles.mobile2, excludeDriverId)
+        .subscribe(
+          response => {
+            if (response?.isDuplicate) {
+              this.showDuplicateMobilePopup(response.duplicates || []);
+              this.advanceTableForm.get('mobile1')?.setErrors({ duplicate: true });
+              if (mobiles.mobile2) {
+                this.advanceTableForm.get('mobile2')?.setErrors({ duplicate: true });
+              }
+              this.saveDisabled = true;
+              return;
+            }
+            this.proceedSave();
+          },
+          () => {
+            this.proceedSave();
+          }
+        );
+      return;
+    }
+    this.proceedSave();
+  }
 
+  private proceedSave(): void {
+    if (this.action == 'edit') {
+      this.Put();
+    } else {
+      this.Post();
+    }
+  }
+
+  private buildMobileValues(): { mobile1: string; mobile2: string } {
+    const phone1 = this.advanceTableForm.get('countryCodes')?.value || '';
+    const phone2 = this.advanceTableForm.get('mobile1')?.value || '';
+    const countryCodes = String(phone1).includes('+')
+      ? String(phone1).split('+')[1]
+      : String(phone1).replace(/^\+/, '');
+    const mobile1 = phone2 ? `${countryCodes}-${phone2}` : null;
+
+    const phone3 = this.advanceTableForm.get('countryCode')?.value || '';
+    const phone4 = this.advanceTableForm.get('mobile2')?.value || '';
+    const countryCode = String(phone3).includes('+')
+      ? String(phone3).split('+')[1]
+      : String(phone3).replace(/^\+/, '');
+    const mobile2 = phone4 ? `${countryCode}-${phone4}` : null;
+
+    return { mobile1, mobile2 };
+  }
+
+  private handleDuplicateMobileResponse(response: any): boolean {
+    const status = response?.activationStatus || '';
+    if (!String(status).startsWith('Duplicate:')) {
+      return false;
+    }
+    if (String(status).includes('Mobile1 and Mobile2')) {
+      this.showDuplicateMobilePopup([], status.replace(/^Duplicate:\s*/, ''));
+    } else {
+      this.showDuplicateMobilePopup(response?.duplicates || []);
+    }
+    this.advanceTableForm.get('mobile1')?.setErrors({ duplicate: true });
+    this.saveDisabled = true;
+    return true;
+  }
+
+  private showDuplicateMobilePopup(
+    duplicates: DriverDuplicateMobileModel[],
+    customMessage: string = null
+  ): void {
+    const esc = (value: any) => String(value ?? '')
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;');
+
+    const rows = (duplicates || []).map((d) => `
+      <tr>
+        <td style="border:1px solid #ccc;padding:6px;text-align:left;">${esc(d.driverName) || 'N/A'}</td>
+        <td style="border:1px solid #ccc;padding:6px;text-align:left;">${esc(d.mobile1) || 'N/A'}</td>
+        <td style="border:1px solid #ccc;padding:6px;text-align:left;">${esc(d.mobile2) || 'N/A'}</td>
+        <td style="border:1px solid #ccc;padding:6px;text-align:left;">${esc(d.driverOfficialIdentityNumber) || 'N/A'}</td>
+      </tr>
+    `).join('');
+
+    const tableHtml = rows
+      ? `
+        <p style="margin-bottom:10px;">The mobile number is already used by the following Active driver(s):</p>
+        <div style="max-height:300px;overflow:auto;">
+          <table style="width:100%;border-collapse:collapse;font-size:13px;">
+            <thead>
+              <tr>
+                <th style="border:1px solid #ccc;padding:6px;text-align:left;">Driver Name</th>
+                <th style="border:1px solid #ccc;padding:6px;text-align:left;">Mobile 1</th>
+                <th style="border:1px solid #ccc;padding:6px;text-align:left;">Mobile 2</th>
+                <th style="border:1px solid #ccc;padding:6px;text-align:left;">Official Identity No.</th>
+              </tr>
+            </thead>
+            <tbody>${rows}</tbody>
+          </table>
+        </div>
+      `
+      : `<p>${esc(customMessage) || 'Duplicate mobile number found for an Active driver.'}</p>`;
+
+    Swal.fire({
+      title: 'Duplicate Mobile Number',
+      html: tableHtml,
+      icon: 'error',
+      confirmButtonText: 'OK',
+      width: rows ? 720 : undefined
+    });
   }
 
   getOldRentnetCode(): number | null {
@@ -1097,6 +1222,35 @@ public loadPassword()
       return null;
     }
     return Number(value);
+  }
+
+  toUpperValue(value: string | null | undefined): string {
+    return value ? String(value).toUpperCase() : '';
+  }
+
+  forceUppercase(controlName: string) {
+    const control = this.advanceTableForm?.get(controlName);
+    if (!control) {
+      return;
+    }
+    const current = control.value;
+    if (current == null || current === '') {
+      return;
+    }
+    const upper = String(current).toUpperCase();
+    if (current !== upper) {
+      control.setValue(upper, { emitEvent: false });
+    }
+  }
+
+  shouldShowActivationStatus(): boolean {
+    // Create mode: always hidden (defaults to Active).
+    // Edit mode: show only when current status is Deleted so it can be reactivated.
+    if (this.action !== 'edit') {
+      return false;
+    }
+    const status = this.advanceTableForm?.get('activationStatus')?.value;
+    return status === false;
   }
 
   keyPressNumbers(event: KeyboardEvent): boolean {
@@ -1270,26 +1424,61 @@ this.advanceTableForm?.get('drivingSinceDate')?.setErrors({ invalidDate: true })
     this.checkDuplicateMobile();
   }
 
+  onMobile2Change(): void {
+    this.checkDuplicateMobile();
+  }
+
   //-------- Check Duplicate Email & Mobile -----------------
 checkDuplicateMobile() {
-  const mobile1 = '91-' + this.advanceTableForm.get('mobile1').value;
+  const driverStatus = this.advanceTableForm.get('driverStatus')?.value;
+  if (driverStatus && String(driverStatus).toLowerCase() !== 'active') {
+    this.clearMobileDuplicateErrors();
+    return;
+  }
 
-  if (mobile1) {
-    this._generalService.DuplicateMobileForDriver(mobile1).subscribe(response => {
-      if (response.isDuplicate) 
-      {
-        this.advanceTableForm.get('mobile1').setErrors({ duplicate: true });
-      }
-      else 
-      {
-        if (this.advanceTableForm.get('mobile1').hasError('duplicate')) 
-        {
-          this.advanceTableForm.get('mobile1').setErrors(null);
+  const mobiles = this.buildMobileValues();
+  if (!mobiles.mobile1 && !mobiles.mobile2) {
+    return;
+  }
+
+  if (mobiles.mobile1 && mobiles.mobile2
+    && String(mobiles.mobile1).toLowerCase() === String(mobiles.mobile2).toLowerCase()) {
+    this.advanceTableForm.get('mobile1')?.setErrors({ duplicate: true });
+    this.advanceTableForm.get('mobile2')?.setErrors({ duplicate: true });
+    return;
+  }
+
+  const excludeDriverId = this.action === 'edit'
+    ? (this.advanceTable?.driverID || -1)
+    : -1;
+
+  this._generalService.DuplicateMobileForDriver(mobiles.mobile1, mobiles.mobile2, excludeDriverId)
+    .subscribe(response => {
+      if (response?.isDuplicate) {
+        this.advanceTableForm.get('mobile1')?.setErrors({ duplicate: true });
+        if (mobiles.mobile2) {
+          this.advanceTableForm.get('mobile2')?.setErrors({ duplicate: true });
         }
+      } else {
+        this.clearMobileDuplicateErrors();
       }
     });
-  }
 }
+
+  private clearMobileDuplicateErrors(): void {
+    const mobile1Control = this.advanceTableForm.get('mobile1');
+    if (mobile1Control?.hasError('duplicate')) {
+      const errors = { ...(mobile1Control.errors || {}) };
+      delete errors['duplicate'];
+      mobile1Control.setErrors(Object.keys(errors).length ? errors : null);
+    }
+    const mobile2Control = this.advanceTableForm.get('mobile2');
+    if (mobile2Control?.hasError('duplicate')) {
+      const errors = { ...(mobile2Control.errors || {}) };
+      delete errors['duplicate'];
+      mobile2Control.setErrors(Object.keys(errors).length ? errors : null);
+    }
+  }
 
 // onMobileChange(): void {
 //   this.checkDuplicateMobile();

@@ -9,6 +9,7 @@ export class Inventory {
    fuelType:string;
    supplier:string;
    supplierName:string;
+   supplierType:string;
    company:string;
    vehicleID: number;
    registrationStateID:number;

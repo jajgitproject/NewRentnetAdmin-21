@@ -888,6 +888,173 @@ body > .swal2-container.swal2-backdrop-show {
   border-collapse: collapse;
 }
 
+/* Driver list: compact fixed columns + top horizontal scrollbar */
+.driver-table-wrap {
+  width: 100%;
+}
+
+.driver-table-wrap .driver-top-scroll {
+  width: 100%;
+  overflow-x: scroll;
+  overflow-y: hidden;
+  height: 16px;
+  margin-bottom: 6px;
+  background: #f3f4f6;
+  border: 1px solid #d9dde3;
+  border-radius: 4px;
+}
+
+.driver-table-wrap .driver-top-scroll-spacer {
+  height: 1px;
+  min-width: 1600px;
+}
+
+.driver-table-wrap .scrollable-table-container {
+  width: 100%;
+  overflow: auto;
+}
+
+.driver-table.floating-header-table,
+.mat-mdc-table.driver-table.floating-header-table,
+.mat-table.driver-table.floating-header-table {
+  width: max-content !important;
+  min-width: 1600px !important;
+}
+
+.driver-table .mat-mdc-header-row,
+.driver-table .mat-mdc-row,
+.driver-table .mat-header-row,
+.driver-table .mat-row {
+  display: flex !important;
+  width: 1600px !important;
+  min-width: 1600px !important;
+  max-width: 1600px !important;
+  box-sizing: border-box;
+}
+
+.driver-table .mat-mdc-header-cell,
+.driver-table .mat-mdc-cell,
+.driver-table .mat-header-cell,
+.driver-table .mat-cell {
+  flex: 0 0 auto !important;
+  box-sizing: border-box;
+  padding: 6px 8px !important;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap !important;
+  font-size: 13px;
+}
+
+.driver-table .mat-column-actions {
+  width: 90px !important;
+  min-width: 90px !important;
+  max-width: 90px !important;
+  flex-basis: 90px !important;
+  overflow: visible !important;
+}
+
+.driver-table .mat-column-driverName {
+  width: 150px !important;
+  min-width: 150px !important;
+  max-width: 150px !important;
+  flex-basis: 150px !important;
+}
+
+.driver-table .mat-column-oldRentnetCode {
+  width: 115px !important;
+  min-width: 115px !important;
+  max-width: 115px !important;
+  flex-basis: 115px !important;
+}
+
+.driver-table .mat-column-supplierName {
+  width: 150px !important;
+  min-width: 150px !important;
+  max-width: 150px !important;
+  flex-basis: 150px !important;
+}
+
+.driver-table .mat-column-supplierType {
+  width: 120px !important;
+  min-width: 120px !important;
+  max-width: 120px !important;
+  flex-basis: 120px !important;
+}
+
+.driver-table .mat-column-driverEmail {
+  width: 180px !important;
+  min-width: 180px !important;
+  max-width: 180px !important;
+  flex-basis: 180px !important;
+}
+
+.driver-table .mat-column-mobile1 {
+  width: 110px !important;
+  min-width: 110px !important;
+  max-width: 110px !important;
+  flex-basis: 110px !important;
+}
+
+.driver-table .mat-column-driverOfficialIdentityNumber {
+  width: 125px !important;
+  min-width: 125px !important;
+  max-width: 125px !important;
+  flex-basis: 125px !important;
+}
+
+.driver-table .mat-column-supplierCode {
+  width: 150px !important;
+  min-width: 150px !important;
+  max-width: 150px !important;
+  flex-basis: 150px !important;
+}
+
+.driver-table .mat-column-hub {
+  width: 100px !important;
+  min-width: 100px !important;
+  max-width: 100px !important;
+  flex-basis: 100px !important;
+}
+
+.driver-table .mat-column-location {
+  width: 110px !important;
+  min-width: 110px !important;
+  max-width: 110px !important;
+  flex-basis: 110px !important;
+}
+
+.driver-table .mat-column-driverImage {
+  width: 70px !important;
+  min-width: 70px !important;
+  max-width: 70px !important;
+  flex-basis: 70px !important;
+  justify-content: center;
+  overflow: visible !important;
+}
+
+.driver-table .mat-column-driverImage img {
+  max-width: 48px !important;
+  height: 32px !important;
+  object-fit: contain;
+}
+
+.driver-table .mat-column-isAdhoc,
+.driver-table .mat-column-status {
+  width: 75px !important;
+  min-width: 75px !important;
+  max-width: 75px !important;
+  flex-basis: 75px !important;
+}
+
+.driver-table .mat-column-actions .mat-mdc-raised-button,
+.driver-table .mat-column-actions .mat-raised-button {
+  height: 28px !important;
+  min-height: 28px !important;
+  padding: 0 10px !important;
+  font-size: 12px !important;
+  min-width: 72px !important;
+}
+
 .mat-header-row {
   position: sticky;
   top: 0;
