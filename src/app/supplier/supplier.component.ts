@@ -434,7 +434,7 @@ export class SupplierComponent implements OnInit {
     if (!row) {
       return '';
     }
-    const name = row.supplierName || '';
+    const name = (row.supplierName || '').toUpperCase();
     const code = row.oldRentnetCode != null && row.oldRentnetCode !== 0
       ? String(row.oldRentnetCode)
       : '';

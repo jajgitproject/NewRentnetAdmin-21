@@ -16,7 +16,7 @@
     <ng-container matColumnDef="supplierName">
         <mat-header-cell *matHeaderCellDef>Supplier Name</mat-header-cell>
         <mat-cell *matCellDef="let row">
-            {{row.supplierName}}</mat-cell>
+            {{row.supplierName | uppercase}}</mat-cell>
     </ng-container>
     
     <ng-container matColumnDef="supplierStatus">

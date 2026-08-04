@@ -46,6 +46,7 @@ export class Inventory {
   userID:number;
   businessDivision:string;
   isAdhoc:boolean;
+  inventoryRemark:string;
    //organizationalEntityOwnership:string;
    //organizationalEntitySupplierID:number;
    //organizationalEntitySupplier:string;
@@ -57,7 +58,7 @@ export class Inventory {
        this.vehicleID = inventory.vehicleID || '';
        this.registrationStateID = inventory.registrationStateID || 0,
        this.registrationCityID = inventory.registrationCityID || 0;
-       this.registrationNumber = inventory.registrationNumber || '';
+       this.registrationNumber = (inventory.registrationNumber || '').toString().toUpperCase().replace(/[^A-Z0-9]/g, '');
        this.registrationFromDateString = inventory.registrationFromDateString || '';
        this.registrationTillDateString = inventory.registrationTillDateString || '';
        this.locationHubID = inventory.locationHubID || '';
@@ -84,6 +85,7 @@ export class Inventory {
        //this.purchaseDate=new Date();
        this.businessDivision = inventory.businessDivision || '';
        this.isAdhoc = inventory.isAdhoc || '';
+       this.inventoryRemark = inventory.inventoryRemark ?? inventory.InventoryRemark ?? '';
        
     }
   }

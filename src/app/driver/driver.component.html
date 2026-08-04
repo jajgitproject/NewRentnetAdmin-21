@@ -240,7 +240,7 @@
                                     <div class="driver-top-scroll" #topScroll (scroll)="syncScroll($event, 'top')">
                                         <div class="driver-top-scroll-spacer"
                                             [style.width.px]="tableScrollWidth"
-                                            [style.minWidth.px]="1600"></div>
+                                            [style.minWidth.px]="1750"></div>
                                     </div>
                                     <div class="scrollable-table-container" #bottomScroll
                                         (scroll)="syncScroll($event, 'bottom')">
@@ -317,6 +317,13 @@
                                             <mat-header-cell *matHeaderCellDef mat-sort-header>Email</mat-header-cell>
                                             <mat-cell *matCellDef="let row" (contextmenu)="onContextMenu($event, row)">
                                                 {{row.driverEmail}}</mat-cell>
+                                        </ng-container>
+
+                                        <ng-container matColumnDef="driverRemark">
+                                            <mat-header-cell *matHeaderCellDef mat-sort-header>Remark</mat-header-cell>
+                                            <mat-cell *matCellDef="let row" (contextmenu)="onContextMenu($event, row)"
+                                                [title]="row.driverRemark || ''">
+                                                {{row.driverRemark}}</mat-cell>
                                         </ng-container>
 
                                         <ng-container matColumnDef="mobile1">

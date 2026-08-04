@@ -5,7 +5,7 @@ export function formatSupplierDisplay(supplier: {
   oldRentnetCode?: number | string | null;
   pan?: string | null;
 }): string {
-  const name = (supplier?.supplierName || '').trim();
+  const name = (supplier?.supplierName || '').trim().toUpperCase();
   const code =
     supplier?.oldRentnetCode !== null &&
     supplier?.oldRentnetCode !== undefined &&

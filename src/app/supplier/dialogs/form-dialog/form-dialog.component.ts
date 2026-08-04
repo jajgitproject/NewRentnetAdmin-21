@@ -205,7 +205,7 @@ export class FormDialogComponent
     return this.fb.group(
     {
       supplierID: [this.advanceTable.supplierID],
-      supplierName: [this.advanceTable.supplierName],
+      supplierName: [this.toUpperValue(this.advanceTable?.supplierName)],
       addressCityID: [this.advanceTable.addressCityID],
       address: [this.advanceTable.address],
       //pin: [this.advanceTable.pin],
@@ -288,6 +288,7 @@ showDetails(){
   }
   public Post(): void {
     this.isLoading = true;
+    this.forceUppercase('supplierName');
     this.advanceTableForm.patchValue({
       supplierTypeID: this.supplierTypeID,
       countryID: this.geoPointID,
@@ -320,6 +321,7 @@ showDetails(){
 
   public Put(): void {
     this.isLoading = true;
+    this.forceUppercase('supplierName');
     this.advanceTableForm.patchValue({
       supplierTypeID: this.supplierTypeID || this.advanceTable.supplierTypeID,
       countryID: this.geoPointID || this.advanceTable.countryID,
@@ -392,6 +394,9 @@ showDetails(){
   /** Normalize optional fields so empty strings are never sent for decimal/nullables (API 400). */
   buildSupplierPayload(raw: any): any {
     const payload = { ...raw };
+    if (payload.supplierName) {
+      payload.supplierName = String(payload.supplierName).toUpperCase();
+    }
     payload.paymentBasis = this.getPaymentBasis();
     payload.supplierPercentage = this.getSupplierPercentage();
     if (payload.paymentBasis === '' || payload.paymentBasis === undefined) {
@@ -441,6 +446,25 @@ showDetails(){
     const panControl = this.advanceTableForm.get('pan');
     if (panControl?.value) {
       panControl.setValue(String(panControl.value).trim().toUpperCase());
+    }
+  }
+
+  toUpperValue(value: string | null | undefined): string {
+    return value ? String(value).toUpperCase() : '';
+  }
+
+  forceUppercase(controlName: string) {
+    const control = this.advanceTableForm?.get(controlName);
+    if (!control) {
+      return;
+    }
+    const current = control.value;
+    if (current == null || current === '') {
+      return;
+    }
+    const upper = String(current).toUpperCase();
+    if (current !== upper) {
+      control.setValue(upper, { emitEvent: false });
     }
   }
 

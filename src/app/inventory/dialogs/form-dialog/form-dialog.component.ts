@@ -6,6 +6,8 @@ import { FormControl, Validators, FormGroup, FormBuilder, ValidationErrors, Abst
 import { Inventory } from '../../inventory.model';
 import { MAT_DATE_LOCALE } from '@angular/material/core';
 import { formatDate } from '@angular/common';
+import { MatSnackBar } from '@angular/material/snack-bar';
+import { provideMomentDateAdapter } from '@angular/material-moment-adapter';
 import { GeneralService } from '../../../general/general.service';
 import { InventoryDropDown } from '../../inventoryDropDown.model';
 import { CurrencyDropDown } from 'src/app/general/currencyDropDown.model';
@@ -28,12 +30,28 @@ import { map, startWith } from 'rxjs/operators';
 import { Color } from 'src/app/color/color.model';
 import { TransmissionTypeDropDown } from 'src/app/transmissionType/transmissionTypeDropDown.model';
 import moment from 'moment';
+
+export const INVENTORY_DATE_FORMATS = {
+  parse: {
+    dateInput: 'DD/MM/YYYY',
+  },
+  display: {
+    dateInput: 'DD/MM/YYYY',
+    monthYearLabel: 'MMM YYYY',
+    dateA11yLabel: 'LL',
+    monthYearA11yLabel: 'MMMM YYYY',
+  },
+};
+
 @Component({
   standalone: false,
   selector: 'app-form-dialog',
   templateUrl: './form-dialog.component.html',
   styleUrls: ['./form-dialog.component.sass'],
-  providers: [{ provide: MAT_DATE_LOCALE, useValue: 'en-GB' }]
+  providers: [
+    { provide: MAT_DATE_LOCALE, useValue: 'en-GB' },
+    ...provideMomentDateAdapter(INVENTORY_DATE_FORMATS),
+  ]
 })
 
 export class FormDialogComponent 
@@ -106,7 +124,8 @@ export class FormDialogComponent
   public advanceTableService: InventoryService,
     private fb: FormBuilder,
     private el: ElementRef,
-  public _generalService:GeneralService)
+  public _generalService:GeneralService,
+  private snackBar: MatSnackBar)
   {
         // Set the defaults
         this.action = data.action;
@@ -114,6 +133,11 @@ export class FormDialogComponent
         {
           this.dialogTitle ='Inventory';       
           this.advanceTable = data.advanceTable;
+          if (this.advanceTable?.registrationNumber) {
+            this.advanceTable.registrationNumber = String(this.advanceTable.registrationNumber)
+              .toUpperCase()
+              .replace(/[^A-Z0-9]/g, '');
+          }
           this.searchVehicle.setValue(this.advanceTable.vehicle);
           this.searchVehicleCategory.setValue(this.advanceTable.vehicleCategory);
           this.searchOrganizationalEntity.setValue(this.advanceTable.company);
@@ -135,8 +159,8 @@ export class FormDialogComponent
             this.Supplier=true;
             this.InitSupplier();
           }
-           let registrationFromDate=moment(this.advanceTable.registrationFromDate).format('DD/MM/yyyy');
-                    let registrationTillDate=moment(this.advanceTable.registrationTillDate).format('DD/MM/yyyy');
+           let registrationFromDate=moment(this.advanceTable.registrationFromDate).format('DD/MM/YYYY');
+                    let registrationTillDate=moment(this.advanceTable.registrationTillDate).format('DD/MM/YYYY');
                     this.onBlurUpdateDateEdit(registrationFromDate);
                     this.onBlurUpdateEndDateEdit(registrationTillDate);
         } 
@@ -328,16 +352,40 @@ export class FormDialogComponent
     this._generalService.GetCompany().subscribe(
       data=>
       {
-        this.OrganizationalEntityList=data;
-        this.advanceTableForm.controls['company'].setValidators([Validators.required,
-          this.organizationalEntityNameValidator(this.OrganizationalEntityList)]);
-        this.advanceTableForm.controls['company'].updateValueAndValidity();
-        this.filteredVOrganizationalEntityOptions = this.advanceTableForm.controls['company'].valueChanges.pipe(
-          startWith(""),
-          map(value => this._filterOrganizationalEntity(value || ''))
-        ); 
+        this.OrganizationalEntityList = data || [];
+        const companyControl = this.advanceTableForm.controls['companyID'];
+        companyControl.setValidators([Validators.required]);
+        companyControl.updateValueAndValidity();
+
+        // Ensure edit value matches option type (number)
+        const currentCompanyID = companyControl.value || this.advanceTable?.companyID;
+        if (currentCompanyID) {
+          const matched = this.OrganizationalEntityList.find(
+            c => Number(c.organizationalEntityID) === Number(currentCompanyID)
+          );
+          if (matched) {
+            companyControl.setValue(matched.organizationalEntityID, { emitEvent: false });
+            this.companyID = matched.organizationalEntityID;
+            this.advanceTableForm.patchValue(
+              { company: matched.organizationalEntityName },
+              { emitEvent: false }
+            );
+          }
+        }
       });
   }
+
+  onCompanyChange(companyID: any) {
+    this.getorganizationalEntityID(companyID);
+    const selected = this.OrganizationalEntityList?.find(
+      c => Number(c.organizationalEntityID) === Number(companyID)
+    );
+    this.advanceTableForm.patchValue(
+      { company: selected?.organizationalEntityName || '' },
+      { emitEvent: false }
+    );
+  }
+
   private _filterOrganizationalEntity(value: string): any {
   if (!value || value.length < 3) {
     return [];  
@@ -921,11 +969,17 @@ export class FormDialogComponent
       vehicleID: [this.advanceTable?.vehicleID],
       vehicle: [this.advanceTable?.vehicle],
       company: [this.advanceTable?.company],
+      companyID: [this.advanceTable?.companyID || null, Validators.required],
       locationHub:[this.advanceTable?.organizationalEntityName],
       organizationalEntityName:[this.advanceTable?.organizationalEntityName],
       registrationStateID: [this.advanceTable?.registrationStateID],
       registrationCityID: [this.advanceTable?.registrationCityID],
-      registrationNumber: [this.advanceTable?.registrationNumber],
+      registrationNumber: [
+        this.advanceTable?.registrationNumber
+          ? String(this.advanceTable.registrationNumber).toUpperCase().replace(/[^A-Z0-9]/g, '')
+          : '',
+        [Validators.required, Validators.pattern(/^[A-Z0-9]+$/)]
+      ],
       registrationFromDate: [this.advanceTable?.registrationFromDate],
       //registrationTillDate: [this.advanceTable?.registrationTillDate],
       locationHubID: [this.advanceTable?.locationHubID],
@@ -946,11 +1000,11 @@ export class FormDialogComponent
       isGPSAvailable: [this.advanceTable?.isGPSAvailable],
       //gpsimeiNo: [this.advanceTable?.gpsimeiNo],
       //purchaseDate: [this.advanceTable?.purchaseDate],
-      companyID: [this.advanceTable?.companyID],
       inventoryCreatedBy: [this.advanceTable?.inventoryCreatedBy],
       //registrationCity: [this.advanceTable?.registrationCity],
       status: [this.advanceTable?.status],
       businessDivision: [this.advanceTable?.businessDivision],
+      inventoryRemark: [this.advanceTable?.inventoryRemark ?? (this.advanceTable as any)?.InventoryRemark ?? ''],
       activationStatus: [this.initialActivationStatus()]
     });
   }
@@ -1001,7 +1055,9 @@ export class FormDialogComponent
     this.advanceTableForm.patchValue({fuelTypeID:this.fuelTypeID});
     //this.advanceTableForm.patchValue({supplierID:this.supplierID});
     this.advanceTableForm.patchValue({locationHubID:this.locationHubID});
-    this.advanceTableForm.patchValue({companyID:this.companyID});
+    this.advanceTableForm.patchValue({
+      companyID: this.companyID || this.advanceTableForm.value.companyID
+    });
     this.advanceTableService.add(this.advanceTableForm.getRawValue())  
     
     .subscribe(
@@ -1014,6 +1070,17 @@ export class FormDialogComponent
     },
     error =>
     {
+       const message = error?.error || 'Save failed';
+       if (typeof message === 'string' && message.toLowerCase().includes('duplicate')) {
+         this.advanceTableForm.get('registrationNumber')?.setErrors({ duplicate: true });
+         this.advanceTableForm.get('registrationNumber')?.markAsTouched();
+         this.snackBar.open('Registration Number already exists', '', {
+           duration: 3000,
+           verticalPosition: 'bottom',
+           horizontalPosition: 'center',
+           panelClass: 'snackbar-danger'
+         });
+       }
        this._generalService.sendUpdate('InventoryAll:InventoryView:Failure');//To Send Updates  
        this.saveDisabled = true;
     }
@@ -1029,7 +1096,9 @@ export class FormDialogComponent
     this.advanceTableForm.patchValue({fuelTypeID:this.fuelTypeID ||this.advanceTable.fuelTypeID});
     //this.advanceTableForm.patchValue({supplierID:this.supplierID ||this.advanceTable.supplierID});
     this.advanceTableForm.patchValue({locationHubID:this.locationHubID ||this.advanceTable.locationHubID});
-    this.advanceTableForm.patchValue({companyID:this.companyID ||this.advanceTable.companyID});
+    this.advanceTableForm.patchValue({
+      companyID: this.companyID || this.advanceTableForm.value.companyID || this.advanceTable.companyID
+    });
     this.advanceTableService.update(this.advanceTableForm.getRawValue())  
     .subscribe(
     response => 
@@ -1040,6 +1109,17 @@ export class FormDialogComponent
     },
     error =>
     {
+     const message = error?.error || 'Save failed';
+     if (typeof message === 'string' && message.toLowerCase().includes('duplicate')) {
+       this.advanceTableForm.get('registrationNumber')?.setErrors({ duplicate: true });
+       this.advanceTableForm.get('registrationNumber')?.markAsTouched();
+       this.snackBar.open('Registration Number already exists', '', {
+         duration: 3000,
+         verticalPosition: 'bottom',
+         horizontalPosition: 'center',
+         panelClass: 'snackbar-danger'
+       });
+     }
      this._generalService.sendUpdate('InventoryAll:InventoryView:Failure');//To Send Updates  
      this.saveDisabled = true;
     }
@@ -1047,15 +1127,13 @@ export class FormDialogComponent
   }
   public confirmAdd(): void 
   {
+    this.onRegistrationNumberInput();
+    if (this.advanceTableForm.get('registrationNumber')?.invalid) {
+      this.advanceTableForm.get('registrationNumber')?.markAsTouched();
+      return;
+    }
     this.saveDisabled = false;
-       if(this.action=="edit")
-       {
-          this.Put();
-       }
-       else
-       {
-          this.Post();
-       }
+    this.checkRegistrationNumberDuplicate(true);
   }
   
   onGPSAvailableChange() {
@@ -1096,9 +1174,10 @@ onBlurUpdateDate(value: string): void {
 const validDate = moment(value, 'DD/MM/YYYY', true).isValid();
 if (validDate) {
   const formattedDate = moment(value, 'DD/MM/YYYY').toDate();
-    this.advanceTableForm?.get('startDate')?.setValue(formattedDate);    
+    this.advanceTableForm?.get('registrationFromDate')?.setValue(formattedDate);
+    this.advanceTableForm?.get('registrationFromDate')?.setErrors(null);
 } else {
-  this.advanceTableForm?.get('startDate')?.setErrors({ invalidDate: true });
+  this.advanceTableForm?.get('registrationFromDate')?.setErrors({ invalidDate: true });
 }
 }
 
@@ -1106,14 +1185,9 @@ onBlurUpdateDateEdit(value: string): void {
 const validDate = moment(value, 'DD/MM/YYYY', true).isValid();
 if (validDate) {
   const formattedDate = moment(value, 'DD/MM/YYYY').toDate();
-  if(this.action==='edit')
-  {
-    this.advanceTable.registrationFromDate=formattedDate
-  }
-  else{
-    this.advanceTableForm?.get('registrationFromDate')?.setValue(formattedDate);
-  }
-  
+  this.advanceTable.registrationFromDate = formattedDate;
+  this.advanceTableForm?.get('registrationFromDate')?.setValue(formattedDate);
+  this.advanceTableForm?.get('registrationFromDate')?.setErrors(null);
 } else {
   this.advanceTableForm?.get('registrationFromDate')?.setErrors({ invalidDate: true });
 }
@@ -1164,15 +1238,80 @@ this.advanceTableForm?.get('registrationTillDate')?.setErrors({ invalidDate: tru
     }
   }
 
-  // Handle pasting or modifying input dynamically
-  removeSpaces() 
+  onRegistrationNumberInput() 
   {
-    let value = this.advanceTableForm.value.registrationNumber;
-    let newValue = value.replace(/\s/g, ''); // Remove spaces
-    if (value !== newValue) 
-    {
-      this.advanceTableForm.get('registrationNumber').setValue(newValue, { emitEvent: false }); // Update FormControl without triggering additional events
+    const control = this.advanceTableForm?.get('registrationNumber');
+    if (!control) {
+      return;
     }
+    const value = control.value == null ? '' : String(control.value);
+    const newValue = value.toUpperCase().replace(/[^A-Z0-9]/g, '');
+    if (value !== newValue) {
+      control.setValue(newValue, { emitEvent: false });
+    }
+    this.clearRegistrationNumberDuplicateError();
+  }
+
+  checkRegistrationNumberDuplicate(saveAfterCheck: boolean = false) 
+  {
+    this.onRegistrationNumberInput();
+    const control = this.advanceTableForm?.get('registrationNumber');
+    const registrationNumber = control?.value;
+    if (!registrationNumber || control?.hasError('pattern') || control?.hasError('required')) {
+      if (saveAfterCheck) {
+        this.saveDisabled = true;
+      }
+      return;
+    }
+
+    const excludeInventoryID = this.action === 'edit'
+      ? (this.advanceTable?.inventoryID || 0)
+      : 0;
+
+    this.advanceTableService.checkRegistrationNumberDuplicate(registrationNumber, excludeInventoryID)
+      .subscribe({
+        next: (exists) => {
+          if (exists) {
+            control.setErrors({ ...(control.errors || {}), duplicate: true });
+            control.markAsTouched();
+            this.snackBar.open('Registration Number already exists', '', {
+              duration: 3000,
+              verticalPosition: 'bottom',
+              horizontalPosition: 'center',
+              panelClass: 'snackbar-danger'
+            });
+            if (saveAfterCheck) {
+              this.saveDisabled = true;
+            }
+            return;
+          }
+          this.clearRegistrationNumberDuplicateError();
+          if (saveAfterCheck) {
+            if (this.action === 'edit') {
+              this.Put();
+            } else {
+              this.Post();
+            }
+          }
+        },
+        error: () => {
+          if (saveAfterCheck) {
+            this.saveDisabled = true;
+            this._generalService.sendUpdate('InventoryAll:InventoryView:Failure');
+          }
+        }
+      });
+  }
+
+  private clearRegistrationNumberDuplicateError() 
+  {
+    const control = this.advanceTableForm?.get('registrationNumber');
+    if (!control?.hasError('duplicate')) {
+      return;
+    }
+    const errors = { ...(control.errors || {}) };
+    delete errors['duplicate'];
+    control.setErrors(Object.keys(errors).length ? errors : null);
   }
 }
 

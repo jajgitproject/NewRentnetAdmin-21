@@ -49,6 +49,7 @@ export class InventoryComponent implements OnInit {
     'supplierOfficialIdentityNumber',
     'locationHub',
     'isAdhoc',
+    'inventoryRemark',
     'status',
     'actions'
   ];
@@ -104,7 +105,6 @@ export class InventoryComponent implements OnInit {
   ];
   
   searchTerm: any = '';
-  selectedFilter: string = 'search';
 
   constructor(
     public httpClient: HttpClient,
@@ -237,71 +237,16 @@ export class InventoryComponent implements OnInit {
       }
     );
   }
-  getSearchOptions(): Observable<any[]> {
-    switch(this.selectedFilter) {
-      case 'vehicleCategory':
-        return this.vehicleCategory.valueChanges.pipe(
-          startWith(this.searchTerm),
-          map(value => this._filterSearchOptions(value || '', 'vehicleCategory'))
-        );
-      case 'vehicle':
-        return this.vehicle.valueChanges.pipe(
-          startWith(this.searchTerm),
-          map(value => this._filterSearchOptions(value || '', 'vehicle'))
-        );
-      case 'registrationNumber':
-        return this.registrationNumber.valueChanges.pipe(
-          startWith(this.searchTerm),
-          map(value => this._filterSearchOptions(value || '', 'registrationNumber'))
-        );
-      case 'supplier':
-        return this.supplier.valueChanges.pipe(
-          startWith(this.searchTerm),
-          map(value => this._filterSearchOptions(value || '', 'supplier'))
-        );
-      default:
-        return new Observable(observer => observer.next([]));
-    }
-  }
-
-  private _filterSearchOptions(value: string, type: string): any[] {
-    if (!value || value.length < 3) {
-      return [];
-    }
-    const filterValue = value.toLowerCase();
-    
-    switch(type) {
-      case 'vehicleCategory':
-        return this.VehicleCategoryList.filter(item =>
-          item.vehicleCategory.toLowerCase().includes(filterValue)
-        ).map(item => ({ displayValue: item.vehicleCategory }));
-      case 'vehicle':
-        return this.VehicleList.filter(item =>
-          item.vehicle.toLowerCase().includes(filterValue)
-        ).map(item => ({ displayValue: item.vehicle }));
-      case 'registrationNumber':
-        return this.RegistrationNumberList.filter(item =>
-          item.registrationNumber.toLowerCase().includes(filterValue)
-        ).map(item => ({ displayValue: item.registrationNumber }));
-      case 'supplier':
-        return this.SupplierList.filter(item =>
-          item.supplierName.toLowerCase().includes(filterValue)
-        ).map(item => ({ displayValue: item.supplierName }));
-      default:
-        return [];
-    }
-  }
 
   refresh() {
-    this.registrationNumber.setValue(''),
-    this.vehicleCategory.setValue(''),
-    this.vehicle.setValue(''),
-    this.supplier.setValue(''),
-     this.locationHub.setValue(''),
+    this.registrationNumber.setValue('');
+    this.vehicleCategory.setValue('');
+    this.vehicle.setValue('');
+    this.supplier.setValue('');
+    this.locationHub.setValue('');
     this.SearchActivationStatus = '';
-    this.PageNumber=0;
+    this.PageNumber = 0;
     this.searchTerm = '';
-    this.selectedFilter = 'search';
     this.loadData();
   }
 
@@ -360,29 +305,19 @@ onBackPress(event)
   }
 }
 
+  onRegistrationSearchInput() {
+    const cleaned = String(this.searchTerm || '')
+      .toUpperCase()
+      .replace(/[^A-Z0-9]/g, '');
+    if (this.searchTerm !== cleaned) {
+      this.searchTerm = cleaned;
+    }
+    this.loadData();
+  }
+
    public loadData() 
    {
-    switch (this.selectedFilter)
-    {
-      case 'vehicleCategory':
-        this.vehicleCategory.setValue(this.searchTerm);
-        break;
-      case 'vehicle':
-        this.vehicle.setValue(this.searchTerm);
-          break;
-      case 'registrationNumber':
-        this.registrationNumber.setValue(this.searchTerm);
-        break;
-      case 'supplier':
-        this.supplier.setValue(this.searchTerm);
-        break;
-        case 'locationHub':
-        this.locationHub.setValue(this.searchTerm);
-        break;
-      default:
-        this.searchTerm = '';
-        break;
-    }
+      this.registrationNumber.setValue(this.searchTerm || '');
       this.inventoryService.getTableData( this.registrationNumber.value, this.InventoryID,
         this.vehicleCategory.value,
         this.vehicle.value,

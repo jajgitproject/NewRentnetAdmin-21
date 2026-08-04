@@ -40,7 +40,7 @@ export class Supplier {
   constructor(supplier) {
     {
        this.supplierID = supplier.supplierID || -1;
-       this.supplierName = supplier.supplierName || '';
+       this.supplierName = (supplier.supplierName || '').toUpperCase();
        this.addressCityID = supplier.addressCityID || '';
        this.address = supplier.address || '';
        this.pin = supplier.pin || '';

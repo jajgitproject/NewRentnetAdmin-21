@@ -42,7 +42,8 @@
         <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
           <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
             <mat-label>Supplier Name</mat-label>
-            <input matInput formControlName="supplierName" required />
+            <input matInput formControlName="supplierName" required class="uppercase-input"
+              (input)="forceUppercase('supplierName')" />
             <mat-error *ngIf="advanceTableForm.get('supplierName').hasError('required')">
               Supplier Name is required
             </mat-error>

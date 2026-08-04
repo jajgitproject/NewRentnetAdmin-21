@@ -151,6 +151,9 @@ export class InventoryService
     advanceTable.inventoryID=-1;
     advanceTable.userID=this.generalService.getUserID();
     advanceTable.inventoryCreatedBy=this.generalService.getUserID();
+    advanceTable.registrationNumber = String(advanceTable.registrationNumber || '')
+      .toUpperCase()
+      .replace(/[^A-Z0-9]/g, '');
     if(advanceTable.isGPSAvailable){
       advanceTable.isGPSAvailable=true;
     }
@@ -166,6 +169,9 @@ export class InventoryService
   {
     advanceTable.userID=this.generalService.getUserID();
     advanceTable.inventoryCreatedBy=this.generalService.getUserID();
+    advanceTable.registrationNumber = String(advanceTable.registrationNumber || '')
+      .toUpperCase()
+      .replace(/[^A-Z0-9]/g, '');
     advanceTable.registrationFromDateString=this.generalService.getTimeApplicable(advanceTable.registrationFromDate);
     advanceTable.registrationTillDateString=this.generalService.getTimeApplicableTO(advanceTable.registrationTillDate);
     advanceTable.purchaseDateString=this.generalService.getTimeApplicable(advanceTable.purchaseDate);
@@ -175,5 +181,10 @@ export class InventoryService
   {
     let userID=this.generalService.getUserID();
     return this.httpClient.delete(this.API_URL + '/'+ inventoryID + '/' + userID);
+  }
+  checkRegistrationNumberDuplicate(registrationNumber: string, excludeInventoryID: number): Observable<boolean>
+  {
+    const regNo = encodeURIComponent(registrationNumber || '');
+    return this.httpClient.get<boolean>(this.API_URL + '/CheckRegistrationNumberDuplicate/' + regNo + '/' + (excludeInventoryID || 0));
   }
 }

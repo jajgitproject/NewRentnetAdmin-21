@@ -65,32 +65,18 @@
 
             <div class="row">
                 <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
-                    <!-- <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
-                        <mat-label>Company </mat-label>
-                        <mat-select required #companyVal [class.is-invalid]="companyVal.invalid && companyVal.touched" formControlName="companyID">
-                            <mat-option [value]="Company.organizationalEntityID" *ngFor="let Company of OrganizationalEntityList">{{Company.organizationalEntityName}}</mat-option>
-                        </mat-select>
-                        <mat-error>
-                            Please select a Company
-                        </mat-error>
-                    </mat-form-field> -->
-
                     <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
                         <mat-label>Company</mat-label>
-                        <input required type="text" matInput formControlName="company" [matAutocomplete]="auto2">
-                        <mat-autocomplete #auto2="matAutocomplete"
-                            (optionSelected)="OnCompanySelect($event.option.value)">
-                            <mat-option *ngFor="let option of filteredVOrganizationalEntityOptions | async"
-                                [value]="option.organizationalEntityName"
-                                (click)="getorganizationalEntityID(option.getorganizationalEntityID)">
-                                {{option.organizationalEntityName}}
+                        <mat-select required formControlName="companyID" (selectionChange)="onCompanyChange($event.value)">
+                            <mat-option [value]="Company.organizationalEntityID"
+                                *ngFor="let Company of OrganizationalEntityList">
+                                {{Company.organizationalEntityName}}
                             </mat-option>
-                        </mat-autocomplete>
-                        <mat-error *ngIf="advanceTableForm.controls['company'].hasError('companyInvalid')">
+                        </mat-select>
+                        <mat-error *ngIf="advanceTableForm.get('companyID')?.hasError('required')">
                             Please select a Company
                         </mat-error>
                     </mat-form-field>
-
                 </div>
 
                 <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
@@ -237,9 +223,18 @@
                     <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
                         <mat-label>Registration Number</mat-label>
                         <input matInput formControlName="registrationNumber" required
-                            (keypress)="keyPressAlphaNumeric($event)" (input)="removeSpaces()">
+                            class="uppercase-input"
+                            (keypress)="keyPressAlphaNumeric($event)"
+                            (input)="onRegistrationNumberInput()"
+                            (blur)="checkRegistrationNumberDuplicate()">
                         <mat-error *ngIf="advanceTableForm.get('registrationNumber').hasError('required')">
                             Registration Number is required
+                        </mat-error>
+                        <mat-error *ngIf="advanceTableForm.get('registrationNumber').hasError('pattern')">
+                            Only English letters and numbers are allowed
+                        </mat-error>
+                        <mat-error *ngIf="advanceTableForm.get('registrationNumber').hasError('duplicate')">
+                            Registration Number already exists
                         </mat-error>
                     </mat-form-field>
                 </div>
@@ -529,6 +524,15 @@
                         </mat-error>
                     </mat-form-field>
 
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12 mb-2">
+                    <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                        <mat-label>Inventory Remark</mat-label>
+                        <input matInput formControlName="inventoryRemark" maxlength="500">
+                    </mat-form-field>
                 </div>
             </div>
 
