@@ -201,6 +201,17 @@ export const ROUTES: RouteInfo[] = [
       },
 
       {
+        path: 'cdpBookingRequest',
+        title: 'Cab Drive Pro Booking Request',
+        moduleName: 'cdpBookingRequest',
+        icon: 'fas fa-tachometer-alt',
+        class: '',
+        groupTitle: false,
+        submenu: [],
+        isAccess: false
+      },
+
+      {
         path: 'customerMIS',
         title: 'Customer MIS',
         moduleName: 'customerMIS',

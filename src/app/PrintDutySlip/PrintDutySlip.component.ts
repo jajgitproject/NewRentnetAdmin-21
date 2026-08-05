@@ -109,9 +109,9 @@ export class PrintDutySlipComponent {
             this.dataSource.customerSignatureImage
           );
         }
-        //this.TotalKMGSG=this.dataSource?.locationInKM-this.dataSource?.locationOutKM;
+        // Total Kms in header uses totalRunningKM; totalKms is for Running Detail total row when distance column is shown.
         if (this.dataSource?.showDistanceOnDutySlipPdf === true) {
-          this.totalKms = this.dataSource?.runningDetailsModels?.reduce((sum: number, item: any) => sum + Number(item.distance || 0), 0);
+          this.totalKms = this.dataSource?.runningDetailsModels?.reduce((sum: number, item: any) => sum + Number(item.distance || 0), 0) ?? 0;
         } else {
           this.totalKms = 0;
         }

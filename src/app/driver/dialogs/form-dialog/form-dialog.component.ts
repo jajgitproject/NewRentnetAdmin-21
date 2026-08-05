@@ -19,7 +19,8 @@ import { StateDropDown } from 'src/app/state/stateDropDown.model';
 import { SupplierDropDown } from 'src/app/supplier/supplierDropDown.model';
 import {
   filterSuppliersByDisplay,
-  formatSupplierDisplay,
+  formatDriverDutyRegisterName,
+  formatSupplierCode,
   supplierMatchesDisplay,
 } from 'src/app/supplier/supplier-display.util';
 import { OrganizationalEntityDropDown } from 'src/app/organizationalEntityMessage/organizationalEntityDropDown.model';
@@ -533,13 +534,24 @@ saveDisabled:boolean = true;
       });
   }
 
-  formatSupplierDisplay = formatSupplierDisplay;
+  formatSupplierCode = formatSupplierCode;
 
   private syncSupplierDisplayFromId(list: SupplierDropDown[], supplierId: number): void {
     const match = list?.find((item) => item.supplierID === supplierId);
     if (match) {
-      this.advanceTableForm.patchValue({ supplier: formatSupplierDisplay(match) });
+      this.advanceTableForm.patchValue({ supplier: formatSupplierCode(match) });
     }
+  }
+
+  getDriverDutyRegisterDisplay(): string {
+    if (!this.advanceTableForm) {
+      return '';
+    }
+    return formatDriverDutyRegisterName({
+      driverName: this.advanceTableForm.get('driverName')?.value,
+      oldRentnetCode: this.advanceTableForm.get('oldRentnetCode')?.value,
+      mobile1: this.advanceTableForm.get('mobile1')?.value,
+    });
   }
 
   private _filterSupplier(value: string): any {
@@ -581,7 +593,7 @@ saveDisabled:boolean = true;
       {
         this.SupplierForOwnershipList=data;
         
-        this.advanceTableForm.patchValue({supplier:formatSupplierDisplay(this.SupplierForOwnershipList[0])});
+        this.advanceTableForm.patchValue({supplier:formatSupplierCode(this.SupplierForOwnershipList[0])});
         this.advanceTableForm.patchValue({supplierID:this.SupplierForOwnershipList[0].supplierID});
       
       });

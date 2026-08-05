@@ -131,9 +131,13 @@ export class GeneralService {
 
   BaseURL: string;
   ImageURL: string;
-  FormURL: string;
   UnlockEmployeeUrl: string;
   lengthToCheck:number = 3;
+
+  /** Resolves at read time so local dev (localhost:4200) never opens prod FormURL (10.0.6.8). */
+  get FormURL(): string {
+    return this.runtimeConfig.getFormUrl();
+  }
 
   // In-memory cache for read-only dropdown/lookup endpoints. Populated lazily
   // on first call per key and reused across the whole app session to avoid
@@ -168,7 +172,6 @@ export class GeneralService {
   ) {
     this.BaseURL = this.runtimeConfig.getBaseUrl();
     this.ImageURL = this.runtimeConfig.getImageUrl();
-    this.FormURL = this.runtimeConfig.getFormUrl();
     this.UnlockEmployeeUrl = this.runtimeConfig.getUnlockEmployeeUrl();
   }
 

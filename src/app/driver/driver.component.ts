@@ -24,6 +24,7 @@ import { DriverGradeDropDown } from '../driverGrade/driverGradeDropDown.model';
 import { QualificationDropDown } from '../general/qualificationDropDown.model';
 import { OrganizationalEntityDropDown } from '../general/organizationalEntityDropDown.model';
 import { ClearIMEIDialogComponent } from './dialogs/clearIMEI/clearIMEI.component';
+import { formatSupplierCode } from '../supplier/supplier-display.util';
 
 interface MenuItem {
   label: string;
@@ -49,7 +50,6 @@ export class DriverComponent implements OnInit, AfterViewChecked {
     'driverEmail',
     'driverRemark',
     'mobile1',
-    'driverOfficialIdentityNumber',
     'supplierCode',
     'hub',
     'location',
@@ -251,9 +251,6 @@ export class DriverComponent implements OnInit, AfterViewChecked {
       case 'driverGrade':
         this.driverGrade.setValue(this.searchTerm);
         break;
-      case 'identityNo':
-        this.searchDriverOfficialIdentityNumber = this.searchTerm;
-        break;
       case 'supplier':
         this.searchSupplier = this.searchTerm;
         break;
@@ -321,14 +318,10 @@ export class DriverComponent implements OnInit, AfterViewChecked {
   }
 
   getSupplierCode(row: Driver): string {
-    if (!row) {
-      return '';
-    }
-    const name = row.supplierName || '';
-    const code = row.supplierOldRentnetCode != null && row.supplierOldRentnetCode !== 0
-      ? String(row.supplierOldRentnetCode)
-      : '';
-    return `${name}${code}`;
+    return formatSupplierCode({
+      supplierName: row?.supplierName,
+      oldRentnetCode: row?.supplierOldRentnetCode,
+    });
   }
 
   showNotification(colorName, text, placementFrom, placementAlign) {

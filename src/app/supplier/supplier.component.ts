@@ -21,6 +21,7 @@ import { MyUploadComponent } from '../myupload/myupload.component';
 import { FormControl } from '@angular/forms';
 import { Router } from '@angular/router';
 import { CitiesDropDown } from '../organizationalEntity/citiesDropDown.model';
+import { formatSupplierCode } from './supplier-display.util';
 import { formatSupplierDisplay } from './supplier-display.util';
 interface MenuItem {
   label: string;

@@ -171,7 +171,7 @@
                             <!-- <strong>Total Kms : {{dataSource?.locationOutKM +
                               dataSource?.pickUpKM +
                               dataSource?.dropOffKM + dataSource?.locationInKM}} </strong> -->
-                              <strong *ngIf="dataSource?.showDistanceOnDutySlipPdf === true && dataSource?.totalRunningKM > 0">Total Kms : {{dataSource?.totalRunningKM}} </strong>
+                              <strong *ngIf="dataSource?.totalRunningKM > 0">Total Kms : {{dataSource?.totalRunningKM}} </strong>
                           </td>
                           <td colspan="2">
                             <strong>Total Time : {{dataSource?.totalTime}}</strong>
@@ -257,13 +257,13 @@
                     <td *ngIf="dataSource?.showDistanceOnDutySlipPdf === true">{{runningDetails?.distance}}</td>
                   </tr>
 
-                  <tr style="font-weight:bold; text-align:center;">
+                  <tr style="font-weight:bold; text-align:center;" *ngIf="dataSource?.showDistanceOnDutySlipPdf === true">
                     <td></td>
                     <td></td>
                     <td></td>
                     <td></td>
-                    <td></td>
-                    <td></td>
+                    <td>Total</td>
+                    <td>{{totalKms}}</td>
                   </tr>
                 </table>
 

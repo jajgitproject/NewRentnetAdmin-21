@@ -130,11 +130,11 @@
                                                 </mat-cell>
                                             </ng-container>
 
-                                            <!-- Pickup Date -->
+                                            <!-- Duty Start Date (Location Out) -->
                                             <ng-container matColumnDef="PickupDate">
-                                                <mat-header-cell *matHeaderCellDef mat-sort-header>Pickup Date</mat-header-cell>
+                                                <mat-header-cell *matHeaderCellDef mat-sort-header>Duty Start Date</mat-header-cell>
                                                 <mat-cell *matCellDef="let row">
-                                                    {{row.pickupDate ? row.pickupDate : 'N/A'}}
+                                                    {{row.locationOutDate ? row.locationOutDate : 'N/A'}}
                                                 </mat-cell>
                                             </ng-container>
 
@@ -595,7 +595,7 @@
                                             <ng-container matColumnDef="ClosingDate">
                                                 <mat-header-cell *matHeaderCellDef mat-sort-header>Closing Date</mat-header-cell>
                                                 <mat-cell *matCellDef="let row">
-                                                    {{row.closingDate || 'N/A'}}
+                                                    {{row.locationInDate || 'N/A'}}
                                                 </mat-cell>
                                             </ng-container>
                                             <ng-container matColumnDef="RunningDetails">
@@ -607,7 +607,7 @@
                                             <ng-container matColumnDef="ClosureMethod">
                                                 <mat-header-cell *matHeaderCellDef mat-sort-header>Closure Method</mat-header-cell>
                                                 <mat-cell *matCellDef="let row">
-                                                    {{row.closureMethod || 'N/A'}}
+                                                    {{row.closureType || 'N/A'}}
                                                 </mat-cell>
                                             </ng-container>
                                             <ng-container matColumnDef="PickupAddress">

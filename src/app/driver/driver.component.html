@@ -78,14 +78,6 @@
 
                                                     <mat-form-field class="example-full-width" appearance="outline"
                                                         floatLabel="always">
-                                                        <mat-label>Driver Official Identity Number</mat-label>
-                                                        <input type="text" matInput
-                                                            [(ngModel)]="searchDriverOfficialIdentityNumber">
-
-                                                    </mat-form-field>
-
-                                                    <mat-form-field class="example-full-width" appearance="outline"
-                                                        floatLabel="always">
                                                         <mat-label>Highest Qualification</mat-label>
                                                         <mat-select [(ngModel)]="searchhighestQualification">
                                                             <mat-option [value]="Qualification.qualification"
@@ -160,7 +152,6 @@
                                                             <option value="driver">Driver</option>
                                                             <option value="driverFatherName">Driver Father Name</option>
                                                             <option value="driverGrade">Driver Grade</option>
-                                                            <option value="identityNo">Identity No</option>
                                                             <option value="supplier">Supplier Name</option>
                                                             <option value="highestQualification">Highest Qualification
                                                             </option>
@@ -277,13 +268,6 @@
                                             <mat-cell *matCellDef="let row" class="table-img"
                                                 (contextmenu)="onContextMenu($event, row)">
                                                 <img style="cursor: pointer;" src="{{row.driverImage}}" /> </mat-cell>
-                                        </ng-container>
-
-                                        <ng-container matColumnDef="driverOfficialIdentityNumber">
-                                            <mat-header-cell *matHeaderCellDef mat-sort-header>Identity
-                                                No.</mat-header-cell>
-                                            <mat-cell *matCellDef="let row" (contextmenu)="onContextMenu($event, row)">
-                                                {{row.driverOfficialIdentityNumber}}</mat-cell>
                                         </ng-container>
 
                                         <ng-container matColumnDef="supplierName">

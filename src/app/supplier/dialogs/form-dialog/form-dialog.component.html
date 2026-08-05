@@ -295,16 +295,6 @@
         </div>
       </div>
 
-      <div class="row">
-        <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
-          <div class="status-display">
-            <strong>Supplier Official Identity Number: </strong>
-            <span *ngIf="action === 'edit'">{{ advanceTable.supplierOfficialIdentityNumber }}</span>
-            <span *ngIf="action === 'add'">Auto-generated on save</span>
-          </div>
-        </div>
-      </div>
-
       <div class="row" *ngIf="action === 'edit'">
         <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
           <div class="status-display">
@@ -328,19 +318,20 @@
         </div>
       </div>
 
+      <div class="row" *ngIf="getSupplierCodeDisplay()">
+        <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+          <div class="status-display">
+            <label><strong>Supplier Code : </strong></label>
+            <span>{{ getSupplierCodeDisplay() }}</span>
+          </div>
+        </div>
+      </div>
+
       <div class="row" *ngIf="action === 'edit'">
         <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
           <div class="status-display">
             <label><strong>Reg. Date : </strong></label>
             <span>{{advanceTable.supplierRegistrationDate }}</span>
-          </div>
-        </div>
-
-        <!-- Supplier Code -->
-        <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
-          <div class="status-display">
-            <label><strong>Supplier Code : </strong></label>
-            <span>{{ advanceTable.supplierCode }}</span>
           </div>
         </div>
       </div>

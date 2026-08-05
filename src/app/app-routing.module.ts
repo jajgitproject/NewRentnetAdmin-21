@@ -3798,6 +3798,14 @@ const routes: Routes = [
       },
 
       {
+        path: 'cdpBookingRequest',
+        loadChildren: () =>
+          import('./cdpBookingRequest/cdpBookingRequest.module').then(
+            (m) => m.CdpBookingRequestModule
+          )
+      },
+
+      {
         path: 'bookingConfiguration',
         loadChildren: () =>
           import('./bookingConfiguration/bookingConfiguration.module').then(

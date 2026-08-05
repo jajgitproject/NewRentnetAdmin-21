@@ -105,6 +105,12 @@ export class RuntimeConfigService {
   }
 
   getFormUrl(): string {
+    if (typeof window !== 'undefined') {
+      const { hostname, origin } = window.location;
+      if (hostname === 'localhost' || hostname === '127.0.0.1') {
+        return `${origin}/#`;
+      }
+    }
     return this.formUrl;
   }
 

@@ -211,6 +211,13 @@ export class ErrorInterceptor implements HttpInterceptor {
           ? httpErr.error.trim()
           : '';
 
+    const timeoutMessage =
+      'Database timeout — the server took too long to respond. Please try again or contact your administrator.';
+
+    if (this.isDatabaseTimeout(msgFromBody)) {
+      return timeoutMessage;
+    }
+
     if (msgFromBody) {
       return msgFromBody;
     }
@@ -223,7 +230,25 @@ export class ErrorInterceptor implements HttpInterceptor {
       return 'API endpoint not found. Restart or redeploy RentnetAPI with the latest Driver Payout MIS export endpoints.';
     }
 
+    if (this.isDatabaseTimeout(httpErr?.message)) {
+      return timeoutMessage;
+    }
+
     return httpErr?.statusText || 'Error';
+  }
+
+  private isDatabaseTimeout(message?: string): boolean {
+    if (!message) {
+      return false;
+    }
+
+    const normalized = message.toLowerCase();
+    return (
+      normalized.includes('timeout expired') ||
+      normalized.includes('database timeout') ||
+      normalized.includes('cannot connect to the database') ||
+      normalized.includes('connection timeout')
+    );
   }
 
 }

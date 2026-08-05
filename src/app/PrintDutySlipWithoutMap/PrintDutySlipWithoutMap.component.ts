@@ -117,9 +117,11 @@ export class PrintDutySlipWithoutMapComponent {
         );
         console.log("dataSource",this.dataSource);
         if (this.dataSource?.showDistanceOnDutySlipPdf === true) {
-          this.totalKms = this.dataSource?.runningDetailsModels?.reduce((sum: number, item: any) => sum + Number(item.distance || 0), 0);
+          this.totalKms = this.dataSource?.totalRunningKM > 0
+            ? this.dataSource.totalRunningKM
+            : this.dataSource?.runningDetailsModels?.reduce((sum: number, item: any) => sum + Number(item.distance || 0), 0);
         } else {
-          this.totalKms = 0;
+          this.totalKms = this.dataSource?.totalRunningKM > 0 ? this.dataSource.totalRunningKM : 0;
         }
         setTimeout(() => this.notifyEmbedParentHeight(), 0);
         //this.getTime();

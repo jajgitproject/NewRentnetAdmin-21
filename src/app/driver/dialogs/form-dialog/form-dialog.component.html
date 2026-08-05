@@ -27,6 +27,12 @@
                         </mat-error>
                     </mat-form-field>
                 </div>
+                <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2" *ngIf="getDriverDutyRegisterDisplay()">
+                    <div class="status-display">
+                        <strong>Duty Register Driver Name: </strong>
+                        <span>{{ getDriverDutyRegisterDisplay() }}</span>
+                    </div>
+                </div>
                 <!-- <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
                     <mat-form-field class="example-full-width" appearance="outline" floatLabel="always"> 
                         <mat-label>Driver Grade</mat-label>                       
@@ -541,8 +547,8 @@ advanceTableForm.get('localAddressAddressString')?.invalid &&
                         <mat-autocomplete #auto20="matAutocomplete"
                             (optionSelected)="OnSupplierForOwnerSelect($event.option.value)">
                             <mat-option *ngFor="let option of filteredSupplierForOwnerOptions | async"
-                                [value]="formatSupplierDisplay(option)" (click)="getsupplierIDForOwner(option.supplierID)">
-                                {{formatSupplierDisplay(option)}}
+                                [value]="formatSupplierCode(option)" (click)="getsupplierIDForOwner(option.supplierID)">
+                                {{formatSupplierCode(option)}}
                             </mat-option>
                         </mat-autocomplete>
                         <mat-error *ngIf="advanceTableForm.get('supplier').hasError('required')">
@@ -562,8 +568,8 @@ advanceTableForm.get('localAddressAddressString')?.invalid &&
                         <mat-autocomplete #auto4="matAutocomplete"
                             (optionSelected)="OnSupplierSelect($event.option.value)">
                             <mat-option *ngFor="let option of filteredSupplierOptions | async"
-                                [value]="formatSupplierDisplay(option)" (click)="getsupplierID(option.supplierID)">
-                                {{formatSupplierDisplay(option)}}
+                                [value]="formatSupplierCode(option)" (click)="getsupplierID(option.supplierID)">
+                                {{formatSupplierCode(option)}}
                             </mat-option>
                         </mat-autocomplete>
                         <mat-error *ngIf="advanceTableForm.controls['supplier'].hasError('required')">

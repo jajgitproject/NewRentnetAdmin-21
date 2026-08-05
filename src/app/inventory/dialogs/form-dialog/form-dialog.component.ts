@@ -18,7 +18,7 @@ import { OrganizationalEntityDropDown } from 'src/app/organizationalEntity/organ
 import { SupplierDropDown } from 'src/app/supplier/supplierDropDown.model';
 import {
   filterSuppliersByDisplay,
-  formatSupplierDisplay,
+  formatSupplierCode,
   supplierMatchesDisplay,
 } from 'src/app/supplier/supplier-display.util';
 import { CitiesDropDown } from 'src/app/organizationalEntity/citiesDropDown.model';
@@ -525,12 +525,12 @@ export class FormDialogComponent
     };
   }
 
-  formatSupplierDisplay = formatSupplierDisplay;
+  formatSupplierCode = formatSupplierCode;
 
   private syncSupplierDisplayFromId(list: SupplierDropDown[], supplierId: number): void {
     const match = list?.find((item) => item.supplierID === supplierId);
     if (match) {
-      this.advanceTableForm.patchValue({ supplier: formatSupplierDisplay(match) });
+      this.advanceTableForm.patchValue({ supplier: formatSupplierCode(match) });
     }
   }
 
@@ -645,7 +645,7 @@ export class FormDialogComponent
       data=>
       {
         this.SupplierForOwnershipList=data;
-        this.advanceTableForm.patchValue({supplier:formatSupplierDisplay(this.SupplierForOwnershipList[0])});
+        this.advanceTableForm.patchValue({supplier:formatSupplierCode(this.SupplierForOwnershipList[0])});
         this.advanceTableForm.patchValue({supplierID:this.SupplierForOwnershipList[0].supplierID});
       });
   }

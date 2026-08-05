@@ -1,4 +1,24 @@
 <section class="content">
+  <ng-template #searchProgress>
+    <mat-progress-spinner
+      *ngIf="isLoading"
+      mode="indeterminate"
+      color="primary"
+      class="cp-search-progress"
+      diameter="28"
+      strokeWidth="3"
+      aria-label="Searching">
+    </mat-progress-spinner>
+  </ng-template>
+  <ng-template #searchActions>
+    <button mat-raised-button color="primary" (click)="SearchData()" [disabled]="isLoading">
+      Search
+    </button>
+    <ng-container *ngTemplateOutlet="searchProgress"></ng-container>
+    <button mat-raised-button color="warn" (click)="onNoClick()" tabindex="-1">
+      Reset
+    </button>
+  </ng-template>
   <div class="container-fluid">
     <!-- <div class="block-header">
       <div class="row">
@@ -568,12 +588,7 @@
 
           <div class="row">
             <div class="col-12 d-flex justify-content-start align-items-center mb-2 quick-search-actions" style="gap: 8px;">
-              <button mat-raised-button color="primary" (click)="SearchData()">
-                Search
-              </button>
-              <button mat-raised-button color="warn" (click)="onNoClick()" tabindex="-1">
-                Reset
-              </button>
+              <ng-container *ngTemplateOutlet="searchActions"></ng-container>
             </div>
           </div>
         </form>
@@ -1077,12 +1092,7 @@
           </div>
           <div class="row">
             <div class="col-12 d-flex justify-content-start align-items-center mb-2 advance-search-actions" style="gap: 8px;">
-              <button mat-raised-button color="primary" (click)="SearchData()">
-                Search
-              </button>
-              <button mat-raised-button color="warn" (click)="onNoClick()" tabindex="-1">
-                Reset
-              </button>
+              <ng-container *ngTemplateOutlet="searchActions"></ng-container>
             </div>
           </div>
         </form>
@@ -3850,10 +3860,11 @@
 
         </form>
       </div>
-      <div class="modal-footer">
-        <button mat-raised-button color="primary" (click)="SearchData()" data-dismiss="modal">
+      <div class="modal-footer d-flex align-items-center" style="gap: 8px;">
+        <button mat-raised-button color="primary" (click)="SearchData()" data-dismiss="modal" [disabled]="isLoading">
           Search
         </button>
+        <ng-container *ngTemplateOutlet="searchProgress"></ng-container>
       </div>
     </div>
   </div>

@@ -1,6 +1,6 @@
 // @ts-nocheck
 
-export function formatSupplierDisplay(supplier: {
+export function formatSupplierCode(supplier: {
   supplierName?: string;
   oldRentnetCode?: number | string | null;
   pan?: string | null;
@@ -17,6 +17,29 @@ export function formatSupplierDisplay(supplier: {
   return `${name}#${code}#${pan}`;
 }
 
+export function formatDriverDutyRegisterName(driver: {
+  driverName?: string;
+  oldRentnetCode?: number | string | null;
+  mobile1?: string | null;
+}): string {
+  const name = (driver?.driverName || '').trim();
+  if (!name) {
+    return '';
+  }
+  const code = driver?.oldRentnetCode;
+  const codeStr =
+    code !== null && code !== undefined && code !== '' && code !== 0 ? String(code) : '';
+  const mobile = (driver?.mobile1 || '').replace(/-/g, '').trim();
+  return `${name}__${codeStr}#${mobile}`;
+}
+
+export function formatSupplierDisplay(supplier: {
+  supplierName?: string;
+  oldRentnetCode?: number | string | null;
+}): string {
+  return formatSupplierCode(supplier);
+}
+
 export function supplierMatchesDisplay(
   supplier: { supplierName?: string; oldRentnetCode?: number | string | null; pan?: string | null },
   displayValue: string
@@ -26,7 +49,7 @@ export function supplierMatchesDisplay(
     return false;
   }
 
-  const formatted = formatSupplierDisplay(supplier).toLowerCase();
+  const formatted = formatSupplierCode(supplier).toLowerCase();
   if (formatted === normalized) {
     return true;
   }
@@ -72,7 +95,7 @@ export function filterSuppliersByDisplay(
         : '';
 
     return (
-      formatSupplierDisplay(supplier).toLowerCase().includes(filterValue) ||
+      formatSupplierCode(supplier).toLowerCase().includes(filterValue) ||
       name.includes(filterValue) ||
       code.includes(filterValue) ||
       pan.includes(filterValue)

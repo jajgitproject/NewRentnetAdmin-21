@@ -19,6 +19,7 @@ import { map, startWith } from 'rxjs/operators';
 import moment from 'moment';
 import { SupplierTypeDropDownModel } from 'src/app/supplierType/supplierType.model';
 import { OrganizationalEntityDropDown } from 'src/app/organizationalEntity/organizationalEntityDropDown.model';
+import { formatSupplierCode } from '../../supplier-display.util';
 @Component({
   standalone: false,
   selector: 'app-form-dialog',
@@ -94,7 +95,6 @@ export class FormDialogComponent
           this.OnStateChangeGetCity();
           this.getStatesBasedOnCity();
           // this.searchCountryTerm.setValue(this.advanceTable.country)
-          this.advanceTable.supplierCode='N/A';
           // this.searchStateTerm.setValue(this.advanceTable.stateName)
           // this.searchCityTerm.setValue(this.advanceTable.city)
           this.registrationDate = moment(this.advanceTable.supplierRegistrationDate).format('DD/MM/yyyy');
@@ -107,7 +107,6 @@ export class FormDialogComponent
           this.advanceTable.supplierStatus='N/A';
           this.advanceTable.verificationStatus='N/A';
           // this.advanceTable.supplierRegistrationDate='N/A';
-          this.advanceTable.supplierCode='N/A';
         }
         this.advanceTableForm = this.createContactForm();
   }
@@ -369,6 +368,20 @@ showDetails(){
       return null;
     }
     return Number(value);
+  }
+
+  getSupplierCodeDisplay(): string {
+    if (!this.advanceTableForm) {
+      return '';
+    }
+    const name = (this.advanceTableForm.get('supplierName')?.value || '').trim();
+    if (!name) {
+      return '';
+    }
+    return formatSupplierCode({
+      supplierName: name,
+      oldRentnetCode: this.advanceTableForm.get('oldRentnetCode')?.value,
+    });
   }
 
   getPaymentBasis(): string | null {
