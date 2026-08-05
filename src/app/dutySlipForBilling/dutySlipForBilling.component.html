@@ -319,10 +319,9 @@
                     <div class="col-xl-3 col-lg-3 col-md-6 col-sm-12 mb-2">
                       <mat-form-field appearance="fill" floatLabel="auto" subscriptSizing="dynamic" class="example-full-width cp-quick-search-field">
                         <mat-label>Pickup Date</mat-label>
-                        <input required matInput [matDatepicker]="pickDate" formControlName="pickUpDateForBilling"
-                          (dateChange)="onPickupDatepickerChange($event)">
-                        <mat-datepicker-toggle matSuffix [for]="pickDate"></mat-datepicker-toggle>
-                        <mat-datepicker #pickDate></mat-datepicker>
+                        <input required matInput [matDatepicker]="pickDate" formControlName="pickUpDateForBilling" readonly tabindex="-1">
+                        <mat-datepicker-toggle matSuffix [for]="pickDate" [disabled]="true"></mat-datepicker-toggle>
+                        <mat-datepicker #pickDate [disabled]="true"></mat-datepicker>
                       </mat-form-field>
                       <!-- <span style="color: green; font-size: 10px;" >
                                 <b>Pickup Date</b> :  {{PickupDate | date:'dd-MM-yyyy'}}
@@ -332,11 +331,8 @@
                     <div class="col-xl-3 col-lg-3 col-md-6 col-sm-12 mb-2">
                       <mat-form-field appearance="fill" floatLabel="auto" subscriptSizing="dynamic" class="example-full-width cp-quick-search-field">
                         <mat-label>Pickup Time</mat-label>
-                        <input required matInput [owlDateTimeTrigger]="time2" [owlDateTime]="time2"
-                          formControlName="pickUpTimeForBilling" (ngModelChange)="onTimeSelection()">
-                        <button mat-icon-button matSuffix type="button" [owlDateTimeTrigger]="time2" class="date-icon" aria-label="Open time picker"><mat-icon>schedule</mat-icon></button>
+                        <input required matInput [owlDateTime]="time2" formControlName="pickUpTimeForBilling" readonly tabindex="-1">
                         <owl-date-time [pickerType]="'timer'" #time2></owl-date-time>
-
                       </mat-form-field>
                       <!-- <span style="color: red; font-size: 10px;" *ngIf="isPickupTimeInvalid()">
                                  Time Not Confirmed

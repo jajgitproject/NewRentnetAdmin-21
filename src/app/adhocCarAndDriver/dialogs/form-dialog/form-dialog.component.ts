@@ -329,11 +329,12 @@ export class FormDialogComponent {
   }
   OnSupplierSelect(selectedSupplier: string) {
     const SupplierName = this.SupplierList.find(
-      data => data.supplierName === selectedSupplier
+      data => data.supplierName?.toLowerCase() === selectedSupplier?.toLowerCase()
     );
-    if (selectedSupplier) {
+    if (selectedSupplier && SupplierName) {
       this.getSupplierID(SupplierName.supplierID);
     }
+    this.forceUppercase('supplierName');
   }
   getSupplierID(supplierID: any) {
     this.supplierID = supplierID;
@@ -385,11 +386,12 @@ export class FormDialogComponent {
   }
   OnDriverSelect(selectedSupplier: string) {
     const DriverName = this.DriverList.find(
-      data => data.driverName === selectedSupplier
+      data => data.driverName?.toLowerCase() === selectedSupplier?.toLowerCase()
     );
-    if (selectedSupplier) {
+    if (selectedSupplier && DriverName) {
       this.getDriverID(DriverName.driverID,);
     }
+    this.forceUppercase('driverName');
   }
   getDriverID(driverID: any) {
     this.driverID = driverID;
@@ -747,17 +749,19 @@ export class FormDialogComponent {
 
   OnRegistrationNumberSelect(selectedRegNo: string) {
     const RegNo = this.RegistrationNumberList.find(
-      data => data.vehicle === selectedRegNo
+      data => data.vehicle?.toLowerCase() === selectedRegNo?.toLowerCase()
     );
-    if (selectedRegNo) {
+    if (selectedRegNo && RegNo) {
       this.getRegistrationNumberID(RegNo.vehicle);
     }
+    this.forceUppercase('registrationNumber');
   }
   getRegistrationNumberID(vehicle: any) {
     this.registrationNumber = vehicle;
     this.GetInventoryDetails();
     this.GetVehicleCategories();
     this.advanceTableForm.patchValue({ registrationNumber: this.registrationNumber });
+    this.forceUppercase('registrationNumber');
   }
 
 
@@ -960,6 +964,8 @@ export class FormDialogComponent {
           this.advanceTableForm.patchValue({ drivingSinceDate: drivingSinceDate });
           this.advanceTableForm.patchValue({ ownedSupplier: this.advanceTable.ownedSupplier });
           this.advanceTableForm.patchValue({ rtoState: this.advanceTable.rtoState });
+          this.forceUppercase('driverName');
+          this.forceUppercase('driverFatherName');
         },
         (error: HttpErrorResponse) => { this.advanceTable = null; }
       );
@@ -979,6 +985,10 @@ export class FormDialogComponent {
 
   //------------------post---------------------
   public Post(): void {
+    this.forceUppercase('supplierName');
+    this.forceUppercase('driverName');
+    this.forceUppercase('driverFatherName');
+    this.forceUppercase('registrationNumber');
     //this.advanceTableForm.patchValue({supplierID:this.supplierID});
     const phone1 = this.advanceTableForm.get('countryCodes').value;
     const phone2 = this.advanceTableForm.get('driverPhone').value;
@@ -1254,7 +1264,7 @@ removeSpaces() {
 
   const value = control?.value || '';
 
-  control?.setValue(value.replace(/\s/g, ''), {
+  control?.setValue(value.replace(/\s/g, '').toUpperCase(), {
     emitEvent: false
   });
 }
@@ -1263,8 +1273,24 @@ sanitizeDriverName() {
   let value = control?.value || '';
   value = value.replace(/[^a-zA-Z ]/g, '');
   value = value.replace(/\s+/g, ' ').trimStart();
+  value = value.toUpperCase();
 
   control?.setValue(value, { emitEvent: false });
+}
+
+forceUppercase(controlName: string) {
+  const control = this.advanceTableForm?.get(controlName);
+  if (!control) {
+    return;
+  }
+  const current = control.value;
+  if (current == null || current === '') {
+    return;
+  }
+  const upper = String(current).toUpperCase();
+  if (current !== upper) {
+    control.setValue(upper, { emitEvent: false });
+  }
 }
 
 }

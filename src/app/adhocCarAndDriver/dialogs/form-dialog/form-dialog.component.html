@@ -39,11 +39,12 @@
                 <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2" *ngIf="advanceTableForm.value.isVendorExisting === 'Existing'">
                     <mat-form-field class="example-full-width" appearance="outline" floatLabel="always"> 
                         <mat-label>Vendor</mat-label>                       
-                        <input required type="text" matInput [matAutocomplete]="auto7" formControlName="supplierName">
+                        <input required type="text" matInput [matAutocomplete]="auto7" formControlName="supplierName"
+                            class="uppercase-input" (input)="forceUppercase('supplierName')">
                         <mat-autocomplete #auto7="matAutocomplete" (optionSelected)="OnSupplierSelect($event.option.value)">
                             <mat-option *ngFor="let supplier of filteredSupplierOptions | async"
                                 [value]="supplier.supplierName" (click)="getSupplierID(supplier.supplierID)">
-                                {{supplier.supplierName}} - {{supplier.supplierPhone}}
+                                {{supplier.supplierName | uppercase}} - {{supplier.supplierPhone}}
                             </mat-option>
                         </mat-autocomplete>
                         <mat-error *ngIf="advanceTableForm.controls['supplierName'].hasError('required')">
@@ -54,7 +55,8 @@
                 <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2" *ngIf="!advanceTableForm.value?.isVendorExisting || advanceTableForm.value.isVendorExisting === 'New'">
                     <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
                         <mat-label>Vendor</mat-label>
-                        <input required type="text" matInput formControlName="supplierName">
+                        <input required type="text" matInput formControlName="supplierName"
+                            class="uppercase-input" (input)="forceUppercase('supplierName')">
                         <mat-error *ngIf="advanceTableForm.controls['supplierName'].hasError('required')">
                             Vendor is required
                         </mat-error>
@@ -201,11 +203,12 @@
                 <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2" *ngIf=" advanceTableForm.value.isDriverExisting === 'Existing'">
                     <mat-form-field class="example-full-width" appearance="outline" floatLabel="always"> 
                         <mat-label>Driver Name</mat-label>                       
-                        <input required type="text" matInput [matAutocomplete]="auto1" formControlName="driverName">
+                        <input required type="text" matInput [matAutocomplete]="auto1" formControlName="driverName"
+                            class="uppercase-input" (input)="forceUppercase('driverName')">
                         <mat-autocomplete #auto1="matAutocomplete" (optionSelected)="OnDriverSelect($event.option.value)">
                             <mat-option *ngFor="let driver of filteredDriverOptions | async"
                                 [value]="driver.driverName" (click)="getDriverID(driver.driverID)">
-                                {{driver.driverName}} - {{driver.driverPhone}}
+                                {{driver.driverName | uppercase}} - {{driver.driverPhone}}
                             </mat-option>
                         </mat-autocomplete>
                         <mat-error *ngIf="advanceTableForm.controls['driverName'].hasError('required')">
@@ -228,7 +231,7 @@
                 <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2" *ngIf="!advanceTableForm.value?.isDriverExisting  || advanceTableForm.value.isDriverExisting === 'New'">
                     <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
                         <mat-label>Driver Name</mat-label>
-                        <input matInput formControlName="driverName" required (input)="sanitizeDriverName()">
+                        <input matInput formControlName="driverName" required class="uppercase-input" (input)="sanitizeDriverName()">
                         <mat-error *ngIf="advanceTableForm.get('driverName').hasError('required')">
                             Driver Name is required
                         </mat-error>
@@ -284,7 +287,7 @@
                 <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2" *ngIf=" advanceTableForm.value.isDriverExisting === 'Existing'">
                     <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
                         <mat-label>Father's Name</mat-label>
-                        <input matInput formControlName="driverFatherName" readonly>
+                        <input matInput formControlName="driverFatherName" readonly class="uppercase-input">
                         <!-- <mat-error *ngIf="advanceTableForm.get('driverFatherName').hasError('required')">
                             Father's Name is required
                         </mat-error> -->
@@ -293,7 +296,8 @@
                 <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2" *ngIf="!advanceTableForm.value?.isDriverExisting  || advanceTableForm.value.isDriverExisting === 'New'">
                     <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
                         <mat-label>Father's Name</mat-label>
-                        <input matInput formControlName="driverFatherName">
+                        <input matInput formControlName="driverFatherName" class="uppercase-input"
+                            (input)="forceUppercase('driverFatherName')">
                         <!-- <mat-error *ngIf="advanceTableForm.get('driverFatherName').hasError('required')">
                             Father's Name is required
                         </mat-error> -->
@@ -380,7 +384,8 @@
                <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2" *ngIf="!advanceTableForm.value?.isCarExisting || advanceTableForm.value.isCarExisting === 'New'">
                     <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
                         <mat-label>Registration No</mat-label>
-                        <input matInput formControlName="registrationNumber" required  (blur)="duplicateRegistrationNoCheck()"
+                        <input matInput formControlName="registrationNumber" required class="uppercase-input"
+                        (blur)="duplicateRegistrationNoCheck()"
                         (keydown)="preventSpace($event)"
                         (input)="removeSpaces()">
                         <mat-error *ngIf="advanceTableForm.get('registrationNumber').hasError('required')">
@@ -394,10 +399,11 @@
                 <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2" *ngIf=" advanceTableForm.value.isCarExisting === 'Existing'">
                     <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
                         <mat-label>Registration No</mat-label>
-                        <input required type="text" matInput formControlName="registrationNumber" [matAutocomplete]="auto4">
+                        <input required type="text" matInput formControlName="registrationNumber" [matAutocomplete]="auto4"
+                            class="uppercase-input" (input)="forceUppercase('registrationNumber')">
                         <mat-autocomplete #auto4="matAutocomplete" (optionSelected)="OnRegistrationNumberSelect($event.option.value)">
                           <mat-option *ngFor="let option of filteredRegistrationNumberOptions | async" [value]="option.vehicle" (click)="getRegistrationNumberID(option.vehicle)">
-                            {{option.vehicle}}
+                            {{option.vehicle | uppercase}}
                           </mat-option>
                         </mat-autocomplete>
                         <mat-error *ngIf="advanceTableForm.controls['registrationNumber']?.hasError('required')">

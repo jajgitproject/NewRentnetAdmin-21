@@ -71,18 +71,22 @@ export class DutySlipForBillingComponent implements OnInit, AfterViewInit, OnCha
  diffP2P: number | null = null;
  totalKMForManul: any;
  totalKMForApp: any;
- /** Date/time and duty-slip status fields stay editable for all closure types (App, Driver, GPS, Manual). */
+ /** Date/time and duty-slip status fields stay editable for all closure types (App, Driver, GPS, Manual).
+  * Pickup Date/Time are locked to Reservation and are never in this list. */
  private readonly alwaysEditableControls = [
    'locationOutDateForBilling',
    'locationOutTimeForBilling',
    'reportingToGuestDateForBilling',
    'reportingToGuestTimeForBilling',
-   'pickUpDateForBilling',
-   'pickUpTimeForBilling',
    'dropOffDateForBilling',
    'dropOffTimeForBilling',
    'locationInDateForBilling',
    'locationInTimeForBilling',
+ ];
+ /** Pickup Date/Time are always read-only; sourced only from Reservation. */
+ private readonly lockedPickupControls = [
+   'pickUpDateForBilling',
+   'pickUpTimeForBilling',
  ];
  /** Address fields editable for all closure types (App, Driver, GPS, Manual). */
  private readonly alwaysEditableAddressControls = [
@@ -208,6 +212,7 @@ export class DutySlipForBillingComponent implements OnInit, AfterViewInit, OnCha
       this.buttonText = 'Update';
       this.LoadDataForBilling();
     } else {
+      this.patchPickupFromReservation();
       this.syncVerifyDutyAndGoodForBillingState();
     }
 
@@ -388,16 +393,7 @@ export class DutySlipForBillingComponent implements OnInit, AfterViewInit, OnCha
         this.advanceTableForm.patchValue({reportingToGuestLatLongForBilling:null });
       } 
 
-      if(this.advanceTableClosingOne.closingReservationForPickupDataModel.pickupDate !== null)
-      {
-        this.advanceTableForm.patchValue({pickUpDateForBilling : this.advanceTableClosingOne.closingReservationForPickupDataModel.pickupDate});
-        this.advanceTableForm.patchValue({pickUpTimeForBilling : this.advanceTableClosingOne.closingReservationForPickupDataModel.pickupTime});
-      }
-      else
-      {
-        this.advanceTableForm.patchValue({pickUpDateForBilling : this.advanceTableClosingOne.closingDutySlipByAppModel.pickUpDateByApp});
-        this.advanceTableForm.patchValue({pickUpTimeForBilling : this.advanceTableClosingOne.closingDutySlipByAppModel.pickUpTimeByApp});
-      }
+      // Pickup Date/Time are locked to Reservation; never patched from App/GPS/Driver here.
       
       this.advanceTableForm.patchValue({pickUpKMForBilling : this.advanceTableClosingOne.closingDutySlipByAppModel.pickupKMByAppActual});
       this.advanceTableForm.patchValue({pickUpAddressStringForBilling : this.advanceTableClosingOne.closingDutySlipByAppModel.pickUpAddressStringByApp});
@@ -581,16 +577,7 @@ export class DutySlipForBillingComponent implements OnInit, AfterViewInit, OnCha
         this.advanceTableForm.patchValue({reportingToGuestLatLongForBilling:null });
       } 
 
-      if(this.advanceTableClosingOne.closingReservationForPickupDataModel.pickupDate !== null)
-      {
-        this.advanceTableForm.patchValue({pickUpDateForBilling : this.advanceTableClosingOne.closingReservationForPickupDataModel.pickupDate});
-        this.advanceTableForm.patchValue({pickUpTimeForBilling : this.advanceTableClosingOne.closingReservationForPickupDataModel.pickupTime});
-      }
-      else
-      {
-        this.advanceTableForm.patchValue({pickUpDateForBilling : this.advanceTableClosingOne.closingDutySlipByAppModel.pickUpDateByApp});
-      this.advanceTableForm.patchValue({pickUpTimeForBilling : this.advanceTableClosingOne.closingDutySlipByAppModel.pickUpTimeByApp});
-      }
+      // Pickup Date/Time are locked to Reservation; never patched from App/GPS/Driver here.
       
       this.advanceTableForm.patchValue({pickUpKMForBilling : this.advanceTableClosingOne.closingDutySlipByAppModel.pickUpKMByApp});
       this.advanceTableForm.patchValue({pickUpAddressStringForBilling : this.advanceTableClosingOne.closingDutySlipByAppModel.pickUpAddressStringByApp});
@@ -773,17 +760,7 @@ export class DutySlipForBillingComponent implements OnInit, AfterViewInit, OnCha
         this.advanceTableForm.patchValue({reportingToGuestLatLongForBilling:null });
       } 
 
-      if(this.advanceTableClosingOne.closingReservationForPickupDataModel.pickupDate !== null)
-      {
-        this.advanceTableForm.patchValue({pickUpDateForBilling : this.advanceTableClosingOne.closingReservationForPickupDataModel.pickupDate});
-        this.advanceTableForm.patchValue({pickUpTimeForBilling : this.advanceTableClosingOne.closingReservationForPickupDataModel.pickupTime});
-      }
-      else
-      {
-        this.advanceTableForm.patchValue({pickUpDateForBilling : this.advanceTableClosingOne.closingDutySlipByGPSModel.pickUpDateByGPS});
-        this.advanceTableForm.patchValue({pickUpTimeForBilling : this.advanceTableClosingOne.closingDutySlipByGPSModel.pickUpTimeByGPS});
-      }
-
+      // Pickup Date/Time are locked to Reservation; InitGPS must not change them (including after Get KM).
       
       this.advanceTableForm.patchValue({pickUpKMForBilling : this.advanceTableClosingOne.closingDutySlipByGPSModel.pickUpKMByGPS});
       this.advanceTableForm.patchValue({pickUpAddressStringForBilling : this.advanceTableClosingOne.closingDutySlipByGPSModel.pickUpAddressStringByGPS});
@@ -967,16 +944,7 @@ export class DutySlipForBillingComponent implements OnInit, AfterViewInit, OnCha
         this.advanceTableForm.patchValue({reportingToGuestLatLongForBilling:null });
       } 
 
-      if(this.advanceTableClosingOne.closingReservationForPickupDataModel.pickupDate !== null)
-      {
-        this.advanceTableForm.patchValue({pickUpDateForBilling : this.advanceTableClosingOne.closingReservationForPickupDataModel.pickupDate});
-        this.advanceTableForm.patchValue({pickUpTimeForBilling : this.advanceTableClosingOne.closingReservationForPickupDataModel.pickupTime});
-      }
-      else
-      {
-        this.advanceTableForm.patchValue({pickUpDateForBilling : this.advanceTableClosingOne.closingDutySlipByDriverModel.pickUpDateByDriver});
-        this.advanceTableForm.patchValue({pickUpTimeForBilling : this.advanceTableClosingOne.closingDutySlipByDriverModel.pickUpTimeByDriver});
-      }
+      // Pickup Date/Time are locked to Reservation; never patched from App/GPS/Driver here.
       
       this.advanceTableForm.patchValue({pickUpKMForBilling : this.advanceTableClosingOne.closingDutySlipByDriverModel.pickUpKMByDriver});
       this.advanceTableForm.patchValue({pickUpAddressStringForBilling : this.advanceTableClosingOne.closingDutySlipByDriverModel.pickUpAddressStringByDriver});
@@ -1378,7 +1346,8 @@ export class DutySlipForBillingComponent implements OnInit, AfterViewInit, OnCha
     }
   }
 
-  /** Date/time and addresses always editable when form is not GFB-blocked; KM always editable. */
+  /** Date/time and addresses always editable when form is not GFB-blocked; KM always editable.
+   * Pickup Date/Time stay disabled and locked to Reservation. */
   private applyManualEditMode(): void {
     if (!this.advanceTableForm || this.isDutySlipEditBlocked) {
       return;
@@ -1393,6 +1362,32 @@ export class DutySlipForBillingComponent implements OnInit, AfterViewInit, OnCha
     this.applyAlwaysEditableKm();
     // Closure type radio must stay selectable so users can switch closure source.
     this.advanceTableForm.get('closureType')?.enable({ emitEvent: false });
+    this.disablePickupDateTimeControls();
+  }
+
+  /** Always fill Pickup Date/Time from Reservation; never from App/GPS/Driver/billing. */
+  private patchPickupFromReservation(): void {
+    const reservation = this.advanceTableClosingOne?.closingReservationForPickupDataModel;
+    if (!reservation || !this.advanceTableForm) {
+      return;
+    }
+    this.advanceTableForm.patchValue(
+      {
+        pickUpDateForBilling: reservation.pickupDate,
+        pickUpTimeForBilling: reservation.pickupTime,
+      },
+      { emitEvent: false }
+    );
+  }
+
+  /** Pickup Date/Time must remain non-editable for every closure type. */
+  private disablePickupDateTimeControls(): void {
+    if (!this.advanceTableForm) {
+      return;
+    }
+    for (const name of this.lockedPickupControls) {
+      this.advanceTableForm.get(name)?.disable({ emitEvent: false });
+    }
   }
 
   private guardDutySlipEdit(): boolean {
@@ -1682,16 +1677,7 @@ export class DutySlipForBillingComponent implements OnInit, AfterViewInit, OnCha
       this.advanceTableForm.patchValue({reportingToGuestLatLongForBilling:null});
     }
 
-    if(this.advanceTableClosingOne.closingReservationForPickupDataModel.pickupDate !== null)
-    {
-      this.advanceTableForm.patchValue({pickUpDateForBilling : this.advanceTableClosingOne.closingDutySlipForBillingModel.pickUpDateForBilling});
-      this.advanceTableForm.patchValue({pickUpTimeForBilling : this.advanceTableClosingOne.closingDutySlipForBillingModel.pickUpTimeForBilling});
-    }
-    else
-    {
-      this.advanceTableForm.patchValue({pickUpDateForBilling : this.advanceTableClosingOne.closingDutySlipForBillingModel.pickUpDateForBilling});
-      this.advanceTableForm.patchValue({pickUpTimeForBilling : this.advanceTableClosingOne.closingDutySlipForBillingModel.pickUpTimeForBilling});
-    }
+    this.patchPickupFromReservation();
 
     this.advanceTableForm.patchValue({pickUpKMForBilling : this.advanceTableClosingOne.closingDutySlipForBillingModel.pickUpKMForBilling});
     this.advanceTableForm.patchValue({pickUpAddressStringForBilling : this.advanceTableClosingOne.closingDutySlipForBillingModel.pickUpAddressStringForBilling});
