@@ -79,6 +79,7 @@ export class FormDialogComponent
       canDeleteFuelEntry: [this.advanceTable.canDeleteFuelEntry, Validators.required],
       canFindFuelEntry: [this.advanceTable.canFindFuelEntry, Validators.required],
       canCloseIncident: [this.advanceTable.canCloseIncident, Validators.required],
+      canCancelBackDateAllotment: [this.advanceTable.canCancelBackDateAllotment, Validators.required],
       canEditDSAfterGoodForBilling: [this.advanceTable.canEditDSAfterGoodForBilling, Validators.required]
     });
   }
@@ -109,6 +110,7 @@ export class FormDialogComponent
       canDeleteFuelEntry: toBool(raw.canDeleteFuelEntry),
       canFindFuelEntry: toBool(raw.canFindFuelEntry),
       canCloseIncident: toBool(raw.canCloseIncident),
+      canCancelBackDateAllotment: toBool(raw.canCancelBackDateAllotment),
       canEditDSAfterGoodForBilling: toBool(raw.canEditDSAfterGoodForBilling),
     };
   }

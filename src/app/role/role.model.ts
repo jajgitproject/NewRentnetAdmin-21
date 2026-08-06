@@ -19,6 +19,7 @@ export class Role {
    canDeleteFuelEntry: boolean;
    canFindFuelEntry: boolean;
    canCloseIncident: boolean;
+   canCancelBackDateAllotment: boolean;
    canEditDSAfterGoodForBilling: boolean;
 
   constructor(role) {
@@ -42,6 +43,7 @@ export class Role {
        this.canDeleteFuelEntry = role.canDeleteFuelEntry ?? role.CanDeleteFuelEntry ?? '';
        this.canFindFuelEntry = role.canFindFuelEntry ?? role.CanFindFuelEntry ?? '';
        this.canCloseIncident = role.canCloseIncident ?? role.CanCloseIncident ?? '';
+       this.canCancelBackDateAllotment = role.canCancelBackDateAllotment ?? role.CanCancelBackDateAllotment ?? '';
        this.canEditDSAfterGoodForBilling = Role.toBoolOrEmpty(
          role.canEditDSAfterGoodForBilling ?? role.CanEditDSAfterGoodForBilling
        );
