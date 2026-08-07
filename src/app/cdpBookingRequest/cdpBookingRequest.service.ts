@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { GeneralService } from '../general/general.service';
@@ -16,45 +16,34 @@ export class CdpBookingRequestService {
     this.apiUrl = generalService.BaseURL + 'cdpBookingRequest';
   }
 
-  private toRouteSegment(value: string | number | null | undefined): string {
-    if (value === null || value === undefined || value === '') {
-      return 'null';
-    }
-    return encodeURIComponent(String(value));
-  }
-
-  private buildListUrl(
-    fromDate: string | null,
-    toDate: string | null,
-    status: string | null,
-    bookingType: string | null,
-    pageNumber: number,
-    orderByColumn: string,
-    order: string
-  ): string {
-    return [
-      this.apiUrl,
-      this.toRouteSegment(fromDate),
-      this.toRouteSegment(toDate),
-      this.toRouteSegment(status),
-      this.toRouteSegment(bookingType),
-      pageNumber,
-      orderByColumn,
-      order
-    ].join('/');
-  }
-
   getTableData(
-    fromDate: string | null,
-    toDate: string | null,
+    fromDate: string,
+    toDate: string,
     status: string | null,
     bookingType: string | null,
     pageNumber: number,
     orderByColumn = 'PickupDate',
     order = 'Descending'
   ): Observable<CdpBookingRequestListResponse> {
-    const url = this.buildListUrl(fromDate, toDate, status, bookingType, pageNumber, orderByColumn, order);
-    return this.httpClient.get<any>(url).pipe(
+    let params = new HttpParams()
+      .set('pageNumber', String(pageNumber))
+      .set('orderByColumn', orderByColumn)
+      .set('order', order);
+
+    if (fromDate) {
+      params = params.set('fromDate', fromDate);
+    }
+    if (toDate) {
+      params = params.set('toDate', toDate);
+    }
+    if (status) {
+      params = params.set('status', status);
+    }
+    if (bookingType) {
+      params = params.set('bookingType', bookingType);
+    }
+
+    return this.httpClient.get<any>(this.apiUrl, { params }).pipe(
       map((response) => this.normalizeResponse(response))
     );
   }

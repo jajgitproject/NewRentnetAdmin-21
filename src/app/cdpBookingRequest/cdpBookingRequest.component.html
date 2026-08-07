@@ -23,14 +23,14 @@
       <div class="br-filter-bar">
         <mat-form-field class="br-field br-field-date" appearance="outline" subscriptSizing="dynamic">
           <mat-label>From Date</mat-label>
-          <input matInput [matDatepicker]="fromPicker" [(ngModel)]="searchFromDate" />
+          <input matInput [matDatepicker]="fromPicker" [(ngModel)]="searchPickupFromDate" />
           <mat-datepicker-toggle matIconPrefix [for]="fromPicker"></mat-datepicker-toggle>
           <mat-datepicker #fromPicker></mat-datepicker>
         </mat-form-field>
 
         <mat-form-field class="br-field br-field-date" appearance="outline" subscriptSizing="dynamic">
           <mat-label>To Date</mat-label>
-          <input matInput [matDatepicker]="toPicker" [(ngModel)]="searchToDate" />
+          <input matInput [matDatepicker]="toPicker" [(ngModel)]="searchPickupToDate" />
           <mat-datepicker-toggle matIconPrefix [for]="toPicker"></mat-datepicker-toggle>
           <mat-datepicker #toPicker></mat-datepicker>
         </mat-form-field>

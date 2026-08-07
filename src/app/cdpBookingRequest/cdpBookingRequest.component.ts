@@ -2,6 +2,7 @@ import { Component, OnInit, ViewChild } from '@angular/core';
 import { MatPaginator, PageEvent } from '@angular/material/paginator';
 import { MatSort, Sort } from '@angular/material/sort';
 import { MatSnackBar } from '@angular/material/snack-bar';
+import { MAT_DATE_LOCALE } from '@angular/material/core';
 import { Router } from '@angular/router';
 import moment from 'moment';
 import { GeneralService } from '../general/general.service';
@@ -13,7 +14,8 @@ import { CdpBookingRequest } from './cdpBookingRequest.model';
   standalone: false,
   selector: 'app-cdpBookingRequest',
   templateUrl: './cdpBookingRequest.component.html',
-  styleUrls: ['./cdpBookingRequest.component.sass']
+  styleUrls: ['./cdpBookingRequest.component.sass'],
+  providers: [{ provide: MAT_DATE_LOCALE, useValue: 'en-GB' }]
 })
 export class CdpBookingRequestComponent implements OnInit {
   readonly pageSize = 20;
@@ -38,8 +40,8 @@ export class CdpBookingRequestComponent implements OnInit {
   filtersCollapsed = false;
   isLoading = false;
 
-  searchFromDate: Date | null = null;
-  searchToDate: Date | null = null;
+  searchPickupFromDate: Date | null = new Date();
+  searchPickupToDate: Date | null = new Date();
   searchStatus = '';
   searchBookingType = '';
   pageNumber = 0;
@@ -58,7 +60,7 @@ export class CdpBookingRequestComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    this.setDefaultSearchDates();
+    this.setDefaultPickupDates();
     this.loadData();
   }
 
@@ -68,8 +70,8 @@ export class CdpBookingRequestComponent implements OnInit {
 
   get activeFilterCount(): number {
     let count = 0;
-    if (this.searchFromDate) count++;
-    if (this.searchToDate) count++;
+    if (this.searchPickupFromDate) count++;
+    if (this.searchPickupToDate) count++;
     if (this.searchStatus?.trim()) count++;
     if (this.searchBookingType?.trim()) count++;
     return count;
@@ -102,7 +104,7 @@ export class CdpBookingRequestComponent implements OnInit {
   }
 
   refresh(): void {
-    this.setDefaultSearchDates();
+    this.setDefaultPickupDates();
     this.searchStatus = '';
     this.searchBookingType = '';
     this.pageNumber = 0;
@@ -257,15 +259,20 @@ export class CdpBookingRequestComponent implements OnInit {
     return 'br-status-neutral';
   }
 
-  private setDefaultSearchDates(): void {
-    const today = moment().startOf('day').toDate();
-    this.searchFromDate = today;
-    this.searchToDate = today;
+  private setDefaultPickupDates(): void {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    this.searchPickupFromDate = new Date(today);
+    this.searchPickupToDate = new Date(today);
   }
 
-  private getFormattedSearchDates(): { fromDate: string | null; toDate: string | null } {
-    const fromDate = this.searchFromDate ? moment(this.searchFromDate).format('YYYY-MM-DD') : null;
-    const toDate = this.searchToDate ? moment(this.searchToDate).format('YYYY-MM-DD') : null;
+  private getFormattedSearchDates(): { fromDate: string; toDate: string } {
+    if (!this.searchPickupFromDate || !this.searchPickupToDate) {
+      this.setDefaultPickupDates();
+    }
+
+    const fromDate = moment(this.searchPickupFromDate).format('YYYY-MM-DD');
+    const toDate = moment(this.searchPickupToDate).format('YYYY-MM-DD');
     return { fromDate, toDate };
   }
 
