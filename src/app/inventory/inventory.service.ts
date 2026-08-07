@@ -16,6 +16,14 @@ export class InventoryService
   {
     this.API_URL=generalService.BaseURL+ "inventory";
   }
+
+  private pathSegment(value: any): string {
+    if (value === null || value === undefined || value === '') {
+      return 'null';
+    }
+    return encodeURIComponent(String(value));
+  }
+
   /** CRUD METHODS */
   getTableData( RegistrationNumber:string,
     InventoryID:number,
@@ -26,39 +34,12 @@ export class InventoryService
     SearchActivationStatus:string, 
     PageNumber: number):  Observable<any> 
   {
-    if(RegistrationNumber==="")
-      {
-        RegistrationNumber="null";
-      }
-    if(InventoryID===0)
-    {
-      InventoryID=0;
-    }
-
-    if(SearchVehcileCategory==="")
-    {
-      SearchVehcileCategory="null";
-    }
-
-    if(SearchVehicle==="")
-    {
-      SearchVehicle="null";
-    }
-
-    if(SearchSupplier==="")
-    {
-      SearchSupplier="null";
-    }
-    if(searchLocationHub==="")
-    {
-      searchLocationHub="null";
-    }
-
-    if(SearchActivationStatus==="")
-    {
-      SearchActivationStatus="null";
-    }
-    return this.httpClient.get(this.API_URL + "/" + RegistrationNumber + "/" + InventoryID + '/'+ SearchVehcileCategory + '/'+ SearchVehicle + '/'+ SearchSupplier + '/'+ searchLocationHub + '/' + SearchActivationStatus +'/' + PageNumber + '/InventoryID/Ascending');
+    return this.httpClient.get(
+      this.API_URL + "/" + this.pathSegment(RegistrationNumber) + "/" + (InventoryID || 0) + '/' +
+      this.pathSegment(SearchVehcileCategory) + '/' + this.pathSegment(SearchVehicle) + '/' +
+      this.pathSegment(SearchSupplier) + '/' + this.pathSegment(searchLocationHub) + '/' +
+      this.pathSegment(SearchActivationStatus) + '/' + PageNumber + '/InventoryID/Ascending'
+    );
   }
   getTableDataSort(
     RegistrationNumber:string,InventoryID:number, 
@@ -71,37 +52,12 @@ export class InventoryService
     coloumName:string,
     sortType:string):  Observable<any> 
   {
-    if(RegistrationNumber==="")
-      {
-        RegistrationNumber="null";
-      }
-    if(InventoryID===0)
-    {
-      InventoryID=0;
-    }
-    if(SearchVehcileCategory==="")
-    {
-      SearchVehcileCategory="null";
-    }
-
-    if(SearchVehicle==="")
-    {
-      SearchVehicle="null";
-    }
-
-    if(SearchSupplier==="")
-    {
-      SearchSupplier="null";
-    }
-     if(searchLocationHub==="")
-    {
-      searchLocationHub="null";
-    }
-    if(SearchActivationStatus==="")
-    {
-      SearchActivationStatus="null";
-    }
-    return this.httpClient.get(this.API_URL + "/"+ RegistrationNumber + "/" + InventoryID + '/'+ SearchVehcileCategory + '/'+ SearchVehicle + '/'+ SearchSupplier + '/' + searchLocationHub + '/' + SearchActivationStatus +'/' + PageNumber +  '/'+coloumName+'/'+sortType);
+    return this.httpClient.get(
+      this.API_URL + "/" + this.pathSegment(RegistrationNumber) + "/" + (InventoryID || 0) + '/' +
+      this.pathSegment(SearchVehcileCategory) + '/' + this.pathSegment(SearchVehicle) + '/' +
+      this.pathSegment(SearchSupplier) + '/' + this.pathSegment(searchLocationHub) + '/' +
+      this.pathSegment(SearchActivationStatus) + '/' + PageNumber + '/' + coloumName + '/' + sortType
+    );
   }
   downloadCsv(
     RegistrationNumber:string,InventoryID:number,
@@ -111,38 +67,11 @@ export class InventoryService
     searchLocationHub:string,
     SearchActivationStatus:string): Observable<Blob>
   {
-    if(RegistrationNumber==="")
-      {
-        RegistrationNumber="null";
-      }
-    if(InventoryID===0)
-    {
-      InventoryID=0;
-    }
-    if(SearchVehcileCategory==="")
-    {
-      SearchVehcileCategory="null";
-    }
-
-    if(SearchVehicle==="")
-    {
-      SearchVehicle="null";
-    }
-
-    if(SearchSupplier==="")
-    {
-      SearchSupplier="null";
-    }
-     if(searchLocationHub==="")
-    {
-      searchLocationHub="null";
-    }
-    if(SearchActivationStatus==="")
-    {
-      SearchActivationStatus="null";
-    }
     return this.httpClient.get(
-      this.API_URL + "/export/"+ RegistrationNumber + "/" + InventoryID + '/'+ SearchVehcileCategory + '/'+ SearchVehicle + '/'+ SearchSupplier + '/' + searchLocationHub + '/' + SearchActivationStatus,
+      this.API_URL + "/export/" + this.pathSegment(RegistrationNumber) + "/" + (InventoryID || 0) + '/' +
+      this.pathSegment(SearchVehcileCategory) + '/' + this.pathSegment(SearchVehicle) + '/' +
+      this.pathSegment(SearchSupplier) + '/' + this.pathSegment(searchLocationHub) + '/' +
+      this.pathSegment(SearchActivationStatus),
       { responseType: 'blob' }
     );
   }

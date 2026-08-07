@@ -164,16 +164,33 @@
                                         <div class="col-lg-6">
                                             <div class="form-group">
                                                 <div class="input-group">
+                                                    <div class="input-group-append input-group-addon">
+                                                        <select style="height: 40px; width: 180px;" class="form-control"
+                                                            name="selectedFilter"
+                                                            [ngModel]="selectedFilter"
+                                                            (ngModelChange)="onSelectedFilterChange($event)"
+                                                            [ngModelOptions]="{standalone: true}">
+                                                            <option value="registrationNumber">Registration Number</option>
+                                                            <option value="vehicleCategory">Vehicle Category</option>
+                                                            <option value="vehicle">Vehicle</option>
+                                                            <option value="supplier">Supplier Name</option>
+                                                            <option value="locationHub">Location</option>
+                                                        </select>
+                                                    </div>
+
                                                     <input type="text"
                                                         style="height: 40px; width: 300px;padding-left: 5px;"
-                                                        class="form-control" placeholder="Registration Number" id="inputGroup"
-                                                        (keyup)="onBackPress($event)" (input)="onRegistrationSearchInput()"
-                                                        [(ngModel)]="searchTerm" />
+                                                        class="form-control" placeholder="Filter" id="inputGroup"
+                                                        name="searchTerm"
+                                                        [ngModel]="searchTerm"
+                                                        (ngModelChange)="onSearchTermChange($event)"
+                                                        [ngModelOptions]="{standalone: true}"
+                                                        (keyup.enter)="Filter()" />
 
                                                     <div class="input-group-append input-group-addon">
                                                         <span class="input-group-text"
                                                             style="cursor: pointer; height: 40px; width: 40px; text-align: center;"
-                                                            (click)="loadData()">
+                                                            (click)="Filter()">
                                                             <i class="fas fa-search"></i>
                                                         </span>
                                                     </div>
@@ -183,6 +200,11 @@
                                     </div>
 
                                     <div style="width: 30%; text-align:right;">
+                                        <button mat-raised-button color="primary" data-dismiss="modal"
+                                            data-toggle="modal" data-backdrop="false" data-target="#exampleModalCenter">
+                                            Search
+                                        </button>
+                                        &nbsp;
                                         <button mat-mini-fab color="primary" (click)="addNew()">
                                             <mat-icon class="col-white">add</mat-icon>
                                         </button>
@@ -204,28 +226,12 @@
                                 Check me!
                             </label> -->
                             <!-- <p>Checkbox is {{ isChecked ? 'checked' : 'unchecked' }}</p> -->
-                            <p *ngIf="!dataSource; then thenBlock2 else elseBlock2">
-                                This is not rendered
-                            </p>
+                            <div class="alert alert-primary" style="background-color:#E8E8E8; text-align: center;"
+                                *ngIf="!dataSource?.length">
+                                No Records Found</div>
 
-                            <ng-template #thenBlock2>
-                                <div class="alert alert-primary" style="background-color:#E8E8E8; text-align: center;">
-                                    No Records Found</div>
-                                <div class="body">
-                                    <div class="example-button-row">
-
-                                        <button mat-raised-button color="primary"
-                                            (click)="PreviousCall()">Previous</button>
-                                        <button mat-raised-button color="primary" (click)="NextCall()">Next</button>
-
-                                    </div>
-                                </div>
-
-                            </ng-template>
-
-                            <ng-template #elseBlock2>
-                                <div class="scrollable-table-container">
-                                    <mat-table #table [dataSource]="dataSource" matSort
+                            <div class="scrollable-table-container">
+                                    <mat-table #table [dataSource]="dataSource || []" matSort
                                         class="mat-cell floating-header-table" (matSortChange)="SortingData($event)">
 
                                         <ng-container matColumnDef="id">
@@ -263,6 +269,13 @@
                                                 Type</mat-header-cell>
                                             <mat-cell *matCellDef="let row" (contextmenu)="onContextMenu($event, row)">
                                                 {{ row.supplierType || '' }}</mat-cell>
+                                        </ng-container>
+
+                                        <ng-container matColumnDef="supplierOfficialIdentityNumber">
+                                            <mat-header-cell *matHeaderCellDef mat-sort-header>Supplier Official
+                                                ID</mat-header-cell>
+                                            <mat-cell *matCellDef="let row" (contextmenu)="onContextMenu($event, row)">
+                                                {{ row.supplierOfficialIdentityNumber || '' }}</mat-cell>
                                         </ng-container>
 
                                         <ng-container matColumnDef="locationHub">
@@ -404,8 +417,6 @@
 
                                     </div>
                                 </div>
-
-                            </ng-template>
 
                         </div>
                     </div>

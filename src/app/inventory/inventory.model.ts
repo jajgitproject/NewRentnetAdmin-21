@@ -10,6 +10,7 @@ export class Inventory {
    supplier:string;
    supplierName:string;
    supplierType:string;
+   supplierOfficialIdentityNumber:string;
    company:string;
    vehicleID: number;
    registrationStateID:number;

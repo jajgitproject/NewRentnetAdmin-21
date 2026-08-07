@@ -1,5 +1,5 @@
 // @ts-nocheck
-import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
+import { Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { InventoryService } from './inventory.service';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { MatDialog } from '@angular/material/dialog';
@@ -8,8 +8,8 @@ import { MatSort } from '@angular/material/sort';
 import { Inventory } from './inventory.model';
 import { DataSource } from '@angular/cdk/collections';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import { BehaviorSubject, fromEvent, merge, Observable, Subscription } from 'rxjs';
-import { map, startWith } from 'rxjs/operators';
+import { BehaviorSubject, fromEvent, merge, Observable, of, Subject, Subscription } from 'rxjs';
+import { catchError, debounceTime, map, startWith, switchMap } from 'rxjs/operators';
 import { FormDialogComponent } from './dialogs/form-dialog/form-dialog.component';
 import { DeleteDialogComponent } from './dialogs/delete/delete.component';
 import { DateAdapter, MAT_DATE_LOCALE } from '@angular/material/core';
@@ -39,7 +39,7 @@ interface MenuItem {
   styleUrls: ['./inventory.component.sass'],
   providers: [{ provide: MAT_DATE_LOCALE, useValue: 'en-GB' }]
 })
-export class InventoryComponent implements OnInit {
+export class InventoryComponent implements OnInit, OnDestroy {
   displayedColumns = [
     'vehicleCategory',
     'vehicle',
@@ -53,7 +53,7 @@ export class InventoryComponent implements OnInit {
     'status',
     'actions'
   ];
-  dataSource: Inventory[] | null;
+  dataSource: Inventory[] = [];
   inventoryID: number;
   advanceTable: Inventory | null;
   InventoryID: number = 0;
@@ -105,6 +105,19 @@ export class InventoryComponent implements OnInit {
   ];
   
   searchTerm: any = '';
+  /** Default to registration so typing filters immediately (old 'search' cleared the term). */
+  selectedFilter: string = 'registrationNumber';
+
+  /** Latest filter values sent to the API (plain strings — not shared modal FormControls). */
+  private queryRegistrationNumber = '';
+  private queryVehicleCategory = '';
+  private queryVehicle = '';
+  private querySupplier = '';
+  private queryLocationHub = '';
+
+  private readonly immediateQuery$ = new Subject<void>();
+  private readonly debouncedQuery$ = new Subject<void>();
+  private tableQuerySub: Subscription;
 
   constructor(
     public httpClient: HttpClient,
@@ -115,14 +128,33 @@ export class InventoryComponent implements OnInit {
     public route:ActivatedRoute,
     public _generalService: GeneralService
   ) {}
-  @ViewChild(MatPaginator, { static: true }) paginator: MatPaginator;
-  @ViewChild(MatSort, { static: true }) sort: MatSort;
-  @ViewChild('filter', { static: true }) filter: ElementRef;
+  @ViewChild(MatPaginator) paginator: MatPaginator;
+  @ViewChild(MatSort) sort: MatSort;
   
   @ViewChild(MatMenuTrigger)
   contextMenu: MatMenuTrigger;
   contextMenuPosition = { x: '0px', y: '0px' };
   ngOnInit() {
+    this.tableQuerySub = merge(
+      this.immediateQuery$,
+      this.debouncedQuery$.pipe(debounceTime(250))
+    ).pipe(
+      switchMap(() =>
+        this.inventoryService.getTableData(
+          this.queryRegistrationNumber,
+          this.InventoryID,
+          this.queryVehicleCategory,
+          this.queryVehicle,
+          this.querySupplier,
+          this.queryLocationHub,
+          this.SearchActivationStatus,
+          this.PageNumber
+        ).pipe(catchError(() => of([])))
+      )
+    ).subscribe((data) => {
+      this.dataSource = Array.isArray(data) ? data : [];
+    });
+
     this.loadData();
     this.SubscribeUpdateService();
     this.InitSupplier();
@@ -131,6 +163,15 @@ export class InventoryComponent implements OnInit {
     this.InitRegistrationNumber();
     this.InitLocationHub();
     this.menuItems.sort((a, b) => a.label.localeCompare(b.label));
+  }
+
+  ngOnDestroy() {
+    if (this.tableQuerySub) {
+      this.tableQuerySub.unsubscribe();
+    }
+    if (this.subscriptionName) {
+      this.subscriptionName.unsubscribe();
+    }
   }
   
   // InitVehicleCategory(){
@@ -239,21 +280,92 @@ export class InventoryComponent implements OnInit {
   }
 
   refresh() {
-    this.registrationNumber.setValue('');
-    this.vehicleCategory.setValue('');
-    this.vehicle.setValue('');
-    this.supplier.setValue('');
-    this.locationHub.setValue('');
+    this.registrationNumber.setValue('', { emitEvent: false });
+    this.vehicleCategory.setValue('', { emitEvent: false });
+    this.vehicle.setValue('', { emitEvent: false });
+    this.supplier.setValue('', { emitEvent: false });
+    this.locationHub.setValue('', { emitEvent: false });
     this.SearchActivationStatus = '';
     this.PageNumber = 0;
     this.searchTerm = '';
-    this.loadData();
+    this.selectedFilter = 'registrationNumber';
+    this.clearQueryFilters();
+    this.immediateQuery$.next();
   }
 
   public SearchData()
   {
-    this.loadData();    
+    // Advanced modal: use FormControl values as-is
+    this.PageNumber = 0;
+    this.queryRegistrationNumber = String(this.registrationNumber.value || '');
+    this.queryVehicleCategory = String(this.vehicleCategory.value || '');
+    this.queryVehicle = String(this.vehicle.value || '');
+    this.querySupplier = String(this.supplier.value || '');
+    this.queryLocationHub = String(this.locationHub.value || '');
+    this.immediateQuery$.next();
   }
+
+  public Filter()
+  {
+    this.PageNumber = 0;
+    this.applyInlineSearchFilter();
+    this.immediateQuery$.next();
+  }
+
+  onSearchTermChange(value: string) {
+    this.searchTerm = value ?? '';
+    this.PageNumber = 0;
+    this.applyInlineSearchFilter();
+    this.debouncedQuery$.next();
+  }
+
+  onSelectedFilterChange(value: string) {
+    this.selectedFilter = value || 'registrationNumber';
+    this.searchTerm = '';
+    this.PageNumber = 0;
+    this.applyInlineSearchFilter();
+    this.immediateQuery$.next();
+  }
+
+  private clearQueryFilters() {
+    this.queryRegistrationNumber = '';
+    this.queryVehicleCategory = '';
+    this.queryVehicle = '';
+    this.querySupplier = '';
+    this.queryLocationHub = '';
+  }
+
+  /** Map inline Search-By + searchTerm into plain query fields (never touch modal FormControls). */
+  private applyInlineSearchFilter() {
+    const term = String(this.searchTerm || '').trim();
+    this.clearQueryFilters();
+
+    switch (this.selectedFilter) {
+      case 'vehicleCategory':
+        this.queryVehicleCategory = term;
+        break;
+      case 'vehicle':
+        this.queryVehicle = term;
+        break;
+      case 'registrationNumber':
+        this.queryRegistrationNumber = term.toUpperCase().replace(/[^A-Z0-9]/g, '');
+        break;
+      case 'supplier':
+        this.querySupplier = term;
+        break;
+      case 'locationHub':
+        this.queryLocationHub = term;
+        break;
+      default:
+        break;
+    }
+  }
+
+  public loadData() {
+    this.applyInlineSearchFilter();
+    this.immediateQuery$.next();
+  }
+
   addNew()
   {
     const dialogRef = this.dialog.open(FormDialogComponent, 
@@ -291,57 +403,15 @@ export class InventoryComponent implements OnInit {
     // Check if item status is 'Deactive' or any other condition you want to consider
     return item.status !== 'Deactive' && !item.isDeleted; // Assuming you have an isDeleted property
   }
-  public Filter()
-  {
-    this.PageNumber = 0;
-    this.loadData();
-  }
-
-onBackPress(event) 
-{
-  if (event.keyCode === 8) 
-  {
-    this.loadData();
-  }
-}
-
-  onRegistrationSearchInput() {
-    const cleaned = String(this.searchTerm || '')
-      .toUpperCase()
-      .replace(/[^A-Z0-9]/g, '');
-    if (this.searchTerm !== cleaned) {
-      this.searchTerm = cleaned;
-    }
-    this.loadData();
-  }
-
-   public loadData() 
-   {
-      this.registrationNumber.setValue(this.searchTerm || '');
-      this.inventoryService.getTableData( this.registrationNumber.value, this.InventoryID,
-        this.vehicleCategory.value,
-        this.vehicle.value,
-        this.supplier.value,
-        this.locationHub.value,
-        this.SearchActivationStatus, 
-        this.PageNumber).subscribe
-    (
-      data =>   
-      {
-        this.dataSource = data;
-      },
-      (error: HttpErrorResponse) => { this.dataSource = null;}
-    );
-  }
 
   downloadCsv() {
     this.inventoryService.downloadCsv(
-      this.registrationNumber.value || '',
+      this.queryRegistrationNumber || '',
       this.InventoryID,
-      this.vehicleCategory.value || '',
-      this.vehicle.value || '',
-      this.supplier.value || '',
-      this.locationHub.value || '',
+      this.queryVehicleCategory || '',
+      this.queryVehicle || '',
+      this.querySupplier || '',
+      this.queryLocationHub || '',
       this.SearchActivationStatus || ''
     ).subscribe(
       (blob: Blob) => {
@@ -380,7 +450,7 @@ onBackPress(event)
   
   NextCall()
   {
-    if (this.dataSource.length>0) 
+    if (this.dataSource && this.dataSource.length > 0) 
     {
      
       this.PageNumber++;
@@ -600,21 +670,23 @@ onBackPress(event)
       this.sortingData = 1;
       this.sortType = "Descending";
     }
-    this.inventoryService.getTableDataSort(this.registrationNumber.value, this.InventoryID,
-        this.vehicleCategory.value,
-        this.vehicle.value,
-        this.supplier.value,
-        this.locationHub.value,
-        this.SearchActivationStatus,
+    this.inventoryService.getTableDataSort(
+      this.queryRegistrationNumber,
+      this.InventoryID,
+      this.queryVehicleCategory,
+      this.queryVehicle,
+      this.querySupplier,
+      this.queryLocationHub,
+      this.SearchActivationStatus,
       this.PageNumber,
       coloumName.active,
       this.sortType).subscribe
     (
       data =>   
       {
-        this.dataSource = data;
+        this.dataSource = Array.isArray(data) ? data : [];
       },
-      (error: HttpErrorResponse) => { this.dataSource = null;}
+      (error: HttpErrorResponse) => { this.dataSource = [];}
     );
   }
 
