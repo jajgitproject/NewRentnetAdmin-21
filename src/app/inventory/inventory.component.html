@@ -294,13 +294,6 @@
                                             </mat-cell>
                                         </ng-container>
 
-                                        <ng-container matColumnDef="inventoryRemark">
-                                            <mat-header-cell *matHeaderCellDef mat-sort-header>Inventory
-                                                Remark</mat-header-cell>
-                                            <mat-cell *matCellDef="let row" (contextmenu)="onContextMenu($event, row)">
-                                                {{row.inventoryRemark}}</mat-cell>
-                                        </ng-container>
-
                                         <ng-container matColumnDef="status">
                                             <mat-header-cell *matHeaderCellDef mat-sort-header>Status</mat-header-cell>
                                             <mat-cell *matCellDef="let row">

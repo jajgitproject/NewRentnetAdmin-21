@@ -42,20 +42,19 @@ interface MenuItem {
 })
 export class DriverComponent implements OnInit, AfterViewChecked {
   displayedColumns = [
-    'actions',
     'driverName',
     'oldRentnetCode',
     'supplierName',
     'supplierType',
     'driverEmail',
-    'driverRemark',
     'mobile1',
     'supplierCode',
     'hub',
     'location',
     'driverImage',
-     'isAdhoc',
-    'status'
+    'isAdhoc',
+    'status',
+    'actions'
   ];
 
   dataSource: Driver[] | null;
@@ -115,7 +114,7 @@ export class DriverComponent implements OnInit, AfterViewChecked {
   @ViewChild('topScroll') topScroll: ElementRef<HTMLDivElement>;
   @ViewChild('bottomScroll') bottomScroll: ElementRef<HTMLDivElement>;
   contextMenuPosition = { x: '0px', y: '0px' };
-  tableScrollWidth = 1750;
+  tableScrollWidth = 0;
   private syncingScroll = false;
   private lastMeasuredWidth = 0;
 
@@ -157,7 +156,7 @@ export class DriverComponent implements OnInit, AfterViewChecked {
       return;
     }
     const table = el.querySelector('.driver-table') as HTMLElement;
-    const width = Math.max(el.scrollWidth || 0, table?.scrollWidth || 0, table?.offsetWidth || 0, 1750);
+    const width = Math.max(el.scrollWidth || 0, table?.scrollWidth || 0, table?.offsetWidth || 0, el.clientWidth || 0);
     if (width && width !== this.lastMeasuredWidth) {
       this.lastMeasuredWidth = width;
       // Defer to avoid ExpressionChangedAfterItHasBeenCheckedError

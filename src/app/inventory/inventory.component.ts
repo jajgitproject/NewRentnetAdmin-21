@@ -49,7 +49,6 @@ export class InventoryComponent implements OnInit, OnDestroy {
     'supplierOfficialIdentityNumber',
     'locationHub',
     'isAdhoc',
-    'inventoryRemark',
     'status',
     'actions'
   ];

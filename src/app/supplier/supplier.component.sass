@@ -1,0 +1,117 @@
+.scrollable-table-container
+  width: 100%
+  overflow: auto
+  height: 70vh
+
+:host ::ng-deep .supplier-table.mat-mdc-table,
+:host ::ng-deep .supplier-table.mat-table
+  display: block
+  width: 100% !important
+  min-width: 100% !important
+  table-layout: fixed
+
+:host ::ng-deep .supplier-table.floating-header-table
+  min-width: 100% !important
+
+:host ::ng-deep .supplier-table .mat-mdc-header-row,
+:host ::ng-deep .supplier-table .mat-mdc-row,
+:host ::ng-deep .supplier-table .mat-header-row,
+:host ::ng-deep .supplier-table .mat-row
+  display: flex
+  width: 100% !important
+  min-width: 100% !important
+  max-width: 100% !important
+  box-sizing: border-box
+  align-items: flex-start
+
+:host ::ng-deep .supplier-table .mat-mdc-header-cell,
+:host ::ng-deep .supplier-table .mat-mdc-cell,
+:host ::ng-deep .supplier-table .mat-header-cell,
+:host ::ng-deep .supplier-table .mat-cell
+  flex: 1 1 0 !important
+  min-width: 0 !important
+  box-sizing: border-box
+  padding: 8px 6px !important
+  line-height: 1.35
+  overflow: visible
+  text-overflow: unset
+  white-space: normal !important
+  word-break: break-word
+  overflow-wrap: anywhere
+  font-size: 13px
+  align-items: flex-start
+  height: auto !important
+  min-height: 40px
+
+:host ::ng-deep .supplier-table .mat-mdc-header-cell,
+:host ::ng-deep .supplier-table .mat-header-cell
+  font-size: 12px !important
+  font-weight: 600 !important
+  white-space: normal !important
+
+:host ::ng-deep .supplier-table .mat-column-supplierName
+  flex: 1.6 1 0 !important
+
+:host ::ng-deep .supplier-table .mat-column-supplierCode
+  flex: 1.1 1 0 !important
+
+:host ::ng-deep .supplier-table .mat-column-supplierType
+  flex: 1 1 0 !important
+
+:host ::ng-deep .supplier-table .mat-column-paymentBasis
+  flex: 0.9 1 0 !important
+
+:host ::ng-deep .supplier-table .mat-column-dateOfAgreement
+  flex: 0.9 1 0 !important
+
+:host ::ng-deep .supplier-table .mat-column-supplierAgreementBranch
+  flex: 1.1 1 0 !important
+
+:host ::ng-deep .supplier-table .mat-column-city
+  flex: 0.8 1 0 !important
+
+:host ::ng-deep .supplier-table .mat-column-phone
+  flex: 0.9 1 0 !important
+
+:host ::ng-deep .supplier-table .mat-column-email
+  flex: 1.4 1 0 !important
+
+:host ::ng-deep .supplier-table .mat-column-isAdhoc
+  flex: 0 0 58px !important
+  width: 58px !important
+  min-width: 58px !important
+  max-width: 58px !important
+
+:host ::ng-deep .supplier-table .mat-column-supplierVerificationStatus
+  flex: 1 1 0 !important
+
+:host ::ng-deep .supplier-table .mat-column-supplierRegistrationDate
+  flex: 0.9 1 0 !important
+
+:host ::ng-deep .supplier-table .mat-column-actions
+  flex: 0 0 88px !important
+  width: 88px !important
+  min-width: 88px !important
+  max-width: 88px !important
+  overflow: visible !important
+  text-overflow: unset !important
+  padding: 4px 6px !important
+  white-space: nowrap !important
+
+:host ::ng-deep .supplier-table .mat-column-actions .mat-mdc-raised-button,
+:host ::ng-deep .supplier-table .mat-column-actions .mat-raised-button
+  height: 28px !important
+  min-height: 28px !important
+  max-height: 28px !important
+  line-height: normal !important
+  padding: 0 10px !important
+  font-size: 12px !important
+  min-width: 72px !important
+
+:host ::ng-deep .supplier-table .mat-row:nth-child(even),
+:host ::ng-deep .supplier-table .mat-mdc-row:nth-child(even)
+  background: #fafbfe
+
+:host ::ng-deep .supplier-table .mat-row:hover,
+:host ::ng-deep .supplier-table .mat-mdc-row:hover
+  background: #eef4ff

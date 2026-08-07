@@ -38,7 +38,6 @@ interface MenuItem {
 })
 export class SupplierComponent implements OnInit {
   displayedColumns = [
-    'actions',
     'supplierName',
     'supplierCode',
     'supplierType',
@@ -49,9 +48,9 @@ export class SupplierComponent implements OnInit {
     'phone',
     'email',
     'isAdhoc',
-    'supplierCreationRemark',
     'supplierVerificationStatus',
-    'supplierRegistrationDate'
+    'supplierRegistrationDate',
+    'actions'
   ];
   dataSource: Supplier[] | null;
   hasSearched = false;

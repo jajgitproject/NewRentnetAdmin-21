@@ -529,15 +529,6 @@
 
             <div class="row">
                 <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12 mb-2">
-                    <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
-                        <mat-label>Inventory Remark</mat-label>
-                        <input matInput formControlName="inventoryRemark" maxlength="500">
-                    </mat-form-field>
-                </div>
-            </div>
-
-            <div class="row">
-                <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12 mb-2">
                     <div class="example-button-row">
                         <button mat-raised-button *ngIf="saveDisabled" color="primary" [type]="submit"
                             [disabled]="!advanceTableForm.valid" (click)="confirmAdd()">Save</button>
