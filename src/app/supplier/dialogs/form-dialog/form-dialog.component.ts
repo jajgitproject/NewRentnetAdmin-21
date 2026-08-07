@@ -58,7 +58,7 @@ export class FormDialogComponent
   public CompanyList?: OrganizationalEntityDropDown[] = [];
   filteredCompanyOptions: Observable<OrganizationalEntityDropDown[]>;
 
-  public BranchList?: OrganizationalEntityDropDown[] = [];
+  public LocationList?: OrganizationalEntityDropDown[] = [];
 
   image: any;
   fileUploadEl: any;
@@ -114,7 +114,7 @@ export class FormDialogComponent
   {
     this.InitCountries();
     this.InitSupplierType();
-    this.InitAgreementBranch();
+    this.InitAgreementLocation();
     //this.InitCompany();
   }
 
@@ -243,9 +243,9 @@ export class FormDialogComponent
           ? new Date(this.advanceTable.dateOfAgreement)
           : null
       ],
-      supplierAgreementBranchID: [
-        (this.advanceTable.supplierAgreementBranchID && this.advanceTable.supplierAgreementBranchID !== 0)
-          ? this.advanceTable.supplierAgreementBranchID
+      supplierAgreementLocationID: [
+        (this.advanceTable.supplierAgreementLocationID && this.advanceTable.supplierAgreementLocationID !== 0)
+          ? this.advanceTable.supplierAgreementLocationID
           : null
       ]
     });
@@ -257,10 +257,10 @@ export class FormDialogComponent
     }
   }
 
-  InitAgreementBranch(): void {
-    this._generalService.GetOrganizationalBranch().subscribe(
+  InitAgreementLocation(): void {
+    this._generalService.GetLocation().subscribe(
       data => {
-        this.BranchList = data || [];
+        this.LocationList = data || [];
       });
   }
 
@@ -427,11 +427,11 @@ showDetails(){
       payload.dateOfAgreement = isNaN(parsed.getTime()) ? null : parsed;
     }
 
-    const branchId = this.advanceTableForm.get('supplierAgreementBranchID')?.value;
-    if (branchId === null || branchId === undefined || branchId === '' || Number(branchId) <= 0) {
-      payload.supplierAgreementBranchID = null;
+    const locationId = this.advanceTableForm.get('supplierAgreementLocationID')?.value;
+    if (locationId === null || locationId === undefined || locationId === '' || Number(locationId) <= 0) {
+      payload.supplierAgreementLocationID = null;
     } else {
-      payload.supplierAgreementBranchID = Number(branchId);
+      payload.supplierAgreementLocationID = Number(locationId);
     }
 
     return payload;

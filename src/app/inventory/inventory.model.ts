@@ -9,6 +9,7 @@ export class Inventory {
    fuelType:string;
    supplier:string;
    supplierName:string;
+   supplierOldRentnetCode:number;
    supplierType:string;
    supplierOfficialIdentityNumber:string;
    company:string;
@@ -65,6 +66,9 @@ export class Inventory {
        this.locationHubID = inventory.locationHubID || '';
        this.ownedSupplied = inventory.ownedSupplied || '';
        this.supplierID = inventory.supplierID || '';
+       this.supplierOldRentnetCode = (inventory.supplierOldRentnetCode && inventory.supplierOldRentnetCode !== 0)
+         ? Number(inventory.supplierOldRentnetCode)
+         : null;
        this.colorID = inventory.colorID || '';
        this.fuelTypeID = inventory.fuelTypeID || '';
        this.mileage = inventory.mileage || '';

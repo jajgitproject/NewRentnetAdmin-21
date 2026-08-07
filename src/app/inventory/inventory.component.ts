@@ -26,6 +26,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { VehicleCategory } from '../vehicleCategory/vehicleCategory.model';
 import { RegistrationDropDown } from '../interstateTaxEntry/registrationDropDown.model';
 import { OrganizationalEntityDropDown } from '../organizationalEntityMessage/organizationalEntityDropDown.model';
+import { formatSupplierDisplay } from '../supplier/supplier-display.util';
 interface MenuItem {
   label: string;
   action: (item: any) => void;
@@ -41,12 +42,10 @@ interface MenuItem {
 })
 export class InventoryComponent implements OnInit, OnDestroy {
   displayedColumns = [
-    'vehicleCategory',
-    'vehicle',
     'registrationNumber',
+    'vehicle',
     'supplierName',
     'supplierType',
-    'supplierOfficialIdentityNumber',
     'locationHub',
     'isAdhoc',
     'status',
@@ -56,7 +55,7 @@ export class InventoryComponent implements OnInit, OnDestroy {
   inventoryID: number;
   advanceTable: Inventory | null;
   InventoryID: number = 0;
-  SearchActivationStatus : string='';
+  SearchActivationStatus : string='All';
   PageNumber: number = 0;
   isChecked: boolean = false;
   sortingData: number;
@@ -146,7 +145,7 @@ export class InventoryComponent implements OnInit, OnDestroy {
           this.queryVehicle,
           this.querySupplier,
           this.queryLocationHub,
-          this.SearchActivationStatus,
+          this.getActivationStatusFilter(),
           this.PageNumber
         ).pipe(catchError(() => of([])))
       )
@@ -284,12 +283,21 @@ export class InventoryComponent implements OnInit, OnDestroy {
     this.vehicle.setValue('', { emitEvent: false });
     this.supplier.setValue('', { emitEvent: false });
     this.locationHub.setValue('', { emitEvent: false });
-    this.SearchActivationStatus = '';
+    this.SearchActivationStatus = 'All';
     this.PageNumber = 0;
     this.searchTerm = '';
     this.selectedFilter = 'registrationNumber';
     this.clearQueryFilters();
     this.immediateQuery$.next();
+  }
+
+  /** Empty / All => no status filter (all activation statuses). */
+  private getActivationStatusFilter(): string {
+    const status = (this.SearchActivationStatus || '').trim();
+    if (!status || status.toLowerCase() === 'all') {
+      return '';
+    }
+    return status;
   }
 
   public SearchData()
@@ -321,6 +329,13 @@ export class InventoryComponent implements OnInit, OnDestroy {
   onSelectedFilterChange(value: string) {
     this.selectedFilter = value || 'registrationNumber';
     this.searchTerm = '';
+    this.PageNumber = 0;
+    this.applyInlineSearchFilter();
+    this.immediateQuery$.next();
+  }
+
+  onActivationStatusChange(value: string) {
+    this.SearchActivationStatus = value || 'All';
     this.PageNumber = 0;
     this.applyInlineSearchFilter();
     this.immediateQuery$.next();
@@ -411,7 +426,7 @@ export class InventoryComponent implements OnInit, OnDestroy {
       this.queryVehicle || '',
       this.querySupplier || '',
       this.queryLocationHub || '',
-      this.SearchActivationStatus || ''
+      this.getActivationStatusFilter()
     ).subscribe(
       (blob: Blob) => {
         const url = window.URL.createObjectURL(blob);
@@ -428,6 +443,13 @@ export class InventoryComponent implements OnInit, OnDestroy {
         this.showNotification('snackbar-danger', 'Failed to download CSV', 'top', 'center');
       }
     );
+  }
+
+  getSupplierDisplay(row: Inventory): string {
+    return formatSupplierDisplay({
+      supplierName: row?.supplierName,
+      oldRentnetCode: row?.supplierOldRentnetCode,
+    });
   }
 
   showNotification(colorName, text, placementFrom, placementAlign) {
@@ -676,7 +698,7 @@ export class InventoryComponent implements OnInit, OnDestroy {
       this.queryVehicle,
       this.querySupplier,
       this.queryLocationHub,
-      this.SearchActivationStatus,
+      this.getActivationStatusFilter(),
       this.PageNumber,
       coloumName.active,
       this.sortType).subscribe

@@ -83,6 +83,7 @@ export class InventoryService
     advanceTable.registrationNumber = String(advanceTable.registrationNumber || '')
       .toUpperCase()
       .replace(/[^A-Z0-9]/g, '');
+    advanceTable.fuelCardNo = advanceTable.fuelCardNo ?? advanceTable.FuelCardNo ?? '';
     if(advanceTable.isGPSAvailable){
       advanceTable.isGPSAvailable=true;
     }
@@ -101,6 +102,7 @@ export class InventoryService
     advanceTable.registrationNumber = String(advanceTable.registrationNumber || '')
       .toUpperCase()
       .replace(/[^A-Z0-9]/g, '');
+    advanceTable.fuelCardNo = advanceTable.fuelCardNo ?? advanceTable.FuelCardNo ?? '';
     advanceTable.registrationFromDateString=this.generalService.getTimeApplicable(advanceTable.registrationFromDate);
     advanceTable.registrationTillDateString=this.generalService.getTimeApplicableTO(advanceTable.registrationTillDate);
     advanceTable.purchaseDateString=this.generalService.getTimeApplicable(advanceTable.purchaseDate);

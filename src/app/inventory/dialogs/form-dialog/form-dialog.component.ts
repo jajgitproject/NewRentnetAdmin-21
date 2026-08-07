@@ -18,7 +18,7 @@ import { OrganizationalEntityDropDown } from 'src/app/organizationalEntity/organ
 import { SupplierDropDown } from 'src/app/supplier/supplierDropDown.model';
 import {
   filterSuppliersByDisplay,
-  formatSupplierCode,
+  formatSupplierDisplay,
   supplierMatchesDisplay,
 } from 'src/app/supplier/supplier-display.util';
 import { CitiesDropDown } from 'src/app/organizationalEntity/citiesDropDown.model';
@@ -214,104 +214,73 @@ export class FormDialogComponent
     this._generalService.GetVehicleCategories().subscribe(
       data=>
       {
-        this.VehicleCategoryList=data;
-        this.advanceTableForm.controls['vehicleCategory'].setValidators([Validators.required,
-          this.vehicleCategoryValidator(this.VehicleCategoryList)]);
-        this.advanceTableForm.controls['vehicleCategory'].updateValueAndValidity();
-        this.filteredVehicleCategoryOptions = this.advanceTableForm.controls['vehicleCategory'].valueChanges.pipe(
-          startWith(""),
-          map(value => this._filter(value || ''))
-        ); 
+        this.VehicleCategoryList = data || [];
+        const categoryCtrl = this.advanceTableForm.controls['vehicleCategoryID'];
+        categoryCtrl.setValidators([Validators.required]);
+        categoryCtrl.updateValueAndValidity();
+        const currentId = categoryCtrl.value || this.advanceTable?.vehicleCategoryID;
+        if (currentId) {
+          const match = this.VehicleCategoryList.find((item) => item.vehicleCategoryID === Number(currentId));
+          if (match) {
+            this.vehicleCategoryID = match.vehicleCategoryID;
+            categoryCtrl.setValue(match.vehicleCategoryID, { emitEvent: false });
+            this.advanceTableForm.patchValue({ vehicleCategory: match.vehicleCategory }, { emitEvent: false });
+            this.initVehicle(true);
+          }
+        }
       });
   }
-  
-  private _filter(value: string): any {
-  // if (!value || value.length < 3) {
-  //   return [];
-  // }
-  const filterValue = value.toLowerCase();
 
-  return this.VehicleCategoryList.filter(customer =>
-    customer.vehicleCategory.toLowerCase().includes(filterValue)
-  );
-}
-
-  // private _filter(value: string): any {
-  //   const filterValue = value.toLowerCase();
-  //   return this.VehicleCategoryList.filter(
-  //     customer => 
-  //     {
-  //       return customer.vehicleCategory.toLowerCase().includes(filterValue);
-  //     });
-  // }
-  OnVehicleCategorySelect(selectedVehicleCategory: string)
-  {
-    const VehicleCategoryName = this.VehicleCategoryList.find(
-      data => data.vehicleCategory === selectedVehicleCategory
-    );
-    if (selectedVehicleCategory) 
-    {
-      this.getTitles(VehicleCategoryName.vehicleCategoryID);
+  onVehicleCategoryChange(vehicleCategoryID: number) {
+    this.getTitles(vehicleCategoryID);
+    const match = this.VehicleCategoryList?.find((item) => item.vehicleCategoryID === Number(vehicleCategoryID));
+    if (match) {
+      this.advanceTableForm.patchValue({ vehicleCategory: match.vehicleCategory });
     }
-  }  
+  }
+
   getTitles(vehicleCategoryID: any)
  {
     this.vehicleCategoryID=vehicleCategoryID;
-    this.initVehicle();
-    this.advanceTableForm.controls['vehicle'].setValue('');
+    this.advanceTableForm.patchValue({ vehicleID: null, vehicle: '' }, { emitEvent: false });
+    this.vehicleID = null;
+    this.initVehicle(false);
   }
 
-  //-------------- Vehicle Category Validator -------------
-  vehicleCategoryValidator(VehicleCategoryList: any[]): ValidatorFn {
-    return (control: AbstractControl): ValidationErrors | null => {
-      const value = control.value?.toLowerCase();
-      const match = VehicleCategoryList.some(group => group.vehicleCategory.toLowerCase() === value);
-      return match ? null : { vehicleCategoryInvalid: true };
-    };
-  }
-  initVehicle() {
+  initVehicle(preserveSelection: boolean = false) {
+    if (!this.vehicleCategoryID) {
+      this.VehicleList = [];
+      return;
+    }
     this._generalService.GetVehicles(this.vehicleCategoryID).subscribe(
       data => {
-        this.VehicleList = data;
-        this.advanceTableForm.controls['vehicle'].setValidators([Validators.required,
-          this.vehicleValidator(this.VehicleList)]);
-        this.advanceTableForm.controls['vehicle'].updateValueAndValidity();
-        this.filteredVehicleOptions = this.advanceTableForm.controls['vehicle'].valueChanges.pipe(
-          startWith(''),
-          map(value => this._filterVehicle(value || ''))
-        );
+        this.VehicleList = data || [];
+        const vehicleCtrl = this.advanceTableForm.controls['vehicleID'];
+        vehicleCtrl.setValidators([Validators.required]);
+        vehicleCtrl.updateValueAndValidity();
+        if (preserveSelection) {
+          const currentId = vehicleCtrl.value || this.advanceTable?.vehicleID;
+          if (currentId) {
+            const match = this.VehicleList.find((item) => item.vehicleID === Number(currentId));
+            if (match) {
+              this.vehicleID = match.vehicleID;
+              vehicleCtrl.setValue(match.vehicleID, { emitEvent: false });
+              this.advanceTableForm.patchValue({ vehicle: match.vehicle }, { emitEvent: false });
+            }
+          }
+        }
       }
     );
   }
-  
-  private _filterVehicle(value: string): any {
-  // if (!value || value.length < 3) {
-  //   return [];
-  // }
-  const filterValue = value.toLowerCase();
-  return this.VehicleList.filter(customer =>
-    customer.vehicle.toLowerCase().includes(filterValue)
-  );
-}
 
-  // private _filterVehicle(value: string): any {
-  //   const filterValue = value.toLowerCase();
-  //   return this.VehicleList.filter(
-  //     customer => 
-  //     {
-  //       return customer.vehicle.toLowerCase().includes(filterValue);
-  //     });
-  // }
-  OnVehicleSelect(selectedVehicle: string)
-  {
-    const VehicleName = this.VehicleList.find(
-      data => data.vehicle === selectedVehicle
-    );
-    if (selectedVehicle) 
-    {
-      this.getvehicleID(VehicleName.vehicleID);
+  onVehicleChange(vehicleID: number) {
+    this.getvehicleID(vehicleID);
+    const match = this.VehicleList?.find((item) => item.vehicleID === Number(vehicleID));
+    if (match) {
+      this.advanceTableForm.patchValue({ vehicle: match.vehicle });
     }
-  } 
+  }
+
   getvehicleID(vehicleID: any)
   {
     this.vehicleID=vehicleID;
@@ -449,57 +418,43 @@ export class FormDialogComponent
     this._generalService.GetLocationHub().subscribe(
       data=>
       {
-        this.OrganizationalEntitiesList=data;
-        this.advanceTableForm.controls['locationHub'].setValidators([Validators.required,
-          this.locationHubValidator(this.OrganizationalEntitiesList)]);
-        this.advanceTableForm.controls['locationHub'].updateValueAndValidity();
-        this.filteredOrganizationalEntityOptions = this.advanceTableForm.controls['locationHub'].valueChanges.pipe(
-          startWith(""),
-          map(value => this._filterOrganizationalsEntity(value || ''))
-        ); 
+        this.OrganizationalEntitiesList = data || [];
+        const locationCtrl = this.advanceTableForm.controls['locationHubID'];
+        locationCtrl.setValidators([Validators.required]);
+        locationCtrl.updateValueAndValidity();
+        const currentId = locationCtrl.value || this.advanceTable?.locationHubID;
+        if (currentId) {
+          const match = this.OrganizationalEntitiesList.find(
+            (item) => item.organizationalEntityID === Number(currentId)
+          );
+          if (match) {
+            this.locationHubID = match.organizationalEntityID;
+            locationCtrl.setValue(match.organizationalEntityID, { emitEvent: false });
+            this.advanceTableForm.patchValue({
+              locationHub: match.organizationalEntityName,
+              organizationalEntityName: match.organizationalEntityName
+            }, { emitEvent: false });
+          }
+        }
       });
   }
-  private _filterOrganizationalsEntity(value: string): any {
-  // if (!value || value.length < 3) {
-  //   return [];
-  // }
-  const filterValue = value.toLowerCase();
 
-  return this.OrganizationalEntitiesList.filter(customer =>
-    customer.organizationalEntityName.toLowerCase().includes(filterValue)
-  );
-}
-
-  // private _filterOrganizationalsEntity(value: string): any {
-  //   const filterValue = value.toLowerCase();
-  //   return this.OrganizationalEntitiesList.filter(
-  //     customer => 
-  //     {
-  //       return customer.organizationalEntityName.toLowerCase().includes(filterValue);
-  //     });
-  // }
-  OnLocationHubSelect(selectedLocationHub: string)
-  {
-    const LocationHubName = this.OrganizationalEntitiesList.find(
-      data => data.organizationalEntityName === selectedLocationHub
+  onLocationHubChange(locationHubID: number) {
+    this.getlocationHubID(locationHubID);
+    const match = this.OrganizationalEntitiesList?.find(
+      (item) => item.organizationalEntityID === Number(locationHubID)
     );
-    if (selectedLocationHub) 
-    {
-      this.getlocationHubID(LocationHubName.organizationalEntityID);
+    if (match) {
+      this.advanceTableForm.patchValue({
+        locationHub: match.organizationalEntityName,
+        organizationalEntityName: match.organizationalEntityName
+      });
     }
   }
+
   getlocationHubID(locationHubID: any)
   {
     this.locationHubID=locationHubID;
-  }
-
-  //-------------- LocationHub Validator -------------
-  locationHubValidator(OrganizationalEntitiesList: any[]): ValidatorFn {
-    return (control: AbstractControl): ValidationErrors | null => {
-      const value = control.value?.toLowerCase();
-      const match = OrganizationalEntitiesList.some(group => group.organizationalEntityName.toLowerCase() === value);
-      return match ? null : { locationHubInvalid: true };
-    };
   }
   
   // InitLocationHub(){
@@ -525,12 +480,12 @@ export class FormDialogComponent
     };
   }
 
-  formatSupplierCode = formatSupplierCode;
+  formatSupplierDisplay = formatSupplierDisplay;
 
   private syncSupplierDisplayFromId(list: SupplierDropDown[], supplierId: number): void {
     const match = list?.find((item) => item.supplierID === supplierId);
     if (match) {
-      this.advanceTableForm.patchValue({ supplier: formatSupplierCode(match) });
+      this.advanceTableForm.patchValue({ supplier: formatSupplierDisplay(match) });
     }
   }
 
@@ -645,7 +600,7 @@ export class FormDialogComponent
       data=>
       {
         this.SupplierForOwnershipList=data;
-        this.advanceTableForm.patchValue({supplier:formatSupplierCode(this.SupplierForOwnershipList[0])});
+        this.advanceTableForm.patchValue({supplier:formatSupplierDisplay(this.SupplierForOwnershipList[0])});
         this.advanceTableForm.patchValue({supplierID:this.SupplierForOwnershipList[0].supplierID});
       });
   }
@@ -772,100 +727,66 @@ export class FormDialogComponent
     this._generalService.getColorsForInventory().subscribe(
       data=>
       {
-        this.ColorList=data;
-        this.advanceTableForm.controls['color'].setValidators([Validators.required,
-          this.colorValidator(this.ColorList)]);
-        this.advanceTableForm.controls['color'].updateValueAndValidity();
-        this.filteredColorOptions =this.advanceTableForm.controls['color'].valueChanges.pipe(
-          startWith(""),
-          map(value => this._filterColor(value || ''))
-        ); 
+        this.ColorList = data || [];
+        const colorCtrl = this.advanceTableForm.controls['colorID'];
+        colorCtrl.setValidators([Validators.required]);
+        colorCtrl.updateValueAndValidity();
+        const currentId = colorCtrl.value || this.advanceTable?.colorID;
+        if (currentId) {
+          const match = this.ColorList.find((item) => item.colorID === Number(currentId));
+          if (match) {
+            this.colorID = match.colorID;
+            colorCtrl.setValue(match.colorID, { emitEvent: false });
+            this.advanceTableForm.patchValue({ color: match.color }, { emitEvent: false });
+          }
+        }
       });
   }
-  private _filterColor(value: string): any {
-  if (!value || value.length < 3) {
-    return []; 
-  }
-  const filterValue = value.toLowerCase();
 
-  return this.ColorList.filter(customer =>
-    customer.color.toLowerCase().includes(filterValue)
-  );
-}
-
-  // private _filterColor(value: string): any {
-  //   const filterValue = value.toLowerCase();
-  //   return this.ColorList.filter(
-  //     customer => 
-  //     {
-  //       return customer.color.toLowerCase().includes(filterValue);
-  //     });
-  // }
-  OnColorSelect(selectedColor: string)
-  {
-    const ColorName = this.ColorList.find(
-      data => data.color === selectedColor
-    );
-    if (selectedColor) 
-    {
-      this.getcolorID(ColorName.colorID);
+  onColorChange(colorID: number) {
+    this.getcolorID(colorID);
+    const match = this.ColorList?.find((item) => item.colorID === Number(colorID));
+    if (match) {
+      this.advanceTableForm.patchValue({ color: match.color });
     }
   }
+
   getcolorID(colorID: any) 
   {
     this.colorID=colorID;
-  }
-
-  colorValidator(ColorList: any[]): ValidatorFn {
-    return (control: AbstractControl): ValidationErrors | null => {
-      const value = control.value?.toLowerCase();
-      const match = ColorList.some(group => group.color?.toLowerCase() === value);
-      return match ? null : { colorInvalid: true };
-    };
   }
 
   InitFuelType(){
     this._generalService.getFuleTypesForInventory().subscribe(
       data=>
       {
-        this.FuelTypeList=data;
-        this.advanceTableForm.controls['fuelType']?.setValidators([Validators.required,
-          this.fuleValidator(this.FuelTypeList)]);
-        this.advanceTableForm.controls['fuelType'].updateValueAndValidity();
-        this.filteredFuelOptions = this.advanceTableForm.controls['fuelType'].valueChanges.pipe(
-          startWith(""),
-          map(value => this._filterFuel(value || ''))
-        ); 
+        this.FuelTypeList = data || [];
+        const fuelCtrl = this.advanceTableForm.controls['fuelTypeID'];
+        fuelCtrl.setValidators([Validators.required]);
+        fuelCtrl.updateValueAndValidity();
+        const currentId = fuelCtrl.value || this.advanceTable?.fuelTypeID;
+        if (currentId) {
+          const match = this.FuelTypeList.find((item) => item.fuelTypeID === Number(currentId));
+          if (match) {
+            this.fuelTypeID = match.fuelTypeID;
+            fuelCtrl.setValue(match.fuelTypeID, { emitEvent: false });
+            this.advanceTableForm.patchValue({ fuelType: match.fuelType }, { emitEvent: false });
+          }
+        }
       });
   }
-  private _filterFuel(value: string): any {
-    const filterValue = value.toLowerCase();
-    return this.FuelTypeList.filter(
-      customer => 
-      {
-        return customer.fuelType.toLowerCase().includes(filterValue);
-      });
-  }
-  OnFuelTypeSelect(selectedFuelType: string)
-  {
-    const FuelTypeName = this.FuelTypeList.find(
-      data => data.fuelType === selectedFuelType
-    );
-    if (selectedFuelType) 
-    {
-      this.getfuelTypeID(FuelTypeName.fuelTypeID);
+
+  onFuelTypeChange(fuelTypeID: number) {
+    this.getfuelTypeID(fuelTypeID);
+    const match = this.FuelTypeList?.find((item) => item.fuelTypeID === Number(fuelTypeID));
+    if (match) {
+      this.advanceTableForm.patchValue({ fuelType: match.fuelType });
     }
   }
+
   getfuelTypeID(fuelTypeID: any) 
   {
     this.fuelTypeID=fuelTypeID;
-  }
-  fuleValidator(FuelTypeList: any[]): ValidatorFn {
-    return (control: AbstractControl): ValidationErrors | null => {
-      const value = control.value?.toLowerCase();
-      const match = FuelTypeList.some(group => group.fuelType?.toLowerCase() === value);
-      return match ? null : { fuleInvalid: true };
-    };
   }
 
   initTrasmissionType(){
@@ -964,14 +885,14 @@ export class FormDialogComponent
     return this.fb.group(
     {
       inventoryID: [this.advanceTable?.inventoryID],
-      vehicleCategoryID: [this.advanceTable?.vehicleCategoryID],
+      vehicleCategoryID: [this.advanceTable?.vehicleCategoryID || null, Validators.required],
       vehicleCategory: [this.advanceTable?.vehicleCategory],
-      vehicleID: [this.advanceTable?.vehicleID],
+      vehicleID: [this.advanceTable?.vehicleID || null, Validators.required],
       vehicle: [this.advanceTable?.vehicle],
       company: [this.advanceTable?.company],
       companyID: [this.advanceTable?.companyID || null, Validators.required],
-      locationHub:[this.advanceTable?.organizationalEntityName],
-      organizationalEntityName:[this.advanceTable?.organizationalEntityName],
+      locationHub:[this.advanceTable?.organizationalEntityName || this.advanceTable?.locationHub],
+      organizationalEntityName:[this.advanceTable?.organizationalEntityName || this.advanceTable?.locationHub],
       registrationStateID: [this.advanceTable?.registrationStateID],
       registrationCityID: [this.advanceTable?.registrationCityID],
       registrationNumber: [
@@ -982,14 +903,14 @@ export class FormDialogComponent
       ],
       registrationFromDate: [this.advanceTable?.registrationFromDate],
       //registrationTillDate: [this.advanceTable?.registrationTillDate],
-      locationHubID: [this.advanceTable?.locationHubID],
+      locationHubID: [this.advanceTable?.locationHubID || null, Validators.required],
       ownedSupplied: [this.advanceTable?.ownedSupplied],
       supplierID: [this.advanceTable?.supplierID],
       supplier: [this.advanceTable?.supplier],
-      colorID: [this.advanceTable?.colorID],
-      fuelTypeID: [this.advanceTable?.fuelTypeID],
+      colorID: [this.advanceTable?.colorID || null, Validators.required],
+      fuelTypeID: [this.advanceTable?.fuelTypeID || null, Validators.required],
       mileage: [this.advanceTable?.mileage],
-      fuelCardNo: [this.advanceTable?.fuelCardNo],
+      fuelCardNo: [this.advanceTable?.fuelCardNo ?? this.advanceTable?.FuelCardNo ?? ''],
       fuelType: [this.advanceTable?.fuelType],
       color: [this.advanceTable?.color],
       isAdhoc: [this.advanceTable?.isAdhoc],
@@ -1047,16 +968,27 @@ export class FormDialogComponent
 
   public Post(): void
   { 
-    this.advanceTableForm.patchValue({vehicleCategoryID:this.vehicleCategoryID});
-    this.advanceTableForm.patchValue({vehicleID:this.vehicleID});
+    this.advanceTableForm.patchValue({
+      vehicleCategoryID: this.advanceTableForm.value.vehicleCategoryID || this.vehicleCategoryID
+    });
+    this.advanceTableForm.patchValue({
+      vehicleID: this.advanceTableForm.value.vehicleID || this.vehicleID
+    });
     this.advanceTableForm.patchValue({registrationCityID:this.registrationCityID});
-    //this.advanceTableForm.patchValue({registrationStateID:this.registrationStateID});
-    this.advanceTableForm.patchValue({colorID:this.colorID});
-    this.advanceTableForm.patchValue({fuelTypeID:this.fuelTypeID});
-    //this.advanceTableForm.patchValue({supplierID:this.supplierID});
-    this.advanceTableForm.patchValue({locationHubID:this.locationHubID});
+    this.advanceTableForm.patchValue({
+      colorID: this.advanceTableForm.value.colorID || this.colorID
+    });
+    this.advanceTableForm.patchValue({
+      fuelTypeID: this.advanceTableForm.value.fuelTypeID || this.fuelTypeID
+    });
+    this.advanceTableForm.patchValue({
+      locationHubID: this.advanceTableForm.value.locationHubID || this.locationHubID
+    });
     this.advanceTableForm.patchValue({
       companyID: this.companyID || this.advanceTableForm.value.companyID
+    });
+    this.advanceTableForm.patchValue({
+      fuelCardNo: (this.advanceTableForm.value.fuelCardNo || '').toString().trim()
     });
     this.advanceTableService.add(this.advanceTableForm.getRawValue())  
     
@@ -1088,16 +1020,27 @@ export class FormDialogComponent
   }
   public Put(): void
   {
-    this.advanceTableForm.patchValue({vehicleCategoryID:this.vehicleCategoryID ||this.advanceTable.vehicleCategoryID});
-    this.advanceTableForm.patchValue({vehicleID:this.vehicleID ||this.advanceTable.vehicleID});
+    this.advanceTableForm.patchValue({
+      vehicleCategoryID: this.advanceTableForm.value.vehicleCategoryID || this.vehicleCategoryID || this.advanceTable.vehicleCategoryID
+    });
+    this.advanceTableForm.patchValue({
+      vehicleID: this.advanceTableForm.value.vehicleID || this.vehicleID || this.advanceTable.vehicleID
+    });
     this.advanceTableForm.patchValue({registrationCityID:this.registrationCityID ||this.advanceTable.registrationCityID });
-    //this.advanceTableForm.patchValue({registrationStateID:this.registrationStateID});
-    this.advanceTableForm.patchValue({colorID:this.colorID ||this.advanceTable.colorID});
-    this.advanceTableForm.patchValue({fuelTypeID:this.fuelTypeID ||this.advanceTable.fuelTypeID});
-    //this.advanceTableForm.patchValue({supplierID:this.supplierID ||this.advanceTable.supplierID});
-    this.advanceTableForm.patchValue({locationHubID:this.locationHubID ||this.advanceTable.locationHubID});
+    this.advanceTableForm.patchValue({
+      colorID: this.advanceTableForm.value.colorID || this.colorID || this.advanceTable.colorID
+    });
+    this.advanceTableForm.patchValue({
+      fuelTypeID: this.advanceTableForm.value.fuelTypeID || this.fuelTypeID || this.advanceTable.fuelTypeID
+    });
+    this.advanceTableForm.patchValue({
+      locationHubID: this.advanceTableForm.value.locationHubID || this.locationHubID || this.advanceTable.locationHubID
+    });
     this.advanceTableForm.patchValue({
       companyID: this.companyID || this.advanceTableForm.value.companyID || this.advanceTable.companyID
+    });
+    this.advanceTableForm.patchValue({
+      fuelCardNo: (this.advanceTableForm.value.fuelCardNo || '').toString().trim()
     });
     this.advanceTableService.update(this.advanceTableForm.getRawValue())  
     .subscribe(

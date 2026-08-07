@@ -24,7 +24,7 @@ import { DriverGradeDropDown } from '../driverGrade/driverGradeDropDown.model';
 import { QualificationDropDown } from '../general/qualificationDropDown.model';
 import { OrganizationalEntityDropDown } from '../general/organizationalEntityDropDown.model';
 import { ClearIMEIDialogComponent } from './dialogs/clearIMEI/clearIMEI.component';
-import { formatSupplierCode } from '../supplier/supplier-display.util';
+import { formatSupplierDisplay } from '../supplier/supplier-display.util';
 
 interface MenuItem {
   label: string;
@@ -46,12 +46,8 @@ export class DriverComponent implements OnInit, AfterViewChecked {
     'oldRentnetCode',
     'supplierName',
     'supplierType',
-    'driverEmail',
     'mobile1',
-    'supplierCode',
-    'hub',
     'location',
-    'driverImage',
     'isAdhoc',
     'status',
     'actions'
@@ -316,8 +312,8 @@ export class DriverComponent implements OnInit, AfterViewChecked {
     );
   }
 
-  getSupplierCode(row: Driver): string {
-    return formatSupplierCode({
+  getSupplierDisplay(row: Driver): string {
+    return formatSupplierDisplay({
       supplierName: row?.supplierName,
       oldRentnetCode: row?.supplierOldRentnetCode,
     });

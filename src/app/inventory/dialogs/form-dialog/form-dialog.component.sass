@@ -1,4 +1,3 @@
-
 .addContainer
   min-width: min(980px, 92vw)
 
@@ -15,6 +14,19 @@
 
 mat-form-field.example-full-width
   display: block
+  width: 100%
+
+.inventory-select-field
+  width: 100%
+
+:host ::ng-deep .inventory-select-field .mat-mdc-form-field-infix,
+:host ::ng-deep .inventory-select-field .mat-form-field-infix
+  width: 100%
+
+:host ::ng-deep .inventory-select-field .mat-mdc-select,
+:host ::ng-deep .inventory-select-field .mat-select
+  display: block
+  width: 100%
 
 mat-checkbox
   display: inline-flex
@@ -22,4 +34,3 @@ mat-checkbox
 
 .uppercase-input
   text-transform: uppercase
-

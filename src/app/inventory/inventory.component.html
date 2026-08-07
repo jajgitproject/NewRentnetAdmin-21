@@ -135,7 +135,9 @@
                                                     <mat-form-field class="example-full-width mb-3" appearance="outline"
                                                         floatLabel="always">
                                                         <mat-label>Activation Status</mat-label>
-                                                        <mat-select [(value)]="SearchActivationStatus">
+                                                        <mat-select [(value)]="SearchActivationStatus"
+                                                            (selectionChange)="onActivationStatusChange($event.value)">
+                                                            <mat-option value="All">--All--</mat-option>
                                                             <mat-option value="Active">Active</mat-option>
                                                             <mat-option value="Maintenance">Maintenance</mat-option>
                                                             <mat-option value="OnHold">On Hold</mat-option>
@@ -160,63 +162,70 @@
                                     <div *ngIf="SearchActivationStatus" style="float: left;"><b>Status</b> : {{SearchActivationStatus}}</div>
                                 </div> -->
 
-                                    <div style="width: 70%; float:left;padding-top: 6px;padding-left: 12px;">
-                                        <div class="col-lg-6">
-                                            <div class="form-group">
-                                                <div class="input-group">
-                                                    <div class="input-group-append input-group-addon">
-                                                        <select style="height: 40px; width: 180px;" class="form-control"
-                                                            name="selectedFilter"
-                                                            [ngModel]="selectedFilter"
-                                                            (ngModelChange)="onSelectedFilterChange($event)"
-                                                            [ngModelOptions]="{standalone: true}">
-                                                            <option value="registrationNumber">Registration Number</option>
-                                                            <option value="vehicleCategory">Vehicle Category</option>
-                                                            <option value="vehicle">Vehicle</option>
-                                                            <option value="supplier">Supplier Name</option>
-                                                            <option value="locationHub">Location</option>
-                                                        </select>
-                                                    </div>
+                                    <div class="inventory-toolbar">
+                                        <div class="inventory-toolbar-main">
+                                            <div class="inventory-toolbar-filters">
+                                                <select class="form-control inventory-control inventory-filter-type"
+                                                    name="selectedFilter"
+                                                    [ngModel]="selectedFilter"
+                                                    (ngModelChange)="onSelectedFilterChange($event)"
+                                                    [ngModelOptions]="{standalone: true}">
+                                                    <option value="registrationNumber">Registration Number</option>
+                                                    <option value="vehicle">Vehicle</option>
+                                                    <option value="supplier">Supplier Name</option>
+                                                    <option value="locationHub">Location</option>
+                                                </select>
 
-                                                    <input type="text"
-                                                        style="height: 40px; width: 300px;padding-left: 5px;"
-                                                        class="form-control" placeholder="Filter" id="inputGroup"
-                                                        name="searchTerm"
-                                                        [ngModel]="searchTerm"
-                                                        (ngModelChange)="onSearchTermChange($event)"
-                                                        [ngModelOptions]="{standalone: true}"
-                                                        (keyup.enter)="Filter()" />
+                                                <input type="text"
+                                                    class="form-control inventory-control inventory-filter-input"
+                                                    placeholder="Filter"
+                                                    id="inputGroup"
+                                                    name="searchTerm"
+                                                    [ngModel]="searchTerm"
+                                                    (ngModelChange)="onSearchTermChange($event)"
+                                                    [ngModelOptions]="{standalone: true}"
+                                                    (keyup.enter)="Filter()" />
 
-                                                    <div class="input-group-append input-group-addon">
-                                                        <span class="input-group-text"
-                                                            style="cursor: pointer; height: 40px; width: 40px; text-align: center;"
-                                                            (click)="Filter()">
-                                                            <i class="fas fa-search"></i>
-                                                        </span>
-                                                    </div>
-                                                </div>
+                                                <select class="form-control inventory-control inventory-status"
+                                                    name="SearchActivationStatus"
+                                                    [ngModel]="SearchActivationStatus"
+                                                    (ngModelChange)="onActivationStatusChange($event)"
+                                                    [ngModelOptions]="{standalone: true}">
+                                                    <option value="All">--All--</option>
+                                                    <option value="Active">Active</option>
+                                                    <option value="Maintenance">Maintenance</option>
+                                                    <option value="OnHold">On Hold</option>
+                                                    <option value="Deactive">Deactive</option>
+                                                </select>
+
+                                                <button type="button"
+                                                    class="btn btn-light inventory-control inventory-search-btn"
+                                                    (click)="Filter()"
+                                                    title="Search">
+                                                    <i class="fas fa-search"></i>
+                                                </button>
+                                            </div>
+
+                                            <div class="inventory-toolbar-actions">
+                                                <button mat-raised-button color="primary" data-dismiss="modal"
+                                                    data-toggle="modal" data-backdrop="false"
+                                                    data-target="#exampleModalCenter">
+                                                    Search
+                                                </button>
+                                                <button mat-raised-button color="accent" (click)="downloadCsv()">
+                                                    Download CSV
+                                                </button>
                                             </div>
                                         </div>
-                                    </div>
 
-                                    <div style="width: 30%; text-align:right;">
-                                        <button mat-raised-button color="primary" data-dismiss="modal"
-                                            data-toggle="modal" data-backdrop="false" data-target="#exampleModalCenter">
-                                            Search
-                                        </button>
-                                        &nbsp;
-                                        <button mat-mini-fab color="primary" (click)="addNew()">
-                                            <mat-icon class="col-white">add</mat-icon>
-                                        </button>
-                                        &nbsp;
-                                        <button mat-mini-fab color="primary" (click)="refresh()">
-                                            <mat-icon class="col-white">refresh</mat-icon>
-                                        </button>
-                                        &nbsp;
-                                        <button mat-raised-button color="accent" (click)="downloadCsv()">
-                                            Download CSV
-                                        </button>
-                                        &nbsp;
+                                        <div class="inventory-toolbar-end">
+                                            <button mat-mini-fab color="primary" (click)="addNew()" title="Add">
+                                                <mat-icon class="col-white">add</mat-icon>
+                                            </button>
+                                            <button mat-mini-fab color="primary" (click)="refresh()" title="Refresh">
+                                                <mat-icon class="col-white">refresh</mat-icon>
+                                            </button>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -239,11 +248,10 @@
                                             <mat-cell *matCellDef="let row">{{row.inventoryID}}</mat-cell>
                                         </ng-container>
 
-                                        <ng-container matColumnDef="vehicleCategory">
-                                            <mat-header-cell *matHeaderCellDef
-                                                mat-sort-header>Category</mat-header-cell>
+                                        <ng-container matColumnDef="registrationNumber">
+                                            <mat-header-cell *matHeaderCellDef mat-sort-header>Reg.No.</mat-header-cell>
                                             <mat-cell *matCellDef="let row" (contextmenu)="onContextMenu($event, row)">
-                                                {{row.vehicleCategory}}</mat-cell>
+                                                {{row.registrationNumber | uppercase}}</mat-cell>
                                         </ng-container>
 
                                         <ng-container matColumnDef="vehicle">
@@ -252,16 +260,11 @@
                                                 {{row.vehicle}}</mat-cell>
                                         </ng-container>
 
-                                        <ng-container matColumnDef="registrationNumber">
-                                            <mat-header-cell *matHeaderCellDef mat-sort-header>Reg.No.</mat-header-cell>
-                                            <mat-cell *matCellDef="let row" (contextmenu)="onContextMenu($event, row)">
-                                                {{row.registrationNumber | uppercase}}</mat-cell>
-                                        </ng-container>
                                         <ng-container matColumnDef="supplierName">
                                             <mat-header-cell *matHeaderCellDef mat-sort-header>Supplier
                                                 Name</mat-header-cell>
                                             <mat-cell *matCellDef="let row" (contextmenu)="onContextMenu($event, row)">
-                                                {{row.supplierName}}</mat-cell>
+                                                {{ getSupplierDisplay(row) }}</mat-cell>
                                         </ng-container>
 
                                         <ng-container matColumnDef="supplierType">
@@ -269,13 +272,6 @@
                                                 Type</mat-header-cell>
                                             <mat-cell *matCellDef="let row" (contextmenu)="onContextMenu($event, row)">
                                                 {{ row.supplierType || '' }}</mat-cell>
-                                        </ng-container>
-
-                                        <ng-container matColumnDef="supplierOfficialIdentityNumber">
-                                            <mat-header-cell *matHeaderCellDef mat-sort-header>Supplier Official
-                                                ID</mat-header-cell>
-                                            <mat-cell *matCellDef="let row" (contextmenu)="onContextMenu($event, row)">
-                                                {{ row.supplierOfficialIdentityNumber || '' }}</mat-cell>
                                         </ng-container>
 
                                         <ng-container matColumnDef="locationHub">

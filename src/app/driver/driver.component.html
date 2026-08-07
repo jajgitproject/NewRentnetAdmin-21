@@ -256,25 +256,11 @@
                                                 {{ row.oldRentnetCode != null && row.oldRentnetCode !== 0 ? row.oldRentnetCode : '' }}</mat-cell>
                                         </ng-container>
 
-                                        <ng-container matColumnDef="supplierCode">
-                                            <mat-header-cell *matHeaderCellDef mat-sort-header>Supplier
-                                                Code</mat-header-cell>
-                                            <mat-cell *matCellDef="let row" (contextmenu)="onContextMenu($event, row)">
-                                                {{ getSupplierCode(row) }}</mat-cell>
-                                        </ng-container>
-
-                                        <ng-container matColumnDef="driverImage">
-                                            <mat-header-cell *matHeaderCellDef>Image</mat-header-cell>
-                                            <mat-cell *matCellDef="let row" class="table-img"
-                                                (contextmenu)="onContextMenu($event, row)">
-                                                <img style="cursor: pointer;" src="{{row.driverImage}}" /> </mat-cell>
-                                        </ng-container>
-
                                         <ng-container matColumnDef="supplierName">
                                             <mat-header-cell *matHeaderCellDef mat-sort-header>Supplier
                                                 Name</mat-header-cell>
                                             <mat-cell *matCellDef="let row" (contextmenu)="onContextMenu($event, row)">
-                                                {{row.supplierName}}</mat-cell>
+                                                {{ getSupplierDisplay(row) }}</mat-cell>
                                         </ng-container>
 
                                         <ng-container matColumnDef="supplierType">
@@ -284,23 +270,11 @@
                                                 {{ row.supplierType || '' }}</mat-cell>
                                         </ng-container>
 
-                                        <ng-container matColumnDef="hub">
-                                            <mat-header-cell *matHeaderCellDef mat-sort-header>Hub</mat-header-cell>
-                                            <mat-cell *matCellDef="let row" (contextmenu)="onContextMenu($event, row)">
-                                                {{row.hub}}</mat-cell>
-                                        </ng-container>
-
                                         <ng-container matColumnDef="location">
                                             <mat-header-cell *matHeaderCellDef
                                                 mat-sort-header>Location</mat-header-cell>
                                             <mat-cell *matCellDef="let row" (contextmenu)="onContextMenu($event, row)">
                                                 {{row.location}}</mat-cell>
-                                        </ng-container>
-
-                                        <ng-container matColumnDef="driverEmail">
-                                            <mat-header-cell *matHeaderCellDef mat-sort-header>Email</mat-header-cell>
-                                            <mat-cell *matCellDef="let row" (contextmenu)="onContextMenu($event, row)">
-                                                {{row.driverEmail}}</mat-cell>
                                         </ng-container>
 
                                         <ng-container matColumnDef="mobile1">

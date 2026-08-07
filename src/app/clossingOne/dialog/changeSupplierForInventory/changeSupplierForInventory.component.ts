@@ -2,17 +2,18 @@ import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { Component, Inject } from '@angular/core';
 import { FormControl, Validators, FormGroup, FormBuilder, AbstractControl, ValidationErrors, ValidatorFn} from '@angular/forms';
 import { MAT_DATE_LOCALE } from '@angular/material/core';
-import { formatDate } from '@angular/common';
 import { GeneralService } from 'src/app/general/general.service';
-import { ModeOfPaymentDropDown } from 'src/app/supplierContract/modeOfPaymentDropDown.model';
 import { map, startWith } from 'rxjs/operators';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import { ThemeService } from 'ng2-charts';
-import Swal from 'sweetalert2';
-import { BehaviorSubject, fromEvent, merge, Observable, of, Subject, Subscription } from 'rxjs';
+import { Observable } from 'rxjs';
 import { ClossingOneService } from '../../clossingOne.service';
 import { SupplierDropDown } from 'src/app/supplier/supplierDropDown.model';
 import { ChangeSupplierForInventoryModel } from '../../clossingOne.model';
+import {
+  filterSuppliersByDisplay,
+  formatSupplierDisplay,
+  supplierMatchesDisplay,
+} from 'src/app/supplier/supplier-display.util';
 
 @Component({
   standalone: false,
@@ -38,6 +39,7 @@ export class FormDialogChangeSupplierForInventory
   AllotmentID: any;
   status: string = '';
   buttonDisabled = false;
+  formatSupplierDisplay = formatSupplierDisplay;
   
   constructor(
   public dialogRef: MatDialogRef<FormDialogChangeSupplierForInventory>, 
@@ -127,8 +129,11 @@ export class FormDialogChangeSupplierForInventory
     this._generalService.GetAllSuppliers().subscribe(
     data => {
       this.SupplierList = data;
-      console.log(this.SupplierList);
-      this.advanceTableForm.controls['supplierName'].setValidators([Validators.required,this.SupplierValidator(this.SupplierList)]);
+      this.advanceTableForm.controls['supplierName'].setValidators([
+        Validators.required,
+        this.SupplierValidator(this.SupplierList)
+      ]);
+      this.advanceTableForm.controls['supplierName'].updateValueAndValidity();
       this.filteredSupplierOptions = this.advanceTableForm.controls['supplierName'].valueChanges.pipe(
         startWith(""),
         map(value => this._filterSupplier(value || ''))
@@ -138,24 +143,24 @@ export class FormDialogChangeSupplierForInventory
 
   SupplierValidator(SupplierList: any[]): ValidatorFn {
     return (control: AbstractControl): ValidationErrors | null => {
-      const value = control.value?.toLowerCase();
-      const match = SupplierList.some(data =>(data.supplierName.toLowerCase()) === value);
+      const match = SupplierList.some(data => supplierMatchesDisplay(data, control.value));
       return match ? null : { pickupCityInvalid: true };
     };
   }
 
   private _filterSupplier(value: string): any {
-    const filterValue = value.toLowerCase();
-    return this.SupplierList.filter(
-      data => {
-        return data.supplierName.toLowerCase().includes(filterValue);
-      });
+    if (!value || value.length < 3) {
+      return [];
+    }
+    return filterSuppliersByDisplay(this.SupplierList, value);
   }
 
   OnSupplierSelect(selectedSupplier: string)
   {
-    const SupplierName = this.SupplierList.find(data => data.supplierName === selectedSupplier);
-    if (selectedSupplier) 
+    const SupplierName = this.SupplierList.find(
+      data => supplierMatchesDisplay(data, selectedSupplier)
+    );
+    if (SupplierName) 
     {
       this.getSupplierID(SupplierName.supplierID);
     }
@@ -163,7 +168,6 @@ export class FormDialogChangeSupplierForInventory
   getSupplierID(supplierID: any) 
   {
     this.supplierID = supplierID;
-    console.log(this.supplierID);
     this.advanceTableForm.patchValue({supplierID: this.supplierID});
   }
 
@@ -171,5 +175,3 @@ export class FormDialogChangeSupplierForInventory
     this.dialogRef.close();
   }
 }
-
-

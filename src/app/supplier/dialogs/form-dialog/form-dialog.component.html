@@ -17,12 +17,11 @@
   <div mat-dialog-content>
     <form class="register-form m-4" [formGroup]="advanceTableForm" (ngSubmit)="(submit)">
       <div class="row">
-        <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+        <div class="col-xl-4 col-lg-4 col-md-6 col-sm-12 mb-2">
           <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
             <mat-label>Supplier Type</mat-label>
             <input required type="text" matInput [matAutocomplete]="auto4" formControlName="supplierType" />
-            <mat-autocomplete #auto4="matAutocomplete" panelWidth="max-content"
-              panelClass="supplier-type-autocomplete-panel"
+            <mat-autocomplete #auto4="matAutocomplete" panelClass="supplier-type-autocomplete-panel"
               (optionSelected)="onSupplierType($event.option.value)">
               <mat-option *ngFor="let options of filteredSupplierTypeOptions | async" [value]="options.supplierType"
                 (click)="getSupplierTypeID(options.supplierTypeID)">
@@ -39,7 +38,7 @@
           </mat-form-field>
         </div>
 
-        <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+        <div class="col-xl-4 col-lg-4 col-md-6 col-sm-12 mb-2">
           <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
             <mat-label>Supplier Name</mat-label>
             <input matInput formControlName="supplierName" required class="uppercase-input"
@@ -49,15 +48,13 @@
             </mat-error>
           </mat-form-field>
         </div>
-      </div>
 
-      <div class="row">
-        <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+        <div class="col-xl-4 col-lg-4 col-md-6 col-sm-12 mb-2">
           <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
             <mat-label>Country</mat-label>
             <input required type="text" matInput [matAutocomplete]="auto1" formControlName="country"
               (keyup)="onCountryInputChange($event)" />
-            <mat-autocomplete #auto1="matAutocomplete" panelWidth="max-content"
+            <mat-autocomplete #auto1="matAutocomplete"
               (optionSelected)="onCountrySelected($event.option.value)">
               <mat-option *ngFor="let options of filteredCountryOptions | async" [value]="options.geoPointName"
                 (click)="getCountryID(options.geoPointID)">
@@ -72,12 +69,12 @@
           </mat-form-field>
         </div>
 
-        <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+        <div class="col-xl-4 col-lg-4 col-md-6 col-sm-12 mb-2">
           <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
             <mat-label>State</mat-label>
             <input required type="text" matInput [matAutocomplete]="auto2" formControlName="stateName"
               (keyup)="onStateInputChange($event)" />
-            <mat-autocomplete #auto2="matAutocomplete" panelWidth="max-content"
+            <mat-autocomplete #auto2="matAutocomplete"
               (optionSelected)="onStateSelected($event.option.value)">
               <mat-option *ngFor="let options of filteredStateOptions | async" [value]="options.geoPointName"
                 (click)="getStateID(options.geoPointID)">
@@ -91,14 +88,12 @@
             </mat-error>
           </mat-form-field>
         </div>
-      </div>
 
-      <div class="row">
-        <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+        <div class="col-xl-4 col-lg-4 col-md-6 col-sm-12 mb-2">
           <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
             <mat-label>City</mat-label>
             <input required type="text" matInput [matAutocomplete]="auto3" formControlName="city" />
-            <mat-autocomplete #auto3="matAutocomplete" panelWidth="max-content"
+            <mat-autocomplete #auto3="matAutocomplete"
               (optionSelected)="onCitySelected($event.option.value)">
               <mat-option *ngFor="let options of filteredCityOptions | async" [value]="options.geoPointName"
                 (click)="getCityID(options.geoPointID)">
@@ -111,7 +106,7 @@
           </mat-form-field>
         </div>
 
-        <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+        <div class="col-xl-4 col-lg-4 col-md-6 col-sm-12 mb-2">
           <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
             <mat-label>Address</mat-label>
             <input matInput formControlName="address" required />
@@ -120,32 +115,8 @@
             </mat-error>
           </mat-form-field>
         </div>
-      </div>
 
-      <!-- <div class="row">
-                <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
-                    <mat-form-field class="example-full-width" appearance="outline"  floatLabel="always">
-                        <mat-label>Pin</mat-label>
-                        <input matInput formControlName="pin" required>
-                        <mat-error *ngIf="advanceTableForm.get('pin').hasError('required')">
-                            Pin is required
-                        </mat-error>
-                    </mat-form-field>
-                </div> 
-               
-                <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
-                    <mat-form-field class="example-full-width" appearance="outline"  floatLabel="always">
-                        <mat-label>Fax</mat-label>
-                        <input matInput formControlName="fax" required>
-                        <mat-error *ngIf="advanceTableForm.get('fax').hasError('required')">
-                            Fax is required
-                        </mat-error>
-                    </mat-form-field>
-                </div> 
-            </div> -->
-
-      <div class="row">
-        <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+        <div class="col-xl-4 col-lg-4 col-md-6 col-sm-12 mb-2">
           <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
             <mat-label>Phone</mat-label>
             <input matInput formControlName="phone" required />
@@ -155,7 +126,7 @@
           </mat-form-field>
         </div>
 
-        <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+        <div class="col-xl-4 col-lg-4 col-md-6 col-sm-12 mb-2">
           <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
             <mat-label>Email</mat-label>
             <input matInput formControlName="email" required />
@@ -164,20 +135,15 @@
             </mat-error>
           </mat-form-field>
         </div>
-      </div>
 
-      <div class="row">
-        <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+        <div class="col-xl-4 col-lg-4 col-md-6 col-sm-12 mb-2">
           <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
             <mat-label>Remark</mat-label>
             <input matInput formControlName="supplierCreationRemark" />
-            <!-- <mat-error *ngIf="advanceTableForm.get('supplierCreationRemark').hasError('required')">
-                            Remark is required
-                        </mat-error> -->
           </mat-form-field>
         </div>
 
-        <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+        <div class="col-xl-4 col-lg-4 col-md-6 col-sm-12 mb-2">
           <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
             <mat-label>Internal/External</mat-label>
             <mat-select required #ieVal [class.is-invalid]="ieVal.invalid && ieVal.touched"
@@ -192,17 +158,13 @@
           </mat-form-field>
         </div>
 
-      </div>
-
-      <div class="row">
-        <!-- Company input: only if Internal is selected -->
-        <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2"
+        <div class="col-xl-4 col-lg-4 col-md-6 col-sm-12 mb-2"
           *ngIf="advanceTableForm.value.internalExternal === 'Internal'">
           <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
             <mat-label>Company</mat-label>
             <input type="text" matInput [matAutocomplete]="auto10"
               formControlName="ifCreatedFromCompanyReferenceCompany" />
-            <mat-autocomplete #auto10="matAutocomplete" panelWidth="max-content"
+            <mat-autocomplete #auto10="matAutocomplete"
               (optionSelected)="onCompanySelected($event.option.value)">
               <mat-option *ngFor="let options of filteredCompanyOptions | async"
                 [value]="options.organizationalEntityName">
@@ -212,8 +174,7 @@
           </mat-form-field>
         </div>
 
-
-<div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+        <div class="col-xl-4 col-lg-4 col-md-6 col-sm-12 mb-2">
           <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
             <mat-label>Is Adhoc</mat-label>
             <mat-select formControlName="isAdhoc">
@@ -225,10 +186,8 @@
             </mat-error>
           </mat-form-field>
         </div>
-      </div>
 
-      <div class="row">
-        <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+        <div class="col-xl-4 col-lg-4 col-md-6 col-sm-12 mb-2">
           <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
             <mat-label>PAN</mat-label>
             <input matInput formControlName="pan" maxlength="10" (keypress)="keyPressAlphaNumeric($event)" (blur)="onPanBlur()" />
@@ -238,7 +197,7 @@
           </mat-form-field>
         </div>
 
-        <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+        <div class="col-xl-4 col-lg-4 col-md-6 col-sm-12 mb-2">
           <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
             <mat-label>Old Rentnet Code</mat-label>
             <input matInput formControlName="oldRentnetCode" required (keypress)="keyPressNumbers($event)" />
@@ -250,10 +209,8 @@
             </mat-error>
           </mat-form-field>
         </div>
-      </div>
 
-      <div class="row">
-        <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+        <div class="col-xl-4 col-lg-4 col-md-6 col-sm-12 mb-2">
           <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
             <mat-label>Payment Basis</mat-label>
             <mat-select formControlName="paymentBasis" (selectionChange)="OnPaymentBasisChange()">
@@ -264,16 +221,14 @@
           </mat-form-field>
         </div>
 
-        <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2" *ngIf="advanceTableForm.value.paymentBasis === 'Percentage Basis'">
+        <div class="col-xl-4 col-lg-4 col-md-6 col-sm-12 mb-2" *ngIf="advanceTableForm.value.paymentBasis === 'Percentage Basis'">
           <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
             <mat-label>Supplier Percentage</mat-label>
             <input matInput formControlName="supplierPercentage" (keypress)="keyPressNumbersDecimal($event)" />
           </mat-form-field>
         </div>
-      </div>
 
-      <div class="row">
-        <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+        <div class="col-xl-4 col-lg-4 col-md-6 col-sm-12 mb-2">
           <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
             <mat-label>Date Of Agreement</mat-label>
             <input matInput [matDatepicker]="dateOfAgreementPicker" formControlName="dateOfAgreement" />
@@ -282,21 +237,19 @@
           </mat-form-field>
         </div>
 
-        <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+        <div class="col-xl-4 col-lg-4 col-md-6 col-sm-12 mb-2">
           <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
-            <mat-label>Supplier Agreement Branch</mat-label>
-            <mat-select formControlName="supplierAgreementBranchID">
+            <mat-label>Supplier Agreement Location</mat-label>
+            <mat-select formControlName="supplierAgreementLocationID">
               <mat-option [value]="null">--Select--</mat-option>
-              <mat-option *ngFor="let branch of BranchList" [value]="branch.organizationalEntityID">
-                {{ branch.organizationalEntityName }}
+              <mat-option *ngFor="let location of LocationList" [value]="location.organizationalEntityID">
+                {{ location.organizationalEntityName }}
               </mat-option>
             </mat-select>
           </mat-form-field>
         </div>
-      </div>
 
-      <div class="row" *ngIf="action === 'edit'">
-        <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+        <div class="col-xl-4 col-lg-4 col-md-6 col-sm-12 mb-2" *ngIf="action === 'edit'">
           <div class="status-display">
             <strong>Supplier Status : </strong>
             <span>{{advanceTable.supplierStatus}}</span>
@@ -306,7 +259,7 @@
           </div>
         </div>
 
-        <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+        <div class="col-xl-4 col-lg-4 col-md-6 col-sm-12 mb-2" *ngIf="action === 'edit'">
           <div class="status-display">
             <strong>Ver. Status: </strong>
             <span>{{advanceTable.verificationStatus}}</span>
@@ -316,19 +269,15 @@
               Details</a>
           </div>
         </div>
-      </div>
 
-      <div class="row" *ngIf="getSupplierCodeDisplay()">
-        <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+        <div class="col-xl-4 col-lg-4 col-md-6 col-sm-12 mb-2" *ngIf="getSupplierCodeDisplay()">
           <div class="status-display">
             <label><strong>Supplier Code : </strong></label>
             <span>{{ getSupplierCodeDisplay() }}</span>
           </div>
         </div>
-      </div>
 
-      <div class="row" *ngIf="action === 'edit'">
-        <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+        <div class="col-xl-4 col-lg-4 col-md-6 col-sm-12 mb-2" *ngIf="action === 'edit'">
           <div class="status-display">
             <label><strong>Reg. Date : </strong></label>
             <span>{{advanceTable.supplierRegistrationDate }}</span>

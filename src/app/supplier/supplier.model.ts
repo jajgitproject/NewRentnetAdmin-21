@@ -34,8 +34,8 @@ export class Supplier {
    paymentBasis:string;
    supplierPercentage:number;
    dateOfAgreement:string;
-   supplierAgreementBranchID:number;
-   supplierAgreementBranch:string;
+   supplierAgreementLocationID:number;
+   supplierAgreementLocation:string;
 
   constructor(supplier) {
     {
@@ -63,10 +63,10 @@ export class Supplier {
         ? Number(supplier.supplierPercentage)
         : null;
       this.dateOfAgreement = supplier.dateOfAgreement || null;
-      this.supplierAgreementBranchID = (supplier.supplierAgreementBranchID && supplier.supplierAgreementBranchID !== 0)
-        ? Number(supplier.supplierAgreementBranchID)
+      this.supplierAgreementLocationID = (supplier.supplierAgreementLocationID && supplier.supplierAgreementLocationID !== 0)
+        ? Number(supplier.supplierAgreementLocationID)
         : null;
-      this.supplierAgreementBranch = supplier.supplierAgreementBranch || '';
+      this.supplierAgreementLocation = supplier.supplierAgreementLocation || '';
     }
   }
   

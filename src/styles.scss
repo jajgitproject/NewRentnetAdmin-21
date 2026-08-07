@@ -272,6 +272,69 @@
   overflow: visible;
 }
 
+/* Supplier Create/Edit: lock width so opening mat-select/autocomplete cannot
+   resize the dialog. Beats _modals.scss (width:auto + max-width:80vw) and CDK
+   flex sibling shrink when a dropdown overlay pane is added. */
+.cdk-overlay-container .cdk-overlay-pane.supplier-form-wide-dialog.mat-mdc-dialog-panel {
+  width: 1100px !important;
+  min-width: 1100px !important;
+  max-width: min(1100px, calc(100vw - 32px)) !important;
+  flex-shrink: 0 !important;
+  flex-grow: 0 !important;
+  box-sizing: border-box;
+  --mat-dialog-container-max-width: 1100px;
+}
+@media (max-width: 1140px) {
+  .cdk-overlay-container .cdk-overlay-pane.supplier-form-wide-dialog.mat-mdc-dialog-panel {
+    width: calc(100vw - 32px) !important;
+    min-width: calc(100vw - 32px) !important;
+    max-width: calc(100vw - 32px) !important;
+  }
+}
+.cdk-overlay-container .cdk-overlay-pane.supplier-form-wide-dialog > .mat-mdc-dialog-container {
+  flex-shrink: 0 !important;
+  min-width: 100% !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  box-sizing: border-box;
+}
+.cdk-overlay-container
+  .cdk-overlay-pane.supplier-form-wide-dialog
+  .mat-mdc-dialog-container
+  .mdc-dialog__surface,
+.cdk-overlay-container
+  .cdk-overlay-pane.supplier-form-wide-dialog
+  .mat-mdc-dialog-container
+  .mat-mdc-dialog-surface {
+  width: 100% !important;
+  max-width: 100% !important;
+  min-width: 0 !important;
+  flex-shrink: 0 !important;
+  box-sizing: border-box;
+  padding: 24px !important;
+  border-radius: 4px !important;
+  background-color: #fff !important;
+}
+.cdk-overlay-container .cdk-overlay-pane.supplier-form-wide-dialog .mat-mdc-dialog-content,
+.cdk-overlay-container .cdk-overlay-pane.supplier-form-wide-dialog .mdc-dialog__content,
+.cdk-overlay-container .cdk-overlay-pane.supplier-form-wide-dialog [mat-dialog-content] {
+  overflow-x: hidden !important;
+}
+.cdk-overlay-container .cdk-overlay-pane.supplier-form-wide-dialog .mat-mdc-form-field-type-mat-select .mdc-floating-label,
+.cdk-overlay-container .cdk-overlay-pane.supplier-form-wide-dialog .mat-mdc-form-field-type-mat-select .mat-mdc-floating-label,
+.cdk-overlay-container .cdk-overlay-pane.supplier-form-wide-dialog .mat-mdc-form-field-type-mat-select .mdc-floating-label--float-above {
+  max-width: none !important;
+  white-space: nowrap !important;
+  overflow: visible !important;
+  text-overflow: clip !important;
+}
+.cdk-overlay-container .cdk-overlay-pane.supplier-form-wide-dialog .mat-mdc-form-field-type-mat-select .mdc-notched-outline__notch {
+  max-width: none !important;
+}
+.cdk-overlay-container .cdk-overlay-pane.supplier-form-wide-dialog .mat-mdc-form-field-type-mat-select .mat-mdc-text-field-wrapper {
+  overflow: visible;
+}
+
 /* General Bill create/edit: centered wide dialog (Ship To two-column layout). */
 .cdk-overlay-container .cdk-overlay-pane.general-bill-form-dialog.mat-mdc-dialog-panel {
   width: min(960px, 98vw) !important;
@@ -570,15 +633,30 @@ mat-option {
   white-space: nowrap !important;
 }
 
-/* Material select panels: grow with longest option; cap to viewport. */
-.mat-mdc-select-panel {
+/* Material select panels: grow with longest option; cap to viewport.
+   Exception: .inventory-select-panel matches the trigger width (panelWidth=auto). */
+.mat-mdc-select-panel:not(.inventory-select-panel) {
   width: max-content !important;
   max-width: min(92vw, calc(100vw - 24px)) !important;
   box-sizing: border-box;
   overflow-x: auto;
 }
 
-.mat-mdc-select-panel .mat-mdc-option .mdc-list-item__primary-text {
+.mat-mdc-select-panel:not(.inventory-select-panel) .mat-mdc-option .mdc-list-item__primary-text {
+  white-space: nowrap !important;
+}
+
+.inventory-select-panel.mat-mdc-select-panel {
+  width: 100% !important;
+  min-width: 100% !important;
+  max-width: 100% !important;
+  box-sizing: border-box;
+  overflow-x: hidden;
+}
+
+.inventory-select-panel.mat-mdc-select-panel .mat-mdc-option .mdc-list-item__primary-text {
+  overflow: hidden;
+  text-overflow: ellipsis;
   white-space: nowrap !important;
 }
 
@@ -593,8 +671,13 @@ mat-option {
   box-sizing: border-box;
 }
 
-.cdk-overlay-container .cdk-overlay-pane:not(.role-form-wide-dialog):has(.mat-mdc-select-panel) {
+.cdk-overlay-container .cdk-overlay-pane:not(.role-form-wide-dialog):has(.mat-mdc-select-panel):not(:has(.inventory-select-panel)) {
   width: max-content !important;
+  max-width: min(92vw, calc(100vw - 24px)) !important;
+  box-sizing: border-box;
+}
+
+.cdk-overlay-container .cdk-overlay-pane:has(.inventory-select-panel) {
   max-width: min(92vw, calc(100vw - 24px)) !important;
   box-sizing: border-box;
 }
@@ -968,10 +1051,10 @@ body > .swal2-container.swal2-backdrop-show {
 }
 
 .driver-table .mat-column-supplierName {
-  width: 150px !important;
-  min-width: 150px !important;
-  max-width: 150px !important;
-  flex-basis: 150px !important;
+  width: 200px !important;
+  min-width: 200px !important;
+  max-width: 200px !important;
+  flex-basis: 200px !important;
 }
 
 .driver-table .mat-column-supplierType {
@@ -979,13 +1062,6 @@ body > .swal2-container.swal2-backdrop-show {
   min-width: 120px !important;
   max-width: 120px !important;
   flex-basis: 120px !important;
-}
-
-.driver-table .mat-column-driverEmail {
-  width: 180px !important;
-  min-width: 180px !important;
-  max-width: 180px !important;
-  flex-basis: 180px !important;
 }
 
 .driver-table .mat-column-mobile1 {
@@ -1002,40 +1078,11 @@ body > .swal2-container.swal2-backdrop-show {
   flex-basis: 125px !important;
 }
 
-.driver-table .mat-column-supplierCode {
-  width: 150px !important;
-  min-width: 150px !important;
-  max-width: 150px !important;
-  flex-basis: 150px !important;
-}
-
-.driver-table .mat-column-hub {
-  width: 100px !important;
-  min-width: 100px !important;
-  max-width: 100px !important;
-  flex-basis: 100px !important;
-}
-
 .driver-table .mat-column-location {
   width: 110px !important;
   min-width: 110px !important;
   max-width: 110px !important;
   flex-basis: 110px !important;
-}
-
-.driver-table .mat-column-driverImage {
-  width: 70px !important;
-  min-width: 70px !important;
-  max-width: 70px !important;
-  flex-basis: 70px !important;
-  justify-content: center;
-  overflow: visible !important;
-}
-
-.driver-table .mat-column-driverImage img {
-  max-width: 48px !important;
-  height: 32px !important;
-  object-fit: contain;
 }
 
 .driver-table .mat-column-isAdhoc,

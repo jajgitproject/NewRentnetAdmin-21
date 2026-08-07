@@ -148,11 +148,11 @@
 }
 
 .cdk-overlay-container
-  .cdk-overlay-pane:not(.control-panel-main-dialog)
+  .cdk-overlay-pane:not(.control-panel-main-dialog):not(.supplier-form-wide-dialog):not(.role-form-wide-dialog):not(.general-bill-form-dialog)
   .mat-mdc-dialog-container
   .mat-mdc-dialog-surface,
 .cdk-overlay-container
-  .cdk-overlay-pane:not(.control-panel-main-dialog)
+  .cdk-overlay-pane:not(.control-panel-main-dialog):not(.supplier-form-wide-dialog):not(.role-form-wide-dialog):not(.general-bill-form-dialog)
   .mat-mdc-dialog-container
   .mdc-dialog__surface {
   border-radius: 4px !important;

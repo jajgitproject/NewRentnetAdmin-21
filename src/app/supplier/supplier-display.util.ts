@@ -37,7 +37,15 @@ export function formatSupplierDisplay(supplier: {
   supplierName?: string;
   oldRentnetCode?: number | string | null;
 }): string {
-  return formatSupplierCode(supplier);
+  const name = (supplier?.supplierName || '').trim();
+  const code =
+    supplier?.oldRentnetCode !== null &&
+    supplier?.oldRentnetCode !== undefined &&
+    supplier?.oldRentnetCode !== '' &&
+    Number(supplier.oldRentnetCode) !== 0
+      ? String(supplier.oldRentnetCode)
+      : '';
+  return `${name}${code}`;
 }
 
 export function supplierMatchesDisplay(
@@ -49,8 +57,13 @@ export function supplierMatchesDisplay(
     return false;
   }
 
-  const formatted = formatSupplierCode(supplier).toLowerCase();
-  if (formatted === normalized) {
+  const formattedCode = formatSupplierCode(supplier).toLowerCase();
+  if (formattedCode === normalized) {
+    return true;
+  }
+
+  const formattedDisplay = formatSupplierDisplay(supplier).toLowerCase();
+  if (formattedDisplay === normalized) {
     return true;
   }
 
@@ -96,6 +109,7 @@ export function filterSuppliersByDisplay(
 
     return (
       formatSupplierCode(supplier).toLowerCase().includes(filterValue) ||
+      formatSupplierDisplay(supplier).toLowerCase().includes(filterValue) ||
       name.includes(filterValue) ||
       code.includes(filterValue) ||
       pan.includes(filterValue)

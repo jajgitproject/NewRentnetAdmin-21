@@ -22,7 +22,6 @@ import { FormControl } from '@angular/forms';
 import { Router } from '@angular/router';
 import { CitiesDropDown } from '../organizationalEntity/citiesDropDown.model';
 import { formatSupplierCode } from './supplier-display.util';
-import { formatSupplierDisplay } from './supplier-display.util';
 interface MenuItem {
   label: string;
   action: (item: any) => void;
@@ -43,8 +42,7 @@ export class SupplierComponent implements OnInit {
     'supplierType',
     'paymentBasis',
     'dateOfAgreement',
-    'supplierAgreementBranch',
-    'city',
+    'supplierAgreementLocation',
     'phone',
     'email',
     'isAdhoc',
@@ -95,7 +93,6 @@ export class SupplierComponent implements OnInit {
  filteredFilterOptions: Observable<string[]>;
  filterSuggestions: string[] = [];
  private suggestionRefresh$ = new BehaviorSubject<void>(undefined);
- formatSupplierDisplay = formatSupplierDisplay;
 
   // supplierMenuItems: any[] = [
   //   //{ label: 'Rate Card', route: '/supplierRateCard', tooltip: 'Rate Card' },
@@ -245,7 +242,7 @@ export class SupplierComponent implements OnInit {
     }
 
     const values = (data || [])
-      .map((row) => formatSupplierDisplay(row))
+      .map((row) => formatSupplierCode(row))
       .filter((value) => !!value && value !== '##');
     this.filterSuggestions = [...new Set(values)];
     this.suggestionRefresh$.next();
@@ -318,6 +315,10 @@ export class SupplierComponent implements OnInit {
   {
     const dialogRef = this.dialog.open(FormDialogComponent, 
     {
+      panelClass: 'supplier-form-wide-dialog',
+      width: '1100px',
+      maxWidth: 'calc(100vw - 32px)',
+      minWidth: 'min(1100px, calc(100vw - 32px))',
       data: 
         {
           advanceTable: this.advanceTable,
@@ -329,6 +330,10 @@ export class SupplierComponent implements OnInit {
       //  alert(row.id);
     this.supplierID = row.supplierID;
     const dialogRef = this.dialog.open(FormDialogComponent, {
+      panelClass: 'supplier-form-wide-dialog',
+      width: '1100px',
+      maxWidth: 'calc(100vw - 32px)',
+      minWidth: 'min(1100px, calc(100vw - 32px))',
       data: {
         advanceTable: row,
         action: 'edit'

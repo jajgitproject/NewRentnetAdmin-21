@@ -212,7 +212,7 @@
                                         <ng-container matColumnDef="supplierName">
                                             <mat-header-cell *matHeaderCellDef mat-sort-header>Supplier Name</mat-header-cell>
                                             <mat-cell *matCellDef="let row" (contextmenu)="onContextMenu($event, row)">
-                                                {{ formatSupplierDisplay(row) }}</mat-cell>
+                                                {{ row.supplierName }}</mat-cell>
                                         </ng-container>
 
                                         <ng-container matColumnDef="supplierCode">
@@ -240,16 +240,10 @@
                                             </mat-cell>
                                         </ng-container>
 
-                                        <ng-container matColumnDef="supplierAgreementBranch">
-                                            <mat-header-cell *matHeaderCellDef mat-sort-header>Branch</mat-header-cell>
+                                        <ng-container matColumnDef="supplierAgreementLocation">
+                                            <mat-header-cell *matHeaderCellDef mat-sort-header>Location</mat-header-cell>
                                             <mat-cell *matCellDef="let row">
-                                                {{ row.supplierAgreementBranch || 'N/A' }}</mat-cell>
-                                        </ng-container>
-
-                                        <ng-container matColumnDef="city">
-                                            <mat-header-cell *matHeaderCellDef mat-sort-header>City</mat-header-cell>
-                                            <mat-cell *matCellDef="let row">
-                                                {{row.city}}</mat-cell>
+                                                {{ row.supplierAgreementLocation || 'N/A' }}</mat-cell>
                                         </ng-container>
 
                                         <ng-container matColumnDef="phone">

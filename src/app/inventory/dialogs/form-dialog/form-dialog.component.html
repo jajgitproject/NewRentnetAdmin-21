@@ -18,45 +18,33 @@
 
             <div class="row">
                 <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
-                    <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                    <mat-form-field class="example-full-width inventory-select-field" appearance="outline" floatLabel="always">
                         <mat-label>Vehicle Category</mat-label>
-                        <input required type="text" matInput formControlName="vehicleCategory"
-                            (keyup)="onvechileInputChanges($event)" [matAutocomplete]="auto">
-                        <mat-autocomplete #auto="matAutocomplete"
-                            (optionSelected)="OnVehicleCategorySelect($event.option.value)">
-                            <mat-option *ngFor="let option of filteredVehicleCategoryOptions | async"
-                                [value]="option.vehicleCategory" (click)="getTitles(option.vehicleCategoryID)">
-                                {{option.vehicleCategory}}
+                        <mat-select panelWidth="auto" panelClass="inventory-select-panel" required
+                            formControlName="vehicleCategoryID"
+                            (selectionChange)="onVehicleCategoryChange($event.value)">
+                            <mat-option [value]="Category.vehicleCategoryID"
+                                *ngFor="let Category of VehicleCategoryList">
+                                {{Category.vehicleCategory}}
                             </mat-option>
-                        </mat-autocomplete>
-                        <mat-error
-                            *ngIf="advanceTableForm.controls['vehicleCategory']?.hasError('vehicleCategoryInvalid')">
+                        </mat-select>
+                        <mat-error *ngIf="advanceTableForm.get('vehicleCategoryID')?.hasError('required')">
                             Please select a Vehicle Category
                         </mat-error>
                     </mat-form-field>
                 </div>
 
                 <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
-                    <!-- <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
-                        <mat-label>Vehicle </mat-label>
-                        <mat-select required #vehicleVal [class.is-invalid]="vehicleVal.invalid && vehicleVal.touched" formControlName="vehicleID">
-                            <mat-option [value]="Vehicle.vehicleID" *ngFor="let Vehicle of VehicleList">{{Vehicle.vehicle}}</mat-option>
-                        </mat-select>
-                        <mat-error>
-                            Please select a Vehicle
-                        </mat-error>
-                    </mat-form-field> -->
-                    <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                    <mat-form-field class="example-full-width inventory-select-field" appearance="outline" floatLabel="always">
                         <mat-label>Vehicle</mat-label>
-                        <input required type="text" matInput formControlName="vehicle" [matAutocomplete]="auto1">
-                        <mat-autocomplete #auto1="matAutocomplete"
-                            (optionSelected)="OnVehicleSelect($event.option.value)">
-                            <mat-option *ngFor="let option of filteredVehicleOptions | async" [value]="option.vehicle"
-                                (click)="getvehicleID(option.vehicleID)">
-                                {{option.vehicle}}
+                        <mat-select panelWidth="auto" panelClass="inventory-select-panel" required
+                            formControlName="vehicleID"
+                            (selectionChange)="onVehicleChange($event.value)">
+                            <mat-option [value]="Vehicle.vehicleID" *ngFor="let Vehicle of VehicleList">
+                                {{Vehicle.vehicle}}
                             </mat-option>
-                        </mat-autocomplete>
-                        <mat-error *ngIf="advanceTableForm.controls['vehicle'].hasError('vehicleInvalid')">
+                        </mat-select>
+                        <mat-error *ngIf="advanceTableForm.get('vehicleID')?.hasError('required')">
                             Please select a Vehicle
                         </mat-error>
                     </mat-form-field>
@@ -67,7 +55,7 @@
                 <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
                     <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
                         <mat-label>Company</mat-label>
-                        <mat-select required formControlName="companyID" (selectionChange)="onCompanyChange($event.value)">
+                        <mat-select panelWidth="auto" panelClass="inventory-select-panel" required formControlName="companyID" (selectionChange)="onCompanyChange($event.value)">
                             <mat-option [value]="Company.organizationalEntityID"
                                 *ngFor="let Company of OrganizationalEntityList">
                                 {{Company.organizationalEntityName}}
@@ -80,27 +68,17 @@
                 </div>
 
                 <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
-                    <!-- <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                    <mat-form-field class="example-full-width inventory-select-field" appearance="outline" floatLabel="always">
                         <mat-label>Location/Hub</mat-label>
-                        <mat-select required #lhVal [class.is-invalid]="lhVal.invalid && lhVal.touched" formControlName="locationHubID">
-                            <mat-option [value]="LocationHub.organizationalEntityID" *ngFor="let LocationHub of OrganizationalEntitiesList">{{LocationHub.organizationalEntityName}}</mat-option>
-                        </mat-select>
-                        <mat-error>
-                            Please select a Location/Hub
-                        </mat-error>
-                    </mat-form-field> -->
-                    <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
-                        <mat-label>Location/Hub</mat-label>
-                        <input required type="text" matInput formControlName="locationHub" [matAutocomplete]="auto3">
-                        <mat-autocomplete #auto3="matAutocomplete"
-                            (optionSelected)="OnLocationHubSelect($event.option.value)">
-                            <mat-option *ngFor="let option of filteredOrganizationalEntityOptions | async"
-                                [value]="option.organizationalEntityName"
-                                (click)="getlocationHubID(option.organizationalEntityID)">
-                                {{option.organizationalEntityName}}
+                        <mat-select panelWidth="auto" panelClass="inventory-select-panel" required
+                            formControlName="locationHubID"
+                            (selectionChange)="onLocationHubChange($event.value)">
+                            <mat-option [value]="LocationHub.organizationalEntityID"
+                                *ngFor="let LocationHub of OrganizationalEntitiesList">
+                                {{LocationHub.organizationalEntityName}}
                             </mat-option>
-                        </mat-autocomplete>
-                        <mat-error *ngIf="advanceTableForm.controls['locationHub'].hasError('locationHubInvalid')">
+                        </mat-select>
+                        <mat-error *ngIf="advanceTableForm.get('locationHubID')?.hasError('required')">
                             Please select a Location/Hub
                         </mat-error>
                     </mat-form-field>
@@ -111,7 +89,7 @@
                 <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
                     <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
                         <mat-label>Owned/Supplied</mat-label>
-                        <mat-select required #ownedsuppliedVal
+                        <mat-select panelWidth="auto" panelClass="inventory-select-panel" required #ownedsuppliedVal
                             [class.is-invalid]="ownedsuppliedVal.invalid && ownedsuppliedVal.touched"
                             formControlName="ownedSupplied" (selectionChange)="onOwnershipChange()">
                             <mat-option value="Owned">Owned</mat-option>
@@ -131,8 +109,8 @@
                         <mat-autocomplete #auto20="matAutocomplete"
                             (optionSelected)="OnSupplierForOwnerSelect($event.option.value)">
                             <mat-option *ngFor="let option of filteredSupplierForOwnerOptions | async"
-                                [value]="formatSupplierCode(option)" (click)="getsupplierIDForOwner(option.supplierID)">
-                                {{formatSupplierCode(option)}}
+                                [value]="formatSupplierDisplay(option)" (click)="getsupplierIDForOwner(option.supplierID)">
+                                {{formatSupplierDisplay(option)}}
                             </mat-option>
                         </mat-autocomplete>
                         <mat-error *ngIf="advanceTableForm.get('supplier').hasError('supplierForOwnerInvalid')">
@@ -148,8 +126,8 @@
                         <mat-autocomplete #auto4="matAutocomplete"
                             (optionSelected)="OnSupplierSelect($event.option.value)">
                             <mat-option *ngFor="let option of filteredSupplierOptions | async"
-                                [value]="formatSupplierCode(option)" (click)="getsupplierID(option.supplierID)">
-                                {{formatSupplierCode(option)}}
+                                [value]="formatSupplierDisplay(option)" (click)="getsupplierID(option.supplierID)">
+                                {{formatSupplierDisplay(option)}}
                             </mat-option>
                         </mat-autocomplete>
                         <mat-error *ngIf="advanceTableForm.controls['supplier'].hasError('supplierInvalid')">
@@ -163,7 +141,7 @@
                 <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
                     <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
                         <mat-label>Model Year</mat-label>
-                        <mat-select required #yearVal [class.is-invalid]="yearVal.invalid && yearVal.touched"
+                        <mat-select panelWidth="auto" panelClass="inventory-select-panel" required #yearVal [class.is-invalid]="yearVal.invalid && yearVal.touched"
                             formControlName="modelYear">
 
                             <mat-option [value]=2010>2010</mat-option>
@@ -254,7 +232,7 @@
             <!-- <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2"> -->
             <!-- <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
                     <mat-label>Registration City</mat-label>
-                    <mat-select (selectionChange)="GetStateBasedOnCity()" matInput formControlName="registrationCityID" required>
+                    <mat-select panelWidth="auto" panelClass="inventory-select-panel" (selectionChange)="GetStateBasedOnCity()" matInput formControlName="registrationCityID" required>
                         <mat-option [value]="City.geoPointID" *ngFor="let City of CityList">{{City.geoPointName}}</mat-option>
                     </mat-select>                            
                 </mat-form-field> -->
@@ -308,52 +286,32 @@
 
             <div class="row">
                 <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
-                    <!-- <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
-                    <mat-label>Color</mat-label>
-                    <mat-select required #colorVal [class.is-invalid]="colorVal.invalid && colorVal.touched" formControlName="colorID">
-                        <mat-option [value]="Color.colorID" *ngFor="let Color of ColorList">{{Color.color}}</mat-option>
-                    </mat-select>
-                    <mat-error>
-                        Please select a Color
-                    </mat-error>
-                </mat-form-field> -->
-                    <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                    <mat-form-field class="example-full-width inventory-select-field" appearance="outline" floatLabel="always">
                         <mat-label>Color</mat-label>
-                        <input required type="text" matInput formControlName="color" [matAutocomplete]="auto6">
-                        <mat-autocomplete #auto6="matAutocomplete"
-                            (optionSelected)="OnColorSelect($event.option.value)">
-                            <mat-option *ngFor="let option of filteredColorOptions | async" [value]="option.color"
-                                (click)="getcolorID(option.colorID)">
-                                {{option.color}}
+                        <mat-select panelWidth="auto" required formControlName="colorID"
+                            panelClass="inventory-select-panel"
+                            (selectionChange)="onColorChange($event.value)">
+                            <mat-option [value]="Color.colorID" *ngFor="let Color of ColorList">
+                                {{Color.color}}
                             </mat-option>
-                        </mat-autocomplete>
-                        <mat-error *ngIf="advanceTableForm.controls['color']?.hasError('colorInvalid')">
+                        </mat-select>
+                        <mat-error *ngIf="advanceTableForm.get('colorID')?.hasError('required')">
                             Please select a Color
                         </mat-error>
                     </mat-form-field>
                 </div>
 
                 <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
-                    <!-- <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
-                    <mat-label>Fuel Type</mat-label>
-                    <mat-select required #fuelTypeVal [class.is-invalid]="fuelTypeVal.invalid && fuelTypeVal.touched" formControlName="fuelTypeID">
-                        <mat-option [value]="FuelType.fuelTypeID" *ngFor="let FuelType of FuelTypeList">{{FuelType.fuelType}}</mat-option>
-                    </mat-select>
-                    <mat-error>
-                        Please select a Fuel Type
-                    </mat-error>
-                </mat-form-field> -->
-                    <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                    <mat-form-field class="example-full-width inventory-select-field" appearance="outline" floatLabel="always">
                         <mat-label>Fuel Type</mat-label>
-                        <input required type="text" matInput formControlName="fuelType" [matAutocomplete]="auto7">
-                        <mat-autocomplete #auto7="matAutocomplete"
-                            (optionSelected)="OnFuelTypeSelect($event.option.value)">
-                            <mat-option *ngFor="let option of filteredFuelOptions | async" [value]="option.fuelType"
-                                (click)="getfuelTypeID(option.fuelTypeID)">
-                                {{option.fuelType}}
+                        <mat-select panelWidth="auto" required formControlName="fuelTypeID"
+                            panelClass="inventory-select-panel"
+                            (selectionChange)="onFuelTypeChange($event.value)">
+                            <mat-option [value]="FuelType.fuelTypeID" *ngFor="let FuelType of FuelTypeList">
+                                {{FuelType.fuelType}}
                             </mat-option>
-                        </mat-autocomplete>
-                        <mat-error *ngIf="advanceTableForm.controls['fuelType']?.hasError('fuleInvalid')">
+                        </mat-select>
+                        <mat-error *ngIf="advanceTableForm.get('fuelTypeID')?.hasError('required')">
                             Please select a Fuel Type
                         </mat-error>
                     </mat-form-field>
@@ -409,7 +367,7 @@
             <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
                 <mat-form-field class="example-full-width" appearance="outline"  floatLabel="always">
                     <mat-label>No.Of Airbags</mat-label>
-                    <mat-select required #airbagsVal [class.is-invalid]="airbagsVal.invalid && airbagsVal.touched" formControlName="noOfAirbags">
+                    <mat-select panelWidth="auto" panelClass="inventory-select-panel" required #airbagsVal [class.is-invalid]="airbagsVal.invalid && airbagsVal.touched" formControlName="noOfAirbags">
                         <mat-option [value]="1">1</mat-option>
                         <mat-option [value]="2">2</mat-option>
                         <mat-option [value]="3">3</mat-option>
@@ -487,7 +445,7 @@
                 <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
                     <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
                         <mat-label>Business Division</mat-label>
-                        <mat-select formControlName="businessDivision" required>
+                        <mat-select panelWidth="auto" panelClass="inventory-select-panel" formControlName="businessDivision" required>
                             <mat-option value="CDC">CDC</mat-option>
                             <mat-option value="ETS">ETS</mat-option>
                         </mat-select>
@@ -499,7 +457,7 @@
                 <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
                     <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
                         <mat-label>Is Adhoc</mat-label>
-                        <mat-select formControlName="isAdhoc">
+                        <mat-select panelWidth="auto" panelClass="inventory-select-panel" formControlName="isAdhoc">
                             <mat-option [value]="true">Yes</mat-option>
                             <mat-option [value]="false">No</mat-option>
                         </mat-select>
@@ -512,7 +470,7 @@
                 <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
                     <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
                         <mat-label>Activation Status</mat-label>
-                        <mat-select formControlName="status" required>
+                        <mat-select panelWidth="auto" panelClass="inventory-select-panel" formControlName="status" required>
                             <mat-option value="Active">Active</mat-option>
                             <mat-option value="Maintenance">Maintenance</mat-option>
                             <mat-option value="OnHold">On Hold</mat-option>
