@@ -1,5 +1,6 @@
 // @ts-nocheck
 export class ZonalDutyRegisterModel {
+  reservationGroupID: string;
   reservationID: number;
   dutySlipID: number;
   pickupDate: string;

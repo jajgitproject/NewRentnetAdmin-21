@@ -145,6 +145,10 @@ export class CustomerPersonService
     {
       advanceTable.employeeCode=null;
     }
+    if(advanceTable.costCenter==="")
+    {
+      advanceTable.costCenter=null;
+    }
     return this.httpClient.post<any>(this.API_URL , advanceTable);
   }
   update(advanceTable: CustomerPerson)
@@ -165,6 +169,10 @@ export class CustomerPersonService
     if(advanceTable.employeeCode==="")
     {
       advanceTable.employeeCode=null;
+    }
+    if(advanceTable.costCenter==="")
+    {
+      advanceTable.costCenter=null;
     }
     return this.httpClient.put<any>(this.API_URL , advanceTable);
   }

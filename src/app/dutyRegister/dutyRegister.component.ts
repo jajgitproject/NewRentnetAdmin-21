@@ -41,6 +41,7 @@ import { EmployeeDropDown } from '../employee/employeeDropDown.model';
 })
 export class DutyRegisterComponent implements OnInit, OnDestroy {
  baseDisplayedColumns = [
+  'ReservationGroupID',
   'ReservationID',
   'PickupDate',
   'BookingDate',

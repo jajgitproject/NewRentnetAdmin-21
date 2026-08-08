@@ -32,6 +32,7 @@ export class CustomerPerson {
   customerDesignation:number;
   customerDepartment:number;
  employeeCode:string;
+ costCenter:string;
  countryCode:string;
  countryCodes:string;
  mobileCode:string;
@@ -66,6 +67,7 @@ export class CustomerPerson {
        this.sendEmail = customerPerson.sendEmail || '';
        this.customerDesignationID = customerPerson.customerDesignationID || 0;
        this.employeeCode = customerPerson.employeeCode || '';
+       this.costCenter = customerPerson.costCenter || '';
        this.customerDepartment=customerPerson.customerDepartment || '';
        this.customerDesignation = customerPerson.customerDesignation|| '';
        this.customerDepartmentID = customerPerson.customerDepartmentID || 0;

@@ -580,6 +580,7 @@ export class FormDialogComponentCustomerPerson
       sendSMSWhatsApp: [this.advanceTable.sendSMSWhatsApp],
       sendEmail: [this.advanceTable.sendEmail],
       employeeCode: [this.advanceTable.employeeCode],
+      costCenter: [this.advanceTable.costCenter],
       customerDesignationID: [this.advanceTable.customerDesignationID],
       customerDesignation: [this.advanceTable.customerDesignation],
       customerDepartmentID: [this.advanceTable.customerDepartmentID],

@@ -2,6 +2,7 @@
 import { formatDate, Time } from '@angular/common';
 export class DutyRegisterModel {
 
+  reservationGroupID: string;
   reservationID: number;
 
   dutySlipID: number;

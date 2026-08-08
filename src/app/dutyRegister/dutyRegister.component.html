@@ -119,6 +119,14 @@
                                                 class="mat-cell floating-header-table"
                                                 (matSortChange)="SortingData($event)">
 
+                                            <!-- Booking Group No -->
+                                            <ng-container matColumnDef="ReservationGroupID">
+                                                <mat-header-cell *matHeaderCellDef mat-sort-header>Booking Group No</mat-header-cell>
+                                                <mat-cell *matCellDef="let row">
+                                                    {{row.reservationGroupID || 'N/A'}}
+                                                </mat-cell>
+                                            </ng-container>
+
                                             <!-- Reservation No -->
                                             <ng-container matColumnDef="ReservationID">
                                                 <mat-header-cell *matHeaderCellDef mat-sort-header>Res No</mat-header-cell>

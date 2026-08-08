@@ -42,6 +42,7 @@ import { EmployeeDropDown } from '../employee/employeeDropDown.model';
 })
 export class ZonalDutyRegisterComponent implements OnInit, OnDestroy {
  baseDisplayedColumns = [
+  'ReservationGroupID',
   'ReservationID',
   'PickupDate',
   'BookingDate',
