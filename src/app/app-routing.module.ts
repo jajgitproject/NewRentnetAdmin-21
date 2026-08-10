@@ -186,6 +186,14 @@ const routes: Routes = [
       },
 
       {
+        path: 'changeModeOfPayment',
+        loadChildren: () =>
+          import('./changeModeOfPayment/changeModeOfPayment.module').then(
+            (m) => m.ChangeModeOfPaymentModule
+          )
+      },
+
+      {
         path: 'changeBooker',
         loadChildren: () =>
           import('./changeBooker/changeBooker.module').then(

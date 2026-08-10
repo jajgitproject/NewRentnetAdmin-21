@@ -462,6 +462,17 @@ export const ROUTES: RouteInfo[] = [
       },
 
       {
+        path: 'changeModeOfPayment',
+        title: 'Change Mode Of Payment',
+        moduleName: 'changeModeOfPayment',
+        icon: 'fas fa-tachometer-alt',
+        class: '',
+        groupTitle: false,
+        submenu: [],
+        isAccess: false
+      },
+
+      {
         path: 'changeBooker',
         title: 'Change Booker',
         moduleName: 'changeBooker',

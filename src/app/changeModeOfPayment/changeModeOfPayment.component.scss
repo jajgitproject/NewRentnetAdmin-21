@@ -1,0 +1,7 @@
+:host ::ng-deep .mat-column-PickupAddress {
+  flex: 0 0 250px !important;   /* force actual width */
+  min-width: 250px !important;  
+  max-width: 250px !important;
+  width: 250px !important;
+  white-space: normal !important;
+}
