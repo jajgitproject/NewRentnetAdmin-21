@@ -104,7 +104,13 @@
 
   <ng-template #noDataTemplate>
     <mat-card-content>
-      <p>No credit note history found for the given invoice ID.</p>
+      <p *ngIf="loading">Loading credit note history...</p>
+      <p *ngIf="!loading">
+        No credit note history found
+        <ng-container *ngIf="creditNoteID > 0"> for Credit Note ID {{ creditNoteID }}.</ng-container>
+        <ng-container *ngIf="!(creditNoteID > 0) && invoiceID > 0"> for Invoice ID {{ invoiceID }}.</ng-container>
+        <ng-container *ngIf="!(creditNoteID > 0) && !(invoiceID > 0)">.</ng-container>
+      </p>
     </mat-card-content>
   </ng-template>
 </mat-card>

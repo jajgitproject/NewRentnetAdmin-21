@@ -260,10 +260,7 @@ resetTaxes() {
                  }).then(result => {
                    if (result.isConfirmed) 
                    {
-                     const url = this.router.serializeUrl(
-                       this.router.createUrlTree(['/creditNoteHome'])
-                     );
-                     window.open(this._generalService.FormURL + url, '_blank');
+                     this.router.navigate(['/invoiceHome']);
                    }
                  }); 
        this.saveDisabled = true; 
@@ -341,37 +338,41 @@ resetTaxes() {
       return;
     }
 
-    if (this.action !== 'edit') {
-      // Error ONLY when Requires Re-Billing = Yes and amounts differ
-      if (requiresReBilling && amount !== creditNoteAmount) {
-        Swal.fire({
-          title: 'Invalid Selection',
-          text: 'Credit Note Amount should be equal to Invoice Amount for Re-billing.',
-          icon: 'error',
-          confirmButtonText: 'OK'
-        });
-        return;
-      }
+    const amountsMatch =
+      Math.round((amount + Number.EPSILON) * 100) / 100 ===
+      Math.round((creditNoteAmount + Number.EPSILON) * 100) / 100;
 
-      // Requires Re-Billing = No and amounts equal — confirm user does not want to rebill
-      if (!requiresReBilling && amount === creditNoteAmount) {
-        Swal.fire({
-          title: 'Are you sure?',
-          text: 'Are you sure you do not want to rebill the Duty Slips (DS) associated with this bill?',
-          icon: 'warning',
-          showCancelButton: true,
-          confirmButtonText: 'Yes',
-          cancelButtonText: 'No'
-        }).then((result) => {
-          if (result.isConfirmed) {
-            this.saveDisabled = false;
+    // Error when Requires Re-Billing = Yes and amounts differ (create and edit)
+    if (requiresReBilling && !amountsMatch) {
+      Swal.fire({
+        title: 'Invalid Selection',
+        text: 'Credit Note Amount should be equal to Invoice Amount for Re-billing.',
+        icon: 'error',
+        confirmButtonText: 'OK'
+      });
+      return;
+    }
+
+    // Requires Re-Billing = No and amounts equal — confirm user does not want to rebill
+    if (!requiresReBilling && amountsMatch) {
+      Swal.fire({
+        title: 'Are you sure?',
+        text: 'Are you sure you do not want to rebill the Duty Slips (DS) associated with this bill?',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonText: 'Yes',
+        cancelButtonText: 'No'
+      }).then((result) => {
+        if (result.isConfirmed) {
+          this.saveDisabled = false;
+          if (this.action === 'edit') {
+            this.Put();
+          } else {
             this.Post();
           }
-        });
-        return;
-      }
-
-      // Requires Re-Billing = No and amounts different — allow save (no error)
+        }
+      });
+      return;
     }
 
     this.saveDisabled = false;

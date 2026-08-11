@@ -137,13 +137,12 @@
                         <div class="col-xl-2 col-lg-2 col-md-2 col-sm-12 mb-2">
                             <mat-form-field appearance="outline" floatLabel="always" class="example-full-width">
                                 <mat-label>Vendor</mat-label>
-                                <input type="text" matInput [formControl]="vendor" [matAutocomplete]="autoVendor"
-                                    (keyup)="onKeyupVendor($event)">
+                                <input type="text" matInput [formControl]="vendor" [matAutocomplete]="autoVendor">
                                 <mat-autocomplete #autoVendor="matAutocomplete" panelWidth="custom-autocomplete-panel"
                                     (optionSelected)="onVendorSelected($event.option.value)">
                                     <mat-option *ngFor="let option of filteredVendorOptions | async"
-                                        [value]="option.supplierName">
-                                        {{option.supplierName}}
+                                        [value]="formatSupplierDisplay(option)">
+                                        {{formatSupplierDisplay(option)}}
                                     </mat-option>
                                 </mat-autocomplete>
                             </mat-form-field>
@@ -221,6 +220,11 @@
                                                 <ng-container matColumnDef="DutySlipID">
                                                     <mat-header-cell *matHeaderCellDef mat-sort-header>Duty Slip</mat-header-cell>
                                                     <mat-cell *matCellDef="let row">{{row.dutySlipID}}</mat-cell>
+                                                </ng-container>
+
+                                                <ng-container matColumnDef="BillingStatus">
+                                                    <mat-header-cell *matHeaderCellDef mat-sort-header>Billing Status</mat-header-cell>
+                                                    <mat-cell *matCellDef="let row">{{row.billingStatus}}</mat-cell>
                                                 </ng-container>
 
                                                 <ng-container matColumnDef="Vendor">

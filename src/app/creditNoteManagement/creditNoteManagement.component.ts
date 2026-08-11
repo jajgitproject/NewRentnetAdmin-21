@@ -78,6 +78,7 @@ export class CreditNoteManagementComponent implements OnInit {
   customerGroupID: any;
 
   SearchCreditNoteNumber: string = '';
+  SearchBillNo: string = '';
   public OrganizationalEntityList?: OrganizationalEntityDropDown[] = [];
   filteredBranchOptions: Observable<ModeOfPaymentDropDown[]>;
   SearchBranch: FormControl=new FormControl();
@@ -224,6 +225,7 @@ export class CreditNoteManagementComponent implements OnInit {
     this.customerGroup.setValue('');
     this.customerName.setValue('');
     this.SearchCreditNoteNumber = '';
+    this.SearchBillNo = '';
     this.SearchBranch.setValue('');
     this.SearchFromDate = '';
     this.SearchToDate = '';
@@ -268,7 +270,7 @@ export class CreditNoteManagementComponent implements OnInit {
     {
       this.SearchToDate=moment(this.SearchToDate).format('yyyy-MM-DD');
     }
-    this.creditNoteManagementService.getTableData(this.customerName.value,this.customerGroup.value,this.searchApprovalStatus,this.SearchCreditNoteNumber,this.SearchBranch.value,this.SearchFromDate,this.SearchToDate,this.SearchType,this.PageNumber).subscribe
+    this.creditNoteManagementService.getTableData(this.customerName.value,this.customerGroup.value,this.SearchBillNo.replace(/\//g, '-'),this.searchApprovalStatus,this.SearchCreditNoteNumber.replace(/\//g, '-'),this.SearchBranch.value,this.SearchFromDate,this.SearchToDate,this.SearchType,this.PageNumber).subscribe
       (
         data => {
           this.dataSource = data;  
@@ -353,7 +355,7 @@ export class CreditNoteManagementComponent implements OnInit {
       this.sortingData = 1;
       this.sortType = "Descending";
     }
-    this.creditNoteManagementService.getTableDataSort(this.customerName.value,this.customerGroup.value,this.searchApprovalStatus,this.SearchCreditNoteNumber,this.SearchBranch.value,this.SearchFromDate,this.SearchToDate,this.SearchType,this.PageNumber, coloumName.active, this.sortType).subscribe
+    this.creditNoteManagementService.getTableDataSort(this.customerName.value,this.customerGroup.value,this.SearchBillNo.replace(/\//g, '-'),this.searchApprovalStatus,this.SearchCreditNoteNumber.replace(/\//g, '-'),this.SearchBranch.value,this.SearchFromDate,this.SearchToDate,this.SearchType,this.PageNumber, coloumName.active, this.sortType).subscribe
     (
       data => {
         this.dataSource = data;

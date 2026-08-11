@@ -3,6 +3,7 @@ import { Component, OnInit, ViewChild } from '@angular/core';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { MatSort } from '@angular/material/sort';
 import { MatSnackBar } from '@angular/material/snack-bar';
+import { MatDialog } from '@angular/material/dialog';
 import { FormControl } from '@angular/forms';
 import { Observable } from 'rxjs';
 import { map, startWith } from 'rxjs/operators';
@@ -13,6 +14,7 @@ import { GeneralService } from '../general/general.service';
 import { ForcedCreditNoteRebillingService } from './forcedCreditNoteRebilling.service';
 import { ForcedCreditNoteRebilling } from './forcedCreditNoteRebilling.model';
 import { CustomerDropDown } from '../supplierCustomerFixedForAllPercentage/customerDropDown.model';
+import { CreditNoteHistoryComponent } from '../creditnotehistory/creditnotehistory.component';
 
 @Component({
   standalone: false,
@@ -29,6 +31,7 @@ export class ForcedCreditNoteRebillingComponent implements OnInit {
     'creditNoteAmount',
     'invoiceNumberWithPrefix',
     'invoiceTotalAmountAfterGST',
+    'requiresReBilling',
     'actions'
   ];
 
@@ -53,6 +56,7 @@ export class ForcedCreditNoteRebillingComponent implements OnInit {
     public httpClient: HttpClient,
     public forcedCreditNoteRebillingService: ForcedCreditNoteRebillingService,
     private snackBar: MatSnackBar,
+    public dialog: MatDialog,
     public _generalService: GeneralService
   ) {}
 
@@ -143,6 +147,27 @@ export class ForcedCreditNoteRebillingComponent implements OnInit {
     this.pageNumber = 0;
     this.dataSource = null;
     this.hasSearched = false;
+  }
+
+  viewCreditNoteHistory(row: ForcedCreditNoteRebilling) {
+    const creditNoteID = Number(row?.invoiceCreditNoteID ?? (row as any)?.InvoiceCreditNoteID ?? 0);
+    if (!creditNoteID || creditNoteID <= 0) {
+      return;
+    }
+
+    this.dialog.open(CreditNoteHistoryComponent, {
+      width: '720px',
+      data: {
+        creditNoteID,
+        invoiceCreditNoteID: creditNoteID,
+        invoiceID: row?.invoiceID ?? (row as any)?.InvoiceID,
+        invoiceNumberWithPrefix:
+          row?.creditNoteNumberWithPrefix
+          || (row as any)?.CreditNoteNumberWithPrefix
+          || row?.invoiceNumberWithPrefix
+          || (row as any)?.InvoiceNumberWithPrefix
+      }
+    });
   }
 
   // ---------- Action: Force Credit Note Rebilling ----------

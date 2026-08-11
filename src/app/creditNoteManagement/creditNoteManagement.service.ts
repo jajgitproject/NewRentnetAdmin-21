@@ -16,7 +16,7 @@ export class CreditNoteManagementService {
   }
 
   /** CRUD METHODS */
-  getTableData(searchCustomerName:string, searchCustomerGroup:string,searchApprovalStatus:string, SearchCreditNoteNumber:string, SearchBranch:string, SearchFromDate:string, SearchToDate:string, SearchType:string, PageNumber: number): Observable<any> {  
+  getTableData(searchCustomerName:string, searchCustomerGroup:string, SearchBillNo:string, searchApprovalStatus:string, SearchCreditNoteNumber:string, SearchBranch:string, SearchFromDate:string, SearchToDate:string, SearchType:string, PageNumber: number): Observable<any> {  
     if (searchCustomerName === "")
     {
       searchCustomerName = "null";
@@ -24,6 +24,10 @@ export class CreditNoteManagementService {
     if (searchCustomerGroup === "")
     {
       searchCustomerGroup = "null";
+    }
+    if (SearchBillNo === "")
+    {
+      SearchBillNo = "null";
     }
     if (searchApprovalStatus === "")
     {
@@ -49,10 +53,10 @@ export class CreditNoteManagementService {
     {
       SearchType = "null";
     }
-    return this.httpClient.get(this.API_URL + "/" + 'GetAllCreditNoteHomeForManagement' + '/' + searchCustomerName + '/'+ searchCustomerGroup + '/'+ searchApprovalStatus + '/' + SearchCreditNoteNumber + '/' + SearchBranch + '/' + SearchFromDate + '/' + SearchToDate + '/' + SearchType + '/' + PageNumber + '/InvoiceCreditNoteID/Ascending');
+    return this.httpClient.get(this.API_URL + "/" + 'GetAllCreditNoteHomeForManagement' + '/' + searchCustomerName + '/'+ searchCustomerGroup + '/' + SearchBillNo + '/'+ searchApprovalStatus + '/' + SearchCreditNoteNumber + '/' + SearchBranch + '/' + SearchFromDate + '/' + SearchToDate + '/' + SearchType + '/' + PageNumber + '/InvoiceCreditNoteID/Ascending');
   }
 
-  getTableDataSort(searchCustomerName:string, searchCustomerGroup:string, searchApprovalStatus:string, SearchCreditNoteNumber:string, SearchBranch:string, SearchFromDate:string, SearchToDate:string, SearchType:string, PageNumber: number, coloumName: string, sortType: string): Observable<any> {
+  getTableDataSort(searchCustomerName:string, searchCustomerGroup:string, SearchBillNo:string, searchApprovalStatus:string, SearchCreditNoteNumber:string, SearchBranch:string, SearchFromDate:string, SearchToDate:string, SearchType:string, PageNumber: number, coloumName: string, sortType: string): Observable<any> {
     if (searchCustomerName === "")
     {
       searchCustomerName = "null";
@@ -60,6 +64,10 @@ export class CreditNoteManagementService {
     if (searchCustomerGroup === "")
     {
       searchCustomerGroup = "null";
+    }
+    if (SearchBillNo === "")
+    {
+      SearchBillNo = "null";
     }
     if (searchApprovalStatus === "")
     {
@@ -85,7 +93,7 @@ export class CreditNoteManagementService {
     {
       SearchType = "null";
     }
-    return this.httpClient.get(this.API_URL + "/" + 'GetAllCreditNoteHomeForManagement' + '/' + searchCustomerName + '/'+ searchCustomerGroup + '/' + searchApprovalStatus + '/' + SearchCreditNoteNumber + '/' + SearchBranch + '/' + SearchFromDate + '/' + SearchToDate + '/' + SearchType + '/' + PageNumber + '/' + coloumName + '/' + sortType);
+    return this.httpClient.get(this.API_URL + "/" + 'GetAllCreditNoteHomeForManagement' + '/' + searchCustomerName + '/'+ searchCustomerGroup + '/' + SearchBillNo + '/' + searchApprovalStatus + '/' + SearchCreditNoteNumber + '/' + SearchBranch + '/' + SearchFromDate + '/' + SearchToDate + '/' + SearchType + '/' + PageNumber + '/' + coloumName + '/' + sortType);
 
   }
 

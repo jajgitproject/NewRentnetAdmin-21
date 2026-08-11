@@ -88,6 +88,18 @@
                                                             <div class="col-xl-6 col-lg-6 col-md-6 col-sm-6 mb-2">
                                                                 <mat-form-field class="example-full-width"
                                                                     appearance="outline" floatLabel="always">
+                                                                    <mat-label>Invoice No.</mat-label>
+                                                                    <input type="text" matInput
+                                                                        [(ngModel)]="SearchBillNo"
+                                                                        placeholder="Invoice number with prefix">
+                                                                </mat-form-field>
+                                                            </div>
+                                                        </div>
+
+                                                        <div class="row">
+                                                            <div class="col-xl-6 col-lg-6 col-md-6 col-sm-6 mb-2">
+                                                                <mat-form-field class="example-full-width"
+                                                                    appearance="outline" floatLabel="always">
                                                                     <mat-label>Branch</mat-label>
                                                                     <input type="text" matInput
                                                                         [matAutocomplete]="auto2"

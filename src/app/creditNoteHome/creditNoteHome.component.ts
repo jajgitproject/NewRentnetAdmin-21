@@ -29,6 +29,7 @@ import { Router } from '@angular/router';
 import { FormDialogComponent as CreateNote } from '../createCreditNote/dialogs/form-dialog/form-dialog.component';
 import Swal from 'sweetalert2';
 import { FormDialogComponent } from '../creditNoteHome/dialogs/form-dialog/form-dialog.component';
+import { CreditNoteHistoryComponent } from '../creditnotehistory/creditnotehistory.component';
 
 @Component({
   standalone: false,
@@ -556,6 +557,27 @@ addCreditNote() {
     window.open(baseUrl + url, '_blank');
   }
 
+  viewCreditNoteHistory(row) {
+    const creditNoteID = Number(row?.invoiceCreditNoteID ?? row?.InvoiceCreditNoteID ?? 0);
+    if (!creditNoteID) {
+      return;
+    }
+
+    this.dialog.open(CreditNoteHistoryComponent, {
+      width: '720px',
+      data: {
+        // History is keyed by InvoiceCreditNoteID (not InvoiceID).
+        creditNoteID,
+        invoiceCreditNoteID: creditNoteID,
+        invoiceID: row?.invoiceID ?? row?.InvoiceID,
+        invoiceNumberWithPrefix:
+          row?.creditNoteNumberWithPrefix
+          || row?.CreditNoteNumberWithPrefix
+          || row?.invoiceNumberWithPrefix
+          || row?.InvoiceNumberWithPrefix
+      }
+    });
+  }
 
 }
 

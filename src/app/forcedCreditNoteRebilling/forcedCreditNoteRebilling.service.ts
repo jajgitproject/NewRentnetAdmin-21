@@ -20,8 +20,8 @@ export class ForcedCreditNoteRebillingService {
    * Fetches the list of credit notes that are eligible for forced rebilling.
    * The backend is expected to apply the business rules:
    *   InvoiceCreditNote.CreditNoteAmount = Invoice.InvoiceTotalAmountAfterGST
-   *   AND InvoiceCreditNote.RequiresReBilling = 0
    *   AND InvoiceCreditNote.InvoiceID = Invoice.InvoiceID
+   * (both RequiresReBilling true and false are included)
    * plus the optional search filters below.
    */
   getTableData(
@@ -85,8 +85,16 @@ export class ForcedCreditNoteRebillingService {
    * The API returns a plain string (Success / Failure), so responseType is text.
    */
   forcedRebilling(invoiceCreditNoteID: number): Observable<string> {
-    return this.httpClient.get(this.ACTION_URL + '/GetApprovedCreditNoteandForcedRebilling/' + invoiceCreditNoteID, {
-      responseType: 'text'
-    });
+    const userId = this.generalService.getUserID() || 0;
+    return this.httpClient.get(
+      this.ACTION_URL +
+        '/GetApprovedCreditNoteandForcedRebilling/' +
+        invoiceCreditNoteID +
+        '?userId=' +
+        userId,
+      {
+        responseType: 'text'
+      }
+    );
   }
 }

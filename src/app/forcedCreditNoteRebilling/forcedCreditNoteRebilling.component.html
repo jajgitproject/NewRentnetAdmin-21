@@ -128,13 +128,29 @@
                                             <mat-cell *matCellDef="let row">{{row.invoiceTotalAmountAfterGST}}</mat-cell>
                                         </ng-container>
 
+                                        <ng-container matColumnDef="requiresReBilling">
+                                            <mat-header-cell *matHeaderCellDef mat-sort-header>Requires Rebilling</mat-header-cell>
+                                            <mat-cell *matCellDef="let row">{{row.requiresReBilling === true ? 'Yes' : 'No'}}</mat-cell>
+                                        </ng-container>
+
                                         <ng-container matColumnDef="actions">
-                                            <mat-header-cell *matHeaderCellDef class="pr-0">Action</mat-header-cell>
-                                            <mat-cell *matCellDef="let row" class="pr-0">
-                                                <button mat-raised-button color="primary"
-                                                    [disabled]="isProcessing" (click)="forceRebill(row)">
-                                                    Force Rebilling
+                                            <mat-header-cell *matHeaderCellDef class="pr-0">Actions</mat-header-cell>
+                                            <mat-cell *matCellDef="let row; let i = index" class="pr-0">
+                                                <button mat-icon-button [matMenuTriggerFor]="actionsMenu"
+                                                    (click)="$event.stopPropagation()">
+                                                    <mat-icon>more_vert</mat-icon>
                                                 </button>
+                                                <mat-menu #actionsMenu="matMenu">
+                                                    <button mat-menu-item [disabled]="isProcessing"
+                                                        (click)="forceRebill(row)">
+                                                        <mat-icon>receipt_long</mat-icon>
+                                                        <span>Force Rebilling</span>
+                                                    </button>
+                                                    <button mat-menu-item (click)="viewCreditNoteHistory(row)">
+                                                        <mat-icon>history</mat-icon>
+                                                        <span>Credit Note History</span>
+                                                    </button>
+                                                </mat-menu>
                                             </mat-cell>
                                         </ng-container>
 

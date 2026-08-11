@@ -920,10 +920,10 @@ bookerName: FormControl = new FormControl();
   
 viewInvoiceBilling(row) {
     this.dialog.open(InvoiceBillingHistoryComponent, {
-      width: '500px',
+      width: '720px',
       data: {
-        invoiceID: row?.invoiceID,
-        invoiceNumberWithPrefix: row?.invoiceNumberWithPrefix
+        invoiceID: row?.invoiceID ?? row?.InvoiceID,
+        invoiceNumberWithPrefix: row?.invoiceNumberWithPrefix ?? row?.InvoiceNumberWithPrefix
       }
     });
   }

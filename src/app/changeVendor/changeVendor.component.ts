@@ -31,8 +31,12 @@ import { ChangeVendorService } from './changeVendor.service';
 import { ChangeVendorFormDialogComponent } from './dialogs/form-dialog/form-dialog.component';
 import { ChangeEntityModel } from './changeVendor.model';
 import { ChangeVendorDetailsComponent } from './dialogs/changeVendorDetails/changeVendorDetails.component';
-import { PassToSupplierService } from '../passToSupplier/passToSupplier.service';
-import { SupplierDropDownModel } from '../passToSupplier/passToSupplier.model';
+import { SupplierDropDown } from '../supplier/supplierDropDown.model';
+import {
+  filterSuppliersByDisplay,
+  formatSupplierDisplay,
+  supplierMatchesDisplay,
+} from '../supplier/supplier-display.util';
 import moment from 'moment';
 
 
@@ -51,6 +55,7 @@ export class ChangeVendorComponent implements OnInit {
     'actions',
     'ReservationID',
     'DutySlipID',
+    'BillingStatus',
     'Vendor',
     'CustomerName',
     'CustomerGroup',
@@ -122,9 +127,10 @@ export class ChangeVendorComponent implements OnInit {
   searchDutySlipID:string = '';
 
   SearchVendor:string = '';
-  public VendorList?:SupplierDropDownModel[] = [];
-  filteredVendorOptions?:Observable<SupplierDropDownModel[]>;
+  public VendorList?:SupplierDropDown[] = [];
+  filteredVendorOptions?:Observable<SupplierDropDown[]>;
   vendor:FormControl = new FormControl();
+  formatSupplierDisplay = formatSupplierDisplay;
 
   selectAll:boolean=false;
   selectedEntity: any[] = [];
@@ -138,7 +144,6 @@ export class ChangeVendorComponent implements OnInit {
       public router:Router,
       public _generalService: GeneralService,
       public route: Router,
-      public passToSupplierService: PassToSupplierService,
     ) { }
     @ViewChild(MatPaginator, { static: true }) paginator?:MatPaginator;
     @ViewChild(MatSort, { static: true }) sort?:MatSort;
@@ -155,6 +160,7 @@ export class ChangeVendorComponent implements OnInit {
       this.InitVehicle();
       this.InitPackageType();
       this.InitPackage();
+      this.InitVendor();
     }
 
     refresh() 
@@ -591,19 +597,13 @@ export class ChangeVendorComponent implements OnInit {
     }
 
 
-    //---------- Vendor (Supplier Official Identity Number) ----------
-    onKeyupVendor(event?: any) {
-      const prefix = ((event?.target?.value ?? this.vendor?.value) || '').toString().trim();
-      if (prefix.length < 3) {
-        this.VendorList = [];
-        this.filteredVendorOptions = of([]);
-        return;
-      }
-
-      this.passToSupplierService.getSupplierCode(encodeURIComponent(prefix)).subscribe(
+    //---------- Vendor (SupplierName + OldRentnetCode, same as closingOne Change Supplier) ----------
+    InitVendor() {
+      this._generalService.GetAllSuppliers().subscribe(
         data => {
           this.VendorList = data || [];
-          this.filteredVendorOptions = merge(of(prefix), this.vendor.valueChanges).pipe(
+          this.filteredVendorOptions = this.vendor.valueChanges.pipe(
+            startWith(''),
             map(value => this._filterVendor((value || '').toString()))
           );
         },
@@ -615,22 +615,20 @@ export class ChangeVendorComponent implements OnInit {
     }
 
     private _filterVendor(value: string): any {
-      const filterValue = value.toLowerCase();
       if (!value || value.length < 3) {
         return [];
       }
-      return (this.VendorList || []).filter(
-        data => data.supplierName?.toLowerCase().includes(filterValue)
-      );
+      return filterSuppliersByDisplay(this.VendorList, value);
     }
 
-    onVendorSelected(vendorName: string) {
+    onVendorSelected(vendorDisplay: string) {
       const selectedVendor = this.VendorList?.find(
-        data => data.supplierName === vendorName
+        data => supplierMatchesDisplay(data, vendorDisplay)
       );
-      if (selectedVendor?.supplierName) {
-        this.vendor.setValue(selectedVendor.supplierName);
-        this.SearchVendor = selectedVendor.supplierName;
+      if (selectedVendor) {
+        const display = formatSupplierDisplay(selectedVendor);
+        this.vendor.setValue(display);
+        this.SearchVendor = display;
       }
     }
  
