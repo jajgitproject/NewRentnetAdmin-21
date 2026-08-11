@@ -134,7 +134,6 @@ export class ChangeCarTypeComponent implements OnInit {
     contextMenuPosition = { x: '0px', y: '0px' };
     ngOnInit() 
     {
-      this.loadData();
       this.InitCustomerGroup();
       this.InitCities();
       this.InitVehicle();
@@ -157,8 +156,8 @@ export class ChangeCarTypeComponent implements OnInit {
       this.searchReservationID = '';
       this.searchDutySlipID = '';    
       this.searchTerm = '';
-      this.selectedFilter = 'search';  
-      this.loadData();
+      this.selectedFilter = 'search';
+      this.dataSource = null;
     }
 
     public SearchData() 

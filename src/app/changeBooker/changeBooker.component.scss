@@ -1,7 +1,54 @@
-:host ::ng-deep .mat-column-PickupAddress {
+﻿:host ::ng-deep .mat-column-PickupAddress {
   flex: 0 0 250px !important;   /* force actual width */
   min-width: 250px !important;  
   max-width: 250px !important;
   width: 250px !important;
   white-space: normal !important;
+}
+
+/* Compact search textboxes */
+:host ::ng-deep #exampleModalLongTitle {
+  > .row + .row {
+    margin-top: 16px;
+  }
+
+  .mat-mdc-form-field {
+    margin-bottom: 0;
+  }
+
+  .mat-mdc-form-field-subscript-wrapper {
+    display: none;
+  }
+
+  .mat-mdc-text-field-wrapper.mdc-text-field--outlined .mat-mdc-form-field-infix {
+    min-height: 44px !important;
+    padding-top: 10px !important;
+    padding-bottom: 10px !important;
+  }
+
+  .mat-mdc-form-field-flex {
+    align-items: center;
+    height: 44px;
+  }
+
+  .mdc-text-field--outlined {
+    --mdc-outlined-text-field-container-shape: 4px;
+  }
+
+  .mat-mdc-form-field-icon-suffix,
+  .mat-datepicker-toggle {
+    height: 44px;
+    display: flex;
+    align-items: center;
+  }
+
+  .mat-mdc-input-element {
+    font-size: 13px !important;
+    line-height: 1.2 !important;
+  }
+
+  .mdc-floating-label,
+  .mat-mdc-floating-label {
+    font-size: 16px !important;
+  }
 }

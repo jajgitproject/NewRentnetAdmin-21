@@ -150,7 +150,6 @@ export class ChangeVendorComponent implements OnInit {
     {
       this.filteredCustomerOptions = of([]);
       this.filteredVendorOptions = of([]);
-      this.loadData();
       this.InitCustomerGroup();
       this.InitCities();
       this.InitVehicle();
@@ -181,7 +180,9 @@ export class ChangeVendorComponent implements OnInit {
       this.filteredCustomerOptions = of([]);
       this.VendorList = [];
       this.filteredVendorOptions = of([]);
-      this.loadData();
+      this.selectedEntity = [];
+      this.selectAll = false;
+      this.dataSource = null;
     }
 
     public SearchData() 

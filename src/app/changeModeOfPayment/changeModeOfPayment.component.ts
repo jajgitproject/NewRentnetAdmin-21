@@ -128,7 +128,6 @@ export class ChangeModeOfPaymentComponent implements OnInit {
   ngOnInit() {
     this.filteredCustomerOptions = of([]);
     this.filteredPaymentModeOptions = of([]);
-    this.loadData();
     this.InitCustomerGroup();
     this.InitCities();
     this.InitVehicle();
@@ -159,7 +158,7 @@ export class ChangeModeOfPaymentComponent implements OnInit {
     this.filteredCustomerOptions = of([]);
     this.selectedEntity = [];
     this.selectAll = false;
-    this.loadData();
+    this.dataSource = null;
   }
 
   public SearchData() {

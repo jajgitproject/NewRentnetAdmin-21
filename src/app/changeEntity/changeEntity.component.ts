@@ -166,7 +166,7 @@ export class ChangeEntityComponent implements OnInit {
     this.customerGroupID = null;
     this.CustomerList = [];
     this.filteredCustomerOptions = of([]);
-   // this.loadData();
+    this.dataSource = null;
   }
 
   public SearchData() 
