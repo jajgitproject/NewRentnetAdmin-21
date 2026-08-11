@@ -77,6 +77,12 @@ export class ChangeModeOfPaymentService {
   }
 
   getChangeModeOfPaymentData(ReservationID: number): Observable<any[]> {
-    return this.httpClient.get<any[]>(this.API_URL + '/GetAllChangeModeOfPayment/' + ReservationID);
+    const url =
+      this.generalService.getBaseURL() +
+      'changeModeOfPayment/GetAllChangeModeOfPayment/' +
+      ReservationID +
+      '?t=' +
+      Date.now();
+    return this.httpClient.get<any[]>(url);
   }
 }

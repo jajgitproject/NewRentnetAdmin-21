@@ -8,7 +8,6 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 import { merge, Observable, of } from 'rxjs';
 import { map, startWith } from 'rxjs/operators';
 import { MAT_DATE_LOCALE } from '@angular/material/core';
-import { MatMenuTrigger } from '@angular/material/menu';
 import { GeneralService } from '../general/general.service';
 import { FormControl } from '@angular/forms';
 import { CustomerDropDown } from '../customer/customerDropDown.model';
@@ -122,8 +121,6 @@ export class ChangeModeOfPaymentComponent implements OnInit {
   @ViewChild(MatPaginator, { static: true }) paginator?: MatPaginator;
   @ViewChild(MatSort, { static: true }) sort?: MatSort;
   @ViewChild('filter', { static: true }) filter?: ElementRef;
-  @ViewChild(MatMenuTrigger) contextMenu?: MatMenuTrigger;
-  contextMenuPosition = { x: '0px', y: '0px' };
 
   ngOnInit() {
     this.filteredCustomerOptions = of([]);
@@ -280,15 +277,6 @@ export class ChangeModeOfPaymentComponent implements OnInit {
       horizontalPosition: placementAlign,
       panelClass: colorName
     });
-  }
-
-  onContextMenu(event: MouseEvent, item: ChangeModeOfPaymentDutyModel) {
-    event.preventDefault();
-    this.contextMenuPosition.x = event.clientX + 'px';
-    this.contextMenuPosition.y = event.clientY + 'px';
-    this.contextMenu!.menuData = { item: item };
-    this.contextMenu?.menu?.focusFirstItem('mouse');
-    this.contextMenu?.openMenu();
   }
 
   NextCall() {
@@ -531,15 +519,48 @@ export class ChangeModeOfPaymentComponent implements OnInit {
   }
 
   OpenModeOfPaymentDetails(row: any) {
-    const dialogRef = this.dialog.open(ChangeModeOfPaymentDetailsComponent, {
-      width: '600px',
-      data: {
-        reservationID: row.reservationID
-      }
-    });
-    dialogRef.afterClosed().subscribe((res: any) => {
-      if (res) {
-        this.loadData();
+    const reservationID = row?.reservationID ?? row?.ReservationID;
+    if (!reservationID) {
+      Swal.fire({
+        icon: 'warning',
+        title: 'Unable to View',
+        text: 'Reservation ID was not found for this row.',
+        confirmButtonText: 'OK'
+      });
+      return;
+    }
+
+    this.changeModeOfPaymentService.getChangeModeOfPaymentData(reservationID).subscribe({
+      next: (data) => {
+        const logs = Array.isArray(data) ? data : [];
+        if (!logs.length) {
+          Swal.fire({
+            icon: 'info',
+            title: 'No Change Log',
+            text: `No Mode Of Payment change log found for reservation ${reservationID}.`,
+            confirmButtonText: 'OK'
+          });
+          return;
+        }
+        this.dialog.open(ChangeModeOfPaymentDetailsComponent, {
+          width: '900px',
+          data: {
+            reservationID,
+            logs
+          }
+        });
+      },
+      error: (error) => {
+        const message =
+          typeof error === 'string'
+            ? error
+            : error?.error?.message || error?.message || 'Failed to load Mode Of Payment change log.';
+        Swal.fire({
+          icon: 'error',
+          title: 'Unable to View',
+          text: message,
+          confirmButtonText: 'OK'
+        });
       }
     });
   }

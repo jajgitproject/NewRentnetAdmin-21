@@ -1,10 +1,6 @@
 // @ts-nocheck
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { Component, Inject } from '@angular/core';
-import { GeneralService } from '../../../general/general.service';
-import { ChangeModeOfPaymentService } from '../../changeModeOfPayment.service';
-import { ChangeModeOfPaymentModel } from '../../changeModeOfPayment.model';
-import { HttpErrorResponse } from '@angular/common/http';
 
 @Component({
   standalone: false,
@@ -13,36 +9,47 @@ import { HttpErrorResponse } from '@angular/common/http';
   styleUrls: ['./changeModeOfPaymentDetails.component.sass']
 })
 export class ChangeModeOfPaymentDetailsComponent {
-  dataSourceForMOP?: ChangeModeOfPaymentModel[] | null;
-  dialogTitle: any;
-  ReservationID: any;
+  dataSourceForMOP: any[] = [];
+  dialogTitle = 'Mode Of Payment Change Log';
+  ReservationID: number | null = null;
 
   constructor(
     public dialogRef: MatDialogRef<ChangeModeOfPaymentDetailsComponent>,
-    @Inject(MAT_DIALOG_DATA) public data: any,
-    public changeModeOfPaymentService: ChangeModeOfPaymentService,
-    public _generalService: GeneralService
+    @Inject(MAT_DIALOG_DATA) public data: any
   ) {
-    this.dialogTitle = 'Mode Of Payment Change Log';
-    this.ReservationID = data?.reservationID;
+    this.ReservationID = data?.reservationID ?? data?.ReservationID ?? null;
+    this.dataSourceForMOP = Array.isArray(data?.logs) ? data.logs : [];
   }
 
-  public ngOnInit(): void {
-    this.loadDataForMOP();
+  formatDate(value: any): string {
+    if (!value) {
+      return 'N/A';
+    }
+    const d = new Date(value);
+    if (isNaN(d.getTime())) {
+      return String(value);
+    }
+    const dd = String(d.getDate()).padStart(2, '0');
+    const mm = String(d.getMonth() + 1).padStart(2, '0');
+    const yyyy = d.getFullYear();
+    return `${dd}-${mm}-${yyyy}`;
+  }
+
+  formatTime(value: any): string {
+    if (!value) {
+      return 'N/A';
+    }
+    const d = new Date(value);
+    if (isNaN(d.getTime())) {
+      return String(value);
+    }
+    const hh = String(d.getHours()).padStart(2, '0');
+    const mi = String(d.getMinutes()).padStart(2, '0');
+    const ss = String(d.getSeconds()).padStart(2, '0');
+    return `${hh}:${mi}:${ss}`;
   }
 
   onNoClick(): void {
     this.dialogRef.close();
-  }
-
-  public loadDataForMOP() {
-    this.changeModeOfPaymentService.getChangeModeOfPaymentData(this.ReservationID).subscribe(
-      (data) => {
-        this.dataSourceForMOP = data;
-      },
-      (error: HttpErrorResponse) => {
-        this.dataSourceForMOP = null;
-      }
-    );
   }
 }
