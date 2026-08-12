@@ -2456,6 +2456,8 @@ incidenceOne(item: any) {
       {
         
         width:'60%',
+        maxWidth: '920px',
+        panelClass: 'trip-feedback-dialog-panel',
         data: 
           {
              advanceTable: this.advanceTable,
@@ -2471,7 +2473,7 @@ incidenceOne(item: any) {
             driverName:driverName,
             reservationPassengerID:reservationPassengerID,
             feedbackRemark:feedbackRemark,
-            customerPersonName:item.customerPerson.customerPersonName,
+            customerPersonName: item?.passengerDetails?.[0]?.customerPersonName,
             item:item ,
             verifyDutyStatusAndCacellationStatus:this.verifyDutyStatusAndCacellationStatus
           }

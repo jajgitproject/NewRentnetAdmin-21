@@ -224,6 +224,20 @@
   overflow: hidden !important;
 }
 
+/* Trip Feedback dialog */
+.cdk-overlay-pane.trip-feedback-dialog-panel {
+  width: min(920px, 92vw) !important;
+  max-width: 92vw !important;
+}
+.cdk-overlay-pane.trip-feedback-dialog-panel .mdc-dialog__surface,
+.cdk-overlay-pane.trip-feedback-dialog-panel .mat-mdc-dialog-container {
+  width: 100% !important;
+  max-width: 100% !important;
+  border-radius: 10px !important;
+  overflow: hidden;
+  padding: 0 !important;
+}
+
 /* Role Create/Edit: override _modals.scss 80vw surface cap + content overflow-x so long mat-labels are not clipped.
    CDK .cdk-global-overlay-wrapper is display:flex; opening mat-select adds a second overlay pane as a flex sibling,
    which can shrink the dialog pane unless we forbid flex-shrink and lock min-width.

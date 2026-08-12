@@ -797,7 +797,9 @@ public Post(): void {
   // Call service
   const payload = {
   ...this.advanceTableForm.getRawValue(),
-  oldRentNetID: this.getOldRentNetID()
+  oldRentNetID: this.getOldRentNetID(),
+  // Booking New Passenger popup: do not send welcome credentials email
+  skipWelcomeEmail: this.someAction === 'CP'
 };
   this.advanceTableService.add(payload).subscribe({
     next: (response) => {
