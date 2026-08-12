@@ -23,6 +23,29 @@
       <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
         <div class="card">
           <div class="body">
+            <div class="row g-2 align-items-center mb-3">
+              <div class="col-auto">
+                <button
+                  mat-raised-button
+                  [color]="bypassOTPForAll ? 'warn' : 'accent'"
+                  type="button"
+                  (click)="toggleGlobalOtpBypass()"
+                  [disabled]="otpConfigLoading || otpConfigSaving"
+                  matTooltip="When enabled, OTP will not be required for any Employee. When disabled, OTP requirements will be determined by the Employee's Role.">
+                  {{ globalOtpToggleLabel }}
+                </button>
+              </div>
+              <div class="col">
+                <span class="export-hint">
+                  {{
+                    bypassOTPForAll
+                      ? 'Global OTP bypass is ON. Click to restore role-based OTP requirements.'
+                      : 'Global OTP bypass is OFF. Click to bypass OTP for all employees.'
+                  }}
+                </span>
+              </div>
+            </div>
+
             <mat-progress-bar *ngIf="exporting" mode="indeterminate"></mat-progress-bar>
 
             <div class="row g-2">

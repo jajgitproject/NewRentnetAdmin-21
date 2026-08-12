@@ -80,7 +80,10 @@ export class FormDialogComponent
       canFindFuelEntry: [this.advanceTable.canFindFuelEntry, Validators.required],
       canCloseIncident: [this.advanceTable.canCloseIncident, Validators.required],
       canCancelBackDateAllotment: [this.advanceTable.canCancelBackDateAllotment, Validators.required],
-      canEditDSAfterGoodForBilling: [this.advanceTable.canEditDSAfterGoodForBilling, Validators.required]
+      canEditDSAfterGoodForBilling: [this.advanceTable.canEditDSAfterGoodForBilling, Validators.required],
+      canBypassOTP: [this.advanceTable.canBypassOTP === true || this.advanceTable.canBypassOTP === false
+        ? this.advanceTable.canBypassOTP
+        : false, Validators.required]
     });
   }
   submit() 
@@ -112,6 +115,7 @@ export class FormDialogComponent
       canCloseIncident: toBool(raw.canCloseIncident),
       canCancelBackDateAllotment: toBool(raw.canCancelBackDateAllotment),
       canEditDSAfterGoodForBilling: toBool(raw.canEditDSAfterGoodForBilling),
+      canBypassOTP: toBool(raw.canBypassOTP),
     };
   }
 

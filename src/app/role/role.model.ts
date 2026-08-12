@@ -21,6 +21,7 @@ export class Role {
    canCloseIncident: boolean;
    canCancelBackDateAllotment: boolean;
    canEditDSAfterGoodForBilling: boolean;
+   canBypassOTP: boolean;
 
   constructor(role) {
     {
@@ -47,6 +48,12 @@ export class Role {
        this.canEditDSAfterGoodForBilling = Role.toBoolOrEmpty(
          role.canEditDSAfterGoodForBilling ?? role.CanEditDSAfterGoodForBilling
        );
+       this.canBypassOTP = Role.toBoolOrEmpty(
+         role.canBypassOTP ?? role.CanBypassOTP ?? false
+       );
+       if (this.canBypassOTP === '') {
+         this.canBypassOTP = false;
+       }
 
     }
   }

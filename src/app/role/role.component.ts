@@ -36,6 +36,7 @@ export class RoleComponent implements OnInit {
    'canThisRoleViewBillOnClosingScreen',
    'canThisRoleDoGoodForBillingOnClosingScreen',
    'canEditDSAfterGoodForBilling',
+   'canBypassOTP',
    'canThisRoleViewDummyInvoice',
     'status',
     'pages',

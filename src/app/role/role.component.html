@@ -177,6 +177,12 @@
                                         {{row.canEditDSAfterGoodForBilling === true || row.canEditDSAfterGoodForBilling === 'true' || row.canEditDSAfterGoodForBilling === 1 ? 'Yes' : 'No'}}</mat-cell>
                                 </ng-container>
 
+                                <ng-container matColumnDef="canBypassOTP">
+                                    <mat-header-cell *matHeaderCellDef mat-sort-header>Can Bypass OTP</mat-header-cell>
+                                    <mat-cell *matCellDef="let row" (contextmenu)="onContextMenu($event, row)">
+                                        {{row.canBypassOTP === true || row.canBypassOTP === 'true' || row.canBypassOTP === 1 ? 'Yes' : 'No'}}</mat-cell>
+                                </ng-container>
+
                                 <ng-container matColumnDef="canThisRoleViewDummyInvoice">
                                     <mat-header-cell *matHeaderCellDef mat-sort-header>CanThisRoleViewDummyInvoice</mat-header-cell>
                                     <mat-cell *matCellDef="let row" (contextmenu)="onContextMenu($event, row)">

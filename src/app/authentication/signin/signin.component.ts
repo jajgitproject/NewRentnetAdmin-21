@@ -14,6 +14,7 @@ import { FormDialogComponent } from 'src/app/validateOTP/dialogs/form-dialog/for
 
 import { ExpirationDateService } from 'src/app/shared/expirationDate.service';
 import { RuntimeConfigService } from 'src/app/core/service/runtime-config.service';
+import { isLoginOtpRequired } from 'src/app/core/service/login-otp-policy';
 // Login geolocation disabled (EmployeeLoginSessionSettings.RequireLoginLocation = false on API).
 
 @Component({
@@ -305,33 +306,13 @@ export class SigninComponent implements OnInit {
 
     const typedLogin = String(this.f.email?.value ?? '');
 
-    const OTP_BYPASS_NUMBERS = [
+    const bypassOTPForAll =
+      employee?.BypassOTPForAll === true || employee?.bypassOTPForAll === true;
 
-      '9560342610',
+    const canBypassOTP =
+      employee?.CanBypassOTP === true || employee?.canBypassOTP === true;
 
-      '9582890377',
-
-      '9599227103',
-
-      '9811051222',
-
-      '8527057487',
-
-      '9990788001',
-
-      '8273089744',
-
-      '8447685514',
-
-      '9891785921',
-      '7080004819',
-      '9721486346',
-
-    ];
-
-
-
-    if (OTP_BYPASS_NUMBERS.includes(mobile) || OTP_BYPASS_NUMBERS.includes(typedLogin)) {
+    if (!isLoginOtpRequired(bypassOTPForAll, canBypassOTP, mobile, typedLogin)) {
 
       this.isPasswordDeactivated = false;
 

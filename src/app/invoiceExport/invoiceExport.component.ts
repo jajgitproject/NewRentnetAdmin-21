@@ -7,6 +7,8 @@ import Swal from 'sweetalert2';
 import { firstValueFrom } from 'rxjs';
 import { TableExportUtil } from '../shared/tableExportUtil';
 import { InvoiceExportService } from './invoiceExport.service';
+import { GlobalOtpConfigurationService } from './globalOtpConfiguration.service';
+import { GeneralService } from '../general/general.service';
 import {
   InvoiceExportRow,
   GeneralLineItemInvoiceGapRow,
@@ -25,9 +27,14 @@ export class InvoiceExportComponent implements OnInit {
   fromDateCtrl = new FormControl<Date | null>(null, Validators.required);
   toDateCtrl = new FormControl<Date | null>(null, Validators.required);
   exporting = false;
+  bypassOTPForAll = false;
+  otpConfigLoading = false;
+  otpConfigSaving = false;
 
   constructor(
     private invoiceExportService: InvoiceExportService,
+    private globalOtpConfigurationService: GlobalOtpConfigurationService,
+    private generalService: GeneralService,
     private snackBar: MatSnackBar
   ) {}
 
@@ -35,6 +42,63 @@ export class InvoiceExportComponent implements OnInit {
     const today = moment().utcOffset('+05:30');
     this.fromDateCtrl.setValue(today.clone().subtract(30, 'days').toDate());
     this.toDateCtrl.setValue(today.toDate());
+    this.loadGlobalOtpConfiguration();
+  }
+
+  get globalOtpToggleLabel(): string {
+    return this.bypassOTPForAll ? 'OTP for All Employees' : 'Bypass OTP for All';
+  }
+
+  loadGlobalOtpConfiguration(): void {
+    this.otpConfigLoading = true;
+    this.globalOtpConfigurationService.get().subscribe({
+      next: (config) => {
+        this.bypassOTPForAll = !!config?.bypassOTPForAll;
+        this.otpConfigLoading = false;
+      },
+      error: () => {
+        this.otpConfigLoading = false;
+        this.showNotification(
+          'snackbar-warning',
+          'Unable to load global OTP configuration.'
+        );
+      },
+    });
+  }
+
+  toggleGlobalOtpBypass(): void {
+    if (this.otpConfigSaving) {
+      return;
+    }
+
+    const nextValue = !this.bypassOTPForAll;
+    const performedBy = this.generalService.getUserID();
+    if (!performedBy || performedBy <= 0) {
+      this.showNotification('snackbar-warning', 'Unable to identify current user.');
+      return;
+    }
+
+    this.otpConfigSaving = true;
+    this.globalOtpConfigurationService.update(performedBy, nextValue).subscribe({
+      next: (config) => {
+        this.bypassOTPForAll = !!config?.bypassOTPForAll;
+        this.otpConfigSaving = false;
+        this.showNotification(
+          'snackbar-success',
+          this.bypassOTPForAll
+            ? 'Global OTP bypass enabled. OTP is not required for any employee on next login.'
+            : 'Global OTP bypass disabled. Role-based OTP rules apply again.'
+        );
+      },
+      error: (error) => {
+        this.otpConfigSaving = false;
+        const message =
+          error?.status === 403
+            ? 'Not authorized to change global OTP configuration.'
+            : error?.error?.message || 'Failed to update global OTP configuration.';
+        this.showNotification('snackbar-danger', message);
+      },
+    });
   }
 
   downloadAllInvoices(): void {

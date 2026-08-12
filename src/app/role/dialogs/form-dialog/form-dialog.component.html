@@ -197,6 +197,22 @@
 
                 <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
                     <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                        <mat-label>Can Bypass OTP</mat-label>
+                        <mat-select formControlName="canBypassOTP">
+                            <mat-option [value]="false">No</mat-option>
+                            <mat-option [value]="true">Yes</mat-option>
+                        </mat-select>
+                        <mat-hint>When Yes, employees with this role can skip login OTP (unless global OTP for all is enforced)</mat-hint>
+                        <mat-error *ngIf="advanceTableForm.get('canBypassOTP')?.hasError('required')">
+                            Can Bypass OTP is required
+                        </mat-error>
+                    </mat-form-field>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                    <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
                         <mat-label>Activation Status</mat-label>
                         <mat-select formControlName="activationStatus">
                             <mat-option [value]="true">Active</mat-option>
