@@ -71,6 +71,7 @@ export class CustomerGroupComponent implements OnInit {
     { label: 'Reservation Capping', },
      { label: 'Allow Car', },
       { label: 'Allow Package Type', },
+      { label: 'Duty Slip Emails', },
   ];
 
   constructor(
@@ -114,6 +115,8 @@ export class CustomerGroupComponent implements OnInit {
   {
     const dialogRef = this.dialog.open(FormDialogComponent, 
     {
+      width: '920px',
+      maxWidth: '96vw',
       data: 
         {
           advanceTable: this.advanceTable,
@@ -126,6 +129,8 @@ export class CustomerGroupComponent implements OnInit {
     //  alert(row.id);
   this.customerGroupID = row.id;
   const dialogRef = this.dialog.open(FormDialogComponent, {
+    width: '920px',
+    maxWidth: '96vw',
     data: {
       advanceTable: row,
       action: 'edit'
@@ -283,6 +288,17 @@ else if (menuItem.label.toLowerCase() === 'allow package type') {
       queryParams: {
         CustomerGroupID: encryptedCustomerGroupID,
         CustomerGroup: encryptedCustomerGroup // ✅ key should match component
+      }
+    })
+  );
+  window.open(baseUrl + url, '_blank');
+}
+else if (menuItem.label.toLowerCase() === 'duty slip emails') {
+  const url = this.router.serializeUrl(
+    this.router.createUrlTree(['/customerGroupDSEmails'], {
+      queryParams: {
+        CustomerGroupID: encryptedCustomerGroupID,
+        CustomerGroup: encryptedCustomerGroup
       }
     })
   );

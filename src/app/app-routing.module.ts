@@ -2665,6 +2665,14 @@ const routes: Routes = [
       },
 
       {
+        path: 'customerGroupDSEmails',
+        loadChildren: () =>
+          import('./customerGroupDSEmails/customerGroupDSEmails.module').then(
+            (m) => m.CustomerGroupDSEmailsModule
+          )
+      },
+
+      {
         path: 'cardType',
         loadChildren: () =>
           import('./cardType/cardType.module').then(
