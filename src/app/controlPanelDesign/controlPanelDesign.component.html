@@ -2040,7 +2040,8 @@
                             width: 100px;
                             float: left;
                           ">
-                           {{ data?.reservationStartDate ? (data.reservationStartDate | date:'dd-MMM-yy') : 'N/A' }}
+                           {{ data?.reservationCreatedOn ? (data.reservationCreatedOn | date:'dd-MMM-yy') : 'N/A' }} <br>
+                           {{ (data.reservationCreatedOn | date : 'shortTime') || 'N/A' }}
                             </span>
                             <span style="
                           font-size: 12px;

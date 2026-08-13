@@ -95,6 +95,14 @@ const routes: Routes = [
       },
 
       {
+        path: 'integrationLogDetail',
+        loadChildren: () =>
+          import('./integrationLogDetail/integrationLogDetail.module').then(
+            (m) => m.IntegrationLogDetailModule
+          )
+      },
+
+      {
         path: 'driverComplianceDashboard',
         loadChildren: () =>
           import('./driverComplianceDashboard/driverComplianceDashboard.module').then(

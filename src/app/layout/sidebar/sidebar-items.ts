@@ -201,6 +201,17 @@ export const ROUTES: RouteInfo[] = [
       },
 
       {
+        path: 'integrationLogDetail',
+        title: 'Integration Log',
+        moduleName: 'integrationLogDetail',
+        icon: 'fas fa-tachometer-alt',
+        class: '',
+        groupTitle: false,
+        submenu: [],
+        isAccess: false
+      },
+
+      {
         path: 'cdpBookingRequest',
         title: 'Cab Drive Pro Booking Request',
         moduleName: 'cdpBookingRequest',
