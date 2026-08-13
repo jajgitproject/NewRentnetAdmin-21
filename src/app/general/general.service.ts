@@ -1,7 +1,7 @@
 // @ts-nocheck
 import { Injectable, Input } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable, Subject } from 'rxjs';
+import { Observable, Subject, of } from 'rxjs';
 import { IproofDocuments } from './IProofDocument';
 import { DepartmentDropDown } from './departmentDropDown.model';
 import { DesignationDropDown } from './designationDropDown.model';
@@ -702,7 +702,40 @@ decrypt(textToDecrypt: string): string{
 
   GetKAMDropDownForControlPanel(Prefix: string): Observable<EmployeeDropDown[]> 
   {
-    return this.http.get<EmployeeDropDown[]>(this.BaseURL + 'controlPanelDropDown/GetKAMForDropDown' + '/' + Prefix);
+    return this.http.get<EmployeeDropDown[]>(this.BaseURL + 'controlPanelDropDown/GetKAMForDropDown' + '/' + encodeURIComponent(Prefix));
+  }
+
+  GetCityDropDownForControlPanel(Prefix: string): Observable<CityDropDown[]> {
+    return this.http.get<CityDropDown[]>(
+      this.BaseURL + 'controlPanelDropDown/GetCityForDropDown/' + encodeURIComponent(Prefix)
+    );
+  }
+
+  GetPackageDropDownForControlPanel(Prefix: string, packageTypeID: number = 0): Observable<PackageDropDown[]> {
+    const typeId = packageTypeID || 0;
+    return this.http.get<PackageDropDown[]>(
+      this.BaseURL + 'controlPanelDropDown/GetPackageForDropDown/' + typeId + '/' + encodeURIComponent(Prefix)
+    );
+  }
+
+  GetSupplierDropDownForControlPanel(Prefix: string): Observable<SupplierDropDown[]> {
+    return this.http.get<SupplierDropDown[]>(
+      this.BaseURL + 'controlPanelDropDown/GetSupplierForDropDown/' + encodeURIComponent(Prefix)
+    );
+  }
+
+  GetDriverInventoryDropDownForControlPanel(Prefix: string, supplierID: number = 0): Observable<DriverInventoryAssociationDropDown[]> {
+    const supplierId = supplierID || 0;
+    return this.http.get<DriverInventoryAssociationDropDown[]>(
+      this.BaseURL + 'controlPanelDropDown/GetDriverInventoryForDropDown/' + supplierId + '/' + encodeURIComponent(Prefix)
+    );
+  }
+
+  GetDOINDropDownForControlPanel(Prefix: string, supplierID: number = 0): Observable<DriverOfficialIdentityNumberDD[]> {
+    const supplierId = supplierID || 0;
+    return this.http.get<DriverOfficialIdentityNumberDD[]>(
+      this.BaseURL + 'controlPanelDropDown/GetDOINForDropDown/' + supplierId + '/' + encodeURIComponent(Prefix)
+    );
   }
 
 
@@ -779,6 +812,16 @@ GetCitiessAl(): Observable<CityDropDown[]> {
   }
   GetCustomerKam(customerID:number): Observable<any[]> {
     return this.http.get<any[]>(this.BaseURL + "customer/GetCustomerKAM/"+customerID);
+  }
+
+  GetCustomerKamBatch(customerIDs: number[]): Observable<any[]> {
+    const ids = (customerIDs || []).filter((id) => id > 0).join(',');
+    if (!ids) {
+      return of([]);
+    }
+    return this.http.get<any[]>(
+      this.BaseURL + 'customer/GetCustomerKAMBatch?ids=' + encodeURIComponent(ids)
+    );
   }
 
   GetCustomerAlertMessage(customerID:number): Observable<any[]> {

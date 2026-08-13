@@ -150,10 +150,10 @@
             <div class="col-xl-2 col-lg-2 col-md-2 col-sm-12 mb-2">
               <mat-form-field class="example-full-width cp-quick-search-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
                 <mat-label>Customer Group</mat-label>
-                <input type="text" matInput (keyup)="onKeyupCustomerGroupDropDown()" formControlName="customerGroup"
+                <input type="text" matInput formControlName="customerGroup"
                   [matAutocomplete]="auto" />
                 <mat-autocomplete #auto="matAutocomplete" panelWidth="custom-autocomplete-panel">
-                  <mat-option *ngFor="let options of filteredCustomerGroupOptions | async"
+                  <mat-option *ngFor="let options of CustomerGroupList"
                     [value]="options.customerGroup" (click)="getCustomerGroupID(options.customerGroupID)">
                     {{ options.customerGroup }}
                   </mat-option>
@@ -164,9 +164,9 @@
               <div class="col-xl-2 col-lg-2 col-md-2 col-sm-12 mb-2">
                 <mat-form-field class="example-full-width cp-quick-search-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
                   <mat-label>Customer</mat-label>
-                  <input type="text" matInput formControlName="customer" [matAutocomplete]="auto2"  (keyup)="onKeyupCustomerDropDown()" />
+                  <input type="text" matInput formControlName="customer" [matAutocomplete]="auto2"  />
                   <mat-autocomplete #auto2="matAutocomplete" panelWidth="custom-autocomplete-panel">
-                    <mat-option *ngFor="let options of filteredCustomerOptions | async"
+                    <mat-option *ngFor="let options of CustomerList"
                       [value]="options.customerName + ' - ' + options.customerGroup"
                       (click)="getCustomerID(option.customerID)">
                       {{ options.customerName}} - {{options.customerGroup}}
@@ -180,9 +180,9 @@
               <div class="col-xl-2 col-lg-2 col-md-2 col-sm-12 mb-2">
                 <mat-form-field class="example-full-width cp-quick-search-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
                   <mat-label>Customer</mat-label>
-                  <input type="text" matInput formControlName="customer" [matAutocomplete]="auto3" (keyup)="onKeyupCustomerDropDown()" />
+                  <input type="text" matInput formControlName="customer" [matAutocomplete]="auto3" />
                   <mat-autocomplete #auto3="matAutocomplete" panelWidth="custom-autocomplete-panel">
-                    <mat-option *ngFor="let options of filteredCustomersOptions | async"
+                    <mat-option *ngFor="let options of CustomerList"
                       [value]="options.customerName + ' - ' + options.customerGroup"
                       (click)="getCustomerIDOnPageLoad(option.customerID)">
                       {{ options.customerName}} - {{options.customerGroup}}
@@ -278,9 +278,9 @@
             <div class="col-xl-2 col-lg-2 col-md-2 col-sm-12 mb-2">
               <mat-form-field class="example-full-width cp-quick-search-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
                 <mat-label>Duty Type</mat-label>
-                <input type="text" matInput formControlName="packageType" [matAutocomplete]="auto12" (keyup)="onKeyupDutyTypeDropDown()">
+                <input type="text" matInput formControlName="packageType" [matAutocomplete]="auto12">
                 <mat-autocomplete #auto12="matAutocomplete" panelWidth="custom-autocomplete-panel">
-                  <mat-option *ngFor="let option of filteredPackageTypeOptions | async" [value]="option.packageType"
+                  <mat-option *ngFor="let option of PackageTypeList" [value]="option.packageType"
                     (click)="getPackageTypeID(option.packageTypeID)">
                     {{option.packageType}}
                   </mat-option>
@@ -357,9 +357,9 @@
             <div class="col-xl-2 col-lg-2 col-md-2 col-sm-12 mb-2">
               <mat-form-field class="example-full-width cp-quick-search-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
                 <mat-label>Location</mat-label>
-                <input type="text" matInput formControlName="locationName" [matAutocomplete]="auto1" (keyup)="onKeyupLocationDropDown()">
+                <input type="text" matInput formControlName="locationName" [matAutocomplete]="auto1">
                 <mat-autocomplete #auto1="matAutocomplete">
-                  <mat-option *ngFor="let option of filteredOrganizationalEntityOptions | async"
+                  <mat-option *ngFor="let option of OrganizationalEntityList"
                     [value]="option.organizationalEntityName">
                     {{option.organizationalEntityName}}
                   </mat-option>
@@ -370,9 +370,9 @@
             <div class="col-xl-2 col-lg-2 col-md-2 col-sm-12 mb-2">
               <mat-form-field class="example-full-width cp-quick-search-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
                 <mat-label>Transfer Location</mat-label>
-                <input type="text" matInput formControlName="transferLocationName" [matAutocomplete]="auto0" (keyup)="onKeyupTransferLocationDropDown()">
+                <input type="text" matInput formControlName="transferLocationName" [matAutocomplete]="auto0">
                 <mat-autocomplete #auto0="matAutocomplete">
-                  <mat-option *ngFor="let option of filteredTransferLocationOptions | async"
+                  <mat-option *ngFor="let option of TransferLocationList"
                     [value]="option.transferLocationName">
                     {{option.transferLocationName}}
                   </mat-option>
@@ -405,9 +405,9 @@
             <div class="col-xl-2 col-lg-2 col-md-2 col-sm-12 mb-2">
               <mat-form-field class="example-full-width cp-allotment-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
                 <mat-label>Regn. No.</mat-label>
-                <input type="text" matInput [matAutocomplete]="auto81" formControlName="vehicleInventory" (keyup)="onKeyupRegnNoDropDown()"/>
+                <input type="text" matInput [matAutocomplete]="auto81" formControlName="vehicleInventory" (focus)="onVehicleInventoryAutocompleteFocus('regNo')"/>
                 <mat-autocomplete #auto81="matAutocomplete" panelWidth="custom-autocomplete-panel">
-                  <mat-option *ngFor="let option of filteredRegNumberOptions | async" [value]="option.registrationNumber">
+                  <mat-option *ngFor="let option of RegNumberList" [value]="option.registrationNumber">
                     {{ option.registrationNumber }}
                   </mat-option>
                 </mat-autocomplete>
@@ -501,9 +501,9 @@
             <div class="col-xl-2 col-lg-2 col-md-2 col-sm-12 mb-2">
               <mat-form-field class="example-full-width cp-advance-search-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
                 <mat-label>Vehicle</mat-label>
-                <input type="text" matInput formControlName="vehicleName" [matAutocomplete]="auto10" (keyup)="onKeyupVehicleDropDown()"/>
+                <input type="text" matInput formControlName="vehicleName" [matAutocomplete]="auto10"/>
                 <mat-autocomplete #auto10="matAutocomplete" panelWidth="custom-autocomplete-panel">
-                  <mat-option *ngFor="let options of filteredVehicleOptions | async" [value]="options.vehicle">
+                  <mat-option *ngFor="let options of VehicleList" [value]="options.vehicle">
                     {{ options.vehicle }}
                   </mat-option>
                 </mat-autocomplete>
@@ -513,9 +513,9 @@
             <div class="col-xl-2 col-lg-2 col-md-2 col-sm-12 mb-2">
               <mat-form-field class="example-full-width cp-allotment-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
                 <mat-label>Payment Mode</mat-label>
-                <input type="text" matInput formControlName="modeOfPayment" [matAutocomplete]="auto50" (keyup)="onKeyupPaymentModeDropDown()">
+                <input type="text" matInput formControlName="modeOfPayment" [matAutocomplete]="auto50">
                 <mat-autocomplete #auto50="matAutocomplete" panelWidth="custom-autocomplete-panel">
-                  <mat-option *ngFor="let option of filteredPaymentModeOptions | async"
+                  <mat-option *ngFor="let option of PaymentModeList"
                               [value]="option.modeOfPayment">
                             {{option.modeOfPayment}}
                   </mat-option>
@@ -533,9 +533,9 @@
             <div class="col-xl-2 col-lg-2 col-md-2 col-sm-12 mb-2">
               <mat-form-field class="example-full-width cp-allotment-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
                 <mat-label>Supplier Type</mat-label>
-                <input type="text" matInput formControlName="supplierType" [matAutocomplete]="auto51" (keyup)="onKeyupSupplierTypeDropDown()">
+                <input type="text" matInput formControlName="supplierType" [matAutocomplete]="auto51">
                 <mat-autocomplete #auto51="matAutocomplete" panelWidth="custom-autocomplete-panel">
-                  <mat-option *ngFor="let option of filteredSupplierTypeOptions | async"
+                  <mat-option *ngFor="let option of SupplierTypeList"
                               [value]="option.supplierType">
                             {{option.supplierType}}
                   </mat-option>
@@ -555,9 +555,9 @@
             <div class="col-xl-2 col-lg-2 col-md-2 col-sm-12 mb-2">
               <mat-form-field class="example-full-width cp-allotment-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
                 <mat-label>KAM</mat-label>
-                <input type="text" matInput formControlName="kAM" [matAutocomplete]="auto52" (keyup)="onKeyupKAMDropDown()">
+                <input type="text" matInput formControlName="kAM" [matAutocomplete]="auto52">
                 <mat-autocomplete #auto52="matAutocomplete" panelWidth="custom-autocomplete-panel">
-                  <mat-option *ngFor="let option of filteredKAMByOptions | async"
+                  <mat-option *ngFor="let option of KAMList"
                               [value]="option.firstName +' '+option.lastName">
                             {{option.firstName +' '+ option.lastName}}
                   </mat-option>
@@ -569,7 +569,7 @@
               <mat-form-field class="example-full-width cp-quick-search-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
                 <mat-label>Guest Name</mat-label>
                 <input type="text" matInput formControlName="passenger"
-                  [matAutocomplete]="cpGuestNameAuto" (keyup)="onKeyupPassengerDropDown()">
+                  [matAutocomplete]="cpGuestNameAuto">
               </mat-form-field>
             </div>
 
@@ -580,7 +580,7 @@
             [panelWidth]="cpGuestNamePanelWidth"
             (opened)="onGuestNamePanelOpened()"
             (optionSelected)="onGuestNameSelected($event.option.value)">
-            <mat-option *ngFor="let option of filteredPassengerOptions | async"
+            <mat-option *ngFor="let option of PassengerList"
               [value]="buildGuestDisplay(option)">
               {{ buildGuestDisplay(option) }}
             </mat-option>
@@ -745,9 +745,9 @@
             <div class="col-xl-3 col-lg-3 col-md-3 col-sm-6 mb-2">
               <mat-form-field class="example-full-width cp-advance-search-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
                 <mat-label>Disputes</mat-label>
-                <input type="text" matInput formControlName="disputes" [matAutocomplete]="auto25" (keyup)="onKeyupDisputesDropDown()">
+                <input type="text" matInput formControlName="disputes" [matAutocomplete]="auto25">
                 <mat-autocomplete #auto25="matAutocomplete" panelWidth="custom-autocomplete-panel">
-                  <mat-option *ngFor="let option of filteredDisputesOptions | async" [value]="option.disputeType">
+                  <mat-option *ngFor="let option of DisputesList" [value]="option.disputeType">
                     {{option.disputeType}}
                   </mat-option>
                 </mat-autocomplete>
@@ -769,10 +769,10 @@
             <div class="col-xl-3 col-lg-3 col-md-3 col-sm-6 mb-2">
               <mat-form-field class="example-full-width cp-advance-search-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
                 <mat-label>Customer Group</mat-label>
-                <input type="text" matInput (keyup)="onKeyupCustomerGroupDropDown()" formControlName="customerGroup"
+                <input type="text" matInput formControlName="customerGroup"
                   [matAutocomplete]="auto" />
                 <mat-autocomplete #auto="matAutocomplete" panelWidth="custom-autocomplete-panel">
-                  <mat-option *ngFor="let options of filteredCustomerGroupOptions | async"
+                  <mat-option *ngFor="let options of CustomerGroupList"
                     [value]="options.customerGroup" (click)="getCustomerGroupID(options.customerGroupID)">
                     {{ options.customerGroup }}
                   </mat-option>
@@ -786,9 +786,9 @@
               <div class="col-xl-3 col-lg-3 col-md-3 col-sm-6 mb-2">
                 <mat-form-field class="example-full-width cp-advance-search-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
                   <mat-label>Customer</mat-label>
-                  <input type="text" matInput formControlName="customer" [matAutocomplete]="auto2" (keyup)="onKeyupCustomerDropDown()" />
+                  <input type="text" matInput formControlName="customer" [matAutocomplete]="auto2" />
                   <mat-autocomplete #auto2="matAutocomplete" panelWidth="custom-autocomplete-panel">
-                    <mat-option *ngFor="let options of filteredCustomerOptions | async"
+                    <mat-option *ngFor="let options of CustomerList"
                       [value]="options.customerName + ' - ' + options.customerGroup"
                       (click)="getCustomerID(option.customerID)">
                       {{ options.customerName}} - {{options.customerGroup}}
@@ -804,7 +804,7 @@
                   <mat-label>Customer</mat-label>
                   <input type="text" matInput formControlName="customer" [matAutocomplete]="auto3" />
                   <mat-autocomplete #auto3="matAutocomplete" panelWidth="custom-autocomplete-panel">
-                    <mat-option *ngFor="let options of filteredCustomersOptions | async"
+                    <mat-option *ngFor="let options of CustomerList"
                       [value]="options.customerName + ' - ' + options.customerGroup"
                       (click)="getCustomerIDOnPageLoad(option.customerID)">
                       {{ options.customerName}} - {{options.customerGroup}}
@@ -821,7 +821,7 @@
                   <mat-label>Booker</mat-label>
                   <input type="text" matInput formControlName="booker" [matAutocomplete]="auto4">
                   <mat-autocomplete #auto4="matAutocomplete" panelWidth="custom-autocomplete-panel">
-                    <mat-option *ngFor="let option of filteredBookerOptions | async"
+                    <mat-option *ngFor="let option of BookerList"
                       [value]="option.customerPersonName + '-' + option.phone + '-' + option.customerName"
                       (click)="getBookerID(option.customerPersonID)">
                       {{option.customerPersonName}} - {{option.phone}} - {{option.customerName}}
@@ -836,9 +836,9 @@
               <div class="col-xl-3 col-lg-3 col-md-3 col-sm-6 mb-2">
                 <mat-form-field class="example-full-width cp-advance-search-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
                   <mat-label>Booker</mat-label>
-                  <input type="text" matInput formControlName="booker" [matAutocomplete]="auto5" (keyup)="onKeyupBookerDropDown()">
+                  <input type="text" matInput formControlName="booker" [matAutocomplete]="auto5">
                   <mat-autocomplete #auto5="matAutocomplete" panelWidth="custom-autocomplete-panel">
-                    <mat-option *ngFor="let option of filteredBookerOptions | async"
+                    <mat-option *ngFor="let option of BookerList"
                       [value]="option.customerPersonName + '-' + option.phone + '-' + option.customerName"
                       (click)="getBookerIDOnPageLoad(option.customerPersonID)">
                       {{option.customerPersonName}} - {{option.phone}} - {{option.customerName}}
@@ -854,7 +854,7 @@
                   <mat-label>Guest Name</mat-label>
                   <input type="text" matInput formControlName="passenger" [matAutocomplete]="auto6">
                   <mat-autocomplete #auto6="matAutocomplete" panelWidth="custom-autocomplete-panel">
-                    <mat-option *ngFor="let option of filteredPassengerOptions | async"
+                    <mat-option *ngFor="let option of PassengerList"
                       [value]="option.customerPersonName + '-' + option.phone + '-' + option.customerName"
                       (click)="getPassengerID(option.customerPersonID, option.customerPersonName)">
                       {{option.customerPersonName}} - {{option.phone}} - {{option.customerName}}
@@ -869,7 +869,7 @@
               <div class="col-xl-3 col-lg-3 col-md-3 col-sm-6 mb-2 cp-guest-name-field">
                 <mat-form-field class="example-full-width cp-advance-search-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
                   <mat-label>Guest Name</mat-label>
-                  <input type="text" matInput formControlName="passenger" [matAutocomplete]="cpGuestNameAuto" (keyup)="onKeyupPassengerDropDown()">
+                  <input type="text" matInput formControlName="passenger" [matAutocomplete]="cpGuestNameAuto">
                 </mat-form-field>
               </div>
             </ng-container>
@@ -879,7 +879,7 @@
                 <input type="text" matInput formControlName="vehicleCategory" [matAutocomplete]="auto8"
                   (keyup)="onVehicleCategoryChanges($event)">
                 <mat-autocomplete #auto8="matAutocomplete" panelWidth="custom-autocomplete-panel">
-                  <mat-option *ngFor="let option of filteredVehicleCategoryOptions | async"
+                  <mat-option *ngFor="let option of vehicleCategoryOptions"
                     [value]="option.vehicleCategory" (click)="getTitles(option.vehicleCategoryID)">
                     {{option.vehicleCategory}}
                   </mat-option>
@@ -895,7 +895,7 @@
                   <mat-label>Vehicle</mat-label>
                   <input type="text" matInput formControlName="vehicleName" [matAutocomplete]="auto9" />
                   <mat-autocomplete #auto9="matAutocomplete" panelWidth="custom-autocomplete-panel">
-                    <mat-option *ngFor="let options of filteredVehicleOptions | async" [value]="options.vehicle">
+                    <mat-option *ngFor="let options of VehicleList" [value]="options.vehicle">
                       {{ options.vehicle }}
                     </mat-option>
                   </mat-autocomplete>
@@ -909,7 +909,7 @@
                   <mat-label>Vehicle</mat-label>
                   <input type="text" matInput formControlName="vehicleName" [matAutocomplete]="auto10" />
                   <mat-autocomplete #auto10="matAutocomplete" panelWidth="custom-autocomplete-panel">
-                    <mat-option *ngFor="let options of filteredVehicleOptions | async" [value]="options.vehicle">
+                    <mat-option *ngFor="let options of VehicleList" [value]="options.vehicle">
                       {{ options.vehicle }}
                     </mat-option>
                   </mat-autocomplete>
@@ -921,7 +921,7 @@
                 <mat-label>City</mat-label>
                 <input type="text" matInput [matAutocomplete]="auto11" formControlName="city">
                 <mat-autocomplete #auto11="matAutocomplete" panelWidth="custom-autocomplete-panel">
-                  <mat-option *ngFor="let options of filteredCityOptions | async" [value]="options.geoPointName">
+                  <mat-option *ngFor="let options of CityList" [value]="options.geoPointName">
                     {{options.geoPointName}}
                   </mat-option>
                 </mat-autocomplete>
@@ -931,9 +931,9 @@
               <mat-form-field class="example-full-width cp-advance-search-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
                 <mat-label>Package Type</mat-label>
                 <input type="text" matInput formControlName="packageType" [matAutocomplete]="auto12"
-                  (keyup)="onKeyupDutyTypeDropDown()">
+>
                 <mat-autocomplete #auto12="matAutocomplete" panelWidth="custom-autocomplete-panel">
-                  <mat-option *ngFor="let option of filteredPackageTypeOptions | async" [value]="option.packageType"
+                  <mat-option *ngFor="let option of PackageTypeList" [value]="option.packageType"
                     (click)="getPackageTypeID(option.packageTypeID)">
                     {{option.packageType}}
                   </mat-option>
@@ -947,7 +947,7 @@
                   <mat-label>Package</mat-label>
                   <input type="text" matInput formControlName="package" [matAutocomplete]="auto13">
                   <mat-autocomplete #auto13="matAutocomplete" panelWidth="custom-autocomplete-panel">
-                    <mat-option *ngFor="let option of filteredPackageOptions | async" [value]="option.package"
+                    <mat-option *ngFor="let option of PackageList" [value]="option.package"
                       (click)="getPackageID(option.packageID)">
                       {{option.package}}
                     </mat-option>
@@ -962,7 +962,7 @@
                   <mat-label>Package</mat-label>
                   <input type="text" matInput formControlName="package" [matAutocomplete]="auto14">
                   <mat-autocomplete #auto14="matAutocomplete" panelWidth="custom-autocomplete-panel">
-                    <mat-option *ngFor="let option of filteredPackageOptions | async" [value]="option.package"
+                    <mat-option *ngFor="let option of PackageList" [value]="option.package"
                       (click)="getPackageID(option.packageID)">
                       {{option.package}}
                     </mat-option>
@@ -978,7 +978,7 @@
                 <input type="text" matInput formControlName="supplier" [matAutocomplete]="auto15"
                   (keyup)="onSupplierChanges($event)">
                 <mat-autocomplete #auto15="matAutocomplete" panelWidth="custom-autocomplete-panel">
-                  <mat-option *ngFor="let option of filteredSupplierOptions | async" [value]="option.supplierName"
+                  <mat-option *ngFor="let option of SupplierList" [value]="option.supplierName"
                     (click)="getSupplierID(option.supplierID)">
                     {{option.supplierName}}
                   </mat-option>
@@ -990,9 +990,9 @@
               <div class="col-xl-3 col-lg-3 col-md-3 col-sm-6 mb-2">
                 <mat-form-field class="example-full-width cp-advance-search-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
                   <mat-label>Vehicle Inventory</mat-label>
-                  <input type="text" matInput formControlName="vehicleInventory" [matAutocomplete]="auto17">
+                  <input type="text" matInput formControlName="vehicleInventory" [matAutocomplete]="auto17"(focus)="onVehicleInventoryAutocompleteFocus('driverInventory')">
                   <mat-autocomplete #auto17="matAutocomplete" panelWidth="custom-autocomplete-panel">
-                    <mat-option *ngFor="let option of filteredVehicleInventoryOptions | async"
+                    <mat-option *ngFor="let option of VehicleInventoryList"
                       [value]="option.registrationNumber + '-' + option.vehicle + '-' + option.supplierName + '-' + option.driverName + '-' + option.driverPhone">
                       {{option.registrationNumber}} - {{option.vehicle}} - {{option.supplierName}} -
                       {{option.driverName}} - {{option.driverPhone}}
@@ -1006,9 +1006,9 @@
               <div class="col-xl-3 col-lg-3 col-md-3 col-sm-6 mb-2">
                 <mat-form-field class="example-full-width cp-advance-search-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
                   <mat-label>Vehicle Inventory</mat-label>
-                  <input type="text" matInput formControlName="vehicleInventory" [matAutocomplete]="auto18">
+                  <input type="text" matInput formControlName="vehicleInventory" [matAutocomplete]="auto18"(focus)="onVehicleInventoryAutocompleteFocus('driverInventory')">
                   <mat-autocomplete #auto18="matAutocomplete" panelWidth="custom-autocomplete-panel">
-                    <mat-option *ngFor="let option of filteredVehicleInventoryOptions | async"
+                    <mat-option *ngFor="let option of VehicleInventoryList"
                       [value]="option.registrationNumber + '-' + option.vehicle + '-' + option.supplierName + '-' + option.driverName + '-' + option.driverPhone">
                       {{option.registrationNumber}} - {{option.vehicle}} - {{option.supplierName}} -
                       {{option.driverName}} - {{option.driverPhone}}
@@ -1024,7 +1024,7 @@
                   <mat-label>Driver</mat-label>
                   <input type="text" matInput formControlName="driver" [matAutocomplete]="auto19">
                   <mat-autocomplete #auto19="matAutocomplete" panelWidth="custom-autocomplete-panel">
-                    <mat-option *ngFor="let option of filteredDriverOptions | async"
+                    <mat-option *ngFor="let option of DriverList"
                       [value]="option.driverName + '-' + option.driverPhone + '-' + option.registrationNumber + '-' + option.vehicle + '-' + option.supplierName">
                       {{option.driverName}} - {{option.driverPhone}} - {{option.registrationNumber}} -
                       {{option.vehicle}} - {{option.supplierName}}
@@ -1040,7 +1040,7 @@
                   <mat-label>Driver</mat-label>
                   <input type="text" matInput formControlName="driver" [matAutocomplete]="auto20">
                   <mat-autocomplete #auto20="matAutocomplete" panelWidth="custom-autocomplete-panel">
-                    <mat-option *ngFor="let option of filteredDriverOptions | async"
+                    <mat-option *ngFor="let option of DriverList"
                       [value]="option.driverName + '-' + option.driverPhone + '-' + option.registrationNumber + '-' + option.vehicle + '-' + option.supplierName">
                       {{option.driverName}} - {{option.driverPhone}} - {{option.registrationNumber}} -
                       {{option.vehicle}} - {{option.supplierName}}
@@ -1056,7 +1056,7 @@
                   <mat-label>Driver Official Identity No</mat-label>
                   <input type="text" matInput formControlName="driverOfficialIdentityNumber" [matAutocomplete]="auto25">
                   <mat-autocomplete #auto25="matAutocomplete" panelWidth="custom-autocomplete-panel">
-                    <mat-option *ngFor="let option of filteredDriverOfficialIdentityNumberOptions | async"
+                    <mat-option *ngFor="let option of DriverOfficialIdentityNumberList"
                       [value]="option.driverOfficialIdentityNumber">
                       {{option.driverOfficialIdentityNumber}}
                     </mat-option>
@@ -1071,7 +1071,7 @@
                   <mat-label>Driver Official Identity No</mat-label>
                   <input type="text" matInput formControlName="driverOfficialIdentityNumber" [matAutocomplete]="auto26">
                   <mat-autocomplete #auto26="matAutocomplete" panelWidth="custom-autocomplete-panel">
-                    <mat-option *ngFor="let option of filteredDriverOfficialIdentityNumberOptions | async"
+                    <mat-option *ngFor="let option of DriverOfficialIdentityNumberList"
                       [value]="option.driverOfficialIdentityNumber">
                       {{option.driverOfficialIdentityNumber}}
                     </mat-option>
@@ -1740,7 +1740,7 @@
                             <span *ngIf="data.hasActiveUpsell" matTooltip="Reservation Upsold"> UP </span>
                             <br>
 
-                            <ng-container *ngIf="getControlPanelMessagingHeaderDisplay(data) as cpMsg">
+                            <ng-container *ngIf="data.cpMsgDisplay as cpMsg">
                               <span *ngIf="cpMsg.hasAnyStatus" [matTooltip]="cpMsg.tooltip" [matTooltipDisabled]="!cpMsg.tooltip"
                                      matTooltipShowDelay="200" style="display: block; line-height: 1.35;">
                                 <ng-container *ngFor="let b of cpMsg.successBadges">
@@ -3452,7 +3452,7 @@
                 <mat-label>Disputes</mat-label>
                 <input type="text" matInput formControlName="disputes" [matAutocomplete]="auto25">
                 <mat-autocomplete #auto25="matAutocomplete">
-                  <mat-option *ngFor="let option of filteredDisputesOptions | async" [value]="option.disputeType">
+                  <mat-option *ngFor="let option of DisputesList" [value]="option.disputeType">
                     {{option.disputeType}}
                   </mat-option>
                 </mat-autocomplete>
@@ -3484,7 +3484,7 @@
                 <input type="text" matInput (keyup)="onCustomerGroupKeyUp($event)" formControlName="customerGroup"
                   [matAutocomplete]="auto" />
                 <mat-autocomplete #auto="matAutocomplete">
-                  <mat-option *ngFor="let options of filteredCustomerGroupOptions | async"
+                  <mat-option *ngFor="let options of CustomerGroupList"
                     [value]="options.customerGroup" (click)="getCustomerGroupID(options.customerGroupID)">
                     {{ options.customerGroup }}
                   </mat-option>
@@ -3498,7 +3498,7 @@
                   <mat-label>Customer</mat-label>
                   <input type="text" matInput formControlName="customer" [matAutocomplete]="auto2" />
                   <mat-autocomplete #auto2="matAutocomplete">
-                    <mat-option *ngFor="let options of filteredCustomerOptions | async"
+                    <mat-option *ngFor="let options of CustomerList"
                       [value]="options.customerName + ' - ' + options.customerGroup"
                       (click)="getCustomerID(option.customerID)">
                       {{ options.customerName}} - {{options.customerGroup}}
@@ -3514,7 +3514,7 @@
                   <mat-label>Customer</mat-label>
                   <input type="text" matInput formControlName="customer" [matAutocomplete]="auto3" />
                   <mat-autocomplete #auto3="matAutocomplete">
-                    <mat-option *ngFor="let options of filteredCustomersOptions | async"
+                    <mat-option *ngFor="let options of CustomerList"
                       [value]="options.customerName + ' - ' + options.customerGroup"
                       (click)="getCustomerIDOnPageLoad(option.customerID)">
                       {{ options.customerName}} - {{options.customerGroup}}
@@ -3532,7 +3532,7 @@
                   <mat-label>Booker</mat-label>
                   <input type="text" matInput formControlName="booker" [matAutocomplete]="auto4">
                   <mat-autocomplete #auto4="matAutocomplete">
-                    <mat-option *ngFor="let option of filteredBookerOptions | async"
+                    <mat-option *ngFor="let option of BookerList"
                       [value]="option.customerPersonName + '-' + option.phone + '-' + option.customerName"
                       (click)="getBookerID(option.customerPersonID)">
                       {{option.customerPersonName}} - {{option.phone}} - {{option.customerName}}
@@ -3548,7 +3548,7 @@
                   <mat-label>Booker</mat-label>
                   <input type="text" matInput formControlName="booker" [matAutocomplete]="auto5">
                   <mat-autocomplete #auto5="matAutocomplete">
-                    <mat-option *ngFor="let option of filteredBookerOptions | async"
+                    <mat-option *ngFor="let option of BookerList"
                       [value]="option.customerPersonName + '-' + option.phone + '-' + option.customerName"
                       (click)="getBookerIDOnPageLoad(option.customerPersonID)">
                       {{option.customerPersonName}} - {{option.phone}} - {{option.customerName}}
@@ -3562,7 +3562,7 @@
               <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2 cp-guest-name-field">
                 <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
                   <mat-label>Guest Name</mat-label>
-                  <input type="text" matInput formControlName="passenger" [matAutocomplete]="cpGuestNameAuto" (keyup)="onKeyupPassengerDropDown()">
+                  <input type="text" matInput formControlName="passenger" [matAutocomplete]="cpGuestNameAuto">
                 </mat-form-field>
               </div>
             </ng-container>
@@ -3571,7 +3571,7 @@
               <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2 cp-guest-name-field">
                 <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
                   <mat-label>Guest Name</mat-label>
-                  <input type="text" matInput formControlName="passenger" [matAutocomplete]="cpGuestNameAuto" (keyup)="onKeyupPassengerDropDown()">
+                  <input type="text" matInput formControlName="passenger" [matAutocomplete]="cpGuestNameAuto">
                 </mat-form-field>
               </div>
             </ng-container>
@@ -3584,7 +3584,7 @@
                 <input type="text" matInput formControlName="vehicleCategory" [matAutocomplete]="auto8"
                   (keyup)="onVehicleCategoryChanges($event)">
                 <mat-autocomplete #auto8="matAutocomplete">
-                  <mat-option *ngFor="let option of filteredVehicleCategoryOptions | async"
+                  <mat-option *ngFor="let option of vehicleCategoryOptions"
                     [value]="option.vehicleCategory" (click)="getTitles(option.vehicleCategoryID)">
                     {{option.vehicleCategory}}
                   </mat-option>
@@ -3598,7 +3598,7 @@
                   <mat-label>Vehicle</mat-label>
                   <input type="text" matInput formControlName="vehicleName" [matAutocomplete]="auto9" />
                   <mat-autocomplete #auto9="matAutocomplete">
-                    <mat-option *ngFor="let options of filteredVehicleOptions | async" [value]="options.vehicle">
+                    <mat-option *ngFor="let options of VehicleList" [value]="options.vehicle">
                       {{ options.vehicle }}
                     </mat-option>
                   </mat-autocomplete>
@@ -3612,7 +3612,7 @@
                   <mat-label>Vehicle</mat-label>
                   <input type="text" matInput formControlName="vehicleName" [matAutocomplete]="auto10" />
                   <mat-autocomplete #auto10="matAutocomplete">
-                    <mat-option *ngFor="let options of filteredVehicleOptions | async" [value]="options.vehicle">
+                    <mat-option *ngFor="let options of VehicleList" [value]="options.vehicle">
                       {{ options.vehicle }}
                     </mat-option>
                   </mat-autocomplete>
@@ -3627,7 +3627,7 @@
                 <mat-label>City</mat-label>
                 <input type="text" matInput [matAutocomplete]="auto11" formControlName="city">
                 <mat-autocomplete #auto11="matAutocomplete">
-                  <mat-option *ngFor="let options of filteredCityOptions | async" [value]="options.geoPointName">
+                  <mat-option *ngFor="let options of CityList" [value]="options.geoPointName">
                     {{options.geoPointName}}
                   </mat-option>
                 </mat-autocomplete>
@@ -3642,7 +3642,7 @@
                 <input type="text" matInput formControlName="packageType" [matAutocomplete]="auto12"
                   (keyup)="onPackageTypeChanges($event)">
                 <mat-autocomplete #auto12="matAutocomplete">
-                  <mat-option *ngFor="let option of filteredPackageTypeOptions | async" [value]="option.packageType"
+                  <mat-option *ngFor="let option of PackageTypeList" [value]="option.packageType"
                     (click)="getPackageTypeID(option.packageTypeID)">
                     {{option.packageType}}
                   </mat-option>
@@ -3656,7 +3656,7 @@
                   <mat-label>Package</mat-label>
                   <input type="text" matInput formControlName="package" [matAutocomplete]="auto13">
                   <mat-autocomplete #auto13="matAutocomplete">
-                    <mat-option *ngFor="let option of filteredPackageOptions | async" [value]="option.package"
+                    <mat-option *ngFor="let option of PackageList" [value]="option.package"
                       (click)="getPackageID(option.packageID)">
                       {{option.package}}
                     </mat-option>
@@ -3671,7 +3671,7 @@
                   <mat-label>Package</mat-label>
                   <input type="text" matInput formControlName="package" [matAutocomplete]="auto14">
                   <mat-autocomplete #auto14="matAutocomplete">
-                    <mat-option *ngFor="let option of filteredPackageOptions | async" [value]="option.package"
+                    <mat-option *ngFor="let option of PackageList" [value]="option.package"
                       (click)="getPackageID(option.packageID)">
                       {{option.package}}
                     </mat-option>
@@ -3688,7 +3688,7 @@
                 <input type="text" matInput formControlName="supplier" [matAutocomplete]="auto15"
                   (keyup)="onSupplierChanges($event)">
                 <mat-autocomplete #auto15="matAutocomplete">
-                  <mat-option *ngFor="let option of filteredSupplierOptions | async" [value]="option.supplierName"
+                  <mat-option *ngFor="let option of SupplierList" [value]="option.supplierName"
                     (click)="getSupplierID(option.supplierID)">
                     {{option.supplierName}}
                   </mat-option>
@@ -3700,9 +3700,9 @@
               <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
                 <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
                   <mat-label>Vehicle Inventory</mat-label>
-                  <input type="text" matInput formControlName="vehicleInventory" [matAutocomplete]="auto17">
+                  <input type="text" matInput formControlName="vehicleInventory" [matAutocomplete]="auto17"(focus)="onVehicleInventoryAutocompleteFocus('driverInventory')">
                   <mat-autocomplete #auto17="matAutocomplete">
-                    <mat-option *ngFor="let option of filteredVehicleInventoryOptions | async"
+                    <mat-option *ngFor="let option of VehicleInventoryList"
                       [value]="option.registrationNumber + '-' + option.vehicle + '-' + option.supplierName + '-' + option.driverName + '-' + option.driverPhone">
                       {{option.registrationNumber}} - {{option.vehicle}} - {{option.supplierName}} -
                       {{option.driverName}} - {{option.driverPhone}}
@@ -3716,9 +3716,9 @@
               <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
                 <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
                   <mat-label>Vehicle Inventory</mat-label>
-                  <input type="text" matInput formControlName="vehicleInventory" [matAutocomplete]="auto18">
+                  <input type="text" matInput formControlName="vehicleInventory" [matAutocomplete]="auto18"(focus)="onVehicleInventoryAutocompleteFocus('driverInventory')">
                   <mat-autocomplete #auto18="matAutocomplete">
-                    <mat-option *ngFor="let option of filteredVehicleInventoryOptions | async"
+                    <mat-option *ngFor="let option of VehicleInventoryList"
                       [value]="option.registrationNumber + '-' + option.vehicle + '-' + option.supplierName + '-' + option.driverName + '-' + option.driverPhone">
                       {{option.registrationNumber}} - {{option.vehicle}} - {{option.supplierName}} -
                       {{option.driverName}} - {{option.driverPhone}}
@@ -3736,7 +3736,7 @@
                   <mat-label>Driver</mat-label>
                   <input type="text" matInput formControlName="driver" [matAutocomplete]="auto19">
                   <mat-autocomplete #auto19="matAutocomplete">
-                    <mat-option *ngFor="let option of filteredDriverOptions | async"
+                    <mat-option *ngFor="let option of DriverList"
                       [value]="option.driverName + '-' + option.driverPhone + '-' + option.registrationNumber + '-' + option.vehicle + '-' + option.supplierName">
                       {{option.driverName}} - {{option.driverPhone}} - {{option.registrationNumber}} -
                       {{option.vehicle}} - {{option.supplierName}}
@@ -3752,7 +3752,7 @@
                   <mat-label>Driver</mat-label>
                   <input type="text" matInput formControlName="driver" [matAutocomplete]="auto20">
                   <mat-autocomplete #auto20="matAutocomplete">
-                    <mat-option *ngFor="let option of filteredDriverOptions | async"
+                    <mat-option *ngFor="let option of DriverList"
                       [value]="option.driverName + '-' + option.driverPhone + '-' + option.registrationNumber + '-' + option.vehicle + '-' + option.supplierName">
                       {{option.driverName}} - {{option.driverPhone}} - {{option.registrationNumber}} -
                       {{option.vehicle}} - {{option.supplierName}}
@@ -3768,7 +3768,7 @@
                   <mat-label>Driver Official Identity No</mat-label>
                   <input type="text" matInput formControlName="driverOfficialIdentityNumber" [matAutocomplete]="auto25">
                   <mat-autocomplete #auto25="matAutocomplete">
-                    <mat-option *ngFor="let option of filteredDriverOfficialIdentityNumberOptions | async"
+                    <mat-option *ngFor="let option of DriverOfficialIdentityNumberList"
                       [value]="option.driverOfficialIdentityNumber">
                       {{option.driverOfficialIdentityNumber}}
                     </mat-option>
@@ -3783,7 +3783,7 @@
                   <mat-label>Driver Official Identity No</mat-label>
                   <input type="text" matInput formControlName="driverOfficialIdentityNumber" [matAutocomplete]="auto26">
                   <mat-autocomplete #auto26="matAutocomplete">
-                    <mat-option *ngFor="let option of filteredDriverOfficialIdentityNumberOptions | async"
+                    <mat-option *ngFor="let option of DriverOfficialIdentityNumberList"
                       [value]="option.driverOfficialIdentityNumber">
                       {{option.driverOfficialIdentityNumber}}
                     </mat-option>

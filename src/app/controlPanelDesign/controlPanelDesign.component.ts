@@ -31,7 +31,7 @@ import { StopOnMapInfoComponent } from '../StopOnMapInfo/StopOnMapInfo.component
 import { FormBuilder, FormControl, FormGroup } from '@angular/forms';
 import { Observable, of, Subject, Subscription } from 'rxjs';
 import { VehicleDropDown } from '../vehicle/vehicleDropDown.model';
-import { map, startWith } from 'rxjs/operators';
+import { debounceTime, distinctUntilChanged, switchMap, takeUntil } from 'rxjs/operators';
 import { FormDialogComponent } from '../feedBack/dialogs/form-dialog/form-dialog.component';
 import { FormDialogComponent as DutySlipQualityCheckFormDialogComponent} from '../dutySlipQualityCheck/dialogs/form-dialog/form-dialog.component';
 import { FormDialogComponent as DutySlipQualityCheckedByExecutive } from '../dutySlipQualityCheckedByExecutive/dialogs/form-dialog/form-dialog.component';
@@ -144,58 +144,44 @@ export class ControlPanelDesignComponent implements OnInit {
   public reservationInfo: any[]=[];
   public reservationHeaderInfo: ControlPanelHeaderDetails[];
   public VehicleList?: VehicleDropDown[] = [];
-  // Seed every autocomplete stream with an empty observable so the template's
-  // "| async" never transitions from null -> array in the same CD cycle
-  // (NG0100 source).
-  filteredVehicleOptions: Observable<VehicleDropDown[]> = of([]);
 
   public CustomerGroupList?: CustomerGroupDropDown[] = [];
-  filteredCustomerGroupOptions: Observable<CustomerGroupDropDown[]> = of([]);
 
   public CustomersList?: CustomerCustomerGroupDropDown[] = [];
-  filteredCustomersOptions: Observable<CustomerCustomerGroupDropDown[]> = of([]);
 
   public CustomerList?: CustomerCustomerGroupDropDown[] = [];
-  filteredCustomerOptions: Observable<CustomerCustomerGroupDropDown[]> = of([]);
 
-  filteredBookerOptions: Observable<CustomerPersonDropDown[]> = of([]);
   public BookerList?: CustomerPersonDropDown[] = [];
 
   public PassengerList?: CustomerPersonDropDown[] = [];
-  filteredPassengerOptions: Observable<CustomerPersonDropDown[]> = of([]);
   cpGuestNamePanelWidth: string | number = 420;
 
   public VehicleCategoryList?: VehicleCategoryDropDown[] = [];
-  filteredVehicleCategoryOptions: Observable<VehicleCategoryDropDown[]> = of([]);
+  vehicleCategoryOptions: VehicleCategoryDropDown[] = [];
+  vehicleInventoryAutocompleteMode: 'regNo' | 'driverInventory' = 'driverInventory';
+  private prefixAutocompleteDestroy$ = new Subject<void>();
   
   public CityList?: CitiesDropDown[] = [];
-  filteredCityOptions: Observable<CitiesDropDown[]> = of([]);
 
   public PackageTypeList?:PackageTypeDropDown[]=[]; 
-  filteredPackageTypeOptions: Observable<PackageTypeDropDown[]> = of([]);
 
   public PackageList?:PackageDropDown[]=[];
-  filteredPackageOptions: Observable<PackageDropDown[]> = of([]);
 
   public SupplierList?:SupplierDropDown[]=[];
-  filteredSupplierOptions: Observable<SupplierDropDown[]> = of([]);
 
-  filteredVehicleInventoryOptions: Observable<DriverInventoryAssociationDropDown[]> = of([]);
   public VehicleInventoryList?: DriverInventoryAssociationDropDown[] = [];
 
-  filteredDriverOptions: Observable<DriverInventoryAssociationDropDown[]> = of([]);
   public DriverList?: DriverInventoryAssociationDropDown[] = [];
 
-  filteredDriverOfficialIdentityNumberOptions: Observable<DriverOfficialIdentityNumberDD[]> = of([]);
   public DriverOfficialIdentityNumberList?: DriverOfficialIdentityNumberDD[] = [];
 
-  filteredDisputesOptions: Observable<DisputeTypeDropDown[]> = of([]);
   public DisputesList?: DisputeTypeDropDown[] = [];
 
   totalData = 0;
   isCountLoading = false;
   private headerSearchGeneration = 0;
   private headerCountSub?: Subscription;
+  private headerMessagingSub?: Subscription;
   recordsPerPage = 50;
   isLoading = false;
   currentPage = 1;
@@ -259,23 +245,17 @@ export class ControlPanelDesignComponent implements OnInit {
   public DutyPostPickUPCall:DutyPostPickUPCallModel | null;
 
   public OrganizationalEntityList?: OrganizationalEntityDropDown[] = [];
-  filteredOrganizationalEntityOptions: Observable<OrganizationalEntityDropDown[]> = of([]);
 
   public TransferLocationList?: TransferedLocationDropDown[] = [];
-  filteredTransferLocationOptions: Observable<TransferedLocationDropDown[]> = of([]);
   verifyDutyStatusAndCacellationStatus: any;
 
   public RegNumberList: InventoryDropDown[] = [];
-  filteredRegNumberOptions:Observable<VehicleDropDown[]>;
 
   public PaymentModeList?:ModeOfPaymentDropDown[]=[];
-  filteredPaymentModeOptions: Observable<ModeOfPaymentDropDown[]>;
 
   public SupplierTypeList?: SupplierTypeDropDownModel[] = [];
-  filteredSupplierTypeOptions: Observable<SupplierTypeDropDownModel[]>;
 
   public KAMList?: EmployeeDropDown[] = [];
-  filteredKAMByOptions: Observable<EmployeeDropDown[]>;
 
   constructor(
     public route: Router,
@@ -344,19 +324,9 @@ export class ControlPanelDesignComponent implements OnInit {
     if (!this.filterForm) {
       this.filterForm = this.createFilterForm();
     }
-    this.safeRun(() => this.FillVehicleDD());
-    // this.safeRun(() => this.FillCustomerGroupDD());
-    // this.safeRun(() => this.FillCustomerDDOnPageLoad());
-    // this.safeRun(() => this.InitBookerOnPageLoad());
-    // this.safeRun(() => this.InitPassengerOnPageLoad());
+    this.setupPrefixAutocompletes();
     this.safeRun(() => this.InitVehicleCategories());
-    this.safeRun(() => this.InitCities());
-    // this.safeRun(() => this.InitPackageType());
-    this.safeRun(() => this.InitPackageOnPageLoad());
-    this.safeRun(() => this.InitSupplier());
-    this.safeRun(() => this.InitVehicleInventoryOnPageLoad());
-    this.safeRun(() => this.InitDriverOnPageLoad());
-    this.safeRun(() => this.InitDOINOnPageLoad());
+    // Phase 2.1: defer heavy dropdown full-list loads; prefix APIs load on valueChanges (min 3 chars).
     // this.safeRun(() => this.InitDisputesOnPageLoad());
     // this.safeRun(() => this.InitLocation());
     // this.safeRun(() => this.InitTransferLocation());
@@ -407,6 +377,195 @@ export class ControlPanelDesignComponent implements OnInit {
     } catch (error) {
       console.error('ControlPanel guarded init error:', error);
     }
+  }
+
+  private setupPrefixAutocomplete(
+    controlName: string,
+    fetchFn: (prefix: string) => Observable<any[]>,
+    assignFn: (list: any[]) => void,
+    onClear?: () => void
+  ): void {
+    const control = this.filterForm?.controls?.[controlName];
+    if (!control) {
+      return;
+    }
+    control.valueChanges.pipe(
+      debounceTime(300),
+      distinctUntilChanged(),
+      switchMap((value) => {
+        const term = (value ?? '').toString().trim();
+        if (term.length < this._generalService.lengthToCheck) {
+          assignFn([]);
+          onClear?.();
+          return of([]);
+        }
+        return fetchFn(term);
+      }),
+      takeUntil(this.prefixAutocompleteDestroy$)
+    ).subscribe((list) => assignFn(list || []));
+  }
+
+  private setupPrefixAutocompletes(): void {
+    this.prefixAutocompleteDestroy$.next();
+    this.prefixAutocompleteDestroy$.complete();
+    this.prefixAutocompleteDestroy$ = new Subject<void>();
+
+    this.setupPrefixAutocomplete(
+      'locationName',
+      (prefix) => this._generalService.GetLocationDropDownForControlPanel(prefix),
+      (list) => { this.OrganizationalEntityList = list; }
+    );
+    this.setupPrefixAutocomplete(
+      'transferLocationName',
+      (prefix) => this._generalService.GetTransferLocationDropDownForControlPanel(prefix),
+      (list) => { this.TransferLocationList = list; }
+    );
+    this.setupPrefixAutocomplete(
+      'customerGroup',
+      (prefix) => this._generalService.GetCustomerGroupDropDownForControlPanel(prefix),
+      (list) => { this.CustomerGroupList = list; }
+    );
+    this.setupPrefixAutocomplete(
+      'customer',
+      (prefix) => this._generalService.GetCustomerDropDownForControlPanel(prefix),
+      (list) => { this.CustomerList = list; }
+    );
+    this.setupPrefixAutocomplete(
+      'booker',
+      (prefix) => this._generalService.GetBookerDropDownForControlPanel(prefix),
+      (list) => { this.BookerList = list; }
+    );
+    this.filterForm.controls['passenger'].valueChanges.pipe(
+      debounceTime(300),
+      distinctUntilChanged(),
+      switchMap((value) => {
+        const term = (value ?? '').toString().trim();
+        if (term.length < this._generalService.lengthToCheck) {
+          this.PassengerList = [];
+          this.passengerID = null;
+          this.filterForm.patchValue({ passengerID: 0 }, { emitEvent: false });
+          return of([]);
+        }
+        return this._generalService.GetPassengerDropDownForControlPanel(term);
+      }),
+      takeUntil(this.prefixAutocompleteDestroy$)
+    ).subscribe((list) => { this.PassengerList = list || []; });
+    this.setupPrefixAutocomplete(
+      'vehicleName',
+      (prefix) => this._generalService.GetVehicleDropDownForControlPanel(prefix),
+      (list) => { this.VehicleList = list; }
+    );
+    this.setupPrefixAutocomplete(
+      'city',
+      (prefix) => this._generalService.GetCityDropDownForControlPanel(prefix),
+      (list) => { this.CityList = list; }
+    );
+    this.setupPrefixAutocomplete(
+      'packageType',
+      (prefix) => this._generalService.GetDutyTypeDropDownForControlPanel(prefix),
+      (list) => { this.PackageTypeList = list; }
+    );
+    this.filterForm.controls['package'].valueChanges.pipe(
+      debounceTime(300),
+      distinctUntilChanged(),
+      switchMap((value) => {
+        const term = (value ?? '').toString().trim();
+        if (term.length < this._generalService.lengthToCheck) {
+          this.PackageList = [];
+          return of([]);
+        }
+        return this._generalService.GetPackageDropDownForControlPanel(term, this.packageTypeID || 0);
+      }),
+      takeUntil(this.prefixAutocompleteDestroy$)
+    ).subscribe((list) => { this.PackageList = list || []; });
+    this.setupPrefixAutocomplete(
+      'supplier',
+      (prefix) => this._generalService.GetSupplierDropDownForControlPanel(prefix),
+      (list) => { this.SupplierList = list; }
+    );
+    const assignDriverInventoryAssociation = (list: DriverInventoryAssociationDropDown[]) => {
+      const rows = list || [];
+      this.VehicleInventoryList = rows;
+      this.DriverList = rows;
+    };
+    this.filterForm.controls['vehicleInventory'].valueChanges.pipe(
+      debounceTime(300),
+      distinctUntilChanged(),
+      switchMap((value) => {
+        const term = (value ?? '').toString().trim();
+        if (term.length < this._generalService.lengthToCheck) {
+          if (this.vehicleInventoryAutocompleteMode === 'regNo') {
+            this.RegNumberList = [];
+          } else {
+            this.clearDriverInventoryAssociationLists();
+          }
+          return of([]);
+        }
+        if (this.vehicleInventoryAutocompleteMode === 'regNo') {
+          return this._generalService.GetRegNoDropDownForControlPanel(term);
+        }
+        return this._generalService.GetDriverInventoryDropDownForControlPanel(term, this.supplierID || 0);
+      }),
+      takeUntil(this.prefixAutocompleteDestroy$)
+    ).subscribe((list) => {
+      if (this.vehicleInventoryAutocompleteMode === 'regNo') {
+        this.RegNumberList = list || [];
+      } else {
+        assignDriverInventoryAssociation(list || []);
+      }
+    });
+    this.setupPrefixAutocomplete(
+      'driver',
+      (prefix) => this._generalService.GetDriverInventoryDropDownForControlPanel(prefix, this.supplierID || 0),
+      assignDriverInventoryAssociation,
+      () => this.clearDriverInventoryAssociationLists()
+    );
+    this.setupPrefixAutocomplete(
+      'driverOfficialIdentityNumber',
+      (prefix) => this._generalService.GetDOINDropDownForControlPanel(prefix, this.supplierID || 0),
+      (list) => { this.DriverOfficialIdentityNumberList = list; },
+      () => { this.DriverOfficialIdentityNumberList = []; }
+    );
+    this.setupPrefixAutocomplete(
+      'disputes',
+      (prefix) => this._generalService.GetDisputeTypeDropDownForControlPanel(prefix),
+      (list) => { this.DisputesList = list; }
+    );
+    this.setupPrefixAutocomplete(
+      'modeOfPayment',
+      (prefix) => this._generalService.GetModeOfPaymentDropDownForControlPanel(prefix),
+      (list) => { this.PaymentModeList = list; }
+    );
+    this.setupPrefixAutocomplete(
+      'supplierType',
+      (prefix) => this._generalService.GetSupplierTypeDropDownForControlPanel(prefix),
+      (list) => { this.SupplierTypeList = list; }
+    );
+    this.setupPrefixAutocomplete(
+      'kAM',
+      (prefix) => this._generalService.GetKAMDropDownForControlPanel(prefix),
+      (list) => { this.KAMList = list; }
+    );
+    this.filterForm.controls['vehicleCategory'].valueChanges.pipe(
+      debounceTime(300),
+      distinctUntilChanged(),
+      takeUntil(this.prefixAutocompleteDestroy$)
+    ).subscribe((value) => this.updateVehicleCategoryOptions((value ?? '').toString()));
+  }
+
+  onVehicleInventoryAutocompleteFocus(mode: 'regNo' | 'driverInventory'): void {
+    this.vehicleInventoryAutocompleteMode = mode;
+  }
+
+  private updateVehicleCategoryOptions(term: string): void {
+    const filterValue = term.toLowerCase().trim();
+    if (filterValue.length < this._generalService.lengthToCheck) {
+      this.vehicleCategoryOptions = [];
+      return;
+    }
+    this.vehicleCategoryOptions = (this.VehicleCategoryList || []).filter((item) =>
+      item.vehicleCategory.toLowerCase().startsWith(filterValue)
+    );
   }
 
   private captureReservationIdFromRoute(params: Record<string, unknown> | null | undefined): void {
@@ -844,6 +1003,10 @@ export class ControlPanelDesignComponent implements OnInit {
       this.headerCountSub.unsubscribe();
       this.headerCountSub = undefined;
     }
+    if (this.headerMessagingSub) {
+      this.headerMessagingSub.unsubscribe();
+      this.headerMessagingSub = undefined;
+    }
     const bookingLookup = this.isBookingNumberLookup(requestPayload);
     if (!bookingLookup) {
       this.isCountLoading = true;
@@ -867,6 +1030,8 @@ export class ControlPanelDesignComponent implements OnInit {
             this.setCalculatedLocationOutTime(row, row.locationOutIntervalInMinutes);
         
           });
+            this.precomputeCpMsgDisplayForRows(this.reservationHeaderInfo);
+            this.loadMessagingLatestStatusBatch(this.reservationHeaderInfo, searchGeneration);
 
             if (rowIndex !== undefined)
             {
@@ -930,6 +1095,89 @@ export class ControlPanelDesignComponent implements OnInit {
           }
         );
     }
+  }
+
+  private precomputeCpMsgDisplayForRows(rows: ControlPanelHeaderDetails[]): void {
+    if (!rows?.length) {
+      return;
+    }
+    rows.forEach((row) => {
+      row.cpMsgDisplay = this.getControlPanelMessagingHeaderDisplay(row);
+    });
+  }
+
+  private loadMessagingLatestStatusBatch(
+    rows: ControlPanelHeaderDetails[],
+    searchGeneration: number
+  ): void {
+    if (!rows?.length) {
+      return;
+    }
+
+    const reservationIds = rows
+      .map((row) => Number(row.reservationID))
+      .filter((id) => id > 0);
+    if (!reservationIds.length) {
+      return;
+    }
+
+    this.headerMessagingSub = this._controlPanelDesignService
+      .getReservationMessagingLatestStatus(reservationIds)
+      .subscribe(
+        (statuses: any[]) => {
+          if (searchGeneration !== this.headerSearchGeneration) {
+            return;
+          }
+          const statusByReservationId = new Map<number, any>();
+          (statuses || []).forEach((status) => {
+            const reservationId = Number(status?.reservationID ?? status?.reservationId);
+            if (reservationId > 0) {
+              statusByReservationId.set(reservationId, status);
+            }
+          });
+          rows.forEach((row) => {
+            const reservationId = Number(row.reservationID);
+            const status = statusByReservationId.get(reservationId);
+            if (status) {
+              this.mergeMessagingStatusOntoRow(row, status);
+            }
+            row.cpMsgDisplay = this.getControlPanelMessagingHeaderDisplay(row);
+          });
+        },
+        () => {
+          if (searchGeneration !== this.headerSearchGeneration) {
+            return;
+          }
+          this.precomputeCpMsgDisplayForRows(rows);
+        }
+      );
+  }
+
+  private mergeMessagingStatusOntoRow(row: any, status: any): void {
+    if (!row || !status) {
+      return;
+    }
+    const messagingFields = [
+      'latestPassengerSmsMessageStatus',
+      'latestPassengerSmsMessageStatusDetails',
+      'latestPassengerWhatsAppMessageStatus',
+      'latestPassengerWhatsAppMessageStatusDetails',
+      'latestBookerSmsMessageStatus',
+      'latestBookerSmsMessageStatusDetails',
+      'latestBookerWhatsAppMessageStatus',
+      'latestBookerWhatsAppMessageStatusDetails',
+      'latestSmsMessageStatus',
+      'latestSmsMessageStatusDetails',
+      'latestWhatsAppMessageStatus',
+      'latestWhatsAppMessageStatusDetails',
+    ];
+    messagingFields.forEach((field) => {
+      const pascalField = field.charAt(0).toUpperCase() + field.slice(1);
+      const value = status[field] ?? status[pascalField];
+      if (value !== null && value !== undefined) {
+        row[field] = value;
+      }
+    });
   }
 
   private isBookingNumberLookup(filters: Partial<Filters>): boolean {
@@ -1014,131 +1262,6 @@ export class ControlPanelDesignComponent implements OnInit {
   //   });
   // }
 
-  onKeyupLocationDropDown()
-  {
-    var Prefix = this.filterForm.controls.locationName.value;
-    if(Prefix.length < this._generalService.lengthToCheck)
-    { 
-      this.OrganizationalEntityList = [];
-      return;
-    }
-    this._generalService.GetLocationDropDownForControlPanel(Prefix).subscribe(
-    data=>
-    {
-      this.OrganizationalEntityList=data;
-      this.filteredOrganizationalEntityOptions = this.filterForm.controls.locationName.valueChanges.pipe(
-        startWith(""),
-        map(value => this._filterLocationName(value || ''))
-      ); 
-    });
-  }
-  
-  private _filterLocationName(value: string): any {
-    const filterValue = value.toLowerCase();
-    // if (filterValue.length < 3) {
-    //   return [];
-    // }
-    return this.OrganizationalEntityList.filter(
-      data => 
-      {
-        return data.organizationalEntityName.toLowerCase().indexOf(filterValue)===0;
-      }
-    );
-  }
-
-  //---------- Transfer Location ----------
-  // InitTransferLocation()
-  // {
-  //   this._generalService.GetOrganizationalEntity().subscribe(
-  //   data=>
-  //   {
-  //     this.TransferLocationList=data;
-  //     this.filteredTransferLocationOptions = this.filterForm.controls.transferLocationName.valueChanges.pipe(
-  //       startWith(""),
-  //       map(value => this._filterTransferLocation(value || ''))
-  //     ); 
-  //   });
-  // }
-  onKeyupTransferLocationDropDown()
-  {
-    var Prefix = this.filterForm.controls.transferLocationName.value;
-    if(Prefix.length < this._generalService.lengthToCheck)
-    { 
-      this.TransferLocationList = [];
-      return;
-    }
-    this._generalService.GetTransferLocationDropDownForControlPanel(Prefix).subscribe(
-    data=>
-    {
-      this.TransferLocationList=data;
-      console.log('TransferLocationList',this.TransferLocationList);
-      this.filteredTransferLocationOptions = this.filterForm.controls.transferLocationName.valueChanges.pipe(
-        startWith(""),
-        map(value => this._filterTransferLocation(value || ''))
-      ); 
-    });
-  }
-  
-  private _filterTransferLocation(value: string): any {
-    const filterValue = value.toLowerCase();
-    // if (filterValue.length < 3) {
-    //   return [];
-    // }
-    return this.TransferLocationList.filter(
-      data => 
-      {
-        return data.transferLocationName.toLowerCase().includes(filterValue);
-      }
-    );
-  }
-
-  //Customer Group
-  // FillCustomerGroupDD() {
-  //   this._generalService.GetCustomersGroups().subscribe(
-  //     (data) => {
-  //       this.CustomerGroupList = data;
-  //       this.filteredCustomerGroupOptions =
-  //         this.filterForm.controls.customerGroup.valueChanges.pipe(
-  //           startWith(''),
-  //           map((value) => this._filterCustomerGroup(value || ''))
-  //         );
-  //     },
-  //     (error) => {}
-  //   );
-  // }
-
-  onKeyupCustomerGroupDropDown() 
-  {
-    var Prefix = this.filterForm.controls.customerGroup.value;
-    if(Prefix.length < this._generalService.lengthToCheck)
-    { 
-      this.CustomerGroupList = [];
-      return;
-    }
-    this._generalService.GetCustomerGroupDropDownForControlPanel(Prefix).subscribe(
-      (data) => {
-        this.CustomerGroupList = data;
-        this.filteredCustomerGroupOptions = this.filterForm.controls.customerGroup.valueChanges.pipe(
-          startWith(''),
-          map((value) => this._filterCustomerGroup(value || ''))
-        );
-      },
-      (error) => {}
-    );
-  }
-
-  private _filterCustomerGroup(value: string): any {
-    const filterValue = value.toLowerCase();
-    // if(filterValue.length === 0) {
-    //   return [];
-    // }
-    //  if(filterValue.length < 3) {
-    //   return [];
-    // }
-    return this.CustomerGroupList.filter((data) => {
-      return data.customerGroup.toLowerCase().indexOf(filterValue) === 0;
-    });
-  }
 
   getCustomerGroupID(customerGroupID:any)
   {
@@ -1175,38 +1298,6 @@ export class ControlPanelDesignComponent implements OnInit {
   //     (error) => {}
   //   );
   // }
-  onKeyupCustomerDropDown() 
-  {
-    var Prefix = this.filterForm.controls.customer.value;
-    if(Prefix.length < this._generalService.lengthToCheck)
-    { 
-      this.CustomerList = [];
-      return;
-    }
-    this._generalService.GetCustomerDropDownForControlPanel(Prefix).subscribe(
-      (data) => {
-        this.CustomerList = data;
-        this.filteredCustomerOptions = this.filterForm.controls.customer.valueChanges.pipe(
-          startWith(''),
-          map((value) => this._filterCustomer(value || ''))
-        );
-      },
-      (error) => {}
-    );
-  }
-
-  private _filterCustomer(value: string): any {
-    const filterValue = value.toLowerCase();
-    // if(filterValue.length === 0) {
-    //   return [];
-    // }
-    //  if(filterValue.length < 3) {
-    //   return [];
-    // }
-    return this.CustomerList.filter((data) => {
-      return data.customerName.toLowerCase().indexOf(filterValue) === 0 || data.customerGroup.toLowerCase().indexOf(filterValue) === 0;
-    });
-  }
   getCustomerID(customerID:any)
   {
     this.customerID=customerID;
@@ -1216,30 +1307,11 @@ export class ControlPanelDesignComponent implements OnInit {
     this._generalService.getCustomerForCPSearch().subscribe(
       (data : CustomerCustomerGroupDropDown[]) => {
         this.CustomersList = data;
-        this.filteredCustomersOptions =
-          this.filterForm.controls.customer.valueChanges.pipe(
-            startWith(''),
-            map((value) => this._filterCustomerOnPageLoad(value || ''))
-          );
       },
       (error) => {}
     );
   }
 
-  private _filterCustomerOnPageLoad(value: string): any {
-    const filterValue = value.toLowerCase().trim();
-    // if(filterValue.length === 0) {
-    //   return [];
-    // }
-     if(filterValue.length < 3) {
-      return [];
-    }
-    return this.CustomersList.filter((data) => {
-      const combinedField = `${data.customerName} ${data.customerGroup}`.toLowerCase();
-      return combinedField.includes(filterValue);
-      //return data.customerName.toLowerCase().indexOf(filterValue) === 0 || data.customerGroup.toLowerCase().indexOf(filterValue) === 0;;
-    });
-  }
   getCustomerIDOnPageLoad(customerID:any)
   {
     this.customerID=customerID;
@@ -1251,166 +1323,28 @@ export class ControlPanelDesignComponent implements OnInit {
         data=>
         {
           this.BookerList=data;
-          this.filteredBookerOptions = this.filterForm.controls['booker'].valueChanges.pipe(
-            startWith(""),
-            map(value => this._filterBooker(value || ''))
-          ); 
         });
-    }
-  
-    private _filterBooker(value: string): any {
-      const filterValue = value.toLowerCase().trim();
-      // if(filterValue.length === 0) {
-      //   return [];
-      // }
-       if(filterValue.length < 3) {
-      return [];
-    }
-      return this.BookerList?.filter(
-        booker => 
-        {
-          const combinedField = `${booker.customerPersonName} ${booker.phone} ${booker.customerName}`.toLowerCase();
-          return combinedField.includes(filterValue);
-          //return customer.customerPersonName.toLowerCase().indexOf(filterValue)===0;
-        }
-      );
     }
     
     getBookerID(bookerID: any) {
       this.bookerID=bookerID;
-    }
-
-    // InitBookerOnPageLoad()
-    // {
-    //   this._generalService.GetCPForBookerInCPSearch().subscribe(
-    //     data=>
-    //     {
-    //       this.BookerList=data;
-    //       this.filteredBookerOptions = this.filterForm.controls['booker'].valueChanges.pipe(
-    //         startWith(""),
-    //         map(value => this._filterBookerOnPageLoad(value || ''))
-    //       ); 
-    //     });
-    // }
-
-    onKeyupBookerDropDown()
-    {
-      var Prefix = this.filterForm.controls.booker.value;
-      if(Prefix.length < this._generalService.lengthToCheck)
-      { 
-        this.BookerList = [];
-        return;
-      }
-      this._generalService.GetBookerDropDownForControlPanel(Prefix).subscribe(
-        data=>
-        {
-          this.BookerList=data;
-          this.filteredBookerOptions = this.filterForm.controls['booker'].valueChanges.pipe(
-            startWith(""),
-            map(value => this._filterBookerOnPageLoad(value || ''))
-          ); 
-        });
-    }  
-    private _filterBookerOnPageLoad(value: string): any {
-      const filterValue = value.toLowerCase().trim();
-      // if(filterValue.length === 0) {
-      //   return [];
-      // }
-    //    if(filterValue.length < 3) {
-    //   return [];
-    // }
-      return this.BookerList?.filter(
-        booker => 
-        {
-          const combinedField = `${booker.customerPersonName} ${booker.phone} ${booker.customerName}`.toLowerCase();
-          return combinedField.includes(filterValue);
-          //return customer.customerPersonName.toLowerCase().indexOf(filterValue)===0;
-        }
-      );
     }
     
     getBookerIDOnPageLoad(bookerID: any) {
       this.bookerID=bookerID;
     }
   
-    //------------ Passenger -----------------
     InitPassenger(){
-       
       this._generalService.GetCPForPassenger(this.customerGroupID).subscribe(
         data=>
         {
           this.PassengerList=data;
-          this.filteredPassengerOptions = this.filterForm.controls['passenger'].valueChanges.pipe(
-            startWith(""),
-            map(value => this._filterPassenger(value || ''))
-          ); 
         });
-    }
-  
-    private _filterPassenger(value: string): any {
-      const filterValue = value.toLowerCase().trim();
-       if(filterValue.length < 3) {
-      return [];
-    }
-      return this.PassengerList.filter(
-        passenger => 
-        {
-          const combinedField = `${passenger.customerPersonName} ${passenger.phone} ${passenger.customerName}`.toLowerCase();
-          return combinedField.includes(filterValue);
-          //return customer.customerPersonName.toLowerCase().indexOf(filterValue)===0 || customer.phone.toLowerCase().indexOf(filterValue)===0;
-        }
-      );
     }
     
     getPassengerID(passengerID: any,passengerName:any) {
       this.passengerID=passengerID;
       this.filterForm.patchValue({ passengerID: passengerID || 0 });
-    }
-
-
-    // InitPassengerOnPageLoad()
-    // {   
-    //   this._generalService.GetCPForPassengerInCPSearch().subscribe(
-    //     data=>
-    //     {
-    //       this.PassengerList=data;
-    //       this.filteredPassengerOptions = this.filterForm.controls['passenger'].valueChanges.pipe(
-    //         startWith(""),
-    //         map(value => this._filterPassengerOnPageLoad(value || ''))
-    //       ); 
-    //     });
-    // }
-
-    onKeyupPassengerDropDown()
-    {   
-      var Prefix = this.filterForm.controls.passenger.value;
-      if (!Prefix || Prefix.length < this._generalService.lengthToCheck)
-      { 
-        this.PassengerList = [];
-        this.passengerID = null;
-        this.filterForm.patchValue({ passengerID: 0 }, { emitEvent: false });
-        return;
-      }
-      this._generalService.GetPassengerDropDownForControlPanel(Prefix).subscribe(
-      data=>
-      {
-        this.PassengerList=data;
-        this.filteredPassengerOptions = this.filterForm.controls['passenger'].valueChanges.pipe(
-          startWith(""),
-          map(value => this._filterPassengerOnPageLoad(value || ''))
-        ); 
-      });
-    }
-  
-    private _filterPassengerOnPageLoad(value: string): any {
-      const filterValue = value.toLowerCase().trim();
-      return this.PassengerList.filter(
-        passenger => 
-        {
-          const combinedField = `${passenger.customerPersonName} ${passenger.gender} ${passenger.importance} ${passenger.phone} ${passenger.customerName}`.toLowerCase();
-          return combinedField.includes(filterValue);
-        }
-      );
     }
 
     buildGuestDisplay(option: CustomerPersonDropDown): string {
@@ -1452,51 +1386,13 @@ export class ControlPanelDesignComponent implements OnInit {
         data=>
         {
           this.VehicleCategoryList=data;
-          this.filteredVehicleCategoryOptions = this.filterForm.controls["vehicleCategory"].valueChanges.pipe(
-            startWith(""),
-            map(value => this._filter(value || ''))
-          ); 
         });
     }
-    private _filter(value: string): any {
-  const filterValue = (value || '').toLowerCase();
 
-  // 3 character required
-  if (filterValue.length < 3) {
-    return [];
-  }
-
-  return this.VehicleCategoryList.filter(customer =>
-    customer.vehicleCategory.toLowerCase().startsWith(filterValue)
-  );
-}
-
-//     private _filter(value: string): any {
-
-//   const filterValue = (value || '').toLowerCase();
-//   if (!filterValue || filterValue.length < 3) {
-//     return []; 
-//   }
-//   return this.VehicleCategoryList.filter(customer =>
-//     customer.vehicleCategory.toLowerCase().indexOf(filterValue) === 0
-//   );
-// }
-
-    
-    // private _filter(value: string): any {
-    //   const filterValue = value.toLowerCase();
-    //   return this.VehicleCategoryList.filter(
-    //     customer => 
-    //     {
-    //       return customer.vehicleCategory.toLowerCase().indexOf(filterValue)===0;
-    //     }
-    //   );
-    // }
-    
     getTitles(vehicleCategoryID: any) {   
       this.vehicleCategoryID=vehicleCategoryID;
       this.filterForm.controls["vehicleName"].setValue('');
-      this.InitVehicleDD();
+      this.VehicleList = [];
     }
 
     onVehicleCategoryChanges(event:any)
@@ -1504,209 +1400,14 @@ export class ControlPanelDesignComponent implements OnInit {
     if(event.keyCode===8)
     {
       this.filterForm.controls["vehicleName"].setValue('');
-      this.InitVehicleDD();
+      this.VehicleList = [];
     }
   }
 
-    //Vehicle
-    FillVehicleDD() 
-    {
-      this._generalService.GetVehicle().subscribe(
-        (data) => {
-          this.VehicleList = data;
-          this.filteredVehicleOptions =
-            this.filterForm.controls.vehicleName.valueChanges.pipe(
-              startWith(''),
-              map((value) => this._filterVehicle(value || ''))
-            );
-        },
-        (error) => {}
-      );
-    }
-  private _filterVehicle(value: string): any {
-  const filterValue = (value || '').toLowerCase();
-  if (filterValue.length < 3) {
-    return [];
-  }
-
-  return this.VehicleList.filter(data =>
-    data.vehicle.toLowerCase().startsWith(filterValue)
-  );
-}
-
-    // private _filterVehicle(value: string): any {
-    //   const filterValue = value.toLowerCase();
-    //   if(filterValue.length === 0) {
-    //     return [];
-    //   }
-    //   return this.VehicleList.filter((data) => {
-    //     return data.vehicle.toLowerCase().indexOf(filterValue) === 0;
-    //   });
-    // }
-
-    //------------ Vehicle -----------------
-    // InitVehicleDD() 
-    // {
-    //   this._generalService.GetVehicles(this.vehicleCategoryID).subscribe(
-    //     (data) => {
-    //       this.VehicleList = data;
-    //       this.filteredVehicleOptions =
-    //         this.filterForm.controls.vehicleName.valueChanges.pipe(
-    //           startWith(''),
-    //           map((value) => this._filterVehicleS(value || ''))
-    //         );
-    //     },
-    //     (error) => {}
-    //   );
-    // }
-    
-  
-    // private _filterVehicleS(value: string): any {
-    //   const filterValue = value.toLowerCase();
-    //   if(filterValue.length === 0) {
-    //     return [];
-    //   }
-    //   return this.VehicleList.filter((data) => {
-    //     return data.vehicle.toLowerCase().indexOf(filterValue) === 0;
-    //   });
-    // }
-
-    onKeyupVehicleDropDown() 
-    {
-      var Prefix = this.filterForm.controls.vehicleName.value;
-      if(Prefix.length < this._generalService.lengthToCheck)
-      { 
-        this.VehicleList = [];
-        return;
-      }
-      this._generalService.GetVehicleDropDownForControlPanel(Prefix).subscribe(
-        (data) => {
-          this.VehicleList = data;
-          this.filteredVehicleOptions = this.filterForm.controls.vehicleName.valueChanges.pipe(
-            startWith(''),
-            map((value) => this._filterVehicleS(value || ''))
-          );
-        },
-        (error) => {}
-      );
-    }
-
-    private _filterVehicleS(value: string): any { 
-      const filterValue = (value || '').toLowerCase();
-      // if (!filterValue || filterValue.length < 3) {
-      //   return [];
-      // }
-
-      return this.VehicleList.filter(data => data.vehicle.toLowerCase().includes(filterValue));
-    }
-
-
-    //City
-    InitCities(){
-      this._generalService.GetCitiessAll().subscribe(
-        data=>
-        {
-          this.CityList=data;
-          this.filteredCityOptions = this.filterForm.controls["city"].valueChanges.pipe(
-            startWith(""),
-            map(value => this._filterCity(value || ''))
-          ); 
-        });
-    }
-    private _filterCity(value: string): any {
-  const filterValue = value.toLowerCase();
-
-  // Only start filtering after 3 characters
-  if (filterValue.length < 3) {
-    return [];
-  }
-
-  return this.CityList.filter(customer => {
-    return customer.geoPointName.toLowerCase().indexOf(filterValue) === 0;
-  });
-}
-
-//     private _filterCity(value: string): any {
-//   const filterValue = value.toLowerCase();
-//   if (filterValue.length === 0) {
-//     return [];
-//   }
-//   return this.CityList.filter(customer => {
-//     return customer.geoPointName.toLowerCase().indexOf(filterValue) === 0;
-//   });
-// }
-
-    // private _filterCity(value: string): any {
-    //   const filterValue = value.toLowerCase();
-    //   if(filterValue.length === 0) {
-    //     return [];
-    //   }
-    //   return this.CityList.filter(
-    //     customer =>
-    //     {
-    //       return customer.geoPointName.toLowerCase().indexOf(filterValue)===0;
-    //     }
-    //   );
-    // }
-
-    //------------ Type -----------------
-  // InitPackageType(){
-  //   this._generalService.GetPackgeType().subscribe(
-  //     data=>
-  //     {
-  //       this.PackageTypeList=data;
-  //       this.filteredPackageTypeOptions = this.filterForm.controls['packageType'].valueChanges.pipe(
-  //         startWith(""),
-  //         map(value => this._filterPackageType(value || ''))
-  //       ); 
-  //     });
-  // }
-  onKeyupDutyTypeDropDown()
-  {
-    var Prefix = this.filterForm.controls['packageType'].value;
-    if(Prefix.length < this._generalService.lengthToCheck)
-    { 
-      this.PackageTypeList = [];
-      return;
-    }
-    this._generalService.GetDutyTypeDropDownForControlPanel(Prefix).subscribe(
-      data=>
-      {
-        this.PackageTypeList=data;
-        this.filteredPackageTypeOptions = this.filterForm.controls['packageType'].valueChanges.pipe(
-          startWith(""),
-          map(value => this._filterPackageType(value || ''))
-        ); 
-      });
-  }
-
-
-//   private _filterPackageType(value: string): any {
-//   if (!value || value.length < 3) {
-//     return []; 
-//   }
-//   const filterValue = value.toLowerCase();
-
-//   return this.PackageTypeList?.filter(
-//     customer =>
-//       customer.packageType.toLowerCase().startsWith(filterValue)
-//   );
-// }
-
-  private _filterPackageType(value: string): any {
-    const filterValue = value.toLowerCase();
-    return this.PackageTypeList?.filter(
-      customer => 
-      {
-        return customer.packageType.toLowerCase().indexOf(filterValue)===0;
-      }
-    );
-  }
-  
   getPackageTypeID(packageTypeID: any) { 
     this.packageTypeID=packageTypeID;
     this.filterForm.controls["package"].setValue('');
-    this.InitPackage();
+    this.PackageList = [];
   }
 
   onPackageTypeChanges(event:any)
@@ -1714,32 +1415,18 @@ export class ControlPanelDesignComponent implements OnInit {
     if(event.keyCode===8)
     {
       this.filterForm.controls["package"].setValue('');
-      this.InitPackageOnPageLoad();
+      this.packageTypeID = null;
+      this.PackageList = [];
     }
   }
 
-  //------------ Package -----------------
   InitPackage()
   { 
     this._generalService.getPackageForSettleRate(this.packageTypeID).subscribe(
       data=>
       {
         this.PackageList=data;
-        this.filteredPackageOptions = this.filterForm.controls['package'].valueChanges.pipe(
-          startWith(""),
-          map(value => this._filterPackage(value || ''))
-        ); 
       });
-  }
-
-  private _filterPackage(value: string): any {
-    const filterValue = value.toLowerCase();
-    return this.PackageList?.filter(
-      customer => 
-      {
-        return customer.package.toLowerCase().indexOf(filterValue)===0;
-      }
-    );
   }
   
   getPackageID(packageID: any) {
@@ -1752,364 +1439,93 @@ export class ControlPanelDesignComponent implements OnInit {
       data=>
       {
         this.PackageList=data;
-        this.filteredPackageOptions = this.filterForm.controls['package'].valueChanges.pipe(
-          startWith(""),
-          map(value => this._filterPackageOnPageLoad(value || ''))
-        ); 
       });
   }
 
-  private _filterPackageOnPageLoad(value: string): any {
-    const filterValue = value.toLowerCase();
-    return this.PackageList?.filter(
-      customer => 
-      {
-        return customer.package.toLowerCase().indexOf(filterValue)===0;
-      }
-    );
-  }
-
-  //Supplier
   InitSupplier()
   { 
     this._generalService.GetSupplier().subscribe(
       data=>
       {
         this.SupplierList=data;
-        this.filteredSupplierOptions = this.filterForm.controls['supplier'].valueChanges.pipe(
-          startWith(""),
-          map(value => this._filterSupplier(value || ''))
-        ); 
       });
   }
-  private _filterSupplier(value: string): any[] {
-  if (!value || value.length < 3) return [];
-
-  const filterValue = value.toLowerCase();
-  return this.SupplierList?.filter(s =>
-    s.supplierName?.toLowerCase().includes(filterValue)
-  ) || [];
-}
-
-
-  // private _filterSupplier(value: string): any {
-  //   const filterValue = value.toLowerCase();
-  //   if(filterValue.length === 0) {
-  //     return [];
-  //   }
-  //   return this.SupplierList?.filter(
-  //     supplier => 
-  //     {
-  //       return supplier.supplierName.toLowerCase().indexOf(filterValue)===0;
-  //     }
-  //   );
-  // }
 
   getSupplierID(SupplierID:any)
   {
     this.supplierID=SupplierID;
     this.filterForm.controls["vehicleInventory"].setValue('');
     this.filterForm.controls["driver"].setValue('');
-    this.InitVehicleInventory();
-    this.InitDriver();
-    this.InitDriverOfficialIdentityNumber();
+    this.filterForm.controls["driverOfficialIdentityNumber"].setValue('');
+    this.clearDriverInventoryAssociationLists();
   }
 
   onSupplierChanges(event:any)
   {
     if(event.keyCode===8)
     {
+      this.supplierID = null;
       this.filterForm.controls["vehicleInventory"].setValue('');
       this.filterForm.controls["driver"].setValue('');
-      this.InitVehicleInventoryOnPageLoad();
-      this.InitDriverOnPageLoad();
-      this.InitDOINOnPageLoad();
+      this.filterForm.controls["driverOfficialIdentityNumber"].setValue('');
+      this.clearDriverInventoryAssociationLists();
     }
   }
 
-  //Vehicle Inventory
+  private clearDriverInventoryAssociationLists(): void {
+    this.VehicleInventoryList = [];
+    this.DriverList = [];
+    this.DriverOfficialIdentityNumberList = [];
+  }
+
   InitVehicleInventory(){
     this._generalService.GetDriverInventoryForCpSearch(this.supplierID).subscribe(
       (data)=>
       {
         this.VehicleInventoryList=data;
-        this.filteredVehicleInventoryOptions = this.filterForm.controls['vehicleInventory'].valueChanges.pipe(
-          startWith(""),
-          map(value => this._filterVehicleInventory(value || ''))
-        ); 
       });
   }
 
-  private _filterVehicleInventory(value: string): any {
-  const filterValue = (value || '').toLowerCase().trim();
-
-  // Minimum 3 characters required
-  if (filterValue.length < 3) {
-    return [];
-  }
-
-  return this.VehicleInventoryList?.filter(vi => {
-    const combinedField = `${vi.registrationNumber} ${vi.vehicle} ${vi.driverName} ${vi.supplierName} ${vi.driverPhone}`.toLowerCase();
-    return combinedField.includes(filterValue);
-  });
-}
-
-  // private _filterVehicleInventory(value: string): any {
-  //   const filterValue = value.toLowerCase().trim();
-  //   if(filterValue.length === 0) {
-  //     return [];
-  //   }
-  //   return this.VehicleInventoryList?.filter(
-  //     vi => 
-  //     {
-  //       const combinedField = `${vi.registrationNumber} ${vi.vehicle} ${vi.driverName} ${vi.supplierName} ${vi.driverPhone}`.toLowerCase();
-  //       return combinedField.includes(filterValue);
-  //       //return customer.registrationNumber.toLowerCase().indexOf(filterValue)===0;
-  //     }
-  //   );
-  // }
-  
   InitVehicleInventoryOnPageLoad(){
     this._generalService.GetDriverInventoryVehicleForCpSearch().subscribe(
       (data)=>
       {
         this.VehicleInventoryList=data;
-        this.filteredVehicleInventoryOptions = this.filterForm.controls['vehicleInventory'].valueChanges.pipe(
-          startWith(""),
-          map(value => this._filterVehicleInventoryOnPageLoad(value || ''))
-        ); 
       });
   }
-  private _filterVehicleInventoryOnPageLoad(value: string): any {
-  const filterValue = (value || '').toLowerCase().trim();
-  if (filterValue.length < 3) {
-    return [];
-  }
 
-  return this.VehicleInventoryList?.filter(vi => {
-    const combinedField = `${vi.registrationNumber} ${vi.vehicle} ${vi.driverName} ${vi.supplierName} ${vi.driverPhone}`.toLowerCase();
-    return combinedField.includes(filterValue);
-  });
-}
-
-
-  // private _filterVehicleInventoryOnPageLoad(value: string): any {
-  //   const filterValue = value.toLowerCase().trim();
-  //   if(filterValue.length === 0) {
-  //     return [];
-  //   }
-  //   return this.VehicleInventoryList?.filter(
-  //     vi => 
-  //     {
-  //       const combinedField = `${vi.registrationNumber} ${vi.vehicle} ${vi.driverName} ${vi.supplierName} ${vi.driverPhone}`.toLowerCase();
-  //       return combinedField.includes(filterValue);
-  //       //return customer.registrationNumber.toLowerCase().indexOf(filterValue)===0;
-  //     }
-  //   );
-  // }
-
-  //Driver
-   InitDriver(){
+  InitDriver(){
     this._generalService.GetDriverInventoryForCpSearch(this.supplierID).subscribe(
       (data)=>
       {
         this.DriverList=data;
-        this.filteredDriverOptions = this.filterForm.controls['driver'].valueChanges.pipe(
-          startWith(""),
-          map(value => this._filterDriver(value || ''))
-        ); 
       });
   }
-  private _filterDriver(value: string): any {
-  const filterValue = (value || '').toLowerCase().trim();
 
-  // Minimum 3 characters required
-  if (filterValue.length < 3) {
-    return [];
-  }
-
-  return this.DriverList?.filter(driver => {
-    const combinedField = `${driver.registrationNumber} ${driver.vehicle} ${driver.driverName} ${driver.supplierName} ${driver.driverPhone}`.toLowerCase();
-    return combinedField.includes(filterValue);
-  });
-}
-
-
-  // private _filterDriver(value: string): any {
-  //   const filterValue = value.toLowerCase().trim();
-  //   if(filterValue.length === 0) {
-  //     return [];
-  //   }
-  //   return this.DriverList?.filter(
-  //     driver => 
-  //     {
-  //       const combinedField = `${driver.registrationNumber} ${driver.vehicle} ${driver.driverName} ${driver.supplierName} ${driver.driverPhone}`.toLowerCase();
-  //       return combinedField.includes(filterValue);
-  //       //return customer.driverName.toLowerCase().indexOf(filterValue)===0;
-  //     }
-  //   );
-  // }
-  
   InitDriverOnPageLoad(){
     this._generalService.GetDriverInventoryVehicleForCpSearch().subscribe(
       (data)=>
       {
         this.DriverList=data;
-        this.filteredDriverOptions = this.filterForm.controls['driver'].valueChanges.pipe(
-          startWith(""),
-          map(value => this._filterDriverOnPageLoad(value || ''))
-        ); 
       });
   }
-  private _filterDriverOnPageLoad(value: string): any {
-  const filterValue = (value || '').toLowerCase().trim();
-
-  // Minimum 3 characters required
-  if (filterValue.length < 3) {
-    return [];
-  }
-
-  return this.DriverList?.filter(driver => {
-    const combinedField =
-      `${driver.registrationNumber} ${driver.vehicle} ${driver.driverName} ${driver.supplierName} ${driver.driverPhone}`.toLowerCase();
-
-    return combinedField.includes(filterValue);
-  });
-}
-
-
-  // private _filterDriverOnPageLoad(value: string): any {
-  //   const filterValue = value.toLowerCase();
-  //   if(filterValue.length === 0) {
-  //     return [];
-  //   }
-  //   return this.DriverList?.filter(
-  //     driver => 
-  //     {
-  //       const combinedField = `${driver.registrationNumber} ${driver.vehicle} ${driver.driverName} ${driver.supplierName} ${driver.driverPhone}`.toLowerCase();
-  //       return combinedField.includes(filterValue);
-  //       //return customer.driverName.toLowerCase().indexOf(filterValue)===0;
-  //     }
-  //   );
-  // }
 
   InitDriverOfficialIdentityNumber(){
     this._generalService.GetDriverOfficialIdentityNumber(this.supplierID).subscribe(
       (data)=>
       {
         this.DriverOfficialIdentityNumberList=data;
-        this.filteredDriverOfficialIdentityNumberOptions = this.filterForm.controls['driverOfficialIdentityNumber'].valueChanges.pipe(
-          startWith(""),
-          map(value => this._filterDriverOfficialIdentityNumber(value || ''))
-        ); 
       });
   }
-
-  private _filterDriverOfficialIdentityNumber(value: string): any {
-  const filterValue = (value || '').toLowerCase().trim();
-
-  // Minimum 3 characters required
-  if (filterValue.length < 3) {
-    return [];
-  }
-
-  return this.DriverOfficialIdentityNumberList?.filter(item =>
-    item.driverOfficialIdentityNumber?.toLowerCase().includes(filterValue)
-  );
-}
-
-  // private _filterDriverOfficialIdentityNumber(value: string): any {
-  //   const filterValue = value.toLowerCase().trim();
-  //   if(filterValue.length === 0) {
-  //     return [];
-  //   }
-  //   return this.DriverOfficialIdentityNumberList?.filter(
-  //     driverOfficialIdentityNumber => 
-  //     {
-  //       return driverOfficialIdentityNumber.driverOfficialIdentityNumber.toLowerCase().includes(filterValue);
-  //       //return customer.driverName.toLowerCase().indexOf(filterValue)===0;
-  //     }
-  //   );
-  // }
 
   InitDOINOnPageLoad(){
     this._generalService.GetDOIN().subscribe(
       (data)=>
       {
         this.DriverOfficialIdentityNumberList=data;
-        this.filteredDriverOfficialIdentityNumberOptions = this.filterForm.controls['driverOfficialIdentityNumber'].valueChanges.pipe(
-          startWith(""),
-          map(value => this._filterDOINOnPageLoad(value || ''))
-        ); 
       });
   }
-  private _filterDOINOnPageLoad(value: string): any {
-  const filterValue = (value || '').toLowerCase().trim();
 
-  if (filterValue.length < 3) {
-    return [];
-  }
-
-  return this.DriverOfficialIdentityNumberList?.filter(driver =>
-    driver.driverOfficialIdentityNumber?.toLowerCase().includes(filterValue)
-  );
-}
-
-
-  // private _filterDOINOnPageLoad(value: string): any {
-  //   const filterValue = value.toLowerCase();
-  //   if(filterValue.length === 0) {
-  //     return [];
-  //   }
-  //   return this.DriverOfficialIdentityNumberList?.filter(
-  //     driver => 
-  //     {     
-  //       return driver.driverOfficialIdentityNumber.toLowerCase().includes(filterValue);
-  //     }
-  //   );
-  // }
-
-  //Disputes
-  // InitDisputesOnPageLoad()
-  // {
-  //   this._generalService.GetDisputes().subscribe(
-  //     (data)=>
-  //     {
-  //       this.DisputesList=data;
-  //       this.filteredDisputesOptions = this.filterForm.controls['disputes'].valueChanges.pipe(
-  //         startWith(""),
-  //         map(value => this._filterDisputesOnPageLoad(value || ''))
-  //       ); 
-  //     });
-  // }
-  onKeyupDisputesDropDown()
-  {
-    var Prefix = this.filterForm.controls.disputes.value;
-    if(Prefix.length < this._generalService.lengthToCheck)
-    { 
-      this.DisputesList = [];
-      return;
-    }
-    this._generalService.GetDisputeTypeDropDownForControlPanel(Prefix).subscribe(
-    (data)=>
-    {
-      this.DisputesList=data;
-      this.filteredDisputesOptions = this.filterForm.controls['disputes'].valueChanges.pipe(
-        startWith(""),
-        map(value => this._filterDisputesOnPageLoad(value || ''))
-      ); 
-    });
-  }
-  private _filterDisputesOnPageLoad(value: string): any {
-    const filterValue = value.toLowerCase().trim();
-    return this.DisputesList?.filter(
-      DisputeType => 
-      {
-        return DisputeType.disputeType.toLowerCase().indexOf(filterValue)===0;
-      }
-    );
-  }
-  
   navigateToBooking() {
     //window.open('http://localhost:4200/#/bookingScreen', '_blank');
     //window.open('http://localhost:4200/#/reservationGroupDetails', '_blank');
@@ -3784,7 +3200,7 @@ openDropOffByExectiveGPS(item: any)
     return v ? `Mode of Payment: ${v}` : null;
   }
 
-  getControlPanelMessagingHeaderDisplay(row: any): {
+  private getControlPanelMessagingHeaderDisplay(row: any): {
     successBadges: string[];
     failedBadges: string[];
     otherParts: string[];
@@ -4527,6 +3943,7 @@ controlPanelDetails(reservationID:any,index:number) {
   // Option 1: Reset to _filters initial values
     this._filters = new Filters({});
     this.filterForm = this.createFilterForm();
+    this.setupPrefixAutocompletes();
     this.searchTerm = '';
     this.selectedFilter = 'search';
     const today = this.formatDate(new Date());
@@ -4600,140 +4017,6 @@ setCalculatedLocationOutTime(data: any, interval?: number) {
     //     ); 
     //   });
     // }
-    onKeyupRegnNoDropDown()
-    {
-      var Prefix = this.filterForm.controls.vehicleInventory.value;
-      if(Prefix.length < this._generalService.lengthToCheck)
-      { 
-        this.RegNumberList = [];
-        return;
-      }
-      this._generalService.GetRegNoDropDownForControlPanel(Prefix).subscribe(
-      data=>
-      {
-        this.RegNumberList=data;
-        this.filteredRegNumberOptions = this.filterForm.controls.vehicleInventory.valueChanges.pipe(
-          startWith(""),
-          map(value => this._filterRegNo(value || ''))
-        ); 
-      });
-    }
-
-    private _filterRegNo(value: string): any {
-      const filterValue = value.toLowerCase().trim();
-      // If the input is empty, return an empty list
-      // if (filterValue.length === 0) 
-      // {
-      //   return [];
-      // }
-      // Return filtered results matching the typed value
-      return this.RegNumberList.filter(data => data.registrationNumber.toLowerCase().includes(filterValue)
-      );
-    }
-
-
-    //---------- Payment Mode ----------
-    // InitPaymentMode() 
-    // {
-    //   this._generalService.GetModeOfPayment().subscribe(
-    //   data => {
-    //     this.PaymentModeList = data;
-    //     this.filteredPaymentModeOptions = this.filterForm.controls.modeOfPayment.valueChanges.pipe(
-    //       startWith(""),
-    //       map(value => this._filterPaymentMode(value || ''))
-    //     );
-    //   });
-    // }
-    onKeyupPaymentModeDropDown() 
-    {
-      var Prefix = this.filterForm.controls.modeOfPayment.value;
-      if(Prefix.length < this._generalService.lengthToCheck)
-      { 
-        this.PaymentModeList = [];
-        return;
-      }
-      this._generalService.GetModeOfPaymentDropDownForControlPanel(Prefix).subscribe(
-      data => {
-        this.PaymentModeList = data;
-        this.filteredPaymentModeOptions = this.filterForm.controls.modeOfPayment.valueChanges.pipe(
-          startWith(""),
-          map(value => this._filterPaymentMode(value || ''))
-        );
-      });
-    }   
-    private _filterPaymentMode(value: string): any {
-      const filterValue = value.toLowerCase();
-        return this.PaymentModeList?.filter(
-        data => 
-        {
-          return data.modeOfPayment.toLowerCase().includes(filterValue);
-        }
-      );
-    }
-
-    
-  //---------- Supplier Type ----------
-  onKeyupSupplierTypeDropDown()
-  {
-    var Prefix = this.filterForm.controls.supplierType.value;
-    if(Prefix.length < this._generalService.lengthToCheck)
-    { 
-      this.SupplierTypeList = [];
-      return;
-    }
-    this._generalService.GetSupplierTypeDropDownForControlPanel(Prefix).subscribe(
-    data=>
-    {
-      this.SupplierTypeList=data;
-      this.filteredSupplierTypeOptions = this.filterForm.controls.supplierType.valueChanges.pipe(
-        startWith(""),
-        map(value => this._filterSupplierType(value || ''))
-      );
-    });
-  }
-  private _filterSupplierType(value: string): any {
-    const filterValue = value.toLowerCase();
-    return this.SupplierTypeList.filter(
-      data =>
-      {
-        return data.supplierType.toLowerCase().includes(filterValue);
-      }
-    );
-  }
-
-  //---------- KAM ----------
-  onKeyupKAMDropDown()
-  {
-    var Prefix = this.filterForm.controls.kAM.value;
-    if(Prefix.length < this._generalService.lengthToCheck)
-    { 
-      this.KAMList = [];
-      return;
-    }
-    this._generalService.GetKAMDropDownForControlPanel(Prefix).subscribe
-    (
-      data =>   
-      {
-        this.KAMList = data;
-        console.log(this.KAMList)
-        this.filteredKAMByOptions = this.filterForm.controls.kAM.valueChanges.pipe(
-          startWith(""),
-          map(value => this._filterKAM(value || ''))
-        );
-      });
-  }
-  private _filterKAM(value: string): any {
-    const filterValue = value.toLowerCase();
-    return this.KAMList.filter(
-    data => 
-    {
-      const fullName = `${data.firstName} ${data.lastName}`.toLowerCase();
-      return fullName.includes(filterValue);
-    });
-  }
-  
-
-
 } 
 
 

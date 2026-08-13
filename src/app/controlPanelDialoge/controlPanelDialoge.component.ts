@@ -368,6 +368,7 @@ export class ControlPanelDialogeComponent {
   private prefetchKamSummaries(list: any[]): void {
     this.kamSummaryByCustomerId = {};
     this.kamRowsByCustomerId = {};
+    const customerIds: number[] = [];
     const seen = new Set<number>();
     for (const row of list) {
       const cid = row?.customerID;
@@ -379,13 +380,33 @@ export class ControlPanelDialogeComponent {
         continue;
       }
       seen.add(n);
+      customerIds.push(n);
       this.kamSummaryByCustomerId[n] = '…';
-      this._generalService
-        .GetCustomerKam(n)
-        .pipe(take(1))
-        .subscribe(
-          (kams: any[]) => {
-            const arr = kams == null ? [] : Array.isArray(kams) ? kams : [kams];
+    }
+    if (!customerIds.length) {
+      return;
+    }
+
+    this._generalService
+      .GetCustomerKamBatch(customerIds)
+      .pipe(take(1))
+      .subscribe(
+        (entries: any[]) => {
+          const byCustomerId = new Map<number, any[]>();
+          (entries || []).forEach((entry) => {
+            const customerId = Number(entry?.customerID ?? entry?.CustomerID);
+            if (Number.isNaN(customerId)) {
+              return;
+            }
+            const kams = entry?.kams ?? entry?.Kams;
+            byCustomerId.set(
+              customerId,
+              kams == null ? [] : Array.isArray(kams) ? kams : [kams]
+            );
+          });
+
+          for (const n of customerIds) {
+            const arr = byCustomerId.get(n) ?? [];
             this.kamRowsByCustomerId[n] = arr;
             if (!arr.length) {
               this.kamSummaryByCustomerId[n] = '—';
@@ -397,15 +418,17 @@ export class ControlPanelDialogeComponent {
                 .filter(Boolean);
               this.kamSummaryByCustomerId[n] = names.length ? names.join(', ') : '—';
             }
-            this.ngZone.run(() => this.cdr.detectChanges());
-          },
-          () => {
+          }
+          this.ngZone.run(() => this.cdr.detectChanges());
+        },
+        () => {
+          for (const n of customerIds) {
             this.kamSummaryByCustomerId[n] = '—';
             this.kamRowsByCustomerId[n] = [];
-            this.ngZone.run(() => this.cdr.detectChanges());
           }
-        );
-    }
+          this.ngZone.run(() => this.cdr.detectChanges());
+        }
+      );
   }
 
   kamSummaryText(item: any): string {
