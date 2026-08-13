@@ -28,7 +28,7 @@ import { ClossingOneService } from '../clossingOne/clossingOne.service';
 import { SpecialInstructionInfoComponent } from '../SpecialInstructionInfo/SpecialInstructionInfo.component';
 import moment from 'moment';
 import { DutyPostPickUPCallModel } from '../dutyPostPickUPCall/dutyPostPickUPCall.model';
-import { Observable, Subject } from 'rxjs';
+import { Observable, Subject, Subscription } from 'rxjs';
 import { take } from 'rxjs/operators';
 import { ReservationDetails } from '../reservationDetails/reservationDetails.model';
 import { PassengerDetails } from '../passengerDetails/passengerDetails.model';
@@ -126,6 +126,9 @@ export class ControlPanelDialogeComponent {
   reservationID: any;
   index: number;
   totalData = 0;
+  isCountLoading = false;
+  private headerSearchGeneration = 0;
+  private headerCountSub?: Subscription;
   recordsPerPage = 50;
   isLoading = true;
   currentPage = 1;
@@ -2797,12 +2800,27 @@ public getInvoiceNumber(item:any ,i: any)
       ...(this.filterForm?.getRawValue() ?? {}),
       showAllLocation: this.getEffectiveShowAllLocation(this.filterForm?.get('showAllLocation')?.value)
     };
+    const searchGeneration = ++this.headerSearchGeneration;
+    if (this.headerCountSub) {
+      this.headerCountSub.unsubscribe();
+      this.headerCountSub = undefined;
+    }
+    const bookingLookup = this.isBookingNumberLookup(requestPayload);
+    if (!bookingLookup) {
+      this.isCountLoading = true;
+    }
     this._controlPanelDesignService.getReservationHeaderDetails(status,requestPayload,currentPage,pageSize,this.sortBy,this.orderBy).subscribe(
       (data: ControlPanelHeaderData) => {
+          if (searchGeneration !== this.headerSearchGeneration) {
+            return;
+          }
           if (data != null) 
           {
             this.reservationHeaderInfo = data.reservationHeaderDetails;
-            this.totalData = data.totalRecords;
+            if (data.totalRecords != null) {
+              this.totalData = data.totalRecords;
+              this.isCountLoading = false;
+            }
 
             if (rowIndex !== undefined)
             {
@@ -2817,12 +2835,46 @@ public getInvoiceNumber(item:any ,i: any)
           {
             this.reservationHeaderInfo = null;
             this.totalData = 0;
+            this.isCountLoading = false;
           }
         },
         (error: HttpErrorResponse) => {
+          if (searchGeneration !== this.headerSearchGeneration) {
+            return;
+          }
           this.reservationHeaderInfo = null;
+          this.isCountLoading = false;
         }
       );
+
+    if (!bookingLookup) {
+      this.headerCountSub = this._controlPanelDesignService
+        .getReservationHeaderCount(status, requestPayload)
+        .subscribe(
+          (countData: { totalRecords: number }) => {
+            if (searchGeneration !== this.headerSearchGeneration) {
+              return;
+            }
+            this.totalData = countData?.totalRecords ?? 0;
+            this.isCountLoading = false;
+          },
+          () => {
+            if (searchGeneration !== this.headerSearchGeneration) {
+              return;
+            }
+            this.isCountLoading = false;
+          }
+        );
+    }
+  }
+
+  private isBookingNumberLookup(filters: Partial<Filters>): boolean {
+    const reservationId = filters?.reservationID;
+    if (reservationId != null && reservationId !== '' && Number(reservationId) !== 0) {
+      return true;
+    }
+    const resId = filters?.resID;
+    return resId != null && String(resId).trim() !== '';
   }
   
 

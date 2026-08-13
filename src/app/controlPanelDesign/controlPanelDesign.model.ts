@@ -2,10 +2,13 @@
 import { AllotmentStatusDetails } from "../AllotmentStatusDetails/AllotmentStatusDetails.model";
 
 export class ControlPanelHeaderData {
-  totalRecords: number;
+  totalRecords: number | null;
   reservationHeaderDetails: ControlPanelHeaderDetails[];
   constructor(controlPanelData) {
-    this.totalRecords = controlPanelData.totalRecords || '';
+    this.totalRecords =
+      controlPanelData.totalRecords === null || controlPanelData.totalRecords === undefined
+        ? null
+        : controlPanelData.totalRecords;
     this.reservationHeaderDetails = controlPanelData.reservationHeaderDetails;
   }
 }

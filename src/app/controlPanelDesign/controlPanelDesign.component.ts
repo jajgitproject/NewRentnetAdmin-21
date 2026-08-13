@@ -29,7 +29,7 @@ import { TimeAndAddressInfoComponent } from '../TimeAndAddressInfo/TimeAndAddres
 import { StopDetailsInfoComponent } from '../StopDetailsInfo/StopDetailsInfo.component';
 import { StopOnMapInfoComponent } from '../StopOnMapInfo/StopOnMapInfo.component';
 import { FormBuilder, FormControl, FormGroup } from '@angular/forms';
-import { Observable, of, Subject } from 'rxjs';
+import { Observable, of, Subject, Subscription } from 'rxjs';
 import { VehicleDropDown } from '../vehicle/vehicleDropDown.model';
 import { map, startWith } from 'rxjs/operators';
 import { FormDialogComponent } from '../feedBack/dialogs/form-dialog/form-dialog.component';
@@ -193,6 +193,9 @@ export class ControlPanelDesignComponent implements OnInit {
   public DisputesList?: DisputeTypeDropDown[] = [];
 
   totalData = 0;
+  isCountLoading = false;
+  private headerSearchGeneration = 0;
+  private headerCountSub?: Subscription;
   recordsPerPage = 50;
   isLoading = false;
   currentPage = 1;
@@ -836,13 +839,28 @@ export class ControlPanelDesignComponent implements OnInit {
       showAllLocation: this.getEffectiveShowAllLocation(this.filterForm.get('showAllLocation')?.value)
     };
     this.filterForm.patchValue({ showAllLocation: requestPayload.showAllLocation }, { emitEvent: false });
+    const searchGeneration = ++this.headerSearchGeneration;
+    if (this.headerCountSub) {
+      this.headerCountSub.unsubscribe();
+      this.headerCountSub = undefined;
+    }
+    const bookingLookup = this.isBookingNumberLookup(requestPayload);
+    if (!bookingLookup) {
+      this.isCountLoading = true;
+    }
     console.log(status);
     this._controlPanelDesignService.getReservationHeaderDetails(status,requestPayload,currentPage,pageSize,this.sortBy,this.orderBy).subscribe(
       (data: ControlPanelHeaderData) => {
+          if (searchGeneration !== this.headerSearchGeneration) {
+            return;
+          }
           if (data != null) 
           {
             this.reservationHeaderInfo = data.reservationHeaderDetails;
-            this.totalData = data.totalRecords;
+            if (data.totalRecords != null) {
+              this.totalData = data.totalRecords;
+              this.isCountLoading = false;
+            }
             console.log(this.reservationHeaderInfo);
              this.reservationHeaderInfo.forEach(row => {
             
@@ -880,14 +898,47 @@ export class ControlPanelDesignComponent implements OnInit {
           }
         },
         (error: HttpErrorResponse) => {
+          if (searchGeneration !== this.headerSearchGeneration) {
+            return;
+          }
           this.reservationHeaderInfo = [];
           this.totalData = 0;
+          this.isCountLoading = false;
           this.isLoading = false;
           if (this.pendingReservationId) {
             this.pendingReservationId = null;
           }
         }
       );
+
+    if (!bookingLookup) {
+      this.headerCountSub = this._controlPanelDesignService
+        .getReservationHeaderCount(status, requestPayload)
+        .subscribe(
+          (countData: { totalRecords: number }) => {
+            if (searchGeneration !== this.headerSearchGeneration) {
+              return;
+            }
+            this.totalData = countData?.totalRecords ?? 0;
+            this.isCountLoading = false;
+          },
+          () => {
+            if (searchGeneration !== this.headerSearchGeneration) {
+              return;
+            }
+            this.isCountLoading = false;
+          }
+        );
+    }
+  }
+
+  private isBookingNumberLookup(filters: Partial<Filters>): boolean {
+    const reservationId = filters?.reservationID;
+    if (reservationId != null && reservationId !== '' && Number(reservationId) !== 0) {
+      return true;
+    }
+    const resId = filters?.resID;
+    return resId != null && String(resId).trim() !== '';
   }
 
   trimBookingNo()

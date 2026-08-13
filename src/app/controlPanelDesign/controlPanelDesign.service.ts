@@ -33,48 +33,7 @@ export class ControlPanelDesignService {
     sortBy:string,
     orderBy:string
   ): Observable<any> {
-    if (
-      _filters.reservationID === null ||
-      _filters.reservationID.toString() === ''
-    ) {
-      _filters.reservationID = 0;
-    }
-
-    if (
-      _filters.dutySlipID === null ||
-      _filters.dutySlipID === undefined ||
-      _filters.dutySlipID.toString() === ''
-    ) {
-      _filters.dutySlipID = 0;
-    } else {
-      const dutySlipId = parseInt(String(_filters.dutySlipID).trim(), 10);
-      _filters.dutySlipID = isNaN(dutySlipId) ? 0 : dutySlipId;
-    }
-
-    if (_filters.fromDate != '' && _filters.fromDate != null) {
-      _filters.fromDate = this.datepipe.transform(
-        _filters.fromDate,
-        'yyyy-MM-dd'
-      );
-    } 
-
-    if (_filters.toDate != '' && _filters.toDate != null) {
-      _filters.toDate = this.datepipe.transform(_filters.toDate, 'yyyy-MM-dd');
-    } 
-
-
-    if (_filters.fromTime != '' && _filters.fromTime != null) {
-      let fromTime = new Date(_filters.fromTime); 
-      const fromTimes=this.generalService.getTimeApplicableTO(fromTime);
-      _filters.fromTime = this.datepipe.transform(fromTimes, 'HH:mm:ss');
-    }
-
-    if (_filters.toTime != '' && _filters.toTime != null) {
-      let toTime = new Date(_filters.toTime); 
-      const toTimes=this.generalService.getTimeApplicableTO(toTime);
-      _filters.toTime = this.datepipe.transform(toTimes, 'HH:mm:ss'); 
-    }
-
+    const filters = this.normalizeHeaderFilters(_filters);
     return this.httpClient.put(
       this.API_URL +
         'getReservationHeaderDetails'+
@@ -88,8 +47,64 @@ export class ControlPanelDesignService {
         encodeURIComponent(sortBy)+
         '/' +
         encodeURIComponent(orderBy),
-      _filters
+      filters
     );
+  }
+
+  /** Decoupled total count for CP header grid (Phase 1.4). Same filter payload as list. */
+  getReservationHeaderCount(status: string, _filters: Filters): Observable<{ totalRecords: number }> {
+    const filters = this.normalizeHeaderFilters(_filters);
+    return this.httpClient.put(
+      this.API_URL + 'getReservationHeaderCount/' + status,
+      filters
+    );
+  }
+
+  private normalizeHeaderFilters(_filters: Filters): Filters {
+    const filters = { ..._filters };
+
+    if (
+      filters.reservationID === null ||
+      filters.reservationID.toString() === ''
+    ) {
+      filters.reservationID = 0;
+    }
+
+    if (
+      filters.dutySlipID === null ||
+      filters.dutySlipID === undefined ||
+      filters.dutySlipID.toString() === ''
+    ) {
+      filters.dutySlipID = 0;
+    } else {
+      const dutySlipId = parseInt(String(filters.dutySlipID).trim(), 10);
+      filters.dutySlipID = isNaN(dutySlipId) ? 0 : dutySlipId;
+    }
+
+    if (filters.fromDate != '' && filters.fromDate != null) {
+      filters.fromDate = this.datepipe.transform(
+        filters.fromDate,
+        'yyyy-MM-dd'
+      );
+    }
+
+    if (filters.toDate != '' && filters.toDate != null) {
+      filters.toDate = this.datepipe.transform(filters.toDate, 'yyyy-MM-dd');
+    }
+
+    if (filters.fromTime != '' && filters.fromTime != null) {
+      let fromTime = new Date(filters.fromTime);
+      const fromTimes = this.generalService.getTimeApplicableTO(fromTime);
+      filters.fromTime = this.datepipe.transform(fromTimes, 'HH:mm:ss');
+    }
+
+    if (filters.toTime != '' && filters.toTime != null) {
+      let toTime = new Date(filters.toTime);
+      const toTimes = this.generalService.getTimeApplicableTO(toTime);
+      filters.toTime = this.datepipe.transform(toTimes, 'HH:mm:ss');
+    }
+
+    return filters;
   }
 
   /** Latest SMS/WhatsApp MessageStatus per reservation (batch). */
