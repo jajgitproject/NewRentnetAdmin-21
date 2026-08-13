@@ -95,10 +95,6 @@ import { ReservationLocationTransferLogModel } from '../reservationLocationTrans
 import { FormDialogSendSmsWhatsappMailComponent } from '../sendSmsWhatsappMail/dialogs/form-dialog/form-dialog.component';
 import { VendorDetailsComponent } from '../vendorDetails/vendorDetails.component';
 import { LocationDetailsComponent } from '../locationDetails/locationDetails.component';
-import { CarMovingStatusByAppComponent } from '../carMovingStatusByApp/carMovingStatusByApp.component';
-import { AppDataMissingStatusComponent } from '../appDataMissingStatus/appDataMissingStatus.component';
-import { AppDataMissingStatusModel } from '../appDataMissingStatus/appDataMissingStatus.model';
-import { AppDataMissingStatusService } from '../appDataMissingStatus/appDataMissingStatus.service';
 import { IncidenceListDialogComponent } from '../incidence/dialogs/incidence-list-dialog/incidence-list-dialog.component';
 import { IncidenceService } from '../incidence/incidence.service';
 import { ResolutionService } from '../resolution/resolution.service';
@@ -232,8 +228,6 @@ export class ControlPanelDesignComponent implements OnInit {
   packageID: any;
   supplierID: any;
   showEmptyTableHeader: boolean = false;
-  /** When true, shows the Tracking Status column in the main Control Panel grid. */
-  showTrackingStatusColumn = false;
   //sortBy:string='Reservation.ReservationID';
   sortBy:string='Reservation.PickupDate, Reservation.PickupTime ';
   orderBy:string='ASC';
@@ -244,14 +238,7 @@ export class ControlPanelDesignComponent implements OnInit {
   ShowAllLocation: any;
   driverAppLatestVersion = '';
 
-  dataSourceForAppDataMissingStatus: AppDataMissingStatusModel[] | null;
   status:string;
-  currentLocationLatitude: string;
-  currentLocationLongitude: string;
-  currentAddress: any;
-  locationBeforeTwoMinutesLatitude: string;
-  locationBeforeTwoMinutesLongitude: string;
-  locationBeforeTwoMinutesAddress: any;
   dutySlipID: number;
   @Output() newDataAddedEvent = new EventEmitter<boolean>();
   @Input() newDataAddedEvents = new EventEmitter<boolean>();
@@ -308,7 +295,6 @@ export class ControlPanelDesignComponent implements OnInit {
      public incidenceService : IncidenceService,
     public passengerDetailsService: PassengerDetailsService,
     public reservationLocationTransferLogService:ReservationLocationTransferLogService,
-    public appDataMissingStatusService: AppDataMissingStatusService,
     public interstateTaxEntryService:InterstateTaxEntryService,
     public passToSupplierService: PassToSupplierService,
     public dutyPostPickUPCallService: DutyPostPickUPCallService,
@@ -595,7 +581,6 @@ export class ControlPanelDesignComponent implements OnInit {
       allotmentStatus: [this._filters.allotmentStatus],
       billingStatus: [this._filters.billingStatus],
       delays: [this._filters.delays],
-      security: [this._filters.security],
       disputes: [this._filters.disputes],
       reservationType: [this._filters.reservationType],
       guestType: [this._filters.guestType],
@@ -3672,40 +3657,6 @@ openDropOffByExectiveGPS(item: any)
     );  
   }
 
-  combinedStatusColor(data: any): string {
-    const allotment = this.AllotmentOnTime(data);
-    const trip = this.TripOnTime(data);
-    const car = data.carStatus;
-    const reservation = data.reservationStatus;
-  
-    // All statuses are positive
-    if (
-      (allotment === 'onTime' || allotment === 'late') &&
-      (trip === 'Dispatched' || trip === 'Reached' || trip === 'Pickup' || trip === 'DropOff' || trip === 'GarageIn') &&
-      (car === 'Moving' || car === 'Car Moving') &&
-      (reservation === 'Confirmed' || reservation === 'Cancelled')
-    ) {
-      return 'green'; 
-    }
-  
-    // Any critical issue
-    if (
-      allotment === 'notDone' ||
-      trip === 'NotDispatchedLessThanTwoHours' ||
-      trip === 'DispatchedButNotReached' ||
-      trip === 'NotPickup' ||
-      trip === 'NotDropOff' ||
-      trip === 'NotGarageIn' ||
-      car === 'Not Moving' ||
-      (reservation !== 'Confirmed' && reservation !== 'Cancelled')
-    ) {
-      return 'red'; 
-    }
-  
-    // Default color
-    return 'black'; 
-  }
-  
   //---------- Allotment & Pickup Time Comparison ----------
   AllotmentOnTime(item: any)
   {
@@ -4173,28 +4124,6 @@ getLifeCycleDisplay(status: any): { label: string; color: string } {
 
   return { label: 'N/A', color: 'black' };
 }
-
-  //---------- Car Moving Status By App Popup----------
-  CarMovingStatusByApp(item: any) 
-  {
-    this.dialog.open(CarMovingStatusByAppComponent, {
-      width: '500px',
-      data: {
-        dutySlipID: item.dutySlipID
-      }
-    });
-  }
-
-  //---------- Car Moving Status By App Popup----------
-  AppDataMissingStatus(item: any) 
-  {
-    this.dialog.open(AppDataMissingStatusComponent, {
-      width: '500px',
-      data: {
-        dutySlipID: item.dutySlipID
-      }
-    });
-  }
 
   incidence(item: any): void {
     this.openIncidenceListDialog(item, 'incidence');

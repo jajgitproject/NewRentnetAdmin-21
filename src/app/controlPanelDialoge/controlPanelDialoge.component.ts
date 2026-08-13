@@ -23,7 +23,6 @@ import { IncidenceService } from '../incidence/incidence.service';
 import { InterstateTaxEntryService } from '../interstateTaxEntry/interstateTaxEntry.service';
 import { DutyPostPickUPCallService } from '../dutyPostPickUPCall/dutyPostPickUPCall.service';
 import { PassToSupplierService } from '../passToSupplier/passToSupplier.service';
-import { AppDataMissingStatusService } from '../appDataMissingStatus/appDataMissingStatus.service';
 import { PassengerDetailsService } from '../passengerDetails/passengerDetails.service';
 import { ClossingOneService } from '../clossingOne/clossingOne.service';
 import { SpecialInstructionInfoComponent } from '../SpecialInstructionInfo/SpecialInstructionInfo.component';
@@ -36,7 +35,6 @@ import { PassengerDetails } from '../passengerDetails/passengerDetails.model';
 import { ReservationLocationTransferLogModel } from '../reservationLocationTransferLog/reservationLocationTransferLog.model';
 import { PassToSupplierModel } from '../passToSupplier/passToSupplier.model';
 import { InterstateTaxEntry } from '../interstateTaxEntry/interstateTaxEntry.model';
-import { AppDataMissingStatusModel } from '../appDataMissingStatus/appDataMissingStatus.model';
 import { DriverOfficialIdentityNumberDD } from '../general/driverOfficialIdentityNumberDD.model';
 import { DisputeTypeDropDown } from '../dispute/disputeTypeDropDown.model';
 import { DriverInventoryAssociationDropDown } from '../driverInventoryAssociation/driverInventoryAssociationDropDown';
@@ -85,8 +83,6 @@ import { LocationInDetailShowComponent } from '../locationInDetailShow/locationI
 import { DropOffDetailShowComponent } from '../dropOffDetailShow/dropOffDetailShow.component';
 import { DriverRemarkDetailsComponent } from '../DriverRemarkDetails/DriverRemarkDetails.component';
 import { FormDialogdriverRemarkComponent } from '../driverRemark/dialogs/form-dialog/form-dialog.component';
-import { CarMovingStatusByAppComponent } from '../carMovingStatusByApp/carMovingStatusByApp.component';
-import { AppDataMissingStatusComponent } from '../appDataMissingStatus/appDataMissingStatus.component';
 import { FormDialogComponent } from '../feedBack/dialogs/form-dialog/form-dialog.component';
 import { NextDayInstructionFormDialogComponent } from '../nextDayInstruction/dialogs/form-dialog/form-dialog.component';
 import { DutyPostFormDialogComponent } from '../dutyPostPickUPCall/dialogs/form-dialog/form-dialog.component';
@@ -169,14 +165,7 @@ export class ControlPanelDialogeComponent {
   public advanceTableRLT: ReservationLocationTransferLogModel | null;
   ShowAllLocation: any;
 
-  dataSourceForAppDataMissingStatus: AppDataMissingStatusModel[] | null;
   status: string;
-  currentLocationLatitude: string;
-  currentLocationLongitude: string;
-  currentAddress: any;
-  locationBeforeTwoMinutesLatitude: string;
-  locationBeforeTwoMinutesLongitude: string;
-  locationBeforeTwoMinutesAddress: any;
 
   @Output() newDataAddedEvent = new EventEmitter<boolean>();
   @Input() newDataAddedEvents = new EventEmitter<boolean>();
@@ -228,7 +217,6 @@ export class ControlPanelDialogeComponent {
     public incidenceService: IncidenceService,
     public passengerDetailsService: PassengerDetailsService,
     public reservationLocationTransferLogService: ReservationLocationTransferLogService,
-    public appDataMissingStatusService: AppDataMissingStatusService,
     public interstateTaxEntryService: InterstateTaxEntryService,
     public passToSupplierService: PassToSupplierService,
     public dutyPostPickUPCallService: DutyPostPickUPCallService,
@@ -2503,26 +2491,7 @@ TrackOnMapInfo(reservationID: number, item?: any) {
   const trackUrl = `https://ecopartner.ecoserp.in/?id=${encodeURIComponent(String(Math.trunc(rid)))}`;
   window.open(trackUrl, '_blank', 'noopener,noreferrer');
 }
- //---------- Car Moving Status By App Popup----------
-  CarMovingStatusByApp(item: any) 
-  {
-    this.dialog.open(CarMovingStatusByAppComponent, {
-      width: '500px',
-      data: {
-        dutySlipID: item.dutySlipID
-      }
-    });
-  }
-  //---------- Car Moving Status By App Popup----------
-  AppDataMissingStatus(item: any) 
-  {
-    this.dialog.open(AppDataMissingStatusComponent, {
-      width: '500px',
-      data: {
-        dutySlipID: item.dutySlipID
-      }
-    });
-  }
+
   /** Manual WA/SMS/Mail from CP is allowed once the booking is allotted (incl. Hard). */
   canSendSmsWhatsappMail(item: any): boolean {
     if (this.ReservationStatus === 'Cancelled') {
@@ -2867,7 +2836,6 @@ public getInvoiceNumber(item:any ,i: any)
         allotmentStatus: [this._filters.allotmentStatus],
         billingStatus: [this._filters.billingStatus],
         delays: [this._filters.delays],
-        security: [this._filters.security],
         disputes: [this._filters.disputes],
         reservationType: [this._filters.reservationType],
         guestType: [this._filters.guestType],

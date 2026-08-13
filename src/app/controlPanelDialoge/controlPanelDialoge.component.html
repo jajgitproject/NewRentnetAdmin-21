@@ -922,28 +922,7 @@
                   </mat-menu>
                   <br>
 
-                  <b><button class="BoldButton" mat-button (click)="CarMovingStatusByApp(item)">Car not
-                      moving by App</button></b><br />
-                  <span
-                    [ngStyle]="{ color: data.carStatus === 'Moving' || data.carStatus === 'Car Moving' ? 'green' :
-                                                                    data.carStatus === 'Not Moving' ? 'red' : 'black' }">
-                    {{ data.carStatus || 'N/A' }}
-                  </span>
-                  <br />
-
                   <b><button class="BoldButton" mat-button>Car not moving by GPS</button></b><br />
-                  Value<br />
-
-                  <b><button class="BoldButton" mat-button (click)="AppDataMissingStatus(item)">App data
-                      missing</button></b><br />
-                  <span
-                    [ngStyle]="{ color: data.appCarStatus === 'Moving' ? 'green' :
-                                                                    data.appCarStatus === 'Not Moving' ? 'red' : 'black' }">
-                    {{ data.appCarStatus || 'N/A' }}
-                  </span>
-                  <br />
-
-                  <b><button class="BoldButton" mat-button>GPS data missing</button></b><br />
                   Value<br />
 
                   <b><button class="BoldButton" mat-button (click)="openIntegrationLog(item.reservationID)">

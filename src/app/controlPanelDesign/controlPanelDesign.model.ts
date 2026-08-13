@@ -396,7 +396,6 @@ export class Filters {
   guestType:string;
   reservationType: string;
   delays:string;
-  security:string;
   disputes:string;
   reservationID: number;
   resID: string;
@@ -462,7 +461,6 @@ export class Filters {
     this.reservationType = filter.reservationType || '';
     this.guestType = filter.guestType || '';
     this.delays = filter.delays || '';
-    this.security = filter.security || '';
     this.vendorTripNumber = filter.vendorTripNumber || '';
     this.reservationID = filter.reservationID || 0;
     this.dutySlipID = filter.dutySlipID || 0;
