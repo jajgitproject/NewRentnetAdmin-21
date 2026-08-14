@@ -218,8 +218,27 @@ export class ErrorInterceptor implements HttpInterceptor {
       return timeoutMessage;
     }
 
+    const validationErrors = this.flattenValidationErrors(httpErr?.error);
+    if (validationErrors) {
+      return validationErrors;
+    }
+
     if (msgFromBody) {
       return msgFromBody;
+    }
+
+    const problemTitle =
+      httpErr?.error &&
+      typeof httpErr.error === 'object' &&
+      httpErr.error !== null &&
+      'title' in httpErr.error
+        ? String((httpErr.error as { title?: unknown }).title ?? '').trim()
+        : '';
+    if (problemTitle && problemTitle.toLowerCase() !== 'one or more validation errors occurred.') {
+      return problemTitle;
+    }
+    if (problemTitle && httpErr?.status) {
+      return `Allotment request failed (HTTP ${httpErr.status}). Invalid data was sent to the API.`;
     }
 
     if (httpErr?.status === 0 || httpErr?.statusText === 'Unknown Error') {
@@ -234,7 +253,14 @@ export class ErrorInterceptor implements HttpInterceptor {
       return timeoutMessage;
     }
 
-    return httpErr?.statusText || 'Error';
+    const statusText = (httpErr?.statusText || '').trim();
+    if (!statusText || statusText.toLowerCase() === 'ok' || statusText.toLowerCase() === 'error') {
+      return httpErr?.status
+        ? `Allotment request failed (HTTP ${httpErr.status}). Restart IIS Express if the API DLL is locked.`
+        : 'Allotment request failed.';
+    }
+
+    return statusText;
   }
 
   private isDatabaseTimeout(message?: string): boolean {
@@ -249,6 +275,24 @@ export class ErrorInterceptor implements HttpInterceptor {
       normalized.includes('cannot connect to the database') ||
       normalized.includes('connection timeout')
     );
+  }
+
+  private flattenValidationErrors(errorBody: unknown): string {
+    if (!errorBody || typeof errorBody !== 'object' || !('errors' in errorBody)) {
+      return '';
+    }
+    const errors = (errorBody as { errors?: Record<string, unknown> }).errors;
+    if (!errors || typeof errors !== 'object') {
+      return '';
+    }
+    return Object.entries(errors)
+      .map(([key, value]) => {
+        const field = String(key || '').replace(/^\$\./, '');
+        const text = Array.isArray(value) ? value.join(' ') : String(value ?? '');
+        return field ? `${field}: ${text}` : text;
+      })
+      .filter((part) => !!part.trim())
+      .join(' | ');
   }
 
 }

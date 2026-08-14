@@ -14,6 +14,7 @@ import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { environment } from 'src/environments/environment';
 
 @Component({
   standalone: true,
@@ -173,11 +174,13 @@ export class FormDialogCAComponent
     this.advanceTableForm.patchValue({reservationID: this.reservationID});
     this.advanceTableForm.patchValue({allotmentStatus:this.AllotmentStatus});
     this.advanceTableForm.patchValue({allotmentType:this.allotmentType});
+    this.markAllotmentPerf('allotment_submit_start');
     this.advanceTableService.update(this.advanceTableForm.getRawValue())  
     .subscribe(
     response => 
-    {debugger
+    {
       console.log(response.message);
+      this.markAllotmentPerf('allotment_submit_done');
       this._generalService.sendUpdate('CancelAllotmentUpdate:CancelAllotmentView:Success');//To Send Updates 
       this.showNotification(
         'snackbar-success',
@@ -213,6 +216,12 @@ export class FormDialogCAComponent
   {
     this.saveDisabled = false;
     this.Put();
+  }
+
+  private markAllotmentPerf(label: string): void {
+    if (!environment.production) {
+      console.info(`[AllotmentPerf] ${label}`);
+    }
   }
    /////////////////for Image Upload////////////////////////////
    public response: { dbPath: '' };

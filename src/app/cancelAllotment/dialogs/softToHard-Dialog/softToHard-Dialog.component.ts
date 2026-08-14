@@ -6,6 +6,7 @@ import { CancelAllotmentService } from '../../cancelAllotment.service';
 import { GeneralService } from '../../../general/general.service';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatButtonModule } from '@angular/material/button';
+import { environment } from 'src/environments/environment';
 
 @Component({
   standalone: true,
@@ -58,16 +59,19 @@ export class SoftToHardDialogComponent
       driverID: row?.driverID,
       userID: this._generalService.getUserID()
     };
+    this.markAllotmentPerf('allotment_submit_start');
     this.advanceTableService.updateAllotmentType(payload)
     .subscribe(
     data => 
     {
+      this.markAllotmentPerf('allotment_submit_done');
        this.showNotification(
         'snackbar-success',
         'Updated...!!!',
         'bottom',
         'center'
       );
+      this.dialogRef.close({ isClose: false });
     },
     error =>
     {
@@ -79,6 +83,12 @@ export class SoftToHardDialogComponent
       );
     }
     )
+  }
+
+  private markAllotmentPerf(label: string): void {
+    if (!environment.production) {
+      console.info(`[AllotmentPerf] ${label}`);
+    }
   }
 }
 

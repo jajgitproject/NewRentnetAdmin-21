@@ -73,7 +73,7 @@
                     </mat-menu>
   </div>
 </div>
-  <div class="cda-mop-banner" *ngIf="getAllotmentModeOfPayment() as mop">
+  <div class="cda-mop-banner" *ngIf="allotmentModeOfPayment as mop">
     <span class="cda-mop-label">Mode of Payment</span>
     <span class="cda-mop-value">{{ mop }}</span>
   </div>
@@ -98,7 +98,8 @@
 
             <br />
 
-            <mat-expansion-panel *ngFor="let item of reservationInfo; let i = index">
+            <mat-expansion-panel *ngFor="let item of reservationInfo; let i = index; trackBy: trackByReservationId"
+              (opened)="onReservationPanelOpened(i)">
               <mat-expansion-panel-header>
                 <mat-panel-title class="cda-summary-row cda-summary-body">
                   <span>
@@ -115,11 +116,11 @@
 
                   <span>{{ item.pickup?.pickupAddress ? item.pickup.pickupAddress.split(',')[0] : 'N/A' }}</span>
 
-                  <span>{{ item.pickup.pickupTime | date : 'shortTime' }}</span>
+                  <span>{{ item.pickup?.pickupTime | date : 'shortTime' }}</span>
 
-                  <span>{{ item.pickup.pickupDate | date : 'dd-MMM-yy' }}</span>
+                  <span>{{ item.pickup?.pickupDate | date : 'dd-MMM-yy' }}</span>
 
-                  <span>{{ getDisplayPassengerName(item) }}</span>
+                  <span>{{ item.displayPassengerName }}</span>
 
                   <span>{{ item.carVendor }}</span>
 
@@ -145,7 +146,7 @@
                     </span>
                   </mat-panel-description> -->
               </mat-expansion-panel-header>
-              <div class="row">
+              <div class="row" *ngIf="openedReservationPanelIndex === i">
                 <table class="col-lg-12 col-md-12 col-sm-12 col-xs-6">
                   <tbody>
                     <tr class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
@@ -191,7 +192,8 @@
                       <td class="TDValue col-lg-2 col-md-2 col-sm-2 col-xs-2">
                         <div *ngFor="
                               let p of item.passengerDetails;
-                              let c = index
+                              let c = index;
+                              trackBy: trackByPassengerId
                             ">
                           <!-- <b><button class="BoldButton" mat-button (click)="
                                   PassengerInfo(
@@ -247,7 +249,8 @@
                         <span *ngIf="item.specialInstruction">
                           <div *ngFor="
                                 let sp of item.specialInstruction;
-                                let s = index
+                                let s = index;
+                                trackBy: trackBySpecialInstructionId
                               ">
                             <b><button class="BoldButton" mat-button>
                                 Special Instructions {{ s + 1 }}
@@ -283,9 +286,9 @@
                             *ngIf="item.stopsDetails?.[0]?.stopType == 'Pickup'"
                           > -->
                         <span>
-                          {{ item.pickup.pickupDate | date : 'dd-MMM-yy' }}
+                          {{ item.pickup?.pickupDate | date : 'dd-MMM-yy' }}
                           {{
-                          item.pickup.pickupTime | date : 'shortTime'
+                          item.pickup?.pickupTime | date : 'shortTime'
                           }} </span><br />
                         <b><button class="BoldButton" mat-button (click)="TimeAndAddressInfo(item)">
                             Pick up Address
@@ -293,7 +296,7 @@
                         <!-- <span
                             *ngIf="item.stopsDetails?.[0]?.stopType == 'Pickup'"
                             > -->
-                        <span> {{ item.pickup.pickupAddress }}</span><br />
+                        <span> {{ item.pickup?.pickupAddress || 'N/A' }}</span><br />
                         <b><button class="BoldButton" mat-button (click)="TimeAndAddressDrop(item)">
                             Drop Off Time
                           </button></b><br />
@@ -303,9 +306,9 @@
                             "
                             > -->
                         <span>
-                          {{ item.drop.dropOffDate | date : 'dd-MMM-yy' }}
+                          {{ item.drop?.dropOffDate | date : 'dd-MMM-yy' }}
                           {{
-                          item.drop.dropOffTime | date : 'shortTime'
+                          item.drop?.dropOffTime | date : 'shortTime'
                           }} </span><br />
                         <b><button class="BoldButton" mat-button (click)="TimeAndAddressDrop(item)">
                             Drop Off Address
@@ -315,7 +318,7 @@
                               item.stopsDetails?.[1]?.stopType == 'Destination'
                             "
                             > -->
-                        <span> {{ item.drop.dropOffAddress }}</span><br />
+                        <span> {{ item.drop?.dropOffAddress || 'N/A' }}</span><br />
                         <b><button class="BoldButton" mat-button (click)="StopDetailsInfo(item)">
                             Stop Details
                           </button></b><br />
@@ -726,7 +729,7 @@
     <div class="card" style="width: 100%">
       <div class="body">
         <!-- <span><b>Alert Message</b></span> -->
-        <div class="responsive_table" *ngFor="let item of reservationInfo; let i = index">
+        <div class="responsive_table" *ngFor="let item of reservationInfo; let i = index; trackBy: trackByReservationId">
           <div class="row" style="margin-left: 10px;">
             <div style="font-size: 10px;" *ngIf="item.customerAlterMessage">
               <b> Customer Alert Message</b> :
@@ -1371,29 +1374,14 @@
                       </tr>
                     </thead>
                     <tbody>
-                      <tr *ngFor="let data of driverInventoryAssociationDataSource; index as i"
+                      <tr *ngFor="let data of driverInventoryAssociationDataSource; index as i; trackBy: trackByInventoryId"
                           [class.row-alt]="i % 2 === 1">
                         <td class="col-actions">
                           <button mat-button class="BoldButton allotment-actions-btn"
-                                  [matMenuTriggerFor]="rowActionsMenu">
+                                  [matMenuTriggerFor]="rowActionsMenu"
+                                  (click)="rowActionsMenuIndex = i">
                             Actions
                           </button>
-                          <mat-menu #rowActionsMenu="matMenu">
-                            <button mat-menu-item
-                                    (click)="openAllotCarAndDriver(i,'Soft',reservationInfo[0].allotmentID)">
-                              Allot Car & Driver (Soft)
-                            </button>
-                            <button mat-menu-item
-                                    (click)="openAllotCarAndDriver(i,'Hard',reservationInfo[0].allotmentID)">
-                              Allot Car & Driver (Hard)
-                            </button>
-                            <button mat-menu-item (click)="AttachAnotherDriver(i)">
-                              Attach another Driver
-                            </button>
-                            <button mat-menu-item (click)="DriverFeedbackInfo(i)">
-                              View Feedback Details
-                            </button>
-                          </mat-menu>
                         </td>
                         <td>{{ data.organizationalEntityName }}</td>
                         <td>{{ data.inventoryName }}</td>
@@ -1416,6 +1404,22 @@
                       </tr>
                     </tbody>
                   </table>
+                  <mat-menu #rowActionsMenu="matMenu">
+                    <button mat-menu-item
+                            (click)="openAllotCarAndDriver(rowActionsMenuIndex,'Soft',reservationInfo[0].allotmentID)">
+                      Allot Car & Driver (Soft)
+                    </button>
+                    <button mat-menu-item
+                            (click)="openAllotCarAndDriver(rowActionsMenuIndex,'Hard',reservationInfo[0].allotmentID)">
+                      Allot Car & Driver (Hard)
+                    </button>
+                    <button mat-menu-item (click)="AttachAnotherDriver(rowActionsMenuIndex)">
+                      Attach another Driver
+                    </button>
+                    <button mat-menu-item (click)="DriverFeedbackInfo(rowActionsMenuIndex)">
+                      View Feedback Details
+                    </button>
+                  </mat-menu>
                 </div>
               </div>
 
