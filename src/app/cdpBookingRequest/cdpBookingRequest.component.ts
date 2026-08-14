@@ -40,8 +40,8 @@ export class CdpBookingRequestComponent implements OnInit {
   filtersCollapsed = false;
   isLoading = false;
 
-  searchPickupFromDate: Date | null = new Date();
-  searchPickupToDate: Date | null = new Date();
+  searchPickupFromDate: Date | null = null;
+  searchPickupToDate: Date | null = null;
   searchStatus = '';
   searchBookingType = '';
   pageNumber = 0;
@@ -60,7 +60,6 @@ export class CdpBookingRequestComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    this.setDefaultPickupDates();
     this.loadData();
   }
 
@@ -104,7 +103,8 @@ export class CdpBookingRequestComponent implements OnInit {
   }
 
   refresh(): void {
-    this.setDefaultPickupDates();
+    this.searchPickupFromDate = null;
+    this.searchPickupToDate = null;
     this.searchStatus = '';
     this.searchBookingType = '';
     this.pageNumber = 0;
@@ -145,11 +145,17 @@ export class CdpBookingRequestComponent implements OnInit {
         this.totalCount = response.totalCount ?? 0;
         this.isLoading = false;
       },
-      error: () => {
+      error: (err) => {
         this.dataSource = [];
         this.totalCount = 0;
         this.isLoading = false;
-        this.showNotification('snackbar-danger', 'Failed to load CDP booking requests.', 'top', 'center');
+        const detail = this.extractErrorDetail(err);
+        this.showNotification(
+          'snackbar-danger',
+          detail ? `Failed to load CDP booking requests: ${detail}` : 'Failed to load CDP booking requests.',
+          'top',
+          'center'
+        );
       }
     });
   }
@@ -236,11 +242,16 @@ export class CdpBookingRequestComponent implements OnInit {
     }
 
     const parts: string[] = [];
-    if (dateValue) {
-      parts.push(moment(dateValue).format('DD/MM/YYYY'));
+    const datePart = moment(dateValue);
+    if (dateValue && datePart.isValid()) {
+      parts.push(datePart.format('DD/MM/YYYY'));
     }
-    if (timeValue) {
-      parts.push(moment(timeValue).format('h:mm A'));
+
+    const timePart = moment(timeValue, [moment.ISO_8601, 'HH:mm:ss', 'HH:mm:ss.SSS', 'HH:mm'], true);
+    const fallbackTime = moment(timeValue);
+    const resolvedTime = timePart.isValid() ? timePart : fallbackTime;
+    if (timeValue && resolvedTime.isValid()) {
+      parts.push(resolvedTime.format('h:mm A'));
     }
     return parts.join(' ').trim() || 'N/A';
   }
@@ -259,21 +270,39 @@ export class CdpBookingRequestComponent implements OnInit {
     return 'br-status-neutral';
   }
 
-  private setDefaultPickupDates(): void {
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    this.searchPickupFromDate = new Date(today);
-    this.searchPickupToDate = new Date(today);
+  private getFormattedSearchDates(): { fromDate: string; toDate: string } {
+    return {
+      fromDate: this.formatSearchDate(this.searchPickupFromDate),
+      toDate: this.formatSearchDate(this.searchPickupToDate)
+    };
   }
 
-  private getFormattedSearchDates(): { fromDate: string; toDate: string } {
-    if (!this.searchPickupFromDate || !this.searchPickupToDate) {
-      this.setDefaultPickupDates();
+  private extractErrorDetail(err: unknown): string {
+    if (typeof err === 'string' && err.trim()) {
+      const text = err.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim();
+      const match = text.match(/([A-Za-z.]+Exception:[^.]{0,180})/);
+      if (match) {
+        return match[1].trim();
+      }
+      return text.slice(0, 180);
+    }
+    if (err && typeof err === 'object' && 'message' in err) {
+      return String((err as { message?: unknown }).message ?? '').slice(0, 180);
+    }
+    return '';
+  }
+
+  private formatSearchDate(value: Date | null): string {
+    if (!value) {
+      return '';
     }
 
-    const fromDate = moment(this.searchPickupFromDate).format('YYYY-MM-DD');
-    const toDate = moment(this.searchPickupToDate).format('YYYY-MM-DD');
-    return { fromDate, toDate };
+    const parsed = moment(value);
+    if (!parsed.isValid()) {
+      return '';
+    }
+
+    return parsed.format('YYYY-MM-DD');
   }
 
   private mapSortColumn(column: string): string {

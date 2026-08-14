@@ -50,7 +50,8 @@ export class CdpBookingRequestService {
 
   private normalizeResponse(response: any): CdpBookingRequestListResponse {
     const rawItems = response?.items ?? response?.Items ?? [];
-    const items = (rawItems as any[]).map((row) => new CdpBookingRequest({
+    const rows = Array.isArray(rawItems) ? rawItems : [];
+    const items = rows.map((row) => new CdpBookingRequest({
       reservationID: row.reservationID ?? row.ReservationID ?? 0,
       reservationGroupID: row.reservationGroupID ?? row.ReservationGroupID ?? 0,
       customerID: row.customerID ?? row.CustomerID ?? 0,
