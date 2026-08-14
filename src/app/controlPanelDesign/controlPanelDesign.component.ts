@@ -236,6 +236,8 @@ export class ControlPanelDesignComponent implements OnInit {
   selectedFilter: string = 'search';
   SearchBookingNo: string = '';
   pendingReservationId: number | null = null;
+  private showAllLocationReady = false;
+  private pendingReservationSearchApplied = false;
 
   sortDirection: 'asc' | 'desc' = 'desc';
   sortColumn: string = 'reservationID';
@@ -349,6 +351,7 @@ export class ControlPanelDesignComponent implements OnInit {
     // Capture status from query params (encrypted) so we can propagate to downstream dialogs
     this.router.queryParams.subscribe((params) => {
       this.captureReservationIdFromRoute(params);
+      this.tryApplyPendingReservationSearch();
       const encStatus = params && params['status'];
       if (encStatus) {
         try {
@@ -594,13 +597,25 @@ export class ControlPanelDesignComponent implements OnInit {
   }
 
   applySingleReservationFilter(reservationID: number): void {
-    this.selectedFilter = 'BookingNo';
-    this.searchTerm = String(reservationID);
     this.currentPage = 1;
     this.filterForm.patchValue({
-      reservationID,
-      resID: reservationID
+      reservationID: 0,
+      resID: String(reservationID),
+      reservationStatus: 'All',
+      fromDate: '',
+      toDate: '',
+      fromTime: '',
+      toTime: ''
     });
+    this.SearchData();
+  }
+
+  private tryApplyPendingReservationSearch(): void {
+    if (!this.showAllLocationReady || !this.pendingReservationId || this.pendingReservationSearchApplied) {
+      return;
+    }
+    this.pendingReservationSearchApplied = true;
+    this.applySingleReservationFilter(this.pendingReservationId);
   }
 
   private normalizeBoolean(value: any, fallback: boolean): boolean {
@@ -808,9 +823,8 @@ export class ControlPanelDesignComponent implements OnInit {
         this.filterForm.controls["fromTime"].setValue('');
         this.filterForm.controls["toTime"].setValue('');
 
-        if (this.pendingReservationId) {
-          this.applySingleReservationFilter(this.pendingReservationId);
-        }
+        this.showAllLocationReady = true;
+        this.tryApplyPendingReservationSearch();
         // const today = this.formatDate(new Date());
         // const now = new Date();
         // this.filterForm.patchValue({fromDate: today});
@@ -824,9 +838,8 @@ export class ControlPanelDesignComponent implements OnInit {
       {
         this.ShowAllLocation = this.getLoginShowAllLocation();
         this.filterForm.patchValue({showAllLocation: this.ShowAllLocation});
-        if (this.pendingReservationId) {
-          this.applySingleReservationFilter(this.pendingReservationId);
-        }
+        this.showAllLocationReady = true;
+        this.tryApplyPendingReservationSearch();
       }
     );
   }

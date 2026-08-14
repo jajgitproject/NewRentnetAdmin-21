@@ -930,7 +930,7 @@ private extractTime(dateTime: Date): Date {
   
    navigateToControlPanel(reservationID?: number) {
       const queryParams = reservationID
-        ? { reservationID: encodeURIComponent(this._generalService.encrypt(String(reservationID))) }
+        ? { reservationID: this._generalService.encrypt(String(reservationID)) }
         : undefined;
       this.router.navigate(['/controlPanelDesign'], { queryParams });
       Swal.close();
