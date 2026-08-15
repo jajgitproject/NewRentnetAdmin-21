@@ -1,4 +1,4 @@
-<div class="row">
+﻿<div class="row">
     <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
         <div class="col-xl-2 col-lg-2 col-md-2 col-sm-12 mb-2">
             <mat-progress-spinner *ngIf="isLoadingdata" mode="indeterminate" diameter="30" strokeWidth="4"></mat-progress-spinner>
@@ -977,7 +977,8 @@
                                 <mat-form-field class="example-full-width cp-booking-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
                                     <mat-label>Reservation Source</mat-label>
                                     <input type="text" matInput formControlName="reservationSource"
-                                        [matAutocomplete]="auto13">
+                                        [matAutocomplete]="auto13"
+                                        [readonly]="isLockedReservationSource">
                                     <mat-autocomplete #auto13="matAutocomplete"
                                         (optionSelected)="onRSSelected($event.option.value)"
                                         panelWidth="custom-autocomplete-panel">

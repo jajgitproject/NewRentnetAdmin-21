@@ -20,11 +20,7 @@ import { CdpBookingRequest } from './cdpBookingRequest.model';
 export class CdpBookingRequestComponent implements OnInit {
   readonly pageSize = 20;
   readonly statusOptions = ['Requested', 'Pending', 'Confirmed', 'Approved', 'Accepted', 'Cancelled', 'Rejected'];
-  readonly bookingTypeOptions = [
-    { value: '', label: 'All' },
-    { value: 'CDP Booking', label: 'CDP Booking' },
-    { value: 'B2B App Booking', label: 'B2B App Booking' }
-  ];
+  readonly reservationSourceOptions = ['CDP', 'B2B Customer App'];
 
   columnDefinitions = [
     { key: 'bookingNo', label: 'Booking No.', visible: true },
@@ -43,7 +39,7 @@ export class CdpBookingRequestComponent implements OnInit {
   searchPickupFromDate: Date | null = null;
   searchPickupToDate: Date | null = null;
   searchStatus = '';
-  searchBookingType = '';
+  searchReservationSource = '';
   pageNumber = 0;
   sortColumn = 'PickupDate';
   sortDirection: 'Ascending' | 'Descending' = 'Descending';
@@ -72,7 +68,7 @@ export class CdpBookingRequestComponent implements OnInit {
     if (this.searchPickupFromDate) count++;
     if (this.searchPickupToDate) count++;
     if (this.searchStatus?.trim()) count++;
-    if (this.searchBookingType?.trim()) count++;
+    if (this.searchReservationSource?.trim()) count++;
     return count;
   }
 
@@ -106,7 +102,7 @@ export class CdpBookingRequestComponent implements OnInit {
     this.searchPickupFromDate = null;
     this.searchPickupToDate = null;
     this.searchStatus = '';
-    this.searchBookingType = '';
+    this.searchReservationSource = '';
     this.pageNumber = 0;
     if (this.paginator) {
       this.paginator.pageIndex = 0;
@@ -128,14 +124,14 @@ export class CdpBookingRequestComponent implements OnInit {
   loadData(): void {
     const { fromDate, toDate } = this.getFormattedSearchDates();
     const status = this.searchStatus?.trim() ? this.searchStatus.trim() : null;
-    const bookingType = this.searchBookingType?.trim() ? this.searchBookingType.trim() : null;
+    const reservationSource = this.searchReservationSource?.trim() ? this.searchReservationSource.trim() : null;
 
     this.isLoading = true;
     this.cdpBookingRequestService.getTableData(
       fromDate,
       toDate,
       status,
-      bookingType,
+      reservationSource,
       this.pageNumber,
       this.mapSortColumn(this.sortColumn),
       this.sortDirection

@@ -1195,6 +1195,7 @@ toArray<T>(value: any): T[] {
         this.advanceTableForm.patchValue({reservationSourceID:normalizedReservationSourceID});
         this.advanceTableForm.patchValue({reservationSource:normalizedReservationSource});
         this.advanceTableForm.patchValue({reservationSourceDetail:normalizedReservationSourceDetail});
+        this.applyLockedReservationSource();
         this.advanceTableForm.patchValue({referenceNumber:this.advanceTable.referenceNumber});
         this.advanceTableForm.patchValue({reservationStatus:normalizedReservationStatus});
         this.advanceTableForm.patchValue({modeOfPaymentID:this.advanceTable.modeOfPaymentID});
@@ -2981,6 +2982,43 @@ DTValidator(PackageTypeList: any[]): ValidatorFn {
   }
 
    //------------ ReservationSource -----------------
+   private readonly lockedReservationSources = [
+     'CDP',
+     'B2B Customer App',
+     'B2B App',
+     'B2C APP',
+     'B2C App'
+   ];
+
+   get isLockedReservationSource(): boolean {
+     return this.isReservationSourceLockedValue(
+       this.advanceTableForm?.getRawValue()?.reservationSource
+         ?? this.advanceTable?.reservationSource,
+       this.advanceTableForm?.getRawValue()?.reservationSourceID
+         ?? this.advanceTable?.reservationSourceID
+     );
+   }
+
+   private isReservationSourceLockedValue(source: unknown, sourceId: unknown): boolean {
+     const name = String(source ?? '').trim().toLowerCase();
+     if (this.lockedReservationSources.some(item => item.toLowerCase() === name)) {
+       return true;
+     }
+     return String(sourceId ?? '') === '26';
+   }
+
+   private applyLockedReservationSource(): void {
+     const control = this.advanceTableForm?.get('reservationSource');
+     if (!control) {
+       return;
+     }
+     if (this.isLockedReservationSource) {
+       control.disable({ emitEvent: false });
+     } else {
+       control.enable({ emitEvent: false });
+     }
+   }
+
    InitReservationSource(){
     this._generalService.GetReservationSource().subscribe(
       data=>
@@ -2989,7 +3027,8 @@ DTValidator(PackageTypeList: any[]): ValidatorFn {
         this.filteredReservationSourceOptions = this.advanceTableForm.controls['reservationSource'].valueChanges.pipe(
           startWith(""),
           map(value => this._filterReservationSource(value || ''))
-        ); 
+        );
+        this.applyLockedReservationSource();
       });
   }
 
@@ -3004,6 +3043,9 @@ DTValidator(PackageTypeList: any[]): ValidatorFn {
   }
   
   onRSSelected(selectedRSName: string) {
+    if (this.isLockedReservationSource) {
+      return;
+    }
     const selectedRS = this.ReservationSourceList.find(
       data => data.reservationSource === selectedRSName
     );
@@ -3014,6 +3056,9 @@ DTValidator(PackageTypeList: any[]): ValidatorFn {
   }
 
   getReservationSourceID(reservationSourceID: any) {
+    if (this.isLockedReservationSource) {
+      return;
+    }
     this.reservationSourceID=reservationSourceID;
     this.advanceTableForm.patchValue({reservationSourceID:this.reservationSourceID});
   }

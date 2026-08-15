@@ -77,6 +77,7 @@ export class OtherDetailsDialogComponent
 }
 
         this.advanceTableForm = this.createContactForm();
+        this.applyLockedReservationSource();
   }
   public ReservationSourceList?:ReservationSourceDropDown[]=[];
   
@@ -107,6 +108,38 @@ export class OtherDetailsDialogComponent
     });
   }
 
+  private readonly lockedReservationSources = [
+    'CDP',
+    'B2B Customer App',
+    'B2B App',
+    'B2C APP',
+    'B2C App'
+  ];
+
+  get isLockedReservationSource(): boolean {
+    const source = this.advanceTableForm?.getRawValue()?.reservationSource
+      ?? this.advanceTable?.reservationSource;
+    const sourceId = this.advanceTableForm?.getRawValue()?.reservationSourceID
+      ?? this.advanceTable?.reservationSourceID;
+    const name = String(source ?? '').trim().toLowerCase();
+    if (this.lockedReservationSources.some(item => item.toLowerCase() === name)) {
+      return true;
+    }
+    return String(sourceId ?? '') === '26';
+  }
+
+  private applyLockedReservationSource(): void {
+    const control = this.advanceTableForm?.get('reservationSource');
+    if (!control) {
+      return;
+    }
+    if (this.isLockedReservationSource) {
+      control.disable({ emitEvent: false });
+    } else {
+      control.enable({ emitEvent: false });
+    }
+  }
+
  InitReservationSource(){
     this._generalService.GetReservationSource().subscribe(
       data=>
@@ -115,7 +148,8 @@ export class OtherDetailsDialogComponent
         this.filteredReservationSourceOptions = this.advanceTableForm.controls['reservationSource'].valueChanges.pipe(
           startWith(""),
           map(value => this._filterReservationSource(value || ''))
-        ); 
+        );
+        this.applyLockedReservationSource();
       });
   }
 
@@ -130,7 +164,9 @@ export class OtherDetailsDialogComponent
   }
   
   getReservationSourceID(reservationSourceID: any) {
-    
+    if (this.isLockedReservationSource) {
+      return;
+    }
     this.reservationSourceID=reservationSourceID;
     this.advanceTableForm.patchValue({reservationSourceID:this.reservationSourceID || this.reservationSourceID});
   }

@@ -20,7 +20,7 @@ export class CdpBookingRequestService {
     fromDate: string,
     toDate: string,
     status: string | null,
-    bookingType: string | null,
+    reservationSource: string | null,
     pageNumber: number,
     orderByColumn = 'PickupDate',
     order = 'Descending'
@@ -39,8 +39,8 @@ export class CdpBookingRequestService {
     if (status) {
       params = params.set('status', status);
     }
-    if (bookingType) {
-      params = params.set('bookingType', bookingType);
+    if (reservationSource) {
+      params = params.set('reservationSource', reservationSource);
     }
 
     return this.httpClient.get<any>(this.apiUrl, { params }).pipe(

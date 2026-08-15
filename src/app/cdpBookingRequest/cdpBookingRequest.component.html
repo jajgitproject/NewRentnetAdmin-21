@@ -44,9 +44,10 @@
         </mat-form-field>
 
         <mat-form-field class="br-field" appearance="outline" subscriptSizing="dynamic">
-          <mat-label>Booking Type</mat-label>
-          <mat-select [(ngModel)]="searchBookingType">
-            <mat-option *ngFor="let option of bookingTypeOptions" [value]="option.value">{{ option.label }}</mat-option>
+          <mat-label>Reservation Source</mat-label>
+          <mat-select [(ngModel)]="searchReservationSource">
+            <mat-option value="">All</mat-option>
+            <mat-option *ngFor="let source of reservationSourceOptions" [value]="source">{{ source }}</mat-option>
           </mat-select>
         </mat-form-field>
       </div>
