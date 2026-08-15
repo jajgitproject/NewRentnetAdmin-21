@@ -118,8 +118,8 @@ export class InvoiceAttachDetachComponent implements OnInit {
   public PackageList?: PackageDropDown[] = [];
   filteredPackageOptions: Observable<PackageDropDown[]>;
 
-  SearchDutySlipID:number = 0;
-  SearchReservationID:number = 0;
+  SearchDutySlipID:string = '';
+  SearchReservationID:string = '';
   SearchGSTType:string = '';
   SearchPassengerName:string = '';
   SearchPassengerMobile:string = '';
@@ -518,8 +518,8 @@ export class InvoiceAttachDetachComponent implements OnInit {
     this.SearchBranch.setValue('');
     this.SearchDutyFromDate = '';
     this.SearchDutyToDate = '';
-    this.SearchReservationID = 0;
-    this.SearchDutySlipID = 0;
+    this.SearchReservationID = '';
+    this.SearchDutySlipID = '';
     this.SearchGSTType = '';
     this.SearchPassengerName = '';
     this.SearchPassengerMobile = '';
