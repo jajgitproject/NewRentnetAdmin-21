@@ -22,7 +22,7 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatPaginator } from '@angular/material/paginator';
 import { MatSort } from '@angular/material/sort';
 import { MatMenuTrigger } from '@angular/material/menu';
-import { ActivatedRoute, Router } from '@angular/router';
+import { ActivatedRoute } from '@angular/router';
 import { DutySlipAccentureService } from '../dutySlipAccenture/dutySlipAccenture.service';
 import { ControlPanelDesignService } from '../controlPanelDesign/controlPanelDesign.service';
 import { ControlPanelData } from '../controlPanelDesign/controlPanelDesign.model';
@@ -58,8 +58,7 @@ export class PrintDutySlipComponent {
     public _controlPanelDesignService: ControlPanelDesignService,
     private snackBar: MatSnackBar,
     public _generalService: GeneralService,
-    private pdfPrintService: PdfPrintService,
-    public router: Router,
+    private pdfPrintService: PdfPrintService
     ) { }
     @ViewChild(MatPaginator, { static: true }) paginator: MatPaginator;
     @ViewChild(MatSort, { static: true }) sort: MatSort;
@@ -99,11 +98,6 @@ export class PrintDutySlipComponent {
       data =>   
       {
         this.dataSource = data;
-        if(!this.dataSource?.runningDetailsModels)
-        {
-          this.router.navigate(['/PrintDutySlipWithoutMap'],
-            { queryParams: { dutySlipID: this.DutySlipID, reservationID: this.ReservationID } });
-        }
         if (this.dataSource?.customerSignatureImage) {
           this.dataSource.customerSignatureImage = this._generalService.resolveStaticImageUrl(
             this.dataSource.customerSignatureImage
