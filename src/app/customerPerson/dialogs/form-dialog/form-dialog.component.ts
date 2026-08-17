@@ -626,6 +626,11 @@ export class FormDialogComponentCustomerPerson
       isAdmin: [this.advanceTable.isAdmin, [Validators.required]],
       maskMobileNumber: [this.advanceTable.maskMobileNumber, [Validators.required]],
       isPostPickUpCallAllowed: [this.advanceTable.isPostPickUpCallAllowed ?? false],
+      isFeedbackEmailAllowed: [
+        this.advanceTable.isFeedbackEmailAllowed === true || this.advanceTable.isFeedbackEmailAllowed === false
+          ? this.advanceTable.isFeedbackEmailAllowed
+          : ''
+      ],
       sendSMSWhatsApp: [this.advanceTable.sendSMSWhatsApp, [Validators.required]],
       sendEmail: [this.advanceTable.sendEmail, [Validators.required]],
       employeeCode: [this.advanceTable.employeeCode],
@@ -663,6 +668,7 @@ export class FormDialogComponentCustomerPerson
   reset(): void 
   {
     this.advanceTableForm.reset();
+    this.advanceTableForm.patchValue({ isFeedbackEmailAllowed: '' });
   }
   onNoClick()
   {
@@ -1003,6 +1009,11 @@ public Post(): void {
 
     this.saveDisabled = false;
     this.isSaving = true; // Disable the Save button
+
+    const feedbackValue = this.advanceTableForm.get('isFeedbackEmailAllowed')?.value;
+    if (feedbackValue === '' || feedbackValue === undefined) {
+      this.advanceTableForm.patchValue({ isFeedbackEmailAllowed: null });
+    }
 
     if (this.action === 'edit') {
         this.Put();

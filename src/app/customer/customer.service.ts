@@ -194,6 +194,9 @@ export class CustomerService
       showDistanceOnDutySlipPdf: toBool(raw.showDistanceOnDutySlipPdf, false),
       isBookerAllowedToBeCreatedFromReservation: toBool(raw.isBookerAllowedToBeCreatedFromReservation, false),
       isPostPickUpCallAllowed: toBool(raw.isPostPickUpCallAllowed, false),
+      isFeedbackEmailAllowed: raw.isFeedbackEmailAllowed === null || raw.isFeedbackEmailAllowed === undefined || raw.isFeedbackEmailAllowed === ''
+        ? null
+        : toBool(raw.isFeedbackEmailAllowed, true),
       isBillToShipToCustomer: toBool(raw.isBillToShipToCustomer, false),
       customerIdentityNumber: raw.customerIdentityNumber || '',
       panNo: raw.panNo || '',

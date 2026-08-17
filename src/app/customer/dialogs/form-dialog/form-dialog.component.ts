@@ -184,6 +184,7 @@ checkDuplicateCustomer()
   onNoClick(action: string) {
     if(action === 'add') {
       this.advanceTableForm.reset();
+      this.advanceTableForm.patchValue({ isFeedbackEmailAllowed: '' });
     } else {
       this.dialogRef.close();
     }
@@ -737,6 +738,11 @@ getBusinessTypeID(businessTypeID: any)
       isPostPickUpCallAllowed: [
         this.advanceTable.isPostPickUpCallAllowed ?? false
       ],
+      isFeedbackEmailAllowed: [
+        this.advanceTable.isFeedbackEmailAllowed === true || this.advanceTable.isFeedbackEmailAllowed === false
+          ? this.advanceTable.isFeedbackEmailAllowed
+          : ''
+      ],
       panNo: [this.advanceTable.panNo],
       customerIdentityNumber: [this.advanceTable.customerIdentityNumber],
       gstCustomerType: [this.advanceTable.gstCustomerType],
@@ -845,6 +851,10 @@ onLatLonRequiredChange() {
   public confirmAdd(): void 
   {
     this.saveDisabled = false;
+    const feedbackValue = this.advanceTableForm.get('isFeedbackEmailAllowed').value;
+    if (feedbackValue === '' || feedbackValue === undefined) {
+      this.advanceTableForm.patchValue({ isFeedbackEmailAllowed: null });
+    }
        if(this.action=="edit")
        {
           this.Put();

@@ -149,6 +149,10 @@ export class CustomerPersonService
     {
       advanceTable.costCenter=null;
     }
+    if(advanceTable.isFeedbackEmailAllowed==="")
+    {
+      advanceTable.isFeedbackEmailAllowed=null;
+    }
     return this.httpClient.post<any>(this.API_URL , advanceTable);
   }
   update(advanceTable: CustomerPerson)
@@ -173,6 +177,10 @@ export class CustomerPersonService
     if(advanceTable.costCenter==="")
     {
       advanceTable.costCenter=null;
+    }
+    if(advanceTable.isFeedbackEmailAllowed==="")
+    {
+      advanceTable.isFeedbackEmailAllowed=null;
     }
     return this.httpClient.put<any>(this.API_URL , advanceTable);
   }

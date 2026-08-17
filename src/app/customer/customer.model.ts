@@ -48,6 +48,7 @@ export class Customer {
       showDistanceOnDutySlipPdf:boolean;
       isBookerAllowedToBeCreatedFromReservation:boolean;
       isPostPickUpCallAllowed:boolean;
+      isFeedbackEmailAllowed:boolean;
       panNo:string;
       customerIdentityNumber:string;
       gstCustomerType:string;
@@ -91,6 +92,9 @@ export class Customer {
        this.showDistanceOnDutySlipPdf = customer.showDistanceOnDutySlipPdf ?? false;
        this.isBookerAllowedToBeCreatedFromReservation = customer.isBookerAllowedToBeCreatedFromReservation ?? false;
        this.isPostPickUpCallAllowed = customer.isPostPickUpCallAllowed ?? false;
+       this.isFeedbackEmailAllowed = customer.isFeedbackEmailAllowed === true || customer.isFeedbackEmailAllowed === false
+         ? customer.isFeedbackEmailAllowed
+         : null;
        this.customerSector = customer.customerSector || '';
        this.contactPerson = customer.contactPerson || '';
        this.locationOutIntervalInMinutes =customer.locationOutIntervalInMinutes || 0;
