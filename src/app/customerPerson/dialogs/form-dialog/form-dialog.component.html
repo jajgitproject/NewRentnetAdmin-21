@@ -1,4 +1,12 @@
 <div class="addContainer">
+    <ng-template #saveValidationSummary>
+        <div class="validation-summary" *ngIf="advanceTableForm?.invalid && validationMessages.length">
+            <div class="validation-summary-title">Save is disabled until the following are fixed:</div>
+            <ul>
+                <li *ngFor="let message of validationMessages">{{ message }}</li>
+            </ul>
+        </div>
+    </ng-template>
     <div class="modalHeader">
         <div class="editRowModal">
             <div class="modalHeader clearfix">
@@ -28,6 +36,9 @@
                                 {{option.customerName}}
                             </mat-option>
                         </mat-autocomplete>
+                        <mat-error *ngIf="advanceTableForm.controls['customerName'].hasError('required')">
+                            Customer is required
+                        </mat-error>
                         <mat-error *ngIf="advanceTableForm.controls['customerName'].hasError('customerInvalid')">
                             Please select a Customer
                         </mat-error>
@@ -45,6 +56,9 @@
                                 {{option.salutation}}
                             </mat-option>
                         </mat-autocomplete>
+                        <mat-error *ngIf="advanceTableForm.controls['salutation'].hasError('required')">
+                            Salutation is required
+                        </mat-error>
                         <mat-error *ngIf="advanceTableForm.controls['salutation'].hasError('salutationInvalid')">
                             Please select a Salutation
                         </mat-error>
@@ -509,7 +523,8 @@
                 <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
                     <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
                         <mat-label>Password</mat-label>
-                        <input name="password" [type]="showPassword ? 'text' : 'password'" matInput
+                        <input name="customerPersonPassword" autocomplete="new-password"
+                            [type]="showPassword ? 'text' : 'password'" matInput
                             formControlName="password">
                         <mat-icon matSuffix (click)="showPassword = !showPassword">{{ showPassword ? 'visibility_off' :
                             'visibility' }}</mat-icon>
@@ -522,15 +537,16 @@
                 <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
                     <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
                         <mat-label>Confirm Password</mat-label>
-                        <input name="password" [type]="showConfirmPassword ? 'text' : 'password'" matInput
-                            formControlName="confirmPassword" (click)="markAsTouched('confirmPassword')">
+                        <input name="customerPersonConfirmPassword" autocomplete="new-password"
+                            [type]="showConfirmPassword ? 'text' : 'password'" matInput
+                            formControlName="confirmPassword">
 
-                        <mat-error *ngIf="advanceTableForm.get('confirmPassword').hasError('required') ">Confirm
+                        <mat-error *ngIf="advanceTableForm.get('confirmPassword').hasError('required')">Confirm
                             Password is required</mat-error>
                         <mat-icon matSuffix (click)="showConfirmPassword = !showConfirmPassword">{{ showConfirmPassword
                             ? 'visibility_off' : 'visibility' }}</mat-icon>
                         <mat-error
-                            *ngIf="advanceTableForm.get('confirmPassword').hasError('confirmPasswordValidator') || advanceTableForm.get('confirmPassword').touched">Passsword
+                            *ngIf="advanceTableForm.get('confirmPassword').hasError('confirmPasswordValidator')">Password
                             and
                             Confirm Password didn't match. </mat-error>
                     </mat-form-field>
@@ -605,6 +621,9 @@
                     <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
                         <mat-label>Old RentNet ID</mat-label>
                         <input matInput type="number" formControlName="oldRentNetID" />
+                        <mat-error *ngIf="advanceTableForm.get('oldRentNetID').hasError('pattern')">
+                            Old RentNet ID must be a number
+                        </mat-error>
 
                     </mat-form-field>
                 </div>
@@ -666,6 +685,7 @@
 
             <div class="row">
                 <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12 mb-2">
+                    <ng-container *ngTemplateOutlet="saveValidationSummary"></ng-container>
                     <div class="example-button-row">
                         <button mat-raised-button color="primary" *ngIf="saveDisabled" [type]="submit"
                             [disabled]="!advanceTableForm.valid" (click)="confirmAdd()">Save</button>
@@ -695,6 +715,9 @@
                                     {{option.customerName}}
                                 </mat-option>
                             </mat-autocomplete>
+                            <mat-error *ngIf="advanceTableForm.controls['customerName'].hasError('required')">
+                                Customer is required
+                            </mat-error>
                             <mat-error *ngIf="advanceTableForm.controls['customerName'].hasError('customerInvalid')">
                                 Please select a Customer
                             </mat-error>
@@ -712,6 +735,9 @@
                                     {{option.salutation}}
                                 </mat-option>
                             </mat-autocomplete>
+                            <mat-error *ngIf="advanceTableForm.controls['salutation'].hasError('required')">
+                                Salutation is required
+                            </mat-error>
                             <mat-error *ngIf="advanceTableForm.controls['salutation'].hasError('salutationInvalid')">
                                 Please select a Salutation
                             </mat-error>
@@ -787,6 +813,9 @@
                                 {{option.customerName}}
                             </mat-option>
                         </mat-autocomplete>
+                        <mat-error *ngIf="advanceTableForm.controls['customerName'].hasError('required')">
+                            Customer is required
+                        </mat-error>
                         <mat-error *ngIf="advanceTableForm.controls['customerName'].hasError('customerInvalid')">
                             Please select a Customer
                         </mat-error>
@@ -804,6 +833,9 @@
                                 {{option.salutation}}
                             </mat-option>
                         </mat-autocomplete>
+                        <mat-error *ngIf="advanceTableForm.controls['salutation'].hasError('required')">
+                            Salutation is required
+                        </mat-error>
                         <mat-error *ngIf="advanceTableForm.controls['salutation'].hasError('salutationInvalid')">
                             Please select a Salutation
                         </mat-error>
@@ -1027,6 +1059,9 @@
                     <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
                         <mat-label>Old RentNet ID</mat-label>
                         <input matInput type="number" formControlName="oldRentNetID" />
+                        <mat-error *ngIf="advanceTableForm.get('oldRentNetID').hasError('pattern')">
+                            Old RentNet ID must be a number
+                        </mat-error>
 
                     </mat-form-field>
                 </div>
@@ -1076,6 +1111,7 @@
 
             <div class="row cp-quick-add-actions-row">
                 <div class="col-12">
+                    <ng-container *ngTemplateOutlet="saveValidationSummary"></ng-container>
                     <div class="example-button-row cp-quick-add-actions">
                         <button mat-raised-button color="primary" [type]="submit" *ngIf="saveDisabled"
                             [disabled]="isSaving || !advanceTableForm.valid" (click)="confirmAdd()">

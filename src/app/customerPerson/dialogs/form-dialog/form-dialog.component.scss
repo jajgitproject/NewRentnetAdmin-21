@@ -13,3 +13,22 @@
   gap: 8px;
   width: 100%;
 }
+
+.validation-summary {
+  background: #fff4f4;
+  border: 1px solid #e53935;
+  border-radius: 4px;
+  color: #c62828;
+  margin-bottom: 12px;
+  padding: 10px 14px;
+}
+
+.validation-summary-title {
+  font-weight: 600;
+  margin-bottom: 6px;
+}
+
+.validation-summary ul {
+  margin: 0;
+  padding-left: 18px;
+}
