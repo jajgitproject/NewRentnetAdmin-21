@@ -48,11 +48,11 @@
                     <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
                         <mat-label>Customer</mat-label>
                         <input (keyup)="onKeyUpCustomer()" required matInput formControlName="customer" [matAutocomplete]="auto1">
-                        <mat-autocomplete #auto1="matAutocomplete">
+                        <mat-autocomplete #auto1="matAutocomplete" [displayWith]="displayCustomer">
                             <mat-option *ngFor="let options of filteredCustomerOptions | async"
                                 [value]="options.customerName + '##' + (options.customerIdentityNumber || '')" 
                                 (click)="getCustomerID(options.customerID,options.customerGroupID,options.customerGroup)">
-                                {{options.customerName}} ## {{options.customerIdentityNumber}}
+                                {{ getCustomerDropdownLabel(options) }}
                             </mat-option>
                         </mat-autocomplete>
                         <mat-error *ngIf="advanceTableForm.controls['customer'].hasError('customerInvalid')">

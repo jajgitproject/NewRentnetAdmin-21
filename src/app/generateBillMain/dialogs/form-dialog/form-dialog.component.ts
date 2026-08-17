@@ -368,12 +368,36 @@ export class FormDialogComponent
     return (data.customerName || '') + '##' + (data.customerIdentityNumber || '');
   }
 
+  getCustomerDropdownLabel(data: CustomerCustomerGroupDropDown): string {
+    const name = data?.customerName || '';
+    const newCustomerId = data?.customerID || '';
+    const tally = data?.tallyCustomerID;
+    const oldRentNetId =
+      tally === null || tally === undefined || tally === '' || tally === 0 || tally === '0'
+        ? ''
+        : tally;
+    return `${name} # NewRNID: ${newCustomerId} # OldRNID: ${oldRentNetId}`;
+  }
+
+  displayCustomer = (value: string): string => {
+    if (!value) {
+      return '';
+    }
+    const match = (this.CustomerList ?? []).find(
+      (customer) => this.getCustomerDisplayValue(customer) === value
+    );
+    return match ? this.getCustomerDropdownLabel(match) : this.getCustomerNameForSearch(value);
+  };
+
   private getCustomerNameForSearch(value: any): string {
     const raw = (value || '').toString().trim();
     if (!raw) {
       return raw;
     }
-    return raw.split('##')[0].trim();
+    if (raw.includes('##')) {
+      return raw.split('##')[0].trim();
+    }
+    return raw.split(' # ')[0].trim();
   }
 
   onKeyUpCustomer()
