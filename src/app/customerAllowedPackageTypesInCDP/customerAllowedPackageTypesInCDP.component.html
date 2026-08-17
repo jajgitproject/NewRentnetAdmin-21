@@ -170,6 +170,12 @@
                                                 {{row.packageType}}</mat-cell>
                                         </ng-container>
 
+                                        <ng-container matColumnDef="customerGivenNameToPackageType">
+                                            <mat-header-cell *matHeaderCellDef mat-sort-header>Customer Given Name</mat-header-cell>
+                                            <mat-cell *matCellDef="let row" (contextmenu)="onContextMenu($event, row)">
+                                                {{row.customerGivenNameToPackageType || row.packageType}}</mat-cell>
+                                        </ng-container>
+
                                         <ng-container matColumnDef="status">
                                             <mat-header-cell *matHeaderCellDef>Status</mat-header-cell>
                                             <mat-cell *matCellDef="let row">

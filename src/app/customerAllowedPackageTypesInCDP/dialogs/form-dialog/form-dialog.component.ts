@@ -46,6 +46,7 @@ public PackageList?: PackageTypeDropDown[] = [];
   someAction: any;
   vehicleID: any;
   packageTypeID: any;
+  lastDefaultPackageTypeName: string = '';
   constructor(
   public dialogRef: MatDialogRef<FormDialogComponentCustomerAllowedPackageTypesInCDP>, 
   private snackBar: MatSnackBar,
@@ -71,6 +72,7 @@ public PackageList?: PackageTypeDropDown[] = [];
           this.advanceTable.activationStatus=true;
         }
         this.advanceTableForm = this.createContactForm();
+        this.lastDefaultPackageTypeName = this.advanceTable.packageType || '';
   }
   public ngOnInit(): void
   {
@@ -100,6 +102,7 @@ public PackageList?: PackageTypeDropDown[] = [];
       customerGroupID: [this.advanceTable.customerGroupID],
        packageTypeID: [this.advanceTable.packageTypeID],
       packageType:[this.advanceTable.packageType],
+      customerGivenNameToPackageType: [this.advanceTable.customerGivenNameToPackageType || this.advanceTable.packageType || ''],
       activationStatus: [this.advanceTable?.activationStatus ?? true]
     });
   }
@@ -117,15 +120,35 @@ public PackageList?: PackageTypeDropDown[] = [];
   reset(): void 
   {
     this.advanceTableForm.reset();
+    this.lastDefaultPackageTypeName = '';
   }
   onNoClick()
   {
     this.dialogRef.close();
   }
+  private getFormPayload()
+  {
+    this.advanceTableForm.patchValue({
+      customerGivenNameToPackageType: this.resolveCustomerGivenNameToPackageType()
+    });
+    return this.advanceTableForm.getRawValue();
+  }
+
+  private resolveCustomerGivenNameToPackageType(): string
+  {
+    const packageTypeName = (this.advanceTableForm.get('packageType')?.value || '').toString().trim();
+    const customerGivenName = (this.advanceTableForm.get('customerGivenNameToPackageType')?.value || '').toString().trim();
+    if (!customerGivenName || customerGivenName.toLowerCase() === packageTypeName.toLowerCase())
+    {
+      return packageTypeName;
+    }
+    return customerGivenName;
+  }
+
   public Post(): void
   {
     this.advanceTableForm.patchValue({ customerGroupID:this.data.customerGroupID });
-    this.advanceTableService.add(this.advanceTableForm.getRawValue())  
+    this.advanceTableService.add(this.getFormPayload())  
     .subscribe(
     response => 
     {
@@ -144,7 +167,7 @@ public PackageList?: PackageTypeDropDown[] = [];
   public Put(): void
   {
     this.advanceTableForm.patchValue({ customerGroupID:this.advanceTable.customerGroupID });
-    this.advanceTableService.update(this.advanceTableForm.getRawValue())  
+    this.advanceTableService.update(this.getFormPayload())  
     .subscribe(
     response => 
     {
@@ -316,9 +339,19 @@ InitPackageTypes(){
       data => data.packageType === selectedPackageType
     );
   
-    if (selectedPackageType) {
+    if (selectedPackage) {
       this.getTitles(selectedPackage.packageTypeID);
+      this.applyDefaultCustomerGivenName(selectedPackage.packageType);
     }
+  }
+
+  applyDefaultCustomerGivenName(packageTypeName: string) {
+    const current = (this.advanceTableForm.get('customerGivenNameToPackageType')?.value || '').toString().trim();
+    const previousDefault = (this.lastDefaultPackageTypeName || '').trim();
+    if (!current || current.toLowerCase() === previousDefault.toLowerCase()) {
+      this.advanceTableForm.patchValue({ customerGivenNameToPackageType: packageTypeName });
+    }
+    this.lastDefaultPackageTypeName = packageTypeName;
   }
   
   getTitles(packageTypeID: any) {
