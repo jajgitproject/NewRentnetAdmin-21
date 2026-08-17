@@ -22,17 +22,76 @@
     <div class="br-filter-card" *ngIf="!filtersCollapsed">
       <div class="br-filter-bar">
         <mat-form-field class="br-field br-field-date" appearance="outline" subscriptSizing="dynamic">
-          <mat-label>From Date</mat-label>
+          <mat-label>Pickup Date From</mat-label>
           <input matInput [matDatepicker]="fromPicker" [(ngModel)]="searchPickupFromDate" />
           <mat-datepicker-toggle matIconPrefix [for]="fromPicker"></mat-datepicker-toggle>
           <mat-datepicker #fromPicker></mat-datepicker>
         </mat-form-field>
 
         <mat-form-field class="br-field br-field-date" appearance="outline" subscriptSizing="dynamic">
-          <mat-label>To Date</mat-label>
+          <mat-label>Pickup Date To</mat-label>
           <input matInput [matDatepicker]="toPicker" [(ngModel)]="searchPickupToDate" />
           <mat-datepicker-toggle matIconPrefix [for]="toPicker"></mat-datepicker-toggle>
           <mat-datepicker #toPicker></mat-datepicker>
+        </mat-form-field>
+
+        <mat-form-field class="br-field br-field-date" appearance="outline" subscriptSizing="dynamic">
+          <mat-label>Booking Date From</mat-label>
+          <input matInput [matDatepicker]="bookingFromPicker" [(ngModel)]="searchBookingFromDate" />
+          <mat-datepicker-toggle matIconPrefix [for]="bookingFromPicker"></mat-datepicker-toggle>
+          <mat-datepicker #bookingFromPicker></mat-datepicker>
+        </mat-form-field>
+
+        <mat-form-field class="br-field br-field-date" appearance="outline" subscriptSizing="dynamic">
+          <mat-label>Booking Date To</mat-label>
+          <input matInput [matDatepicker]="bookingToPicker" [(ngModel)]="searchBookingToDate" />
+          <mat-datepicker-toggle matIconPrefix [for]="bookingToPicker"></mat-datepicker-toggle>
+          <mat-datepicker #bookingToPicker></mat-datepicker>
+        </mat-form-field>
+
+        <mat-form-field class="br-field" appearance="outline" subscriptSizing="dynamic">
+          <mat-label>Booking No</mat-label>
+          <input matInput [(ngModel)]="searchBookingNo" />
+        </mat-form-field>
+
+        <mat-form-field class="br-field br-field-customer" appearance="outline" subscriptSizing="dynamic">
+          <mat-label>Customer Group</mat-label>
+          <input
+            matInput
+            [formControl]="customerGroupCtrl"
+            [matAutocomplete]="customerGroupAuto"
+            autocomplete="off" />
+          <mat-autocomplete #customerGroupAuto="matAutocomplete" panelWidth="custom-autocomplete-panel">
+            <mat-option
+              *ngFor="let option of customerGroupOptions"
+              [value]="getCustomerGroupOptionValue(option)">
+              {{ getCustomerGroupOptionValue(option) }}
+            </mat-option>
+          </mat-autocomplete>
+        </mat-form-field>
+
+        <mat-form-field class="br-field br-field-customer" appearance="outline" subscriptSizing="dynamic">
+          <mat-label>Customer Name</mat-label>
+          <input
+            matInput
+            [formControl]="customerNameCtrl"
+            [matAutocomplete]="customerNameAuto"
+            autocomplete="off" />
+          <mat-autocomplete #customerNameAuto="matAutocomplete" [displayWith]="displayCustomerNameFn" panelWidth="custom-autocomplete-panel">
+            <mat-option
+              *ngFor="let option of customerNameOptions"
+              [value]="getCustomerOptionValue(option)">
+              {{ getCustomerOptionLabel(option) }}
+            </mat-option>
+          </mat-autocomplete>
+        </mat-form-field>
+
+        <mat-form-field class="br-field" appearance="outline" subscriptSizing="dynamic">
+          <mat-label>Confirmation</mat-label>
+          <mat-select [(ngModel)]="searchConfirmation">
+            <mat-option value="">All</mat-option>
+            <mat-option *ngFor="let option of confirmationOptions" [value]="option.value">{{ option.label }}</mat-option>
+          </mat-select>
         </mat-form-field>
 
         <mat-form-field class="br-field" appearance="outline" subscriptSizing="dynamic">
@@ -68,7 +127,7 @@
     <div class="br-table-card">
       <div class="br-table-toolbar">
         <div class="br-table-toolbar-spacer"></div>
-        <button mat-icon-button type="button" matTooltip="Refresh" (click)="loadData()" [disabled]="isLoading">
+        <button mat-icon-button type="button" matTooltip="Refresh" (click)="reloadSearchedData()" [disabled]="isLoading || !hasSearched">
           <mat-icon>refresh</mat-icon>
         </button>
         <button mat-stroked-button type="button" class="br-columns-btn" [matMenuTriggerFor]="columnsMenu">
@@ -86,7 +145,7 @@
       </mat-menu>
 
       <div class="br-empty-state" *ngIf="!isLoading && !dataSource?.length">
-        <p>No Records Found</p>
+        <p>{{ hasSearched ? 'No Records Found' : 'Use filters and click Search to load bookings.' }}</p>
       </div>
 
       <div class="br-table-wrap" *ngIf="dataSource?.length">
@@ -99,6 +158,11 @@
           <ng-container matColumnDef="bookingNo">
             <mat-header-cell *matHeaderCellDef mat-sort-header="bookingNo">Booking No.</mat-header-cell>
             <mat-cell *matCellDef="let row">{{ formatBookingNo(row) }}</mat-cell>
+          </ng-container>
+
+          <ng-container matColumnDef="customerGroup">
+            <mat-header-cell *matHeaderCellDef mat-sort-header="customerGroup">Customer Group</mat-header-cell>
+            <mat-cell *matCellDef="let row">{{ row.customerGroup || 'N/A' }}</mat-cell>
           </ng-container>
 
           <ng-container matColumnDef="customerName">

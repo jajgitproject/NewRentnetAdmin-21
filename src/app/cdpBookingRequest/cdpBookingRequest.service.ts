@@ -19,8 +19,14 @@ export class CdpBookingRequestService {
   getTableData(
     fromDate: string,
     toDate: string,
+    bookingFromDate: string,
+    bookingToDate: string,
     status: string | null,
     reservationSource: string | null,
+    bookingNo: string | null,
+    customerGroup: string | null,
+    customerName: string | null,
+    confirmation: string | null,
     pageNumber: number,
     orderByColumn = 'PickupDate',
     order = 'Descending'
@@ -36,11 +42,29 @@ export class CdpBookingRequestService {
     if (toDate) {
       params = params.set('toDate', toDate);
     }
+    if (bookingFromDate) {
+      params = params.set('bookingFromDate', bookingFromDate);
+    }
+    if (bookingToDate) {
+      params = params.set('bookingToDate', bookingToDate);
+    }
     if (status) {
       params = params.set('status', status);
     }
     if (reservationSource) {
       params = params.set('reservationSource', reservationSource);
+    }
+    if (bookingNo) {
+      params = params.set('bookingNo', bookingNo);
+    }
+    if (customerGroup) {
+      params = params.set('customerGroup', customerGroup);
+    }
+    if (customerName) {
+      params = params.set('customerName', customerName);
+    }
+    if (confirmation) {
+      params = params.set('confirmation', confirmation);
     }
 
     return this.httpClient.get<any>(this.apiUrl, { params }).pipe(

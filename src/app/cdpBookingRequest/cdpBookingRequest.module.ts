@@ -1,6 +1,7 @@
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { MatAutocompleteModule } from '@angular/material/autocomplete';
 import { MatTableModule } from '@angular/material/table';
 import { MatPaginatorModule } from '@angular/material/paginator';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -26,6 +27,8 @@ import { ClossingOneService } from '../clossingOne/clossingOne.service';
   imports: [
     CommonModule,
     FormsModule,
+    ReactiveFormsModule,
+    MatAutocompleteModule,
     MatTooltipModule,
     CdpBookingRequestRoutingModule,
     MatTableModule,
