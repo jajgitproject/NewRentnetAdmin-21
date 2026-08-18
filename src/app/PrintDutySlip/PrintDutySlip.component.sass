@@ -111,11 +111,27 @@ td, th
 	max-height: 40px !important
 	object-fit: contain !important
 
+.map-cell
+	text-align: center
+	vertical-align: middle
+	padding: 4px 6px
+	width: auto
+
+.map-wrap
+	width: 100%
+	max-width: 100%
+	overflow: hidden
+	line-height: 0
+
 .map-image
 	width: 100%
-	height: 260px
-	object-fit: cover
+	max-width: 100%
+	height: auto
+	aspect-ratio: 670 / 350
+	object-fit: contain
+	object-position: center center
 	display: block
+	margin: 0 auto
 	border: 1px solid #ccc
 
 @media print
@@ -142,8 +158,11 @@ td, th
 
 	.map-image
 		width: 100% !important
-		height: 260px !important
-		object-fit: cover !important
+		max-width: 100% !important
+		height: auto !important
+		aspect-ratio: 670 / 350
+		object-fit: contain !important
+		object-position: center center !important
 		display: block !important
 		border: 1px solid #ccc !important
 		page-break-inside: avoid

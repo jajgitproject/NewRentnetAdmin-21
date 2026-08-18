@@ -186,9 +186,11 @@
 
                       <table width="556" border="0" cellpadding="1" cellspacing="0" class="text1">
                         <tr>
-                          <td style="text-align:center; padding:10px 0;">
-                            <img *ngIf="dataSource?.mapURL; else noMapImage"
-                                  [src]="dataSource?.mapURL" class="map-image" alt="Duty Slip Map" />
+                          <td class="map-cell">
+                            <div class="map-wrap">
+                              <img *ngIf="dataSource?.mapURL; else noMapImage"
+                                    [src]="dataSource?.mapURL" class="map-image" alt="Duty Slip Map" />
+                            </div>
                                   <ng-template #noMapImage>No Image</ng-template>
                           </td>
                           <td valign="top" width="130" align="center" class="signature-cell">
