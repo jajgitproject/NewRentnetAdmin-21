@@ -1,0 +1,56 @@
+.feedback-search-card
+  margin-bottom: 15px
+
+.feedback-search-panel
+  display: flex
+  flex-wrap: wrap
+  align-items: center
+  gap: 12px
+  padding: 4px 0
+
+  .search-field
+    width: 200px
+    margin-bottom: -1.25em
+
+  .search-actions
+    display: flex
+    align-items: center
+    gap: 10px
+
+.feedback-email-job-panel
+  margin: 8px 0
+  padding: 16px
+  border: 1px solid #e0e0e0
+  border-radius: 4px
+  background: #fafafa
+
+  .panel-title
+    font-size: 15px
+    font-weight: 600
+    margin-bottom: 12px
+
+  .send-job-meta
+    display: flex
+    flex-wrap: wrap
+    gap: 12px 20px
+    margin-bottom: 12px
+    font-size: 13px
+
+    .send-job-stat
+      color: #d32f2f
+      font-weight: 600
+
+  .send-job-message
+    margin: 12px 0
+    font-size: 13px
+    color: #444
+
+.feedback-table-scroll
+  max-height: calc(100vh - 320px)
+  overflow: auto
+
+  ::ng-deep .mat-header-row
+    position: sticky
+    top: 0
+    z-index: 100
+    background: #fff

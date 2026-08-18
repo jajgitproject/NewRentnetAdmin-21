@@ -1,75 +1,50 @@
 // @ts-nocheck
-import { formatDate } from '@angular/common';
 export class FeedbackEmailMIS {
-  reservationID :number;
-  customerID  :number;
-  allotmentID :number;
-  vehicleID  :number;
-  dutySlipID:number;
-  CustomerTypeID :number; 
- 
-  pickupDate :Date; 
+  isFeedbackEmailSent: boolean;
+  reservationID: number;
+  reservationGroupID: number;
+  dutySlipID: number;
+  pickupDate: Date;
+  vehicle: string;
+  registrationNumber: string;
+  driverName: string;
+  pickupCity: string;
+  passengerName: string;
+  passengerEmail: string;
+  passengerID: number;
+  passengerMobile: string;
+  passengerFeedbackEmailAllowed: boolean;
+  customerName: string;
+  customerType: string;
+  customerFeedbackEmailAllowed: boolean;
+  kam: string;
+  kamMobile: string;
+  customerPersonID: number;
+  customerID: number;
+  employeeID: number;
 
-  customerName :string;
-  vehicle :string;
-  userName:string;
-
-  guestName:string;
-  gender:string;
-  primaryMobile :string;
-  primaryEmail:string;
-  city :string;
-  customerType:string;
-  driverName :string;
- 
-  message:string;
-  messageType :string;
-  messageSource:string;
-  registrationNumber:string;
-  vehicleCategory:string;
-  isBooker:boolean;
-  isPassenger:boolean;
-  reachedSMSToBooker:boolean;
-  reachedSMSToPassenger:boolean;
-  sendSMSWhatsApp:boolean;
- 
   constructor(feedbackEmailMIS) {
-    {
-
-       this.reservationID = feedbackEmailMIS.reservationID || '';
-       this.customerID  = feedbackEmailMIS.customerID || '';
-       this.vehicleID  = feedbackEmailMIS.vehicleID || '';
-       this.dutySlipID= feedbackEmailMIS.dutySlipID || '';
-       this.allotmentID = feedbackEmailMIS.allotmentID || '';
-       this.CustomerTypeID = feedbackEmailMIS.CustomerTypeID || '';
-
-
-
-       this.pickupDate= feedbackEmailMIS.pickupDate || '';
-       this.customerName= feedbackEmailMIS.customerName || '';
-       this.vehicle= feedbackEmailMIS.vehicle || '';
-       this.userName= feedbackEmailMIS.userName || '';
-
-       this.guestName= feedbackEmailMIS.guestName || '';
-       this.gender= feedbackEmailMIS.gender || '';       
-       this.primaryMobile= feedbackEmailMIS.primaryMobile || '';
-       this.primaryEmail= feedbackEmailMIS.primaryEmail || '';
-       this.city= feedbackEmailMIS.city || '';
-       this.customerType= feedbackEmailMIS.customerType || '';
-       this.driverName= feedbackEmailMIS.driverName || '';
-       this.message= feedbackEmailMIS.message || '';
-       this.messageType= feedbackEmailMIS.messageType || '';
-       this.messageSource= feedbackEmailMIS.messageSource || '';
-       this.registrationNumber= feedbackEmailMIS.registrationNumber || '';
-       this.vehicleCategory= feedbackEmailMIS.vehicleCategory || '';
-       this.isBooker= feedbackEmailMIS.isBooker || '';
-       this.isPassenger= feedbackEmailMIS.isPassenger || '';
-       this.reachedSMSToBooker = feedbackEmailMIS.reachedSMSToBooker || '';
-      this.reachedSMSToPassenger = feedbackEmailMIS.reachedSMSToPassenger || '';
-      this.sendSMSWhatsApp = feedbackEmailMIS.sendSMSWhatsApp || '';
-     
-    }
+    this.isFeedbackEmailSent = feedbackEmailMIS.isFeedbackEmailSent;
+    this.reservationID = feedbackEmailMIS.reservationID || '';
+    this.reservationGroupID = feedbackEmailMIS.reservationGroupID || '';
+    this.dutySlipID = feedbackEmailMIS.dutySlipID || '';
+    this.pickupDate = feedbackEmailMIS.pickupDate || '';
+    this.vehicle = feedbackEmailMIS.vehicle || '';
+    this.registrationNumber = feedbackEmailMIS.registrationNumber || '';
+    this.driverName = feedbackEmailMIS.driverName || '';
+    this.pickupCity = feedbackEmailMIS.pickupCity || '';
+    this.passengerName = feedbackEmailMIS.passengerName || '';
+    this.passengerEmail = feedbackEmailMIS.passengerEmail || '';
+    this.passengerID = feedbackEmailMIS.passengerID || '';
+    this.passengerMobile = feedbackEmailMIS.passengerMobile || '';
+    this.passengerFeedbackEmailAllowed = feedbackEmailMIS.passengerFeedbackEmailAllowed;
+    this.customerName = feedbackEmailMIS.customerName || '';
+    this.customerType = feedbackEmailMIS.customerType || '';
+    this.customerFeedbackEmailAllowed = feedbackEmailMIS.customerFeedbackEmailAllowed;
+    this.kam = feedbackEmailMIS.kam || '';
+    this.kamMobile = feedbackEmailMIS.kamMobile || '';
+    this.customerPersonID = feedbackEmailMIS.customerPersonID || '';
+    this.customerID = feedbackEmailMIS.customerID || '';
+    this.employeeID = feedbackEmailMIS.employeeID || '';
   }
-  
 }
-
