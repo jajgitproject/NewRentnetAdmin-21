@@ -16,41 +16,39 @@ export class FeedbackEmailMISService {
 
 
   /** CRUD METHODS */
-  getTableData(searchDutySlipID: string, searchFromDate: string,
-    searchToDate: string, PageNumber: number): Observable<any> {
-
-    if (searchDutySlipID === "") {
-      searchDutySlipID = "null";
-    } else {
-      searchDutySlipID = encodeURIComponent(searchDutySlipID);
-    }
-    if (searchFromDate === "") {
-      searchFromDate = "null";
-    }
-    if (searchToDate === "") {
-      searchToDate = "null";
-    }
-    return this.httpClient.get(this.API_URL + "/" + searchDutySlipID + '/' + searchFromDate + '/' + searchToDate + '/' + PageNumber + '/PickupDate/Descending');
-
+  getTableData(searchReservationID: string, searchDutySlipID: string, searchCustomer: string, searchIsAllotted: string,
+    searchFromDate: string, searchToDate: string, PageNumber: number): Observable<any> {
+    return this.httpClient.get(this.buildSearchUrl(
+      searchReservationID, searchDutySlipID, searchCustomer, searchIsAllotted,
+      searchFromDate, searchToDate, PageNumber, 'PickupDate', 'Descending'));
   }
 
-  getTableDataSort(searchDutySlipID: string, searchFromDate: string, searchToDate: string,
-    PageNumber: number, coloumName: string, sortType: string): Observable<any> {
+  getTableDataSort(searchReservationID: string, searchDutySlipID: string, searchCustomer: string, searchIsAllotted: string,
+    searchFromDate: string, searchToDate: string, PageNumber: number, coloumName: string, sortType: string): Observable<any> {
+    return this.httpClient.get(this.buildSearchUrl(
+      searchReservationID, searchDutySlipID, searchCustomer, searchIsAllotted,
+      searchFromDate, searchToDate, PageNumber, coloumName, sortType));
+  }
 
-      if (searchDutySlipID === "") {
-        searchDutySlipID = "null";
-      } else {
-        searchDutySlipID = encodeURIComponent(searchDutySlipID);
-      }
+  private buildSearchUrl(searchReservationID: string, searchDutySlipID: string, searchCustomer: string, searchIsAllotted: string,
+    searchFromDate: string, searchToDate: string, PageNumber: number, coloumName: string, sortType: string): string {
+    return this.API_URL + '/'
+      + this.toPathValue(searchReservationID) + '/'
+      + this.toPathValue(searchDutySlipID) + '/'
+      + this.toPathValue(searchCustomer) + '/'
+      + this.toPathValue(searchIsAllotted) + '/'
+      + this.toPathValue(searchFromDate) + '/'
+      + this.toPathValue(searchToDate) + '/'
+      + PageNumber + '/'
+      + coloumName + '/'
+      + sortType;
+  }
 
-    if (searchFromDate === "") {
-      searchFromDate = "null";
+  private toPathValue(value: string): string {
+    if (value === undefined || value === null || String(value).trim() === '') {
+      return 'null';
     }
-    if (searchToDate === "") {
-      searchToDate = "null";
-    }
-    return this.httpClient.get(this.API_URL + "/" + searchDutySlipID + '/' + searchFromDate + '/' + searchToDate + '/' + PageNumber + '/' + coloumName + '/' + sortType);
-
+    return encodeURIComponent(String(value).trim());
   }
 
   startSendJob(reservationIDs: number[], senderEmployeeID: number): Observable<any> {

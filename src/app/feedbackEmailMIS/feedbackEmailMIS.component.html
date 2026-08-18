@@ -27,9 +27,35 @@
                     <div class="body">
                         <div class="feedback-search-panel">
                             <mat-form-field appearance="outline" floatLabel="always" class="search-field">
+                                <mat-label>Reservation No</mat-label>
+                                <input type="text" matInput [(ngModel)]="searchReservationID"
+                                    placeholder="e.g. 101,102,103">
+                            </mat-form-field>
+
+                            <mat-form-field appearance="outline" floatLabel="always" class="search-field">
                                 <mat-label>Duty Slip No</mat-label>
                                 <input type="text" matInput [(ngModel)]="searchDutySlipID"
                                     placeholder="e.g. 101,102,103">
+                            </mat-form-field>
+
+                            <mat-form-field appearance="outline" floatLabel="always" class="search-field">
+                                <mat-label>Customer</mat-label>
+                                <input type="text" matInput [formControl]="searchCustomerControl"
+                                    [matAutocomplete]="autoCustomer" placeholder="Type at least 3 letters">
+                                <mat-autocomplete #autoCustomer="matAutocomplete" [displayWith]="displayCustomer">
+                                    <mat-option *ngFor="let option of customerOptions" [value]="option">
+                                        {{ option.customerName }}
+                                    </mat-option>
+                                </mat-autocomplete>
+                            </mat-form-field>
+
+                            <mat-form-field appearance="outline" floatLabel="always" class="search-field">
+                                <mat-label>Allotment Done</mat-label>
+                                <mat-select [(ngModel)]="searchIsAllotted">
+                                    <mat-option value="">All</mat-option>
+                                    <mat-option value="Yes">Yes</mat-option>
+                                    <mat-option value="No">No</mat-option>
+                                </mat-select>
                             </mat-form-field>
 
                             <mat-form-field appearance="outline" floatLabel="always" class="search-field">
@@ -91,6 +117,9 @@
                     <div class="body">
                         <div class="responsive_table">
                             <div class="table-responsive">
+                                <div class="feedback-record-count">
+                                    {{ getRecordCount() }} {{ getRecordCount() === 1 ? 'record' : 'records' }} found
+                                </div>
 
                                 <p *ngIf="!dataSource; then thenBlock2 else elseBlock2">
                                     This is not rendered
@@ -100,13 +129,6 @@
                                     <div class="alert alert-primary"
                                         style="background-color:#E8E8E8; text-align: center;">
                                         No Records Found</div>
-                                    <div class="body">
-                                        <div class="example-button-row">
-                                            <button mat-raised-button color="primary"
-                                                (click)="PreviousCall()">Previous</button>
-                                            <button mat-raised-button color="primary" (click)="NextCall()">Next</button>
-                                        </div>
-                                    </div>
                                 </ng-template>
 
                                 <ng-template #elseBlock2>
@@ -147,6 +169,12 @@
                                                 <mat-header-cell *matHeaderCellDef mat-sort-header>Duty Slip No</mat-header-cell>
                                                 <mat-cell *matCellDef="let row">
                                                     {{row.dutySlipID ? row.dutySlipID : 'N/A'}}</mat-cell>
+                                            </ng-container>
+
+                                            <ng-container matColumnDef="IsAllotted">
+                                                <mat-header-cell *matHeaderCellDef mat-sort-header>Allotment Done</mat-header-cell>
+                                                <mat-cell *matCellDef="let row">
+                                                    {{ formatYesNo(row.isAllotted) }}</mat-cell>
                                             </ng-container>
 
                                             <ng-container matColumnDef="PickupDate">
@@ -250,14 +278,6 @@
                                         <ng-template matMenuContent let-item="item">
                                         </ng-template>
                                     </mat-menu>
-
-                                    <div class="body">
-                                        <div class="example-button-row">
-                                            <button mat-raised-button color="primary"
-                                                (click)="PreviousCall()">Previous</button>
-                                            <button mat-raised-button color="primary" (click)="NextCall()">Next</button>
-                                        </div>
-                                    </div>
 
                                 </ng-template>
                             </div>

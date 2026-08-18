@@ -4,6 +4,8 @@ export class FeedbackEmailMIS {
   reservationID: number;
   reservationGroupID: number;
   dutySlipID: number;
+  isAllotted: boolean;
+  allotmentStatus: string;
   pickupDate: Date;
   vehicle: string;
   registrationNumber: string;
@@ -28,6 +30,8 @@ export class FeedbackEmailMIS {
     this.reservationID = feedbackEmailMIS.reservationID || '';
     this.reservationGroupID = feedbackEmailMIS.reservationGroupID || '';
     this.dutySlipID = feedbackEmailMIS.dutySlipID || '';
+    this.isAllotted = feedbackEmailMIS.isAllotted;
+    this.allotmentStatus = feedbackEmailMIS.allotmentStatus || '';
     this.pickupDate = feedbackEmailMIS.pickupDate || '';
     this.vehicle = feedbackEmailMIS.vehicle || '';
     this.registrationNumber = feedbackEmailMIS.registrationNumber || '';

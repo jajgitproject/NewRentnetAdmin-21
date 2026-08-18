@@ -5,7 +5,8 @@ import { MatDialog, MatDialogRef } from '@angular/material/dialog';
 import { MatPaginator } from '@angular/material/paginator';
 import { MatSort } from '@angular/material/sort';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import { Subscription } from 'rxjs';
+import { Subscription, of } from 'rxjs';
+import { debounceTime, distinctUntilChanged, switchMap } from 'rxjs/operators';
 import { MAT_DATE_LOCALE } from '@angular/material/core';
 import { MatMenuTrigger } from '@angular/material/menu';
 import { SelectionModel } from '@angular/cdk/collections';
@@ -29,6 +30,7 @@ export class FeedbackEmailMISComponent implements OnInit, OnDestroy {
     'IsFeedbackEmailSent',
     'ReservationID',
     'DutySlipID',
+    'IsAllotted',
     'PickupDate',
     'Vehicle',
     'RegistrationNumber',
@@ -64,7 +66,11 @@ export class FeedbackEmailMISComponent implements OnInit, OnDestroy {
 
   searchTerm: any = '';
   selectedFilter: string = 'search';
+  searchReservationID: any = '';
   searchDutySlipID: any = '';
+  searchCustomerControl: FormControl = new FormControl('');
+  customerOptions: any[] = [];
+  searchIsAllotted: string = '';
   searchFromDate: string = '';
   searchToDate: string = '';
   selection = new SelectionModel<any>(true, []);
@@ -75,6 +81,7 @@ export class FeedbackEmailMISComponent implements OnInit, OnDestroy {
   sendJobError = '';
   sendJobStartedAt: number | null = null;
   private sendPollSub: Subscription;
+  private customerAutocompleteSub: Subscription;
 
   constructor(
     public httpClient: HttpClient,
@@ -91,6 +98,7 @@ export class FeedbackEmailMISComponent implements OnInit, OnDestroy {
   contextMenuPosition = { x: '0px', y: '0px' };
   ngOnInit() {
     this.initDefaultDates();
+    this.setupCustomerAutocomplete();
     this.SubscribeUpdateService();
   }
 
@@ -100,8 +108,52 @@ export class FeedbackEmailMISComponent implements OnInit, OnDestroy {
     this.searchToDate = today.toDate();
   }
 
+  private setupCustomerAutocomplete() {
+    this.customerAutocompleteSub = this.searchCustomerControl.valueChanges.pipe(
+      debounceTime(300),
+      distinctUntilChanged(),
+      switchMap((value) => {
+        if (value && typeof value === 'object') {
+          return of(this.customerOptions);
+        }
+        const term = (value || '').toString().trim();
+        if (term.length < this._generalService.lengthToCheck) {
+          this.customerOptions = [];
+          return of([]);
+        }
+        return this._generalService.GetCustomerDropDownForControlPanel(term);
+      })
+    ).subscribe((list) => {
+      this.customerOptions = list || [];
+    });
+  }
+
+  displayCustomer(option: any): string {
+    return option && typeof option === 'object' ? (option.customerName || '') : (option || '');
+  }
+
+  private getSelectedCustomerId(): string {
+    const value = this.searchCustomerControl.value;
+    const customerId = Number(value?.customerID ?? value?.CustomerID);
+    return customerId > 0 ? String(customerId) : '';
+  }
+
+  private hasIncompleteCustomerSelection(): boolean {
+    const value = this.searchCustomerControl.value;
+    if (!value) {
+      return false;
+    }
+    if (typeof value === 'object') {
+      return !(Number(value.customerID ?? value.CustomerID) > 0);
+    }
+    return String(value).trim().length > 0;
+  }
+
   ngOnDestroy() {
     this.stopSendPolling();
+    if (this.customerAutocompleteSub) {
+      this.customerAutocompleteSub.unsubscribe();
+    }
     if (this.subscriptionName) {
       this.subscriptionName.unsubscribe();
     }
@@ -112,7 +164,11 @@ export class FeedbackEmailMISComponent implements OnInit, OnDestroy {
     this.SearchActivationStatus = true;
     this.PageNumber = 0;
     this.searchTerm = '';
+    this.searchReservationID = '';
     this.searchDutySlipID = '';
+    this.searchCustomerControl.setValue('');
+    this.customerOptions = [];
+    this.searchIsAllotted = '';
     this.selectedFilter = 'search';
     this.selection.clear();
     this.initDefaultDates();
@@ -122,6 +178,10 @@ export class FeedbackEmailMISComponent implements OnInit, OnDestroy {
   public SearchData() {
     if (!this.searchFromDate || !this.searchToDate) {
       this.showNotification('snackbar-danger', 'From Date and To Date are required.', 'bottom', 'center');
+      return;
+    }
+    if (this.hasIncompleteCustomerSelection()) {
+      this.showNotification('snackbar-danger', 'Please select a customer from the list.', 'bottom', 'center');
       return;
     }
     this.PageNumber = 0;
@@ -171,7 +231,15 @@ export class FeedbackEmailMISComponent implements OnInit, OnDestroy {
       return;
     }
 
-    this.feedbackEmailMISService.getTableData(this.searchDutySlipID, fromDate, toDate, this.PageNumber).subscribe
+    this.feedbackEmailMISService.getTableData(
+      this.searchReservationID,
+      this.searchDutySlipID,
+      this.getSelectedCustomerId(),
+      this.searchIsAllotted,
+      fromDate,
+      toDate,
+      this.PageNumber
+    ).subscribe
       (
         data => {
           this.dataSource = data;
@@ -204,26 +272,15 @@ export class FeedbackEmailMISComponent implements OnInit, OnDestroy {
     this.contextMenu.openMenu();
   }
 
-  NextCall() {
-    if (this.dataSource.length > 0) {
-
-      this.PageNumber++;
-      this.loadData();
-    }
-  }
-  PreviousCall() {
-
-    if (this.PageNumber > 0) {
-      this.PageNumber--;
-      this.loadData();
-    }
-  }
-
   formatYesNo(value: any): string {
     if (value === true || value === 1 || value === '1' || value === 'true') {
       return 'Yes';
     }
     return 'No';
+  }
+
+  getRecordCount(): number {
+    return Array.isArray(this.dataSource) ? this.dataSource.length : 0;
   }
 
   getBookingNo(row: any): string {
@@ -520,7 +577,10 @@ export class FeedbackEmailMISComponent implements OnInit, OnDestroy {
       this.sortType = "Descending";
     }
     this.feedbackEmailMISService.getTableDataSort(
+      this.searchReservationID,
       this.searchDutySlipID,
+      this.getSelectedCustomerId(),
+      this.searchIsAllotted,
       this.formatSearchDate(this.searchFromDate),
       this.formatSearchDate(this.searchToDate),
       this.PageNumber,
