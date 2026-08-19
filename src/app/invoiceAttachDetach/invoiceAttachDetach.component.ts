@@ -134,6 +134,8 @@ export class InvoiceAttachDetachComponent implements OnInit {
   InvoiceID: any;
   invoiceBillDate: Date | null = null;
   invoiceCustomerName: string = '';
+  invoiceType: string = '';
+  hasAttachedDuties = false;
   invoiceAnchorGstNumbers: string[] = [];
   hasMixedInvoiceGst = false;
   activeGstKey: string | null = null;
@@ -180,11 +182,7 @@ export class InvoiceAttachDetachComponent implements OnInit {
   loadInvoiceBillDate() {
     const invoiceId = Number(this.InvoiceID);
     if (!invoiceId || invoiceId <= 0) {
-      this.invoiceBillDate = null;
-      this.invoiceCustomerName = '';
-      this.invoiceAnchorGstNumbers = [];
-      this.hasMixedInvoiceGst = false;
-      this.activeGstKey = null;
+      this.resetInvoiceGstContext();
       return;
     }
 
@@ -192,17 +190,15 @@ export class InvoiceAttachDetachComponent implements OnInit {
       response => {
         this.invoiceBillDate = response?.invoiceDate ? new Date(response.invoiceDate) : null;
         this.invoiceCustomerName = response?.invoiceCustomerName || '';
+        this.invoiceType = response?.invoiceType || '';
+        this.hasAttachedDuties = !!response?.hasAttachedDuties;
         this.invoiceAnchorGstNumbers = response?.distinctInvoiceGstNumbers || [];
         this.hasMixedInvoiceGst = !!response?.hasMixedGst;
         this.applyInvoiceGstAnchor();
         this.buildGroupedDutySections();
       },
       () => {
-        this.invoiceBillDate = null;
-        this.invoiceCustomerName = '';
-        this.invoiceAnchorGstNumbers = [];
-        this.hasMixedInvoiceGst = false;
-        this.activeGstKey = null;
+        this.resetInvoiceGstContext();
       }
     );
   }
@@ -212,6 +208,20 @@ export class InvoiceAttachDetachComponent implements OnInit {
       return this.noGstConfiguredKey;
     }
     return String(gstNumber).trim().toUpperCase();
+  }
+
+  resetInvoiceGstContext() {
+    this.invoiceBillDate = null;
+    this.invoiceCustomerName = '';
+    this.invoiceType = '';
+    this.hasAttachedDuties = false;
+    this.invoiceAnchorGstNumbers = [];
+    this.hasMixedInvoiceGst = false;
+    this.activeGstKey = null;
+  }
+
+  isEmptyInvoiceGeneral(): boolean {
+    return this.invoiceType === 'InvoiceGeneral' && !this.hasAttachedDuties;
   }
 
   applyInvoiceGstAnchor() {
@@ -225,6 +235,11 @@ export class InvoiceAttachDetachComponent implements OnInit {
     }
 
     if (this.hasMixedInvoiceGst) {
+      this.activeGstKey = null;
+      return;
+    }
+
+    if (this.isEmptyInvoiceGeneral()) {
       this.activeGstKey = null;
       return;
     }
@@ -290,6 +305,9 @@ export class InvoiceAttachDetachComponent implements OnInit {
     }
     if (this.activeGstKey === this.noGstConfiguredKey) {
       return 'Selected group: duties with no GST configured. Mixed GSTINs cannot be billed together.';
+    }
+    if (this.isEmptyInvoiceGeneral()) {
+      return 'Select duties from one GSTIN group only. Mixed GSTINs cannot be billed together.';
     }
     return 'Select duties from one GSTIN group only. Mixed GSTINs cannot be billed together on a Multi-Duty invoice.';
   }

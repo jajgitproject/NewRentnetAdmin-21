@@ -42,6 +42,8 @@ export interface InvoiceBillDateContext {
   invoiceDate?: string;
   invoiceCustomerId?: number;
   invoiceCustomerName?: string;
+  invoiceType?: string;
+  hasAttachedDuties?: boolean;
   distinctInvoiceGstNumbers?: string[];
   hasMixedGst?: boolean;
 }
