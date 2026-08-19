@@ -72,21 +72,21 @@ export class DutySlipForBillingComponent implements OnInit, AfterViewInit, OnCha
  totalKMForManul: any;
  totalKMForApp: any;
  /** Date/time and duty-slip status fields stay editable for all closure types (App, Driver, GPS, Manual).
-  * Pickup Date/Time are locked to Reservation and are never in this list. */
+  * Pickup Date stays locked to Reservation and is never in this list. Pickup Time is editable. */
  private readonly alwaysEditableControls = [
    'locationOutDateForBilling',
    'locationOutTimeForBilling',
    'reportingToGuestDateForBilling',
    'reportingToGuestTimeForBilling',
+   'pickUpTimeForBilling',
    'dropOffDateForBilling',
    'dropOffTimeForBilling',
    'locationInDateForBilling',
    'locationInTimeForBilling',
  ];
- /** Pickup Date/Time are always read-only; sourced only from Reservation. */
+ /** Pickup Date is always read-only; sourced only from Reservation. */
  private readonly lockedPickupControls = [
    'pickUpDateForBilling',
-   'pickUpTimeForBilling',
  ];
  /** Address fields editable for all closure types (App, Driver, GPS, Manual). */
  private readonly alwaysEditableAddressControls = [
@@ -1347,7 +1347,7 @@ export class DutySlipForBillingComponent implements OnInit, AfterViewInit, OnCha
   }
 
   /** Date/time and addresses always editable when form is not GFB-blocked; KM always editable.
-   * Pickup Date/Time stay disabled and locked to Reservation. */
+   * Pickup Date stays disabled and locked to Reservation. Pickup Time stays editable. */
   private applyManualEditMode(): void {
     if (!this.advanceTableForm || this.isDutySlipEditBlocked) {
       return;
@@ -1365,7 +1365,8 @@ export class DutySlipForBillingComponent implements OnInit, AfterViewInit, OnCha
     this.disablePickupDateTimeControls();
   }
 
-  /** Always fill Pickup Date/Time from Reservation; never from App/GPS/Driver/billing. */
+  /** Always fill Pickup Date from Reservation. Pickup Time is initialized from Reservation
+   * on first close, and from saved billing data (fallback Reservation) on reload. */
   private patchPickupFromReservation(): void {
     const reservation = this.advanceTableClosingOne?.closingReservationForPickupDataModel;
     if (!reservation || !this.advanceTableForm) {
@@ -1380,7 +1381,33 @@ export class DutySlipForBillingComponent implements OnInit, AfterViewInit, OnCha
     );
   }
 
-  /** Pickup Date/Time must remain non-editable for every closure type. */
+  private patchPickupDateFromReservation(): void {
+    const reservation = this.advanceTableClosingOne?.closingReservationForPickupDataModel;
+    if (!reservation || !this.advanceTableForm) {
+      return;
+    }
+    this.advanceTableForm.patchValue(
+      { pickUpDateForBilling: reservation.pickupDate },
+      { emitEvent: false }
+    );
+  }
+
+  private patchPickupTimeForClosing(): void {
+    const reservation = this.advanceTableClosingOne?.closingReservationForPickupDataModel;
+    const billing = this.advanceTableClosingOne?.closingDutySlipForBillingModel;
+    if (!this.advanceTableForm) {
+      return;
+    }
+    const savedTime = this.isValidBillingDate(billing?.pickUpTimeForBilling)
+      ? billing.pickUpTimeForBilling
+      : reservation?.pickupTime;
+    this.advanceTableForm.patchValue(
+      { pickUpTimeForBilling: savedTime },
+      { emitEvent: false }
+    );
+  }
+
+  /** Pickup Date must remain non-editable for every closure type. Pickup Time stays editable. */
   private disablePickupDateTimeControls(): void {
     if (!this.advanceTableForm) {
       return;
@@ -1677,7 +1704,8 @@ export class DutySlipForBillingComponent implements OnInit, AfterViewInit, OnCha
       this.advanceTableForm.patchValue({reportingToGuestLatLongForBilling:null});
     }
 
-    this.patchPickupFromReservation();
+    this.patchPickupDateFromReservation();
+    this.patchPickupTimeForClosing();
 
     this.advanceTableForm.patchValue({pickUpKMForBilling : this.advanceTableClosingOne.closingDutySlipForBillingModel.pickUpKMForBilling});
     this.advanceTableForm.patchValue({pickUpAddressStringForBilling : this.advanceTableClosingOne.closingDutySlipForBillingModel.pickUpAddressStringForBilling});

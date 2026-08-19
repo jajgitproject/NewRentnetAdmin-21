@@ -32,6 +32,7 @@ export class ZonalDutyRegisterModel {
   driverMobile: string;
   modeOfPayment: string;
   locationOutDate: string;
+  bookingLocationOutDate: string;
   locationOutTime: string;
   locationOutKM: number;
   dsPickUpDate: string;

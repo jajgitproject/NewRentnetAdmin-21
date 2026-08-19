@@ -45,6 +45,7 @@ export class DutyRegisterModel {
   modeOfPayment: string;
 
   locationOutDate: Date | null;
+  bookingLocationOutDate: string;
   locationOutTime: string;
   locationOutKM: number;
 

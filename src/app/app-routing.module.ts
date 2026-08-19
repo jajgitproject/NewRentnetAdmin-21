@@ -103,6 +103,15 @@ const routes: Routes = [
       },
 
       {
+        path: 'integrationHealth',
+        loadChildren: () =>
+          import('./integrationHealth/integrationHealth.module').then(
+            (m) => m.IntegrationHealthModule
+          ),
+        data: { skipRolePageGuard: true }
+      },
+
+      {
         path: 'driverComplianceDashboard',
         loadChildren: () =>
           import('./driverComplianceDashboard/driverComplianceDashboard.module').then(

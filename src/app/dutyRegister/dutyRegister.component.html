@@ -123,7 +123,7 @@
                                             <ng-container matColumnDef="ReservationGroupID">
                                                 <mat-header-cell *matHeaderCellDef mat-sort-header>Booking Group No</mat-header-cell>
                                                 <mat-cell *matCellDef="let row">
-                                                    {{row.reservationGroupID || 'N/A'}}
+                                                    {{row.reservationGroupID}}
                                                 </mat-cell>
                                             </ng-container>
 
@@ -131,7 +131,7 @@
                                             <ng-container matColumnDef="ReservationID">
                                                 <mat-header-cell *matHeaderCellDef mat-sort-header>Res No</mat-header-cell>
                                                 <mat-cell *matCellDef="let row">
-                                                    {{row.reservationID || 'N/A'}}
+                                                    {{row.reservationID}}
                                                 </mat-cell>
                                             </ng-container>
 
@@ -139,7 +139,7 @@
                                             <ng-container matColumnDef="PickupDate">
                                                 <mat-header-cell *matHeaderCellDef mat-sort-header>Duty Start Date</mat-header-cell>
                                                 <mat-cell *matCellDef="let row">
-                                                    {{row.locationOutDate ? row.locationOutDate : 'N/A'}}
+                                                    {{row.bookingLocationOutDate}}
                                                 </mat-cell>
                                             </ng-container>
 
@@ -147,7 +147,7 @@
                                             <ng-container matColumnDef="BookingDate">
                                                 <mat-header-cell *matHeaderCellDef mat-sort-header>Booking Date</mat-header-cell>
                                                 <mat-cell *matCellDef="let row">
-                                                    {{row.bookingDate || 'N/A'}}
+                                                    {{row.bookingDate}}
                                                 </mat-cell>
                                             </ng-container>
 
@@ -155,7 +155,7 @@
                                             <ng-container matColumnDef="DispatchLocation">
                                                 <mat-header-cell *matHeaderCellDef mat-sort-header>Dispatch Location</mat-header-cell>
                                                 <mat-cell *matCellDef="let row">
-                                                    {{row.dispatchLocation || 'N/A'}}
+                                                    {{row.dispatchLocation}}
                                                 </mat-cell>
                                             </ng-container>
 
@@ -163,7 +163,7 @@
                                             <ng-container matColumnDef="CustomerName">
                                                 <mat-header-cell *matHeaderCellDef mat-sort-header>Customer Name</mat-header-cell>
                                                 <mat-cell *matCellDef="let row">
-                                                    {{row.customerName || 'N/A'}}
+                                                    {{row.customerName}}
                                                 </mat-cell>
                                             </ng-container>
 
@@ -171,7 +171,7 @@
                                             <ng-container matColumnDef="GuestName">
                                                 <mat-header-cell *matHeaderCellDef mat-sort-header>Guest Name</mat-header-cell>
                                                 <mat-cell *matCellDef="let row">
-                                                    {{row.guestName || 'N/A'}}
+                                                    {{row.guestName}}
                                                 </mat-cell>
                                             </ng-container>
 
@@ -179,7 +179,7 @@
                                             <ng-container matColumnDef="City">
                                                 <mat-header-cell *matHeaderCellDef mat-sort-header>City</mat-header-cell>
                                                 <mat-cell *matCellDef="let row">
-                                                    {{row.city || 'N/A'}}
+                                                    {{row.city}}
                                                 </mat-cell>
                                             </ng-container>
 
@@ -187,7 +187,7 @@
                                             <ng-container matColumnDef="PackageType">
                                                 <mat-header-cell *matHeaderCellDef mat-sort-header>Duty Type</mat-header-cell>
                                                 <mat-cell *matCellDef="let row">
-                                                    {{row.packageType || 'N/A'}}
+                                                    {{row.packageType}}
                                                 </mat-cell>
                                             </ng-container>
 
@@ -195,7 +195,7 @@
                                             <ng-container matColumnDef="CarNumber">
                                                 <mat-header-cell *matHeaderCellDef mat-sort-header>Car No</mat-header-cell>
                                                 <mat-cell *matCellDef="let row">
-                                                    {{row.carNumber || 'N/A'}}
+                                                    {{row.carNumber}}
                                                 </mat-cell>
                                             </ng-container>
 
@@ -203,21 +203,21 @@
                                             <ng-container matColumnDef="DriverID">
                                                 <mat-header-cell *matHeaderCellDef mat-sort-header>Driver ID</mat-header-cell>
                                                 <mat-cell *matCellDef="let row">
-                                                    {{row.driverID || 'N/A'}}
+                                                    {{row.driverID}}
                                                 </mat-cell>
                                             </ng-container>
 
                                             <ng-container matColumnDef="DriverName">
                                                 <mat-header-cell *matHeaderCellDef mat-sort-header>Driver Name</mat-header-cell>
                                                 <mat-cell *matCellDef="let row">
-                                                    {{row.driverName || 'N/A'}}
+                                                    {{row.driverName}}
                                                 </mat-cell>
                                             </ng-container>
 
                                             <ng-container matColumnDef="DriverMobile">
                                                 <mat-header-cell *matHeaderCellDef mat-sort-header>Driver Mobile</mat-header-cell>
                                                 <mat-cell *matCellDef="let row">
-                                                    {{row.driverMobile || 'N/A'}}
+                                                    {{row.driverMobile}}
                                                 </mat-cell>
                                             </ng-container>
 
@@ -225,7 +225,7 @@
                                             <ng-container matColumnDef="BilledDutyType">
                                                 <mat-header-cell *matHeaderCellDef mat-sort-header>Billed Duty Type</mat-header-cell>
                                                 <mat-cell *matCellDef="let row">
-                                                    {{row.billedDutyType || 'N/A'}}
+                                                    {{row.billedDutyType}}
                                                 </mat-cell>
                                             </ng-container>
 
@@ -233,7 +233,7 @@
                                             <ng-container matColumnDef="Package">
                                                 <mat-header-cell *matHeaderCellDef mat-sort-header>Package Billed</mat-header-cell>
                                                 <mat-cell *matCellDef="let row">
-                                                    {{row.package || 'N/A'}}
+                                                    {{row.package}}
                                                 </mat-cell>
                                             </ng-container>
 
@@ -241,7 +241,7 @@
                                             <ng-container matColumnDef="CarBooked">
                                                 <mat-header-cell *matHeaderCellDef mat-sort-header>Car Booked</mat-header-cell>
                                                 <mat-cell *matCellDef="let row">
-                                                    {{row.carBooked || 'N/A'}}
+                                                    {{row.carBooked}}
                                                 </mat-cell>
                                             </ng-container>
 
@@ -249,7 +249,7 @@
                                             <ng-container matColumnDef="CarSent">
                                                 <mat-header-cell *matHeaderCellDef mat-sort-header>Car Sent</mat-header-cell>
                                                 <mat-cell *matCellDef="let row">
-                                                    {{row.carSent || 'N/A'}}
+                                                    {{row.carSent}}
                                                 </mat-cell>
                                             </ng-container>
 
@@ -257,7 +257,7 @@
                                             <ng-container matColumnDef="ModeOfPayment">
                                                 <mat-header-cell *matHeaderCellDef mat-sort-header>MOP</mat-header-cell>
                                                 <mat-cell *matCellDef="let row">
-                                                    {{row.modeOfPayment || 'N/A'}}
+                                                    {{row.modeOfPayment}}
                                                 </mat-cell>
                                             </ng-container>
 
@@ -265,7 +265,7 @@
                                             <ng-container matColumnDef="LocationOutDate">
                                                 <mat-header-cell *matHeaderCellDef mat-sort-header>Location Out Date</mat-header-cell>
                                                 <mat-cell *matCellDef="let row">
-                                                    {{row.locationOutDate ? row.locationOutDate : 'N/A'}}
+                                                    {{row.locationOutDate}}
                                                 </mat-cell>
                                             </ng-container>
 
@@ -273,7 +273,7 @@
                                             <ng-container matColumnDef="LocationOutTime">
                                                 <mat-header-cell *matHeaderCellDef mat-sort-header>Location Out Time</mat-header-cell>
                                                 <mat-cell *matCellDef="let row">
-                                                    {{row.locationOutTime || 'N/A'}}
+                                                    {{row.locationOutTime}}
                                                 </mat-cell>
                                             </ng-container>
 
@@ -281,7 +281,7 @@
                                             <ng-container matColumnDef="LocationOutKM">
                                                 <mat-header-cell *matHeaderCellDef mat-sort-header>Location Out Odometer</mat-header-cell>
                                                 <mat-cell *matCellDef="let row">
-                                                    {{row.locationOutKM || 'N/A'}}
+                                                    {{row.locationOutKM}}
                                                 </mat-cell>
                                             </ng-container>
 
@@ -289,7 +289,7 @@
                                             <ng-container matColumnDef="reportingDate">
                                                 <mat-header-cell *matHeaderCellDef mat-sort-header>Reporting Date</mat-header-cell>
                                                 <mat-cell *matCellDef="let row">
-                                                    {{row.dsPickUpDate ? row.dsPickUpDate : 'N/A'}}
+                                                    {{row.dsPickUpDate}}
                                                 </mat-cell>
                                             </ng-container>
 
@@ -297,7 +297,7 @@
                                             <ng-container matColumnDef="reportingTime">
                                                 <mat-header-cell *matHeaderCellDef mat-sort-header>Reporting Time</mat-header-cell>
                                                 <mat-cell *matCellDef="let row">
-                                                    {{row.pickUpTime || 'N/A'}}
+                                                    {{row.pickUpTime}}
                                                 </mat-cell>
                                             </ng-container>
 
@@ -305,7 +305,7 @@
                                             <ng-container matColumnDef="reportingKM">
                                                 <mat-header-cell *matHeaderCellDef mat-sort-header>Reporting Odometer</mat-header-cell>
                                                 <mat-cell *matCellDef="let row">
-                                                    {{row.pickUpKM || 'N/A'}}
+                                                    {{row.pickUpKM}}
                                                 </mat-cell>
                                             </ng-container>
 
@@ -313,7 +313,7 @@
                                             <ng-container matColumnDef="releasingDate">
                                                 <mat-header-cell *matHeaderCellDef mat-sort-header>Releasing Date</mat-header-cell>
                                                 <mat-cell *matCellDef="let row">
-                                                    {{row.dropOffDate ? row.dropOffDate : 'N/A'}}
+                                                    {{row.dropOffDate}}
                                                 </mat-cell>
                                             </ng-container>
 
@@ -321,7 +321,7 @@
                                             <ng-container matColumnDef="releasingTime">
                                                 <mat-header-cell *matHeaderCellDef mat-sort-header>Releasing Time</mat-header-cell>
                                                 <mat-cell *matCellDef="let row">
-                                                    {{row.dropOffTime || 'N/A'}}
+                                                    {{row.dropOffTime}}
                                                 </mat-cell>
                                             </ng-container>
 
@@ -329,7 +329,7 @@
                                             <ng-container matColumnDef="releasingKM">
                                                 <mat-header-cell *matHeaderCellDef mat-sort-header>Releasing Odometer</mat-header-cell>
                                                 <mat-cell *matCellDef="let row">
-                                                    {{row.dropOffKM || 'N/A'}}
+                                                    {{row.dropOffKM}}
                                                 </mat-cell>
                                             </ng-container>
 
@@ -337,7 +337,7 @@
                                             <ng-container matColumnDef="LocationInDate">
                                                 <mat-header-cell *matHeaderCellDef mat-sort-header>Location In Date</mat-header-cell>
                                                 <mat-cell *matCellDef="let row">
-                                                    {{row.locationInDate ? row.locationInDate : 'N/A'}}
+                                                    {{row.locationInDate}}
                                                 </mat-cell>
                                             </ng-container>
 
@@ -345,7 +345,7 @@
                                             <ng-container matColumnDef="LocationInTime">
                                                 <mat-header-cell *matHeaderCellDef mat-sort-header>Location In Time</mat-header-cell>
                                                 <mat-cell *matCellDef="let row">
-                                                    {{row.locationInTime || 'N/A'}}
+                                                    {{row.locationInTime}}
                                                 </mat-cell>
                                             </ng-container>
 
@@ -353,7 +353,7 @@
                                             <ng-container matColumnDef="LocationInKM">
                                                 <mat-header-cell *matHeaderCellDef mat-sort-header>Location In Odometer</mat-header-cell>
                                                 <mat-cell *matCellDef="let row">
-                                                    {{row.locationInKM || 'N/A'}}
+                                                    {{row.locationInKM}}
                                                 </mat-cell>
                                             </ng-container>
 
@@ -361,7 +361,7 @@
                                             <ng-container matColumnDef="G2P">
                                                 <mat-header-cell *matHeaderCellDef mat-sort-header>G2P</mat-header-cell>
                                                 <mat-cell *matCellDef="let row">
-                                                    {{row.g2P || 'N/A'}}
+                                                    {{row.g2P}}
                                                 </mat-cell>
                                             </ng-container>
 
@@ -369,7 +369,7 @@
                                             <ng-container matColumnDef="D2G">
                                                 <mat-header-cell *matHeaderCellDef mat-sort-header>D2G</mat-header-cell>
                                                 <mat-cell *matCellDef="let row">
-                                                    {{row.d2G || 'N/A'}}
+                                                    {{row.d2G}}
                                                 </mat-cell>
                                             </ng-container>
 
@@ -377,7 +377,7 @@
                                             <ng-container matColumnDef="AppP2D">
                                                 <mat-header-cell *matHeaderCellDef mat-sort-header>App P2D</mat-header-cell>
                                                 <mat-cell *matCellDef="let row">
-                                                    {{row.appP2D || 'N/A'}}
+                                                    {{row.appP2D}}
                                                 </mat-cell>
                                             </ng-container>
 
@@ -385,7 +385,7 @@
                                             <ng-container matColumnDef="DriverP2D">
                                                 <mat-header-cell *matHeaderCellDef mat-sort-header>Driver P2D</mat-header-cell>
                                                 <mat-cell *matCellDef="let row">
-                                                    {{row.driverP2D || 'N/A'}}
+                                                    {{row.driverP2D}}
                                                 </mat-cell>
                                             </ng-container>
 
@@ -393,7 +393,7 @@
                                             <ng-container matColumnDef="GPSP2D">
                                                 <mat-header-cell *matHeaderCellDef mat-sort-header>GPS P2D</mat-header-cell>
                                                 <mat-cell *matCellDef="let row">
-                                                    {{row.gpsP2D || 'N/A'}}
+                                                    {{row.gpsP2D}}
                                                 </mat-cell>
                                             </ng-container>
 
@@ -401,7 +401,7 @@
                                             <ng-container matColumnDef="TotalKMWithAddtionalKM">
                                                 <mat-header-cell *matHeaderCellDef mat-sort-header>Billed Kms</mat-header-cell>
                                                 <mat-cell *matCellDef="let row">
-                                                    {{row.totalKMWithAddtionalKM || 'N/A'}}
+                                                    {{row.totalKMWithAddtionalKM}}
                                                 </mat-cell>
                                             </ng-container>
 
@@ -409,7 +409,7 @@
                                             <ng-container matColumnDef="TotalHoursWithAddtionalHours">
                                                 <mat-header-cell *matHeaderCellDef mat-sort-header>Billed Hrs</mat-header-cell>
                                                 <mat-cell *matCellDef="let row">
-                                                    {{row.totalHoursWithAddtionalHours || 'N/A'}}
+                                                    {{row.totalHoursWithAddtionalHours}}
                                                 </mat-cell>
                                             </ng-container>
 
@@ -417,7 +417,7 @@
                                             <ng-container matColumnDef="Parking">
                                                 <mat-header-cell *matHeaderCellDef mat-sort-header>Parking</mat-header-cell>
                                                 <mat-cell *matCellDef="let row">
-                                                    {{row.parking || 'N/A'}}
+                                                    {{row.parking}}
                                                 </mat-cell>
                                             </ng-container>
 
@@ -425,7 +425,7 @@
                                             <ng-container matColumnDef="Toll">
                                                 <mat-header-cell *matHeaderCellDef mat-sort-header>Toll</mat-header-cell>
                                                 <mat-cell *matCellDef="let row">
-                                                    {{row.toll || 'N/A'}}
+                                                    {{row.toll}}
                                                 </mat-cell>
                                             </ng-container>
 
@@ -433,7 +433,7 @@
                                             <ng-container matColumnDef="FasTag">
                                                 <mat-header-cell *matHeaderCellDef mat-sort-header>Fastag</mat-header-cell>
                                                 <mat-cell *matCellDef="let row">
-                                                    {{row.fasTag || 'N/A'}}
+                                                    {{row.fasTag}}
                                                 </mat-cell>
                                             </ng-container>
 
@@ -441,7 +441,7 @@
                                             <ng-container matColumnDef="InvoiceInterstateTax">
                                                 <mat-header-cell *matHeaderCellDef mat-sort-header>Interstate Tax</mat-header-cell>
                                                 <mat-cell *matCellDef="let row">
-                                                    {{row.invoiceInterstateTax || 'N/A'}}
+                                                    {{row.invoiceInterstateTax}}
                                                 </mat-cell>
                                             </ng-container>
 
@@ -449,7 +449,7 @@
                                             <ng-container matColumnDef="DutyExpenseChargeTotal">
                                                 <mat-header-cell *matHeaderCellDef mat-sort-header>Chargeable Expenses</mat-header-cell>
                                                 <mat-cell *matCellDef="let row">
-                                                    {{row.dutyExpenseChargeTotal || 'N/A'}}
+                                                    {{row.dutyExpenseChargeTotal}}
                                                 </mat-cell>
                                             </ng-container>
 
@@ -457,7 +457,7 @@
                                             <ng-container matColumnDef="Revenue">
                                                 <mat-header-cell *matHeaderCellDef mat-sort-header>Revenue</mat-header-cell>
                                                 <mat-cell *matCellDef="let row">
-                                                    {{row.revenue || 'N/A'}}
+                                                    {{row.revenue}}
                                                 </mat-cell>
                                             </ng-container>
 
@@ -465,7 +465,7 @@
                                             <ng-container matColumnDef="SubTotal">
                                                 <mat-header-cell *matHeaderCellDef mat-sort-header>Subtotal</mat-header-cell>
                                                 <mat-cell *matCellDef="let row">
-                                                    {{row.subTotal || 'N/A'}}
+                                                    {{row.subTotal}}
                                                 </mat-cell>
                                             </ng-container>
 
@@ -473,7 +473,7 @@
                                             <ng-container matColumnDef="GSTAmount">
                                                 <mat-header-cell *matHeaderCellDef mat-sort-header>GST Amount</mat-header-cell>
                                                 <mat-cell *matCellDef="let row">
-                                                    {{row.gstAmount || 'N/A'}}
+                                                    {{row.gstAmount}}
                                                 </mat-cell>
                                             </ng-container>
 
@@ -481,7 +481,7 @@
                                             <ng-container matColumnDef="GSTType">
                                                 <mat-header-cell *matHeaderCellDef mat-sort-header>GST Type</mat-header-cell>
                                                 <mat-cell *matCellDef="let row">
-                                                    {{row.gstType || 'N/A'}}
+                                                    {{row.gstType}}
                                                 </mat-cell>
                                             </ng-container>
 
@@ -489,7 +489,7 @@
                                             <ng-container matColumnDef="InvoiceTotalAmountAfterGST">
                                                 <mat-header-cell *matHeaderCellDef mat-sort-header>Final Bill Amount</mat-header-cell>
                                                 <mat-cell *matCellDef="let row">
-                                                    {{row.invoiceTotalAmountAfterGST || 'N/A'}}
+                                                    {{row.invoiceTotalAmountAfterGST}}
                                                 </mat-cell>
                                             </ng-container>
 
@@ -497,7 +497,7 @@
                                             <ng-container matColumnDef="DSVerifyStatus">
                                                 <mat-header-cell *matHeaderCellDef mat-sort-header>DS Verify Status</mat-header-cell>
                                                 <mat-cell *matCellDef="let row">
-                                                    {{row.dsVerifyStatus || 'N/A'}}
+                                                    {{row.dsVerifyStatus}}
                                                 </mat-cell>
                                             </ng-container>
 
@@ -505,7 +505,7 @@
                                             <ng-container matColumnDef="GoodForBilling">
                                                 <mat-header-cell *matHeaderCellDef mat-sort-header>Good For Bill</mat-header-cell>
                                                 <mat-cell *matCellDef="let row">
-                                                    {{row.goodForBilling === true ? 'Yes' : (row.goodForBilling === false ? 'No' : 'N/A')}}
+                                                    {{row.goodForBilling === true ? 'Yes' : (row.goodForBilling === false ? 'No' : '')}}
                                                 </mat-cell>
                                             </ng-container>
 
@@ -513,7 +513,7 @@
                                             <ng-container matColumnDef="DSStatus">
                                                 <mat-header-cell *matHeaderCellDef mat-sort-header>DS Status</mat-header-cell>
                                                 <mat-cell *matCellDef="let row">
-                                                    {{row.dsStatus || 'N/A'}}
+                                                    {{row.dsStatus}}
                                                 </mat-cell>
                                             </ng-container>
 
@@ -521,7 +521,7 @@
                                             <ng-container matColumnDef="ReservationStatus">
                                                 <mat-header-cell *matHeaderCellDef mat-sort-header>Booking Status</mat-header-cell>
                                                 <mat-cell *matCellDef="let row">
-                                                    {{row.reservationStatus || 'N/A'}}
+                                                    {{row.reservationStatus}}
                                                 </mat-cell>
                                             </ng-container>
 
@@ -529,7 +529,7 @@
                                             <ng-container matColumnDef="OwnedSupplied">
                                                 <mat-header-cell *matHeaderCellDef mat-sort-header>Owned/Supplier</mat-header-cell>
                                                 <mat-cell *matCellDef="let row">
-                                                    {{row.ownedSupplied || 'N/A'}}
+                                                    {{row.ownedSupplied}}
                                                 </mat-cell>
                                             </ng-container>
 
@@ -537,7 +537,7 @@
                                             <ng-container matColumnDef="SupplierType">
                                                 <mat-header-cell *matHeaderCellDef mat-sort-header>Vendor Type</mat-header-cell>
                                                 <mat-cell *matCellDef="let row">
-                                                    {{row.supplierType || 'N/A'}}
+                                                    {{row.supplierType}}
                                                 </mat-cell>
                                             </ng-container>
 
@@ -545,7 +545,7 @@
                                             <ng-container matColumnDef="AdocStatus">
                                                 <mat-header-cell *matHeaderCellDef mat-sort-header>Adoc Status</mat-header-cell>
                                                 <mat-cell *matCellDef="let row">
-                                                    {{row.adocStatus === true ? 'Yes' : (row.adocStatus === false ? 'No' : 'N/A')}}
+                                                    {{row.adocStatus === true ? 'Yes' : (row.adocStatus === false ? 'No' : '')}}
                                                 </mat-cell>
                                             </ng-container>
 
@@ -553,7 +553,7 @@
                                             <ng-container matColumnDef="SalesPerson">
                                                 <mat-header-cell *matHeaderCellDef mat-sort-header>Sales Person</mat-header-cell>
                                                 <mat-cell *matCellDef="let row">
-                                                    {{row.salesPerson || 'N/A'}}
+                                                    {{row.salesPerson}}
                                                 </mat-cell>
                                             </ng-container>
 
@@ -561,7 +561,7 @@
                                             <ng-container matColumnDef="KAM">
                                                 <mat-header-cell *matHeaderCellDef mat-sort-header>KAM</mat-header-cell>
                                                 <mat-cell *matCellDef="let row">
-                                                    {{row.kam || 'N/A'}}
+                                                    {{row.kam}}
                                                 </mat-cell>
                                             </ng-container>
 
@@ -569,7 +569,7 @@
                                             <ng-container matColumnDef="ReservationCreatedBy">
                                                 <mat-header-cell *matHeaderCellDef mat-sort-header>Booking Created By</mat-header-cell>
                                                 <mat-cell *matCellDef="let row">
-                                                    {{row.reservationCreatedBy || 'N/A'}}
+                                                    {{row.reservationCreatedBy}}
                                                 </mat-cell>
                                             </ng-container>
 
@@ -577,28 +577,28 @@
                                             <ng-container matColumnDef="AllotmentBy">
                                                 <mat-header-cell *matHeaderCellDef mat-sort-header>Allotment By</mat-header-cell>
                                                 <mat-cell *matCellDef="let row">
-                                                    {{row.allotmentBy || 'N/A'}}
+                                                    {{row.allotmentBy}}
                                                 </mat-cell>
                                             </ng-container>
 
                                             <ng-container matColumnDef="SupplierID">
                                                 <mat-header-cell *matHeaderCellDef mat-sort-header>Vendor ID</mat-header-cell>
                                                 <mat-cell *matCellDef="let row">
-                                                    {{row.supplierID || 'N/A'}}
+                                                    {{row.supplierID}}
                                                 </mat-cell>
                                             </ng-container>
 
                                             <ng-container matColumnDef="SupplierName">
                                                 <mat-header-cell *matHeaderCellDef mat-sort-header>Vendor</mat-header-cell>
                                                 <mat-cell *matCellDef="let row">
-                                                    {{row.supplierName || 'N/A'}}
+                                                    {{row.supplierName}}
                                                 </mat-cell>
                                             </ng-container>
 
                                             <ng-container matColumnDef="DSClosedBy">
                                                 <mat-header-cell *matHeaderCellDef mat-sort-header>DS Closed By</mat-header-cell>
                                                 <mat-cell *matCellDef="let row">
-                                                    {{ row.dsClosedBy?.trim() ? row.dsClosedBy : 'N/A' }}
+                                                    {{ row.dsClosedBy?.trim() ? row.dsClosedBy : '' }}
                                                 </mat-cell>
                                             </ng-container>
 
@@ -612,49 +612,49 @@
                                             <ng-container matColumnDef="ClosingDate">
                                                 <mat-header-cell *matHeaderCellDef mat-sort-header>Closing Date</mat-header-cell>
                                                 <mat-cell *matCellDef="let row">
-                                                    {{row.closingDate || 'N/A'}}
+                                                    {{row.closingDate}}
                                                 </mat-cell>
                                             </ng-container>
                                             <ng-container matColumnDef="RunningDetails">
                                                 <mat-header-cell *matHeaderCellDef mat-sort-header>Remark on DS Closing</mat-header-cell>
                                                 <mat-cell *matCellDef="let row">
-                                                    {{row.runningDetails || 'N/A'}}
+                                                    {{row.runningDetails}}
                                                 </mat-cell>
                                             </ng-container>
                                             <ng-container matColumnDef="ClosureMethod">
                                                 <mat-header-cell *matHeaderCellDef mat-sort-header>Closure Method</mat-header-cell>
                                                 <mat-cell *matCellDef="let row">
-                                                    {{row.closureType || 'N/A'}}
+                                                    {{row.closureType}}
                                                 </mat-cell>
                                             </ng-container>
                                             <ng-container matColumnDef="BookerEmail">
                                                 <mat-header-cell *matHeaderCellDef mat-sort-header>Booker Email</mat-header-cell>
                                                 <mat-cell *matCellDef="let row">
-                                                    {{row.bookerEmail  || 'N/A'}}
+                                                    {{row.bookerEmail }}
                                                 </mat-cell>
                                             </ng-container>
                                             <ng-container matColumnDef="GuestEmail">
                                                 <mat-header-cell *matHeaderCellDef mat-sort-header>Guest Email</mat-header-cell>
                                                 <mat-cell *matCellDef="let row">
-                                                    {{row.guestEmail  || 'N/A'}}
+                                                    {{row.guestEmail }}
                                                 </mat-cell>
                                             </ng-container>
                                             <ng-container matColumnDef="PickupAddress">
                                                 <mat-header-cell *matHeaderCellDef mat-sort-header>Pickup Address </mat-header-cell>
                                                 <mat-cell *matCellDef="let row">
-                                                    {{row.pickupAddress || 'N/A'}}
+                                                    {{row.pickupAddress}}
                                                 </mat-cell>
                                             </ng-container>
                                              <ng-container matColumnDef="PickupAddressDetails">
                                                 <mat-header-cell *matHeaderCellDef mat-sort-header>Pickup Address Details</mat-header-cell>
                                                 <mat-cell *matCellDef="let row">
-                                                    {{row.pickupAddressDetails  || 'N/A'}}
+                                                    {{row.pickupAddressDetails }}
                                                 </mat-cell>
                                             </ng-container>
                                              <ng-container matColumnDef="DropOffAddress">
                                                 <mat-header-cell *matHeaderCellDef mat-sort-header>DropOff Address</mat-header-cell>
                                                 <mat-cell *matCellDef="let row">
-                                                    {{row.dropOffAddress || 'N/A'}}
+                                                    {{row.dropOffAddress}}
                                                 </mat-cell>
                                             </ng-container>
                                              <ng-container *ngFor="let fieldCol of customerSpecificFieldColumns; trackBy: trackCustomerSpecificFieldColumn" [matColumnDef]="fieldCol.columnId">

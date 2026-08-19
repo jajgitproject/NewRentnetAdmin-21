@@ -1,0 +1,169 @@
+:host {
+  display: block;
+}
+
+.ih-wrap {
+  padding: 20px;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.ih-title {
+  margin: 0 0 4px;
+  font-size: 22px;
+}
+
+.ih-sub {
+  margin: 0 0 20px;
+  color: #6b7280;
+  font-size: 13px;
+}
+
+.ih-section {
+  margin: 20px 0 10px;
+  font-size: 15px;
+  font-weight: 600;
+}
+
+/* Grids */
+.ih-grid {
+  display: grid;
+  gap: 12px;
+}
+
+.ih-kpi-grid {
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+}
+
+.ih-vendor-grid {
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+}
+
+/* Cards */
+.ih-card {
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+  padding: 14px;
+
+  h3 {
+    margin: 0 0 8px;
+    font-size: 12px;
+    color: #6b7280;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+  }
+
+  p {
+    margin: 4px 0 0;
+    font-size: 13px;
+  }
+}
+
+/* KPI number */
+.ih-kpi {
+  font-size: 28px;
+  font-weight: 700;
+}
+
+/* Tone classes */
+.ok   { color: #16a34a; }
+.warn { color: #d97706; }
+.err  { color: #dc2626; }
+.ih-ok   { color: #16a34a; }
+.ih-warn { color: #d97706; }
+.ih-err  { color: #dc2626; }
+
+/* Row inside vendor card */
+.ih-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+/* Circuit chips */
+.ih-chip {
+  font-size: 11px;
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-weight: 600;
+}
+
+.ih-chip-ok   { background: #dcfce7; color: #15803d; }
+.ih-chip-warn { background: #fef3c7; color: #92400e; }
+.ih-chip-err  { background: #fee2e2; color: #991b1b; }
+
+/* Filters */
+.ih-filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: flex-end;
+
+  mat-form-field {
+    flex: 1 1 180px;
+    max-width: 260px;
+  }
+}
+
+.ih-customer-field {
+  flex: 2 1 360px !important;
+  max-width: 420px !important;
+}
+
+.ih-filter-btns {
+  display: flex;
+  gap: 8px;
+  padding-bottom: 18px;
+}
+
+/* Table */
+.ih-table-wrap {
+  overflow: auto;
+  margin-top: 0;
+}
+
+.ih-table {
+  width: 100%;
+  font-size: 13px;
+}
+
+.ih-status {
+  font-weight: 700;
+}
+
+.ih-empty {
+  text-align: center;
+  padding: 24px;
+  color: #9ca3af;
+}
+
+/* Driver chain */
+.ih-chain-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 0;
+  border-bottom: 1px solid #f3f4f6;
+  gap: 12px;
+  flex-wrap: wrap;
+
+  &:last-child {
+    border-bottom: none;
+  }
+}
+
+.ih-chain-label {
+  font-size: 13px;
+  color: #374151;
+  flex: 1;
+}
+
+.ih-chain-result {
+  font-size: 13px;
+  font-weight: 600;
+  white-space: nowrap;
+}

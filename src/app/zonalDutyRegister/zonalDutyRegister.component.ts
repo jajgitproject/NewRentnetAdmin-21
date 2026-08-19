@@ -1385,7 +1385,7 @@ export class ZonalDutyRegisterComponent implements OnInit, OnDestroy {
     const value = row?.customerSpecificFieldMap?.[fieldName];
     const text = value !== undefined && value !== null ? String(value).trim() : '';
     if (!text || text === '--Select--') {
-      return 'NA';
+      return '';
     }
     return text;
   }

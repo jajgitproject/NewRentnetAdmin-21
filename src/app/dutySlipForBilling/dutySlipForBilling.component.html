@@ -331,7 +331,9 @@
                     <div class="col-xl-3 col-lg-3 col-md-6 col-sm-12 mb-2">
                       <mat-form-field appearance="fill" floatLabel="auto" subscriptSizing="dynamic" class="example-full-width cp-quick-search-field">
                         <mat-label>Pickup Time</mat-label>
-                        <input required matInput [owlDateTime]="time2" formControlName="pickUpTimeForBilling" readonly tabindex="-1">
+                        <input required matInput [owlDateTimeTrigger]="time2" [owlDateTime]="time2"
+                          formControlName="pickUpTimeForBilling" (ngModelChange)="onTimeSelection()">
+                        <button mat-icon-button matSuffix type="button" [owlDateTimeTrigger]="time2" class="date-icon" aria-label="Open time picker"><mat-icon>schedule</mat-icon></button>
                         <owl-date-time [pickerType]="'timer'" #time2></owl-date-time>
                       </mat-form-field>
                       <!-- <span style="color: red; font-size: 10px;" *ngIf="isPickupTimeInvalid()">

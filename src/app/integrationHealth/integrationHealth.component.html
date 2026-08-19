@@ -1,0 +1,189 @@
+<!-- @ts-nocheck -->
+<div class="ih-wrap">
+  <h1 class="ih-title">Integration Health Dashboard</h1>
+  <p class="ih-sub">Vendor retries, failures, and driver-app event chain visibility</p>
+
+  <!-- KPI cards -->
+  <section class="ih-grid ih-kpi-grid">
+    <article class="ih-card" *ngFor="let kpi of kpis">
+      <h3>{{ kpi.label }}</h3>
+      <div class="ih-kpi" [ngClass]="kpi.tone">{{ kpi.value }}</div>
+    </article>
+  </section>
+
+  <!-- Vendor cards -->
+  <h2 class="ih-section">Vendors</h2>
+  <section class="ih-grid ih-vendor-grid">
+    <article class="ih-card" *ngFor="let v of vendors">
+      <div class="ih-row">
+        <strong>{{ v.name }}</strong>
+        <span class="ih-chip" [ngClass]="circuitClass(v.circuitState)">
+          {{ v.circuitState }}
+        </span>
+      </div>
+      <p [ngClass]="v.tone">{{ v.successRate }} success</p>
+    </article>
+  </section>
+
+  <!-- Filters -->
+  <h2 class="ih-section">Failure Explorer</h2>
+  <section class="ih-card ih-filters">
+    <mat-form-field appearance="outline">
+      <mat-label>Vendor</mat-label>
+      <mat-select [(ngModel)]="filters.vendor">
+        <mat-option value="">All</mat-option>
+        <mat-option *ngFor="let v of vendorOptions" [value]="v">{{ v }}</mat-option>
+      </mat-select>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Status</mat-label>
+      <mat-select [(ngModel)]="filters.status">
+        <mat-option value="">All</mat-option>
+        <mat-option *ngFor="let s of statusOptions" [value]="s">{{ s }}</mat-option>
+      </mat-select>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Source</mat-label>
+      <mat-select [(ngModel)]="filters.source">
+        <mat-option value="">All</mat-option>
+        <mat-option *ngFor="let s of sourceOptions" [value]="s">{{ s }}</mat-option>
+      </mat-select>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Driver Endpoint</mat-label>
+      <mat-select [(ngModel)]="filters.driverEndpoint">
+        <mat-option value="">All</mat-option>
+        <mat-option *ngFor="let e of driverEndpointOptions" [value]="e">{{ e }}</mat-option>
+      </mat-select>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Rentnet Reservation ID</mat-label>
+      <input matInput type="text" [(ngModel)]="filters.rentnetReservationID" placeholder="e.g. 45621" />
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="ih-customer-field">
+      <mat-label>Customer Name##Integration Code</mat-label>
+      <input
+        matInput
+        type="text"
+        [ngModel]="filters.customerIntegrationSearch"
+        (ngModelChange)="onCustomerIntegrationInput($event)"
+        [matAutocomplete]="customerIntegrationAuto"
+        placeholder="e.g. Acme##MMT-TRIP-9001"
+      />
+      <mat-autocomplete #customerIntegrationAuto="matAutocomplete">
+        <mat-option *ngFor="let option of customerIntegrationOptions" [value]="option">
+          {{ option }}
+        </mat-option>
+      </mat-autocomplete>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>From Date</mat-label>
+      <input matInput type="date" [(ngModel)]="filters.fromDate" />
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>To Date</mat-label>
+      <input matInput type="date" [(ngModel)]="filters.toDate" />
+    </mat-form-field>
+
+    <div class="ih-filter-btns">
+      <button mat-raised-button color="primary" (click)="applyFilters()">Apply</button>
+      <button mat-button (click)="resetFilters()">Reset</button>
+    </div>
+  </section>
+
+  <!-- Failure table -->
+  <section class="ih-card ih-table-wrap">
+    <table mat-table [dataSource]="filteredFailures" class="ih-table">
+
+      <ng-container matColumnDef="time">
+        <th mat-header-cell *matHeaderCellDef>Time</th>
+        <td mat-cell *matCellDef="let r">{{ r.time }}</td>
+      </ng-container>
+
+      <ng-container matColumnDef="vendor">
+        <th mat-header-cell *matHeaderCellDef>Vendor</th>
+        <td mat-cell *matCellDef="let r">{{ r.vendor }}</td>
+      </ng-container>
+
+      <ng-container matColumnDef="eventName">
+        <th mat-header-cell *matHeaderCellDef>Event</th>
+        <td mat-cell *matCellDef="let r">{{ r.eventName }}</td>
+      </ng-container>
+
+      <ng-container matColumnDef="source">
+        <th mat-header-cell *matHeaderCellDef>Source</th>
+        <td mat-cell *matCellDef="let r">{{ r.source }}</td>
+      </ng-container>
+
+      <ng-container matColumnDef="driverEndpoint">
+        <th mat-header-cell *matHeaderCellDef>Driver Endpoint</th>
+        <td mat-cell *matCellDef="let r">{{ r.driverEndpoint || '—' }}</td>
+      </ng-container>
+
+      <ng-container matColumnDef="reservationNo">
+        <th mat-header-cell *matHeaderCellDef>Reservation</th>
+        <td mat-cell *matCellDef="let r">{{ r.reservationNo }}</td>
+      </ng-container>
+
+      <ng-container matColumnDef="rentnetReservationID">
+        <th mat-header-cell *matHeaderCellDef>Rentnet Reservation ID</th>
+        <td mat-cell *matCellDef="let r">{{ r.rentnetReservationID }}</td>
+      </ng-container>
+
+      <ng-container matColumnDef="customerIntegration">
+        <th mat-header-cell *matHeaderCellDef>Customer##Integration Code</th>
+        <td mat-cell *matCellDef="let r">{{ r.customerName }}##{{ r.integrationCode }}</td>
+      </ng-container>
+
+      <ng-container matColumnDef="httpStatus">
+        <th mat-header-cell *matHeaderCellDef>HTTP</th>
+        <td mat-cell *matCellDef="let r">{{ r.httpStatus }}</td>
+      </ng-container>
+
+      <ng-container matColumnDef="retryCount">
+        <th mat-header-cell *matHeaderCellDef>Retries</th>
+        <td mat-cell *matCellDef="let r">{{ r.retryCount }}</td>
+      </ng-container>
+
+      <ng-container matColumnDef="status">
+        <th mat-header-cell *matHeaderCellDef>Status</th>
+        <td mat-cell *matCellDef="let r">
+          <span class="ih-status" [ngClass]="statusClass(r.status)">{{ r.status }}</span>
+        </td>
+      </ng-container>
+
+      <ng-container matColumnDef="error">
+        <th mat-header-cell *matHeaderCellDef>Error</th>
+        <td mat-cell *matCellDef="let r">{{ r.error }}</td>
+      </ng-container>
+
+      <ng-container matColumnDef="action">
+        <th mat-header-cell *matHeaderCellDef>Action</th>
+        <td mat-cell *matCellDef="let r">
+          <button mat-stroked-button (click)="resend(r)">Resend</button>
+        </td>
+      </ng-container>
+
+      <tr mat-header-row *matHeaderRowDef="displayedColumns; sticky: true"></tr>
+      <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+    </table>
+
+    <p *ngIf="filteredFailures.length === 0" class="ih-empty">No records match the selected filters.</p>
+  </section>
+
+  <!-- Driver event chain -->
+  <h2 class="ih-section">Driver Event Chain ({{ chain.reservationNo }})</h2>
+  <section class="ih-card">
+    <div class="ih-chain-row" *ngFor="let step of chain.steps">
+      <span class="ih-chain-label">{{ step.label }}</span>
+      <span class="ih-chain-result" [ngClass]="step.tone">{{ step.result }}</span>
+    </div>
+  </section>
+</div>

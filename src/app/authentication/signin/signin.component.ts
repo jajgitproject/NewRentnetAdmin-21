@@ -61,6 +61,8 @@ export class SigninComponent implements OnInit {
 
   isPasswordDeactivated: boolean = false;
   errorMessageToBeShown: string = '';
+  readonly passwordExpiredMessage =
+    'Password has expired. Please contact administrator to reset your password.';
 
   constructor(
 
@@ -205,6 +207,11 @@ export class SigninComponent implements OnInit {
           {
             this.errorMessageToBeShown = 'Please enter correct username and password';
           }
+          else if (message === this.passwordExpiredMessage)
+          {
+            this.errorMessageToBeShown = this.passwordExpiredMessage;
+            this.authService.clearLocalSession();
+          }
           else if (typeof loginDetails === 'string' && loginDetails.includes('Invalid User: User not found'))
           {
             this.errorMessageToBeShown = 'Unauthorized';
@@ -296,11 +303,57 @@ export class SigninComponent implements OnInit {
 
 
 
+  private getPasswordExpirationDate(employee: any): Date | null {
+    const pwdExp =
+      employee?.PasswordExpirationDate ?? employee?.passwordExpirationDate;
+
+    if (!pwdExp) {
+      return null;
+    }
+
+    const expirationDate = new Date(pwdExp);
+    return isNaN(expirationDate.getTime()) ? null : expirationDate;
+  }
+
+  private getCalendarDaysUntilExpiration(expirationDate: Date): number {
+    const startOfToday = new Date();
+    startOfToday.setHours(0, 0, 0, 0);
+
+    const startOfExpiration = new Date(expirationDate);
+    startOfExpiration.setHours(0, 0, 0, 0);
+
+    const msPerDay = 1000 * 60 * 60 * 24;
+    return Math.round(
+      (startOfExpiration.getTime() - startOfToday.getTime()) / msPerDay
+    );
+  }
+
+  private isPasswordExpired(employee: any): boolean {
+    const expirationDate = this.getPasswordExpirationDate(employee);
+    if (!expirationDate) {
+      return false;
+    }
+
+    return this.getCalendarDaysUntilExpiration(expirationDate) < 0;
+  }
+
+  private blockExpiredPasswordLogin(): void {
+    this.isPasswordDeactivated = false;
+    this.authService.clearLocalSession();
+    this.error = this.passwordExpiredMessage;
+    this.errorMessageToBeShown = this.passwordExpiredMessage;
+  }
+
   public calculateDaysLeft(): void {
 
     const currentUser = JSON.parse(localStorage.getItem('currentUser') || '{}');
 
     const employee = currentUser.employee ?? currentUser.Employee;
+
+    if (this.isPasswordExpired(employee)) {
+      this.blockExpiredPasswordLogin();
+      return;
+    }
 
     const mobile = String(employee?.Mobile ?? employee?.mobile ?? '');
 
@@ -334,15 +387,9 @@ export class SigninComponent implements OnInit {
 
     }
 
+    const expirationDate = this.getPasswordExpirationDate(employee);
 
-
-    const pwdExp =
-
-      employee?.PasswordExpirationDate ?? employee?.passwordExpirationDate;
-
-    const expirationDate = pwdExp ? new Date(pwdExp) : null;
-
-    if (!expirationDate || isNaN(expirationDate.getTime())) {
+    if (!expirationDate) {
 
       this.isPasswordDeactivated = false;
 
@@ -352,25 +399,7 @@ export class SigninComponent implements OnInit {
 
     }
 
-
-
-    const timeDiff = expirationDate.getTime() - Date.now();
-
-    this.daysLeft = Math.ceil(timeDiff / (1000 * 3600 * 24));
-
-
-
-    if (this.daysLeft <= 0) {
-
-      this.isPasswordDeactivated = true;
-
-      this.deactivateAccount();
-
-      return;
-
-    }
-
-
+    this.daysLeft = this.getCalendarDaysUntilExpiration(expirationDate);
 
     this.isPasswordDeactivated = false;
 
