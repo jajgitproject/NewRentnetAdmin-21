@@ -2979,6 +2979,20 @@ const routes: Routes = [
             (m) => m.LocationGroupModule
           )
       },
+      {
+        path: 'locationCityMapping',
+        loadChildren: () =>
+          import('./locationCityMapping/locationCityMapping.module').then(
+            (m) => m.LocationCityMappingModule
+          )
+      },
+      {
+        path: 'locationCityMappingDetails',
+        loadChildren: () =>
+          import('./locationCityMappingDetails/locationCityMappingDetails.module').then(
+            (m) => m.LocationCityMappingDetailsModule
+          )
+      },
 
       {
         path: 'messageType',

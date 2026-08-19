@@ -1,0 +1,171 @@
+<section class="content">
+    <div class="container-fluid">
+        <div class="block-header">
+            <div class="row">
+                <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+                    <ul>
+                        <li class="breadcrumb-item bcrumb-1">
+                            <a routerLink="/dashboard/main">
+                                <i class="fas fa-home"></i> Home</a>|
+                            <a href="#" onClick="return false;">Admin</a>|
+                            <a routerLink="/locationCityMapping">Location City Mapping</a>|
+                            <a href="#" onClick="return false;">Location City Mapping Details</a>
+                        </li>
+                    </ul>
+                    <ul class="breadcrumb breadcrumb-style ">
+                        <li class="breadcrumb-item">
+                            <h2>Location City Mapping Details For <b>{{locationName}}</b></h2>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                <div class="card">
+                    <div class="body">
+                        <div class="responsive_table">
+                            <div class="materialTableHeader">
+                                <div class="row">
+                                    <div style="width: 55%; float:left;padding-top: 6px;padding-left: 12px;">
+                                        <div class="col-lg-8">
+                                            <div class="form-group">
+                                                <div class="input-group">
+                                                    <div class="input-group-append input-group-addon">
+                                                        <select style="height: 40px; width: 150px;" class="form-control" [(ngModel)]="selectedFilter">
+                                                            <option value="search" hidden>Search By</option>
+                                                            <option value="city">City</option>
+                                                        </select>
+                                                    </div>
+                                                    <input type="text" style="height: 40px; width: 300px;padding-left: 5px;" class="form-control" placeholder="Filter" id="inputGroup"
+                                                        (keyup)="onBackPress($event)" (input)="loadData()" [(ngModel)]="searchTerm" />
+                                                    <div class="input-group-append input-group-addon">
+                                                        <span class="input-group-text" style="cursor: pointer; height: 40px; width: 40px; text-align: center;" (click)="loadData()">
+                                                            <i class="fas fa-search"></i>
+                                                        </span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div style="width: 45%; text-align:right;">
+                                        <button mat-raised-button color="warn" [disabled]="selection.selected.length === 0" (click)="unmapSelected()">
+                                            Unmap Selected
+                                        </button>
+                                        &nbsp;
+                                        <button mat-raised-button color="primary"
+                                            data-dismiss="modal" data-toggle="modal" data-backdrop="false"
+                                            data-target="#exampleModalCenter">
+                                            Search
+                                        </button>
+                                        &nbsp;
+                                        <button mat-mini-fab color="primary" matTooltip="Map Cities" (click)="addNew()">
+                                            <mat-icon class="col-white">add</mat-icon>
+                                        </button>
+                                        &nbsp;
+                                        <button mat-mini-fab color="primary" (click)="refresh()">
+                                            <mat-icon class="col-white">refresh</mat-icon>
+                                        </button>
+                                        &nbsp;
+                                    </div>
+                                </div>
+                            </div>
+
+                            <p *ngIf="!dataSource; then thenBlock2 else elseBlock2">
+                                This is not rendered
+                            </p>
+
+                            <ng-template #thenBlock2>
+                                <div class="alert alert-primary" style="background-color:#E8E8E8; text-align: center;">No Records Found</div>
+                                <div class="body">
+                                    <div class="example-button-row">
+                                        <button mat-raised-button color="primary" (click)="PreviousCall()">Previous</button>
+                                        <button mat-raised-button color="primary" (click)="NextCall()">Next</button>
+                                    </div>
+                                </div>
+                            </ng-template>
+
+                            <ng-template #elseBlock2>
+                                <div class="scrollable-table-container">
+                                <mat-table #table [dataSource]="dataSource" matSort class="mat-cell floating-header-table" (matSortChange)="SortingData($event)">
+                                    <ng-container matColumnDef="select">
+                                        <mat-header-cell *matHeaderCellDef [ngClass]="'tbl-col-width-per-6'">
+                                            <mat-checkbox (change)="$event ? masterToggle() : null"
+                                                [checked]="selection.hasValue() && isAllSelected()"
+                                                [indeterminate]="selection.hasValue() && !isAllSelected()"
+                                                [ngClass]="'tbl-checkbox'">
+                                            </mat-checkbox>
+                                        </mat-header-cell>
+                                        <mat-cell *matCellDef="let row" [ngClass]="'tbl-col-width-per-6'">
+                                            <mat-checkbox (click)="$event.stopPropagation()"
+                                                (change)="$event ? selection.toggle(row) : null"
+                                                [checked]="selection.isSelected(row)"
+                                                [ngClass]="'tbl-checkbox'">
+                                            </mat-checkbox>
+                                        </mat-cell>
+                                    </ng-container>
+
+                                    <ng-container matColumnDef="city">
+                                        <mat-header-cell *matHeaderCellDef mat-sort-header>City</mat-header-cell>
+                                        <mat-cell *matCellDef="let row">{{row.city}}</mat-cell>
+                                    </ng-container>
+
+                                    <ng-container matColumnDef="status">
+                                        <mat-header-cell *matHeaderCellDef>Status</mat-header-cell>
+                                        <mat-cell *matCellDef="let row">
+                                            {{row.activationStatus===true ? 'Active' : 'Deleted'}}</mat-cell>
+                                    </ng-container>
+
+                                    <mat-header-row *matHeaderRowDef="displayedColumns"></mat-header-row>
+                                    <mat-row *matRowDef="let row; columns: displayedColumns;" [style.cursor]="'pointer'" matRipple>
+                                    </mat-row>
+                                </mat-table>
+                                </div>
+
+                                <div class="body">
+                                    <div class="example-button-row">
+                                        <button mat-raised-button color="primary" (click)="PreviousCall()">Previous</button>
+                                        <button mat-raised-button color="primary" (click)="NextCall()">Next</button>
+                                    </div>
+                                </div>
+                            </ng-template>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<div class="modal fade" id="exampleModalCenter" tabindex="-1" role="dialog">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLongTitle">
+                    Location City Mapping Details
+                </h5>
+                <button type="button" class="close" data-dismiss="modal"
+                    aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                    <mat-label>City</mat-label>
+                    <input type="text" matInput [(ngModel)]="SearchCity">
+                </mat-form-field>
+                <mat-form-field class="example-full-width mb-3" appearance="outline" floatLabel="always">
+                    <mat-label>Activation Status</mat-label>
+                    <mat-select [(value)]="SearchActivationStatus">
+                        <mat-option [value]=true>Active</mat-option>
+                        <mat-option [value]=false>Deleted</mat-option>
+                    </mat-select>
+                </mat-form-field>
+            </div>
+            <div class="modal-footer">
+                <button mat-raised-button color="primary" (click)="SearchData()"
+                    data-dismiss="modal">Search</button>
+            </div>
+        </div>
+    </div>
+</div>

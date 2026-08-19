@@ -55,6 +55,7 @@ export class RoleComponent implements OnInit {
   PageNumber:number=0;
   selectedFilter: string = 'search';
   searchTerm: any = '';
+  isTblLoading = true;
 
   constructor(
     public httpClient: HttpClient,
@@ -154,9 +155,9 @@ export class RoleComponent implements OnInit {
       data =>   
       {
         this.dataSource = data;
-       
+        this.isTblLoading = false;
       },
-      (error: HttpErrorResponse) => { this.dataSource = null;}
+      (error: HttpErrorResponse) => { this.dataSource = null; this.isTblLoading = false;}
     );
   }
   showNotification(colorName, text, placementFrom, placementAlign) {
@@ -204,6 +205,27 @@ export class RoleComponent implements OnInit {
     {
       this.loadData();
     }
+  }
+
+  flagLabel(value: any, allowNa = false): string {
+    if (value === true || value === 'true' || value === 1 || value === '1') {
+      return 'Yes';
+    }
+    if (value === false || value === 'false' || value === 0 || value === '0') {
+      return 'No';
+    }
+    return allowNa ? 'N/A' : 'No';
+  }
+
+  flagClass(value: any, allowNa = false): string {
+    const label = this.flagLabel(value, allowNa);
+    if (label === 'Yes') {
+      return 'role-flag role-flag--yes';
+    }
+    if (label === 'No') {
+      return 'role-flag role-flag--no';
+    }
+    return 'role-flag role-flag--na';
   }
 
   PageMapping(row)

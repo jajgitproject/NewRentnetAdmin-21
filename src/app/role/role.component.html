@@ -26,32 +26,19 @@
                         <div class="responsive_table">
                             <div class="materialTableHeader">
                                 <div class="row">
-                                    <div style="width: 70%; float:left;padding-top: 6px;padding-left: 22px;">
-                                        <div class="col-lg-6">
-                                            <div class="form-group">
-                                                <div class="input-group">
-                                                    <!-- Dropdown for selecting Type, Parent, City -->
-                                                    <div class="input-group-append input-group-addon">
-                                                        <select style="height: 40px; width: 120px;" class="form-control" [(ngModel)]="selectedFilter">
-                                                            <option value="search" hidden>Search By</option>
-                                                            <option value="role">Role</option>
-                                                            <option value="roleFor">Role For</option>
-                                                            <!-- <option value="Remark">Remark</option> -->
-                                                        </select>
-                                                    </div>
-                                        
-                                                    <!-- Input field for filtering -->
-                                                     
-                                                    <input type="text" style="height: 40px; width: 300px;padding-left: 5px;" class="form-control" placeholder="Filter" id="inputGroup"
-                                                        (keyup)="onBackPress($event)" (input)="loadData()" [(ngModel)]="searchTerm" />
-                                        
-                                                    <!-- Search button -->
-                                                    <div class="input-group-append input-group-addon">
-                                                        <span class="input-group-text" style="cursor: pointer; height: 40px; width: 40px; text-align: center;padding-top: 5px;" (click)="loadData()">
-                                                            <i class="fas fa-search"></i>
-                                                        </span>
-                                                    </div>
-                                                </div>
+                                    <div class="role-toolbar-left">
+                                        <div class="form-group mb-0">
+                                            <div class="input-group role-search-group">
+                                                <select class="form-control role-search-type" [(ngModel)]="selectedFilter">
+                                                    <option value="search" hidden>Search By</option>
+                                                    <option value="role">Role</option>
+                                                    <option value="roleFor">Role For</option>
+                                                </select>
+                                                <input type="text" class="form-control role-search-input" placeholder="Filter" id="inputGroup"
+                                                    (keyup)="onBackPress($event)" (input)="loadData()" [(ngModel)]="searchTerm" />
+                                                <span class="input-group-text role-search-btn" (click)="loadData()">
+                                                    <i class="fas fa-search"></i>
+                                                </span>
                                             </div>
                                         </div>
                                     </div>
@@ -93,8 +80,7 @@
                                         </div>
                                     </div>
 
-                                    <div style="width: 30%; text-align: right;">
-
+                                    <div class="role-toolbar-right">
                                         <button mat-raised-button color="primary"
                                             data-dismiss="modal" data-toggle="modal" data-target="#exampleModalCenter" data-backdrop="false">
                                             Search
@@ -107,118 +93,133 @@
                                         <button mat-mini-fab color="primary" (click)="refresh()">
                                             <mat-icon class="col-white">refresh</mat-icon>
                                         </button>
-                                      
                                     </div>
                                 </div>
                             </div>
+                            <div *ngIf="!isTblLoading && (!dataSource || dataSource.length === 0)" class="alert alert-primary" style="background-color:#E8E8E8; text-align: center;">
+                                No Records Found
+                            </div>
+                            <div class="role-table-wrap" *ngIf="dataSource && dataSource.length > 0">
                               <div class="scrollable-table-container">
-                            <mat-table #table [dataSource]="dataSource" matSort class="mat-cell floating-header-table" (matSortChange)="SortingData($event)">
+                            <mat-table #table [dataSource]="dataSource" matSort class="mat-cell floating-header-table role-table" (matSortChange)="SortingData($event)">
                                 <ng-container matColumnDef="id">
-                                    <mat-header-cell *matHeaderCellDef  mat-sort-header>Id</mat-header-cell>
+                                    <mat-header-cell *matHeaderCellDef mat-sort-header>Id</mat-header-cell>
                                     <mat-cell *matCellDef="let row">{{row.roleID}}</mat-cell>
                                 </ng-container>
 
                                 <ng-container matColumnDef="role">
-                                    <mat-header-cell *matHeaderCellDef mat-sort-header >Role</mat-header-cell>
-                                    <mat-cell *matCellDef="let row" (contextmenu)="onContextMenu($event, row)">
+                                    <mat-header-cell *matHeaderCellDef mat-sort-header>Role</mat-header-cell>
+                                    <mat-cell *matCellDef="let row" [matTooltip]="row.role" (contextmenu)="onContextMenu($event, row)">
                                         {{row.role}}</mat-cell>
                                 </ng-container>
-                   
+
                                 <ng-container matColumnDef="roleFor">
-                                    <mat-header-cell *matHeaderCellDef mat-sort-header >Role For</mat-header-cell>
+                                    <mat-header-cell *matHeaderCellDef mat-sort-header>Role For</mat-header-cell>
                                     <mat-cell *matCellDef="let row" (contextmenu)="onContextMenu($event, row)">
                                         {{row.roleFor}}</mat-cell>
                                 </ng-container>
                                 <ng-container matColumnDef="remark">
-                                    <mat-header-cell *matHeaderCellDef mat-sort-header >Remark</mat-header-cell>
-                                    <mat-cell *matCellDef="let row" (contextmenu)="onContextMenu($event, row)">
-                                        {{row.remark}}</mat-cell>
+                                    <mat-header-cell *matHeaderCellDef mat-sort-header>Remark</mat-header-cell>
+                                    <mat-cell *matCellDef="let row" [matTooltip]="row.remark" (contextmenu)="onContextMenu($event, row)">
+                                        <span class="role-remark">{{row.remark}}</span></mat-cell>
                                 </ng-container>
 
                                 <ng-container matColumnDef="canCreateReservation">
-                                    <mat-header-cell *matHeaderCellDef mat-sort-header >Can Create Reservation</mat-header-cell>
+                                    <mat-header-cell *matHeaderCellDef mat-sort-header matTooltip="Can create reservation">Reservation</mat-header-cell>
                                     <mat-cell *matCellDef="let row" (contextmenu)="onContextMenu($event, row)">
-                                        {{row.canCreateReservation=== true ? 'Yes' : 'No'}}</mat-cell>
+                                        <span [class]="flagClass(row.canCreateReservation)">{{flagLabel(row.canCreateReservation)}}</span>
+                                    </mat-cell>
                                 </ng-container>
 
                                 <ng-container matColumnDef="isThisAKeyAccountManagerRole">
-                                    <mat-header-cell *matHeaderCellDef mat-sort-header>KAM</mat-header-cell>
+                                    <mat-header-cell *matHeaderCellDef mat-sort-header matTooltip="Key Account Manager role">KAM</mat-header-cell>
                                     <mat-cell *matCellDef="let row" (contextmenu)="onContextMenu($event, row)">
-                                        {{(row.isThisAKeyAccountManagerRole === null) ? 'N/A' : (row.isThisAKeyAccountManagerRole=== true ? 'Yes' : 'No')}}</mat-cell>
+                                        <span [class]="flagClass(row.isThisAKeyAccountManagerRole, true)">{{flagLabel(row.isThisAKeyAccountManagerRole, true)}}</span>
+                                    </mat-cell>
                                 </ng-container>
 
                                 <ng-container matColumnDef="canThisRoleCreateBackDateBooking">
-                                    <mat-header-cell *matHeaderCellDef mat-sort-header >Back Date Booking</mat-header-cell>
+                                    <mat-header-cell *matHeaderCellDef mat-sort-header matTooltip="Can create back date booking">Back Date</mat-header-cell>
                                     <mat-cell *matCellDef="let row" (contextmenu)="onContextMenu($event, row)">
-                                        {{(row.canThisRoleCreateBackDateBooking === null) ? 'N/A' : (row.canThisRoleCreateBackDateBooking=== true ? 'Yes' : 'No')}}</mat-cell>
+                                        <span [class]="flagClass(row.canThisRoleCreateBackDateBooking, true)">{{flagLabel(row.canThisRoleCreateBackDateBooking, true)}}</span>
+                                    </mat-cell>
                                 </ng-container>
 
                                 <ng-container matColumnDef="canThisRoleCreateBillOnClosingScreen">
-                                    <mat-header-cell *matHeaderCellDef mat-sort-header>CanThisRoleCreateBillOnClosingScreen</mat-header-cell>
+                                    <mat-header-cell *matHeaderCellDef mat-sort-header matTooltip="Can create bill on closing screen">Create Bill</mat-header-cell>
                                     <mat-cell *matCellDef="let row" (contextmenu)="onContextMenu($event, row)">
-                                        {{row.canThisRoleCreateBillOnClosingScreen === true ? 'Yes' : 'No'}}</mat-cell>
+                                        <span [class]="flagClass(row.canThisRoleCreateBillOnClosingScreen)">{{flagLabel(row.canThisRoleCreateBillOnClosingScreen)}}</span>
+                                    </mat-cell>
                                 </ng-container>
 
                                 <ng-container matColumnDef="canThisRoleViewBillOnClosingScreen">
-                                    <mat-header-cell *matHeaderCellDef mat-sort-header>CanThisRoleViewBillOnClosingScreen</mat-header-cell>
+                                    <mat-header-cell *matHeaderCellDef mat-sort-header matTooltip="Can view bill on closing screen">View Bill</mat-header-cell>
                                     <mat-cell *matCellDef="let row" (contextmenu)="onContextMenu($event, row)">
-                                        {{row.canThisRoleViewBillOnClosingScreen === true ? 'Yes' : 'No'}}</mat-cell>
+                                        <span [class]="flagClass(row.canThisRoleViewBillOnClosingScreen)">{{flagLabel(row.canThisRoleViewBillOnClosingScreen)}}</span>
+                                    </mat-cell>
                                 </ng-container>
 
                                 <ng-container matColumnDef="canThisRoleDoGoodForBillingOnClosingScreen">
-                                    <mat-header-cell *matHeaderCellDef mat-sort-header>CanThisRoleDoGoodForBillingOnClosingScreen</mat-header-cell>
+                                    <mat-header-cell *matHeaderCellDef mat-sort-header matTooltip="Can mark good for billing on closing screen">GFB</mat-header-cell>
                                     <mat-cell *matCellDef="let row" (contextmenu)="onContextMenu($event, row)">
-                                        {{row.canThisRoleDoGoodForBillingOnClosingScreen === true ? 'Yes' : 'No'}}</mat-cell>
+                                        <span [class]="flagClass(row.canThisRoleDoGoodForBillingOnClosingScreen)">{{flagLabel(row.canThisRoleDoGoodForBillingOnClosingScreen)}}</span>
+                                    </mat-cell>
                                 </ng-container>
 
                                 <ng-container matColumnDef="canEditDSAfterGoodForBilling">
-                                    <mat-header-cell *matHeaderCellDef mat-sort-header>DS Edit</mat-header-cell>
+                                    <mat-header-cell *matHeaderCellDef mat-sort-header matTooltip="Can edit duty slip after good for billing">DS Edit</mat-header-cell>
                                     <mat-cell *matCellDef="let row" (contextmenu)="onContextMenu($event, row)">
-                                        {{row.canEditDSAfterGoodForBilling === true || row.canEditDSAfterGoodForBilling === 'true' || row.canEditDSAfterGoodForBilling === 1 ? 'Yes' : 'No'}}</mat-cell>
+                                        <span [class]="flagClass(row.canEditDSAfterGoodForBilling)">{{flagLabel(row.canEditDSAfterGoodForBilling)}}</span>
+                                    </mat-cell>
                                 </ng-container>
 
                                 <ng-container matColumnDef="canBypassOTP">
-                                    <mat-header-cell *matHeaderCellDef mat-sort-header>Can Bypass OTP</mat-header-cell>
+                                    <mat-header-cell *matHeaderCellDef mat-sort-header matTooltip="Can bypass OTP">Bypass OTP</mat-header-cell>
                                     <mat-cell *matCellDef="let row" (contextmenu)="onContextMenu($event, row)">
-                                        {{row.canBypassOTP === true || row.canBypassOTP === 'true' || row.canBypassOTP === 1 ? 'Yes' : 'No'}}</mat-cell>
+                                        <span [class]="flagClass(row.canBypassOTP)">{{flagLabel(row.canBypassOTP)}}</span>
+                                    </mat-cell>
                                 </ng-container>
 
                                 <ng-container matColumnDef="canThisRoleViewDummyInvoice">
-                                    <mat-header-cell *matHeaderCellDef mat-sort-header>CanThisRoleViewDummyInvoice</mat-header-cell>
+                                    <mat-header-cell *matHeaderCellDef mat-sort-header matTooltip="Can view dummy invoice">Dummy Inv.</mat-header-cell>
                                     <mat-cell *matCellDef="let row" (contextmenu)="onContextMenu($event, row)">
-                                        {{row.canThisRoleViewDummyInvoice === true ? 'Yes' : 'No'}}</mat-cell>
+                                        <span [class]="flagClass(row.canThisRoleViewDummyInvoice)">{{flagLabel(row.canThisRoleViewDummyInvoice)}}</span>
+                                    </mat-cell>
                                 </ng-container>
 
                                 <ng-container matColumnDef="status">
                                     <mat-header-cell *matHeaderCellDef mat-sort-header>Status</mat-header-cell>
                                     <mat-cell *matCellDef="let row">
-                                        {{row.activationStatus===true ? 'Active' : 'Deleted'}}</mat-cell>
+                                        <span class="role-status" [class.role-status--active]="row.activationStatus === true" [class.role-status--deleted]="row.activationStatus !== true">
+                                            {{row.activationStatus === true ? 'Active' : 'Deleted'}}
+                                        </span>
+                                    </mat-cell>
                                 </ng-container>
-                                <!-- actions -->
                                 <ng-container matColumnDef="pages">
-<mat-header-cell *matHeaderCellDef >Pages</mat-header-cell>
-<mat-cell *matCellDef="let row; let i=index;"  >
-<button  color="accent"  (click)="$event.stopPropagation()" (click)="PageMapping(row)">
-Select
-</button>
-</mat-cell>
+                                    <mat-header-cell *matHeaderCellDef>Pages</mat-header-cell>
+                                    <mat-cell *matCellDef="let row; let i=index;">
+                                        <button mat-stroked-button color="primary" (click)="$event.stopPropagation(); PageMapping(row)">
+                                            Select
+                                        </button>
+                                    </mat-cell>
                                 </ng-container>
                                 <ng-container matColumnDef="actions">
-                                    <mat-header-cell *matHeaderCellDef class="pr-0" [ngClass]="'tbl-col-width-per-9'">Actions</mat-header-cell>
-                                    <mat-cell *matCellDef="let row; let i=index;" class="pr-0" [ngClass]="'tbl-col-width-per-9'">
-                                        <button mat-icon-button color="accent" class="btn-tbl-edit" (click)="$event.stopPropagation()" (click)="editCall(row)">
-                      <mat-icon aria-label="Edit" class="col-white">edit</mat-icon>
-                    </button>
-                                        <button mat-icon-button color="accent" class="btn-tbl-delete" (click)="$event.stopPropagation()" (click)="deleteItem(row)">
-                      <mat-icon aria-label="Delete" class="col-white">delete</mat-icon>
-                    </button>
+                                    <mat-header-cell *matHeaderCellDef class="pr-0">Actions</mat-header-cell>
+                                    <mat-cell *matCellDef="let row; let i=index;" class="pr-0">
+                                        <button mat-icon-button color="accent" class="btn-tbl-edit" (click)="$event.stopPropagation(); editCall(row)">
+                                            <mat-icon aria-label="Edit" class="col-white">edit</mat-icon>
+                                        </button>
+                                        <button mat-icon-button color="accent" class="btn-tbl-delete" (click)="$event.stopPropagation(); deleteItem(row)">
+                                            <mat-icon aria-label="Delete" class="col-white">delete</mat-icon>
+                                        </button>
                                     </mat-cell>
-                                </ng-container>                                
-                                <mat-header-row *matHeaderRowDef="displayedColumns"></mat-header-row>
+                                </ng-container>
+                                <mat-header-row *matHeaderRowDef="displayedColumns; sticky: true"></mat-header-row>
                                 <mat-row *matRowDef="let row; columns: displayedColumns;" (click)="editCall(row)" [style.cursor]="'pointer'" matRipple>
                                 </mat-row>
                             </mat-table>
                               </div>
+                            </div>
                             <!-- Loading spinner -->
                             <!-- <div *ngIf="exampleDatabase.isTblLoading" class="tbl-spinner">
                                 <mat-progress-spinner color="primary" [diameter]="40" mode="indeterminate">
@@ -276,13 +277,9 @@ Select
                                 No results
                             </div> -->
 
-                            <div class="body">
-                                <div class="example-button-row">
-
-                                    <button mat-raised-button color="primary" (click)="PreviousCall()">Previous</button>
-                                    <button mat-raised-button color="primary" (click)="NextCall()">Next</button>
-
-                                </div>
+                            <div class="role-pager">
+                                <button mat-raised-button color="primary" (click)="PreviousCall()">Previous</button>
+                                <button mat-raised-button color="primary" (click)="NextCall()">Next</button>
                             </div>
 
                         </div>

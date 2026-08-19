@@ -1352,6 +1352,18 @@ export const ROUTES: RouteInfo[] = [
         isAccess: false
       },
       {
+        path: 'locationCityMapping',
+        title: 'Location City Mapping',
+        pageKey: 'Location City Mapping',
+        moduleName: 'locationCityMapping',
+        alternateAccessPageKeys: ['locationCityMapping', 'Location City Mapping'],
+        icon: 'fas fa-tachometer-alt',
+        class: '',
+        groupTitle: false,
+        submenu: [],
+        isAccess: false
+      },
+      {
         path: 'attachOrDetachInvoicesToSummary',
         title: 'Attach or Detach Invoices to Invoice Summary',
         moduleName: 'attachOrDetachInvoicesToSummary',

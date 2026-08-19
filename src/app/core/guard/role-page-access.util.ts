@@ -42,17 +42,31 @@ export function buildAccessPagesArrayFromApi(
   data: any[]
 ): { page: string; pageID: number }[] {
   const accessPagesArray: { page: string; pageID: number }[] = [];
+  const seen = new Set<string>();
   data?.forEach((element) => {
     const activation = element?.activationStatus ?? element?.ActivationStatus;
-    const pageName = element?.page ?? element?.Page;
     const pageID = Number(element?.pageID ?? element?.PageID ?? -1);
     if (!isRoleMappingRowActive(activation)) {
       return;
     }
-    const page = normalizeMenuPageKey(pageName);
-    if (page) {
+    const names = [
+      element?.page ?? element?.Page,
+      element?.path ?? element?.Path,
+      element?.title ?? element?.Title,
+      element?.moduleName ?? element?.ModuleName,
+    ];
+    names.forEach((pageName) => {
+      const page = normalizeMenuPageKey(pageName);
+      if (!page) {
+        return;
+      }
+      const dedupe = pageID + ':' + page;
+      if (seen.has(dedupe)) {
+        return;
+      }
+      seen.add(dedupe);
       accessPagesArray.push({ pageID, page });
-    }
+    });
   });
   return accessPagesArray;
 }

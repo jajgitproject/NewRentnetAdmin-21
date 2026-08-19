@@ -59,7 +59,10 @@ export class RolePageGuard implements CanActivate, CanActivateChild {
 
     const cached = this.readAccessPagesFromStorage();
     if (cached !== null) {
-      return this.evaluate(state, route, cached);
+      const cachedResult = this.evaluate(state, route, cached);
+      if (cachedResult === true) {
+        return true;
+      }
     }
 
     return this.roleMapService.getTableData(null, roleID, true, 0).pipe(
