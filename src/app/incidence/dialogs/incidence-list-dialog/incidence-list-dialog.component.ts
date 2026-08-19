@@ -228,4 +228,15 @@ export class IncidenceListDialogComponent implements OnInit {
   close(): void {
     this.dialogRef.close(true);
   }
+
+  isIncidenceClosed(row: any): boolean {
+    if (!row) {
+      return false;
+    }
+    if (row.closureDate) {
+      return true;
+    }
+    const closedBy = Number(row.closedByEmployeeID || 0);
+    return closedBy > 0;
+  }
 }

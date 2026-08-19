@@ -147,7 +147,9 @@ export class IncidenceComponent implements OnInit {
           action: 'edit',
           item: this.reservationData,
           advanceTable: item,
-          
+          incidenceID: item?.incidenceID,
+          reservationID: item?.reservationID || this.reservationID,
+          dutySlipID: item?.dutySlipID || this.dutySlipID,
         },
       });
 
@@ -212,6 +214,17 @@ export class IncidenceComponent implements OnInit {
 
   shouldShowDeleteButton(item: any): boolean {
     return item.activationStatus !== false; // Only show delete button if activationStatus is not false (not deleted)
+  }
+
+  isIncidenceClosed(row: any): boolean {
+    if (!row) {
+      return false;
+    }
+    if (row.closureDate) {
+      return true;
+    }
+    const closedBy = Number(row.closedByEmployeeID || 0);
+    return closedBy > 0;
   }
 
   public Filter() {

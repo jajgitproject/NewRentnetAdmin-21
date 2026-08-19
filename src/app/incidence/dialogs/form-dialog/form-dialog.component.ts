@@ -92,29 +92,57 @@ export class incidenceFormDialogComponent {
     public _generalService: GeneralService) 
     {
       console.log(data);
-    this.reservationID = this.data?.item?.reservationID || this.data?.reservationID;
-    this.dutySlipID = this.data?.dutySlipID || this.data?.item?.dutySlipID;
-    this.incidenceID = this.data?.incidenceID || this.data?.item?.incidenceID;
-    this.incidenceTypeID = this.data?.item?.incidenceTypeID;
-    this.issueCategoryID = this.data?.item?.issueCategoryID;
-    this.customerID = this.data?.item?.customerID;
-    this.customerName = this.data?.item?.customerName;
-    this.customerType = this.data?.item?.customerType;
-    this.driverID = this.data?.item?.driverID;
-    this.driverName = this.data?.item?.driverName;
-    this.customerID = this.data?.item?.customerID;
-    this.registrationNumber = this.data?.item?.registrationNumber;
-    this.inventoryID = this.data?.item?.inventoryID;
-    this.customerPersonID = this.data?.item?.customerPersonID;
-    this.organizationalEntityName = this.data?.item?.transferedLocation;
-    this.transferedLocationID = this.data?.item?.transferedLocationID;
-    this.supplier= this.data?.item?.carVendor;
-    this.isVIP = this.data?.item?.customerPerson?.importance;
+    const editRow = this.data?.advanceTable || this.data?.item;
+    this.reservationID =
+      this.data?.reservationID ||
+      editRow?.reservationID ||
+      this.data?.item?.reservationID;
+    this.dutySlipID =
+      this.data?.dutySlipID ||
+      editRow?.dutySlipID ||
+      this.data?.item?.dutySlipID;
+    this.incidenceID =
+      this.data?.incidenceID ||
+      editRow?.incidenceID ||
+      this.data?.item?.incidenceID;
+    this.incidenceTypeID = editRow?.incidenceTypeID || this.data?.item?.incidenceTypeID;
+    this.issueCategoryID = editRow?.issueCategoryID || this.data?.item?.issueCategoryID;
+    this.customerID = editRow?.customerID || this.data?.item?.customerID;
+    this.customerName = editRow?.customerName || this.data?.item?.customerName;
+    this.customerType = editRow?.customerType || this.data?.item?.customerType;
+    this.driverID = editRow?.driverID || this.data?.item?.driverID;
+    this.driverName = editRow?.driverName || this.data?.item?.driverName;
+    this.registrationNumber = editRow?.registrationNumber || this.data?.item?.registrationNumber;
+    this.inventoryID = editRow?.inventoryID || this.data?.item?.inventoryID;
+    this.customerPersonID =
+      editRow?.customerPersonID ||
+      editRow?.passengerID ||
+      this.data?.item?.customerPersonID ||
+      this.data?.item?.primaryPassengerID;
+    this.organizationalEntityName =
+      editRow?.transferedLocation ||
+      editRow?.organizationalEntityName ||
+      editRow?.dispatchLocation ||
+      this.data?.item?.transferedLocation ||
+      this.data?.item?.organizationalEntityName;
+    this.transferedLocationID =
+      editRow?.transferedLocationID ||
+      editRow?.dispatchLocationID ||
+      this.data?.item?.transferedLocationID;
+    this.supplier = editRow?.supplier || editRow?.carVendor || this.data?.item?.carVendor;
+    this.isVIP = editRow?.isVIP || this.data?.item?.customerPerson?.importance;
     this.customerPersonName =
-      this.data?.item?.primaryPassengerName ;
+      editRow?.customerPersonName ||
+      editRow?.customerpersonName ||
+      editRow?.primaryPassengerName ||
+      this.data?.item?.primaryPassengerName ||
+      this.data?.item?.primaryPassenger;
     this.passengerID =
-      this.data?.item?.customerPersonID;
-    this.CustomerPersonID = data.CustomerPersonID;
+      editRow?.passengerID ||
+      editRow?.customerPersonID ||
+      this.data?.item?.customerPersonID ||
+      this.data?.item?.primaryPassengerID;
+    this.CustomerPersonID = data.CustomerPersonID || this.passengerID;
     // Set the defaults
     this.action = data.action;
     this.verifyDutyStatusAndCacellationStatus = data.verifyDutyStatusAndCacellationStatus;
@@ -151,37 +179,10 @@ export class incidenceFormDialogComponent {
     }
 
   public ngOnInit(): void {
-   // this.loadData();
     this.InitDuty();
     this.initPassenger();
-    // this.InitincidenceType();
-    // this.initIssueCategory();
-   // this.InitEmployee();
     this.InitDepartment();
-    this.getOpenByEmployee();
-    const now = new Date();
-    const currentDate = now.toISOString().split('T')[0];
-    const currentTime = new Date(now).toISOString();
 
-    this.advanceTableForm.patchValue({
-      reservationID: this.reservationID,
-      customerName: this.customerName,
-      customerType: this.customerType,
-      registrationNumber: this.registrationNumber,
-      driverName: this.driverName,
-      dispatchLocation: this.organizationalEntityName,
-      incidenceDate: currentDate,
-      incidenceTime: currentTime,
-      openDate: now,
-      openTime: now,
-      reportingDate: currentDate,
-      reportingTime: currentTime,
-      supplier:this.supplier,
-      isVIP:this.isVIP,
-      dutySlipNumber:this.dutySlipID,
-     customerPersonName: this.customerPersonName,
-     passengerID:this.passengerID
-    });
     this.advanceTableForm.controls['openDate'].disable();
     this.advanceTableForm.controls['openTime'].disable();
     this.advanceTableForm.controls['reservationID'].disable();
@@ -193,6 +194,53 @@ export class incidenceFormDialogComponent {
     this.advanceTableForm.controls['customerType'].disable();
     this.advanceTableForm.controls['supplier'].disable();
     this.advanceTableForm.controls['isVIP'].disable();
+
+    if (this.action === 'edit') {
+      // Keep existing incidence values; do not overwrite with "now".
+      this.patchReservationContext();
+      this.loadData();
+    } else {
+      this.getOpenByEmployee();
+      const now = new Date();
+      const currentDate = now.toISOString().split('T')[0];
+      const currentTime = new Date(now).toISOString();
+      this.advanceTableForm.patchValue({
+        reservationID: this.reservationID,
+        customerName: this.customerName,
+        customerType: this.customerType,
+        registrationNumber: this.registrationNumber,
+        driverName: this.driverName,
+        dispatchLocation: this.organizationalEntityName,
+        incidenceDate: currentDate,
+        incidenceTime: currentTime,
+        openDate: now,
+        openTime: now,
+        reportingDate: currentDate,
+        reportingTime: currentTime,
+        supplier: this.supplier,
+        isVIP: this.isVIP,
+        dutySlipNumber: this.dutySlipID,
+        customerPersonName: this.customerPersonName,
+        passengerID: this.passengerID
+      });
+    }
+  }
+
+  private patchReservationContext(): void {
+    this.advanceTableForm.patchValue({
+      reservationID: this.reservationID || this.advanceTable?.reservationID,
+      incidenceID: this.incidenceID || this.advanceTable?.incidenceID,
+      customerName: this.customerName || this.advanceTable?.customerName,
+      customerType: this.customerType || this.advanceTable?.customerType,
+      registrationNumber: this.registrationNumber || this.advanceTable?.registrationNumber,
+      driverName: this.driverName || this.advanceTable?.driverName,
+      dispatchLocation: this.organizationalEntityName || this.advanceTable?.dispatchLocation,
+      supplier: this.supplier || this.advanceTable?.supplier,
+      isVIP: this.isVIP || this.advanceTable?.isVIP,
+      dutySlipNumber: this.dutySlipID || this.advanceTable?.dutySlipID,
+      customerPersonName: this.customerPersonName || this.advanceTable?.customerPersonName || this.advanceTable?.customerpersonName,
+      passengerID: this.passengerID || this.advanceTable?.passengerID
+    });
   }
 
   createContactForm(): FormGroup {
@@ -200,16 +248,16 @@ export class incidenceFormDialogComponent {
       dutySlipID: [this.advanceTable?.dutySlipID],
       userID: [this.advanceTable?.userID || ''],
       reservationID: [this.advanceTable?.reservationID ],
-      incidenceID: [this.data?.item?.incidenceID || -1],
+      incidenceID: [this.advanceTable?.incidenceID || this.data?.incidenceID || this.data?.item?.incidenceID || -1],
       passengerID: [this.advanceTable?.passengerID],
       inventoryID: [this.advanceTable?.inventoryID || 0],
-      dutySlipNumber: [this.advanceTable?.dutySlipNumber || ''],
+      dutySlipNumber: [this.advanceTable?.dutySlipNumber || this.advanceTable?.dutySlipID || ''],
       driverID: [this.advanceTable?.driverID || 0],
       driverName: [this.advanceTable?.driverName || ''],
       locationOutAddressString: [this.advanceTable?.locationOutAddressString || ''],
       registrationNumber: [this.advanceTable?.registrationNumber || ''],
-      incidenceDate: [null, Validators.required],
-      incidenceTime: [null, Validators.required],
+      incidenceDate: [this.advanceTable?.incidenceDate || null, Validators.required],
+      incidenceTime: [this.advanceTable?.incidenceTime || null, Validators.required],
       incidencePlace: [this.advanceTable?.incidencePlace || ''],
       dispatchLocationID: [this.advanceTable?.dispatchLocationID || 0],
       incidenceTypeID: [this.advanceTable?.incidenceTypeID],
@@ -307,13 +355,19 @@ export class incidenceFormDialogComponent {
       )
   }
   public Put(): void {
-    this.advanceTableForm.patchValue({ reservationID: this.reservationID || this.advanceTable.reservationID  });
-    this.advanceTableForm.patchValue({ dutySlipID: this.dutySlipID || this.advanceTable?.dutySlipID });
-    this.advanceTableForm.patchValue({ customerID: this.customerID || this.advanceTable?.customerID });
-    this.advanceTableForm.patchValue({ driverID: this.driverID || this.advanceTable?.driverID});
-    this.advanceTableForm.patchValue({ inventoryID: this.inventoryID || this.advanceTable?.inventoryID });
-    this.advanceTableForm.patchValue({ dispatchLocationID: this.transferedLocationID || this.advanceTable?.dispatchLocationID });
-   
+    this.advanceTableForm.patchValue({
+      incidenceID: this.incidenceID || this.advanceTable?.incidenceID,
+      reservationID: this.reservationID || this.advanceTable?.reservationID,
+      dutySlipID: this.dutySlipID || this.advanceTable?.dutySlipID,
+      customerID: this.customerID || this.advanceTable?.customerID,
+      driverID: this.driverID || this.advanceTable?.driverID,
+      inventoryID: this.inventoryID || this.advanceTable?.inventoryID,
+      dispatchLocationID: this.transferedLocationID || this.advanceTable?.dispatchLocationID,
+      passengerID: this.passengerID || this.advanceTable?.passengerID,
+      incidenceTypeID: this.incidenceTypeID || this.advanceTableForm.get('incidenceTypeID')?.value,
+      issueCategoryID: this.issueCategoryID || this.advanceTableForm.get('issueCategoryID')?.value
+    });
+
     this.advanceTableService.update(this.advanceTableForm.getRawValue())
       .subscribe(
         response => {
@@ -544,12 +598,40 @@ export class incidenceFormDialogComponent {
           this.advanceTableForm.controls['department'].setValidators([Validators.required,
             this.departmentNameValidator(this.DepartmentList )
             ]);
-          this.advanceTableForm.controls['department']?.updateValueAndValidity();
+          this.advanceTableForm.controls['department']?.updateValueAndValidity({ emitEvent: false });
           this.filteredDepartmentByOptions = this.advanceTableForm.controls['department']?.valueChanges.pipe(
             startWith(""),
             map(value => this?._filterDepartment(value || ''))
           );
+          if (this.action === 'edit') {
+            this.syncDepartmentCascade();
+          }
         });
+  }
+
+  private syncDepartmentCascade(): void {
+    const deptName = (
+      this.advanceTableForm.get('department')?.value ||
+      this.advanceTable?.department ||
+      ''
+    )
+      .toString()
+      .trim()
+      .toLowerCase();
+
+    if (!deptName || !this.DepartmentList?.length) {
+      return;
+    }
+
+    const matched = this.DepartmentList.find(
+      (d) => d.department?.toString().trim().toLowerCase() === deptName
+    );
+    if (!matched) {
+      return;
+    }
+
+    this.departmentID = matched.departmentID;
+    this.InitincidenceType();
   }
   private _filterDepartment(value: string): any {
     const filterValue = value.toLowerCase();
@@ -993,10 +1075,10 @@ incidenceTypeValidator(list: any[]): ValidatorFn {
       }
 
       const targetIncidenceID =
-        this.data?.incidenceID ||
-        this.data?.item?.incidenceID ||
         this.incidenceID ||
-        this.advanceTable?.incidenceID;
+        this.advanceTable?.incidenceID ||
+        this.data?.incidenceID ||
+        this.data?.item?.incidenceID;
 
       this.advanceTableService.getTableData(this.reservationID, true ,0).subscribe
         (
@@ -1021,16 +1103,25 @@ incidenceTypeValidator(list: any[]): ValidatorFn {
               return;
             }
 
+            this.advanceTable = selected;
             this.incidenceID = selected.incidenceID;
+            this.dutySlipID = selected.dutySlipID || this.dutySlipID;
+            this.passengerID = selected.passengerID || this.passengerID;
             this.advanceTableForm.patchValue({ reservationID: selected.reservationID });
             this.advanceTableForm.patchValue({ incidenceID: selected.incidenceID });
             this.advanceTableForm.patchValue({
               incidenceDate: selected.incidenceDate
             });
             this.advanceTableForm.patchValue({ dutySlipNumber: selected.dutySlipID });
+            this.advanceTableForm.patchValue({ dutySlipID: selected.dutySlipID });
             this.advanceTableForm.patchValue({ customerPersonName: selected.customerpersonName || selected.customerPersonName });
             this.advanceTableForm.patchValue({ incidenceTime: selected.incidenceTime });
             this.advanceTableForm.patchValue({ openedByEmployeeDepartment: selected.openedByEmployeeDepartment});
+            this.advanceTableForm.patchValue({
+              openedByEmployeeName: selected.openedByEmployeeName,
+              openedByEmployeeID: selected.openedByEmployeeID
+            });
+            this.advanceTableForm.controls['openedByEmployeeName'].disable();
             this.advanceTableForm.patchValue({ reportSource: selected.reportSource });
             this.advanceTableForm.patchValue({ reportedBy: selected.reportedBy });
             this.advanceTableForm.patchValue({ incidencePlace: selected.incidencePlace });
@@ -1048,16 +1139,17 @@ incidenceTypeValidator(list: any[]): ValidatorFn {
             this.advanceTableForm.patchValue({ issueCategoryID: selected.issueCategoryID });
             this.incidenceTypeID = selected.incidenceTypeID;
             this.issueCategoryID = selected.issueCategoryID;
+            this.advanceTableForm.patchValue({ passengerID: selected.passengerID });
+            this.advanceTableForm.patchValue({ reportEvidenceDoc: selected.reportEvidenceDoc });
+            this.advanceTableForm.patchValue({ type: selected.type });  
+            this.advanceTableForm.patchValue({ department: selected.department });
+            this.ImagePath = selected.reportEvidenceDoc;
+            this.syncDepartmentCascade();
             if (this.incidenceTypeID) {
               this.initIssueCategory();
             } else {
               this.advanceTableForm.patchValue({ issueCategory: selected.issueCategory });
             }
-            this.advanceTableForm.patchValue({ passengerID: selected.passengerID });
-            this.advanceTableForm.patchValue({ reportEvidenceDoc: selected.reportEvidenceDoc });
-            this.advanceTableForm.patchValue({ type: selected.type });  
-            this.advanceTableForm.patchValue({ department: selected.department });              
-            this.ImagePath = selected.reportEvidenceDoc;
           },
           (error: HttpErrorResponse) => { this.dataSource = null; }
         );

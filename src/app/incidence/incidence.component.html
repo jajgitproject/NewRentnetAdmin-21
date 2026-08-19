@@ -127,7 +127,6 @@
                   [dataSource]="dataSource"
                   class="mat-elevation-z2 w-100"
                 >
-                  <pre>{{ dataSource | json }}</pre>
                   <!-- Incidence ID -->
                   <ng-container matColumnDef="IncidenceID">
                     <th mat-header-cell *matHeaderCellDef>Incidence ID</th>
@@ -164,15 +163,15 @@
                   <ng-container matColumnDef="IncidenceCategory">
                     <th mat-header-cell *matHeaderCellDef>Category</th>
                     <td mat-cell *matCellDef="let row">
-                      {{ row.incidenceCategory }}
+                      {{ row.issueCategory || row.incidenceCategory || '—' }}
                     </td>
                   </ng-container>
 
-                  <!-- Internal/External -->
+                  <!-- Type -->
                   <ng-container matColumnDef="InternalExternalType">
                     <th mat-header-cell *matHeaderCellDef>Type</th>
                     <td mat-cell *matCellDef="let row">
-                      {{ row.internalExternalType }}
+                      {{ row.incidenceType || row.type || row.internalExternalType || '—' }}
                     </td>
                   </ng-container>
 
@@ -203,12 +202,12 @@
                     <td mat-cell *matCellDef="let row">
                       <span
                         class="badge badge-success"
-                        *ngIf="!row.closureDate"
+                        *ngIf="!isIncidenceClosed(row)"
                       >
                         Open
                       </span>
 
-                      <span class="badge badge-primary" *ngIf="row.closureDate">
+                      <span class="badge badge-primary" *ngIf="isIncidenceClosed(row)">
                         Closed
                       </span>
                     </td>
@@ -347,7 +346,6 @@
           <input type="text" matInput [(ngModel)]="SearchIncidence" />
         </mat-form-field>
 
-        <
         <mat-form-field
           class="example-full-width mb-3"
           appearance="outline"
