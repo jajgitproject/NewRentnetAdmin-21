@@ -11,6 +11,11 @@ import { Observable } from 'rxjs';
 import { map, startWith } from 'rxjs/operators';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { HttpErrorResponse } from '@angular/common/http';
+import {
+  filterSuppliersByDisplay,
+  formatSupplierDisplay,
+  supplierMatchesDisplay,
+} from 'src/app/supplier/supplier-display.util';
 
 @Component({
   standalone: false,
@@ -38,6 +43,7 @@ export class FormDialogComponent
   email: any;
   phone: any;
   reservationID: any;
+  formatSupplierDisplay = formatSupplierDisplay;
 
   constructor(
   public dialogRef: MatDialogRef<FormDialogComponent>, 
@@ -94,7 +100,7 @@ export class FormDialogComponent
 
   ngOnInit():void
   {
-    //this.InitSupplier();
+    this.InitSupplier();
   }
   
   createContactForm(): FormGroup 
@@ -208,64 +214,64 @@ export class FormDialogComponent
     }
   }
 
-  //---------- Supplier Drop Down ----------
-  supplierTypeValidator(SupplierList: any[]): ValidatorFn {
-      return (control: AbstractControl): ValidationErrors | null => {
-        const value = control.value?.toLowerCase();
-        const match = SupplierList.some(group => group.supplierName.toLowerCase() === value);
-        return match ? null : { supplierNameInvalid: true };
-      };
-    }
-    
-    onKeyupSupplier(_event?: Event)
-    {
-      var Prefix = this.advanceTableForm.get("supplierName").value;
-      if(Prefix.length < 3)
-      { 
-        this.SupplierList = [];
-        return;
-      }
-      this.passToSupplierService.getSupplierCode(Prefix).subscribe(
-      data=>
+  //---------- Supplier Drop Down (SupplierName + OldRentnetCode, same as closingOne Change Supplier) ----------
+  InitSupplier()
+  {
+    this.passToSupplierService.getSupplier().subscribe(
+      data =>
       {
-        this.SupplierList=data;
-        this.advanceTableForm.controls['supplierName'].setValidators([Validators.required,this.supplierTypeValidator(this.SupplierList)]);
-        this.advanceTableForm.controls['supplierName'].updateValueAndValidity();
+        this.SupplierList = data || [];
+        this.advanceTableForm.controls['supplierName'].setValidators([
+          Validators.required,
+          this.supplierTypeValidator(this.SupplierList)
+        ]);
+        this.advanceTableForm.controls['supplierName'].updateValueAndValidity({ emitEvent: false });
         this.filteredSupplierOptions = this.advanceTableForm.controls['supplierName'].valueChanges.pipe(
-          startWith(""),
+          startWith(this.advanceTableForm.controls['supplierName'].value || ''),
           map(value => this._filterSupplier(value || ''))
-        ); 
-      });
-    }
-  
-    private _filterSupplier(value: string)
-    {
-      const filterValue = value.toLowerCase();
-      return this.SupplierList.filter(
-      customer => 
-      {
-        return customer.supplierName.toLowerCase().includes(filterValue);
-      });
-    }
-    OnSupplierSelect(selectedSupplier: string)
-    {
-      const SupplierName = this.SupplierList.find(data => data.supplierName === selectedSupplier);
-      if (selectedSupplier) 
-      {
-        this.getSupplierID(SupplierName.supplierID,SupplierName.address,SupplierName.email,SupplierName.phone);
+        );
       }
-    }
-    getSupplierID(supplierID:any,address:any,email:any,phone:any) 
+    );
+  }
+
+  supplierTypeValidator(SupplierList: any[]): ValidatorFn {
+    return (control: AbstractControl): ValidationErrors | null => {
+      const match = (SupplierList || []).some(group => supplierMatchesDisplay(group, control.value));
+      return match ? null : { supplierNameInvalid: true };
+    };
+  }
+
+  private _filterSupplier(value: string)
+  {
+    if (!value || value.length < 3)
     {
-      this.supplierID = supplierID;
-      this.address = address;
-      this.email = email;
-      this.phone = phone;
-      this.advanceTableForm.patchValue({supplierID:this.supplierID});
-      this.advanceTableForm.patchValue({supplierAddress:this.address});
-      this.advanceTableForm.patchValue({supplierEmail:this.email});
-      this.advanceTableForm.patchValue({supplierConcernedPersonMobile:this.phone});
+      return [];
     }
+    return filterSuppliersByDisplay(this.SupplierList, value);
+  }
+
+  OnSupplierSelect(selectedSupplier: string)
+  {
+    const selected = this.SupplierList.find(data => supplierMatchesDisplay(data, selectedSupplier));
+    if (selected)
+    {
+      this.getSupplierID(selected.supplierID, selected.address, selected.email, selected.phone);
+    }
+  }
+
+  getSupplierID(supplierID:any,address:any,email:any,phone:any)
+  {
+    this.supplierID = supplierID;
+    this.address = address;
+    this.email = email;
+    this.phone = phone;
+    this.advanceTableForm.patchValue({
+      supplierID: this.supplierID,
+      supplierAddress: this.address,
+      supplierEmail: this.email,
+      supplierConcernedPersonMobile: this.phone
+    }, { emitEvent: false });
+  }
 
 
   loadData()
@@ -278,7 +284,12 @@ export class FormDialogComponent
         this.advanceTableForm.patchValue({ reservationPassedToSupplierID: this.dataSource?.reservationPassedToSupplierID });
         this.advanceTableForm.patchValue({ reservationID: this.dataSource?.reservationID });
         this.advanceTableForm.patchValue({ supplierID: this.dataSource?.supplierID });
-        this.advanceTableForm.patchValue({ supplierName: this.dataSource?.supplierName });
+        this.advanceTableForm.patchValue({
+          supplierName: formatSupplierDisplay({
+            supplierName: this.dataSource?.supplierName,
+            oldRentnetCode: this.dataSource?.oldRentnetCode
+          })
+        });
         this.advanceTableForm.patchValue({ supplierAddress: this.dataSource?.supplierAddress });
         this.advanceTableForm.patchValue({ supplierReservationNumber: this.dataSource?.supplierReservationNumber });
         this.advanceTableForm.patchValue({ supplierEmail: this.dataSource?.supplierEmail });

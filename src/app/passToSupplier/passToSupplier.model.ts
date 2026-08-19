@@ -5,6 +5,7 @@ export class PassToSupplierModel {
   reservationID:number;
   supplierID:number;
   supplierName:string;
+  oldRentnetCode:number;
   supplierAddress:string;
   supplierReservationNumber:string;
   supplierEmail:string;
@@ -19,6 +20,7 @@ export class PassToSupplierModel {
       this.reservationID = passToSupplierModel.reservationID || '';
       this.supplierID = passToSupplierModel.supplierID || '';
       this.supplierName = passToSupplierModel.supplierName || '';
+      this.oldRentnetCode = passToSupplierModel.oldRentnetCode || null;
       this.supplierAddress = passToSupplierModel.supplierAddress || '';
       this.supplierReservationNumber = passToSupplierModel.supplierReservationNumber || '';
       this.supplierEmail = passToSupplierModel.supplierEmail || '';
@@ -32,6 +34,7 @@ export class PassToSupplierModel {
 export class SupplierDropDownModel {
   supplierID: number;
   supplierName: string;
+  oldRentnetCode: number;
   address:string;
   phone:string;
   email:string;
@@ -40,6 +43,9 @@ export class SupplierDropDownModel {
     {
       this.supplierID = supplierDropDown.supplierID || -1;
       this.supplierName = supplierDropDown.supplierName || '';
+      this.oldRentnetCode = (supplierDropDown.oldRentnetCode && supplierDropDown.oldRentnetCode !== 0)
+        ? Number(supplierDropDown.oldRentnetCode)
+        : null;
       this.address = supplierDropDown.address || '';
       this.phone = supplierDropDown.phone || '';
       this.email = supplierDropDown.email || '';

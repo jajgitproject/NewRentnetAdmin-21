@@ -2489,7 +2489,7 @@ incidenceOne(item: any) {
             feedbackRemark:feedbackRemark,
             customerPersonName: item?.passengerDetails?.[0]?.customerPersonName,
             item:item ,
-            verifyDutyStatusAndCacellationStatus:this.verifyDutyStatusAndCacellationStatus
+            verifyDutyStatusAndCacellationStatus: 'Changes allow'
           }
           
       });

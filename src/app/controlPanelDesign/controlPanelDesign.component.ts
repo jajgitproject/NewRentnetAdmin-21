@@ -2320,7 +2320,8 @@ reachedByExecutiveGPS(item:any){
             reservationPassengerID:reservationPassengerID,
             feedbackRemark:feedbackRemark,
             customerPersonName: item?.passengerDetails?.[0]?.customerPersonName,
-            item:item 
+            item:item,
+            verifyDutyStatusAndCacellationStatus: 'Changes allow'
           }
           
       });
