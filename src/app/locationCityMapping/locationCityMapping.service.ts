@@ -12,18 +12,24 @@ export class LocationCityMappingService {
     this.API_URL = generalService.BaseURL + 'locationCityMapping';
   }
 
-  getLocations(searchLocationName: string, pageNumber: number): Observable<any> {
+  getLocations(searchLocationName: string, searchMappedCities: string, pageNumber: number): Observable<any> {
     if (searchLocationName === '') {
       searchLocationName = 'null';
     }
-    return this.httpClient.get(this.API_URL + '/locations/' + searchLocationName + '/' + pageNumber + '/LocationName/Ascending');
+    if (searchMappedCities === '') {
+      searchMappedCities = 'null';
+    }
+    return this.httpClient.get(this.API_URL + '/locations/' + searchLocationName + '/' + searchMappedCities + '/' + pageNumber + '/LocationName/Ascending');
   }
 
-  getLocationsSort(searchLocationName: string, pageNumber: number, columnName: string, sortType: string): Observable<any> {
+  getLocationsSort(searchLocationName: string, searchMappedCities: string, pageNumber: number, columnName: string, sortType: string): Observable<any> {
     if (searchLocationName === '') {
       searchLocationName = 'null';
     }
-    return this.httpClient.get(this.API_URL + '/locations/' + searchLocationName + '/' + pageNumber + '/' + columnName + '/' + sortType);
+    if (searchMappedCities === '') {
+      searchMappedCities = 'null';
+    }
+    return this.httpClient.get(this.API_URL + '/locations/' + searchLocationName + '/' + searchMappedCities + '/' + pageNumber + '/' + columnName + '/' + sortType);
   }
 
   getMappedCities(locationID: number, searchCity: string, searchActivationStatus: boolean, pageNumber: number): Observable<any> {

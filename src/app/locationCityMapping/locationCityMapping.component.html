@@ -34,6 +34,7 @@
                                                         <select style="height: 40px; width: 150px;" class="form-control" [(ngModel)]="selectedFilter">
                                                             <option value="search" hidden>Search By</option>
                                                             <option value="locationName">Location</option>
+                                                            <option value="mappedCities">Mapped Cities</option>
                                                         </select>
                                                     </div>
                                                     <input type="text" style="height: 40px; width: 300px;padding-left: 5px;" class="form-control" placeholder="Filter" id="inputGroup"
@@ -153,6 +154,10 @@
                 <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
                     <mat-label>Location</mat-label>
                     <input type="text" matInput [(ngModel)]="SearchLocationName">
+                </mat-form-field>
+                <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                    <mat-label>Mapped Cities</mat-label>
+                    <input type="text" matInput [(ngModel)]="SearchMappedCities">
                 </mat-form-field>
             </div>
             <div class="modal-footer">

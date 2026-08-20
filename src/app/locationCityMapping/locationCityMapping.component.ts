@@ -26,6 +26,7 @@ export class LocationCityMappingComponent implements OnInit {
   ];
   dataSource: LocationCityMappingModel[] | null;
   SearchLocationName: string = '';
+  SearchMappedCities: string = '';
   PageNumber: number = 0;
   sortingData: number;
   sortType: string;
@@ -58,6 +59,7 @@ export class LocationCityMappingComponent implements OnInit {
     this.selectedFilter = 'search';
     this.searchTerm = '';
     this.SearchLocationName = '';
+    this.SearchMappedCities = '';
     this.PageNumber = 0;
     this.loadData();
   }
@@ -70,6 +72,7 @@ export class LocationCityMappingComponent implements OnInit {
 
   public SearchData() {
     this.PageNumber = 0;
+    this.selectedFilter = 'search';
     this.loadData();
   }
 
@@ -77,13 +80,17 @@ export class LocationCityMappingComponent implements OnInit {
     switch (this.selectedFilter) {
       case 'locationName':
         this.SearchLocationName = this.searchTerm;
+        this.SearchMappedCities = '';
+        break;
+      case 'mappedCities':
+        this.SearchMappedCities = this.searchTerm;
+        this.SearchLocationName = '';
         break;
       default:
         this.searchTerm = '';
-        this.SearchLocationName = '';
         break;
     }
-    this.locationCityMappingService.getLocations(this.SearchLocationName, this.PageNumber).subscribe(
+    this.locationCityMappingService.getLocations(this.SearchLocationName, this.SearchMappedCities, this.PageNumber).subscribe(
       data => {
         this.dataSource = data;
       },
@@ -155,7 +162,7 @@ export class LocationCityMappingComponent implements OnInit {
       this.sortingData = 1;
       this.sortType = 'Descending';
     }
-    this.locationCityMappingService.getLocationsSort(this.SearchLocationName, this.PageNumber, coloumName.active, this.sortType).subscribe(
+    this.locationCityMappingService.getLocationsSort(this.SearchLocationName, this.SearchMappedCities, this.PageNumber, coloumName.active, this.sortType).subscribe(
       data => {
         this.dataSource = data;
       },
