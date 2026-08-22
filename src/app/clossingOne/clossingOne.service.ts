@@ -14,7 +14,7 @@ import {
   summaryOfDutyHasDisplayableData,
   unwrapInvoiceCalculationPayload
 } from '../summaryOfDuty/invoice-calculation-to-summary-of-duty.mapper';
-import { ChangeSupplierForInventoryModel, ClosingModel } from './clossingOne.model';
+import { ChangeSupplierForInventoryModel } from './clossingOne.model';
 import {
   CustomerInvoicingGstDutyCheckResult
 } from '../shared/customer-invoicing-gstn-confirm.util';
@@ -30,6 +30,7 @@ export interface CalculateBillSummaryResult {
 
 export interface ActiveEInvoiceState {
   hasActiveEInvoice: boolean;
+  hasActiveInvoice: boolean;
   irn: string | null;
 }
 
@@ -74,17 +75,18 @@ export class ClossingOneService
 
   /** Re-fetch IRN block state from the server (used before saves and on poll). */
   refreshActiveEInvoiceState(dutySlipID: number | string): Observable<ActiveEInvoiceState> {
-    return this.GetClosingData(dutySlipID).pipe(
-      map((data) => {
-        const closing = new ClosingModel(data);
-        return {
-          hasActiveEInvoice: closing.hasActiveEInvoice === true,
-          irn: closing.irn ?? null,
-        };
-      }),
+    return this.httpClient.get<any>(this.API_URL + '/eInvoiceState/' + dutySlipID).pipe(
+      map((data) => ({
+        hasActiveEInvoice:
+          data?.hasActiveEInvoice === true || data?.HasActiveEInvoice === true,
+        hasActiveInvoice:
+          data?.hasActiveInvoice === true || data?.HasActiveInvoice === true,
+        irn: data?.irn ?? data?.IRN ?? null,
+      })),
       catchError(() =>
         of({
           hasActiveEInvoice: false,
+          hasActiveInvoice: false,
           irn: null,
         })
       )

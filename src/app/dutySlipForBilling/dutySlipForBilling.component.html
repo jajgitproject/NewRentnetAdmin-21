@@ -539,9 +539,23 @@
             &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
             <button *ngIf="canThisRoleViewDummyInvoice" mat-raised-button color="primary" type="button"
               [disabled]="!canViewDummyInvoice()"
-              (click)="openDummyInvoice()">
+              (click)="openDummyInvoice($event)">
               View Dummy Invoice
             </button>
+            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+            <mat-checkbox *ngIf="canToggleGoodForBilling"
+              [checked]="readyForBulkGfb"
+              (change)="onReadyForBulkGfbChange($event)"
+              [disabled]="!canToggleReadyForBulkGfb || tagSaving">
+              Ready for Bulk GFB
+            </mat-checkbox>
+            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+            <mat-checkbox *ngIf="canToggleGoodForBilling"
+              [checked]="readyForBulkBilling"
+              (change)="onReadyForBulkBillingChange($event)"
+              [disabled]="!canToggleReadyForBulkBilling || tagSaving">
+              Ready For Bulk Billing
+            </mat-checkbox>
             <br>
             <img *ngIf="showSpinnerForVDGB && !showCalculateBillOverlay" src="assets/images/loader4.gif" width="30">
           </mat-card-content>
