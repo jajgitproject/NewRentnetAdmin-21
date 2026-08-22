@@ -202,19 +202,20 @@ export class IntegrationHealthComponent implements OnInit {
         (customers: any[]) => {
           const options = new Set<string>();
           (customers || []).forEach((customer) => {
-            const name = String(customer?.CustomerName ?? '').trim();
-            if (name) {
-              const codes = this.failures
-                .filter((row) => row.customerName.toLowerCase() === name.toLowerCase())
-                .map((row) => row.integrationCode)
-                .filter((code) => !!code);
-
-              if (codes.length > 0) {
-                codes.forEach((code) => options.add(`${name}##${code}`));
-              } else {
-                options.add(`${name}##`);
-              }
+            const name = String(
+              customer?.customerName ?? customer?.CustomerName ?? ''
+            ).trim();
+            if (!name) {
+              return;
             }
+            const tallyCode = String(
+              customer?.tallyIntegrationCode
+                ?? customer?.TallyIntegrationCode
+                ?? customer?.tallyCustomerID
+                ?? customer?.TallyCustomerID
+                ?? ''
+            ).trim();
+            options.add(`${name}##${tallyCode}`);
           });
           this.customerIntegrationOptions = Array.from(options).sort((a, b) => a.localeCompare(b));
         },

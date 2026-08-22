@@ -6,6 +6,8 @@ export class CustomerCustomerGroupDropDown {
    customerName: string;
    customerGroupID: number;
    customerGroup: string;
+   tallyCustomerID: number;
+   tallyIntegrationCode: string;
 
   constructor(customerCustomerGroupDropDown) {
     {
@@ -13,6 +15,12 @@ export class CustomerCustomerGroupDropDown {
        this.customerName = customerCustomerGroupDropDown.customerName || '';
        this.customerGroupID = customerCustomerGroupDropDown.customerGroupID || '';
        this.customerGroup = customerCustomerGroupDropDown.customerGroup || '';
+       this.tallyCustomerID = customerCustomerGroupDropDown.tallyCustomerID
+         ?? customerCustomerGroupDropDown.TallyCustomerID
+         ?? 0;
+       this.tallyIntegrationCode = customerCustomerGroupDropDown.tallyIntegrationCode
+         ?? customerCustomerGroupDropDown.TallyIntegrationCode
+         ?? String(this.tallyCustomerID || '');
     }
   }
   
