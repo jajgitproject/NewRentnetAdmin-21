@@ -1201,6 +1201,45 @@ export const ROUTES: RouteInfo[] = [
         isAccess: false
       },
 
+      {
+        path: 'bulkGfb',
+        title: 'Bulk GFB',
+        pageKey: 'Bulk GFB',
+        moduleName: 'bulkGfb',
+        alternateAccessPageKeys: ['bulkGfb', 'closingOne', 'Closing', 'generateEInvoice', 'Generate E - Invoice'],
+        icon: 'fas fa-check-square',
+        class: '',
+        groupTitle: false,
+        submenu: [],
+        isAccess: false
+      },
+
+      {
+        path: 'markReadyForBulkBilling',
+        title: 'Mark Ready For Bulk Billing',
+        pageKey: 'Mark Ready For Bulk Billing',
+        moduleName: 'markReadyForBulkBilling',
+        alternateAccessPageKeys: ['markReadyForBulkBilling', 'bulkInvoice', 'bulkGfb', 'closingOne', 'Closing', 'generateEInvoice', 'Generate E - Invoice'],
+        icon: 'fas fa-tags',
+        class: '',
+        groupTitle: false,
+        submenu: [],
+        isAccess: false
+      },
+
+      {
+        path: 'bulkInvoice',
+        title: 'Bulk Invoice',
+        pageKey: 'Bulk Invoice',
+        moduleName: 'bulkInvoice',
+        alternateAccessPageKeys: ['bulkInvoice', 'bulkGfb', 'closingOne', 'Closing', 'generateEInvoice', 'Generate E - Invoice'],
+        icon: 'fas fa-file-invoice-dollar',
+        class: '',
+        groupTitle: false,
+        submenu: [],
+        isAccess: false
+      },
+
 
       {
         path: 'gstPercentage',

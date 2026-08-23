@@ -1,0 +1,55 @@
+.bulk-invoice-page {
+  .w-100 {
+    width: 100%;
+  }
+
+  .page-subtitle {
+    margin-bottom: 0;
+    max-width: 960px;
+  }
+
+  .search-panel {
+    margin-bottom: 1rem;
+  }
+
+  .search-panel__header {
+    display: flex;
+    justify-content: space-between;
+    gap: 0.5rem;
+  }
+
+  .search-panel__actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-top: 0.5rem;
+  }
+
+  .results-panel {
+    margin-bottom: 1rem;
+  }
+
+  .text-danger {
+    color: #b91c1c;
+  }
+
+  .last-status-detail {
+    color: #6b7280;
+    font-size: 12px;
+  }
+
+  .bulk-invoice-tabs {
+    background: #fff;
+  }
+
+  .tab-body {
+    padding-top: 1rem;
+  }
+
+  .search-panel__fields {
+    .mat-mdc-form-field,
+    .mat-form-field {
+      width: 100%;
+    }
+  }
+}

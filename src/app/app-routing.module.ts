@@ -500,6 +500,42 @@ const routes: Routes = [
       },
 
       {
+        path: 'bulkGfb',
+        loadChildren: () =>
+          import('./bulkGfb/bulkGfb.module').then(
+            (m) => m.BulkGfbModule
+          ),
+        data: {
+          requiredPageKey: 'Bulk GFB',
+          alternatePageKeys: ['bulkGfb', 'closingOne', 'Closing', 'generateEInvoice', 'Generate E - Invoice'],
+        },
+      },
+
+      {
+        path: 'markReadyForBulkBilling',
+        loadChildren: () =>
+          import('./markReadyForBulkBilling/markReadyForBulkBilling.module').then(
+            (m) => m.MarkReadyForBulkBillingModule
+          ),
+        data: {
+          requiredPageKey: 'Mark Ready For Bulk Billing',
+          alternatePageKeys: ['markReadyForBulkBilling', 'bulkInvoice', 'bulkGfb', 'closingOne', 'Closing', 'generateEInvoice', 'Generate E - Invoice'],
+        },
+      },
+
+      {
+        path: 'bulkInvoice',
+        loadChildren: () =>
+          import('./bulkInvoice/bulkInvoice.module').then(
+            (m) => m.BulkInvoiceModule
+          ),
+        data: {
+          requiredPageKey: 'Bulk Invoice',
+          alternatePageKeys: ['bulkInvoice', 'bulkGfb', 'closingOne', 'Closing', 'generateEInvoice', 'Generate E - Invoice'],
+        },
+      },
+
+      {
         path: 'dynamicEInvoice',
         loadChildren: () =>
           import('./dynamicEInvoice/dynamicEInvoice.module').then(

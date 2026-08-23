@@ -81,6 +81,8 @@ export class ClosingDutySlipForBillingModel {
 
   goodForBilling: boolean;
   verifyDuty: boolean;
+  readyForBulkBilling: boolean;
+  readyForBulkGfb: boolean;
   dsClosing: string;
   runningDetails: string;
   vendorRemark: string;
@@ -158,7 +160,10 @@ export class ClosingDutySlipForBillingModel {
     this.dutySlipForBillingCreatedByID = closingDutySlipForBillingModel.dutySlipForBillingCreatedByID || '';
     this.disputeReason = closingDutySlipForBillingModel.disputeReason || '';
     this.discountApplicableOn = closingDutySlipForBillingModel.discountApplicableOn || '';
-    this.closureType = closingDutySlipForBillingModel.closureType || '';
+    this.closureType =
+      closingDutySlipForBillingModel.closureType
+      || closingDutySlipForBillingModel.ClosureType
+      || '';
     this.dutyType = closingDutySlipForBillingModel.dutyType || '';
     this.package = closingDutySlipForBillingModel.package || '';
     this.disputeType = closingDutySlipForBillingModel.disputeType || '';
@@ -178,6 +183,12 @@ export class ClosingDutySlipForBillingModel {
     );
     this.verifyDuty = ClosingDutySlipForBillingModel.toBool(
       closingDutySlipForBillingModel.verifyDuty ?? closingDutySlipForBillingModel.VerifyDuty
+    );
+    this.readyForBulkBilling = ClosingDutySlipForBillingModel.toBool(
+      closingDutySlipForBillingModel.readyForBulkBilling ?? closingDutySlipForBillingModel.ReadyForBulkBilling
+    );
+    this.readyForBulkGfb = ClosingDutySlipForBillingModel.toBool(
+      closingDutySlipForBillingModel.readyForBulkGfb ?? closingDutySlipForBillingModel.ReadyForBulkGfb
     );
     this.dsClosing = (closingDutySlipForBillingModel.dsClosing ?? closingDutySlipForBillingModel.DSClosing) || '';
     this.runningDetails = closingDutySlipForBillingModel.runningDetails || '';
