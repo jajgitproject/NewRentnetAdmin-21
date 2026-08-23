@@ -302,3 +302,37 @@ export interface StartDutySlipPackageDownloadJobResult {
   jobStatus: string;
   totalDutySlips: number;
 }
+
+export interface DutySlipLobExportCriteria {
+  fromDutySlipID?: number | null;
+  toDutySlipID?: number | null;
+  maxCandidates?: number;
+  exportMaps?: boolean;
+  exportRunningDetails?: boolean;
+  dryRun?: boolean;
+}
+
+export interface DutySlipLobExportCandidatePreview {
+  dutySlipID: number;
+  column: string;
+  contentBytes: number;
+  status: string;
+}
+
+export interface DutySlipLobExportPreviewResult {
+  totalMatchedCount?: number;
+  mapCandidateCount?: number;
+  runningCandidateCount?: number;
+  totalMapBytes?: number;
+  totalRunningBytes?: number;
+  willProcessCount?: number;
+  estimatedBatchCount?: number;
+  maxCandidates?: number;
+  candidates?: DutySlipLobExportCandidatePreview[];
+}
+
+export interface StartDutySlipLobExportJobResult {
+  jobId: number;
+  jobStatus: string;
+  totalDutySlips: number;
+}

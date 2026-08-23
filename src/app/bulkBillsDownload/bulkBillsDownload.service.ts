@@ -22,6 +22,9 @@ import {
   DutySlipPackageDownloadCriteria,
   DutySlipPackageDownloadPreviewResult,
   StartDutySlipPackageDownloadJobResult,
+  DutySlipLobExportCriteria,
+  DutySlipLobExportPreviewResult,
+  StartDutySlipLobExportJobResult,
   CreditNoteSearchCriteria,
   CreditNoteSummary,
   StartCreditNoteDownloadJobRequest,
@@ -136,6 +139,34 @@ export class BulkBillsDownloadService {
 
   forceClearStuckTollInterstateBackfill(): Observable<any> {
     return this.httpClient.post(`${this.API_URL}/backfill/toll-interstate/force-clear-stuck`, {});
+  }
+
+  previewDutySlipLobExport(criteria: DutySlipLobExportCriteria): Observable<DutySlipLobExportPreviewResult> {
+    return this.httpClient.post<DutySlipLobExportPreviewResult>(
+      `${this.API_URL}/backfill/duty-slip-lob/preview`,
+      criteria || {}
+    );
+  }
+
+  startDutySlipLobExportJob(
+    criteria: DutySlipLobExportCriteria,
+    performedBy: number
+  ): Observable<StartDutySlipLobExportJobResult> {
+    return this.httpClient.post<StartDutySlipLobExportJobResult>(
+      `${this.API_URL}/backfill/duty-slip-lob/start/${performedBy}`,
+      criteria || {}
+    );
+  }
+
+  cancelDutySlipLobExportJob(jobId: number): Observable<any> {
+    return this.httpClient.post(`${this.API_URL}/backfill/duty-slip-lob/cancel/${jobId}`, {});
+  }
+
+  forceClearStuckDutySlipLobExport(): Observable<{ status?: string; clearedCount?: number; ClearedCount?: number; message?: string; Message?: string }> {
+    return this.httpClient.post<{ status?: string; clearedCount?: number; ClearedCount?: number; message?: string; Message?: string }>(
+      `${this.API_URL}/backfill/duty-slip-lob/force-clear-stuck`,
+      {}
+    );
   }
 
   previewDutySlipPackageDownload(

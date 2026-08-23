@@ -31,6 +31,7 @@
                   <button mat-button type="button" [color]="activeTab === 'creditNote' ? 'primary' : undefined" (click)="setTab('creditNote')">Download Credit Notes</button>
                   <button mat-button type="button" [color]="activeTab === 'upload' ? 'primary' : undefined" (click)="setTab('upload')">Upload Documents</button>
                   <button mat-button type="button" [color]="activeTab === 'verifiedDutySlip' ? 'primary' : undefined" (click)="setTab('verifiedDutySlip')">Download Duty Slips, Toll Parking &amp; Interstate</button>
+                  <button mat-button type="button" [color]="activeTab === 'dutySlipLobExport' ? 'primary' : undefined" (click)="setTab('dutySlipLobExport')">DutySlip LOB Export</button>
                 </div>
                 <div class="bulk-actions">
                   <button mat-mini-fab color="primary" type="button" (click)="refresh()" title="Reset">
@@ -394,6 +395,111 @@
                           <td>{{ formatSlipSource(row.slipSource) }}</td>
                           <td>{{ row.tollReceiptCount ?? 0 }}</td>
                           <td>{{ row.interstateReceiptCount ?? 0 }}</td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              </div>
+
+              <div *ngIf="activeTab === 'dutySlipLobExport'">
+                <div class="backfill-panel">
+                  <div class="panel-title">DutySlip LOB Export</div>
+                  <p class="backfill-hint">
+                    Exports legacy inline <code>DutySlip.DutySlipMap</code> and <code>DutySlip.RunningDetails</code> text
+                    into files under DocumentRepository, then updates those columns to relative paths.
+                    Preview first, then start batches until matched count is 0. Does not shrink columns or touch DutySlipForBilling.
+                  </p>
+                  <div class="row bulk-filters g-2 backfill-search-row">
+                    <div class="col-xl-2 col-lg-3 col-md-4 col-sm-6">
+                      <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                        <mat-label>From DutySlip ID</mat-label>
+                        <input matInput type="number" [formControl]="lobFromDutySlipIdCtrl" placeholder="Optional" />
+                      </mat-form-field>
+                    </div>
+                    <div class="col-xl-2 col-lg-3 col-md-4 col-sm-6">
+                      <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                        <mat-label>To DutySlip ID</mat-label>
+                        <input matInput type="number" [formControl]="lobToDutySlipIdCtrl" placeholder="Optional" />
+                      </mat-form-field>
+                    </div>
+                    <div class="col-xl-2 col-lg-3 col-md-4 col-sm-6">
+                      <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                        <mat-label>Max candidates / batch</mat-label>
+                        <input matInput type="number" [formControl]="lobMaxCandidatesCtrl" min="1" max="2000" />
+                      </mat-form-field>
+                    </div>
+                    <div class="col-xl-3 col-lg-4 col-md-6 col-sm-12 d-flex align-items-center gap-3">
+                      <mat-checkbox [(ngModel)]="lobExportMaps" [ngModelOptions]="{standalone: true}">Export maps</mat-checkbox>
+                      <mat-checkbox [(ngModel)]="lobExportRunningDetails" [ngModelOptions]="{standalone: true}">Export running details</mat-checkbox>
+                    </div>
+                  </div>
+                  <div class="backfill-actions">
+                    <button mat-stroked-button type="button" (click)="previewDutySlipLobExport()" [disabled]="lobPreviewLoading || lobExporting">
+                      {{ lobPreviewLoading ? 'Previewing…' : 'Preview' }}
+                    </button>
+                    <button mat-raised-button color="primary" type="button" (click)="startDutySlipLobExport()" [disabled]="!canStartDutySlipLobExport()">
+                      Start export
+                    </button>
+                    <button mat-button type="button" (click)="clearJob()" [disabled]="!lobExporting && !isDutySlipLobExportJob()">
+                      {{ lobExporting ? 'Cancel' : 'Dismiss' }}
+                    </button>
+                    <button *ngIf="isLobStuckJobError()" mat-stroked-button color="warn" type="button" (click)="forceClearStuckDutySlipLobExport()">
+                      Clear stuck job
+                    </button>
+                  </div>
+                  <p class="backfill-error" *ngIf="lobLoadError">{{ lobLoadError }}</p>
+                  <div class="backfill-summary" *ngIf="lobPreview">
+                    <div><strong>Matched duty slips:</strong> {{ getLobMatchedCount() }}</div>
+                    <div><strong>Map candidates:</strong> {{ getLobMapCount() }} ({{ getLobMapBytesLabel() }})</div>
+                    <div><strong>Running candidates:</strong> {{ getLobRunningCount() }} ({{ getLobRunningBytesLabel() }})</div>
+                    <div><strong>This batch will process:</strong> {{ getLobWillProcessCount() }}</div>
+                    <div><strong>Estimated batches:</strong> {{ getLobEstimatedBatches() }}</div>
+                  </div>
+                  <div class="closing-progress-panel" *ngIf="isDutySlipLobExportJob() && activeJob">
+                    <div class="panel-title">Export progress — Job #{{ getActiveJobId() }} ({{ getJobStatus() }})</div>
+                    <div class="job-meta">
+                      <div><strong>Processed:</strong> {{ activeJob.processedFiles }} / {{ activeJob.totalFiles }}</div>
+                      <div><strong>Successful:</strong> {{ activeJob.successCount }}</div>
+                      <div><strong>Failed:</strong> {{ activeJob.errorCount }}</div>
+                    </div>
+                    <mat-progress-bar mode="determinate" [value]="getJobProgress()"></mat-progress-bar>
+                    <p class="job-message" *ngIf="activeJob.errorMessage">{{ activeJob.errorMessage }}</p>
+                  </div>
+                  <div class="table-responsive" *ngIf="lobCandidates.length">
+                    <table mat-table [dataSource]="lobCandidates" class="mat-elevation-z1 bulk-table">
+                      <ng-container matColumnDef="dutySlipID">
+                        <th mat-header-cell *matHeaderCellDef>DutySlip ID</th>
+                        <td mat-cell *matCellDef="let row">{{ row.dutySlipID }}</td>
+                      </ng-container>
+                      <ng-container matColumnDef="column">
+                        <th mat-header-cell *matHeaderCellDef>Column</th>
+                        <td mat-cell *matCellDef="let row">{{ row.column }}</td>
+                      </ng-container>
+                      <ng-container matColumnDef="contentBytes">
+                        <th mat-header-cell *matHeaderCellDef>Bytes</th>
+                        <td mat-cell *matCellDef="let row">{{ formatLobBytes(row.contentBytes) }}</td>
+                      </ng-container>
+                      <ng-container matColumnDef="status">
+                        <th mat-header-cell *matHeaderCellDef>Status</th>
+                        <td mat-cell *matCellDef="let row">{{ row.status }}</td>
+                      </ng-container>
+                      <tr mat-header-row *matHeaderRowDef="lobCandidateColumns"></tr>
+                      <tr mat-row *matRowDef="let row; columns: lobCandidateColumns"></tr>
+                    </table>
+                  </div>
+                  <div class="table-responsive" *ngIf="isDutySlipLobExportJob() && jobErrors.length">
+                    <table class="error-table">
+                      <thead>
+                        <tr>
+                          <th>DutySlip ID</th>
+                          <th>Error</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <tr *ngFor="let err of jobErrors">
+                          <td>{{ err.fileName }}</td>
+                          <td>{{ err.errorDescription }}</td>
                         </tr>
                       </tbody>
                     </table>

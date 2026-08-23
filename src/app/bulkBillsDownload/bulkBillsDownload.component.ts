@@ -33,6 +33,9 @@ import {
   DutySlipPackageDownloadCriteria,
   DutySlipPackageDownloadPreviewResult,
   DutySlipPackageDownloadRow,
+  DutySlipLobExportCriteria,
+  DutySlipLobExportPreviewResult,
+  DutySlipLobExportCandidatePreview,
   CreditNoteSearchCriteria,
   CreditNoteSummary,
   StartCreditNoteDownloadJobRequest,
@@ -49,7 +52,7 @@ export class BulkBillsDownloadComponent implements OnInit, OnDestroy, AfterViewI
   @ViewChild('invoicePaginator') invoicePaginator?: MatPaginator;
   @ViewChild('creditNotePaginator') creditNotePaginator?: MatPaginator;
 
-  activeTab: 'backfill' | 'download' | 'upload' | 'closingDutySlip' | 'verifiedDutySlip' | 'tollInterstate' | 'creditNote' = 'download';
+  activeTab: 'backfill' | 'download' | 'upload' | 'closingDutySlip' | 'verifiedDutySlip' | 'tollInterstate' | 'creditNote' | 'dutySlipLobExport' = 'download';
   loading = false;
   loadError = '';
   downloading = false;
@@ -157,6 +160,18 @@ export class BulkBillsDownloadComponent implements OnInit, OnDestroy, AfterViewI
   tollRunAllBatches = false;
   tollJobStartedAt: number | null = null;
 
+  lobFromDutySlipIdCtrl = new FormControl('');
+  lobToDutySlipIdCtrl = new FormControl('');
+  lobMaxCandidatesCtrl = new FormControl(500);
+  lobExportMaps = true;
+  lobExportRunningDetails = true;
+  lobPreview: DutySlipLobExportPreviewResult | null = null;
+  lobCandidates: DutySlipLobExportCandidatePreview[] = [];
+  lobLoadError = '';
+  lobPreviewLoading = false;
+  lobExporting = false;
+  lobCandidateColumns = ['dutySlipID', 'column', 'contentBytes', 'status'];
+
   creditNoteCustomerCtrl = new FormControl('');
   creditNoteNumberCtrl = new FormControl('');
   creditNoteInvoiceNumberCtrl = new FormControl('');
@@ -215,6 +230,7 @@ export class BulkBillsDownloadComponent implements OnInit, OnDestroy, AfterViewI
   private pollIsVerifiedBackfill = false;
   private pollIsTollBackfill = false;
   private pollIsPackageDownload = false;
+  private pollIsLobExport = false;
   private pollSub?: Subscription;
   private backfillCancelled = false;
   private selectedFiles: File[] = [];
@@ -247,7 +263,7 @@ export class BulkBillsDownloadComponent implements OnInit, OnDestroy, AfterViewI
     this.stopPolling();
   }
 
-  setTab(tab: 'backfill' | 'download' | 'upload' | 'closingDutySlip' | 'verifiedDutySlip' | 'tollInterstate' | 'creditNote'): void {
+  setTab(tab: 'backfill' | 'download' | 'upload' | 'closingDutySlip' | 'verifiedDutySlip' | 'tollInterstate' | 'creditNote' | 'dutySlipLobExport'): void {
     this.activeTab = tab;
   }
 
@@ -905,6 +921,11 @@ export class BulkBillsDownloadComponent implements OnInit, OnDestroy, AfterViewI
     return jobType === 'TollInterstateDryRun' || jobType === 'TollInterstateProduction';
   }
 
+  isDutySlipLobExportJob(): boolean {
+    const jobType = this.activeJob?.jobType || this.activeJob?.JobType || '';
+    return jobType === 'DutySlipLobExport';
+  }
+
   getTollRunButtonLabel(): string {
     const mode = this.tollTargetMode === 'Production' ? 'Production' : 'Dry Run';
     const batches = this.tollBackfillPreview?.estimatedBatchCount ?? this.tollBackfillPreview?.EstimatedBatchCount ?? 1;
@@ -965,11 +986,15 @@ export class BulkBillsDownloadComponent implements OnInit, OnDestroy, AfterViewI
     if (activeJobId && this.isTollInterstateJob()) {
       this.service.cancelTollInterstateBackfillJob(activeJobId).subscribe({ error: () => {} });
     }
+    if (activeJobId && this.isDutySlipLobExportJob()) {
+      this.service.cancelDutySlipLobExportJob(activeJobId).subscribe({ error: () => {} });
+    }
     this.stopPolling();
     this.backfilling = false;
     this.closingBackfilling = false;
     this.verifiedBackfilling = false;
     this.tollBackfilling = false;
+    this.lobExporting = false;
     this.activeJob = null;
     this.jobErrors = [];
     this.backfillProgressRows = [];
@@ -990,6 +1015,7 @@ export class BulkBillsDownloadComponent implements OnInit, OnDestroy, AfterViewI
     this.pollIsVerifiedBackfill = false;
     this.pollIsTollBackfill = false;
     this.pollIsPackageDownload = false;
+    this.pollIsLobExport = false;
     this.verifiedBackfillProgressRows = [];
     this.tollBackfillProgressRows = [];
     this.verifiedBatchSkip = 0;
@@ -1021,6 +1047,7 @@ export class BulkBillsDownloadComponent implements OnInit, OnDestroy, AfterViewI
       || this.verifiedBackfilling
       || this.tollBackfilling
       || this.dutySlipPackageDownloading
+      || this.lobExporting
       || this.getJobStatus() === 'Processing';
   }
 
@@ -2037,19 +2064,199 @@ export class BulkBillsDownloadComponent implements OnInit, OnDestroy, AfterViewI
     return !!(this.tollBackfillLoadError && /already running|stuck|in-memory lock/i.test(this.tollBackfillLoadError));
   }
 
+  private buildDutySlipLobExportCriteria(): DutySlipLobExportCriteria {
+    const parseOptionalId = (value: any): number | null => {
+      const n = Number(String(value ?? '').trim());
+      return Number.isFinite(n) && n > 0 ? Math.floor(n) : null;
+    };
+    let maxCandidates = Number(this.lobMaxCandidatesCtrl.value);
+    if (!Number.isFinite(maxCandidates) || maxCandidates <= 0) {
+      maxCandidates = 500;
+    }
+    maxCandidates = Math.min(Math.floor(maxCandidates), 2000);
+
+    return {
+      fromDutySlipID: parseOptionalId(this.lobFromDutySlipIdCtrl.value),
+      toDutySlipID: parseOptionalId(this.lobToDutySlipIdCtrl.value),
+      maxCandidates,
+      exportMaps: !!this.lobExportMaps,
+      exportRunningDetails: !!this.lobExportRunningDetails,
+      dryRun: false,
+    };
+  }
+
+  previewDutySlipLobExport(): void {
+    const criteria = this.buildDutySlipLobExportCriteria();
+    if (!criteria.exportMaps && !criteria.exportRunningDetails) {
+      this.lobLoadError = 'Select at least one of Export maps or Export running details.';
+      this.snackBar.open(this.lobLoadError, 'Close', { duration: 5000 });
+      return;
+    }
+
+    this.lobLoadError = '';
+    this.lobPreview = null;
+    this.lobCandidates = [];
+    this.lobPreviewLoading = true;
+
+    this.service.previewDutySlipLobExport(criteria).pipe(
+      finalize(() => {
+        this.lobPreviewLoading = false;
+      })
+    ).subscribe({
+      next: (result) => {
+        this.lobPreview = result;
+        const raw = result?.candidates ?? result?.Candidates ?? [];
+        this.lobCandidates = (raw || []).map((row: any) => ({
+          dutySlipID: row.dutySlipID ?? row.DutySlipID,
+          column: row.column ?? row.Column,
+          contentBytes: row.contentBytes ?? row.ContentBytes ?? 0,
+          status: row.status ?? row.Status ?? 'Ready',
+        }));
+        const matched = result?.totalMatchedCount ?? result?.TotalMatchedCount ?? 0;
+        if (matched === 0) {
+          this.lobLoadError = 'No legacy DutySlip LOB rows matched. Export may already be complete for this range.';
+        }
+      },
+      error: (err) => {
+        this.lobLoadError = this.extractError(err, 'Failed to preview DutySlip LOB export.');
+        this.snackBar.open(this.lobLoadError, 'Close', { duration: 8000 });
+      },
+    });
+  }
+
+  canStartDutySlipLobExport(): boolean {
+    const matched = this.lobPreview?.totalMatchedCount ?? this.lobPreview?.TotalMatchedCount ?? 0;
+    return !!this.lobPreview && matched > 0 && !this.lobExporting && !this.isBackfillRunning();
+  }
+
+  getLobMatchedCount(): number {
+    return this.lobPreview?.totalMatchedCount ?? this.lobPreview?.TotalMatchedCount ?? 0;
+  }
+
+  getLobMapCount(): number {
+    return this.lobPreview?.mapCandidateCount ?? this.lobPreview?.MapCandidateCount ?? 0;
+  }
+
+  getLobRunningCount(): number {
+    return this.lobPreview?.runningCandidateCount ?? this.lobPreview?.RunningCandidateCount ?? 0;
+  }
+
+  getLobWillProcessCount(): number {
+    return this.lobPreview?.willProcessCount ?? this.lobPreview?.WillProcessCount ?? 0;
+  }
+
+  getLobEstimatedBatches(): number {
+    return this.lobPreview?.estimatedBatchCount ?? this.lobPreview?.EstimatedBatchCount ?? 0;
+  }
+
+  formatLobBytes(value: number | null | undefined): string {
+    const bytes = Number(value || 0);
+    if (!Number.isFinite(bytes) || bytes <= 0) {
+      return '0 B';
+    }
+    if (bytes < 1024) {
+      return `${bytes} B`;
+    }
+    if (bytes < 1024 * 1024) {
+      return `${(bytes / 1024).toFixed(1)} KB`;
+    }
+    return `${(bytes / (1024 * 1024)).toFixed(2)} MB`;
+  }
+
+  getLobMapBytesLabel(): string {
+    return this.formatLobBytes(this.lobPreview?.totalMapBytes ?? this.lobPreview?.TotalMapBytes);
+  }
+
+  getLobRunningBytesLabel(): string {
+    return this.formatLobBytes(this.lobPreview?.totalRunningBytes ?? this.lobPreview?.TotalRunningBytes);
+  }
+
+  startDutySlipLobExport(): void {
+    if (!this.canStartDutySlipLobExport()) {
+      return;
+    }
+
+    const performedBy = this.generalService.getUserID();
+    if (!performedBy) {
+      this.snackBar.open('User session is required to start export.', 'Close', { duration: 5000 });
+      return;
+    }
+
+    const criteria = this.buildDutySlipLobExportCriteria();
+    this.lobLoadError = '';
+    this.lobExporting = true;
+    this.jobErrors = [];
+    this.backfillCancelled = false;
+
+    this.service.startDutySlipLobExportJob(criteria, performedBy).subscribe({
+      next: (result) => {
+        const jobId = result?.jobId ?? result?.JobId;
+        if (!jobId) {
+          this.lobExporting = false;
+          this.snackBar.open('Export job did not start.', 'Close', { duration: 5000 });
+          return;
+        }
+        this.activeJob = this.normalizeJob({
+          bulkUploadJobID: jobId,
+          jobType: 'DutySlipLobExport',
+          jobStatus: result?.jobStatus ?? result?.JobStatus ?? 'Pending',
+          totalFiles: result?.totalDutySlips ?? result?.TotalDutySlips ?? 0,
+          processedFiles: 0,
+          successCount: 0,
+          errorCount: 0,
+        });
+        this.startPolling(jobId, false, false, false, false, false, true);
+      },
+      error: (err) => {
+        this.lobExporting = false;
+        this.lobLoadError = this.extractError(err, 'Failed to start DutySlip LOB export.');
+        this.snackBar.open(this.lobLoadError, 'Close', { duration: 8000 });
+      },
+    });
+  }
+
+  isLobStuckJobError(): boolean {
+    return !!(this.lobLoadError && /already running|stuck|in-memory lock/i.test(this.lobLoadError));
+  }
+
+  forceClearStuckDutySlipLobExport(): void {
+    this.lobLoadError = '';
+    this.service.forceClearStuckDutySlipLobExport().subscribe({
+      next: (result) => {
+        const cleared = result?.clearedCount ?? result?.ClearedCount ?? 0;
+        const message =
+          result?.message ??
+          result?.Message ??
+          (cleared > 0
+            ? `Cleared ${cleared} stuck DutySlip LOB export job(s).`
+            : 'No stuck DutySlip LOB export jobs were found.');
+        this.lobExporting = false;
+        this.activeJob = null;
+        this.pollIsLobExport = false;
+        this.stopPolling();
+        this.snackBar.open(message, 'Close', { duration: 8000 });
+      },
+      error: (err) => {
+        this.lobLoadError = this.extractError(err, 'Failed to clear stuck LOB export job.');
+        this.snackBar.open(this.lobLoadError, 'Close', { duration: 8000 });
+      },
+    });
+  }
+
   formatBackfillCompletedAt(value: string | Date | null | undefined): string {
     if (!value) return '—';
     const m = moment.utc(value).utcOffset('+05:30');
     return m.isValid() ? m.format('DD/MM/YYYY HH:mm:ss') : String(value);
   }
 
-  private startPolling(jobId: number, isIrnBackfill = false, isClosingBackfill = false, isVerifiedBackfill = false, isTollBackfill = false, isPackageDownload = false): void {
+  private startPolling(jobId: number, isIrnBackfill = false, isClosingBackfill = false, isVerifiedBackfill = false, isTollBackfill = false, isPackageDownload = false, isLobExport = false): void {
     this.stopPolling();
     this.pollIsIrnBackfill = isIrnBackfill;
     this.pollIsClosingBackfill = isClosingBackfill;
     this.pollIsVerifiedBackfill = isVerifiedBackfill;
     this.pollIsTollBackfill = isTollBackfill;
     this.pollIsPackageDownload = isPackageDownload;
+    this.pollIsLobExport = isLobExport;
     this.pollSub = timer(0, 2000)
       .pipe(
         switchMap(() =>
@@ -2079,6 +2286,8 @@ export class BulkBillsDownloadComponent implements OnInit, OnDestroy, AfterViewI
           } else if (isPackageDownload) {
             this.mergePackageDownloadProgress(errors || []);
             this.jobErrors = (errors || []).map((row) => this.normalizeErrorRow(row));
+          } else if (isLobExport) {
+            this.jobErrors = (errors || []).map((row) => this.normalizeErrorRow(row));
           } else {
             this.jobErrors = (errors || []).map((row) => this.normalizeErrorRow(row));
             await this.showNewNamingSkipModals(this.jobErrors);
@@ -2097,11 +2306,22 @@ export class BulkBillsDownloadComponent implements OnInit, OnDestroy, AfterViewI
               this.onPackageBatchJobFinished(errors || []);
             } else if (isIrnBackfill) {
               this.onIrnBatchJobFinished(errors || []);
+            } else if (isLobExport) {
+              this.lobExporting = false;
+              this.loadJobErrors(jobId);
+              const success = this.activeJob?.successCount ?? this.activeJob?.SuccessCount ?? 0;
+              const failed = this.activeJob?.errorCount ?? this.activeJob?.ErrorCount ?? 0;
+              this.snackBar.open(
+                `DutySlip LOB export finished (${status}). Success=${success}, Failed=${failed}. Re-preview to continue remaining rows.`,
+                'Close',
+                { duration: 10000 }
+              );
             } else {
               this.closingBackfilling = false;
               this.verifiedBackfilling = false;
               this.tollBackfilling = false;
               this.dutySlipPackageDownloading = false;
+              this.lobExporting = false;
               this.loadJobErrors(jobId);
             }
           }
@@ -2189,6 +2409,7 @@ export class BulkBillsDownloadComponent implements OnInit, OnDestroy, AfterViewI
     this.pollIsVerifiedBackfill = false;
     this.pollIsTollBackfill = false;
     this.pollIsPackageDownload = false;
+    this.pollIsLobExport = false;
   }
 
   private resetUploadFileSelection(): void {
