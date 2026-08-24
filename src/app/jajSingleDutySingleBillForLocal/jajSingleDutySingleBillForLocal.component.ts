@@ -203,6 +203,33 @@ isTollOrParking(type: string): boolean {
   return type === 'Toll' || type === 'Parking';
 }
 
+/** SEZ LUT text: only when invoicing config is SEZ and InvoiceGST has no tax charged. */
+shouldPrintSezLutDeclaration(): boolean {
+  if (!this.isSezCustomerForInvoice()) {
+    return false;
+  }
+  return !this.isInvoiceGstCharged();
+}
+
+private isSezCustomerForInvoice(): boolean {
+  if (this.dataSource?.isSEZ === true || this.dataSource?.invoiceGSTModel?.isSEZ === true) {
+    return true;
+  }
+  const customerType = (this.dataSource?.invoiceCustomerModel?.customerType || '').toString().trim();
+  return customerType.toUpperCase() === 'SEZ';
+}
+
+private isInvoiceGstCharged(): boolean {
+  const gst = this.dataSource?.invoiceGSTModel;
+  if (!gst) {
+    return false;
+  }
+  const cgst = Number(gst.cgstAmount) || 0;
+  const sgst = Number(gst.sgstAmount) || 0;
+  const igst = Number(gst.igstAmount) || 0;
+  return (cgst + sgst + igst) > 0;
+}
+
 rfidFastagAttachments() {
   return (this.dataSource?.invoiceTollParkingModel ?? [])
     .filter(img => img?.tollParkingImage && !this.isTollOrParking(img.tollParkingType));
