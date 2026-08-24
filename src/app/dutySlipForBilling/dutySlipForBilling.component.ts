@@ -247,6 +247,7 @@ export class DutySlipForBillingComponent implements OnInit, AfterViewInit, OnCha
     }
 
     this.onKeyUp();
+    this.applyRoundOffBillingTimes();
     this.onTimeSelection();
     this.applyClosingFieldDefaults();
     this.applyDutySlipEditLockState();
@@ -482,6 +483,7 @@ export class DutySlipForBillingComponent implements OnInit, AfterViewInit, OnCha
     
     
     this.onKeyUp();
+    this.applyRoundOffBillingTimes();
     this.onTimeSelection();
   }
 
@@ -670,6 +672,7 @@ export class DutySlipForBillingComponent implements OnInit, AfterViewInit, OnCha
       }
     
     this.onKeyUp();
+    this.applyRoundOffBillingTimes();
     this.onTimeSelection();
   }
 
@@ -856,6 +859,7 @@ export class DutySlipForBillingComponent implements OnInit, AfterViewInit, OnCha
       }
     this.applyReportingFromPickupFallbackToForm();
     this.onKeyUp();
+    this.applyRoundOffBillingTimes();
     this.onTimeSelection();
   }
 
@@ -1075,6 +1079,84 @@ export class DutySlipForBillingComponent implements OnInit, AfterViewInit, OnCha
     }
     const date = value instanceof Date ? value : new Date(value as any);
     return !Number.isNaN(date.getTime());
+  }
+
+  originalDutySlipTime(field: 'locationOutTime' | 'pickUpTime' | 'dropOffTime' | 'locationInTime'): string {
+    const raw = this.advanceTableClosingOne?.closingDutySlipModel?.[field];
+    if (!this.isValidBillingDate(raw)) {
+      return '';
+    }
+    const date = raw instanceof Date ? raw : new Date(raw as any);
+    const hours = String(date.getHours()).padStart(2, '0');
+    const minutes = String(date.getMinutes()).padStart(2, '0');
+    return `${hours}:${minutes}`;
+  }
+
+  private isRoundOffTimeEnabled(): boolean {
+    const reservation = this.advanceTableClosingOne?.closingReservationForPickupDataModel as any;
+    if (!reservation) {
+      return true;
+    }
+    const flag = reservation.roundOffTime ?? reservation.RoundOffTime;
+    if (flag === false || flag === 0 || flag === '0' || flag === 'false') {
+      return false;
+    }
+    return true;
+  }
+
+  private applyRoundOffBillingTimes(): void {
+    if (!this.isRoundOffTimeEnabled() || !this.advanceTableForm) {
+      return;
+    }
+    this.roundBillingTimePair('locationOutTimeForBilling', 'locationOutDateForBilling');
+    this.roundBillingTimePair('pickUpTimeForBilling', 'pickUpDateForBilling');
+    this.roundBillingTimePair('dropOffTimeForBilling', 'dropOffDateForBilling');
+    this.roundBillingTimePair('locationInTimeForBilling', 'locationInDateForBilling');
+  }
+
+  private roundBillingTimePair(timeCtrl: string, dateCtrl: string): void {
+    const timeVal = this.advanceTableForm.get(timeCtrl)?.value;
+    if (!this.isValidBillingDate(timeVal)) {
+      return;
+    }
+    const source = timeVal instanceof Date ? timeVal : new Date(timeVal);
+    const rounded = this.roundMinutesToBillingQuarter(source);
+    this.advanceTableForm.get(timeCtrl)?.setValue(rounded.time, { emitEvent: false });
+    if (!rounded.addDays) {
+      return;
+    }
+    const dateVal = this.advanceTableForm.get(dateCtrl)?.value;
+    if (!this.isValidBillingDate(dateVal)) {
+      return;
+    }
+    const nextDate = new Date(dateVal instanceof Date ? dateVal.getTime() : new Date(dateVal).getTime());
+    nextDate.setDate(nextDate.getDate() + 1);
+    this.advanceTableForm.get(dateCtrl)?.setValue(nextDate, { emitEvent: false });
+  }
+
+  private roundMinutesToBillingQuarter(source: Date): { time: Date; addDays: boolean } {
+    const copy = new Date(source.getTime());
+    let hours = copy.getHours();
+    let minutes = copy.getMinutes();
+    let addDays = false;
+    if (minutes <= 6) {
+      minutes = 0;
+    } else if (minutes <= 22) {
+      minutes = 15;
+    } else if (minutes <= 37) {
+      minutes = 30;
+    } else if (minutes <= 52) {
+      minutes = 45;
+    } else {
+      minutes = 0;
+      hours += 1;
+    }
+    if (hours >= 24) {
+      hours = 0;
+      addDays = true;
+    }
+    copy.setHours(hours, minutes, 0, 0);
+    return { time: copy, addDays };
   }
 
   /** Pickup = reporting when reporting leg was never captured separately. */
@@ -1751,6 +1833,7 @@ export class DutySlipForBillingComponent implements OnInit, AfterViewInit, OnCha
     //this.advanceTableForm.patchValue({actionTaken : this.advanceTableClosingOne.closingDutySlipModel.actionTaken});
     //this.advanceTableForm.patchValue({actionDetails : this.advanceTableClosingOne.closingDutySlipModel.actionDetails});
     this.onKeyUp();
+    this.applyRoundOffBillingTimes();
     this.onTimeSelection();
     this.applyClosingFieldDefaults();
     this.applyDutySlipEditLockState();

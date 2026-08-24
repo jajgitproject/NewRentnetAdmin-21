@@ -191,6 +191,7 @@ export class CustomerService
       printRunningDetailOnDutySlip: toBool(raw.printRunningDetailOnDutySlip, false),
       showRateOnDutySlip: toBool(raw.showRateOnDutySlip, false),
       showOTPOnDutySlip: toBool(raw.showOTPOnDutySlip, false),
+      roundOffTime: toBool(raw.roundOffTime, true),
       showDistanceOnDutySlipPdf: toBool(raw.showDistanceOnDutySlipPdf, false),
       isBookerAllowedToBeCreatedFromReservation: toBool(raw.isBookerAllowedToBeCreatedFromReservation, false),
       isPostPickUpCallAllowed: toBool(raw.isPostPickUpCallAllowed, false),
