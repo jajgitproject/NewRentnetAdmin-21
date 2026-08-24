@@ -1108,8 +1108,6 @@ export class DutySlipForBillingComponent implements OnInit, AfterViewInit, OnCha
     if (!this.isRoundOffTimeEnabled() || !this.advanceTableForm) {
       return;
     }
-    this.roundBillingTimePair('locationOutTimeForBilling', 'locationOutDateForBilling');
-    this.roundBillingTimePair('pickUpTimeForBilling', 'pickUpDateForBilling');
     this.roundBillingTimePair('dropOffTimeForBilling', 'dropOffDateForBilling');
     this.roundBillingTimePair('locationInTimeForBilling', 'locationInDateForBilling');
   }

@@ -687,6 +687,31 @@ getBusinessTypeID(businessTypeID: any)
       ? 'Not a valid email'
       : '';
   }
+
+  private coerceBool(value: any, fallback: boolean): boolean {
+    if (value === null || value === undefined || value === '') {
+      return fallback;
+    }
+    if (typeof value === 'boolean') {
+      return value;
+    }
+    if (typeof value === 'string') {
+      const normalized = value.trim().toLowerCase();
+      if (normalized === 'true' || normalized === '1' || normalized === 'yes') {
+        return true;
+      }
+      if (normalized === 'false' || normalized === '0' || normalized === 'no') {
+        return false;
+      }
+    }
+    if (value === 1) {
+      return true;
+    }
+    if (value === 0) {
+      return false;
+    }
+    return fallback;
+  }
   
   createContactForm(): FormGroup 
   {
@@ -731,7 +756,7 @@ getBusinessTypeID(businessTypeID: any)
       printRunningDetailOnDutySlip: [this.advanceTable.printRunningDetailOnDutySlip ?? false],
       showRateOnDutySlip: [this.advanceTable.showRateOnDutySlip ?? false],
       showOTPOnDutySlip: [this.advanceTable.showOTPOnDutySlip ?? false],
-      roundOffTime: [this.advanceTable.roundOffTime ?? true],
+      roundOffTime: [this.coerceBool(this.advanceTable.roundOffTime, true)],
       showDistanceOnDutySlipPdf: [this.advanceTable.showDistanceOnDutySlipPdf ?? false],
       isBookerAllowedToBeCreatedFromReservation: [
         this.advanceTable.isBookerAllowedToBeCreatedFromReservation ?? false
