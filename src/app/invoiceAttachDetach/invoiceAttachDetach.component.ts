@@ -949,7 +949,16 @@ export class InvoiceAttachDetachComponent implements OnInit {
       });
       return;
     }
-    const duties: number[] = this.selectedInvoices.map(x => x.dutySlipID);
+    if (this.invoiceType === 'InvoiceSingleDuty' && !this.hasAttachedDuties) {
+      Swal.fire({
+        title: 'No duty on this invoice',
+        text: 'This Single Duty invoice has no duty attached yet. After it already has one duty, attaching another converts InvoiceType to InvoiceMultyDuty.',
+        icon: 'warning',
+        confirmButtonText: 'Ok'
+      });
+      return;
+    }
+    const duties: number[] = [...new Set(this.selectedInvoices.map(x => x.dutySlipID))];
     this.advanceTableForm.patchValue({invoiceID:this.InvoiceID});
     this.advanceTableForm.patchValue({invoiceType:"InvoiceMultyDuty"});
     this.advanceTableForm.patchValue({action:"Attach"});
