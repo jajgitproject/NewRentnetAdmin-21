@@ -408,19 +408,24 @@
                   <p class="backfill-hint">
                     Exports legacy inline <code>DutySlip.DutySlipMap</code> and <code>DutySlip.RunningDetails</code> text
                     into files under DocumentRepository, then updates those columns to relative paths.
-                    Preview first, then start batches until matched count is 0. Does not shrink columns or touch DutySlipForBilling.
+                    Filter by pickup date (max 31 days). Preview first, then start batches until matched count is 0.
+                    Does not shrink columns or touch DutySlipForBilling.
                   </p>
                   <div class="row bulk-filters g-2 backfill-search-row">
                     <div class="col-xl-2 col-lg-3 col-md-4 col-sm-6">
                       <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
-                        <mat-label>From DutySlip ID</mat-label>
-                        <input matInput type="number" [formControl]="lobFromDutySlipIdCtrl" placeholder="Optional" />
+                        <mat-label>Pickup Date From</mat-label>
+                        <input matInput [matDatepicker]="lobFromPicker" [formControl]="lobFromPickupDateCtrl" />
+                        <mat-datepicker-toggle matSuffix [for]="lobFromPicker"></mat-datepicker-toggle>
+                        <mat-datepicker #lobFromPicker></mat-datepicker>
                       </mat-form-field>
                     </div>
                     <div class="col-xl-2 col-lg-3 col-md-4 col-sm-6">
                       <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
-                        <mat-label>To DutySlip ID</mat-label>
-                        <input matInput type="number" [formControl]="lobToDutySlipIdCtrl" placeholder="Optional" />
+                        <mat-label>Pickup Date To</mat-label>
+                        <input matInput [matDatepicker]="lobToPicker" [formControl]="lobToPickupDateCtrl" />
+                        <mat-datepicker-toggle matSuffix [for]="lobToPicker"></mat-datepicker-toggle>
+                        <mat-datepicker #lobToPicker></mat-datepicker>
                       </mat-form-field>
                     </div>
                     <div class="col-xl-2 col-lg-3 col-md-4 col-sm-6">

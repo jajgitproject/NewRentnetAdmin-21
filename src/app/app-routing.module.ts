@@ -3123,6 +3123,17 @@ const routes: Routes = [
       },
 
       {
+        path: 'dutySlipLobExport',
+        loadChildren: () =>
+          import('./dutySlipLobExport/dutySlipLobExport.module').then(
+            (m) => m.DutySlipLobExportModule
+          ),
+        data: {
+          requiredPageKey: 'DutySlip Map / Running Export',
+        },
+      },
+
+      {
         path: 'invoiceExport',
         loadChildren: () =>
           import('./invoiceExport/invoiceExport.module').then(

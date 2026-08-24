@@ -1,0 +1,136 @@
+<section class="content">
+  <div class="container-fluid">
+    <div class="block-header">
+      <div class="row">
+        <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+          <ul class="breadcrumb breadcrumb-style">
+            <li class="breadcrumb-item bcrumb-1">
+              <a routerLink="/dashboard/main"><i class="fas fa-home"></i> Home</a>
+            </li>
+            <li class="breadcrumb-item">DutySlip Map / Running Export</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="body lob-panel">
+        <h2 class="panel-title">DutySlip Map / Running Export</h2>
+        <p class="hint">
+          Exports legacy inline <code>DutySlip.DutySlipMap</code> and <code>DutySlip.RunningDetails</code>
+          into files under DocumentRepository, then updates those columns to relative paths.
+          Enter a pickup date range (max 31 days), Preview first, then start batches until matched count is 0.
+        </p>
+
+        <div class="row g-2 filters-row">
+          <div class="col-xl-2 col-lg-3 col-md-4 col-sm-6">
+            <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+              <mat-label>Pickup Date From</mat-label>
+              <input matInput [matDatepicker]="pickupFromPicker" [formControl]="fromPickupDateCtrl" />
+              <mat-datepicker-toggle matSuffix [for]="pickupFromPicker"></mat-datepicker-toggle>
+              <mat-datepicker #pickupFromPicker></mat-datepicker>
+            </mat-form-field>
+          </div>
+          <div class="col-xl-2 col-lg-3 col-md-4 col-sm-6">
+            <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+              <mat-label>Pickup Date To</mat-label>
+              <input matInput [matDatepicker]="pickupToPicker" [formControl]="toPickupDateCtrl" />
+              <mat-datepicker-toggle matSuffix [for]="pickupToPicker"></mat-datepicker-toggle>
+              <mat-datepicker #pickupToPicker></mat-datepicker>
+            </mat-form-field>
+          </div>
+          <div class="col-xl-2 col-lg-3 col-md-4 col-sm-6">
+            <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+              <mat-label>Max candidates / batch</mat-label>
+              <input matInput type="number" [formControl]="maxCandidatesCtrl" min="1" max="2000" />
+            </mat-form-field>
+          </div>
+          <div class="col-xl-4 col-lg-5 col-md-6 col-sm-12 d-flex align-items-center gap-3 checkbox-row">
+            <mat-checkbox [(ngModel)]="exportMaps" [ngModelOptions]="{standalone: true}">Export maps</mat-checkbox>
+            <mat-checkbox [(ngModel)]="exportRunningDetails" [ngModelOptions]="{standalone: true}">Export running details</mat-checkbox>
+          </div>
+        </div>
+
+        <p class="hint" *ngIf="previewLoading">
+          Previewing… scanning LOB columns for the pickup date range. Large ranges can take up to 2 minutes.
+        </p>
+
+        <div class="actions">
+          <button mat-stroked-button type="button" (click)="previewExport()" [disabled]="previewLoading || exporting">
+            {{ previewLoading ? 'Previewing…' : 'Preview' }}
+          </button>
+          <button mat-raised-button color="primary" type="button" (click)="startExport()" [disabled]="!canStartExport()">
+            Start export
+          </button>
+          <button mat-button type="button" (click)="clearJob()" [disabled]="!exporting && !isLobExportJob()">
+            {{ exporting ? 'Cancel' : 'Dismiss' }}
+          </button>
+          <button *ngIf="isStuckJobError()" mat-stroked-button color="warn" type="button" (click)="forceClearStuck()">
+            Clear stuck job
+          </button>
+        </div>
+
+        <p class="error" *ngIf="loadError">{{ loadError }}</p>
+
+        <div class="summary" *ngIf="preview">
+          <div><strong>Matched duty slips:</strong> {{ getMatchedCount() }}</div>
+          <div><strong>Map candidates:</strong> {{ getMapCount() }} ({{ getMapBytesLabel() }})</div>
+          <div><strong>Running candidates:</strong> {{ getRunningCount() }} ({{ getRunningBytesLabel() }})</div>
+          <div><strong>This batch will process:</strong> {{ getWillProcessCount() }}</div>
+          <div><strong>Estimated batches:</strong> {{ getEstimatedBatches() }}</div>
+        </div>
+
+        <div class="progress-panel" *ngIf="isLobExportJob() && activeJob">
+          <div class="panel-title">Export progress — Job #{{ getActiveJobId() }} ({{ getJobStatus() }})</div>
+          <div class="job-meta">
+            <div><strong>Processed:</strong> {{ activeJob.processedFiles }} / {{ activeJob.totalFiles }}</div>
+            <div><strong>Successful:</strong> {{ activeJob.successCount }}</div>
+            <div><strong>Failed:</strong> {{ activeJob.errorCount }}</div>
+          </div>
+          <mat-progress-bar mode="determinate" [value]="getJobProgress()"></mat-progress-bar>
+          <p class="job-message" *ngIf="activeJob.errorMessage">{{ activeJob.errorMessage }}</p>
+        </div>
+
+        <div class="table-responsive" *ngIf="candidates.length">
+          <table mat-table [dataSource]="candidates" class="mat-elevation-z1 lob-table">
+            <ng-container matColumnDef="dutySlipID">
+              <th mat-header-cell *matHeaderCellDef>DutySlip ID</th>
+              <td mat-cell *matCellDef="let row">{{ row.dutySlipID }}</td>
+            </ng-container>
+            <ng-container matColumnDef="column">
+              <th mat-header-cell *matHeaderCellDef>Column</th>
+              <td mat-cell *matCellDef="let row">{{ row.column }}</td>
+            </ng-container>
+            <ng-container matColumnDef="contentBytes">
+              <th mat-header-cell *matHeaderCellDef>Bytes</th>
+              <td mat-cell *matCellDef="let row">{{ formatBytes(row.contentBytes) }}</td>
+            </ng-container>
+            <ng-container matColumnDef="status">
+              <th mat-header-cell *matHeaderCellDef>Status</th>
+              <td mat-cell *matCellDef="let row">{{ row.status }}</td>
+            </ng-container>
+            <tr mat-header-row *matHeaderRowDef="candidateColumns"></tr>
+            <tr mat-row *matRowDef="let row; columns: candidateColumns"></tr>
+          </table>
+        </div>
+
+        <div class="table-responsive" *ngIf="isLobExportJob() && jobErrors.length">
+          <table class="error-table">
+            <thead>
+              <tr>
+                <th>DutySlip ID</th>
+                <th>Error</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let err of jobErrors">
+                <td>{{ err.fileName }}</td>
+                <td>{{ err.errorDescription }}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>

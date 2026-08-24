@@ -1348,6 +1348,17 @@ export const ROUTES: RouteInfo[] = [
         isAccess: false
       },
       {
+        path: 'dutySlipLobExport',
+        title: 'DutySlip Map / Running Export',
+        pageKey: 'DutySlip Map / Running Export',
+        moduleName: 'dutySlipLobExport',
+        icon: 'fas fa-file-export',
+        class: '',
+        groupTitle: false,
+        submenu: [],
+        isAccess: false
+      },
+      {
         path: 'invoiceExport',
         title: 'Forensic',
         pageKey: 'Invoice Export',

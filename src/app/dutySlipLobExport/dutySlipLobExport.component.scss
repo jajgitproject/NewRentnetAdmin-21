@@ -1,0 +1,96 @@
+.lob-panel {
+  padding: 16px 20px 24px;
+}
+
+.panel-title {
+  margin: 0 0 8px;
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.hint {
+  margin: 0 0 16px;
+  color: #555;
+  font-size: 13px;
+  line-height: 1.45;
+}
+
+.filters-row {
+  margin-bottom: 8px;
+}
+
+.checkbox-row {
+  min-height: 56px;
+  gap: 16px;
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 8px 0 12px;
+}
+
+.error {
+  color: #c62828;
+  margin: 8px 0;
+}
+
+.summary {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 8px 16px;
+  margin: 12px 0 16px;
+  padding: 12px;
+  background: #f5f7fa;
+  border-radius: 6px;
+  font-size: 13px;
+}
+
+.progress-panel {
+  margin: 16px 0;
+  padding: 12px;
+  border: 1px solid #e0e0e0;
+  border-radius: 6px;
+}
+
+.job-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  margin-bottom: 10px;
+  font-size: 13px;
+}
+
+.job-message {
+  margin: 8px 0 0;
+  color: #c62828;
+  font-size: 13px;
+}
+
+.lob-table {
+  width: 100%;
+  margin-top: 12px;
+}
+
+.error-table {
+  width: 100%;
+  margin-top: 16px;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+
+.error-table th,
+.error-table td {
+  border: 1px solid #e0e0e0;
+  padding: 8px;
+  text-align: left;
+}
+
+.error-table th {
+  background: #f5f5f5;
+}
+
+.example-full-width {
+  width: 100%;
+}

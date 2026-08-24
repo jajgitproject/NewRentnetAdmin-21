@@ -160,11 +160,12 @@ export class BulkBillsDownloadComponent implements OnInit, OnDestroy, AfterViewI
   tollRunAllBatches = false;
   tollJobStartedAt: number | null = null;
 
-  lobFromDutySlipIdCtrl = new FormControl('');
-  lobToDutySlipIdCtrl = new FormControl('');
+  lobFromPickupDateCtrl = new FormControl(this.getTodayDate());
+  lobToPickupDateCtrl = new FormControl(this.getTodayDate());
   lobMaxCandidatesCtrl = new FormControl(500);
   lobExportMaps = true;
   lobExportRunningDetails = true;
+  readonly lobMaxPickupDateRangeDays = 31;
   lobPreview: DutySlipLobExportPreviewResult | null = null;
   lobCandidates: DutySlipLobExportCandidatePreview[] = [];
   lobLoadError = '';
@@ -2065,10 +2066,6 @@ export class BulkBillsDownloadComponent implements OnInit, OnDestroy, AfterViewI
   }
 
   private buildDutySlipLobExportCriteria(): DutySlipLobExportCriteria {
-    const parseOptionalId = (value: any): number | null => {
-      const n = Number(String(value ?? '').trim());
-      return Number.isFinite(n) && n > 0 ? Math.floor(n) : null;
-    };
     let maxCandidates = Number(this.lobMaxCandidatesCtrl.value);
     if (!Number.isFinite(maxCandidates) || maxCandidates <= 0) {
       maxCandidates = 500;
@@ -2076,8 +2073,8 @@ export class BulkBillsDownloadComponent implements OnInit, OnDestroy, AfterViewI
     maxCandidates = Math.min(Math.floor(maxCandidates), 2000);
 
     return {
-      fromDutySlipID: parseOptionalId(this.lobFromDutySlipIdCtrl.value),
-      toDutySlipID: parseOptionalId(this.lobToDutySlipIdCtrl.value),
+      fromPickupDate: this.formatApiDate(this.lobFromPickupDateCtrl.value),
+      toPickupDate: this.formatApiDate(this.lobToPickupDateCtrl.value),
       maxCandidates,
       exportMaps: !!this.lobExportMaps,
       exportRunningDetails: !!this.lobExportRunningDetails,
@@ -2085,7 +2082,34 @@ export class BulkBillsDownloadComponent implements OnInit, OnDestroy, AfterViewI
     };
   }
 
+  private validateLobPickupDates(): string | null {
+    const fromVal = this.lobFromPickupDateCtrl.value;
+    const toVal = this.lobToPickupDateCtrl.value;
+    if (!fromVal || !toVal) {
+      return 'Select both Pickup Date From and Pickup Date To.';
+    }
+    const fromDate = moment(fromVal).startOf('day');
+    const toDate = moment(toVal).startOf('day');
+    if (!fromDate.isValid() || !toDate.isValid()) {
+      return 'Pickup dates are invalid.';
+    }
+    if (toDate.isBefore(fromDate)) {
+      return 'Pickup Date To must be on or after Pickup Date From.';
+    }
+    if (toDate.diff(fromDate, 'days') + 1 > this.lobMaxPickupDateRangeDays) {
+      return `Pickup date range cannot exceed ${this.lobMaxPickupDateRangeDays} days.`;
+    }
+    return null;
+  }
+
   previewDutySlipLobExport(): void {
+    const dateError = this.validateLobPickupDates();
+    if (dateError) {
+      this.lobLoadError = dateError;
+      this.snackBar.open(this.lobLoadError, 'Close', { duration: 8000 });
+      return;
+    }
+
     const criteria = this.buildDutySlipLobExportCriteria();
     if (!criteria.exportMaps && !criteria.exportRunningDetails) {
       this.lobLoadError = 'Select at least one of Export maps or Export running details.';
@@ -2114,7 +2138,7 @@ export class BulkBillsDownloadComponent implements OnInit, OnDestroy, AfterViewI
         }));
         const matched = result?.totalMatchedCount ?? result?.TotalMatchedCount ?? 0;
         if (matched === 0) {
-          this.lobLoadError = 'No legacy DutySlip LOB rows matched. Export may already be complete for this range.';
+          this.lobLoadError = 'No legacy DutySlip LOB rows matched. Export may already be complete for this pickup date range.';
         }
       },
       error: (err) => {
@@ -2173,6 +2197,12 @@ export class BulkBillsDownloadComponent implements OnInit, OnDestroy, AfterViewI
 
   startDutySlipLobExport(): void {
     if (!this.canStartDutySlipLobExport()) {
+      return;
+    }
+
+    const dateError = this.validateLobPickupDates();
+    if (dateError) {
+      this.snackBar.open(dateError, 'Close', { duration: 5000 });
       return;
     }
 

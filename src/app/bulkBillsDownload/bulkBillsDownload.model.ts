@@ -304,8 +304,8 @@ export interface StartDutySlipPackageDownloadJobResult {
 }
 
 export interface DutySlipLobExportCriteria {
-  fromDutySlipID?: number | null;
-  toDutySlipID?: number | null;
+  fromPickupDate?: string | null;
+  toPickupDate?: string | null;
   maxCandidates?: number;
   exportMaps?: boolean;
   exportRunningDetails?: boolean;
