@@ -1739,7 +1739,7 @@ export class DutySlipForBillingComponent implements OnInit, AfterViewInit, OnCha
         billing.readyForBulkGfb === true || (billing as any).ReadyForBulkGfb === true;
     }
     this.readyForBulkBilling = !!billing?.readyForBulkBilling && !this.hasActiveInvoiceLock;
-    this.readyForBulkGfb = !!billing?.readyForBulkGfb && !this.hasActiveInvoiceLock;
+    this.readyForBulkGfb = !!billing?.readyForBulkGfb && !goodForBilling && !this.hasActiveInvoiceLock;
     this.advanceTableForm.patchValue({ verifyDuty });
     this.advanceTableForm.patchValue({dsClosing : this.advanceTableClosingOne.closingDutySlipForBillingModel.dsClosing});
     this.advanceTableForm.patchValue({runningDetails : this.advanceTableClosingOne.closingDutySlipForBillingModel.runningDetails});
@@ -2118,6 +2118,10 @@ export class DutySlipForBillingComponent implements OnInit, AfterViewInit, OnCha
         this.advanceTableClosingOne.closingDutySlipForBillingModel.goodForBilling = isChecked;
         this.advanceTableClosingOne.closingDutySlipForBillingModel.verifyDuty =
           this.advanceTableForm.value.verifyDuty;
+        if (isChecked) {
+          this.readyForBulkGfb = false;
+          this.advanceTableClosingOne.closingDutySlipForBillingModel.readyForBulkGfb = false;
+        }
         if (!isChecked) {
           this.readyForBulkBilling = false;
           this.advanceTableClosingOne.closingDutySlipForBillingModel.readyForBulkBilling = false;
@@ -2925,7 +2929,10 @@ onChange() {
   get canToggleReadyForBulkGfb(): boolean {
     const verifyDuty = this.advanceTableForm?.getRawValue()?.verifyDuty
       ?? this.advanceTableClosingOne?.closingDutySlipForBillingModel?.verifyDuty;
+    const goodForBilling = this.advanceTableForm?.getRawValue()?.goodForBilling
+      ?? this.advanceTableClosingOne?.closingDutySlipForBillingModel?.goodForBilling;
     return !!verifyDuty
+      && !goodForBilling
       && !this.hasActiveInvoiceLock
       && !this.isEInvoiceBlockingEdits;
   }
@@ -2940,11 +2947,15 @@ onChange() {
     const isChecked = event.checked === true;
     if (isChecked && !this.canToggleReadyForBulkGfb) {
       this.readyForBulkGfb = false;
+      const goodForBilling = this.advanceTableForm?.getRawValue()?.goodForBilling
+        ?? this.advanceTableClosingOne?.closingDutySlipForBillingModel?.goodForBilling;
       this.showNotification(
         'snackbar-warning',
         this.hasActiveInvoiceLock
           ? 'Invoice already exists. Ready for Bulk GFB cannot be set.'
-          : 'Check Verify Duty before Ready for Bulk GFB.',
+          : goodForBilling
+            ? 'Uncheck Good for Billing before Ready for Bulk GFB.'
+            : 'Check Verify Duty before Ready for Bulk GFB.',
         'bottom',
         'center'
       );

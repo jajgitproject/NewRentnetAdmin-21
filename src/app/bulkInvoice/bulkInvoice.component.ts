@@ -27,8 +27,8 @@ export class BulkInvoiceComponent implements OnInit, OnDestroy {
   selectedTabIndex = 0;
   mode = 'Shadow';
   maxDuties = 25;
-  maxDutiesLimit = 100;
-  batchSize = 25;
+  maxDutiesLimit = 1000;
+  batchSize = 50;
   allowManual = true;
   nightEnabled = false;
 
@@ -90,8 +90,8 @@ export class BulkInvoiceComponent implements OnInit, OnDestroy {
       next: (limits) => {
         this.mode = limits.defaultMode || 'Shadow';
         this.maxDuties = limits.defaultMaxDuties || 25;
-        this.maxDutiesLimit = limits.maxDutiesLimit || 100;
-        this.batchSize = limits.batchSize || 25;
+        this.maxDutiesLimit = limits.maxDutiesLimit || 1000;
+        this.batchSize = limits.batchSize || 50;
         this.allowManual = limits.allowManual !== false;
         this.nightEnabled = limits.nightEnabled === true;
       },
@@ -109,7 +109,7 @@ export class BulkInvoiceComponent implements OnInit, OnDestroy {
 
   get estimatedBatchCount(): number {
     const willProcess = this.preview?.willProcessCount || 0;
-    const size = this.preview?.batchSize || this.batchSize || 25;
+    const size = this.preview?.batchSize || this.batchSize || 50;
     if (willProcess <= 0) {
       return 0;
     }
