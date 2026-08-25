@@ -50,6 +50,12 @@ export class EmailInfoModel {
   // Special Instructions
   specialInstructions: ReservationSpecialInstructionModel[];
 
+  // Customer Specific Fields (dynamic per customer)
+  customerSpecificFields: string;
+  customerSpecificFieldList: CustomerSpecificFieldModel[];
+  /** Built client-side for quick cell lookup by field name */
+  customerSpecificFieldMap?: Record<string, string>;
+
   constructor(emailInfo?: any) {
 
     this.reservationID = emailInfo?.reservationID || 0;
@@ -110,6 +116,22 @@ export class EmailInfoModel {
     // Special Instructions
     this.specialInstructions =
       emailInfo?.specialInstructions || [];
+
+    this.customerSpecificFields = emailInfo?.customerSpecificFields || '';
+    this.customerSpecificFieldList =
+      emailInfo?.customerSpecificFieldList || [];
+  }
+}
+
+export class CustomerSpecificFieldModel {
+  customerReservationFieldID: number;
+  fieldName: string;
+  fieldValue: string;
+
+  constructor(field?: any) {
+    this.customerReservationFieldID = field?.customerReservationFieldID || 0;
+    this.fieldName = field?.fieldName || field?.FieldName || '';
+    this.fieldValue = field?.fieldValue || field?.FieldValue || '';
   }
 }
 // ---------------- Customer Person ----------------

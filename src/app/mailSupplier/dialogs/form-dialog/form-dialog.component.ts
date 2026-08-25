@@ -28,6 +28,7 @@ export class MTSFormDialogComponent implements OnInit
   saveDisabled:boolean=true;
   dataSource: MailToSupplier | null;
   emailList: EmailInfoModel[] = [];
+  customerSpecificFieldColumns: string[] = [];
   loggedInUserName = '';
   isSendingMail = false;
 
@@ -260,7 +261,9 @@ export class MTSFormDialogComponent implements OnInit
       // not collide with the new value (NG0100).
       this.ngZone.run(() => {
         setTimeout(() => {
-          this.emailList = this.normalizeEmailInfoList(list || []);
+          this.emailList = this.applyCustomerSpecificFieldColumns(
+            this.normalizeEmailInfoList(list || [])
+          );
           this.cdr.detectChanges();
         }, 0);
       });
@@ -269,8 +272,84 @@ export class MTSFormDialogComponent implements OnInit
     { 
       console.error('[EmailInfo] Failed to load email details:', error);
       this.emailList = [];
+      this.customerSpecificFieldColumns = [];
       this.cdr.detectChanges();
     });
+  }
+
+  private applyCustomerSpecificFieldColumns(list: EmailInfoModel[]): EmailInfoModel[] {
+    const rows = Array.isArray(list) ? list : [];
+    const fieldNames = new Set<string>();
+
+    rows.forEach((row: any) => {
+      const items = this.resolveCustomerSpecificFields(row);
+      const fieldMap: Record<string, string> = {};
+
+      items.forEach((item) => {
+        if (item.fieldName) {
+          fieldNames.add(item.fieldName);
+          fieldMap[item.fieldName] = item.fieldValue ?? '';
+        }
+      });
+
+      row.customerSpecificFieldMap = fieldMap;
+      row.customerSpecificFieldList = items;
+    });
+
+    this.customerSpecificFieldColumns = Array.from(fieldNames).sort((a, b) =>
+      a.localeCompare(b)
+    );
+
+    return rows;
+  }
+
+  private resolveCustomerSpecificFields(
+    row: any
+  ): { fieldName: string; fieldValue: string }[] {
+    const fromList = row?.customerSpecificFieldList ?? row?.CustomerSpecificFieldList;
+    if (Array.isArray(fromList) && fromList.length) {
+      return fromList
+        .map((item) => ({
+          fieldName: (item?.FieldName ?? item?.fieldName ?? '').trim(),
+          fieldValue: (item?.FieldValue ?? item?.fieldValue ?? '').trim()
+        }))
+        .filter((item) => item.fieldName || item.fieldValue);
+    }
+
+    const trimmed = (
+      row?.customerSpecificFields ?? row?.CustomerSpecificFields ?? ''
+    ).trim();
+    if (!trimmed) {
+      return [];
+    }
+
+    try {
+      const parsed = JSON.parse(
+        trimmed.startsWith('[') ? trimmed : `[${trimmed}]`
+      );
+      const list = Array.isArray(parsed) ? parsed : [parsed];
+      return list
+        .map((item) => ({
+          fieldName: (item?.FieldName ?? item?.fieldName ?? '').trim(),
+          fieldValue: (item?.FieldValue ?? item?.fieldValue ?? '').trim()
+        }))
+        .filter((item) => item.fieldName || item.fieldValue);
+    } catch {
+      return [];
+    }
+  }
+
+  getCustomerSpecificFieldValue(info: any, fieldName: string): string {
+    const fromMap = info?.customerSpecificFieldMap?.[fieldName];
+    const text = fromMap !== undefined && fromMap !== null ? String(fromMap).trim() : '';
+    if (text && text !== '--Select--') {
+      return text;
+    }
+    return 'N/A';
+  }
+
+  trackCustomerSpecificFieldColumn(_index: number, fieldName: string): string {
+    return fieldName;
   }
 
   private normalizeEmailInfoList(list: EmailInfoModel[]): EmailInfoModel[] {

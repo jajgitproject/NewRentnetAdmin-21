@@ -19,6 +19,8 @@ export class EmailInfoComponent {
  emailList: EmailInfoModel[] = [];
   dialogTitle: string;
   reservationID: any;
+  /** Dynamic CSF column headers (union of field names across all rows). */
+  customerSpecificFieldColumns: string[] = [];
   constructor(
     public dialogRef: MatDialogRef<EmailInfoComponent>,
     @Inject(MAT_DIALOG_DATA) public data: any,
@@ -49,6 +51,7 @@ export class EmailInfoComponent {
     if (this.reservationID === null || this.reservationID === undefined || this.reservationID === '') {
       console.warn('[EmailInfo] No reservation identifier supplied; skipping load.');
       this.emailList = [];
+      this.customerSpecificFieldColumns = [];
       return;
     }
     this.loadData();      
@@ -97,6 +100,131 @@ export class EmailInfoComponent {
     return texts.length ? texts.join('; ') : 'N/A';
   }
 
+  getCustomerSpecificFieldValue(info: any, fieldName: string): string {
+    const fromMap = info?.customerSpecificFieldMap?.[fieldName];
+    const text = fromMap !== undefined && fromMap !== null ? String(fromMap).trim() : '';
+    if (text && text !== '--Select--') {
+      return text;
+    }
+    return 'N/A';
+  }
+
+  trackCustomerSpecificFieldColumn(_index: number, fieldName: string): string {
+    return fieldName;
+  }
+
+  private applyCustomerSpecificFieldColumns(list: any[]): any[] {
+    const rows = Array.isArray(list) ? list : [];
+    const fieldNames = new Set<string>();
+
+    rows.forEach((row) => {
+      const items = this.resolveCustomerSpecificFields(row);
+      const fieldMap: Record<string, string> = {};
+
+      items.forEach((item) => {
+        if (item.fieldName) {
+          fieldNames.add(item.fieldName);
+          fieldMap[item.fieldName] = item.fieldValue ?? '';
+        }
+      });
+
+      row.customerSpecificFieldMap = fieldMap;
+      row.customerSpecificFieldList = items;
+    });
+
+    this.customerSpecificFieldColumns = Array.from(fieldNames).sort((a, b) =>
+      a.localeCompare(b)
+    );
+
+    return rows;
+  }
+
+  private resolveCustomerSpecificFields(
+    row: any
+  ): { fieldName: string; fieldValue: string }[] {
+    const fromList = row?.customerSpecificFieldList ?? row?.CustomerSpecificFieldList;
+    if (Array.isArray(fromList) && fromList.length) {
+      return fromList
+        .map((item) => this.extractCustomerSpecificFieldPair(item))
+        .filter((item) => item.fieldName || item.fieldValue);
+    }
+
+    return this.parseCustomerSpecificFields(
+      row?.customerSpecificFields ?? row?.CustomerSpecificFields
+    );
+  }
+
+  private parseCustomerSpecificFields(
+    value: string | null | undefined
+  ): { fieldName: string; fieldValue: string }[] {
+    const trimmed = (value || '').trim();
+    if (!trimmed) {
+      return [];
+    }
+
+    const parseCandidates = [
+      trimmed,
+      `[${trimmed}]`,
+      trimmed.startsWith('[') ? trimmed : `[${trimmed.replace(/^\s*,\s*/, '')}]`
+    ];
+
+    for (const candidate of parseCandidates) {
+      try {
+        const parsed = JSON.parse(candidate);
+        const list = Array.isArray(parsed) ? parsed : [parsed];
+        const mapped = list
+          .map((item) => this.extractCustomerSpecificFieldPair(item))
+          .filter((item) => item.fieldName || item.fieldValue);
+
+        if (mapped.length) {
+          return mapped;
+        }
+      } catch {
+        // try next parse strategy
+      }
+    }
+
+    const results: { fieldName: string; fieldValue: string }[] = [];
+    const fieldPattern =
+      /"(?:FieldName|fieldName)"\s*:\s*"([^"]*)"[\s\S]*?"(?:FieldValue|fieldValue)"\s*:\s*"([^"]*)"/g;
+    let match;
+
+    while ((match = fieldPattern.exec(trimmed)) !== null) {
+      results.push({ fieldName: match[1], fieldValue: match[2] });
+    }
+
+    if (results.length) {
+      return results;
+    }
+
+    // Summary format: "Name: Value; Name2: Value2"
+    if (!trimmed.startsWith('[') && !trimmed.startsWith('{')) {
+      trimmed.split(';').forEach((segment) => {
+        const colonIndex = segment.indexOf(':');
+        if (colonIndex <= 0) {
+          return;
+        }
+        const fieldName = segment.substring(0, colonIndex).trim();
+        const fieldValue = segment.substring(colonIndex + 1).trim();
+        if (fieldName) {
+          results.push({ fieldName, fieldValue });
+        }
+      });
+    }
+
+    return results;
+  }
+
+  private extractCustomerSpecificFieldPair(item: any): {
+    fieldName: string;
+    fieldValue: string;
+  } {
+    return {
+      fieldName: (item?.FieldName ?? item?.fieldName ?? '').trim(),
+      fieldValue: (item?.FieldValue ?? item?.fieldValue ?? '').trim()
+    };
+  }
+
   public loadData() 
   {
     this.emailInfoService.getData(this.reservationID).subscribe(
@@ -118,7 +246,7 @@ export class EmailInfoComponent {
       // not collide with the new value (NG0100).
       this.ngZone.run(() => {
         setTimeout(() => {
-          this.emailList = list || [];
+          this.emailList = this.applyCustomerSpecificFieldColumns(list || []);
           this.cdr.detectChanges();
         }, 0);
       });
@@ -127,6 +255,7 @@ export class EmailInfoComponent {
     { 
       console.error('[EmailInfo] Failed to load email details:', error);
       this.emailList = [];
+      this.customerSpecificFieldColumns = [];
       this.cdr.detectChanges();
     });
   }
