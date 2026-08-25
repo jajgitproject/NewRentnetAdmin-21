@@ -2166,8 +2166,8 @@ export class DutySlipForBillingComponent implements OnInit, AfterViewInit, OnCha
           this.advanceTableForm.patchValue({ goodForBilling: false });
           return false;
         }
-        const needsPersistAndCalc = this.hasUnsavedClosingEdits();
-        if (needsPersistAndCalc) {
+        const needsPersist = this.hasUnsavedClosingEdits();
+        if (needsPersist) {
           const saved = await this.persistClosingUpdate({ fromGfb: true });
           if (!saved) {
             this.advanceTableForm.patchValue({ goodForBilling: false });
@@ -2181,8 +2181,10 @@ export class DutySlipForBillingComponent implements OnInit, AfterViewInit, OnCha
         this.advanceTableBH.goodForBilling = isChecked;
         this.advanceTableBH.actionTaken = this.advanceTableForm.value.actionTaken;
         this.advanceTableBH.actionDetails = this.advanceTableForm.value.actionDetails;
-        if (needsPersistAndCalc || !this.isDutyCalculated) {
-          await this.calculateBillAfterGfb();
+        const calculated = await this.calculateBillAfterGfb();
+        if (!calculated) {
+          this.advanceTableForm.patchValue({ goodForBilling: false });
+          return false;
         }
       }
       if(isChecked === false)
@@ -3126,7 +3128,7 @@ onChange() {
       });
   }
 
-  /** GFB calculate: persist already ran. Do not open Dummy Invoice. Skip extra allowance GET. */
+  /** GFB calculate: persist already ran if the form was dirty. Do not open Dummy Invoice. Skip extra allowance GET. */
   private calculateBillAfterGfb(): Promise<boolean> {
     return this.CalculateBill(false, true, true);
   }
