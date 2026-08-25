@@ -1187,7 +1187,15 @@ export class DutySlipForBillingComponent implements OnInit, AfterViewInit, OnCha
     this.advanceTableForm.patchValue(patch);
   }
 
-  private extractApiErrorMessage(error: any, fallback: string): string {
+  private formatApiErrorForSwal(message: string): string {
+    const escaped = (message || '')
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;');
+    return `<div style="text-align:left;white-space:pre-wrap">${escaped}</div>`;
+  }
+
+  private extractApiErrorMessage(error: any, fallback = 'Operation Failed.....!!!'): string {
     const body = error?.error ?? error;
     if (typeof body === 'string' && body.trim()) {
       return body;
@@ -2926,13 +2934,17 @@ public resetVerificationForEcoStateChange(): void {
           this.showSpinnerForVDGB = false;
         }
         const errorMessage = this.extractApiErrorMessage(error, 'Operation Failed.....!!!');
+        this.advanceTableForm.patchValue({ verifyDuty: true, goodForBilling: false });
+        if (this.advanceTableClosingOne?.closingDutySlipForBillingModel) {
+          this.advanceTableClosingOne.closingDutySlipForBillingModel.verifyDuty = true;
+          this.advanceTableClosingOne.closingDutySlipForBillingModel.goodForBilling = false;
+        }
         Swal.fire({
-          title: errorMessage,
-          icon: 'error'
+          icon: 'error',
+          html: this.formatApiErrorForSwal(errorMessage)
         }).then(() => {
-            this.advanceTableForm.patchValue({ verifyDuty: true });
-            this.advanceTableForm.patchValue({ goodForBilling: false });
-            this.onGFBChange({ checked: false });
+            // GFB path already unchecks in onGFBChange after this promise rejects.
+            // Do not call onGFBChange here — that would POST a dummy Unchecked history row.
             this.saveDisabled = true;
           });
         resolve(false);
