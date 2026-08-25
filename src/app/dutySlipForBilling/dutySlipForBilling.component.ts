@@ -52,12 +52,14 @@ export class DutySlipForBillingComponent implements OnInit, AfterViewInit, OnCha
   @Input() InvoiceID;
   @Input() IRN;
   @Input() hasActiveEInvoice = false;
+  @Input() hasActiveInvoice = false;
   @Input() DSClosing;
   @Input() canThisRoleDoGoodForBillingOnClosingScreen = false;
   @Input() canThisRoleViewDummyInvoice = false;
   @Input() canEditDSAfterGoodForBilling = false;
+  @Input() dutyBillingSummary: any = null;
   @Output() dataSaved: EventEmitter<void> = new EventEmitter();
-  @Output() dutyStatusChanged = new EventEmitter<{verifyDuty: boolean, goodForBilling: boolean,message: string}>();
+  @Output() dutyStatusChanged = new EventEmitter<{verifyDuty: boolean, goodForBilling: boolean,message: string, invoiceCalculated?: boolean}>();
   //@Output() dutyMessage = new EventEmitter<string>();
  advanceTableForm:FormGroup;
  panelExpanded: boolean = false;
@@ -114,6 +116,22 @@ export class DutySlipForBillingComponent implements OnInit, AfterViewInit, OnCha
    'locationInKMForBilling',
    'locationInLatLongForBilling',
  ];
+ /** Full-PUT fields. KM/lat-long are excluded — UpdateRemarks already writes those. */
+ private readonly fullPutFieldControls = [
+   ...this.alwaysEditableControls,
+   ...this.alwaysEditableAddressControls,
+   'locationOutLocationOrHubID',
+   'locationInLocationOrHubID',
+   'closureType',
+   'closureStatus',
+   'closureMethod',
+   'dsClosing',
+   'physicalDutySlipReceived',
+   'dutyTypeID',
+   'packageID',
+   'verifyDuty',
+   'goodForBilling',
+ ];
  advanceTableBH : BillingHistory | null;
  CustomerSignatureImage :string = null;
  buttonText: string = 'Save';
@@ -121,6 +139,9 @@ export class DutySlipForBillingComponent implements OnInit, AfterViewInit, OnCha
   DutySlipID: number;
 
   saveDisabled: boolean = true;
+  readyForBulkBilling = false;
+  readyForBulkGfb = false;
+  tagSaving = false;
   Action: string;
   Message: string;
   //DSClosing: any = null;
@@ -136,6 +157,8 @@ export class DutySlipForBillingComponent implements OnInit, AfterViewInit, OnCha
   private loadedRunningDetails = '';
   private loadedVendorRemark = '';
   private loadedKmValues: Record<string, string> = {};
+  private loadedTripFieldValues: Record<string, string> = {};
+  private tripFieldsSnapshotReady = false;
   private suppressInitialDutyStatusEmit = true;
 
   constructor(
@@ -161,8 +184,12 @@ export class DutySlipForBillingComponent implements OnInit, AfterViewInit, OnCha
   
 
   ngOnChanges(changes: SimpleChanges): void {
-    if (changes['hasActiveEInvoice'] || changes['canEditDSAfterGoodForBilling'] || changes['advanceTableClosingOne']) {
+    if (changes['hasActiveEInvoice'] || changes['hasActiveInvoice'] || changes['canEditDSAfterGoodForBilling'] || changes['advanceTableClosingOne']) {
       this.applyDutySlipEditLockState();
+      if (this.hasActiveInvoiceLock) {
+        this.readyForBulkBilling = false;
+        this.readyForBulkGfb = false;
+      }
     }
     if (changes['disputeAdvanceTable']) {
       const hasUnapprovedDispute = this.disputeAdvanceTable?.some(d => d.approvalStatus === false);
@@ -175,6 +202,9 @@ export class DutySlipForBillingComponent implements OnInit, AfterViewInit, OnCha
     }
     if (changes['hasActiveEInvoice'] || changes['canThisRoleDoGoodForBillingOnClosingScreen']) {
       this.syncVerifyDutyAndGoodForBillingState();
+    }
+    if (changes['dutyBillingSummary']) {
+      this.mapClosingAllowancesFromSummary(this.dutyBillingSummary);
     }
   }
 
@@ -217,10 +247,11 @@ export class DutySlipForBillingComponent implements OnInit, AfterViewInit, OnCha
     }
 
     this.onKeyUp();
+    this.applyRoundOffBillingTimes();
     this.onTimeSelection();
     this.applyClosingFieldDefaults();
     this.applyDutySlipEditLockState();
-    this.loadClosingAllowances();
+    this.syncLoadedTripFieldsFromForm();
   }
 
   ngAfterViewInit(): void {
@@ -267,11 +298,6 @@ export class DutySlipForBillingComponent implements OnInit, AfterViewInit, OnCha
       this.advanceTableForm.patchValue({closureType : event.value});
       this.advanceTableForm.patchValue({closureMethod:event.value});
       this.InitManual();
-      if(this.advanceTableClosingOne.closingDutySlipForBillingModel.dsClosing)
-      {
-      this.LoadDataForBilling();
-      }
- 
     }
     this.applyManualEditMode();
   }
@@ -457,190 +483,13 @@ export class DutySlipForBillingComponent implements OnInit, AfterViewInit, OnCha
     
     
     this.onKeyUp();
+    this.applyRoundOffBillingTimes();
     this.onTimeSelection();
   }
 
   InitDriver()
   {
-    let locationOutLatByApp:string;
-    let locationOutLongByApp : string;
-    let reportingToGuestLatByApp:string;
-    let reportingToGuestLongByApp : string;
-    let pickUpLatByApp:string;
-    let pickUpLongByApp : string;
-    let dropOffLatByApp:string;
-    let dropOffLongByApp : string;
-    let locationInLatByApp:string;
-    let locationInLongByApp : string;
-
-    if(this.advanceTableClosingOne.closingDutySlipByAppModel.locationOutLatLongByApp)
-    {
-       var value = this.advanceTableClosingOne.closingDutySlipByAppModel.locationOutLatLongByApp.replace(
-        '(',
-        ''
-      );
-      value = value.replace(')', '');
-      var lat = value.split(' ')[2];
-      var long = value.split(' ')[1];
-   
-      locationOutLatByApp=lat;
-      locationOutLongByApp=long;
-    }
-   
-    if(this.advanceTableClosingOne.closingDutySlipByAppModel.pickUpLatLongByApp)
-    {
-      var value = this.advanceTableClosingOne.closingDutySlipByAppModel.pickUpLatLongByApp.replace(
-        '(',
-        ''
-      );
-      value = value.replace(')', '');
-      var lat1 = value.split(' ')[2];
-      var long1 = value.split(' ')[1];
-   
-      pickUpLatByApp=lat1;
-      pickUpLongByApp=long1;
-    }
-   
-    if(this.advanceTableClosingOne.closingDutySlipByAppModel.reportingToGuestLatLongByApp)
-    {
-      var value = this.advanceTableClosingOne.closingDutySlipByAppModel.reportingToGuestLatLongByApp.replace(
-        '(',
-        ''
-      );
-      value = value.replace(')', '');
-      var lat2 = value.split(' ')[2];
-      var long2 = value.split(' ')[1];
-   
-      reportingToGuestLatByApp=lat2;
-      reportingToGuestLongByApp=long2;
-    }
-   
-    if(this.advanceTableClosingOne.closingDutySlipByAppModel.dropOffLatLongByApp)
-    {
-      var value = this.advanceTableClosingOne.closingDutySlipByAppModel.dropOffLatLongByApp.replace(
-        '(',
-        ''
-      );
-      value = value.replace(')', '');
-      var lat3 = value.split(' ')[2];
-      var long3 = value.split(' ')[1];
-   
-      dropOffLatByApp=lat3;
-      dropOffLongByApp=long3;
-    }
-   
-    if(this.advanceTableClosingOne.closingDutySlipByAppModel.locationInLatLongByApp)
-    {
-      var value = this.advanceTableClosingOne.closingDutySlipByAppModel.locationInLatLongByApp.replace(
-        '(',
-        ''
-      );
-      value = value.replace(')', '');
-      var lat4 = value.split(' ')[2];
-      var long4 = value.split(' ')[1];
-  
-      locationInLatByApp=lat4;
-      locationInLongByApp=long4;
-    }
-
-      if(this.advanceTableClosingOne.closingDutySlipByAppModel.locationOutLocationOrHubID)
-      {
-        this.advanceTableForm.patchValue({locationOutLocationOrHubID : this.advanceTableClosingOne.closingDutySlipByAppModel.locationOutLocationOrHubID});
-      }
-      else
-      {
-        this.advanceTableForm.patchValue({locationOutLocationOrHubID : 0});
-      }
-      this.advanceTableForm.patchValue({locationOutDateForBilling : this.advanceTableClosingOne.closingDutySlipByAppModel.locationOutDateByApp});
-      this.advanceTableForm.patchValue({locationOutTimeForBilling : this.advanceTableClosingOne.closingDutySlipByAppModel.locationOutTimeByApp});
-      this.advanceTableForm.patchValue({locationOutKMForBilling : this.advanceTableClosingOne.closingDutySlipByAppModel.locationOutKMByApp});
-      this.advanceTableForm.patchValue({locationOutAddressStringForBilling : this.advanceTableClosingOne.closingDutySlipByAppModel.locationOutAddressStringByApp});
-      if(this.advanceTableClosingOne.closingDutySlipByAppModel.locationOutLatLongByApp)
-      {
-        this.advanceTableForm.patchValue({locationOutLatLongForBilling:locationOutLatByApp + ',' + locationOutLongByApp});
-      }
-      else
-      {
-        this.advanceTableForm.patchValue({locationOutLatLongForBilling:null });
-      } 
-
-      this.advanceTableForm.patchValue({reportingToGuestDateForBilling : this.advanceTableClosingOne.closingDutySlipByAppModel.reportingToGuestDateByApp});
-      this.advanceTableForm.patchValue({reportingToGuestTimeForBilling : this.advanceTableClosingOne.closingDutySlipByAppModel.reportingToGuestTimeByApp});
-      this.advanceTableForm.patchValue({reportingToGuestKMForBilling : this.advanceTableClosingOne.closingDutySlipByAppModel.reportingToGuestKMByApp});
-      this.advanceTableForm.patchValue({reportingToGuestAddressStringForBilling : this.advanceTableClosingOne.closingDutySlipByAppModel.reportingToGuestAddressStringByApp});
-      if(this.advanceTableClosingOne.closingDutySlipByAppModel.reportingToGuestLatLongByApp)
-      {
-        this.advanceTableForm.patchValue({reportingToGuestLatLongForBilling:reportingToGuestLatByApp + ',' + reportingToGuestLongByApp});
-      }
-      else
-      {
-        this.advanceTableForm.patchValue({reportingToGuestLatLongForBilling:null });
-      } 
-
-      // Pickup Date/Time are locked to Reservation; never patched from App/GPS/Driver here.
-      
-      this.advanceTableForm.patchValue({pickUpKMForBilling : this.advanceTableClosingOne.closingDutySlipByAppModel.pickUpKMByApp});
-      this.advanceTableForm.patchValue({pickUpAddressStringForBilling : this.advanceTableClosingOne.closingDutySlipByAppModel.pickUpAddressStringByApp});
-      if(this.advanceTableClosingOne.closingDutySlipByAppModel.pickUpLatLongByApp)
-      {
-        this.advanceTableForm.patchValue({pickUpLatLongForBilling:pickUpLatByApp + ',' + pickUpLongByApp});
-      }
-      else
-      {
-        this.advanceTableForm.patchValue({pickUpLatLongForBilling:null });
-      } 
-
-      this.advanceTableForm.patchValue({dropOffDateForBilling : this.advanceTableClosingOne.closingDutySlipByAppModel.dropOffDateByApp});
-      this.advanceTableForm.patchValue({dropOffTimeForBilling : this.advanceTableClosingOne.closingDutySlipByAppModel.dropOffTimeByApp});
-      this.advanceTableForm.patchValue({dropOffKMForBilling : this.advanceTableClosingOne.closingDutySlipByAppModel.dropOffKMByApp});
-      this.advanceTableForm.patchValue({dropOffAddressStringForBilling : this.advanceTableClosingOne.closingDutySlipByAppModel.dropOffAddressStringByApp});
-      if(this.advanceTableClosingOne.closingDutySlipByAppModel.dropOffLatLongByApp)
-      {
-        this.advanceTableForm.patchValue({dropOffLatLongForBilling:dropOffLatByApp + ',' + dropOffLongByApp});
-      }
-      else
-      {
-        this.advanceTableForm.patchValue({dropOffLatLongForBilling:null });
-      }
-
-
-      if(this.advanceTableClosingOne.closingDutySlipByAppModel.locationOutLocationOrHubID)
-      {
-        this.advanceTableForm.patchValue({locationInLocationOrHubID : this.advanceTableClosingOne.closingDutySlipByAppModel.locationOutLocationOrHubID});
-      }
-      else
-      {
-        this.advanceTableForm.patchValue({locationInLocationOrHubID : 0});
-      }
-      this.advanceTableForm.patchValue({locationInDateForBilling : this.advanceTableClosingOne.closingDutySlipByAppModel.locationInDateByApp});
-      this.advanceTableForm.patchValue({locationInTimeForBilling : this.advanceTableClosingOne.closingDutySlipByAppModel.locationInTimeByApp});
-      this.advanceTableForm.patchValue({locationInKMForBilling : this.advanceTableClosingOne.closingDutySlipByAppModel.locationInKMByApp});
-      if(this.advanceTableClosingOne.closingDutySlipByAppModel.locationInAddressStringByApp !== null)
-      {
-        this.advanceTableForm.patchValue({locationInAddressStringForBilling : this.advanceTableClosingOne.closingDutySlipByAppModel.locationInAddressStringByApp});
-      }
-      else
-      {
-        this.advanceTableForm.patchValue({locationInAddressStringForBilling : this.advanceTableClosingOne.closingDutySlipByAppModel.locationOutAddressStringByApp});
-      }
-      if(this.advanceTableClosingOne.closingDutySlipByAppModel.locationInLatLongByApp)
-      {
-        this.advanceTableForm.patchValue({locationInLatLongForBilling:locationInLatByApp + ',' + locationInLongByApp});
-      }
-      else
-      {
-        if(this.advanceTableClosingOne.closingDutySlipByAppModel.locationOutAddressStringByApp !== null)
-        {
-          this.advanceTableForm.patchValue({locationInLatLongForBilling:locationOutLatByApp + ',' + locationOutLongByApp });
-        }
-        else
-        {
-          this.advanceTableForm.patchValue({locationInLatLongForBilling:null });
-        }
-      }
-
-    this.onKeyUp();
-    this.onTimeSelection();
+    this.InitManual();
   }
 
   InitGPS()
@@ -823,6 +672,7 @@ export class DutySlipForBillingComponent implements OnInit, AfterViewInit, OnCha
       }
     
     this.onKeyUp();
+    this.applyRoundOffBillingTimes();
     this.onTimeSelection();
   }
 
@@ -1009,6 +859,7 @@ export class DutySlipForBillingComponent implements OnInit, AfterViewInit, OnCha
       }
     this.applyReportingFromPickupFallbackToForm();
     this.onKeyUp();
+    this.applyRoundOffBillingTimes();
     this.onTimeSelection();
   }
 
@@ -1085,6 +936,7 @@ export class DutySlipForBillingComponent implements OnInit, AfterViewInit, OnCha
     }
     this.applyClosingFieldDefaults();
     this.syncLoadedRemarksFromForm();
+    this.syncLoadedTripFieldsFromForm();
   }
 
   private applyClosingAllowanceValues(response: any): void {
@@ -1229,6 +1081,82 @@ export class DutySlipForBillingComponent implements OnInit, AfterViewInit, OnCha
     return !Number.isNaN(date.getTime());
   }
 
+  originalDutySlipTime(field: 'locationOutTime' | 'pickUpTime' | 'dropOffTime' | 'locationInTime'): string {
+    const raw = this.advanceTableClosingOne?.closingDutySlipModel?.[field];
+    if (!this.isValidBillingDate(raw)) {
+      return '';
+    }
+    const date = raw instanceof Date ? raw : new Date(raw as any);
+    const hours = String(date.getHours()).padStart(2, '0');
+    const minutes = String(date.getMinutes()).padStart(2, '0');
+    return `${hours}:${minutes}`;
+  }
+
+  private isRoundOffTimeEnabled(): boolean {
+    const reservation = this.advanceTableClosingOne?.closingReservationForPickupDataModel as any;
+    if (!reservation) {
+      return true;
+    }
+    const flag = reservation.roundOffTime ?? reservation.RoundOffTime;
+    if (flag === false || flag === 0 || flag === '0' || flag === 'false') {
+      return false;
+    }
+    return true;
+  }
+
+  private applyRoundOffBillingTimes(): void {
+    if (!this.isRoundOffTimeEnabled() || !this.advanceTableForm) {
+      return;
+    }
+    this.roundBillingTimePair('dropOffTimeForBilling', 'dropOffDateForBilling');
+    this.roundBillingTimePair('locationInTimeForBilling', 'locationInDateForBilling');
+  }
+
+  private roundBillingTimePair(timeCtrl: string, dateCtrl: string): void {
+    const timeVal = this.advanceTableForm.get(timeCtrl)?.value;
+    if (!this.isValidBillingDate(timeVal)) {
+      return;
+    }
+    const source = timeVal instanceof Date ? timeVal : new Date(timeVal);
+    const rounded = this.roundMinutesToBillingQuarter(source);
+    this.advanceTableForm.get(timeCtrl)?.setValue(rounded.time, { emitEvent: false });
+    if (!rounded.addDays) {
+      return;
+    }
+    const dateVal = this.advanceTableForm.get(dateCtrl)?.value;
+    if (!this.isValidBillingDate(dateVal)) {
+      return;
+    }
+    const nextDate = new Date(dateVal instanceof Date ? dateVal.getTime() : new Date(dateVal).getTime());
+    nextDate.setDate(nextDate.getDate() + 1);
+    this.advanceTableForm.get(dateCtrl)?.setValue(nextDate, { emitEvent: false });
+  }
+
+  private roundMinutesToBillingQuarter(source: Date): { time: Date; addDays: boolean } {
+    const copy = new Date(source.getTime());
+    let hours = copy.getHours();
+    let minutes = copy.getMinutes();
+    let addDays = false;
+    if (minutes <= 6) {
+      minutes = 0;
+    } else if (minutes <= 22) {
+      minutes = 15;
+    } else if (minutes <= 37) {
+      minutes = 30;
+    } else if (minutes <= 52) {
+      minutes = 45;
+    } else {
+      minutes = 0;
+      hours += 1;
+    }
+    if (hours >= 24) {
+      hours = 0;
+      addDays = true;
+    }
+    copy.setHours(hours, minutes, 0, 0);
+    return { time: copy, addDays };
+  }
+
   /** Pickup = reporting when reporting leg was never captured separately. */
   private applyReportingFromPickupFallbackToForm(): void {
     const form = this.advanceTableForm.getRawValue();
@@ -1315,7 +1243,7 @@ export class DutySlipForBillingComponent implements OnInit, AfterViewInit, OnCha
       return;
     }
     if (this.isDutySlipEditBlocked) {
-      this.advanceTableForm.disable({ emitEvent: false });
+      this.disableLockedControlsWithoutFullFormDisable();
       this.applyAlwaysEditableRemarks();
       this.applyAlwaysEditableKm();
       return;
@@ -1324,6 +1252,22 @@ export class DutySlipForBillingComponent implements OnInit, AfterViewInit, OnCha
     this.applyManualEditMode();
     this.applyClosingFieldDefaults();
     this.syncVerifyDutyAndGoodForBillingState();
+  }
+
+  /** Disable locked fields one-by-one. FormGroup.disable() then re-enabling KM/remarks freezes Closing One after GFB. */
+  private disableLockedControlsWithoutFullFormDisable(): void {
+    const keepEnabled = this.isEInvoiceBlockingEdits
+      ? new Set<string>()
+      : new Set<string>([
+          ...this.alwaysEditableRemarkControls,
+          ...this.alwaysEditableKmControls,
+        ]);
+    for (const name of Object.keys(this.advanceTableForm.controls)) {
+      if (keepEnabled.has(name)) {
+        continue;
+      }
+      this.advanceTableForm.get(name)?.disable({ emitEvent: false });
+    }
   }
 
   /** Remark On DS Closing and Vendor Remark stay editable unless E-Invoice blocks the duty slip. */
@@ -1417,7 +1361,7 @@ export class DutySlipForBillingComponent implements OnInit, AfterViewInit, OnCha
     }
   }
 
-  private guardDutySlipEdit(): boolean {
+  private guardDutySlipEdit(options?: { skipGfbLock?: boolean }): boolean {
     if (this.isEInvoiceBlockingEdits) {
       this.showNotification(
         'snackbar-warning',
@@ -1427,7 +1371,7 @@ export class DutySlipForBillingComponent implements OnInit, AfterViewInit, OnCha
       );
       return false;
     }
-    if (this.isGoodForBillingBlockingEdits) {
+    if (!options?.skipGfbLock && this.isGoodForBillingBlockingEdits) {
       this.showNotification(
         'snackbar-warning',
         'Duty slip is marked Good for Billing. Your role is not allowed to make changes.',
@@ -1439,13 +1383,17 @@ export class DutySlipForBillingComponent implements OnInit, AfterViewInit, OnCha
     return true;
   }
 
-  applyExternalEInvoiceState(state: { hasActiveEInvoice: boolean; irn?: string | null }): void {
+  applyExternalEInvoiceState(state: { hasActiveEInvoice: boolean; hasActiveInvoice?: boolean; irn?: string | null }): void {
     this.hasActiveEInvoice = state.hasActiveEInvoice === true;
+    if (state.hasActiveInvoice !== undefined) {
+      this.hasActiveInvoice = state.hasActiveInvoice === true;
+    }
     if (state.irn !== undefined) {
       this.IRN = state.irn;
     }
     if (this.advanceTableClosingOne) {
       this.advanceTableClosingOne.hasActiveEInvoice = this.hasActiveEInvoice;
+      this.advanceTableClosingOne.hasActiveInvoice = this.hasActiveInvoice;
       if (state.irn !== undefined) {
         this.advanceTableClosingOne.irn = state.irn;
       }
@@ -1453,12 +1401,12 @@ export class DutySlipForBillingComponent implements OnInit, AfterViewInit, OnCha
     this.applyDutySlipEditLockState();
   }
 
-  private async refreshEInvoiceStateBeforeSave(): Promise<boolean> {
+  private async refreshEInvoiceStateBeforeSave(options?: { skipGfbLock?: boolean }): Promise<boolean> {
     const dutySlipId = this.DutySlipID
       ?? this.advanceTableClosingOne?.closingDutySlipModel?.dutySlipID
       ?? this.advanceTableForm?.get('dutySlipID')?.value;
     if (dutySlipId == null || dutySlipId === '') {
-      return this.guardDutySlipEdit();
+      return this.guardDutySlipEdit(options);
     }
     try {
       const state = await firstValueFrom(
@@ -1468,7 +1416,7 @@ export class DutySlipForBillingComponent implements OnInit, AfterViewInit, OnCha
     } catch {
       // Fall back to in-memory guard when refresh fails.
     }
-    return this.guardDutySlipEdit();
+    return this.guardDutySlipEdit(options);
   }
 
   get isDutyCalculated(): boolean {
@@ -1523,6 +1471,96 @@ export class DutySlipForBillingComponent implements OnInit, AfterViewInit, OnCha
     }
     return this.normalizeRemark(form.runningDetails) !== this.loadedRunningDetails
       || this.normalizeRemark(form.vendorRemark) !== this.loadedVendorRemark;
+  }
+
+  private normalizeTripField(name: string, value: unknown): string {
+    if (value == null || value === '') {
+      return '';
+    }
+    if (name.endsWith('DateForBilling')) {
+      const dateM = moment(value as moment.MomentInput);
+      return dateM.isValid() ? dateM.format('YYYY-MM-DD') : String(value).trim();
+    }
+    if (name.endsWith('TimeForBilling')) {
+      const timeM = moment(value as moment.MomentInput);
+      return timeM.isValid() ? timeM.format('HH:mm') : String(value).trim();
+    }
+    if (typeof value === 'boolean') {
+      return value ? '1' : '0';
+    }
+    if (typeof value === 'number' && Number.isFinite(value)) {
+      return String(value);
+    }
+    const asString = String(value).trim();
+    if (asString === 'true' || asString === '1') {
+      return '1';
+    }
+    if (asString === 'false' || asString === '0') {
+      return '0';
+    }
+    return asString;
+  }
+
+  private syncLoadedTripFieldsFromForm(): void {
+    const form = this.advanceTableForm?.getRawValue();
+    if (!form) {
+      this.tripFieldsSnapshotReady = false;
+      return;
+    }
+    this.loadedTripFieldValues = {};
+    for (const name of this.fullPutFieldControls) {
+      this.loadedTripFieldValues[name] = this.normalizeTripField(name, form[name]);
+    }
+    this.tripFieldsSnapshotReady = true;
+  }
+
+  haveTripFieldsChanged(): boolean {
+    if (!this.tripFieldsSnapshotReady) {
+      return true;
+    }
+    const form = this.advanceTableForm?.getRawValue();
+    if (!form) {
+      return true;
+    }
+    return this.fullPutFieldControls.some(
+      name => this.normalizeTripField(name, form[name]) !== (this.loadedTripFieldValues[name] ?? '')
+    );
+  }
+
+  /** GFB checkbox is not a data edit. Ignore Verify/GFB so a GFB click does not always look dirty. */
+  private haveUnsavedBillingPutFieldsChanged(): boolean {
+    if (!this.tripFieldsSnapshotReady) {
+      return true;
+    }
+    const form = this.advanceTableForm?.getRawValue();
+    if (!form) {
+      return true;
+    }
+    return this.fullPutFieldControls.some((name) => {
+      if (name === 'verifyDuty' || name === 'goodForBilling') {
+        return false;
+      }
+      return this.normalizeTripField(name, form[name]) !== (this.loadedTripFieldValues[name] ?? '');
+    });
+  }
+
+  private hasUnsavedClosingEdits(): boolean {
+    return this.haveUnsavedBillingPutFieldsChanged()
+      || this.haveKmChanged()
+      || this.haveRemarksChanged()
+      || this.haveClosingAllowancesChanged();
+  }
+
+  get canSavePartialPreGfb(): boolean {
+    const billingId = this.advanceTableForm?.get('dutySlipForBillingID')?.value;
+    return this.buttonText === 'Update'
+      && billingId != null
+      && billingId !== ''
+      && Number(billingId) > 0
+      && !this.isGoodForBillingBlockingEdits
+      && !this.isEInvoiceBlockingEdits
+      && (this.haveRemarksChanged() || this.haveKmChanged())
+      && !this.haveTripFieldsChanged();
   }
 
   get canSavePartialAfterGfb(): boolean {
@@ -1775,7 +1813,13 @@ export class DutySlipForBillingComponent implements OnInit, AfterViewInit, OnCha
     if (billing) {
       billing.verifyDuty = verifyDuty;
       billing.goodForBilling = goodForBilling;
+      billing.readyForBulkBilling =
+        billing.readyForBulkBilling === true || (billing as any).ReadyForBulkBilling === true;
+      billing.readyForBulkGfb =
+        billing.readyForBulkGfb === true || (billing as any).ReadyForBulkGfb === true;
     }
+    this.readyForBulkBilling = !!billing?.readyForBulkBilling && !this.hasActiveInvoiceLock;
+    this.readyForBulkGfb = !!billing?.readyForBulkGfb && !goodForBilling && !this.hasActiveInvoiceLock;
     this.advanceTableForm.patchValue({ verifyDuty });
     this.advanceTableForm.patchValue({dsClosing : this.advanceTableClosingOne.closingDutySlipForBillingModel.dsClosing});
     this.advanceTableForm.patchValue({runningDetails : this.advanceTableClosingOne.closingDutySlipForBillingModel.runningDetails});
@@ -1787,6 +1831,7 @@ export class DutySlipForBillingComponent implements OnInit, AfterViewInit, OnCha
     //this.advanceTableForm.patchValue({actionTaken : this.advanceTableClosingOne.closingDutySlipModel.actionTaken});
     //this.advanceTableForm.patchValue({actionDetails : this.advanceTableClosingOne.closingDutySlipModel.actionDetails});
     this.onKeyUp();
+    this.applyRoundOffBillingTimes();
     this.onTimeSelection();
     this.applyClosingFieldDefaults();
     this.applyDutySlipEditLockState();
@@ -2102,7 +2147,7 @@ export class DutySlipForBillingComponent implements OnInit, AfterViewInit, OnCha
   }
 
 
-  onGFBChange(event: any) 
+  async onGFBChange(event: any)
     {
       if(this.advanceTableForm.value.verifyDuty===false || this.advanceTableForm.value.verifyDuty==='' || this.advanceTableForm.value.verifyDuty===null)
       {
@@ -2121,6 +2166,14 @@ export class DutySlipForBillingComponent implements OnInit, AfterViewInit, OnCha
           this.advanceTableForm.patchValue({ goodForBilling: false });
           return false;
         }
+        const needsPersistAndCalc = this.hasUnsavedClosingEdits();
+        if (needsPersistAndCalc) {
+          const saved = await this.persistClosingUpdate({ fromGfb: true });
+          if (!saved) {
+            this.advanceTableForm.patchValue({ goodForBilling: false });
+            return false;
+          }
+        }
         let at = "Checked";
         this.advanceTableForm.patchValue({actionTaken : "GoodForBilling"});
         this.advanceTableForm.patchValue({actionDetails : at});
@@ -2128,9 +2181,9 @@ export class DutySlipForBillingComponent implements OnInit, AfterViewInit, OnCha
         this.advanceTableBH.goodForBilling = isChecked;
         this.advanceTableBH.actionTaken = this.advanceTableForm.value.actionTaken;
         this.advanceTableBH.actionDetails = this.advanceTableForm.value.actionDetails;
-        this.updateDutyStatus(true, true, () => {
-          this.CalculateBill(false, true);
-        });
+        if (needsPersistAndCalc || !this.isDutyCalculated) {
+          await this.calculateBillAfterGfb();
+        }
       }
       if(isChecked === false)
       {
@@ -2146,12 +2199,19 @@ export class DutySlipForBillingComponent implements OnInit, AfterViewInit, OnCha
         this.advanceTableClosingOne.closingDutySlipForBillingModel.goodForBilling = isChecked;
         this.advanceTableClosingOne.closingDutySlipForBillingModel.verifyDuty =
           this.advanceTableForm.value.verifyDuty;
+        if (isChecked) {
+          this.readyForBulkGfb = false;
+          this.advanceTableClosingOne.closingDutySlipForBillingModel.readyForBulkGfb = false;
+        }
+        if (!isChecked) {
+          this.readyForBulkBilling = false;
+          this.advanceTableClosingOne.closingDutySlipForBillingModel.readyForBulkBilling = false;
+        }
       }
       if(isChecked !==null)
       {
-        this.SaveDataInBillingHistory();
+        this.SaveDataInBillingHistory({ skipGfbLock: true });
       }
-      this.applyDutySlipEditLockState();
   }
 
   // onVDChange(event: any) 
@@ -2213,9 +2273,7 @@ export class DutySlipForBillingComponent implements OnInit, AfterViewInit, OnCha
     if (!this.disputeAdvanceTable || this.disputeAdvanceTable.length === 0) {
       // No disputes, allow verify duty
       this.setVerifyDuty(true, "Checked");
-      this.updateDutyStatus(true,false,() => {
-    this.CalculateBillForVerifyDuty();
-});
+      this.CalculateBillForVerifyDuty();
     } else {
       // Disputes exist: all approvalStatus must be true
       const allApproved = this.disputeAdvanceTable.every(
@@ -2224,9 +2282,7 @@ export class DutySlipForBillingComponent implements OnInit, AfterViewInit, OnCha
 
       if (allApproved) {
         this.setVerifyDuty(true, "Checked");
-        this.updateDutyStatus(true,false,() => {
-    this.CalculateBillForVerifyDuty();
-});
+        this.CalculateBillForVerifyDuty();
       }
        else {
         // Show alert and revert checkbox
@@ -2264,6 +2320,12 @@ setVerifyDuty(value: boolean, details: string) {
   if (this.advanceTableClosingOne?.closingDutySlipForBillingModel) {
     this.advanceTableClosingOne.closingDutySlipForBillingModel.verifyDuty = value;
     this.advanceTableClosingOne.closingDutySlipForBillingModel.goodForBilling = false;
+    if (!value) {
+      this.advanceTableClosingOne.closingDutySlipForBillingModel.readyForBulkGfb = false;
+    }
+  }
+  if (!value) {
+    this.readyForBulkGfb = false;
   }
   this.SaveDataInBillingHistory();
 }
@@ -2291,9 +2353,9 @@ public resetVerificationForEcoStateChange(): void {
 }
 
 
-  SaveDataInBillingHistory()
+  SaveDataInBillingHistory(options?: { skipGfbLock?: boolean })
   {
-    if (!this.guardDutySlipEdit()) {
+    if (!this.guardDutySlipEdit(options)) {
       return;
     }
     if (!this.showCalculateBillOverlay) {
@@ -2318,7 +2380,10 @@ public resetVerificationForEcoStateChange(): void {
         }
       }
       this.applyDutySlipEditLockState();
-      if(response.actionTaken !== "Verify Duty")
+      const actionTaken = response.actionTaken ?? this.advanceTableBH?.actionTaken;
+      const isGfbCheck = actionTaken === 'GoodForBilling'
+        && (response.goodForBilling === true || this.advanceTableBH?.goodForBilling === true);
+      if (actionTaken !== 'Verify Duty' && !isGfbCheck)
       {
         this.showNotification(
           'snackbar-success',
@@ -2598,6 +2663,7 @@ public resetVerificationForEcoStateChange(): void {
           'bottom',
           'center'
         );
+        this.saveClosingAllowancesIfChanged();
       },
       error => {
         this.showSpinner = false;
@@ -2617,63 +2683,157 @@ public resetVerificationForEcoStateChange(): void {
     if (!allowed) {
       return;
     }
-    if (this.canSavePartialAfterGfb) {
+    const usePartial = this.canSavePartialAfterGfb || this.canSavePartialPreGfb;
+    this.resetGoodForBillingOnUpdate();
+    if (usePartial) {
       this.savePartialAfterGfb();
       return;
     }
-    if (!this.guardDutySlipEdit()) {
-      return;
+    await this.persistClosingUpdate({ skipEInvoiceRefresh: true });
+  }
+
+  /** Update/Save unchecks GFB (Verify stays) and clears Ready. Not used by the GFB checkbox path. */
+  private resetGoodForBillingOnUpdate(): boolean {
+    const billing = this.advanceTableClosingOne?.closingDutySlipForBillingModel;
+    const dutySlip = this.advanceTableClosingOne?.closingDutySlipModel;
+    const isGfb = this.getBillingFlag(
+      billing?.goodForBilling ?? (billing as any)?.GoodForBilling,
+      dutySlip?.goodForBilling ?? (dutySlip as any)?.GoodForBilling
+        ?? this.advanceTableForm?.get('goodForBilling')?.value
+    );
+    if (!isGfb) {
+      return false;
+    }
+
+    if (!this.advanceTableBH) {
+      this.advanceTableBH = {} as BillingHistory;
+    }
+
+    this.advanceTableForm.patchValue({
+      goodForBilling: false,
+      actionTaken: 'GoodForBilling',
+      actionDetails: 'Unchecked',
+    });
+    this.advanceTableBH.verifyDuty = this.advanceTableForm.getRawValue()?.verifyDuty;
+    this.advanceTableBH.goodForBilling = false;
+    this.advanceTableBH.actionTaken = 'GoodForBilling';
+    this.advanceTableBH.actionDetails = 'Unchecked';
+    this.readyForBulkBilling = false;
+    if (billing) {
+      billing.goodForBilling = false;
+      billing.readyForBulkBilling = false;
+    }
+    this.SaveDataInBillingHistory({ skipGfbLock: true });
+    this.dutyStatusChanged.emit({
+      verifyDuty: !!this.advanceTableForm.getRawValue()?.verifyDuty,
+      goodForBilling: false,
+      message: 'Good for Billing was reset.',
+    });
+    this.showNotification(
+      'snackbar-warning',
+      'Good for Billing was reset. Please set Good for Billing again.',
+      'bottom',
+      'center'
+    );
+    return true;
+  }
+
+  /**
+   * Full PUT /Closing (Update). Update already reset GFB when it was checked. Does not call GTrack.
+   * GFB checkbox path uses fromGfb so unsaved times/KM/remarks are saved before calculate.
+   */
+  private async persistClosingUpdate(options?: {
+    fromGfb?: boolean;
+    skipEInvoiceRefresh?: boolean;
+  }): Promise<boolean> {
+    const fromGfb = options?.fromGfb === true;
+    const guardOptions = fromGfb ? { skipGfbLock: true } : undefined;
+    if (!options?.skipEInvoiceRefresh) {
+      const allowed = await this.refreshEInvoiceStateBeforeSave(guardOptions);
+      if (!allowed) {
+        return false;
+      }
+    }
+    if (!this.guardDutySlipEdit(guardOptions)) {
+      return false;
     }
     this.showSpinner = true;
     if (!this.checkChronologyAndValues()) {
       this.showSpinner = false;
-      return;
+      return false;
     }
     this.applyClosingFieldDefaults();
-    //this.saveDisabled = true;
-      if (!this.ClossingDetails())
-      {
+    if (!this.ClossingDetails()) {
+      this.showSpinner = false;
+      return false;
+    }
+
+    const payload = this.advanceTableForm.getRawValue();
+    payload.fetchGtrackRunningDetails = false;
+    payload.goodForBilling = false;
+
+    try {
+      const response = await firstValueFrom(this.dutySlipForBillingService.update(payload));
+      this.DSClosing = response.dsClosing;
+      this.buttonText = 'Update';
+      this.syncClosingModelFromResponse(response);
+      this.syncVerifyDutyAndGoodForBillingState();
+      if (fromGfb) {
+        this.advanceTableForm.patchValue(
+          { goodForBilling: true, verifyDuty: true },
+          { emitEvent: false }
+        );
+      }
+      this.syncLoadedTripFieldsFromForm();
+      this.syncLoadedKmFromForm();
+      const allowancesOk = await this.saveClosingAllowancesIfChangedAsync();
+      this.showSpinner = false;
+      if (!fromGfb) {
+        this.showNotification(
+          'snackbar-success',
+          'Saved...!!!',
+          'bottom',
+          'center'
+        );
+      }
+      return allowancesOk;
+    } catch (error) {
+      this.showSpinner = false;
+      this.showNotification(
+        'snackbar-danger',
+        this.extractApiErrorMessage(error, 'Operation Failed.....!!!'),
+        'bottom',
+        'center'
+      );
+      return false;
+    }
+  }
+
+  private saveClosingAllowancesIfChangedAsync(): Promise<boolean> {
+    return new Promise((resolve) => {
+      if (!this.canEditClosingAllowances || !this.haveClosingAllowancesChanged()) {
+        resolve(true);
         return;
-      } 
-      this.advanceTableForm.patchValue({actionDetails :'Unchecked',actionTaken : "Verify Duty"});
-      //this.saveDisabled = true;      
-      this.dutySlipForBillingService.update(this.advanceTableForm.getRawValue())  
-      .subscribe(
-        response => 
-        {
-          this.DSClosing = response.dsClosing;
-          this.buttonText = 'Update';
-          this.syncClosingModelFromResponse(response);
-          this.syncVerifyDutyAndGoodForBillingState();
-          if(response.goodForBilling === true || response.verifyDuty === true)
-          {
-            this.advanceTableForm.controls["goodForBilling"].setValue(false);
-            this.advanceTableForm.controls["verifyDuty"].setValue(false);
-          }
-          const finishPutSuccess = () => {
-            this.showSpinner = false;
-            this.showNotification(
-              'snackbar-success',
-              'Saved...!!!',
-              'bottom',
-              'center'
-            );
-          };
-          this.saveClosingAllowancesIfChanged(finishPutSuccess);
+      }
+      this.clossingOneService.updateClosingAllowances(this.DutySlipID, {
+        totalDriverAllowanceDays: this.toAllowanceNumber(this.totalDriverAllowanceDays),
+        totalNights: this.toAllowanceNumber(this.totalNights),
+      }).subscribe(
+        (response) => {
+          this.applyClosingAllowanceValues(response);
+          resolve(true);
         },
-        error =>
-        {
-          this.showSpinner = false;
+        (error) => {
           this.showNotification(
             'snackbar-danger',
-            this.extractApiErrorMessage(error, 'Operation Failed.....!!!'),
+            this.extractApiErrorMessage(error, 'Failed to save driver/night allowance.'),
             'bottom',
             'center'
-          ); 
-          //this.saveDisabled = true;
+          );
+          resolve(false);
         }
-      )
-    
+      );
+    });
   }
       
 
@@ -2704,15 +2864,23 @@ public resetVerificationForEcoStateChange(): void {
   //---------Calculate Bill------------------------
   /**
    * @param showSummaryPopup when true, opens Summary of Duty dialog after success
-   * @param openDummyInvoiceAfter when true (GFB path), opens Dummy Invoice in a new tab and never shows Summary
+   * @param skipEditGuard when true (GFB path), skip the edit guard so calc still runs after GFB lock.
+   * Dummy Invoice is not opened here; clerks open it with View Dummy Invoice.
+   * @param skipLoadClosingAllowances GFB already has Verify allowance totals; skip extra GET.
    */
-  public CalculateBill(showSummaryPopup = false, openDummyInvoiceAfter = false)
+  public CalculateBill(
+    showSummaryPopup = false,
+    skipEditGuard = false,
+    skipLoadClosingAllowances = false
+  ): Promise<boolean>
   {
+    return new Promise((resolve) => {
     // GFB path already persisted status; skip edit guard so calc still runs after GFB lock.
-    if (!openDummyInvoiceAfter && !this.guardDutySlipEdit()) {
+    if (!skipEditGuard && !this.guardDutySlipEdit()) {
+      resolve(false);
       return;
     }
-    if (showSummaryPopup || openDummyInvoiceAfter) {
+    if (showSummaryPopup) {
       this.showCalculateBillOverlay = true;
     } else {
       this.showSpinnerForVDGB = true;
@@ -2728,7 +2896,7 @@ public resetVerificationForEcoStateChange(): void {
         goodForBilling: this.advanceTableForm.value.goodForBilling,
         message: this.Message
       });
-        if (showSummaryPopup || openDummyInvoiceAfter) {
+        if (showSummaryPopup) {
           this.showCalculateBillOverlay = false;
         } else {
           this.showSpinnerForVDGB = false;
@@ -2740,16 +2908,17 @@ public resetVerificationForEcoStateChange(): void {
           'center'
         );
         this.saveDisabled = true;
-        this.loadClosingAllowances();
-        if (openDummyInvoiceAfter) {
-          this.openDummyInvoice();
-        } else if (showSummaryPopup) {
+        if (!skipLoadClosingAllowances) {
+          this.loadClosingAllowances();
+        }
+        if (showSummaryPopup) {
           this.openSummaryOfDutyDialog();
         }
+        resolve(true);
       },
       error =>
       {
-        if (showSummaryPopup || openDummyInvoiceAfter) {
+        if (showSummaryPopup) {
           this.showCalculateBillOverlay = false;
         } else {
           this.showSpinnerForVDGB = false;
@@ -2764,8 +2933,10 @@ public resetVerificationForEcoStateChange(): void {
             this.onGFBChange({ checked: false });
             this.saveDisabled = true;
           });
+        resolve(false);
       }
     );
+    });
   }
 
  GetClosingData()
@@ -2828,7 +2999,142 @@ onChange() {
     return this.advanceTableForm?.get('goodForBilling')?.value === true;
   }
 
-  openDummyInvoice(): void {
+  get hasActiveInvoiceLock(): boolean {
+    if (this.hasActiveInvoice === true || this.advanceTableClosingOne?.hasActiveInvoice === true) {
+      return true;
+    }
+    const invoiceId = this.advanceTableClosingOne?.invoiceID ?? this.InvoiceID;
+    return Number(invoiceId) > 0;
+  }
+
+  get canToggleReadyForBulkGfb(): boolean {
+    const verifyDuty = this.advanceTableForm?.getRawValue()?.verifyDuty
+      ?? this.advanceTableClosingOne?.closingDutySlipForBillingModel?.verifyDuty;
+    const goodForBilling = this.advanceTableForm?.getRawValue()?.goodForBilling
+      ?? this.advanceTableClosingOne?.closingDutySlipForBillingModel?.goodForBilling;
+    return !!verifyDuty
+      && !goodForBilling
+      && !this.hasActiveInvoiceLock
+      && !this.isEInvoiceBlockingEdits;
+  }
+
+  get canToggleReadyForBulkBilling(): boolean {
+    return this.canViewDummyInvoice()
+      && !this.hasActiveInvoiceLock
+      && !this.isEInvoiceBlockingEdits;
+  }
+
+  onReadyForBulkGfbChange(event: any): void {
+    const isChecked = event.checked === true;
+    if (isChecked && !this.canToggleReadyForBulkGfb) {
+      this.readyForBulkGfb = false;
+      const goodForBilling = this.advanceTableForm?.getRawValue()?.goodForBilling
+        ?? this.advanceTableClosingOne?.closingDutySlipForBillingModel?.goodForBilling;
+      this.showNotification(
+        'snackbar-warning',
+        this.hasActiveInvoiceLock
+          ? 'Invoice already exists. Ready for Bulk GFB cannot be set.'
+          : goodForBilling
+            ? 'Uncheck Good for Billing before Ready for Bulk GFB.'
+            : 'Check Verify Duty before Ready for Bulk GFB.',
+        'bottom',
+        'center'
+      );
+      return;
+    }
+
+    const previous = this.readyForBulkGfb;
+    this.readyForBulkGfb = isChecked;
+    this.tagSaving = true;
+    this.dutySlipForBillingService
+      .setReadyForBulkGfb(this.DutySlipID, isChecked, this._generalService.getUserID())
+      .subscribe({
+        next: (response) => {
+          this.tagSaving = false;
+          this.readyForBulkGfb =
+            response?.readyForBulkGfb === true || response?.ReadyForBulkGfb === true;
+          if (this.advanceTableClosingOne?.closingDutySlipForBillingModel) {
+            this.advanceTableClosingOne.closingDutySlipForBillingModel.readyForBulkGfb =
+              this.readyForBulkGfb;
+          }
+          this.showNotification(
+            'snackbar-success',
+            this.readyForBulkGfb ? 'Ready for Bulk GFB set.' : 'Ready for Bulk GFB cleared.',
+            'bottom',
+            'center'
+          );
+        },
+        error: (err) => {
+          this.tagSaving = false;
+          this.readyForBulkGfb = previous;
+          this.showNotification(
+            'snackbar-danger',
+            err?.error?.message || err?.error?.Message || err || 'Could not update Ready for Bulk GFB.',
+            'bottom',
+            'center'
+          );
+        },
+      });
+  }
+
+  onReadyForBulkBillingChange(event: any): void {
+    const isChecked = event.checked === true;
+    if (isChecked && !this.canToggleReadyForBulkBilling) {
+      this.readyForBulkBilling = false;
+      this.showNotification(
+        'snackbar-warning',
+        this.hasActiveInvoiceLock
+          ? 'Invoice already exists. Ready For Bulk Billing cannot be set.'
+          : 'Check Good For Billing before Ready For Bulk Billing.',
+        'bottom',
+        'center'
+      );
+      return;
+    }
+
+    const previous = this.readyForBulkBilling;
+    this.readyForBulkBilling = isChecked;
+    this.tagSaving = true;
+    this.dutySlipForBillingService
+      .setReadyForBulkBilling(this.DutySlipID, isChecked, this._generalService.getUserID())
+      .subscribe({
+        next: (response) => {
+          this.tagSaving = false;
+          this.readyForBulkBilling =
+            response?.readyForBulkBilling === true || response?.ReadyForBulkBilling === true;
+          if (this.advanceTableClosingOne?.closingDutySlipForBillingModel) {
+            this.advanceTableClosingOne.closingDutySlipForBillingModel.readyForBulkBilling =
+              this.readyForBulkBilling;
+          }
+          this.showNotification(
+            'snackbar-success',
+            this.readyForBulkBilling ? 'Ready For Bulk Billing set.' : 'Ready For Bulk Billing cleared.',
+            'bottom',
+            'center'
+          );
+        },
+        error: (err) => {
+          this.tagSaving = false;
+          this.readyForBulkBilling = previous;
+          this.showNotification(
+            'snackbar-danger',
+            err?.error?.message || err?.error?.Message || err || 'Could not update Ready For Bulk Billing.',
+            'bottom',
+            'center'
+          );
+        },
+      });
+  }
+
+  /** GFB calculate: persist already ran. Do not open Dummy Invoice. Skip extra allowance GET. */
+  private calculateBillAfterGfb(): Promise<boolean> {
+    return this.CalculateBill(false, true, true);
+  }
+
+  openDummyInvoice(event?: Event): void {
+    if (!event || event.type !== 'click') {
+      return;
+    }
     if (!this.canViewDummyInvoice()) {
       this.showNotification(
         'snackbar-warning',
@@ -2878,7 +3184,8 @@ onChange() {
         this.dutyStatusChanged.emit({
           verifyDuty: this.advanceTableForm.value.verifyDuty,
           goodForBilling: this.advanceTableForm.value.goodForBilling,
-          message: this.Message
+          message: this.Message,
+          invoiceCalculated: true
         });
 
         this.showNotification(
@@ -2891,10 +3198,13 @@ onChange() {
       },
       error =>
       {
-        // Calculation still runs; suppress error popup on Verify Duty only
-        this.advanceTableForm.patchValue({ verifyDuty: true });
-        this.advanceTableForm.patchValue({ goodForBilling: false });
-        this.onGFBChange({ checked: false });
+        // Keep Verify on and GFB off locally. Do not call onGFBChange —
+        // that would POST a dummy GoodForBilling Unchecked history row.
+        this.advanceTableForm.patchValue({ verifyDuty: true, goodForBilling: false });
+        if (this.advanceTableClosingOne?.closingDutySlipForBillingModel) {
+          this.advanceTableClosingOne.closingDutySlipForBillingModel.verifyDuty = true;
+          this.advanceTableClosingOne.closingDutySlipForBillingModel.goodForBilling = false;
+        }
         this.saveDisabled = true;
       }
     );
@@ -2907,8 +3217,12 @@ onChange() {
       goodForBilling: goodForBilling
     });
 
+    const payload = this.advanceTableForm.getRawValue();
+    // Update also sends actionTaken "Verify Duty"; only the checkbox should call GTrack.
+    payload.fetchGtrackRunningDetails = verifyDuty === true && goodForBilling !== true;
+
     this.dutySlipForBillingService
-      .update(this.advanceTableForm.getRawValue())
+      .update(payload)
       .subscribe({
         next: (response) => {
 

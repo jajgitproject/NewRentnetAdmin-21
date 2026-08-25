@@ -290,6 +290,9 @@
                     </div>
 
                     <div class="col-xl-3 col-lg-3 col-md-6 col-sm-12 mb-2">
+                      <div class="original-billing-time" *ngIf="originalDutySlipTime('locationOutTime') as originalTime">
+                        Actual Time: {{ originalTime }}
+                      </div>
                       <mat-form-field appearance="fill" floatLabel="auto" subscriptSizing="dynamic" class="example-full-width cp-quick-search-field">
                         <mat-label>Location Out Time</mat-label>
                         <input required matInput [owlDateTimeTrigger]="time1" [owlDateTime]="time1"
@@ -329,6 +332,9 @@
                     </div>
 
                     <div class="col-xl-3 col-lg-3 col-md-6 col-sm-12 mb-2">
+                      <div class="original-billing-time" *ngIf="originalDutySlipTime('pickUpTime') as originalTime">
+                        Actual Time: {{ originalTime }}
+                      </div>
                       <mat-form-field appearance="fill" floatLabel="auto" subscriptSizing="dynamic" class="example-full-width cp-quick-search-field">
                         <mat-label>Pickup Time</mat-label>
                         <input required matInput [owlDateTimeTrigger]="time2" [owlDateTime]="time2"
@@ -372,6 +378,9 @@
                     </div>
 
                     <div class="col-xl-3 col-lg-3 col-md-6 col-sm-12 mb-2">
+                      <div class="original-billing-time" *ngIf="originalDutySlipTime('dropOffTime') as originalTime">
+                        Actual Time: {{ originalTime }}
+                      </div>
                       <mat-form-field appearance="fill" floatLabel="auto" subscriptSizing="dynamic" class="example-full-width cp-quick-search-field">
                         <mat-label>DropOff Time</mat-label>
                         <input required matInput [owlDateTimeTrigger]="time3" [owlDateTime]="time3"
@@ -408,6 +417,9 @@
                     </div>
 
                     <div class="col-xl-3 col-lg-3 col-md-6 col-sm-12 mb-2">
+                      <div class="original-billing-time" *ngIf="originalDutySlipTime('locationInTime') as originalTime">
+                        Actual Time: {{ originalTime }}
+                      </div>
                       <mat-form-field appearance="fill" floatLabel="auto" subscriptSizing="dynamic" class="example-full-width cp-quick-search-field">
                         <mat-label>LocationIn Time</mat-label>
                         <input required matInput [owlDateTimeTrigger]="time4" [owlDateTime]="time4"
@@ -539,9 +551,23 @@
             &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
             <button *ngIf="canThisRoleViewDummyInvoice" mat-raised-button color="primary" type="button"
               [disabled]="!canViewDummyInvoice()"
-              (click)="openDummyInvoice()">
+              (click)="openDummyInvoice($event)">
               View Dummy Invoice
             </button>
+            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+            <mat-checkbox *ngIf="canToggleGoodForBilling"
+              [checked]="readyForBulkGfb"
+              (change)="onReadyForBulkGfbChange($event)"
+              [disabled]="!canToggleReadyForBulkGfb || tagSaving">
+              Ready for Bulk GFB
+            </mat-checkbox>
+            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+            <mat-checkbox *ngIf="canToggleGoodForBilling"
+              [checked]="readyForBulkBilling"
+              (change)="onReadyForBulkBillingChange($event)"
+              [disabled]="!canToggleReadyForBulkBilling || tagSaving">
+              Ready For Bulk Billing
+            </mat-checkbox>
             <br>
             <img *ngIf="showSpinnerForVDGB && !showCalculateBillOverlay" src="assets/images/loader4.gif" width="30">
           </mat-card-content>

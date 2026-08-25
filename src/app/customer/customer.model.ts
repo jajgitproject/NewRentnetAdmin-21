@@ -45,6 +45,7 @@ export class Customer {
     printRunningDetailOnDutySlip:boolean;  
     showRateOnDutySlip:boolean;
       showOTPOnDutySlip:boolean;
+      roundOffTime:boolean;
       showDistanceOnDutySlipPdf:boolean;
       isBookerAllowedToBeCreatedFromReservation:boolean;
       isPostPickUpCallAllowed:boolean;
@@ -89,6 +90,7 @@ export class Customer {
        this.printRunningDetailOnDutySlip = customer.printRunningDetailOnDutySlip ?? false;
        this.showRateOnDutySlip = customer.showRateOnDutySlip ?? false;
        this.showOTPOnDutySlip = customer.showOTPOnDutySlip ?? false;
+       this.roundOffTime = customer.roundOffTime ?? true;
        this.showDistanceOnDutySlipPdf = customer.showDistanceOnDutySlipPdf ?? false;
        this.isBookerAllowedToBeCreatedFromReservation = customer.isBookerAllowedToBeCreatedFromReservation ?? false;
        this.isPostPickUpCallAllowed = customer.isPostPickUpCallAllowed ?? false;

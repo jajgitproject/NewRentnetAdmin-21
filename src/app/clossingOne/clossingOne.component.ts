@@ -197,6 +197,8 @@ export class ClossingOneComponent implements OnInit, AfterViewInit, OnDestroy {
   summaryOfDutyData: SummaryOfDutyData | null = null;
   /** True when duty-billing-summary shows an active InvoiceCalculation for this duty. */
   hasActiveInvoiceCalculation = false;
+  /** Shared duty-billing-summary payload (Generate Bill gate + child nights/DA). */
+  dutyBillingSummary: any = null;
   dataSource: Dispute[] | null;
   dataSourceforCard: any = null;
   reservationCloseDetail: any = null;
@@ -266,6 +268,7 @@ export class ClossingOneComponent implements OnInit, AfterViewInit, OnDestroy {
   DutySlipMap:any;
   IRN:any;
   hasActiveEInvoice = false;
+  hasActiveInvoice = false;
   private irnPollSubscription: Subscription | null = null;
   private readonly irnPollIntervalMs = 60000;
    CityName:any;
@@ -344,11 +347,6 @@ export class ClossingOneComponent implements OnInit, AfterViewInit, OnDestroy {
       this.startInitialLoadsIfReady();
       
     });
-    this.checkVerifyDutyBeforeFormOpen();
-  this.GetClosingData();
-   this.BookingDataOnClosing();
-   this.GSTDataOnClosing();
-   this.CustomerSpecificFieldsloadData();
   }
 
   ngAfterViewInit(): void {
@@ -361,6 +359,7 @@ export class ClossingOneComponent implements OnInit, AfterViewInit, OnDestroy {
       return;
     }
     this.initialLoadsStarted = true;
+    this.checkVerifyDutyBeforeFormOpen();
     this.GetClosingData();
     this.disputeService.disputeData$.subscribe(data => {
       this.disputeAdvanceTable = data ?? [];
@@ -369,6 +368,8 @@ export class ClossingOneComponent implements OnInit, AfterViewInit, OnDestroy {
     this.GetTotalTollParInStDispute();
     this.loadDataForCard();
     this.BookingDataOnClosing();
+    this.GSTDataOnClosing();
+    this.CustomerSpecificFieldsloadData();
     this.TollParkingLoadData();
     this.DutyInterStateTaxLoadData();
     this.DisputeLoadData();
@@ -405,13 +406,17 @@ export class ClossingOneComponent implements OnInit, AfterViewInit, OnDestroy {
     );
   }
 
-  private applyActiveEInvoiceState(state: { hasActiveEInvoice: boolean; irn?: string | null }): void {
+  private applyActiveEInvoiceState(state: { hasActiveEInvoice: boolean; hasActiveInvoice?: boolean; irn?: string | null }): void {
     this.hasActiveEInvoice = state.hasActiveEInvoice === true;
+    if (state.hasActiveInvoice !== undefined) {
+      this.hasActiveInvoice = state.hasActiveInvoice === true;
+    }
     if (state.irn !== undefined) {
       this.IRN = state.irn;
     }
     if (this.advanceTableClosingOne) {
       this.advanceTableClosingOne.hasActiveEInvoice = this.hasActiveEInvoice;
+      this.advanceTableClosingOne.hasActiveInvoice = this.hasActiveInvoice;
       if (state.irn !== undefined) {
         this.advanceTableClosingOne.irn = state.irn;
       }
@@ -467,6 +472,7 @@ export class ClossingOneComponent implements OnInit, AfterViewInit, OnDestroy {
         this.invoiceID = this.advanceTableClosingOne?.invoiceID;
         this.IRN = this.advanceTableClosingOne?.irn;
         this.hasActiveEInvoice = !!this.advanceTableClosingOne?.hasActiveEInvoice;
+        this.hasActiveInvoice = !!this.advanceTableClosingOne?.hasActiveInvoice || Number(this.invoiceID) > 0;
         this.goodForBilling = !!this.advanceTableClosingOne?.closingDutySlipForBillingModel?.goodForBilling;
         this.verifyDuty = !!this.advanceTableClosingOne?.closingDutySlipForBillingModel?.verifyDuty;
         this.DSClosing = this.advanceTableClosingOne?.closingDutySlipForBillingModel?.dsClosing;
@@ -725,9 +731,12 @@ export class ClossingOneComponent implements OnInit, AfterViewInit, OnDestroy {
           verifyDutyStatusAndCacellationStatus: this.verifyDutyStatusAndCacellationStatus
         }
       });
-    dialogRef.afterClosed().subscribe((res: any) => {
+    dialogRef.afterClosed().subscribe((saved: boolean) => {
+      if (saved !== true) {
+        return;
+      }
       this.DutyGSTPercentageLoadData();
-      window.location.reload();
+      this.recalculateBillQuietly();
     });
     });
   }
@@ -906,9 +915,12 @@ export class ClossingOneComponent implements OnInit, AfterViewInit, OnDestroy {
           verifyDutyStatusAndCacellationStatus: this.verifyDutyStatusAndCacellationStatus
         }
       });
-    dialogRef.afterClosed().subscribe((res: any) => {
+    dialogRef.afterClosed().subscribe((saved: boolean) => {
+      if (saved !== true) {
+        return;
+      }
       this.loadDataForReservationDiscountClosing();
-      window.location.reload();
+      this.recalculateBillQuietly();
     });
     });
   }
@@ -945,7 +957,7 @@ export class ClossingOneComponent implements OnInit, AfterViewInit, OnDestroy {
     dialogRef.afterClosed().subscribe((res: any) => {
       if (res === true) {
         this.loadDataforAdditionalKMHR();
-        window.location.reload();
+        this.recalculateBillQuietly();
       }
     });
     });
@@ -1216,13 +1228,16 @@ export class ClossingOneComponent implements OnInit, AfterViewInit, OnDestroy {
   refreshHasActiveInvoiceCalculation(): void {
     if (this.DutySlipID == null || this.DutySlipID === '') {
       this.hasActiveInvoiceCalculation = false;
+      this.dutyBillingSummary = null;
       return;
     }
     this.clossingOneService.getDutyBillingSummary(this.DutySlipID).subscribe(
       (response) => {
+        this.dutyBillingSummary = response;
         this.hasActiveInvoiceCalculation = hasInvoiceCalculationResult(response);
       },
       () => {
+        this.dutyBillingSummary = null;
         this.hasActiveInvoiceCalculation = false;
       }
     );
@@ -1933,13 +1948,14 @@ export class ClossingOneComponent implements OnInit, AfterViewInit, OnDestroy {
       );
   }
 
-  onDutyStatusChanged(event: { verifyDuty: boolean, goodForBilling: boolean, message: string }) {
+  onDutyStatusChanged(event: { verifyDuty: boolean, goodForBilling: boolean, message: string, invoiceCalculated?: boolean }) {
     this.verifyDuty = event.verifyDuty;
     this.goodForBilling = event.goodForBilling;
     this.Message = event.message;
     this.applyEditBlockStatus();
-     this.GSTDataOnClosing();
-    this.refreshHasActiveInvoiceCalculation();
+    if (event.invoiceCalculated) {
+      this.hasActiveInvoiceCalculation = true;
+    }
   }
 
   openSearchModal() {
@@ -2125,10 +2141,12 @@ export class ClossingOneComponent implements OnInit, AfterViewInit, OnDestroy {
               status: this.verifyDutyStatusAndCacellationStatus
             }
           });
-          dialogRef.afterClosed().subscribe((res: any) => {
+          dialogRef.afterClosed().subscribe((saved: boolean) => {
+            if (saved !== true) {
+              return;
+            }
             this.settledRateLoadData();
-            //this.ngOnInit();
-            window.location.reload();
+            this.recalculateBillQuietly();
           })
         }
         else
@@ -2142,10 +2160,12 @@ export class ClossingOneComponent implements OnInit, AfterViewInit, OnDestroy {
               status: this.verifyDutyStatusAndCacellationStatus
             }
           });
-          dialogRef.afterClosed().subscribe((res: any) => {
+          dialogRef.afterClosed().subscribe((saved: boolean) => {
+            if (saved !== true) {
+              return;
+            }
             this.settledRateLoadData();
-            //this.ngOnInit();
-            window.location.reload();
+            this.recalculateBillQuietly();
           })
         }
       }
@@ -2188,8 +2208,13 @@ showAndScrollOpenSettledRates() {
           verifyDutyStatusAndCacellationStatus: this.verifyDutyStatusAndCacellationStatus
         }
       });
-    dialogRef.afterClosed().subscribe((res: any) => {
-      window.location.reload();
+    dialogRef.afterClosed().subscribe((saved: boolean) => {
+      if (saved !== true) {
+        return;
+      }
+      this.GetClosingData();
+      this.BookingDataOnClosing();
+      this.recalculateBillQuietly();
     });
     });
   }

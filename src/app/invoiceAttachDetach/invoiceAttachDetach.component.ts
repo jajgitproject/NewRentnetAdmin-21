@@ -775,9 +775,15 @@ export class InvoiceAttachDetachComponent implements OnInit {
     return this.isDutyDateAfterBillDate(row);
   }
 
-  /** Match legacy Attach: allow select unless billing date is after bill date / today, and GST group matches. */
+  private isDutyReadyForInvoice(row: any): boolean {
+    return this.isTrueValue(row?.verifyDuty) && this.isTrueValue(row?.goodForBilling);
+  }
+
+  /** Allow select unless billing date, GST group, Verify, or GFB blocks the row. */
   isRowSelectable(row: any): boolean {
-    return !this.isDutyDateAfterBillDate(row) && this.isSameGstGroup(row);
+    return !this.isDutyDateAfterBillDate(row)
+      && this.isSameGstGroup(row)
+      && this.isDutyReadyForInvoice(row);
   }
 
   getRowSelectTooltip(row: any): string {
@@ -795,6 +801,12 @@ export class InvoiceAttachDetachComponent implements OnInit {
         return `This duty belongs to a different GSTIN group than ${this.activeGstKey}`;
       }
       return 'Select duties from one GSTIN group only';
+    }
+    if (!this.isTrueValue(row?.verifyDuty)) {
+      return 'Duty is not Verified — cannot generate invoice';
+    }
+    if (!this.isTrueValue(row?.goodForBilling)) {
+      return 'Duty is not Good for Billing — cannot generate invoice';
     }
     return '';
   }

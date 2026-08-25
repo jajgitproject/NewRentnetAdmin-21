@@ -26,6 +26,24 @@ export class DutySlipForBillingService
     return this.httpClient.post<any>(this.API_URL + '/SaveBillingHistory', advanceTable);
   }
 
+  setReadyForBulkBilling(dutySlipID: number, readyForBulkBilling: boolean, performedBy: number)
+  {
+    return this.httpClient.put<any>(this.API_URL + '/ReadyForBulkBilling', {
+      dutySlipID,
+      readyForBulkBilling,
+      performedBy
+    });
+  }
+
+  setReadyForBulkGfb(dutySlipID: number, readyForBulkGfb: boolean, performedBy: number)
+  {
+    return this.httpClient.put<any>(this.API_URL + '/ReadyForBulkGfb', {
+      dutySlipID,
+      readyForBulkGfb,
+      performedBy
+    });
+  }
+
   update(advanceTable: ClosingDutySlipForBillingModel)
   {
     this.applyReportingFromPickupFallback(advanceTable);

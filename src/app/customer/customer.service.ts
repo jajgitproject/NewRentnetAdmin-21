@@ -162,8 +162,13 @@ export class CustomerService
     const toBool = (v: any, fallback: boolean = false) => {
       if (v === null || v === undefined || v === '') return fallback;
       if (typeof v === 'boolean') return v;
-      if (v === 'true' || v === 1 || v === '1') return true;
-      if (v === 'false' || v === 0 || v === '0') return false;
+      if (typeof v === 'string') {
+        const normalized = v.trim().toLowerCase();
+        if (normalized === 'true' || normalized === '1' || normalized === 'yes') return true;
+        if (normalized === 'false' || normalized === '0' || normalized === 'no') return false;
+      }
+      if (v === 1) return true;
+      if (v === 0) return false;
       return fallback;
     };
 
@@ -191,6 +196,7 @@ export class CustomerService
       printRunningDetailOnDutySlip: toBool(raw.printRunningDetailOnDutySlip, false),
       showRateOnDutySlip: toBool(raw.showRateOnDutySlip, false),
       showOTPOnDutySlip: toBool(raw.showOTPOnDutySlip, false),
+      roundOffTime: toBool(raw.roundOffTime, true),
       showDistanceOnDutySlipPdf: toBool(raw.showDistanceOnDutySlipPdf, false),
       isBookerAllowedToBeCreatedFromReservation: toBool(raw.isBookerAllowedToBeCreatedFromReservation, false),
       isPostPickUpCallAllowed: toBool(raw.isPostPickUpCallAllowed, false),
