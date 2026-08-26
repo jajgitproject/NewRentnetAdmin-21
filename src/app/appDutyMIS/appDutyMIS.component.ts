@@ -261,11 +261,11 @@ export class AppDutyMISComponent implements OnInit, OnDestroy {
     if (this.subscriptionName) {
       this.subscriptionName.unsubscribe();
     }
-  }
+      }
 
   refresh() {
     this.setDefaultDateRange();
-    this.dispatch_Location.setValue('');
+   this.dispatch_Location.setValue('');
     this.SearchActivationStatus = true;
     this.PageNumber = 0;
     this.searchTerm = '';

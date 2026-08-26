@@ -672,7 +672,7 @@ export class FormDialogComponent
       ...this.customerPersonQuickAddDialog,
       hasBackdrop: true,
       data: {
-        action: 'add',
+          action: 'add',
         forCP: 'CP',
         fromGeneralBill: true,
         advanceTable: guestCustomerDetail,

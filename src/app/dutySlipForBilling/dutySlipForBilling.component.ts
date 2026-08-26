@@ -15,7 +15,7 @@ import { MatMenu, MatMenuTrigger } from '@angular/material/menu';
 import { SelectionModel } from '@angular/cdk/collections';
 import { GeneralService } from '../general/general.service';
 import { MyUploadComponent } from '../myupload/myupload.component';
-import { AbstractControl, FormBuilder, FormControl, FormGroup, ValidationErrors, ValidatorFn } from '@angular/forms';
+import { AbstractControl, FormBuilder, FormControl, FormGroup, ValidationErrors, ValidatorFn, Validators } from '@angular/forms';
 import { MatAccordion } from '@angular/material/expansion';
 import moment from 'moment';
 import { ActivatedRoute, Router } from '@angular/router';
@@ -902,6 +902,9 @@ export class DutySlipForBillingComponent implements OnInit, AfterViewInit, OnCha
 
   private validateClosingStatusForGfb(): boolean {
     const form = this.advanceTableForm.getRawValue();
+    if (!this.validateClosureTypeSelected(form?.closureType)) {
+      return false;
+    }
     if (!form.dsClosing) {
       Swal.fire('', 'Please Select DS Closing Option.', 'warning');
       return false;
@@ -915,6 +918,16 @@ export class DutySlipForBillingComponent implements OnInit, AfterViewInit, OnCha
       return false;
     }
     return true;
+  }
+
+  /** Closing source must be Driver / App / GPS / Manual before save, verify, or GFB. */
+  private validateClosureTypeSelected(closureType?: string | null): boolean {
+    const value = (closureType ?? this.advanceTableForm?.getRawValue()?.closureType ?? '').toString().trim();
+    if (value) {
+      return true;
+    }
+    Swal.fire('', 'Please select closing source (Driver / App / GPS / Manual KM).', 'warning');
+    return false;
   }
 
   private syncClosingModelFromResponse(response: any): void {
@@ -1853,7 +1866,7 @@ export class DutySlipForBillingComponent implements OnInit, AfterViewInit, OnCha
       dutySlipID: [null],
       locationOutLocationOrHubID: [null],
       locationInLocationOrHubID: [0],
-      closureType:[''],
+      closureType:['', Validators.required],
       reservationID:[''],
       allotmentID:[''],
 
@@ -2280,6 +2293,10 @@ export class DutySlipForBillingComponent implements OnInit, AfterViewInit, OnCha
   }
 
   if (isChecked) {
+    if (!this.validateClosureTypeSelected()) {
+      this.advanceTableForm.patchValue({ verifyDuty: false });
+      return;
+    }
     if (!this.disputeAdvanceTable || this.disputeAdvanceTable.length === 0) {
       // No disputes, allow verify duty
       this.setVerifyDuty(true, "Checked");
@@ -2527,6 +2544,11 @@ public resetVerificationForEcoStateChange(): void {
   public ClossingDetails(): boolean
   {
     const form = this.advanceTableForm.getRawValue();
+
+    if (!this.validateClosureTypeSelected(form?.closureType)) {
+      this.showSpinner = false;
+      return false;
+    }
 
     if (!form.dsClosing) {
       Swal.fire({
