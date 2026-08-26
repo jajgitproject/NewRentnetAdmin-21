@@ -1551,6 +1551,13 @@ const routes: Routes = [
             (m) => m.ControlPanelTempModule
           )
       },
+      {
+        path: 'upsellDeclineReason',
+        loadChildren: () =>
+          import('./upsellDeclineReason/upsellDeclineReason.module').then(
+            (m) => m.UpsellDeclineReasonModule
+          )
+      },
 
       {
         path: 'CarAndDriverAllotmentTemp',

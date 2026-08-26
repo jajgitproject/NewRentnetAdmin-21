@@ -1,0 +1,67 @@
+.upsell-decline-log-dialog {
+  min-width: min(720px, 92vw);
+  width: 100%;
+}
+
+.upsell-res-id {
+  margin-left: 6px;
+  font-size: 14px;
+  font-weight: 500;
+  color: #666;
+}
+
+.log-body {
+  padding: 8px 12px 4px;
+}
+
+.log-loading {
+  display: flex;
+  justify-content: center;
+  padding: 28px 0;
+}
+
+.log-empty {
+  text-align: center;
+  margin-bottom: 12px;
+  background-color: #e8e8e8 !important;
+  border: none;
+  color: #555;
+}
+
+.log-table-wrap {
+  max-height: 360px;
+  overflow: auto;
+  margin-bottom: 12px;
+  border: 1px solid #ddd;
+}
+
+.log-table {
+  width: 100%;
+  border-collapse: collapse;
+
+  th,
+  td {
+    padding: 8px 10px;
+    border: 1px solid #ddd;
+    font-size: 13px;
+    vertical-align: top;
+  }
+
+  th {
+    background: #f1f1f1;
+    font-weight: 700;
+    font-size: 12px;
+    position: sticky;
+    top: 0;
+    z-index: 1;
+  }
+}
+
+.nowrap {
+  white-space: nowrap;
+}
+
+.example-button-row {
+  display: flex;
+  gap: 8px;
+}

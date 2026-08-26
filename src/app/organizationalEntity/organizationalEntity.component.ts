@@ -46,6 +46,7 @@ export class OrganizationalEntityComponent implements OnInit {
     'geoPointName',
     'organizationalEntityOwnership',
     'operationalStatus',
+    'defaultCDPLocation',
     'status',
     'actions'
   ];

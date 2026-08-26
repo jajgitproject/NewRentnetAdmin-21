@@ -42,6 +42,19 @@ export const ROUTES: RouteInfo[] = [
       },
 
       {
+        path: 'upsellDeclineReason',
+        title: 'UpSell Decline Reason',
+        pageKey: 'UpSell Decline Reason',
+        moduleName: 'upsellDeclineReason',
+        alternateAccessPageKeys: ['upsellDeclineReason', 'UpSell Decline Reason'],
+        icon: 'fas fa-tachometer-alt',
+        class: '',
+        groupTitle: false,
+        submenu: [],
+        isAccess: false
+      },
+
+      {
         path: 'CarAndDriverAllotmentTemp',
         title: 'Car And Driver Allotment Temp',
         moduleName: 'CarAndDriverAllotmentTemp',

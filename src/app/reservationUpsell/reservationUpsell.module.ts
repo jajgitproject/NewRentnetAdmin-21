@@ -10,12 +10,20 @@ import { MatSelectModule } from '@angular/material/select';
 import { MatRadioModule } from '@angular/material/radio';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSnackBarModule } from '@angular/material/snack-bar';
+import { MatIconModule } from '@angular/material/icon';
 import { ReservationUpsellService } from './reservationUpsell.service';
 import { UpsellFlowDialogComponent } from './dialogs/upsell-flow-dialog/upsell-flow-dialog.component';
 import { CancelUpsellDialogComponent } from './dialogs/cancel-upsell-dialog/cancel-upsell-dialog.component';
+import { UpsellDeclineLogDialogComponent } from './dialogs/upsell-decline-log-dialog/upsell-decline-log-dialog.component';
+import { UpsellHistoryDialogComponent } from './dialogs/upsell-history-dialog/upsell-history-dialog.component';
 
 @NgModule({
-  declarations: [UpsellFlowDialogComponent, CancelUpsellDialogComponent],
+  declarations: [
+    UpsellFlowDialogComponent,
+    CancelUpsellDialogComponent,
+    UpsellDeclineLogDialogComponent,
+    UpsellHistoryDialogComponent
+  ],
   imports: [
     CommonModule,
     FormsModule,
@@ -27,9 +35,15 @@ import { CancelUpsellDialogComponent } from './dialogs/cancel-upsell-dialog/canc
     MatSelectModule,
     MatRadioModule,
     MatProgressSpinnerModule,
-    MatSnackBarModule
+    MatSnackBarModule,
+    MatIconModule
   ],
   providers: [ReservationUpsellService],
-  exports: [UpsellFlowDialogComponent, CancelUpsellDialogComponent]
+  exports: [
+    UpsellFlowDialogComponent,
+    CancelUpsellDialogComponent,
+    UpsellDeclineLogDialogComponent,
+    UpsellHistoryDialogComponent
+  ]
 })
 export class ReservationUpsellModule {}

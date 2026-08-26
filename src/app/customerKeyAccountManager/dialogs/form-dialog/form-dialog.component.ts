@@ -8,7 +8,7 @@ import { MAT_DATE_LOCALE } from '@angular/material/core';
 import { formatDate } from '@angular/common';
 import { GeneralService } from '../../../general/general.service';
 //import { EmployeeDropDown } from 'src/app/general/IEmployees';
-import { Observable, Subscription } from 'rxjs';
+import { Observable, of, Subscription } from 'rxjs';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { EmployeeDropDown } from 'src/app/employee/employeeDropDown.model';
 import { CityDropDown } from 'src/app/city/cityDropDown.model';
@@ -64,6 +64,7 @@ export class FormDialogComponentHolder
           this.advanceTable = data.advanceTable;
 
           this.searchinstructedBy.setValue(this.advanceTable.employeeName);
+          this.employeesID = this.advanceTable.employeeID;
           let startDate=moment(this.advanceTable.fromDate).format('DD/MM/yyyy');
           let endDate=moment(this.advanceTable.endDate).format('DD/MM/yyyy');
           this.onBlurFromDateEdit(startDate);
@@ -83,8 +84,16 @@ export class FormDialogComponentHolder
   
   public ngOnInit(): void
   {
-   this.InitEmployee(); 
-  //  this.InitCity();
+    this.filteredinstructedByOptionss = of([]);
+    this.advanceTableForm.get('attachmentStatus').valueChanges.subscribe(value => {
+      if (value === 'Detached')
+      {
+        this.advanceTableForm.get('endDate').setValue(new Date());
+      }
+    });
+    if (this.action === 'edit') {
+      this.InitEmployee();
+    }
   }
   
   
@@ -149,39 +158,40 @@ export class FormDialogComponentHolder
     };
   }
 
-  InitEmployee()
+  InitEmployee(_event?: any)
   {
-    this.advanceTableForm.get('attachmentStatus').valueChanges.subscribe(value => {
-      if (value === 'Detached') 
-      {
-        this.advanceTableForm.get('endDate').setValue(new Date());
-      }
-    });
-
-    this._generalService.GetEmployeesForVehicleCategory().subscribe
+    const Prefix = this.advanceTableForm.get('employeeName').value || '';
+    if (Prefix.length < 3)
+    {
+      this.EmployeeList = [];
+      this.filteredinstructedByOptionss = of([]);
+      this.advanceTableForm.controls['employeeName'].setValidators([Validators.required]);
+      this.advanceTableForm.controls['employeeName'].updateValueAndValidity({ emitEvent: false });
+      return;
+    }
+    this._generalService.GetEmployeesForVehicleCategoryPrefix(Prefix).subscribe
     (
-      data =>   
+      data =>
       {
-        this.EmployeeList = data;
+        if ((this.advanceTableForm.get('employeeName').value || '') !== Prefix) {
+          return;
+        }
+        this.EmployeeList = data || [];
         this.advanceTableForm.controls['employeeName'].setValidators([Validators.required,
           this.employeeNameValidator(this.EmployeeList)]);
-        this.advanceTableForm.controls['employeeName'].updateValueAndValidity(); 
-        this.filteredinstructedByOptionss = this.advanceTableForm.controls['employeeName'].valueChanges.pipe(
-          startWith(""),
-          map(value => this._filtersearchinstructed(value || ''))
-        );
+        this.advanceTableForm.controls['employeeName'].updateValueAndValidity({ emitEvent: false });
+        this.filteredinstructedByOptionss = of(this._filtersearchinstructed(Prefix));
       }
     );
   }
   private _filtersearchinstructed(value: string): any {
-    const filterValue = value.toLowerCase();
-    // if (!value || value.length < 3) {
-    //   return [];   
-    // }
-    return this.EmployeeList.filter(
-      data => 
+    const filterValue = (value || '').toLowerCase();
+    if (!filterValue || filterValue.length < 3) {
+      return [];
+    }
+    return (this.EmployeeList || []).filter(
+      data =>
       {
-        //return customer.firstName.toLowerCase().indexOf(filterValue)===0;
         const fullName = `${data.firstName} ${data.lastName}`.toLowerCase();
         return fullName.includes(filterValue);
       });
@@ -208,7 +218,7 @@ export class FormDialogComponentHolder
       customerKeyAccountManagerID: [this.advanceTable.customerKeyAccountManagerID],
       customerID: [this.advanceTable.customerID],
       employeeID: [this.advanceTable.employeeID,],
-      employeeName: [this.advanceTable.employeeName],
+      employeeName: [this.advanceTable.employeeName, [Validators.required]],
       serviceDescription: [this.advanceTable.serviceDescription],
       attachmentStatus: [this.advanceTable.attachmentStatus],
       fromDate: [this.advanceTable.fromDate,[Validators.required, this._generalService.dateValidator()]],

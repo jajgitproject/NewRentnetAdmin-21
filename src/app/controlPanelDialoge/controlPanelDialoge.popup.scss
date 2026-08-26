@@ -434,7 +434,8 @@
   .post-pickup-call-row,
   .incidence-row,
   .feedback-row,
-  .track-on-map-row {
+  .track-on-map-row,
+  .upsell-row {
     display: grid !important;
     grid-template-columns: max-content 18px !important;
     grid-template-rows: var(--cp-row-lh) !important;
@@ -468,6 +469,7 @@
   .incidence-row .BoldButton,
   .feedback-row .BoldButton,
   .track-on-map-row .BoldButton,
+  .upsell-row .BoldButton,
   .life-cycle-status-row .BoldButton {
     grid-column: 1 !important;
     grid-row: 1 !important;
@@ -497,7 +499,8 @@
   .post-pickup-call-dots,
   .incidence-dots,
   .feedback-dots,
-  .track-on-map-dots {
+  .track-on-map-dots,
+  .upsell-dots {
     grid-column: 2 !important;
     grid-row: 1 !important;
     justify-self: start !important;
@@ -539,7 +542,8 @@
   .post-pickup-call-dots svg,
   .incidence-dots svg,
   .feedback-dots svg,
-  .track-on-map-dots svg {
+  .track-on-map-dots svg,
+  .upsell-dots svg {
     width: 14px !important;
     height: 14px !important;
     margin: 0 !important;
@@ -568,6 +572,18 @@
     height: var(--cp-track-hit) !important;
     max-height: var(--cp-track-hit) !important;
     line-height: var(--cp-track-hit) !important;
+  }
+
+  .upsell-row .BoldButton.upsold-label,
+  .upsell-row .BoldButton.upsold-label .mdc-button__label {
+    color: #1b7a2d !important;
+    font-weight: 700 !important;
+  }
+
+  .upsell-row .BoldButton:not(.upsold-label),
+  .upsell-row .BoldButton:not(.upsold-label) .mdc-button__label {
+    color: #000 !important;
+    font-weight: 700 !important;
   }
 
   /* After .BoldButton + column rules: Reservation Group label in grid col 1 */

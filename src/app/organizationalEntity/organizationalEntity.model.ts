@@ -44,6 +44,7 @@ export class OrganizationalEntity {
   organizationalEntityBranchType:string;
   userID:number;
   oldRentNetService_Location:string;
+  defaultCDPLocation:boolean;
 
   constructor(organizationalEntity) {
     {
@@ -78,6 +79,7 @@ export class OrganizationalEntity {
        this.organizationalEntityStartDate=new Date();
        //this.organizationalEntityEndDate=new Date();
        this.oldRentNetService_Location=organizationalEntity.oldRentNetService_Location || '';
+       this.defaultCDPLocation=organizationalEntity.defaultCDPLocation === true;
     }
   }
   

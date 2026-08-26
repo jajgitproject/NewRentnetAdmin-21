@@ -108,6 +108,8 @@ import { isAllotedBooking } from '../shared/messaging-validation.util';
 import { ReservationUpsellService } from '../reservationUpsell/reservationUpsell.service';
 import { UpsellFlowDialogComponent } from '../reservationUpsell/dialogs/upsell-flow-dialog/upsell-flow-dialog.component';
 import { CancelUpsellDialogComponent } from '../reservationUpsell/dialogs/cancel-upsell-dialog/cancel-upsell-dialog.component';
+import { UpsellDeclineLogDialogComponent } from '../reservationUpsell/dialogs/upsell-decline-log-dialog/upsell-decline-log-dialog.component';
+import { UpsellHistoryDialogComponent } from '../reservationUpsell/dialogs/upsell-history-dialog/upsell-history-dialog.component';
 import { ReservationUpsellStatus } from '../reservationUpsell/reservationUpsell.model';
 
 @Component({
@@ -309,11 +311,14 @@ export class ControlPanelDialogeComponent {
     }
 
     const dialogRef = this.dialog.open(UpsellFlowDialogComponent, {
-      width: '760px',
+      width: '680px',
       maxWidth: '95vw',
+      autoFocus: false,
       data: {
         reservationID: this.reservationID,
-        hasActiveUpsell: !!this.upsellStatus?.hasActiveUpsell
+        hasActiveUpsell: !!this.upsellStatus?.hasActiveUpsell,
+        currentVehicleCategoryName: this.upsellStatus?.currentVehicleCategoryName || '',
+        currentContractRate: this.upsellStatus?.currentContractRate ?? null
       }
     });
     dialogRef.afterClosed().subscribe((result) => {
@@ -337,9 +342,32 @@ export class ControlPanelDialogeComponent {
     });
     dialogRef.afterClosed().subscribe((result) => {
       if (result?.saved) {
+        // Clear green Upsold immediately; loadData refreshes true status from API.
+        if (this.upsellStatus) {
+          this.upsellStatus.hasActiveUpsell = false;
+          this.cdr.detectChanges();
+        }
         this.loadData(this.reservationID, this.index);
         this.newDataAddedEvent.emit(true);
       }
+    });
+  }
+
+  openUpsellDeclineLogDialog(): void {
+    this.dialog.open(UpsellDeclineLogDialogComponent, {
+      width: '760px',
+      maxWidth: '95vw',
+      autoFocus: false,
+      data: { reservationID: this.reservationID }
+    });
+  }
+
+  openUpsellHistoryDialog(): void {
+    this.dialog.open(UpsellHistoryDialogComponent, {
+      width: '960px',
+      maxWidth: '95vw',
+      autoFocus: false,
+      data: { reservationID: this.reservationID }
     });
   }
 

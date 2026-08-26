@@ -1,28 +1,125 @@
-.loading-wrap {
+.upsell-dialog {
+  min-width: min(640px, 92vw);
+  width: 100%;
+}
+
+.upsell-res-id {
+  margin-left: 6px;
+  font-size: 14px;
+  font-weight: 500;
+  color: #666;
+}
+
+.upsell-body {
+  padding: 8px 12px 4px;
+}
+
+.upsell-loading {
   display: flex;
   justify-content: center;
-  padding: 24px;
+  padding: 28px 0;
 }
 
-.full-width {
+.upsell-info-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px 28px;
+  margin-bottom: 14px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid #eee;
+
+  label {
+    display: block;
+    margin-bottom: 2px;
+    font-size: 12px;
+    font-weight: 500;
+    color: #888;
+  }
+
+  div > div {
+    font-size: 14px;
+    font-weight: 600;
+    color: #333;
+  }
+}
+
+.upsell-prompt {
+  margin: 0 0 12px;
+  font-size: 14px;
+  color: #555;
+}
+
+.upsell-hint {
+  margin: 0 0 12px;
+  font-size: 13px;
+  color: #777;
+}
+
+.upsell-empty {
+  text-align: center;
+  margin-bottom: 12px;
+  background-color: #e8e8e8 !important;
+  border: none;
+  color: #555;
+}
+
+.example-full-width {
   width: 100%;
 }
 
-.upsell-grid {
+.mt-2 {
+  margin-top: 8px;
+}
+
+.upsell-table-wrap {
+  max-height: 260px;
+  overflow: auto;
+  margin-bottom: 8px;
+  border: 1px solid #ddd;
+}
+
+.upsell-table {
   width: 100%;
   border-collapse: collapse;
-  margin-bottom: 12px;
+
+  th,
+  td {
+    padding: 8px 10px;
+    border: 1px solid #ddd;
+    font-size: 13px;
+    vertical-align: middle;
+  }
+
+  th {
+    background: #f1f1f1;
+    font-weight: 700;
+    font-size: 12px;
+    position: sticky;
+    top: 0;
+    z-index: 1;
+  }
+
+  tbody tr {
+    cursor: pointer;
+
+    &:hover {
+      background: #f7f7f7;
+    }
+
+    &.selected {
+      background: #e3f2fd;
+    }
+  }
 }
 
-.upsell-grid th,
-.upsell-grid td {
-  border: 1px solid #ddd;
-  padding: 6px 8px;
-  font-size: 13px;
+.text-right {
+  text-align: right;
+  white-space: nowrap;
 }
 
-.hint-text {
-  margin-top: 12px;
-  color: #666;
-  font-size: 13px;
+.example-button-row {
+  margin-top: 8px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
 }

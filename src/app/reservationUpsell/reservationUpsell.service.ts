@@ -24,6 +24,14 @@ export class ReservationUpsellService {
     return this.http.get(`${this.API_URL}/${reservationId}/upsell-decline-reasons`);
   }
 
+  getDeclineLog(reservationId: number, userId: number): Observable<any> {
+    return this.http.get(`${this.API_URL}/${reservationId}/upsell-decline-log/${userId}`);
+  }
+
+  getUpsellHistory(reservationId: number, userId: number): Observable<any> {
+    return this.http.get(`${this.API_URL}/${reservationId}/upsell-history/${userId}`);
+  }
+
   getCancelOptions(reservationId: number, userId: number): Observable<any> {
     return this.http.get(`${this.API_URL}/${reservationId}/cancel-upsell-options/${userId}`);
   }

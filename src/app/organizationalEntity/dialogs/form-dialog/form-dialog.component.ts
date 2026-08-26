@@ -20,6 +20,7 @@ import { CountryDropDown } from '../../countryDropDown.model';
 import { CityDropDown } from 'src/app/city/cityDropDown.model';
 import { AbstractControl, ValidationErrors, ValidatorFn } from '@angular/forms';
 import moment from 'moment';
+import Swal from 'sweetalert2';
 @Component({
   standalone: false,
     selector: 'app-form-dialog',
@@ -247,7 +248,8 @@ export class FormDialogComponent {
         organizationalEntitySupplier: [this.advanceTable.organizationalEntitySupplier],
         searchOrganizationalEntity: [this.advanceTable.parent],
         organizationalEntityBranchType:[this.advanceTable.organizationalEntityBranchType],
-        oldRentNetService_Location:[this.advanceTable.oldRentNetService_Location]
+        oldRentNetService_Location:[this.advanceTable.oldRentNetService_Location],
+        defaultCDPLocation:[this.advanceTable.defaultCDPLocation === true]
       });
   }
 
@@ -365,6 +367,45 @@ export class FormDialogComponent {
       );
   }
   public confirmAdd(): void {
+    const isDefaultCDP = this.advanceTableForm.value.defaultCDPLocation === true;
+    const alreadyCurrentDefault = this.action === 'edit' && this.advanceTable.defaultCDPLocation === true;
+    const isLocation = this.advanceTableForm.value.organizationalEntityType === 'Location';
+
+    if (isLocation && isDefaultCDP && !alreadyCurrentDefault) {
+      const currentId = this.advanceTableForm.value.organizationalEntityID || -1;
+      this.advanceTableService.getDefaultCDPLocation(currentId).subscribe(
+        existing => {
+          if (existing && existing.organizationalEntityID) {
+            Swal.fire({
+              title: 'Default CDP Location already exists',
+              html: `<p><b>${existing.organizationalEntityName}</b> is already marked as Default CDP Location.</p>
+                     <p>Do you want to mark this location as default? The previous location will be set to No.</p>`,
+              icon: 'warning',
+              showCancelButton: true,
+              confirmButtonText: 'Yes',
+              cancelButtonText: 'No',
+            }).then(result => {
+              if (result.isConfirmed) {
+                this.saveOrganizationalEntity();
+              } else {
+                this.advanceTableForm.patchValue({ defaultCDPLocation: false });
+              }
+            });
+          } else {
+            this.saveOrganizationalEntity();
+          }
+        },
+        () => {
+          this.saveOrganizationalEntity();
+        }
+      );
+      return;
+    }
+
+    this.saveOrganizationalEntity();
+  }
+
+  private saveOrganizationalEntity(): void {
     if (this.action == "edit") {
       this.Put();
     }

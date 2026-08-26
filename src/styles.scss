@@ -238,6 +238,12 @@
   padding: 0 !important;
 }
 
+/* Reservation Upsell flow dialog — uses default app modal chrome (same as Email Format) */
+.cdk-overlay-container .cdk-overlay-pane:has(app-upsell-flow-dialog).mat-mdc-dialog-panel {
+  width: min(680px, 95vw) !important;
+  max-width: 95vw !important;
+}
+
 /* Role Create/Edit: override _modals.scss 80vw surface cap + content overflow-x so long mat-labels are not clipped.
    CDK .cdk-global-overlay-wrapper is display:flex; opening mat-select adds a second overlay pane as a flex sibling,
    which can shrink the dialog pane unless we forbid flex-shrink and lock min-width.
@@ -649,14 +655,14 @@ mat-option {
 
 /* Material select panels: grow with longest option; cap to viewport.
    Exception: .inventory-select-panel matches the trigger width (panelWidth=auto). */
-.mat-mdc-select-panel:not(.inventory-select-panel) {
+.mat-mdc-select-panel:not(.inventory-select-panel):not(.upsell-reason-select-panel) {
   width: max-content !important;
   max-width: min(92vw, calc(100vw - 24px)) !important;
   box-sizing: border-box;
   overflow-x: auto;
 }
 
-.mat-mdc-select-panel:not(.inventory-select-panel) .mat-mdc-option .mdc-list-item__primary-text {
+.mat-mdc-select-panel:not(.inventory-select-panel):not(.upsell-reason-select-panel) .mat-mdc-option .mdc-list-item__primary-text {
   white-space: nowrap !important;
 }
 
@@ -674,6 +680,30 @@ mat-option {
   white-space: nowrap !important;
 }
 
+/* Decline Upsell Reason: options panel width locked to the select field */
+.upsell-reason-select-panel.mat-mdc-select-panel {
+  width: 100% !important;
+  min-width: 100% !important;
+  max-width: 100% !important;
+  box-sizing: border-box;
+  overflow-x: hidden !important;
+}
+
+.upsell-reason-select-panel.mat-mdc-select-panel .mat-mdc-option {
+  height: auto !important;
+  min-height: 48px;
+  white-space: normal;
+}
+
+.upsell-reason-select-panel.mat-mdc-select-panel .mat-mdc-option .mdc-list-item__primary-text {
+  white-space: normal !important;
+  word-break: break-word;
+  overflow-wrap: anywhere;
+  overflow: visible;
+  text-overflow: unset;
+  line-height: 1.35;
+}
+
 /*
  * Widen the CDK overlay *pane* (not just the inner panel). Otherwise Material
  * sets pane width = trigger width and long options clip — Control Panel avoids
@@ -685,7 +715,7 @@ mat-option {
   box-sizing: border-box;
 }
 
-.cdk-overlay-container .cdk-overlay-pane:not(.role-form-wide-dialog):has(.mat-mdc-select-panel):not(:has(.inventory-select-panel)) {
+.cdk-overlay-container .cdk-overlay-pane:not(.role-form-wide-dialog):has(.mat-mdc-select-panel):not(:has(.inventory-select-panel)):not(:has(.upsell-reason-select-panel)) {
   width: max-content !important;
   max-width: min(92vw, calc(100vw - 24px)) !important;
   box-sizing: border-box;
@@ -693,6 +723,13 @@ mat-option {
 
 .cdk-overlay-container .cdk-overlay-pane:has(.inventory-select-panel) {
   max-width: min(92vw, calc(100vw - 24px)) !important;
+  box-sizing: border-box;
+}
+
+.cdk-overlay-container .cdk-overlay-pane:has(.upsell-reason-select-panel) {
+  /* Width comes from mat-select [panelWidth] (measured from the Reason field). */
+  max-width: min(92vw, calc(100vw - 24px)) !important;
+  min-width: 0 !important;
   box-sizing: border-box;
 }
 

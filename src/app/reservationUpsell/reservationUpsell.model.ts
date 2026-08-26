@@ -51,6 +51,29 @@ export class UpsellDeclineReason {
   }
 }
 
+export class ReservationUpsellDeclineLog {
+  declineID: number;
+  reservationID: number;
+  reasonID: number;
+  reasonName: string;
+  comment: string;
+  username: string;
+  userID: number;
+  createdOn: Date | null;
+
+  constructor(item?: any) {
+    this.declineID = item?.declineID ?? item?.DeclineID ?? 0;
+    this.reservationID = item?.reservationID ?? item?.ReservationID ?? 0;
+    this.reasonID = item?.reasonID ?? item?.ReasonID ?? 0;
+    this.reasonName = item?.reasonName ?? item?.ReasonName ?? '';
+    this.comment = item?.comment ?? item?.Comment ?? '';
+    this.username = item?.username ?? item?.Username ?? '';
+    this.userID = item?.userID ?? item?.UserID ?? 0;
+    const rawDate = item?.createdOn ?? item?.CreatedOn ?? item?.createdDate ?? item?.CreatedDate ?? null;
+    this.createdOn = rawDate ? new Date(rawDate) : null;
+  }
+}
+
 export class CancelUpsellOption {
   upsellHistoryID: number;
   vehicleCategoryID: number;
@@ -62,5 +85,51 @@ export class CancelUpsellOption {
     this.vehicleCategoryID = item?.vehicleCategoryID ?? item?.VehicleCategoryID ?? 0;
     this.carCategory = item?.carCategory ?? item?.CarCategory ?? '';
     this.vehicleID = item?.vehicleID ?? item?.VehicleID ?? 0;
+  }
+}
+
+export class ReservationUpsellHistory {
+  upsellHistoryID: number;
+  reservationID: number;
+  oldCarCategoryID: number;
+  oldCarCategoryName: string;
+  newCarCategoryID: number;
+  newCarCategoryName: string;
+  oldVehicleID: number | null;
+  oldVehicleName: string;
+  newVehicleID: number | null;
+  newVehicleName: string;
+  oldContractRate: number;
+  newContractRate: number;
+  rateDifference: number;
+  upsellTimestamp: Date | null;
+  upsellByUsername: string;
+  status: string;
+  remarks: string;
+  cancelReason: string;
+  cancelledTimestamp: Date | null;
+
+  constructor(item?: any) {
+    this.upsellHistoryID = item?.upsellHistoryID ?? item?.UpsellHistoryID ?? 0;
+    this.reservationID = item?.reservationID ?? item?.ReservationID ?? 0;
+    this.oldCarCategoryID = item?.oldCarCategoryID ?? item?.OldCarCategoryID ?? 0;
+    this.oldCarCategoryName = item?.oldCarCategoryName ?? item?.OldCarCategoryName ?? '';
+    this.newCarCategoryID = item?.newCarCategoryID ?? item?.NewCarCategoryID ?? 0;
+    this.newCarCategoryName = item?.newCarCategoryName ?? item?.NewCarCategoryName ?? '';
+    this.oldVehicleID = item?.oldVehicleID ?? item?.OldVehicleID ?? null;
+    this.oldVehicleName = item?.oldVehicleName ?? item?.OldVehicleName ?? '';
+    this.newVehicleID = item?.newVehicleID ?? item?.NewVehicleID ?? null;
+    this.newVehicleName = item?.newVehicleName ?? item?.NewVehicleName ?? '';
+    this.oldContractRate = item?.oldContractRate ?? item?.OldContractRate ?? 0;
+    this.newContractRate = item?.newContractRate ?? item?.NewContractRate ?? 0;
+    this.rateDifference = item?.rateDifference ?? item?.RateDifference ?? 0;
+    const rawDate = item?.upsellTimestamp ?? item?.UpsellTimestamp ?? null;
+    this.upsellTimestamp = rawDate ? new Date(rawDate) : null;
+    this.upsellByUsername = item?.upsellByUsername ?? item?.UpsellByUsername ?? '';
+    this.status = item?.status ?? item?.Status ?? '';
+    this.remarks = item?.remarks ?? item?.Remarks ?? '';
+    this.cancelReason = item?.cancelReason ?? item?.CancelReason ?? '';
+    const rawCancelDate = item?.cancelledTimestamp ?? item?.CancelledTimestamp ?? null;
+    this.cancelledTimestamp = rawCancelDate ? new Date(rawCancelDate) : null;
   }
 }
