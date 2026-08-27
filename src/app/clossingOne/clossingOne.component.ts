@@ -1,5 +1,5 @@
 //@ts-nocheck
-import { AfterViewInit, Component, ElementRef, Input, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import { AfterViewInit, ChangeDetectorRef, Component, ElementRef, Input, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { ClossingOneService } from './clossingOne.service';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { MatDialog, MatDialogRef } from '@angular/material/dialog';
@@ -314,6 +314,7 @@ export class ClossingOneComponent implements OnInit, AfterViewInit, OnDestroy {
     public _dutySlipImageService: DutySlipImageService,
     public odoMeterAndManualDutySlipImageService: OdoMeterAndManualDutySlipImageService,
     public settleRateService: SettledRateDetailsService,
+    private cdr: ChangeDetectorRef,
    
   ) {
 
@@ -488,49 +489,53 @@ export class ClossingOneComponent implements OnInit, AfterViewInit, OnDestroy {
     this.clossingOneService.getClosingData(this.AllotmentID).subscribe
       (
         data => {
-          this.closingDataAdvanceTable = data;
-          console.log('Closing Data:', this.closingDataAdvanceTable);
-          this.allotmentID = this.closingDataAdvanceTable?.allotmentID;
-          this.dutySlipID = this.closingDataAdvanceTable?.dutySlipID;
-          this.ReservationID = this.closingDataAdvanceTable?.reservationID;
-          this.CustomerID = this.closingDataAdvanceTable?.customerID;
-          this.PackageID = this.closingDataAdvanceTable?.packageID;
-          this.PackageTypeID = this.closingDataAdvanceTable?.packageTypeID;
-          this.CustomerContractID = this.closingDataAdvanceTable?.customerContractID;
-          this.PackageType = this.closingDataAdvanceTable?.packageType;
-          this.DutySlipForBillingID = this.closingDataAdvanceTable?.dutySlipForBillingID;
-          this.RegistrationNumber = this.closingDataAdvanceTable?.registrationNumber;
-          this.InventoryID = this.closingDataAdvanceTable?.inventoryID;
-          this.DropOffDate = this.closingDataAdvanceTable?.dropOffDate;
-          this.PickupDate = this.closingDataAdvanceTable?.pickupDate;
-          this.closureStatus = this.closingDataAdvanceTable?.closureStatus;
-          this.PickupTime = this.closingDataAdvanceTable?.pickupTime;
-          this.DropOffTime = this.closingDataAdvanceTable?.dropOffTime;
-          this.LocationOutDate = this.closingDataAdvanceTable?.locationOutDate;
-          this.LocationOutTime = this.closingDataAdvanceTable?.locationOutTime;
-          this.PickupAddress = this.closingDataAdvanceTable?.pickupAddress;
-          this.DropOffAddress = this.closingDataAdvanceTable?.dropOffAddress;
-          this.LocationOutAddress = this.closingDataAdvanceTable?.locationOutAddress;
-          this.CustomerName = this.closingDataAdvanceTable?.customerName || '';
-          this.TallyCustomerID = this.closingDataAdvanceTable?.tallyCustomerID || 0;
-          this.PickupCityID = this.closingDataAdvanceTable?.pickupCityID;
-          this.VehicleCategoryID = this.closingDataAdvanceTable?.vehicleCategoryID;
-          this.VehicleID = this.closingDataAdvanceTable?.vehicleID;
-          this.guestName = this.closingDataAdvanceTable?.guestName;
-          this.DutySlipMap= this.closingDataAdvanceTable?.dutySlipMap;
-          this.CityName = this.closingDataAdvanceTable?.city;
-          this.Package = this.closingDataAdvanceTable?.package;
-          this.carBooked=this.closingDataAdvanceTable?.vehicle;
-          this.carSent=this.closingDataAdvanceTable?.carSent;
-          this.fuelType=this.closingDataAdvanceTable?.fuelType;
-         
-          this.advanceDetailsLoadData();
-          this.kamCardLoadData();
-          // this.loadDataforAdditionalKMHR();
-          this.DutySACLoadData();
-          this.salesPersonLoadData();
-          this.GetBillFromTo();
-
+          // Defer binding updates so *ngIf="closingDataAdvanceTable" does not trip NG0100
+          // (ExpressionChangedAfterItHasBeenCheckedError) during the same CD pass.
+          Promise.resolve().then(() => {
+            this.closingDataAdvanceTable = data;
+            console.log('Closing Data:', this.closingDataAdvanceTable);
+            this.allotmentID = this.closingDataAdvanceTable?.allotmentID;
+            this.dutySlipID = this.closingDataAdvanceTable?.dutySlipID;
+            this.ReservationID = this.closingDataAdvanceTable?.reservationID;
+            this.CustomerID = this.closingDataAdvanceTable?.customerID;
+            this.PackageID = this.closingDataAdvanceTable?.packageID;
+            this.PackageTypeID = this.closingDataAdvanceTable?.packageTypeID;
+            this.CustomerContractID = this.closingDataAdvanceTable?.customerContractID;
+            this.PackageType = this.closingDataAdvanceTable?.packageType;
+            this.DutySlipForBillingID = this.closingDataAdvanceTable?.dutySlipForBillingID;
+            this.RegistrationNumber = this.closingDataAdvanceTable?.registrationNumber;
+            this.InventoryID = this.closingDataAdvanceTable?.inventoryID;
+            this.DropOffDate = this.closingDataAdvanceTable?.dropOffDate;
+            this.PickupDate = this.closingDataAdvanceTable?.pickupDate;
+            this.closureStatus = this.closingDataAdvanceTable?.closureStatus;
+            this.PickupTime = this.closingDataAdvanceTable?.pickupTime;
+            this.DropOffTime = this.closingDataAdvanceTable?.dropOffTime;
+            this.LocationOutDate = this.closingDataAdvanceTable?.locationOutDate;
+            this.LocationOutTime = this.closingDataAdvanceTable?.locationOutTime;
+            this.PickupAddress = this.closingDataAdvanceTable?.pickupAddress;
+            this.DropOffAddress = this.closingDataAdvanceTable?.dropOffAddress;
+            this.LocationOutAddress = this.closingDataAdvanceTable?.locationOutAddress;
+            this.CustomerName = this.closingDataAdvanceTable?.customerName || '';
+            this.TallyCustomerID = this.closingDataAdvanceTable?.tallyCustomerID || 0;
+            this.PickupCityID = this.closingDataAdvanceTable?.pickupCityID;
+            this.VehicleCategoryID = this.closingDataAdvanceTable?.vehicleCategoryID;
+            this.VehicleID = this.closingDataAdvanceTable?.vehicleID;
+            this.guestName = this.closingDataAdvanceTable?.guestName;
+            this.DutySlipMap= this.closingDataAdvanceTable?.dutySlipMap;
+            this.CityName = this.closingDataAdvanceTable?.city;
+            this.Package = this.closingDataAdvanceTable?.package;
+            this.carBooked=this.closingDataAdvanceTable?.vehicle;
+            this.carSent=this.closingDataAdvanceTable?.carSent;
+            this.fuelType=this.closingDataAdvanceTable?.fuelType;
+           
+            this.advanceDetailsLoadData();
+            this.kamCardLoadData();
+            // this.loadDataforAdditionalKMHR();
+            this.DutySACLoadData();
+            this.salesPersonLoadData();
+            this.GetBillFromTo();
+            this.cdr.detectChanges();
+          });
         },
         (error: HttpErrorResponse) => { this.closingDataAdvanceTable = null; }
       );

@@ -73,6 +73,10 @@ export class ClossingOneService
     return this.httpClient.get<any>(this.API_URL +"/"+DutySlipID);
   }
 
+  getTableDataForDriver(dutySlipID: number | string): Observable<any> {
+    return this.httpClient.get(this.API_URL_CurrentDutyInfo + '/GetDataforDriver/' + dutySlipID);
+  }
+
   /** Re-fetch IRN block state from the server (used before saves and on poll). */
   refreshActiveEInvoiceState(dutySlipID: number | string): Observable<ActiveEInvoiceState> {
     return this.httpClient.get<any>(this.API_URL + '/eInvoiceState/' + dutySlipID).pipe(

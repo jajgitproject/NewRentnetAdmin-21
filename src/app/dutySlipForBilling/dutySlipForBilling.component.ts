@@ -23,6 +23,7 @@ import Swal from 'sweetalert2';
 import { firstValueFrom } from 'rxjs';
 import { BillingHistory } from './dutySlipForBilling.model';
 import { ClosingModel } from '../clossingOne/clossingOne.model';
+import { ClosingDutySlipByDriverModel } from '../clossingOne/closingDutySlipByDriver.model';
 import { Dispute } from '../dispute/dispute.model';
 import { ClossingOneService } from '../clossingOne/clossingOne.service';
 import { SummaryOfDutyData } from '../summaryOfDuty/summary-of-duty.model';
@@ -238,13 +239,17 @@ export class DutySlipForBillingComponent implements OnInit, AfterViewInit, OnCha
         this.CustomerSignatureImage;
     }
     
-    if (this.advanceTableClosingOne.closingDutySlipForBillingModel.dsClosing !== null) {
+    const billingId = Number(this.advanceTableClosingOne.closingDutySlipForBillingModel.dutySlipForBillingID);
+    const hasSavedBilling = billingId > 0;
+    if (hasSavedBilling) {
       this.buttonText = 'Update';
       this.LoadDataForBilling();
     } else {
       this.patchPickupFromReservation();
       this.syncVerifyDutyAndGoodForBillingState();
     }
+
+    this.applyClosureSourceOnLoad();
 
     this.onKeyUp();
     this.applyRoundOffBillingTimes();
@@ -302,194 +307,47 @@ export class DutySlipForBillingComponent implements OnInit, AfterViewInit, OnCha
     this.applyManualEditMode();
   }
 
-   InitApp()
-  {
-    let locationOutLatByApp:string;
-    let locationOutLongByApp : string;
-    let reportingToGuestLatByApp:string;
-    let reportingToGuestLongByApp : string;
-    let pickUpLatByApp:string;
-    let pickUpLongByApp : string;
-    let dropOffLatByApp:string;
-    let dropOffLongByApp : string;
-    let locationInLatByApp:string;
-    let locationInLongByApp : string;
-
-    if(this.advanceTableClosingOne.closingDutySlipByAppModel.locationOutLatLongByApp)
-    {
-       var value = this.advanceTableClosingOne.closingDutySlipByAppModel.locationOutLatLongByApp.replace(
-        '(',
-        ''
-      );
-      value = value.replace(')', '');
-      var lat = value.split(' ')[2];
-      var long = value.split(' ')[1];
-   
-      locationOutLatByApp=lat;
-      locationOutLongByApp=long;
-    }
-   
-    if(this.advanceTableClosingOne.closingDutySlipByAppModel.pickUpLatLongByApp)
-    {
-      var value = this.advanceTableClosingOne.closingDutySlipByAppModel.pickUpLatLongByApp.replace(
-        '(',
-        ''
-      );
-      value = value.replace(')', '');
-      var lat1 = value.split(' ')[2];
-      var long1 = value.split(' ')[1];
-   
-      pickUpLatByApp=lat1;
-      pickUpLongByApp=long1;
-    }
-   
-    if(this.advanceTableClosingOne.closingDutySlipByAppModel.reportingToGuestLatLongByApp)
-    {
-      var value = this.advanceTableClosingOne.closingDutySlipByAppModel.reportingToGuestLatLongByApp.replace(
-        '(',
-        ''
-      );
-      value = value.replace(')', '');
-      var lat2 = value.split(' ')[2];
-      var long2 = value.split(' ')[1];
-   
-      reportingToGuestLatByApp=lat2;
-      reportingToGuestLongByApp=long2;
-    }
-   
-    if(this.advanceTableClosingOne.closingDutySlipByAppModel.dropOffLatLongByApp)
-    {
-      var value = this.advanceTableClosingOne.closingDutySlipByAppModel.dropOffLatLongByApp.replace(
-        '(',
-        ''
-      );
-      value = value.replace(')', '');
-      var lat3 = value.split(' ')[2];
-      var long3 = value.split(' ')[1];
-   
-      dropOffLatByApp=lat3;
-      dropOffLongByApp=long3;
-    }
-   
-    if(this.advanceTableClosingOne.closingDutySlipByAppModel.locationInLatLongByApp)
-    {
-      var value = this.advanceTableClosingOne.closingDutySlipByAppModel.locationInLatLongByApp.replace(
-        '(',
-        ''
-      );
-      value = value.replace(')', '');
-      var lat4 = value.split(' ')[2];
-      var long4 = value.split(' ')[1];
-  
-      locationInLatByApp=lat4;
-      locationInLongByApp=long4;
-    }
-
-      if(this.advanceTableClosingOne.closingDutySlipByAppModel.locationOutLocationOrHubID)
-      {
-        this.advanceTableForm.patchValue({locationOutLocationOrHubID : this.advanceTableClosingOne.closingDutySlipByAppModel.locationOutLocationOrHubID});
-      }
-      else
-      {
-        this.advanceTableForm.patchValue({locationOutLocationOrHubID : 0});
-      }
-      this.advanceTableForm.patchValue({locationOutDateForBilling : this.advanceTableClosingOne.closingDutySlipByAppModel.locationOutDateByApp});
-      this.advanceTableForm.patchValue({locationOutTimeForBilling : this.advanceTableClosingOne.closingDutySlipByAppModel.locationOutTimeByApp});
-      this.advanceTableForm.patchValue({locationOutKMForBilling : this.advanceTableClosingOne.closingDutySlipByAppModel.locationOutKMByAppActual});
-      this.advanceTableForm.patchValue({locationOutAddressStringForBilling : this.advanceTableClosingOne.closingDutySlipByAppModel.locationOutAddressStringByApp});
-      if(this.advanceTableClosingOne.closingDutySlipByAppModel.locationOutLatLongByApp)
-      {
-        this.advanceTableForm.patchValue({locationOutLatLongForBilling:locationOutLatByApp + ',' + locationOutLongByApp});
-      }
-      else
-      {
-        this.advanceTableForm.patchValue({locationOutLatLongForBilling:null });
-      } 
-
-      this.advanceTableForm.patchValue({reportingToGuestDateForBilling : this.advanceTableClosingOne.closingDutySlipByAppModel.reportingToGuestDateByApp});
-      this.advanceTableForm.patchValue({reportingToGuestTimeForBilling : this.advanceTableClosingOne.closingDutySlipByAppModel.reportingToGuestTimeByApp});
-      this.advanceTableForm.patchValue({reportingToGuestKMForBilling : this.advanceTableClosingOne.closingDutySlipByAppModel.reportingToGuestKMByAppActual});
-      this.advanceTableForm.patchValue({reportingToGuestAddressStringForBilling : this.advanceTableClosingOne.closingDutySlipByAppModel.reportingToGuestAddressStringByApp});
-      if(this.advanceTableClosingOne.closingDutySlipByAppModel.reportingToGuestLatLongByApp)
-      {
-        this.advanceTableForm.patchValue({reportingToGuestLatLongForBilling:reportingToGuestLatByApp + ',' + reportingToGuestLongByApp});
-      }
-      else
-      {
-        this.advanceTableForm.patchValue({reportingToGuestLatLongForBilling:null });
-      } 
-
-      // Pickup Date/Time are locked to Reservation; never patched from App/GPS/Driver here.
-      
-      this.advanceTableForm.patchValue({pickUpKMForBilling : this.advanceTableClosingOne.closingDutySlipByAppModel.pickupKMByAppActual});
-      this.advanceTableForm.patchValue({pickUpAddressStringForBilling : this.advanceTableClosingOne.closingDutySlipByAppModel.pickUpAddressStringByApp});
-      if(this.advanceTableClosingOne.closingDutySlipByAppModel.pickUpLatLongByApp)
-      {
-        this.advanceTableForm.patchValue({pickUpLatLongForBilling:pickUpLatByApp + ',' + pickUpLongByApp});
-      }
-      else
-      {
-        this.advanceTableForm.patchValue({pickUpLatLongForBilling:null });
-      } 
-
-      this.advanceTableForm.patchValue({dropOffDateForBilling : this.advanceTableClosingOne.closingDutySlipByAppModel.dropOffDateByApp});
-      this.advanceTableForm.patchValue({dropOffTimeForBilling : this.advanceTableClosingOne.closingDutySlipByAppModel.dropOffTimeByApp});
-      this.advanceTableForm.patchValue({dropOffKMForBilling : this.advanceTableClosingOne.closingDutySlipByAppModel.dropOffKMByAppActual});
-      this.advanceTableForm.patchValue({dropOffAddressStringForBilling : this.advanceTableClosingOne.closingDutySlipByAppModel.dropOffAddressStringByApp});
-      if(this.advanceTableClosingOne.closingDutySlipByAppModel.dropOffLatLongByApp)
-      {
-        this.advanceTableForm.patchValue({dropOffLatLongForBilling:dropOffLatByApp + ',' + dropOffLongByApp});
-      }
-      else
-      {
-        this.advanceTableForm.patchValue({dropOffLatLongForBilling:null });
-      }
-
-      
-      if(this.advanceTableClosingOne.closingDutySlipByAppModel.locationOutLocationOrHubID)
-      {
-        this.advanceTableForm.patchValue({locationInLocationOrHubID : this.advanceTableClosingOne.closingDutySlipByAppModel.locationOutLocationOrHubID});
-      }
-      else
-      {
-        this.advanceTableForm.patchValue({locationInLocationOrHubID : 0});
-      }
-      this.advanceTableForm.patchValue({locationInDateForBilling : this.advanceTableClosingOne.closingDutySlipByAppModel.locationInDateByApp});
-      this.advanceTableForm.patchValue({locationInTimeForBilling : this.advanceTableClosingOne.closingDutySlipByAppModel.locationInTimeByApp});
-      this.advanceTableForm.patchValue({locationInKMForBilling : this.advanceTableClosingOne.closingDutySlipByAppModel.locationInKMByAppActual});
-      if(this.advanceTableClosingOne.closingDutySlipByAppModel.locationInAddressStringByApp !== null)
-      {
-        this.advanceTableForm.patchValue({locationInAddressStringForBilling : this.advanceTableClosingOne.closingDutySlipByAppModel.locationInAddressStringByApp});
-      }
-      else
-      {
-        this.advanceTableForm.patchValue({locationInAddressStringForBilling : this.advanceTableClosingOne.closingDutySlipByAppModel.locationOutAddressStringByApp});
-      }
-      if(this.advanceTableClosingOne.closingDutySlipByAppModel.locationInLatLongByApp)
-      {
-        this.advanceTableForm.patchValue({locationInLatLongForBilling:locationInLatByApp + ',' + locationInLongByApp});
-      }
-      else
-      {
-        if(this.advanceTableClosingOne.closingDutySlipByAppModel.locationOutAddressStringByApp !== null)
-        {
-          this.advanceTableForm.patchValue({locationInLatLongForBilling:locationOutLatByApp + ',' + locationOutLongByApp });
-        }
-        else
-        {
-          this.advanceTableForm.patchValue({locationInLatLongForBilling:null });
-        }
-      }
-    
-    
-    this.onKeyUp();
-    this.applyRoundOffBillingTimes();
-    this.onTimeSelection();
+  InitApp(): void {
+    this.patchFormFromAppModel({ useActualKm: true });
   }
 
-  InitDriver()
-  {
-    this.InitManual();
+  InitDriver(): void {
+    const driver = this.advanceTableClosingOne?.closingDutySlipByDriverModel;
+    if (this.hasUsableDriverData(driver)) {
+      this.patchFormFromDriverModel(driver);
+      return;
+    }
+
+    // Driver KM comparison column uses DutySlipByApp odometer (g2PApp / p2DApp / d2GApp).
+    if (this.hasUsableAppData(this.advanceTableClosingOne?.closingDutySlipByAppModel)) {
+      this.patchFormFromAppModel({ useActualKm: false });
+      return;
+    }
+
+    if (!this.DutySlipID) {
+      this.showNoDriverDataWarning();
+      return;
+    }
+    this.clossingOneService.getTableDataForDriver(this.DutySlipID).subscribe({
+      next: (data) => {
+        const row = Array.isArray(data) ? data[0] : data;
+        if (row && this.hasUsableDriverData(row)) {
+          this.advanceTableClosingOne.closingDutySlipByDriverModel = new ClosingDutySlipByDriverModel(row);
+          this.patchFormFromDriverModel(this.advanceTableClosingOne.closingDutySlipByDriverModel);
+        } else if (this.hasUsableAppData(this.advanceTableClosingOne?.closingDutySlipByAppModel)) {
+          this.patchFormFromAppModel({ useActualKm: false });
+        } else {
+          this.showNoDriverDataWarning();
+        }
+      },
+      error: () => {
+        if (this.hasUsableAppData(this.advanceTableClosingOne?.closingDutySlipByAppModel)) {
+          this.patchFormFromAppModel({ useActualKm: false });
+        } else {
+          this.showNoDriverDataWarning();
+        }
+      },
+    });
   }
 
   InitGPS()
@@ -676,187 +534,8 @@ export class DutySlipForBillingComponent implements OnInit, AfterViewInit, OnCha
     this.onTimeSelection();
   }
 
-  InitManual()
-  {
-    let locationOutLatByDriver:string;
-    let locationOutLongByDriver : string;
-    let reportingToGuestLatByDriver:string;
-    let reportingToGuestLongByDriver : string;
-    let pickUpLatByDriver:string;
-    let pickUpLongByDriver : string;
-    let dropOffLatByDriver:string;
-    let dropOffLongByDriver : string;
-    let locationInLatByDriver:string;
-    let locationInLongByDriver : string;
-
-    if(this.advanceTableClosingOne.closingDutySlipByDriverModel.locationOutLatLongByDriver)
-    {
-       var value = this.advanceTableClosingOne.closingDutySlipByDriverModel.locationOutLatLongByDriver.replace(
-        '(',
-        ''
-      );
-      value = value.replace(')', '');
-      var lat = value.split(' ')[2];
-      var long = value.split(' ')[1];
-   
-      locationOutLatByDriver=lat;
-      locationOutLongByDriver=long;
-    }
-   
-    if(this.advanceTableClosingOne.closingDutySlipByDriverModel.pickUpLatLongByDriver)
-    {
-      var value = this.advanceTableClosingOne.closingDutySlipByDriverModel.pickUpLatLongByDriver.replace(
-        '(',
-        ''
-      );
-      value = value.replace(')', '');
-      var lat1 = value.split(' ')[2];
-      var long1 = value.split(' ')[1];
-   
-      pickUpLatByDriver=lat1;
-      pickUpLongByDriver=long1;
-    }
-   
-    if(this.advanceTableClosingOne.closingDutySlipByDriverModel.reportingToGuestLatLongByDriver)
-    {
-      var value = this.advanceTableClosingOne.closingDutySlipByDriverModel.reportingToGuestLatLongByDriver.replace(
-        '(',
-        ''
-      );
-      value = value.replace(')', '');
-      var lat2 = value.split(' ')[2];
-      var long2 = value.split(' ')[1];
-   
-      reportingToGuestLatByDriver=lat2;
-      reportingToGuestLongByDriver=long2;
-    }
-   
-    if(this.advanceTableClosingOne.closingDutySlipByDriverModel.dropOffLatLongByDriver)
-    {
-      var value = this.advanceTableClosingOne.closingDutySlipByDriverModel.dropOffLatLongByDriver.replace(
-        '(',
-        ''
-      );
-      value = value.replace(')', '');
-      var lat3 = value.split(' ')[2];
-      var long3 = value.split(' ')[1];
-   
-      dropOffLatByDriver=lat3;
-      dropOffLongByDriver=long3;
-    }
-   
-    if(this.advanceTableClosingOne.closingDutySlipByDriverModel.locationInLatLongByDriver)
-    {
-      var value = this.advanceTableClosingOne.closingDutySlipByDriverModel.locationInLatLongByDriver.replace(
-        '(',
-        ''
-      );
-      value = value.replace(')', '');
-      var lat4 = value.split(' ')[2];
-      var long4 = value.split(' ')[1];
-  
-      locationInLatByDriver=lat4;
-      locationInLongByDriver=long4;
-    }
-
-
-      if(this.advanceTableClosingOne.closingDutySlipByDriverModel.locationOutLocationOrHubID)
-      {
-        this.advanceTableForm.patchValue({locationOutLocationOrHubID : this.advanceTableClosingOne.closingDutySlipByDriverModel.locationOutLocationOrHubID});
-      }
-      else
-      {
-        this.advanceTableForm.patchValue({locationOutLocationOrHubID : 0});
-      }
-      this.advanceTableForm.patchValue({locationOutDateForBilling : this.advanceTableClosingOne.closingDutySlipByDriverModel.locationOutDateByDriver});
-      this.advanceTableForm.patchValue({locationOutTimeForBilling : this.advanceTableClosingOne.closingDutySlipByDriverModel.locationOutTimeByDriver});
-      this.advanceTableForm.patchValue({locationOutKMForBilling : this.advanceTableClosingOne.closingDutySlipByDriverModel.locationOutKMByDriver});
-      this.advanceTableForm.patchValue({locationOutAddressStringForBilling : this.advanceTableClosingOne.closingDutySlipByDriverModel.locationOutAddressStringByDriver});
-      if(this.advanceTableClosingOne.closingDutySlipByDriverModel.locationOutLatLongByDriver)
-      {
-        this.advanceTableForm.patchValue({locationOutLatLongForBilling:locationOutLatByDriver + ',' + locationOutLongByDriver});
-      }
-      else
-      {
-        this.advanceTableForm.patchValue({locationOutLatLongForBilling:null });
-      } 
-
-      this.advanceTableForm.patchValue({reportingToGuestDateForBilling : this.advanceTableClosingOne.closingDutySlipByDriverModel.reportingToGuestDateByDriver});
-      this.advanceTableForm.patchValue({reportingToGuestTimeForBilling : this.advanceTableClosingOne.closingDutySlipByDriverModel.reportingToGuestTimeByDriver});
-      this.advanceTableForm.patchValue({reportingToGuestKMForBilling : this.advanceTableClosingOne.closingDutySlipByDriverModel.reportingToGuestKMByDriver});
-      this.advanceTableForm.patchValue({reportingToGuestAddressStringForBilling : this.advanceTableClosingOne.closingDutySlipByDriverModel.reportingToGuestAddressStringByDriver});
-      if(this.advanceTableClosingOne.closingDutySlipByDriverModel.reportingToGuestLatLongByDriver)
-      {
-        this.advanceTableForm.patchValue({reportingToGuestLatLongForBilling:reportingToGuestLatByDriver + ',' + reportingToGuestLongByDriver});
-      }
-      else
-      {
-        this.advanceTableForm.patchValue({reportingToGuestLatLongForBilling:null });
-      } 
-
-      // Pickup Date/Time are locked to Reservation; never patched from App/GPS/Driver here.
-      
-      this.advanceTableForm.patchValue({pickUpKMForBilling : this.advanceTableClosingOne.closingDutySlipByDriverModel.pickUpKMByDriver});
-      this.advanceTableForm.patchValue({pickUpAddressStringForBilling : this.advanceTableClosingOne.closingDutySlipByDriverModel.pickUpAddressStringByDriver});
-      if(this.advanceTableClosingOne.closingDutySlipByDriverModel.pickUpLatLongByDriver)
-      {
-        this.advanceTableForm.patchValue({pickUpLatLongForBilling:pickUpLatByDriver + ',' + pickUpLongByDriver});
-      }
-      else
-      {
-        this.advanceTableForm.patchValue({pickUpLatLongForBilling:null });
-      } 
-
-      this.advanceTableForm.patchValue({dropOffDateForBilling : this.advanceTableClosingOne.closingDutySlipByDriverModel.dropOffDateByDriver});
-      this.advanceTableForm.patchValue({dropOffTimeForBilling : this.advanceTableClosingOne.closingDutySlipByDriverModel.dropOffTimeByDriver});
-      this.advanceTableForm.patchValue({dropOffKMForBilling : this.advanceTableClosingOne.closingDutySlipByDriverModel.dropOffKMByDriver});
-      this.advanceTableForm.patchValue({dropOffAddressStringForBilling : this.advanceTableClosingOne.closingDutySlipByDriverModel.dropOffAddressStringByDriver});
-      if(this.advanceTableClosingOne.closingDutySlipByDriverModel.dropOffLatLongByDriver)
-      {
-        this.advanceTableForm.patchValue({dropOffLatLongForBilling:dropOffLatByDriver + ',' + dropOffLongByDriver});
-      }
-      else
-      {
-        this.advanceTableForm.patchValue({dropOffLatLongForBilling:null });
-      }
-
-
-      if(this.advanceTableClosingOne.closingDutySlipByDriverModel.locationOutLocationOrHubID)
-      {
-        this.advanceTableForm.patchValue({locationInLocationOrHubID : this.advanceTableClosingOne.closingDutySlipByDriverModel.locationOutLocationOrHubID});
-      }
-      else
-      {
-        this.advanceTableForm.patchValue({locationInLocationOrHubID : 0});
-      }
-      this.advanceTableForm.patchValue({locationInDateForBilling : this.advanceTableClosingOne.closingDutySlipByDriverModel.locationInDateByDriver});
-      this.advanceTableForm.patchValue({locationInTimeForBilling : this.advanceTableClosingOne.closingDutySlipByDriverModel.locationInTimeByDriver});
-      this.advanceTableForm.patchValue({locationInKMForBilling : this.advanceTableClosingOne.closingDutySlipByDriverModel.locationInKMByDriver});
-      if(this.advanceTableClosingOne.closingDutySlipByAppModel.locationInAddressStringByApp !== null)
-      {
-        this.advanceTableForm.patchValue({locationInAddressStringForBilling : this.advanceTableClosingOne.closingDutySlipByDriverModel.locationInAddressStringByDriver});
-      }
-      else
-      {
-        this.advanceTableForm.patchValue({locationInAddressStringForBilling : this.advanceTableClosingOne.closingDutySlipByDriverModel.locationOutAddressStringByDriver});
-      }
-
-      
-      if(this.advanceTableClosingOne.closingDutySlipByDriverModel.locationInLatLongByDriver)
-      {
-        this.advanceTableForm.patchValue({locationInLatLongForBilling:locationInLatByDriver + ',' + locationInLongByDriver});
-      }
-      else
-      {
-        if(this.advanceTableClosingOne.closingDutySlipByDriverModel.locationOutLatLongByDriver !== null)
-        {
-          this.advanceTableForm.patchValue({locationInLatLongForBilling:locationOutLatByDriver + ',' + locationOutLongByDriver});
-        }
-        else
-        {
-          this.advanceTableForm.patchValue({locationInLatLongForBilling:null });
-        }
-      }
+  InitManual(): void {
+    this.patchBillingTripFieldsFromForBillingModel();
     this.applyReportingFromPickupFallbackToForm();
     this.onKeyUp();
     this.applyRoundOffBillingTimes();
@@ -1372,6 +1051,332 @@ export class DutySlipForBillingComponent implements OnInit, AfterViewInit, OnCha
     );
   }
 
+  private applyClosureSourceOnLoad(): void {
+    const closureType =
+      this.advanceTableClosingOne?.closingDutySlipForBillingModel?.closureType
+      ?? this.advanceTableForm?.get('closureType')?.value;
+    if (closureType === 'Driver') {
+      this.InitDriver();
+    } else if (closureType === 'App') {
+      this.InitApp();
+    } else if (closureType === 'GPS') {
+      this.InitGPS();
+    }
+  }
+
+  private hasUsableDriverData(driver: any): boolean {
+    if (!driver) {
+      return false;
+    }
+    const locationOutDate =
+      driver.locationOutDateByDriver ?? driver.LocationOutDateByDriver;
+    if (this.isValidBillingDate(locationOutDate)) {
+      return true;
+    }
+    const kmFields = [
+      driver.locationOutKMByDriver ?? driver.LocationOutKMByDriver,
+      driver.pickUpKMByDriver ?? driver.PickUpKMByDriver,
+      driver.dropOffKMByDriver ?? driver.DropOffKMByDriver,
+      driver.locationInKMByDriver ?? driver.LocationInKMByDriver,
+    ];
+    return kmFields.some((value) => {
+      const n = Number(value);
+      return Number.isFinite(n) && n !== 0;
+    });
+  }
+
+  private hasUsableAppData(app: any): boolean {
+    if (!app) {
+      return false;
+    }
+    if (this.isValidBillingDate(app.locationOutDateByApp ?? app.LocationOutDateByApp)) {
+      return true;
+    }
+    const kmFields = [
+      app.locationOutKMByApp ?? app.LocationOutKMByApp,
+      app.pickUpKMByApp ?? app.PickUpKMByApp,
+      app.dropOffKMByApp ?? app.DropOffKMByApp,
+      app.locationInKMByApp ?? app.LocationInKMByApp,
+      app.locationOutKMByAppActual ?? app.LocationOutKMByAppActual,
+      app.pickupKMByAppActual ?? app.PickupKMByAppActual,
+      app.dropOffKMByAppActual ?? app.DropOffKMByAppActual,
+      app.locationInKMByAppActual ?? app.LocationInKMByAppActual,
+    ];
+    return kmFields.some((value) => {
+      const n = Number(value);
+      return Number.isFinite(n) && n !== 0;
+    });
+  }
+
+  private showNoDriverDataWarning(): void {
+    Swal.fire('', 'No driver KM data found for this duty.', 'warning');
+  }
+
+  private parseLatLongPair(latLong: string | null | undefined): { lat: string; long: string } | null {
+    if (!latLong) {
+      return null;
+    }
+    const value = latLong.replace('(', '').replace(')', '');
+    const lat = value.split(' ')[2];
+    const long = value.split(' ')[1];
+    if (!lat || !long) {
+      return null;
+    }
+    return { lat, long };
+  }
+
+  /**
+   * Fill billing trip fields from DutySlipByApp.
+   * useActualKm:true  → App KM radio (constructed Actual odometer chain)
+   * useActualKm:false → Driver KM fallback (raw App odometer = comparison Driver column)
+   */
+  private patchFormFromAppModel(options: { useActualKm: boolean }): void {
+    const app = this.advanceTableClosingOne?.closingDutySlipByAppModel;
+    if (!app || !this.advanceTableForm) {
+      return;
+    }
+
+    const locationOutCoords = this.parseLatLongPair(app.locationOutLatLongByApp);
+    const pickUpCoords = this.parseLatLongPair(app.pickUpLatLongByApp);
+    const reportingCoords = this.parseLatLongPair(app.reportingToGuestLatLongByApp);
+    const dropOffCoords = this.parseLatLongPair(app.dropOffLatLongByApp);
+    const locationInCoords = this.parseLatLongPair(app.locationInLatLongByApp);
+
+    const locationOutKm = options.useActualKm ? app.locationOutKMByAppActual : app.locationOutKMByApp;
+    const reportingKm = options.useActualKm ? app.reportingToGuestKMByAppActual : app.reportingToGuestKMByApp;
+    const pickUpKm = options.useActualKm ? app.pickupKMByAppActual : app.pickUpKMByApp;
+    const dropOffKm = options.useActualKm ? app.dropOffKMByAppActual : app.dropOffKMByApp;
+    const locationInKm = options.useActualKm ? app.locationInKMByAppActual : app.locationInKMByApp;
+
+    if (app.locationOutLocationOrHubID) {
+      this.advanceTableForm.patchValue({ locationOutLocationOrHubID: app.locationOutLocationOrHubID });
+    } else {
+      this.advanceTableForm.patchValue({ locationOutLocationOrHubID: 0 });
+    }
+
+    this.advanceTableForm.patchValue({ locationOutDateForBilling: app.locationOutDateByApp });
+    this.advanceTableForm.patchValue({ locationOutTimeForBilling: app.locationOutTimeByApp });
+    this.advanceTableForm.patchValue({ locationOutKMForBilling: locationOutKm });
+    this.advanceTableForm.patchValue({ locationOutAddressStringForBilling: app.locationOutAddressStringByApp });
+    this.advanceTableForm.patchValue({
+      locationOutLatLongForBilling: locationOutCoords
+        ? `${locationOutCoords.lat},${locationOutCoords.long}`
+        : null,
+    });
+
+    this.advanceTableForm.patchValue({ reportingToGuestDateForBilling: app.reportingToGuestDateByApp });
+    this.advanceTableForm.patchValue({ reportingToGuestTimeForBilling: app.reportingToGuestTimeByApp });
+    this.advanceTableForm.patchValue({ reportingToGuestKMForBilling: reportingKm });
+    this.advanceTableForm.patchValue({ reportingToGuestAddressStringForBilling: app.reportingToGuestAddressStringByApp });
+    this.advanceTableForm.patchValue({
+      reportingToGuestLatLongForBilling: reportingCoords
+        ? `${reportingCoords.lat},${reportingCoords.long}`
+        : null,
+    });
+
+    // Pickup Date/Time are locked to Reservation; never patched from App/GPS/Driver here.
+    this.advanceTableForm.patchValue({ pickUpKMForBilling: pickUpKm });
+    this.advanceTableForm.patchValue({ pickUpAddressStringForBilling: app.pickUpAddressStringByApp });
+    this.advanceTableForm.patchValue({
+      pickUpLatLongForBilling: pickUpCoords ? `${pickUpCoords.lat},${pickUpCoords.long}` : null,
+    });
+
+    this.advanceTableForm.patchValue({ dropOffDateForBilling: app.dropOffDateByApp });
+    this.advanceTableForm.patchValue({ dropOffTimeForBilling: app.dropOffTimeByApp });
+    this.advanceTableForm.patchValue({ dropOffKMForBilling: dropOffKm });
+    this.advanceTableForm.patchValue({ dropOffAddressStringForBilling: app.dropOffAddressStringByApp });
+    this.advanceTableForm.patchValue({
+      dropOffLatLongForBilling: dropOffCoords ? `${dropOffCoords.lat},${dropOffCoords.long}` : null,
+    });
+
+    if (app.locationOutLocationOrHubID) {
+      this.advanceTableForm.patchValue({ locationInLocationOrHubID: app.locationOutLocationOrHubID });
+    } else {
+      this.advanceTableForm.patchValue({ locationInLocationOrHubID: 0 });
+    }
+
+    this.advanceTableForm.patchValue({ locationInDateForBilling: app.locationInDateByApp });
+    this.advanceTableForm.patchValue({ locationInTimeForBilling: app.locationInTimeByApp });
+    this.advanceTableForm.patchValue({ locationInKMForBilling: locationInKm });
+    if (app.locationInAddressStringByApp !== null && app.locationInAddressStringByApp !== undefined && app.locationInAddressStringByApp !== '') {
+      this.advanceTableForm.patchValue({ locationInAddressStringForBilling: app.locationInAddressStringByApp });
+    } else {
+      this.advanceTableForm.patchValue({ locationInAddressStringForBilling: app.locationOutAddressStringByApp });
+    }
+
+    if (locationInCoords) {
+      this.advanceTableForm.patchValue({
+        locationInLatLongForBilling: `${locationInCoords.lat},${locationInCoords.long}`,
+      });
+    } else if (locationOutCoords && app.locationOutAddressStringByApp) {
+      this.advanceTableForm.patchValue({
+        locationInLatLongForBilling: `${locationOutCoords.lat},${locationOutCoords.long}`,
+      });
+    } else {
+      this.advanceTableForm.patchValue({ locationInLatLongForBilling: null });
+    }
+
+    this.onKeyUp();
+    this.applyRoundOffBillingTimes();
+    this.onTimeSelection();
+  }
+
+  private patchFormFromDriverModel(driver: ClosingDutySlipByDriverModel | any): void {
+    if (!driver || !this.advanceTableForm) {
+      return;
+    }
+
+    const locationOutCoords = this.parseLatLongPair(driver.locationOutLatLongByDriver);
+    const pickUpCoords = this.parseLatLongPair(driver.pickUpLatLongByDriver);
+    const reportingCoords = this.parseLatLongPair(driver.reportingToGuestLatLongByDriver);
+    const dropOffCoords = this.parseLatLongPair(driver.dropOffLatLongByDriver);
+    const locationInCoords = this.parseLatLongPair(driver.locationInLatLongByDriver);
+
+    if (driver.locationOutLocationOrHubID) {
+      this.advanceTableForm.patchValue({ locationOutLocationOrHubID: driver.locationOutLocationOrHubID });
+    } else {
+      this.advanceTableForm.patchValue({ locationOutLocationOrHubID: 0 });
+    }
+
+    this.advanceTableForm.patchValue({ locationOutDateForBilling: driver.locationOutDateByDriver });
+    this.advanceTableForm.patchValue({ locationOutTimeForBilling: driver.locationOutTimeByDriver });
+    this.advanceTableForm.patchValue({ locationOutKMForBilling: driver.locationOutKMByDriver });
+    this.advanceTableForm.patchValue({ locationOutAddressStringForBilling: driver.locationOutAddressStringByDriver });
+    this.advanceTableForm.patchValue({
+      locationOutLatLongForBilling: locationOutCoords
+        ? `${locationOutCoords.lat},${locationOutCoords.long}`
+        : null,
+    });
+
+    this.advanceTableForm.patchValue({ reportingToGuestDateForBilling: driver.reportingToGuestDateByDriver });
+    this.advanceTableForm.patchValue({ reportingToGuestTimeForBilling: driver.reportingToGuestTimeByDriver });
+    this.advanceTableForm.patchValue({ reportingToGuestKMForBilling: driver.reportingToGuestKMByDriver });
+    this.advanceTableForm.patchValue({
+      reportingToGuestAddressStringForBilling: driver.reportingToGuestAddressStringByDriver,
+    });
+    this.advanceTableForm.patchValue({
+      reportingToGuestLatLongForBilling: reportingCoords
+        ? `${reportingCoords.lat},${reportingCoords.long}`
+        : null,
+    });
+
+    // Pickup Date/Time are locked to Reservation; never patched from App/GPS/Driver here.
+    this.advanceTableForm.patchValue({ pickUpKMForBilling: driver.pickUpKMByDriver });
+    this.advanceTableForm.patchValue({ pickUpAddressStringForBilling: driver.pickUpAddressStringByDriver });
+    this.advanceTableForm.patchValue({
+      pickUpLatLongForBilling: pickUpCoords ? `${pickUpCoords.lat},${pickUpCoords.long}` : null,
+    });
+
+    this.advanceTableForm.patchValue({ dropOffDateForBilling: driver.dropOffDateByDriver });
+    this.advanceTableForm.patchValue({ dropOffTimeForBilling: driver.dropOffTimeByDriver });
+    this.advanceTableForm.patchValue({ dropOffKMForBilling: driver.dropOffKMByDriver });
+    this.advanceTableForm.patchValue({ dropOffAddressStringForBilling: driver.dropOffAddressStringByDriver });
+    this.advanceTableForm.patchValue({
+      dropOffLatLongForBilling: dropOffCoords ? `${dropOffCoords.lat},${dropOffCoords.long}` : null,
+    });
+
+    if (driver.locationOutLocationOrHubID) {
+      this.advanceTableForm.patchValue({ locationInLocationOrHubID: driver.locationOutLocationOrHubID });
+    } else {
+      this.advanceTableForm.patchValue({ locationInLocationOrHubID: 0 });
+    }
+
+    this.advanceTableForm.patchValue({ locationInDateForBilling: driver.locationInDateByDriver });
+    this.advanceTableForm.patchValue({ locationInTimeForBilling: driver.locationInTimeByDriver });
+    this.advanceTableForm.patchValue({ locationInKMForBilling: driver.locationInKMByDriver });
+
+    const locationInAddress =
+      driver.locationInAddressStringByDriver ?? driver.locationOutAddressStringByDriver ?? null;
+    this.advanceTableForm.patchValue({ locationInAddressStringForBilling: locationInAddress });
+
+    if (locationInCoords) {
+      this.advanceTableForm.patchValue({
+        locationInLatLongForBilling: `${locationInCoords.lat},${locationInCoords.long}`,
+      });
+    } else if (locationOutCoords) {
+      this.advanceTableForm.patchValue({
+        locationInLatLongForBilling: `${locationOutCoords.lat},${locationOutCoords.long}`,
+      });
+    } else {
+      this.advanceTableForm.patchValue({ locationInLatLongForBilling: null });
+    }
+
+    this.applyReportingFromPickupFallbackToForm();
+    this.onKeyUp();
+    this.applyRoundOffBillingTimes();
+    this.onTimeSelection();
+  }
+
+  /** Patch trip/KM/address fields from saved DutySlipForBilling row (Manual KM baseline). */
+  private patchBillingTripFieldsFromForBillingModel(): void {
+    const billing = this.advanceTableClosingOne?.closingDutySlipForBillingModel;
+    if (!billing || !this.advanceTableForm) {
+      return;
+    }
+
+    const locationOutCoords = this.parseLatLongPair(billing.locationOutLatLongForBilling);
+    const reportingCoords = this.parseLatLongPair(billing.reportingToGuestLatLongForBilling);
+    const pickUpCoords = this.parseLatLongPair(billing.pickUpLatLongForBilling);
+    const dropOffCoords = this.parseLatLongPair(billing.dropOffLatLongForBilling);
+    const locationInCoords = this.parseLatLongPair(billing.locationInLatLongForBilling);
+
+    this.advanceTableForm.patchValue({ locationOutDateForBilling: billing.locationOutDateForBilling });
+    this.advanceTableForm.patchValue({ locationOutTimeForBilling: billing.locationOutTimeForBilling });
+    this.advanceTableForm.patchValue({ locationOutKMForBilling: billing.locationOutKMForBilling });
+    this.advanceTableForm.patchValue({ locationOutAddressStringForBilling: billing.locationOutAddressStringForBilling });
+    this.advanceTableForm.patchValue({
+      locationOutLatLongForBilling: locationOutCoords
+        ? `${locationOutCoords.lat},${locationOutCoords.long}`
+        : null,
+    });
+
+    this.advanceTableForm.patchValue({ reportingToGuestDateForBilling: billing.reportingToGuestDateForBilling });
+    this.advanceTableForm.patchValue({ reportingToGuestTimeForBilling: billing.reportingToGuestTimeForBilling });
+    this.advanceTableForm.patchValue({ reportingToGuestKMForBilling: billing.reportingToGuestKMForBilling });
+    this.advanceTableForm.patchValue({
+      reportingToGuestAddressStringForBilling: billing.reportingToGuestAddressStringForBilling,
+    });
+    this.advanceTableForm.patchValue({
+      reportingToGuestLatLongForBilling: reportingCoords
+        ? `${reportingCoords.lat},${reportingCoords.long}`
+        : null,
+    });
+
+    this.patchPickupDateFromReservation();
+    this.patchPickupTimeForClosing();
+
+    this.advanceTableForm.patchValue({ pickUpKMForBilling: billing.pickUpKMForBilling });
+    this.advanceTableForm.patchValue({ pickUpAddressStringForBilling: billing.pickUpAddressStringForBilling });
+    this.advanceTableForm.patchValue({
+      pickUpLatLongForBilling: pickUpCoords ? `${pickUpCoords.lat},${pickUpCoords.long}` : null,
+    });
+
+    this.advanceTableForm.patchValue({ dropOffDateForBilling: billing.dropOffDateForBilling });
+    this.advanceTableForm.patchValue({ dropOffTimeForBilling: billing.dropOffTimeForBilling });
+    this.advanceTableForm.patchValue({ dropOffKMForBilling: billing.dropOffKMForBilling });
+    this.advanceTableForm.patchValue({ dropOffAddressStringForBilling: billing.dropOffAddressStringForBilling });
+    this.advanceTableForm.patchValue({
+      dropOffLatLongForBilling: dropOffCoords ? `${dropOffCoords.lat},${dropOffCoords.long}` : null,
+    });
+
+    this.advanceTableForm.patchValue({ locationInDateForBilling: billing.locationInDateForBilling });
+    this.advanceTableForm.patchValue({ locationInTimeForBilling: billing.locationInTimeForBilling });
+    this.advanceTableForm.patchValue({ locationInKMForBilling: billing.locationInKMForBilling });
+    this.advanceTableForm.patchValue({ locationInAddressStringForBilling: billing.locationInAddressStringForBilling });
+    this.advanceTableForm.patchValue({
+      locationInLatLongForBilling: locationInCoords
+        ? `${locationInCoords.lat},${locationInCoords.long}`
+        : null,
+    });
+
+    this.advanceTableForm.patchValue({
+      locationOutLocationOrHubID: this.toFormIntOrNull(billing.locationOutLocationOrHubID),
+    });
+    this.advanceTableForm.patchValue({
+      locationInLocationOrHubID: this.toFormIntOrZero(billing.locationInLocationOrHubID),
+    });
+  }
+
   /** Pickup Date must remain non-editable for every closure type. Pickup Time stays editable. */
   private disablePickupDateTimeControls(): void {
     if (!this.advanceTableForm) {
@@ -1656,165 +1661,9 @@ export class DutySlipForBillingComponent implements OnInit, AfterViewInit, OnCha
   public LoadDataForBilling()
   {
     this.syncVerifyDutyAndGoodForBillingState();
-    let locationOutLatForBilling:string;
-    let locationOutLongForBilling : string;
-    let reportingToGuestLatForBilling:string;
-    let reportingToGuestLongForBilling : string;
-    let pickUpLatForBilling:string;
-    let pickUpLongForBilling : string;
-    let dropOffLatForBilling:string;
-    let dropOffLongForBilling : string;
-    let locationInLatForBilling:string;
-    let locationInLongForBilling : string;
-
-    if(this.advanceTableClosingOne.closingDutySlipForBillingModel.locationOutLatLongForBilling)
-    {
-       var value = this.advanceTableClosingOne.closingDutySlipForBillingModel.locationOutLatLongForBilling.replace(
-        '(',
-        ''
-      );
-      value = value.replace(')', '');
-      var lat = value.split(' ')[2];
-      var long = value.split(' ')[1];
-   
-      locationOutLatForBilling=lat;
-      locationOutLongForBilling=long;
-    }
-
-    if(this.advanceTableClosingOne.closingDutySlipForBillingModel.reportingToGuestLatLongForBilling)
-    {
-       var value = this.advanceTableClosingOne.closingDutySlipForBillingModel.reportingToGuestLatLongForBilling.replace(
-        '(',
-        ''
-      );
-      value = value.replace(')', '');
-      var lat = value.split(' ')[2];
-      var long = value.split(' ')[1];
-   
-      reportingToGuestLatForBilling=lat;
-      reportingToGuestLongForBilling=long;
-    }
-
-    if(this.advanceTableClosingOne.closingDutySlipForBillingModel.pickUpLatLongForBilling)
-    {
-       var value = this.advanceTableClosingOne.closingDutySlipForBillingModel.pickUpLatLongForBilling.replace(
-        '(',
-        ''
-      );
-      value = value.replace(')', '');
-      var lat = value.split(' ')[2];
-      var long = value.split(' ')[1];
-   
-      pickUpLatForBilling=lat;
-      pickUpLongForBilling=long;
-    }
-
-    if(this.advanceTableClosingOne.closingDutySlipForBillingModel.dropOffLatLongForBilling)
-    {
-       var value = this.advanceTableClosingOne.closingDutySlipForBillingModel.dropOffLatLongForBilling.replace(
-        '(',
-        ''
-      );
-      value = value.replace(')', '');
-      var lat = value.split(' ')[2];
-      var long = value.split(' ')[1];
-   
-      dropOffLatForBilling=lat;
-      dropOffLongForBilling=long;
-    }
-
-    if(this.advanceTableClosingOne.closingDutySlipForBillingModel.locationInLatLongForBilling)
-    {
-       var value = this.advanceTableClosingOne.closingDutySlipForBillingModel.locationInLatLongForBilling.replace(
-        '(',
-        ''
-      );
-      value = value.replace(')', '');
-      var lat = value.split(' ')[2];
-      var long = value.split(' ')[1];
-   
-      locationInLatForBilling=lat;
-      locationInLongForBilling=long;
-    }
-
-    this.advanceTableForm.patchValue({locationOutDateForBilling : this.advanceTableClosingOne.closingDutySlipForBillingModel.locationOutDateForBilling});
-    this.advanceTableForm.patchValue({locationOutTimeForBilling : this.advanceTableClosingOne.closingDutySlipForBillingModel.locationOutTimeForBilling});
-    this.advanceTableForm.patchValue({locationOutKMForBilling : this.advanceTableClosingOne.closingDutySlipForBillingModel.locationOutKMForBilling});
-    this.advanceTableForm.patchValue({locationOutAddressStringForBilling : this.advanceTableClosingOne.closingDutySlipForBillingModel.locationOutAddressStringForBilling});
-    if(this.advanceTableClosingOne.closingDutySlipForBillingModel.locationOutLatLongForBilling)
-    {
-      this.advanceTableForm.patchValue({locationOutLatLongForBilling:locationOutLatForBilling + ',' + locationOutLongForBilling});
-    }
-    else
-    {
-      this.advanceTableForm.patchValue({locationOutLatLongForBilling:null});
-    }
-
-    this.advanceTableForm.patchValue({reportingToGuestDateForBilling : this.advanceTableClosingOne.closingDutySlipForBillingModel.reportingToGuestDateForBilling});
-    this.advanceTableForm.patchValue({reportingToGuestTimeForBilling : this.advanceTableClosingOne.closingDutySlipForBillingModel.reportingToGuestTimeForBilling});
-    this.advanceTableForm.patchValue({reportingToGuestKMForBilling : this.advanceTableClosingOne.closingDutySlipForBillingModel.reportingToGuestKMForBilling});
-    this.advanceTableForm.patchValue({reportingToGuestAddressStringForBilling : this.advanceTableClosingOne.closingDutySlipForBillingModel.reportingToGuestAddressStringForBilling});
-    if(this.advanceTableClosingOne.closingDutySlipForBillingModel.reportingToGuestLatLongForBilling)
-    {
-      this.advanceTableForm.patchValue({reportingToGuestLatLongForBilling:reportingToGuestLatForBilling + ',' + reportingToGuestLongForBilling});
-    }
-    else
-    {
-      this.advanceTableForm.patchValue({reportingToGuestLatLongForBilling:null});
-    }
-
-    this.patchPickupDateFromReservation();
-    this.patchPickupTimeForClosing();
-
-    this.advanceTableForm.patchValue({pickUpKMForBilling : this.advanceTableClosingOne.closingDutySlipForBillingModel.pickUpKMForBilling});
-    this.advanceTableForm.patchValue({pickUpAddressStringForBilling : this.advanceTableClosingOne.closingDutySlipForBillingModel.pickUpAddressStringForBilling});
-    if(this.advanceTableClosingOne.closingDutySlipForBillingModel.pickUpLatLongForBilling)
-    {
-      this.advanceTableForm.patchValue({pickUpLatLongForBilling:pickUpLatForBilling + ',' + pickUpLongForBilling});
-    }
-    else
-    {
-      this.advanceTableForm.patchValue({pickUpLatLongForBilling:null});
-    }
-
+    this.patchBillingTripFieldsFromForBillingModel();
     this.applyReportingFromPickupFallbackToForm();
 
-    this.advanceTableForm.patchValue({dropOffDateForBilling : this.advanceTableClosingOne.closingDutySlipForBillingModel.dropOffDateForBilling});
-    this.advanceTableForm.patchValue({dropOffTimeForBilling : this.advanceTableClosingOne.closingDutySlipForBillingModel.dropOffTimeForBilling});
-    this.advanceTableForm.patchValue({dropOffKMForBilling : this.advanceTableClosingOne.closingDutySlipForBillingModel.dropOffKMForBilling});
-    this.advanceTableForm.patchValue({dropOffAddressStringForBilling : this.advanceTableClosingOne.closingDutySlipForBillingModel.dropOffAddressStringForBilling});
-    if(this.advanceTableClosingOne.closingDutySlipForBillingModel.dropOffLatLongForBilling)
-    {
-      this.advanceTableForm.patchValue({dropOffLatLongForBilling:dropOffLatForBilling + ',' + dropOffLongForBilling});
-    }
-    else
-    {
-      this.advanceTableForm.patchValue({dropOffLatLongForBilling:null});
-    }
-
-    this.advanceTableForm.patchValue({locationInDateForBilling : this.advanceTableClosingOne.closingDutySlipForBillingModel.locationInDateForBilling});
-    this.advanceTableForm.patchValue({locationInTimeForBilling : this.advanceTableClosingOne.closingDutySlipForBillingModel.locationInTimeForBilling});
-    this.advanceTableForm.patchValue({locationInKMForBilling : this.advanceTableClosingOne.closingDutySlipForBillingModel.locationInKMForBilling});
-    this.advanceTableForm.patchValue({locationInAddressStringForBilling : this.advanceTableClosingOne.closingDutySlipForBillingModel.locationInAddressStringForBilling});
-    if(this.advanceTableClosingOne.closingDutySlipForBillingModel.locationInLatLongForBilling)
-    {
-      this.advanceTableForm.patchValue({locationInLatLongForBilling:locationInLatForBilling + ',' + locationInLongForBilling});
-    }
-    else
-    {
-      this.advanceTableForm.patchValue({locationInLatLongForBilling:null});
-    }
-
-    this.advanceTableForm.patchValue({
-      locationOutLocationOrHubID: this.toFormIntOrNull(
-        this.advanceTableClosingOne.closingDutySlipForBillingModel.locationOutLocationOrHubID
-      )
-    });
-    this.advanceTableForm.patchValue({
-      locationInLocationOrHubID: this.toFormIntOrZero(
-        this.advanceTableClosingOne.closingDutySlipForBillingModel.locationInLocationOrHubID
-      )
-    });
     this.advanceTableForm.patchValue({closureType : this.advanceTableClosingOne.closingDutySlipForBillingModel.closureType});
     this.advanceTableForm.patchValue({dutyTypeID : this.advanceTableClosingOne.closingReservationForPickupDataModel.packageTypeID});
     this.advanceTableForm.patchValue({packageID : this.advanceTableClosingOne.closingReservationForPickupDataModel.packageID});
