@@ -454,6 +454,12 @@ export class DutyRegisterService
     });
   }
 
+  cancelExportJob(jobId: string): Observable<any> {
+    return this.httpClient.post(`${this.API_URL}/ExportCsv/Cancel/${jobId}`, {}, {
+      params: { userId: String(this.generalService.getUserID() || 0) }
+    });
+  }
+
   pollExportJob(jobId: string): Observable<any> {
     return timer(0, 3000).pipe(
       switchMap(() => this.getExportJobStatus(jobId)),

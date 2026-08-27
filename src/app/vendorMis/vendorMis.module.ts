@@ -11,6 +11,7 @@ import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatAutocompleteModule } from '@angular/material/autocomplete';
 import { MatExpansionModule } from '@angular/material/expansion';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
+import { StoredMisExportsComponent } from '../general/stored-mis-exports.component';
 import { VendorMisRoutingModule } from './vendorMis-routing.module';
 import { VendorMisComponent } from './vendorMis.component';
 import { VendorMisService } from './vendorMis.service';
@@ -30,7 +31,8 @@ import { VendorMisService } from './vendorMis.service';
     MatDatepickerModule,
     MatAutocompleteModule,
     MatExpansionModule,
-    MatProgressBarModule
+    MatProgressBarModule,
+    StoredMisExportsComponent
   ],
   providers: [VendorMisService]
 })

@@ -200,16 +200,22 @@ export class ErrorInterceptor implements HttpInterceptor {
 
 
 
+  private extractBodyMessage(errorBody: unknown): string {
+    if (typeof errorBody === 'string' && errorBody.trim()) {
+      return errorBody.trim();
+    }
+    if (errorBody && typeof errorBody === 'object' && !(errorBody instanceof Blob)) {
+      const body = errorBody as { message?: unknown; Message?: unknown };
+      const raw = body.message ?? body.Message;
+      if (typeof raw === 'string' && raw.trim()) {
+        return raw.trim();
+      }
+    }
+    return '';
+  }
+
   private extractErrorText(httpErr: HttpErrorResponse): string {
-    const msgFromBody =
-      httpErr?.error &&
-      typeof httpErr.error === 'object' &&
-      httpErr.error !== null &&
-      'message' in httpErr.error
-        ? String((httpErr.error as { message?: unknown }).message ?? '')
-        : typeof httpErr?.error === 'string' && httpErr.error.trim()
-          ? httpErr.error.trim()
-          : '';
+    const msgFromBody = this.extractBodyMessage(httpErr?.error);
 
     const timeoutMessage =
       'Database timeout — the server took too long to respond. Please try again or contact your administrator.';

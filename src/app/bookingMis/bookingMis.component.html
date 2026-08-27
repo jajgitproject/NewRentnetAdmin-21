@@ -261,7 +261,7 @@
                 <br />
                 <div class="duty-register-inline-search-actions quick-search-actions">
                   <button mat-raised-button color="primary" class="duty-register-search-button" (click)="SearchData()" [disabled]="isExportJobInProgress()">
-                    {{ isExportJobInProgress() ? 'Exporting...' : 'Search' }}
+                    {{ getExportSearchButtonLabel() }}
                   </button>
                   &nbsp;&nbsp;
                   <button mat-raised-button color="warn" class="duty-register-reset-button" (click)="refresh()" [disabled]="isExportJobInProgress()">Refresh</button>
@@ -283,8 +283,12 @@
                 <button mat-raised-button color="accent" type="button" (click)="downloadExportCsv()" [disabled]="!canDownloadExport()">
                   Download CSV
                 </button>
+                <button mat-stroked-button type="button" (click)="cancelExportJob()" [disabled]="!isExportJobInProgress()">
+                  Cancel
+                </button>
               </div>
             </div>
+            <app-stored-mis-exports></app-stored-mis-exports>
           </div>
         </div>
       </div>

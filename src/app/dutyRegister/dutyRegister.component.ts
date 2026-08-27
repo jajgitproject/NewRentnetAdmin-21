@@ -14,6 +14,8 @@ import { DateAdapter, MAT_DATE_LOCALE } from '@angular/material/core';
 import { MatMenu, MatMenuTrigger } from '@angular/material/menu';
 import { SelectionModel } from '@angular/cdk/collections';
 import { GeneralService } from '../general/general.service';
+import { extractExportErrorMessage, exportJobAcceptedSnackbarMessage, exportSearchButtonLabel, formatExportElapsedTime, IN_FLIGHT_EXPORT_MESSAGE, isExportJobCancelled, loadPersistedExportJobId, markExportDumpStarted, persistExportJobId } from '../general/export-job.helper';
+import { StoredMisExportsComponent } from '../general/stored-mis-exports.component';
 import { Form, FormControl } from '@angular/forms';
 import { PackageTypeDropDown } from '../packageType/packageTypeDropDown.model';
 import moment from 'moment';
@@ -251,6 +253,8 @@ export class DutyRegisterComponent implements OnInit, OnDestroy {
   exportJobError = '';
   exportJobStartedAt: number | null = null;
   private exportPollSub?: Subscription;
+  private readonly exportJobPageKey = 'dutyRegister';
+  @ViewChild(StoredMisExportsComponent) storedExports?: StoredMisExportsComponent;
   hasManualSearch: boolean = false;
   readonly maxPickupDateRangeDays = 15;
     
@@ -300,6 +304,7 @@ export class DutyRegisterComponent implements OnInit, OnDestroy {
     this.InitCities();
     this.InitBranch();
     this.InitKAM();
+    this.resumeExportJobIfNeeded();
     //this.SubscribeUpdateService();
   }
 
@@ -460,6 +465,7 @@ export class DutyRegisterComponent implements OnInit, OnDestroy {
   public SearchData()
   {
     if (this.exportJobRunning) {
+      this.showNotification('snackbar-danger', IN_FLIGHT_EXPORT_MESSAGE, 'bottom', 'center');
       return;
     }
 
@@ -472,11 +478,9 @@ export class DutyRegisterComponent implements OnInit, OnDestroy {
     this.hasManualSearch = true;
     this.dataSource = [];
     this.exportJobError = '';
-    this.exportJobStartedAt = Date.now();
     const searchCriteria = this.buildSearchCriteria();
 
     this.exportJobRunning = true;
-    this.showNotification('snackbar-info', 'Export job started. CSV will be ready when processing completes.', 'bottom', 'center');
 
     this.dutyRegisterService.startExportJob(searchCriteria).subscribe(
       (startResult: any) => {
@@ -489,17 +493,39 @@ export class DutyRegisterComponent implements OnInit, OnDestroy {
         }
 
         this.exportJobId = jobId;
+        persistExportJobId(this.exportJobPageKey, jobId);
         this.exportJobStatus = {
           jobId,
           status: startResult?.status ?? startResult?.Status ?? 'Pending',
           message: startResult?.message ?? startResult?.Message ?? 'Export queued'
         };
+        this.exportJobStartedAt = markExportDumpStarted(this.exportJobStartedAt, this.exportJobStatus);
         this.startExportPolling(jobId);
+        this.showNotification('snackbar-info', exportJobAcceptedSnackbarMessage(startResult), 'bottom', 'center');
       },
       async (error) => {
         this.exportJobRunning = false;
-        this.exportJobError = await this.extractExportErrorMessage(error);
+        this.exportJobError = await extractExportErrorMessage(error, 'Could not start export');
         this.showNotification('snackbar-danger', this.exportJobError, 'bottom', 'center');
+      }
+    );
+  }
+
+  cancelExportJob() {
+    if (!this.exportJobId || !this.isExportJobInProgress()) {
+      return;
+    }
+
+    this.dutyRegisterService.cancelExportJob(this.exportJobId).subscribe(
+      (status: any) => {
+        this.exportJobStatus = status;
+        this.exportJobRunning = false;
+        this.stopExportPolling();
+        this.showNotification('snackbar-info', status?.message ?? status?.Message ?? 'Export cancelled.', 'bottom', 'center');
+      },
+      async (error) => {
+        const message = await extractExportErrorMessage(error, 'Could not cancel export.');
+        this.showNotification('snackbar-danger', message, 'bottom', 'center');
       }
     );
   }
@@ -546,7 +572,7 @@ export class DutyRegisterComponent implements OnInit, OnDestroy {
       },
       async (error) => {
         this.exportJobDownloading = false;
-        const message = await this.extractExportErrorMessage(error);
+        const message = await extractExportErrorMessage(error, 'Export download failed.');
         this.showNotification('snackbar-danger', message, 'bottom', 'center');
       }
     );
@@ -573,13 +599,11 @@ export class DutyRegisterComponent implements OnInit, OnDestroy {
   }
 
   getExportElapsedTime(): string {
-    if (!this.exportJobStartedAt) {
-      return '—';
-    }
-    const elapsedSeconds = Math.floor((Date.now() - this.exportJobStartedAt) / 1000);
-    const minutes = Math.floor(elapsedSeconds / 60);
-    const seconds = elapsedSeconds % 60;
-    return minutes > 0 ? `${minutes}m ${seconds}s` : `${seconds}s`;
+    return formatExportElapsedTime(this.exportJobStartedAt, this.exportJobStatus);
+  }
+
+  getExportSearchButtonLabel(): string {
+    return exportSearchButtonLabel(this.exportJobStatus, this.isExportJobInProgress());
   }
 
   private startExportPolling(jobId: string) {
@@ -587,6 +611,7 @@ export class DutyRegisterComponent implements OnInit, OnDestroy {
     this.exportPollSub = this.dutyRegisterService.pollExportJob(jobId).subscribe(
       (status: any) => {
         this.exportJobStatus = status;
+        this.exportJobStartedAt = markExportDumpStarted(this.exportJobStartedAt, status);
         const current = String(status?.status ?? status?.Status ?? '').toLowerCase();
 
         if (current === 'failed') {
@@ -594,6 +619,15 @@ export class DutyRegisterComponent implements OnInit, OnDestroy {
           this.exportJobError = status?.message ?? status?.Message ?? 'Export failed.';
           this.showNotification('snackbar-danger', this.exportJobError, 'bottom', 'center');
           this.stopExportPolling();
+          persistExportJobId(this.exportJobPageKey, null);
+          return;
+        }
+
+        if (isExportJobCancelled(status)) {
+          this.exportJobRunning = false;
+          this.showNotification('snackbar-info', status?.message ?? status?.Message ?? 'Export cancelled.', 'bottom', 'center');
+          this.stopExportPolling();
+          persistExportJobId(this.exportJobPageKey, null);
           return;
         }
 
@@ -607,11 +641,12 @@ export class DutyRegisterComponent implements OnInit, OnDestroy {
             'center'
           );
           this.stopExportPolling();
+          this.storedExports?.refresh();
         }
       },
       async (error) => {
         this.exportJobRunning = false;
-        this.exportJobError = await this.extractExportErrorMessage(error);
+        this.exportJobError = await extractExportErrorMessage(error, 'Export failed.');
         this.showNotification('snackbar-danger', this.exportJobError, 'bottom', 'center');
         this.stopExportPolling();
       }
@@ -625,6 +660,31 @@ export class DutyRegisterComponent implements OnInit, OnDestroy {
     }
   }
 
+  private resumeExportJobIfNeeded() {
+    const jobId = loadPersistedExportJobId(this.exportJobPageKey);
+    if (!jobId) {
+      return;
+    }
+
+    this.dutyRegisterService.getExportJobStatus(jobId).subscribe(
+      (status: any) => {
+        if (!status) {
+          persistExportJobId(this.exportJobPageKey, null);
+          return;
+        }
+
+        this.exportJobId = jobId;
+        this.exportJobStatus = status;
+        if (this.dutyRegisterService.isExportJobRunning(status)) {
+          this.exportJobRunning = true;
+          this.exportJobStartedAt = markExportDumpStarted(this.exportJobStartedAt, this.exportJobStatus);
+          this.startExportPolling(jobId);
+        }
+      },
+      () => persistExportJobId(this.exportJobPageKey, null)
+    );
+  }
+
   private clearExportJob() {
     this.stopExportPolling();
     this.exportJobId = null;
@@ -633,37 +693,6 @@ export class DutyRegisterComponent implements OnInit, OnDestroy {
     this.exportJobDownloading = false;
     this.exportJobError = '';
     this.exportJobStartedAt = null;
-  }
-
-  private async parseExportError(error: any): Promise<{ message: string; useBackgroundExport: boolean }> {
-    const fallback = { message: 'Error downloading CSV', useBackgroundExport: false };
-    if (!error) {
-      return fallback;
-    }
-
-    const blob = error?.error;
-    if (blob instanceof Blob) {
-      const text = await blob.text();
-      try {
-        const parsed = JSON.parse(text || '{}');
-        return {
-          message: parsed.message || text || fallback.message,
-          useBackgroundExport: !!parsed.useBackgroundExport
-        };
-      } catch {
-        return { message: text || fallback.message, useBackgroundExport: false };
-      }
-    }
-
-    return {
-      message: error?.message || error?.error?.message || fallback.message,
-      useBackgroundExport: false
-    };
-  }
-
-  private async extractExportErrorMessage(error: any): Promise<string> {
-    const parsed = await this.parseExportError(error);
-    return parsed.message;
   }
 
   private triggerCsvDownload(blob: Blob, preferredFileName?: string) {

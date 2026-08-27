@@ -1,5 +1,5 @@
 // @ts-nocheck
-import { Component, OnDestroy, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { FormControl } from '@angular/forms';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { MAT_DATE_LOCALE } from '@angular/material/core';
@@ -9,7 +9,8 @@ import { map, startWith } from 'rxjs/operators';
 import { GeneralService } from '../general/general.service';
 import { SearchCriteria } from './creditNoteMis.model';
 import { CreditNoteMisService } from './creditNoteMis.service';
-import { extractExportErrorMessage } from '../general/export-job.helper';
+import { extractExportErrorMessage, exportJobAcceptedSnackbarMessage, exportSearchButtonLabel, formatExportElapsedTime, IN_FLIGHT_EXPORT_MESSAGE, isExportJobCancelled, loadPersistedExportJobId, markExportDumpStarted, persistExportJobId } from '../general/export-job.helper';
+import { StoredMisExportsComponent } from '../general/stored-mis-exports.component';
 import { CustomerDropDown } from '../customer/customerDropDown.model';
 import { OrganizationalEntityDropDown } from '../organizationalEntity/organizationalEntityDropDown.model';
 
@@ -28,6 +29,8 @@ export class CreditNoteMisComponent implements OnInit, OnDestroy {
   exportJobError = '';
   exportJobStartedAt: number | null = null;
   private exportPollSub?: Subscription;
+  private readonly exportJobPageKey = 'creditNoteMis';
+  @ViewChild(StoredMisExportsComponent) storedExports?: StoredMisExportsComponent;
   readonly maxCreditNoteDateRangeDays = 15;
 
   customer: FormControl = new FormControl();
@@ -54,6 +57,7 @@ export class CreditNoteMisComponent implements OnInit, OnDestroy {
   ngOnInit() {
     this.initCustomer();
     this.initBranch();
+    this.resumeExportJobIfNeeded();
   }
 
   ngOnDestroy() {
@@ -87,6 +91,7 @@ export class CreditNoteMisComponent implements OnInit, OnDestroy {
 
   SearchData() {
     if (this.exportJobRunning) {
+      this.showNotification('snackbar-danger', IN_FLIGHT_EXPORT_MESSAGE, 'bottom', 'center');
       return;
     }
 
@@ -97,16 +102,9 @@ export class CreditNoteMisComponent implements OnInit, OnDestroy {
     }
 
     this.exportJobError = '';
-    this.exportJobStartedAt = Date.now();
     const searchCriteria = this.buildSearchCriteria();
 
     this.exportJobRunning = true;
-    this.showNotification(
-      'snackbar-info',
-      'Export job started. CSV will be ready when processing completes.',
-      'bottom',
-      'center'
-    );
 
     this.creditNoteMisService.startExportJob(searchCriteria).subscribe(
       (startResult: any) => {
@@ -119,23 +117,24 @@ export class CreditNoteMisComponent implements OnInit, OnDestroy {
         }
 
         this.exportJobId = jobId;
+        persistExportJobId(this.exportJobPageKey, jobId);
         this.exportJobStatus = {
           jobId,
           status: startResult?.status ?? startResult?.Status ?? 'Pending',
           message: startResult?.message ?? startResult?.Message ?? 'Export queued'
         };
+        this.exportJobStartedAt = markExportDumpStarted(this.exportJobStartedAt, this.exportJobStatus);
         this.startExportPolling(jobId);
+        this.showNotification(
+          'snackbar-info',
+          exportJobAcceptedSnackbarMessage(startResult),
+          'bottom',
+          'center'
+        );
       },
       async (error) => {
         this.exportJobRunning = false;
-        const status = error?.status;
-        const fallback =
-          status === 404
-            ? 'Credit Note MIS export API was not found. Restart/redeploy the API with creditNoteMIS endpoints.'
-            : status === 0
-              ? 'Could not reach the API. Check that the backend is running.'
-              : 'Error starting export';
-        this.exportJobError = await extractExportErrorMessage(error, fallback);
+        this.exportJobError = await extractExportErrorMessage(error, 'Could not start export');
         this.showNotification('snackbar-danger', this.exportJobError, 'bottom', 'center');
       }
     );
@@ -183,6 +182,25 @@ export class CreditNoteMisComponent implements OnInit, OnDestroy {
     );
   }
 
+  cancelExportJob() {
+    if (!this.exportJobId || !this.isExportJobInProgress()) {
+      return;
+    }
+
+    this.creditNoteMisService.cancelExportJob(this.exportJobId).subscribe(
+      (status: any) => {
+        this.exportJobStatus = status;
+        this.exportJobRunning = false;
+        this.stopExportPolling();
+        this.showNotification('snackbar-info', status?.message ?? status?.Message ?? 'Export cancelled.', 'bottom', 'center');
+      },
+      async (error) => {
+        const message = await extractExportErrorMessage(error, 'Could not cancel export.');
+        this.showNotification('snackbar-danger', message, 'bottom', 'center');
+      }
+    );
+  }
+
   canDownloadExport(): boolean {
     return (
       !!this.exportJobId &&
@@ -208,13 +226,11 @@ export class CreditNoteMisComponent implements OnInit, OnDestroy {
   }
 
   getExportElapsedTime(): string {
-    if (!this.exportJobStartedAt) {
-      return '—';
-    }
-    const elapsedSeconds = Math.floor((Date.now() - this.exportJobStartedAt) / 1000);
-    const minutes = Math.floor(elapsedSeconds / 60);
-    const seconds = elapsedSeconds % 60;
-    return minutes > 0 ? `${minutes}m ${seconds}s` : `${seconds}s`;
+    return formatExportElapsedTime(this.exportJobStartedAt, this.exportJobStatus);
+  }
+
+  getExportSearchButtonLabel(): string {
+    return exportSearchButtonLabel(this.exportJobStatus, this.isExportJobInProgress());
   }
 
   validateCreditNoteDateRange(): string | null {
@@ -263,6 +279,7 @@ export class CreditNoteMisComponent implements OnInit, OnDestroy {
     this.exportPollSub = this.creditNoteMisService.pollExportJob(jobId).subscribe(
       (status: any) => {
         this.exportJobStatus = status;
+        this.exportJobStartedAt = markExportDumpStarted(this.exportJobStartedAt, status);
         const current = String(status?.status ?? status?.Status ?? '').toLowerCase();
 
         if (current === 'failed') {
@@ -270,6 +287,15 @@ export class CreditNoteMisComponent implements OnInit, OnDestroy {
           this.exportJobError = status?.message ?? status?.Message ?? 'Export failed.';
           this.showNotification('snackbar-danger', this.exportJobError, 'bottom', 'center');
           this.stopExportPolling();
+          persistExportJobId(this.exportJobPageKey, null);
+          return;
+        }
+
+        if (isExportJobCancelled(status)) {
+          this.exportJobRunning = false;
+          this.showNotification('snackbar-info', status?.message ?? status?.Message ?? 'Export cancelled.', 'bottom', 'center');
+          this.stopExportPolling();
+          persistExportJobId(this.exportJobPageKey, null);
           return;
         }
 
@@ -283,6 +309,7 @@ export class CreditNoteMisComponent implements OnInit, OnDestroy {
             'center'
           );
           this.stopExportPolling();
+          this.storedExports?.refresh();
         }
       },
       async (error) => {
@@ -299,6 +326,31 @@ export class CreditNoteMisComponent implements OnInit, OnDestroy {
       this.exportPollSub.unsubscribe();
       this.exportPollSub = undefined;
     }
+  }
+
+  private resumeExportJobIfNeeded() {
+    const jobId = loadPersistedExportJobId(this.exportJobPageKey);
+    if (!jobId) {
+      return;
+    }
+
+    this.creditNoteMisService.getExportJobStatus(jobId).subscribe(
+      (status: any) => {
+        if (!status) {
+          persistExportJobId(this.exportJobPageKey, null);
+          return;
+        }
+
+        this.exportJobId = jobId;
+        this.exportJobStatus = status;
+        if (this.creditNoteMisService.isExportJobRunning(status)) {
+          this.exportJobRunning = true;
+          this.exportJobStartedAt = markExportDumpStarted(this.exportJobStartedAt, this.exportJobStatus);
+          this.startExportPolling(jobId);
+        }
+      },
+      () => persistExportJobId(this.exportJobPageKey, null)
+    );
   }
 
   private clearExportJob() {

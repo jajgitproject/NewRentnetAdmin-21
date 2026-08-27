@@ -1,5 +1,5 @@
 // @ts-nocheck
-import { Component, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { FormControl } from '@angular/forms';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { Observable, Subscription } from 'rxjs';
@@ -9,6 +9,8 @@ import moment from 'moment';
 import { GeneralService } from '../general/general.service';
 import { SearchCriteria } from './driverPayoutMIS.model';
 import { DriverPayoutMISService } from './driverPayoutMIS.service';
+import { extractExportErrorMessage, exportJobAcceptedSnackbarMessage, exportSearchButtonLabel, formatExportElapsedTime, IN_FLIGHT_EXPORT_MESSAGE, isExportJobCancelled, loadPersistedExportJobId, markExportDumpStarted, persistExportJobId } from '../general/export-job.helper';
+import { StoredMisExportsComponent } from '../general/stored-mis-exports.component';
 import { CustomerDropDown } from '../customer/customerDropDown.model';
 import { DriverDropDown } from '../customerPersonDriverRestriction/driverDropDown.model';
 import { SupplierTypeDropDownModel } from '../supplierType/supplierType.model';
@@ -22,7 +24,7 @@ import { OrganizationalEntityDropDown } from '../organizationalEntity/organizati
   styleUrls: ['./driverPayoutMIS.component.sass'],
   providers: [{ provide: MAT_DATE_LOCALE, useValue: 'en-GB' }]
 })
-export class DriverPayoutMISComponent implements OnInit {
+export class DriverPayoutMISComponent implements OnInit, OnDestroy {
   exportJobId: string | null = null;
   exportJobStatus: any = null;
   exportJobRunning = false;
@@ -30,6 +32,8 @@ export class DriverPayoutMISComponent implements OnInit {
   exportJobError = '';
   exportJobStartedAt: number | null = null;
   private exportPollSub?: Subscription;
+  private readonly exportJobPageKey = 'driverPayoutMIS';
+  @ViewChild(StoredMisExportsComponent) storedExports?: StoredMisExportsComponent;
   readonly maxPickupDateRangeDays = 31;
   IsKAMRole = false;
 
@@ -70,6 +74,11 @@ export class DriverPayoutMISComponent implements OnInit {
     this.InitSupplierType();
     this.InitCities();
     this.InitDispatchLocation();
+    this.resumeExportJobIfNeeded();
+  }
+
+  ngOnDestroy() {
+    this.stopExportPolling();
   }
 
   refresh() {
@@ -100,6 +109,7 @@ export class DriverPayoutMISComponent implements OnInit {
 
   SearchData() {
     if (this.exportJobRunning) {
+      this.showNotification('snackbar-danger', IN_FLIGHT_EXPORT_MESSAGE, 'bottom', 'center');
       return;
     }
 
@@ -110,11 +120,9 @@ export class DriverPayoutMISComponent implements OnInit {
     }
 
     this.exportJobError = '';
-    this.exportJobStartedAt = Date.now();
     const searchCriteria = this.buildSearchCriteria();
 
     this.exportJobRunning = true;
-    this.showNotification('snackbar-info', 'Export job started. CSV will be ready when processing completes.', 'bottom', 'center');
 
     this.driverPayoutMISService.startExportJob(searchCriteria).subscribe(
       (startResult: any) => {
@@ -127,16 +135,19 @@ export class DriverPayoutMISComponent implements OnInit {
         }
 
         this.exportJobId = jobId;
+        persistExportJobId(this.exportJobPageKey, jobId);
         this.exportJobStatus = {
           jobId,
           status: startResult?.status ?? startResult?.Status ?? 'Pending',
           message: startResult?.message ?? startResult?.Message ?? 'Export queued'
         };
+        this.exportJobStartedAt = markExportDumpStarted(this.exportJobStartedAt, this.exportJobStatus);
         this.startExportPolling(jobId);
+        this.showNotification('snackbar-info', exportJobAcceptedSnackbarMessage(startResult), 'bottom', 'center');
       },
       async (error) => {
         this.exportJobRunning = false;
-        this.exportJobError = await this.extractExportErrorMessage(error);
+        this.exportJobError = await extractExportErrorMessage(error, 'Could not start export');
         this.showNotification('snackbar-danger', this.exportJobError, 'bottom', 'center');
       }
     );
@@ -184,7 +195,26 @@ export class DriverPayoutMISComponent implements OnInit {
       },
       async (error) => {
         this.exportJobDownloading = false;
-        const message = await this.extractExportErrorMessage(error);
+        const message = await extractExportErrorMessage(error, 'Export download failed.');
+        this.showNotification('snackbar-danger', message, 'bottom', 'center');
+      }
+    );
+  }
+
+  cancelExportJob() {
+    if (!this.exportJobId || !this.isExportJobInProgress()) {
+      return;
+    }
+
+    this.driverPayoutMISService.cancelExportJob(this.exportJobId).subscribe(
+      (status: any) => {
+        this.exportJobStatus = status;
+        this.exportJobRunning = false;
+        this.stopExportPolling();
+        this.showNotification('snackbar-info', status?.message ?? status?.Message ?? 'Export cancelled.', 'bottom', 'center');
+      },
+      async (error) => {
+        const message = await extractExportErrorMessage(error, 'Could not cancel export.');
         this.showNotification('snackbar-danger', message, 'bottom', 'center');
       }
     );
@@ -211,13 +241,11 @@ export class DriverPayoutMISComponent implements OnInit {
   }
 
   getExportElapsedTime(): string {
-    if (!this.exportJobStartedAt) {
-      return '—';
-    }
-    const elapsedSeconds = Math.floor((Date.now() - this.exportJobStartedAt) / 1000);
-    const minutes = Math.floor(elapsedSeconds / 60);
-    const seconds = elapsedSeconds % 60;
-    return minutes > 0 ? `${minutes}m ${seconds}s` : `${seconds}s`;
+    return formatExportElapsedTime(this.exportJobStartedAt, this.exportJobStatus);
+  }
+
+  getExportSearchButtonLabel(): string {
+    return exportSearchButtonLabel(this.exportJobStatus, this.isExportJobInProgress());
   }
 
   private startExportPolling(jobId: string) {
@@ -225,6 +253,7 @@ export class DriverPayoutMISComponent implements OnInit {
     this.exportPollSub = this.driverPayoutMISService.pollExportJob(jobId).subscribe(
       (status: any) => {
         this.exportJobStatus = status;
+        this.exportJobStartedAt = markExportDumpStarted(this.exportJobStartedAt, status);
         const current = String(status?.status ?? status?.Status ?? '').toLowerCase();
 
         if (current === 'failed') {
@@ -232,6 +261,15 @@ export class DriverPayoutMISComponent implements OnInit {
           this.exportJobError = status?.message ?? status?.Message ?? 'Export failed.';
           this.showNotification('snackbar-danger', this.exportJobError, 'bottom', 'center');
           this.stopExportPolling();
+          persistExportJobId(this.exportJobPageKey, null);
+          return;
+        }
+
+        if (isExportJobCancelled(status)) {
+          this.exportJobRunning = false;
+          this.showNotification('snackbar-info', status?.message ?? status?.Message ?? 'Export cancelled.', 'bottom', 'center');
+          this.stopExportPolling();
+          persistExportJobId(this.exportJobPageKey, null);
           return;
         }
 
@@ -245,11 +283,12 @@ export class DriverPayoutMISComponent implements OnInit {
             'center'
           );
           this.stopExportPolling();
+          this.storedExports?.refresh();
         }
       },
       async (error) => {
         this.exportJobRunning = false;
-        this.exportJobError = await this.extractExportErrorMessage(error);
+        this.exportJobError = await extractExportErrorMessage(error, 'Export failed.');
         this.showNotification('snackbar-danger', this.exportJobError, 'bottom', 'center');
         this.stopExportPolling();
       }
@@ -263,6 +302,31 @@ export class DriverPayoutMISComponent implements OnInit {
     }
   }
 
+  private resumeExportJobIfNeeded() {
+    const jobId = loadPersistedExportJobId(this.exportJobPageKey);
+    if (!jobId) {
+      return;
+    }
+
+    this.driverPayoutMISService.getExportJobStatus(jobId).subscribe(
+      (status: any) => {
+        if (!status) {
+          persistExportJobId(this.exportJobPageKey, null);
+          return;
+        }
+
+        this.exportJobId = jobId;
+        this.exportJobStatus = status;
+        if (this.driverPayoutMISService.isExportJobRunning(status)) {
+          this.exportJobRunning = true;
+          this.exportJobStartedAt = markExportDumpStarted(this.exportJobStartedAt, this.exportJobStatus);
+          this.startExportPolling(jobId);
+        }
+      },
+      () => persistExportJobId(this.exportJobPageKey, null)
+    );
+  }
+
   private clearExportJob() {
     this.stopExportPolling();
     this.exportJobId = null;
@@ -271,37 +335,6 @@ export class DriverPayoutMISComponent implements OnInit {
     this.exportJobDownloading = false;
     this.exportJobError = '';
     this.exportJobStartedAt = null;
-  }
-
-  private async extractExportErrorMessage(error: any): Promise<string> {
-    if (!error) {
-      return 'Error starting export';
-    }
-
-    if (typeof error === 'string' && error.trim()) {
-      return error.trim();
-    }
-
-    const blob = error?.error;
-    if (blob instanceof Blob) {
-      const text = await blob.text();
-      try {
-        const parsed = JSON.parse(text || '{}');
-        return parsed.message || parsed.Message || text || 'Error starting export';
-      } catch {
-        return text || 'Error starting export';
-      }
-    }
-
-    if (typeof error?.error === 'string' && error.error.trim()) {
-      return error.error.trim();
-    }
-
-    if (error?.error && typeof error.error === 'object') {
-      return error.error.message || error.error.Message || 'Error starting export';
-    }
-
-    return error?.message || 'Error starting export';
   }
 
   validatePickupDateRange(): string | null {

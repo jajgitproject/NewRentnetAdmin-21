@@ -12,9 +12,11 @@ import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatSortModule } from '@angular/material/sort';
 import { MatPaginatorModule } from '@angular/material/paginator';
 import { MatExpansionModule } from '@angular/material/expansion';
+import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { TallyMis20Component } from './tallyMis.component';
 import { TallyMis20RoutingModule } from './tallyMis-routing.module';
 import { TallyMis20Service } from './tallyMis.service';
+import { StoredMisExportsComponent } from '../general/stored-mis-exports.component';
 
 @NgModule({
   declarations: [TallyMis20Component],
@@ -32,7 +34,9 @@ import { TallyMis20Service } from './tallyMis.service';
     MatCardModule,
     MatDatepickerModule,
     MatSortModule,
-    MatPaginatorModule
+    MatPaginatorModule,
+    MatProgressBarModule,
+    StoredMisExportsComponent
   ],
   providers: [TallyMis20Service]
 })

@@ -1,12 +1,13 @@
 // @ts-nocheck
-import { Component, OnDestroy, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { FormControl } from '@angular/forms';
 import { Observable, Subscription } from 'rxjs';
 import { map, startWith } from 'rxjs/operators';
 import { MAT_DATE_LOCALE } from '@angular/material/core';
 import moment from 'moment';
 import { GeneralService } from '../general/general.service';
-import { extractExportErrorMessage } from '../general/export-job.helper';
+import { extractExportErrorMessage, exportSearchButtonLabel, formatExportElapsedTime, IN_FLIGHT_EXPORT_MESSAGE, isExportJobCancelled, loadPersistedExportJobId, markExportDumpStarted, persistExportJobId } from '../general/export-job.helper';
+import { StoredMisExportsComponent } from '../general/stored-mis-exports.component';
 import { MISTALLY_API_COLUMNS } from './tallyMis.model';
 import { TallyMis20Service } from './tallyMis.service';
 
@@ -36,6 +37,8 @@ export class TallyMis20Component implements OnInit, OnDestroy {
   exportJobError = '';
   exportJobStartedAt: number | null = null;
   private exportPollSub?: Subscription;
+  private readonly exportJobPageKey = 'tallyMis20';
+  @ViewChild(StoredMisExportsComponent) storedExports?: StoredMisExportsComponent;
   readonly maxDateRangeDays = 15;
   readonly exportJobType = 'TallyMIS20Export';
 
@@ -48,6 +51,7 @@ export class TallyMis20Component implements OnInit, OnDestroy {
     this.initBranch();
     this.initCustomerAutocomplete();
     this.initInvoiceNumberInput();
+    this.resumeExportJobIfNeeded();
   }
 
   ngOnDestroy() {
@@ -131,13 +135,15 @@ export class TallyMis20Component implements OnInit, OnDestroy {
   }
 
   searchData() {
-    if (this.exportJobRunning) return;
+    if (this.exportJobRunning) {
+      this.exportJobError = IN_FLIGHT_EXPORT_MESSAGE;
+      return;
+    }
 
     const dateRangeError = this.validateDateRange();
     if (dateRangeError) return;
 
     this.exportJobError = '';
-    this.exportJobStartedAt = Date.now();
 
     const fromDate = this.formatDate(this.searchFromDate);
     const toDate = this.formatDate(this.searchToDate);
@@ -156,17 +162,36 @@ export class TallyMis20Component implements OnInit, OnDestroy {
         }
 
         this.exportJobId = jobId;
+        persistExportJobId(this.exportJobPageKey, jobId);
         this.exportJobStatus = {
           jobId,
           jobType: startResult?.jobType ?? startResult?.JobType ?? this.exportJobType,
           status: startResult?.status ?? startResult?.Status ?? 'Pending',
           message: startResult?.message ?? startResult?.Message ?? 'Export queued'
         };
+        this.exportJobStartedAt = markExportDumpStarted(this.exportJobStartedAt, this.exportJobStatus);
         this.startExportPolling(jobId);
       },
       async (error) => {
         this.exportJobRunning = false;
-        this.exportJobError = await extractExportErrorMessage(error);
+        this.exportJobError = await extractExportErrorMessage(error, 'Could not start export');
+      }
+    );
+  }
+
+  cancelExportJob() {
+    if (!this.exportJobId || !this.isExportJobInProgress()) {
+      return;
+    }
+
+    this.tallyMisService.cancelExportJob(this.exportJobId).subscribe(
+      (status: any) => {
+        this.exportJobStatus = status;
+        this.exportJobRunning = false;
+        this.stopExportPolling();
+      },
+      async (error) => {
+        this.exportJobError = await extractExportErrorMessage(error, 'Could not cancel export.');
       }
     );
   }
@@ -210,11 +235,11 @@ export class TallyMis20Component implements OnInit, OnDestroy {
   }
 
   getExportElapsedTime(): string {
-    if (!this.exportJobStartedAt) return '—';
-    const elapsedSeconds = Math.floor((Date.now() - this.exportJobStartedAt) / 1000);
-    const minutes = Math.floor(elapsedSeconds / 60);
-    const seconds = elapsedSeconds % 60;
-    return minutes > 0 ? `${minutes}m ${seconds}s` : `${seconds}s`;
+    return formatExportElapsedTime(this.exportJobStartedAt, this.exportJobStatus);
+  }
+
+  getExportSearchButtonLabel(): string {
+    return exportSearchButtonLabel(this.exportJobStatus, this.isExportJobInProgress());
   }
 
   hasAdditionalFilters(): boolean {
@@ -254,21 +279,30 @@ export class TallyMis20Component implements OnInit, OnDestroy {
     this.exportPollSub = this.tallyMisService.pollExportJob(jobId).subscribe(
       (status: any) => {
         this.exportJobStatus = status;
+        this.exportJobStartedAt = markExportDumpStarted(this.exportJobStartedAt, status);
         const current = String(status?.status ?? status?.Status ?? '').toLowerCase();
         if (current === 'failed') {
           this.exportJobRunning = false;
           this.exportJobError = status?.message ?? status?.Message ?? 'Export failed.';
           this.stopExportPolling();
+          persistExportJobId(this.exportJobPageKey, null);
+          return;
+        }
+        if (isExportJobCancelled(status)) {
+          this.exportJobRunning = false;
+          this.stopExportPolling();
+          persistExportJobId(this.exportJobPageKey, null);
           return;
         }
         if (current === 'completed') {
           this.exportJobRunning = false;
           this.stopExportPolling();
+          this.storedExports?.refresh();
         }
       },
       async (error) => {
         this.exportJobRunning = false;
-        this.exportJobError = await extractExportErrorMessage(error);
+        this.exportJobError = await extractExportErrorMessage(error, 'Export failed.');
         this.stopExportPolling();
       }
     );
@@ -279,6 +313,31 @@ export class TallyMis20Component implements OnInit, OnDestroy {
       this.exportPollSub.unsubscribe();
       this.exportPollSub = undefined;
     }
+  }
+
+  private resumeExportJobIfNeeded() {
+    const jobId = loadPersistedExportJobId(this.exportJobPageKey);
+    if (!jobId) {
+      return;
+    }
+
+    this.tallyMisService.getExportJobStatus(jobId).subscribe(
+      (status: any) => {
+        if (!status) {
+          persistExportJobId(this.exportJobPageKey, null);
+          return;
+        }
+
+        this.exportJobId = jobId;
+        this.exportJobStatus = status;
+        if (this.tallyMisService.isExportJobRunning(status)) {
+          this.exportJobRunning = true;
+          this.exportJobStartedAt = markExportDumpStarted(this.exportJobStartedAt, this.exportJobStatus);
+          this.startExportPolling(jobId);
+        }
+      },
+      () => persistExportJobId(this.exportJobPageKey, null)
+    );
   }
 
   private clearExportJob() {

@@ -53,6 +53,12 @@ export class CreditNoteMisService {
     });
   }
 
+  cancelExportJob(jobId: string): Observable<any> {
+    return this.httpClient.post(`${this.API_URL}/ExportCsv/Cancel/${jobId}`, {}, {
+      params: { userId: String(this.generalService.getUserID() || 0) }
+    });
+  }
+
   pollExportJob(jobId: string): Observable<any> {
     return pollExportJob(this.httpClient, `${this.API_URL}/ExportCsv/JobStatus/${jobId}`);
   }

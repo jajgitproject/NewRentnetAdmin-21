@@ -37,7 +37,7 @@
                                 <br/>
                                 <div class="zonal-duty-register-inline-search-actions quick-search-actions">
                                     <button mat-raised-button color="primary" class="zonal-duty-register-search-button" (click)="SearchData()" [disabled]="isExportJobInProgress()">
-                                        {{ isExportJobInProgress() ? 'Exporting...' : 'Search' }}
+                                        {{ getExportSearchButtonLabel() }}
                                     </button>
                                     &nbsp;&nbsp;
                                     
@@ -63,7 +63,7 @@
                                 <br/>
                                 <div class="zonal-duty-register-inline-search-actions quick-search-actions">
                                     <button mat-raised-button color="primary" class="zonal-duty-register-search-button" (click)="SearchData()" [disabled]="isExportJobInProgress()">
-                                        {{ isExportJobInProgress() ? 'Exporting...' : 'Search' }}
+                                        {{ getExportSearchButtonLabel() }}
                                     </button>
                                     &nbsp;&nbsp;
                                     
@@ -91,8 +91,12 @@
                                 <button mat-raised-button color="accent" type="button" (click)="downloadExportCsv()" [disabled]="!canDownloadExport()">
                                     {{ exportJobDownloading ? 'Downloading...' : 'Download CSV' }}
                                 </button>
+                                <button mat-stroked-button type="button" (click)="cancelExportJob()" [disabled]="!isExportJobInProgress()">
+                                    Cancel
+                                </button>
                             </div>
                         </div>
+                        <app-stored-mis-exports></app-stored-mis-exports>
 
                         <p class="export-hint" *ngIf="!exportJobId && !exportJobError">
                             <strong>Pickup date range is required.</strong> When no other filters are selected, the range is limited to {{ maxPickupDateRangeDays }} days. Add any other search filter to search a wider range. Click <strong>Search</strong> to generate a CSV export in the background.

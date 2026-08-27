@@ -12,7 +12,8 @@ import { DateAdapter, MAT_DATE_LOCALE } from '@angular/material/core';
 import { MatMenu, MatMenuTrigger } from '@angular/material/menu';
 import { SelectionModel } from '@angular/cdk/collections';
 import { GeneralService } from '../general/general.service';
-import { extractExportErrorMessage } from '../general/export-job.helper';
+import { extractExportErrorMessage, exportJobAcceptedSnackbarMessage, exportSearchButtonLabel, formatExportElapsedTime, IN_FLIGHT_EXPORT_MESSAGE, isExportJobCancelled, loadPersistedExportJobId, markExportDumpStarted, persistExportJobId } from '../general/export-job.helper';
+import { StoredMisExportsComponent } from '../general/stored-mis-exports.component';
 import { MyUploadComponent } from '../myupload/myupload.component';
 // import { FormDialogComponent } from '../appDutyMIS/dialogs/form-dialog/form-dialog.component';
 import { DeleteDialogCityComponent } from '../dashboard/city-master/dialogscity/delete-city/delete-city.component';
@@ -167,6 +168,8 @@ export class AppDutyMISComponent implements OnInit, OnDestroy {
   exportJobError = '';
   exportJobStartedAt: number | null = null;
   private exportPollSub?: Subscription;
+  private readonly exportJobPageKey = 'appDutyMIS';
+  @ViewChild(StoredMisExportsComponent) storedExports?: StoredMisExportsComponent;
   readonly maxDateRangeDays = 15;
   readonly exportJobType = 'AppMISExport';
   private readonly pageSize = 50;
@@ -202,6 +205,7 @@ export class AppDutyMISComponent implements OnInit, OnDestroy {
     //this.loadData();
     this.SubscribeUpdateService();
     this.initDispatchLocation();
+    this.resumeExportJobIfNeeded();
   }
 
     // initdispatchLocation(){
@@ -534,6 +538,7 @@ shouldShowDeleteButton(item: any): boolean {
   public SearchData()
   {
     if (this.exportJobRunning) {
+      this.showNotification('snackbar-danger', IN_FLIGHT_EXPORT_MESSAGE, 'bottom', 'center');
       return;
     }
 
@@ -546,12 +551,10 @@ shouldShowDeleteButton(item: any): boolean {
     this.PageNumber = 0;
     this.dataSource = null;
     this.exportJobError = '';
-    this.exportJobStartedAt = Date.now();
     const fromDate = this.formatDateParam(this.searchFromDate);
     const toDate = this.formatDateParam(this.searchToDate);
 
     this.exportJobRunning = true;
-    this.showNotification('snackbar-info', 'Export job started. CSV will be ready when processing completes.', 'bottom', 'center');
 
     this.appDutyMISService.startExportJob(
       fromDate,
@@ -569,18 +572,40 @@ shouldShowDeleteButton(item: any): boolean {
         }
 
         this.exportJobId = jobId;
+        persistExportJobId(this.exportJobPageKey, jobId);
         this.exportJobStatus = {
           jobId,
           jobType: startResult?.jobType ?? startResult?.JobType ?? this.exportJobType,
           status: startResult?.status ?? startResult?.Status ?? 'Pending',
           message: startResult?.message ?? startResult?.Message ?? 'Export queued'
         };
+        this.exportJobStartedAt = markExportDumpStarted(this.exportJobStartedAt, this.exportJobStatus);
         this.startExportPolling(jobId);
+        this.showNotification('snackbar-info', exportJobAcceptedSnackbarMessage(startResult), 'bottom', 'center');
       },
       async (error) => {
         this.exportJobRunning = false;
-        this.exportJobError = await extractExportErrorMessage(error);
+        this.exportJobError = await extractExportErrorMessage(error, 'Could not start export');
         this.showNotification('snackbar-danger', this.exportJobError, 'bottom', 'center');
+      }
+    );
+  }
+
+  cancelExportJob() {
+    if (!this.exportJobId || !this.isExportJobInProgress()) {
+      return;
+    }
+
+    this.appDutyMISService.cancelExportJob(this.exportJobId).subscribe(
+      (status: any) => {
+        this.exportJobStatus = status;
+        this.exportJobRunning = false;
+        this.stopExportPolling();
+        this.showNotification('snackbar-info', status?.message ?? status?.Message ?? 'Export cancelled.', 'bottom', 'center');
+      },
+      async (error) => {
+        const message = await extractExportErrorMessage(error, 'Could not cancel export.');
+        this.showNotification('snackbar-danger', message, 'bottom', 'center');
       }
     );
   }
@@ -618,7 +643,7 @@ shouldShowDeleteButton(item: any): boolean {
       },
       async (error) => {
         this.exportJobDownloading = false;
-        this.showNotification('snackbar-danger', await extractExportErrorMessage(error), 'bottom', 'center');
+        this.showNotification('snackbar-danger', await extractExportErrorMessage(error, 'Export download failed.'), 'bottom', 'center');
       }
     );
   }
@@ -644,11 +669,11 @@ shouldShowDeleteButton(item: any): boolean {
   }
 
   getExportElapsedTime(): string {
-    if (!this.exportJobStartedAt) return '—';
-    const elapsedSeconds = Math.floor((Date.now() - this.exportJobStartedAt) / 1000);
-    const minutes = Math.floor(elapsedSeconds / 60);
-    const seconds = elapsedSeconds % 60;
-    return minutes > 0 ? `${minutes}m ${seconds}s` : `${seconds}s`;
+    return formatExportElapsedTime(this.exportJobStartedAt, this.exportJobStatus);
+  }
+
+  getExportSearchButtonLabel(): string {
+    return exportSearchButtonLabel(this.exportJobStatus, this.isExportJobInProgress());
   }
 
   hasAdditionalFilters(): boolean {
@@ -683,12 +708,21 @@ shouldShowDeleteButton(item: any): boolean {
     this.exportPollSub = this.appDutyMISService.pollExportJob(jobId).subscribe(
       (status: any) => {
         this.exportJobStatus = status;
+        this.exportJobStartedAt = markExportDumpStarted(this.exportJobStartedAt, status);
         const current = String(status?.status ?? status?.Status ?? '').toLowerCase();
         if (current === 'failed') {
           this.exportJobRunning = false;
           this.exportJobError = status?.message ?? status?.Message ?? 'Export failed.';
           this.showNotification('snackbar-danger', this.exportJobError, 'bottom', 'center');
           this.stopExportPolling();
+          persistExportJobId(this.exportJobPageKey, null);
+          return;
+        }
+        if (isExportJobCancelled(status)) {
+          this.exportJobRunning = false;
+          this.showNotification('snackbar-info', status?.message ?? status?.Message ?? 'Export cancelled.', 'bottom', 'center');
+          this.stopExportPolling();
+          persistExportJobId(this.exportJobPageKey, null);
           return;
         }
         if (current === 'completed') {
@@ -696,11 +730,12 @@ shouldShowDeleteButton(item: any): boolean {
           const rows = status?.rowsExported ?? status?.RowsExported ?? 0;
           this.showNotification('snackbar-success', status?.message ?? `Export ready (${rows} rows). Click Download CSV.`, 'bottom', 'center');
           this.stopExportPolling();
+          this.storedExports?.refresh();
         }
       },
       async (error) => {
         this.exportJobRunning = false;
-        this.exportJobError = await extractExportErrorMessage(error);
+        this.exportJobError = await extractExportErrorMessage(error, 'Export failed.');
         this.showNotification('snackbar-danger', this.exportJobError, 'bottom', 'center');
         this.stopExportPolling();
       }
@@ -712,6 +747,31 @@ shouldShowDeleteButton(item: any): boolean {
       this.exportPollSub.unsubscribe();
       this.exportPollSub = undefined;
     }
+  }
+
+  private resumeExportJobIfNeeded() {
+    const jobId = loadPersistedExportJobId(this.exportJobPageKey);
+    if (!jobId) {
+      return;
+    }
+
+    this.appDutyMISService.getExportJobStatus(jobId).subscribe(
+      (status: any) => {
+        if (!status) {
+          persistExportJobId(this.exportJobPageKey, null);
+          return;
+        }
+
+        this.exportJobId = jobId;
+        this.exportJobStatus = status;
+        if (this.appDutyMISService.isExportJobRunning(status)) {
+          this.exportJobRunning = true;
+          this.exportJobStartedAt = markExportDumpStarted(this.exportJobStartedAt, this.exportJobStatus);
+          this.startExportPolling(jobId);
+        }
+      },
+      () => persistExportJobId(this.exportJobPageKey, null)
+    );
   }
 
   private clearExportJob() {

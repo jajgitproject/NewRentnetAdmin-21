@@ -54,7 +54,7 @@
       <div class="br-filter-actions">
         <button mat-flat-button color="primary" class="br-btn-search" (click)="SearchData()" [disabled]="isExportJobInProgress()">
           <mat-icon>search</mat-icon>
-          {{ isExportJobInProgress() ? 'Exporting...' : 'Search' }}
+          {{ getExportSearchButtonLabel() }}
         </button>
         <button mat-stroked-button type="button" class="br-btn-reset" (click)="refresh()" [disabled]="isExportJobInProgress()">
           <mat-icon>refresh</mat-icon>
@@ -83,8 +83,12 @@
         <button mat-raised-button color="accent" type="button" (click)="downloadExportCsv()" [disabled]="!canDownloadExport()">
           {{ exportJobDownloading ? 'Downloading...' : 'Download CSV' }}
         </button>
+        <button mat-stroked-button type="button" (click)="cancelExportJob()" [disabled]="!isExportJobInProgress()">
+          Cancel
+        </button>
       </div>
     </div>
+    <app-stored-mis-exports></app-stored-mis-exports>
 
     <p class="export-hint" *ngIf="!exportJobId && !exportJobError">
       <strong>Duty date range is required.</strong> When no other filters are selected, the range is limited to {{ maxDateRangeDays }} days. Add dispatch location or activation status to search a wider range.
