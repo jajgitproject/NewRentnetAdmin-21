@@ -480,6 +480,18 @@ const routes: Routes = [
       },
 
       {
+        path: 'bulkCreditNote',
+        loadChildren: () =>
+          import('./bulkCreditNote/bulkCreditNote.module').then(
+            (m) => m.BulkCreditNoteModule
+          ),
+        data: {
+          requiredPageKey: 'Bulk Credit Note',
+          alternatePageKeys: ['bulkCreditNote', 'createCreditNote', 'creditNoteApproval', 'creditNoteHome'],
+        },
+      },
+
+      {
         path: 'generateEInvoice',
         loadChildren: () =>
           import('./generateEInvoice/generateEInvoice.module').then(

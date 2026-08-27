@@ -608,6 +608,19 @@ export const ROUTES: RouteInfo[] = [
       },
 
       {
+        path: 'bulkCreditNote',
+        title: 'Bulk Credit Note',
+        pageKey: 'Bulk Credit Note',
+        moduleName: 'bulkCreditNote',
+        alternateAccessPageKeys: ['bulkCreditNote', 'createCreditNote', 'creditNoteApproval', 'creditNoteHome'],
+        icon: 'fas fa-file-invoice',
+        class: '',
+        groupTitle: false,
+        submenu: [],
+        isAccess: false
+      },
+
+      {
         path: 'creditNoteApproval',
         title: 'Credit Note Approval',
         moduleName: 'creditNoteApproval',
