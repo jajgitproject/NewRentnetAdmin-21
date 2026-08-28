@@ -305,9 +305,7 @@ toggleStopFold() {
           this.advanceTableForm.patchValue({vehicle:this.dataSource.vehicle});
           this.advanceTableForm.patchValue({pickupAddress:this.dataSource.pickupAddress});
           this.advanceTableForm.patchValue({
-            pickupAddressDetails: this.dataSource.pickupAddressDetails
-              ? `${this.dataSource.pickupAddressDetails} ${this.dataSource.pickupAddress}`
-              : this.dataSource.pickupAddress
+            pickupAddressDetails: this.dataSource.pickupAddressDetails || ''
           });
           this.advanceTableForm.patchValue({serviceLocationID:this.dataSource.serviceLocationID});
           this.advanceTableForm.patchValue({serviceLocation:this.dataSource.serviceLocation});
@@ -316,9 +314,7 @@ toggleStopFold() {
           this.advanceTableForm.patchValue({dropOffTime:this.dataSource.dropOffTime});
           this.advanceTableForm.patchValue({dropOffAddress:this.dataSource.dropOffAddress});
           this.advanceTableForm.patchValue({
-            dropOffAddressDetails: this.dataSource.dropOffAddressDetails
-              ? `${this.dataSource.dropOffAddressDetails} ${this.dataSource.dropOffAddress}`
-              : this.dataSource.dropOffAddress
+            dropOffAddressDetails: this.dataSource.dropOffAddressDetails || ''
           });
           this.advanceTableForm.patchValue({dropOffPriorityOrder:this.dataSource.dropOffPriorityOrder});
 
@@ -705,18 +701,18 @@ private extractTime(dateTime: Date): Date {
       this.refreshReservationStops(enrouteStops);
 
       const pickupStop = this.stopDetailsList.find(
-        x => x.integrationRequestStopType?.toLowerCase() === 'pickup'
+        x => this.isPickupIntegrationStopType(x.integrationRequestStopType)
       );
 
       const dropOffStop = this.stopDetailsList.find(
-        x => x.integrationRequestStopType?.toLowerCase() === 'dropoff'
+        x => this.isDropoffIntegrationStopType(x.integrationRequestStopType)
       );
 
       // Pickup Binding
       if (pickupStop) {
         const address = this.getStopAddress(pickupStop);
         const landmark = this.getStopLandmark(pickupStop);
-        const formattedDetails = landmark ? (address ? `${landmark} (${address})` : landmark) : `${landmark} (${address})`;
+        const formattedDetails = landmark ? (address ? `${landmark} (${address})` : landmark) : address;
   this.advanceTableForm.patchValue({
     pickupAddress: address,
     pickupAddressLatitude: pickupStop.integrationRequestStopLatitude,
@@ -730,7 +726,7 @@ private extractTime(dateTime: Date): Date {
       if (dropOffStop) {
         const address = this.getStopAddress(dropOffStop);
         const landmark = this.getStopLandmark(dropOffStop);
-        const formattedDetails = landmark ? (address ? `${landmark} (${address})` : landmark) : `${landmark} (${address})`;
+        const formattedDetails = landmark ? (address ? `${landmark} (${address})` : landmark) : address;
   this.advanceTableForm.patchValue({
     dropOffAddress: address,
     dropOffAddressLatitude: dropOffStop.integrationRequestStopLatitude,
@@ -1950,15 +1946,22 @@ OnDropOffGeoLocationClick(option:any)
     return this.stopDetailsList.filter(stop => this.isIntegrationEnrouteStop(stop));
   }
 
+  private isPickupIntegrationStopType(stopType: string | null | undefined): boolean {
+    const type = stopType?.trim().toLowerCase();
+    return type === 'start' || type === 'pickup';
+  }
+
+  private isDropoffIntegrationStopType(stopType: string | null | undefined): boolean {
+    const type = stopType?.trim().toLowerCase();
+    return type === 'end' || type === 'dropoff';
+  }
+
   private isIntegrationEnrouteStop(stop: BookingConfigurationStopDetails): boolean {
     const type = stop?.integrationRequestStopType?.trim().toLowerCase();
     if (!type) {
       return false;
     }
-    if (type === 'start' || type === 'pickup') {
-      return false;
-    }
-    if (type === 'end' || type === 'dropoff') {
+    if (this.isPickupIntegrationStopType(type) || this.isDropoffIntegrationStopType(type)) {
       return false;
     }
     return true;
@@ -2010,8 +2013,10 @@ OnDropOffGeoLocationClick(option:any)
         return linkedStop;
       }
     }
-    return this.stopDetailsList.find(
-      stop => stop.integrationRequestStopType?.toLowerCase() === fallbackType
+    return this.stopDetailsList.find(stop =>
+      fallbackType === 'pickup'
+        ? this.isPickupIntegrationStopType(stop.integrationRequestStopType)
+        : this.isDropoffIntegrationStopType(stop.integrationRequestStopType)
     ) || null;
   }
 
@@ -2037,7 +2042,7 @@ OnDropOffGeoLocationClick(option:any)
 
   get pickupCityName(): string {
     const pickupStop = this.stopDetailsList?.find(
-      stop => stop.integrationRequestStopType?.toLowerCase() === 'pickup'
+      stop => this.isPickupIntegrationStopType(stop.integrationRequestStopType)
     );
     if (pickupStop?.integrationRequestStopCity) {
       return pickupStop.integrationRequestStopCity;
