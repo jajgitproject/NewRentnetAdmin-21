@@ -214,6 +214,11 @@ export class ZonalDutyRegisterComponent implements OnInit, OnDestroy {
   public CarNoList?: VehicleDropDown[] = [];
   filteredCarNoOptions:Observable<VehicleDropDown[]>;
 
+  SearchRegnNo : FormControl = new FormControl();
+  public RegnNoList?: VehicleDropDown[] = [];
+  filteredRegnNoOptions: Observable<VehicleDropDown[]>;
+  SearchInventoryID: number = 0;
+
   SearchSupplierO : FormControl = new FormControl();
 
   SearchCustomerType: FormControl = new FormControl();
@@ -293,6 +298,7 @@ export class ZonalDutyRegisterComponent implements OnInit, OnDestroy {
     this.InitCarBooked();
     this.InitDriver();
     this.InitCarNo();
+    this.InitRegnNo();
     this.InitCustomerType();
     this.InitSalesPerson();
     this.InitGuestName();
@@ -338,6 +344,8 @@ export class ZonalDutyRegisterComponent implements OnInit, OnDestroy {
     this.SearchBillStatus.setValue(null);
     this.SearchDri.setValue('');
     this.SearchCarNo.setValue('');
+    this.SearchRegnNo.setValue('');
+    this.SearchInventoryID = 0;
     this.SearchSupplierO.setValue('');
     this.SearchCustomerType.setValue('');
     this.SearchRes = '';
@@ -740,6 +748,7 @@ export class ZonalDutyRegisterComponent implements OnInit, OnDestroy {
       (this.SearchBillStatus?.value !== null && this.SearchBillStatus?.value !== undefined) ||
       this.isSearchValueSet(this.SearchDri?.value) ||
       this.isSearchValueSet(this.SearchCarNo?.value) ||
+      this.isSearchValueSet(this.SearchInventoryID) ||
       this.isSearchValueSet(this.SearchSupplierO?.value) ||
       this.isSearchValueSet(this.SearchRes) ||
       this.isSearchValueSet(this.SearchDuty) ||
@@ -825,6 +834,7 @@ export class ZonalDutyRegisterComponent implements OnInit, OnDestroy {
       SearchBillStatus: this.SearchBillStatus?.value,
       SearchDri: this.SearchDri?.value || "",
       SearchCarNo: this.SearchCarNo?.value || "",
+      SearchInventoryID: this.SearchInventoryID || 0,
       SearchSupplierO: this.SearchSupplierO?.value || "",
       SearchRes: this.SearchRes || "",
       SearchDuty: this.SearchDuty || "",
@@ -1305,6 +1315,44 @@ export class ZonalDutyRegisterComponent implements OnInit, OnDestroy {
     {
       return data.vehicle.toLowerCase().indexOf(filterValue)===0;
     });
+  }
+
+  InitRegnNo()
+  {
+    this.zonalDutyRegisterService.getRegistrationNumber().subscribe(
+    data=>
+    {
+      this.RegnNoList = data;
+      this.filteredRegnNoOptions = this.SearchRegnNo.valueChanges.pipe(
+      startWith(""),
+      map(value => {
+        const selected = this.RegnNoList?.find(item => item.vehicle === value);
+        this.SearchInventoryID = selected ? selected.vehicleID : 0;
+        return this._filterRegnNo(value || '');
+      })
+      );
+    });
+  }
+  private _filterRegnNo(value: string): any {
+    const filterValue = value.toLowerCase();
+    if (!value || value.length < 0) {
+      return [];
+    }
+    return this.RegnNoList.filter(
+      data => data.vehicle.toLowerCase().includes(filterValue)
+    );
+  }
+
+  OnRegnNoSelected(selectedRegnNo: string) {
+    const selected = this.RegnNoList?.find(
+      data => data.vehicle === selectedRegnNo
+    );
+
+    if (selected) {
+      this.SearchInventoryID = selected.vehicleID;
+    } else {
+      this.SearchInventoryID = 0;
+    }
   }
 
   //---------- Customer Type ----------

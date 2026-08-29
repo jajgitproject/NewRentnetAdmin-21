@@ -192,6 +192,7 @@ export class SearchCriteria
   SearchGoodForBill: boolean;
   SearchDri: string;
   SearchCarNo: string;
+  SearchInventoryID: number;
   SearchSupplierO: string;
   SearchRes: string;
   SearchDuty: string;
