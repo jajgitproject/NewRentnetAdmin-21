@@ -58,6 +58,9 @@
         <div class="col-xl-2 col-lg-4 col-md-12 col-sm-12 mb-2">
           <b>City:</b> <br/>{{CityName}}
         </div>
+        <div class="col-xl-3 col-lg-4 col-md-12 col-sm-12 mb-2">
+          <b>Pickup Address:</b> <br/>{{PickupAddress || 'N/A'}}
+        </div>
         <div class="col-xl-2 col-lg-4 col-md-12 col-sm-12 mb-2" *ngIf="closingDataAdvanceTable">
           <b>Mode of Payment:</b> <br/>{{closingDataAdvanceTable?.modeOfPayment || 'N/A'}}
         </div>
