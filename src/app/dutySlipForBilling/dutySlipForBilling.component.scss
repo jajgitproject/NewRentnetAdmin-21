@@ -1,36 +1,36 @@
-tbody, thead {
-    border: 1px solid #000;
-    width: 100%;
-    box-sizing: border-box;
-  }
-  
-  td, th {
-    border: 1px solid #000; 
-    padding: 8px;
-  }
-  
-  td:first-of-type {
-    border-right: none; 
-  }
+.original-billing-time {
+  font-size: 11px;
+  color: #666;
+  line-height: 1.2;
+  margin-bottom: 2px;
+}
 
-  ::ng-deep .mat-tab-label {
-    width: 100%;
-  }
+td, th {
+  border: 1px solid #000;
+  padding: 8px;
+}
 
+td:first-of-type {
+  border-right: none;
+}
 
-  .mat-expansion-panel-header-title {
-    display: block;
-    width: 100%;
-  }
-  
-  .disabled {
-    pointer-events: none;
-    color: gray;
-  }
+::ng-deep .mat-tab-label {
+  width: 100%;
+}
 
-  .underlined-button {
-    text-decoration: underline;
-  }
+.mat-expansion-panel-header-title {
+  display: block;
+  width: 100%;
+}
+
+.disabled {
+  pointer-events: none;
+  color: gray;
+}
+
+.underlined-button {
+  text-decoration: underline;
+}
 
 .calculate-bill-blocking-overlay {
   position: fixed;

@@ -163,4 +163,9 @@ export class OrganizationalEntityService
   {
     return this.httpClient.get<OrganizationalEntityDropDown[]>(this.API_URL + "/GetDropDownForParentForHub/" + OrganizationalEntityType + '/' + OrganizationalEntity);
   }
+
+  getDefaultCDPLocation(organizationalEntityID: number): Observable<OrganizationalEntityDropDown>
+  {
+    return this.httpClient.get<OrganizationalEntityDropDown>(this.API_URL + "/GetDefaultCDPLocation/" + organizationalEntityID);
+  }
 }

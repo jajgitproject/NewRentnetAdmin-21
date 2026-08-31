@@ -160,6 +160,12 @@
               <th style="width: 18%;">Pickup Address</th>
               <th style="width: 12%;">Drop Address</th>
               <th style="width: 8%;">MOP</th>
+              <th
+                *ngFor="let fieldName of customerSpecificFieldColumns; trackBy: trackCustomerSpecificFieldColumn"
+                style="width: 10%;"
+              >
+                {{ fieldName }}
+              </th>
             </tr>
           </thead>
           <tbody>
@@ -177,6 +183,9 @@
               <td>{{ getPickupAddressDisplay(info) }}</td>
               <td>{{ getDropAddressDisplay(info) }}</td>
               <td>{{ info?.modeOfPayment || 'N/A' }}</td>
+              <td *ngFor="let fieldName of customerSpecificFieldColumns; trackBy: trackCustomerSpecificFieldColumn">
+                {{ getCustomerSpecificFieldValue(info, fieldName) }}
+              </td>
             </tr>
           </tbody>
         </table>

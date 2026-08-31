@@ -1,5 +1,5 @@
 //@ts-nocheck
-import { AfterViewInit, Component, ElementRef, Input, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import { AfterViewInit, ChangeDetectorRef, Component, ElementRef, Input, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { ClossingOneService } from './clossingOne.service';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { MatDialog, MatDialogRef } from '@angular/material/dialog';
@@ -197,6 +197,8 @@ export class ClossingOneComponent implements OnInit, AfterViewInit, OnDestroy {
   summaryOfDutyData: SummaryOfDutyData | null = null;
   /** True when duty-billing-summary shows an active InvoiceCalculation for this duty. */
   hasActiveInvoiceCalculation = false;
+  /** Shared duty-billing-summary payload (Generate Bill gate + child nights/DA). */
+  dutyBillingSummary: any = null;
   dataSource: Dispute[] | null;
   dataSourceforCard: any = null;
   reservationCloseDetail: any = null;
@@ -266,6 +268,7 @@ export class ClossingOneComponent implements OnInit, AfterViewInit, OnDestroy {
   DutySlipMap:any;
   IRN:any;
   hasActiveEInvoice = false;
+  hasActiveInvoice = false;
   private irnPollSubscription: Subscription | null = null;
   private readonly irnPollIntervalMs = 60000;
    CityName:any;
@@ -311,6 +314,7 @@ export class ClossingOneComponent implements OnInit, AfterViewInit, OnDestroy {
     public _dutySlipImageService: DutySlipImageService,
     public odoMeterAndManualDutySlipImageService: OdoMeterAndManualDutySlipImageService,
     public settleRateService: SettledRateDetailsService,
+    private cdr: ChangeDetectorRef,
    
   ) {
 
@@ -344,11 +348,6 @@ export class ClossingOneComponent implements OnInit, AfterViewInit, OnDestroy {
       this.startInitialLoadsIfReady();
       
     });
-    this.checkVerifyDutyBeforeFormOpen();
-  this.GetClosingData();
-   this.BookingDataOnClosing();
-   this.GSTDataOnClosing();
-   this.CustomerSpecificFieldsloadData();
   }
 
   ngAfterViewInit(): void {
@@ -361,6 +360,7 @@ export class ClossingOneComponent implements OnInit, AfterViewInit, OnDestroy {
       return;
     }
     this.initialLoadsStarted = true;
+    this.checkVerifyDutyBeforeFormOpen();
     this.GetClosingData();
     this.disputeService.disputeData$.subscribe(data => {
       this.disputeAdvanceTable = data ?? [];
@@ -369,6 +369,8 @@ export class ClossingOneComponent implements OnInit, AfterViewInit, OnDestroy {
     this.GetTotalTollParInStDispute();
     this.loadDataForCard();
     this.BookingDataOnClosing();
+    this.GSTDataOnClosing();
+    this.CustomerSpecificFieldsloadData();
     this.TollParkingLoadData();
     this.DutyInterStateTaxLoadData();
     this.DisputeLoadData();
@@ -405,13 +407,17 @@ export class ClossingOneComponent implements OnInit, AfterViewInit, OnDestroy {
     );
   }
 
-  private applyActiveEInvoiceState(state: { hasActiveEInvoice: boolean; irn?: string | null }): void {
+  private applyActiveEInvoiceState(state: { hasActiveEInvoice: boolean; hasActiveInvoice?: boolean; irn?: string | null }): void {
     this.hasActiveEInvoice = state.hasActiveEInvoice === true;
+    if (state.hasActiveInvoice !== undefined) {
+      this.hasActiveInvoice = state.hasActiveInvoice === true;
+    }
     if (state.irn !== undefined) {
       this.IRN = state.irn;
     }
     if (this.advanceTableClosingOne) {
       this.advanceTableClosingOne.hasActiveEInvoice = this.hasActiveEInvoice;
+      this.advanceTableClosingOne.hasActiveInvoice = this.hasActiveInvoice;
       if (state.irn !== undefined) {
         this.advanceTableClosingOne.irn = state.irn;
       }
@@ -467,6 +473,7 @@ export class ClossingOneComponent implements OnInit, AfterViewInit, OnDestroy {
         this.invoiceID = this.advanceTableClosingOne?.invoiceID;
         this.IRN = this.advanceTableClosingOne?.irn;
         this.hasActiveEInvoice = !!this.advanceTableClosingOne?.hasActiveEInvoice;
+        this.hasActiveInvoice = !!this.advanceTableClosingOne?.hasActiveInvoice || Number(this.invoiceID) > 0;
         this.goodForBilling = !!this.advanceTableClosingOne?.closingDutySlipForBillingModel?.goodForBilling;
         this.verifyDuty = !!this.advanceTableClosingOne?.closingDutySlipForBillingModel?.verifyDuty;
         this.DSClosing = this.advanceTableClosingOne?.closingDutySlipForBillingModel?.dsClosing;
@@ -482,49 +489,53 @@ export class ClossingOneComponent implements OnInit, AfterViewInit, OnDestroy {
     this.clossingOneService.getClosingData(this.AllotmentID).subscribe
       (
         data => {
-          this.closingDataAdvanceTable = data;
-          console.log('Closing Data:', this.closingDataAdvanceTable);
-          this.allotmentID = this.closingDataAdvanceTable?.allotmentID;
-          this.dutySlipID = this.closingDataAdvanceTable?.dutySlipID;
-          this.ReservationID = this.closingDataAdvanceTable?.reservationID;
-          this.CustomerID = this.closingDataAdvanceTable?.customerID;
-          this.PackageID = this.closingDataAdvanceTable?.packageID;
-          this.PackageTypeID = this.closingDataAdvanceTable?.packageTypeID;
-          this.CustomerContractID = this.closingDataAdvanceTable?.customerContractID;
-          this.PackageType = this.closingDataAdvanceTable?.packageType;
-          this.DutySlipForBillingID = this.closingDataAdvanceTable?.dutySlipForBillingID;
-          this.RegistrationNumber = this.closingDataAdvanceTable?.registrationNumber;
-          this.InventoryID = this.closingDataAdvanceTable?.inventoryID;
-          this.DropOffDate = this.closingDataAdvanceTable?.dropOffDate;
-          this.PickupDate = this.closingDataAdvanceTable?.pickupDate;
-          this.closureStatus = this.closingDataAdvanceTable?.closureStatus;
-          this.PickupTime = this.closingDataAdvanceTable?.pickupTime;
-          this.DropOffTime = this.closingDataAdvanceTable?.dropOffTime;
-          this.LocationOutDate = this.closingDataAdvanceTable?.locationOutDate;
-          this.LocationOutTime = this.closingDataAdvanceTable?.locationOutTime;
-          this.PickupAddress = this.closingDataAdvanceTable?.pickupAddress;
-          this.DropOffAddress = this.closingDataAdvanceTable?.dropOffAddress;
-          this.LocationOutAddress = this.closingDataAdvanceTable?.locationOutAddress;
-          this.CustomerName = this.closingDataAdvanceTable?.customerName || '';
-          this.TallyCustomerID = this.closingDataAdvanceTable?.tallyCustomerID || 0;
-          this.PickupCityID = this.closingDataAdvanceTable?.pickupCityID;
-          this.VehicleCategoryID = this.closingDataAdvanceTable?.vehicleCategoryID;
-          this.VehicleID = this.closingDataAdvanceTable?.vehicleID;
-          this.guestName = this.closingDataAdvanceTable?.guestName;
-          this.DutySlipMap= this.closingDataAdvanceTable?.dutySlipMap;
-          this.CityName = this.closingDataAdvanceTable?.city;
-          this.Package = this.closingDataAdvanceTable?.package;
-          this.carBooked=this.closingDataAdvanceTable?.vehicle;
-          this.carSent=this.closingDataAdvanceTable?.carSent;
-          this.fuelType=this.closingDataAdvanceTable?.fuelType;
-         
-          this.advanceDetailsLoadData();
-          this.kamCardLoadData();
-          // this.loadDataforAdditionalKMHR();
-          this.DutySACLoadData();
-          this.salesPersonLoadData();
-          this.GetBillFromTo();
-
+          // Defer binding updates so *ngIf="closingDataAdvanceTable" does not trip NG0100
+          // (ExpressionChangedAfterItHasBeenCheckedError) during the same CD pass.
+          Promise.resolve().then(() => {
+            this.closingDataAdvanceTable = data;
+            console.log('Closing Data:', this.closingDataAdvanceTable);
+            this.allotmentID = this.closingDataAdvanceTable?.allotmentID;
+            this.dutySlipID = this.closingDataAdvanceTable?.dutySlipID;
+            this.ReservationID = this.closingDataAdvanceTable?.reservationID;
+            this.CustomerID = this.closingDataAdvanceTable?.customerID;
+            this.PackageID = this.closingDataAdvanceTable?.packageID;
+            this.PackageTypeID = this.closingDataAdvanceTable?.packageTypeID;
+            this.CustomerContractID = this.closingDataAdvanceTable?.customerContractID;
+            this.PackageType = this.closingDataAdvanceTable?.packageType;
+            this.DutySlipForBillingID = this.closingDataAdvanceTable?.dutySlipForBillingID;
+            this.RegistrationNumber = this.closingDataAdvanceTable?.registrationNumber;
+            this.InventoryID = this.closingDataAdvanceTable?.inventoryID;
+            this.DropOffDate = this.closingDataAdvanceTable?.dropOffDate;
+            this.PickupDate = this.closingDataAdvanceTable?.pickupDate;
+            this.closureStatus = this.closingDataAdvanceTable?.closureStatus;
+            this.PickupTime = this.closingDataAdvanceTable?.pickupTime;
+            this.DropOffTime = this.closingDataAdvanceTable?.dropOffTime;
+            this.LocationOutDate = this.closingDataAdvanceTable?.locationOutDate;
+            this.LocationOutTime = this.closingDataAdvanceTable?.locationOutTime;
+            this.PickupAddress = this.closingDataAdvanceTable?.pickupAddress;
+            this.DropOffAddress = this.closingDataAdvanceTable?.dropOffAddress;
+            this.LocationOutAddress = this.closingDataAdvanceTable?.locationOutAddress;
+            this.CustomerName = this.closingDataAdvanceTable?.customerName || '';
+            this.TallyCustomerID = this.closingDataAdvanceTable?.tallyCustomerID || 0;
+            this.PickupCityID = this.closingDataAdvanceTable?.pickupCityID;
+            this.VehicleCategoryID = this.closingDataAdvanceTable?.vehicleCategoryID;
+            this.VehicleID = this.closingDataAdvanceTable?.vehicleID;
+            this.guestName = this.closingDataAdvanceTable?.guestName;
+            this.DutySlipMap= this.closingDataAdvanceTable?.dutySlipMap;
+            this.CityName = this.closingDataAdvanceTable?.city;
+            this.Package = this.closingDataAdvanceTable?.package;
+            this.carBooked=this.closingDataAdvanceTable?.vehicle;
+            this.carSent=this.closingDataAdvanceTable?.carSent;
+            this.fuelType=this.closingDataAdvanceTable?.fuelType;
+           
+            this.advanceDetailsLoadData();
+            this.kamCardLoadData();
+            // this.loadDataforAdditionalKMHR();
+            this.DutySACLoadData();
+            this.salesPersonLoadData();
+            this.GetBillFromTo();
+            this.cdr.detectChanges();
+          });
         },
         (error: HttpErrorResponse) => { this.closingDataAdvanceTable = null; }
       );
@@ -725,9 +736,12 @@ export class ClossingOneComponent implements OnInit, AfterViewInit, OnDestroy {
           verifyDutyStatusAndCacellationStatus: this.verifyDutyStatusAndCacellationStatus
         }
       });
-    dialogRef.afterClosed().subscribe((res: any) => {
+    dialogRef.afterClosed().subscribe((saved: boolean) => {
+      if (saved !== true) {
+        return;
+      }
       this.DutyGSTPercentageLoadData();
-      window.location.reload();
+      this.recalculateBillQuietly();
     });
     });
   }
@@ -906,9 +920,12 @@ export class ClossingOneComponent implements OnInit, AfterViewInit, OnDestroy {
           verifyDutyStatusAndCacellationStatus: this.verifyDutyStatusAndCacellationStatus
         }
       });
-    dialogRef.afterClosed().subscribe((res: any) => {
+    dialogRef.afterClosed().subscribe((saved: boolean) => {
+      if (saved !== true) {
+        return;
+      }
       this.loadDataForReservationDiscountClosing();
-      window.location.reload();
+      this.recalculateBillQuietly();
     });
     });
   }
@@ -945,7 +962,7 @@ export class ClossingOneComponent implements OnInit, AfterViewInit, OnDestroy {
     dialogRef.afterClosed().subscribe((res: any) => {
       if (res === true) {
         this.loadDataforAdditionalKMHR();
-        window.location.reload();
+        this.recalculateBillQuietly();
       }
     });
     });
@@ -1216,13 +1233,16 @@ export class ClossingOneComponent implements OnInit, AfterViewInit, OnDestroy {
   refreshHasActiveInvoiceCalculation(): void {
     if (this.DutySlipID == null || this.DutySlipID === '') {
       this.hasActiveInvoiceCalculation = false;
+      this.dutyBillingSummary = null;
       return;
     }
     this.clossingOneService.getDutyBillingSummary(this.DutySlipID).subscribe(
       (response) => {
+        this.dutyBillingSummary = response;
         this.hasActiveInvoiceCalculation = hasInvoiceCalculationResult(response);
       },
       () => {
+        this.dutyBillingSummary = null;
         this.hasActiveInvoiceCalculation = false;
       }
     );
@@ -1933,13 +1953,14 @@ export class ClossingOneComponent implements OnInit, AfterViewInit, OnDestroy {
       );
   }
 
-  onDutyStatusChanged(event: { verifyDuty: boolean, goodForBilling: boolean, message: string }) {
+  onDutyStatusChanged(event: { verifyDuty: boolean, goodForBilling: boolean, message: string, invoiceCalculated?: boolean }) {
     this.verifyDuty = event.verifyDuty;
     this.goodForBilling = event.goodForBilling;
     this.Message = event.message;
     this.applyEditBlockStatus();
-     this.GSTDataOnClosing();
-    this.refreshHasActiveInvoiceCalculation();
+    if (event.invoiceCalculated) {
+      this.hasActiveInvoiceCalculation = true;
+    }
   }
 
   openSearchModal() {
@@ -2125,10 +2146,12 @@ export class ClossingOneComponent implements OnInit, AfterViewInit, OnDestroy {
               status: this.verifyDutyStatusAndCacellationStatus
             }
           });
-          dialogRef.afterClosed().subscribe((res: any) => {
+          dialogRef.afterClosed().subscribe((saved: boolean) => {
+            if (saved !== true) {
+              return;
+            }
             this.settledRateLoadData();
-            //this.ngOnInit();
-            window.location.reload();
+            this.recalculateBillQuietly();
           })
         }
         else
@@ -2142,10 +2165,12 @@ export class ClossingOneComponent implements OnInit, AfterViewInit, OnDestroy {
               status: this.verifyDutyStatusAndCacellationStatus
             }
           });
-          dialogRef.afterClosed().subscribe((res: any) => {
+          dialogRef.afterClosed().subscribe((saved: boolean) => {
+            if (saved !== true) {
+              return;
+            }
             this.settledRateLoadData();
-            //this.ngOnInit();
-            window.location.reload();
+            this.recalculateBillQuietly();
           })
         }
       }
@@ -2188,8 +2213,13 @@ showAndScrollOpenSettledRates() {
           verifyDutyStatusAndCacellationStatus: this.verifyDutyStatusAndCacellationStatus
         }
       });
-    dialogRef.afterClosed().subscribe((res: any) => {
-      window.location.reload();
+    dialogRef.afterClosed().subscribe((saved: boolean) => {
+      if (saved !== true) {
+        return;
+      }
+      this.GetClosingData();
+      this.BookingDataOnClosing();
+      this.recalculateBillQuietly();
     });
     });
   }

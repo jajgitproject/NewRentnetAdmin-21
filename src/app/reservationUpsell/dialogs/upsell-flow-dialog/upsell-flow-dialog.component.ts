@@ -1,5 +1,5 @@
 // @ts-nocheck
-import { ChangeDetectorRef, Component, Inject } from '@angular/core';
+import { ChangeDetectorRef, Component, ElementRef, Inject, ViewChild } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { MatSnackBar } from '@angular/material/snack-bar';
@@ -14,6 +14,8 @@ import { EligibleUpsellCategory, UpsellDeclineReason } from '../../reservationUp
   styleUrls: ['./upsell-flow-dialog.component.scss']
 })
 export class UpsellFlowDialogComponent {
+  @ViewChild('reasonField', { read: ElementRef }) reasonFieldRef?: ElementRef<HTMLElement>;
+
   step: 'confirm' | 'categories' | 'decline' | 'no-options' = 'confirm';
   isLoading = false;
   yesAttempted = false;
@@ -26,6 +28,10 @@ export class UpsellFlowDialogComponent {
   declineForm: FormGroup;
   declineReasons: UpsellDeclineReason[] = [];
   filterText = '';
+  initialCategory = '';
+  initialRate: number | null = null;
+  /** Pixel width of the Reason field — keeps the open options panel the same width. */
+  reasonPanelWidth: number | null = null;
 
   constructor(
     public dialogRef: MatDialogRef<UpsellFlowDialogComponent>,
@@ -36,6 +42,8 @@ export class UpsellFlowDialogComponent {
     private fb: FormBuilder,
     private cdr: ChangeDetectorRef
   ) {
+    this.initialCategory = data?.currentVehicleCategoryName || '';
+    this.initialRate = data?.currentContractRate ?? null;
     this.declineForm = this.fb.group({
       reasonID: [null, Validators.required],
       comment: ['', Validators.maxLength(500)]
@@ -58,6 +66,46 @@ export class UpsellFlowDialogComponent {
     return !this.data?.hasActiveUpsell && !this.yesAttempted;
   }
 
+  get stepTitle(): string {
+    switch (this.step) {
+      case 'categories':
+        return 'Select Upsell Category';
+      case 'decline':
+        return 'Decline Upsell';
+      case 'no-options':
+        return 'Upsell Unavailable';
+      default:
+        return 'Reservation Upsell';
+    }
+  }
+
+  selectCategory(row: EligibleUpsellCategory): void {
+    this.selectedCategory = row;
+  }
+
+  onReasonPanelOpened(opened: boolean, reasonField?: any): void {
+    if (!opened) {
+      return;
+    }
+    this.syncReasonPanelWidth(reasonField);
+  }
+
+  private syncReasonPanelWidth(reasonField?: any): void {
+    const el: HTMLElement | null =
+      this.reasonFieldRef?.nativeElement ??
+      reasonField?._elementRef?.nativeElement ??
+      reasonField?.nativeElement ??
+      null;
+    if (!el) {
+      return;
+    }
+    const width = Math.round(el.getBoundingClientRect().width);
+    if (width > 0 && width !== this.reasonPanelWidth) {
+      this.reasonPanelWidth = width;
+      this.cdr.detectChanges();
+    }
+  }
+
   onNo(): void {
     if (!this.canDeclineUpsell) {
       return;
@@ -70,6 +118,7 @@ export class UpsellFlowDialogComponent {
         this.declineReasons = (reasons || []).map(r => new UpsellDeclineReason(r));
         this.isLoading = false;
         this.cdr.detectChanges();
+        setTimeout(() => this.syncReasonPanelWidth(), 0);
       },
       error: (err) => {
         this.isLoading = false;
@@ -94,11 +143,11 @@ export class UpsellFlowDialogComponent {
           this.showNoOptions(res.message);
           return;
         }
-        this.currentCarCategory = payload.currentCarCategory ?? payload.CurrentCarCategory ?? '';
-        this.currentRate = payload.currentRate ?? payload.CurrentRate ?? 0;
+        this.currentCarCategory = payload.currentCarCategory ?? payload.CurrentCarCategory ?? this.initialCategory ?? '';
+        this.currentRate = payload.currentRate ?? payload.CurrentRate ?? this.initialRate ?? 0;
         this.eligibleCategories = (categories || []).map(c => new EligibleUpsellCategory(c));
         if (this.eligibleCategories.length === 0) {
-          this.showNoOptions('No higher contract category available for this reservation.');
+          this.showNoOptions('No contract categories available for this reservation.');
           return;
         }
         this.step = 'categories';

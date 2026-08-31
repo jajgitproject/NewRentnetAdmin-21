@@ -38,7 +38,7 @@
                   
                     <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
                         <mat-label>Employee</mat-label>
-                        <input required type="text" matInput formControlName="employeeName" [matAutocomplete]="auto">
+                        <input required type="text" matInput formControlName="employeeName" [matAutocomplete]="auto" (keyup)="InitEmployee($event)">
                         <mat-autocomplete #auto="matAutocomplete" (optionSelected)="OnEmployeeSelect($event.option.value)">
                           <mat-option *ngFor="let option of filteredinstructedByOptionss | async" 
                           [value]="option.firstName +' '+option.lastName" (click)="getemployeeIDTitles(option.employeeID)">

@@ -480,6 +480,18 @@ const routes: Routes = [
       },
 
       {
+        path: 'bulkCreditNote',
+        loadChildren: () =>
+          import('./bulkCreditNote/bulkCreditNote.module').then(
+            (m) => m.BulkCreditNoteModule
+          ),
+        data: {
+          requiredPageKey: 'Bulk Credit Note',
+          alternatePageKeys: ['bulkCreditNote', 'createCreditNote', 'creditNoteApproval', 'creditNoteHome'],
+        },
+      },
+
+      {
         path: 'generateEInvoice',
         loadChildren: () =>
           import('./generateEInvoice/generateEInvoice.module').then(
@@ -496,6 +508,42 @@ const routes: Routes = [
         data: {
           requiredPageKey: 'Bulk E-Invoice',
           alternatePageKeys: ['bulkEInvoice', 'generateEInvoice', 'Generate E - Invoice'],
+        },
+      },
+
+      {
+        path: 'bulkGfb',
+        loadChildren: () =>
+          import('./bulkGfb/bulkGfb.module').then(
+            (m) => m.BulkGfbModule
+          ),
+        data: {
+          requiredPageKey: 'Bulk GFB',
+          alternatePageKeys: ['bulkGfb', 'closingOne', 'Closing', 'generateEInvoice', 'Generate E - Invoice'],
+        },
+      },
+
+      {
+        path: 'markReadyForBulkBilling',
+        loadChildren: () =>
+          import('./markReadyForBulkBilling/markReadyForBulkBilling.module').then(
+            (m) => m.MarkReadyForBulkBillingModule
+          ),
+        data: {
+          requiredPageKey: 'Mark Ready For Bulk Billing',
+          alternatePageKeys: ['markReadyForBulkBilling', 'bulkInvoice', 'bulkGfb', 'closingOne', 'Closing', 'generateEInvoice', 'Generate E - Invoice'],
+        },
+      },
+
+      {
+        path: 'bulkInvoice',
+        loadChildren: () =>
+          import('./bulkInvoice/bulkInvoice.module').then(
+            (m) => m.BulkInvoiceModule
+          ),
+        data: {
+          requiredPageKey: 'Bulk Invoice',
+          alternatePageKeys: ['bulkInvoice', 'bulkGfb', 'closingOne', 'Closing', 'generateEInvoice', 'Generate E - Invoice'],
         },
       },
 
@@ -1513,6 +1561,13 @@ const routes: Routes = [
         loadChildren: () =>
           import('./controlPanelTemp/controlPanelTemp.module').then(
             (m) => m.ControlPanelTempModule
+          )
+      },
+      {
+        path: 'upsellDeclineReason',
+        loadChildren: () =>
+          import('./upsellDeclineReason/upsellDeclineReason.module').then(
+            (m) => m.UpsellDeclineReasonModule
           )
       },
 

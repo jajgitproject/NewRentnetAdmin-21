@@ -42,6 +42,19 @@ export const ROUTES: RouteInfo[] = [
       },
 
       {
+        path: 'upsellDeclineReason',
+        title: 'UpSell Decline Reason',
+        pageKey: 'UpSell Decline Reason',
+        moduleName: 'upsellDeclineReason',
+        alternateAccessPageKeys: ['upsellDeclineReason', 'UpSell Decline Reason'],
+        icon: 'fas fa-tachometer-alt',
+        class: '',
+        groupTitle: false,
+        submenu: [],
+        isAccess: false
+      },
+
+      {
         path: 'CarAndDriverAllotmentTemp',
         title: 'Car And Driver Allotment Temp',
         moduleName: 'CarAndDriverAllotmentTemp',
@@ -588,6 +601,19 @@ export const ROUTES: RouteInfo[] = [
         title: 'Credit Note Home',
         moduleName: 'creditNoteHome',
         icon: 'fas fa-tachometer-alt',
+        class: '',
+        groupTitle: false,
+        submenu: [],
+        isAccess: false
+      },
+
+      {
+        path: 'bulkCreditNote',
+        title: 'Bulk Credit Note',
+        pageKey: 'Bulk Credit Note',
+        moduleName: 'bulkCreditNote',
+        alternateAccessPageKeys: ['bulkCreditNote', 'createCreditNote', 'creditNoteApproval', 'creditNoteHome'],
+        icon: 'fas fa-file-invoice',
         class: '',
         groupTitle: false,
         submenu: [],
@@ -1195,6 +1221,45 @@ export const ROUTES: RouteInfo[] = [
         moduleName: 'bulkEInvoice',
         alternateAccessPageKeys: ['bulkEInvoice', 'generateEInvoice', 'Generate E - Invoice'],
         icon: 'fas fa-file-invoice',
+        class: '',
+        groupTitle: false,
+        submenu: [],
+        isAccess: false
+      },
+
+      {
+        path: 'bulkGfb',
+        title: 'Bulk GFB',
+        pageKey: 'Bulk GFB',
+        moduleName: 'bulkGfb',
+        alternateAccessPageKeys: ['bulkGfb', 'closingOne', 'Closing', 'generateEInvoice', 'Generate E - Invoice'],
+        icon: 'fas fa-check-square',
+        class: '',
+        groupTitle: false,
+        submenu: [],
+        isAccess: false
+      },
+
+      {
+        path: 'markReadyForBulkBilling',
+        title: 'Mark Ready For Bulk Billing',
+        pageKey: 'Mark Ready For Bulk Billing',
+        moduleName: 'markReadyForBulkBilling',
+        alternateAccessPageKeys: ['markReadyForBulkBilling', 'bulkInvoice', 'bulkGfb', 'closingOne', 'Closing', 'generateEInvoice', 'Generate E - Invoice'],
+        icon: 'fas fa-tags',
+        class: '',
+        groupTitle: false,
+        submenu: [],
+        isAccess: false
+      },
+
+      {
+        path: 'bulkInvoice',
+        title: 'Bulk Invoice',
+        pageKey: 'Bulk Invoice',
+        moduleName: 'bulkInvoice',
+        alternateAccessPageKeys: ['bulkInvoice', 'bulkGfb', 'closingOne', 'Closing', 'generateEInvoice', 'Generate E - Invoice'],
+        icon: 'fas fa-file-invoice-dollar',
         class: '',
         groupTitle: false,
         submenu: [],
