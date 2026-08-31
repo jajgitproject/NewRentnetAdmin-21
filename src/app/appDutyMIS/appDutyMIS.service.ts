@@ -91,13 +91,4 @@ export class AppDutyMISService
   isExportJobReady(status: any): boolean {
     return isExportJobReady(status);
   }
-
-  /** @deprecated Use startExportJob */
-  downloadCsv(searchFromDate: string, searchToDate: string, dispatchLocation: string, searchActivationStatus: boolean): Observable<Blob>
-  {
-    return this.httpClient.get(
-      `${this.API_URL}/export/${this.toRouteSegment(searchFromDate)}/${this.toRouteSegment(searchToDate)}/${this.toRouteSegment(dispatchLocation)}/${this.toRouteSegment(searchActivationStatus)}`,
-      { responseType: 'blob' }
-    );
-  }
 }

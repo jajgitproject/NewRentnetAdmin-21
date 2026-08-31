@@ -8,7 +8,7 @@ import { MatSort } from '@angular/material/sort';
 import { ModelForReservation, Reservation, ReservationStatusLog, SameReservationModel } from './reservation.model';
 import { DataSource } from '@angular/cdk/collections';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import { BehaviorSubject, fromEvent, merge, Observable, of, Subject, Subscription } from 'rxjs';
+import { BehaviorSubject, fromEvent, merge, Observable, of, Subject, Subscription, throwError } from 'rxjs';
 import { map, startWith, switchMap, catchError } from 'rxjs/operators';
 import { DateAdapter, MAT_DATE_LOCALE } from '@angular/material/core';
 import { MatMenu, MatMenuTrigger } from '@angular/material/menu';
@@ -82,6 +82,13 @@ export class ReservationComponent implements OnInit {
   @Input() allotmentType:any = '';
   @Input() IsKAMRole:boolean;
   @Input() LocationOutDate:string | null = null;
+  @Input() testBookingMode = false;
+  @Input() testBookingBusy = false;
+  @Input() testBookingCanSave = false;
+  @Output() testBookingSave = new EventEmitter<void>();
+  @Output() testBookingSaved = new EventEmitter<any>();
+  @Output() testBookingClearImei = new EventEmitter<void>();
+  @Output() testBookingClear = new EventEmitter<void>();
   advanceTableFormEdit: FormGroup;
   advanceTable:Reservation;
   dataForReservationList:ModelForReservation | null;
@@ -414,7 +421,6 @@ canCreateReservation: boolean;
     } else {
       this.buttonDisabled = false;
     }
-    debugger;
     if(this.fromForm !=='newForm')
     {
       this.route.queryParams.subscribe(paramsData =>{
@@ -730,6 +736,9 @@ onTNCChange(checked: any)
 
   CustomerSpecificFieldsloadData()
     {
+      if (this.testBookingMode) {
+        return;
+      }
       const reservationID = this.getCurrentReservationID();
       if (!reservationID) { return; }
       this.newFormService.GetCustomerSpecificFields(reservationID).subscribe(
@@ -759,7 +768,9 @@ onTNCChange(checked: any)
     // access so ngOnInit doesn't throw and abort the rest of the init chain
     // (which previously left contractID / customerID / customerGroupID unset
     // and produced a cascade of 400s to `.../undefined` URLs).
-    const customerID = this.advanceTableForm.value.customerID
+    const customerID = this.advanceTableForm.getRawValue()?.customerID
+      || this.advanceTableForm.value.customerID
+      || this.customerID
       || (this.advanceTable && this.advanceTable.customerID);
 
     if (!customerID) {
@@ -777,9 +788,16 @@ onTNCChange(checked: any)
         // read it, which is what produces NG0100 in dev mode.
         setTimeout(() => {
           const incomingFields = this.toArray<CustomerReservationFields>(data);
+          if (this.testBookingMode && this.toArray(this.CustomerExtraFieldList).length > 0) {
+            return;
+          }
+          const preservedValues: Record<string, unknown> = {};
           const previousDynamicKeys = [...this.arr2];
           previousDynamicKeys.forEach((key) => {
             if (this.advanceTableForm.contains(key)) {
+              if (this.testBookingMode) {
+                preservedValues[key] = this.advanceTableForm.controls[key].value;
+              }
               this.advanceTableForm.removeControl(key);
             }
           });
@@ -793,18 +811,25 @@ onTNCChange(checked: any)
 
             const isMandatory = ele.isMandatory ? [Validators.required] : [];
             const existingControl = this.advanceTableForm.controls[ele.fieldName];
+            const preserved = preservedValues[ele.fieldName];
             if (existingControl) {
               existingControl.setValidators(isMandatory);
+              if (preserved !== undefined && preserved !== null && preserved !== '') {
+                existingControl.setValue(preserved, { emitEvent: false });
+              }
               existingControl.updateValueAndValidity({ emitEvent: false });
             } else {
-              this.advanceTableForm.addControl(ele.fieldName, new FormControl('', isMandatory));
+              this.advanceTableForm.addControl(
+                ele.fieldName,
+                new FormControl(preserved ?? '', isMandatory)
+              );
             }
           });
           this.CustomerExtraFieldList = incomingFields;
 
           // Prefill saved CSF whenever a reservation is open — not only when
           // action === 'edit' (some entry paths omit action but still pass reservationID).
-          if (this.getCurrentReservationID()) {
+          if (this.getCurrentReservationID() && !this.testBookingMode) {
             this.CustomerSpecificFieldsloadData();
           }
 
@@ -862,7 +887,7 @@ private buildCustomerSpecificFieldsPayload(reservationIDOverride?: number): {
   const reservationID = Number(
     reservationIDOverride
       ?? this.getCurrentReservationID()
-      ?? this.advanceTableForm?.value?.reservationID
+      ?? this.advanceTableForm?.getRawValue()?.reservationID
   );
   if (!reservationID || Number.isNaN(reservationID)) {
     return null;
@@ -3160,6 +3185,22 @@ private isEmptyValue(value: unknown): boolean {
   return this.isEmptyId(value);
 }
 
+private isValidLatLong(value: unknown): boolean {
+  const text = String(value ?? '').trim().replace(/[()]/g, '');
+  if (!text) {
+    return false;
+  }
+  const parts = text.split(',').map((part) => part.trim());
+  if (parts.length < 2) {
+    return false;
+  }
+  const lat = Number(parts[0]);
+  const lng = Number(parts[1]);
+  return Number.isFinite(lat) && Number.isFinite(lng)
+    && lat >= -90 && lat <= 90
+    && lng >= -180 && lng <= 180;
+}
+
 private isGstForBillingUnset(value: unknown): boolean {
   const text = String(value ?? '').trim();
   return text === '' || text.toLowerCase() === '--select--';
@@ -3291,10 +3332,18 @@ public PickupDetails(): boolean {
     });
     return false;
   }
+  if (!this.isValidLatLong(form.pickupAddressLatLong)) {
+    Swal.fire({
+      title: '',
+      text: 'Pickup Geo Location is mandatory. Please select a valid address from the list so latitude and longitude are set.',
+      icon: 'warning',
+    });
+    return false;
+  }
   if (this.isEmptyText(form.pickupAddressDetails)) {
     Swal.fire({
       title: '',
-      text: 'Please Select Pickup Address Details.',
+      text: 'Pickup Address Details i.e Street/Flat No./Flight No./Train No. is mandatory.',
       icon: 'warning',
     });
     return false;
@@ -3409,12 +3458,13 @@ public validateCustomerSpecificFields(): boolean {
   {
     const csfPayload = this.buildCustomerSpecificFieldsPayload();
     this.applyCustomerSpecificFieldsToForm(csfPayload);
+    const raw = this.advanceTableForm.getRawValue();
     this.advanceTableForm.patchValue({isTimeNotConfirmed:this.isTNCSelected});
-    if(!this.advanceTableForm.value.dropOffPriorityOrder)
+    if(!raw.dropOffPriorityOrder)
         {
           this.advanceTableForm.patchValue({dropOffPriorityOrder:0});
         }
-    if(this.advanceTableForm.value.customerConfigurationInvoicingID !== 0)
+    if(raw.customerConfigurationInvoicingID !== 0)
     {
       this.advanceTableForm.patchValue({customerConfigurationInvoicingID:this.customerConfigurationInvoicingID});
     }
@@ -3426,7 +3476,10 @@ public validateCustomerSpecificFields(): boolean {
     this.reservationService.update(saveBody)  
     .pipe(
       switchMap((response) =>
-        this.persistCustomerSpecificFields(response?.reservationID).pipe(map(() => response))
+        this.persistCustomerSpecificFields(response?.reservationID).pipe(
+          map(() => response),
+          catchError((err) => this.testBookingMode ? of(response) : throwError(() => err))
+        )
       )
     )
     .subscribe(
@@ -3439,6 +3492,10 @@ public validateCustomerSpecificFields(): boolean {
         'center'
       );
       this.reservationNo=response.reservationID
+      if (this.testBookingMode) {
+        this.testBookingSaved.emit(this.reservationNo);
+        return;
+      }
       Swal.fire({
         title: '',
         text: 'Reservation - '+ this.reservationNo+' updated. You can add further details from booking details section.',
@@ -4749,9 +4806,506 @@ private patchPickupAddress(res: any) {
     }
   }
 
+  public saveFromTestPage(): void {
+    this.buttonDisabled = false;
+    this.confirmAdd();
+  }
+
+  public showTestBookingSavePopup(extraText?: string): void {
+    const suffix = extraText ? ' ' + extraText : '';
+    Swal.fire({
+      title: '',
+      text: 'Reservation - ' + this.reservationNo + ' updated.' + suffix,
+      icon: 'warning',
+      showConfirmButton: true,
+      showCancelButton: false,
+      showDenyButton: false,
+      confirmButtonText: 'OK',
+    });
+  }
+
+  public applyTestBookingDefaults(): Promise<string | null> {
+    if (!this.testBookingMode) {
+      return Promise.resolve('Test booking mode is not active.');
+    }
+    return this.runTestBookingDefaults();
+  }
+
+  private async runTestBookingDefaults(): Promise<string | null> {
+    const missing: string[] = [];
+    try {
+      await this.waitUntil(
+        () => !!(this.customerID || this.advanceTableForm?.getRawValue()?.customerID),
+        20000
+      );
+    } catch {
+      return 'Customer was not loaded on the booking form.';
+    }
+
+    const formStart = this.advanceTableForm.getRawValue();
+    const customerID = formStart.customerID || this.customerID;
+    const customerGroupID = formStart.customerGroupID || this.customerGroupID;
+    this.advanceTableForm.patchValue({
+      customerID,
+      customerGroupID,
+      ticketNumber: '111111111111',
+      tripType: 'Local',
+    });
+
+    try {
+      await this.waitUntil(() => this.toArray(this.CustomerTypeList).length > 0, 8000);
+    } catch {
+      try {
+        this.CustomerTypeList = this.toArray(
+          await this.toPromise(this._generalService.getCustomerType())
+        );
+      } catch { /* handled below */ }
+    }
+    const corporateType = this.findByTestName(this.CustomerTypeList, 'Corporate', ['customerType']);
+    if (!corporateType) {
+      missing.push('Customer Type "Corporate"');
+    } else {
+      this.customerTypeID = corporateType.customerTypeID;
+      this.customerType = corporateType.customerType;
+      this.advanceTableForm.controls['customerTypeID']?.setValue(
+        corporateType.customerTypeID,
+        { emitEvent: false }
+      );
+      this.advanceTableForm.controls['customerType']?.setValue(
+        corporateType.customerType,
+        { emitEvent: false }
+      );
+    }
+
+    const today = moment().startOf('day').toDate();
+    const pickupDateLabel = moment(today).format('DD/MM/YYYY');
+    const pickupTime = moment().seconds(0).milliseconds(0).toDate();
+    this.pickupDate = pickupDateLabel;
+    this.advanceTableForm.patchValue({
+      pickupDate: today,
+      pickupTime,
+    });
+    this.GetIntervalMin();
+
+    const contractDate = moment(today).format('YYYY-MM-DD');
+    let contractID: any = null;
+    try {
+      contractID = await this.toPromise(
+        this._generalService.GetContractIDBasedOnDate(customerID, contractDate)
+      );
+    } catch {
+      return 'Could not load a contract for JAJ Technologies on today\'s date.';
+    }
+    if (!contractID) {
+      this.noReservationMessage = true;
+      return 'There is no contract on this date for JAJ Technologies.';
+    }
+    if (Array.isArray(contractID)) {
+      contractID = contractID[0];
+    }
+    if (contractID && typeof contractID === 'object') {
+      contractID = contractID.contractID || contractID.customerContractID || contractID.id || null;
+    }
+    if (!contractID) {
+      this.noReservationMessage = true;
+      return 'There is no contract on this date for JAJ Technologies.';
+    }
+    this.contractID = contractID;
+    this.noReservationMessage = false;
+
+    this.InitPackageType();
+    try {
+      await this.waitUntil(() => this.toArray(this.PackageTypeList).length > 0, 20000);
+    } catch {
+      return 'Could not load duty types for the contract.';
+    }
+
+    const dutyType = this.findByTestName(this.PackageTypeList, 'Local Rate', ['packageType']);
+    if (!dutyType) {
+      missing.push('Duty Type "Local Rate"');
+    } else {
+      this.advanceTableForm.patchValue({
+        packageTypeID: dutyType.packageTypeID,
+        packageType: dutyType.packageType,
+      });
+      this.getPackageTypeID(dutyType.packageTypeID, dutyType.packageType);
+    }
+
+    try {
+      await this.waitUntil(() => this.toArray(this.PackageList).length > 0, 20000);
+    } catch {
+      if (!dutyType) {
+        return missing.join(', ') + ' was not found.';
+      }
+      return 'Could not load packages for the selected duty type.';
+    }
+
+    const pkg = this.findByTestName(this.PackageList, '4 Hrs 40 Kms', ['package'])
+      || this.findByTestName(this.PackageList, '4/40', ['package']);
+    if (!pkg) {
+      missing.push('Package "4 Hrs 40 Kms"');
+    } else {
+      this.advanceTableForm.patchValue({ package: pkg.package });
+      this.getPackageID(pkg.packageID);
+    }
+
+    const rateTypeForLists = this.resolveTestBookingRateType();
+    this.InitCity(rateTypeForLists);
+    this.InitDropOffCity(rateTypeForLists);
+    this.InitVehicle(rateTypeForLists);
+    this.InitPaymentMode();
+
+    try {
+      await this.waitUntil(() => this.toArray(this.VehicleList).length > 0, 20000);
+    } catch {
+      missing.push('Vehicle list');
+    }
+    const vehicle = this.findByTestName(this.VehicleList, 'Maruti Dzire', ['vehicle', 'vehicleName']);
+    if (!vehicle) {
+      missing.push('Vehicle "Maruti Dzire"');
+    } else {
+      this.advanceTableForm.patchValue({ vehicle: vehicle.vehicle });
+      this.getVehicleID(vehicle.vehicleID, vehicle.vehicleCategoryID);
+    }
+
+    try {
+      await this.waitUntil(() => this.toArray(this.CityList).length > 0, 20000);
+    } catch {
+      missing.push('Pickup city list');
+    }
+    if (this.toArray(this.CityList).length > 0) {
+      const city = this.toArray(this.CityList)[0];
+      this.advanceTableForm.patchValue({ pickupCity: city.geoPointName });
+      this.getCityID(city.geoPointID);
+    }
+
+    try {
+      await this.waitUntil(() => this.toArray(this.PaymentModeList).length > 0, 20000);
+    } catch {
+      missing.push('Payment mode list');
+    }
+    const payment = this.findByTestName(this.PaymentModeList, 'BTC', ['modeOfPayment']);
+    if (!payment) {
+      missing.push('Payment "BTC"');
+    } else {
+      this.advanceTableForm.patchValue({ modeOfPayment: payment.modeOfPayment });
+      this.getPaymentModeID(payment.modeOfPaymentID);
+    }
+
+    try {
+      await this.waitUntil(() => this.toArray(this.ServiceLocationList).length > 0, 15000);
+    } catch {
+      this.InitServiceLocation();
+      try {
+        await this.waitUntil(() => this.toArray(this.ServiceLocationList).length > 0, 15000);
+      } catch { /* reported below */ }
+    }
+    let headOffice = this.findByTestName(
+      this.ServiceLocationList,
+      'Head Office',
+      ['organizationalEntityName']
+    );
+    if (!headOffice) {
+      this.InitServiceLocation();
+      try {
+        await this.waitUntil(() =>
+          !!this.findByTestName(this.ServiceLocationList, 'Head Office', ['organizationalEntityName']),
+          15000
+        );
+      } catch { /* reported below */ }
+      headOffice = this.findByTestName(
+        this.ServiceLocationList,
+        'Head Office',
+        ['organizationalEntityName']
+      );
+    }
+    if (!headOffice) {
+      missing.push('Service Location "Head Office"');
+    } else {
+      this.advanceTableForm.patchValue({ serviceLocation: headOffice.organizationalEntityName });
+      this.getServiceLocationIDBasedOnCity(headOffice.organizationalEntityID);
+    }
+
+    await this.applyTestBookingBookerAndGuest(customerID, customerGroupID, missing);
+
+    const raw = this.advanceTableForm.getRawValue();
+    if (!raw.tripType) {
+      this.advanceTableForm.patchValue({ tripType: 'Local' });
+    }
+    if (!raw.reservationSource) {
+      this.advanceTableForm.patchValue({ reservationSourceID: 20, reservationSource: 'Email' });
+    }
+
+    this.locationTimeSet(pickupTime);
+    await this.applyTestBookingRefAndRequestNumbers(missing);
+    this.disableTestBookingFields();
+
+    if (missing.length) {
+      return 'Could not find: ' + missing.join(', ') + '. Save is blocked until these exist.';
+    }
+    return null;
+  }
+
+  private async applyTestBookingBookerAndGuest(customerID: any, customerGroupID: any, missing: string[]): Promise<void> {
+    try {
+      await this.waitUntil(() => this.toArray(this.BookerList).length > 0, 12000);
+    } catch { /* try prefix lookup */ }
+    let booker = this.findByTestName(this.BookerList, 'Mayank Mishra', ['customerPersonName']);
+    if (!booker && customerID) {
+      try {
+        const prefixList = this.toArray(await this.toPromise(
+          this._generalService.getCustomerPersonPrefix(customerID, 'Mayank')
+        ));
+        booker = this.findByTestName(prefixList, 'Mayank Mishra', ['customerPersonName']);
+        if (booker) {
+          this.BookerList = [...(this.BookerList || []), booker];
+          this.advanceTableForm.controls['booker'].setValidators([
+            Validators.required,
+            this.primaryBookerValidator(this.BookerList),
+          ]);
+          this.advanceTableForm.controls['booker'].updateValueAndValidity({ emitEvent: false });
+        }
+      } catch { /* keep missing */ }
+    }
+    if (!booker) {
+      missing.push('Booker "Mayank Mishra"');
+    } else {
+      const bookerLabel = [
+        booker.customerPersonName,
+        booker.gender,
+        booker.importance,
+        booker.phone,
+        booker.customerDepartment,
+        booker.customerDesignation,
+        booker.customerName,
+      ].join('-');
+      this.advanceTableForm.patchValue({ booker: bookerLabel });
+      this.getBookerID(booker.customerPersonID);
+    }
+
+    try {
+      await this.waitUntil(() => this.toArray(this.PassengerList).length > 0, 12000);
+    } catch { /* try prefix lookup */ }
+    let guest = this.findByTestName(this.PassengerList, 'Anand Awasthy', ['customerPersonName']);
+    if (!guest && customerID) {
+      try {
+        const prefixList = this.toArray(await this.toPromise(
+          this._generalService.getCustomerPersonPrefix(customerID, 'Anand')
+        ));
+        guest = this.findByTestName(prefixList, 'Anand Awasthy', ['customerPersonName']);
+        if (guest) {
+          this.PassengerList = [...(this.PassengerList || []), guest];
+          this.advanceTableForm.controls['passenger'].setValidators([
+            Validators.required,
+            this.PassengerValidator(this.PassengerList),
+          ]);
+          this.advanceTableForm.controls['passenger'].updateValueAndValidity({ emitEvent: false });
+        }
+      } catch { /* keep missing */ }
+    }
+    if (!guest) {
+      missing.push('Guest "Anand Awasthy"');
+    } else {
+      this.advanceTableForm.patchValue({ passenger: this.buildPassengerDisplay(guest) });
+      this.getPassengerID(guest.customerPersonID, guest.customerPersonName);
+    }
+  }
+
+  private async applyTestBookingRefAndRequestNumbers(missing: string[]): Promise<void> {
+    const value = '1234';
+    this.advanceTableForm.controls['referenceNumber']?.setValue(value, { emitEvent: false });
+
+    const customerID = this.advanceTableForm.getRawValue()?.customerID || this.customerID;
+    await this.ensureTestBookingCustomerFields(customerID);
+
+    const fields = this.toArray(this.CustomerExtraFieldList);
+    const refField = this.findTestBookingCsfField(fields, ['refno', 'referencenumber'], true);
+    const requestField = this.findTestBookingCsfField(fields, ['requestno', 'requestnumber'], false);
+
+    if (refField?.fieldName) {
+      this.setTestBookingCsfValue(refField.fieldName, value);
+    } else {
+      missing.push('Ref No');
+    }
+
+    if (requestField?.fieldName) {
+      this.setTestBookingCsfValue(requestField.fieldName, value);
+    } else {
+      missing.push('Request No');
+    }
+
+    this.getFieldValues();
+  }
+
+  private async ensureTestBookingCustomerFields(customerID: any): Promise<void> {
+    const controlsReady = () => {
+      const fields = this.toArray(this.CustomerExtraFieldList);
+      return fields.length > 0 && fields.every((field) =>
+        !!this.resolveCustomerFieldControlKey(field?.fieldName)
+      );
+    };
+
+    if (controlsReady()) {
+      return;
+    }
+
+    if (customerID) {
+      try {
+        const data = await this.toPromise(
+          this._generalService.GetCustomerRentNetFieldsBasedOnCustomerID(customerID)
+        );
+        this.applyTestBookingCustomerFieldControls(this.toArray(data));
+      } catch {
+        this.InitProjectCode();
+      }
+    } else {
+      this.InitProjectCode();
+    }
+
+    try {
+      await this.waitUntil(controlsReady, 15000);
+    } catch { /* missing fields reported by caller */ }
+  }
+
+  private applyTestBookingCustomerFieldControls(incomingFields: any[]): void {
+    incomingFields.forEach((ele) => {
+      const fieldName = String(ele?.fieldName ?? '').trim();
+      if (!fieldName) {
+        return;
+      }
+      const isMandatory = ele.isMandatory ? [Validators.required] : [];
+      const existingControl = this.advanceTableForm.controls[fieldName];
+      if (existingControl) {
+        existingControl.setValidators(isMandatory);
+        existingControl.updateValueAndValidity({ emitEvent: false });
+      } else {
+        this.advanceTableForm.addControl(fieldName, new FormControl('', isMandatory));
+      }
+      if (!this.arr1.includes(ele.customerReservationFieldID)) {
+        this.arr1.push(ele.customerReservationFieldID);
+      }
+      if (!this.arr2.includes(fieldName)) {
+        this.arr2.push(fieldName);
+      }
+    });
+    this.CustomerExtraFieldList = incomingFields;
+    this.advanceTableForm.patchValue({
+      customerReservationFieldID: this.arr1,
+      fieldName: this.arr2,
+    });
+  }
+
+  private findTestBookingCsfField(fields: any[], compactNeedles: string[], excludeRequest: boolean): any {
+    return fields.find((field) => {
+      const compact = String(field?.fieldName ?? '').toLowerCase().replace(/[^a-z0-9]/g, '');
+      if (!compact) {
+        return false;
+      }
+      if (excludeRequest && compact.includes('request')) {
+        return false;
+      }
+      return compactNeedles.some((needle) => compact === needle || compact.includes(needle));
+    }) || null;
+  }
+
+  private setTestBookingCsfValue(fieldName: string, value: string): void {
+    this.setCustomerFieldValue(fieldName, value);
+    const controlKey = this.resolveCustomerFieldControlKey(fieldName);
+    const control = controlKey ? this.advanceTableForm.controls[controlKey] : this.advanceTableForm.get(fieldName);
+    if (control) {
+      control.setValue(value, { emitEvent: false });
+      if (!control.disabled) {
+        control.disable({ emitEvent: false });
+      }
+    }
+  }
+
+  private resolveTestBookingRateType(): string {
+    const packageType = String(this.packageType || this.advanceTableForm?.getRawValue()?.packageType || '').trim();
+    if (/rate$/i.test(packageType)) {
+      return packageType;
+    }
+    return 'Local Rate';
+  }
+
+  private disableTestBookingFields(): void {
+    [
+      'customerCustomerGroup',
+      'customerType',
+      'packageType',
+      'package',
+      'passenger',
+      'booker',
+      'pickupDate',
+      'ticketNumber',
+      'vehicle',
+      'modeOfPayment',
+      'referenceNumber',
+    ].forEach((name) => {
+      const control = this.advanceTableForm?.get(name);
+      if (control && !control.disabled) {
+        control.disable({ emitEvent: false });
+      }
+    });
+  }
+
+  private findByTestName(list: any[], wanted: string, keys: string[], preferExact = false): any {
+    const rows = this.toArray(list);
+    if (!wanted || !rows.length) {
+      return null;
+    }
+    const wantedNorm = this.normalizeTestLabel(wanted);
+    const read = (row: any) => keys.map((key) => String(row?.[key] ?? '')).join(' ');
+    const exact = rows.find((row) => this.normalizeTestLabel(read(row)) === wantedNorm);
+    if (exact) {
+      return exact;
+    }
+    if (preferExact) {
+      const exactWord = rows.find((row) => this.normalizeTestLabel(read(row)) === wantedNorm);
+      if (exactWord) {
+        return exactWord;
+      }
+    }
+    return rows.find((row) => {
+      const actual = this.normalizeTestLabel(read(row));
+      return actual.includes(wantedNorm) || wantedNorm.includes(actual);
+    }) || null;
+  }
+
+  private normalizeTestLabel(value: any): string {
+    return String(value ?? '').trim().toLowerCase().replace(/\s+/g, '');
+  }
+
+  private toPromise<T>(obs: Observable<T>): Promise<T> {
+    return new Promise((resolve, reject) => {
+      obs.subscribe({
+        next: (value) => resolve(value),
+        error: (err) => reject(err),
+      });
+    });
+  }
+
+  private waitUntil(check: () => boolean, timeoutMs = 15000, intervalMs = 200): Promise<void> {
+    return new Promise((resolve, reject) => {
+      const started = Date.now();
+      const tick = () => {
+        if (check()) {
+          resolve();
+          return;
+        }
+        if (Date.now() - started > timeoutMs) {
+          reject(new Error('timeout'));
+          return;
+        }
+        setTimeout(tick, intervalMs);
+      };
+      tick();
+    });
+  }
+
   public confirmAdd(): void 
   {
-    if (this.buttonDisabled) {
+    if (this.buttonDisabled && !this.testBookingMode) {
       return;
     }
     // Sync CSF arrays from live controls before validation/save.
@@ -5170,7 +5724,7 @@ private canThisRoleCreateBackDateBooking(): boolean {
   private getCurrentReservationID(): any {
     return this.ReservationID
       || this.reservationID
-      || this.advanceTableForm?.value?.reservationID
+      || this.advanceTableForm?.getRawValue()?.reservationID
       || this.advanceTable?.reservationID;
   }
 
@@ -5596,53 +6150,73 @@ private isEditingAllowed(): boolean {
   //---------- Check Validation For Same Reservation ----------
   CheckValidationForSameReservation() 
   {
-    //alert(this.advanceTableForm.value.pickupTime)
-    const pickupDate = new Date(this.advanceTableForm.value.pickupDate);
-    const pickupTime = this.advanceTableForm.value.pickupTime ? this.datePipe.transform(this.advanceTableForm.value.pickupTime, 'HH:mm') : null;
-    //const pickupTime = (new Date(this.advanceTableForm.value.pickupTime)) || null;
-   // const pickupTime = (this.advanceTableForm.value.pickupTime) ? (new Date(this.advanceTableForm.value.pickupTime)) : null;
-    this.reservationService.CheckValidationForSameReservation(this.customerID, this.passengerID, this.cityID, pickupDate, pickupTime).subscribe(
-    data => 
-    {
-      if (data?.result === true) 
-      {
-        Swal.fire({
-          title: 'Confirmation',
-          html: `
-              <div style="text-align:left">
-                There is already a reservation with same details.<br>
-                <b>Customer : </b> ${this.customer}<br>
-                <b>Passenger : </b> ${this.passengerName}<br>
-                <b>City : </b> ${this.advanceTableForm.value.pickupCity}<br>
-                <b>PickUp Date : </b> ${this.datePipe.transform(pickupDate,'dd-MMM-yyyy')}<br>
-                <b>PickUp Time : </b> ${pickupTime}<br>
-                Do you really want to make this booking?
-              </div>
-            `,
-            icon: 'warning',
-            showCancelButton: true,
-            confirmButtonText: 'Yes',
-            cancelButtonText: 'No'
-          }).then((result) => {
-            if (result.isConfirmed) 
-            {
-              this.Put();
-            }
-          });
+    const raw = this.advanceTableForm.getRawValue();
+    const pickupDateSource = raw.pickupDate;
+    const pickupTimeSource = raw.pickupTime;
+    const pickupDate = pickupDateSource ? new Date(pickupDateSource) : null;
+    let pickupTime = null;
+    try {
+      pickupTime = pickupTimeSource ? this.datePipe.transform(pickupTimeSource, 'HH:mm') : null;
+    } catch {
+      pickupTime = null;
+    }
+    const customerID = this.customerID || raw.customerID;
+    const passengerID = this.passengerID || raw.primaryPassengerID;
+    const cityID = this.cityID || raw.pickupCityID;
+    const pickupCity = raw.pickupCity;
+    const customerLabel = this.customer || this.customerName || raw.customerCustomerGroup || '';
 
-      } 
-      else 
-      {
-        this.Put();
-      }
-    },
-    () => 
-    {
-      // The duplicate check is only advisory. Previously a failure here silently
-      // dropped the save, leaving the pre-created reservation without its
-      // stops/passenger rows. Proceed with the save instead.
+    if (!pickupDate || Number.isNaN(pickupDate.getTime()) || !customerID || !passengerID || !cityID) {
       this.Put();
-    });  
+      return;
+    }
+
+    try {
+      this.reservationService.CheckValidationForSameReservation(customerID, passengerID, cityID, pickupDate, pickupTime).subscribe(
+      data => 
+      {
+        if (data?.result === true) 
+        {
+          Swal.fire({
+            title: 'Confirmation',
+            html: `
+                <div style="text-align:left">
+                  There is already a reservation with same details.<br>
+                  <b>Customer : </b> ${customerLabel}<br>
+                  <b>Passenger : </b> ${this.passengerName}<br>
+                  <b>City : </b> ${pickupCity}<br>
+                  <b>PickUp Date : </b> ${this.datePipe.transform(pickupDate,'dd-MMM-yyyy')}<br>
+                  <b>PickUp Time : </b> ${pickupTime}<br>
+                  Do you really want to make this booking?
+                </div>
+              `,
+              icon: 'warning',
+              showCancelButton: true,
+              confirmButtonText: 'Yes',
+              cancelButtonText: 'No'
+            }).then((result) => {
+              if (result.isConfirmed) 
+              {
+                this.Put();
+              }
+            });
+
+        } 
+        else 
+        {
+          this.Put();
+        }
+      },
+      () => 
+      {
+        // The duplicate check is only advisory. Previously a failure here silently
+        // dropped the save, leaving the pre-created reservation without its
+        // stops/passenger rows. Proceed with the save instead.
+        this.Put();
+      });
+    } catch {
+      this.Put();
+    }
   }
 
 }

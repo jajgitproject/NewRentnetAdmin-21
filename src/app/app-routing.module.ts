@@ -3130,11 +3130,25 @@ const routes: Routes = [
       },
 
       {
-        path: 'invoiceExport',
+        path: 'Forensic',
         loadChildren: () =>
           import('./invoiceExport/invoiceExport.module').then(
             (m) => m.InvoiceExportModule
           )
+      },
+
+      {
+        path: 'testBooking',
+        loadChildren: () =>
+          import('./testBooking/testBooking.module').then(
+            (m) => m.TestBookingModule
+          )
+      },
+
+      {
+        path: 'invoiceExport',
+        redirectTo: 'Forensic',
+        pathMatch: 'full'
       },
 
       {

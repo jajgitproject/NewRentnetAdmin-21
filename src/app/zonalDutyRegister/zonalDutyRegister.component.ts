@@ -14,7 +14,7 @@ import { DateAdapter, MAT_DATE_LOCALE } from '@angular/material/core';
 import { MatMenu, MatMenuTrigger } from '@angular/material/menu';
 import { SelectionModel } from '@angular/cdk/collections';
 import { GeneralService } from '../general/general.service';
-import { extractExportErrorMessage, exportJobAcceptedSnackbarMessage, exportSearchButtonLabel, formatExportElapsedTime, IN_FLIGHT_EXPORT_MESSAGE, isExportJobCancelled, loadPersistedExportJobId, markExportDumpStarted, persistExportJobId } from '../general/export-job.helper';
+import { extractExportErrorMessage, exportJobAcceptedSnackbarMessage, exportSearchButtonLabel, formatExportElapsedTime, IN_FLIGHT_EXPORT_MESSAGE, isExportJobCancelled, isExportJobNotFoundError, loadPersistedExportJobId, markExportDumpStarted, persistExportJobId } from '../general/export-job.helper';
 import { StoredMisExportsComponent } from '../general/stored-mis-exports.component';
 import { Form, FormControl } from '@angular/forms';
 import { PackageTypeDropDown } from '../packageType/packageTypeDropDown.model';
@@ -663,22 +663,43 @@ export class ZonalDutyRegisterComponent implements OnInit, OnDestroy {
       return;
     }
 
+    this.exportJobId = jobId;
+    if (!this.exportJobStatus) {
+      this.exportJobStatus = { status: 'Pending', message: 'Checking export status...' };
+    }
+
     this.zonalDutyRegisterService.getExportJobStatus(jobId).subscribe(
       (status: any) => {
         if (!status) {
-          persistExportJobId(this.exportJobPageKey, null);
+          this.exportJobRunning = true;
+          this.startExportPolling(jobId);
           return;
         }
 
         this.exportJobId = jobId;
         this.exportJobStatus = status;
+        this.exportJobError = '';
         if (this.zonalDutyRegisterService.isExportJobRunning(status)) {
           this.exportJobRunning = true;
           this.exportJobStartedAt = markExportDumpStarted(this.exportJobStartedAt, this.exportJobStatus);
           this.startExportPolling(jobId);
+          return;
         }
+
+        this.exportJobRunning = false;
       },
-      () => persistExportJobId(this.exportJobPageKey, null)
+      (error) => {
+        if (isExportJobNotFoundError(error)) {
+          persistExportJobId(this.exportJobPageKey, null);
+          this.exportJobId = null;
+          this.exportJobStatus = null;
+          this.exportJobRunning = false;
+          return;
+        }
+
+        this.exportJobRunning = true;
+        this.startExportPolling(jobId);
+      }
     );
   }
 

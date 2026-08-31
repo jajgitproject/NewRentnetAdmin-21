@@ -26,6 +26,8 @@ import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatMenuModule } from '@angular/material/menu';
 import { SupplierService } from './supplier.service';
 import { SupplierRoutingModule } from './supplier-routing.module';
+import { MatProgressBarModule } from '@angular/material/progress-bar';
+import { StoredMisExportsComponent } from '../general/stored-mis-exports.component';
 import { MyUploadComponent } from '../myupload/myupload.component';
 import { MyUploadModule } from '../myupload/myupload.module';
 import { SupplierStatusComponent } from './dialogs/supplier-status/supplier-status.component';
@@ -69,6 +71,8 @@ import {MatTooltipModule} from '@angular/material/tooltip';
     MatToolbarModule,
     MatMenuModule,
     MatProgressSpinnerModule,
+    MatProgressBarModule,
+    StoredMisExportsComponent,
     MyUploadModule,
     //TwoDigitDecimaNumberDirective
   ],

@@ -46,6 +46,12 @@
               </div>
             </div>
 
+            <div class="forensic-queue-section">
+              <h3>MIS Export Queue</h3>
+              <p class="export-hint">Background CSV exports queued or running across all users.</p>
+              <app-mis-export-queue-panel></app-mis-export-queue-panel>
+            </div>
+
             <mat-progress-bar *ngIf="exporting" mode="indeterminate"></mat-progress-bar>
 
             <div class="row g-2">

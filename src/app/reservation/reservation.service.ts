@@ -1,6 +1,6 @@
 // @ts-nocheck
 import { Injectable } from '@angular/core';
-import { BehaviorSubject, Observable } from 'rxjs';
+import { BehaviorSubject, Observable, of } from 'rxjs';
 import { GoogleAddress, Reservation, SameReservationModel } from './reservation.model';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { DatePipe, formatDate } from '@angular/common';
@@ -488,16 +488,17 @@ export class ReservationService
 
   CheckValidationForSameReservation(CustomerID: number, PassengerID: number, CityID: number, PickupDate: string, PickupTime: string):Observable<any> 
   {
-    PickupDate = this.datePipe.transform(PickupDate, 'yyyy-MM-dd');
-    // if (PickupTime) 
-    // {
-    //   const PickupTime = this.datePipe.transform(PickupTime, 'HH:mm');
-    // } 
-    // else
-    // {
-    //   PickupTime = null;
-    // }
-    return this.httpClient.get<any>(this.API_URL + '/' + 'CheckValidationForSameReservation' + '/' + CustomerID + '/' + PassengerID + '/' + CityID + '/' + PickupDate + '/' + PickupTime);
+    let formattedDate: string | null = null;
+    try {
+      formattedDate = PickupDate ? this.datePipe.transform(PickupDate, 'yyyy-MM-dd') : null;
+    } catch {
+      formattedDate = null;
+    }
+    if (!formattedDate || CustomerID == null || CustomerID === '' || PassengerID == null || PassengerID === '' || CityID == null || CityID === '') {
+      return of({ result: false });
+    }
+    const formattedTime = PickupTime || '00:00';
+    return this.httpClient.get<any>(this.API_URL + '/' + 'CheckValidationForSameReservation' + '/' + CustomerID + '/' + PassengerID + '/' + CityID + '/' + formattedDate + '/' + formattedTime);
   }
 
 }

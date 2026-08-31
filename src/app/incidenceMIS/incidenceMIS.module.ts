@@ -16,6 +16,8 @@ import { MatSortModule } from '@angular/material/sort';
 import { MatAutocompleteModule } from '@angular/material/autocomplete';
 import { MatExpansionModule } from '@angular/material/expansion';
 import { MatTooltipModule } from '@angular/material/tooltip';
+import { MatProgressBarModule } from '@angular/material/progress-bar';
+import { StoredMisExportsComponent } from '../general/stored-mis-exports.component';
 import { IncidenceMISService } from './incidenceMIS.service';
 import { IncidenceMISRoutingModule } from './incidenceMIS-routing.module';
 import { MAT_DATE_LOCALE, MatNativeDateModule } from '@angular/material/core';
@@ -40,7 +42,9 @@ import { MAT_DATE_LOCALE, MatNativeDateModule } from '@angular/material/core';
     MatSortModule,
     MatAutocompleteModule,
     MatExpansionModule,
-    MatTooltipModule
+    MatTooltipModule,
+    MatProgressBarModule,
+    StoredMisExportsComponent
   ],
   providers: [
     IncidenceMISService,

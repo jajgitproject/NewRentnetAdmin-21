@@ -1,5 +1,5 @@
 // @ts-nocheck
-import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
+import { Component, ElementRef, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { CarMasterMISService } from './carMasterMIS.service';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { MatDialog } from '@angular/material/dialog';
@@ -25,6 +25,8 @@ import { VehicleCategory } from '../vehicleCategory/vehicleCategory.model';
 import { RegistrationDropDown } from '../interstateTaxEntry/registrationDropDown.model';
 import { OrganizationalEntityDropDown } from '../organizationalEntityMessage/organizationalEntityDropDown.model';
 import moment from 'moment';
+import { extractExportErrorMessage, exportJobAcceptedSnackbarMessage, exportSearchButtonLabel, formatExportElapsedTime, IN_FLIGHT_EXPORT_MESSAGE, isExportJobCancelled, isExportJobNotFoundError, loadPersistedExportJobId, markExportDumpStarted, persistExportJobId } from '../general/export-job.helper';
+import { StoredMisExportsComponent } from '../general/stored-mis-exports.component';
 interface MenuItem {
   label: string;
   action: (item: any) => void;
@@ -38,7 +40,16 @@ interface MenuItem {
   styleUrls: ['./carMasterMIS.component.sass'],
   providers: [{ provide: MAT_DATE_LOCALE, useValue: 'en-GB' }]
 })
-export class CarMasterMISComponent implements OnInit {
+export class CarMasterMISComponent implements OnInit, OnDestroy {
+  exportJobId: string | null = null;
+  exportJobStatus: any = null;
+  exportJobRunning = false;
+  exportJobDownloading = false;
+  exportJobError = '';
+  exportJobStartedAt: number | null = null;
+  private exportPollSub?: Subscription;
+  private readonly exportJobPageKey = 'carMasterMIS';
+  @ViewChild(StoredMisExportsComponent) storedExports?: StoredMisExportsComponent;
   displayedColumns = [
     'vehicleCategory',
        'vehicle',
@@ -165,6 +176,11 @@ export class CarMasterMISComponent implements OnInit {
     this.initVehicle();
     this.InitLocationHub();
     this.InitCompany();
+    this.resumeExportJobIfNeeded();
+  }
+
+  ngOnDestroy() {
+    this.stopExportPolling();
   }
   
   initVehicleCategories(){
@@ -265,6 +281,7 @@ export class CarMasterMISComponent implements OnInit {
       );
     }
   refresh() {
+    this.clearExportJob();
     this.vehicleCategory.setValue(''),
     this.vehicle.setValue(''),
     this.locationHub.setValue(''),
@@ -389,8 +406,16 @@ onBackPress(event)
     );
   }
 
-  downloadCsv() {
-    this.inventoryService.downloadCsv(
+  startExportJob() {
+    if (this.exportJobRunning) {
+      this.showNotification('snackbar-danger', IN_FLIGHT_EXPORT_MESSAGE, 'bottom', 'center');
+      return;
+    }
+
+    this.exportJobError = '';
+    this.exportJobRunning = true;
+
+    this.inventoryService.startExportJob(
       this.vehicleCategory.value || '',
       this.vehicle.value || '',
       this.locationHub.value || '',
@@ -400,21 +425,234 @@ onBackPress(event)
       this.company.value || '',
       this.SearchActivationStatus || ''
     ).subscribe(
-      (blob: Blob) => {
-        const url = window.URL.createObjectURL(blob);
-        const anchor = document.createElement('a');
-        anchor.href = url;
-        anchor.download = `CarMasterMIS_${moment().format('YYYYMMDD_HHmmss')}.csv`;
-        document.body.appendChild(anchor);
-        anchor.click();
-        document.body.removeChild(anchor);
-        window.URL.revokeObjectURL(url);
-        this.showNotification('snackbar-success', 'CSV downloaded successfully', 'top', 'center');
+      (startResult: any) => {
+        const jobId = startResult?.jobId ?? startResult?.JobId;
+        if (!jobId) {
+          this.exportJobRunning = false;
+          this.exportJobError = 'Could not start export job.';
+          this.showNotification('snackbar-danger', this.exportJobError, 'bottom', 'center');
+          return;
+        }
+
+        this.exportJobId = jobId;
+        persistExportJobId(this.exportJobPageKey, jobId);
+        this.exportJobStatus = {
+          jobId,
+          status: startResult?.status ?? startResult?.Status ?? 'Pending',
+          message: startResult?.message ?? startResult?.Message ?? 'Export queued'
+        };
+        this.exportJobStartedAt = markExportDumpStarted(this.exportJobStartedAt, this.exportJobStatus);
+        this.startExportPolling(jobId);
+        this.showNotification('snackbar-info', exportJobAcceptedSnackbarMessage(startResult), 'bottom', 'center');
       },
-      (error: HttpErrorResponse) => {
-        this.showNotification('snackbar-danger', 'Failed to download CSV', 'top', 'center');
+      async (error) => {
+        this.exportJobRunning = false;
+        this.exportJobError = await extractExportErrorMessage(error, 'Could not start export');
+        this.showNotification('snackbar-danger', this.exportJobError, 'bottom', 'center');
       }
     );
+  }
+
+  downloadExportCsv() {
+    if (!this.exportJobId || !this.inventoryService.isExportJobReady(this.exportJobStatus) || this.exportJobDownloading) {
+      return;
+    }
+
+    this.exportJobDownloading = true;
+    this.inventoryService.downloadExportJob(this.exportJobId).subscribe(
+      async (blob: Blob) => {
+        this.exportJobDownloading = false;
+        if (!blob || blob.size === 0) {
+          this.showNotification('snackbar-danger', 'Export file is empty or unavailable.', 'bottom', 'center');
+          return;
+        }
+
+        const contentType = (blob.type || '').toLowerCase();
+        if (contentType.includes('application/json') || contentType.includes('text/plain')) {
+          const text = await blob.text();
+          let message = 'Export file is not ready.';
+          try {
+            message = JSON.parse(text || '{}').message || message;
+          } catch {
+            if (text?.trim()) {
+              message = text;
+            }
+          }
+          this.showNotification('snackbar-danger', message, 'bottom', 'center');
+          return;
+        }
+
+        const fileName = this.exportJobStatus?.fileName ?? this.exportJobStatus?.FileName;
+        this.triggerExportDownload(blob, fileName);
+      },
+      async (error) => {
+        this.exportJobDownloading = false;
+        this.showNotification('snackbar-danger', await extractExportErrorMessage(error, 'Export download failed.'), 'bottom', 'center');
+      }
+    );
+  }
+
+  cancelExportJob() {
+    if (!this.exportJobId || !this.isExportJobInProgress()) {
+      return;
+    }
+
+    this.inventoryService.cancelExportJob(this.exportJobId).subscribe(
+      (status: any) => {
+        this.exportJobStatus = status;
+        this.exportJobRunning = false;
+        this.stopExportPolling();
+        this.showNotification('snackbar-info', status?.message ?? status?.Message ?? 'Export cancelled.', 'bottom', 'center');
+      },
+      async (error) => {
+        this.showNotification('snackbar-danger', await extractExportErrorMessage(error, 'Could not cancel export.'), 'bottom', 'center');
+      }
+    );
+  }
+
+  canDownloadExport(): boolean {
+    return !!this.exportJobId && this.inventoryService.isExportJobReady(this.exportJobStatus) && !this.exportJobDownloading;
+  }
+
+  isExportJobInProgress(): boolean {
+    return this.exportJobRunning || this.inventoryService.isExportJobRunning(this.exportJobStatus);
+  }
+
+  getExportJobStatusLabel(): string {
+    return this.exportJobStatus?.status ?? this.exportJobStatus?.Status ?? '';
+  }
+
+  getExportJobMessage(): string {
+    return this.exportJobStatus?.message ?? this.exportJobStatus?.Message ?? this.exportJobError ?? '';
+  }
+
+  getExportRowsExported(): number {
+    return this.exportJobStatus?.rowsExported ?? this.exportJobStatus?.RowsExported ?? 0;
+  }
+
+  getExportElapsedTime(): string {
+    return formatExportElapsedTime(this.exportJobStartedAt, this.exportJobStatus);
+  }
+
+  getExportButtonLabel(): string {
+    const label = exportSearchButtonLabel(this.exportJobStatus, this.isExportJobInProgress());
+    return label === 'Search' ? 'Export CSV' : label;
+  }
+
+  private startExportPolling(jobId: string) {
+    this.stopExportPolling();
+    this.exportPollSub = this.inventoryService.pollExportJob(jobId).subscribe(
+      (status: any) => {
+        this.exportJobStatus = status;
+        this.exportJobStartedAt = markExportDumpStarted(this.exportJobStartedAt, status);
+        const current = String(status?.status ?? status?.Status ?? '').toLowerCase();
+
+        if (current === 'failed') {
+          this.exportJobRunning = false;
+          this.exportJobError = status?.message ?? status?.Message ?? 'Export failed.';
+          this.showNotification('snackbar-danger', this.exportJobError, 'bottom', 'center');
+          this.stopExportPolling();
+          persistExportJobId(this.exportJobPageKey, null);
+          return;
+        }
+
+        if (isExportJobCancelled(status)) {
+          this.exportJobRunning = false;
+          this.showNotification('snackbar-info', status?.message ?? status?.Message ?? 'Export cancelled.', 'bottom', 'center');
+          this.stopExportPolling();
+          persistExportJobId(this.exportJobPageKey, null);
+          return;
+        }
+
+        if (current === 'completed') {
+          this.exportJobRunning = false;
+          this.showNotification('snackbar-success', status?.message ?? 'Export ready. Click Download CSV.', 'bottom', 'center');
+          this.stopExportPolling();
+          this.storedExports?.refresh();
+        }
+      },
+      async (error) => {
+        this.exportJobRunning = false;
+        this.exportJobError = await extractExportErrorMessage(error, 'Export failed.');
+        this.showNotification('snackbar-danger', this.exportJobError, 'bottom', 'center');
+        this.stopExportPolling();
+      }
+    );
+  }
+
+  private stopExportPolling() {
+    if (this.exportPollSub) {
+      this.exportPollSub.unsubscribe();
+      this.exportPollSub = undefined;
+    }
+  }
+
+  private resumeExportJobIfNeeded() {
+    const jobId = loadPersistedExportJobId(this.exportJobPageKey);
+    if (!jobId) {
+      return;
+    }
+
+    this.exportJobId = jobId;
+    if (!this.exportJobStatus) {
+      this.exportJobStatus = { status: 'Pending', message: 'Checking export status...' };
+    }
+
+    this.inventoryService.getExportJobStatus(jobId).subscribe(
+      (status: any) => {
+        if (!status) {
+          this.exportJobRunning = true;
+          this.startExportPolling(jobId);
+          return;
+        }
+
+        this.exportJobId = jobId;
+        this.exportJobStatus = status;
+        this.exportJobError = '';
+        if (this.inventoryService.isExportJobRunning(status)) {
+          this.exportJobRunning = true;
+          this.exportJobStartedAt = markExportDumpStarted(this.exportJobStartedAt, this.exportJobStatus);
+          this.startExportPolling(jobId);
+          return;
+        }
+
+        this.exportJobRunning = false;
+      },
+      (error) => {
+        if (isExportJobNotFoundError(error)) {
+          persistExportJobId(this.exportJobPageKey, null);
+          this.exportJobId = null;
+          this.exportJobStatus = null;
+          this.exportJobRunning = false;
+          return;
+        }
+
+        this.exportJobRunning = true;
+        this.startExportPolling(jobId);
+      }
+    );
+  }
+
+  private clearExportJob() {
+    this.stopExportPolling();
+    this.exportJobId = null;
+    this.exportJobStatus = null;
+    this.exportJobRunning = false;
+    this.exportJobDownloading = false;
+    this.exportJobError = '';
+    this.exportJobStartedAt = null;
+  }
+
+  private triggerExportDownload(blob: Blob, preferredFileName?: string) {
+    const url = window.URL.createObjectURL(blob);
+    const anchor = document.createElement('a');
+    anchor.href = url;
+    anchor.download = preferredFileName || `CarMasterMIS_${moment().format('YYYYMMDD_HHmmss')}.csv`;
+    document.body.appendChild(anchor);
+    anchor.click();
+    document.body.removeChild(anchor);
+    window.URL.revokeObjectURL(url);
+    this.showNotification('snackbar-success', 'CSV downloaded successfully', 'top', 'center');
   }
 
   onStatusChange(selectedStatus: string) {

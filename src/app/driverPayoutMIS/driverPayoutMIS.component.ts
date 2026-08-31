@@ -9,7 +9,7 @@ import moment from 'moment';
 import { GeneralService } from '../general/general.service';
 import { SearchCriteria } from './driverPayoutMIS.model';
 import { DriverPayoutMISService } from './driverPayoutMIS.service';
-import { extractExportErrorMessage, exportJobAcceptedSnackbarMessage, exportSearchButtonLabel, formatExportElapsedTime, IN_FLIGHT_EXPORT_MESSAGE, isExportJobCancelled, loadPersistedExportJobId, markExportDumpStarted, persistExportJobId } from '../general/export-job.helper';
+import { extractExportErrorMessage, exportJobAcceptedSnackbarMessage, exportSearchButtonLabel, formatExportElapsedTime, IN_FLIGHT_EXPORT_MESSAGE, isExportJobCancelled, isExportJobNotFoundError, loadPersistedExportJobId, markExportDumpStarted, persistExportJobId } from '../general/export-job.helper';
 import { StoredMisExportsComponent } from '../general/stored-mis-exports.component';
 import { CustomerDropDown } from '../customer/customerDropDown.model';
 import { DriverDropDown } from '../customerPersonDriverRestriction/driverDropDown.model';
@@ -308,22 +308,43 @@ export class DriverPayoutMISComponent implements OnInit, OnDestroy {
       return;
     }
 
+    this.exportJobId = jobId;
+    if (!this.exportJobStatus) {
+      this.exportJobStatus = { status: 'Pending', message: 'Checking export status...' };
+    }
+
     this.driverPayoutMISService.getExportJobStatus(jobId).subscribe(
       (status: any) => {
         if (!status) {
-          persistExportJobId(this.exportJobPageKey, null);
+          this.exportJobRunning = true;
+          this.startExportPolling(jobId);
           return;
         }
 
         this.exportJobId = jobId;
         this.exportJobStatus = status;
+        this.exportJobError = '';
         if (this.driverPayoutMISService.isExportJobRunning(status)) {
           this.exportJobRunning = true;
           this.exportJobStartedAt = markExportDumpStarted(this.exportJobStartedAt, this.exportJobStatus);
           this.startExportPolling(jobId);
+          return;
         }
+
+        this.exportJobRunning = false;
       },
-      () => persistExportJobId(this.exportJobPageKey, null)
+      (error) => {
+        if (isExportJobNotFoundError(error)) {
+          persistExportJobId(this.exportJobPageKey, null);
+          this.exportJobId = null;
+          this.exportJobStatus = null;
+          this.exportJobRunning = false;
+          return;
+        }
+
+        this.exportJobRunning = true;
+        this.startExportPolling(jobId);
+      }
     );
   }
 

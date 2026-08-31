@@ -60,23 +60,64 @@ export function pollExportJob(httpClient: HttpClient, statusUrl: string): Observ
   );
 }
 
+function exportJobStorageKey(pageKey: string): string {
+  return `rentnet.misExportJob.${pageKey}`;
+}
+
+function readStorageItem(storage: Storage | undefined, key: string): string | null {
+  if (!storage) {
+    return null;
+  }
+
+  try {
+    return storage.getItem(key);
+  } catch {
+    return null;
+  }
+}
+
+function writeStorageItem(storage: Storage | undefined, key: string, value: string | null) {
+  if (!storage) {
+    return;
+  }
+
+  try {
+    if (!value) {
+      storage.removeItem(key);
+      return;
+    }
+
+    storage.setItem(key, value);
+  } catch {
+  }
+}
+
 export function persistExportJobId(pageKey: string, jobId: string | null) {
-  if (!pageKey || typeof sessionStorage === 'undefined') {
+  if (!pageKey) {
     return;
   }
-  const key = `rentnet.misExportJob.${pageKey}`;
-  if (!jobId) {
-    sessionStorage.removeItem(key);
-    return;
-  }
-  sessionStorage.setItem(key, jobId);
+
+  const key = exportJobStorageKey(pageKey);
+  writeStorageItem(typeof localStorage === 'undefined' ? undefined : localStorage, key, jobId);
+  writeStorageItem(typeof sessionStorage === 'undefined' ? undefined : sessionStorage, key, jobId);
 }
 
 export function loadPersistedExportJobId(pageKey: string): string | null {
-  if (!pageKey || typeof sessionStorage === 'undefined') {
+  if (!pageKey) {
     return null;
   }
-  return sessionStorage.getItem(`rentnet.misExportJob.${pageKey}`);
+
+  const key = exportJobStorageKey(pageKey);
+  return readStorageItem(typeof localStorage === 'undefined' ? undefined : localStorage, key)
+    || readStorageItem(typeof sessionStorage === 'undefined' ? undefined : sessionStorage, key);
+}
+
+export function isExportJobNotFoundError(error: any): boolean {
+  const text =
+    typeof error === 'string'
+      ? error
+      : error?.message || error?.error || error?.Message || '';
+  return String(text).toLowerCase().includes('export job not found');
 }
 
 export function isExportJobCancelled(status: any): boolean {

@@ -194,13 +194,32 @@
                                             <mat-icon class="col-white">refresh</mat-icon>
                                         </button>
                                         &nbsp;
-                                        <button mat-raised-button color="accent" (click)="downloadCsv()">
-                                            Download CSV
-                                        </button>
+                                        <button mat-raised-button color="accent" (click)="startExportJob()" [disabled]="isExportJobInProgress()">{{ getExportButtonLabel() }}</button>
                                         &nbsp;
                                     </div>
                                 </div>
                             </div>
+
+                            <div class="duty-register-export-job-panel" *ngIf="exportJobId || exportJobError">
+                                <div class="panel-title">Driver Master CSV Export</div>
+                                <div class="export-job-meta" *ngIf="exportJobId">
+                                    <span>Job: {{ exportJobId }}</span>
+                                    <span class="export-job-stat">Status: {{ getExportJobStatusLabel() || '—' }}</span>
+                                    <span class="export-job-stat" *ngIf="isExportJobInProgress() || getExportRowsExported()">Rows: {{ getExportRowsExported() }}</span>
+                                    <span class="export-job-stat">Elapsed: {{ getExportElapsedTime() }}</span>
+                                </div>
+                                <mat-progress-bar *ngIf="isExportJobInProgress()" mode="indeterminate"></mat-progress-bar>
+                                <p class="export-job-message" *ngIf="getExportJobMessage()">{{ getExportJobMessage() }}</p>
+                                <div class="export-job-actions">
+                                    <button mat-raised-button color="accent" type="button" (click)="downloadExportCsv()" [disabled]="!canDownloadExport()">
+                                        {{ exportJobDownloading ? 'Downloading...' : 'Download CSV' }}
+                                    </button>
+                                    <button mat-stroked-button type="button" (click)="cancelExportJob()" [disabled]="!isExportJobInProgress()">
+                                        Cancel
+                                    </button>
+                                </div>
+                            </div>
+                            <app-stored-mis-exports></app-stored-mis-exports>
 
                             <!-- <label>
                                 <input type="checkbox" [(ngModel)]="isChecked">

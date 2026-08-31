@@ -1361,12 +1361,23 @@ export const ROUTES: RouteInfo[] = [
         isAccess: false
       },
       {
-        path: 'invoiceExport',
+        path: 'Forensic',
         title: 'Forensic',
-        pageKey: 'Invoice Export',
-        moduleName: 'invoiceExport',
-        alternateAccessPageKeys: ['invoiceExport', 'Forensic'],
+        pageKey: 'Forensic',
+        moduleName: 'Forensic',
+        alternateAccessPageKeys: ['invoiceExport', 'Invoice Export', 'Forensic'],
         icon: 'fas fa-file-excel',
+        class: '',
+        groupTitle: false,
+        submenu: [],
+        isAccess: false
+      },
+      {
+        path: 'testBooking',
+        title: 'Test Booking',
+        pageKey: 'testBooking',
+        moduleName: 'testBooking',
+        icon: 'fas fa-clipboard-check',
         class: '',
         groupTitle: false,
         submenu: [],

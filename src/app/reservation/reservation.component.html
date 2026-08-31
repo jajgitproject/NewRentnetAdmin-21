@@ -1302,25 +1302,39 @@
                            
                             <br>
                             
-                            <button type="button" mat-raised-button style="background-color: #bcb4db"  *ngIf="this.action !== 'edit' && canCreateReservation"
+                            <button type="button" mat-raised-button style="background-color: #bcb4db"  *ngIf="!testBookingMode && this.action !== 'edit' && canCreateReservation"
                                 (click)="confirmAdd()">Save</button>
 
-                            <button type="button" mat-raised-button style="background-color: #bcb4db"  *ngIf="this.action === 'edit' && canCreateReservation"
+                            <button type="button" mat-raised-button style="background-color: #bcb4db"  *ngIf="!testBookingMode && this.action === 'edit' && canCreateReservation"
                                 (click)="confirmAdd()" [disabled]="buttonDisabled || isAllotmentLockedForEdit()">Update</button>
-                            
+
+                            <ng-container *ngIf="testBookingMode">
+                            <button type="button" mat-raised-button style="background-color: #bcb4db"
+                                [disabled]="testBookingBusy || !testBookingCanSave"
+                                (click)="saveFromTestPage()">Save</button>
+                            <button type="button" mat-raised-button style="background-color: #bcb4db"
+                                [disabled]="testBookingBusy"
+                                (click)="testBookingClearImei.emit()">Clear IMEI</button>
                             <button type="button" mat-raised-button style="background-color: #f29f99"
+                                [disabled]="testBookingBusy"
+                                (click)="testBookingClear.emit()">Clear</button>
+                            <mat-progress-spinner *ngIf="testBookingBusy" mode="indeterminate" diameter="28" strokeWidth="3"
+                                style="display: inline-block; vertical-align: middle; margin-left: 12px;"></mat-progress-spinner>
+                            </ng-container>
+                            
+                            <button type="button" mat-raised-button style="background-color: #f29f99" *ngIf="!testBookingMode"
                                 (click)="navigateToNewForms()">Add Details</button>
 
-                            <button type="button" mat-raised-button style="background-color: #f29f99"
+                            <button type="button" mat-raised-button style="background-color: #f29f99" *ngIf="!testBookingMode"
                                 (click)="openSpecialInstrucation()">Special Instruction</button>
 
-                            <button type="button" mat-raised-button style="background-color: #f29f99"
+                            <button type="button" mat-raised-button style="background-color: #f29f99" *ngIf="!testBookingMode"
                                 (click)="InternalNote()">Internal Note</button>
 
-                            <button type="button" mat-raised-button style="background-color: #f29f99"
+                            <button type="button" mat-raised-button style="background-color: #f29f99" *ngIf="!testBookingMode"
                                 (click)="settledRates()">Settled Rate</button>
 
-                            <button type="button" mat-raised-button style="background-color: #f29f99"
+                            <button type="button" mat-raised-button style="background-color: #f29f99" *ngIf="!testBookingMode"
                                 (click)="emailInfo()"> Email format</button>
 
                         </div>

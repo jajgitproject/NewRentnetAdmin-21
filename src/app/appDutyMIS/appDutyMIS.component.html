@@ -100,15 +100,6 @@
         <button mat-icon-button type="button" matTooltip="Refresh" (click)="loadData()">
           <mat-icon>refresh</mat-icon>
         </button>
-        <button
-          mat-stroked-button
-          type="button"
-          class="br-columns-btn"
-          (click)="downloadCsv()"
-          [disabled]="csvExporting">
-          <mat-icon>download</mat-icon>
-          {{ csvExporting ? 'Exporting...' : 'Download CSV' }}
-        </button>
       </div>
 
       <div class="br-empty-state" *ngIf="!dataSource?.length">

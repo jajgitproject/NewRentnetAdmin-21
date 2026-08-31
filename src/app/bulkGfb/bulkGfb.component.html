@@ -3,9 +3,9 @@
     <div class="block-header">
       <h2>Bulk GFB</h2>
       <p class="text-muted page-subtitle">
-        Set Good for Billing on duties that are Verified, tagged Ready for Bulk GFB, and not yet GFB.
-        Preview, uncheck duties to skip, then Set GFB. Same calculate and GFB write as Closing.
-        Does not invoice.
+        Set Good for Billing on duties that are Verified and not yet GFB (Ready for Bulk GFB tag required by default).
+        Use Preview Without Ready for GFB Tag to include verified duties without that tag. Preview, uncheck duties to skip, then Set GFB.
+        Same calculate and GFB write as Closing. Does not invoice.
       </p>
     </div>
 
@@ -78,6 +78,14 @@
                     <input matInput type="number" min="1" [max]="maxDutiesLimit" [(ngModel)]="maxDuties" />
                     <mat-hint>Batch size {{ batchSize }} — {{ estimatedBatchCount || 1 }} batch{{ (estimatedBatchCount || 1) === 1 ? '' : 'es' }}</mat-hint>
                   </mat-form-field>
+                </div>
+                <div class="col-xl-4 col-lg-6 col-md-8 col-sm-12 search-panel__ready-option">
+                  <mat-checkbox
+                    color="primary"
+                    [(ngModel)]="previewWithoutReadyTag"
+                    [disabled]="readyTagOptionLocked || previewLoading || jobRunning">
+                    Preview Without Ready for GFB Tag
+                  </mat-checkbox>
                 </div>
               </div>
 

@@ -17,6 +17,7 @@ export interface BulkGfbPreviewQuery {
   customerId?: number;
   runStatus?: string;
   excludeDutySlipIds?: string;
+  requireReadyForBulkGfb?: boolean;
 }
 
 @Injectable()
@@ -54,15 +55,24 @@ export class BulkGfbService {
     if (query.excludeDutySlipIds) {
       params = params.set('excludeDutySlipIds', query.excludeDutySlipIds);
     }
+    if (query.requireReadyForBulkGfb === false) {
+      params = params.set('requireReadyForBulkGfb', 'false');
+    }
     return this.httpClient.get<BulkGfbPreviewResult>(`${this.apiUrl}/preview`, { params });
   }
 
-  startJob(maxDuties: number, performedBy: number, dutySlipIds: number[]): Observable<BulkGfbStartResult> {
+  startJob(
+    maxDuties: number,
+    performedBy: number,
+    dutySlipIds: number[],
+    requireReadyForBulkGfb = true
+  ): Observable<BulkGfbStartResult> {
     return this.httpClient.post<BulkGfbStartResult>(`${this.apiUrl}/start`, {
       mode: 'Create',
       maxDuties,
       performedBy,
       dutySlipIds,
+      requireReadyForBulkGfb,
     });
   }
 

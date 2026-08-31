@@ -20,6 +20,10 @@ export class StoredMisExportsService {
     return this.httpClient.get(`${this.baseUrl}/stored`, this.userParams());
   }
 
+  listQueued(): Observable<any> {
+    return this.httpClient.get(`${this.baseUrl}/queued`);
+  }
+
   download(jobId: string): Observable<Blob> {
     return this.httpClient.get(`${this.baseUrl}/Download/${jobId}`, { responseType: 'blob' });
   }

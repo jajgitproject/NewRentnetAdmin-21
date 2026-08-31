@@ -25,6 +25,12 @@
     margin-top: 0.5rem;
   }
 
+  .search-panel__ready-option {
+    display: flex;
+    align-items: center;
+    min-height: 56px;
+  }
+
   .results-panel {
     margin-bottom: 1rem;
   }

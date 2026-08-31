@@ -1,46 +1,52 @@
-:host ::ng-deep .materialTableHeader > .row
-  display: flex
-  width: 100%
-  margin: 0
-  align-items: center
+:host ::ng-deep .materialTableHeader.inventory-table-header
+  height: auto !important
+  min-height: 70px
+  min-width: 0 !important
+  align-items: stretch !important
+  padding: 10px 20px
+
+  > .row.inventory-header-row
+    display: block !important
+    flex-wrap: wrap !important
+    align-items: stretch !important
+    width: 100% !important
+    height: auto !important
+    margin: 0 !important
+
+    > .inventory-toolbar
+      display: flex !important
+      align-items: center !important
+      justify-content: space-between !important
+      width: 100% !important
+      flex: 1 1 100% !important
+      float: none !important
+      padding: 0 !important
+      gap: 12px
+      flex-wrap: wrap
 
 .inventory-toolbar
   display: flex
   align-items: center
   justify-content: space-between
   width: 100%
-  padding: 8px 12px
-  box-sizing: border-box
-  gap: 16px
-
-.inventory-toolbar-main
-  display: flex
-  align-items: center
   gap: 12px
-  flex: 1 1 auto
-  min-width: 0
   flex-wrap: wrap
 
 .inventory-toolbar-filters
   display: flex
   align-items: center
   gap: 8px
-  flex: 1 1 420px
+  flex: 1 1 480px
   min-width: 0
+  flex-wrap: wrap
 
 .inventory-toolbar-actions
-  display: flex
-  align-items: center
-  gap: 8px
-  flex: 0 0 auto
-
-.inventory-toolbar-end
   display: flex
   align-items: center
   justify-content: flex-end
   gap: 8px
   flex: 0 0 auto
-  margin-left: auto
+  flex-wrap: wrap
 
 .inventory-control
   height: 40px
@@ -54,9 +60,9 @@
   flex: 0 0 180px
 
 .inventory-filter-input
-  flex: 1 1 280px
-  min-width: 200px
-  max-width: 560px
+  flex: 1 1 240px
+  min-width: 180px
+  max-width: 420px
   padding-left: 10px
 
 .inventory-status
@@ -78,21 +84,75 @@
   &:hover
     background: #f5f5f5
 
+.inventory-export-section
+  padding: 0 20px 8px
+  clear: both
+
+.inventory-content-area
+  padding: 8px 0 0
+  clear: both
+
 .scrollable-table-container
   width: 100%
   overflow: auto
   height: 70vh
 
+.duty-register-export-job-panel
+  margin: 0 0 12px
+  padding: 16px
+  border: 1px solid #e0e0e0
+  border-radius: 4px
+  background: #fafafa
+  width: 100%
+  box-sizing: border-box
+  clear: both
+
+  .panel-title
+    font-size: 15px
+    font-weight: 600
+    margin-bottom: 12px
+
+  .export-job-meta
+    display: flex
+    flex-wrap: wrap
+    gap: 12px 20px
+    margin-bottom: 12px
+    font-size: 13px
+
+    span
+      white-space: nowrap
+
+    .export-job-stat
+      color: #d32f2f
+      font-weight: 600
+
+  .export-job-message
+    margin: 12px 0
+    font-size: 13px
+    color: #444
+    word-break: break-word
+
+  .export-job-actions
+    display: flex
+    flex-wrap: wrap
+    gap: 8px
+    margin-top: 12px
+
+:host ::ng-deep .inventory-export-section app-stored-mis-exports .stored-mis-exports
+  margin: 0 0 12px
+  width: 100%
+  box-sizing: border-box
+
 @media (max-width: 992px)
   .inventory-toolbar
-    flex-wrap: wrap
+    flex-direction: column
+    align-items: stretch
 
-  .inventory-toolbar-main
-    flex: 1 1 100%
-
-  .inventory-toolbar-end
-    flex: 1 1 100%
-    justify-content: flex-end
+  .inventory-toolbar-filters,
+  .inventory-toolbar-actions
+    width: 100%
+    justify-content: flex-start
 
   .inventory-filter-input
     max-width: none
+    flex: 1 1 100%

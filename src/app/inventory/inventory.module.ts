@@ -26,6 +26,8 @@ import { MatMenuModule } from '@angular/material/menu';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { InventoryService } from './inventory.service';
 import { InventoryRoutingModule } from './inventory-routing.module';
+import { MatProgressBarModule } from '@angular/material/progress-bar';
+import { StoredMisExportsComponent } from '../general/stored-mis-exports.component';
 import { MyUploadComponent } from '../myupload/myupload.component';
 import { MyUploadModule } from '../myupload/myupload.module';
 import { GooglePlaceModule } from '@compat/google-places-shim';
@@ -63,6 +65,8 @@ import { InventoryDocumentService } from '../inventoryDocument/inventoryDocument
     MatMenuModule,
     MatTooltipModule,
     MatProgressSpinnerModule,
+    MatProgressBarModule,
+    StoredMisExportsComponent,
     MyUploadModule,
     //TwoDigitDecimaNumberDirective
   ],

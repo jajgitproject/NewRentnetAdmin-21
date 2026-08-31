@@ -1,5 +1,5 @@
 // @ts-nocheck
-import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
+import { Component, ElementRef, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { MatDialog } from '@angular/material/dialog';
 import { MatPaginator } from '@angular/material/paginator';
@@ -24,6 +24,8 @@ import { SupplierTypeDropDownModel } from '../supplierType/supplierType.model';
 import { DriverDropDown } from '../customerPersonDriverRestriction/driverDropDown.model';
 import { OrganizationalEntityDropDown } from '../organizationalEntityMessage/organizationalEntityDropDown.model';
 import moment from 'moment';
+import { extractExportErrorMessage, exportJobAcceptedSnackbarMessage, exportSearchButtonLabel, formatExportElapsedTime, IN_FLIGHT_EXPORT_MESSAGE, isExportJobCancelled, isExportJobNotFoundError, loadPersistedExportJobId, markExportDumpStarted, persistExportJobId } from '../general/export-job.helper';
+import { StoredMisExportsComponent } from '../general/stored-mis-exports.component';
 
 interface MenuItem {
   label: string;
@@ -39,7 +41,16 @@ interface MenuItem {
   styleUrls: ['./drivermis.component.sass'],
   providers: [{ provide: MAT_DATE_LOCALE, useValue: 'en-GB' }]
 })
-export class DriverMISComponent implements OnInit {
+export class DriverMISComponent implements OnInit, OnDestroy {
+  exportJobId: string | null = null;
+  exportJobStatus: any = null;
+  exportJobRunning = false;
+  exportJobDownloading = false;
+  exportJobError = '';
+  exportJobStartedAt: number | null = null;
+  private exportPollSub?: Subscription;
+  private readonly exportJobPageKey = 'driverMIS';
+  @ViewChild(StoredMisExportsComponent) storedExports?: StoredMisExportsComponent;
   displayedColumns = [
     'driverName',
     'registrationNumber',
@@ -201,9 +212,17 @@ filteredDriverOptions:Observable<DriverDropDown[]>;
      this.initDriver();
      this.InitLocationHub();
     this.SubscribeUpdateService();
+    this.resumeExportJobIfNeeded();
+  }
+
+  ngOnDestroy() {
+    this.stopExportPolling();
+    if (this.subscriptionName) {
+      this.subscriptionName.unsubscribe();
+    }
   }
   refresh() {
-    // this.driver.setvalue ('');
+    this.clearExportJob();
     this.driver.setValue('');
     this.locationHub.setValue('');
     this.searchdateofjoiningfrom ='';
@@ -565,40 +584,271 @@ private _filterOrganizationalsEntity(value: string): any {
     );
   }
 
-  downloadCsv() {
+  private buildExportFilterParams() {
     let dateFrom = this.searchdateofjoiningfrom;
     let dateTo = this.searchdateofjoiningto;
-
-    if (dateFrom !== "") {
+    if (dateFrom !== '') {
       dateFrom = moment(dateFrom).format('MMM DD yyyy');
     }
-    if (dateTo !== "") {
+    if (dateTo !== '') {
       dateTo = moment(dateTo).format('MMM DD yyyy');
     }
+    return {
+      driverName: this.driver.value || '',
+      location: this.locationHub.value || '',
+      dateFrom: dateFrom || '',
+      dateTo: dateTo || '',
+      supplierType: this.supplierType.value || '',
+      activationStatus: this.SearchActivationStatus
+    };
+  }
 
-    this.drivermisService.downloadCsv(
-      this.driver.value || '',
-      this.locationHub.value || '',
-      dateFrom || '',
-      dateTo || '',
-      this.supplierType.value || '',
-      this.SearchActivationStatus
+  startExportJob() {
+    if (this.exportJobRunning) {
+      this.showNotification('snackbar-danger', IN_FLIGHT_EXPORT_MESSAGE, 'bottom', 'center');
+      return;
+    }
+
+    this.exportJobError = '';
+    const filters = this.buildExportFilterParams();
+    this.exportJobRunning = true;
+
+    this.drivermisService.startExportJob(
+      filters.driverName,
+      filters.location,
+      filters.dateFrom,
+      filters.dateTo,
+      filters.supplierType,
+      filters.activationStatus
     ).subscribe(
-      (blob: Blob) => {
-        const fileUrl = window.URL.createObjectURL(blob);
-        const anchor = document.createElement('a');
-        anchor.href = fileUrl;
-        anchor.download = `DriverMIS_${moment().format('YYYYMMDD_HHmmss')}.csv`;
-        document.body.appendChild(anchor);
-        anchor.click();
-        document.body.removeChild(anchor);
-        window.URL.revokeObjectURL(fileUrl);
-        this.showNotification('snackbar-success', 'CSV downloaded successfully', 'top', 'center');
+      (startResult: any) => {
+        const jobId = startResult?.jobId ?? startResult?.JobId;
+        if (!jobId) {
+          this.exportJobRunning = false;
+          this.exportJobError = 'Could not start export job.';
+          this.showNotification('snackbar-danger', this.exportJobError, 'bottom', 'center');
+          return;
+        }
+
+        this.exportJobId = jobId;
+        persistExportJobId(this.exportJobPageKey, jobId);
+        this.exportJobStatus = {
+          jobId,
+          status: startResult?.status ?? startResult?.Status ?? 'Pending',
+          message: startResult?.message ?? startResult?.Message ?? 'Export queued'
+        };
+        this.exportJobStartedAt = markExportDumpStarted(this.exportJobStartedAt, this.exportJobStatus);
+        this.startExportPolling(jobId);
+        this.showNotification('snackbar-info', exportJobAcceptedSnackbarMessage(startResult), 'bottom', 'center');
       },
-      (error: HttpErrorResponse) => {
-        this.showNotification('snackbar-danger', 'Failed to download CSV', 'top', 'center');
+      async (error) => {
+        this.exportJobRunning = false;
+        this.exportJobError = await extractExportErrorMessage(error, 'Could not start export');
+        this.showNotification('snackbar-danger', this.exportJobError, 'bottom', 'center');
       }
     );
+  }
+
+  downloadExportCsv() {
+    if (!this.exportJobId || !this.drivermisService.isExportJobReady(this.exportJobStatus) || this.exportJobDownloading) {
+      return;
+    }
+
+    this.exportJobDownloading = true;
+    this.drivermisService.downloadExportJob(this.exportJobId).subscribe(
+      async (blob: Blob) => {
+        this.exportJobDownloading = false;
+        if (!blob || blob.size === 0) {
+          this.showNotification('snackbar-danger', 'Export file is empty or unavailable.', 'bottom', 'center');
+          return;
+        }
+
+        const contentType = (blob.type || '').toLowerCase();
+        if (contentType.includes('application/json') || contentType.includes('text/plain')) {
+          const text = await blob.text();
+          let message = 'Export file is not ready.';
+          try {
+            message = JSON.parse(text || '{}').message || message;
+          } catch {
+            if (text?.trim()) {
+              message = text;
+            }
+          }
+          this.showNotification('snackbar-danger', message, 'bottom', 'center');
+          return;
+        }
+
+        const fileName = this.exportJobStatus?.fileName ?? this.exportJobStatus?.FileName;
+        this.triggerExportDownload(blob, fileName);
+      },
+      async (error) => {
+        this.exportJobDownloading = false;
+        this.showNotification('snackbar-danger', await extractExportErrorMessage(error, 'Export download failed.'), 'bottom', 'center');
+      }
+    );
+  }
+
+  cancelExportJob() {
+    if (!this.exportJobId || !this.isExportJobInProgress()) {
+      return;
+    }
+
+    this.drivermisService.cancelExportJob(this.exportJobId).subscribe(
+      (status: any) => {
+        this.exportJobStatus = status;
+        this.exportJobRunning = false;
+        this.stopExportPolling();
+        this.showNotification('snackbar-info', status?.message ?? status?.Message ?? 'Export cancelled.', 'bottom', 'center');
+      },
+      async (error) => {
+        this.showNotification('snackbar-danger', await extractExportErrorMessage(error, 'Could not cancel export.'), 'bottom', 'center');
+      }
+    );
+  }
+
+  canDownloadExport(): boolean {
+    return !!this.exportJobId && this.drivermisService.isExportJobReady(this.exportJobStatus) && !this.exportJobDownloading;
+  }
+
+  isExportJobInProgress(): boolean {
+    return this.exportJobRunning || this.drivermisService.isExportJobRunning(this.exportJobStatus);
+  }
+
+  getExportJobStatusLabel(): string {
+    return this.exportJobStatus?.status ?? this.exportJobStatus?.Status ?? '';
+  }
+
+  getExportJobMessage(): string {
+    return this.exportJobStatus?.message ?? this.exportJobStatus?.Message ?? this.exportJobError ?? '';
+  }
+
+  getExportRowsExported(): number {
+    return this.exportJobStatus?.rowsExported ?? this.exportJobStatus?.RowsExported ?? 0;
+  }
+
+  getExportElapsedTime(): string {
+    return formatExportElapsedTime(this.exportJobStartedAt, this.exportJobStatus);
+  }
+
+  getExportButtonLabel(): string {
+    const label = exportSearchButtonLabel(this.exportJobStatus, this.isExportJobInProgress());
+    return label === 'Search' ? 'Export CSV' : label;
+  }
+
+  private startExportPolling(jobId: string) {
+    this.stopExportPolling();
+    this.exportPollSub = this.drivermisService.pollExportJob(jobId).subscribe(
+      (status: any) => {
+        this.exportJobStatus = status;
+        this.exportJobStartedAt = markExportDumpStarted(this.exportJobStartedAt, status);
+        const current = String(status?.status ?? status?.Status ?? '').toLowerCase();
+
+        if (current === 'failed') {
+          this.exportJobRunning = false;
+          this.exportJobError = status?.message ?? status?.Message ?? 'Export failed.';
+          this.showNotification('snackbar-danger', this.exportJobError, 'bottom', 'center');
+          this.stopExportPolling();
+          persistExportJobId(this.exportJobPageKey, null);
+          return;
+        }
+
+        if (isExportJobCancelled(status)) {
+          this.exportJobRunning = false;
+          this.showNotification('snackbar-info', status?.message ?? status?.Message ?? 'Export cancelled.', 'bottom', 'center');
+          this.stopExportPolling();
+          persistExportJobId(this.exportJobPageKey, null);
+          return;
+        }
+
+        if (current === 'completed') {
+          this.exportJobRunning = false;
+          this.showNotification('snackbar-success', status?.message ?? 'Export ready. Click Download CSV.', 'bottom', 'center');
+          this.stopExportPolling();
+          this.storedExports?.refresh();
+        }
+      },
+      async (error) => {
+        this.exportJobRunning = false;
+        this.exportJobError = await extractExportErrorMessage(error, 'Export failed.');
+        this.showNotification('snackbar-danger', this.exportJobError, 'bottom', 'center');
+        this.stopExportPolling();
+      }
+    );
+  }
+
+  private stopExportPolling() {
+    if (this.exportPollSub) {
+      this.exportPollSub.unsubscribe();
+      this.exportPollSub = undefined;
+    }
+  }
+
+  private resumeExportJobIfNeeded() {
+    const jobId = loadPersistedExportJobId(this.exportJobPageKey);
+    if (!jobId) {
+      return;
+    }
+
+    this.exportJobId = jobId;
+    if (!this.exportJobStatus) {
+      this.exportJobStatus = { status: 'Pending', message: 'Checking export status...' };
+    }
+
+    this.drivermisService.getExportJobStatus(jobId).subscribe(
+      (status: any) => {
+        if (!status) {
+          this.exportJobRunning = true;
+          this.startExportPolling(jobId);
+          return;
+        }
+
+        this.exportJobId = jobId;
+        this.exportJobStatus = status;
+        this.exportJobError = '';
+        if (this.drivermisService.isExportJobRunning(status)) {
+          this.exportJobRunning = true;
+          this.exportJobStartedAt = markExportDumpStarted(this.exportJobStartedAt, this.exportJobStatus);
+          this.startExportPolling(jobId);
+          return;
+        }
+
+        this.exportJobRunning = false;
+      },
+      (error) => {
+        if (isExportJobNotFoundError(error)) {
+          persistExportJobId(this.exportJobPageKey, null);
+          this.exportJobId = null;
+          this.exportJobStatus = null;
+          this.exportJobRunning = false;
+          return;
+        }
+
+        this.exportJobRunning = true;
+        this.startExportPolling(jobId);
+      }
+    );
+  }
+
+  private clearExportJob() {
+    this.stopExportPolling();
+    this.exportJobId = null;
+    this.exportJobStatus = null;
+    this.exportJobRunning = false;
+    this.exportJobDownloading = false;
+    this.exportJobError = '';
+    this.exportJobStartedAt = null;
+  }
+
+  private triggerExportDownload(blob: Blob, preferredFileName?: string) {
+    const fileUrl = window.URL.createObjectURL(blob);
+    const anchor = document.createElement('a');
+    anchor.href = fileUrl;
+    anchor.download = preferredFileName || `DriverMIS_${moment().format('YYYYMMDD_HHmmss')}.csv`;
+    document.body.appendChild(anchor);
+    anchor.click();
+    document.body.removeChild(anchor);
+    window.URL.revokeObjectURL(fileUrl);
+    this.showNotification('snackbar-success', 'CSV downloaded', 'bottom', 'center');
   }
  
 }

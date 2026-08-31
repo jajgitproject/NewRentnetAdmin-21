@@ -17,6 +17,13 @@
       </div>
     </div>
 
+    <div class="alert alert-warning" style="margin-bottom: 16px;">
+      <strong>Tally MIS 1.0 is deprecated.</strong>
+      CSV export has moved to background jobs on
+      <a routerLink="/tallyMis20">Tally MIS 2.0</a>.
+      Please use Tally MIS 2.0 for new exports.
+    </div>
+
     <mat-accordion>
       <mat-expansion-panel [expanded]="true">
         <mat-expansion-panel-header>
@@ -79,10 +86,6 @@
         <div class="row">
           <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
             <button mat-raised-button color="primary" (click)="searchData()">Search</button>
-            &nbsp;
-            <button mat-raised-button color="accent" (click)="downloadCsv()" [disabled]="csvExporting">
-              {{ csvExporting ? 'Downloading...' : 'Download as CSV' }}
-            </button>
             &nbsp;
             <button mat-raised-button color="warn" (click)="refresh()">Reset</button>
           </div>

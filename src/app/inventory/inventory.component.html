@@ -24,20 +24,16 @@
                 <div class="card">
                     <div class="body">
                         <div class="responsive_table">
-                            <div class="materialTableHeader">
-                                <div class="row">
-                                    <div class="modal fade" id="exampleModalCenter" tabindex="-1" role="dialog">
-                                        <div class="modal-dialog modal-dialog-centered">
-                                            <div class="modal-content">
-                                                <div class="modal-header">
-                                                    <h5 class="modal-title" id="exampleModalLongTitle">Inventory
-                                                    </h5>
-                                                    <button type="button" class="close" data-dismiss="modal"
-                                                        aria-label="Close">
-                                                        <span aria-hidden="true">&times;</span>
-                                                    </button>
-                                                </div>
-                                                <div class="modal-body">
+                            <div class="modal fade" id="exampleModalCenter" tabindex="-1" role="dialog">
+                                <div class="modal-dialog modal-dialog-centered">
+                                    <div class="modal-content">
+                                        <div class="modal-header">
+                                            <h5 class="modal-title" id="exampleModalLongTitle">Inventory</h5>
+                                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                                <span aria-hidden="true">&times;</span>
+                                            </button>
+                                        </div>
+                                        <div class="modal-body">
                                                     <!-- <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
                                                     <mat-label>Vehicle Category</mat-label>
                                                     <mat-select [formControl]="vehicleCategory"
@@ -146,79 +142,67 @@
                                                     </mat-form-field>
 
                                                 </div>
-                                                <div class="modal-footer">
-                                                    <button mat-raised-button color="primary" (click)="SearchData()"
-                                                        data-dismiss="modal">Search</button>
-
-                                                </div>
-                                            </div>
+                                        <div class="modal-footer">
+                                            <button mat-raised-button color="primary" (click)="SearchData()"
+                                                data-dismiss="modal">Search</button>
                                         </div>
                                     </div>
-                                    <!-- <div style="width: 70%; float:left;padding-top: 15px;padding-left: 22px;">
-                                    <div style="float:left" *ngIf="registrationNumber.value"><b>Registration Number</b> : {{registrationNumber.value}},</div>
-                                    <div *ngIf="vehicleCategory.value" style="float: left;"><b>Vehicle Category</b> : {{vehicleCategory.value}},</div>
-                                    <div *ngIf="vehicle.value" style="float: left;"><b>Vehicle</b> : {{vehicle.value}},</div>
-                                    <div *ngIf="supplier.value" style="float: left;"><b>Supplier</b> : {{supplier.value}},</div>
-                                    <div *ngIf="SearchActivationStatus" style="float: left;"><b>Status</b> : {{SearchActivationStatus}}</div>
-                                </div> -->
+                                </div>
+                            </div>
 
+                            <div class="materialTableHeader inventory-table-header">
+                                <div class="row inventory-header-row">
                                     <div class="inventory-toolbar">
-                                        <div class="inventory-toolbar-main">
-                                            <div class="inventory-toolbar-filters">
-                                                <select class="form-control inventory-control inventory-filter-type"
-                                                    name="selectedFilter"
-                                                    [ngModel]="selectedFilter"
-                                                    (ngModelChange)="onSelectedFilterChange($event)"
-                                                    [ngModelOptions]="{standalone: true}">
-                                                    <option value="registrationNumber">Registration Number</option>
-                                                    <option value="vehicle">Vehicle</option>
-                                                    <option value="supplier">Supplier Name</option>
-                                                    <option value="locationHub">Location</option>
-                                                </select>
+                                        <div class="inventory-toolbar-filters">
+                                            <select class="form-control inventory-control inventory-filter-type"
+                                                name="selectedFilter"
+                                                [ngModel]="selectedFilter"
+                                                (ngModelChange)="onSelectedFilterChange($event)"
+                                                [ngModelOptions]="{standalone: true}">
+                                                <option value="registrationNumber">Registration Number</option>
+                                                <option value="vehicle">Vehicle</option>
+                                                <option value="supplier">Supplier Name</option>
+                                                <option value="locationHub">Location</option>
+                                            </select>
 
-                                                <input type="text"
-                                                    class="form-control inventory-control inventory-filter-input"
-                                                    placeholder="Filter"
-                                                    id="inputGroup"
-                                                    name="searchTerm"
-                                                    [ngModel]="searchTerm"
-                                                    (ngModelChange)="onSearchTermChange($event)"
-                                                    [ngModelOptions]="{standalone: true}"
-                                                    (keyup.enter)="Filter()" />
+                                            <input type="text"
+                                                class="form-control inventory-control inventory-filter-input"
+                                                placeholder="Filter"
+                                                id="inputGroup"
+                                                name="searchTerm"
+                                                [ngModel]="searchTerm"
+                                                (ngModelChange)="onSearchTermChange($event)"
+                                                [ngModelOptions]="{standalone: true}"
+                                                (keyup.enter)="Filter()" />
 
-                                                <select class="form-control inventory-control inventory-status"
-                                                    name="SearchActivationStatus"
-                                                    [ngModel]="SearchActivationStatus"
-                                                    (ngModelChange)="onActivationStatusChange($event)"
-                                                    [ngModelOptions]="{standalone: true}">
-                                                    <option value="All">--All--</option>
-                                                    <option value="Active">Active</option>
-                                                    <option value="Maintenance">Maintenance</option>
-                                                    <option value="OnHold">On Hold</option>
-                                                    <option value="Deactive">Deactive</option>
-                                                </select>
+                                            <select class="form-control inventory-control inventory-status"
+                                                name="SearchActivationStatus"
+                                                [ngModel]="SearchActivationStatus"
+                                                (ngModelChange)="onActivationStatusChange($event)"
+                                                [ngModelOptions]="{standalone: true}">
+                                                <option value="All">--All--</option>
+                                                <option value="Active">Active</option>
+                                                <option value="Maintenance">Maintenance</option>
+                                                <option value="OnHold">On Hold</option>
+                                                <option value="Deactive">Deactive</option>
+                                            </select>
 
-                                                <button type="button"
-                                                    class="btn btn-light inventory-control inventory-search-btn"
-                                                    (click)="Filter()"
-                                                    title="Search">
-                                                    <i class="fas fa-search"></i>
-                                                </button>
-                                            </div>
-
-                                            <div class="inventory-toolbar-actions">
-                                                <button mat-raised-button color="primary" data-dismiss="modal"
-                                                    data-toggle="modal" data-backdrop="false"
-                                                    data-target="#exampleModalCenter">
-                                                    Search
-                                                </button>
-                                                <button mat-raised-button color="accent" (click)="downloadCsv()">
-                                                    Download CSV
-                                                </button>
-                                            </div>
+                                            <button type="button"
+                                                class="btn btn-light inventory-control inventory-search-btn"
+                                                (click)="Filter()"
+                                                title="Search">
+                                                <i class="fas fa-search"></i>
+                                            </button>
                                         </div>
 
-                                        <div class="inventory-toolbar-end">
+                                        <div class="inventory-toolbar-actions">
+                                            <button mat-raised-button color="primary" data-dismiss="modal"
+                                                data-toggle="modal" data-backdrop="false"
+                                                data-target="#exampleModalCenter">
+                                                Search
+                                            </button>
+                                            <button mat-raised-button color="accent" (click)="startExportJob()"
+                                                [disabled]="isExportJobInProgress()">{{ getExportButtonLabel() }}</button>
                                             <button mat-mini-fab color="primary" (click)="addNew()" title="Add">
                                                 <mat-icon class="col-white">add</mat-icon>
                                             </button>
@@ -230,16 +214,47 @@
                                 </div>
                             </div>
 
-                            <!-- <label>
-                                <input type="checkbox" [(ngModel)]="isChecked">
-                                Check me!
-                            </label> -->
-                            <!-- <p>Checkbox is {{ isChecked ? 'checked' : 'unchecked' }}</p> -->
+                            <div class="inventory-export-section">
+                                <div class="duty-register-export-job-panel" *ngIf="exportJobId || exportJobError">
+                                    <div class="panel-title">Inventory Master CSV Export</div>
+                                    <div class="export-job-meta" *ngIf="exportJobId">
+                                        <span>Job: {{ exportJobId }}</span>
+                                        <span class="export-job-stat">Status: {{ getExportJobStatusLabel() || '—' }}</span>
+                                        <span class="export-job-stat" *ngIf="isExportJobInProgress() || getExportRowsExported()">Rows: {{ getExportRowsExported() }}</span>
+                                        <span class="export-job-stat">Elapsed: {{ getExportElapsedTime() }}</span>
+                                    </div>
+                                    <mat-progress-bar *ngIf="isExportJobInProgress()" mode="indeterminate"></mat-progress-bar>
+                                    <p class="export-job-message" *ngIf="getExportJobMessage()">{{ getExportJobMessage() }}</p>
+                                    <div class="export-job-actions">
+                                        <button mat-raised-button color="accent" type="button" (click)="downloadExportCsv()"
+                                            [disabled]="!canDownloadExport()">
+                                            {{ exportJobDownloading ? 'Downloading...' : 'Download CSV' }}
+                                        </button>
+                                        <button mat-stroked-button type="button" (click)="cancelExportJob()"
+                                            [disabled]="!isExportJobInProgress()">
+                                            Cancel
+                                        </button>
+                                    </div>
+                                </div>
+                                <app-stored-mis-exports></app-stored-mis-exports>
+                            </div>
+
+                            <div class="inventory-content-area">
+                            <p *ngIf="!hasSearched; then initialPrompt else searchResultsBlock">
+                                This is not rendered
+                            </p>
+
+                            <ng-template #initialPrompt>
+                                <div class="alert alert-primary" style="background-color:#E8E8E8; text-align: center;">
+                                    Use Search to load inventory</div>
+                            </ng-template>
+
+                            <ng-template #searchResultsBlock>
                             <div class="alert alert-primary" style="background-color:#E8E8E8; text-align: center;"
                                 *ngIf="!dataSource?.length">
                                 No Records Found</div>
 
-                            <div class="scrollable-table-container">
+                            <div class="scrollable-table-container" *ngIf="dataSource?.length">
                                     <mat-table #table [dataSource]="dataSource || []" matSort
                                         class="mat-cell floating-header-table" (matSortChange)="SortingData($event)">
 
@@ -406,6 +421,8 @@
 
                                     </div>
                                 </div>
+                            </ng-template>
+                            </div>
 
                         </div>
                     </div>

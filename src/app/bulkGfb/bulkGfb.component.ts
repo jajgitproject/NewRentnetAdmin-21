@@ -35,6 +35,8 @@ export class BulkGfbComponent implements OnInit, OnDestroy {
   searchReservationIds = '';
   searchPickupDate: Date | null = null;
   searchRunStatus = 'NotRun';
+  previewWithoutReadyTag = false;
+  readyTagOptionLocked = false;
   customerCtrl = new FormControl('');
   customerList: CustomerDropDown[] = [];
   filteredCustomerOptions: Observable<CustomerDropDown[]> = of([]);
@@ -181,10 +183,13 @@ export class BulkGfbComponent implements OnInit, OnDestroy {
     this.selectedCustomerID = 0;
     this.preview = null;
     this.selectedDutySlipIds = [];
+    this.previewWithoutReadyTag = false;
+    this.readyTagOptionLocked = false;
     this.resetBatchSession();
   }
 
   previewCandidates(): void {
+    this.readyTagOptionLocked = true;
     this.resetBatchSession();
     this.previewFromSearch(this.maxDuties, true);
   }
@@ -375,6 +380,7 @@ export class BulkGfbComponent implements OnInit, OnDestroy {
     if (status === 'failed' || status === 'cancelled') {
       this.runAllBatches = false;
       this.jobRunning = false;
+      this.readyTagOptionLocked = false;
       this.snackBar.open('Batch failed or cancelled. Remaining batches were not started.', '', { duration: 4000 });
       return;
     }
@@ -419,7 +425,12 @@ export class BulkGfbComponent implements OnInit, OnDestroy {
   private startBatch(selectedIds: number[]): void {
     this.jobRunning = true;
     this.sessionExcludeIds = this.mergeIds(this.sessionExcludeIds, selectedIds);
-    this.service.startJob(this.batchSize, this.generalService.getUserID(), selectedIds).subscribe({
+    this.service.startJob(
+      this.batchSize,
+      this.generalService.getUserID(),
+      selectedIds,
+      this.getRequireReadyForBulkGfb()
+    ).subscribe({
       next: (started) => {
         this.activeRunId = started.bulkGfbRunId ?? (started as any).BulkGfbRunId;
         this.snackBar.open(`Batch ${this.currentBatch} of ${this.totalBatches} started (job ${this.activeRunId}).`, '', {
@@ -453,6 +464,7 @@ export class BulkGfbComponent implements OnInit, OnDestroy {
         customerId: this.selectedCustomerID,
         runStatus: this.searchRunStatus || 'NotRun',
         excludeDutySlipIds: this.sessionExcludeIds.join(','),
+        requireReadyForBulkGfb: this.getRequireReadyForBulkGfb(),
       })
       .subscribe({
         next: (result) => {
@@ -504,6 +516,7 @@ export class BulkGfbComponent implements OnInit, OnDestroy {
   private finishBatchSession(): void {
     this.runAllBatches = false;
     this.jobRunning = false;
+    this.readyTagOptionLocked = false;
     this.preview = null;
     this.selectedDutySlipIds = [];
     this.sessionExcludeIds = [];
@@ -616,6 +629,10 @@ export class BulkGfbComponent implements OnInit, OnDestroy {
   private isActiveStatus(status: string): boolean {
     const value = (status || '').toLowerCase();
     return value === 'pending' || value === 'processing';
+  }
+
+  private getRequireReadyForBulkGfb(): boolean {
+    return !this.previewWithoutReadyTag;
   }
 
   private readError(err: any, fallback: string): string {

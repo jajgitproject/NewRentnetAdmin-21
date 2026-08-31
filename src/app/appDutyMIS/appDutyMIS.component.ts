@@ -12,7 +12,7 @@ import { DateAdapter, MAT_DATE_LOCALE } from '@angular/material/core';
 import { MatMenu, MatMenuTrigger } from '@angular/material/menu';
 import { SelectionModel } from '@angular/cdk/collections';
 import { GeneralService } from '../general/general.service';
-import { extractExportErrorMessage, exportJobAcceptedSnackbarMessage, exportSearchButtonLabel, formatExportElapsedTime, IN_FLIGHT_EXPORT_MESSAGE, isExportJobCancelled, loadPersistedExportJobId, markExportDumpStarted, persistExportJobId } from '../general/export-job.helper';
+import { extractExportErrorMessage, exportJobAcceptedSnackbarMessage, exportSearchButtonLabel, formatExportElapsedTime, IN_FLIGHT_EXPORT_MESSAGE, isExportJobCancelled, isExportJobNotFoundError, loadPersistedExportJobId, markExportDumpStarted, persistExportJobId } from '../general/export-job.helper';
 import { StoredMisExportsComponent } from '../general/stored-mis-exports.component';
 import { MyUploadComponent } from '../myupload/myupload.component';
 // import { FormDialogComponent } from '../appDutyMIS/dialogs/form-dialog/form-dialog.component';
@@ -159,7 +159,6 @@ export class AppDutyMISComponent implements OnInit, OnDestroy {
 
   searchFromDate: Date | null = null;
   searchToDate: Date | null = null;
-  csvExporting = false;
   filtersCollapsed = false;
   exportJobId: string | null = null;
   exportJobStatus: any = null;
@@ -755,22 +754,43 @@ shouldShowDeleteButton(item: any): boolean {
       return;
     }
 
+    this.exportJobId = jobId;
+    if (!this.exportJobStatus) {
+      this.exportJobStatus = { status: 'Pending', message: 'Checking export status...' };
+    }
+
     this.appDutyMISService.getExportJobStatus(jobId).subscribe(
       (status: any) => {
         if (!status) {
-          persistExportJobId(this.exportJobPageKey, null);
+          this.exportJobRunning = true;
+          this.startExportPolling(jobId);
           return;
         }
 
         this.exportJobId = jobId;
         this.exportJobStatus = status;
+        this.exportJobError = '';
         if (this.appDutyMISService.isExportJobRunning(status)) {
           this.exportJobRunning = true;
           this.exportJobStartedAt = markExportDumpStarted(this.exportJobStartedAt, this.exportJobStatus);
           this.startExportPolling(jobId);
+          return;
         }
+
+        this.exportJobRunning = false;
       },
-      () => persistExportJobId(this.exportJobPageKey, null)
+      (error) => {
+        if (isExportJobNotFoundError(error)) {
+          persistExportJobId(this.exportJobPageKey, null);
+          this.exportJobId = null;
+          this.exportJobStatus = null;
+          this.exportJobRunning = false;
+          return;
+        }
+
+        this.exportJobRunning = true;
+        this.startExportPolling(jobId);
+      }
     );
   }
 
@@ -905,126 +925,6 @@ shouldShowDeleteButton(item: any): boolean {
         }
       }
     );
-  }
-
-  downloadCsv() {
-    if (this.csvExporting) {
-      return;
-    }
-
-    if (!this.dataSource?.length) {
-      this.showNotification('snackbar-danger', 'No data to export. Run a search first.', 'bottom', 'center');
-      return;
-    }
-
-    // Always export all rows matching filters (not just the current page of 50).
-    this.exportFullCsv();
-  }
-
-  private exportFullCsv() {
-    const fromDate = this.formatDateParam(this.searchFromDate);
-    const toDate = this.formatDateParam(this.searchToDate);
-
-    this.csvExporting = true;
-    this.showNotification('snackbar-info', 'Preparing CSV export of all matching records...', 'bottom', 'center');
-
-    this.appDutyMISService.downloadCsv(
-      fromDate,
-      toDate,
-      this.dispatch_Location.value || '',
-      this.SearchActivationStatus
-    ).subscribe(
-      async (blob: Blob) => {
-        this.csvExporting = false;
-        if (!blob || blob.size === 0) {
-          this.showNotification('snackbar-danger', 'No data available for CSV export', 'bottom', 'center');
-          return;
-        }
-
-        if (blob.type?.includes('json') || blob.type?.includes('text/plain')) {
-          const message = await this.readBlobText(blob);
-          this.showNotification('snackbar-danger', message || 'Failed to download CSV', 'bottom', 'center');
-          return;
-        }
-
-        this.triggerBlobDownload(blob, 'xls');
-        this.showNotification('snackbar-success', 'Excel downloaded successfully (all matching records)', 'bottom', 'center');
-      },
-      async (err) => {
-        this.csvExporting = false;
-        let message = 'Failed to download full export for all matching records.';
-        try {
-          if (err?.error instanceof Blob) {
-            const text = await this.readBlobText(err.error);
-            try {
-              const json = JSON.parse(text);
-              message = json.Message || json.message || message;
-            } catch {
-              if (text?.trim()) {
-                message = text.trim();
-              }
-            }
-          } else {
-            message =
-              err?.error?.Message
-              || err?.error?.message
-              || err?.message
-              || message;
-          }
-        } catch {
-          // keep default message
-        }
-        this.showNotification('snackbar-danger', message, 'bottom', 'center');
-      }
-    );
-  }
-
-  private triggerBlobDownload(blob: Blob, extension: 'csv' | 'xls' | 'xlsx' = 'xls'): void {
-    const fileUrl = window.URL.createObjectURL(blob);
-    const anchor = document.createElement('a');
-    anchor.href = fileUrl;
-    anchor.download = `AppDutyMIS_${moment().format('YYYYMMDD_HHmmss')}.${extension}`;
-    document.body.appendChild(anchor);
-    anchor.click();
-    document.body.removeChild(anchor);
-    window.URL.revokeObjectURL(fileUrl);
-  }
-
-  private downloadVisibleRowsCsv(): void {
-    const headers = this.displayedColumns.map((column) => this.columnTitleMap[column] || column);
-    const rows = (this.dataSource || []).map((row) =>
-      this.displayedColumns.map((column) => {
-        if (column === 'dutyDate') {
-          return row[column] ? moment(row[column]).format('DD-MM-YYYY') : 'N/A';
-        }
-        if (column === 'driverName') {
-          return this.formatDriverName(row);
-        }
-        return String(this.getDisplayValue(column, row));
-      })
-    );
-
-    const csv = [headers, ...rows]
-      .map((line) => line.map((value) => `"${String(value).replace(/"/g, '""')}"`).join(','))
-      .join('\n');
-
-    const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' });
-    this.triggerBlobDownload(blob, 'csv');
-    this.showNotification(
-      'snackbar-success',
-      'CSV downloaded for visible page only (not full filter result).',
-      'bottom',
-      'center'
-    );
-  }
-
-  private readBlobText(blob: Blob): Promise<string> {
-    return new Promise((resolve) => {
-      const reader = new FileReader();
-      reader.onload = () => resolve(String(reader.result || ''));
-      reader.onerror = () => resolve('');
-      reader.readAsText(blob);
-    });
   }
 
   SortingData(coloumName:any) {

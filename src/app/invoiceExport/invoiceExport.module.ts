@@ -16,6 +16,7 @@ import { InvoiceExportRoutingModule } from './invoiceExport-routing.module';
 import { InvoiceExportComponent } from './invoiceExport.component';
 import { InvoiceExportService } from './invoiceExport.service';
 import { GlobalOtpConfigurationService } from './globalOtpConfiguration.service';
+import { MisExportQueuePanelComponent } from '../general/mis-export-queue-panel.component';
 
 @NgModule({
   declarations: [InvoiceExportComponent],
@@ -34,6 +35,7 @@ import { GlobalOtpConfigurationService } from './globalOtpConfiguration.service'
     MatProgressBarModule,
     MatProgressSpinnerModule,
     MatTooltipModule,
+    MisExportQueuePanelComponent,
   ],
   providers: [InvoiceExportService, GlobalOtpConfigurationService],
 })

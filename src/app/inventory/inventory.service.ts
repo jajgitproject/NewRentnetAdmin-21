@@ -5,6 +5,7 @@ import { Inventory } from './inventory.model';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { DatePipe } from '@angular/common';
 import { GeneralService } from '../general/general.service';
+import { isExportJobReady, isExportJobRunning, pollExportJob } from '../general/export-job.helper';
 @Injectable()
 export class InventoryService 
 {
@@ -59,22 +60,55 @@ export class InventoryService
       this.pathSegment(SearchActivationStatus) + '/' + PageNumber + '/' + coloumName + '/' + sortType
     );
   }
-  downloadCsv(
-    RegistrationNumber:string,InventoryID:number,
-    SearchVehcileCategory:string,
-    SearchVehicle:string,
-    SearchSupplier:string,
-    searchLocationHub:string,
-    SearchActivationStatus:string): Observable<Blob>
-  {
-    return this.httpClient.get(
-      this.API_URL + "/export/" + this.pathSegment(RegistrationNumber) + "/" + (InventoryID || 0) + '/' +
-      this.pathSegment(SearchVehcileCategory) + '/' + this.pathSegment(SearchVehicle) + '/' +
-      this.pathSegment(SearchSupplier) + '/' + this.pathSegment(searchLocationHub) + '/' +
-      this.pathSegment(SearchActivationStatus),
-      { responseType: 'blob' }
-    );
+  startExportJob(
+    registrationNumber: string,
+    inventoryID: number,
+    vehicleCategory: string,
+    vehicle: string,
+    supplierName: string,
+    locationHub: string,
+    status: string
+  ): Observable<any> {
+    return this.httpClient.post(`${this.API_URL}/export/StartJob`, {
+      userID: this.generalService.getUserID(),
+      registrationNumber: registrationNumber || null,
+      inventoryID: inventoryID || 0,
+      vehicleCategory: vehicleCategory || null,
+      vehicle: vehicle || null,
+      supplierName: supplierName || null,
+      locationHub: locationHub || null,
+      status: status || null
+    });
   }
+
+  getExportJobStatus(jobId: string): Observable<any> {
+    return this.httpClient.get(`${this.API_URL}/export/JobStatus/${jobId}`);
+  }
+
+  downloadExportJob(jobId: string): Observable<Blob> {
+    return this.httpClient.get(`${this.API_URL}/export/Download/${jobId}`, {
+      responseType: 'blob'
+    });
+  }
+
+  cancelExportJob(jobId: string): Observable<any> {
+    return this.httpClient.post(`${this.API_URL}/export/Cancel/${jobId}`, {}, {
+      params: { userId: String(this.generalService.getUserID() || 0) }
+    });
+  }
+
+  pollExportJob(jobId: string): Observable<any> {
+    return pollExportJob(this.httpClient, `${this.API_URL}/export/JobStatus/${jobId}`);
+  }
+
+  isExportJobRunning(status: any): boolean {
+    return isExportJobRunning(status);
+  }
+
+  isExportJobReady(status: any): boolean {
+    return isExportJobReady(status);
+  }
+
   add(advanceTable: Inventory) 
   {
     advanceTable.inventoryID=-1;

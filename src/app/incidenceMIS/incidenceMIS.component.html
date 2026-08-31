@@ -168,16 +168,37 @@
                 </div>
 
                 <div class="duty-register-inline-search-actions quick-search-actions">
-                  <button mat-raised-button color="primary" (click)="SearchData()">Search</button>
+                  <button mat-raised-button color="primary" (click)="SearchData()" [disabled]="isExportJobInProgress()">Search</button>
                   &nbsp;&nbsp;
-                  <button mat-raised-button color="warn" (click)="refresh()">Refresh</button>
+                  <button mat-raised-button color="warn" (click)="refresh()" [disabled]="isExportJobInProgress()">Refresh</button>
                   &nbsp;&nbsp;
-                  <button mat-raised-button color="accent" (click)="downloadFilteredCsv()" [disabled]="csvExporting || !hasManualSearch" [matTooltip]="!hasManualSearch ? 'Run search first' : ''">
-                    {{ csvExporting ? 'Downloading...' : 'Download CSV' }}
+                  <button mat-raised-button color="accent" (click)="startExportJob()" [disabled]="isExportJobInProgress() || !hasManualSearch" [matTooltip]="!hasManualSearch ? 'Run search first' : ''">
+                    {{ getExportButtonLabel() }}
                   </button>
                 </div>
               </mat-expansion-panel>
             </mat-accordion>
+
+            <div class="duty-register-export-job-panel" *ngIf="exportJobId || exportJobError">
+              <div class="panel-title">Incidence MIS CSV Export</div>
+              <div class="export-job-meta" *ngIf="exportJobId">
+                <span>Job: {{ exportJobId }}</span>
+                <span class="export-job-stat">Status: {{ getExportJobStatusLabel() || '—' }}</span>
+                <span class="export-job-stat" *ngIf="isExportJobInProgress() || getExportRowsExported()">Rows: {{ getExportRowsExported() }}</span>
+                <span class="export-job-stat">Elapsed: {{ getExportElapsedTime() }}</span>
+              </div>
+              <mat-progress-bar *ngIf="isExportJobInProgress()" mode="indeterminate"></mat-progress-bar>
+              <p class="export-job-message" *ngIf="getExportJobMessage()">{{ getExportJobMessage() }}</p>
+              <div class="export-job-actions">
+                <button mat-raised-button color="accent" type="button" (click)="downloadExportCsv()" [disabled]="!canDownloadExport()">
+                  Download CSV
+                </button>
+                <button mat-stroked-button type="button" (click)="cancelExportJob()" [disabled]="!isExportJobInProgress()">
+                  Cancel
+                </button>
+              </div>
+            </div>
+            <app-stored-mis-exports></app-stored-mis-exports>
 
             <br />
 

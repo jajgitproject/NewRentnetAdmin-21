@@ -24,6 +24,8 @@ import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatMenuModule } from '@angular/material/menu';
 import { DriverService } from './driver.service';
 import { DriverRoutingModule } from './driver-routing.module';
+import { MatProgressBarModule } from '@angular/material/progress-bar';
+import { StoredMisExportsComponent } from '../general/stored-mis-exports.component';
 import { MyUploadComponent } from '../myupload/myupload.component';
 import { MyUploadModule } from '../myupload/myupload.module';
 import { GooglePlaceModule } from '@compat/google-places-shim';
@@ -64,6 +66,8 @@ import { ClearIMEIDialogComponent } from './dialogs/clearIMEI/clearIMEI.componen
     MatToolbarModule,
     MatMenuModule,
     MatProgressSpinnerModule,
+    MatProgressBarModule,
+    StoredMisExportsComponent,
     MyUploadModule,
     //TwoDigitDecimaNumberDirective
   ],
