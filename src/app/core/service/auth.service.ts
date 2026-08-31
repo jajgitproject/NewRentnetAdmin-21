@@ -247,6 +247,9 @@ export class AuthService {
             CanEditDSAfterGoodForBilling:
               rawEmployee.CanEditDSAfterGoodForBilling ??
               rawEmployee.canEditDSAfterGoodForBilling,
+            CanCancelBackDateAllotment:
+              rawEmployee.CanCancelBackDateAllotment ??
+              rawEmployee.canCancelBackDateAllotment,
             EmployeeEntityID:
               rawEmployee.EmployeeEntityID ?? rawEmployee.employeeEntityID,
             EmployeeID: rawEmployee.EmployeeID ?? rawEmployee.employeeID,

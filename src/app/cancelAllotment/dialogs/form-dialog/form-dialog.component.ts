@@ -193,12 +193,17 @@ export class FormDialogCAComponent
     },
     error =>
     {
+      const message =
+        error?.error?.message ??
+        (typeof error?.error === 'string' ? error.error : null) ??
+        error?.message ??
+        'Cancellation failed';
       this.showNotification(
-    'snackbar-danger',
-    error || 'Cancellation failed',
-    'bottom',
-    'center'
-  ); 
+        'snackbar-danger',
+        message,
+        'bottom',
+        'center'
+      );
      this.saveDisabled = true;
     }
   )

@@ -331,6 +331,21 @@ export class GeneralService {
     }
   }
 
+  canCancelBackDateAllotment(): boolean {
+    if (this.readRoleFlagFromStorage('canCancelBackDateAllotment') === true) {
+      return true;
+    }
+    try {
+      const currentUser = JSON.parse(localStorage.getItem('currentUser') || '{}');
+      const employee = currentUser?.employee ?? currentUser?.Employee;
+      return !!(
+        employee?.CanCancelBackDateAllotment ?? employee?.canCancelBackDateAllotment
+      );
+    } catch {
+      return false;
+    }
+  }
+
   getContractTariffRoleTrack(): 'Auditor' | 'Verifier' | null {
     if (this.canActAsContractTariffAuditor()) {
       return 'Auditor';

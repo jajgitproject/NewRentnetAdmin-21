@@ -86,6 +86,7 @@ import { FormDialogComponent as AdhocCarAndDriverFormDialogComponent } from '../
 import { DriverOfficialIdentityNumberDD } from '../general/driverOfficialIdentityNumberDD.model';
 import { SupplierTypeDropDownModel } from '../supplierType/supplierType.model';
 import { SoftToHardDialogComponent } from '../cancelAllotment/dialogs/softToHard-Dialog/softToHard-Dialog.component';
+import { CancelAllotmentService } from '../cancelAllotment/cancelAllotment.service';
 import { UpdateDriverMobileComponent } from '../driverInventoryAssociation/dialogs/updateDriverMobile/updateDriverMobile.component';
 import { environment } from 'src/environments/environment';
 
@@ -328,6 +329,7 @@ export class CarAndDriverAllotmentComponent implements OnInit {
     public feedBackDetailsService: FeedBackDetailsService,
     public dispatchByExecutiveService: DispatchByExecutiveService,
     public reservationLocationTransferLogService: ReservationLocationTransferLogService,
+    public cancelAllotmentService: CancelAllotmentService,
     public router: ActivatedRoute
   ) { }
 
@@ -2395,8 +2397,57 @@ export class CarAndDriverAllotmentComponent implements OnInit {
         icon: 'warning',
 
       })
+      return;
     }
-    if (this.reservationInfo[0].allotmentStatus === 'Alloted') {
+    if (this.reservationInfo[0].allotmentStatus !== 'Alloted') {
+      return;
+    }
+
+    this.cancelAllotmentService.checkInvoiceNumber(reservationID).subscribe(
+      (data) => {
+        if (data?.invoiceNumber === true) {
+          Swal.fire({
+            title: 'Cancellation not allowed',
+            icon: 'warning',
+            text: 'This allotment cannot be cancelled because an active invoice has already been generated.'
+          });
+          return;
+        }
+
+        if (this.isPastPickupDate() && !this._generalService.canCancelBackDateAllotment()) {
+          Swal.fire({
+            title: '',
+            icon: 'warning',
+            text: 'Past allotment cancellation is not permitted for your role.'
+          });
+          return;
+        }
+
+        this.openCancelAllotmentDialog(allotmentID, reservationID);
+      },
+      () => {
+        Swal.fire({
+          title: '',
+          icon: 'error',
+          text: 'Unable to verify invoice status. Please try again.'
+        });
+      }
+    );
+  }
+
+  private isPastPickupDate(): boolean {
+    const pickupDateValue =
+      this.reservationInfo?.[0]?.pickupDate ??
+      this.reservationInfo?.[0]?.PickupDate ??
+      this.pickupDate;
+    if (!pickupDateValue) {
+      return false;
+    }
+    const parsed = moment(pickupDateValue).startOf('day');
+    return parsed.isValid() && parsed.isBefore(moment().startOf('day'));
+  }
+
+  private openCancelAllotmentDialog(allotmentID: any, reservationID: any) {
       const dialogRef = this.dialog.open(FormDialogCAComponent,
         {
           width: '400px',
@@ -2411,14 +2462,12 @@ export class CarAndDriverAllotmentComponent implements OnInit {
 
         });
       dialogRef.afterClosed().subscribe(res => {
-        if (res.isClose === false) {
+        if (res?.isClose === false) {
           this.applyOptimisticCancelledHeader();
           this.refreshReservationHeaderLite(false);
         }
 
       })
-
-    }
   }
 
   CovertSoftToHard(allotmentID: any, reservationInfo) {

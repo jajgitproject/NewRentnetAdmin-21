@@ -2832,9 +2832,9 @@ public getInvoiceNumber(item:any ,i: any)
           else
           {
              Swal.fire({
-                  title: '',
+                  title: 'Cancellation not allowed',
                   icon: 'warning',
-                  html: `<b>Invoice is generate so reservation is not cancelled...</b>`
+                  text: 'This reservation cannot be cancelled because an active invoice has already been generated.'
                   })
                  return;
           }

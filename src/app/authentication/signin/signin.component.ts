@@ -286,6 +286,14 @@ export class SigninComponent implements OnInit {
                   ? 'true'
                   : 'false'
               );
+              localStorage.setItem(
+                'canCancelBackDateAllotment',
+                String(
+                  employee.CanCancelBackDateAllotment ??
+                    employee.canCancelBackDateAllotment ??
+                    false
+                )
+              );
               this.calculateDaysLeft();
             }
           } else {
