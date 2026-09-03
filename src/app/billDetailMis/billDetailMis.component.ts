@@ -52,11 +52,11 @@ export class BillDetailMisComponent implements OnInit, OnDestroy {
   SearchCarNo: FormControl = new FormControl();
   SearchCity: FormControl = new FormControl();
   SearchBookingStatus: FormControl = new FormControl('');
-  SearchFromDate = '';
-  SearchToDate = '';
+  SearchFromDate: Date | string | null = null;
+  SearchToDate: Date | string | null = null;
   SearchDuty = '';
-  SearchBillDateFrom = '';
-  SearchBillToDate = '';
+  SearchBillDateFrom: FormControl = new FormControl(null);
+  SearchBillToDate: FormControl = new FormControl(null);
 
   CustomerGroupList: CustomerGroupDropDown[] = [];
   CustomerList: CustomerDropDown[] = [];
@@ -119,11 +119,11 @@ export class BillDetailMisComponent implements OnInit, OnDestroy {
     this.SearchCarNo.setValue('');
     this.SearchCity.setValue('');
     this.SearchBookingStatus.setValue('');
-    this.SearchFromDate = '';
-    this.SearchToDate = '';
+    this.SearchFromDate = null;
+    this.SearchToDate = null;
     this.SearchDuty = '';
-    this.SearchBillDateFrom = '';
-    this.SearchBillToDate = '';
+    this.SearchBillDateFrom.setValue(null);
+    this.SearchBillToDate.setValue(null);
   }
 
   buildSearchCriteria(): SearchCriteria {
@@ -136,26 +136,28 @@ export class BillDetailMisComponent implements OnInit, OnDestroy {
       SearchMOP: this.SearchMOP?.value || '',
       SearchSupplierType: this.SearchSupplierType?.value || '',
       SearchSupplier: this.SearchSupplier?.value || '',
-      SearchFromDate: this.isDutySlipIdSearchActive()
-        ? ''
-        : (this.SearchFromDate !== '' ? moment(this.SearchFromDate).format('MMM DD yyyy') : ''),
-      SearchToDate: this.isDutySlipIdSearchActive()
-        ? ''
-        : (this.SearchToDate !== '' ? moment(this.SearchToDate).format('MMM DD yyyy') : ''),
+      SearchFromDate: this.isDutySlipIdSearchActive() ? '' : this.formatSearchDate(this.SearchFromDate),
+      SearchToDate: this.isDutySlipIdSearchActive() ? '' : this.formatSearchDate(this.SearchToDate),
       SearchSupplierO: this.normalizeSelect(this.SearchSupplierO?.value),
       SearchDri: this.SearchDri?.value || '',
       SearchCarNo: this.SearchCarNo?.value || '',
       SearchCity: this.SearchCity?.value || '',
       SearchBookingStatus: this.normalizeSelect(this.SearchBookingStatus?.value),
       SearchDuty: this.SearchDuty || '',
-      SearchBillFromDate: this.SearchBillDateFrom !== '' ? moment(this.SearchBillDateFrom).format('MMM DD yyyy') : '',
-      SearchBillToDate: this.SearchBillToDate !== '' ? moment(this.SearchBillToDate).format('MMM DD yyyy') : ''
+      SearchBillFromDate: this.formatSearchDate(this.SearchBillDateFrom?.value),
+      SearchBillToDate: this.formatSearchDate(this.SearchBillToDate?.value)
     };
   }
 
   SearchData() {
     if (this.exportJobRunning) {
       this.showNotification('snackbar-danger', IN_FLIGHT_EXPORT_MESSAGE, 'bottom', 'center');
+      return;
+    }
+
+    const billDateRangeError = this.validateBillDateRange();
+    if (billDateRangeError) {
+      this.showNotification('snackbar-danger', billDateRangeError, 'bottom', 'center');
       return;
     }
 
@@ -292,12 +294,33 @@ export class BillDetailMisComponent implements OnInit, OnDestroy {
     return this.isSearchValueSet(this.SearchDuty);
   }
 
+  isBillDateSearchActive(): boolean {
+    return this.hasValidDate(this.SearchBillDateFrom?.value) && this.hasValidDate(this.SearchBillToDate?.value);
+  }
+
+  isPickupDateRequired(): boolean {
+    return !this.isDutySlipIdSearchActive() && !this.isBillDateSearchActive();
+  }
+
+  openDatePicker(picker: { open?: () => void }, disabled = false) {
+    if (disabled || !picker?.open) {
+      return;
+    }
+    picker.open();
+  }
+
   validatePickupDateRange(): string | null {
-    if (this.isDutySlipIdSearchActive()) {
-      return null;
+    if (this.isDutySlipIdSearchActive() || this.isBillDateSearchActive()) {
+      if (this.hasValidDate(this.SearchFromDate) || this.hasValidDate(this.SearchToDate)) {
+        if (!this.hasValidDate(this.SearchFromDate) || !this.hasValidDate(this.SearchToDate)) {
+          return 'Please select both Pickup Date From and Pickup Date To, or leave both blank when using bill dates.';
+        }
+      } else {
+        return null;
+      }
     }
 
-    if (!this.SearchFromDate || !this.SearchToDate) {
+    if (!this.hasValidDate(this.SearchFromDate) || !this.hasValidDate(this.SearchToDate)) {
       return 'Pickup date range is required. Please select From and To dates.';
     }
 
@@ -319,6 +342,29 @@ export class BillDetailMisComponent implements OnInit, OnDestroy {
     return null;
   }
 
+  validateBillDateRange(): string | null {
+    const fromValue = this.SearchBillDateFrom?.value;
+    const toValue = this.SearchBillToDate?.value;
+    if (!this.hasValidDate(fromValue) && !this.hasValidDate(toValue)) {
+      return null;
+    }
+
+    if (!this.hasValidDate(fromValue) || !this.hasValidDate(toValue)) {
+      return 'Please select both Bill From Date and Bill To Date.';
+    }
+
+    const fromDate = moment(fromValue).startOf('day');
+    const toDate = moment(toValue).startOf('day');
+    if (!fromDate.isValid() || !toDate.isValid()) {
+      return 'Please enter valid bill dates.';
+    }
+    if (toDate.isBefore(fromDate)) {
+      return 'Bill To Date cannot be earlier than Bill From Date.';
+    }
+
+    return null;
+  }
+
   hasAdditionalSearchFilters(): boolean {
     return this.isSearchValueSet(this.SearchCustomerGroup?.value)
       || this.isSearchValueSet(this.SearchCustomer?.value)
@@ -332,8 +378,23 @@ export class BillDetailMisComponent implements OnInit, OnDestroy {
       || this.isSearchValueSet(this.SearchCity?.value)
       || this.isSearchValueSet(this.SearchBookingStatus?.value)
       || this.isSearchValueSet(this.SearchDuty)
-      || this.isSearchValueSet(this.SearchBillDateFrom)
-      || this.isSearchValueSet(this.SearchBillToDate);
+      || this.hasValidDate(this.SearchBillDateFrom?.value)
+      || this.hasValidDate(this.SearchBillToDate?.value);
+  }
+
+  private hasValidDate(value: any): boolean {
+    if (value === null || value === undefined || value === '') {
+      return false;
+    }
+    const parsed = moment(value);
+    return parsed.isValid();
+  }
+
+  private formatSearchDate(value: any): string {
+    if (!this.hasValidDate(value)) {
+      return '';
+    }
+    return moment(value).format('MMM DD yyyy');
   }
 
   private isSearchValueSet(value: any): boolean {

@@ -179,6 +179,7 @@ export class SearchCriteria
   SearchMOP: string;
   SearchSupplierType: string;
   SearchSupplier: string;
+  SearchSupplierID: number;
   SearchFromDate: string;
   SearchToDate: string;
   SearchSalesPersonName: string;

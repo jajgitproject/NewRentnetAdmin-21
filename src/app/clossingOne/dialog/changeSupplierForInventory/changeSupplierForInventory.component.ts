@@ -12,6 +12,7 @@ import { ChangeSupplierForInventoryModel } from '../../clossingOne.model';
 import {
   filterSuppliersByDisplay,
   formatSupplierDisplay,
+  normalizeSupplierDropDownList,
   supplierMatchesDisplay,
 } from 'src/app/supplier/supplier-display.util';
 
@@ -128,7 +129,7 @@ export class FormDialogChangeSupplierForInventory
   {
     this._generalService.GetAllSuppliers().subscribe(
     data => {
-      this.SupplierList = data;
+      this.SupplierList = normalizeSupplierDropDownList(data);
       this.advanceTableForm.controls['supplierName'].setValidators([
         Validators.required,
         this.SupplierValidator(this.SupplierList)

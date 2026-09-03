@@ -142,6 +142,9 @@
                 <p class="text-subheading">
                   <strong>Rupees {{dataSourceForCalculate?.totalAmountAfterGSTInWords}} Only</strong>
                 </p>
+                <p class="text-subheading" *ngIf="shouldPrintSezInvoiceDeclaration()">
+                  {{ getSezInvoiceDeclaration() }}
+                </p>
               </td>
 
               <td width="600" valign="top" >

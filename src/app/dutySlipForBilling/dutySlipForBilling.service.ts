@@ -116,8 +116,8 @@ export class DutySlipForBillingService
     }
 
     if (advanceTable.reportingToGuestKMForBilling === null) {
-      advanceTable.reportingToGuestKMForBilling = 0;
-    }
+        advanceTable.reportingToGuestKMForBilling = 0;
+      } 
     this.sanitizeClosingUpdatePayload(advanceTable);
     advanceTable.userID = this.generalService.getUserID();
     return this.httpClient.put<any>(this.API_URL, advanceTable);
@@ -139,20 +139,25 @@ export class DutySlipForBillingService
     locationInKMForBilling?: number | null;
     locationInLatLongForBilling?: string | null;
   }) {
+    const pickUpKm = this.toNullableInt(payload.pickUpKMForBilling);
+    let reportingKm = this.toNullableInt(payload.reportingToGuestKMForBilling);
+    if (!reportingKm && pickUpKm) {
+      reportingKm = pickUpKm;
+    }
     return this.httpClient.put<any>(this.API_URL + '/UpdateRemarks', {
       dutySlipID: this.toNullableInt(payload.dutySlipID) ?? 0,
       dutySlipForBillingID: this.toNullableInt(payload.dutySlipForBillingID) ?? 0,
       runningDetails: payload.runningDetails ?? null,
       vendorRemark: payload.vendorRemark ?? null,
-      locationOutKMForBilling: payload.locationOutKMForBilling ?? null,
+      locationOutKMForBilling: this.toNullableInt(payload.locationOutKMForBilling),
       locationOutLatLongForBilling: payload.locationOutLatLongForBilling ?? null,
-      reportingToGuestKMForBilling: payload.reportingToGuestKMForBilling ?? null,
+      reportingToGuestKMForBilling: reportingKm,
       reportingToGuestLatLongForBilling: payload.reportingToGuestLatLongForBilling ?? null,
-      pickUpKMForBilling: payload.pickUpKMForBilling ?? null,
+      pickUpKMForBilling: pickUpKm,
       pickUpLatLongForBilling: payload.pickUpLatLongForBilling ?? null,
-      dropOffKMForBilling: payload.dropOffKMForBilling ?? null,
+      dropOffKMForBilling: this.toNullableInt(payload.dropOffKMForBilling),
       dropOffLatLongForBilling: payload.dropOffLatLongForBilling ?? null,
-      locationInKMForBilling: payload.locationInKMForBilling ?? null,
+      locationInKMForBilling: this.toNullableInt(payload.locationInKMForBilling),
       locationInLatLongForBilling: payload.locationInLatLongForBilling ?? null,
       userID: this.generalService.getUserID(),
     });
@@ -306,7 +311,7 @@ export class DutySlipForBillingService
     }
     const n = Number(value);
     return Number.isFinite(n) ? n : null;
-  }
+    }
 
  PostDataGPS(dutySlipID:any,RegistrationNumber:any):  Observable<any> 
   { 

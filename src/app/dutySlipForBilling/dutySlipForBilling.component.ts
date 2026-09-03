@@ -493,7 +493,7 @@ export class DutySlipForBillingComponent implements OnInit, AfterViewInit, OnCha
         this.advanceTableForm.patchValue({dropOffLatLongForBilling:null });
       }
 
-
+      
       if(this.advanceTableClosingOne.closingDutySlipByGPSModel.locationOutLocationOrHubID)
       {
         this.advanceTableForm.patchValue({locationInLocationOrHubID : this.advanceTableClosingOne.closingDutySlipByGPSModel.locationOutLocationOrHubID});
@@ -533,7 +533,7 @@ export class DutySlipForBillingComponent implements OnInit, AfterViewInit, OnCha
     this.applyRoundOffBillingTimes();
     this.onTimeSelection();
   }
-
+    
   InitManual(): void {
     this.patchBillingTripFieldsFromForBillingModel();
     this.applyReportingFromPickupFallbackToForm();
@@ -1853,12 +1853,12 @@ export class DutySlipForBillingComponent implements OnInit, AfterViewInit, OnCha
     }
 
     const formatHoursMinutes = (totalMilliseconds: number): string => {
-      const totalMinutes = totalMilliseconds / (1000 * 60);
-      if (!Number.isFinite(totalMinutes)) {
+    const totalMinutes = totalMilliseconds / (1000 * 60);
+    if (!Number.isFinite(totalMinutes)) {
         return '';
-      }
-      const hours = Math.floor(totalMinutes / 60);
-      const minutes = Math.floor(totalMinutes % 60);
+    }
+    const hours = Math.floor(totalMinutes / 60);
+    const minutes = Math.floor(totalMinutes % 60);
       return hours + '.' + minutes;
     };
 
@@ -2327,7 +2327,7 @@ public resetVerificationForEcoStateChange(): void {
       this.showChronologyValidationError('Location In date is missing or invalid.');
       return false;
     }
-
+  
     if (pickupDate < locationOutDate) {
       this.showChronologyValidationError('Pickup Date cannot be before Location Out Date.');
       return false;
@@ -2346,47 +2346,47 @@ public resetVerificationForEcoStateChange(): void {
     const resolved = resolveBillingTripLegDateTimes(legs);
     if (!resolved.ok) {
       this.showChronologyValidationError(resolved.message);
-      return false;
-    }
+    return false;
+  }
 
     const [locationOutDT, pickupDT, dropOffDT, locationInDT] = resolved.dateTimes;
-
+  
     if (pickupDT < locationOutDT) {
       this.showChronologyValidationError('Pickup DateTime cannot be before Location Out DateTime.');
       return false;
     }
-
+  
     if (dropOffDT < pickupDT) {
       this.showChronologyValidationError('Drop-off DateTime cannot be before Pickup DateTime.');
       return false;
     }
-
+  
     if (locationInDT < dropOffDT) {
       this.showChronologyValidationError('Location In DateTime cannot be before Drop-off DateTime.');
       return false;
     }
-
+  
     // KM validations
     const locationOutKM = Number(form.locationOutKMForBilling);
     const pickupKM = Number(form.pickUpKMForBilling);
     const dropOffKM = Number(form.dropOffKMForBilling);
     const locationInKM = Number(form.locationInKMForBilling);
-
+  
     if (pickupKM < locationOutKM) {
       this.showChronologyValidationError('Pickup KM cannot be less than Location Out KM.');
       return false;
     }
-
+  
     if (dropOffKM < pickupKM) {
       this.showChronologyValidationError('Drop-off KM cannot be less than Pickup KM.');
       return false;
     }
-
+  
     if (locationInKM < dropOffKM) {
       this.showChronologyValidationError('Location In KM cannot be less than Drop-off KM.');
       return false;
     }
-
+  
     return true;
   }
 
@@ -2492,8 +2492,8 @@ public resetVerificationForEcoStateChange(): void {
         'bottom',
         'center'
       );
-      return;
-    }
+        return;
+      } 
 
     this.showSpinner = true;
     const form = this.advanceTableForm.getRawValue();
@@ -2564,7 +2564,9 @@ public resetVerificationForEcoStateChange(): void {
     if (!allowed) {
       return;
     }
-    const usePartial = this.canSavePartialAfterGfb || this.canSavePartialPreGfb;
+    // Pre-GFB updates use the same full PUT /Closing path as first save (sanitized payload).
+    // Partial UpdateRemarks is only for post-GFB when the form is locked for most fields.
+    const usePartial = this.canSavePartialAfterGfb;
     this.resetGoodForBillingOnUpdate();
     if (usePartial) {
       this.savePartialAfterGfb();
@@ -2640,7 +2642,7 @@ public resetVerificationForEcoStateChange(): void {
     }
     this.showSpinner = true;
     if (!this.checkChronologyAndValues()) {
-      this.showSpinner = false;
+          this.showSpinner = false;
       return false;
     }
     this.applyClosingFieldDefaults();
@@ -2655,7 +2657,7 @@ public resetVerificationForEcoStateChange(): void {
 
     try {
       const response = await firstValueFrom(this.dutySlipForBillingService.update(payload));
-      this.DSClosing = response.dsClosing;
+          this.DSClosing = response.dsClosing;
       this.buttonText = 'Update';
       this.syncClosingModelFromResponse(response);
       this.syncVerifyDutyAndGoodForBillingState();
@@ -2670,22 +2672,22 @@ public resetVerificationForEcoStateChange(): void {
       const allowancesOk = await this.saveClosingAllowancesIfChangedAsync();
       this.showSpinner = false;
       if (!fromGfb) {
-        this.showNotification(
-          'snackbar-success',
-          'Saved...!!!',
-          'bottom',
-          'center'
-        );
+          this.showNotification(
+            'snackbar-success',
+            'Saved...!!!',
+            'bottom',
+            'center'
+          );
       }
       return allowancesOk;
     } catch (error) {
-      this.showSpinner = false;
-      this.showNotification(
-        'snackbar-danger',
+          this.showSpinner = false;
+          this.showNotification(
+            'snackbar-danger',
         this.extractApiErrorMessage(error, 'Operation Failed.....!!!'),
-        'bottom',
-        'center'
-      );
+            'bottom',
+            'center'
+          ); 
       return false;
     }
   }

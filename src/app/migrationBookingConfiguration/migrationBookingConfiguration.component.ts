@@ -15,11 +15,11 @@ import { GeneralService } from '../general/general.service';
 // import { MyUploadComponent } from '../myupload/myupload.component';
 import { MyUploadComponent } from '../myupload/myupload.component';
 import { AbstractControl, FormBuilder, FormControl, ValidationErrors, ValidatorFn, Validators } from '@angular/forms';
-import { BookingConfigurationService } from './bookingConfiguration.service';
+import { MigrationBookingConfigurationService } from './migrationBookingConfiguration.service';
 import { CustomerDropDown } from '../customer/customerDropDown.model';
 import moment from 'moment';
 import { ActivatedRoute, Router } from '@angular/router';
-import { B2cDataDetails, BookingConfigurationCustomerDetails, BookingConfigurationPassengerDetails, BookingConfigurationStopDetails, BookingPackageVehcileDetails, Reservation } from './bookingConfiguration.model';
+import { B2cDataDetails, MigrationBookingConfigurationCustomerDetails, MigrationBookingConfigurationPassengerDetails, MigrationBookingConfigurationStopDetails, BookingPackageVehcileDetails, Reservation } from './migrationBookingConfiguration.model';
 import { PackageTypeDropDown } from '../packageType/packageTypeDropDown.model';
 import { PackageDropDown } from '../package/packageDropDown.model';
 import { CitiesDropDown } from '../organizationalEntity/citiesDropDown.model';
@@ -36,12 +36,12 @@ import { ReservationStopDetails } from '../reservationStopDetails/reservationSto
 
 @Component({
   standalone: false,
-  selector: 'app-bookingConfiguration',
-  templateUrl: './bookingConfiguration.component.html',
-  styleUrls: ['./bookingConfiguration.component.sass'],
+  selector: 'app-migrationBookingConfiguration',
+  templateUrl: './migrationBookingConfiguration.component.html',
+  styleUrls: ['./migrationBookingConfiguration.component.sass'],
   providers: [{ provide: MAT_DATE_LOCALE, useValue: 'en-GB' }]
 })
-export class BookingConfigurationComponent implements OnInit {
+export class MigrationBookingConfigurationComponent implements OnInit {
   displayedColumns = [
     'SR',
     'TRN',
@@ -55,10 +55,10 @@ export class BookingConfigurationComponent implements OnInit {
     'CheckedByEco'
   ];
 
-  customerDetails: BookingConfigurationCustomerDetails | null;
+  customerDetails: MigrationBookingConfigurationCustomerDetails | null;
   b2cDetails: B2cDataDetails | null;
-  stopDetailsList: BookingConfigurationStopDetails[] | null;
-  passengerDetailsList: BookingConfigurationPassengerDetails[] | null;
+  stopDetailsList: MigrationBookingConfigurationStopDetails[] | null;
+  passengerDetailsList: MigrationBookingConfigurationPassengerDetails[] | null;
   integrationCustomFields: { fieldName: string; fieldValue: string }[] = [];
   packageVehcileDetailsList: BookingPackageVehcileDetails | null;
 
@@ -236,7 +236,7 @@ googlePlacesForm = this.fb.group({
     public httpClient: HttpClient,
     public dialog: MatDialog,
     private fb: FormBuilder,
-    public bookingConfigurationService: BookingConfigurationService,
+    public migrationBookingConfigurationService: MigrationBookingConfigurationService,
     private snackBar: MatSnackBar,
     public reservationService: ReservationService,
     public router:Router,
@@ -284,7 +284,7 @@ toggleStopFold() {
 
   public loadData() 
   {
-    this.bookingConfigurationService.GetReservationByID(this.BookingID).subscribe(
+    this.migrationBookingConfigurationService.GetReservationByID(this.BookingID).subscribe(
       data => {
           if (!data) {
             this.dataSource = null;
@@ -359,7 +359,7 @@ toggleStopFold() {
 
   public GetCustomerDetails() 
   {
-    this.bookingConfigurationService.getCustomerDetails(this.BookingID).subscribe(
+    this.migrationBookingConfigurationService.getCustomerDetails(this.BookingID).subscribe(
         data => {
           this.customerDetails = data;
           console.log(this.customerDetails);  
@@ -410,7 +410,7 @@ toggleStopFold() {
   }
 
   public GetIntegrationCustomerSpecificFields() {
-    this.bookingConfigurationService.getIntegrationCustomerSpecificFields(this.BookingID).subscribe(
+    this.migrationBookingConfigurationService.getIntegrationCustomerSpecificFields(this.BookingID).subscribe(
       data => { this.integrationCustomFields = data || []; },
       () => { this.integrationCustomFields = []; }
     );
@@ -584,7 +584,7 @@ private extractTime(dateTime: Date): Date {
 
   public GetB2CData() 
   {
-    this.bookingConfigurationService.getB2CDetails(this.BookingID).subscribe(
+    this.migrationBookingConfigurationService.getB2CDetails(this.BookingID).subscribe(
         data => {
           this.b2cDetails = data;
           this.advanceTableForm.patchValue({packageTypeID:this.b2cDetails.packageTypeID});
@@ -691,7 +691,7 @@ private extractTime(dateTime: Date): Date {
 
   public GetStopDetails() {
     debugger
-  this.bookingConfigurationService.getStopDetails(this.BookingID).subscribe(
+  this.migrationBookingConfigurationService.getStopDetails(this.BookingID).subscribe(
     data => {
       debugger;
       this.stopDetailsList = data;
@@ -745,7 +745,7 @@ private extractTime(dateTime: Date): Date {
   public GetPassengerDetails() 
   {
     
-    this.bookingConfigurationService.getPassengerDetails(this.BookingID).subscribe(
+    this.migrationBookingConfigurationService.getPassengerDetails(this.BookingID).subscribe(
         data => {
           
           this.passengerDetailsList = data;
@@ -762,7 +762,7 @@ private extractTime(dateTime: Date): Date {
 
   public GetPackageVehcileDetails() 
   {
-    this.bookingConfigurationService.getPackageVehcileDetails(this.BookingID).subscribe(
+    this.migrationBookingConfigurationService.getPackageVehcileDetails(this.BookingID).subscribe(
     data => {
       this.packageVehcileDetailsList = data;
       this.customerTravelRequestNumber=this.packageVehcileDetailsList.customerTravelRequestNumber;
@@ -789,7 +789,7 @@ private extractTime(dateTime: Date): Date {
       panelClass: colorName
     });
   }
-  onContextMenu(event: MouseEvent, item: BookingConfigurationCustomerDetails) {
+  onContextMenu(event: MouseEvent, item: MigrationBookingConfigurationCustomerDetails) {
     event.preventDefault();
     this.contextMenuPosition.x = event.clientX + 'px';
     this.contextMenuPosition.y = event.clientY + 'px';
@@ -885,7 +885,9 @@ private extractTime(dateTime: Date): Date {
     });
     const payload: any = this.advanceTableForm.getRawValue();
     payload.reservationStops = this.reservationStops;
-    this.bookingConfigurationService.add(payload)  
+    payload.pickupTime = null;
+    payload.dropOffTime = null;
+    this.migrationBookingConfigurationService.add(payload)  
     .subscribe(
     response => 
     {
@@ -1907,7 +1909,7 @@ OnDropOffGeoLocationClick(option:any)
   }
    confirmRejected()
   {
-    this.bookingConfigurationService.delete(this.BookingID,this.customerTravelRequestNumber)  
+    this.migrationBookingConfigurationService.delete(this.BookingID,this.customerTravelRequestNumber)  
     .subscribe(
      response => 
       { 
@@ -1937,7 +1939,7 @@ OnDropOffGeoLocationClick(option:any)
     return 'Stop';
   }
 
-  get enrouteStops(): BookingConfigurationStopDetails[] {
+  get enrouteStops(): MigrationBookingConfigurationStopDetails[] {
     if (!this.stopDetailsList?.length) {
       return [];
     }
@@ -1954,7 +1956,7 @@ OnDropOffGeoLocationClick(option:any)
     return type === 'end' || type === 'dropoff';
   }
 
-  private isIntegrationEnrouteStop(stop: BookingConfigurationStopDetails): boolean {
+  private isIntegrationEnrouteStop(stop: MigrationBookingConfigurationStopDetails): boolean {
     const type = stop?.integrationRequestStopType?.trim().toLowerCase();
     if (!type) {
       return false;
@@ -1965,7 +1967,7 @@ OnDropOffGeoLocationClick(option:any)
     return true;
   }
 
-  getStopAddress(stop: BookingConfigurationStopDetails | null | undefined): string {
+  getStopAddress(stop: MigrationBookingConfigurationStopDetails | null | undefined): string {
     if (!stop) {
       return '';
     }
@@ -1974,7 +1976,7 @@ OnDropOffGeoLocationClick(option:any)
       || '';
   }
 
-  getStopLandmark(stop: BookingConfigurationStopDetails | null | undefined): string {
+  getStopLandmark(stop: MigrationBookingConfigurationStopDetails | null | undefined): string {
     if (!stop) {
       return '';
     }
@@ -1984,14 +1986,14 @@ OnDropOffGeoLocationClick(option:any)
     return stop.landmark || '';
   }
 
-  getPassengerPickupStop(passenger: BookingConfigurationPassengerDetails): BookingConfigurationStopDetails | null {
+  getPassengerPickupStop(passenger: MigrationBookingConfigurationPassengerDetails): MigrationBookingConfigurationStopDetails | null {
     return this.resolvePassengerStop(
       passenger?.integrationRequestPickupStopID,
       'pickup'
     );
   }
 
-  getPassengerDropoffStop(passenger: BookingConfigurationPassengerDetails): BookingConfigurationStopDetails | null {
+  getPassengerDropoffStop(passenger: MigrationBookingConfigurationPassengerDetails): MigrationBookingConfigurationStopDetails | null {
     return this.resolvePassengerStop(
       passenger?.integrationRequestDropoffStopID,
       'dropoff'
@@ -2001,7 +2003,7 @@ OnDropOffGeoLocationClick(option:any)
   private resolvePassengerStop(
     stopId: number | null | undefined,
     fallbackType: 'pickup' | 'dropoff'
-  ): BookingConfigurationStopDetails | null {
+  ): MigrationBookingConfigurationStopDetails | null {
     if (!this.stopDetailsList?.length) {
       return null;
     }
@@ -2018,23 +2020,23 @@ OnDropOffGeoLocationClick(option:any)
     ) || null;
   }
 
-  getPassengerPickupAddress(passenger: BookingConfigurationPassengerDetails): string {
+  getPassengerPickupAddress(passenger: MigrationBookingConfigurationPassengerDetails): string {
     return this.getStopAddress(this.getPassengerPickupStop(passenger))
       || passenger?.pickupAddress
       || '';
   }
 
-  getPassengerDropoffAddress(passenger: BookingConfigurationPassengerDetails): string {
+  getPassengerDropoffAddress(passenger: MigrationBookingConfigurationPassengerDetails): string {
     return this.getStopAddress(this.getPassengerDropoffStop(passenger))
       || passenger?.dropoffAddress
       || '';
   }
 
-  getPassengerPickupLandmark(passenger: BookingConfigurationPassengerDetails): string {
+  getPassengerPickupLandmark(passenger: MigrationBookingConfigurationPassengerDetails): string {
     return this.getStopLandmark(this.getPassengerPickupStop(passenger));
   }
 
-  getPassengerDropoffLandmark(passenger: BookingConfigurationPassengerDetails): string {
+  getPassengerDropoffLandmark(passenger: MigrationBookingConfigurationPassengerDetails): string {
     return this.getStopLandmark(this.getPassengerDropoffStop(passenger));
   }
 
@@ -2104,12 +2106,12 @@ OnDropOffGeoLocationClick(option:any)
     ].some(value => this.hasDisplayValue(value));
   }
 
-  getPassengerDisplayName(passenger: BookingConfigurationPassengerDetails, index: number): string {
+  getPassengerDisplayName(passenger: MigrationBookingConfigurationPassengerDetails, index: number): string {
     const name = passenger?.integrationRequestPassenger?.trim();
     return name || `Passenger ${index + 1}`;
   }
 
-  getPassengerPickupDateTime(passenger: BookingConfigurationPassengerDetails): string {
+  getPassengerPickupDateTime(passenger: MigrationBookingConfigurationPassengerDetails): string {
     const requestParts: string[] = [];
     if (this.customerDetails?.pickupDate) {
       requestParts.push(moment(this.customerDetails.pickupDate).format('DD/MM/YYYY'));
@@ -2126,7 +2128,7 @@ OnDropOffGeoLocationClick(option:any)
     return this.formatStopDateTime(this.getPassengerPickupStop(passenger));
   }
 
-  getPassengerDropoffDateTime(passenger: BookingConfigurationPassengerDetails): string {
+  getPassengerDropoffDateTime(passenger: MigrationBookingConfigurationPassengerDetails): string {
     const requestParts: string[] = [];
     if (this.customerDetails?.dropOffDate) {
       requestParts.push(moment(this.customerDetails.dropOffDate).format('DD/MM/YYYY'));
@@ -2143,7 +2145,7 @@ OnDropOffGeoLocationClick(option:any)
     return this.formatStopDateTime(this.getPassengerDropoffStop(passenger));
   }
 
-  formatStopDateTime(stop: BookingConfigurationStopDetails | null | undefined): string {
+  formatStopDateTime(stop: MigrationBookingConfigurationStopDetails | null | undefined): string {
     if (!stop) {
       return '--';
     }
@@ -2171,7 +2173,7 @@ OnDropOffGeoLocationClick(option:any)
     return customerName.includes('cognizant') || customerCode === 'cvx-cvxindia';
   }
 
-  private refreshReservationStops(enrouteStops?: BookingConfigurationStopDetails[]): void {
+  private refreshReservationStops(enrouteStops?: MigrationBookingConfigurationStopDetails[]): void {
     const stops = enrouteStops
       ?? this.stopDetailsList?.filter(stop => this.isIntegrationEnrouteStop(stop))
       ?? [];

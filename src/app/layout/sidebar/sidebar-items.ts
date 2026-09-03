@@ -214,6 +214,17 @@ export const ROUTES: RouteInfo[] = [
       },
 
       {
+        path: 'migrationBookingRequest',
+        title: 'Migration Booking Request',
+        moduleName: 'migrationBookingRequest',
+        icon: 'fas fa-tachometer-alt',
+        class: '',
+        groupTitle: false,
+        submenu: [],
+        isAccess: false
+      },
+
+      {
         path: 'customerMIS',
         title: 'Customer MIS',
         moduleName: 'customerMIS',
