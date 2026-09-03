@@ -468,6 +468,11 @@ app-controlPanelDesign .control-panel-main-header .cp-booking-category-field .ma
     letter-spacing: 0 !important;
   }
 
+  .cp-quick-search-field input[matDatepicker],
+  .cp-advance-search-field input[matDatepicker] {
+    cursor: pointer;
+  }
+
   .cp-quick-search-field .mdc-line-ripple::before,
   .cp-advance-search-field .mdc-line-ripple::before {
     border-bottom-color: #d7d7d7 !important;

@@ -99,7 +99,7 @@
                         <app-stored-mis-exports></app-stored-mis-exports>
 
                         <p class="export-hint" *ngIf="!exportJobId && !exportJobError">
-                            <strong>Pickup date range is required.</strong> When no other filters are selected, the range is limited to {{ maxPickupDateRangeDays }} days. Add any other search filter to search a wider range. Click <strong>Search</strong> to generate a CSV export in the background.
+                            <strong>Pickup date range is required (max {{ maxPickupDateRangeDays }} days).</strong> Click <strong>Search</strong> to generate a CSV export in the background.
                         </p>
 
                         <div class="responsive_table" *ngIf="false">
@@ -1162,42 +1162,6 @@
 
         <div class="col-xl-3 col-lg-3 col-md-3 col-sm-12 mb-2">
             <mat-form-field class="example-full-width cp-quick-search-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
-                <mat-label>Car Booked</mat-label>
-                <input type="text" matInput [formControl]="SearchCarBooked" [matAutocomplete]="auto9">
-                <mat-autocomplete #auto9="matAutocomplete">
-                    <mat-option *ngFor="let option of filteredCarBookedOptions | async" [value]="option.vehicle">
-                        {{option.vehicle}}
-                    </mat-option>
-                </mat-autocomplete>
-            </mat-form-field>
-        </div>
-
-        <div class="col-xl-3 col-lg-3 col-md-3 col-sm-12 mb-2">
-            <mat-form-field class="example-full-width cp-quick-search-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
-                <mat-label>Car Sent</mat-label>
-                <input type="text" matInput [formControl]="SearchCarSend" [matAutocomplete]="auto8">
-                <mat-autocomplete #auto8="matAutocomplete">
-                    <mat-option *ngFor="let option of filteredCarSendOptions | async" [value]="option.vehicle">
-                        {{option.vehicle}}
-                    </mat-option>
-                </mat-autocomplete>
-            </mat-form-field>
-        </div>
-
-        <div class="col-xl-3 col-lg-3 col-md-3 col-sm-12 mb-2">
-            <mat-form-field class="example-full-width cp-quick-search-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
-                <mat-label>Car No.</mat-label>
-                <input type="text" matInput [formControl]="SearchCarNo" [matAutocomplete]="auto12">
-                <mat-autocomplete #auto12="matAutocomplete">
-                    <mat-option *ngFor="let option of filteredCarNoOptions | async" [value]="option.vehicle">
-                        {{option.vehicle}}
-                    </mat-option>
-                </mat-autocomplete>
-            </mat-form-field>
-        </div>
-
-        <div class="col-xl-3 col-lg-3 col-md-3 col-sm-12 mb-2">
-            <mat-form-field class="example-full-width cp-quick-search-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
                 <mat-label>Regn. No.</mat-label>
                 <input type="text" matInput [formControl]="SearchRegnNo" [matAutocomplete]="autoRegnNoAdvance">
                 <mat-autocomplete #autoRegnNoAdvance="matAutocomplete" (optionSelected)="OnRegnNoSelected($event.option.value)">
@@ -1210,18 +1174,6 @@
       </div>
       
       <div class="row">
-        <div class="col-xl-3 col-lg-3 col-md-3 col-sm-12 mb-2">
-           <mat-form-field class="example-full-width cp-quick-search-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
-                <mat-label>Driver</mat-label>
-                <input type="text" matInput [formControl]="SearchDri" [matAutocomplete]="auto15">
-                <mat-autocomplete #auto15="matAutocomplete">
-                    <mat-option *ngFor="let option of filteredDriverOptions | async" [value]="option.driverName">
-                        {{option.driverName}}
-                    </mat-option>
-                </mat-autocomplete>
-            </mat-form-field>
-        </div>
-
         <div class="col-xl-3 col-lg-3 col-md-3 col-sm-12 mb-2">
             <mat-form-field class="example-full-width cp-quick-search-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
                 <mat-label>Guest Name</mat-label>
@@ -1310,22 +1262,20 @@
         <div class="col-xl-3 col-lg-3 col-md-3 col-sm-12 mb-2">
             <mat-form-field class="example-full-width cp-quick-search-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
                 <mat-label>Pickup Date From</mat-label>
-                <input type="text" matInput [matDatepicker]="fromDate" [(ngModel)]="SearchFromDate" [required]="!isDutySlipIdSearchActive()" [disabled]="isDutySlipIdSearchActive()">
-                <mat-datepicker-toggle matSuffix [for]="fromDate" [disabled]="isDutySlipIdSearchActive()"></mat-datepicker-toggle>
+                <input type="text" matInput [matDatepicker]="fromDate" [(ngModel)]="SearchFromDate" required>
+                <mat-datepicker-toggle matSuffix [for]="fromDate"></mat-datepicker-toggle>
                 <mat-datepicker #fromDate></mat-datepicker>
-                <mat-hint *ngIf="!isDutySlipIdSearchActive()">Required</mat-hint>
-                <mat-hint *ngIf="isDutySlipIdSearchActive()">Disabled when Duty Slip ID is entered</mat-hint>
+                <mat-hint>Required (max {{ maxPickupDateRangeDays }} days)</mat-hint>
             </mat-form-field>
         </div>
         
         <div class="col-xl-3 col-lg-3 col-md-3 col-sm-12 mb-2">
             <mat-form-field class="example-full-width cp-quick-search-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
                 <mat-label>Pickup Date To</mat-label>
-                <input type="text" matInput [matDatepicker]="toDate" [(ngModel)]="SearchToDate" [required]="!isDutySlipIdSearchActive()" [disabled]="isDutySlipIdSearchActive()">
-                <mat-datepicker-toggle matSuffix [for]="toDate" [disabled]="isDutySlipIdSearchActive()"></mat-datepicker-toggle>
+                <input type="text" matInput [matDatepicker]="toDate" [(ngModel)]="SearchToDate" required>
+                <mat-datepicker-toggle matSuffix [for]="toDate"></mat-datepicker-toggle>
                 <mat-datepicker #toDate></mat-datepicker>
-                <mat-hint *ngIf="!isDutySlipIdSearchActive()">Required</mat-hint>
-                <mat-hint *ngIf="isDutySlipIdSearchActive()">Disabled when Duty Slip ID is entered</mat-hint>
+                <mat-hint>Required (max {{ maxPickupDateRangeDays }} days)</mat-hint>
             </mat-form-field>
         </div>
     </div>
@@ -1427,6 +1377,69 @@
     </div>
 
     <div class="row">
+        <div class="col-xl-3 col-lg-3 col-md-3 col-sm-12 mb-2">
+            <mat-form-field class="example-full-width cp-quick-search-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
+                <mat-label>Supplier Name</mat-label>
+                <input type="text" matInput [formControl]="SearchSupplier" [matAutocomplete]="autoSupplierQuick" autocomplete="off">
+                <mat-hint>Type 3+ letters or 2+ digit Old Rentnet Code</mat-hint>
+                <mat-autocomplete #autoSupplierQuick="matAutocomplete" (optionSelected)="OnSupplierSelected($event.option.value)">
+                    <mat-option *ngFor="let option of filteredSupplierOptions | async" [value]="formatSupplierDisplay(option)" (click)="getSupplierID(option.supplierID)">
+                        {{ formatSupplierDisplay(option) }}
+                    </mat-option>
+                </mat-autocomplete>
+            </mat-form-field>
+        </div>
+
+        <div class="col-xl-3 col-lg-3 col-md-3 col-sm-12 mb-2">
+            <mat-form-field class="example-full-width cp-quick-search-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
+                <mat-label>Car No.</mat-label>
+                <input type="text" matInput [formControl]="SearchCarNo" [matAutocomplete]="auto12">
+                <mat-autocomplete #auto12="matAutocomplete">
+                    <mat-option *ngFor="let option of filteredCarNoOptions | async" [value]="option.vehicle">
+                        {{option.vehicle}}
+                    </mat-option>
+                </mat-autocomplete>
+            </mat-form-field>
+        </div>
+
+        <div class="col-xl-3 col-lg-3 col-md-3 col-sm-12 mb-2">
+            <mat-form-field class="example-full-width cp-quick-search-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
+                <mat-label>Driver</mat-label>
+                <input type="text" matInput [formControl]="SearchDri" [matAutocomplete]="auto15">
+                <mat-autocomplete #auto15="matAutocomplete">
+                    <mat-option *ngFor="let option of filteredDriverOptions | async" [value]="option.driverName">
+                        {{option.driverName}}
+                    </mat-option>
+                </mat-autocomplete>
+            </mat-form-field>
+        </div>
+
+        <div class="col-xl-3 col-lg-3 col-md-3 col-sm-12 mb-2">
+            <mat-form-field class="example-full-width cp-quick-search-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
+                <mat-label>Car Booked</mat-label>
+                <input type="text" matInput [formControl]="SearchCarBooked" [matAutocomplete]="auto9">
+                <mat-autocomplete #auto9="matAutocomplete">
+                    <mat-option *ngFor="let option of filteredCarBookedOptions | async" [value]="option.vehicle">
+                        {{option.vehicle}}
+                    </mat-option>
+                </mat-autocomplete>
+            </mat-form-field>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-xl-3 col-lg-3 col-md-3 col-sm-12 mb-2">
+            <mat-form-field class="example-full-width cp-quick-search-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
+                <mat-label>Car Sent</mat-label>
+                <input type="text" matInput [formControl]="SearchCarSend" [matAutocomplete]="auto8">
+                <mat-autocomplete #auto8="matAutocomplete">
+                    <mat-option *ngFor="let option of filteredCarSendOptions | async" [value]="option.vehicle">
+                        {{option.vehicle}}
+                    </mat-option>
+                </mat-autocomplete>
+            </mat-form-field>
+        </div>
+
         <div class="col-xl-3 col-lg-3 col-md-3 col-sm-12 mb-2">
             <mat-form-field class="example-full-width cp-quick-search-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
                 <mat-label>Duty Slip ID</mat-label>

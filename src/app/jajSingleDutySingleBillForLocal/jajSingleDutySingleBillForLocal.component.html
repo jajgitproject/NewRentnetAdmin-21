@@ -231,7 +231,9 @@
                 {{dataSource?.invoicePackageModel?.extraKMRate | number:'1.2-2'}}
               </td>
               <td class="table-midrow-thirdcolumn">
-                {{dataSource?.invoicePackageValuesModel?.extraKMAmount | number:'1.2-2'}}
+                <span *ngIf="(+dataSource?.invoicePackageValuesModel?.extraKMAmount || 0) > 0">
+                  {{dataSource?.invoicePackageValuesModel?.extraKMAmount | number:'1.2-2'}}
+                </span>
               </td>
             </tr>
 
@@ -246,7 +248,9 @@
                 {{ dataSource?.invoicePackageModel?.extraHRRate | number:'1.2-2' }}
               </td>
               <td class="table-midrow-thirdcolumn">
-                {{ dataSource?.invoicePackageValuesModel?.extraMinutesAmount | number:'1.2-2' }}
+                <span *ngIf="(+dataSource?.invoicePackageValuesModel?.extraMinutesAmount || 0) > 0">
+                  {{ dataSource?.invoicePackageValuesModel?.extraMinutesAmount | number:'1.2-2' }}
+                </span>
               </td>
             </tr>
 
@@ -296,7 +300,9 @@
               <td class="table-midrow-secondcolumn">
               </td>
               <td class="table-midrow-thirdcolumn">
-                {{dataSource?.invoicePackageFGRModel?.fgrkmAmount + dataSource?.invoicePackageFGRModel.fgrFixedAmount | number:'1.2-2'}}
+                <span *ngIf="((+dataSource?.invoicePackageFGRModel?.fgrkmAmount || 0) + (+dataSource?.invoicePackageFGRModel?.fgrFixedAmount || 0)) > 0">
+                  {{dataSource?.invoicePackageFGRModel?.fgrkmAmount + dataSource?.invoicePackageFGRModel.fgrFixedAmount | number:'1.2-2'}}
+                </span>
               </td>
             </tr>
 

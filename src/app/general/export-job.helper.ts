@@ -1,7 +1,51 @@
 // @ts-nocheck
 import { HttpClient } from '@angular/common/http';
+import moment from 'moment';
 import { Observable, timer } from 'rxjs';
 import { switchMap, takeWhile } from 'rxjs/operators';
+
+const MIS_SEARCH_DATE_INPUT_FORMATS = [
+  'DD/MM/YYYY',
+  'D/M/YYYY',
+  'DD-MM-YYYY',
+  'D-M-YYYY',
+  'MMM DD yyyy',
+  'MMM D yyyy',
+  moment.ISO_8601
+];
+
+export function parseMisSearchDate(value: any): moment.Moment | null {
+  if (value == null || value === '') {
+    return null;
+  }
+
+  if (moment.isMoment(value)) {
+    return value.isValid() ? value.clone().startOf('day') : null;
+  }
+
+  if (value instanceof Date) {
+    const parsed = moment(value);
+    return parsed.isValid() ? parsed.startOf('day') : null;
+  }
+
+  const text = String(value).trim();
+  if (!text) {
+    return null;
+  }
+
+  const strict = moment(text, MIS_SEARCH_DATE_INPUT_FORMATS, true);
+  if (strict.isValid()) {
+    return strict.startOf('day');
+  }
+
+  const loose = moment(text, MIS_SEARCH_DATE_INPUT_FORMATS);
+  return loose.isValid() ? loose.startOf('day') : null;
+}
+
+export function formatMisSearchDateForApi(value: any): string {
+  const parsed = parseMisSearchDate(value);
+  return parsed ? parsed.format('DD/MM/YYYY') : '';
+}
 
 export function getExportJobStatusName(status: any): string {
   return String(status?.status ?? status?.Status ?? '').toLowerCase();
