@@ -215,6 +215,7 @@ export class FormDialogComponent implements OnInit {
         advanceTable: customerDetailData,
         action: 'add',
         forCP: 'CB',
+        reservationID: this.reservationID,
         CustomerGroupID: customerDetailData.customerGroupID,
         CustomerGroupName: customerDetailData.customerGroup,
       },

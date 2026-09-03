@@ -1,10 +1,9 @@
-// @ts-nocheck
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable, timeout } from 'rxjs';
 
 import { GeneralService } from '../general/general.service';
-import { AuditTrailEvent, AuditTrailRow } from './auditTrail.model';
+import { AuditTrailEvent, AuditTrailNlpQueryResponse } from './auditTrail.model';
 
 @Injectable()
 export class AuditTrailService {
@@ -14,32 +13,36 @@ export class AuditTrailService {
     private httpClient: HttpClient,
     private generalService: GeneralService
   ) {
-    this.apiBase = this.generalService.BaseURL + 'auditTrail';
+    this.apiBase = this.generalService.BaseURL + 'reservationAllotmentAudit';
   }
 
   getEvents(
-    userId: number | null,
-    pageName: string,
+    module: string,
     reservationId: number | null,
+    allotmentId: number | null,
+    userId: number | null,
+    fromDate: Date | null,
+    toDate: Date | null,
     pageNumber: number,
     pageSize: number,
-    includeNullUser: boolean = true,
-    fromDate: Date | null = null,
-    toDate: Date | null = null
+    operation?: string | null,
+    searchText?: string | null
   ): Observable<AuditTrailEvent[]> {
     let params = new HttpParams()
-      .set('pageNumber', pageNumber.toString())
-      .set('pageSize', pageSize.toString())
-      .set('includeNullUser', includeNullUser ? 'true' : 'false');
+      .set('pageNumber', String(pageNumber))
+      .set('pageSize', String(pageSize));
 
-    // Empty string means "all pages" (backend treats it as NULL).
-    params = params.set('pageName', pageName || '');
-
-    if (userId != null) {
-      params = params.set('userId', userId.toString());
+    if (module) {
+      params = params.set('module', module);
     }
     if (reservationId != null) {
-      params = params.set('reservationId', reservationId.toString());
+      params = params.set('reservationId', String(reservationId));
+    }
+    if (allotmentId != null) {
+      params = params.set('allotmentId', String(allotmentId));
+    }
+    if (userId != null) {
+      params = params.set('userId', String(userId));
     }
     if (fromDate) {
       params = params.set('fromDate', this.formatApiDate(fromDate));
@@ -47,22 +50,31 @@ export class AuditTrailService {
     if (toDate) {
       params = params.set('toDate', this.formatApiDate(toDate));
     }
+    if (operation) {
+      params = params.set('operation', operation);
+    }
+    if (searchText) {
+      params = params.set('searchText', searchText);
+    }
 
-    const timeoutMs = reservationId != null ? 120000 : 120000;
-    return this.httpClient.get<AuditTrailEvent[]>(
-      this.apiBase + '/events',
-      { params }
-    ).pipe(timeout(timeoutMs));
+    return this.httpClient
+      .get<AuditTrailEvent[]>(this.apiBase + '/events', { params })
+      .pipe(timeout(120000));
   }
 
-  getRows(auditEventId: number, options?: { lite?: boolean }): Observable<AuditTrailRow[]> {
-    let params = new HttpParams();
-    if (options?.lite) {
-      params = params.set('lite', 'true');
-    }
-    return this.httpClient.get<AuditTrailRow[]>(
-      this.apiBase + '/events/' + auditEventId + '/rows',
-      { params }
+  queryEvents(q: string, pageNumber: number, pageSize: number): Observable<AuditTrailNlpQueryResponse> {
+    return this.httpClient
+      .post<AuditTrailNlpQueryResponse>(this.apiBase + '/events/query', {
+        q,
+        pageNumber,
+        pageSize
+      })
+      .pipe(timeout(120000));
+  }
+
+  getEvent(eventId: string): Observable<AuditTrailEvent> {
+    return this.httpClient.get<AuditTrailEvent>(
+      this.apiBase + '/events/' + encodeURIComponent(eventId)
     );
   }
 
@@ -73,5 +85,3 @@ export class AuditTrailService {
     return `${y}-${m}-${d}`;
   }
 }
-
-

@@ -1,5 +1,5 @@
 // @ts-nocheck
-import { Component, ElementRef, EventEmitter, Input, OnInit, Output, ViewChild } from '@angular/core';
+import { Component, ElementRef, EventEmitter, Input, OnDestroy, OnInit, Output, ViewChild } from '@angular/core';
 import { ReservationService } from './reservation.service';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { MatDialog, MatDialogConfig, MatDialogRef } from '@angular/material/dialog';
@@ -73,7 +73,7 @@ import { DatePipe } from '@angular/common';
   styleUrls: ['./reservation.component.sass'],
   providers: [{ provide: MAT_DATE_LOCALE, useValue: 'en-GB' }]
 })
-export class ReservationComponent implements OnInit {
+export class ReservationComponent implements OnInit, OnDestroy {
   @Input() ReservationID:any;
   @Input() action:any;
   @Input() fromForm:any;
@@ -415,6 +415,7 @@ canCreateReservation: boolean;
     this.applyStaticRequiredValidators();
      this.canCreateReservation =
     localStorage.getItem('canCreateReservation') === 'true';
+    this.rememberAuditReservationId();
     // Enhanced status checking - allow changes for new duplicated bookings
     if(this.status && this.status !== 'Changes allow' && !this.isEditingAllowed()) {
       this.buttonDisabled = true;
@@ -459,6 +460,7 @@ canCreateReservation: boolean;
 
       if (encryptedReservationID) {
         this.ReservationID = this._generalService.decrypt(decodeURIComponent(encryptedReservationID));
+        this.rememberAuditReservationId(this.ReservationID);
       }
 
       if (encryptedCustomerGroupID) {
@@ -543,6 +545,7 @@ canCreateReservation: boolean;
     const encryptedReservationID = paramsData.reservationID;
     this.reservationID = this._generalService.decrypt(decodeURIComponent(encryptedReservationID));
     this.ReservationID = this.reservationID;
+    this.rememberAuditReservationId(this.ReservationID);
 
     const encryptedTransferedLocationID = paramsData.transferedLocationID;
     this.transferedLocationID = this._generalService.decrypt(decodeURIComponent(encryptedTransferedLocationID));
@@ -3949,6 +3952,7 @@ public validateCustomerSpecificFields(): boolean {
               advanceTable: this.customerDetailData,
               action: 'add',
               forCP:'CP',
+              reservationID: this.getCurrentReservationID(),
               // forCP:'368807',
               CustomerGroupID:this.customerDetailData.customerGroupID,
               CustomerGroupName:this.customerDetailData.customerGroup
@@ -3973,6 +3977,7 @@ public validateCustomerSpecificFields(): boolean {
             advanceTable: this.customerDetailData,
             action: 'add',
             forCP:'CP',
+            reservationID: this.getCurrentReservationID(),
             CustomerGroupID:this.customerDetailData.customerGroupID,
             CustomerGroupName:this.customerDetailData.customerGroup
           }
@@ -3995,6 +4000,7 @@ public validateCustomerSpecificFields(): boolean {
    
     if(this.action==='edit')
     {
+      this.rememberAuditReservationId();
       let customerGroup=this.advanceTableForm.controls['customerCustomerGroup'].value.split('-')[1];
       this.customerDetailData={customerGroup:customerGroup,customerGroupID:this.advanceTableForm.value.customerGroupID, customerID:this.customerID,customerName:this.customerName}
       if(this.customerDetailData)
@@ -4005,6 +4011,7 @@ public validateCustomerSpecificFields(): boolean {
             {
               advanceTable: this.selectedPassengerData,
               action: 'edit',
+              reservationID: this.getCurrentReservationID(),
               CustomerGroupID:this.customerDetailData.customerGroupID,
               CustomerGroupName:this.customerDetailData.customerGroup
             }
@@ -4041,6 +4048,7 @@ public validateCustomerSpecificFields(): boolean {
         advanceTable: this.customerDetailData,
         action: 'add',
         forCP: 'CB',
+        reservationID: this.getCurrentReservationID(),
         CustomerGroupID: this.customerDetailData.customerGroupID,
         CustomerGroupName: this.customerDetailData.customerGroup
       }
@@ -5726,6 +5734,22 @@ private canThisRoleCreateBackDateBooking(): boolean {
       || this.reservationID
       || this.advanceTableForm?.getRawValue()?.reservationID
       || this.advanceTable?.reservationID;
+  }
+
+  private rememberAuditReservationId(id?: any): void {
+    const reservationId = id ?? this.getCurrentReservationID();
+    if (!reservationId) {
+      return;
+    }
+    try {
+      sessionStorage.setItem('audit_reservationId', String(reservationId));
+    } catch {}
+  }
+
+  ngOnDestroy(): void {
+    try {
+      sessionStorage.removeItem('audit_reservationId');
+    } catch {}
   }
 
   private shouldUseEditPrefill(): boolean {
