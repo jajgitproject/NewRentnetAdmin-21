@@ -18,6 +18,9 @@
     <button mat-raised-button color="warn" (click)="onNoClick()" tabindex="-1">
       Reset
     </button>
+    <button mat-raised-button color="accent" (click)="onResetAllClick()" tabindex="-1">
+      Reset All
+    </button>
   </ng-template>
   <div class="container-fluid">
     <!-- <div class="block-header">
@@ -57,7 +60,7 @@
             <div class="col-xl-2 col-lg-2 col-md-2 col-sm-12 mb-2">
               <mat-form-field class="example-full-width cp-quick-search-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
                 <mat-label>Pickup Date From</mat-label>
-                <input matInput [matDatepicker]="fromDateQuick" formControlName="fromDate" />
+                <input matInput [matDatepicker]="fromDateQuick" formControlName="fromDate" (click)="fromDateQuick.open()" />
                 <mat-datepicker-toggle matSuffix [for]="fromDateQuick"></mat-datepicker-toggle>
                 <mat-datepicker #fromDateQuick></mat-datepicker>
               </mat-form-field>
@@ -66,7 +69,7 @@
             <div class="col-xl-2 col-lg-2 col-md-2 col-sm-12 mb-2">
               <mat-form-field class="example-full-width cp-quick-search-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
                 <mat-label>Pickup Date To</mat-label>
-                <input matInput [matDatepicker]="todateQuick" formControlName="toDate" />
+                <input matInput [matDatepicker]="todateQuick" formControlName="toDate" (click)="todateQuick.open()" />
                 <mat-datepicker-toggle matSuffix [for]="todateQuick"></mat-datepicker-toggle>
                 <mat-datepicker #todateQuick></mat-datepicker>
               </mat-form-field>
@@ -608,7 +611,7 @@
             <div class="col-xl-3 col-lg-3 col-md-3 col-sm-6 mb-2">
               <mat-form-field class="example-full-width cp-advance-search-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
                 <mat-label>Pickup Date From</mat-label>
-                <input matInput [matDatepicker]="fromDateAdvance" formControlName="fromDate" />
+                <input matInput [matDatepicker]="fromDateAdvance" formControlName="fromDate" (click)="fromDateAdvance.open()" />
                 <mat-datepicker-toggle matSuffix [for]="fromDateAdvance"></mat-datepicker-toggle>
                 <mat-datepicker #fromDateAdvance></mat-datepicker>
               </mat-form-field>
@@ -627,7 +630,7 @@
             <div class="col-xl-3 col-lg-3 col-md-3 col-sm-6 mb-2">
               <mat-form-field class="example-full-width cp-advance-search-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
                 <mat-label>Pickup Date To</mat-label>
-                <input matInput [matDatepicker]="todateAdvance" formControlName="toDate" />
+                <input matInput [matDatepicker]="todateAdvance" formControlName="toDate" (click)="todateAdvance.open()" />
                 <mat-datepicker-toggle matSuffix [for]="todateAdvance"></mat-datepicker-toggle>
                 <mat-datepicker #todateAdvance></mat-datepicker>
               </mat-form-field>
@@ -3297,7 +3300,7 @@
             <div class="col-xl-6 col-lg-6 col-md-6 col-sm-6 mb-2">
               <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
                 <mat-label>Pickup Date From</mat-label>
-                <input matInput [matDatepicker]="fromDate" formControlName="fromDate" />
+                <input matInput [matDatepicker]="fromDate" formControlName="fromDate" (click)="fromDate.open()" />
                 <mat-datepicker-toggle matSuffix [for]="fromDate"></mat-datepicker-toggle>
                 <mat-datepicker #fromDate></mat-datepicker>
               </mat-form-field>
@@ -3317,7 +3320,7 @@
             <div class="col-xl-6 col-lg-6 col-md-6 col-sm-6 mb-2">
               <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
                 <mat-label>Pickup Date To</mat-label>
-                <input matInput [matDatepicker]="todate" formControlName="toDate" />
+                <input matInput [matDatepicker]="todate" formControlName="toDate" (click)="todate.open()" />
                 <mat-datepicker-toggle matSuffix [for]="todate"></mat-datepicker-toggle>
                 <mat-datepicker #todate></mat-datepicker>
               </mat-form-field>

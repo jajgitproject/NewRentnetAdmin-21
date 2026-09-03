@@ -2564,7 +2564,9 @@ public resetVerificationForEcoStateChange(): void {
     if (!allowed) {
       return;
     }
-    const usePartial = this.canSavePartialAfterGfb || this.canSavePartialPreGfb;
+    // Pre-GFB updates use the same full PUT /Closing path as first save (sanitized payload).
+    // Partial UpdateRemarks is only for post-GFB when the form is locked for most fields.
+    const usePartial = this.canSavePartialAfterGfb;
     this.resetGoodForBillingOnUpdate();
     if (usePartial) {
       this.savePartialAfterGfb();

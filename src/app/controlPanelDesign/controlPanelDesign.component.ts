@@ -3954,35 +3954,48 @@ controlPanelDetails(reservationID:any,index:number) {
       });
       }
  onNoClick(): void {
-  // Option 1: Reset to _filters initial values
-    this._filters = new Filters({});
-    this.filterForm = this.createFilterForm();
-    this.setupPrefixAutocompletes();
-    this.searchTerm = '';
-    this.selectedFilter = 'search';
-    const today = this.formatDate(new Date());
-    const now = new Date();
-    this.filterForm.patchValue({fromDate: today});
-    this.filterForm.patchValue({toDate: today});
-    this.filterForm.patchValue({showAllLocation:true});
+  this.resetFilters(false);
+ }
+
+ onResetAllClick(): void {
+  this.resetFilters(true);
+ }
+
+ private resetFilters(clearDateFilters: boolean): void {
+  this._filters = new Filters({});
+  this.filterForm = this.createFilterForm();
+  this.setupPrefixAutocompletes();
+  this.searchTerm = '';
+  this.selectedFilter = 'search';
+
+  if (clearDateFilters) {
     this.filterForm.patchValue({
-      customer: '',
-      customerID: '',
-      customerGroup: '',
-      customerGroupID: '',
-      packageType: '',
-      packageTypeID: ''
+      fromDate: '',
+      toDate: '',
+      fromTime: '',
+      toTime: ''
     });
+  } else {
+    const today = this.formatDate(new Date());
+    this.filterForm.patchValue({ fromDate: today, toDate: today });
+  }
 
+  this.filterForm.patchValue({ showAllLocation: true });
+  this.filterForm.patchValue({
+    customer: '',
+    customerID: '',
+    customerGroup: '',
+    customerGroupID: '',
+    packageType: '',
+    packageTypeID: ''
+  });
 
-  this.FillCustomerGroupDD(); 
-  this.FillCustomerDD();          
-  this.FillCustomerDDOnPageLoad(); 
-  this.InitPackageType();  
-  this.loadDataForHeader('complete',this.currentPage,50,true);
-   
-
-}
+  this.FillCustomerGroupDD();
+  this.FillCustomerDD();
+  this.FillCustomerDDOnPageLoad();
+  this.InitPackageType();
+  this.loadDataForHeader('complete', this.currentPage, 50, true);
+ }
 
 setCalculatedLocationOutTime(data: any, interval?: number) {
 
