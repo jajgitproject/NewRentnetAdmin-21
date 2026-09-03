@@ -636,10 +636,7 @@
       <div class="gst-section">
         <div class="gst-row"><strong>Sub Total : </strong><span>{{dataSource?.totalAmountAfterExpences |
             number:'1.2-2'}}</span></div>
-            <div class="gst-row gst-row-block" *ngIf="shouldPrintSezLutDeclaration()">Supply meant for Export/supply to SEZ unit or SEZ developer for 
-                          <br/>
-              authorised operations under bond or letter of undertaking
-               <br/> without payment of integrated Tax</div>
+            <div class="gst-row gst-row-block" *ngIf="shouldPrintSezInvoiceDeclaration()">{{ getSezInvoiceDeclaration() }}</div>
         <div class="gst-row">
           <strong>CGST @ {{dataSource?.invoiceGSTModel?.cgstPercentage}}% :</strong>
           <span>{{dataSource?.invoiceGSTModel?.cgstAmount | number:'1.2-2'}}</span>

@@ -144,6 +144,42 @@ convertNumberToWords(amount: number): string {
   window.print();
 }
 
+shouldPrintSezInvoiceDeclaration(): boolean {
+  return this.isSezCustomerForInvoice();
+}
+
+getSezInvoiceDeclaration(): string {
+  if (this.isInvoiceGstCharged()) {
+    return 'Supply meant for Export/supply to SEZ unit or SEZ developer for authorised operations under bond or letter of undertaking with payment of integrated TAX';
+  }
+  return 'Supply meant for Export/supply to SEZ unit or SEZ developer for authorised operations under bond or letter of undertaking without payment of integrated TAX';
+}
+
+private isSezCustomerForInvoice(): boolean {
+  if (this.dataSource?.isSEZ === true) {
+    return true;
+  }
+  const customerType = (this.dataSource?.customerType || '').toString().trim();
+  return customerType.toUpperCase() === 'SEZ';
+}
+
+private isInvoiceGstCharged(): boolean {
+  const src = this.dataSource;
+  if (!src) {
+    return false;
+  }
+  const amount =
+    (Number(src.cgstAmount) || 0) + (Number(src.sgstAmount) || 0) + (Number(src.igstAmount) || 0);
+  if (amount > 0) {
+    return true;
+  }
+  return (
+    (Number(src.cgstPercentage) || 0) +
+    (Number(src.sgstPercentage) || 0) +
+    (Number(src.igstPercentage) || 0)
+  ) > 0;
+}
+
   formatExtraKmsHrs(lineItem: any): string {
     if (!lineItem) {
       return '';
