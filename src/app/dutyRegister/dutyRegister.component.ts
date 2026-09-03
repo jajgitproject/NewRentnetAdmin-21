@@ -14,7 +14,7 @@ import { DateAdapter, MAT_DATE_LOCALE } from '@angular/material/core';
 import { MatMenu, MatMenuTrigger } from '@angular/material/menu';
 import { SelectionModel } from '@angular/cdk/collections';
 import { GeneralService } from '../general/general.service';
-import { extractExportErrorMessage, exportJobAcceptedSnackbarMessage, exportSearchButtonLabel, formatExportElapsedTime, IN_FLIGHT_EXPORT_MESSAGE, isExportJobCancelled, isExportJobNotFoundError, loadPersistedExportJobId, markExportDumpStarted, persistExportJobId } from '../general/export-job.helper';
+import { extractExportErrorMessage, exportJobAcceptedSnackbarMessage, exportSearchButtonLabel, formatExportElapsedTime, IN_FLIGHT_EXPORT_MESSAGE, isExportJobCancelled, isExportJobNotFoundError, loadPersistedExportJobId, markExportDumpStarted, parseMisSearchDate, persistExportJobId } from '../general/export-job.helper';
 import { StoredMisExportsComponent } from '../general/stored-mis-exports.component';
 import { Form, FormControl } from '@angular/forms';
 import { PackageTypeDropDown } from '../packageType/packageTypeDropDown.model';
@@ -23,6 +23,7 @@ import { ModeOfPaymentDropDown } from '../modeOfPayment/modeOfPaymentDropDown.mo
 import { OrganizationalEntityDropDown } from '../organizationalEntity/organizationalEntityDropDown.model';
 import { SupplierTypeDropDownModel } from '../supplierType/supplierType.model';
 import { SupplierDropDown } from '../supplier/supplierDropDown.model';
+import { filterSuppliersByDisplay, formatSupplierDisplay, normalizeSupplierDropDownList, resolveSupplierSearchTerm, supplierMatchesDisplay } from '../supplier/supplier-display.util';
 import { VehicleVehicleCategoryDropDown } from '../vehicle/vehicleVehicleCategoryDropDown.model';
 import { VehicleDropDown } from '../vehicle/vehicleDropDown.model';
 import { DriverDropDown } from '../customerPersonDriverRestriction/driverDropDown.model';
@@ -182,7 +183,8 @@ export class DutyRegisterComponent implements OnInit, OnDestroy {
 
   SearchSupplier: FormControl = new FormControl();
   public SupplierList?: SupplierDropDown[] = [];
-  filteredSupplierOptions: Observable<SupplierDropDown[]>;  
+  filteredSupplierOptions: Observable<SupplierDropDown[]>;
+  SearchSupplierID: number = 0;  
 
   SearchClosureType : FormControl = new FormControl();
 
@@ -262,6 +264,7 @@ export class DutyRegisterComponent implements OnInit, OnDestroy {
   @ViewChild(StoredMisExportsComponent) storedExports?: StoredMisExportsComponent;
   hasManualSearch: boolean = false;
   readonly maxPickupDateRangeDays = 15;
+  formatSupplierDisplay = formatSupplierDisplay;
     
   UserID:any;
   IsKAMRole:any;
@@ -340,6 +343,7 @@ export class DutyRegisterComponent implements OnInit, OnDestroy {
     this.SearchToDate = '';
     this.SearchSalesPerson.setValue('');
     this.SearchSupplier.setValue('');
+    this.SearchSupplierID = 0;
     this.SearchCarSend.setValue('');
     this.SearchCarBooked.setValue('');
     this.SearchBookingStatus.setValue('');
@@ -803,27 +807,22 @@ export class DutyRegisterComponent implements OnInit, OnDestroy {
   }
 
   validatePickupDateRange(): string | null {
-    if (this.isDutySlipIdSearchActive()) {
-      return null;
-    }
-
     if (!this.SearchFromDate || !this.SearchToDate) {
       return 'Pickup date range is required. Please select From and To dates.';
     }
 
-    const fromDate = moment(this.SearchFromDate).startOf('day');
-    const toDate = moment(this.SearchToDate).startOf('day');
-    if (!fromDate.isValid() || !toDate.isValid()) {
+    const fromDate = parseMisSearchDate(this.SearchFromDate);
+    const toDate = parseMisSearchDate(this.SearchToDate);
+    if (!fromDate || !toDate) {
       return 'Please enter valid pickup dates.';
     }
     if (toDate.isBefore(fromDate)) {
       return 'Pickup To Date cannot be earlier than From Date.';
     }
-    if (!this.hasAdditionalSearchFilters()) {
-      const inclusiveDays = toDate.diff(fromDate, 'days') + 1;
-      if (inclusiveDays > this.maxPickupDateRangeDays) {
-        return `Pickup date range cannot exceed ${this.maxPickupDateRangeDays} days when no other search filters are selected. Add another filter to search a wider range.`;
-      }
+
+    const inclusiveDays = toDate.diff(fromDate, 'days') + 1;
+    if (inclusiveDays > this.maxPickupDateRangeDays) {
+      return `Pickup date range cannot exceed ${this.maxPickupDateRangeDays} days.`;
     }
 
     return null;
@@ -841,19 +840,16 @@ export class DutyRegisterComponent implements OnInit, OnDestroy {
       SearchKAMID: this.SearchKAMID,
       SearchCustomerPersonName: this.SearchCustomerPerson?.value || "",
       SearchDutyType: this.SearchDutyType?.value || "",
-      SearchFeedbackDate: this.SearchFeedbackDate !== "" ? moment(this.SearchFeedbackDate).format('MMM DD yyyy') : "",
+      SearchFeedbackDate: this.SearchFeedbackDate || "",
       SearchSlipReceipt: this.SearchSlipReceipt,
       SearchClosureType: this.SearchClosureType?.value || "",
       SearchDispatchLocation: this.SearchDispatchLocation?.value || "",
       SearchMOP: this.SearchMOP?.value || "",
       SearchSupplierType: this.SearchSupplierType?.value || "",
-      SearchSupplier: this.SearchSupplier?.value || "",
-      SearchFromDate: this.isDutySlipIdSearchActive()
-        ? ""
-        : (this.SearchFromDate !== "" ? moment(this.SearchFromDate).format('MMM DD yyyy') : ""),
-      SearchToDate: this.isDutySlipIdSearchActive()
-        ? ""
-        : (this.SearchToDate !== "" ? moment(this.SearchToDate).format('MMM DD yyyy') : ""),
+      SearchSupplier: (this.SearchSupplierID || 0) > 0 ? "" : this.resolveSupplierSearchValue(),
+      SearchSupplierID: (this.SearchSupplier?.value || '').toString().trim() ? (this.SearchSupplierID || 0) : 0,
+      SearchFromDate: this.SearchFromDate ?? "",
+      SearchToDate: this.SearchToDate ?? "",
       SearchSalesPersonName: this.SearchSalesPerson?.value || "",
       SearchCarSent: this.SearchCarSend?.value || "",
       SearchCarBook: this.SearchCarBooked?.value || "",
@@ -866,7 +862,7 @@ export class DutyRegisterComponent implements OnInit, OnDestroy {
       SearchBillStatus: this.SearchBillStatus?.value,
       SearchDri: this.SearchDri?.value || "",
       SearchCarNo: this.SearchCarNo?.value || "",
-      SearchInventoryID: this.SearchInventoryID || 0,
+      SearchInventoryID: (this.SearchRegnNo?.value || '').toString().trim() ? (this.SearchInventoryID || 0) : 0,
       SearchSupplierO: this.SearchSupplierO?.value || "",
       SearchRes: this.SearchRes || "",
       SearchDuty: this.SearchDuty || "",
@@ -874,14 +870,14 @@ export class DutyRegisterComponent implements OnInit, OnDestroy {
       // SearchGuestEmail: this.SearchGuestEmail || "",
       SearchGuestMobile: this.SearchGuestMobile || "",
       SearchCity: this.SearchCity?.value || "",
-      SearchCancellationDateFrom: this.SearchCancellationDateFrom !== "" ? moment(this.SearchCancellationDateFrom).format('MMM DD yyyy') : "",
-      SearchCancellationDateTo: this.SearchCancellationDateTo !== "" ? moment(this.SearchCancellationDateTo).format('MMM DD yyyy') : "",
-      SearchBookingDateFrom: this.SearchBookingDateFrom !== "" ? moment(this.SearchBookingDateFrom).format('MMM DD yyyy') : "",
-      SearchBookingDate: this.SearchBookingDate !== "" ? moment(this.SearchBookingDate).format('MMM DD yyyy') : "",
+      SearchCancellationDateFrom: this.SearchCancellationDateFrom || "",
+      SearchCancellationDateTo: this.SearchCancellationDateTo || "",
+      SearchBookingDateFrom: this.SearchBookingDateFrom || "",
+      SearchBookingDate: this.SearchBookingDate || "",
       SearchChangeMOPCase: this.SearchChangeMOPCase,
       SearchLocationGroup: this.SearchLocationGroup?.value || "null",
-      SearchBillFromDate: this.SearchBillDateFrom !== "" ? moment(this.SearchBillDateFrom).format('MMM DD yyyy') : "",
-      SearchBillToDate: this.SearchBillToDate !== "" ? moment(this.SearchBillToDate).format('MMM DD yyyy') : "",
+      SearchBillFromDate: this.SearchBillDateFrom || "",
+      SearchBillToDate: this.SearchBillToDate || "",
     };
   }
 
@@ -1225,26 +1221,36 @@ export class DutyRegisterComponent implements OnInit, OnDestroy {
   //---------- Supplier Type ----------
   InitSupplier() 
   {
-    this._generalService.getSupplier().subscribe(
+    this._generalService.GetAllSuppliers().subscribe(
     data => {
-      this.SupplierList = data;
+      this.SupplierList = normalizeSupplierDropDownList(data);
+      const currentValue = (this.SearchSupplier.value || '').toString();
       this.filteredSupplierOptions = this.SearchSupplier.valueChanges.pipe(
-      startWith(""),
-      map(value => this._filterSupplier(value || ''))
+      startWith(currentValue),
+      map(value => this._filterSupplier((value || '').toString()))
       );
     });
   }
-  private _filterSupplier(value: string): any {
-    const filterValue = value.toLowerCase();
-      if (!value || value.length < 0)
-     {
-        return [];   
-      }
-      return this.SupplierList.filter(
-      data => 
-      {
-        return data.supplierName.toLowerCase().indexOf(filterValue) === 0;
-      });
+  private _filterSupplier(value: string): any[] {
+    return filterSuppliersByDisplay(this.SupplierList || [], value);
+  }
+
+  OnSupplierSelected(selectedSupplier: string) {
+    const supplier = this.SupplierList?.find(
+      data => supplierMatchesDisplay(data, selectedSupplier)
+    );
+    if (supplier) {
+      this.SearchSupplierID = supplier.supplierID;
+      this.SearchSupplier.setValue(formatSupplierDisplay(supplier), { emitEvent: false });
+    }
+  }
+
+  getSupplierID(supplierID: number) {
+    this.SearchSupplierID = supplierID;
+  }
+
+  private resolveSupplierSearchValue(): string {
+    return resolveSupplierSearchTerm(this.SupplierList || [], this.SearchSupplier?.value || '');
   }
 
   //---------- Car Send ----------
@@ -1270,7 +1276,7 @@ export class DutyRegisterComponent implements OnInit, OnDestroy {
     return this.CarSendList.filter(
     data => 
     {
-      return data.vehicle.toLowerCase().indexOf(filterValue)===0;
+      return data.vehicle.toLowerCase().includes(filterValue);
     });
   }
 
@@ -1296,7 +1302,7 @@ export class DutyRegisterComponent implements OnInit, OnDestroy {
     return this.CarBookedList.filter(
     data => 
     {
-      return data.vehicle.toLowerCase().indexOf(filterValue)===0;
+      return data.vehicle.toLowerCase().includes(filterValue);
     });
   }
 
@@ -1322,7 +1328,7 @@ export class DutyRegisterComponent implements OnInit, OnDestroy {
     return this.DriverList.filter(
     data => 
     {
-      return data.driverName.toLowerCase().indexOf(filterValue)===0;
+      return data.driverName.toLowerCase().includes(filterValue);
     });
   }
 
@@ -1361,8 +1367,13 @@ export class DutyRegisterComponent implements OnInit, OnDestroy {
       this.filteredRegnNoOptions = this.SearchRegnNo.valueChanges.pipe(
       startWith(""),
       map(value => {
-        const selected = this.RegnNoList?.find(data => data.vehicle === value);
-        this.SearchInventoryID = selected ? selected.vehicleID : 0;
+        const trimmed = (value || '').toString().trim();
+        if (!trimmed) {
+          this.SearchInventoryID = 0;
+        } else {
+          const selected = this.RegnNoList?.find(data => data.vehicle === value);
+          this.SearchInventoryID = selected ? selected.vehicleID : 0;
+        }
         return this._filterRegnNo(value || '');
       })
       );
@@ -1379,6 +1390,12 @@ export class DutyRegisterComponent implements OnInit, OnDestroy {
   }
 
   OnRegnNoSelected(selectedRegnNo: string) {
+    const trimmed = (selectedRegnNo || '').trim();
+    if (!trimmed) {
+      this.SearchInventoryID = 0;
+      return;
+    }
+
     const selected = this.RegnNoList?.find(
       data => data.vehicle === selectedRegnNo
     );

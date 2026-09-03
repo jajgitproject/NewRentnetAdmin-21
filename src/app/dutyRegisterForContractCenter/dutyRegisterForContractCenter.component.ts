@@ -21,6 +21,7 @@ import { ModeOfPaymentDropDown } from '../modeOfPayment/modeOfPaymentDropDown.mo
 import { OrganizationalEntityDropDown } from '../organizationalEntity/organizationalEntityDropDown.model';
 import { SupplierTypeDropDownModel } from '../supplierType/supplierType.model';
 import { SupplierDropDown } from '../supplier/supplierDropDown.model';
+import { normalizeSupplierDropDownList } from '../supplier/supplier-display.util';
 import { VehicleVehicleCategoryDropDown } from '../vehicle/vehicleVehicleCategoryDropDown.model';
 import { VehicleDropDown } from '../vehicle/vehicleDropDown.model';
 import { DriverDropDown } from '../customerPersonDriverRestriction/driverDropDown.model';
@@ -1106,7 +1107,7 @@ export class DutyRegisterForContractCenterComponent implements OnInit, OnDestroy
   {
     this._generalService.getSupplier().subscribe(
     data => {
-      this.SupplierList = data;
+      this.SupplierList = normalizeSupplierDropDownList(data);
       this.filteredSupplierOptions = this.SearchSupplier.valueChanges.pipe(
       startWith(""),
       map(value => this._filterSupplier(value || ''))
