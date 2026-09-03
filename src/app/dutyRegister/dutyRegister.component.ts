@@ -8,7 +8,7 @@ import { MatSort } from '@angular/material/sort';
 import { DutyRegisterModel, SalesPersonDropDownModel, SearchCriteria } from './dutyRegister.model';
 import { DataSource } from '@angular/cdk/collections';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import { BehaviorSubject, fromEvent, merge, Observable, Subscription } from 'rxjs';
+import { BehaviorSubject, fromEvent, merge, Observable, Subscription, timer } from 'rxjs';
 import { map, startWith } from 'rxjs/operators';
 import { DateAdapter, MAT_DATE_LOCALE } from '@angular/material/core';
 import { MatMenu, MatMenuTrigger } from '@angular/material/menu';
@@ -257,7 +257,9 @@ export class DutyRegisterComponent implements OnInit, OnDestroy {
   exportJobDownloading = false;
   exportJobError = '';
   exportJobStartedAt: number | null = null;
+  exportElapsedLabel = '—';
   private exportPollSub?: Subscription;
+  private exportElapsedSub?: Subscription;
   private readonly exportJobPageKey = 'dutyRegister';
   @ViewChild(StoredMisExportsComponent) storedExports?: StoredMisExportsComponent;
   hasManualSearch: boolean = false;
@@ -492,29 +494,35 @@ export class DutyRegisterComponent implements OnInit, OnDestroy {
 
     this.dutyRegisterService.startExportJob(searchCriteria).subscribe(
       (startResult: any) => {
-        const jobId = startResult?.jobId ?? startResult?.JobId;
-        if (!jobId) {
-          this.exportJobRunning = false;
-          this.exportJobError = 'Could not start export job.';
-          this.showNotification('snackbar-danger', this.exportJobError, 'bottom', 'center');
-          return;
-        }
+        setTimeout(() => {
+          const jobId = startResult?.jobId ?? startResult?.JobId;
+          if (!jobId) {
+            this.exportJobRunning = false;
+            this.exportJobError = 'Could not start export job.';
+            this.showNotification('snackbar-danger', this.exportJobError, 'bottom', 'center');
+            return;
+          }
 
-        this.exportJobId = jobId;
-        persistExportJobId(this.exportJobPageKey, jobId);
-        this.exportJobStatus = {
-          jobId,
-          status: startResult?.status ?? startResult?.Status ?? 'Pending',
-          message: startResult?.message ?? startResult?.Message ?? 'Export queued'
-        };
-        this.exportJobStartedAt = markExportDumpStarted(this.exportJobStartedAt, this.exportJobStatus);
-        this.startExportPolling(jobId);
-        this.showNotification('snackbar-info', exportJobAcceptedSnackbarMessage(startResult), 'bottom', 'center');
+          this.exportJobId = jobId;
+          persistExportJobId(this.exportJobPageKey, jobId);
+          this.exportJobStatus = {
+            jobId,
+            status: startResult?.status ?? startResult?.Status ?? 'Pending',
+            message: startResult?.message ?? startResult?.Message ?? 'Export queued'
+          };
+          this.exportJobStartedAt = markExportDumpStarted(this.exportJobStartedAt, this.exportJobStatus);
+          this.refreshExportElapsedLabel();
+          this.startExportPolling(jobId);
+          this.showNotification('snackbar-info', exportJobAcceptedSnackbarMessage(startResult), 'bottom', 'center');
+        });
       },
       async (error) => {
-        this.exportJobRunning = false;
-        this.exportJobError = await extractExportErrorMessage(error, 'Could not start export');
-        this.showNotification('snackbar-danger', this.exportJobError, 'bottom', 'center');
+        const message = await extractExportErrorMessage(error, 'Could not start export');
+        setTimeout(() => {
+          this.exportJobRunning = false;
+          this.exportJobError = message;
+          this.showNotification('snackbar-danger', this.exportJobError, 'bottom', 'center');
+        });
       }
     );
   }
@@ -526,10 +534,13 @@ export class DutyRegisterComponent implements OnInit, OnDestroy {
 
     this.dutyRegisterService.cancelExportJob(this.exportJobId).subscribe(
       (status: any) => {
-        this.exportJobStatus = status;
-        this.exportJobRunning = false;
-        this.stopExportPolling();
-        this.showNotification('snackbar-info', status?.message ?? status?.Message ?? 'Export cancelled.', 'bottom', 'center');
+        setTimeout(() => {
+          this.exportJobStatus = status;
+          this.exportJobRunning = false;
+          this.stopExportPolling();
+          this.refreshExportElapsedLabel();
+          this.showNotification('snackbar-info', status?.message ?? status?.Message ?? 'Export cancelled.', 'bottom', 'center');
+        });
       },
       async (error) => {
         const message = await extractExportErrorMessage(error, 'Could not cancel export.');
@@ -606,57 +617,79 @@ export class DutyRegisterComponent implements OnInit, OnDestroy {
     return this.exportJobStatus?.rowsExported ?? this.exportJobStatus?.RowsExported ?? 0;
   }
 
-  getExportElapsedTime(): string {
-    return formatExportElapsedTime(this.exportJobStartedAt, this.exportJobStatus);
-  }
-
   getExportSearchButtonLabel(): string {
     return exportSearchButtonLabel(this.exportJobStatus, this.isExportJobInProgress());
   }
 
+  private refreshExportElapsedLabel() {
+    this.exportElapsedLabel = formatExportElapsedTime(this.exportJobStartedAt, this.exportJobStatus);
+  }
+
+  private startExportElapsedTimer() {
+    this.stopExportElapsedTimer();
+    this.refreshExportElapsedLabel();
+    this.exportElapsedSub = timer(0, 1000).subscribe(() => {
+      this.refreshExportElapsedLabel();
+    });
+  }
+
+  private stopExportElapsedTimer() {
+    if (this.exportElapsedSub) {
+      this.exportElapsedSub.unsubscribe();
+      this.exportElapsedSub = undefined;
+    }
+  }
+
   private startExportPolling(jobId: string) {
     this.stopExportPolling();
+    this.startExportElapsedTimer();
     this.exportPollSub = this.dutyRegisterService.pollExportJob(jobId).subscribe(
       (status: any) => {
-        this.exportJobStatus = status;
-        this.exportJobStartedAt = markExportDumpStarted(this.exportJobStartedAt, status);
-        const current = String(status?.status ?? status?.Status ?? '').toLowerCase();
+        setTimeout(() => {
+          this.exportJobStatus = status;
+          this.exportJobStartedAt = markExportDumpStarted(this.exportJobStartedAt, status);
+          this.refreshExportElapsedLabel();
+          const current = String(status?.status ?? status?.Status ?? '').toLowerCase();
 
-        if (current === 'failed') {
-          this.exportJobRunning = false;
-          this.exportJobError = status?.message ?? status?.Message ?? 'Export failed.';
-          this.showNotification('snackbar-danger', this.exportJobError, 'bottom', 'center');
-          this.stopExportPolling();
-          persistExportJobId(this.exportJobPageKey, null);
-          return;
-        }
+          if (current === 'failed') {
+            this.exportJobRunning = false;
+            this.exportJobError = status?.message ?? status?.Message ?? 'Export failed.';
+            this.showNotification('snackbar-danger', this.exportJobError, 'bottom', 'center');
+            this.stopExportPolling();
+            persistExportJobId(this.exportJobPageKey, null);
+            return;
+          }
 
-        if (isExportJobCancelled(status)) {
-          this.exportJobRunning = false;
-          this.showNotification('snackbar-info', status?.message ?? status?.Message ?? 'Export cancelled.', 'bottom', 'center');
-          this.stopExportPolling();
-          persistExportJobId(this.exportJobPageKey, null);
-          return;
-        }
+          if (isExportJobCancelled(status)) {
+            this.exportJobRunning = false;
+            this.showNotification('snackbar-info', status?.message ?? status?.Message ?? 'Export cancelled.', 'bottom', 'center');
+            this.stopExportPolling();
+            persistExportJobId(this.exportJobPageKey, null);
+            return;
+          }
 
-        if (current === 'completed') {
-          this.exportJobRunning = false;
-          const rows = status?.rowsExported ?? status?.RowsExported ?? 0;
-          this.showNotification(
-            'snackbar-success',
-            status?.message ?? `Export ready (${rows} rows). Click Download CSV.`,
-            'bottom',
-            'center'
-          );
-          this.stopExportPolling();
-          this.storedExports?.refresh();
-        }
+          if (current === 'completed') {
+            this.exportJobRunning = false;
+            const rows = status?.rowsExported ?? status?.RowsExported ?? 0;
+            this.showNotification(
+              'snackbar-success',
+              status?.message ?? `Export ready (${rows} rows). Click Download CSV.`,
+              'bottom',
+              'center'
+            );
+            this.stopExportPolling();
+            this.storedExports?.refresh();
+          }
+        });
       },
       async (error) => {
-        this.exportJobRunning = false;
-        this.exportJobError = await extractExportErrorMessage(error, 'Export failed.');
-        this.showNotification('snackbar-danger', this.exportJobError, 'bottom', 'center');
-        this.stopExportPolling();
+        const message = await extractExportErrorMessage(error, 'Export failed.');
+        setTimeout(() => {
+          this.exportJobRunning = false;
+          this.exportJobError = message;
+          this.showNotification('snackbar-danger', this.exportJobError, 'bottom', 'center');
+          this.stopExportPolling();
+        });
       }
     );
   }
@@ -666,6 +699,8 @@ export class DutyRegisterComponent implements OnInit, OnDestroy {
       this.exportPollSub.unsubscribe();
       this.exportPollSub = undefined;
     }
+    this.stopExportElapsedTimer();
+    this.refreshExportElapsedLabel();
   }
 
   private resumeExportJobIfNeeded() {
@@ -674,44 +709,53 @@ export class DutyRegisterComponent implements OnInit, OnDestroy {
       return;
     }
 
-    this.exportJobId = jobId;
-    if (!this.exportJobStatus) {
-      this.exportJobStatus = { status: 'Pending', message: 'Checking export status...' };
-    }
-
-    this.dutyRegisterService.getExportJobStatus(jobId).subscribe(
-      (status: any) => {
-        if (!status) {
-          this.exportJobRunning = true;
-          this.startExportPolling(jobId);
-          return;
-        }
-
-        this.exportJobId = jobId;
-        this.exportJobStatus = status;
-        this.exportJobError = '';
-        if (this.dutyRegisterService.isExportJobRunning(status)) {
-          this.exportJobRunning = true;
-          this.exportJobStartedAt = markExportDumpStarted(this.exportJobStartedAt, this.exportJobStatus);
-          this.startExportPolling(jobId);
-          return;
-        }
-
-        this.exportJobRunning = false;
-      },
-      (error) => {
-        if (isExportJobNotFoundError(error)) {
-          persistExportJobId(this.exportJobPageKey, null);
-          this.exportJobId = null;
-          this.exportJobStatus = null;
-          this.exportJobRunning = false;
-          return;
-        }
-
-        this.exportJobRunning = true;
-        this.startExportPolling(jobId);
+    setTimeout(() => {
+      this.exportJobId = jobId;
+      if (!this.exportJobStatus) {
+        this.exportJobStatus = { status: 'Pending', message: 'Checking export status...' };
       }
-    );
+
+      this.dutyRegisterService.getExportJobStatus(jobId).subscribe(
+        (status: any) => {
+          setTimeout(() => {
+            if (!status) {
+              this.exportJobRunning = true;
+              this.startExportPolling(jobId);
+              return;
+            }
+
+            this.exportJobId = jobId;
+            this.exportJobStatus = status;
+            this.exportJobError = '';
+            if (this.dutyRegisterService.isExportJobRunning(status)) {
+              this.exportJobRunning = true;
+              this.exportJobStartedAt = markExportDumpStarted(this.exportJobStartedAt, this.exportJobStatus);
+              this.refreshExportElapsedLabel();
+              this.startExportPolling(jobId);
+              return;
+            }
+
+            this.exportJobRunning = false;
+            this.refreshExportElapsedLabel();
+          });
+        },
+        (error) => {
+          setTimeout(() => {
+            if (isExportJobNotFoundError(error)) {
+              persistExportJobId(this.exportJobPageKey, null);
+              this.exportJobId = null;
+              this.exportJobStatus = null;
+              this.exportJobRunning = false;
+              this.refreshExportElapsedLabel();
+              return;
+            }
+
+            this.exportJobRunning = true;
+            this.startExportPolling(jobId);
+          });
+        }
+      );
+    });
   }
 
   private clearExportJob() {
@@ -722,6 +766,7 @@ export class DutyRegisterComponent implements OnInit, OnDestroy {
     this.exportJobDownloading = false;
     this.exportJobError = '';
     this.exportJobStartedAt = null;
+    this.exportElapsedLabel = '—';
   }
 
   private triggerCsvDownload(blob: Blob, preferredFileName?: string) {
@@ -780,7 +825,7 @@ export class DutyRegisterComponent implements OnInit, OnDestroy {
       (this.SearchBillStatus?.value !== null && this.SearchBillStatus?.value !== undefined) ||
       this.isSearchValueSet(this.SearchDri?.value) ||
       this.isSearchValueSet(this.SearchCarNo?.value) ||
-      this.isSearchValueSet(this.SearchInventoryID) ||
+      this.resolveSearchInventoryId() > 0 ||
       this.isSearchValueSet(this.SearchSupplierO?.value) ||
       this.isSearchValueSet(this.SearchRes) ||
       this.isSearchValueSet(this.SearchDuty) ||
@@ -829,6 +874,18 @@ export class DutyRegisterComponent implements OnInit, OnDestroy {
     return null;
   }
 
+  private resolveSearchInventoryId(): number {
+    const regn = String(this.SearchRegnNo?.value ?? '').trim();
+    if (!regn) {
+      this.SearchInventoryID = 0;
+      return 0;
+    }
+    const selected = this.RegnNoList?.find(item => item.vehicle === regn);
+    const inventoryId = selected ? selected.vehicleID : 0;
+    this.SearchInventoryID = inventoryId;
+    return inventoryId;
+  }
+
   private buildSearchCriteria(): SearchCriteria {
     return {
       UserID:this._generalService.getUserID(),
@@ -866,7 +923,7 @@ export class DutyRegisterComponent implements OnInit, OnDestroy {
       SearchBillStatus: this.SearchBillStatus?.value,
       SearchDri: this.SearchDri?.value || "",
       SearchCarNo: this.SearchCarNo?.value || "",
-      SearchInventoryID: this.SearchInventoryID || 0,
+      SearchInventoryID: this.resolveSearchInventoryId(),
       SearchSupplierO: this.SearchSupplierO?.value || "",
       SearchRes: this.SearchRes || "",
       SearchDuty: this.SearchDuty || "",

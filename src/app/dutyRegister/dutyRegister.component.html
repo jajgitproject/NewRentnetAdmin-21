@@ -80,7 +80,7 @@
                                 <span>Job: {{ exportJobId }}</span>
                                 <span class="export-job-stat">Status: {{ getExportJobStatusLabel() || '—' }}</span>
                                 <span class="export-job-stat" *ngIf="isExportJobInProgress() || getExportRowsExported()">Rows: {{ getExportRowsExported() }}</span>
-                                <span class="export-job-stat">Elapsed: {{ getExportElapsedTime() }}</span>
+                                <span class="export-job-stat">Elapsed: {{ exportElapsedLabel }}</span>
                             </div>
                             <mat-progress-bar *ngIf="isExportJobInProgress()" mode="indeterminate"></mat-progress-bar>
                             <p class="export-job-message" *ngIf="getExportJobMessage()">{{ getExportJobMessage() }}</p>

@@ -3910,6 +3910,22 @@ const routes: Routes = [
       },
 
       {
+        path: 'migrationBookingRequest',
+        loadChildren: () =>
+          import('./migrationBookingRequest/migrationBookingRequest.module').then(
+            (m) => m.MigrationBookingRequestModule
+          )
+      },
+
+      {
+        path: 'migrationBookingConfiguration',
+        loadChildren: () =>
+          import('./migrationBookingConfiguration/migrationBookingConfiguration.module').then(
+            (m) => m.MigrationBookingConfigurationModule
+          )
+      },
+
+      {
         path: 'bookingConfiguration',
         loadChildren: () =>
           import('./bookingConfiguration/bookingConfiguration.module').then(

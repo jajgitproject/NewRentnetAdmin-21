@@ -1,0 +1,209 @@
+<section class="content br-page">
+  <div class="container-fluid">
+    <div class="br-header">
+      <div class="br-header-left">
+        <ul class="br-breadcrumb">
+          <li>
+            <a routerLink="/dashboard/main">Home</a>
+            <span class="br-breadcrumb-sep">&gt;</span>
+            <span>Admin</span>
+            <span class="br-breadcrumb-sep">&gt;</span>
+            <span>Migration Booking Request</span>
+          </li>
+        </ul>
+        <h2 class="br-title">Migration Booking Request</h2>
+      </div>
+      <button type="button" class="br-collapse-btn" (click)="toggleFilters()">
+        {{ filtersCollapsed ? 'Expand Filters' : 'Collapse Filters' }}
+        <mat-icon>{{ filtersCollapsed ? 'expand_more' : 'expand_less' }}</mat-icon>
+      </button>
+    </div>
+
+    <div class="br-filter-card" *ngIf="!filtersCollapsed">
+      <div class="br-filter-bar">
+        <mat-form-field class="br-field br-field-date" appearance="outline" subscriptSizing="dynamic">
+          <mat-label>Booking Date</mat-label>
+          <mat-date-range-input [rangePicker]="requestRangePicker">
+            <input matStartDate [(ngModel)]="SearchRequestFromDate" placeholder="From" />
+            <input matEndDate [(ngModel)]="SearchRequestToDate" placeholder="To" />
+          </mat-date-range-input>
+          <mat-datepicker-toggle matIconPrefix [for]="requestRangePicker"></mat-datepicker-toggle>
+          <mat-date-range-picker #requestRangePicker></mat-date-range-picker>
+        </mat-form-field>
+
+        <mat-form-field class="br-field" appearance="outline" subscriptSizing="dynamic">
+          <mat-label>Customer Request No.</mat-label>
+          <mat-icon matIconPrefix>description</mat-icon>
+          <input matInput [(ngModel)]="SearchTRN" />
+        </mat-form-field>
+
+        <mat-form-field class="br-field" appearance="outline" subscriptSizing="dynamic">
+          <mat-label>Eco Booking No.</mat-label>
+          <mat-icon matIconPrefix>badge</mat-icon>
+          <input matInput [(ngModel)]="SearchEcoBookingNo" />
+        </mat-form-field>
+
+        <mat-form-field class="br-field" appearance="outline" subscriptSizing="dynamic">
+          <mat-label>iTravel Request No.</mat-label>
+          <mat-icon matIconPrefix>show_chart</mat-icon>
+          <input matInput [(ngModel)]="SearchiTRN" />
+        </mat-form-field>
+
+        <mat-form-field class="br-field" appearance="outline" subscriptSizing="dynamic">
+          <mat-label>Customer Group</mat-label>
+          <input type="text" matInput [matAutocomplete]="autoCustomerGroup" [formControl]="customerGroupName" />
+          <mat-autocomplete #autoCustomerGroup="matAutocomplete">
+            <mat-option *ngFor="let option of filteredCustomerGroupOptions | async" [value]="option.customerGroup">
+              {{ option.customerGroup }}
+            </mat-option>
+          </mat-autocomplete>
+        </mat-form-field>
+
+        <mat-form-field class="br-field br-field-confirm" appearance="outline" subscriptSizing="dynamic">
+          <mat-label>Confirm By Eco</mat-label>
+          <mat-select [(ngModel)]="SearchConfirmByEco">
+            <mat-option value="all">All</mat-option>
+            <mat-option value="yes">Yes</mat-option>
+            <mat-option value="no">No</mat-option>
+          </mat-select>
+        </mat-form-field>
+      </div>
+
+      <div class="br-filter-actions">
+        <button mat-flat-button color="primary" class="br-btn-search" (click)="SearchData()">
+          <mat-icon>search</mat-icon>
+          Search
+        </button>
+        <button mat-stroked-button type="button" class="br-btn-reset" (click)="refresh()">
+          <mat-icon>refresh</mat-icon>
+          Reset
+        </button>
+        <button mat-stroked-button type="button" class="br-btn-filters" (click)="toggleFilters()">
+          <mat-icon>filter_list</mat-icon>
+          Filters
+          <span class="br-filter-badge" *ngIf="activeFilterCount > 0">{{ activeFilterCount }}</span>
+        </button>
+      </div>
+    </div>
+
+    <div class="br-table-card">
+      <div class="br-table-toolbar">
+        <div class="br-table-toolbar-spacer"></div>
+        <button mat-icon-button type="button" matTooltip="Refresh" (click)="loadData()">
+          <mat-icon>refresh</mat-icon>
+        </button>
+        <button mat-stroked-button type="button" class="br-columns-btn" [matMenuTriggerFor]="columnsMenu">
+          <mat-icon>view_column</mat-icon>
+          Columns
+        </button>
+        <button mat-icon-button type="button" matTooltip="Download" (click)="downloadTable()" [disabled]="!dataSource?.length">
+          <mat-icon>download</mat-icon>
+        </button>
+      </div>
+
+      <mat-menu #columnsMenu="matMenu" class="br-columns-menu">
+        <button mat-menu-item *ngFor="let col of columnDefinitions" (click)="toggleColumn(col.key); $event.stopPropagation()">
+          <mat-checkbox [checked]="col.visible" (click)="$event.stopPropagation()" (change)="setColumnVisible(col.key, $event.checked)">
+            {{ col.label }}
+          </mat-checkbox>
+        </button>
+      </mat-menu>
+
+      <div class="br-empty-state" *ngIf="!dataSource?.length">
+        <p>No Records Found</p>
+      </div>
+
+      <div class="br-table-wrap" *ngIf="dataSource?.length">
+        <mat-table
+          #table
+          [dataSource]="dataSource"
+          matSort
+          (matSortChange)="SortingData($event)"
+          class="br-table mat-elevation-z0">
+
+          <ng-container matColumnDef="IntegrationRequestID">
+            <mat-header-cell *matHeaderCellDef mat-sort-header>Request No.</mat-header-cell>
+            <mat-cell *matCellDef="let row">{{ (row.integrationRequestGroupID || '') + (row.integrationRequestGroupID ? '.' : '') + row.integrationRequestID }}</mat-cell>
+          </ng-container>
+
+          <ng-container matColumnDef="CustomerTravelRequestNumber">
+            <mat-header-cell *matHeaderCellDef mat-sort-header>TR No.</mat-header-cell>
+            <mat-cell *matCellDef="let row">{{ row.customerTravelRequestNumber }}</mat-cell>
+          </ng-container>
+
+          <ng-container matColumnDef="CustomerName">
+            <mat-header-cell *matHeaderCellDef mat-sort-header>Customer Name</mat-header-cell>
+            <mat-cell *matCellDef="let row">{{ row.customerName || 'N/A' }}</mat-cell>
+          </ng-container>
+
+          <ng-container matColumnDef="RequestDate">
+            <mat-header-cell *matHeaderCellDef mat-sort-header>Booking Date Time</mat-header-cell>
+            <mat-cell *matCellDef="let row">{{ formatDateTime(row.requestDate, row.requestTime) }}</mat-cell>
+          </ng-container>
+
+          <ng-container matColumnDef="PickupDate">
+            <mat-header-cell *matHeaderCellDef mat-sort-header>Pickup Date Time</mat-header-cell>
+            <mat-cell *matCellDef="let row">{{ formatDateTime(row.pickupDate, row.pickupTime) }}</mat-cell>
+          </ng-container>
+
+          <ng-container matColumnDef="ConfirmationDateTime">
+            <mat-header-cell *matHeaderCellDef mat-sort-header>Confirmation Date Time</mat-header-cell>
+            <mat-cell *matCellDef="let row">
+              {{ row.reservationCreatedOn ? (row.reservationCreatedOn | date:'dd/MM/yyyy h:mm a') : 'N/A' }}
+            </mat-cell>
+          </ng-container>
+
+          <ng-container matColumnDef="ReservationID">
+            <mat-header-cell *matHeaderCellDef mat-sort-header>Booking No.</mat-header-cell>
+            <mat-cell *matCellDef="let row">
+              {{ row.reservationID ? ((row.reservationGroupID || '') + (row.reservationGroupID ? '.' : '') + row.reservationID) : '' }}
+            </mat-cell>
+          </ng-container>
+
+          <ng-container matColumnDef="reservationCreatedBy">
+            <mat-header-cell *matHeaderCellDef mat-sort-header>Reservation Created By</mat-header-cell>
+            <mat-cell *matCellDef="let row">{{ row.reservationCreatedBy || 'N/A' }}</mat-cell>
+          </ng-container>
+
+          <ng-container matColumnDef="RequestStatus">
+            <mat-header-cell *matHeaderCellDef mat-sort-header>Status</mat-header-cell>
+            <mat-cell *matCellDef="let row">
+              <span class="br-status-pill" [ngClass]="getStatusClass(row.requestStatus)">
+                {{ getStatusLabel(row.requestStatus) }}
+              </span>
+            </mat-cell>
+          </ng-container>
+
+          <ng-container matColumnDef="actions">
+            <mat-header-cell *matHeaderCellDef class="br-actions-header">Actions</mat-header-cell>
+            <mat-cell *matCellDef="let row" class="br-actions-cell">
+              <button
+                mat-icon-button
+                type="button"
+                [disabled]="row.customerName === 'Individual'"
+                [matMenuTriggerFor]="rowMenu"
+                (click)="setActionRow(row)">
+                <mat-icon>more_vert</mat-icon>
+              </button>
+            </mat-cell>
+          </ng-container>
+
+          <mat-header-row *matHeaderRowDef="visibleColumns"></mat-header-row>
+          <mat-row *matRowDef="let row; columns: visibleColumns;" matRipple></mat-row>
+        </mat-table>
+      </div>
+
+      <mat-menu #rowMenu="matMenu">
+        <button mat-menu-item (click)="openInNewTab(actionRow)" [disabled]="!actionRow || actionRow.customerName === 'Individual'">
+          <mat-icon>how_to_reg</mat-icon>
+          <span>Configuration</span>
+        </button>
+      </mat-menu>
+
+      <div class="br-pagination" *ngIf="dataSource?.length">
+        <button mat-stroked-button color="primary" (click)="PreviousCall()" [disabled]="PageNumber === 0">Previous</button>
+        <button mat-stroked-button color="primary" (click)="NextCall()">Next</button>
+      </div>
+    </div>
+  </div>
+</section>

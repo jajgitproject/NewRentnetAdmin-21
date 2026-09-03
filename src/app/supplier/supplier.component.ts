@@ -245,9 +245,9 @@ export class SupplierComponent implements OnInit, OnDestroy {
     }
 
     const lower = term.toLowerCase();
-    return this.filterSuggestions.filter((option) =>
-      option.toLowerCase().includes(lower)
-    );
+        return this.filterSuggestions.filter((option) =>
+          option.toLowerCase().includes(lower)
+        );
   }
 
   private updateFilterSuggestions(data: Supplier[]): void {
@@ -662,15 +662,15 @@ export class SupplierComponent implements OnInit, OnDestroy {
   }
 
   private triggerExportDownload(blob: Blob, preferredFileName?: string) {
-    const url = window.URL.createObjectURL(blob);
-    const anchor = document.createElement('a');
-    anchor.href = url;
+        const url = window.URL.createObjectURL(blob);
+        const anchor = document.createElement('a');
+        anchor.href = url;
     anchor.download = preferredFileName || `SupplierMaster_${new Date().toISOString().replace(/[:.]/g, '-')}.csv`;
-    document.body.appendChild(anchor);
-    anchor.click();
-    document.body.removeChild(anchor);
-    window.URL.revokeObjectURL(url);
-    this.showNotification('snackbar-success', 'CSV downloaded successfully', 'top', 'center');
+        document.body.appendChild(anchor);
+        anchor.click();
+        document.body.removeChild(anchor);
+        window.URL.revokeObjectURL(url);
+        this.showNotification('snackbar-success', 'CSV downloaded successfully', 'top', 'center');
   }
 
   getSupplierCode(row: Supplier): string {

@@ -116,8 +116,8 @@ export class DutySlipForBillingService
     }
 
     if (advanceTable.reportingToGuestKMForBilling === null) {
-      advanceTable.reportingToGuestKMForBilling = 0;
-    }
+        advanceTable.reportingToGuestKMForBilling = 0;
+      } 
     this.sanitizeClosingUpdatePayload(advanceTable);
     advanceTable.userID = this.generalService.getUserID();
     return this.httpClient.put<any>(this.API_URL, advanceTable);
@@ -306,7 +306,7 @@ export class DutySlipForBillingService
     }
     const n = Number(value);
     return Number.isFinite(n) ? n : null;
-  }
+    }
 
  PostDataGPS(dutySlipID:any,RegistrationNumber:any):  Observable<any> 
   { 

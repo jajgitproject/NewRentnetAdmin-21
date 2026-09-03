@@ -59,7 +59,7 @@ export class DriverComponent implements OnInit, AfterViewChecked, OnDestroy {
     'supplierType',
     'mobile1',
     'location',
-    'isAdhoc',
+     'isAdhoc',
     'status',
     'actions'
   ];
@@ -539,15 +539,15 @@ export class DriverComponent implements OnInit, AfterViewChecked, OnDestroy {
   }
 
   private triggerExportDownload(blob: Blob, preferredFileName?: string) {
-    const url = window.URL.createObjectURL(blob);
-    const anchor = document.createElement('a');
-    anchor.href = url;
+        const url = window.URL.createObjectURL(blob);
+        const anchor = document.createElement('a');
+        anchor.href = url;
     anchor.download = preferredFileName || `DriverMaster_${new Date().toISOString().replace(/[:.]/g, '-')}.csv`;
-    document.body.appendChild(anchor);
-    anchor.click();
-    document.body.removeChild(anchor);
-    window.URL.revokeObjectURL(url);
-    this.showNotification('snackbar-success', 'CSV downloaded successfully', 'top', 'center');
+        document.body.appendChild(anchor);
+        anchor.click();
+        document.body.removeChild(anchor);
+        window.URL.revokeObjectURL(url);
+        this.showNotification('snackbar-success', 'CSV downloaded successfully', 'top', 'center');
   }
 
   getSupplierDisplay(row: Driver): string {
