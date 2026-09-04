@@ -20,6 +20,8 @@ import { FormControl } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 import { DutySlipAccentureModel } from './dutySlipAccenture.model';
 import { DutySlipAccentureService } from './dutySlipAccenture.service';
+import { ControlPanelDesignService } from '../controlPanelDesign/controlPanelDesign.service';
+import { ControlPanelData } from '../controlPanelDesign/controlPanelDesign.model';
 import moment from 'moment';
 
 
@@ -35,6 +37,8 @@ export class DutySlipAccentureComponent {
   advanceTable: DutySlipAccentureModel | null;
   vehicleName: any;
   DutySlipID: any;
+  ReservationID: any;
+  reservationInfo: any;
   dialogTitle: string;
   datetime: any;
   totalDays:any;
@@ -46,6 +50,7 @@ export class DutySlipAccentureComponent {
     public dialog: MatDialog,
     public route:ActivatedRoute,
     public dutySlipAccentureService: DutySlipAccentureService,
+    public _controlPanelDesignService: ControlPanelDesignService,
     private snackBar: MatSnackBar,
     public _generalService: GeneralService
   ) {
@@ -64,8 +69,10 @@ export class DutySlipAccentureComponent {
   {
     this.route.queryParams.subscribe(paramsData =>{
       this.DutySlipID = paramsData.dutySlipID;
+      this.ReservationID = paramsData.reservationID;
+      this.loadDataForReservation();
+      this.loadData();
     });
-    this.loadData();
   }
 
   onNoClick(): void 
@@ -76,15 +83,67 @@ export class DutySlipAccentureComponent {
     }
   }
 
+  public loadDataForReservation()
+  {
+    const reservationId = this.ReservationID || this.dataSource?.reservationID;
+    if (!reservationId) {
+      return;
+    }
+    this._controlPanelDesignService.getReservationDetails(reservationId).subscribe(
+    (data: ControlPanelData) =>
+    {
+      this.reservationInfo = data?.reservationDetails;
+      this.applyDropAddressFromReservation();
+    },
+    (error: HttpErrorResponse) => { this.reservationInfo = null; });
+  }
+
   public loadData() 
   {
     this.dutySlipAccentureService.printDutySlipInfo(this.DutySlipID).subscribe(
     data =>   
     {
-      this.dataSource = data; 
+      this.dataSource = data;
+      this.applyDropAddressFromReservation();
+      if (!this.ReservationID && this.dataSource?.reservationID) {
+        this.ReservationID = this.dataSource.reservationID;
+        this.loadDataForReservation();
+      }
       this.GetTimeDays(this.dataSource);
     },
     (error: HttpErrorResponse) => { this.dataSource = null});
+  }
+
+  getDropAddress(): string {
+    return this.firstNonEmptyAddress(
+      this.dataSource?.dropOffAddress,
+      this.dataSource?.DropOffAddress,
+      this.dataSource?.dropOffAddressDetails,
+      this.dataSource?.DropOffAddressDetails,
+      this.reservationInfo?.[0]?.drop?.dropOffAddress,
+      this.reservationInfo?.[0]?.drop?.DropOffAddress,
+      this.reservationInfo?.[0]?.drop?.dropOffAddressDetails,
+      this.reservationInfo?.[0]?.drop?.DropOffAddressDetails,
+      this.reservationInfo?.[0]?.dropOffAddress,
+      this.reservationInfo?.[0]?.DropOffAddress
+    );
+  }
+
+  private applyDropAddressFromReservation(): void {
+    if (!this.dataSource) {
+      return;
+    }
+    this.dataSource.dropOffAddress = this.getDropAddress();
+  }
+
+  private firstNonEmptyAddress(...values: any[]): string {
+    for (const value of values) {
+      const text = (value ?? '').toString().trim();
+      if (text) {
+        return text;
+      }
+    }
+    return '';
   }
 
  
