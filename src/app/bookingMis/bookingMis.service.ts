@@ -40,6 +40,8 @@ export class BookingMisService {
       SearchToDate: this.toNull(criteria.SearchToDate),
       SearchCancellationFrom: this.toNull(criteria.SearchCancellationFrom),
       SearchCancellationTo: this.toNull(criteria.SearchCancellationTo),
+      SearchBookingDateFrom: this.toNull(criteria.SearchBookingDateFrom),
+      SearchBookingDateTo: this.toNull(criteria.SearchBookingDateTo),
       SearchSalesPerson: this.toNull(criteria.SearchSalesPerson),
       SearchDispatchStatus: this.toNull(criteria.SearchDispatchStatus),
       SearchBookingStatus: this.toNull(criteria.SearchBookingStatus),

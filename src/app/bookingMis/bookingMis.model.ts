@@ -13,6 +13,8 @@ export class SearchCriteria {
   SearchToDate: string;
   SearchCancellationFrom: string;
   SearchCancellationTo: string;
+  SearchBookingDateFrom: string;
+  SearchBookingDateTo: string;
   SearchSalesPerson: string;
   SearchDispatchStatus: string;
   SearchBookingStatus: string;
