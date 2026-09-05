@@ -116,7 +116,7 @@
           <td>{{duty.city}}</td>
           <td>{{duty.vehicle}}</td>
           <td>{{duty.package}}</td>
-          <td>{{duty.baseRate}}</td>
+          <td>{{ getBasicRate(duty) }}</td>
           <td>{{duty.totalKMWithAddtionalKM}}</td>
           <td>{{duty.totalHoursWithAddtionalHours / 60 | number:'1.2-2'}}</td>
           <td>{{duty.extraKMs}}</td>
@@ -130,7 +130,7 @@
           <td>{{duty.fgr}}</td>
           <td>{{duty.interStateTax}}</td>
           <td>{{duty.totalExpences}}</td>
-          <td>{{duty.driverAllowance}}</td>
+          <td>{{ getDriverAllowance(duty) }}</td>
           <td>{{duty.totalFuelSurchargeOnPackageRate}}</td>
           <td>{{duty.totalFuelSurchargeOnExtraKM }}</td>
           <td>{{duty.totalAmountAfterExpences}}</td>

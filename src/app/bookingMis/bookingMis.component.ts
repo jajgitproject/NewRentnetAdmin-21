@@ -61,6 +61,8 @@ export class BookingMisComponent implements OnInit, OnDestroy {
   searchToDate = '';
   searchCancellationFrom = '';
   searchCancellationTo = '';
+  searchBookingDateFrom = '';
+  searchBookingDateTo = '';
   geoPointTypeID: any;
 
   PaymentModeList: ModeOfPaymentDropDown[] = [];
@@ -133,6 +135,8 @@ export class BookingMisComponent implements OnInit, OnDestroy {
     this.searchToDate = '';
     this.searchCancellationFrom = '';
     this.searchCancellationTo = '';
+    this.searchBookingDateFrom = '';
+    this.searchBookingDateTo = '';
     this.geoPointTypeID = null;
     this.PickupSpotList = [];
   }
@@ -154,6 +158,10 @@ export class BookingMisComponent implements OnInit, OnDestroy {
         this.searchCancellationFrom !== '' ? moment(this.searchCancellationFrom).format('MMM DD yyyy') : '',
       SearchCancellationTo:
         this.searchCancellationTo !== '' ? moment(this.searchCancellationTo).format('MMM DD yyyy') : '',
+      SearchBookingDateFrom:
+        this.searchBookingDateFrom !== '' ? moment(this.searchBookingDateFrom).format('MMM DD yyyy') : '',
+      SearchBookingDateTo:
+        this.searchBookingDateTo !== '' ? moment(this.searchBookingDateTo).format('MMM DD yyyy') : '',
       SearchSalesPerson: this.salesPerson?.value || '',
       SearchDispatchStatus: this.searchDispatchStatus || '',
       SearchBookingStatus: this.searchBookingStatus || '',
@@ -172,7 +180,7 @@ export class BookingMisComponent implements OnInit, OnDestroy {
       return;
     }
 
-    const dateRangeError = this.validatePickupDateRange();
+    const dateRangeError = this.validateSearchDateRanges();
     if (dateRangeError) {
       this.showNotification('snackbar-danger', dateRangeError, 'bottom', 'center');
       return;
@@ -310,27 +318,105 @@ export class BookingMisComponent implements OnInit, OnDestroy {
     return exportSearchButtonLabel(this.exportJobStatus, this.isExportJobInProgress());
   }
 
-  validatePickupDateRange(): string | null {
-    if (!this.searchFromDate || !this.searchToDate) {
-      return 'Pickup date range is required. Please select From and To dates.';
+  validateSearchDateRanges(): string | null {
+    const hasPickupFrom = this.isSearchValueSet(this.searchFromDate);
+    const hasPickupTo = this.isSearchValueSet(this.searchToDate);
+    const hasBookingFrom = this.isSearchValueSet(this.searchBookingDateFrom);
+    const hasBookingTo = this.isSearchValueSet(this.searchBookingDateTo);
+    const hasPickupRange = hasPickupFrom && hasPickupTo;
+    const hasBookingRange = hasBookingFrom && hasBookingTo;
+
+    if (hasPickupFrom !== hasPickupTo) {
+      return 'Please select both Pickup Date From and Pickup Date To.';
+    }
+    if (hasBookingFrom !== hasBookingTo) {
+      return 'Please select both Booking Date From and Booking Date To.';
+    }
+    if (!hasPickupRange && !hasBookingRange) {
+      return 'Select Pickup Date From/To, or Booking Date From/To.';
     }
 
-    const fromDate = moment(this.searchFromDate).startOf('day');
-    const toDate = moment(this.searchToDate).startOf('day');
-    if (!fromDate.isValid() || !toDate.isValid()) {
-      return 'Please enter valid pickup dates.';
+    if (hasPickupRange) {
+      const pickupError = this.validateDatePair(
+        this.searchFromDate,
+        this.searchToDate,
+        'Pickup date',
+        !hasBookingRange && !this.hasAdditionalSearchFilters()
+      );
+      if (pickupError) {
+        return pickupError;
+      }
     }
-    if (toDate.isBefore(fromDate)) {
-      return 'Pickup To Date cannot be earlier than From Date.';
-    }
-    if (!this.hasAdditionalSearchFilters()) {
-      const inclusiveDays = toDate.diff(fromDate, 'days') + 1;
-      if (inclusiveDays > this.maxPickupDateRangeDays) {
-        return `Pickup date range cannot exceed ${this.maxPickupDateRangeDays} days when no other search filters are selected. Add another filter to search a wider range.`;
+
+    if (hasBookingRange) {
+      const bookingError = this.validateDatePair(
+        this.searchBookingDateFrom,
+        this.searchBookingDateTo,
+        'Booking date',
+        !hasPickupRange && !this.hasFiltersBesidesBookingDates()
+      );
+      if (bookingError) {
+        return bookingError;
       }
     }
 
     return null;
+  }
+
+  validatePickupDateRange(): string | null {
+    return this.validateSearchDateRanges();
+  }
+
+  validateBookingDateRange(): string | null {
+    return this.validateSearchDateRanges();
+  }
+
+  private validateDatePair(
+    fromValue: any,
+    toValue: any,
+    label: string,
+    enforceMaxRange: boolean
+  ): string | null {
+    const fromDate = moment(fromValue).startOf('day');
+    const toDate = moment(toValue).startOf('day');
+    if (!fromDate.isValid() || !toDate.isValid()) {
+      return `Please enter valid ${label.toLower()}s.`;
+    }
+    if (toDate.isBefore(fromDate)) {
+      return `${label} To cannot be earlier than From.`;
+    }
+    if (enforceMaxRange) {
+      const inclusiveDays = toDate.diff(fromDate, 'days') + 1;
+      if (inclusiveDays > this.maxPickupDateRangeDays) {
+        return `${label} range cannot exceed ${this.maxPickupDateRangeDays} days when no other search filters are selected. Add another filter to search a wider range.`;
+      }
+    }
+    return null;
+  }
+
+  hasFiltersBesidesBookingDates(): boolean {
+    return (
+      this.isSearchValueSet(this.modeOfPayment?.value) ||
+      this.isSearchValueSet(this.serviceLocation?.value) ||
+      this.isSearchValueSet(this.customer?.value) ||
+      this.isSearchValueSet(this.searchDutySlip) ||
+      this.isSearchValueSet(this.searchManualDS) ||
+      this.isSearchValueSet(this.searchBooking) ||
+      this.isSearchValueSet(this.city?.value) ||
+      this.isSearchValueSet(this.searchCancellationFrom) ||
+      this.isSearchValueSet(this.searchCancellationTo) ||
+      this.isSearchValueSet(this.searchFromDate) ||
+      this.isSearchValueSet(this.searchToDate) ||
+      this.isSearchValueSet(this.salesPerson?.value) ||
+      this.isSearchValueSet(this.searchDispatchStatus) ||
+      this.isSearchValueSet(this.searchBookingStatus) ||
+      this.isSearchValueSet(this.customerLocation?.value) ||
+      this.isSearchValueSet(this.guestName?.value) ||
+      this.isSearchValueSet(this.pickupDetail?.value) ||
+      this.isSearchValueSet(this.pickupSubDetail?.value) ||
+      this.isSearchValueSet(this.customerGroup?.value) ||
+      this.isSearchValueSet(this.bookerName?.value)
+    );
   }
 
   hasAdditionalSearchFilters(): boolean {
@@ -344,6 +430,8 @@ export class BookingMisComponent implements OnInit, OnDestroy {
       this.isSearchValueSet(this.city?.value) ||
       this.isSearchValueSet(this.searchCancellationFrom) ||
       this.isSearchValueSet(this.searchCancellationTo) ||
+      this.isSearchValueSet(this.searchBookingDateFrom) ||
+      this.isSearchValueSet(this.searchBookingDateTo) ||
       this.isSearchValueSet(this.salesPerson?.value) ||
       this.isSearchValueSet(this.searchDispatchStatus) ||
       this.isSearchValueSet(this.searchBookingStatus) ||

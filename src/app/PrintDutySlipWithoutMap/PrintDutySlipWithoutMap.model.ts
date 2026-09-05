@@ -44,6 +44,7 @@ export class PrintDutySlipWithoutMap {
   bookerMobile: string;
   passengerName: string;
   pickUpAddressString: string;
+  dropOffAddress: string;
   passengerMobile: string;
   pickupCity: string;
   package: string;
