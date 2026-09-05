@@ -1228,27 +1228,13 @@ const routes: Routes = [
             (m) => m.PasswordResetModule
           )
       },
- {
+      {
         path: 'auditTrail',
         loadChildren: () =>
           import('./auditTrail/auditTrail.module').then(
             (m) => m.AuditTrailModule
           )
         },
-      {
-        path: 'applicationAuditLog',
-        loadChildren: () =>
-          import('./applicationAuditLog/applicationAuditLog.module').then(
-            (m) => m.ApplicationAuditLogModule
-          )
-      },
-      {
-        path: 'applicationAuditSettings',
-        loadChildren: () =>
-          import('./applicationAuditSettings/applicationAuditSettings.module').then(
-            (m) => m.ApplicationAuditSettingsModule
-          )
-      },
       {
         path: 'reservationGroup',
         loadChildren: () =>

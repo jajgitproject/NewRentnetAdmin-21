@@ -133,6 +133,7 @@ const normalized = (this.status || '').trim().toLowerCase();
     this.advanceTableForm.patchValue({ dropOffTime: this.advanceTable.dropOffTime });
     const payload = this.advanceTableForm.getRawValue();
     payload.pickupDate = payload.pickupDate ?? this.pickupDate ?? this.advanceTableCP.pickup?.pickupDate;
+    payload.userID = this._generalService.getUserID();
     this.advanceTableService.updatePickupEdit(payload)
       .subscribe(
         response => {

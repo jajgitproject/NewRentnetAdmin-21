@@ -185,6 +185,7 @@ export class ChangePassengerFormDialogComponent
           advanceTable: this.advanceTable,
           action: action,
           forCP:'CP',
+          reservationID: this.ReservationID,
           CustomerID:this.CustomerID,
           CustomerName:this.CustomerName,
           CustomerGroupID:this.CustomerGroupID,

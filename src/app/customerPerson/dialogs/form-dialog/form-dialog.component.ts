@@ -109,6 +109,7 @@ export class FormDialogComponentCustomerPerson
   CustomerGroupID: any;
   someAction: any;
   fromGeneralBill = false;
+  reservationID: any;
 
   /** New Passenger (CP) and Create new Booker (CB) — same compact popup from booking. */
   get isReservationQuickAdd(): boolean {
@@ -146,6 +147,12 @@ export class FormDialogComponentCustomerPerson
         this.action = data.action;
         this.someAction = data.forCP;
         this.fromGeneralBill = data.fromGeneralBill === true;
+        this.reservationID = data.reservationID ?? data.ReservationID ?? null;
+        if (Number(this.reservationID) > 0) {
+          try {
+            sessionStorage.setItem('audit_reservationId', String(this.reservationID));
+          } catch {}
+        }
         if (this.action === 'edit') 
         {
           this.CustomerGroupID=data.CustomerGroupID;
@@ -854,7 +861,8 @@ public Post(): void {
   ...this.advanceTableForm.getRawValue(),
   oldRentNetID: this.getOldRentNetID(),
   // Booking New Passenger popup: do not send welcome credentials email
-  skipWelcomeEmail: this.someAction === 'CP'
+  skipWelcomeEmail: this.someAction === 'CP',
+  reservationID: Number(this.reservationID) > 0 ? Number(this.reservationID) : null
 };
   this.advanceTableService.add(payload).subscribe({
     next: (response) => {
@@ -930,7 +938,8 @@ public Post(): void {
     this.advanceTableForm.patchValue({secondaryMobile2:secondaryMobile2});
      const payload = {
   ...this.advanceTableForm.getRawValue(),
-  oldRentNetID: this.getOldRentNetID()
+  oldRentNetID: this.getOldRentNetID(),
+  reservationID: Number(this.reservationID) > 0 ? Number(this.reservationID) : null
 };
     this.advanceTableService.update(payload)  
     .subscribe(

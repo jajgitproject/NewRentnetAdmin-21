@@ -1,27 +1,65 @@
-.json
-  background: #f7f7f7
-  padding: 10px
-  border-radius: 6px
-  overflow: auto
-  max-height: 260px
-  font-size: 12px
-  margin-top: 6px
-  margin-bottom: 12px
+.page-subtitle
+  color: #666
+  margin-top: 0
 
-.diff-grid
-  display: grid
-  grid-template-columns: 1fr 1fr
+.nlp-filter
+  mat-form-field
+    width: 100%
+
+.nlp-ask
+  padding-bottom: 18px
+  white-space: nowrap
+
+.nlp-meta
+  margin: -8px 0 12px 0
+
+.nlp-chip
+  display: inline-block
+  background: #e8f1ff
+  border-radius: 12px
+  padding: 4px 10px
+  font-size: 13px
+  margin-right: 8px
+  margin-bottom: 6px
+
+.nlp-warnings
+  margin: 6px 0 0 0
+  padding-left: 18px
+  color: #a15c00
+  font-size: 13px
+
+.user-filter
+  min-width: 0
+
+  mat-form-field
+    width: 100%
+
+.filter-actions
+  display: flex
+  align-items: center
+  flex-wrap: wrap
   gap: 12px
+  padding-bottom: 18px
 
-.changed
-  color: #d32f2f
-  font-weight: 700
+.spinner-wrap
+  padding: 16px 0
 
-.json-line
-  white-space: pre
+.audit-event-table
+  width: 100%
+  border-collapse: collapse
+  margin-top: 12px
 
-.json-key
-  color: #2b5b84
+  th, td
+    border-bottom: 1px solid #ededed
+    padding: 8px 10px
+    text-align: left
+
+  th
+    background: #fafafa
+    font-weight: 700
+
+  tbody tr:hover
+    background: #f5f9ff
 
 .audit-diff-table-wrap
   width: 100%
@@ -50,60 +88,7 @@
     font-weight: 600
 
   .col-before, .col-after
-    width: 30%
-
-  .col-change
-    width: 12%
-    font-weight: 700
-    color: #d32f2f
+    width: 36%
 
 .changed-row
   background: #fff5f5
-
-.reservation-audit-hint
-  margin-bottom: 0
-
-.reservation-table-groups
-  display: flex
-  flex-direction: column
-  gap: 16px
-
-.reservation-table-card
-  margin-bottom: 0
-
-  .reservation-table-card-header
-    display: flex
-    align-items: baseline
-    justify-content: space-between
-    flex-wrap: wrap
-    gap: 8px
-    padding-bottom: 8px
-    border-bottom: 1px solid #eee
-
-  .reservation-table-title
-    font-size: 1.15rem
-    margin: 0
-    font-weight: 600
-
-  .reservation-table-meta
-    font-size: 0.85rem
-    color: #666
-
-.reservation-panel-desc
-  display: flex
-  flex-wrap: wrap
-  align-items: center
-  gap: 4px
-  justify-content: flex-end
-
-  .res-user
-    font-weight: 600
-    max-width: 220px
-    overflow: hidden
-    text-overflow: ellipsis
-    white-space: nowrap
-
-  .res-time
-    color: #555
-    font-size: 0.9em
-

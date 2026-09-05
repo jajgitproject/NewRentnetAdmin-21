@@ -119,28 +119,6 @@ export const ROUTES: RouteInfo[] = [
       },
 
       {
-        path: 'applicationAuditLog',
-        title: 'Application Audit Log',
-        moduleName: 'applicationAuditLog',
-        icon: 'fas fa-file-alt',
-        class: '',
-        groupTitle: false,
-        submenu: [],
-        isAccess: false
-      },
-
-      {
-        path: 'applicationAuditSettings',
-        title: 'Application Audit Settings',
-        moduleName: 'applicationAuditSettings',
-        icon: 'fas fa-toggle-on',
-        class: '',
-        groupTitle: false,
-        submenu: [],
-        isAccess: false
-      },
-
-      {
         path: 'addB2CServiceLocation',
         title: 'Add B2C Service Location',
         moduleName: 'addB2CServiceLocation',

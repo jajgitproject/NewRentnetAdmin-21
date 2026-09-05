@@ -1,33 +1,43 @@
-// @ts-nocheck
+export interface AuditChangedField {
+  field: string;
+  oldValue: string;
+  newValue: string;
+}
+
 export interface AuditTrailEvent {
-  auditEventId: number;
-  eventAtUtc: string;
+  eventId: string;
+  timestampUtc: string;
+  module: string;
+  formName: string;
   tableName: string;
-  formName?: string | null;
   operation: string;
+  reservationId: number | null;
+  allotmentId: number | null;
+  recordId: string;
   userId: number | null;
-  correlationId: string | null;
-  rowCount: number;
-  hostName?: string | null;
-  appName?: string | null;
-  loginName?: string | null;
-  userDisplayName?: string | null;
+  userDisplayName: string | null;
+  oldDriver?: string | null;
+  newDriver?: string | null;
+  beforeJson?: string;
+  afterJson?: string;
+  changedFields?: AuditChangedField[];
 }
 
-export interface AuditTrailRow {
-  auditEventRowId: number;
-  rowOrdinal: number;
-  formName?: string | null;
-  primaryKeyJson: string | null;
-  beforeJson: string | null;
-  afterJson: string | null;
+export interface AuditTrailQueryInterpretation {
+  module: string | null;
+  reservationId: number | null;
+  allotmentId: number | null;
+  userId: number | null;
+  userDisplayName: string | null;
+  fromDate: string | null;
+  toDate: string | null;
+  operation: string | null;
+  searchText: string | null;
+  warnings: string[];
 }
 
-/** Groups audit events by SQL table for reservation-centric view */
-export interface AuditTrailTableGroup {
-  tableKey: string;
-  tableLabel: string;
+export interface AuditTrailNlpQueryResponse {
+  interpretation: AuditTrailQueryInterpretation;
+  warnings: string[];
   events: AuditTrailEvent[];
 }
-
-

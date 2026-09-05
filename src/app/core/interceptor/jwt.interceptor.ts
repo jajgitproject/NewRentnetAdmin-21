@@ -45,20 +45,42 @@ export class JwtInterceptor implements HttpInterceptor {
       const empId =
         (currentUser as any)?.employee?.EmployeeID ??
         (currentUser as any)?.employee?.employeeID ??
-        (currentUser as any)?.Employee?.EmployeeID;
+        (currentUser as any)?.Employee?.EmployeeID ??
+        (currentUser as any)?.Employee?.employeeID ??
+        (currentUser as any)?.EmployeeID ??
+        (currentUser as any)?.employeeID;
       const sessionGuid = (currentUser as any)?.SessionGuid ?? (currentUser as any)?.sessionGuid;
+      let reservationId = '';
+      try {
+        reservationId = sessionStorage.getItem('audit_reservationId') || '';
+      } catch {}
+      const bodyReservationId =
+        request.body?.reservationID ??
+        request.body?.ReservationID ??
+        '';
+      const auditReservationId = String(bodyReservationId || reservationId || '').trim();
       request = request.clone({
         setHeaders: {
           Authorization: `Bearer ${bearer}`,
           'X-Audit-FormName': routeFormName,
           ...(empId ? { 'X-Audit-UserId': String(empId) } : {}),
           ...(sessionGuid ? { 'X-Session-Guid': String(sessionGuid) } : {}),
+          ...(auditReservationId && /^\d+$/.test(auditReservationId)
+            ? { 'X-Audit-ReservationId': auditReservationId }
+            : {}),
         },
       });
     } else if (routeFormName) {
+      let reservationId = '';
+      try {
+        reservationId = sessionStorage.getItem('audit_reservationId') || '';
+      } catch {}
       request = request.clone({
         setHeaders: {
           'X-Audit-FormName': routeFormName,
+          ...(reservationId && /^\d+$/.test(reservationId)
+            ? { 'X-Audit-ReservationId': reservationId }
+            : {}),
         },
       });
     }
