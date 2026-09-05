@@ -191,6 +191,19 @@ export const ROUTES: RouteInfo[] = [
         isAccess: false
       },
 
+       {
+        path: 'rejectedQCDriverPhoto',
+        title: 'Rejected QC Driver Photo',
+        pageKey: 'Rejected QC Driver Photo',
+        moduleName: 'rejectedQCDriverPhoto',
+        alternateAccessPageKeys: ['rejectedQCDriverPhoto', 'Rejected QC Driver Photo'],
+        icon: 'fas fa-file-archive',
+        class: '',
+        groupTitle: false,
+        submenu: [],
+        isAccess: false
+      },
+
       {
         path: 'integrationLogDetail',
         title: 'Integration Log',

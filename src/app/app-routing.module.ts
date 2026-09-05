@@ -94,6 +94,18 @@ const routes: Routes = [
           )
       },
 
+       {
+        path: 'rejectedQCDriverPhoto',
+        loadChildren: () =>
+          import('./rejectedQCDriverPhoto/rejectedQCDriverPhoto.module').then(
+            (m) => m.RejectedQCDriverPhotoModule
+          ),
+        data: {
+          requiredPageKey: 'Rejected QC Driver Photo',
+          alternatePageKeys: ['rejectedQCDriverPhoto', 'Rejected QC Driver Photo'],
+        },
+      },
+
       {
         path: 'integrationLogDetail',
         loadChildren: () =>
