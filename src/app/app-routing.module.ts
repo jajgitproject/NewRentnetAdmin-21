@@ -3652,6 +3652,19 @@ const routes: Routes = [
       },
 
       {
+        path: 'qcMisCst',
+        loadChildren: () =>
+          import('./qcMisCst/qcMisCst.module').then(
+            (m) => m.QcMisCSTModule
+          ),
+        data: {
+          requiredPageKey: 'QC MIS (CST)',
+          alternatePageKeys: ['qcMisCst', 'QC MIS (CST)', 'QCMIS(CST)'],
+          skipRolePageGuard: true
+        }
+      },
+
+      {
         path: 'resolution',
         loadChildren: () =>
           import('./resolution/resolution.module').then(

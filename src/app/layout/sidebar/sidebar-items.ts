@@ -1308,6 +1308,20 @@ export const ROUTES: RouteInfo[] = [
         submenu: [],
         isAccess: false
       },
+
+      {
+        path: 'qcMisCst',
+        title: 'QC MIS (CST)',
+        pageKey: 'QC MIS (CST)',
+        moduleName: 'qcMisCst',
+        alternateAccessPageKeys: ['qcMisCst', 'QC MIS (CST)', 'QCMIS(CST)'],
+        icon: 'fas fa-clipboard-check',
+        class: '',
+        groupTitle: false,
+        submenu: [],
+        isAccess: false,
+        alwaysAccessible: true
+      },
       {        
         path: 'incidenceMIS',
         title: 'Incidence MIS',

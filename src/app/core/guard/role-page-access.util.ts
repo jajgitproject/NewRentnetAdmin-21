@@ -92,6 +92,10 @@ export function applyMenuAccessRecursive(
       applyMenuAccessRecursive(r.submenu, accessPagesArray);
       r.isAccess = false;
     } else {
+      if (r.alwaysAccessible) {
+        r.isAccess = true;
+        continue;
+      }
       const keys = routeAccessNormalizedKeys(r);
       r.isAccess = keys.some((key) => accessPagesArray.some((p) => p.page === key));
     }
@@ -101,7 +105,7 @@ export function applyMenuAccessRecursive(
 export function denyAllMenuAccess(routes: RouteInfo[]): void {
   if (!routes) return;
   for (const r of routes) {
-    if (r.groupTitle) {
+    if (r.groupTitle || r.alwaysAccessible) {
       r.isAccess = true;
     } else {
       r.isAccess = false;
@@ -132,7 +136,7 @@ export function routePageAllowed(
   routeNode: RouteInfo,
   accessPages: { page: string }[]
 ): boolean {
-  if (routeNode.groupTitle) {
+  if (routeNode.groupTitle || routeNode.alwaysAccessible) {
     return true;
   }
   const keys = routeAccessNormalizedKeys(routeNode);

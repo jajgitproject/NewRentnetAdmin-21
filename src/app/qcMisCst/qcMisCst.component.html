@@ -1,0 +1,131 @@
+<section class="content">
+  <div class="container-fluid">
+    <div class="block-header">
+      <div class="row">
+        <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+          <ul>
+            <li class="breadcrumb-item bcrumb-1">
+              <a routerLink="/dashboard/main">
+                <i class="fas fa-home"></i> Home</a> |
+              <a href="#" onClick="return false;">Admin</a> |
+              <a href="#" onClick="return false;">QC MIS (CST)</a>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="row">
+      <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+        <div class="card">
+          <div class="body">
+            <mat-accordion class="duty-register-search-accordion">
+              <mat-expansion-panel class="duty-register-inline-search-panel" [expanded]="true">
+                <mat-expansion-panel-header>
+                  <mat-panel-title>Search</mat-panel-title>
+                </mat-expansion-panel-header>
+
+                <div class="duty-register-inline-search-body">
+                  <div class="row">
+                    <div class="col-md-3">
+                      <mat-form-field appearance="outline" class="w-100">
+                        <mat-label>Pickup Date From</mat-label>
+                        <input matInput [matDatepicker]="fromPicker" [(ngModel)]="searchPickupDateFrom">
+                        <mat-datepicker-toggle matSuffix [for]="fromPicker"></mat-datepicker-toggle>
+                        <mat-datepicker #fromPicker></mat-datepicker>
+                      </mat-form-field>
+                    </div>
+
+                    <div class="col-md-3">
+                      <mat-form-field appearance="outline" class="w-100">
+                        <mat-label>Pickup Date To</mat-label>
+                        <input matInput [matDatepicker]="toPicker" [(ngModel)]="searchPickupDateTo">
+                        <mat-datepicker-toggle matSuffix [for]="toPicker"></mat-datepicker-toggle>
+                        <mat-datepicker #toPicker></mat-datepicker>
+                      </mat-form-field>
+                    </div>
+
+                    <div class="col-md-3">
+                      <mat-form-field appearance="outline" class="w-100">
+                        <mat-label>Location</mat-label>
+                        <mat-select [(ngModel)]="searchLocationID">
+                          <mat-option [value]="0">All</mat-option>
+                          <mat-option *ngFor="let item of locations" [value]="item.organizationalEntityID">
+                            {{ item.organizationalEntityName }}
+                          </mat-option>
+                        </mat-select>
+                      </mat-form-field>
+                    </div>
+
+                    <div class="col-md-3">
+                      <mat-form-field appearance="outline" class="w-100">
+                        <mat-label>City</mat-label>
+                        <input type="text" matInput [formControl]="searchCity" [matAutocomplete]="autoCity">
+                        <mat-autocomplete #autoCity="matAutocomplete" [displayWith]="displayCity.bind(this)">
+                          <mat-option *ngFor="let option of cityOptions" [value]="option">
+                            {{ option.geoPointName }}
+                          </mat-option>
+                        </mat-autocomplete>
+                      </mat-form-field>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="duty-register-inline-search-actions quick-search-actions">
+                  <button mat-raised-button color="primary" (click)="SearchData()">Search</button>
+                  &nbsp;&nbsp;
+                  <button mat-raised-button color="warn" (click)="refresh()">Refresh</button>
+                </div>
+              </mat-expansion-panel>
+            </mat-accordion>
+
+            <br />
+
+            <div class="responsive_table">
+              <div class="table-responsive">
+                <p *ngIf="!dataSource || dataSource.length === 0; then thenBlock else elseBlock">
+                  This is not rendered
+                </p>
+
+                <ng-template #thenBlock>
+                  <div class="alert alert-primary" style="background-color:#E8E8E8; text-align: center;">No Records Found</div>
+                  <div class="body">
+                    <div class="example-button-row">
+                      <button mat-raised-button color="primary" (click)="PreviousCall()">Previous</button>
+                      <button mat-raised-button color="primary" (click)="NextCall()">Next</button>
+                    </div>
+                  </div>
+                </ng-template>
+
+                <ng-template #elseBlock>
+                  <div class="scrollable-table-container">
+                    <mat-table #table [dataSource]="dataSource" class="mat-cell floating-header-table">
+                      <ng-container *ngFor="let column of displayedColumns" [matColumnDef]="column">
+                        <mat-header-cell *matHeaderCellDef>
+                          {{ columnTitleMap[column] || column }}
+                        </mat-header-cell>
+                        <mat-cell *matCellDef="let row">
+                          {{ row[column] || 'N/A' }}
+                        </mat-cell>
+                      </ng-container>
+
+                      <mat-header-row *matHeaderRowDef="displayedColumns"></mat-header-row>
+                      <mat-row *matRowDef="let row; columns: displayedColumns;"></mat-row>
+                    </mat-table>
+                  </div>
+
+                  <div class="body">
+                    <div class="example-button-row">
+                      <button mat-raised-button color="primary" (click)="PreviousCall()">Previous</button>
+                      <button mat-raised-button color="primary" (click)="NextCall()">Next</button>
+                    </div>
+                  </div>
+                </ng-template>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
