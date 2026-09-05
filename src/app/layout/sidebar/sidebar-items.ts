@@ -214,6 +214,16 @@ export const ROUTES: RouteInfo[] = [
         submenu: [],
         isAccess: false
       },
+      {
+        path: 'integrationHealth',
+        title: 'Integration Health',
+        moduleName: 'integrationHealth',
+        icon: 'fas fa-heartbeat',
+        class: '',
+        groupTitle: false,
+        submenu: [],
+        isAccess: false
+      },
 
       {
         path: 'cdpBookingRequest',

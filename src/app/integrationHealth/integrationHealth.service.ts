@@ -19,12 +19,13 @@ export class IntegrationHealthService {
 
   getEvents(filters: HealthFilters, page: number = 1): Observable<any> {
     const params = new URLSearchParams({
-      aggregator: filters.vendor,
-      status: filters.status,
-      source: filters.source,
-      driverEndpoint: filters.driverEndpoint,
-      from: filters.fromDate,
-      to: filters.toDate,
+      aggregator: filters.vendor || '',
+      status: filters.status || '',
+      source: filters.source || '',
+      driverEndpoint: filters.driverEndpoint || '',
+      rentnetReservationID: filters.rentnetReservationID || '',
+      from: filters.fromDate || '',
+      to: filters.toDate || '',
       page: String(page)
     });
     return this.http.get<any>(`${this.baseUrl}events?${params}`);
