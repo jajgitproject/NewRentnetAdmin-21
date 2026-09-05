@@ -376,13 +376,17 @@ toggleStopFold() {
             this.customerDetails.pickupDate,
             this.customerDetails.pickupTime
           );
-          const dropOffDateTime = this.mergeDateAndTimeFromStrings(
-            this.customerDetails.dropOffDate,
-            dropOffTime24
-          ) ?? this.mergeDateAndTime(
-            this.customerDetails.dropOffDate,
-            this.customerDetails.dropOffTime
+          const dropOffDateSource = this.isMissingDate(this.customerDetails.dropOffDate)
+            ? this.customerDetails.pickupDate
+            : this.customerDetails.dropOffDate;
+          const resolvedDropOffTime24 = dropOffTime24 || pickupTime24;
+          let dropOffDateTime = this.mergeDateAndTimeFromStrings(
+            dropOffDateSource,
+            resolvedDropOffTime24
           );
+          if (this.isMissingDate(dropOffDateTime) && pickupDateTime) {
+            dropOffDateTime = pickupDateTime;
+          }
           this.advanceTableForm.patchValue({customerID:this.customerDetails.customerID});
           this.bookerID = this.customerDetails.primaryBookerID;
           this.advanceTableForm.patchValue({primaryBookerID:this.customerDetails.primaryBookerID});
@@ -390,14 +394,16 @@ toggleStopFold() {
           this.advanceTableForm.patchValue({pickupDate:this.extractDate(pickupDateTime)});
           this.advanceTableForm.patchValue({pickupTime:this.extractTime(pickupDateTime)});
           this.advanceTableForm.patchValue({dropOffDateTime:dropOffDateTime});
-          this.advanceTableForm.patchValue({dropOffDate:this.extractDate(dropOffDateTime)});
-          this.advanceTableForm.patchValue({dropOffTime:this.extractTime(dropOffDateTime)});
+          if (dropOffDateTime) {
+            this.advanceTableForm.patchValue({dropOffDate:this.extractDate(dropOffDateTime)});
+            this.advanceTableForm.patchValue({dropOffTime:this.extractTime(dropOffDateTime)});
+          }
           this.advanceTableForm.patchValue({customerGroupID:this.customerDetails.customerGroupID});
           this.advanceTableForm.patchValue({customerTypeID:this.customerDetails.customerTypeID});
           this.advanceTableForm.patchValue({pickupDateString:this._generalService.getDateFrom(this.advanceTableForm.value.pickupDate)});
           this.advanceTableForm.patchValue({pickupTimeString:pickupTime24 || this.formatTime24FromDateTime(pickupDateTime)});
           this.advanceTableForm.patchValue({dropOffDateString:this._generalService.getDateFrom(this.advanceTableForm.value.dropOffDate)});
-          this.advanceTableForm.patchValue({dropOffTimeString:dropOffTime24 || this.formatTime24FromDateTime(dropOffDateTime)});
+          this.advanceTableForm.patchValue({dropOffTimeString:resolvedDropOffTime24 || this.formatTime24FromDateTime(dropOffDateTime)});
           this.onPickupDateChange();
           this.getSalesManager(this.customerDetails.customerID);
           this.getCustomerKam(this.customerDetails.customerID);
@@ -557,6 +563,14 @@ toggleStopFold() {
   );
 
   return dateObj;
+}
+
+private isMissingDate(value: any): boolean {
+  if (value === null || value === undefined || value === '') {
+    return true;
+  }
+  const asMoment = moment(value);
+  return !asMoment.isValid() || asMoment.year() <= 1970;
 }
 
 private extractDate(dateTime: Date): Date {

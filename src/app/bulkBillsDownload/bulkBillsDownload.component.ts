@@ -290,6 +290,15 @@ export class BulkBillsDownloadComponent implements OnInit, OnDestroy, AfterViewI
       return;
     }
 
+    const invoiceNumberCount = invoiceNumber
+      ? invoiceNumber.split(',').map((token) => token.trim()).filter((token) => token.length > 0).length
+      : 0;
+    if (invoiceNumberCount > 100) {
+      this.loadError = 'A maximum of 100 invoice numbers can be searched at once';
+      this.snackBar.open(this.loadError, 'Close', { duration: 4000 });
+      return;
+    }
+
     if (!invoiceNumber && !hasDateRange && !customer?.customerID && summaryId === null) {
       this.loadError = 'Please select customer, invoice number, summary ID, or date range';
       this.snackBar.open(this.loadError, 'Close', { duration: 4000 });
