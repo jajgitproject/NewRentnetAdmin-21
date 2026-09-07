@@ -3562,6 +3562,14 @@ const routes: Routes = [
           )
       },
 
+
+      {
+        path: 'customerMeeting',
+        loadChildren: () =>
+          import('./customerMeeting/customerMeeting.module').then(
+            (m) => m.CustomerMeetingModule
+          )
+      },
       {
         path: 'integrationLog',
         loadChildren: () =>

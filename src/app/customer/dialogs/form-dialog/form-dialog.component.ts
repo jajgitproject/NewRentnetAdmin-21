@@ -23,8 +23,8 @@ import { CustomerTypeDropDown } from 'src/app/customerType/customerTypeDropDown.
 import { CustomerCategoryDropDown } from 'src/app/customerCategory/customerCategoryDropDown.model';
 import { CountryDropDown } from 'src/app/general/countryDropDown.model';
 import { StatesDropDown } from 'src/app/organizationalEntity/stateDropDown.model';
-import { Observable } from 'rxjs';
-import { map, startWith } from 'rxjs/operators';
+import { Observable, of } from 'rxjs';
+import { map, startWith, debounceTime, distinctUntilChanged, switchMap, catchError, tap } from 'rxjs/operators';
 import { AbstractControl, ValidationErrors, ValidatorFn } from '@angular/forms';
 import { CountryCodeDropDown } from 'src/app/general/countryCodeDropDown.model';
 import { BusinessTypeDropDown } from '../../businessTypeDropDown.model';
@@ -49,8 +49,8 @@ export class FormDialogComponent
   name = '';
  
   searchTerm:  FormControl = new FormControl();
-  filteredOptions: Observable<CustomerGroupDropDown[]>;
-  public customerGroupList?: CustomerGroupDropDown[] = [];
+  filteredCustomerGroupOptions: Observable<CustomerGroupDropDown[]>;
+  selectedCustomerGroupName: string = '';
   
   searchTypeTerm:  FormControl = new FormControl();
   filteredTypeOptions: Observable<CustomerTypeDropDown[]>;
@@ -84,6 +84,9 @@ export class FormDialogComponent
    
   filteredBusinessTypeOptions: Observable<BusinessTypeDropDown[]>;
    public BusinessTypeList?: BusinessTypeDropDown[] = [];
+  public AggregatorCustomerList?: CustomerDropDown[] = [];
+  filteredAggregatorOptions: Observable<CustomerDropDown[]>;
+  aggregatorCustomerID: any;
   image: any;
   fileUploadEl: any;
   customerGroupID: any;
@@ -122,12 +125,33 @@ export class FormDialogComponent
           //this.searchcorporateCompany.setValue(this.advanceTable.customerName);
 
           this.advanceTableForm.controls['maximumAgeOfCarToBeSent'].setValue(this.advanceTable.maximumAgeOfCarToBeSent);
+          this.customerTypeID = this.advanceTable.customerTypeID;
+          this.customerCategoryID = this.advanceTable.customerCategoryID;
+          this.companyID = this.advanceTable.companyID;
+          this.organizationalEntityID = this.advanceTable.serviceLocationID;
+          this.geoPointID = this.advanceTable.countryForISDCodeID;
+          this.customerGroupID = this.advanceTable.customerGroupID ?? null;
+          this.selectedCustomerGroupName = (this.advanceTable.customerGroup || '').trim();
+          this.advanceTableForm.patchValue({
+            customerGroup: this.selectedCustomerGroupName,
+            customerGroupID: this.customerGroupID,
+            aggregatorCustomerName: this.advanceTable.aggregatorCustomerID
+              ? this.advanceTable.aggregatorCustomerName
+              : 'None',
+            isAggregator: this.advanceTable.isAggregator ?? false,
+          }, { emitEvent: false });
+          this.aggregatorCustomerID = this.advanceTable.aggregatorCustomerID || null;
         } else 
         {
           this.dialogTitle = 'Customer';
           this.advanceTable = new Customer({});
           this.advanceTable.activationStatus=true;
           this.advanceTableForm = this.createContactForm();
+          this.advanceTableForm.patchValue({
+            aggregatorCustomerName: 'None',
+            isAggregator: false,
+          });
+          this.aggregatorCustomerID = null;
         }
 
         if (this.advanceTable.contactNo) {
@@ -151,6 +175,7 @@ export class FormDialogComponent
     this.InitCountries();
     this.InitCountryISDCode();
     this.onLatLonRequiredChange();
+    this.initAggregatorCustomers();
   }
 
 
@@ -191,52 +216,61 @@ checkDuplicateCustomer()
   }
 
   //---------- Customer Group ----------
-  customerGroupValidator(customerGroupList: any[]): ValidatorFn {
+  customerGroupSelectionValidator(): ValidatorFn {
     return (control: AbstractControl): ValidationErrors | null => {
       if (!control.value) {
-        return null; // No value to validate, return null (no error)
+        return null;
       }
-      const value = control.value?.toLowerCase();
-      const match = customerGroupList.some(group => group.customerGroup.toLowerCase() === value);
-      return match ? null : { customerGroupInvalid: true };
+      const groupId = this.customerGroupID ?? this.advanceTableForm?.get('customerGroupID')?.value;
+      if (!groupId) {
+        return { customerGroupInvalid: true };
+      }
+      return null;
     };
   }
 
   initCustomerGroup(){
-    this._generalService.getCustomerGroup().subscribe(
-      data=>{
-        this.customerGroupList=data;
-        this.advanceTableForm.controls['customerGroup'].setValidators([Validators.required,
-          this.customerGroupValidator(this.customerGroupList)]);
-        this.advanceTableForm.controls['customerGroup'].updateValueAndValidity();
-        this.filteredOptions = this.advanceTableForm.controls['customerGroup'].valueChanges.pipe(
-          startWith(""),
-          map(value => this._filter(value || ''))
-        );
+    if (this.action === 'edit') {
+      const groupName = (this.advanceTable?.customerGroup || this.advanceTableForm?.get('customerGroup')?.value || '').trim();
+      this.selectedCustomerGroupName = groupName;
+      this.customerGroupID = this.advanceTable?.customerGroupID ?? this.customerGroupID;
+      if (groupName) {
+        this.advanceTableForm.controls['customerGroup'].setValue(groupName, { emitEvent: false });
+        this.advanceTableForm.controls['customerGroupID'].setValue(this.customerGroupID, { emitEvent: false });
       }
-    )
-  }
-  private _filter(value: string): any {
-    const filterValue = value.toLowerCase();
-    // if (!value || value.length < 3) {
-    //   return [];   
-    // }
-    return this.customerGroupList.filter(
-      customer => 
-      {
-        return customer.customerGroup.toLowerCase().includes(filterValue);
-      }
-    );
-  };
-  OnCustomerGroupSelect(selectedCustomerGroup: string)
-  {
-    const selectedCountry = this.customerGroupList.find(
-      customerGroup => customerGroup.customerGroup === selectedCustomerGroup
-    );
-    if (selectedCustomerGroup) 
-    {
-      this.getGroupID(selectedCountry.customerGroupID);
     }
+
+    this.advanceTableForm.controls['customerGroup'].setValidators([
+      Validators.required,
+      this.customerGroupSelectionValidator()
+    ]);
+    this.advanceTableForm.controls['customerGroup'].updateValueAndValidity({ emitEvent: false });
+
+    this.filteredCustomerGroupOptions = this.advanceTableForm.controls['customerGroup'].valueChanges.pipe(
+      tap((value: string) => {
+        const typedValue = (value || '').trim();
+        const selectedValue = (this.selectedCustomerGroupName || '').trim();
+        if (typedValue !== selectedValue) {
+          this.customerGroupID = null;
+        }
+      }),
+      debounceTime(300),
+      switchMap((value: string) => this._generalService.getCustomerGroupForDropDown(value))
+    );
+  }
+
+  OnCustomerGroupSelect(selectedCustomerGroup: CustomerGroupDropDown)
+  {
+    if (!selectedCustomerGroup) {
+      return;
+    }
+    this.selectedCustomerGroupName = (selectedCustomerGroup.customerGroup || '').trim();
+    this.advanceTableForm.patchValue({
+      customerGroup: selectedCustomerGroup.customerGroup,
+      customerGroupID: selectedCustomerGroup.customerGroupID
+    }, { emitEvent: false });
+    this.getGroupID(selectedCustomerGroup.customerGroupID);
+    this.advanceTableForm.controls['customerGroup'].updateValueAndValidity();
   }
   getGroupID(customerGroupID: any) {
     this.customerGroupID=customerGroupID;
@@ -432,6 +466,69 @@ checkDuplicateCustomer()
       const match = CustomerList.some(group => group.customerName.toLowerCase() === value);
       return match ? null : { corporateCompanyInvalid: true };
     };
+  }
+
+  //---------- Aggregator Customer ----------
+  aggregatorCustomerValidator(aggregatorCustomerList: any[]): ValidatorFn {
+    return (control: AbstractControl): ValidationErrors | null => {
+      const value = control.value;
+      if (!value) {
+        return { required: true };
+      }
+      if (value.toLowerCase() === 'none') {
+        return null;
+      }
+      const match = aggregatorCustomerList.some(
+        customer => customer.customerName.toLowerCase() === value.toLowerCase()
+      );
+      return match ? null : { aggregatorCustomerInvalid: true };
+    };
+  }
+
+  initAggregatorCustomers() {
+    this.advanceTableService.getAggregatorCustomers().subscribe(
+      data => {
+        this.AggregatorCustomerList = data || [];
+        this.advanceTableForm.controls['aggregatorCustomerName'].setValidators([
+          Validators.required,
+          this.aggregatorCustomerValidator(this.AggregatorCustomerList)
+        ]);
+        this.advanceTableForm.controls['aggregatorCustomerName'].updateValueAndValidity();
+        this.filteredAggregatorOptions = this.advanceTableForm.controls['aggregatorCustomerName'].valueChanges.pipe(
+          startWith(this.advanceTableForm.controls['aggregatorCustomerName'].value || ''),
+          map(value => this._filterAggregator(value || ''))
+        );
+      }
+    );
+  }
+
+  private _filterAggregator(value: string): CustomerDropDown[] {
+    const noneOption = { customerID: null, customerName: 'None' } as CustomerDropDown;
+    const filterValue = (value || '').trim().toLowerCase();
+
+    let customers = this.AggregatorCustomerList || [];
+    if (filterValue && filterValue !== 'none') {
+      customers = customers.filter(customer =>
+        customer.customerName.toLowerCase().includes(filterValue)
+      );
+    }
+
+    return [noneOption, ...customers];
+  }
+
+  OnAggregatorSelect(selectedAggregator: string) {
+    if (!selectedAggregator || selectedAggregator.toLowerCase() === 'none') {
+      this.aggregatorCustomerID = null;
+      this.advanceTableForm.patchValue({ aggregatorCustomerID: null });
+      return;
+    }
+    const selectedCustomer = this.AggregatorCustomerList.find(
+      customer => customer.customerName === selectedAggregator
+    );
+    if (selectedCustomer) {
+      this.aggregatorCustomerID = selectedCustomer.customerID;
+      this.advanceTableForm.patchValue({ aggregatorCustomerID: selectedCustomer.customerID });
+    }
   }
 
   //---------- Service Location ----------
@@ -777,6 +874,9 @@ getBusinessTypeID(businessTypeID: any)
       businessTypeID: [this.advanceTable.businessTypeID],
       businessServices: [this.advanceTable.businessServices],
       isBillToShipToCustomer: [this.advanceTable.isBillToShipToCustomer ?? false],
+      isAggregator: [this.advanceTable.isAggregator ?? false, Validators.required],
+      aggregatorCustomerID: [this.advanceTable.aggregatorCustomerID],
+      aggregatorCustomerName: [this.advanceTable.aggregatorCustomerName || 'None', Validators.required],
     });
   }
 
@@ -826,7 +926,8 @@ onLatLonRequiredChange() {
     this.advanceTableForm.patchValue({countryForISDCodeID:this.geoPointID});
     this.advanceTableForm.patchValue({serviceLocationID:this.organizationalEntityID});
     this.advanceTableForm.patchValue({customerCategoryID:this.customerCategoryID});  
-    this.advanceTableForm.patchValue({companyID:this.companyID});  
+    this.advanceTableForm.patchValue({companyID:this.companyID});
+    this.advanceTableForm.patchValue({aggregatorCustomerID: this.aggregatorCustomerID});
     this.advanceTableService.add(this.advanceTableForm.getRawValue())  
     .subscribe(
     response => 
@@ -857,7 +958,10 @@ onLatLonRequiredChange() {
     this.advanceTableForm.patchValue({countryForISDCodeID:this.geoPointID || this.advanceTable.countryForISDCodeID});
     this.advanceTableForm.patchValue({serviceLocationID:this.organizationalEntityID || this.advanceTable.serviceLocationID});
     //this.advanceTableForm.patchValue({customerCategoryID:this.customerCategoryID || this.advanceTable.customerCategoryID});
-    this.advanceTableForm.patchValue({companyID:this.companyID || this.advanceTable.companyID});  
+    this.advanceTableForm.patchValue({companyID:this.companyID || this.advanceTable.companyID});
+    this.advanceTableForm.patchValue({
+      aggregatorCustomerID: this.aggregatorCustomerID ?? this.advanceTable.aggregatorCustomerID ?? null
+    });
     this.advanceTableService.update(this.advanceTableForm.getRawValue())  
     .subscribe(
     response => 
@@ -880,6 +984,11 @@ onLatLonRequiredChange() {
     const feedbackValue = this.advanceTableForm.get('isFeedbackEmailAllowed').value;
     if (feedbackValue === '' || feedbackValue === undefined) {
       this.advanceTableForm.patchValue({ isFeedbackEmailAllowed: null });
+    }
+    const aggregatorName = this.advanceTableForm.get('aggregatorCustomerName').value;
+    if (!aggregatorName || aggregatorName.toLowerCase() === 'none') {
+      this.advanceTableForm.patchValue({ aggregatorCustomerID: null });
+      this.aggregatorCustomerID = null;
     }
        if(this.action=="edit")
        {

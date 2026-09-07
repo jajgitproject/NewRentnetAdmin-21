@@ -748,6 +748,17 @@ export const ROUTES: RouteInfo[] = [
       },
 
       {
+        path: 'customerMeeting',
+        title: 'Customer Meeting',
+        moduleName: 'customerMeeting',
+        icon: 'fas fa-tachometer-alt',
+        class: '',
+        groupTitle: false,
+        submenu: [],
+        isAccess: false
+      },
+
+      {
         path: 'customerCategory',
         title: 'Customer Category',
         moduleName: 'customerCategory',

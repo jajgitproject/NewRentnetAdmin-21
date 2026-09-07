@@ -1790,6 +1790,15 @@ GetVehicleBasedOnContractIDForOutStationRoundTrip(contractID: any,PackageID:numb
     return this.cachedGet('getCustomerGroup', () =>
       this.http.get<CustomerGroupDropDown[]>(this.BaseURL + "CustomerGroup/ForDropDown"));
   }
+
+  getCustomerGroupForDropDown(Prefix: string): Observable<CustomerGroupDropDown[]> {
+    const searchPrefix = (Prefix || '').trim();
+    if (searchPrefix.length < 3) {
+      return of([]);
+    }
+    return this.http.get<CustomerGroupDropDown[]>(
+      this.BaseURL + "CustomerGroup/ForDropDownPrefix/" + encodeURIComponent(searchPrefix));
+  }
   GetCustomerForIndividual(): Observable<CustomerGroupDropDown[]> {
     return this.http.get<CustomerGroupDropDown[]>(this.BaseURL + "CustomerGroup/GetCustomerForIndividual");
   }

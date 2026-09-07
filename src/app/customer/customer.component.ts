@@ -9,7 +9,8 @@ import { Customer } from './customer.model';
 import { DataSource } from '@angular/cdk/collections';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { BehaviorSubject, fromEvent, merge, Observable, Subject, Subscription } from 'rxjs';
-import { debounceTime, distinctUntilChanged, map, startWith } from 'rxjs/operators';
+import { debounceTime, distinctUntilChanged, map, startWith, switchMap, catchError, tap } from 'rxjs/operators';
+import { of } from 'rxjs';
 import { FormDialogComponent } from './dialogs/form-dialog/form-dialog.component';
 import { DeleteDialogComponent } from './dialogs/delete/delete.component';
 import { DateAdapter, MAT_DATE_LOCALE } from '@angular/material/core';
@@ -93,7 +94,6 @@ export class CustomerComponent implements OnInit {
   supplier:FormControl=new FormControl('');
   
   // regNumber:FormControl=new FormControl();
-  public customerGroupList?: CustomerGroupDropDown[] = [];
   public CustomerTypeList?: CustomerTypeDropDown[] = [];
   public customerCategoryList?: CustomerCategoryDropDown[] = [];
   public SupplierList?: SupplierDropDown[] = [];
@@ -177,7 +177,20 @@ export class CustomerComponent implements OnInit {
     // keystroke. 300ms is the sweet spot between responsiveness and backend load.
     this.searchTerm$
       .pipe(debounceTime(300), distinctUntilChanged())
-      .subscribe(() => this.loadData(false));
+      .subscribe(() => {
+        if (this.selectedFilter !== 'customerGroup') {
+          this.loadData(false);
+        }
+      });
+
+    this.customerGroup.valueChanges
+      .pipe(debounceTime(300), distinctUntilChanged())
+      .subscribe(() => {
+        if (this.selectedFilter === 'customerGroup') {
+          this.searchTerm = this.customerGroup.value || '';
+          this.loadData(false);
+        }
+      });
 
     this.loadData();
     this.SubscribeUpdateService();
@@ -330,10 +343,28 @@ export class CustomerComponent implements OnInit {
     this.selectedFilter = 'name';
   }
 
-  this.searchCustomerName = this.searchTerm; // 🔥 MOST IMPORTANT LINE
+  if (this.selectedFilter === 'customerGroup') {
+    this.searchTerm = this.customerGroup.value || '';
+  } else {
+    this.searchCustomerName = this.searchTerm;
+  }
 
-  this.loadData(true); // exact match
+  this.loadData(true);
 }
+
+  onCustomerGroupSearchClick() {
+    this.searchTerm = this.customerGroup.value || '';
+    this.loadData(true);
+  }
+
+  onCustomerGroupOptionSelected(option: CustomerGroupDropDown) {
+    if (!option) {
+      return;
+    }
+    this.customerGroup.setValue(option.customerGroup, { emitEvent: false });
+    this.searchTerm = option.customerGroup;
+    this.loadData(true);
+  }
 
   onSearchTermChange(value: string) {
     this.searchTerm = value ?? '';
@@ -389,30 +420,11 @@ export class CustomerComponent implements OnInit {
   };
 
   initCustomerGroup(){
-    this._generalService.getCustomerGroup().subscribe(
-      data=>{
-        this.customerGroupList=data;
-        this.filteredOptions = this.customerGroup.valueChanges.pipe(
-          startWith(""),
-          map(value => this._filter(value || ''))
-        );
-
-      }
-    )
-  }
-  private _filter(value: string): any {
-    const filterValue = value.toLowerCase();
-    if (!value || value.length < 3) {
-      return [];   
-    }
-    return this.customerGroupList.filter(
-      customer => 
-      {
-        return customer.customerGroup.toLowerCase().indexOf(filterValue)===0;
-      }
+    this.filteredOptions = this.customerGroup.valueChanges.pipe(
+      debounceTime(300),
+      switchMap((value: string) => this._generalService.getCustomerGroupForDropDown(value))
     );
-    
-  };
+  }
 
   initCustomerType(){
     this._generalService.getCustomerType().subscribe(

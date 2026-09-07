@@ -19,6 +19,43 @@
             <div class="row">
                 <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
                     <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                        <mat-label>Is Aggregator</mat-label>
+                        <mat-select formControlName="isAggregator" required>
+                            <mat-option [value]="true">Yes</mat-option>
+                            <mat-option [value]="false">No</mat-option>
+                        </mat-select>
+                        <mat-error *ngIf="advanceTableForm.get('isAggregator').hasError('required')">
+                            Is Aggregator is required
+                        </mat-error>
+                    </mat-form-field>
+                </div>
+
+                <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                    <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                        <mat-label>Aggregator</mat-label>
+                        <input required type="text" matInput [matAutocomplete]="aggregatorAuto"
+                            formControlName="aggregatorCustomerName">
+                        <mat-autocomplete #aggregatorAuto="matAutocomplete"
+                            (optionSelected)="OnAggregatorSelect($event.option.value)">
+                            <mat-option *ngFor="let options of filteredAggregatorOptions | async"
+                                [value]="options.customerName" (click)="OnAggregatorSelect(options.customerName)">
+                                {{options.customerName}}
+                            </mat-option>
+                        </mat-autocomplete>
+                        <mat-error *ngIf="advanceTableForm.get('aggregatorCustomerName').hasError('required')">
+                            Aggregator is required
+                        </mat-error>
+                        <mat-error
+                            *ngIf="advanceTableForm.controls['aggregatorCustomerName'].hasError('aggregatorCustomerInvalid')">
+                            Please select a valid Aggregator
+                        </mat-error>
+                    </mat-form-field>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                    <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
                         <mat-label>New Customer</mat-label>
                         <mat-select formControlName="newCustomer">
                             <mat-option [value]=true>Yes</mat-option>
@@ -64,12 +101,13 @@
                 <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
                     <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
                         <mat-label>Customer Group</mat-label>
-                        <input required type="text" matInput [matAutocomplete]="auto" formControlName="customerGroup">
-                        <mat-autocomplete #auto="matAutocomplete"
-                            (optionSelected)="OnCustomerGroupSelect($event.option.value)">
-                            <mat-option *ngFor="let options of filteredOptions | async" [value]="options.customerGroup"
-                                (click)="getGroupID(options.customerGroupID)">
-                                {{options.customerGroup}}
+                        <input required type="text" matInput [matAutocomplete]="customerGroupAuto"
+                            formControlName="customerGroup" placeholder="Type at least 3 characters">
+                        <mat-autocomplete #customerGroupAuto="matAutocomplete">
+                            <mat-option *ngFor="let option of filteredCustomerGroupOptions | async"
+                                [value]="option.customerGroup"
+                                (onSelectionChange)="$event.isUserInput && OnCustomerGroupSelect(option)">
+                                {{option.customerGroup}}
                             </mat-option>
                         </mat-autocomplete>
                         <mat-error *ngIf="advanceTableForm.get('customerGroup').hasError('required')">

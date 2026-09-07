@@ -2,6 +2,7 @@
 import { Injectable } from '@angular/core';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { Customer, CustomerNameModel } from './customer.model';
+import { CustomerDropDown } from './customerDropDown.model';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { DatePipe } from '@angular/common';
 import { GeneralService } from '../general/general.service';
@@ -204,6 +205,14 @@ export class CustomerService
         ? null
         : toBool(raw.isFeedbackEmailAllowed, true),
       isBillToShipToCustomer: toBool(raw.isBillToShipToCustomer, false),
+      isAggregator: toBool(raw.isAggregator, false),
+      aggregatorCustomerID:
+        raw.aggregatorCustomerID === null ||
+        raw.aggregatorCustomerID === undefined ||
+        raw.aggregatorCustomerID === '' ||
+        raw.aggregatorCustomerID === 0
+          ? null
+          : toInt(raw.aggregatorCustomerID),
       customerIdentityNumber: raw.customerIdentityNumber || '',
       panNo: raw.panNo || '',
       gstCustomerType: raw.gstCustomerType || '',
@@ -221,5 +230,10 @@ export class CustomerService
   DuplicateCustomer(CustomerName:string): Observable<CustomerNameModel>
   {
     return this.httpClient.get<CustomerNameModel>(this.API_URL + "/checkDuplicateCustomerName/" + CustomerName);
+  }
+
+  getAggregatorCustomers(): Observable<CustomerDropDown[]>
+  {
+    return this.httpClient.get<CustomerDropDown[]>(this.API_URL + "/ForAggregatorDropDown");
   }
 }

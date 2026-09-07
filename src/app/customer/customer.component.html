@@ -87,26 +87,17 @@
                                                         
                                                     </mat-form-field> -->
 
-                                                    <!-- <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
-                                                        <mat-label>Customer Group</mat-label>
-                                                        <mat-select [formControl]="customerGroup"
-                                                            [(ngModel)]="searchcustomerGroup">
-                                                            <mat-option [value]="Customers.customerGroup"
-                                                                *ngFor="let Customers of customerGroupList">{{Customers.customerGroup}}</mat-option>
-                                                        </mat-select>
-                                                    </mat-form-field> -->
-
                                                     <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
                                                         <mat-label>Customer Group</mat-label>
-                                                        <input type="text" matInput [matAutocomplete]="auto"
-                                                            [formControl]="customerGroup">
-                                                        <mat-autocomplete #auto="matAutocomplete">
-                                                            <mat-option *ngFor="let options of filteredOptions | async"
-                                                                [value]="options.customerGroup">
-                                                                {{options.customerGroup}}
+                                                        <input type="text" matInput [matAutocomplete]="customerGroupSearchAuto"
+                                                            [formControl]="customerGroup" placeholder="Type at least 3 characters">
+                                                        <mat-autocomplete #customerGroupSearchAuto="matAutocomplete">
+                                                            <mat-option *ngFor="let option of filteredOptions | async"
+                                                                [value]="option.customerGroup"
+                                                                (onSelectionChange)="$event.isUserInput && onCustomerGroupOptionSelected(option)">
+                                                                {{option.customerGroup}}
                                                             </mat-option>
                                                         </mat-autocomplete>
-
                                                     </mat-form-field>
 
                                                     <mat-form-field class="example-full-width mb-3"
@@ -148,10 +139,26 @@
                                                 <option value="customerGroup">Customer Group</option>
                                             </select>
 
-                                            <input type="text" class="form-control customer-search-input"
-                                                placeholder="Filter" id="inputGroup" [(ngModel)]="searchTerm"
+                                            <input *ngIf="selectedFilter !== 'customerGroup'" type="text"
+                                                class="form-control customer-search-input" placeholder="Filter"
+                                                id="inputGroup" [(ngModel)]="searchTerm"
                                                 (ngModelChange)="onSearchTermChange($event)"
                                                 (keyup.enter)="onSearchClick()" />
+
+                                            <mat-form-field *ngIf="selectedFilter === 'customerGroup'"
+                                                class="customer-group-search-field" appearance="outline">
+                                                <input type="text" matInput placeholder="Type at least 3 characters"
+                                                    [formControl]="customerGroup"
+                                                    [matAutocomplete]="customerGroupToolbarAuto"
+                                                    (keyup.enter)="onCustomerGroupSearchClick()" />
+                                                <mat-autocomplete #customerGroupToolbarAuto="matAutocomplete">
+                                                    <mat-option *ngFor="let option of filteredOptions | async"
+                                                        [value]="option.customerGroup"
+                                                        (onSelectionChange)="$event.isUserInput && onCustomerGroupOptionSelected(option)">
+                                                        {{option.customerGroup}}
+                                                    </mat-option>
+                                                </mat-autocomplete>
+                                            </mat-form-field>
 
                                             <button type="button" class="btn btn-light customer-search-btn"
                                                 (click)="onSearchClick()">
