@@ -374,6 +374,12 @@ export const DUTY_SLIP_PRINT_CSS = `
 .map-image {
   width: auto; height: auto; max-width: 100%; display: block; margin: 0 auto; border: 1px solid #ccc;
 }
+.otp-generated-at {
+  font-size: 6pt;
+  line-height: 1.1;
+  display: inline-block;
+  margin-top: 1px;
+}
 `;
 
 export const PDF_IMAGE_PAGE_CSS = `

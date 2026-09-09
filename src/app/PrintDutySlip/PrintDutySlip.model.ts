@@ -28,6 +28,8 @@ export class PrintDutySlip {
   mobile1: string;
   startTripOTP: string;
   endTripOTP: string;
+  startTripOTPGeneratedAt: string;
+  endTripOTPGeneratedAt: string;
   tripType: string;
   dutySlipType: string;
   printRunningDetailOnDutySlip: string;

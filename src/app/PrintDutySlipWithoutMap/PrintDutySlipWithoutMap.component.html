@@ -334,10 +334,12 @@
                             Start Trip OTP
                             <br />
                             <span *ngIf="dataSource?.showOTPOnDutySlip === true">{{dataSource?.startTripOTP}}</span>
+                            <span *ngIf="dataSource?.showOTPOnDutySlip === true && dataSource?.startTripOTP && dataSource?.startTripOTPGeneratedAt" class="otp-generated-at"><br />{{ dataSource.startTripOTPGeneratedAt | date:'dd/MM/yyyy HH:mm' }}</span>
                             <br/>
                             End Trip OTP
                             <br />
                             <span *ngIf="dataSource?.showOTPOnDutySlip === true">{{dataSource?.endTripOTP}}</span>
+                            <span *ngIf="dataSource?.showOTPOnDutySlip === true && dataSource?.endTripOTP && dataSource?.endTripOTPGeneratedAt" class="otp-generated-at"><br />{{ dataSource.endTripOTPGeneratedAt | date:'dd/MM/yyyy HH:mm' }}</span>
                           </td>
                         </tr>
                       </table>

@@ -959,9 +959,7 @@ onLatLonRequiredChange() {
     this.advanceTableForm.patchValue({serviceLocationID:this.organizationalEntityID || this.advanceTable.serviceLocationID});
     //this.advanceTableForm.patchValue({customerCategoryID:this.customerCategoryID || this.advanceTable.customerCategoryID});
     this.advanceTableForm.patchValue({companyID:this.companyID || this.advanceTable.companyID});
-    this.advanceTableForm.patchValue({
-      aggregatorCustomerID: this.aggregatorCustomerID ?? this.advanceTable.aggregatorCustomerID ?? null
-    });
+    this.advanceTableForm.patchValue({aggregatorCustomerID: this.aggregatorCustomerID});
     this.advanceTableService.update(this.advanceTableForm.getRawValue())  
     .subscribe(
     response => 
