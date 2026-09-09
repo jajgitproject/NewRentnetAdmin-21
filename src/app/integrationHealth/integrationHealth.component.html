@@ -12,17 +12,21 @@
     </article>
   </section>
 
-  <!-- Vendor cards -->
-  <h2 class="ih-section">Vendors</h2>
+  <!-- Aggregator cards -->
+  <h2 class="ih-section">Aggregators</h2>
   <section class="ih-grid ih-vendor-grid">
-    <article class="ih-card" *ngFor="let v of vendors">
+    <article
+      class="ih-card ih-card-click"
+      *ngFor="let v of vendors"
+      [class.ih-card-selected]="isAggregatorSelected(v.name)"
+      (click)="filterByAggregator(v.name)">
       <div class="ih-row">
         <strong>{{ v.name }}</strong>
         <span class="ih-chip" [ngClass]="circuitClass(v.circuitState)">
           {{ v.circuitState }}
         </span>
       </div>
-      <p [ngClass]="v.tone">{{ v.successRate }} success</p>
+      <p [ngClass]="v.tone">{{ vendorRateLabel(v) }}</p>
     </article>
   </section>
 
@@ -30,10 +34,10 @@
   <h2 class="ih-section">Failure Explorer</h2>
   <section class="ih-card ih-filters">
     <mat-form-field appearance="outline">
-      <mat-label>Vendor</mat-label>
+      <mat-label>Aggregator</mat-label>
       <mat-select [(ngModel)]="filters.vendor">
         <mat-option value="">All</mat-option>
-        <mat-option *ngFor="let v of vendorOptions" [value]="v">{{ v }}</mat-option>
+        <mat-option *ngFor="let v of aggregatorFilterOptions" [value]="v">{{ v }}</mat-option>
       </mat-select>
     </mat-form-field>
 
@@ -67,17 +71,17 @@
     </mat-form-field>
 
     <mat-form-field appearance="outline" class="ih-customer-field">
-      <mat-label>Customer Name##Integration Code</mat-label>
+      <mat-label>Customer Name##Tally Integration Code</mat-label>
       <input
         matInput
         type="text"
         [ngModel]="filters.customerIntegrationSearch"
         (ngModelChange)="onCustomerIntegrationInput($event)"
         [matAutocomplete]="customerIntegrationAuto"
-        placeholder="e.g. Acme##MMT-TRIP-9001"
+        placeholder="e.g. Acme Corp##12345"
       />
-      <mat-autocomplete #customerIntegrationAuto="matAutocomplete">
-        <mat-option *ngFor="let option of customerIntegrationOptions" [value]="option">
+      <mat-autocomplete #customerIntegrationAuto="matAutocomplete" panelClass="ih-customer-auto-panel">
+        <mat-option *ngFor="let option of customerIntegrationOptions" [value]="option" [title]="option">
           {{ option }}
         </mat-option>
       </mat-autocomplete>
@@ -85,12 +89,16 @@
 
     <mat-form-field appearance="outline">
       <mat-label>From Date</mat-label>
-      <input matInput type="date" [(ngModel)]="filters.fromDate" />
+      <input matInput [matDatepicker]="fromPicker" [(ngModel)]="filters.fromDate" />
+      <mat-datepicker-toggle matSuffix [for]="fromPicker"></mat-datepicker-toggle>
+      <mat-datepicker #fromPicker></mat-datepicker>
     </mat-form-field>
 
     <mat-form-field appearance="outline">
       <mat-label>To Date</mat-label>
-      <input matInput type="date" [(ngModel)]="filters.toDate" />
+      <input matInput [matDatepicker]="toPicker" [(ngModel)]="filters.toDate" />
+      <mat-datepicker-toggle matSuffix [for]="toPicker"></mat-datepicker-toggle>
+      <mat-datepicker #toPicker></mat-datepicker>
     </mat-form-field>
 
     <div class="ih-filter-btns">
@@ -109,7 +117,7 @@
       </ng-container>
 
       <ng-container matColumnDef="vendor">
-        <th mat-header-cell *matHeaderCellDef>Vendor</th>
+        <th mat-header-cell *matHeaderCellDef>Aggregator</th>
         <td mat-cell *matCellDef="let r">{{ r.vendor }}</td>
       </ng-container>
 
@@ -139,7 +147,7 @@
       </ng-container>
 
       <ng-container matColumnDef="customerIntegration">
-        <th mat-header-cell *matHeaderCellDef>Customer##Integration Code</th>
+        <th mat-header-cell *matHeaderCellDef>Customer##Tally Integration Code</th>
         <td mat-cell *matCellDef="let r">{{ r.customerName }}##{{ r.integrationCode }}</td>
       </ng-container>
 
@@ -162,12 +170,12 @@
 
       <ng-container matColumnDef="error">
         <th mat-header-cell *matHeaderCellDef>Error</th>
-        <td mat-cell *matCellDef="let r">{{ r.error }}</td>
+        <td mat-cell *matCellDef="let r" [title]="r.error">{{ r.error }}</td>
       </ng-container>
 
       <ng-container matColumnDef="action">
-        <th mat-header-cell *matHeaderCellDef>Action</th>
-        <td mat-cell *matCellDef="let r">
+        <th mat-header-cell *matHeaderCellDef stickyEnd>Action</th>
+        <td mat-cell *matCellDef="let r" stickyEnd>
           <button mat-stroked-button (click)="resend(r)">Resend</button>
         </td>
       </ng-container>

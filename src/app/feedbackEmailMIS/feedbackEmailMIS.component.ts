@@ -285,7 +285,7 @@ export class FeedbackEmailMISComponent implements OnInit, OnDestroy {
 
   getBookingNo(row: any): string {
     if (!row?.reservationID) {
-      return 'N/A';
+      return '';
     }
     if (row.reservationGroupID) {
       return row.reservationGroupID + '.' + row.reservationID;

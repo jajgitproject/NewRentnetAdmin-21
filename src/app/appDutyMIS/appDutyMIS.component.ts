@@ -28,6 +28,7 @@ import moment from 'moment';
 import { VehicleCategoryDropDown } from '../general/vehicleCategoryDropDown.model';
 import { VehicleDropDown } from '../vehicle/vehicleDropDown.model';
 import { OrganizationalEntityDropDown } from '../organizationalEntityMessage/organizationalEntityDropDown.model';
+import { blankIfNa } from '../shared/blank-if-na.util';
 @Component({
   standalone: false,
   selector: 'app-appDutyMIS',
@@ -375,11 +376,12 @@ shouldShowDeleteButton(item: any): boolean {
   private normalizeRow(row: any): any {
     const driverOfficialIdentityNumber =
       row.driverOfficialIdentityNumber ?? row.DriverOfficialIdentityNumber ?? null;
+    const driverName = blankIfNa(row.driverName ?? row.DriverName);
     return {
       ...row,
       driverOfficialIdentityNumber,
-      driverName: driverOfficialIdentityNumber,
-      driverDisplayName: this.formatDriverName({ driverOfficialIdentityNumber }),
+      driverName,
+      driverDisplayName: driverName,
       locationOutTimeByApp: this.formatTimeValue(row.locationOutTimeByApp ?? row.LocationOutTimeByApp),
       reportingToGuestTimeByApp: this.formatTimeValue(
         row.reportingToGuestTimeByApp ?? row.ReportingToGuestTimeByApp
@@ -390,22 +392,18 @@ shouldShowDeleteButton(item: any): boolean {
   }
 
   formatDriverName(row: any): string {
-    // Driver Name column shows Driver.DriverOfficialIdentityNumber only.
-    const code = (row?.driverOfficialIdentityNumber ?? row?.DriverOfficialIdentityNumber ?? '')
-      .toString()
-      .trim();
-    return code || 'N/A';
+    return blankIfNa(row?.driverName ?? row?.DriverName);
   }
 
   private formatTimeValue(value: any): string {
-    if (value === undefined || value === null || value === '' || value === 'N/A') {
-      return 'N/A';
+    if (value === undefined || value === null || value === '' || blankIfNa(value) === '') {
+      return '';
     }
 
     if (typeof value === 'string') {
       const trimmed = value.trim();
       if (!trimmed) {
-        return 'N/A';
+        return '';
       }
       const parsed = moment(trimmed, [moment.ISO_8601, 'HH:mm:ss', 'HH:mm:ss.SSSSSSS', 'HH:mm'], true);
       if (parsed.isValid()) {
@@ -440,12 +438,12 @@ shouldShowDeleteButton(item: any): boolean {
       }
     }
 
-    return 'N/A';
+    return '';
   }
 
   getDisplayValue(column: string, row: any): string | number {
     if (column === 'driverName') {
-      return row.driverDisplayName || this.formatDriverName(row);
+      return this.formatDriverName(row);
     }
 
     if (this.timeColumns.has(column)) {
@@ -455,18 +453,18 @@ shouldShowDeleteButton(item: any): boolean {
     const value = row[column];
 
     if (this.zeroAsNaColumns.has(column)) {
-      return value === undefined || value === null || value === 0 ? 'N/A' : value;
+      return value === undefined || value === null || value === 0 ? '' : value;
     }
 
     if (value === undefined || value === null || value === '') {
-      return 'N/A';
+      return '';
     }
 
     if (typeof value === 'object') {
-      return 'N/A';
+      return '';
     }
 
-    return value;
+    return blankIfNa(value);
   }
 
    public loadData() 

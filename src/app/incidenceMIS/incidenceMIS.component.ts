@@ -10,6 +10,7 @@ import { IncidenceMIS, IncidenceMISSearchCriteria } from './incidenceMIS.model';
 import { IncidenceMISService } from './incidenceMIS.service';
 import { extractExportErrorMessage, exportJobAcceptedSnackbarMessage, exportSearchButtonLabel, formatExportElapsedTime, IN_FLIGHT_EXPORT_MESSAGE, isExportJobCancelled, isExportJobNotFoundError, loadPersistedExportJobId, markExportDumpStarted, persistExportJobId } from '../general/export-job.helper';
 import { StoredMisExportsComponent } from '../general/stored-mis-exports.component';
+import { blankIfNa } from '../shared/blank-if-na.util';
 
 @Component({
   standalone: false,
@@ -255,7 +256,7 @@ export class IncidenceMISComponent implements OnInit, OnDestroy {
     if (typeof value === 'boolean') {
       return value ? 'Yes' : 'No';
     }
-    return String(value);
+    return blankIfNa(value);
   }
 
   SearchData(): void {

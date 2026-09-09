@@ -63,6 +63,15 @@
   }
 }
 
+.ih-card-click {
+  cursor: pointer;
+}
+
+.ih-card-selected {
+  border-color: #2563eb;
+  box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.15);
+}
+
 /* KPI number */
 .ih-kpi {
   font-size: 28px;
@@ -112,8 +121,8 @@
 }
 
 .ih-customer-field {
-  flex: 2 1 360px !important;
-  max-width: 420px !important;
+  flex: 2 1 520px !important;
+  max-width: 640px !important;
 }
 
 .ih-filter-btns {
@@ -124,13 +133,40 @@
 
 /* Table */
 .ih-table-wrap {
-  overflow: auto;
+  overflow-x: auto;
+  overflow-y: auto;
+  max-width: 100%;
+  max-height: calc(100vh - 280px);
   margin-top: 0;
 }
 
 .ih-table {
-  width: 100%;
+  min-width: 1400px;
+  width: max-content;
   font-size: 13px;
+}
+
+.ih-table .mat-column-error,
+.ih-table .cdk-column-error {
+  min-width: 220px;
+  max-width: 320px;
+  white-space: normal;
+  word-break: break-word;
+}
+
+.ih-table .mat-column-action,
+.ih-table .cdk-column-action,
+.ih-table .mat-mdc-table-sticky-border-elem-right {
+  min-width: 110px;
+  background: #fff;
+  z-index: 2;
+}
+
+.ih-table .mat-column-customerIntegration,
+.ih-table .cdk-column-customerIntegration {
+  min-width: 220px;
+  white-space: normal;
+  word-break: break-word;
 }
 
 .ih-status {
@@ -168,4 +204,17 @@
   font-size: 13px;
   font-weight: 600;
   white-space: nowrap;
+}
+
+::ng-deep .ih-customer-auto-panel {
+  min-width: 560px !important;
+  max-width: min(720px, 92vw) !important;
+}
+
+::ng-deep .ih-customer-auto-panel .mat-mdc-option,
+::ng-deep .ih-customer-auto-panel .mat-option {
+  white-space: normal !important;
+  line-height: 1.35;
+  height: auto !important;
+  min-height: 36px;
 }

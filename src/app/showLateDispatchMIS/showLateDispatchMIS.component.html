@@ -89,53 +89,53 @@
                                         <mat-table #table [dataSource]="dataSource" matSort class="mat-cell floating-header-table" (matSortChange)="SortingData($event)">
                                         <ng-container matColumnDef="ReservationID">
                                             <mat-header-cell *matHeaderCellDef mat-sort-header>Booking No</mat-header-cell>
-                                            <mat-cell *matCellDef="let row">{{row.reservationID ? row.reservationID : 'N/A'}}</mat-cell>
+                                            <mat-cell *matCellDef="let row">{{row.reservationID ? row.reservationID : ''}}</mat-cell>
                                         </ng-container>
 
                                         <ng-container matColumnDef="CustomerName">
                                             <mat-header-cell *matHeaderCellDef mat-sort-header>Customer</mat-header-cell>
-                                            <mat-cell *matCellDef="let row">{{row.customerName ? row.customerName : 'N/A'}}</mat-cell>
+                                            <mat-cell *matCellDef="let row">{{row.customerName ? row.customerName : ''}}</mat-cell>
                                         </ng-container>
 
                                         <ng-container matColumnDef="LocationOutDate">
                                             <mat-header-cell *matHeaderCellDef mat-sort-header>Location Out Date</mat-header-cell>                                            
                                             <mat-cell *matCellDef="let row">
-                                                {{row.locationOutDate ? (row.locationOutDate | date: 'yyyy-MM-dd') : 'N/A'}}</mat-cell>
+                                                {{row.locationOutDate ? (row.locationOutDate | date: 'yyyy-MM-dd') : ''}}</mat-cell>
                                         </ng-container>
 
                                         <ng-container matColumnDef="LocationOutTime">
                                             <mat-header-cell *matHeaderCellDef mat-sort-header>Location Out Time</mat-header-cell>
-                                            <mat-cell *matCellDef="let row">{{row.locationOutTime ? (row.locationOutTime | date:'HH:mm:ss') : 'N/A'}}</mat-cell>
+                                            <mat-cell *matCellDef="let row">{{row.locationOutTime ? (row.locationOutTime | date:'HH:mm:ss') : ''}}</mat-cell>
                                         </ng-container>
 
                                         <ng-container matColumnDef="DispatchDate">
                                             <mat-header-cell *matHeaderCellDef mat-sort-header>Dispatch Date</mat-header-cell>
                                             <mat-cell *matCellDef="let row" (contextmenu)="onContextMenu($event, row)">
-                                                {{row.dispatchDate ? (row.dispatchDate | date: 'yyyy-MM-dd') : 'N/A'}}</mat-cell>
+                                                {{row.dispatchDate ? (row.dispatchDate | date: 'yyyy-MM-dd') : ''}}</mat-cell>
                                         </ng-container>
 
                                         <ng-container matColumnDef="DispatchTime">
                                             <mat-header-cell *matHeaderCellDef mat-sort-header>Dispatch Time</mat-header-cell>
                                             <mat-cell *matCellDef="let row" (contextmenu)="onContextMenu($event, row)">
-                                                {{row.dispatchTime ? (row.dispatchTime | date:'HH:mm:ss') : 'N/A'}}</mat-cell>
+                                                {{row.dispatchTime ? (row.dispatchTime | date:'HH:mm:ss') : ''}}</mat-cell>
                                         </ng-container>
 
                                         <ng-container matColumnDef="TimeDiff">
                                             <mat-header-cell *matHeaderCellDef mat-sort-header>Time Differnce</mat-header-cell>
                                             <mat-cell *matCellDef="let row" (contextmenu)="onContextMenu($event, row)">
-                                                {{row.timeDiff ? ((row.timeDiff / 60 | number: '2.0-0') + ':' + (row.timeDiff % 60 | number: '2.0-0')) : 'N/A'}}</mat-cell>
+                                                {{row.timeDiff ? ((row.timeDiff / 60 | number: '2.0-0') + ':' + (row.timeDiff % 60 | number: '2.0-0')) : ''}}</mat-cell>
                                         </ng-container>
 
                                         <ng-container matColumnDef="EmployeeName">
                                             <mat-header-cell *matHeaderCellDef mat-sort-header>Car Alloted By</mat-header-cell>
                                             <mat-cell *matCellDef="let row" (contextmenu)="onContextMenu($event, row)">
-                                                {{row.employeeName ? row.employeeName : 'N/A'}}</mat-cell>
+                                                {{row.employeeName ? row.employeeName : ''}}</mat-cell>
                                         </ng-container>
 
                                         <ng-container matColumnDef="ServiceLocationName">
                                             <mat-header-cell *matHeaderCellDef mat-sort-header>Service Location</mat-header-cell>
                                             <mat-cell *matCellDef="let row" (contextmenu)="onContextMenu($event, row)">
-                                                {{row.serviceLocationName ? row.serviceLocationName : 'N/A'}}</mat-cell>
+                                                {{row.serviceLocationName ? row.serviceLocationName : ''}}</mat-cell>
                                         </ng-container>
                                   
                                         <mat-header-row *matHeaderRowDef="displayedColumns"></mat-header-row>

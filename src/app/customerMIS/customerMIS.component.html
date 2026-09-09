@@ -157,7 +157,7 @@
                                                     Number</mat-header-cell>
                                                 <mat-cell *matCellDef="let row"
                                                     (contextmenu)="onContextMenu($event, row)">
-                                                    {{row.customerGroupID ? row.customerGroupID : 'N/A'}}</mat-cell>
+                                                    {{row.customerGroupID ? row.customerGroupID : ''}}</mat-cell>
                                             </ng-container>
                                             <ng-container matColumnDef="CustomerCreationDate">
                                                 <mat-header-cell *matHeaderCellDef mat-sort-header>Customer Creation
@@ -165,14 +165,14 @@
                                                 <mat-cell *matCellDef="let row"
                                                     (contextmenu)="onContextMenu($event, row)">
                                                     {{row.customerCreationDate ? (row.customerCreationDate| date: 'dd-MM-yyyy')   :
-                                                    'N/A'}}</mat-cell>
+                                                    ''}}</mat-cell>
                                             </ng-container>
                                             <ng-container matColumnDef="CustomerName">
                                                 <mat-header-cell *matHeaderCellDef mat-sort-header>Customer
                                                     Name</mat-header-cell>
                                                 <mat-cell *matCellDef="let row"
                                                     (contextmenu)="onContextMenu($event, row)">
-                                                    {{row.customerName ? row.customerName : 'N/A'}}</mat-cell>
+                                                    {{row.customerName ? row.customerName : ''}}</mat-cell>
                                             </ng-container>
 
                                             <ng-container matColumnDef="Gender">
@@ -180,26 +180,26 @@
                                                     mat-sort-header>Gender</mat-header-cell>
                                                 <mat-cell *matCellDef="let row"
                                                     (contextmenu)="onContextMenu($event, row)">
-                                                    {{row.gender ? row.gender : 'N/A'}}</mat-cell>
+                                                    {{row.gender ? row.gender : ''}}</mat-cell>
                                             </ng-container>
                                             <ng-container matColumnDef="CompleteAddress">
                                                 <mat-header-cell *matHeaderCellDef mat-sort-header>
                                                     Address</mat-header-cell>
                                                 <mat-cell *matCellDef="let row"
                                                     (contextmenu)="onContextMenu($event, row)">
-                                                    {{row.address ? row.address : 'N/A'}}</mat-cell>
+                                                    {{row.address ? row.address : ''}}</mat-cell>
                                             </ng-container>
                                             <ng-container matColumnDef="ContactNo">
                                                 <mat-header-cell *matHeaderCellDef mat-sort-header>Contact No</mat-header-cell>
                                                 <mat-cell *matCellDef="let row" (contextmenu)="onContextMenu($event, row)">
-                                                    {{row.contactNo ? row.contactNo : 'N/A'}}
+                                                    {{row.contactNo ? row.contactNo : ''}}
                                                 </mat-cell>
                                             </ng-container>
                                             
                                             <ng-container matColumnDef="Email">
                                                 <mat-header-cell *matHeaderCellDef mat-sort-header>Email</mat-header-cell>
                                                 <mat-cell *matCellDef="let row" (contextmenu)="onContextMenu($event, row)">
-                                                    {{row.email ? row.email : 'N/A'}}
+                                                    {{row.email ? row.email : ''}}
                                                 </mat-cell>
                                             </ng-container>
 
@@ -210,7 +210,7 @@
                                                 <mat-cell *matCellDef="let row"
                                                     (contextmenu)="onContextMenu($event, row)">
                                                     {{row.customerPersonName ? row.customerPersonName :
-                                                    'N/A'}}</mat-cell>
+                                                    ''}}</mat-cell>
                                             </ng-container>
 
 
@@ -218,14 +218,14 @@
                                                 <mat-header-cell *matHeaderCellDef mat-sort-header>Customer Person Mobile</mat-header-cell>
                                                 <mat-cell *matCellDef="let row"
                                                     (contextmenu)="onContextMenu($event, row)">
-                                                    {{row.primaryMobile ? row.primaryMobile : 'N/A'}}</mat-cell>
+                                                    {{row.primaryMobile ? row.primaryMobile : ''}}</mat-cell>
                                             </ng-container>
 
                                             <ng-container matColumnDef="PrimaryEmail">
                                                 <mat-header-cell *matHeaderCellDef mat-sort-header>Customer Person Email</mat-header-cell>
                                                 <mat-cell *matCellDef="let row"
                                                     (contextmenu)="onContextMenu($event, row)">
-                                                    {{row.primaryEmail ? row.primaryEmail : 'N/A'}}</mat-cell>
+                                                    {{row.primaryEmail ? row.primaryEmail : ''}}</mat-cell>
                                             </ng-container>
 
                                            
@@ -235,7 +235,7 @@
                                                 <mat-cell *matCellDef="let row"
                                                     (contextmenu)="onContextMenu($event, row)">
                                                     {{row.customerDesignation ? row.customerDesignation :
-                                                    'N/A'}}</mat-cell>
+                                                    ''}}</mat-cell>
                                             </ng-container>
 
                                           
@@ -243,35 +243,35 @@
                                             <ng-container matColumnDef="MotherLocation">
                                                 <mat-header-cell *matHeaderCellDef mat-sort-header>Mother Location</mat-header-cell>
                                                 <mat-cell *matCellDef="let row" (contextmenu)="onContextMenu($event, row)">
-                                                    {{row.motherLocation ? row.motherLocation : 'N/A'}}
+                                                    {{row.motherLocation ? row.motherLocation : ''}}
                                                 </mat-cell>
                                             </ng-container>
                                             
                                             <ng-container matColumnDef="CustomerGroup">
                                                 <mat-header-cell *matHeaderCellDef mat-sort-header>Customer Group</mat-header-cell>
                                                 <mat-cell *matCellDef="let row" (contextmenu)="onContextMenu($event, row)">
-                                                    {{row.customerGroup ? row.customerGroup : 'N/A'}}
+                                                    {{row.customerGroup ? row.customerGroup : ''}}
                                                 </mat-cell>
                                             </ng-container>
                                             
                                             <ng-container matColumnDef="CompanyName">
                                                 <mat-header-cell *matHeaderCellDef mat-sort-header>Company Name</mat-header-cell>
                                                 <mat-cell *matCellDef="let row" (contextmenu)="onContextMenu($event, row)">
-                                                    {{row.companyName ? row.companyName : 'N/A'}}
+                                                    {{row.companyName ? row.companyName : ''}}
                                                 </mat-cell>
                                             </ng-container>
                                             
                                             <ng-container matColumnDef="Country">
                                                 <mat-header-cell *matHeaderCellDef mat-sort-header>Country</mat-header-cell>
                                                 <mat-cell *matCellDef="let row" (contextmenu)="onContextMenu($event, row)">
-                                                    {{row.country ? row.country : 'N/A'}}
+                                                    {{row.country ? row.country : ''}}
                                                 </mat-cell>
                                             </ng-container>
                                             
                                             <ng-container matColumnDef="StateName">
                                                 <mat-header-cell *matHeaderCellDef mat-sort-header>State Name</mat-header-cell>
                                                 <mat-cell *matCellDef="let row" (contextmenu)="onContextMenu($event, row)">
-                                                    {{row.stateName ? row.stateName : 'N/A'}}
+                                                    {{row.stateName ? row.stateName : ''}}
                                                 </mat-cell>
                                             </ng-container>                                          
                                             
@@ -284,7 +284,7 @@
                                                     Person</mat-header-cell>
                                                 <mat-cell *matCellDef="let row"
                                                     (contextmenu)="onContextMenu($event, row)">
-                                                    {{row.salesPerson ? row.salesPerson : 'N/A'}}</mat-cell>
+                                                    {{row.salesPerson ? row.salesPerson : ''}}</mat-cell>
                                             </ng-container>                                        
 
                                             
@@ -294,7 +294,7 @@
                                                     mat-sort-header>City</mat-header-cell>
                                                 <mat-cell *matCellDef="let row"
                                                     (contextmenu)="onContextMenu($event, row)">
-                                                    {{row.city ? row.city : 'N/A'}}</mat-cell>
+                                                    {{row.city ? row.city : ''}}</mat-cell>
                                             </ng-container>
 
                                            

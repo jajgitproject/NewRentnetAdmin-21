@@ -51,6 +51,6 @@ export interface HealthFilters {
   driverEndpoint: string;
   rentnetReservationID: string;
   customerIntegrationSearch: string;
-  fromDate: string;
-  toDate: string;
+  fromDate: Date | null;
+  toDate: Date | null;
 }

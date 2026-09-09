@@ -90,17 +90,17 @@
                         <mat-cell *matCellDef="let row">
                           <!-- For Purchase Date -->
                           <ng-container *ngIf="column === 'purchaseDate'">
-                            {{ row[column] ? (row[column] | date: 'dd-MM-yyyy') : 'N/A' }}
+                            {{ row[column] ? (row[column] | date: 'dd-MM-yyyy') : '' }}
                           </ng-container>
                       
                           <!-- For Registration Date (registrationFromDate) -->
                           <ng-container *ngIf="column === 'registrationFromDate'">
-                            {{ row[column] ? (row[column] | date: 'dd-MM-yyyy') : 'N/A' }}
+                            {{ row[column] ? (row[column] | date: 'dd-MM-yyyy') : '' }}
                           </ng-container>
                       
                           <!-- For Car Creation Date (registrationTillDate) -->
                           <ng-container *ngIf="column === 'registrationTillDate'">
-                            {{ row[column] ? (row[column] | date: 'dd-MM-yyyy') : 'N/A' }}
+                            {{ row[column] ? (row[column] | date: 'dd-MM-yyyy') : '' }}
                           </ng-container>
                       
                           <!-- For GPS Availability -->
@@ -110,13 +110,13 @@
                       
                           <!-- For Driver Name and Phone Number -->
                           <ng-container *ngIf="column === 'driverName'">
-                            {{ row['driverName'] ? row['driverName'] : 'N/A' }}
+                            {{ row['driverName'] ? row['driverName'] : '' }}
                             <span *ngIf="row['mobile1']"> ({{ row['mobile1'] }})</span>
                           </ng-container>
                       
                           <!-- For All Other Columns -->
                           <ng-container *ngIf="column !== 'purchaseDate' && column !== 'registrationFromDate' && column !== 'registrationTillDate' && column !== 'isGPSAvailable' && column !== 'driverName'">
-                            {{ row[column] === undefined || row[column] === null || row[column] === 0 ? 'N/A' : row[column] }}
+                            {{ row[column] === undefined || row[column] === null || row[column] === 0 ? '' : row[column] }}
                           </ng-container>
                         </mat-cell>
                       </ng-container>
