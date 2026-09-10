@@ -486,7 +486,7 @@ export class CarAndDriverAllotmentComponent implements OnInit {
       if (triggerGridLoad) {
         this.carAndDriverAllotmentDataForUnassociated();
         if (reloadRestrictions) {
-          this.preloadPassengerRestrictions();
+        this.preloadPassengerRestrictions();
         } else if (this.restrictionsPreloaded) {
           this.applyAllRestrictions();
         }
@@ -1513,7 +1513,7 @@ export class CarAndDriverAllotmentComponent implements OnInit {
 
   private autoOpenSingleSearchResult(): void {
     requestAnimationFrame(() => {
-      this.openAllotCarAndDriver(0, 'Soft or Hard', this.reservationInfo[0]?.allotmentID);
+        this.openAllotCarAndDriver(0, 'Soft or Hard', this.reservationInfo[0]?.allotmentID);
     });
   }
   
@@ -1802,13 +1802,13 @@ export class CarAndDriverAllotmentComponent implements OnInit {
     this._carAndDriverAllotmentService.GetDriverFeedbackAverage(driverID).subscribe(
       (data) => {
         this.driverFeedbackAverageCache.set(normalizedDriverId, data);
-        this.driverAvg[index] = data;
-      },
+          this.driverAvg[index] = data;
+        },
       () => {
         this.driverFeedbackAverageCache.set(normalizedDriverId, 0);
         this.driverAvg[index] = 0;
       }
-    );
+      );
   }
 
   onChangedPage(pageData: PageEvent) {

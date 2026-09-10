@@ -26,7 +26,24 @@
           {{ v.circuitState }}
         </span>
       </div>
-      <p [ngClass]="v.tone">{{ vendorRateLabel(v) }}</p>
+      <dl class="ih-vendor-stats">
+        <div>
+          <dt>Bookings</dt>
+          <dd>{{ v.bookingCount }}</dd>
+        </div>
+        <div>
+          <dt>Calls</dt>
+          <dd>{{ v.totalCalls }}</dd>
+        </div>
+        <div>
+          <dt>Success</dt>
+          <dd [ngClass]="v.tone">{{ v.successRate }}</dd>
+        </div>
+        <div>
+          <dt>Failure</dt>
+          <dd [ngClass]="failureTone(v)">{{ v.failureRate }}</dd>
+        </div>
+      </dl>
     </article>
   </section>
 

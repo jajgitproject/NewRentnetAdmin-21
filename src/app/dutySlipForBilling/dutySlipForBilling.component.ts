@@ -247,9 +247,8 @@ export class DutySlipForBillingComponent implements OnInit, AfterViewInit, OnCha
     } else {
       this.patchPickupFromReservation();
       this.syncVerifyDutyAndGoodForBillingState();
+      this.applyClosureSourceOnLoad();
     }
-
-    this.applyClosureSourceOnLoad();
 
     this.onKeyUp();
     this.applyRoundOffBillingTimes();
@@ -318,12 +317,6 @@ export class DutySlipForBillingComponent implements OnInit, AfterViewInit, OnCha
       return;
     }
 
-    // Driver KM comparison column uses DutySlipByApp odometer (g2PApp / p2DApp / d2GApp).
-    if (this.hasUsableAppData(this.advanceTableClosingOne?.closingDutySlipByAppModel)) {
-      this.patchFormFromAppModel({ useActualKm: false });
-      return;
-    }
-
     if (!this.DutySlipID) {
       this.showNoDriverDataWarning();
       return;
@@ -334,18 +327,12 @@ export class DutySlipForBillingComponent implements OnInit, AfterViewInit, OnCha
         if (row && this.hasUsableDriverData(row)) {
           this.advanceTableClosingOne.closingDutySlipByDriverModel = new ClosingDutySlipByDriverModel(row);
           this.patchFormFromDriverModel(this.advanceTableClosingOne.closingDutySlipByDriverModel);
-        } else if (this.hasUsableAppData(this.advanceTableClosingOne?.closingDutySlipByAppModel)) {
-          this.patchFormFromAppModel({ useActualKm: false });
         } else {
           this.showNoDriverDataWarning();
         }
       },
       error: () => {
-        if (this.hasUsableAppData(this.advanceTableClosingOne?.closingDutySlipByAppModel)) {
-          this.patchFormFromAppModel({ useActualKm: false });
-        } else {
-          this.showNoDriverDataWarning();
-        }
+        this.showNoDriverDataWarning();
       },
     });
   }
@@ -946,12 +933,32 @@ export class DutySlipForBillingComponent implements OnInit, AfterViewInit, OnCha
       this.disableLockedControlsWithoutFullFormDisable();
       this.applyAlwaysEditableRemarks();
       this.applyAlwaysEditableKm();
+      this.restoreClosureTypeSelection();
       return;
     }
     this.advanceTableForm.enable({ emitEvent: false });
     this.applyManualEditMode();
     this.applyClosingFieldDefaults();
     this.syncVerifyDutyAndGoodForBillingState();
+    this.restoreClosureTypeSelection();
+  }
+
+  private restoreClosureTypeSelection(): void {
+    if (!this.advanceTableForm) {
+      return;
+    }
+    const saved =
+      this.advanceTableClosingOne?.closingDutySlipForBillingModel?.closureType
+      ?? this.advanceTableForm.getRawValue()?.closureType
+      ?? this.selectedClosureType;
+    if (!saved) {
+      return;
+    }
+    if (!this.isDutySlipEditBlocked) {
+      this.advanceTableForm.get('closureType')?.enable({ emitEvent: false });
+    }
+    this.advanceTableForm.patchValue({ closureType: saved }, { emitEvent: false });
+    this.selectedClosureType = saved;
   }
 
   /** Disable locked fields one-by-one. FormGroup.disable() then re-enabling KM/remarks freezes Closing One after GFB. */

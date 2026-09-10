@@ -127,7 +127,7 @@ saveDisabled:boolean = true;
         this.action = data.action;
         if (this.action === 'edit') 
         {
-          this.dialogTitle ='Driver';
+          this.dialogTitle ='Driver';       
           // Clone so mobile/lat-long parsing does not mutate the search-result row
           this.advanceTable = Object.assign(new Driver({}), data.advanceTable);
           this.referenceID=this.advanceTable.driverID;
@@ -431,9 +431,9 @@ saveDisabled:boolean = true;
         const control = this.advanceTableForm.get('localAddressCity');
         if (control) {
           this.filteredOptions = control.valueChanges.pipe(
-            startWith(""),
-            map(value => this._filter(value || ''))
-          );
+          startWith(""),
+          map(value => this._filter(value || ''))
+        ); 
         }
       });
   }
@@ -480,9 +480,9 @@ saveDisabled:boolean = true;
         const control = this.advanceTableForm.get('permanentAddressCity');
         if (control) {
           this.filteredCityOptions = control.valueChanges.pipe(
-            startWith(""),
-            map(value => this._filtering(value || ''))
-          );
+          startWith(""),
+          map(value => this._filtering(value || ''))
+        ); 
         }
       });
   }
@@ -559,8 +559,8 @@ saveDisabled:boolean = true;
     if (filterValue.length < 3) {
       return [];
     }
-    return filterSuppliersByDisplay(this.SupplierList, filterValue);
-  }
+  return filterSuppliersByDisplay(this.SupplierList, filterValue);
+}
 
   
   OnSupplierSelect(selectedSupplier: string)
@@ -642,8 +642,8 @@ saveDisabled:boolean = true;
     if (filterValue.length < 3) {
       return [];
     }
-    return filterSuppliersByDisplay(this.SupplierForOwnerList, filterValue);
-  }
+  return filterSuppliersByDisplay(this.SupplierForOwnerList, filterValue);
+}
 
 
   OnSupplierForOwnerSelect(selectedSupplier: string)
@@ -680,9 +680,9 @@ saveDisabled:boolean = true;
         const control = this.advanceTableForm.get('hub');
         if (control) {
           this.filteredHubOptions = control.valueChanges.pipe(
-            startWith(""),
-            map(value => this._filterHub(value || ''))
-          );
+          startWith(""),
+          map(value => this._filterHub(value || ''))
+        ); 
         }
       });
   }
@@ -842,9 +842,9 @@ saveDisabled:boolean = true;
         const control = this.advanceTableForm.get('rtoState');
         if (control) {
           this.filteredStateOptions = control.valueChanges.pipe(
-            startWith(""),
-            map(value => this._filterState(value || ''))
-          );
+          startWith(""),
+          map(value => this._filterState(value || ''))
+        ); 
         }
       }
      
@@ -1058,7 +1058,7 @@ saveDisabled:boolean = true;
         [Validators.pattern(/^[0-9]+$/)]
       ]
     
-    },
+    }, 
     {
       validator: ConfirmPasswordValidator("password", "confirmPassword")
     }
@@ -1266,7 +1266,7 @@ public loadPassword()
     if (this.action == 'edit') {
       this.Put();
     } else {
-      this.Post();
+          this.Post();
     }
   }
 
@@ -1606,7 +1606,7 @@ onBlurFitnessCertificateIssueDateEdit(value: string): void {
     }
   } else {
     this.advanceTableForm?.get('driverFitnessCertificateIssueDate')?.setErrors({ invalidDate: true });
-  }
+}
 }
 
   /////////////////for Image Upload////////////////////////////
@@ -1677,8 +1677,8 @@ checkDuplicateMobile() {
       const errors = { ...(mobile2Control.errors || {}) };
       delete errors['duplicate'];
       mobile2Control.setErrors(Object.keys(errors).length ? errors : null);
-    }
   }
+}
 
 // onMobileChange(): void {
 //   this.checkDuplicateMobile();

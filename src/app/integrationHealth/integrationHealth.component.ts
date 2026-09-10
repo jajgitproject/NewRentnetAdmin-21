@@ -108,10 +108,29 @@ export class IntegrationHealthComponent implements OnInit {
     return from === today && to === today ? 'Total Calls (Today)' : 'Total Calls';
   }
 
+  private emptyVendorCard(name: string): VendorCard {
+    return {
+      name,
+      totalCalls: 0,
+      bookingCount: 0,
+      successCount: 0,
+      failureCount: 0,
+      successRate: 'No calls',
+      failureRate: 'No calls',
+      circuitState: 'Closed',
+      tone: 'warn'
+    };
+  }
+
   private mergeVendorCards(apiVendors: any[]): VendorCard[] {
     const mapped = (apiVendors || []).map((v) => ({
       name: v.name || v.Name,
+      totalCalls: Number(v.totalCalls ?? v.TotalCalls ?? 0),
+      bookingCount: Number(v.bookingCount ?? v.BookingCount ?? 0),
+      successCount: Number(v.successCount ?? v.SuccessCount ?? 0),
+      failureCount: Number(v.failureCount ?? v.FailureCount ?? 0),
       successRate: v.successRate || v.SuccessRate || 'No calls',
+      failureRate: v.failureRate || v.FailureRate || 'No calls',
       circuitState: v.circuitState || v.CircuitState || 'Closed',
       tone: (v.tone || v.Tone || 'warn') as Tone
     }));
@@ -121,12 +140,7 @@ export class IntegrationHealthComponent implements OnInit {
         .map((v) => [String(v.name).toLowerCase(), v])
     );
     const cards = this.vendorOptions.map((name) => {
-      return byName.get(name.toLowerCase()) || {
-        name,
-        successRate: 'No calls',
-        circuitState: 'Closed',
-        tone: 'warn' as Tone
-      };
+      return byName.get(name.toLowerCase()) || this.emptyVendorCard(name);
     });
     mapped.forEach((v) => {
       if (v.name && !this.vendorOptions.some((n) => n.toLowerCase() === String(v.name).toLowerCase())) {
@@ -329,6 +343,15 @@ export class IntegrationHealthComponent implements OnInit {
       return 'No calls';
     }
     return rate.toLowerCase().includes('success') ? rate : rate + ' success';
+  }
+
+  failureTone(vendor: VendorCard): Tone {
+    const raw = String(vendor?.failureRate || '').replace('%', '').trim();
+    const rate = Number(raw);
+    if (!Number.isFinite(rate) || String(vendor?.failureRate || '').toLowerCase() === 'no calls') {
+      return 'warn';
+    }
+    return rate > 10 ? 'err' : (rate > 0 ? 'warn' : 'ok');
   }
 
   statusClass(status: FailureRow['status']): string {

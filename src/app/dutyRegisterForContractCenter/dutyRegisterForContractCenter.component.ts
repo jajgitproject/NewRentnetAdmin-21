@@ -527,8 +527,8 @@ export class DutyRegisterForContractCenterComponent implements OnInit, OnDestroy
             }
           }
           this.showNotification('snackbar-danger', message, 'bottom', 'center');
-          return;
-        }
+              return;
+            }
 
         const fileName = this.exportJobStatus?.fileName ?? this.exportJobStatus?.FileName;
         this.triggerCsvDownload(blob, fileName);
@@ -543,8 +543,8 @@ export class DutyRegisterForContractCenterComponent implements OnInit, OnDestroy
 
   cancelExportJob() {
     if (!this.exportJobId || !this.isExportJobInProgress()) {
-      return;
-    }
+          return;
+        }
 
     this.dutyRegisterForContractCenterService.cancelExportJob(this.exportJobId).subscribe(
       (status: any) => {

@@ -104,7 +104,7 @@ export class ZonalDutyRegisterComponent implements OnInit, OnDestroy {
   'ReservationCreatedBy',
   'AllotmentBy',
   'SupplierID',
-  'SupplierName',
+  'SupplierName',  
   'DSClosedBy',
   'DutySlipImage',
   'ClosingDate',
@@ -477,7 +477,7 @@ export class ZonalDutyRegisterComponent implements OnInit, OnDestroy {
     if (this.exportJobRunning) {
       this.showNotification('snackbar-danger', IN_FLIGHT_EXPORT_MESSAGE, 'bottom', 'center');
       return;
-    }
+  }
 
     const dateRangeError = this.validatePickupDateRange();
     if (dateRangeError) {
@@ -577,8 +577,8 @@ export class ZonalDutyRegisterComponent implements OnInit, OnDestroy {
             }
           }
           this.showNotification('snackbar-danger', message, 'bottom', 'center');
-          return;
-        }
+              return;
+            }
 
         const fileName = this.exportJobStatus?.fileName ?? this.exportJobStatus?.FileName;
         this.triggerCsvDownload(blob, fileName);
@@ -655,8 +655,8 @@ export class ZonalDutyRegisterComponent implements OnInit, OnDestroy {
             this.showNotification('snackbar-danger', this.exportJobError, 'bottom', 'center');
             this.stopExportPolling();
             persistExportJobId(this.exportJobPageKey, null);
-            return;
-          }
+          return;
+        }
 
           if (isExportJobCancelled(status)) {
             this.exportJobRunning = false;
