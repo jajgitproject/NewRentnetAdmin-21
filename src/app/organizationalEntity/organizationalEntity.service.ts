@@ -120,6 +120,14 @@ export class OrganizationalEntityService
       {
         advanceTable.oldRentNetService_Location = advanceTable.oldRentNetService_Location;
       }
+      if (!advanceTable.isECommerceBranch || advanceTable.preFixForEcommerce === "") 
+      {
+        advanceTable.preFixForEcommerce = null;
+      }
+      if (!advanceTable.isECommerceBranch)
+      {
+        advanceTable.isECommerceBranch = false;
+      }
     return this.httpClient.post<any>(this.API_URL , advanceTable);
   }
   update(advanceTable: OrganizationalEntity)
@@ -145,6 +153,14 @@ export class OrganizationalEntityService
       else 
       {
         advanceTable.oldRentNetService_Location = advanceTable.oldRentNetService_Location;
+      }
+      if (!advanceTable.isECommerceBranch || advanceTable.preFixForEcommerce === "") 
+      {
+        advanceTable.preFixForEcommerce = null;
+      }
+      if (!advanceTable.isECommerceBranch)
+      {
+        advanceTable.isECommerceBranch = false;
       }
     return this.httpClient.put<any>(this.API_URL , advanceTable);
   }

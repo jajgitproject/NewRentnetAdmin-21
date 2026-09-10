@@ -28,7 +28,9 @@
               <mat-option value="Hub">Hub</mat-option>
             </mat-select>
 
-            <mat-error> Please Select a Type </mat-error>
+            <mat-error *ngIf="advanceTableForm.get('organizationalEntityType').hasError('required')">
+              Please select a Type
+            </mat-error>
           </mat-form-field>
         </div>
 
@@ -41,7 +43,9 @@
               <mat-option value="ETS">ETS</mat-option>
             </mat-select>
 
-            <mat-error> Please Select a Branch Type </mat-error>
+            <mat-error *ngIf="advanceTableForm.get('organizationalEntityBranchType').hasError('required')">
+              Please select a Branch Type
+            </mat-error>
           </mat-form-field>
         </div>
       </div>
@@ -99,6 +103,9 @@
                 {{ option.organizationalEntityName }}
               </mat-option>
             </mat-autocomplete>
+            <mat-error *ngIf="advanceTableForm.controls['searchOrganizationalEntity'].hasError('required')">
+              Parent is required
+            </mat-error>
             <mat-error *ngIf="
                 advanceTableForm.controls[
                   'searchOrganizationalEntity'
@@ -308,10 +315,12 @@
         </div>
         
         <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
-          <mat-label style="margin-left: 18px"> Entity Logo </mat-label>
-          <br />
+          <mat-label>
+            Entity Logo
+          </mat-label>
+          <br>
           <a href="{{ ImagePath }}" target="_blank" *ngIf="ImagePath">
-            <img [src]="ImagePath" class="table" style="height: 80px; width: auto" />
+            <img [src]="ImagePath" class="table" style="height: 80px; width: auto;">
           </a>
 
           <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
@@ -389,7 +398,9 @@
               <mat-option [value]="false">Non-Operational</mat-option>
             </mat-select>
 
-            <mat-error> Operational Status is required </mat-error>
+            <mat-error *ngIf="advanceTableForm.get('operationalStatus').hasError('required')">
+              Operational Status is required
+            </mat-error>
           </mat-form-field>
         </div>
         
@@ -460,6 +471,13 @@
                   .hasError('required')
               ">
               GST No. is required
+            </mat-error>
+            <mat-error *ngIf="
+                advanceTableForm
+                  .get('organizationalEntityGSTN')
+                  .hasError('pattern')
+              ">
+              Enter a valid GST number
             </mat-error>
           </mat-form-field>
         </div>
@@ -589,12 +607,65 @@
         </div>
       </div>
 
+      <div class="row" *ngIf="advanceTableForm.value.organizationalEntityType === 'Branch'">
+        <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+          <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+            <mat-label>E-Commerce Branch</mat-label>
+            <mat-select formControlName="isECommerceBranch" (selectionChange)="onECommerceBranchChange()">
+              <mat-option [value]="true">Yes</mat-option>
+              <mat-option [value]="false">No</mat-option>
+            </mat-select>
+          </mat-form-field>
+        </div>
+
+        <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2" *ngIf="advanceTableForm.value.isECommerceBranch === true">
+          <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+            <mat-label>Prefix For Ecommerce</mat-label>
+            <input matInput maxlength="10" formControlName="preFixForEcommerce" (keydown.space)="$event.preventDefault()" (input)="onPreFixForEcommerceInput($event)" />
+            <mat-error *ngIf="advanceTableForm.get('preFixForEcommerce').hasError('required')">
+              Prefix For Ecommerce is required
+            </mat-error>
+            <mat-error *ngIf="advanceTableForm.get('preFixForEcommerce').hasError('whitespace')">
+              Prefix For Ecommerce cannot be empty
+            </mat-error>
+            <mat-error *ngIf="advanceTableForm.get('preFixForEcommerce').hasError('spaces')">
+              Spaces are not allowed
+            </mat-error>
+          </mat-form-field>
+        </div>
+      </div>
+
+      <div class="row" *ngIf="advanceTableForm.value.organizationalEntityType">
+        <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12 mb-2">
+          <div class="required-fields-help">
+            <div class="required-fields-help-title">Required fields for {{ advanceTableForm.value.organizationalEntityType }}</div>
+            <ul>
+              <li *ngFor="let item of getRequiredFieldsHelp()">{{ item }}</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <div class="row" *ngIf="showValidationSummary && validationErrors.length">
+        <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12 mb-2">
+          <div id="validation-summary" class="validation-summary">
+            <div class="validation-summary-title">
+              <mat-icon>error_outline</mat-icon>
+              <span>Please fix the following before saving:</span>
+            </div>
+            <ul>
+              <li *ngFor="let error of validationErrors">{{ error }}</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
       <div class="row">
         <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12 mb-2">
           <div class="example-button-row">
             <button mat-raised-button
                     color="primary"
-                    [disabled]="!advanceTableForm.valid || isLoading"
+                    [disabled]="isLoading"
                     (click)="confirmAdd()">
               <mat-spinner *ngIf="isLoading" diameter="20" class="spinner"></mat-spinner>  <!-- Spinner for loading -->
               <span *ngIf="!isLoading">Save</span>  <!-- Text when not loading -->

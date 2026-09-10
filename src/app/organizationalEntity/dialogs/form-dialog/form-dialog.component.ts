@@ -82,6 +82,37 @@ export class FormDialogComponent {
   supplier: boolean = true;
   isDeleted: boolean = false;
   minEndDate: Date = new Date();
+  validationErrors: string[] = [];
+  showValidationSummary: boolean = false;
+  private readonly gstnPattern = /^[0-9]{2}[A-Z]{3}[ABCFGHLJPTF]{1}[A-Z]{1}[0-9]{4}[A-Z]{1}[1-9A-Z]{1}Z[0-9A-Z]{1}$/;
+  private readonly fieldLabels: Record<string, string> = {
+    organizationalEntityType: 'Type',
+    organizationalEntityBranchType: 'Branch Type',
+    organizationalEntityName: 'Name',
+    searchOrganizationalEntity: 'Parent',
+    city: 'City',
+    state: 'State',
+    country: 'Country',
+    organizationalEntityAddress: 'Address',
+    organizationalEntityPincode: 'Pincode',
+    organizationalEntityPhone1: 'Phone1',
+    organizationalEntityEmail1: 'Email1',
+    organizationalEntityWebsite: 'Website',
+    organizationalEntityPAN: 'PAN',
+    organizationalEntityStartDate: 'Start Date',
+    organizationalEntityEndDate: 'End Date',
+    operationalStatus: 'Operational Status',
+    organizationalEntityCINNo: 'CIN No.',
+    organizationalEntityPrefix: 'Prefix',
+    organizationalEntityGSTN: 'GST No.',
+    organizationalEntityOwnership: 'Ownership',
+    organizationalEntitySupplier: 'Supplier',
+    organizationalEntityAddressString: 'Address String',
+    latitude: 'Latitude',
+    longitude: 'Longitude',
+    preFixForEcommerce: 'Prefix For Ecommerce',
+    isECommerceBranch: 'E-Commerce Branch'
+  };
   constructor(
     public dialogRef: MatDialogRef<FormDialogComponent>,
 
@@ -118,6 +149,7 @@ export class FormDialogComponent {
         this.setEndDateValidators();
       }
       this.searchOrganizationalEntity.setValue(this.advanceTable.parent);
+      this.organizationalEntityID = this.advanceTable.organizationalEntityParentID;
       if (this.advanceTable.organizationalEntityOwnership === 'Owned') {
         this.owned = true;
         this.supplier = false;
@@ -142,6 +174,7 @@ export class FormDialogComponent {
     }
 
     this.onChanges();
+    this.syncValidatorsForEntityType();
   }
   public ngOnInit() {
 
@@ -182,6 +215,7 @@ export class FormDialogComponent {
       this.clearEndDateValidators();
       this.isDeleted = false;
     }
+    this.syncValidatorsForEntityType();
   }
 
   setEndDateValidators() {
@@ -230,6 +264,7 @@ export class FormDialogComponent {
         organizationalEntityEndDate: [''],
 
         organizationalEntityCINNo: [this.advanceTable.organizationalEntityCINNo],
+        preFixForEcommerce: [this.advanceTable.preFixForEcommerce],
         organizationalEntityPrefix: [this.advanceTable.organizationalEntityPrefix],
         organizationalEntityGSTN: [this.advanceTable.organizationalEntityGSTN],
         organizationalEntityOwnership: [this.advanceTable.organizationalEntityOwnership],
@@ -249,7 +284,8 @@ export class FormDialogComponent {
         searchOrganizationalEntity: [this.advanceTable.parent],
         organizationalEntityBranchType:[this.advanceTable.organizationalEntityBranchType],
         oldRentNetService_Location:[this.advanceTable.oldRentNetService_Location],
-        defaultCDPLocation:[this.advanceTable.defaultCDPLocation === true]
+        defaultCDPLocation:[this.advanceTable.defaultCDPLocation === true],
+        isECommerceBranch:[this.advanceTable.isECommerceBranch === true]
       });
   }
 
@@ -257,6 +293,329 @@ export class FormDialogComponent {
     const isWhitespace = (control.value || '').trim().length === 0;
     const isValid = !isWhitespace;
     return isValid ? null : { 'whitespace': true };
+  }
+
+  noSpacesValidator(control: AbstractControl): ValidationErrors | null {
+    if (control.value && /\s/.test(control.value)) {
+      return { spaces: true };
+    }
+    return null;
+  }
+
+  onECommerceBranchChange(): void {
+    this.updateECommerceFieldsValidation();
+    this.showValidationSummary = false;
+    this.validationErrors = [];
+  }
+
+  onPreFixForEcommerceInput(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    const sanitized = input.value.replace(/\s/g, '');
+    if (input.value !== sanitized) {
+      this.advanceTableForm.get('preFixForEcommerce').setValue(sanitized);
+    }
+  }
+
+  updateECommerceFieldsValidation(): void {
+    const preFixControl = this.advanceTableForm.get('preFixForEcommerce');
+    const isECommerce = this.advanceTableForm.get('isECommerceBranch').value === true;
+    const isBranch = this.advanceTableForm.get('organizationalEntityType').value === 'Branch';
+
+    if (isBranch && isECommerce) {
+      preFixControl.setValidators([
+        Validators.required,
+        this.noWhitespaceValidator.bind(this),
+        this.noSpacesValidator.bind(this)
+      ]);
+    } else {
+      preFixControl.clearValidators();
+      preFixControl.setValue('');
+    }
+
+    preFixControl.updateValueAndValidity();
+  }
+
+  prepareECommerceFields(): void {
+    const isBranch = this.advanceTableForm.value.organizationalEntityType === 'Branch';
+    const isECommerce = this.advanceTableForm.value.isECommerceBranch === true;
+
+    if (!isBranch || !isECommerce) {
+      this.advanceTableForm.patchValue({
+        isECommerceBranch: isBranch ? (isECommerce || false) : false,
+        preFixForEcommerce: null
+      });
+    }
+  }
+
+  setFieldValidators(controlName: string, validators: ValidatorFn[]): void {
+    const control = this.advanceTableForm.get(controlName);
+    if (!control) {
+      return;
+    }
+    if (validators.length) {
+      control.setValidators(validators);
+    } else {
+      control.clearValidators();
+    }
+    control.updateValueAndValidity({ emitEvent: false });
+  }
+
+  syncValidatorsForEntityType(): void {
+    if (!this.advanceTableForm) {
+      return;
+    }
+
+    const entityType = this.advanceTableForm.get('organizationalEntityType').value;
+    const isCompany = entityType === 'Company';
+    const isBranch = entityType === 'Branch';
+    const isLocationOrHub = entityType === 'Location' || entityType === 'Hub';
+    const requiresParent = isBranch || isLocationOrHub;
+    const activationStatus = this.advanceTableForm.get('activationStatus').value;
+
+    this.setFieldValidators('organizationalEntityType', [Validators.required]);
+    this.setFieldValidators('organizationalEntityName', [Validators.required]);
+    this.setFieldValidators('organizationalEntityAddress', [Validators.required]);
+    this.setFieldValidators('organizationalEntityPincode', [Validators.required]);
+    this.setFieldValidators('organizationalEntityPhone1', [Validators.required]);
+    this.setFieldValidators('organizationalEntityEmail1', [Validators.required]);
+    this.setFieldValidators('organizationalEntityStartDate', [Validators.required]);
+    this.setFieldValidators('operationalStatus', [Validators.required]);
+    this.setFieldValidators('searchOrganizationalEntity', requiresParent ? [Validators.required] : []);
+    this.setFieldValidators('organizationalEntityBranchType', isBranch ? [Validators.required] : []);
+    this.setFieldValidators('organizationalEntityPrefix', isBranch ? [Validators.required] : []);
+    this.setFieldValidators(
+      'organizationalEntityGSTN',
+      isBranch ? [Validators.required, Validators.pattern(this.gstnPattern)] : []
+    );
+    this.setFieldValidators('organizationalEntityWebsite', isCompany ? [Validators.required, Validators.maxLength(100)] : []);
+    this.setFieldValidators('organizationalEntityPAN', isCompany ? [Validators.required] : []);
+    this.setFieldValidators('organizationalEntityCINNo', isCompany ? [Validators.required] : []);
+    this.setFieldValidators('organizationalEntityOwnership', isLocationOrHub ? [Validators.required] : []);
+    this.setFieldValidators('organizationalEntityAddressString', isLocationOrHub ? [Validators.required] : []);
+    this.setFieldValidators('latitude', isLocationOrHub ? [Validators.required] : []);
+    this.setFieldValidators('longitude', isLocationOrHub ? [Validators.required] : []);
+    this.setFieldValidators(
+      'organizationalEntitySupplier',
+      isLocationOrHub ? [Validators.required] : []
+    );
+
+    if (activationStatus === false) {
+      this.setEndDateValidators();
+    } else {
+      this.clearEndDateValidators();
+    }
+
+    this.updateECommerceFieldsValidation();
+  }
+
+  getFieldLabel(controlName: string): string {
+    return this.fieldLabels[controlName] || controlName;
+  }
+
+  getErrorMessageForControl(controlName: string, control: AbstractControl): string {
+    const errors = control.errors || {};
+
+    if (errors.required) {
+      return 'This field is required.';
+    }
+    if (errors.cityNameInvalid) {
+      return 'Type at least 3 characters and select a city from the list.';
+    }
+    if (errors.stateNameInvalid) {
+      return 'Select a valid state from the list.';
+    }
+    if (errors.countryNameInvalid) {
+      return 'Select a valid country from the list.';
+    }
+    if (errors.organizationalEntityInvalid) {
+      return 'Select a valid parent from the autocomplete list.';
+    }
+    if (errors.pattern) {
+      if (controlName === 'organizationalEntityGSTN') {
+        return 'Enter a valid GST number (15 characters, e.g. 22AAAAA0000A1Z5).';
+      }
+      return 'The value format is invalid.';
+    }
+    if (errors.whitespace) {
+      return 'Value cannot be empty or only spaces.';
+    }
+    if (errors.spaces) {
+      return 'Spaces are not allowed.';
+    }
+    if (errors.invalidDate) {
+      return 'Enter a valid date in DD/MM/YYYY format.';
+    }
+    if (errors.min) {
+      return 'Date cannot be in the past.';
+    }
+    if (errors.maxlength) {
+      return `Maximum length is ${errors.maxlength.requiredLength} characters.`;
+    }
+
+    return 'Please review this field.';
+  }
+
+  getCustomValidationErrors(entityType: string): string[] {
+    const errors: string[] = [];
+    const formValue = this.advanceTableForm.getRawValue();
+    const parentTypes = ['Branch', 'Hub', 'Location'];
+
+    if (parentTypes.includes(entityType)) {
+      const parentId = this.organizationalEntityID || formValue.organizationalEntityParentID;
+      if (formValue.searchOrganizationalEntity?.trim() && !parentId) {
+        errors.push('Parent: Choose a valid parent from the dropdown (type at least 3 characters, then select from the list).');
+      }
+    }
+
+    if ((entityType === 'Location' || entityType === 'Hub') && formValue.organizationalEntityOwnership) {
+      const supplierControl = this.advanceTableForm.get('organizationalEntitySupplier');
+      if (!formValue.organizationalEntitySupplier?.trim() && !supplierControl?.hasError('required')) {
+        errors.push('Supplier: Select a supplier from the autocomplete list.');
+      }
+    }
+
+    return errors;
+  }
+
+  collectValidationErrors(): string[] {
+    const errors: string[] = [];
+    const entityType = this.advanceTableForm.get('organizationalEntityType').value;
+    const hiddenFields = this.getHiddenFieldsForType(entityType);
+
+    Object.keys(this.advanceTableForm.controls).forEach(controlName => {
+      if (hiddenFields.includes(controlName)) {
+        return;
+      }
+
+      const control = this.advanceTableForm.get(controlName);
+      if (!control || control.disabled || !control.invalid || !control.errors) {
+        return;
+      }
+
+      errors.push(`${this.getFieldLabel(controlName)}: ${this.getErrorMessageForControl(controlName, control)}`);
+    });
+
+    errors.push(...this.getCustomValidationErrors(entityType));
+    return Array.from(new Set(errors));
+  }
+
+  getHiddenFieldsForType(entityType: string): string[] {
+    const hiddenFields = [
+      'organizationalEntityID',
+      'organizationalEntityParentID',
+      'organizationalEntityCityID',
+      'organizationalEntityFax',
+      'organizationalEntityEmail2',
+      'organizationalEntityPhone2',
+      'organizationalEntityRegistrationNo',
+      'organizationalEntityLogo',
+      'organizationalEntityGeoLocation',
+      'stateID',
+      'countryID',
+      'organizationalEntitySupplierID',
+      'oldRentNetService_Location',
+      'defaultCDPLocation',
+      'isECommerceBranch'
+    ];
+
+    if (entityType !== 'Branch') {
+      hiddenFields.push(
+        'organizationalEntityBranchType',
+        'organizationalEntityPrefix',
+        'organizationalEntityGSTN',
+        'preFixForEcommerce'
+      );
+    } else if (this.advanceTableForm.get('isECommerceBranch').value !== true) {
+      hiddenFields.push('preFixForEcommerce');
+    }
+
+    if (entityType !== 'Company') {
+      hiddenFields.push('organizationalEntityCINNo', 'organizationalEntityWebsite', 'organizationalEntityPAN');
+    }
+
+    if (entityType !== 'Location' && entityType !== 'Hub') {
+      hiddenFields.push(
+        'organizationalEntityOwnership',
+        'organizationalEntitySupplier',
+        'organizationalEntityAddressString',
+        'latitude',
+        'longitude'
+      );
+    }
+
+    if (entityType === 'Company') {
+      hiddenFields.push('searchOrganizationalEntity');
+    }
+
+    if (this.advanceTableForm.get('activationStatus').value !== false) {
+      hiddenFields.push('organizationalEntityEndDate');
+    }
+
+    return hiddenFields;
+  }
+
+  getRequiredFieldsHelp(): string[] {
+    const entityType = this.advanceTableForm.get('organizationalEntityType').value;
+    const commonFields = [
+      'Type, Name, City (select from list), Address, Pincode, Phone1, Email1, Start Date, Operational Status'
+    ];
+
+    if (!entityType) {
+      return ['Select a Type to see the required fields for that organizational entity.'];
+    }
+
+    if (entityType === 'Company') {
+      return [
+        ...commonFields,
+        'Website, PAN, CIN No.'
+      ];
+    }
+
+    if (entityType === 'Branch') {
+      const branchFields = [
+        ...commonFields,
+        'Branch Type, Parent (select from list), Prefix, GST No.',
+        'If E-Commerce Branch is Yes: Prefix For Ecommerce (required, no spaces, max 10 characters)'
+      ];
+      return branchFields;
+    }
+
+    if (entityType === 'Location' || entityType === 'Hub') {
+      return [
+        ...commonFields,
+        'Parent (select from list), Ownership, Supplier, Address String, Latitude, Longitude'
+      ];
+    }
+
+    return commonFields;
+  }
+
+  validateForm(): boolean {
+    this.syncValidatorsForEntityType();
+    this.advanceTableForm.markAllAsTouched();
+    this.validationErrors = this.collectValidationErrors();
+    this.showValidationSummary = this.validationErrors.length > 0;
+
+    if (this.showValidationSummary) {
+      this.cdr.detectChanges();
+      setTimeout(() => this.scrollToValidationSummary(), 0);
+      return false;
+    }
+
+    return true;
+  }
+
+  scrollToValidationSummary(): void {
+    const summary = this.el.nativeElement.querySelector('#validation-summary');
+    if (summary) {
+      summary.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      return;
+    }
+
+    const firstInvalid = this.el.nativeElement.querySelector('.mat-form-field-invalid, .ng-invalid');
+    if (firstInvalid) {
+      firstInvalid.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
   }
 
   AddressChange(address: Address) {
@@ -277,6 +636,7 @@ export class FormDialogComponent {
   }
   public Post(): void {
     this.isLoading = true;  // Start the loading spinner
+    this.prepareECommerceFields();
     this.advanceTableForm.patchValue({
       countryID: this.geoPointID,
       organizationalEntityParentID: this.organizationalEntityID,
@@ -321,6 +681,7 @@ export class FormDialogComponent {
 
   public Put(): void {
     this.isLoading = true;  // Start the loading spinner
+    this.prepareECommerceFields();
 
     // Patch the form with the necessary values
     this.advanceTableForm.patchValue({
@@ -367,6 +728,11 @@ export class FormDialogComponent {
       );
   }
   public confirmAdd(): void {
+    if (!this.validateForm()) {
+      return;
+    }
+
+    this.showValidationSummary = false;
     const isDefaultCDP = this.advanceTableForm.value.defaultCDPLocation === true;
     const alreadyCurrentDefault = this.action === 'edit' && this.advanceTable.defaultCDPLocation === true;
     const isLocation = this.advanceTableForm.value.organizationalEntityType === 'Location';
@@ -439,6 +805,9 @@ export class FormDialogComponent {
       this.advanceTableForm.patchValue({organizationalEntityOwnership:"Owned"});
       this.onOwnershipChange();
     }
+    this.syncValidatorsForEntityType();
+    this.showValidationSummary = false;
+    this.validationErrors = [];
   }
 
   // InitOrganizationalEntity() {
@@ -618,6 +987,7 @@ export class FormDialogComponent {
       this.InitSupplier();
 
     }
+    this.syncValidatorsForEntityType();
   }
 
   InitSupplier() {
@@ -874,19 +1244,15 @@ export class FormDialogComponent {
 
   onChanges(): void {
     this.advanceTableForm.get('organizationalEntityType').valueChanges.subscribe(val => {
-      const websiteControl = this.advanceTableForm.get('organizationalEntityWebsite');
-      const panControl = this.advanceTableForm.get('organizationalEntityPAN');
-
-      if (val !== 'Branch' && val !== 'Location' && val !== 'Hub') {
-        websiteControl.setValidators([Validators.required, Validators.maxLength(100)]);
-        panControl.setValidators([Validators.required]);
-      } else {
-        websiteControl.clearValidators();
-        panControl.clearValidators();
+      if (val !== 'Branch') {
+        this.advanceTableForm.patchValue({
+          isECommerceBranch: false,
+          preFixForEcommerce: ''
+        });
       }
-
-      websiteControl.updateValueAndValidity();
-      panControl.updateValueAndValidity();
+      this.syncValidatorsForEntityType();
+      this.showValidationSummary = false;
+      this.validationErrors = [];
     });
   }
 
