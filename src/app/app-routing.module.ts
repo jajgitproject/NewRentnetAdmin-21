@@ -3685,6 +3685,19 @@ const routes: Routes = [
       },
 
       {
+        path: 'postPickupCallMis',
+        loadChildren: () =>
+          import('./postPickupCallMis/postPickupCallMis.module').then(
+            (m) => m.PostPickupCallMisModule
+          ),
+        data: {
+          requiredPageKey: 'Post Pickup Call MIS',
+          alternatePageKeys: ['postPickupCallMis', 'Post Pickup Call MIS'],
+          skipRolePageGuard: true
+        }
+      },
+
+      {
         path: 'resolution',
         loadChildren: () =>
           import('./resolution/resolution.module').then(

@@ -1356,6 +1356,19 @@ export const ROUTES: RouteInfo[] = [
         isAccess: false,
         alwaysAccessible: true
       },
+      {
+        path: 'postPickupCallMis',
+        title: 'Post Pickup Call MIS',
+        pageKey: 'Post Pickup Call MIS',
+        moduleName: 'postPickupCallMis',
+        alternateAccessPageKeys: ['postPickupCallMis', 'Post Pickup Call MIS'],
+        icon: 'fas fa-phone',
+        class: '',
+        groupTitle: false,
+        submenu: [],
+        isAccess: false,
+        alwaysAccessible: true
+      },
       {        
         path: 'incidenceMIS',
         title: 'Incidence MIS',
