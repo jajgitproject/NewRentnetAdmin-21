@@ -57,6 +57,7 @@ export class BillDetailMisComponent implements OnInit, OnDestroy {
   SearchDuty = '';
   SearchBillDateFrom: FormControl = new FormControl(null);
   SearchBillToDate: FormControl = new FormControl(null);
+  SearchPaidStatus: FormControl = new FormControl('All');
 
   CustomerGroupList: CustomerGroupDropDown[] = [];
   CustomerList: CustomerDropDown[] = [];
@@ -80,6 +81,7 @@ export class BillDetailMisComponent implements OnInit, OnDestroy {
 
   ownedSuppliedOptions = ['All', 'Owned', 'Supplied'];
   bookingStatusOptions = ['All', 'Confirmed', 'Cancelled', 'Completed'];
+  billStatusOptions = ['All', 'Paid', 'Unpaid'];
 
   constructor(
     private snackBar: MatSnackBar,
@@ -124,6 +126,7 @@ export class BillDetailMisComponent implements OnInit, OnDestroy {
     this.SearchDuty = '';
     this.SearchBillDateFrom.setValue(null);
     this.SearchBillToDate.setValue(null);
+    this.SearchPaidStatus.setValue('All');
   }
 
   buildSearchCriteria(): SearchCriteria {
@@ -145,7 +148,8 @@ export class BillDetailMisComponent implements OnInit, OnDestroy {
       SearchBookingStatus: this.normalizeSelect(this.SearchBookingStatus?.value),
       SearchDuty: this.SearchDuty || '',
       SearchBillFromDate: this.formatSearchDate(this.SearchBillDateFrom?.value),
-      SearchBillToDate: this.formatSearchDate(this.SearchBillToDate?.value)
+      SearchBillToDate: this.formatSearchDate(this.SearchBillToDate?.value),
+      SearchPaidStatus: this.normalizeSelect(this.SearchPaidStatus?.value)
     };
   }
 
@@ -379,7 +383,8 @@ export class BillDetailMisComponent implements OnInit, OnDestroy {
       || this.isSearchValueSet(this.SearchBookingStatus?.value)
       || this.isSearchValueSet(this.SearchDuty)
       || this.hasValidDate(this.SearchBillDateFrom?.value)
-      || this.hasValidDate(this.SearchBillToDate?.value);
+      || this.hasValidDate(this.SearchBillToDate?.value)
+      || this.isSearchValueSet(this.SearchPaidStatus?.value);
   }
 
   private hasValidDate(value: any): boolean {

@@ -3,6 +3,7 @@ import { Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { FormControl } from '@angular/forms';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { MAT_DATE_LOCALE } from '@angular/material/core';
+import { provideMomentDateAdapter } from '@angular/material-moment-adapter';
 import moment from 'moment';
 import { Observable, Subscription } from 'rxjs';
 import { map, startWith } from 'rxjs/operators';
@@ -21,12 +22,27 @@ import { GeoPointTypeDropDown } from '../geoPointType/geoPointTypeDropDown.model
 import { StatesDropDown } from '../organizationalEntity/stateDropDown.model';
 import { SalesPersonModel } from '../bookingBackupMIS/bookingBackupMIS.model';
 
+const BOOKING_MIS_DATE_FORMATS = {
+  parse: {
+    dateInput: 'DD-MM-YYYY',
+  },
+  display: {
+    dateInput: 'DD-MM-YYYY',
+    monthYearLabel: 'MMM YYYY',
+    dateA11yLabel: 'LL',
+    monthYearA11yLabel: 'MMMM YYYY',
+  },
+};
+
 @Component({
   standalone: false,
   selector: 'app-booking-mis',
   templateUrl: './bookingMis.component.html',
   styleUrls: ['./bookingMis.component.sass'],
-  providers: [{ provide: MAT_DATE_LOCALE, useValue: 'en-GB' }]
+  providers: [
+    { provide: MAT_DATE_LOCALE, useValue: 'en-GB' },
+    ...provideMomentDateAdapter(BOOKING_MIS_DATE_FORMATS),
+  ]
 })
 export class BookingMisComponent implements OnInit, OnDestroy {
   exportJobId: string | null = null;

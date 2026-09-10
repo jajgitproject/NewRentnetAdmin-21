@@ -45,7 +45,8 @@ export class BillDetailMisService {
       SearchBookingStatus: this.toNull(criteria.SearchBookingStatus),
       SearchDuty: this.toNull(criteria.SearchDuty),
       SearchBillFromDate: this.toNull(criteria.SearchBillFromDate),
-      SearchBillToDate: this.toNull(criteria.SearchBillToDate)
+      SearchBillToDate: this.toNull(criteria.SearchBillToDate),
+      SearchPaidStatus: this.toNull(criteria.SearchPaidStatus)
     };
   }
 
