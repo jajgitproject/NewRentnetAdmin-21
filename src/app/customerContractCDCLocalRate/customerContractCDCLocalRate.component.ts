@@ -607,8 +607,7 @@ openInNewTab(menuItem: any, rowItem: any) {
                this.refresh();
                this.showNotification(
                 'snackbar-danger',
-                //'Local Rate Already Exists.....!!!',
-                'Duplicate Value Found.....!!!',
+                'An active rate already exists for a shared city in another city tier.',
                 'bottom',
                 'center'
               );

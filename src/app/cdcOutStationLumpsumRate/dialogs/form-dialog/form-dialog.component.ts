@@ -373,22 +373,25 @@ numberOnly(event): boolean {
     this.advanceTableService.add(this.advanceTableForm.getRawValue())  
     .subscribe(
       response => {
-        if (response && response.activationStatus && typeof response.activationStatus === 'string' && response.activationStatus.includes("Duplicate")) 
+        if (this._generalService.isDuplicateSaveError(response)) 
         {
-          this._generalService.sendUpdate('DataNotFound:DuplicacyError:Failure');
-          this.saveDisabled = true;
+          this._generalService.showDuplicateSaveError(
+            'An active rate already exists for a shared city in another city tier.',
+            () => this.endSaving(),
+            response
+          );
         }
         else
         {
           this.dialogRef.close();
           this._generalService.sendUpdate('CDCOutStationLumpsumRateCreate:CDCOutStationLumpsumRateView:Success');//To Send Updates  
-          this.saveDisabled = true;
+          this.endSaving();
         } 
       },
       error =>
       {
         this._generalService.sendUpdate('CDCOutStationLumpsumRateAll:CDCOutStationLumpsumRateView:Failure');//To Send Updates  
-        this.saveDisabled = true;
+        this.endSaving();
       }
     )
   }
@@ -401,22 +404,25 @@ numberOnly(event): boolean {
     this.advanceTableService.update(this.advanceTableForm.getRawValue())  
     .subscribe(
       response => {
-        if (response && response.activationStatus && typeof response.activationStatus === 'string' && response.activationStatus.includes("Duplicate")) 
+        if (this._generalService.isDuplicateSaveError(response)) 
         {
-          this._generalService.sendUpdate('DataNotFound:DuplicacyError:Failure');
-          this.saveDisabled = true;
+          this._generalService.showDuplicateSaveError(
+            'An active rate already exists for a shared city in another city tier.',
+            () => this.endSaving(),
+            response
+          );
         }
         else
         {
           this.dialogRef.close();
           this._generalService.sendUpdate('CDCOutStationLumpsumRateUpdate:CDCOutStationLumpsumRateView:Success');//To Send Updates  
-          this.saveDisabled = true;
+          this.endSaving();
         } 
       },
       error =>
       {
         this._generalService.sendUpdate('CDCOutStationLumpsumRateAll:CDCOutStationLumpsumRateView:Failure');//To Send Updates  
-        this.saveDisabled = true;
+        this.endSaving();
       }
     )
   }
@@ -431,30 +437,38 @@ numberOnly(event): boolean {
     .subscribe(
     response => 
     {
-      if(response.activationStatus===false)
+      if (this._generalService.isDuplicateSaveError(response))
       {
-        this._generalService.sendUpdate('DataNotFound:DuplicacyError:Failure');
-        this.saveDisabled = true;
-        this.cdr.detectChanges();
+        this._generalService.showDuplicateSaveError(
+          'An active rate already exists for a shared city in another city tier.',
+          () => this.endSaving(),
+          response
+        );
       }
       else 
       {
         this.dialogRef.close();
         this._generalService.sendUpdate('CDCOutStationLumpsumRateUpdate:CDCOutStationLumpsumRateView:Success');
-        this.saveDisabled = true; 
+        this.endSaving(); 
       }
     },
     error =>
     {
      this._generalService.sendUpdate('CDCOutStationLumpsumRateAll:CDCOutStationLumpsumRateView:Failure');//To Send Updates 
-     this.saveDisabled = true;
+     this.endSaving();
     }
   )
+  }
+
+  private endSaving(): void {
+    this.saveDisabled = true;
+    this.cdr.detectChanges();
   }
 
   public confirmAdd(): void 
   {
     this.saveDisabled = false;
+    this.cdr.detectChanges();
     if(this.action=="duplicate")
     {
       this.Duplicate();

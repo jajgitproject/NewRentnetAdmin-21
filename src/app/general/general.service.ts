@@ -75,6 +75,7 @@ import { ReservationCustomerDetails } from './reservationCustomerDetailsDropDown
 import { AllotmentDetails } from '../dutySlipQualityCheck/dutySlipQualityCheck.model';
 import { DutyAllotmentDetails } from '../dutySlipQualityCheckedByExecutive/dutySlipQualityCheckedByExecutive.model';
 import { AuthService } from '../core/service/auth.service';
+import Swal from 'sweetalert2';
 import { ParentMenuDropDown } from './parentMenuDropDown.model';
 import { PageDropDown } from './pageDropDown.model';
 import { PageAuditDropDown } from '../auditTrail/pageAuditDropDown.model';
@@ -2067,6 +2068,83 @@ getCustomerCategory(): Observable<CustomerCategoryDropDown[]>{
   getUpdate(): Observable<any> {
     //the receiver component calls this function 
     return this.subjectName.asObservable(); //it returns as an observable to which the receiver funtion will subscribe
+  }
+
+  showErrorMessageBox(message: string): Promise<void> {
+    return Swal.fire({
+      icon: 'error',
+      title: 'Error',
+      text: message,
+      confirmButtonText: 'OK',
+      allowOutsideClick: false,
+      allowEscapeKey: false
+    }).then(() => undefined);
+  }
+
+  normalizeSaveResponse(response: any): any {
+    if (response == null) {
+      return response;
+    }
+
+    let normalized = response;
+    if (typeof response === 'string') {
+      const trimmed = response.trim();
+      if (trimmed.startsWith('{') || trimmed.startsWith('[')) {
+        try {
+          normalized = JSON.parse(trimmed);
+        } catch {
+          return { activationStatus: trimmed };
+        }
+      } else if (trimmed.toLowerCase().includes('duplicate')) {
+        return { activationStatus: trimmed };
+      } else {
+        return response;
+      }
+    }
+
+    if (normalized && typeof normalized === 'object') {
+      const status = normalized.activationStatus ?? normalized.ActivationStatus;
+      if (status !== undefined && normalized.activationStatus === undefined) {
+        return { ...normalized, activationStatus: status };
+      }
+    }
+
+    return normalized;
+  }
+
+  isDuplicateSaveError(response: any): boolean {
+    const normalized = this.normalizeSaveResponse(response);
+    if (!normalized || typeof normalized !== 'object') {
+      return false;
+    }
+    if (normalized.activationStatus === false) {
+      return true;
+    }
+    return typeof normalized.activationStatus === 'string'
+      && normalized.activationStatus.toLowerCase().includes('duplicate');
+  }
+
+  getDuplicateErrorMessage(response: any, defaultMessage: string): string {
+    const normalized = this.normalizeSaveResponse(response);
+    if (normalized?.activationStatus && typeof normalized.activationStatus === 'string') {
+      const status = normalized.activationStatus.replace(/^\+/, '').trim();
+      if (status.toLowerCase().startsWith('duplicate data -')) {
+        const detail = status.substring('duplicate data -'.length).trim();
+        return detail || defaultMessage;
+      }
+      if (status.toLowerCase().includes('duplicate')) {
+        return defaultMessage;
+      }
+    }
+    return defaultMessage;
+  }
+
+  showDuplicateSaveError(defaultMessage: string, onClose: () => void, response?: any): void {
+    const message = this.getDuplicateErrorMessage(response, defaultMessage);
+    onClose();
+    setTimeout(() => {
+      void this.showErrorMessageBox(message);
+    }, 0);
   }
 
   getCustomerID(): number {
