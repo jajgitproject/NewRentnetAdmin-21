@@ -294,6 +294,22 @@ export class SigninComponent implements OnInit {
                     false
                 )
               );
+              localStorage.setItem(
+                'canCancelBackDateReservation',
+                String(
+                  employee.CanCancelBackDateReservation ??
+                    employee.canCancelBackDateReservation ??
+                    false
+                )
+              );
+              localStorage.setItem(
+                'canReactivateBackDateReservation',
+                String(
+                  employee.CanReactivateBackDateReservation ??
+                    employee.canReactivateBackDateReservation ??
+                    false
+                )
+              );
               this.calculateDaysLeft();
             }
           } else {

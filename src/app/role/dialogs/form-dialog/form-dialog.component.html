@@ -303,6 +303,35 @@
                         </mat-error>
                     </mat-form-field>
                 </div>
+                <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                    <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                        <mat-label>Can Cancel Back Date Reservation</mat-label>
+                        <mat-select formControlName="canCancelBackDateReservation">
+                            <mat-option value="">--Select--</mat-option>
+                            <mat-option [value]="true">Yes</mat-option>
+                            <mat-option [value]="false">No</mat-option>
+                        </mat-select>
+                        <mat-error *ngIf="advanceTableForm.get('canCancelBackDateReservation')?.hasError('required')">
+                            Can Cancel Back Date Reservation is required
+                        </mat-error>
+                    </mat-form-field>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                    <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                        <mat-label>Can Reactivate Back Date Reservation</mat-label>
+                        <mat-select formControlName="canReactivateBackDateReservation">
+                            <mat-option value="">--Select--</mat-option>
+                            <mat-option [value]="true">Yes</mat-option>
+                            <mat-option [value]="false">No</mat-option>
+                        </mat-select>
+                        <mat-error *ngIf="advanceTableForm.get('canReactivateBackDateReservation')?.hasError('required')">
+                            Can Reactivate Back Date Reservation is required
+                        </mat-error>
+                    </mat-form-field>
+                </div>
             </div>
 
             <div class="row">

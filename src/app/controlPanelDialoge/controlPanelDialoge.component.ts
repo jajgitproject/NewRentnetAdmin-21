@@ -188,6 +188,7 @@ export class ControlPanelDialogeComponent {
   verifyDutyStatusAndCacellationStatus: any;
 
   ReservationStatus:any;
+  showReactivateReservationOption = false;
 
   /** Display line under KAM button; keyed by customerID */
   kamSummaryByCustomerId: Record<number, string> = {};
@@ -259,7 +260,11 @@ export class ControlPanelDialogeComponent {
         this.IsPostPickUpCallAllowedToCustomerPerson =  this.reservationInfo[0].isPostPickUpCallAllowedToCustomerPerson;
 
         console.log('Fetched reservation details:', this.reservationInfo);
-        this.ReservationStatus = list[0]?.reservationStatus ?? null;
+        this.ReservationStatus =
+          list[0]?.reservationStatus ??
+          list[0]?.ReservationStatus ??
+          null;
+        this.loadReactivatePermission();
         this.prefetchKamSummaries(list);
         this.loadUpsellStatus(reservationID);
         this.ngZone.run(() => {
@@ -269,6 +274,7 @@ export class ControlPanelDialogeComponent {
       (error: HttpErrorResponse) => {
         this.reservationInfo = null;
         this.ReservationStatus = null;
+        this.showReactivateReservationOption = false;
         this.kamSummaryByCustomerId = {};
         this.kamRowsByCustomerId = {};
         this.cdr.detectChanges();
@@ -2684,6 +2690,8 @@ TrackOnMapInfo(reservationID: number, item?: any) {
 
   CancellReservation(item:any ,i: any)
   {
+    const cancelReservationDialogFlags = this.getCancelReservationDialogFlags(item);
+
     // if(item.allotmentType === 'Hard')
     // {
     //   Swal.fire({
@@ -2711,7 +2719,8 @@ TrackOnMapInfo(reservationID: number, item?: any) {
       this.dialog.open(FormDialogCRAComponent, {
       width: '500px',
       data: {
-        advanceTable: item
+        advanceTable: item,
+        ...cancelReservationDialogFlags
       }
     });
     }
@@ -2738,12 +2747,13 @@ TrackOnMapInfo(reservationID: number, item?: any) {
                   data: 
                     {
                       popUpTitle: 'Cancel Reservation',
-                      advanceTable: this.advanceTable,             
-                      allotmentID:this.reservationInfo[0].allotmentID,
-                      reservationID: this.reservationInfo[0].reservationID,
-                      allotmentStatus: this.reservationInfo[0].allotmentStatus,
-                      allotmentType: this.reservationInfo[0].allotmentType,  
-                        status: status        
+                      advanceTable: item,             
+                      allotmentID: item.allotmentID,
+                      reservationID: item.reservationID,
+                      allotmentStatus: item.allotmentStatus,
+                      allotmentType: item.allotmentType,  
+                        status: status,
+                        ...cancelReservationDialogFlags
                     }
                     
                 });
@@ -2781,12 +2791,12 @@ TrackOnMapInfo(reservationID: number, item?: any) {
                 data: 
                   {
                     popUpTitle: 'Cancel Reservation',
-                    advanceTable: this.advanceTable,             
-                    allotmentID:this.reservationInfo[0].allotmentID,
-                    reservationID: this.reservationInfo[0].reservationID,
-                    allotmentStatus: this.reservationInfo[0].allotmentStatus,
-                    status: '' 
-                          
+                    advanceTable: item,             
+                    allotmentID: item.allotmentID,
+                    reservationID: item.reservationID,
+                    allotmentStatus: item.allotmentStatus,
+                    status: '',
+                    ...cancelReservationDialogFlags
                   }
                   
               });
@@ -2816,6 +2826,126 @@ TrackOnMapInfo(reservationID: number, item?: any) {
           }
         );
     }      
+  }
+
+  isCancelledReservation(item?: any): boolean {
+    const status =
+      item?.reservationStatus ??
+      item?.ReservationStatus ??
+      this.ReservationStatus;
+    return String(status || '').trim().toLowerCase() === 'cancelled';
+  }
+
+  private loadReactivatePermission(): void {
+    this.showReactivateReservationOption = false;
+    if (!this.isCancelledReservation(this.reservationInfo?.[0])) {
+      return;
+    }
+
+    const employeeId = this._generalService.getUserID();
+    if (!employeeId) {
+      this.showReactivateReservationOption =
+        this._generalService.canReactivateBackDateReservation();
+      return;
+    }
+
+    this.controlPanelDialogeService
+      .getReactivateReservationPermission(employeeId)
+      .subscribe(
+        (data) => {
+          this.showReactivateReservationOption = !!(
+            data?.canReactivate ?? data?.CanReactivate
+          );
+          this.cdr.detectChanges();
+        },
+        () => {
+          this.showReactivateReservationOption =
+            this._generalService.canReactivateBackDateReservation();
+          this.cdr.detectChanges();
+        }
+      );
+  }
+
+  reactivateCancelledReservation(item: any): void {
+    if (!this.showReactivateReservationOption) {
+      return;
+    }
+
+    const reservationID = item?.reservationID ?? this.reservationID;
+    Swal.fire({
+      title: 'Reactivate Reservation',
+      text: 'Are you sure you want to reactivate this cancelled reservation?',
+      icon: 'question',
+      showCancelButton: true,
+      confirmButtonText: 'Yes, reactivate',
+      cancelButtonText: 'No'
+    }).then((result) => {
+      if (!result.isConfirmed) {
+        return;
+      }
+
+      const userID = this._generalService.getUserID();
+      this.controlPanelDialogeService.reactivateReservation(reservationID, userID).subscribe(
+        () => {
+          Swal.fire({
+            title: '',
+            icon: 'success',
+            text: 'Reservation reactivated successfully.'
+          });
+          this._generalService.sendUpdate('ReactivateReservation:ControlPanel:Success');
+          this.loadData(this.reservationID, this.index);
+        },
+        (error) => {
+          const message =
+            error?.error?.message ??
+            'Unable to reactivate reservation. Please try again.';
+          Swal.fire({
+            title: '',
+            icon: 'warning',
+            text: message
+          });
+        }
+      );
+    });
+  }
+
+  private getCancelReservationDialogFlags(item?: any) {
+    if (this.isPastPickupDate(item) && !this._generalService.canCancelBackDateReservation()) {
+      return {
+        backDateCancellationBlocked: true,
+        backDateCancellationMessage:
+          'Past reservation cancellation is not permitted for your role.'
+      };
+    }
+
+    return {
+      backDateCancellationBlocked: false,
+      backDateCancellationMessage: ''
+    };
+  }
+
+  private resolvePickupDate(source?: any): any {
+    if (!source) {
+      return null;
+    }
+    return (
+      source?.pickup?.pickupDate ??
+      source?.pickup?.PickupDate ??
+      source?.pickupDate ??
+      source?.PickupDate ??
+      null
+    );
+  }
+
+  private isPastPickupDate(item?: any): boolean {
+    const pickupDateValue =
+      this.resolvePickupDate(item) ??
+      this.resolvePickupDate(this.reservationInfo?.[0]);
+    if (!pickupDateValue) {
+      return false;
+    }
+    const parsed = moment(pickupDateValue).startOf('day');
+    return parsed.isValid() && parsed.isBefore(moment().startOf('day'));
   }
 
 public getInvoiceNumber(item:any ,i: any) 

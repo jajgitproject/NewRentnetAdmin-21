@@ -80,6 +80,8 @@ export class FormDialogComponent
       canFindFuelEntry: [this.advanceTable.canFindFuelEntry, Validators.required],
       canCloseIncident: [this.advanceTable.canCloseIncident, Validators.required],
       canCancelBackDateAllotment: [this.advanceTable.canCancelBackDateAllotment, Validators.required],
+      canCancelBackDateReservation: [this.advanceTable.canCancelBackDateReservation, Validators.required],
+      canReactivateBackDateReservation: [this.advanceTable.canReactivateBackDateReservation, Validators.required],
       canEditDSAfterGoodForBilling: [this.advanceTable.canEditDSAfterGoodForBilling, Validators.required],
       canBypassOTP: [this.advanceTable.canBypassOTP === true || this.advanceTable.canBypassOTP === false
         ? this.advanceTable.canBypassOTP
@@ -114,6 +116,8 @@ export class FormDialogComponent
       canFindFuelEntry: toBool(raw.canFindFuelEntry),
       canCloseIncident: toBool(raw.canCloseIncident),
       canCancelBackDateAllotment: toBool(raw.canCancelBackDateAllotment),
+      canCancelBackDateReservation: toBool(raw.canCancelBackDateReservation),
+      canReactivateBackDateReservation: toBool(raw.canReactivateBackDateReservation),
       canEditDSAfterGoodForBilling: toBool(raw.canEditDSAfterGoodForBilling),
       canBypassOTP: toBool(raw.canBypassOTP),
     };

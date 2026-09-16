@@ -44,6 +44,7 @@ interface MenuItem {
 })
 export class CustomerContractCDCLocalRateComponent implements OnInit {
   displayedColumns = [
+    'actions',
     'CustomerContractCarCategory',
     'CustomerContractCityTier',
     'package',
@@ -55,8 +56,7 @@ export class CustomerContractCDCLocalRateComponent implements OnInit {
     'BillFromTo',
     'FKMP2P',
     'FixedP2PAmount',
-    'status',
-    'actions'
+    'status'
   ];
 
   displayColumnsOfFRD = [

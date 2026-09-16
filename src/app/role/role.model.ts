@@ -20,6 +20,8 @@ export class Role {
    canFindFuelEntry: boolean;
    canCloseIncident: boolean;
    canCancelBackDateAllotment: boolean;
+   canCancelBackDateReservation: boolean;
+   canReactivateBackDateReservation: boolean;
    canEditDSAfterGoodForBilling: boolean;
    canBypassOTP: boolean;
 
@@ -45,6 +47,8 @@ export class Role {
        this.canFindFuelEntry = role.canFindFuelEntry ?? role.CanFindFuelEntry ?? '';
        this.canCloseIncident = role.canCloseIncident ?? role.CanCloseIncident ?? '';
        this.canCancelBackDateAllotment = role.canCancelBackDateAllotment ?? role.CanCancelBackDateAllotment ?? '';
+       this.canCancelBackDateReservation = role.canCancelBackDateReservation ?? role.CanCancelBackDateReservation ?? '';
+       this.canReactivateBackDateReservation = role.canReactivateBackDateReservation ?? role.CanReactivateBackDateReservation ?? '';
        this.canEditDSAfterGoodForBilling = Role.toBoolOrEmpty(
          role.canEditDSAfterGoodForBilling ?? role.CanEditDSAfterGoodForBilling
        );

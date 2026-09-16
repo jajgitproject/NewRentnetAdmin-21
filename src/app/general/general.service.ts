@@ -265,12 +265,27 @@ export class GeneralService {
     return this.authService?.currentUserValue?.employee?.RoleID ?? 0;
   }
 
+  private isTruthyRoleFlag(value: any): boolean {
+    return (
+      value === true ||
+      value === 1 ||
+      value === '1' ||
+      value === 'true' ||
+      value === 'True'
+    );
+  }
+
   private readRoleFlagFromStorage(key: string): boolean | null {
     const value = localStorage.getItem(key);
-    if (value === 'true') {
+    if (this.isTruthyRoleFlag(value)) {
       return true;
     }
-    if (value === 'false') {
+    if (
+      value === 'false' ||
+      value === 'False' ||
+      value === '0' ||
+      value === 0
+    ) {
       return false;
     }
     return null;
@@ -345,6 +360,54 @@ export class GeneralService {
     } catch {
       return false;
     }
+  }
+
+  canCancelBackDateReservation(): boolean {
+    const stored = this.readRoleFlagFromStorage('canCancelBackDateReservation');
+    if (stored === true) {
+      return true;
+    }
+    if (stored === false) {
+      return false;
+    }
+    try {
+      const currentUser = JSON.parse(localStorage.getItem('currentUser') || '{}');
+      const employee = currentUser?.employee ?? currentUser?.Employee;
+      return !!(
+        employee?.CanCancelBackDateReservation ?? employee?.canCancelBackDateReservation
+      );
+    } catch {
+      return false;
+    }
+  }
+
+  canReactivateBackDateReservation(): boolean {
+    try {
+      const currentUser =
+        this.authService?.currentUserValue ??
+        JSON.parse(localStorage.getItem('currentUser') || '{}');
+      const employee = currentUser?.employee ?? currentUser?.Employee;
+      if (
+        this.isTruthyRoleFlag(
+          employee?.CanReactivateBackDateReservation ??
+            employee?.canReactivateBackDateReservation
+        )
+      ) {
+        return true;
+      }
+    } catch {
+      // Fall through to localStorage.
+    }
+
+    const stored = this.readRoleFlagFromStorage('canReactivateBackDateReservation');
+    if (stored === true) {
+      return true;
+    }
+    if (stored === false) {
+      return false;
+    }
+
+    return false;
   }
 
   getContractTariffRoleTrack(): 'Auditor' | 'Verifier' | null {

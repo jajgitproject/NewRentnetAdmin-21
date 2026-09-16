@@ -336,11 +336,17 @@
 
                             <ng-template #elseBlock2>
                                   <div class="scrollable-table-container">
-                                <mat-table #table [dataSource]="dataSource" matSort class="mat-cell floating-header-table" (matSortChange)="SortingData($event)">
+                                <mat-table #table [dataSource]="dataSource" matSort class="mat-cell floating-header-table cdc-local-rate-table" (matSortChange)="SortingData($event)">
 
-                                    <ng-container matColumnDef="id">
-                                        <mat-header-cell *matHeaderCellDef mat-sort-header>Id</mat-header-cell>
-                                        <mat-cell *matCellDef="let row">{{row.cdcLocalRateID}}</mat-cell>
+                                    <ng-container matColumnDef="actions">
+                                        <mat-header-cell *matHeaderCellDef sticky class="pr-0 cdc-local-rate-actions-header">Actions</mat-header-cell>
+                                        <mat-cell *matCellDef="let row; let i=index;" sticky class="pr-0 cdc-local-rate-actions-cell">
+                                            <button mat-raised-button color="primary"
+                                                (contextmenu)="onContextMenu($event, row)"
+                                                (click)="onContextMenu($event, row)">
+                                                Actions
+                                            </button>
+                                        </mat-cell>
                                     </ng-container>
 
                                     <ng-container matColumnDef="CustomerContractCarCategory">
@@ -414,22 +420,8 @@
                                         <mat-cell *matCellDef="let row">
                                             {{row.activationStatus===true ? 'Active' : 'Deleted'}}</mat-cell>
                                     </ng-container>
-                                    <!-- actions -->
-                                    <ng-container matColumnDef="actions">
-                                        <mat-header-cell *matHeaderCellDef class="pr-0"
-                                            [ngClass]="'tbl-col-width-per-9'">Actions</mat-header-cell>
-                                        <mat-cell *matCellDef="let row; let i=index;" class="pr-0"
-                                            [ngClass]="'tbl-col-width-per-9'">
-                                            
-                                            <button mat-raised-button color="primary"
-                                                (contextmenu)="onContextMenu($event, row)"
-                                                (click)="onContextMenu($event, row)">
-                                                Actions
-                                            </button>
-                                        </mat-cell>
-                                    </ng-container>
                                    
-                                    <mat-header-row *matHeaderRowDef="displayedColumns"></mat-header-row>
+                                    <mat-header-row *matHeaderRowDef="displayedColumns; sticky: true"></mat-header-row>
                                     <mat-row *matRowDef="let row; columns: displayedColumns;" [style.cursor]="'pointer'"
                                         matRipple>
                                     </mat-row>

@@ -9,6 +9,7 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 import { CancelReservationAndAllotment } from '../../cancelReservationAndAllotment.model';
 import { CancelReservationAndAllotmentService } from '../../cancelReservationAndAllotment.service';
 import Swal from 'sweetalert2';
+import moment from 'moment';
 
 @Component({
   standalone: false,
@@ -31,6 +32,8 @@ export class FormDialogCRAComponent
   AllotmentStatus: any;
   ReservationID: any;
   AllotmentType: any;
+  backDateCancellationBlocked = false;
+  backDateCancellationMessage = '';
   constructor(
     private snackBar: MatSnackBar,
   public dialogRef: MatDialogRef<FormDialogCRAComponent>, 
@@ -80,10 +83,47 @@ export class FormDialogCRAComponent
         
         
         this.advanceTableForm = this.createContactForm();
-        this.AllotmentID=data?.advanceTable?.allotmentID;
-        this.AllotmentStatus=data?.advanceTable?.allotmentStatus;
-        this.ReservationID=data?.advanceTable?.reservationID;
-        this.AllotmentType=data?.advanceTable?.allotmentType;
+        this.AllotmentID=data?.advanceTable?.allotmentID ?? data?.allotmentID;
+        this.AllotmentStatus=data?.advanceTable?.allotmentStatus ?? data?.allotmentStatus;
+        this.ReservationID=data?.advanceTable?.reservationID ?? data?.reservationID;
+        this.AllotmentType=data?.advanceTable?.allotmentType ?? data?.allotmentType;
+        this.applyBackDateCancellationRestrictions();
+  }
+
+  private resolvePickupDate(source?: any): any {
+    if (!source) {
+      return null;
+    }
+    return (
+      source?.pickup?.pickupDate ??
+      source?.pickup?.PickupDate ??
+      source?.pickupDate ??
+      source?.PickupDate ??
+      null
+    );
+  }
+
+  private isPastPickupDateValue(pickupDateValue: any): boolean {
+    if (!pickupDateValue) {
+      return false;
+    }
+    const parsed = moment(pickupDateValue).startOf('day');
+    return parsed.isValid() && parsed.isBefore(moment().startOf('day'));
+  }
+
+  private applyBackDateCancellationRestrictions(): void {
+    const pickupDateValue = this.resolvePickupDate(this.data?.advanceTable);
+    const isPastPickup = this.isPastPickupDateValue(pickupDateValue);
+    const canCancel = this._generalService.canCancelBackDateReservation();
+
+    if (isPastPickup && !canCancel) {
+      this.backDateCancellationBlocked = true;
+      this.backDateCancellationMessage =
+        this.data?.backDateCancellationMessage ??
+        'Past reservation cancellation is not permitted for your role.';
+      this.buttonDisabled = true;
+      this.advanceTableForm.disable();
+    }
   }
   formControl = new FormControl('', 
   [
@@ -174,6 +214,14 @@ export class FormDialogCRAComponent
     {
      this._generalService.sendUpdate('CancelReservationAndAllotmentAll:CancelReservationAndAllotmentView:Failure');//To Send Updates  
      this.saveDisabled = true;
+     const message =
+       error?.error?.message ??
+       'Unable to cancel reservation. Please try again.';
+     Swal.fire({
+       title: '',
+       icon: 'warning',
+       text: message
+     });
     }
   )
   }
@@ -188,6 +236,9 @@ export class FormDialogCRAComponent
   }
   public confirmAdd(): void 
   {
+    if (this.backDateCancellationBlocked) {
+      return;
+    }
     this.saveDisabled = false;
     this.Put();   
   }

@@ -89,6 +89,12 @@ export class ControlPanelDialogeService
     getShowAllLocationCheck(employeeID:any): Observable<any> {    
       return this.httpClient.get(this.API_URL +'getShowAllLocationCheck' +'/' +employeeID);
     }
+
+    getReactivateReservationPermission(employeeID: number): Observable<any> {
+      return this.httpClient.get(
+        this.API_URL + 'getReactivateReservationPermission/' + employeeID
+      );
+    }
   
     getReservationDetailsForAllotment(
       _filters: Filters,
@@ -136,6 +142,14 @@ export class ControlPanelDialogeService
    checkInvoiceNumber(ReservationID:any): Observable<any> 
   {    
     return this.httpClient.get(this.API_URL + 'CheckInvoiceNumber' + '/' + ReservationID);
+  }
+
+  reactivateReservation(reservationID: number, userID: number): Observable<any> {
+    return this.httpClient.put(this.API_URL + 'ReactivateReservation', {
+      reservationID,
+      userID,
+      cancellationByEmployeeID: userID
+    });
   }
    getInvoiceType(invoiceID:any): Observable<any>{
      
