@@ -1384,10 +1384,11 @@ toArray<T>(value: any): T[] {
     };
   }
 
-  public handleAddressChange(address: any) {    
-    this.pickupAddress = address.formatted_address;
-    //this.pickupAddress = address.name;
-    this.advanceTableForm.patchValue({ pickupAddress: this.pickupAddress });
+  public handleAddressChange(address: any) {
+    const placeTitle = address.name || address.formatted_address;
+    this.pickupAddress = placeTitle;
+    this.formattedAddress = address.formatted_address;
+    this.advanceTableForm.patchValue({ pickupAddress: placeTitle });
     this.advanceTableForm.patchValue({pickupAddressLatLong:address.geometry.location.lat()
       +
        ',' +
@@ -1412,7 +1413,7 @@ toArray<T>(value: any): T[] {
     this.googlePlacesForm.patchValue({geoPointID:-1});
     this.googlePlacesForm.patchValue({latitude:address.geometry.location.lat()});
     this.googlePlacesForm.patchValue({longitude:address.geometry.location.lng()}); 
-    this.googlePlacesForm.patchValue({geoSearchString:this.pickupAddress});
+    this.googlePlacesForm.patchValue({geoSearchString: placeTitle});
     this.googlePlacesForm.patchValue({geoPointName:'Google Address'});
     this.googlePlacesForm.patchValue({googlePlacesID:address.place_id});
     this.googlePlacesForm.patchValue({activationStatus:true});
@@ -1459,10 +1460,10 @@ toArray<T>(value: any): T[] {
     };
   }
   public handleAddressChangeDropOff(address: any) {
-    //this.formattedAddress = address.formatted_address;
-    this.dropOffAddress = address.formatted_address;
-    //this.dropOffAddress = address.name;
-    this.advanceTableForm.patchValue({ dropOffAddress: this.dropOffAddress });
+    const placeTitle = address.name || address.formatted_address;
+    this.dropOffAddress = placeTitle;
+    this.formattedAddress = address.formatted_address;
+    this.advanceTableForm.patchValue({ dropOffAddress: placeTitle });
     this.advanceTableForm.patchValue({dropOffAddressLatLong:address.geometry.location.lat()
       +
        ',' +
@@ -1486,7 +1487,7 @@ toArray<T>(value: any): T[] {
     this.googlePlacesForm.patchValue({geoPointID:-1});
     this.googlePlacesForm.patchValue({latitude:address.geometry.location.lat()});
     this.googlePlacesForm.patchValue({longitude:address.geometry.location.lng()}); 
-    this.googlePlacesForm.patchValue({geoSearchString:this.pickupAddress});
+    this.googlePlacesForm.patchValue({geoSearchString: placeTitle});
     this.googlePlacesForm.patchValue({geoPointName:'Google Address'});
     this.googlePlacesForm.patchValue({googlePlacesID:address.place_id});
     this.googlePlacesForm.patchValue({activationStatus:true});
