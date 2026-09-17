@@ -71,6 +71,13 @@
         (sectionDataChanged)="onSectionDataChanged()">
       </app-dutyStateCustomer>
 
+      <app-dutyNight *ngSwitchCase="'dutyNight'"
+        [advanceTableDutyNight]="ctx.advanceTableDutyNight"
+        [dutySlipID]="ctx.DutySlipID"
+        [verifyDutyStatusAndCacellationStatus]="ctx.verifyDutyStatusAndCacellationStatus"
+        (sectionDataChanged)="onSectionDataChanged()">
+      </app-dutyNight>
+
       <app-dutySAC *ngSwitchCase="'dutySAC'"
         [advanceTableSAC]="ctx.advanceTableSAC"
         [dutySlipID]="ctx.DutySlipID"

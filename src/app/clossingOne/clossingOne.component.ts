@@ -88,6 +88,9 @@ import { BillToOther } from '../billToOther/billToOther.model';
 import { DutyStateCustomer } from '../dutyStateCustomer/dutyStateCustomer.model';
 import { DutyStateCustomerFormDialogComponent } from '../dutyStateCustomer/dialogs/form-dialog/form-dialog.component';
 import { DutyStateCustomerService } from '../dutyStateCustomer/dutyStateCustomer.service';
+import { DutyNight } from '../dutyNight/dutyNight.model';
+import { DutyNightFormDialogComponent } from '../dutyNight/dialogs/form-dialog/form-dialog.component';
+import { DutyNightService } from '../dutyNight/dutyNight.service';
 import { SingleDutySingleBillForLocalService } from '../SingleDutySingleBillForLocal/SingleDutySingleBillForLocal.service';
 import { PackageRateDetailsForClosingService } from '../packageRateDetailsForClosing/packageRateDetailsForClosing.service';
 import { FormDialogComponent } from '../MOPDetailsShow/dialogs/mopDetails/mopDetails.component';
@@ -226,6 +229,8 @@ export class ClossingOneComponent implements OnInit, AfterViewInit, OnDestroy {
   showHidesettledRates: boolean = false;
   showHideDutyStateCustomer: boolean = false;
   advanceTableDutyStateCustomer: DutyStateCustomer | null;
+  showHideDutyNight: boolean = false;
+  advanceTableDutyNight: DutyNight | null;
   showMOP: boolean = false;
   invoiceID: any;
   goodForBilling: boolean;
@@ -293,6 +298,7 @@ export class ClossingOneComponent implements OnInit, AfterViewInit, OnDestroy {
     public dutyGSTPercentageService: DutyGSTPercentageService,
     public dutyStateService: DutyStateService,
     public dutyStateCustomerService: DutyStateCustomerService,
+    public dutyNightService: DutyNightService,
     public additionalKmsDetailsService: AdditionalKmsDetailsService,
     public dutySACService: DutySACService,
     public discountDetails: DiscountDetailsService,
@@ -378,6 +384,7 @@ export class ClossingOneComponent implements OnInit, AfterViewInit, OnDestroy {
     this.DutyGSTPercentageLoadData();
     this.loadDutyStateData();
     this.loadDutyStateDataCustomer();
+    this.loadDutyNightData();
     this.loadDataforAdditionalKMHR();
     this.salesPersonLoadData();
     this.settledRateLoadData();
@@ -906,6 +913,64 @@ export class ClossingOneComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   ///end Duty State Customer=======//
+
+  //======= Duty Night=======//
+  openDutyNight() {
+    this.runIfEditAllowed(() => {
+      this.dutyNightService.hasActiveDutyNight(this.DutySlipID).subscribe(
+        (response: any) => {
+          if (response?.hasActive) {
+            this.showNotification(
+              'snackbar-danger',
+              'An active Duty Night record already exists. Please delete it before adding a new record.',
+              'bottom',
+              'center'
+            );
+            return;
+          }
+
+          const dialogRef = this.dialog.open(DutyNightFormDialogComponent,
+            {
+              data:
+              {
+                dutySlipID: this.DutySlipID,
+                record: this.advanceTableDutyNight,
+                verifyDutyStatusAndCacellationStatus: this.verifyDutyStatusAndCacellationStatus,
+                action: 'add'
+              }
+            });
+          dialogRef.afterClosed().subscribe((res: any) => {
+            this.loadDutyNightData();
+            window.location.reload();
+          });
+        },
+        () => {
+          this.showNotification(
+            'snackbar-danger',
+            'Unable to verify existing Duty Night records. Please try again.',
+            'bottom',
+            'center'
+          );
+        }
+      );
+    });
+  }
+
+  loadDutyNightData() {
+    this.dutyNightService.getTableDataDutyNightClosing(this.DutySlipID).subscribe
+      (
+        data => {
+          if (data !== null) {
+            this.showHideDutyNight = true;
+          }
+          this.advanceTableDutyNight = data;
+          this.refreshClosingSectionViewDialogContext();
+        },
+        (error: HttpErrorResponse) => { this.advanceTableDutyNight = null; }
+      );
+  }
+
+  ///end Duty Night=======//
 
   //---------- Start Add Discount ----------
   addDiscount() {
@@ -1704,6 +1769,10 @@ export class ClossingOneComponent implements OnInit, AfterViewInit, OnDestroy {
   showAndScrollDutyStateCustomer() {
     this.openClosingSectionView('dutyStateCustomer', 'Customer Duty State');
   }
+
+  showAndScrollDutyNight() {
+    this.openClosingSectionView('dutyNight', 'Duty Night');
+  }
   //------DutySAC
   showAndScrollDutySAC() {
     this.openClosingSectionView('dutySAC', 'Duty SAC');
@@ -1743,6 +1812,7 @@ export class ClossingOneComponent implements OnInit, AfterViewInit, OnDestroy {
       advanceTableDGP: this.advanceTableDGP,
       advanceTableDutyState: this.advanceTableDutyState,
       advanceTableDutyStateCustomer: this.advanceTableDutyStateCustomer,
+      advanceTableDutyNight: this.advanceTableDutyNight,
       advanceTableSAC: this.advanceTableSAC,
       advanceTableAD: this.advanceTableAD,
       advanceTableMOP: this.advanceTableMOP,
@@ -1789,6 +1859,9 @@ export class ClossingOneComponent implements OnInit, AfterViewInit, OnDestroy {
         break;
       case 'dutyStateCustomer':
         this.loadDutyStateDataCustomer();
+        break;
+      case 'dutyNight':
+        this.loadDutyNightData();
         break;
       case 'dutySAC':
         this.DutySACLoadData();
