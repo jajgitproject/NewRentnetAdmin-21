@@ -25,6 +25,7 @@ export class DutyNightComponent implements OnInit {
   @Input() advanceTableDutyNight;
   @Input() dutySlipID;
   @Input() verifyDutyStatusAndCacellationStatus;
+  @Input() isDutyNightEditBlocked = false;
   @Output() sectionDataChanged = new EventEmitter<void>();
 
   displayedColumns = [
@@ -34,6 +35,14 @@ export class DutyNightComponent implements OnInit {
     'changedBy',
     'status',
     'actions'
+  ];
+
+  displayedColumnsWithoutActions = [
+    'numberOnNights',
+    'changeDateTime',
+    'reasonOfChange',
+    'changedBy',
+    'status'
   ];
 
   dutyNightID: any;
@@ -64,7 +73,7 @@ export class DutyNightComponent implements OnInit {
   }
 
   editCall(row) {
-    if (!row.activationStatus) {
+    if (!row.activationStatus || this.isDutyNightEditBlocked) {
       return;
     }
     this.dutyNightID = row.dutyNightID;
@@ -73,6 +82,7 @@ export class DutyNightComponent implements OnInit {
         advanceTable: row,
         action: 'edit',
         verifyDutyStatusAndCacellationStatus: this.verifyDutyStatusAndCacellationStatus,
+        isDutyNightEditBlocked: this.isDutyNightEditBlocked,
         dutySlipID: this.dutySlipID
       }
     });
@@ -80,7 +90,7 @@ export class DutyNightComponent implements OnInit {
   }
 
   deleteItem(row) {
-    if (!row.activationStatus) {
+    if (!row.activationStatus || this.isDutyNightEditBlocked) {
       return;
     }
     this.dutyNightID = row.dutyNightID;

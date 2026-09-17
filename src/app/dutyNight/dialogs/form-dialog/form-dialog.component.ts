@@ -47,7 +47,7 @@ export class DutyNightFormDialogComponent {
     }
     this.advanceTableForm = this.createContactForm();
     this.dutySlipID = data.dutySlipID;
-    if (this.verifyDutyStatusAndCacellationStatus !== 'Changes allow') {
+    if (data.isDutyNightEditBlocked === true || this.verifyDutyStatusAndCacellationStatus !== 'Changes allow') {
       this.isSaveAllowed = true;
     } else {
       this.isSaveAllowed = false;

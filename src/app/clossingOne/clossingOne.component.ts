@@ -776,6 +776,17 @@ export class ClossingOneComponent implements OnInit, AfterViewInit, OnDestroy {
     };
   }
 
+  get activeDutyNightNumberOnNights(): number | null {
+    if (!this.advanceTableDutyNight) {
+      return null;
+    }
+    const records = Array.isArray(this.advanceTableDutyNight)
+      ? this.advanceTableDutyNight
+      : [this.advanceTableDutyNight];
+    const active = records.find((record) => record?.activationStatus === true);
+    return active?.numberOnNights ?? null;
+  }
+
   private guardDutyStateEdit(): boolean {
     if (this.hasGeneratedInvoice()) {
       this.showNotification(
@@ -916,8 +927,11 @@ export class ClossingOneComponent implements OnInit, AfterViewInit, OnDestroy {
 
   //======= Duty Night=======//
   openDutyNight() {
-    this.runIfEditAllowed(() => {
-      this.dutyNightService.hasActiveDutyNight(this.DutySlipID).subscribe(
+    if (this.isDutyNightEditBlocked) {
+      this.showDutyNightEditBlockedMessage();
+      return;
+    }
+    this.dutyNightService.hasActiveDutyNight(this.DutySlipID).subscribe(
         (response: any) => {
           if (response?.hasActive) {
             this.showNotification(
@@ -936,6 +950,7 @@ export class ClossingOneComponent implements OnInit, AfterViewInit, OnDestroy {
                 dutySlipID: this.DutySlipID,
                 record: this.advanceTableDutyNight,
                 verifyDutyStatusAndCacellationStatus: this.verifyDutyStatusAndCacellationStatus,
+                isDutyNightEditBlocked: this.isDutyNightEditBlocked,
                 action: 'add'
               }
             });
@@ -953,7 +968,19 @@ export class ClossingOneComponent implements OnInit, AfterViewInit, OnDestroy {
           );
         }
       );
-    });
+  }
+
+  private showDutyNightEditBlockedMessage(): void {
+    const { verifyDuty, goodForBilling } = this.getDutyStateBillingFlags();
+    let message = 'Duty Night changes are not allowed.';
+    if (this.isEInvoiceBlockingEdits) {
+      message = 'E-Invoice (IRN) is already generated and active. Duty Night changes are not allowed.';
+    } else if (goodForBilling) {
+      message = 'Duty is marked Good for Billing. Duty Night changes are not allowed.';
+    } else if (verifyDuty) {
+      message = 'Duty is verified. Duty Night changes are not allowed.';
+    }
+    this.showNotification('snackbar-warning', message, 'bottom', 'center');
   }
 
   loadDutyNightData() {
@@ -1262,6 +1289,11 @@ export class ClossingOneComponent implements OnInit, AfterViewInit, OnDestroy {
 
   get isDutySlipEditBlocked(): boolean {
     return this.isEInvoiceBlockingEdits || this.isGoodForBillingBlockingEdits;
+  }
+
+  get isDutyNightEditBlocked(): boolean {
+    const { verifyDuty, goodForBilling } = this.getDutyStateBillingFlags();
+    return this.isEInvoiceBlockingEdits || verifyDuty || goodForBilling;
   }
 
   private guardEInvoiceEdit(): boolean {
@@ -1827,6 +1859,7 @@ export class ClossingOneComponent implements OnInit, AfterViewInit, OnDestroy {
       goodForBillingStatusAndCancellationStatus: this.goodForBillingStatusAndCancellationStatus,
       verifyDuty: billingFlags.verifyDuty,
       goodForBilling: billingFlags.goodForBilling,
+      isDutyNightEditBlocked: this.isDutyNightEditBlocked,
       invoiceGenerated: this.hasGeneratedInvoice(),
       from: this.from
     };

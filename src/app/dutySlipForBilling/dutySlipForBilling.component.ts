@@ -59,6 +59,7 @@ export class DutySlipForBillingComponent implements OnInit, AfterViewInit, OnCha
   @Input() canThisRoleViewDummyInvoice = false;
   @Input() canEditDSAfterGoodForBilling = false;
   @Input() dutyBillingSummary: any = null;
+  @Input() activeDutyNightNumberOnNights: number | null = null;
   @Output() dataSaved: EventEmitter<void> = new EventEmitter();
   @Output() dutyStatusChanged = new EventEmitter<{verifyDuty: boolean, goodForBilling: boolean,message: string, invoiceCalculated?: boolean}>();
   //@Output() dutyMessage = new EventEmitter<string>();
@@ -622,11 +623,7 @@ export class DutySlipForBillingComponent implements OnInit, AfterViewInit, OnCha
     this.totalDriverAllowanceDays = this.toAllowanceNumber(
       response?.totalDriverAllowanceDays ?? response?.TotalDriverAllowanceDays
     );
-    this.totalNights = this.toAllowanceNumber(
-      response?.totalNights ?? response?.TotalNights
-    );
     this.loadedDriverAllowanceDays = this.totalDriverAllowanceDays;
-    this.loadedNights = this.totalNights;
   }
 
   private mapClosingAllowancesFromSummary(response: any): void {
@@ -675,11 +672,7 @@ export class DutySlipForBillingComponent implements OnInit, AfterViewInit, OnCha
 
   private haveClosingAllowancesChanged(): boolean {
     const driver = this.toAllowanceNumber(this.totalDriverAllowanceDays);
-    const night = this.toAllowanceNumber(this.totalNights);
-    return (
-      driver !== this.toAllowanceNumber(this.loadedDriverAllowanceDays)
-      || night !== this.toAllowanceNumber(this.loadedNights)
-    );
+    return driver !== this.toAllowanceNumber(this.loadedDriverAllowanceDays);
   }
 
   private saveClosingAllowancesIfChanged(onComplete?: () => void): void {
@@ -690,7 +683,6 @@ export class DutySlipForBillingComponent implements OnInit, AfterViewInit, OnCha
 
     this.clossingOneService.updateClosingAllowances(this.DutySlipID, {
       totalDriverAllowanceDays: this.toAllowanceNumber(this.totalDriverAllowanceDays),
-      totalNights: this.toAllowanceNumber(this.totalNights),
     }).subscribe(
       (response) => {
         this.applyClosingAllowanceValues(response);
@@ -700,7 +692,7 @@ export class DutySlipForBillingComponent implements OnInit, AfterViewInit, OnCha
         this.showSpinner = false;
         this.showNotification(
           'snackbar-danger',
-          this.extractApiErrorMessage(error, 'Failed to save driver/night allowance.'),
+          this.extractApiErrorMessage(error, 'Failed to save driver allowance.'),
           'bottom',
           'center'
         );
@@ -2707,7 +2699,6 @@ public resetVerificationForEcoStateChange(): void {
       }
       this.clossingOneService.updateClosingAllowances(this.DutySlipID, {
         totalDriverAllowanceDays: this.toAllowanceNumber(this.totalDriverAllowanceDays),
-        totalNights: this.toAllowanceNumber(this.totalNights),
       }).subscribe(
         (response) => {
           this.applyClosingAllowanceValues(response);
@@ -2716,7 +2707,7 @@ public resetVerificationForEcoStateChange(): void {
         (error) => {
           this.showNotification(
             'snackbar-danger',
-            this.extractApiErrorMessage(error, 'Failed to save driver/night allowance.'),
+            this.extractApiErrorMessage(error, 'Failed to save driver allowance.'),
             'bottom',
             'center'
           );
