@@ -1594,6 +1594,19 @@ export const ROUTES: RouteInfo[] = [
         submenu: [],
         isAccess: false
       },
+      {
+        path: 'dynamicsTesting',
+        title: 'Dynamics Testing',
+        pageKey: 'dynamicsTesting',
+        moduleName: 'dynamicsTesting',
+        alternateAccessPageKeys: ['dynamicsTesting', 'Dynamics Testing'],
+        icon: 'fas fa-vial',
+        class: '',
+        groupTitle: false,
+        submenu: [],
+        isAccess: false,
+        alwaysAccessible: true
+      },
 
       {
         path: 'driverCarChangesMIS',

@@ -1,0 +1,183 @@
+<!-- @ts-nocheck -->
+<section class="content dt-page">
+  <div class="container-fluid">
+    <div class="block-header">
+      <div class="row">
+        <div class="col-12">
+          <ul>
+            <li class="breadcrumb-item">
+              <a routerLink="/dashboard/main"><i class="fas fa-home"></i> Home</a> |
+              <a href="#" (click)="$event.preventDefault()">Admin</a> |
+              <a href="#" (click)="$event.preventDefault()">Dynamics Testing</a>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="row">
+      <div class="col-12">
+        <div class="dt-hero">
+          <div class="dt-hero-content">
+            <div class="dt-hero-icon">
+              <i class="fas fa-plug"></i>
+            </div>
+            <div>
+              <h2>Dynamics API Testing</h2>
+              <p>Send invoice data to Business Central or patch e-invoice fields for an existing invoice record.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="row">
+      <div class="col-12">
+        <div class="card dt-card">
+          <div class="body">
+            <div class="dt-input-panel">
+              <label class="dt-input-label">RentNet Invoice ID</label>
+              <mat-form-field appearance="outline" class="dt-invoice-field">
+                <mat-label>Enter RentNet Invoice ID</mat-label>
+                <input
+                  matInput
+                  type="number"
+                  [(ngModel)]="invoiceId"
+                  placeholder="e.g. 12345"
+                  (keyup.enter)="createInvoice()"
+                />
+              </mat-form-field>
+              <p class="dt-input-hint">
+                Both APIs accept only RentNet <strong>InvoiceID</strong>. For E-Invoice update, the backend resolves
+                <strong>InvoiceNumberWithPrefix</strong> and uses it as the Dynamics PATCH key.
+              </p>
+            </div>
+
+            <div class="dt-actions-grid">
+              <div class="dt-action-card dt-action-card--post">
+                <div class="dt-action-card__badge">POST</div>
+                <div class="dt-action-card__icon">
+                  <i class="fas fa-file-invoice"></i>
+                </div>
+                <h3>Create Invoice</h3>
+                <p>Send full invoice header and line items to Dynamics via <code>SendInvoiceToDynamicsAPI</code>.</p>
+                <button
+                  mat-raised-button
+                  color="primary"
+                  class="dt-action-btn"
+                  [disabled]="busy"
+                  (click)="createInvoice()">
+                  <i class="fas fa-paper-plane"></i>
+                  Send Full Invoice
+                </button>
+              </div>
+
+              <div class="dt-action-card dt-action-card--patch">
+                <div class="dt-action-card__badge">PATCH</div>
+                <div class="dt-action-card__icon">
+                  <i class="fas fa-receipt"></i>
+                </div>
+                <h3>Update E-Invoice</h3>
+                <p>Send RentNet InvoiceID; backend looks up <code>InvoiceNumberWithPrefix</code> and PATCHes Dynamics using that invoice number.</p>
+                <button
+                  mat-raised-button
+                  class="dt-action-btn dt-action-btn--accent"
+                  [disabled]="busy"
+                  (click)="sendEInvoice()">
+                  <i class="fas fa-sync-alt"></i>
+                  Send E-Invoice Update
+                </button>
+              </div>
+            </div>
+
+            <div class="dt-loading" *ngIf="busy">
+              <mat-progress-spinner
+                mode="indeterminate"
+                diameter="36"
+                strokeWidth="3">
+              </mat-progress-spinner>
+              <span>
+                {{ activeAction === 'einvoice' ? 'Patching e-invoice data to Dynamics...' : 'Sending invoice to Dynamics...' }}
+              </span>
+            </div>
+
+            <mat-card class="dt-response-panel" *ngIf="hasResponse">
+              <div class="dt-response-header">
+                <div>
+                  <mat-card-title>{{ responseTitle }}</mat-card-title>
+                  <p class="dt-response-subtitle">
+                    {{ activeAction === 'einvoice' ? 'PATCH RentNetSalesDataHeaders' : 'POST RentNetSalesDataHeaders' }}
+                  </p>
+                </div>
+                <span
+                  class="dt-result-chip"
+                  [ngClass]="dynamicsIsSuccess ? 'dt-result-chip--success' : 'dt-result-chip--error'">
+                  {{ dynamicsIsSuccess ? (responseMessage.includes('already exists') || responseMessage.includes('skipped') ? 'Already Exists' : 'Success') : 'Failed' }}
+                </span>
+              </div>
+
+              <mat-card-content>
+                <div class="dt-metrics">
+                  <div class="dt-metric" *ngIf="customerBillingType">
+                    <span class="dt-metric__label">Customer Type</span>
+                    <span
+                      class="dt-billing-badge"
+                      [ngClass]="customerBillingType === 'B2B' ? 'dt-billing-badge--b2b' : 'dt-billing-badge--b2c'">
+                      {{ customerBillingType }}
+                    </span>
+                  </div>
+                  <div class="dt-metric" *ngIf="resolvedInvoiceNumber">
+                    <span class="dt-metric__label">Dynamics Invoice No</span>
+                    <span class="dt-metric__value">{{ resolvedInvoiceNumber }}</span>
+                  </div>
+                  <div class="dt-metric">
+                    <span class="dt-metric__label">RentNet API</span>
+                    <span class="dt-metric__value">{{ apiStatusCode ?? '—' }}</span>
+                  </div>
+                  <div class="dt-metric" *ngIf="dynamicsStatusCode !== null">
+                    <span class="dt-metric__label">Dynamics API</span>
+                    <span
+                      class="dt-metric__value"
+                      [ngClass]="dynamicsIsSuccess ? 'dt-success' : 'dt-error'">
+                      {{ dynamicsStatusCode }}
+                      <small *ngIf="dynamicsStatusCodeName">({{ dynamicsStatusCodeName }})</small>
+                    </span>
+                  </div>
+                </div>
+
+                <div class="dt-history-grid" *ngIf="dynamicsHistory">
+                  <div class="dt-history-item">
+                    <span class="dt-history-label">Invoice Created in Dynamics</span>
+                    <span
+                      class="dt-history-value"
+                      [ngClass]="(dynamicsHistory.invoicePreviouslyCreatedInDynamics ?? dynamicsHistory.InvoicePreviouslyCreatedInDynamics) ? 'dt-success' : 'dt-muted'">
+                      {{ (dynamicsHistory.invoicePreviouslyCreatedInDynamics ?? dynamicsHistory.InvoicePreviouslyCreatedInDynamics) ? 'Yes' : 'No' }}
+                    </span>
+                  </div>
+                  <div class="dt-history-item">
+                    <span class="dt-history-label">E-Invoice Updated in Dynamics</span>
+                    <span
+                      class="dt-history-value"
+                      [ngClass]="(dynamicsHistory.eInvoicePreviouslyUpdatedInDynamics ?? dynamicsHistory.EInvoicePreviouslyUpdatedInDynamics) ? 'dt-success' : 'dt-muted'">
+                      {{ (dynamicsHistory.eInvoicePreviouslyUpdatedInDynamics ?? dynamicsHistory.EInvoicePreviouslyUpdatedInDynamics) ? 'Yes' : 'No' }}
+                    </span>
+                  </div>
+                </div>
+
+                <div class="dt-message-box" *ngIf="responseMessage">
+                  <i class="fas fa-info-circle"></i>
+                  <span>{{ responseMessage }}</span>
+                </div>
+
+                <div class="dt-response-body-wrap" *ngIf="responseBody">
+                  <div class="dt-response-body-title">Response JSON</div>
+                  <pre class="dt-response-body">{{ responseBody }}</pre>
+                </div>
+              </mat-card-content>
+            </mat-card>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>

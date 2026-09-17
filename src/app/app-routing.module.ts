@@ -173,6 +173,14 @@ const routes: Routes = [
             (m) => m.DynamicsMis20Module
           )
       },
+      {
+        path: 'dynamicsTesting',
+        loadChildren: () =>
+          import('./dynamicsTesting/dynamicsTesting.module').then(
+            (m) => m.DynamicsTestingModule
+          ),
+        data: { skipRolePageGuard: true }
+      },
 
       {
         path: 'dutyState',
