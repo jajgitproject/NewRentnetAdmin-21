@@ -165,6 +165,7 @@ export class FormDialogComponent {
       this.dialogTitle = 'Adhoc Car And Driver';
       this.advanceTable = new AdhocCarAndDriver({});
       this.advanceTable.activationStatus = true;
+      this.advanceTable.isVendorExisting = 'Existing';
       this.advanceTable.driverOfficialIdentityNumber = 'N/A';
       this.advanceTable.aadharAuthenticationToken = 'N/A';
       this.locationID = data.reservationInfo.transferedLocationID;
@@ -310,11 +311,44 @@ export class FormDialogComponent {
     this._generalService.GetAllSuppliers().subscribe(
       data => {
         this.SupplierList = data;
+        this.advanceTableForm.controls['supplierName'].setValidators([
+          Validators.required,
+          this.supplierTypeValidator(this.SupplierList)
+        ]);
+        this.advanceTableForm.controls['supplierID'].setValidators([
+          Validators.required,
+          Validators.min(1)
+        ]);
+        this.advanceTableForm.controls['supplierName'].updateValueAndValidity();
+        this.advanceTableForm.controls['supplierID'].updateValueAndValidity();
         this.filteredSupplierOptions = this.advanceTableForm.controls['supplierName'].valueChanges.pipe(
           startWith(""),
           map(value => this._filterSupplier(value || ''))
         );
+        this.advanceTableForm.controls['supplierName'].valueChanges.subscribe(value => {
+          const matchedSupplier = this.SupplierList.find(
+            supplier => supplier.supplierName?.toLowerCase() === value?.toLowerCase()
+          );
+          if (!matchedSupplier) {
+            this.supplierID = null;
+            this.advanceTableForm.patchValue({ supplierID: null }, { emitEvent: false });
+            this.advanceTableForm.controls['supplierID'].updateValueAndValidity({ emitEvent: false });
+          }
+        });
       });
+  }
+
+  supplierTypeValidator(SupplierList: any[]): ValidatorFn {
+    return (control: AbstractControl): ValidationErrors | null => {
+      const value = control.value;
+      if (!value) {
+        return null;
+      }
+      const match = (SupplierList || []).some(
+        supplier => supplier.supplierName?.toLowerCase() === value?.toLowerCase()
+      );
+      return match ? null : { supplierNameInvalid: true };
+    };
   }
 
   private _filterSupplier(value: string): any {
@@ -364,14 +398,68 @@ export class FormDialogComponent {
   //       });
   //   }
   InitDriver() {
+    if (!this.supplierID) {
+      this.DriverList = [];
+      this.updateDriverValidators();
+      return;
+    }
     this._generalService.GetDriverDropDown(this.supplierID).subscribe(
       data => {
         this.DriverList = data;
+        this.updateDriverValidators();
         this.filteredDriverOptions = this.advanceTableForm.controls['driverName'].valueChanges.pipe(
           startWith(""),
           map(value => this._filterDriver(value || ''))
         );
+        this.advanceTableForm.controls['driverName'].valueChanges.subscribe(value => {
+          const matchedDriver = (this.DriverList || []).find(
+            driver => driver.driverName?.toLowerCase() === value?.toLowerCase()
+          );
+          if (!matchedDriver) {
+            this.driverID = null;
+            this.advanceTableForm.patchValue({ driverID: null }, { emitEvent: false });
+            this.advanceTableForm.controls['driverID'].updateValueAndValidity({ emitEvent: false });
+          }
+        });
       });
+  }
+
+  driverTypeValidator(DriverList: any[]): ValidatorFn {
+    return (control: AbstractControl): ValidationErrors | null => {
+      const value = control.value?.trim();
+      if (!value) {
+        return null;
+      }
+      const match = (DriverList || []).some(
+        driver => driver.driverName?.toLowerCase() === value?.toLowerCase()
+      );
+      return match ? null : { driverTypeInvalid: true };
+    };
+  }
+
+  updateDriverValidators(): void {
+    const isExisting = this.advanceTableForm.value?.isDriverExisting === 'Existing';
+    const isNew = this.advanceTableForm.value?.isDriverExisting === 'New';
+
+    if (isExisting) {
+      this.advanceTableForm.controls['driverName'].setValidators([
+        Validators.required,
+        this.driverTypeValidator(this.DriverList || [])
+      ]);
+      this.advanceTableForm.controls['driverID'].setValidators([
+        Validators.required,
+        Validators.min(1)
+      ]);
+    } else if (isNew) {
+      this.advanceTableForm.controls['driverName'].setValidators([Validators.required]);
+      this.advanceTableForm.controls['driverID'].clearValidators();
+    } else {
+      this.advanceTableForm.controls['driverName'].clearValidators();
+      this.advanceTableForm.controls['driverID'].clearValidators();
+    }
+
+    this.advanceTableForm.controls['driverName'].updateValueAndValidity({ emitEvent: false });
+    this.advanceTableForm.controls['driverID'].updateValueAndValidity({ emitEvent: false });
   }
 
   private _filterDriver(value: string): any {
@@ -724,15 +812,70 @@ export class FormDialogComponent {
   );
 }
   initRegistrationNumber() {
+    if (!this.supplierID) {
+      this.RegistrationNumberList = [];
+      this.updateInventoryValidators();
+      return;
+    }
     this._generalService.GetRegistrationNumberDropDown(this.supplierID).subscribe(
       data => {
         this.RegistrationNumberList = data;
+        this.updateInventoryValidators();
         this.filteredRegistrationNumberOptions = this.advanceTableForm.controls['registrationNumber'].valueChanges.pipe(
           startWith(''),
           map(value => this._filterRegistrationNumber(value || ''))
         );
+        this.advanceTableForm.controls['registrationNumber'].valueChanges.subscribe(value => {
+          const matchedRegistration = (this.RegistrationNumberList || []).find(
+            item => item.vehicle?.toLowerCase() === value?.toLowerCase()
+          );
+          if (!matchedRegistration) {
+            this.inventoryID = null;
+            this.registrationNumber = null;
+            this.advanceTableForm.patchValue({ inventoryID: null }, { emitEvent: false });
+            this.advanceTableForm.controls['inventoryID'].updateValueAndValidity({ emitEvent: false });
+          }
+        });
       }
     );
+  }
+
+  registrationNumberTypeValidator(RegistrationNumberList: any[]): ValidatorFn {
+    return (control: AbstractControl): ValidationErrors | null => {
+      const value = control.value?.trim();
+      if (!value) {
+        return null;
+      }
+      const match = (RegistrationNumberList || []).some(
+        item => item.vehicle?.toLowerCase() === value?.toLowerCase()
+      );
+      return match ? null : { registrationTypeInvalid: true };
+    };
+  }
+
+  updateInventoryValidators(): void {
+    const isExisting = this.advanceTableForm.value?.isCarExisting === 'Existing';
+    const isNew = this.advanceTableForm.value?.isCarExisting === 'New';
+
+    if (isExisting) {
+      this.advanceTableForm.controls['registrationNumber'].setValidators([
+        Validators.required,
+        this.registrationNumberTypeValidator(this.RegistrationNumberList || [])
+      ]);
+      this.advanceTableForm.controls['inventoryID'].setValidators([
+        Validators.required,
+        Validators.min(1)
+      ]);
+    } else if (isNew) {
+      this.advanceTableForm.controls['registrationNumber'].setValidators([Validators.required]);
+      this.advanceTableForm.controls['inventoryID'].clearValidators();
+    } else {
+      this.advanceTableForm.controls['registrationNumber'].clearValidators();
+      this.advanceTableForm.controls['inventoryID'].clearValidators();
+    }
+
+    this.advanceTableForm.controls['registrationNumber'].updateValueAndValidity({ emitEvent: false });
+    this.advanceTableForm.controls['inventoryID'].updateValueAndValidity({ emitEvent: false });
   }
 
   private _filterRegistrationNumber(value: string): any {
@@ -856,8 +999,8 @@ export class FormDialogComponent {
         driverPhone: [this.advanceTable?.driverPhone],
         supplierPhone: [this.advanceTable?.supplierPhone],
         ownedSupplier: [this.advanceTable?.ownedSupplier],
-        supplierID: [this.advanceTable?.supplierID],
-        supplierName: [this.advanceTable?.supplierName],
+        supplierID: [this.advanceTable?.supplierID, [Validators.required, Validators.min(1)]],
+        supplierName: [this.advanceTable?.supplierName, Validators.required],
         rtoStateID: [this.advanceTable?.rtoStateID],
         rtoState: [this.advanceTable?.rtoState],
         activationStatus: [this.advanceTable?.activationStatus],
@@ -873,7 +1016,7 @@ export class FormDialogComponent {
         dateOfJoining: [this.advanceTable?.dateOfJoining],
         drivingSinceDate: [this.advanceTable?.drivingSinceDate],
         companyName: [this.advanceTable?.companyName],
-        isVendorExisting: [this.advanceTable?.isVendorExisting],
+        isVendorExisting: [this.advanceTable?.isVendorExisting || 'Existing'],
         isDriverExisting: [this.advanceTable?.isDriverExisting],
         isCarExisting: [this.advanceTable?.isCarExisting]
 
@@ -907,7 +1050,8 @@ export class FormDialogComponent {
       (
         (data: any) => {
           this.advanceTable = data;
-          this.advanceTableForm.patchValue({ inventoryID: this.advanceTable.inventoryID });
+          this.inventoryID = this.advanceTable.inventoryID;
+          this.advanceTableForm.patchValue({ inventoryID: this.inventoryID });
         },
         (error: HttpErrorResponse) => { this.advanceTable = null; }
       );
@@ -985,11 +1129,20 @@ export class FormDialogComponent {
 
   //------------------post---------------------
   public Post(): void {
+    if (!this.isValidSupplierSelected()) {
+      return;
+    }
+    if (!this.isValidExistingDriverSelected()) {
+      return;
+    }
+    if (!this.isValidExistingRegistrationSelected()) {
+      return;
+    }
     this.forceUppercase('supplierName');
     this.forceUppercase('driverName');
     this.forceUppercase('driverFatherName');
     this.forceUppercase('registrationNumber');
-    //this.advanceTableForm.patchValue({supplierID:this.supplierID});
+    this.advanceTableForm.patchValue({ supplierID: this.supplierID });
     const phone1 = this.advanceTableForm.get('countryCodes').value;
     const phone2 = this.advanceTableForm.get('driverPhone').value;
     const countryCodes = phone1.split('+')[1];
@@ -1003,7 +1156,12 @@ export class FormDialogComponent {
     // const mobile2 = phone4 ? `${countryCode}-${phone4}` : null;
 
     if (this.advanceTableForm.value?.isDriverExisting === 'New') {
-      this.advanceTableForm.patchValue({ ownedSupplier: "Supplier" });
+      this.advanceTableForm.patchValue({ ownedSupplier: "Supplier", driverID: null });
+    } else if (this.advanceTableForm.value?.isDriverExisting === 'Existing') {
+      this.advanceTableForm.patchValue({ driverID: this.driverID });
+    }
+    if (this.advanceTableForm.value?.isCarExisting === 'New') {
+      this.advanceTableForm.patchValue({ inventoryID: null });
     }
     this.advanceTableForm.patchValue({ supplierPhone: phone4 });
     this.advanceTableForm.patchValue({ reservationID: this.reservationID });
@@ -1027,9 +1185,10 @@ export class FormDialogComponent {
         error => {
           const mobile = this.advanceTableForm?.get('driverPhone').value.split('-')[1];
           this.advanceTableForm?.patchValue({ driverPhone: mobile });
+          const errorMessage = error?.error || 'Operation Failed...!!!';
           this.showNotification(
             'snackbar-danger',
-            'Operation Failed...!!!',
+            errorMessage,
             'bottom',
             'center'
           );
@@ -1037,7 +1196,125 @@ export class FormDialogComponent {
         }
       )
   }
+
+  private isValidSupplierSelected(): boolean {
+    const supplierId = this.advanceTableForm.get('supplierID')?.value;
+    const supplierName = this.advanceTableForm.get('supplierName')?.value;
+    const matchedSupplier = (this.SupplierList || []).find(
+      supplier => supplier.supplierID === supplierId
+        && supplier.supplierName?.toLowerCase() === supplierName?.toLowerCase()
+    );
+
+    if (!supplierId || supplierId <= 0 || !matchedSupplier) {
+      this.advanceTableForm.controls['supplierName'].markAsTouched();
+      this.advanceTableForm.controls['supplierID'].markAsTouched();
+      this.advanceTableForm.controls['supplierName'].setErrors({ supplierNameInvalid: true });
+      this.advanceTableForm.controls['supplierID'].setErrors({ required: true });
+      this.showNotification(
+        'snackbar-danger',
+        'Please select a valid Supplier from the Supplier Master.',
+        'bottom',
+        'center'
+      );
+      return false;
+    }
+
+    return true;
+  }
+
+  private isValidExistingDriverSelected(): boolean {
+    if (this.advanceTableForm.value?.isDriverExisting !== 'Existing') {
+      return true;
+    }
+
+    const driverId = this.advanceTableForm.get('driverID')?.value;
+    const driverName = this.advanceTableForm.get('driverName')?.value?.trim();
+
+    if (!driverName) {
+      this.advanceTableForm.controls['driverName'].markAsTouched();
+      this.advanceTableForm.controls['driverName'].setErrors({ required: true });
+      this.showNotification(
+        'snackbar-danger',
+        'Please select a driver name.',
+        'bottom',
+        'center'
+      );
+      return false;
+    }
+
+    const matchedDriver = (this.DriverList || []).find(
+      driver => driver.driverID === driverId
+        && driver.driverName?.toLowerCase() === driverName?.toLowerCase()
+    );
+
+    if (!driverId || driverId <= 0 || !matchedDriver) {
+      this.advanceTableForm.controls['driverName'].markAsTouched();
+      this.advanceTableForm.controls['driverID'].markAsTouched();
+      this.advanceTableForm.controls['driverName'].setErrors({ driverTypeInvalid: true });
+      this.advanceTableForm.controls['driverID'].setErrors({ required: true });
+      this.showNotification(
+        'snackbar-danger',
+        'Please select a existing driver.',
+        'bottom',
+        'center'
+      );
+      return false;
+    }
+
+    return true;
+  }
+
+  private isValidExistingRegistrationSelected(): boolean {
+    if (this.advanceTableForm.value?.isCarExisting !== 'Existing') {
+      return true;
+    }
+
+    const registrationNo = this.advanceTableForm.get('registrationNumber')?.value?.trim();
+    const inventoryId = this.advanceTableForm.get('inventoryID')?.value;
+
+    if (!registrationNo) {
+      this.advanceTableForm.controls['registrationNumber'].markAsTouched();
+      this.advanceTableForm.controls['registrationNumber'].setErrors({ required: true });
+      this.showNotification(
+        'snackbar-danger',
+        'Please select registration no.',
+        'bottom',
+        'center'
+      );
+      return false;
+    }
+
+    const matchedRegistration = (this.RegistrationNumberList || []).find(
+      item => item.vehicle?.toLowerCase() === registrationNo?.toLowerCase()
+    );
+
+    if (!inventoryId || inventoryId <= 0 || !matchedRegistration) {
+      this.advanceTableForm.controls['registrationNumber'].markAsTouched();
+      this.advanceTableForm.controls['inventoryID'].markAsTouched();
+      this.advanceTableForm.controls['registrationNumber'].setErrors({ registrationTypeInvalid: true });
+      this.advanceTableForm.controls['inventoryID'].setErrors({ required: true });
+      this.showNotification(
+        'snackbar-danger',
+        'Please select existing registration no.',
+        'bottom',
+        'center'
+      );
+      return false;
+    }
+
+    return true;
+  }
+
   public confirmAdd(): void {
+    if (!this.isValidSupplierSelected()) {
+      return;
+    }
+    if (!this.isValidExistingDriverSelected()) {
+      return;
+    }
+    if (!this.isValidExistingRegistrationSelected()) {
+      return;
+    }
     if (this.action == "edit") {
       // this.Put();
     }
@@ -1155,46 +1432,55 @@ export class FormDialogComponent {
 
   getDriverExisting(event: any) {
     this.copydetails = true;
-    this.copyCheckBox.checked = false;
-    if (event === 'Existing') {
-
-      this.advanceTableForm.controls['driverName'].setValue('');
-      this.advanceTableForm.controls['driverEmail'].setValue('');
-      this.advanceTableForm.controls['driverPhone'].setValue('');
-      this.advanceTableForm.controls['driverFatherName'].setValue('');
-      this.advanceTableForm.controls['driverOfficialIdentityNumber'].setValue('');
-      this.advanceTableForm.controls['rtoState'].setValue('');
+    if (this.copyCheckBox) {
+      this.copyCheckBox.checked = false;
     }
-    else {
-      this.advanceTableForm.controls['driverName'].setValue('');
-      this.advanceTableForm.controls['driverEmail'].setValue('');
-      this.advanceTableForm.controls['driverPhone'].setValue('');
-      this.advanceTableForm.controls['driverFatherName'].setValue('');
-      this.advanceTableForm.controls['driverOfficialIdentityNumber'].setValue('');
-      this.advanceTableForm.controls['rtoState'].setValue('');
+    this.driverID = null;
+    this.advanceTableForm.controls['driverName'].setValue('');
+    this.advanceTableForm.controls['driverEmail'].setValue('');
+    this.advanceTableForm.controls['driverPhone'].setValue('');
+    this.advanceTableForm.controls['driverFatherName'].setValue('');
+    this.advanceTableForm.controls['driverOfficialIdentityNumber'].setValue('');
+    this.advanceTableForm.controls['rtoState'].setValue('');
+    this.advanceTableForm.patchValue({ driverID: null, companyID: null, companyName: '', rtoStateID: null });
+
+    if (event === 'Existing') {
+      if (this.supplierID) {
+        this.InitDriver();
+      } else {
+        this.DriverList = [];
+        this.updateDriverValidators();
+      }
+    } else {
+      this.updateDriverValidators();
     }
     this.checkAllExisting();
 
   }
 
   getCarExisting(event: any) {
-    if (event === 'Existing') {
-      this.advanceTableForm.controls['registrationNumber'].setValue('');
-      this.advanceTableForm.controls['vehicleCategory'].setValue('');
-      this.advanceTableForm.controls['vehicle'].setValue('');
-      this.advanceTableForm.controls['locationName'].setValue('');
+    this.inventoryID = null;
+    this.registrationNumber = null;
+    this.advanceTableForm.controls['registrationNumber'].setValue('');
+    this.advanceTableForm.controls['vehicleCategory'].setValue('');
+    this.advanceTableForm.controls['vehicle'].setValue('');
+    this.advanceTableForm.patchValue({ inventoryID: null });
 
+    if (event === 'Existing') {
+      this.advanceTableForm.controls['locationName'].setValue('');
+      if (this.supplierID) {
+        this.initRegistrationNumber();
+      } else {
+        this.RegistrationNumberList = [];
+        this.updateInventoryValidators();
+      }
     }
     else {
-      this.advanceTableForm.controls['registrationNumber'].setValue('');
-      this.advanceTableForm.controls['vehicleCategory'].setValue('');
-      this.advanceTableForm.controls['vehicle'].setValue('');
       this.advanceTableForm.controls['locationName'].setValue(this.data.reservationInfo.transferedLocation);
       this.InitLocation();
       //this.LocationID = this.data.reservationInfo.transferedLocationID;
       this.advanceTableForm.patchValue({ locationID: this.data.reservationInfo.transferedLocationID });
-
-
+      this.updateInventoryValidators();
     }
     this.checkAllExisting();
   }
