@@ -61,6 +61,7 @@ export class Customer {
       isAggregator:boolean;
       aggregatorCustomerID:number;
       aggregatorCustomerName:string;
+      showBillingInApp:boolean;
   constructor(customer) {
     {
        this.customerID = customer.customerID || -1;
@@ -115,6 +116,7 @@ export class Customer {
        this.isAggregator = customer.isAggregator ?? false;
        this.aggregatorCustomerID = customer.aggregatorCustomerID || null;
        this.aggregatorCustomerName = customer.aggregatorCustomerName || '';
+       this.showBillingInApp = customer.showBillingInApp ?? false;
     }
   }
   
