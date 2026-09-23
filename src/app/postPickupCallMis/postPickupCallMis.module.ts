@@ -12,6 +12,9 @@ import { MatCardModule } from '@angular/material/card';
 import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatExpansionModule } from '@angular/material/expansion';
 import { MatSelectModule } from '@angular/material/select';
+import { MatTooltipModule } from '@angular/material/tooltip';
+import { MatProgressBarModule } from '@angular/material/progress-bar';
+import { StoredMisExportsComponent } from '../general/stored-mis-exports.component';
 import { PostPickupCallMisService } from './postPickupCallMis.service';
 import { PostPickupCallMisRoutingModule } from './postPickupCallMis-routing.module';
 import { MAT_DATE_LOCALE, MatNativeDateModule } from '@angular/material/core';
@@ -31,7 +34,10 @@ import { MAT_DATE_LOCALE, MatNativeDateModule } from '@angular/material/core';
     MatDatepickerModule,
     MatNativeDateModule,
     MatExpansionModule,
-    MatSelectModule
+    MatSelectModule,
+    MatTooltipModule,
+    MatProgressBarModule,
+    StoredMisExportsComponent
   ],
   providers: [
     PostPickupCallMisService,
