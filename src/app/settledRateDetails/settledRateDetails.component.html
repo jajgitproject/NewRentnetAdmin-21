@@ -206,5 +206,35 @@
         <br/>
         <span>{{data.nextDayCharging}}</span>
     </div>
+
+    <div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 mb-2">
+        <span>
+            <b>
+                FGR Amount
+            </b>                   
+        </span>
+        <br/>
+        <span>{{data.fgrAmount ?? '-'}}</span>
+    </div>
+
+    <div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 mb-2">
+        <span>
+            <b>
+                FGR Km
+            </b>                   
+        </span>
+        <br/>
+        <span>{{data.fgrKm ?? '-'}}</span>
+    </div>
+
+    <div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 mb-2">
+        <span>
+            <b>
+                Fuel Surcharge
+            </b>                   
+        </span>
+        <br/>
+        <span>{{data.fuelSurcharge === true ? 'Yes' : 'No'}}</span>
+    </div>
 </div>
 </div>
