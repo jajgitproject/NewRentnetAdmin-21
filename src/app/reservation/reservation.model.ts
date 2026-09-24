@@ -183,6 +183,7 @@ export class SavedAddress {
   landamrk:string;
   isFavourite:boolean;
   addressStringForMap:string;
+  latLong:string;
 
  constructor(savedAddress) {
    {
@@ -193,6 +194,7 @@ export class SavedAddress {
       this.landamrk = savedAddress.landamrk || '';
       this.isFavourite = savedAddress.isFavourite || '';
       this.addressStringForMap= savedAddress.addressStringForMap||'';
+      this.latLong = savedAddress.latLong || '';
    }
  }
 

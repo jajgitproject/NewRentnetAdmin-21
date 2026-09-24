@@ -3205,6 +3205,36 @@ private isValidLatLong(value: unknown): boolean {
     && lng >= -180 && lng <= 180;
 }
 
+private normalizeSavedAddressLatLong(raw: unknown): string | null {
+  const text = String(raw ?? '').trim();
+  if (!text) {
+    return null;
+  }
+
+  if (text.includes(',') && !text.toUpperCase().includes('POINT')) {
+    const parts = text.split(',').map((part) => part.trim());
+    if (parts.length >= 2) {
+      const normalized = `${parts[0]},${parts[1]}`;
+      if (this.isValidLatLong(normalized)) {
+        return normalized;
+      }
+    }
+  }
+
+  const cleaned = text.replace(/[()]/g, '').trim();
+  const pointParts = cleaned.split(/\s+/).filter(Boolean);
+  if (pointParts.length >= 3 && pointParts[0].toUpperCase() === 'POINT') {
+    const lng = pointParts[1];
+    const lat = pointParts[2];
+    const normalized = `${lat},${lng}`;
+    if (this.isValidLatLong(normalized)) {
+      return normalized;
+    }
+  }
+
+  return null;
+}
+
 private isGstForBillingUnset(value: unknown): boolean {
   const text = String(value ?? '').trim();
   return text === '' || text.toLowerCase() === '--select--';
@@ -4155,7 +4185,10 @@ public validateCustomerSpecificFields(): boolean {
       if(this.passengerID || this.advanceTableForm.value.primaryPassengerID){
         const dialogRef = this.dialog.open(SavedAddressComponent, 
           {
-            width:'60%',
+            width: '560px',
+            maxWidth: '95vw',
+            panelClass: 'saved-address-dialog-panel',
+            autoFocus: false,
             data: 
               {
                 // advanceTable: this.advanceTable,
@@ -4168,14 +4201,7 @@ public validateCustomerSpecificFields(): boolean {
             // received data from dialog-component
             if(res!==undefined)
             {
-            this.advanceTableForm.patchValue({dropOffAddress:res.data.addressStringForMap});
-            this.advanceTableForm.patchValue({dropOffAddressDetails:res.data.address});
-            this.advanceTableForm.patchValue({dropOffCity:res.data.city});
-            this.advanceTableForm.patchValue({dropOffCityID:res.data.cityID});
-            this.advanceTableForm.controls["dropOffSpotType"].setValue('');
-            this.advanceTableForm.controls["dropOffSpotTypeID"].setValue(0);
-            this.advanceTableForm.controls["dropOffSpotID"].setValue(0);
-            this.advanceTableForm.controls["dropOffSpot"].setValue('');
+            this.patchDropOffAddress(res);
             }
           })
         }
@@ -4185,7 +4211,10 @@ public validateCustomerSpecificFields(): boolean {
       if(this.passengerID){
         const dialogRef = this.dialog.open(SavedAddressComponent, 
           {
-            width:'60%',
+            width: '560px',
+            maxWidth: '95vw',
+            panelClass: 'saved-address-dialog-panel',
+            autoFocus: false,
             data: 
               {
                 // advanceTable: this.advanceTable,
@@ -4198,14 +4227,7 @@ public validateCustomerSpecificFields(): boolean {
             // received data from dialog-component
             if(res!==undefined)
             {
-            this.advanceTableForm.patchValue({dropOffAddress:res.data.addressStringForMap});
-            this.advanceTableForm.patchValue({dropOffAddressDetails:res.data.address});
-            this.advanceTableForm.patchValue({dropOffCity:res.data.city});
-            this.advanceTableForm.patchValue({dropOffCityID:res.data.cityID});
-            this.advanceTableForm.controls["dropOffSpotType"].setValue('');
-            this.advanceTableForm.controls["dropOffSpotTypeID"].setValue(0);
-            this.advanceTableForm.controls["dropOffSpotID"].setValue(0);
-            this.advanceTableForm.controls["dropOffSpot"].setValue('');
+            this.patchDropOffAddress(res);
             }
           })
         }
@@ -4219,7 +4241,10 @@ public validateCustomerSpecificFields(): boolean {
       if(this.passengerID || this.advanceTableForm.value.primaryPassengerID){
         const dialogRef = this.dialog.open(SavedAddressComponent, 
           {
-            width:'60%',
+            width: '560px',
+            maxWidth: '95vw',
+            panelClass: 'saved-address-dialog-panel',
+            autoFocus: false,
             data: 
               {
                 // advanceTable: this.advanceTable,
@@ -4246,7 +4271,7 @@ public validateCustomerSpecificFields(): boolean {
               cancelButtonText: 'No, cancel'
             }).then(result => {
               if (result.isConfirmed) {
-                this.advanceTableForm.patchValue({pickupAddress:res.data.addressStringForMap});
+                this.patchPickupAddress(res);
               }
             });
           } else {
@@ -4270,7 +4295,10 @@ public validateCustomerSpecificFields(): boolean {
       if(this.passengerID){
         const dialogRef = this.dialog.open(SavedAddressComponent, 
           {
-            width:'60%',
+            width: '560px',
+            maxWidth: '95vw',
+            panelClass: 'saved-address-dialog-panel',
+            autoFocus: false,
             data: 
               {
                 // advanceTable: this.advanceTable,
@@ -4296,7 +4324,7 @@ public validateCustomerSpecificFields(): boolean {
               cancelButtonText: 'No, cancel'
             }).then(result => {
               if (result.isConfirmed) {
-                this.advanceTableForm.patchValue({pickupAddress:res.data.addressStringForMap});
+                this.patchPickupAddress(res);
               }
             });
           } else {
@@ -4318,17 +4346,60 @@ public validateCustomerSpecificFields(): boolean {
     }
     
   }
+private buildSavedAddressDetails(data: any): string {
+  if (!data) {
+    return '';
+  }
+  const parts: string[] = [];
+  if (data.address) {
+    parts.push(data.address);
+  }
+  const landmark = data.landmark || data.landMark;
+  if (landmark) {
+    parts.push(landmark);
+  }
+  if (data.city) {
+    parts.push(data.city);
+  }
+  if (data.state) {
+    parts.push(data.state);
+  }
+  if (data.country) {
+    parts.push(data.country);
+  }
+  return parts.join(', ');
+}
+
 private patchPickupAddress(res: any) {
+  const data = res?.data;
+  const pickupAddressLatLong = this.normalizeSavedAddressLatLong(data?.latLong);
   this.advanceTableForm.patchValue({
-    pickupAddress: res.data.addressStringForMap,
-    pickupAddressDetails: res.data.address,
-    pickupCity: res.data.city,
-    pickupCityID: res.data.cityID
+    pickupAddress: data?.addressStringForMap,
+    pickupAddressDetails: this.buildSavedAddressDetails(data),
+    pickupCity: data?.city,
+    pickupCityID: data?.cityID,
+    pickupAddressLatLong: pickupAddressLatLong
   });
   this.advanceTableForm.controls['pickupSpotType'].setValue('');
   this.advanceTableForm.controls['pickupSpotTypeID'].setValue(0);
   this.advanceTableForm.controls['pickupSpotID'].setValue(0);
   this.advanceTableForm.controls['pickupSpot'].setValue('');
+}
+
+private patchDropOffAddress(res: any) {
+  const data = res?.data;
+  const dropOffAddressLatLong = this.normalizeSavedAddressLatLong(data?.latLong);
+  this.advanceTableForm.patchValue({
+    dropOffAddress: data?.addressStringForMap,
+    dropOffAddressDetails: this.buildSavedAddressDetails(data),
+    dropOffCity: data?.city,
+    dropOffCityID: data?.cityID,
+    dropOffAddressLatLong: dropOffAddressLatLong
+  });
+  this.advanceTableForm.controls['dropOffSpotType'].setValue('');
+  this.advanceTableForm.controls['dropOffSpotTypeID'].setValue(0);
+  this.advanceTableForm.controls['dropOffSpotID'].setValue(0);
+  this.advanceTableForm.controls['dropOffSpot'].setValue('');
 }
   onPickupDateChangeAndLocationTimeSet(event: any) 
   {
