@@ -91,6 +91,12 @@ import { DutyStateCustomerService } from '../dutyStateCustomer/dutyStateCustomer
 import { DutyNight } from '../dutyNight/dutyNight.model';
 import { DutyNightFormDialogComponent } from '../dutyNight/dialogs/form-dialog/form-dialog.component';
 import { DutyNightService } from '../dutyNight/dutyNight.service';
+import {
+  getDutyNightEntryBlockedMessage,
+  showDutyNightEntryBlockedDialog,
+} from '../dutyNight/duty-night-entry-guard.util';
+import { isDutyNightRecordActive, normalizeDutyNightRecords } from '../dutyNight/duty-night-status.util';
+import { isNightCountProvided, toNightCount } from '../shared/night-charges.util';
 import { SingleDutySingleBillForLocalService } from '../SingleDutySingleBillForLocal/SingleDutySingleBillForLocal.service';
 import { PackageRateDetailsForClosingService } from '../packageRateDetailsForClosing/packageRateDetailsForClosing.service';
 import { FormDialogComponent } from '../MOPDetailsShow/dialogs/mopDetails/mopDetails.component';
@@ -783,8 +789,31 @@ export class ClossingOneComponent implements OnInit, AfterViewInit, OnDestroy {
     const records = Array.isArray(this.advanceTableDutyNight)
       ? this.advanceTableDutyNight
       : [this.advanceTableDutyNight];
-    const active = records.find((record) => record?.activationStatus === true);
+    const active = records.find((record) => isDutyNightRecordActive(record));
     return active?.numberOnNights ?? null;
+  }
+
+  get dutyNightEntryBlockedMessage(): string | null {
+    const { verifyDuty, goodForBilling } = this.getDutyStateBillingFlags();
+    return getDutyNightEntryBlockedMessage(verifyDuty, goodForBilling);
+  }
+
+  get isDutyNightEntryBlocked(): boolean {
+    return this.dutyNightEntryBlockedMessage != null;
+  }
+
+  private guardDutyNightEntry(): boolean {
+    const message = this.dutyNightEntryBlockedMessage;
+    if (!message) {
+      return true;
+    }
+    showDutyNightEntryBlockedDialog(message);
+    return false;
+  }
+
+  getActiveDutyNightOverrideCount(): number | null {
+    const nights = this.activeDutyNightNumberOnNights;
+    return isNightCountProvided(nights) ? toNightCount(nights) : null;
   }
 
   private guardDutyStateEdit(): boolean {
@@ -927,47 +956,29 @@ export class ClossingOneComponent implements OnInit, AfterViewInit, OnDestroy {
 
   //======= Duty Night=======//
   openDutyNight() {
+    if (!this.guardDutyNightEntry()) {
+      return;
+    }
     if (this.isDutyNightEditBlocked) {
       this.showDutyNightEditBlockedMessage();
       return;
     }
-    this.dutyNightService.hasActiveDutyNight(this.DutySlipID).subscribe(
-        (response: any) => {
-          if (response?.hasActive) {
-            this.showNotification(
-              'snackbar-danger',
-              'An active Duty Night record already exists. Please delete it before adding a new record.',
-              'bottom',
-              'center'
-            );
-            return;
-          }
-
-          const dialogRef = this.dialog.open(DutyNightFormDialogComponent,
-            {
-              data:
-              {
-                dutySlipID: this.DutySlipID,
-                record: this.advanceTableDutyNight,
-                verifyDutyStatusAndCacellationStatus: this.verifyDutyStatusAndCacellationStatus,
-                isDutyNightEditBlocked: this.isDutyNightEditBlocked,
-                action: 'add'
-              }
-            });
-          dialogRef.afterClosed().subscribe((res: any) => {
-            this.loadDutyNightData();
-            window.location.reload();
-          });
-        },
-        () => {
-          this.showNotification(
-            'snackbar-danger',
-            'Unable to verify existing Duty Night records. Please try again.',
-            'bottom',
-            'center'
-          );
-        }
-      );
+    const dialogRef = this.dialog.open(DutyNightFormDialogComponent, {
+      data: {
+        dutySlipID: this.DutySlipID,
+        advanceTable: new DutyNight({}),
+        action: 'add',
+        verifyDutyStatusAndCacellationStatus: this.verifyDutyStatusAndCacellationStatus,
+        isDutyNightEditBlocked: this.isDutyNightEditBlocked,
+      },
+    });
+    dialogRef.afterClosed().subscribe((result) => {
+      if (result === true) {
+        this.loadDutyNightData(() => {
+          this.recalculateBillQuietly();
+        });
+      }
+    });
   }
 
   private showDutyNightEditBlockedMessage(): void {
@@ -983,18 +994,38 @@ export class ClossingOneComponent implements OnInit, AfterViewInit, OnDestroy {
     this.showNotification('snackbar-warning', message, 'bottom', 'center');
   }
 
-  loadDutyNightData() {
-    this.dutyNightService.getTableDataDutyNightClosing(this.DutySlipID).subscribe
-      (
-        data => {
-          if (data !== null) {
-            this.showHideDutyNight = true;
-          }
-          this.advanceTableDutyNight = data;
-          this.refreshClosingSectionViewDialogContext();
-        },
-        (error: HttpErrorResponse) => { this.advanceTableDutyNight = null; }
-      );
+  loadDutyNightData(afterLoad?: () => void): void {
+    if (!this.DutySlipID) {
+      this.advanceTableDutyNight = [];
+      this.showHideDutyNight = false;
+      this.refreshClosingSectionViewDialogContext();
+      this.cdr.detectChanges();
+      afterLoad?.();
+      return;
+    }
+    this.dutyNightService.getTableDataDutyNightClosing(this.DutySlipID).subscribe(
+      (data) => {
+        const records = normalizeDutyNightRecords(data);
+        this.showHideDutyNight = records.length > 0;
+        this.advanceTableDutyNight = records;
+        this.refreshClosingSectionViewDialogContext();
+        this.cdr.detectChanges();
+        afterLoad?.();
+      },
+      () => {
+        this.advanceTableDutyNight = [];
+        this.showHideDutyNight = false;
+        this.refreshClosingSectionViewDialogContext();
+        this.cdr.detectChanges();
+        afterLoad?.();
+      }
+    );
+  }
+
+  onDutyNightSectionChanged(): void {
+    this.loadDutyNightData(() => {
+      this.recalculateBillQuietly();
+    });
   }
 
   ///end Duty Night=======//
@@ -1860,6 +1891,8 @@ export class ClossingOneComponent implements OnInit, AfterViewInit, OnDestroy {
       verifyDuty: billingFlags.verifyDuty,
       goodForBilling: billingFlags.goodForBilling,
       isDutyNightEditBlocked: this.isDutyNightEditBlocked,
+      isDutyNightEntryBlocked: this.isDutyNightEntryBlocked,
+      dutyNightEntryBlockedMessage: this.dutyNightEntryBlockedMessage,
       invoiceGenerated: this.hasGeneratedInvoice(),
       from: this.from
     };
@@ -1894,7 +1927,7 @@ export class ClossingOneComponent implements OnInit, AfterViewInit, OnDestroy {
         this.loadDutyStateDataCustomer();
         break;
       case 'dutyNight':
-        this.loadDutyNightData();
+        this.onDutyNightSectionChanged();
         break;
       case 'dutySAC':
         this.DutySACLoadData();

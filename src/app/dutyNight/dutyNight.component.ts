@@ -1,5 +1,5 @@
 // @ts-nocheck
-import { Component, ElementRef, EventEmitter, Input, OnInit, Output, ViewChild } from '@angular/core';
+import { Component, ElementRef, EventEmitter, Input, OnChanges, OnInit, Output, SimpleChanges, ViewChild } from '@angular/core';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { MatDialog } from '@angular/material/dialog';
 import { MatPaginator } from '@angular/material/paginator';
@@ -9,10 +9,11 @@ import { Subscription } from 'rxjs';
 import { MAT_DATE_LOCALE } from '@angular/material/core';
 import { MatMenuTrigger } from '@angular/material/menu';
 import { GeneralService } from '../general/general.service';
-import { DutyNightFormDialogComponent } from './dialogs/form-dialog/form-dialog.component';
 import { DeleteDialogComponent } from './dialogs/delete/delete.component';
 import { DutyNight } from './dutyNight.model';
 import { DutyNightService } from './dutyNight.service';
+import { showDutyNightEntryBlockedDialog } from './duty-night-entry-guard.util';
+import { isDutyNightRecordActive, normalizeDutyNightRecords } from './duty-night-status.util';
 
 @Component({
   standalone: false,
@@ -21,11 +22,14 @@ import { DutyNightService } from './dutyNight.service';
   styleUrls: ['./dutyNight.component.sass'],
   providers: [{ provide: MAT_DATE_LOCALE, useValue: 'en-GB' }]
 })
-export class DutyNightComponent implements OnInit {
+export class DutyNightComponent implements OnInit, OnChanges {
   @Input() advanceTableDutyNight;
   @Input() dutySlipID;
   @Input() verifyDutyStatusAndCacellationStatus;
   @Input() isDutyNightEditBlocked = false;
+  @Input() embeddedInClosing = false;
+  @Input() isDutyNightEntryBlocked = false;
+  @Input() dutyNightEntryBlockedMessage: string | null = null;
   @Output() sectionDataChanged = new EventEmitter<void>();
 
   displayedColumns = [
@@ -46,6 +50,7 @@ export class DutyNightComponent implements OnInit {
   ];
 
   dutyNightID: any;
+  isDutyNightRecordActive = isDutyNightRecordActive;
 
   constructor(
     public httpClient: HttpClient,
@@ -62,68 +67,92 @@ export class DutyNightComponent implements OnInit {
   contextMenuPosition = { x: '0px', y: '0px' };
 
   ngOnInit() {
-    this.loadData();
+    if (this.embeddedInClosing) {
+      if (this.advanceTableDutyNight != null) {
+        this.advanceTableDutyNight = this.normalizeRecords(this.advanceTableDutyNight);
+      }
+      return;
+    }
     this.loadDataDutyNightClosing();
     this.SubscribeUpdateService();
   }
 
+  ngOnChanges(changes: SimpleChanges): void {
+    if (changes['advanceTableDutyNight'] && changes['advanceTableDutyNight'].currentValue != null) {
+      this.advanceTableDutyNight = this.normalizeRecords(changes['advanceTableDutyNight'].currentValue);
+    }
+  }
+
   refresh() {
-    this.loadData();
+    if (this.embeddedInClosing) {
+      this.sectionDataChanged.emit();
+      return;
+    }
+    this.loadDataDutyNightClosing();
     this.sectionDataChanged.emit();
   }
 
-  editCall(row) {
-    if (!row.activationStatus || this.isDutyNightEditBlocked) {
-      return;
-    }
-    this.dutyNightID = row.dutyNightID;
-    const dialogRef = this.dialog.open(DutyNightFormDialogComponent, {
-      data: {
-        advanceTable: row,
-        action: 'edit',
-        verifyDutyStatusAndCacellationStatus: this.verifyDutyStatusAndCacellationStatus,
-        isDutyNightEditBlocked: this.isDutyNightEditBlocked,
-        dutySlipID: this.dutySlipID
-      }
-    });
-    this.handleSectionDialogClosed(dialogRef);
-  }
-
   deleteItem(row) {
-    if (!row.activationStatus || this.isDutyNightEditBlocked) {
+    if (this.isDutyNightEntryBlocked) {
+      showDutyNightEntryBlockedDialog(this.dutyNightEntryBlockedMessage);
+      return;
+    }
+    if (!isDutyNightRecordActive(row) || this.isDutyNightEditBlocked) {
       return;
     }
     this.dutyNightID = row.dutyNightID;
-    const dialogRef = this.dialog.open(DeleteDialogComponent, {
-      data: row
-    });
-    this.handleSectionDialogClosed(dialogRef);
-  }
-
-  private handleSectionDialogClosed(dialogRef): void {
+    const dialogRef = this.dialog.open(DeleteDialogComponent, { data: row });
     dialogRef.afterClosed().subscribe((saved: any) => {
-      if (saved) {
+      if (saved === true) {
+        this.markDutyNightDeactivatedLocally(row.dutyNightID);
         this.refresh();
       }
     });
   }
 
-  public loadData() {
-    this.dutyNightService.getTableDataforClosing(this.dutySlipID).subscribe(
-      data => {
-        this.advanceTableDutyNight = data;
-      },
-      (error: HttpErrorResponse) => { this.advanceTableDutyNight = null; }
+  private markDutyNightDeactivatedLocally(dutyNightID: number): void {
+    if (dutyNightID == null) {
+      return;
+    }
+    const records = this.normalizeRecords(this.advanceTableDutyNight);
+    this.advanceTableDutyNight = records.map((record) =>
+      record.dutyNightID === dutyNightID
+        ? { ...record, activationStatus: false }
+        : record
     );
   }
 
   public loadDataDutyNightClosing() {
+    if (this.dutySlipID == null || this.dutySlipID === '') {
+      this.advanceTableDutyNight = [];
+      return;
+    }
     this.dutyNightService.getTableDataDutyNightClosing(this.dutySlipID).subscribe(
       data => {
-        this.advanceTableDutyNight = data;
+        this.advanceTableDutyNight = this.normalizeRecords(data);
       },
-      (error: HttpErrorResponse) => { this.advanceTableDutyNight = null; }
+      (error: HttpErrorResponse) => {
+        this.advanceTableDutyNight = [];
+      }
     );
+  }
+
+  private normalizeRecords(data: any): DutyNight[] {
+    return normalizeDutyNightRecords(data);
+  }
+
+  get tableColumns(): string[] {
+    if (this.isDutyNightEntryBlocked || this.isDutyNightEditBlocked) {
+      return this.displayedColumnsWithoutActions;
+    }
+    return this.displayedColumns;
+  }
+
+  getStatusLabel(row: DutyNight): string {
+    if (isDutyNightRecordActive(row)) {
+      return 'Active';
+    }
+    return this.embeddedInClosing ? 'Deactive' : 'Deleted';
   }
 
   showNotification(colorName, text, placementFrom, placementAlign) {

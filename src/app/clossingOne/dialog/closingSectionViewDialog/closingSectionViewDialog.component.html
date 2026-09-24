@@ -74,8 +74,11 @@
       <app-dutyNight *ngSwitchCase="'dutyNight'"
         [advanceTableDutyNight]="ctx.advanceTableDutyNight"
         [dutySlipID]="ctx.DutySlipID"
+        [embeddedInClosing]="true"
         [verifyDutyStatusAndCacellationStatus]="ctx.verifyDutyStatusAndCacellationStatus"
         [isDutyNightEditBlocked]="ctx.isDutyNightEditBlocked"
+        [isDutyNightEntryBlocked]="ctx.isDutyNightEntryBlocked"
+        [dutyNightEntryBlockedMessage]="ctx.dutyNightEntryBlockedMessage"
         (sectionDataChanged)="onSectionDataChanged()">
       </app-dutyNight>
 

@@ -64,13 +64,17 @@ export class DutyNightFormDialogComponent {
       lastName: [this.advanceTable.lastName || ''],
       executive: [this.advanceTable.firstName + '' + this.advanceTable.lastName],
       changeDateTime: [this.advanceTable.changeDateTime || ''],
-      reasonOfChange: [this.advanceTable.reasonOfChange || ''],
+      reasonOfChange: [this.advanceTable.reasonOfChange || '', Validators.required],
       activationStatus: [this.advanceTable.activationStatus || ''],
     });
   }
 
   ngOnInit() {
     this.getEmployee();
+    const now = new Date();
+    this.advanceTableForm.patchValue({
+      changeDateTime: this.advanceTable.changeDateTime || now,
+    });
     this.advanceTableForm.get('changeDateTime')?.disable();
   }
 
@@ -99,7 +103,9 @@ export class DutyNightFormDialogComponent {
     this.advanceTableForm.patchValue({ dutySlipID: this.dutySlipID });
     this.advanceTableForm.patchValue({ changedByID: this.employeeDataSource[0].employeeID });
     this.advanceTableForm.patchValue({ activationStatus: true });
-    this.advanceTableService.add(this.advanceTableForm.getRawValue())
+    const payload = this.advanceTableForm.getRawValue();
+    payload.changeDateTime = payload.changeDateTime || new Date();
+    this.advanceTableService.add(payload)
       .subscribe(
         response => {
           this.showNotification('snackbar-success', 'Duty Night Created...!!!', 'bottom', 'center');
