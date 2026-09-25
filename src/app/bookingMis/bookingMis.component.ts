@@ -10,7 +10,7 @@ import { map, startWith } from 'rxjs/operators';
 import { GeneralService } from '../general/general.service';
 import { SearchCriteria } from './bookingMis.model';
 import { BookingMisService } from './bookingMis.service';
-import { extractExportErrorMessage, exportJobAcceptedSnackbarMessage, exportSearchButtonLabel, formatExportElapsedTime, IN_FLIGHT_EXPORT_MESSAGE, isExportJobCancelled, isExportJobNotFoundError, loadPersistedExportJobId, markExportDumpStarted, persistExportJobId } from '../general/export-job.helper';
+import { extractExportErrorMessage, exportJobAcceptedSnackbarMessage, exportSearchButtonLabel, formatExportElapsedTime, formatMisSearchDateForApi, IN_FLIGHT_EXPORT_MESSAGE, isExportJobCancelled, isExportJobNotFoundError, loadPersistedExportJobId, markExportDumpStarted, persistExportJobId } from '../general/export-job.helper';
 import { StoredMisExportsComponent } from '../general/stored-mis-exports.component';
 import { CustomerDropDown } from '../customer/customerDropDown.model';
 import { CustomerGroupDropDown } from '../customerGroup/customerGroupDropDown.model';
@@ -174,10 +174,8 @@ export class BookingMisComponent implements OnInit, OnDestroy {
         this.searchCancellationFrom !== '' ? moment(this.searchCancellationFrom).format('MMM DD yyyy') : '',
       SearchCancellationTo:
         this.searchCancellationTo !== '' ? moment(this.searchCancellationTo).format('MMM DD yyyy') : '',
-      SearchBookingDateFrom:
-        this.searchBookingDateFrom !== '' ? moment(this.searchBookingDateFrom).format('MMM DD yyyy') : '',
-      SearchBookingDateTo:
-        this.searchBookingDateTo !== '' ? moment(this.searchBookingDateTo).format('MMM DD yyyy') : '',
+      SearchBookingDateFrom: formatMisSearchDateForApi(this.searchBookingDateFrom),
+      SearchBookingDateTo: formatMisSearchDateForApi(this.searchBookingDateTo),
       SearchSalesPerson: this.salesPerson?.value || '',
       SearchDispatchStatus: this.searchDispatchStatus || '',
       SearchBookingStatus: this.searchBookingStatus || '',
