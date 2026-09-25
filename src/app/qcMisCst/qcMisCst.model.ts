@@ -9,6 +9,7 @@ export class QcMisCST {
 }
 
 export class QcMisCSTSearchCriteria {
+  userID?: number;
   pickupDateFrom?: string;
   pickupDateTo?: string;
   locationID?: number;

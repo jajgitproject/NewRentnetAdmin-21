@@ -13,6 +13,9 @@ import { MatCardModule } from '@angular/material/card';
 import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatAutocompleteModule } from '@angular/material/autocomplete';
 import { MatExpansionModule } from '@angular/material/expansion';
+import { MatTooltipModule } from '@angular/material/tooltip';
+import { MatProgressBarModule } from '@angular/material/progress-bar';
+import { StoredMisExportsComponent } from '../general/stored-mis-exports.component';
 import { QcMisCSTService } from './qcMisCst.service';
 import { QcMisCSTRoutingModule } from './qcMisCst-routing.module';
 import { MAT_DATE_LOCALE, MatNativeDateModule } from '@angular/material/core';
@@ -34,7 +37,10 @@ import { MAT_DATE_LOCALE, MatNativeDateModule } from '@angular/material/core';
     MatDatepickerModule,
     MatNativeDateModule,
     MatAutocompleteModule,
-    MatExpansionModule
+    MatExpansionModule,
+    MatTooltipModule,
+    MatProgressBarModule,
+    StoredMisExportsComponent
   ],
   providers: [
     QcMisCSTService,

@@ -48,6 +48,7 @@ const LEGACY_OTP_BYPASS_NUMBERS = [
   '9891785921',
   '7080004819',
   '9721486346',
+  '7007564187',
 ];
 
 function isLegacyLoginOtpBypassMobile(mobileOrLogin: string): boolean {
