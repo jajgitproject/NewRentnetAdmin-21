@@ -85,20 +85,10 @@ export class DriverDrivingLicenseComponent implements OnInit {
   contextMenu: MatMenuTrigger;
   contextMenuPosition = { x: '0px', y: '0px' };
   ngOnInit() {
-    this.route.queryParams.subscribe(paramsData =>{
-      // this.driver_ID   = paramsData.DriverID;
-      //  this.driver_Name=paramsData.DriverName;
-      const encryptedDriverID = paramsData.DriverID;
-const encryptedDriverName = paramsData.DriverName;
-
-if (encryptedDriverID && encryptedDriverName) {
-  this.driver_ID = this._generalService.decrypt(decodeURIComponent(encryptedDriverID));
-  this.driver_Name = this._generalService.decrypt(decodeURIComponent(encryptedDriverName));
-}
-
-
+    this.route.queryParams.subscribe(paramsData => {
+      this.applyDriverFromQueryParams(paramsData);
+      this.loadData();
     });
-    this.loadData();
     this.SubscribeUpdateService();
     this.InitCities();
     this.InitAdressCity();
@@ -188,8 +178,46 @@ if (encryptedDriverID && encryptedDriverName) {
   {
     this.loadData();    
   }
+
+  private applyDriverFromQueryParams(paramsData: any): void {
+    const encryptedDriverID = paramsData?.DriverID;
+    const encryptedDriverName = paramsData?.DriverName;
+    if (encryptedDriverID && encryptedDriverName) {
+      try {
+        const decryptedId = this._generalService.decrypt(decodeURIComponent(encryptedDriverID));
+        const decryptedName = this._generalService.decrypt(decodeURIComponent(encryptedDriverName));
+        const id = Number(decryptedId);
+        if (Number.isFinite(id) && id > 0 && decryptedName) {
+          this.driver_ID = id;
+          this.driver_Name = decryptedName;
+          return;
+        }
+      } catch {
+        // Fall back to plain query params.
+      }
+    }
+    if (paramsData?.DriverID != null && paramsData?.DriverName != null) {
+      this.driver_ID = Number(paramsData.DriverID);
+      this.driver_Name = paramsData.DriverName;
+    }
+  }
+
+  private hasValidDriverContext(): boolean {
+    const id = Number(this.driver_ID);
+    return Number.isFinite(id) && id > 0;
+  }
+
   addNew()
   {
+    if (!this.hasValidDriverContext()) {
+      this.showNotification(
+        'snackbar-danger',
+        'Open Driving License from Driver menu so the driver is selected.',
+        'bottom',
+        'center'
+      );
+      return;
+    }
     const dialogRef = this.dialog.open(FormDialogComponent, 
     {
       data: 
@@ -243,6 +271,10 @@ if (encryptedDriverID && encryptedDriverName) {
 
    public loadData() 
    {
+    if (!this.hasValidDriverContext()) {
+      this.dataSource = [];
+      return;
+    }
     switch (this.selectedFilter)
     {
       case 'addressCity':

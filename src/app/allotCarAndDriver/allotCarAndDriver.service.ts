@@ -29,6 +29,12 @@ export class AllotCarAndDriverService
     return this.httpClient.put<any>(this.API_URL+'/UpdateAllotment' , advanceTable);
   }
 
+  validateCarDriverCompliance(driverId: number, inventoryId: number) {
+    return this.httpClient.get<any>(
+      `${this.API_URL}/validateCarDriverCompliance/${driverId}/${inventoryId}`
+    );
+  }
+
   private prepareAllotmentPayload(advanceTable: any, isCreate: boolean): void {
     const emptyToNull = (value: any) => (value === '' || value === undefined ? null : value);
     const emptyToNumber = (value: any, fallback: number) => {

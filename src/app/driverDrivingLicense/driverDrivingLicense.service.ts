@@ -49,21 +49,35 @@ export class DriverDrivingLicenseService
     }
     return this.httpClient.get(this.API_URL+ '/'+ driver_ID +'/'+ SearchAddressCity +'/'+ SearchIssuingCity +'/'+ SearchActivationStatus +'/' + PageNumber +  '/'+coloumName+'/'+sortType);
   }
+  private preparePayload(advanceTable: any): void {
+    advanceTable.userID = this.generalService.getUserID();
+    advanceTable.uploadedByID = this.generalService.getUserID();
+    advanceTable.driverID = Number(advanceTable.driverID);
+    advanceTable.driverAddressCityID = Number(advanceTable.driverAddressCityID);
+    advanceTable.licenseIssueCityID = Number(advanceTable.licenseIssueCityID);
+
+    const uploadEdited = advanceTable.uploadEditedDate ? new Date(advanceTable.uploadEditedDate) : null;
+    const expiry = advanceTable.drivingLicenseExpiryDate ? new Date(advanceTable.drivingLicenseExpiryDate) : null;
+    if (uploadEdited && !Number.isNaN(uploadEdited.getTime())) {
+      advanceTable.uploadEditedDate = uploadEdited;
+      advanceTable.uploadEditedDateString = this.generalService.getTimeApplicable(uploadEdited);
+    }
+    if (expiry && !Number.isNaN(expiry.getTime())) {
+      advanceTable.drivingLicenseExpiryDate = expiry;
+      advanceTable.drivingLicenseExpiryDateString = this.generalService.getTimeApplicable(expiry);
+    }
+    advanceTable.licenseImage = advanceTable.licenseImage || '';
+  }
+
   add(advanceTable: DriverDrivingLicense) 
   {
-    advanceTable.userID=this.generalService.getUserID();
     advanceTable.driverDrivingLicenseID=-1;
-    advanceTable.uploadEditedDateString=this.generalService.getTimeApplicable(advanceTable.uploadEditedDate);
-    advanceTable.drivingLicenseExpiryDateString=this.generalService.getTimeApplicable(advanceTable.drivingLicenseExpiryDate);
-    advanceTable.uploadedByID=this.generalService.getUserID();
+    this.preparePayload(advanceTable);
     return this.httpClient.post<any>(this.API_URL , advanceTable);
   }
   update(advanceTable: DriverDrivingLicense)
   {
-    advanceTable.userID=this.generalService.getUserID();
-    advanceTable.uploadEditedDateString=this.generalService.getTimeApplicable(advanceTable.uploadEditedDate);
-    advanceTable.drivingLicenseExpiryDateString=this.generalService.getTimeApplicable(advanceTable.drivingLicenseExpiryDate);
-    advanceTable.uploadedByID=this.generalService.getUserID();
+    this.preparePayload(advanceTable);
     return this.httpClient.put<any>(this.API_URL , advanceTable);
   }
   delete(driverDrivingLicenseID: number):  Observable<any> 
