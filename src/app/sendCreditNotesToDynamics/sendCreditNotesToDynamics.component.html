@@ -1,0 +1,270 @@
+<section class="content sdd-page sdd-page--credit-notes">
+  <ng-template #rentNetDynamicsBrand let-variant="variant">
+    <span class="sdd-flow-brand" [ngClass]="'sdd-flow-brand--' + (variant || 'default')">
+      <span class="sdd-flow-brand__from">RentNet</span>
+      <span class="sdd-flow-brand__arrow" aria-hidden="true">
+        <span class="sdd-flow-brand__seg">-</span>
+        <span class="sdd-flow-brand__seg">-</span>
+        <span class="sdd-flow-brand__seg sdd-flow-brand__seg--head">&gt;</span>
+      </span>
+      <span class="sdd-flow-brand__to">Dynamics</span>
+    </span>
+  </ng-template>
+
+  <div class="container-fluid">
+    <div class="block-header">
+      <div class="row">
+        <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+          <ul>
+            <li class="breadcrumb-item bcrumb-1">
+              <a routerLink="/dashboard/main"><i class="fas fa-home"></i> Home</a>|
+              <a href="#" onClick="return false;">Admin</a>|
+              <a href="#" onClick="return false;">Send Credit Notes To Dynamics</a>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="sdd-shell card">
+      <div class="sdd-hero">
+        <div class="sdd-hero__glow" aria-hidden="true"></div>
+        <div class="sdd-hero__inner">
+          <div class="sdd-hero__main">
+            <div class="sdd-hero__brand">
+              <div class="sdd-hero__icon" aria-hidden="true"><i class="fas fa-file-invoice-dollar"></i></div>
+              <div class="sdd-hero__copy">
+                <h1 class="sdd-hero__title">Send Credit Notes To Dynamics</h1>
+              </div>
+            </div>
+            <div class="sdd-hero__stats">
+              <div class="sdd-stat"><span class="sdd-stat__label">Results</span><span class="sdd-stat__value">{{ getRecordCount() }}</span></div>
+              <div class="sdd-stat sdd-stat--accent"><span class="sdd-stat__label">Selected</span><span class="sdd-stat__value">{{ getSelectedSelectableCount() }}</span></div>
+              <div class="sdd-stat"><span class="sdd-stat__label">Page</span><span class="sdd-stat__value">{{ PageNumber + 1 }}</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="sdd-test-warning" role="alert">
+        <i class="fas fa-exclamation-triangle" aria-hidden="true"></i>
+        <span><strong>Warning:</strong> For test purpose only.</span>
+      </div>
+
+      <div class="body sdd-shell__body">
+        <div class="sdd-tab-content">
+          <mat-accordion class="sdd-search-accordion" multi>
+            <mat-expansion-panel expanded="true">
+              <mat-expansion-panel-header>
+                <mat-panel-title><i class="fas fa-filter sdd-panel-icon"></i> Credit Note Filters</mat-panel-title>
+                <mat-panel-description>Narrow results before syncing to ERP</mat-panel-description>
+              </mat-expansion-panel-header>
+
+              <div class="invoice-home-search quick-search-panel">
+                <div class="row">
+                  <div class="col-xl-2 col-lg-2 col-md-2 col-sm-12 mb-2">
+                    <mat-form-field class="example-full-width cp-quick-search-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
+                      <mat-label>Customer Group</mat-label>
+                      <input type="text" matInput [matAutocomplete]="autoGroup" [formControl]="customerGroup" placeholder="Type at least 3 characters">
+                      <mat-autocomplete #autoGroup="matAutocomplete" panelWidth="custom-autocomplete-panel" (optionSelected)="onCustomerGroupSelected($event.option.value)">
+                        <mat-option *ngFor="let option of filteredOptions | async" [value]="option.customerGroup" (click)="onCustomerGroupOptionClick(option)">{{ option.customerGroup }}</mat-option>
+                      </mat-autocomplete>
+                    </mat-form-field>
+                  </div>
+                  <div class="col-xl-2 col-lg-2 col-md-2 col-sm-12 mb-2">
+                    <mat-form-field class="example-full-width cp-quick-search-field" appearance="fill" floatLabel="auto">
+                      <mat-label>Customer</mat-label>
+                      <input (keyup)="onKeyupCustomerName($event)" type="text" matInput [matAutocomplete]="autoCustomer" [formControl]="customer">
+                      <mat-autocomplete #autoCustomer="matAutocomplete" panelWidth="custom-autocomplete-panel">
+                        <mat-option *ngFor="let option of filteredCustomerOptions | async" [value]="option.customerName + '##' + (option.customerIdentityNumber || '')">
+                          {{ option.customerName }} ## {{ option.customerIdentityNumber }}
+                        </mat-option>
+                      </mat-autocomplete>
+                    </mat-form-field>
+                  </div>
+                  <div class="col-xl-2 col-lg-2 col-md-2 col-sm-12 mb-2">
+                    <mat-form-field class="example-full-width cp-quick-search-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
+                      <mat-label>Credit Note No.</mat-label>
+                      <input type="text" matInput [(ngModel)]="searchCreditNoteNo">
+                    </mat-form-field>
+                  </div>
+                  <div class="col-xl-2 col-lg-2 col-md-2 col-sm-12 mb-2">
+                    <mat-form-field class="example-full-width cp-quick-search-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
+                      <mat-label>Invoice No.</mat-label>
+                      <input type="text" matInput [(ngModel)]="searchInvoiceNo" placeholder="Invoice number with prefix">
+                    </mat-form-field>
+                  </div>
+                  <div class="col-xl-2 col-lg-2 col-md-2 col-sm-12 mb-2">
+                    <mat-form-field class="example-full-width cp-quick-search-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
+                      <mat-label>Branch</mat-label>
+                      <input type="text" matInput [formControl]="branch" [matAutocomplete]="autoBranch">
+                      <mat-autocomplete #autoBranch="matAutocomplete" panelWidth="custom-autocomplete-panel">
+                        <mat-option *ngFor="let option of filteredOrganizationalEntityOptions | async" [value]="option.organizationalEntityName">{{ option.organizationalEntityName }}</mat-option>
+                      </mat-autocomplete>
+                    </mat-form-field>
+                  </div>
+                </div>
+
+                <div class="row">
+                  <div class="col-xl-2 col-lg-2 col-md-2 col-sm-12 mb-2">
+                    <mat-form-field class="example-full-width cp-quick-search-field cp-date-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
+                      <mat-label>Date From</mat-label>
+                      <input matInput [matDatepicker]="startDate" [(ngModel)]="SearchFromDate">
+                      <mat-datepicker-toggle matSuffix [for]="startDate"></mat-datepicker-toggle>
+                      <mat-datepicker #startDate></mat-datepicker>
+                    </mat-form-field>
+                  </div>
+                  <div class="col-xl-2 col-lg-2 col-md-2 col-sm-12 mb-2">
+                    <mat-form-field class="example-full-width cp-quick-search-field cp-date-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
+                      <mat-label>Date To</mat-label>
+                      <input matInput [matDatepicker]="endDate" [(ngModel)]="SearchToDate">
+                      <mat-datepicker-toggle matSuffix [for]="endDate"></mat-datepicker-toggle>
+                      <mat-datepicker #endDate></mat-datepicker>
+                    </mat-form-field>
+                  </div>
+                  <div class="col-xl-2 col-lg-2 col-md-2 col-sm-12 mb-2">
+                    <mat-form-field class="example-full-width cp-quick-search-field mb-3" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
+                      <mat-label>Type</mat-label>
+                      <mat-select [(ngModel)]="searchCreditNoteType">
+                        <mat-option value="">All</mat-option>
+                        <mat-option value="Full">Full</mat-option>
+                        <mat-option value="Partial">Partial</mat-option>
+                      </mat-select>
+                    </mat-form-field>
+                  </div>
+                  <div class="col-xl-2 col-lg-2 col-md-2 col-sm-12 mb-2">
+                    <mat-form-field class="example-full-width cp-quick-search-field mb-3" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
+                      <mat-label>E-Credit Note Status</mat-label>
+                      <mat-select [(ngModel)]="searchECreditNoteStatus">
+                        <mat-option value="">All</mat-option>
+                        <mat-option value="Not Created">Not Created</mat-option>
+                        <mat-option value="Generated">Generated</mat-option>
+                        <mat-option value="Cancelled">Cancelled</mat-option>
+                      </mat-select>
+                    </mat-form-field>
+                  </div>
+                </div>
+
+                <div class="row quick-search-actions">
+                  <div class="col-xl-2 col-lg-2 col-md-2 col-sm-12 mb-2">
+                    <button mat-raised-button color="primary" class="sdd-btn-search" (click)="searchData()" [disabled]="loading">
+                      <i class="fas fa-search"></i> {{ loading ? 'Searching...' : 'Search' }}
+                    </button>
+                  </div>
+                  <div class="col-xl-2 col-lg-2 col-md-2 col-sm-12 mb-2">
+                    <button mat-stroked-button class="sdd-btn-refresh" (click)="refresh()"><i class="fas fa-sync-alt"></i> Reset Filters</button>
+                  </div>
+                </div>
+              </div>
+            </mat-expansion-panel>
+          </mat-accordion>
+
+          <div class="sdd-grid-card">
+            <div class="sdd-toolbar">
+              <div class="sdd-toolbar__left">
+                <h4 class="sdd-toolbar__title"><i class="fas fa-file-invoice"></i> Search Results</h4>
+              </div>
+              <div class="sdd-toolbar__right">
+                <span class="sdd-toolbar__selection" *ngIf="getSelectedSelectableCount() > 0">{{ getSelectedSelectableCount() }} selected</span>
+                <button mat-raised-button class="sdd-sync-btn" [disabled]="sending || getSelectedSelectableCount() === 0" (click)="sendCreditNotesToDynamics()">
+                  <mat-spinner *ngIf="sending" diameter="18" strokeWidth="3"></mat-spinner>
+                  <i *ngIf="!sending" class="fas fa-cloud-upload-alt"></i>
+                  <span *ngIf="!sending">Send to Dynamics</span>
+                  <span *ngIf="sending">Sending...</span>
+                </button>
+              </div>
+            </div>
+
+            <div class="sdd-summary" *ngIf="sendSummary" [ngClass]="getSummaryClass()">
+              <div class="sdd-summary__body">
+                <span class="sdd-summary__text">{{ sendSummary }}</span>
+                <button *ngIf="lastBatchId > 0" type="button" mat-stroked-button class="sdd-summary__link" (click)="openBatchMonitor()">
+                  Open Batch Monitor
+                </button>
+              </div>
+            </div>
+
+            <div class="responsive_table">
+              <div class="table-responsive">
+                <p *ngIf="!dataSource; then noRecords else recordsBlock">This is not rendered</p>
+                <ng-template #noRecords>
+                  <div class="sdd-empty-state">
+                    <div class="sdd-empty-state__icon"><i class="fas fa-search"></i></div>
+                    <h5>No credit notes found</h5>
+                  </div>
+                  <div class="sdd-pager">
+                    <button mat-stroked-button (click)="previousCall()" [disabled]="PageNumber === 0"><i class="fas fa-chevron-left"></i> Previous</button>
+                    <span class="sdd-pager__info">Page {{ PageNumber + 1 }}</span>
+                    <button mat-stroked-button (click)="nextCall()" [disabled]="!dataSource?.length">Next <i class="fas fa-chevron-right"></i></button>
+                  </div>
+                </ng-template>
+
+                <ng-template #recordsBlock>
+                  <div class="scrollable-table-container">
+                    <mat-table #table [dataSource]="dataSource" matSort class="mat-cell floating-header-table sdd-table" (matSortChange)="sortingDataHandler($event)">
+                      <ng-container matColumnDef="select">
+                        <mat-header-cell *matHeaderCellDef class="sdd-col-select">
+                          <mat-checkbox (change)="$event ? masterToggle() : null" [checked]="selection.hasValue() && isAllSelected()" [indeterminate]="hasPartialSelection()" [disabled]="!getSelectableRows().length"></mat-checkbox>
+                        </mat-header-cell>
+                        <mat-cell *matCellDef="let row" class="sdd-col-select">
+                          <mat-checkbox (click)="$event.stopPropagation()" (change)="$event ? toggleRowSelection(row) : null" [checked]="selection.isSelected(row)" [disabled]="!isRowSelectable(row)" [matTooltip]="getRowDisabledReason(row)" matTooltipPosition="above"></mat-checkbox>
+                        </mat-cell>
+                      </ng-container>
+                      <ng-container matColumnDef="creditNoteNumberWithPrefix">
+                        <mat-header-cell *matHeaderCellDef mat-sort-header>Credit Note No.</mat-header-cell>
+                        <mat-cell *matCellDef="let row"><span class="sdd-invoice-no">{{ row.creditNoteNumberWithPrefix }}</span></mat-cell>
+                      </ng-container>
+                      <ng-container matColumnDef="creditNoteDate">
+                        <mat-header-cell *matHeaderCellDef mat-sort-header>Credit Note Date</mat-header-cell>
+                        <mat-cell *matCellDef="let row">{{ row.creditNoteDate ? (row.creditNoteDate | date : 'dd-MM-yyyy') : 'N/A' }}</mat-cell>
+                      </ng-container>
+                      <ng-container matColumnDef="creditNoteGstStatus">
+                        <mat-header-cell *matHeaderCellDef mat-sort-header>GST Status</mat-header-cell>
+                        <mat-cell *matCellDef="let row"><span [ngClass]="getStatusBadgeClass(row.creditNoteGstStatus)">{{ row.creditNoteGstStatus || 'NonGST' }}</span></mat-cell>
+                      </ng-container>
+                      <ng-container matColumnDef="invoiceType">
+                        <mat-header-cell *matHeaderCellDef mat-sort-header>Invoice Type</mat-header-cell>
+                        <mat-cell *matCellDef="let row">{{ getInvoiceTypeLabel(row.invoiceType) }}</mat-cell>
+                      </ng-container>
+                      <ng-container matColumnDef="IRNStatus">
+                        <mat-header-cell *matHeaderCellDef mat-sort-header>E-Credit Note Status</mat-header-cell>
+                        <mat-cell *matCellDef="let row"><span [ngClass]="getStatusBadgeClass(row.irnStatus || 'Not Created')">{{ getECreditNoteStatusLabel(row.irnStatus) }}</span></mat-cell>
+                      </ng-container>
+                      <ng-container matColumnDef="creditNoteSyncStatus">
+                        <mat-header-cell *matHeaderCellDef>ERP Sync</mat-header-cell>
+                        <mat-cell *matCellDef="let row"><span [ngClass]="getStatusBadgeClass(row.creditNoteSyncStatus)">{{ row.creditNoteSyncStatus || 'Unprocessed' }}</span></mat-cell>
+                      </ng-container>
+                      <ng-container matColumnDef="customerName">
+                        <mat-header-cell *matHeaderCellDef mat-sort-header>Customer</mat-header-cell>
+                        <mat-cell *matCellDef="let row" class="sdd-cell-customer">{{ row.customerName || 'N/A' }}</mat-cell>
+                      </ng-container>
+                      <ng-container matColumnDef="branchName">
+                        <mat-header-cell *matHeaderCellDef mat-sort-header>Branch</mat-header-cell>
+                        <mat-cell *matCellDef="let row">{{ row.branchName || 'N/A' }}</mat-cell>
+                      </ng-container>
+                      <ng-container matColumnDef="invoiceNumberWithPrefix">
+                        <mat-header-cell *matHeaderCellDef mat-sort-header>Invoice No.</mat-header-cell>
+                        <mat-cell *matCellDef="let row">{{ row.invoiceNumberWithPrefix || 'N/A' }}</mat-cell>
+                      </ng-container>
+                      <ng-container matColumnDef="creditNoteAmount">
+                        <mat-header-cell *matHeaderCellDef mat-sort-header class="sdd-col-amount">Amount</mat-header-cell>
+                        <mat-cell *matCellDef="let row" class="sdd-col-amount">{{ row.creditNoteAmount | currency : 'INR' : 'symbol' : '1.0-0' }}</mat-cell>
+                      </ng-container>
+                      <mat-header-row *matHeaderRowDef="displayedColumns"></mat-header-row>
+                      <mat-row *matRowDef="let row; columns: displayedColumns;" [class.sdd-row-selected]="isRowSelected(row)" [class.sdd-row-disabled]="!isRowSelectable(row)"></mat-row>
+                    </mat-table>
+                  </div>
+                  <div class="sdd-pager">
+                    <button mat-stroked-button (click)="previousCall()" [disabled]="PageNumber === 0"><i class="fas fa-chevron-left"></i> Previous</button>
+                    <span class="sdd-pager__info">Page {{ PageNumber + 1 }} · {{ getRecordCount() }} record(s)</span>
+                    <button mat-stroked-button (click)="nextCall()" [disabled]="!dataSource?.length">Next <i class="fas fa-chevron-right"></i></button>
+                  </div>
+                </ng-template>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>

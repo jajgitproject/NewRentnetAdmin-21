@@ -618,6 +618,13 @@
           </mat-form-field>
         </div>
 
+        <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+          <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+            <mat-label>Dynamic Branch Code</mat-label>
+            <input matInput maxlength="50" formControlName="dynamicBranchCode" />
+          </mat-form-field>
+        </div>
+
         <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2" *ngIf="advanceTableForm.value.isECommerceBranch === true">
           <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
             <mat-label>Prefix For Ecommerce</mat-label>

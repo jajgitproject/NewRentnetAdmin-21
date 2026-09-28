@@ -128,6 +128,10 @@ export class OrganizationalEntityService
       {
         advanceTable.isECommerceBranch = false;
       }
+      if (advanceTable.organizationalEntityType !== 'Branch' || advanceTable.dynamicBranchCode === '')
+      {
+        advanceTable.dynamicBranchCode = null;
+      }
     return this.httpClient.post<any>(this.API_URL , advanceTable);
   }
   update(advanceTable: OrganizationalEntity)
@@ -161,6 +165,10 @@ export class OrganizationalEntityService
       if (!advanceTable.isECommerceBranch)
       {
         advanceTable.isECommerceBranch = false;
+      }
+      if (advanceTable.organizationalEntityType !== 'Branch' || advanceTable.dynamicBranchCode === '')
+      {
+        advanceTable.dynamicBranchCode = null;
       }
     return this.httpClient.put<any>(this.API_URL , advanceTable);
   }

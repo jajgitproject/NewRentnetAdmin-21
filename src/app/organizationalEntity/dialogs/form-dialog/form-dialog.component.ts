@@ -111,7 +111,8 @@ export class FormDialogComponent {
     latitude: 'Latitude',
     longitude: 'Longitude',
     preFixForEcommerce: 'Prefix For Ecommerce',
-    isECommerceBranch: 'E-Commerce Branch'
+    isECommerceBranch: 'E-Commerce Branch',
+    dynamicBranchCode: 'Dynamic Branch Code'
   };
   constructor(
     public dialogRef: MatDialogRef<FormDialogComponent>,
@@ -285,7 +286,8 @@ export class FormDialogComponent {
         organizationalEntityBranchType:[this.advanceTable.organizationalEntityBranchType],
         oldRentNetService_Location:[this.advanceTable.oldRentNetService_Location],
         defaultCDPLocation:[this.advanceTable.defaultCDPLocation === true],
-        isECommerceBranch:[this.advanceTable.isECommerceBranch === true]
+        isECommerceBranch:[this.advanceTable.isECommerceBranch === true],
+        dynamicBranchCode:[this.advanceTable.dynamicBranchCode]
       });
   }
 
@@ -344,6 +346,13 @@ export class FormDialogComponent {
         isECommerceBranch: isBranch ? (isECommerce || false) : false,
         preFixForEcommerce: null
       });
+    }
+  }
+
+  prepareDynamicBranchCodeField(): void {
+    const isBranch = this.advanceTableForm.value.organizationalEntityType === 'Branch';
+    if (!isBranch) {
+      this.advanceTableForm.patchValue({ dynamicBranchCode: null });
     }
   }
 
@@ -523,7 +532,8 @@ export class FormDialogComponent {
         'organizationalEntityBranchType',
         'organizationalEntityPrefix',
         'organizationalEntityGSTN',
-        'preFixForEcommerce'
+        'preFixForEcommerce',
+        'dynamicBranchCode'
       );
     } else if (this.advanceTableForm.get('isECommerceBranch').value !== true) {
       hiddenFields.push('preFixForEcommerce');
@@ -637,6 +647,7 @@ export class FormDialogComponent {
   public Post(): void {
     this.isLoading = true;  // Start the loading spinner
     this.prepareECommerceFields();
+    this.prepareDynamicBranchCodeField();
     this.advanceTableForm.patchValue({
       countryID: this.geoPointID,
       organizationalEntityParentID: this.organizationalEntityID,
@@ -674,6 +685,8 @@ export class FormDialogComponent {
         },
         error => {
           this.isLoading = false;  // Stop the spinner
+          const apiMessage = error?.error?.message || error?.message || 'Save failed. Check that the API is running locally and OrganizationalEntityProc includes @DynamicBranchCode.';
+          Swal.fire({ icon: 'error', title: 'Save failed', text: apiMessage });
           this._generalService.sendUpdate('OrganizationalEntityAll:OrganizationalEntityView:Failure');
         }
       );
@@ -682,6 +695,7 @@ export class FormDialogComponent {
   public Put(): void {
     this.isLoading = true;  // Start the loading spinner
     this.prepareECommerceFields();
+    this.prepareDynamicBranchCodeField();
 
     // Patch the form with the necessary values
     this.advanceTableForm.patchValue({
@@ -723,6 +737,8 @@ export class FormDialogComponent {
         },
         error => {
           this.isLoading = false;  // Stop the spinner in case of error
+          const apiMessage = error?.error?.message || error?.message || 'Update failed. Check that the API is running locally and OrganizationalEntityProc includes @DynamicBranchCode.';
+          Swal.fire({ icon: 'error', title: 'Update failed', text: apiMessage });
           this._generalService.sendUpdate('OrganizationalEntityAll:OrganizationalEntityView:Failure');  // To send failure updates
         }
       );
@@ -1247,7 +1263,8 @@ export class FormDialogComponent {
       if (val !== 'Branch') {
         this.advanceTableForm.patchValue({
           isECommerceBranch: false,
-          preFixForEcommerce: ''
+          preFixForEcommerce: '',
+          dynamicBranchCode: null
         });
       }
       this.syncValidatorsForEntityType();

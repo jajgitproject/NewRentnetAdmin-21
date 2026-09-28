@@ -47,6 +47,7 @@ export class OrganizationalEntity {
   oldRentNetService_Location:string;
   defaultCDPLocation:boolean;
   isECommerceBranch:boolean;
+  dynamicBranchCode:string;
 
   constructor(organizationalEntity) {
     {
@@ -84,6 +85,7 @@ export class OrganizationalEntity {
        this.oldRentNetService_Location=organizationalEntity.oldRentNetService_Location || '';
        this.defaultCDPLocation=organizationalEntity.defaultCDPLocation === true;
        this.isECommerceBranch=organizationalEntity.isECommerceBranch === true;
+       this.dynamicBranchCode = organizationalEntity.dynamicBranchCode || '';
     }
   }
   

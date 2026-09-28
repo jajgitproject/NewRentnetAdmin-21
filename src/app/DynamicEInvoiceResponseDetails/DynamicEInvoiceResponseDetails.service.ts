@@ -37,7 +37,7 @@ export class DynamicEInvoiceResponseDetailsService
     {
       SearchdynamicsAPIStatusCode = "null";
     }
-    return this.httpClient.get(this.API_URL + '/InvoiceSearch' + "/" + SearchInvoiceNumber + '/'+ SearchFromDate + '/' + SearchToDate + '/'+ SearchCustomerName + '/' + SearchdynamicsAPIStatusCode + '/' + PageNumber + '/DynamicsAPICallID/Ascending');
+    return this.httpClient.get(this.API_URL + '/InvoiceSearch' + "/" + SearchInvoiceNumber + '/'+ SearchFromDate + '/' + SearchToDate + '/'+ SearchCustomerName + '/' + SearchdynamicsAPIStatusCode + '/' + PageNumber + '/DynamicsSyncID/Ascending');
   }
 
 

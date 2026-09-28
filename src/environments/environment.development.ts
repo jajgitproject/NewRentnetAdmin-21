@@ -4,7 +4,10 @@
 
 export const environment = {
   production: false,
-  // Visual Studio IIS Express (launchSettings iisExpress sslPort)
+  // Must match the API you attach the debugger to (see RententAPI/Properties/launchSettings.json):
+  // - IIS Express profile: https://localhost:44368/
+  // - RententAPI (Kestrel) profile: http://localhost:5000/ or https://localhost:5001/
+  // Override without rebuild via src/assets/runtime-config.json → BaseURL
   apiUrl: 'https://localhost:44368/',
   BaseURL: 'https://localhost:44368/',
   ImageURL: 'https://localhost:44368/',

@@ -174,12 +174,46 @@ const routes: Routes = [
           )
       },
       {
-        path: 'dynamicsTesting',
+        path: 'sendDataToDynamics',
         loadChildren: () =>
-          import('./dynamicsTesting/dynamicsTesting.module').then(
-            (m) => m.DynamicsTestingModule
+          import('./sendDataToDynamics/sendDataToDynamics.module').then(
+            (m) => m.SendDataToDynamicsModule
           ),
-        data: { skipRolePageGuard: true }
+        data: {
+          requiredPageKey: 'Send Data To Dynamics',
+          alternatePageKeys: [
+            'sendDataToDynamics',
+            'Send Invoice to Dynamics',
+            'Send Invoices To Dynamics'
+          ],
+        },
+      },
+      {
+        path: 'sendCreditNotesToDynamics',
+        loadChildren: () =>
+          import('./sendCreditNotesToDynamics/sendCreditNotesToDynamics.module').then(
+            (m) => m.SendCreditNotesToDynamicsModule
+          ),
+        data: {
+          requiredPageKey: 'Send Credit Notes To Dynamics',
+          alternatePageKeys: [
+            'sendCreditNotesToDynamics',
+            'Send Credit Notes To Dynamics',
+            'DynamicsCreditNote',
+            'Dynamics Credit Note'
+          ],
+        },
+      },
+      {
+        path: 'dynamicsSyncBatch',
+        loadChildren: () =>
+          import('./dynamicsSyncBatch/dynamicsSyncBatch.module').then(
+            (m) => m.DynamicsSyncBatchModule
+          ),
+        data: {
+          requiredPageKey: 'DynamicsSyncBatch',
+          alternatePageKeys: ['dynamicsSyncBatch', 'Dynamics Sync Batch'],
+        },
       },
 
       {

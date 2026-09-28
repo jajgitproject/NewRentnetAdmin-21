@@ -106,6 +106,18 @@
                                         {{row.sacNumber}}</mat-cell>
                                 </ng-container>
 
+                                <ng-container matColumnDef="dynamicGLcode">
+                                    <mat-header-cell *matHeaderCellDef>Dynamic GL Code</mat-header-cell>
+                                    <mat-cell *matCellDef="let row" (contextmenu)="onContextMenu($event, row)">
+                                        {{row.dynamicGLcode}}</mat-cell>
+                                </ng-container>
+
+                                <ng-container matColumnDef="dynamicGLName">
+                                    <mat-header-cell *matHeaderCellDef>Dynamic GL Name</mat-header-cell>
+                                    <mat-cell *matCellDef="let row" (contextmenu)="onContextMenu($event, row)">
+                                        {{row.dynamicGLName}}</mat-cell>
+                                </ng-container>
+
                                 <!-- <ng-container matColumnDef="isDefault">
                                     <mat-header-cell *matHeaderCellDef>Is Default</mat-header-cell>
                                     <mat-cell *matCellDef="let row" (contextmenu)="onContextMenu($event, row)">

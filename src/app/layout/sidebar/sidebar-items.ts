@@ -1390,6 +1390,52 @@ export const ROUTES: RouteInfo[] = [
         isAccess: false
       },
       {
+        path: 'sendDataToDynamics',
+        title: 'RentNet → Dynamics',
+        pageKey: 'Send Data To Dynamics',
+        moduleName: 'sendDataToDynamics',
+        alternateAccessPageKeys: [
+          'Send Data To Dynamics',
+          'sendDataToDynamics',
+          'Send Invoice to Dynamics',
+          'Send Invoices To Dynamics'
+        ],
+        icon: 'fas fa-cloud-upload-alt',
+        class: '',
+        groupTitle: false,
+        submenu: [],
+        isAccess: false
+      },
+      {
+        path: 'sendCreditNotesToDynamics',
+        title: 'Send Credit Notes To Dynamics',
+        pageKey: 'Send Credit Notes To Dynamics',
+        moduleName: 'sendCreditNotesToDynamics',
+        alternateAccessPageKeys: [
+          'Send Credit Notes To Dynamics',
+          'sendCreditNotesToDynamics',
+          'DynamicsCreditNote',
+          'Dynamics Credit Note'
+        ],
+        icon: 'fas fa-file-invoice-dollar',
+        class: '',
+        groupTitle: false,
+        submenu: [],
+        isAccess: false
+      },
+      {
+        path: 'dynamicsSyncBatch',
+        title: 'Batch Monitor',
+        pageKey: 'DynamicsSyncBatch',
+        moduleName: 'dynamicsSyncBatch',
+        alternateAccessPageKeys: ['DynamicsSyncBatch', 'dynamicsSyncBatch', 'Dynamics Sync Batch'],
+        icon: 'fas fa-tasks',
+        class: '',
+        groupTitle: false,
+        submenu: [],
+        isAccess: false
+      },
+      {
         path: 'invoicePaidStatus',
         title: 'Invoice Paid Status',
         moduleName: 'invoicePaidStatus',
@@ -1594,20 +1640,6 @@ export const ROUTES: RouteInfo[] = [
         submenu: [],
         isAccess: false
       },
-      {
-        path: 'dynamicsTesting',
-        title: 'Dynamics Testing',
-        pageKey: 'dynamicsTesting',
-        moduleName: 'dynamicsTesting',
-        alternateAccessPageKeys: ['dynamicsTesting', 'Dynamics Testing'],
-        icon: 'fas fa-vial',
-        class: '',
-        groupTitle: false,
-        submenu: [],
-        isAccess: false,
-        alwaysAccessible: true
-      },
-
       {
         path: 'driverCarChangesMIS',
         title: 'Driver Car Changes',
