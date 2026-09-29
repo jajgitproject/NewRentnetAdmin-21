@@ -33,6 +33,8 @@ import { CustomerAlertMessageDetailsService } from '../customerAlertMessageDetai
 import { ReservationGroupService } from '../reservationGroup/reservationGroup.service';
 import { DuplicateWithRangeDialogComponent } from './dialogs/duplicate-with-range-dialog/duplicate-with-range-dialog.component';
 import { EmailInfoModule } from '../EmailInfo/EmailInfo.module';
+import { IndividualCustomerModule } from '../individualCustomer/individualCustomer.module';
+import { IndividualCustomerService } from '../individualCustomer/individualCustomer.service';
 @NgModule({
   declarations: [
     ReservationGroupDetailsComponent,
@@ -67,8 +69,9 @@ import { EmailInfoModule } from '../EmailInfo/EmailInfo.module';
     MatAutocompleteModule,
     ReservationModule,
     EmailInfoModule,
+    IndividualCustomerModule,
   ],
-  providers: [ReservationGroupDetailsService,CustomerAlertMessageDetailsService,ReservationGroupService]
+  providers: [ReservationGroupDetailsService,CustomerAlertMessageDetailsService,ReservationGroupService, IndividualCustomerService]
 })
 export class ReservationGroupDetailsModule {}
 
