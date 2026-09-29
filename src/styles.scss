@@ -137,6 +137,71 @@
   overflow-y: auto !important;
 }
 
+/* Customer page create/edit popups (Corporate, Individual, Corp. Indi.) — true 4-column layout.
+   Templates still use pairs of fields per `.row`; `display: contents` on `.row` flattens all
+   field cells into one 4-column grid on the form (`.customer-form-four-col`). */
+.cdk-overlay-pane.customer-page-form-dialog,
+.cdk-overlay-pane:has(form.customer-form-four-col) {
+  width: 1400px !important;
+  max-width: 96vw !important;
+}
+.cdk-overlay-pane.customer-page-form-dialog .mat-mdc-dialog-container,
+.cdk-overlay-pane.customer-page-form-dialog .mdc-dialog__surface,
+.cdk-overlay-pane:has(form.customer-form-four-col) .mat-mdc-dialog-container,
+.cdk-overlay-pane:has(form.customer-form-four-col) .mdc-dialog__surface {
+  width: 100% !important;
+  max-width: 100% !important;
+}
+.cdk-overlay-pane.customer-page-form-dialog [mat-dialog-content],
+.cdk-overlay-pane.customer-page-form-dialog .mat-mdc-dialog-content,
+.cdk-overlay-pane:has(form.customer-form-four-col) [mat-dialog-content],
+.cdk-overlay-pane:has(form.customer-form-four-col) .mat-mdc-dialog-content {
+  width: 100%;
+  box-sizing: border-box;
+}
+
+form.customer-form-four-col {
+  display: grid !important;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  column-gap: 16px;
+  row-gap: 8px;
+  width: 100%;
+  align-items: start;
+}
+form.customer-form-four-col > .row {
+  display: contents !important;
+}
+form.customer-form-four-col > .row > [class*='col-'] {
+  width: 100% !important;
+  max-width: 100% !important;
+  min-width: 0 !important;
+  flex: none !important;
+  padding-left: 0 !important;
+  padding-right: 0 !important;
+  margin-bottom: 0 !important;
+}
+form.customer-form-four-col > .row > .col-xl-12,
+form.customer-form-four-col > .row > .col-lg-12,
+form.customer-form-four-col > .row > .col-md-12,
+form.customer-form-four-col > .row > .customer-form-actions {
+  grid-column: 1 / -1;
+}
+form.customer-form-four-col .example-full-width,
+form.customer-form-four-col mat-form-field {
+  width: 100%;
+}
+
+@media (max-width: 900px) {
+  form.customer-form-four-col {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+@media (max-width: 520px) {
+  form.customer-form-four-col {
+    grid-template-columns: 1fr;
+  }
+}
+
 /* Global dialog scrolling fix for Angular Material 21 (MDC).
    Many dialogs in this app (Customer, Supplier, Employee, etc.) don't pass a
    panelClass, so the `.dbe-dialog-centered`-scoped rules above don't reach them

@@ -55,7 +55,6 @@ export class CustomerComponent implements OnInit {
     'customerID',
     'tallyCustomerID',
     'customerName',
-    'customerIdentityNumber',
     'customerGroup',
     'customerType',
     'customerCategory',
@@ -264,27 +263,28 @@ export class CustomerComponent implements OnInit {
   }
 
 
+  private openCustomerFormDialog(component: any, data: any) {
+    return this.dialog.open(component, {
+      data,
+      width: '1400px',
+      maxWidth: '96vw',
+      panelClass: 'customer-page-form-dialog'
+    });
+  }
+
   CIPlus()
   {
-    const dialogRef = this.dialog.open(CIPlusComponent, 
-    {
-      data: 
-        {
-          advanceTable: this.advanceTable,
-          action: 'add'
-        }
+    this.openCustomerFormDialog(CIPlusComponent, {
+      advanceTable: this.advanceTable,
+      action: 'add'
     });
   }
 
   IndividualCustomer()
   {
-    this.dialog.open(IndividualCustomerComponent,
-    {
-      data:
-        {
-          advanceTable: this.advanceTable,
-          action: 'add'
-        }
+    this.openCustomerFormDialog(IndividualCustomerComponent, {
+      advanceTable: this.advanceTable,
+      action: 'add'
     });
   }
 
@@ -458,24 +458,17 @@ export class CustomerComponent implements OnInit {
   }
   addNew()
   {
-    const dialogRef = this.dialog.open(FormDialogComponent, 
-    {
-      data: 
-        {
-          advanceTable: this.advanceTable,
-          action: 'add'
-        }
+    this.openCustomerFormDialog(FormDialogComponent, {
+      advanceTable: this.advanceTable,
+      action: 'add'
     });
   }
   editCall(row) {
       //  alert(row.id);
     this.customerID = row.customerID;
-    const dialogRef = this.dialog.open(FormDialogComponent, {
-      data: {
-        advanceTable: row,
-        action: 'edit'
-        
-      }
+    this.openCustomerFormDialog(FormDialogComponent, {
+      advanceTable: row,
+      action: 'edit'
     });
   }
   deleteItem(row)
@@ -495,6 +488,30 @@ export class CustomerComponent implements OnInit {
   {
     this.PageNumber = 0;
     this.loadData();
+  }
+
+  /** API may return camelCase or PascalCase manager name fields. */
+  private normalizeCustomerGridRows(rows: any[]): any[] {
+    if (!Array.isArray(rows)) {
+      return rows;
+    }
+    return rows.map((row) => {
+      const kam =
+        row?.keyAccountManagerName ??
+        row?.KeyAccountManagerName ??
+        null;
+      const sales =
+        row?.salesManagerName ??
+        row?.SalesManagerName ??
+        null;
+      const kamText = kam != null ? String(kam).trim() : '';
+      const salesText = sales != null ? String(sales).trim() : '';
+      return {
+        ...row,
+        keyAccountManagerName: kamText || null,
+        salesManagerName: salesText || null,
+      };
+    });
   }
 
   public loadData(exactMatch: boolean = false)
@@ -592,7 +609,7 @@ if (exactMatch) {
   }
 }
 
-        this.dataSource = filteredData;
+        this.dataSource = this.normalizeCustomerGridRows(filteredData);
         this.isLoading = false;
       },
       (error: HttpErrorResponse) => { this.dataSource = null; this.isLoading = false; }
@@ -839,7 +856,7 @@ if (exactMatch) {
     (
       data =>   
       {
-        this.dataSource = data;
+        this.dataSource = this.normalizeCustomerGridRows(data);
       },
       (error: HttpErrorResponse) => { this.dataSource = null;}
     );
