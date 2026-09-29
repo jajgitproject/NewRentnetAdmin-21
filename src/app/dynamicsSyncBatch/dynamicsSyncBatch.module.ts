@@ -10,9 +10,10 @@ import { RouterModule } from '@angular/router';
 import { DynamicsSyncBatchRoutingModule } from './dynamicsSyncBatch-routing.module';
 import { DynamicsSyncBatchComponent } from './dynamicsSyncBatch.component';
 import { DynamicsSyncBatchService } from './dynamicsSyncBatch.service';
+import { BatchDetailsDialogComponent } from './dialogs/batch-details-dialog.component';
 
 @NgModule({
-  declarations: [DynamicsSyncBatchComponent],
+  declarations: [DynamicsSyncBatchComponent, BatchDetailsDialogComponent],
   imports: [
     CommonModule,
     FormsModule,

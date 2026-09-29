@@ -250,7 +250,6 @@
   .mat-mdc-row {
     min-height: 52px;
     border-bottom: 1px solid #f1f5f9;
-    cursor: pointer;
     transition: background 0.15s ease;
 
     &:hover {
@@ -395,26 +394,6 @@
 }
 
 // ─── Buttons ─────────────────────────────────────────────────────────────────
-
-.dsb-btn-detail {
-  font-size: 12px !important;
-  font-weight: 600 !important;
-  height: 32px !important;
-  line-height: 32px !important;
-  border-color: #cbd5e1 !important;
-  color: #334155 !important;
-
-  i {
-    margin-right: 4px;
-    font-size: 11px;
-  }
-
-  &--active {
-    border-color: #0d9488 !important;
-    color: #0f766e !important;
-    background: #ecfdf5 !important;
-  }
-}
 
 .dsb-btn-ghost-dark {
   font-size: 13px !important;

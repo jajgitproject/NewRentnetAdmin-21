@@ -304,5 +304,11 @@ export class SendCreditNotesToDynamicsService {
 
   }
 
+  getCreditNoteDynamicsSyncDetails(invoiceCreditNoteId: number): Observable<any> {
+
+    return this.httpClient.get(`${this.DYNAMICS_CREDIT_NOTE_API_URL}/GetCreditNoteDynamicsSyncDetails/${invoiceCreditNoteId}`);
+
+  }
+
 }
 

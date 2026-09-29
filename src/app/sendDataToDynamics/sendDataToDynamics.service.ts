@@ -189,4 +189,8 @@ export class SendDataToDynamicsService {
       batchCreatedByID: batchCreatedById
     });
   }
+
+  getInvoiceDynamicsSyncDetails(invoiceId: number): Observable<any> {
+    return this.httpClient.get(`${this.DYNAMICS_API_URL}/GetInvoiceDynamicsSyncDetails/${invoiceId}`);
+  }
 }

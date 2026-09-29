@@ -17,13 +17,16 @@ import { MatExpansionModule } from '@angular/material/expansion';
 import { MatTabsModule } from '@angular/material/tabs';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatDialogModule } from '@angular/material/dialog';
 import { SendDataToDynamicsComponent } from './sendDataToDynamics.component';
 import { SendDataToDynamicsRoutingModule } from './sendDataToDynamics-routing.module';
 import { SendDataToDynamicsService } from './sendDataToDynamics.service';
+import { InvoiceSyncDetailsDialogModule } from './dialogs/invoice-sync-details-dialog.module';
 
 @NgModule({
   declarations: [SendDataToDynamicsComponent],
   imports: [
+    InvoiceSyncDetailsDialogModule,
     CommonModule,
     FormsModule,
     ReactiveFormsModule,
@@ -42,7 +45,8 @@ import { SendDataToDynamicsService } from './sendDataToDynamics.service';
     MatExpansionModule,
     MatTabsModule,
     MatTooltipModule,
-    MatProgressSpinnerModule
+    MatProgressSpinnerModule,
+    MatDialogModule
   ],
   providers: [SendDataToDynamicsService]
 })

@@ -18,10 +18,14 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { SendCreditNotesToDynamicsComponent } from './sendCreditNotesToDynamics.component';
 import { SendCreditNotesToDynamicsRoutingModule } from './sendCreditNotesToDynamics-routing.module';
 import { SendCreditNotesToDynamicsService } from './sendCreditNotesToDynamics.service';
+import { InvoiceSyncDetailsDialogModule } from '../sendDataToDynamics/dialogs/invoice-sync-details-dialog.module';
+import { MatDialogModule } from '@angular/material/dialog';
 
 @NgModule({
   declarations: [SendCreditNotesToDynamicsComponent],
   imports: [
+    InvoiceSyncDetailsDialogModule,
+    MatDialogModule,
     CommonModule,
     FormsModule,
     ReactiveFormsModule,

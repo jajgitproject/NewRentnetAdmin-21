@@ -1,8 +1,10 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
+import { MatDialog, MatDialogRef } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { Subscription, timer } from 'rxjs';
 import { switchMap } from 'rxjs/operators';
+import { BatchDetailsDialogComponent } from './dialogs/batch-details-dialog.component';
 import { DynamicsSyncBatch, DynamicsSyncItem } from './dynamicsSyncBatch.model';
 import { DynamicsSyncBatchService } from './dynamicsSyncBatch.service';
 
@@ -15,10 +17,6 @@ import { DynamicsSyncBatchService } from './dynamicsSyncBatch.service';
 export class DynamicsSyncBatchComponent implements OnInit, OnDestroy {
   batches: DynamicsSyncBatch[] = [];
   loading = false;
-  selectedBatch: DynamicsSyncBatch | null = null;
-  detailLoading = false;
-  showDetails = false;
-
   batchColumns = [
     'dynamicsSyncBatchID',
     'startDate',
@@ -31,54 +29,36 @@ export class DynamicsSyncBatchComponent implements OnInit, OnDestroy {
     'actions'
   ];
 
-  itemColumns = [
-    'documentType',
-    'invoiceID',
-    'invoiceNumberWithPrefix',
-    'syncStatus',
-    'responseCode',
-    'responseStatus',
-    'syncDate'
-  ];
-
   /** Where "New Sync" should return: invoice vs credit note send page. */
   syncSource: 'invoice' | 'creditNote' = 'invoice';
 
   private pollSub: Subscription | null = null;
+  private detailsDialogRef: MatDialogRef<BatchDetailsDialogComponent> | null = null;
 
   constructor(
     private service: DynamicsSyncBatchService,
     private snackBar: MatSnackBar,
-    private route: ActivatedRoute
+    private route: ActivatedRoute,
+    private dialog: MatDialog
   ) {}
 
   ngOnInit(): void {
     this.applySyncSourceFromQuery(this.route.snapshot.queryParamMap.get('syncSource'));
-    this.route.queryParamMap.subscribe((params) => {
-      this.applySyncSourceFromQuery(params.get('syncSource'));
-    });
-
     this.loadBatches();
+    this.startPolling();
+
     const batchId = Number(this.route.snapshot.queryParamMap.get('batchId') || 0);
     if (batchId > 0) {
       this.openDetails({ dynamicsSyncBatchID: batchId } as DynamicsSyncBatch);
     }
 
-    this.pollSub = timer(0, 10000).pipe(
-      switchMap(() => this.service.listBatches(50))
-    ).subscribe({
-      next: (batches) => {
-        this.batches = batches || [];
-        if (this.showDetails && this.selectedBatch) {
-          this.service.getBatch(this.selectedBatch.dynamicsSyncBatchID).subscribe({
-            next: (detail) => {
-              this.selectedBatch = detail;
-            },
-            error: () => undefined
-          });
-        }
-      },
-      error: () => undefined
+    this.route.queryParamMap.subscribe((params) => {
+      const previous = this.syncSource;
+      this.applySyncSourceFromQuery(params.get('syncSource'));
+      if (previous !== this.syncSource) {
+        this.loadBatches();
+        this.startPolling();
+      }
     });
   }
 
@@ -88,7 +68,7 @@ export class DynamicsSyncBatchComponent implements OnInit, OnDestroy {
 
   loadBatches(): void {
     this.loading = true;
-    this.service.listBatches(50).subscribe({
+    this.service.listBatches(50, this.syncSource).subscribe({
       next: (batches) => {
         this.loading = false;
         this.batches = batches || [];
@@ -101,31 +81,32 @@ export class DynamicsSyncBatchComponent implements OnInit, OnDestroy {
   }
 
   openDetails(batch: DynamicsSyncBatch): void {
-    this.showDetails = true;
-    this.detailLoading = true;
-    this.service.getBatch(batch.dynamicsSyncBatchID).subscribe({
-      next: (detail) => {
-        this.detailLoading = false;
-        this.selectedBatch = detail;
-        this.applySyncSourceFromBatch(detail);
-      },
-      error: () => {
-        this.detailLoading = false;
-        this.showMessage('Failed to load batch details.');
-      }
-    });
-  }
-
-  closeDetails(): void {
-    this.showDetails = false;
-    this.selectedBatch = null;
-  }
-
-  refreshDetails(): void {
-    if (!this.selectedBatch) {
+    const batchId = batch.dynamicsSyncBatchID;
+    if (!batchId) {
       return;
     }
-    this.openDetails(this.selectedBatch);
+
+    if (this.detailsDialogRef) {
+      this.detailsDialogRef.close();
+    }
+
+    this.detailsDialogRef = this.dialog.open(BatchDetailsDialogComponent, {
+      width: '960px',
+      maxWidth: '95vw',
+      maxHeight: '92vh',
+      panelClass: 'dsb-batch-details-dialog-panel',
+      autoFocus: false,
+      data: {
+        batchId,
+        initialBatch: batch,
+        syncSource: this.syncSource,
+        onBatchLoaded: (detail: DynamicsSyncBatch) => this.applySyncSourceFromBatch(detail)
+      }
+    });
+
+    this.detailsDialogRef.afterClosed().subscribe(() => {
+      this.detailsDialogRef = null;
+    });
   }
 
   getStatusClass(status: string): string {
@@ -182,11 +163,6 @@ export class DynamicsSyncBatchComponent implements OnInit, OnDestroy {
     return Math.min(100, Math.round((this.getProcessedCount(batch) / total) * 100));
   }
 
-  isBatchSelected(batch: DynamicsSyncBatch): boolean {
-    return this.showDetails
-      && this.selectedBatch?.dynamicsSyncBatchID === batch?.dynamicsSyncBatchID;
-  }
-
   formatBatchStatus(status: string): string {
     const value = String(status || '').trim();
     if (!value) {
@@ -202,11 +178,6 @@ export class DynamicsSyncBatchComponent implements OnInit, OnDestroy {
     return (batch?.numberofSuccessfulItems || 0) + (batch?.numberofFailedItems || 0);
   }
 
-  getPendingCount(batch: DynamicsSyncBatch): number {
-    const total = batch?.numberofItems || 0;
-    return Math.max(total - this.getProcessedCount(batch), 0);
-  }
-
   formatDateTime(dateValue?: string, timeValue?: string): string {
     if (!dateValue) {
       return '-';
@@ -215,16 +186,6 @@ export class DynamicsSyncBatchComponent implements OnInit, OnDestroy {
     const timeRaw = timeValue ? String(timeValue) : '';
     const timePart = timeRaw && !timeRaw.startsWith('[object') ? timeRaw.substring(0, 8) : '';
     return timePart ? `${datePart} ${timePart}` : datePart;
-  }
-
-  formatResponseCode(item: { responseCode?: string; responseStatus?: string; syncStatus?: string }): string {
-    const code = String(item?.responseCode || '').trim();
-    const status = String(item?.responseStatus || '').trim();
-    const syncStatus = String(item?.syncStatus || '').trim();
-    if (status === 'Created' || status === 'AlreadyExists' || (syncStatus === 'Successful' && code === '400')) {
-      return '201';
-    }
-    return code || '-';
   }
 
   trackItem(_index: number, item: DynamicsSyncItem): number {
@@ -241,6 +202,52 @@ export class DynamicsSyncBatchComponent implements OnInit, OnDestroy {
     return this.syncSource === 'creditNote'
       ? 'Send Credit Notes To Dynamics'
       : 'Send Invoices To Dynamics';
+  }
+
+  get isCreditNoteView(): boolean {
+    return this.syncSource === 'creditNote';
+  }
+
+  get monitorTitle(): string {
+    return this.isCreditNoteView ? 'Credit Note Batch Monitor' : 'Invoice Batch Monitor';
+  }
+
+  get monitorSubtitle(): string {
+    if (this.isCreditNoteView) {
+      return 'Track RentNet → Dynamics credit note sync batches in real time. Processing continues on the server even if you leave this page.';
+    }
+    return 'Track RentNet → Dynamics invoice sync batches in real time. Processing continues on the server even if you leave this page.';
+  }
+
+  get batchesSectionTitle(): string {
+    return this.isCreditNoteView ? 'Credit Note Sync Batches' : 'Invoice Sync Batches';
+  }
+
+  get itemsColumnHeader(): string {
+    return this.isCreditNoteView ? 'Credit Notes' : 'Invoices';
+  }
+
+  get syncedItemsStatLabel(): string {
+    return this.isCreditNoteView ? 'Synced Credit Notes' : 'Synced Invoices';
+  }
+
+  get emptyStateDescription(): string {
+    if (this.isCreditNoteView) {
+      return 'Start a credit note batch from Send Credit Notes To Dynamics to monitor progress here.';
+    }
+    return 'Start an invoice batch from Send Invoices To Dynamics to monitor progress here.';
+  }
+
+  private startPolling(): void {
+    this.pollSub?.unsubscribe();
+    this.pollSub = timer(0, 10000).pipe(
+      switchMap(() => this.service.listBatches(50, this.syncSource))
+    ).subscribe({
+      next: (batches) => {
+        this.batches = batches || [];
+      },
+      error: () => undefined
+    });
   }
 
   private applySyncSourceFromQuery(value: string | null): void {

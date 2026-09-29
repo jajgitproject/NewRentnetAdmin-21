@@ -54,6 +54,60 @@
       <div class="body sdd-shell__body">
         <div class="sdd-tab-content">
           <mat-accordion class="sdd-search-accordion" multi>
+            <mat-expansion-panel class="sdd-sync-accordion-panel" expanded="true">
+              <mat-expansion-panel-header>
+                <mat-panel-title>
+                  <i class="fas fa-sync-alt sdd-panel-icon"></i>
+                  <ng-container *ngTemplateOutlet="rentNetDynamicsBrand; context: { variant: 'panel' }"></ng-container>
+                </mat-panel-title>
+                <mat-panel-description>Batch mode — runs in background, no need to stay on this page</mat-panel-description>
+              </mat-expansion-panel-header>
+
+              <div class="sdd-batch-banner" role="note">
+                <div class="sdd-batch-banner__badge" aria-hidden="true">
+                  <i class="fas fa-layer-group"></i>
+                </div>
+                <div class="sdd-batch-banner__content">
+                  <div class="sdd-batch-banner__headline">
+                    <span class="sdd-batch-banner__tag">Batch mode</span>
+                    <h2 class="sdd-batch-banner__title">Runs in the background — no need to wait on this page</h2>
+                  </div>
+                  <p class="sdd-batch-banner__text">
+                    After you click <strong>Send to Dynamics</strong>, credit notes are queued and processed automatically.
+                    You can navigate away immediately and monitor progress anytime.
+                  </p>
+                  <div class="sdd-batch-banner__steps" aria-label="How batch sync works">
+                    <div class="sdd-batch-step">
+                      <span class="sdd-batch-step__num">1</span>
+                      <span class="sdd-batch-step__label">Select credit notes</span>
+                    </div>
+                    <i class="fas fa-chevron-right sdd-batch-step__arrow" aria-hidden="true"></i>
+                    <div class="sdd-batch-step">
+                      <span class="sdd-batch-step__num">2</span>
+                      <span class="sdd-batch-step__label">Click Send to Dynamics</span>
+                    </div>
+                    <i class="fas fa-chevron-right sdd-batch-step__arrow" aria-hidden="true"></i>
+                    <div class="sdd-batch-step sdd-batch-step--highlight">
+                      <span class="sdd-batch-step__num"><i class="fas fa-check"></i></span>
+                      <span class="sdd-batch-step__label">Leave this page</span>
+                    </div>
+                    <i class="fas fa-chevron-right sdd-batch-step__arrow" aria-hidden="true"></i>
+                    <div class="sdd-batch-step">
+                      <span class="sdd-batch-step__num">4</span>
+                      <span class="sdd-batch-step__label">Track on Batch Monitor</span>
+                    </div>
+                  </div>
+                </div>
+                <div class="sdd-batch-banner__action">
+                  <button type="button" class="sdd-batch-banner__btn" (click)="openBatchMonitor()">
+                    <i class="fas fa-tasks"></i>
+                    Open Batch Monitor
+                  </button>
+                  <span class="sdd-batch-banner__hint">Dynamics Sync Batch</span>
+                </div>
+              </div>
+            </mat-expansion-panel>
+
             <mat-expansion-panel expanded="true">
               <mat-expansion-panel-header>
                 <mat-panel-title><i class="fas fa-filter sdd-panel-icon"></i> Credit Note Filters</mat-panel-title>
@@ -176,12 +230,17 @@
             </div>
 
             <div class="sdd-summary" *ngIf="sendSummary" [ngClass]="getSummaryClass()">
-              <div class="sdd-summary__body">
-                <span class="sdd-summary__text">{{ sendSummary }}</span>
-                <button *ngIf="lastBatchId > 0" type="button" mat-stroked-button class="sdd-summary__link" (click)="openBatchMonitor()">
-                  Open Batch Monitor
-                </button>
+              <div class="sdd-summary__icon" aria-hidden="true">
+                <i class="fas fa-check-circle"></i>
               </div>
+              <div class="sdd-summary__body">
+                <span class="sdd-summary__title">Batch queued successfully</span>
+                <span class="sdd-summary__text">{{ sendSummary }}</span>
+              </div>
+              <button mat-stroked-button type="button" class="sdd-summary__link" (click)="openBatchMonitor()">
+                <i class="fas fa-external-link-alt"></i>
+                View Batch Monitor
+              </button>
             </div>
 
             <div class="responsive_table">
@@ -251,7 +310,12 @@
                         <mat-cell *matCellDef="let row" class="sdd-col-amount">{{ row.creditNoteAmount | currency : 'INR' : 'symbol' : '1.0-0' }}</mat-cell>
                       </ng-container>
                       <mat-header-row *matHeaderRowDef="displayedColumns"></mat-header-row>
-                      <mat-row *matRowDef="let row; columns: displayedColumns;" [class.sdd-row-selected]="isRowSelected(row)" [class.sdd-row-disabled]="!isRowSelectable(row)"></mat-row>
+                      <mat-row
+                        *matRowDef="let row; columns: displayedColumns;"
+                        class="sdd-row-clickable"
+                        [class.sdd-row-selected]="isRowSelected(row)"
+                        [class.sdd-row-disabled]="!isRowSelectable(row)"
+                        (click)="openCreditNoteSyncDetails(row, $event)"></mat-row>
                     </mat-table>
                   </div>
                   <div class="sdd-pager">

@@ -5,6 +5,8 @@ import { MAT_DATE_LOCALE } from '@angular/material/core';
 import { HttpErrorResponse } from '@angular/common/http';
 import { FormControl } from '@angular/forms';
 import { MatSnackBar } from '@angular/material/snack-bar';
+import { MatDialog } from '@angular/material/dialog';
+import { InvoiceSyncDetailsDialogComponent } from './dialogs/invoice-sync-details-dialog.component';
 import { SelectionModel } from '@angular/cdk/collections';
 import { Observable, merge, of } from 'rxjs';
 import { debounceTime, map, startWith, switchMap, tap } from 'rxjs/operators';
@@ -75,7 +77,8 @@ export class SendDataToDynamicsComponent implements OnInit {
     private sendDataToDynamicsService: SendDataToDynamicsService,
     private generalService: GeneralService,
     private snackBar: MatSnackBar,
-    private router: Router
+    private router: Router,
+    private dialog: MatDialog
   ) {}
 
   ngOnInit(): void {
@@ -487,6 +490,29 @@ export class SendDataToDynamicsComponent implements OnInit {
   getEInvoiceStatusLabel(irnStatus: string): string {
     const status = String(irnStatus || '').trim();
     return status || 'Not Created';
+  }
+
+  openInvoiceSyncDetails(row: SendDataToDynamicsInvoice, event?: MouseEvent): void {
+    const invoiceId = row?.invoiceID || row?.InvoiceID || 0;
+    if (!invoiceId) {
+      return;
+    }
+
+    if (event) {
+      const target = event.target as HTMLElement;
+      if (target.closest('.sdd-col-select') || target.closest('mat-checkbox')) {
+        return;
+      }
+    }
+
+    this.dialog.open(InvoiceSyncDetailsDialogComponent, {
+      width: '520px',
+      maxWidth: '520px',
+      maxHeight: '90vh',
+      panelClass: 'sdd-invoice-sync-details-panel',
+      autoFocus: false,
+      data: { documentKind: 'invoice', invoiceId, row }
+    });
   }
 
   isRowSelected(row: SendDataToDynamicsInvoice): boolean {

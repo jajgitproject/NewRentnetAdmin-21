@@ -27,7 +27,7 @@ export class SendDataToDynamicsInvoice {
     this.customerID = row?.customerID || 0;
     this.customerName = row?.customerName || '';
     this.customerGroupID = row?.customerGroupID || 0;
-    this.invoiceID = row?.invoiceID || 0;
+    this.invoiceID = row?.invoiceID || row?.InvoiceID || 0;
     this.branchID = row?.branchID || 0;
     this.customerGroup = row?.customerGroup || '';
     this.invoiceDate = row?.invoiceDate || '';

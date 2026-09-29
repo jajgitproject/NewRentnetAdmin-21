@@ -16,8 +16,11 @@ export class DynamicsSyncBatchService {
     this.apiUrl = generalService.BaseURL + 'DynamicsSyncBatch';
   }
 
-  listBatches(take = 25): Observable<DynamicsSyncBatch[]> {
-    const params = new HttpParams().set('take', String(take));
+  listBatches(take = 25, syncSource?: 'invoice' | 'creditNote'): Observable<DynamicsSyncBatch[]> {
+    let params = new HttpParams().set('take', String(take));
+    if (syncSource === 'invoice' || syncSource === 'creditNote') {
+      params = params.set('syncSource', syncSource);
+    }
     return this.httpClient.get<any>(this.apiUrl, { params }).pipe(
       map((response) => (response?.batches || []).map((row) => mapDynamicsSyncBatch(row)))
     );

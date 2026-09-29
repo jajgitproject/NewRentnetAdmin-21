@@ -873,9 +873,13 @@
 
                         *matRowDef="let row; columns: displayedColumns;"
 
+                        class="sdd-row-clickable"
+
                         [class.sdd-row-selected]="isRowSelected(row)"
 
-                        [class.sdd-row-disabled]="!isRowSelectable(row)">
+                        [class.sdd-row-disabled]="!isRowSelectable(row)"
+
+                        (click)="openInvoiceSyncDetails(row, $event)">
 
                       </mat-row>
 

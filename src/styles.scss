@@ -1755,3 +1755,93 @@ body.side-closed.submenu-closed.side-closed-hover .sidebar .menu .list li.menu-r
   padding: 10px 18px 16px !important;
 }
 
+/* Invoice sync details dialog — fixed 520px width */
+.cdk-overlay-container .cdk-overlay-pane.sdd-invoice-sync-details-panel {
+  width: 520px !important;
+  max-width: min(520px, 96vw) !important;
+  max-height: 90vh !important;
+  overflow: hidden !important;
+}
+
+.cdk-overlay-container .cdk-overlay-pane.sdd-invoice-sync-details-panel .mat-mdc-dialog-container,
+.cdk-overlay-container .cdk-overlay-pane.sdd-invoice-sync-details-panel .mat-dialog-container,
+.cdk-overlay-container .cdk-overlay-pane.sdd-invoice-sync-details-panel .mat-mdc-dialog-container .mat-mdc-dialog-surface,
+.cdk-overlay-container .cdk-overlay-pane.sdd-invoice-sync-details-panel .mat-mdc-dialog-container .mdc-dialog__surface {
+  width: 100% !important;
+  max-width: 100% !important;
+  max-height: 90vh !important;
+  padding: 16px !important;
+  box-sizing: border-box !important;
+  overflow: hidden !important;
+  display: flex !important;
+  flex-direction: column !important;
+  min-height: 0 !important;
+}
+
+.cdk-overlay-container .cdk-overlay-pane.sdd-invoice-sync-details-panel app-invoice-sync-details-dialog {
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow: hidden;
+}
+
+/* One scrollbar: only mat-dialog-content scrolls (not surface/container/nested lists). */
+.cdk-overlay-container .cdk-overlay-pane.sdd-invoice-sync-details-panel .mat-mdc-dialog-container .mat-mdc-dialog-content,
+.cdk-overlay-container .cdk-overlay-pane.sdd-invoice-sync-details-panel .mat-mdc-dialog-container .mdc-dialog__content,
+.cdk-overlay-container .cdk-overlay-pane.sdd-invoice-sync-details-panel .mat-mdc-dialog-container [mat-dialog-content],
+.cdk-overlay-container .cdk-overlay-pane.sdd-invoice-sync-details-panel .mat-dialog-content {
+  flex: 1 1 auto;
+  min-height: 0;
+  max-width: 100% !important;
+  max-height: none !important;
+  box-sizing: border-box !important;
+  overflow-x: hidden !important;
+  overflow-y: auto !important;
+}
+
+/* Dynamics sync batch details dialog */
+.cdk-overlay-container .cdk-overlay-pane.dsb-batch-details-dialog-panel {
+  width: 960px !important;
+  max-width: min(960px, 95vw) !important;
+  max-height: 92vh !important;
+  overflow: hidden !important;
+}
+
+.cdk-overlay-container .cdk-overlay-pane.dsb-batch-details-dialog-panel .mat-mdc-dialog-container,
+.cdk-overlay-container .cdk-overlay-pane.dsb-batch-details-dialog-panel .mat-dialog-container,
+.cdk-overlay-container .cdk-overlay-pane.dsb-batch-details-dialog-panel .mat-mdc-dialog-container .mat-mdc-dialog-surface,
+.cdk-overlay-container .cdk-overlay-pane.dsb-batch-details-dialog-panel .mat-mdc-dialog-container .mdc-dialog__surface {
+  width: 100% !important;
+  max-width: 100% !important;
+  max-height: 92vh !important;
+  padding: 16px !important;
+  box-sizing: border-box !important;
+  overflow: hidden !important;
+  display: flex !important;
+  flex-direction: column !important;
+  min-height: 0 !important;
+}
+
+.cdk-overlay-container .cdk-overlay-pane.dsb-batch-details-dialog-panel app-dynamics-sync-batch-details-dialog {
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow: hidden;
+}
+
+/* One scrollbar: header stays fixed; only mat-dialog-content scrolls. */
+.cdk-overlay-container .cdk-overlay-pane.dsb-batch-details-dialog-panel .mat-mdc-dialog-container .mat-mdc-dialog-content,
+.cdk-overlay-container .cdk-overlay-pane.dsb-batch-details-dialog-panel .mat-mdc-dialog-container .mdc-dialog__content,
+.cdk-overlay-container .cdk-overlay-pane.dsb-batch-details-dialog-panel .mat-mdc-dialog-container [mat-dialog-content],
+.cdk-overlay-container .cdk-overlay-pane.dsb-batch-details-dialog-panel .mat-dialog-content {
+  flex: 1 1 auto;
+  min-height: 0;
+  max-width: 100% !important;
+  max-height: none !important;
+  box-sizing: border-box !important;
+  overflow-x: auto !important;
+  overflow-y: auto !important;
+}
+
