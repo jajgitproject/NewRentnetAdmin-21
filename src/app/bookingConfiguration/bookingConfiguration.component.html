@@ -327,7 +327,9 @@
                 <input required type="text" matInput formControlName="pickupAddress"
                   [matAutocomplete]="auto20">
                 <mat-icon matSuffix>location_on</mat-icon>
-                <mat-autocomplete #auto20="matAutocomplete" (optionSelected)="onPGLSelected($event.option.value)">
+                <mat-autocomplete #auto20="matAutocomplete" class="google-autocomplete-panel"
+                  panelWidth="fit-content"
+                  (optionSelected)="onPGLSelected($event.option.value)">
                   <mat-option *ngFor="let option of filteredGoogleAddressOptions | async"
                     [value]="option.geoSearchString"
                     (click)="OnPickupGeoLocationClick(option)">
@@ -387,7 +389,9 @@
                 <input type="text" matInput formControlName="dropOffAddress"
                   [matAutocomplete]="auto21">
                 <mat-icon matSuffix>location_on</mat-icon>
-                <mat-autocomplete #auto21="matAutocomplete" (optionSelected)="onDropGLSelected($event.option.value)">
+                <mat-autocomplete #auto21="matAutocomplete" class="google-autocomplete-panel"
+                  panelWidth="fit-content"
+                  (optionSelected)="onDropGLSelected($event.option.value)">
                   <mat-option *ngFor="let option of filteredDropOffGoogleAddressOptions | async"
                     [value]="option.geoSearchString"
                     (click)="OnDropOffGeoLocationClick(option)">

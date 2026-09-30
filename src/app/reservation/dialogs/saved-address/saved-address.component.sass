@@ -1,21 +1,30 @@
 .saved-address-dialog
   background: #fff
   border-radius: 10px
-  overflow: hidden
-  min-width: 480px
-  max-width: 640px
+  overflow: visible
+  width: 100%
+  min-width: 0
+  box-sizing: border-box
 
 .modalHeader
   display: flex
   align-items: flex-start
   justify-content: space-between
-  gap: 16px
-  padding: 18px 20px 14px
+  gap: 12px
+  padding: 16px 18px 14px
   border-bottom: 1px solid rgba(31, 36, 48, 0.08)
+
+.header-leading
+  display: flex
+  align-items: flex-start
+  gap: 14px
+  flex: 1
+  min-width: 0
 
 .header-text
   min-width: 0
   flex: 1
+  padding-top: 2px
 
 .dialog-title
   font-size: 20px
@@ -29,14 +38,8 @@
   color: #6b7280
   word-break: break-word
 
-.header-actions
-  display: flex
-  align-items: center
-  gap: 8px
-  flex-shrink: 0
-
 .add-address-btn
-  white-space: nowrap
+  flex-shrink: 0
 
   mat-icon
     font-size: 18px
@@ -46,19 +49,20 @@
 
 .dialog-close-btn
   color: #4b5563
+  flex-shrink: 0
 
 .dialog-content
-  padding: 16px 20px 20px !important
-  max-height: min(60vh, 520px)
+  padding: 16px 18px 20px !important
+  max-height: min(72vh, 680px)
   overflow-y: auto
+  overflow-x: visible
 
 .empty-state
   display: flex
   flex-direction: column
-  align-items: center
-  justify-content: center
-  text-align: center
-  padding: 32px 16px
+  align-items: flex-start
+  text-align: left
+  padding: 24px 16px
   background: #f7f8fa
   border: 1px dashed rgba(31, 36, 48, 0.12)
   border-radius: 10px
@@ -80,7 +84,7 @@
   margin: 0 0 16px
   font-size: 13px
   color: #6b7280
-  max-width: 320px
+  max-width: 100%
 
 .address-list
   display: flex
@@ -90,7 +94,7 @@
 .address-card
   border: 1px solid rgba(31, 36, 48, 0.1)
   border-radius: 10px
-  overflow: hidden
+  overflow: visible
   background: #fff
   transition: box-shadow 0.15s ease, border-color 0.15s ease
 
@@ -98,21 +102,29 @@
     border-color: rgba(23, 162, 184, 0.35)
     box-shadow: 0 4px 14px rgba(31, 36, 48, 0.08)
 
-.address-card-header
+.address-card-layout
   display: flex
-  align-items: center
-  justify-content: space-between
-  gap: 12px
-  padding: 12px 14px
-  background: linear-gradient(180deg, #f0f9fb 0%, #e8f4f7 100%)
-  border-bottom: 1px solid rgba(23, 162, 184, 0.12)
+  align-items: flex-start
+  gap: 14px
+  padding: 14px 14px 16px
+
+.address-card-actions
+  flex-shrink: 0
+  padding-top: 2px
+
+.select-btn
+  min-width: 88px
+
+.address-card-body
+  flex: 1
+  min-width: 0
 
 .address-card-title
   display: flex
   align-items: center
   flex-wrap: wrap
   gap: 8px
-  min-width: 0
+  margin-bottom: 10px
 
 .address-index
   font-size: 14px
@@ -133,42 +145,28 @@
   color: #374151
   background: rgba(31, 36, 48, 0.08)
 
-.select-btn
-  flex-shrink: 0
-  min-width: 72px
-  line-height: 32px
-  padding: 0 14px
-
-.address-card-body
-  padding: 14px 16px 16px
-
-.address-primary
+.address-line
   margin: 0 0 8px
   font-size: 14px
   font-weight: 500
   color: #1f2430
-  line-height: 1.5
-  word-break: break-word
-
-.address-secondary
-  margin: 0 0 6px
-  font-size: 13px
-  color: #4b5563
   line-height: 1.45
+  white-space: normal
   word-break: break-word
+  overflow-wrap: anywhere
+
+.address-line-muted
+  font-size: 13px
+  font-weight: 400
+  color: #4b5563
 
 .address-meta
-  margin: 8px 0 0
+  margin: 4px 0 0
   padding-top: 8px
   border-top: 1px solid rgba(31, 36, 48, 0.06)
   font-size: 12px
   font-weight: 600
   color: #6b7280
   letter-spacing: 0.01em
-
-::ng-deep .saved-address-dialog-panel
-  .mat-dialog-container,
-  .mat-mdc-dialog-container
-    padding: 0
-    overflow: hidden
-    border-radius: 10px
+  white-space: normal
+  word-break: break-word

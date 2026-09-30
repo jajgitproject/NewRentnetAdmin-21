@@ -1048,6 +1048,17 @@ GetCitiessAl(): Observable<CityDropDown[]> {
   getGoogleAddress(): Observable<GoogleAddressDropDown[]> {
     return this.http.get<GoogleAddressDropDown[]>(this.BaseURL + "GoogleAddress/ForDropDown");
   }
+
+  searchGoogleAddress(prefix: string): Observable<GoogleAddressDropDown[]> {
+    const term = (prefix ?? '').trim();
+    if (!term) {
+      return of([]);
+    }
+    return this.http.get<GoogleAddressDropDown[]>(
+      this.BaseURL + 'GoogleAddress/SearchForDropDown',
+      { params: { prefix: term } }
+    );
+  }
   
   getCustomerPersonDetails(): Observable<CustomerPersonDetailsDropDown[]> {
     return this.http.get<CustomerPersonDetailsDropDown[]>(this.BaseURL + "ReservationPassenger/ForCustomerPersonDetailsDropDown");

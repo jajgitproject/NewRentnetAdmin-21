@@ -6,8 +6,8 @@ import { MatPaginator } from '@angular/material/paginator';
 import { MatSort } from '@angular/material/sort';
 import { DataSource } from '@angular/cdk/collections';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import { BehaviorSubject, fromEvent, merge, Observable, Subscription } from 'rxjs';
-import { map, startWith } from 'rxjs/operators';
+import { BehaviorSubject, fromEvent, merge, Observable, of, Subscription } from 'rxjs';
+import { catchError, debounceTime, distinctUntilChanged, map, startWith, switchMap } from 'rxjs/operators';
 import { DateAdapter, MAT_DATE_LOCALE } from '@angular/material/core';
 import { MatMenu, MatMenuTrigger } from '@angular/material/menu';
 import { SelectionModel } from '@angular/cdk/collections';
@@ -1433,30 +1433,25 @@ private extractTime(dateTime: Date): Date {
   }
 
 
-  InitGoogleAddress(){
-    this._generalService.getGoogleAddress().subscribe(
-      data=>
-      {
-        this.GoogleAddressList=data;
-        this.filteredGoogleAddressOptions = this.advanceTableForm.controls['pickupAddress'].valueChanges.pipe(
-          startWith(""),
-          map(value => this._filterGA(value || ''))
-        ); 
-      });
-      
-  }
-
-  private _filterGA(value: string): any {
-    const filterValue = value.toLowerCase();
-    if(filterValue.length===0)
-    {
-      return []
-    }
-    return this.GoogleAddressList.filter(
-      customer => 
-      {
-        return customer.geoSearchString.toLowerCase().includes(filterValue);
-      }
+  InitGoogleAddress() {
+    this.filteredGoogleAddressOptions = this.advanceTableForm.controls['pickupAddress'].valueChanges.pipe(
+      startWith(''),
+      debounceTime(300),
+      distinctUntilChanged(),
+      switchMap((value) => {
+        const term = (typeof value === 'string' ? value : '').trim();
+        if (!term) {
+          this.GoogleAddressList = [];
+          return of([]);
+        }
+        return this._generalService.searchGoogleAddress(term).pipe(
+          catchError(() => of([])),
+          map((data) => {
+            this.GoogleAddressList = data ?? [];
+            return this.GoogleAddressList;
+          })
+        );
+      })
     );
   }
 
@@ -1737,29 +1732,25 @@ private extractTime(dateTime: Date): Date {
 
 
 
- InitDropOffGoogleAddress(){
-  this._generalService.getGoogleAddress().subscribe(
-    data=>
-    {
-      this.DropOffGoogleAddressList=data;
-      this.filteredDropOffGoogleAddressOptions = this.advanceTableForm.controls['dropOffAddress'].valueChanges.pipe(
-        startWith(""),
-        map(value => this._filterDropoffGA(value || ''))
-      ); 
-    });
-}
-
-private _filterDropoffGA(value: string): any {
-  const filterValue = value.toLowerCase();
-  if(filterValue.length===0)
-  {
-    return []
-  }
-  return this.DropOffGoogleAddressList.filter(
-    customer => 
-    {
-      return customer.geoSearchString.toLowerCase().includes(filterValue);
-    }
+ InitDropOffGoogleAddress() {
+  this.filteredDropOffGoogleAddressOptions = this.advanceTableForm.controls['dropOffAddress'].valueChanges.pipe(
+    startWith(''),
+    debounceTime(300),
+    distinctUntilChanged(),
+    switchMap((value) => {
+      const term = (typeof value === 'string' ? value : '').trim();
+      if (!term) {
+        this.DropOffGoogleAddressList = [];
+        return of([]);
+      }
+      return this._generalService.searchGoogleAddress(term).pipe(
+        catchError(() => of([])),
+        map((data) => {
+          this.DropOffGoogleAddressList = data ?? [];
+          return this.DropOffGoogleAddressList;
+        })
+      );
+    })
   );
 }
 
