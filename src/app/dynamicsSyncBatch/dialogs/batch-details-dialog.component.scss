@@ -338,6 +338,15 @@
     cursor: default;
   }
 
+  .mat-mdc-row.dsb-line-item-row {
+    cursor: pointer;
+    transition: background-color 0.15s ease;
+
+    &:hover {
+      background-color: rgba(37, 99, 235, 0.06);
+    }
+  }
+
   .mat-mdc-cell {
     color: #334155;
     font-size: 13px;

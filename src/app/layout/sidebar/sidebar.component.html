@@ -41,7 +41,7 @@
               <a href="#"
                 [routerLink]="sidebarSubItem.submenu.length > 0 ? null : ['/', sidebarSubItem.path]"
                 (click)="openMenuPage(sidebarSubItem.submenu.length > 0 ? null : sidebarSubItem.path, $event, 2, sidebarSubItem.moduleName)" [ngClass]="[sidebarSubItem.class]">
-                {{sidebarSubItem.title | translate}} 
+                {{sidebarSubItem.title | translate}}
               </a>
               <!-- Second level menu -->
               <ul class="ml-menu-2" *ngIf="visibleLevel3(sidebarSubItem).length > 0">

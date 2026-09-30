@@ -272,7 +272,7 @@
 
 }
 
-// ─── RentNet → Dynamics brand ────────────────────────────────────────────────
+// ─── Dynamics flow brand (Invoices / Credit note → Dynamics) ─────────────────
 
 .sdd-flow-brand {
 
@@ -1239,6 +1239,60 @@
   font-style: italic;
 }
 
+.sdd-multi-value-field {
+  margin-bottom: 0.5rem;
+}
+
+.sdd-multi-value-input {
+  line-height: 1.35;
+  resize: none;
+  overflow-y: auto;
+  overflow-x: hidden;
+  height: 24px;
+  max-height: 24px;
+  margin: 0;
+  padding: 0;
+}
+
+:host ::ng-deep .invoice-home-search.quick-search-panel .sdd-multi-value-field .mat-mdc-form-field-subscript-wrapper {
+  height: auto !important;
+  min-height: 1.125rem !important;
+  margin-top: 2px !important;
+}
+
+:host ::ng-deep .invoice-home-search.quick-search-panel .sdd-multi-value-field .mat-mdc-form-field-infix {
+  width: 100% !important;
+  min-width: 0 !important;
+  min-height: unset !important;
+  padding-top: 22px !important;
+  padding-bottom: 6px !important;
+}
+
+:host ::ng-deep .invoice-home-search.quick-search-panel .sdd-multi-value-field textarea.mat-mdc-input-element {
+  width: 100% !important;
+  min-width: 100% !important;
+  box-sizing: border-box;
+  display: block;
+  height: 24px !important;
+  max-height: 24px !important;
+  overflow-y: auto !important;
+  scrollbar-width: thin;
+}
+
+:host ::ng-deep .invoice-home-search.quick-search-panel .sdd-multi-value-field textarea.mat-mdc-input-element::-webkit-scrollbar {
+  width: 6px;
+}
+
+:host ::ng-deep .invoice-home-search.quick-search-panel .sdd-multi-value-field textarea.mat-mdc-input-element::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 3px;
+}
+
+:host ::ng-deep .invoice-home-search.quick-search-panel .sdd-multi-value-field .mdc-text-field--filled {
+  height: auto !important;
+  min-height: unset !important;
+}
+
 .sdd-row-clickable:not(.sdd-row-disabled) {
   cursor: pointer;
 }
@@ -1941,9 +1995,7 @@
 
 
 
-:host ::ng-deep .invoice-home-search.quick-search-panel .cp-quick-search-field .mat-mdc-input-element,
-
-:host ::ng-deep .invoice-home-search.quick-search-panel .cp-quick-search-field .mat-mdc-select-value-text {
+:host ::ng-deep .invoice-home-search.quick-search-panel .cp-quick-search-field .mat-mdc-input-element {
 
   color: #222 !important;
 
@@ -1952,6 +2004,31 @@
   font-weight: 400 !important;
 
   letter-spacing: 0 !important;
+
+}
+
+
+
+:host ::ng-deep .invoice-home-search.quick-search-panel .cp-quick-search-field .mat-mdc-select-value-text,
+:host ::ng-deep .invoice-home-search.quick-search-panel .cp-quick-search-field .mat-mdc-select-min-line {
+
+  color: #222 !important;
+
+  font-size: 12px !important;
+
+  font-weight: 400 !important;
+
+  letter-spacing: 0 !important;
+
+}
+
+
+
+:host ::ng-deep .cp-quick-search-select-panel.mat-mdc-select-panel .mat-mdc-option .mdc-list-item__primary-text {
+
+  font-size: 12px !important;
+
+  line-height: 1.35 !important;
 
 }
 

@@ -11,10 +11,12 @@ import { DynamicsSyncBatchRoutingModule } from './dynamicsSyncBatch-routing.modu
 import { DynamicsSyncBatchComponent } from './dynamicsSyncBatch.component';
 import { DynamicsSyncBatchService } from './dynamicsSyncBatch.service';
 import { BatchDetailsDialogComponent } from './dialogs/batch-details-dialog.component';
+import { InvoiceSyncDetailsDialogModule } from '../sendDataToDynamics/dialogs/invoice-sync-details-dialog.module';
 
 @NgModule({
   declarations: [DynamicsSyncBatchComponent, BatchDetailsDialogComponent],
   imports: [
+    InvoiceSyncDetailsDialogModule,
     CommonModule,
     FormsModule,
     RouterModule,

@@ -1,5 +1,15 @@
 /* Credit Notes → Dynamics page-only overrides (invoice screen unchanged). */
 
+.sdd-credit-note-filters {
+  padding-top: 0.25rem;
+}
+
+.sdd-filter-actions {
+  margin-top: 0.35rem;
+  padding-top: 0.85rem;
+  border-top: 1px solid #e8edf2;
+}
+
 :host ::ng-deep .sdd-page--credit-notes .invoice-home-search.quick-search-panel {
   .cp-quick-search-field.cp-date-field {
     .mat-mdc-form-field-flex {

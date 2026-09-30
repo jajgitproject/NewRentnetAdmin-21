@@ -92,6 +92,30 @@ export class SendCreditNotesToDynamicsService {
 
 
 
+  private toCreditNoteListRouteParam(value: any): string {
+
+    if (value === null || value === undefined) {
+
+      return 'null';
+
+    }
+
+    const text = String(value).trim();
+
+    if (text === '' || text === 'null') {
+
+      return 'null';
+
+    }
+
+    const encoded = text.replace(/,/g, '~').replace(/\//g, '-');
+
+    return this.toRouteParam(encoded);
+
+  }
+
+
+
   private buildSearchUrl(
 
     searchCustomerName: string,
@@ -111,6 +135,8 @@ export class SendCreditNotesToDynamicsService {
     searchCreditNoteType: string,
 
     searchECreditNoteStatus: string,
+
+    searchCreditNoteSyncStatus: string,
 
     searchActivationStatus: boolean,
 
@@ -134,7 +160,7 @@ export class SendCreditNotesToDynamicsService {
 
       + '/' + this.toDocumentRouteParam(searchInvoiceNo)
 
-      + '/' + this.toDocumentRouteParam(searchCreditNoteNo)
+      + '/' + this.toCreditNoteListRouteParam(searchCreditNoteNo)
 
       + '/' + this.toRouteParam(searchBranch)
 
@@ -142,7 +168,7 @@ export class SendCreditNotesToDynamicsService {
 
       + '/' + this.toRouteParam(searchToDate)
 
-      + '/null'
+      + '/' + this.toRouteParam(searchCreditNoteSyncStatus)
 
       + '/' + this.toRouteParam(searchECreditNoteStatus)
 
@@ -180,6 +206,8 @@ export class SendCreditNotesToDynamicsService {
 
     searchECreditNoteStatus: string,
 
+    searchCreditNoteSyncStatus: string,
+
     searchActivationStatus: boolean,
 
     pageNumber: number
@@ -205,6 +233,8 @@ export class SendCreditNotesToDynamicsService {
       searchCreditNoteType,
 
       searchECreditNoteStatus,
+
+      searchCreditNoteSyncStatus,
 
       searchActivationStatus,
 
@@ -240,6 +270,8 @@ export class SendCreditNotesToDynamicsService {
 
     searchECreditNoteStatus: string,
 
+    searchCreditNoteSyncStatus: string,
+
     searchActivationStatus: boolean,
 
     pageNumber: number,
@@ -270,6 +302,8 @@ export class SendCreditNotesToDynamicsService {
 
       searchECreditNoteStatus,
 
+      searchCreditNoteSyncStatus,
+
       searchActivationStatus,
 
       pageNumber,
@@ -292,13 +326,27 @@ export class SendCreditNotesToDynamicsService {
 
   }
 
-  sendCreditNotesToDynamics(invoiceCreditNoteIds: number[], batchCreatedById: number): Observable<any> {
+  sendCreditNotesToDynamics(
+    creditNotes: { invoiceCreditNoteID: number; creditNoteNumberWithPrefix: string }[],
+    batchCreatedById: number
+  ): Observable<any> {
+
+    const invoiceCreditNoteIds = (creditNotes || [])
+      .map((row) => Number(row?.invoiceCreditNoteID || 0))
+      .filter((id) => id > 0);
 
     return this.httpClient.post(`${this.BATCH_API_URL}/startCreditNotes`, {
 
-      invoiceCreditNoteIds,
+      InvoiceCreditNoteIds: invoiceCreditNoteIds,
 
-      batchCreatedByID: batchCreatedById
+      CreditNotes: (creditNotes || [])
+        .filter((row) => Number(row?.invoiceCreditNoteID || 0) > 0 && String(row?.creditNoteNumberWithPrefix || '').trim())
+        .map((row) => ({
+          InvoiceCreditNoteID: Number(row.invoiceCreditNoteID),
+          CreditNoteNumberWithPrefix: String(row.creditNoteNumberWithPrefix).trim()
+        })),
+
+      BatchCreatedByID: batchCreatedById
 
     });
 

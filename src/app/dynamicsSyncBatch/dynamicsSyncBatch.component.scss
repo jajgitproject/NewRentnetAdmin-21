@@ -273,6 +273,23 @@
   font-variant-numeric: tabular-nums;
 }
 
+.dsb-pager {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+  padding: 14px 18px;
+  border-top: 1px solid #f1f5f9;
+  background: #fafbfc;
+}
+
+.dsb-pager__info {
+  font-size: 13px;
+  color: var(--dsb-muted);
+  font-variant-numeric: tabular-nums;
+}
+
 .dsb-cell-num {
   font-variant-numeric: tabular-nums;
   font-weight: 600;

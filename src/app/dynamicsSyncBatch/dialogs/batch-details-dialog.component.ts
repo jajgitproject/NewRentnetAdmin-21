@@ -1,9 +1,10 @@
 import { ChangeDetectorRef, Component, Inject, OnDestroy, OnInit } from '@angular/core';
-import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
+import { MAT_DIALOG_DATA, MatDialog, MatDialogRef } from '@angular/material/dialog';
+import { InvoiceSyncDetailsDialogComponent } from '../../sendDataToDynamics/dialogs/invoice-sync-details-dialog.component';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { Subscription, timer } from 'rxjs';
 import { switchMap } from 'rxjs/operators';
-import { DynamicsSyncBatch } from '../dynamicsSyncBatch.model';
+import { DynamicsSyncBatch, DynamicsSyncItem } from '../dynamicsSyncBatch.model';
 import { DynamicsSyncBatchService } from '../dynamicsSyncBatch.service';
 
 export interface BatchDetailsDialogData {
@@ -43,7 +44,8 @@ export class BatchDetailsDialogComponent implements OnInit, OnDestroy {
     @Inject(MAT_DIALOG_DATA) private data: BatchDetailsDialogData,
     private service: DynamicsSyncBatchService,
     private snackBar: MatSnackBar,
-    private changeDetectorRef: ChangeDetectorRef
+    private changeDetectorRef: ChangeDetectorRef,
+    private dialog: MatDialog
   ) {
     this.batchId = Number(data?.batchId || 0);
     this.syncSource = data?.syncSource === 'creditNote' ? 'creditNote' : 'invoice';
@@ -112,6 +114,74 @@ export class BatchDetailsDialogComponent implements OnInit, OnDestroy {
 
   close(): void {
     this.dialogRef.close();
+  }
+
+  openLineItemSyncDetails(item: DynamicsSyncItem): void {
+    if (!item) {
+      return;
+    }
+
+    if (this.isCreditNoteView) {
+      const invoiceCreditNoteId = Number(item.invoiceID || 0);
+      if (!invoiceCreditNoteId) {
+        return;
+      }
+
+      this.dialog.open(InvoiceSyncDetailsDialogComponent, {
+        width: '520px',
+        maxWidth: '520px',
+        maxHeight: '90vh',
+        panelClass: 'sdd-invoice-sync-details-panel',
+        autoFocus: false,
+        data: {
+          documentKind: 'creditNote',
+          title: 'Credit Note & Dynamics Sync Details',
+          invoiceCreditNoteId,
+          row: {
+            invoiceCreditNoteID: invoiceCreditNoteId,
+            creditNoteNumberWithPrefix: item.invoiceNumberWithPrefix,
+            creditNoteSyncStatus: item.syncStatus,
+            syncDate: item.syncDate,
+            syncTime: item.syncTime,
+            dynamicsResponse: item.response,
+            dynamicsResponseCode: item.responseCode,
+            dynamicsResponseStatus: item.responseStatus,
+            dynamicsResponseDate: item.responseDate,
+            dynamicsResponseTime: item.responseTime
+          }
+        }
+      });
+      return;
+    }
+
+    const invoiceId = Number(item.invoiceID || 0);
+    if (!invoiceId) {
+      return;
+    }
+
+    this.dialog.open(InvoiceSyncDetailsDialogComponent, {
+      width: '520px',
+      maxWidth: '520px',
+      maxHeight: '90vh',
+      panelClass: 'sdd-invoice-sync-details-panel',
+      autoFocus: false,
+      data: {
+        documentKind: 'invoice',
+        invoiceId,
+        row: {
+          invoiceID: invoiceId,
+          invoiceNumberWithPrefix: item.invoiceNumberWithPrefix,
+          invoiceSyncStatus: item.syncStatus,
+          syncDate: item.syncDate,
+          syncTime: item.syncTime,
+          dynamicsResponse: item.response,
+          dynamicsResponseCode: item.responseCode,
+          dynamicsResponseStatus: item.responseStatus,
+          dynamicsResponseDate: item.responseDate,
+          dynamicsResponseTime: item.responseTime
+        }
+      }
+    });
   }
 
   getStatusClass(status: string): string {

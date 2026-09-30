@@ -1,7 +1,7 @@
 <section class="content sdd-page sdd-page--credit-notes">
   <ng-template #rentNetDynamicsBrand let-variant="variant">
     <span class="sdd-flow-brand" [ngClass]="'sdd-flow-brand--' + (variant || 'default')">
-      <span class="sdd-flow-brand__from">RentNet</span>
+      <span class="sdd-flow-brand__from">Credit note</span>
       <span class="sdd-flow-brand__arrow" aria-hidden="true">
         <span class="sdd-flow-brand__seg">-</span>
         <span class="sdd-flow-brand__seg">-</span>
@@ -19,7 +19,7 @@
             <li class="breadcrumb-item bcrumb-1">
               <a routerLink="/dashboard/main"><i class="fas fa-home"></i> Home</a>|
               <a href="#" onClick="return false;">Admin</a>|
-              <a href="#" onClick="return false;">Send Credit Notes To Dynamics</a>
+              <a href="#" onClick="return false;">Credit note &rarr; Dynamics</a>
             </li>
           </ul>
         </div>
@@ -34,7 +34,9 @@
             <div class="sdd-hero__brand">
               <div class="sdd-hero__icon" aria-hidden="true"><i class="fas fa-file-invoice-dollar"></i></div>
               <div class="sdd-hero__copy">
-                <h1 class="sdd-hero__title">Send Credit Notes To Dynamics</h1>
+                <h1 class="sdd-hero__title">
+                  <ng-container *ngTemplateOutlet="rentNetDynamicsBrand; context: { variant: 'hero' }"></ng-container>
+                </h1>
               </div>
             </div>
             <div class="sdd-hero__stats">
@@ -110,13 +112,18 @@
 
             <mat-expansion-panel expanded="true">
               <mat-expansion-panel-header>
-                <mat-panel-title><i class="fas fa-filter sdd-panel-icon"></i> Credit Note Filters</mat-panel-title>
-                <mat-panel-description>Narrow results before syncing to ERP</mat-panel-description>
+                <mat-panel-title>
+                  <i class="fas fa-filter sdd-panel-icon"></i>
+                  Credit Note Filters
+                </mat-panel-title>
+                <mat-panel-description>
+                  Narrow results before syncing to ERP
+                </mat-panel-description>
               </mat-expansion-panel-header>
 
-              <div class="invoice-home-search quick-search-panel">
+              <div class="invoice-home-search quick-search-panel sdd-credit-note-filters">
                 <div class="row">
-                  <div class="col-xl-2 col-lg-2 col-md-2 col-sm-12 mb-2">
+                  <div class="col-xl-3 col-lg-3 col-md-6 col-sm-12 mb-2">
                     <mat-form-field class="example-full-width cp-quick-search-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
                       <mat-label>Customer Group</mat-label>
                       <input type="text" matInput [matAutocomplete]="autoGroup" [formControl]="customerGroup" placeholder="Type at least 3 characters">
@@ -125,10 +132,10 @@
                       </mat-autocomplete>
                     </mat-form-field>
                   </div>
-                  <div class="col-xl-2 col-lg-2 col-md-2 col-sm-12 mb-2">
-                    <mat-form-field class="example-full-width cp-quick-search-field" appearance="fill" floatLabel="auto">
+                  <div class="col-xl-3 col-lg-3 col-md-6 col-sm-12 mb-2">
+                    <mat-form-field class="example-full-width cp-quick-search-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
                       <mat-label>Customer</mat-label>
-                      <input (keyup)="onKeyupCustomerName($event)" type="text" matInput [matAutocomplete]="autoCustomer" [formControl]="customer">
+                      <input (keyup)="onKeyupCustomerName($event)" type="text" matInput [matAutocomplete]="autoCustomer" [formControl]="customer" placeholder="Type at least 3 characters">
                       <mat-autocomplete #autoCustomer="matAutocomplete" panelWidth="custom-autocomplete-panel">
                         <mat-option *ngFor="let option of filteredCustomerOptions | async" [value]="option.customerName + '##' + (option.customerIdentityNumber || '')">
                           {{ option.customerName }} ## {{ option.customerIdentityNumber }}
@@ -136,60 +143,46 @@
                       </mat-autocomplete>
                     </mat-form-field>
                   </div>
-                  <div class="col-xl-2 col-lg-2 col-md-2 col-sm-12 mb-2">
-                    <mat-form-field class="example-full-width cp-quick-search-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
+                  <div class="col-xl-3 col-lg-3 col-md-6 col-sm-12 mb-2">
+                    <mat-form-field class="example-full-width cp-quick-search-field sdd-multi-value-field" appearance="fill" floatLabel="always" subscriptSizing="dynamic">
                       <mat-label>Credit Note No.</mat-label>
-                      <input type="text" matInput [(ngModel)]="searchCreditNoteNo">
+                      <textarea matInput class="sdd-multi-value-input" rows="1" [(ngModel)]="searchCreditNoteNo"></textarea>
+                      <mat-hint class="sdd-comma-hint">Comma separated</mat-hint>
                     </mat-form-field>
                   </div>
-                  <div class="col-xl-2 col-lg-2 col-md-2 col-sm-12 mb-2">
+                  <div class="col-xl-3 col-lg-3 col-md-6 col-sm-12 mb-2">
                     <mat-form-field class="example-full-width cp-quick-search-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
                       <mat-label>Invoice No.</mat-label>
                       <input type="text" matInput [(ngModel)]="searchInvoiceNo" placeholder="Invoice number with prefix">
                     </mat-form-field>
                   </div>
-                  <div class="col-xl-2 col-lg-2 col-md-2 col-sm-12 mb-2">
+                </div>
+
+                <div class="row">
+                  <div class="col-xl-3 col-lg-3 col-md-6 col-sm-12 mb-2">
                     <mat-form-field class="example-full-width cp-quick-search-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
                       <mat-label>Branch</mat-label>
-                      <input type="text" matInput [formControl]="branch" [matAutocomplete]="autoBranch">
+                      <input type="text" matInput [formControl]="branch" [matAutocomplete]="autoBranch" placeholder="Type at least 3 characters">
                       <mat-autocomplete #autoBranch="matAutocomplete" panelWidth="custom-autocomplete-panel">
                         <mat-option *ngFor="let option of filteredOrganizationalEntityOptions | async" [value]="option.organizationalEntityName">{{ option.organizationalEntityName }}</mat-option>
                       </mat-autocomplete>
                     </mat-form-field>
                   </div>
-                </div>
-
-                <div class="row">
-                  <div class="col-xl-2 col-lg-2 col-md-2 col-sm-12 mb-2">
-                    <mat-form-field class="example-full-width cp-quick-search-field cp-date-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
-                      <mat-label>Date From</mat-label>
-                      <input matInput [matDatepicker]="startDate" [(ngModel)]="SearchFromDate">
-                      <mat-datepicker-toggle matSuffix [for]="startDate"></mat-datepicker-toggle>
-                      <mat-datepicker #startDate></mat-datepicker>
-                    </mat-form-field>
-                  </div>
-                  <div class="col-xl-2 col-lg-2 col-md-2 col-sm-12 mb-2">
-                    <mat-form-field class="example-full-width cp-quick-search-field cp-date-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
-                      <mat-label>Date To</mat-label>
-                      <input matInput [matDatepicker]="endDate" [(ngModel)]="SearchToDate">
-                      <mat-datepicker-toggle matSuffix [for]="endDate"></mat-datepicker-toggle>
-                      <mat-datepicker #endDate></mat-datepicker>
-                    </mat-form-field>
-                  </div>
-                  <div class="col-xl-2 col-lg-2 col-md-2 col-sm-12 mb-2">
+                  <div class="col-xl-3 col-lg-3 col-md-6 col-sm-12 mb-2">
                     <mat-form-field class="example-full-width cp-quick-search-field mb-3" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
-                      <mat-label>Type</mat-label>
-                      <mat-select [(ngModel)]="searchCreditNoteType">
+                      <mat-label>ERP Sync Status</mat-label>
+                      <mat-select panelClass="cp-quick-search-select-panel" [(ngModel)]="searchCreditNoteSyncStatus">
                         <mat-option value="">All</mat-option>
-                        <mat-option value="Full">Full</mat-option>
-                        <mat-option value="Partial">Partial</mat-option>
+                        <mat-option value="Successful">Successful</mat-option>
+                        <mat-option value="Failed">Failed</mat-option>
+                        <mat-option value="Unprocessed">Unprocessed</mat-option>
                       </mat-select>
                     </mat-form-field>
                   </div>
-                  <div class="col-xl-2 col-lg-2 col-md-2 col-sm-12 mb-2">
+                  <div class="col-xl-3 col-lg-3 col-md-6 col-sm-12 mb-2">
                     <mat-form-field class="example-full-width cp-quick-search-field mb-3" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
                       <mat-label>E-Credit Note Status</mat-label>
-                      <mat-select [(ngModel)]="searchECreditNoteStatus">
+                      <mat-select panelClass="cp-quick-search-select-panel" [(ngModel)]="searchECreditNoteStatus">
                         <mat-option value="">All</mat-option>
                         <mat-option value="Not Created">Not Created</mat-option>
                         <mat-option value="Generated">Generated</mat-option>
@@ -197,16 +190,47 @@
                       </mat-select>
                     </mat-form-field>
                   </div>
+                  <div class="col-xl-3 col-lg-3 col-md-6 col-sm-12 mb-2">
+                    <mat-form-field class="example-full-width cp-quick-search-field mb-3" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
+                      <mat-label>Type</mat-label>
+                      <mat-select panelClass="cp-quick-search-select-panel" [(ngModel)]="searchCreditNoteType">
+                        <mat-option value="">All</mat-option>
+                        <mat-option value="Full">Full</mat-option>
+                        <mat-option value="Partial">Partial</mat-option>
+                      </mat-select>
+                    </mat-form-field>
+                  </div>
                 </div>
 
-                <div class="row quick-search-actions">
-                  <div class="col-xl-2 col-lg-2 col-md-2 col-sm-12 mb-2">
+                <div class="row">
+                  <div class="col-xl-3 col-lg-3 col-md-6 col-sm-12 mb-2">
+                    <mat-form-field class="example-full-width cp-quick-search-field cp-date-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
+                      <mat-label>Date From</mat-label>
+                      <input matInput [matDatepicker]="startDate" [(ngModel)]="SearchFromDate" title="Defaults to current month if empty">
+                      <mat-datepicker-toggle matSuffix [for]="startDate"></mat-datepicker-toggle>
+                      <mat-datepicker #startDate></mat-datepicker>
+                    </mat-form-field>
+                  </div>
+                  <div class="col-xl-3 col-lg-3 col-md-6 col-sm-12 mb-2">
+                    <mat-form-field class="example-full-width cp-quick-search-field cp-date-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
+                      <mat-label>Date To</mat-label>
+                      <input matInput [matDatepicker]="endDate" [(ngModel)]="SearchToDate">
+                      <mat-datepicker-toggle matSuffix [for]="endDate"></mat-datepicker-toggle>
+                      <mat-datepicker #endDate></mat-datepicker>
+                    </mat-form-field>
+                  </div>
+                </div>
+
+                <div class="row quick-search-actions sdd-filter-actions">
+                  <div class="col-xl-2 col-lg-2 col-md-3 col-sm-12 mb-2">
                     <button mat-raised-button color="primary" class="sdd-btn-search" (click)="searchData()" [disabled]="loading">
                       <i class="fas fa-search"></i> {{ loading ? 'Searching...' : 'Search' }}
                     </button>
                   </div>
-                  <div class="col-xl-2 col-lg-2 col-md-2 col-sm-12 mb-2">
-                    <button mat-stroked-button class="sdd-btn-refresh" (click)="refresh()"><i class="fas fa-sync-alt"></i> Reset Filters</button>
+                  <div class="col-xl-2 col-lg-2 col-md-3 col-sm-12 mb-2">
+                    <button mat-stroked-button class="sdd-btn-refresh" (click)="refresh()">
+                      <i class="fas fa-sync-alt"></i> Reset Filters
+                    </button>
                   </div>
                 </div>
               </div>
@@ -290,7 +314,7 @@
                         <mat-cell *matCellDef="let row"><span [ngClass]="getStatusBadgeClass(row.irnStatus || 'Not Created')">{{ getECreditNoteStatusLabel(row.irnStatus) }}</span></mat-cell>
                       </ng-container>
                       <ng-container matColumnDef="creditNoteSyncStatus">
-                        <mat-header-cell *matHeaderCellDef>ERP Sync</mat-header-cell>
+                        <mat-header-cell *matHeaderCellDef>Credit Note Sync</mat-header-cell>
                         <mat-cell *matCellDef="let row"><span [ngClass]="getStatusBadgeClass(row.creditNoteSyncStatus)">{{ row.creditNoteSyncStatus || 'Unprocessed' }}</span></mat-cell>
                       </ng-container>
                       <ng-container matColumnDef="customerName">
@@ -304,6 +328,10 @@
                       <ng-container matColumnDef="invoiceNumberWithPrefix">
                         <mat-header-cell *matHeaderCellDef mat-sort-header>Invoice No.</mat-header-cell>
                         <mat-cell *matCellDef="let row">{{ row.invoiceNumberWithPrefix || 'N/A' }}</mat-cell>
+                      </ng-container>
+                      <ng-container matColumnDef="invoiceSyncStatus">
+                        <mat-header-cell *matHeaderCellDef>Invoice ERP Sync</mat-header-cell>
+                        <mat-cell *matCellDef="let row"><span [ngClass]="getStatusBadgeClass(row.invoiceSyncStatus)">{{ row.invoiceSyncStatus || 'Unprocessed' }}</span></mat-cell>
                       </ng-container>
                       <ng-container matColumnDef="creditNoteAmount">
                         <mat-header-cell *matHeaderCellDef mat-sort-header class="sdd-col-amount">Amount</mat-header-cell>

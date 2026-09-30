@@ -20,11 +20,12 @@ export class SendCreditNotesToDynamicsCreditNote {
   creditNoteGstStatus: string;
   isGstCreditNote: boolean;
   creditNoteSyncStatus: string;
+  invoiceSyncStatus: string;
   canSelectForDynamics: boolean;
 
   constructor(row: any) {
-    this.invoiceCreditNoteID = row?.invoiceCreditNoteID || 0;
-    this.invoiceID = row?.invoiceID || 0;
+    this.invoiceCreditNoteID = Number(row?.invoiceCreditNoteID ?? row?.InvoiceCreditNoteID ?? 0) || 0;
+    this.invoiceID = Number(row?.invoiceID ?? row?.InvoiceID ?? 0) || 0;
     this.customerID = row?.customerID || 0;
     this.customerName = row?.customerName || '';
     this.customerGroupID = row?.customerGroupID || 0;
@@ -43,10 +44,12 @@ export class SendCreditNotesToDynamicsCreditNote {
     this.creditNoteGstStatus = row?.creditNoteGstStatus || (this.customerGSTNumber ? 'GST' : 'NonGST');
     this.isGstCreditNote = row?.isGstCreditNote === true || this.creditNoteGstStatus === 'GST';
     this.creditNoteSyncStatus = row?.creditNoteSyncStatus || 'Unprocessed';
+    this.invoiceSyncStatus = row?.invoiceSyncStatus || row?.InvoiceSyncStatus || 'Unprocessed';
     if (row?.canSelectForDynamics === true || row?.canSelectForDynamics === false) {
       this.canSelectForDynamics = row.canSelectForDynamics;
     } else {
       this.canSelectForDynamics = this.creditNoteSyncStatus !== 'Successful'
+        && String(this.invoiceSyncStatus || '').toLowerCase() === 'successful'
         && String(this.approvalStatus || '').toLowerCase() === 'approved'
         && (!this.isGstCreditNote || String(this.irnStatus || '').trim().toLowerCase() === 'generated');
     }

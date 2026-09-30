@@ -127,7 +127,11 @@
             </ng-container>
 
             <tr mat-header-row *matHeaderRowDef="itemColumns"></tr>
-            <tr mat-row *matRowDef="let row; columns: itemColumns;"></tr>
+            <tr
+              mat-row
+              *matRowDef="let row; columns: itemColumns;"
+              class="dsb-line-item-row"
+              (click)="openLineItemSyncDetails(row)"></tr>
           </table>
         </div>
 

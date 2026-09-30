@@ -1390,49 +1390,60 @@ export const ROUTES: RouteInfo[] = [
         isAccess: false
       },
       {
-        path: 'sendDataToDynamics',
-        title: 'RentNet → Dynamics',
-        pageKey: 'Send Data To Dynamics',
-        moduleName: 'sendDataToDynamics',
-        alternateAccessPageKeys: [
-          'Send Data To Dynamics',
-          'sendDataToDynamics',
-          'Send Invoice to Dynamics',
-          'Send Invoices To Dynamics'
+        path: 'dynamicsMenu',
+        title: 'Dynamics',
+        moduleName: 'dynamicsMenu',
+        icon: 'fas fa-cloud',
+        class: '',
+        groupTitle: false,
+        submenu: [
+          {
+            path: 'sendDataToDynamics',
+            title: 'Invoices → Dynamics',
+            pageKey: 'Send Data To Dynamics',
+            moduleName: 'sendDataToDynamics',
+            alternateAccessPageKeys: [
+              'Send Data To Dynamics',
+              'sendDataToDynamics',
+              'Send Invoice to Dynamics',
+              'Send Invoices To Dynamics'
+            ],
+            icon: 'fas fa-cloud-upload-alt',
+            class: '',
+            groupTitle: false,
+            submenu: [],
+            isAccess: false
+          },
+          {
+            path: 'sendCreditNotesToDynamics',
+            title: 'Credit note → Dynamics',
+            pageKey: 'Send Credit Notes To Dynamics',
+            moduleName: 'sendCreditNotesToDynamics',
+            alternateAccessPageKeys: [
+              'Send Credit Notes To Dynamics',
+              'sendCreditNotesToDynamics',
+              'DynamicsCreditNote',
+              'Dynamics Credit Note'
+            ],
+            icon: 'fas fa-file-invoice-dollar',
+            class: '',
+            groupTitle: false,
+            submenu: [],
+            isAccess: false
+          },
+          {
+            path: 'dynamicsMis20',
+            title: 'Dynamics MIS 2.0',
+            pageKey: 'dynamicsMis20',
+            moduleName: 'dynamicsMis20',
+            alternateAccessPageKeys: ['dynamicsMis20', 'Dynamics MIS 2.0', 'Dynamics MIS'],
+            icon: 'fas fa-chart-bar',
+            class: '',
+            groupTitle: false,
+            submenu: [],
+            isAccess: false
+          }
         ],
-        icon: 'fas fa-cloud-upload-alt',
-        class: '',
-        groupTitle: false,
-        submenu: [],
-        isAccess: false
-      },
-      {
-        path: 'sendCreditNotesToDynamics',
-        title: 'Send Credit Notes To Dynamics',
-        pageKey: 'Send Credit Notes To Dynamics',
-        moduleName: 'sendCreditNotesToDynamics',
-        alternateAccessPageKeys: [
-          'Send Credit Notes To Dynamics',
-          'sendCreditNotesToDynamics',
-          'DynamicsCreditNote',
-          'Dynamics Credit Note'
-        ],
-        icon: 'fas fa-file-invoice-dollar',
-        class: '',
-        groupTitle: false,
-        submenu: [],
-        isAccess: false
-      },
-      {
-        path: 'dynamicsSyncBatch',
-        title: 'Batch Monitor',
-        pageKey: 'DynamicsSyncBatch',
-        moduleName: 'dynamicsSyncBatch',
-        alternateAccessPageKeys: ['DynamicsSyncBatch', 'dynamicsSyncBatch', 'Dynamics Sync Batch'],
-        icon: 'fas fa-tasks',
-        class: '',
-        groupTitle: false,
-        submenu: [],
         isAccess: false
       },
       {
@@ -1622,18 +1633,6 @@ export const ROUTES: RouteInfo[] = [
         pageKey: 'tallyMis20',
         moduleName: 'tallyMis20',
         alternateAccessPageKeys: ['tallyMis20', 'Tally MIS 2.0'],
-        icon: 'fas fa-tachometer-alt',
-        class: '',
-        groupTitle: false,
-        submenu: [],
-        isAccess: false
-      },
-      {
-        path: 'dynamicsMis20',
-        title: 'Dynamics MIS 2.0',
-        pageKey: 'dynamicsMis20',
-        moduleName: 'dynamicsMis20',
-        alternateAccessPageKeys: ['dynamicsMis20', 'Dynamics MIS 2.0'],
         icon: 'fas fa-tachometer-alt',
         class: '',
         groupTitle: false,

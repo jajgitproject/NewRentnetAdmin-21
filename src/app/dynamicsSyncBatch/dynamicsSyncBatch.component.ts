@@ -15,6 +15,9 @@ import { DynamicsSyncBatchService } from './dynamicsSyncBatch.service';
   styleUrls: ['./dynamicsSyncBatch.component.scss']
 })
 export class DynamicsSyncBatchComponent implements OnInit, OnDestroy {
+  readonly pageSize = 20;
+  pageNumber = 0;
+  totalBatchCount = 0;
   batches: DynamicsSyncBatch[] = [];
   loading = false;
   batchColumns = [
@@ -56,6 +59,7 @@ export class DynamicsSyncBatchComponent implements OnInit, OnDestroy {
       const previous = this.syncSource;
       this.applySyncSourceFromQuery(params.get('syncSource'));
       if (previous !== this.syncSource) {
+        this.pageNumber = 0;
         this.loadBatches();
         this.startPolling();
       }
@@ -68,16 +72,45 @@ export class DynamicsSyncBatchComponent implements OnInit, OnDestroy {
 
   loadBatches(): void {
     this.loading = true;
-    this.service.listBatches(50, this.syncSource).subscribe({
-      next: (batches) => {
+    this.service.listBatches(this.pageNumber, this.pageSize, this.syncSource).subscribe({
+      next: (result) => {
         this.loading = false;
-        this.batches = batches || [];
+        this.batches = result.batches || [];
+        this.totalBatchCount = result.totalCount;
+        this.clampPageNumberToTotal();
       },
       error: () => {
         this.loading = false;
         this.showMessage('Failed to load batches.');
       }
     });
+  }
+
+  nextPage(): void {
+    if (!this.canGoNext()) {
+      return;
+    }
+    this.pageNumber++;
+    this.loadBatches();
+  }
+
+  previousPage(): void {
+    if (this.pageNumber <= 0) {
+      return;
+    }
+    this.pageNumber--;
+    this.loadBatches();
+  }
+
+  canGoNext(): boolean {
+    return (this.pageNumber + 1) * this.pageSize < this.totalBatchCount;
+  }
+
+  getPageCount(): number {
+    if (this.totalBatchCount <= 0) {
+      return 0;
+    }
+    return Math.ceil(this.totalBatchCount / this.pageSize);
   }
 
   openDetails(batch: DynamicsSyncBatch): void {
@@ -241,13 +274,25 @@ export class DynamicsSyncBatchComponent implements OnInit, OnDestroy {
   private startPolling(): void {
     this.pollSub?.unsubscribe();
     this.pollSub = timer(0, 10000).pipe(
-      switchMap(() => this.service.listBatches(50, this.syncSource))
+      switchMap(() => this.service.listBatches(this.pageNumber, this.pageSize, this.syncSource))
     ).subscribe({
-      next: (batches) => {
-        this.batches = batches || [];
+      next: (result) => {
+        this.batches = result.batches || [];
+        this.totalBatchCount = result.totalCount;
+        this.clampPageNumberToTotal();
       },
       error: () => undefined
     });
+  }
+
+  private clampPageNumberToTotal(): void {
+    const pageCount = this.getPageCount();
+    if (pageCount > 0 && this.pageNumber >= pageCount) {
+      this.pageNumber = pageCount - 1;
+      if (!this.loading) {
+        this.loadBatches();
+      }
+    }
   }
 
   private applySyncSourceFromQuery(value: string | null): void {

@@ -2,7 +2,7 @@
 
   <ng-template #rentNetDynamicsBrand let-variant="variant">
     <span class="sdd-flow-brand" [ngClass]="'sdd-flow-brand--' + (variant || 'default')">
-      <span class="sdd-flow-brand__from">RentNet</span>
+      <span class="sdd-flow-brand__from">Invoices</span>
       <span class="sdd-flow-brand__arrow" aria-hidden="true">
         <span class="sdd-flow-brand__seg">-</span>
         <span class="sdd-flow-brand__seg">-</span>
@@ -28,7 +28,7 @@
 
               <a href="#" onClick="return false;">Admin</a>|
 
-              <a href="#" onClick="return false;">RentNet &rarr; Dynamics</a>
+              <a href="#" onClick="return false;">Invoices &rarr; Dynamics</a>
 
             </li>
 
@@ -189,7 +189,7 @@
 
                       <span class="sdd-batch-step__num">2</span>
 
-                      <span class="sdd-batch-step__label">Click RentNet &rarr; Dynamics</span>
+                      <span class="sdd-batch-step__label">Click Invoices &rarr; Dynamics</span>
 
                     </div>
 
@@ -269,7 +269,7 @@
 
                       <mat-label>Invoice GST Status</mat-label>
 
-                      <mat-select [(ngModel)]="searchGstCategory">
+                      <mat-select panelClass="cp-quick-search-select-panel" [(ngModel)]="searchGstCategory">
 
                         <mat-option value="Both">Both</mat-option>
 
@@ -311,47 +311,11 @@
 
                   <div class="col-xl-2 col-lg-2 col-md-2 col-sm-12 mb-2">
 
-                    <mat-form-field class="example-full-width cp-quick-search-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
-
-                      <mat-label>Invoice Date From</mat-label>
-
-                      <input matInput [matDatepicker]="startDate" [(ngModel)]="SearchFromDate" title="Defaults to current month if empty">
-
-                      <mat-datepicker-toggle matSuffix [for]="startDate"></mat-datepicker-toggle>
-
-                      <mat-datepicker #startDate></mat-datepicker>
-
-                    </mat-form-field>
-
-                  </div>
-
-
-
-                  <div class="col-xl-2 col-lg-2 col-md-2 col-sm-12 mb-2">
-
-                    <mat-form-field class="example-full-width cp-quick-search-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
-
-                      <mat-label>Invoice Date To</mat-label>
-
-                      <input matInput [matDatepicker]="endDate" [(ngModel)]="SearchToDate">
-
-                      <mat-datepicker-toggle matSuffix [for]="endDate"></mat-datepicker-toggle>
-
-                      <mat-datepicker #endDate></mat-datepicker>
-
-                    </mat-form-field>
-
-                  </div>
-
-
-
-                  <div class="col-xl-2 col-lg-2 col-md-2 col-sm-12 mb-2">
-
                     <mat-form-field class="example-full-width cp-quick-search-field mb-3" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
 
                       <mat-label>ERP Sync Status</mat-label>
 
-                      <mat-select [(ngModel)]="searchInvoiceSyncStatus">
+                      <mat-select panelClass="cp-quick-search-select-panel" [(ngModel)]="searchInvoiceSyncStatus">
 
                         <mat-option value="">All</mat-option>
 
@@ -375,7 +339,7 @@
 
                       <mat-label>Invoice Type</mat-label>
 
-                      <mat-select [(ngModel)]="searchInvoiceType">
+                      <mat-select panelClass="cp-quick-search-select-panel" [(ngModel)]="searchInvoiceType">
 
                         <mat-option value="All">All</mat-option>
 
@@ -463,43 +427,11 @@
 
                   <div class="col-xl-2 col-lg-2 col-md-2 col-sm-12 mb-2">
 
-                    <mat-form-field class="example-full-width cp-quick-search-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
-
-                      <mat-label>DutySlipID</mat-label>
-
-                      <input type="text" matInput [(ngModel)]="searchDutySlip">
-
-                      <mat-hint class="sdd-comma-hint">Comma Separated</mat-hint>
-
-                    </mat-form-field>
-
-                  </div>
-
-
-
-                  <div class="col-xl-2 col-lg-2 col-md-2 col-sm-12 mb-2">
-
-                    <mat-form-field class="example-full-width cp-quick-search-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
-
-                      <mat-label>ReservationID</mat-label>
-
-                      <input type="text" matInput [(ngModel)]="searchReservationID">
-
-                      <mat-hint class="sdd-comma-hint">Comma Separated</mat-hint>
-
-                    </mat-form-field>
-
-                  </div>
-
-
-
-                  <div class="col-xl-2 col-lg-2 col-md-2 col-sm-12 mb-2">
-
                     <mat-form-field class="example-full-width cp-quick-search-field mb-3" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
 
                       <mat-label>E-Invoice Status</mat-label>
 
-                      <mat-select [(ngModel)]="SearchEInvoiceStatus">
+                      <mat-select panelClass="cp-quick-search-select-panel" [(ngModel)]="SearchEInvoiceStatus">
 
                         <mat-option value="Not Created">Not Created</mat-option>
 
@@ -513,6 +445,61 @@
 
                   </div>
 
+
+
+                  <div class="col-xl-2 col-lg-2 col-md-2 col-sm-12 mb-2">
+
+                    <mat-form-field class="example-full-width cp-quick-search-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
+
+                      <mat-label>Invoice Date From</mat-label>
+
+                      <input matInput [matDatepicker]="startDate" [(ngModel)]="SearchFromDate" title="Defaults to current month if empty">
+
+                      <mat-datepicker-toggle matSuffix [for]="startDate"></mat-datepicker-toggle>
+
+                      <mat-datepicker #startDate></mat-datepicker>
+
+                    </mat-form-field>
+
+                  </div>
+
+
+
+                  <div class="col-xl-2 col-lg-2 col-md-2 col-sm-12 mb-2">
+
+                    <mat-form-field class="example-full-width cp-quick-search-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
+
+                      <mat-label>Invoice Date To</mat-label>
+
+                      <input matInput [matDatepicker]="endDate" [(ngModel)]="SearchToDate">
+
+                      <mat-datepicker-toggle matSuffix [for]="endDate"></mat-datepicker-toggle>
+
+                      <mat-datepicker #endDate></mat-datepicker>
+
+                    </mat-form-field>
+
+                  </div>
+
+                </div>
+
+
+
+                <div class="row">
+                  <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                    <mat-form-field class="example-full-width cp-quick-search-field sdd-multi-value-field" appearance="fill" floatLabel="always" subscriptSizing="dynamic">
+                      <mat-label>DutySlipID</mat-label>
+                      <textarea matInput class="sdd-multi-value-input" rows="1" [(ngModel)]="searchDutySlip"></textarea>
+                      <mat-hint class="sdd-comma-hint">Comma separated</mat-hint>
+                    </mat-form-field>
+                  </div>
+                  <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                    <mat-form-field class="example-full-width cp-quick-search-field sdd-multi-value-field" appearance="fill" floatLabel="always" subscriptSizing="dynamic">
+                      <mat-label>ReservationID</mat-label>
+                      <textarea matInput class="sdd-multi-value-input" rows="1" [(ngModel)]="searchReservationID"></textarea>
+                      <mat-hint class="sdd-comma-hint">Comma separated</mat-hint>
+                    </mat-form-field>
+                  </div>
                 </div>
 
 

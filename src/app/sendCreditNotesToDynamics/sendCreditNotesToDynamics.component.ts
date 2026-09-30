@@ -40,6 +40,7 @@ export class SendCreditNotesToDynamicsComponent implements OnInit {
     'customerName',
     'branchName',
     'invoiceNumberWithPrefix',
+    'invoiceSyncStatus',
     'creditNoteAmount'
   ];
 
@@ -61,6 +62,7 @@ export class SendCreditNotesToDynamicsComponent implements OnInit {
   SearchToDate = '';
   searchCreditNoteType = '';
   searchECreditNoteStatus = '';
+  searchCreditNoteSyncStatus = '';
 
   customerGroup = new FormControl();
   customer = new FormControl();
@@ -102,6 +104,7 @@ export class SendCreditNotesToDynamicsComponent implements OnInit {
     this.searchCreditNoteNo = '';
     this.searchCreditNoteType = '';
     this.searchECreditNoteStatus = '';
+    this.searchCreditNoteSyncStatus = '';
     this.SearchFromDate = '';
     this.SearchToDate = '';
     this.sendSummary = '';
@@ -130,6 +133,7 @@ export class SendCreditNotesToDynamicsComponent implements OnInit {
       this.SearchToDate,
       this.searchCreditNoteType,
       this.searchECreditNoteStatus,
+      this.searchCreditNoteSyncStatus,
       this.searchActivationStatus,
       this.PageNumber
     ).subscribe({
@@ -175,6 +179,7 @@ export class SendCreditNotesToDynamicsComponent implements OnInit {
       this.SearchToDate,
       this.searchCreditNoteType,
       this.searchECreditNoteStatus,
+      this.searchCreditNoteSyncStatus,
       this.searchActivationStatus,
       this.PageNumber,
       column.active,
@@ -260,6 +265,9 @@ export class SendCreditNotesToDynamicsComponent implements OnInit {
     if (row.isGstCreditNote && String(row.irnStatus || '').trim().toLowerCase() !== 'generated') {
       return 'GST credit note requires E-Credit Note before syncing to Dynamics';
     }
+    if (String(row.invoiceSyncStatus || '').toLowerCase() !== 'successful') {
+      return 'Parent invoice must be synced successfully to Dynamics before this credit note can be sent';
+    }
     return 'This credit note cannot be sent to Dynamics';
   }
 
@@ -282,17 +290,38 @@ export class SendCreditNotesToDynamicsComponent implements OnInit {
       return;
     }
 
-    const creditNoteIds = selected.map((row) => row.invoiceCreditNoteID).filter((id) => id > 0);
+    const creditNotes = selected.map((row) => ({
+      invoiceCreditNoteID: Number(row?.invoiceCreditNoteID || 0),
+      creditNoteNumberWithPrefix: String(row?.creditNoteNumberWithPrefix || '').trim()
+    }));
+    if (creditNotes.some((row) => row.invoiceCreditNoteID <= 0)) {
+      this.showNotification(
+        'snackbar-danger',
+        'Could not read credit note IDs for one or more selected rows. Refresh the grid and try again.',
+        'bottom',
+        'center'
+      );
+      return;
+    }
+    if (creditNotes.some((row) => !row.creditNoteNumberWithPrefix)) {
+      this.showNotification(
+        'snackbar-danger',
+        'Could not read credit note numbers for one or more selected rows. Refresh the grid and try again.',
+        'bottom',
+        'center'
+      );
+      return;
+    }
     this.sending = true;
     this.sendSummary = '';
 
     this.sendCreditNotesToDynamicsService
-      .sendCreditNotesToDynamics(creditNoteIds, this.generalService.getUserID())
+      .sendCreditNotesToDynamics(creditNotes, this.generalService.getUserID())
       .subscribe({
         next: (response) => {
           this.sending = false;
           const batchId = response?.dynamicsSyncBatchID ?? response?.DynamicsSyncBatchID ?? 0;
-          const itemCount = response?.numberofItems ?? response?.NumberofItems ?? creditNoteIds.length;
+          const itemCount = response?.numberofItems ?? response?.NumberofItems ?? creditNotes.length;
           this.lastBatchId = batchId;
           this.sendSummary = batchId
             ? `Batch #${batchId} started in background for ${itemCount} credit note(s). Track progress on the DynamicsSyncBatch page.`
