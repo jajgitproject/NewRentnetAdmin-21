@@ -40,6 +40,9 @@
 
       <section class="isdd-dialog__panel">
         <h3>Dynamics sync</h3>
+        <p class="isdd-dialog__link-row">
+          <button type="button" class="isdd-dialog__link" (click)="openRequestPayloadDialog()">Show Request Json</button>
+        </p>
         <dl>
           <dt>Sync status</dt>
           <dd><span [ngClass]="getSyncStatusBadgeClass()">{{ displayText(details.syncStatus) }}</span></dd>

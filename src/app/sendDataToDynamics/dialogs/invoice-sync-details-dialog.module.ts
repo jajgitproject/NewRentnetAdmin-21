@@ -5,11 +5,12 @@ import { MatDialogModule } from '@angular/material/dialog';
 import { MatButtonModule } from '@angular/material/button';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { InvoiceSyncDetailsDialogComponent } from './invoice-sync-details-dialog.component';
+import { DynamicsRequestPayloadDialogComponent } from './dynamics-request-payload-dialog.component';
 import { SendDataToDynamicsService } from '../sendDataToDynamics.service';
 import { SendCreditNotesToDynamicsService } from '../../sendCreditNotesToDynamics/sendCreditNotesToDynamics.service';
 
 @NgModule({
-  declarations: [InvoiceSyncDetailsDialogComponent],
+  declarations: [InvoiceSyncDetailsDialogComponent, DynamicsRequestPayloadDialogComponent],
   imports: [CommonModule, MatDialogModule, MatButtonModule, MatProgressSpinnerModule],
   exports: [InvoiceSyncDetailsDialogComponent],
   providers: [SendDataToDynamicsService, SendCreditNotesToDynamicsService]

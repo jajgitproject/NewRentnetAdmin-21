@@ -88,6 +88,26 @@
   background: #fff;
 }
 
+.isdd-dialog__link-row {
+  margin: 0 0 10px;
+}
+
+.isdd-dialog__link {
+  padding: 0;
+  border: none;
+  background: none;
+  color: #2563eb;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.isdd-dialog__link:hover {
+  color: #1d4ed8;
+}
+
 .isdd-dialog__panel h3 {
   margin: 0 0 8px;
   padding-bottom: 6px;

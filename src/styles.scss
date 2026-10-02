@@ -2013,6 +2013,49 @@ body.side-closed.submenu-closed.side-closed-hover .sidebar .menu .list li.menu-r
   overflow-y: auto !important;
 }
 
+/* Dynamics request payload JSON dialog */
+.cdk-overlay-container .cdk-overlay-pane.sdd-dynamics-request-payload-panel {
+  width: 720px !important;
+  max-width: min(720px, 95vw) !important;
+  max-height: 90vh !important;
+  overflow: hidden !important;
+}
+
+.cdk-overlay-container .cdk-overlay-pane.sdd-dynamics-request-payload-panel .mat-mdc-dialog-container,
+.cdk-overlay-container .cdk-overlay-pane.sdd-dynamics-request-payload-panel .mat-dialog-container,
+.cdk-overlay-container .cdk-overlay-pane.sdd-dynamics-request-payload-panel .mat-mdc-dialog-container .mat-mdc-dialog-surface,
+.cdk-overlay-container .cdk-overlay-pane.sdd-dynamics-request-payload-panel .mat-mdc-dialog-container .mdc-dialog__surface {
+  width: 100% !important;
+  max-width: 100% !important;
+  max-height: 90vh !important;
+  padding: 16px !important;
+  box-sizing: border-box !important;
+  overflow: hidden !important;
+  display: flex !important;
+  flex-direction: column !important;
+  min-height: 0 !important;
+}
+
+.cdk-overlay-container .cdk-overlay-pane.sdd-dynamics-request-payload-panel app-dynamics-request-payload-dialog {
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.cdk-overlay-container .cdk-overlay-pane.sdd-dynamics-request-payload-panel .mat-mdc-dialog-container .mat-mdc-dialog-content,
+.cdk-overlay-container .cdk-overlay-pane.sdd-dynamics-request-payload-panel .mat-mdc-dialog-container .mdc-dialog__content,
+.cdk-overlay-container .cdk-overlay-pane.sdd-dynamics-request-payload-panel .mat-mdc-dialog-container [mat-dialog-content],
+.cdk-overlay-container .cdk-overlay-pane.sdd-dynamics-request-payload-panel .mat-dialog-content {
+  flex: 1 1 auto;
+  min-height: 0;
+  max-width: 100% !important;
+  max-height: none !important;
+  overflow-x: auto !important;
+  overflow-y: auto !important;
+}
+
 /* Dynamics sync batch details dialog */
 .cdk-overlay-container .cdk-overlay-pane.dsb-batch-details-dialog-panel {
   width: 960px !important;

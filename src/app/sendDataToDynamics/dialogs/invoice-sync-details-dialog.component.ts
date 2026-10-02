@@ -2,11 +2,15 @@
 
 import { ChangeDetectorRef, Component, Inject, OnInit } from '@angular/core';
 
-import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
+import { MAT_DIALOG_DATA, MatDialog, MatDialogRef } from '@angular/material/dialog';
 
 import { SendDataToDynamicsService } from '../sendDataToDynamics.service';
 
 import { SendCreditNotesToDynamicsService } from '../../sendCreditNotesToDynamics/sendCreditNotesToDynamics.service';
+
+import {
+  DynamicsRequestPayloadDialogComponent
+} from './dynamics-request-payload-dialog.component';
 
 
 
@@ -71,6 +75,8 @@ export class InvoiceSyncDetailsDialogComponent implements OnInit {
     private sendDataToDynamicsService: SendDataToDynamicsService,
 
     private sendCreditNotesToDynamicsService: SendCreditNotesToDynamicsService,
+
+    private dialog: MatDialog,
 
     private changeDetectorRef: ChangeDetectorRef
 
@@ -296,7 +302,9 @@ export class InvoiceSyncDetailsDialogComponent implements OnInit {
 
         dynamicsResponseDate: source.dynamicsResponseDate ?? source.DynamicsResponseDate,
 
-        dynamicsResponseTime: source.dynamicsResponseTime ?? source.DynamicsResponseTime
+        dynamicsResponseTime: source.dynamicsResponseTime ?? source.DynamicsResponseTime,
+
+        requestPayload: source.requestPayload ?? source.RequestPayload
 
       };
 
@@ -326,7 +334,9 @@ export class InvoiceSyncDetailsDialogComponent implements OnInit {
 
         dynamicsResponseDate: source.dynamicsResponseDate ?? source.DynamicsResponseDate,
 
-        dynamicsResponseTime: source.dynamicsResponseTime ?? source.DynamicsResponseTime
+        dynamicsResponseTime: source.dynamicsResponseTime ?? source.DynamicsResponseTime,
+
+        requestPayload: source.requestPayload ?? source.RequestPayload
 
       };
 
@@ -361,6 +371,34 @@ export class InvoiceSyncDetailsDialogComponent implements OnInit {
   close(): void {
 
     this.dialogRef.close();
+
+  }
+
+
+
+  openRequestPayloadDialog(): void {
+
+    this.dialog.open(DynamicsRequestPayloadDialogComponent, {
+
+      width: '720px',
+
+      maxWidth: '95vw',
+
+      maxHeight: '90vh',
+
+      panelClass: 'sdd-dynamics-request-payload-panel',
+
+      autoFocus: false,
+
+      data: {
+
+        title: 'Request JSON',
+
+        requestPayload: this.details?.requestPayload
+
+      }
+
+    });
 
   }
 
