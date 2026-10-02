@@ -205,8 +205,8 @@ export class ErrorInterceptor implements HttpInterceptor {
       return errorBody.trim();
     }
     if (errorBody && typeof errorBody === 'object' && !(errorBody instanceof Blob)) {
-      const body = errorBody as { message?: unknown; Message?: unknown };
-      const raw = body.message ?? body.Message;
+      const body = errorBody as { message?: unknown; Message?: unknown; result?: unknown };
+      const raw = body.message ?? body.Message ?? body.result;
       if (typeof raw === 'string' && raw.trim()) {
         return raw.trim();
       }

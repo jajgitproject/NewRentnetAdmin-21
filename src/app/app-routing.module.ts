@@ -3888,6 +3888,30 @@ const routes: Routes = [
       },
 
       {
+        path: 'emailBookingRequest',
+        loadChildren: () =>
+          import('./emailBookingRequest/emailBookingRequest.module').then(
+            (m) => m.EmailBookingRequestModule
+          )
+      },
+
+      {
+        path: 'emailBookingConfiguration',
+        loadChildren: () =>
+          import('./emailBookingConfiguration/emailBookingConfiguration.module').then(
+            (m) => m.EmailBookingConfigurationModule
+          )
+      },
+
+      {
+        path: 'emailBookingClerkMIS',
+        loadChildren: () =>
+          import('./emailBookingClerkMIS/emailBookingClerkMIS.module').then(
+            (m) => m.EmailBookingClerkMISModule
+          )
+      },
+
+      {
         path: 'cdpBookingRequest',
         loadChildren: () =>
           import('./cdpBookingRequest/cdpBookingRequest.module').then(

@@ -276,6 +276,30 @@
 .cdk-overlay-container .cdk-overlay-pane.role-form-wide-dialog [mat-dialog-content] {
   overflow-x: visible !important;
 }
+
+/* Email Booking: modeless Add Booker / Add Passenger — page stays selectable behind the window. */
+.cdk-global-overlay-wrapper:has(.bc-modeless-person-dialog) {
+  pointer-events: none !important;
+}
+.cdk-overlay-container .cdk-overlay-pane.bc-modeless-person-dialog {
+  pointer-events: auto !important;
+  box-shadow: 0 8px 32px rgba(16, 42, 67, 0.28);
+}
+.cdk-overlay-container .cdk-overlay-pane.role-form-wide-dialog.bc-person-dialog-minimized.mat-mdc-dialog-panel {
+  width: 340px !important;
+  min-width: 340px !important;
+  max-width: 340px !important;
+  height: 56px !important;
+  max-height: 56px !important;
+}
+.cdk-overlay-container .cdk-overlay-pane.role-form-wide-dialog.bc-person-dialog-minimized .mdc-dialog__surface,
+.cdk-overlay-container .cdk-overlay-pane.role-form-wide-dialog.bc-person-dialog-minimized .mat-mdc-dialog-container,
+.cdk-overlay-container .cdk-overlay-pane.role-form-wide-dialog.bc-person-dialog-minimized .mat-mdc-dialog-surface {
+  height: 56px !important;
+  min-height: 56px !important;
+  max-height: 56px !important;
+  overflow: hidden !important;
+}
 /* Dropdown (mat-select) labels: one line, no wrap (outline notch can grow with wide dialog). */
 .cdk-overlay-container .cdk-overlay-pane.role-form-wide-dialog .mat-mdc-form-field-type-mat-select .mdc-floating-label,
 .cdk-overlay-container .cdk-overlay-pane.role-form-wide-dialog .mat-mdc-form-field-type-mat-select .mat-mdc-floating-label,

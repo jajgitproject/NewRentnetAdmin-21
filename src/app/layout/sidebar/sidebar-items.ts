@@ -192,6 +192,28 @@ export const ROUTES: RouteInfo[] = [
       },
 
       {
+        path: 'emailBookingRequest',
+        title: 'Email Booking Request',
+        moduleName: 'emailBookingRequest',
+        icon: 'fas fa-tachometer-alt',
+        class: '',
+        groupTitle: false,
+        submenu: [],
+        isAccess: false
+      },
+
+      {
+        path: 'emailBookingClerkMIS',
+        title: 'Email Booking Clerk MIS',
+        moduleName: 'emailBookingClerkMIS',
+        icon: 'fas fa-tachometer-alt',
+        class: '',
+        groupTitle: false,
+        submenu: [],
+        isAccess: false
+      },
+
+      {
         path: 'integrationLogDetail',
         title: 'Integration Log',
         moduleName: 'integrationLogDetail',

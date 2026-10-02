@@ -1,4 +1,4 @@
-<div class="addContainer">
+<div class="addContainer" [class.bc-person-minimized]="minimized">
     <ng-template #saveValidationSummary>
         <div class="validation-summary" *ngIf="advanceTableForm?.invalid && validationMessages.length">
             <div class="validation-summary-title">Save is disabled until the following are fixed:</div>
@@ -7,8 +7,8 @@
             </ul>
         </div>
     </ng-template>
-    <div class="modalHeader">
-        <div class="editRowModal">
+    <div class="modalHeader" [class.bc-person-min-bar]="minimized">
+        <div class="editRowModal" *ngIf="!minimized">
             <div class="modalHeader clearfix">
                 <!-- <img [src]='advanceTable.img' alt="avatar"> -->
                 <div class="modal-about">
@@ -17,11 +17,18 @@
                 </div>
             </div>
         </div>
+        <button *ngIf="minimized" type="button" class="bc-person-min-restore" (click)="toggleMinimize()">
+            {{ minimizeBarLabel }}
+        </button>
+        <button *ngIf="allowMinimize && !minimized" mat-icon-button type="button" (click)="toggleMinimize()"
+            aria-label="Minimize dialog">
+            <mat-icon>remove</mat-icon>
+        </button>
         <button mat-icon-button (click)="dialogRef.close()" aria-label="Close dialog">
             <mat-icon>close</mat-icon>
         </button>
     </div>
-    <div mat-dialog-content *ngIf="!isReservationQuickAdd">
+    <div mat-dialog-content *ngIf="!isReservationQuickAdd && !minimized">
         <form class="register-form m-4" [formGroup]="advanceTableForm" (ngSubmit)="submit">
 
             <div class="row">
@@ -713,7 +720,7 @@
         </form>
     </div>
 
-    <div mat-dialog-content *ngIf="isReservationQuickAdd" class="cp-quick-add-dialog-content">
+    <div mat-dialog-content *ngIf="isReservationQuickAdd && !minimized" class="cp-quick-add-dialog-content">
         <form class="register-form m-4" [formGroup]="advanceTableForm" (ngSubmit)="submit">
 
             <ng-container *ngIf="fromGeneralBill; else reservationQuickAddFields">

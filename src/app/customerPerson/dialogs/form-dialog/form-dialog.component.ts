@@ -64,6 +64,8 @@ export class ShowOnInvalidErrorStateMatcher implements ErrorStateMatcher {
     MatTooltipModule,
     MatCheckboxModule,
     MatCardModule,
+    FormDialogComponentCustomerDepartment,
+    FormDialogComponentCustomerDesignation
   ],
   providers: [
     { provide: MAT_DATE_LOCALE, useValue: 'en-GB' },
@@ -110,6 +112,8 @@ export class FormDialogComponentCustomerPerson
   someAction: any;
   fromGeneralBill = false;
   reservationID: any;
+  allowMinimize = false;
+  minimized = false;
 
   /** New Passenger (CP) and Create new Booker (CB) — same compact popup from booking. */
   get isReservationQuickAdd(): boolean {
@@ -147,6 +151,7 @@ export class FormDialogComponentCustomerPerson
         this.action = data.action;
         this.someAction = data.forCP;
         this.fromGeneralBill = data.fromGeneralBill === true;
+        this.allowMinimize = data.allowMinimize === true;
         this.reservationID = data.reservationID ?? data.ReservationID ?? null;
         if (Number(this.reservationID) > 0) {
           try {
@@ -229,9 +234,19 @@ export class FormDialogComponentCustomerPerson
           }
           if (data.forCP === 'CP' || data.forCP === 'CB') {
             this.customerID = data.advanceTable.customerID;
+            this.advanceTable.customerID = data.advanceTable.customerID;
             this.advanceTable.customerName = data.advanceTable.customerName;
             this.advanceTable.customerGroupID = data.advanceTable.customerGroupID;
             this.CustomerGroupName = data.advanceTable.customerGroup;
+            if (data.advanceTable.customerPersonName) {
+              this.advanceTable.customerPersonName = data.advanceTable.customerPersonName;
+            }
+            if (data.advanceTable.primaryMobile || data.advanceTable.phone) {
+              this.advanceTable.primaryMobile = data.advanceTable.primaryMobile || data.advanceTable.phone;
+            }
+            if (data.advanceTable.primaryEmail) {
+              this.advanceTable.primaryEmail = data.advanceTable.primaryEmail;
+            }
             if (data.forCP === 'CB') {
               this.advanceTable.isBooker = true;
               this.advanceTable.isPassenger = false;
@@ -681,6 +696,32 @@ export class FormDialogComponentCustomerPerson
   {
     this.dialogRef.close();
     this.ImagePath="";
+  }
+
+  toggleMinimize(): void {
+    if (!this.allowMinimize) {
+      return;
+    }
+    this.minimized = !this.minimized;
+    if (this.minimized) {
+      this.dialogRef.addPanelClass('bc-person-dialog-minimized');
+      this.dialogRef.updateSize('340px', '56px');
+      this.dialogRef.updatePosition({ bottom: '16px', right: '16px' });
+      return;
+    }
+    this.dialogRef.removePanelClass('bc-person-dialog-minimized');
+    this.dialogRef.updateSize('1200px');
+    this.dialogRef.updatePosition({ top: '48px', right: '16px' });
+  }
+
+  get minimizeBarLabel(): string {
+    if (this.someAction === 'CB') {
+      return 'Add Booker — click to restore';
+    }
+    if (this.someAction === 'CP') {
+      return 'Add Passenger — click to restore';
+    }
+    return 'Click to restore';
   }
   // public Post(): void
   // {

@@ -1,3 +1,31 @@
+.addContainer.bc-person-minimized {
+  overflow: hidden;
+  padding: 0;
+}
+
+.bc-person-min-bar {
+  align-items: center;
+  padding: 4px 8px;
+  gap: 4px;
+  min-height: 48px;
+}
+
+.bc-person-min-restore {
+  flex: 1;
+  min-width: 0;
+  text-align: left;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 8px 4px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 .cp-quick-add-dialog-content .register-form.m-4 {
   padding: 0 16px 16px;
 }

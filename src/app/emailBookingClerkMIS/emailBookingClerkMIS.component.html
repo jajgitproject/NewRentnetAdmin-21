@@ -1,0 +1,78 @@
+<section class="content">
+  <div class="container-fluid">
+    <div class="block-header">
+      <h2>Email Booking Clerk MIS</h2>
+      <p class="page-subtitle">
+        Daily clerk performance from Email Booking AI saves. Default range is today (ProcessedUtc, IST).
+        All four categories: Reservations, Updates, Cancellations, and Not Related.
+      </p>
+    </div>
+    <div class="card">
+      <div class="body">
+        <div class="row">
+          <div class="col-lg-3">
+            <mat-form-field appearance="outline" class="example-full-width">
+              <mat-label>From date</mat-label>
+              <input matInput [matDatepicker]="fromPicker" [formControl]="fromDateCtrl" />
+              <mat-datepicker-toggle matSuffix [for]="fromPicker"></mat-datepicker-toggle>
+              <mat-datepicker #fromPicker></mat-datepicker>
+            </mat-form-field>
+          </div>
+          <div class="col-lg-3">
+            <mat-form-field appearance="outline" class="example-full-width">
+              <mat-label>To date</mat-label>
+              <input matInput [matDatepicker]="toPicker" [formControl]="toDateCtrl" />
+              <mat-datepicker-toggle matSuffix [for]="toPicker"></mat-datepicker-toggle>
+              <mat-datepicker #toPicker></mat-datepicker>
+            </mat-form-field>
+          </div>
+          <div class="col-lg-2 filter-actions">
+            <button mat-raised-button color="primary" type="button" (click)="search()" [disabled]="loading">Search</button>
+          </div>
+        </div>
+
+        <div class="spinner-wrap" *ngIf="loading">
+          <mat-spinner diameter="32"></mat-spinner>
+        </div>
+
+        <div class="table-wrap" *ngIf="!loading">
+          <table class="clerk-mis-table">
+            <thead>
+              <tr>
+                <th></th>
+                <th class="num">Reservations</th>
+                <th class="num">Updates</th>
+                <th class="num">Cancellations</th>
+                <th class="num">Not Related</th>
+                <th class="num">Total</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let row of rows">
+                <td>{{ row.clerkName }}</td>
+                <td class="num">{{ row.reservations }}</td>
+                <td class="num">{{ row.updates }}</td>
+                <td class="num">{{ row.cancellations }}</td>
+                <td class="num">{{ row.notRelated }}</td>
+                <td class="num">{{ row.total }}</td>
+              </tr>
+              <tr *ngIf="rows.length === 0">
+                <td colspan="6">No clerk saves in this date range.</td>
+              </tr>
+            </tbody>
+            <tfoot *ngIf="rows.length > 0">
+              <tr>
+                <td>{{ totals.clerkName }}</td>
+                <td class="num">{{ totals.reservations }}</td>
+                <td class="num">{{ totals.updates }}</td>
+                <td class="num">{{ totals.cancellations }}</td>
+                <td class="num">{{ totals.notRelated }}</td>
+                <td class="num">{{ totals.total }}</td>
+              </tr>
+            </tfoot>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
