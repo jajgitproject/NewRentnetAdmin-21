@@ -29,6 +29,8 @@ import { FormControl } from '@angular/forms';
 export class SACComponent implements OnInit {
   displayedColumns = [
     'SACNumber',
+    'dynamicGLcode',
+    'dynamicGLName',
     'status',
     'actions'
   ];

@@ -58,6 +58,10 @@ export class Customer {
       businessServices:string;
       businessTypeID:number;
       isBillToShipToCustomer:boolean;
+      isAggregator:boolean;
+      aggregatorCustomerID:number;
+      aggregatorCustomerName:string;
+      showBillingInApp:boolean;
   constructor(customer) {
     {
        this.customerID = customer.customerID || -1;
@@ -109,6 +113,10 @@ export class Customer {
        this.businessType = customer.businessType || '';
        this.businessServices = customer.businessServices || '';
        this.isBillToShipToCustomer = customer.isBillToShipToCustomer ?? false;
+       this.isAggregator = customer.isAggregator ?? false;
+       this.aggregatorCustomerID = customer.aggregatorCustomerID || null;
+       this.aggregatorCustomerName = customer.aggregatorCustomerName || '';
+       this.showBillingInApp = customer.showBillingInApp ?? false;
     }
   }
   

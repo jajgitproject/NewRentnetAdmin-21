@@ -168,7 +168,7 @@
                                             <ng-container matColumnDef="DutySlipID">
                                                 <mat-header-cell *matHeaderCellDef mat-sort-header>Duty Slip No</mat-header-cell>
                                                 <mat-cell *matCellDef="let row">
-                                                    {{row.dutySlipID ? row.dutySlipID : 'N/A'}}</mat-cell>
+                                                    {{row.dutySlipID ? row.dutySlipID : ''}}</mat-cell>
                                             </ng-container>
 
                                             <ng-container matColumnDef="IsAllotted">
@@ -180,55 +180,55 @@
                                             <ng-container matColumnDef="PickupDate">
                                                 <mat-header-cell *matHeaderCellDef mat-sort-header>Pickup Date</mat-header-cell>
                                                 <mat-cell *matCellDef="let row">
-                                                    {{ row.pickupDate ? (row.pickupDate | date: 'dd-MM-yyyy') : 'N/A'}}</mat-cell>
+                                                    {{ row.pickupDate ? (row.pickupDate | date: 'dd-MM-yyyy') : ''}}</mat-cell>
                                             </ng-container>
 
                                             <ng-container matColumnDef="Vehicle">
                                                 <mat-header-cell *matHeaderCellDef mat-sort-header>Car Type</mat-header-cell>
                                                 <mat-cell *matCellDef="let row">
-                                                    {{row.vehicle ? row.vehicle : 'N/A'}}</mat-cell>
+                                                    {{row.vehicle ? row.vehicle : ''}}</mat-cell>
                                             </ng-container>
 
                                             <ng-container matColumnDef="RegistrationNumber">
                                                 <mat-header-cell *matHeaderCellDef mat-sort-header>Regn No</mat-header-cell>
                                                 <mat-cell *matCellDef="let row">
-                                                    {{row.registrationNumber ? row.registrationNumber : 'N/A'}}</mat-cell>
+                                                    {{row.registrationNumber ? row.registrationNumber : ''}}</mat-cell>
                                             </ng-container>
 
                                             <ng-container matColumnDef="DriverName">
                                                 <mat-header-cell *matHeaderCellDef mat-sort-header>Driver</mat-header-cell>
                                                 <mat-cell *matCellDef="let row">
-                                                    {{row.driverName ? row.driverName : 'N/A'}}</mat-cell>
+                                                    {{row.driverName ? row.driverName : ''}}</mat-cell>
                                             </ng-container>
 
                                             <ng-container matColumnDef="PickupCity">
                                                 <mat-header-cell *matHeaderCellDef mat-sort-header>Pickup City</mat-header-cell>
                                                 <mat-cell *matCellDef="let row">
-                                                    {{row.pickupCity ? row.pickupCity : 'N/A'}}</mat-cell>
+                                                    {{row.pickupCity ? row.pickupCity : ''}}</mat-cell>
                                             </ng-container>
 
                                             <ng-container matColumnDef="PassengerName">
                                                 <mat-header-cell *matHeaderCellDef mat-sort-header>Passenger Name</mat-header-cell>
                                                 <mat-cell *matCellDef="let row">
-                                                    {{row.passengerName ? row.passengerName : 'N/A'}}</mat-cell>
+                                                    {{row.passengerName ? row.passengerName : ''}}</mat-cell>
                                             </ng-container>
 
                                             <ng-container matColumnDef="PassengerEmail">
                                                 <mat-header-cell *matHeaderCellDef mat-sort-header>Passenger Email</mat-header-cell>
                                                 <mat-cell *matCellDef="let row">
-                                                    {{row.passengerEmail ? row.passengerEmail : 'N/A'}}</mat-cell>
+                                                    {{row.passengerEmail ? row.passengerEmail : ''}}</mat-cell>
                                             </ng-container>
 
                                             <ng-container matColumnDef="PassengerID">
                                                 <mat-header-cell *matHeaderCellDef mat-sort-header>Passenger ID</mat-header-cell>
                                                 <mat-cell *matCellDef="let row">
-                                                    {{row.passengerID ? row.passengerID : 'N/A'}}</mat-cell>
+                                                    {{row.passengerID ? row.passengerID : ''}}</mat-cell>
                                             </ng-container>
 
                                             <ng-container matColumnDef="PassengerMobile">
                                                 <mat-header-cell *matHeaderCellDef mat-sort-header>Passenger Mobile</mat-header-cell>
                                                 <mat-cell *matCellDef="let row">
-                                                    {{row.passengerMobile ? row.passengerMobile : 'N/A'}}</mat-cell>
+                                                    {{row.passengerMobile ? row.passengerMobile : ''}}</mat-cell>
                                             </ng-container>
 
                                             <ng-container matColumnDef="PassengerFeedbackEmailAllowed">
@@ -240,13 +240,13 @@
                                             <ng-container matColumnDef="CustomerName">
                                                 <mat-header-cell *matHeaderCellDef mat-sort-header>Customer Name</mat-header-cell>
                                                 <mat-cell *matCellDef="let row">
-                                                    {{row.customerName ? row.customerName : 'N/A'}}</mat-cell>
+                                                    {{row.customerName ? row.customerName : ''}}</mat-cell>
                                             </ng-container>
 
                                             <ng-container matColumnDef="CustomerType">
                                                 <mat-header-cell *matHeaderCellDef mat-sort-header>Customer Type</mat-header-cell>
                                                 <mat-cell *matCellDef="let row">
-                                                    {{row.customerType ? row.customerType : 'N/A'}}</mat-cell>
+                                                    {{row.customerType ? row.customerType : ''}}</mat-cell>
                                             </ng-container>
 
                                             <ng-container matColumnDef="CustomerFeedbackEmailAllowed">
@@ -258,7 +258,7 @@
                                             <ng-container matColumnDef="KAM">
                                                 <mat-header-cell *matHeaderCellDef mat-sort-header>KAM</mat-header-cell>
                                                 <mat-cell *matCellDef="let row">
-                                                    {{row.kam ? row.kam : 'N/A'}}</mat-cell>
+                                                    {{row.kam ? row.kam : ''}}</mat-cell>
                                             </ng-container>
 
                                             <mat-header-row *matHeaderRowDef="displayedColumns"></mat-header-row>

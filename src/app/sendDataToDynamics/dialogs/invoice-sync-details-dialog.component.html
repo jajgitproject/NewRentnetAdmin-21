@@ -1,0 +1,91 @@
+<div class="isdd-dialog">
+  <h2 mat-dialog-title class="isdd-dialog__title">{{ dialogTitle }}</h2>
+
+  <mat-dialog-content class="isdd-dialog__content">
+    <div *ngIf="loading" class="isdd-dialog__loading">
+      <mat-spinner diameter="36"></mat-spinner>
+      <span>Loading...</span>
+    </div>
+
+    <p *ngIf="errorMessage" class="isdd-dialog__error">{{ errorMessage }}</p>
+
+    <div *ngIf="details" class="isdd-dialog__panels" [class.isdd-dialog__panels--loading]="loading">
+      <section class="isdd-dialog__panel">
+        <h3>{{ documentSectionTitle }}</h3>
+        <dl *ngIf="isCreditNote; else invoiceDocumentFields">
+          <dt>Credit note number</dt>
+          <dd>{{ displayText(details.creditNoteNumberWithPrefix) }}</dd>
+          <dt>Credit note date</dt>
+          <dd>{{ displayDate(details.creditNoteDate) }}</dd>
+          <dt>Invoice number</dt>
+          <dd>{{ displayText(details.invoiceNumberWithPrefix) }}</dd>
+          <dt>Customer name</dt>
+          <dd>{{ displayText(details.customerName) }}</dd>
+          <dt>Branch</dt>
+          <dd>{{ displayText(details.branchName) }}</dd>
+        </dl>
+        <ng-template #invoiceDocumentFields>
+          <dl>
+            <dt>Invoice number</dt>
+            <dd>{{ displayText(details.invoiceNumberWithPrefix) }}</dd>
+            <dt>Invoice date</dt>
+            <dd>{{ displayDate(details.invoiceDate) }}</dd>
+            <dt>Customer name</dt>
+            <dd>{{ displayText(details.customerName) }}</dd>
+            <dt>Branch</dt>
+            <dd>{{ displayText(details.branchName) }}</dd>
+          </dl>
+        </ng-template>
+      </section>
+
+      <section class="isdd-dialog__panel">
+        <h3>Dynamics sync</h3>
+        <p class="isdd-dialog__link-row">
+          <button type="button" class="isdd-dialog__link" (click)="openRequestPayloadDialog()">Show Request Json</button>
+        </p>
+        <dl>
+          <dt>Sync status</dt>
+          <dd><span [ngClass]="getSyncStatusBadgeClass()">{{ displayText(details.syncStatus) }}</span></dd>
+          <dt>Sync date</dt>
+          <dd>{{ displayDate(details.syncDate) }}</dd>
+          <dt>Sync time</dt>
+          <dd>{{ displayTime(details.syncTime) }}</dd>
+          <dt>Response code</dt>
+          <dd><span [ngClass]="getResponseCodeBadgeClass()">{{ displayText(details.dynamicsResponseCode) }}</span></dd>
+          <dt>Response status</dt>
+          <dd>{{ displayText(details.dynamicsResponseStatus) }}</dd>
+          <dt>Response date</dt>
+          <dd>{{ displayDate(details.dynamicsResponseDate) }}</dd>
+          <dt>Response time</dt>
+          <dd>{{ displayTime(details.dynamicsResponseTime) }}</dd>
+        </dl>
+      </section>
+    </div>
+
+    <section
+      *ngIf="details"
+      class="isdd-dialog__response"
+      [class.isdd-dialog__panels--loading]="loading"
+      aria-labelledby="isdd-dynamics-response-heading">
+      <h3 id="isdd-dynamics-response-heading" class="isdd-dialog__response-heading">Dynamics response</h3>
+      <div class="isdd-dialog__response-body" *ngIf="getDynamicsResponsePresentation() as responseView">
+        <p
+          class="isdd-dialog__response-summary"
+          [class.isdd-dialog__response-summary--error]="responseView.isError"
+          [class.isdd-dialog__response-summary--success]="!responseView.isError">
+          {{ responseView.summary }}
+        </p>
+        <ul class="isdd-dialog__response-details" *ngIf="responseView.details.length">
+          <li *ngFor="let item of responseView.details">
+            <span class="isdd-dialog__response-details-label">{{ item.label }}</span>
+            <span class="isdd-dialog__response-details-value">{{ item.value }}</span>
+          </li>
+        </ul>
+      </div>
+    </section>
+  </mat-dialog-content>
+
+  <mat-dialog-actions class="isdd-dialog__actions" align="end">
+    <button mat-stroked-button type="button" (click)="close()">Close</button>
+  </mat-dialog-actions>
+</div>

@@ -88,6 +88,15 @@ import { BillToOther } from '../billToOther/billToOther.model';
 import { DutyStateCustomer } from '../dutyStateCustomer/dutyStateCustomer.model';
 import { DutyStateCustomerFormDialogComponent } from '../dutyStateCustomer/dialogs/form-dialog/form-dialog.component';
 import { DutyStateCustomerService } from '../dutyStateCustomer/dutyStateCustomer.service';
+import { DutyNight } from '../dutyNight/dutyNight.model';
+import { DutyNightFormDialogComponent } from '../dutyNight/dialogs/form-dialog/form-dialog.component';
+import { DutyNightService } from '../dutyNight/dutyNight.service';
+import {
+  getDutyNightEntryBlockedMessage,
+  showDutyNightEntryBlockedDialog,
+} from '../dutyNight/duty-night-entry-guard.util';
+import { isDutyNightRecordActive, normalizeDutyNightRecords } from '../dutyNight/duty-night-status.util';
+import { isNightCountProvided, toNightCount } from '../shared/night-charges.util';
 import { SingleDutySingleBillForLocalService } from '../SingleDutySingleBillForLocal/SingleDutySingleBillForLocal.service';
 import { PackageRateDetailsForClosingService } from '../packageRateDetailsForClosing/packageRateDetailsForClosing.service';
 import { FormDialogComponent } from '../MOPDetailsShow/dialogs/mopDetails/mopDetails.component';
@@ -226,6 +235,8 @@ export class ClossingOneComponent implements OnInit, AfterViewInit, OnDestroy {
   showHidesettledRates: boolean = false;
   showHideDutyStateCustomer: boolean = false;
   advanceTableDutyStateCustomer: DutyStateCustomer | null;
+  showHideDutyNight: boolean = false;
+  advanceTableDutyNight: DutyNight | null;
   showMOP: boolean = false;
   invoiceID: any;
   goodForBilling: boolean;
@@ -293,6 +304,7 @@ export class ClossingOneComponent implements OnInit, AfterViewInit, OnDestroy {
     public dutyGSTPercentageService: DutyGSTPercentageService,
     public dutyStateService: DutyStateService,
     public dutyStateCustomerService: DutyStateCustomerService,
+    public dutyNightService: DutyNightService,
     public additionalKmsDetailsService: AdditionalKmsDetailsService,
     public dutySACService: DutySACService,
     public discountDetails: DiscountDetailsService,
@@ -378,6 +390,7 @@ export class ClossingOneComponent implements OnInit, AfterViewInit, OnDestroy {
     this.DutyGSTPercentageLoadData();
     this.loadDutyStateData();
     this.loadDutyStateDataCustomer();
+    this.loadDutyNightData();
     this.loadDataforAdditionalKMHR();
     this.salesPersonLoadData();
     this.settledRateLoadData();
@@ -769,6 +782,40 @@ export class ClossingOneComponent implements OnInit, AfterViewInit, OnDestroy {
     };
   }
 
+  get activeDutyNightNumberOnNights(): number | null {
+    if (!this.advanceTableDutyNight) {
+      return null;
+    }
+    const records = Array.isArray(this.advanceTableDutyNight)
+      ? this.advanceTableDutyNight
+      : [this.advanceTableDutyNight];
+    const active = records.find((record) => isDutyNightRecordActive(record));
+    return active?.numberOnNights ?? null;
+  }
+
+  get dutyNightEntryBlockedMessage(): string | null {
+    const { verifyDuty, goodForBilling } = this.getDutyStateBillingFlags();
+    return getDutyNightEntryBlockedMessage(verifyDuty, goodForBilling);
+  }
+
+  get isDutyNightEntryBlocked(): boolean {
+    return this.dutyNightEntryBlockedMessage != null;
+  }
+
+  private guardDutyNightEntry(): boolean {
+    const message = this.dutyNightEntryBlockedMessage;
+    if (!message) {
+      return true;
+    }
+    showDutyNightEntryBlockedDialog(message);
+    return false;
+  }
+
+  getActiveDutyNightOverrideCount(): number | null {
+    const nights = this.activeDutyNightNumberOnNights;
+    return isNightCountProvided(nights) ? toNightCount(nights) : null;
+  }
+
   private guardDutyStateEdit(): boolean {
     if (this.hasGeneratedInvoice()) {
       this.showNotification(
@@ -906,6 +953,82 @@ export class ClossingOneComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   ///end Duty State Customer=======//
+
+  //======= Duty Night=======//
+  openDutyNight() {
+    if (!this.guardDutyNightEntry()) {
+      return;
+    }
+    if (this.isDutyNightEditBlocked) {
+      this.showDutyNightEditBlockedMessage();
+      return;
+    }
+    const dialogRef = this.dialog.open(DutyNightFormDialogComponent, {
+      data: {
+        dutySlipID: this.DutySlipID,
+        advanceTable: new DutyNight({}),
+        action: 'add',
+        verifyDutyStatusAndCacellationStatus: this.verifyDutyStatusAndCacellationStatus,
+        isDutyNightEditBlocked: this.isDutyNightEditBlocked,
+      },
+    });
+    dialogRef.afterClosed().subscribe((result) => {
+      if (result === true) {
+        this.loadDutyNightData(() => {
+          this.recalculateBillQuietly();
+        });
+      }
+    });
+  }
+
+  private showDutyNightEditBlockedMessage(): void {
+    const { verifyDuty, goodForBilling } = this.getDutyStateBillingFlags();
+    let message = 'Duty Night changes are not allowed.';
+    if (this.isEInvoiceBlockingEdits) {
+      message = 'E-Invoice (IRN) is already generated and active. Duty Night changes are not allowed.';
+    } else if (goodForBilling) {
+      message = 'Duty is marked Good for Billing. Duty Night changes are not allowed.';
+    } else if (verifyDuty) {
+      message = 'Duty is verified. Duty Night changes are not allowed.';
+    }
+    this.showNotification('snackbar-warning', message, 'bottom', 'center');
+  }
+
+  loadDutyNightData(afterLoad?: () => void): void {
+    if (!this.DutySlipID) {
+      this.advanceTableDutyNight = [];
+      this.showHideDutyNight = false;
+      this.refreshClosingSectionViewDialogContext();
+      this.cdr.detectChanges();
+      afterLoad?.();
+      return;
+    }
+    this.dutyNightService.getTableDataDutyNightClosing(this.DutySlipID).subscribe(
+      (data) => {
+        const records = normalizeDutyNightRecords(data);
+        this.showHideDutyNight = records.length > 0;
+        this.advanceTableDutyNight = records;
+        this.refreshClosingSectionViewDialogContext();
+        this.cdr.detectChanges();
+        afterLoad?.();
+      },
+      () => {
+        this.advanceTableDutyNight = [];
+        this.showHideDutyNight = false;
+        this.refreshClosingSectionViewDialogContext();
+        this.cdr.detectChanges();
+        afterLoad?.();
+      }
+    );
+  }
+
+  onDutyNightSectionChanged(): void {
+    this.loadDutyNightData(() => {
+      this.recalculateBillQuietly();
+    });
+  }
+
+  ///end Duty Night=======//
 
   //---------- Start Add Discount ----------
   addDiscount() {
@@ -1197,6 +1320,11 @@ export class ClossingOneComponent implements OnInit, AfterViewInit, OnDestroy {
 
   get isDutySlipEditBlocked(): boolean {
     return this.isEInvoiceBlockingEdits || this.isGoodForBillingBlockingEdits;
+  }
+
+  get isDutyNightEditBlocked(): boolean {
+    const { verifyDuty, goodForBilling } = this.getDutyStateBillingFlags();
+    return this.isEInvoiceBlockingEdits || verifyDuty || goodForBilling;
   }
 
   private guardEInvoiceEdit(): boolean {
@@ -1704,6 +1832,10 @@ export class ClossingOneComponent implements OnInit, AfterViewInit, OnDestroy {
   showAndScrollDutyStateCustomer() {
     this.openClosingSectionView('dutyStateCustomer', 'Customer Duty State');
   }
+
+  showAndScrollDutyNight() {
+    this.openClosingSectionView('dutyNight', 'Duty Night');
+  }
   //------DutySAC
   showAndScrollDutySAC() {
     this.openClosingSectionView('dutySAC', 'Duty SAC');
@@ -1743,6 +1875,7 @@ export class ClossingOneComponent implements OnInit, AfterViewInit, OnDestroy {
       advanceTableDGP: this.advanceTableDGP,
       advanceTableDutyState: this.advanceTableDutyState,
       advanceTableDutyStateCustomer: this.advanceTableDutyStateCustomer,
+      advanceTableDutyNight: this.advanceTableDutyNight,
       advanceTableSAC: this.advanceTableSAC,
       advanceTableAD: this.advanceTableAD,
       advanceTableMOP: this.advanceTableMOP,
@@ -1757,6 +1890,9 @@ export class ClossingOneComponent implements OnInit, AfterViewInit, OnDestroy {
       goodForBillingStatusAndCancellationStatus: this.goodForBillingStatusAndCancellationStatus,
       verifyDuty: billingFlags.verifyDuty,
       goodForBilling: billingFlags.goodForBilling,
+      isDutyNightEditBlocked: this.isDutyNightEditBlocked,
+      isDutyNightEntryBlocked: this.isDutyNightEntryBlocked,
+      dutyNightEntryBlockedMessage: this.dutyNightEntryBlockedMessage,
       invoiceGenerated: this.hasGeneratedInvoice(),
       from: this.from
     };
@@ -1789,6 +1925,9 @@ export class ClossingOneComponent implements OnInit, AfterViewInit, OnDestroy {
         break;
       case 'dutyStateCustomer':
         this.loadDutyStateDataCustomer();
+        break;
+      case 'dutyNight':
+        this.onDutyNightSectionChanged();
         break;
       case 'dutySAC':
         this.DutySACLoadData();

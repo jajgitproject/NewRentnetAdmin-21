@@ -72,7 +72,7 @@
                                             {{ row[column] | date:'dd-MM-yyyy' }}
                                           </ng-container>
                                           <ng-template #defaultCell>
-                                            {{ row[column] || 'N/A' }}
+                                            {{ row[column] || '' }}
                                           </ng-template>
                                         </mat-cell>
                                       </ng-container>

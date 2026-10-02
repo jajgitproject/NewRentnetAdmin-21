@@ -25,6 +25,7 @@ import { GooglePlaceModule } from '@compat/google-places-shim';
 import { PrintBlankDutySlipComponent } from './PrintBlankDutySlip.component';
 import { PrintBlankDutySlipRoutingModule } from './PrintBlankDutySlip-routing.module';
 import { DutySlipAccentureService } from '../dutySlipAccenture/dutySlipAccenture.service';
+import { ControlPanelDesignService } from '../controlPanelDesign/controlPanelDesign.service';
 
 @NgModule({
   declarations: [
@@ -55,7 +56,7 @@ import { DutySlipAccentureService } from '../dutySlipAccenture/dutySlipAccenture
     MyUploadModule,
     GooglePlaceModule,
   ],
-  providers: [DutySlipAccentureService ]
+  providers: [DutySlipAccentureService, ControlPanelDesignService ]
 })
 export class PrintBlankDutySlipModule {}
 

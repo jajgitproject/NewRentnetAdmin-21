@@ -227,7 +227,7 @@
                             {{ columnTitleMap[column] || column }}
                           </mat-header-cell>
                           <mat-cell *matCellDef="let row">
-                            {{ getCellDisplayValue(row, column) || 'N/A'}}
+                            {{ getCellDisplayValue(row, column) }}
                           </mat-cell>
                         </ng-container>
 

@@ -382,7 +382,8 @@
                                         [matAutocomplete]="auto20"></textarea>
                                     <mat-autocomplete #auto20="matAutocomplete"
                                         (optionSelected)="onPGLSelected($event.option.value)"
-                                       class="google-autocomplete-panel">
+                                        panelWidth="fit-content"
+                                        class="google-autocomplete-panel">
                                         <mat-option *ngFor="let option of toArray(filteredGoogleAddressOptions | async)"
                                             [value]="option.geoSearchString" (click)="OnPickupGeoLocationClick(option)">
                                             {{option.geoSearchString}}
@@ -800,7 +801,8 @@
                                         [matAutocomplete]="auto21"></textarea>
                                     <mat-autocomplete #auto21="matAutocomplete"
                                         (optionSelected)="onDropGLSelected($event.option.value)"
-                                        panelWidth="custom-autocomplete-panel">
+                                        panelWidth="fit-content"
+                                        class="google-autocomplete-panel">
                                         <mat-option *ngFor="let option of toArray(filteredDropOffGoogleAddressOptions | async)"
                                             [value]="option.geoSearchString"
                                             (click)="OnDropOffGeoLocationClick(option)">

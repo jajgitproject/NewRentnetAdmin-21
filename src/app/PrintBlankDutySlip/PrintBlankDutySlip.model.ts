@@ -43,6 +43,8 @@ export class PrintBlankDutySlip {
   bookerName: string;
   bookerMobile: string;
   passengerName: string;
+  pickUpAddressString: string;
+  dropOffAddress: string;
   passengerMobile: string;
   pickupCity: string;
   package: string;

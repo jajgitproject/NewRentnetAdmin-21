@@ -94,6 +94,18 @@ const routes: Routes = [
           )
       },
 
+       {
+        path: 'rejectedQCDriverPhoto',
+        loadChildren: () =>
+          import('./rejectedQCDriverPhoto/rejectedQCDriverPhoto.module').then(
+            (m) => m.RejectedQCDriverPhotoModule
+          ),
+        data: {
+          requiredPageKey: 'Rejected QC Driver Photo',
+          alternatePageKeys: ['rejectedQCDriverPhoto', 'Rejected QC Driver Photo'],
+        },
+      },
+
       {
         path: 'integrationLogDetail',
         loadChildren: () =>
@@ -160,6 +172,48 @@ const routes: Routes = [
           import('./dynamicsMis20/dynamicsMis.module').then(
             (m) => m.DynamicsMis20Module
           )
+      },
+      {
+        path: 'sendDataToDynamics',
+        loadChildren: () =>
+          import('./sendDataToDynamics/sendDataToDynamics.module').then(
+            (m) => m.SendDataToDynamicsModule
+          ),
+        data: {
+          requiredPageKey: 'Send Data To Dynamics',
+          alternatePageKeys: [
+            'sendDataToDynamics',
+            'Send Invoice to Dynamics',
+            'Send Invoices To Dynamics'
+          ],
+        },
+      },
+      {
+        path: 'sendCreditNotesToDynamics',
+        loadChildren: () =>
+          import('./sendCreditNotesToDynamics/sendCreditNotesToDynamics.module').then(
+            (m) => m.SendCreditNotesToDynamicsModule
+          ),
+        data: {
+          requiredPageKey: 'Send Credit Notes To Dynamics',
+          alternatePageKeys: [
+            'sendCreditNotesToDynamics',
+            'Send Credit Notes To Dynamics',
+            'DynamicsCreditNote',
+            'Dynamics Credit Note'
+          ],
+        },
+      },
+      {
+        path: 'dynamicsSyncBatch',
+        loadChildren: () =>
+          import('./dynamicsSyncBatch/dynamicsSyncBatch.module').then(
+            (m) => m.DynamicsSyncBatchModule
+          ),
+        data: {
+          requiredPageKey: 'DynamicsSyncBatch',
+          alternatePageKeys: ['dynamicsSyncBatch', 'Dynamics Sync Batch'],
+        },
       },
 
       {
@@ -3550,6 +3604,14 @@ const routes: Routes = [
           )
       },
 
+
+      {
+        path: 'customerMeeting',
+        loadChildren: () =>
+          import('./customerMeeting/customerMeeting.module').then(
+            (m) => m.CustomerMeetingModule
+          )
+      },
       {
         path: 'integrationLog',
         loadChildren: () =>
@@ -3649,6 +3711,32 @@ const routes: Routes = [
           import('./incidenceMIS/incidenceMIS.module').then(
             (m) => m.IncidenceMISModule
           )
+      },
+
+      {
+        path: 'qcMisCst',
+        loadChildren: () =>
+          import('./qcMisCst/qcMisCst.module').then(
+            (m) => m.QcMisCSTModule
+          ),
+        data: {
+          requiredPageKey: 'QC MIS (CST)',
+          alternatePageKeys: ['qcMisCst', 'QC MIS (CST)', 'QCMIS(CST)'],
+          skipRolePageGuard: true
+        }
+      },
+
+      {
+        path: 'postPickupCallMis',
+        loadChildren: () =>
+          import('./postPickupCallMis/postPickupCallMis.module').then(
+            (m) => m.PostPickupCallMisModule
+          ),
+        data: {
+          requiredPageKey: 'Post Pickup Call MIS',
+          alternatePageKeys: ['postPickupCallMis', 'Post Pickup Call MIS'],
+          skipRolePageGuard: true
+        }
       },
 
       {

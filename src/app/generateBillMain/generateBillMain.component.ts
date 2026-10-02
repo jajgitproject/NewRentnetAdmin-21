@@ -8,8 +8,7 @@ import { MatSort } from '@angular/material/sort';
 import { GenerateBillMainModel } from './generateBillMain.model';
 import { DataSource } from '@angular/cdk/collections';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import { Subscription } from 'rxjs';
-import { finalize } from 'rxjs/operators';
+import { debounceTime, distinctUntilChanged, finalize, of, Subscription, switchMap } from 'rxjs';
 import { DateAdapter, MAT_DATE_LOCALE } from '@angular/material/core';
 import { MatMenu, MatMenuTrigger } from '@angular/material/menu';
 import { SelectionModel } from '@angular/cdk/collections';
@@ -46,7 +45,10 @@ export class GenerateBillMainComponent implements OnInit, OnDestroy {
   hasSearched = false;
   isLoading = false;
   advanceTable: GenerateBillMainModel | null;
-  SearchCustomer: string = '';
+  searchCustomer = new FormControl('');
+  searchGuest = new FormControl('');
+  customerOptions: any[] = [];
+  guestOptions: any[] = [];
   SearchActivationStatus : boolean=true;
   PageNumber: number = 0;
   activation: string;
@@ -65,8 +67,6 @@ export class GenerateBillMainComponent implements OnInit, OnDestroy {
 
   SearchEndDate: string = '';
   endDate : FormControl = new FormControl();
-  SearchGuset: string='';
-    
   constructor(
     public httpClient: HttpClient,
     public dialog: MatDialog,
@@ -86,6 +86,57 @@ export class GenerateBillMainComponent implements OnInit, OnDestroy {
   ngOnInit() 
   {
     this.SubscribeUpdateService();
+    this.setupAutocomplete(
+      this.searchCustomer,
+      (prefix) => this._generalService.GetCustomerDropDownForControlPanel(prefix),
+      (list) => (this.customerOptions = list || [])
+    );
+    this.setupAutocomplete(
+      this.searchGuest,
+      (prefix) => this._generalService.GetPassengerDropDownForControlPanel(prefix),
+      (list) => (this.guestOptions = list || [])
+    );
+  }
+
+  private setupAutocomplete(
+    control: FormControl,
+    fetchFn: (prefix: string) => any,
+    assignFn: (list: any[]) => void
+  ): void {
+    control.valueChanges.pipe(
+      debounceTime(300),
+      distinctUntilChanged(),
+      switchMap((value) => {
+        const term = (value || '').toString().trim();
+        if (typeof value === 'object' && value !== null) {
+          assignFn([]);
+          return of([]);
+        }
+        if (term.length < 3) {
+          assignFn([]);
+          return of([]);
+        }
+        return fetchFn(term);
+      })
+    ).subscribe((list) => assignFn(list || []));
+  }
+
+  displayCustomer(option: any): string {
+    return option && typeof option === 'object' ? option.customerName : option || '';
+  }
+
+  displayGuest(option: any): string {
+    return option && typeof option === 'object' ? option.customerPersonName : option || '';
+  }
+
+  private extractSearchText(value: any, objectKey: string): string {
+    if (!value) {
+      return '';
+    }
+    if (typeof value === 'object') {
+      return value[objectKey] || '';
+    }
+    return value.toString().trim();
   }
 
   ngOnDestroy() {
@@ -101,10 +152,10 @@ export class GenerateBillMainComponent implements OnInit, OnDestroy {
   }
 
   private buildSearchParams() {
-    const guest = (this.SearchGuset || '').trim();
-    const invoiceNumber = (this.SearchInvoiceNumberWithPrefix || '').replace('/', '-');
+    const guest = this.extractSearchText(this.searchGuest.value, 'customerPersonName');
+    const invoiceNumber = (this.SearchInvoiceNumberWithPrefix || '').trim();
     return {
-      customer: (this.SearchCustomer || '').trim(),
+      customer: this.extractSearchText(this.searchCustomer.value, 'customerName'),
       invoiceNumber,
       guest,
       billDate: this.SearchBillDate || '',
@@ -128,9 +179,11 @@ export class GenerateBillMainComponent implements OnInit, OnDestroy {
 
   refresh(reload = false) 
   {
-    this.SearchCustomer = '';
+    this.searchCustomer.setValue('');
     this.SearchInvoiceNumberWithPrefix = '';
-    this.SearchGuset = '';
+    this.searchGuest.setValue('');
+    this.customerOptions = [];
+    this.guestOptions = [];
     this.SearchBillDate = '';
     this.SearchStartDate = '';
     this.SearchEndDate = '';

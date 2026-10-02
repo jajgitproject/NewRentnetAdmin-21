@@ -23,6 +23,8 @@ import { MatMenuTrigger } from '@angular/material/menu';
 import { ActivatedRoute } from '@angular/router';
 import { DutySlipAccentureService } from '../dutySlipAccenture/dutySlipAccenture.service';
 import { PrintBlankDutySlip } from './PrintBlankDutySlip.model';
+import { ControlPanelDesignService } from '../controlPanelDesign/controlPanelDesign.service';
+import { ControlPanelData } from '../controlPanelDesign/controlPanelDesign.model';
 import moment from 'moment';
 
 @Component({
@@ -44,6 +46,7 @@ export class PrintBlankDutySlipComponent {
     vehicleName: any;
     DutySlipID: any;
     dialogTitle: string;
+    reservationInfo: any;
     dataSourceForCalculate: any = { 
       totalRecivableAfterAdvace: 0,
       totalBasicAmount: 0,
@@ -58,6 +61,7 @@ export class PrintBlankDutySlipComponent {
       public dialog: MatDialog,
       public route:ActivatedRoute,
       public dutySlipAccentureService: DutySlipAccentureService,
+      public _controlPanelDesignService: ControlPanelDesignService,
       private snackBar: MatSnackBar,
       public _generalService: GeneralService
     ) {
@@ -75,8 +79,10 @@ export class PrintBlankDutySlipComponent {
     {
       this.route.queryParams.subscribe(paramsData =>{
       this.DutySlipID = paramsData.dutySlipID;
-    });
+      this.reservationID = paramsData.reservationID;
+      this.loadDataForReservation();
       this.loadData();
+    });
     }
   
     onNoClick(): void 
@@ -87,15 +93,67 @@ export class PrintBlankDutySlipComponent {
       // }
     }
   
+    public loadDataForReservation()
+    {
+      const reservationId = this.reservationID || this.dataSource?.reservationID;
+      if (!reservationId) {
+        return;
+      }
+      this._controlPanelDesignService.getReservationDetails(reservationId).subscribe(
+      (data: ControlPanelData) =>
+      {
+        this.reservationInfo = data?.reservationDetails;
+        this.applyDropAddressFromReservation();
+      },
+      (error: HttpErrorResponse) => { this.reservationInfo = null; });
+    }
+
     public loadData() 
     {
       this.dutySlipAccentureService.printDutySlipInfo(this.DutySlipID).subscribe(
       data =>   
       {
         this.dataSource = data;
+        this.applyDropAddressFromReservation();
+        if (!this.reservationID && this.dataSource?.reservationID) {
+          this.reservationID = this.dataSource.reservationID;
+          this.loadDataForReservation();
+        }
         this.getTime()
       },
       (error: HttpErrorResponse) => { this.dataSource = null});
+    }
+
+    getDropAddress(): string {
+      return this.firstNonEmptyAddress(
+        this.dataSource?.dropOffAddress,
+        this.dataSource?.DropOffAddress,
+        this.dataSource?.dropOffAddressDetails,
+        this.dataSource?.DropOffAddressDetails,
+        this.reservationInfo?.[0]?.drop?.dropOffAddress,
+        this.reservationInfo?.[0]?.drop?.DropOffAddress,
+        this.reservationInfo?.[0]?.drop?.dropOffAddressDetails,
+        this.reservationInfo?.[0]?.drop?.DropOffAddressDetails,
+        this.reservationInfo?.[0]?.dropOffAddress,
+        this.reservationInfo?.[0]?.DropOffAddress
+      );
+    }
+
+    private applyDropAddressFromReservation(): void {
+      if (!this.dataSource) {
+        return;
+      }
+      this.dataSource.dropOffAddress = this.getDropAddress();
+    }
+
+    private firstNonEmptyAddress(...values: any[]): string {
+      for (const value of values) {
+        const text = (value ?? '').toString().trim();
+        if (text) {
+          return text;
+        }
+      }
+      return '';
     }
   
    getTime() 

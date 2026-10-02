@@ -44,6 +44,7 @@ interface MenuItem {
 })
 export class CustomerContractCDCLocalRateComponent implements OnInit {
   displayedColumns = [
+    'actions',
     'CustomerContractCarCategory',
     'CustomerContractCityTier',
     'package',
@@ -55,8 +56,7 @@ export class CustomerContractCDCLocalRateComponent implements OnInit {
     'BillFromTo',
     'FKMP2P',
     'FixedP2PAmount',
-    'status',
-    'actions'
+    'status'
   ];
 
   displayColumnsOfFRD = [
@@ -607,8 +607,7 @@ openInNewTab(menuItem: any, rowItem: any) {
                this.refresh();
                this.showNotification(
                 'snackbar-danger',
-                //'Local Rate Already Exists.....!!!',
-                'Duplicate Value Found.....!!!',
+                'An active rate already exists for a shared city in another city tier.',
                 'bottom',
                 'center'
               );

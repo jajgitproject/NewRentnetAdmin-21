@@ -10,6 +10,9 @@ import { MatAutocompleteModule } from '@angular/material/autocomplete';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
 import { MatIconModule } from '@angular/material/icon';
+import { MatSnackBarModule } from '@angular/material/snack-bar';
+import { MatDatepickerModule } from '@angular/material/datepicker';
+import { MAT_DATE_LOCALE, MatNativeDateModule } from '@angular/material/core';
 
 import { IntegrationHealthComponent } from './integrationHealth.component';
 import { IntegrationHealthRoutingModule } from './integrationHealth-routing.module';
@@ -28,8 +31,14 @@ import { IntegrationHealthService } from './integrationHealth.service';
     MatAutocompleteModule,
     MatButtonModule,
     MatCardModule,
-    MatIconModule
+    MatIconModule,
+    MatSnackBarModule,
+    MatDatepickerModule,
+    MatNativeDateModule
   ],
-  providers: [IntegrationHealthService]
+  providers: [
+    IntegrationHealthService,
+    { provide: MAT_DATE_LOCALE, useValue: 'en-GB' }
+  ]
 })
 export class IntegrationHealthModule {}

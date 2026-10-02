@@ -162,6 +162,7 @@ export class ChangeCarTypeComponent implements OnInit {
 
     public SearchData() 
     {
+      this.PageNumber = 0;
       this.loadData();
     }
  
@@ -200,8 +201,8 @@ export class ChangeCarTypeComponent implements OnInit {
       {
         dutySlipIDs = this.searchDutySlipID.split(/[\s,]+/).filter(x => x.trim() !== "").join(',');
       }
-      let Package = this.package.value ? this.package.value.replace('/','-') : null;
-      this.changeCarTypeService.getTableData(this.customerGroup.value,this.customer.value,this.city.value,this.vehicle.value,this.packageType.value,encodeURIComponent(Package),this.SearchFromDate,this.SearchToDate,reservationIDs,dutySlipIDs,this.searchActivationStatus,this.PageNumber).subscribe(
+      let Package = this.package.value ? this.package.value.replace('/','-') : '';
+      this.changeCarTypeService.getTableData(this.customerGroup.value,this.customer.value,this.city.value,this.vehicle.value,this.packageType.value,Package,this.SearchFromDate,this.SearchToDate,reservationIDs,dutySlipIDs,this.searchActivationStatus,this.PageNumber).subscribe(
       data => 
       {
         this.dataSource = data;
@@ -222,7 +223,18 @@ export class ChangeCarTypeComponent implements OnInit {
         this.sortingData = 1;
         this.sortType = "Descending";
       }
-      this.changeCarTypeService.getTableDataSort(this.searchCustomerGroup,this.searchCustomerName,this.SearchCity,this.SearchVehicle,this.SearchPackageType,this.SearchPakcage.replace(/\//g, '-'),this.SearchFromDate,this.SearchToDate,this.searchReservationID,this.searchDutySlipID,this.searchActivationStatus, this.PageNumber, coloumName.active, this.sortType).subscribe
+      let reservationIDs = null;
+      if (this.searchReservationID && this.searchReservationID.trim() !== "")
+      {
+        reservationIDs = this.searchReservationID.split(/[\s,]+/).filter(x => x.trim() !== "").join(',');
+      }
+      let dutySlipIDs = null;
+      if (this.searchDutySlipID && this.searchDutySlipID.trim() !== "")
+      {
+        dutySlipIDs = this.searchDutySlipID.split(/[\s,]+/).filter(x => x.trim() !== "").join(',');
+      }
+      const packageName = this.SearchPakcage ? this.SearchPakcage.replace(/\//g, '-') : '';
+      this.changeCarTypeService.getTableDataSort(this.searchCustomerGroup,this.searchCustomerName,this.SearchCity,this.SearchVehicle,this.SearchPackageType,packageName,this.SearchFromDate,this.SearchToDate,reservationIDs,dutySlipIDs,this.searchActivationStatus, this.PageNumber, coloumName.active, this.sortType).subscribe
       (
         data =>   
         {

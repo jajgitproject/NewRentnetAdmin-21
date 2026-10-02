@@ -68,10 +68,10 @@
                                       </mat-header-cell>
                                       <mat-cell *matCellDef="let row">
                                         <ng-container *ngIf="column === 'openDate'">
-                                          {{ row[column] ? (row[column] | date: 'dd-MM-yyyy') : 'N/A' }}
+                                          {{ row[column] ? (row[column] | date: 'dd-MM-yyyy') : '' }}
                                         </ng-container>
                                         <ng-container *ngIf="column !== 'openDate'">
-                                          {{ row[column] === undefined || row[column] === null || row[column] === 0 ? 'N/A' : row[column] }}
+                                          {{ row[column] === undefined || row[column] === null || row[column] === 0 ? '' : row[column] }}
                                         </ng-container>
                                       </mat-cell>
                                     </ng-container>

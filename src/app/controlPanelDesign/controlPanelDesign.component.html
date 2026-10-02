@@ -1785,7 +1785,8 @@
                                   width: 100px;
                                   float: left;
                                 ">
-                            {{ data.reservationGroupID +'.'+ data.reservationID}}
+                            {{ data.reservationGroupID +'.'+ data.reservationID}}<br/>
+                            <span *ngIf="data.customerName === 'ECO MOBILITY B2C'">B2C Res.No - {{ data.reservationSourceDetail }}</span> 
                             <!-- <br/>
                                 {{ data.customerGroup}}
                                 <br/>

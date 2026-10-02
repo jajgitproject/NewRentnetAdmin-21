@@ -74,9 +74,9 @@ export class PrintDutySlipComponent {
       this.route.queryParams.subscribe(paramsData =>{
         this.DutySlipID = paramsData.dutySlipID;
         this.ReservationID = paramsData.reservationID;
+        this.loadDataForReservation();
+        this.loadData();
       });
-    this.loadDataForReservation();
-    this.loadData();
     }
   
     onNoClick(): void 
@@ -84,10 +84,14 @@ export class PrintDutySlipComponent {
 
     public loadDataForReservation() 
     {
+      if (!this.ReservationID) {
+        return;
+      }
       this._controlPanelDesignService.getReservationDetails(this.ReservationID).subscribe(
       (data: ControlPanelData) => {
           this.reservationInfo = data?.reservationDetails;
-          this.ReservationStatus = this.reservationInfo[0].reservationStatus;
+          this.ReservationStatus = this.reservationInfo?.[0]?.reservationStatus;
+          this.applyDropAddressFromReservation();
         },
       (error: HttpErrorResponse) => {this.reservationInfo = null;});
     }
@@ -103,6 +107,7 @@ export class PrintDutySlipComponent {
             this.dataSource.customerSignatureImage
           );
         }
+        this.applyDropAddressFromReservation();
         // Total Kms in header uses totalRunningKM; totalKms is for Running Detail total row when distance column is shown.
         if (this.dataSource?.showDistanceOnDutySlipPdf === true) {
           this.totalKms = this.dataSource?.runningDetailsModels?.reduce((sum: number, item: any) => sum + Number(item.distance || 0), 0) ?? 0;
@@ -112,6 +117,38 @@ export class PrintDutySlipComponent {
         //this.getTime();
       },
       (error: HttpErrorResponse) => { this.dataSource = null});
+    }
+
+    getDropAddress(): string {
+      return this.firstNonEmptyAddress(
+        this.dataSource?.dropOffAddress,
+        this.dataSource?.DropOffAddress,
+        this.dataSource?.dropOffAddressDetails,
+        this.dataSource?.DropOffAddressDetails,
+        this.reservationInfo?.[0]?.drop?.dropOffAddress,
+        this.reservationInfo?.[0]?.drop?.DropOffAddress,
+        this.reservationInfo?.[0]?.drop?.dropOffAddressDetails,
+        this.reservationInfo?.[0]?.drop?.DropOffAddressDetails,
+        this.reservationInfo?.[0]?.dropOffAddress,
+        this.reservationInfo?.[0]?.DropOffAddress
+      );
+    }
+
+    private applyDropAddressFromReservation(): void {
+      if (!this.dataSource) {
+        return;
+      }
+      this.dataSource.dropOffAddress = this.getDropAddress();
+    }
+
+    private firstNonEmptyAddress(...values: any[]): string {
+      for (const value of values) {
+        const text = (value ?? '').toString().trim();
+        if (text) {
+          return text;
+        }
+      }
+      return '';
     }  
   
     getTime() 

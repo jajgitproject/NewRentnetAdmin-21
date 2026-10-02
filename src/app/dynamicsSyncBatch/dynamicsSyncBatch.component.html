@@ -1,0 +1,190 @@
+<section class="content dsb-page">
+  <div class="container-fluid">
+    <div class="block-header">
+      <div class="row">
+        <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+          <ul>
+            <li class="breadcrumb-item bcrumb-1">
+              <a routerLink="/dashboard/main"><i class="fas fa-home"></i> Home</a>|
+              <a href="#" onClick="return false;">Admin</a>|
+              <a href="#" onClick="return false;">{{ monitorTitle }}</a>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="dsb-shell card">
+      <div class="dsb-hero">
+        <div class="dsb-hero__glow" aria-hidden="true"></div>
+        <div class="dsb-hero__inner">
+          <div class="dsb-hero__main">
+            <div class="dsb-hero__brand">
+              <div class="dsb-hero__icon" aria-hidden="true">
+                <i class="fas fa-tasks"></i>
+              </div>
+              <div class="dsb-hero__copy">
+                <span class="dsb-hero__eyebrow">
+                  <i class="fas fa-layer-group"></i>
+                  Background ERP Sync
+                </span>
+                <h1 class="dsb-hero__title">{{ monitorTitle }}</h1>
+                <p class="dsb-hero__subtitle">
+                  {{ monitorSubtitle }}
+                </p>
+              </div>
+            </div>
+
+            <div class="dsb-hero__actions">
+              <button mat-stroked-button class="dsb-btn-ghost" type="button" [routerLink]="newSyncRoute">
+                <i class="fas fa-cloud-upload-alt"></i>
+                New Sync
+              </button>
+              <button mat-stroked-button class="dsb-btn-ghost" type="button" (click)="loadBatches()" [disabled]="loading">
+                <i class="fas fa-sync-alt" [class.dsb-spin]="loading"></i>
+                Refresh
+              </button>
+            </div>
+          </div>
+
+          <div class="dsb-hero__stats">
+            <div class="dsb-stat">
+              <span class="dsb-stat__label">Total Batches</span>
+              <span class="dsb-stat__value">{{ totalBatchCount }}</span>
+            </div>
+            <div class="dsb-stat dsb-stat--accent">
+              <span class="dsb-stat__label">Active</span>
+              <span class="dsb-stat__value">{{ getActiveBatchCount() }}</span>
+            </div>
+            <div class="dsb-stat dsb-stat--success">
+              <span class="dsb-stat__label">{{ syncedItemsStatLabel }}</span>
+              <span class="dsb-stat__value">{{ getTotalSuccessCount() }}</span>
+            </div>
+            <div class="dsb-stat dsb-stat--warning">
+              <span class="dsb-stat__label">Failed Items</span>
+              <span class="dsb-stat__value">{{ getTotalFailedCount() }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="body dsb-shell__body">
+        <mat-progress-bar *ngIf="loading" mode="indeterminate" class="dsb-top-loader"></mat-progress-bar>
+
+        <div class="dsb-grid-card" *ngIf="totalBatchCount > 0; else noBatches">
+          <div class="dsb-toolbar">
+            <div class="dsb-toolbar__left">
+              <h4 class="dsb-toolbar__title">
+                <i class="fas fa-list-alt"></i>
+                {{ batchesSectionTitle }}
+              </h4>
+              <span class="dsb-toolbar__hint">Auto-refreshes every 10 seconds</span>
+            </div>
+          </div>
+
+          <div class="dsb-table-wrap">
+            <table mat-table [dataSource]="batches" class="dsb-table">
+              <ng-container matColumnDef="dynamicsSyncBatchID">
+                <th mat-header-cell *matHeaderCellDef>Batch</th>
+                <td mat-cell *matCellDef="let row">
+                  <span class="dsb-batch-id">#{{ row.dynamicsSyncBatchID }}</span>
+                </td>
+              </ng-container>
+
+              <ng-container matColumnDef="startDate">
+                <th mat-header-cell *matHeaderCellDef>Started</th>
+                <td mat-cell *matCellDef="let row">{{ formatDateTime(row.startDate, row.startTime) }}</td>
+              </ng-container>
+
+              <ng-container matColumnDef="batchCreatedByName">
+                <th mat-header-cell *matHeaderCellDef>Created By</th>
+                <td mat-cell *matCellDef="let row">{{ row.batchCreatedByName || row.batchCreatedByID }}</td>
+              </ng-container>
+
+              <ng-container matColumnDef="numberofItems">
+                <th mat-header-cell *matHeaderCellDef>{{ itemsColumnHeader }}</th>
+                <td mat-cell *matCellDef="let row" class="dsb-cell-num">{{ row.numberofItems }}</td>
+              </ng-container>
+
+              <ng-container matColumnDef="progress">
+                <th mat-header-cell *matHeaderCellDef>Progress</th>
+                <td mat-cell *matCellDef="let row">
+                  <div class="dsb-progress-cell">
+                    <div class="dsb-progress-bar">
+                      <div
+                        class="dsb-progress-bar__fill"
+                        [style.width.%]="getProgressPercent(row)"
+                        [class.dsb-progress-bar__fill--done]="row.batchStatus === 'Completed'"
+                        [class.dsb-progress-bar__fill--warn]="row.batchStatus === 'CompletedWithErrors' || row.batchStatus === 'Failed'">
+                      </div>
+                    </div>
+                    <span class="dsb-progress-label">{{ getProcessedCount(row) }} / {{ row.numberofItems }}</span>
+                  </div>
+                </td>
+              </ng-container>
+
+              <ng-container matColumnDef="numberofSuccessfulItems">
+                <th mat-header-cell *matHeaderCellDef>Success</th>
+                <td mat-cell *matCellDef="let row" class="dsb-cell-num dsb-cell-success">{{ row.numberofSuccessfulItems }}</td>
+              </ng-container>
+
+              <ng-container matColumnDef="numberofFailedItems">
+                <th mat-header-cell *matHeaderCellDef>Failed</th>
+                <td mat-cell *matCellDef="let row" class="dsb-cell-num dsb-cell-failed">{{ row.numberofFailedItems }}</td>
+              </ng-container>
+
+              <ng-container matColumnDef="batchStatus">
+                <th mat-header-cell *matHeaderCellDef>Status</th>
+                <td mat-cell *matCellDef="let row">
+                  <span [ngClass]="getStatusClass(row.batchStatus)">
+                    <i [class]="getStatusIcon(row.batchStatus)" aria-hidden="true"></i>
+                    {{ formatBatchStatus(row.batchStatus) }}
+                  </span>
+                </td>
+              </ng-container>
+
+              <ng-container matColumnDef="actions">
+                <th mat-header-cell *matHeaderCellDef></th>
+                <td mat-cell *matCellDef="let row">
+                  <button mat-raised-button color="primary" type="button" (click)="openDetails(row)">
+                    Details
+                  </button>
+                </td>
+              </ng-container>
+
+              <tr mat-header-row *matHeaderRowDef="batchColumns"></tr>
+              <tr mat-row *matRowDef="let row; columns: batchColumns;"></tr>
+            </table>
+          </div>
+
+          <div class="dsb-pager">
+            <button mat-stroked-button type="button" (click)="previousPage()" [disabled]="pageNumber === 0 || loading">
+              <i class="fas fa-chevron-left"></i> Previous
+            </button>
+            <span class="dsb-pager__info">
+              Page {{ pageNumber + 1 }} of {{ getPageCount() || 1 }} · {{ totalBatchCount }} batch(es)
+            </span>
+            <button mat-stroked-button type="button" (click)="nextPage()" [disabled]="!canGoNext() || loading">
+              Next <i class="fas fa-chevron-right"></i>
+            </button>
+          </div>
+        </div>
+
+        <ng-template #noBatches>
+          <div class="dsb-empty-state" *ngIf="!loading">
+            <div class="dsb-empty-state__icon">
+              <i class="fas fa-inbox"></i>
+            </div>
+            <h5>No {{ isCreditNoteView ? 'credit note' : 'invoice' }} sync batches yet</h5>
+            <p>{{ emptyStateDescription }}</p>
+            <button mat-raised-button class="dsb-empty-cta" [routerLink]="newSyncRoute">
+              <i class="fas fa-cloud-upload-alt"></i>
+              Go to {{ newSyncLabel }}
+            </button>
+          </div>
+        </ng-template>
+
+      </div>
+    </div>
+  </div>
+</section>

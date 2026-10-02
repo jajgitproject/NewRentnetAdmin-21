@@ -22,6 +22,10 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { environment } from 'src/environments/environment';
+import {
+  extractComplianceFromAllotmentResponse,
+  showCarDriverCompliancePopup
+} from '../../compliance-popup';
 
 
 @Component({
@@ -383,7 +387,22 @@ allotmentType: any;
       : this.advanceTableService.add(this.advanceTableForm.getRawValue());
 
     request$.subscribe(
-      () => {
+      (response) => {
+        const resolvedType =
+          allotmentType ||
+          this.data?.allotmentType ||
+          this.advanceTableForm?.getRawValue()?.allotmentType;
+        const isSoftOrHardAllotment =
+          resolvedType === 'Hard' || resolvedType === 'Soft';
+        const compliance = isSoftOrHardAllotment
+          ? extractComplianceFromAllotmentResponse(response)
+          : null;
+        if (compliance) {
+          showCarDriverCompliancePopup(compliance).then(() => {
+            this.onAllotSubmitSuccess(successMessage);
+          });
+          return;
+        }
         this.onAllotSubmitSuccess(successMessage);
       },
       error => {

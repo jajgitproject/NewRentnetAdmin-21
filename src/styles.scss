@@ -137,6 +137,71 @@
   overflow-y: auto !important;
 }
 
+/* Customer page create/edit popups (Corporate, Individual, Corp. Indi.) — true 4-column layout.
+   Templates still use pairs of fields per `.row`; `display: contents` on `.row` flattens all
+   field cells into one 4-column grid on the form (`.customer-form-four-col`). */
+.cdk-overlay-pane.customer-page-form-dialog,
+.cdk-overlay-pane:has(form.customer-form-four-col) {
+  width: 1400px !important;
+  max-width: 96vw !important;
+}
+.cdk-overlay-pane.customer-page-form-dialog .mat-mdc-dialog-container,
+.cdk-overlay-pane.customer-page-form-dialog .mdc-dialog__surface,
+.cdk-overlay-pane:has(form.customer-form-four-col) .mat-mdc-dialog-container,
+.cdk-overlay-pane:has(form.customer-form-four-col) .mdc-dialog__surface {
+  width: 100% !important;
+  max-width: 100% !important;
+}
+.cdk-overlay-pane.customer-page-form-dialog [mat-dialog-content],
+.cdk-overlay-pane.customer-page-form-dialog .mat-mdc-dialog-content,
+.cdk-overlay-pane:has(form.customer-form-four-col) [mat-dialog-content],
+.cdk-overlay-pane:has(form.customer-form-four-col) .mat-mdc-dialog-content {
+  width: 100%;
+  box-sizing: border-box;
+}
+
+form.customer-form-four-col {
+  display: grid !important;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  column-gap: 16px;
+  row-gap: 8px;
+  width: 100%;
+  align-items: start;
+}
+form.customer-form-four-col > .row {
+  display: contents !important;
+}
+form.customer-form-four-col > .row > [class*='col-'] {
+  width: 100% !important;
+  max-width: 100% !important;
+  min-width: 0 !important;
+  flex: none !important;
+  padding-left: 0 !important;
+  padding-right: 0 !important;
+  margin-bottom: 0 !important;
+}
+form.customer-form-four-col > .row > .col-xl-12,
+form.customer-form-four-col > .row > .col-lg-12,
+form.customer-form-four-col > .row > .col-md-12,
+form.customer-form-four-col > .row > .customer-form-actions {
+  grid-column: 1 / -1;
+}
+form.customer-form-four-col .example-full-width,
+form.customer-form-four-col mat-form-field {
+  width: 100%;
+}
+
+@media (max-width: 900px) {
+  form.customer-form-four-col {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+@media (max-width: 520px) {
+  form.customer-form-four-col {
+    grid-template-columns: 1fr;
+  }
+}
+
 /* Global dialog scrolling fix for Angular Material 21 (MDC).
    Many dialogs in this app (Customer, Supplier, Employee, etc.) don't pass a
    panelClass, so the `.dbe-dialog-centered`-scoped rules above don't reach them
@@ -242,6 +307,90 @@
 .cdk-overlay-container .cdk-overlay-pane:has(app-upsell-flow-dialog).mat-mdc-dialog-panel {
   width: min(680px, 95vw) !important;
   max-width: 95vw !important;
+}
+
+/* Booking screen — Saved Addresses list (panelClass is on cdk-overlay-pane, not inside the component). */
+.cdk-overlay-container .cdk-overlay-pane.saved-address-dialog-panel.mat-mdc-dialog-panel {
+  width: min(760px, 96vw) !important;
+  min-width: min(320px, 96vw) !important;
+  max-width: 96vw !important;
+  flex-shrink: 0 !important;
+  --mat-dialog-container-max-width: min(760px, 96vw);
+}
+.cdk-overlay-container .cdk-overlay-pane.saved-address-dialog-panel > .mat-mdc-dialog-container {
+  width: 100% !important;
+  max-width: 100% !important;
+  overflow: visible !important;
+}
+.cdk-overlay-container .cdk-overlay-pane.saved-address-dialog-panel .mdc-dialog__surface,
+.cdk-overlay-container .cdk-overlay-pane.saved-address-dialog-panel .mat-mdc-dialog-container .mat-mdc-dialog-surface {
+  width: 100% !important;
+  max-width: 100% !important;
+  overflow: visible !important;
+}
+.cdk-overlay-container .cdk-overlay-pane.saved-address-dialog-panel .mat-mdc-dialog-content,
+.cdk-overlay-container .cdk-overlay-pane.saved-address-dialog-panel [mat-dialog-content] {
+  overflow-x: visible !important;
+}
+
+/* Saved Address → Add / Edit address form */
+.cdk-overlay-container .cdk-overlay-pane.customer-person-address-dialog-panel.mat-mdc-dialog-panel {
+  width: min(920px, 96vw) !important;
+  min-width: min(320px, 96vw) !important;
+  max-width: 96vw !important;
+  flex-shrink: 0 !important;
+  --mat-dialog-container-max-width: min(920px, 96vw);
+}
+.cdk-overlay-container .cdk-overlay-pane.customer-person-address-dialog-panel > .mat-mdc-dialog-container {
+  width: 100% !important;
+  max-width: 100% !important;
+  overflow: visible !important;
+}
+.cdk-overlay-container .cdk-overlay-pane.customer-person-address-dialog-panel .mdc-dialog__surface,
+.cdk-overlay-container .cdk-overlay-pane.customer-person-address-dialog-panel .mat-mdc-dialog-container .mat-mdc-dialog-surface {
+  width: 100% !important;
+  max-width: 100% !important;
+  overflow: visible !important;
+}
+.cdk-overlay-container .cdk-overlay-pane.customer-person-address-dialog-panel .mat-mdc-dialog-content,
+.cdk-overlay-container .cdk-overlay-pane.customer-person-address-dialog-panel [mat-dialog-content] {
+  overflow-x: visible !important;
+  max-height: calc(90vh - 96px) !important;
+}
+
+.cdk-overlay-container .cdk-overlay-pane.saved-address-dialog-panel .dialog-action-btn,
+.cdk-overlay-container .cdk-overlay-pane.customer-person-address-dialog-panel .dialog-action-btn {
+  flex-shrink: 0;
+}
+.cdk-overlay-container .cdk-overlay-pane.saved-address-dialog-panel .dialog-action-btn .mdc-button__label,
+.cdk-overlay-container .cdk-overlay-pane.customer-person-address-dialog-panel .dialog-action-btn .mdc-button__label {
+  overflow: visible !important;
+  text-overflow: unset !important;
+  white-space: nowrap !important;
+}
+
+/* Google address field: show full selected text across multiple lines */
+.cdk-overlay-container .cdk-overlay-pane.customer-person-address-dialog-panel .cpa-google-address-field .mat-mdc-text-field-wrapper,
+.cdk-overlay-container .cdk-overlay-pane.customer-person-address-dialog-panel .cpa-google-address-field .mdc-text-field,
+.cdk-overlay-container .cdk-overlay-pane.customer-person-address-dialog-panel .cpa-google-address-field .mat-mdc-form-field-infix {
+  overflow: visible !important;
+}
+.cdk-overlay-container .cdk-overlay-pane.customer-person-address-dialog-panel .cpa-google-address-field .mat-mdc-form-field-infix {
+  min-height: 72px !important;
+  height: auto !important;
+  align-items: flex-start !important;
+}
+.cdk-overlay-container .cdk-overlay-pane.customer-person-address-dialog-panel .cpa-google-address-field textarea.mat-mdc-input-element {
+  width: 100% !important;
+  min-height: 4.5rem !important;
+  line-height: 1.4 !important;
+  white-space: pre-wrap !important;
+  word-break: break-word !important;
+  overflow-wrap: anywhere !important;
+  overflow-x: hidden !important;
+  overflow-y: auto !important;
+  field-sizing: content;
+  resize: vertical;
 }
 
 /* Role Create/Edit: override _modals.scss 80vw surface cap + content overflow-x so long mat-labels are not clipped.
@@ -502,11 +651,28 @@
   pointer-events: auto !important;
 }
 
+/* Geo address suggestions (Google Places): grow to longest line; cap at viewport. */
 .pac-container {
   box-sizing: border-box !important;
-  max-width: min(100vw, 500px) !important;
+  width: max-content !important;
+  max-width: min(92vw, calc(100vw - 24px)) !important;
+  overflow-x: auto;
   /* Above MatDialog; works when parent is `body` or `cdk-overlay-container` */
   z-index: 2147483647 !important;
+}
+
+.pac-container .pac-item {
+  white-space: normal !important;
+  overflow: visible !important;
+  text-overflow: unset !important;
+  line-height: 1.35 !important;
+  padding-top: 6px !important;
+  padding-bottom: 6px !important;
+}
+
+.pac-container .pac-item .pac-item-query,
+.pac-container .pac-item .pac-matched {
+  white-space: normal !important;
 }
 
 .cdk-overlay-pane:has([ngx-google-places-autocomplete]),
@@ -734,6 +900,13 @@ mat-option {
  * this on mat-select via [panelWidth]="null"; autocompletes need pane-level sizing.
  */
 .cdk-overlay-container .cdk-overlay-pane:has(.mat-mdc-autocomplete-panel:not(.google-autocomplete-panel)) {
+  width: max-content !important;
+  max-width: min(92vw, calc(100vw - 24px)) !important;
+  box-sizing: border-box;
+}
+
+/* Rentnet geo list (Google Addresses unchecked): same width behavior as .pac-container */
+.cdk-overlay-container .cdk-overlay-pane:has(.google-autocomplete-panel) {
   width: max-content !important;
   max-width: min(92vw, calc(100vw - 24px)) !important;
   box-sizing: border-box;
@@ -1026,8 +1199,48 @@ body > .swal2-container.swal2-backdrop-show {
   min-height: calc(100% - 3.5rem);
 }
 
-.google-autocomplete-panel {
-  width: 800px;
+.mat-mdc-autocomplete-panel.google-autocomplete-panel {
+  box-sizing: border-box !important;
+  width: max-content !important;
+  min-width: 100%;
+  max-width: min(92vw, calc(100vw - 24px)) !important;
+  background-color: #ffffff !important;
+  border-radius: 2px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+  overflow-x: auto;
+  overflow-y: auto;
+  padding: 0;
+}
+
+.mat-mdc-autocomplete-panel.google-autocomplete-panel .mat-mdc-option {
+  word-break: normal !important;
+  white-space: nowrap !important;
+  height: auto !important;
+  min-height: 30px;
+  max-width: none !important;
+  padding: 8px 12px !important;
+  line-height: 30px !important;
+  border-top: 1px solid #e6e6e6;
+}
+
+.mat-mdc-autocomplete-panel.google-autocomplete-panel .mat-mdc-option:first-of-type {
+  border-top: none;
+}
+
+.mat-mdc-autocomplete-panel.google-autocomplete-panel .mat-mdc-option .mdc-list-item__primary-text {
+  white-space: nowrap !important;
+  word-break: normal !important;
+  overflow-wrap: normal;
+  overflow: visible;
+  text-overflow: unset;
+  line-height: 30px !important;
+  font-size: 13px !important;
+  color: #000 !important;
+}
+
+.mat-mdc-autocomplete-panel.google-autocomplete-panel .mat-mdc-option.mdc-list-item--selected:not(.mdc-list-item--disabled),
+.mat-mdc-autocomplete-panel.google-autocomplete-panel .mat-mdc-option.mat-mdc-option-active {
+  background-color: #ebf2fe !important;
 }
 
 .scrollable-table-container {
@@ -1777,5 +1990,138 @@ body.side-closed.submenu-closed.side-closed-hover .sidebar .menu .list li.menu-r
   width: 100% !important;
   color: #121212 !important;
   padding: 10px 18px 16px !important;
+}
+
+/* Invoice sync details dialog — fixed 520px width */
+.cdk-overlay-container .cdk-overlay-pane.sdd-invoice-sync-details-panel {
+  width: 520px !important;
+  max-width: min(520px, 96vw) !important;
+  max-height: 90vh !important;
+  overflow: hidden !important;
+}
+
+.cdk-overlay-container .cdk-overlay-pane.sdd-invoice-sync-details-panel .mat-mdc-dialog-container,
+.cdk-overlay-container .cdk-overlay-pane.sdd-invoice-sync-details-panel .mat-dialog-container,
+.cdk-overlay-container .cdk-overlay-pane.sdd-invoice-sync-details-panel .mat-mdc-dialog-container .mat-mdc-dialog-surface,
+.cdk-overlay-container .cdk-overlay-pane.sdd-invoice-sync-details-panel .mat-mdc-dialog-container .mdc-dialog__surface {
+  width: 100% !important;
+  max-width: 100% !important;
+  max-height: 90vh !important;
+  padding: 16px !important;
+  box-sizing: border-box !important;
+  overflow: hidden !important;
+  display: flex !important;
+  flex-direction: column !important;
+  min-height: 0 !important;
+}
+
+.cdk-overlay-container .cdk-overlay-pane.sdd-invoice-sync-details-panel app-invoice-sync-details-dialog {
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow: hidden;
+}
+
+/* One scrollbar: only mat-dialog-content scrolls (not surface/container/nested lists). */
+.cdk-overlay-container .cdk-overlay-pane.sdd-invoice-sync-details-panel .mat-mdc-dialog-container .mat-mdc-dialog-content,
+.cdk-overlay-container .cdk-overlay-pane.sdd-invoice-sync-details-panel .mat-mdc-dialog-container .mdc-dialog__content,
+.cdk-overlay-container .cdk-overlay-pane.sdd-invoice-sync-details-panel .mat-mdc-dialog-container [mat-dialog-content],
+.cdk-overlay-container .cdk-overlay-pane.sdd-invoice-sync-details-panel .mat-dialog-content {
+  flex: 1 1 auto;
+  min-height: 0;
+  max-width: 100% !important;
+  max-height: none !important;
+  box-sizing: border-box !important;
+  overflow-x: hidden !important;
+  overflow-y: auto !important;
+}
+
+/* Dynamics request payload JSON dialog */
+.cdk-overlay-container .cdk-overlay-pane.sdd-dynamics-request-payload-panel {
+  width: 720px !important;
+  max-width: min(720px, 95vw) !important;
+  max-height: 90vh !important;
+  overflow: hidden !important;
+}
+
+.cdk-overlay-container .cdk-overlay-pane.sdd-dynamics-request-payload-panel .mat-mdc-dialog-container,
+.cdk-overlay-container .cdk-overlay-pane.sdd-dynamics-request-payload-panel .mat-dialog-container,
+.cdk-overlay-container .cdk-overlay-pane.sdd-dynamics-request-payload-panel .mat-mdc-dialog-container .mat-mdc-dialog-surface,
+.cdk-overlay-container .cdk-overlay-pane.sdd-dynamics-request-payload-panel .mat-mdc-dialog-container .mdc-dialog__surface {
+  width: 100% !important;
+  max-width: 100% !important;
+  max-height: 90vh !important;
+  padding: 16px !important;
+  box-sizing: border-box !important;
+  overflow: hidden !important;
+  display: flex !important;
+  flex-direction: column !important;
+  min-height: 0 !important;
+}
+
+.cdk-overlay-container .cdk-overlay-pane.sdd-dynamics-request-payload-panel app-dynamics-request-payload-dialog {
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.cdk-overlay-container .cdk-overlay-pane.sdd-dynamics-request-payload-panel .mat-mdc-dialog-container .mat-mdc-dialog-content,
+.cdk-overlay-container .cdk-overlay-pane.sdd-dynamics-request-payload-panel .mat-mdc-dialog-container .mdc-dialog__content,
+.cdk-overlay-container .cdk-overlay-pane.sdd-dynamics-request-payload-panel .mat-mdc-dialog-container [mat-dialog-content],
+.cdk-overlay-container .cdk-overlay-pane.sdd-dynamics-request-payload-panel .mat-dialog-content {
+  flex: 1 1 auto;
+  min-height: 0;
+  max-width: 100% !important;
+  max-height: none !important;
+  overflow-x: auto !important;
+  overflow-y: auto !important;
+}
+
+/* Dynamics sync batch details dialog */
+.cdk-overlay-container .cdk-overlay-pane.dsb-batch-details-dialog-panel {
+  width: 960px !important;
+  max-width: min(960px, 95vw) !important;
+  max-height: 92vh !important;
+  overflow: hidden !important;
+}
+
+.cdk-overlay-container .cdk-overlay-pane.dsb-batch-details-dialog-panel .mat-mdc-dialog-container,
+.cdk-overlay-container .cdk-overlay-pane.dsb-batch-details-dialog-panel .mat-dialog-container,
+.cdk-overlay-container .cdk-overlay-pane.dsb-batch-details-dialog-panel .mat-mdc-dialog-container .mat-mdc-dialog-surface,
+.cdk-overlay-container .cdk-overlay-pane.dsb-batch-details-dialog-panel .mat-mdc-dialog-container .mdc-dialog__surface {
+  width: 100% !important;
+  max-width: 100% !important;
+  max-height: 92vh !important;
+  padding: 16px !important;
+  box-sizing: border-box !important;
+  overflow: hidden !important;
+  display: flex !important;
+  flex-direction: column !important;
+  min-height: 0 !important;
+}
+
+.cdk-overlay-container .cdk-overlay-pane.dsb-batch-details-dialog-panel app-dynamics-sync-batch-details-dialog {
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow: hidden;
+}
+
+/* One scrollbar: header stays fixed; only mat-dialog-content scrolls. */
+.cdk-overlay-container .cdk-overlay-pane.dsb-batch-details-dialog-panel .mat-mdc-dialog-container .mat-mdc-dialog-content,
+.cdk-overlay-container .cdk-overlay-pane.dsb-batch-details-dialog-panel .mat-mdc-dialog-container .mdc-dialog__content,
+.cdk-overlay-container .cdk-overlay-pane.dsb-batch-details-dialog-panel .mat-mdc-dialog-container [mat-dialog-content],
+.cdk-overlay-container .cdk-overlay-pane.dsb-batch-details-dialog-panel .mat-dialog-content {
+  flex: 1 1 auto;
+  min-height: 0;
+  max-width: 100% !important;
+  max-height: none !important;
+  box-sizing: border-box !important;
+  overflow-x: auto !important;
+  overflow-y: auto !important;
 }
 

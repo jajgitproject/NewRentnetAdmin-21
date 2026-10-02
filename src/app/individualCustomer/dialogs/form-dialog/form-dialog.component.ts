@@ -61,9 +61,8 @@ export class FormDialogComponent
   public SalesManagerList?: EmployeeDropDown[] = [];
   salesManagerID:any
 
-  filteredKAMCityOptions: Observable<CityDropDown[]>;
-  public KAMCityList?: CityDropDown[] = [];
-  customerKAMCityID:any;
+  private readonly defaultCustomerContractName = 'Default';
+  private readonly defaultLocationName = 'Head Office';
 
   constructor(
   public dialogRef: MatDialogRef<FormDialogComponent>,
@@ -75,11 +74,16 @@ export class FormDialogComponent
   {
     this.action = data.action;
     this.dialogTitle = 'Individual Customer';
-    this.advanceTable = new IndividualCustomerModel({});
-    this.advanceTable.activationStatus = true;
-    this.advanceTable.isPostPickUpCallAllowed = false;
-    this.advanceTable.isBillToShipToCustomer = false;
-    this.advanceTable.roundOffInvoiceValue = false;
+    if (this.action === 'edit' && data.advanceTable) {
+      this.advanceTable = data.advanceTable;
+    } else {
+      this.advanceTable = new IndividualCustomerModel({});
+      this.advanceTable.activationStatus = true;
+      this.advanceTable.importance = 'General';
+      this.advanceTable.isPostPickUpCallAllowed = true;
+      this.advanceTable.isBillToShipToCustomer = false;
+      this.advanceTable.roundOffInvoiceValue = false;
+    }
     this.advanceTableForm = this.createContactForm();
   }
 
@@ -91,6 +95,7 @@ export class FormDialogComponent
     this.InitState();
     this.InitKAMEmployee();
     this.InitSalesManager();
+    this.setupFieldAutoPopulation();
   }
 
   createContactForm(): FormGroup
@@ -102,27 +107,25 @@ export class FormDialogComponent
       customerContractName: [this.advanceTable.customerContractName],
       salutationID: [this.advanceTable.salutationID],
       salutation: [this.advanceTable.salutation],
-      gender: [this.advanceTable.gender],
-      importance: [this.advanceTable.importance],
-      primaryMobile: [this.advanceTable.primaryMobile],
-      primaryEmail: [this.advanceTable.primaryEmail],
-      billingEmail: [this.advanceTable.billingEmail],
+      gender: [this.advanceTable.gender, Validators.required],
+      importance: [this.advanceTable.importance || 'General', Validators.required],
+      primaryMobile: [this.advanceTable.primaryMobile, Validators.required],
+      primaryEmail: [this.advanceTable.primaryEmail, [Validators.required, Validators.email]],
+      billingEmail: [this.advanceTable.billingEmail, [Validators.required, Validators.email]],
       locationID: [this.advanceTable.locationID],
       location: [this.advanceTable.location],
       gstNumber: [this.advanceTable.gstNumber || null],
-      gstRate: [this.advanceTable.gstRate],
-      billingName: [this.advanceTable.billingName],
-      billingAddress: [this.advanceTable.billingAddress],
+      gstRate: [this.advanceTable.gstRate, [Validators.required, Validators.pattern(/^\d+(\.\d+)?$/)]],
+      billingName: [this.advanceTable.billingName, [Validators.required, this.noWhitespaceValidator]],
+      billingAddress: [this.advanceTable.billingAddress, [Validators.required, this.noWhitespaceValidator]],
       billingCityID: [this.advanceTable.billingCityID],
       billingCityName: [this.advanceTable.billingCityName],
       billingStateID: [this.advanceTable.billingStateID],
       billingStateName: [this.advanceTable.billingStateName],
-      billingPin: [this.advanceTable.billingPin],
-      eInvoiceAddress: [this.advanceTable.eInvoiceAddress],
+      billingPin: [this.advanceTable.billingPin, Validators.required],
+      eInvoiceAddress: [this.advanceTable.eInvoiceAddress, [Validators.required, this.noWhitespaceValidator]],
       employeeID: [this.advanceTable.employeeID],
       employeeName: [this.advanceTable.employeeName],
-      customerKAMCityID: [this.advanceTable.customerKAMCityID],
-      customerKAMCity: [this.advanceTable.customerKAMCity],
       roundOffInvoiceValue: [this.advanceTable.roundOffInvoiceValue],
       salesManagerID: [this.advanceTable.salesManagerID],
       salesManagerName: [this.advanceTable.salesManagerName],
@@ -131,10 +134,84 @@ export class FormDialogComponent
       customerDepartmentID: [this.advanceTable.customerDepartmentID],
       customerDesignationID: [this.advanceTable.customerDesignationID],
       maskMobileNumber:[this.advanceTable.maskMobileNumber],
-      isPostPickUpCallAllowed: [this.advanceTable.isPostPickUpCallAllowed ?? false],
+      isPostPickUpCallAllowed: [this.advanceTable.isPostPickUpCallAllowed ?? true],
       isBillToShipToCustomer: [this.advanceTable.isBillToShipToCustomer ?? false],
-      customerIdentityNumber: [this.advanceTable.customerIdentityNumber]
     });
+  }
+
+  private setupFieldAutoPopulation(): void {
+    this.advanceTableForm.get('primaryEmail')?.valueChanges.subscribe((value) => {
+      this.advanceTableForm.patchValue({ billingEmail: value ?? '' }, { emitEvent: false });
+    });
+
+    this.advanceTableForm.get('customerPersonName')?.valueChanges.subscribe((value) => {
+      this.advanceTableForm.patchValue({ billingName: value ?? '' }, { emitEvent: false });
+    });
+
+    this.advanceTableForm.get('billingAddress')?.valueChanges.subscribe((value) => {
+      const address = (value ?? '').toString();
+      const eInvoiceAddress = address.length > 100 ? address.substring(0, 100) : address;
+      this.advanceTableForm.patchValue({ eInvoiceAddress }, { emitEvent: false });
+    });
+  }
+
+  private applyDefaultCustomerContract(): void {
+    if (this.action !== 'add') {
+      return;
+    }
+    const current = this.advanceTableForm.get('customerContractName')?.value;
+    if (current) {
+      return;
+    }
+    const contract = this.findListItemByPreferredLabel(
+      this.CustomerContractList || [],
+      c => c.customerContractName,
+      this.defaultCustomerContractName
+    );
+    if (contract) {
+      this.advanceTableForm.patchValue({
+        customerContractName: contract.customerContractName,
+        customerContractID: contract.customerContractID
+      });
+      this.advanceTableForm.controls['customerContractName'].updateValueAndValidity({ emitEvent: false });
+    }
+  }
+
+  private applyDefaultLocation(): void {
+    if (this.action !== 'add') {
+      return;
+    }
+    const current = this.advanceTableForm.get('location')?.value;
+    if (current) {
+      return;
+    }
+    const location = this.findListItemByPreferredLabel(
+      this.OrganizationalEntitiesList || [],
+      l => l.organizationalEntityName,
+      this.defaultLocationName
+    );
+    if (location) {
+      this.advanceTableForm.patchValue({
+        location: location.organizationalEntityName,
+        locationID: location.organizationalEntityID
+      });
+      this.advanceTableForm.controls['location'].updateValueAndValidity({ emitEvent: false });
+    }
+  }
+
+  private applyAddModeFormDefaults(): void {
+    if (this.action !== 'add') {
+      return;
+    }
+    this.advanceTableForm.patchValue({
+      importance: 'General',
+      isPostPickUpCallAllowed: true,
+      isBillToShipToCustomer: false,
+      activationStatus: true,
+      roundOffInvoiceValue: false
+    });
+    this.applyDefaultCustomerContract();
+    this.applyDefaultLocation();
   }
 
   public noWhitespaceValidator(control: FormControl)
@@ -144,6 +221,117 @@ export class FormDialogComponent
     return isValid ? null : { 'whitespace': true };
   }
 
+  private normalizeLabel(value: string): string {
+    return (value || '').toString().replace(/\s+/g, ' ').trim().toLowerCase();
+  }
+
+  private findListItemByPreferredLabel<T>(
+    list: T[],
+    labelSelector: (item: T) => string,
+    preferredLabel: string
+  ): T | undefined {
+    if (!list?.length) {
+      return undefined;
+    }
+    const preferred = this.normalizeLabel(preferredLabel);
+    let item = list.find(i => this.normalizeLabel(labelSelector(i)) === preferred);
+    if (item) {
+      return item;
+    }
+    item = list.find(i => this.normalizeLabel(labelSelector(i)).includes(preferred));
+    if (item) {
+      return item;
+    }
+    return list.find(i => preferred.includes(this.normalizeLabel(labelSelector(i))));
+  }
+
+  private employeeDisplayName(employee: EmployeeDropDown): string {
+    return `${employee.firstName || ''} ${employee.lastName || ''}`.replace(/\s+/g, ' ').trim();
+  }
+
+  /** Resolve hidden *ID fields from display text when the user picked a list value without firing option handlers. */
+  private syncAutocompleteIds(): void {
+    const raw = this.advanceTableForm.getRawValue();
+
+    const contract = (this.CustomerContractList || []).find(
+      c => this.normalizeLabel(c.customerContractName) === this.normalizeLabel(raw.customerContractName)
+    );
+    if (contract) {
+      this.advanceTableForm.patchValue({ customerContractID: contract.customerContractID });
+    }
+
+    const salutation = (this.SalutationList || []).find(
+      s => this.normalizeLabel(s.salutation) === this.normalizeLabel(raw.salutation)
+    );
+    if (salutation) {
+      this.advanceTableForm.patchValue({ salutationID: salutation.salutationID });
+    }
+
+    const location = (this.OrganizationalEntitiesList || []).find(
+      l => this.normalizeLabel(l.organizationalEntityName) === this.normalizeLabel(raw.location)
+    );
+    if (location) {
+      this.advanceTableForm.patchValue({ locationID: location.organizationalEntityID });
+    }
+
+    const state = (this.StatesList || []).find(
+      s => this.normalizeLabel(s.geoPointName) === this.normalizeLabel(raw.billingStateName)
+    );
+    if (state) {
+      this.advanceTableForm.patchValue({ billingStateID: state.geoPointID });
+    }
+
+    const city = (this.CityList || []).find(
+      c => this.normalizeLabel(c.geoPointName) === this.normalizeLabel(raw.billingCityName)
+    );
+    if (city) {
+      this.advanceTableForm.patchValue({ billingCityID: city.geoPointID });
+    }
+
+    const employee = (this.EmployeeList || []).find(
+      e => this.normalizeLabel(this.employeeDisplayName(e)) === this.normalizeLabel(raw.employeeName)
+    );
+    if (employee) {
+      this.advanceTableForm.patchValue({ employeeID: employee.employeeID });
+    }
+
+    const salesManager = (this.SalesManagerList || []).find(
+      e => this.normalizeLabel(this.employeeDisplayName(e)) === this.normalizeLabel(raw.salesManagerName)
+    );
+    if (salesManager) {
+      this.advanceTableForm.patchValue({ salesManagerID: salesManager.employeeID });
+    }
+  }
+
+  private validateReferenceIds(): string | null {
+    const v = this.advanceTableForm.getRawValue();
+    if (!v.customerContractID) {
+      return 'Please select Customer Contract from the list';
+    }
+    if (!v.salutationID) {
+      return 'Please select Salutation from the list';
+    }
+    if (!v.locationID) {
+      return 'Please select Location from the list';
+    }
+    if (!v.billingStateID) {
+      return 'Please select Billing State from the list';
+    }
+    if (!v.billingCityID) {
+      return 'Please select Billing City from the list';
+    }
+    if (!v.employeeID) {
+      return 'Please select KAM from the list';
+    }
+    if (!v.salesManagerID) {
+      return 'Please select Sales Manager from the list';
+    }
+    if (!this._generalService.getUserID()) {
+      return 'Your session has no user ID. Please log in again and retry.';
+    }
+    return null;
+  }
+
   submit() {}
 
   onNoClick(): void
@@ -151,12 +339,7 @@ export class FormDialogComponent
     if(this.action==='add')
     {
       this.advanceTableForm.reset();
-      this.advanceTableForm.patchValue({
-        activationStatus: true,
-        isPostPickUpCallAllowed: false,
-        isBillToShipToCustomer: false,
-        roundOffInvoiceValue: false
-      });
+      this.applyAddModeFormDefaults();
     }
     else if(this.action==='edit')
     {
@@ -249,6 +432,7 @@ export class FormDialogComponent
         }
         else
         {
+          this._generalService.sendUpdate('CustomerCreate:CustomerView:Success');
           this.showNotification(
             'snackbar-success',
             'Individual Customer Created...!!!',
@@ -271,8 +455,40 @@ export class FormDialogComponent
     )
   }
 
+  private syncEInvoiceAddressFromBilling(): void {
+    const address = (this.advanceTableForm.get('billingAddress')?.value ?? '').toString();
+    const eInvoiceAddress = address.length > 100 ? address.substring(0, 100) : address;
+    this.advanceTableForm.patchValue({ eInvoiceAddress }, { emitEvent: false });
+  }
+
   public confirmAdd(): void
   {
+    this.syncEInvoiceAddressFromBilling();
+    this.syncAutocompleteIds();
+    this.advanceTableForm.updateValueAndValidity();
+
+    if (this.advanceTableForm.invalid) {
+      this.advanceTableForm.markAllAsTouched();
+      this.showNotification(
+        'snackbar-danger',
+        'Please complete all required fields correctly.',
+        'bottom',
+        'center'
+      );
+      return;
+    }
+
+    const idError = this.validateReferenceIds();
+    if (idError) {
+      this.showNotification(
+        'snackbar-danger',
+        idError,
+        'bottom',
+        'center'
+      );
+      return;
+    }
+
     this.saveDisabled = false;
     this.Post();
   }
@@ -280,12 +496,12 @@ export class FormDialogComponent
   //------------ Customer Contract -----------------
     customerContractValidator(CustomerContractList: any[]): ValidatorFn {
       return (control: AbstractControl): ValidationErrors | null => {
-        const value = control.value?.toLowerCase();
+        const value = this.normalizeLabel(control.value);
         if (!value) {
           return { customerContractNameInvalid: true };
         }
         const match = (CustomerContractList || []).some(
-          contract => (contract.customerContractName || '').toLowerCase() === value
+          contract => this.normalizeLabel(contract.customerContractName) === value
         );
         return match ? null : { customerContractNameInvalid: true };
       };
@@ -305,6 +521,7 @@ export class FormDialogComponent
           startWith(""),
           map(value => this._filterCustomerContract(value || ''))
         );
+        this.applyDefaultCustomerContract();
       });
     }
     private _filterCustomerContract(value: string): CustomerContractDropDown[] {
@@ -316,8 +533,8 @@ export class FormDialogComponent
     OnCustomerContractNameSelect(selectedCustomerContract: string)
     {
       const CustomerContract = this.CustomerContractList.find(
-        data => data.customerContractName === selectedCustomerContract);
-      if (selectedCustomerContract && CustomerContract)
+        data => this.normalizeLabel(data.customerContractName) === this.normalizeLabel(selectedCustomerContract));
+      if (CustomerContract)
       {
         this.getCustomerContractID(CustomerContract.customerContractID);
       }
@@ -331,8 +548,13 @@ export class FormDialogComponent
   //------------ Salutation -----------------
     salutationValidator(SalutationList: any[]): ValidatorFn {
       return (control: AbstractControl): ValidationErrors | null => {
-        const value = control.value?.toLowerCase();
-        const match = SalutationList.some(group => group.salutation.toLowerCase() === value);
+        const value = this.normalizeLabel(control.value);
+        if (!value) {
+          return { salutationInvalid: true };
+        }
+        const match = (SalutationList || []).some(
+          group => this.normalizeLabel(group.salutation) === value
+        );
         return match ? null : { salutationInvalid: true };
       };
     }
@@ -361,8 +583,8 @@ export class FormDialogComponent
     OnSalutationSelect(selectedSalutation: string)
     {
       const SalutationName = this.SalutationList.find(
-        data => data.salutation === selectedSalutation);
-      if (selectedSalutation)
+        data => this.normalizeLabel(data.salutation) === this.normalizeLabel(selectedSalutation));
+      if (SalutationName)
       {
         this.getSalutationID(SalutationName.salutationID);
       }
@@ -376,8 +598,13 @@ export class FormDialogComponent
   //------------ Location -----------------
     serviceLocationValidator(OrganizationalEntitiesList: any[]): ValidatorFn {
       return (control: AbstractControl): ValidationErrors | null => {
-        const value = control.value?.toLowerCase();
-        const match = OrganizationalEntitiesList.some(group => group.organizationalEntityName.toLowerCase() === value);
+        const value = this.normalizeLabel(control.value);
+        if (!value) {
+          return { locationInvalid: true };
+        }
+        const match = (OrganizationalEntitiesList || []).some(
+          group => this.normalizeLabel(group.organizationalEntityName) === value
+        );
         return match ? null : { locationInvalid: true };
       };
     }
@@ -392,6 +619,7 @@ export class FormDialogComponent
           startWith(""),
           map(value => this._filterLocation(value || ''))
         );
+        this.applyDefaultLocation();
       })
     }
     private _filterLocation(value: string): any {
@@ -405,7 +633,7 @@ export class FormDialogComponent
     };
     onServiceLocationSelected(selectedServiceName: string) {
       const selectedValue = this.OrganizationalEntitiesList.find(
-      data => data.organizationalEntityName === selectedServiceName);
+        data => this.normalizeLabel(data.organizationalEntityName) === this.normalizeLabel(selectedServiceName));
       if (selectedValue)
       {
         this.getLocationID(selectedValue.organizationalEntityID);
@@ -521,8 +749,13 @@ export class FormDialogComponent
   //--------------- Employee -----------
     employeeNameValidator(EmployeeList: any[]): ValidatorFn {
       return (control: AbstractControl): ValidationErrors | null => {
-        const value = control.value?.toLowerCase();
-        const match = EmployeeList.some(employee => (employee.firstName + ' ' + employee.lastName).toLowerCase() === value);
+        const value = this.normalizeLabel(control.value);
+        if (!value) {
+          return { employeeNameInvalid: true };
+        }
+        const match = (EmployeeList || []).some(
+          employee => this.normalizeLabel(this.employeeDisplayName(employee)) === value
+        );
         return match ? null : { employeeNameInvalid: true };
       };
     }
@@ -552,8 +785,8 @@ export class FormDialogComponent
     OnEmployeeSelect(selectedEmployee: string)
     {
       const EmployeeName = this.EmployeeList.find(
-      data => `${data.firstName} ${data.lastName}` === selectedEmployee);
-      if (selectedEmployee)
+        data => this.normalizeLabel(this.employeeDisplayName(data)) === this.normalizeLabel(selectedEmployee));
+      if (EmployeeName)
       {
         this.getEmployeeID(EmployeeName.employeeID);
       }
@@ -562,61 +795,18 @@ export class FormDialogComponent
     {
       this.employeeID=employeeID;
       this.advanceTableForm.patchValue({employeeID:this.employeeID});
-      this.InitKAMCity();
     }
-
-
-    //------------ KAM City -----------------
-    kamCityNameValidator(KAMCityList: any[]): ValidatorFn {
-      return (control: AbstractControl): ValidationErrors | null => {
-        const value = control.value?.toLowerCase();
-        const match = KAMCityList.some(group => group.geoPointName.toLowerCase() === value);
-        return match ? null : { kamCityNameInvalid: true };
-      };
-    }
-    InitKAMCity()
-    {
-      this._generalService.GetCitys().subscribe(
-      data =>
-      {
-        this.KAMCityList = data;
-        this.advanceTableForm.controls['customerKAMCity'].setValidators([Validators.required,this.kamCityNameValidator(this.KAMCityList)]);
-        this.advanceTableForm.controls['customerKAMCity'].updateValueAndValidity();
-        this.filteredKAMCityOptions = this.advanceTableForm.controls['customerKAMCity'].valueChanges.pipe(
-          startWith(""),
-          map(value => this._filterKAMCity(value || ''))
-        );
-      });
-    }
-    private _filterKAMCity(value: string): any {
-      const filterValue = value.toLowerCase();
-      return this.KAMCityList.filter(
-      data =>
-      {
-        return data.geoPointName.toLowerCase().includes(filterValue);
-      });
-    }
-    OnKAMCitySelect(selectedCity: string)
-    {
-      const CityName = this.KAMCityList.find(
-        data => data.geoPointName === selectedCity);
-      if (selectedCity)
-      {
-        this.getKAMCityID(CityName.geoPointID);
-      }
-    }
-    getKAMCityID(geoPointID: any)
-    {
-    this.customerKAMCityID=geoPointID;
-    this.advanceTableForm.patchValue({customerKAMCityID:this.customerKAMCityID});
-    }
-
 
     //--------------- Sales Manager -----------
     salesManagerValidator(SalesManagerList: any[]): ValidatorFn {
       return (control: AbstractControl): ValidationErrors | null => {
-        const value = control.value?.toLowerCase();
-        const match = SalesManagerList.some(employee => (employee.firstName + ' ' + employee.lastName).toLowerCase() === value);
+        const value = this.normalizeLabel(control.value);
+        if (!value) {
+          return { salesManagerNameInvalid: true };
+        }
+        const match = (SalesManagerList || []).some(
+          employee => this.normalizeLabel(this.employeeDisplayName(employee)) === value
+        );
         return match ? null : { salesManagerNameInvalid: true };
       };
     }
@@ -646,8 +836,8 @@ export class FormDialogComponent
     OnSalesManagerSelect(selectedEmployee: string)
     {
       const EmployeeName = this.SalesManagerList.find(
-      data => `${data.firstName} ${data.lastName}` === selectedEmployee);
-      if (selectedEmployee)
+        data => this.normalizeLabel(this.employeeDisplayName(data)) === this.normalizeLabel(selectedEmployee));
+      if (EmployeeName)
       {
         this.getSalesManagerID(EmployeeName.employeeID);
       }

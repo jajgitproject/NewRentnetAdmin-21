@@ -1,6 +1,6 @@
 // @ts-nocheck
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
-import { Component, ElementRef, HostListener, Inject } from '@angular/core';
+import { ChangeDetectorRef, Component, ElementRef, HostListener, Inject } from '@angular/core';
 import { CustomerContractCityTiersCityMappingService } from '../../customerContractCityTiersCityMapping.service';
 import { FormControl, Validators, FormGroup, FormBuilder, ValidatorFn, AbstractControl, ValidationErrors} from '@angular/forms';
 import { CustomerContractCityTiersCityMapping } from '../../customerContractCityTiersCityMapping.model';
@@ -51,6 +51,7 @@ export class FormDialogComponent
   public dialogRef: MatDialogRef<FormDialogComponent>, 
   
   @Inject(MAT_DIALOG_DATA) public data: any,
+  private cdr: ChangeDetectorRef,
   public advanceTableService: CustomerContractCityTiersCityMappingService,
     private fb: FormBuilder,
     private el: ElementRef,
@@ -202,14 +203,25 @@ export class FormDialogComponent
     .subscribe(
     response => 
     {
-      this.dialogRef.close();
-      this._generalService.sendUpdate('CustomerContractCityTiersCityMappingCreate:CustomerContractCityTiersCityMappingView:Success');//To Send Updates  
-      this.saveDisabled = true;
+      if (this._generalService.isDuplicateSaveError(response))
+      {
+        this._generalService.showDuplicateSaveError(
+          'This city is already active in this city tier.',
+          () => this.endSaving(),
+          response
+        );
+      }
+      else
+      {
+        this.dialogRef.close();
+        this._generalService.sendUpdate('CustomerContractCityTiersCityMappingCreate:CustomerContractCityTiersCityMappingView:Success');//To Send Updates  
+        this.endSaving();
+      }
     },
     error =>
     {
       this._generalService.sendUpdate('CustomerContractCityTiersCityMappingAll:CustomerContractCityTiersCityMappingView:Failure');//To Send Updates 
-      this.saveDisabled = true; 
+      this.endSaving(); 
     }
   )
   }
@@ -221,20 +233,37 @@ export class FormDialogComponent
     .subscribe(
     response => 
     {
-      this.dialogRef.close();
-      this._generalService.sendUpdate('CustomerContractCityTiersCityMappingUpdate:CustomerContractCityTiersCityMappingView:Success');//To Send Updates  
-      this.saveDisabled = true;
+      if (this._generalService.isDuplicateSaveError(response))
+      {
+        this._generalService.showDuplicateSaveError(
+          'This city is already active in this city tier.',
+          () => this.endSaving(),
+          response
+        );
+      }
+      else
+      {
+        this.dialogRef.close();
+        this._generalService.sendUpdate('CustomerContractCityTiersCityMappingUpdate:CustomerContractCityTiersCityMappingView:Success');//To Send Updates  
+        this.endSaving();
+      }
     },
     error =>
     {
      this._generalService.sendUpdate('CustomerContractCityTiersCityMappingAll:CustomerContractCityTiersCityMappingView:Failure');//To Send Updates 
-     this.saveDisabled = true; 
+     this.endSaving(); 
     }
   )
   }
+  private endSaving(): void {
+    this.saveDisabled = true;
+    this.cdr.detectChanges();
+  }
+
   public confirmAdd(): void 
   {
     this.saveDisabled = false;
+    this.cdr.detectChanges();
        if(this.action=="edit")
        {
           this.Put();

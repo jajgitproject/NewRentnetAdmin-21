@@ -1,0 +1,72 @@
+/* Credit Notes → Dynamics page-only overrides (invoice screen unchanged). */
+
+.sdd-credit-note-filters {
+  padding-top: 0.25rem;
+}
+
+.sdd-filter-actions {
+  margin-top: 0.35rem;
+  padding-top: 0.85rem;
+  border-top: 1px solid #e8edf2;
+}
+
+:host ::ng-deep .sdd-page--credit-notes .invoice-home-search.quick-search-panel {
+  .cp-quick-search-field.cp-date-field {
+    .mat-mdc-form-field-flex {
+      align-items: flex-end;
+    }
+
+    .mat-mdc-form-field-infix {
+      min-width: 0;
+      padding-right: 0 !important;
+    }
+
+    input.mat-mdc-input-element {
+      padding-right: 30px !important;
+      box-sizing: border-box;
+    }
+
+    .mat-mdc-floating-label,
+    .mdc-floating-label {
+      max-width: calc(100% - 36px);
+    }
+
+    .mat-mdc-form-field-icon-suffix {
+      padding: 0 !important;
+      align-self: flex-end;
+    }
+
+    .mat-datepicker-toggle {
+      margin-right: -4px;
+    }
+
+    .mat-datepicker-toggle .mat-mdc-icon-button {
+      width: 32px !important;
+      height: 32px !important;
+      padding: 4px !important;
+    }
+  }
+}
+
+:host ::ng-deep .sdd-page--credit-notes .sdd-table {
+  .mat-mdc-header-row {
+    min-height: 30px;
+  }
+
+  .mat-mdc-header-cell {
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    padding-top: 4px;
+    padding-bottom: 4px;
+    line-height: 1.2;
+  }
+
+  .mat-sort-header-content {
+    font-size: 10px;
+  }
+
+  .mat-sort-header-arrow {
+    transform: scale(0.75);
+  }
+}

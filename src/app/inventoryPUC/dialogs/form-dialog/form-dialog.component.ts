@@ -1,5 +1,6 @@
 // @ts-nocheck
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
+import { MatSnackBar } from '@angular/material/snack-bar';
 import { Component, ElementRef, HostListener, Inject } from '@angular/core';
 import { InventoryPUCService } from '../../inventoryPUC.service';
 import { FormControl, Validators, FormGroup, FormBuilder} from '@angular/forms';
@@ -42,7 +43,8 @@ export class FormDialogComponent
   public advanceTableService: InventoryPUCService,
     private fb: FormBuilder,
     private el: ElementRef,
-  public _generalService:GeneralService)
+  public _generalService:GeneralService,
+  private snackBar: MatSnackBar)
   {
         // Set the defaults
         this.action = data.action;
@@ -117,9 +119,33 @@ export class FormDialogComponent
     this.dialogRef.close();
     
   }
+  private inventoryIdForSave(): number {
+    return Number(this.InventoryID);
+  }
+
+  private showApiError(error: any): void {
+    const message =
+      error?.error?.message ||
+      error?.error?.Message ||
+      error?.message ||
+      'Operation Failed';
+    this.snackBar.open(message, '', {
+      duration: 5000,
+      verticalPosition: 'bottom',
+      horizontalPosition: 'center',
+      panelClass: 'snackbar-danger'
+    });
+  }
+
   public Post(): void
   {
-    this.advanceTableForm.patchValue({inventoryID:this.InventoryID});
+    const inventoryId = this.inventoryIdForSave();
+    if (!Number.isFinite(inventoryId) || inventoryId <= 0) {
+      this._generalService.sendUpdate('InventoryPUCAll:InventoryPUCView:Failure');
+      this.saveDisabled = true;
+      return;
+    }
+    this.advanceTableForm.patchValue({ inventoryID: inventoryId });
     this.advanceTableService.add(this.advanceTableForm.getRawValue())  
     .subscribe(
     response => 
@@ -130,6 +156,7 @@ export class FormDialogComponent
     },
     error =>
     {
+       this.showApiError(error);
        this._generalService.sendUpdate('InventoryPUCAll:InventoryPUCView:Failure');//To Send Updates  
        this.saveDisabled = true;
     }
@@ -137,7 +164,13 @@ export class FormDialogComponent
   }
   public Put(): void
   {
-    this.advanceTableForm.patchValue({inventoryID:this.InventoryID});
+    const inventoryId = this.inventoryIdForSave();
+    if (!Number.isFinite(inventoryId) || inventoryId <= 0) {
+      this._generalService.sendUpdate('InventoryPUCAll:InventoryPUCView:Failure');
+      this.saveDisabled = true;
+      return;
+    }
+    this.advanceTableForm.patchValue({ inventoryID: inventoryId });
     this.advanceTableService.update(this.advanceTableForm.getRawValue())  
     .subscribe(
     response => 
@@ -148,6 +181,7 @@ export class FormDialogComponent
     },
     error =>
     {
+     this.showApiError(error);
      this._generalService.sendUpdate('InventoryPUCAll:InventoryPUCView:Failure');//To Send Updates 
      this.saveDisabled = true; 
     }

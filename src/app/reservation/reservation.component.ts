@@ -9,7 +9,7 @@ import { ModelForReservation, Reservation, ReservationStatusLog, SameReservation
 import { DataSource } from '@angular/cdk/collections';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { BehaviorSubject, fromEvent, merge, Observable, of, Subject, Subscription, throwError } from 'rxjs';
-import { map, startWith, switchMap, catchError } from 'rxjs/operators';
+import { catchError, debounceTime, distinctUntilChanged, map, startWith, switchMap } from 'rxjs/operators';
 import { DateAdapter, MAT_DATE_LOCALE } from '@angular/material/core';
 import { MatMenu, MatMenuTrigger } from '@angular/material/menu';
 import { SelectionModel } from '@angular/cdk/collections';
@@ -1284,30 +1284,25 @@ toArray<T>(value: any): T[] {
       : '';
   }
 
-  InitGoogleAddress(){
-    this._generalService.getGoogleAddress().subscribe(
-      data=>
-      {
-        this.GoogleAddressList=data;
-        this.filteredGoogleAddressOptions = this.advanceTableForm.controls['pickupAddress'].valueChanges.pipe(
-          startWith(""),
-          map(value => this._filterGA(value || ''))
-        ); 
-      });
-      
-  }
-
-  private _filterGA(value: string): any {
-    const filterValue = value.toLowerCase();
-    if(filterValue.length===0)
-    {
-      return []
-    }
-    return this.GoogleAddressList.filter(
-      customer => 
-      {
-        return customer.geoSearchString.toLowerCase().includes(filterValue);
-      }
+  InitGoogleAddress() {
+    this.filteredGoogleAddressOptions = this.advanceTableForm.controls['pickupAddress'].valueChanges.pipe(
+      startWith(''),
+      debounceTime(300),
+      distinctUntilChanged(),
+      switchMap((value) => {
+        const term = (typeof value === 'string' ? value : '').trim();
+        if (!term) {
+          this.GoogleAddressList = [];
+          return of([]);
+        }
+        return this._generalService.searchGoogleAddress(term).pipe(
+          catchError(() => of([])),
+          map((data) => {
+            this.GoogleAddressList = data ?? [];
+            return this.GoogleAddressList;
+          })
+        );
+      })
     );
   }
 
@@ -1317,12 +1312,28 @@ toArray<T>(value: any): T[] {
     );
   
     if (selectedPGL) {
+      this.advanceTableForm.patchValue({ pickupAddress: selectedPGL.geoSearchString });
       this.OnPickupGeoLocationClick(selectedPGL);
     }
   }
 
+  private googlePlaceDisplayText(address: any): string {
+    const fromPac = address?.rentnetDisplayText?.trim();
+    if (fromPac) {
+      return fromPac;
+    }
+    const formatted = address?.formatted_address?.trim();
+    if (formatted) {
+      return formatted;
+    }
+    return address?.name?.trim() || '';
+  }
+
   OnPickupGeoLocationClick(option:any)
   {
+    if (option?.geoSearchString) {
+      this.advanceTableForm.patchValue({ pickupAddress: option.geoSearchString });
+    }
     let pickupGeoLocation=option.geoLocation;
     var value = pickupGeoLocation.replace(
       '(',
@@ -1347,6 +1358,9 @@ toArray<T>(value: any): T[] {
 
   OnDropOffGeoLocationClick(option:any)
   {
+    if (option?.geoSearchString) {
+      this.advanceTableForm.patchValue({ dropOffAddress: option.geoSearchString });
+    }
     let dropOffGeoLocation=option.geoLocation;
     var value = dropOffGeoLocation.replace(
       '(',
@@ -1384,10 +1398,11 @@ toArray<T>(value: any): T[] {
     };
   }
 
-  public handleAddressChange(address: any) {    
-    this.pickupAddress = address.formatted_address;
-    //this.pickupAddress = address.name;
-    this.advanceTableForm.patchValue({ pickupAddress: this.pickupAddress });
+  public handleAddressChange(address: any) {
+    const placeTitle = this.googlePlaceDisplayText(address);
+    this.pickupAddress = placeTitle;
+    this.formattedAddress = address.formatted_address;
+    this.advanceTableForm.patchValue({ pickupAddress: placeTitle });
     this.advanceTableForm.patchValue({pickupAddressLatLong:address.geometry.location.lat()
       +
        ',' +
@@ -1412,7 +1427,7 @@ toArray<T>(value: any): T[] {
     this.googlePlacesForm.patchValue({geoPointID:-1});
     this.googlePlacesForm.patchValue({latitude:address.geometry.location.lat()});
     this.googlePlacesForm.patchValue({longitude:address.geometry.location.lng()}); 
-    this.googlePlacesForm.patchValue({geoSearchString:this.pickupAddress});
+    this.googlePlacesForm.patchValue({geoSearchString: placeTitle});
     this.googlePlacesForm.patchValue({geoPointName:'Google Address'});
     this.googlePlacesForm.patchValue({googlePlacesID:address.place_id});
     this.googlePlacesForm.patchValue({activationStatus:true});
@@ -1459,10 +1474,10 @@ toArray<T>(value: any): T[] {
     };
   }
   public handleAddressChangeDropOff(address: any) {
-    //this.formattedAddress = address.formatted_address;
-    this.dropOffAddress = address.formatted_address;
-    //this.dropOffAddress = address.name;
-    this.advanceTableForm.patchValue({ dropOffAddress: this.dropOffAddress });
+    const placeTitle = this.googlePlaceDisplayText(address);
+    this.dropOffAddress = placeTitle;
+    this.formattedAddress = address.formatted_address;
+    this.advanceTableForm.patchValue({ dropOffAddress: placeTitle });
     this.advanceTableForm.patchValue({dropOffAddressLatLong:address.geometry.location.lat()
       +
        ',' +
@@ -1486,7 +1501,7 @@ toArray<T>(value: any): T[] {
     this.googlePlacesForm.patchValue({geoPointID:-1});
     this.googlePlacesForm.patchValue({latitude:address.geometry.location.lat()});
     this.googlePlacesForm.patchValue({longitude:address.geometry.location.lng()}); 
-    this.googlePlacesForm.patchValue({geoSearchString:this.pickupAddress});
+    this.googlePlacesForm.patchValue({geoSearchString: placeTitle});
     this.googlePlacesForm.patchValue({geoPointName:'Google Address'});
     this.googlePlacesForm.patchValue({googlePlacesID:address.place_id});
     this.googlePlacesForm.patchValue({activationStatus:true});
@@ -1523,29 +1538,25 @@ toArray<T>(value: any): T[] {
   //}
 
    //------------DropOff Google Address -----------------
-   InitDropOffGoogleAddress(){
-    this._generalService.getGoogleAddress().subscribe(
-      data=>
-      {
-        this.DropOffGoogleAddressList=data;
-        this.filteredDropOffGoogleAddressOptions = this.advanceTableForm.controls['dropOffAddress'].valueChanges.pipe(
-          startWith(""),
-          map(value => this._filterDropoffGA(value || ''))
-        ); 
-      });
-  }
-
-  private _filterDropoffGA(value: string): any {
-    const filterValue = value.toLowerCase();
-    if(filterValue.length===0)
-    {
-      return []
-    }
-    return this.DropOffGoogleAddressList.filter(
-      customer => 
-      {
-        return customer.geoSearchString.toLowerCase().includes(filterValue);
-      }
+  InitDropOffGoogleAddress() {
+    this.filteredDropOffGoogleAddressOptions = this.advanceTableForm.controls['dropOffAddress'].valueChanges.pipe(
+      startWith(''),
+      debounceTime(300),
+      distinctUntilChanged(),
+      switchMap((value) => {
+        const term = (typeof value === 'string' ? value : '').trim();
+        if (!term) {
+          this.DropOffGoogleAddressList = [];
+          return of([]);
+        }
+        return this._generalService.searchGoogleAddress(term).pipe(
+          catchError(() => of([])),
+          map((data) => {
+            this.DropOffGoogleAddressList = data ?? [];
+            return this.DropOffGoogleAddressList;
+          })
+        );
+      })
     );
   }
   
@@ -1555,6 +1566,7 @@ toArray<T>(value: any): T[] {
     );
   
     if (selectedDGL) {
+      this.advanceTableForm.patchValue({ dropOffAddress: selectedDGL.geoSearchString });
       this.OnDropOffGeoLocationClick(selectedDGL);
     }
   }
@@ -3204,6 +3216,36 @@ private isValidLatLong(value: unknown): boolean {
     && lng >= -180 && lng <= 180;
 }
 
+private normalizeSavedAddressLatLong(raw: unknown): string | null {
+  const text = String(raw ?? '').trim();
+  if (!text) {
+    return null;
+  }
+
+  if (text.includes(',') && !text.toUpperCase().includes('POINT')) {
+    const parts = text.split(',').map((part) => part.trim());
+    if (parts.length >= 2) {
+      const normalized = `${parts[0]},${parts[1]}`;
+      if (this.isValidLatLong(normalized)) {
+        return normalized;
+      }
+    }
+  }
+
+  const cleaned = text.replace(/[()]/g, '').trim();
+  const pointParts = cleaned.split(/\s+/).filter(Boolean);
+  if (pointParts.length >= 3 && pointParts[0].toUpperCase() === 'POINT') {
+    const lng = pointParts[1];
+    const lat = pointParts[2];
+    const normalized = `${lat},${lng}`;
+    if (this.isValidLatLong(normalized)) {
+      return normalized;
+    }
+  }
+
+  return null;
+}
+
 private isGstForBillingUnset(value: unknown): boolean {
   const text = String(value ?? '').trim();
   return text === '' || text.toLowerCase() === '--select--';
@@ -4154,7 +4196,10 @@ public validateCustomerSpecificFields(): boolean {
       if(this.passengerID || this.advanceTableForm.value.primaryPassengerID){
         const dialogRef = this.dialog.open(SavedAddressComponent, 
           {
-            width:'60%',
+            width: '760px',
+            maxWidth: '96vw',
+            panelClass: 'saved-address-dialog-panel',
+            autoFocus: false,
             data: 
               {
                 // advanceTable: this.advanceTable,
@@ -4167,14 +4212,7 @@ public validateCustomerSpecificFields(): boolean {
             // received data from dialog-component
             if(res!==undefined)
             {
-            this.advanceTableForm.patchValue({dropOffAddress:res.data.addressStringForMap});
-            this.advanceTableForm.patchValue({dropOffAddressDetails:res.data.address});
-            this.advanceTableForm.patchValue({dropOffCity:res.data.city});
-            this.advanceTableForm.patchValue({dropOffCityID:res.data.cityID});
-            this.advanceTableForm.controls["dropOffSpotType"].setValue('');
-            this.advanceTableForm.controls["dropOffSpotTypeID"].setValue(0);
-            this.advanceTableForm.controls["dropOffSpotID"].setValue(0);
-            this.advanceTableForm.controls["dropOffSpot"].setValue('');
+            this.patchDropOffAddress(res);
             }
           })
         }
@@ -4184,7 +4222,10 @@ public validateCustomerSpecificFields(): boolean {
       if(this.passengerID){
         const dialogRef = this.dialog.open(SavedAddressComponent, 
           {
-            width:'60%',
+            width: '760px',
+            maxWidth: '96vw',
+            panelClass: 'saved-address-dialog-panel',
+            autoFocus: false,
             data: 
               {
                 // advanceTable: this.advanceTable,
@@ -4197,14 +4238,7 @@ public validateCustomerSpecificFields(): boolean {
             // received data from dialog-component
             if(res!==undefined)
             {
-            this.advanceTableForm.patchValue({dropOffAddress:res.data.addressStringForMap});
-            this.advanceTableForm.patchValue({dropOffAddressDetails:res.data.address});
-            this.advanceTableForm.patchValue({dropOffCity:res.data.city});
-            this.advanceTableForm.patchValue({dropOffCityID:res.data.cityID});
-            this.advanceTableForm.controls["dropOffSpotType"].setValue('');
-            this.advanceTableForm.controls["dropOffSpotTypeID"].setValue(0);
-            this.advanceTableForm.controls["dropOffSpotID"].setValue(0);
-            this.advanceTableForm.controls["dropOffSpot"].setValue('');
+            this.patchDropOffAddress(res);
             }
           })
         }
@@ -4218,7 +4252,10 @@ public validateCustomerSpecificFields(): boolean {
       if(this.passengerID || this.advanceTableForm.value.primaryPassengerID){
         const dialogRef = this.dialog.open(SavedAddressComponent, 
           {
-            width:'60%',
+            width: '760px',
+            maxWidth: '96vw',
+            panelClass: 'saved-address-dialog-panel',
+            autoFocus: false,
             data: 
               {
                 // advanceTable: this.advanceTable,
@@ -4245,7 +4282,7 @@ public validateCustomerSpecificFields(): boolean {
               cancelButtonText: 'No, cancel'
             }).then(result => {
               if (result.isConfirmed) {
-                this.advanceTableForm.patchValue({pickupAddress:res.data.addressStringForMap});
+                this.patchPickupAddress(res);
               }
             });
           } else {
@@ -4269,7 +4306,10 @@ public validateCustomerSpecificFields(): boolean {
       if(this.passengerID){
         const dialogRef = this.dialog.open(SavedAddressComponent, 
           {
-            width:'60%',
+            width: '760px',
+            maxWidth: '96vw',
+            panelClass: 'saved-address-dialog-panel',
+            autoFocus: false,
             data: 
               {
                 // advanceTable: this.advanceTable,
@@ -4295,7 +4335,7 @@ public validateCustomerSpecificFields(): boolean {
               cancelButtonText: 'No, cancel'
             }).then(result => {
               if (result.isConfirmed) {
-                this.advanceTableForm.patchValue({pickupAddress:res.data.addressStringForMap});
+                this.patchPickupAddress(res);
               }
             });
           } else {
@@ -4317,17 +4357,60 @@ public validateCustomerSpecificFields(): boolean {
     }
     
   }
+private buildSavedAddressDetails(data: any): string {
+  if (!data) {
+    return '';
+  }
+  const parts: string[] = [];
+  if (data.address) {
+    parts.push(data.address);
+  }
+  const landmark = data.landmark || data.landMark;
+  if (landmark) {
+    parts.push(landmark);
+  }
+  if (data.city) {
+    parts.push(data.city);
+  }
+  if (data.state) {
+    parts.push(data.state);
+  }
+  if (data.country) {
+    parts.push(data.country);
+  }
+  return parts.join(', ');
+}
+
 private patchPickupAddress(res: any) {
+  const data = res?.data;
+  const pickupAddressLatLong = this.normalizeSavedAddressLatLong(data?.latLong);
   this.advanceTableForm.patchValue({
-    pickupAddress: res.data.addressStringForMap,
-    pickupAddressDetails: res.data.address,
-    pickupCity: res.data.city,
-    pickupCityID: res.data.cityID
+    pickupAddress: data?.addressStringForMap,
+    pickupAddressDetails: this.buildSavedAddressDetails(data),
+    pickupCity: data?.city,
+    pickupCityID: data?.cityID,
+    pickupAddressLatLong: pickupAddressLatLong
   });
   this.advanceTableForm.controls['pickupSpotType'].setValue('');
   this.advanceTableForm.controls['pickupSpotTypeID'].setValue(0);
   this.advanceTableForm.controls['pickupSpotID'].setValue(0);
   this.advanceTableForm.controls['pickupSpot'].setValue('');
+}
+
+private patchDropOffAddress(res: any) {
+  const data = res?.data;
+  const dropOffAddressLatLong = this.normalizeSavedAddressLatLong(data?.latLong);
+  this.advanceTableForm.patchValue({
+    dropOffAddress: data?.addressStringForMap,
+    dropOffAddressDetails: this.buildSavedAddressDetails(data),
+    dropOffCity: data?.city,
+    dropOffCityID: data?.cityID,
+    dropOffAddressLatLong: dropOffAddressLatLong
+  });
+  this.advanceTableForm.controls['dropOffSpotType'].setValue('');
+  this.advanceTableForm.controls['dropOffSpotTypeID'].setValue(0);
+  this.advanceTableForm.controls['dropOffSpotID'].setValue(0);
+  this.advanceTableForm.controls['dropOffSpot'].setValue('');
 }
   onPickupDateChangeAndLocationTimeSet(event: any) 
   {

@@ -59,6 +59,7 @@ export class DutySlipForBillingComponent implements OnInit, AfterViewInit, OnCha
   @Input() canThisRoleViewDummyInvoice = false;
   @Input() canEditDSAfterGoodForBilling = false;
   @Input() dutyBillingSummary: any = null;
+  @Input() activeDutyNightNumberOnNights: number | null = null;
   @Output() dataSaved: EventEmitter<void> = new EventEmitter();
   @Output() dutyStatusChanged = new EventEmitter<{verifyDuty: boolean, goodForBilling: boolean,message: string, invoiceCalculated?: boolean}>();
   //@Output() dutyMessage = new EventEmitter<string>();
@@ -247,9 +248,8 @@ export class DutySlipForBillingComponent implements OnInit, AfterViewInit, OnCha
     } else {
       this.patchPickupFromReservation();
       this.syncVerifyDutyAndGoodForBillingState();
+      this.applyClosureSourceOnLoad();
     }
-
-    this.applyClosureSourceOnLoad();
 
     this.onKeyUp();
     this.applyRoundOffBillingTimes();
@@ -318,12 +318,6 @@ export class DutySlipForBillingComponent implements OnInit, AfterViewInit, OnCha
       return;
     }
 
-    // Driver KM comparison column uses DutySlipByApp odometer (g2PApp / p2DApp / d2GApp).
-    if (this.hasUsableAppData(this.advanceTableClosingOne?.closingDutySlipByAppModel)) {
-      this.patchFormFromAppModel({ useActualKm: false });
-      return;
-    }
-
     if (!this.DutySlipID) {
       this.showNoDriverDataWarning();
       return;
@@ -334,18 +328,12 @@ export class DutySlipForBillingComponent implements OnInit, AfterViewInit, OnCha
         if (row && this.hasUsableDriverData(row)) {
           this.advanceTableClosingOne.closingDutySlipByDriverModel = new ClosingDutySlipByDriverModel(row);
           this.patchFormFromDriverModel(this.advanceTableClosingOne.closingDutySlipByDriverModel);
-        } else if (this.hasUsableAppData(this.advanceTableClosingOne?.closingDutySlipByAppModel)) {
-          this.patchFormFromAppModel({ useActualKm: false });
         } else {
           this.showNoDriverDataWarning();
         }
       },
       error: () => {
-        if (this.hasUsableAppData(this.advanceTableClosingOne?.closingDutySlipByAppModel)) {
-          this.patchFormFromAppModel({ useActualKm: false });
-        } else {
-          this.showNoDriverDataWarning();
-        }
+        this.showNoDriverDataWarning();
       },
     });
   }
@@ -635,11 +623,7 @@ export class DutySlipForBillingComponent implements OnInit, AfterViewInit, OnCha
     this.totalDriverAllowanceDays = this.toAllowanceNumber(
       response?.totalDriverAllowanceDays ?? response?.TotalDriverAllowanceDays
     );
-    this.totalNights = this.toAllowanceNumber(
-      response?.totalNights ?? response?.TotalNights
-    );
     this.loadedDriverAllowanceDays = this.totalDriverAllowanceDays;
-    this.loadedNights = this.totalNights;
   }
 
   private mapClosingAllowancesFromSummary(response: any): void {
@@ -688,11 +672,7 @@ export class DutySlipForBillingComponent implements OnInit, AfterViewInit, OnCha
 
   private haveClosingAllowancesChanged(): boolean {
     const driver = this.toAllowanceNumber(this.totalDriverAllowanceDays);
-    const night = this.toAllowanceNumber(this.totalNights);
-    return (
-      driver !== this.toAllowanceNumber(this.loadedDriverAllowanceDays)
-      || night !== this.toAllowanceNumber(this.loadedNights)
-    );
+    return driver !== this.toAllowanceNumber(this.loadedDriverAllowanceDays);
   }
 
   private saveClosingAllowancesIfChanged(onComplete?: () => void): void {
@@ -703,7 +683,6 @@ export class DutySlipForBillingComponent implements OnInit, AfterViewInit, OnCha
 
     this.clossingOneService.updateClosingAllowances(this.DutySlipID, {
       totalDriverAllowanceDays: this.toAllowanceNumber(this.totalDriverAllowanceDays),
-      totalNights: this.toAllowanceNumber(this.totalNights),
     }).subscribe(
       (response) => {
         this.applyClosingAllowanceValues(response);
@@ -713,7 +692,7 @@ export class DutySlipForBillingComponent implements OnInit, AfterViewInit, OnCha
         this.showSpinner = false;
         this.showNotification(
           'snackbar-danger',
-          this.extractApiErrorMessage(error, 'Failed to save driver/night allowance.'),
+          this.extractApiErrorMessage(error, 'Failed to save driver allowance.'),
           'bottom',
           'center'
         );
@@ -946,12 +925,32 @@ export class DutySlipForBillingComponent implements OnInit, AfterViewInit, OnCha
       this.disableLockedControlsWithoutFullFormDisable();
       this.applyAlwaysEditableRemarks();
       this.applyAlwaysEditableKm();
+      this.restoreClosureTypeSelection();
       return;
     }
     this.advanceTableForm.enable({ emitEvent: false });
     this.applyManualEditMode();
     this.applyClosingFieldDefaults();
     this.syncVerifyDutyAndGoodForBillingState();
+    this.restoreClosureTypeSelection();
+  }
+
+  private restoreClosureTypeSelection(): void {
+    if (!this.advanceTableForm) {
+      return;
+    }
+    const saved =
+      this.advanceTableClosingOne?.closingDutySlipForBillingModel?.closureType
+      ?? this.advanceTableForm.getRawValue()?.closureType
+      ?? this.selectedClosureType;
+    if (!saved) {
+      return;
+    }
+    if (!this.isDutySlipEditBlocked) {
+      this.advanceTableForm.get('closureType')?.enable({ emitEvent: false });
+    }
+    this.advanceTableForm.patchValue({ closureType: saved }, { emitEvent: false });
+    this.selectedClosureType = saved;
   }
 
   /** Disable locked fields one-by-one. FormGroup.disable() then re-enabling KM/remarks freezes Closing One after GFB. */
@@ -2700,7 +2699,6 @@ public resetVerificationForEcoStateChange(): void {
       }
       this.clossingOneService.updateClosingAllowances(this.DutySlipID, {
         totalDriverAllowanceDays: this.toAllowanceNumber(this.totalDriverAllowanceDays),
-        totalNights: this.toAllowanceNumber(this.totalNights),
       }).subscribe(
         (response) => {
           this.applyClosingAllowanceValues(response);
@@ -2709,7 +2707,7 @@ public resetVerificationForEcoStateChange(): void {
         (error) => {
           this.showNotification(
             'snackbar-danger',
-            this.extractApiErrorMessage(error, 'Failed to save driver/night allowance.'),
+            this.extractApiErrorMessage(error, 'Failed to save driver allowance.'),
             'bottom',
             'center'
           );

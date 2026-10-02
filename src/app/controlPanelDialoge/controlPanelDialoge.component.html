@@ -66,8 +66,13 @@
                       Send SMS
                     </button> -->
 
-                    <button mat-menu-item (click)="getInvoiceNumber(item,i)">
+                    <button mat-menu-item *ngIf="!isCancelledReservation(item)" (click)="getInvoiceNumber(item,i)">
                       Reservation Cancel
+                    </button>
+                    <button mat-menu-item
+                      *ngIf="isCancelledReservation(item) && showReactivateReservationOption"
+                      (click)="reactivateCancelledReservation(item)">
+                      Reactivate Reservation
                     </button>
                     <!-- </span> -->
                   </mat-menu>

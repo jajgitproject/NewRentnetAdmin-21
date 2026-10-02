@@ -64,58 +64,58 @@
                                         <mat-table #table [dataSource]="dataSource" matSort class="mat-cell floating-header-table" (matSortChange)="SortingData($event)">
                                         <ng-container matColumnDef="ReservationID">
                                             <mat-header-cell *matHeaderCellDef mat-sort-header>Booking No</mat-header-cell>
-                                            <mat-cell *matCellDef="let row">{{row.bookingNo ? row.bookingNo : 'N/A'}}</mat-cell>
+                                            <mat-cell *matCellDef="let row">{{row.bookingNo ? row.bookingNo : ''}}</mat-cell>
                                         </ng-container>
 
                                         <ng-container matColumnDef="DutySlipID">
                                             <mat-header-cell *matHeaderCellDef mat-sort-header>DutySlip No</mat-header-cell>
-                                            <mat-cell *matCellDef="let row">{{row.dutySlipID ? row.dutySlipID : 'N/A'}}</mat-cell>
+                                            <mat-cell *matCellDef="let row">{{row.dutySlipID ? row.dutySlipID : ''}}</mat-cell>
                                         </ng-container>
 
                                         <ng-container matColumnDef="DispatchLocation">
                                             <mat-header-cell *matHeaderCellDef mat-sort-header><span matTooltip="Dispatch Location" matTooltipPosition="above">Dis. Location</span></mat-header-cell>                                            
-                                            <mat-cell *matCellDef="let row">{{row.dispatchLocation ? row.dispatchLocation : 'N/A'}}</mat-cell>
+                                            <mat-cell *matCellDef="let row">{{row.dispatchLocation ? row.dispatchLocation : ''}}</mat-cell>
                                         </ng-container>
 
                                         <ng-container matColumnDef="CustomerName">
                                             <mat-header-cell *matHeaderCellDef mat-sort-header>Customer</mat-header-cell>
-                                            <mat-cell *matCellDef="let row">{{row.customerName ? row.customerName : 'N/A'}}</mat-cell>
+                                            <mat-cell *matCellDef="let row">{{row.customerName ? row.customerName : ''}}</mat-cell>
                                         </ng-container>
 
                                         <ng-container matColumnDef="CarNo">
                                             <mat-header-cell *matHeaderCellDef mat-sort-header>Car No</mat-header-cell>
                                             <mat-cell *matCellDef="let row" (contextmenu)="onContextMenu($event, row)">
-                                                {{row.carNo ? row.carNo : 'N/A'}}</mat-cell>
+                                                {{row.carNo ? row.carNo : ''}}</mat-cell>
                                         </ng-container>
 
                                         <ng-container matColumnDef="DriverName">
                                             <mat-header-cell *matHeaderCellDef mat-sort-header>Driver Name</mat-header-cell>
                                             <mat-cell *matCellDef="let row" (contextmenu)="onContextMenu($event, row)">
-                                                {{row.driverName ? row.driverName : 'N/A'}}</mat-cell>
+                                                {{row.driverName ? row.driverName : ''}}</mat-cell>
                                         </ng-container>
 
                                         <ng-container matColumnDef="Status">
                                             <mat-header-cell *matHeaderCellDef mat-sort-header>Status</mat-header-cell>
                                             <mat-cell *matCellDef="let row" (contextmenu)="onContextMenu($event, row)">
-                                                {{row.status ? row.status : 'N/A'}}</mat-cell>
+                                                {{row.status ? row.status : ''}}</mat-cell>
                                         </ng-container>
 
                                         <ng-container matColumnDef="PickupDate">
                                             <mat-header-cell *matHeaderCellDef mat-sort-header>Pickup Date</mat-header-cell>
                                             <mat-cell *matCellDef="let row" (contextmenu)="onContextMenu($event, row)">
-                                                {{row.pickupDate ? (row.pickupDate | date:'dd-MM-yyyy') : 'N/A'}}</mat-cell>
+                                                {{row.pickupDate ? (row.pickupDate | date:'dd-MM-yyyy') : ''}}</mat-cell>
                                         </ng-container>
 
                                         <!-- <ng-container matColumnDef="AfterSMSCarChange">
                                             <mat-header-cell *matHeaderCellDef mat-sort-header>After SMS Car Change</mat-header-cell>
                                             <mat-cell *matCellDef="let row" (contextmenu)="onContextMenu($event, row)">
-                                                {{row.afterSMSCarChange ? row.afterSMSCarChange : 'N/A'}}</mat-cell>
+                                                {{row.afterSMSCarChange ? row.afterSMSCarChange : ''}}</mat-cell>
                                         </ng-container>
                                         
                                         <ng-container matColumnDef="DriverCarChange">
                                             <mat-header-cell *matHeaderCellDef mat-sort-header>Driver Car Change</mat-header-cell>
                                             <mat-cell *matCellDef="let row" (contextmenu)="onContextMenu($event, row)">
-                                                {{row.driverCarChange ? row.driverCarChange : 'N/A'}}</mat-cell>
+                                                {{row.driverCarChange ? row.driverCarChange : ''}}</mat-cell>
                                         </ng-container> -->
                                   
                                         <mat-header-row *matHeaderRowDef="displayedColumns"></mat-header-row>

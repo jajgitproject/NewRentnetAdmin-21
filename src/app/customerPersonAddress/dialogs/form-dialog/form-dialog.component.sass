@@ -1,3 +1,30 @@
+.addContainer
+  width: 100%
+  box-sizing: border-box
 
+.cpa-form-actions
+  display: flex
+  flex-wrap: wrap
+  align-items: center
+  justify-content: flex-start
+  gap: 10px
 
+:host ::ng-deep .cpa-google-address-field .mat-mdc-text-field-wrapper,
+:host ::ng-deep .cpa-google-address-field .mdc-text-field,
+:host ::ng-deep .cpa-google-address-field .mat-mdc-form-field-infix
+  overflow: visible !important
 
+:host ::ng-deep .cpa-google-address-field .mat-mdc-form-field-infix
+  min-height: 72px !important
+  height: auto !important
+  align-items: flex-start !important
+
+:host ::ng-deep .cpa-google-address-field textarea.mat-mdc-input-element
+  width: 100% !important
+  min-height: 4.5rem !important
+  line-height: 1.4 !important
+  white-space: pre-wrap !important
+  word-break: break-word !important
+  overflow-wrap: anywhere !important
+  field-sizing: content
+  resize: vertical

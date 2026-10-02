@@ -22,6 +22,8 @@ import { GoogleAddressDropDown } from 'src/app/reservation/googleAddressDropDown
 import { ReservationService } from 'src/app/reservation/reservation.service';
 import moment from 'moment';
 import { ThemeService } from 'ng2-charts';
+import { AuthService } from 'src/app/core/service/auth.service';
+import { canBypassGarageOutLock } from 'src/app/core/service/garage-out-lock-bypass';
 
 @Component({
   standalone: false,
@@ -91,7 +93,8 @@ export class FormDialogDBEComponent {
     private snackBar: MatSnackBar,
     public dialog: MatDialog,
     public reservationService: ReservationService,
-    public _generalService: GeneralService) {
+    public _generalService: GeneralService,
+    private authService: AuthService) {
     // Set the defaults
     this.action = data.action;
     this.advanceTable = data.advanceTable;
@@ -113,7 +116,13 @@ export class FormDialogDBEComponent {
   .trim()
   .toLowerCase();
 
-this.isSaveAllowed = status === 'changes allow';
+    const row = data?.rowRecord ?? {};
+    const hasInvoice = Number(row.invoiceID ?? row.InvoiceID) > 0;
+    const employee = this.authService.currentUserValue?.employee as any;
+    const employeeMobile = String(employee?.Mobile ?? employee?.mobile ?? '');
+    this.isSaveAllowed =
+      !hasInvoice &&
+      (status === 'changes allow' || canBypassGarageOutLock(employeeMobile));
     
     this.ReservationID = data.reservationID;
     this.AllotmentID = data.allotmentID;

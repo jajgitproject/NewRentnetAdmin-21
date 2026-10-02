@@ -75,7 +75,7 @@ export class CDCOutStationLumpsumRate {
       this.tollChargeable = cdcOutStationLumpsumRate.tollChargeable || '';
       this.parkingChargeable = cdcOutStationLumpsumRate.parkingChargeable || '';
       this.interStateChargeable = cdcOutStationLumpsumRate.interStateChargeable || '';
-      this.activationStatus = cdcOutStationLumpsumRate.activationStatus || '';     
+      this.activationStatus = cdcOutStationLumpsumRate.activationStatus ?? true;     
     
       this.nightChargesStartTime=new Date();
       this.nightChargesEndTime=new Date();

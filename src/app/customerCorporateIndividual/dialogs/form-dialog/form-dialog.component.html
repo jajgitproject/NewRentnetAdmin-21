@@ -12,9 +12,9 @@
     </button>
     </div>
     <div mat-dialog-content>
-        <form class="register-form m-4" [formGroup]="advanceTableForm" (ngSubmit)="submit">
+        <form class="register-form m-4 customer-form-four-col" [formGroup]="advanceTableForm" (ngSubmit)="submit">
             <div class="row">
-                <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                <div class="col-xl-3 col-lg-3 col-md-6 col-sm-12 mb-2">
                     <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
                         <mat-label>Corporate Company</mat-label>
                         <input required type="text" matInput formControlName="corporateCompany"
@@ -35,7 +35,7 @@
                     </mat-form-field>
                 </div>
 
-                <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                <div class="col-xl-3 col-lg-3 col-md-6 col-sm-12 mb-2">
                     <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
                         <mat-label>Customer Person</mat-label>
                         <input required type="text" matInput formControlName="customerPersonName" [matAutocomplete]="auto1">
@@ -52,7 +52,7 @@
             </div>
 
             <div class="row">
-                <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                <div class="col-xl-3 col-lg-3 col-md-6 col-sm-12 mb-2">
                     <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
                         <mat-label>Salutation</mat-label>
                         <input required type="text" matInput formControlName="salutation" [matAutocomplete]="auto2">
@@ -67,7 +67,7 @@
                     </mat-form-field>
                 </div>
 
-                <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                <div class="col-xl-3 col-lg-3 col-md-6 col-sm-12 mb-2">
                     <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
                         <mat-label>Gender</mat-label>
                         <mat-select required #genderVal [class.is-invalid]="genderVal.invalid && genderVal.touched"
@@ -84,7 +84,7 @@
             </div>
 
             <div class="row">
-                <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                <div class="col-xl-3 col-lg-3 col-md-6 col-sm-12 mb-2">
                     <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
                         <mat-label>Importance</mat-label>
                         <mat-select required #importanceVal [class.is-invalid]="importanceVal.invalid && importanceVal.touched" formControlName="importance">
@@ -99,7 +99,7 @@
                     </mat-form-field>
                 </div>
 
-                <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                <div class="col-xl-3 col-lg-3 col-md-6 col-sm-12 mb-2">
                     <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
                         <mat-label>Mobile</mat-label>
                         <input matInput formControlName="primaryMobile" required>
@@ -111,7 +111,7 @@
             </div>
 
             <div class="row">
-                <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                <div class="col-xl-3 col-lg-3 col-md-6 col-sm-12 mb-2">
                     <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
                         <mat-label>Primary Email</mat-label>
                         <input matInput formControlName="primaryEmail" required>
@@ -121,7 +121,7 @@
                     </mat-form-field>
                 </div>
 
-                <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                <div class="col-xl-3 col-lg-3 col-md-6 col-sm-12 mb-2">
                     <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
                         <mat-label>Billing Email</mat-label>
                         <input matInput formControlName="billingEmail" required>
@@ -133,7 +133,7 @@
             </div>
 
             <div class="row">
-                <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                <div class="col-xl-3 col-lg-3 col-md-6 col-sm-12 mb-2">
                     <mat-form-field class="example-full-width" appearance="outline" floatLabel="always"> 
                         <mat-label>Location</mat-label>                       
                         <input required  type="text" matInput [matAutocomplete]="auto3"
@@ -150,7 +150,7 @@
                     </mat-form-field>
                 </div>
 
-                <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                <div class="col-xl-3 col-lg-3 col-md-6 col-sm-12 mb-2">
                     <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
                         <mat-label>Customer Identity Number</mat-label>
                         <input matInput formControlName="customerIdentityNumber">
@@ -160,14 +160,14 @@
 
 
             <div class="row">
-                <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                <div class="col-xl-3 col-lg-3 col-md-6 col-sm-12 mb-2">
                     <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
                         <mat-label>GST Number</mat-label>
                         <input matInput formControlName="gstNumber">
                     </mat-form-field>
                 </div>
 
-                <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                <div class="col-xl-3 col-lg-3 col-md-6 col-sm-12 mb-2">
                     <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
                         <mat-label>GST Rate</mat-label>
                         <input matInput formControlName="gstRate" required>
@@ -179,7 +179,7 @@
             </div>
 
             <div class="row">
-                <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                <div class="col-xl-3 col-lg-3 col-md-6 col-sm-12 mb-2">
                     <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
                         <mat-label>Billing Name</mat-label>
                         <input matInput formControlName="billingName" required>
@@ -189,7 +189,7 @@
                     </mat-form-field>
                 </div>
 
-                <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                <div class="col-xl-3 col-lg-3 col-md-6 col-sm-12 mb-2">
                     <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
                         <mat-label>Billing Address</mat-label>
                         <input matInput formControlName="billingAddress" required>
@@ -201,7 +201,7 @@
             </div>
 
             <div class="row">
-                <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                <div class="col-xl-3 col-lg-3 col-md-6 col-sm-12 mb-2">
                     <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
                         <mat-label>Billing State</mat-label>
                         <input required type="text" matInput [matAutocomplete]="auto4" formControlName="billingStateName" (change)="onStateInputChange($event)">
@@ -216,7 +216,7 @@
                     </mat-form-field>
                 </div>
 
-                <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                <div class="col-xl-3 col-lg-3 col-md-6 col-sm-12 mb-2">
                     <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
                         <mat-label>City</mat-label>
                         <input required type="text" matInput [matAutocomplete]="auto5" formControlName="billingCityName">
@@ -233,7 +233,7 @@
             </div>
 
             <div class="row">
-                <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                <div class="col-xl-3 col-lg-3 col-md-6 col-sm-12 mb-2">
                     <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
                         <mat-label>Billing Pin</mat-label>
                         <input matInput formControlName="billingPin" required>
@@ -243,7 +243,7 @@
                     </mat-form-field>
                 </div>
 
-                <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                <div class="col-xl-3 col-lg-3 col-md-6 col-sm-12 mb-2">
                     <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
                         <mat-label>E - Invoice Address</mat-label>
                         <input matInput formControlName="eInvoiceAddress" required>
@@ -255,7 +255,7 @@
             </div>
 
             <div class="row">
-                <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">                  
+                <div class="col-xl-3 col-lg-3 col-md-6 col-sm-12 mb-2">                  
                     <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
                         <mat-label>KAM</mat-label>
                         <input required type="text" matInput formControlName="employeeName" [matAutocomplete]="auto6">
@@ -270,7 +270,7 @@
                     </mat-form-field>                
                 </div>
 
-                <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                <div class="col-xl-3 col-lg-3 col-md-6 col-sm-12 mb-2">
                     <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
                         <mat-label>KAM City</mat-label>
                         <input required type="text" matInput [matAutocomplete]="auto7" formControlName="customerKAMCity">
@@ -287,7 +287,7 @@
             </div>
           
             <div class="row">
-                <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                <div class="col-xl-3 col-lg-3 col-md-6 col-sm-12 mb-2">
                     <mat-form-field class="example-full-width" appearance="outline"  floatLabel="always">
                         <mat-label>Round Off Invoice Value</mat-label>
                         <mat-select formControlName="roundOffInvoiceValue">
@@ -300,7 +300,7 @@
                     </mat-form-field>
                 </div>
 
-                <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">                  
+                <div class="col-xl-3 col-lg-3 col-md-6 col-sm-12 mb-2">                  
                     <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
                         <mat-label>Sales Manager</mat-label>
                         <input required type="text" matInput formControlName="salesManagerName" [matAutocomplete]="auto8">
@@ -317,7 +317,7 @@
             </div>
 
             <div class="row">
-                <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                <div class="col-xl-3 col-lg-3 col-md-6 col-sm-12 mb-2">
                     <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
                         <mat-label>Is Post Pick Up Call Allowed</mat-label>
                         <mat-select formControlName="isPostPickUpCallAllowed">
@@ -326,7 +326,7 @@
                         </mat-select>
                     </mat-form-field>
                 </div>
-                <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                <div class="col-xl-3 col-lg-3 col-md-6 col-sm-12 mb-2">
                     <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
                         <mat-label>IsBillToShipToCustomer</mat-label>
                         <mat-select formControlName="isBillToShipToCustomer">
@@ -338,7 +338,7 @@
             </div>
 
             <div class="row">
-                <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                <div class="col-xl-3 col-lg-3 col-md-6 col-sm-12 mb-2">
                     <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
                         <mat-label>Activation Status</mat-label>
                         <mat-select formControlName="activationStatus">
@@ -354,7 +354,7 @@
 
 
             <div class="row">
-                <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12 mb-2">
+                <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12 mb-2 customer-form-actions">
                     <div class="example-button-row">
                         <button mat-raised-button color="primary" *ngIf="saveDisabled" [type]="submit" [disabled]="!advanceTableForm.valid"  (click)="confirmAdd()">Save</button>
                         <mat-spinner *ngIf="!saveDisabled" diameter="30"></mat-spinner>

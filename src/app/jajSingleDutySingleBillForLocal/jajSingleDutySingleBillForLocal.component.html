@@ -7,10 +7,18 @@
       <!-- HEADER -->
       <div class="header">
         <div class="header-title">
+          @if (dataSource?.invoiceAggregatorModel?.customerAggregatorName != null) 
+          {
+            <strong>BILL OF SUPPLY</strong>
+          }
+          @else
+          {
+            
           <strong>TAX INVOICE
             <br />
             Original for Recipient
           </strong>
+        }
         </div>
         <table class="header-body" cellpadding="0" cellspacing="0" border="0" width="100%">
           <tr>
@@ -77,11 +85,19 @@
           <strong>Place of Supply & State :</strong>
           {{dataSource?.invoiceCustomerModel?.customerGSTStateName}},
           <strong>State Code :</strong> {{dataSource?.invoiceCustomerModel?.customerGSTStateCode}}<br />
-          <strong>GST : </strong>{{dataSource?.invoiceCustomerModel?.customerGSTNumber}} <br />
+          <strong>GST : </strong>{{dataSource?.invoiceCustomerModel?.customerGSTNumber}}
+           @if (dataSource?.invoiceAggregatorModel?.customerAggregatorName != null) {
+
+          , <strong>PANNo:</strong> {{ dataSource?.invoiceCustomerModel?.panNo }}
+           }
+          <br />
           <strong>Reverse Charge(Y/N) : </strong> N
 
           </td>
           <td class="bill-box" valign="top" align="right">
+             @if (dataSource?.invoiceAggregatorModel?.customerAggregatorName != null) {
+*Original for Recipient<br>
+             }
           <b>Bill No : </b> {{dataSource?.invoiceModel?.invoiceNumberWithPrefix}}<br>
           <b>Bill Date : </b> {{dataSource?.invoiceModel?.invoiceDate | date:'dd/MM/yyyy'}}<br>
           <b>DS No : </b> {{dataSource?.dutySlipID}}<br>
@@ -704,9 +720,22 @@
       </div>
      <div style="clear: both;"></div>
       <!-- FOOTER -->
+        @if (dataSource?.invoiceAggregatorModel?.customerAggregatorName != null) {
+
+       It is hereby declared that the aforesaid services are supplied through an
+       <strong>
+       {{dataSource?.invoiceAggregatorModel?.customerAggregatorName}}</strong>
+       , electronic commerce operator in
+terms of Section 9(5) of the CGST Act, 2017, pursuant to which the electronic commerce operator shall be deemed to be the supplier liable to pay
+GST on such notified supplies. Accordingly, the tax on such supplies shall be discharged by the electronic commerce operator, and the original
+supplier shall not be liable to pay GST thereon. <br />
+PAN NO: AABCE1357N}
+        @if (dataSource?.invoiceAggregatorModel?.customerAggregatorName == null) {
       <table class="footer" cellpadding="0" cellspacing="0" border="0" width="100%">
         <tr>
           <td class="terms" valign="top">
+           
+
           <b>Terms & Conditions:</b><br>
           Our Responsibility of the Signed duty slip rests till we handover the same to you with the bill.
           Interest @ 24% will be charged if payment is not received as per payment terms settled.
@@ -714,6 +743,7 @@
           Send the RTGS/NEFT Payment to: KOTAK MAHINDRA BANK / A/C NO: 3911291161, IFSC CODE: KKBK0004620, PAN NO: AABCE1357N, <br>
           CIN NO: L74999DL1996PLC076375
           Electronic Mode of Payments as per Section 269SU of Income Tax Act, 1961.
+           
           <!-- <a href="https://www.ecosmobility.com/pay-online/"
             target="_blank">https://www.ecosmobility.com/pay-online/</a> -->
             <br/>
@@ -724,6 +754,7 @@
           </td>
         </tr>
       </table>
+    }
     </div>
   </div>
   <div class="invoice-attachments">

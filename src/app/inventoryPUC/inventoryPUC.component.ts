@@ -88,21 +88,10 @@ export class InventoryPUCComponent implements OnInit {
   ngOnInit() {
   
     this.SubscribeUpdateService();
-    this.route.queryParams.subscribe(paramsData =>{
-      // this.inventoryID=paramsData.InventoryID;
-      // this.regNo=paramsData.RegNo;
-      const encryptedInventoryID = paramsData.InventoryID;
-const encryptedRegNo = paramsData.RegNo;
-
-if (encryptedInventoryID && encryptedRegNo) {
-  this.inventoryID = this._generalService.decrypt(decodeURIComponent(encryptedInventoryID));
-  this.regNo = this._generalService.decrypt(decodeURIComponent(encryptedRegNo));
-}
-
-
-    
+    this.route.queryParams.subscribe(paramsData => {
+      this.applyInventoryFromQueryParams(paramsData);
+      this.loadData();
     });
-    this.loadData();
   }
 
  
@@ -122,8 +111,45 @@ if (encryptedInventoryID && encryptedRegNo) {
   {
     this.loadData();    
   }
+  private applyInventoryFromQueryParams(paramsData: any): void {
+    const encryptedInventoryID = paramsData?.InventoryID;
+    const encryptedRegNo = paramsData?.RegNo;
+    if (encryptedInventoryID && encryptedRegNo) {
+      try {
+        const decryptedId = this._generalService.decrypt(decodeURIComponent(encryptedInventoryID));
+        const decryptedReg = this._generalService.decrypt(decodeURIComponent(encryptedRegNo));
+        const id = Number(decryptedId);
+        if (Number.isFinite(id) && id > 0 && decryptedReg) {
+          this.inventoryID = id;
+          this.regNo = decryptedReg;
+          return;
+        }
+      } catch {
+        // Fall back to plain query params (bookmarks / manual links).
+      }
+    }
+    if (paramsData?.InventoryID != null && paramsData?.RegNo != null) {
+      this.inventoryID = Number(paramsData.InventoryID);
+      this.regNo = paramsData.RegNo;
+    }
+  }
+
+  private hasValidInventoryContext(): boolean {
+    const id = Number(this.inventoryID);
+    return Number.isFinite(id) && id > 0;
+  }
+
   addNew()
   {
+    if (!this.hasValidInventoryContext()) {
+      this.showNotification(
+        'snackbar-danger',
+        'Open Inventory PUC from Inventory (PUC menu) so vehicle registration is selected.',
+        'bottom',
+        'center'
+      );
+      return;
+    }
     const dialogRef = this.dialog.open(FormDialogComponent, 
     {
       data: 
@@ -175,6 +201,10 @@ if (encryptedInventoryID && encryptedRegNo) {
 
    public loadData() 
    {
+    if (!this.hasValidInventoryContext()) {
+      this.dataSource = [];
+      return;
+    }
     if(this.SearchStartDate!==""){
       this.SearchStartDate=moment(this.SearchStartDate).format('MMM DD yyyy');
     }
@@ -336,10 +366,9 @@ if (encryptedInventoryID && encryptedRegNo) {
             {
               if(this.MessageArray[2]=="Failure")
               {
-               this.refresh();
                this.showNotification(
                 'snackbar-danger',
-                'Operation Failed.....!!!',
+                this.MessageArray[3] ? decodeURIComponent(this.MessageArray.slice(3).join(':')) : 'Operation Failed.....!!!',
                 'bottom',
                 'center'
               );

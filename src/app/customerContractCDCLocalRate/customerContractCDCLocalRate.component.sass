@@ -1,20 +1,3 @@
-:host ::ng-deep .mat-mdc-header-cell
-	white-space: nowrap
-	overflow: visible
-	text-overflow: unset
-
-:host ::ng-deep .mat-mdc-cell
-	white-space: nowrap
-	overflow: visible
-	text-overflow: unset
-
-:host ::ng-deep .scrollable-table-container mat-table
-	min-width: 100%
-	width: max-content
-
-:host ::ng-deep .scrollable-table-container
-	overflow-x: auto
-
 .variable-title-wrap
 	width: 10%
 	float: left
@@ -56,6 +39,158 @@
 	display: flex
 	align-items: center
 	justify-content: center
+
+.scrollable-table-container
+	width: 100%
+	overflow-x: auto
+
+:host ::ng-deep .cdc-local-rate-table.floating-header-table
+	width: max-content !important
+	min-width: 1540px !important
+
+:host ::ng-deep .cdc-local-rate-table .mat-header-row,
+:host ::ng-deep .cdc-local-rate-table .mat-mdc-header-row,
+:host ::ng-deep .cdc-local-rate-table .mat-row,
+:host ::ng-deep .cdc-local-rate-table .mat-mdc-row
+	display: flex !important
+	width: 1540px !important
+	min-width: 1540px !important
+	max-width: 1540px !important
+	box-sizing: border-box
+	align-items: center
+
+:host ::ng-deep .cdc-local-rate-table .mat-mdc-header-row,
+:host ::ng-deep .cdc-local-rate-table .mat-header-row
+	position: sticky
+	top: 0
+	z-index: 2
+	background: #f4f6fb
+	min-height: 48px
+
+:host ::ng-deep .cdc-local-rate-table .mat-mdc-header-cell,
+:host ::ng-deep .cdc-local-rate-table .mat-mdc-cell,
+:host ::ng-deep .cdc-local-rate-table .mat-header-cell,
+:host ::ng-deep .cdc-local-rate-table .mat-cell
+	flex: 0 0 auto !important
+	box-sizing: border-box
+	padding: 8px 10px !important
+	font-size: 13px
+	line-height: 1.3
+	white-space: nowrap
+	overflow: hidden
+	text-overflow: ellipsis
+	align-items: center
+	height: auto !important
+	min-height: 44px
+
+:host ::ng-deep .cdc-local-rate-table .mat-mdc-header-cell,
+:host ::ng-deep .cdc-local-rate-table .mat-header-cell
+	font-size: 12px !important
+	font-weight: 600 !important
+	color: #31415a
+
+:host ::ng-deep .cdc-local-rate-table .mat-column-actions
+	flex: 0 0 100px !important
+	width: 100px !important
+	min-width: 100px !important
+	max-width: 100px !important
+	justify-content: center
+	overflow: visible !important
+	text-overflow: unset !important
+	white-space: nowrap !important
+	padding: 4px 8px !important
+
+:host ::ng-deep .cdc-local-rate-table .cdc-local-rate-actions-header,
+:host ::ng-deep .cdc-local-rate-table .cdc-local-rate-actions-cell
+	z-index: 5 !important
+	background: #fff
+	box-shadow: 2px 0 4px rgba(0, 0, 0, 0.06)
+
+:host ::ng-deep .cdc-local-rate-table .cdc-local-rate-actions-header
+	background: #f4f6fb
+	z-index: 6 !important
+
+:host ::ng-deep .cdc-local-rate-table .mat-column-CustomerContractCarCategory
+	flex: 0 0 150px !important
+	width: 150px !important
+	min-width: 150px !important
+	max-width: 150px !important
+
+:host ::ng-deep .cdc-local-rate-table .mat-column-CustomerContractCityTier
+	flex: 0 0 120px !important
+	width: 120px !important
+	min-width: 120px !important
+	max-width: 120px !important
+
+:host ::ng-deep .cdc-local-rate-table .mat-column-package
+	flex: 0 0 120px !important
+	width: 120px !important
+	min-width: 120px !important
+	max-width: 120px !important
+
+:host ::ng-deep .cdc-local-rate-table .mat-column-MinimumHours,
+:host ::ng-deep .cdc-local-rate-table .mat-column-MinimumKM,
+:host ::ng-deep .cdc-local-rate-table .mat-column-baseRate,
+:host ::ng-deep .cdc-local-rate-table .mat-column-NightCharge,
+:host ::ng-deep .cdc-local-rate-table .mat-column-DriverAllowance,
+:host ::ng-deep .cdc-local-rate-table .mat-column-FKMP2P,
+:host ::ng-deep .cdc-local-rate-table .mat-column-FixedP2PAmount
+	flex: 0 0 110px !important
+	width: 110px !important
+	min-width: 110px !important
+	max-width: 110px !important
+	justify-content: flex-end
+	text-align: right
+
+:host ::ng-deep .cdc-local-rate-table .mat-column-BillFromTo
+	flex: 0 0 120px !important
+	width: 120px !important
+	min-width: 120px !important
+	max-width: 120px !important
+
+:host ::ng-deep .cdc-local-rate-table .mat-column-status
+	flex: 0 0 90px !important
+	width: 90px !important
+	min-width: 90px !important
+	max-width: 90px !important
+	justify-content: center
+	text-align: center
+
+:host ::ng-deep .cdc-local-rate-table .mat-column-actions .mat-mdc-raised-button,
+:host ::ng-deep .cdc-local-rate-table .mat-column-actions .mat-raised-button
+	height: 28px !important
+	min-height: 28px !important
+	max-height: 28px !important
+	line-height: normal !important
+	padding: 0 10px !important
+	font-size: 12px !important
+	min-width: 72px !important
+	display: inline-flex !important
+	align-items: center !important
+	justify-content: center !important
+
+:host ::ng-deep .cdc-local-rate-table .mat-row:nth-child(even),
+:host ::ng-deep .cdc-local-rate-table .mat-mdc-row:nth-child(even)
+	background: #fafbfe
+
+:host ::ng-deep .cdc-local-rate-table .mat-row:nth-child(even) .cdc-local-rate-actions-cell,
+:host ::ng-deep .cdc-local-rate-table .mat-mdc-row:nth-child(even) .cdc-local-rate-actions-cell
+	background: #fafbfe
+
+:host ::ng-deep .cdc-local-rate-table .mat-row:hover,
+:host ::ng-deep .cdc-local-rate-table .mat-mdc-row:hover
+	background: #eef4ff
+
+:host ::ng-deep .cdc-local-rate-table .mat-row:hover .cdc-local-rate-actions-cell,
+:host ::ng-deep .cdc-local-rate-table .mat-mdc-row:hover .cdc-local-rate-actions-cell
+	background: #eef4ff
+
+:host ::ng-deep .scrollable-table-container .floating-header-table:not(.cdc-local-rate-table) .mat-mdc-header-cell,
+:host ::ng-deep .scrollable-table-container .floating-header-table:not(.cdc-local-rate-table) .mat-mdc-cell
+	white-space: nowrap
+	overflow: visible
+	text-overflow: unset
+	padding: 8px 12px
 
 @media (max-width: 1400px)
 	.variable-title-wrap

@@ -94,11 +94,11 @@
                                         <mat-cell *matCellDef="let row">
                                           <!-- Handle Date Fields -->
                                           <ng-container *ngIf="['dateOfJoining', 'dob', 'dateOfLeaving', 'drivingSinceDate'].includes(column)">
-                                            {{ row[column] ? (row[column] | date: 'dd-MM-yyyy') : 'N/A' }}
+                                            {{ row[column] ? (row[column] | date: 'dd-MM-yyyy') : '' }}
                                           </ng-container>
                                           <!-- Handle Other Fields -->
                                           <ng-container *ngIf="!['dateOfJoining', 'dob', 'dateOfLeaving', 'drivingSinceDate'].includes(column)">
-                                            {{ row[column] === undefined || row[column] === null || row[column] === 0 ? 'N/A' : row[column] }}
+                                            {{ row[column] === undefined || row[column] === null || row[column] === 0 ? '' : row[column] }}
                                           </ng-container>
                                         </mat-cell>
                                       </ng-container>

@@ -160,6 +160,32 @@ getHoursAndMinutes(totalMinutes: number): { hours: number; minutes: number } {
   return { hours, minutes };
 }
 
+getBasicRate(duty: any): number {
+  if (this.isOutstationPackage(duty)) {
+    return Number(duty?.dutyTotalPackageAmount ?? duty?.DutyTotalPackageAmount ?? 0);
+  }
+  return Number(duty?.baseRate ?? 0);
+}
+
+getDriverAllowance(duty: any): number {
+  if (this.isOutstationPackage(duty)) {
+    const stored = Number(duty?.totalDriverAllowanceAmount ?? duty?.TotalDriverAllowanceAmount ?? 0);
+    if (stored) {
+      return stored;
+    }
+    const dailyRate = Number(duty?.dailyDriverAllowanceRate ?? duty?.DailyDriverAllowanceRate ?? 0);
+    const days = Number(duty?.totalDriverAllowanceDays ?? duty?.TotalDriverAllowanceDays ?? 0);
+    return dailyRate * days;
+  }
+  return Number(duty?.driverAllowance ?? 0);
+}
+
+private isOutstationPackage(duty: any): boolean {
+  const pkg = (duty?.package || '').toString().trim().toLowerCase();
+  const pkgType = (duty?.packageType || '').toString().trim().toLowerCase();
+  return pkg.includes('outstation') || pkgType.includes('outstation');
+}
+
 get totalTax(): number {
   const invoice = this.dataSource?.invoiceModel;
   if (!invoice) {

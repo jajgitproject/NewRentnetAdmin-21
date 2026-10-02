@@ -11,7 +11,12 @@ export interface Kpi {
 
 export interface VendorCard {
   name: string;
+  totalCalls: number;
+  bookingCount: number;
+  successCount: number;
+  failureCount: number;
   successRate: string;
+  failureRate: string;
   circuitState: CircuitState;
   tone: Tone;
 }
@@ -51,6 +56,6 @@ export interface HealthFilters {
   driverEndpoint: string;
   rentnetReservationID: string;
   customerIntegrationSearch: string;
-  fromDate: string;
-  toDate: string;
+  fromDate: Date | null;
+  toDate: Date | null;
 }

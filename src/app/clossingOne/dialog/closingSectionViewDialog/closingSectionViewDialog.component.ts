@@ -10,6 +10,7 @@ export type ClosingSectionKey =
   | 'dutyGST'
   | 'dutyState'
   | 'dutyStateCustomer'
+  | 'dutyNight'
   | 'dutySAC'
   | 'additionalKm'
   | 'mop'

@@ -191,6 +191,19 @@ export const ROUTES: RouteInfo[] = [
         isAccess: false
       },
 
+       {
+        path: 'rejectedQCDriverPhoto',
+        title: 'Rejected QC Driver Photo',
+        pageKey: 'Rejected QC Driver Photo',
+        moduleName: 'rejectedQCDriverPhoto',
+        alternateAccessPageKeys: ['rejectedQCDriverPhoto', 'Rejected QC Driver Photo'],
+        icon: 'fas fa-file-archive',
+        class: '',
+        groupTitle: false,
+        submenu: [],
+        isAccess: false
+      },
+
       {
         path: 'emailBookingRequest',
         title: 'Email Booking Request',
@@ -218,6 +231,16 @@ export const ROUTES: RouteInfo[] = [
         title: 'Integration Log',
         moduleName: 'integrationLogDetail',
         icon: 'fas fa-tachometer-alt',
+        class: '',
+        groupTitle: false,
+        submenu: [],
+        isAccess: false
+      },
+      {
+        path: 'integrationHealth',
+        title: 'Integration Health',
+        moduleName: 'integrationHealth',
+        icon: 'fas fa-heartbeat',
         class: '',
         groupTitle: false,
         submenu: [],
@@ -739,6 +762,17 @@ export const ROUTES: RouteInfo[] = [
         path: 'customerGroup',
         title: 'Customer Group',
         moduleName: 'customerGroup',
+        icon: 'fas fa-tachometer-alt',
+        class: '',
+        groupTitle: false,
+        submenu: [],
+        isAccess: false
+      },
+
+      {
+        path: 'customerMeeting',
+        title: 'Customer Meeting',
+        moduleName: 'customerMeeting',
         icon: 'fas fa-tachometer-alt',
         class: '',
         groupTitle: false,
@@ -1330,6 +1364,33 @@ export const ROUTES: RouteInfo[] = [
         submenu: [],
         isAccess: false
       },
+
+      {
+        path: 'qcMisCst',
+        title: 'QC MIS (CST)',
+        pageKey: 'QC MIS (CST)',
+        moduleName: 'qcMisCst',
+        alternateAccessPageKeys: ['qcMisCst', 'QC MIS (CST)', 'QCMIS(CST)'],
+        icon: 'fas fa-clipboard-check',
+        class: '',
+        groupTitle: false,
+        submenu: [],
+        isAccess: false,
+        alwaysAccessible: true
+      },
+      {
+        path: 'postPickupCallMis',
+        title: 'Post Pickup Call MIS',
+        pageKey: 'Post Pickup Call MIS',
+        moduleName: 'postPickupCallMis',
+        alternateAccessPageKeys: ['postPickupCallMis', 'Post Pickup Call MIS'],
+        icon: 'fas fa-phone',
+        class: '',
+        groupTitle: false,
+        submenu: [],
+        isAccess: false,
+        alwaysAccessible: true
+      },
       {        
         path: 'incidenceMIS',
         title: 'Incidence MIS',
@@ -1348,6 +1409,63 @@ export const ROUTES: RouteInfo[] = [
         class: '',
         groupTitle: false,
         submenu: [],
+        isAccess: false
+      },
+      {
+        path: 'dynamicsMenu',
+        title: 'Dynamics',
+        moduleName: 'dynamicsMenu',
+        icon: 'fas fa-cloud',
+        class: '',
+        groupTitle: false,
+        submenu: [
+          {
+            path: 'sendDataToDynamics',
+            title: 'Invoices → Dynamics',
+            pageKey: 'Send Data To Dynamics',
+            moduleName: 'sendDataToDynamics',
+            alternateAccessPageKeys: [
+              'Send Data To Dynamics',
+              'sendDataToDynamics',
+              'Send Invoice to Dynamics',
+              'Send Invoices To Dynamics'
+            ],
+            icon: 'fas fa-cloud-upload-alt',
+            class: '',
+            groupTitle: false,
+            submenu: [],
+            isAccess: false
+          },
+          {
+            path: 'sendCreditNotesToDynamics',
+            title: 'Credit note → Dynamics',
+            pageKey: 'Send Credit Notes To Dynamics',
+            moduleName: 'sendCreditNotesToDynamics',
+            alternateAccessPageKeys: [
+              'Send Credit Notes To Dynamics',
+              'sendCreditNotesToDynamics',
+              'DynamicsCreditNote',
+              'Dynamics Credit Note'
+            ],
+            icon: 'fas fa-file-invoice-dollar',
+            class: '',
+            groupTitle: false,
+            submenu: [],
+            isAccess: false
+          },
+          {
+            path: 'dynamicsMis20',
+            title: 'Dynamics MIS 2.0',
+            pageKey: 'dynamicsMis20',
+            moduleName: 'dynamicsMis20',
+            alternateAccessPageKeys: ['dynamicsMis20', 'Dynamics MIS 2.0', 'Dynamics MIS'],
+            icon: 'fas fa-chart-bar',
+            class: '',
+            groupTitle: false,
+            submenu: [],
+            isAccess: false
+          }
+        ],
         isAccess: false
       },
       {
@@ -1543,19 +1661,6 @@ export const ROUTES: RouteInfo[] = [
         submenu: [],
         isAccess: false
       },
-      {
-        path: 'dynamicsMis20',
-        title: 'Dynamics MIS 2.0',
-        pageKey: 'dynamicsMis20',
-        moduleName: 'dynamicsMis20',
-        alternateAccessPageKeys: ['dynamicsMis20', 'Dynamics MIS 2.0'],
-        icon: 'fas fa-tachometer-alt',
-        class: '',
-        groupTitle: false,
-        submenu: [],
-        isAccess: false
-      },
-
       {
         path: 'driverCarChangesMIS',
         title: 'Driver Car Changes',

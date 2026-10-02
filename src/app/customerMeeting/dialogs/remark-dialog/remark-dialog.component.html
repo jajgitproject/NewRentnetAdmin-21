@@ -1,0 +1,83 @@
+<div class="addContainer">
+  <div class="modalHeader">
+    <div class="editRowModal">
+      <div class="modalHeader clearfix">
+        <div class="modal-about">
+          <div class="font-weight-bold p-t-5 font-17">{{dialogTitle}}</div>
+          <div class="meeting-context" *ngIf="customerGroup || meetingSubject">
+            <span *ngIf="customerGroup">{{customerGroup}}</span>
+            <span *ngIf="customerGroup && meetingSubject"> | </span>
+            <span *ngIf="meetingSubject">{{meetingSubject}}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+    <button mat-icon-button (click)="dialogRef.close()" aria-label="Close dialog">
+      <mat-icon>close</mat-icon>
+    </button>
+  </div>
+
+  <div mat-dialog-content>
+    <form class="register-form m-4" [formGroup]="remarkForm">
+      <div class="row">
+        <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12 mb-3">
+          <label class="field-label">Remark</label>
+          <mat-form-field class="example-full-width" appearance="outline">
+            <textarea matInput formControlName="remark" maxlength="500" rows="4" required></textarea>
+          </mat-form-field>
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="col-xl-4 col-lg-4 col-md-4 col-sm-12 mb-3">
+          <label class="field-label">Remark By</label>
+          <div class="readonly-value">{{remarkByName || '-'}}</div>
+        </div>
+        <div class="col-xl-4 col-lg-4 col-md-4 col-sm-12 mb-3">
+          <label class="field-label">Remark Date</label>
+          <div class="readonly-value">{{currentRemarkDate | date:'dd/MM/yyyy'}}</div>
+        </div>
+        <div class="col-xl-4 col-lg-4 col-md-4 col-sm-12 mb-3">
+          <label class="field-label">Remark Time</label>
+          <div class="readonly-value">{{currentRemarkTime | date:'hh:mm a'}}</div>
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12 mb-2">
+          <div class="example-button-row">
+            <button mat-raised-button color="primary" *ngIf="saveDisabled" [disabled]="!remarkForm.valid"
+              (click)="confirmSave()">Save</button>
+            <mat-spinner *ngIf="!saveDisabled" diameter="30"></mat-spinner>
+            <button mat-raised-button color="warn" (click)="dialogRef.close()" tabindex="-1">Close</button>
+          </div>
+        </div>
+      </div>
+    </form>
+
+    <div class="remarks-section">
+      <h6 class="remarks-title">Existing Remarks</h6>
+      <div *ngIf="remarkList.length === 0" class="no-remarks">No remarks added yet.</div>
+      <div class="remarks-table-wrapper" *ngIf="remarkList.length > 0">
+        <table class="remarks-table">
+          <thead>
+            <tr>
+              <th>Remark By</th>
+              <th>Date</th>
+              <th>Time</th>
+              <th>Remark</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let item of remarkList">
+              <td>{{item.remarkByName || '-'}}</td>
+              <td>{{formatRemarkDate(item.remarkDate)}}</td>
+              <td>{{formatRemarkTime(item.remarkTime)}}</td>
+              <td class="remark-text">{{item.remark}}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>

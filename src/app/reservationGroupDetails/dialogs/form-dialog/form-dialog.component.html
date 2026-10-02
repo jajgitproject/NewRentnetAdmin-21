@@ -51,11 +51,23 @@
               Please select a Customer Group
             </mat-error>
           </mat-form-field>
-
+        </div>
+        <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+          <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+            <mat-label>Customer Type</mat-label>
+            <input required type="text" matInput formControlName="customerType" readonly />
+            <mat-error *ngIf="
+                advanceTableForm.controls['customerType'].hasError(
+                  'customerTypeInvalid'
+                )
+              ">
+              Please select a Customer Type
+            </mat-error>
+          </mat-form-field>
         </div>
       </div>
       <div class="row">
-        <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2" *ngIf="this.advanceTableForm.value.customerGroupID && IsKAMRole === false">
+        <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12 mb-2" *ngIf="this.advanceTableForm.value.customerGroupID && IsKAMRole === false">
           <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
             <mat-label>Customer</mat-label>
             <input required type="text" matInput formControlName="customerCustomerGroup" [matAutocomplete]="auto1" />
@@ -63,7 +75,7 @@
               panelWidth="custom-autocomplete-panel">
               <mat-option *ngFor="
                   let option of filteredCustomerCustomerGroupOptions | async
-                " [value]="option.customerName + '##' + option.tallyCustomerID + '##' + option.stateName + '##' + (option.customerIdentityNumber || '')" (click)="
+                " [value]="formatCustomerOption(option)" (click)="
                   getCustomerCustomerGroupID(
                     option.customerID,
                     option.customerGroupID,
@@ -73,7 +85,7 @@
                     option.customerType
                   )
                 ">
-                {{ option.customerName }} ## {{ option.tallyCustomerID }} ## {{ option.stateName }} ## {{ option.customerIdentityNumber }}
+                {{ option.customerName }} ## {{ option.tallyCustomerID }} ## {{ option.stateName }} ## {{ option.customerIdentityNumber }} ## {{ option.contactNo }}
               </mat-option>
             </mat-autocomplete>
             <mat-error *ngIf="
@@ -101,7 +113,7 @@
                     </mat-hint>
                     </div> -->
         </div>
-        <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2" *ngIf="!this.advanceTableForm.value.customerGroupID && IsKAMRole === false">
+        <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12 mb-2" *ngIf="!this.advanceTableForm.value.customerGroupID && IsKAMRole === false">
           <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
             <mat-label>Customer</mat-label>
             <input required type="text" matInput formControlName="customerCustomerGroup" [matAutocomplete]="auto3" />
@@ -109,7 +121,7 @@
               panelWidth="custom-autocomplete-panel">
               <mat-option *ngFor="
                   let option of filteredCustomerCustomerGroupOptions | async
-                " [value]="option.customerName + '##' + option.tallyCustomerID + '##' + option.stateName + '##' + (option.customerIdentityNumber || '')" (click)="
+                " [value]="formatCustomerOption(option)" (click)="
                   getCustomerIDForRD(
                     option.customerID,
                     option.customerGroupID,
@@ -119,7 +131,7 @@
                     option.customerType
                   )
                 ">
-                {{ option.customerName }} ## {{ option.tallyCustomerID }} ## {{ option.stateName }} ## {{ option.customerIdentityNumber }}
+                {{ option.customerName }} ## {{ option.tallyCustomerID }} ## {{ option.stateName }} ## {{ option.customerIdentityNumber }} ## {{ option.contactNo }}
               </mat-option>
             </mat-autocomplete>
             <mat-error *ngIf="
@@ -148,17 +160,17 @@
                     </div> -->
         </div>
 
-        <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2" *ngIf="!this.advanceTableForm.value.customerGroupID && IsKAMRole === true">
+        <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12 mb-2" *ngIf="!this.advanceTableForm.value.customerGroupID && IsKAMRole === true">
           <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
             <mat-label>Customer</mat-label>
             <input required type="text" matInput formControlName="customerCustomerGroup" [matAutocomplete]="auto10" />
             <mat-autocomplete #auto10="matAutocomplete" (optionSelected)="onCustomerRGByKAMSelected($event.option.value)"
               panelWidth="custom-autocomplete-panel">
               <mat-option *ngFor="let option of filteredCustomerCustomerGroupOptions | async" 
-                          [value]="option.customerName + '##' + option.tallyCustomerID + '##' + option.stateName + '##' + (option.customerIdentityNumber || '')" 
+                          [value]="formatCustomerOption(option)" 
                           (click)="getCustomerIDForRGByKAM(option.customerID,option.customerGroupID,option.customerName,
                                                       option.customerGroup, option.customerTypeID,option.customerType)">
-                {{ option.customerName }} ## {{ option.tallyCustomerID }} ## {{ option.stateName }} ## {{ option.customerIdentityNumber }}
+                {{ option.customerName }} ## {{ option.tallyCustomerID }} ## {{ option.stateName }} ## {{ option.customerIdentityNumber }} ## {{ option.contactNo }}
               </mat-option>
             </mat-autocomplete>
             <mat-error *ngIf="advanceTableForm.controls['customerCustomerGroup'].hasError('customerRGByKAMInvalid')">
@@ -168,17 +180,17 @@
         </div>
 
 
-        <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2" *ngIf="this.advanceTableForm.value.customerGroupID && IsKAMRole === true">
+        <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12 mb-2" *ngIf="this.advanceTableForm.value.customerGroupID && IsKAMRole === true">
           <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
             <mat-label>Customer</mat-label>
             <input required type="text" matInput formControlName="customerCustomerGroup" [matAutocomplete]="auto10" />
             <mat-autocomplete #auto10="matAutocomplete" (optionSelected)="onCustomerCustomerGroupForRGByKAMSelected($event.option.value)"
               panelWidth="custom-autocomplete-panel">
               <mat-option *ngFor="let option of filteredCustomerCustomerGroupOptions | async" 
-                          [value]="option.customerName + '##' + option.tallyCustomerID + '##' + option.stateName + '##' + (option.customerIdentityNumber || '')" 
+                          [value]="formatCustomerOption(option)" 
                           (click)="getCustomerCustomerGroupIDForRGByKAM(option.customerID,option.customerGroupID,option.customerName,
                                                       option.customerGroup, option.customerTypeID,option.customerType)">
-                {{ option.customerName }} ## {{ option.tallyCustomerID }} ## {{ option.stateName }} ## {{ option.customerIdentityNumber }}
+                {{ option.customerName }} ## {{ option.tallyCustomerID }} ## {{ option.stateName }} ## {{ option.customerIdentityNumber }} ## {{ option.contactNo }}
               </mat-option>
             </mat-autocomplete>
             <mat-error *ngIf="advanceTableForm.controls['customerCustomerGroup'].hasError('customerRGByKAMInvalid')">
@@ -186,28 +198,10 @@
             </mat-error>
           </mat-form-field>
         </div>
-
-        <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
-          <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
-            <mat-label>Customer Type</mat-label>
-            <input required type="text" matInput formControlName="customerType" readonly />
-            <!-- <input required type="text" matInput formControlName="customerType" [matAutocomplete]="auto">
-                        <mat-autocomplete #auto="matAutocomplete" (optionSelected)="onCTSelected($event.option.value)">
-                            <mat-option *ngFor="let option of filteredCustomerTypeOptions | async"
-                                [value]="option.customerType"
-                                (click)="getTitles(option.customerTypeID, option)">
-                                {{option.customerType}}
-                            </mat-option>
-                        </mat-autocomplete> -->
-
-            <mat-error *ngIf="
-                advanceTableForm.controls['customerType'].hasError(
-                  'customerTypeInvalid'
-                )
-              ">
-              Please select a Customer Type
-            </mat-error>
-          </mat-form-field>
+        <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12 mb-2" *ngIf="action !== 'edit'">
+          <div class="link-actions-below-left">
+            <a class="link-action" (click)="openIndividualCustomer()">Individual Customer</a>
+          </div>
         </div>
       </div>
 

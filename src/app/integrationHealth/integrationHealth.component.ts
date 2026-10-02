@@ -1,5 +1,6 @@
 // @ts-nocheck
 import { Component, OnInit } from '@angular/core';
+import { MatSnackBar } from '@angular/material/snack-bar';
 import {
   Kpi, VendorCard, FailureRow, DriverChain, HealthFilters, Tone
 } from './integrationHealth.model';
@@ -15,24 +16,16 @@ export class IntegrationHealthComponent implements OnInit {
   private readonly autocompleteMinPrefixLength = 3;
 
   kpis: Kpi[] = [
-    { label: 'Total Calls (24h)', value: '—', tone: 'ok' },
-    { label: 'Success Rate',      value: '—', tone: 'ok' },
-    { label: 'Failure Rate',      value: '—', tone: 'err' },
-    { label: 'Pending Retries',   value: '—', tone: 'warn' }
+    { label: 'Total Calls (Today)', value: '—', tone: 'ok' },
+    { label: 'Success Rate', value: '—', tone: 'ok' },
+    { label: 'Failure Rate', value: '—', tone: 'err' },
+    { label: 'Pending Retries', value: '—', tone: 'warn' }
   ];
 
-  vendors: VendorCard[] = [
-    { name: 'MoveInSync', successRate: '—', circuitState: 'Closed', tone: 'ok' },
-    { name: 'MMT',        successRate: '—', circuitState: 'Closed', tone: 'ok' },
-    { name: 'MYF',        successRate: '—', circuitState: 'Closed', tone: 'ok' },
-    { name: 'Indecab',    successRate: '—', circuitState: 'Closed', tone: 'ok' },
-    { name: 'Adobe',      successRate: '—', circuitState: 'Closed', tone: 'ok' },
-    { name: 'Citibank',   successRate: '—', circuitState: 'Closed', tone: 'ok' },
-    { name: 'GTrack',     successRate: '—', circuitState: 'Closed', tone: 'ok' },
-    { name: 'Dynamics',   successRate: '—', circuitState: 'Closed', tone: 'ok' }
-  ];
+  vendors: VendorCard[] = [];
 
-  vendorOptions = ['MoveInSync','MMT','MYF','Indecab','Adobe','Citibank','GTrack','Dynamics'];
+  vendorOptions = ['MoveInSync', 'MMT', 'MYF', 'Indecab', 'Adobe', 'CitiBank', 'GTrack', 'Dynamics'];
+  aggregatorFilterOptions = [...this.vendorOptions, '(unknown)'];
   driverEndpointOptions = [
     'dispatchByApp',
     'reachedByApp',
@@ -42,88 +35,12 @@ export class IntegrationHealthComponent implements OnInit {
     'api/events/pushdata',
     'multiplePickupDropByApp'
   ];
-  statusOptions = ['Success','Failure','Retrying','DeadLetter','Recovered'];
-  sourceOptions  = ['DriverApp','Admin','Scheduled','InboundVendor'];
+  statusOptions = ['Success', 'Failure', 'Retrying', 'DeadLetter'];
+  sourceOptions = ['DriverApp', 'Admin', 'Scheduled', 'InboundVendor'];
 
-  filters: HealthFilters = {
-    vendor: '',
-    status: '',
-    source: '',
-    driverEndpoint: '',
-    rentnetReservationID: '',
-    customerIntegrationSearch: '',
-    fromDate: '',
-    toDate: ''
-  };
+  filters: HealthFilters = this.defaultFilters();
 
-  // Dummy rows — replace with API call
-  failures: FailureRow[] = [
-    {
-      apiIntegrationLogID: 1001,
-      rentnetReservationID: 45621,
-      time: '13:01',
-      vendor: 'MMT',
-      eventName: 'startTrip',
-      source: 'DriverApp',
-      driverEndpoint: 'pickupByApp',
-      reservationNo: 'RN-45621',
-      customerName: 'Acme Corp',
-      integrationCode: 'MMT-TRIP-9001',
-      httpStatus: 503,
-      retryCount: 3,
-      status: 'Failure',
-      error: 'Upstream timeout'
-    },
-    {
-      apiIntegrationLogID: 1002,
-      rentnetReservationID: 45619,
-      time: '12:54',
-      vendor: 'Indecab',
-      eventName: 'DriverAssignment',
-      source: 'Admin',
-      driverEndpoint: '',
-      reservationNo: 'RN-45619',
-      customerName: 'Globex India',
-      integrationCode: 'INDECAB-2219',
-      httpStatus: 500,
-      retryCount: 5,
-      status: 'DeadLetter',
-      error: 'Auth token expired'
-    },
-    {
-      apiIntegrationLogID: 1003,
-      rentnetReservationID: 45611,
-      time: '12:46',
-      vendor: 'MoveInSync',
-      eventName: 'Tracking',
-      source: 'DriverApp',
-      driverEndpoint: 'api/events/pushdata',
-      reservationNo: 'RN-45611',
-      customerName: 'Contoso Pvt Ltd',
-      integrationCode: 'MIS-TRK-7781',
-      httpStatus: 200,
-      retryCount: 1,
-      status: 'Recovered',
-      error: 'Recovered after retry'
-    },
-    {
-      apiIntegrationLogID: 1004,
-      rentnetReservationID: 45609,
-      time: '12:30',
-      vendor: 'MYF',
-      eventName: 'endTrip',
-      source: 'DriverApp',
-      driverEndpoint: 'dropOffByApp',
-      reservationNo: 'RN-45609',
-      customerName: 'Northwind Travels',
-      integrationCode: 'MYF-END-5520',
-      httpStatus: 429,
-      retryCount: 2,
-      status: 'Retrying',
-      error: 'Rate limited'
-    }
-  ];
-
+  failures: FailureRow[] = [];
   filteredFailures: FailureRow[] = [];
   customerIntegrationOptions: string[] = [];
 
@@ -134,62 +51,188 @@ export class IntegrationHealthComponent implements OnInit {
   ];
 
   chain: DriverChain = {
-    reservationNo: 'RN-45621',
-    steps: [
-      { label: 'dispatchByApp → startDuty (MoveInSync, MYF, CitiBank, MMT)',  result: 'All vendors: Success', tone: 'ok' },
-      { label: 'reachedByApp → arrived (MYF, CitiBank, MMT)',                  result: 'All vendors: Success', tone: 'ok' },
-      { label: 'pickupByApp → startTrip (MoveInSync, MYF, CitiBank, MMT)',    result: 'MMT failed | Others: Success', tone: 'warn' },
-      { label: 'dropOffByApp → endTrip',                                       result: 'Pending', tone: 'warn' }
-    ]
+    reservationNo: '',
+    steps: []
   };
 
-  constructor(private integrationHealthService: IntegrationHealthService) {}
+  constructor(
+    private integrationHealthService: IntegrationHealthService,
+    private snackBar: MatSnackBar
+  ) {}
 
   ngOnInit(): void {
-    this.filteredFailures = [...this.failures];
-    this.loadDummyKpis();
-    this.loadDummyVendors();
-    this.updateCustomerIntegrationOptions();
+    this.loadDashboard();
   }
 
-  private loadDummyKpis(): void {
-    this.kpis = [
-      { label: 'Total Calls (24h)', value: '12,480', tone: 'ok'  },
-      { label: 'Success Rate',      value: '94.2%',  tone: 'ok'  },
-      { label: 'Failure Rate',      value: '5.8%',   tone: 'err' },
-      { label: 'Pending Retries',   value: '173',    tone: 'warn' }
-    ];
+  private startOfToday(): Date {
+    const now = new Date();
+    return new Date(now.getFullYear(), now.getMonth(), now.getDate());
   }
 
-  private loadDummyVendors(): void {
-    this.vendors = [
-      { name: 'MoveInSync', successRate: '97%', circuitState: 'Closed',    tone: 'ok'   },
-      { name: 'MMT',        successRate: '91%', circuitState: 'Closed',    tone: 'warn' },
-      { name: 'MYF',        successRate: '89%', circuitState: 'Half-Open', tone: 'warn' },
-      { name: 'Indecab',    successRate: '72%', circuitState: 'Open',      tone: 'err'  },
-      { name: 'Adobe',      successRate: '95%', circuitState: 'Closed',    tone: 'ok'   },
-      { name: 'Citibank',   successRate: '93%', circuitState: 'Closed',    tone: 'ok'   },
-      { name: 'GTrack',     successRate: '98%', circuitState: 'Closed',    tone: 'ok'   },
-      { name: 'Dynamics',   successRate: '99%', circuitState: 'Closed',    tone: 'ok'   }
-    ];
+  private formatLocalDate(value: Date | string | null | undefined): string {
+    const date = value instanceof Date
+      ? value
+      : (value ? new Date(value) : this.startOfToday());
+    if (isNaN(date.getTime())) {
+      return this.formatLocalDate(this.startOfToday());
+    }
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  }
+
+  private defaultFilters(): HealthFilters {
+    const today = this.startOfToday();
+    return {
+      vendor: '',
+      status: '',
+      source: '',
+      driverEndpoint: '',
+      rentnetReservationID: '',
+      customerIntegrationSearch: '',
+      fromDate: today,
+      toDate: new Date(today.getTime())
+    };
+  }
+
+  private range(): { from: string; to: string } {
+    return {
+      from: this.formatLocalDate(this.filters.fromDate),
+      to: this.formatLocalDate(this.filters.toDate)
+    };
+  }
+
+  private totalCallsLabel(from: string, to: string): string {
+    const today = this.formatLocalDate(this.startOfToday());
+    return from === today && to === today ? 'Total Calls (Today)' : 'Total Calls';
+  }
+
+  private emptyVendorCard(name: string): VendorCard {
+    return {
+      name,
+      totalCalls: 0,
+      bookingCount: 0,
+      successCount: 0,
+      failureCount: 0,
+      successRate: 'No calls',
+      failureRate: 'No calls',
+      circuitState: 'Closed',
+      tone: 'warn'
+    };
+  }
+
+  private mergeVendorCards(apiVendors: any[]): VendorCard[] {
+    const mapped = (apiVendors || []).map((v) => ({
+      name: v.name || v.Name,
+      totalCalls: Number(v.totalCalls ?? v.TotalCalls ?? 0),
+      bookingCount: Number(v.bookingCount ?? v.BookingCount ?? 0),
+      successCount: Number(v.successCount ?? v.SuccessCount ?? 0),
+      failureCount: Number(v.failureCount ?? v.FailureCount ?? 0),
+      successRate: v.successRate || v.SuccessRate || 'No calls',
+      failureRate: v.failureRate || v.FailureRate || 'No calls',
+      circuitState: v.circuitState || v.CircuitState || 'Closed',
+      tone: (v.tone || v.Tone || 'warn') as Tone
+    }));
+    const byName = new Map(
+      mapped
+        .filter((v) => v.name)
+        .map((v) => [String(v.name).toLowerCase(), v])
+    );
+    const cards = this.vendorOptions.map((name) => {
+      return byName.get(name.toLowerCase()) || this.emptyVendorCard(name);
+    });
+    mapped.forEach((v) => {
+      if (v.name && !this.vendorOptions.some((n) => n.toLowerCase() === String(v.name).toLowerCase())) {
+        cards.push(v);
+      }
+    });
+    return cards;
+  }
+
+  private mapRow(row: any): FailureRow {
+    return {
+      apiIntegrationLogID: row.apiIntegrationLogID ?? row.ApiIntegrationLogID ?? 0,
+      rentnetReservationID: row.rentnetReservationID ?? row.RentnetReservationID ?? 0,
+      time: row.time ?? row.Time ?? '',
+      vendor: row.vendor ?? row.Vendor ?? '',
+      eventName: row.eventName ?? row.EventName ?? '',
+      source: row.source ?? row.Source ?? '',
+      driverEndpoint: row.driverEndpoint ?? row.DriverEndpoint ?? '',
+      reservationNo: row.reservationNo ?? row.ReservationNo ?? '',
+      customerName: row.customerName ?? row.CustomerName ?? '',
+      integrationCode: row.integrationCode ?? row.IntegrationCode ?? row.tallyCustomerID ?? row.TallyCustomerID ?? '',
+      httpStatus: row.httpStatus ?? row.HttpStatus ?? 0,
+      retryCount: row.retryCount ?? row.RetryCount ?? 0,
+      status: row.status ?? row.Status ?? 'Failure',
+      error: row.error ?? row.Error ?? ''
+    };
+  }
+
+  loadDashboard(): void {
+    const { from, to } = this.range();
+    this.integrationHealthService.getSummary(from, to).subscribe(
+      (summary) => {
+        const total = summary?.totalCalls ?? summary?.TotalCalls ?? 0;
+        const success = summary?.successRate ?? summary?.SuccessRate ?? 0;
+        const failure = summary?.failureRate ?? summary?.FailureRate ?? 0;
+        const pending = summary?.pendingRetries ?? summary?.PendingRetries ?? 0;
+        this.kpis = [
+          { label: this.totalCallsLabel(from, to), value: String(total), tone: 'ok' },
+          { label: 'Success Rate', value: success + '%', tone: 'ok' },
+          { label: 'Failure Rate', value: failure + '%', tone: failure > 10 ? 'err' : 'warn' },
+          { label: 'Pending Retries', value: String(pending), tone: pending > 0 ? 'warn' : 'ok' }
+        ];
+        this.vendors = this.mergeVendorCards(summary?.vendors || summary?.Vendors || []);
+      },
+      () => {
+        this.kpis[0].value = '0';
+      }
+    );
+    this.loadEvents();
+  }
+
+  private loadEvents(): void {
+    const { from, to } = this.range();
+    this.integrationHealthService.getEvents(this.filters, 1, from, to).subscribe(
+      (rows) => {
+        const list = Array.isArray(rows) ? rows : [];
+        this.failures = list.map((row) => this.mapRow(row));
+        this.applyLocalFilters();
+        this.updateCustomerIntegrationOptions();
+        this.updateChain();
+      },
+      () => {
+        this.failures = [];
+        this.filteredFailures = [];
+      }
+    );
   }
 
   applyFilters(): void {
-    this.filteredFailures = this.failures.filter(r => {
-      const vendorOk   = !this.filters.vendor         || r.vendor         === this.filters.vendor;
-      const statusOk   = !this.filters.status         || r.status         === this.filters.status;
-      const sourceOk   = !this.filters.source         || r.source         === this.filters.source;
-      const endpointOk = !this.filters.driverEndpoint || r.driverEndpoint === this.filters.driverEndpoint;
-      const reservationIdOk =
-        !this.filters.rentnetReservationID ||
-        String(r.rentnetReservationID).includes(this.filters.rentnetReservationID.trim());
+    this.loadDashboard();
+  }
+
+  resetFilters(): void {
+    this.filters = this.defaultFilters();
+    this.loadDashboard();
+  }
+
+  filterByAggregator(name: string): void {
+    const selected = String(name || '').trim();
+    this.filters.vendor = this.isAggregatorSelected(selected) ? '' : selected;
+    this.loadDashboard();
+  }
+
+  isAggregatorSelected(name: string): boolean {
+    return String(this.filters.vendor || '').toLowerCase() === String(name || '').toLowerCase();
+  }
+
+  private applyLocalFilters(): void {
+    this.filteredFailures = this.failures.filter((r) => {
       const customerIntegrationTerm = (this.filters.customerIntegrationSearch || '').trim().toLowerCase();
       const customerIntegrationValue = `${r.customerName}##${r.integrationCode}`.toLowerCase();
-      const customerIntegrationOk =
-        !customerIntegrationTerm ||
-        customerIntegrationValue.includes(customerIntegrationTerm);
-
-      return vendorOk && statusOk && sourceOk && endpointOk && reservationIdOk && customerIntegrationOk;
+      return !customerIntegrationTerm || customerIntegrationValue.includes(customerIntegrationTerm);
     });
   }
 
@@ -223,10 +266,12 @@ export class IntegrationHealthComponent implements OnInit {
           this.updateCustomerIntegrationOptions();
         }
       );
+      this.applyLocalFilters();
       return;
     }
 
     this.updateCustomerIntegrationOptions();
+    this.applyLocalFilters();
   }
 
   private updateCustomerIntegrationOptions(): void {
@@ -251,23 +296,62 @@ export class IntegrationHealthComponent implements OnInit {
     return raw.split('##')[0].trim();
   }
 
-  resetFilters(): void {
-    this.filters = {
-      vendor: '',
-      status: '',
-      source: '',
-      driverEndpoint: '',
-      rentnetReservationID: '',
-      customerIntegrationSearch: '',
-      fromDate: '',
-      toDate: ''
+  private updateChain(): void {
+    const first = this.filteredFailures[0];
+    if (!first) {
+      this.chain = { reservationNo: '', steps: [] };
+      return;
+    }
+
+    const reservation = first.reservationNo;
+    const related = this.failures.filter((r) => r.reservationNo === reservation);
+    this.chain = {
+      reservationNo: reservation,
+      steps: related.map((r) => ({
+        label: r.eventName || r.driverEndpoint || r.source,
+        result: r.status,
+        tone: (r.status === 'Success' || r.status === 'Recovered') ? 'ok' : (r.status === 'Failure' || r.status === 'DeadLetter') ? 'err' : 'warn'
+      }))
     };
-    this.filteredFailures = [...this.failures];
-    this.updateCustomerIntegrationOptions();
   }
 
   resend(row: FailureRow): void {
-    alert(`Resend queued for log #${row.apiIntegrationLogID} (${row.vendor} – ${row.eventName})`);
+    const payload = {
+      reservationID: row.rentnetReservationID,
+      eventName: row.eventName,
+      travelRequestNo: row.reservationNo,
+      aggregator: row.vendor,
+      requestJson: null
+    };
+    this.integrationHealthService.resend(payload).subscribe(
+      (res) => {
+        const isSuccess = res?.success === true || res?.Success === true || res?.status === true;
+        this.snackBar.open(isSuccess ? 'Resend queued' : (res?.message || res?.Message || 'Resend sent'), 'Close', {
+          duration: 3000
+        });
+        this.loadDashboard();
+      },
+      () => {
+        this.snackBar.open('Resend failed', 'Close', { duration: 3000 });
+      }
+    );
+  }
+
+  vendorRateLabel(vendor: VendorCard): string {
+    const rate = String(vendor?.successRate || '').trim();
+    if (!rate || rate.toLowerCase() === 'no calls') {
+      return 'No calls';
+    }
+    return rate.toLowerCase().includes('success') ? rate : rate + ' success';
+  }
+
+  failureTone(vendor: VendorCard): Tone {
+    const raw = String(vendor?.failureRate || '').replace('%', '').trim();
+    const rate = Number(raw);
+    if (!Number.isFinite(rate) || String(vendor?.failureRate || '').toLowerCase() === 'no calls') {
+      return 'warn';
+    }
+    return rate > 10 ? 'err' : (rate > 0 ? 'warn' : 'ok');
   }
 
   statusClass(status: FailureRow['status']): string {
@@ -277,8 +361,8 @@ export class IntegrationHealthComponent implements OnInit {
   }
 
   circuitClass(state: string): string {
-    if (state === 'Closed')    return 'ih-chip-ok';
-    if (state === 'Open')      return 'ih-chip-err';
+    if (state === 'Closed') return 'ih-chip-ok';
+    if (state === 'Open') return 'ih-chip-err';
     return 'ih-chip-warn';
   }
 }

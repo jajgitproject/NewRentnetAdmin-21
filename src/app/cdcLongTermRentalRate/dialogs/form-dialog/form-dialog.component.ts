@@ -1,6 +1,6 @@
 // @ts-nocheck
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
-import { Component, ElementRef, HostListener, Inject } from '@angular/core';
+import { ChangeDetectorRef, Component, ElementRef, HostListener, Inject } from '@angular/core';
 import { CDCLongTermRentalRateService } from '../../cdcLongTermRentalRate.service';
 import { FormControl, Validators, FormGroup, FormBuilder, ValidatorFn, ValidationErrors, AbstractControl } from '@angular/forms';
 import { CDCLongTermRentalRate } from '../../cdcLongTermRentalRate.model';
@@ -57,6 +57,7 @@ export class FormDialogComponent {
     public dialogRef: MatDialogRef<FormDialogComponent>,
 
     @Inject(MAT_DIALOG_DATA) public data: any,
+    private cdr: ChangeDetectorRef,
     public advanceTableService: CDCLongTermRentalRateService,
     private fb: FormBuilder,
     private el: ElementRef,
@@ -348,21 +349,24 @@ export class FormDialogComponent {
     this.advanceTableService.add(this.advanceTableForm.getRawValue())
       .subscribe(
         response => {
-          if (response && response.activationStatus && typeof response.activationStatus === 'string' && response.activationStatus.includes("Duplicate")) 
+          if (this._generalService.isDuplicateSaveError(response)) 
           {
-            this._generalService.sendUpdate('DataNotFound:DuplicacyError:Failure');
-            this.saveDisabled = true;
+            this._generalService.showDuplicateSaveError(
+              'An active rate already exists for a shared city in another city tier.',
+              () => this.endSaving(),
+              response
+            );
           }
           else
           {
             this.dialogRef.close();
             this._generalService.sendUpdate('CDCLongTermRentalRateCreate:CDCLongTermRentalRateView:Success');//To Send Updates  
-            this.saveDisabled = true;
+            this.endSaving();
           } 
         },
         error => {
           this._generalService.sendUpdate('CDCLongTermRentalRateAll:CDCLongTermRentalRateView:Failure');//To Send Updates  
-          this.saveDisabled = true;
+          this.endSaving();
         }
       )
   }
@@ -374,21 +378,24 @@ export class FormDialogComponent {
     this.advanceTableService.update(this.advanceTableForm.getRawValue())
       .subscribe(
         response => {
-          if (response && response.activationStatus && typeof response.activationStatus === 'string' && response.activationStatus.includes("Duplicate")) 
+          if (this._generalService.isDuplicateSaveError(response)) 
           {
-            this._generalService.sendUpdate('DataNotFound:DuplicacyError:Failure');
-            this.saveDisabled = true;
+            this._generalService.showDuplicateSaveError(
+              'An active rate already exists for a shared city in another city tier.',
+              () => this.endSaving(),
+              response
+            );
           }
           else
           {
             this.dialogRef.close();
             this._generalService.sendUpdate('CDCLongTermRentalRateUpdate:CDCLongTermRentalRateView:Success');//To Send Updates  
-            this.saveDisabled = true;
+            this.endSaving();
           } 
         },
         error => {
           this._generalService.sendUpdate('CDCLongTermRentalRateAll:CDCLongTermRentalRateView:Failure');//To Send Updates  
-          this.saveDisabled = true;
+          this.endSaving();
         }
       )
   }
@@ -402,28 +409,37 @@ export class FormDialogComponent {
     .subscribe(
     response => 
     {
-      if(response.activationStatus===false)
+      if (this._generalService.isDuplicateSaveError(response))
       {
-        this._generalService.sendUpdate('DataNotFound:DuplicacyError:Failure');
-        this.saveDisabled = true;
+        this._generalService.showDuplicateSaveError(
+          'An active rate already exists for a shared city in another city tier.',
+          () => this.endSaving(),
+          response
+        );
       }
       else 
       {
         this.dialogRef.close();
         this._generalService.sendUpdate('CDCLongTermRentalRateUpdate:CDCLongTermRentalRateView:Success');
-        this.saveDisabled = true; 
+        this.endSaving(); 
       }
     },
     error =>
     {
      this._generalService.sendUpdate('CDCLongTermRentalRateAll:CDCLongTermRentalRateView:Failure');
-     this.saveDisabled = true;
+     this.endSaving();
     }
   )
   }
 
+  private endSaving(): void {
+    this.saveDisabled = true;
+    this.cdr.detectChanges();
+  }
+
   public confirmAdd(): void {
     this.saveDisabled = false;
+    this.cdr.detectChanges();
     if(this.action=="duplicate")
     {
       this.Duplicate();

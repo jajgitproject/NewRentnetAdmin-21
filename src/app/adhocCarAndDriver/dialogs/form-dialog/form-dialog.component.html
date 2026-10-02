@@ -47,8 +47,8 @@
                                 {{supplier.supplierName | uppercase}} - {{supplier.supplierPhone}}
                             </mat-option>
                         </mat-autocomplete>
-                        <mat-error *ngIf="advanceTableForm.controls['supplierName'].hasError('required')">
-                            Please select a  Vendor
+                        <mat-error *ngIf="advanceTableForm.controls['supplierName'].hasError('required') || advanceTableForm.controls['supplierName'].hasError('supplierNameInvalid') || advanceTableForm.controls['supplierID'].hasError('required')">
+                            Please select a valid Supplier.
                         </mat-error>
                     </mat-form-field>
                 </div>
@@ -212,7 +212,10 @@
                             </mat-option>
                         </mat-autocomplete>
                         <mat-error *ngIf="advanceTableForm.controls['driverName'].hasError('required')">
-                            Please select a  Driver Name 
+                            Please select a driver name.
+                        </mat-error>
+                        <mat-error *ngIf="!advanceTableForm.controls['driverName'].hasError('required') && (advanceTableForm.controls['driverName'].hasError('driverTypeInvalid') || advanceTableForm.controls['driverID'].hasError('required'))">
+                            Please select a existing driver.
                         </mat-error>
                     </mat-form-field>
                 </div>
@@ -407,7 +410,10 @@
                           </mat-option>
                         </mat-autocomplete>
                         <mat-error *ngIf="advanceTableForm.controls['registrationNumber']?.hasError('required')">
-                            Please select a Registration No
+                            Please select registration no.
+                        </mat-error>
+                        <mat-error *ngIf="!advanceTableForm.controls['registrationNumber']?.hasError('required') && (advanceTableForm.controls['registrationNumber']?.hasError('registrationTypeInvalid') || advanceTableForm.controls['inventoryID']?.hasError('required'))">
+                            Please select existing registration no.
                         </mat-error>
                       </mat-form-field>
                 </div>

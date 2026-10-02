@@ -13,5 +13,7 @@ export interface RouteInfo {
   groupTitle: boolean;
   submenu: RouteInfo[];
   isAccess: boolean;
+  /** When true, the item is shown without a matching Page / RolePageMapping row. */
+  alwaysAccessible?: boolean;
 }
 

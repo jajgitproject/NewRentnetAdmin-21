@@ -36,6 +36,7 @@ export class AuthService {
             localStorage.setItem('currentUser', updated);
           }
           this.syncExpirationDateFromEmployee(normalized);
+          this.syncRolePermissionFlags(normalized?.employee);
         }
       } catch {
         localStorage.removeItem('currentUser');
@@ -105,6 +106,7 @@ export class AuthService {
         if (this.isValidSession(normalized)) {
           localStorage.setItem('currentUser', JSON.stringify(normalized));
           this.syncExpirationDateFromEmployee(normalized);
+          this.syncRolePermissionFlags(normalized?.employee);
           this.currentUserSubject.next(normalized);
           this.tabSessionCoordinator.registerTab();
         }
@@ -250,6 +252,12 @@ export class AuthService {
             CanCancelBackDateAllotment:
               rawEmployee.CanCancelBackDateAllotment ??
               rawEmployee.canCancelBackDateAllotment,
+            CanCancelBackDateReservation:
+              rawEmployee.CanCancelBackDateReservation ??
+              rawEmployee.canCancelBackDateReservation,
+            CanReactivateBackDateReservation:
+              rawEmployee.CanReactivateBackDateReservation ??
+              rawEmployee.canReactivateBackDateReservation,
             EmployeeEntityID:
               rawEmployee.EmployeeEntityID ?? rawEmployee.employeeEntityID,
             EmployeeID: rawEmployee.EmployeeID ?? rawEmployee.employeeID,
@@ -330,6 +338,45 @@ export class AuthService {
     if (expirationDate) {
       localStorage.setItem('expirationDate', expirationDate);
     }
+  }
+
+  private isTruthyRoleFlag(value: any): boolean {
+    return (
+      value === true ||
+      value === 1 ||
+      value === '1' ||
+      value === 'true' ||
+      value === 'True'
+    );
+  }
+
+  private syncRolePermissionFlags(employee: any): void {
+    if (!employee) {
+      return;
+    }
+
+    const toStorageBool = (value: any) =>
+      this.isTruthyRoleFlag(value) ? 'true' : 'false';
+
+    localStorage.setItem(
+      'canCancelBackDateAllotment',
+      toStorageBool(
+        employee.CanCancelBackDateAllotment ?? employee.canCancelBackDateAllotment
+      )
+    );
+    localStorage.setItem(
+      'canCancelBackDateReservation',
+      toStorageBool(
+        employee.CanCancelBackDateReservation ?? employee.canCancelBackDateReservation
+      )
+    );
+    localStorage.setItem(
+      'canReactivateBackDateReservation',
+      toStorageBool(
+        employee.CanReactivateBackDateReservation ??
+          employee.canReactivateBackDateReservation
+      )
+    );
   }
 
   private getSessionPayload(): Record<string, unknown> {

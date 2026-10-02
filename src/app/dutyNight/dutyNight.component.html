@@ -1,0 +1,63 @@
+<div class="row">
+  <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+    <div class="card">
+      <div class="body">
+        <div class="responsive_table">
+          <mat-table #table [dataSource]="advanceTableDutyNight" matSort class="mat-cell">
+            <ng-container matColumnDef="numberOnNights">
+              <mat-header-cell *matHeaderCellDef mat-sort-header>Number Of Nights</mat-header-cell>
+              <mat-cell *matCellDef="let row">
+                {{row.numberOnNights}}</mat-cell>
+            </ng-container>
+
+            <ng-container matColumnDef="changeDateTime">
+              <mat-header-cell *matHeaderCellDef mat-sort-header>Date/Time</mat-header-cell>
+              <mat-cell *matCellDef="let row">
+                {{ row.changeDateTime | date: 'yyyy-MM-dd' }} / {{ row.changeDateTime | date: 'HH:mm:ss' }}</mat-cell>
+            </ng-container>
+
+            <ng-container matColumnDef="reasonOfChange">
+              <mat-header-cell *matHeaderCellDef mat-sort-header>Reason Of Changes</mat-header-cell>
+              <mat-cell *matCellDef="let row">
+                {{row.reasonOfChange}}</mat-cell>
+            </ng-container>
+
+            <ng-container matColumnDef="changedBy">
+              <mat-header-cell *matHeaderCellDef mat-sort-header>Change By</mat-header-cell>
+              <mat-cell *matCellDef="let row">
+                {{row.firstName}} {{row.lastName}}</mat-cell>
+            </ng-container>
+
+            <ng-container matColumnDef="status">
+              <mat-header-cell *matHeaderCellDef mat-sort-header>Status</mat-header-cell>
+              <mat-cell *matCellDef="let row">
+                {{ getStatusLabel(row) }}</mat-cell>
+            </ng-container>
+
+            <ng-container matColumnDef="actions" *ngIf="!isDutyNightEntryBlocked && !isDutyNightEditBlocked">
+              <mat-header-cell *matHeaderCellDef class="pr-0" [ngClass]="'tbl-col-width-per-9'">Actions</mat-header-cell>
+              <mat-cell *matCellDef="let row; let i=index;" class="pr-0" [ngClass]="'tbl-col-width-per-9'">
+                <button *ngIf="isDutyNightRecordActive(row)" mat-raised-button color="primary" (contextmenu)="onContextMenu($event, row)" (click)="onContextMenu($event, row)">
+                  Actions
+                </button>
+              </mat-cell>
+            </ng-container>
+            <mat-header-row *matHeaderRowDef="tableColumns"></mat-header-row>
+            <mat-row *matRowDef="let row; columns: tableColumns;" matRipple>
+            </mat-row>
+          </mat-table>
+          <div style="visibility: hidden; position: fixed" [style.left]="contextMenuPosition.x" [style.top]="contextMenuPosition.y" [matMenuTriggerFor]="contextMenu">
+          </div>
+          <mat-menu #contextMenu="matMenu">
+            <ng-template matMenuContent let-item="item">
+              <button mat-menu-item *ngIf="isDutyNightRecordActive(item)" (click)="deleteItem(item)">
+                <mat-icon>delete</mat-icon>
+                <span>Delete</span>
+              </button>
+            </ng-template>
+          </mat-menu>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
