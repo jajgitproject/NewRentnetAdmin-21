@@ -664,8 +664,8 @@ export class FormDialogComponent {
       // If owned car -> show popup
       if (this.ownedSupplier === true) {
         Swal.fire({
-          title: 'This is owned car',
-          text: 'This is owned car',
+          title: 'This car is owned by existing supplier',
+          text: 'This car is owned by existing supplier',
           icon: 'warning',
           confirmButtonText: 'OK'
         }).then((result) => {
@@ -719,13 +719,16 @@ export class FormDialogComponent {
 
                 this.advanceTableService.getInventoryIdByregNo(regNo)
                   .subscribe(inventoryRes => {
-
-                     this.inventoryID = inventoryRes?.inventoryID;
-                    //console.log('Inventory ID:', this.inventoryID);
-                    this.advanceTableForm.patchValue({ inventoryID: this.inventoryID });
-                    this.registrationNumber=regNo;
-                     this.GetInventoryDetails();
-                     this.GetVehicleCategories();
+                    const rawInventoryId = inventoryRes?.inventoryID ?? inventoryRes?.InventoryID;
+                    const parsedInventoryId = rawInventoryId === '' || rawInventoryId == null ? 0 : Number(rawInventoryId);
+                    if (!parsedInventoryId || parsedInventoryId <= 0) {
+                      return;
+                    }
+                    this.inventoryID = parsedInventoryId;
+                    this.advanceTableForm.patchValue({ inventoryID: parsedInventoryId });
+                    this.registrationNumber = regNo;
+                    this.GetInventoryDetails();
+                    this.GetVehicleCategories();
                   });
 
               } else {
@@ -790,11 +793,14 @@ export class FormDialogComponent {
 
                 this.advanceTableService.getDriverIdByPhone(driverPhone)
                   .subscribe(driverRes => {
-
-                     this.driverID = driverRes?.driverID;
-                    //console.log('Driver ID:', this.driverID);
+                    const rawDriverId = driverRes?.driverID ?? driverRes?.DriverID;
+                    const parsedDriverId = rawDriverId === '' || rawDriverId == null ? 0 : Number(rawDriverId);
+                    if (!parsedDriverId || parsedDriverId <= 0) {
+                      return;
+                    }
+                    this.driverID = parsedDriverId;
                     this.GetDriverDetails();
-                    this.advanceTableForm.patchValue({ driverID: this.driverID });
+                    this.advanceTableForm.patchValue({ driverID: parsedDriverId });
                   });
 
               } else {
@@ -1081,9 +1087,16 @@ export class FormDialogComponent {
 
   //------------------ DriverDetails---------------------
   public GetDriverDetails() {
-    this.advanceTableService.GetDriverDetails(this.driverID).subscribe
+    const driverId = Number(this.driverID ?? this.advanceTableForm.get('driverID')?.value);
+    if (!driverId || driverId <= 0) {
+      return;
+    }
+    this.advanceTableService.GetDriverDetails(driverId).subscribe
       (
         (data: any) => {
+          if (!data) {
+            return;
+          }
           this.advanceTable = data;
           this.advanceTableForm.patchValue({ rtoStateID: this.advanceTable.rtoStateID });
           this.advanceTableForm.patchValue({ companyID: this.advanceTable.companyID });
@@ -1155,13 +1168,26 @@ export class FormDialogComponent {
 
     // const mobile2 = phone4 ? `${countryCode}-${phone4}` : null;
 
+    const resolvedDriverId = this.advanceTableForm.get('driverID')?.value ?? this.driverID;
     if (this.advanceTableForm.value?.isDriverExisting === 'New') {
-      this.advanceTableForm.patchValue({ ownedSupplier: "Supplier", driverID: null });
+      if (resolvedDriverId && resolvedDriverId > 0) {
+        this.advanceTableForm.patchValue({ driverID: resolvedDriverId });
+      } else {
+        this.advanceTableForm.patchValue({ ownedSupplier: "Supplier", driverID: null });
+      }
     } else if (this.advanceTableForm.value?.isDriverExisting === 'Existing') {
-      this.advanceTableForm.patchValue({ driverID: this.driverID });
+      this.advanceTableForm.patchValue({ driverID: resolvedDriverId });
     }
+
+    const resolvedInventoryId = this.advanceTableForm.get('inventoryID')?.value ?? this.inventoryID;
     if (this.advanceTableForm.value?.isCarExisting === 'New') {
-      this.advanceTableForm.patchValue({ inventoryID: null });
+      if (resolvedInventoryId && resolvedInventoryId > 0) {
+        this.advanceTableForm.patchValue({ inventoryID: resolvedInventoryId });
+      } else {
+        this.advanceTableForm.patchValue({ inventoryID: null });
+      }
+    } else if (this.advanceTableForm.value?.isCarExisting === 'Existing') {
+      this.advanceTableForm.patchValue({ inventoryID: resolvedInventoryId });
     }
     this.advanceTableForm.patchValue({ supplierPhone: phone4 });
     this.advanceTableForm.patchValue({ reservationID: this.reservationID });
