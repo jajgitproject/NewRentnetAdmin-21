@@ -60,13 +60,15 @@ import { SettledRateDetailsComponent } from '../settledRateDetails/settledRateDe
 import { EmailInfoService } from '../EmailInfo/EmailInfo.service';
 import { EmailInfoModule } from '../EmailInfo/EmailInfo.module';
 import { LocationOutTimeEditComponent } from './dialogs/locationOutTimeEdit/locationOutTimeEdit.component';
+import { KamPickupAddressHistoryDialogComponent } from './dialogs/kam-pickup-address-history-dialog/kam-pickup-address-history-dialog.component';
 import { ReservationGroupDetailsService } from '../reservationGroupDetails/reservationGroupDetails.service';
 @NgModule({
   declarations: [
     ReservationComponent,
     SavedAddressComponent,
     FormDialogComponent,
-    LocationOutTimeEditComponent
+    LocationOutTimeEditComponent,
+    KamPickupAddressHistoryDialogComponent
   ],
   imports: [
     GooglePlaceModule,

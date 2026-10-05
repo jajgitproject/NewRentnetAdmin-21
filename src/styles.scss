@@ -309,6 +309,19 @@ form.customer-form-four-col mat-form-field {
   max-width: 95vw !important;
 }
 
+/* Booking screen — KAM pickup address correction history */
+.cdk-overlay-container .cdk-overlay-pane.kam-pickup-address-history-dialog-panel.mat-mdc-dialog-panel {
+  width: min(760px, 96vw) !important;
+  min-width: min(320px, 96vw) !important;
+  max-width: 96vw !important;
+  flex-shrink: 0 !important;
+  --mat-dialog-container-max-width: min(760px, 96vw);
+}
+.cdk-overlay-container .cdk-overlay-pane.kam-pickup-address-history-dialog-panel > .mat-mdc-dialog-container {
+  width: 100% !important;
+  max-width: 100% !important;
+}
+
 /* Booking screen — Saved Addresses list (panelClass is on cdk-overlay-pane, not inside the component). */
 .cdk-overlay-container .cdk-overlay-pane.saved-address-dialog-panel.mat-mdc-dialog-panel {
   width: min(760px, 96vw) !important;
@@ -439,6 +452,51 @@ form.customer-form-four-col mat-form-field {
 }
 .cdk-overlay-container .cdk-overlay-pane.role-form-wide-dialog .mat-mdc-form-field-type-mat-select .mat-mdc-text-field-wrapper {
   overflow: visible;
+}
+
+/* KAM Pickup Address Correction dialog */
+.cdk-overlay-container .cdk-overlay-pane.kam-address-correction-dialog-panel.mat-mdc-dialog-panel {
+  width: min(1200px, 96vw) !important;
+  max-width: 96vw !important;
+  flex-shrink: 0 !important;
+  --mat-dialog-container-max-width: min(1200px, 96vw);
+}
+.cdk-overlay-container .cdk-overlay-pane.kam-address-correction-dialog-panel > .mat-mdc-dialog-container {
+  width: 100% !important;
+  padding: 0 !important;
+  box-sizing: border-box;
+}
+.cdk-overlay-container .cdk-overlay-pane.kam-address-correction-dialog-panel .mdc-dialog__surface,
+.cdk-overlay-container .cdk-overlay-pane.kam-address-correction-dialog-panel .mat-mdc-dialog-container .mat-mdc-dialog-surface {
+  width: 100% !important;
+  max-width: 100% !important;
+  max-height: 90vh !important;
+  padding: 0 !important;
+  overflow: hidden !important;
+  display: flex !important;
+  flex-direction: column !important;
+  box-sizing: border-box;
+}
+.cdk-overlay-container .cdk-overlay-pane.kam-address-correction-dialog-panel app-kam-address-correction-dialog {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  min-height: 0;
+  max-height: 90vh;
+}
+.cdk-overlay-container .cdk-overlay-pane.kam-address-correction-dialog-panel .kam-ac-dialog.addContainer {
+  width: 100%;
+  flex: 1 1 auto;
+  min-height: 0;
+}
+.cdk-overlay-container .cdk-overlay-pane.kam-address-correction-dialog-panel .mat-mdc-dialog-container .kam-ac-body.mat-mdc-dialog-content,
+.cdk-overlay-container .cdk-overlay-pane.kam-address-correction-dialog-panel .mat-mdc-dialog-container .kam-ac-body[mat-dialog-content] {
+  margin: 0 !important;
+  max-height: none !important;
+  overflow-x: hidden !important;
+  overflow-y: auto !important;
+  flex: 1 1 auto;
+  min-height: 0;
 }
 
 /* Supplier Create/Edit: lock width so opening mat-select/autocomplete cannot

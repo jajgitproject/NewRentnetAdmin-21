@@ -38,6 +38,7 @@ import { FormDialogComponent } from '../viewKAM/dialogs/form-dialog/form-dialog.
 import { ViewKAM } from '../viewKAM/viewKAM.model';
 import { GoogleAddressDropDown } from './googleAddressDropDown.model';
 import { SavedAddressComponent } from './dialogs/saved-address/saved-address.component';
+import { KamPickupAddressHistoryDialogComponent } from './dialogs/kam-pickup-address-history-dialog/kam-pickup-address-history-dialog.component';
 import moment from 'moment';
 import { ReservationCustomerDetails } from '../general/reservationCustomerDetailsDropDown.model';
 import { CustomerReservationFields } from './customerReservationField.model';
@@ -89,6 +90,17 @@ export class ReservationComponent implements OnInit, OnDestroy {
   @Output() testBookingSaved = new EventEmitter<any>();
   @Output() testBookingClearImei = new EventEmitter<void>();
   @Output() testBookingClear = new EventEmitter<void>();
+  /** KAM pickup correction dialog: show only pickup address controls and save via edit API. */
+  @Input() addressCorrectionMode = false;
+  @Input() useEmbeddedReservationContext = false;
+  @Input() hideAddressCorrectionSummaryPanel = false;
+  @Input() embeddedReservationGroupID: any;
+  @Input() embeddedCustomerGroupID: any;
+  @Input() embeddedCustomerID: any;
+  @Input() embeddedCustomerName: any;
+  @Input() embeddedCustomerGroup: any;
+  @Output() addressCorrectionReady = new EventEmitter<void>();
+  @Output() addressCorrectionSaved = new EventEmitter<void>();
   advanceTableFormEdit: FormGroup;
   advanceTable:Reservation;
   dataForReservationList:ModelForReservation | null;
@@ -289,6 +301,7 @@ advanceTableIN: InternalNoteDetails | null;
       gSTForBilling:[''],
       customerConfigurationInvoicingID:[],
       isTimeNotConfirmed:[''],
+      isAddressCorrectionRequiredByKAM:[false],
       tripTo:[''],
       tripType:['']
   })
@@ -410,9 +423,18 @@ canCreateReservation: boolean;
   @ViewChild(MatMenuTrigger)
   contextMenu: MatMenuTrigger;
   contextMenuPosition = { x: '0px', y: '0px' };
+  isPickupCorrectionView(): boolean {
+    return this.addressCorrectionMode && this.useEmbeddedReservationContext;
+  }
+
   ngOnInit() { 
     this.LocationOutDate = this.LocationOutDate?.trim() ? this.LocationOutDate : null;
     this.applyStaticRequiredValidators();
+    if (this.isPickupCorrectionView()) {
+      this.buttonDisabled = false;
+      this.initPickupCorrectionEmbedded();
+      return;
+    }
      this.canCreateReservation =
     localStorage.getItem('canCreateReservation') === 'true';
     this.rememberAuditReservationId();
@@ -1237,6 +1259,9 @@ toArray<T>(value: any): T[] {
         {
           this.advanceTableForm.get('isTimeNotConfirmed')?.setValue(false);
         }
+        this.advanceTableForm.patchValue({
+          isAddressCorrectionRequiredByKAM: this.advanceTable?.isAddressCorrectionRequiredByKAM === true
+        });
         //this.advanceTableForm.patchValue({isTimeNotConfirmed:this.advanceTable.isTimeNotConfirmed});    
         this.ImagePath=this.normalizeAttachmentPath(this.advanceTable.attachment);
         this.advanceTableForm.patchValue({attachment:this.ImagePath});
@@ -1265,15 +1290,155 @@ toArray<T>(value: any): T[] {
        
       }
        this.isLoadingdata = false;
+       if (this.isPickupCorrectionView()) {
+         this.finishPickupCorrectionInit();
+       }
     },
     (error: HttpErrorResponse) => { 
       this.reservationDataSource = null;
       this.isLoadingdata = false;
+      if (this.isPickupCorrectionView()) {
+        this.addressCorrectionReady.emit();
+      }
     }
       
     );
   }
 
+  private initPickupCorrectionEmbedded(): void {
+    this.action = this.action || 'edit';
+    this.fromForm = 'embeddedKamPickup';
+    if (this.embeddedCustomerID) {
+      this.customerID = this.embeddedCustomerID;
+    }
+    if (this.embeddedCustomerName) {
+      this.customerName = this.embeddedCustomerName;
+    }
+    if (this.embeddedCustomerGroupID) {
+      this.customerGroupID = this.embeddedCustomerGroupID;
+    }
+    if (this.embeddedCustomerGroup) {
+      this.customerGroup = this.embeddedCustomerGroup;
+    }
+    if (this.embeddedReservationGroupID) {
+      this.reservationGroupID = this.embeddedReservationGroupID;
+    }
+    const customerGroupLabel =
+      this.embeddedCustomerName && this.embeddedCustomerGroup
+        ? `${this.embeddedCustomerName} - ${this.embeddedCustomerGroup}`
+        : '';
+    this.advanceTableForm.patchValue({
+      reservationID: this.ReservationID,
+      reservationGroupID: this.embeddedReservationGroupID ?? null,
+      customerID: this.embeddedCustomerID ?? null,
+      customerGroupID: this.embeddedCustomerGroupID ?? null,
+      customerCustomerGroup: customerGroupLabel,
+    });
+    if (this.ReservationID) {
+      this.rememberAuditReservationId(this.ReservationID);
+      this.loadData();
+    } else {
+      this.addressCorrectionReady.emit();
+    }
+  }
+
+  private finishPickupCorrectionInit(): void {
+    this.InitGoogleAddress();
+    this.addressCorrectionReady.emit();
+  }
+
+  private validatePickupCorrectionOnly(): boolean {
+    const form = this.reservationFormValue();
+    if (this.isEmptyText(form.pickupAddress)) {
+      Swal.fire({
+        title: '',
+        text: 'Please Select Pickup Address.',
+        icon: 'warning',
+      });
+      return false;
+    }
+    if (!this.isValidLatLong(form.pickupAddressLatLong)) {
+      Swal.fire({
+        title: '',
+        text: 'Pickup Geo Location is mandatory. Please select a valid address from the list so latitude and longitude are set.',
+        icon: 'warning',
+      });
+      return false;
+    }
+    if (this.isEmptyText(form.pickupAddressDetails)) {
+      Swal.fire({
+        title: '',
+        text: 'Pickup Address Details i.e Street/Flat No./Flight No./Train No. is mandatory.',
+        icon: 'warning',
+      });
+      return false;
+    }
+    const pickupControl = this.advanceTableForm.get('pickupAddress');
+    if (pickupControl?.hasError('invalidPickupAddress')) {
+      Swal.fire({
+        title: '',
+        text: 'Please select an address from suggestions',
+        icon: 'warning',
+      });
+      return false;
+    }
+    return true;
+  }
+
+  confirmPickupCorrectionSave(): void {
+    if (this.buttonDisabled) {
+      return;
+    }
+    if (!this.validatePickupCorrectionOnly()) {
+      this.advanceTableForm.markAllAsTouched();
+      return;
+    }
+    this.savePickupCorrectionAddress();
+  }
+
+  private savePickupCorrectionAddress(): void {
+    const form = this.reservationFormValue();
+    const reservationID = Number(this.ReservationID ?? form.reservationID);
+    if (!reservationID || Number.isNaN(reservationID)) {
+      this.showNotification(
+        'snackbar-danger',
+        'Reservation is required.',
+        'bottom',
+        'center'
+      );
+      return;
+    }
+    this.reservationService.updatePickupAddressOnly({
+      reservationID,
+      reservationStopAddress: form.pickupAddress,
+      reservationStopAddressDetails: form.pickupAddressDetails,
+      reservationStopAddressLatLong: form.pickupAddressLatLong,
+      isKamAddressCorrection: true,
+    }).subscribe({
+      next: () => {
+        this.showNotification(
+          'snackbar-success',
+          'Pickup address updated.',
+          'bottom',
+          'center'
+        );
+        this.addressCorrectionSaved.emit();
+      },
+      error: (error) => {
+        const message =
+          error?.error?.message
+          ?? (typeof error?.error === 'string' ? error.error : null)
+          ?? error?.message
+          ?? 'Operation Failed.....!!!';
+        this.showNotification(
+          'snackbar-danger',
+          message,
+          'bottom',
+          'center'
+        );
+      },
+    });
+  }
 
   getErrorMessage() 
   {
@@ -3252,6 +3417,13 @@ private isGstForBillingUnset(value: unknown): boolean {
 }
 
 public validateReservationForm(): boolean {
+  if (this.isPickupCorrectionView()) {
+    const isValid = this.validatePickupCorrectionOnly();
+    if (!isValid) {
+      this.advanceTableForm.markAllAsTouched();
+    }
+    return isValid;
+  }
   const isValid = this.CustomerDetails()
     && this.PickupDetails()
     && this.OtherDetails()
@@ -4244,6 +4416,35 @@ public validateCustomerSpecificFields(): boolean {
         }
     }
   }
+  getReservationIdForHistory(): number {
+    const fromForm = this.advanceTableForm?.getRawValue?.()?.reservationID;
+    const fromRoute = this.ReservationID;
+    const id = fromForm || fromRoute;
+    const parsed = Number(id);
+    return Number.isFinite(parsed) && parsed > 0 ? parsed : 0;
+  }
+
+  openKamPickupAddressCorrectionHistory(): void {
+    const reservationID = this.getReservationIdForHistory();
+    if (!reservationID) {
+      this.showNotification(
+        'snackbar-warning',
+        'Save the reservation first to view pickup address correction history.',
+        'bottom',
+        'center'
+      );
+      return;
+    }
+
+    this.dialog.open(KamPickupAddressHistoryDialogComponent, {
+      width: '760px',
+      maxWidth: '96vw',
+      autoFocus: false,
+      panelClass: ['kam-pickup-address-history-dialog-panel', 'dbe-dialog-centered'],
+      data: { reservationID }
+    });
+  }
+
   savedAddress()
   {
     if(this.action==='edit')

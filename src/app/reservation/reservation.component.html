@@ -1,4 +1,94 @@
-﻿<div class="row">
+﻿<ng-container *ngIf="isPickupCorrectionView(); else fullReservationView">
+    <div class="kam-pickup-correction-fields">
+        <mat-progress-spinner *ngIf="isLoadingdata" mode="indeterminate" diameter="30" strokeWidth="4"></mat-progress-spinner>
+        <form class="register-form m-0" [formGroup]="advanceTableForm" *ngIf="!isLoadingdata">
+            <div class="row">
+                <div class="col-xl-7 col-lg-7 col-md-12 col-sm-12 mb-2" *ngIf="ifBlock;else kamPickupGeoElse">
+                    <mat-form-field class="example-full-width cp-booking-field cp-address-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
+                        <mat-label>Pickup Geo Location</mat-label>
+                        <textarea required matInput formControlName="pickupAddress" rows="2"
+                            [matAutocomplete]="kamAutoPickupGeo"></textarea>
+                        <mat-autocomplete #kamAutoPickupGeo="matAutocomplete"
+                            (optionSelected)="onPGLSelected($event.option.value)"
+                            panelWidth="fit-content"
+                            class="google-autocomplete-panel">
+                            <mat-option *ngFor="let option of toArray(filteredGoogleAddressOptions | async)"
+                                [value]="option.geoSearchString" (click)="OnPickupGeoLocationClick(option)">
+                                {{option.geoSearchString}}
+                            </mat-option>
+                        </mat-autocomplete>
+                        <mat-hint align="end">
+                            <div class="pickup-geo-hint-stack">
+                                <div class="hint-actions-row">
+                                    <a class="link-action" (click)="savedAddress()">Saved Addresses</a>
+                                    <mat-checkbox color="danger" formControlName="googleAddresses"
+                                        (change)="valueSwitch()" [(indeterminate)]="indeterminate"
+                                        [labelPosition]="labelPosition">Google Addresses</mat-checkbox>
+                                </div>
+                                <div class="kam-address-correction-row">
+                                    <button type="button" class="kam-address-history-btn"
+                                        title="Pickup address correction history"
+                                        (click)="openKamPickupAddressCorrectionHistory()"
+                                        [disabled]="!getReservationIdForHistory()">H</button>
+                                    <mat-checkbox class="kam-address-correction-checkbox" color="primary"
+                                        formControlName="isAddressCorrectionRequiredByKAM" [labelPosition]="labelPosition">
+                                        Address to be corrected by KAM</mat-checkbox>
+                                </div>
+                            </div>
+                        </mat-hint>
+                    </mat-form-field>
+                </div>
+                <ng-template #kamPickupGeoElse>
+                    <div class="col-xl-7 col-lg-7 col-md-12 col-sm-12 mb-2">
+                        <mat-form-field class="example-full-width cp-booking-field cp-address-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
+                            <mat-label>Geo Location</mat-label>
+                            <textarea matInput ngx-google-places-autocomplete [options]='options'
+                                #placesRef="ngx-places" (onAddressChange)="handleAddressChange($event)"
+                                formControlName="pickupAddress" rows="2"
+                                (input)="onPickupTyping()"></textarea>
+                            <mat-hint align="end">
+                                <div class="pickup-geo-hint-stack">
+                                    <div class="hint-actions-row">
+                                        <a class="link-action" (click)="savedAddress()">Saved Addresses</a>
+                                        <mat-checkbox color="primary" formControlName="googleAddresses"
+                                            [(indeterminate)]="indeterminate" [labelPosition]="labelPosition"
+                                            (change)="valueSwitch()">Google Addresses</mat-checkbox>
+                                    </div>
+                                    <div class="kam-address-correction-row">
+                                        <button type="button" class="kam-address-history-btn"
+                                            title="Pickup address correction history"
+                                            (click)="openKamPickupAddressCorrectionHistory()"
+                                            [disabled]="!getReservationIdForHistory()">H</button>
+                                        <mat-checkbox class="kam-address-correction-checkbox" color="primary"
+                                            formControlName="isAddressCorrectionRequiredByKAM" [labelPosition]="labelPosition">
+                                            Address to be corrected by KAM</mat-checkbox>
+                                    </div>
+                                </div>
+                            </mat-hint>
+                        </mat-form-field>
+                        <mat-error *ngIf="advanceTableForm.get('pickupAddress')?.touched &&
+                                           advanceTableForm.get('pickupAddress')?.hasError('invalidPickupAddress')">
+                            Please select an address from suggestions
+                        </mat-error>
+                    </div>
+                </ng-template>
+                <div class="col-xl-5 col-lg-5 col-md-12 col-sm-12 mb-2">
+                    <mat-form-field class="example-full-width cp-booking-field cp-address-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
+                        <mat-label>Pickup Address Details i.e Street/Flat No./Flight No./Train No.</mat-label>
+                        <textarea required matInput formControlName="pickupAddressDetails" rows="2"></textarea>
+                    </mat-form-field>
+                </div>
+            </div>
+            <div class="row kam-pickup-correction-actions">
+                <button type="button" mat-raised-button color="primary" (click)="confirmPickupCorrectionSave()"
+                    [disabled]="buttonDisabled">Save Pickup Correction</button>
+            </div>
+        </form>
+    </div>
+</ng-container>
+
+<ng-template #fullReservationView>
+<div class="row">
     <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
         <div class="col-xl-2 col-lg-2 col-md-2 col-sm-12 mb-2">
             <mat-progress-spinner *ngIf="isLoadingdata" mode="indeterminate" diameter="30" strokeWidth="4"></mat-progress-spinner>
@@ -405,11 +495,22 @@
                                             </div>
                                         </mat-error> -->
                                     <mat-hint align="end">
-                                        <div class="hint-actions-row">
-                                            <a class="link-action" (click)="savedAddress()">Saved Addresses</a>
-                                            <mat-checkbox color="danger" formControlName="googleAddresses"
-                                                (change)="valueSwitch()" [(indeterminate)]="indeterminate"
-                                                [labelPosition]="labelPosition">Google Addresses</mat-checkbox>
+                                        <div class="pickup-geo-hint-stack">
+                                            <div class="hint-actions-row">
+                                                <a class="link-action" (click)="savedAddress()">Saved Addresses</a>
+                                                <mat-checkbox color="danger" formControlName="googleAddresses"
+                                                    (change)="valueSwitch()" [(indeterminate)]="indeterminate"
+                                                    [labelPosition]="labelPosition">Google Addresses</mat-checkbox>
+                                            </div>
+                                            <div class="kam-address-correction-row">
+                                                <button type="button" class="kam-address-history-btn"
+                                                    title="Pickup address correction history"
+                                                    (click)="openKamPickupAddressCorrectionHistory()"
+                                                    [disabled]="!getReservationIdForHistory()">H</button>
+                                                <mat-checkbox class="kam-address-correction-checkbox" color="primary"
+                                                    formControlName="isAddressCorrectionRequiredByKAM" [labelPosition]="labelPosition">
+                                                    Address to be corrected by KAM</mat-checkbox>
+                                            </div>
                                         </div>
                                     </mat-hint>
                                 </mat-form-field>
@@ -441,11 +542,22 @@
                                                 </div>
                                             </mat-error> -->
                                         <mat-hint align="end">
-                                            <div class="hint-actions-row">
-                                                <a class="link-action" (click)="savedAddress()">Saved Addresses</a>
-                                                <mat-checkbox color="primary" formControlName="googleAddresses"
-                                                    [(indeterminate)]="indeterminate" [labelPosition]="labelPosition"
-                                                    (change)="valueSwitch()">Google Addresses</mat-checkbox>
+                                            <div class="pickup-geo-hint-stack">
+                                                <div class="hint-actions-row">
+                                                    <a class="link-action" (click)="savedAddress()">Saved Addresses</a>
+                                                    <mat-checkbox color="primary" formControlName="googleAddresses"
+                                                        [(indeterminate)]="indeterminate" [labelPosition]="labelPosition"
+                                                        (change)="valueSwitch()">Google Addresses</mat-checkbox>
+                                                </div>
+                                                <div class="kam-address-correction-row">
+                                                    <button type="button" class="kam-address-history-btn"
+                                                        title="Pickup address correction history"
+                                                        (click)="openKamPickupAddressCorrectionHistory()"
+                                                        [disabled]="!getReservationIdForHistory()">H</button>
+                                                    <mat-checkbox class="kam-address-correction-checkbox" color="primary"
+                                                        formControlName="isAddressCorrectionRequiredByKAM" [labelPosition]="labelPosition">
+                                                        Address to be corrected by KAM</mat-checkbox>
+                                                </div>
                                             </div>
                                         </mat-hint>
                                     </mat-form-field>
@@ -1348,3 +1460,4 @@
         </div>
     </div>
 </div>
+</ng-template>

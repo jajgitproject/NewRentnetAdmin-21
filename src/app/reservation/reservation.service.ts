@@ -360,6 +360,30 @@ export class ReservationService
     return this.httpClient.put<any>(this.API_URL+'/'+'UpdateReservationForEdit' , advanceTable);
   }
 
+  /** Pickup geo + details only (Reservation + pickup stop). Used by KAM correction and change-pickup flows. */
+  updatePickupAddressOnly(payload: {
+    reservationID: number;
+    reservationStopAddress: string;
+    reservationStopAddressDetails: string;
+    reservationStopAddressLatLong: string;
+    userID?: number;
+    isKamAddressCorrection?: boolean;
+  }): Observable<any> {
+    const body = {
+      reservationID: payload.reservationID,
+      userID: payload.userID ?? this.generalService.getUserID(),
+      reservationStopAddress: payload.reservationStopAddress,
+      reservationStopAddressDetails: payload.reservationStopAddressDetails,
+      reservationStopAddressLatLong: payload.reservationStopAddressLatLong,
+      isKamAddressCorrection: payload.isKamAddressCorrection === true,
+    };
+    return this.httpClient.put<any>(this.API_URL + '/UpdatePickupTimeChnagesReservation', body);
+  }
+
+  getKamPickupAddressCorrectionHistory(reservationID: number): Observable<any> {
+    return this.httpClient.get(this.API_URL + '/kamPickupAddressCorrectionHistory/' + reservationID);
+  }
+
   /**
    * Ensure CSF arrays + customerSpecificFields JSON are never wiped to null/"" before PUT.
    * Backend UpdateReservationForEdit writes DBNull when CustomerReservationFieldID is empty/null.

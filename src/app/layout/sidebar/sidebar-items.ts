@@ -237,6 +237,22 @@ export const ROUTES: RouteInfo[] = [
       },
 
       {
+        path: 'kamAddressCorrection',
+        title: 'KAM Pickup Address Correction',
+        moduleName: 'kamAddressCorrection',
+        alternateAccessPageKeys: [
+          'kamAddressCorrection',
+          'KAM Pickup Address Correction',
+          'KAM Address Correction'
+        ],
+        icon: 'fas fa-map-marked-alt',
+        class: '',
+        groupTitle: false,
+        submenu: [],
+        isAccess: false
+      },
+
+      {
         path: 'migrationBookingRequest',
         title: 'Migration Booking Request',
         moduleName: 'migrationBookingRequest',

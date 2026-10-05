@@ -3984,6 +3984,14 @@ const routes: Routes = [
       },
 
       {
+        path: 'kamAddressCorrection',
+        loadChildren: () =>
+          import('./kamAddressCorrection/kamAddressCorrection.module').then(
+            (m) => m.KamAddressCorrectionModule
+          )
+      },
+
+      {
         path: 'migrationBookingRequest',
         loadChildren: () =>
           import('./migrationBookingRequest/migrationBookingRequest.module').then(
