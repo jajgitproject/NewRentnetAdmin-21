@@ -12,7 +12,7 @@ import { SendCreditNotesToDynamicsService } from '../../sendCreditNotesToDynamic
 @NgModule({
   declarations: [InvoiceSyncDetailsDialogComponent, DynamicsRequestPayloadDialogComponent],
   imports: [CommonModule, MatDialogModule, MatButtonModule, MatProgressSpinnerModule],
-  exports: [InvoiceSyncDetailsDialogComponent],
+  exports: [InvoiceSyncDetailsDialogComponent, DynamicsRequestPayloadDialogComponent],
   providers: [SendDataToDynamicsService, SendCreditNotesToDynamicsService]
 })
 export class InvoiceSyncDetailsDialogModule {}

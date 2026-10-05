@@ -2101,3 +2101,21 @@ body.side-closed.submenu-closed.side-closed-hover .sidebar .menu .list li.menu-r
   overflow-y: auto !important;
 }
 
+/* Invoice Sync Details — compact line-item grid headers (override global 14px mat-header) */
+.cdk-overlay-container .cdk-overlay-pane.dsb-batch-details-dialog-panel .dsb-table .mat-mdc-header-row,
+.cdk-overlay-container .cdk-overlay-pane.dsb-batch-details-dialog-panel .dsb-table .mat-header-row {
+  min-height: 34px !important;
+}
+
+.cdk-overlay-container .cdk-overlay-pane.dsb-batch-details-dialog-panel .dsb-table .mat-mdc-header-cell,
+.cdk-overlay-container .cdk-overlay-pane.dsb-batch-details-dialog-panel .dsb-table th.mat-mdc-header-cell,
+.cdk-overlay-container .cdk-overlay-pane.dsb-batch-details-dialog-panel .dsb-table .mat-header-cell {
+  font-size: 9px !important;
+  font-weight: 700 !important;
+  letter-spacing: 0.04em !important;
+  text-transform: uppercase !important;
+  line-height: 1.2 !important;
+  padding-top: 4px !important;
+  padding-bottom: 4px !important;
+}
+

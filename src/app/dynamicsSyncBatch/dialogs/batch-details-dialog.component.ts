@@ -1,6 +1,9 @@
 import { ChangeDetectorRef, Component, Inject, OnDestroy, OnInit } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialog, MatDialogRef } from '@angular/material/dialog';
 import { InvoiceSyncDetailsDialogComponent } from '../../sendDataToDynamics/dialogs/invoice-sync-details-dialog.component';
+import {
+  DynamicsRequestPayloadDialogComponent
+} from '../../sendDataToDynamics/dialogs/dynamics-request-payload-dialog.component';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { Subscription, timer } from 'rxjs';
 import { switchMap } from 'rxjs/operators';
@@ -30,6 +33,7 @@ export class BatchDetailsDialogComponent implements OnInit, OnDestroy {
     'invoiceID',
     'invoiceNumberWithPrefix',
     'syncStatus',
+    'requestJson',
     'responseCode',
     'responseStatus',
     'syncDate'
@@ -180,6 +184,23 @@ export class BatchDetailsDialogComponent implements OnInit, OnDestroy {
           dynamicsResponseDate: item.responseDate,
           dynamicsResponseTime: item.responseTime
         }
+      }
+    });
+  }
+
+  openRequestPayloadDialog(item: DynamicsSyncItem, event?: MouseEvent): void {
+    event?.stopPropagation();
+    event?.preventDefault();
+
+    this.dialog.open(DynamicsRequestPayloadDialogComponent, {
+      width: '720px',
+      maxWidth: '95vw',
+      maxHeight: '90vh',
+      panelClass: 'sdd-dynamics-request-payload-panel',
+      autoFocus: false,
+      data: {
+        title: 'Request JSON',
+        requestPayload: item?.requestPayload
       }
     });
   }

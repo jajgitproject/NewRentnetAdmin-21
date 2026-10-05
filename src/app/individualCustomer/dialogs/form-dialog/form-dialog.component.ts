@@ -1,13 +1,13 @@
 // @ts-nocheck
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
-import { Component, Inject } from '@angular/core';
+import { Component, Inject, OnDestroy, OnInit, ChangeDetectorRef } from '@angular/core';
 import { FormControl, Validators, FormGroup, FormBuilder, ValidatorFn, AbstractControl, ValidationErrors} from '@angular/forms';
 import { MAT_DATE_LOCALE } from '@angular/material/core';
 import { GeneralService } from '../../../general/general.service';
 import { IndividualCustomerService } from '../../individualCustomer.service';
 import { IndividualCustomerModel } from '../../individualCustomer.model';
-import { Observable } from 'rxjs';
-import { map, startWith } from 'rxjs/operators';
+import { Observable, Subject, of } from 'rxjs';
+import { catchError, debounceTime, map, startWith, takeUntil } from 'rxjs/operators';
 import { SalutationDropDown } from 'src/app/salutation/salutationDropDown.model';
 import { OrganizationalEntityDropDown } from 'src/app/organizationalEntityMessage/organizationalEntityDropDown.model';
 import { StateDropDown } from 'src/app/state/stateDropDown.model';
@@ -24,7 +24,7 @@ import { MatSnackBar } from '@angular/material/snack-bar';
   providers: [{ provide: MAT_DATE_LOCALE, useValue: 'en-GB' }]
 })
 
-export class FormDialogComponent
+export class FormDialogComponent implements OnInit, OnDestroy
 {
   showError: string;
   action: string;
@@ -32,6 +32,11 @@ export class FormDialogComponent
   advanceTableForm: FormGroup;
   advanceTable: IndividualCustomerModel;
   saveDisabled:boolean=true;
+  private readonly destroy$ = new Subject<void>();
+  private duplicateEntryActive = false;
+  private mobileDuplicateAlertShown = false;
+  private emailDuplicateAlertShown = false;
+  private readonly duplicateEntryMessage = 'Duplicate Entry';
 
   filteredCustomerContractOptions: Observable<CustomerContractDropDown[]>;
   public CustomerContractList?: CustomerContractDropDown[] = [];
@@ -70,7 +75,8 @@ export class FormDialogComponent
   public individualCustomerService: IndividualCustomerService,
   private fb: FormBuilder,
   private snackBar: MatSnackBar,
-  public _generalService:GeneralService)
+  public _generalService:GeneralService,
+  private changeDetectorRef: ChangeDetectorRef)
   {
     this.action = data.action;
     this.dialogTitle = 'Individual Customer';
@@ -96,6 +102,14 @@ export class FormDialogComponent
     this.InitKAMEmployee();
     this.InitSalesManager();
     this.setupFieldAutoPopulation();
+    if (this.action === 'add') {
+      this.setupDuplicateEntryValidation();
+    }
+  }
+
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
   }
 
   createContactForm(): FormGroup
@@ -153,6 +167,206 @@ export class FormDialogComponent
       const eInvoiceAddress = address.length > 100 ? address.substring(0, 100) : address;
       this.advanceTableForm.patchValue({ eInvoiceAddress }, { emitEvent: false });
     });
+  }
+
+  private setupDuplicateEntryValidation(): void {
+    const nameCtrl = this.advanceTableForm.get('customerPersonName');
+    const emailCtrl = this.advanceTableForm.get('primaryEmail');
+    const mobileCtrl = this.advanceTableForm.get('primaryMobile');
+    if (!nameCtrl || !emailCtrl || !mobileCtrl) {
+      return;
+    }
+
+    mobileCtrl.valueChanges.pipe(
+      debounceTime(400),
+      takeUntil(this.destroy$)
+    ).subscribe(() => this.evaluateDuplicateEntry('mobile'));
+
+    emailCtrl.valueChanges.pipe(
+      debounceTime(400),
+      takeUntil(this.destroy$)
+    ).subscribe(() => this.evaluateDuplicateEntry('email'));
+
+    nameCtrl.valueChanges.pipe(
+      debounceTime(400),
+      takeUntil(this.destroy$)
+    ).subscribe(() => {
+      if ((mobileCtrl.value || '').toString().trim()) {
+        this.evaluateDuplicateEntry('mobile');
+      }
+      const email = (emailCtrl.value || '').toString().trim();
+      if (email && this.isEmailReadyForDuplicateCheck(email, emailCtrl)) {
+        this.evaluateDuplicateEntry('email');
+      }
+    });
+  }
+
+  onMobileDuplicateBlur(): void {
+    if (this.action === 'add') {
+      this.evaluateDuplicateEntry('mobile');
+    }
+  }
+
+  onEmailDuplicateBlur(): void {
+    if (this.action === 'add') {
+      this.evaluateDuplicateEntry('email');
+    }
+  }
+
+  private evaluateDuplicateEntry(source: 'mobile' | 'email'): void {
+    if (this.action !== 'add') {
+      return;
+    }
+
+    const name = (this.advanceTableForm.get('customerPersonName')?.value || '').toString().trim();
+    if (!name) {
+      this.clearDuplicateEntryForField(source);
+      this.syncDuplicateEntryActiveFlag();
+      this.changeDetectorRef.markForCheck();
+      return;
+    }
+
+    const emailCtrl = this.advanceTableForm.get('primaryEmail');
+    const mobileCtrl = this.advanceTableForm.get('primaryMobile');
+    const email = (emailCtrl?.value || '').toString().trim();
+    const mobile = (mobileCtrl?.value || '').toString().trim();
+
+    if (source === 'mobile' && !mobile) {
+      this.clearDuplicateEntryForField('mobile');
+      this.syncDuplicateEntryActiveFlag();
+      this.changeDetectorRef.markForCheck();
+      return;
+    }
+
+    if (source === 'email' && !this.isEmailReadyForDuplicateCheck(email, emailCtrl)) {
+      this.clearDuplicateEntryForField('email');
+      this.syncDuplicateEntryActiveFlag();
+      this.changeDetectorRef.markForCheck();
+      return;
+    }
+
+    this.individualCustomerService.checkDuplicate(name, email, mobile).pipe(
+      catchError(() => {
+        this.showNotification(
+          'snackbar-danger',
+          'Could not verify duplicate customer. Please try again.',
+          'bottom',
+          'center'
+        );
+        return of(null);
+      })
+    ).subscribe((result) => {
+      if (!result) {
+        return;
+      }
+
+      const matchedByEmail = !!(result?.matchedByEmail ?? result?.MatchedByEmail);
+      const matchedByMobile = !!(result?.matchedByMobile ?? result?.MatchedByMobile);
+
+      if (source === 'mobile') {
+        if (matchedByMobile) {
+          this.setControlDuplicateError('primaryMobile', true);
+          this.showDuplicateEntryMessageBox('mobile');
+        } else {
+          this.clearDuplicateEntryForField('mobile');
+        }
+      }
+
+      if (source === 'email') {
+        if (matchedByEmail) {
+          this.setControlDuplicateError('primaryEmail', true);
+          this.showDuplicateEntryMessageBox('email');
+        } else {
+          this.clearDuplicateEntryForField('email');
+        }
+      }
+
+      this.syncDuplicateEntryActiveFlag();
+      this.changeDetectorRef.markForCheck();
+    });
+  }
+
+  private showDuplicateEntryMessageBox(source: 'mobile' | 'email'): void {
+    if (source === 'mobile') {
+      if (this.mobileDuplicateAlertShown) {
+        return;
+      }
+      this.mobileDuplicateAlertShown = true;
+    } else {
+      if (this.emailDuplicateAlertShown) {
+        return;
+      }
+      this.emailDuplicateAlertShown = true;
+    }
+
+    window.alert(this.duplicateEntryMessage);
+  }
+
+  private isEmailReadyForDuplicateCheck(email: string, emailCtrl: AbstractControl): boolean {
+    if (!email) {
+      return false;
+    }
+    if (!emailCtrl?.hasError('email')) {
+      return true;
+    }
+    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/i.test(email);
+  }
+
+  private setControlDuplicateError(controlName: string, active: boolean): void {
+    const control = this.advanceTableForm.get(controlName);
+    if (!control) {
+      return;
+    }
+
+    if (!active) {
+      this.removeDuplicateErrorFromControl(control);
+      return;
+    }
+
+    const errors = { ...(control.errors || {}), duplicateEntry: true };
+    control.setErrors(errors);
+    control.markAsTouched();
+  }
+
+  private removeDuplicateErrorFromControl(control: AbstractControl): void {
+    if (!control?.hasError('duplicateEntry')) {
+      return;
+    }
+    const errors = { ...(control.errors || {}) };
+    delete errors.duplicateEntry;
+    control.setErrors(Object.keys(errors).length ? errors : null);
+  }
+
+  private clearDuplicateEntryForField(field: 'mobile' | 'email'): void {
+    if (field === 'mobile') {
+      this.mobileDuplicateAlertShown = false;
+      this.removeDuplicateErrorFromControl(this.advanceTableForm.get('primaryMobile'));
+    } else {
+      this.emailDuplicateAlertShown = false;
+      this.removeDuplicateErrorFromControl(this.advanceTableForm.get('primaryEmail'));
+    }
+  }
+
+  private clearDuplicateEntryErrors(resetAlerts: boolean): void {
+    if (resetAlerts) {
+      this.mobileDuplicateAlertShown = false;
+      this.emailDuplicateAlertShown = false;
+    }
+    this.removeDuplicateErrorFromControl(this.advanceTableForm.get('primaryEmail'));
+    this.removeDuplicateErrorFromControl(this.advanceTableForm.get('primaryMobile'));
+    this.syncDuplicateEntryActiveFlag();
+  }
+
+  private syncDuplicateEntryActiveFlag(): void {
+    this.duplicateEntryActive =
+      this.advanceTableForm.get('primaryEmail')?.hasError('duplicateEntry')
+      || this.advanceTableForm.get('primaryMobile')?.hasError('duplicateEntry');
+  }
+
+  private hasDuplicateEntryError(): boolean {
+    return this.duplicateEntryActive
+      || this.advanceTableForm.get('primaryEmail')?.hasError('duplicateEntry')
+      || this.advanceTableForm.get('primaryMobile')?.hasError('duplicateEntry');
   }
 
   private applyDefaultCustomerContract(): void {
@@ -414,7 +628,7 @@ export class FormDialogComponent
         {
           this.showNotification(
               'snackbar-danger',
-              'Duplicate Value Found.....!!!',
+              this.duplicateEntryMessage,
               'bottom',
               'center'
               );
@@ -466,6 +680,17 @@ export class FormDialogComponent
     this.syncEInvoiceAddressFromBilling();
     this.syncAutocompleteIds();
     this.advanceTableForm.updateValueAndValidity();
+
+    if (this.hasDuplicateEntryError()) {
+      this.advanceTableForm.markAllAsTouched();
+      this.showNotification(
+        'snackbar-danger',
+        this.duplicateEntryMessage,
+        'bottom',
+        'center'
+      );
+      return;
+    }
 
     if (this.advanceTableForm.invalid) {
       this.advanceTableForm.markAllAsTouched();
