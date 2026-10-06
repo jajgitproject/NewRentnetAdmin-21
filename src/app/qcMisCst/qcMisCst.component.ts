@@ -16,6 +16,7 @@ import {
   exportJobAcceptedSnackbarMessage,
   exportSearchButtonLabel,
   formatExportElapsedTime,
+  formatMisSearchDateForApi,
   IN_FLIGHT_EXPORT_MESSAGE,
   isExportJobCancelled,
   isExportJobNotFoundError,
@@ -132,9 +133,12 @@ export class QcMisCSTComponent implements OnInit, OnDestroy {
         const rows = Array.isArray(data) ? data : (data?.$values || data?.data || []);
         this.dataSource = (rows || []).map((row) => this.normalizeRow(row));
       },
-      (error: HttpErrorResponse) => {
+      (error: HttpErrorResponse | string) => {
         this.dataSource = [];
-        this.showNotification('snackbar-danger', error?.message || 'QC MIS (CST) search failed', 'bottom', 'center');
+        const message = typeof error === 'string'
+          ? error
+          : (error?.error?.message ?? error?.error ?? error?.message ?? 'QC MIS (CST) search failed');
+        this.showNotification('snackbar-danger', String(message), 'bottom', 'center');
       }
     );
   }
@@ -309,12 +313,12 @@ export class QcMisCSTComponent implements OnInit, OnDestroy {
     const cityValue = this.searchCity.value;
     let cityID = 0;
     if (cityValue && typeof cityValue === 'object') {
-      cityID = cityValue.geoPointID || 0;
+      cityID = cityValue.geoPointID ?? cityValue.GeoPointID ?? 0;
     }
 
     return {
-      pickupDateFrom: this.searchPickupDateFrom ? moment(this.searchPickupDateFrom).format('MMM DD yyyy') : '',
-      pickupDateTo: this.searchPickupDateTo ? moment(this.searchPickupDateTo).format('MMM DD yyyy') : '',
+      pickupDateFrom: formatMisSearchDateForApi(this.searchPickupDateFrom),
+      pickupDateTo: formatMisSearchDateForApi(this.searchPickupDateTo),
       locationID: this.searchLocationID || 0,
       cityID
     };
